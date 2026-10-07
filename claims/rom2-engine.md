@@ -1901,7 +1901,7 @@ The saved-entry receiver is unchanged in ECX at initialization call EN L2.00333 
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-191 | The selected RU Player list calls Group inline; Group invokes two unresolved embedded programmes before its member path and three final scalar calls. | Medium | ✔ promoted | [EXP-2024](../experiments/EXP-2024-rom2-group-serialization/) |
+| R2-ENGINE-191 | The selected RU Player list calls Group inline; two embedded programmes precede its member path and three final scalar calls, with selected binding/extents narrowed by R2-ENGINE-199 and R2-ENGINE-200. | Medium | ✔ promoted (amended) | [EXP-2024](../experiments/EXP-2024-rom2-group-serialization/) |
 | R2-ENGINE-192 | The selected RU Group member writer calls the published u32 helper for its count, then repeats a call to an unread member helper; encoding and membership remain unproved. | Medium | ✔ promoted | [EXP-2024](../experiments/EXP-2024-rom2-group-serialization/) |
 
 ### R2-ENGINE-191
@@ -1932,6 +1932,15 @@ No image-wide enumeration, locale pairing or absence claim is made.
 **Unknown.** Embedded classes, extents, field meanings, reference repair,
 constructor internals beyond the selected body, and the EN counterparts.
 
+**Amended.** R2-ENGINE-199 and R2-ENGINE-200 extend the earlier partial
+population: selected construction paths bind both embedded +8 calls and
+establish conditional counted-programme extents. The original
+constructor-read deviation and then-unread clauses above remain historical
+facts of that population. Other runtime classes/vptr changes, field
+meanings, reference/alias effects through unread callees, complete Group
+grammar and EN counterparts remain Unknown. Grade and inline dispatch facts
+are unchanged.
+
 ### R2-ENGINE-192
 
 Group writer site L2.00352 calls L2.00353. That complete body calls L2.00354
@@ -1951,3 +1960,66 @@ alias behavior and complete list membership open.
 
 **Unknown.** Null, class reuse, object alias, body and member validation arms;
 actor grammar; current-player, hero and party identity; complete LOAD.
+
+## Selected RU embedded Group programmes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-199 | The selected RU construction paths bind both embedded Group +8 calls to one counted two-byte-element programme; other runtime class targets remain unproved. | Medium | ✔ promoted | [EXP-2025](../experiments/EXP-2025-rom2-group-embedded-programmes/) |
+| R2-ENGINE-200 | The selected RU embedded programme stores an escaped count and two bytes per visited node; load uses decoded count, while count/chain equality and complete transfer remain unproved. | Medium | ✔ promoted | [EXP-2025](../experiments/EXP-2025-rom2-group-embedded-programmes/) |
+
+### R2-ENGINE-199
+
+The Group constructor L2.00349 calls L2.00350 on Group+0x20 at L2.00535.
+It constructs the Group+0x3c receiver through L2.00500 at L2.00536.
+The latter constructs its +0x4c pointer through L2.00350 at L2.00537;
+field-helper load reconstructs that pointer through the same constructor
+at L2.00538. Constructor L2.00350 writes vtable L2.00539 at L2.00540.
+Only its selected +8 cell L2.00541 was read; it points to L2.00542.
+The Group+0x20 and field+0x3c.pointer+0x4c +8 dispatches use this cell
+under these selected construction paths. No class descriptor or other cell
+was selected. Constructor reads establish binding, not byte widths.
+
+**Confidence.** Medium for constructor-selected binding. Direct caller
+operands, the final constructor store and exact selected cell reproduce in
+both fresh runs. No image-wide class enumeration, runtime-vptr invariant
+or complete ordinary-save reachability was established.
+
+**Unknown.** Other classes or vptr mutations, allocation failure, old-object
+virtual +4 destruction, and complete lifecycle/runtime reachability.
+
+### R2-ENGINE-200
+
+Programme L2.00542 calls empty local base serializer L2.00543. Its count
+writer L2.00544 emits u16 n when n<65535; otherwise it emits u16 65535
+then u32 n. Reader L2.00545 uses the same escape. Selected scalar helpers
+store/load 2 or 4 bytes and advance their buffer cursors by that width.
+Element helper L2.00546 requests twice its element argument; both selected
+programme branches pass 1, giving two requested bytes per operation.
+
+Let c(n) be 2 for n<65535 and 6 otherwise. Load loops decoded count n,
+so its extent is c(n)+2*n after complete successful transfers and normal
+helper returns. Store writes receiver+0x0c count n, then follows the linked
+chain until null: its extent is c(n)+2*L for visited node count L. This body
+checks neither n==L nor complete chain consistency.
+
+Between the two embedded programmes, field helper L2.00351 requests 80 raw
+bytes. Writer L2.00547 partitions that request; reader L2.00548 can return
+less than requested. The field helper ignores that return. Buffer spill,
+refill and file-transport virtual targets remain unread. The boundary model
+requires complete successful transfer; it proves no native acceptance.
+
+The reached local L2.00542 CFG shows no explicit reference/alias transfer.
+Its unread append call L2.00549 receives no archive operand at this caller;
+that does not exclude archive/global effects in its body. Unread lifecycle,
+transport and refill paths remain alternatives. The unread L2.00550 call
+between field-helper return and member-count read has the same limitation.
+
+**Confidence.** Medium for the selected programme and conditional extents.
+Complete local CFGs, primitive operand widths and cursor increments exclude
+a fixed embedded extent on the decoded-count load path. Constructor/class,
+count/chain and transport alternatives remain open. Synthetic and reporting
+controls are instrument sanity checks and add no native evidence.
+
+**Unknown.** Element meanings/namespaces, n versus L consistency, short-read
+and invalid-input behavior, transport/refill semantics and original LOAD.

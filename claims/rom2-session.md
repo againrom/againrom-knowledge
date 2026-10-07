@@ -697,7 +697,7 @@ actor inventory/equipment/stats/progression and interpretation of opaque bytes.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-083 | Walking the published first-Player prefix in four frozen revisions fits group count 1 and Group starts at decoded offsets 2707 or 2708; member offset, extent and identity remain Unknown. | Medium | ✔ promoted | [EXP-2024](../experiments/EXP-2024-rom2-group-serialization/) |
+| R2-SESSION-083 | Four frozen first-Player walks fit group count 1 and Group starts at 2707/2708; R2-SESSION-091 extends the first-member boundary conditionally, while complete extent and identity remain Unknown. | Medium | ✔ promoted (amended) | [EXP-2024](../experiments/EXP-2024-rom2-group-serialization/) |
 
 ### R2-SESSION-083
 
@@ -728,3 +728,46 @@ member-grammar evidence.
 **Unknown.** The embedded Group programmes, first member offset, complete
 Group extent and remaining Players; which Player is current; actual hero or
 party; original acceptance, actor/World LOAD and post-load behavior.
+
+**Amended.** R2-ENGINE-199 and R2-ENGINE-200 supply selected
+embedded-programme authority; R2-SESSION-091 extends these same four frozen
+first-Player walks to conditional first-member operation offsets 2795/2796.
+The original prefix/count facts and grade are unchanged. Constructor
+alternatives, short-read/transport/refill behavior, complete Group/member
+extent, remaining Players and current-player/hero/party identity, original
+acceptance and complete LOAD remain Unknown. The old stopping and
+member-offset clauses describe the earlier partial population.
+
+## Conditional RU first-member boundary
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-091 | Under selected RU constructor targets and complete successful archive transfer, four frozen first-Player walks give first-member operation offsets 2795/2796; short-read, transport/refill and LOAD remain Unknown. | Medium | ✔ promoted | [EXP-2025](../experiments/EXP-2025-rom2-group-embedded-programmes/) |
+
+### R2-SESSION-091
+
+The four frozen buffers are size/SHA256-verified from the same buffers
+consumed by decoding. The published first-Player prefix gives Group starts
+2707 in A/C and 2708 in B/D, as already reported by R2-SESSION-083 and
+R2-SESSION-078. New native authority R2-ENGINE-199/200 supplies the selected
+embedded load programmes; no prior decoded output seeds this walk.
+
+Under that constructor-selected target and complete successful archive
+transfer, both embedded counts are 0 in all four. Each programme consumes
+2 bytes; the intervening raw request is 80 bytes. Member count 1 is at
+2791 in A/C and 2792 in B/D. Its published u32 width places the first member
+operation at 2795/2796. The walk stops there, before any member operation.
+The pre-member extent is 84; including its count it is 88. These are
+conditional physical boundaries, not decoded member identities or extent.
+
+**Confidence.** Medium for this conditional fit. Both fresh runs reproduce
+every consumed-buffer hash, count and boundary. The four zero-count cases
+exercise neither nonempty embedded elements nor the extended-count branch.
+The raw reader's short-return behavior and unread transport/refill paths
+prevent native acceptance or unconditional LOAD authority. No observed
+class, alias, current-Player or membership relation follows from the fit.
+
+**Unknown.** Other constructed/runtime targets, incomplete transfers,
+member reference/class/alias grammar and complete Group extent; remaining
+Players, current participant, actual hero/roster/items/purse; original
+acceptance, actor/World LOAD and post-load behavior.

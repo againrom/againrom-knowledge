@@ -8,7 +8,7 @@ position, world-present byte and trailer with ROM1; the world half, the
 Player body and the physical tail differ. This page lists the differences
 only; where it says "as ROM1", the [ROM1 SAV references](../sav/format.md)
 apply. Four original save points have measured envelope, head and physical-tail
-coverage. Group/actor programmes and current-party identity remain Unknown.
+coverage. Complete Group/actor programmes and current-party identity remain Unknown.
 — R2-SESSION-017, R2-SESSION-018, R2-SESSION-075, R2-SESSION-078
 
 ## Envelope
@@ -72,26 +72,45 @@ bytes. ROM1 has the group list, 32 raw bytes and a Diary; ROM2 has no Diary.
 ## Selected RU Group boundary
 
 The selected RU Player list calls each Group body directly. Group first
-invokes a virtual serializer on embedded +0x20, then a direct helper on its
-+0x3c pointer. That helper requests 80 raw bytes and invokes a second virtual
-serializer. Group then reaches its member path and three final scalar calls.
-Both virtual programmes and their extents remain Unknown. The 80-byte request
-is not new authority for the unread transfer helpers. — R2-ENGINE-191
+invokes embedded +0x20, then a helper on its +0x3c pointer; the helper invokes
+its own +0x4c pointer before the Group member path. — R2-ENGINE-191
+
+Under the selected construction paths, both embedded virtual +8 calls bind
+to one counted two-byte-element programme. Other runtime classes/vptr
+mutations and complete ordinary-save reachability remain unproved.
+— R2-ENGINE-199
+
+The count prefix c(n) is 2 bytes for n<65535, otherwise 6 bytes: u16 65535
+then u32 n. With complete successful archive transfers and normal helper
+returns, embedded load consumes c(n)+2*n. Store writes declared count n but
+traverses L linked nodes, giving c(n)+2*L; no local n==L check is shown.
+The intervening raw request is 80 bytes. Its reader can return short and the
+caller ignores that return; transport/refill targets remain unread.
+The reached local embedded CFG shows no explicit reference/alias transfer.
+Unread append, lifecycle and transport/refill callees can still affect archive
+or global state. A caller that passes no archive operand does not rule out
+those effects.
+These conditions prevent unconditional native LOAD authority.
+— R2-ENGINE-200
+
+Walking the published first-Player prefix gives Group starts 2707 in A/C
+and 2708 in B/D. Record order and same-offset coincidence establish no
+current-player identity. — R2-SESSION-083
+
+With the selected constructor target and complete successful transfer,
+both embedded counts are 0 in each frozen revision. Member count 1 then
+lies at 2791 in A/C and 2792 in B/D; the first member operation starts at
+2795/2796. Short-read, transport/refill and other-class alternatives remain
+Unknown beside this conditional boundary. The walk stops before members;
+complete Group extent, member identity and native LOAD remain unproved.
+— R2-SESSION-091
 
 The member writer calls the published u32 helper for its count, then repeats
-a call with the archive and selected item pointer. Group load reads its count
-and items in its own inline loop; it does not call that writer body. The
-writer body's separate reader branch is not reached by this Group load path.
-Reference/body helpers remain unread. Native class, alias and membership
-grammar, actual hero/party identity and complete LOAD remain Unknown.
-— R2-ENGINE-192
-
-Walking only the first published Player prefix in four frozen revisions fits
-group count 1 and decoded first-Group starts 2707 in A/C and 2708 in B/D.
-These are conditional corpus boundaries. The first member offset and complete
-Group extent remain Unknown because the embedded programmes are unresolved.
-Record order and same-offset coincidence establish no current-player identity.
-— R2-SESSION-083
+a call with the archive and selected item pointer. Group load reads count
+and items in its own inline loop; the writer body's separate reader branch
+is not reached by this Group path. Reference/body helpers, native class,
+alias and membership grammar, actual hero/party and complete LOAD remain
+Unknown. — R2-ENGINE-192
 
 ## Physical tail
 
@@ -188,7 +207,7 @@ All four measured files satisfy `Bsg&`, version `0x0bad0002`,
 four frozen inputs within this corpus and imply no filename role or ordering.
 — R2-SESSION-075
 
-| Symbol | Physical bytes | Decoded bytes | Parsed decoded prefix | Opaque decoded remainder | Player-list count |
+| Symbol | Physical bytes | Decoded bytes | Published first-Player prefix | Remainder after that prefix | Player-list count |
 |---|---:|---:|---:|---:|---:|
 | A | 6348 | 4486 | 2707 | 1779 | 1 |
 | B | 26886 | 72178 | 2708 | 69470 | 8 |
@@ -198,11 +217,12 @@ four frozen inputs within this corpus and imply no filename role or ordering.
 The first reference introduces schema 1 class `Player`, shared class index 1
 and object index 2 under shared archive-index framing; those indices are
 inferred protocol state. Its admitted prefix and raw2560 block lead to Group count 1
-in all four. The inline ROM2 Group programme is unsupported, so the remaining
-document is opaque. Subsequent Players, actor references, world-present flag,
+in all four. The selected construction/full-transfer model extends the
+conditional Group walk to its first member operation. Complete Group/member
+programmes and the remaining document are opaque. Subsequent Players, actor references, world-present flag,
 inventory/equipment, stats and progression are unparsed. Player-list counts
 and equal saved-address words do not establish active-party roles.
-— R2-SESSION-078
+— R2-SESSION-078, R2-SESSION-091
 
 A/C decoded documents compare byte-for-byte equal. B/D have equal parsed
 first Player state but different first head DWORDs and opaque document bytes.
