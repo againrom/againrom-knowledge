@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 2975. Observation: 95. Static analysis: 2455. Mixed: 425.
+Claims labelled: 2983. Observation: 95. Static analysis: 2463. Mixed: 425.
 
 ## Ledger ai
 
@@ -118,8 +118,8 @@ Claims labelled: 2975. Observation: 95. Static analysis: 2455. Mixed: 425.
 | AI-SURFACE-063 | static analysis | ● active (partially retracted, superseded) |
 | AI-FANOUT-064 | static analysis | ● active |
 | AI-SELECT-065 | static analysis | ● active |
-| AI-FACE-066 | static analysis | ● active |
-| AI-FACE-067 | static analysis | ● active |
+| AI-FACE-066 | static analysis | ● active (amended) |
+| AI-FACE-067 | static analysis | ● active (amended) |
 | AI-GROUPSEE-068 | static analysis | ● active |
 | AI-SCORE-069 | static analysis | ● active |
 | AI-PREF-070 | static analysis | ● active |
@@ -262,6 +262,14 @@ Claims labelled: 2975. Observation: 95. Static analysis: 2455. Mixed: 425.
 | AI-393 | mixed | ● active |
 | AI-397 | static analysis | ✔ promoted (branch candidate) |
 | AI-398 | static analysis | ✔ promoted (branch candidate) |
+| AI-405 | static analysis | ● active |
+| AI-406 | static analysis | ● active |
+| AI-407 | static analysis | ● active |
+| AI-408 | static analysis | ● active |
+| AI-409 | static analysis | ● active |
+| AI-410 | static analysis | ● active |
+| AI-411 | static analysis | ● active |
+| AI-412 | static analysis | ● active |
 
 ## Ledger alm
 

@@ -1,5 +1,12 @@
 # Overturn history
 
+## Ranged release facing and attack-route clauses
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `AI-FACE-066` (the clause placing `L00738` on a `R0041` branch, the "every route" sentence and the re-run-every-tick clause only; the guard sets, the two tests of `R0041` and the `L00092` latch stand) | Verbatim: "`L00738` and the pursuit arms at `L00101` and `L00581` each sit on the taken branch of their own `R0041` (`L00742`, `L00743`, `L00744`)" "Every route into the attack act-state passes through it", "`ord+0x9 = 1` is written only by those same passing branches (`L00745`/`L00103`, `L00746`, `L00747`)" and "The test is re-run every tick" | High / Medium | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md), AI-411 | `L00738` is pending order 2 and has no `R0041` call; `L00742` is cast arm 8. The continuous re-test holds only at progress 0: once `ord+9` is 1 no gate runs (`L00092`). The pursuit arms at `L00101` and `L00581` and the other five `ord+9 = 1` writers do follow a passing gate. The one ungated writer is not reached by a read route (`AI-411`). | **NARROWED** |
+| `AI-FACE-067` (the caller count and "complete set" only; the routine's snap and the three exclusions stand) | Verbatim: "`EnumRefs callto:R0056` is **7 hits / 6 owners / 0 orphan**" | High / Medium | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md), AI-411 | A raw `E8` scan of `.text` finds 11 call sites: `L00752`, `L13266`, `L00751`, `L13267`, `L00753`, `L01933`, `L01934`, `L00754`, `L07010`, `L13268`, `L13269`. None is reached from the state-3 body or the progress-1 arm. | **NARROWED** |
+
 ## Card knowledge level thresholds
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

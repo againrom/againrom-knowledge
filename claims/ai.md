@@ -1083,8 +1083,8 @@ The layout is fixed by three independent uses rather than asserted: `R0213`, `R0
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-FACE-066 | An attacker must already be facing its victim, and the swing neither tests facing nor produces it — the mirror of `AI-RETAL-056`, where the victim's turn IS the consequence. | High / Medium | ● active | [EXP-0111](../experiments/EXP-0111-blow-display/) |
-| AI-FACE-067 | The complete turn-to-face producer set is six routines, and not one of them is on the swing path. | High / Medium | ● active | [EXP-0111](../experiments/EXP-0111-blow-display/) |
+| AI-FACE-066 | An attacker must already be facing its victim, and the swing neither tests facing nor produces it — the mirror of `AI-RETAL-056`, where the victim's turn IS the consequence. | High / Medium | ● active (amended) | [EXP-0111](../experiments/EXP-0111-blow-display/) |
+| AI-FACE-067 | The turn-to-face producer set is at least six routines (11 call sites of `R0056`), and none read is on the swing path. | High / Medium | ● active (amended) | [EXP-0111](../experiments/EXP-0111-blow-display/) |
 
 ### AI-FACE-066
 
@@ -1094,6 +1094,8 @@ Every route into the attack act-state passes through it. An `EnumRefs` pattern s
 
 **Confidence.** **High** for the two routines' guard sets and for `R0041`'s two tests — all read end to end, every clause a named instruction, and the latch arm settled by a static table rather than by inference / **Medium** for *every route*: the store-form sweep is `AI-STATE-043`'s instrument and inherits its blind spot, a state restored from a save or produced by arithmetic in place being invisible to it, and `AI-PROGRESS-034`'s second switch was read only at the one arm this row needs
 
+**Amended.** `L00738` is pending order 2 and has no `R0041` call; `L00742` is cast arm 8. The other `ord+9 = 1` writers follow a passing gate (`AI-411`). The sentence "The test is re-run every tick ... facing is a precondition, maintained continuously by the approach" holds only at progress 0: once `ord+9 == 1` no gate runs (`L00092`) and the body is not re-turned (`AI-408`). The guard sets and the two tests stand.
+
 ### AI-FACE-067
 
 `R0056(actor, dir)` is the only routine in the image that aims an actor: it stores the wanted facing at `mover+0x01` (`L00748`), takes the shortest arc against `mover+0x00`, and — when `mover+0xa0` is 0 and that arc is at most `0x21` in either direction (the compares against `0x21` at `L00749` and `L00750`) — **snaps** `mover+0x00 := mover+0x01` and raises `mover+0xa4`; otherwise it hands off to `R0249`, which is what actually issues a turn. `EnumRefs callto:R0056` is **7 hits / 6 owners / 0 orphan**: `R0205` at `L00751` (the idle-turn arm whose `rand()` gate `AI-RETAL-056`'s struck flag skips), `R0016` at `L00752`, `R0250` at `L00753`, `R0043` at `L00754` (the approach's stand-and-face), `R0178` twice, and `R0054`.
@@ -1101,6 +1103,8 @@ Every route into the attack act-state passes through it. An `EnumRefs` pattern s
 **None of the six is `R0245`, `R0246` or `R0037`**, and none is reached from them. Two consequences a consumer must carry: the snap threshold means an actor already inside its reach usually corrects its facing within one tick and without any visible turn animation, since a turn under 45 degrees never becomes action code 5; and the turn belongs to the mover or to the order machine, never to the strike, so a consumer that turns the attacker as part of the swing has invented a coupling the original does not have
 
 **Confidence.** **High** for the routine — read end to end, both immediates and the snap transcribed — and for the caller set, a `callto:` enumeration on the repaired function table reporting 0 orphan, which is the shape that can carry an *only* / **Medium** for *none is reached from them*: that is a reading of three call chains rather than an enumeration, and a `callto:` sweep cannot see an indirect call
+
+**Amended.** A raw `E8` scan finds 11 call sites of `R0056`, not 7 (`AI-411`); "none is reached from the swing path" is Medium (raw `E8`/`E9`, blind to indirect calls). The routine's snap stands.
 
 ## Group sight, target scoring, guard and Stand Ground
 
@@ -3298,3 +3302,101 @@ So the console is usable on a map where the participant flag is 0 after one `#Ch
 The console builds each reply line through `R0443`, a `0x91` record, and sends it with `R0217`. All 12 call sites in `R0440` push Player 0, so `+7` is stored as 0 (`L13191` to `L13192`). `R0217` tests `[arg+7]` at `L12414`: zero walks the connection list at `+0x18b8`, nonzero looks one connection up by id. `#event` differs: `R0188` passes its Player, so `+7` is that Player's id. The notices of `MENU-111` are not used by the console arms.
 
 **Confidence.** High for the record fields and the two branches of `R0217`. Unknown for any filter inside the connection loop (`L13193`, `L13194`, not read) and for the client panel that shows the line.
+
+## Ranged release facing
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs, sha256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`); no process was run. `EXP-0493` was allocated ids `405`..`412` of `claims/ai.md` and spent all eight. Blocks: `actor+0x158` is the order block (`ord`), `actor+0x154` the mover; `mover+0` is the current facing byte and `mover+1` the wanted facing. Listings and scans are in `experiments/EXP-0493-ranged-release-facing/evidence/`.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-405 | High: the load gate `R0041` tests sim byte `mover+0` equal to the 8-way heading (tolerance 0) and edge distance at most reach. Medium: a walker finishes its step and turns before it loads, for the five gated writers, not `L06163`. | High / Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-406 | A move order during a loaded cycle does not interrupt it; an attack order given during the following walk acts at the next cell centre, then turn, load and shot follow in that order. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-407 | Among read routines, automatic acquisition (`R0004`) loads through the same gate or turns without loading and none replaces the victim or resets the phase while `ord+9` is 1; five writers and `R0008` are unread. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-408 | No `mover` access in the state-3 body, swing start and strike ranges or their 16 direct callees (five virtual calls unread); the countdown continues, the strike tests reach only, and 0x72 carries `(facing + 8) >> 4` at load. | High / Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-409 | The shot builder reads the 0x72 direction; while the `+0x86` victim lookup succeeds the projectile driver re-reads the victim's point every tick, so projectile direction is not the stored direction. ShootDelay is `units.reg` data. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-410 | A shot can leave over one heading from the drawn facing if the victim's bearing changes by more than one heading between load and shot (not computed); on identical delta vectors 8-way and 16-way indices differ by at most half a heading. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-411 | Pending order 2 loads a cycle with no facing or distance test, but its only immediate setter `L13240` has no reference in the scanned population (`E8`/`E9`, dword pointers, `[reg+8]`, `[reg+9]` stores), so no read route reaches it. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-412 | The client drops a 0x72 message while the drawable run counter `+0xa0` is nonzero, as for 0x6b and 0x6d; for arcs of 0x21 or more the 0x6d count equals the sim step count; for the one-heading snap the sequence is Unknown. | Medium / Unknown | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+
+### AI-405
+
+- `R0041(actor, target, reach)` compares `mover+0` with the result of `R0051` at `L00577`. `R0051` returns a multiple of 32 (pairs of 16-way sub-sectors, output shifted left by 4, boundaries at a 2:1 slope), so the equality is exact and a facing one heading off fails. Edge distance from `R0036` must be at most the reach (`L00578`).
+- `R0016` runs once per actor tick before the body (`L00086`, gated at `L13241` by `+0x3c == 0`). The pending-order switch is read only at `ord+9 == 0`. Pending 5 and 6 (`L00101`, `L00581`) are the pursuit arms; each stores `ord+9 = 1` only after a passing gate (`L00743`, `L00744`).
+- Outside the stop distance the arm paths; at a cell centre inside it `R0043` calls `R0051` then `R0056`. `R0056` snaps `mover+0 := mover+1` when `mover+0xa0 == 0` and the arc is below 0x21 (`L00749`, `L00750`), so a one-heading turn completes in one call; larger arcs rotate by the rotation speed `mover+0xa` and set `mover+0xa4` to ceil(arc / rate).
+- A step already begun continues through `R0039` and ends at a cell centre (progress 3), so the turn follows the step.
+
+**Confidence.** High for the gate's two tests and tolerance (on the sim byte `mover+0`, not the client drawn facing) and for the single executor call per tick. Medium for the sequence step, turn, load: the callees `R0039`, `R2130` and `R0036` were read for their effect, not end to end. Turn-before-load holds for the five gated `ord+9 = 1` writers, not for pending order 2 (`L06163`, `AI-411`).
+
+**Unknown.** Register-form or indirect stores to `ord+9` and `ord+8`, and orders restored from a save.
+
+### AI-406
+
+- The move setter `R0301` and the common reset `R0007` both write `mover+1 := mover+0` and `actor+0x54 = 0`; neither writes `ord+9`. The move setter also writes `actor+0x50 = 1` and `ord+8 = 1`.
+- The progress-1 arm at `L00092` sets state 3 again, increments the counter and clears progress and state only when the counter exceeds 2 and `+0x136` is set. So a loaded cycle runs to its recovery (`AI-RETREAT-272`) and the walk starts afterwards.
+- During the walk the progress is 3 until a cell centre (`L00096`); the new attack order is consulted at progress 0 only, so it waits for the centre, then the gate of `AI-405` decides turn or load.
+
+**Confidence.** Medium: assembled from `AI-405`, `AI-RETREAT-272` and the setters; no run observed the order of events.
+
+**Unknown.** The exact tick count between the move order and the first walk step.
+
+### AI-407
+
+- `R0004` has one caller, the tail at `L00011`. The tail at `L00010` clears `mover+0x98` and branches on `actor+0x50`: 1 tears down to 0xc, 0xa and 0x17 have their own arms, every other value calls `R0004`.
+- The routine admits candidates within reach, scores them by turn cost (`AI-361`) and writes `ord+0xc` and `ord+8 = 6`. If `R0041` passes (`L00741`) it calls `R0005` (progress 1, counter 0, state 3, victim); otherwise `R0051` then `R0250` (turn only) and state 1.
+- `mover+0x98` is written only at `L01720`, `L00161` and `L00162` (movement internals), whose callers are executor arms or orphan routines. The tail is therefore not entered from a progress-1 invocation, and no read writer of `ord+0xc` or `actor+0x5c` runs during progress 1; the statement covers read routines only.
+
+**Confidence.** Medium: a call-graph reading over raw `E8`/`E9` scans (`evidence/xrefs.txt`), blind to indirect calls.
+
+**Unknown.** The group slot-level arm `R0008` for `actor+0x50 == 1`, other phase and victim writers (`L13242`, `L13243`, `L13244`, `L13245`, `L13246`: hurt, stun, cast cancel, death) which were not read (they store 0 to `actor+0x58` or `actor+0x5c`), the stores at `L13247`, `L13248`, `L13249` and `L13250` in the region of `R0008`, and the dedicated server.
+
+### AI-408
+
+- State 3 phase 0 (`L00005`): the swing start `R0245` (`L05237`) sends the message and phase 5 counts down from the charge (`+0x134`) plus a distance term. At zero it calls `R0001` then `R0246` (`L00006`). Phase 7 sets phase 0 and completion 1.
+- Guards of `R0246`: target non-null, health above 0, reach at least the distance (`L00735`..`L00736`). No `+0x154` access exists in `L00005`..`L00009`, `R0245`..`R0001` or `R0246`..`R0563` (`evidence/calls-state3-swing-strike.txt`).
+- `R0245` calls `R0549`, which sends 0x72 (via `R1064`) when reach exceeds 1 and 0x71 otherwise. Fields: `+0xc` = `R2131(mover)` = `(facing + 8) >> 4`, `+0xd` charge plus relax, `+0xa` actor id, `+0xe` victim client id.
+
+**Confidence.** High for the bounded absence (no `mover` access in the three ranges nor in their sixteen direct callees, depth 1) and for the message fields. Medium for a universal "no facing test after the load". Medium that nothing else writes `mover+0` meanwhile: the callers of `R0056` (`AI-411`, 11 raw sites) are not reachable from this path.
+
+**Unknown.** The five virtual calls `L13251`, `L13252`, `L13253`, `L02047` and `L04400`, and callees below depth 1.
+
+### AI-409
+
+- Client message arm `L09206` sets action 7, `+0x85 := msg +0xc`, phase 0 and the target `+0x86`. The driver `R0548` action-7 arm (`L02711`) calls the shot builder (`vt+0x58`, `R0603`) at phase equal to ShootDelay (`L02716`) and writes `+0x6c := +0x85` every tick after that call (`L02535`).
+- ShootDelay (`EXP-0428`, `shot-classes.csv`): Catapult and Ballista 0, Dragon 8, Goblin slinger 10, Archer 21, Crossbowman 9, Orc Archer 22, Sonic Bat 2. For 0 the builder reads `+0x6c` before the first write.
+- The builder looks the victim up by `+0x86` and builds nothing if absent; its origin offset is `ShootOffset[(+0x6c - 8) & 0xe]`.
+- The projectile driver `R0558`, action-1 arm, copies the victim's point (`+0x58`, `+0x5c`, `+0x10`) to `+0x88`..`+0x90` on every call while the lookup by `+0x86` succeeds (on failure, `L13254`, the last copy and direction stay; every shot from the builder takes this arm, `+0x84 = 1` at `L13255`), derives the 16-way direction through `L02828`, stores it at `+0x85` and `+0x6c` (`L02827`..`L13256`) and steps the position by (target - position) over the remaining segments (`L05578`..`L05579`).
+
+**Confidence.** Medium: read from listings; the ShootDelay table is cited from `EXP-0428`, not re-derived.
+
+**Unknown.** Whether the ShootDelay and reach rows (`units.reg` data, cited from `EXP-0428`) are equal on the EN and RU installs. Whether the drawable body redraw uses `+0x6c` or `+0x85` at the shot tick (read for the builder only).
+
+### AI-410
+
+- Existence case: the victim moves after load. The body is not turned (`AI-408`) while the projectile homes (`AI-409`). Exceeding one 8-way heading needs the victim's bearing to change by more than one heading within ShootDelay ticks; no magnitude was computed.
+- Not a case here: a ShootDelay-0 class reads a stale `+0x6c`, which feeds only the origin offset (`L13257`..`L13258`), not the direction; whether it is the old facing depends on the client turn count (`AI-412`) and is Unknown.
+- Instrument `dircompare.py`: instruction-level ports of `R0051` (8-way) and `L02828` (16-way) over |dx|,|dy| at most 400 on identical vectors, 320800 cells each, give index differences of 0 or 1 sixteenth-index only (`evidence/dircompare-400.txt`), at most half a heading. The sim routine reads cell coordinates and the projectile routine world points, so the result holds on identical delta vectors only.
+
+**Confidence.** Medium. The comparison does not bound the origin shift of `ShootOffset`, footprint, or sim and client point differences.
+
+**Unknown.** The magnitude of those three terms; any runtime witness.
+
+### AI-411
+
+- `L06163` is pending order 2: it stores `ord+9 = 1` with no `R0041` call. A byte-immediate scan of L13259..L13260 and a `[reg+9]` displacement scan of L02478..L13260 find six `ord+9 := 1` writers (`L06163`, `L00103`, `L00746`, `L00747`, `L13261`, `L13262`); the other five follow a gate.
+- The only immediate byte writer of `ord+8 = 2` is `L13240`; it has no `E8`/`E9` call reference and no dword reference (`evidence/imm-ord8-store2.txt`, `evidence/xrefs.txt`). The loader variants `L13263`, `L13264` and `L13265` have none either.
+- `AI-FACE-066` names `L00738` among routes on a taken `R0041` branch; `L00738` is the pending-2 arm and `L00742` is cast arm 8. `AI-FACE-067` counts 7 hits and 6 owners for `R0056`; the raw scan finds 11 sites: `L00752`, `L13266`, `L00751`, `L13267`, `L00753`, `L01933`, `L01934`, `L00754`, `L07010`, `L13268`, `L13269`.
+
+**Confidence.** Medium: negative reachability over the named scans (immediate stores, `[reg+9]` displacements, `E8`/`E9` calls, dword pointers). The ungated load is reachable only through `ord+8 == 2` and any restored order; the route is not called absent beyond that population. Three dword stores of 2 to `[reg+8]` (`L13270`, `L13271`, `L05400`) lie outside the order code and were not resolved.
+
+**Unknown.** Indirect callers, register-form stores and orders loaded from saves or scripts.
+
+`AI-FACE-066` and `AI-FACE-067` are narrowed in `claims/retracted.md` for these facts.
+
+### AI-412
+
+- The client 0x72 arm is accepted only when the drawable run counter `+0xa0` is 0; otherwise it logs "Overriding by Shoot" and returns. The 0x6b (move) and 0x6d (turn) arms have the same gate. Opcodes 0x6c, 0x6e, 0x6f and 0x70 are state sync with a mask whose bit 0x10 writes `unit+0x6c` (`L02537`); the tick-time projector masks seen are 1, 2, 409 and 20.
+- For arcs of 0x21 or more the 0x6d count `mover+0xa4` equals the sim step count (`ceil(arc / rate)`). For a smaller arc `R0056` snaps `mover+0` at once and sets `mover+0xa4 = 1` (`L13272`..`L01977`), so the gate can pass on the next sim tick and send 0x72 while the drawable run counter may still be nonzero.
+
+**Confidence.** Medium for the gate and the masks; Unknown for a drop after a one-heading snap turn, which no run observed.
+
+**Unknown.** A full-mask re-projection landing mid-cycle.
