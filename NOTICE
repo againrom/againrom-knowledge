@@ -1,0 +1,27 @@
+NOTICE
+
+Againrom knowledge contains project-authored research documentation and tooling.
+It is not an official game release and does not grant permission to redistribute
+original game installations, resource archives, executable binaries or decoder SDKs.
+
+The documentation describes results of static analysis, runtime observations and
+corpus measurements, for interoperability with lawfully owned installations. The
+public edition states operations functionally; it carries no instruction listings,
+machine-code runs or executable locators, and METHODS.md labels each claim's
+method. Technical quotations remain where a finding names them. This notice is not
+a certificate of non-infringement or a representation that every datum was
+created by this project.
+
+CC BY 4.0 applies to the project's own documentation rights. Apache-2.0 applies to
+the project's own tooling rights. To the extent an instruction excerpt, quotation
+or other included material remains protected expression of a game or component
+rightsholder, this project does not purport to license that third-party expression.
+Retention of such material requires its own applicable basis; this notice alone
+supplies no permission. Existing license grants for project-owned work are unchanged.
+
+"Rage of Mages", "Rage of Mages II", "Smacker" and other product names identify the
+subjects or interfaces being discussed. Their names and marks belong to their
+respective rightsholders. No sponsorship, endorsement, affiliation or transfer of
+trademark rights is asserted. Current ownership is not inferred from an old binary.
+
+See SOURCE.md, THIRD_PARTY.md and PUBLICATION.md for scope and remaining review work.

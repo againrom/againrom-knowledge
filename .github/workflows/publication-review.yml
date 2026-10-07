@@ -1,0 +1,57 @@
+name: Publication review
+
+on:
+  push:
+    branches: [main, publication/legal-hygiene-k1]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publication-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Synthetic publication-check tests
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Compile and exercise the claim reader
+        run: |
+          go test ./tools/claim
+          go run ./tools/claim FAME-HDR-001 FAME-REC-002 FAME-NAME-003 FAME-SCORE-004 FAME-UNK-005 FAME-DEFAULT-006 FAME-WRITE-007 FAME-DEFAULT-008 > /dev/null
+
+  remaining-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Report remaining review candidates without source excerpts
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/publication_check.py --strict --json > "$RUNNER_TEMP/publication-review.json"
+          status=$?
+          set -e
+          python3 - "$RUNNER_TEMP/publication-review.json" <<'PY'
+          import json, sys
+          from collections import Counter
+          from pathlib import Path
+          report = json.loads(Path(sys.argv[1]).read_text())
+          print('Not legal clearance. Existing corpus findings remain unapproved.')
+          for key in ('files', 'claim_ids', 'retracted_ids', 'private_citations', 'external_links', 'errors', 'review_candidates'):
+              print(f'{key}: {report[key]}')
+          for code, count in sorted(Counter(f['code'] for f in report['findings']).items()):
+              print(f'{code}: {count}')
+          print('First 40 locations (no source text):')
+          for item in report['findings'][:40]:
+              print(f"{item['path']}:{item['line']} {item['code']} {item['claim']}")
+          PY
+          exit "$status"
