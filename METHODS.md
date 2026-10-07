@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 2951. Observation: 95. Static analysis: 2431. Mixed: 425.
+Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
 
 ## Ledger ai
 
@@ -2080,6 +2080,8 @@ Claims labelled: 2951. Observation: 95. Static analysis: 2431. Mixed: 425.
 | SAV-1169 | static analysis | ● active |
 | SAV-1170 | mixed | ● active |
 | SAV-1171 | static analysis | ● active |
+| SAV-1172 | static analysis | ● active |
+| SAV-1173 | static analysis | ● active |
 
 ## Ledger session
 
@@ -2564,7 +2566,7 @@ Claims labelled: 2951. Observation: 95. Static analysis: 2431. Mixed: 425.
 | TEXT-UI-033 | static analysis | ● active |
 | TEXT-UI-034 | static analysis | ● active |
 | TEXT-UI-035 | static analysis | ● active |
-| TEXT-UI-036 | mixed | ● active |
+| TEXT-UI-036 | mixed | ● active (amended) |
 | TEXT-UI-037 | static analysis | ● active |
 | TEXT-UI-038 | static analysis | ● active |
 | TEXT-UI-039 | static analysis | ● active |
@@ -3042,6 +3044,10 @@ Claims labelled: 2951. Observation: 95. Static analysis: 2431. Mixed: 425.
 | UNIT-142 | mixed | ● active |
 | UNIT-143 | mixed | ● active |
 | UNIT-144 | static analysis | ● active |
+| UNIT-145 | static analysis | ● active |
+| UNIT-146 | static analysis | ● active |
+| UNIT-147 | static analysis | ● active |
+| UNIT-148 | static analysis | ● active |
 
 ## Ledger video
 

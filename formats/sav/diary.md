@@ -101,6 +101,17 @@ the selector. Nibble15 remains 15; some drawing gates require exact7.
 These are conditional client reads, not proof of every drawable's binding
 or a native redraw schedule. — SAV-996
 
+The panel reads the selector as one unclamped nibble level L: 0..7 from the Diary path, 15 from the 0xffff send. Health and Mana
+need L>=1, Sight and Speed 2, attack and damage 3, armour and defence 4,
+primary statistics 5, resistances 6, skills 7. The local player's own units
+read 7 without the table, and a Human or hero reads no table nibble.
+— UNIT-145, UNIT-146, UNIT-147
+
+The client array is not serialized: SAV carries the two Diary arrays and the
+original rebuilds the array from opcode186. The four mission-151 owner saves
+hold all-zero Diaries, so the level the owner reported on enemy Humans did not
+come from a Diary count. — SAV-1172, SAV-1173
+
 Normal-return setup with nonnull Player `+34` calls the builder with that
 Player, independently of the setup argument's optional initialization arm.
 This extends the conditional opcode4 resume relation. Later attributed

@@ -958,7 +958,7 @@ accessor address remains outside the negative
 |---|---|---|---|---|
 | TEXT-UI-034 | The shared character/unit panel selects its displayed actor name as `unitname.txt[typeID]`. | High | ● active | [EXP-0228](../experiments/EXP-0228-ui-text-indices/) |
 | TEXT-UI-035 | The same panel's persistent statistic captions come from fixed global `main.txt` slots, not `stats.txt`. | High | ● active | [EXP-0228](../experiments/EXP-0228-ui-text-indices/) |
-| TEXT-UI-036 | The character/unit panel supplies its own numeric grammar and gates caption groups by visibility level. | High / Medium | ● active | [EXP-0228](../experiments/EXP-0228-ui-text-indices/) |
+| TEXT-UI-036 | The character/unit panel supplies its own numeric grammar and gates caption groups by visibility level. | High / Medium | ● active (amended) | [EXP-0228](../experiments/EXP-0228-ui-text-indices/), amended [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
 | TEXT-UI-037 | `stats.txt` has exactly three accessor calls, all in the item-description formatter, and none in the character/unit panel. | High | ● active | [EXP-0228](../experiments/EXP-0228-ui-text-indices/) |
 | TEXT-UI-038 | The item-description formatter uses ten executable-authored format literals around its selected `stats.txt` labels and values. | High | ● active | [EXP-0228](../experiments/EXP-0228-ui-text-indices/) |
 | TEXT-UI-039 | The shop hover consumer maps four stock rectangles to global slots 62..65 and the shopkeeper rectangle to slot 61. | High | ● active | [EXP-0228](../experiments/EXP-0228-ui-text-indices/) |
@@ -1003,6 +1003,8 @@ line in `stats.txt`
 **Confidence.** **High** for the comparisons and format operands, read from one complete retained
 consumer, byte-checked in `format-literals.tsv` / **Medium** for calling the controlling value
 “visibility level”; its provenance was not decoded in this experiment
+
+**Amended.** The "skills/resistances above 6" clause is narrowed in `retracted.md`: resistances are drawn at level 6 and above, skills at 7, and the controlling value is the unit's knowledge level (`UNIT-145`, `UNIT-146`). The other thresholds, the pools and the format operands stand.
 
 ### TEXT-UI-037
 

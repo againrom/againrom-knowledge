@@ -14941,3 +14941,33 @@ read here (no image-wide read census was run); the grouped dead-actor case with 
 
 **Evidence.** [EXP-0490](../experiments/EXP-0490-dead-actor-state/), `evidence/load-arm.txt`,
 `evidence/world-tick-rebuild.txt`, `evidence/closure-summary.tsv`, `evidence/pair-records.txt`.
+
+## Enemy card knowledge carrier
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1172 | The only serialized input found to the monster table nibble is the Diary in the Player tail (119 dword counts, 119 word remainders); no SAV record naming the client table at `R+0x3f58` was found, so the original rebuilds it from opcode 186. | Medium | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+| SAV-1173 | Mission 151 owner saves carry all-zero Diaries, so the level 5 to 7 cards the owner reported on enemy Humans did not come from a Diary count; the source is Unknown. | High / Unknown | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+
+### SAV-1172
+
+- Carrier: the Player record tail holds the Diary as a dword array of kill counts per Units/Humans row (119 elements) and a word array of remainders (1024 minus count), with a trailing reference restored at LOAD (`SAV-847`). The count is capped at 17, seen in two saves with byte-identical Diaries (`game0002-bigsack`, `game0017-victory`); the remainder relation is `SAV-668`'s.
+- Not carried, as far as searched: the client table at `R+0x3f58` and `+0x3f5c`. Searched population: `tools/savdoc`, `formats/sav` and `formats/rom2-sav`; the only hit is the client-array statement of `SAV-995`. The frontend object is constructed empty (`R0391`); the image's serializers were not enumerated. After LOAD the original therefore holds no monster level until opcode 186 arrives.
+- The Diary-to-table path is opcode 186 (`L08064` to `L08062`); the first send after LOAD is gated on a change of `count>>1` and was not read to its trigger.
+
+**Confidence.** High that the Diary is saved. Medium that the table is not: a bounded decoder search, not an image-wide serializer census. Medium for the post-LOAD statement: no run was made.
+
+**Unknown.** Whether `Player+0x68` is serialized: the Player block fields read here do not include it.
+
+**Unknown.** The first refresh and delivery timing after LOAD.
+
+### SAV-1173
+
+- Population: four owner saves of mission 151 (`game0002-original`, `game0003-original-native151`, `game2320-input`, `game9999-original-entry151`). `game0002-original` and `game2320-input` hold 115 Diaries each, the other two 5; 20 are Player-class and 220 Humanoid-class. All 240 are zero (`evidence/diary-census-m151.tsv`).
+- The owner's cards of enemy Humans of types 9 and 24 showed levels 5 to 7. A Human reads no table nibble (`UNIT-146`), so the source was not separated among the three level inputs read in `R0877` (owner index 0, row bit 8 for the enemy entry, global `L01661` set by `#show map`) and an untraced writer (`SAV-1126`). A zero Diary excludes no Human input.
+- Owner-reported, not reproduced by this experiment: in the original `#show map` also makes every card show its values. This does not settle which level input it uses and raises no grade.
+- `SAV-1125` already fixes that the numbers of such a Human come from packets; this claim concerns only the level that gates their display.
+
+**Confidence.** High that the Diary counts are zero in these saves; the observation is owner-reported with no stated source; Unknown for which input applied.
+
+**Unknown.** Which of the three sources applied; no runtime observation was made.

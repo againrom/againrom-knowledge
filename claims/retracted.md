@@ -1,5 +1,11 @@
 # Overturn history
 
+## Card knowledge level thresholds
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TEXT-UI-036` (the skills/resistances threshold only; the other thresholds, the pools and the format operands stand) | Verbatim: "skills/resistances above 6" | High / Medium | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/), UNIT-145, UNIT-146 | The resistances are drawn at level 6 and above and the skills at level 7. The controlling value is the knowledge level L of the unit: 7 for the local player's own units, otherwise the client table nibble set by opcode 186, 0 when none. | **NARROWED** |
+
 ## Detailed Back class/sex copy and EN/RU font sidecars
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

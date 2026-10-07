@@ -539,3 +539,59 @@ Evidence is the installed `Data.bin` Units collection, the type-6 records of eve
 **Confidence.** High for the store and the compare, each a cited instruction, and for the consequence on `HERO-DEATH-026`'s evidence.
 
 **Unknown.** Whether the original draws a stage-1 actor at mission start: no frame was observed and the draw path was not read.
+
+## Enemy card knowledge
+
+Evidence is `rom.exe` static analysis and the installed Data.bin Units collection; no process was run.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| UNIT-145 | The mission card and tooltip draw field groups by knowledge level L, an unclamped nibble: Health and Mana at 1, Sight and Speed 2, attack and damage 3, armour and defence 4, primary statistics 5, resistances 6, skills 7. | High | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+| UNIT-146 | L is 7 for the local player's own units, or for any unit when global `L01661` is set; else it is the client table nibble for the unit's (type, face), 0 when none. Human and hero numbers come only from packets. | High / Medium | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+| UNIT-147 | The table nibble is `min(kills>>1, 7)` of the killing Player's Diary count for one Units row, so it rises only by hero-typed kills, per killing Player and (typeID, face), not per instance; debug paths set every nibble to 15. | High / Medium | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+| UNIT-148 | Single-player mission entry keeps the human Player and its Diary; a new campaign zeroes it; the client table is rebuilt from the Diary and is empty until a packet arrives. | Medium / Unknown | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+
+### UNIT-145
+
+- `R0877` (card) and `R0916` (tooltip) read one local level L and gate by compares against it. The per-field gate values below are read from the listing of `R0877`; `evidence/static-facts.tsv` does not tabulate them by address.
+- Always drawn: the name and the hostile or ally label. L at least 1: Health and Mana. At least 2: Sight and Speed. At least 3: attack and damage. At least 4: armour and defence. At least 5: the four primary statistics. At least 6: resistances (`+0x150`..`+0x154`). At least 7: skills (`+0x14b`..`+0x14f`) and the items the reader tests for exactly 7.
+- `TEXT-UI-036` states "skills/resistances above 6". The resistances gate is 6 (drawn at 6), the skills gate 7. Its primary statistics, Sight/Speed, attack/damage and defence/absorption thresholds agree with the levels above. See `claims/retracted.md`.
+- L is the nibble value and is not clamped (`SAV-996`): 0..7 from the Diary path, 7 from the owner and global rules, 15 from the `0xffff` send. At 15 every gate 1..7 passes, but the items tested for exactly 7 are not drawn.
+- The two readers carry the same gates, so a tooltip and a card agree for one unit.
+
+**Confidence.** High: the comparisons are instructions in the listing of `R0877`; the tooltip reader repeats them.
+
+**Unknown.** Which fields the per-class variants (structures, items) draw at each level: only the unit arm was read.
+
+### UNIT-146
+
+- L is 0 unless a rule below raises it. L is 7 when the unit's owner CPlayer index `[[U+0x14]+4]` is 0, or when the owner's entry in the row `[[R+0x9b4]+0x38]` (32 u16 entries) has bit 8 (the local player's own entry; bit 1 is hostile). Global `L01661` nonzero forces 7; its initial value is 0.
+- When `U+0x20` is at least 64 (a monster row), L is the nibble `WORD[[R+0x3f5c]+2*(U+0x20-64)] >> 4*(U+0x24-1)`, bounded by the table length `[R+0x3f60]`. `U+0x20` is the Units type id and `U+0x24` the face. A Human (below `0x1a`) or hero (`0x20`..`0x3f`) reads no table nibble.
+- Values: `R0590` fills a monster drawable's stats from a client prototype table; for a Human or hero it sets class and flag bits only, so their numbers come from packets alone (`SAV-1125`, `SAV-1126`).
+- Mechanisms that set `L01661`: opcode 170 sent by `#show map` and `#hide map` (`R0430`). Other writers were not searched beyond the listings read.
+
+**Confidence.** High: each read is a cited instruction. Medium for completeness of the `L01661` writers.
+
+**Unknown.** The first draw after LOAD; see `SAV-1172`.
+
+### UNIT-147
+
+- Writer `R1484`, called from the teardown at `R0427`: when the killer's type word `+0x0e` is in 33..63 and killer health is at least 0, it increments the killer Player's Diary dword for the victim's row and decrements the word remainder. The count caps at 17. A victim is rejected only when `vtable+0x30` is nonzero and its row is above 63 (`SAV-668` correction).
+- Builder `L08064` sends opcode 186 with 17 words when `(new>>1) != (old>>1)` and `Diary+0x2c` is nonnull: at counts 2, 4, ..., 16 for each (typeID, face). Quantity `q = min(count>>1, 7)` is placed at word `typeID-64`, shift `4*(face-1)`. If `Player+0x68` is above 10 the builder sends `0xffff`.
+- Rows 64..116 of Data.bin Units with typeID 64..80 are admitted: 53 rows, 14 typeIDs, no (typeID, face) collision (`evidence/keys.tsv`); EN and RU agree row by row (`evidence/units-rows-*.tsv`, which differ only in the file digest header). Rows 26, 27 and 118 are not admitted.
+- Direction: the Diary level rises only. Scope: the killing Player (the campaign participant, `UNIT-148`) and one (typeID, face); not one instance, and no separate mission or profile record was found. Debug and cheat producers: `#Chicken` sets `Player+0x68` to `0xff`, so the next send is `0xffff` and every nibble is 15; `#modify +knowledge` re-sends the Diary.
+- Census: 58 of 376 Diaries in 68 distinct save files hold a nonzero count, all on Player-owned Diaries; all nonzero indices are 64..114 and the highest count is 17 (`evidence/diary-census.tsv`).
+
+**Confidence.** High for the writer, builder, caps and data. Medium for completeness of the writers: the census of callers of `R1484` was bounded to the image's direct calls, and the `#modify` arm was not shown to be unprivileged.
+
+**Unknown.** Whether another producer writes the Diary indirectly; whether `#modify +knowledge` is gated before its arm.
+
+### UNIT-148
+
+- The map loader `R0423` reuses the campaign participant Player for roster slot 1 in single-player; the cull `R0809` keeps the human Player and does not touch its Diary. A new campaign creates a fresh participant (`R0913`) with a zero Diary. The Diary is serialized with the Player (`SAV-847`).
+- The client table at `R+0x3f58` exists only on the client receiver (constructor `R0391`, 0x3f78 bytes), starts empty and is written only by the opcode 186 handler `L08062`.
+- So the Diary carries across mission entry within one campaign, and the card level of a new map is the nibble last sent. The join arm `L08063` sends the Diary to a joining client.
+
+**Confidence.** Medium: loader reuse and cull are cited reads, but the path of every mission entry was not traced.
+
+**Unknown.** Whether town entry and exit rebuild the Player; the first send after mission entry (the send is gated on a change of `count>>1`, so an unchanged Diary may send nothing).
