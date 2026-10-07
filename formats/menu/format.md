@@ -378,9 +378,34 @@ procedure leaves to its default arm, and reach neither arm (`MENU-082`).
 Alt plus a letter B..Y except S broadcasts one type `0x46` record with sub-selector `0x80` and the
 index letter minus `A`; Alt+S is the screenshot (`MENU-062`). The record's receiver arm is a debug
 console that acts only for a Player whose privilege byte exceeds `0x32`. A fresh Player holds 0, and the chat line
-`#Chicken` sets it to `0xff`. D toggles turn tracing, T script tracing, Q the AI admission override
+`#Chicken` sets it to `0xff` (`MENU-102`, `MENU-103`). D toggles turn tracing, T script tracing, Q the AI admission override
 and prints its state, H prints a help, I the last-turn and average-turn AI statistics, U the
 mission unit experience; the other 17 keys do nothing (`AI-378`).
+
+The console tests no participant flag, and the byte can be raised only where `#Chicken` acts
+(`AI-397`, Medium; a Player privileged earlier in the process is not excluded). A reply is a `0x91` record with addressee 0, which the send routine takes as all connections; the filter inside that loop is Unknown (`AI-398`).
+
+Chat lines that begin with `#` reach one typed-command parser of 13 literals and 12 commands (`MENU-099`), which returns at once on
+a map whose participant flag is set (`MENU-100`). The privilege byte is checked by nine arms of the 12 commands
+and not by `#modify`, `#event` or `#Chicken` (`MENU-101`); `#Chicken` raises it to `0xff`
+(`MENU-102`). The byte is not saved and a LOAD leaves it at 0 by the constructor route (`MENU-103`, Medium). The commands:
+
+| Command | Effect | Claim |
+|---|---|---|
+| `#create [N ]<name>` | N gold for `Gold`, else N of a named item in the hero's inventory | `MENU-104` |
+| `#modify self\|army +god` | modifier protection and damage-kind bytes to 100 | `MENU-105` |
+| `#modify self +spell <id>`, `+spells` | spell id, spells 1 to 28 into the spellbook | `MENU-105` |
+| `#modify self\|army +knowledge` | Diary resend to the client | `MENU-105` |
+| `#summon [hero ]<name>` | N creatures or one hero | `MENU-106` |
+| `#killall`, `#kill all`, `#kill cheaters`, `#kill <name>` | kill the actors of the targets | `MENU-107` |
+| `#pickup all` | every Sack picked up by the hero | `MENU-108` |
+| `#show map`, `#hide map`, `#victory` | opcode `0xaa` selector 1, 0, 2 | `MENU-109` |
+| `#event <n>` | event text panel n | `MENU-110` |
+
+Three broadcast notices report a cheater, an ineffective use and a successful use (`MENU-111`). The
+phase-3 host console adds `disconnect <id>` and `curse <id>` (`MENU-112`). No other cheat input was
+found in the searched populations (`MENU-113`); the SAV consequence of each state change is
+`MENU-114`.
 
 The frame handler never reads the map key handler's return: it forwards the key, then always
 calls the MFC default, so a return of 0 only lets the root offer the key to its other children

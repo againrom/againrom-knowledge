@@ -548,7 +548,7 @@ Evidence is `rom.exe` static analysis and the installed Data.bin Units collectio
 |---|---|---|---|---|
 | UNIT-145 | The mission card and tooltip draw field groups by knowledge level L, an unclamped nibble: Health and Mana at 1, Sight and Speed 2, attack and damage 3, armour and defence 4, primary statistics 5, resistances 6, skills 7. | High | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
 | UNIT-146 | L is 7 for the local player's own units, or for any unit when global `L01661` is set; else it is the client table nibble for the unit's (type, face), 0 when none. Human and hero numbers come only from packets. | High / Medium | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
-| UNIT-147 | The table nibble is `min(kills>>1, 7)` of the killing Player's Diary count for one Units row, so it rises only by hero-typed kills, per killing Player and (typeID, face), not per instance; debug paths set every nibble to 15. | High / Medium | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+| UNIT-147 | The table nibble is `min(kills>>1, 7)` of the killing Player's Diary count for one Units row, so it rises only by hero-typed kills, per killing Player and (typeID, face), not per instance; debug paths set every nibble to 15. | High / Medium | ● active (amended) | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
 | UNIT-148 | Single-player mission entry keeps the human Player and its Diary; a new campaign zeroes it; the client table is rebuilt from the Diary and is empty until a packet arrives. | Medium / Unknown | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
 
 ### UNIT-145
@@ -584,7 +584,9 @@ Evidence is `rom.exe` static analysis and the installed Data.bin Units collectio
 
 **Confidence.** High for the writer, builder, caps and data. Medium for completeness of the writers: the census of callers of `R1484` was bounded to the image's direct calls, and the `#modify` arm was not shown to be unprivileged.
 
-**Unknown.** Whether another producer writes the Diary indirectly; whether `#modify +knowledge` is gated before its arm.
+**Unknown.** Whether another producer writes the Diary indirectly.
+
+**Amended.** `#modify +knowledge` is not privilege-gated: the `#modify` arm has no call to the privilege test and the arm is reached on any map whose participant flag is 0 (`MENU-101`, `MENU-105`). The all-15 send needs `Player+0x68` above 10, which `#Chicken` sets (`MENU-102`); `#modify +knowledge` alone sends the real counts.
 
 ### UNIT-148
 

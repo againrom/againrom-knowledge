@@ -14946,7 +14946,7 @@ read here (no image-wide read census was run); the grouped dead-actor case with 
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1172 | The only serialized input found to the monster table nibble is the Diary in the Player tail (119 dword counts, 119 word remainders); no SAV record naming the client table at `R+0x3f58` was found, so the original rebuilds it from opcode 186. | Medium | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
+| SAV-1172 | The only serialized input found to the monster table nibble is the Diary in the Player tail (119 dword counts, 119 word remainders); no SAV record naming the client table at `R+0x3f58` was found, so the original rebuilds it from opcode 186. | Medium | ● active (amended) | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
 | SAV-1173 | Mission 151 owner saves carry all-zero Diaries, so the level 5 to 7 cards the owner reported on enemy Humans did not come from a Diary count; the source is Unknown. | High / Unknown | ● active | [EXP-0491](../experiments/EXP-0491-enemy-card-knowledge/) |
 
 ### SAV-1172
@@ -14957,7 +14957,7 @@ read here (no image-wide read census was run); the grouped dead-actor case with 
 
 **Confidence.** High that the Diary is saved. Medium that the table is not: a bounded decoder search, not an image-wide serializer census. Medium for the post-LOAD statement: no run was made.
 
-**Unknown.** Whether `Player+0x68` is serialized: the Player block fields read here do not include it.
+**Amended.** `Player::Serialize` (`R0415`) writes no `Player+0x68`, and a Player rebuilt at LOAD holds the constructor value 0 by that route (`MENU-103`, Medium: the other archive-side writers were sampled); the byte that selects the all-15 send is then not restored by LOAD.
 
 **Unknown.** The first refresh and delivery timing after LOAD.
 

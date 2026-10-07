@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
+Claims labelled: 2975. Observation: 95. Static analysis: 2455. Mixed: 425.
 
 ## Ledger ai
 
@@ -249,7 +249,7 @@ Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
 | AI-395 | static analysis | ● active |
 | AI-376 | static analysis | ✔ promoted (amended) |
 | AI-377 | static analysis | ✔ promoted |
-| AI-378 | static analysis | ● active |
+| AI-378 | static analysis | ● active (amended) |
 | AI-381 | static analysis | ● active |
 | AI-382 | static analysis | ● active |
 | AI-383 | static analysis | ● active |
@@ -260,6 +260,8 @@ Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
 | AI-391 | static analysis | ● active |
 | AI-392 | static analysis | ● active |
 | AI-393 | mixed | ● active |
+| AI-397 | static analysis | ✔ promoted (branch candidate) |
+| AI-398 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger alm
 
@@ -1071,6 +1073,22 @@ Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
 | MENU-093 | static analysis | ✔ promoted (branch candidate) |
 | MENU-094 | static analysis | ✔ promoted (branch candidate) |
 | MENU-095 | static analysis | ✔ promoted (branch candidate) |
+| MENU-099 | static analysis | ✔ promoted (branch candidate) |
+| MENU-100 | static analysis | ✔ promoted (branch candidate) |
+| MENU-101 | static analysis | ✔ promoted (branch candidate) |
+| MENU-102 | static analysis | ✔ promoted (branch candidate) |
+| MENU-103 | static analysis | ✔ promoted (branch candidate) |
+| MENU-104 | static analysis | ✔ promoted (branch candidate) |
+| MENU-105 | static analysis | ✔ promoted (branch candidate) |
+| MENU-106 | static analysis | ✔ promoted (branch candidate) |
+| MENU-107 | static analysis | ✔ promoted (branch candidate) |
+| MENU-108 | static analysis | ✔ promoted (branch candidate) |
+| MENU-109 | static analysis | ✔ promoted (branch candidate) |
+| MENU-110 | static analysis | ✔ promoted (branch candidate) |
+| MENU-111 | static analysis | ✔ promoted (branch candidate) |
+| MENU-112 | static analysis | ✔ promoted (branch candidate) |
+| MENU-113 | static analysis | ✔ promoted (branch candidate) |
+| MENU-114 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger mission
 
@@ -2080,7 +2098,7 @@ Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
 | SAV-1169 | static analysis | ● active |
 | SAV-1170 | mixed | ● active |
 | SAV-1171 | static analysis | ● active |
-| SAV-1172 | static analysis | ● active |
+| SAV-1172 | static analysis | ● active (amended) |
 | SAV-1173 | static analysis | ● active |
 
 ## Ledger session
@@ -3046,7 +3064,7 @@ Claims labelled: 2957. Observation: 95. Static analysis: 2437. Mixed: 425.
 | UNIT-144 | static analysis | ● active |
 | UNIT-145 | static analysis | ● active |
 | UNIT-146 | static analysis | ● active |
-| UNIT-147 | static analysis | ● active |
+| UNIT-147 | static analysis | ● active (amended) |
 | UNIT-148 | static analysis | ● active |
 
 ## Ledger video

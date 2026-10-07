@@ -3070,7 +3070,7 @@ Evidence is a static read of `rom.exe` (identical on both lawful installs; capst
 |---|---|---|---|---|
 | AI-376 | The engage selector reads no cast-state field of its own actor, so a pending cast does not stop a draw; a miss writes order kind 5 over the retained cast order, while the in-flight cast runs from actor fields. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 | AI-377 | The slot draw skips a zero slot id before `rand()`, never matches a zero threshold, and has no owner test in its body; only a mage-bit actor with reach below 2 and `Player+0x28 == 0` is diverted. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
-| AI-378 | The Alt+letter record's receiver is the debug console `R0440`, which acts only for a Player with `+0x68` above `0x32`; six keys act (D, H, I, Q, T, U), 17 do nothing; `#Chicken` in chat sets `+0x68` to `0xff`. | High / Medium / Unknown | ● active | [EXP-0450](../experiments/EXP-0450-keyboard-remainder/) |
+| AI-378 | The Alt+letter record's receiver is the debug console `R0440`, which acts only for a Player with `+0x68` above `0x32`; six keys act (D, H, I, Q, T, U), 17 do nothing; `#Chicken` in chat sets `+0x68` to `0xff`. | High / Medium / Unknown | ● active (amended) | [EXP-0450](../experiments/EXP-0450-keyboard-remainder/) |
 
 ### AI-376
 
@@ -3113,6 +3113,8 @@ Cast admission: `R0268` refuses only a caster with the mage bit, no item in `cas
 **Confidence.** High for the receiver, the gate, the two tables and each arm's flag write or print (read whole, strings dumped). Medium for how `R0430` compares the typed line to `#Chicken` (whole line or prefix), for the demotion arm at `L02013`, for `R0201` being the constructor, and for the AI effect of Q (an inference).
 
 **Unknown.** The readers of the two trace flags, everything `R0399` and `R0400` print beyond the strings named, where a client displays the `0x91` lines, and whether the save loader writes `+0x68`: only `L02014` and `R0445` store the byte by displacement, so a loaded privileged state would need a wider store.
+
+**Amended.** `#Chicken` is a prefix match with no further gate (`MENU-102`), so the Medium comparison statement above is High; `R0201` is the Player constructor and `Player::Serialize` writes no `+0x68` in its own body (`MENU-103`); the console has no participant-flag test and, by the writers found, is reachable only where `#Chicken` acts or for a Player privileged earlier in the process (`AI-397`, Medium); a LOAD leaves the byte at 0 by the constructor route (Medium).
 
 ## Attack cycle, pickup pass and pursuit thresholds
 
@@ -3275,3 +3277,24 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and a
 **Confidence.** Medium: a census over saves the owner and the install happened to produce; 155 of the 220 `+0x5c` values do not resolve, so the table covers 30 percent of the nonzero targets and cannot exclude a melee-on-flier hold among the rest. The null has little power: one domain-3 target appears among all 65 resolved `+0x5c` pairs and none among the 103 resolved order victims, and the 87 melee order victims come from 5 saves, so the absence of a melee-on-flier pair is expected whether or not a route exists.
 
 **Unknown.** The unresolved 155 targets. Whether any save was taken while a melee creature held a flier, which the veto routes read here predict it would not.
+
+## Debug console reachability
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-397 | The Alt console tests no participant flag, and the only writer found that raises the privilege byte is `#Chicken`, which a participant flag blocks; so a multi-participant session refuses every key unless a Player was privileged before. | High / Medium | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| AI-398 | A console reply is one `0x91` record with `+7 = 0` and `+0xa = 0`, which `R0217` treats as the all-connections path; it carries no notice 5, 6 or 7. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+
+### AI-397
+
+`R0440`, whose only caller is `L02000` in the `0x80` arm of `R0061`, requires `byte[cmd+4] == 0`, `[L00004] != 0` and `Player+0x68 > 0x32`, then the index tests of `AI-378`. It reads no `server+0x0c` (`rom-console.txt`). The only writer found that raises the byte is `#Chicken` (`MENU-102`; `callto:R0445` and the `disp:68` census, not other operand forms), and `R0430` returns before that test when `server+0x0c` is set (`MENU-100`). A fresh Player holds 0 (`MENU-103`).
+
+So the console is usable on a map where the participant flag is 0 after one `#Chicken`, and refuses every key where the flag is set. The exception is a Player whose byte was raised earlier in the same process, which depends on the lifetime left Unknown in `MENU-103`.
+
+**Confidence.** High for the three tests and the absence of a `server+0xc` read in the console and in the `0x46` arm (`rom-dispatch.txt`). Medium for "only writer" (`AI-378` left other operand forms unexcluded and `MENU-103` bounds its census) and for the multi-participant refusal, which also rests on `MENU-100`.
+
+### AI-398
+
+The console builds each reply line through `R0443`, a `0x91` record, and sends it with `R0217`. All 12 call sites in `R0440` push Player 0, so `+7` is stored as 0 (`L13191` to `L13192`). `R0217` tests `[arg+7]` at `L12414`: zero walks the connection list at `+0x18b8`, nonzero looks one connection up by id. `#event` differs: `R0188` passes its Player, so `+7` is that Player's id. The notices of `MENU-111` are not used by the console arms.
+
+**Confidence.** High for the record fields and the two branches of `R0217`. Unknown for any filter inside the connection loop (`L13193`, `L13194`, not read) and for the client panel that shows the line.

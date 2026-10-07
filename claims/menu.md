@@ -1147,3 +1147,183 @@ archive/call-graph absence claim.
 **Confidence.** High for scalar source, width, symmetric transform and direct
 consumer join. Unknown for native SAVE/LOAD/pickup continuation and for the
 state a SAVE observes between client debit and command execution.
+
+## Typed chat commands, the privilege byte and host-console input
+
+Population: the `rom.exe` image (one image for the EN and RU installs), the chat opcode `0x91` arm of `R0061`, the typed-command parser `R0430` and its 24-literal block at `L13195`. All command words are ASCII bytes in the image, so EN and RU accept the same words. Instrument: `tools/ghidra` `DisasmFn`, `DisasmRange` and `EnumRefs`; listings in `experiments/EXP-0492-cheat-commands/evidence/listings/`. Nothing was run.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-099 | The chat line reaches one typed-command parser, `R0430`, through one call (`L13196`) taken when the first character is `#`; its chain tests 13 literals (12 commands) in a fixed order with a case-sensitive prefix match. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-100 | The parser's first test is `server+0x0c != 0`, which returns silently, so no `#` command, `#Chicken` included, acts on a map whose participant flag is set; the notice and privilege tests below come after it. | High / Medium | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-101 | Nine arms of the 12 commands test the privilege byte through `R0444` (10 direct call sites, all in the parser); `#modify`, `#event` and `#Chicken` call no such test, so `#modify +knowledge` is not privilege-gated. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-102 | `#Chicken` is a prefix match that sets the sender's privilege byte to `0xff`, logs one line naming the Player and sends notice 5; it has no gate besides MENU-100. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-103 | The privilege byte `Player+0x68` is 0 from the constructor, 0xff after `#Chicken`, 0 after `#kill cheaters`, and is not written by `Player::Serialize`, so SAVE does not carry it and a LOAD restores 0 by the constructor (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-104 | `#create [N ]<name>` credits N gold for the name `Gold` and otherwise adds a named item of count N to the hero's inventory, under the participant flag, the single-player flag, the privilege byte and a hero test. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-105 | `#modify <self\|army>` has four arms with no privilege test: `+god` (self or whole army), `+spell <id>` and `+spells` (self only) and `+knowledge` (either); each ends in notice 7. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-106 | `#summon [hero ]<name>` spawns N creatures or one hero by type name at the caller's hero, under the privilege byte, owned by the caller. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-107 | The four kill commands require the privilege byte and set every actor of the target Players to a health word of `0xffce` (death on the next tick is Medium); `#kill cheaters` also clears the targets' privilege byte and sends no notice. | High / Medium | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-108 | `#pickup all` moves every Sack on the server's list into the caller's hero through the ordinary pickup routine, crediting its gold and inventory, under the privilege byte. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-109 | `#show map`, `#hide map` and `#victory` send opcode `0xaa` with selector 1, 0 and 2 to the caller; the client reveals the whole map and sets a runtime flag, clears the flag, or runs the mission-win arm; no server state is written. | High / Medium | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-110 | `#event <n>` has no privilege test and sends packet `0xb6` with n to the caller, which opens the mission event text panel n; it sends no notice. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-111 | Three broadcast notices (`0x92` subtypes 5, 6 and 7) tell every client that a Player became a cheater, used a command ineffectively, or used a command successfully. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-112 | The phase-3 host console panel accepts two further `#` commands with no privilege test: `disconnect <id>` and `curse <id>`. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-113 | Outside the parser and the Alt console, no further cheat-like key or text input was found in four bounded populations; 28 command-line switch literals are named and only `-trace` was read. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-114 | Each command's state change reaches the SAV only through the ordinary records it edits; the three non-saved effects are the privilege byte, the map reveal flag and the `+knowledge` Diary resend. | High / Medium | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+
+### MENU-099
+
+The chat producer `R2123(text, recipient)` builds a record with `+9 = 0x91` and the text at `+0xf`; it is called by the Enter handler `R2124` and by the frame handler `R0709`. The server arm `L09396` of `R0061` formats `"%d|%s: %s"` for display and, when the first character is `#` (`L13197`), calls `R0430(msg, Player)` at `L13196`. That is the only caller of `R0430` (`rom-enum.txt`, `callto:R0430`: 1 hit).
+
+The parser tests each literal with `CString::Find` (`R0996`, which calls `strstr`) and takes a match only at index 0, so every test is a case-sensitive prefix test: `#Chicken123` matches `#Chicken`. The chain order, by address of the test: `#create ` `L13198`, `#modify ` `L13199`, `#summon ` `L13200`, `#killall` `L13201` or `#kill all` `L13202`, `#kill cheaters` `L13203`, `#kill ` `L13204`, `#pickup all` `L13205`, `#show map` `L13206`, `#hide map` `L13207`, `#victory` `L13208`, `#event ` `L13209`, and `#Chicken` `L13210` as the last test. An earlier test shadows a later one, so `#kill cheaters` must precede `#kill `, which it does.
+
+The literal block at `L13195` holds 24 strings: the 13 command literals above (12 commands: `#killall` and `#kill all` share one arm), the argument words `Gold`, `self`, `army`, `+god`, `+spell `, `+spells`, `+knowledge`, `hero`, the log strings `All sacks picked up`, ` enable cheating.` and `Player `. The 89 call sites of `R0996` in 30 owner routines are enumerated in `rom-enum.txt` (`callto:R0996`, 0 in orphan code). Their classification from string operands, as CSV, INI, registry or dialogue-script parsers rather than chat input, is a lane note not in the committed evidence (Medium).
+
+**Confidence.** High: the parser is read whole and the literal block is dumped (`rom-tables.txt`). Medium for the classification of the other 29 owners of `R0996`.
+
+**Unknown.** Whether another code path posts a `0x91` record that begins with `#` without the producer above: the opcode `0x91` senders enumerated here are the chat producer and the console reply `R0443`, which writes `+7 = 0` (`AI-398`). The `:` arm of the same chat arm (`L13211` to `L13212`, `rom-chat-arm.txt`) relays by team bit or plainly and parses nothing.
+
+### MENU-100
+
+`R0430` is a server method. Its first instruction sequence tests `[this+0xc]` and returns when it is nonzero. `server+0x0c` is "more than one participant": `L02087` stores `(map+0xd4 > 1)`, and the server constructor stores `arg0 < 2`. The single-player flag `server+0x14c` is recomputed as `(+0x0c == 0)` by its two writers (`SHOP-ENTRY-016`). `#create` additionally tests `server+0x14c`.
+
+A map whose participant count `map+0xd4` exceeds 1 therefore ignores every typed command, `#Chicken` included. The lane read `map+0xd4` as 1 on all 56 embedded campaign maps and as 4, 8, 12 or 16 on 15 of 16 loose maps; that census is a lane note and is not in the committed evidence.
+
+**Confidence.** High for the gate and the stores. Medium for which shipped maps pass it, because the per-map values are not committed.
+
+**Unknown.** Whether a map can be played with `map+0xd4 > 1` in a session whose server constructor argument is below 2.
+
+### MENU-101
+
+`R0444` is the test `Player+0x68 > 0x32` (unsigned byte). `EnumRefs callto:R0444` (direct calls; `rom-enum.txt`: 10 hits, 1 owner, 0 in orphan code) finds exactly 10 call sites, all inside `R0430`; an inline `+0x68 > 0x32` test is excluded only through the `disp:68` census (`MENU-103` bounds it): `L13213` (`#create`), `L13214` (`#summon`), `L13215` (`#killall` and `#kill all`), `L13216` (`#kill cheaters`, the sender), `L13217` (`#kill cheaters`, each other Player in its loop) and `L13218` (`#kill <name>`), `L13219` (`#pickup all`), `L13220` (`#show map`), `L13221` (`#hide map`) and `L13222` (`#victory`). A refused command sends notice 6 (MENU-111).
+
+`#modify` (every arm), `#event` and `#Chicken` have no call to it. The `#modify +knowledge` arm re-sends the Diary; it tests the separate threshold `Player+0x68 > 10` (`R2125`, sole caller `L13223` in `L08064`) only to choose the count it sends: `0xffff` for every nibble when the byte exceeds 10, the Player's real counts otherwise (`UNIT-147`, `SAV-845`). This answers the `UNIT-147` Unknown on whether `#modify +knowledge` is gated: it is not.
+
+**Confidence.** High: the 10 sites come from the call enumeration and each arm is read whole.
+
+### MENU-102
+
+After the earlier tests fail, `L13210` tests the line against `#Chicken` (`L02012`). A match does three things and has no other gate: it formats `"Player <name> enable cheating."` and posts it as a frame message (`R1347`), stores `0xff` in `Player+0x68` through `L13224` calling `R0445`, and sends notice 5 (MENU-111). Since the test is a prefix match, any line that begins with `#Chicken` qualifies.
+
+**Confidence.** High; this replaces the Medium prefix-versus-whole-line statement of `AI-378`.
+
+### MENU-103
+
+`Player+0x68` is a byte. Byte-width accesses in the image: the constructor store `L02014` (value 0, `R0201`, vtable `L07944`), the test at `L13225`, the setter at `L13226`, the `>10` test at `L13227` and the console test at `L02001`. The setter `R0445` has two call sites, both in the parser: `0xff` at `L13224` and `0` at `L02013` for each other Player whose byte exceeds `0x32` (MENU-107).
+
+`Player::Serialize` (`R0415`) reads and writes no `+0x68` (`rom-player.txt`). A Player rebuilt from the archive is made by the class factory `R0203`, which calls the constructor, so after LOAD the byte is 0 by that route.
+
+Bounds. "Byte-width accesses" means the `disp:68` enumeration (`[reg+0x68]` operand form, `rom-enum-disp.txt`: 750 hits, 325 owners) plus the call enumeration of the setter; it excludes other operand forms, address-of forms and bulk copies. "Reads and writes no `+0x68`" is true of the body of `R0415`; its base call `R0530` and the callees that take the archive were not read. Wider-width stores at displacement `0x68` belong to many classes; those sampled are other objects and the classification of all of them is partial.
+
+Lifetime across mission entry, mission end and the town: the Player object persists in memory across the campaign path (`PARTY-PERSIST-014`, `-028`), which suggests the byte survives them in one process, but the five other constructor callers (`L13228`, `L13229`, `L13230`, `L13231`, `L13232`) were not read for a mission-entry rebuild. Whether the town has a chat entry is Unknown: the construction site of the chat edit control was not read.
+
+**Confidence.** High for the constructor value, the two writers and the absence from `Player::Serialize`. Medium for the LOAD value, because the other archive-side writers of the byte are classified only by sampling. Unknown for survival across mission entry, mission end and town entry within one process.
+
+### MENU-104
+
+The arm tests, in order: `server+0x0c == 0` (MENU-100), `[L00285]+0x14c != 0`, the privilege byte (refusal: notice 6), and, when the hero actor's byte `[Player+0x34]+0x13c` is above 0, sends notice 6 and returns (`L13233` to `L13234`). The count is the token before the first space: `L13235` parses it with `atoi`; a positive value is the count and the rest of the line is the name, otherwise the count is 1 and the whole text is the name.
+
+For the name `Gold` the arm calls `R0449(Player, count, 0)`, which adds to `Player+0x38` and sends opcode `0x67` with the new balance, then notice 7. For any other name it calls the item factory `R0947(L02110, name)`; a null result, or a failure of the validity test `L09852`, gives notice 6. Success stores the count at `item+0x42`, adds the item to the hero's inventory (`Player+0x34`, container `+0x7c`, `R0929`), runs `R0451`, projects the actor with `R0059` mask `-1` and sends notice 7.
+
+**Confidence.** High for the gates, the count syntax and the gold arm. Unknown for the item-name grammar of `R0947`: its families go through sub-databases at `L04589`, `L04593`, `L04591` and `L04587`, and the name set it accepts was not decoded.
+
+### MENU-105
+
+`#modify ` is followed by `self` or `army` and then one of the `+` words, tested in this order: `+god`, `+spell `, `+spells`, `+knowledge`. The arms:
+
+- `+god`: `R1562` on the hero (`self`) or on every actor of `[Player+0x20]` (`army`). It writes the six modifier protection words and six damage-kind bytes to 100 and recomputes (`HERO-MODDK-161`), then projects with mask `0xbf7fff7f`.
+- `+spell <id>`: `self` only; needs the hero's spellbook `actor+0x140` and `0 < id < size(L05046)`. It builds `Spell(id)` (`R0463`) and inserts it (`R0464`). An out-of-range id still projects and sends notice 7.
+- `+spells`: inserts ids 1 to 28.
+- `+knowledge`: `L08064` re-sends the Diary (MENU-101, MENU-114); `self` and `army` behave alike.
+
+None tests the privilege byte; each ends with notice 7.
+
+**Confidence.** High for the arms as read whole. The 28 of `+spells` is the loop bound read from the code, not the shipped spell count.
+
+### MENU-106
+
+After the privilege test and a non-null `Player+0x34`, `#summon ` takes an optional `hero ` word. With `hero` the count is forced to 1 and the hero flag is set. Otherwise the token before the first space is the count as in MENU-104. The arm loops `R0066(server, &name, actor, heroflag)`, which tries `R0501(name)` and, when the type word is 0, falls back to `R0497(name, flag, 0)`. The owner is the owner of the actor passed in, which is the caller's hero.
+
+**Confidence.** High for the gates and the loop. Unknown for the accepted name set and for the placement cell of each spawn: `R0501` and `R0497` were not read.
+
+### MENU-107
+
+All four arms test the privilege byte first (MENU-101). The kill is the helper `L06591`, which writes the health word `+0x94 = 0xffce` (-50) on every actor of `[Player+0x20]`, which is a health at or below the death threshold of the tick routine; the death arm was not read here, so "dies on the next tick" is Medium. Whether `#killall` includes the caller is Unknown: the matrix test on `[caller][caller]` bit 0 does not exclude it.
+
+- `#killall` and `#kill all` (prefix match, so `#killall` also takes any suffix): every Player whose relation bit 0 toward the caller is set in the matrix `[L00004]+0xa9c4 + 0x32*P.id + caller.id`; then notice 7.
+- `#kill cheaters`: every other Player whose privilege byte exceeds `0x32` has the byte set to 0 (`L02013`) and its actors killed. No notice.
+- `#kill <name>`: the Player found by name through `L13236` (`R2126`, `R1387`, `R0751`); its actors are killed; notice 7.
+
+The name compare `R0751` is a byte compare (a multibyte-aware compare when the locale flag `[L03507]` is set); it is not a case-insensitive compare, in contrast to `R0911` (`_stricmp`).
+
+**Confidence.** High for the arms and the helper. Medium for the name compare being case-sensitive: the locale-flag branch (lead-byte table `L13237`) was read only to its first lines.
+
+### MENU-108
+
+After the privilege test and a non-null `Player+0x34`, the arm walks every Sack in the list at `[server+0x14]+8`. Per Sack it removes it from the grid (`R0447`) and from the list (`L02016`) and calls `R0448` with the caller's hero. That is the ordinary pickup (`MENU-094`): credit `Sack+0x3c` gold through `R0449`, pour the container into the hero's inventory (`R0450`), destroy the Sack and project with mask `0xa08000`. Then notice 7 and the frame log line `All sacks picked up`.
+
+**Confidence.** High for the arm and the pickup routine.
+
+### MENU-109
+
+All three arms test the privilege byte, then send opcode `0xaa` through the session with the caller as addressee and the selector at `+0xa`: 1 for `#show map`, 0 for `#hide map`, 2 for `#victory`. The first two also send notice 7; `#victory` sends none. No server state is written.
+
+The client arm is `L10592` (byte table `L02523`, dword table `L02524`, `rom-tables.txt`):
+
+- Selector 0 stores `[L01661] = 0`.
+- Selector 1 stores `[L01661] = 1` and ORs `0xc000` into every word of the view's map array (`[view+0x80]`, data at `+0xc`, width `+4`, height `+8`). The flag freezes the periodic fog clear (`TERR-FOG-085`) and forces the enemy-card level to 7 (`UNIT-146`).
+- Selector 2 posts frame message `0x430`, the win arm that packet `0xb5` also reaches: it sets `campaign+0x3bc = 1` and either posts `0x41d` (side missions) or builds the Victory and Continue panel.
+
+**Confidence.** High for the sends and the three client arms. Medium for the effect of `0x430` on any SAV-carried flag: the arm was read to `campaign+0x3bc` only.
+
+### MENU-110
+
+`#event ` takes the rest of the line as a number n and calls `R0188(mgr, Player, n, 0)`, which sends packet `0xb6` (client message `0x433`, event text n; `DLG-PATH-002`) to the sender. There is no privilege test, no notice and no check that n names an event of the loaded map.
+
+**Confidence.** High for the send. Unknown for the display of an n without text, which depends on the client panel.
+
+### MENU-111
+
+`R1343(code, playerword, 0)` calls `R0623(0x92, code, playerword, 0)`: a broadcast record with subtype = code and the Player index at `+0xe`. The client arm in `R0509` (jump table `L13238`) formats a three-part line from the string table entries 221 to 226:
+
+- Subtype 5 (entries 221, 222): the Player has decided to become a cheater. Sent by `#Chicken`.
+- Subtype 6 (223, 224): the Player used cheats ineffectively. Sent by a refused privilege test and by a failed `#create`.
+- Subtype 7 (225, 226): the Player used cheats successfully. Sent by the arms that end in notice 7.
+
+**Confidence.** High for the send sites and the subtype arms.
+
+### MENU-112
+
+`R2127` is a key handler of the class built by `R2128`, constructed by `R0099` at `L13239` only when `campaign+0x6bc == 3`, the phase-3 host console panel. On Enter, text that begins with `#` is lowercased (`R0723`) and passed to `R2129`; other text is sent as an ordinary `0x91` chat record to `L00522`.
+
+- `disconnect <id>`: finds the connection by id (`L08057`) and the Player (`L00171`), then `L12801` disconnects the client.
+- `curse <id>`: for a Player with a hero, sets, on the hero actor reached through `Player+0x34`, `+0x130 = 0` (total experience), the stat words `+0x84`, `+0x86` and `+0x88` to 10 and `+0x8a` to 1, runs `vt+0x50`, projects with `R0059(hero, 0, -1)` and `L12802(mgr, Player)`.
+
+There is no privilege test. These commands act on remote Players in a multiplayer host session and are lowercase only, because the lowercasing precedes the compare.
+
+**Confidence.** High for the dispatch, the two literals and the `curse` stores. Unknown for what `L12801` and `L12802` do beyond their names and for the meaning of the four stat words (`HERO-STAT-001` names the offsets).
+
+### MENU-113
+
+Searched: (a) the 24-literal command block and the 89 `R0996` call sites; (b) the command-line switch strings in `.data` and `.rdata`; (c) the mission key table (`AI-KEY-125`, `keyboard.tsv`) and the Alt console; (d) the two `#` consumers MENU-099 and MENU-112. Found no further typed command or cheat key.
+
+The 28 switch literals are `-saveonserver`, `-internetserver`, `-aslfile`, `-startserver`, `-window`, `-safevideo`, `-detail0`, `-detail1`, `-detail2`, `-noanimation`, `-noshadows`, `-nodynamiclighting`, `-trace`, `-nomusic`, `-protocol0` to `-protocol4`, `-protocol`, `-serverid`, `-name`, `-mage`, `-female`, `-waitforever`, `-emulation`, `-systemmemory`, `-map"`, `-session"` and `-ip"`. `-trace` is read at `L06538` into `[L04662]` and gates 22 diagnostic message-line posts (`MISSION-MSGPOST-058`). The effects of the others were not read.
+
+**Confidence.** Medium: a bounded string and key search, not a read of every input route.
+
+**Unknown.** The effects of the 27 other switches; registry and INI values that unlock behaviour; any input handled by data (a script command) rather than code.
+
+### MENU-114
+
+By command, what SAV carries (`SAV-1172`, `HERO-MODDK-161`, `SAV-PLAYER-028`):
+
+- `#create` gold and items, `#pickup all`, `#summon`, kills, `#modify +spell` and `+spells`: ordinary saved state (`Player+0x38`, inventory, actors, Spellbook).
+- `#modify +god`: the modifier damage-kind bytes the actor archive carries.
+- `#modify +knowledge`: the Diary counts are unchanged and saved as before; the effect is a client table resend only.
+- `#show map` and `#hide map`: `[L01661]` is a global outside the SAV; the revealed map words are client state.
+- `#victory`: writes none of the SAV-carried state itself. The `Player+0x3c` win latch is written by the reporter `R0132` (`SAV-FLAG-027`); the effect of the `0x430` arm on it was not read.
+- `#event`, the notices and `#Chicken`: no SAV state.
+
+A LOAD restores the saved records and, by the constructor route, leaves the privilege byte at 0 (MENU-103, Medium: the other archive-side writers were sampled), so a cheat effect that lives in a saved record survives SAVE and LOAD while the privilege to repeat it does not.
+
+**Confidence.** High for the serializer joins named. Medium for the three non-saved effects, which rest on the absence of a store in the serializers read. Unknown for the win latch.
