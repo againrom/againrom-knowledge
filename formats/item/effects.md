@@ -149,6 +149,26 @@ by a Units `EquipItem` cell and is not the unarmed-Human default.
 — ITEM-NAMEPARSE-040, ITEM-DMGCOL-018 (damage-column clause retracted;
 use ITEM-WEAPCOL-021), HERO-BARE-037
 
+### The serialized Weapon attack tail
+
+W52 is the 24-byte block at Weapon `+0x52`. Its bytes `[19:22]` are Weapon
+`+0x65`, `+0x66` and `+0x67`. The name and direct-code Weapon constructors
+unconditionally initialize all three to zero through the embedded attack
+initializer, before shape/material/row selection and fill. This is explicit
+initialization and does not depend on new allocation contents. — ITEM-157
+
+The named fill, price, text-Effect attachment, Equip and removal bodies have
+no direct local store to these three Weapon bytes on valid, nonaliased paths.
+The melee Equip branch reads them independently and assigns actor
+`+0xf9/+0xfa/+0xfb`; removal clears the actor bytes. Transitive callback
+preservation remains Unknown. — ITEM-158, ITEM-WEAPCOL-021
+
+Weapon copy initializes the block and then copies 46 current source bytes
+from `+0x52`, carrying any source tail over the zeros. SAVE exports the current
+24-byte W52; LOAD restores the same raw block. Constructor defaults therefore
+do not constrain a copied or loaded Weapon's tail. Other writers, callbacks
+and the complete construction-to-first-SAVE lifetime remain Unknown. — ITEM-159
+
 ### An armour's and a shield's numbers — `R0890`, `R0888` (`ITEM-ARMFILL-032`)
 
 The same routine twice, offset by two bytes because the armour spends `+0x50` on its `Slot`. The

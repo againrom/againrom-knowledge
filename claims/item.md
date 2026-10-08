@@ -726,7 +726,7 @@ is 2 only between `L00541` and `L00115`.
 | ITEM-DMGCOL-018 | An item's displayed damage and the pair it puts into the actor's combat block differ: the item holds `(base, spread)`, not the row's `(min, max)`. | High | ● active (partially retracted) | [EXP-0105](../experiments/EXP-0105-damage-fold/), [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
 | ITEM-LADDER-019 | The nine doubles of a shape or material record sit at `record + 0x20 + 8j`, fixed by the record stride `0x68`. | High | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
 | ITEM-DMGFACT-020 | The weapon damage factor is the column the game names `@.damage`, at `record+0x40` = `f64[4]`, and a shape factor is never 1. | High | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
-| ITEM-WEAPCOL-021 | The `Weapons` row's slot-to-title map is `slot i = title i+1`, anchored by four instruction-level uses; `Weapon::Equip` has three arms on slot 5. | High / Unknown | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
+| ITEM-WEAPCOL-021 | The `Weapons` row's slot-to-title map is `slot i = title i+1`, anchored by four instruction-level uses; `Weapon::Equip` has three arms on slot 5. | High / Unknown | ✔ promoted (amended) | [EXP-0106](../experiments/EXP-0106-weapon-columns/), [EXP-0495](../experiments/EXP-0495-weapon-attack-tail/) |
 | ITEM-PANEL-022 | The item panel draws a weapon's damage line from the weapon's own two bytes as `[base, base+spread]`, composed the way the character sheet does. | High / Unknown | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
 
 ### ITEM-SCALE-017
@@ -894,8 +894,14 @@ ordering.
 on a different field, and the title list has no spare entry to absorb a shift,
 unlike group A's ladder. High for the three arms, read from one listing.
 
-**Unknown.** What writes `w+0x65/+0x66/+0x67`. `R0856` writes none of
-them, so a third writer exists and was not enumerated.
+**Unknown.** The complete first-SAVE lifecycle of `w+0x65/+0x66/+0x67` outside
+the bounded producers in ITEM-157 through ITEM-159.
+
+**Amended.** ITEM-157 locates the embedded initializer that writes three zero
+bytes in the name and direct-code Weapon constructors. ITEM-158 preserves the
+local fill no-store result. ITEM-159 identifies the copy and archive carry
+paths. These replace the unlocated-producer Unknown, not the slot map or
+equipment arms (EXP-0495).
 
 ### ITEM-PANEL-022
 
@@ -3327,6 +3333,96 @@ evaluate: EN 593 records, 373 repeating a constructed kind; RU 135, 96. The
 save written by another producer carries a list with a
 repeated kind: the serialized list is stored and reloaded in order
 (`ITEM-SAVE-014`) and no save was read for this claim.
+
+## Weapon attack-tail producers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-157 | The name and direct-code Weapon constructors unconditionally initialize W52[19:22] to three zero bytes through the embedded attack initializer. | High | ✔ promoted | [EXP-0495](../experiments/EXP-0495-weapon-attack-tail/) |
+| ITEM-158 | The named Weapon fill, Equip and removal bodies have no direct local store to W52[19:22]; melee Equip reads the three current bytes independently. | High / Unknown | ✔ promoted | [EXP-0495](../experiments/EXP-0495-weapon-attack-tail/) |
+| ITEM-159 | Weapon copy carries the source W52[19:22] over its initialized zeros; the named SAVE and LOAD attack-block transfers use all 24 current bytes. | High / Unknown | ✔ promoted | [EXP-0495](../experiments/EXP-0495-weapon-attack-tail/) |
+
+### ITEM-157
+
+W52 is the 24-byte block at Weapon `+0x52`. Its indices 19, 20 and 21 are
+Weapon `+0x65`, `+0x66` and `+0x67`. The name constructor `R0665`
+passes Weapon `+0x52` to `R1044` at `L13273`. The direct-code
+constructor `R0969` does the same at `L13274`.
+
+The shared wrapper calls `R1577`. Three unconditional byte stores
+at `L13275`, `L13276` and `L13277` assign zero to inner `+0x13`,
+`+0x14` and `+0x15`. They run before shape/material/row selection and before
+fill. The default Weapon constructor `R0889` also calls this wrapper.
+
+The name allocation control is the cell-0 arm of `R0656`: successful
+allocation of `0x84` bytes reaches `R0665`. The class-1 arm of
+`R0520` allocates `0x84` bytes and passes shape, material and row to
+`R0969`. Allocation failure has no new Weapon. No allocator-wide
+initial-memory value is asserted.
+
+**Confidence.** High for these constructor stores. Raw-image instructions
+establish the pointer rebase and unconditional literals. Isolated execution
+of the original initializer on 256 uniform byte patterns and two ordered
+patterns yields three zero bytes in all 258 controls with exterior guards
+intact. This discriminates prior allocation contents from explicit init.
+
+**Unknown.** A first-SAVE lifetime after the constructor, exceptional paths
+and other producer families. The controls execute no original process.
+
+### ITEM-158
+
+The complete named local bodies are `R0887` (admission/fill wrapper),
+`R0856` (scalar fill), `R0962` (price), `R0992` (text
+Effect attachment), `R0850` (Equip), `R0853` (removal) and
+`R0854` (removal Effect walker). For valid, nonaliased receiver and
+actor pointers, their own local stores do not overwrite Weapon `+0x65..+0x67`.
+The fill writes one byte at each of `+0x60` and `+0x61` and two-byte words
+at `+0x52` and `+0x6a`. These writes do not overlap the questioned interval.
+
+On the signed parameter-5 branch below 10, Equip reads current Weapon bytes
+`+0x65`, `+0x66` and `+0x67` at `L13278`, `L13279` and `L13280`.
+It assigns them independently to actor `+0xf9`, `+0xfa` and `+0xfb`.
+The removal branch clears those actor bytes and does not clear the Weapon
+source bytes. ITEM-WEAPCOL-021 supplies the other parameter-5 branches.
+
+**Confidence.** High for the direct local no-store result and three reads.
+The raw-image instrument decodes the complete named bodies; its reduced
+sweep retains non-stack outer/inner offsets, overlapping widths, address
+rebases and indexed matches. Full listings separately expose calls and
+bulk-copy boundaries. Table-factor qword reads at `L13281/L13282` use
+factor-row pointers, not Weapon pointers. Unknown for transitive preservation:
+actor derive, old-item removal, Effect dispatch and value callbacks are calls,
+not locally proven pure operations.
+
+**Unknown.** Complete callback mutation, other methods, subclass overrides,
+arbitrary aliases and every action between construction and first SAVE.
+No whole-image writer census or native runtime result is asserted.
+
+### ITEM-159
+
+Weapon copy `L08717` first runs the same attack initializer. At
+`L13283..L13284` it copies `0x2e` bytes from source Weapon `+0x52`
+to destination Weapon `+0x52`, overwriting the initialized tail with the
+source's current three bytes. The split method `R2132` and copy
+virtual `R2133` allocate `0x84` bytes and invoke this copy constructor
+(ITEM-EFFSPLIT-074). Five isolated original-copy-interval controls preserve
+distinct synthetic source triples, including nonzero values.
+
+Weapon vtable `L04583` slot `+0x08` targets `R1639`. It passes
+Weapon `+0x52` to `R1594`; that helper dispatches SAVE with length
+`0x18` and the existing block pointer to `R0271`, or LOAD with the
+same length and pointer to `R0272`. The SAVE transfer carries the
+current tail; the LOAD transfer can overwrite constructor defaults. The
+serializer has no local normalization of these three bytes (SAV-MEMBER-036).
+
+**Confidence.** High for the named copy interval and raw archive-call
+operands. The controls execute embedded init, defense memset and native
+memcpy, ending before the owned-Spell arm. Unknown for first-SAVE values
+after intervening callbacks and for a native archive run.
+
+**Unknown.** The live origin of any nonzero copied or loaded tail, complete
+first-SAVE reachability and transitive mutation. Zero initialization is not
+a constraint that all serialized Weapons must carry three zeros.
 
 ## Open questions
 
