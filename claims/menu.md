@@ -1327,3 +1327,449 @@ By command, what SAV carries (`SAV-1172`, `HERO-MODDK-161`, `SAV-PLAYER-028`):
 A LOAD restores the saved records and, by the constructor route, leaves the privilege byte at 0 (MENU-103, Medium: the other archive-side writers were sampled), so a cheat effect that lives in a saved record survives SAVE and LOAD while the privilege to repeat it does not.
 
 **Confidence.** High for the serializer joins named. Medium for the three non-saved effects, which rest on the absence of a store in the serializers read. Unknown for the win latch.
+
+## Repeated push buttons, sliders and lists
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-115 | Selected menu and dialogue buttons share a procedural painter; the menu highlights an enabled hovered or focused label, while the dialogue pager supplies different color ramps. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-116 | The selected menu button keeps the generic down latch but overrides release, key and character slots: inside release, Enter and the caption accelerator send `0x47a` with the command field; the key slot declines every key. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-117 | The selected slider and scroll bar painter uses scrlbars.256 with orientation-specific endcaps and fixed 24x24 thumb art. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-118 | The selected horizontal slider maps 0..N to a 16-pixel knob hit rectangle; track press and drag map pointer x, while endcaps and focused arrows step by max(trunc(N/16),1). | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-119 | The selected vertical bar has fixed thumb art, position travel over N-1 and separate line, page and drag requests to its parent. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-120 | The selected shared list keeps its selected row visible and binds the bar position to that selected index; four navigation keys act with focus. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-121 | SAVE/LOAD, Sound Options and the cutscene chooser construct the same in-image list and scroll bar classes through two list constructors. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-122 | The selected SAVE/LOAD builder appends saved title bytes to the shared list, whose virtual row painter reaches font1 and its byte converter. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+
+### MENU-115
+
+The menu wrapper `R1167` calls generic constructor `R0700`
+and installs table `L13371`. Its paint slot `+2c` (`R2135`) and
+move slot `+4c` (`R2136`) only forward to generic painter
+`R0768` and move body `R0771` of button table `L03644`; its
+up, key and character slots are overridden (MENU-116).
+Painter `R0768` reads color argument `+64`,
+hover `+68`, pressed latch `+6c`, font `+60` and enabled/focus flags.
+
+The measured mission menu passes color argument zero. With that argument,
+an enabled hover or focus selects cell `L13372`; otherwise it selects
+`L06235`. Their initial pointers are `L03616` and `L03668`. Existing
+color measurements identify gold RGB `(185,159,73)` and grey `(210,210,210)`.
+The dialogue pager's nonzero argument selects gold idle and brown hover
+RGB `(150,90,0)` instead. DLG-BUTTON-039 and DIALOGUE-065 supply its prior
+pixel controls. Focus has no separate outline in this selected painter.
+
+The painter repaints its parent and draws no button sprite or interior
+fill. The bevel uses lines and points, light RGB `(41,69,63)` and dark
+`(7,12,9)`. A pressed latch while the pointer is inside swaps the bevel and
+changes the label shadow offset from 2 to 4. The label anchor stays fixed.
+For half-open rectangle `(L,T,R,B)`, it is
+`(L+trunc((R-1-L)/2)+1,T+trunc((B-1-T)/2))`, anchor flags 10. Disabled
+presentation requests level-3 remapping after painting. MENU-ART-014
+supplies the menu's 30-pixel row geometry.
+
+**Confidence.** High for the selected branch instructions, table binding,
+bevel requests and anchor. Medium for initial pointer cells interpreted as
+native label colors; the fresh probe does not observe their runtime values.
+
+**Unknown.** Arbitrary later cell replacement, native format and pixels,
+hover/focus delivery and controls with a different table or color argument.
+
+### MENU-116
+
+Menu table `L13371` binds down `+54` to `R2137`, up `+58` to
+`R2138`, key `+6c` to `R2139` and character `+74` to
+`R1852`. Generic table `L03644` binds the same slots to
+`R0778`, `R0779`, `R0713` and `R0780`.
+
+- Down: `R2137` only forwards to generic `R0778`. With a
+  parent `+30` and enabled flag 1, and no latch, it sets latch `+6c`,
+  requests capture and repaints. Down sends no activation message.
+- Up: `R2138` builds the half-open screen rectangle. With latch `+6c`
+  set it clears the latch, restores capture and returns 1; release inside
+  then sends message `0x47a` with command field `+70` as its first
+  argument, through `R1989` and `R1990`. Without a latch it
+  returns 0. Unlike generic `R0779`, this body reads neither parent
+  `+30` nor the enabled flag.
+- Character: `R1852` requires parent `+30` and enabled flag 1. It
+  converts the byte with `R1517`, then lowercases it with
+  `R1173`. Byte 13 or a match with accelerator `+74` sends `0x47a`
+  with `+70` and returns 1. MENU-KEY-013 defines the first unescaped `~`
+  marker that sets `+74`.
+- Key: `R2139` returns 0 without reading the key. Enter therefore
+  acts only through the character slot; the generic key route of
+  MENU-086 and MENU-093 does not apply to this subclass.
+
+The generic handlers send command field `+70` itself as the message, with
+zero arguments. The menu handlers send `0x47a` and carry `+70` as an
+argument. MISSION-VICTORY-030 reads one parent handler of `0x47a`; the
+mission menu's own handler of it is not read here. The release-inside test
+uses the same rectangle helper `L03643` as DIALOGUE-045's generic
+release. Space has no arm in either menu body.
+
+**Confidence.** High for the table targets and the five complete local
+bodies; the release-inside test excludes activation on down or on outside
+release.
+
+**Unknown.** Native delivery of Enter as a character, character dispatch
+order among sibling controls, capture replacement, disable or deletion
+between down and up, and the mission menu's handling of `0x47a`.
+
+### MENU-117
+
+Constructor `R1185` installs table `L06344`; painter is
+`R2140`. The interface loader constructs `scrlbars.256` and stores
+it at `L13373` at `L13374`. MENU-129 measures every frame as 24x24.
+
+For width less than height, frame selectors are top 18, track 19, bottom
+20 and thumb 22; endcap state fields `+64/+68` select 21/23 instead. For
+the horizontal arm they are left 0, track 7, right 8 and knob 10, with
+state variants 3/11. Mouse move writes endcap states from pointer
+membership: these variants are not established as press-only art.
+Each part requests sprite shadow slot `+1c` at offset `(4,4)`, mode 4,
+then body slot `+18`, mode 0. Disabled painting requests level-3 remapping.
+
+**Confidence.** High for the loader binding, frame selectors and fixed
+thumb frame. Medium for composition under supplied geometry; the final
+native shadow/remap pixels are unobserved.
+
+**Unknown.** Native shading, arbitrary geometry and additional classes.
+
+### MENU-118
+
+For width `W`, height `H`, left `L`, maximum `N` at `+c8` and position `p`,
+`R2141` computes hit-left
+`K=L+H-4+trunc(p*(W-2H-4)/N)` for nonzero `N`, otherwise `L+H-4`.
+Hit rectangle is `(K,T,K+16,B)`. The 24x24 knob body is requested at
+`(K+1,T)` and its shadow at `(K+5,T+4)`.
+
+`R2142` maps x to
+`clamp(trunc(N*(x-L-H-2)/(W-2H-4)),0,N)`.
+Horizontal down `R1235` steps endcaps by `max(trunc(N/16),1)`.
+Track down maps x directly, recomputes the knob hit rectangle and arms
+drag if the point is inside that new rectangle. Drag move
+`R1236` maps x and posts `0x46d` with the position. Release
+`R1237` posts `0x473`, releases capture and clears drag.
+
+Focused `R1187` handles Left/Right only when `W>H`, using the same
+step and clamps. Game-speed `N=8` therefore steps one level. Volume
+position units follow the same formula; MENU-076 supplies their separate
+quadratic attenuation conversion. Initializer R0658 receives the
+configuration at L03126 through L03127 and stores all three maxima
+as 5000 and attenuations as -700 at L13375..L13376. Their default
+arrow/endcap step is therefore 312 position units. Later arbitrary range
+writers were not swept. Speed applies at OK (MENU-074).
+
+**Confidence.** High for message/key literals and selected handler calls.
+Medium for manually interpreted coordinate arithmetic and drag flow.
+
+**Unknown.** Degenerate dimensions, negative ranges, native drag delivery
+and held-repeat cadence.
+
+### MENU-119
+
+For vertical width `W`, height `H`, top `T`, position `p` and count `N`,
+the painter uses `q=trunc(p*(H-3W+8)/(N-1))` when `N>=2`, otherwise zero.
+Thumb body is `(L,T+W+q-4)` and shadow `(L+4,T+W+q)`. Its size is the
+fixed frame from MENU-117, not a visible/total-row fraction.
+
+Down requests `0x469` at the top, `0x46a` at the bottom, `0x46b` above
+the thumb and `0x46c` below it. Thumb down captures. The nondegenerate
+drag arm sends `0x468` with
+`clamp(trunc((N-1)*(y-T-24)/(H-3*(W-4))),0,N-1)`.
+Draw and input denominators differ by four pixels. Release sends `0x473`
+and clears capture. A held-left move can be offered to down again.
+The bar's own key routine has no vertical arrow/page arms; those belong
+to the associated list or text control (MENU-078, MENU-120).
+
+**Confidence.** High for the local request literals. Medium for thumb
+position and pointer arithmetic interpreted without native execution.
+
+**Unknown.** Zero-range first paint, degenerate geometry, capture replacement,
+repeat cadence and wheel delivery outside MENU-078's named dispatcher scope.
+
+### MENU-120
+
+The shared list stores font height at `+5c`, pitch `font-height+4` at
+`+60`, strings `+64`, font `+78`, top `+84`, selection `+88`, visible count
+`+8c` and bar id `+90`. Both constructors round bottom to
+`top+floor(height/pitch)*pitch+2`.
+
+For a nonnegative selection, `R2143` clamps it to `count-1` and
+moves top to the selection, or to `selection-visible+1`, if it lies
+outside the visible rows. The associated bar receives `(selection,count)`
+through `R1241`, not `(top,count-visible)`. A negative selection
+resets top to zero and retains a negative selected index.
+
+Up/Down change selection by one. Page Up first selects top, then on a
+second press targets `top-visible`; Page Down first selects the last
+visible row, then targets `top+2*visible-1`. Shared clamping follows.
+Focused `R0731` has only these four key arms. Home, End, Left and
+Right return zero in this key table. List down selects and posts `0x46d`,
+up sends `0x472`, and double-click sends `0x444`.
+The help-derived text control has its own top-line setter and range
+(MENU-078, MENU-079); this selection-index rule is not its contract.
+
+**Confidence.** High for field stores, table/key selectors and messages.
+Medium for interpreted scrolling arithmetic and empty/negative states.
+
+**Unknown.** Native event cadence, malformed list geometry and other callers.
+
+### MENU-121
+
+Both `R0762` and `R1183` install list table `L13377`.
+The following three selected builders pass font1 and attach bars constructed
+by `R1185`:
+
+| Builder | List call | Id | Initial list rectangle | Bar call / id |
+|---|---|---|---|---|
+| SAVE/LOAD `R1221` | `L13378` | 3 | `(40,128,W-64,272)` | `L13379` / 10 |
+| Sound `L06329` | `L13380` | 3 | `(40,80,W-64,170)` | `L13381` / 10 |
+| Cutscene `L12940` | `L13382` | 2 | builder rectangle, right reduced by 24 | `L13383` / `0x29b` |
+
+The SAVE/LOAD and Sound constructors adjust bottom by MENU-120's pitch
+rule. Bars are 24 pixels wide at the list's right edge, using the adjusted
+bottom. VIDEO-OPTIONS-057 and VIDEO-075 supply the music/cutscene populations.
+
+**Confidence.** High for the three positive constructor/table links.
+Medium for initial rectangles interpreted from constructor arguments.
+
+**Unknown.** An image-wide list/caller count and final native layout.
+
+### MENU-122
+
+The selected SAVE/LOAD builder reads the 256-byte header title at
+`L13384` and appends its buffer to the list at `L13385` through
+`R2144` and `R2145`. The separate filenames live at dialog
+`+6c`. Both constructors install list table `L13377`: paint slot `+2c`
+is `R2146`, which calls row slot `+7c`, `R2147`.
+
+The row painter retrieves the CString from list `+64` through
+`R2148`, clips the row, and calls `R0571` at `L13386`
+with font `+78`. SAVE/LOAD, Sound and cutscene constructors pass font1
+`[L03615]`. The wrapper calls font slot `+14` for shadow and ink.
+Fresh table `L11080` binds that slot to `R0767`, whose glyph
+path calls `R0793` at `L07922` and `L10051`.
+
+**Confidence.** High for this positive instruction/table chain: the saved
+title input and both virtual receiver tables are identified. This excludes
+the former inference that the field needs an outside-image native painter.
+TEXT-SAVELABEL-054's bounded direct-caller facts stand; the renderer-reach
+clause and the all-fixed-caption classification of TEXT-SAVELABEL-058 are
+partially retracted and TEXT-SAVELABEL-061 is retracted. The NUL-copy and GDI-wrapper facts are separate.
+
+**Unknown.** Native glyph pixels, malformed-label clipping, active locale,
+arbitrary vtable replacement and save round-trip behavior.
+
+## Selection controls, edits, frames and hover boxes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-123 | The selected radio group draws radiob.256 frames 0/1 at 24-pixel pitch; down selects and notifies, focused arrows change the local index and Space notifies. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-124 | The selected standard checkbox group draws radiob.256 frames 2/3; down and focused Space toggle a bit and notify, while focused arrows move only the keyboard row. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-125 | The selected tip checkbox retains standard checkbox input but draws radiob.256 frames 4/5 at 16-pixel pitch with per-row pointer-dependent label ramps. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-126 | Save Game constructs the generic in-image edit: its painter requests a procedural bevel, level-12 selection remap and a focused two-pixel white caret. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-127 | The bounded 96-table base-widget population has two concrete lm frame painters, using frames 0..8 and 9..17; normal dialogs snap dimensions, while room tips bypass that snap. | High / Medium | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+| MENU-128 | The selected normal hover box uses a procedural green fill and gold bevel with Ball.bmp corners, preserves authored # line breaks and positions above the pointer with right/top correction. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+
+### MENU-123
+
+Wrapper `R2149` installs table `L13387`; painter
+`R2150` selects `radiob.256` frame 0 for unselected and 1 for
+selected index `+80`. Both are 24x24. For absolute rectangle `(L,T,R,B)`
+and row `i`, body requests are `(L+1,T+24*i)`, mode 0; shadow requests
+are `(L+5,T+24*i+4)`, mode 4. Label uses supplied font `+78` at
+`(L+30,T+24*i+5)`. A selected focused row chooses cell `L13372`;
+other rows choose `L06235`. Disabled drawing remaps level 3 over
+`(L-1,T-1,R+1,B+1)`. No separate pressed/hover sprite is selected locally.
+
+Enabled down `R2151` uses `R2152` to select a row by signed
+truncation of `(pointerY-T)/24`. It sets `+80/+88`, repaints and notifies
+the parent with `0x46d`. Release is no-op `R1812`; held-left move
+can invoke down again. Focused Up/Down change the local selected index
+and repaint without a local `0x46d`. Space copies keyboard row `+88`
+to selection `+80`, repaints and notifies. MENU-073 supplies option owners.
+
+**Confidence.** High for the hash-pinned complete local branches, literal
+resource binding and draw requests. The two state frames exclude a local
+pressed/hover frame alternative in this painter.
+
+**Unknown.** Runtime ramp RGB, final placement after sprite wrappers,
+native delivery and parent persistence after key-only changes.
+
+### MENU-124
+
+Wrapper `L06338` installs table `L06340`; painter
+`R2153` selects `radiob.256` frames 2/3 for a clear/set bit of
+mask `+80`. Both are 24x24, using MENU-123's body, shadow and label
+coordinates. Focus chooses `L13372` for the whole group; idle uses
+`L06235`. Disabled painting remaps level 3. Mouse field `+5c` does
+not select a sprite frame in this complete local painter.
+
+Enabled down `L06426` toggles `1<<row`, stores keyboard row `+88`,
+repaints and notifies `0x46d` with the mask. Release is a no-op. Focused
+Space toggles the keyboard-row bit and notifies. Focused Up/Down move
+only `+88` and repaint. Move tests right/bottom enlarged by 4, assigns
+parent focus/capture state and stores `+5c` through `R2154`.
+MENU-073 and MENU-075 supply the settings owners.
+
+**Confidence.** High for the selected table, complete draw/input branches
+and frame dimensions. Toggle-on-down excludes waiting for release locally.
+
+**Unknown.** Runtime focus ramp and native placement/delivery.
+
+### MENU-125
+
+Tip checkbox table `L12175` keeps standard checkbox input slots and
+substitutes painter `R2155` and selector `R2156`. It uses
+`radiob.256` frame 4 clear and 5 checked, both 16x16. Row requests are
+body `(L+1,T+16*i)`, shadow `(L+5,T+16*i+4)`, label
+`(L+22,T+16*i+3)`. Row hit selection divides `(pointerY-T)` by 16.
+
+The painter obtains cursor position and tests each row: inside label
+ramp is `L03617`, outside `L03616`. Disabled drawing remaps level 3.
+The two-index state branch has no separate pressed frame. TOWN-480
+supplies the four room-tip owners and immediate TipsMode writes.
+
+**Confidence.** High for the complete local branch, inherited input slots,
+resource binding and 16-pixel dimensions.
+
+**Unknown.** Runtime ramp colors and native pixel appearance.
+
+### MENU-126
+
+Constructor `L06347` installs generic edit table `L06349`, CString
+`+5c`, supplied font `+60` and ramp `+64`. Painter `R2157` asks
+the parent to repaint its background. It loads no frame art and issues
+no own uniform background fill. Its four line requests are:
+
+| Side | Endpoints | RGB |
+|---|---|---|
+| Top | `(L+1,T)` to `(R-1,T)` | `(8,8,8)` |
+| Left | `(L,T+1)` to `(L,B-1)` | `(8,8,8)` |
+| Right | `(R,T+1)` to `(R,B-1)` | `(94,115,101)` |
+| Bottom | `(L+1,B)` to `(R-1,B)` | `(94,115,101)` |
+
+Text requests `(L+4,T+trunc((B-T)/2))`, flag 8. Unequal selection
+endpoints `+68/+6c` request level-12 remapping over
+`(L+4+width(prefix(start)),T+2,L+4+width(prefix(end)),B-2)` before text,
+without a local focus gate. Focus flag 4 plus phase `+74` requests a
+two-pixel white RGB `(255,255,255)` caret from
+`(L+4+width(prefix(caret)),T+2)` to `(L+6+width(prefix(caret)),B-2)`.
+
+Message `0x462` reaches `R2158`; unsigned `now-last>500` toggles
+phase and stores timestamp `+78`. Enabled state gates repaint. Reset
+`R1265` sets time and phase 1. Mouse down sets caret and both
+selection endpoints by prefix-width hit testing; held-left move updates
+ordered endpoints and caret. MENU-091 supplies generic edit keys/admission.
+
+Save builder `R1221` calls this constructor at `L13388`, id 1,
+requested rectangle `(40,68,W-40,92)`, font1 and cell `L06235`.
+Gold uses the same generic class (MENU-088, MENU-090). Character-generation
+name table `L07729` is separate, with its own glyph caret and ten-byte
+limit (TEXT-075, TEXT-076, TEXT-NAMEIN-024).
+
+**Confidence.** High for local drawing/input and the positive Save-class
+binding. Medium for the requested Save rectangle as final geometry; the
+generic base rectangle constructor was not traversed.
+
+**Unknown.** Overflow clipping/scroll, runtime glyph/ramp pixels, final
+Save geometry, native blink interval and reopen/post-load state.
+
+### MENU-127
+
+Normal frame `R0760` uses `lm.256` frames 0..8. A nonzero panel
+`+64` instead requests the supplied bitmap at `(L,T)`, with no local
+stretch arithmetic. MENU-ART-014 and DLG-PANEL-035 supply normal tile
+and shadow details. Base `R0758` calls snap `R0707`:
+`W'=trunc((W-8)/96)*96+8`, `H'=trunc((H-104)/64)*64+104`, then centers.
+Save/Load constructors, options and cutscene tables bind this frame;
+MENU-077 supplies the selected options sizes.
+
+Room-tip table `L06362` uses `R1975`, frames 9..17. Constructor
+`R1261` bypasses that snap. Body right/bottom are reduced by 8;
+corners are 32x32, horizontal edges/fill 48x32, vertical edges 32x32.
+Interior tile counts truncate `(bodyW-64)/48` and `(bodyH-64)/32`.
+Right/bottom shadows are requested first, offset `(8,8)`, mode 6.
+TOWN-480 supplies the four room-tip owners.
+
+A raw aligned 30-pointer-table scan in `.rdata/.data`, filtered to prefix
+slots `+08/+0c/+10` equal `R0530/R0531/L06492`, returns 96 tables
+and 19 distinct frame-slot `+30` targets. All 19 local bodies were read:
+14 no-op, one parent delegate, two black-fill routines and two lm painters.
+The lm painters occupy 28 and one tables. The probe records every table,
+target and local body, including unnamed addresses. Its raw table scan
+avoids Ghidra function-creation/vtable-repair omissions.
+
+**Confidence.** High for this explicit raw population, local frame selectors,
+resource identity and sizing arithmetic. Medium for extending the two
+families to the question's broader window population: nonmatching/computed
+tables, slot `+2c` drawing and nonzero-bitmap callers remain unexamined.
+
+**Unknown.** Global frame-kind count, owner mapping for all 96 tables,
+all nonzero-bitmap callers and native cropping/remap pixels. A wider
+preregistered caller/owner census would settle the static population gap.
+
+### MENU-128
+
+Normal hover painter `R0371` requests fill RGB `(36,44,39)` over
+`(L+1,T+1,R-1,B-2)`. Loader binding identifies its 4x4, 24-bit
+`graphics.res::interface/Ball.bmp` at `L13389`. Keyed source `(0,0,4,4)`
+corner requests are `(L,T)`, `(R-3,T)`, `(L,B-4)`, `(R-3,B-4)`.
+
+Two border colors are RGB `(160,120,50)` and `(80,60,24)`. Horizontal
+lines span `L+3` to `R-3` at `T+1/T+2` and `B-3/B-2`; vertical lines
+span `T+3` to `B-4` at `L+1/L+2` and `R-2/R-1`, in that color order.
+Packing uses the display shift globals; these are requests, not native pixels.
+
+Split `L11146` uses `#` breaks. Layout `L11147` sets
+`width=maxLineWidth+11`, `height=14*lineCount+5`; the initial rectangle is
+above the pointer, with its left at pointer x and bottom at pointer y.
+Right overflow shifts left, top overflow shifts down. These local bodies
+have no further left/bottom clamp or word-wrap pass. Font2 labels use
+`(L+5,T+4+14*i)` and ramp `L13390`. TEXT-HOVERPAINT-053 and
+TEXT-HOVER-048 supply prior layout and stationary-pointer timing.
+
+**Confidence.** High for complete local branches, literal Ball binding,
+explicit requested colors and placement; wrapping alternatives are excluded
+only within these three routines.
+
+**Unknown.** Native corner keying/pixels, eventual label ramp, other hover
+paths and oversized authored-text population.
+
+## Direct interface sprite population
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-129 | The measured EN/RU direct interface population has seven byte-identical .256 banks and 54 indexed frames per root; lm has 18 frames, radiob 6 and scrlbars 26. | High | ✔ promoted (branch candidate) | [EXP-0500](../experiments/EXP-0500-ui-widgets/) |
+
+### MENU-129
+
+`assets_probe.py` reads only direct `graphics.res::interface/` entries:
+87 EN and 85 RU. It excludes all subdirectories. The seven `.256` bank
+path/hash maps agree between roots. Their 54 indexed frames per root
+all close under the strict RLE decoder; counts refer to indexed records,
+not appended data. `myitem`, `shopitem` and `shopframe` have appended data
+outside their indexed frame walks, recorded separately in `sprites.tsv`.
+
+| Resource | Indexed frames | Dimensions |
+|---|---:|---|
+| `lm.256` | 18 | frames 0..8: 96x64 fill, 48x48 corners, 96x48 horizontal and 48x64 vertical edges; frames 9..17: 48x32 fill/horizontal and 32x32 corners/vertical edges |
+| `radiob.256` | 6 | 0..3: 24x24; 4..5: 16x16 |
+| `scrlbars.256` | 26 | every frame 24x24 |
+| `t_border.256` | 1 | 88x108 |
+
+`Ball.bmp` measures 4x4, 24-bit; `t_back.bmp` 160x240, 24-bit. The
+sprite header has no origin field; literal-pixel bounds measured by the
+decoder are not a widget origin. The probe records resource/frame hashes,
+dimensions, offsets, literal bounds and independent skipped/literal counts,
+without committing pixel or asset bytes.
+
+**Confidence.** High for this measured archive population and well-formed
+indexed streams. Synthetic controls distinguish drawable palette index zero
+from RLE skips, cover the `0xc0` alias, blank rows and malformed closure.
+SHA-256 identity excludes locale-specific payload differences in these seven
+banks, not in every interface resource.
+
+**Unknown.** Native composition, draw-state selectors outside the separate
+instruction probes and malformed-stream native thresholds.

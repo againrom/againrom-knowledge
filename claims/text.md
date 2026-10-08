@@ -1859,13 +1859,13 @@ Unknown.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| TEXT-SAVELABEL-054 | The established byte-indexed code-page converter `R0793` is not called by any of the nine SAVE/LOAD dialog functions, directly or through its only wrapper. | Medium | ● active | [EXP-0372](../experiments/EXP-0372-save-label-encoding/EXP-0372.md) |
+| TEXT-SAVELABEL-054 | The two-level direct-caller search for the converter and its wrapper finds none of the nine named SAVE/LOAD dialog functions; the later virtual list-row path reaches the converter. | Medium | ● active (amended) | [EXP-0372](../experiments/EXP-0372-save-label-encoding/EXP-0372.md) |
 | TEXT-SAVELABEL-055 | Withdrawn: the capped name class was said to be constructed nowhere by a literal vtable store; its vtable is `L07729`, three instructions store it, and `TEXT-075` finds its one construction at `L07730`. | — | ✖ retracted | [EXP-0372](../experiments/EXP-0372-save-label-encoding/EXP-0372.md), retracted by [EXP-0406](../experiments/EXP-0406-precreate-name/EXP-0406.md) |
 | TEXT-SAVELABEL-057 | The SAVE label's copy primitive `R1604`/`R1893` (`SAV-LABELTAIL-236`'s NUL-bounded copy into application storage) filters no byte value other than `0x00` within the disassembled range read. | High | ● active | [EXP-0372](../experiments/EXP-0372-save-label-encoding/EXP-0372.md) |
-| TEXT-SAVELABEL-058 | Neither catalogued text-rendering mechanism is reached by any of the nine SAVE/LOAD dialog functions, extending `TEXT-SAVELABEL-054` to the draw functions, the glyph blit and the GDI text-out imports. | High / Medium | ● active | [EXP-0376](../experiments/EXP-0376-save-label-draw/EXP-0376.md) |
+| TEXT-SAVELABEL-058 | The nine SAVE/LOAD bodies contain no direct call to the catalogued draw entries; the list painter reaches the font renderer and one font1 load is the list's font argument, retracting the reachability and all-fixed-caption clauses. | High | ● active (partially retracted) | [EXP-0376](../experiments/EXP-0376-save-label-draw/EXP-0376.md) |
 | TEXT-SAVELABEL-059 | The four MFC `CDC` GDI-wrapper stubs sit at matching offsets in the `CDC`, `CClientDC`, `CWindowDC` and `CPaintDC` tables; `imm:`/`disp:`/`refto:` find no reference to `L11383`/`L11384`/`L11385`/`L11386`, slot 11 of each. | High / Unknown | ● active (partially retracted) | [EXP-0376](../experiments/EXP-0376-save-label-draw/EXP-0376.md), partially retracted by [EXP-0406](../experiments/EXP-0406-precreate-name/EXP-0406.md) |
 | TEXT-SAVELABEL-060 | `R0375`, the child-vector-by-id accessor `TOWN-354` reads, sits immediately before the copy `SAV-SAVELABEL-1017` traced into `dialog+0x68`, and it is a system-wide utility, not SAVE/LOAD-specific. | High / Medium | ● active | [EXP-0376](../experiments/EXP-0376-save-label-draw/EXP-0376.md) |
-| TEXT-SAVELABEL-061 | By elimination among the two catalogued text-rendering mechanisms and their sole GDI-wrapper path, the SAVE/LOAD chooser's label pixels are consistent with native list-control painting outside `rom.exe`'s code. | Medium / Unknown | ● active (amended) | [EXP-0376](../experiments/EXP-0376-save-label-draw/EXP-0376.md), amended [EXP-0406](../experiments/EXP-0406-precreate-name/EXP-0406.md) |
+| TEXT-SAVELABEL-061 | The native-control painting inference and outside-image-only EN/RU conclusion are retracted; MENU-122 traces the saved title through the internal list-row font painter. | — | ✖ retracted | [EXP-0376](../experiments/EXP-0376-save-label-draw/EXP-0376.md), amended [EXP-0406](../experiments/EXP-0406-precreate-name/EXP-0406.md) |
 
 ### TEXT-SAVELABEL-054
 
@@ -1883,6 +1883,11 @@ population, with vtable-dispatched entry ruled out by the same scan. It does not
 mechanism, if any, draws the label instead — no paint/`WM_DRAWITEM` call chain was traced, and a
 caller reached only through a third level, or an indirect call through a pointer not stored in
 `.rdata`, would not appear
+
+**Amended.** MENU-122 identifies the additional virtual list-row and font layers
+that reach the converter. The named two-level direct-caller census stands; it
+is not an absence result for the complete chooser paint path.
+
 
 ### TEXT-SAVELABEL-055
 
@@ -1933,9 +1938,10 @@ zero test of the loaded byte is the only comparison gating what gets stored. The
 
 ### TEXT-SAVELABEL-058
 
-Neither of this codebase's two catalogued text-rendering mechanisms is reached by any of the nine
-SAVE/LOAD dialog functions, extending `TEXT-SAVELABEL-054`'s converter-only negative to the draw
-functions, the glyph blit, and the whole GDI text-out import surface.
+The literal-reference and font-global observations below are a bounded
+search record. They do not exclude the virtual list-row painter MENU-122
+positively traces to the internal font renderer. The struck classification
+of the eighteen font-global loads is partially retracted.
 
 `callto:R0767`/`callto:R1854`/`callto:R1250` (the font-atlas draw functions and glyph blit
 already established for other text surfaces) find, in the whole 1,977,344-byte image, exactly one
@@ -1955,21 +1961,29 @@ nine SAVE/LOAD dialog functions among them, and neither `R1900`'s own callers no
 `R1901`'s were searched, so an unsearched path from the nine reaching either through a
 further level is unfound, not excluded. Within the nine functions, the only references to any of the
 four known font-object globals (`font1`..`font4`, `L03615`/`L02677`/`L10053`/`L06186`) are
-eighteen occurrences (six in `R1220`, seven in `R1221`, five in `R0701`) of one
+eighteen occurrences (six in `R1220`, seven in `R1221`, five in `R0701`)~~ of one
 repeated idiom — load the font1 pointer, then a compile-time-constant caption selector (a pushed
 index `0x97`/`0x1d`/`0x90` into the caption-lookup accessor `R0668`, or, for `R0701`,
 a fixed `+0x34c` displacement off a second string-table global) into a control-construction helper —
 a fixed-caption/warning control, not a per-item draw call; none reads a loop variable, list index,
-or the label buffer. The remaining two of the nine dialog functions, `R1246` and
+or the label buffer~~. The remaining two of the nine dialog functions, `R1246` and
 `R1245`, carry no reference to any of the four font-object globals at all
 (`evidence/disasm-ctors.txt`)
 
-**Confidence.** **High** for the search itself (six modes, reproducible, whole-image scope).
-**Medium** for "this rules out the two catalogued mechanisms": `callto:`/`refto:` cannot see a
-virtual call dispatched through a font-object pointer without a literal reference to the callee's
-own address (indirect calls through offset +0x14 were not enumerated system-wide), so an
-uncatalogued caller reached only that way would not appear; the font-global check is complete for
-the four *known* font objects only
+**Confidence.** High for the recorded literal-reference counts. The former
+Medium inference that neither catalogued renderer is reached is retracted.
+The classification of all eighteen loads as fixed-caption controls is
+retracted.
+
+**Amended.** MENU-122 follows the chooser list vtable and font vtable to the
+internal glyph path. In `R1221` the font1 load at `L13391` is pushed
+as the font argument of list constructor `R0762`, called at
+`L13378`; the constructor stores it in list `+78` at `L13392`, and the
+list row painter later draws each saved title with it (MENU-121, MENU-122).
+That load is a construction-time font argument, not a fixed-caption control
+and not a direct per-item draw call. The other seventeen loads are not
+reclassified. The raw search counts stand.
+
 
 ### TEXT-SAVELABEL-059
 
@@ -2040,32 +2054,15 @@ traced, so whether it reads back already-rendered widget state or something else
 
 ### TEXT-SAVELABEL-061
 
-By elimination among this codebase's two catalogued text-rendering mechanisms (`TEXT-SAVELABEL-058`)
-and their sole GDI-wrapper access path (`TEXT-SAVELABEL-059`), the SAVE/LOAD chooser's per-item
-label pixels are consistent with native Win32/MFC list-control default painting occurring entirely
-outside `rom.exe`'s own code — an inference by elimination among named candidates, not a positive
-trace of an external paint call, and it does not exclude an uncatalogued in-game draw routine
-reached only by virtual dispatch this search cannot enumerate.
+The native-control elimination is retracted. MENU-122 traces the saved
+header title into the list string bank and through its virtual row painter
+to the internal font renderer and byte converter. Identical executable
+bytes do not exclude locale-dependent font or text resources.
 
-Because no draw primitive inside this image is shown reached, no byte-to-glyph table is shown
-indexed for this field either, so `TEXT-SAVELABEL-054`'s open item narrows rather than closes: EN
-and RU cannot differ in a mechanism this image does not exhibit for this field, because the two
-lawful executables are the same file (independently re-verified in this experiment, not only cited
-from `EXP-0372`) — any difference would have to come from outside `rom.exe`, unreachable by static
-analysis. What the draw path does with a byte outside 7-bit printable ASCII, and what bounds a
-label's drawn (as opposed to retrieved) length in a chooser row, are Unreachable by this experiment:
-both require observing the native control's own paint step, which needs a running original
+**Amended.** The native-control inference and the claim that locale differences
+must occur outside this image are withdrawn. The prior statement and grades
+are recorded in [`retracted.md`](retracted.md); the positive path is MENU-122.
 
-**Confidence.** **Medium** for the elimination and for "EN/RU cannot differ here" (both rest on
-`TEXT-SAVELABEL-058`/`-059`'s own Medium bounds). **Unreachable**, not merely Unknown, for the
-non-ASCII draw handling and the visible length bound: both need a running original, excluded by the
-static-analysis-only boundary
-
-**Amended.** EXP-0406 partially retracts `TEXT-SAVELABEL-059`: the `CDC`, `CWindowDC` and
-`CPaintDC` classes whose tables hold the GDI text wrappers are constructed in the image, so the
-wrappers are not unreachable by construction. The GDI-wrapper leg of this elimination rests on
-`TEXT-SAVELABEL-058`'s traced-path negative alone: no traced SAVE/LOAD chooser path reaches the
-wrappers or the text-out imports.
 
 ## Help text
 

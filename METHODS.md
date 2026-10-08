@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3015. Observation: 95. Static analysis: 2494. Mixed: 426.
+Claims labelled: 3030. Observation: 95. Static analysis: 2507. Mixed: 428.
 
 ## Ledger ai
 
@@ -1111,6 +1111,21 @@ Claims labelled: 3015. Observation: 95. Static analysis: 2494. Mixed: 426.
 | MENU-112 | static analysis | ✔ promoted (branch candidate) |
 | MENU-113 | static analysis | ✔ promoted (branch candidate) |
 | MENU-114 | static analysis | ✔ promoted (branch candidate) |
+| MENU-115 | static analysis | ✔ promoted (branch candidate) |
+| MENU-116 | static analysis | ✔ promoted (branch candidate) |
+| MENU-117 | static analysis | ✔ promoted (branch candidate) |
+| MENU-118 | static analysis | ✔ promoted (branch candidate) |
+| MENU-119 | mixed | ✔ promoted (branch candidate) |
+| MENU-120 | static analysis | ✔ promoted (branch candidate) |
+| MENU-121 | static analysis | ✔ promoted (branch candidate) |
+| MENU-122 | static analysis | ✔ promoted (branch candidate) |
+| MENU-123 | static analysis | ✔ promoted (branch candidate) |
+| MENU-124 | static analysis | ✔ promoted (branch candidate) |
+| MENU-125 | static analysis | ✔ promoted (branch candidate) |
+| MENU-126 | static analysis | ✔ promoted (branch candidate) |
+| MENU-127 | static analysis | ✔ promoted (branch candidate) |
+| MENU-128 | static analysis | ✔ promoted (branch candidate) |
+| MENU-129 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger mission
 
@@ -2663,13 +2678,13 @@ Claims labelled: 3015. Observation: 95. Static analysis: 2494. Mixed: 426.
 | TEXT-075 | static analysis | ● active |
 | TEXT-076 | static analysis | ● active |
 | TEXT-077 | static analysis | ● active |
-| TEXT-SAVELABEL-054 | static analysis | ● active |
+| TEXT-SAVELABEL-054 | static analysis | ● active (amended) |
 | TEXT-SAVELABEL-055 | static analysis | ✖ retracted |
 | TEXT-SAVELABEL-057 | static analysis | ● active |
-| TEXT-SAVELABEL-058 | static analysis | ● active |
+| TEXT-SAVELABEL-058 | static analysis | ● active (partially retracted) |
 | TEXT-SAVELABEL-059 | static analysis | ● active (partially retracted) |
 | TEXT-SAVELABEL-060 | static analysis | ● active |
-| TEXT-SAVELABEL-061 | mixed | ● active (amended) |
+| TEXT-SAVELABEL-061 | mixed | ✖ retracted |
 | TEXT-086 | static analysis | ● active |
 | TEXT-087 | mixed | ● active |
 | TEXT-088 | static analysis | ● active (amended) |

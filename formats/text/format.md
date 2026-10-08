@@ -222,24 +222,26 @@ an address inside that class's vtable rather than the vtable itself. The control
 not the save-label producer (`TEXT-SAVELABEL-057`), and its only direct construction is the
 pre-create screen's name field (`TEXT-075`).
 
-The byte-indexed display-conversion selector documented above for other text surfaces is
-not called, directly or through its only wrapper, by any traced save-label chooser code
-path. — `TEXT-SAVELABEL-054`
+The bounded direct-caller search did not find the nine named chooser bodies
+among callers of the byte converter or its wrapper. Additional virtual
+list-row and font layers reach both. — `TEXT-SAVELABEL-054`, `MENU-122`
 
-Neither the byte-indexed selector's own draw functions nor this image's GDI text-out
-import surface is reached by any traced save-label chooser code path either; the MFC `CDC`
-classes whose tables hold the GDI text wrappers are constructed, so that leg rests on the
-traced chooser paths alone (`TEXT-SAVELABEL-059`'s never-constructed clause is retracted). By
-elimination among these named mechanisms, the field's pixels are consistent with native
-Win32/MFC list-control default painting outside this executable's own code — an
-elimination among catalogued candidates, not a positive trace, and it does not exclude an
-uncatalogued in-game draw routine reached only by virtual dispatch this search cannot
-enumerate. Because the two lawful executables are the same file, EN and RU cannot differ
-in a mechanism this image does not exhibit for this field. What the draw path does with a
-byte outside 7-bit printable ASCII, and what bounds the field's *drawn* (as opposed to
-retrieved) length, both require observing a running original and are not established by
-static analysis. — `TEXT-SAVELABEL-058`, `TEXT-SAVELABEL-059`, `TEXT-SAVELABEL-060`,
-`TEXT-SAVELABEL-061`
+The SAVE/LOAD builder copies the saved header title into the list's string
+bank. The list row painter retrieves that string and calls the internal
+font1 renderer, which reaches the byte-indexed display converter. The list
+class also paints the Sound Options and cutscene rows. Identical executable
+bytes do not exclude locale-dependent font or text resources. Native pixels
+for malformed labels remain Unknown. — `MENU-122`
+
+`TEXT-SAVELABEL-058` is partially retracted in two clauses: its
+renderer-reachability inference, and its classification of all eighteen
+font1 loads in the chooser bodies as fixed-caption controls. One of those
+loads is the list's construction-time font argument, not a fixed caption
+and not a direct per-item draw call; per-item drawing happens in the list
+row painter. Its literal-reference counts stand. `TEXT-SAVELABEL-061`'s
+native-control painting inference and outside-image-only locale conclusion are retracted.
+`TEXT-SAVELABEL-059`'s never-constructed clause remains retracted; its bounded
+GDI-wrapper search is separate from the positive list-row font path.
 
 ## Character-generation and UI labels
 
@@ -294,16 +296,8 @@ The published rules do not establish:
 - semantic equality of every EN/RU string-table entry;
 - a universal UI labelling mechanism;
 - coverage of strings embedded in every possible non-text resource type;
-- whether the save-label chooser's byte-to-glyph mapping can differ between EN and RU for
-  this field: the two lawful executables are byte-identical (`TEXT-SAVELABEL-061`), so any
-  such difference would have to come from outside `rom.exe` — no traced chooser path
-  reaches this image's own draw mechanisms (`TEXT-SAVELABEL-058`; `TEXT-SAVELABEL-059`
-  partially retracted), so the mapping is a property of whatever paints the field, not
-  settled by that elimination;
-- which native control paints the save-label chooser's field (a catalogued in-image
-  mechanism is excluded by elimination, `TEXT-SAVELABEL-058`/`-061`, but the specific
-  native control is not identified), what it does with a byte outside 7-bit printable
-  ASCII, and what bounds the field's drawn length — all three need a running original;
+- the save-label row's native pixels for non-ASCII or malformed strings and
+  its visible clipping under the complete native setup (`MENU-122`);
 - whether a keystroke reaches the pre-create name field before the field is pressed
   (`TEXT-075`), and what the `-name` source string and any untraced opening of that
   screen supply (`TEXT-073`);

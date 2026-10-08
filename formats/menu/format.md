@@ -9,6 +9,11 @@ BMP and sprite codecs are defined in their respective references.
 — MENU-ASSET-001, MENU-ASSET-002, MENU-MASK-003, MENU-STATE-007,
 MENU-ESC-010 (partially retracted), MENU-COMBAT-017
 
+[Repeated interface widgets](widgets.md) specifies shared button, slider,
+scroll/list, selection-control, edit, frame and hover contracts, including
+their bounded Unknowns. The widget resource population is measured by frame
+index and dimensions. — MENU-115, MENU-129
+
 ## Asset set (18 files under `graphics/mainmenu/`)
 
 | Entry | Dims | Bpp | Role |
