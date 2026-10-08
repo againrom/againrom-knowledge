@@ -17,7 +17,8 @@ destination X     col*32 + i, i = 0..31 — always 32 columns, NO horizontal ter
 **A larger altitude subtracts from the destination row index** (`R1818` @`L10245`), i.e.
 it moves the pixel toward the clip rectangle's `top` field — up the screen in the Win32 device
 coordinates the clip rect is expressed in. The mesh lives at `CMapView+0xb4` and is rebuilt every
-frame for a several-cell over-scan margin (`TERR-EDGE-026`); the *derived* `+0xc0` grid (mean of
+frame for a several-cell over-scan margin (`TERR-EDGE-026`, whose terrain-admission
+clause is partially retracted); the *derived* `+0xc0` grid (mean of
 four heights) belongs to a different consumer and must not be used here.
 
 The flat blitter is selected exactly when
@@ -78,7 +79,7 @@ column 31.
 - Hit testing uses `y0+((y1-y0)*(x&31))/32`, which can differ from the drawn
   table walk by up to 3 rows. Rendering uses the table walk.
 
-## Far-edge cells (`TERR-EDGE-024…TERR-EDGE-026`)
+## Far-edge cells (`TERR-EDGE-024…TERR-EDGE-026`, the latter partially retracted)
 
 Render grids are unpadded W×H arrays: type 1 uses 2WH bytes; the byte planes
 use WH. A cell samples four vertex corners, so the last row and column have
@@ -91,15 +92,85 @@ side table for those reads:
   reads `grid[(row+1)·W + 0]` — the **next row's column 0** (a row-major wrap, in-bounds except at the
   last row); a **last-row** cell's `+W` corner reads `grid[H·W + col]` — **past the `W×H` allocation**.
   The same flat scheme drives heights (projection `R1818`) and tile words (object passes).
-- **The outer ring is drawn, not skipped.** No renderer special-cases it; the mesh is built (plus a
-  several-cell over-scan margin beyond the grid) and blits are issued, gated only by screen culling.
-  The one bounds check in the whole draw is a single `if (worldRow < H)` guard on the smoothed-height
-  pass — its presence proves the draw reaches/exceeds the grid edge.
-- **But the outer band's shading is degenerate.** The per-vertex brightness outer ring is never
-  computed (interior `{1..W-2}×{1..H-2}` only) and the allocator does not zero it, so the far corners
-  of the outermost cells are uninitialised / wrapped / out-of-bounds. The engine tolerates this
-  because gameplay is bounded by the **derived 8-cell sim border** (`R0470`, `ALM-TERR-016`) and
-  the camera keeps that band at the extreme edge.
-- **Reimplementation guidance:** the far edge has **no defined shading** to reproduce — a faithful
-  port should **clamp-to-edge** (safe, defined) and treat the outer band as the non-gameplay border it
-  is. See `claims/terrain.md` `TERR-EDGE-024…026`.
+- The terrain-dispatch and guard-implies-raster clauses of TERR-EDGE-026 are
+  partially retracted. Projection and drawable overscan are separate from
+  the four terrain routines' admitted cells. TERR-217 supplies their bounds.
+- The per-vertex brightness outer ring is not computed. Raw corner reads
+  at a stored outermost cell therefore have no defined shading contract;
+  those cells are outside the terrain-dispatch population of a nonempty
+  eight-cell camera band. — TERR-EDGE-025, TERR-217
+
+## Camera stops and terrain edges
+
+For map dimensions W,H and nominal cell span C,R, the cell origin is bounded
+by `8..W-8-C` and `8..H-8-R`. Thus the top/left nominal first cell is 8;
+the bottom/right nominal last cell is H-9/W-9. The playable rectangle is
+inclusive `(8,8,W-9,H-9)`. It is a movement rectangle, not a sprite clip.
+— SESS-VIEW-030, TERR-SIGHT-116
+
+The absolute target routine is `R1677`; axis deltas use
+`R1678/R1679`. The inspected original clamp bodies read dimensions,
+spans and origins, without grid content. The recompute prefix
+`R1280` applies the upper bound only. Crossed bands are possible on
+small supplied maps; no measured installed map exercises one. — TERR-216
+
+| Resolution | View pixels without child panel | Cell span | Maximum origin X,Y |
+|---|---|---|---|
+| 640x480 | 480x480 | 15x15 | W-23,H-23 |
+| 800x600 | 640x576 | 20x18 | W-28,H-26 |
+| 1024x768 | 864x768 | 27x24 | W-35,H-32 |
+
+The view excludes the 160-pixel side panel and snaps its bottom to whole
+32-pixel rows. Open child panels can reduce its vertical span.
+— SESS-VIEW-028
+
+All four terrain routines admit local rows `0..R+3` and columns `0..C-1`.
+Rows ascend and columns descend. At the top stop, the first terrain row is
+8; the top, left and right movement-border strips are not terrain-dispatched.
+At the bottom stop, ordinary terrain includes border rows H-8..H-5. Their
+height projection can move pixels into the view. No stored outermost cell
+is terrain-dispatched when the camera band is nonempty. The full software
+redraw arm enters ordinary terrain without a preceding black-clear call;
+conditional color-zero grid lines are a separate overlay. Native pixel
+coverage, retained surface contents and alternate rendering remain Unknown.
+— TERR-217
+
+## Art at an edge
+
+The software painter resolves the absolute widget view, intersects its
+repaint rectangle with it, and resets that rectangle to the view after a
+camera change. Repaint work and child overlays can reduce the active area.
+The resulting global clip is screen space; it is not the playable rectangle
+or a cell window. — TERR-218
+
+Ordinary and mirrored indexed body blitters accept art across a cell line
+and clip rows/pixels to the supplied global rectangle. In 18 supplied
+original-x86 cases, only the sprite/clip intersection changes and all
+outside or rejected pixels remain intact. Native registration, alternate
+body overlays, fog and frame selection are outside that finite population.
+The sheared shadow uses its separate global clip contract.
+— TERR-219, TERR-SPR-140
+
+Terrain finishes before the drawable phases. Non-flat structures, selector-2
+units, auxiliary calls, static objects and retained-area overlays are ordered
+within the main cell phase; other categories use separate phases. Within
+the relevant sweeps, rows ascend and columns descend. Admission and dispatch
+do not by themselves guarantee an opaque pixel.
+— ANIM-CELL-085, ANIM-AIRPASS-086, ANIM-DRAWGATE-087, ANIM-WALKORDER-088
+
+Mission 90 Castle's shared lift uses footprint-centre corners 28,28,28,44,
+giving 32. At the selected create-time vertical offset 0, its first strip
+and the highest view both start at world Y256: computed margin 0 px for all
+three resolutions. Native current offset and the complete captured frame
+remain Unknown. — TERR-221
+
+## First-row populations
+
+Stored row 0 and first playable row 8 are distinct. Over columns 8..W-9,
+the measured 38 EN/34 RU maps have three all-terrain-blocked row-8 maps in
+each root and some terrain-open cells in the other 35/31. The 140.alm row
+has 240 blocked/0 open cells; 90.alm has 60 blocked/68 open, including five
+water cells. These counts exclude objects, stamped simulation borders,
+occupants and runtime flags. Every measured altitude is signed 0..127;
+all 216 map/resolution camera bands are nonempty. Native blocked-versus-open
+frame differences remain Unknown. — TERR-220

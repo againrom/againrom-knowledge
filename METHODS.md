@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3009. Observation: 95. Static analysis: 2489. Mixed: 425.
+Claims labelled: 3015. Observation: 95. Static analysis: 2494. Mixed: 426.
 
 ## Ledger ai
 
@@ -2426,7 +2426,7 @@ Claims labelled: 3009. Observation: 95. Static analysis: 2489. Mixed: 425.
 | TERR-LIGHT-023 | static analysis | ● active (amended) |
 | TERR-EDGE-024 | static analysis | ● active |
 | TERR-EDGE-025 | static analysis | ● active |
-| TERR-EDGE-026 | static analysis | ● active |
+| TERR-EDGE-026 | static analysis | ● active (partially retracted) |
 | TERR-GRID-027 | mixed | ● active |
 | TERR-LIGHT-028 | static analysis | ● active |
 | TERR-LIGHT-029 | static analysis | ● active |
@@ -2495,7 +2495,7 @@ Claims labelled: 3009. Observation: 95. Static analysis: 2489. Mixed: 425.
 | TERR-STRUCT-103 | static analysis | ● active |
 | TERR-STRUCT-104 | static analysis | ✔ promoted (partially retracted) |
 | TERR-STRUCT-105 | static analysis | ● active |
-| TERR-STRUCT-106 | static analysis | ● active |
+| TERR-STRUCT-106 | static analysis | ● active (partially retracted) |
 | TERR-STRUCT-107 | static analysis | ● active |
 | TERR-LIGHT-108 | static analysis | ● active |
 | TERR-LIGHT-109 | static analysis | ● active |
@@ -2566,11 +2566,17 @@ Claims labelled: 3009. Observation: 95. Static analysis: 2489. Mixed: 425.
 | TERR-202 | static analysis | ● active |
 | TERR-204 | static analysis | ● active |
 | TERR-GMAP-206 | mixed | ● active |
-| TERR-STRUCT-207 | mixed | ● active |
+| TERR-STRUCT-207 | mixed | ● active (partially retracted) |
 | TERR-PLACE-208 | static analysis | ● active |
 | TERR-STRUCT-210 | static analysis | ● active |
 | TERR-STRUCT-211 | mixed | ● active |
 | TERR-STRUCT-212 | mixed | ● active |
+| TERR-216 | static analysis | ✔ promoted (branch candidate) |
+| TERR-217 | static analysis | ✔ promoted (branch candidate) |
+| TERR-218 | static analysis | ✔ promoted (branch candidate) |
+| TERR-219 | static analysis | ✔ promoted (branch candidate) |
+| TERR-220 | mixed | ✔ promoted (branch candidate) |
+| TERR-221 | static analysis | ✔ promoted (branch candidate) |
 | TERR-224 | static analysis | ● active (branch candidate) |
 | TERR-225 | static analysis | ● active (branch candidate) |
 | TERR-226 | static analysis | ● active (branch candidate) |

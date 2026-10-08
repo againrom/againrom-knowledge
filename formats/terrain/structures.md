@@ -21,21 +21,28 @@ drawn once per footprint cell (c, r), c in [ac, ac+TileWidth), r in [ar, ar+Tile
     for k = rowTop down to limit:
         frame = block(k*TileWidth + COL0)               see SPR256-STR-041
         dstX  = (c - scrollX) * 32
-        dstY  = (r - scrollY) * 32 - lift - (k_first - k)*32       ( - obj+0x10, always 0 )
+        dstY  = (r - scrollY) * 32 - lift - (k_first - k)*32       ( - drawable+0x10; 0 at selected creation )
 ```
 
-`lift` is the drawable's own `+0x68`: a **bilinear** sample of the cell's four corner heights
-at the object's sub-cell position (`TERR-STRUCT-106`) — which at a cell centre, where every
-structure sits, equals the four-corner mean the unit path uses. `dst` is the frame's
-top-left, as above.
+`lift` is the drawable's shared `+0x68`, sampled at the footprint centre
+`(TileWidth<<7)+fineX-128`, `(TileHeight<<7)+fineY-128`. The containing
+four signed heights feed three interpolations with truncation toward zero.
+The unconditional structure cell-centre/mean consequence of TERR-STRUCT-106
+is partially retracted: footprint parity changes the weights, and nested
+truncation need not equal a four-corner mean. The named arithmetic stands.
+`dst` is the frame's top-left. — TERR-221
 
 So a `TileWidth × TileHeight` building draws `TileWidth × FullHeight` tiles: the bottom
 `TileHeight` rows sit on the footprint, the top `FullHeight − TileHeight` rows hang above the
 back row.
 
-The mission 90 Castle is 11x5 cells with `FullHeight` 5, so nothing hangs above its back row: it stands
-at columns 104..114, rows 9..13 of a 144x144 map, inside the playable rectangle, and its top edge sits
-4 px below the highest reachable view (`TERR-STRUCT-207`).
+The mission 90 Castle is 11x5 cells with `FullHeight` 5 at columns
+104..114, rows 9..13 of a 144x144 map. The placement clause of TERR-STRUCT-207
+stands; its 4 px top-margin projection is partially retracted. The shared
+centre `(109.5,11.5)` has heights 28,28,28,44 and lift 32. At the selected
+creation offset 0, the first strip is at world Y256, exactly the highest
+view's top. Computed margin: 0 px. Native current offset and complete frame
+visibility remain Unknown. — TERR-221
 
 **Shadow** (`TERR-STRUCT-103`, `TERR-SHDW-136`): the same loop and the same `dstY`, through the
 sprite's `vt+0x3c` with `[L04368]`, and `dstX` displaced **per strip** by

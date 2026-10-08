@@ -36,7 +36,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/terrain/for
 | TERR-LIGHT-023 | Type-0 light-field offsets (resolves the `TERR-LIGHT-015` prose/evidence conflict). | High / Unknown | ● active (amended) | [EXP-0025](../experiments/EXP-0025-shading-table/), [EXP-0298](../experiments/EXP-0298-map-scalar-consumers/) |
 | TERR-EDGE-024 | Far-edge cell corner sourcing = raw flat row-major addressing (no clamp/dup/wrap/table). | High | ● active | [EXP-0029](../experiments/EXP-0029-terrain-edge-cells/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/) |
 | TERR-EDGE-025 | The per-vertex brightness OUTER RING is never computed (amends `TERR-LIGHT-013`). | High / Unknown | ● active | [EXP-0029](../experiments/EXP-0029-terrain-edge-cells/) |
-| TERR-EDGE-026 | The outer ring is drawn, not padding-never-drawn; its degenerate shading is tolerated by the border+camera. | High / Medium | ● active | [EXP-0029](../experiments/EXP-0029-terrain-edge-cells/) |
+| TERR-EDGE-026 | The projection and drawable paths overscan the view; the inference that this admits the stored outermost terrain cells is partially retracted by TERR-217. | High / Medium | ● active (partially retracted) | [EXP-0029](../experiments/EXP-0029-terrain-edge-cells/) |
 | TERR-GRID-027 | The tile grid every `TERR-*` render claim consumes starts 8 bytes later in the `.alm` than `ALM-GRID-011` said — a render indexing the section payload from byte 0 is four cells off in X. | High | ● active | [EXP-0030](../experiments/EXP-0030-alm-grid-origin/) |
 | TERR-LIGHT-028 | The height-gradient span is the ADJACENT ONE-CELL difference — twice, along the same axis (amends `TERR-LIGHT-013`; resolves R-3). | High | ● active | [EXP-0031](../experiments/EXP-0031-terrain-gradient-span/) |
 | TERR-LIGHT-029 | Corpus level census, corrected — and it is a function of θ (corrects `TERR-LIGHT-018`'s `30…74`). | High / Medium | ● active | [EXP-0031](../experiments/EXP-0031-terrain-gradient-span/) |
@@ -374,6 +374,9 @@ Corpus verification (38 maps, 880 552 type1 cells, overlay corner excluded) with
 
 ### TERR-EDGE-026
 
+The affected former wording below is partially retracted. See the
+**Amended.** paragraph for the retained facts and correcting claim.
+
 **The outer ring is drawn, not padding-never-drawn; its degenerate shading is tolerated by the border+camera.** No renderer skips or special-cases the outer ring: the screen-Y mesh is built for it (and for a several-cell over-scan margin beyond the grid — the draw loops run **viewport-relative** `row ∈ [-4…-3, visRows+7…+9]`, `col ∈ [-4…-3, visCols+3…+5]` in `R1818`/`R0379`, offset by the scroll origin `+0x5c/+0x60` and reading the grids flat, never tested against `W`/`H`), and blits are issued, gated only by normal screen-rect culling. The **only** bounds check in the entire draw is a single `if (worldRow < H)` guard on the smoothed-height `+0xc0` pass in `R1818` — its presence proves the draw expects `worldRow` to reach/exceed `H`. The engine tolerates the degenerate outer band (uncomputed brightness ring + wrap/OOB far corners) because gameplay is bounded by the **derived 8-cell sim border** (`R0470` marks `0x1f` 8 cells deep on the 256×256 sim grid, `ALM-TERR-016`) and the camera keeps that band at/beyond the extreme edge. **For a reimplementation the far edge has no defined shading to reproduce — clamp-to-edge is the safe, intent-matching choice.**
 
 **Confidence.** High (not skipped; over-scan; the guard) / **Medium clause ANSWERED (EXP-0118, `SESS-VIEW-030`)**: the CMapView scroll clamp is `8 <= origin <= dim − 8 − span` on each axis, four enforcement sites, each one named instruction — so the origin never enters the outer 8 cells and the outermost ring is reachable only through this row's own 3–4 cell over-scan. The scroll origin this row locates at `+0x5c/+0x60` is confirmed and given a unit (cells) and a value at map start by `SESS-VIEW-029` / `MISSION-VIEW-019`; `visCols`/`visRows` are `+0x64`/`+0x68` and are resolution-dependent (`SESS-VIEW-028`)
@@ -381,6 +384,8 @@ Corpus verification (38 maps, 880 552 type1 cells, overlay corner excluded) with
 **Original status.** ● active
 
 **Evidence.** [EXP-0029](../experiments/EXP-0029-terrain-edge-cells/)
+
+**Amended.** TERR-217 partially retracts the outermost-terrain-dispatch and guard-implies-raster clauses. Projection/drawable overscan is not the four terrain routines' admitted cell population. The raw corner arithmetic and uncomputed brightness-ring facts stand.
 
 ### TERR-GRID-027
 
@@ -1078,7 +1083,7 @@ Corpus verification (38 maps, 880 552 type1 cells, overlay corner excluded) with
 | TERR-STRUCT-103 | (rom.exe) | High | ● active | [EXP-0092](../experiments/EXP-0092-structure-art/) |
 | TERR-STRUCT-104 | (rom.exe) Flat selects the structure body phase; both body phases admit signed +0x78<2. | High | ✔ promoted (partially retracted) | [EXP-0092](../experiments/EXP-0092-structure-art/); [EXP-0333](../experiments/EXP-0333-drawable-cell-passes/) |
 | TERR-STRUCT-105 | (rom.exe) | High | ● active | [EXP-0092](../experiments/EXP-0092-structure-art/) |
-| TERR-STRUCT-106 | (rom.exe) | High / Medium | ● active | [EXP-0092](../experiments/EXP-0092-structure-art/) |
+| TERR-STRUCT-106 | Drawable lift uses footprint-centre signed interpolation; the unconditional structure cell-centre and four-corner-mean consequence is partially retracted by TERR-221. | High / Medium | ● active (partially retracted) | [EXP-0092](../experiments/EXP-0092-structure-art/) |
 | TERR-STRUCT-107 | (rom.exe) | High | ● active | [EXP-0092](../experiments/EXP-0092-structure-art/) |
 | TERR-LIGHT-108 | the global at `L06260` is the `ShowTimeFlow` game option — a shipped, persisted, on-by-default user setting, not a debug switch. | High / Medium | ● active | [EXP-0116](../experiments/EXP-0116-daylight-cycle/) |
 | TERR-LIGHT-109 | The sun angle's span is ±0.78539815, not ±π/2 — `TERR-LIGHT-030` and `TERR-LIGHT-014` are both wrong about it by a factor of two (see retracted.md). | High | ● active | [EXP-0116](../experiments/EXP-0116-daylight-cycle/) |
@@ -1190,6 +1195,9 @@ Corpus verification (38 maps, 880 552 type1 cells, overlay corner excluded) with
 
 ### TERR-STRUCT-106
 
+The affected former wording below is partially retracted. See the
+**Amended.** paragraph for the retained facts and correcting claim.
+
 **(rom.exe)** `drawable+0x68`, the altitude lift every sprite is raised by, is computed in `R0614` (`L10634`…`L10635`) as a **bilinear interpolation of the containing cell's four corner heights at the object's sub-cell position**, the position used being the **footprint centre** `+0x58`/`+0x5c` = `(TileWidth<<7) + fineX - 128`, `(TileHeight<<7) + fineY - 128`, and the grid being `[[view+0x80]+0x10]` read as signed bytes. This refines `TERR-SPR-039`/`TERR-SPR-040`'s "the mean of the cell's four corners": at the exact centre of a cell both fractional weights are 16/32 and bilinear *is* the mean, which is why the mean reading held — but a drawable at any other sub-cell position is lifted by the interpolant, not the mean. For a structure the two always agree, because `TERR-STRUCT-100` puts every one of the 3141 shipped placements exactly on a half-cell
 
 **Confidence.** High for the arithmetic (four sign-extended loads and three interpolations, read instruction by instruction in one routine). Medium for the consequence that a structure always samples a cell centre — that follows from the corpus and the `(TileWidth<<7)` term rather than from a test in the code
@@ -1197,6 +1205,8 @@ Corpus verification (38 maps, 880 552 type1 cells, overlay corner excluded) with
 **Original status.** ● active
 
 **Evidence.** [EXP-0092](../experiments/EXP-0092-structure-art/)
+
+**Amended.** TERR-221 partially retracts the unconditional cell-centre/mean consequence. The sampled position is the footprint centre; its weights depend on footprint dimensions. Three signed truncations are not an unconditional four-corner mean. The named arithmetic and signed loads stand.
 
 ### TERR-STRUCT-107
 
@@ -2215,7 +2225,7 @@ actual C18 history and other writers.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TERR-GMAP-206 | Mission 90 (Fortress Kargallas) is world-map object `MapObject15`, point (478, 298), rectangle (477, 287, 27, 36), with no `Picture` entry; the rectangle covers the castle drawn in the 640x480 `GMap.bmp`, in EN and RU. | High / Medium | ● active | [EXP-0479](../experiments/EXP-0479-dialogue-art/) |
-| TERR-STRUCT-207 | On the 144x144 map of mission 90 the Castle (structures.reg ID 57, 11x5 cells) stands at columns 104 to 114, rows 9 to 13, wholly inside the playable rectangle; the strip rule puts its top edge 4 px below the highest view. | High / Medium | ● active | [EXP-0479](../experiments/EXP-0479-dialogue-art/) |
+| TERR-STRUCT-207 | Mission 90 Castle lies at columns 104..114, rows 9..13 inside the playable rectangle; its former 4 px top-margin projection is partially retracted by TERR-221. | High / Medium | ● active (partially retracted) | [EXP-0479](../experiments/EXP-0479-dialogue-art/) |
 | TERR-PLACE-208 | Mission 100's `100.alm` places 2 of its 11 class-76 turtles on border-ring cells (43,136) and (53,137); by static read the loader's seat call returns 0 on a ring cell, after which the listing logs and deletes the actor. | High / Medium | ● active | [EXP-0479](../experiments/EXP-0479-dialogue-art/) |
 
 ### TERR-GMAP-206
@@ -2243,6 +2253,9 @@ a missing `Picture` entry reads as "nothing" beyond the condition `TOWN-041` sta
 
 ### TERR-STRUCT-207
 
+The affected former wording below is partially retracted. See the
+**Amended.** paragraph for the retained facts and correcting claim.
+
 - `90.alm`: 144x144; type-4 structure record 28 is kind 57, `DescText` Castle (`Structure56`),
   footprint 11x5 cells, `FullHeight` 5, anchor (104, 9). Footprint: columns 104..114, rows 9..13.
 - Playable rectangle (8, 8, 135, 135) (`TERR-SIGHT-116`): 0 footprint cells outside; 1 free
@@ -2262,6 +2275,8 @@ Medium for "drawn whole": the strip and lift rules were applied to the records, 
 captured frame.
 
 **Unknown.** A captured frame of the castle at the top of the scroll band.
+
+**Amended.** TERR-221 partially retracts shared lift 28, world top 260 and the 4 px top margin. The footprint-centre corners are 28,28,28,44; shared lift is 32. At the selected creation offset 0, world top and highest view top are both 256. Placement, playable rectangle and structure-census facts stand. Native full-frame visibility remains Unknown.
 
 ### TERR-PLACE-208
 
@@ -2380,6 +2395,166 @@ writers and the Switch use arm), and any structure outside the corpus.
 
 **Evidence.** [EXP-0480](../experiments/EXP-0480-structures/), `evidence/nonpositive-hp.tsv`,
 `evidence/placement-word-vs-saved-hp.tsv`, `evidence/census/`.
+
+## Map edges
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-216 | The inspected camera-clamp bodies use dimensions, spans and origins, not grid content; 342 supplied original-x86 cases match their endpoint arithmetic. | High | ✔ promoted (branch candidate) | [EXP-0499](../experiments/EXP-0499-map-edges/) |
+| TERR-217 | The four terrain routines admit rows 0..spanRows+3 and columns 0..spanCols-1; a nonempty eight-cell camera band keeps the stored outermost terrain cells out of that population. | High | ✔ promoted (branch candidate) | [EXP-0499](../experiments/EXP-0499-map-edges/) |
+| TERR-218 | The software painter intersects its repaint clip with the absolute widget view and resets it to that view when the camera changes; this is a screen rectangle, not a playable-cell bound. | High | ✔ promoted (branch candidate) | [EXP-0499](../experiments/EXP-0499-map-edges/) |
+| TERR-219 | In 18 supplied original-x86 cases, ordinary and mirrored indexed body blits write only the sprite/clip intersection and preserve every outside or rejected destination pixel. | High | ✔ promoted (branch candidate) | [EXP-0499](../experiments/EXP-0499-map-edges/) |
+| TERR-220 | The enumerated 38 EN and 34 RU maps have nonempty camera bands at all three resolutions; first playable row 8 is terrain-blocked on 3 maps in each root and partly open on the other 35/31. | High | ✔ promoted (branch candidate) | [EXP-0499](../experiments/EXP-0499-map-edges/) |
+| TERR-221 | Mission 90 Castle uses footprint-centre corners 28,28,28,44 and shared lift 32; its first strip at the selected creation offset meets the highest view top, with a computed margin of 0 px. | High / Medium | ✔ promoted (branch candidate) | [EXP-0499](../experiments/EXP-0499-map-edges/) |
+
+### TERR-216
+
+`R1677` through `L13363` clamps absolute targets then writes
+pending deltas. `R1678/R1679` clamp axis deltas. The prefix
+`R1280..L13364` of `R1280` recomputes spans and reduces an
+excessive origin to its upper bound; it adds no lower clamp.
+`SESS-VIEW-028/030` supply the viewport and eight-cell band.
+
+`clamp-cases.tsv` contains 342 matching original-x86 executions over spans
+15x15,20x18,27x24, dimensions 16,32,40,64,144,256 and six target pairs.
+`clamp-accesses.json` preserves every non-stack read/write location.
+Grid pointers are null. Data reads touch only the view's dimensions, spans,
+origins, pending deltas and landscape-presence pointer, plus landscape W/H
+for span recomputation. The absolute body stops before notification; the
+span prefix stops before allocation.
+
+**Confidence.** High for these complete arithmetic bodies/prefix and the
+finite execution population. Raw PE ranges and access traces rule out a
+content-dependent branch inside them. Synthetic crossed bands demonstrate
+upper-after-lower behavior; they are not shipped frame observations.
+
+**Unknown.** Session notification, native scroll cadence and native small
+maps. Other operations can set or restore an origin.
+
+### TERR-217
+
+`R0539`, `R1814`, `R1815` and `R1816`
+walk rows 0 through spanRows+3 ascending and columns spanCols-1 through 0
+descending. Each adds view origins to obtain world cells. With
+`SESS-VIEW-030`'s nonempty band, columns stay in 8..W-9 and the greatest
+terrain row is H-5. At the bottom stop, four ordinary terrain rows H-8..H-5
+are inside the movement border. The top, left and right strips are not
+terrain-dispatched by these loops. Altitude can move admitted pixels.
+
+`terrain-renderers.txt` retains the original instructions. The full software
+redraw call at L13365 enters the ordinary terrain renderer; it has no
+preceding black-clear call in that arm. Conditional color-zero grid lines
+are separate from border treatment. Tile clipping can preserve pixels.
+The mesh and drawable margins have different bounds. The smoothed-height
+guard at L13366 compares an unshifted row; its sampled base subtracts 1.
+
+**Confidence.** High for the four loop headers, world indices and nonempty
+band consequence. The raw bytes are translated through their PE section.
+The stored outermost ring is not a terrain-dispatch population in this
+scope; a projection read is not a draw call.
+
+**Unknown.** Native per-pixel coverage and preceding surface contents;
+selector-mask-0x02 alternate rendering and invalid camera bands.
+
+### TERR-218
+
+`R1224` resolves both rectangle corners through the widget ancestry.
+The map painter calls it at L13367 using view+8. It intersects view+0xf4
+with that absolute view at L13368 through imported IntersectRect. When
+the origin differs from saved view+0xec/+0xf0, L13369..L13370 copies
+the entire view rectangle to view+0xf4. Full-redraw/overlay state has other
+reset paths. Repaint work and child overlays can reduce the active area.
+
+`R0373` copies four dwords into clip globals L01503..L01506.
+The software painter installs view+0xf4 for drawable work; `TERR-SPR-140`
+identifies its four installations. The source is an absolute screen view,
+not movement bounds or a per-cell destination window.
+
+**Confidence.** High for the named producer, imported rectangle operation,
+camera-change reset and setter. Instructions and import names are read from
+the same lawful image; no native active value is inferred from a screenshot.
+
+**Unknown.** The precise active repaint subset at an arbitrary native frame,
+alternate rendering and overlay population during that frame.
+
+### TERR-219
+
+Structure/body wrappers `R0794`, `R1791` and `R1547`
+reach indexed .256 body blitters, including ordinary `R0796` and
+mirrored `R0895`. Their rejection/inside tests use global screen
+clip edges; partial drawing tests rows and pixels against the same edges.
+
+`body-clip-cases.tsv` runs both bodies on a 64x64 16-bit destination with
+supplied half-open clip (4,3,52,51) and a synthetic 40x40 literal-run sprite.
+Nine placements per body exercise four crossed edges, an interior sprite
+and four whole rejections. All 18 complete original-x86 executions match
+every destination pixel. The interior case crosses the 32-pixel cell line.
+No cell rectangle is supplied to these blitters. Outside pixels retain
+the 0xa55a sentinel; accepted pixels match the indexed palette, reversed
+for the mirrored body.
+
+**Confidence.** High for the named instruction paths and supplied finite
+population. Whole rejection and partial clipping are distinct cases.
+
+**Unknown.** Native receiver binding, registration, frame selection, fog,
+malformed streams and the alternate overlay body blitters. Shadow geometry
+has its separate `TERR-SPR-140` contract.
+
+### TERR-220
+
+`tools/mapedges` enumerates every M7R member in both scenario containers
+and all root ALM files. The resulting population is 38 EN maps/880,704 cells
+and 34 RU maps/677,696 cells. Twenty source files and every map are hashed.
+All 216 map/resolution camera bands are nonempty. All signed Altitudes bytes
+are 0..127, with zero negative values.
+
+Over columns 8..W-9, row 8 has three all-terrain-blocked maps per root:
+140.alm,141.alm,91.alm. The other 35 EN and 31 RU maps have some terrain-open
+cells. On 140.alm row 8, blocked/open is 240/0; on 90.alm it is 60/68,
+including five water cells. Both locales have those same two row populations.
+Stored row 0 is counted separately. Four full-side eight-cell strips include
+each corner in two strips. `maps/regions.csv` preserves the populations.
+
+Terrain-only classification uses `TERR-PASS-049/050`'s tile bit13, raw water
+and class8 predicates. It excludes type3 objects, the stamped simulation
+border, occupants and runtime flags. Unknown class pairs remain Unknown;
+none occurs in this measured corpus.
+
+**Confidence.** High for this exact install/data population and derived
+counts. Strict framing/length checks and sorted enumeration prevent silent
+map omissions. EN/RU are data populations, not two code witnesses.
+
+**Unknown.** Native frame differences between blocked/open rows, loose maps
+outside the two roots and runtime changes to movement or terrain state.
+
+### TERR-221
+
+The mission 90 Castle placement remains `TERR-STRUCT-207`'s kind 57,
+anchor (104,9), 11x5 cells, FullHeight 5 in the 144x144 map. The shared lift is
+sampled at footprint centre (109.5,11.5), not the anchor cell. Both map hashes
+are 1af4b4ff040d48f4293020101d5042092328f2794254f438cfd8253aa6a006e1.
+Its four signed heights are 28,28,28,44. `R0614` performs three
+signed interpolations with truncation toward zero, yielding 32. Four
+supplied original-x86 executions reproduce centre 32 / anchor 28 in both roots.
+
+The selected creation writes drawable+0x10=0 at L10620. The strip body
+`R1794` subtracts that field and the shared lift from row*32.
+At origin row 8, the first Castle strip is (9-8)*32-0-32=0, independently
+of the three resolution spans. The world top and highest view top are 256.
+
+Footprint parity can change interpolation weights even when the placement
+anchor is at a half cell. Nested truncation is not an unconditional mean:
+supplied original-x86 corners 1,0,0,0 at weights 16/32 give lift 1, while
+their exact four-corner mean is 0.25. This narrows `TERR-STRUCT-106`'s mean
+consequence without changing its named arithmetic.
+
+**Confidence.** High for measured corners, original integer arithmetic,
+the selected create-time offset and controlled lift executions. Medium for
+the first-strip placement applied to those inputs; no native full frame
+was executed. The supplied owner crop has no measured camera origin.
+
+**Unknown.** The current drawable+0x10 and frame in the owner observation,
+subsequent offset writers and the complete native Castle silhouette.
 
 ## Unit health and mana bars
 
