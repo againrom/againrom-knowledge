@@ -125,6 +125,17 @@ block halves it, `((facing − 8) >> 1) & 7`; `Flip` mirrors the upper half (`SP
 drawn standing at a facing that advances by `(target − current)/ticksRemaining` sixteenths per tick,
 wrapping by the shortest arc.
 
+The server sends the turn message once per new desired facing, from an actor
+in action 1 whose position did not change in that tick, with the target
+rounded to a sixteenth and the turn estimate as the count — ANIM-134. The
+client starts from its drawn facing, moves a 1/256 accumulator by the shortest
+arc divided by the ticks left, and lands on the target in the last tick. A
+turn of up to two sixteenths, such as one heading of an 8-way walk, is one
+tick when the server's active turn flag was clear and the run is not
+replaced; otherwise the client follows the message count, so a short turn
+after a stop reset can take two ticks. Larger turns take ceil(arc/rate)
+ticks — ANIM-136.
+
 ## Action messages
 
 `R0509` dispatches on `msg+0x9` biased by 3, through a byte arm-index table at `L02523`
@@ -139,6 +150,10 @@ into a jump table at `L02524`.
 0x6c 0x6e 0x6f 0x70    the field-masked state sync — one bit per field:
       0 health  1 mana  2 +0x108  3 corpse stage  4 facing  5 position
 ```
+
+The move and turn arms apply their message even while a run is active; they
+replace it after an "Overriding ... segments lost" log line. The shoot arm
+returns without applying its message in that state — ANIM-135.
 
 ## Death and corpse phases
 

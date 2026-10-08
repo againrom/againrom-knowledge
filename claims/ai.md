@@ -3316,7 +3316,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 | AI-409 | The shot builder reads the 0x72 direction; while the `+0x86` victim lookup succeeds the projectile driver re-reads the victim's point every tick, so projectile direction is not the stored direction. ShootDelay is `units.reg` data. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
 | AI-410 | A shot can leave over one heading from the drawn facing if the victim's bearing changes by more than one heading between load and shot (not computed); on identical delta vectors 8-way and 16-way indices differ by at most half a heading. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
 | AI-411 | Pending order 2 loads a cycle with no facing or distance test, but its only immediate setter `L13240` has no reference in the scanned population (`E8`/`E9`, dword pointers, `[reg+8]`, `[reg+9]` stores), so no read route reaches it. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
-| AI-412 | The client drops a 0x72 message while the drawable run counter `+0xa0` is nonzero, as for 0x6b and 0x6d; for arcs of 0x21 or more the 0x6d count equals the sim step count; for the one-heading snap the sequence is Unknown. | Medium / Unknown | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-412 | The client drops a 0x72 message while the drawable run counter `+0xa0` is nonzero, as for 0x6b and 0x6d; for arcs of 0x21 or more the 0x6d count equals the sim step count; for the one-heading snap the sequence is Unknown. | Medium / Unknown | ● active (partially retracted) | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
 
 ### AI-405
 
@@ -3400,3 +3400,84 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 **Confidence.** Medium for the gate and the masks; Unknown for a drop after a one-heading snap turn, which no run observed.
 
 **Unknown.** A full-mask re-projection landing mid-cycle.
+
+**Amended.** The clause that the 0x6b and 0x6d arms share the 0x72 gate is refuted by EXP-0498: both apply their message while `+0xa0` is nonzero, replacing the running action (`ANIM-135`; see [`retracted.md`](retracted.md)). The 0x72 gate stands.
+
+## Pursuit search cadence
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs) and CPU emulation (unicorn) of the image's own bytes for `R0043`, `R0053`, `R0055`, `R0054` and their leaves, with the step, the position write and the allocator replaced by stated models; no process of the game was run. `EXP-0494` was allocated ids `413`..`420` of `claims/ai.md` and spent `413`..`418`. `mover` is `actor+0x154`; a pass is one call of `R0043(actor, victim, stop)`; a sub-tick is one call of `R0193` (`SESS-TICK-006`).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-413 | In the pursuit pass `mover+0x8a` is a word holding the static route count after the last full search or single-node rebuild, set to 0x00ff when the victim differs from `mover+0x7c`; the mover constructor zeroes it. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| AI-414 | On a pass by a centred mover whose victim differs from `mover+0x7c` and whose edge distance exceeds the stop distance, the full static search runs (threshold 5); an off-centre mover finishes its step and a mover within stop turns. | High | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| AI-415 | For an unchanged victim a re-search is a full search only while the last count exceeds 5; at 5 or less it rebuilds the old route end as one node, count 1, until a route-end match clears `mover+0x7c` and forces a full search. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| AI-416 | With an empty dynamic list the stepper takes no step and only turns `mover+0` toward `mover+1`; position, claim and `mover+0x90` stay, and unless the near search set `mover+0x98` (`AI-373`) the next sub-tick passes again. | High | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| AI-417 | At most one pass per sub-tick, none in transit or on arrival. Byte `mover+0x78` counts centred out-of-stop passes since the last near search; byte `mover+0x09` near searches and route-end matches since the last full search or rebuild. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| AI-418 | Modelled band case (rings 1..4 impassable): from Chebyshev 7 a pursuer with reach below 7 raises `mover+0x98` on its first pass; from 12 it walks to ring 5 and raises it there when reach is below 5, else stands in reach. | Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+
+### AI-413
+
+- Writers in `R0043`: `L13285` stores the word 0x00ff in the victim-change block (`L13286`..`L01893`), which also sets `mover+0x09 = 0xff`, frees the static list and stores the victim cell in `mover+0x76` and `mover+0x8c`. `L13287` stores the low word of the static count `actor+0x168` after either the full search (`L01894`) or the single-node rebuild (`L13288`..`L01898`).
+- Readers: `L13289` (full search when the word is greater than `ctx+0x585c8`, shipped 5 by `MOVE-PARAM-006`) and `L13290` (the dynamic list is freed after a search when the word is greater than 5).
+- The mover constructor `R0206`, called at `L13291` before `actor+0x154` is stored at `L13292`, zeroes 0xb4 bytes (`rep stosd`, 0x2d dwords) and then sets `+0x05 = 0x41`, `+0x0a = 0x10`, `+0x09 = 0xff`, `+0x08 = 5`. A new mover therefore has `mover+0x7c = 0` and `mover+0x8a = 0`.
+- After a victim change the field is 0x00ff while `mover+0x09` is 0xff; the next read at `L13289` is in the same pass.
+- Emulation (`q2-first-call.tsv`, 108 first passes on open ground): after a search from Chebyshev distance d the field equals d and the count left after the near search equals d - 1.
+
+**Confidence.** High for the two writers, the two readers and their values in `R0043`, read whole. Medium for "only": a displacement scan of `.text` finds 11 other word stores at `+0x8a` (`L13293`..`L13294`), all outside the movement routines; their base objects were not resolved.
+
+**Unknown.** Whether a save load or a script writes `mover+0x8a` or `mover+0x7c`. Other constructors of a mover than the call at `L13291` were not enumerated.
+
+### AI-414
+
+- The pass first returns when the actor is not centred (`L01890`..`L01891`), then compares the edge distance `R0036` with the stop argument (`L00580`); at or below it it turns (`R0051`, `R0056`) and returns with no search.
+- Past the stop test a victim different from `mover+0x7c` sets `mover+0x09 = 0xff` and `mover+0x8a = 0x00ff` and empties the static list. The test `mover+0x09 > N/3 + 1` with N = 0 passes (`L01895`), and `0x00ff > 5` selects the full search `R0053(..., flag 1)` at `L01894`.
+- A fresh mover has `mover+0x7c = 0` (`AI-413`), so the first centred out-of-stop pursuit pass of any victim takes this branch. A mover off its cell centre never reaches it on that call: `L01890`..`L01891` calls `R0039` and returns, with no search and `mover+0x8a` unchanged. The `> 5` test is against `ctx+0x585c8`, shipped 5 (`MOVE-PARAM-006`).
+- Emulation of the original bytes over stop distances 1, 5 and 7, three directions and Chebyshev distances 1 to 12 (108 cases): every pass that reached `L06116` ran the full search at `L01894` and never the rebuild at `L13295`; passes at or within the stop distance ran no search.
+
+**Confidence.** High for the branch after the centre and stop guards: it is a cited instruction sequence and the emulation of the routine bytes agrees in all 108 centred cases.
+
+**Unknown.** A pursuit started while `mover+0x7c` already holds the same victim (an earlier pursuit of it that left the field set) does not reset; `AI-415` governs it.
+
+### AI-415
+
+- With `mover+0x7c` equal to the victim, a re-search happens when `mover+0x09 > N/3 + 1` (N the static count). When `mover+0x8a` is greater than 5 it is the full search; otherwise `L13288`..`L01898` frees the static list and appends one node holding `mover+0x76`, the end of the previous route, and `L13287` then stores count 1.
+- After a full search `mover+0x76` is the tail node's cell (`L13296`..`L13297`), and `mover+0x74` and `mover+0x8c` hold the victim's cell at that pass (`L13298`, `L13299`). The rebuild does not read the victim's current cell.
+- The route-end match: when the actor's cell equals `mover+0x76` and `mover+0x8c` equals the victim's current cell (`L06963`, `L06964`), the pass increments `mover+0x09`, stores `mover+0x7c = 0` and returns without the stepper (`L13300`..`L06965`). The next pass, if the pursuit order continues and the mover is centred and outside the stop distance, sees a changed victim and runs the full search (`AI-414`).
+- Emulated walk (`AI-418` set-up, start Chebyshev 12, reach 3): full search at the first pass (count 7), a second full search at (137,128) after three cell moves, on the fourth stepping pass (count 4), a rebuild at the next re-search (count 1), the route-end match on the route end, and a full search on the following pass.
+
+**Confidence.** High for the branch structure, read whole. Medium for the emulated sequence, which depends on the harness's step model.
+
+**Unknown.** How often play reaches the rebuild with a moved victim; the near search then aims at the old route end while picker B uses the victim's current position (`AI-373`).
+
+### AI-416
+
+- `R0054` tests the dynamic count `actor+0x184` (`L13301`); at 0 it calls `R0249(actor)` and returns (`L06979`..`L13302`). `R0249` writes only `mover+0`: it snaps to `mover+1` when the folded arc is below the rate `mover+0x0a`, otherwise moves `mover+0` by the rate in the direction that reaches `mover+1`.
+- Emulation of `R0054` over six facing and rate cases compared every byte of the actor, mover and position record and the whole occupancy plane: only `mover+0` changed, and not at all when `mover+0 == mover+1`.
+- The rest of the same pass, read in `R0043`: `mover+0x78` is incremented (`L13303`); when the near search ran, `mover+0x94` and `mover+0x96` take the victim and actor cells, `mover+0x09` is incremented and `mover+0x78` cleared (`L01905`..`L01906`). `mover+0x90` has no writer in `R0043`, `R0054` or `R0249`; its two writers in the movement range are in `R0178` (`L06947`, `L00457`).
+- `R0042` then finds the actor centred, stores no progress 3, and stores `actor+0x54 = 1` (`L13304`..`L06119`); the next sub-tick runs the pursuit row again (`AI-417`). When the empty list came from a kind-1 near search, `L00162` has already stored `mover+0x98 = 1` and the executor epilogue of the same call cancels the order (`AI-373`, `AI-ROUTE-045`).
+
+**Confidence.** High: both routines are short and read whole, and emulation of their bytes shows no other change.
+
+### AI-417
+
+- `R0193` runs once per sub-tick and calls each actor's slot `R0037`, which calls the executor `R0016` once (`AI-371`, `SESS-TICK-006`; 62 ms at the default speed index, `SESS-CLOCK-005`).
+- In the executor, progress 3 calls the step routine `R0039` (`L06938`); when the actor is then centred it clears progress and jumps to the epilogue (`L13305`..`L13306`), so the arrival call runs no pending arm. The pursuit rows run only at progress 0 (`AI-350`), and row 5 reaches `R0043` once through `R0042` (`L06113`).
+- A pass whose stepper starts a step calls `R0047`, which adds the step vector `mover+0xb0`, `mover+0xb1` to the sub-cell position; `R0042` then finds the actor off centre and stores progress 3 (`L00107`).
+- So between two passes of a stepping pursuer lie the transit calls of one cell, ending with the arrival call. `mover+0x78` counts centred out-of-stop passes (`L13303`) and is cleared after a near search (`L01906`); `mover+0x09` counts near searches (`L01919`) and route-end matches (`L02020`) and is reset after a full search or rebuild (`L01900`). Both are bytes and wrap. A turning-only pass with an unchanged victim and a non-empty dynamic list increments `mover+0x78` and leaves `mover+0x09`.
+
+**Confidence.** High for the executor and wrapper structure and the two counters' writers. Medium for the rate of passes per cell stepped: a pass whose stepper only turns (`AI-416`, or facing unequal at `L07009`) is repeated each sub-tick, and the number of transit calls per cell is the step speed (`MOVE-094`), not measured here.
+
+**Unknown.** The second executor caller `R0038` (no reference found, `MOVE-GATE-039`). Catch-up sub-ticks of the pacer run the same body (`SESS-CLOCK-005`).
+
+### AI-418
+
+- Set-up (`q7_band.py`): a victim at a cell whose Chebyshev rings 1 to 4 carry a blocking bit of the mover mask in both planes, one or three attackers (side 1, mask 0x41, rate 0x20) in a column at Chebyshev 7 or 12, stop distance = reach 3, 5 or 6, 100 sub-ticks.
+- Original bytes run: `R0043`, `R0053` with pickers A and B, `R0055`, `R0054`, the turn, direction and distance leaves, `R0041` and the occupancy writers. Modelled: the step (a transit of 6 sub-ticks ending with the arrival release and the dynamic-list free of `R0039`), `R1088`, `R0047`, the allocator, and the order layer (the harness stops an attacker at `mover+0x98 = 1` or in position).
+- Chebyshev 7, every reach and group size: the first full search fails (picker A radius `(7>>2)+3 = 4`, `AI-394`), and `L00161` stores `mover+0x98 = 1` on the start cell.
+- Chebyshev 12: the first search reaches ring 5 (radius 6). Reach 3: the attacker walks to ring 5; there the route-end match clears `mover+0x7c`, the next full search from distance 5 has radius 4 and fails, and `L00161` fires on the ring-5 cell (sub-tick 47 under the 6-sub-tick step). Reach 5: in position on ring 5. Reach 6: in position on ring 6. Each member of the group of three ends on its own row's cell.
+- After `mover+0x98 = 1` the executor epilogue cancels the order and runs `R0004` (`AI-ROUTE-045`); the harness does not model that, so the cell at 100 sub-ticks is the cell at the flag.
+
+**Confidence.** Medium: the searches and pickers are the original bytes, but the step model, the occupancy bit standing for impassable terrain and the absent order layer are the harness's.
+
+**Unknown.** What the attacker does after the cancel within 100 sub-ticks (reacquisition by `R0004` and the group AI once per full tick); groups whose members' routes cross; a native run.

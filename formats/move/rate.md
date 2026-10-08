@@ -114,6 +114,23 @@ All three direct leaf callers are selected; eight of eleven direct turn-caller
 sites and all unresolved indirect/rebased accesses remain outside this local
 proof. Full scheduling and elapsed time remain Unknown — MOVE-RATE-055.
 
+**The turn schedule.** A fresh turn of at most two sixteenths (an arc of 32
+or less) sets the facing in the calling sub-tick. A larger turn moves the
+facing byte by RotationSpeed once per actor sub-tick and ends after
+ceil(arc/rate) sub-ticks: at rate 16 a quarter turn takes 4 and a half turn
+8, at rate 20 a half turn takes 7 — MOVE-105. The rate is mover+a for every
+actor; the local turn arithmetic reads only that byte. Each derive of a
+Humans-table actor, including a hero, a hired Human, a mounted rider and a
+mage, copies the low byte of its speed word into it. Whether a Human holds
+that derived value at every turn is Medium, and the rate of its first turn
+after spawn is Unknown. A Units-table monster's RotationSpeed is set in the
+shipped table independently of Speed — MOVE-106. A turning unit does not
+step. The non-self unit-target and point-target act gates need the current
+facing on the 8-way heading; a self-target cast skips them. A new target
+continues from the current byte; the stop reset ends the turn at the current
+byte and leaves the active flag set, so the next short fresh turn steps by
+rate — MOVE-107.
+
 **The clock.** One `R0047` per actor per **sub-tick** — the counter `server+0x04`, paced by
 `R0454` against `timeGetTime` at `campaign+0x3f0 = 1000/R` ms, `R` from the nine-arm ladder
 `{8,10,12,14,16,20,24,28,32}` defaulting to index 4 (`SESS-CLOCK-005`). Nothing in the step routine

@@ -44,7 +44,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 | MOVE-TICK-017 | The walk order is NOT preserved across save/load — the saved stream never carries it, and the loader rebuilds it grouped by player. | High / Medium | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
 | MOVE-ALT-018 | The substitution is not the caller's — `R0053` does it itself, in three branches, and `altTarget` is a target *actor*, not a cell. | High | ● active | [EXP-0068](../experiments/EXP-0068-alt-goal/) |
 | MOVE-ALT-019 | Picker A (`R0392`): expanding square rings around the requested cell, and the whole ring is scanned before the best in it is taken. | High | ● active | [EXP-0068](../experiments/EXP-0068-alt-goal/) |
-| MOVE-ALT-020 | Picker B (`R0435`): the contact ring around the target actor, entered where the line between the two actors crosses it and walked in both directions. | High / Medium | ● active | [EXP-0068](../experiments/EXP-0068-alt-goal/) |
+| MOVE-ALT-020 | Picker B (`R0435`): the contact ring around the target actor, entered where the line between the two actors crosses it and walked in both directions. | High / Medium | ● active (amended) | [EXP-0068](../experiments/EXP-0068-alt-goal/), [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
 | MOVE-ALT-021 | What a candidate is tested against, and what the choice is measured from — and the answer to both is the label plane, so the substitute is the cell cheapest to reach *from the mover*, not the cell nearest the click. | High | ● active | [EXP-0068](../experiments/EXP-0068-alt-goal/) |
 | MOVE-ALT-022 | The substitute is never written back — it is consumed by one route extraction and forgotten. | High / Medium | ● active | [EXP-0068](../experiments/EXP-0068-alt-goal/) |
 | MOVE-ORDER-023 | There is no multi-unit destination distribution anywhere: no formation, no offset table, no spread. A group move writes the same cell into every member's order block. | Medium | ● active (partially retracted) | [EXP-0068](../experiments/EXP-0068-alt-goal/), **[EXP-0094](../experiments/EXP-0094-group-rate/)** |
@@ -273,7 +273,9 @@ plane that carries occupancy. Each produces its own route list on the actor.
 
 **Confidence.** High (the box, the 8-ring bound, the two walkers, the direction table, the four jump tables and both label probes are named instructions over a full listing of a 1559-byte routine whose bytes are hashed; the jump tables are read out of the image, not off the decompiler, in `evidence/image.txt`. Check **D2** (`evidence/box.txt`): at ring 0 the box perimeter is exactly the set of mover origins whose `nM × nM` footprint touches the target's `nT × nT` footprint without overlapping it, for every `(nM,nT)` in `1..4` — so "contact ring" is measured, not asserted) / Medium (the entry-cell arithmetic: the four FPU arms were read and their *shape* — line, slope, intercept, truncate — is transcribed, but the quadrant→edge mapping was not checked cell by cell against a worked example, and no consumer of the entry cell's exact value was tested. What would lift it: re-execute the four arms over a grid of `(dx,dy)` and confirm the entry cell always lies on the box)
 
-**Original status.** ● active
+**Original status.** ● active (amended)
+
+**Amended.** The entry clause is narrowed: for a mover footprint of 2 to 4 with bearing codes 0, 1, 10 or 11 the entry cell can lie outside the box and one walker then leaves the ring (`MOVE-098`); the edge selection and the entry arithmetic are measured in `MOVE-097` and `MOVE-098`. `retracted.md` records the narrowing.
 
 **Evidence.** [EXP-0068](../experiments/EXP-0068-alt-goal/)
 
@@ -1140,3 +1142,102 @@ Through the countdown the occupancy slot, the claim bits, `+0xa6`, `+0x80` and `
 **Unknown.** Other writers of `+0x54`. Observed play. Whether a unit dies in the tick it crosses.
 
 **Evidence.** [EXP-0452](../experiments/EXP-0452-area-cost/EXP-0452.md), `evidence/listings/rom-death.txt`, `evidence/listings/rom-removal.txt`
+
+## Contact-ring picker geometry and dynamic labels
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs) and CPU emulation (unicorn) of the image's own bytes for `R0436`, `R0435` and their leaves `R0862`, `R0863` and `R0279`, over fake actors whose footprint side and movement class come from stubbed vtable slots `+0x1c` and `+0x20`; no process of the game was run. `EXP-0494` was allocated ids `97`..`104` of `claims/move.md` and spent `97`..`100`. Fine coordinates are `cell * 256 + sub-cell + (side - 1) * 128` per axis, the footprint centre as `R0862` and `R0863` return it; `dx`, `dy` are mover minus target.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-097 | `R0436` returns the bearing of the mover's fine centre from the target's as a 16-way code, 0 just east of north, clockwise, with sector edges at the axes, the diagonals and the 2:1 slopes. | High | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| MOVE-098 | Picker B enters each ring on the edge facing the mover's bearing quadrant where the centre-to-centre line meets that edge's row or column; for a mover footprint of 2 to 4 near NNE or WSW the entry falls outside the ring. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| MOVE-099 | Picker B keeps the first strictly lowest label over its executed probes, walker 1 before walker 2 per step; the first ring iteration whose probes find a label ends the scan. An off-ring entry can skip ring cells and return an outer cell. | High | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| MOVE-100 | In the dynamic search a non-seed cell whose occupancy bits meet the mover mask is not labelled by relaxation, so picker B skips it; the start cell keeps its seed label 0 and can be picked. Own bits are cleared for the wave, then reset. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+
+### MOVE-097
+
+- With `a = |dx|` and `b = |dy|`: for `dx > 0, dy <= 0` the code is 0 when `b > 2a`, 1 when `a <= b <= 2a`, 2 when `b < a <= 2b`, 3 when `a > 2b`. For `dx > 0, dy > 0`: 4 when `a > 2b`, 5 when `b < a <= 2b`, 6 when `a <= b <= 2a`, 7 when `b > 2a`. For `dx <= 0, dy > 0`: 8 when `b > 2a`, 9 when `a <= b <= 2a`, 10 when `b < a <= 2b`, 11 when `a > 2b`. For `dx <= 0, dy <= 0`: 12 when `a > 2b`, 13 when `b < a <= 2b`, 14 when `a <= b <= 2a`, 15 when `b > 2a`.
+- The routine is integer only (`R0436`..`L13318`): two calls to each centre leaf, absolute values, and compares of one magnitude with the other and with its double.
+- Emulation of the routine bytes against this rule: 107201 cases (every `|dx|, |dy| <= 40`; the lines `|dx| = 2|dy|` and `|dx| = |dy|` with offsets -2..2 up to 8000; 60000 random up to 20000), 0 mismatches. The byte range hash is in `q4-r0436-verify.txt`.
+
+**Confidence.** High: closed form and emulation agree on every case, including each sector edge.
+
+### MOVE-098
+
+- Picker B folds the code to an edge `q = ((code + 2) >> 2 & 3) + 4` (`L06824`..`L06825`): codes 14, 15, 0, 1 give the north edge (row `ty - nM - r + 1` on ring r), 2..5 the east edge (column `tx + nT + r - 1`), 6..9 the south edge, 10..13 the west edge (`MOVE-ALT-020` gives the box).
+- North and south: `slope = (Xt - Xm) / (Yt - Ym)` in single precision, `c = trunc(Xt - Yt * slope)`, entry x `= trunc((row * 256 + 0x80) * slope + c) >> 8`. East and west: `slope = (Yt - Ym) / (Xt - Xm)` with a zero `Xt - Xm` replaced by 1, `c = trunc(Yt - Xt * slope)`, entry y `= trunc((column * 256 + 0x80) * slope + c) >> 8`. `trunc` is `R0279` (toward zero); `>> 8` is an arithmetic shift.
+- Emulation at FPU control word 0x27f: the first probe cell equals this rule in all 29992 grid runs (mover offsets -12..12 per axis, every `(nM, nT)` in 1..4, three target sub-cell choices; `q4-entry-grid.tsv` lists the 9992 centred-target runs) and in 20000 random runs (`q4-fpu-precision.txt`; also at 0x37f). At 0x07f (24-bit mantissa) 7 of the 20000 random runs enter one cell away (`q4-fpu-precision.txt`).
+- Off the ring: with `nM = 1` every entry of the centred-target grid (2498 runs, offsets -12..12) lies on the ring. With `nM` of 2 to 4, codes 0 and 1 can place the north entry up to `nM - 1` columns east of the east edge, and codes 10 and 11 the west entry up to `nM - 1` rows south of the south edge (`q4-entry-grid.tsv`). Then one walker never meets its corner and runs straight outward. For `nM = 2, nT = 1` and a mover at offset (9, -12), ring 1 probes 7 cells east of the box on its north row and leaves 6 of its 12 ring cells unprobed (`q4-offbox.txt`); for `(4, 4)` 18 cells off the ring and 17 ring cells unprobed.
+
+**Confidence.** High for the edge selection, the entry rule at 0x27f and 0x37f and the off-ring cases, all from emulation of the bytes. Medium for the entry in play: the FPU precision the original runs at was not observed, and at 24-bit precision boundary cases move.
+
+**Unknown.** The FPU control word in a running session. Which units have a footprint of 2 or more and pursue.
+
+### MOVE-099
+
+- Each step probes walker 1's cell (`L06835`) and then walker 2's (`L06836`); each replaces the kept cell only when its label is strictly lower (`L13319`, `L13320`, `jge`). Walker 1 starts in the edge's direction (`world+0x54186` table index q: north edge eastward, east edge southward) and turns at each box corner with an increasing index; walker 2 runs the opposite way. The table bytes are stored by the world constructor (`L13321`..`L13322`, `ebx` zeroed at `L13323`).
+- A ring iteration runs `half its cell count + 1` steps (both walkers probe the meeting cell), capped at 0x64 (`L13324`). The ring loop continues only while the kept label is 0xffff (`L06823`), up to 8 rings; no label returns 0. The minimum and the stop are over the executed probes, not the ring's cells. Walker 1 runs clockwise on screen only when the entry lies on the perimeter. With an off-ring entry (`MOVE-098`, the `MOVE-ALT-020` narrowing) one walker leaves the ring: for target (100,100) side 1 and a side-2 mover at (109,88), a lone label at (108,98) outside ring 1 is returned in the first ring iteration, and a lone label at ring-1 cell (101,100) is never probed and the routine returns 0 after 336 probes.
+- Emulation (`q4-tie.txt`, target side 1, mover side 1 north or east): equal labels on the whole ring return the entry cell; equal labels at the two cells one step from the entry return walker 1's; a later cell with a lower label beats an earlier higher one; a ring-1 label 9 beats a ring-2 label 1; with no label the routine probes 304 cells and returns 0.
+
+**Confidence.** High for the strict comparison, walker-1 priority and the stop over executed probes: the compares are cited instructions and every case was run on the bytes.
+
+### MOVE-100
+
+- The flag-0 search calls `R1332(world, actor, cell)` at `L06784` before the wave and `R0058` at `L01945` after it, before the picker tail. Both read the movement class through vtable `+0x20`: class 1 or 2 clears or sets bit 0x40, class 3 bit 0x80, class 0 neither, over the side-by-side footprint (`L13325`..`L13326`, `L13327`, `L13328`).
+- The four dynamic relaxers `R1327`, `R1328`, `R1329`, `R1330` test the occupancy byte `world+0x20000` against the mask before any label store (`L13329`, `L13330`, `L13331` and its seven siblings, `L13332` and its seven siblings) and skip the cell when a bit meets it. The label plane is reset to 0xffff (`L01912`) in every search that passes the start-equals-goal return (`L01950`); that return leaves earlier labels in place. The start cell is seeded with label 0 (`L01965`) before the occupancy clear at `L06784`.
+- Picker B reads only the label plane (`L06835`, `L06836`), so an occupied or claimed cell other than the seed is not returned. The mover's own bits are restored at `L01945` before the picker, but the seed keeps label 0: for target (100,100) and a side-1 class-1 mover at (101,100), the flag-0 search reaches picker B with the start cell occupied (0x40) and labelled 0, picker B returns the start cell, and the dynamic count is 0. The goal cell of a near search at an occupied victim cell is unlabelled, and the search goes to picker B (`AI-373`).
+- Writers of bits 0x40 and 0x80: `R0058` and `R0257` set them by class, `R1332` and `R0046` clear them, and `R0453` rebuilds a cell's byte from its cell record and sets 0x40 or 0x80 when the record's `+0x04` or `+0x08` is nonzero (`L10529`, `L10530`). `MOVE-PLANE-005` names the same five and the claim protocol is the reservation `MOVE-PLANE-005` cites.
+
+**Confidence.** High for the seed, the clear-wave-set order, the bit selection and the relaxer tests, cited instructions; the start-cell pick was run on the bytes. Medium for the mask meaning (bit 0x40 ground, 0x80 air) taken from `MOVE-PLANE-005`.
+
+**Unknown.** What `R0453`'s record fields `+0x04` and `+0x08` hold in play.
+
+## Turn schedule by unit kind
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-105 | A fresh turn of at most two sixteenths sets the facing byte in the calling sub-tick; a larger turn advances it by the mover rate byte per actor sub-tick and ends after ceil(arc/rate) sub-ticks. | High / Medium | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+| MOVE-106 | The turn rate is mover byte +0x0a; each Human derive copies the low byte of the speed word into it, and Units-table RotationSpeed is 8..23; whether a Human holds the derived value at every turn is Medium, its first turn Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+| MOVE-107 | A turning unit does not step; the non-self unit and point act gates need the current facing on the heading; a self-target cast skips them; a new target continues from the current byte; a stop reset leaves the active flag. | High / Medium | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+
+### MOVE-105
+
+- The facing byte `mover+0` holds 256 steps per circle; one sixteenth is 16. `R0056` writes the desired byte `mover+1`. When the active dword `mover+0xa0` is 0 and the shortest arc is at most 32 (`L00749`, `L00750`), it writes current := desired and `mover+0xa4` = 1 in that call. Otherwise it calls the leaf `R0249`, which snaps when the arc is below the rate byte `mover+0x0a` and else moves the byte by the rate along the shorter arc, addition on the 128 tie (`MOVE-TURN-044`). The call then writes `mover+0xa4` = ceil(arc/rate) from the arc before the step and clears `mover+0xa0` when the facings match.
+- Counted from the first call, a fresh turn reaches the desired byte on call ceil(arc/rate), or on call 1 for an arc up to 32. Ported arithmetic over rates 1..40 (`evidence/turnsim.txt`) gives:
+
+  | rate | 1/16 | 4/16 | 8/16 |
+  |---|---|---|---|
+  | 8 | 1 | 8 | 16 |
+  | 12 | 1 | 6 | 11 |
+  | 16 | 1 | 4 | 8 |
+  | 19, 20, 21 | 1 | 4 | 7 |
+  | 23 | 1 | 3 | 6 |
+
+  A 2/16 arc also ends on call 1 at every rate.
+- One call per actor sub-tick: the actor tick `R0037` runs once per sub-tick (`HERO-DYETICK-067`) and calls the executor `R0016` at `L00086` when `actor+0x3c` is nonzero (`R0416`). The executor's turning paths call `R0056` at most once per invocation: the walk stepper's mismatch arm (`MOVE-090`), the approach `R0043` through `R0042`, pending order 0xa (`L06983`), the face helper `L13333`, the idle turn `R0205` and the face-and-mark routines at `L13334` and `R0250` (the latter from pending arm 6 at `L13335`). A sub-tick is 1/16 of a full tick: 62 ms at the default speed index (`MOVE-CLOCK-032`). At rate 16 a half turn takes 8 sub-ticks, about 0.5 s; a quarter turn 4 sub-ticks.
+
+**Confidence.** High for the routine arithmetic, read end to end, and the ported table. Medium that every order path issues exactly one call in each sub-tick of a turn: the eleven direct call sites are named (`evidence/callers.txt`), but the scheduling of every executor arm across sub-ticks was read per arm, not enumerated.
+
+**Unknown.** Sub-ticks in which `actor+0x3c` is 0 and the executor is skipped; what `actor+0x3c` holds. Observed timing in a run.
+
+### MOVE-106
+
+- Producers of `mover+0x0a`: the mover constructor, actor defaults and the table binding at spawn (`MOVE-RATE-052`); for Humanoid and Human actors, every derive `R0280` copies the low byte of the speed word `actor+0x8c` (`MOVE-RATE-053`), computed from Reaction, the type-word +10 arm, carried load and the speed modifier `+0xd8` (`SAV-1116`, `HERO-SPEED-008`). Effect selector 18 adds into the byte before calling that target's derive (`MOVE-RATE-054`), so a Human ends at the derived value. The Unit derive `R0836` does not write the byte. The turn routines only read it (`L06981`, `L06982`, `L06978`); no per-sub-tick producer exists in them. Serialized movers carry the byte (`SAV-1116`).
+- Shipped `world.res:data/data.bin` (`tools/movespeed -mode classes`, `evidence/rates/class-rates.csv`; EN and RU, 0 differing rows over 333): the Humans table has Speed equal to RotationSpeed on 210 of 210 populated rows. Its named classes include `Man_*`, the mounted `ManHorse_*`, `ManMage_*` and the heroes; `PC_Reniesta` is 16, `PC_Reniesta_3` 17. The Units table has 56 populated rows with RotationSpeed 8..23, equal to Speed on 15; `Goblin_Pike` is Speed 24 RotationSpeed 16, `Dragon` 24 and 12, `Troll` 8 and 8.
+- The local turn arithmetic of `MOVE-105` is one routine for every actor with a mover, and it reads only this byte for the rate. Scheduling across unit kinds is not established. A mounted rider is a Humans-table class, so its derive is the Human derive. A monster's table rate is independent of its walking speed, and an effect-18 change stays in its byte until another producer writes it.
+
+**Confidence.** High for the derive's store and the shipped table values. Medium that a Human holds its derived value when it turns: table equality does not show when derive ran, and neither the derive trigger set nor post-LOAD recomputation is closed (`SAV-1116`).
+
+**Unknown.** Whether derive runs at Human spawn before the first turn, so whether a fresh Human turns once at its table value. The derived value of a given hero in play, which depends on that hero's Reaction, load and modifiers.
+
+### MOVE-107
+
+- The stepper's mismatch arm turns and returns without a position change; the step comes at the next call after the facings match (`MOVE-TURN-044`, `MOVE-090`).
+- The attack and unit-target cast gate `R0041` requires `mover+0` equal to the 8-way heading of `R0051` and edge distance within reach (`AI-405`); cast arm 8 tests it at `L00742` and otherwise calls the approach `R0042`. The point-target gate `R0086` requires `mover+0` equal to the 8-way direction of `R0089` and the larger cell-axis distance within reach; pending arms 9 (`L06108`) and 0xf (`L13336`) call it. Both gates compare the current facing `mover+0` with the requested heading (`L00577`, `L06109`) and test reach; neither reads `mover+1` or `mover+0xa0`, so a current facing off the heading blocks them, and that test alone does not show that every turn has ended. A self-target cast skips the gate: `L06104` compares actor and target and `L05041` jumps to `L06105`, which sets cast action 0xd at `L13337`.
+- A later call with another desired byte replaces `mover+1`. While `mover+0xa0` is 1 that call goes to the leaf from the current byte, with no short-arc snap.
+- The stop reset `R0007` (64 direct call sites) writes `mover+1` := `mover+0` when they differ and `actor+0x54` = 0 (`L13338`, `L00017`). It does not write `mover+0xa0`. The turn stops at the current byte, and the next fresh short turn steps by rate: a 2/16 arc takes 2 calls at rates 16..20 instead of 1 (`evidence/turnsim.txt`).
+- Pending order 0xa turns until `mover+0` equals `mover+1` and then clears the pending byte (`L06983`..`L13339`); the only byte-immediate store of 0xa to `ord+8` in `.text` is in the walk at `L13340`, after a turn toward an occupied cell.
+
+**Confidence.** High for each branch and store named. Medium for the composed sequences: other writers of `mover+0xa0` in register form were not enumerated, and no run shows whether an act and a turn overlap.
+
+**Unknown.** How often a reset lands during a turn in play.

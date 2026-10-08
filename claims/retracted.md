@@ -1,5 +1,18 @@
 # Overturn history
 
+## Contact-ring entry for wide movers
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MOVE-ALT-020` (the entry clause only, for mover footprints of 2 to 4; the box, the 8-ring bound, the walkers and the probes stand) | Verbatim: "The entry cell is where the straight line between the two actors' **fine footprint centres** meets that box" | High / Medium | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md), MOVE-098 | The entry is the crossing with the row or column of the edge the bearing code selects; with a mover footprint of 2 to 4 and codes 0, 1, 10 or 11 it can fall up to `nM - 1` cells beyond the box, and one walker then probes cells off the ring while ring cells stay unprobed. With `nM = 1` it lay on the box in every grid run (offsets -12..12, centred target). | **NARROWED** |
+
+## Turn message sender and client turn override
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ANIM-MSG-005` (the reading of `R0550`'s two arms only; the opcode-to-action mapping stands) | Verbatim: "sends `0x6d` when the actor's `1/256` position has changed since its caller sampled it and `0x6b` when it has not and both fine coordinates read `0x80`" | Medium | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md), ANIM-134 | `L13341` and `L13342` branch to the 0x6b path when a position word differs. 0x6d is built only when both words are unchanged and `R2134` finds the desired facing byte changed. 0x6b is built when a word changed and both sampled sub-cell bytes were 0x80. | **REFUTED** |
+| `AI-412` (the 0x6b and 0x6d gate clause only; the 0x72 gate, the masks and the count clauses stand) | Verbatim: "The 0x6b (move) and 0x6d (turn) arms have the same gate." | Medium | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md), ANIM-135 | With `+0xa0` nonzero the 0x6d arm (`L13309`) and the 0x6b arm (`L13313`) format an Overriding line and continue to their stores at `L13312` and `L13314`. Only the 0x72 arm (`L02519`) returns without applying the message. | **REFUTED** |
+
 ## Ranged release facing and attack-route clauses
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

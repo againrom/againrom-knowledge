@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 2989. Observation: 95. Static analysis: 2469. Mixed: 425.
+Claims labelled: 3005. Observation: 95. Static analysis: 2485. Mixed: 425.
 
 ## Ledger ai
 
@@ -269,7 +269,13 @@ Claims labelled: 2989. Observation: 95. Static analysis: 2469. Mixed: 425.
 | AI-409 | static analysis | ● active |
 | AI-410 | static analysis | ● active |
 | AI-411 | static analysis | ● active |
-| AI-412 | static analysis | ● active |
+| AI-412 | static analysis | ● active (partially retracted) |
+| AI-413 | static analysis | ● active |
+| AI-414 | static analysis | ● active |
+| AI-415 | static analysis | ● active |
+| AI-416 | static analysis | ● active |
+| AI-417 | static analysis | ● active |
+| AI-418 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -422,7 +428,7 @@ Claims labelled: 2989. Observation: 95. Static analysis: 2469. Mixed: 425.
 | ANIM-STATE-002 | static analysis | ● active (amended) |
 | ANIM-PHASE-003 | static analysis | ● active (amended) |
 | ANIM-RUN-004 | static analysis | ● active |
-| ANIM-MSG-005 | static analysis | ● active |
+| ANIM-MSG-005 | static analysis | ● active (partially retracted) |
 | ANIM-DIR-006 | static analysis | ● active |
 | ANIM-DEATH-007 | static analysis | ● active (amended, partially retracted) |
 | ANIM-OBJ-008 | static analysis | ● active (amended, partially retracted) |
@@ -508,6 +514,9 @@ Claims labelled: 2989. Observation: 95. Static analysis: 2469. Mixed: 425.
 | ANIM-131 | static analysis | ✔ promoted |
 | ANIM-132 | static analysis | ✔ promoted |
 | ANIM-133 | static analysis | ✔ promoted |
+| ANIM-134 | static analysis | ✔ promoted |
+| ANIM-135 | static analysis | ✔ promoted |
+| ANIM-136 | static analysis | ✔ promoted |
 
 ## Ledger databin
 
@@ -1186,7 +1195,7 @@ Claims labelled: 2989. Observation: 95. Static analysis: 2469. Mixed: 425.
 | MOVE-TICK-017 | static analysis | ● active |
 | MOVE-ALT-018 | static analysis | ● active |
 | MOVE-ALT-019 | static analysis | ● active |
-| MOVE-ALT-020 | static analysis | ● active |
+| MOVE-ALT-020 | static analysis | ● active (amended) |
 | MOVE-ALT-021 | static analysis | ● active |
 | MOVE-ALT-022 | static analysis | ● active |
 | MOVE-ORDER-023 | static analysis | ● active (partially retracted) |
@@ -1232,6 +1241,13 @@ Claims labelled: 2989. Observation: 95. Static analysis: 2469. Mixed: 425.
 | MOVE-094 | static analysis | ● active |
 | MOVE-095 | static analysis | ● active |
 | MOVE-096 | static analysis | ● active |
+| MOVE-097 | static analysis | ● active |
+| MOVE-098 | static analysis | ● active |
+| MOVE-099 | static analysis | ● active |
+| MOVE-100 | static analysis | ● active |
+| MOVE-105 | static analysis | ✔ promoted |
+| MOVE-106 | static analysis | ✔ promoted |
+| MOVE-107 | static analysis | ✔ promoted |
 
 ## Ledger pal
 

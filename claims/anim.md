@@ -26,7 +26,7 @@ hierarchies are disjoint and only the actor is serialized.
 | ANIM-STATE-002 | The nine-value draw state is a copy of a one-byte action code, and two of its nine values are set by nothing. | High / Medium | ● active (amended) | [EXP-0071](../experiments/EXP-0071-animation-driver/) |
 | ANIM-PHASE-003 | What advances the phase is per action, and the walk cycle is advanced by DISTANCE, not by time. | High | ● active (amended) | [EXP-0071](../experiments/EXP-0071-animation-driver/) |
 | ANIM-RUN-004 | A run's length comes from the ART, not from the duration the simulation ships — and the two disagree on 143 of 262 shipped pairs. | High / Medium | ● active | [EXP-0071](../experiments/EXP-0071-animation-driver/) |
-| ANIM-MSG-005 | Eleven message opcodes fill the action block, and the mapping is read out of the dispatcher's own two tables. | High / Medium / Unknown | ● active | [EXP-0071](../experiments/EXP-0071-animation-driver/) |
+| ANIM-MSG-005 | Eleven message opcodes fill the action block, and the mapping is read out of the dispatcher's own two tables. | High / Medium / Unknown | ● active (partially retracted) | [EXP-0071](../experiments/EXP-0071-animation-driver/) |
 | ANIM-DIR-006 | The facing is sixteen-way, it is client state, and a turn is the standing frame at a moving facing. | High | ● active | [EXP-0071](../experiments/EXP-0071-animation-driver/) |
 | ANIM-DEATH-007 | The whole death animation is driven by one byte the server ships, and `REG-UNITS-050`'s "what advances `unit+0x15a`" is answered: nothing on the client does. | High / Medium | ● active (amended, partially retracted) | [EXP-0071](../experiments/EXP-0071-animation-driver/), **[EXP-0405](../experiments/EXP-0405-hurt-voice-bank/)** |
 
@@ -202,6 +202,8 @@ one arm's own range) / **Medium** (the *reading* of `R0550`'s two arms as
 "the position changed" vs "centred and about to step": the tests are
 instructions, the situation each serves is inference) / **Unknown** (what
 distinguishes `0x86`/`0x8a`/`0x8b`/`0x8c` from `0x6b`/`0x71`)
+
+**Amended.** The Medium reading of `R0550` is refuted by EXP-0498: 0x6d goes when the position is unchanged and the desired facing byte changed, and 0x6b when the position changed from a centred start (`ANIM-134`; see [`retracted.md`](retracted.md)). The opcode-to-action mapping stands.
 
 ### ANIM-DIR-006
 
@@ -2527,3 +2529,43 @@ are outside the selected original constructor association.
 **Unknown.** Alternative receiver bindings, malformed aliases, callback paths
 elsewhere in the arm and native message ordering. This is not a global stage
 writer or audibility census.
+
+## Turn message and drawn turn
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-134 | Turn message 0x6d has one found sender, the action-1 arm of the actor tick; it goes when the tick left the position unchanged and changed the desired facing byte, with (desired+8)>>4 and the estimate mover+0xa4. | High / Medium | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+| ANIM-135 | The client 0x6b and 0x6d arms apply a message while a run is active, replacing it after an Overriding log line; only the 0x72 shoot arm returns without applying it. | High | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+| ANIM-136 | A turn is drawn standing at a 16-way facing moving from the drawn facing to the message target over the message count: one tick for a snap with server flag +0xa0 clear, ceil(arc/rate) ticks otherwise. | High / Medium | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+
+### ANIM-134
+
+- The actor tick samples the two position words (`R0165`/`R0166`: cell byte times 256 plus sub-cell byte), `mover+0` and `mover+1` (`L04563`..`L13307`) before the executor call at `L00086`. Action value 1 selects `L01777` (table `L01775`), which calls `R0550` with those samples; that call at `L04571` is its only direct reference.
+- When both words are unchanged, `R2134` compares the sampled desired byte with the current `mover+1`. When they differ it returns `mover+0xa4`, and `L13308`..`L03037` builds 0x6d with facing `(mover+1 + 8) >> 4` (0..16) and that count. The builder `R0622` writes opcode, facing at `msg+0xc`, count at `msg+0xd`, and `actor+0x138` = clock + count.
+- When a word changed and both sampled sub-cell bytes were 0x80, the arm builds 0x6b with `2 * mover+0xae` and `mover+0xaa` instead.
+- So one 0x6d goes per new desired byte of an action-1 actor, in the sub-tick of the turn call; a continuing turn sends none. A fresh snap sends count 1. A tick that ends with an action other than 1, such as after the stop reset, sends no turn message.
+- Search: among four raw `push 0x6d` sites in `.text`, `L13308` is the only one feeding a message; the other three feed `R0668` and `L11280`. No byte-immediate store of 0x6d to `+9` exists. `R0622` has three direct callers, `L03036` (0x71), `L03037` (0x6d) and `L03038` (opcode 0, written as 0x6b).
+
+**Confidence.** High for the arm, both predicates and the fields. Medium for the sender being the only one: the scans cover immediate pushes and byte-immediate stores, not an opcode built in a register.
+
+**Unknown.** Message delivery latency between the server tick and the client's next presentation tick.
+
+### ANIM-135
+
+- 0x6d arm: `L13309` tests `+0xa0`. When it is nonzero the arm formats "Overriding '<action>' by 'Turn'. %d segments lost." by the running action (strings `L13310`..`L13311`), logs it only when `[L04662]` is nonzero, and continues to `L13312`. There it writes `+0xa0` = `msg+0xd`, `+0x84` = 5, `+0x85` = `msg+0xc`, `+0xbc` = `+0x6c << 4`, and zeroes `+0x94`, `+0x9c` and `+0x98`.
+- 0x6b arm: the same structure at `L13313`..`L13314`, with "... by 'Move' ..." strings at `L13315`..`L13316`.
+- 0x72 arm: `L02519` jumps away when `+0xa0` is nonzero; that path formats "... by 'Shoot' ..." and ends at `L13317` without writing the action block.
+- A turn or move message therefore replaces a running attack, shoot, cast, move or turn run on the client at once.
+
+**Confidence.** High: each branch and store is a named instruction and the strings are read from their addresses.
+
+### ANIM-136
+
+- Driver turn arm `L02709`..`L02536`, once per presentation tick with n = `+0xa0`: d = (`+0x85` << 4) − `+0xbc`, folded into (−128, 128]; `+0xbc` += d / n, truncated toward zero; a negative result adds 256; `+0x6c` = `+0xbc >> 4`. The tail decrements `+0xa0` (`L02481`). The last tick, n = 1, lands on the target exactly.
+- The draw takes the standing frame at the whole 16-way facing during the turn; move and attack frames halve it to 8 (`ANIM-DIR-006`). The server byte has 256 steps; the client sees only the message target rounded to a sixteenth.
+- Composed with `MOVE-105` and `ANIM-134` (`evidence/turnsim.txt`), drawn facings per tick from 0: rate 16, 8/16: 1 2 3 4 5 6 7 8; rates 19 and 20, 8/16: 1 2 3 4 5 6 8; rate 23, 8/16: 1 2 3 5 6 8; rates 16..21, 4/16: 1 2 3 4; any rate, 1/16 or 2/16: one tick.
+- A turn of up to two sixteenths, which includes every one-heading change of an 8-way walk, is drawn as a one-tick change of facing when the server active flag `mover+0xa0` was clear at the turn call and the client run is not replaced. With the flag set the call takes the leaf and sends its count: after the stop reset of `MOVE-107`, a 2/16 request at rate 16 sends count 2 and is drawn 1, 2 (`evidence/turnsim.txt`, `A32:2`).
+
+**Confidence.** High for the conditional arithmetic and the drawn sequences given a delivered, uninterrupted message run. Medium that server and client ticks stay aligned through a turn: delivery order in the session loop was not read.
+
+**Unknown.** Rendering of a frame between presentation ticks; observed play.
