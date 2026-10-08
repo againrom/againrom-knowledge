@@ -56,7 +56,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/terrain/for
 | TERR-SPR-043 | The anchor's frame index is not always 0 — the body pass uses the drawn frame, the shadow pass uses frame 0 (amends `TERR-SPR-040`). | High / Medium | ● active | [EXP-0038](../experiments/EXP-0038-object-frame/) |
 | TERR-TILE-044 | The tile word's top three bits: bit 13 is mutable at runtime and shared by three consumers; bits 15..14 gate a whole second draw path and are 0 on every shipped cell. | High / Medium | ● active (amended, partially retracted) | [EXP-0038](../experiments/EXP-0038-object-frame/), **[EXP-0040](../experiments/EXP-0040-enumeration-audit/)**, **[EXP-0084](../experiments/EXP-0084-idle-animation/)**, **[EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/)** |
 | TERR-SPR-047 | What reaches a unit's `frame` argument: nine animation states, six arms, and a default that draws the class id. | High / Medium / Unknown | ● active (amended) | [EXP-0039](../experiments/EXP-0039-unit-frame/) |
-| TERR-SPR-048 | Where a unit is drawn, and by which dispatch — the unit sprite pass is `vt+0x2c`, not `vt+0x30`. | High | ● active (partially retracted) | [EXP-0039](../experiments/EXP-0039-unit-frame/) |
+| TERR-SPR-048 | Where a unit is drawn, and by which dispatch — the unit sprite pass is `vt+0x2c`, not `vt+0x30`. | High | ● active (partially retracted) | [EXP-0039](../experiments/EXP-0039-unit-frame/), [EXP-0501](../experiments/EXP-0501-status-bar-colour/) |
 | TERR-PASS-049 | The map→sim ingest: three 256-stride byte planes, and the five arms that set the block byte. | High / Medium | ● active | [EXP-0041](../experiments/EXP-0041-terrain-passability/) |
 | TERR-PASS-050 | The terrain classifier `R0469`: which tile-word bits reach movement, and the 5-level cost blend. | High / Medium | ● active (partially retracted) | [EXP-0041](../experiments/EXP-0041-terrain-passability/), [EXP-0349](../experiments/EXP-0349-tile-word-consumers/), `evidence/instructions.tsv`, `evidence/controls.tsv`, `evidence/boundaries.tsv` |
 | TERR-PASS-051 | The rule: a cell blocks a mover iff `block[cell] & mover.mask` over the mover's `n×n` footprint — the block byte is a BITMASK, not the enum `ALM-TERR-016` published. | High / Medium | ● active (amended, superseded) | [EXP-0041](../experiments/EXP-0041-terrain-passability/), **[EXP-0044](../experiments/EXP-0044-mover-domain/)**, **[EXP-0078](../experiments/EXP-0078-movement-domains/)** |
@@ -602,7 +602,7 @@ Corpus verification (38 maps, 880 552 type1 cells, overlay corner excluded) with
 
 **Evidence.** [EXP-0039](../experiments/EXP-0039-unit-frame/)
 
-**Amended.** The table ledger carried the status "✖ partially retracted". `retracted.md` records a correction against this claim.
+**Amended.** The table ledger carried the status "✖ partially retracted". `retracted.md` records a correction against this claim. The clause that all three status-bar grids require selection is also partially retracted by TERR-225: grids +0x8c and +0x90 additionally admit unselected, visible objects in show-health mode.
 
 ### TERR-PASS-049
 
@@ -2380,3 +2380,117 @@ writers and the Switch use arm), and any structure outside the corpus.
 
 **Evidence.** [EXP-0480](../experiments/EXP-0480-structures/), `evidence/nonpositive-hp.tsv`,
 `evidence/placement-word-vs-saved-hp.tsv`, `evidence/census/`.
+
+## Unit health and mana bars
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-224 | Original unit bars select red below trunc(max HP/4), yellow below trunc(max HP/2), else green; four filled RGB rows use intensities 128,255,192,128 before surface packing. | High | ● active (branch candidate) | [EXP-0501](../experiments/EXP-0501-status-bar-colour/) |
+| TERR-225 | Original unit bars overwrite unfilled rows with RGB grey 64,128,96,64, except unselected show-health bars: their unfilled pixels are untouched and their filled pixels blend with the destination. | High | ● active (branch candidate) | [EXP-0501](../experiments/EXP-0501-status-bar-colour/) |
+| TERR-226 | The original unit mana bar has fixed blue filled rows of intensities 128,255,192,128 before surface packing; show-health blending also applies to mana, and nonpositive maximum mana skips its bar. | High | ● active (branch candidate) | [EXP-0501](../experiments/EXP-0501-status-bar-colour/) |
+| TERR-227 | Original unit bars use inner width class.Right-class.Left-8 and signed trunc(width*current/maximum); a zero quotient becomes 1 for nonzero HP and for any mana, with no clamp to the inner width. | High | ● active (branch candidate) | [EXP-0501](../experiments/EXP-0501-status-bar-colour/) |
+
+### TERR-224
+
+The read path is CUnit/CAirUnit vt+0x30, `R1106`, and helper
+`R1824`. Current HP H at unit+0xfc and maximum HP M at unit+0x100
+are signed 16-bit inputs. The caller compares H with trunc(M/4), then
+trunc(M/2), using signed comparisons at `L13343` and `L13344`.
+For positive M, truncation is floor; equality advances to the next colour.
+For M=101, H=24 is red, H=25 is yellow, and H=50 is green.
+
+The four rows at Y-2, Y-1, Y and Y+1 have source RGB components
+`[128,255,192,128]` in red alone, red and green together, or green alone.
+These are generated channel values, not palette indices. A channel c
+is packed as `(c >> (8-bits)) << shift`, ORed across R/G/B.
+TERR-225 defines the conditional destination blend.
+
+**Confidence.** High for this original 16-bit path. Complete caller/helper
+instructions exclude an absolute-current selector, a third state selector
+for the colour family, floating-point ratios, and rounding the ratio first.
+Ghidra 12.1.2 and Capstone 5.0.7 agree on every instruction boundary in
+seven bounded ranges. Unicorn 2.1.4 executes the original instructions
+on 1056 bar vectors across two injected pixel formats; all interior pixels
+are checked. EN/RU are one byte-identical executable, not two witnesses.
+
+**Unknown.** Native display format choice and other bar paths are not measured.
+The original process is not launched; caps and the numeric label are excluded.
+
+### TERR-225
+
+Helper arguments are `(L,R,Y,N,bright,middle,dark)`. Its interior starts
+at L+4 and ends at R-4. The ordinary branch at `L13345` writes four
+background rows with source RGB `(64,64,64)`, `(128,128,128)`,
+`(96,96,96)`, `(64,64,64)`, then overwrites the filled N pixels.
+
+When view+0xaa0 is nonzero and unit+0x7c is zero, the caller halves each
+packed fill word with `(word >> 1) & mask`; the helper instead shades
+the existing filled rectangle with shroud row 8 and adds the halved fill.
+Its rectangle ends at L+4+N, so the unfilled pixels are not touched.
+For packed destination B and source fill C, the result is
+`((B >> 1) & mask) + ((C >> 1) & mask)`, with masks 0x7bef for RGB565
+and 0x3def for RGB555. TERR-FOG-084 supplies the shroud-row law.
+The four filled row intensities retain TERR-224's order.
+
+Unit selection method `L13346` stores its argument at +0x7c
+(`L13347`); AI-CURSOR-202 connects this flag to the selection count.
+MENU-057 identifies view+0xaa0 as the Ctrl+H toggle. The map painter
+admits selected objects in all three grids. In +0x8c and +0x90 it also
+admits unselected objects when show-health is on and object+0x78 is zero
+(`L13348..L13349`, `L13350..L13351`). The +0x94 grid requires
+selection. This narrows TERR-SPR-048's selected-only wording for all grids.
+
+**Confidence.** High for the named guards and original interior pixel writes.
+The probe covers all four selection/show-health combinations in RGB565 and
+RGB555. The original overwrite, additive and shroud-lookup pixel loops run;
+only the row-8 lookup data is injected from TERR-FOG-084. The unfilled
+population is the interior remainder for N between 0 and W. This is not
+a global no-write claim about cap sprites, other render passes or N>W.
+
+**Unknown.** Native framebuffer contents and the cap sprite pixels are unobserved.
+
+### TERR-226
+
+At `L13352..L13353` the caller reads signed maximum mana from
+unit+0x13e and skips the mana bar when it is not positive. It reads
+signed current mana from unit+0x13c at `L13354`.
+The colour construction at `L13355..L13356` generates blue
+intensities 255,192,128 with zero red and green, without comparing
+current mana to any colour threshold. The helper lays them out as
+`[128,255,192,128]`. Mana Y is health Y+4. The selection/show-health
+predicate and pixel operations are the same as TERR-225.
+
+**Confidence.** High for the complete mana arm and its shared helper.
+The original instructions produce fixed blue across all measured current/max
+mana ratios, including zero. A health-like red/yellow selector is excluded
+from this arm, not from every mana display in the executable.
+
+**Unknown.** Other mana display paths and native cap appearance are not measured.
+
+### TERR-227
+
+The caller forms L/R from class+0x84/+0x8c with the same screen offset,
+then computes W=R-L-8 at `L13357..L13358`. Fill starts at L+4.
+Maximum and current values are signed 16-bit. The multiplication keeps
+the signed 32-bit low product; IDIV truncates its quotient toward zero.
+For ordinary positive W and maximum, N=trunc(W*current/maximum).
+
+HP quotient zero becomes 1 only if the original HP word is nonzero
+(`L13359..L13360`); HP zero keeps N=0. Mana quotient zero always
+becomes 1 (`L13361..L13362`), including current mana zero.
+Maximum mana must be positive; the HP division has no zero-denominator
+guard in this routine.
+
+Neither quotient is clamped to W before the helper. The overfull
+control current=150, maximum=100, W=17 passes N=25 for both bars.
+The reached pixel helpers separately clip rectangles to the viewport;
+a nonpositive rectangle width writes no pixels. These are raster bounds,
+not saturation of the current/max ratio.
+
+**Confidence.** High for the two complete arithmetic blocks and three reached
+pixel writers. The probe distinguishes truncation from nearest rounding
+with W=17, current=1, maximum=3 giving N=5; it checks HP zero, mana zero,
+the one-pixel minimum, skipped nonpositive mana maxima and overfull lengths.
+
+**Unknown.** Native admission of nonpositive HP maxima, negative widths,
+negative current values and overflowing products is not established.

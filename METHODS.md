@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3005. Observation: 95. Static analysis: 2485. Mixed: 425.
+Claims labelled: 3009. Observation: 95. Static analysis: 2489. Mixed: 425.
 
 ## Ledger ai
 
@@ -2571,6 +2571,10 @@ Claims labelled: 3005. Observation: 95. Static analysis: 2485. Mixed: 425.
 | TERR-STRUCT-210 | static analysis | ● active |
 | TERR-STRUCT-211 | mixed | ● active |
 | TERR-STRUCT-212 | mixed | ● active |
+| TERR-224 | static analysis | ● active (branch candidate) |
+| TERR-225 | static analysis | ● active (branch candidate) |
+| TERR-226 | static analysis | ● active (branch candidate) |
+| TERR-227 | static analysis | ● active (branch candidate) |
 
 ## Ledger text
 

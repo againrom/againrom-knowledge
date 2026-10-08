@@ -2,6 +2,55 @@
 
 [Reference](format.md)
 
+## Unit health and mana bars
+
+The original 16-bit CUnit/CAirUnit status-bar path reads signed current HP
+H and maximum HP M. For positive M its colour family is red when
+H < floor(M/4), yellow when H < floor(M/2), otherwise green. Equality
+advances to the next family. These comparisons truncate the maximum
+before comparison; M=101 changes colour at H=25 and H=50.
+— TERR-224
+
+Four filled rows run from Y-2 through Y+1. Their source RGB components
+before surface packing are:
+
+| Family | Row 0 | Row 1 | Row 2 | Row 3 |
+|---|---|---|---|---|
+| HP red | (128,0,0) | (255,0,0) | (192,0,0) | (128,0,0) |
+| HP yellow | (128,128,0) | (255,255,0) | (192,192,0) | (128,128,0) |
+| HP green | (0,128,0) | (0,255,0) | (0,192,0) | (0,128,0) |
+| Mana blue | (0,0,128) | (0,0,255) | (0,0,192) | (0,0,128) |
+
+Each component c is packed by `(c >> (8-bits)) << shift`; combine
+channels with OR. These values are generated RGB, not palette indices.
+Mana has no colour threshold in this arm; maximum mana <= 0 skips its
+bar, and its Y is health Y+4. — TERR-224, TERR-226
+
+The ordinary unfilled rows use grey RGB intensities `[64,128,96,64]`.
+If show-health is on and the unit is unselected, the remainder is untouched.
+Only filled pixels blend: for packed destination B and fill C, output is
+`((B >> 1) & mask) + ((C >> 1) & mask)`; RGB565 uses mask 0x7bef and
+RGB555 uses 0x3def. A selected unit keeps the ordinary grey remainder
+and full fill colours in either show-health state. — TERR-225
+
+The map painter admits selected objects in all three grids; its +0x8c
+and +0x90 grids also admit unselected objects when show-health is on and
+object+0x78 is zero. The earlier all-grids selected-only clause of
+TERR-SPR-048 is partially retracted. — TERR-225
+
+Inner width W is `class.Right-class.Left-8`, using class+0x8c/+0x84.
+Fill starts at L+4 inside `[L+4,R-4)`. Length is the signed quotient
+`trunc(W*current/maximum)` after a 32-bit multiplication. A zero HP
+quotient becomes one pixel only when current HP is nonzero; a zero mana
+quotient always becomes one pixel, including current mana zero.
+There is no clamp to W. The pixel writers separately clip to the viewport.
+— TERR-227
+
+These contracts are High for the named 16-bit interior path. Native format
+choice, cap pixels, other bar paths and native admission of malformed HP
+maxima or overflowing products remain Unknown. — TERR-224, TERR-225,
+TERR-226, TERR-227
+
 ## Sprite placement — where a unit or object stands (`TERR-SPR-038…TERR-SPR-041`)
 
 Sprite placement applies one vertical terrain lift to the frame; sprite

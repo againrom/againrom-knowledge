@@ -1145,3 +1145,9 @@ on evidence already committed.
 |---|---|---|---|---|---|
 | `R2-ENGINE-057` (the terrain-relative bitmap clause only) | "The activity reset clears terrain+0x400" | High / Medium | [EXP-2008](../experiments/EXP-2008-rom2-script/) (`instructions.tsv`, activity-mission-tick/reset/recount) | Both observed mission tick routes pass terrain+0x92ecc as the embedded activity object. Bitmap+0x400 and counters+0x1614/+0x1624 are local to that object: terrain+0x932cc/+0x944e0/+0x944f0. The group override clear and stated activity consequences stand. | **CORRECTED** — embedded-object base replaces the terrain-relative attribution |
 | `R2-ENGINE-059` (the mission10 trigger7 left operand only) | "trigger7 tests result(check 10)<=result(check 4)" | High | [EXP-2008](../experiments/EXP-2008-rom2-script/) (`triggers.tsv`, map10.alm/index0=7) | Both roots retain left0=12, right0=4 and cmp0=5. Check12 is the original ID; the comparison, latch and ordered action IDs 9,23,12,28 stand. | **CORRECTED** — check12 replaces check10 in the example |
+
+## Unit status-bar selection guard
+
+| Claim | Former clause | Prior confidence | Overturn evidence | Corrected fact | Kind |
+|---|---|---|---|---|---|
+| TERR-SPR-048 (all-three-grids selected-only clause) | The vt+0x30 status-bar pass runs over all three grids under obj+0x7c != 0. | High | [EXP-0501](../experiments/EXP-0501-status-bar-colour/), TERR-225 | Grid +0x94 requires selection; +0x8c and +0x90 also admit obj+0x7c == 0 when view+0xaa0 != 0 and obj+0x78 == 0. The original calls at L10323 and L10324 reach the unselected show-health blend branch. Other clauses retain their existing amendments. | PARTIALLY RETRACTED |
