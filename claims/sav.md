@@ -14971,3 +14971,47 @@ read here (no image-wide read census was run); the grouped dead-actor case with 
 **Confidence.** High that the Diary counts are zero in these saves; the observation is owner-reported with no stated source; Unknown for which input applied.
 
 **Unknown.** Which of the three sources applied; no runtime observation was made.
+
+## Ranged removal archive frontier
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1180 | Ranged Weapon removal writes members of Unit's raw attack and Modifier spans; their following actual SAVE vector remains Unknown. | High / Unknown | ✔ promoted | [EXP-0496](../experiments/EXP-0496-ranged-unequip-modifier/) |
+
+### SAV-1180
+
+Unit Serialize `R0210` supplies actor `+a6` to `R1594` with literal
+length 24 and actor `+d4` to `R1570` with literal length 64. The storing
+arms pass the current buffer addresses to raw archive Write. Human's
+ordinary serializer reaches this Unit programme through Humanoid.
+
+ITEM-161's selector store `+b6` is live-attack member 16. Its word `+e6`
+is Modifier members 18..19, and bytes `+f9/+fa/+fb` are members 37/38/39.
+Physical-kind 5 stores `+f4/+f5` are members 32/33, and `+fe` is members 42..43.
+These writes are part of the raw serialized buffers; the archive helper does
+not reconstruct them from the equipment references. Four isolated native
+helper controls with distinct nonzero synthetic payloads preserve the
+existing source address, payload and lengths at Write/Read call boundaries.
+IsStoring and actual archive transfer are explicit cuts; no file is written.
+
+The promoted constructor controls SAV-HUMGAPS-449 and SAV-HUMNEW-505 identify
+separate live `+a6`, Base `+114` and Modifier `+d4` buffers. The shared attack
+initializer writes 22 of 24 bytes; Modifier uses its separate memset 64. They
+establish neither a safe default nor preservation until this archive.
+
+The intervening frontier includes equipment Effects, actor derive, a
+quotient-changing load refresh's additional derive, optional Spell deletion,
+command22 container/load/notification events, elapsed runtime and earlier
+nested serialization. Selected Unit derive/load and base-Effect paths run
+natively in the controls. Human derive and Spell deletion are explicit cuts;
+their complete transitive effects are unresolved. A synthetic callback model
+can change the modifier again while satisfying every local removal byte.
+
+**Confidence.** High for local member joins and raw-span call operands.
+Complete PE-mapped instruction listings and four source-transfer controls
+exclude a locally synthesized/default archive vector at those helper
+boundaries. They do not execute archive buffering or a native SAVE.
+
+**Unknown.** The first-archive vector after ordinary ranged removal, full
+callback/lifetime closure, actual buffer/file correspondence and runtime
+occurrence. No first-archive value is supplied.

@@ -3466,3 +3466,87 @@ a constraint that all serialized Weapons must carry three zeros.
 - What `[screen+0xe8]->vt+0xa4` does. It is the only call the refusal path
   makes before returning 0 (`ITEM-WEAR-057`). Identifying it would settle
   whether a refused drag is cancelled or continues.
+
+## Ranged Weapon removal
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-161 | Weapon removal branches on signed attackType, not range; ordinary physical ranged kind 5 subtracts physical/defence members and clears elemental modifiers. | High / Unknown | ✔ promoted | [EXP-0496](../experiments/EXP-0496-ranged-unequip-modifier/) |
+| ITEM-162 | Unit/Human removal wrappers guard the supplied null Item, while native Weapon removal has no local slot-identity or opposite-hand guard. | High / Unknown | ✔ promoted | [EXP-0496](../experiments/EXP-0496-ranged-unequip-modifier/) |
+
+### ITEM-161
+
+Weapon removal R0853 selects its damage arm from signed current definition
+parameter 5, read after the Effect walker returns. It does not use physical
+range for that selection. The promoted ITEM-WEAPCOL-021 slot map and primary
+EXP-0106/EXP-0131 rows identify Short Bow, Long Bow and Crossbow as kind 5
+with range parameters 4/5/6. They therefore enter the signed-kind <10 arm:
+
+- actor +f4 u8 subtracts current Weapon +60 u8;
+- actor +f5 u8 subtracts current Weapon +61 u8;
+- actor +fe u16 subtracts current Weapon +6a u16;
+- actor +f9/+fa/+fb are each assigned literal zero as bytes.
+
+Kinds 11/12 instead subtract Weapon +60/+61 from actor +f9/+fa and assign
++fb zero. Values at least 10 other than 11/12 bypass these damage-member
+writes. Every arm subtracts current Weapon +52 from actor +e6 as a word
+and assigns active selector +b6 zero before actor virtual +50. Arithmetic
+wraps. No arm directly clears or copies the whole Modifier.
+
+SAV-EQUIPORDER-552 retains the later normal-return order: derive; current-byte
+range delta; timing literals 8/4; negative signed weight refresh; flags;
+optional owned-Spell deletion/clear; actor weapon slot clear.
+SAV-HUMEQUIP-447's kind 11/12 to-hit rule is separate from physical-reach
+classification; its exact operands stand.
+
+The selected complete body and 41 isolated original-instruction controls
+cover Unit/Human, branch boundaries, nonzero prior values, wrap, selected
+base Effects and explicit callback cuts. With no Effects, prior physical
+f4/f5/fe=250/247/65532 and Weapon +60/61/6a=10/7/13 give 240/240/65519 for
+kind 5; elemental f9/fa/fb become 0/0/0. Kind 11 with the same Weapon range
+instead preserves the physical members and changes initial elemental 3/2/4
+to 249/251/0. Both take prior to-hit 5 minus Weapon +52=11 to 65530 before the
+explicit actor-derive boundary. These are synthetic values, not defaults.
+
+**Confidence.** High for complete selected local branches, exact widths,
+source operands, arithmetic, branch-input distinction and normal-return order.
+PE-mapped Capstone listings retain every local non-stack/non-FS write width,
+all reads, rebases and calls. Isolated Unicorn controls distinguish physical
+range from attackType and modular subtraction from clear/saturation/copy.
+The input rows reuse primary promoted evidence; no new whole-table census
+is claimed. Calls, arbitrary aliases outside these ranges and full runtime
+chronology are not covered by the local block-clear exclusion.
+
+**Unknown.** Transitive callback writes, faults, subclass overrides, ordinary
+kind 12 reach and the full resulting vector at the following archive.
+
+### ITEM-162
+
+Original vtables select Unit wrapper `R0932`, Human/Humanoid wrapper
+`R0934`, and Weapon removal `R0853`. Both wrappers return zero for a
+null supplied Item. A nonnull Item is forwarded through its virtual `+3c`
+and then returned. Unit adds actor virtual `+54`, whose selected target reads
+`+1c`; Human/Humanoid adds no trailing call.
+
+Neither wrapper nor the complete local Weapon removal body compares the
+supplied Item against actor `+74`, tests that slot for empty, or reads
+opposite-hand slot `+78`. The Weapon body's last local write is the dword
+literal zero at actor `+74`. Nonnull arguments with same/different/empty
+slots and shield present/absent have the same selected local removal path.
+These are synthetic guard discriminators, not evidence of ordinary mismatch
+reach. Command22's ordinary weapon-source arm obtains its argument from
+current actor `+74`, so an empty ordinary source supplies null.
+
+SAV-EQUIPORDER-552 supplies the real attach alternatives: old-Weapon eviction
+calls Item `+3c` directly; Shield's two-handed-Weapon eviction calls actor
+`+40` and reinserts its return. Weapon attach's mirror branch removes a
+Shield. These guards belong to attach, not to the removed Weapon body.
+
+**Confidence.** High for raw vtable bindings and complete local guard/store
+population. Capstone decodes the full three named bodies, including all
+branches, memory operands and calls; original-instruction controls
+independently distinguish a null argument from an empty slot. This is not
+an image-wide admission, alias or UI census.
+
+**Unknown.** Ordinary reach of nonnull mismatched-slot arguments, callback
+changes to slots, non-Weapon overrides and exceptional completion.

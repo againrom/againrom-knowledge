@@ -148,6 +148,15 @@ purity and the state observed by an actual SAVE remain Unknown.
 — SAV-EQUIPEFFECT-553, SAV-EQUIPCALL-554, SAV-EQUIPOBS-555, ITEM-EQUIP-006
 (its universal wrapper and recompute clauses are retracted)
 
+Ordinary physical ranged kind 5 removal subtracts Weapon fields from actor
+`+f4/+f5/+fe` as byte/byte/word and clears `+f9/+fa/+fb` as three bytes.
+Elemental kinds 11/12 instead subtract `+f9/+fa` and clear `+fb`. Both subtract
+the to-hit word `+e6` and assign active selector `+b6` zero. No arm directly
+clears the whole Modifier. These local writes
+occupy Unit's raw attack/Modifier spans. Their value at the next actual
+SAVE remains Unknown because callback, derive, command and runtime effects
+between that boundary and the archive are not closed. — ITEM-161, SAV-1180
+
 ## City producers
 
 Carried-to-table transfer updates container bookkeeping without a local

@@ -109,6 +109,14 @@ stores there. Which path produced them is Unknown (`HERO-MODDK-161`).
 — SAV-1031, SAV-UNITPROG-156, SAV-CITYSTORE-516, SAV-HUMLOAD-445, HERO-MOD-016,
 HERO-MODDK-161, UNIT-CTOR-004, UNIT-GATE-013
 
+Ranged Weapon removal's selector `+b6` is member 16 of live attack `+a6`.
+Its to-hit word `+e6` is Modifier members 18..19, and damage bytes
+`+f9/+fa/+fb` are Modifier members 37/38/39. Physical-kind 5 `+f4/+f5` are
+members 32/33 and `+fe` is members 42..43. Unit serialization transfers
+the current spans with literal lengths 24/64; it does not reconstruct those
+members from equipment references. The next actual SAVE vector remains
+Unknown. — SAV-1180
+
 A city-shape save's roster is measured end to end in decoded-stream
 coordinates. One preserved 6,110-byte stream: head `0..75`, Player list
 `75..5696`, the Player record `87..5696` whose fixed field run is `94..145`

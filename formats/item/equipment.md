@@ -245,3 +245,38 @@ Only the Unit wrappers add a trailing `actor->vt+0x54()`: equip `R0931` and remo
 wrappers `R0933`/`R0934` omit it. `vt+0x54` is Token value, not an equipment recompute
 (`ITEM-EQUIP-006`, whose universal wrapper and recompute clauses are retracted;
 `SAV-EQUIPCALL-554`).
+
+### Ranged Weapon removal
+
+After the Effect walker returns, Weapon removal reads signed definition
+parameter 5. Physical range does not select its damage arm. Ordinary bows and
+Crossbow have kind 5 and range parameters 4/5/6, so they enter the signed-kind
+`<10` branch. It subtracts Weapon `+60/+61/+6a` from actor `+f4/+f5/+fe`
+as byte/byte/word, and clears `+f9/+fa/+fb` as three bytes. — ITEM-161
+
+Kinds 11/12 instead select these direct damage stores; all arms share the
+to-hit and selector stores before actor derive:
+
+| Actor field | Width | Operation |
+|---|---:|---|
+| `+f9` | 1 | Subtract current Weapon byte `+60`, modulo 256 |
+| `+fa` | 1 | Subtract current Weapon byte `+61`, modulo 256 |
+| `+fb` | 1 | Assign zero |
+| `+e6` | 2 | Subtract current Weapon word `+52`, modulo 65536 |
+| `+b6` | 1 | Assign zero |
+
+The kind 11/12 direct stores preserve `+f4/+f5/+fe` and other Modifier members;
+they do not clear or replace the whole block. Other parameter values at
+least 10 bypass the damage-member stores and still reach the common
+`+e6/+b6` operations. Kind 12 is a native branch; the established shipped
+parameter set contains 11. Neither physical-ranged nor elemental removal
+clears the whole Modifier. Full callback effects and ordinary kind 12 reach
+remain Unknown. — ITEM-161, ITEM-WEAPCOL-021
+
+The Unit/Human wrappers test the supplied Item for null. Their local paths
+and the Weapon body do not compare its identity with actor `+74`, test that
+slot for empty, or read opposite-hand `+78`. Every normally returning Weapon
+body ends by clearing `+74` as a dword. Command22 supplies the current slot
+pointer, so an empty ordinary weapon source passes null. Ordinary reach of
+a nonnull mismatched-slot argument remains Unknown. The opposite-hand
+guards belong to attach/eviction methods. — ITEM-162, SAV-EQUIPORDER-552
