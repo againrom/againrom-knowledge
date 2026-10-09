@@ -2378,9 +2378,9 @@ an authorized original visit and click would settle that composed route.
 | R2-ENGINE-232 | The active Kaarg square paints background, shop/inn highlight, girl1, girl2, guard, dervish and gates in that order, then delegates overlays and children. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-233 | The selected town sampler maps nine mask bytes to selectors; eight occur in the Kaarg mask, and hit testing uses the view-relative pixel rather than figure bounds. | High | ● active (branch candidate, partially retracted) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-234 | Kaarg mask clicks open shop, inn, mission navigation or the main menu; its four person regions request stage-keyed dialogue, with no school click arm. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
-| R2-ENGINE-235 | Kaarg person animation starts use separate elapsed-time intervals; frame advancement admits one step only after more than 100 ms, while scheduling runs on every active paint. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-235 | Kaarg person animation starts use separate elapsed-time intervals; frame advancement admits one step only after more than 100 ms, while scheduling runs on every active paint. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-236 | Kaarg gates advance toward frame 10 while the pointer samples selector 8 and toward frame 0 otherwise; they use their frame series rather than a separate highlight bitmap. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
-| R2-ENGINE-237 | Campaign town ID 2 selects Kaarg inn and shop pages with shared native bases; the inn mixes generic overlays with Kaarg art, while the shop selects Kaarg frame, fire and keeper art. | High / Medium | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-237 | Campaign town ID 2 selects Kaarg inn and shop pages with shared native bases; the inn mixes generic overlays with Kaarg art, while the shop selects Kaarg frame, fire and keeper art. | High / Medium | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 
 ### R2-ENGINE-231
 
@@ -2595,6 +2595,8 @@ with R(4), +0x234 after more than 45000 ms, and +0x238..+0x24c
 at guard cursor states. These are bounded request clocks, not
 observed sound playback or a complete ambience contract.
 
+**Amended.** R2-ENGINE-280 names the keys behind the scheduler's sound slots, their waits and the reachable guard cursors; audible output stays Unknown.
+
 ### R2-ENGINE-236
 
 EN gate advance L2.00600 / RU L2.00601 samples the current
@@ -2660,6 +2662,8 @@ Only-art differences and complete layout equality are not proven.
 **Unknown.** Full room layout, animation destinations, caller cadence
 and trigger conditions. These need the later derived room painter
 and scheduling probe; native play would settle live presentation.
+
+**Amended.** R2-ENGINE-277 answers the inn taverner destinations and triggers; R2-ENGINE-278 and R2-ENGINE-279 answer the shop fire and keeper destinations, triggers and the 100 ms tick rule; delivered paint and tick cadence stays Unknown.
 
 ## Kaarg view rectangle and shell boundary
 
@@ -3066,7 +3070,7 @@ Selected evidence: [square leave request](../experiments/EXP-2030-rom2-first-tow
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-251 | The three selected ROM2 square classes have 44 virtual slots; druid and Kaarg constructors call the generic town constructor, which calls the shared native page base. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
-| R2-ENGINE-252 | Selected ROM2 town overrides mix resource data with distinct native behavior: town 1 has a campaign gate, Kaarg reversible gate frames, and druid hover-started people and sprite selector tables. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-252 | Selected ROM2 town overrides mix resource data with distinct native behavior: town 1 has a campaign gate, Kaarg reversible gate frames, and druid hover-started people and sprite selector tables. | High / Medium | ● active (amended, branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 | R2-ENGINE-253 | The active druid square draws background, shop highlight, woman, inn highlight, man, lizard and bug before inherited overlay and child dispatch; person subset changes also change destinations. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 | R2-ENGINE-254 | The druid view inherits the shared ROM2 mask sampler; changed shop/inn hover can immediately start person subset 2, while its two dialogue selectors do not start an episode. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 | R2-ENGINE-255 | Selected druid click arms post shop, inn, navigation and menu messages or stage-keyed keeper dialogue; its complete selected loader, painter and advance contain no gate frame operation. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
@@ -3124,6 +3128,8 @@ Classification is bounded by the selected methods, not whole-client equivalence.
 
 **Unknown.** Complete semantic equivalence of all inherited callbacks, wider
 shell behavior and live delivery. The slot matrix names unresolved purposes.
+
+**Amended.** R2-ENGINE-281 bounds the effect of Kaarg's omitted pre-load release: each slot load releases its own slot first, so no different sound state results.
 
 ### R2-ENGINE-253
 
@@ -3848,3 +3854,261 @@ the shared child dispatcher `L2.00782`.
 **Confidence.** High for the panel, button, checkbox, application, window
 and square bodies in both locales. Medium that no stack child before the
 square consumes 0x45a.
+
+## Kaarg room schedules and square sounds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-277 | The ROM2 Kaarg inn taverner picks a1..a5 by ((rand*21)>>15)+1 with no idle wait, runs each series once in >100 ms steps at fixed center positions and keeps its state in a process static. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-278 | The ROM2 Kaarg shop fire steps once per 100 ms tick through 18 frames: idle loops lite or cicle, choosing weapons runs it up through burn to cicle, another category runs it back to lite. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-279 | The ROM2 Kaarg shop keeper plays a1 or a2 files 2..20 under one modulus-20 counter; an idle start picks either, buy and sale start a2, and refusals and category clicks start nothing. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-280 | ROM2 Kaarg square slots +0x20c..+0x24c hold 17 town_kaarg keys: three voice and four bird clocks, Kman1 after 45 s, two hover keys, the Kvox1 entry loop and six guard steps at nine guard cursors. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-281 | Kaarg's omitted pre-load release leaves no different sound state: each slot load releases its slot first and leave releases the same 17 slots; only clock baselines and waits carry across visits. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+
+### R2-ENGINE-277
+
+Kaarg inn center painter slot +0x2c, EN `L2.00935` (RU `L2.00936`),
+draws the taverner only in campaign mode (application +0x5d8, RU +0x63c,
+equal to 2). Process static `L2.00937` (RU `L2.00938`) holds the state;
+its image value is -1, idle. Positions are center-local.
+
+| State | Series, vector | Files | Destination | Steps per episode | Source values of 32768 | Start sound |
+|---|---|---|---|---|---|---|
+| 1 | a1, +0x3cc | 0001..0015 | (72,88) | 15 | 1561 | +0x154 `Kman3.wav` |
+| 2 | a2, +0x3fc | 0001..0025 | (72,88) | 25 | 1560 | +0x150 `Kman2.wav` |
+| 3 | a3, +0x42c | 0001..0003 | (112,112) | 3 | 4682 | none |
+| 4 | a4, +0x45c | 0000..0006 | (200,136) | 7 | 23405 | none |
+| 5 | a5, +0x48c | 0000..0028 | (88,84) | 95 | 1560 | none |
+
+Selection. When the state is -1 the same paint call zeroes center +0x4bc,
+draws r = ((rand()*21)>>15)+1 through `L2.00939` and maps it through jump
+table `L2.00940`: 1, 2 and 5 keep their value, 3, 4 and 6 give state 3,
+and 7..21 give state 4. States 1 and 2 then request their start sound
+through play-once `L2.00941`. No wait precedes the choice: the paint after
+an episode ends starts the next one.
+
+Draw and advance. States 1..4 draw the cached bitmap of their vector
+(`L2.00942`); state 5 draws vector element `L2.00943`[+0x4bc]
+(`L2.00944`). Static `L2.00945` takes the first paint's time. A paint
+advances when unsigned(now - `L2.00945`) > 100 and then stores now. States
+1..4 call one-shot `L2.00686`: below the last cursor it increments the
+cursor and caches that element; at the last cursor it returns 0, the
+state becomes -1 and reset `L2.00687` zeroes the cursor without changing
+the cached bitmap. State 5 increments +0x4bc and ends when the table value
+is -1. The table holds 95 element indexes before the -1, with repeated
+holds; `taverner-a5-steps.tsv` lists them. A paint draws before it
+advances, so each terminal image stays on screen for one step. A restarted
+series first draws its cached previous terminal image.
+
+Entry. Campaign entry `L2.00613` binds the five vectors through
+`L2.00761`, which zeroes each cursor and caches element 0. It writes
+neither `L2.00937` nor +0x4bc. The raw-dword census finds `L2.00937` only
+in this painter (14 operands), so a running episode continues after a
+re-entry from element 0 of its series, or for a5 from its stored step.
+
+Relation to R2-ENGINE-258. Kaarg uses the same one-shot and reset helpers
+and the same >100 ms step as the druid taverner, but has no idle wait: the
+druid rand()/16+3200 wait and (wait&3)+1 choice have no Kaarg counterpart.
+The painter stores rand()/65 in `L2.00946` and times in `L2.00947` and
+`L2.00948` once; each has one raw-dword operand, the write, so none is
+read through a direct operand; indirect access is not excluded. State 3 is a one-shot a3 episode, not a static pose.
+
+Inn ambience. The same painter, under two further campaign-mode tests after
+the non-campaign call `L2.00949`, requests
+R(3)+1 of +0x15c, +0x160, +0x164 (`Kvox6`, `Kvox7`, `Kvox8.wav`) when
+now - +0x4c8 > +0x4cc, and R(4)+1 of +0x140..+0x14c (`Kdish1`..`Kdish4.wav`)
+when now - +0x4c0 > +0x4c4; each request stores 2000+R(2000) and now.
+Constructor `L2.00609` initializes all four fields the same way. R(n) is
+the R2-ENGINE-235 helper. Every selected EN body has an RU body equal to
+it after normalizing addresses and application-field displacements.
+
+**Confidence.** High for the selection arithmetic, state counts,
+destinations, step and end rules, start and ambience requests. Medium for
+re-entry continuation and for the static being written only here: the
+raw-dword census does not exclude indirect access. Unknown for live
+timing and for what the screen shows during a restarted series.
+
+**Unknown.** Delivered paint cadence and audible output; an authorized
+timed original session would settle both.
+
+### R2-ENGINE-278
+
+Kaarg shop center painter slot +0x2c, EN `L2.00950` (RU `L2.00951`),
+paints only while page+0x148 is nonzero. Static `L2.00952` (RU
+`L2.00953`) starts at now-100. A paint with unsigned(now - `L2.00952`) >= 100
+runs one tick and stores now. Each tick runs the page sound clock and the
+keeper (R2-ENGINE-279), then moves fire cursor +0x2fc by direction +0x300:
+
+- direction nonzero: cursor += direction; at cursor <= 0 or >= 17 the
+  direction becomes 0;
+- direction zero: cursor + 1; 6 wraps to 0, and 18 or more becomes 12.
+
+Art loader slot +0x78 `L2.00619` fills two 18-cell arrays from
+`interface/shop_kaarg/fire/dark/` at +0x26c and `fire/select/` at +0x2b4:
+cells 0..5 `lite1..6.bmp`, 6..11 `burn1..6.bmp`, 12..17 `cicle1..6.bmp`.
+It zeroes cursor and direction. Shop entry `L2.00954` calls it on every
+entry, so the fire starts at `lite1` in its lite loop.
+
+Category select slot +0xa4 `L2.00955` returns 0 for an unchanged word.
+Otherwise, when the previous category word page+0x132 is not 0x64,
+choosing 3 (weapons) with cursor < 12 sets direction +1 and choosing
+another category with cursor > 0 sets direction -1. Entry sets the word
+to 0x64 and calls +0xa4(0), so the first choice sets no direction.
+Direction +1 passes the burn cells and stops at 17, then the cicle loop
+12..17 runs. Direction -1 runs down to 0, then the lite loop runs. A later
+choice can reverse a transit. Burn cells appear only in transit.
+
+The paint draws, center-local: ShopFrame (0,0), ShopMain (5,8), the
+highlight of category word 0, 1, 2 or 3 at (5,8), (49,72), (49,8) or
+(153,8), the keeper at (125,116), then the fire at (193,204): the select
+cell when the word is 3, otherwise the dark cell. Word 0x64 draws no
+highlight. EN and RU bodies are equal after normalizing addresses.
+
+**Confidence.** High for these selected bodies, the arrays and the draw
+order. Unknown for live timing and pixels.
+
+**Unknown.** Delivered tick cadence; authorized original observation
+would settle it.
+
+### R2-ENGINE-279
+
+In each tick of R2-ENGINE-278 the painter first calls page slot +0x88
+`L2.00956`, then draws a new threshold 5000+1000*(rand()%5) ms at
+`L2.00957`, one rand() per tick, also while an episode runs. When
+unsigned(now - `L2.00958`) reaches that tick's threshold (RU `L2.00959`;
+the static takes the first paint's time) and center flags +0x240 bits
+0x10 and 0x20 are clear, it sets
+flags |= 0x10<<R(2): 0x10 for 16385 and 0x20 for 16383 of 32768 source
+values. Bit 0x40 is not tested. When flags & 0x30 the updater runs; a zero
+counter after it restarts `L2.00958`. An idle start therefore comes at the
+first tick whose elapsed time reaches its own threshold: rand()%5 takes
+0..4 for 6554, 6554, 6554, 6553 and 6553 of 32768 values, so a tick admits
+the start with about 0.2 of source values from 5000 ms, 0.4 from 6000 ms,
+0.6 from 7000 ms, 0.8 from 8000 ms and always from 9000 ms. With one tick
+per 100 ms, about 0.20 of starts fall on the 5000 ms tick, 0.936 by
+6000 ms and 0.9994 by 6900 ms; delivered tick cadence is Unknown.
+
+Updater slot +0x88 `L2.00621` frees image +0x12c through slot +0x9c,
+sets counter +0x254 = (counter+1) % 20, keeps only flags & 0xf at 0, and
+loads `movies\shop_kaarg\a1%04d.bmp` for 0x10 or `a2%04d.bmp` for 0x20
+with counter+1, else `a10000.bmp`. 0x10 has priority. The painter draws
++0x12c at center (125,116) while flags & 0x30, else resting +0x128
+(`a10000` from the art loader). An episode from counter 0 shows files
+0002..0020 for 19 ticks; the 20th tick wraps, ends and restores the rest
+image. No episode selects a10001 or a20001. The page sound clock requests
++0xb4 or +0xb8, both `Shop\Kman4.wav`, when bit 0x10 or 0x20 is set and the
+counter is 1.
+
+Triggers. The Kaarg action callback `L2.00960` (RU `L2.00961`) calls the
+shared responses of R2-ENGINE-269: buy `L2.00776` sets 0x20 for an
+affordable buy and 0x40 for a refusal; sell `L2.00777` sets 0x20 for a
+credited sale. Their center calls +0x80 and +0x84 reach `L2.00962` and
+`L2.00963` through slots +0x94 and +0x98; these only free twelve-cell
+arrays +0x1e0 and +0x210 and load no art. Updater and painter test only
+0x30, so 0x40 draws and advances nothing and stays set until a counter
+wrap or a whole-word clear. Kaarg category click `L2.00964` sets no
+episode bit in its own body; its callees `L2.00965` and page+0x68 slot
++0x34 were not read. A buy during an a1 episode adds 0x20, but a1 keeps priority
+and both bits clear at its wrap.
+
+Shared with R2-ENGINE-269: the buy and sell bodies and conditions; the
+first-choice clear (+0xa4 with word 0x64 zeroes +0x240 and +0x244..+0x250);
+inherited page exit `L2.00966` zeroing +0x240. Neither writes the counter.
+An episode started after such a clear at counter c shows files c+2..0020.
+The modulus bounds the counter to 0..19, so R2-ENGINE-269's counter-12
+case has no Kaarg analogue. Different: one modulus-20 counter for both
+series with an a10000 rest instead of a modulus-30 pose series and
+Yes/No series ending at 12; an idle start choosing 0x10 or 0x20 instead of
+0x10; no 0x40 test at idle start; no category-click episode; no No series;
+statics separate from the generic painter.
+
+**Confidence.** High for these bodies, slots and draw rules. Medium for
+writer completeness: no executable-wide census of +0x240 and +0x254
+writers was made. Unknown for live timing and appearance.
+
+**Unknown.** Writers of the flag word or counter outside the selected
+bodies; a census of center-field writers would settle them.
+
+### R2-ENGINE-280
+
+Kaarg square sound loader slot +0x88, EN `L2.00588` (RU `L2.00967`), binds:
+
+| Slot | Key under `sfx\town_kaarg\` | Request |
+|---|---|---|
+| +0x20c, +0x210, +0x214 | `Kvox2`, `Kvox3`, `Kvox4.wav` | clock A, R(3) = 0, 1, 2 |
+| +0x218..+0x224 | `Kbird1`..`Kbird4.wav` | clock B, R(4) = 0..3 |
+| +0x228 | `Kvox1.wav` | square entry, looping |
+| +0x22c | `Kenter2.wav` | hover selector 1, shop (R2-ENGINE-233) |
+| +0x230 | `Kenter1.wav` | hover selector 2, inn (R2-ENGINE-233) |
+| +0x234 | `Kman1.wav` | now - +0x260 > 45000 ms, then +0x260 = now |
+| +0x238 / +0x23c | `Ksteps2` / `Ksteps21.wav` | guard cursors 5, 13, 21, 47 |
+| +0x240 / +0x244 | `Ksteps1` / `Ksteps11.wav` | guard cursors 9, 17, 23, 51 |
+| +0x248 / +0x24c | `Ksteps3` / `Ksteps31.wav` | guard cursor 31 |
+
+Scheduler slot +0x9c `L2.00597` runs on every active paint
+(R2-ENGINE-235). Clock A requests when unsigned(now - +0xb8) exceeds
+static `L2.00968`; clock B when now - +0x25c exceeds static `L2.00969`.
+Each static takes 2000+R(2000) on its first use, flagged in `L2.00970`, and
+a new 2000+R(2000) after each request, when the baseline takes now. The
+request choice is stored in +0xc0 for clock A.
+
+Guard steps run while flag 0x800 is set. Cursor +0x1cc minus 5 indexes
+65-byte table `L2.00971` into jump table `L2.00972`. An arm cursor
+requests its first key when R(4) is nonzero and its second otherwise,
+then sets latch +0x258; any other cursor clears the latch, so each arm
+cursor requests once per pass. Table cells at cursors 55, 59, 63 and 69
+also name arms, but guard advance `L2.00973` zeroes the cursor and clears
+0x800 when it reaches the vector count, 55 frames (R2-ENGINE-235), so they
+never run. The square paint calls advance at most once per paint and the
+scheduler on every active paint after it, so the scheduler sees every
+cursor and a guard episode requests nine steps.
+
+Square entry `L2.00631` calls +0x88, zeroes flags +0x208 and finally
+requests +0x228 through `L2.00974`, which passes Play flag 1 (looping) to
+`L2.00975`. Play-once `L2.00941` passes 0. Both skip a slot whose buffer is
+playing (`L2.00976`). Kaarg slot +0x90 `L2.00977` loops +0x74, which no
+selected Kaarg body loads and view init `L2.00709` zeroes; of 32 EN
+`call [reg+0x90]` sites, four lie in selected bodies (generic entry,
+druid entry, shop entry and shop sound load) and none in a Kaarg square
+body.
+
+**Confidence.** High for the keys, conditions, waits and the reachable
+guard cursors in the selected EN/RU bodies. Unknown for audible output:
+mixing, volume and stops are not read.
+
+**Unknown.** Physical playback; authorized original observation would
+settle it.
+
+### R2-ENGINE-281
+
+Generic sound loader `L2.00978` and druid `L2.00979` call this +0x8c
+first, then load 12 and 21 slots. Kaarg `L2.00588` loads its 17 slots
+directly through `L2.00980` and zeroes hover latches +0x250, +0xac and
++0x254. `L2.00980` first calls release `L2.00981` on the same slot. The
+release stops a playing channel (`L2.00976`, `L2.00982`), deletes the
+object and zeroes the slot; the load then stores a new object for the key.
+Kaarg release +0x8c `L2.00983` calls `L2.00981` on the same 17 slots,
++0x20c..+0x24c, and on nothing else. The omitted call would therefore
+release exactly the slots that each load releases. Both orders end with
+each of the 17 slots holding the object that constructor `L2.00984`
+returns for its key; that constructor was not read. No selected body
+starts playback before entry's `Kvox1` loop. Only the order differs:
+Kaarg stops each old sound just before its replacement.
+
+Inherited leave `L2.00784` calls art release +0xa4 and sound release
++0x8c; entry `L2.00631` calls +0xa0, then +0x88, then loops `Kvox1`. Every
+visit therefore starts from released slots.
+
+What does differ on re-entry is clock state. Statics `L2.00968` and
+`L2.00969` (RU `L2.00985`, `L2.00986`) and fields +0xb8, +0x25c and
++0x260 are written only by the scheduler among the selected Kaarg view
+methods and constructor chain (`L2.00559`, `L2.00560`, `L2.00709`). Entry,
+loader, release and leave leave them unchanged, so after time away the
+first scheduler pass can request a voice, a bird and `Kman1` together.
+
+**Confidence.** High for slot equivalence and for the field census within
+the selected bodies. Unknown for the first-visit values of +0xb8, +0x25c
+and +0x260 and for what constructor `L2.00984` stores.
+
+**Unknown.** Their first values; an executable-wide writer census or a
+read of the view allocation would settle them.

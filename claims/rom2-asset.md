@@ -230,7 +230,7 @@ Classifying `allods2.exe`'s Data.bin-reading population against `a2server.exe`'s
 | R2-ASSET-049 | The declared ROM2 town/room art subtrees contain 1101 keys per locale; 1099 payloads match, and both differences belong to druid lizard BMPs. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ASSET-050 | Both preserved Kaarg masks are 640x480 indexed BMPs with eight populated action values; native selector byte 80 has no pixel in either mask. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ASSET-051 | The preserved Kaarg square has 218 numbered 24-bpp animation BMPs in seven series, plus a background, mask and two building highlights. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
-| R2-ASSET-052 | Kaarg inn art contains a 320x480 background and five taverner series; shop art contains a 288x288 background, six fire series and two movie BMP keeper series. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ASSET-052 | Kaarg inn art contains a 320x480 background and five taverner series; shop art contains a 288x288 background, six fire series and two movie BMP keeper series. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 
 ### R2-ASSET-049
 
@@ -320,6 +320,8 @@ full sequence populations. No claim imports ROM1 room drawing behavior.
 
 **Unknown.** Full room composition, animation destinations and scheduling,
 and the original pixel decoder of the shop frame.
+
+**Amended.** R2-ENGINE-277, R2-ENGINE-278 and R2-ENGINE-279 answer the inn and shop animation destinations, triggers and the 100 ms step rule; delivered paint cadence stays Unknown.
 
 ## First-town art
 
@@ -639,3 +641,43 @@ observation, not a decoded structure.
 
 **Unknown.** What produced or reads the residual bytes; a consumer outside
 the selected paint or the producing tool's contract would settle it.
+
+## Kaarg room and square sounds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-073 | ROM2 sfx.res holds 35 town_kaarg WAV keys per locale; Kaarg loaders find all they name except Kin1 and Kin2, and every found file is mono 16-bit 22050 Hz PCM, equal between locales. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+
+### R2-ASSET-073
+
+EN `sfx.res` has 446 entries and RU 556; in each, 35 keys contain
+`kaarg`: 19 directly under `town_kaarg/`, 10 under `town_kaarg/inn/` and 6 under
+`town_kaarg/shop/`. The selected Kaarg square, inn and shop sound loaders
+push 35 distinct `Town_kaarg` keys (R2-ENGINE-277, R2-ENGINE-279,
+R2-ENGINE-280). 33 are found. `SFX\Town_kaarg\Inn\Kin1.wav` (inn slot
++0xa4) and `SFX\Town_kaarg\Shop\Kin2.wav` (shop slot +0xac) are absent
+from both archives. The two archive keys the loaders do not name are
+`Kdoor1` and `Kdoor2`, which the gate arms request (R2-ENGINE-236).
+
+Every found key is RIFF WAVE format tag 1, one channel, 16 bits,
+22050 Hz. Durations are data-chunk bytes over the byte rate, rounded to milliseconds:
+
+| Keys | Milliseconds |
+|---|---|
+| `Kvox1`, `Kvox2`, `Kvox3`, `Kvox4` | 3665, 1556, 1469, 1570 |
+| `Kbird1`..`Kbird4` | 625, 657, 1016, 1599 |
+| `Kman1`, `Kenter1`, `Kenter2` | 4365, 811, 549 |
+| `Ksteps1`, `Ksteps11`, `Ksteps2`, `Ksteps21`, `Ksteps3`, `Ksteps31` | 50, 335, 52, 333, 610, 908 |
+| inn `Kdish1`..`Kdish4` | 2159, 701, 1712, 1962 |
+| inn `Kman2`, `Kman3`, `Kvox5`..`Kvox8` | 849, 615, 3665, 1469, 1570, 1016 |
+| shop `Kman4`, `Kotdel`, `Ktools1`..`Ktools4` | 780, 893, 1518, 376, 1402, 2229 |
+
+`Kvox1`, inn `Kvox5` and `SFX\Town\Crowd.wav` have the same bytes. Among
+the found keys pushed by the selected bodies, no other pair is byte-equal.
+EN and RU payloads are equal for every pushed key.
+
+**Confidence.** High for the archive populations, absences and WAV fields.
+Unknown for the effect of loading an absent key.
+
+**Unknown.** What the slot loader stores when the key is absent; a read of
+the sound object constructor on a missing entry would settle it.

@@ -165,7 +165,8 @@ Audible background ambience is Unknown. The selected scheduler requests
 one of slots +0x20c/+0x210/+0x214 after 2000+R(2000) ms with R(3), one
 of +0x218..+0x224 after a separate 2000+R(2000) ms with R(4), +0x234
 after more than 45000 ms, and +0x238..+0x24c at guard cursor states.
-These are bounded request clocks; playback was not observed (`R2-ENGINE-235`).
+These are bounded request clocks; playback was not observed (`R2-ENGINE-235`,
+amended). The square sound table below names their keys.
 
 Each admitted advance samples the pointer for gates. Selector 8 increments
 the cursor toward 10; other selectors decrement it toward 0. Direction
@@ -193,20 +194,89 @@ and a2 indices 0001..0020. No `inn_kaarg` subtree occurs in either complete
 Shop keeper updater EN `L2.00621` / RU `L2.00622` increments a counter
 modulo 20. Flags 0x10/0x20 choose a1/a2 with filename index counter+1;
 otherwise it uses a10000. Counter zero clears episode flags outside the
-low nibble (`R2-ENGINE-237`, High).
+low nibble (`R2-ENGINE-237`, amended, High).
 
 The Kaarg inn page and center call common inn bases. The Kaarg shop
 center calls the common shop base. These calls and shared inn art establish
 shared structure. Layout reuse is Medium; complete layout equality and
-differences limited to art are unproven. Full room destinations, clocks,
-triggers and the shop-frame pixel decoder remain Unknown
-(`R2-ENGINE-237`, `R2-ASSET-052`).
+differences limited to art are unproven. The taverner, fire and keeper
+destinations and schedules follow (`R2-ENGINE-237`, `R2-ASSET-052`,
+amended).
+
+### Kaarg inn taverner
+
+The center painter draws the taverner only in campaign mode. A process
+static holds the state; -1 is idle. At idle the same paint draws
+r=((rand()*21)>>15)+1 and maps 1, 2 and 5 to themselves, 3, 4 and 6 to 3
+and 7..21 to 4. There is no idle wait. Each series runs once: one step
+per paint after more than 100 ms, ending at its last element, then idle.
+Reset keeps the cached bitmap, so a restarted series first draws its
+previous terminal image. Entry rebinds the vectors but keeps the state
+(`R2-ENGINE-277`, High / Medium).
+
+| State | Series | Center-local destination | Steps | Source values of 32768 | Start sound |
+|---|---|---|---|---|---|
+| 1 | a1 0001..0015 | (72,88) | 15 | 1561 | `Inn\Kman3.wav` |
+| 2 | a2 0001..0025 | (72,88) | 25 | 1560 | `Inn\Kman2.wav` |
+| 3 | a3 0001..0003 | (112,112) | 3 | 4682 | none |
+| 4 | a4 0000..0006 | (200,136) | 7 | 23405 | none |
+| 5 | a5 0000..0028 by a 95-step index table | (88,84) | 95 | 1560 | none |
+
+Unlike the druid taverner (`R2-ENGINE-258`), Kaarg has no idle wait and
+no static pose. The same painter requests `Kvox6..8` with R(3) and
+`Kdish1..4` with R(4) on two 2000+R(2000) ms clocks (`R2-ENGINE-277`).
+
+### Kaarg shop fire and keeper
+
+The center paints only while the page is active. One tick runs per paint
+after at least 100 ms. Center-local draw order is ShopFrame (0,0),
+ShopMain (5,8), the category highlight at (5,8), (49,72), (49,8) or
+(153,8), the keeper at (125,116) and the fire at (193,204)
+(`R2-ENGINE-278`, High).
+
+Fire cells 0..5 are lite1..6, 6..11 burn1..6 and 12..17 cicle1..6. Weapons
+(category 3) draw the select family, other categories the dark family.
+Each tick moves the cursor: with no direction, lite loops 0..5 and cicle
+loops 12..17; direction +1 runs up to 17, direction -1 down to 0. Choosing
+weapons below cell 12 sets +1; choosing another category above cell 0 sets
+-1. Entry resets the fire to cell 0 and the first category choice sets no
+direction (`R2-ENGINE-278`, High).
+
+The keeper uses one counter modulo 20 for both series. Every tick draws a
+new threshold 5000+1000*(rand()%5) ms; an idle start comes at the first
+tick whose elapsed time since the last episode reaches it, so at one tick
+per 100 ms about 0.20 of starts fall at 5000 ms and 0.936 by 6000 ms. It
+sets a1 or a2 by R(2); affordable buys and credited sales set a2. An episode from counter 0 shows files 0002..0020
+and returns to a10000 at the wrap; `Shop\Kman4.wav` is requested at
+counter 1. Refusals and category clicks start no episode. The generic
+first-choice and exit clears apply; they leave the counter, so a later
+episode can start part-way (`R2-ENGINE-279`, High / Medium).
+
+### Kaarg square sounds
+
+| Slot | Key under `sfx\town_kaarg\` | Request |
+|---|---|---|
+| +0x20c..+0x214 | `Kvox2..4.wav` | voice clock, R(3) |
+| +0x218..+0x224 | `Kbird1..4.wav` | bird clock, R(4) |
+| +0x228 | `Kvox1.wav` | entry, looping |
+| +0x22c / +0x230 | `Kenter2.wav` / `Kenter1.wav` | shop / inn hover |
+| +0x234 | `Kman1.wav` | more than 45000 ms since the last request |
+| +0x238..+0x24c | `Ksteps2`/`21`, `Ksteps1`/`11`, `Ksteps3`/`31` | guard cursors 5, 13, 21, 47 / 9, 17, 23, 51 / 31; second key when R(4) is 0 |
+
+A latch requests each guard cursor once per pass; table cells at cursors
+55..69 are unreachable with 55 guard frames. The loader's missing
+pre-load release changes no slot state: each slot load releases its slot
+first, and leave releases the same 17 slots. Clock baselines and waits
+survive leaving the square; their first-visit values are Unknown
+(`R2-ENGINE-280`, `R2-ENGINE-281`, High / Unknown). Two room keys,
+`Inn\Kin1.wav` and `Shop\Kin2.wav`, are absent from both sound archives;
+the found keys are mono 16-bit 22050 Hz PCM (`R2-ASSET-073`).
 
 ## Unknown boundaries
 
 Shell text, status and buttons need a native trace from the active Kaarg
-tip getter to the final renderer and destinations. Full Kaarg room destinations and schedules
-need further derived painters and scheduling callers. Authorized original observation would
+tip getter to the final renderer and destinations. Live room and square timing needs
+original observation. Authorized original observation would
 settle live pixels, device conversion and elapsed-time appearance.
 Exhaustive campaign order needs the availability/event graph or an
 observed route (`R2-ENGINE-238`, `R2-ENGINE-234`, `R2-ENGINE-237`,
@@ -483,7 +553,7 @@ selected methods; universal behavior equivalence remains Medium
 | 04 | deleting destructor | same wrapper with different destruction target; deeper member ownership differs |
 | 14 | tip | druid inherits; Kaarg extends selector-to-text data |
 | 2c,54,80,98,9c,a8 | paint, click, entry, hover, schedule, advance | distinct native control flow |
-| 88 | sound load | druid changes keys and local state; Kaarg also omits the pre-load virtual release |
+| 88 | sound load | druid changes keys and local state; Kaarg also omits the pre-load virtual release, with no different slot state (`R2-ENGINE-281`) |
 | 8c,90,a4 | sound release, ambience start, art release | owned lists/fields and counts differ |
 | a0 | art load | both per-town data and distinct loading programs |
 | remaining slots | shared native callbacks | exact same-locale targets inherited |
