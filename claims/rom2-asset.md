@@ -329,7 +329,7 @@ and the original pixel decoder of the shop frame.
 | R2-ASSET-057 | The selected first-town ROM2 art contains 339 equal payloads per locale; both 640x480 town masks contain 150 index values. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ASSET-058 | The generic ROM2 square has 36 numbered animation BMPs and 41 own-palette sprite resources containing 1180 frames per locale. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ASSET-059 | Selected ROM2 .16a frames fit native WORD runs and BMP copy paths differ; the source-RGB composition remains Medium. | High / Medium | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
-| R2-ASSET-060 | Generic ROM2 inn art has 154 keys; shop art has 47 graphics and 54 movie BMPs plus a ShopFrame.256 whose pixel stream remains unread. | High / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ASSET-060 | Generic ROM2 inn art has 154 keys; shop art has 47 graphics and 54 movie BMPs plus a ShopFrame.256 whose pixel stream remains unread. | High / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 
 ### R2-ASSET-057
 
@@ -436,6 +436,8 @@ Unknown; this measurement does not claim an exact rendered shop frame.
 using measured/art/{entries,frames,sequences}.tsv. Unknown for ShopFrame.256
 pixel semantics and its unclassified tail. The native palette 8 reader
 would settle that bounded gap. Room composition is a separate engine claim.
+
+**Amended.** R2-ASSET-070 and R2-ENGINE-270 decode the ShopFrame.256 pixel stream with the native byte reader and palette mode 1; the 1743-byte tail stays unread by that reader and its purpose remains Unknown.
 
 ## Druid archive population
 
@@ -580,3 +582,60 @@ not a second native execution witness.
 compact-table pixel output, child drawing and the indexed shop
 frame pixel decoder. Authorized device observation or a complete
 measured presentation configuration would settle pixel identity.
+
+## First-town shop keeper and frame
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-069 | The ROM2 generic shop keeper uses 29 Pose2-3, 13 Yes and 12 No 76x176 movie BMPs at center (113,112); the native loaders skip Yes 1, Yes 13 and No 1. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ASSET-070 | ROM2 ShopFrame.256 is a 1024-byte palette and one 316x303 byte-RLE frame; 1743 residual bytes, equal to its skip-command count, precede the trailer unread by the shop reader. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+
+### R2-ASSET-069
+
+`movies.res` `shopanim/Pose2-3` holds files 1..29, `Yes` 1..13 and `No`
+1..12 in both locales; each is an uncompressed 24-bit BMP, 76x176 with a
+positive height. `graphics.res` `interface/shopanim/ShopMain.bmp` is
+288x288, 24-bit. The center draws ShopMain at (5,8) and every keeper
+image at (113,112), page (169,8) and (277,112) inside the center at
+(164,0).
+
+Loader slot +0x78 loads resting file Pose2-3 1. Slot +0x80 fills the Yes
+array with Pose2-3 1 at index 0 and Yes 2..12 at 1..11; slot +0x84 fills
+the No array the same way from No 2..12. Slot +0x88 loads Pose2-3 file
+counter+1. No selected loader names Yes 1, Yes 13 or No 1. EN and RU
+populations, dimensions and loader formats are equal.
+
+**Confidence.** High for these two archive populations and the selected
+loader formats.
+
+### R2-ASSET-070
+
+EN and RU `graphics.res` `interface/shopframe.256` are the same 13798 bytes.
+Bytes 0..1023 are a 256-entry four-byte palette. At 1024 one frame header
+gives width 316, height 303 and dataSize 11015; commands occupy
+1036..12050. R2-ENGINE-270 reads them to exactly 12051 after 303 rows: 651
+literal commands carrying 8621 palette-index pixels and 1743 horizontal
+skip commands covering 87127 cells, with no row-skip command. The final
+DWORD at 13794 is `0x80000001`.
+
+The 1743 bytes 12051..13793 start with another `0x80000001`. The loader
+creates one frame pointer and the selected reader stops before them, so
+they supply no frame and no pixel to the shop paint. Among the top-level
+.res archives of each install (ten EN, eleven RU), only `graphics.res`
+holds .256 keys: 1929 per locale, eight of them empty
+(`cursors/{cast,defend,move,patrol}.256` and
+`equipment/{f,m}fighter/primary/0{0,1}05002.256`). A walk of the 1921
+non-empty entries by the envelope of R2-ASSET-008 (trailer bit 31 selects
+the palette, low bits count frames) decodes every frame to its dataSize.
+1916 entries end exactly at the trailer. Five single-frame entries carry residual bytes:
+`interface/{myitem,shopitem,shopframe}.256` and
+`projectiles/goblin/{arrow,arrowb}.256`. In each the residual length
+equals the frame's skip-command count (20, 20, 1743, 8, 11) and begins
+with a copy of the trailer.
+
+**Confidence.** High for the layout, the decode stop and the census
+counts. Unknown for the residual purpose; the equal counts are an
+observation, not a decoded structure.
+
+**Unknown.** What produced or reads the residual bytes; a consumer outside
+the selected paint or the producing tool's contract would settle it.

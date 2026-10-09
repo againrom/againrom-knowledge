@@ -4,7 +4,9 @@
 
 The preserved `.16a`, `.256`, `.16` and `.pal` resources have the container
 shapes below. This reference establishes frame geometry and residual regions;
-it does not establish ROM2 RLE, pixel, color or runtime draw semantics.
+the survey rows do not establish general ROM2 RLE, pixel, color or runtime
+draw semantics. The named town-1 ShopFrame reader below is a separate,
+bounded native contract.
 — R2-ASSET-007, R2-ASSET-008, R2-ASSET-009
 
 <a id="16a--256-result"></a><a id="16-result"></a>
@@ -49,11 +51,44 @@ The preserved resources use 156 BMP-shaped and three raw palettes. The
 shape determines where to read/write the table bytes; color-value meanings
 and ROM2 table-building modes remain Unknown. — R2-ASSET-008
 
+## Town-1 ShopFrame reader
+
+The EN shop loader builds `interface/ShopFrame.256` as a byte sprite with
+one palette row, palette mode 1 and zero colour adjustment. Mode 1 reads
+B, G and R from each four-byte palette entry and packs a WORD with the
+active output channel widths and shifts. Paint slot +0x18 calls normal
+reader `L2.00798` (`R2-ENGINE-270`, High).
+
+Each command is one byte. The low six bits are a count. Top bits 00 copy
+that many following palette indexes, 01 skip that many rows keeping the
+column, and 10 or 11 skip that many pixels. A row ends when the column
+reaches the width. The reader stops after the frame height, not at
+dataSize (`R2-ENGINE-270`, High).
+
+| Offset | Bytes | Content |
+|---|---|---|
+| 0 | 1024 | palette, 256 four-byte entries |
+| 1024 | 12 | width 316, height 303, dataSize 11015 |
+| 1036 | 11015 | 651 literal and 1743 pixel-skip commands; 8621 pixels, 87127 skipped cells |
+| 12051 | 1743 | residual, starting with a copy of the trailer |
+| 13794 | 4 | trailer `0x80000001` |
+
+EN and RU resources are the same 13798 bytes. The selected reader ends at
+12051 and never reads the residual. Only `graphics.res` holds .256 keys:
+1929 per locale, eight empty. Of the 1921 non-empty entries, five
+single-frame entries carry residual bytes between the frame and the
+trailer, and in each the residual length equals the frame's
+skip-command count. Their purpose remains Unknown (`R2-ASSET-070`,
+High / Unknown).
+
 <a id="not-yet-surveyed"></a>
 
 ## Unknowns
 
-RLE opcodes, pixel/color conversion, native use of residual bytes, arbitrary
-malformed resources and other locales are outside the established contract.
+Consumers outside the named byte reader, the residual purpose, malformed
+resources and device output are outside the established contract. A
+residual consumer or the producing tool's contract would settle the tail.
+RU reader bodies were not decoded separately (`R2-ENGINE-270`,
+`R2-ASSET-070`).
 Related ROM1 references: [SPR16A](../spr16a/format.md),
 [SPR256](../spr256/format.md), [PAL](../pal/format.md).

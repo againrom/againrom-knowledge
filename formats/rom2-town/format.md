@@ -232,8 +232,9 @@ quantization, reduced-mode state and live frames are unobserved.
 R2-ASSET-059.
 
 The generic inn has 154 art keys. Generic shop graphics have 47 BMPs and
-its movie subtree has 54 BMPs. ShopFrame.256 has a 316x303 header, but its
-palette 8 pixel stream and 1743-byte tail remain Unknown. R2-ASSET-060.
+its movie subtree has 54 BMPs. R2-ASSET-060 (amended). ShopFrame.256 is
+one 316x303 byte-RLE frame over a 1024-byte palette; its 1743-byte tail is
+not read by the shop reader and its purpose remains Unknown. R2-ASSET-070.
 
 ## Town 1 square
 
@@ -351,7 +352,7 @@ The generic inn loads 10 candle pictures, 21 cauldron pictures, 24 breath pictur
 
 Inn animation archive keys use `interface/inn/candle/t0000.bmp`..`t0009.bmp`, `cauldron/t0000.bmp`..`t0020.bmp`, `tender/breath/br0001.bmp`..`br0024.bmp` and `tender/drink/dr0001.bmp`..`dr0040.bmp`. Actor art selects `interface/inn/Unit%d/sprites.16a` or HeroMage/HeroFighter. The missing-controlled-actor fallback selects Unit1; its use by every fresh actor remains Unknown (`R2-ENGINE-248`, `R2-ENGINE-247`).
 
-The shop builds inventory (0,303,480,390), hero inventory (0,390,480,480), item information (0,0,164,303), main art (164,0,480,303) and buttons (464,0,640,238). Its selected painter draws ShopFrame at (164,0), ShopMain at (169,8), enabled category layers 0..3 at (353,108), (197,108), (313,20), (201,20) and the keeper at (277,112), then shared children. Support art includes myitem/shopitem, cost and inventory-background families. State-supplied items populate the panels; complete initial stock, item-price text and episode state remain Unknown (`R2-ENGINE-249`, High / Medium / Unknown).
+The shop builds inventory (0,303,480,390), hero inventory (0,390,480,480), item information (0,0,164,303), main art (164,0,480,303) and buttons (464,0,640,238). Its selected painter draws ShopFrame at (164,0), ShopMain at (169,8), enabled category layers 0..3 at (353,108), (197,108), (313,20), (201,20) and the keeper at (277,112), then shared children. Support art includes myitem/shopitem, cost and inventory-background families. State-supplied items populate the panels (`R2-ENGINE-249`, amended, High / Medium); the stock, price text and keeper episodes follow below.
 
 Selected shop archive keys are `graphics.res:interface/ShopFrame.256`, `interface/shopanim/ShopMain.bmp` and `interface/shopanim/01..04/1..11.bmp`; keeper pictures use `movies.res:shopanim/{Pose2-3,Yes,No}/`. Support keys are `interface/{myitem,shopitem}.256`, `costs1..7.bmp`, `costm1..7.bmp` and `backinv{g,b,s}.bmp`. Buttons append the per-town prefix and ShopButton1..4.bmp under interface/. The generic empty prefix remains a Medium inference; Kaarg supplies its own prefix (`R2-ENGINE-249`).
 
@@ -362,6 +363,68 @@ Entering the shop or inn sends square leave-and-remove request 0x445. It invokes
 Re-entry reloads square art and repeats HORSE/BABA/DERVISH variant and position selection; random draws may select the same variants again. It clears per-window animation flags, initializes tavern/sign/stars/shopie/vane frame selections, restores BABA/HORSE idle frames with new initial waits and starts DERVISH at frame 0 under bit 0x400. Gates initialize to cursor 8/T08 with a cleared direction latch. The guard returns to frame 7 with step 0 and a cleared sound-direction latch; the pointer selector resets to -1. Global painter clock state, bird delay and the stars blank counter are not cleared by the selected loader/enter/release (`R2-ENGINE-250`, partially retracted).
 
 The composed visible return remains Medium. Application+0x404 writers and values, the subsequent no-0x42e outcome, complete input/queue admission and visible return timing remain Unknown (`R2-ENGINE-250`, partially retracted).
+
+### Town 1 shop stock
+
+Scenario.dll ordinal 15 returns the town's assortment record; the client
+fills four category lists from data.bin tables under it. Town 1 has these
+new-game values, copied verbatim by save and load, with no other town-1
+writer in the DLL (`R2-ENGINE-263`, High):
+
+| Category | Price range | Draws | Quantity bound | Admitted candidates |
+|---|---|---|---|---|
+| 0 | 0..1500 | 100 | 2 | 57 armor and 13 shield rows |
+| 1 | 0..1500 | 100 | 2 | 44 weapon rows |
+| 2 | 0..1500 | 20 | 1 | 4 weapon rows, enchanted per draw |
+| 3 | 0..1500 | 20 | 1 | 5 books and per-fill scroll rows; six potions preloaded |
+
+Mask bits select materials, classes and item tables; admission price is
+trunc(column2 x material factor x class factor) within the range
+(`R2-ENGINE-264`, High). Each draw picks a random admitted candidate.
+Stackable items take quantity 1 plus a random 0..bound and merge with
+equal items. Books enter at quantity 2 and the six potions at 51..100.
+Category 2 adds one tag-41 spell effect from five usable spells at a
+random level, giving 160 possible variants priced 649..1442 (`R2-ENGINE-265`,
+High). Every fill is random.
+
+A fill replaces all four lists, only while no deal is open: on entering with an empty category 0, and on refill message 0x3f
+sent at campaign start and from the client's 0x468 handler. Buy stops at
+the first pending shop item the hero cannot afford, debits q*P and moves
+each bought item to the hero. Sale credits floor(q*P/2+0.5) and places the
+item back into its category, merging with an equal stackable entry.
+Undo returns pending items. Finite stock is implied by these bodies, not
+read as one. How a selection splits a stack into the pending list and
+whether the lists survive a save remain Unknown (`R2-ENGINE-266`,
+High / Medium / Unknown).
+
+### Town 1 shop prices and text
+
+Names come from `main.res` `text/itemname.txt` joined to `world.res`
+`data/itemname.bin` IDs. Descriptions format item attributes with
+`stats.txt`, `spell.txt` and `main.txt` keys. Equipment price P is
+trunc(column2 x material factor x class factor + 0.5) plus effect prices;
+magic items use MagicItems column 0 and books spell column 21. Each shop
+item cell shows a unit price: P, or (P+1)/2 for an item offered for sale.
+The pending totals are P*q for purchases and ((P+1)/2)*q for sales, with
+the resulting gold balance. Settlement debits P*q and credits
+floor(P*q/2+0.5), floor(q/2) less than the client total for odd P. The measured consumers apply no town or campaign
+factor. The whole rendered description is Medium (`R2-ENGINE-267`,
+High / Medium).
+
+### Town 1 shop keeper
+
+The keeper draws at page (277,112) from 29 Pose2-3, Yes 2..12 and No 2..12
+movie BMPs, 76x176 (`R2-ASSET-069`, High). A paint call advances it once
+after 100 ms. Each advance draws a fresh 5000+1000*(rand()%5) ms idle
+threshold; reaching it with no episode running starts the random episode,
+which shows Pose2-3 2..28 and returns to file 1. Yes and No episodes show
+files 2..12 and end at counter 12 (`R2-ENGINE-268`, High; live timing
+Unknown). A changed category, an affordable buy or a credited sale starts
+Yes; an unaffordable buy starts No. The first category choice after entry
+and leaving the shop clear every episode bit but not the counter, so a
+response episode starts from the inherited counter value; the outcome of a
+start at counter 12 or more is Unknown (`R2-ENGINE-269`,
+High / Medium / Unknown).
 
 ## Shared town class and overrides
 

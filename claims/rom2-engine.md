@@ -2903,7 +2903,7 @@ Frame counts are from the complete selected [art frame envelopes](../experiments
 | R2-ENGINE-246 | The selected ROM2 EN generic inn fixes three panel rectangles, primary art layers and three button targets; complete portrait/stat drawing and the lower-right resource binding remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-247 | The selected ROM2 EN inn consumes packed DLL options, seats actors and dispatches talk by NPC/topic; the stage-10 roster is conditional, and its complete live actor-art join is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-248 | Selected ROM2 EN inn branches load candle, cauldron, breath and drink lists and advance them on native clocks; container-count interpretation and the complete visible schedule remain bounded. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
-| R2-ENGINE-249 | The selected ROM2 EN generic shop fixes five child rectangles, primary art and Undo/Buy/Sell/Exit targets; complete stock, item-price text and episode state remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-249 | The selected ROM2 EN generic shop fixes five child rectangles, primary art and Undo/Buy/Sell/Exit targets; complete stock, item-price text and episode state remain Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-250 | Selected ROM2 EN inn/shop departure releases and removes the square; conditional Exit/Escape posts re-enter it and rebuild local art/state, while complete queue admission and visible return are unobserved. | High / Medium | ● active (partially retracted, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 
 
@@ -3038,6 +3038,8 @@ Selected evidence: [builder](../experiments/EXP-2030-rom2-first-town/evidence/me
 **Confidence.** High for selected EN constructor geometry, primary art operands, text keys and finite local button targets. Medium for complete composition and the generic empty-prefix inference. Unknown for the full initial stock, item-price text layout and complete live episode state.
 
 **Unknown.** The selected constructors, panels and traversal do not close the town-1 stock source or every item-panel virtual edge. Follow them on a known readonly initial campaign state, or obtain original observation. Complete item sprite/name/price drawing requires those receivers; no catalog-wide absence or stock identity is claimed.
+
+**Amended.** R2-ENGINE-263 through R2-ENGINE-267 answer the town-1 stock, price and item-text Unknowns; R2-ENGINE-268 and R2-ENGINE-269 answer the keeper episode state; R2-ENGINE-270 decodes the ShopFrame pixels.
 
 ### R2-ENGINE-250
 
@@ -3405,3 +3407,250 @@ character-panel class is established by this construction.
 **Unknown.** Panel callback algorithms, null boundary semantics and final
 shared-widget presentation. Read the identified targets and consumers or
 observe an authorized original session. The panel probe is EN only.
+
+## First-town shop
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-263 | ROM2 town-1 shop stock is parameterized by the Scenario.dll ordinal-15 record: four categories with prices 0..1500, draws 100/100/20/20, quantity bounds 2/2/1/1 and fixed masks. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-264 | Town-1 category masks admit 70 armor/shield rows, 44 weapon rows, 4 enchantable weapon rows and 5 books plus scroll rows per fill from data.bin tables, by price, class and material. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-265 | A town-1 shop fill draws random admitted candidates with stackable quantities, preloads six potions and the books, and enchants category 2 into 160 possible spell-level variants. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-266 | ROM2 shop buy moves affordable pending items to the hero, sale and undo return items into categories, and refills replace all lists only while no deal is open; finite stock is implied. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-267 | ROM2 shop text and prices come from text tables, item attributes and data.bin factors; cells show unit P or (P+1)/2, pending totals P*q and ceil(P/2)*q, sale credit floor(P*q/2+0.5). | High / Medium | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-268 | The ROM2 generic shop keeper updates after 100 ms, resamples a 5000+1000*(rand()%5) ms idle threshold, plays Pose2-3 through counter 28 and responses through counter 12. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-269 | Generic shop responses start the keeper's Yes on category change, affordable buy or credited sale and No on an unaffordable buy; first category choice and exit clear all episode bits, not the counter. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-270 | ROM2 EN draws the town-1 ShopFrame with byte reader L2.00798 and palette mode 1: low six bits count, top bits select palette literals, row skip or pixel skip. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+
+### R2-ENGINE-263
+
+Scenario.dll export ordinal 15, `ScenarioGetShopAssortment` (`D2.00220`),
+returns `D2.00104 + location*0x50`, with the location ID read through
+`D2.00011` at location+4. The record has four 0x14-byte category entries:
+minimum price, maximum price, draws, quantity bound and mask.
+`ScenarioNewGame` (`D2.00004`) writes town 1 at `D2.00221`:
+
+| Category | Min | Max | Draws | Quantity bound | Mask |
+|---|---|---|---|---|---|
+| 0 | 0 | 1500 | 100 | 2 | 0x1381cc03 |
+| 1 | 0 | 1500 | 100 | 2 | 0x10418103 |
+| 2 | 0 | 1500 | 20 | 1 | 0x28018100 |
+| 3 | 0 | 1500 | 20 | 1 | 0x04000000 |
+
+`ScenarioSave` (`D2.00102`) and `ScenarioLoad` (`D2.00103`) copy every
+location's entries verbatim. A linear census of every .text operand in
+`D2.00104..D2.00007` in both DLLs finds no other town-1 writer; the other
+writers index the location-2 and location-3 records by category times 0x14.
+EN and RU DLL exports, bodies and records are equal.
+
+The client binds ordinal 15 once at startup: EN `L2.00799` stores the pointer
+in `L2.00800`, RU `L2.00801` in `L2.00802`. Fill `L2.00803` and sold-item placement
+`L2.00804` call it only while `[L2.00805]+0x74` is zero; otherwise both read
+the deal source at +0x94+0x70.
+
+**Confidence.** High for the record, the town-1 writes, the copy bodies,
+the census population and the client binding. Unknown for when the deal
+source replaces the record.
+
+**Unknown.** When `[L2.00805]+0x74` is nonzero in a single-player campaign; a census of the writers of that field would settle it.
+
+### R2-ENGINE-264
+
+Kind builder `L2.00806` decodes the mask: bits 0..14 select materials (bit 13
+is material 14, bit 14 material 15), bits 15..21 classes 0..6, bit 29 an
+enchanted category and bit 28 an extra 50 percent enchant gate with bit 29.
+Kind 0x400000 admits weapon table `L2.00807` in mode 2 (column15 bit 0 set);
+0x1000000 armor `L2.00808` in mode 1; 0x800000 shield `L2.00809` in mode 7;
+0x8000000 with bit 29 weapon mode 8 (column15 bit 0 clear); 0x4000000 the
+magic admission `L2.00810`. Data.bin tables load from owner `L2.00811`; armor,
+shield, weapon, magic and spell rows start at index 1.
+
+Table admission `L2.00812` requires the row's class mask word to carry the
+material bit and price trunc(column2 x material factor x class factor) in
+[min, max]; an enchanted category skips the range and keeps rows with
+min^0.4 at most the material x class level product; with min 0 that is
+every row, taking the C library's pow(0, 0.4) as 0. Armor mode excludes
+(class, material, row) triples (0,0,2), (0,1,2) and (6,4,6).
+
+| Category | Admitted from both installed data.bin files |
+|---|---|
+| 0 | 57 armor and 13 shield rows; 8 rows above 1500; 2 excluded triples |
+| 1 | 44 weapon rows, classes 0..1, materials 0, 1 and 8 |
+| 2 | 4 weapon rows: classes 0 and 1, material 8, rows 13 and 14 |
+| 3 | books for spells 1, 5, 10, 16 and 26 at 1000; per fill one of MagicItems rows i+5 or i+34 for each i in 1..29, admitted at column0 in range |
+
+Books cover spell IDs 1..29 except 9, 14, 15, 24, 28 and 29, priced by
+spell column 21. Of the 58 phase-two rows, 23 are admissible and all are
+type 4 (Scroll or SuperScroll prefix). EN and RU populations are equal.
+
+**Confidence.** High. The pow(0, 0.4) reading is an inference about the
+CRT helper. Exact rational admission products equal host double
+products for every candidate and none lies within 1e-9 of an integer.
+
+### R2-ENGINE-265
+
+Fill `L2.00803` clears four lists and runs draw `L2.00813` per category. The
+magic category first clones each admitted book at quantity 2 and adds six
+named potions (MagicItems rows 69..74) at quantity 51..100 regardless of
+price. Each draw picks index (rand()*n)>>15 over the n candidates, retrying
+up to 1000 times on a book. A category without bit 29 accepts the pick.
+Quantity is 1+((rand()*(bound+1))>>15) for a stackable item (type 3 or 4, or
+no effects) and 1 otherwise; merge `L2.00814` adds quantities of equal
+stackable items; sort `L2.00815` orders the list.
+
+Category 2 enchants each pick (`L2.00816`, `L2.00817`). Budget is
+min(2*max - P, 100*P), with P the weapon reader price (base product plus
+0.5, truncated): 167, 83, 333 and 167. The spell is uniform over table
+`L2.00818` {1, 10, 11, 18, 26, 5, 16}, redrawn up to 100 times while
+`L2.00819` returns -1. The level cap is trunc((1.2^log2(budget/(10*c20))
+- 1)*30), capped by weapon level field +0x48 (20 or 40) and 100; spells 11
+and 18 (column20 5000 and 10000) give -1. Effect slot +0x54 (`L2.00820`)
+draws the level uniformly in 1..cap. Effect slot +0x4c (`L2.00821`) prices
+the tag-41 effect at trunc(10*c20*2^(ln(1+L/30)/ln 1.2)); the weapon
+reader adds it. A draw outside [min, max] fails; failures stop the loop
+after 10*draws. In both locales 160 of 687 (base, spell, level) rows
+survive: levels 1..8, 1..9, 1..7 and 1..8 for each of five spells, final
+prices 649..1442.
+
+**Confidence.** High for the rules and the replayed population. Host
+doubles replace the x87 ln/pow helpers; every kept or rejected price lies
+more than 1e-9 from an integer, except level 6, where both logarithms take
+the same double argument and the ratio is exactly 1.
+
+### R2-ENGINE-266
+
+Shop object `L2.00822+0x6c` holds an open-deal count at +4, a pending-refill
+counter at +8 and four category lists. Fill runs only when +4 <= 0.
+Enter `L2.00823` (message 0x32) fills when the category-0 list is empty.
+Message 0x3f (`L2.00824`, only when `+0x74` is zero) refills through
+`L2.00825`; the client sends it from campaign start `L2.00826` and its 0x468
+handler `L2.00827`. With a deal source, tick `L2.00828` adds a pending refill
+every 180 ticks, applied by `L2.00829` when no deal is open, including on
+leave `L2.00830`.
+
+Buy (0x33, `L2.00831`) walks the pending deal list and stops at the first
+shop item whose q*P exceeds hero gold; each bought item debits q*P, takes
+the hero as owner and enters the hero inventory. Sell (0x34, `L2.00832`)
+credits trunc(q*P*0.5+0.5) for each hero item with nonzero P, clears its
+owner and places it through `L2.00804`: back to its tagged category, else a
+non-stackable non-book to the first bit-29 category, else the first
+category carrying its kind bit; `L2.00833` merges into an equal stackable
+entry or a quantity-0 placeholder or appends. Server cases 0x33 and 0x34
+reach buy and sell through `L2.00834` and `L2.00835`. Undo (0x35) runs
+`L2.00836`, `L2.00837`, which sets the deal's customer through `L2.00838`, then
+`L2.00839`: pending items with an owner go to the hero inventory, items
+without one go through `L2.00804`, and the pending list is cleared. Leave
+removes quantity-0 entries whose +0x4c byte is zero.
+
+Finite stock is implied, not read as one body: a deal references shop
+items and increments their +0x4c byte, bought items leave with the hero,
+and leave drops unreferenced quantity-0 entries. The producer that moves
+a selection into the pending list is the Unknown below.
+
+**Confidence.** High for these bodies, including undo. Medium for finite
+stock as an inference from them, and for the campaign meaning of the 0x468
+senders and location-type gate. Unknown for how a selection moves
+part of a shop stack into the pending list, and whether the client lists
+survive SAV.
+
+**Unknown.** The selection producer of the pending list and the stock's
+SAV round trip; reading the client transfer message and the save writer
+would settle them.
+
+### R2-ENGINE-267
+
+Name: `main.res` `text/itemname.txt` lines join in order with `world.res`
+`data/itemname.bin` IDs (491 IDs, templates and lines in each locale) into
+name map `L2.00840`. Description `L2.00841` walks the item attribute
+sequence: tag 1 is the price and is not described; default tags use
+`stats.txt` key equal to the tag with `#%s %d`; tags 13 and 44..48 form
+damage ranges; tags 41 and 42 use `spell.txt` key value-1 with `main.txt`
+keys 5a..5d.
+
+Price: armor, shield and weapon slot +0x4c (`L2.00842`, `L2.00843`, `L2.00844`)
+give trunc(column2 x material factor x class factor + 0.5); a tag-1 effect
+replaces the price; tag-41 effects add their own price (R2-ENGINE-265);
+other effects add trunc(50*S*(1+(S/70)^1.5)); the total caps at 19999999.
+Magic items use MagicItems column 0; books use spell column 21. Shop paint
+`L2.00845` prints one unit price per item cell: (P+1)/2 for an item with
++0x18 == 2, else P, with P from wrapper `L2.00846`; it does not multiply by
+quantity. Pending totals come from `L2.00847` (RU `L2.00848`), which buy
+and sell responses call first: page+0x150 takes hero gold, page+0x158 sums
+((P+1)/2)*q for +0x18 == 2 items, page+0x154 subtracts P*q for the others,
+and page+0x15c holds the sum of the three. Server sale credit
+(R2-ENGINE-266) is floor(q*P/2+0.5); for odd P it is floor(q/2) below the
+client's ((P+1)/2)*q. The measured quote, preview and settlement bodies
+apply no town or campaign multiplier.
+
+**Confidence.** High for text bindings, keys and price arithmetic in the
+measured consumers. Medium for the whole rendered description, whose
+helper-derived spell clauses were not executed.
+
+**Unknown.** A price factor outside the measured consumers; a census of the callers of the price slots and the price wrapper would settle it.
+
+### R2-ENGINE-268
+
+Painter `L2.00769` (RU `L2.00849`) runs only when page+0x148 is nonzero.
+Two static baselines start at now-100 ms and now on first use and are
+shared by all centers. A paint call updates once when
+unsigned(now - update baseline) >= 100, then sets the baseline to now.
+Each update samples 5000+1000*(rand()%5) ms and sets the random-episode bit
+0x10 when unsigned(now - episode baseline) reaches it and bits 0x10, 0x20
+and 0x40 are clear.
+
+Bit 0x10: slot +0x88 sets counter = (counter+1) % 30 and loads Pose2-3
+file counter+1; at counter 28 the bit clears, the counter resets and the
+baseline restarts, and the resting file 1 is drawn. Bits 0x20 and 0x40
+increment the counter and end at 12, freeing the Yes or No array. Arrays
+hold Pose2-3 file 1 at index 0 and Yes or No files 2..12 at 1..11. Update
+priority is 0x10, 0x20, 0x40.
+
+**Confidence.** High for the static update and draw rules. Unknown for live
+timing and overlapping-event appearance.
+
+**Unknown.** Native presentation; original observation would settle it.
+
+### R2-ENGINE-269
+
+Category click slot +0x54 calls slot +0xa4, which returns 1 for a changed
+valid category; the click then sets bit 0x20 and loads the Yes array. Buy
+response `L2.00776` needs nonzero pending cost page+0x154; when
+page+0x150 + page+0x154 is negative it sets bit 0x40 and plays the refusal,
+else bit 0x20 and sends the purchase. Sell response `L2.00777` sets bit
+0x20 when pending credit page+0x158 is nonzero. The page sound clock never
+sets episode bits.
+
+Two writers clear the whole flag word +0x240, including bits 0x10, 0x20
+and 0x40. Page slot +0x80 sets the category word page+0x132 to 0x64 on
+entry; when slot +0xa4 finds 0x64 (EN `L2.00850`, RU `L2.00851`) it zeroes
++0x240 and +0x244..+0x250 and calls slot +0xa0, so the first category
+choice ends a running episode before setting 0x20. Page slot +0x84 (EN
+`L2.00852`, RU `L2.00853`) zeroes center +0x240 on exit. Neither writes
+counter +0x254; in the committed listings only the constructor, the
+increments, the modulo-30 advance and the three episode ends write it. A Yes episode started by a response therefore
+starts from the counter value it inherits.
+
+**Confidence.** High for these paths and the two flag-word writers.
+Medium for completeness: no executable-wide census of center flag and
+counter writers was made. Unknown for a Yes or No episode started at
+counter 12 or more: the 0x20 and 0x40 arms end only at counter 12 and draw
+array index counter.
+
+**Unknown.** The outcome of an episode started at counter 12 or more; a
+read of the array bounds and allocation, or original observation, would
+settle it.
+
+### R2-ENGINE-270
+
+Shop loader `L2.00768` builds the byte sprite through `L2.00643` and sets
+one palette row, mode 1 and zero colour adjustment through `L2.00644`.
+Mode 1 (`L2.00854`) reads B, G and R from each four-byte entry and packs a
+WORD with the active channel widths and shifts. Sprite table `L2.00855`
+slot +0x18 is `L2.00856`; normal reader `L2.00798` reads one-byte
+commands: low six bits are the count; top bits 00 copy that many palette
+indexes, 01 skip rows keeping the column, 10 and 11 skip pixels. A row ends
+when the column reaches the width. The reader stops by height, not by
+dataSize.
+
+**Confidence.** High for the selected EN bodies and their exact stop at the
+installed frame's data end in both locales. Unknown for RU reader bodies
+and device output.
