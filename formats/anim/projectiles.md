@@ -135,7 +135,10 @@ unit action. Four picture ids replace the rule:
 4, 3, 2, 1, 0, 1, 2, 1, 0, 1, 2, 3, 4
 ```
 
-which is one value per tick and consumes exactly the 13-tick life those two pictures get. The range
+which is one value per successful call on the normal caster route. That
+route supplies 13 calls; ANIM-BOLTRAMP-035's universal lifetime clause is
+narrowed. MAGIC-281 gives the other initial phase/countdown pairs; outside
+actionphase 1..13 the old phase is retained. The range
 0 to 4 is exactly `lightnin`'s 5 phases. Picture 36 adds `5 * (link index mod 7)` to the same ramp
 (below), giving 0 to 34 against `chain`'s 35 phases.
 
@@ -146,7 +149,9 @@ under this clock and under no other divisor.
 
 ## Picture 34/36 polylines
 
-`ANIM-BOLTDRAW-034`. The two picture ids that draw a path do not draw the projectile's
+`ANIM-BOLTDRAW-034` is partially retracted for its same-frame headline
+scope and tag ownership; MAGIC-280 fixes link scope and the exact receiver.
+The two picture ids that draw a path do not draw the projectile's
 own sprite at all. Their draw arms iterate a list of 8-byte records held on the object (the list
 itself, and the geometry that fills it, are [MAGIC projectile geometry](../magic/projectiles.md)):
 
@@ -172,8 +177,40 @@ Three properties a consumer must reproduce:
 
 Every point of one figure carries the same frame for picture 34, so the whole bolt flickers as one.
 For picture 36 the per-record byte is the chain-link index modulo 7, so each branch is drawn from a
-different fifth of the 35-frame sheet — the byte is a branch identifier, not an age.
+five-frame block of the 35-frame sheet; the seven blocks repeat by index — the byte is a branch identifier, not an age.
 
+
+## Bolt stamp blending and clipping
+
+The fixed lightnin/chain sheets contain 5/35 frames, each 16x16. The two
+arms call own-table .16a vt+18 with tableOverride=0 and mirror=0; receiver
+R1785 selects sprite+1c and forward decoder R1518. Each stored point
+causes one stamp, including duplicates. — MAGIC-280
+
+Each literal W reads current old destination and writes the u16 sum of
+sourceTable+W and a destination-table word. Normal destination offset is
+2*entries+2*old+((W<<8)&0x1e0000). Selector 1 instead uses
+2*(old>>3)+((W<<5)&0x3c000). For installed even words, L=(W>>9)&15.
+Normal palette source scales by (L+1)/16 and old destination by (15-L)/16,
+each separately quantized/packed. Low-memory source uses /18 and destination
+row L, without the normal extra row. This is ordered table blending over
+current output. — MAGIC-280
+
+The active rectangle is [left,right) x [top,bottom). Each stamp is either
+contained, wholly rejected or forward-clipped by literal run. Excluded
+source words are skipped without framebuffer writes; point records are
+unchanged. Normal insertion joins the projectile collection's ascending
+bucket/node traversal before selector-3 bodies, markers/bars and shroud;
+inside a bolt, indices ascend. Native buffer, packing masks, clip, stride,
+tables and current collection were not captured. — MAGIC-280
+
+Normal caster construction gives the full ramp. Direct 0x8b starts phase
+-1 and supplies five successful calls, giving 0,4,3,2,1. Source-cell 0x8c
+picture 36 starts -1 with thirteen calls, giving
+0,4,3,2,1,0,1,2,1,0,1,2,3. Loaded Prj state uses its saved phase/counter.
+Geometry is invoked on each live action-1 call after phase selection and
+before countdown decrement. Visible-frame scheduling remains Unknown.
+— MAGIC-281
 
 ## Spell-effect presentation (`ANIM-044`…`ANIM-047`, late-pass scope amended)
 

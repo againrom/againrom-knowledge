@@ -1,5 +1,16 @@
 # Overturn history
 
+## Bolt figure and construction-route corrections
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-BOLTSHAPE-070` (unqualified no-interpolation clause and -0.5 smoothing attribution only) | Verbatim: "not an interpolation"; "smooths the result over every second point with the factor `-0.5`" | High / Medium | [EXP-0504](../experiments/EXP-0504-bolt-figure/), MAGIC-276, MAGIC-277, MAGIC-278 | The source is a random walk, but the drawn samples come from overlapping quadratic triples. The -0.5 instructions create midpoint knots before the fit. | **REFUTED** — partially retracted |
+| `MAGIC-BOLTSHAPE-070` (parametric reading and endpoint-order Unknown only) | Medium parametric reading; Unknown which endpoint is the polyline's origin | Medium / Unknown | [EXP-0504](../experiments/EXP-0504-bolt-figure/), MAGIC-275, MAGIC-277, MAGIC-282 | Both producer stack captures put the projectile display point first. The ordered arithmetic and FPU recipe replace the earlier parametric inference. Native entry CW is still Unknown. | **SUPERSEDED** |
+| `MAGIC-BOLTSTILL-072` (universal 13-tick clause only; stationary raw position stands) | Verbatim: "its 13 ticks are a countdown rather than a distance" | High | [EXP-0504](../experiments/EXP-0504-bolt-figure/), MAGIC-281 | Normal caster construction supplies 13 successful calls. Direct 0x8b supplies 5; source-cell 0x8c supplies 13 with another initial phase; LOAD resumes its saved counter. | **NARROWED** |
+| `ANIM-BOLTRAMP-035` (universal 13-tick lifetime only; table and sheet counts stand) | Verbatim: "consumes exactly the object's 13-tick life" | High | [EXP-0504](../experiments/EXP-0504-bolt-figure/), MAGIC-281 | The full thirteen values describe actionphase 1..13 and the normal caster route. Direct and source-cell routes start at -1; saved state may start elsewhere. | **NARROWED** |
+| `ANIM-BOLTDRAW-034` (same-frame headline scope and tag argument ownership only; layout and body formulas stand) | Verbatim: "every point of one figure is stamped at the same sheet frame"; "the caller's tag byte read from `+0x28` of the caller's object" | High | [EXP-0504](../experiments/EXP-0504-bolt-figure/), MAGIC-275, MAGIC-280 | Points of one link share frame; Prismatic links can differ by 5*tag. EBP+0x28 is the generator's explicit stack tag argument, not a caller-object field. | **REFUTED** — partially retracted |
+| `MAGIC-272` (direct 0x8b phase sequence only; counter 5, reset and cleanup stand) | Verbatim: "5 for spells 13 and 14, giving phases 4,3,2,1,0" | High | [EXP-0504](../experiments/EXP-0504-bolt-figure/), MAGIC-281 | Original direct initializer writes actionphase=-1. The five successful calls retain initial phase 0, then select 4,3,2,1. | **REFUTED** — partially retracted |
+
 ## Second Teleport object's construction coordinates
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

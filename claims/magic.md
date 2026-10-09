@@ -565,9 +565,9 @@ current account.
 | MAGIC-FIREDIV-047 | (rom.exe) `fire_ball`'s footprint-squared divide is a per-cell normalisation, not a size penalty — because a unit is stored in every cell record it covers. | High | ● active (amended, partially retracted) | [EXP-0174](../experiments/EXP-0174-area-movement/), [EXP-0271](../experiments/EXP-0271-multicell-area/) |
 | MAGIC-RING-048 | (rom.exe) The three staged AreaEffect spells use three distinct cell generators. | High / Medium | ✔ promoted | [EXP-0175](../experiments/EXP-0175-ring-geometry/) |
 | MAGIC-BOLTGATE-069 | (rom.exe) Exactly two picture ids produce a drawn path, and the routine that produces it is one virtual slot whose whole body sits behind a two-comparison gate. | High | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
-| MAGIC-BOLTSHAPE-070 | (rom.exe) The path is a bounded random walk generated in a canonical horizontal frame and rotated onto the caster-to-target segment, not an interpolation. | High / Medium / Unknown | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
+| MAGIC-BOLTSHAPE-070 | The bolt figure starts with a bounded random walk, inserts midpoint knots, samples quadratic triples and rotates the resulting points onto the projectile-to-target segment. | High | ✔ promoted (partially retracted, superseded) | [EXP-0178](../experiments/EXP-0178-bolt-path/); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-BOLTLIST-071 | (rom.exe) The point list is rebuilt on every driver tick and it does not accumulate: picture 34 replaces it, picture 36 clears it and concatenates one generated set per victim id. | High | ✔ promoted (superseded) | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
-| MAGIC-BOLTSTILL-072 | (rom.exe) A Lightning or Prismatic Spray projectile never moves, and its 13 ticks are a countdown rather than a distance. | High | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
+| MAGIC-BOLTSTILL-072 | On the inspected action-1 driver path, Lightning and Prismatic Spray keep their raw position; normal caster construction gives a 13-call countdown. | High | ✔ promoted (amended) | [EXP-0178](../experiments/EXP-0178-bolt-path/); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-TRAIL-073 | (rom.exe) The trail behind a Fire Arrow or a Fire Ball is a queue of at most six PAST positions, and its oldest entry is dropped one at a time. | High | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
 | MAGIC-BOLTEND-074 | (rom.exe) Nothing is created when a Lightning or Prismatic Spray figure ends, and the whole figure ceases with the object. | High / Unknown | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
 | MAGIC-AREADRAW-049 | (rom.exe) The three `AreaEffect` tick modes create three different kinds of drawable, and only one of them creates one object per covered cell. | High | ● active | [EXP-0176](../experiments/EXP-0176-area-draw/) |
@@ -855,14 +855,29 @@ on this code read is not independent corroboration.
 **Evidence.** [EXP-0178](../experiments/EXP-0178-bolt-path/)
 
 ### MAGIC-BOLTSHAPE-070
+The picture gate remains MAGIC-BOLTGATE-069.
+The complete builder first creates the bounded random source walk, inserts
+midpoint knots, evaluates quadratic samples, rejects an excessive sampled
+ordinate, then rotates/truncates accepted samples. MAGIC-275 through
+MAGIC-278 and MAGIC-282 define those local passes and their exact arithmetic.
+The final point list is therefore interpolated from random knots; the former
+unqualified "not an interpolation" clause is withdrawn. The stored -0.5 is
+used for midpoint insertion before the quadratic helper, not inside its fit.
 
-**(rom.exe) The path is a bounded random walk generated in a canonical horizontal frame and rotated onto the caster-to-target segment, not an interpolation.** `R1090(x0, y0, x1, y1, tag)` computes the segment length with `L05532` (a call of L05533) and keeps it at `L05534` (a double store at `+0x60`); calls the shape generator with the horizontal segment `(x0,y0)` to `(x0+len, y0)` at `L05535`; divides the two real deltas by that length at `L05536` and `L05537` to get a cosine and a sine; and maps every generated point through that rotation before truncating it to two words. `R1091` is the shape: it calls `rand` at `L05538`, `L05539` and `L05540`, takes `rand()%7` (`L05541`) with a random sign and `rand()%50` (`L05542`), accumulates the first into a value clamped to the `.rdata` pair `3.0` and `-3.0` (`L05543`, `L05544`) and the second, scaled by `0.01` (`L05545`), into a running abscissa, ends the walk when that abscissa passes `0.7` (`L05546`, `L05547`), and smooths the result over every second point with the factor `-0.5` (`L05548`, `L05549` (a call of R1092)). The walk is **rejected and rerun**, not clamped: `L05550` multiplies the segment length by the double at `L05551`, `0.15`, `L05552` compares every generated ordinate's distance from the straight line against the stack double at `+0x54`, and `L05553` calls R1091 re-enters the same routine with the same four arguments on failure. Both endpoints are screen-space fields of a drawable: the projectile's own `+0x50` and `+0x54 - +0x10 - +0x68`, and the resolved target's `+0x60` and `+0x64 - +0x68 - +0x10`. **G2:** the ten constants are `.rdata` doubles and the moduli are immediates, so the bolt's raggedness is an engine limit and no data edit changes it
+**Confidence.** High for the random source structure and the enumerated local
+pass order. The former Medium parametric reading is superseded by the exact
+operand/control-word recipe in MAGIC-275, MAGIC-277 and MAGIC-282. The
+endpoint-order Unknown is closed by MAGIC-275's two producer captures.
+Native entry CW and cache/frame scheduling remain Unknown in those claims.
 
-**Confidence.** High for the structure: the length, the canonical call, the two divides, the three `rand` calls, the two moduli, the clamps, the termination bound, the self-call and the smoothing call are each their own instruction in a dumped listing, and the ten doubles are read out of the PE by section walk. High for the negative that discriminates it from an interpolation: the two draw arms never read the object's own position. Medium for the parametric reading — the mapping from the walk's internal units to screen pixels is an FPU reading and each constant's role is inferred from the instruction that consumes it rather than from a named field. **Unknown:** which endpoint is the polyline's origin, because the four double arguments are built through interleaved stack-adjust and float-store sequences and the argument order was not settled to instruction precision
+**Evidence.** [EXP-0178](../experiments/EXP-0178-bolt-path/),
+[EXP-0504](../experiments/EXP-0504-bolt-figure/).
 
-**Original status.** ✔ promoted
-
-**Evidence.** [EXP-0178](../experiments/EXP-0178-bolt-path/)
+**Amended.** The unqualified no-interpolation clause and the -0.5 smoothing
+attribution are partially retracted in claims/retracted.md. The random-walk
+source, gate, rotation and whole-figure retry stand; the former parametric
+reading and endpoint Unknown are superseded by MAGIC-275 through MAGIC-278
+and MAGIC-282.
 
 ### MAGIC-BOLTLIST-071
 
@@ -878,13 +893,17 @@ on this code read is not independent corroboration.
 
 ### MAGIC-BOLTSTILL-072
 
-**(rom.exe) A Lightning or Prismatic Spray projectile never moves, and its 13 ticks are a countdown rather than a distance.** The driver computes a per-axis step before its switch — `L05576`, `L05577` and `L02830`, three signed divides by `actionsegments` — into stack slots, and **only the default arm applies it**: `L05578`..`L05579` read the three step values and store them as the 32-bit fields `+0x8`, `+0x10` and `+0xc`, the value read from stack slot `0x20` going to `+0x10` and the other two going to `+0x8` and `+0xc` respectively. Pictures 34 and 36 take arm `L05580` instead — a bias of −1, `L02882` (a bound at 0xc) and `L05581` (a jump through the table at `L02881` with stride 4) — whose thirteen entries write only `+0x70`, the sheet frame. So the object's `x`, `y` and `z` keep the spawner's values for its whole life, while `MAGIC-CASTSPAWN-033`'s flight-length arm `L05582` gives it `actionsegments = 13` and `L05583`/`L02836` (a decrement stored to the 32-bit field `+0xa0`) counts that down once per tick. The target is still re-read every tick before the switch (`L02824`, `L02825`, `L02826`), and the producer resolves it again itself, so the figure follows a moving target by being regenerated onto it rather than by travelling toward it. **G2:** the arm assignment is the `.text` switch table at `L02879` and the length is the `.text` switch table at `L05380`, so making these two spells travel is an engine edit
+**(rom.exe) A Lightning or Prismatic Spray projectile keeps its raw position; normal caster construction supplies a 13-call countdown rather than distance.** The driver computes a per-axis step before its switch — `L05576`, `L05577` and `L02830`, three signed divides by `actionsegments` — into stack slots, and **only the default arm applies it**: `L05578`..`L05579` read the three step values and store them as the 32-bit fields `+0x8`, `+0x10` and `+0xc`, the value read from stack slot `0x20` going to `+0x10` and the other two going to `+0x8` and `+0xc` respectively. Pictures 34 and 36 take arm `L05580` instead — a bias of −1, `L02882` (a bound at 0xc) and `L05581` (a jump through the table at `L02881` with stride 4) — whose thirteen entries write only `+0x70`, the sheet frame. So on this action-1 path the object's `x`, `y` and `z` keep the spawner's values, while normal caster construction's `MAGIC-CASTSPAWN-033` flight-length arm `L05582` gives it `actionsegments = 13` and `L05583`/`L02836` (a decrement stored to the 32-bit field `+0xa0`) counts that down once per tick. The target is still re-read every tick before the switch (`L02824`, `L02825`, `L02826`), and the producer resolves it again itself, so the figure follows a moving target by being regenerated onto it rather than by travelling toward it. **G2:** the arm assignment is the `.text` switch table at `L02879` and the length is the `.text` switch table at `L05380`, so making these two spells travel is an engine edit
 
 **Confidence.** High. The three signed divides, the four position writes of the default arm, the arm's own three instructions and the decrement are each their own instruction in a dumped listing and re-read from the raw image bytes; the arm assignment is read out of the PE by section walk (`tools/castflight -mode tables`), which excludes the competing model that the 34/36 arm falls through into the default one
 
 **Original status.** ✔ promoted
 
 **Evidence.** [EXP-0178](../experiments/EXP-0178-bolt-path/)
+
+**Amended.** The universal 13-tick clause is narrowed to normal caster
+construction in claims/retracted.md. MAGIC-281 supplies direct-message,
+source-cell and saved-state lifetimes. Stationary raw-coordinate stores stand.
 
 ### MAGIC-TRAIL-073
 
@@ -2188,7 +2207,7 @@ those behaviors.
 | MAGIC-269 | The CProjectile light selector deposits vertex stamps for pictures 10, 12, 13, 34 and 36 during the client view rebuild. | High | ● active (amended) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
 | MAGIC-270 | Lightning and Prismatic Spray overwrite the four vertices of each admitted drawn-path cell with the low byte of 10 times phase. | High | ● active | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
 | MAGIC-271 | Fire Arrow, Fire Ball flight and its explosion use clipped uniform point stamps with radii 0, 1 and an explosion phase table. | High | ● active | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
-| MAGIC-272 | Spell light is rebuilt per client frame; normal caster construction gives Lightning and Prismatic Spray 13 successful phase steps before shared cleanup. | High | ● active (amended) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+| MAGIC-272 | Spell light is rebuilt per client frame; normal caster construction gives Lightning and Prismatic Spray 13 successful phase steps before shared cleanup. | High | ● active (amended, partially retracted) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-273 | Dynamic lighting gates point stamps and bit-clear terrain lighting; bolt light still reaches units with the option off, while native activation and visible results of the L10964 & 2 set branch are Unknown. | High / Unknown | ● active (amended, partially retracted) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
 | MAGIC-274 | The measured spell light is client draw state; the direct Prj SAV program saves 16 source scalars and omits the light grids and drawn-path array. | High / Medium | ● active | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
 
@@ -2240,7 +2259,7 @@ The helper subtracts view scroll. For nonnegative i,j <= radius it accepts i*i+j
 
 R1657 copies the previous stamp at L13419 when L10964 == 2. It clears view+0xa8 to 255 at L13420 and its write count to zero at L13421 before object vt+0x40 calls. It finishes by calling R0608 at L13422. In the original reset control, four stamped vertices become unstamped and ambient 48 gives unit level 12 without a source. The current frame does not subtract an expired object's old contribution.
 
-For pictures 34/36 from normal caster construction, R0558 writes phases 4,3,2,1,0,1,2,1,0,1,2,3,4 on successful calls 1..13 (MAGIC-CASTSPAWN-033, MAGIC-BOLTSTILL-072). The stamp bytes on that route are 40,30,20,10,0,10,20,10,0,10,20,30,40. The probe supplies actionsegments = 13; it does not enumerate every construction route. The direct 0x8b message route takes actionsegments from msg+0xf: 5 for spells 13 and 14, giving phases 4,3,2,1,0 (MAGIC-DELIVER-035). A loaded object resumes from its saved actionsegments and actionphase (MAGIC-274). The common tail decrements actionsegments and returns 1; the next call with zero returns 0. The shared updater R0334 calls vt+0x3c at L02474, collects zero-return IDs, unlinks their store nodes and calls the scalar destructor at L13423. That cleanup arm has no picture filter. Removal prevents later deposits by that object. SAV-1133 supports this positive shared cleanup route.
+For pictures 34/36 from normal caster construction, R0558 writes phases 4,3,2,1,0,1,2,1,0,1,2,3,4 on successful calls 1..13 (MAGIC-CASTSPAWN-033, MAGIC-BOLTSTILL-072). The stamp bytes on that route are 40,30,20,10,0,10,20,10,0,10,20,30,40. The probe supplies actionsegments = 13; it does not enumerate every construction route. The direct 0x8b message route takes actionsegments from msg+0xf: 5 for spells 13 and 14, starting actionphase at -1 and giving phases 0,4,3,2,1 (MAGIC-DELIVER-035, MAGIC-281). A loaded object resumes from its saved actionsegments and actionphase (MAGIC-274). The common tail decrements actionsegments and returns 1; the next call with zero returns 0. The shared updater R0334 calls vt+0x3c at L02474, collects zero-return IDs, unlinks their store nodes and calls the scalar destructor at L13423. That cleanup arm has no picture filter. Removal prevents later deposits by that object. SAV-1133 supports this positive shared cleanup route.
 
 Fire Arrow and Fire Ball flight retain their fixed stamp levels while present. On normal caster construction, MAGIC-CASTSPAWN-033 supplies distance-derived countdowns dist/200 for picture 10 and dist/384 for 12; the direct message route instead supplies its message counter (MAGIC-DELIVER-035). The normal picture-13 explosion receives 22 ticks (MAGIC-BURSTLIFE-034, amended only for staged-area cadence), with its two-tick sheet clock in ANIM-PROJ-025. The positive shared cleanup route applies when their driver returns zero. MAGIC-BOLTSTILL-072 supplies the existing bolt countdown authority. The bolt probe executes counter/phase instructions while skipping only the separate geometry call.
 
@@ -2248,7 +2267,7 @@ Fire Arrow and Fire Ball flight retain their fixed stamp levels while present. O
 
 **Unknown.** Exact native spawn/removal frame ordering and scheduling were not observed. A timed native cast is required to join successful driver calls to visible frames.
 
-**Amended.** The universal 13-step clause is narrowed to normal caster construction; claims/retracted.md records the former wording. The direct 0x8b and loaded-object routes use their own supplied or saved counters. Frame reset and positive shared cleanup stand.
+**Amended.** The universal 13-step clause is narrowed to normal caster construction; claims/retracted.md records the former wording. The direct 0x8b and loaded-object routes use their own supplied or saved counters. The direct sequence formerly written 4,3,2,1,0 is also partially retracted: MAGIC-281 executes its initializer and measures 0,4,3,2,1. Frame reset and positive shared cleanup stand.
 
 ### MAGIC-273
 
@@ -2275,3 +2294,311 @@ The direct Prj writer in R0084, L13430..L08365, and loader in R0099, L13431..L13
 **Confidence.** High for the positive client writes and complete direct Prj scalar field program. Medium for absence of independent light persistence and simulation lighting outside these routines: other alias/helper populations were not independently enumerated.
 
 **Unknown.** Identical Lightning/Prismatic light and random geometry after original LOAD before the first client tick. The bounded SAV population in SAV-1152 has no picture14+ witness. A live-object SAV, original LOAD, frame observation, post-load ticks and resave comparison would settle that boundary. Other simulation or SAV routes require their own enumeration.
+
+## Bolt figure arithmetic and drawing
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-275 | Both inspected bolt producers pass the projectile display point first and the resolved target display point second; rotation subtracts the first generated sample, then truncates to coordinate words. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-276 | The bolt walk admits only deflection magnitude greater than 2 and abscissa step greater than stored 0.15; accepted steps alternate sign, clamp the ordinate and stop at abscissa at least stored 0.7. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-277 | The bolt builder inserts midpoint knots with -0.5, fits overlapping quadratic triples, and samples each triple every six canonical x units over a half-open interval. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-278 | The bolt builder rejects a completed sampled figure only when a sampled ordinate exceeds the stored 0.15-times-length band; retry consumes the continued random stream and rebuilds every point. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-279 | The bolt walk reads the current thread's CRT seed, shared with same-thread callers; the bounded direct-call census names potential consumers but does not determine the native interval between bolt ticks. | High / Medium / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-280 | The selected software bolt drawer stamps each stored point once, in list order, using the own-table forward .16a receiver; sequential table blending and rectangle clipping preserve that order. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-281 | Normal caster, direct 0x8b and source-cell 0x8c bolt routes have different initial phase/countdown pairs; every live action-1 driver call invokes geometry after phase selection and before countdown decrement. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-282 | Finite bolt length uses a scaled PC64 hypot with explicit binary64 spills and restores the incoming control word; later arithmetic inherits that word, whose precision and rounding can change integer points. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+
+### MAGIC-275
+
+The original producer calls L05528 and L05527 pass four doubles in this
+order. Each SUB wraps to 32 bits before the result is interpreted as signed.
+
+```
+Ax = s32(projectile+50)
+Ay = s32wrap(projectile+54 - projectile+10 - projectile+68)
+Bx = s32(target+60)
+By = s32wrap(target+64 - target+68 - target+10)
+```
+
+FILD dword and FSTP qword preserve each resulting integer exactly. Picture
+34 passes tag 34; picture 36 passes the original victim-list index modulo 7.
+Twenty-two original-producer controls execute construction, zero-size array
+clear and target hash lookup without substitution. Independent field changes
+and signed-wrap cases distinguish the endpoint order and every operand.
+MAGIC-261 and MAGIC-265 supply the upstream raw construction origins; these
+display fields are later inputs, not interchangeable raw world coordinates.
+
+Let R round each arithmetic instruction under the incoming x87 control word,
+and S store binary64 under that word. MAGIC-282 defines L. The horizontal end
+is H=S(R(Ax+L)); the walk uses D=S(R(H-Ax)), not an algebraically substituted
+L. Real deltas are dx=S(R(Bx-Ax)) and dy=S(R(By-Ay)). Rotation stores
+c=S(R(dx/L)), s=S(R(dy/L)). For final canonical arrays X and Y:
+
+```
+u = R(X[i]-X[0]); v = R(Y[i]-Y[0])
+rx = R(R(R(c*u)+X[0])-R(s*v))
+ry = R(R(R(c*v)+R(s*u))+Y[0])
+```
+
+The original R0279 helper saves CW, ORs its RC bits with 0x0c00, FISTPs
+to signed i64, restores CW and returns the low/high dwords. The point stores
+only the low 16 bits of each result. The record is i16 x, i16 y, i16 zero,
+u8 tag, u8 zero. This is truncation then word wrapping, not screen clipping.
+The origin is the projectile end; the first generated Y can differ from Ay
+by floating evaluation residue. Subtracting the literal Ay instead of Y[0]
+does not implement the displayed instruction sequence.
+
+**Confidence.** High for local argument order, conversions and ordered
+rotation operations. The original instruction capture and native fragment
+controls agree. This does not establish native cache refresh order.
+
+### MAGIC-276
+
+R1091 clears output arrays and starts raw arrays t=[0], q=[0]. It
+sets verticalScale=S(R(L*0.03)) and band=S(R(L*0.15)). All constants are
+stored binary64 values; MAGIC-282 names their bits and precision boundary.
+The first rand selects sign +1 for an odd return and -1 for an even return.
+Each attempt consumes two further draws, even when it is not admitted:
+
+```
+v = (rand()%7)*sign
+d = S(R((rand()%50)*stored_0.01))
+if abs(v)>2 and d>stored_0.15:
+    qnext = clamp(R(q[-1]+v), -3, +3)
+    tnext = S(R(t[-1]+d))
+    append(qnext, tnext)
+    sign = S(R(sign*stored_minus_1))
+continue while t[-1] < stored_0.7
+```
+
+The initial sign draw is at L05538, the two attempt draws at L05539 and
+L05540. The magnitude and step comparisons branch on less-or-equal at
+L13433/L13434. Magnitudes 0,1,2 and step residues 0..15 are rejected.
+The clamp and signed-scale store precede the next attempt. If the last t is
+at least 1, the builder removes that last raw t/q pair, then appends (1,0).
+Otherwise it appends (1,0) directly. The terminal raw endpoint is not the
+last stamped point; MAGIC-277 defines sampling.
+
+**Confidence.** High for this complete local walk and finite predicates.
+Original instructions distinguish strict admission, alternating accepted
+steps and independent pair consumption. No finite maximum retry count is
+claimed.
+
+### MAGIC-277
+
+Transform raw point j by the ordered, stored operations:
+Px=S(R(R(t[j]*D)+Ax));
+Py=S(R(R(R(t[j]*0)+R(q[j]*verticalScale))+Ay)).
+The local knot arrays start with P0 and P1. For each j from 2 through the
+penultimate raw point, append M then Pj, where each component is
+M=S(R(previous-R(R(Pj-previous)*stored_minus_half))). Here previous is
+the last knot P(j-1). The exact factor -0.5 creates a midpoint; it does not
+scale a quadratic coefficient. Append the canonical terminal endpoint last.
+
+R1092 receives overlapping triples K[0:3], K[2:5], K[4:7], in that
+order. It computes coefficients A,B,C for a quadratic y=(A*x+B)*x+C.
+The reproducible coefficient program has 43 ordered operations and ten
+binary64 stores. It preserves the determinant cancellation. With tN denoting
+its arithmetic temporaries, outputs are A=S(t42), B=S(t41), C=S(t43). The coefficient
+program and the complete instruction operands are in the evidence. A
+closed-form polynomial is a real-arithmetic interpretation, not permission
+to reorder those operations.
+
+Each triple starts with held x=first.x. While held x<third.x, evaluate
+R(R(R(R(A*heldX)+B)*heldX)+C), store y to binary64, and append binary64 x/y
+to generator arrays +94/+a8, count +98/+ac. The next held x is
+R(storedPreviousX-stored_minus_6). It is retained on the x87 stack for the
+comparison and polynomial; x's array store is a separate rounding boundary.
+The last endpoint is excluded. Shared triple starts are included once.
+Six is horizontal canonical spacing, not arc length; the final interval can
+be shorter, and rotation/truncation can change integer spacing or duplicate
+points. Drawing does not insert intermediate stamps.
+
+**Confidence.** High for local knot order, coefficient instruction program
+and half-open six-unit sampling. Twenty native helper controls cover four
+distinct triples and five CW values. All 33 PC53-nearest helper sample y
+words match the independent 43-operation evaluator bit for bit.
+
+### MAGIC-278
+
+After all quadratic triples, L13435..L13436 visits every sampled Y in
+array +a8, count +98. It accepts abs(R(Y[i]-Ay))<=stored band; it retries
+when the comparison is greater, not when equal. The band is
+S(R(L*stored_0.15)), not a screen-space clipping rectangle.
+
+The recursive call at L05553 receives the same four endpoint arguments.
+The next invocation clears its point/raw arrays and consumes the continued
+CRT stream; no rewind or per-bolt seed occurs. It replaces the complete
+sampled output rather than deleting offending points. Rotation and word
+conversion follow acceptance. No deduplication or point clipping appears
+in these complete producer/generator/rotation bodies. Screen clipping is
+per stamp in MAGIC-280.
+
+**Confidence.** High for the bounded pass order and strict retry predicate.
+Among 300 native supplied-state controls, 58 encounter one rejected figure;
+none exceeds one retry in that population. This is not a global retry bound.
+
+### MAGIC-279
+
+Original rand R0179 and srand R0291 both call R0228. TlsGetValue
+uses index L13437; on null the getter allocates 0x74 bytes and installs a
+block with TlsSetValue. Seed is block+14. Initializer L12226 writes 1.
+The recurrence is state=214013*state+2531011 modulo 2^32; return is
+(state>>16)&0x7fff. CRT-created threads initialize their own block and do
+not inherit the creator's seed.
+
+Three direct srand sites take timeGetTime at L12227 and L12228, and
+time(0) at L00376. The walk has no local seed. Synchronous routes R0260
+and R0454 call simulation tick, client dispatch and message 0x401 on the
+same thread. The separate callback R0261 is created through CRT R0457
+and has its own block. Client/simulation sharing therefore depends on route.
+
+Raw E8 scanning covers all executable PE sections. It retains 88 rand sites:
+87 inventory-boundary matches across 44 owners and orphan L13438, whose
+local start/fallthrough is decoded but native reachability is unknown. It
+also retains three srand sites, 44 integer-range wrapper calls and one float
+wrapper call. The whole-file dword scan finds no rand/srand/getter entry
+pointer; computed addresses remain outside this population.
+
+Potential same-thread consumers include Heal R1103, Drain R1104,
+music selection R2050 and shuffle R1230, AI spellbook R0009,
+idle turn R0205, roaming R0155, and the measured map/actor/item range
+wrapper callers. A refused walk attempt and each regenerated Prismatic link
+also advance the stream. These are possible consumers, not a runtime interval
+list. One figure is reproducible from the pre-generation thread seed plus
+the numeric inputs/CW. Cast, object and tick identities alone do not fix it.
+
+**Confidence.** High for TLS, recurrence, initialization and the named seed
+operand sources. Medium for the bounded potential-caller classification.
+Unknown for the executed caller sequence, thread assignment and seed of a
+native bolt. A trace of thread IDs, srand arguments, every rand seed/return
+and consecutive walk entries would settle the chosen mode's interval.
+
+### MAGIC-280
+
+Each arm of R0556 visits point indices 0..count-1 and sends one call
+to sprite vt+18: (i16x-8,i16y-8,frame,0,0). Fixed sheets are record 34
+lightnin, five 16x16 frames, and record 36 chain, thirty-five 16x16 frames.
+Frame34=phase. Frame36=phase+5*u8tag; generator tag is victim index modulo 7.
+All points of one link share its frame, while distinct links can differ.
+There is no facing fold, interpolation, b-sibling pass or trail in these arms.
+The thirteen phase values are 4,3,2,1,0,1,2,1,0,1,2,3,4 for actionphase 1..13.
+Outside that range the driver retains the previous phase. MAGIC-281 names
+construction-dependent sequences.
+
+The selected own-table .16a receiver is R1785, forward decoder R1518.
+It uses sprite+1c and the current framebuffer. For each literal source word W,
+it adds read16(sourceTable+W) to a destination-table u16 modulo 65536.
+Normal destination offset is 2*entries+2*old+((W<<8)&0x1e0000).
+Low-memory selector 1 uses 2*(old>>3)+((W<<5)&0x3c000).
+For installed even words, L=(W>>9)&15; normal source palette scaling is
+(L+1)/16 and destination scaling (15-L)/16, separately quantized and packed.
+Low-memory source uses /18 and destination row L, not the normal extra row.
+SPR16A-080 and PAL-MODE4-010 supply table-generation authorities.
+
+Each stamp uses active [left,right) x [top,bottom) globals L01503..14,
+buffer L01168 and stride L01511. Whole exterior stamps return; crossing
+stamps trim forward literal runs and skip excluded source words. No point
+list entry changes. Later stamps blend with earlier output.
+Normal projectile insertion joins view+9d4 to software painter R0379's
+collection pass: buckets ascending, then node+0 chains; payload vt+28 is
+called at L02994 with (0,0,0). This follows selector-3 shadows and precedes
+retained-area/selector-3 body passes, markers/bars and shroud.
+
+**Confidence.** High for the joined software path and finite measurement:
+22 stamp captures, 17 ramp cases, three collection cases and 1120 installed
+frame/clip/memory-mode decoder comparisons. EN/RU executables are one witness.
+Unknown for native framebuffer words, packing masks, clip, stride, tables,
+current collection and frame gates. Capture them before/after drawing and
+byte-compare the resulting buffer to settle native pixels and overlap order.
+
+### MAGIC-281
+
+The original driver tests nonzero actionsegments before geometry. On action 1
+it increments actionphase, selects/retains phase, invokes vt+50, then decrements
+actionsegments and returns 1. With zero it returns 0 before either operation.
+Other actions bypass geometry. The thirteen-entry ramp is bounded unsigned;
+an actionphase outside 1..13 preserves the preceding phase.
+
+| Named construction | Initial actionphase | Counter | Successful phase values |
+|---|---:|---:|---|
+| Normal caster, pictures 34/36 | 0 | 13 | 4,3,2,1,0,1,2,1,0,1,2,3,4 |
+| Direct 0x8b, spells 13/14 | -1 | message 5 | 0,4,3,2,1 |
+| Source-cell 0x8c, picture 36 | -1 | 13 | 0,4,3,2,1,0,1,2,1,0,1,2,3 |
+| Loaded Prj | saved value | saved counter | Ramp indexed by saved value+call, otherwise retained phase |
+
+The direct initializer writes -1 at L02569; source-cell writes -1 at
+L02570 and 13 at L03020. The base constructor initializes phase to 0.
+N positive saved remaining calls do not imply N new ramp entries. The next
+zero-counter call returns 0; shared updater R0334 collects that result,
+unlinks the node and calls the scalar destructor at L13423.
+
+Producer admission still matters: unresolved picture-34 target retains its
+previous list; picture 36 clears then appends only resolved victim entries,
+in their original index order. The schedule promises a vt+50 invocation,
+not a resolved target or a visible frame. MAGIC-BOLTLIST-071 (superseded in
+part) and MAGIC-274 supply list/loaded-scalar boundaries.
+
+**Confidence.** High for executed original route initializers and 96 driver
+calls across 17 controls. Geometry is captured at a substituted vt+50 stub;
+these controls establish call timing and state, not random path pixels.
+Unknown for native spawn/update/draw/removal ordering, redraw counts per
+tick and loaded first draw. A timed native cast or live-object LOAD trace
+would settle the selected route's visible-frame schedule.
+
+### MAGIC-282
+
+L05533 delegates the finite hypot to L13439. For differences of
+signed-i32 endpoints and incoming masked precision exception, it installs
+CW 0x133f: PC64, nearest, all exceptions masked. It selects m=max(abs(dx),
+abs(dy)); m=0 restores caller CW and returns +0. For m>0, R64 means x87
+64-bit-significand arithmetic, nearest; S53 means a separate binary64 store.
+
+```
+a=S53(R64(abs(dx)/m)); b=S53(R64(abs(dy)/m))
+q=S53(R64(R64(a*a)+R64(b*b)))
+h=S53(R64(sqrt(q)))
+(fm,em)=frexp(m); (fh,eh)=frexp(h)
+p=S53(R64(fm*fh)); ep=encodedExponent(p)-1022
+n=ep+em+eh
+top16=(oldTop16(p)&0x800f)|((n+1022)<<4)
+```
+
+Normal frexp replaces exponent bits with 1022 and reports oldExponent-1022.
+The last helper rebuilds p's exponent, preserving sign/fraction; it is not
+another multiply. FSQRT runs with CW 0x037f, then restores 0x133f; the masked
+precision path can add an equivalent binary64 spill. Hypot stores length,
+restores caller CW, then reloads length. It must not be replaced by one
+binary64 sqrt(dx*dx+dy*dy).
+
+Later operations use caller PC/RC, including coefficient arithmetic, stores,
+walk comparisons, midpoint operations and rotation. __ftol temporarily sets
+RC to truncation and restores it. Stored constants' bits are:
+
+| Value | Binary64 bits |
+|---|---|
+| -6 | c018000000000000 |
+| 0.15 | 3fc3333333333333 |
+| 0.03 | 3f9eb851eb851eb8 |
+| 1 | 3ff0000000000000 |
+| -1 | bff0000000000000 |
+| 0.01 | 3f847ae147ae147b |
+| 2 | 4000000000000000 |
+| 3 | 4008000000000000 |
+| -3 | c008000000000000 |
+| 0.7 | 3fe6666666666666 |
+| -0.5 | bfe0000000000000 |
+
+**Confidence.** High for the finite masked length sequence, exact operand
+bits and conditional arithmetic recipe. Three hundred original native x86
+fragment controls use six endpoint pairs, ten seeds and five explicit CWs.
+Against CW027f, integer point lists change in 35/60 PC64, 38/60 round-down,
+32/60 round-up and 41/60 truncating-round controls. Each completed host run
+executes original geometry, arrays, rand, hypot and conversion; allocation,
+free and TLS access are controlled substitutions. No application entry runs.
+
+**Unknown.** The CW at a native bolt entry was not observed. MAGIC-092
+records prior startup CW027f, not a bolt-entry witness. A native breakpoint
+must capture CW before R1090, alongside endpoints, TLS seed and target
+resolution order. Cache scheduling, arbitrary IEEE-special/unmasked inputs
+and native buffer identity are outside these controls.

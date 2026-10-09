@@ -1124,8 +1124,8 @@ type.
 | ANIM-PROJ-026 | The projectile's draw: the frame index is `Phases * facing + phase`, `Flip` HALVES the sheet exactly as it does for a unit, and two sprites outside the registry are the smoke. | High / Medium | ● active | [EXP-0139](../experiments/EXP-0139-spell-pictures/) |
 | ANIM-CAST-027 | (rom.exe) The projectile draw is not uniform: `R0556` switches on the picture id, with six special arms and a smoke trail in the default one. | High / Unknown | ● active | [EXP-0140](../experiments/EXP-0140-cast-art-drawn/) |
 | ANIM-PHASECLOCK-028 | (rom.exe) A projectile advances one sheet frame every TWO game ticks, and four picture ids replace that clock with their own. | High | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
-| ANIM-BOLTDRAW-034 | (rom.exe) A polyline point is an 8-byte record and every point of one figure is stamped at the same sheet frame, with no facing fold and a hard-coded centring. | High | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
-| ANIM-BOLTRAMP-035 | (rom.exe) Pictures 34 and 36 replace the projectile frame clock with a fixed 13-step ramp, and that ramp and the two shipped sheets tile each other exactly. | High | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
+| ANIM-BOLTDRAW-034 | Each 8-byte bolt point is stamped once; all points of one link share its sheet frame, with picture 36 adding five times the link tag and both arms centring by eight pixels. | High | ✔ promoted (partially retracted) | [EXP-0178](../experiments/EXP-0178-bolt-path/); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| ANIM-BOLTRAMP-035 | (rom.exe) Pictures 34 and 36 replace the projectile frame clock with a fixed 13-step ramp, and that ramp and the two shipped sheets tile each other exactly. | High | ✔ promoted (amended) | [EXP-0178](../experiments/EXP-0178-bolt-path/); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 
 ### ANIM-PROJ-025
 
@@ -1287,7 +1287,7 @@ picture 51 and 60 exceptions stand.
 The record is written in the generator's rotation loop:
 `L02884` and `L02885` store the two 32-bit halves of an 8-byte record slot
 (offsets 0 and 4 of slot `index * 8`), assembled from a zero 16-bit word
-(`L02886`, local stack offset `0x2c`), the caller's tag byte read from `+0x28` of the caller's object
+(`L02886`, local stack offset `0x2c`), the tag byte argument read from `[EBP+0x28]` in the generator's stack frame
 (`L02887`/`L02888`, local stack offset `0x2e`) and a zero byte (`L02889`, local stack offset `0x2f`), plus two coordinate words each
 produced by the CRT float-to-int helper R0279 on a rotated double. So the layout is
 `int16 x; int16 y; int16 zero; uint8 tag; uint8 zero`. Both draw arms iterate
@@ -1315,6 +1315,12 @@ bytes at their own addresses by `tools/boltpath -mode asserts`, 74 of 74 holding
 on three roots. The `RotationPhases` values are a corpus measurement over both
 preserved roots (`tools/castflight -mode map`)
 
+**Amended.** The same-frame headline is narrowed from an entire figure to
+one link; picture 36 can assign distinct frames to distinct links. The tag
+operand is a stack argument, not caller-object+0x28. Those clauses are
+partially retracted in claims/retracted.md; MAGIC-275 and MAGIC-280 supply
+the exact argument and draw scopes. Record layout and body formulas stand.
+
 ### ANIM-BOLTRAMP-035
 
 `ANIM-PHASECLOCK-028` reports that these two picture ids take their phase from a
@@ -1325,8 +1331,8 @@ table's thirteen entries in order are the arms `L02900`, `L02901`,
 `L02878`, `L02903`, `L02902`, `L02901`, `L02900`, which write `+0x70` =
 **4, 3, 2, 1, 0, 1, 2, 1, 0, 1, 2, 3, 4** for `actionphase` 1 through 13. The
 index is `actionphase - 1` and `actionphase` is incremented once per tick at
-`L02871` (an increment), so the ramp is one value per tick and consumes exactly the
-object's 13-tick life (`MAGIC-BOLTSTILL-072`). The fifth constant is 0, which
+`L02871` (an increment), so the ramp is one value per tick and consumes the normal
+caster route's 13 successful calls (`MAGIC-BOLTSTILL-072`, amended). The fifth constant is 0, which
 `ANIM-PHASECLOCK-028` did not list. Two independent quantities agree on the
 frame budget: the ramp's range is 0 to 4 and `lightnin` ships **5** phases;
 picture 36 adds `5 * (linkIndex mod 7)` to the same ramp, so its range is 0 to
@@ -1343,6 +1349,11 @@ frame count in a shipped archive, measured on both preserved roots
 The EN and RU `rom.exe` are one image (SHA-256 `942e9b72…`), so their agreement
 on this code read is not independent corroboration. The agreement between the per-root
 data stands as corroboration: the archive frame counts are separate files in each root.
+
+**Amended.** The universal 13-tick lifetime clause is narrowed to normal
+caster construction in claims/retracted.md. MAGIC-281 preserves the ramp
+but measures route-specific initial phases and countdowns. The thirteen
+values and shipped frame-budget agreement stand.
 
 ## Retained area effects
 

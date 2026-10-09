@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3066. Observation: 95. Static analysis: 2538. Mixed: 433.
+Claims labelled: 3074. Observation: 95. Static analysis: 2545. Mixed: 434.
 
 ## Ledger ai
 
@@ -457,8 +457,8 @@ Claims labelled: 3066. Observation: 95. Static analysis: 2538. Mixed: 433.
 | ANIM-PROJ-026 | static analysis | ● active |
 | ANIM-CAST-027 | static analysis | ● active |
 | ANIM-PHASECLOCK-028 | static analysis | ● active (amended, partially retracted) |
-| ANIM-BOLTDRAW-034 | static analysis | ✔ promoted |
-| ANIM-BOLTRAMP-035 | static analysis | ✔ promoted |
+| ANIM-BOLTDRAW-034 | static analysis | ✔ promoted (partially retracted) |
+| ANIM-BOLTRAMP-035 | static analysis | ✔ promoted (amended) |
 | ANIM-AREAPHASE-029 | static analysis | ● active |
 | ANIM-AREAOFFSET-030 | static analysis | ● active |
 | ANIM-AREANOSTATE-031 | static analysis | ● active |
@@ -938,9 +938,9 @@ Claims labelled: 3066. Observation: 95. Static analysis: 2538. Mixed: 433.
 | MAGIC-FIREDIV-047 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-RING-048 | static analysis | ✔ promoted |
 | MAGIC-BOLTGATE-069 | static analysis | ✔ promoted |
-| MAGIC-BOLTSHAPE-070 | static analysis | ✔ promoted |
+| MAGIC-BOLTSHAPE-070 | mixed | ✔ promoted (partially retracted, superseded) |
 | MAGIC-BOLTLIST-071 | static analysis | ✔ promoted (superseded) |
-| MAGIC-BOLTSTILL-072 | static analysis | ✔ promoted |
+| MAGIC-BOLTSTILL-072 | static analysis | ✔ promoted (amended) |
 | MAGIC-TRAIL-073 | static analysis | ✔ promoted |
 | MAGIC-BOLTEND-074 | static analysis | ✔ promoted |
 | MAGIC-AREADRAW-049 | static analysis | ● active |
@@ -1034,9 +1034,17 @@ Claims labelled: 3066. Observation: 95. Static analysis: 2538. Mixed: 433.
 | MAGIC-269 | static analysis | ● active (amended) |
 | MAGIC-270 | static analysis | ● active |
 | MAGIC-271 | static analysis | ● active |
-| MAGIC-272 | static analysis | ● active (amended) |
+| MAGIC-272 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-273 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-274 | static analysis | ● active |
+| MAGIC-275 | static analysis | ✔ promoted |
+| MAGIC-276 | static analysis | ✔ promoted |
+| MAGIC-277 | static analysis | ✔ promoted |
+| MAGIC-278 | static analysis | ✔ promoted |
+| MAGIC-279 | static analysis | ✔ promoted |
+| MAGIC-280 | static analysis | ✔ promoted |
+| MAGIC-281 | static analysis | ✔ promoted |
+| MAGIC-282 | static analysis | ✔ promoted |
 
 ## Ledger menu
 
