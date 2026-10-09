@@ -59,9 +59,10 @@ R2-ENGINE-147, R2-ENGINE-148
 
 A nonzero slot 775 first clears availability and appends 42 unconditional fixed
 records and one of four records chosen by slots 776 and 781. The types and IDs behind those records are not
-resolved. The measured closure has no unresolved direct callee other than two excluded
-unread callees, and no indirect
-edge in the controller or list helpers. — R2-ENGINE-149, R2-ENGINE-150
+resolved. The earlier controller/list closure excluded two allocation wrappers;
+their selected local contracts are now measured. Their failure callbacks,
+small-block internals and aliasing remain open. — R2-ENGINE-149,
+R2-ENGINE-150, R2-ENGINE-218
 
 Every ordinary departure zeroes slot 773, normalizes 532+i against 512+i, zeroes
 512+i, removes current, clears current and stores 1 at slot 896+ID before the
@@ -77,45 +78,84 @@ slot 896+ID has no ID bound check, so IDs of 128 or above would address outside
 the bank; whether such IDs occur is Unknown. — R2-SESSION-050,
 R2-SESSION-051, R2-SESSION-052
 
-## Second town entry and TALK
+## Inn stage, options and town 2 TALK
 
-The catalog record kind 2 / ID 2 has one constructor, D2.00016, which
-initializes object D2.00018; it is one of 52 constant-argument constructor call
-sites, identical in EN and RU. Whether the constructor is also reached by
-registration or by a save-loaded record is Unknown. — R2-ENGINE-159
+Catalog kind2/ID2 has a measured constructor, but a catalog ID is not an
+EnterInn stage. The client passes an option-array pointer and count pointer.
+EnterInn reads bank768 for every catalog record. All four measured local
+EN/RU call setups use this ABI, guarded by mode member+0x5d8/+0x63c equal
+to 2. Complete mode producers and runtime dispatch remain Unknown.
+— R2-ENGINE-159, R2-ENGINE-215, R2-SESSION-060, R2-SESSION-071,
+R2-SESSION-072
 
-The EnterInn export has case bodies for stages 10, 30, 40, 50, 60, 70, 80, 90,
-100 and 110 and no dedicated body for stage 20. Stage 20 selects the shared
-continuation D2.00019, which seven case bodies jump to and the stage-110 body
-falls into. The continuation is 295 instructions and holds 15 packed-entry
-stores behind compares of bank slots: kind 0 NPC 5 topic 79, kind 0 NPC 675
-topic 78, kind 3 NPC 2022 topics 74..77, 84..87 and 93..96, and kind 3 NPC 22
-topic 62. Whether a stage-20 call satisfies those compares is Unknown. Stage 10
-and stage 30 hold packed TALK entries (kind, topic, NPC) with compares of bank
-slots between them. The stage that the client passes for ID 2 is Unknown.
-— R2-ENGINE-161
+NewGame returns 768=10. Ordinary departures with IDs divisible by ten
+increment it by ten; type2 departures do not. On the named fresh path,
+Leave10 gives20, Leave20 gives30 and admits town2, and Leave30 gives40.
+An admitted town2 revisit after mission30 therefore uses stage40.
+Restored bank, arbitrary writers and the complete event schedule remain
+Unknown. — R2-SESSION-049, R2-SESSION-107
 
-One client body has a separate arm per ID 1, 2 and 3, selected by a compare chain
-on the record member at +4; the arm for ID 2 pushes a music resource key in both
-locales, and indirect calls in that body are unresolved. The EN text member has
-one section each for NPC 22 topic 30 and NPC 2108 topic 31, which match the
-stage-30 packed entries by key scheme. The choice-action producer, the RU
-sections and the first-town arm key are Unknown. — R2-ENGINE-160,
+The export retains its ten stage case bodies and shared continuation.
+Stage30 returns kind3 NPC22/topic30, kind3 NPC2108/topic31 only when
+slot927=0, and kind0 NPC2110/topic39. The stores fill the caller buffer
+and increment its count; they add no catalog record. Kind3 TALK later
+searches catalog type1/ID-topic and admits matching pointers to
+availability only if absent. NPC22/topic30 also sets533=1 and 553=2;
+NPC2108/topic31 has no special bank store; NPC2110/topic39 kind0 makes no
+state change in the selected export. — R2-ENGINE-147, R2-ENGINE-161,
+R2-ENGINE-216, R2-ENGINE-219
+
+The selected client copies packed words in order. Kinds1/2 enter one actor
+vector; other kinds, including 0/3, enter its talk vector. The TALK action
+finds the first word matching the selected actor's low16 key, formats
+npc%dtalk%d, dispatches text, then sends the same full word to TalkTo.
+The stage30 keys are npc22talk30, npc2108talk31 and npc2110talk39.
+Rendered rows, actor lookup success, dialogue alternatives and event
+scheduling remain Unknown. The independently measured ID2 music arm is
+separate from this option contract. — R2-ENGINE-160, R2-ENGINE-220,
 R2-SESSION-059
 
-The selected first EnterInn caller compares EN member+0x5d8 and RU
-member+0x63c with 2; its unequal direct branch skips the local call setup.
-This extends the earlier unmeasured RU clause for this caller only. The other
-three RU windows, the member's meaning and changes across preceding unread calls
-or aliases remain Unknown.
-— R2-SESSION-060, R2-SESSION-072
+The fifteen fixed continuation stores use these predicates:
 
-The final local setup pushes frame-0x14 and then frame-0x94, leaving ECX at
-the second address. It produces no scalar catalog or stage value. The full
-ABI, buffer contract, indirect switch destinations, all-path entry and effects
-of preceding callees or aliases are Unknown; no catalog/stage relation or runtime
-route is established.
-— R2-SESSION-071
+| Option topics / NPC | Kind | Predicate |
+|---|---:|---|
+| 79 / 5 | 0 | currentID3; signed768>60;774=1 |
+| 78 / 675 | 0 | currentID3; signed768>60;770=1 |
+| 74..77 / 2022 | 3 | currentID2;959!=0; all970..973=0 |
+| 84..87 / 2022 | 3 | currentID2; any970..973!=0; all980..983=0 |
+| 93..96 / 2022 | 3 | currentID2; any980..983!=0; all989..992=0 |
+| 62 / 22 | 3 | currentID2; signed768>=60;958=0;949!=0 |
+
+For each NPC2022 family, flags776/781 zero/zero select74/84/93,
+zero/nonzero select75/85/94, nonzero/nonzero select76/86/95 and
+nonzero/zero select77/87/96. These families have no stage compare.
+Each kind3 option requests available type1/ID-topic on TALK; kind0 adds
+no catalog record. — R2-ENGINE-217
+
+The three named callees do not interpret these packed options. D2.00011
+reads record ID. D2.00035/00036 allocate/release storage blocks for list
+nodes through selected heap paths. EnterInn calls only the ID getter.
+Allocation callbacks, small-block internals and aliasing remain Unknown.
+— R2-ENGINE-218
+
+The published action populations for maps 10/20/30 contain0/1/0 instant35
+nodes; the map20 node conditionally writes 772=1. Their 4/6/8 instant36
+nodes target753..756. None of these selected nodes targets a fixed inn
+completion family. Known NewGame/Leave10/Leave20 writers keep those
+families zero, so that named stage20/30 path admits no fixed continuation
+option. This Medium result does not cover every live bank or later visit
+at the same stage. — R2-SESSION-108, R2-SESSION-109
+
+The separate dynamic tail scans i=0..19. It emits kind1/2, low ID i+1,
+when552+i=currentID and 532+i is 1/2, with bit31 iff signed512+i>0.
+An admitted EnterInn call with currentID2 immediately after Leave20 and
+without an intervening writer emits kind1/ID1. The selected topic30 TALK
+also enables kind1/ID2 under the same call and writer conditions. The whole
+continuation is therefore not empty on that stage30 call. — R2-ENGINE-221
+
+The initial kind3/topic10 TALK also writes 769=1. The former
+availability-rather-than-bank clause of R2-SESSION-023 is partially
+retracted; its NewGame and Leave facts stand. — R2-SESSION-110
 
 ## Selected client tail
 

@@ -133,7 +133,7 @@ ROM1 root names (`Character`, `GameOptions`, `SpellBook`, `Objects`,
 No ROM1 campaign record is found in this position; no ROM1 campaign routine was
 compared byte for byte, so that the three blocks replace it is Medium. Field
 meanings outside the campaign bank and selected location fields below remain
-Unknown. — R2-SESSION-021, R2-SESSION-023
+Unknown. — R2-SESSION-021
 
 ### Scenario campaign state
 
@@ -141,7 +141,8 @@ The 4,096-byte bank holds 1,024 DWORD slots. At DLL NewGame return all are
 zero except slot 768=10. The initial current/available record has raw type 2
 and ID 1. Later client character choice writes slots 776/781 from its flag
 bits 0x40/0x80; the DLL return is not the complete client initialization state.
-— R2-SESSION-023
+— R2-SESSION-023 (the initial TALK clause is partially retracted; the
+NewGame-return contract stands)
 
 Ordinary Leave normalizes nonzero slots 532+i to 1 or 2 according to incoming
 512+i, then clears 512+i for i=0..19. It sets completed slot 896+ID and clears
@@ -149,7 +150,8 @@ current. The selected mission-10 case adds record type 1, ID 20 availability and
 output 1. The common divisible-by-ten rule advances stage slot 768 by ten.
 Slot 773 is cleared; nonzero incoming slot 775 invokes an availability
 restoration branch. These are conditional native transitions, not a general
-linear mission sequence. — R2-SESSION-023
+linear mission sequence. — R2-SESSION-023 (the initial TALK clause is
+partially retracted; these Leave clauses stand)
 
 The [departure transition](campaign.md#departure-transition) gives the per-ID
 additions, output values, bank stores and the slot 768 stage rule of the
@@ -158,17 +160,29 @@ output consumer and the array after the bank remain Unknown. — R2-ENGINE-145,
 R2-ENGINE-146, R2-ENGINE-148, R2-ENGINE-149, R2-SESSION-047, R2-SESSION-048,
 R2-SESSION-049, R2-SESSION-050, R2-SESSION-052
 
-The [second town entry](campaign.md#second-town-entry-and-talk) records the
-constructor of catalog record kind 2 / ID 2, the EnterInn stage cases and the
-shared continuation that stage 20 selects. The stage and TALK section used by
-ID 2 remain Unknown. — R2-ENGINE-159,
-R2-ENGINE-161, R2-SESSION-059
+The [inn contract](campaign.md#inn-stage-options-and-town-2-talk) separates
+catalog identity, bank stage and returned options. EnterInn reads bank768;
+its client ABI passes an option array and count pointer. The named fresh
+ordinary departures10/20/30 yield stages20/30/40, so town2 is first admitted
+at 30 and an admitted revisit after mission30 uses 40. Arbitrary bank
+writers, restored state and runtime scheduling remain Unknown.
+— R2-ENGINE-159, R2-ENGINE-215, R2-SESSION-107
 
-The selected first EnterInn caller's final local setup pushes two frame
-addresses and produces no scalar catalog or stage value. The preceding EN/RU
-member compare is measured, but the ABI, buffers, unread callee and alias effects,
-indirect switch destinations, all-path entry, catalog/stage relation and runtime
-entry stage remain Unknown. — R2-SESSION-071, R2-SESSION-072
+Stage30 returns NPC22/topic30 kind3, NPC2108/topic31 kind3 only at 927=0,
+and NPC2110/topic39 kind0. Stores fill the option buffer; kind3 TALK admits
+catalog type1/ID-topic pointers to availability. NPC22/topic30 also
+sets533=1,553=2. The selected client lists kinds0/3 as talk actors and
+passes the complete word after dispatching npc%dtalk%d text.
+— R2-ENGINE-216, R2-ENGINE-219, R2-ENGINE-220
+
+The fifteen fixed continuation predicates require current-record ID and
+bank values; NPC2022 families have no stage gate. The named early writer
+path enables none at stages20/30, but all live bank states remain open.
+A separate dynamic tail can emit kind1/ID1 immediately after Leave20.
+The initial topic10 TALK also writes 769=1, correcting the partially
+retracted availability-only clause of R2-SESSION-023.
+— R2-ENGINE-161, R2-ENGINE-217, R2-ENGINE-221, R2-SESSION-109,
+R2-SESSION-110
 
 The selected type-1 entry filter takes additional ID i+1 only when both
 512+i and 532+i are nonzero. The native creation gateway uses ID and stage

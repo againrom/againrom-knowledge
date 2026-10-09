@@ -1577,13 +1577,13 @@ consumer.
 | R2-ENGINE-144 | The type-2 departure routine removes the current record available node only for ID 1 (without a null check on the found node) and clears current for every ID; it writes no output and no bank slot. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-145 | The ordinary departure routine is one 2383-byte body with a 12-case ID switch (IDs 10..110) and a 9-case stage switch on bank slot 768 (values 30..110); every other selector takes the join without a case body. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-146 | Ordinary departure adds: 10 mission 20; 20 town 2, plus mission 21 if bank772; 31 mission 32; 40 missions 50, 60; 50 town 3, plus fixed record D2.00015 (type and ID unresolved) if bank780; 60 mission 80; other IDs none. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-ENGINE-147 | The add helpers scan the catalog for matching type and ID, append the record pointer to the available list only when no node already holds that pointer, and the remove and clear helpers unlink or empty that doubly linked list. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
+| R2-ENGINE-147 | The add helpers scan the catalog for matching type and ID, append the record pointer to the available list only when no node already holds that pointer, and the remove and clear helpers unlink or empty that doubly linked list. | High | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-148 | The departure output DWORD is -1 by default, 1 for ID 10, 2 for ID 30, 3 for IDs 70 and 80 only under opposite bank777/bank778 gates (the gate skips only the store), 5 or 4 for ID 110 by bank779, unchanged otherwise and for type 2. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-149 | A nonzero bank775 makes ordinary departure clear the available list and append 42 fixed record pointers plus one of four bank776/bank781-selected records before the normal path; the types and IDs behind those pointers are not resolved here. | Medium | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-150 | In the 23-routine EN/RU population no direct callee is unresolved except two unread excluded callees of the node shells, and no indirect edge exists in the controller or list helpers. | Medium | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-159 | Catalog record kind 2 / ID 2 is built by one constructor, D2.00016, calling the record initializer D2.00017 on object D2.00018; it is one of 52 constant-argument initializer call sites in EN and RU scenario.dll. | Medium | ● active | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 | R2-ENGINE-160 | The client body that selects per-ID town data has a separate arm for ID 2 beside arms for IDs 1 and 3; the ID 2 arm pushes the resource key music\b16.wav in EN (arm L2.00264) and RU (arm L2.00265). | Medium | ● active | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
-| R2-ENGINE-161 | The EnterInn export has 10 stage case bodies (8 distinct) and a default; stage 20 and other unlisted stages select the shared continuation D2.00019 (295 instructions), which holds 15 packed-entry stores behind bank-slot compares. | Medium | ● active | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
+| R2-ENGINE-161 | The EnterInn export has 10 stage case bodies (8 distinct) and a default; stage 20 and other unlisted stages select the shared continuation D2.00019 (295 instructions), which holds 15 packed-entry stores behind bank-slot compares. | Medium | ● active (amended) | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 
 ### R2-ENGINE-143
 
@@ -1626,6 +1626,8 @@ add-mission (D2.00014) and add-town (D2.00031) are identical except the type com
 **Confidence.** High for the helper bodies. The node-shell routines are read; their callees D2.00035 and D2.00036 are excluded and unread; the role label in exclusions.tsv comes from call context and is not measured.
 
 **Unknown.** The behavior of the two excluded callees and any node-pool aliasing.
+
+**Amended.** R2-ENGINE-218 resolves the two excluded wrappers as size-taking allocation and pointer release paths. Node-pool aliasing remains Unknown.
 
 ### R2-ENGINE-148
 
@@ -1678,6 +1680,8 @@ No dedicated case body exists for stage 20. The byte table maps stage 20 to the 
 **Confidence.** Medium: the case bodies are decoded by recursive descent with the jump table resolved. The continuation entries and compares are tabulated mechanically; their predicates are not evaluated, and the callees D2.00035, D2.00036 and D2.00011 are not read, so the statement covers packed entries, bank compares and calls, not every effect. Method: the experiment exceeded its preregistered inputs cap (20 reported and 24 conservative against 16), so this claim is bounded by an incomplete method record.
 
 **Unknown.** Which stage value the client passes for catalog ID 2, which continuation entries a stage-20 call reaches at run time, whether the bank-slot compares are gates, the effects of the continuation beyond its stores and compares, and the meaning of the stage labels beyond the earlier numbering.
+
+**Amended.** R2-ENGINE-215/216/217/218 resolve the selector, output-buffer contract, current-ID predicates and named helpers. R2-ENGINE-221 separates the dynamic tail; R2-SESSION-109 bounds the early writer inference. The earlier method grade is unchanged.
 
 ## Startup caller and concrete collection receiver
 
@@ -2023,3 +2027,172 @@ controls are instrument sanity checks and add no native evidence.
 
 **Unknown.** Element meanings/namespaces, n versus L consistency, short-read
 and invalid-input behavior, transport/refill semantics and original LOAD.
+
+
+## Inn option contract and town 2 TALK
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-215 | EnterInn selects bank slot 768 for every catalog record; all four measured EN/RU client call sites pass an option-array pointer and count pointer, without a scalar stage argument. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-216 | The stage-30 EnterInn body returns NPC22/topic30 kind3, NPC2108/topic31 kind3 only when slot927=0, and NPC2110/topic39 kind0; its stores fill the caller's option buffer, not the catalog. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-217 | The 15 fixed EnterInn continuation stores depend on current-record ID and exact bank predicates; three NPC2022 families have no stage bound and use slots776/781 to select one topic each. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-218 | D2.00011 reads record ID; D2.00035/00036 allocate/release list-node blocks through selected heap paths and do not decode packed options; EnterInn calls only the ID getter. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-219 | Selected town2 stage30 kind3 TALK admits type1/ID-topic to availability; NPC22/topic30 also sets slots533=1,553=2, while NPC2108/topic31 has no special bank store and NPC2110/topic39 kind0 makes no state change. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-220 | The selected EN/RU inn builder lists option kinds0/3 as talk actors; its TALK action finds the first matching low16 actor key, formats npc%dtalk%d, dispatches text, then passes the same packed word to TalkTo. | High / Medium | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-221 | The EnterInn dynamic tail emits kind1/2, low ID i+1 when slot552+i=currentID and slot532+i is 1/2, with bit31 iff signed slot512+i>0; an admitted currentID2 EnterInn call after Leave20 without an intervening writer emits kind1/ID1. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+
+### R2-ENGINE-215
+
+EnterInn D2.00089 uses parameter+8 as an array pointer and parameter+0xc
+as a count pointer, zeroes the count at D2.00122, reads bank768 at
+D2.00123 and returns with RET8 at D2.00098. The selector is unrelated
+to the current catalog ID. EnterLocation stores current and clears
+752..767 without a stage store.
+
+Ordinal9 binds the DLL export to EN cellL2.00409 and RU cellL2.00551.
+The four EN calls areL2.00399,L2.00400,L2.00401,L2.00402; their RU
+counterparts areL2.00410,L2.00411,L2.00412,L2.00413. Each pushes two
+stack addresses. The first array/count pair is frame-0x94/frame-0x14;
+the other three use frame-0xb8/frame-0x38. Each local call gate compares
+EN member+0x5d8 or RU member+0x63c with 2 and bypasses the setup on inequality.
+
+**Confidence.** High for the positive selector, ABI, bindings and eight
+local call setups. PE section translation, complete DLL decode and
+linear/recursive instruction boundaries exclude a scalar stage argument
+in this contract. EN/RU DLL equality is one dependency. This is not a
+whole-image call-site enumeration or an all-path client dispatch proof.
+
+**Unknown.** The mode member's complete producer set, the first caller's
+unresolved indirect switch, intervening aliases and runtime admission.
+
+### R2-ENGINE-216
+
+The stage30 body has three stores: kind3/topic30/NPC22 atD2.00124;
+kind3/topic31/NPC2108 atD2.00125; kind0/topic39/NPC2110 atD2.00126.
+The compare atD2.00127 reads slot927 against0. JNED2.00128 bypasses the
+middle store; the first and third stores have no additional bank gate.
+Every selected store writes array[count] and increments the pointed count.
+R2-ENGINE-219 identifies the subsequent TALK effects.
+
+**Confidence.** High for this entire case and its gate polarity. The
+native walk exercises slot927=0,1,-1 in both DLLs. The complete EnterInn
+body calls only the read-only ID getter and writes its output/stack locals;
+the measured client arguments are stack buffers. Arbitrary aliased caller
+arguments are outside this contract.
+
+### R2-ENGINE-217
+
+The continuation atD2.00019 contains fifteen constant packed stores before
+its dynamic loop. Topic79/NPC5 kind0 requires currentID3, signed768>60
+and 774=1. Topic78/NPC675 kind0 requires currentID3, signed768>60 and 770=1.
+
+All twelve NPC2022 options have kind3 and require currentID2. Topics74..77
+require959!=0 and every970..973=0. Topics84..87 require any970..973!=0
+and every980..983=0. Topics93..96 require any980..983!=0 and every989..992=0.
+The families have no stage compare. For each family, slots776/781 select
+topics as follows: zero/zero gives74,84,93; zero/nonzero gives75,85,94;
+nonzero/nonzero gives76,86,95; nonzero/zero gives77,87,96.
+
+Topic62/NPC22 kind3 requires currentID2, signed768>=60,958=0 and 949!=0.
+R2-ENGINE-216 states the output-buffer contract. Kind3 subsequently requests
+available type1/ID-topic; kind0 adds no catalog record. The exact individual
+stores and bank-compare branches are regenerable measurements.
+
+**Confidence.** High for this bounded constant-store population. Native
+branch polarity is established by direct decoding. The 2,046 static cases
+check the other gates, currentID, each family blocker, flag arms, signed
+stage boundaries and the separate stage30 gate against an independent
+predicate expression. This control set fixes slots774/770 at 1, leaving both
+gates' false branches uncovered. One focused test covers the false branch
+of the slot770 gate; no test covers the false branch of the slot774 gate.
+The whole
+EnterInn instruction set has complete linear agreement. No global absence
+or runtime state claim follows.
+
+**Unknown.** Actual bank predicates for every campaign visit. The native
+stage20/currentID2/959=1 counterexample admits topic74.
+
+### R2-ENGINE-218
+
+D2.00011 atD2.00011 returns DWORD[this+4], the record ID. The complete
+EnterInn body has fifteen direct calls, all to this getter, and no
+unresolved indirect edge.
+
+D2.00035 atD2.00035 takes a byte size, callsD2.00129 and can invoke an
+allocation-failure callback before retrying. The selected allocation path
+reachesD2.00130/D2.00131 and the imported HeapAlloc cellD2.00132.
+D2.00036 atD2.00036 forwards its pointer toD2.00133; the selected release
+path reaches imported HeapFree cellD2.00134 or small-block helpers.
+
+Node-block allocationD2.00135 requests 4+nodeCount*nodeSize bytes; the
+measured node-acquire caller supplies nodeSize12. A four-byte header links
+blocks. ReleaseD2.00136 follows that header chain and passes each block
+pointer to D2.00036. List append stores the catalog pointer in node+8.
+These wrappers process sizes and storage pointers, not packed-option fields.
+
+**Confidence.** High for the selected local contracts and positive heap
+paths. Complete wrapper/caller ranges and import names reproduce. This
+does not identify every allocator caller or close the CRT implementation.
+
+**Unknown.** Failure callbacks, small-block internals, allocation success,
+malformed block chains and node-pool aliasing.
+
+### R2-ENGINE-219
+
+TalkToD2.00137 extracts low16 NPC, bits16..27 topic and bits28..30 kind.
+Kind3 calls AddMission(topic) atD2.00138 without a bank compare. That helper
+admits matching type1/ID-topic catalog pointers to availability only when
+each pointer is absent; missing catalog matches add nothing, and the
+catalog itself is unchanged (R2-ENGINE-147).
+
+NPC22/topic30 then passes two explicit identity compares and stores
+bank533=1 atD2.00139 and bank553=2 atD2.00140. NPC2108/topic31 passes
+neither special identity branch. NPC2110/topic39 kind0 matches neither
+kind0 effect arm and reaches the return without a state store.
+The offer predicates are R2-ENGINE-216. AddMission's topic is a mission
+record ID; the NPC low16 is not the added mission ID.
+
+**Confidence.** High for the complete selected TalkTo arms and call
+arguments in the identical DLL code. No rendering or allocation-success
+witness is claimed.
+
+### R2-ENGINE-220
+
+Builder ENL2.00552/RUL2.00553 copies the returned packed words, in order,
+to its vector+0xfc. It extracts kind and low16; kinds1/2 resolve actors
+into vector+0xc0, while other kinds resolve actors into vector+0xe8.
+The measured vector count/index/append helpers establish count at+8,
+backing pointer at+4 and four-byte indexing/appending.
+
+Action ENL2.00554/RUL2.00555 selects a+0xe8 actor after subtracting the
+first vector's count. Helper ENL2.00556/RUL2.00557 finds the first packed
+word whose low16 matches actor u16+0x1dc. The action formats npc%dtalk%d
+using NPC/topic, calls the text dispatcher, then calls TalkTo with the
+same full word. Topic30/NPC22 therefore selects npc22talk30; topic31/NPC2108
+selects npc2108talk31. R2-ENGINE-051 and R2-ENGINE-069 supply the published
+dialogue/actor boundaries.
+
+**Confidence.** High for native word copying, vector routing, first-match
+selection, format arguments and call order. Medium for the composed
+player-visible route: complete selected ranges agree across independent
+linear/recursive decoding, but virtual rendering calls and resizing
+callees are not closed and no original run occurred.
+
+**Unknown.** Rendered rows, actor lookup/allocation success, dialogue
+alternatives, multiple topics for one actor key and input scheduling.
+
+### R2-ENGINE-221
+
+The loopD2.00141..D2.00098 visits i=0..19. It compares bank552+i with
+currentID and accepts bank532+i only when1 or 2. The emitted low ID is i+1,
+kind is the retained value, and bit31 is set iff signed bank512+i>0.
+These stores are not among R2-ENGINE-161's fifteen constant entries.
+
+R2-SESSION-047/048 give immediate Leave20 values512=0,532=1,552=2.
+An admitted currentID2 call in that state emits kind1/ID1 with bit31 clear.
+R2-ENGINE-219's subsequent topic30 TALK adds 533=1,553=2, enabling kind1/ID2
+under the same currentID. Intervening writers can change either inference.
+
+**Confidence.** High for the complete native loop and conditional named
+state. Static controls separately exercise the high bit. This is not a
+claim of a complete runtime roster or an empty stage30 continuation.

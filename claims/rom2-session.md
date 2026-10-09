@@ -184,19 +184,21 @@ The file name is `<decimal id0><decimal id1>.a2c` (`%u%u.a2c`); the character-cr
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-023 | In the matching ROM2 DLL code, NewGame returns a cleared 1,024-DWORD bank except slot 768=10; selected first Leave paths have explicit bank and availability transitions. | High | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
+| R2-SESSION-023 | In the matching ROM2 DLL code, NewGame returns a cleared 1,024-DWORD bank except slot 768=10; selected first Leave paths have explicit bank and availability transitions. | High | ● active (partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 
 ### R2-SESSION-023
 
 NewGame export 11 at D2.00004 clears 4096 bytes at bank base D2.00003, rebuilds the pointer catalog, clears availability, adds/enters the initial type-2 ID-1 record and initializes two grids outside the bank. The complete selected export and its catalog/list helpers leave bank slot 768=10 and every other slot zero. This applies at DLL return. Later client character-choice code writes slots 776/781 from flag bits 0x40/0x80. R2-SESSION-021 supplies the bank's raw scenario-save block.
 
-The selected initial EnterInn/TalkTo kind-3 unlock changes availability rather than the bank. Type-2 ID-1 Leave removes the initial record and clears current, with movie output remaining minus one. Mission Enter clears slots 752..767, as R2-ENGINE-048 establishes.
+The selected initial EnterInn/TalkTo kind-3 unlock changes availability and stores bank769=1 (R2-SESSION-110). Type-2 ID-1 Leave removes the initial record and clears current, with movie output remaining minus one. Mission Enter clears slots 752..767, as R2-ENGINE-048 establishes.
 
 Ordinary mission-10 Leave sets slot 773 to zero. For i=0..19, nonzero 532+i becomes 1 when incoming 512+i is zero or 2 otherwise; zero 532+i stays zero. Every 512+i becomes zero. It removes the current record, clears current and sets completed slot 906 to 1. The established ID-10 case adds type-1 ID-20 availability and outputs 1. The common divisible-by-ten rule advances slot 768 by ten; incoming 10 becomes 20. A nonzero slot 775 first invokes a separate available-list restoration branch, so the resulting list must not be inferred under arbitrary incoming bank state.
 
 **Confidence.** High for the bounded DLL post-export state and stated conditional first-transition algebra. The full NewGame span, catalog/list calls, bank-address translation, type-2 branch, ordinary loop, selected ID jump-table slot and stage/return branches are preserved with exact image/range hashes. The matching raw DLL text/data sections are one code dependency, not independent locale confirmation. No global bank-writer absence is asserted.
 
 **Unknown.** Complete whole-client post-NewGame state, every script/network writer, arbitrary restored catalog values, complete party carryover and owner-save instances. The states are static derivations, not executed snapshots.
+
+**Amended.** R2-SESSION-110 partially retracts only the initial kind-3 TALK availability-rather-than-bank clause: topic10 also stores bank769=1. The exact NewGame-return bank and stated Leave transitions stand.
 
 ## Native campaign record and selected client tail
 
@@ -478,6 +480,8 @@ Instrument: raw scan for calls through the EnterInn import cell L2.00409 (ordina
 
 **Amended.** R2-SESSION-072 measures the member compare and unequal bypass in the selected first RU caller only. Its other three RU windows and member semantics remain Unknown.
 
+R2-ENGINE-215 measures all four EN/RU local gates and the two-pointer ABI. Complete mode semantics and runtime dispatch remain Unknown.
+
 ## Selected initialization local flags and unresolved insertion field
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -507,8 +511,8 @@ R2-ENGINE-153's wrapper calls the map caller only on initialization return zero.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-071 | The selected EN/RU EnterInn setup pushes frame-0x14 then frame-0x94 and leaves ECX at frame-0x94; no scalar catalog or stage value is produced in that local setup. | Medium | ● active | [EXP-2022](../experiments/EXP-2022-rom2-entry-stage/) |
-| R2-SESSION-072 | In the selected first EnterInn caller, EN member+0x5d8 and RU member+0x63c are compared with 2; the unequal direct branch bypasses the local call setup. | Medium | ● active | [EXP-2022](../experiments/EXP-2022-rom2-entry-stage/) |
+| R2-SESSION-071 | The selected EN/RU EnterInn setup pushes frame-0x14 then frame-0x94 and leaves ECX at frame-0x94; no scalar catalog or stage value is produced in that local setup. | Medium | ● active (amended) | [EXP-2022](../experiments/EXP-2022-rom2-entry-stage/) |
+| R2-SESSION-072 | In the selected first EnterInn caller, EN member+0x5d8 and RU member+0x63c are compared with 2; the unequal direct branch bypasses the local call setup. | Medium | ● active (amended) | [EXP-2022](../experiments/EXP-2022-rom2-entry-stage/) |
 
 ### R2-SESSION-071
 
@@ -541,6 +545,8 @@ catalog/stage relationship, effects across unread callees and aliases,
 indirect destinations, all-path entry into the setup, runtime reachability,
 roster and player route.
 
+**Amended.** R2-ENGINE-215 reads the DLL buffer/count ABI and bank768 selector. The earlier local setup facts stand; unresolved client dispatch and runtime scheduling remain open.
+
 ### R2-SESSION-072
 
 The final local compares are EN L2.00429 and RU L2.00415. They compare a
@@ -560,6 +566,8 @@ three RU EnterInn windows and intervening callee effects were not read.
 **Unknown.** The member's semantic name, the values it takes at runtime,
 changes across calls or aliases, the other three RU windows, and whether this
 path serves any particular catalog record or stage.
+
+**Amended.** R2-ENGINE-215 measures the corresponding gate in all four EN/RU call windows. Complete mode-member producers and runtime admission remain Unknown.
 
 ## Four original save-point corpus
 
@@ -771,3 +779,101 @@ class, alias, current-Player or membership relation follows from the fit.
 member reference/class/alias grammar and complete Group extent; remaining
 Players, current participant, actual hero/roster/items/purse; original
 acceptance, actor/World LOAD and post-load behavior.
+
+
+## Inn stage progression and early bank scope
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-107 | On the published fresh ordinary-departure path, bank768 progresses10→20→30→40 for IDs10/20/30; town2 is added at 30 and an admitted revisit after mission30 uses 40, independently of its catalog ID2. | High / Medium | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-SESSION-108 | In the published EN/RU action populations for maps 10/20/30, only map20 has instant35, targeting772=1; their instant36 targets753..756, with no fixed inn completion-family target in those nodes. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-SESSION-109 | The named NewGame/Leave10/Leave20 and early-map35/36 writer path enables none of the 15 fixed EnterInn continuation stores at stages20/30; this bounded result does not establish all live bank states or exclude the dynamic tail. | Medium | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-SESSION-110 | The selected initial kind3/topic10 TalkTo stores bank769=1 as well as admitting mission10; R2-SESSION-023's availability-rather-than-bank clause is partially retracted while its NewGame and Leave facts stand. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+
+### R2-SESSION-107
+
+R2-SESSION-023 gives NewGame return bank768=10. R2-SESSION-049's ordinary
+departure rule adds 10 iff the incoming ID is divisible by 10. Type2
+departure writes no bank and preserves availability for ID2
+(R2-ENGINE-144). Leave10 yields 20; Leave20 yields 30 and adds town2
+(R2-ENGINE-146); Leave30 yields 40 and adds no town in its ID case.
+R2-ENGINE-215 reads the resulting bank for any admitted EnterInn call.
+
+Thus catalog ID2 first becomes available at bank stage30 on this named
+path; an admitted revisit after Leave30 uses 40. There is no fixed
+per-catalog stage mapping. Ordinary non-multiples of ten can change
+completion slots without changing768.
+
+**Confidence.** High for the conditional published transition algebra
+and native selector. Medium for the composed campaign route: no native
+playthrough or complete availability/event schedule was observed.
+
+**Unknown.** Restored bank, unrestricted SetVar, other writers, arbitrary
+availability restoration and actual scheduling of each town visit.
+
+### R2-SESSION-108
+
+The published R2-ENGINE-041 action/parameter/trigger measurements are
+joined for 10.alm,20.alm,30.alm in each locale. Exact action populations
+are 32,31,57; instant35 counts are 0,1,0 and instant36 counts4,6,8.
+The sole early instant35 is map20 action index22/ID24, literal
+slot772/value1. Trigger3 lists it at action position2 after IDs10 and 21,
+under signed result(check3)<=result(check5). Check5 has constant4.
+R2-ENGINE-043/045/046/059 supply the compiler, bank and trigger semantics.
+
+Instant36 targets753/754 in map10,753..755 in map20 and 753..756 in map30.
+Their modes and trigger conditions do not imply unconditional execution.
+None of these complete selected35/36 node populations targets949,958,959,
+970..973,980..983 or 989..992. Input hashes and every selected row regenerate
+from the committed published measurements.
+
+**Confidence.** High for the exact three-map/full-word population and
+literal operands, independently of function recovery. This negative
+does not cover other script operations, unit packet keys or indirect
+bank writers. EN/RU matching data is not two native-code witnesses.
+
+**Unknown.** Whether map20 trigger3 must pass before victory and whether
+unreferenced map20 instant36 nodes execute by another route.
+
+### R2-SESSION-109
+
+NewGame starts every relevant completion-family slot at 0. The named
+Leave10/Leave20 path marks906/916, not 949,958,959,970..973,980..983 or 989..992.
+R2-SESSION-108's early authored35/36 nodes do not target those families.
+Client character-choice slots776/781 may each remain zero or become
+nonzero. That does not satisfy an outer family predicate.
+
+Stage20/30 blocks topics79/78/62 by the signed stage bounds. The named
+state keeps all three NPC2022 prior-completion predicates false. Known
+later positive writers are Leave53/62/63 for 949/958/959, Leave74..77
+for 970..973, Leave84..87 for 980..983 and Leave93..96 for 989..992;
+Leave60 writes 774=1 and Leave70 writes 770=1.
+
+R2-ENGINE-221 separately establishes the dynamic tail: immediate
+post-Leave20/currentID2 returns kind1/ID1. No statement that all
+continuation output is absent is made. A synthetic stage20/currentID2
+with 959=1 returns topic74, demonstrating the open bank-state alternative.
+
+**Confidence.** Medium for campaign-state closure. The named writer
+algebra and conditional static walks agree, but the published contracts
+leave the live writer/reachability population open.
+
+**Unknown.** Unrestricted SetVar, ScenarioLoad's raw bank, the packet
+writer at 531+unit key, indirect aliases and later visits reached through
+non-multiple-of-ten missions. A complete writer and available/TALK graph,
+or an authorized original observation, would settle actual early states.
+
+### R2-SESSION-110
+
+The initial record constructorD2.00142 calls the catalog initializer
+with type1,ID10 and objectD2.00143. In TalkTo's kind3 arm,D2.00138 first
+calls AddMission(topic);D2.00144 reads that object's ID, and equality
+atD2.00145 admits the bank769=1 store atD2.00121. Initial topic10
+therefore mutates bank769 as well as availability. Topics30/31 do not
+meet this equality. R2-SESSION-023's contrary clause is partially
+retracted through the recorded correction; its exact DLL NewGame-return
+and ordinary Leave facts remain unchanged.
+
+**Confidence.** High for the measured constructor constants, native ID
+getter and complete direct branch. Both DLL ranges reproduce and agree
+under linear/recursive decoding. This is not a whole-client bank census.
