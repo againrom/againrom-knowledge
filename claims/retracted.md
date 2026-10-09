@@ -1,5 +1,19 @@
 # Overturn history
 
+## Second Teleport object's construction coordinates
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-CASTSPAWN-033` (second Teleport object's caster-centre placement only; construction, timing and lifetime clauses stand) | Verbatim: "placed at the caster's own bounding-box centre" | High / Medium | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md), MAGIC-265 | The second object writes raw `+08/+0c` from copied target `+88/+8c` plus the Selection fallback at `L13398/L13399`; construction keeps source `+28/+2c`. Native first draw remains Unknown. | **REFUTED** — partially retracted |
+
+## Spell-light route and selector scope
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-269` (the target-count clause only; the five light picture IDs, vtable slot and named callers stand) | Verbatim: "The unsigned selector uses pictures 10..36, 27 index bytes and six targets." | High | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) | The committed evidence reaches five arms over all 256 byte picture IDs. The jump table at L13410 is not in that evidence, so no sixth target is established. | **NARROWED** |
+| `MAGIC-272` (the universal 13-step clause only; frame reset and positive shared cleanup stand) | Verbatim: "Spell light is rebuilt per client frame; Lightning and Prismatic Spray have 13 successful phase steps, then the shared updater removes them." | High | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md), MAGIC-CASTSPAWN-033, MAGIC-DELIVER-035, MAGIC-274 | The 13-step phase and stamp sequences apply to normal caster construction. The direct 0x8b route supplies counter 5 for spells 13 and 14, giving phases 4,3,2,1,0. Loaded objects resume saved actionsegments and actionphase. | **NARROWED** |
+| `MAGIC-273` (the hardware-mode label and native visible-result grade only; named local gates, stores, branch and fallback stand) | Verbatim: "Dynamic lighting gates point stamps and the software terrain pass; bolt stores and the named hardware terrain paths bypass that flag."; "Medium for the visible result across native rendering modes; no original game was run." | High / Medium | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md), TERR-FAMILY-187 | The branch is selected by L10964 & 2 set; its local path and fallback are High. TERR-FAMILY-187 found no enabling writer in its bounded address-form search and records startup writing 0. Native activation and the branch's visible result are Unknown. With the bit clear and Dynamic lighting off, bolt light reaches units and not ground. | **RETRACTED** |
+
 ## Contact-ring entry for wide movers
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
@@ -1174,3 +1188,10 @@ on evidence already committed.
 | Claim | Former wording | Prior confidence | Correcting evidence | Corrected fact | Disposition |
 |---|---|---|---|---|---|
 | R2-SESSION-023 (initial kind-3 TALK availability-only clause) | "The selected initial EnterInn/TalkTo kind-3 unlock changes availability rather than the bank." | High | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/), R2-SESSION-110 | Topic10 compares equal to the initial type1/ID10 record and stores bank769=1 atD2.00121 after AddMission. NewGame-return and Leave facts stand. | **REFUTED** — partially retracted |
+
+## Spell-object light sources and point-stamp gates
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-UNITLIGHT-057` (the square footprint and stamp-gate clauses only) | Verbatim: "which splats a level over a radius-1 square" and "The splat is gated on `[L05659] == 0`" | High | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md), MAGIC-271, MAGIC-273 | The helper uses the clipped i*i+j*j < radius*(radius+1) reflected-vertex footprint. Lighting L06417 gates stamp stores; Animation L05659 gates rectangle invalidation. The cell-mask and literal-level clauses stand. | **REFUTED** |
+| `TERR-LIGHT-061` (the sole +0xa8 writer and lit-object-only population clauses; the same-grid consequence is narrowed to the named reads) | Verbatim: "written only by `R1095(col,row,radius,value)`" and "uniform over the map except at lit-object cells" and "no shipped frame can light one differently from the other" | High / Medium | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md), MAGIC-269, MAGIC-270, MAGIC-273 | R2160 directly stamps the Lightning/Prismatic path vertices. Those stamps also feed the unit-grid merge away from standing cell-effect entries. Named ordinary consumers share the grid; existing unit-pass exceptions still prevent an all-frame equality claim. Allocation, initialization and merge arithmetic stand. | **REFUTED** |

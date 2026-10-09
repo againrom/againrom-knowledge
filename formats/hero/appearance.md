@@ -82,6 +82,18 @@ names class 24 (`Human Mage`) holds 24 and the swing hook is passed slot 510 (`A
 Claims: `HERO-APPEAR-040`…`HERO-APPEAR-046`, `UNIT-APPEAR-030`, `ANIM-116`…`ANIM-118`. The name list's order and the
 second sheet's consumer follow the figure-equipment rules below.
 
+In `R0551`, human state 8 uses the idle weapon/shield name selection.
+The selector's branches and name-to-ID stores are High. Its class-store path
+maps an unshielded mage with empty hands to `mage` (23) and staff name-table
+indices 12/13 to `mage_st` (24). At ShootDelay, the held class matches this
+selection when the selector last wrote it for the current equipment and no
+other `caster+20` writer ran since. The writer population is unenumerated:
+hero creation writes `+20`, and the selector can return without a write. Equipment freshness and
+changes during wind-up remain Unknown. Action 6 bypasses the weapon and is
+the death control. Other supported weapons select their mapped body classes.
+The held class supplies cast-origin geometry; the origin window does not
+directly read the equipment. — MAGIC-262
+
 ## Figure equipment slots (`HERO-APPEAR-047`…`HERO-APPEAR-055`, `HERO-FIGURE-062`)
 
 **Who sends them.** `R0669` sends nothing at all unless `actor->vt+0x30()` — the humanoid

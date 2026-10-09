@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3053. Observation: 95. Static analysis: 2526. Mixed: 432.
+Claims labelled: 3066. Observation: 95. Static analysis: 2538. Mixed: 433.
 
 ## Ledger ai
 
@@ -921,7 +921,7 @@ Claims labelled: 3053. Observation: 95. Static analysis: 2526. Mixed: 432.
 | MAGIC-CASTTICK-030 | static analysis | ● active (partially retracted) |
 | MAGIC-BURST-031 | static analysis | ● active |
 | MAGIC-SENDER-032 | static analysis | ● active |
-| MAGIC-CASTSPAWN-033 | static analysis | ● active |
+| MAGIC-CASTSPAWN-033 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-BURSTLIFE-034 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-DELIVER-035 | static analysis | ● active |
 | MAGIC-AREATICK-036 | static analysis | ● active |
@@ -951,7 +951,7 @@ Claims labelled: 3053. Observation: 95. Static analysis: 2526. Mixed: 432.
 | MAGIC-AREARADIUS-054 | static analysis | ● active |
 | MAGIC-LIGHTDRAW-055 | static analysis | ● active |
 | MAGIC-LIGHTLEVEL-056 | static analysis | ● active |
-| MAGIC-UNITLIGHT-057 | static analysis | ● active |
+| MAGIC-UNITLIGHT-057 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-WALLFIRE-058 | static analysis | ● active |
 | MAGIC-MARK-059 | static analysis | ✔ promoted |
 | MAGIC-MARK-060 | static analysis | ✔ promoted |
@@ -1024,6 +1024,19 @@ Claims labelled: 3053. Observation: 95. Static analysis: 2526. Mixed: 432.
 | MAGIC-250 | static analysis | ● active |
 | MAGIC-251 | static analysis | ● active |
 | MAGIC-252 | static analysis | ● active |
+| MAGIC-261 | static analysis | ● active |
+| MAGIC-262 | static analysis | ● active |
+| MAGIC-263 | static analysis | ● active |
+| MAGIC-264 | mixed | ● active |
+| MAGIC-265 | static analysis | ● active |
+| MAGIC-266 | static analysis | ● active |
+| MAGIC-267 | static analysis | ● active |
+| MAGIC-269 | static analysis | ● active (amended) |
+| MAGIC-270 | static analysis | ● active |
+| MAGIC-271 | static analysis | ● active |
+| MAGIC-272 | static analysis | ● active (amended) |
+| MAGIC-273 | static analysis | ● active (amended, partially retracted) |
+| MAGIC-274 | static analysis | ● active |
 
 ## Ledger menu
 
@@ -2497,7 +2510,7 @@ Claims labelled: 3053. Observation: 95. Static analysis: 2526. Mixed: 432.
 | TERR-MOVE-058 | static analysis | ● active (amended) |
 | TERR-LIGHT-059 | static analysis | ● active |
 | TERR-LIGHT-060 | static analysis | ● active |
-| TERR-LIGHT-061 | static analysis | ● active |
+| TERR-LIGHT-061 | static analysis | ● active (amended, partially retracted) |
 | TERR-LIGHT-062 | static analysis | ● active |
 | TERR-LIGHT-063 | static analysis | ● active |
 | TERR-LIGHT-064 | static analysis | ● active (amended, partially retracted) |

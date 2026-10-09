@@ -69,7 +69,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/terrain/for
 | TERR-MOVE-058 | The speed override `actor+0x70 → +0x3c → +0x44` (`TERR-MOVE-056`) is NOT the definition database; the DB supplies the fallback. | High | ● active (amended) | [EXP-0049](../experiments/EXP-0049-placeable-db/) |
 | TERR-LIGHT-059 | A sprite IS lit — and the sprite blit family splits in two, decided by which pointer its pixel loop reads. | High | ● active | [EXP-0053](../experiments/EXP-0053-sprite-lighting/) |
 | TERR-LIGHT-060 | Mode 2 — the exact per-entry transform every sprite table is built with. | High | ● active | [EXP-0053](../experiments/EXP-0053-sprite-lighting/) |
-| TERR-LIGHT-061 | What feeds a sprite's level: `CMapView+0xb0`, a per-frame byte grid whose base value is a single global. | High / Medium | ● active | [EXP-0053](../experiments/EXP-0053-sprite-lighting/) |
+| TERR-LIGHT-061 | What feeds a sprite's level: `CMapView+0xb0`, a per-frame byte grid whose base value is a single global. | High / Medium | ● active (amended, partially retracted) | [EXP-0053](../experiments/EXP-0053-sprite-lighting/), [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
 | TERR-LIGHT-062 | The sprite ladder and the terrain ladder are the SAME ladder, and in the shipped daytime band the two are half a step apart. | High / Medium | ● active | [EXP-0053](../experiments/EXP-0053-sprite-lighting/) |
 | TERR-LIGHT-063 | The terrain mapping's OUTPUT range, and it saturates to white on shipped data. | High | ● active | [EXP-0053](../experiments/EXP-0053-sprite-lighting/) |
 | TERR-LIGHT-064 | Which drawable gets which table, and the palettes are disjoint. | High / Unknown | ● active (amended, partially retracted) | [EXP-0053](../experiments/EXP-0053-sprite-lighting/), [EXP-0089](../experiments/EXP-0089-tier-hue/) |
@@ -750,6 +750,8 @@ The affected former wording below is partially retracted. See the
 **Original status.** ● active
 
 **Evidence.** [EXP-0053](../experiments/EXP-0053-sprite-lighting/)
+
+**Amended.** The sole stamp-writer and lit-object-only population clauses are partially retracted: MAGIC-269 and MAGIC-270 establish direct CProjectile path stores. The same-grid sentence does not guarantee equal lighting across drawable passes; the existing Medium exceptions stand. MAGIC-273 gives the named consumers and option boundary. The allocation, initialization and four-corner arithmetic stand. See claims/retracted.md.
 
 ### TERR-LIGHT-062
 

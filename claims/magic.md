@@ -548,7 +548,7 @@ current account.
 | MAGIC-CASTTICK-030 | The tick a spell is applied, in units a consumer can implement: tick `actor+0x134` of the action, counting the tick that started it as 0. | High / Medium | ● active (partially retracted) | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-BURST-031 | `MAGIC-PIC-027`'s Unknown is answerable: the `Distribution system` column decides the burst picture, and 10 of 28 shipped spells reach it. | High / Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-SENDER-032 | Two corrections to `MAGIC-PIC-027`'s sender enumeration, one of which changes what a consumer must build. | Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
-| MAGIC-CASTSPAWN-033 | (rom.exe) The object a cast puts on the map is built by the CASTER, not by the message, and its flight length comes from a hard-coded switch on the picture id -- non-zero for 7 picture ids and zero for the other 44. | High / Medium | ● active | [EXP-0167](../experiments/EXP-0167-spell-art/) |
+| MAGIC-CASTSPAWN-033 | (rom.exe) The object a cast puts on the map is built by the CASTER, not by the message, and its flight length comes from a hard-coded switch on the picture id -- non-zero for 7 picture ids and zero for the other 44. | High / Medium | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
 | MAGIC-BURSTLIFE-034 | (rom.exe) A burst is stationary, and its sender chooses its lifetime. | High | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/), [EXP-0175](../experiments/EXP-0175-ring-geometry/) |
 | MAGIC-DELIVER-035 | (rom.exe) The simulation and the client each compute a cast projectile's flight length, by different rules, and on the normal path the client's wins. | High / Medium | ● active | [EXP-0167](../experiments/EXP-0167-spell-art/) |
 | MAGIC-AREATICK-036 | (rom.exe) The `AreaEffect` per-tick entry is vtable slot `+0x18`, and `effect+0x08` selects one of three exclusive per-tick modes. | High / Medium | ● active | [EXP-0172](../experiments/EXP-0172-area-tick/) |
@@ -578,7 +578,7 @@ current account.
 | MAGIC-AREARADIUS-054 | (rom.exe) An `AreaEffect`'s radius is the shipped `Radius, Length/2` column read once at construction, not a power term, and the overlay bitmap is sized for the shipped values and no more. | High / Medium | ● active | [EXP-0176](../experiments/EXP-0176-area-draw/) |
 | MAGIC-LIGHTDRAW-055 | (rom.exe) `light` and `darkness` create no sprite. They write the terrain brightness plane directly, four vertices per covered cell, and the removal recomputes those vertices. | High | ● active | [EXP-0176](../experiments/EXP-0176-area-draw/) |
 | MAGIC-LIGHTLEVEL-056 | (rom.exe) A higher brightness byte is darker: `light`'s 0 is the brightest row of the shading table and `darkness`'s 0x50 is a half-brightness row. | High / Medium | ● active | [EXP-0176](../experiments/EXP-0176-area-draw/) |
-| MAGIC-UNITLIGHT-057 | (rom.exe) The same per-cell mask drives a second, per-frame lighting input: the light level units are drawn at. | High | ● active | [EXP-0176](../experiments/EXP-0176-area-draw/) |
+| MAGIC-UNITLIGHT-057 | (rom.exe) The same per-cell mask drives a second, per-frame lighting input: the light level units are drawn at. | High | ● active (amended, partially retracted) | [EXP-0176](../experiments/EXP-0176-area-draw/), [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
 | MAGIC-WALLFIRE-058 | (rom.exe) `wall_of_fire` is the singular overlay spell, in four separate ways. | High | ● active | [EXP-0176](../experiments/EXP-0176-area-draw/) |
 | MAGIC-MARK-059 | (rom.exe) A lasting effect draws on its actor through an array of 8-byte mark records the client unit owns, and the unit draw walks that array twice, once before its own sprite and once after. | High | ✔ promoted | [EXP-0177](../experiments/EXP-0177-effect-marks/) |
 | MAGIC-MARK-060 | (rom.exe) The mark set is not stored: it is re-derived every rebuild from a list of kind-and-countdown pairs the simulation opens and closes with two dedicated messages. | High / Medium | ✔ promoted | [EXP-0177](../experiments/EXP-0177-effect-marks/) |
@@ -665,6 +665,12 @@ current account.
 **(rom.exe) The object a cast puts on the map is built by the CASTER, not by the message, and its flight length comes from a hard-coded switch on the picture id -- non-zero for 7 picture ids and zero for the other 44.** `EnumRefs callto:R0609` plus `imm:14c` enumerate every construction of the `0x14c`-byte `CProjectile`: 6 call hits over 4 owners, 0 orphan -- the cast spawner `R0620`, the unit shot `R0603`, three arms of the client dispatcher `R0509` (`L03002`, `L03003`, `L03004`) and the savegame loader `R0099`. `R0620` is `CUnit` `vt+0x5c` and `CAirUnit` `vt+0x5c` (`.rdata` slots `L05368`, `L05369`; both vtables dumped, 0 of 33 slots without a function), and inside the unit action driver that slot has exactly two call sites, both in the **cast arm**: the 8-entry jump table at `L02482` sends action 8 to `L02712`, and `L02723`, a virtual call of the slot at offset 0x5c, fires on the tick `actionphase == classRecord+0xfc` `ShootDelay` (`L05370`, `L05350`) while `L02722` fires on tick 0 when `actionspell == 0x3c` (`L02720`). A whole-image `EnumRefs re:` sweep for a call through a register-based `+0x5c` slot returns **32 hits over 26 owners, 1 orphan**, of which these are the only two in `R0548`; the other 30 sit in the runtime and MFC address families and their object class was not established here. The spawner: `L05371`/`L05372`, a copy of the 32-bit field `+0xa4` of the source to `+0x20` of the new object -- **`picture = actionspell`, which `MAGIC-CASTANIM-029` fixes as `2*spellId + 8`**; the spawn point is the class's own muzzle table `classRecord+0xec` indexed by `(casterDir - 8) & 0xe` minus `classRecord+0x34`, times 8, added to caster `+0x58` (`L05373`..`L05374`), used only when `classRecord+0xf0` is non-zero and the picture is not `0x3c`, otherwise the class bounding-box centre `(class+0x8c - class+0x84)/2` (`L05375`); `actionx`/`actiony`/`actionz` are the target's `+0x58`/`+0x5c`/`+0x10` when `actiontarget` is set and the caster's own `+0x88`/`+0x8c`/`+0x90` otherwise; `action = 1` (`L05376`), `actionphase = 0` (`L05377`). The flight length is `L05378` bounding `picture - 10` at 0x32, `L05379` reading the index byte from the table at `L05380` and `L05381` jumping through the table at `L05382` with stride 4 -- **51 index bytes, an 8-entry jump table, six distinct arms**, read out of the PE by virtual address (`tools/castflight -mode tables`): `dist/200` for picture 10, `dist/384` for 12, `1` for 20 and 30, `13` for 34 and 36, `21` for 60, and `0` for the remaining 44. **A zero means the driver `R0558` returns finished at `L02817` before reaching its own switch at `L02834`, so those cast objects never execute a driver arm.** `picture == 0x3c` alone allocates a **second** `CProjectile`, copy-constructed at `L05383`/`L03009` and placed at the caster's own bounding-box centre -- teleport draws two sprites. **G2:** the 51-byte table and its arms are `.text`, so which spells throw something and for how long is an **engine** limit; the muzzle table, `ShootDelay` and the sheet are `units.reg` / `projectiles.reg` data and free
 
 **Confidence.** High (every quantity is an immediate, a displacement or a compare bound in a listing dumped over an address range; the two switch tables are read from the PE by section walk with no disassembler in the path; the construction census and the `vt+0x5c` call-site sweep are both `EnumRefs`, which attributes orphan hits rather than dropping them; and the competing model "the switch is also reached by a unit's shot" is excluded by the vtable dump giving `vt+0x58` a different routine that computes `dist/200` inline) / Medium (the muzzle-table reading, whose `classRecord+0xec` / `+0xf0` field names are not established here)
+
+**Amended.** MAGIC-261 names the class fields and exact fallback arithmetic.
+The second Teleport object's caster-centre placement clause is partially
+retracted in `retracted.md`: MAGIC-265 establishes destination-derived raw
+`+08/+0c` and source-derived cached `+28/+2c` at construction. Native first
+draw remains Unknown. Construction, timing and lifetime clauses stand.
 
 **Original status.** ● active
 
@@ -989,6 +995,8 @@ on this code read is not independent corroboration.
 **Original status.** ● active
 
 **Evidence.** [EXP-0176](../experiments/EXP-0176-area-draw/)
+
+**Amended.** The radius-1 square and L05659 stamp-gate clauses are partially retracted. MAGIC-271 gives the clipped distance-table footprint; MAGIC-273 separates the Lighting stamp gate from the Animation invalidation gate. The mask bits, literal unit levels and wall_of_fire source call stand. See claims/retracted.md.
 
 ### MAGIC-WALLFIRE-058
 
@@ -1940,3 +1948,330 @@ The arm does not unlink the corpse: none of the direct-call closures of the arm'
 **Unknown.** Which shops admit an id-25 Scroll or Book under their price cap. Whether a compressed ALM or LM container, a save or a script gives a weapon or item id 25.
 
 **Evidence.** [EXP-0464](../experiments/EXP-0464-control-spirit/EXP-0464.md), `evidence/controlspirit.txt`
+
+## Cast delivery start positions
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-261 | The normal CUnit/CAirUnit cast producer starts at cached caster centre plus class ShootOffset minus Center, times 8; an empty array or picture 60 uses an unscaled Selection fallback. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-262 | Human state 8 uses idle weapon/shield name selection in R0551; the class-store path maps an unshielded empty-handed mage to 23 and staff categories to 24. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-263 | EN/RU units.reg has three distinct human ShootOffset arrays for mage/xbowman, mage_st and archer; the other 12 human class IDs use delta (-48,-57), with exact eight-direction integer vectors established. | High / Medium | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-264 | Among the 12 EN/RU Units rows with positive spell slots, Goblin_Sling.4, Orc_Bow.4 and Bat_Sonic.4 have ShootOffset arrays; the other nine use the normal cast producer's Selection fallback. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-265 | The inspected cast and cell-effect producers have different origins: Teleport forces the fallback and its second object's raw point is destination-derived; three message arms use cell centres. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-266 | Direct simulation delivery-2 admission copies caster Position into SpellTransport; its tick leaves Position unchanged, while the nested PointEffect copies the target Position. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-267 | The visible projectile SAV writer stores current +08/+0c as Prj<ID>/x and /y; its sixteen leaves have no separate launch-point copy from +28/+2c, so a moved projectile does not preserve its original point there. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+
+### MAGIC-261
+
+`R0620` occupies slot `+5c` in CUnit vtable `L02468` and
+CAirUnit vtable `L02585`. The inspected hero constructor creates CUnit.
+The action-8 driver calls that slot at class ShootDelay; picture 60 uses
+clock zero. The all-byte executable dword search finds two pointers to the
+producer, both in those vtables. This is not a census of relative calls.
+
+The complete origin window `L13393..L13394` uses class ID `caster+20`,
+class array `L02113`, facing `caster+6c`, and cached centre
+`A=(caster+58,caster+5c)`. With `i=(facing-8)&14`, nonempty ShootOffset
+`class+ec` and picture other than 60 give
+`A+8*(ShootOffset[i:i+2]-Center)`. Center is `class+34/+38`.
+Otherwise each axis is `A+trunc((Selection2-Selection1)/2)-Center`, with
+Selection at `class+84/+88/+8c/+90`. The fallback neither multiplies by 8
+nor adds Selection1. The loader stores Selection values unscaled.
+
+REG-UNITS-049 supplies the registry key-to-offset mapping: CenterX/Y at
+`class+34/+38` and the ShootOffset CArray at `class+e8`, with data at
+`+ec` and size at `+f0`. The fragment controls use that mapping; they
+verify the arithmetic, not the key-to-offset mapping.
+
+The producer writes new object `+08/+0c` and copies them into `+28/+2c`.
+`R0614` derives A from cached `P28/P2c` plus
+`128*(TileSize-1)` through the two TileSize getters. The unit-shot path in
+SAV-1142 instead reads caster `+08/+0c`; those inputs are not interchangeable
+without the geometry step. The complete origin window has no call, frame
+lookup or equipment read. Equipment can select the class upstream.
+
+**Confidence.** High for the exact integer formula and direct input population.
+Both branches execute in 18,816 original-fragment controls across 28 class/row
+inputs, 28 even pictures and eight directions. Translation/frame/equipment
+controls and odd-facing aliases agree; both output copies agree. Static
+memory operands exclude direct equipment and frame terms in this window.
+
+**Unknown.** Native first-visible-frame position and external cache ordering
+were not observed. Alternate producers and arbitrary memory aliases are
+outside the population.
+
+### MAGIC-262
+
+`R0551` requires `caster+18c & 1`, reads slot-0 weapon `+15c`, and
+uses `(byte[weapon+6]&31)-1` to select `main.res::text/heropicture.txt`.
+Absent weapon uses index 0, `unarmed`. Slot-1 shield `+160` appends `_`.
+Mage flag `+18c & 2` changes the exact name `unarmed` to `mage`.
+In this selector, cast action 8 uses the idle weapon/shield name selection.
+Action 6 bypasses it and uses `mage_st` or `unarmed`; this is the death control.
+
+The subsequent original name-to-class chain maps `mage` to 23, `mage_st`
+to 24, sword names to 3/4/5, axes to 7/8/9, clubs to 10/11, pikes to
+12/13, archer/bowman to 14, xbowman to 15 and unarmed names to 1/2.
+Shipped Data.bin Weapons rows 13 `Staff` and 14 `Shaman Staff` correspond
+to name indices 12/13, both `mage_st`, on EN and RU. Unsupported suffix
+combinations do not acquire a class meaning from this claim.
+HERO-APPEAR-040 through HERO-APPEAR-046 supply the body-art route;
+the geometry still comes from the selected units.reg class.
+
+The cast-message window `L05328..L13395` sets action 8 without calling
+the selector. At ShootDelay, the held class matches this selection when
+the selector last wrote it for the current equipment and no other
+`caster+20` writer ran since.
+
+**Confidence.** High for the selector's static branches, name-to-ID stores
+and isolated original name controls. The original selector and table accessor execute 144 times:
+two mage-flag values, two shield values, twelve weapon cases and states 0/8/6.
+Cast and idle names agree in all controls. The class chain has explicit
+matching names and ID stores.
+
+**Unknown.** The `caster+20` writer population was not enumerated. Hero
+creation writes the message class `[L03223]` at `L02143`, then calls
+the selector at `L03209`. The selector can return at `L04246` ->
+`L03172` without a class write when `+18c & 2` is set and the body name
+is unchanged. A writer census and native observation of the held class at
+ShootDelay would settle cast-time selection freshness. Native
+equipment-message freshness, changes during wind-up and unsupported names
+were not observed. Successful class/art allocation is the boundary;
+no asset pixels are claimed.
+
+### MAGIC-263
+
+Both shipped `graphics.res::units/units.reg` members are byte-identical.
+The 16 human body IDs are 1,2,3,4,5,7,8,9,10,11,12,13,14,15,23,24.
+All have Center `(64,78)`, Selection `(48,48,80,90)` and TileSize 1.
+The effective ShootOffset arrays, in eight stored pairs, are:
+
+| Class IDs | ShootOffset |
+|---|---|
+| 23,15 | 57,75;45,66;44,53;52,43;68,42;80,50;81,62;73,73 |
+| 24 | 52,79;36,64;37,46;54,33;75,34;91,46;91,65;75,79 |
+| 14 | 61,90;36,80;28,58;40,39;65,30;85,40;96,60;87,81 |
+
+The other twelve IDs have empty arrays after the inspected parent fallback.
+MAGIC-261 then yields `(-48,-57)` in every direction. For these TileSize-1
+classes A equals cached `P28/P2c`. Original `L02828` resolves
+N/NE/E/SE/S/SW/W/NW to facing 0/2/4/6/8/10/12/14, with positive y south.
+The corresponding pair indices are 8/10/12/14/0/2/4/6; odd facings use the
+preceding even pair. Exact integer deltas are in the evidence vectors and
+the canonical presentation table. Teleport yields the fallback for all 16.
+
+**Confidence.** High for registry values, parent provenance, original direction
+labels and integer deltas. The parser consumes full registry members and
+the original origin fragment verifies every human class in eight directions.
+Medium for eight fine units per map pixel, retained from SAV-1130 and
+UNIT-STRUCTDELIVERY-065; no native pixel witness upgrades that scale.
+
+**Unknown.** Native first draw and art-dependent pixel extent remain unobserved.
+The registry File descriptor is geometry provenance; dynamically selected
+hero art is a separate route.
+
+### MAGIC-264
+
+The full EN/RU Data.bin parser consumes all 118 stored Units rows;
+56 carry parameters and 12 have a positive spell ID in the three spell slots.
+These rows and their class IDs are Goblin_Pike.4 (64), Goblin_Sling.4 (79),
+Orc_Sword.4 (80), Orc_Bow.4 (65), Ogre.4 (66), Troll.4 (68),
+Bat_Sonic.4 (70), Ghost.4 (69), Bee.4 (73), Squirrel.4 (74),
+Foot_Animated.4 (75) and Turtle.4 (76). Derived rows agree across locales.
+
+Classes 79 and 65 use pairs
+`59,77;44,67;42,53;51,42;66,39;80,45;85,59;77,72`.
+Class 70 uses eight `(64,64)` pairs and Center `(64,64)`, giving zero delta
+for a normal non-Teleport cast. The other nine rows have no effective array
+and use their own Selection/Center fallback, not necessarily zero.
+The evidence records all twelve classes' geometry and vectors.
+MAGIC-238 remains the authority for creature cast selection and aimed cells.
+
+**Confidence.** High for this stored population and its inputs to MAGIC-261.
+The parser joins each positive spell-slot row to its shipped graphics class;
+original-fragment execution checks all twelve geometries in eight directions.
+
+**Unknown.** A stored spell slot does not prove native visible-cast reachability
+for that row. Modded rows and unexamined construction paths are outside scope.
+
+### MAGIC-265
+
+The population is all 28 shipped Spells rows joined to projectiles.reg,
+normal producer `R0620`, and the three inspected client arms at
+`L03226`, `L13396` and `L13397`. Normal pictures with nonzero
+cast lifetime are 10,12,20,30,34,36,60. They share MAGIC-261's origin
+window; picture 60 alone forces its Selection fallback.
+
+Teleport creates a second object through copy constructor `L03008`,
+which calls drawable copy constructor `R2159`. The producer then
+uses copied action target `+88/+8c` plus the same Selection delta for its
+raw `+08/+0c` at `L13398/L13399`. It preserves source `+28/+2c`
+through construction. Driver tail `L13400/L13401` later copies raw
+current coordinates into those cached fields. Thus the second object's raw
+point is destination-derived, while its construction cache is source-derived.
+The caster-centre placement clause of MAGIC-CASTSPAWN-033 is partially
+retracted. This does not determine the first rendered Teleport point.
+
+The odd-picture 0x86 arm writes
+`(256*msg[0d]+128,256*msg[0e]+128)`. Source-cell opcode 0x8b writes
+`(256*msg[0a]+128,256*msg[0b]+128)`. Source-cell 0x8c picture 36 uses
+the low/high bytes of packed source word `msg+0e`, each multiplied by 256
+and increased by 128. These message arms do not use the normal class origin.
+MAGIC-DELIVER-035 supplies the no-client-ID sender boundary.
+
+**Confidence.** High for the enumerated registry join and raw coordinate stores,
+copy paths and driver-tail sync. Whole copy constructors have no unresolved
+branches in the recursive instruction capture. Direct coordinate windows
+distinguish caster, destination and message-cell alternatives.
+
+**Unknown.** Global producer completeness, native reachability, external
+geometry/draw ordering and the first displayed Teleport point remain unknown.
+A native capture or complete draw-order trace would settle that presentation
+boundary; no native game was run here.
+
+### MAGIC-266
+
+The direct-admission window `L05107..L03052` inside `R0003`
+supplies caster Position `+10` from that function's `[ebp+8]` caster
+argument at `L13402..L13403` to `R0633`.
+MAGIC-DELIVERY-170 supplies the enclosing dispatch and caster argument.
+The base chain through `L05979`, `R1009` and `R1010`
+copies coordinate and
+binding fields of that 12-byte Position; offsets 6/7 are not copied.
+Class ShootOffset, equipment, frame and visible projectile
+coordinates are not inputs to this direct Position copy. The nested
+PointEffect constructor `R1046` separately supplies target Position
+to assignment helper `L05872`. SAV-1068 retains the padding boundary.
+
+The inspected `R0634` tick body has 43 reached instructions and
+does not move Position. MAGIC-DELIVERY-170 supplies its countdown role;
+MAGIC-225 and SAV-1068 retain admission/allocation/alias boundaries.
+SAV-TOKENPOS-074, SAV-1054 and SAV-CASTCONT-1006 establish persistence in
+the common Token/SpellEffect prefix. Token serializer `R0950`
+calls `R1494` for the 12 Position bytes at body offset 0.
+
+**Confidence.** High for the direct pointer and Position-copy chain and
+unchanged tick field. Every captured body has zero unresolved branches.
+This establishes simulation position, separately from visible origin.
+
+**Unknown.** Native ordering, arbitrary aliasing, later writes outside this
+tick body and native SAVE/LOAD continuation were not tested.
+
+### MAGIC-267
+
+The visible writer window `L13404..L13405` stores projectile `+08/+0c`
+as top-level `Prj<ID>/x` and `/y`, with z and thirteen other action leaves.
+`Projectiles/IDs` indexes those records. The sixteen-leaf list in
+SAV-PROJSTORE-428 contains no dedicated leaf sourced from `+28/+2c`, which
+MAGIC-261 initializes as coordinate copies. SAVE records the current point,
+not an immutable origin. A moving Fire Arrow/Fire Ball can save a later
+point; stationary Lightning/Prismatic retain the initial raw point under
+the inspected driver in MAGIC-DELIVER-035.
+
+SAV-1130 and SAV-1142 supply coordinate/layout and related unit-shot evidence.
+SAV-PROJLOAD-429 supplies the loader's defaults and post-load helper;
+this writer claim does not upgrade native restoration. Simulation transport
+persistence uses the separate Position prefix in MAGIC-266, not these leaves.
+
+**Confidence.** High for the complete writer leaf population, exact source
+fields and absence of a dedicated coordinate-copy leaf within that writer.
+The absence claim is limited to those sixteen leaves.
+
+**Unknown.** Native resave, first post-load frame, cache restoration and
+continued flight were not observed. A native SAVE/LOAD in flight would settle
+those behaviors.
+
+## Spell-object light
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-269 | The CProjectile light selector deposits vertex stamps for pictures 10, 12, 13, 34 and 36 during the client view rebuild. | High | ● active (amended) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+| MAGIC-270 | Lightning and Prismatic Spray overwrite the four vertices of each admitted drawn-path cell with the low byte of 10 times phase. | High | ● active | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+| MAGIC-271 | Fire Arrow, Fire Ball flight and its explosion use clipped uniform point stamps with radii 0, 1 and an explosion phase table. | High | ● active | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+| MAGIC-272 | Spell light is rebuilt per client frame; normal caster construction gives Lightning and Prismatic Spray 13 successful phase steps before shared cleanup. | High | ● active (amended) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+| MAGIC-273 | Dynamic lighting gates point stamps and bit-clear terrain lighting; bolt light still reaches units with the option off, while native activation and visible results of the L10964 & 2 set branch are Unknown. | High / Unknown | ● active (amended, partially retracted) | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+| MAGIC-274 | The measured spell light is client draw state; the direct Prj SAV program saves 16 source scalars and omits the light grids and drawn-path array. | High / Medium | ● active | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md) |
+
+### MAGIC-269
+
+R2160 is CProjectile vt+0x40 (slot L13406, vtable L02587). R1657 calls that slot in the primary store at L13407 and the deferred projectile store at L13408. The frame painter R0379 calls the rebuild at L13409. The unsigned selector uses pictures 10..36 and 27 index bytes. Five arms are reached over all 256 byte picture IDs; the jump table at L13410 is not in the committed evidence. Only 10, 12, 13, 34 and 36 reach a light store. Other integer pictures take this method's default.
+
+The original-x86 probe runs all 256 byte picture IDs at phase 0 with both lighting options enabled and one supplied valid path point. Only those five IDs change view+0xa8. MAGIC-PIC-026 identifies their spell names; MAGIC-BOLTGATE-069 identifies the two drawn paths. The source is separate from the standing light, darkness and wall_of_fire cell bits.
+
+**Confidence.** High for this complete local selector, vtable slot and named callers. The owned EN/RU executable is one byte-identical input, not two independent witnesses.
+
+**Unknown.** R1657 has a third R1095 call at L13411 over a second store: radius 1, level selected by an 11-arm value >> 1 switch at L13412, default no stamp. This identified point source is unattributed. Other object classes and indirect lighting methods were not enumerated. Their own dispatch populations would settle the global question.
+
+**Amended.** The target-count clause is narrowed to the five arms reached by the committed evidence; claims/retracted.md records the former wording. The five light picture IDs, vtable slot and named callers stand.
+
+### MAGIC-270
+
+Pictures 34 and 36 use the point array at object+0x114, count +0x118 and stride 8. For each signed point, c = pointX >> 5 and r = R0377(pointX, pointY). The method admits 0 <= c <= visibleColumns and 0 <= r <= visibleRows+4. With stamp stride visibleColumns+7, it writes (c+3,r+3), (c+4,r+3), (c+3,r+4) and (c+4,r+4), each as u8(10 * object.phase). These are path-cell vertices, not a radial halo at the object's position.
+
+The stores at L13413/L13414/L13415/L13416 overwrite prior bytes. They do not add or take a minimum. Adjacent path cells share vertices. Empty paths and off-view columns deposit nothing. The original method and inverse-row helper run on a synthetic planar view; path controls distinguish an empty list, adjacent cells, an off-view point and overwriting an existing zero stamp with 40.
+
+**Confidence.** High for the complete local arm and its executed stores. MAGIC-BOLTLIST-071 (superseded in part) and MAGIC-BOLTSTILL-072 supply path storage and stationary-object context.
+
+**Unknown.** Native random path geometry, fog admission and overlapping object order were not observed. A native cast with initialized view grids would settle the resulting pixels.
+
+### MAGIC-271
+
+Picture 10 calls R1095(worldCellX,worldCellY,0,16). Picture 12 calls it with radius 1 and level 16. Picture 13 uses this phase table:
+
+| Phase | Radius | Level |
+|---:|---:|---:|
+| 0 | 1 | 16 |
+| 1 | 2 | 8 |
+| 2,3 | 3 | 0 |
+| 4 | 3 | 8 |
+| 5 | 3 | 16 |
+| 6 | 3 | 24 |
+| 7 | 3 | 32 |
+| 8 | 3 | 40 |
+| 9,10 | 3 | 46 |
+
+The helper subtracts view scroll. For nonnegative i,j <= radius it accepts i*i+j*j < radius*(radius+1), with threshold 1 at radius 0. Relative to the unpadded source cell, the X choices are 4+i and 3-i, and Y choices are 4+j and 3-j. Each reflected vertex gets the same byte; each write is separately viewport-clipped. There is no radial falloff. Unclipped radii 0,1,2,3 touch 4,12,32,52 distinct vertices. The original initializer at L13417..L13418 fills all 1681 square-distance entries; the original helper executes against it.
+
+**Confidence.** High for the named point helper, phase table and executed vertex populations. This corrects the square-radius wording of MAGIC-UNITLIGHT-057 (partially retracted).
+
+**Unknown.** Synthetic explosion phases above 10 take a default in the probe, but are not established native frames. Native edge pixels and overlapping source order require observation.
+
+### MAGIC-272
+
+R1657 copies the previous stamp at L13419 when L10964 == 2. It clears view+0xa8 to 255 at L13420 and its write count to zero at L13421 before object vt+0x40 calls. It finishes by calling R0608 at L13422. In the original reset control, four stamped vertices become unstamped and ambient 48 gives unit level 12 without a source. The current frame does not subtract an expired object's old contribution.
+
+For pictures 34/36 from normal caster construction, R0558 writes phases 4,3,2,1,0,1,2,1,0,1,2,3,4 on successful calls 1..13 (MAGIC-CASTSPAWN-033, MAGIC-BOLTSTILL-072). The stamp bytes on that route are 40,30,20,10,0,10,20,10,0,10,20,30,40. The probe supplies actionsegments = 13; it does not enumerate every construction route. The direct 0x8b message route takes actionsegments from msg+0xf: 5 for spells 13 and 14, giving phases 4,3,2,1,0 (MAGIC-DELIVER-035). A loaded object resumes from its saved actionsegments and actionphase (MAGIC-274). The common tail decrements actionsegments and returns 1; the next call with zero returns 0. The shared updater R0334 calls vt+0x3c at L02474, collects zero-return IDs, unlinks their store nodes and calls the scalar destructor at L13423. That cleanup arm has no picture filter. Removal prevents later deposits by that object. SAV-1133 supports this positive shared cleanup route.
+
+Fire Arrow and Fire Ball flight retain their fixed stamp levels while present. On normal caster construction, MAGIC-CASTSPAWN-033 supplies distance-derived countdowns dist/200 for picture 10 and dist/384 for 12; the direct message route instead supplies its message counter (MAGIC-DELIVER-035). The normal picture-13 explosion receives 22 ticks (MAGIC-BURSTLIFE-034, amended only for staged-area cadence), with its two-tick sheet clock in ANIM-PROJ-025. The positive shared cleanup route applies when their driver returns zero. MAGIC-BOLTSTILL-072 supplies the existing bolt countdown authority. The bolt probe executes counter/phase instructions while skipping only the separate geometry call.
+
+**Confidence.** High for the frame reset, positive cleanup route and executed bolt phase/countdown path with the normal caster counter. The named direct-message counter and loaded-counter route are scoped by MAGIC-DELIVER-035 and MAGIC-274.
+
+**Unknown.** Exact native spawn/removal frame ordering and scheduling were not observed. A timed native cast is required to join successful driver calls to visible frames.
+
+**Amended.** The universal 13-step clause is narrowed to normal caster construction; claims/retracted.md records the former wording. The direct 0x8b and loaded-object routes use their own supplied or saved counters. Frame reset and positive shared cleanup stand.
+
+### MAGIC-273
+
+VIDEO-077 identifies Lighting at L06417 and Object animations at L05659. R1095 skips point stamps when Lighting is zero. Object animations controls its invalidation rectangle, not its stamp stores. The picture34/36 arm of R2160 reads neither flag. All four flag combinations give the same bolt vertices and original unit-grid merge. MENU-074 identifies the options OK path that clears Lighting when Animation is zero.
+
+R0608 initializes view+0xb0 from ambient>>2. Each stamped cell maps each corner to max(stamp-32,0), substitutes ambient for a 255 corner, sums and shifts right 4, then takes min(result,ambient>>2). Four 255 corners leave the prior initialized/cell-bit value. Four equal bolt bytes at phases 0..4 give levels 0,0,0,0,2 at ambient 48. The merge has no Lighting predicate.
+
+The software terrain call at L13424 requires nonzero write count, L10964 & 2 clear and Lighting nonzero. With that bit clear and Dynamic lighting off, bolt light reaches units and not the ground. R1816 selects terrain+0x18 at an unstamped corner and min(stamp,terrainByte) at a stamped corner. The L10964 & 2 set branch is selected at L13425..L13426; calls at L13427 and L13428 pass view+0xa8 without a Lighting test in the inspected local dispatch/call paths. R0541 uses a present stamp directly, falling back to terrain+0x18 at 255. R2161 constructs update regions from current/previous stamps; it is not a colour converter. The persistent terrain plane is not overwritten by these deposits.
+
+The Lighting test at L13429 skips WallFire art and rejoins before the ordinary object reads of view+0xb0 at L10388/L10389. TERR-SPR-065 and TERR-LIGHT-061 (partially retracted) keep the Medium boundary for unit-body passes that force zero or interpret the argument differently. The same grid does not guarantee identical lighting for every drawable pass.
+
+**Confidence.** High for the named local gates, stores, branch, stamp-else-terrain fallback, consumer arithmetic and executed synthetic controls. Native activation and the visible result of the L10964 & 2 set branch are Unknown. TERR-FAMILY-187 found no enabling writer in its file-backed embedded-address scan for L10968..L10969 and records the startup write of 0 at L10967; computed pointers, bulk copies and native lifecycle remain outside that search. No original game was run.
+
+**Unknown.** Native activation and the visible result of the L10964 & 2 set branch, other options, fog admission, outer frame suppression, exact overlap ordering and native pixels. A native selector/lifecycle observation and casts under both Lighting states would settle the corresponding boundaries.
+
+**Amended.** The hardware-mode label and Medium visible-result clause are withdrawn; claims/retracted.md records the former wording. The selector-bit branch and local fallback remain High. TERR-FAMILY-187 bounds native activation, and the bit-set visible result is Unknown.
+
+### MAGIC-274
+
+R2160 reads the object's attached client view at +0xe0 and deposits into view+0xa8. R0608 derives view+0xb0 for drawing. These methods write viewport light and invalidation, not simulation lighting. MAGIC-DELIVERY-170 is the separate simulation delivery authority; the measured presentation effect does not replace it.
+
+The direct Prj writer in R0084, L13430..L08365, and loader in R0099, L13431..L13432, preserve 16 scalars: x,y,z,picture,dir,phase,lastaction,action,actiondir,actiontarget,actionx,actiony,actionz,actionphase,actionsegments,actionspell. Manager IDs and FreeIndex are separate leaves. The field program omits the viewport stamp and unit-level grids, and the point array +0x114/+0x118. The loader reattaches the client view, inserts into the projectile store and rebinds the drawable. SAV-PROJSTORE-428, SAV-PROJLOAD-429 and SAV-1130 supply the typed field authorities. SAV-914 and SAV-915 bound the direct consumer/producer program and retain their unexpanded-helper Unknown.
+
+**Confidence.** High for the positive client writes and complete direct Prj scalar field program. Medium for absence of independent light persistence and simulation lighting outside these routines: other alias/helper populations were not independently enumerated.
+
+**Unknown.** Identical Lightning/Prismatic light and random geometry after original LOAD before the first client tick. The bounded SAV population in SAV-1152 has no picture14+ witness. A live-object SAV, original LOAD, frame observation, post-load ticks and resave comparison would settle that boundary. Other simulation or SAV routes require their own enumeration.

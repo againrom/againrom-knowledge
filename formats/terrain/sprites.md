@@ -230,9 +230,31 @@ for every cell:                                       # +0xa8 = light-source sta
     else grid[cell] = min( (q0+q1+q2+q3) >> 4 , ambient >> 2 )
 ```
 
-Lower level = brighter, so the sweep can only brighten; the only darkening mechanism is a
-`0x20000`-flagged object. Objects and units read the same grid, so nothing can light one differently
-from the other.
+Lower level means brighter. The merge caps its result at the ambient level.
+The sole stamp-writer and lit-object-only clauses of TERR-LIGHT-061 are
+partially retracted: Lightning and Prismatic Spray directly overwrite four
+vertices per admitted drawn-path cell with `u8(10 * phase)`. Fire Arrow,
+Fire Ball flight and its explosion also deposit point stamps through the
+helper; its footprint follows a clipped squared-distance test rather than
+a radius square. — TERR-LIGHT-061, MAGIC-270, MAGIC-271
+
+Dynamic lighting gates point stamps. It does not gate the direct bolt
+stores or the named unit-grid merge. With `L10964 & 2` clear, Dynamic
+lighting gates the terrain-light pass. With that bit clear and Dynamic
+lighting off, bolt light reaches units but not the ground. The
+`L10964 & 2` set branch passes the stamp through the inspected terrain
+dispatch/call paths without a local Lighting test. It uses the stamp
+directly, falling back to the terrain byte for an unstamped corner. The
+local branch and fallback are High. Native activation and the visible
+result of the bit-set branch are Unknown: TERR-FAMILY-187 found no
+enabling writer in its bounded address-form search, and startup writes 0.
+Ordinary consumers share `+0xb0`; special unit passes can force zero or
+interpret the argument
+differently. The same-grid equality clause of TERR-LIGHT-061 is therefore
+narrowed to its named reads. Native pixels and outer option/frame gates
+remain Unknown.
+— MAGIC-273 (hardware-mode label partially retracted), TERR-LIGHT-061,
+TERR-FAMILY-187
 
 **Mode 2 — the table.** `R1107`'s arm at `L10378` (the dispatch table sits at
 `L05822`), built as `(nLevels = 0x10, mode = 2, useTint = 1)`:

@@ -128,7 +128,7 @@ on a cast. Every cast of every spell animates its caster; only the map object is
 
 ## SpellEffect map objects
 
-Settled by `MAGIC-CASTSPAWN-033`, `MAGIC-BURSTLIFE-034` (amended and partially retracted in the ledger), `MAGIC-DELIVER-035`. Section 11
+Settled by `MAGIC-CASTSPAWN-033` (amended and partially retracted in the ledger), `MAGIC-BURSTLIFE-034` (amended and partially retracted in the ledger), `MAGIC-DELIVER-035`. Section 11
 describes the message; this section describes the object. The two are built by different code at
 different times.
 
@@ -138,17 +138,91 @@ into the [cast action](casting.md). On the tick `actionphase == ShootDelay` the 
 
 ```
 picture         = 2*spellId + 8          taken from the caster's actionspell field
-position        = the class's muzzle point for facing (dir - 8) & 0xe,
-                  or the class bounding-box centre when the class has no muzzle table
-                  or the picture is 60 (teleport)
+position        = cached caster centre plus the class offset defined below
 actionx/y/z     = the target's current position, or the caster's own aim point
 action          = 1
 actionphase     = 0
 actionsegments  = a hard-coded switch on the picture id (below)
 ```
 
-`picture == 60` allocates a **second** projectile, copy-constructed, at the caster's own centre —
-teleport draws two sprites.
+`picture == 60` copy-constructs a second projectile. Its raw `+08/+0c`
+is copied target `+88/+8c` plus the Selection fallback. Its construction
+cache `+28/+2c` still holds the first object's source-derived point; the
+driver later copies raw coordinates into it. The caster-centre placement
+clause of MAGIC-CASTSPAWN-033 is partially retracted. Native first draw and
+external geometry/draw ordering remain Unknown. — MAGIC-265
+
+### Cast origin and human equipment
+
+The normal CUnit/CAirUnit cast producer uses class ID `caster+20` and
+facing `caster+6c`. Let `A=(caster+58,caster+5c)`, the cached footprint
+centre, and `i=(facing-8)&14`. Its exact integer formula is:
+
+```text
+nonempty ShootOffset and picture != 60:
+    x = A.x + 8*(ShootOffset[i]   - CenterX)
+    y = A.y + 8*(ShootOffset[i+1] - CenterY)
+otherwise:
+    x = A.x + trunc((SelectionX2-SelectionX1)/2) - CenterX
+    y = A.y + trunc((SelectionY2-SelectionY1)/2) - CenterY
+```
+
+The fallback is unscaled and does not add SelectionX1/Y1. Both raw
+`+08/+0c` and cached `+28/+2c` receive the first object's result.
+A is `P28/P2c + 128*(TileSize-1)`, not necessarily raw caster `+08/+0c`.
+The complete origin window reads no animation frame or equipment pointer;
+the action clock determines when it runs. — MAGIC-261
+
+In `R0551`, human state 8 uses the idle weapon/shield name selection.
+The selector's branches and name-to-ID stores are High. Its class-store path
+maps an unshielded mage with empty hands to `mage` (23) and staff categories
+to `mage_st` (24). At ShootDelay, the held class matches this selection when
+the selector last wrote it for the current equipment and no other `caster+20`
+writer ran since. The writer population is unenumerated: hero creation writes
+`+20`, and the selector can return without a write. Equipment freshness and changes
+during wind-up remain Unknown. Sword, axe, club and pike classes have empty
+arrays; bow class 14 and crossbow class 15 have arrays. State 6's weapon
+bypass is the death control. Body art and registry geometry are separate.
+— MAGIC-262
+
+All sixteen shipped human classes have Center `(64,78)`, Selection
+`(48,48,80,90)` and TileSize 1. Normal pictures other than 60 produce
+these deltas from A, in fine integer coordinates, with positive y south:
+
+| Direction | Facing | mage / xbowman (23/15) | mage_st (24) | archer (14) | Empty array |
+|---|---:|---|---|---|---|
+| N | 0 | (32,-288) | (88,-352) | (8,-384) | (-48,-57) |
+| NE | 2 | (128,-224) | (216,-256) | (168,-304) | (-48,-57) |
+| E | 4 | (136,-128) | (216,-104) | (256,-144) | (-48,-57) |
+| SE | 6 | (72,-40) | (88,8) | (184,24) | (-48,-57) |
+| S | 8 | (-56,-24) | (-96,8) | (-24,96) | (-48,-57) |
+| SW | 10 | (-152,-96) | (-224,-112) | (-224,16) | (-48,-57) |
+| W | 12 | (-160,-200) | (-216,-256) | (-288,-160) | (-48,-57) |
+| NW | 14 | (-96,-280) | (-80,-360) | (-192,-312) | (-48,-57) |
+
+Odd facing values share the preceding even pair. Teleport uses `(-48,-57)`
+for all human classes. Integer values and direction labels are High;
+the eight-fine-units-per-map-pixel interpretation retains Medium confidence.
+— MAGIC-263
+
+Within the twelve shipped Units rows with positive spell slots,
+Goblin_Sling.4 (79), Orc_Bow.4 (65) and Bat_Sonic.4 (70) have arrays.
+The bat's pairs equal Center and give zero non-Teleport delta; the other
+nine rows use their class Selection fallback. This stored population does
+not establish visible-cast reachability for every row. — MAGIC-264
+
+The searched delivery population is all 28 Spells rows, the normal producer
+and three client cell-effect arms. Normal active pictures 10,12,20,30,34,36,60
+share the formula; Teleport forces the fallback. The odd-picture 0x86 arm
+uses message cell `+0d/+0e`; source-cell 0x8b uses `+0a/+0b`; source-cell
+0x8c picture 36 uses packed source word `+0e`. Each writes cell*256+128.
+Global producer completeness and native first-visible-frame position remain
+Unknown. — MAGIC-265
+
+Visible SAVE records current `Prj<ID>/x` and `/y`, without a separate
+immutable launch-point leaf. Simulation transport has a separate caster
+Position. Native SAVE/LOAD continuation remains unobserved.
+— MAGIC-266, MAGIC-267
 
 **The flight length is an engine table, not data.** 51 index bytes over pictures 10..60 through an
 8-entry jump table. Seven ids are non-zero:

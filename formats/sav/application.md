@@ -117,6 +117,12 @@ An empty manager still emits both leaves. No rule requires
 `FreeIndex=max(ID)+1`; preserve the allocator field separately from the IDs.
 — SAV-PROJSTORE-428, SAV-PROJCORP-430
 
+The writer sources `x/y` from current projectile `+08/+0c`. It emits no
+dedicated launch-point leaf from cached `+28/+2c`. A moving projectile can
+therefore save a point different from its origin; SAVE does not freeze the
+original cast point in a second field. Native in-flight SAVE/LOAD and
+post-load cache restoration remain unobserved. — MAGIC-267
+
 LOAD is less restrictive than the producer. Missing FreeIndex defaults to 0;
 missing IDs leaves the constructed vector empty. Kind 6 yields `size/4`
 elements, taking each low u16; kind 2 has a one-element compatibility arm.

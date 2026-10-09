@@ -39,6 +39,34 @@ REG-ROSTER-019 must not be used. `Flip=1` selects its own sheet-layout arm.
 `Anim*Frame`, `Anim*Time`, `ShootOffset` and `Sound` arrays carry independent
 element counts. — REG-VAL-029, REG-ROSTER-052, REG-UNITS-051
 
+### Human and creature cast geometry
+
+The EN/RU `graphics.res::units/units.reg` members have the same bytes.
+Human body IDs 1,2,3,4,5,7,8,9,10,11,12,13,14,15,23,24 all use
+Center `(64,78)`, Selection `(48,48,80,90)` and TileSize 1.
+Their effective `ShootOffset` values are:
+
+| Class IDs | Eight stored pairs |
+|---|---|
+| 23 mage, 15 xbowman | 57,75;45,66;44,53;52,43;68,42;80,50;81,62;73,73 |
+| 24 mage_st | 52,79;36,64;37,46;54,33;75,34;91,46;91,65;75,79 |
+| 14 archer | 61,90;36,80;28,58;40,39;65,30;85,40;96,60;87,81 |
+| Other twelve human IDs | Empty, including parent fallback |
+
+These are geometry inputs, even when hero appearance loads art from its
+dynamic body path. The normal cast consumer and eight-direction deltas
+are defined in [magic presentation](../magic/presentation.md#cast-origin-and-human-equipment).
+The registry's empty-array case uses an unscaled Selection fallback.
+— MAGIC-263
+
+Of 118 stored Units rows, 56 have parameters and twelve have a positive
+spell slot. Only Goblin_Sling.4 (79), Orc_Bow.4 (65) and Bat_Sonic.4 (70)
+have nonempty arrays in this caster-definition population. Classes 79/65
+use `59,77;44,67;42,53;51,42;66,39;80,45;85,59;77,72`.
+Class 70 uses eight `(64,64)` pairs equal to its Center. The other nine
+rows use their own Selection/Center fallback. Stored spell slots do not
+prove native visible-cast reachability. — MAGIC-264
+
 Phase counts and animation-array lengths are independent. The loader iterates
 the kind-6 array's `size/4` elements. For example, Goblin movement has 8 phases
 and 10 entries; Ghost movement/idle have 3 phases and 4 entries. MoveBegin,

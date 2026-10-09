@@ -90,3 +90,95 @@ constants, the two moduli, the tag stride 5, the 8-pixel centring, the trail cap
 frame ramp are all `.text` or `.rdata`. A third spell with a drawn path, a straight bolt, a longer
 trail or a differently sized bolt sheet all require an engine change; none is reachable from
 `Data.bin` or `projectiles.reg`.
+
+## Light cast by spell objects
+
+The client CProjectile light method deposits into a viewport vertex grid for
+five pictures: 10 Fire Arrow, 12 Fire Ball flight, 13 its explosion,
+34 Lightning and 36 Prismatic Spray. The client view rebuild calls it in
+the primary and deferred object stores. This complete local selector is
+not an enumeration of other object classes. The rebuild has a third
+point-stamp call over a second store; attribution of that radius-1 source
+is Unknown. — MAGIC-269
+
+Lightning and Prismatic Spray visit every 8-byte drawn-path record. Set
+`c = signedPointX >> 5` and obtain `r` from the original screen-to-row
+helper, which accounts for terrain projection. Admit `0 <= c <= visCols`
+and `0 <= r <= visRows+4`. With stamp stride `visCols+7`, write the four
+vertices `(c+3,r+3)`, `(c+4,r+3)`, `(c+3,r+4)`, `(c+4,r+4)` to
+`u8(10 * phase)`. Adjacent path cells share vertices. Empty or off-view
+paths deposit nothing. Each store overwrites previous light; it does not
+add or take a minimum. This is light along the drawn path, with no radial
+halo around the stationary projectile. — MAGIC-270
+
+Fire Arrow uses radius 0 and stamp 16. Fire Ball flight uses radius 1
+and stamp 16. The explosion uses this table. — MAGIC-271
+
+| Explosion phase | Radius | Stamp |
+|---:|---:|---:|
+| 0 | 1 | 16 |
+| 1 | 2 | 8 |
+| 2,3 | 3 | 0 |
+| 4 | 3 | 8 |
+| 5 | 3 | 16 |
+| 6 | 3 | 24 |
+| 7 | 3 | 32 |
+| 8 | 3 | 40 |
+| 9,10 | 3 | 46 |
+
+For nonnegative `i,j <= radius`, a point stamp accepts
+`i*i+j*j < radius*(radius+1)`, with threshold 1 at radius 0. After
+subtracting scroll, the reflected vertex offsets from the unpadded source
+cell are X=`4+i` or `3-i`, Y=`4+j` or `3-j`. Each accepted vertex gets
+the same byte, clipped separately to the viewport. There is no radial
+falloff. Unclipped radii 0,1,2,3 touch 4,12,32,52 vertices. — MAGIC-271
+
+The client rebuild copies the previous stamp when `L10964 == 2`, then
+clears the stamp grid to 255 before objects deposit again and rebuilds
+unit light. Under normal caster construction,
+Lightning and Prismatic Spray have 13 successful driver steps with phases
+`4,3,2,1,0,1,2,1,0,1,2,3,4` and stamps
+`40,30,20,10,0,10,20,10,0,10,20,30,40`. The following zero-countdown call
+returns finished; the shared updater unlinks and destroys the object.
+The direct `0x8b` message route supplies `actionsegments` from its message
+counter: 5 for spells 13 and 14, giving phases `4,3,2,1,0`, then removal.
+A loaded object resumes from its saved `actionsegments` and `actionphase`.
+Fire Arrow and Fire Ball retain their fixed levels while present; the
+normal explosion receives 22 ticks and follows its two-tick sheet clock.
+Normal caster construction uses distance-derived counters `dist/200` for
+Fire Arrow and `dist/384` for Fire Ball flight; a direct message uses its
+supplied counter. Each successful driver call decrements the counter.
+Exact visible frame ordering remains Unknown.
+— MAGIC-272, MAGIC-DELIVER-035, MAGIC-274
+
+Dynamic lighting gates point deposits. Object animations gates their
+rectangle invalidation. Neither flag is read by the direct Lightning or
+Prismatic stores, and their unit-grid merge still runs with both flags
+off. With `L10964 & 2` clear, Dynamic lighting gates the terrain-light
+pass. With that bit clear and Dynamic lighting off, bolt light reaches
+units but not the ground. The `L10964 & 2` set branch passes the stamp
+through the inspected terrain dispatch/call paths without that local
+Lighting test. The local branch and fallback are High. Native activation
+and the visible result of the bit-set branch are Unknown:
+TERR-FAMILY-187 found no enabling writer in its bounded address-form
+search, and startup writes 0.
+Native pixels and outer option/frame gates remain Unknown.
+— MAGIC-273 (hardware-mode label partially retracted), TERR-FAMILY-187
+
+The unit-grid merge maps each corner to `max(stamp-32,0)`, substitutes
+ambient for an unstamped 255 corner, sums and divides by 16, and caps
+the result at `ambient >> 2`. Four unstamped corners leave the initialized
+or cell-bit value. Ordinary object/unit consumers use this grid, while
+special unit passes retain their separate behavior. Bit-clear terrain uses
+`min(stamp,terrainByte)` at stamped corners. The bit-set branch uses the
+stamp directly, falling back to the terrain byte for an unstamped corner.
+Neither deposit changes the persistent terrain plane.
+— MAGIC-273 (hardware-mode label partially retracted)
+
+The measured light is client draw state. The direct Prj SAV program saves
+16 projectile source scalars, including phase and countdown, and omits the
+viewport light grids and drawn-path array. Absence of independent light
+persistence outside this program is Medium. Identical light and random
+geometry after native LOAD of a live Lightning or Prismatic object remain
+Unknown; a live-object SAV and original LOAD/post-load observation are
+required. — MAGIC-274

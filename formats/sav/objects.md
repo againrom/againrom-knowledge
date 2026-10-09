@@ -58,6 +58,14 @@ common bytes. A child and its transport therefore need not carry the same
 invariants: allocation/alias boundaries and later writes remain Unknown.
 — SAV-1069, MAGIC-ATTRGATE-118, MAGIC-225
 
+Direct delivery-2 admission supplies the caster's Position `+10` to
+SpellTransport's Position-copy constructor chain. Its inspected tick body
+does not move that Position. The nested PointEffect separately copies the
+target Position. The transport's caster-origin Position persists as the
+12-byte Token prefix at body offset 0; it is separate from the visible
+projectile's class-dependent start. Native ordering, aliases and SAVE/LOAD
+continuation remain Unknown. — MAGIC-266
+
 `Effect_DirectDamage`'s raw 24 bytes at `+48` are not a separate shape: the
 same constructor family that builds the [attack block](actors.md#unit-programme)
 at live `+a6` and base `+114`, and the same resolver pair that reads the
