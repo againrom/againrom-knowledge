@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3074. Observation: 95. Static analysis: 2545. Mixed: 434.
+Claims labelled: 3087. Observation: 95. Static analysis: 2553. Mixed: 439.
 
 ## Ledger ai
 
@@ -1500,12 +1500,16 @@ Claims labelled: 3074. Observation: 95. Static analysis: 2545. Mixed: 434.
 | R2-ASSET-024 | static analysis | ✔ promoted |
 | R2-ASSET-025 | mixed | ✔ promoted |
 | R2-ASSET-026 | static analysis | ✔ promoted |
-| R2-ASSET-027 | static analysis | ✔ promoted (partially retracted: maxima attribution only; see retracted.md) |
+| R2-ASSET-027 | static analysis | ✔ promoted (partially retracted) |
 | R2-ASSET-029 | static analysis | ✔ promoted |
 | R2-ASSET-030 | mixed | ✔ promoted |
 | R2-ASSET-031 | mixed | ✔ promoted |
 | R2-ASSET-032 | mixed | ✔ promoted |
 | R2-ASSET-033 | static analysis | ✔ promoted |
+| R2-ASSET-049 | mixed | ● active (branch candidate) |
+| R2-ASSET-050 | mixed | ● active (branch candidate) |
+| R2-ASSET-051 | mixed | ● active (branch candidate) |
+| R2-ASSET-052 | mixed | ● active (branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -1639,6 +1643,14 @@ Claims labelled: 3074. Observation: 95. Static analysis: 2545. Mixed: 434.
 | R2-ENGINE-228 | static analysis | ✔ promoted |
 | R2-ENGINE-229 | static analysis | ✔ promoted |
 | R2-ENGINE-230 | static analysis | ✔ promoted |
+| R2-ENGINE-231 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-232 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-233 | static analysis | ● active (branch candidate, partially retracted) |
+| R2-ENGINE-234 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-235 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-236 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-237 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-238 | static analysis | ● active (branch candidate, partially retracted) |
 
 ## Ledger rom2-session
 
@@ -1695,6 +1707,7 @@ Claims labelled: 3074. Observation: 95. Static analysis: 2545. Mixed: 434.
 | R2-SESSION-112 | static analysis | ✔ promoted |
 | R2-SESSION-113 | static analysis | ✔ promoted |
 | R2-SESSION-114 | mixed | ✔ promoted |
+| R2-SESSION-115 | mixed | ● active (branch candidate) |
 
 ## Ledger sav
 

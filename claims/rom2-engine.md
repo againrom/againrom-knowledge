@@ -2369,3 +2369,355 @@ dialogue alternatives and input scheduling open.
 
 **Unknown.** Displayed text, topic availability and successful interaction;
 an authorized original visit and click would settle that composed route.
+
+## Selected town presentation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-231 | Selected ROM2 town IDs 1/2/3 bind generic/Kaarg/druid views and music b14/b16/b15; their measured loaders select different square art. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-232 | The active Kaarg square paints background, shop/inn highlight, girl1, girl2, guard, dervish and gates in that order, then delegates overlays and children. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-233 | The selected town sampler maps nine mask bytes to selectors; eight occur in the Kaarg mask, and hit testing uses the view-relative pixel rather than figure bounds. | High | ● active (branch candidate, partially retracted) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-234 | Kaarg mask clicks open shop, inn, mission navigation or the main menu; its four person regions request stage-keyed dialogue, with no school click arm. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-235 | Kaarg person animation starts use separate elapsed-time intervals; frame advancement admits one step only after more than 100 ms, while scheduling runs on every active paint. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-236 | Kaarg gates advance toward frame 10 while the pointer samples selector 8 and toward frame 0 otherwise; they use their frame series rather than a separate highlight bitmap. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-237 | Campaign town ID 2 selects Kaarg inn and shop pages with shared native bases; the inn mixes generic overlays with Kaarg art, while the shop selects Kaarg frame, fire and keeper art. | High / Medium | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+
+### R2-ENGINE-231
+
+EN dispatcher L2.00266 and RU L2.00267 read the current record ID
+through getters L2.00271 and L2.00275. The getters return record+4.
+EN arms L2.00279, L2.00264 and L2.00280 select controller members
++0x110, +0x118 and +0x114, then call the chosen view's virtual +0x80.
+They push music\b14.wav, music\b16.wav and music\b15.wav.
+RU arms L2.00281, L2.00265 and L2.00282 have the same choices.
+Playback is conditional on the dispatcher music-enable word; key
+selection alone is not evidence of audible output.
+
+EN construction L2.00558 stores generic constructor L2.00559 at
++0x110, Kaarg L2.00560 at +0x118 and druid L2.00561 at +0x114.
+Their installed tables are L2.00562, L2.00563 and L2.00564.
+The selected virtual +0xa0 loaders are EN L2.00565 / RU L2.00566
+(generic), EN L2.00567 / RU L2.00568 (Kaarg), and EN L2.00569 /
+RU L2.00570 (druid).
+
+Generic loads interface/town/{townmask,townmain,Tavern_l,Trener_l,
+Shop_l,Town_add}.bmp; sign/V%.2d.bmp, door/T%.2d.bmp, stars/S%.2d.bmp,
+fluger/F%.2d.bmp; and interface/townbirds/{tavern,fighter,mage,shopie,
+Guards}/sprites.16a, Birds%d/sprites.16a, HORSE%d/A%d/sprites.16a,
+BABA%d/A%d/sprites.16a and DERVISH%d/sprites.16a.
+Druid loads interface/town_druid/{townmask,townmain,hili_tavern,
+hili_shop}.bmp, woman/a%d%04d.bmp, man/a%d%04d.bmp,
+bug/sprites.16a and Lizard/sprites.16a.
+Kaarg loads interface/town_kaarg/{townmask,townmain,hili_tavern,
+hili_shop}.bmp, dervish/d%04d.bmp, guard/g%04d.bmp,
+girl1/g%d%03d.bmp, girl2/g%d%03d.bmp and maingates/m%04d.bmp.
+Each native graphics key has prefix graphics\. Literal casing and
+individual push/call addresses are retained in the measured key tables.
+
+Evidence is measured/selection/{instructions,resource-pushes,class-slots,
+music}.tsv and measured/square/{anchors,resource-pushes}.tsv.
+The three music nodes exist in both hashed music archives and agree.
+The Kaarg loader and painter contain no TownBirds key or sprite draw;
+that is a bounded local result, not executable-wide absence.
+
+**Confidence.** High for the positive local branch, constructor, table
+and pushed-key contracts. The selection decoder resolves each selected
+body's direct CFG; square table and instruction controls retain the
+Kaarg dispatch targets. This closes R2-ENGINE-160's unread arm strings
+and identifies its +0x118 view without claiming a global consumer census.
+
+**Unknown.** Other ID consumers, loose-resource overrides, runtime
+admission of each view and audible music delivery.
+
+### R2-ENGINE-232
+
+EN painter L2.00571 / RU L2.00572 returns when view+0x204 is zero.
+For an active view it paints the following destinations relative to
+view left/top: townmain (0,0); shop highlight (328,256) for hover 1
+or inn highlight (480,196) for hover 2; girl1 (216,284); girl2
+(260,284); guard (140,152) for active cursor 13..37, otherwise
+(184,156); dervish (416,328); and maingates (152,256).
+Inactive person flags select the first subset's first frame. Active
+flags select the retained subset/frame. Gate frame is always selected
+from its current cursor.
+
+Every square raster call uses virtual +0x18. EN BMP constructor
+L2.00573 installs table L2.00574, slot +0x18=L2.00575, which forwards
+x,y to L2.00576. That bounded receiver copies opaque 16-bit rows,
+decrementing the source row from the BMP bottom-up buffer. There is no
+color-key test in that receiver. BGR24 conversion L2.00577 uses device
+format globals; a fixed RGB565 pixel format is not established.
+Generic overlay L2.00578 calls the view's +0x30 and child paint
+L2.00579. The Kaarg +0x30 target L2.00580 is empty.
+
+Evidence is measured/square/{painter-en,painter-ru,bitmap-load-en,
+bitmap-paint-en,bitmap-blit-en,bgr24-convert-en,overlay-dispatch-en,
+child-paint-en,own-overlay-en}.txt and geometry.tsv.
+
+**Confidence.** High for the selected painter order, operands and
+identified EN bitmap receiver. All selected painter branch targets
+are decoded boundaries. No claim enumerates other child constructors
+or substitutes a source-RGB PNG for observed original pixels.
+
+**Unknown.** The current device format, the wider shell's overlays,
+capture/cursor effects and original runtime presentation.
+
+### R2-ENGINE-233
+
+EN sampler L2.00581 / RU L2.00582 rejects an absent mask or an
+out-of-view point with -1. It subtracts the view origin, samples the
+indexed buffer at x+640*y and uses a byte-index/dword jump table.
+Bytes 32,64,80,96,128,144,160,176,192 map to selectors
+0x400,0x800,0x1000,0x200,2,1,8,16,4 respectively; the other
+247 byte values map to -1. R2-ASSET-050 bounds the actual population:
+byte 80 is absent in both Kaarg masks.
+
+EN mask loader L2.00583 and row transform L2.00584 reverse stored
+BMP rows before sampling. Screen pixel (x-left,y-top) therefore uses
+the top-origin picture index with no sprite extent test.
+Hover L2.00585 / L2.00586 stores a changed selector at +0xb4.
+Selectors 1 and 2 take latched sound arms: shop starts Kenter2 at
++0x22c under latch +0xac and stops +0x230; inn starts Kenter1 at
++0x230 under latch +0x250 and stops +0x22c. Selector 8 stops both
+sounds under latch +0x254; -1 calls reset L2.00587 and clears
+the latches. EN sound loader L2.00588 binds the two Kenter keys.
+These arms do not write +0x208. Selectors 4,0x200,0x400,0x800
+take a switch no-op arm. Among the named selectors, only
+0,3,16,0x1000 reach the OR into +0x208; only 16 and 0x1000
+from that group are sampler outputs. The default OR arm also admits
+other values outside the selected sampler's output domain.
+Person hovering does not start their timer-driven episodes.
+The inherited EN slot +0x4c at L2.00589 calls hover +0x98.
+Hover is therefore also reachable outside the painter's 100 ms arm.
+
+Evidence is measured/square/{mask-map,mask-index-en,mask-dword-en,
+hover-dword-en,cfg-controls,branches}.tsv and mask/hover loader
+instruction excerpts. The selected Kaarg click body calls this sampler.
+Supplemental sound-loader and inherited-hover excerpts and slot
+bindings are in measured/correction.
+
+**Confidence.** High for the complete 256-byte selector domain and
+the selected sampler, hover and click paths. The decoder preserves
+every finite table target on an instruction boundary. Archive pixel
+counts are measured independently of function recovery.
+
+**Unknown.** Physical pointer delivery, mouse capture and added child
+widgets outside the selected construction/entry paths.
+
+**Amended.** The remaining-selectors flag-write clause is partially
+retracted in claims/retracted.md. The decoded sound, reset and OR arms
+replace it; the sampler and person-hover clauses stand.
+
+### R2-ENGINE-234
+
+EN click L2.00590 / RU L2.00591 dispatches decoded selector 1 to
+message 0x42a, 2 to 0x42b, 8 to 0x442(1,0) followed by 0x42d,
+and 16 to 0x41f. Shop, inn and gates call leave preparation first;
+the main-menu arm does not. Person selectors 0x800,0x200,4,0x400
+request kaargguard%d, kaargwoman%d, kaargwoman%d and kaargman%d,
+using Scenario variable 0x300 as the suffix. They call dialogue
+entry R2.0038 rather than open a separate room.
+
+The window dispatcher EN L2.00262 / RU R2.0036 maps 0x42a and
+0x42b to the room selectors R2-ENGINE-237 identifies. Message 0x41f
+creates popup L2.00592 / L2.00593, mode 1, at (100,100), size
+440x340. Its dialogs.txt binding labels save, load, sound options,
+quest end, game return and exit actions: it is the main menu.
+Gate posting is measured locally; the full mission-navigation
+acceptance and movie/route sequence are not established here.
+
+Tip getter L2.00594 / L2.00595 returns main-table indices
+233,236,237,235 for shop, inn, gates and menu; 359,360,361,362
+for girl1, girl2, guard and dervish. Selected EN text identifies
+the last as sleeping man, while selected RU text calls him beggar.
+These are labels for one native region, not different sampled masks.
+
+Evidence is measured/square/{click,tip-getter}-*.txt,
+measured/rooms/{room-dispatch,menu-text}.tsv and measured/text/.
+The menu identity is a native constructor/table/text join.
+No school region is inferred from ROM1's mask16 semantics.
+
+**Confidence.** High for the selected click arms, posted messages,
+room/menu receivers and text-index bindings. The selected byte-domain
+and finite target tables are complete. This is not an enumeration of
+all physical input handlers or popup controls.
+
+**Unknown.** Full gate receiver flow, person dialogue contents and
+runtime input/admission. Following those native receiver paths or an
+authorized original observation would settle them.
+
+### R2-ENGINE-235
+
+EN active painter L2.00571 imports timeGetTime. When elapsed time
+from its process baseline exceeds 100 ms it polls the pointer, calls
+advance L2.00596 and resets that baseline to current time. It never
+catches up several frames. Scheduler L2.00597 then runs on every
+active paint, including paints that did not admit a frame step.
+RU counterparts are L2.00572, L2.00598 and L2.00599.
+
+Enter initializes girl1/girl2/guard waits to 2000+R(2000) ms and
+dervish to 4000+R(500). At a later strictly elapsed wait, scheduler
+sets the family cursor to 0, saves the current family clock and
+replaces its interval: girls 3500+R(5000), guard 7500+R(5000),
+dervish 3700+R(500). Girls choose subset 0 or 1 with R(2).
+The elapsed-wait arms do not test the family flag. A slow redraw
+cadence can therefore restart an episode that is still running.
+R(n)=floor(rand()*n/32767)%n on the read integer path;
+the native source masks its output to 0x7fff. This establishes
+ranges, not a uniform or independent distribution.
+
+Thus initial waits are 2000..3999 ms for girls/guard and
+4000..4499 for dervish; subsequent waits are 3500..8499,
+7500..12499 and 3700..4199 respectively. The start flags are
+girl1 0x200, girl2 4, guard 0x800 and dervish 0x400 in +0x208.
+Each admitted family advance increments once; equality with the
+selected vector count clears the flag and resets its cursor.
+Girl subset cursors correspond to the filename ranges in R2-ASSET-051.
+Idle drawing selects the first frame separately from the episode.
+
+Evidence is measured/square/{clocks,bounds,timer-import,
+random-source,cfg-controls,branches}.tsv and painter, scheduler,
+advance, person-advance and random helper excerpts.
+
+**Confidence.** High for this native predicate, update order and
+bounded interval arithmetic. Timer imports, random source mask,
+17 selected method decodes, 193 direct branch targets and 34 finite
+table targets per locale are explicit controls. The methods are
+examined without global writer or PRNG independence assumptions.
+
+**Unknown.** Delivered redraw cadence, the process baseline before
+re-entry and actual random sequence. An authorized timed original
+session would settle appearance and elapsed-time delivery.
+Audible background ambience remains Unknown. The selected scheduler
+also requests sound slots +0x20c/+0x210/+0x214 after 2000+R(2000)
+ms with R(3), +0x218..+0x224 after a separate 2000+R(2000) ms
+with R(4), +0x234 after more than 45000 ms, and +0x238..+0x24c
+at guard cursor states. These are bounded request clocks, not
+observed sound playback or a complete ambience contract.
+
+### R2-ENGINE-236
+
+EN gate advance L2.00600 / RU L2.00601 samples the current
+pointer through the native mask helper on each admitted advance.
+Selector 8 increments cursor +0x1a0 and clamps it to 10; another
+selector decrements and clamps it to 0. It records direction state
+at +0x1a4 and clears flag 8 at the endpoint. Direction changes
+request SFX\Town_kaarg\Kdoor1.wav or Kdoor2.wav once in these
+local arms. The painter always draws the retained frame at (152,256).
+
+Evidence is measured/square/{gate-en,gate-ru,advance-en,
+advance-ru,painter-en,painter-ru}.txt. R2-ASSET-051 provides
+the complete eleven-frame archive range.
+
+**Confidence.** High for the bounded pointer predicate, direction
+state, integer clamps and draw choice. The whole selected method
+and its direct branch targets are retained. Gate completion is
+independent of whether the +0x208 gate flag is currently set.
+
+**Unknown.** Physical hover delivery, audible sound and the complete
+mission-start receiver. The click's posted messages are R2-ENGINE-234.
+
+### R2-ENGINE-237
+
+In campaign mode EN app+0x5d8==2 / RU +0x63c==2, shop
+selectors L2.00602 / L2.00603 and inn selectors L2.00425 /
+L2.00427 read the Scenario current ID. ID2 chooses app+0x100
+(shop) and +0x10c (inn). EN construction L2.00558 binds
+those members to page constructors L2.00604 and L2.00605.
+
+Kaarg inn page L2.00605 / L2.00606 calls common inn base
+L2.00607 / L2.00608. Its center L2.00609 calls common inn
+center L2.00610, then installs a derived table. Art loader
+L2.00611 / L2.00612 requests generic interface/inn/manback.bmp,
+ManBackTalk.bmp, LUOver.bmp, LDOver.bmp and RUOver.bmp,
+plus interface/inn_kaarg/TavernMain.bmp. Campaign entry
+L2.00613 / L2.00614 copies taverner a1..a5 vectors of
+15,25,3,7,29 frames into center fields +0x3cc,+0x3fc,+0x42c,
++0x45c,+0x48c. R2-ASSET-052 records their filenames and geometry.
+
+Kaarg shop page L2.00604 constructs child L2.00615 /
+L2.00616, which calls common shop base L2.00617 / L2.00618
+then installs its derived table. Loader L2.00619 / L2.00620
+requests interface/shop_kaarg/ShopFrame.256, ShopMain.bmp,
+hili_armor.bmp, hili_magic.bmp, hili_potion.bmp and hili_weapon.bmp;
+six fire families dark/select crossed with lite/burn/cicle;
+and movies\shop_kaarg\a10000.bmp. Updater L2.00621 /
+L2.00622 increments its counter modulo 20. Flag 0x10 chooses
+movies\shop_kaarg\a1%04d.bmp and 0x20 chooses a2%04d.bmp,
+with counter+1; otherwise it uses a10000.bmp. Counter zero
+clears the episode flags outside +0x240's low nibble.
+
+Evidence is measured/rooms/{native-resource-loads,inn-frame-loads,
+room-dispatch,ranges}.tsv, selected constructor/art/update excerpts
+and vtable cells, plus measured/selection/instructions.tsv.
+
+**Confidence.** High for the positive native selection, keys, vector
+ranges and common-base calls. Medium for reuse of room layout:
+shared base widgets establish shared structure, but derived
+constructors and paint methods can use different rectangles.
+Only-art differences and complete layout equality are not proven.
+
+**Unknown.** Full room layout, animation destinations, caller cadence
+and trigger conditions. These need the later derived room painter
+and scheduling probe; native play would settle live presentation.
+
+## Kaarg view rectangle and shell boundary
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-238 | The selected EN initializer centers the 640x480 town view in three screen sizes; Kaarg entry conditionally adds a child, while final shell text and button drawing remain unidentified. | High / Unknown | ● active (branch candidate, partially retracted) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+
+### R2-ENGINE-238
+
+EN initializer L2.00623 first checks the word at L2.00624;
+a nonzero value forces 640x480. Otherwise it tests the command
+line at app+0x70 for -800, -1024 and -640 in that order.
+Without a matching switch it tests buffer L2.00625 for -800
+and -1024, then falls back to 640x480. Registry initialization
+queries RESOLUTION into that buffer at L2.00626 and calls the
+fallback copy of -640 at L2.00627 if the query fails. Thus 640x480
+is the default only without a selecting command-line or registry value, or
+when the force word is nonzero. The other sizes are 800x600
+and 1024x768. It stores width/height at
+L2.00628/L2.00629 and computes left=(width-640)/2 and
+top=(height-480)/2, with signed division truncated toward zero.
+Right=width-left and bottom=height-top. The measured origins
+are therefore (0,0), (80,60) and (192,144).
+Construction at L2.00630 passes this rectangle to Kaarg
+constructor L2.00560 with ID 0x3fc.
+
+Kaarg entry EN L2.00631 / RU L2.00632 checks a global word.
+The admitted EN arm constructs L2.00633, stores it at view+0x200,
+and adds child ID 0x467 with left=328, top=0, right=640,
+bottom=200 and resource argument 12. The rectangle is 312x200.
+The EN chain L2.00633 -> L2.00634 -> L2.00635 -> L2.00636 ->
+L2.00637 forwards the bounds to SetRect at import cell L2.00638.
+Whether these bounds are view-relative or screen-relative is Unknown.
+This is a positive child path, not
+a census of application overlays. R2-ENGINE-232 identifies the
+empty own-overlay slot and following child paint.
+
+Evidence is measured/selection/instructions.tsv, selected bodies
+campaign-screen-initializer and campaign-child-construction,
+and measured/square/{enter-en,enter-ru,ctor-en,ctor-ru}.txt.
+Supplemental registry and rectangle receiver excerpts, decode
+controls and the SetRect import binding are in measured/correction.
+R2-ENGINE-234 identifies the pointer text keys. The selected
+square painter, entry and tip bodies do not identify the final
+application text receiver or all shell widgets.
+
+**Confidence.** High for the EN screen-selection arithmetic,
+constructor arguments and positive EN/RU child path. Unknown
+for the child coordinate reference, purpose, live visibility, final
+tip/status/button destinations and their draw order. No absence of status lines,
+buttons or text is claimed. This confidence does not infer an
+unmeasured RU screen initializer from EN agreement elsewhere.
+
+**Unknown.** Wider shell composition and device presentation.
+Trace the active Kaarg virtual +0x14 consumer into its final
+text renderer and child paint receivers to settle destinations.
+An authorized original capture would settle live appearance.
+
+**Amended.** The child width/height interpretation and unconditional
+default-resolution clause are partially retracted in claims/retracted.md.
+Rectangle bounds and command-line/registry precedence replace them.

@@ -1007,3 +1007,33 @@ compiler semantics for 35/36. EN/RU agreement is not a second code witness.
 **Unknown.** Other operation populations, indexed native or packet writes,
 callbacks, raw restoration and arbitrary SetVar inputs. The census makes
 no all-writer or complete-runtime-state claim.
+
+## Town presentation route
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-115 | The published named fresh campaign path enters generic town 1 before Kaarg town 2; druid town 3 has conditional later admission, not an established exhaustive visit order. | Medium | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+
+### R2-SESSION-115
+
+R2-SESSION-107, R2-SESSION-112 and R2-SESSION-113 establish
+the conditional named fresh visits: NewGame supplies town 1 at
+stage 10; the initial TALK admits mission 10; ordinary departures
+from missions 10 then 20 yield stage 30 and admit town 2. R2-ENGINE-231
+identifies the selected town 1 art as generic and town 2 as Kaarg.
+Town catalog ID and stage bank768 are separate selectors.
+
+R2-ENGINE-146 adds town3 on ordinary Leave50. R2-SESSION-113
+also establishes that nonzero bank775 restoration appends towns 2
+and 3 independently of stage. Those positive additions do
+not establish when a live player enters town 3. No new campaign
+schedule or original playthrough is claimed by this experiment.
+
+**Confidence.** Medium for the composed named route. It inherits
+the published availability/admission boundaries of its cited
+claims and adds measured client art binding. EN/RU agreement
+does not create an independent playthrough witness.
+
+**Unknown.** Exhaustive visit order, arbitrary restoration,
+the complete bank775 producer graph and actual player acceptance. Close the
+availability/event graph or record an authorized original route.

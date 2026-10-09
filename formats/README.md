@@ -67,6 +67,7 @@ in `claims/rom2-engine.md` have no standalone stored format page.
 | **Sprite / palette** | `*.16a, *.16, *.256, *.pal` | [Reference](rom2-spr/format.md) | Frame/trailer/palette shapes and named residues; full pixel/RLE/color semantics remain Unknown |
 | **TEXT** | `main.res text and patch.txt` | [Reference](rom2-text/format.md) | String-table structure and known byte ranges; a complete named encoding and decoder remain Unknown |
 | **Completion video** | `video.res SMK/REG and main.res UI text` | [Reference](rom2-video/format.md) | Selected report/movie source, numeric plan and return boundaries; codec internals, physical EOF and media fidelity remain Unknown |
+| **Town presentation** | `Town-ID views and interface art` | [Reference](rom2-town/format.md) | ID/resource selection, Kaarg square layers, mask, clocks and room art; full room layout and shell text destinations remain Unknown |
 | **Session frame** | `Socket and DirectPlay receive paths` | [Reference](rom2-net/format.md) | Eight-byte header and admission/decompression bounds; payload/opcode grammar and ROM1 equivalence remain Unknown (`R2-SESSION-003`) |
 | **SAV** | `game*.sav` | [Reference](rom2-sav/format.md) | Four original save points: exact envelope/tail and bounded first Player decode; Group/actor/current-party identity Unknown (`R2-SESSION-075`, `R2-SESSION-078`) |
 | **Character** | `*.a2c` | [Reference](rom2-a2c/format.md) | Six scrambled sections, checksum, plus a byte-run codec; section meanings Unknown (`R2-SESSION-022`) |

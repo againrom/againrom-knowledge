@@ -1,5 +1,12 @@
 # Overturn history
 
+## ROM2 Kaarg hover arms and child rectangle
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-233` (remaining-selector flag writes only; sampler and person-hover clauses stand) | Verbatim: "Other admitted selector values feed flags." | High | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/EXP-2029.md) | Selectors 1/2 play latched Kenter2/Kenter1, 8 stops both, and -1 resets. None of these arms writes +0x208. Among the named selectors, 0/3/16/0x1000 reach the OR arm; the selected sampler emits only 16/0x1000 from that group. | **REFUTED** — partially retracted |
+| `R2-ENGINE-238` (child operand roles and unconditional default-resolution wording only; view arithmetic and positive child path stand) | Verbatim: "x=328, y=0, width=640, height=200"; "selects 640x480 by default or with -640" | High / Unknown | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/EXP-2029.md) | Child bounds are left=328, top=0, right=640, bottom=200, passed through SetRect, with extent 312x200. Coordinate reference remains Unknown. A force word selects 640x480; otherwise command-line -800/-1024/-640 takes precedence over the RESOLUTION registry buffer's -800/-1024 and the 640x480 fallback. | **REFUTED** — partially retracted |
+
 ## Bolt figure and construction-route corrections
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
