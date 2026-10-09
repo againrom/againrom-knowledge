@@ -184,6 +184,25 @@ retracted availability-only clause of R2-SESSION-023.
 — R2-ENGINE-161, R2-ENGINE-217, R2-ENGINE-221, R2-SESSION-109,
 R2-SESSION-110
 
+The [remaining inn bodies](campaign.md#remaining-inn-bodies-and-pre-50-visits)
+give all 25 additional stores and their gates: stages40/50, shared60/70/80,
+90,100,110. Kind3 chooses type1/ID-topic admission through TalkTo; the two
+kind0 topics48/49 have no selected bank or catalog effect. Native contracts
+are High, while composed presentation remains Medium.
+— R2-ENGINE-223, R2-ENGINE-224, R2-ENGINE-225, R2-ENGINE-226,
+R2-ENGINE-227, R2-ENGINE-228, R2-ENGINE-229, R2-ENGINE-230
+
+With incoming DWORD stage s, Leave31/32 preserve s and Leave30 gives s+10
+modulo 2^32; this local algebra is High. With no intervening stage writer,
+Leave31/32 would retain 40 after the named Leave30 path; the generated
+postponed-side-mission path retains 70. Postponing mission50 after Leave40
+permits named town2 visits at 60/70 through Leave60/80. Leave50 unconditionally
+calls add-town(3); the nonzero 775 restoration also adds town3.
+The full 46-map authored35/36 population targets neither 768 nor775.
+Positive composed routes are Medium; an exhaustive live stage/town set
+remains Unknown because indexed writers and raw restoration are unclosed.
+— R2-SESSION-111, R2-SESSION-112, R2-SESSION-113, R2-SESSION-114
+
 The selected type-1 entry filter takes additional ID i+1 only when both
 512+i and 532+i are nonzero. The native creation gateway uses ID and stage
 to choose a template. Intervening bank writes and complete entering-party

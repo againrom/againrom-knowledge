@@ -157,6 +157,102 @@ The initial kind3/topic10 TALK also writes 769=1. The former
 availability-rather-than-bank clause of R2-SESSION-023 is partially
 retracted; its NewGame and Leave facts stand. — R2-SESSION-110
 
+## Remaining inn bodies and pre-50 visits
+
+The six other distinct stage bodies emit 25 packed options: 23 kind3
+mission offers and two kind0 dialogue offers. These stores fill the caller
+buffer. A later kind3 TALK requests type1/ID equal to topic; NPC is an actor
+key. Kind0 has no admitted catalog type or ID in the selected paths.
+The table gives native store order and every extra gate. A nonzero
+predicate compares against zero; all admitting branches fall through
+except the topic82 bank776=0 arm, which takes its equality branch.
+— R2-ENGINE-223, R2-ENGINE-224, R2-ENGINE-225, R2-ENGINE-226,
+R2-ENGINE-227, R2-ENGINE-228, R2-ENGINE-229, R2-ENGINE-230
+
+| Stage | Kind | Topic / NPC | Predicate beyond dispatch | Claim |
+|---|---:|---|---|---|
+| 40 | 3 | 40 / 22 | None | R2-ENGINE-223 |
+| 40 | 0 | 48 / 2108 | None | R2-ENGINE-223 |
+| 40 | 3 | 41 / 2015 | 937=0 | R2-ENGINE-223 |
+| 40 | 3 | 42 / 2111 | 938=0 | R2-ENGINE-223 |
+| 40 | 3 | 43 / 2004 | 939=0 | R2-ENGINE-223 |
+| 50 | 0 | 49 / 23 | None | R2-ENGINE-224 |
+| 50 | 3 | 51 / 2 | 533!=0;947=0 | R2-ENGINE-224 |
+| 50 | 3 | 53 / 2019 | 949=0 | R2-ENGINE-224 |
+| 60/70/80 | 3 | 70 / 680 | currentID3;771!=0;966=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 71 / 681 | currentID3;771!=0;966=0;967=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 83 / 677 | currentID3;768=80;979=0;536!=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 61 / 2006 | currentID2;768=60;957=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 63 / 2109 | currentID2;768=60;959=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 73 / 2004 | currentID2;768=70;969=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 72 / 2108 | currentID2;768=70;968=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 81 / 2010 | currentID2;768=80;776!=0;977=0 | R2-ENGINE-225 |
+| 60/70/80 | 3 | 82 / 2009 | currentID2;768=80;776=0;978=0 | R2-ENGINE-225 |
+| 90 | 3 | 90 / 2004 | currentID2 | R2-ENGINE-226 |
+| 90 | 3 | 91 / 681 | currentID3;987=0 | R2-ENGINE-226 |
+| 90 | 3 | 92 / 2003 | currentID3;988=0 | R2-ENGINE-226 |
+| 100 | 3 | 100 / 2006 | currentID2 | R2-ENGINE-227 |
+| 100 | 3 | 102 / 2109 | currentID2;998=0 | R2-ENGINE-227 |
+| 100 | 3 | 103 / 2005 | currentID2;987!=0;999=0 | R2-ENGINE-227 |
+| 100 | 3 | 101 / 681 | currentID3;997=0 | R2-ENGINE-227 |
+| 110 | 3 | 110 / 2006 | currentID2 | R2-ENGINE-228 |
+
+Topic71 inherits966=0: a nonzero 966 skips both 70 and 71. The shared
+body's stage60/70/80 label alone does not satisfy its current-ID or bank
+gates. These local native predicates are High; actual campaign bank values
+and scheduling remain Unknown. — R2-ENGINE-225
+
+All 23 remaining kind3 topics call the same TalkTo AddMission arm. With
+the measured initial recordID10 they write no additional bank slot:
+bank769=1 requires a topic equal to that initial record ID, and none of
+these topics is 10. TalkTo has no direct stage store. Its kind1 arm toggles
+bank[511+low16]; inn-emitted kind1 low IDs1..20 bound it to slots512..531,
+outside stage slot768. Kind0 topics48/49
+also write no bank and add no catalog record; the selected client route
+uses npc2108talk48 and npc23talk49. Native effects are High, composed
+presentation is Medium, and a displayed dialogue was not observed.
+— R2-ENGINE-229, R2-ENGINE-230
+
+With incoming DWORD stage s, ordinary Leave30 gives s+10 modulo 2^32;
+Leave31 and Leave32 preserve s. This local algebra is High. The common
+prelude stores into bank[512+i] and bank[532+i] for i=0..19 and bank[896+ID].
+For IDs31/32 these address slots512..551 and 927/928, never stage slot768.
+— R2-SESSION-111
+
+Named fresh paths before playing50 permit these visits. This is a Medium
+positive reachability result, not an exhaustive live stage set. Town1 is
+removed on its type2 departure; the named stage20 point has no available
+town. Leave20 admits town2. Leave40 admits both 50 and 60, so postponing 50
+allows Leave60 then Leave80 to reach60 then 70 while town2 remains available.
+With no intervening stage writer, Leave31/32 after the named Leave30 path
+would retain 40; this composition is not a generated named visit. The
+generated postponed-side-mission path retains 70 through Leave31/32.
+— R2-SESSION-112, R2-SESSION-113
+
+| Admitted town | Bank stage | Inn stage body | Named writer |
+|---|---:|---|---|
+| type2/ID1 | 10 | stage10,D2.00207 | NewGame |
+| type2/ID2 | 30 | stage30,D2.00208 | Leave20 |
+| type2/ID2 | 40 | stage40,D2.00146 | Leave30 |
+| type2/ID2 | 50 | stage50,D2.00155 | Leave40 |
+| type2/ID2 | 60 | shared60/70/80,D2.00162 | Leave60 while postponing 50 |
+| type2/ID2 | 70 | shared60/70/80,D2.00162 | Leave80 while postponing 50 |
+
+The measured constructors identify type2 IDs1,2,3. Leave50 unconditionally
+calls add-town(3); nonzero 775 restoration also appends town2 and town3 regardless
+of stage. Its complete775 producer set is Unknown; no pre-50 town3 visit
+was observed. Any admitted town uses global bank768 dispatch, with its
+current ID changing inner predicates. Topic70 in the shared body needs
+currentID3 and 771!=0; Leave50 is a named771=1 writer. — R2-SESSION-113
+
+The full 46-map corpus per locale contains four authored instant35 and
+140 instant36 nodes. Their literal targets are 772/780/779 and 753..756;
+none targets768 or 775. This bounded negative is High. Indexed SetVar,
+packet-key writers, aliases, raw restoration and other operations remain
+outside that population. A complete writer/availability graph or authorized
+original observation would settle the exhaustive pre-50 state set.
+— R2-SESSION-114, R2-SESSION-112
+
 ## Selected client tail
 
 After the store, the selected EN/RU writer and reader arms transfer the pair

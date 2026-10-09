@@ -877,3 +877,133 @@ and ordinary Leave facts remain unchanged.
 **Confidence.** High for the measured constructor constants, native ID
 getter and complete direct branch. Both DLL ranges reproduce and agree
 under linear/recursive decoding. This is not a whole-client bank census.
+
+## Remaining inn campaign stages and towns
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-111 | With incoming DWORD stage s, ordinary Leave31 and Leave32 preserve s, while Leave30 gives s+10 modulo 2^32. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-SESSION-112 | Named fresh paths that postpone mission50 permit town1 at stage10 and town2 at stages30/40/50/60/70 through NewGame and Leave10/20/30/40/60/80; this is not an exhaustive live stage set. | Medium | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-SESSION-113 | Measured type2 town IDs1/2/3 use global bank768 dispatch; named pre-50 visits use town1 then town2, while a nonzero 775 restoration also appends town2 and town3 independently of stage. | High / Medium | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-SESSION-114 | In each installed46-map ROM2 corpus, all 4 instant35 and 140 instant36 nodes have literal bank targets and none targets768 or 775; this negative excludes no other writer population. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+
+### R2-SESSION-111
+
+Ordinary departureD2.00012 reaches tailD2.00026..D2.00200 after its
+ID cases. A zero remainder from incoming ID divided by 10 executes
+ADD DWORD[D2.00118],10 at D2.00201. ID30 always has zero remainder;
+IDs31/32 never do. Their case bodies and the common prelude have no
+other exact stage store. The prelude's indexed stores address bank[512+i]
+and bank[532+i] for i=0..19, plus bank[896+ID] at D2.00120. For IDs30..32
+these address slots512..551 and 926..928, never stage slot768.
+Thus Leave30 maps s to s+10 as a DWORD; Leave31/32 preserve s.
+R2-SESSION-112 grades composed route outcomes separately.
+
+**Confidence.** High for this conditional algebra over any incoming DWORD.
+The complete ordinary body and its resolved tables agree under recursive
+and linear decoding. There are 216 native static stage/ID controls across
+EN/RU, including zero, unsigned wrap, signed extremes and ID boundaries.
+The result is not an assertion of a fixed mission order or incoming bank.
+
+**Unknown.** Incoming stage and intervening writers in an actual playthrough.
+
+### R2-SESSION-112
+
+The positive named paths begin at NewGame stage10 with town1, select
+initial mission10 through TALK, then leave town1 and depart10/20.
+Leave10 produces stage20 with no remaining town on that path; Leave20
+produces 30 and admits town2. Stage30 TALK admits30 and 31; departure31
+admits32 without advancing stage. Leave30 produces 40. Stage40 TALK
+admits40; Leave40 produces 50 and admits both 50 and 60. Postponing 50,
+Leave60 produces 60 and admits80; Leave80 produces 70. Town2 stays
+available through these visits. With no intervening stage writer, a
+subsequent Leave31 or Leave32 after Leave30 would retain 40. This stage40
+route composition is not a generated named visit. The generated
+early-departure path retains 30 through Leave31/32.
+Keeping31 pending until after Leave80 permits Leave31 and Leave32
+at 70 without changing it on the generated postponed-side-mission path.
+
+The measured town visits are town1/stage10 and town2/stages30,40,50,60,70.
+NewGame stores 10 at D2.00202; each named divisible-by-ten departure
+uses D2.00201. Type2 departure and complete TalkTo add no direct stage store.
+The rawD2.00118-address scan covers all raw PE sections of each DLL,
+including overlapping byte starts:12 hits per locale, every hit classified.
+Two are exact-address stores, the named +10 and =10. It is not a complete
+writer census: indexed SetVar, TalkTo's kind1 bank[511+low16] toggle,
+bulk bank initialization/restoration, embedded aliases and packet531+key
+are outside this selector. R2-ENGINE-221 bounds inn-emitted kind1 low IDs
+to 1..20, so those words address slots512..531 rather than stage slot768.
+
+**Confidence.** Medium for the composed positive paths and the conditional
+stage40 outcome; the generated Leave31/32 path retains stage70. Every selected
+mission admission, available ID and stage selection has a native local
+contract and 52 generated path rows. The available/TALK model is deliberately
+conditional, not a simulation of the client, an exhaustive graph or an
+original playthrough. R2-SESSION-114 bounds authored35/36 writers separately.
+
+**Unknown.** An exhaustive pre-50 stage set and maximum; complete SetVar
+inputs, packet-key population, restoration, aliases and actual scheduling.
+Close that writer/availability graph or record an authorized original route.
+
+### R2-SESSION-113
+
+The native constructors call initializerD2.00017 with type2 and IDs1,2,3
+on objectsD2.00085,D2.00018,D2.00039 respectively. Constructor/call pairs
+are D2.00203/D2.00204,D2.00016/D2.00084,D2.00205/D2.00206. Selected catalog
+rebuild positions are 0,1,2. Type2 ID1 departure removes its available pointer;
+ID2/3 departures preserve availability, as R2-ENGINE-144 states.
+
+R2-SESSION-112's named fresh visits use town1/stage10 bodyD2.00207;
+town2/stage30 bodyD2.00208; town2/stage40 bodyD2.00146;
+town2/stage50 bodyD2.00155; and town2/stage60/70 bodyD2.00162.
+EnterInn's selector is global bank768 for any admitted record. Town3
+at the same stage would select the same body, with its currentID3
+changing inner gates. Shared-body topic70 requires currentID3,771!=0
+and 966=0; Leave50 is a named771=1 writer, not part of that pre-50 route.
+
+Ordinary departure compares775 with 0 at D2.00209; JED2.00116 bypasses
+restoration. Nonzero 775 reaches availability clearD2.00210, then
+appends town2 at D2.00211 and town3 at D2.00212 before the ID switch.
+Their push sites are D2.00213/D2.00214. This local contract is independent
+of stage. It does not prove that775 is reached before 50 or that an
+actual town3 visit occurs there. R2-SESSION-114 excludes authored35/36
+as 775 writers only within its declared full-map population.
+
+**Confidence.** High for the three positive constructor identities,
+rebuild references, exact dispatch and conditional restoration additions;
+Medium for their composed fresh availability and visit schedule.
+All eight selected native bodies have complete linear agreement and
+instruction-boundary controls. EN/RU code equality is one dependency.
+Dynamic catalog mutation, restore scheduling and allocation remain open.
+
+**Unknown.** Complete775/771 producers, arbitrary restored town membership,
+pre-50 town3 admission and native visit acceptance. Closing those producers
+or an authorized original observation would settle these alternatives.
+
+### R2-SESSION-114
+
+The full input population is 46 installed ALMs per locale from the hashed
+scenario.res. Each has 1334 action and 986 check nodes in total; EN has 715
+trigger nodes and RU714. All selected full-word action opcodes35/36 are
+joined with all ten parameter rows. Their scalar0/1 types are 1 and their
+values are outside the 8000..9999 register-reference interval, so every
+selected target is literal under R2-ENGINE-044/045/046.
+
+There are four instant35 nodes per locale: map20 action24 writes 772=1;
+map50 action34 writes 780=1; map110 actions11/12 write779=0/1.
+There are 140 instant36 nodes per locale, all with n1..4 and target752+n,
+therefore753..756. None of these144 nodes targets768 or 775. Mission32
+has no35/36 node. A separately labeled numeric-ID-below 50 subset is not
+used as evidence of chronological pre-50 reachability.
+
+**Confidence.** High for this exact population and bounded negative.
+Two fresh r2script runs produce five TSVs equal byte for byte to each
+other and EXP-2008's published measurements. Current full scenario.res
+hashes match those inputs. The generator verifies hashes before reuse
+and regenerates every join with source/instrument provenance. This census
+is independent of function recovery but depends on the measured native
+compiler semantics for 35/36. EN/RU agreement is not a second code witness.
+
+**Unknown.** Other operation populations, indexed native or packet writes,
+callbacks, raw restoration and arbitrary SetVar inputs. The census makes
+no all-writer or complete-runtime-state claim.

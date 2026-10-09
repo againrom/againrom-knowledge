@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3041. Observation: 95. Static analysis: 2515. Mixed: 431.
+Claims labelled: 3053. Observation: 95. Static analysis: 2526. Mixed: 432.
 
 ## Ledger ai
 
@@ -1610,6 +1610,14 @@ Claims labelled: 3041. Observation: 95. Static analysis: 2515. Mixed: 431.
 | R2-ENGINE-219 | static analysis | ✔ promoted |
 | R2-ENGINE-220 | static analysis | ✔ promoted |
 | R2-ENGINE-221 | static analysis | ✔ promoted |
+| R2-ENGINE-223 | static analysis | ✔ promoted |
+| R2-ENGINE-224 | static analysis | ✔ promoted |
+| R2-ENGINE-225 | static analysis | ✔ promoted |
+| R2-ENGINE-226 | static analysis | ✔ promoted |
+| R2-ENGINE-227 | static analysis | ✔ promoted |
+| R2-ENGINE-228 | static analysis | ✔ promoted |
+| R2-ENGINE-229 | static analysis | ✔ promoted |
+| R2-ENGINE-230 | static analysis | ✔ promoted |
 
 ## Ledger rom2-session
 
@@ -1662,6 +1670,10 @@ Claims labelled: 3041. Observation: 95. Static analysis: 2515. Mixed: 431.
 | R2-SESSION-108 | mixed | ✔ promoted |
 | R2-SESSION-109 | mixed | ✔ promoted |
 | R2-SESSION-110 | static analysis | ✔ promoted |
+| R2-SESSION-111 | static analysis | ✔ promoted |
+| R2-SESSION-112 | static analysis | ✔ promoted |
+| R2-SESSION-113 | static analysis | ✔ promoted |
+| R2-SESSION-114 | mixed | ✔ promoted |
 
 ## Ledger sav
 

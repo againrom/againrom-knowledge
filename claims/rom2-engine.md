@@ -2196,3 +2196,176 @@ under the same currentID. Intervening writers can change either inference.
 **Confidence.** High for the complete native loop and conditional named
 state. Static controls separately exercise the high bit. This is not a
 claim of a complete runtime roster or an empty stage30 continuation.
+
+## Remaining inn stage bodies
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-223 | Stage40 emits kind3 topics40/41/42/43 and kind0 topic48; only 41/42/43 require zero slots937/938/939, with no current-record gate in that body. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-224 | Stage50 emits kind0 topic49, kind3 topic51 only at 533!=0 and 947=0, and kind3 topic53 only at 949=0; the body has no current-record gate. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-225 | The shared stage60/70/80 body has nine kind3 stores, selected by currentID2/3, exact stage and bank gates; topic71 also requires966=0 because that compare skips both 70 and 71. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-226 | Stage90 emits kind3 topic90 for currentID2, or topics91/92 for currentID3 only when slots987/988 respectively equal zero. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-227 | Stage100 emits kind3 topics100/102/103 for currentID2, with 102 gated by 998=0 and 103 by 987!=0 and 999=0; currentID3 gets101 only at 997=0. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-228 | Stage110 emits its single kind3 topic110/NPC2006 store only for currentID2 before entering the shared continuation. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-229 | All 23 remaining kind3 options pass topic to TalkTo's AddMission call as type1/ID-topic; with initial recordID10 they add no special bank store, and TalkTo has no direct stage store. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-230 | Remaining kind0 options NPC2108/topic48 and NPC23/topic49 have no catalog or bank effect in TalkTo; the published client route selects npc2108talk48 and npc23talk49 text keys. | High / Medium | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+
+### R2-ENGINE-223
+
+Stage40 bodyD2.00146 has five stores in this order: kind3/topic40/NPC22
+at D2.00147; kind0/topic48/NPC2108 at D2.00148; kind3/topic41/NPC2015
+at D2.00149; kind3/topic42/NPC2111 at D2.00150; kind3/topic43/NPC2004
+at D2.00151. The first two have no additional gate. CMP slot937,0
+at D2.00152 guards topic41, CMP938,0 at D2.00153 guards topic42 and
+CMP939,0 at D2.00154 guards topic43. Each JNE skips that store;
+equality falls through. No current-record condition precedes these stores.
+R2-ENGINE-229/230 give their subsequent TALK effects. Stores fill the
+caller buffer; mission admission occurs on TALK, not on EnterInn.
+
+**Confidence.** High for this complete local body. Capstone 5.0.7 recursive
+and linear boundaries agree for complete EnterInn, with its switch tables
+resolved and no unresolved indirect edge. Three-value zero/positive/negative
+bank controls and currentIDs0,1,2,3,4,-1 agree with independent predicates.
+Identical EN/RU code is one dependency. This is not runtime admission.
+
+**Unknown.** Actual bank values, rendering, actor resolution and call scheduling.
+
+### R2-ENGINE-224
+
+Stage50 bodyD2.00155 stores kind0/topic49/NPC23 at D2.00156,
+kind3/topic51/NPC2 at D2.00157 and kind3/topic53/NPC2019 at D2.00158.
+Topic49 has no additional gate. Topic51 requires CMP533,0 at D2.00159
+and CMP947,0 at D2.00160: nonzero 533 bypasses JE, then zero947 bypasses
+JNE. Topic53 requires CMP949,0 at D2.00161, with equality bypassing JNE.
+All admitting outcomes fall through. No current-record condition is tested
+in this body. Kind3 selects type1/ID-topic through R2-ENGINE-229;
+kind0's consumer is R2-ENGINE-230.
+
+**Confidence.** High for all three stores and complete predicates. The
+complete EnterInn decode and static three-value controls exclude inverted
+zero gates and omission of the outer533 predicate. These are local contracts,
+not a complete live bank population.
+
+### R2-ENGINE-225
+
+Stages60,70,80 select bodyD2.00162. All nine stores have kind3 and
+subsequently request type1/ID-topic. Their order and predicates are:
+
+| Store | Topic / NPC | Required predicate |
+|---|---|---|
+| D2.00163 | 70 / 680 | currentID3;771!=0;966=0 |
+| D2.00164 | 71 / 681 | currentID3;771!=0;966=0;967=0 |
+| D2.00165 | 83 / 677 | currentID3;768=80;979=0;536!=0 |
+| D2.00166 | 61 / 2006 | currentID2;768=60;957=0 |
+| D2.00167 | 63 / 2109 | currentID2;768=60;959=0 |
+| D2.00168 | 73 / 2004 | currentID2;768=70;969=0 |
+| D2.00169 | 72 / 2108 | currentID2;768=70;968=0 |
+| D2.00170 | 81 / 2010 | currentID2;768=80;776!=0;977=0 |
+| D2.00171 | 82 / 2009 | currentID2;768=80;776=0;978=0 |
+
+Every bank predicate compares against zero except the explicit stage
+comparisons against 60/70/80. CurrentID compares against 2 or 3 after getter
+D2.00011. All admitting compare branches fall through except776=0,
+which takes JED2.00172. CMP966,0 at D2.00173 followed by JNED2.00174
+skips both 70 and 71 on nonzero; CMP967,0 at D2.00175 guards71 separately.
+The per-store compare addresses, mnemonics and targets are in the
+experiment's inn-gates.tsv, with every selected row independently replayed.
+
+**Confidence.** High for the complete shared body and local gate conjunctions.
+The full dispatch maps all three labels to one target. Complete instruction
+boundaries, native static walks and independent predicates exclude treating
+these as three unrestricted mission lists or ignoring966 for topic71.
+No Ghidra function census or runtime visit is used.
+
+**Unknown.** Live bank771/536/776 values, current-record scheduling and
+presentation. R2-SESSION-113 separates the named pre-50 town paths.
+
+### R2-ENGINE-226
+
+Stage90 bodyD2.00176 emits kind3/topic90/NPC2004 at D2.00177 only for
+currentID2. CurrentID3 instead admits kind3/topic91/NPC681 at D2.00178
+only at 987=0 and kind3/topic92/NPC2003 at D2.00179 only at 988=0.
+Current-ID comparisons are D2.00180 and D2.00181 against 2 and 3.
+The bank compares are D2.00182/D2.00183 against 0. Each admitting
+outcome falls through a JNE. All other current IDs bypass these stores.
+
+**Confidence.** High for this complete body and the local current-ID split.
+Resolved dispatch, complete boundaries and positive/negative bank controls
+agree with the predicates. Each kind3 store has R2-ENGINE-229's consumer.
+
+### R2-ENGINE-227
+
+Stage100 bodyD2.00184 emits four kind3 options. CurrentID2 admits
+100/NPC2006 at D2.00185 unconditionally within that arm, 102/NPC2109
+at D2.00186 only at 998=0, and 103/NPC2005 at D2.00187 only at 987!=0
+and 999=0. CurrentID3 admits101/NPC681 at D2.00188 only at 997=0.
+Current-ID compares are D2.00189 and D2.00190. Bank compares against 0
+are D2.00191,D2.00192,D2.00193 and D2.00194. Their admitting outcomes
+fall through;987's JE skips103 on equality. There is no bank998
+gate on 103 and no bank987 gate on 101.
+
+**Confidence.** High for the complete four-store population and exact
+predicate separation. Native boundaries and independently specified
+three-value controls exclude transferring one option's gate to another.
+The subsequent mission contract is R2-ENGINE-229.
+
+### R2-ENGINE-228
+
+Stage110 bodyD2.00195 compares currentID with 2 at D2.00196. JNE skips
+kind3/topic110/NPC2006 at D2.00197; equality falls through. No additional
+bank compare guards this store. Both outcomes then enter continuation
+D2.00019. Its fixed and dynamic outputs remain R2-ENGINE-217/221.
+
+**Confidence.** High for the single local store, equality gate and join.
+Complete dispatch/boundary coverage and current-ID controls reproduce.
+This does not assert that the entire EnterInn output is a single option.
+
+### R2-ENGINE-229
+
+The 25 remaining stage stores contain23 kind3 words. TalkToD2.00137
+extracts kind from bits28..30 and topic from bits16..27, then calls
+AddMissionD2.00014 at D2.00138 with topic. The requested catalog type
+is 1 and ID is that topic; low16 NPC is not the mission ID.
+R2-ENGINE-147 supplies absent-pointer admission and missing-key behaviour.
+The caller-buffer stores themselves add no catalog record.
+
+A generic store bank769=1 at D2.00121 requires topic equal to the ID
+of objectD2.00143. R2-SESSION-110 identifies its initial ID10; none
+of the 23 remaining topics is 10. None is NPC22/topic30, the other
+special kind3 identity branch. With that initial identity the measured
+remaining paths write no bank slot. The full 61-instruction TalkTo body
+has no direct stage store; its only direct callees are AddMission and
+ID getterD2.00011. The condition on object identity is preserved: a
+synthetic matching ID enables bank769=1.
+
+The separate kind1 TalkTo arm at D2.00198..D2.00199 toggles
+bank[511+low16]. R2-ENGINE-221 bounds inn-emitted kind1 low IDs to 1..20,
+so their indexed stores address slots512..531, not stage slot768.
+
+**Confidence.** High for the complete local kind3 contract, conditional
+bank result and no-direct-stage-store clause. PE translation, complete
+recursive/linear agreement and 124 word/initial-ID static controls reproduce.
+The negative covers these selected arms with initial ID10, not arbitrary
+catalog mutation, allocator callbacks or every possible bank writer.
+
+**Unknown.** Catalog matching/allocation success and mutations outside
+that initial identity; no native click or live availability was observed.
+
+### R2-ENGINE-230
+
+Kind0/topic48/NPC2108 at D2.00148 and kind0/topic49/NPC23 at D2.00156
+match neither state-changing kind0 identity arm in complete TalkTo.
+They return without a catalog addition or bank store. Stage is unchanged
+by those selected paths. R2-ENGINE-220's published client consumer routes
+kind0 to talk actors, finds the first matching low16 key, formats
+npc%dtalk%d and dispatches text before TalkTo. These pairs select keys
+npc2108talk48 and npc23talk49; kind3 keys follow their own NPC/topic pair.
+
+**Confidence.** High for the complete selected native no-state-effect
+paths and key arithmetic; Medium for composed player presentation.
+Native controls execute both kind0 words under two initial-record-ID
+states. The reused client route leaves virtual rendering, actor lookup,
+dialogue alternatives and input scheduling open.
+
+**Unknown.** Displayed text, topic availability and successful interaction;
+an authorized original visit and click would settle that composed route.
