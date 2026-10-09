@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3087. Observation: 95. Static analysis: 2553. Mixed: 439.
+Claims labelled: 3102. Observation: 95. Static analysis: 2565. Mixed: 442.
 
 ## Ledger ai
 
@@ -1510,6 +1510,10 @@ Claims labelled: 3087. Observation: 95. Static analysis: 2553. Mixed: 439.
 | R2-ASSET-050 | mixed | ● active (branch candidate) |
 | R2-ASSET-051 | mixed | ● active (branch candidate) |
 | R2-ASSET-052 | mixed | ● active (branch candidate) |
+| R2-ASSET-063 | mixed | ● active (branch candidate) |
+| R2-ASSET-064 | mixed | ● active (branch candidate) |
+| R2-ASSET-065 | mixed | ● active (branch candidate) |
+| R2-ASSET-066 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -1651,6 +1655,16 @@ Claims labelled: 3087. Observation: 95. Static analysis: 2553. Mixed: 439.
 | R2-ENGINE-236 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-237 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-238 | static analysis | ● active (branch candidate, partially retracted) |
+| R2-ENGINE-251 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-252 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-253 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-254 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-255 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-256 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-257 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-258 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-259 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-260 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 
@@ -1708,6 +1722,7 @@ Claims labelled: 3087. Observation: 95. Static analysis: 2553. Mixed: 439.
 | R2-SESSION-113 | static analysis | ✔ promoted |
 | R2-SESSION-114 | mixed | ✔ promoted |
 | R2-SESSION-115 | mixed | ● active (branch candidate) |
+| R2-SESSION-123 | static analysis | ● active (branch candidate) |
 
 ## Ledger sav
 

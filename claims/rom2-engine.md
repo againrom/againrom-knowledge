@@ -2721,3 +2721,352 @@ An authorized original capture would settle live appearance.
 **Amended.** The child width/height interpretation and unconditional
 default-resolution clause are partially retracted in claims/retracted.md.
 Rectangle bounds and command-line/registry precedence replace them.
+
+## ROM2 town classes and druid square
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-251 | The three selected ROM2 square classes have 44 virtual slots; druid and Kaarg constructors call the generic town constructor, which calls the shared native page base. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-252 | Selected ROM2 town overrides mix resource data with distinct native behavior: town 1 has a campaign gate, Kaarg reversible gate frames, and druid hover-started people and sprite selector tables. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-253 | The active druid square draws background, shop highlight, woman, inn highlight, man, lizard and bug before inherited overlay and child dispatch; person subset changes also change destinations. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-254 | The druid view inherits the shared ROM2 mask sampler; changed shop/inn hover can immediately start person subset 2, while its two dialogue selectors do not start an episode. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-255 | Selected druid click arms post shop, inn, navigation and menu messages or stage-keyed keeper dialogue; its complete selected loader, painter and advance contain no gate frame operation. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-256 | The druid square advances once after more than 100 ms and schedules each paint; people require idle state, bug uses three 61-frame routes, and lizard uses four sentinel-terminated selector vectors. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+
+### R2-ENGINE-251
+
+EN town-ID construction binds generic/druid/Kaarg constructors
+L2.00559/L2.00561/L2.00560 to tables L2.00562/L2.00564/L2.00563.
+Each table has 44 slots, +0x00 through +0xac. The two derived constructors
+call generic L2.00559. Generic calls native page constructor L2.00634,
+which assigns table L2.00651 with 34 slots through +0x84. Slot identity
+is recorded separately from a method's interpreted purpose.
+
+Evidence is the complete slot matrix, constructor assignments and selected
+method excerpts in evidence/measured/classes. The base-to-derived comparison
+uses observed table cells, not a source-language class name or imported symbols.
+Shared native methods include pointer forwarding +0x4c, leave +0x84,
+mask sampling +0x94 and departure preparation +0xac. A matching pointer
+proves method reuse; it does not prove identical data, state or presentation.
+
+**Confidence.** High for the finite table population and positive constructor
+chain. Every selected table cell is retained with its address. The native
+function instrument controls selected decode boundaries. No global class census
+or complete inherited window semantics is asserted.
+
+**Unknown.** Source class names and unmeasured shell/window callback purposes.
+Native observation or additional receiver tracing would settle delivered behavior.
+
+### R2-ENGINE-252
+
+The complete matrix in evidence/measured/classes distinguishes reused pointers,
+data overrides, logic overrides and callbacks whose purpose remains unresolved.
+Druid differs from the generic table at twelve slots:
+04,2c,54,80,88,8c,90,98,9c,a0,a4,a8. Kaarg also changes tip slot 14.
+The lifecycle and sound methods are kept separate from paint and input.
+Sound-entry slot 90 uses the same helper but a different druid sound field.
+Resource-release counts and keys are data. Kaarg sound loading omits the
+pre-load virtual release used by generic and druid; this changes control flow.
+Art release L2.00652 (druid) and L2.00653 (Kaarg) call a subset of generic
+L2.00654 cleanup primitives. Generic also calls L2.00655, L2.00656 and
+L2.00657. The data label does not assert identical teardown programs.
+
+Generic's selected gate click tests Scenario variable 0x301 before navigation.
+Kaarg has reversible gate frames and four timed person families
+(R2-ENGINE-235, R2-ENGINE-236). Druid starts shop/inn person subset 2 from
+hover and uses separate bug and lizard sprite rules (R2-ENGINE-254,
+R2-ENGINE-256). These named native branches prevent a claim that every
+town difference is a resource key or constant.
+
+**Confidence.** High for positive table differences and named instructions.
+Medium for the data/logic labels: a changed address alone does not establish
+a different algorithm, and shared pointers still consume per-instance state.
+Classification is bounded by the selected methods, not whole-client equivalence.
+
+**Unknown.** Complete semantic equivalence of all inherited callbacks, wider
+shell behavior and live delivery. The slot matrix names unresolved purposes.
+
+### R2-ENGINE-253
+
+EN painter L2.00658 / RU L2.00659 returns if +0x204 is zero. Destinations
+add the view origin. Background is (0,0), shop highlight (420,224), inn
+highlight (0,184), lizard (0,300), bug (0,212). Woman subset s=0..2 uses
+(336+4q,244-20q); man uses (164-12q,200-16q), where q=trunc(s/2).
+Idle hover 1 selects woman subset 2/file 1 at (340,224); otherwise subset
+0/file 1 at (336,244). Idle hover 2 selects man subset 2/file 1 at
+(152,184); otherwise subset 0/file 1 at (164,200).
+
+The shop highlight is drawn when hover=1 or woman subset=2. The inn
+highlight is drawn when hover=2 or man subset=2. Thus an episode can
+retain a building highlight after the pointer leaves. Lizard draws its
+selector value minus one when route and cursor are nonnegative, otherwise
+frame 0. Bug draws 61*route+cursor only when both values are nonnegative.
+The inherited overlay dispatcher then invokes empty own slot 30 and children.
+
+Evidence is evidence/measured/square/painter-*.txt, geometry.tsv and
+lizard-sequences.tsv. The full selected painter and its direct branches
+are controlled. Native sprite binding is separately bounded by R2-ASSET-066.
+
+**Confidence.** High for local draw order, arithmetic and conditions.
+**Unknown.** Device conversion, wider children, shell text/cursor destinations
+and live frames. Source-RGB reconstruction does not establish original pixels.
+
+### R2-ENGINE-254
+
+Druid slot 94 points to the same sampler as generic and Kaarg. It samples
+the top-origin indexed byte at (x-left)+640*(y-top), rejecting absent mask
+or an out-of-view point with -1. Its full 256-byte map is retained.
+The actual druid population is R2-ASSET-064.
+
+EN hover L2.00660 / RU L2.00661 stores the selector. For shop 1 or inn 2,
+changed admission and a current subset other than 2 stop the family sound,
+reset its clock, select subset 2, store cursor -1, set its flag and call
+advance immediately. This produces cursor 0.
+Ddruid1 at +248 is stopped and replayed by hover selector 1 (L2.00662);
+Ddruid2 at +24c by selector 2 (L2.00663). Scheduler person start arms
+stop/replay the same keys at L2.00664/L2.00665 and L2.00666/L2.00667.
+Shop/inn use latched Denter2/Denter1 and stop the other entry and Dout sound.
+Selector 8
+requests Dout under its latch. -1 calls reset and clears three latches.
+0x200 and 0x1000 are no-op arms. The inherited slot 4c calls virtual 98
+outside the painter too; hover is not limited to the 100 ms paint path.
+
+Evidence is evidence/measured/square/{mask-map,branches,anchors}.tsv and
+mask-sampler, hover, inherited-hover, person-advance, scheduler and sound-load
+excerpts.
+
+**Confidence.** High for the complete byte domain and selected finite hover
+table, plus local person state writes. No global input-handler census is implied.
+**Unknown.** Physical pointer capture/delivery and audible sound.
+
+### R2-ENGINE-255
+
+EN click L2.00668 / RU L2.00669 dispatches selectors 1 and 2 to messages
+0x42a (shop) and 0x42b (inn). Selector 8 posts 0x442(1,0), then 0x42d.
+These three arms call departure preparation first. Selector 16 posts
+0x41f (main menu) without it. This menu arm has no mask pixel in the
+preserved druid masks (R2-ASSET-064).
+
+Selectors 0x200 and 0x1000 format druidinnkeeper%d and druidshopkeeper%d
+with Scenario variable 0x300 and call dialogue entry R2.0038. They do
+not construct new room classes. The inherited tip returns indices
+233/236/237/235 for shop/inn/navigation/menu, and no text for the two
+keeper selectors. The selected complete loader, painter and advance have
+no gate frame family or gate frame operation. Navigation posting and the
+hover sound remain present; this is not a global absence of gates.
+
+Evidence is evidence/measured/square/{click,loader,painter,advance,tip}-*.txt,
+tip-indices.tsv and the retained room dispatch. R2-ENGINE-257 identifies
+the per-town inn/shop selectors.
+
+**Confidence.** High for local click arms, strings, message values, tip table
+and the bounded gate-frame negative. Whole selected methods and their
+direct/table targets are retained.
+**Unknown.** Acceptance after navigation posting, dialogue contents and final
+tip rendering. Trace the native receivers or observe an authorized session.
+
+### R2-ENGINE-256
+
+EN painter L2.00658 admits one virtual advance only when unsigned elapsed
+time is greater than 100 ms. It resets its process baseline to current time,
+without a catch-up loop. Scheduler L2.00670 runs on every active paint.
+Define R(n)=floor(rand()*n/32767)%n on the shared 15-bit helper already
+measured by R2-ENGINE-235. This establishes bounds, not uniformity.
+
+Woman and man enter with 2000+R(2000) ms waits. Later strictly elapsed waits
+replace the baseline and wait with 3500+R(5000). They start only if their
+subset is -1: hover 1/2 selects subset 2, otherwise R(2), cursor 0,
+flag 1/2. Each admitted active advance increments once; equality with
+the selected vector count resets cursor to 0, subset to -1 and clears the flag.
+The native loader attempts files 1..20 for each of three subsets; failed
+lookup ends that subset early. R2-ASSET-065 bounds the installed population.
+
+Bug starts after 7000+R(5000) ms, then 10000+R(10000). The start arm
+selects R(3), sets flag 0x80 and updates the baseline. It does not test
+active state or reset the cursor. Entry cursor -1 becomes 0 on the first
+advance; equality with 61 resets cursor 0, route -1 and clears the flag.
+Later starts therefore use the retained cursor. A slow redraw cadence can
+reschedule a running route without rewinding it.
+
+Idle lizard starts each paint with R(15)+1: values 1/2/3 choose routes
+1/2/3; values 4..15 choose route 0. Cursor starts 0, flag 0x100.
+Four explicit vectors have lengths 8/11/25/47 followed by -1. Their
+one-based values, including repeated holds, are reduced by one for drawing.
+One advance increments cursor; reaching a -1 cell ends the episode.
+
+The sound loader selects 21 town_druid keys. Bird/tree waits are separately
+2000+R(2000); wolf requests after more than 60000 ms. Bug/lizard starts
+request route sounds. These are requests, not observed playback.
+Evidence is evidence/measured/square/{constants,lizard-sequences,controls,
+branches,resource-pushes}.tsv and complete entry, painter, hover, scheduler,
+advance, person/bug/lizard advance and sound excerpts.
+
+**Confidence.** High for the selected native predicates, order, integers,
+finite tables and frame state transitions. All selected methods decode
+completely and branch/table targets are retained. EN/RU is one code dependency.
+**Unknown.** Delivered cadence, PRNG sequence, process baseline before re-entry,
+sound delivery and live episode appearance. Authorized observation would settle
+the delivered timing; no game execution occurred in this experiment.
+
+## ROM2 room classes and druid behavior
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-257 | Selected ROM2 inn/shop pages and centers reuse native room bases; per-town overrides mix data and control flow, while five changed shop cleanup methods retain equivalent native algorithms. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-258 | Selected druid inn methods add water and taverner state transitions over shared widgets; ten water names feed a nine-cursor loop, and taverner cursor reset preserves its cached bitmap. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-259 | Selected druid shop methods gate the fourth category through campaign query 0x302 and use a modulo-30 keeper counter; native paint, click and selection differ from the shared shop base. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-260 | Selected inn/shop pages reuse shared native child classes; EN construction binds app+0xe0 to a panel with 33 nonzero targets, while changed callback purposes and its null boundary remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+
+### R2-ENGINE-257
+
+Campaign selectors choose inn pages at application +0x104/+0x10c/+0x108
+and shop pages at +0xf8/+0x100/+0xfc for IDs 1/2/3. Original EN/RU
+constructors bind fifteen inn page/center and shop page/center/header tables.
+The room matrix has 1868 slot rows across both locales, including shared
+side widgets, inventories and actions. Constructor and boundary controls
+retain every callable target and its next cell. Native window table
+L2.00671 ends at +0x74 before the next table head at L2.00672.
+
+Inn pages 2/3 change 04,78,80,84,88,8c; centers change 04,2c,80,84.
+Shop pages change 04,78,80,88,8c,90,94; leave 84 is inherited.
+Shop centers change 04,14,2c,54,78,7c,80,84,88,8c,90,94,98,9c,a0,a4.
+Headers change 04 and b4. Five center cleanup overrides at 90,94,98,9c,a0
+are identical after normalizing local branch targets in both locales.
+A different code address alone is not a different native algorithm.
+
+For these ten derived classes, each locale has 396 slots: 326 inherited,
+37 data overrides, 23 logic overrides and 10 equivalent overrides.
+Both locales have 652 inherited, 74 data, 46 logic and 20 equivalent rows.
+Inn pages each have 4 data/2 logic; inn centers 3 data/1 logic; shop pages
+5 data/2 logic; shop center 2 has 4 data/7 logic/5 equivalent; shop center 3
+has 5 data/6 logic/5 equivalent; headers each have 2 data/0 logic.
+
+All ten derived +04 wrappers have their base wrapper's 17 instructions,
+changing only the destructor call target. This is a data override of the
+wrapper. Derived destructor bodies were read only for the headers:
+EN druid L2.00673 forwards to base L2.00674; the other derived room
+destructor bodies remain unclassified. Shared widget and shell +04
+listings have the same deleting-destructor wrapper shape; window +04
+semantics remain Unknown. Shop-center +14 EN L2.00675 and L2.00676
+change only the text-index base from base L2.00677's 0x3e to 0x116 and
+0x112. RU L2.00678 and L2.00679 have the same single difference.
+The four-category rectangle scan is the same loop as the base.
+
+Evidence is evidence/measured/rooms/{class-slots,constructor-bindings,
+boundary-controls,equivalent-controls,range-controls}.tsv and their selected
+native listings. The experiment room table separates resource data, logic,
+equivalent overrides and unidentified callback purposes. Room data includes
+keys, frame vectors, constructor choices, sound fields and keeper moduli.
+Paint, entry, schedule and category selection carry per-town branches.
+
+**Confidence.** High for positive bindings, pointer reuse, boundary controls
+and normalized native cleanup equivalence. Medium for the whole semantic
+data/logic taxonomy and whole room equivalence: shared widget message paths
+and every callback purpose were not closed. This is a selected class census,
+not an executable-wide enumeration of all possible rooms.
+
+**Unknown.** Other derived room destructor bodies, unlabelled callbacks,
+complete Kaarg state schedules, town 1 room measurements assigned separately
+and live presentation. Read the
+named destructor bodies and native callbacks or observe an authorized
+original route.
+
+### R2-ENGINE-258
+
+Druid page L2.00680 and center L2.00681 call the shared inn bases and use
+shared sides plus the campaign panel. Center painter L2.00682 draws
+TavernMain, water at center+(168,144), a1/a2 at +(40,128), static a30001
+at +(104,152), shared portraits/quest presentation, edges and children.
+The center is page+(160,0). Art loader L2.00683 loads druid background
+and static taverner with generic manback/ManBackTalk/LUOver/LDOver/RUOver.
+Campaign entry L2.00684 binds ten water files, forty a1 and thirty a2.
+R2-ASSET-065 separately measures their installed headers and keys.
+
+Water admits advancement after more than 100 ms. Helper L2.00685 uses
+(cursor+1) mod (loaded-count-1), so its steady cursors are 0..8 for ten
+loaded names. A1/a2 use one-shot helper L2.00686 through cursors 39/29.
+Reset L2.00687 changes the cursor without changing the cached bitmap.
+An episode can therefore first paint its previous terminal image before
+advancing to file 2. The idle wait rand()/16+3200 is 3200..5247 ms on
+the measured 15-bit source. Expiry chooses (wait&3)+1 with 4 mapped to 3.
+State 3 stores a new wait and changes to 4; the next admitted >100-ms
+state-4 tick returns to idle. Its stored wait is not a simple static-frame
+duration. Hover, tooltip and click targets are inherited.
+
+Evidence is evidence/measured/rooms selected entry/art/painter listings,
+frame-binding/count/loop/once/reset helpers, resource pushes and finite
+table controls. Matching RU methods and bindings are retained.
+
+**Confidence.** High for bounded native keys, destinations, state arithmetic
+and frame rules. Medium for the complete room composition because global
+lower-right edge art and every shared child presentation were not identified.
+**Unknown.** Lower-right global bitmap identities, physical hover, audible
+delivery and live timing. Trace their loaders or observe authorized output.
+
+### R2-ENGINE-259
+
+Druid center L2.00688 and header L2.00689 reuse shop/widget bases.
+Loader L2.00690 selects ShopFrame.256, ShopMain, elven and four highlights
+under interface/shop_druid, with movies/shop_druid/a10001 as default.
+Header loader L2.00691 selects four arrows and ShopInv. At center origin
+page+(164,0), painter L2.00692 draws frame (0,0), background (5,8),
+admitted elven (93,172), selected armor (5,112), magic (5,52) or potion
+(121,36), keeper (197,92), then children.
+
+Predicate L2.00693 / RU L2.00694 admits outside campaign. In campaign it
+queries 0x302 through the EN dynamic Scenario pointer L2.00451 and requires nonzero.
+Original startup binds ordinal 1, ScenarioGetVar at DLL D2.00001, which
+reads bank[argument]. Thus 0x302 is bank770 at D2.00215. Selected ordinary
+Leave70 reaches case D2.00216 and stores bank770=1 at D2.00217. It enables
+this gate absent an intervening writer; no complete producer census follows.
+The predicate gates elven paint, category-3 click and category-3 selection.
+Tooltip L2.00676 scans all four category rectangles without that predicate.
+
+Keeper ticks require at least 100 ms. Each tick samples a fresh
+5000+1000*(rand()%5) idle threshold, rather than retaining one deadline.
+An admitted idle start selects flag 0x10 or 0x20. Updater L2.00695 deletes
+the current image, increments counter modulo 30, clears episode flags on
+zero and formats counter+1 for a1/a2 or a10001 otherwise. Shared constructor
+initializes counter/flags to zero. An admitted episode first updates to file
+2, reaches file 30 and returns to default file 1. Kaarg updater L2.00621
+uses modulus 20 and default a10000, with separate fire selection transitions.
+Five cleanup overrides are equivalent native algorithms (R2-ENGINE-257).
+
+Evidence is evidence/measured/rooms selected gate/art/paint/click/tooltip/
+selection/frame/header listings, native resource pushes and controls.
+R2-ASSET-065 gives the installed art population, not a clock witness.
+Evidence/measured/query retains the startup/export/getter binding, Leave70
+selector cells and decoded writer excerpts.
+
+**Confidence.** High for selected native gate, counter, update order and
+draw rules. Medium for whole shop composition and data/logic equivalence:
+all shared shell/button resources and sibling message paths were not closed.
+**Unknown.** Complete bank770 campaign progression and restoration, pending dialogue, shared
+shell art, audible delivery and live pixels. Additional scenario producers
+and authorized native observation would settle those boundaries.
+
+### R2-ENGINE-260
+
+The selected inn pages share left/right classes and shop pages share player
+inventory, sell list and actions, each with positively bound native tables.
+Their differing targets against window/inventory bases are shared room
+methods, not per-town variants. Full addresses and inherited relations are
+in evidence/measured/rooms/class-slots.tsv.
+
+EN application construction allocates 0x17c, calls L2.00696 at L2.00697
+and stores its result at application+0xe0 at L2.00698. Constructor L2.00696
+calls window L2.00635 and binds table L2.00699. This panel prefix has 33
+nonzero targets at 00..80: 18 same-offset inherited targets, twelve changed
+targets and three extensions against the 30-target window prefix. Cell 84
+is zero, followed by a new table head at 88. Evidence is the EN constructor
+excerpts, slots.tsv, boundaries.tsv and bindings.tsv in measured/panel.
+
+**Confidence.** High for positive EN panel binding, finite pointer values,
+shared room references and same-offset target equality. Unknown for the
+changed panel method purposes and zero cell's role. It may be reserved null
+or alignment; this probe does not label it a callable slot. No per-town
+character-panel class is established by this construction.
+
+**Unknown.** Panel callback algorithms, null boundary semantics and final
+shared-widget presentation. Read the identified targets and consumers or
+observe an authorized original session. The panel probe is EN only.

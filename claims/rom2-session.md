@@ -1037,3 +1037,53 @@ does not create an independent playthrough witness.
 **Unknown.** Exhaustive visit order, arbitrary restoration,
 the complete bank775 producer graph and actual player acceptance. Close the
 availability/event graph or record an authorized original route.
+
+## Conditional druid campaign route
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-123 | Selected native campaign paths add druid town3 on ordinary Leave50 or nonzero bank775 restoration; the named fresh town1-to-town2-to-town3 route remains conditional. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+
+### R2-SESSION-123
+
+Town3 constructorD2.00205 callsD2.00017 on objectD2.00039 with
+type2 and ID3. InitializerD2.00017 forwards to field setterD2.00086,
+which stores those arguments at record+0/+4. Catalog rebuildD2.00005
+appends that object as its third initial record. GetterD2.00010 returns
+type and D2.00011 returns ID.
+
+The ordinary departure switch at D2.00024 sends incoming ID50 to
+D2.00218, which pushes3 and calls AddTownD2.00031 at D2.00219.
+The add helper scans catalog type2/ID3 and appends a matching record
+only if its pointer is absent from availability, as R2-ENGINE-147 states.
+
+Ordinary departure compares bank775 at D2.00209. The zero arm bypasses
+restoration. The nonzero arm clears bank775 and availability, then
+appends town2 at D2.00211 and positively identified town3 objectD2.00039
+at D2.00212 before the incoming-ID switch. This addition is independent
+of global stage768. Type2 departureD2.00013 removes availability only
+for ID1 and clears current for every ID, preserving town3 availability.
+
+EnterLocationD2.00006 stores its incoming pointer to currentD2.00007
+and clears 16 topic slots. The selected setter has no admission test.
+This does not establish the preceding client's actual acceptance.
+
+R2-SESSION-107, R2-SESSION-112 and R2-SESSION-113 supply the named
+fresh path through town1/stage10, missions10 and 20, then town2/stage30.
+Combining that conditional path with the measured ordinary Leave50
+addition supplies a later available druid town3, not a complete live
+visit order. R2-SESSION-115 keeps the same scheduling boundary.
+
+Evidence: evidence/measured/campaign/{inputs,bodies,controls,branches}.tsv and
+selected native listings. All20 selected EN/RU bodies have complete
+linear/recursive instruction agreement and no unresolved indirect edge.
+
+**Confidence.** High for positively identified record fields and the
+conditional additions, selector and type2 departure contracts. Medium
+for the composed fresh campaign route. EN/RU code equality is one
+dependency and supplies no original playthrough.
+
+**Unknown.** Complete bank775 producers, arbitrary restored availability,
+the client's accepted-visit conditions, actual town3 visit scheduling
+and exhaustive town order. Closing the availability/caller graph or an
+authorized original route would settle those alternatives.

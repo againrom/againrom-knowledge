@@ -320,3 +320,147 @@ full sequence populations. No claim imports ROM1 room drawing behavior.
 
 **Unknown.** Full room composition, animation destinations and scheduling,
 and the original pixel decoder of the shop frame.
+
+## Druid archive population
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-063 | The four declared druid art subtrees contain 366 keys per locale; 364 payloads match, while two lizard source BMPs differ. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ASSET-064 | Both preserved druid town masks have 307200 identical indexed cells, with five populated nonzero action bytes: 80, 96, 128, 144 and 160. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ASSET-065 | The preserved druid square contains 113 person BMPs and 183/42-frame bug/lizard sprite envelopes; its inn and shop art contain the measured keeper and waterdrop series. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ASSET-066 | Selected ROM2 sprite code establishes the druid 16a envelopes and word-run geometry; owner compositions approximate its full-table memory-mode blend in source RGB. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+
+### R2-ASSET-063
+
+The complete selected archive population is graphics.res
+interface/town_druid, interface/inn_druid and interface/shop_druid,
+plus movies.res shop_druid. Each locale contains respectively 204, 82,
+19 and 61 entries. Town has 202 BMPs and two 16a members. Inn has
+82 BMPs. Shop has 18 BMPs and one 256 member. The movie subtree has
+61 BMPs. Both archive registry traversals account for every node.
+
+All 366 keys agree. SHA256 payload comparison identifies 364 equal
+members. The two differences are graphics.res keys
+interface/town_druid/lizard/a_a10013.bmp and a_a10042.bmp.
+Presence does not establish native selection. These source BMPs are not
+selected by the measured druid square loader, which loads sprites.16a.
+
+Evidence: evidence/measured/assets/{archives,entries,populations,locales}.tsv.
+
+**Confidence.** High within the four complete declared subtrees of the
+two hashed resource installations. The RES walker reads registry nodes
+and payload extents without depending on native function recovery or
+sprite pixel decoding. This narrows and agrees with R2-ASSET-049.
+
+**Unknown.** Art outside these prefixes and resource uses outside the
+selected native square and room paths.
+
+### R2-ASSET-064
+
+Both interface/town_druid/townmask.bmp members are uncompressed 8-bpp
+BMPs at 640x480. Original indexed bytes give 262188 cells of byte0,
+5421 of byte80, 2144 of byte96, 3397 of byte128, 24098 of byte144
+and 9952 of byte160. The sum is 307200. EN/RU payloads and every
+indexed cell agree. There is no differing pixel bounding rectangle.
+
+Exclusive nonzero rectangles are: byte80 (338,253)-(390,368);
+byte96 (166,202)-(201,270); byte128 (120,189)-(169,274);
+byte144 (375,223)-(570,395); byte160 (0,293)-(174,374).
+No other byte occurs in either selected resource. This includes byte176,
+although a native menu selector exists outside this populated mask.
+
+Evidence: evidence/measured/assets/{masks,mask-locales}.tsv. Native action semantics
+come from the separately measured druid sampler and click methods.
+
+**Confidence.** High for all cells in these two hashed BMP members.
+The probe accounts for BMP row padding and positive-height row reversal,
+then counts raw indices before any palette or RGB conversion.
+
+**Unknown.** Runtime pointer coordinates and any other mask resource.
+
+### R2-ASSET-065
+
+The town_druid background and mask are 640x480. hili_shop is
+152x164; hili_tavern is 152x96. Man BMP series a1/a2/a3 contain
+19/19/20 files, numbered from 1; a1/a2 are 48x72 and a3 is 60x88.
+Woman a1/a2/a3 contain 15/20/20 files, numbered from 1; a1/a2 are
+84x128 and a3 is 80x148. All six series have no internal missing
+number. Their combined count is 113.
+
+Bug sprites.16a contains 183 frames, all 640x268. Lizard sprites.16a
+contains 42 frames, all 100x120. The lizard subtree also contains two
+42-file BMP source series a1 and a_a1, all 100x120, and palette.bmp
+at 102x122. These extra source BMPs are a resource census, not additional
+layers inferred into the native square composition.
+
+Inn TavernMain is 320x480. Inn taverner a1 contains 40 files at 128x196;
+a2 contains 30 at 128x196; a30001 is 32x24. Waterdrop d0001..d0010
+contains 10 files at 116x96.
+
+ShopMain is 288x288; ShopInv is 164x303; ShopMenu is 176x238; ShopTable is 472x87.
+ShopFrame.bmp and the one-frame ShopFrame.256 envelope are 316x303.
+ShopArrow1..4 are 72x32. ShopButton1..4 use 120x52 or 140x46.
+Elven and hili_elven are 96x104; hili_armor is 88x112;
+hili_magic is 96x60; hili_potion is 72x112. The movies.res keeper a1/a2/a3
+groups contain 30/30/1 BMPs, all 72x164, numbered from 1.
+
+Evidence: evidence/measured/assets/{entries,frames,sequences}.tsv. Archive frame
+counts and dimensions do not independently establish native schedules.
+
+**Confidence.** High for the complete selected filename ranges, BMP
+headers and sprite envelope geometry. EN/RU members agree except the
+two source BMPs named by R2-ASSET-063. Native loader bounds and
+cursor semantics are separate engine claims.
+
+**Unknown.** Runtime device colors, the native indexed ShopFrame.256
+pixel decoder, and resource consumers outside the measured classes.
+
+### R2-ASSET-066
+
+EN sprite constructorL2.00639 installs vtableL2.00640. Slot18 targets
+L2.00641. The no-flag painter branch forwards the selected frame header
+width/height, data at header+12 and palette table to L2.00642.
+LoaderL2.00643 reads the final DWORD count, clears its high own-palette
+bit, reads 1024 leading palette bytes when set, and walks12-byte
+width/height/payload-length headers without remaining envelope bytes.
+
+The selectedL2.00642 opcode order tests4000 for row skip, then 8000
+for pixel skip, otherwise consumes that word's literal count. Skip
+counts retain the low14bits. A completed width advances one row.
+All450 bug/lizard frame streams across the two installations fit the
+selected word-run geometry and own-palette offset bounds.
+
+Druid configurationL2.00644(16,4,0) reaches palette builderL2.00645.
+The six-entry tableL2.00646 positively selects L2.00647 for mode4.
+For memory-table flag L2.00648=0, mode4 builds palette rows1..16 with
+each source component multiplied by row and truncated after division16,
+then packs the runtime color masks. The normal branch of destination
+LUT builderL2.00649 and blitterL2.00642 gives foreground weight
+(level+1)/16 and destination weight(15-level)/16 for literal bits9..12.
+
+The owner render keeps source RGB and approximates those factors using
+RGBA before native packing. It uses the separately measured square
+destinations and frame selectors. It omits child overlays and device
+presentation. No screenshot or original game execution is a witness.
+
+The table-mode initializer calls the positively identified KERNEL32
+GlobalMemoryStatus import at cellL2.00650. It compares result structure+8
+with 24000000 and sets flag L2.00648 to 1 when that unsigned word is below
+the threshold, otherwise 0. This selector is a memory-status-dependent
+table mode, not a display-format selector. The result word's interpretation
+and actual runtime value are not required by the conditional arithmetic.
+
+Evidence: evidence/measured/assets/{entries,frames}.tsv and
+evidence/measured/sprite/{bodies,controls,inputs}.json plus the nine native listings.
+
+**Confidence.** High for selected EN loader, word-run, table and
+conditional full-table memory-mode arithmetic, and for complete frame fits in
+the hashed EN/RU resource population. Medium for source-RGB owner
+composition: packing, truncation and the live memory-table flag are not
+reproduced. EN/RU resource equality is one shared-content dependency,
+not a second native execution witness.
+
+**Unknown.** Live memory-table flag, original device packing/presentation,
+compact-table pixel output, child drawing and the indexed shop
+frame pixel decoder. Authorized device observation or a complete
+measured presentation configuration would settle pixel identity.
