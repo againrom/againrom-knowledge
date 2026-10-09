@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
+Claims labelled: 3169. Observation: 95. Static analysis: 2624. Mixed: 450.
 
 ## Ledger ai
 
@@ -1015,7 +1015,7 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | MAGIC-235 | static analysis | ● active (amended) |
 | MAGIC-237 | static analysis | ✔ promoted |
 | MAGIC-238 | static analysis | ✔ promoted |
-| MAGIC-239 | static analysis | ✔ promoted |
+| MAGIC-239 | static analysis | ✔ promoted (amended) |
 | MAGIC-240 | static analysis | ✔ promoted |
 | MAGIC-245 | static analysis | ● active |
 | MAGIC-246 | static analysis | ● active |
@@ -1027,6 +1027,7 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | MAGIC-250 | static analysis | ● active |
 | MAGIC-251 | static analysis | ● active |
 | MAGIC-252 | static analysis | ● active |
+| MAGIC-253 | static analysis | ✔ promoted |
 | MAGIC-261 | static analysis | ● active |
 | MAGIC-262 | static analysis | ● active |
 | MAGIC-263 | static analysis | ● active |
@@ -1150,6 +1151,11 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | MENU-127 | static analysis | ✔ promoted (branch candidate) |
 | MENU-128 | static analysis | ✔ promoted (branch candidate) |
 | MENU-129 | mixed | ✔ promoted (branch candidate) |
+| MENU-135 | static analysis | ✔ promoted (branch candidate) |
+| MENU-136 | static analysis | ✔ promoted (branch candidate) |
+| MENU-137 | static analysis | ✔ promoted (branch candidate) |
+| MENU-138 | static analysis | ✔ promoted (branch candidate) |
+| MENU-139 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger mission
 
@@ -2820,6 +2826,8 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | TEXT-108 | static analysis | ● active |
 | TEXT-109 | mixed | ● active |
 | TEXT-110 | mixed | ● active |
+| TEXT-111 | static analysis | ✔ promoted (branch candidate) |
+| TEXT-112 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger town
 
@@ -2972,7 +2980,7 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | TOWN-185 | static analysis | ● active (amended) |
 | TOWN-186 | static analysis | ● active (amended) |
 | TOWN-187 | static analysis | ● active |
-| TOWN-188 | static analysis | ● active |
+| TOWN-188 | static analysis | ● active (partially retracted) |
 | TOWN-206 | static analysis | ● active |
 | TOWN-207 | static analysis | ● active |
 | TOWN-208 | static analysis | ● active |
@@ -2984,7 +2992,7 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | TOWN-216 | static analysis | ● active (amended) |
 | TOWN-217 | static analysis | ● active (amended) |
 | TOWN-222 | static analysis | ● active |
-| TOWN-223 | static analysis | ● active (amended) |
+| TOWN-223 | static analysis | ● active (amended, partially retracted) |
 | TOWN-224 | static analysis | ● active (amended, partially retracted) |
 | TOWN-232 | static analysis | ● active (amended, partially retracted) |
 | TOWN-233 | static analysis | ● active (amended) |
@@ -3064,7 +3072,7 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | TOWN-477 | static analysis | ● active |
 | TOWN-478 | static analysis | ● active |
 | TOWN-479 | static analysis | ● active |
-| TOWN-480 | static analysis | ● active |
+| TOWN-480 | static analysis | ● active (amended) |
 | TOWN-481 | static analysis | ● active |
 | TOWN-482 | static analysis | ● active |
 | TOWN-483 | static analysis | ● active |
@@ -3091,6 +3099,14 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | TOWN-501 | static analysis | ● active (branch candidate) |
 | TOWN-502 | static analysis | ● active (branch candidate) |
 | TOWN-MARKER-508 | static analysis | ● active |
+| TOWN-516 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-517 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-518 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-519 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-520 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-521 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-522 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-523 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger trigger
 
@@ -3158,6 +3174,8 @@ Claims labelled: 3151. Observation: 95. Static analysis: 2607. Mixed: 449.
 | TRIG-DRAGON-079 | mixed | ● active |
 | TRIG-BRIGAND-080 | mixed | ● active |
 | TRIG-VIP-081 | mixed | ● active |
+| TRIG-TIPS-087 | static analysis | ✔ promoted (branch candidate) |
+| TRIG-TIPS-088 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger unit
 

@@ -178,6 +178,45 @@ a participant nor a live actor. Successful `0x48` is the commit point and copies
 `actor+0x80` unchanged (`HERO-CHARGEN-085`). Back/Play close is latched and idempotent while the screen
 is inactive; repeated Reset reconstructs the same draft.
 
+## Generator tips, highlights, lighting and cursors
+
+Pre-create keeps a tip step at `+0x1dc`. Every enter sets step 0 and, while
+`TipsMode` is set, shows `chrsel1`. A portrait click at step 0 sets step 1 and
+shows `chrsel2`. A level click at step 1 sets step 2 and shows `chrsel3`.
+Drags, keys and the name field leave the step unchanged (`TOWN-518`).
+
+While the flag and the popup remain, each paint runs the guided cycle. Step 0
+cycles the four portraits, step 1 the three levels, and step 2 the amulet and
+OK. A chosen target draws `lon` and an unchosen one draws `l`. The cycle draws
+nothing until 500 ms after the last hover. It then advances when more than
+300 ms have passed since the last advance, and resumes after the target last
+hovered. Hovering a target of the current step freezes it. Its index and
+timers are process statics that page enter does not reset (`TOWN-519`).
+
+Click targets come from `Mask.bmp`: levels 20/40/60, portraits 80..140,
+amulet 160 and OK 180. The draw rectangles are literals (`TOWN-520`). In a
+portrait or level state, bit 0 means chosen and bit 1 hovered. State 1 draws
+`on`, 2 draws `l`, 3 draws `lon`, and 0 lets the background show. The enter
+chooses portrait 0 and the stored difficulty. A sparkle plays at random over
+the levels, amulet and OK whatever the step (`TOWN-521`).
+
+The detailed page shows `chrgen1m` for a mage and `chrgen1f` otherwise at
+(160,280)-(472,480). The first skill click with the flag set shows `chrgen2`.
+Until that click, or until the popup closes, the five skills cycle with the
+same timing, drawing `shine_on` on the chosen skill and `shine_off` on the
+others. The cycle does not read the flag (`TOWN-522`).
+
+Pre-create shows the `select` cursor at enter and at every paint. The detailed
+page shows `default` unless the current cursor is `dice`. The routine that
+sets `dice` there is Unknown (`TOWN-523`).
+
+Each stat's `+` and `-` buttons draw rest, hover, held or disabled art. `+` is
+disabled when the pool is below the next point's cost or the stat is 45 or
+more; `-` when the stat is 15 or less. The `pnlon` and `mnlon` files are
+loaded but never drawn (`MENU-138`). Accept, Reset and Back are
+`Inn\button{1,2,3}{on,off}.bmp` at x 484..624. `on` draws only while the
+button is pressed and hovered. The buttons have no disabled state (`MENU-139`).
+
 ## Starting templates and non-item state
 
 The four class/sex combinations select `PC_Danath`, `PC_Naira`, `PC_Fergard`, or `PC_Reniesta`.

@@ -131,9 +131,11 @@ initializes Spell+9 from Max Range; the ordinary power producer calculates
 non-Teleport branch leaves a zero base unchanged. Player-command handlers
 and the unit-order constructor **copy the stored Spell+9** into order+0x14,
 replacing weapon reach. These copies do not prove that current power was
-recomputed before the distance decision. The inspected player handlers
-initially set parent state0x0d/0x0e and child order kind0; their later transition
-to kind8/9 and all range-refresh timing remain Unknown (`MAGIC-REACH-178`).
+recomputed before the distance decision (`MAGIC-REACH-178`). The admitted
+manual setters clear order+0x60 from the register their heads zero. Parent
+states 0x0d/0x0e reissue kind 8/9 and reload reach from the saved Spell+9 on
+each evaluation, preserving the progress byte and the zero flag. This is a stored-value reload, not a power
+recalculation (`MAGIC-253`).
 
 For child order8, a non-self target must first match the mover's current
 facing. The typed actor predicate then uses Position cell bytes+0/+1,
@@ -296,9 +298,17 @@ from the caster toward the victim; Teleport's search for a free cell around the 
 its result is overwritten (`MAGIC-238`). Fire Sacrifice and Control Spirit write no order. No
 slot-drawn spell is aimed at an ally; none of the 28 arms is.
 
-A cast order that is out of range or not faced is neither dropped nor fired. The order machine
-walks toward the target or cell and tests again; the test is facing plus distance to the order's
-reach byte; the facing test and the kind-9 distance (larger absolute cell difference) are read, the kind-8 distance metric is not (`MAGIC-239`). `ord+0x60` is read by the two cast install arms: a zero value runs the
+A failed kind-8/9 reach or facing test selects approach rather than immediate
+release. Approach whose route search leaves a non-empty path re-evaluates the
+cast. The former unconditional pending-order-retention wording is narrowed by
+two paths. A route search that leaves the path list empty sets mover+0x98
+(`L01720` point, `L00161` actor); for a manual cast's parent state
+0x0d/0x0e the executor epilogue then clears the pending kind and calls
+reacquisition, which writes kind 6, 0x0b or 0.
+The point helper's obstacle branch can write pending kind 10 or 0; that local
+replacement does not itself clear the parent cast command. Whether a later
+parent evaluation reissues the cast after either path, native route
+completion and feedback remain Unknown (`MAGIC-239`, amended). `ord+0x60` is read by the two cast install arms: a zero value runs the
 stop-and-reset at install, a nonzero value keeps the order armed, and every creature cast selector
 found writes 1 (`MAGIC-240`). A selector pass that finds no slot match writes a kind-5 engage order and
 leaves `ord+0x60` alone; the cast already in flight runs from actor fields and is not cancelled by

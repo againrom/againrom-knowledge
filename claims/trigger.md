@@ -543,3 +543,59 @@ Population: `120.alm` triggers and matrix. T05 "1stBridge": distance of the near
 Population: `110.alm`. The Talker is unit 57 (`F_BrigandLeader3`, (69,39), player 5 "Talker", Self relation 0/0). T00 sends the goblin (group 7, unit 25) to (69,38) when Self is within 6 of (19,55). T01: Self within 6 of (69,39) and unit 57 alive, then message 2 (the interrogation naming Fliver) and Mission Complete. Node #29, check 18 on unit 57, is authored and referenced by no trigger. By `MISSION-VIP-004` authorship arms it, and its death is the loss. T00 sends the goblin (unit 25) to (69,38), beside the Talker at (69,39), and event 1 of the mission has the heroes say the goblin ran for help; this is the reason for matching the bridge NPC the owner calls the rat to unit 57. The relation matrix of 110 holds 0 from the Talker toward every player and 0 from every player toward him, so no standing hostility targets him. T01 completes the mission when any Self unit is within 6 of (69,39) while he is alive, so a melee kill cannot precede completion; a loss by his death needs a ranged attacker or a relation flip, and when the loss counter (`+0xb3b4`) and the win counter (`+0xb3ac`) both stand the loss counter is read first (`MISSION-DEFEAT-045`). No trigger reads damage or an attack on unit 57; attacking the goblin or the Talker without killing him changes nothing in the script.
 
 **Confidence.** **High** that no trigger reads an attack. **Medium** that the death loss comes from node #29 (the arming rule is Medium in `MISSION-VIP-004`; the loss was not run). The bridge NPC the owner calls the rat was matched to unit 57 by the lead on Fliver, an inference.
+
+## Mission tips
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-TIPS-087 | A mission tip shows when a dialogue closes on its last page after its shown part set `tips=N`: it posts `0x45b`, and while `TipsMode` is set the campaign arm shows `m<mission>\tips<NN>.txt` in popup `0x10`, replacing an older one. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TRIG-TIPS-088 | The shipped `tips=` tags are 12 blocks per locale, all in m10 and m20 event nodes; fire-once triggers post them, so each tip shows at most once per mission run, and LOAD restores the latch. | High / Medium | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/), [EXP-0096](../experiments/EXP-0096-campaign-mission/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
+
+### TRIG-TIPS-087
+
+The dialogue part parser stores the `%d` value after `tips=` (`L13561`, pushed at `L03628`) in panel `+0x80`. Tags are lowercased first (`DLG-MARKUP-007`), so `Tips=3` counts. When the pager reports no further page, the handler `R0715` posts `0x45b` with wParam `+0x80` and lParam 0 at `L13562`, and then sends `0x445` (`DIALOGUE-050`). The raw byte scan finds `68 5b040000` only at `L13562`. The only other `5b040000` sequence, at `L13563`, is inside a `jmp` displacement.
+
+The campaign window procedure `R0701` handles `0x45b` at `L03630`:
+
+1. With `[L03631]` = 0 it does nothing.
+2. Otherwise it formats `main\text\battle\m%d\tips%02d.txt` (`L13519`, its only reference) from `[campaign+0x660]` and wParam, and reads it (`L13525`).
+3. It finds child `0x10` of `[campaign+0xd0]`. When one is present it removes and deletes it.
+4. It constructs the popup with id `0x10` at (10,20)-(370,188), 360x168, and attaches it to `[campaign+0xd0]` (`MENU-137`).
+
+The arm keeps no latch. Close deletes the popup through the `0x45a` arm `L12180` (`MENU-137`). This identifies the child `0x10` that TOWN-480 left open.
+
+**Confidence.** High: the post site, the arm and the format string are read at instruction level and the raw scans bound the alternatives. A `0x45b` built by arithmetic or posted by another process is outside the scan.
+
+### TRIG-TIPS-088
+
+The tag census over every `text/` node of both roots:
+
+| mission | node | block | NPC / Part | tip |
+|---|---|---|---|---|
+| m10 | `event01` | 3 | 51 / 3 | 5 |
+| m10 | `event02` | 2 EN, 3 RU | 51 / 2 | 7 |
+| m10 | `event04` | 1 | 21 / 1 | 1 |
+| m10 | `event14` | 1 | 21 / 1 | 4 |
+| m10 | `event15` | male and female | 21 / 1 | 2 |
+| m10 | `event16` | 1 (`Tips=3`) | 21 / 1 | 3 |
+| m10 | `event18` | male and female | 21 / 1 | 6 |
+| m20 | `event01` | 2 | 52 / 2 | 1 |
+| m20 | `event07` | male and female | 21 / 1 | 2 |
+
+`instant 2` opens `event<NN>.txt` for message N (`MISSION-TEXT-005`). The m10 script posts these messages from fire-once triggers:
+
+| trigger | condition | message | tip |
+|---|---|---|---|
+| T00 "Just Start" | mission start | 15 | 2 |
+| T12 "Sack found" | hero at distance 0 from (20,65) | 16 | 3 |
+| T06 "Kill: rogues" | group 1 count 0 | 4 | 1 |
+| T02 "Woman found" | hero within 3 of (36,51) and group 1 count 0 | 1 | 5 |
+| T03 "Thanx, woman" | npc51 within 3 of (56,21) | 2 | 7 |
+| T08 "Kill: bees" | group 7 count 0 | 14 | 4 |
+| T09 "Kill: ghosts" | group 3 count 0 | 18 | 6 |
+
+In m20, T08 "Start" posts message 1 (tip 1) and T01 "Squiells", group 1 count 0, posts message 7 (tip 2).
+
+The fire-once latch is `session+0xbec4+index` (`TRIG-FIRE-007`). It is saved in SAV and restored before the triggers are rebuilt (`TRIG-SAVE-008`). A tip whose trigger fired before SAVE therefore does not fire again after LOAD. Each tip is raised only when its block is the part the dialogue shows.
+
+**Confidence.** High for the census, the trigger table and the latch. Medium for "once per mission run": a dialogue could also reach the panel by another route than `instant 2`, and no such route for these event nodes was searched.

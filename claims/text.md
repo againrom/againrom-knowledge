@@ -2311,3 +2311,56 @@ data stands as corroboration: the string tables are separate files in each root.
 **Confidence.** **High** for the records and the blank states, which are measured. **Medium** for the letter named at each record in font4 and font5 (`TEXT-109`).
 
 **Unknown.** Whether any shipped EN text holds a byte `0xC0..0xFF`: the census of `TEXT-ALIAS-011`'s evidence found 58 high bytes in two EN text nodes, which this experiment did not re-run.
+
+## Tip text nodes and the text-node reader
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TEXT-111 | Each installed locale ships 20 tip nodes in `main.res`: 11 under `text/tips/` and `text/battle/m10/tips01..07` and `m20/tips01..02`; every tip popup text is one of them, and `patch.res` holds no tip node. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TEXT-112 | The text-node reader `R1293` has 16 rel32 call sites in 14 functions: 11 read a tip node and 5 read the title, briefing map, help, objectives and document nodes. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+
+### TEXT-111
+
+The nodes, per locale, with size in bytes (EN/RU):
+
+- `text/tips/`:
+  - `chrgen1f` 416/323, `chrgen1m` 415/376, `chrgen2` 258/321;
+  - `chrsel1` 168/149, `chrsel2` 199/165, `chrsel3` 160/147;
+  - `inn` 443/421, `shop1` 208/150, `shop2` 222/183;
+  - `town` 444/493, `training` 505/368.
+- `text/battle/m10/tips01..07`: 161/150, 119/94, 111/96, 220/223, 101/111, 161/155, 125/146.
+- `text/battle/m20/tips01..02`: 77/82, 61/81.
+
+Hashes and line counts are in the evidence. Each of the 11 room and generator paths is one image string with exactly one reference, a push before the reader. The battle nodes are reached only through the format `main\text\battle\m%d\tips%02d.txt` at `L13519`, which also has one reference (`TRIG-TIPS-087`). `patch.res` holds only `patch.txt` on both roots. The popup's own captions are `main.txt` lines 127 "Close" and 128 "Show tips next time" (`MENU-137`). No installed `tips` node exists for another mission. A `tips=N` value for which no node ships reads nothing.
+
+**Confidence.** High: complete container walk on both roots and complete raw dword scans of the 13 tip string addresses.
+
+### TEXT-112
+
+The tip sites are:
+
+| site | node |
+|---|---|
+| `L13520` | `chrgen1m` or `chrgen1f` |
+| `L13521` | `chrgen2` |
+| `L13522` | `chrsel1` |
+| `L13523` | `chrsel2` |
+| `L13524` | `chrsel3` |
+| `L13525` | battle tips |
+| `L13526` | `inn` |
+| `L13527` | `shop1` |
+| `L09824` | `shop2` |
+| `L13528` | `town` |
+| `L13529` | `training` |
+
+The other five sites:
+
+- `L13530`: title;
+- `L13531`: briefing map;
+- `L11418`: `help.txt`;
+- `L13532`: objectives, into `L13533`;
+- `L13534`: documents.
+
+The image holds no raw pointer to `R1293`. This count corrects TOWN-188's "remaining callers" clause ([`retracted.md`](retracted.md)).
+
+**Confidence.** High: a byte-level rel32 scan of `.text` with every hit inside the recursive map.

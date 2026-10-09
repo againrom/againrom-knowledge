@@ -536,3 +536,48 @@ of every drawable family remain Unknown. The painter pairs the overlay draw
 `vt+0x34` with the five-argument base draw `vt+0x18` (`SPR256-077`), so
 `SPR256-OVL-014`'s `vt+0x14` pairing is narrowed; that claim's no-path-read
 clause is superseded. — TOWN-SMOOTH-460, SPR256-OVL-014
+
+## Tip popups
+
+Each locale ships 20 tip nodes in `main.res`:
+
+- 11 under `text/tips/`;
+- `text/battle/m10/tips01..07`;
+- `text/battle/m20/tips01..02`.
+
+`patch.res` holds none. Every popup text is one of these nodes. The text-node
+reader has 16 call sites: 11 read tips and 5 read the title, briefing map,
+help, objectives and documents. — TEXT-111, TEXT-112
+
+`TipsMode` is one process-wide word. Its default is 1. It is loaded at
+startup from `HKLM\SOFTWARE\1C\Allods` value `TipsMode` and saved there. After
+the startup load, only the popup checkbox and Game Options OK write it, and no
+SAV holds it.
+It gates every tip construction and every tip step. It does not gate the
+`shop2` retext or the detailed-page skill cycle. Clearing it deletes no open
+popup. — MENU-135, MENU-136
+
+Seven sites construct the one popup class, each with a literal rectangle.
+The panel keeps that size. Its list, Close and checkbox are laid out from the
+panel size, and its text is `font2` wrapped at the list width. Close posts
+`45ah`. The campaign arm deletes the mission popup (child `10h`) when one
+exists; otherwise the owner deletes its own popup. Whether an open popup
+survives SAVE and LOAD, and placement at other resolutions, are Unknown.
+— MENU-137
+
+The town, tavern, school and shop build their popup at every room enter while
+the flag is set. No latch exists, so a closed tip returns at the next enter.
+An enter with the flag clear deletes a leftover popup. The shop replaces
+`shop1` with `shop2` at most once per activation. It does so on its idle
+message, when the tray getter returns nonzero, without reading the flag.
+— TOWN-516, TOWN-517
+
+A mission tip shows when a dialogue closes on its last page and its shown part
+carried `tips=N`. The dialogue posts `45bh`. While the flag is set, the
+campaign arm reads `m<mission>\tips<NN>.txt` into popup `10h` at
+(10,20)-(370,188), replacing an older one. The shipped tags are 12 blocks per
+locale, in m10 and m20 event nodes. Fire-once triggers post them: m10 at
+mission start, at the sack cell, at the rogue, bee and ghost kills, and near
+the woman and her destination; m20 at start and at the squirrel kill. The
+trigger latch is in SAV, so a tip shown before SAVE does not return after
+LOAD. — TRIG-TIPS-087, TRIG-TIPS-088

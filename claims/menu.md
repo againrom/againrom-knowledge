@@ -1773,3 +1773,121 @@ banks, not in every interface resource.
 
 **Unknown.** Native composition, draw-state selectors outside the separate
 instruction probes and malformed-stream native thresholds.
+
+## Tips option, tip popup class and detailed-page buttons
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-135 | `TipsMode` is one process-wide word `[L03631]`, default 1, loaded from registry `HKLM\SOFTWARE\1C\Allods` value `TipsMode` at startup and saved there; after that load only the popup checkbox and Game Options OK write it; SAV lacks it. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| MENU-136 | `TipsMode` gates every tip construction, every tip step and the pre-create cycle; it does not gate the `shop2` retext or the detailed-page skill cycle, and clearing it deletes no open popup. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| MENU-137 | Seven call sites construct the tip popup class `L06362` through `R1261`, each with a literal rectangle; its two other constructors have no caller; Close posts `0x45a`, which the mission arm or the owner turns into deletion. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| MENU-138 | The detailed-page stat `+` and `-` buttons draw rest, hover, pressed or disabled art; `+` is disabled when the pool is below the cost or the stat is 45 or more, `-` when the stat is 15 or less; `pnlon` and `mnlon` are never drawn. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| MENU-139 | Detailed-page Accept, Reset and Back are three art buttons `Inn\button{1,2,3}{on,off}.bmp` at x 484..624 with `main.txt` labels; `on` shows only while pressed and hovered; they have no disabled state. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+
+### MENU-135
+
+The word is options object `L06413` field `+0x1c`. Four sites store it: the default `L09828`, the registry load whose data pointer is pushed at `L11766`, the popup checkbox `L07706` and the Game Options OK export; after the startup load only the last two write it.
+
+| role | site |
+|---|---|
+| static initializer | `R1846` sets the object's defaults through `R1269`; `L09828` stores 1 |
+| startup load | `R1469` calls `R1985`, which calls `R1983`; `RegQueryValueExA` leaves the default 1 when the value is absent |
+| save | `R1984` calls `R1982` (`RegSetValueExA`); callers are `L12953`, in a shutdown path next to the `famehall.dat` save, and `L12943` |
+| writer: popup checkbox | `L07706`, on message `0x46d` with wParam `0xf` (`TOWN-480`) |
+| writer: Game Options OK | export of checkbox `0xd` at `L13506`; import at `L13507` (`MENU-073`, `MENU-074`) |
+
+The raw scan finds 16 occurrences of `L03631` in the image. All 16 are classified:
+
+- 3 registry and default sites;
+- 2 Game Options sites;
+- 1 popup writer;
+- 10 gates (`MENU-136`).
+
+The 6 occurrences of `L06413` are the initializer, load, save and the Game Options builder. No SAV writer or reader cites either address. The value is per machine, not per profile or campaign.
+
+**Confidence.** High: complete raw dword census with every hit read in its instruction.
+
+### MENU-136
+
+Gates on `[L03631]`:
+
+- the four room enters (`TOWN-516`);
+- the pre-create enter, step and paint call of the cycle (`TOWN-518`, `TOWN-519`);
+- the detailed enter and step (`TOWN-522`);
+- the mission arm `L03630` (`TRIG-TIPS-087`).
+
+Two tip routines read no flag:
+
+- `R1760` retexts `shop2` into an existing popup (`TOWN-517`);
+- the skill cycle `R2004` runs while popup `+0x80` exists and step `+0x100` is 0.
+
+Neither writer deletes a popup, and no routine read deletes a popup when the word becomes 0. An open popup therefore stays until Close, leave or the next enter with the flag clear. The pre-create cycle stops at the next paint. The detailed skill cycle continues, and a skill click no longer advances its step.
+
+**Confidence.** High: every gate is one of the 16 classified references, and the two ungated routines are read whole.
+
+### MENU-137
+
+The 7 rel32 calls to `R1261(id,left,top,right,bottom,text)`:
+
+| owner | site | rectangle | id | parent |
+|---|---|---|---|---|
+| detailed page | `L11836` | (0,280)-(312,480) | `0x467` | skill panel `+0x7c` |
+| pre-create | `L11820` | (232,0)-(640,136) | `0x467` | the page |
+| mission | `L11819` | (10,20)-(370,188) | `0x10` | `[campaign+0xd0]` |
+| tavern | `L10197` | (0,0)-(312,200) | `0x467` | roster |
+| shop | `L12174` | (0,162)-(312,298) | `0x3f3` | merchant panel |
+| town | `L12114` | (328,0)-(640,200) | `0x467` | town view |
+| school | `L12169` | (0,0)-(456,200) | `0x467` | school view |
+
+The literal coordinates are parent-relative. The absolute rectangles are in TOWN-480 and TOWN-516, and (160,280)-(472,480) for the detailed page. The pre-create popup is at (232,0)-(640,136) when the page origin is (0,0). The default 640x480 resolution gives that origin.
+
+The image holds the vtable `L06362` at three stores: `L11755` in `R1261`, and `L13508` and `L13509` in the default constructor `L13510` and the rectangle-object constructor `L13511`. Neither of the last two has a rel32 call or a raw pointer, and the recursive map does not reach them.
+
+Retext `R1987(text)` sets list child `0xd`'s text. It has 4 callers: `L11839`, `L13512`, `L13513`, and `L13514` inside `R1770`.
+
+The controls are built by `R1974` from the panel size W x H:
+
+- list `0xd` at (`0x14`,`0x18`)-(W−`0x1c`,H−`0x24`), font2 `[L02677]`, ramp `[L03616]`;
+- Close `0xe` at (W−`0x78`,H−`0x28`)-(W−`0x28`,H−`0x16`);
+- checkbox `0xf` at (`0x28`,H−`0x28`)-(W−`0x7c`,H−`0x18`).
+
+Captions are `main.txt` 127 and 128, and the checkbox art is MENU-125. The frame is lm frames 9..17 without the dialog snap (`MENU-127`). The panel does not resize to its text. The list wraps at its own width (`TOWN-314`).
+
+Close release posts `0x45a` to the campaign window (`TOWN-480`). Its arm `L12180` deletes child `0x10` of `[campaign+0xd0]` when present, which is the mission tip popup (`TRIG-TIPS-087`). Otherwise it forwards to the root view `[campaign+0xcc]`. Each owner's message slot then deletes its own popup: the rooms per TOWN-480, pre-create `R2162` and the detailed page `R1960`.
+
+**Confidence.** High for the census, layout and Close routing. Medium for the pre-create absolute origin and for the font and ramp roles.
+
+**Unknown.** Placement at 800x600 and 1024x768. Whether an open popup survives SAVE and LOAD: no serializer read cites the class. Settled by native observation.
+
+### MENU-138
+
+Stat panel `+0x70` (vtable `L06316`). The hit-test `L13515` returns `(row<<8)|kind`, where kind 1 is `+` (x 107..127) and kind 2 is `-` (x 132..152). The state setter `R0835(flags,x,y)` runs from move `R2163`, down `R2164` and up `R2165`. For each of the four stats `+0x1d0[k]`, with the pool at `+0x1f0`:
+
+| button | field | rest | hovered | hovered with button held | disabled |
+|---|---|---|---|---|---|
+| `+` | `+0x174+8k` | `+0x1a0` `pnloff` | `+0x198` `ploff` | `+0x194` `plon` | `+0x1a4` `pdisable`: pool < cost, or stat ≥ 45 |
+| `-` | `+0x178+8k` | `+0x1b4` `mnloff` | `+0x1ac` `mloff` | `+0x1a8` `mlon` | `+0x1b8` `mdisable`: stat ≤ 15 |
+
+The cost `R0828` is C(v+1)−C(v) and the refund `R0829` is C(v)−C(v−1), with C = `R0824`. The clicks `R0830` and `R0831` change the stat under the same bounds, play a sound and update campaign `+0x420`. The loader also fills `+0x19c` `pnlon` and `+0x1b0` `mnlon`. Over the class's methods in `L13516..L13517`, those fields are read only by the loader and release. The tooltip is MENU-066 and TEXT-098.
+
+**Confidence.** High: the setter is read whole and the field-to-file binding comes from the loader.
+
+### MENU-139
+
+Command panel `+0x78` (vtable `L11782`). The background is `Inn\ButtonsArea.bmp` at (480,0). The buttons are:
+
+| button | rectangle | label |
+|---|---|---|
+| Accept | (484,44)-(624,90) | `main.txt` 238 |
+| Reset | (484,91)-(624,137) | `main.txt` 239 |
+| Back | (484,138)-(624,184) | `main.txt` 260 |
+
+Labels use font4 `[L06186]`, with ramp `[L09922]` when hovered and `[L09928]` otherwise. Button i draws `Inn\button{i}on.bmp`, with the label 1 px lower, when pressed `+0xc0` and hovered `+0xc4` both equal i. Otherwise it draws `button{i}off.bmp`.
+
+Input:
+
+- Down `R2113` stores the press and plays a sound.
+- Up `R2166` acts only when released on the pressed button: Accept sends `0x445`, Reset runs `R0834` (pool 100, every stat 25; `HERO-CHARGEN-082`), and Back sends `0x446`.
+- Move `L13518` stores the hover.
+
+**Confidence.** High: draw and input slots read at instruction level.

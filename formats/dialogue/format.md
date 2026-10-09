@@ -151,8 +151,9 @@ A rejected candidate resumes the same-part scan, rather than advancing the
 part. Its `npc=` test can already have changed portrait flag `+7c`. After the
 conditions, `tips=` can store `+80` before a missing header LF forces return 0.
 Those stores have no rollback in the parser body. A later failed `0x46f`
-lookup sends `0x45b` when tips is nonzero, then `0x445`; receiver presentation
-is Unknown. — DIALOGUE-050
+lookup sends `0x45b` when tips is nonzero, then `0x445`. The campaign arm
+shows tip N of the current mission in popup `0x10` while `TipsMode` is set.
+— DIALOGUE-050, TRIG-TIPS-087
 
 Each preserved EN/RU MAIN.RES tree contains four shop offer nodes and three
 training offer nodes. All 14 contain one unconditional part-1 candidate.
@@ -315,8 +316,8 @@ leaves), not when it closes. A `tips=` tag stores the number after it in `panel+
 12 RU mission event blocks carry one and no inn, mercenary, shop or training block does.
 That the button's key handler rather than the panel's key slot answers Enter is Medium: it rests
 on the dispatcher's child order, and both send the same command. Whether siblings of the panel
-under the root answer Space, the key-release and system-key routes and what the `0x45b` arm
-shows are Unknown.
+under the root answer Space and the key-release and system-key routes are Unknown. The `0x45b`
+arm shows `m<mission>\tips<NN>.txt` in a tip popup (`TRIG-TIPS-087`).
 — `DLG-KEYS-040`, `DLG-LIFE-005` (amended for the routing of Enter; its clear enumeration partially
 retracted)
 

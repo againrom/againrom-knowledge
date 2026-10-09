@@ -1,5 +1,12 @@
 # Overturn history
 
+## Tip reader callers and the pre-create cycle
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TOWN-188` (remaining reader callers clause only; the flag-address conclusion stands) | Verbatim: "the remaining callers not read in this experiment are two character-select screens and a per-mission battle-tip call" | High / Medium | [EXP-0506](../experiments/EXP-0506-tips-state-machine/EXP-0506.md), TEXT-112 | The 16 call sites are 11 tip reads and 5 non-tip reads: title, briefing map, help, objectives and documents. The character-select and battle-tip sites are among the 11 and are now read (TOWN-518, TRIG-TIPS-087). | **REFUTED** — partially retracted |
+| `TOWN-223` (role of `R1999` and blit item (7) only; routine identity, other blits and gates stand) | Verbatim: "a `timeGetTime()`-gated hover-highlight blink state machine, one `vt+0x38` call on a sub-rectangle of `+0x15c`/`+0x160`" and "(7) A tip-popup call gated on `[L03631]!=0 && +0x1c0!=0`, delegating into the blink routine" | High | [EXP-0506](../experiments/EXP-0506-tips-state-machine/EXP-0506.md), TOWN-519 | `R1999` is the guided-step cycle. It draws portrait art at step 0, level art at step 1 and the Amulet or ButtonOk sub-rectangle at step 2. It waits 500 ms after hover and steps after more than 300 ms. Item (7) is the paint's call of that cycle, not a popup call. | **REFUTED** — partially retracted |
+
 ## ROM2 first-town departure and gate label
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
@@ -1221,3 +1228,10 @@ on evidence already committed.
 |---|---|---|---|---|---|
 | `MAGIC-UNITLIGHT-057` (the square footprint and stamp-gate clauses only) | Verbatim: "which splats a level over a radius-1 square" and "The splat is gated on `[L05659] == 0`" | High | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md), MAGIC-271, MAGIC-273 | The helper uses the clipped i*i+j*j < radius*(radius+1) reflected-vertex footprint. Lighting L06417 gates stamp stores; Animation L05659 gates rectangle invalidation. The cell-mask and literal-level clauses stand. | **REFUTED** |
 | `TERR-LIGHT-061` (the sole +0xa8 writer and lit-object-only population clauses; the same-grid consequence is narrowed to the named reads) | Verbatim: "written only by `R1095(col,row,radius,value)`" and "uniform over the map except at lit-object cells" and "no shipped frame can light one differently from the other" | High / Medium | [EXP-0503](../experiments/EXP-0503-spell-light/EXP-0503.md), MAGIC-269, MAGIC-270, MAGIC-273 | R2160 directly stamps the Lightning/Prismatic path vertices. Those stamps also feed the unit-grid merge away from standing cell-effect entries. Named ordinary consumers share the grid; existing unit-pass exceptions still prevent an all-frame equality claim. Allocation, initialization and merge arithmetic stand. | **REFUTED** |
+
+## Cast approach target and obstacle boundary
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-239` (the mover+0x7c operand and non-centred actor only) | Verbatim: "`+0x7c = reach`" and "when the target is between cells" | High / Medium | [EXP-0497](../experiments/EXP-0497-out-of-range-cast/), `evidence/instructions.tsv`; AI-373 | `L13495` loads the target pointer argument and `L01899` stores it at mover+0x7c. Reach is the separate byte argument compared at `L00580`. The non-centred branch reads caster position, not target position. The approach selection stands. | **CORRECTED** |
+| `MAGIC-239` (unconditional pending-kind retention only) | Verbatim: "the caster approaches and turns, and the same order is evaluated again on each executor pass" | High / Medium | [EXP-0497](../experiments/EXP-0497-out-of-range-cast/), `evidence/instructions.tsv` | Two paths replace the pending kind. Route-search failure: the point helper stores mover+0x98 = 1 at `L01720` (`actor+0x168` zero after the full search) and the actor helper at `L00161` (empty path list, AI-373); for parent state 0xd/0xe the executor epilogue stores ord+0x08 = 0 at `L00114` and calls `R0004`, which writes kind 6, 0xb or 0 (AI-ROUTE-045, AI-350). Obstacle: complete point helper `R0178` has a branch after a blocked candidate footprint and a nonzero `R0402` result that writes pending kind 10 or 0 at `L13340/L13496`; these local stores do not clear the parent cast command. Ordinary failed reach still selects approach. The parent outcome after either path and the native obstruction outcome remain Unknown. | **NARROWED** |

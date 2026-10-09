@@ -1311,7 +1311,7 @@ Town's own tip-popup call is read directly, not by structural analogy: filename 
 | TOWN-185 | `R1974` (called from `R1261` immediately after the rect is set) constructs three child controls on the popup, ids `0xd`/`0xe`/`0xf`, each through a different constructor function; control `0xf` is the "show tips" checkbox… | High | ● active (amended) | [EXP-0197](../experiments/EXP-0197-room-buttons-and-tips/), **[EXP-0198](../experiments/EXP-0198-tip-popup-presentation/)** |
 | TOWN-186 | the global at `L03631` has two direct writers, both read in full, and it persists across process runs in the Windows Registry under the value name "TipsMode"… | High | ● active (amended) | [EXP-0197](../experiments/EXP-0197-room-buttons-and-tips/), [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md); TOWN-480 |
 | TOWN-187 | The character generator's two own tip-popup call sites are read directly: a class-conditional (not gender-conditional) first popup at the lower-left of the screen… | High | ● active | [EXP-0197](../experiments/EXP-0197-room-buttons-and-tips/) |
-| TOWN-188 | the global at `L03631` is referenced by one fixed absolute address from every tip call site read across this repository, in at least six structurally unrelated screens… | High / Medium | ● active | [EXP-0197](../experiments/EXP-0197-room-buttons-and-tips/) |
+| TOWN-188 | the global at `L03631` is referenced by one fixed absolute address from every tip call site read across this repository, in at least six structurally unrelated screens… | High / Medium | ● active (partially retracted) | [EXP-0197](../experiments/EXP-0197-room-buttons-and-tips/) |
 | TOWN-206 | Both caption ids `TOWN-185` left unread name plain lines of `text/main.txt`, and both are now read on both preserved roots: id `0x7f` is "Close"/"Закрыть", id `0x80` is "Show tips next time"/"Показывать далее". | High / Medium | ● active | [EXP-0198](../experiments/EXP-0198-tip-popup-presentation/) |
 | TOWN-207 | Control `0xe`, captioned "Close" (`TOWN-206`), is the popup's own close control, established by an executable binding and not by caption text alone… | High / Medium | ● active | [EXP-0198](../experiments/EXP-0198-tip-popup-presentation/) |
 | TOWN-208 | The popup's own `vt+0x2c` (`TOWN-062`'s address for the tavern's shared "no own content" epilogue) is a generic three-step composite — compute a rect, dispatch through the instance's own `vt+0x30`, then walk children — and for the popup… | High | ● active | [EXP-0198](../experiments/EXP-0198-tip-popup-presentation/) |
@@ -1403,6 +1403,8 @@ An image-wide scan of `R1293` (the tip-text reader every one of these calls into
 
 **Confidence.** High for "one fixed address, referenced by every read call site" (read directly, no ambiguity in what a literal operand cites); Medium for the broader claim that the two remaining unread call sites (character select, battle tip) carry the identical semantics, since their own gating code was not read in this experiment
 
+**Amended.** The clause naming the remaining reader callers is partially retracted: of the 16 call sites, 5 read non-tip nodes (`TEXT-112`). The flag-address conclusion stands, and the character-select and battle-tip gates are now read (`TOWN-518`, `TRIG-TIPS-087`). [`retracted.md`](retracted.md) holds the entry.
+
 ### TOWN-206
 
 `TEXT-STRTAB-030` reads `R1773` to its own leaf: it is a four-byte array index, not a Win32 `STRINGTABLE` call, and its table `L09841` is `TEXT-STRTAB-023`'s own shared global line-pointer array; `main.txt` is that array's base-0 file. `tools/strtabprobe` reads `text/main.txt` directly out of each preserved root's `MAIN.RES`, splits it on `CR` matching `R0661`'s own scan (confirmed at instruction level by `TEXT-STRTAB-030`'s evidence), and prints the line at each requested index. Both roots hold 274 lines for this file, matching `TEXT-STRTAB-023`'s own count exactly. EN: id `0x7f` (line 127) = "Close", id `0x80` (line 128) = "Show tips next time".
@@ -1466,7 +1468,7 @@ The base Control class's generic message handler (`TOWN-139`'s already-named `vt
 | TOWN-216 | The character generator's precreate stage loads 26 archive nodes through one routine, `R1672`, which is a loader and not the stage's paint routine. | High | ● active (amended) | [EXP-0199](../experiments/EXP-0199-room-composition/) |
 | TOWN-217 | The character generator's final/detailed stage loads 48 archive nodes across two loaders; one of the four routines prior prose named for this stage, `R0833`, is confirmed a real paint routine… | High / Unknown | ● active (amended) | EXP-0199, [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 | TOWN-222 | `TOWN-214`'s paint-time origin addend for the tavern button panel is the panel's parent pointer's own stored LEFT/TOP (`this+8`/`+0xc`)… | High / Medium | ● active | [EXP-0200](../experiments/EXP-0200-paint-destinations/) |
-| TOWN-223 | The character generator's precreate stage is painted by `R1474` (vtable `L07691` slot `+0x2c`); the hit-test/click handler `R1472` first read as that slot belongs to the name field class… | High / Medium / Unknown | ● active (amended) | [EXP-0200](../experiments/EXP-0200-paint-destinations/) |
+| TOWN-223 | The character generator's precreate stage is painted by `R1474` (vtable `L07691` slot `+0x2c`); the hit-test/click handler `R1472` first read as that slot belongs to the name field class… | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0200](../experiments/EXP-0200-paint-destinations/) |
 | TOWN-224 | `TOWN-217`'s unresolved background coordinate call, `R1224`, is a general ancestor-chain rectangle accumulator, not the plain rectangle-copy this row originally read — corrected by `TOWN-232`. | High / Unknown | ● active (amended, partially retracted) | EXP-0200, [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 | TOWN-232 | `R1224`/`R1212` is a general ancestor-chain rectangle accumulator, not a plain copy as `TOWN-224` read it, and for all four of the final/detailed stage's own top-level children the chain is empty at construction… | High / Medium | ● active (amended, partially retracted) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/) |
 | TOWN-233 | The final stage's `+0x74` and `+0x78` children (`TOWN-232`) paint through `R1992` and `R1993`, confirmed at vtable slots `L11774` and `L11775` (each child's own vtable `+0x2c`)… | High / Medium / Unknown | ● active (amended) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/) |
@@ -1542,7 +1544,7 @@ The character generator's precreate stage is painted by `R1474` (vtable `L07691`
 
 **Confidence.** High for the routine identity, the +0x2c correction, and the ordered blit list, primitives and gating conditions (every blit call site in `R1474` read directly, the vtable slots read from one direct scan); Medium for the archive-node-to-file mapping's internal consistency (the `on`/`l`/`lon` suffix pattern repeats identically across the Heroes and Levels groups — an internal cross-check, not an external confirmation); explicitly Unknown for every rectangle's literal numeric value, for whether `vt+0x30`/a child paints anything further, and for why the two hover highlights are drawn twice
 
-**Amended.** The vtable base, slot index and enter-slot clauses. The scan read a 59-slot window from `L07693`, which starts inside the name field class's table (`L07729`, 30 slots, ending before `L07691`) and runs 5 slots into the table at `L11778`. The stage's own table starts at `L07691` and has 34 slots; `R1473` stores it at `L07692` (`TEXT-073`). Paint is `+0x2c` and enter is `+0x80`. The routine identity, blit list, gates, confidence grades and Unknowns stand. [`retracted.md`](retracted.md) holds the entry.
+**Amended.** The vtable base, slot index and enter-slot clauses. The scan read a 59-slot window from `L07693`, which starts inside the name field class's table (`L07729`, 30 slots, ending before `L07691`) and runs 5 slots into the table at `L11778`. The stage's own table starts at `L07691` and has 34 slots; `R1473` stores it at `L07692` (`TEXT-073`). Paint is `+0x2c` and enter is `+0x80`. The routine identity, blit list, gates, confidence grades and Unknowns stand. [`retracted.md`](retracted.md) holds the entry. The role given to `R1999` and item (7) of the blit list are partially retracted: the routine is the guided-step cycle of `TOWN-519`, and item (7) is its call, not a popup call. `TOWN-520` answers the Mask.bmp and rectangle Unknowns. [`retracted.md`](retracted.md) holds the entry.
 
 ### TOWN-224
 
@@ -2326,7 +2328,7 @@ LoaderR1057 assigns graphics/backpack/sprites.256 and spritesb.256 to its respec
 | TOWN-477 | A room click leaves the town view through message `0x445`, which frees the guard sheet and sounds but writes no frame, step or latch; the return runs enter `R1383`, which sets frame 7, step 0, latch 0 and reloads the sheet. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/d-town-guards.txt`, `evidence/d-campaign.txt`, `evidence/model-vectors.tsv`, `evidence/refs-cluster-hits.tsv`; extends TOWN-164, TOWN-403, TOWN-412 |
 | TOWN-478 | In the shop and school panels read, the painted merchant, trainers, diamond and column frame have no click test; the shop panel tests four shelf and two prompt rectangles, the school two class masks in two states. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/d-shop.txt`, `evidence/d-school.txt`, `evidence/d-capstone.txt`, `evidence/rooms.tsv`, `evidence/school-masks.tsv`, `evidence/refs.txt`; extends SHOP-SHELF-047, TOWN-154, TOWN-428 |
 | TOWN-479 | Without the tip popup, merchant down is inert only with prompts disabled or missed, and up acts with a held item; school figure down acts only in class panels, and 608 fighter pixels consume up without a button action. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/figure-presses.tsv`, `evidence/windows.tsv`, `evidence/d-shop.txt`, `evidence/d-school.txt`, `evidence/d-dispatch.txt`, `evidence/slot-table.tsv`, `evidence/exe-anchors.tsv`; extends TOWN-478, TOWN-473, TOWN-348 |
-| TOWN-480 | The four room tip popups pass list/body presses below, consume check box and Close presses, write the tips flag on check box down, and route Close release through `0x45a`; delivery to a room is conditional. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/popup-controls.tsv`, `evidence/popup-presses.tsv`, `evidence/windows.tsv`, `evidence/d-popup.txt`, `evidence/d-dispatch.txt`, `evidence/d-town.txt`, `evidence/d-tavern.txt`, `evidence/d-shop.txt`, `evidence/d-school.txt`, `evidence/exe-anchors.tsv`; extends TOWN-185, TOWN-186, TOWN-207, SHOP-TIP-045 |
+| TOWN-480 | The four room tip popups pass list/body presses below, consume check box and Close presses, write the tips flag on check box down, and route Close release through `0x45a`; delivery to a room is conditional. | High / Medium | ● active (amended) | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/popup-controls.tsv`, `evidence/popup-presses.tsv`, `evidence/windows.tsv`, `evidence/d-popup.txt`, `evidence/d-dispatch.txt`, `evidence/d-town.txt`, `evidence/d-tavern.txt`, `evidence/d-shop.txt`, `evidence/d-school.txt`, `evidence/exe-anchors.tsv`; extends TOWN-185, TOWN-186, TOWN-207, SHOP-TIP-045 |
 | TOWN-481 | Town enter calls a synchronous paint before queued pointer dispatch; an unblocked paint can run the hub when its timer is due. Static room-close routes do not establish which pointer messages the OS generates next. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/d-town.txt`, `evidence/d-campaign.txt`, `evidence/r-campaign.txt`, `evidence/guard-steps.tsv`, `evidence/api-summary.tsv`, `evidence/refs-api.txt`, `evidence/code-anchors.tsv`; extends TOWN-476, TOWN-477 |
 | TOWN-482 | The 96 residual stores have 33 owners and no direct-call reach from the measured town closure; indirect attribution remains open. Guard frames 0 and 1 are crossed, and sound overlap with the closing endpoint is timing-dependent. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/guard-stores.tsv`, `evidence/guard-store-owners.tsv`, `evidence/guard-store-summary.tsv`, `evidence/guard-cones.tsv`, `evidence/guard-frames.tsv`, `evidence/guard-steps.tsv`, `evidence/guard-timing.tsv`, `evidence/wave-headers.tsv`; extends TOWN-476, TOWN-477 |
 | TOWN-483 | Gate helper R1416 returns -1 when neither the main record nor a child is latched. Hearing alone does not latch; accepted children can survive a main win, and the last-mission arm posts 0x428 before town entry. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/r-record.txt`, `evidence/r-campaign.txt`, `evidence/d-campaign.txt`, `evidence/code-anchors.tsv`; extends REG-SCN-062, REG-SCN-063, REG-SCN-064, REG-SCN-065, SAV-CAMPAIGN-076, SAV-CAMPAIGN-080, SAV-CAMPAIGN-081, SAV-CAMPAIGN-082 |
@@ -2447,6 +2449,8 @@ Closing. The campaign window procedure runs the arm `L12180` for `0x45a`. It loo
 **Confidence.** High for the control slots, the pixel table and the closing arms in the four room slots: read at instruction level or computed over the popup rectangles on both roots, which run one program. Alternative (a), a named window acting on the press, holds for the check box and Close button; alternative (b), a handler that does nothing, is the result on the list and body of the tavern; alternative (c), another route, is the shop button panel. Medium for the delivery of `0x45a` to the room: the campaign arm's child `0x10` of `[campaign+0xd0]` was not identified, so a popup closed while it exists is not shown to reach the room arm. Medium for a press after the pointer has moved over a control: the routing above assumes no capture child, and the check box's move slot `L12186` was read only in outline.
 
 **Unknown.** What child `0x10` of `[campaign+0xd0]` is and whether it exists while a popup is shown, the consumers of `0x472`, and whether a game with tips off shows the popup after a later toggle without a re-enter.
+
+**Amended.** Child `0x10` of `[campaign+0xd0]` is the mission tip popup (`TRIG-TIPS-087`). A later toggle of the flag without a re-enter shows no popup, because only the enter constructs one (`TOWN-516`).
 
 ### TOWN-481
 
@@ -2879,3 +2883,140 @@ The marker array's size routine `R2051` has five call sites in four owners (`cal
 **Confidence.** **High** for the builder, the dedup by mission number, the `Picture` gate, the data and the five callers with their arguments as read. **Medium** for when a mission first gets its marker (three callers pass array contents not traced to their source) and for "no routine removes a marker during play" (the instrument is the callers of the size routine and the displacement sweep of `+0x15c/+0x160`; a removal through another routine type was not searched).
 
 **Unknown.** The array that world-map setup, shop entry and training-hall entry hand to the routine; the picture's draw order against the scroll list.
+
+## Tips in the rooms and the character generator
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-516 | The town, tavern, school and shop build their tip popup at every room enter while `TipsMode` is set, with no latch; with the flag clear the enter deletes a leftover popup. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-517 | The shop's second tip `shop2` replaces `shop1` in the open popup at most once per shop activation, on the shop's idle message, when a tray getter returns nonzero; it does not read `TipsMode`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-518 | Pre-create step `+0x1dc` restarts at 0 (`chrsel1`) on every enter; a portrait click at step 0 sets 1 (`chrsel2`) and a level click at step 1 sets 2 (`chrsel3`); nothing else moves it. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-519 | `R1999` is the pre-create guided cycle: per step it highlights the 4 portraits, the 3 levels, or the amulet and OK, waits 500 ms after hover and steps after more than 300 ms. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-520 | Pre-create targets come from `Mask.bmp`: `R1880` returns its pixel as a region code (levels 20/40/60, portraits 80..140, amulet 160, OK 180); the draw rectangles are literals in the loader. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-521 | Portrait and level state bit 0 means chosen and bit 1 hovered; state 1 draws `on`, 2 draws `l`, 3 draws `lon`, 0 draws no overlay; a click chooses, the pointer hovers. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-522 | The detailed page shows `chrgen1m` (mage) or `chrgen1f` at enter and `chrgen2` after the first skill click while `TipsMode` is set; its skill cycle runs until that click or until the popup closes, without reading `TipsMode`. | High | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+| TOWN-523 | Pre-create shows cursor slot 5 `select` at enter and at every paint; the detailed page shows slot 0 `default` at enter and at paint unless the current cursor is `dice`. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0506](../experiments/EXP-0506-tips-state-machine/) |
+
+### TOWN-516
+
+Each room enter tests `[L03631]` and, when it is nonzero, reads its node and constructs the popup (`MENU-137`). When it is zero, the enter removes and deletes any popup still stored. The enter routines, gates and stores:
+
+| room | enter | gate | node | popup field | parent | absolute rectangle |
+|---|---|---|---|---|---|---|
+| town | `R1383` | `L11742` | `town.txt` | view `+0x200` | the view | (328,0)-(640,200) |
+| tavern | `R1412` | `L13535` | `inn.txt` | `+0x80` | roster `[+0x7c]` | (160,0)-(472,200) |
+| school | `R0706` | `L11771` | `training.txt` | `+0x7c` | the view | (0,0)-(456,200) |
+| shop | `R0705` | `L09820` | `shop1.txt` | `+0x88` | merchant panel `[+0x74]` | (164,162)-(476,298) |
+
+The rectangles are TOWN-480's. No field outside the room's own popup field records that a tip was shown, so the popup returns at the next enter. A popup closed with Close does not return until the room is entered again (`MENU-137`).
+
+**Confidence.** High: each gate, read, construction and deletion is read at instruction level, and the raw scan of `L03631` classifies all 16 references (`MENU-135`).
+
+### TOWN-517
+
+The shop's message `0x402` arm (`L13536`) runs when `[campaign+0x3dc] & 8` is clear and calls `R1760` at `L09823`. `0x402` is the periodic idle post that `L02963` and `L13537` send to the root view. `R1760` acts only when all three hold:
+
+1. Popup `+0x88` exists.
+2. The getter `L13538` (`[this+8]`) on `[[view+0x70]+0x84]` returns nonzero.
+3. Latch `+0x8c` is 0.
+
+It then sets `+0x8c` to 1, reads `shop2.txt` and retexts the popup through `R1770`, which calls `R1987`. The shop activation stores 0 in `+0x8c` at `L13539`. The arm reads no `TipsMode`. Because the popup exists only when the flag was set at activation, a flag cleared later still lets `shop2` replace the text.
+
+**Confidence.** High for the call chain, the latch and its reset. Medium that the test means "the tray holds an item": `view+0x70` is the tray (`SHOP-TRAY-024`), and the `+0x84` object's `+8` was not traced to its writer.
+
+### TOWN-518
+
+Page vtable `L07691`; enter `R1475`. While `TipsMode` is set, the enter builds the popup with `chrsel1.txt` into `+0x1c0`. With the flag clear it deletes any popup there. In both cases it stores 0 in step `+0x1dc`.
+
+The step routine `R2167(region)` has one caller, `L13540`, in the left-down slot `+0x54` (`R1878`). That slot first runs the hit-test `R1879(x,y,1)`. The step routine returns at once when `TipsMode` or `+0x1c0` is 0. Otherwise:
+
+- portrait regions `0x50`, `0x64`, `0x78` and `0x8c` at step 0 set step 1 and retext `chrsel2.txt`;
+- level regions `0x14`, `0x28` and `0x3c` at step 1 set step 2 and retext `chrsel3.txt`.
+
+Other routes leave the step unchanged:
+
+- The move slot `+0x4c` (`R1882`) passes `wParam & 1` to the hit-test, so a drag with the button held selects without moving the step.
+- The key slot `+0x6c` (`R2168`) sends Enter to `R2116` and Escape to `R2117`.
+- The name field is a separate child.
+
+The leave slot `R2169` deletes the popup. Message `0x45a` (Close) deletes it in the message slot `R2162` and stores 0 in `+0x1c0`.
+
+**Confidence.** High: the single caller and the jump table are in the committed listing and `switches.tsv`.
+
+### TOWN-519
+
+The paint `R1474` calls `R1999` once, at `L13541`, only when `[L03631]` and `+0x1c0` are both nonzero. Its argument is the region under the pointer, from `R1880` on `[L01257]`,`[L01258]`. The timers `T_hover` `L13542` and `T_step` `L13543`, and the index `L13544`, are set on first use and never reset by page enter. The length `L13545` starts at 1 and the last hovered region `L13546` at −1.
+
+Each call:
+
+1. If less than 500 ms (`0x1f4`) has passed since `T_hover`, set `T_step` to now and draw nothing.
+2. When a last hovered region is recorded, set the index to the target after it. The region-to-index table at `L13547` maps 20→1, 40→2, 60→3, 80→1, 100→2, 120→3, 140→4, 160→1 and 180→2.
+3. Draw by the step `+0x1dc`:
+   - Step 0: if a portrait region is hovered, store now in both timers, record the region and return. Otherwise the length is 4 and the index wraps mod 4. It draws `+0xc0` (`lon`) when that portrait's state is 1 and `+0xac` (`l`) otherwise, at rectangle `+0x110[index]`.
+   - Step 1: the same for the levels, with length 3, art `+0xfc` or `+0xe8` and rectangles `+0x124`.
+   - Step 2: hovering region 160 or 180 freezes the cycle the same way. Otherwise the length is 2: index 0 draws `Amulet.bmp` (`+0x15c`) through its sub-rectangle `+0x164..+0x170`, index 1 draws `ButtonOk.bmp` (`+0x160`) through `+0x174..+0x180`.
+   - Any other step: length −1, no draw.
+4. Clear the last hovered region. When more than 300 ms (`0x12c`) has passed since `T_step` and the length is not −1, advance the index mod the length and store now in `T_step`.
+
+The cycle runs at the page's paint rate, which `0x402` drives (`vt+0x34` in `R2162`). It stops when `TipsMode` clears or the popup is deleted.
+
+**Confidence.** High for the gates, constants, targets, art fields and order, read at instruction level. The wall-clock period also depends on the repaint rate, which this experiment did not measure.
+
+### TOWN-520
+
+`R1880(x,y)` tests the point against the page rectangle (`PtInRect`). It then returns the byte of `Mask.bmp` (`+0x6c`) at that pixel, with row stride 640. Mask.bmp is TOWN-223's unlocated node. The hit-test `R1879(x,y,click)` then works in this order:
+
+1. Clear bit 1 of every portrait and level state.
+2. On a click, region 20/40/60 chooses level 0/1/2 (`+0x1d0`), clearing the other levels' bit 0. Region 80/100/120/140 chooses portrait 0/1/2/3 (`+0x1cc`).
+3. Set bit 1 on the hovered item.
+4. Region 160 stores `Amulet.bmp` in `+0x184` and region 180 stores `ButtonOk.bmp` in `+0x188`.
+
+The loader `R0597` writes the draw rectangles as literals, page-relative (left,top)-(right,bottom):
+
+- levels 0..2: (60,196)-(120,270), (0,110)-(76,222), (48,65)-(148,217);
+- portraits 0..3: (16,273)-(164,424), (124,166)-(260,302), (288,130)-(408,259), (416,190)-(548,342);
+- amulet: (528,140)-(640,344);
+- OK: (468,373)-(568,429).
+
+The rectangles place art. Only the mask decides what a click hits. This answers TOWN-223's Unknowns for Mask.bmp's consumer and the rectangles' literal values.
+
+**Confidence.** High: the jump tables `L13548` and `L13549` and the loader stores are in the committed evidence.
+
+### TOWN-521
+
+Pre-create paint draws each level and portrait by its state, with fields as in TOWN-223. Portrait files: `+0x98` `{mf,ff,fm,mm}on`, `+0xac` `…l`, `+0xc0` `…lon`. Level files: `+0xd4`, `+0xe8`, `+0xfc` = `level{0,1,2}{on,l,lon}`. The state values mean:
+
+| state | meaning | art |
+|---|---|---|
+| 0 | unchosen, not hovered | none; `MainArea.bmp` shows |
+| 1 | chosen | `on` |
+| 2 | hovered | `l` |
+| 3 | chosen and hovered | `lon` |
+
+Bit 0 is set by a click and bit 1 by the hit-test under the pointer (`TOWN-520`). The page enter chooses portrait 0 and the level in `+0x1d0`, both state 1. The guided cycle draws over this: `lon` on a chosen target and `l` on an unchosen one (`TOWN-519`).
+
+The sparkle `Blind\sprites.16a` (`+0x70`) plays at a rectangle drawn at random from the 3 levels, the amulet and OK (`+0x84`, filled in `R0597`). Its frame step is 63 ms and its interval 500 + rand/65 ms. It reads neither `TipsMode` nor the step.
+
+On the detailed page the skill art `+0x78` `on` draws for state 1, `+0x8c` `shine_off` for state 2 and `+0xa0` `shine_on` for state 3. The hover handler `R2170` sets bit 1. Fighter skills are sword, axe, mace, pike and bow; mage skills are fire, water, air, earth and astral.
+
+**Confidence.** High: the paint selectors, hit-test and enter stores are read at instruction level.
+
+### TOWN-522
+
+Page vtable `R1312`; enter `R1870`. While `TipsMode` is set, the enter reads `chrgen1m.txt` when `[hero+0x18c] & 2` (mage) and `chrgen1f.txt` otherwise. It builds the popup into `+0x80`, as a child of the skill panel `+0x7c`, at absolute (160,280)-(472,480). With the flag clear it deletes any popup there. It stores 0 in step `+0x100`.
+
+A skill click (slot `+0x54` `R1552`, hit-test `R1216` returns 0..4 or −1) chooses the skill, plays a sound and calls `R1986` at `L13550`. `R1986` acts only when `TipsMode` is set, `+0x100` is 0 and popup `+0x80` exists. It then retexts `chrgen2.txt` and increments `+0x100`. The message slot `R1960` deletes the popup on `0x45a` and stores 0 in `+0x80`. The leave `L13551` deletes it.
+
+The skill cycle `R2004` runs from the skill panel paint `R1871` (at `L13552`). It acts only when `+0x100` is 0 and `+0x80` is nonzero, and it reads no `TipsMode`. Its timing is TOWN-519's: 500 ms after hover, then a step after more than 300 ms. The statics are `L13553`, `L13554` and `L13555`, with last hovered `L13556` = −1 and length `L13557` = 5. Hovering a skill freezes it, and it resumes after that skill. It draws `+0xa0` (`shine_on`) when the skill's state is 1 and `+0x8c` (`shine_off`) otherwise, at the skill's rectangle (`+0xb4`,`+0xb8`,`+0xdc`,`+0xe0` per index).
+
+With `TipsMode` cleared through the popup checkbox, the popup stays and the cycle keeps running. A later skill click no longer advances the step.
+
+**Confidence.** High: gates, constants and callers are in the committed listing and scans.
+
+### TOWN-523
+
+The pre-create enter calls `R0320` with `[L06217]` at `L13558`. That is cursor slot 5, `graphics\cursors\select\sprites.16a`. The paint calls it again at `L13559` on every pass, so `select` shows over every control on that page. The detailed enter sets `[L01211]`, slot 0 `default`, at `L13560`. Its paint `R1310` sets `default` again unless the current cursor is the `dice` slot (`MISSION-066`).
+
+**Confidence.** High for the calls and slots read.
+
+**Unknown.** Which routine sets `dice` on the detailed page. Searched: the committed detailed-page listings, where the `dice` slot `[L06731]` is read only by the paint compare at `L06734`; no image-wide census of `L06731` was run. Settled by that census.

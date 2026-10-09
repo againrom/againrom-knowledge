@@ -1754,7 +1754,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 |---|---|---|---|---|
 | MAGIC-237 | A slot-drawn spell is aimed by its `R0209` arm: 7 ids at the engage victim, 9 at the caster, 8 at the victim's cell, Acid Stream and Teleport at the cell next to the caster, 2 at nothing. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 | MAGIC-238 | A drawn Acid Stream or Teleport orders a kind-9 cast at the cell one step from the caster toward the victim; Teleport's nine-cell search is overwritten by that store. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
-| MAGIC-239 | An out-of-range or unfaced kind-8 or kind-9 cast order walks toward its target or cell and stays armed; the facing test and kind-9 distance are read and nothing in the read routines drops the order. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
+| MAGIC-239 | Kind-8/9 reach or facing failure selects approach rather than release; approach with a non-empty route retries, while route-search failure or the point obstacle branch can replace the pending kind. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md), [EXP-0497](../experiments/EXP-0497-out-of-range-cast/EXP-0497.md) |
 | MAGIC-240 | `ord+0x60` is a retention flag read by the two cast install arms: zero runs the stop-and-reset at install, nonzero keeps the order armed; the eight stores of 1 found in the AI module are in creature cast selectors. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 
 ### MAGIC-237
@@ -1789,21 +1789,90 @@ Teleport's arm (`L05162`) first reads the victim's and the caster's packed cells
 
 ### MAGIC-239
 
-The order machine `R0016` runs its kind switch only while the progress byte `ord+9` is 0 (`L00547`, a jump to `L00548` on equal); `ord+8` selects the arm through the table at `L00099` (read off both roots).
+The order machine `R0016` selects the kind arm only while order+9
+is zero. Kind 8 at `L00108` bypasses distance and facing for self-target;
+otherwise `R0041` gates installation at `L06105`. A false result
+calls actor approach `R0042` at `L06107`. Kind 9 at `L05042`
+uses `R0086`; a false result calls point approach `R0087`
+at `L06112`. Their exact metrics are MAGIC-REACH-179 and
+MAGIC-REACH-180. Forty-nine original-instruction controls in EXP-0497
+stop at approach or install and corroborate these branches without a
+service stub.
 
-Kind 8 (arm `L00108`, cast at the actor `ord+0x28`): when the target is the caster the range test is skipped (`L06104`: a comparison of target with caster, jumping to `L06105` on equal). Otherwise `R0041(plane, caster, target, ord+0x14)` (`L00742`) is true only when the mover's facing byte equals the direction `R0051` returns for caster-to-target (`L00577`, a byte comparison of the facing) and the distance `R0036` returns is not above the reach byte (`L00578`, `L06106`, a jump on above); `R0036` was not disassembled here. True leads to the cast install at `L06105`. False calls `R0042(this, caster, target)` (`L06107`).
+`R0042` passes the target and order reach to `R0043`.
+Non-centred caster position calls the step-follow helper. At a centre,
+distance within reach selects a direction/turn request and returns;
+distance above reach selects path work. The path stores mover+0x7c
+from the target pointer argument at `L13495/L01899`; reach is the
+separate byte compared at `L00580`. AI-373 covers the subsequent
+search, list and step preparation.
 
-Kind 9 (arm `L05042`, cast at the cell `ord+0x3c`): `R0086(plane, caster, cell, ord+0x14)` (`L06108`) is true when the facing byte equals `R0089`'s direction (`L06109`) and the larger of the two absolute cell differences, measured from the caster's packed cell `pos+2`, is not above the reach (`L06110`, `L06111 JA`). True calls `R0013`, the install; false pushes the reach and cell and calls `R0087` (`L06112`).
+`R0087` passes cell and reach to `R0178`. Non-centred
+caster position calls the step-follow helper. At a centre, whole-cell
+distance within nonzero reach requests direction/turn and returns before
+path search; distance above reach reaches path work. Both wrappers store
+progress 3 and order+0x15 = 0 if the position centre predicate returns
+zero, and end with actor action 1. Progress arm 3 can clear progress at
+the next centre, allowing the kind arm to be evaluated again.
 
-The failure routines walk. `R0042` calls `R0043` with the order's reach (`L06113`). That routine returns after a step-follow call (`L06114`, a call of R0039) when the target is between cells, after a turn toward the target (`L06115`, a call of R0051, `L00754`, a call of R0056) when the distance is within the reach, and otherwise plans a path (`L06116` on: `mover+0x74`, `+0x76`, `+0x7c = reach`, `+0x98 = 1`). `R0087` does the same for a cell through `R0178` (`L06117`). Each stores progress 3 and `ord+0x15 = 0` when the position object's `R0040` returns zero (`L00107`, `L06118`) and ends with `actor+0x54 = 1` (`L06119`, `L06120`, `L04577`). Progress arm 3 (`L00096`) calls `R0039`, and when `R0040` is nonzero stores progress 0 and `actor+0x54 = 0` (`L00097`..), so the next executor pass runs the kind arm and the range test again. No instruction in the two arms, in `R0042`, `R0087`, or the read portions of `R0043` (`R0043`..`L06121`) and stores `ord+8` or any other field of the order block except the progress and counter bytes named above. The body of `R0268` (`R0268`..`L06122`) contains no range or facing test; its only `return 0` is a mage's cost above current mana (`L01998`..`L01999`). Its callees `R0904`, `R0269`, `R0621`, `R0416` and `R1144`, the apply routines at `R0617` and `R0618`, and the pre-call gates of the unit-tick callers `L01994` and `L01995` were not read.
+Complete point helper `R0178` also contains an obstacle branch.
+After a centred out-of-range case reaches dynamic-route refresh, a blocked
+candidate footprint and a nonzero external `R0402` verdict reach
+a direction comparison. Wrong facing writes pending kind 10 at
+`L13340`; matching facing writes pending kind 0 at `L13496`.
+These local stores do not clear the parent cast state or queued Spell.
 
-So an out-of-range or unfaced cast order is neither dropped nor fired: the caster approaches and turns, and the same order is evaluated again on each executor pass. Mana refusal retries on the cadence `MAGIC-CADENCE-127` publishes.
+Route-search failure is a second path that replaces the pending kind. The
+point helper stores mover+0x98 = 1 at `L01720` when `actor+0x168` is zero
+after its full search `R0053`; the actor helper stores it at
+`L00161` when the static path list is empty (AI-373). AI-373 also names
+the near search `R0055`, an external callee, as a setter. The
+executor epilogue is the flag's sole consumer (AI-ROUTE-045). For an
+`actor+0x50` other than 1, 0xa and 0x17 it stores ord+0x08 = 0 at
+`L00114` and calls reacquisition `R0004`, which writes kind 6, 0xb
+or 0 (AI-350). The manual setters write parent state 0xd/0xe at
+`L13497/L13498`, so an admitted manual cast whose route search fails
+loses its pending cast kind in the same executor pass. The four complete
+approach/wrapper bodies are the bounded store population; external callees
+are not covered by that negative. MAGIC-253 establishes the ordinary manual
+parent reissue and progress preservation.
 
-**Confidence.** High for the two facing tests, the kind-9 distance test (larger absolute cell difference, `L06123`..`L06111`), the failure routines' calls and stores, and the absence of an `ord+8` store in the routines named (complete-body reads of the arms, `R0041`, `R0086`, `R0042`, `R0087`). Medium for the approach and path routines' internals: `R0043` was read to `L06121` only. The kind-8 distance metric is unknown: it is whatever `R0036` returns.
+The body of `R0268` has no range/facing test and its mage mana
+refusal remains MAGIC-CADENCE-127's retained retry contract. This does
+not close additional checks in its callees or the unit-tick gates.
 
-**Unknown.** The kind-8 distance metric (`R0036`). The direction routine `R0089` and `R0178` were not disassembled here. Whether `R0268`'s callees and the unit-tick callers' gates add a range, facing or ownership refusal at cast time. Whether repeated path-planning failure ends the walk: the planning callees were not followed. A target that has died or been removed before the kind-8 arm runs: the arm reads `ord+0x28` with no liveness test, and nothing was traced for that case.
+**Confidence.** High for the selected gate branches, four complete
+approach/wrapper bodies' direct stores, the conditional obstacle writes and
+the two route-failure flag stores. The flag's consumer is the published
+High AI-ROUTE-045 and AI-350 contract, not re-read here. Raw disassembly
+and finite original-instruction execution exclude immediate install at the
+selected distant non-self gates. Medium for approach, re-evaluation and
+eventual movement as gameplay: path services, turn/step helpers and native
+scheduling are not executed. The obstacle verdict is an untraced call, not
+a claim that every blocked destination reaches this branch; which
+destinations leave the route search empty is not established either.
 
-**Evidence.** [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md), `evidence/asserts-en.txt`, `evidence/listing.txt`, `evidence/spell-arms.tsv`
+**Unknown.** Native arrival and release, repeated path failure, sound/text,
+removed or dead targets, the obstacle verdict and multi-tick parent outcome.
+After a route failure, whether the next parent state-0xd/0xe evaluation
+reissues kind 8/9 over the reacquisition order, or `R0004` leaves the
+command state, is not established. A read of `R0004`'s `actor+0x50`
+stores and of the parent evaluation's caller cadence, or a native trace of
+order+0x08 and `actor+0x50` across ticks after a failed search, would settle
+it. Whether cast-admission callees or unit-tick gates add range, facing or
+owner checks remains unclosed. No whole-image absence is claimed.
+
+**Amended.** The former mover+0x7c reach operand is corrected to the target
+pointer; the non-centred branch reads caster position, not target position.
+The unconditional pending-kind-retention consequence is narrowed by two
+paths: route-search failure through mover+0x98 and the point obstacle
+branch. The ordinary failed reach still selects approach, not immediate
+release. The two correction entries preserve the former
+wording; the kind-8 metric is independently MAGIC-REACH-179.
+
+**Evidence.** [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md),
+[EXP-0497](../experiments/EXP-0497-out-of-range-cast/EXP-0497.md),
+`evidence/instructions.tsv`, `evidence/orders.tsv`.
 
 ### MAGIC-240
 
@@ -1967,6 +2036,57 @@ The arm does not unlink the corpse: none of the direct-call closures of the arm'
 **Unknown.** Which shops admit an id-25 Scroll or Book under their price cap. Whether a compressed ALM or LM container, a save or a script gives a weapon or item id 25.
 
 **Evidence.** [EXP-0464](../experiments/EXP-0464-control-spirit/EXP-0464.md), `evidence/controlspirit.txt`
+
+## Manual cast retention and parent reach reload
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-253 | Admitted manual actor/point setters clear order+0x60; parent states 13/14 reissue kind 8/9 and reload stored Spell+9 without changing the progress byte or that flag. | High | ✔ promoted | [EXP-0497](../experiments/EXP-0497-out-of-range-cast/EXP-0497.md) |
+
+### MAGIC-253
+
+The admitted non-null Spell branches of `R0011` and `R0012`
+write EBX to order+0x60 at `L13499` and `L13500`. EBX is zeroed at the
+function heads `L13501` and `L13502`. The 67 instructions between each
+head and its admitted slice contain no EBX writer and five calls, which are
+assumed to preserve EBX by the callee-saved convention. The store therefore
+replaces both zero and nonzero previous values with zero. Their
+target/Spell/range and progress boundary is otherwise the contract AI-356
+establishes.
+
+`R0008` dispatches parent states 13 and 14 through the table at
+`L00322` to `L01993` and `L13503`. With a non-null actor target,
+state 13 calls `R0018`, whose non-null branch writes kind 8 and
+loads reach from Spell+9 at `L05040/L00075`. State 14 writes kind 9
+and loads the same byte at `L13504/L13505`. These reached parent paths
+leave order+9 and order+0x60 unchanged.
+
+Each setter slice is entered with the EBX value that the executed head
+`xor` leaves from a nonzero sentinel. A sentinel-entered control per form
+stores the sentinel at order+0x60, so the stored value is the register, not
+a constant. Eighteen original-instruction cases use both setter forms,
+previous flag values 0/1/7 and progress 0/2/3. The setter copies Spell+9 =
+33 to order+0x14. Spell+9 is then set to 35 before the first and 31 before
+the second complete parent execution; order+0x14 reads 35 and then 31
+after the two passes. The parent retains progress, leaves the active victim
+unchanged and retains flag zero. No external service is substituted. Forty-nine
+selected child-gate cases corroborate the reused self/facing/distance
+contracts; they stop before approach or install and do not witness release.
+
+**Confidence.** High for the named local stores, parent representation chain
+and finite original-instruction contrasts. Retaining the previous nonzero
+flag is excluded by the listing (head `xor`, no EBX writer before the store)
+and the sentinel control; the five skipped calls rest on the callee-saved
+convention, not on execution. Fixing reach at setter time is excluded by the
+order+0x14 reads after each parent pass, each differing from the value
+stored before it. Clearing progress at these parent evaluations is excluded
+by the executed parent passes. These are admitted setter slices, not a full
+command admission or native game run. Both locale executables are one image.
+
+**Unknown.** Whether current power is recalculated before an individual
+order; null-target selection, native event timing, route completion,
+release success and feedback. Single-cast cleanup composes this zero flag
+with MAGIC-240; no native repetition count is observed.
 
 ## Cast delivery start positions
 
