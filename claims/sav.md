@@ -15015,3 +15015,212 @@ boundaries. They do not execute archive buffering or a native SAVE.
 **Unknown.** The first-archive vector after ordinary ranged removal, full
 callback/lifetime closure, actual buffer/file correspondence and runtime
 occurrence. No first-archive value is supplied.
+
+## Unit-shot origin, projectile counter, shooter death and trail
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1188 | The unit shot starts at the shooter's current x/y plus 8 × (ShootOffset pair − Center), the pair chosen by ((dir − 8) & 14) / 2 from eight XY pairs; the cast producer reads the same class data from the cached centre. | High / Medium | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1189 | Eight instructions store the projectile counter at client world `+0xa0c`: zero in the world constructor, old + 1 at six record insertions and the low u16 of FreeIndex at LOAD; no other writer was found in the decoded population. | High / Medium | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1190 | No found writer resets the projectile counter at a mission boundary: its one zero store is in the client-world constructor, reached only from virtual method `R0326`, and the collect-all clears do not write it. | Medium | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1191 | LOAD sets the projectile counter to the low u16 of `Projectiles/FreeIndex`, 0 when absent, before it inserts the saved records under their document IDs; SAVE writes the same counter. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1192 | A shooter's pending attack damage, ranged included, is never applied once an actor tick sees its HP at or below 0: that tick overwrites the countdown and both damage evaluators refuse an attacker at HP 0 or less. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1193 | SAVE writes no projectile trail point and LOAD builds each record with an empty trail; the driver's trail arm then refills it for pictures 10 and 12, and other trail writers were not searched. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1194 | The leave-map routine `R0121` takes the actor off the list the walker `R0427` ticks, without writing its countdown or state; other callers of the tick slot were not searched. | High / Medium | ● active | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+
+### SAV-1188
+
+- Unit shot `R0603`, window `L13450..L13451`, with the shooter in edi
+  and the record in esi: the class is `[L02113][shooter+0x20]`; i =
+  `(shooter dir +0x6c − 8) & 0xe` is a dword index into the ShootOffset data
+  `[class+0xec]`.
+- `x = shooter+0x08 + 8 × (ShootOffset[i] − class+0x34)`,
+  `y = shooter+0x0c + 8 × (ShootOffset[i+1] − class+0x38)`; both are copied to
+  `+0x28/+0x2c`. The window has no test of the array count `+0xf0` and no
+  other fallback.
+- Loader keys: `CenterX` (`L13452`) goes to class `+0x34` (`L13453`),
+  `CenterY` (`L13454`) to `+0x38` (`L13455`), `ShootOffset` (`L13456`)
+  to the CArray at `+0xe8` (`L13457`), data `+0xec`, count `+0xf0`; an empty
+  array takes the parent class's array (`L13458..L13459`).
+- Pair k = i / 2 serves facings 8+2k and 9+2k (mod 16): S/SW/W/NW/N/NE/E/SE
+  use pairs 0..7. EN `units/units.reg` (34 classes): Human Archer 14, Human
+  CrossBowMan 15, Catapult 1 26 and Catapult 2 27 each hold 16 dwords. The
+  original window, run on synthetic memory for those four classes and all 16
+  facings (64 runs), gives the formula's x/y and the same `+0x28/+0x2c`.
+- The cast producer `R0620` uses the same i, array and Center but adds the
+  caster's cached `+0x58/+0x5c` and has the empty-array and picture-60
+  fallback (`MAGIC-261`). The two routines differ in base and fallback.
+
+**Confidence.** High for the instructions, the key mapping and the 64 runs.
+Medium for 8 fine units per map pixel, the scale `SAV-1130` already grades.
+
+**Unknown.** The first drawn position after the shot is built; a customised
+registry with fewer than 16 dwords (the window reads without a bound).
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-direction-start.txt`, `evidence/class-key-names.txt`,
+`evidence/direction/unit-shot-origin.tsv`, `evidence/direction/registry-input.tsv`.
+
+### SAV-1189
+
+| Instruction | Routine | Value |
+|---|---|---|
+| `L13460` | client-world constructor `R0391` | 0 |
+| `L13461` | client arm 0x86 | old + 1 |
+| `L13462` | client arm 0x8b | old + 1 |
+| `L13463` | client arm 0x8c | old + 1 |
+| `L13464` | unit shot `R0603` | old + 1 |
+| `L13465` | cast producer `R0620`, as `[world+0x9d4]+0x38` | old + 1 |
+| `L13466` | cast producer, second record | old + 1 |
+| `L13467` | mission loader, SAV document arm | low u16 of FreeIndex |
+
+- Each store is 16 bits, so the increments wrap at 65536. Each insertion
+  takes the old value as the record ID (`SAV-1131`).
+- Population: a linear `.text` sweep finds 17 instructions with displacement
+  `+0xa0c` (these eight stores, nine loads); a raw dword scan of every section
+  finds 19, the two extra inside instructions at `L13468` and `L13469`
+  whose bytes contain it. No decoded memory operand starting at
+  `+0x9fd..+0xa0d` other than `+0xa0c` overlaps the word. The store base
+  `+0x9d4` has 23 decoded touches and 23 raw hits; a non-stack 16-bit MOV to
+  `+0x38` occurs once in `.text`, at `L13465`.
+
+**Confidence.** High for each listed store and value. Medium that the list is
+complete: a store through a pointer computed from another field, a block copy
+or a width other than a 16-bit MOV at `+0x38` would not be seen.
+
+**Unknown.** A writer outside the decoded population. A native watchpoint on
+the two bytes would settle it.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/identity/counter-census.txt`, `evidence/identity/counter-ranges.txt`.
+
+### SAV-1190
+
+- The constructor `R0391` has one call site, `L06468`, in `R0315`,
+  which stores the new world at campaign `+0xd0`. `R0315` has one call site,
+  `L13470`, in `R0326`, a virtual method referenced only by the `.rdata`
+  dword `L01309`. The committed listing holds its prologue only.
+  Neither constructor address occurs as a raw dword.
+- The mission loader `R0099` reads the existing world from campaign `+0xd0`
+  (`L13471`). Its ordinary entry sends message 4 (`L03843`, `R0545`).
+  The FreeIndex read is reached only when campaign `+0x6bc` is 2 and the
+  loader's document argument is non-zero (`L13472..L13473`), the arm that
+  reads the saved `CurrentState`, `GameOptions` and `Projectiles` keys; no
+  branch of the loader enters `L13474..L13475` from outside it.
+- The collect-all routines `R0809` (706 instructions) and `R1301` (652)
+  destroy and unlink every record. Neither has a `+0xa0c` operand, a non-stack
+  16-bit store to `+0x38` or a MOVS/STOS instruction.
+- So, within the found writers, the counter keeps counting across collect-all
+  clears and mission entries of one process; a SAV LOAD replaces it
+  (`SAV-1191`).
+
+**Confidence.** Medium. The call chain and bodies are direct, but the claim
+rests on `SAV-1189`'s writer list, and the callees of the two clear routines
+and a whole-object copy of the world were not excluded.
+
+**Unknown.** Whether `R0326` runs more than once per process. A watchpoint
+across a mission change would settle the reset question.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/identity/counter-census.txt`, `evidence/identity/counter-ranges.txt`,
+`evidence/identity/counter-reset-census.txt`, `evidence/vtables.txt`.
+
+### SAV-1191
+
+- LOAD (`L13475..L13467`): `Projectiles/FreeIndex` is read with default 0
+  (`L13476`) and its low 16 bits are stored at world `+0xa0c` (`L13467`)
+  before the `IDs` vector is read and the records are built
+  (`L13477..L13478`). Each record takes its ID from the vector
+  (`L13479`, `L13480`); the counter is not read or derived from the IDs.
+- SAVE (`L13481..L13482`) writes the 16-bit counter, zero-extended, as
+  `Projectiles/FreeIndex`. A save and a load therefore return the counter
+  unchanged, and the next live shot takes ID FreeIndex.
+- The owner's EN mission-150 saves game0022, game0023 and game0024 hold
+  FreeIndex 28, 29 and 31 with records Prj27, Prj28 and Prj29/Prj30.
+
+**Confidence.** High: direct listings of both arms.
+
+**Unknown.** A native LOAD followed by a new shot was not run.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-save-load.txt`, `evidence/save-observations.txt`.
+
+### SAV-1192
+
+- Actor tick `R0037` (vtable slot `+0x18` of `L00001`, `L00002` and
+  `L00003`) tests the signed HP word `+0x94` (`R0864`). At or below 0 it
+  sets `+0x50` and `+0x54` to 0. On the first such tick (`+0x13c` was 0) it sets
+  `+0x13c`, halves `+0xbe`, stores the dying time from virtual slot `+0x6c`
+  minus 1 into the countdown byte `+0x6c` (`L04377`) and returns. Later ticks
+  decrement that byte and return; at its end an HP at or below −10 sets state
+  `0x10` (`L13483..L01924`).
+- The pending attack is the countdown `+0x6c` with sub-state `+0x58` 5; only
+  its arm `L13484` calls the resolver `R0001` at zero (`SAV-1132`). A dead
+  tick returns before the dispatch that reaches that arm.
+- Both evaluators also refuse a dead attacker: the unit evaluator `R0246`
+  jumps to its exit when attacker HP is not above 0 (`L13485..L13486`),
+  before the Fire_Ball rider call `L03045` (`ANIM-115`); the Building
+  evaluator `R0563` does the same (`L13487..L13488`).
+- The active-list walker `R0427`, called on `[L00240]` (`L13489`),
+  skips the tick for state `0x10` and moves the actor to the dead list.
+
+**Confidence.** High for this control flow: complete listings of the tick's
+death branch, both evaluators and the walker. The visual record is not
+touched by this path; its survival is `SAV-1133`'s Medium.
+
+**Unknown.** An HP that rises above 0 before any tick sees it at or below 0.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-shooter-death.txt`, `evidence/vtables.txt`.
+
+### SAV-1193
+
+- The writer's record loop `L13490..L13491` writes the sixteen leaves and
+  reads no offset at or above `+0xa8` of the record, so not the trail at
+  `+0x138..+0x140`.
+- The loader builds each record with the constructor `R0609`, whose CArray
+  constructor sets data and count to 0 (`ANIM-140`). The leaf arm
+  `L13477..L13478` and the post-load helper `R0614..L13492` write no
+  trail field; the helper's two virtual calls are `+0x20` and `+0x24`, which for
+  the projectile vtable `L02587` return 1 (`L03099`, `L03100`).
+- The driver's trail arm appends for pictures 10 and 12 only (`ANIM-140`);
+  whether another writer gives a trail to other pictures was not searched. The four owner records have 16 numeric leaves
+  each and pictures 1, 5, 2 and 13.
+
+**Confidence.** High for the omission and the empty trail after these direct
+arms. Which pictures can hold a trail before SAVE carries `ANIM-140`'s bound.
+
+**Unknown.** The first drawn frame after LOAD. A native SAVE and LOAD of a
+picture-10 or 12 shot in flight would show the trail loss and regrowth.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-save-load.txt`, `evidence/disasm-smoke.txt`, `evidence/vtables.txt`,
+`evidence/save-observations.txt`.
+
+### SAV-1194
+
+- `R0121..R0122`: when `+0x4c` bit 3 is clear it releases the actor's
+  occupancy (`L07141`), sets bit 3, removes the actor from the list at
+  `[L00240]+4` (`L12780`) and sends message 0x74 twice. It writes neither
+  `+0x6c` nor `+0x54` nor `+0x58`.
+- That list is the one the walker `R0427` ticks (`SAV-1192`), so that
+  walker does not advance the countdown while the actor is off it. Other
+  callers of tick slot `+0x18` were not searched.
+- The two return routines `R0122..R0123` and `R0123..R0671`
+  re-insert the actor through `R0032` on `[L00240]` (`L13493`,
+  `L13494`) and clear bit 3 of `+0x4c`. Their own instructions write no
+  other actor field; the callees `R1145`, `R0032`, `R0811`,
+  `R0059` and `R0623` were not read.
+
+**Confidence.** High for the leave-map and return routines' own instructions.
+Medium that the countdown stops off the map: it rests on `R0427` being
+the only tick caller. Medium for what a full leave and return does to the
+pending hit: the routines' callers and callees were not read.
+
+**Unknown.** Another caller of tick slot `+0x18`; a census of indirect calls
+through `+0x18` on actor pointers or a native watch on `+0x6c` would settle
+it. The pending hit after a leave-and-return; what actor destruction does to
+a pending hit (no destructor census).
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-shooter-death.txt`.

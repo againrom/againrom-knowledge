@@ -2580,3 +2580,113 @@ writer or audibility census.
 **Confidence.** High for the conditional arithmetic and the drawn sequences given a delivered, uninterrupted message run. Medium that server and client ticks stay aligned through a turn: delivery order in the session loop was not read.
 
 **Unknown.** Rendering of a frame between presentation ticks; observed play.
+
+## Unit-shot direction and smoke trail
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-138 | The direction helper `L02828` maps a coordinate difference to one of 16 values by signed integer slope comparisons with quadrant boundaries 1/4, 3/4, 4/3 and 4; the zero vector gives 4. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| ANIM-139 | Every action-1 projectile driver call with non-zero actionsegments that resolves actiontarget recomputes actiondir from the shot's current x/y to the target's current centre, then copies actiondir to dir. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| ANIM-140 | The projectile driver's trail arm appends the pre-move point to the trail array at `+0x138` for pictures 10 and 12 only, keeping at most six points and dropping the oldest; other trail writers were not searched. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+
+### ANIM-138
+
+- `L02828..L13440` is the whole helper: no call, no FPU instruction. It
+  subtracts the object's `+08/+0c` from its two coordinate arguments, so
+  `dx = argX - x`, `dy = argY - y`, then `a = abs(dx)`, `b = abs(dy)` by the
+  CDQ/XOR/SUB sequence.
+- q is chosen in this order, every comparison signed 32-bit:
+
+  ```text
+  a >= 4*b      -> q = 0
+  3*a >= 4*b    -> q = 1
+  b >= 4*a      -> q = 4
+  otherwise     -> q = 2 + (3*b >= 4*a)
+  ```
+
+- dy > 0: result `(4+q) & 15` for dx > 0, else `(12-q) & 15`. dy <= 0:
+  `(12+q) & 15` for dx < 0, else `(4-q) & 15`. The zero vector gives 4.
+- With y growing downward, (0,-1) gives 0, (1,0) 4, (0,1) 8, (-1,0) 12; the
+  diagonals give 2, 6, 10, 14. Without overflow the quadrant boundaries are the
+  slopes b/a = 1/4, 3/4, 4/3 and 4. A slope exactly on 1/4 or 3/4 takes the
+  lower q; one exactly on 4/3 or 4 takes q 3 or 4. The sectors are not equal
+  angles and there is no rounding step.
+- The products wrap at 32 bits. For |dx| or |dy| at or above 2^29 the slope
+  description fails; the instruction arithmetic still holds.
+
+**Confidence.** High. The listing is the complete body. The original
+instructions, run on synthetic memory, equal the integer model above on all
+1,681 vectors in [-20,20]² and 18 wrap-edge vectors. The two owner EN
+mission-150 records with a target and segments left (`SAV-1130` leaves) carry
+the actiondir the model gives from their saved x/y to actionx/y (2 and 0).
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-direction-start.txt`, `evidence/direction/direction-vectors.tsv`,
+`evidence/direction/direction-boundaries.tsv`, `evidence/save-observations.txt`.
+
+### ANIM-139
+
+- The driver `R0558` returns at once when actionsegments `+0xa0` is zero
+  (`L02817`). Otherwise it saves the pre-move x/y (`L05514`) and, when action
+  `+0x84` is 1 (`L13441`), looks up the word actiontarget `+0x86` in the unit
+  hash at world `+0x9bc/+0x9c0` (`L02823..L13442`).
+- Found: it copies the target's `+0x58/+0x5c` to actionx/y and `+0x10` to
+  actionz, calls `L02828` with the shot as object and actionx/y as arguments,
+  and stores the low byte in actiondir `+0x85` (`L13443..L13444`). The
+  helper reads the shot's current `+08/+0c`, not the cached `+28/+2c`.
+- Not found, or actiontarget 0: actionx/y/z and actiondir keep their values.
+- Either way `L13256` sets dir `+0x6c` to the sign-extended actiondir, and the
+  travel arm `L05578`, which every picture below 13 or above 64 takes, moves the shot and
+  sets dir from actiondir again (`L13445`).
+- The world tick calls the driver through vtable slot `+0x3c` at `L02474`
+  for each store record (`SAV-1133`). The prologue `R0558..L02817` has no
+  return. The picture dispatch `L02833..L13446` sends pictures below 13
+  and above 64 to `L05578`.
+- No call-count test gates the recompute: the counter `+0x94` is incremented
+  after it (`L02831`). The first call is therefore one case of every call;
+  `SAV-1133` states the target lookup.
+
+**Confidence.** High for this path. Four synthetic runs of the original
+fragment `L02823..L02831` separate a moved shot, a moved target and a
+missing target while `+28/+2c` hold unrelated values.
+
+**Unknown.** Which call comes first after a LOAD relative to the first draw;
+no native run was made. The direction writes of the picture-13+ arms.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-direction-start.txt`, `evidence/direction/later-direction.tsv`.
+
+### ANIM-140
+
+- The projectile constructor `R0609` builds a CArray at `+0x138`
+  (`L05586`: data `+0x13c`, count `+0x140`, both 0).
+- `L05588..L05518`: for picture 10 or 12 only, when the count is at least 6
+  it removes element 0 (`L05593`), then appends `(oldY << 16) | oldX` at
+  index count (`L05595`), where oldX/oldY are the x/y saved at `L05514`
+  before the move. Any other picture skips both arms. The arm runs after the
+  travel move of an action-1 call with actionsegments non-zero.
+- The draw loop takes the drawer index from its argument for any picture
+  other than 10 and 12 (`L13447`), so it does not by itself exclude a trail
+  on another picture.
+- Draw: the projectile vtable `L02587` slot `+0x28` is `R0556`. Its loop
+  `L13448..L13449` runs only with a non-zero count, selects the drawer
+  `[L02869 + 4k]` with k = 0 for picture 10 and 1 for picture 12, and visits indices 0..count-1, oldest
+  first. For each point it takes `(p >> 3) & 0x1fff` and `p >> 19`, that is
+  x/8 and y/8, subtracts the view origin, half the sheet size, the shot's
+  current `+0x68` and `+0x10`, and passes the index as the third argument of
+  that drawer's slot `+0x18`.
+- Unit shots use pictures 1..7 and 12 (`SAV-1129`). The owner EN saves hold
+  pictures 1, 2 and 5 for the arrow, bolt and rock; the driver's trail arm
+  appends nothing for them.
+
+**Confidence.** High for the driver's append arm, the six-point bound and the
+draw loop: complete listings. The statement is bounded to the driver. A replay of the remove/append rule over eight calls is in
+`evidence/smoke-replay.txt`.
+
+**Unknown.** Other writers of `+0x138..+0x140`, so whether any other path
+gives pictures 1, 2 or 5 a trail. A typed census of stores to those fields over
+`.text` would settle it. What the
+drawer's slot `+0x18` does with the index argument was not read.
+
+**Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
+`evidence/disasm-smoke.txt`, `evidence/vtables.txt`, `evidence/smoke-replay.txt`.

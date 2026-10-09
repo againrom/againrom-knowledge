@@ -131,6 +131,22 @@ sixteen defaulted leaf reads, terrain/world/ID binding, insertion and a
 post-load helper. The tree is producer-complete but not loader-mandatory.
 — SAV-PROJLOAD-429
 
+LOAD stores the low u16 of FreeIndex into the live counter before it builds
+the records, and SAVE writes that counter back, so a round trip keeps it and
+the next shot takes ID FreeIndex. — SAV-1191
+
+The counter's other writers are the client-world constructor (0) and six
+record insertions (old + 1, wrapping at 65536). No found writer resets it at
+a mission entry or a collect-all clear; the client-world constructor is
+reached only from one virtual method.
+— SAV-1189, SAV-1190
+
+The sixteen leaves are the whole saved record. The projectile trail, which the
+driver fills for pictures 10 and 12, is not saved and starts empty after LOAD. The start point is not saved
+either: `x/y` is the current point. A dead shooter's pending damage is not part
+of the projectile and is never applied; the record itself keeps flying. —
+SAV-1193, SAV-1192, SAV-1133
+
 ## Unknown entries and extension survival
 
 The raw registry loader copies framed records/pool bytes without name

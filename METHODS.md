@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3118. Observation: 95. Static analysis: 2578. Mixed: 445.
+Claims labelled: 3128. Observation: 95. Static analysis: 2588. Mixed: 445.
 
 ## Ledger ai
 
@@ -517,6 +517,9 @@ Claims labelled: 3118. Observation: 95. Static analysis: 2578. Mixed: 445.
 | ANIM-134 | static analysis | ✔ promoted |
 | ANIM-135 | static analysis | ✔ promoted |
 | ANIM-136 | static analysis | ✔ promoted |
+| ANIM-138 | static analysis | ✔ promoted |
+| ANIM-139 | static analysis | ✔ promoted |
+| ANIM-140 | static analysis | ✔ promoted |
 
 ## Ledger databin
 
@@ -2233,6 +2236,13 @@ Claims labelled: 3118. Observation: 95. Static analysis: 2578. Mixed: 445.
 | SAV-1172 | static analysis | ● active (amended) |
 | SAV-1173 | static analysis | ● active |
 | SAV-1180 | static analysis | ✔ promoted |
+| SAV-1188 | static analysis | ✔ promoted |
+| SAV-1189 | static analysis | ✔ promoted |
+| SAV-1190 | static analysis | ✔ promoted |
+| SAV-1191 | static analysis | ✔ promoted |
+| SAV-1192 | static analysis | ✔ promoted |
+| SAV-1193 | static analysis | ✔ promoted |
+| SAV-1194 | static analysis | ● active |
 
 ## Ledger session
 

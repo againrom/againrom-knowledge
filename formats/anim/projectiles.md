@@ -22,9 +22,11 @@ object size 0x14c; the save also carries [Projectiles] Count / FreeIndex / IDs
 
 ```
 if actionsegments == 0            -> the object is finished
-if actiontarget != 0              -> actionx/y/z := the target's CURRENT position
+if action == 1 and actiontarget is found
+                                  -> actionx/y/z := the target's CURRENT centre
+                                  -> actiondir := direction(x/y -> actionx/y)
 step                              := (actionx - x) / actionsegments, per axis
-actiondir                         := recomputed from the two coordinates
+dir                               := actiondir
 actionphase                       += 1
 lastaction := action ; actionsegments -= 1
 ```
@@ -48,6 +50,43 @@ Palette == 0 -> the shared projectiles.pal, otherwise the sheet's own
 the sheet is loaded on FIRST DRAW, not at start-up
 picture 10 and 12 also blit a smoke sheet once per point of the object's trail array
 ```
+
+## Direction, unit-shot origin and trail
+
+The direction helper takes `dx = targetX - x`, `dy = targetY - y`, `a = |dx|`,
+`b = |dy|`, all signed 32-bit, and picks q in this order:
+
+```text
+a >= 4*b     -> q = 0
+3*a >= 4*b   -> q = 1
+b >= 4*a     -> q = 4
+otherwise    -> q = 2 + (3*b >= 4*a)
+dy > 0       -> dx > 0 ? 4+q : 12-q
+dy <= 0      -> dx < 0 ? 12+q : 4-q        (result & 15; zero vector -> 4)
+```
+
+N, E, S and W are 0, 4, 8 and 12 with y growing downward. Quadrant boundaries
+are the slopes 1/4, 3/4, 4/3 and 4, not equal angles. — ANIM-138
+
+The driver recomputes actiondir on every action-1 call that finds its target,
+from the current x/y, not from the launch point; a lost target keeps the last
+actiondir and aim point. dir follows actiondir on every action-1 call with
+non-zero actionsegments; the finished return and the non-action-1 arm leave
+dir unchanged. — ANIM-139
+
+A unit shot starts at `shooter.x/y + 8 * (ShootOffset[pair] - Center)`, where
+the class array holds eight XY pairs and `pair = ((dir - 8) & 14) / 2`, so
+S, SW, W, NW, N, NE, E and SE use pairs 0..7. Its base is the shooter's current
+x/y; a cast uses the cached centre and has a fallback. — SAV-1188
+
+The driver appends trail points for pictures 10 and 12 only: at most six
+pre-move points, packed `(y << 16) | x`, appended after each travel step with
+the oldest dropped. The draw visits the trail oldest first at x/8, y/8 and the
+shot's current height. The driver appends none for pictures 1, 2 and 5 (arrow,
+bolt, rock); other trail writers were not searched. — ANIM-140
+
+SAVE does not write the trail; a loaded record starts with an empty one, and
+the driver refills it for pictures 10 and 12. — SAV-1193
 
 
 ## Picture-7 coordinate callback
