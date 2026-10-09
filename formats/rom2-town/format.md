@@ -71,9 +71,9 @@ establish a fixed RGB565 display (`R2-ENGINE-232`, `R2-ASSET-051`, High).
 
 Conditional entry creates child ID 0x467 with rectangle bounds
 (left=328, top=0, right=640, bottom=200), passed through SetRect.
-Its extent is 312x200. These operands are High; whether the coordinates
-are relative to the view or screen, its live purpose and visibility are
-Unknown. The tip getter supplies text
+Its extent is 312x200. These operands are High. The child is the tips
+panel class built when the TipsMode option is nonzero. Its bounds are relative to the view (Medium)
+(`R2-ENGINE-273`, `R2-ENGINE-274`). Live visibility is Unknown. The tip getter supplies text
 keys, but the final receiver, status line, buttons and their destinations
 are not established. No absence of these elements is claimed
 (`R2-ENGINE-238`, amended, High / Unknown).
@@ -113,8 +113,8 @@ Click EN `L2.00590` / RU `L2.00591` uses Scenario variable 0x300 as the
 dialogue suffix. Shop, inn and gate clicks prepare departure before
 posting. Selector 16 opens a 440x340 main menu at (100,100), not a school.
 Its native constructor binds save, load, sound, quest end, return and exit
-labels. Gate acceptance after the posted messages is Unknown
-(`R2-ENGINE-234`, High for posting and identified receivers).
+labels. The posted 0x442 and 0x42d have the receivers described under
+Town 1 gate navigation (`R2-ENGINE-234`, `R2-ENGINE-271`, `R2-ENGINE-272`).
 
 Tip indices are 233/236/237/235 for shop/inn/gates/menu and
 359/360/361/362 for girl1/girl2/guard/dervish. The last region is labelled
@@ -205,8 +205,7 @@ triggers and the shop-frame pixel decoder remain Unknown
 ## Unknown boundaries
 
 Shell text, status and buttons need a native trace from the active Kaarg
-tip getter to the final renderer and destinations. Gate acceptance needs
-the receivers after 0x442/0x42d. Full Kaarg room destinations and schedules
+tip getter to the final renderer and destinations. Full Kaarg room destinations and schedules
 need further derived painters and scheduling callers. Authorized original observation would
 settle live pixels, device conversion and elapsed-time appearance.
 Exhaustive campaign order needs the availability/event graph or an
@@ -272,7 +271,7 @@ The active painter follows this order. Destinations add to the view origin. Town
 | 14 | DERVISH | selected position | retained frame |
 | 15 | shared children | delegated | after square layers |
 
-The initializer attaches child 0x445. Entry can attach child 0x467 with native rectangle (328,0,640,200), extent 312x200. Its view/screen coordinate reference, live purpose and visibility are Unknown. The generic own-overlay method is empty; shared child dispatch remains. No absence of other shell text, status or buttons is claimed (`R2-ENGINE-239`).
+The initializer attaches child 0x445. Entry attaches child 0x467 with native rectangle (328,0,640,200), extent 312x200, when TipsMode is nonzero; Town 1 tips panel describes it (`R2-ENGINE-274`). The generic own-overlay method is empty; shared child dispatch remains. No absence of other shell text, status or buttons is claimed (`R2-ENGINE-239`).
 
 The selected EN delayed-tip receiver calls the child at the pointer and its tip slot. Text appears when its elapsed accumulator crosses 500 ms while below 25500 ms and the native admission fields allow it. For pointer (x,y), maximum line width w and line count n, the initial box is (x,y-5-14n,x+w+11,y); right/top overflow is shifted inside maintained screen bounds. Text begins at (left+5,top+4+14i). Live admission and other shell visibility remain Unknown (`R2-ENGINE-239`, High for the selected native receiver).
 
@@ -292,9 +291,45 @@ The 640x480 mask has 307200 cells and 150 distinct raw indices. The sampler subt
 | 176 | 0x10 | 5592 | main menu | post 0x41f |
 | 192 | 4 | 14733 | school | no room or other click action |
 
-Only shop/inn draw separate hover highlights. Shop starts its enter sound under a latch and can start shopie when `rand()%100>95`. School takes an explicit hover no-op after common selector/guard-direction writes. Other ordinary selectors OR their value into animation flags; inn activates tavern, menu activates stars,0x200 can set BABA and 0x400 sets DERVISH. The complete selected advance has no receiver for 0x800/0x1000. Gate hover controls guard direction through flag 0x301. Tip indices 233/236/234/237/235 identify shop/inn/school/gates/menu. Posted gate navigation acceptance and actual flag value remain Unknown (`R2-ENGINE-241`, High for finite native dispatch).
+Only shop/inn draw separate hover highlights. Shop starts its enter sound under a latch and can start shopie when `rand()%100>95`. School takes an explicit hover no-op after common selector/guard-direction writes. Other ordinary selectors OR their value into animation flags; inn activates tavern, menu activates stars,0x200 can set BABA and 0x400 sets DERVISH. The complete selected advance has no receiver for 0x800/0x1000. Gate hover controls guard direction through flag 0x301. Tip indices 233/236/234/237/235 identify shop/inn/school/gates/menu (`R2-ENGINE-241`, High for finite native dispatch). Town 1 gate flag and Town 1 gate navigation give the flag value and the receivers of the posted messages.
 
 The remaining EN input slots +0x48/+0x4c/+0x50/+0x58..+0x70 contain no direct selector+0xb4 read that opens a room. Motion delegates to the measured hover; the key body accepts Enter/Escape and forwards other keys. The school and four figure click result is bounded to these input bodies and the finite click table (`R2-ENGINE-241`, amended).
+
+### Town 1 gate flag
+
+Flag 0x301 is Scenario bank slot 769. In both DLL images its only literal store sets 1 in the kind-3 TalkTo arm when the topic is 10. NewGame clears the bank and Load restores it raw. No indexed DLL store and no client SetVar call through the ordinal cells reaches slot 769. Indirect client calls outside those cells are not searched (`R2-SESSION-127`, High).
+
+| Campaign point | Slot 769 | Gate |
+|---|---|---|
+| first town-1 entry after NewGame | 0 | T08, guard reversed, click shows `plagatguard` |
+| after the stage-10 inn talk with NPC 517, topic 10 | 1 | cursor follows the pointer, click posts 0x442(1,0) then 0x42d |
+| any later point | 1 until NewGame or Load | town 1 is no longer available |
+
+ScenarioSave writes the bank raw, so the flag is at byte 0xC04 of that record. Live inn admission of NPC 517 is unobserved (`R2-SESSION-128`, High / Medium).
+
+### Town 1 gate navigation
+
+The application dispatcher routes 0x442 and 0x42d through its switch tables to fixed arms in both locales.
+
+1. 0x442 copies `patch.txt` zero-based line index 55 (wParam 0) or 95 (otherwise) to a 256-byte application label, formats `game%d.sav` with 9999-wParam and calls the single-player save driver. With application mode word 2 the driver works on the named file and appends the label at its end. With any other mode it puts the name into a type-7 record and passes it to a recipient-list dispatcher; what the recipients do is Unknown. The gate's wParam 1 gives `game9998.sav`. The label as a restore-point description and the meaning of mode 2 are Medium (`R2-ENGINE-271`, High for the branch structure).
+2. 0x42d reads the current location. For a town it moves the map position to the town's coordinates and calls LeaveLocation; a nonnegative output plays `video\%s\%02d.smk`, and leaving town 1 outputs -1. Leaving town ID 1 also sets the map's route mode. A current record that is not type 2 skips the position set, LeaveLocation, the cutscene and the town-ID test. It then opens the global map and sets application bit 0x10; it requests `music\map.wav` only when EN global `L2.00878` is nonzero, and the map enter loads `main\text\globalmap.txt` (`R2-ENGINE-272`, High).
+3. In route mode the map routes to the first available location, then posts 0x468 and calls EnterLocation on that location. 0x468 runs the mission path for a type-1 location and the town dispatcher otherwise. After the stage-10 talk that location is mission 10 (`R2-ENGINE-272`, Medium).
+
+Neither receiver refuses navigation. A false flag stops the click before posting.
+
+### Town 1 tips panel
+
+The TipsMode option global starts at 1, is read from the registry value `TipsMode`, and is written by the options dialog's Tips checkbox and the panel's own checkbox (`R2-ENGINE-273`, High). When it is nonzero, town-1 entry builds child 0x467, a 312x200 panel at (328,0) relative to the view (`R2-ENGINE-274`, High / Medium for the screen position).
+
+| Control | Rectangle in the panel | Content |
+|---|---|---|
+| text | (20,24)-(284,164) | `town.txt` section `#tips1` |
+| button | (192,160)-(272,178) | `main.txt` index 127, EN "Close" |
+| checkbox | (40,160)-(188,176) | `main.txt` index 128, EN "Show tips next time", initially checked |
+
+Text indices are zero-based line indices.
+
+The panel draws a frame of `graphics\interface\lm.256` pieces with a shadow pass, corners, tiled edges and a fill, then its children. It takes mouse input. Close posts 0x45a; the application passes it to the room stack, which offers it to its children, and the square deletes the panel (`R2-ENGINE-275`, Medium for that delivery). The checkbox state goes to TipsMode, so a cleared box skips the panel at later town entries (`R2-ENGINE-274`, `R2-ENGINE-275`, High).
 
 ### Town 1 animation
 
@@ -310,7 +345,7 @@ The painter admits one step when unsigned elapsed time exceeds 67 ms, sets a new
 
 These five rules are native episode state, not a promised live frame rate. Entry requests Crowd.wav through its loop-start helper. The lazy step baseline and stars blank counter persist across entry (`R2-ENGINE-242`).
 
-Gates use T00..08 at (180,148). Flag 0x301 false selects T08 immediately. The visual "closed" label for T08 is unmeasured. With the flag true, pointer gate 8 decrements toward 0; away increments toward 8, with endpoint clamps. Direction changes request GateUp/GateDn. Guards use eight frames at (184,158), begin at 7 and add hover direction. Common hover sets 1; gate hover with flag false sets -1. Endpoints 0/7 stop motion and release the guard sound handle; direction transitions request Guard1/Guard2. Actual flag value and accepted navigation remain Unknown (`R2-ENGINE-243`, amended, High for selected native cursor rules).
+Gates use T00..08 at (180,148). Flag 0x301 false selects T08 immediately. The visual "closed" label for T08 is unmeasured. With the flag true, pointer gate 8 decrements toward 0; away increments toward 8, with endpoint clamps. Direction changes request GateUp/GateDn. Guards use eight frames at (184,158), begin at 7 and add hover direction. Common hover sets 1; gate hover with flag false sets -1. Endpoints 0/7 stop motion and release the guard sound handle; direction transitions request Guard1/Guard2 (`R2-ENGINE-243`, amended, High for selected native cursor rules). Town 1 gate flag gives the flag value.
 
 | Variant | HORSE position | BABA position | DERVISH position |
 |---|---|---|---|

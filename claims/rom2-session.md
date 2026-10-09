@@ -1087,3 +1087,82 @@ dependency and supplies no original playthrough.
 the client's accepted-visit conditions, actual town3 visit scheduling
 and exhaustive town order. Closing the availability/caller graph or an
 authorized original route would settle those alternatives.
+
+## Town-1 gate flag
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-127 | In both ROM2 Scenario.dll images bank slot 769 has one literal store, kind-3 topic-10 TalkTo, plus NewGame's clear and Load's raw restore; no indexed DLL store or client SetVar call site reaches 769. | High | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-SESSION-128 | ROM2 flag 0x301 is 0 at the first town-1 entry of a new campaign, becomes 1 after the stage-10 inn talk with topic 10, is never cleared later, and travels in the SAV as ScenarioSave bank offset 0xC04. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+
+### R2-SESSION-127
+
+Flag 0x301 is bank slot 769, address `D2.00222` (bank base `D2.00003`,
+1024 DWORDs). Population: every byte start in every section of the EN and
+RU `Scenario.dll` images, every bank operand of their linear `.text`
+sweeps, and every `.text` call or store through the client's eighteen
+ordinal cells in both `allods2.exe` images.
+
+- The raw scan finds the slot address once per image, at `D2.00121`:
+  `mov [D2.00222],1` in the TalkTo kind-3 arm, after AddMission(topic)
+  and an equality with the ID of object `D2.00143` (R2-SESSION-110). That
+  object has raw references only at its constructor, the catalog rebuild
+  and the getter; its field setter `D2.00086` has one caller, the
+  initializer, which passes type 1 and ID 10.
+- Bulk writers: NewGame clears 4096 bytes at `D2.00223`; Load reads 4096
+  bytes into the bank at `D2.00224`. Save writes the same 4096 bytes at
+  `D2.00225`.
+- Indexed stores and their slot ranges: SetVar export `D2.00226` (client
+  index); EnterLocation `D2.00227` (752..767); Leave and NewGame loops
+  `D2.00228`, `D2.00229`, `D2.00230`, `D2.00231` (512..551); ordinary Leave
+  `D2.00120` (896+ID; 769 needs ID -127, and all 52 record constructors pass
+  positive constant IDs); TalkTo kind-1 toggle `D2.00199` (511+low16; the
+  inn emits hire IDs 1..20, R2-ENGINE-247).
+- The client calls SetVar from eight `.text` sites per locale (EN
+  `L2.00917`, `L2.00918`, `L2.00919`, `L2.00920`, `L2.00921`, `L2.00922`,
+  `L2.00923`, `L2.00924`). Their indices are 531+key for key 1..20, 776,
+  781 and the literal targets of script instants 35 and 36. Over the 46
+  installed maps of `scenario.res` per locale, none of those targets is 769
+  (R2-SESSION-114).
+- The client reads 0x301 at three sites per locale: EN `L2.00925` (gate
+  click), `L2.00926` (gate helper) and `L2.00927` (gate hover); RU
+  `L2.00928`, `L2.00929`, `L2.00930`.
+- The module handle the ordinal bindings read (EN `L2.00390`, RU
+  `L2.00391`) has 21 raw references per locale, all within EN
+  `L2.00931..L2.00932` / RU `L2.00933..L2.00934`, the span that holds the
+  ordinal bindings. No other client code reuses that handle.
+
+All eleven DLL bodies are equal in EN and RU, address for address.
+
+**Confidence.** High for the searched population. The raw scan and the
+operand census exclude a second literal or indexed DLL writer; the call-site
+census excludes a client SetVar to 769 through the ordinal cells.
+
+**Unknown.** A second load of `Scenario.dll` by name through LoadLibrary or
+GetModuleHandle, and scripts outside the 46 installed maps. A census of
+module-name strings and their loader calls would settle the first.
+
+### R2-SESSION-128
+
+1. NewGame clears the bank, leaves slot 768 = 10 and enters type-2 ID 1
+   (R2-SESSION-023). Slot 769 is 0 at the first town-1 entry. The gate
+   helper selects T08, the guard reverses and a gate click shows
+   `plagatguard` (R2-ENGINE-243, R2-ENGINE-241).
+2. The stage-10 inn offers NPC 517 with kind-3 topic 10 (R2-ENGINE-247).
+   That talk stores 1 (R2-SESSION-127). None of the other kind-3 topics is
+   10 (R2-ENGINE-229).
+3. No writer stores 0 afterwards. Only NewGame and Load replace the slot.
+4. Leaving town 1 removes ID 1 from availability (R2-SESSION-023); the named
+   fresh path does not return to town 1 (R2-SESSION-112).
+
+ScenarioSave writes the raw bank first (R2-SESSION-021), so slot 769 is at
+byte offset 0xC04 of that record, and ScenarioLoad restores it. Owner saves
+B, C and D of R2-SESSION-077 hold 769 = 1; A holds 0.
+
+**Confidence.** High for the static order, the absence of a later clear in
+the searched population and the SAV position. Medium that the stage-10
+talk with NPC 517 is the only way the value becomes 1 in play: live inn
+admission of that speaker is not observed.
+
+**Unknown.** The live order of inn talks and gate clicks in play. An
+authorized runtime trace would settle it.

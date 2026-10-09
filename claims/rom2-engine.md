@@ -2726,7 +2726,7 @@ Rectangle bounds and command-line/registry precedence replace them.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-239 | ROM2 town ID 1 binds the generic native square and a centered 640x480 rectangle; the selected shared receiver draws delayed pointer tips, while other shell visibility remains unobserved. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-239 | ROM2 town ID 1 binds the generic native square and a centered 640x480 rectangle; the selected shared receiver draws delayed pointer tips, while other shell visibility remains unobserved. | High | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-240 | The selected ROM2 town-1 loader has 19 graphics-interface key literals; its painter orders bitmap, sprite and child layers, with three loaded graphics absent from the complete painter and advance bodies. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-241 | ROM2 town 1 has nine positive mask selectors across 150 raw pixel indices; finite native tables separate hover and click effects, and the school selector has a tip but opens no room. | High | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-242 | The selected ROM2 town-1 painter admits one animation step after elapsed time exceeds 67 ms; its tavern, sign, stars, shopie and weather vane use distinct finite episode rules. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
@@ -2746,6 +2746,8 @@ The EN shared pointer receiver `L2.00714..L2.00715` finds the child at the point
 **Confidence.** High for the selected generic bindings, rectangle arithmetic, conditional child operands and EN tip receiver. The PE/Capstone instrument records input hashes and versions, verifies complete selected instruction ranges and direct branch boundaries, and checks vtable cells. This excludes an art-only view substitution, a full-screen-scaled town rectangle and an untraced final tip destination within the selected receiver.
 
 **Unknown.** Live visibility and purpose of child `0x467`, its view/screen coordinate reference, and other status text or buttons remain unobserved. The seven EN shell bodies are not a complete shell census. Native execution with a recorded screen state would settle these clauses.
+
+**Amended.** R2-ENGINE-274 identifies child `0x467` as the TipsMode tips panel with parent-relative bounds, and R2-ENGINE-273 names the writers of `L2.00713`. Live visibility remains unobserved.
 
 ### R2-ENGINE-240
 
@@ -2826,7 +2828,7 @@ The EN [input-slot census](../experiments/EXP-2030-rom2-first-town/evidence/meas
 
 **Unknown.** Live flag 0x301 value, the retained descriptor's actual pointer graphic, accepted gate navigation and the effects of unobserved shell admission remain open. Selected posting is not proof that the destination accepts navigation. Recorded native execution would settle these live clauses; a bounded descriptor initialization trace would settle its graphic.
 
-**Amended.** The former "departure prepare 0x445" label is corrected to a leave-and-remove request. The selector map and school no-op stand. See the correction entry in [retracted.md](retracted.md).
+**Amended.** The former "departure prepare 0x445" label is corrected to a leave-and-remove request. The selector map and school no-op stand. See the correction entry in [retracted.md](retracted.md). R2-ENGINE-271 and R2-ENGINE-272 give the receivers of the posted gate messages 0x442 and 0x42d; R2-SESSION-128 gives the flag value.
 
 ### R2-ENGINE-242
 
@@ -2866,7 +2868,7 @@ Evidence is the complete [gate helper](../experiments/EXP-2030-rom2-first-town/e
 
 **Unknown.** The visual "closed" label for T08, actual flag 0x301 value, campaign reason for its value, sound playback and acceptance of posted navigation remain unobserved. A measured art-state join would settle the label. The campaign flag writer graph and an authorized runtime trace would settle the live clauses without changing the bounded cursor rules.
 
-**Amended.** The unmeasured "closed" label for T08 is withdrawn from the observed rule. The flag-false T08 selection and cursor mechanics stand. See the narrowing entry in [retracted.md](retracted.md).
+**Amended.** The unmeasured "closed" label for T08 is withdrawn from the observed rule. The flag-false T08 selection and cursor mechanics stand. See the narrowing entry in [retracted.md](retracted.md). R2-SESSION-128 settles the campaign value of flag 0x301: 0 at the first town-1 entry, 1 after the stage-10 topic-10 talk.
 
 ### R2-ENGINE-244
 
@@ -3654,3 +3656,195 @@ dataSize.
 **Confidence.** High for the selected EN bodies and their exact stop at the
 installed frame's data end in both locales. Unknown for RU reader bodies
 and device output.
+
+## Town-1 gate navigation and tips panel
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-271 | ROM2 message 0x442 sets a patch.txt label, names game(9999-wParam).sav and calls the save driver: mode word 2 saves and appends the label, other modes send the name in a type-7 record; the gate gives game9998.sav. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-ENGINE-272 | ROM2 message 0x42d leaves a current town through LeaveLocation and opens the global map; leaving town ID 1 sets a map mode that routes to and enters the first available location. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-ENGINE-273 | ROM2 global L2.00713 is the TipsMode option: the options constructor sets 1, and registry load, the options Tips checkbox and the tips-panel checkbox write it; the client has no other writer. | High | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-ENGINE-274 | ROM2 town child 0x467 is a 312x200 tips panel framed from lm.256 with town.txt section #tips1, a Close button and a checked Show-tips checkbox at fixed panel-relative rectangles. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-ENGINE-275 | The ROM2 tips panel takes mouse input: Close posts 0x45a, which makes the town square delete the panel; the checkbox state is stored into TipsMode and decides the panel at later town entries. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+
+### R2-ENGINE-271
+
+The application message dispatcher EN `L2.00262` / RU `R2.0036` subtracts
+0x416 and indexes a byte table and a dword table (EN limit 0x73, RU 0x78).
+Message 0x442 resolves to EN `L2.00857` / RU `L2.00858`; both arms have 40
+instructions with equal mnemonics.
+
+1. wParam 0 copies `patch.txt` zero-based line index 55 into app+0x148; any
+   other wParam copies index 95. Pool `L2.00859` holds `patch.txt`; the pool
+   load appends lines from the first line on, and the getter adds index n to
+   the pool base. The EN lines are "Restart last mission" and "Abort mission
+   and return to town".
+2. `game%d.sav` is formatted with 9999-wParam into app+0x248.
+3. The arm calls save driver EN `L2.00860` / RU `R2.0166`, the
+   single-player save driver of R2-SESSION-021. Its first test compares
+   app+0x5d8 (RU +0x63c) with 2.
+4. timeGetTime goes to app+0x424; app+0x40c and app+0x428 become 0 (RU
+   +0x43c, +0x424, +0x440).
+
+The two branches of the driver:
+
+- **Mode word 2.** The driver calls `L2.00861` on global `L2.00805` with
+  the app+0x248 name. It then opens that file without the create flag,
+  moves to its end through SetFilePointer and writes the 256 bytes at
+  app+0x148 through WriteFile (`L2.00862`, `L2.00863`, `L2.00864`). The
+  label is appended at the end of the named file. The body ends with a
+  jump past the other branch.
+- **Any other value.** The `jne` goes to EN `L2.00865` / RU `L2.00866`. That
+  branch passes the app+0x248 name to EN `L2.00867` / RU `L2.00868` on
+  app+0xd0 and returns. The callee fills global record EN `L2.00869` / RU
+  `L2.00870`: byte +9 = 7, word +5 from the word at app+0xd0's +0x9cc
+  object +4, word +7 = 0, and the name at +0xf. It passes the record to EN
+  `L2.00871` on object `L2.00872`. With word +7 zero, that body walks the
+  list at +0x18b8 and calls the record's slot +8 for each element that
+  passes its admission tests. The RU dispatch body `L2.00459` is paired by
+  call operand; its instruction sequence differs from EN.
+
+The town-1 gate posts 0x442 with wParam 1 (R2-ENGINE-241). In mode word 2
+the driver therefore works on `game9998.sav` and appends the index-95
+label to it.
+
+**Confidence.** High for the switch cells, the arm, the branch structure
+of the driver, the label append in mode 2 and the type-7 record fields in
+both locales. Medium that the labels describe restore points for
+"restart" and "abort to town", and that mode 2 is single-player campaign
+play: the readers of the appended label and the writers of app+0x5d8 were
+not traced.
+
+**Unknown.** What the type-7 record does at its recipients, and which mode
+values reach it. Which code loads `game9998.sav` or `game9999.sav`, and the
+meaning of app+0x404 bits beyond 0x10. Reading the recipients' slot +8
+bodies, the writers of app+0x5d8 and the load path of `game%d.sav` would
+settle them.
+
+### R2-ENGINE-272
+
+Message 0x42d resolves to EN `L2.00873` / RU `L2.00874`; both arms have
+37 instructions with equal mnemonics and operands. The map view is
+app+0xf0.
+
+1. GetCurrentLocation (ordinal 18) gives the current record. Map+0x1b0
+   becomes 0.
+2. If the record type is 2, map position +0x104/+0x108 is set from the
+   record coordinates (town 1: 215,234) and LeaveLocation (ordinal 6) runs.
+   An output of at least 0 plays `video\%s\%02d.smk` through EN `L2.00875`;
+   leaving town 1 gives -1 (R2-SESSION-023). If the record ID is 1, map+0x1b0
+   becomes 1.
+3. EN `L2.00876` / RU `L2.00877` opens the map: it adds app+0xf0 to room
+   stack app+0xcc, calls its enter slot +0x80 and sets bit 0x10 in app+0x404
+   (RU +0x41c). It requests `music\map.wav` only when EN global `L2.00878` is
+   nonzero (`L2.00879`). The map enter EN `L2.00880`
+   loads `main\text\globalmap.txt`.
+
+With map+0x1b0 nonzero, map paint EN `L2.00881` / RU `L2.00882` sets a
+route from the current position to the coordinates of the first record of
+GetAvailableLocations and sets +0x12c to 8. When the route ends it posts
+0x468 and calls EnterLocation (ordinal 5) on that first record; with
+map+0x1b0 zero it takes the selection path instead. The 0x468 arm EN
+`L2.00827` calls `L2.00466` and `R2.0026` for a type-1 current record and
+town dispatcher `L2.00266` (R2-ENGINE-231) otherwise.
+
+Neither arm refuses navigation. A false flag 0x301 stops the gate click
+before posting (R2-ENGINE-241). A current record that is not type 2 skips
+the map position set, LeaveLocation, the cutscene and the town-ID test; a
+town other than ID 1 opens the map without the route mode.
+After the stage-10 inn talk the availability list holds mission 10
+(R2-SESSION-110, R2-SESSION-023).
+
+**Confidence.** High for both arms, the map open and the map-paint branch
+in both locales. Medium that the town-1 gate leads to mission 10: the list
+content is a static derivation, not an observed map. Medium for labelling
+`R2.0026` the mission path.
+
+**Unknown.** The map's appearance in route mode and the live route
+duration. An authorized capture would settle them.
+
+### R2-ENGINE-273
+
+`L2.00713` (RU `L2.00883`). A raw scan of every byte start in every
+section of both clients finds 21 references per locale: four writers and
+seventeen readers.
+
+| Writer | EN | RU | Value |
+|---|---|---|---|
+| options constructor | `L2.00884` | `L2.00885` | 1 |
+| registry load | `L2.00886` | `L2.00887` | registry value `TipsMode` |
+| options dialog on 0x445 | `L2.00888` | `L2.00889` | control 0xd state through checkbox get +0x3c |
+| tips panel on 0x46e | `L2.00890` | `L2.00891` | lParam from control 0xf (RU 0x10) |
+
+The options dialog binds control 0xd to `dialogs.txt` index 156 ("Tips")
+only in mode 2; otherwise it binds `L2.00892` with index 175 ("Names &
+Clans"). Registry store `L2.00893` writes the global back. Readers include
+the town-1 enter `L2.00894` and the Kaarg enter `L2.00895`.
+
+**Confidence.** High. The raw scan covers every byte start; each hit
+decodes to the named instruction, and EN and RU bodies agree.
+
+### R2-ENGINE-274
+
+Town-1 enter EN `L2.00710` tests TipsMode at `L2.00894`. When it is
+nonzero it reads `town.txt` section `#tips1` through `L2.00896`
+(`#tips%d` with argument 1) and constructs class EN `L2.00633` / RU
+`L2.00897` with ID 0x467 and rectangle (328,0,640,200). The Kaarg enter
+builds the same class under the same TipsMode test (R2-ENGINE-238,
+R2-ENGINE-273).
+
+Panel init EN `L2.00898` / RU `L2.00899` builds three children from the
+panel extent W=312, H=200:
+
+| Control | ID (RU) | Class | Rectangle | Content |
+|---|---|---|---|---|
+| text | 0xd (0xe) | `L2.00900` | (20,24)-(W-28,H-36) = (20,24)-(284,164) | the section text |
+| button | 0xe (0xf) | `L2.00901` | (W-120,H-40)-(W-40,H-22) = (192,160)-(272,178) | `main.txt` index 127, EN "Close"; message 0x45a |
+| checkbox | 0xf (0x10) | `L2.00902` | (40,H-40)-(W-124,H-24) = (40,160)-(188,176) | `main.txt` index 128, EN "Show tips next time"; state 1 |
+
+Text indices are zero-based line indices of the text pool (R2-ENGINE-271).
+The EN `#tips1` section is 313 bytes and RU 284 bytes. Panel overlay EN
+`L2.00903` draws frame pieces of `graphics\interface\lm.256` (loaded at
+`L2.00904`): a shadow pass through slot +0x1c with pieces 0xc, 0xf, 0x11,
+0x10 and 0xe, then corners 0xa, 0xc, 0xf and 0x11, edges 0xb and 0x10 every
+48 pixels, edges 0xd and 0xe every 32 pixels and fill piece 9. Children
+paint through `L2.00578`.
+
+A child rectangle is parent-relative: `L2.00905` calls `L2.00906`, which
+adds each parent's left and top along +0x30. Room stack app+0xcc is built
+at `L2.00907` with rectangle (0,0,width,height) and no parent.
+
+**Confidence.** High for the construction, rectangles, keys and frame
+pieces; EN and RU bodies agree. Medium that the panel appears at view
+origin plus (328,0): the live parent chain of the square is inferred from
+these construction paths.
+
+**Unknown.** Live pixels and text wrapping in the text control. An
+authorized capture would settle them.
+
+### R2-ENGINE-275
+
+Panel message slot EN `L2.00908` returns 0 for 0x100, 0x445 and 0x446. For
+0x202 it first calls slot +0x58; 0x202 and every other message then go to
+the shared child dispatcher `L2.00782`.
+
+- The Close button posts its message 0x45a to the application on release
+  `L2.00909` or hotkey `L2.00910`. App arm 0x45a EN `L2.00911` removes and
+  deletes mission-view child 0x10 (RU 0x11) when it exists; otherwise it
+  calls slot +0x48 of room stack app+0xcc. The stack is built by window
+  constructor EN `L2.00635`, whose vtable EN `L2.00671` / RU `L2.00912`
+  has slot +0x48 EN `L2.00913` / RU `L2.00914`. That slot passes a
+  non-mouse message to EN `L2.00915`, which offers it to each child in
+  list order, without a rectangle test, until one returns nonzero. Town
+  square slot +0x48 `L2.00726` receives it as a stack child and removes and
+  deletes the child at view+0x200 and clears that field. Delivery to the
+  square rather than an earlier stack child is an inference from that
+  loop.
+- Checkbox toggle `L2.00916` flips its state and sends 0x46e with its ID and
+  state to the parent's slot +0x48. The panel stores the state in TipsMode
+  (R2-ENGINE-273). A cleared box therefore skips the panel at the next town
+  entry.
+
+**Confidence.** High for the panel, button, checkbox, application, window
+and square bodies in both locales. Medium that no stack child before the
+square consumes 0x45a.

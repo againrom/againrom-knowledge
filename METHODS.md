@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3138. Observation: 95. Static analysis: 2596. Mixed: 447.
+Claims labelled: 3145. Observation: 95. Static analysis: 2602. Mixed: 448.
 
 ## Ledger ai
 
@@ -1664,7 +1664,7 @@ Claims labelled: 3138. Observation: 95. Static analysis: 2596. Mixed: 447.
 | R2-ENGINE-236 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-237 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-238 | static analysis | ● active (branch candidate, partially retracted) |
-| R2-ENGINE-239 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-239 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-240 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-241 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-242 | static analysis | ● active (branch candidate) |
@@ -1694,6 +1694,11 @@ Claims labelled: 3138. Observation: 95. Static analysis: 2596. Mixed: 447.
 | R2-ENGINE-268 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-269 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-270 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-271 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-272 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-273 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-274 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-275 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 
@@ -1752,6 +1757,8 @@ Claims labelled: 3138. Observation: 95. Static analysis: 2596. Mixed: 447.
 | R2-SESSION-114 | mixed | ✔ promoted |
 | R2-SESSION-115 | mixed | ● active (branch candidate) |
 | R2-SESSION-123 | static analysis | ● active (branch candidate) |
+| R2-SESSION-127 | static analysis | ● active (branch candidate) |
+| R2-SESSION-128 | mixed | ● active (branch candidate) |
 
 ## Ledger sav
 
