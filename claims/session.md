@@ -575,3 +575,105 @@ The bounded control study reads 66 complete routines,6 windows and 3 data ranges
 
 **Evidence.** [EXP-0351](../experiments/EXP-0351-authored-player-control/)
 
+## Random stream threads and reseeds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SESS-082 | `rom.exe` has six secondary thread entries with creator code; only the unlaunched server loop `R0261` can reach `rand` or `srand`, so the draws run on the main thread, and no image-created thread runs sound or video. | High / Medium | ✔ promoted | [EXP-0507](../experiments/EXP-0507-random-stream/) |
+| SESS-083 | The main thread's stream starts at seed 1 and draws at start-up before sound initialisation reseeds it from `timeGetTime`; mission and save load reseed from `time(0)` before their first direct draw. | High / Medium / Unknown | ✔ promoted | [EXP-0507](../experiments/EXP-0507-random-stream/) |
+
+### SESS-082
+
+- **Census.** The `CreateThread` import `L13586` is referenced by CRT
+  `_beginthread` `R0457`, `_beginthreadex` `R1676` and an unreferenced
+  thunk `L13587`. `_beginthread` has seven call sites in six image
+  functions. `_beginthreadex` is called only by MFC `CWinThread::CreateThread`
+  `L13588`, whose callers are `L06389` and the library wrappers `L13589`
+  and `L13590`, which have no reference. The image has no TLS directory and
+  no `_beginthread`, `timeSetEvent`, `SetTimer`, `QueueUserWorkItem` or
+  `CreateTimerQueue` string (`SESS-TIMER-022`).
+- **Threads.**
+
+  | Thread | Entry | Creator | Closure | Reaches |
+  |---|---|---|---|---|
+  | server loop | `R0261` | `R0456`, no reference | 1630 | `rand`, `srand` |
+  | map scan (`*.alm` list) | `L13591` | `L06389`, slot `+0x78` of window vtable `L06390` | 162 | none |
+  | Winsock receive | `L13592` | `L13593`, `L13594` | 125 | none |
+  | Winsock accept | `L13593` | `L13595` | 111 | none |
+  | Winsock accept | `L13596` | `L13595` | 91 | none |
+  | DirectPlay receive | `L13597` | `L02814`, `L02815` | 469 | none |
+
+  A closure follows direct calls and tail jumps from the entry, plus the slots
+  of each vtable whose constructor store was read (map scan: map-info and file
+  objects; DirectPlay receive: the network object and its packets, including
+  the network pump `R2085` reached on the destroy-player path).
+- **Main thread.** MFC InitInstance `R0326`, OnIdle `R0560` (the
+  simulation tick through `R0260`, `R0454`, `R0455` and the bootstrap
+  `R0099`) and the frame window procedure `R0701` run there.
+- **Sound and video.** DirectSound is created on the main thread inside sound
+  initialisation `R0576`. The music service `L13584` runs from OnIdle
+  through the frame `+0xc4` callback `L13598`. No image function pointer is
+  passed to a `dsound`, `ddraw`, `winmm` or `smackw32` import. `L13599` has
+  the timer-callback shape and no reference.
+- **Seed state.** A CRT thread block starts at seed 1 (MAGIC-279). The server
+  loop, if launched, would start at 1 and reseed only through
+  `R0414` → `R0077` → `R0124` (`time(0)`).
+
+**Confidence.** High for the creation census and the creator-site entries.
+Medium that no launched secondary thread reaches `rand`: every non-library
+computed call in the five closures is classified (22 resolved for map scan;
+9 resolved and 17 COM for DirectPlay receive), library routines at or above
+`L13600` are not followed, and one call is unresolved, the deleting
+destructor `L13601` of a packet list element. None of the 47 data-stored
+functions that reach `rand` by direct calls has the deleting-destructor shape
+(216 inventory functions have it).
+
+**Unknown.** A library path that dispatches into game code on a launched
+secondary thread; a destructor reaching `rand` through a further computed
+call. Searched: the five launched closures with library routines unfollowed.
+A native trace of `rand` return addresses with thread IDs would settle both.
+
+### SESS-083
+
+- **Start-up, seed 1.** InitInstance runs, in this order: the default hall of
+  fame `L03693` at `L13602`, only when `famehall.dat` fails to open or is
+  empty (`FAME-SEED-015`), 9 draws; the screen builder `R0315` at
+  `L13470`, which constructs four item-star grids, one through `L09896`
+  and three through the screen `L13603` → `R1733` → panels
+  `L13604`, `L13142`, `R2172` → `L13605`; each grid constructor
+  `L13606` calls `R2171`, 1024 iterations of x then y, each
+  `rand()/511 + 8` (`ITEM-STARPIX-098`), 2048 draws; then `R2048` at
+  `L13607` → `R0576`, whose first act is `srand(timeGetTime())` at
+  `L12227`; then the music routines `R2035` and `R1658`. The grids
+  therefore hold draws 1..8192 of seed 1, or 10..8201 after the fame fallback.
+- **Reseed sites.**
+
+  | Site | Routine | Operand | Reached from |
+  |---|---|---|---|
+  | `L12227` | sound initialisation `R0576` | `timeGetTime` | InitInstance; frame messages `0x438` (arm index 2) and `0x435` through `R2048` |
+  | `L12228` | `R1716` | `timeGetTime` | scenario constructor `R0967` through `R1304`, from frame messages `0x425`, `0x419`, `0x440`, `0x452`, `0x47e`, `0x481`, and `0x44c` (handler `R0709` through `R1666`, `R1667`); first call of mission load `R0512` (`L13608`) |
+  | `L00376` | AI manager constructor `R0124` | `time(0)` | `R0077` from map loader `R0128` (`L00977`) and scenario deserialiser `R0414` (`L08510`); `R0414` from `R1305` (save branch of `R0512`; message `0x419`) and `R0804` through `R0084` (messages `0x442` and `0x44c`, handler `R0709`; session command dispatcher `R0061`) |
+
+  Five further callers of `R0124` have no reference.
+- **Mission load.** `R0512` reseeds from `timeGetTime`, then takes the
+  save branch `R1305` or the map loader `R0128`; each reaches the
+  `time(0)` reseed before any directly reached draw. The draws that follow —
+  the map loader's `R0151` and `R1603`, then `R1575` and, on
+  multiplayer maps, the scatter `R0945` (`ITEM-SPAWN-027`) — and every
+  later main-thread consumer use that `time(0)` seed until the next reseed.
+- **Stream.** Every site runs on the main thread (`SESS-082`) and reseeds its
+  block.
+
+**Confidence.** High for the sites, operands, callers and the order of direct
+calls in InitInstance and the load routines. Medium that no computed call
+draws between them, which fixes the exact seed-1 count. Unknown for clock
+values.
+
+**Unknown.** The poster of message `0x435` (no decoded inventory instruction
+has the immediate) and of `0x438` with wParam 2; whether slot `+0x78` of that
+screen's vtable `L03649` (`R1733`) runs again after start-up and rebuilds
+three grids from the running stream (23 game-code computed `+0x78` calls are
+unresolved); the runtime order of consumers between reseeds. A message-hook
+trace of the frame window and a breakpoint on `R1733` would settle the
+first two.
+

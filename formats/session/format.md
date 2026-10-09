@@ -235,6 +235,49 @@ SESS-075
 
 <a id="the-map-load-in-order"></a>
 
+## Random stream
+
+The CRT seed is per thread. Six secondary thread entries have creator code:
+the server loop, a map-list scanner, three Winsock threads and the DirectPlay
+receive thread. The server loop reaches `rand` and `srand`, and its launcher
+has no reference (High). The five others reach neither by direct calls and the
+classified computed calls; library routines and one destructor call are not
+followed (Medium). Sound and video run on no thread the image creates. Placed
+`rand` sites, range-wrapper calls, float-wrapper calls and `srand` sites run
+on the main thread: 47 by a direct path (High), 88 by exclusion (Medium); the
+orphan site `L13438` is not placed. — SESS-082, MAGIC-283
+
+The main thread starts at seed 1. Start-up draws 9 values for the default
+hall of fame when `famehall.dat` is missing or empty, then 2048 for each of
+four item-star grids, before sound initialisation calls
+`srand(timeGetTime())`. Frame messages `0x435` and `0x438` repeat that
+reseed. The scenario constructor reseeds from `timeGetTime`; frame message
+`0x44c` reaches it and the `time(0)` reseed. Mission load
+reseeds from `timeGetTime`, then the AI manager constructor reseeds from
+`time(0)` before the first directly reached draw; save deserialisation reaches
+the same `time(0)` reseed. Computed calls between the listed calls are not
+excluded, so the exact seed-1 count is Medium. — SESS-083
+
+| Form | Contract |
+|---|---|
+| range wrapper `R0861(n)` | n = 0: 0, no draw; otherwise one draw, 32-bit `rand()*(n+1)` divided by 32768 toward zero; exact for 0 ≤ n ≤ 65537, above that the product can wrap |
+| `R1715(n)` | `1 + R0861(n-1)`; n = 1 makes no draw |
+| float wrapper `L13564` | one draw, `rand()/32767.0` |
+| dice `L13565` | no caller |
+
+— MAGIC-284
+
+Consumers draw through raw `rand()` with an inline scale (`n*rand()/32767`,
+`n*rand()/AImgr[0]` with `AImgr[0] = 0x8000`, `rand()/511 + 8`,
+`rand()/10`, `rand()/16`, shifts, `rand()%k`), the range wrapper or the float
+wrapper. The random item kind draws one float: Weapon below 0.4, Armor below
+0.65, Shield below 0.8, otherwise Potion. — MAGIC-285
+
+A music list replace draws its start track as `rand()%n` after the stop and
+before the order build. An order build draws 2n times (n swaps of two
+`rand()%n` indices) only in Random Order mode, and the start track does not
+depend on the order. — MAGIC-286
+
 ## Map-load sequence
 
 `R0128` receives `server+0x44` as its map sub-object. Its

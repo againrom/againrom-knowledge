@@ -333,11 +333,16 @@ seed is 1; rand advances state=214013*state+2531011 modulo 2^32 and returns
 (state>>16)&0x7fff. Three named reseeds take timeGetTime or time(0). Heal,
 Drain, music, AI and range-wrapper consumers can share this thread. The
 bounded direct-call population has 88 rand sites, including one preserved
-orphan, plus 44 range-wrapper and one float-wrapper caller. Synchronous
-simulation/client routes share their thread; a dedicated CRT thread gets
-its own block. The executed interval between two bolt ticks is Unknown.
-A pre-generation seed is enough for one isolated figure with endpoints and
-CW; cast/object/tick identity alone is insufficient. — MAGIC-279
+orphan, plus 44 range-wrapper and one float-wrapper caller. The executed
+interval between two bolt ticks is Unknown. A pre-generation seed is enough
+for one isolated figure with endpoints and CW; cast/object/tick identity
+alone is insufficient. — MAGIC-279
+
+The bolt walk is placed on the main thread by exclusion (Medium): its owner
+is reached only through stored pointers, and no launched secondary thread
+reaches it by direct calls and classified computed calls. The server loop,
+the only secondary thread that reaches rand by direct calls, has a launcher
+with no reference. — MAGIC-283, SESS-082
 
 | Construction route | Initial actionphase | Successful calls | Phase sequence |
 |---|---:|---:|---|

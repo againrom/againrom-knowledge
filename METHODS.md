@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3169. Observation: 95. Static analysis: 2624. Mixed: 450.
+Claims labelled: 3175. Observation: 95. Static analysis: 2630. Mixed: 450.
 
 ## Ledger ai
 
@@ -1045,10 +1045,14 @@ Claims labelled: 3169. Observation: 95. Static analysis: 2624. Mixed: 450.
 | MAGIC-276 | static analysis | ✔ promoted |
 | MAGIC-277 | static analysis | ✔ promoted |
 | MAGIC-278 | static analysis | ✔ promoted |
-| MAGIC-279 | static analysis | ✔ promoted |
+| MAGIC-279 | static analysis | ✔ promoted (amended) |
 | MAGIC-280 | static analysis | ✔ promoted |
 | MAGIC-281 | static analysis | ✔ promoted |
 | MAGIC-282 | static analysis | ✔ promoted |
+| MAGIC-283 | static analysis | ✔ promoted |
+| MAGIC-284 | static analysis | ✔ promoted |
+| MAGIC-285 | static analysis | ✔ promoted |
+| MAGIC-286 | static analysis | ✔ promoted |
 
 ## Ledger menu
 
@@ -2325,6 +2329,8 @@ Claims labelled: 3169. Observation: 95. Static analysis: 2624. Mixed: 450.
 | SESS-073 | static analysis | ✔ promoted |
 | SESS-074 | static analysis | ✔ promoted |
 | SESS-075 | static analysis | ✔ promoted |
+| SESS-082 | static analysis | ✔ promoted |
+| SESS-083 | static analysis | ✔ promoted |
 
 ## Ledger shop
 

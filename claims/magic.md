@@ -2423,7 +2423,7 @@ The direct Prj writer in R0084, L13430..L08365, and loader in R0099, L13431..L13
 | MAGIC-276 | The bolt walk admits only deflection magnitude greater than 2 and abscissa step greater than stored 0.15; accepted steps alternate sign, clamp the ordinate and stop at abscissa at least stored 0.7. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-277 | The bolt builder inserts midpoint knots with -0.5, fits overlapping quadratic triples, and samples each triple every six canonical x units over a half-open interval. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-278 | The bolt builder rejects a completed sampled figure only when a sampled ordinate exceeds the stored 0.15-times-length band; retry consumes the continued random stream and rebuilds every point. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
-| MAGIC-279 | The bolt walk reads the current thread's CRT seed, shared with same-thread callers; the bounded direct-call census names potential consumers but does not determine the native interval between bolt ticks. | High / Medium / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-279 | The bolt walk reads the current thread's CRT seed, shared with same-thread callers; the bounded direct-call census names potential consumers but does not determine the native interval between bolt ticks. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-280 | The selected software bolt drawer stamps each stored point once, in list order, using the own-table forward .16a receiver; sequential table blending and rectangle clipping preserve that order. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-281 | Normal caster, direct 0x8b and source-cell 0x8c bolt routes have different initial phase/countdown pairs; every live action-1 driver call invokes geometry after phase selection and before countdown decrement. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-282 | Finite bolt length uses a scaled PC64 hypot with explicit binary64 spills and restores the incoming control word; later arithmetic inherits that word, whose precision and rounding can change integer points. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
@@ -2594,6 +2594,11 @@ Unknown for the executed caller sequence, thread assignment and seed of a
 native bolt. A trace of thread IDs, srand arguments, every rand seed/return
 and consecutive walk entries would settle the chosen mode's interval.
 
+**Amended.** The thread-assignment Unknown becomes Medium: the bolt walk is
+placed on the main thread by exclusion (MAGIC-283), and the separate callback
+R0261 is the server loop, whose launcher has no reference (SESS-082). The executed caller sequence and the seed at a native bolt stay
+Unknown; SESS-083 gives the reseed points.
+
 ### MAGIC-280
 
 Each arm of R0556 visits point indices 0..count-1 and sends one call
@@ -2722,3 +2727,128 @@ records prior startup CW027f, not a bolt-entry witness. A native breakpoint
 must capture CW before R1090, alongside endpoints, TLS seed and target
 resolution order. Cache scheduling, arbitrary IEEE-special/unmasked inputs
 and native buffer identity are outside these controls.
+
+## Random stream placement and call forms
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-283 | Of the MAGIC-279 census, 87 `rand` sites, 44 range-wrapper calls, the float-wrapper call and 3 `srand` sites run on the main thread; orphan `L13438` is not placed. | High / Medium | ✔ promoted | [EXP-0507](../experiments/EXP-0507-random-stream/) |
+| MAGIC-284 | `R0861(n)` returns 0 without drawing when n is 0 and otherwise draws once for `rand()*(n+1)` shifted right 15; `R1715(n)` is `1+R0861(n-1)`; `L13564` is `rand()/32767.0`; dice `L13565` has no caller. | High | ✔ promoted | [EXP-0507](../experiments/EXP-0507-random-stream/) |
+| MAGIC-285 | Every consumer family named for the shared stream draws through raw `rand()` with an inline scale, the range wrapper or the float wrapper; existing claims give each family's arithmetic, and the random item kind and school timers are added. | High / Medium | ✔ promoted | [EXP-0507](../experiments/EXP-0507-random-stream/) |
+| MAGIC-286 | A music list replace draws its start track as `rand()%n` after the stop and before the order build; an order build draws 2n times only in Random Order mode. | High / Medium | ✔ promoted | [EXP-0507](../experiments/EXP-0507-random-stream/) |
+
+### MAGIC-283
+
+Input: the 88 `rand` sites, 3 `srand` sites, 44 range-wrapper calls and one
+float-wrapper call of MAGIC-279, each re-verified as an `E8` call to its
+target.
+
+| Target | Direct path from an anchor | By exclusion, stored roots | By exclusion, some roots unreferenced | Not placed |
+|---|---:|---:|---:|---:|
+| `rand` | 19 | 60 | 8 | 1 (`L13438`) |
+| range wrapper `R0861` | 24 | 14 | 6 | 0 |
+| float wrapper `L13564` | 1 | 0 | 0 | 0 |
+| `srand` | 3 | 0 | 0 | 0 |
+
+The anchors are InitInstance `R0326`, OnIdle `R0560` and the frame
+window procedure `R0701` (SESS-082). A site is placed by exclusion when its
+owner is reached only from functions stored in data (vtable slots, callback
+tables) or from roots without a reference, and no launched secondary thread's
+closure contains it. 13 `rand` sites, 24 range-wrapper calls, the float-wrapper
+call and `srand` `L00376` also lie in the unlaunched server loop's closure;
+each of them also has a direct path from OnIdle or the frame window procedure.
+The roots without a reference include the dice wrapper `L13565`
+(MAGIC-284).
+
+**Confidence.** High for the 47 direct-path placements. Medium for the
+exclusion placements, which inherit SESS-082's bound on library and
+unresolved computed calls.
+
+**Unknown.** The owner and reachability of `L13438`.
+
+### MAGIC-284
+
+- `R0861(n)`: `n == 0` returns 0 at `L13566` with no call. Otherwise one
+  `rand()` call; `rand()*(n+1)` is divided by 32768 with truncation toward zero
+  (`cdq`, `and edx, 0x7fff`, `add`, `sar 15`). The product is a 32-bit
+  `imul` at `L13567`. For 0 ≤ n ≤ 65537 that is
+  `floor(rand()*(n+1)/32768)`, range 0..n; above 65537 the product can wrap.
+  n = -1 draws and returns 0.
+- `R1715(n)` passes `n-1` and adds 1, so n = 1 returns 1 without drawing.
+- `L13564` is one draw, `rand()/32767.0` (`[L13568]` = 32767.0), range
+  0.0..1.0 inclusive.
+- `L13565(k, s)` sums k calls of `R0861(s-1)` and adds k (k dice of s
+  sides); no reference to it exists.
+
+A consumer that counts draws therefore counts no draw for a zero-width range.
+
+### MAGIC-285
+
+Forms: raw `rand()` with an inline scale; the range wrapper (MAGIC-284); the
+float wrapper. The inline scales are `n*rand()/32767` (multiply by `0x80010003`
+or `idiv` by `0x7fff`), `n*rand()/AImgr[0]` with `AImgr[0] = 0x8000`
+(AI-RANGE-102), `rand()/511` (`0x80402011`), `rand()/10` (`0x66666667`),
+`rand()/65` (`0x7e07e07f`), shifts and masks, signed `rand()%k` by a
+constant, and unsigned `rand()%n`.
+
+| Family | Owners (sites) | Form | Authority |
+|---|---|---|---|
+| AI roam, idle turn, guard and aggression rolls | `R0155` (1), `R0205` (2), `R0258`, `R0259` (1 each), `R0024` (2), `R0161` (2), `R0175` (2), `R0146` (2) | raw, `n*rand()/AImgr[0]` | AI-ROAM-025, AI-TURN-104, AI-JITTER-103, AI-DEADROLL-078, AI-GUARD-012, AI-POST-095 |
+| AI spellbook slot pick | `R0009` (5), `R0393` (5), `R0394` (5), `R0293` (1) | raw against thresholds, `n*rand()/AImgr[0]` | AI-341, MAGIC-221, MAGIC-AI-012, MAGIC-AIBIT-082, MAGIC-MASKREAD-081 |
+| combat damage, hit, Bless and Curse | `R0265` (6), buildings `R0653` (1) | range wrapper | HERO-DAMAGE-022, UNIT-STRUCTDAMAGE-064 |
+| Meteor, Heal and Drain, bolt walk | `R0639` (2), `R1103`, `R1104` (2 each), `R1091` (3) | range wrapper; raw `rand()%3`, `rand()%360`; raw parity, `rand()%7`, `rand()%50` | MAGIC-093, MAGIC-CLOUD-065, MAGIC-276, MAGIC-279 |
+| mission load drop pick, scatter, seating; death gold; trigger return | `R0065` (3), `R0945` (4 and the item kind), `R1145` (2), `R0208` (2), `R0948` (1) | range wrapper | MISSION-DROP-002, ITEM-SPAWN-027, MISSION-SEAT-012, TRIG-RETURN-042, MISSION-DROP-074 |
+| shop stock | `R1779` (3), `R1711` (2), `R1038` (2), `R1031` (2), `R1035` (2), `R1627` (2), `R1715` | range wrapper | SHOP-RNG-008, SHOP-EFFALT-071, ITEM-155, SAV-775 |
+| random item | `L13569` (float), `L09853` (1), `L13570` (3) | float then range wrapper | this card |
+| town square | `R1906`, `R1383`, `R1489`, `R1924`, `R1925`, `R1907`, `R1916`, `L11546`, `R0706` | raw, `n*rand()/32767`, `rand()%100` | TOWN-505, TOWN-MARKER-508 |
+| tavern | `R1902` (3) | raw, `rand()/16 + 3000` | TOWN-409 |
+| shop interior | `L09858` (2), `L09664` (1), `R1539` (1) | raw, `n*rand()/32767`, `rand()%5` | SHOP-109, SHOP-ANIMATION-085 |
+| school | `L11522`, `L11521` (2 each), `R1971` (3), `L13571`, `L13572` (2 each) | raw, `n*rand()/32767`; `rand()/10` | TOWN-499, this card |
+| music | `R2050` (1), `R1230` (2 per swap) | raw, unsigned `rand()%n` | MAGIC-286, VIDEO-MUSIC-056 |
+| voice speaker and recording | `R2089` (3), `R0578`, `R0579` (1 each) | raw, `n*rand()/32767`; `rand()>>13`, `rand()>>14` | VIDEO-067, ANIM-119 |
+| item stars | `R2171` (2 per pair) | raw, `rand()/511 + 8` | ITEM-STARPIX-098, SESS-083 |
+
+Within one routine the draws run in address order along the executed branch;
+`evidence/sites.tsv` gives each site's instruction window.
+
+- **Random item kind.** `L13569` draws u from `L13564` and selects
+  `Weapon` (u < 0.4), `Armor` (u < 0.65), `Shield` (u < 0.8) or `Potion`
+  (`[L13573]`, `[L13574]`, `[L13575]`), then calls the generator
+  `L09853` with that kind; the generator's range calls are
+  `R0861(12)+1` at `L13576` and, in `L13570`, `R0861(v-lo)+lo`
+  with v from `L13577`, `R0861(5)` and `R0861(16)`. Callers: the scatter `R0945`,
+  `L08216` (two), `L13578` and `L09853`.
+- **School timers.** `L13571` and `L13572` each draw `rand()/10` into a
+  delay global (`L13579`, `L13580`) on first use, and again when more
+  than delay + 3000 ms have passed since the stamp while `+0x324 & 3` is clear (`L13581`, `L13582`,
+  from `timeGetTime`); both are reached from the school paint `R1487`.
+
+**Confidence.** High for the forms, read at each call site. Medium that the
+family list is complete: it is bounded by the MAGIC-279 direct-call census.
+
+### MAGIC-286
+
+- **Replace** `R2050(list)`, when the player buffer `+0x9c` is set: stop
+  `R1233`; copy the list; n = its count; one draw, `rand()%n` (unsigned
+  `div`) at `L13583`; then `R1232(start)`.
+- **Order build** `R1232(value)`: calls `R1230(+0x20)`, which writes the
+  identity order 0..n-1 and, when the mode word `+0x20` is non-zero (Random
+  Order), runs n swaps, each drawing a = `rand()%n` then b = `rand()%n` and
+  exchanging `order[a]` and `order[b]` (VIDEO-MUSIC-056). It then sets the
+  current position to the index holding `value`, so the start track does not
+  depend on the order.
+- **Stop** `R1233`: when `+0x9c`, `+0x10` and `+0x18` are all non-zero it
+  calls `R1232(+0x1c)`, an order build.
+- A replace therefore draws 1 time with Random Order off, and 1 + 2n times
+  with it on, plus any order build its stop makes. The Random Order setter
+  path through `L03131` calls `R1230` and `R1232` directly.
+- Callers of `R2050`: nine screen routines reached from the frame window
+  procedure (`R1315`, `R1317`, `R0816`, `R1318`, `R1319`,
+  `R1320`, `L08084`, `R0909`, `R2087`). The service `L13584`,
+  run from OnIdle (SESS-082), calls the stop at `L13585`. All run on the
+  main thread.
+
+**Confidence.** High for the draw counts and order, read whole. Medium for
+when the service's stop call runs.
+
+**Unknown.** The service's stream-end conditions that reach `L13585`.
