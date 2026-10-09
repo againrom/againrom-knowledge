@@ -321,6 +321,122 @@ full sequence populations. No claim imports ROM1 room drawing behavior.
 **Unknown.** Full room composition, animation destinations and scheduling,
 and the original pixel decoder of the shop frame.
 
+## First-town art
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+
+| R2-ASSET-057 | The selected first-town ROM2 art contains 339 equal payloads per locale; both 640x480 town masks contain 150 index values. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ASSET-058 | The generic ROM2 square has 36 numbered animation BMPs and 41 own-palette sprite resources containing 1180 frames per locale. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ASSET-059 | Selected ROM2 .16a frames fit native WORD runs and BMP copy paths differ; the source-RGB composition remains Medium. | High / Medium | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ASSET-060 | Generic ROM2 inn art has 154 keys; shop art has 47 graphics and 54 movie BMPs plus a ShopFrame.256 whose pixel stream remains unread. | High / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+
+### R2-ASSET-057
+
+The declared population is graphics.res interface/town, townbirds, inn,
+shopanim and ShopFrame.256, plus movies.res shopanim. Counts are
+42, 41, 154, 47, 1 and 54 per locale: 339 keys. Every selected payload agrees
+by SHA256 between the installed EN/RU resources. This is resource equality,
+not a runtime comparison.
+
+Each townmask.bmp contains 307200 pixels and 150 original index values.
+Zero occupies 266003 pixels. Counts for native recognized bytes
+32, 64, 80, 96, 128, 144, 160, 176, 192 are 17, 18, 4, 6, 5764, 5771, 7911, 5592, 14733.
+Their total is 39816. The other 141 present values contain 267384 cells,
+including zero. Nonzero default values contain 1381 cells. The native
+selector mapping is a separate engine claim.
+
+**Confidence.** High for the complete declared subtree population and
+all mask pixels. The generator walks every file node, reads the indexed
+pixels at the BMP offset, includes row padding and reverses positive-height
+rows. It records every populated value and its exclusive box. This count
+does not infer regions from visible color and makes no claim about the
+intent behind minor index values.
+
+**Unknown.** Resources outside the declared population and runtime use
+outside the selected loaders. Evidence is measured/art/{archives,entries,
+locales,populations,masks}.tsv.
+
+### R2-ASSET-058
+
+The 42 generic town BMPs comprise townmain/townmask at 640x480,
+Tavern_l 28x64, Shop_l 52x76, Trener_l 140x116, Town_add 552x92 and 36
+numbered pictures. Sign V00..09 has 10 frames at 40x32; door T00..08 has 9
+at 36x48; stars S00..08 has 9 at 64x44; fluger F00..07 has 8 at 64x64.
+The visible BMPs are uncompressed 24bpp; the mask is uncompressed 8bpp.
+
+The 41 townbirds .16a resources contain 1180 frames. Birds1..9 each have 57 frames;
+Guards has 8, Tavern has 10, Shopie has 30, Fighter has 11 and Mage has 11. Each Horse1..5/A1..3
+has 15. Each Baba1..4/A1 has 31 and /A2 has 32. Each Dervish1..4 has 30.
+Per-frame dimensions are recorded rather than inferred from file names.
+Resource presence does not establish a paint or advance call.
+
+**Confidence.** High for each header, sequence range and frame count
+in both hashed populations. Every .16a palette flag and frame envelope
+fits exactly through the final frame-count trailer. Evidence is
+measured/art/{entries,frames,sequences}.tsv.
+
+**Unknown.** Device conversion and live frame choices. R2-ASSET-059
+separates native pixel-command semantics from owner RGB composition.
+
+### R2-ASSET-059
+
+The ROM2 EN bitmap table L2.00574 slot+18 calls L2.00575 then L2.00576
+for opaque converted-WORD copying. Slot+38 calls L2.00704 then L2.00705
+and skips source WORD zero. Town_add uses the second path. The loader
+L2.00573 and converter L2.00577 use live display channel bit counts/shifts;
+source RGB does not establish a fixed device pixel format.
+
+The .16a constructor L2.00639 installs table L2.00640. Slot+18 calls
+L2.00641 then L2.00642. Commands test 0x4000 first (skip rows), then 0x8000
+(skip pixels); their low 14 bits are counts. Otherwise the WORD counts a
+literal run followed by WORD palette addresses. All 1385 selected .16a
+frames per locale, from 67 resources, fit these commands and their measured
+extents. Literal addresses are even and confined to 16*256 WORD entries:
+index = (word>>1)&255 and level = (word>>9)&15.
+
+Generic square setup L2.00644 receives (16, 4, 0). Type 4 of the six-entry
+palette dispatcher L2.00645 selects L2.00647. Normal mode source channels
+use floor(channel*(level+1)/16); destination table L2.00649 uses
+floor(quantized-channel*(15-level)/16). The reduced mode uses /18 for the
+source and a smaller destination table. The owner composition uses normal
+RGB factors before device conversion and explicit static frame selections.
+
+**Confidence.** High for these selected native paths and all recorded
+command-fit checks. Direct receiver tables, the finite type 4 dispatcher
+and complete selected bodies are retained in measured/art/native-*.
+The .16a decoder follows these ROM2 instructions. Medium for the resulting
+RGB composition because device masks, reduced-mode state and live frame
+choices are unobserved.
+
+**Unknown.** Exact runtime framebuffer pixels, display masks and selected
+palette mode. A lawful observed framebuffer paired with the native device
+state would settle them; no original game was executed.
+
+### R2-ASSET-060
+
+Generic inn art contains 128 BMPs and 26 .16a resources with 205 frames.
+CenterArea is 320x480. LeftStats and ButtonsArea are 160x238; LeftPicture
+160x242; ManBack/ManBackTalk 48x64; LU/RUOver 16x238; LDOver/Tav_09 16x242;
+the six main button pictures 140x46. Candle T0000..0009 is 80x120;
+Cauldron T0000..0020 is 60x252; Tender drink DR0001..0040 and breath
+BR0001..0024 are 180x212.
+
+Generic shop graphics contain ShopMain 288x288, MyItem/ShopItem 80x80
+and four subtrees 01..04 with 11 numbered BMPs each (1..11), at 112x88,
+132x88, 80x112, 80x112. The 54 shopanim movie BMPs are 76x176: No1..12,
+Pose2-3/1..29 and Yes1..13. Every named BMP is uncompressed 24bpp.
+
+ShopFrame.256 has one palette-flagged frame header 316x303 and data-size
+field 11015. Header-described bytes total 12051 and leave 1743 bytes before
+the frame-count trailer. Their role and the palette 8 pixel stream remain
+Unknown; this measurement does not claim an exact rendered shop frame.
+
+**Confidence.** High for selected headers, sequence populations and hashes,
+using measured/art/{entries,frames,sequences}.tsv. Unknown for ShopFrame.256
+pixel semantics and its unclassified tail. The native palette 8 reader
+would settle that bounded gap. Room composition is a separate engine claim.
+
 ## Druid archive population
 
 | ID | Claim | Confidence | Status | Evidence |

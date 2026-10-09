@@ -1,5 +1,13 @@
 # Overturn history
 
+## ROM2 first-town departure and gate label
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-241` (departure label only; selector and no-op clauses stand) | Verbatim: "departure prepare 0x445" | High | [EXP-2030](../experiments/EXP-2030-rom2-first-town/RESULTS.md) | The request invokes square leave and release, then posts 0x44c for removal. It does not retain the square while a room is open. R2-ENGINE-250 carries the conditional re-entry route. | **CORRECTED** |
+| `R2-ENGINE-243` (visual T08 label only; flag selection and cursor rules stand) | Verbatim: "closed T08" | High | [EXP-2030](../experiments/EXP-2030-rom2-first-town/RESULTS.md) | The flag-false arm selects T08. The visual "closed" label is unmeasured and remains Unknown. | **NARROWED** |
+| `R2-ENGINE-250` (retained-square return clause only; local room removal stands) | Verbatim: "The town remains a child of the parent stack, so this local mechanism returns to the retained square." | High / Medium | [EXP-2030](../experiments/EXP-2030-rom2-first-town/RESULTS.md) | Departure releases and removes the square. Shop Exit/Escape post 0x42e when application+0x404=2; inn Exit/Escape do so when +0x404=4. The post calls the town dispatcher and re-enters the square, reloading art and local state. Composed visible return remains Medium; +0x404 writers and the no-post outcome remain Unknown. | **REFUTED** — partially retracted |
+
 ## ROM2 Kaarg hover arms and child rectangle
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

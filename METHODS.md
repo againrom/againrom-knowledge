@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3102. Observation: 95. Static analysis: 2565. Mixed: 442.
+Claims labelled: 3118. Observation: 95. Static analysis: 2578. Mixed: 445.
 
 ## Ledger ai
 
@@ -1510,6 +1510,10 @@ Claims labelled: 3102. Observation: 95. Static analysis: 2565. Mixed: 442.
 | R2-ASSET-050 | mixed | ● active (branch candidate) |
 | R2-ASSET-051 | mixed | ● active (branch candidate) |
 | R2-ASSET-052 | mixed | ● active (branch candidate) |
+| R2-ASSET-057 | mixed | ● active (branch candidate) |
+| R2-ASSET-058 | mixed | ● active (branch candidate) |
+| R2-ASSET-059 | static analysis | ● active (branch candidate) |
+| R2-ASSET-060 | mixed | ● active (branch candidate) |
 | R2-ASSET-063 | mixed | ● active (branch candidate) |
 | R2-ASSET-064 | mixed | ● active (branch candidate) |
 | R2-ASSET-065 | mixed | ● active (branch candidate) |
@@ -1655,6 +1659,18 @@ Claims labelled: 3102. Observation: 95. Static analysis: 2565. Mixed: 442.
 | R2-ENGINE-236 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-237 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-238 | static analysis | ● active (branch candidate, partially retracted) |
+| R2-ENGINE-239 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-240 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-241 | static analysis | ● active (amended, branch candidate) |
+| R2-ENGINE-242 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-243 | static analysis | ● active (amended, branch candidate) |
+| R2-ENGINE-244 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-245 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-246 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-247 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-248 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-249 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-250 | static analysis | ● active (partially retracted, branch candidate) |
 | R2-ENGINE-251 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-252 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-253 | static analysis | ● active (branch candidate) |

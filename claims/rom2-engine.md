@@ -2722,6 +2722,341 @@ An authorized original capture would settle live appearance.
 default-resolution clause are partially retracted in claims/retracted.md.
 Rectangle bounds and command-line/registry precedence replace them.
 
+## First-town square
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-239 | ROM2 town ID 1 binds the generic native square and a centered 640x480 rectangle; the selected shared receiver draws delayed pointer tips, while other shell visibility remains unobserved. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-240 | The selected ROM2 town-1 loader has 19 graphics-interface key literals; its painter orders bitmap, sprite and child layers, with three loaded graphics absent from the complete painter and advance bodies. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-241 | ROM2 town 1 has nine positive mask selectors across 150 raw pixel indices; finite native tables separate hover and click effects, and the school selector has a tip but opens no room. | High | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-242 | The selected ROM2 town-1 painter admits one animation step after elapsed time exceeds 67 ms; its tavern, sign, stars, shopie and weather vane use distinct finite episode rules. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-243 | ROM2 town 1 draws nine gate bitmaps and eight guard sprite frames; native flag 0x301 and pointer selection control direction, endpoint clamps and sound requests. | High | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-244 | ROM2 town 1 schedules 57-frame bird groups and BABA/HORSE episodes, chooses actor art and positions at load, and advances a 30-frame DERVISH continuously under its entry flag. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+
+### R2-ENGINE-239
+
+Town ID 1 selects the generic view through controller member +0x110 (`R2-ENGINE-231`). EN construction at `L2.00706` calls `L2.00559` with window ID `0x3fc` and rectangle globals `L2.00707..L2.00708`. The constructor installs vtable `L2.00562` and calls initializer `L2.00709`. RU uses vtable `L2.00700` and corresponding generic methods at EN+`0x8170`. The bindings are in [anchors](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/anchors.tsv).
+
+The generic enter, painter and loader are EN `L2.00710`, `L2.00711`, `L2.00565`. The view is 640x480. Shared screen initializer EN `L2.00623..L2.00712` centers it in 640x480, 800x600 or 1024x768, giving origins (0,0), (80,60), (192,144). A nonzero force word selects 640x480. Otherwise command-line `-800`, `-1024`, `-640` are tested in order, then the retained resolution buffer for `-800` and `-1024`, then the 640x480 fallback (`R2-ENGINE-238`). These are the same native rectangle globals used for the Kaarg construction.
+
+The generic initializer zeros resource and state pointers and attaches child ID `0x445`. Enter conditionally creates child `0x467` when global `L2.00713` is nonzero, with native rectangle bounds (left=328, top=0, right=640, bottom=200), extent 312x200. The same receiver and bounds occur in the selected Kaarg entry (`R2-ENGINE-238`). The generic own-overlay method `L2.00580` is empty. The painter delegates children through `L2.00578` after its square layers.
+
+The EN shared pointer receiver `L2.00714..L2.00715` finds the child at the pointer through `L2.00716` and calls its tip slot +0x14. A new tip requires elapsed accumulator +0x58 to cross from a previous unsigned value below 500 to a signed value at least 500 and below 25500, plus the receiver/controller admission fields. Nonempty text passes to `L2.00717`, `L2.00718`, `L2.00719` and font call `L2.00720`. For pointer (x,y), maximum measured line width w and line count n, the initial box is (x,y-5-14n,x+w+11,y). The receiver shifts a right overflow to screen right and a top overflow to the maintained screen top. Text begins at (left+5,top+4+14i) for line i. Exact bodies are in [shell controls](../experiments/EXP-2030-rom2-first-town/evidence/measured/shell/controls.tsv).
+
+**Confidence.** High for the selected generic bindings, rectangle arithmetic, conditional child operands and EN tip receiver. The PE/Capstone instrument records input hashes and versions, verifies complete selected instruction ranges and direct branch boundaries, and checks vtable cells. This excludes an art-only view substitution, a full-screen-scaled town rectangle and an untraced final tip destination within the selected receiver.
+
+**Unknown.** Live visibility and purpose of child `0x467`, its view/screen coordinate reference, and other status text or buttons remain unobserved. The seven EN shell bodies are not a complete shell census. Native execution with a recorded screen state would settle these clauses.
+
+### R2-ENGINE-240
+
+The generic square loader has 19 graphics-interface literal keys per locale. [Resource pushes](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/resource-pushes.tsv) identify each literal and instruction. Paths below are relative to `graphics.res`; native literals prefix `graphics\`.
+
+| Resource | Native loaded population |
+|---|---|
+| `interface/town/{townmain,townmask,Tavern_l,Trener_l,Shop_l,Town_add}.bmp` | six fixed files, including the mask |
+| `interface/town/sign/V%.2d.bmp` | V00..V09, ten bitmaps |
+| `interface/town/door/T%.2d.bmp` | T00..T08, nine bitmaps |
+| `interface/town/stars/S%.2d.bmp` | S00..S08, nine bitmaps |
+| `interface/town/fluger/F%.2d.bmp` | F00..F07, eight bitmaps |
+| `interface/townbirds/{tavern,fighter,mage,shopie,Guards}/sprites.16a` | five fixed sprite files |
+| `interface/townbirds/Birds%d/sprites.16a` | Birds1..Birds9 |
+| `interface/townbirds/HORSE%d/A%d/sprites.16a` | one random variant 1..5, its A1..A3 |
+| `interface/townbirds/BABA%d/A%d/sprites.16a` | one random variant 1..4, its A1..A2 |
+| `interface/townbirds/DERVISH%d/sprites.16a` | one variant 1..4 unequal to the selected BABA variant |
+
+Town-1 music is `music\b14.wav`, the `b14.wav` key in `music.res`, selected outside the graphics loader under the music-enable word (`R2-ENGINE-231`).
+
+The active generic painter uses this order. Coordinates add to view origin. [Geometry](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/geometry.tsv) and the complete [EN painter](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/painter-en.txt) preserve load-bearing immediates and conditions.
+
+| Order | Layer | Destination | Condition |
+|---|---|---|---|
+| 1 | townmain | (0,0) | loaded pointer |
+| 2 | selected birds | (0,0), in selection order | active bit 0x80 and frame below count |
+| 3 | Town_add | (0,0) | bird-paint branch; follows the bird sprites |
+| 4 | Shop_l | (264,264) | selector 1 |
+| 5 | Tavern_l | (144,332) | selector 2 |
+| 6 | tavern sprite | (124,312) | loaded pointer, retained frame |
+| 7 | sign/V | (360,232) | retained bitmap |
+| 8 | gate/T | (180,148) | retained bitmap |
+| 9 | stars/S | (340,288) | retained bitmap, may be null |
+| 10 | shopie sprite | (276,296) | loaded pointer, retained frame |
+| 11 | weather vane/F | (308,64) | retained bitmap |
+| 12 | guards sprite | (184,158) | loaded pointer, retained frame |
+| 13 | HORSE sprite | selected position | active frame; otherwise frame 0 |
+| 14 | BABA sprite | selected position | active frame; otherwise frame 0 |
+| 15 | DERVISH sprite | selected position | retained frame |
+| 16 | shared child dispatch | shared receiver | after square surface end |
+
+The resource destination fields are background+0x68, mask+0x6c, addition+0x70, inn highlight+0x164, shop highlight+0x1dc and school highlight+0x1c4. The complete generic painter `L2.00711..L2.00565` and advance `L2.00721..L2.00722` contain no use of loaded school highlight+0x1c4, fighter+0x1c8 or mage+0x1d0: exactly three graphics in this bounded negative. The complete loader does not attach these graphics as children. The Kaarg painter instead uses its own numbered BMP figures and positions (`R2-ENGINE-232`); these generic sprites are not substitutions for those Kaarg figures.
+
+Town_add uses bitmap slot+0x38, whose selected native receiver skips a zero converted 16-bit pixel. Other selected BMP layers use slot+0x18, the ordinary copy receiver. The [native art receivers](../experiments/EXP-2030-rom2-first-town/evidence/measured/art/native-bodies.tsv) preserve their distinct targets. Neither path establishes a fixed RGB565 display.
+
+**Confidence.** High for the complete selected loader key population, painter order and destinations, and the three-resource negative bounded to the named painter/advance bodies. Complete instruction ranges, local branch targets and resource-result stores rule out archive-order composition and preceding-store misassociation. The instrument does not use function-name enumeration for absence.
+
+**Unknown.** Runtime frame/hover state, other whole-image uses of the three loaded graphics, delivered pixels and device conversion remain unobserved. A complete pointer-use sweep would settle global use; an authorized runtime image would settle live composition.
+
+### R2-ENGINE-241
+
+Both preserved generic masks are 640x480, with 307200 cells and 150 distinct raw pixel indices. The selected sampler `L2.00581` rejects a missing mask or an out-of-view pointer, subtracts view origin, then reads byte[x+640*y]. It uses a 161-byte finite index table and ten DWORD arm pointers. The complete [256-byte map](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/mask-map-en.tsv), [tables](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/tables.tsv) and [mask measurements](../experiments/EXP-2030-rom2-first-town/evidence/measured/art/masks.tsv) establish every positive selector present.
+
+| Pixel byte | Selector | Cells | Tip index | Native click |
+|---|---|---|---|---|
+| 32 | 0x400 | 17 | none | default, returns 1 |
+| 64 | 0x800 | 18 | none | default, returns 1 |
+| 80 | 0x1000 | 4 | none | default, returns 1 |
+| 96 | 0x200 | 6 | none | default, returns 1 |
+| 128 | 2 | 5764 | 236, inn | leave-and-remove request 0x445, then 0x42b |
+| 144 | 1 | 5771 | 233, shop | leave-and-remove request 0x445, then 0x42a |
+| 160 | 8 | 7911 | 237, gate | flag 0x301 gate; allowed leave-and-remove request 0x445, 0x442(1,0) then 0x42d, otherwise `plagatguard` text |
+| 176 | 0x10 | 5592 | 235, menu | message 0x41f |
+| 192 | 4 | 14733 | 234, school | default, returns 1; opens no room |
+| all other indices | -1 | 267384 | none | default, returns 1 |
+
+The all-other cell includes zero and the 140 remaining present indices, not only background zero. The nine mapped bytes total 39816 cells. Tip slot+0x14 returns null when the square active word+0x204 is zero. The finite getter maps only selectors 1,2,4,8,16 to the five text indices above. `R2-ENGINE-239` supplies the final delayed-tip receiver.
+
+Hover `L2.00723` writes selector+0xb4 and guard direction+0xec=1 before dispatch. Selector 1 draws Shop_l through the painter; when shop latch+0xac is zero it stops School/Point.wav, starts Shop/enter.wav and sets the latch. If `rand()%100>95` and bit 1 is inactive, it sets bit 1 for shopie. Selector 4 has an explicit no-op arm after the common writes: no school highlight, sound start or animation OR. Selector 8 sets guard direction-1 when flag 0x301 is false and 1 when true. Selector-1 forwards the retained global descriptor through `L2.00587`. Gate, selector-1 and ordinary OR arms clear the shop latch and +0xb0.
+
+Other selectors OR their value into animation flags+0x208: inn 2 starts tavern bit 2, menu 0x10 activates stars, small mask 0x200 can set BABA bit 0x200, and 0x400 sets DERVISH bit 0x400. Bits 0x800/0x1000 have no receiver in the complete selected advance body. The school pointer still takes the common guard-direction write; no absence of all hover state change is asserted.
+
+The complete click `L2.00724..L2.00725` uses a finite 16-case byte table. Shop and inn send leave-and-remove request 0x445 before posting. Gate flag false invokes `plagatguard` through the controller text helper; flag true sends the same request then posts the two messages. R2-ENGINE-250 traces square release and removal. School and the four small figure selectors take the default arm. The menu opens the existing main-menu receiver (`R2-ENGINE-234`), not another town room.
+
+The EN [input-slot census](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/input-slots-en.tsv) covers the remaining vtable `L2.00562` input slots. Slot +0x48 `L2.00726` handles messages without a direct selector+0xb4 read; +0x4c `L2.00589` calls the measured hover and returns 0; +0x6c `L2.00727` accepts Enter/Escape and forwards other keys to the base key handler. Slots +0x50, +0x58..+0x68 and +0x70 return 0. None of these named bodies directly reads selector+0xb4 to open a room. This census supports the bounded school and figure click result; it is not a whole-image indirect-input census.
+
+**Confidence.** High for the complete mask population, finite mapping, positive hover/click branches and school no-op. The archive walker measured every mask pixel; the native generator covered all 256 possible bytes and every switch target in both selected locales. This excludes treating mask indices as direct selectors, inferring school behavior from its loaded art and equating hover flags with click destinations.
+
+**Unknown.** Live flag 0x301 value, the retained descriptor's actual pointer graphic, accepted gate navigation and the effects of unobserved shell admission remain open. Selected posting is not proof that the destination accepts navigation. Recorded native execution would settle these live clauses; a bounded descriptor initialization trace would settle its graphic.
+
+**Amended.** The former "departure prepare 0x445" label is corrected to a leave-and-remove request. The selector map and school no-op stand. See the correction entry in [retracted.md](retracted.md).
+
+### R2-ENGINE-242
+
+Generic painter EN `L2.00711..L2.00565` reads imported `timeGetTime`. Unsigned elapsed time strictly greater than 67 ms admits hover, random triggers and one call to advance slot+0xa8, then replaces the global baseline with current time. There is no accumulated multi-frame catch-up loop in this body. The independent actor scheduler still runs on every active paint. [Timer identity](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/timer.tsv), [painter](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/painter-en.txt) and [advance](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/advance-en.txt) preserve this branch.
+
+Define R(n) = floor(rand()*n/32767)%n. Helper `L2.00728` and source `L2.00729` return 0..n-1 from the measured 15-bit source. Uniformity and independence are unestablished. The generic step requests sign animation when R(100)>94 and weather-vane animation when a second R(100)>97. These OR bits 0x40/0x20 before the admitted advance.
+
+| Family | Frames / destination | Admission | Advance and end |
+|---|---|---|---|
+| tavern | sprite 0..9 / (124,312) | bit 2 from inn hover | increment 1; equality with count 10 restores 0 and clears bit 2 |
+| sign | V00..V09 / (360,232) | bit 0x40 from random request | increment 1; at 10 restore 0 and clear bit 0x40 |
+| stars | S00..S08 / (340,288) | bit 0x10 from menu hover | increment 1; below 9 selectS; at/above 9 increment persistent blank counter, set current bitmap null and clear bit 0x10; on its tenth such call restore index 0/counter 0, still null that call |
+| shopie | sprite 0..29 / (276,296) | bit 1 from special shop hover | increment 1; equality with count 30 restores 0 and clears bit 1 |
+| weather vane | F00..F07 / (308,64) | bit 0x20 from random request | increment 1; at 8 restore 0 and clear bit 0x20 |
+
+The tavern helper plays Town/Point.wav when its old frame is 0, after stopping Shop/enter.wav and School/Point.wav. Sign, stars and weather vane request Flag.wav, Stars.wav and Flugel.wav respectively when their old index is 0. The loop-start helper invoked at entry requests Crowd.wav. The one-shot helper checks whether its retained sound is already playing before starting it. These are native requests, not observed audible playback.
+
+Loader initialization calls set tavern 0, V00, S00, shopie 0 and F00. The stars global blank counter and painter lazy clock variables are not reset by generic enter; exact re-entry history can change the retained phase. Gate and guard advancement are `R2-ENGINE-243`; the wildlife/actor schedules are `R2-ENGINE-244`. The loaded fighter/mage sprites are outside the selected advance population (`R2-ENGINE-240`).
+
+**Confidence.** High for the bounded timing branch, helper ranges, request inequalities and episode rules. The complete finite advance bodies, direct boundary controls, timer import identity and inspected random source exclude a nominal fixed-frame-rate guarantee, an unbounded random range and a simple nine-frame stars loop.
+
+**Unknown.** Redraw cadence, random outputs, retained global history, active sound handles and audible playback were not observed. A recorded native run with state/timer capture would settle them. No precise live duration or random probability is claimed.
+
+### R2-ENGINE-243
+
+Town-1 gates use `interface/town/door/T00..T08.bmp` at view-relative (180,148). Native gate helper EN `L2.00730..L2.00731` runs on each admitted generic step. The pointer selects gate 8 through the shared mask sampler. The helper queries Scenario flag 0x301. A false flag sets cursor 8 and selects T08 immediately. A true flag decrements the cursor toward 0 while the pointer is gate 8, and increments it toward 8 otherwise. Endpoints clamp to 0/8. A change to hover direction requests GateUp.wav; leaving that direction requests GateDn.wav. The retained direction field and current bitmap are updated in the selected arms.
+
+This direction convention differs from the Kaarg gate cursor, which increases under hover (`R2-ENGINE-236`). File index alone therefore cannot be shared as an opening-direction rule.
+
+The guard sprite is `interface/townbirds/Guards/sprites.16a`, eight frames 0..7 at (184,158). Entry sets frame 7, direction 0 and sound-direction latch 0. Every hover call first sets direction 1. Only gate 8 with a false flag changes it to-1. Guard helper `L2.00732..L2.00733` adds this direction once per admitted step and clamps to 0..7, setting direction 0 at either endpoint. Transition to direction 1 with latch 0 loads/requests Guard2.wav and sets the latch; transition to direction-1 with nonzero latch loads/requests Guard1.wav and clears it. Endpoint handling releases the retained guard sound handle.
+
+Gate art, guard art and click acceptance are distinct paths: a false flag selects T08, reverses the guard and shows `plagatguard` on click; a true flag admits the gate click posting in `R2-ENGINE-241`. Naming T08 "closed" is unmeasured; neither file index nor the flag-false branch establishes that visual label.
+
+Evidence is the complete [gate helper](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/gate-advance-en.txt), [guard helper](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/guard-advance-en.txt), [hover](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/hover-en.txt), [entry](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/enter-en.txt) and [art frames](../experiments/EXP-2030-rom2-first-town/evidence/measured/art/frames.tsv).
+
+**Confidence.** High for these selected finite paths and coordinates. Complete instruction ranges and branch controls exclude an ungated hover-only mechanism, interchangeable gate/guard cursors and Kaarg's index direction. The grade does not include live flag admission or a rendered open state.
+
+**Unknown.** The visual "closed" label for T08, actual flag 0x301 value, campaign reason for its value, sound playback and acceptance of posted navigation remain unobserved. A measured art-state join would settle the label. The campaign flag writer graph and an authorized runtime trace would settle the live clauses without changing the bounded cursor rules.
+
+**Amended.** The unmeasured "closed" label for T08 is withdrawn from the observed rule. The flag-false T08 selection and cursor mechanics stand. See the narrowing entry in [retracted.md](retracted.md).
+
+### R2-ENGINE-244
+
+The selected loader chooses HORSE variant 1..5 with R(5), BABA variant 1..4 with R(4), then retries DERVISH R(4) until its variant differs from BABA. Native coordinates and table references are in [positions](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/positions.tsv).
+
+| Variant | HORSE position | BABA position | DERVISH position |
+|---|---|---|---|
+| 1 | (104,404) | (216,364) | (224,364) |
+| 2 | (104,404) | (308,424) | (324,424) |
+| 3 | (256,344) | (384,424) | (392,420) |
+| 4 | (448,400) | (580,384) | (592,388) |
+| 5 | (140,400) | absent variant | absent variant |
+
+Each HORSE variant loads A1..A3, all 15 frames. Each BABA variant loads A1=31 frames and A2=32 frames. Each DERVISH variant has 30 frames. Entry retains HORSE A1 and BABA A1 with frame -1, which the painter renders as frame 0. Entry sets DERVISH frame 0 and bit 0x400; admitted advancement uses (frame+1)%30.
+
+Independent BABA/HORSE scheduler EN `L2.00734..L2.00723` runs on every paint. Both initial waits are 2000+R(2000), range 2000..3999 ms. Later waits are 2000+R(5000), range 2000..6999 ms. A start uses strict unsigned elapsed>wait, sets frame 0, randomly chooses one loaded action and sets BABA bit 0x200 or HORSE bit 0x100. The elapsed arms do not test the active flag. A slow redraw can therefore restart an episode whose clock has exceeded its wait. Every active frame advance updates that actor's baseline; equality/overflow at sprite count restores frame -1 and clears its flag. A tiny mask selector 0x200 can set BABA's flag, but the frame -1 guard prevents that OR alone from restarting a completed episode. Exact operands are in [clocks](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/clocks.tsv).
+
+The HORSE painter uses action index 0/1/2 for A1/A2/A3. It requests Horse2.wav at A1 frame 14 and A2 frames 8/14. It requests Horse1.wav at A3 frame 1 and Horse2.wav at A3 frame 14. Horse3.wav is loaded but has no request in the complete selected painter. The selected one-shot helper prevents a new start while the handle is already playing; playback is unobserved.
+
+Birds1..Birds9 each contain 57 frames. An inactive bird branch starts when unsigned time since retained baseline exceeds 1000+R(2000), range 1000..2999 ms for the initial and later waits. It chooses group R(3), amount 1+R(3), and indices group*3 through group*3+amount-1, corresponding to a prefix of Birds1..3, Birds4..6 or Birds7..9. Each starts frame 0. Bit 0x80 admits one increment per generic step. The painter draws selected sprites at view origin while their frame is below 57, then draws Town_add at the same origin. It clears bit 0x80 only when all selected sprites have completed; even that paint draws Town_add. The bird-paint branch updates its baseline on every active paint. A one-bird group requests Birds1.wav; two/three birds request Birds2.wav.
+
+Frame counts are from the complete selected [art frame envelopes](../experiments/EXP-2030-rom2-first-town/evidence/measured/art/frames.tsv). Schedule, reset and paint conditions are in the [scheduler](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/scheduler-en.txt), [bird clock](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/bird-clock-en.txt), [bird painter](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/bird-paint-en.txt) and per-actor advance listings.
+
+**Confidence.** High for the finite loaded populations, position tables, measured frame counts and selected schedule/advance rules. The complete loader loops, inspected table contents, strict elapsed comparisons, bit receivers and envelope enumeration exclude art-only fixed positions, a single fixed actor action, identical BABA/DERVISH variants and birds painted above their occluder. EN/RU are not separate runtime witnesses.
+
+**Unknown.** The actual selected variants/actions, random sequence, redraw cadence, re-entry state, active sound handles and whole-image Horse3 requests remain unobserved. Runtime capture would settle the live state; a complete sound-pointer-use sweep would settle global Horse3 use. The three loaded-only graphics stay bounded by `R2-ENGINE-240`.
+
+## First-town rooms
+
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-245 | Campaign town ID 1 selects the generic inn and shop in preserved ROM2 EN/RU; selected EN generic and Kaarg constructors share native page or child bases. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-246 | The selected ROM2 EN generic inn fixes three panel rectangles, primary art layers and three button targets; complete portrait/stat drawing and the lower-right resource binding remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-247 | The selected ROM2 EN inn consumes packed DLL options, seats actors and dispatches talk by NPC/topic; the stage-10 roster is conditional, and its complete live actor-art join is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-248 | Selected ROM2 EN inn branches load candle, cauldron, breath and drink lists and advance them on native clocks; container-count interpretation and the complete visible schedule remain bounded. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-249 | The selected ROM2 EN generic shop fixes five child rectangles, primary art and Undo/Buy/Sell/Exit targets; complete stock, item-price text and episode state remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-250 | Selected ROM2 EN inn/shop departure releases and removes the square; conditional Exit/Escape posts re-enter it and rebuild local art/state, while complete queue admission and visible return are unobserved. | High / Medium | ● active (partially retracted, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+
+
+### R2-ENGINE-245
+
+R2-ENGINE-237 supplies the positive campaign room selectors in the preserved EN/RU clients. Town ID 1 selects the generic shop and inn; town ID 2 selects their Kaarg variants. EN application members are +0xf8 and +0x104 for the generic pages, and +0x100 and +0x10c for Kaarg. EN campaign mode is application+0x5d8=2.
+
+The selected EN generic inn constructor is `L2.00607`; its center constructor is `L2.00610`. The generic shop page constructor is `L2.00735`; its art child is `L2.00617`. The Kaarg page constructors call the generic page bases; its derived center/child constructors call those generic center/child bases. Both inn builders instantiate left panel `L2.00736`, right panel `L2.00737` and seat builder `L2.00738`.
+
+These positive calls establish shared native receivers. Per-town center/art methods still provide different backgrounds, overlays and animation episodes. The following room layout contracts measure selected EN bodies. They do not establish complete EN/RU room geometry equality or differences limited to art.
+
+The [inn page entry slots](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-entry-slots.tsv) separate roster entry from shared controls. Generic table `L2.00739` uses enter +0x80 `L2.00552`; third table `L2.00740` uses `L2.00684`; Kaarg table `L2.00741` uses `L2.00613`. Kaarg's own [enter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/kaarg-inn-enter-0049e451.txt) calls actor resolution. All three tables use Escape +0x6c `L2.00742`. The generic, third and Kaarg builders call right-panel constructor `L2.00737`; right-panel action `L2.00743` calls talk `L2.00554`. Shared buttons, talk and exit do not establish a shared roster enter body.
+
+Selected evidence: [class pointer cells](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/class-slots.tsv), [generic inn constructor](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-ctor-0049a428.txt), [generic inn builder](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-slot78-0049a65e.txt), [generic shop constructor](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-page-ctor-004b6bb2.txt), [generic shop builder](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-page-slot78-004b85e2.txt). R2-ENGINE-237 carries the selected Kaarg constructor calls and locale selectors.
+
+**Confidence.** High for positive campaign selection and the named shared-base constructor calls. Direct-CFG boundaries agree with independent linear decoding; this is a selected native contract, not a runtime observation.
+
+**Unknown.** Complete RU layout/event-body equality and all state-dependent room presentation. The selected EN bodies and positive EN/RU selectors do not close these alternatives. RU room painters and original observation would settle them.
+
+### R2-ENGINE-246
+
+Generic inn builder `L2.00744` adds the left, right and center children in that order. Coordinates below are its passed corner operands for the 640x480 page:
+
+| Child | Constructor | ID | Corners |
+|---|---|---|---|
+| Left | `L2.00736` | 0x44d | (0,0,160,480) |
+| Right buttons | `L2.00737` | 0x44e | (480,0,640,238) |
+| Center | `L2.00610` | 0x450 | (160,0,480,480) |
+
+Enter `L2.00552` attaches the existing campaign hero panel at `(640-panelWidth,0)`. Its contents depend on campaign state.
+
+The selected loaders name these archive keys under `graphics.res:interface/inn/`; native literals prefix `graphics/`: `LeftStats.bmp`, `LeftPicture.bmp`, `ButtonsArea.bmp`, `CenterArea.bmp`, `manback.bmp`, `ManBackTalk.bmp`, `LUOver.bmp`, `LDOver.bmp`, `RUOver.bmp`, `button1on.bmp` through `button3on.bmp` and `button1off.bmp` through `button3off.bmp`. The quest-art loop is noncampaign-only.
+
+Left painter `L2.00745` draws LeftStats at (0,0) and LeftPicture at (0,238), then selected actor material. It formats `graphics/infowindow/%s.bmp`, but its complete live portrait/stat join is unclosed.
+
+Center painter `L2.00746` draws CenterArea at (160,0), candle at (160,48), cauldron at (420,160), conditional tender art at (240,152), then hire actors followed by talk actors, each back before its actor sprite. It then draws LUOver at (160,0), LDOver at (160,238), RUOver at (464,0), and a conditional shared lower-right image at (464,238), cropped to 16x242. This last branch selects global `L2.00747` or `L2.00748` using the shared hero panel's +0x6c state. The key-to-global binding is not established. Shared child painting follows.
+
+Right painter `L2.00749` returns when page+0x110 is zero; otherwise it draws ButtonsArea at (480,0). Button hit rectangles are:
+
+| Index | Corners | Caption/action |
+|---|---|---|
+| 0 | (484,44,624,90) | Selected hire: Hire or Fire; selected talk: blank |
+| 1 | (484,91,624,137) | Talk |
+| 2 | (484,138,624,184) | Exit |
+
+Refresh `L2.00750` uses main-text keys 258/259 for Hire/Fire according to option bit 31 and key 242 for Talk. The initial generic caption uses key 243 Hire/Fire; Exit is key 232. Release `L2.00743` requires the same pressed/released index. Index 1 sends a selected talk entry through `L2.00554`, or formats `npc%dabout` for a hire entry. Index 2 calls the exit receiver `L2.00751`; index 0 takes hire/fire branches.
+
+Selected evidence: [builder](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-slot78-0049a65e.txt), [art pushes](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/resource-pushes.tsv), [center painter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-center-slot2c-00497adf.txt), [left painter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-left-paint-selected-00494832.txt), [right builder](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-right-build-00496172.txt), [caption refresh](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-buttons-refresh-00497223.txt), [button action](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-button-action-00496bba.txt), [text keys](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/main-text.tsv).
+
+**Confidence.** High for the selected EN corner operands, primary keys, painter order, caption keys and local button targets. Unknown for complete portrait/stat drawing and lower-right resource identity; no complete visible-room equality is asserted.
+
+**Unknown.** The selected left painter does not close the fresh actor portrait/stat state; the center painter exposes conditional globals without a closed resource initializer. Follow the corresponding actor state and global initialization, or obtain original observation. No complete RU geometry claim follows from shared art payloads.
+
+### R2-ENGINE-247
+
+In EN campaign mode, generic enter `L2.00552`, bound by `L2.00739` slot +0x80, copies DLL `EnterInn` options into page+0xfc in DLL order. Option kinds 1 and 2 resolve into hire vector +0xc0; other kinds resolve into talk vector +0xe8. Actor resolution calls `R2.0071`. The initial selected index is 0 for a nonempty combined roster, otherwise -1. This option-copying body is not attributed to Kaarg; its enter override is R2-ENGINE-245.
+
+The stage-10 options in R2-ENGINE-161 and R2-ENGINE-073 are NPC 207/topic 9/kind 0, NPC 2108/topic 8/kind 0 and NPC 517/topic 10/kind 3. They are talk entries in that order. This is a conditional roster: shared continuation can append state-gated options, and this experiment did not execute a full fresh-bank admission sequence.
+
+Seat builder `L2.00738` creates three rows of six 48x64 rectangles. For row `r=0..2` and column `c=0..5`, corners are `(176+48*c,480-64*(r+1),224+48*c,480-64*r)`. Hire entries precede talk entries. With only those three stage-10 options, their seats begin at (176,416), (224,416), (272,416).
+
+Hit receiver `L2.00752` subtracts the page origin, checks populated seats in order and returns the first matching index or -1. Center slot +0x54 (`L2.00753`) calls that hit and left selection `L2.00754`; selection writes page+0xb8, refreshes buttons and requests the Helper sound at page+0xa8. Pointer update `L2.00755` calls its selection slot and sends selected talk entries to `L2.00554`. Complete input gesture classification remains bounded by unclosed virtual dispatch.
+
+Talk `L2.00554` indexes the talk vector with `selected-hireCount`. It first-matches the actor's u16 at +0x1dc against copied option low 16 bits through `L2.00556`, extracts topic bits 16..27, formats `npc%dtalk%d`, dispatches text through `R2.0038`, then calls DLL `TalkTo` with the packed option. R2-ENGINE-220 supplies the broader positive talk chain.
+
+Actor-art builder `L2.00756` formats `graphics/interface/inn/Unit%d/sprites.16a` from actor+0x24. Talk actor flag bit 0 instead selects HeroMage when bit 1 is set, otherwise HeroFighter. Newly allocated frame-index cells initialize to zero through `L2.00757`. Missing-lookup fallback `R2.0069` initializes flags+0x1b8=0x56, actor+0x24=1, actor+0x28=NPC-ID-80 and u16+0x1dc=NPC-ID. A missing-map composition therefore chooses Unit1, but this does not prove the fresh live map misses the three actors.
+
+The installed EN `scenario.res:npc.reg` is 448 bytes and has five records: Multiplayer, FacesMF, FacesMM, FacesFF, FacesFM. It has no row for those three NPC IDs; that bounded registry result does not establish global absence of campaign actors.
+
+Selected evidence: [enter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-slot80-0049abfe.txt), [seats](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-seats-build-0049783c.txt), [hit](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-pointer-hit-00499367.txt), [selection](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-actor-select-004946b6.txt), [talk](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-talk-0049ba28.txt), [art selection](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-center-slot78-00499783.txt), [fallback](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/npc-fallback-actor-0041d8bb.txt), [frame initialization](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-animation-index-init-0059fb96.txt), [registry records](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/npc-registry-records.tsv).
+
+**Confidence.** High for the selected EN consumption, seating, selection and key/call chain. Medium for composing the named stage-10 roster with the fresh campaign route. Unknown for its complete live actor-to-art join and all continuation admissions.
+
+**Unknown.** The fresh controlled actor map was not reconstructed, and the selected registry lacks the necessary per-NPC data. Readonly closure of fresh scenario/map construction through `R2.0050`/`R2.0071`, or original observation, would settle the art. Full fresh-bank inputs and continuation predicates would settle roster completeness. No runtime click or dialogue presentation was observed.
+
+### R2-ENGINE-248
+
+Enter `L2.00552` constructs four filename lists and copies them into the generic inn center in campaign mode 2. Archive keys are under `graphics.res:interface/inn/`; native literals prefix `graphics/`:
+
+| List | Center offset | Files | Loaded list count | Destination |
+|---|---|---|---|---|
+| Candle | +0x280 | `candle/t0000.bmp`..`t0009.bmp` | 10 | (160,48) |
+| Cauldron | +0x2b0 | `cauldron/t0000.bmp`..`t0020.bmp` | 21 | (420,160) |
+| Breath | +0x2e0 | `tender/breath/br0001.bmp`..`br0024.bmp` | 24 | (240,152) |
+| Drink | +0x310 | `tender/drink/dr0001.bmp`..`dr0040.bmp` | 40 | (240,152) |
+
+Painter `L2.00746` draws current candle/cauldron art before their updates. Unsigned elapsed time greater than 100 ms advances each once and resets the baseline to the current clock; there is no catch-up loop. Helper `L2.00685` computes `(cursor+1) % L`, where `L` is getter `L2.00758`, exactly `container field+0x8-1`. This measured expression is not identified with the filename-list count.
+
+Tender state 0 is idle, 1 drink and 2 breath. Elapsed time greater than the retained delay selects drink for an odd delay, with forward direction, or breath for an even delay, requesting chair and shop Breath sounds. Delay resets use signed truncation of the return from `L2.00729` divided by 16, plus 3000. R2-ENGINE-242 bounds that source to 0..32767, so the reset delay is 3000..5047 ms. Uniformity and episode probabilities are unestablished.
+
+An active episode advances once after elapsed time exceeds 83 ms. Forward helper `L2.00686` increments until cursor equals `L`, then returns zero; reverse helper `L2.00759` decrements until zero, then returns zero. Drink changes to reverse after forward failure and ends after reverse failure, requesting glotok. Painted drink cursor 30 requests drink.wav. Breath failure returns to idle and resets its cursor to zero. Steam requests occur after elapsed time exceeds 10000 ms.
+
+The painter advances only the selected seated actor after elapsed time exceeds 125 ms; other seats retain their frame index. The selected index wraps using the sprite's reported frame count. Sound loader `L2.00760` names the corresponding inn/shop sound keys; requests do not prove audible playback.
+
+Selected evidence: [filename loops](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-slot80-0049abfe.txt), [painter clocks](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-center-slot2c-00497adf.txt), [wrap](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/animation-next-wrap-00401658.txt), [container getter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/animation-count-004019c0.txt), [forward](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/animation-next-stop-004015c5.txt), [reverse](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/animation-previous-stop-00401612.txt), [sound loader](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-page-slot88-0049bb47.txt).
+
+**Confidence.** High for filename loops, fixed destinations, native timer comparisons and helper expressions. Medium for a composed visible schedule because container loading and retained live state are unclosed. Unknown for the relation of `L` to loaded list counts. The RNG range is bounded by R2-ENGINE-242; its distribution remains unobserved.
+
+**Unknown.** Loader `L2.00761` was not followed; the raw field-minus-one getter does not settle whether a final loaded picture is skipped. Its allocation/append contract would settle that relation. Selected helper/caller listings do not establish redraw cadence, pre-entry baselines, RNG distribution or audible playback. Native runtime observation would settle their presentation.
+
+### R2-ENGINE-249
+
+Generic shop builder `L2.00762` adds these children using passed corner operands:
+
+| Child | Constructor | ID | Corners |
+|---|---|---|---|
+| Shop inventory | `L2.00763` | 0x3eb | (0,303,480,390) |
+| Hero inventory | `L2.00764` | 0x3e9 | (0,390,480,480) |
+| Item information | `L2.00765` | 0x3ea | (0,0,164,303) |
+| Main shop art | `L2.00617` | 0x3ed | (164,0,480,303) |
+| Buttons | `L2.00766` | 0x3ee | (464,0,640,238) |
+
+Enter `L2.00767` attaches the existing campaign hero panel at `(640-panelWidth,0)` and joins current character/item state. Those fixed child rectangles do not imply a fixed initial stock list.
+
+Native paths prefix archive keys with `graphics/` or `movies/`, for graphics.res or movies.res respectively. Main-art loader `L2.00768` names `graphics/interface/ShopFrame.256`, `graphics/interface/shopanim/ShopMain.bmp` and `movies/shopanim/Pose2-3/1.bmp`. Painter `L2.00769` draws the frame at (164,0), ShopMain at (169,8), enabled category layers 0..3 at their stored rectangle origins, then the chosen keeper frame at (277,112), then shared children. The constructor's layer origins make category 0 (353,108), 1 (197,108), 2 (313,20) and 3 (201,20) in page coordinates. Shelf loader `L2.00770` formats `graphics/interface/shopanim/%.2d/%d.bmp` from category/episode fields. Keeper methods name Pose2-3, Yes and No movie series.
+
+Support loader `L2.00771` names `graphics/interface/{myitem.256,shopitem.256,backinvg.bmp,backinvb.bmp,backinvs.bmp}`, `costs1.bmp` through `costs7.bmp` and `costm1.bmp` through `costm7.bmp`. Button loader `L2.00772` appends page slot +0x94's prefix and `ShopButton1.bmp` through `ShopButton4.bmp` under `graphics/interface/`. Generic prefix method `L2.00773` constructs the default native string through `L2.00774`; an empty prefix is an inference because its underlying storage initializer was not closed. Kaarg supplies a per-town prefix.
+
+| Index | Hit corners | Text key | Local action target |
+|---|---|---|---|
+| 0 | (494,15,614,67) | 72 Undo | `L2.00775` |
+| 1 | (483,67,623,113) | 70 Buy | `L2.00776` |
+| 2 | (483,114,623,160) | 71 Sell | `L2.00777` |
+| 3 | (494,160,614,212) | 73 Exit | `L2.00778` |
+
+The four-entry native click table is `L2.00779`. Cases clear the pressed index to -1 and set page+0x14c bit 0x20. Hit, art and text rectangles differ. These local calls do not establish every transaction side effect.
+
+Selected item traversal `L2.00780` enumerates state-supplied item objects. Inventory, hero and information-panel painters are included, with unresolved switches and virtual edges preserved. Complete initial stock, all item sprite/name/price destinations, applicable buttons and episode state are not established. R2-ASSET-060 bounds the unresolved ShopFrame pixel decoding.
+
+Selected evidence: [builder](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-page-slot78-004b85e2.txt), [art-child constructor](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-child-ctor-004b9cf5.txt), [art loader](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-child-slot78-004baa98.txt), [painter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-child-slot2c-004bb3d7.txt), [support art](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-support-art-004b796f.txt), [button constructor](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-buttons-ctor-004bc2b0.txt), [button tables](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/fixed-switches.tsv), [item traversal](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-item-iteration-004b5e2f.txt), [unclosed edges](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/bodies.tsv).
+
+**Confidence.** High for selected EN constructor geometry, primary art operands, text keys and finite local button targets. Medium for complete composition and the generic empty-prefix inference. Unknown for the full initial stock, item-price text layout and complete live episode state.
+
+**Unknown.** The selected constructors, panels and traversal do not close the town-1 stock source or every item-panel virtual edge. Follow them on a known readonly initial campaign state, or obtain original observation. Complete item sprite/name/price drawing requires those receivers; no catalog-wide absence or stock identity is claimed.
+
+### R2-ENGINE-250
+
+Shop and inn click arms call square slot +0xac `L2.00781`, which sends 0x445 to its own slot +0x48 `L2.00726`. The handler forwards 0x445 to `L2.00782`. Square enter calls base enter `L2.00783`, which sets +0x5c=1. The shared message receiver admits virtual leave +0x84 `L2.00784`: it clears active+0x204, removes child+0x200, calls art release +0xa4 and container release +0x8c, then base leave `L2.00785`. The receiver posts 0x44c with the square pointer. Application arm `L2.00786` calls removal `L2.00787`; `L2.00788` removes the square from application+0xcc through `L2.00789`. Town removal branch `L2.00790..L2.00791` adds no return dispatch. The square is released and removed while the room is open.
+
+Inn Escape `L2.00742` tests key 27 and calls Exit `L2.00751`. Shop Escape `L2.00792` and Exit click `L2.00793` call `L2.00778`. These send current-room removal 0x445; the shared receiver posts 0x44c and removal drops the room. A separate conditional post returns to town: shop Exit and Escape post 0x42e only when application+0x404=2; inn Exit, also reached by Escape, posts it only when +0x404=4. With another value these bodies send no 0x42e. This is not an unconditional Exit return guarantee.
+
+The selected [application switch](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/application-message-index-0048539d-004853d0.txt) subtracts 0x416, bounds the index by 0x73, reads byte table `L2.00794` and jumps through DWORD table `L2.00795`. Its [measured cells](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/application-message-arms.tsv) map 0x44c to `L2.00786` and 0x42e to `L2.00796`. The 0x42e arm calls town dispatcher `L2.00266`, which re-adds member+0x110 through `L2.00797` and calls enter +0x80 `L2.00710`. Enter unconditionally calls loader +0xa0 and container setup +0x88.
+
+Re-entry reloads square art and reruns HORSE R(5), BABA R(4) and DERVISH R(4), retrying DERVISH until its variant differs from BABA. It selects their positions again; a new draw may still choose the previous variant. Per-window flags+0x208 clear, then DERVISH bit 0x400 is set with frame 0. Tavern, sign, stars, shopie and vane initialize their frame selections; BABA/HORSE return to idle frame -1 with first-action pointers, new clocks and 2000..3999 ms initial waits. Gate initialization yields cursor 8 and T08, then clears gate direction latch+0x1a4. The guard returns to its last sprite frame, 7, with step+0xec=0 and sound-direction latch+0xf0=0. Selector+0xb4 resets to -1. The painter's global baseline and lazy clock state, bird delay and stars blank counter are not cleared by the selected loader/enter/release. Re-entry does not reset every animation variable.
+
+Selected evidence: [square leave request](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/leave-prep-en.txt), [square message](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/message-en.txt), [square leave](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/leave-en.txt), [square enter](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/enter-en.txt), [square loader](../experiments/EXP-2030-rom2-first-town/evidence/measured/square/loader-en.txt), [base enter](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/base-enter-004dc232.txt), [shared message receiver](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/room-stack-message-004dc2b0.txt), [common removal](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/room-remove-common-004891d8-004892ab.txt), [town removal](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/room-remove-town-0048957b-004895b3.txt), [shop Exit](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-button-click-case3-004bdb2d.txt), [shop Escape](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/shop-page-slot6c-004b70a2.txt), [inn Exit](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/inn-choose-0049b69b.txt), [0x42e arm](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/room-message42e-dispatch-0048637d-0048638d.txt), [town dispatcher](../experiments/EXP-2030-rom2-first-town/evidence/measured/rooms/town-dispatcher-0048bbc0.txt).
+
+**Confidence.** High for the selected EN departure, release/removal, conditional Exit/Escape posts and local re-entry/reset instructions. Medium for their composed input-to-visible campaign return because complete queue and virtual input admission were not executed or closed.
+
+**Unknown.** Application+0x404 writers and campaign values, subsequent behavior when these bodies send no 0x42e, original input delivery, complete queue acceptance and visible return timing remain unmeasured. A bounded +0x404 writer and no-post continuation trace would settle those alternatives. Complete virtual dispatch closure or original observation would settle admission and visible return.
+
+**Amended.** The retained-square clause is refuted and partially retracted in [retracted.md](retracted.md). Departure releases and removes the square; the measured conditional 0x42e route re-enters it. The local room-removal clause stands.
+
 ## ROM2 town classes and druid square
 
 | ID | Claim | Confidence | Status | Evidence |
