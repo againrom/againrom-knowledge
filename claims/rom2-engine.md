@@ -3573,10 +3573,10 @@ observe an authorized original session. The panel probe is EN only.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-263 | ROM2 town-1 shop stock is parameterized by the Scenario.dll ordinal-15 record: four categories with prices 0..1500, draws 100/100/20/20, quantity bounds 2/2/1/1 and fixed masks. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-263 | ROM2 town-1 shop stock is parameterized by the Scenario.dll ordinal-15 record: four categories with prices 0..1500, draws 100/100/20/20, quantity bounds 2/2/1/1 and fixed masks. | High / Unknown | ● active (amended, branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-264 | Town-1 category masks admit 70 armor/shield rows, 44 weapon rows, 4 enchantable weapon rows and 5 books plus scroll rows per fill from data.bin tables, by price, class and material. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-265 | A town-1 shop fill draws random admitted candidates with stackable quantities, preloads six potions and the books, and enchants category 2 into 160 possible spell-level variants. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
-| R2-ENGINE-266 | ROM2 shop buy moves affordable pending items to the hero, sale and undo return items into categories, and refills replace all lists only while no deal is open; finite stock is implied. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-266 | ROM2 shop buy moves affordable pending items to the hero, sale and undo return items into categories, and refills replace all lists only while no deal is open; finite stock is implied. | High / Medium / Unknown | ● active (branch candidate, partially retracted) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-267 | ROM2 shop text and prices come from text tables, item attributes and data.bin factors; cells show unit P or (P+1)/2, pending totals P*q and ceil(P/2)*q, sale credit floor(P*q/2+0.5). | High / Medium | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-268 | The ROM2 generic shop keeper updates after 100 ms, resamples a 5000+1000*(rand()%5) ms idle threshold, plays Pose2-3 through counter 28 and responses through counter 12. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-269 | Generic shop responses start the keeper's Yes on category change, affordable buy or credited sale and No on an unaffordable buy; first category choice and exit clear all episode bits, not the counter. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
@@ -3613,6 +3613,11 @@ the census population and the client binding. Unknown for when the deal
 source replaces the record.
 
 **Unknown.** When `[L2.00805]+0x74` is nonzero in a single-player campaign; a census of the writers of that field would settle it.
+
+**Amended.** R2-ENGINE-334 reads the writers of `+0x74`: the server
+constructor writes 0 and init writes (mode < 2) (High); campaign start
+passing mode 2, which leaves it 0, and network paths setting it to 1 are
+Medium. R2-ENGINE-329 and R2-ENGINE-330 give the other location records.
 
 ### R2-ENGINE-264
 
@@ -3692,9 +3697,8 @@ Buy (0x33, `L2.00831`) walks the pending deal list and stops at the first
 shop item whose q*P exceeds hero gold; each bought item debits q*P, takes
 the hero as owner and enters the hero inventory. Sell (0x34, `L2.00832`)
 credits trunc(q*P*0.5+0.5) for each hero item with nonzero P, clears its
-owner and places it through `L2.00804`: back to its tagged category, else a
-non-stackable non-book to the first bit-29 category, else the first
-category carrying its kind bit; `L2.00833` merges into an equal stackable
+owner and places it through `L2.00804` by the rule of R2-ENGINE-333;
+`L2.00833` merges into an equal stackable
 entry or a quantity-0 placeholder or appends. Server cases 0x33 and 0x34
 reach buy and sell through `L2.00834` and `L2.00835`. Undo (0x35) runs
 `L2.00836`, `L2.00837`, which sets the deal's customer through `L2.00838`, then
@@ -3716,6 +3720,10 @@ survive SAV.
 **Unknown.** The selection producer of the pending list and the stock's
 SAV round trip; reading the client transfer message and the save writer
 would settle them.
+
+**Amended.** The sold-item fallback clause is partially retracted in
+claims/retracted.md; R2-ENGINE-333 gives the placement rule. Buy, sell
+credit, undo and refill clauses stand.
 
 ### R2-ENGINE-267
 
@@ -5253,3 +5261,220 @@ body `R2.0085` calls the group list `R2.0122` and then `R2.0175` on
 are read.
 
 **Unknown.** The meaning of Group +0x1c and +0x40, and of the 36 bytes.
+
+## Shop pool in every location
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-327 | ROM2 armour admission excludes (class, material, row) (0,0,2), (0,1,2) and (6,4,6) by program immediates in both locales; the other admission modes test data.bin fields or other program constants. | High | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-328 | No ROM2 shop fill admits a beard: the two beard-named armour keys 0x0502 and 0x1502 are removed only by the armour exclusion, from any record; a sold beard can still be shelved. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-329 | The ROM2 Scenario.dll shop table holds four zero-filled location records; 62 operand sites per DLL reach it, from NewGame, departure, TalkTo, Save, Load and the lookup. No direct store writes record 0. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-330 | ROM2 NewGame writes shop records 1 and 2; departures rewrite record-2 masks after missions 30, 40, 60, 80 and 90, write record 3 after mission 50 and raise record 2 and 3 price bounds at stages 30..110. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-331 | ROM2 shop record 3 category 3 has no class bit until TalkTo kind 0, NPC 0x2a3, topic 0x4e ORs in class 4; EnterInn offers that word at location 3 when stage > 60 and bank 770 is 1. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-332 | Under the record values the Scenario.dll direct stores write, ROM2 shops admit 458 data.bin keys (190 armour, 35 shield, 146 weapon, 64 MagicItems, 23 books); none selects class 5 or 6. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-333 | ROM2 sold-item placement L2.00804 tests the item tag, type and stackability and the category kind bits and bit 29, never class, material or row; a stackable item prefers a category without bit 29. | High | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-334 | The ROM2 server object's init sets +0x74 to (mode < 2); campaign start passes mode 2 (Medium), so shop fills read the Scenario.dll record; network paths pass 0; other +0x74 stores are unclassified. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+
+### R2-ENGINE-327
+
+Table admission `L2.00812` (RU `L2.01331`) dispatches on mode through the
+jump table at `L2.01332`. The mode-1 armour arm `L2.01333` (RU `L2.01334`)
+compares its class, material and row arguments with immediates in three
+groups:
+
+| Triple | EN compares | RU compares | Item ID | itemname line |
+|---|---|---|---|---|
+| (0, 0, 2) | `L2.01333`, `L2.01335`, `L2.01336` | `L2.01334`, `L2.01337`, `L2.01338` | `0x0502` | 17 |
+| (0, 1, 2) | `L2.01339`, `L2.01340`, `L2.01341` | `L2.01342`, `L2.01343`, `L2.01344` | `0x1502` | 3 |
+| (6, 4, 6) | `L2.01345`, `L2.01346`, `L2.01347` | `L2.01348`, `L2.01349`, `L2.01350` | `0x46c6` | 64 |
+
+The armour constructor `L2.01351` stores item ID material<<12 | part<<8 |
+class<<5 | row at +0x40, part being armour column 4 (5, 5 and 6 here). The
+three IDs name Magic Beard / Магическая Борода, Beard / Борода and Gold
+Crown / Золотая Корона (R2-ENGINE-267 name map).
+
+Other arms: weapon mode 2 (`L2.01352`) keeps weapon column 15 bit 0 set;
+weapon mode 8 (`L2.01353`) keeps it clear; shield mode 7 (`L2.01354`) has
+no extra test; modes 3..6 (`L2.01355`) build nothing. Magic admission
+`L2.00810` skips book spells {9, 14, 15, 24, 28, 29}, picks MagicItems row
+i+5 or i+34 for i in 1..29, adds potions by name (rows 69..74) and never
+builds rows 64..68 or 75..96. A bit-29 category removes a row when
+pow(min, 0.4) exceeds trunc(material column 8 x class column 8).
+
+**Confidence.** High. All admission and mode bodies are complete linear
+decodes with in-body branch targets in both locales.
+
+### R2-ENGINE-328
+
+The only two beard names among the 491 itemname lines of each locale
+(casefold `beard`, `борода`) are IDs `0x0502` and `0x1502`: armour row 2,
+class 0, materials 0 and 1, part 5. Their class mask words admit both
+materials. Only record 1 category 0 (both keys, range 0..1500) and
+record 2 category 0 under its NewGame mask `1383c305` (material 0, range
+0..5000 or 0..10000) select them; their admission prices, 100 and 25, lie
+inside those ranges, so the armour exclusion (R2-ENGINE-327) is their only
+removing test. Every later record-2 and record-3 category-0 mask clears
+material bit 0 and selects neither, and their minima (499, 12000, 40000)
+would exclude both prices. The exclusion sits in table admission, which every fill uses
+for armour, including fills from the deal source (R2-ENGINE-334). No other
+admission mode builds armour, and the draw takes only admitted candidates
+(R2-ENGINE-265).
+
+Sold-item placement (R2-ENGINE-333) tests no row, and server sale
+`L2.00832` places every pending hero item with an owner and a nonzero
+price.
+
+**Confidence.** High that no fill admits a beard. Unknown whether a
+player sale can place one: the client's admission of a beard to the
+pending sale list was not read.
+
+**Unknown.** The client sale-selection producer.
+
+### R2-ENGINE-329
+
+Ordinal 15 (R2-ENGINE-263) returns `D2.00104 + ID*0x50` with no bound
+check. Records 0..3 span `D2.00104..D2.00232`; `D2.00007` holds the
+current-location pointer. Both DLLs' .data has raw data to `D2.00233` and
+virtual end `D2.00234`, so the records start zero. A record with zero
+masks builds no candidate.
+
+An operand census of every executable section for displacements or
+immediates in `D2.00235..D2.00236` finds 62 sites per DLL, each matched by
+a raw dword scan of every section at every byte: 16 in ScenarioNewGame,
+41 in departure `D2.00012`, a read and a write in TalkTo `D2.00137`, and
+the record address in ScenarioSave `D2.00237`, ScenarioLoad `D2.00238`
+and ScenarioGetShopAssortment `D2.00239`. EN and RU sites are equal. No
+direct store writes record 0; ScenarioLoad's copy at `D2.00238` restores
+every record, record 0 included, from the bytes Save wrote
+(R2-ENGINE-263). The census counts direct stores only; bulk copies and
+writes through a computed pointer are not stores it can classify.
+
+**Confidence.** High for the DLL census population.
+
+**Unknown.** Writes through the record pointer the lookup returns, in the
+client and inside the DLL; neither was searched.
+
+### R2-ENGINE-330
+
+| Writer | Record | Values |
+|---|---|---|
+| NewGame | 1 | R2-ENGINE-263 |
+| NewGame | 2 | masks `1383c305`, `2bc3c304`, `04000000`, `10438305`; 0..5000; draws 100/20/20/100; bounds 2/1/1/2 |
+| leave 30 | 2 | masks cat 0/1/3 `1383c22c`, `2bc3c324`, `10438324` |
+| leave 40 | 2 | `1387c26c`, `2bc7c324`, `10478264` |
+| leave 50 | 3 | min 499/499/0/499; draws 100/20/20/100; bounds 2/1/1/2; masks `13c7d318`, `2bc7d318`, `04000000`, `2bc042f0` |
+| leave 60 | 2 | `1387c268`, `2bc7c268`, `10478260` |
+| leave 80 | 2 | `138752e0`, `2bc752e0`, `104702e0` |
+| leave 90 | 2 | `138772c0`, `2bc772c0`, `104722c0` |
+| stage 30, 40 | 2 | max 10000, 22000 |
+| stage 50..80 | 2, 3 | max 60000, 150000, 400000, 800000 |
+| stage 90 | 2, 3 | max 1500000; record 2 min 12000 (cats 0, 1, 3) |
+| stage 100 | 2, 3 | max 5000000; record 2 min 40000 (cats 0, 1, 3) |
+| stage 110 | 2, 3 | max 10000000 |
+
+LeaveLocation `D2.00009` calls departure `D2.00012` when the current
+location's type is not 2. Departure switches on the location ID (byte
+table `D2.00025`), adds 10 to stage bank 768 (`D2.00118`) when ID%10 is 0
+and switches on the new stage (`D2.00028`). Town IDs 1, 2 and 3
+(R2-ENGINE-231) index records 1, 2 and 3.
+
+Admitted keys per category, record 2, in departure order 10..110 from
+stage 10: 56/75/39/33 at NewGame, 60/80/51/36 after 20, 107/130/71/47
+after 50, 42/120/86/33 after 90. Record 3: 43/69/71/0 after 50,
+50/71/87/0 after 100.
+
+**Confidence.** High for the writer values and switch conditions. Medium
+for the per-state counts as a campaign order: they assume departures in
+ID order through the non-type-2 path.
+
+**Unknown.** Whether town 3 is entered after a bank-775 restoration
+(R2-SESSION-123) with record 3 still zero.
+
+### R2-ENGINE-331
+
+TalkTo `D2.00137` splits its word into NPC (bits 0..15), topic (bits
+16..27) and kind (bits 28..30). Kind 0 with NPC 0x2a3 and topic 0x4e sets
+bank 770 to 2 and ORs `0x80000` (class 4) into record 3's category-3 mask
+at `D2.00240` (`D2.00241..D2.00242`). Mask `2bc042f0` has no class bit, so
+category 3 admits nothing before that; `2bc842f0` admits 38 keys (23
+armour, 15 weapon). EnterInn `D2.00089` offers word `L2.01356` at
+`D2.00100` when stage bank 768 > 0x3c, bank 770 is 1 (`D2.00215`) and the
+current location ID is 3. The mission-70 departure arm sets bank 770 to 1.
+Bank 770 is the druid category-3 gate query 0x302 (R2-ENGINE-259).
+
+**Confidence.** High for the TalkTo and EnterInn bodies. Medium that
+EnterInn is the only offer of the word: dword scans of the EN DLL and both
+clients found one site.
+
+### R2-ENGINE-332
+
+Over every legal key of both installed data.bin tables (row class mask
+word carrying the material bit), every MagicItems row and spells 1..29,
+across every record state the direct DLL stores of R2-ENGINE-330 and
+R2-ENGINE-331 produce, and the widest-bound control:
+
+| Table | Legal | Admitted | Never admitted |
+|---|---|---|---|
+| armour | 204 | 190 | 2 beard keys by constant; 11 keys of class 5 or 6; row 28 class 2 material 11 by material selection |
+| shield | 37 | 35 | row 5 class 5 by class; row 8 class 1 material 1 by price 1600 > 1500 |
+| weapon | 154 | 146 | 8 keys of class 5 or 6; rows 1, 23..27 have no legal key |
+| MagicItems | 96 | 64 | rows 1..5 built by the book path; 64..68 and 75..96 never built |
+| books | 29 | 23 | spells 9, 14, 15, 24, 28, 29 |
+
+The OR of all directly stored masks is `0x3fcfffff`, classes 0..4. Union per
+record and category: 70/44/4/34, 151/233/87/95, 50/71/87/38. EN and RU
+data.bin are byte-equal and verdicts are equal.
+
+Inputs: record values are DLL immediates; legality is the data.bin row
+mask word; price is row column 2 x material column 2 x class column 2;
+the armour exclusion, book skips, phase-two row arithmetic and potion
+names are program constants; weapon modes read column 15 bit 0; the
+enchant level reads material and class column 8.
+
+**Confidence.** High for admission under those record values. Unknown
+which bit-29 keys survive the enchanted draw outside record 1: enchant
+`L2.01357` is unread.
+
+**Unknown.** Record values outside the direct stores: writes through the
+lookup's pointer in the client or the DLL (R2-ENGINE-329), a loaded SAV's
+bytes, and deal-source records (R2-ENGINE-334). The `L2.01357` enchant and
+its final-price failures.
+
+### R2-ENGINE-333
+
+Placement `L2.00804` (RU `L2.01358`) uses a nonzero tag +0x4d as category
+tag-1. Otherwise it sets kind `0x4000000` for types 3, 4 and 5,
+`0x400000` for type 2 and `0x1000000` for type 1. A non-stackable
+(vtable +0x50) non-book goes to the first category with bit 29, else
+category 3. A stackable item or a book goes to the first category with its
+kind bit and no bit 29, else the first with its kind bit, else category 3.
+Insert `L2.00833` merges into an equal stackable entry or appends to the
+shop category list ([deal+0x9c]+0xc+k*0x1c); an appended item also enters
+the deal list +4+k*0x1c. The body reads no class, material or row.
+
+**Confidence.** High: complete body with its insert.
+
+### R2-ENGINE-334
+
+Server global `L2.00805` (RU `L2.01317`): constructor `L2.01359` (RU
+`L2.01360`) writes +0x74 = 0; init `L2.00221(mode)` (RU `R2.0010`)
+writes +0x74 = (mode < 2) and +0x70 = (mode > 0); creator `L2.01003` (RU
+`L2.01019`) stores the global and calls init. Campaign start callers EN
+`L2.01004`, `L2.01005` (RU `L2.01361`, `L2.01362`) store app+0x3ec = 1 and
+app+0x5d8 = 2 (RU +0x404, +0x63c) and pass mode 2. EN `L2.01006`,
+`L2.01007` (RU `L2.01363`, `L2.01364`) pass 0. EN `L2.01008` (RU
+`L2.01365`) passes app+0x5d8, whose stores are 0, 2, 2, 0, 0, 3, 3 and 1.
+Of 14 methods called through the global, only init writes +0x74. A .text
+linear sweep finds 119 (EN) and 121 (RU) other dword [reg+0x74] stores.
+
+**Confidence.** High for the committed bodies: constructor `L2.01359`
+writes 0, init `L2.00221` writes (mode < 2) and (mode > 0), creator
+`L2.01003` stores the global and passes its argument to init. Medium for
+the caller set, the caller arguments, the 14-method census and that a
+single-player campaign keeps +0x74 at 0: they come from the client linear
+sweeps and the global raw scan, which ran beyond the preregistered scan
+budget, and the load that puts app+0x5d8 into each pushed register is not
+in a committed listing.
+
+**Unknown.** The owners of the unclassified +0x74 stores and the mode
+`L2.01008` passes in a campaign.

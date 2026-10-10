@@ -498,11 +498,13 @@ A fill replaces all four lists, only while no deal is open: on entering with an 
 sent at campaign start and from the client's 0x468 handler. Buy stops at
 the first pending shop item the hero cannot afford, debits q*P and moves
 each bought item to the hero. Sale credits floor(q*P/2+0.5) and places the
-item back into its category, merging with an equal stackable entry.
+item on a shelf, merging with an equal stackable entry.
 Undo returns pending items. Finite stock is implied by these bodies, not
 read as one. How a selection splits a stack into the pending list and
 whether the lists survive a save remain Unknown (`R2-ENGINE-266`,
-High / Medium / Unknown).
+partially retracted, High / Medium / Unknown). Its former fallback rule
+for a sold item is retracted; the shelf rule is in Shop pool in every
+town.
 
 ### Town 1 shop prices and text
 
@@ -532,6 +534,52 @@ and leaving the shop clear every episode bit but not the counter, so a
 response episode starts from the inherited counter value; the outcome of a
 start at counter 12 or more is Unknown (`R2-ENGINE-269`,
 High / Medium / Unknown).
+
+## Shop pool in every town
+
+Scenario.dll holds four shop records, one per location ID 0..3, zero at
+load; town IDs 1, 2 and 3 read records 1, 2 and 3. No direct store writes
+record 0; loading a save restores every record from the saved bytes.
+Writes through the record pointer, in the client or the DLL, were not
+searched (`R2-ENGINE-329`, High / Unknown). New game writes records 1 and 2.
+Leaving a mission rewrites record-2 masks after missions 30, 40, 60, 80
+and 90 and writes record 3 after mission 50; the stage reached raises the
+record-2 and record-3 maximum price at stages 30..110 and the record-2
+minimum at stages 90 and 100 (`R2-ENGINE-330`, High / Medium):
+
+| Record | Price range over the campaign | Draws | Quantity bound |
+|---|---|---|---|
+| 1 | 0..1500, fixed | 100/100/20/20 | 2/2/1/1 |
+| 2 | 0..5000 at new game, up to 40000..10000000 | 100/20/20/100 | 2/1/1/2 |
+| 3 | 499..150000 up to 499..10000000 (category 2 from 0) | 100/20/20/100 | 2/1/1/2 |
+
+Record 3's fourth category has no class bit until one druid inn talk
+(NPC 0x2a3, topic 0x4e) adds class 4; the inn offers that talk in town 3
+after mission 70 (`R2-ENGINE-331`, High / Medium).
+
+Under the record values the Scenario.dll's direct stores write, the shops
+can admit 458 keys from the installed data.bin: 190 armour, 35 shield and
+146 weapon keys, 64 MagicItems rows and 23 books. None of those masks
+selects class 5 or 6. EN and RU are equal. Record values from pointer
+writes, a loaded save or a deal source are outside this population, and
+which enchanted keys survive the draw outside town 1 is Unknown
+(`R2-ENGINE-332`, High / Unknown).
+
+Armour admission excludes three (class, material, row) keys by program
+constants: Magic Beard, Beard and Gold Crown (`R2-ENGINE-327`, High). The
+two beards are the only beard items, so no shop fill admits a beard from
+any record, and the draw takes only admitted keys. Whether a beard the player sells can reach a shelf depends on
+the client's sale selection, which is Unknown (`R2-ENGINE-328`,
+High / Unknown).
+
+A sold item goes to its tagged category; otherwise a non-stackable
+non-book goes to the first enchanted category, else category 3, and a
+stackable item or book to the first category of its kind without the
+enchanted bit, else the first of its kind, else category 3. Class,
+material and row are not tested (`R2-ENGINE-333`, High). The server
+object's init makes fills read the Scenario.dll record for mode 2 and
+above and a deal source below it (High); that campaign start passes mode 2
+and network paths pass 0 is Medium (`R2-ENGINE-334`, High / Medium).
 
 ## Shared town class and overrides
 
@@ -764,7 +812,8 @@ on nonzero return; outside campaign the predicate admits it. Tooltip
 still scans four rectangles. Original ScenarioGetVar reads bank770 for
 0x302; ordinary Leave70 stores it to 1. This enables the gate without
 an intervening writer. Other producers and restoration remain Unknown
-(`R2-ENGINE-259`, High for these local rules).
+(`R2-ENGINE-259`, High for these local rules). The stock in that category is
+empty until the druid inn talk adds class 4 (`R2-ENGINE-331`).
 
 Keeper ticks require at least 100 ms. Each tick samples a fresh
 5000+1000*(rand()%5) idle threshold, then chooses episode flag 0x10/0x20

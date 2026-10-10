@@ -1,5 +1,11 @@
 # Overturn history
 
+## ROM2 sold-item placement fallback
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-266` (sold-item fallback clause only; buy, sell credit, undo, refill and finite-stock clauses stand) | Verbatim: "else a non-stackable non-book to the first bit-29 category, else the first category carrying its kind bit" | High | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/), R2-ENGINE-333 | Placement `L2.00804` sends a non-stackable non-book to the first bit-29 category, else category 3. A stackable item or a book goes to the first category with its kind bit and no bit 29, else the first with its kind bit, else category 3. In record 2 a stackable weapon goes to category 3, not to bit-29 category 1. | **REFUTED** — partially retracted |
+
 ## Shop candidate admission condition
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

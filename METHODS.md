@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3267. Observation: 95. Static analysis: 2715. Mixed: 457.
+Claims labelled: 3275. Observation: 95. Static analysis: 2723. Mixed: 457.
 
 ## Ledger ai
 
@@ -1723,10 +1723,10 @@ Claims labelled: 3267. Observation: 95. Static analysis: 2715. Mixed: 457.
 | R2-ENGINE-258 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-259 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-260 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-263 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-263 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-264 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-265 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-266 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-266 | static analysis | ● active (branch candidate, partially retracted) |
 | R2-ENGINE-267 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-268 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-269 | static analysis | ● active (branch candidate) |
@@ -1775,6 +1775,14 @@ Claims labelled: 3267. Observation: 95. Static analysis: 2715. Mixed: 457.
 | R2-ENGINE-322 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-323 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-324 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-327 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-328 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-329 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-330 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-331 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-332 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-333 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-334 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-session
 
