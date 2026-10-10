@@ -1,5 +1,11 @@
 # Overturn history
 
+## Shop candidate admission condition
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SHOP-POOL-006` (the admission condition only; the corrected window value, the collection map, the shape walk and the constructor stores stand) | Verbatim: "and admits `(tier, materialBit, shape)` iff `collector+0x34 <= v && v <= collector+0x38`" | High | [EXP-0512](../experiments/EXP-0512-shop-generator-pool/), SHOP-118 | After the window `R0963` constructs the item and, unless `collector+0x50` is 6, deletes a Weapon whose `sutableFor` bit 0 is clear (`L13806`..`L13807`) and an Armor whose packed class field is 3..5 (`L13808`..`L13809`). On the weapons and armour shelves the window is necessary, not sufficient; Staff, Shaman Staff, Ring and Amulet reach only the Magic Items shelf. | **REFUTED** — partially retracted |
+
 ## Direct 0x8b bolt route spell set
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

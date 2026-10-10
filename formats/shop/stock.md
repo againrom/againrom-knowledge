@@ -203,9 +203,9 @@ therefore starts with an empty shop (`SHOP-SAVE-015`).
 
 | shelf | code | drawn | source | second stage |
 |---|---|---|---|---|
-| 0 | 1 | 100 | `Data.bin` Shields (`L04591`) + Armors (`L04589`) | — |
-| 1 | 2 | 100 | `Data.bin` Weapons (`L04593`) | — |
-| 2 | 4 | 20 | the union of the two above | **enchantment required** |
+| 0 | 1 | 100 | `Data.bin` Shields (`L04591`) + Armors (`L04589`) whose class field is not 3..5 | — |
+| 1 | 2 | 100 | `Data.bin` Weapons (`L04593`) whose `sutableFor` has bit 0 | — |
+| 2 | 4 | 20 | Shields + Armors + Weapons, without the two class tests | **enchantment required** |
 | 3 | 3 | `rand(1..8)` | `Data.bin` **Spells** (`L05046`), via `R1036` — two subtypes `0x2a`/`0x29` priced from param slots `0x15`/`0x14` | — |
 
 Then six literal potions are appended by name — `Potion Health Regeneration`,
@@ -244,6 +244,49 @@ withdrawn. **The `0 -> 4`
 row is arithmetic about a state no player reaches** (`SHOP-TOWN-023`): the campaign never opens
 the town while the ceiling is 0, and until the first homecoming the static town shop has been
 neither capped nor generated, so it is empty rather than four-item.
+
+These are window counts. The armour and weapons shelves apply one more test, below.
+
+### Shelf tests after the window
+
+After the window `R0963` constructs the item and, on the armour and weapons shelves only
+(collector mode 1 or 2, not 6), deletes it instead of adding it when (`SHOP-118`):
+
+- it is a Weapon whose `sutableFor` (parameter 15) has bit 0 clear: Staff and Shaman Staff;
+- it is an Armor whose packed class field, which is the row's `Slot`, is 3, 4 or 5: Ring and
+  Amulet.
+
+Shields have no test. The order per candidate is: shape (outer, 0..4), row from 1, material bit
+0..15, mask bit, window floor, window ceiling, construction, class test, add. Of the later
+stages, those read remove no code: the draw is `rand(0..count-1)`, the add merges equal stackable
+items, the two sorts are `qsort`, and `R2111` only sets the stack size. The Magic Items
+shelf alone rejects a drawn item, when no first effect is possible. Three callees of the draw were
+not read: the clone `vt+0x40`, the transfer `R2184` that moves the drawn list into the
+shelf, and `R1721`, which empties the drawn list afterwards.
+
+Staff, Shaman Staff, Ring and Amulet therefore reach only the Magic Items shelf. Two of their codes
+cannot take a first effect there either: `0x0502` (Common Iron Amulet, MagCap 0, named
+`Magic Beard`) and `0x1502` (Common Bronze Amulet, MagCap 3, named `Beard`). MagCap 0 fails the
+selector's positive-MagCap gate; MagCap 3 is below cost × minimum for every kind of the fighter
+slot-5 column, whose smallest is 10. Neither test reads the ceiling, so the generator never shelves
+either code, on EN or RU, at any ceiling (`SHOP-119`).
+
+Over the 416 legal codes of each root (367 equipment triples and 49 `MagicItems` rows), at any
+ceiling of at least 1 000 000 the read stages can hand the shelf transfer 128 weapon, 204 armour,
+245 Magic Items and 16 consumable codes; the unread transfer is the only place a shelf could
+differ. 365 of the 367 equipment codes reach some shelf. 33 `MagicItems` rows never do:
+seven potions and the 26 `Quest` items. EN and RU agree row for row. The Magic Items figure models
+first-effect feasibility and is graded lower than the others (`SHOP-120`).
+
+| shelf test input | installed field or constant (`SHOP-121`) |
+|---|---|
+| rows, mask, `Price`, `Materials`/`Shapes` price double | installed, `Data.bin` |
+| shapes 0..4, materials 0..15, floor 0, counts 100/100/20/`rand(1..8)` | constant |
+| ceiling | installed, `scenario.reg` `ShopMaxPrice` or the map shop's cap |
+| Weapon test | installed `sutableFor`, constant bit 0 |
+| Armor test | installed `Slot` (read for 0..12; above 12 the class field is not written), constant range 3..5 |
+| first effect | installed MagCap doubles, `Magic` columns, `Spells` parameter 20; constant cast spell ids |
+| Book / Scroll | installed `Spells` parameters 21 / 20; constant id ranges and names |
 
 `R1713`'s kinds **3, 4 and 5** — the Magic-Items pools filtered by the names `Potion`,
 `Scroll`, `Book` — are reachable only from `R1712`, which has **0 callers**. The four

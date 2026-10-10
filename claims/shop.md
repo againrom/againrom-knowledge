@@ -237,7 +237,7 @@ what a duplicate is — is [EXP-0061](../experiments/EXP-0061-shop-trade/); its 
 
 **Evidence.** [EXP-0057](../experiments/EXP-0057-shop/), **[EXP-0059](../experiments/EXP-0059-shop-mission/)**
 
-**Amended.** The source claim and status above retain their amendment scope. The standing correction is recorded in `retracted.md`.
+**Amended.** The source claim and status above retain their amendment scope. The standing correction is recorded in `retracted.md`. The "iff" admission clause is also partially retracted: on the weapons and armour shelves a window-admitted Weapon or Armor can still be deleted by the per-class test of `SHOP-118`.
 
 ### SHOP-MAGIC-007
 
@@ -1395,3 +1395,104 @@ The cursor selector (slot `+0x14`, `R1021`) returns 0 when `[view+0x148] == 0` (
 **Confidence.** High for the click consumption in slot `+0x54` and for the cursor branch order: operands in `evidence/strip-listing-excerpt.txt`.
 
 **Unknown.** Whether the view's dispatch reaches slot `+0x54` for this strip, and in what state; which sample the request at `L10018` names (`[L02733]`) and whether it is audible; which cursor shapes the three `[L04369]` offsets hold; the meaning of `[view+0x148]` and `[obj+0x3cc]`.
+
+## Shelf admission tests
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-118 | On the weapons and armour shelves the candidate walk drops, after the value window, a Weapon whose sutableFor bit 0 is clear and an Armor whose packed class field is 3..5; the Magic Items shelf skips both tests. | High | ✔ promoted | [EXP-0512](../experiments/EXP-0512-shop-generator-pool/) |
+| SHOP-119 | Item codes 0x0502 and 0x1502 (Common Iron and Bronze Amulet, named Magic Beard and Beard) are never shelved by the generator, EN or RU, at any ceiling: the armour test drops them and neither can take a first effect. | High | ✔ promoted | [EXP-0512](../experiments/EXP-0512-shop-generator-pool/) |
+| SHOP-120 | Of 416 legal item codes per root the generator's read stages can pass 365 of 367 equipment and 16 of 49 MagicItems codes to the shelf transfer: at most 128 weapon, 204 armour, 245 Magic Items and 16 consumable codes; EN and RU agree. | High / Medium | ✔ promoted | [EXP-0512](../experiments/EXP-0512-shop-generator-pool/) |
+| SHOP-121 | Each shelf test reads an installed field or a program constant; the class range 3..5, sutableFor bit 0, the floor 0, the loop bounds, the spell-id ranges and the shelf counts are constants; an Armors Slot is covered for 0..12. | High | ✔ promoted | [EXP-0512](../experiments/EXP-0512-shop-generator-pool/) |
+
+### SHOP-118
+
+`R0963` runs, for one shape `t` (`R1714` passes 0..4 when asked for 5):
+
+1. rows 1 to the collection's count minus 1 (`L13810`, `L13811`);
+2. material bits 0..15 (`L13812`);
+3. the mask word at `row+0x1c+2t` with bit `m` set (`L03296`..`L03298`);
+4. `v = ftol(Price × Materials[m].+0x30 × Shapes[t].+0x30)` (`SHOP-POOL-021`), then `v >= collector+0x34` (`L09670`) and `v <= collector+0x38` (`L09671`);
+5. construction by code: 2 Weapon, 7 Shield, 1 Armor (`L13813`..`L13814`);
+6. a per-class test, then `Add` to the collector (`L13815`).
+
+The per-class test runs only when `collector+0x50 != 6`:
+
+- Weapon: `[item+0x3c]` is the Weapons row (`L13816`). Parameter 15, `sutableFor` (`ITEM-SUIT-035`), is read at `L13817`; when bit 0 is clear the item is deleted, not added (`L13806`..`L13807`).
+- Armor: `R1056` returns `(item+0x40 >> 8) & 0xf`; when that class field is 3, 4 or 5 the item is deleted (`L13808`..`L13809`). `R0890` builds `item+0x40` with `R0667(Slot, shape, material, row)`, so the class field is the row's `Slot` (`ITEM-ARMSLOT-031`).
+- Shield: no test.
+
+The wrapper sets the mode before the walk: `R2180` 1 (Shields then Armors), `R0194` 2 (Weapons), `R2181` 6 (both kinds). On the installed tables the Weapon test drops Staff and Shaman Staff (`sutableFor` 2), and the Armor test drops Ring (`Slot` 4) and Amulet (`Slot` 5); no shipped `Armors` row has `Slot` 3. These rows reach only the Magic Items shelf.
+
+Among the stages after the walk, the routines listed remove no code: `R1711` draws index `rand(0..count-1)` (`L13818`..`L13819`); `L13166` merges an equal stackable item into an existing element; `R2182` and `R2183` are `qsort` calls; `R2111`, called in modes 1 and 2 (`L13820`), only writes the stack size `item+0x42` by shape (`rand(1..8)`, `rand(1..4)`, `rand(1..2)`, 1, 1; jump table at `L13821`). Only mode 6 rejects a drawn item, through the first-effect requirement of `R1031`; every exit of that routine after `L13822` returns 1 (`SHOP-MAGIC-007`). Three callees of `R1711` were not read: the clone `vt+0x40` (`L13823`, `L13824`), `R2184`, which moves the drawn list into the shop's shelf (`L13825`; all four generator calls pass a non-null shelf, so it always runs), and `R1721`, which empties the drawn list afterwards (`L13826`, `SHOP-LIFE-013`). Whether any of them drops or replaces an element is outside this claim.
+
+**Confidence.** High. The walk is one listing read end to end; the two tests are its operands; the mode values are immediates in the three wrappers. A raw `E8 rel32` sweep of `.text` finds `R0963` called only by `R1714`, which `R1713` calls from its kind 1 and kind 2 arms, and `R1711` called only by `R1500` (4 sites); no target address occurs as a dword elsewhere in the file. Blind spot: a call whose target is computed at run time. The statement about later stages is bounded to the routines listed in the experiment's `listings.txt`; the three unread callees above carry no grade.
+
+### SHOP-119
+
+Codes `0x0502` and `0x1502` decode as `Armors` row 2 (`Amulet`), shape 0 (`Common`), materials 0 (`Iron`) and 1 (`Bronze`) (`ITEM-NAMEKEY-037`); their name lines are `Magic Beard` and `Beard` (`ITEM-NAMEPOP-038`). Both mask bits are set, so both enter the walk (`ITEM-PICT-050`). Measured on EN and RU alike: window value 100 and 25, `Slot` 5, `sutableFor` 3, MagCap 0 and 3.
+
+| shelf | candidates | what removes the two codes |
+|---|---|---|
+| weapons | Weapons | never candidates |
+| armour | Shields, Armors | class field 5 is in 3..5 (`SHOP-118`) |
+| Magic Items | Shields, Armors, Weapons | no first effect |
+| consumables | `MagicItems` rows by name | never candidates |
+
+On the Magic Items shelf `R1031` passes MagCap `item+0x48` (`L13827`) to `R1035`, which returns null when the budget or MagCap is not positive (`L13828`..`L13829`). The Iron Amulet's MagCap is 0. For the Bronze Amulet, MagCap 3, the fighter column for slot 5 (`SHOP-EFFWEIGHT-062`) holds 29 positive-weight kinds and no `castSpell`. `R2185` takes `3 idiv cost` as the cap (`L13830`..`L13831`) and returns -1 when the payload maximum is below the kind's minimum (`L13832`). The smallest cost × minimum among the 29 kinds is 10 (`toHit`: cost 10, minimum 1), so every kind fails at any budget. A required null rejects the item (`SHOP-MAGIC-007`). Both removals happen before or at the draw, so this result does not rest on the unread transfer stages of `SHOP-118`.
+
+Neither removing test reads the ceiling, so the result holds at every campaign ceiling and every map-shop cap. MagCap is `ftol(Materials[m].+0x60 × Shapes[t].+0x60)` (`L13833`..`L13834`).
+
+This agrees with the owner's report that the original's shops never sell either beard. The report carries no part of the grade.
+
+**Confidence.** High. Each shelf's candidate population and each removing test is a read instruction; the field values are measured on both roots. EN and RU `rom.exe` are one image, so the code read is one witness.
+
+**Unknown.** Whether either code reaches a shelf by a route other than the generator, such as an item the player sells or returns to the shop. Settled by reading the shop's sell and return commits up to the call that adds the item to a shelf list, or by a runtime trace of a shelf after the player sells an Amulet of either material.
+
+### SHOP-120
+
+Population: the 367 mask-admitted equipment triples and the 49 `MagicItems` rows of each root, 416 codes, equal to the 416 keys of `text/itemname.bin` on both roots. Inputs: the 13 distinct shipped `ShopMaxPrice` ceilings (1 000 … 10 000 000) and 1 000 000 000.
+
+The counts are the codes the read stages of `SHOP-118` can hand to `R2184`, the transfer into the shelf. That the transfer, the clone and `R1721` keep every element is not read; a shelf could differ from these counts only through them.
+
+At every ceiling of at least 1 000 000:
+
+- weapons shelf 128 codes: 138 Weapons triples less the 10 Staff and Shaman Staff triples;
+- armour shelf 204 codes: 36 Shields and 193 Armors triples less 11 Ring and 14 Amulet triples;
+- Magic Items shelf 245 codes;
+- 365 equipment codes reach some shelf; the two that reach none are `0x0502` and `0x1502` (`SHOP-119`);
+- consumables shelf 16 `MagicItems` codes: five `Book` rows (lowest admitting ceiling 1 500 … 40 000, from `Spells` parameter 21), five `Scroll` rows (50 … 300, parameter 20) and six named potions with no window (`SHOP-CONSUME-073`, `SHOP-CONSUME-074`). The other 33 rows, 7 potions and 26 `Quest` items, are never constructed by the generator.
+
+Per ceiling, EN and RU identical (weapons / armour / Magic Items / consumables): 1 000 → 46/87/4/11; 10 000 → 70/143/72/13; 100 000 → 106/189/208/16; 1 000 000 → 128/204/245/16.
+
+The Magic Items membership is a feasibility model of the first effect: positive budget and MagCap, a positive-weight kind in the item's column, `min(MagCap idiv cost, budget maximum) >= minimum` for an ordinary kind (`SHOP-EFFPAY-063`), and `log2(B/(10 S)) > 0` for a cast, since `R2185` returns a non-negative power whenever that holds and both callers accept it. The cast term, its constant 10 and its power law are `SHOP-EFFCAST-065`; this experiment did not dump the doubles at `L13835`, `L04115` and `L05069` that carry them. It decides possibility, not probability.
+
+**Confidence.** High for the weapons, armour and consumables populations handed to the transfer and for the two codes no shelf offers: the tests are read instructions and the inputs are installed numbers. The High does not extend past `R2184`. The list of codes no shelf offers depends on the Magic Items model only for the 35 codes the plain-shelf tests drop; the other 33 have MagCap 60 or more or take the mage forced cast. Medium for the Magic Items count 245 and its per-ceiling ladder: the budget term follows the x87 formula as read and was not executed natively.
+
+**Unknown.** Whether `R2184`, the clone `vt+0x40` or `R1721` drops or replaces an element; settled by listing those three routines. The probability of each code and the stock of any particular generation; settled by a runtime trace of the four shelf lists after generation at a known seed, or by executing `R1711` natively over the CRT `rand` stream. The Magic Items count at a budget boundary; settled by native execution of `R2185` with the read constants.
+
+### SHOP-121
+
+| test | input | kind |
+|---|---|---|
+| candidate collections | addresses `L04591`, `L04589`, `L04593` by mode 1, 2, 6 | constant |
+| rows walked | 1 to the collection's row count | installed (`Data.bin`) |
+| shapes walked | 0..4 | constant (`L13836`) |
+| materials walked | bits 0..15 | constant (`L13812`) |
+| mask | five `u16` after each row's parameter words | installed (`Data.bin`) |
+| value | `Price` (parameter 2); `Materials` and `Shapes` double at `+0x30` | installed (`Data.bin`) |
+| floor | 0 | constant (`SHOP-MISSION-019`) |
+| ceiling | `[Mission<n>] ShopMaxPrice`, or a map shop's cap | installed (`scenario.reg`, map record) |
+| Weapon test | parameter 15 `sutableFor`; bit 0 | installed column, constant bit |
+| Armor test | parameter 4 `Slot`; range 3..5 | installed column, constant range |
+| first effect | MagCap doubles at `+0x60`; `Magic` cost, minimum and 24 cumulative columns; `Spells` parameter 20 | installed (`Data.bin`) |
+| cast spells | ids 20, 11 (fighter) and 1, 13, 14, 20, 11 (mage) at `L06178` / `L08698` | constant |
+| Book / Scroll | `Spells` parameters 21 / 20; id ranges and the Book exclusions 11, 17, 27 | installed price, constant ranges |
+| consumable rows | names `Book <school>`, `Scroll <school>` and six potion names, looked up in `MagicItems` | constant names, installed rows |
+| shelf counts | 100, 100, 20, `rand(1..8)` | constant (`SHOP-GEN-005`) |
+
+A customised row changes what a shelf offers through its mask, price, `Slot` and `sutableFor`. For `Slot` 0..12 an `Armors` row given `Slot` 3, 4 or 5 is kept off the armour shelf. Above 12, `R0890` takes the error branch (`L04721` `CMP 0xc`, `L13837`) and leaves through `L13838` without writing `item+0x40`, so the class field the test reads is whatever the base constructor left; this claim does not cover that case.
+
+**Unknown.** The class field and armour-shelf fate of an `Armors` row with `Slot` above 12, and whether the error branch returns at all; settled by listing the base constructor `R0884` for the initial `item+0x40` and the calls at `L13839` and `L13840` on the error branch.
+
+**Confidence.** High. Each input is the operand of a read instruction in the listings `SHOP-118` and `SHOP-119` cite.
