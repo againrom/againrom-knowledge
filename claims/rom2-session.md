@@ -1325,3 +1325,31 @@ and `Inventory` were not read. Unknown for the rest.
 **Unknown.** The hero's SAV path; reading the Group member class and the
 `&YA1` writers would settle it. Whether the client grid +0x80 reveal bits
 persist.
+
+## Tip state persistence
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-140 | No ROM2 tip state is saved: TipsMode lives in the registry, and the shop and generator latches and every panel pointer live in room objects that each entry resets, so SAVE and LOAD neither keep nor reset a tip. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+
+### R2-SESSION-140
+
+The 21 instructions per client naming TipsMode lie in the twelve
+creation sites, retext sites 7, 9 and 10, the pre-create paint, the 0x45b
+arm, the default constructor, the options bodies, the registry store and
+the panel checkbox (R2-ENGINE-273, R2-ENGINE-311). None lies in a SAV
+writer or reader.
+
+The tip state is the panel fields (square +0x200, inn +0x80, shop +0x88,
+generator +0x80 and +0x1f8), the shop latch +0x8c, the detail latch
++0x100 and the pre-create stage +0x218 (R2-ENGINE-310). Every room entry
+or generator activation either overwrites each of them or deletes the
+panel it holds and clears it. On the path without a build the square
+enter reads +0x200 (EN `L2.01268`), removes and deletes that panel, and
+then writes 0 (`L2.01269`). A value restored by LOAD therefore could not
+show a tip.
+
+**Confidence.** High for the TipsMode reference census and the
+entry-time resets. Medium that no SAV serializer copies those room
+fields: the save driver's callees were not read in full
+(R2-ENGINE-271).

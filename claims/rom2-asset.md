@@ -741,3 +741,53 @@ Staff with castSpell Fire_Arrow:1, Uncommon Robe, Uncommon Cloak. Loader
 (R2-ENGINE-126 names the rows).
 
 **Confidence.** High for the stored rows in the three payloads.
+
+## Tip texts and popup art
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-080 | ROM2 ships tip text only as twelve sections #tips1..#tips12 of main.res text/town.txt, once each in EN and RU; no other archive entry, map, library or executable in either root holds a #tips key or a tips= value. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ASSET-081 | ROM2 tip popups draw graphics.res interface/lm.256 frames 9..17 (48x32 and 32x32), interface/radiob.256 frames 4 and 5 (16x16) and the font2 8x10 font of 224 glyphs; the bytes are equal in EN and RU. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+
+### R2-ASSET-080
+
+The census reads every entry of every `.res` archive and every `.alm`,
+`.dll` and `.exe` file under both roots as raw bytes and searches
+`#tips` with optional digits and `tips=`, ignoring case. Mission and quest
+texts are uncompressed `main.res` entries (`text/mission<N>.txt`,
+`text/quest.txt`) and are inside that population.
+
+| File | Entry | Keys |
+|---|---|---|
+| EN and RU `main.res` | `text/town.txt` | `#tips1`..`#tips12`, each once |
+| EN and RU `allods2.exe`, RU `a2server.exe` | | the strings `#tips` and `tips=` |
+
+Section lengths in bytes, from the key end plus two to the next `#`, after
+CharToOemA with an assumed code page (EN 1252 to 437, RU 1251 to 866):
+
+| Key | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| EN | 313 | 398 | 173 | 239 | 329 | 374 | 281 | 89 | 119 | 62 | 207 | 259 |
+| RU | 284 | 335 | 150 | 183 | 389 | 396 | 321 | 94 | 92 | 70 | 205 | 281 |
+
+Every section is one paragraph except RU `#tips12`, which has two.
+R2-ENGINE-307 gives the code site of each key.
+
+**Confidence.** High for the population searched. A text loaded from a
+file outside the two roots, or a compressed payload, is outside it.
+
+### R2-ASSET-081
+
+`graphics.res` `interface/lm.256` holds 18 frames. The tip overlay
+(R2-ENGINE-313) uses frames 9 (48x32 fill), 10, 12, 15 and 17 (32x32
+corners), 11 and 16 (48x32 top and bottom edges), and 13 and 14 (32x32
+left and right edges). `interface/radiob.256` frames 4 and 5 are 16x16.
+`graphics\font2\font2.16` holds 224 frames of 8x10 pixels in 4-bit runs
+(decoder EN `L2.01189`: control 0x40 skips rows, 0x80 skips pixels, any
+other byte N copies N bytes of two pixels, low nibble first, ending at a
+zero high nibble) followed by 32 bytes. `font2.dat` holds 224 dword
+advances; entry 0x20 (space) is 6. Frame sizes, opaque counts and SHA-256
+hashes are equal in EN and RU.
+
+**Confidence.** High for the frame headers, the decoder rule and the
+equality.

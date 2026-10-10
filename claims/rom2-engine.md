@@ -3823,7 +3823,7 @@ and device output.
 | R2-ENGINE-271 | ROM2 message 0x442 sets a patch.txt label, names game(9999-wParam).sav and calls the save driver: mode word 2 saves and appends the label, other modes send the name in a type-7 record; the gate gives game9998.sav. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
 | R2-ENGINE-272 | ROM2 message 0x42d leaves a current town through LeaveLocation and opens the global map; leaving town ID 1 sets a map mode that routes to and enters the first available location. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
 | R2-ENGINE-273 | ROM2 global L2.00713 is the TipsMode option: the options constructor sets 1, and registry load, the options Tips checkbox and the tips-panel checkbox write it; the client has no other writer. | High | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
-| R2-ENGINE-274 | ROM2 town child 0x467 is a 312x200 tips panel framed from lm.256 with town.txt section #tips1, a Close button and a checked Show-tips checkbox at fixed panel-relative rectangles. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-ENGINE-274 | ROM2 town child 0x467 is a 312x200 tips panel framed from lm.256 with town.txt section #tips1, a Close button and a checked Show-tips checkbox at fixed panel-relative rectangles. | High / Medium | ● active (amended, branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
 | R2-ENGINE-275 | The ROM2 tips panel takes mouse input: Close posts 0x45a, which makes the town square delete the panel; the checkbox state is stored into TipsMode and decides the panel at later town entries. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
 
 ### R2-ENGINE-271
@@ -3980,6 +3980,10 @@ these construction paths.
 
 **Unknown.** Live pixels and text wrapping in the text control. An
 authorized capture would settle them.
+
+**Amended.** R2-ENGINE-314 answers the text wrapping from the text
+control bodies; live pixels stay Unknown. R2-ENGINE-312 and R2-ENGINE-313
+extend the panel class to every tip surface.
 
 ### R2-ENGINE-275
 
@@ -4775,3 +4779,289 @@ server's creation calls and `#ready`'s callees. Reading the server writers
 of Player +0x10 would identify the pair's holder; a census of the server's
 creation calls with their modes would settle the modes; reading the
 `#ready` arm would settle its effect.
+
+## Tip popups
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-307 | ROM2 has 17 tip formatter calls per locale: 16 push a constant tip number 1..12 and one passes the 0x45b wParam; 12 direct panel-constructor calls create tip popups and 4 sites retext them. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-308 | ROM2 room tips open at every room entry while TipsMode is set: squares #tips1, #tips12 (Kaarg), #tips11 (druid); inns #tips2 and shops #tips3 also need mode 2; #tips4 then replaces #tips3 once per shop entry. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-309 | ROM2 message 0x45b shows #tips<wParam> of the current text pool in mission-view child 0x10 (RU 0x11) at (10,20,370,188); the only constant 0x45b in either client is a dialogue's post of its nonzero tips= value, which no shipped text has. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-310 | ROM2 tip popups have no show-once latch: Close (0x45a) and the room leave delete the panel, and an entry that does not build one deletes a leftover; the shop and generator latches reset at each entry. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-311 | ROM2 TipsMode is loaded from HKLM once at startup and stored at exit and after a cutscene through a key opened with KEY_READ; clearing it closes no open tip, stops later builds and the pre-create cycle, not the detail cycle. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-312 | ROM2 tip panels have a fixed rectangle per creation site and never size to their text: square (328,0)-(640,200), inn (160,0)-(472,200), shop (164,162)-(476,298), mission view (10,20)-(370,188); no gate tip. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-313 | Every ROM2 tip popup is one panel class: an lm.256 frame tiled to the panel, font2 gold text at (20,24), a Close button and a checked Show-tips box; no room or mission tip lights another control. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-314 | ROM2 tip text splits at CR LF, wraps greedily at spaces to the panel width minus 48 in font2, indents each paragraph 6 pixels, justifies non-final lines and clips past (height-60)/12 lines; no shipped tip clips. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+
+### R2-ENGINE-307
+
+The tip-section formatter EN `L2.00896` / RU `L2.01190` formats
+`#tips%d`, finds its first occurrence in the text pool `L2.01191` and
+returns the bytes from the key end plus two to the next `#`, or an empty
+string when the key is absent. Panel constructor EN `L2.00633` / RU
+`L2.00897` takes (ID, left, top, right, bottom, text). Retext EN
+`L2.01192` / RU `L2.01193` replaces the text child's lines; wrapper EN
+`L2.01194` / RU `L2.01195` calls it.
+
+A byte scan of every `.text` offset for direct calls finds, per locale,
+17 formatter calls, 12 constructor calls, 3 calls to the retext (one is the
+wrapper) and 2 calls to the wrapper.
+
+| Tip | EN function | RU function | Action | Panel ID | Rectangle in parent | Panel field |
+|---|---|---|---|---|---|---|
+| 1 | `L2.00710` | `L2.01196` | create | 0x467 | (328,0,640,200) | square +0x200 |
+| 12 | `L2.00631` | `L2.00632` | create | 0x467 | (328,0,640,200) | square +0x200 |
+| 11 | `L2.01197` | `L2.01198` | create | 0x467 | (328,0,640,200) | square +0x200 |
+| 2 | `L2.00552`, `L2.00684`, `L2.00613` | `L2.00553`, `L2.01199`, `L2.00614` | create | 0x467 | (0,0,312,200) | inn page +0x80 |
+| 3 | `L2.00767`, `L2.01200`, `L2.00954` | `L2.01201`, `L2.01202`, `L2.01203` | create | 0x3f3 | (0,162,312,298) | shop page +0x88 |
+| 4 | `L2.01204` | `L2.01205` | retext | | | shop page +0x88 |
+| wParam | arm `L2.01206` | arm `L2.01207` | create | 0x10 (RU 0x11) | (10,20,370,188) | none |
+| 5, 6 | `L2.01208` | `L2.01209` | create | 0x467 | (0,280,312,480) | detail +0x80 |
+| 7 | `L2.01210` | `L2.01211` | retext | | | detail +0x80 |
+| 8 | `L2.01117` | `L2.01212` | create | 0x467 | (232,48,640,184) | pre-create +0x1f8 |
+| 9, 10 | `L2.01213` | `L2.01214` | retext | | | pre-create +0x1f8 |
+
+R2-ENGINE-289 states the generator events for tips 5 to 10. Room table
+slots (enter +0x80, leave +0x84, message +0x48) bind the square, inn and
+shop bodies: EN `L2.00562`, `L2.00563`, `L2.00564`, `L2.00739`,
+`L2.00741`, `L2.00740`, `L2.01215`, `L2.01216`, `L2.01217`.
+
+**Confidence.** High. The call census covers every byte offset of `.text`
+in both clients, every site decodes to the listed constant or wParam, and
+the 76 named EN bodies equal their RU partners in mnemonic sequence except
+the wrap body (R2-ENGINE-314) and the application initializer, which is
+not a tip site.
+
+### R2-ENGINE-308
+
+| Tip | Surface | Enter test | Shown |
+|---|---|---|---|
+| 1 | town 1 square | TipsMode nonzero | every entry |
+| 12 | Kaarg (town 2) square | TipsMode nonzero | every entry |
+| 11 | druid (town 3) square | TipsMode nonzero | every entry |
+| 2 | generic, druid and Kaarg inn | TipsMode nonzero and application mode word +0x5d8 (RU +0x63c) equal to 2 | every entry |
+| 3 | generic, druid and Kaarg shop | the same two tests | every entry |
+| 4 | the shop popup | no TipsMode test | once per shop entry |
+
+Town IDs follow R2-ENGINE-231. The mode word is the one the save driver
+tests (R2-ENGINE-271).
+
+Tip 4: the shop message slot EN `L2.01218` / RU `L2.01219` decodes message
+0x402 to EN `L2.01220`; when application +0x404 has bit 8 clear it calls
+EN `L2.01204` / RU `L2.01205`. That body needs the popup field +0x88
+nonzero, a nonzero count (`L2.01221`, the dword at +8) of the item list at
+shop-inventory child (+0x70, ID 0x3eb, R2-ENGINE-249) +0x84, and latch
++0x8c zero. It then sets +0x8c to 1, formats `#tips4` and retexts the open
+popup. The application idle body EN `L2.01222` / RU `L2.01223` sends 0x402
+to the room stack while application +0xbc is nonzero. The child's list
+pointer is set by its table slot +0x90 (EN `L2.01224`).
+
+No tip site reads a script, pickup, kill or timer state. Missions raise
+tips only through message 0x45b (R2-ENGINE-309).
+
+**Confidence.** High for the tests, fields and message routes in both
+clients. Medium that 0x402 reaches the shop as a room-stack child; the
+stack offers a message to its children in list order (R2-ENGINE-275).
+Medium that the item list becomes nonempty when a shelf is opened; the
+callers of slot +0x90 were not read.
+
+**Unknown.** Which shop actions fill the shop-inventory list and what
+application +0x404 bit 8 means. Reading the callers of slot +0x90 and the
+writers of that bit would settle them.
+
+### R2-ENGINE-309
+
+Arm 0x45b of the application dispatcher (EN `L2.00262` byte table
+`L2.00794`, dword table `L2.00795`; RU `R2.0036`, `L2.01225`,
+`L2.01226`) runs when TipsMode is nonzero. It formats `#tips<wParam>` from
+the current pool, removes and deletes mission-view child 0x10 (RU 0x11) if
+present, constructs a panel with that ID at (10,20,370,188) and adds it to
+application +0xd0. That field holds the window built by EN `L2.01227` with
+(0,0,width-160,height) at EN `L2.01228` / RU `L2.01229`.
+
+The only `.text` instruction per locale whose immediate is 0x45b is the
+push in dialogue message body EN `R2.0054` / RU `R2.0053`. On exhaustion
+it posts 0x45b with dialogue +0x80 as wParam when that field is nonzero,
+then closes with 0x445 (R2-ENGINE-051). Constructor EN `R2.0040` zeroes
++0x80; parser EN `R2.0048` / RU `R2.0047` reads five characters after
+`tips=` with `%d` into it.
+
+The pool holds `town.txt` in towns and the generator, `globalmap.txt` on
+the map, and the mission or quest text in a mission. A census of every
+`.res` entry, `.alm`, `.dll` and `.exe` file in both roots finds `#tips`
+sections only in `town.txt` and `tips=` only as a string in the executables
+(R2-ASSET-080). No shipped dialogue posts 0x45b through that push, and a mission pool has no
+`#tips` section, so a `tips=` added to mission text would open an empty
+panel.
+
+**Confidence.** High. The arm, the poster census and the resource census
+cover both clients and both roots. The poster census is bounded to a
+constant 0x45b; a message number computed at run time is not excluded.
+
+### R2-ENGINE-310
+
+| Family | Panel field | Close (0x45a) deletes in | Leave deletes in | Entry without a build deletes in | Latch and reset |
+|---|---|---|---|---|---|
+| squares | +0x200 | square message `L2.00726` | `L2.00784` | each square enter | none |
+| inns | +0x80 | inn message `L2.01230` | `L2.01231`, `L2.01232`, `L2.01233` | each inn enter | none |
+| shops | +0x88 | shop message `L2.01218` | `L2.00966` | each shop enter | +0x8c, set by tip 4, cleared by every shop enter |
+| mission | child 0x10 | arm 0x45a `L2.00911` | | the next 0x45b | none |
+| detail | +0x80 | detail message `L2.01234` | `L2.01235` | activation | +0x100, cleared by activation |
+| pre-create | +0x1f8 | pre-create message `L2.01236` | `L2.01237` | activation | stage +0x218, cleared by activation |
+
+Addresses are EN; `room-tables.tsv`, `field-writes.tsv` and
+`message-switches.tsv` give the RU partners. Close is the panel button's
+0x45a; the application arm deletes mission child 0x10 if present and
+otherwise offers 0x45a to the room stack (R2-ENGINE-275). An entry builds
+no panel when TipsMode is zero, or for inns and shops when the mode word is
+not 2; it then deletes a panel left in the field. Square, inn and shop
+popups therefore show at each entry while TipsMode is set, and closing one
+holds only until the room is entered again. Every +0x8c store in the
+bodies of the three EN shop tables is the enter's zero; the only other
+store is tip 4's one. R2-SESSION-140 covers SAVE and LOAD.
+
+**Confidence.** High. Every field store in the named bodies of both
+clients is listed, and the table slots bind those bodies to the rooms.
+
+### R2-ENGINE-311
+
+Load EN `L2.01238` / RU `L2.01239` and store EN `L2.01240` / RU
+`L2.01241` open `HKEY_LOCAL_MACHINE` key EN `SOFTWARE\Rage of Mages 2` /
+RU `SOFTWARE\1C\Allods 2` with access mask 0x20019 (KEY_READ). The load
+reads value `TipsMode` into the global through `RegQueryValueExA` and runs
+once, from the application initializer (EN call `L2.01242`). The store
+ignores the open result and writes `TipsMode` with `RegSetValueExA` from
+EN `L2.00893`. It runs from the application exit (EN `L2.01243`) and from
+the cutscene player EN `L2.00875` after it marks a video as seen (EN
+`L2.01244`). R2-ENGINE-273 gives the default 1 and the four writers; no
+writer deletes a panel.
+
+| Tip use | Tests TipsMode |
+|---|---|
+| every panel creation (12 sites) | yes, before creating |
+| retexts 7, 9 and 10 | yes |
+| retext 4 | no |
+| pre-create highlight cycle (paint `L2.01114`) | yes, each paint |
+| detail highlight cycle `L2.01132` | no; it runs while the detail panel exists and the skill latch is clear |
+
+Clearing TipsMode through the panel checkbox or the options dialog leaves
+an open popup until Close, leave or the next entry. A shop popup can
+still change to tip 4. The pre-create cycle stops at the next paint; the
+detail cycle continues until the first skill click or deactivation.
+
+**Confidence.** High for the key, mask, call sites and gate table in both
+clients. Medium that a change persists only where the store's write is
+admitted: on Windows NT `RegSetValueExA` needs KEY_SET_VALUE on the handle,
+which KEY_READ does not grant, so the stored value would stay as installed;
+this was not observed.
+
+**Unknown.** The registry contents of the preserved installs and the
+store's result on the owner's system. Reading the key and observing one
+exit would settle them.
+
+### R2-ENGINE-312
+
+| Surface | Panel in parent | Parent and its page rectangle | Page rectangle of the panel |
+|---|---|---|---|
+| town squares | (328,0,640,200) | square view (R2-ENGINE-274) | (328,0)-(640,200) |
+| inns | (0,0,312,200) | inn center +0x7c, ID 0x450, (160,0,480,480) (R2-ENGINE-246) | (160,0)-(472,200) |
+| shops | (0,162,312,298) | main shop art +0x74, ID 0x3ed, (164,0,480,303) (R2-ENGINE-249) | (164,162)-(476,298) |
+| mission view | (10,20,370,188) | window at application +0xd0, (0,0,width-160,height) | (10,20)-(370,188) |
+| generator detail, pre-create | R2-ENGINE-289 | | (0,280)-(312,480), (232,48)-(640,184) |
+
+All three inn builders (EN `L2.00744`, `L2.01245`, `L2.01246`) store the
+center at +0x7c, and all three shop builders (EN `L2.00762`, `L2.01247`,
+`L2.01248`) store the main art at +0x74. Each rectangle is a constant
+pushed at its site; no site measures the text. Child rectangles are
+parent-relative (R2-ENGINE-274). None of the 17 formatter calls or 12
+constructor calls lies in a gate body (R2-ENGINE-307), so the gate shows
+no tip.
+
+**Confidence.** High for the constants, parents and the absence at the
+gate in both clients. Medium for page positions: the page origin and the
+chain to the screen are inferred from construction paths
+(R2-ENGINE-238, R2-ENGINE-274).
+
+### R2-ENGINE-313
+
+Panel init EN `L2.00898` / RU `L2.00899` builds the text child, the Close
+button and the checkbox (R2-ENGINE-274). Text and button use font2
+(global `L2.01249`, created from `graphics\font2\font2` with spacing 2 by
+EN `R2.0064`) and colour table `L2.01250`, entry i = (0xb9,0x9f,0x49)·i/15
+from `L2.01251`; hover table `L2.01252` is (0x96,0x5a,0)·i/15.
+
+Overlay EN `L2.00903` / RU `L2.01253` uses `lm.256` pieces (R2-ASSET-081)
+on the panel less 8 pixels at the right and bottom; with L, T, R'=R-8,
+B'=B-8, nx=(R'-L-64)/48 and ny=(B'-T-64)/32:
+
+| Pass | Pieces and positions |
+|---|---|
+| shadow, slot +0x1c level 6 | 0xc (R'-24,T+8), 0xf (L+8,B'-24), 0x11 (R'-24,B'-24), 0x10 at (L+40+48i,B'-24), 0xe at (R'-24,T+40+32j) |
+| corners | 0xa (L,T), 0xc (R'-32,T), 0xf (L,B'-32), 0x11 (R'-32,B'-32) |
+| edges | 0xb top and 0x10 bottom at x=L+32+48i; 0xd left and 0xe right at y=T+32+32j |
+| fill | 9 at (L+32+48i, T+32+32j) |
+
+Every panel size in R2-ENGINE-312 gives an exact tiling: 312 and 360 and
+408 wide, 200, 168 and 136 high.
+
+Button paint EN `L2.01254`: label centred at the rectangle centre plus one
+pixel right, shadow offset 2, colour table `L2.01250` (`L2.01252` while
++0x68 is set); bevel (0x29,0x45,0x3f) top and left, (7,0xc,9) bottom and
+right. Checkbox paint EN `L2.01255` (slot +0x2c of the checkbox class
+`L2.00902`, table `L2.01256`): `radiob.256` frame 5 when set, 4 when
+clear, at (left+1,top) with its shadow at (left+5,top+4) level 4; label at
+(left+16+6, top+3).
+
+The tip sites, the 0x45b arm and the room message bodies set no highlight
+on another control. The generator's two cycles are R2-ENGINE-289.
+
+**Confidence.** High for the bodies in both clients. Pixel colours are
+16-bit packings of these values; their exact device colours were not
+observed.
+
+### R2-ENGINE-314
+
+Layout EN `L2.01257` / RU `L2.01258` splits the text at CR LF
+(`L2.01259`): each paragraph keeps its CR, and left trimming of the rest
+removes blank lines. Wrap EN `L2.01260` / RU `L2.01261` trims a paragraph
+and, while it does not fit, extends a candidate to the next space,
+including that space, until the candidate's width reaches the text width;
+it cuts at the last space before that. A paragraph's last line gains a CR.
+A first word at least as wide as the line is kept whole; when that word
+is exactly as wide, EN (`jle` at `L2.01262`) cuts nothing and RU (`jl` at
+`L2.01263`) keeps the word.
+
+Width EN `L2.01264` adds advance+2 per byte, plus 5 for a space; bytes
+below 0x20 add nothing, and `~` adds nothing unless doubled. The byte
+mapper EN `R2.0060` applies R2-ENGINE-052's selector remap.
+
+Paint EN `L2.01265` / RU `L2.01266` draws at most (text height)/12 lines:
+12 is the font height 10 plus 2. A paragraph's first line is indented by
+`font2.dat` entry 0x20 (6 pixels). A line that does not end its paragraph,
+or a paragraph's first line whose width with one more space exceeds the
+text width, is justified (`L2.01267`): words are spread with an equal
+floating gap and their positions truncated. Text has a shadow of
+(8,8,8) one pixel down and right; `~` followed by another byte underlines
+that byte in table entry 15. Click scrolling (text +0x90) is zero for tip
+text, so extra lines are clipped.
+
+Text width is panel width minus 48; visible lines are (panel height
+minus 60)/12: 264 and 11 for 312x200, 264 and 6 for 312x136, 360 and 6
+for 408x136, 312 and 9 for 360x168.
+
+| Key | EN lines | RU lines | Panel |
+|---|---|---|---|
+| #tips1, #tips11, #tips12 | 8, 6, 7 | 8, 6, 8 | 312x200 |
+| #tips2 | 10 | 9 | 312x200 |
+| #tips3, #tips4 | 4, 6 | 4, 5 | 312x136 |
+| #tips5, #tips6, #tips7 | 8, 9, 7 | 11, 11, 9 | 312x200 |
+| #tips8, #tips9, #tips10 | 2, 2, 1 | 2, 2, 2 | 408x136 |
+
+**Confidence.** High for the rules read from the bodies of both clients.
+Medium for the line counts: they come from re-implementing these rules,
+and the RU counts also assume CharToOemA maps code page 1251 to 866
+(R2-ENGINE-052). The EN tip sections hold no byte above 0x7f.
+
+**Unknown.** Live pixels. An authorized capture would settle them. The
+CharToOemA code page behind the RU line counts: the conversion result of
+one RU section on the owner's system, or a capture, would settle it.

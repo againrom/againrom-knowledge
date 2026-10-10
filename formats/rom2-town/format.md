@@ -401,6 +401,8 @@ Text indices are zero-based line indices.
 
 The panel draws a frame of `graphics\interface\lm.256` pieces with a shadow pass, corners, tiled edges and a fill, then its children. It takes mouse input. Close posts 0x45a; the application passes it to the room stack, which offers it to its children, and the square deletes the panel (`R2-ENGINE-275`, Medium for that delivery). The checkbox state goes to TipsMode, so a cleared box skips the panel at later town entries (`R2-ENGINE-274`, `R2-ENGINE-275`, High).
 
+[Tip popups](#tip-popups) gives every tip surface, its trigger, the setting's persistence and the text layout.
+
 ### Town 1 animation
 
 The painter admits one step when unsigned elapsed time exceeds 67 ms, sets a new baseline and performs no multi-frame catch-up loop. Actor scheduling runs every paint. R(n) = floor(rand()*n/32767)%n yields 0..n-1; uniformity and independence are unestablished. Live redraw cadence and sound playback are Unknown (`R2-ENGINE-242`, High for the bounded native mechanisms).
@@ -773,3 +775,31 @@ passes file 30 and returns to default file 1. Kaarg instead uses modulus
 20/default a10000 and additional fire transitions. Shared shell/button
 art, pending dialogue, audible timing and live pixels remain Unknown
 (`R2-ENGINE-259`).
+
+## Tip popups
+
+ROM2 ships twelve tips as sections `#tips1`..`#tips12` of `main.res` `text/town.txt`, once each in EN and RU; no other archive entry, map, library or executable holds a `#tips` key or a `tips=` value (`R2-ASSET-080`, High). Each client creates a tip panel at 12 sites and retexts one at 4 (`R2-ENGINE-307`, High). The generator tips `#tips5`..`#tips10` and their highlight cycles are in `R2-ENGINE-289`.
+
+| Tip | Surface | Raised by | Panel rectangle on the page |
+|---|---|---|---|
+| `#tips1` | town 1 square | enter, TipsMode set | (328,0)-(640,200) |
+| `#tips12` | Kaarg square | enter, TipsMode set | (328,0)-(640,200) |
+| `#tips11` | druid square | enter, TipsMode set | (328,0)-(640,200) |
+| `#tips2` | each inn | enter, TipsMode set and mode 2 | (160,0)-(472,200) |
+| `#tips3` | each shop | enter, TipsMode set and mode 2 | (164,162)-(476,298) |
+| `#tips4` | the open shop tip | idle message 0x402 with a nonempty shop-inventory list, once per shop entry | replaces the `#tips3` text |
+| `#tips<N>` | mission view | message 0x45b from a dialogue `tips=N`; no shipped text has one | (10,20)-(370,188) |
+
+Sources: `R2-ENGINE-308` (High; Medium that `#tips4` follows opening a shelf), `R2-ENGINE-309` (High), `R2-ENGINE-312` (High for the rectangles; Medium for page positions). The gate shows no tip.
+
+### Tip latches and persistence
+
+No tip has a show-once latch. Close (0x45a) and the room leave delete the panel, and an entry that builds no panel deletes a leftover one, so a room tip shows again at each entry while TipsMode is set. The shop's `#tips4` latch and the generator latches reset at each entry (`R2-ENGINE-310`, High). No tip state is saved; SAVE and LOAD neither keep nor reset a tip (`R2-SESSION-140`, High / Medium).
+
+TipsMode is the HKLM value `TipsMode` under EN `SOFTWARE\Rage of Mages 2` and RU `SOFTWARE\1C\Allods 2`, default 1. It is read once at startup and written at exit and after a cutscene through a handle opened with KEY_READ; inferred from that access mask, not observed, the write would be refused on Windows NT, so changes may not persist (`R2-ENGINE-311`, High; Medium for persistence). It gates every panel creation and the generator retexts, not the `#tips4` retext. Clearing it leaves an open popup until Close, leave or the next entry (`R2-ENGINE-311`).
+
+### Tip panel look and text
+
+Every tip popup is one panel class: an `lm.256` frame tiled over the panel less 8 pixels at the right and bottom, `font2` gold text, a Close button and a checked Show-tips box. The panel never sizes to its text, and no room or mission tip lights another control (`R2-ENGINE-313`, High; `R2-ASSET-081`, High).
+
+Text splits at CR LF, drops blank lines, wraps greedily at spaces to the panel width minus 48, indents each paragraph 6 pixels, justifies non-final lines and clips past (panel height minus 60)/12 lines. No shipped tip clips: the longest, RU `#tips5` and `#tips6`, fill 11 of 11 lines on a 312x200 panel (`R2-ENGINE-314`, High for the rules; Medium for the line counts). Live pixels are Unknown.
