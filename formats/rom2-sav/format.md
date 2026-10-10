@@ -75,6 +75,16 @@ The body does not write the cheat flag (Player +0xa78); the constructor
 sets it to 0. That a loaded Player therefore starts with cheats locked is
 Medium: the load-time construction path was not read. — R2-SESSION-135
 
+Gold is prefix field +0x3c, stored XOR 0x5c073f4d like +0xa48. The prefix
+ends with Player +0x38, the controlled hero's saved address, and the
+Player's own saved address. Load passes the latter to a map insert and
++0x38 to a map lookup after the groups are read; that these register and
+resolve saved addresses is Medium, since the two map callees were not
+read. — R2-ENGINE-323
+
+The four frozen saves store gold at decoded offset 113 (A/C) and 114 (B/D)
+as 1543978149, which unmasks to 1000. — R2-SESSION-146
+
 ## Selected RU Group boundary
 
 The selected RU Player list calls each Group body directly. Group first
@@ -166,8 +176,60 @@ All other references are null; no earlier-object alias occurs.
 — R2-SESSION-100
 
 A/C and B/D member bytes are equal. A and B differ only in the raw 12,
-raw 180, raw 184 and +0x50 raw 4 Unit blocks. Field meanings, including
-stats and the purse, remain Unknown. — R2-SESSION-101
+raw 180, raw 184 and +0x50 raw 4 Unit blocks. — R2-SESSION-101
+
+#### Hero fields
+
+The producer builds the hero from a Humans row: template load copies the
+row's parameters in order into Body, Reaction, Mind, Spirit (+0x84..+0x8a),
+HealthMax (+0x96), ManaMax (+0x9c), speed (+0x8c), the six skills
+(+0xa8+2i), typeID and face (+0xe, +0x4b), timing and token fields. The
+producer then writes the chosen attributes, the name (+0x80), the owner
+Player (+0x14) and +0x14c. Binding each read to its parameter title is
+Medium. — R2-ENGINE-319
+
+School skills sit at +0xa8+2i, their base at +0x116+2i, the main skill at
++0x23c, each school skill's experience at +0x23c+4i (i = 1..5) and the sum
+at +0x130. — R2-ENGINE-320
+
+Recompute derives HP and mana maxima, speed, sight (+0xa4), defence
+(+0xbe) and resistances (+0xc2+2i) from the attributes, then adds the item
+modifier totals held at +0xd8..+0x113. — R2-ENGINE-321
+
+The hand weapon is reference +0x74, an Armor sits in the Humanoid slot its
+own +0x58 names, the bag is gate +0x7c and the spellbook gate +0x140 is set
+only when ManaMax is positive. — R2-ENGINE-322
+
+The four frozen saves hold one Start_MF hero: attributes 41/34/24/17, Axe
+20 and Shooting 10, experience 7320, HP 149/149, mana 0/0, speed 18. Face
++0x4b = 32 disagrees with the static template load, which writes 5.
+— R2-SESSION-144
+
+Hero +0x14 and Group +0x44 hold the Player's saved address; Player +0x38
+holds the hero's. That load maps them back to the Player and the hero is
+Medium. — R2-SESSION-145
+
+Each of the five Armor objects carries +0x58 equal to its slot; the item
+identities are Unknown. — R2-SESSION-148
+
+Twenty-nine positions have no direct store in the selected writer
+bodies, among them +0x8, +0x18, +0x78, +0x8e, +0x98, +0x9e, +0xd4..+0xd7,
+the raw 12 and 184 blocks and the raw 180 block except +0xa. Unread
+callees of the Unit constructor (the base constructor and the
+constructors of the embedded objects at +0xa6, +0x114 and +0xd4) are
+candidate writers of the base fields, +0xbb..+0xbd, +0x114..+0x12b and
++0xd4..+0xd7. The main skill +0x23c is set from the row only when the
+template name contains `_Hero` or `Start_`. — R2-ENGINE-319
+
+### After the first member
+
+After its members the Group writes u32 +0x1c, +0x40 and +0x44 (a saved
+Player address) and ends; the Player then writes 36 raw bytes and ends.
+— R2-ENGINE-324
+
+In the four frozen saves these are 0, 0 and 254852752 from 4024 (A/C) and
+4025 (B/D); the first Player ends at 4072 and 4073. B/D continue with
+0x8001, an earlier-class tag; what follows is Unknown. — R2-SESSION-147
 
 ## Physical tail
 

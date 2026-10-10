@@ -787,7 +787,7 @@ acceptance, actor/World LOAD and post-load behavior.
 |---|---|---|---|---|
 | R2-SESSION-099 | In four frozen RU saves the first Group member is a new Human object, class index 3 and object index 4, whose 1218-byte payload ends at 4024 in A/C and 4025 in B/D. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 | R2-SESSION-100 | The four first members each carry a Weapon at Unit+0x74 and five Armor objects in Humanoid slots 7..10 and 12; every other reference is null and no reference aliases an earlier object. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
-| R2-SESSION-101 | First-member bytes are equal in A/C and in B/D; A and B differ only in four raw Unit blocks. No field of the walked member is identified as the purse. | High / Unknown | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-SESSION-101 | First-member bytes are equal in A/C and in B/D; A and B differ only in four raw Unit blocks. No field of the walked member is identified as the purse. | High / Unknown | ✔ promoted (amended) | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 
 ### R2-SESSION-099
 
@@ -859,6 +859,10 @@ meanings, including stats, experience and money.
 
 **Unknown.** Where the purse is stored; whether the Player prefix's
 obfuscated fields hold it.
+
+**Amended.** R2-SESSION-146 places the purse in the Player prefix at +0x3c;
+R2-SESSION-144 and R2-SESSION-148 give the member's stats, experience and
+items.
 
 
 ## Inn stage progression and early bank scope
@@ -1251,7 +1255,7 @@ authorized runtime trace would settle it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-131 | After the ROM2 generator, a town-1 save carries slots 776 (mage) and 781 (female) at bank offsets 0xC20/0xC34 and the Player gold 1000 at +0x3c; the hero record's SAV bytes remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-SESSION-131 | After the ROM2 generator, a town-1 save carries slots 776 (mage) and 781 (female) at bank offsets 0xC20/0xC34 and the Player gold 1000 at +0x3c; the hero record's SAV bytes remain Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
 
 ### R2-SESSION-131
 
@@ -1282,6 +1286,10 @@ the SAV.
 a save written after a known attribute redistribution would settle the
 first. Whether `L2.00195` runs before the first save; a census of its
 call sites would settle gold 1000.
+
+**Amended.** R2-SESSION-144, R2-SESSION-145 and R2-SESSION-148 identify the
+hero record in the SAV: the first Group member. R2-SESSION-146 gives the
+gold position.
 
 ## Cheat state persistence
 
@@ -1353,3 +1361,128 @@ show a tip.
 entry-time resets. Medium that no SAV serializer copies those room
 fields: the save driver's callees were not read in full
 (R2-ENGINE-271).
+
+## Hero record values
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-144 | The four frozen RU town-1 saves hold one Start_MF hero: Body/Reaction/Mind/Spirit 41/34/24/17, Axe 20 and Shooting 10, experience 7320, HP 149/149, mana 0/0, speed 18. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-SESSION-145 | In the four frozen RU saves the hero's saved address equals Player +0x38, and the Player's saved address equals hero +0x14 and Group +0x44. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-SESSION-146 | The four frozen RU saves store Player +0x3c at decoded offset 113 (A/C) and 114 (B/D) as 1543978149, which unmasks to gold 1000. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-SESSION-147 | In the four frozen RU saves the first Player ends 48 bytes after its only member: Group +0x1c 0, +0x40 0, +0x44 the Player address, then 36 raw bytes, at 4072 in A/C and 4073 in B/D. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-SESSION-148 | In the four frozen RU saves the hero holds a Weapon at +0x74 and Armor in slots 7, 8, 9, 10 and 12, each Armor's +0x58 equal to its slot; item identities are Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+
+### R2-SESSION-144
+
+The first Group member (R2-SESSION-099) read under R2-ENGINE-319..322
+holds, equal in A..D:
+
+| Field | Value |
+|---|---|
+| +0xc row, +0xe class code | 26 (Start_MF), 0x21 (male fighter) |
+| Body, Reaction, Mind, Spirit +0x84..+0x8a | 41, 34, 24, 17 |
+| skills General, Blade, Axe, Bludgeon, Pike, Shooting +0xa8..+0xb2 | 0, 0, 20, 0, 0, 10 |
+| base school skills +0x118..+0x120 | 0, 20, 0, 0, 10 |
+| main skill +0x23c | 2 (Axe) |
+| experience +0x240..+0x250, total +0x130 | 0, 5727, 0, 0, 1593; 7320 |
+| +0x1c | 57 |
+| HP +0x94/+0x96, mana +0x9a/+0x9c | 149/149, 0/0 |
+| speed +0x8c, sight +0xa4 | 18, 1617 |
+| +0xbe, +0xc0, +0xc4..+0xcc | 42, 4, 8 each |
+| modifiers +0xf4, +0xf5, +0xfe, +0x100 | 6, 7, 31, 4 |
+| +0x49, +0x4a, +0x4b, +0x4c | 1, 1, 32, 0 |
+| +0x134, +0x135, +0x12c, +0x14c | 8, 4, 1, 21 |
+| +0x8e, +0x90, +0x92, +0x98, +0x9e, +0xa6 | 246, 246, 411, 100, 50, 75 |
+| bag gate +0x7c, spellbook gate +0x140 | 1 with no reference, 0 |
+
+The attributes differ from the Start_MF row (40/36/25/17, R2-ASSET-076)
+and give ΣF = 93+35+9+3 = 140 under R2-ENGINE-287. E(20) = 5727 and
+E(10) = 1593. +0x1c = trunc(0.01·5727) is the template-time value
+(R2-ENGINE-320). The R2-ENGINE-290 formulas with Body 41, Reaction 34,
+Mind 24, Spirit 17 and experience 7320 give HP 149, speed 34/5+12 = 18,
+sight trunc((58/25+4)·256) = 1617, +0xbe 34/3 = 11 plus modifier 31, and
+resistances 17/2 = 8. +0x98 = 100 equals the inner term trunc(41·2 +
+log1.1(7320/5000+1)·2) of the HP formula. A/C and B/D differ in
+[+0x1c0]+0xa (18 against 16), +0x50 (11 against 12) and the raw blocks of
+R2-SESSION-101.
+
+**Confidence.** High for the stored values and the arithmetic matches.
+Medium that the attributes, skills, experience, HP, mana, speed, sight,
+defence and resistances are the generator's output: they match the
+generator arithmetic, but no capture tied a save to its generator inputs.
+Two observations stand against the whole record being unchanged generator
+state. Template load stores the suffix number 5 into +0x4b after the
+parameter routine stores the face, and the saves hold 32
+(R2-ENGINE-319). Recompute stores the low byte of +0x8c into
+[+0x1c0]+0xa unconditionally (`L2.01329`..`L2.01330`); all four saves hold
++0x8c = 18, and B/D hold [+0x1c0]+0xa = 16, so in B/D that byte was
+written after the last recompute or +0x8c changed without one. Unknown
+for +0x4b = 32 and for B/D [+0x1c0]+0xa = 16.
+
+**Unknown.** The writers of +0x8e, +0x98 and +0x9e; the meaning of the
+Unknown positions in R2-ENGINE-319..322; the cause of the A/B difference
+in [+0x1c0]+0xa.
+
+### R2-SESSION-145
+
+Every save stores the hero's own address 262270312 in its Unit base and
+the Player's own address 254852752 in the Player prefix (R2-ENGINE-323).
+Player +0x38 holds 262270312; hero +0x14 and Group +0x44 hold 254852752.
+On load these map to the hero and the Player.
+
+**Confidence.** High for the equal values at the read positions in all
+four saves. Medium for the mapping on load: the load arms pass these
+values to `L2.01168` and `L2.01323` (R2-ENGINE-323), which were not read.
+
+### R2-SESSION-146
+
+Player body `R2.0085` writes +0x3c after u16 +0x30 (R2-ENGINE-323). The
+stored u32 is 1543978149 in A..D at decoded offset 113 in A/C and 114 in
+B/D; XOR 0x5c073f4d gives 1000, the gold of R2-SESSION-131 and
+R2-SESSION-136. +0xa48 follows at 119/120 and unmasks to 0.
+
+**Confidence.** High: the position follows from the walked prefix and the
+transform from `L2.01271`.
+
+### R2-SESSION-147
+
+The member payload ends at 4024 (A/C) and 4025 (B/D). Then:
+
+| Field | A/C | B/D | Value |
+|---|---|---|---|
+| Group +0x1c | 4024 | 4025 | 0 |
+| Group +0x40 | 4028 | 4029 | 0 |
+| Group +0x44 | 4032 | 4033 | 254852752 |
+| Player [+0x34] raw 36 | 4036 | 4037 | 2 nonzero bytes |
+
+The first Player ends at 4072 (A/C) and 4073 (B/D). The documents are 4486
+and 72178 bytes. The next u16 is 0x8001 in B/D, the tag of an earlier class
+with index 1 (R2-ENGINE-207), which the eight-Player B/D documents fit as a
+second Player; A/C hold 0x0000 there.
+
+**Confidence.** High for the grammar and the offsets. Unknown for what
+follows the first Player.
+
+**Unknown.** The structure after 4072/4073 and the meaning of the 36
+bytes.
+
+### R2-SESSION-148
+
+| Reference | Class | Object index | +0x0c | +0x1c | +0x4a | +0x58 |
+|---|---|---|---|---|---|---|
+| hero +0x74 | Weapon | 6 | 18 | 700 | 30 | 1 |
+| slot 7 | Armor | 8 | 15 | 38 | 16 | 7 |
+| slot 8 | Armor | 9 | 19 | 700 | 100 | 8 |
+| slot 9 | Armor | 10 | 22 | 300 | 40 | 9 |
+| slot 10 | Armor | 11 | 26 | 200 | 10 | 10 |
+| slot 12 | Armor | 12 | 30 | 400 | 50 | 12 |
+
+Values are equal in A..D. Armor equip writes slot +0x208+4·(armor +0x58)
+(R2-ENGINE-322), and each Armor's +0x58 equals the slot it is saved in.
+The weapon's +0x58 = 1 adds 0 to hero +0x12c.
+
+**Confidence.** High for the values and the slot match. Unknown for item
+identities: +0x0c, +0x1c and +0x4a were not tied to an item table.
+
+**Unknown.** Which items these are; reading the Item base writers or an
+item table would settle it.

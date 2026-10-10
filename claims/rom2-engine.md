@@ -4281,7 +4281,7 @@ read of the view allocation would settle them.
 | R2-ENGINE-287 | ROM2 attributes cost F(v)=trunc(0.349*1.15^(v-1)+0.5); plus needs the pool and v<45, minus v>15; the producer accepts 140-sum(F)>=0 else sets 25s; each Start row sums exactly 140. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
 | R2-ENGINE-288 | The ROM2 skill click tests four mask bytes: fighters sword/axe/mace/pike, mages fire/water/air/earth; bow and astral are never tested or drawn; the template main skill 1 is lit until a click. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
 | R2-ENGINE-289 | ROM2 generator tips are town.txt #tips8/#tips9/#tips10 on pre-create and #tips5 or #tips6 and #tips7 on detail under the tips mode; two cycles light controls; pre-create sets the select cursor, detail the default. | High / Medium | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
-| R2-ENGINE-290 | The ROM2 producer sets the chosen school skill 20, skill 5 to 10, others 0, a skill weapon (the mage staff by sex) and HP/mana at max; recompute gives 142, 123, 29/157, 42/99 and speed 19, 19, 16, 16 for the templates before items. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-290 | The ROM2 producer sets the chosen school skill 20, skill 5 to 10, others 0, a skill weapon (the mage staff by sex) and HP/mana at max; recompute gives 142, 123, 29/157, 42/99 and speed 19, 19, 16, 16 for the templates before items. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
 
 ### R2-ENGINE-283
 
@@ -4516,6 +4516,13 @@ name suffix: the string parse inside `R2.0088` was not traced beyond the
 
 **Unknown.** Item modifier totals, including +0xe8 skill modifiers, and
 the load term; the item-effect tables or a live save would settle them.
+
+**Amended.** R2-ENGINE-319 reads the RU suffix store (`L2.01270`), which
+writes 5 for the name `Start_MF.f5` after the parameter routine stores the
+face. The Start_MF hero of the four frozen RU saves holds +0x4b = 32, the
+row's face parameter (R2-SESSION-144); which writer or construction path
+leaves 32 in the generated hero is Unknown. R2-SESSION-144 gives that hero's values after its
+attribute choice and items.
 
 ## Cheat and debug commands
 
@@ -5065,3 +5072,184 @@ and the RU counts also assume CharToOemA maps code page 1251 to 866
 **Unknown.** Live pixels. An authorized capture would settle them. The
 CharToOemA code page behind the RU line counts: the conversion result of
 one RU section on the owner's system, or a capture, would settle it.
+
+## Hero record writers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-319 | RU ROM2 template load R2.0089 and its parameter routine L2.00220 copy the Humans row into the hero record by a sequential cursor; the producer L2.00162 then writes attributes, name, key, owner and +0x14c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-320 | RU ROM2 keeps school skills at hero +0xa8+2i, their base at +0x116+2i, the main skill at +0x23c, per-skill experience E(s) at +0x23c+4i (i=1..5), their sum at +0x130 and trunc(0.01 x sum) at +0x1c. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-321 | RU ROM2 recompute L2.00052 derives speed, HP and mana maxima, sight, defence and resistances, then adds the item modifier totals kept at hero +0xd8..+0x113 through L2.00102. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-322 | RU ROM2 equip puts a Weapon at hero +0x74 and its modifiers into +0xd4 block fields, an Armor at slot +0x208+4·(armor +0x58), and a refused item into the bag at +0x7c; the spellbook +0x140 exists only with ManaMax > 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-323 | The RU ROM2 Player body stores +0x3c and +0xa48 XORed with 0x5c073f4d (L2.01271); Player and Unit store their own address, which load registers in one saved-address map and uses to resolve Player +0x38 and Unit +0x14. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-324 | After its members the RU ROM2 Group body writes u32 +0x1c, +0x40 and +0x44 and ends; the Player body then writes 36 raw bytes of [+0x34] through R2.0175 and ends. Load resolves +0x40 and +0x44 as saved addresses. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+
+### R2-ENGINE-319
+
+RU producer `L2.00162` calls template constructor `L2.00130` (at
+`L2.01272`). It calls the Humanoid constructor `L2.01157`, which runs the
+Unit constructor `L2.01273` and the Humanoid initializer `L2.01274`, sets
+vtable `L2.00218` and calls template load `R2.0089`. Template load writes
++0xe = 0, the Humans row index to +0xc (`L2.01275`) and calls the parameter
+routine `L2.00220` (`L2.01276`).
+
+The parameter routine sets a cursor {row, index 0} (`L2.01277`). Its
+readers `L2.01278` (word), `L2.01279` (byte), `L2.01280` (dword) and
+`L2.01281` (word) store a value only when it is not −1 and advance the
+index in every case, so the n-th read takes parameter n. Read in order,
+under the R2-ASSET-076 titles:
+
+| Parameter | Hero field |
+|---|---|
+| Body, Reaction, Mind, Spirit | +0x84, +0x86, +0x88, +0x8a |
+| HealthMax, ManaMax | +0x96 (copied to +0x94), +0x9c (copied to +0x9a) |
+| Speed, RotationSpeed, ScanRange | +0x8c, [+0x1c0]+0xa, +0xa5 |
+| Defence | +0xbe |
+| Skill.General and school skills 1..5 | +0xa8+2i; school skills also +0x116+2i |
+| (computed) | +0xa6 = 0; +0x23c = index of the largest school skill, only when the template name contains `_Hero` or `Start_` |
+| typeID, face | +0xe, +0x4b |
+| gender | local; +0xe = 0x21 + gender for a fighter, 0x23 + gender for a mage (`L2.01282`, `L2.01283`) |
+| AttackChargeTime, AttackRelaxTime | +0x134, +0x135 |
+| TokenSize, MovementType | +0x49, +0x4a |
+
+Template load also writes +0x14c from serverID ((v/10) mod 1000 when v
+exceeds 10000), equips the row's items, sets +0x4c |= 6 when ManaMax > 0,
+builds the spellbook +0x140 from knownSpells, writes the name-suffix
+number to +0x4b when it is positive (`L2.01270`; the substring after the
+dot and one more character, parsed by `L2.01284`), then calls skill
+experience `L2.01285`, recompute (vtable +0x58) and vtable +0x5c, and sets
+HP and mana to their maxima.
+
+The producer then writes the four attributes (or 25 each, R2-ENGINE-287)
+to +0x84..+0x8a, calls chosen skill `L2.01286` (R2-ENGINE-320), recompute,
+HP and mana to their maxima, +0x80 = Player +0x18 name, +0x4 = the low
+word of the `L2.01287` result, +0x14 = owner, +0x14c = 21 when session
++0x74 is 0, +0x1a4 = owner +0x30 and owner +0x38 = hero.
+
+The +0x23c store (`L2.01288`) runs only when `L2.01289` finds `_Hero`
+(string `L2.01290`) or `Start_` (`L2.01291`) in the template name at
+[+0x3c]+4 (`L2.01292`..`L2.01293`); otherwise +0x23c keeps the Humanoid
+initializer's 0. Every Start_ row qualifies.
+
+**Confidence.** High for the call chain and every listed store, including
+the +0x23c condition. Medium for the binding of each read to a title: the
+row element accessor `L2.01294` was not read; the binding assumes it
+returns parameter n. That `L2.01289` is a substring search follows from
+its call shape; it was not read.
+
+**Unknown.** Which writer leaves +0x4b = 32 in a Start_MF hero
+(R2-SESSION-144) when template load writes the suffix number 5; a hero
+built under a breakpoint, or the load-time path, would settle it. The
+R2-ENGINE-209 positions with no direct displacement store in the 19
+selected writer bodies: the raw 12 at [+0x10], +0x8, +0x18, the +0x20
+count, +0xbb..+0xbd, +0x114..+0x117, +0x122..+0x12b, +0xd4..+0xd7, the raw
+180 at [+0x1c0] except +0xa, the raw 184 at [+0x1c4], +0x50, +0x54, +0x58,
++0x5c, +0x60, +0x61, +0x64, +0x68, +0x6c, +0x78, +0x8e, +0x98, +0x9e,
++0xa2, +0xa3, +0x136, +0x138, +0x13c and +0x144. This bounds direct stores
+only; a callee that receives the hero or an embedded object can still
+write them. The Unit constructor `L2.01273` passes the hero to the base
+constructor `L2.01295` (`L2.01296`), hero+0xa6 and hero+0x114 to `L2.01297`
+(`L2.01298`, `L2.01299`), hero+0xbe to `L2.01300` (`L2.01301`) and
+hero+0xd4 to `L2.01302` (`L2.01303`). None of these was read. They are
+the candidate writers of the base fields +0x8, +0x18 and [+0x10], of
++0xbb..+0xbd, +0x114..+0x117 and +0x122..+0x12b, and of +0xd4..+0xd7.
+
+### R2-ENGINE-320
+
+Chosen skill `L2.01286(skill, 20)` removes the hand item through vtable
++0x48, zeroes school skills 1..5 (+0xaa..+0xb2), writes the chosen skill
+20, writes +0xb2 = 20/2 = 10, writes +0x23c = the chosen skill and calls
+skill experience `L2.01285`. That routine copies school skill i to
++0x116+2i, writes E(s) = trunc((1.1^s − 1)·1000) to +0x23c+4i for
+i = 1..5 (R2-ENGINE-290) and their sum to +0x130. Vtable +0x5c `L2.01304`
+writes +0x1c = trunc(0.01 x the sum of +0x240..+0x250). Of the selected bodies
+only template load calls it (`L2.01305`), before the producer calls chosen
+skill. Chosen skill then adds the skill weapon through vtable +0x44
+(R2-ENGINE-322). Recompute restores +0xa8+2i from +0x116+2i and adds the +0xe8
+skill modifiers.
+
+**Confidence.** High: every store is read in the four bodies.
+
+### R2-ENGINE-321
+
+Recompute `L2.00052` (Human vtable +0x58) caps the four attributes by
+class and sex plus the signed bytes +0xd4..+0xd7, writes +0x96 and +0x9c
+by the R2-ENGINE-290 formulas, +0x8c speed, +0x92 from Body, +0x90 from
++0x8e and bag +0x20, +0xa4 sight, +0xa6, +0xb4 and +0xb5, restores the
+skills (R2-ENGINE-320), zeroes +0xb7..+0xba, clears 22 bytes at +0xbe
+(`L2.01306`), sets +0xbe = Reaction/3 and +0xc2+2i = Spirit/2 (i = 1..5),
+then applies `L2.00102` on the record at +0xd4: +0xd8 into +0x8c, +0xda
+into +0x92, +0xdc into +0x96, +0xe0 into +0x9c, +0xe4 into +0xa4, the
++0xe6 block into +0xa6 and the +0xfe block into +0xbe. It bounds HP and
+mana by their maxima, writes +0xa0 from +0x9c and Player +0xa5c, and the
+low byte of speed into [+0x1c0]+0xa.
+
+**Confidence.** High for the stores and their sources. The RU arithmetic
+uses the constants at `L2.01307`, `L2.00067`, `L2.00107` and `L2.01308`
+and the helpers `L2.00109`, `L2.00108` and `L2.01309`, none read here; the
+RU evidence for the R2-ENGINE-290 formulas is the matching instruction
+shape and one hero whose HP 149 and sight 1617 they reproduce exactly
+(R2-SESSION-144). Medium for the names of +0xbe (defence) and +0xc2+2i
+(resistances), which follow R2-ENGINE-290.
+
+**Unknown.** The writers of +0x8e and +0xd4..+0xd7, and the meaning of
++0x90, +0x92, +0xa0, +0xa6, +0xb4, +0xb5 and +0xb7..+0xba.
+
+### R2-ENGINE-322
+
+Add item (vtable +0x44, `L2.01310`) calls the equip test (vtable +0x40,
+`L2.01311`). It tests the item class against Armor `L2.01176`, Weapon
+`L2.01175` and Shield `L2.01312`, item parameter 0xf and the mage
+predicate `L2.00044`, then calls item vtable +0x38; an item the test
+returns goes into the bag [+0x7c] through `L2.01313`.
+
+Weapon equip `L2.01314` writes +0x74 = weapon; for weapon parameter 0xe
+equal to 2 it moves +0x78 to the bag. It writes the modifier fields +0xe6,
++0xf4, +0xf5, +0xf9..+0xfb and +0xfe, +0xb6 = weapon parameter 5 when below
+10, else 0, calls recompute, takes +0x134 and +0x135 from weapon
+parameters 0xc and 0xd, and adds weapon +0x58 − 1 to +0x12c. Armor equip
+`L2.01315` writes hero +0x208 + 4·(armor +0x58) = armor and adds the
+armor's 22-byte block +0x5a into hero +0xfe and +0xbe (`L2.01316`).
+Template load allocates +0x140 only when ManaMax > 0.
+
+**Confidence.** High for the stores. Medium for parameter 0xe = 2 as a
+two-handed weapon and +0x78 as the off hand: no weapon row was read.
+
+**Unknown.** The writer of +0x78 and the bag object's fields.
+
+### R2-ENGINE-323
+
+Player body `R2.0085` (R2-SESSION-020) writes the name, then the 51-byte
+prefix: u16 +0x4, u32 +0x8, raw 8 +0x10, u8 +0xa44, u32 +0x2c, u16 +0x30,
+u32 +0x3c, u8 +0x40, u8 +0x41, u32 +0xa48, u32 +0xa50, u16 +0xa54, u16
++0xa4c, u32 +0xa5c, u32 +0x38 and u32 = the Player's own address. Store and
+load pass +0x3c and +0xa48 through `L2.01271`, an XOR with 0x5c073f4d. Load
+calls `L2.01168`([`L2.01317`]+0xdc, saved own address, Player)
+(`L2.01318`), reads the 2560 raw bytes, the group list (`R2.0122`) and the
+36 raw bytes, then passes +0x38 to `L2.01319` and stores the Player
+directly into each member's +0x14 (`L2.01320`). The Unit base `L2.01164`
+writes the Unit's own address (`L2.01321`), calls `L2.01168` with it on
+load (`L2.01322`) and passes +0x14 to `L2.01169`. `L2.01169` and
+`L2.01319` are identical instruction for instruction, address aside: each
+calls `L2.01323` on the same map with the saved value and an out slot and
+stores the out value when the call returns nonzero, else 0. Read as a
+map, `L2.01168` inserts saved address to object and `L2.01323` looks it
+up.
+
+**Confidence.** High for the field order, the XOR and the call sequence
+of both arms. Medium that `L2.01168` registers and `L2.01323` resolves
+saved addresses: neither callee was read.
+
+### R2-ENGINE-324
+
+Group body `R2.0123` (R2-ENGINE-191, R2-ENGINE-192) writes, after the
+member list, u32 +0x1c, u32 +0x40 and u32 +0x44 (`L2.01324`, `L2.01325`,
+`L2.01326`) and returns. Load reads the three, resolves +0x40 through
+`L2.01319` (`L2.01327`) and +0x44 through `L2.01169` (`L2.01328`). Player
+body `R2.0085` calls the group list `R2.0122` and then `R2.0175` on
+[+0x34], which transfers 36 raw bytes, and returns.
+
+**Confidence.** High: both arms of `R2.0123` and the Player body's tail
+are read.
+
+**Unknown.** The meaning of Group +0x1c and +0x40, and of the 36 bytes.
