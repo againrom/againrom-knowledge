@@ -217,7 +217,7 @@ loaded but never drawn (`MENU-138`). Accept, Reset and Back are
 `Inn\button{1,2,3}{on,off}.bmp` at x 484..624. `on` draws only while the
 button is pressed and hovered. The buttons have no disabled state (`MENU-139`).
 
-## Stat panel numbers (`TOWN-534`…`TOWN-536`)
+## Stat panel numbers (`TOWN-534`…`TOWN-536`, `TOWN-538`…`TOWN-540`)
 
 The four stat values and the remaining-points counter are font4 text, drawn
 with a 1-pixel black shadow at (x+1, y+1) and then the ink. Values are `%d`,
@@ -236,6 +236,28 @@ shadow pixel keeps (15 − L)/16 of the background (`TOWN-535`).
 The stat names and the pool caption are pixels of each root's `leftup.bmp`,
 not text. Font, ink and positions are the same in EN and RU; whether the
 row icons differ between the roots was not compared (`TOWN-536`).
+
+The branch of the ink table is stored before the table is built (at the call
+sequence `L14046`, `L13957`): a reported physical memory of 24,000,000
+bytes or more takes the normal-memory (`/16`) table, less takes the
+low-memory (`/18`) one. The test is unsigned, and neither the display mode nor
+a setting enters the store at `L07734`, the only write the scan found
+(`TOWN-538`). EN and RU run one executable, so the branch is the same in both
+roots (`TOWN-540`).
+
+### Statistics card text
+
+The `+0x74` child paints a background and then calls the shared character
+sheet with the rectangle (L + 12, T, R + 12, B) of its accumulated rectangle.
+Under the default resolution, with the child's rectangle (0, 238)-(160, 242),
+that is (12, 238, 172, 242) in absolute screen coordinates (the rectangle
+rests on construction literals and an empty ancestor chain at runtime, so the
+numbers are Medium). The sheet's first text row, drawn only when the hero
+record's name string is non-empty, is centred on x 84 at y 256 (18 below the
+rectangle top and 88 left of its right edge), and the second row is at y 266.
+The rows lie below the child's own rectangle. That this child is the card the
+page shows is Medium: a second painter, whose class and gate were not read,
+passes the sheet a rectangle with the same top (`TOWN-539`).
 
 ## Starting templates and non-item state
 

@@ -1278,3 +1278,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `PARTY-ENDCULL-026` (the inventory clause only; the cull passes, the band, the reset fields and the call site stand) | Verbatim: "Neither `R0826` nor the reset helper `R1380` writes an inventory field, not the sack `+0x7c` (`TRIG-ADDITEM-027`) and not the twelve worn slots `+0x198` (`SAV-CARRY-050`), so a survivor keeps what it carried." | High | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/), `PARTY-M100-034` | `R1380` first calls `R0014`, which appends a cast-slot item to the pack through `R0929` (`L13778`) when the effect `R2173` returns has kind `0x29` (castSpell), the item byte `+0x44` is not 2, the actor is not in state 0xd or 0xe with `+0x136` = 0, and the effect id matches the spell at `+0x64`. `R1380` then deletes a class-14 item still in the cast slot through `vt+4(1)` (`L13780`) when `+0x136` is 0. The worn slots are not written, and pack contents other than that append are kept. | **REFUTED** — partially retracted |
+
+## Character generator card sheet call
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TOWN-233` (the `R0877` argument description only; the vtable slots, the background blit and the `+0x78` clauses stand) | Verbatim: "followed by an undecompiled call `R0877(&stack)` passing three literal small values (`0,0,0xc`) built after the blit's own coordinates are already consumed" | High | [EXP-0520](../experiments/EXP-0520-chargen-panel-branch/), `TOWN-539` | The call passes `&C`, a four-dword rectangle (L + 12, T, R + 12, B) built at `L14038..L14039` from the child's accumulated rectangle, with ECX `[[this+0x5c]+0x94]`. `R0877` is the shared character sheet that draws text at rows from C[1] and C[2]. | **REFUTED** — partially retracted |

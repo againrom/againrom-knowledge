@@ -1473,7 +1473,7 @@ The base Control class's generic message handler (`TOWN-139`'s already-named `vt
 | TOWN-223 | The character generator's precreate stage is painted by `R1474` (vtable `L07691` slot `+0x2c`); the hit-test/click handler `R1472` first read as that slot belongs to the name field class… | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0200](../experiments/EXP-0200-paint-destinations/) |
 | TOWN-224 | `TOWN-217`'s unresolved background coordinate call, `R1224`, is a general ancestor-chain rectangle accumulator, not the plain rectangle-copy this row originally read — corrected by `TOWN-232`. | High / Unknown | ● active (amended, partially retracted) | EXP-0200, [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 | TOWN-232 | `R1224`/`R1212` is a general ancestor-chain rectangle accumulator, not a plain copy as `TOWN-224` read it, and for all four of the final/detailed stage's own top-level children the chain is empty at construction… | High / Medium | ● active (amended, partially retracted) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/) |
-| TOWN-233 | The final stage's `+0x74` and `+0x78` children (`TOWN-232`) paint through `R1992` and `R1993`, confirmed at vtable slots `L11774` and `L11775` (each child's own vtable `+0x2c`)… | High / Medium / Unknown | ● active (amended) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/) |
+| TOWN-233 | The final stage's `+0x74` and `+0x78` children (`TOWN-232`) paint through `R1992` and `R1993`, confirmed at vtable slots `L11774` and `L11775` (each child's own vtable `+0x2c`)… | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/), [EXP-0520](../experiments/EXP-0520-chargen-panel-branch/) |
 | TOWN-234 | The final stage's `+0x7c` child (`TOWN-232`, absolute rect `(160,0)-(480,480)`) paints through `R1871`, confirmed at vtable slot `L11776`… | High / Medium / Unknown | ● active | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 | TOWN-235 | `TOWN-224`'s unresolved icon-loop virtual dispatch in `R0833` (the final stage's `+0x70` stats-panel child) is `vt+0x24`/`vt+0x20` called on the icon object itself — `GetHeight()`/`GetWidth()`… | High / Unknown | ● active (amended) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 | TOWN-236 | `TOWN-223`'s precreate-stage Levels (3-slot, `+0x124`) and Heroes (4-slot, `+0x110`) loops read POINTERS to an external rectangle table, not embedded rectangle arrays: `+0x124`/`+0x110` hold addresses… | High / Unknown | ● active (partially retracted) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
@@ -1592,7 +1592,7 @@ This directly extends `TOWN-217`'s reading: `TOWN-217` found no string literal i
 
 **Confidence.** High for both routines' vtable-slot identity and blit/text-draw call structure (every call site in each routine's decompiled body read directly, cross-referenced against each child's own constructor `PTR_LAB` write); High that `R1993` draws text (the shared primitive and its five-argument shape match the convention `TOWN-223` already establishes); Medium for the icon loop's exact per-slot semantics (the state-selector and highlight-offset logic is read but not exercised at runtime); High for the top-level screen's own absolute position, resolved by `TOWN-242`; Unknown for `R0877`'s purpose and for the text-source table at `iVar3+100`
 
-**Amended.** The amendment is stated in the claim text above.
+**Amended.** The amendment is stated in the claim text above. `TOWN-539` retracts the description of the `R0877` call as three literal small values (`0, 0, 0xc`): the argument is a rectangle (L + 12, T, R + 12, B) built from the accumulated rectangle, and `R0877` is the shared character sheet.
 
 ### TOWN-234
 
@@ -3107,7 +3107,7 @@ With the paint offsets of `TOWN-528` to `TOWN-530`, and if slot `+0x18` places a
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TOWN-534 | The detailed generator's four stat values and remaining-points counter are font4 text with a 1-px shadow, ink table `[[L09928]+8]`; values left-aligned at (84, 58+32k), the counter centred on (84, 194) and drawn 4 times a paint. | High | ✔ promoted (branch candidate) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/); answers TOWN-235's format and tail-field Unknowns |
-| TOWN-535 | The ink table `[[L09928]+8]` is built by mode 4 from a palette whose entry i is (185, 159, 73)·i/255; on the `/16` (normal-memory) table an opaque font4 pixel is RGB(185, 159, 73) before packing; the shadow table is black. | High / Medium | ✔ promoted (branch candidate) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/) |
+| TOWN-535 | The ink table `[[L09928]+8]` is built by mode 4 from a palette whose entry i is (185, 159, 73)·i/255; on the `/16` (normal-memory) table an opaque font4 pixel is RGB(185, 159, 73) before packing; the shadow table is black. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/) |
 | TOWN-536 | The panel paint draws no text but the five numbers; the stat names and the pool caption are pixels of the root's `leftup.bmp`; font, ink and positions are the same in EN and RU, and the row icons' roots were not compared. | High | ✔ promoted (branch candidate) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/) |
 
 ### TOWN-534
@@ -3150,7 +3150,9 @@ The stat panel paint `R0833` (vtable `L06316` slot `+0x2c`, `TOWN-235`) blits th
 
 **Confidence.** High for the builder's operands, the palette constants, the mode-4 arithmetic and the emulated table values: the immediates are read in the listing and the executable's own loop and builder were run. Medium that the paint reads this object: nothing else is found to rewrite the global `L09928` or the table, but a store through an indexed or computed base, or a bulk copy, has no displacement for the scan to find.
 
-**Unknown.** Which pixel layout and memory arm a given machine runs; the displayed colour is the packed value of that layout, and on the `/18` branch also depends on the background.
+**Unknown.** Which pixel layout a given machine runs; the displayed colour is the packed value of that layout, and on the `/18` branch also depends on the background.
+
+**Amended.** `TOWN-538` states the condition that selects the memory arm: reported physical memory below 24,000,000 bytes takes `/18`. The memory a given machine reports stays open.
 
 ### TOWN-536
 
@@ -3162,3 +3164,66 @@ The stat panel paint `R0833` (vtable `L06316` slot `+0x2c`, `TOWN-235`) blits th
 **Confidence.** High for the two text calls (complete paint listing) and for the root comparison of `rom.exe`, the font4 files and `leftup.bmp` (file hashes).
 
 **Unknown.** Whether the row icons differ between EN and RU; settled by tying their load paths to the both-root resource census behind `TEXT-CHARGEN-027`.
+
+## Character generator statistics card and ink branch
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-538 | The generator ink table's `/16` or `/18` branch is `[L03346]` = (GlobalMemoryStatus physical memory < 24,000,000, unsigned), stored before the table is built; the only write found, `L07734`, reads no display mode or setting. | High / Medium | ● active | [EXP-0520](../experiments/EXP-0520-chargen-panel-branch/) |
+| TOWN-539 | The `+0x74` child's paint passes the shared character sheet (L + 12, T, R + 12, B), under the default resolution (12, 238, 172, 242); the first row, if the name is non-empty, is centred on (84, 256), below the child's rectangle. | High / Medium / Unknown | ● active | [EXP-0520](../experiments/EXP-0520-chargen-panel-branch/) |
+| TOWN-540 | EN and RU run one `rom.exe`, so the ink branch and the card draw have the same code and operands in both roots; the card's strings come from the hero record. | High | ● active | [EXP-0520](../experiments/EXP-0520-chargen-panel-branch/) |
+
+### TOWN-538
+
+`R0788` reads the installed memory and stores the flag that `R1107` mode 4 tests (`TOWN-535`, `PAL-MODE4-010`).
+
+- The head calls the import slot `L14040`, `KERNEL32.dll GlobalMemoryStatus` (`L07733`), with a buffer at `[esp+0x68]`. It loads the total-physical-memory dword (buffer offset 8, `L14041`), runs `CMP eax, 0x16e3600` (24,000,000, `L03634`), then `SBB eax, eax` and `NEG eax`, and stores the 0 or 1 result at `L07734`. The compare is unsigned: `SBB` takes the carry. No branch or other read feeds the store.
+- The display-bit globals `[L06281]`, `[L10235]` and `[L06282]` are read in the same head, and within the window (`R0788..L14042`) they feed three masks held in locals. The store at `L07734` does not depend on them, on a registry or ini read, or on any option; the masks' later consumers lie past the window and were not read.
+- The same flag sets the destination-table stride `[L03340]` to `0x10000` (flag 0) or `0x2000` (flag 1) at `L14043..L14044`.
+- The caller sequence is `L14045 CALL R1693`, `L14046 CALL R0788`, `L13957 CALL R0572` (`TOWN-535`'s one builder caller), straight line in one routine, after the stores to `[L10235]` and `[L06282]` (`L14047`, `L14048`). The flag is set before the ink table is built.
+- `L03346` lies past the raw extent of `.data` (raw `0x15600` bytes from `L14049`), so it starts at 0 and the table is `/16` until the setter runs.
+- The whole-image dword scan of `L03346` over every section's raw extent returns 18 hits, all in `.text`, classified by the opcode bytes `scans.txt` prints before each operand:
+  - store: `L14050`, opcode `A3` (`MOV [abs], EAX`), 1 hit;
+  - loads, 9 hits: `A1` (`MOV EAX, [abs]`) at `L14051`, `L14052`, `L14053`; `8B 0D` (`MOV ECX, [abs]`) at `L14054`, `L14055`, `L14056`; `8B 1D` (`MOV EBX, [abs]`) at `L14057`; `8B 35` (`MOV ESI, [abs]`) at `L14058`, `L14059`;
+  - compares, 8 hits: `83 3D` (`CMP dword [abs], imm8`) with immediate 0 at `L14060`, `L14061` and immediate 1 at `L14062`, `L14063`, `L14064`, `L14065`, `L14066`, `L14067`.
+  - No `C7 05` or other immediate store of the address occurs.
+
+Machine states, from the instruction contract: a reported total physical memory of 24,000,000 bytes or more gives flag 0 and the `/16` table; less gives flag 1 and the `/18` table, whatever the display mode. A reported value with the top bit set is not below the limit.
+
+**Confidence.** High for the dataflow: every instruction of the head and the caller sequence is cited. Medium that this is the only writer: the scan returns one store, but a width-overlapping start, a computed base or a bulk copy has no displacement for it to find, and `PAL-MODE4-010` rests on an earlier single-hit instrument. Medium for the machine mapping: what `GlobalMemoryStatus` reports on a given system, including above 4 GiB and under a compatibility setting, is the Windows API's documented behaviour and was not measured here.
+
+**Unknown.** Each is settled by one observation.
+- Other callers of `R0788`: the scan for its address as a stored dword returns no hit and its direct call sites were not enumerated. Settled by an `EnumRefs callto:` of `R0788` plus a scan for `E9` `rel32` jumps to it; this also decides whether the flag is stored once.
+- The memory a native run of the original reports. Settled by a runtime observation of the `GlobalMemoryStatus` buffer at `L14041` on a known machine, including one above 4 GiB and one under a compatibility setting.
+- A narrow, indexed or bulk write to `L03346`. Settled by a scan for the neighbouring starts that overlap the dword and a read of the bulk copies that could cover `.bss`.
+
+### TOWN-539
+
+The `+0x74` child of the final stage (`TOWN-232`, rectangle (0, 238)-(160, 242)) is the only one of the four children whose paint calls the shared character sheet `R0877` (`TOWN-255` lists its five callers: `L11803` here, `L11804`, `L10185`, `L11805` and `L06402`).
+
+**Medium: which painter draws the card the page shows.** The sentence that this child is the card of `TEXT-CHARGEN-027`'s statistic, card, navigation and skill order is an identification, not a read: `TEXT-CHARGEN-027` names a child list from `R1870` and does not say which child draws text. The alternatives:
+- (a) The `L14068` class (paint `R2017`, below) draws the card, at the same owner origin and the same top. Settled by the creation site and owner of that class, its rectangle and the writer of `[A+0x98]`.
+- (b) One of the other three callers, `L10185`, `L11805` or `L06402`, draws it on the detailed page. No window of this experiment read them, so nothing places them inside or outside the generator. Settled by reading each caller's owner class and the screen that creates it.
+- (c) Neither: the text the page shows is drawn elsewhere (hover prose). Settled by a runtime observation of which paint call produces the card text on the detailed page.
+
+- Paint `R1992` (vtable `L11781` slot `+0x2c`; `TOWN-233` describes the call's argument wrongly, see its amendment) has no visibility gate. It locks the back surface (`R0346`), takes the child's accumulated rectangle (L, T, R, B) from `R1224` (the numeric value (0, 238, 160, 242) needs the construction literals of `TOWN-232`, not read in this experiment, and an empty ancestor chain at runtime, `TOWN-243`, Medium), blits the background `vt+0x18(L, T, 0, 0, 0)` through `this+0x60`, and builds the rectangle C = (L + 12, T, R + 12, B) at `L14038..L14039`. It calls `R0877` at `L11803` with ECX `[[this+0x5c]+0x94]` and `&C`, then unlocks (`R0312`).
+- The sheet reads C[1] (top) and C[2] (right) at `[esi+4]` and `[esi+8]`. Its first text call, in the path where the record's name string at `+0xe4` is non-empty, is `R0571(C[2] − 0x58, C[1] + 0x12, name, 2, L03616, 1)` on font object `[L02677]` (`L14069..L14070`); the second row is the string at `+0xf0` at C[1] + 0x1c (`L14071..L14072`). Flag 2 centres x on its argument (`TOWN-534`). The first row exists only when the record's name string is non-empty. Under the premises of the Confidence paragraph, C = (12, 238, 172, 242): x = 84, y = 256, second row y = 266.
+- With an empty name the first draw is a string from `[L04369]+0x150` or `+0x14c` at the same (C[2] − 0x58, C[1] + 0x12), then a `R0668` string at C[1] + 0x1c (`L14073..L14074`).
+- The coordinates are absolute: no value is made relative to the child's origin, and under the default resolution the top-level screen sits at (0, 0) (`TOWN-242`; `TOWN-222` gives a different addend for `-800` and `-1024`). The rows at y 256 and below lie under the child's own rectangle, which ends at y 242. The paint calls `R0373` (clip) nowhere.
+- A second painter calls the same sheet: a class with vtable `L14068`, paint `R2017` (slot `+0x2c`, `L14075`, committed W12). It returns at once when `[A+0x98]` is 0, offsets its own rectangle (`+8..+0x14`) by the owner origin with `OffsetRect` (`L14076`) and passes (left + 12, owner top + 238, right + 12, owner top + 480) at `L11804`, so its first sheet row is also at y 256. Before the sheet it draws four `"%d"` numbers of `[A+0x68]` (`+0x78`, `+0x7c`, `+0x80`, `+0x84`) with four labels from `[L04369]`, and it draws neither them nor the sheet when bit 0 of `[[A+0x68]+0x70]` is set. Its own rectangle, its construction and the field `[A+0x98]` were not read.
+
+**Confidence.** High for the instruction arithmetic: C = (L + 12, T, R + 12, B) at `L14038..L14039` and the sheet's first-row operands as functions of C, each an instruction row of the committed listing. Medium for the numeric rectangle (12, 238, 172, 242), the centre (84, 256) and the row y, which rest on three premises: the construction literals of the child (`TOWN-232`, not read here), an empty ancestor chain at runtime (`TOWN-243`, Medium: vtable surface only, `this+0x30` possibly written by a non-virtual routine or an external pointer), and the default resolution (`TOWN-242`). Medium that the `+0x74` child is the card the generator page shows (alternatives above). The sheet's choice between the name path and the empty-name path depends on hero record data that this experiment did not read. No High rests on W10, W11 or W12.
+
+**Unknown.** Each is settled by one observation.
+- The rectangle, construction and gate of the `L14068` class, and so whether both painters run on the detailed page. Settled by its creation site and owner and by the writer of `[A+0x98]`.
+- Where `R2017` sits in a vtable. `TOWN-245` (High / Unknown, active) says it is a slot of the `+0x7c` child's own vtable at `+0xb4`; the committed W12 shows it at slot `+0x2c` of the `L14068` class (`L14075`). The committed W10 is 30 dwords from `L11783`, ends at `L14077` and does not reach `L14078` (`L11783 + 0xb4`), so it neither confirms nor excludes `TOWN-245`. The vtable ranges also overlap: `L11783 + 0x78` is the page vtable `R1312`, so `L14078` is not a slot of a 30-slot table starting at `L11783`, and the 48 slots `TOWN-243` gives each class do not fit the ranges W12 prints. Settled by reading the dwords `L11783..L14068` in one window and the class boundaries from the constructors' vtable stores.
+- Whether a caller sets a clip narrower than the screen before the paint (the clip globals `L01503..L01506`; no setter in the paint was found). Settled by reading the setters of those globals and the paint's callers.
+- The record behind `[A+0x94]`, and so whether the name is non-empty. Settled by reading the writer of the record's `+0xe4` string for the page's hero.
+
+### TOWN-540
+
+- EN and RU `rom.exe` are byte-identical (SHA-256 `942e9b72…7d03`, 1,977,344 bytes), so `R0788`, `R0572`, `R1992` and `R0877` are one code image with one set of operands (`TOWN-535`, `TOWN-536`).
+- The ink branch depends on the machine's memory only (`TOWN-538`), not on the root.
+- The card's strings are read from the hero record at `+0xe4`, `+0xf0`, `[L04369]+0x14c` and `+0x150` and from `R0668`. Positions do not depend on them except through the x centring of flag 2.
+
+**Confidence.** High for the identical image and operands. The archives were not opened, so the strings themselves were not compared between the roots.
