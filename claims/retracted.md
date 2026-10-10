@@ -1,5 +1,12 @@
 # Overturn history
 
+## Party placement order at map load
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MOVE-TICK-014` (the party-first clause for the members the join walk places only; a companion inserted by AddHero between missions stays contested; the insert routine, the type-6 record order and the per-ticking-thing scope stand) | Verbatim: "What fixes the order at map load: the creators' call sequence — campaign party first, then the map's type-6 records in ascending record order" | High / Medium | [EXP-0515](../experiments/EXP-0515-map-load-registry/), MOVE-114 | On the new-mission path the session start `R0512` runs the spawner and the binder, and the join command is sent at `L03843` after it returns. The walk it triggers appends the primary and the carried members after the type-6 records. | **REFUTED** — partially retracted |
+| `MOVE-TICK-009` (the map-load order clause for the members the join walk places only; update order and list mechanics stand) | Verbatim: "map load inserts party then type-6 record order" | High | [EXP-0515](../experiments/EXP-0515-map-load-registry/), MOVE-114 | The type-6 records are inserted at map load and the members the join walk places after the binder. A companion inserted by AddHero between missions is not covered by this correction. | **REFUTED** — partially retracted |
+
 ## Binder slot 0 for a condition above opcode 0x10002
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

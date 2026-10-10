@@ -38,7 +38,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 | MOVE-SPEED-011 | Speed does not feed the search. | High | ● active | [EXP-0054](../experiments/EXP-0054-unit-movement/) |
 | MOVE-REFRESH-012 | When a route is recomputed — per cell for the dynamic one, per target change for the static one, and nothing is staggered. | High / Medium | ● active | [EXP-0054](../experiments/EXP-0054-unit-movement/) |
 | MOVE-TICK-013 | The tick loop's container is a pooled doubly-linked list embedded in a 0x20-byte manager at `[L00240]`, its walk is head→tail, and its order is pure insertion history — the only insert operation that exists for it is AddTail. | High | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
-| MOVE-TICK-014 | What fixes the order at map load: the creators' call sequence — campaign party first, then the map's type-6 records in ascending record order — and the list is per-*ticking-thing*, not total. | High / Medium | ● active (contested) | [EXP-0055](../experiments/EXP-0055-tick-order/) |
+| MOVE-TICK-014 | What fixes the order at map load: the creators' call sequence — campaign party first, then the map's type-6 records in ascending record order — and the list is per-*ticking-thing*, not total. | High / Medium | ● active (contested, partially retracted) | [EXP-0055](../experiments/EXP-0055-tick-order/) |
 | MOVE-TICK-015 | How the order changes during play — and death leaves no hole. | High | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
 | MOVE-ID-016 | The runtime id (`actor+0x04`, `SAV-ID-015`'s) is a lowest-free-bit bitmap allocation — creation-ordered only until the first death decays, and never the walk order. | High | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
 | MOVE-TICK-017 | The walk order is NOT preserved across save/load — the saved stream never carries it, and the loader rebuilds it grouped by player. | High / Medium | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
@@ -161,7 +161,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 
 **Evidence.** [EXP-0054](../experiments/EXP-0054-unit-movement/), [EXP-0055](../experiments/EXP-0055-tick-order/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/)
 
-**Amended.** The teardown typeID range as proof of every list member being Human is partially retracted. Update order and list mechanics stand; PARTY-M20-031 and retracted.md record the correction.
+**Amended.** The teardown typeID range as proof of every list member being Human is partially retracted. Update order and list mechanics stand; PARTY-M20-031 and retracted.md record the correction. EXP-0515 also refutes "map load inserts party then type-6 record order" for the members the join walk places on the new-mission path: the type-6 records are inserted first and those members after the binder (High, `MOVE-114`, [`retracted.md`](retracted.md)). A companion inserted by AddHero between missions stays open (Medium).
 
 ### MOVE-STEP-010
 
@@ -215,7 +215,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 
 **Evidence.** [EXP-0055](../experiments/EXP-0055-tick-order/)
 
-**Amended.** Building membership remains contested: no Building insert was found over the named insert surface, but untraced wrappers and other tick containers remain open. The record-array to file-order link also remains Medium. The party-first clause is contested by EXP-0514 (`TRIG-MAPORD-105`): the session start `R0512` loads the map, spawns the type-6 records and runs the binder without calling the placement walk `R0065`, whose session-path caller is the join arm of the command executor. Two readings stand: the party is inserted first (this card), or after the map's records, when the join command executes. Neither experiment read when the join command executes relative to the session start, and the walk's caller `L13863` is unclassified.
+**Amended.** Building membership remains contested: no Building insert was found over the named insert surface, but untraced wrappers and other tick containers remain open. The record-array to file-order link also remains Medium. The party-first clause is contested by EXP-0514 (`TRIG-MAPORD-105`): the session start `R0512` loads the map, spawns the type-6 records and runs the binder without calling the placement walk `R0065`, whose session-path caller is the join arm of the command executor. Two readings stand: the party is inserted first (this card), or after the map's records, when the join command executes. Neither experiment read when the join command executes relative to the session start, and the walk's caller `L13863` is unclassified. EXP-0515 refutes the party-first clause for the members the join walk places on the new-mission path, High ([`retracted.md`](retracted.md)): the join command is sent after the session start has run the spawner and the binder, and `L13863` is the watchdog arm (`MOVE-114`). A companion that an AddHero command inserted between missions, through the drain caller `R0192` whose callers are not enumerated, would still precede the type-6 records; that case stays contested at Medium. Building membership stays contested.
 
 ### MOVE-TICK-015
 
@@ -1241,3 +1241,33 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 **Confidence.** High for each branch and store named. Medium for the composed sequences: other writers of `mover+0xa0` in register form were not enumerated, and no run shows whether an act and a turn overlap.
 
 **Unknown.** How often a reset lands during a turn in play.
+
+## Registry at a campaign binder
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-113 | The mission-end server cull empties the actor registry unconditionally and the stepper does not run before the next binder, so that binder sees the new map's type-6 placements and no previous-map actor, bar out-of-tick inserts. | High / Medium | ● active | [EXP-0515](../experiments/EXP-0515-map-load-registry/) |
+| MOVE-114 | On the new-mission path the members the join walk places enter the registry after the map's type-6 records; a companion an AddHero command inserted between missions would precede them, which stays open. | High / Medium | ● active | [EXP-0515](../experiments/EXP-0515-map-load-registry/) |
+
+### MOVE-113
+
+- `R0826` (called at `L07384` on the campaign mission-end arm, `PARTY-M100-033`) empties the tick list `[L00240]+4` (`PARTY-ENDCULL-026`). In `w09` it has no early exit: after its player loop, which calls `R0123` at `L13876`, it deletes `[L00004]` and the map grid `[L04624]`, then calls RemoveAll (`R0033` to `R0251`) on `[L00240]+4` (`L13877`..`L13878`) with no test between.
+- It also clears the run flag `server+0x2c` (`MISSION-STOP-016`). The stepper `R0147` returns while the flag is 0. The thread loop `R0075`, the only other caller of the sub-tick and of the revive chain, is created by a launcher that tests the same flag and has no found caller or stored address (`AI-385`, `SESS-DEFEAT-065`). `R0512` sets the flag at `L06208`, after the map load and the binder.
+- All 40 references to `[L00240]` (linear and raw scans agree) are classified. Inserts: through `R0411` at `L13879` (walk), `L13880` (`R0066`), `L13881` (type-6 spawner), `L13882` (trigger spawner), `L13883` (`R0003`), `L13884` (`R0432`); through `R0032` at `L12539` (SAV restore), `L13885` (walk), `L12785`, `L13886`. Removals: `L13887`, `L12779`, `L13888` through `R1133`, and the RemoveAll. `L00241` and `L13889` pass the registry to the grid constructor `R0118`, which keeps a copy.
+- Of the classified inserts, the map load reaches the spawner's; the map-load routines were not read whole for another. `R0066` (AddHero `0x49`, summon) is called only from the command executor `R0061`, which the drain `R0191` calls; the drain runs from the sub-tick (`L09146`) and from `R0192` (`L09418`), whose callers were not enumerated.
+
+**Confidence.** **High** that the cull empties the registry (`PARTY-ENDCULL-026`; the `w09` read agrees) and that the stepper does not run before the next binder. **Medium** for the cull's order of deletions and the absence of a test before the RemoveAll as read here: `w09` lies past the fourteenth range of the preregistered window budget. **Medium** that nothing else inserts between the cull and the binder: the thread loop's launcher is Unknown (`AI-385`); the callers of `R0192`, of the routines holding `L12785` and `L13886`, and of `R0432` were not enumerated; the grid's stored copy of the registry pointer is not traced.
+
+**Unknown.** Whether a command drained through `R0192`, such as AddHero `0x49`, can execute between the cull and the binder. An actor inserted then would also sit in its owner's flat list. Enumerating the callers of `R0192`, or a save written in town after a hire that shows the hired actor in the registry, settles it.
+
+### MOVE-114
+
+- `R0099`, on the new-mission arm, writes `server+0x154` = 0, calls the session start `R0512` at `L06688`, then the opcode-`0x04` sender `R0545` at `L03843` (its only caller), then the stepper at `L03780`. `R0512` has one other caller, `L09338` in `R1662`, which has no caller.
+- The placement walk `R0065` has three direct callers. `L06675` in `R0131` is called from the executor's opcode-`0x04` arm (`L06672`); the executor's only caller is the drain `R0191`, whose callers are the sub-tick `R0193` (`L09146`) and `R0192` (`L09418`, callers not enumerated). `L06590` in the revive is reached from `R1576`, which the stepper calls on subclock 15 (`L13890`) and the thread loop at `L13891`. `L13863` in the watchdog `R1290` is taken only when `server+0x148` is nonzero (`L13892`); the constructor writes 0 and a restore copies the saved word (`SESS-DEFEAT-065`, `SAV-WHEADWATCH-524`). A raw dword scan of every section finds none of these routine addresses, so no pointer table reaches them.
+- The join command of this mission is sent at `L03843`, after `R0512` has run the spawner and the binder, so the walk it triggers runs after the binder, whichever drain executes it. Every registry insert is an AddTail (`MOVE-TICK-013`), so the members the walk places (the primary and the carried members, whose registry nodes the cull removed, `MOVE-113`) follow the type-6 records.
+- As read in `w08`, the walk appends each member, seated or not, with `R0032` at `L13885`, and skips a member the new grid already holds at its position (`L13893`..`L13894`).
+- The open alternative: AddHero (`R0066`, insert at `L13880`) is reached only from the executor. If a hire executes through `R0192` or the thread loop in town, between the cull and the next map's spawner, the hired companion is in the registry before the type-6 records.
+
+**Confidence.** **High** that the members the join walk places enter after the type-6 records on the new-mission path: the session start, the sender's position and the walk's callers are read at instruction level, the raw scans exclude table dispatch, and the order does not depend on whether `R0545` queues the command or runs it. **Medium** for the whole party's order, open to the AddHero alternative above. **Medium** for the insert site and the grid-held skip of the walk: `w08` lies past the fourteenth range of the preregistered window budget.
+
+**Unknown.** The callers of `R0192`, and so whether a companion hired in town enters the registry before the next map's type-6 records; enumerating them, or a save written in town after a hire, settles it. The order on the SAV restore path, which inserts through `L12539` (`MOVE-TICK-017`).

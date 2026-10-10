@@ -463,7 +463,7 @@ The original instructions of `R0508`, `R0908`, the accessors and the iterator ra
 
 **Unknown.** Whether the list head is always the human player of a single-player session. What `Player+0x20` and the registry hold at the call on the new-mission path. Whether the restore arm rewrites the world flag `+0xc` before the binder runs. The typeID and class bit of the shipped companion rows at the binder.
 
-**Amended.** EXP-0514 narrows the clause on the new-mission lists. The type-6 contribution to the registry is read: at map load the spawner inserts the placed actors of every owner in record order just before the binder (`TRIG-MAPORD-105`, at its grades), and among them only npc-arm placements are named (`TRIG-MAPNAME-106`). Two parts stay open: whether the registry still holds the previous mission's actors (Unknown) and whether a carried companion is in `Player+0x20` at binding (Medium, `TRIG-MAPORD-108`). The Medium for the lists' contents and the matching Unknown stand for those two parts.
+**Amended.** EXP-0514 narrows the clause on the new-mission lists. The type-6 contribution to the registry is read: at map load the spawner inserts the placed actors of every owner in record order just before the binder (`TRIG-MAPORD-105`, at its grades), and among them only npc-arm placements are named (`TRIG-MAPNAME-106`). Two parts stay open: whether the registry still holds the previous mission's actors (Unknown) and whether a carried companion is in `Player+0x20` at binding (Medium, `TRIG-MAPORD-108`). The Medium for the lists' contents and the matching Unknown stand for those two parts. EXP-0515 closes the first: the mission-end cull empties the registry, so on the new-mission path the binder sees this map's type-6 placements and no actor of the previous map, unless an out-of-tick command inserted one (**Medium**, `MOVE-113`).
 
 ### TRIG-HEROTPL-076
 
@@ -503,7 +503,7 @@ In the restore arm the order is `R1372` on the player list (`L08155`), the actor
 
 **Unknown.** Whether the script state in a SAV carries resolved pointers or is rebuilt only by this binding. Whether any code between the unit load and the binder rewrites `+0x0e`, `+0x4b` or `+0x4c`. The lifetime of a resolved pointer after its actor is torn down.
 
-**Amended.** EXP-0514 reads the map-load arm's roster: the spawner runs immediately before the binder, and the session start does not call the party placement walk (`TRIG-MAPORD-105`, High); that the party is placed after the binder is Medium there, against the party-first reading of `MOVE-TICK-014`. On the map-load path no routine between the Humans constructor and the binder stores to `+0x0e`, `+0x4b` or `+0x4c` at those exact displacements; wider overlapping stores are unswept (`TRIG-MAPNAME-106`). The restore-arm Unknown stands.
+**Amended.** EXP-0514 reads the map-load arm's roster: the spawner runs immediately before the binder, and the session start does not call the party placement walk (`TRIG-MAPORD-105`, High); that the party is placed after the binder is Medium there, against the party-first reading of `MOVE-TICK-014`. EXP-0515 places the members the join walk places after the binder (High) and keeps the whole party's order Medium, open to a companion inserted by AddHero between missions (`MOVE-114`). On the map-load path no routine between the Humans constructor and the binder stores to `+0x0e`, `+0x4b` or `+0x4c` at those exact displacements; wider overlapping stores are unswept (`TRIG-MAPNAME-106`). The restore-arm Unknown stands.
 
 ### TRIG-HEROFAIL-078
 
@@ -521,9 +521,9 @@ A scan that finds the actor under one condition and not another, such as a prima
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| TRIG-MAPORD-105 | At map load the type-6 spawner puts every placed actor of every owner into the registry and its owner's flat list, in record order, just before the binder; the party placement walk is not called from the session start. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
+| TRIG-MAPORD-105 | At map load the type-6 spawner puts every placed actor of every owner into the registry and its owner's flat list, in record order, just before the binder; the party placement walk is not called from the session start. | High / Medium | ● active (amended) | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
 | TRIG-MAPNAME-106 | A map-placed actor is named for the ordinal scan only on the npc arm, from a line of `text/npcnames.txt`; no shipped Humans row is named by its constructor, and the Units arm writes no name. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
-| TRIG-MAPORD-107 | Of the npc placements `100.alm` 245, `30.alm` 56, `81.alm` 52 and `151.alm` 205 and 589, EN and RU, only unit 245 resolves an ordinal at map load, 10004 for every primary, if each placement and the registry hold as read. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
+| TRIG-MAPORD-107 | Of the npc placements `100.alm` 245, `30.alm` 56, `81.alm` 52 and `151.alm` 205 and 589, EN and RU, only unit 245 resolves an ordinal at map load, 10004 for every primary, if each placement and the registry hold as read. | High / Medium | ● active (amended) | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
 | TRIG-MAPORD-108 | A companion in player 1's flat list that satisfies an ordinal is taken before any map-placed actor that also satisfies it: the flat list is scanned before the registry, and the companion precedes player 1's map actors in it. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
 
 ### TRIG-MAPORD-105
@@ -536,6 +536,8 @@ A scan that finds the actor under one condition and not another, such as a prima
 **Confidence.** **High** for the spawner's gates, inserts and record order, the spawner-then-binder sequence and the absence of a walk call in the session start (routines read whole at instruction level, windows `w01`, `w07`). **Medium** that the party is placed after the binder: two readings stand. (a) The walk runs when the join command executes, after the session start returns, so the party is not in the registry at binding. (b) The join command, or the unclassified caller `L13863`, runs before `R0512` loads the map, so the party is inserted first (`MOVE-TICK-014`). The direct-caller census misses computed calls, and the containing routines are located by `55 8b ec` prologue scans. Either way the scan reaches the party through player 1's flat list before the registry, so `TRIG-MAPORD-107` and `TRIG-MAPORD-108` do not depend on it.
 
 **Unknown.** When the join command executes relative to `R0512` and what `L13863` is: searched were the direct callers of the walk and of `R0131`; reading the routine that holds `L13863` and the command queue's producer of the join command settles it. The value of `[[L00285]+0x11c]` in a campaign session: its writers were not enumerated; were it nonzero, the records of every player above slot 1 would be dropped on campaign maps (`ALM-PLAYER-069`); a `disp:0x11c` sweep of the server object's writers, or a campaign save holding type-6 actors of players above slot 1, settles it. Whether the registry still holds actors of the previous mission at the new map load: the registry's removals at the mission end were not read; reading the mission-end teardown of `[L00240]` settles it.
+
+**Amended.** EXP-0515 closes the three Unknowns at these grades. Party order: the members the join walk places (the primary and carried members) enter the registry after the binder, reading (a), High through the stepper (`MOVE-114`); `L13863` is the watchdog arm behind `server+0x148`. The whole party's order stays **Medium**: the command drain `R0191` has a second caller, `R0192`, whose callers are not enumerated, and an AddHero command executed through it between missions, or through the thread loop, would insert a companion before the type-6 records. Gate word: two writers, the constructor's 0 and the restore, High; 0 in every campaign session is **Medium** on 71 of 71 saves (`TRIG-DROPGATE-109`). Registry leftovers: the mission-end cull empties the registry, High; no previous-map actor at the binder is **Medium**, open to an out-of-tick insert (`MOVE-113`). The **Medium** of the **Confidence.** paragraph stands for the whole party's order.
 
 ### TRIG-MAPNAME-106
 
@@ -559,6 +561,8 @@ A scan that finds the actor under one condition and not another, such as a prima
 
 **Unknown.** Settling (a) and (c) is as in `TRIG-MAPORD-105`; (b) is settled by evaluating `R1145` on the four maps' occupancy at load, or by a save written at mission start; (d) by reading the built actors' `+0x4b`, `+0x4c` and `+0x0e` in such a save. What becomes of unit 245 (health 0) at the first sub-tick: the binding precedes it; reading the sub-tick's health-0 handling settles it.
 
+**Amended.** EXP-0515 narrows inputs (a), (b) and (c) and the health-0 Unknown, at these grades. (a) The gate word has two writers and is 0 in 71 of 71 saves; it dropped no placement in the observed mission-30 session (High), and is 0 in every campaign session at **Medium** (`TRIG-DROPGATE-109`). (b) The seven placements' cells are free, so each seat succeeds (High, `TRIG-MAPORD-110`). (c) The registry holds no actor of the previous map at the binder unless an out-of-tick command inserted one (**Medium**, `MOVE-113`). Unit 245 survives its health 0 (High) and stays placed and bound until its node runs at **Medium**: script actions, blows, spells and the writers of a node's bound actor are not enumerated (`TRIG-MAPORD-110`). Input (d) stands. The headline's **Medium** for the running game stands.
+
 ### TRIG-MAPORD-108
 
 - `R0508` scans the head player's `[+0x20]+4` before `[L00240]+4` (`TRIG-HEROORD-075`). A map actor owned by player 1, such as `151.alm` unit 589, sits in the same flat list, but the spawner appends it with AddTail (`L06603`) after the party already in the list, so a companion precedes it.
@@ -567,6 +571,37 @@ A scan that finds the actor under one condition and not another, such as a prima
 **Confidence.** **High** for the precedence given the lists (original instructions). **Medium** that a carried companion is in player 1's flat list when the binder runs: it rests on the campaign memory carry (`PARTY-PERSIST-014`, `PARTY-PERSIST-028`), not on a read of the list at the binder, and on the list head being the human player (`TRIG-HEROORD-075`).
 
 **Unknown.** Whether a companion that arrives only through the `0xbe` carry command, after the binder, is ever the companion at binding: searched were the carry arm's writes (`PARTY-INSTALL-012`), not when the command executes; reading the command's producer settles it.
+
+## Drop gate and placement at a campaign binder
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-DROPGATE-109 | The server word `+0x11c` the type-6 spawner tests has two writers in `.text`, the constructor's 0 and the SAV restore; it is 0 in 71 of 71 original saves, and the gate dropped no placement in the observed mission-30 session. | High / Medium | ● active | [EXP-0515](../experiments/EXP-0515-map-load-registry/) |
+| TRIG-MAPORD-110 | `100.alm` unit 245 (health 0) is seated at its cell (129,14) at map load, EN and RU, and stays in the registry and owner 7's flat list through every tick, so a node bound to it stays bound. | High / Medium | ● active | [EXP-0515](../experiments/EXP-0515-map-load-registry/) |
+
+### TRIG-DROPGATE-109
+
+- The spawner drops a record when `[[L00285]+0x11c]` and `Player+0x28` are both nonzero (`TRIG-MAPORD-105`).
+- Writers of the dword: a store search over displacements `0x119`..`0x11f` of the whole `.text` (linear sweep and a raw re-decode at every dword in range, 16 and 17 hits; the extra raw hit is an instruction interior) finds one store to the server object, the constant 0 at `L08242` in the constructor `R0967`. `R1304` allocates the 0x174-byte object, constructs it at `L07364` and stores it to `[L00285]` at `L07321`. The other 15 stores lie outside the server's routines, on bases no window loads from `[L00285]`.
+- References to the constant `0x11c` (50 linear, 73 raw; the 23 raw-only are instruction interiors) add one more server writer: the SAV restore arm passes `server+0x11c` to its field reader (`L13895`); the store arm reads it (`L13896`). The other immediate and LEA hits belong to UI, layout and campaign-record routines.
+- The server object is not rebuilt between missions (`PARTY-PERSIST-014`, `PARTY-PERSIST-028`), and the new-mission path (`R0099` to `R0512`) writes nothing to the dword. In a session begun at campaign start it holds the constructor's 0; in a session begun from a SAV load it holds the restored value. While it is 0 the gate drops no record, and none of the seven npc placements of `30.alm`, `81.alm`, `100.alm` and `151.alm`.
+- Save corpus (`tools/savflag`, 71 original saves in 13 directories, missions 0 to 141): the dword is 0 in all 71. The mission-30 save written at subtick 1 holds 13 actors of slot 2, whose `Player+0x28` is 1; `30.alm` gives ordinal 2 (type-5 `+0x04` = 1) exactly 13 type-6 records, so the gate kept that population.
+- Induction: a saved value was stored from a live server whose swept writers are the constructor's 0 and the restore, so a chain of sessions that begins at campaign start carries 0 through every save.
+
+**Confidence.** **High** for the swept writer population (the constructor's 0 and the restore copy) and for the observed mission-30 session. **Medium** that the word is 0 in every campaign session, including one begun at campaign start: it rests on the 71-save corpus and the induction, and both are bounded by what the sweeps cannot see, a write through an interior pointer into the world-head run `+0x11c..+0x148` or a bulk copy of it, and by the 15 non-server stores classified from six-instruction windows.
+
+**Unknown.** Whether any original save holds a nonzero `+0x11c`, and what would set it.
+
+### TRIG-MAPORD-110
+
+- `100.alm` (EN and RU identical): unit 245 is type-6 record idx 112, owner 7, cell (129,14), tile `0x0131`, block byte 0. No type-4 structure footprint covers the cell and no earlier record stands on it; the nearest earlier record is idx 94, unit 168 (Humans, side 1) at (128,13).
+- The spawner seats with `R1145(x, y, 0)` (`L11042`): one exact-cell test by `R1287` against `block & 0x41` and occupancy (`MISSION-SEAT-012`, `TERR-PLACE-208`). At (129,14) both are clear, so the seat succeeds and the actor is not deleted. The other six npc placements (`30.alm` 56, `81.alm` 52, `100.alm` 134 and 168, `151.alm` 205 and 589) are likewise on block-0 cells with no structure and no earlier record.
+- The spawner stores health 0 at `+0x94` and inserts the actor (`TRIG-MAPORD-105`). Unit 245 is a ground Human, movementType 1 (`MOVE-DOM-028`), so the sub-tick's `0xfc18` store for movementType above 1 (`L04427`..`L04398`) does not apply. Health 0 is then a fixed point of both health arms of the actor tick (`HERO-ZERO-070`): `L04052 JLE` admits health <= 0 and `L04053 JGE` leaves at health >= 0; the sub-tick arm leaves at `L04103 JG` for health > -10. Neither reaches the teardown state `+0x54` = 0x10, the dead list or the unlink, so the actor stays in the registry and owner 7's flat list.
+- The node `TRIG-MAPORD-107` binds to it keeps a live actor. That it keeps that actor rests on the actor's survival: the writers of a node's bound-actor field were not enumerated.
+
+**Confidence.** **High** for the cell, block, structure and occupant values (both roots decoded) and for the health arms (`HERO-ZERO-070`; this experiment's read of `w11` agrees). **Medium** that unit 245 stays placed and bound until its node runs: a blow, a spell or a script action can change its health or position, the trigger actions of `100.alm` naming it were not enumerated, and neither were the writers of a node's bound actor.
+
+**Unknown.** Whether a `100.alm` script action moves, kills or removes unit 245 before its node runs; whether anything rewrites a built node's bound actor.
 
 ## Original mission survey: dragon, bridge brigands and the interrogation
 

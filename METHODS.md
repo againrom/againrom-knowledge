@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3292. Observation: 95. Static analysis: 2736. Mixed: 461.
+Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
 
 ## Ledger ai
 
@@ -1254,7 +1254,7 @@ Claims labelled: 3292. Observation: 95. Static analysis: 2736. Mixed: 461.
 | MOVE-SPEED-011 | static analysis | ● active |
 | MOVE-REFRESH-012 | static analysis | ● active |
 | MOVE-TICK-013 | static analysis | ● active |
-| MOVE-TICK-014 | static analysis | ● active (contested) |
+| MOVE-TICK-014 | static analysis | ● active (contested, partially retracted) |
 | MOVE-TICK-015 | static analysis | ● active |
 | MOVE-ID-016 | static analysis | ● active |
 | MOVE-TICK-017 | static analysis | ● active |
@@ -1313,6 +1313,8 @@ Claims labelled: 3292. Observation: 95. Static analysis: 2736. Mixed: 461.
 | MOVE-105 | static analysis | ✔ promoted |
 | MOVE-106 | static analysis | ✔ promoted |
 | MOVE-107 | static analysis | ✔ promoted |
+| MOVE-113 | static analysis | ● active |
+| MOVE-114 | static analysis | ● active |
 
 ## Ledger pal
 
@@ -3283,10 +3285,12 @@ Claims labelled: 3292. Observation: 95. Static analysis: 2736. Mixed: 461.
 | TRIG-HEROTPL-076 | static analysis | ● active |
 | TRIG-HEROBIND-077 | static analysis | ● active (amended) |
 | TRIG-HEROFAIL-078 | static analysis | ● active |
-| TRIG-MAPORD-105 | static analysis | ● active |
+| TRIG-MAPORD-105 | static analysis | ● active (amended) |
 | TRIG-MAPNAME-106 | static analysis | ● active |
-| TRIG-MAPORD-107 | static analysis | ● active |
+| TRIG-MAPORD-107 | static analysis | ● active (amended) |
 | TRIG-MAPORD-108 | static analysis | ● active |
+| TRIG-DROPGATE-109 | static analysis | ● active |
+| TRIG-MAPORD-110 | static analysis | ● active |
 | TRIG-DRAGON-079 | mixed | ● active |
 | TRIG-BRIGAND-080 | mixed | ● active |
 | TRIG-VIP-081 | mixed | ● active |
