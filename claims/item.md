@@ -3424,6 +3424,32 @@ after intervening callbacks and for a native archive run.
 first-SAVE reachability and transitive mutation. Zero initialization is not
 a constraint that all serialized Weapons must carry three zeros.
 
+## Quest items at a mission end
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-169 | Script opcode 13 reaches only the holder's pack `+0x7c`; a class-14 item has no worn-slot place to escape it, because its own Equip consumes it, so the pack and the cast slot `+0x68` are a holder's only class-14 containers. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| ITEM-170 | Within a depth-6 direct-call closure of the mission-end culls' arm, nothing searches an item by code and only a kept actor's cast-slot item is tested by class; the arm's continuation and town entry were not searched. | Medium / Unknown | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+
+### ITEM-169
+
+- Opcode 13 calls `R1522` on `unit+0x7c` with the item code and deletes the object it returns (`TRIG-TAKEITEM-038`). No other container is passed.
+- Class 14 is the base `Item` class (`ITEM-CODE-029`). The worn fields are `actor+0x74`, `actor+0x78` and `actor+0x198 + 4i` (`ITEM-EQUIP-006`). `Item`'s own Equip `R0935` attaches the item's effects to the actor and deletes the item, so a class-14 item never occupies a worn field (`ITEM-EQUIP-006`).
+- The kept-actor reset handles a class-14 item in the cast slot `+0x68` (`PARTY-M100-034`).
+
+**Confidence.** **High** that opcode 13 reaches only the pack (cited arm, read whole by `TRIG-TAKEITEM-038`). **Medium** that the pack and the cast slot are the only class-14 containers on an actor: no image-wide sweep of stores into item-pointer fields was run.
+
+### ITEM-170
+
+- The closure roots are the seven direct callees of the window `L07928`..`L13769` of the mission-end arm of `R0701`: `R0809`, `R1302`, `R0826`, `R1660`, `R1658`, `R0802` and `R1301`. The window ends inside the arm. `R0802` and `R1301` run only when `[ebp+0x664]` is non-zero and `[ebp+0x660]` is a multiple of 10 (`L12196`..`L13770`); that path posts message `0x428` (`L13771`), which `TOWN-483` places before town entry, and its handler was not followed. On every other path the arm continues at `L08133` and calls `R1420`, `R1298`, `R1669`, `R1317`, `R1414`, `R0785`, `R1411` and `R1947` (navigation listing `L13772`..`L13773`). None of these is a closure root.
+- The direct-call closure from the seven roots, to depth 6, walks 663 routine bodies, reaches 749 targets, leaves 84 targets unwalked at the depth cut, passes 511 indirect call sites without following them and fails to decode 0 bodies (`closure.tsv`). It does not reach the by-code container search `R1522`, the walk `R2057`, the quantity removal `R0095` or the unlink `R2068`. It reaches the pack append `R0929` only through `R0014` (`PARTY-M100-034`), and the actor destroy `R1388` through the server cull.
+- Among the bodies read whole on that path (`R1380`, `R0014`), the only item test by class is `L13774`, class 14 in the cast slot.
+- A holder destroyed by the client cull (`PARTY-CULL-004`) or the server cull (`PARTY-ENDCULL-026`) is destroyed through `vt+0x04(1)`; a carried item does not move to another actor on that path. A kept player character keeps its pack.
+
+**Confidence.** **Medium** for the negative inside the closure as run. It follows direct calls only; virtual destructors, the 511 indirect sites and the 84 targets at the depth cut are outside it, and a by-code search inlined in a routine would not appear as a call. **Unknown** whether the `L08133` continuation, the `0x428` handler or town entry remove, convert or keep a carried class-14 item.
+
+**Unknown.** What the actor destructors do with a pack's contents. Whether an item on the ground survives into town.
+
 ## Open questions
 
 - Whether the interface ever emits the session-space source-3 form of the

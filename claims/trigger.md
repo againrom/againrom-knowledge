@@ -599,3 +599,51 @@ In m20, T08 "Start" posts message 1 (tip 1) and T01 "Squiells", group 1 count 0,
 The fire-once latch is `session+0xbec4+index` (`TRIG-FIRE-007`). It is saved in SAV and restored before the triggers are rebuilt (`TRIG-SAVE-008`). A tip whose trigger fired before SAVE therefore does not fire again after LOAD. Each tip is raised only when its block is the part the dialogue shows.
 
 **Confidence.** High for the census, the trigger table and the latch. Medium for "once per mission run": a dialogue could also reach the panel by another route than `instant 2`, and no such route for these event nodes was searched.
+
+## Mission 100: the servant script and the win pass
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-M100-095 | In 100.alm no trigger slot names action 2, 16 or 35, on EN or RU, and no binder parameter arm resolves an action; action 2 still runs as subscript 0, and the servant's escort is started by T1 and T2 only. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| TRIG-M100-096 | A trigger slot naming an unbuilt node runs instant subscript 0, the first built action below opcode 0x10002; in 100.alm that is action 2, so each unresolved role of T16 sends the servant group to (13,14) at the win. | High / Medium / Unknown | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| TRIG-M100-097 | The pattern pass walks every pattern to the list end and never reads the win or loss counter, so 100.alm's T3 and T16 run in one pass and instant 36 runs in the win pass, after instant 9 in slot order. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+
+### TRIG-M100-095
+
+Population: `100.alm` type 7 in the EN and RU `scenario.res`, decoded whole (`tools/scriptrefs`). EN holds 36 actions, 42 conditions and 19 triggers; RU holds 36, 40 and 17. RU lacks C44 (`VIP` check on unit 245), C45 (diplomacy of player 5 toward player 1), T17 (a second drop-location trigger) and T18 (C45 != C1, repeating, then action 10, Mission Fail). Every node and trigger cited below is byte-identical on both roots.
+
+The servant is unit 135: type-6 record 68 at (23,26), owner slot 5 "Friends", group 21, flags 0, the only member of group 21.
+
+- T1 "start" (once): action 32, group command 15 (Follow) for group 21 on unit 10001, range 3.
+- T2 (once): C39 (distance from 135 to 10001) < C16 (5), then action 7 (message 1) and action 33, Follow with range 6.
+- T11 (once): C28, unit 135 in the circle at (28,14) radius 4, then message 2.
+- Actions 2 (group command 4 to (13,14)), 16 (opcode 22, group 21 to player 1) and 35 (group command 4 to (77,135)) appear in no trigger action slot. Actions 3, 4, 5, 22, 27 and 29 are also unbound.
+- C8 "Is unit 135 dead?" tests unit 134; no condition tests the death of unit 135.
+
+The raw scan finds every dword in the type-7 payload equal to 2, 16 or 35 and classifies it by structure and field. The hits are node ids, type words, values of unrelated parameters and name bytes; no hit lands in a trigger action slot.
+
+The binder `R0067` dispatches each parameter on its type word through the table at `L12450`, index type minus 2, bounded at 7 (`L12449`, `L13784`; `param-table.tsv`). Type 2 (group) calls `R0421` on the group map, types 3 and 4 look up the player and unit, type 8 adds `0xe18` (`L12454`), type 9 looks up the structure, and types 5..7 and every other value take the default arm `L12451`, which keeps the raw value. The action-id map `[ebp-0xcc]` is addressed at four sites only, `L13785`, `L13786` (the insert after the parameter loop), `L13787` and `L13788` (the pattern build), and none is in a parameter arm (`action-map-refs.tsv`). A parameter therefore cannot resolve to an action.
+
+Action 2 is also reached without a trigger slot naming it: it holds instant subscript 0, which every slot naming an unbuilt node runs (`TRIG-M100-096`). Subscript 0 is the first built action below `0x10002`, so it is one of actions 2, 3, 4, 5 or 7, never 16 or 35.
+
+**Confidence.** **High** that no trigger slot of 100.alm names actions 2, 16 or 35 (whole payload, both roots) and that no parameter arm of the binder resolves an action (binder read whole, `param-table.tsv`, `action-map-refs.tsv`). **Medium** that nothing else runs actions 16 and 35: instant executor `R0262` has two further direct callers, `L06060` and `L06061`, which run the subscript stored at a record's `+0x8c`. Its producer `R2174` was not read.
+
+**Unknown.** What fills a record's `+0x8c` and which records the two further callers walk.
+
+### TRIG-M100-096
+
+The binder `R0067` sizes the instant array to the count of action opcodes below `0x10002` (`L13789`, `L13790`). It starts the subscript at 0 (`L13791`) and skips a node with opcode `0x10002` or more (`L13792`). It maps a node id to the current subscript and increments the subscript only for a built node (`L13793`, `L13794`, `L13795`). An unbuilt node is logged (`L13796`) and takes no subscript. Each non-zero pattern action slot is looked up through `CMap::operator[]` `R2053` (`L13797`), and the value read becomes the slot's subscript (`L13798`). On a miss, `operator[]` creates an association (`R2175`) whose value `R2176` fills with zero (`rep stosd` at `L13799`). The slot then holds subscript 0.
+
+In 100.alm the action list opens with action 1 (opcode `0x10002`, drop location), which takes no subscript, then action 2. Action 2 names group 21. When the type-2 lookup finds group 21 at binding, action 2 is built and holds subscript 0; otherwise subscript 0 passes to the next built action, action 3 (group 11). T16 "mission complit 2" has the same conditions as T3 and runs actions 37, 38, 39 and 40: opcode 13 on ordinals 10002, 10003, 10004 and 10005. An ordinal with no qualifying actor leaves its node unbuilt (`TRIG-HEROFAIL-078`). Each such slot runs action 2, a Move group command for group 21 to (13,14). Action 2 is named "D - servant flees to deploy area".
+
+**Confidence.** **High** for the binder rule and the zero value of a missed lookup (instructions read in the routines above). **Medium** that action 2 is built and holds subscript 0: the type-2 arm calls `R0421` on the group map (`L01837`, `L01838`) and marks the node unbuilt on a null result; that map is filled at `L01811` from each player's group list `player+0x24` at binding; `R0421` was not read, and group 21 is attested by the authored type-6 record, not by the bind-time list. `TRIG-BIND-010`'s static count of 0 unresolved group references supports it. **Medium** that subscript order equals file order for 100.alm (the list is walked in order; no load-time reordering was read). **Unknown** which of 10002..10005 resolve in a given run: the result depends on the roster and on the named actors in the registry scan (`TRIG-HEROORD-075`).
+
+**Unknown.** Any visible movement before the mission ends. The win pass precedes the mission-end arm, which destroys the servant (`PARTY-M100-033`).
+
+### TRIG-M100-097
+
+The pattern pass `R0428` (196 instructions, read whole) loads the pattern list at `session+0xc2b4` (`L13800`) and loops to its end (`L13801`). A latched once-pattern is skipped (`L13802`, `TRIG-FIRE-007`). Each condition triple compares two check results from `session+0xbd34` through the six-way table at `L02136`. A pattern whose triples all hold sets its latch (`L12324`) and runs its instants in slot order (`L01870`, `R0262`). No instruction of the body reads `+0xb3ac` or `+0xb3b4`, the win and loss counters (`MISSION-DEFEAT-045`). A win instant therefore does not stop the pass.
+
+In 100.alm, T3 (index 3) runs actions 30 (message 8), 28 (unit 245 to player 1), 9 (Mission Complete) and 36 (opcode 13, item 11 from 10001). T16 (index 16) has the same two condition pairs and runs in the same pass.
+
+**Confidence.** **High** for the pass structure, the absence of a counter read and instant 36 running in the win pass (one body read whole, `stores.tsv` and `outcome-reads.tsv`). **Medium** that instant 36 runs after instant 9: the pass walks a pattern's instant list head to tail (`L13803`..`L13804`), and the list is built by `R2177` (`L13805`) and copied through `R2178` and `R2179`, none read. **Medium** that the pattern list order is the file order of the triggers.

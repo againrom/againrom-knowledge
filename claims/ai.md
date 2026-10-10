@@ -3481,3 +3481,37 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 **Confidence.** Medium: the searches and pickers are the original bytes, but the step model, the occupancy bit standing for impassable terrain and the absent order layer are the harness's.
 
 **Unknown.** What the attacker does after the cancel within 100 sub-ticks (reacquisition by `R0004` and the group AI once per full tick); groups whose members' routes cross; a native run.
+
+## Script Follow and what ends it
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs). `ord` is `actor+0x158`; `grpAI` is the group's AI block (`AI-ORDER-031`). The population is the routines named below; the per-actor machine `R0008` was not re-read. `EXP-0511` was allocated ids `437`..`442` of `claims/ai.md` and spent `437`..`438`.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-437 | Script group command 15 (Follow) calls `R0176`: group order 0 from a register, the named unit `actor+0x50 = 0xc`, every other member `0x11` with subject `ord+0x10` and range `ord+0x70` (parameter, else 3). | High | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| AI-438 | A Follow is replaced by a join, teardown, an empty group or the mission-end reset, and suspended or replaced by a later group command; distance does not end it, and no writer was found for the subject's death. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+
+### AI-437
+
+- The script group-command arm `R0156` loads the sub-command from `rec+8`, subtracts 1, bounds it at 0x10 and jumps through the 17-entry table at `L00408` (`L01842`..`L01843`). Entry 15 is `L01128`, which passes `rec+0x30` (the named unit) and calls `R0176` (`L01129`). Entry 4 is `L00555`, which calls `R0108` (`L13762`).
+- `R0176` (142 instructions, read whole) first clears `ord+0x50` and `ord+0x38` of every member. It then stores `grpAI+0x20 = 0` from `bl` (`L00437`), a register-form store outside `AI-ORDER-031`'s immediate sweep.
+- On the second walk, the named unit gets `actor+0x50 = 0xc` (`L01118`). Every other member gets `actor+0x50 = 0x11` (`L01119`), `ord+0x10 =` the named unit (`L01120`), `ord+0x08 = 0`, and `ord+0x70 =` the range byte, or 3 when it is zero (`L01106`, `L01109`).
+- `0x11` is the follow arm (`AI-FOLLOW-112`); it has no leash and no distance end.
+
+**Confidence.** High. The dispatch table is read out of the PE (`groupcmd-table.tsv`), and each store is a named instruction in a body read whole.
+
+### AI-438
+
+The writers that end or replace a Follow, by the field they write:
+
+1. A later group command for the same group runs its own setter through `R0156`. The Move entry `R0108` writes group order 0 or 4 (`AI-ORDER-031`). Its member stores were not read in this experiment. Under order 4 the group runs `R0154` instead of the members' states; under order 0 the members' states run, so a member still at `0x11` would resume the follow unless the Move entry rewrote it (`AI-ORDER-010`).
+2. A join (instants 19 and 22, `R0064`, `PARTY-JOIN-025`) reaches `R0063`, which writes `actor+0x50 = 0xc` (`L00150`) and group order 3 (`L00153`) (`AI-STATE-043`, `AI-ORDER-031`).
+3. Teardown `R0208` writes `0x10` (`AI-STATE-043`).
+4. An empty group is set to group order `0xff` (`L00300`, `AI-ORDER-031`).
+5. The mission-end kept-actor reset `R1380` writes `actor+0x54 = 0` and `actor+0x50 = 0` (`L13763`, `L13764`).
+
+The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` and `ord+0x0a` (`L13765`/`L13766`, `L13767`/`L13768`), or they call `R0022`. They write no `actor+0x50`, no `grpAI+0x20` and no `ord+0x10` (`stores.tsv`). Distance has no end condition (`AI-FOLLOW-112`). Nothing was found that clears `ord+0x10` when the subject dies (`AI-FOLLOWDEATH-119`).
+
+**Confidence.** **High** for writers 2 to 5 and for the withdraw tails' store set. **Medium** for writer 1: the group order it writes is read, its effect on the members is not. **Medium** for the death clause, a lower bound bounded to the searches of `AI-FOLLOWDEATH-119` and the bodies read here. **Medium** for completeness: `AI-STATE-043`'s sweep is Medium, and the callees of the withdraw tails (`R0022`, `R0104` and others) were not read.
+
+**Unknown.** Whether `R0108` rewrites the members' `actor+0x50` or `ord+0x10`, and so whether a later Move ends the follow or only suspends it. `R0003` (spell apply) also calls `R0063`; which group it passes was not read. Behaviour when the subject leaves the map was not read.

@@ -1621,3 +1621,29 @@ Parameter indices are those of `mission0478 -mode row`; its column labels are no
 Mission 111 places the Troll (unit 119, class 68, `class2` 3), the Ogre (unit 53, class 66, `class2` 3) and the Orc at (87,36) (class 80, `class2` 3), so each uses its tier 3 row: unit 119 draws `24200 + U[0,36300]` with chance 90/101 and nothing with chance 11/101. The gold goes through `R0871` into the corpse sack. Items come from the actor's inventory, not these columns (`ITEM-DEATH-012`); the magic treasure columns 41..43 are not read in this routine.
 
 **Confidence.** **High** for the draw, compare, range and the tier rows dumped (84 and 86 on both roots, the others on EN). **Medium** that rows 85 and 87 feed the draw identically (the draw reads the actor's own row; only rows 84 and 86 were dumped on both roots) and that the item and magic columns are unused (not searched outside the routine).
+
+## Mission 100: the quest amulet
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MISSION-M100-079 | In 100.alm the amulet 0x0e23 starts as loot of unit 146; T10 takes it from 10001 at (78,132), the win pass from roles 10001..10005; a holder no role names keeps it, a kept one through the culls; town entry unsearched. | High / Medium / Unknown | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+
+### MISSION-M100-079
+
+`100.alm`, EN and RU. Every node is opcode 12 or 13 with item value 11, which is code `0x0e23` (`0xe18 + 11`), class 14, `MagicItems` row 35.
+
+- Placement: unit 146 (owner 6 "Enemies", group 24, (120,112)) carries `[0x0e14, 0x0e23]` in its type-6 loot list. Action 22 (opcode 12, add the amulet to 10001) is in no trigger slot.
+- T10 (once): the nearest Self unit is at most 3 from (78,132) (C25 <= C18), and C37, the item check for item 11 on 10001, equals TRUE. It runs message 7, action 21 (opcode 13 on 10001), and hands groups 15 and 20 to player 1.
+- T3 (once): C14 == C7 (FALSE) and C43 (check opcode 4, "D - 4th health", on unit 245) > C1 (0). It runs message 8, unit 245 to player 1, Mission Complete (instant 9) and action 36 (opcode 13 on 10001). T16 has the same conditions and runs opcode 13 on 10002, 10003, 10004 and 10005 in the same pass (`TRIG-M100-097`).
+- Opcode 13 reaches only the pack (`ITEM-169`). An unresolved role's slot runs action 2 instead (`TRIG-M100-096`).
+
+At the end the amulet's fate follows its holder:
+
+1. A holder the matching role resolves to loses one amulet from its pack. **High** that opcode 13 takes from that holder's pack; **Medium** that the amulet is there (`ITEM-169`'s container clause, and the amulet not consumed by use).
+2. A mercenary or other holder no role resolves to keeps it in the mission. The culls destroy that holder with its pack unless it is a kept player character (`PARTY-CULL-004`, `PARTY-ENDCULL-026`). A kept player character holds the amulet through both culls (**Medium**, `ITEM-170`'s closure). Whether it reaches town with it is **Unknown**: the arm's continuation at `L08133`, the `0x428` handler and town entry were not searched (`ITEM-170`).
+3. An amulet in the cast slot of a kept actor returns to the pack only under the conditions of `PARTY-M100-034` (castSpell effect, item byte `+0x44` not 2, state not 0xd or 0xe with `+0x136` = 0, matching spell id); otherwise it is deleted at the reset when `+0x136` is 0.
+4. An amulet on the ground is not carried. This rests on the culls emptying the document's other objects (`PARTY-CULL-004`).
+
+**Confidence.** **High** for the authored placement, triggers and nodes (decoded whole, both roots; the comparison codes read from the pass's table, `compare-table.tsv`). **Medium** for outcomes 2 to 4 within the culls, which depend on `ITEM-170`'s closure and on which roles resolve. **Unknown** for the amulet's fate after the culls.
+
+**Unknown.** Which hero a role resolves to in a given roster (`TRIG-HEROORD-075`). No original save of mission 100 exists in the searched corpus of 134 files, so no outcome was observed.

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
+Claims labelled: 3263. Observation: 95. Static analysis: 2711. Mixed: 457.
 
 ## Ledger ai
 
@@ -276,6 +276,8 @@ Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
 | AI-416 | static analysis | ● active |
 | AI-417 | static analysis | ● active |
 | AI-418 | static analysis | ● active |
+| AI-437 | static analysis | ● active |
+| AI-438 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -881,6 +883,8 @@ Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
 | ITEM-157 | static analysis | ✔ promoted |
 | ITEM-158 | static analysis | ✔ promoted |
 | ITEM-159 | static analysis | ✔ promoted |
+| ITEM-169 | static analysis | ● active |
+| ITEM-170 | static analysis | ● active |
 | ITEM-161 | static analysis | ✔ promoted |
 | ITEM-162 | static analysis | ✔ promoted |
 
@@ -1231,6 +1235,7 @@ Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
 | MISSION-REPORT-070 | observation | ● active |
 | MISSION-MAP-073 | static analysis | ● active |
 | MISSION-DROP-074 | static analysis | ● active |
+| MISSION-M100-079 | static analysis | ● active |
 
 ## Ledger move
 
@@ -1359,13 +1364,15 @@ Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
 | PARTY-MONEY-018 | mixed | ● active (partially retracted) |
 | PARTY-MONEY-024 | static analysis | ✔ promoted |
 | PARTY-JOIN-025 | static analysis | ● active |
-| PARTY-ENDCULL-026 | static analysis | ● active |
+| PARTY-ENDCULL-026 | static analysis | ● active (partially retracted) |
 | PARTY-BAND-027 | static analysis | ✖ retracted |
 | PARTY-PERSIST-028 | static analysis | ● active (amended, superseded) |
 | PARTY-JOINCORPUS-029 | mixed | ● active (amended, partially retracted) |
 | PARTY-M20-030 | mixed | ● active |
 | PARTY-M20-031 | static analysis | ● active |
 | PARTY-M20-032 | mixed | ● active |
+| PARTY-M100-033 | static analysis | ● active |
+| PARTY-M100-034 | static analysis | ● active |
 
 ## Ledger reg
 
@@ -3260,6 +3267,9 @@ Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
 | TRIG-VIP-081 | mixed | ● active |
 | TRIG-TIPS-087 | static analysis | ✔ promoted (branch candidate) |
 | TRIG-TIPS-088 | mixed | ✔ promoted (branch candidate) |
+| TRIG-M100-095 | static analysis | ● active |
+| TRIG-M100-096 | static analysis | ● active |
+| TRIG-M100-097 | static analysis | ● active |
 
 ## Ledger unit
 

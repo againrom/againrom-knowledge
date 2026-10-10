@@ -712,7 +712,7 @@ copies remain a blind spot. The start chain does not depend on that universal.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | PARTY-JOIN-025 | A mid-mission join is one routine, `R0064`, reached from trigger instants 19 and 22: `PARTY-INSTALL-012`'s install sequence without the hero pointer or a fresh runtime id. | High | ● active | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
-| PARTY-ENDCULL-026 | The server's end-of-mission cull `R0826` decides which players and actors exist on the next map; it keeps an actor iff `0x21 <= word[actor+0x0e] < 0x40`. | High | ● active | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
+| PARTY-ENDCULL-026 | The server's end-of-mission cull `R0826` decides which players and actors exist on the next map; it keeps an actor iff `0x21 <= word[actor+0x0e] < 0x40`. | High | ● active (partially retracted) | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
 | PARTY-BAND-027 | Withdrawn: the server survival band `[0x21,0x40)` was said to be the Humans creation arm's typeID range; the band is real, but that arm's output is conditional (`PARTY-M20-031`). | High | ✖ retracted | [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
 | PARTY-PERSIST-028 | The campaign's mission-to-mission edge preserves the surviving human `Player`, its name and every actor that first passes the client and server filters, not an unfiltered roster. | High | ● active (amended, superseded) | [EXP-0165](../experiments/EXP-0165-join-persistence/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
 | PARTY-JOINCORPUS-029 | The shipped join corpus holds 28 runtime instant-19/22 nodes on 16 maps, 22 of which hand actors to player 1; the handed Humans are not all on the kept side. | High / Medium | ● active (amended, partially retracted) | [EXP-0165](../experiments/EXP-0165-join-persistence/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
@@ -778,6 +778,14 @@ own instruction, and the two absences are two of the five writes
 each test and each store is a named instruction, both removals are calls to the
 object's own `vt+0x04(1)`, and the literal was read out of the PE through its
 section table.
+
+**Amended.** The inventory clause is partially retracted by EXP-0511
+(`PARTY-M100-034`, [`retracted.md`](retracted.md)). The reset helper's first
+callee `R0014` appends a castSpell cast-slot item to the pack `+0x7c`
+under the three conditions `PARTY-M100-034` names (item byte `+0x44` not 2,
+state not 0xd or 0xe with `+0x136` = 0, matching spell id), and `R1380`
+deletes a class-14 item still in the cast slot. The pack and worn slots are
+otherwise unwritten, and every other clause stands.
 
 ### PARTY-BAND-027
 
@@ -908,6 +916,36 @@ paths. Medium for the paired-save boundary; for the zero-type stock dependency,
 because no image-wide writer sweep is committed; for later-session absence; and
 for the predicted fresh type-14 runtime identity, which was not viewed in the
 tavern UI.
+
+## Mission 100's servant and the kept-actor reset
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| PARTY-M100-033 | Mission 100's servant, unit 135 (owner 5, group 21), is a mode-0 placement and is destroyed by the client cull at the mission end, whether or not group 21 was handed to player 1. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| PARTY-M100-034 | The kept-actor reset returns a castSpell cast-slot item to the pack except when its byte +0x44 is 2, the actor's +0x54 is 0xd or 0xe with +0x136 = 0, or the spell id differs; a class-14 item left there is deleted. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+
+### PARTY-M100-033
+
+- `100.alm` type 6, EN and RU identical: unit 135 is record 68, flags 0, so the definition arm places it, owner slot 5 "Friends", group 21, the only member.
+- The mission-end arm of `R0701` calls the client cull `R0809` at `L07290`, then the server cull `R0826` at `L07384`, then `R1660` and `R1658(-1)` (window `L07928`..`L13769`).
+- The client cull keeps a `CUnit` only when `[+0x18c] & 1` is set and the owner is the local player (`PARTY-CULL-004`). Bit 0 is set only by the hero arm with a non-zero constructor mode (`UNIT-140`), which a flags-0 placement does not take (`PARTY-M20-031`).
+- Action 16 (group 21 to player 1) is in no trigger slot (`TRIG-M100-095`). A join would change the owner test but not bit 0, so the servant fails the client cull either way.
+
+**Confidence.** **High** that the client cull destroys the servant (two named tests; the placement mode is read from the map). **Medium** for the server-cull result, which needs the typeID of definition 1009; that value was not read.
+
+### PARTY-M100-034
+
+The server cull resets a kept actor through `R1380` (`PARTY-ENDCULL-026`). `R1380` (67 instructions, read whole) runs in this order:
+
+1. It calls `R0014` (`L13775`). That helper (84 instructions, read whole) exits when `actor+0x68` is null, when the item's byte `+0x44` is 2, when the item's first effect (as returned by `R2173`, not read) is missing or its kind byte is not `0x29` (`L13776`), or when `actor+0x54` is 0xd or 0xe while `+0x136` is 0. Otherwise it compares the spell id byte at `[+0x64]+8` with the effect word `+0x40` (`L13777`). When they are equal it deletes the spell, clears `+0x64`, appends the item to the pack `actor+0x7c` (`R0929`, `L13778`) and clears `+0x68`. When they differ it logs string `L13779`.
+2. When `+0x136` is 0, `+0x68` is non-null and the item's class (`R1056`: `(word +0x40 >> 8) & 0xf`) is 14, it deletes the item through `vt+4(1)` (`L13780`), clears `+0x68` (`L13781`) and deletes the spell at `+0x64` (`L13782`).
+3. It clears `+0x64` and `+0x58`, sets `+0x136 = 1`, and stores `+0x54 = 0` and `+0x50 = 0` (`L13783`..`L13764`).
+
+The two bodies write no other actor field (`stores.tsv`). An item in neither path stays in the pack or worn slot it was in. The server cull then zeroes `+0x68` (`PARTY-ENDCULL-026`). A cast-slot item of another class and another effect kind is therefore unlinked without a return to the pack. A class-14 castSpell item that fails any of the three tests of step 1 (byte `+0x44` = 2, state 0xd or 0xe with `+0x136` = 0, or a spell id mismatch) is still in `+0x68` at step 2 and is deleted there when `+0x136` is 0.
+
+**Confidence.** **High** for the order, the tests and the stores (two bodies read whole). **Medium** that the tested effect is the item's first: `R2173` was not read. **Medium** that no callee writes the pack or the worn slots: `R2173` and the `vt+4` destructors were not read. Effect kind `0x29` is castSpell (`MAGIC-ITEM-007`).
+
+**Unknown.** Which items reach `actor+0x68` at a mission end in play.
 
 ## Open questions
 
