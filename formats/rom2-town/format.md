@@ -11,7 +11,10 @@ The scope is selected native paths in the preserved EN/RU clients
 The current record's ID at +4 selects the view. EN dispatcher `L2.00266`
 and RU `L2.00267` use these arms. Playback depends on the music-enable
 word; the three music keys exist in both music archives
-(`R2-ENGINE-231`, High).
+(`R2-ENGINE-231`, High). The dispatcher skips the list set when the
+player already holds the town's key, so re-entering a town resumes its
+track; [ROM2 music](../rom2-music/format.md) gives the player rules
+(`R2-ENGINE-335`, High).
 
 | ID | EN / RU arm | Member | Art | Music key | EN / RU loader |
 |---|---|---|---|---|---|

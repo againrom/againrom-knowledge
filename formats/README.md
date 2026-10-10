@@ -61,12 +61,13 @@ in `claims/rom2-engine.md` have no standalone stored format page.
 | Format | Seen as | Reference | Contents and limits |
 |---|---|---|---|
 | **RES** | `Root archives` | [Reference](rom2-res/format.md) | Header/tree addressing and standard emission; payload equivalence between world/world_srv remains Unknown (`R2-ASSET-001`) |
-| **ALM** | `Loose and scenario.res maps` | [Reference](rom2-alm/format.md) | Record types 0–12, version gates and declared/actual extents; new field meanings and writer accounting remain Unknown |
+| **ALM** | `Loose and scenario.res maps` | [Reference](rom2-alm/format.md) | Record types 0–12, version gates, declared/actual extents and type-12 music areas (`R2-ASSET-084`); type 10/11 field meanings and writer accounting remain Unknown |
 | **Data.bin** | `world/world_srv data and root templates.bin` | [Reference](rom2-databin/format.md) | A–H layouts, C raw14 extension and bounded templates.bin divergence; wider table semantics remain Unknown |
 | **REG** | `Nested &YA1 resources` | [Reference](rom2-reg/format.md) | 24-byte header, records and pool; ROM2 kind semantics, lookup and value consumers remain Unknown |
 | **Sprite / palette** | `*.16a, *.16, *.256, *.pal` | [Reference](rom2-spr/format.md) | Frame/trailer/palette shapes and named residues; full pixel/RLE/color semantics remain Unknown |
 | **TEXT** | `main.res text and patch.txt` | [Reference](rom2-text/format.md) | String-table structure and known byte ranges; a complete named encoding and decoder remain Unknown |
 | **Completion video** | `video.res SMK/REG and main.res UI text` | [Reference](rom2-video/format.md) | Selected report/movie source, numeric plan and return boundaries; codec internals, physical EOF and media fidelity remain Unknown |
+| **Music** | `music.res, Music.ini, ALM type 12` | [Reference](rom2-music/format.md) | Archive keys and wave format, screen keys, mission area selection, player loop/stop rules and settings (`R2-ASSET-083`, `R2-ENGINE-337`); audible output remains Unknown |
 | **Town presentation** | `Town-ID views and interface art` | [Reference](rom2-town/format.md) | ID/resource selection, Kaarg square layers, mask, clocks, room art and tip popups; full room layout and shell text destinations remain Unknown |
 | **Character generator** | `interface/chrgen art, Start_* Humans rows` | [Reference](rom2-chargen/format.md) | Pre-create and detail screens, attribute budget, skill choice, tips and the hero at town 1; item effects and the hero's SAV bytes remain Unknown (`R2-ENGINE-290`, `R2-SESSION-131`) |
 | **Session frame** | `Socket and DirectPlay receive paths` | [Reference](rom2-net/format.md) | Eight-byte header and admission/decompression bounds; payload/opcode grammar and ROM1 equivalence remain Unknown (`R2-SESSION-003`) |

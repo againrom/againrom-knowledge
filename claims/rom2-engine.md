@@ -5478,3 +5478,280 @@ in a committed listing.
 
 **Unknown.** The owners of the unclassified +0x74 stores and the mode
 `L2.01008` passes in a campaign.
+
+## Music selection and playback
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-335 | ROM2 screens request fixed music keys: menu 0x421 menu, New Game 0x425 chrgen, town 0x42e/0x468 b14/b16/b15, map 0x42d/0x41d map, credits 0x428 credit; menu, chrgen and town skip a list already holding the key. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-336 | A ROM2 mission sets the list B00..B16; every 16 ticks the type-12 music area holding the hero, or the map's default record, picks one of its four themes at random, and the next track end plays that list index. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-337 | The ROM2 music player streams one list entry through a looping DirectSound buffer; at a track end it plays the area pick, else the held index, else the next list entry; stop pauses and start resumes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-338 | While no dialogue tune is held, ROM2 music stops for logos, every cutscene, mission entry, mission end and message 0x451 and resumes only on a later screen request; a stream read failure posts 0x486. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-339 | ROM2 stores SoundRandom, SoundMusPos, SoundSfxPos, SoundSpeechPos and MusicEnabled in HKLM; volume defaults to -700, MusicEnabled to 1; -nomusic or a music.res mount failure disables screen and mission music requests. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-341 | A ROM2 dialogue tag tune=N cross-fades music to list index N, which repeats only while no area pick exists; no data file or archive entry in either root contains tune=, so shipped dialogue never changes music. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+
+### R2-ENGINE-335
+
+Each body tests the music-available word (EN `L2.00878`, RU `L2.01366`)
+and does nothing to music when it is zero. The application dispatcher
+(EN jump tables `L2.00794`/`L2.00795`, base 0x416) reaches the bodies.
+
+| Screen | Message | EN / RU body | Key | Same-key test |
+|---|---|---|---|---|
+| Main menu | 0x421 | `L2.01096` / `L2.01367` | `music\menu.wav` | yes |
+| Pre-create (New Game) | 0x425 | `L2.01100` / `L2.01368` | `music\chrgen.wav` | yes |
+| Town | 0x42e, 0x468 | `L2.00266` / `L2.00267` | `music\b14.wav`, `b16`, `b15` (R2-ENGINE-231) | yes |
+| World map | 0x42d, 0x41d | `L2.00876` / `L2.00877` | `music\map.wav` | no |
+| Credits | 0x428 | `L2.01369` / `L2.00268` | `music\credit.wav` | no |
+
+A body with the same-key test calls `L2.01370` (RU `L2.01371`), which
+compares the requested key with the player's current list entry. When they
+match it skips the list set and only calls start, so the track resumes from
+its paused position (R2-ENGINE-337). Otherwise, and always for the map and
+credits, it sets a one-entry list and starts it from its first byte. The
+pre-create body is also called twice from the view-close body EN
+`L2.00787` (`L2.01372`, `L2.01373`). The six list-set callers and eight
+start callers of the EN rel32 call census are these five bodies, the
+mission body (R2-ENGINE-336) and the sound panel (R2-ENGINE-340).
+
+`music.res` holds the keys without the `music\` prefix and in lower case;
+the mission keys are written `B00`..`B16`. Each `allods2.exe` holds 24
+`music\` literals; the five screen bodies and the mission body push all
+24, and the raw reference scan of the sampled 10 EN and 8 RU literals
+finds one reference each.
+
+**Confidence.** High: every body is decoded completely in EN; the RU
+bodies have equal normalized mnemonics except the main menu (208 EN, 210
+RU instructions), whose key and same-key test were read in RU.
+
+**Unknown.** A screen reached only through an indirect call; the RU
+fourth pre-create caller at RU `L2.01374`; the resolver's case rule for
+archive keys (inferred case-insensitive, since `B00` must reach `b00.wav`).
+
+### R2-ENGINE-336
+
+Mission body EN `L2.01375` / RU `L2.01376` builds the 17-entry list
+`music\B00.wav`..`music\B16.wav` and calls list set EN `L2.01377`, which
+stops the player, copies the list, opens entry rand() mod 17, and sets
+the area pick EN `L2.01378` / RU `L2.01379` to -1. If the mission view
+has a hero object (view+0x3f6c), area select EN `L2.01380` / RU
+`L2.01381` runs on the hero's +8/+0xc position and, for a pick of at least
+0, select opens that list index. Start follows. It has no same-key test.
+The random source is `L2.00729`, the step R2-ENGINE-242 bounds.
+
+Callers: mission entry EN `R2.0026` at `L2.01382` (skipped when
+application +0x5d8 is 3) and view-close EN `L2.00787` at `L2.01383` and
+`L2.01384`, when the closed view is application +0xf8, +0xfc or +0x100
+(or +0x104, +0x108, +0x10c) and +0x5d8 is not 2. Closing such a view
+sets the list again, as at mission entry.
+
+Mission load EN `L2.01385` / RU `L2.01386` fills global array EN
+`L2.01387` (RU `L2.01388`) of 28-byte records from the map's type-12 data
+(R2-ASSET-084): the head record at map+0x374 first, only when its theme 0
+is at least 0, then the area array at map+0x360. Area select, per record:
+
+1. A record at (0,0) is the default. It is taken, with distance 1e10,
+   when the best distance is still above 1e15.
+2. Another record with all four themes -1 is skipped.
+3. Otherwise distance is the Euclidean distance from the position to
+   (x·256, y·256). The record is a candidate when distance < radius·256
+   and is taken when distance is below the best so far (initially 1e20).
+
+When a record is taken the pick is theme[R(3)], where R(n) is
+(rand()·(n+1))>>15 (EN `L2.00939`), drawn again while the theme is -1.
+Without a taken record the pick keeps its value. Mission tick EN
+`L2.01389` / RU `L2.01390` calls area select when its counter +0xa88 has
+low four bits 0, the music-available word is set and the hero object
+exists. The player reads the pick only at a track end (R2-ENGINE-337), so
+a new area changes the music after the current track.
+
+Only set list writes -1 to the pick. On a map whose head record is
+admitted (every campaign map, R2-ASSET-084) the default record is taken
+whenever no area holds the hero, so every area select leaves a pick of at
+least 0:
+
+- When the hero object exists at mission entry, the mission body's own
+  area select replaces the random entry before start; the first entry is
+  a theme of the area holding the hero or of the head.
+- Every later track end opens a theme drawn at most 16 ticks earlier; the
+  next-entry branch (index+1) mod n is not reached.
+- The random start entry plays only when no hero object exists at mission
+  entry, and only until the first track end after an area select.
+
+On a map without an admitted head (the root maps) the list plays in order
+from its random start until the hero first enters an area; after that the
+last pick stays in force, since nothing else in a mission resets it.
+
+**Confidence.** High for the list, the record walk and the theme draw in
+both locales (equal normalized mnemonics). Medium for the array
+population and the consequences above that depend on it: the head append
+`L2.01391`, the area append `L2.01392` and the count and index helpers
+`L2.01393` and `L2.01394` are not decoded, and eight references to
+`L2.01387` (`L2.01395`..`L2.01396`, `L2.01397`..`L2.01398`, `L2.01399`,
+`L2.01400`) lie in unread bodies. Whether the head stays in the array and
+whether the array is cleared between missions is therefore Medium. Medium
+that the object at view+0x3f6c is the player's hero and that its
++8/+0xc are map units of 1/256 tile; the scale is inferred from the shift
+by 8.
+
+**Unknown.** The identities of the closed views and of mode 3; the
+semantics of the four helpers and the eight unread `L2.01387` references;
+the pick after a mission ends while a later screen leaves it at a stale
+value.
+
+### R2-ENGINE-337
+
+Player object application +0xc8, created by EN `L2.01401` / RU
+`L2.01402` with a streaming buffer of 0x56000 or 0xac000 bytes (chosen by
+EN `L2.00648`) and initial volume SoundMusPos. Methods (EN / RU):
+
+| Method | EN / RU | Behaviour |
+|---|---|---|
+| set list | `L2.01377` / `L2.01403` | stop, copy list, select rand() mod n, pick = -1 |
+| select | `L2.01404` / `L2.01405` | open entry n from its start |
+| start | `L2.01406` / `L2.01407` | needs MusicEnabled and a buffer; re-arms the timer after a stop; Play with the looping flag |
+| stop | `L2.01408` / `L2.01409` | not holding: kill the timer and Stop the buffer; holding: select the held index and restore SoundMusPos |
+| fade | `L2.01410` / `L2.01411` | volume ramp, called with (2000, 8000) |
+| cross-fade | `L2.01412` / `L2.01413` | hold flag +0x18 = 1, held index +0x1c = n, fade |
+| set random | `L2.01414` / `L2.01415` | +0x20 = value, hold flag = 0 |
+
+Refill EN `L2.01416` streams the open entry into the looping buffer. At an
+entry's end it opens the next one: the area pick when at least 0, else
+the current index when the hold flag is set, else (index+1) mod n. A
+one-entry list therefore repeats its key. The mission list advances in
+list order only while the area pick is -1 (R2-ENGINE-336). The timer EN `L2.01417` drives refill and
+the fade; a fade that reaches the end calls stop. DirectSound Stop keeps
+the play position, so start after stop resumes the paused entry.
+
+**Confidence.** High for the methods and the next-entry rule; every body
+is decoded in both locales with equal normalized mnemonics. Medium for
+audible resume: it rests on documented DirectSound Stop/Play semantics,
+not on an observation.
+
+**Unknown.** The reader of +0x20 (none in the player class range
+EN `L2.01418`..`L2.01419`); the effect of stop called by list set while
+the hold flag is set.
+
+### R2-ENGINE-338
+
+The EN rel32 call census finds ten stop callers: the sound panel (two),
+the player's own timer, list set and destructor, and the five below.
+
+| Caller | EN site | Context |
+|---|---|---|
+| Logos `L2.01420` | `L2.01421` | startup logos |
+| Cutscene `L2.00875` | `L2.01422` | every movie: intro, 0x41d, 0x436, 0x42d, view-close |
+| Mission entry `R2.0026` | `L2.01423` | before the mission list (R2-ENGINE-336) |
+| Mission end `L2.01424` | `L2.01425` | 0x41d, 0x45c, 0x45d, exit |
+| Message 0x451 arm `L2.01426` | `L2.01427` | posted from view-close |
+
+The cutscene and logos bodies contain no start call. Music resumes only
+when the next screen requests it; a same-key screen resumes the paused
+entry (R2-ENGINE-335). These are stops only while the hold flag is clear.
+With the flag set by a dialogue tune (R2-ENGINE-341), each stop call
+instead selects the held index from its start and restores SoundMusPos,
+and the flag stays set (R2-ENGINE-337). On a refill read failure the player clears +0x10
+and posts 0x486; the application arm for 0x486 posts WM_CLOSE (0x10).
+Startup order in the application initializer EN `L2.01428`: registry load
+`L2.01242`, player creation `L2.01429`, logos `L2.01430`, intro cutscene
+`L2.01431`; the main menu then requests `menu.wav`.
+
+**Confidence.** High for the stop sites, the hold-flag branch and the
+absence of a start call in the cutscene and logos bodies. Medium for the
+0x486 consequence, including whether a read at an exact track end returns
+0, and the context labels of the 0x41d, 0x45c and 0x45d arms.
+
+**Unknown.** Stops reached through indirect calls; the sender and meaning
+of 0x451.
+
+### R2-ENGINE-339
+
+Settings object EN `L2.01432` / RU `L2.01433` (no file bytes; constructor
+EN `L2.01434` / RU `L2.01435`, static initializer EN `L2.01436`):
+
+| Offset | Registry value | Meaning | Constructor value |
+|---|---|---|---|
+| +0x00 | SoundRandom | random flag | none (static 0) |
+| +0x08 | SoundMusPos | music volume, DirectSound hundredths of a dB | -700 |
+| +0x0c | | music scale | 5000 |
+| +0x10 | SoundSfxPos | effects volume | -700 |
+| +0x14 | | effects scale | 5000 |
+| +0x18 | SoundSpeechPos | speech volume | -700 |
+| +0x1c | | speech scale | 5000 |
+| +0x20 | | music available (EN `L2.00878`) | 1 |
+| +0x24 | MusicEnabled | music on (EN `L2.01437`) | 1 |
+
+Load EN `L2.01438` / RU `L2.01439` reads the five values with
+RegQueryValueExA into those offsets; store EN `L2.01440` / RU `L2.01441`
+writes them. They are called from the registry load and store of
+R2-ENGINE-311, so the key, the once-at-startup load and the store at exit
+and after a cutscene are those of TipsMode. A missing value keeps the
+constructor value.
+
+Music available is not stored. The initializer clears it when the
+`music.res` mount throws (EN `L2.01442`) or when the command line contains
+`-nomusic` (EN `L2.01443`); a failed sound initialization also clears
+it. Every screen request, the mission tick and the mission list test it.
+The sound panel's music-on arm does not: the EN census of `L2.00878`
+has no site in the handler `L2.01444`..`L2.01445`, and player creation
+always builds the player. MusicEnabled gates start only (R2-ENGINE-337).
+
+**Confidence.** High: the constructor, load and store are decoded in both
+locales with equal normalized mnemonics.
+
+**Unknown.** Values outside the panel's range written to the registry by
+another program; what the panel's music-on arm plays while music is
+unavailable.
+
+### R2-ENGINE-340
+
+Panel handler EN `L2.01444` / RU `L2.01446` (table slot +0x48 of EN
+`L2.01447`), messages 0x467..0x478 through EN tables `L2.01448`/`L2.01445`:
+
+| Message | Action |
+|---|---|
+| 0x477 music on | MusicEnabled = 1; when the chosen melody is the current index: set volume, start; else stop, select it, set volume, start |
+| 0x478 music off | player state 2: stop; state 1: fade (2000, 8000); then MusicEnabled = 0 |
+| 0x46e, wParam 2 | SoundRandom = lParam; player set random (clears the hold flag) |
+| 0x46e, wParam 3 | chosen melody = lParam (no player call) |
+| 0x46e, wParam 6, 7, 8 | music, effects, speech volume from the slider through EN `L2.01449`, clamped to -10000..0 |
+| 0x474 | effects or speech test sound |
+| 0x476 | close |
+| 0x467, other | no action |
+
+Panel build EN `L2.01450` lists the current list's entries. Each name is
+the entry key without its first six characters (`music\`) looked up in
+the map EN `L2.01451`, which tune-name fill EN `L2.01452` builds from
+`main\text\tunes.txt` (loaded at EN `L2.01453`) by splitting each line at
+`=`. That file names `credits.wav` while the archive key and the literal
+are `credit.wav` (R2-ASSET-083), so the credits entry has no name.
+
+**Confidence.** High for the EN arms and the RU handler alignment (equal
+normalized mnemonics). Medium for the RU tune-name path: the RU build and
+fill bodies are not decoded. Medium for the slider curve, read from
+`L2.01449` only in EN.
+
+**Unknown.** The on-screen layout of the panel; the player state values
+the off arm tests beyond 1 and 2.
+
+### R2-ENGINE-341
+
+Dialogue parser EN `R2.0048` / RU `R2.0047` reads `tune=` (literal EN
+`L2.01454`) with `%d`; page EN `R2.0046` / RU `R2.0045` calls
+cross-fade EN `L2.01412` with the value when it is at least 0. The
+cross-fade is its only caller. After the fade, stop selects the held
+index. The refill tests the area pick before the hold flag, so the held
+index repeats at a track end only while the pick is -1; in a campaign
+mission (R2-ENGINE-336) it plays once and the area theme follows. The
+flag stays set until set random clears it (R2-ENGINE-337,
+R2-ENGINE-340).
+
+The census reads every file of both roots and every entry of every `.res`
+archive as raw bytes, ignoring case: `tune=` occurs only in EN and RU
+`allods2.exe` and RU `a2server.exe`. Declared instant 37 is not a music
+path (R2-ENGINE-058).
+
+**Confidence.** High for the parser and page path in both locales and for
+the absence within the census population. A compressed payload or a file
+outside the two roots is outside it.

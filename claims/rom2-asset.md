@@ -791,3 +791,89 @@ hashes are equal in EN and RU.
 
 **Confidence.** High for the frame headers, the decoder rule and the
 equality.
+
+## Music archive and map music areas
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-083 | ROM2 EN and RU music.res are identical: 21 PCM keys b00..b16, chrgen, credit, map and menu, all stereo 22050 Hz 16-bit; Music.ini lists 17 titles; no game image holds music.ini or melody in ASCII. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ASSET-084 | ROM2 ALM type 12 holds music areas of seven int32 (x, y, radius in tiles, four themes, -1 for none); all 46 campaign maps per root carry a default record and 2..33 areas; themes are 0..16. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+
+### R2-ASSET-083
+
+EN `music.res` and RU `MUSIC.RES` are 140067844 bytes with equal SHA-256.
+Each holds 21 file nodes at the root, in this order:
+
+| Key | Bytes | Seconds | Key | Bytes | Seconds |
+|---|---:|---:|---|---:|---:|
+| b00.wav | 7688332 | 87.169 | b11.wav | 4619292 | 52.372 |
+| b01.wav | 6920696 | 78.465 | b12.wav | 9261044 | 105.000 |
+| b02.wav | 8564176 | 97.099 | b13.wav | 12170708 | 137.989 |
+| b03.wav | 6669132 | 75.613 | b14.wav | 4467500 | 50.651 |
+| b04.wav | 8899164 | 100.897 | b15.wav | 7404536 | 83.951 |
+| b05.wav | 6655172 | 75.455 | b16.wav | 6050536 | 68.600 |
+| b06.wav | 8874020 | 100.612 | chrgen.wav | 4565508 | 51.763 |
+| b07.wav | 7371544 | 83.577 | credit.wav | 7835180 | 88.834 |
+| b08.wav | 5924884 | 67.175 | map.wav | 3437504 | 38.973 |
+| b09.wav | 4810760 | 54.543 | menu.wav | 3528496 | 40.005 |
+| b10.wav | 4348964 | 49.307 | | | |
+
+Every entry is a RIFF WAVE whose RIFF size equals the entry size minus 8,
+with a 16-byte fmt chunk (format 1, 2 channels, 22050 Hz, 88200 bytes per
+second, block align 4, 16 bits) and one data chunk of the entry size
+minus 44 bytes.
+
+Root `Music.ini` (399 bytes, equal in EN and RU) has one section
+`[Global]` with `Count=17` and `Melody1`..`Melody17`. Each `MelodyN`
+value has the length and SHA-256 of the EN `main.res` `text/tunes.txt`
+name of `b(N-1).wav`. `text/tunes.txt` holds 21 `key=name` lines, one per
+archive key, except that it names `credits.wav` for the archive key
+`credit.wav`; the RU file has the same keys with other names.
+
+A raw ASCII census of every file in both roots and every `.res` entry,
+ignoring case, finds `music.ini` only in `ROM2 Map Editor.exe` and the
+GOG installer files `goggame-galaxyFileList.ini` and `goglog.ini`, and
+the token `melody` only in `Music.ini` and `ROM2 Map Editor.exe`. No game
+image (`allods2.exe`, `Scenario.dll`, RU `a2server.exe`) contains either
+string. A profile read of the `MelodyN` keys would need the token
+`melody`, in full or composed from parts; its absence is the evidence
+against a reader that builds the file name at run time. The map editor's
+Help describes map music areas with up to four themes and a radius.
+
+**Confidence.** High for the archive, header and file measurements and
+for the ASCII census. UTF-16 strings and a key name composed entirely
+from other parts are outside the census.
+
+### R2-ASSET-084
+
+Type 12 (R2-ASSET-023 gives its extent) is one 28-byte head record then
+`meta[+0x40]` area records of the same shape:
+
+| Offset | Type | Field |
+|---:|---|---|
+| 0x00 | i32 | x, tiles |
+| 0x04 | i32 | y, tiles |
+| 0x08 | i32 | radius, tiles |
+| 0x0c..0x18 | 4 × i32 | themes 0..3: index into the mission list `B00`..`B16`, -1 for none |
+
+The field meanings come from the loader and area select of
+R2-ENGINE-336. The population is 142 maps: 46 `scenario.res` maps and
+13 (EN) or 37 (RU) root `.alm` files, versions 1300 and 1600, parsed
+with record 0 consuming 660 bytes.
+
+| Population | Head | Areas |
+|---|---|---|
+| 46 campaign maps per root | (0,0,0) with 1..4 themes at least 0 (EN: 1, 7, 23 and 15 maps) | 470 per root, 2..33 per map; 10 have all themes -1 |
+| EN `CROSS2.ALM`, `SHALLOW.ALM` | (0,0,0), themes -1 | 9, 7 |
+| RU `CROSS2.ALM`, `Road.alm`, `shallow.alm`, `wsdesert.alm`, `wsenigma.alm`, `wsruined.alm` | (0,0,0), themes -1 | 9, 8, 7, 24, 6, 4 |
+| other root maps (11 EN, 31 RU) | (0,0,0), themes -1 | 0 |
+
+The campaign records are equal in EN and RU. Area radii are 4..25 (EN)
+and 3..25 (RU). Every theme value 0..16 occurs; no value lies outside
+-1..16. Root maps admit no head record, so until the hero first enters
+an area their music follows the list order; campaign maps admit the head,
+so their mission music is always a theme of an area or of the head
+(R2-ENGINE-336).
+
+**Confidence.** High for the record shape over the 142 maps and for the
+field meanings, which the loader and area select read.

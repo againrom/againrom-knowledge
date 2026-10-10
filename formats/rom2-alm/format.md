@@ -53,6 +53,31 @@ The campaign type7 grammar is exactly consumed for all 46 maps per preserved
 root. Full-word operation values, compilation and the supported added arms are
 specified in [Campaign scripts](script.md). — R2-ENGINE-041
 
+<a id="music-areas-type-12"></a>
+
+## Music areas (type 12)
+
+Type 12 is one head record and `meta[+0x40]` area records, each seven
+little-endian i32:
+
+| Offset | Field |
+|---:|---|
+| 0x00 | x, tiles |
+| 0x04 | y, tiles |
+| 0x08 | radius, tiles |
+| 0x0c..0x18 | themes 0..3: index into the mission music list, -1 for none |
+
+The loader admits the head only when its theme 0 is at least 0. A record
+at (0,0) is the default for a position outside every area, so on a map
+with an admitted head every mission track is an area or head theme; a
+record with all four themes -1 is ignored. Area selection and the theme draw are in
+[ROM2 music](../rom2-music/format.md). — R2-ASSET-084, R2-ENGINE-336
+
+All 46 campaign maps per root have a (0,0,0) head with 1..4 themes and
+2..33 areas (470 per root, equal in EN and RU). Two EN and six RU root
+maps have areas and a head with themes -1; the other root maps have
+neither. Theme values are -1..16. — R2-ASSET-084
+
 ## Version conditions
 
 | Case | Condition | Transfer |
@@ -92,8 +117,9 @@ R2-ASSET-003, R2-ASSET-024
 
 ## Authoring limits and Unknowns
 
-The meaning of the new type 10/11/12 fields is Unknown. Their known counts,
-widths and target arrays do not supply semantic defaults. The writer's reason
+The meaning of the new type 10/11 fields is Unknown. Their known counts,
+widths and target arrays do not supply semantic defaults. Type 12 is
+decoded above (R2-ASSET-084). The writer's reason
 for declaring 644 bytes while the metadata programme transfers 660 is also
 Unknown; no complete original-compatible ROM2 ALM writer follows from this
 loader grammar. — R2-ASSET-023, R2-ASSET-024

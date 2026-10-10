@@ -9,12 +9,13 @@ semantics and writer boundaries remain explicit on each page.
 | Surface | Reference | Defined boundary |
 |---|---|---|
 | Archives | [RES](../rom2-res/format.md) | Header, node array and payload geometry; payload identity separate |
-| Maps | [ALM](../rom2-alm/format.md) | Headers, 660-byte metadata programme, version rules and type 0–12 extents |
+| Maps | [ALM](../rom2-alm/format.md) | Headers, 660-byte metadata programme, version rules, type 0–12 extents and type-12 music areas |
 | Definitions | [Data.bin](../rom2-databin/format.md) | Eight groups, 14-byte C block, client/server counts and parameter schema |
 | Inline registry | [REG](../rom2-reg/format.md) | Header, record array and pool; value and lookup meanings Unknown |
 | Sprites and palettes | [Sprite/palette](../rom2-spr/format.md) | Frame container and palette shapes; pixel decoding Unknown |
 | Text | [Text](../rom2-text/format.md) | Resource families and stored-byte domain; conversion Unknown |
 | Completion presentation | [Report/movie](../rom2-video/format.md) | Selected sources, numeric plans and client return boundaries; codec/physical EOF Unknown |
+| Music | [Music](../rom2-music/format.md) | Archive keys and wave format, screen keys, mission areas, player and settings; audible output Unknown |
 | Town presentation | [Town](../rom2-town/format.md) | ID/resource selection, Kaarg square layers, mask, clocks and room art; full room layout and shell text destinations Unknown |
 | Character generator | [Generator](../rom2-chargen/format.md) | Pre-create and detail screens, budget, skills, tips and the hero at town 1; item effects and the hero's SAV bytes Unknown |
 | Session records | [Header](../rom2-net/format.md) | Eight-byte header and transport length rules; payload grammar Unknown |
