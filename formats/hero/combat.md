@@ -4,7 +4,7 @@
 
 ## Hit resolution (`R0265`, the actor's `vt+0x4c`)
 
-For a unit target, the decoded blow and direct-damage effect use this resolver (`HERO-DAMAGE-022`).
+For a unit target, the decoded blow and direct-damage effect use this resolver (`HERO-DAMAGE-022`, amended).
 Building targets use a different resolver (`UNIT-STRUCTDAMAGE-064`). Its second argument is a `0x16`-byte
 combat block of the `+0xa6` layout — the attacker's own live block for a melee strike, an
 `Effect_DirectDamage`'s copy at `+0x48` for a spell ([MAGIC](../magic/format.md)).
@@ -178,7 +178,7 @@ state-1/progress-3 (crossing) records exist, and every one carries `actor+0x6c =
 contains no example of a crossing actor carrying a live countdown (`HERO-CROSSHOLD-146`).
 
 The start routine itself does **not** reject out-of-reach targets: it computes distance for
-extra delay. Application rechecks reach (`HERO-CADENCE-115`, `UNIT-STRUCTREACH-063`). The
+extra delay. Application rechecks reach (`HERO-CADENCE-115` as amended, `UNIT-STRUCTREACH-063`). The
 Building branch reads only combat bytes `+0x13/+0x14`, with a positive-spread gate and flat
 subtraction 5; ordinary physical `+0x0e/+0x0f` is ignored. A physical Building hit writes the
 word HP without clamping, unlike the direct-effect Building consumer, which clamps at zero.
@@ -196,8 +196,8 @@ assignment, is retaliation (`HERO-AGGRO-028`, bounded by `AI-DIPLO-004`'s bit 1;
 `MinimalGuardRange` default clause is superseded and does not touch the bit).
 
 ```
-death, from the killing blow to the freed id  (HERO-DEATH-026, SESS-TICK-004,
-                                               SESS-TICK-006, HERO-DWELL-065,
+death, from the killing blow to the freed id  (HERO-DEATH-026 amended, SESS-TICK-004,
+                                               SESS-TICK-006, HERO-DWELL-065 amended,
                                                HERO-FINISH-066, HERO-DYETICK-067,
                                                HERO-REVIVE-068, HERO-DECAY-069,
                                                HERO-ZERO-070)

@@ -136,7 +136,7 @@ The six skill words are **not** in this fold — the derive adds `+0xe8 + 2i` it
 The complete attack fold is 53 instructions with seven `ADD`s (one word and
 six bytes) and one byte assignment. It also skips active-index mirror `+0xf6`
 and final bytes `+0xfc/+0xfd`; the active live index is written separately.
-— HERO-FOLD-035, SAV-HUMFOLD-446
+— HERO-FOLD-035 (amended), SAV-HUMFOLD-446
 
 No shipped Armor or Shield block and no effect-arm body writes the modifier's six damage-kind
 bytes `+0x10e..+0x113`: the shipped blocks add zero and no arm body stores there. A sweep of the
@@ -230,7 +230,7 @@ original instruction slices. Weapon directly writes modifiers and invokes
 derive; Armor/Shield explicitly add into both defensive copies. Full runtime
 cycles and transitive callback interleaving remain Unknown. The bounded local
 event sequence is specified below.
-— HERO-EQUIP-017, SAV-HUMEQUIP-447
+— HERO-EQUIP-017 (amended), SAV-HUMEQUIP-447
 
 ### Local equipment sequence
 

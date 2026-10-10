@@ -132,7 +132,7 @@ ITEM-ARMFILL-032, SHOP-PRICE-011
 (the byte at `w+0x60` is loaded at `L04003` and the floating-point subtraction is at `L04004`), so the spread is
 `round(max×f) − round(min×f)` and not `round((max−min)×f)`. The two encodings are
 indistinguishable while one weapon is equipped and diverge as soon as a second source contributes,
-because the actor's fold sums bases and spreads **separately** (`HERO-FOLD-035`).
+because the actor's fold sums bases and spreads **separately** (`HERO-FOLD-035`, amended).
 
 `Common`'s `@.damage` factor is `0.2000`; omitting a leading shape word
 selects this factor. For example: `Iron Short Sword` = shape

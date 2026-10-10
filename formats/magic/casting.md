@@ -251,7 +251,7 @@ AI module, no writer other than that spawn setup and `Order::Serialize`'s own ra
 SAV load was found (`AI-341`, `SAV-1066`). Of the twelve unit classes `R0184` sets up, only
 Dragon and Daemon receive the mage bit there that can reach the second mechanism below; a Human
 with positive streamed `ManaMax` also carries the same bit through a different writer
-(`HERO-CLASS-013`, `MAGIC-AI-012`). Only when the loop finds no match does the actor fall through
+(`HERO-CLASS-013` as amended, `MAGIC-AI-012`). Only when the loop finds no match does the actor fall through
 toward the mage-only choice.
 
 Only a **mage** reaches that choice (`actor+0x4c & 4`, `[actor+0x14]+0x28 != 0`, and a non-null

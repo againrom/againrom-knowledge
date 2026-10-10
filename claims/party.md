@@ -947,6 +947,100 @@ The two bodies write no other actor field (`stores.tsv`). An item in neither pat
 
 **Unknown.** Which items reach `actor+0x68` at a mission end in play.
 
+## Inventory across a mission start
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| PARTY-037 | No mission-start routine read moves an item between party members on the campaign's mission-to-mission edge; 11 unread closure owners, the SAV-load path and three census blind spots bound this. | High / Medium / Unknown | ● active | [EXP-0519](../experiments/EXP-0519-hero-build-fallbacks/) |
+| PARTY-038 | A member the mission-end culls remove takes its stack out of the party, and a second `Quest Documents` stack is made only when a primary hero is constructed fresh. | High / Medium / Unknown | ● active | [EXP-0519](../experiments/EXP-0519-hero-build-fallbacks/) |
+
+### PARTY-037
+
+The inventory is the actor's own container at `actor+0x7c` (`ITEM-CONT-004`). On the campaign's
+mission-to-mission edge the surviving actors are the same objects (`PARTY-PERSIST-028`); the only
+boundary routine that writes an inventory field is the end-of-mission reset, which touches the
+cast slot `+0x68` alone (`PARTY-M100-034`). No mission-start routine read rebuilds inventories. The scope is the campaign's
+mission-to-mission edge and the routines named below; it does not cover the SAV-load start path
+or the unread owners.
+
+- The type-5 player builder `R0423` (read whole): its reuse arm (`L07361`..`L13990`,
+  `L13991`..`L02132`) writes `player+0x44` and `player+0x28` and touches no actor.
+- `R0823` (read whole) with `player+0x34 != 0` returns that hero (`L07351` → `L13992`
+  → `L13993`). Its repair arm (`L13994`..`L13995`, taken when `byte[hero+0x13c] > 0`) calls
+  `R0825`, copies the two pools and re-installs the hero in `+0x20` and a group; it makes
+  no container call. The `Quest Documents` producer `R0993` (`L13987`) is on the
+  construction arm only.
+- `R0993` (read whole) tests `server+0x0c == 0` (`L13996`) and `[L03937] != 2`
+  (`L13997`), builds an item from the literal at `L13998` through `R2076`, and appends
+  it to its argument's `+0x7c` (`L13999`). It reads no other actor's container and does not look
+  for an existing stack.
+- Container calls: 45 direct `E8` calls in `.text` to the add `R0929`, insert `R0930`, drain
+  `R0450` and take `R1522` (`callto.tsv`).
+- Direct-call closure from `R0423` and the placement walk `R0065`, depth 6: 419
+  bodies, 125 indirect calls not followed. Two owners call a container routine: `R0907`, the
+  `Humans.Hero` `.ini` parser, whose file does not ship (`ITEM-SPAWN-026`), and `R0993`.
+- Closure widened to the per-mission starter `R0099` and `R0512`, depth 6: 1731
+  bodies, 1004 indirect calls not followed, 12 owners besides the container routines. Each of the
+  12 is a walked body, so the closure shows a direct-call path from the start roots to it
+  (depth 6 or less); the TSV carries no parent edge, so that path is not recorded, and it may be
+  spurious (a fall-through or tail-jump walk). `R0993` is read whole. The other 11 are not
+  read by this experiment: `R0946`, `R0945`, `R0907`, `R0461`,
+  `R0472`, `R0262`, `R0061`, `R0407`, `R0014`, `R0430`
+  and `R0448`. Their roles (the order dispatcher `R0061`, the pickup `R0448`,
+  the script instants in `R0262`, `Give All` `R0407`, item creators, the chat
+  handler `R0430`, the cast-slot return `R0014`) come from earlier claims
+  this card does not cite, not from a read here. Whether any of them runs at a mission start is
+  Unknown.
+- Script corpus, both roots (EXP-0160 `corpus-nodes.txt`): the file holds item-reference nodes
+  only, 50 instant nodes per root in 10 ALM files (7 of operation 12, 43 of operation 13) plus
+  check nodes, and no instant of operation 11, 20 or 28. No node in it carries code `0x0e1c`. The
+  filter and count were a third data pass, one over the preregistered budget. The three `Give All` nodes move a map unit's container into hero ordinal 10001
+  (`TRIG-GIVEALL-025`); no shipped node authors `Drop all` (`TRIG-DROPALL-024`).
+
+A save loaded at a mission start restores each actor with its own container record
+(`SAV-CARRY-050`) and re-indexes the actors from the groups (`PARTY-ORIGIN-010`). The load path
+was not traced by this experiment: its closure roots did not include the `Player::Serialize` load
+arm.
+
+**Confidence.** High for what the three routines read whole do (`R0423`, `R0823`,
+`R0993`) and for the existence of the 45 direct `E8` calls. Medium for the negative over
+the whole start: the closures do not follow indirect calls; 11 closure owners were not read; the
+call census ran no raw dword scan of the four routine addresses (tables and callbacks), did not
+look for tail `jmp rel32`, and does not see item moves through the base list methods on
+`actor+0x7c` that bypass the four routines (`ITEM-CONT-004` explains why those routines keep the
+load field, which makes a bypass unlikely and does not exclude it). Medium for the script census:
+its population is the item-reference nodes above, and the pass was over budget. Unknown for the
+SAV-load start path. The EN and RU
+`rom.exe` are one image, and the script corpus is identical on both roots, so the answer does
+not differ between them.
+
+### PARTY-038
+
+- The server cull keeps an actor iff `0x21 <= word[actor+0x0e] < 0x40` (`PARTY-ENDCULL-026`); the
+  client cull keeps `CUnit+0x18c` bit 0 (`PARTY-CULL-004`). Mercenaries do not cross as objects
+  (`PARTY-MERC-007`), and a mode-0 `Humans` actor does not cross (`PARTY-M20-031`). A culled
+  actor is destroyed through `R1388` and `vt+0x04(1)`; slot `+0x04` of the `Human` vtable
+  `L00003` is `R2195` (read whole), which calls `R2196`.
+- Direct-call closure from `R2196` and `R1388`, depth 6: 69 bodies, 20 indirect calls
+  not followed, and no call to the container add, insert, drain or take, or to the sack makers
+  `R0871`, `R0944` and `R0472`. The stack is therefore not handed to another
+  actor or dropped into a sack by any direct call; it leaves the party with its holder.
+- The `0xbe` carry serializes one root actor (`PARTY-CARRY-005`), so on that path a companion and
+  its stack do not cross.
+- `R0993` runs only on `R0823`'s construction arm, `player+0x34 == 0`
+  (`PARTY-037`). A primary that already exists gets no second stack at a mission start; a primary
+  constructed while another member holds a stack would hold a second one.
+
+**Confidence.** High for the cull membership (cited claims, each read at instruction level) and
+for the construction-arm gate (`R0823` read whole). Medium that the stack is destroyed with
+its holder rather than moved: the destructor closure is direct calls only, and the `vt+4`
+destructors of the contained items were not read.
+
+**Unknown.** Whether any shipped flow constructs a primary hero while a companion already holds
+`Quest Documents`. Whether `Quest Documents` can reach the cast slot `+0x68`, where the end reset
+deletes a class-14 item (`PARTY-M100-034`). The client's inventory mirror at a mission start was
+not traced.
+
 ## Open questions
 
 - The remaining bits of `+0x18c` (`PARTY-FLAG-003`), and the eleven sites that

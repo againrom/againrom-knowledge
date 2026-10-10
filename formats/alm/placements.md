@@ -182,7 +182,7 @@ runs are stat overrides, and installed bytes+0x2c..+0x3f do not use 0xff.
 | +0x14 | u32 | **owner** | low u16 used: 1-based physical slot in the type-5 array |
 | +0x18 | u32 | **type-8 link** | 1-based, bounded by `meta+0x2c`; `0` = none. The loader writes this record's `+0x40` word into entry `[value−1]` of `mapObj+0x2dc` |
 | +0x1c | u32 | — | installed values 0..14; not a field-width limit. No direct reader in the established game record-holder family; stream escape remains bounded. The editor reads, copies and writes an opaque dword. Meaning Unknown (`ALM-TAILDIR-081`, `ALM-PLACESTREAM-111`, `ALM-PLACEEDITOR-112`) |
-| +0x20 | u16 | **current health** | absent value `0xFFFF`; applied to `actor+0x94` (`UNIT-PLACE-034`), signed and unclamped, with no skip for 0 (`UNIT-144`). Optional in installed maps (`ALM-TAILU16-082`): 30 records authored, 21 at 0 and 9 at -10 (`UNIT-143`). A 0 enters the death arm of `HERO-DEATH-026`; the frame-0 draw is Unknown |
+| +0x20 | u16 | **current health** | absent value `0xFFFF`; applied to `actor+0x94` (`UNIT-PLACE-034`), signed and unclamped, with no skip for 0 (`UNIT-144`). Optional in installed maps (`ALM-TAILU16-082`): 30 records authored, 21 at 0 and 9 at -10 (`UNIT-143`). A 0 enters the death arm of `HERO-DEATH-026` (amended); the frame-0 draw is Unknown |
 | +0x22 | u16 | — | absent value `0xFFFF`; authored on exactly the records `+0x20` is and with a different value set, and **no reader** (`ALM-TAILU16-082`) |
 | +0x24 | u16 | **current mana** | absent value `0xFFFF`; applied to `actor+0x9a` (`UNIT-PLACE-034`). Installed value 0xffff; the consumer exists but installed maps leave it absent (`UNIT-PLACEIDLE-088`) |
 | +0x26 | u16 | — | Installed value 0xffff, with **no reader** (`ALM-TAILU16-082`) |

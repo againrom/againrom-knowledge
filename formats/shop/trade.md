@@ -145,6 +145,27 @@ Each draw rect is exactly the size of its own eleven loaded frame files. Opening
 to its first item and stores the shelf index in `view+0x132`, which is `0x64` while none is open
 (partially retracted `SHOP-SCREEN-034`; its scroll reset, shelf-index store and initial value stand).
 
+No text drawn by the shop code `L09774..L14000` names the selected shelf. That code draws 18
+text runs — the grid's quantity and price, the button panel's captions and numbers, and the
+identify modal's four lines — and none reads `view+0x132` (`SHOP-124`). Three paths outside that
+range were not read and stay open: the shop view's inherited paint `R1311`, the tip popup's
+paint and hover getter, and the borrowed character panel's paint. Within the code read, a shelf is named only by
+hover help: the
+merchant panel's hover getter returns `main.txt` slot `62 + i` for the hit rect `i` under the
+pointer, open or not, and slot 61 for the shopkeeper rect `(274,110,354,295)`; the shared hover box
+draws it above the pointer in font2 (`SHOP-125`):
+
+```
+i   hit rect           main.txt   EN                         RU
+0   354,110,459,295    62         Armor                      Броня
+1   169,110,274,295    63         Weapons                    Оружие
+2   314,  5,454,105    64         Magic items                Магические предметы
+3   172,  5,314,105    65         Scrolls, books & potions   Свитки, книги и пузырьки
+```
+
+The identify modal draws slots 79 and 80 and the executable literals `Yes` and `No`, so the RU
+install shows the English `Yes` and `No` there (`SHOP-126`).
+
 The merchant himself is drawn at `(277,112)`, 76x176, from
 `movies\shopanim\Pose2-3\1.bmp` — two immediate offsets
 `(+113, +112)` from the merchant panel's own top-left, not a rect. His Yes and No animations

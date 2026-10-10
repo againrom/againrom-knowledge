@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
+Claims labelled: 3310. Observation: 95. Static analysis: 2754. Mixed: 461.
 
 ## Ledger ai
 
@@ -660,28 +660,28 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | HERO-COST-002 | static analysis | ● active |
 | HERO-BUY-003 | static analysis | ● active |
 | HERO-BUDGET-004 | static analysis | ● active |
-| HERO-HP-005 | static analysis |  |
+| HERO-HP-005 | static analysis | ● active (partially retracted) |
 | HERO-MP-006 | static analysis | ● active |
-| HERO-SIGHT-007 | static analysis | ● active (amended, contested) |
+| HERO-SIGHT-007 | static analysis | ● active (amended, superseded, contested) |
 | HERO-SPEED-008 | static analysis | ● active |
 | HERO-SKILL-009 | static analysis | ● active |
 | HERO-XP-010 | static analysis | ✖ retracted |
-| HERO-COMBAT-011 | static analysis |  |
+| HERO-COMBAT-011 | static analysis | ● active (partially retracted) |
 | HERO-RESIST-012 | static analysis | ● active |
-| HERO-CLASS-013 | static analysis | ● active (corrected) |
+| HERO-CLASS-013 | static analysis | ● active (amended, partially retracted, superseded) |
 | HERO-ORDER-014 | static analysis | ● active |
 | HERO-CAP-015 | static analysis | ● active |
 | HERO-MOD-016 | static analysis | ● active |
-| HERO-EQUIP-017 | static analysis | ● active (weapon inverse, direct-write scope and selector provenance corrected) |
-| HERO-ARMOUR-018 | static analysis |  |
+| HERO-EQUIP-017 | static analysis | ● active (amended, partially retracted) |
+| HERO-ARMOUR-018 | static analysis | ● active (amended, partially retracted) |
 | HERO-EFFECT-019 | static analysis | ● active |
 | HERO-CLASS-020 | static analysis | ● active |
-| HERO-REGEN-021 | static analysis | ● active (partially retracted/amended) |
-| HERO-DAMAGE-022 | static analysis | ● active (amended) |
-| HERO-CADENCE-023 | static analysis | ● active (amended; complete-period formula and worked intervals retracted) |
-| HERO-TARGET-024 | static analysis | ● active (amended, contested) |
+| HERO-REGEN-021 | static analysis | ● active (amended, partially retracted) |
+| HERO-DAMAGE-022 | static analysis | ● active (amended, partially retracted) |
+| HERO-CADENCE-023 | static analysis | ● active (amended, partially retracted) |
+| HERO-TARGET-024 | static analysis | ● active (amended, partially retracted, contested) |
 | HERO-REACH-025 | static analysis | ● active |
-| HERO-DEATH-026 | static analysis | ● active (amended) |
+| HERO-DEATH-026 | static analysis | ● active (amended, superseded) |
 | HERO-KILL-027 | static analysis | ● active (amended) |
 | HERO-AGGRO-028 | static analysis | ● active (amended) |
 | HERO-DMG2-029 | static analysis | ● active |
@@ -690,7 +690,7 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | HERO-HEALTH-032 | static analysis | ● active (amended) |
 | HERO-FOLD-033 | static analysis | ● active (amended) |
 | HERO-DERIVE-034 | static analysis | ● active |
-| HERO-FOLD-035 | static analysis | ● active (instruction counts corrected) |
+| HERO-FOLD-035 | static analysis | ● active (amended, partially retracted) |
 | HERO-STATDMG-036 | static analysis | ● active |
 | HERO-BARE-037 | static analysis | ● active |
 | HERO-SHEET-038 | static analysis | ● active |
@@ -711,16 +711,16 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | HERO-APPEAR-053 | static analysis | ● active |
 | HERO-APPEAR-054 | static analysis | ● active |
 | HERO-APPEAR-055 | static analysis | ● active |
-| HERO-APPEAR-056 | static analysis |  |
+| HERO-APPEAR-056 | static analysis | ● active (partially retracted) |
 | HERO-FIGURE-057 | static analysis | ● active |
 | HERO-FIGURE-058 | static analysis | ● active |
 | HERO-FIGURE-059 | static analysis | ● active |
 | HERO-FIGURE-060 | static analysis | ● active |
 | HERO-FIGURE-061 | static analysis | ● active (amended) |
-| HERO-FIGURE-062 | static analysis | ● active (corrects `HERO-APPEAR-056`) |
+| HERO-FIGURE-062 | static analysis | ● active |
 | HERO-FIGURE-063 | static analysis | ● active (amended) |
 | HERO-FIGURE-064 | static analysis | ● active |
-| HERO-DWELL-065 | static analysis | ● active (amended) |
+| HERO-DWELL-065 | static analysis | ● active (amended, superseded) |
 | HERO-FINISH-066 | static analysis | ● active |
 | HERO-DYETICK-067 | static analysis | ● active |
 | HERO-REVIVE-068 | static analysis | ● active |
@@ -729,32 +729,32 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | HERO-HP-071 | static analysis | ● active |
 | HERO-HP-072 | static analysis | ● active |
 | HERO-SKILLUP-073 | static analysis | ● active |
-| HERO-SKILLGATE-074 | mixed | ● active (corrected) |
-| HERO-SKILLLOSS-075 | static analysis |  |
-| HERO-SKILLBUY-076 | static analysis | ● active (amended) |
+| HERO-SKILLGATE-074 | mixed | ● active (amended, partially retracted) |
+| HERO-SKILLLOSS-075 | static analysis | ● active (amended, partially retracted) |
+| HERO-SKILLBUY-076 | static analysis | ● active (amended, partially retracted) |
 | HERO-XP-077 | static analysis | ● active |
 | HERO-DOLL-078 | static analysis | ● active |
-| HERO-START-081 | static analysis | ✔ promoted (amended) |
+| HERO-START-081 | static analysis | ✔ promoted (amended, partially retracted) |
 | HERO-NAME-079 | static analysis | ● active |
 | HERO-TYPED-080 | static analysis | ● active |
 | HERO-CHARGEN-082 | static analysis | ● active |
 | HERO-CHARGEN-083 | static analysis | ● active (amended) |
 | HERO-CHARGEN-084 | static analysis | ● active |
 | HERO-CHARGEN-085 | static analysis | ● active |
-| HERO-GENERAL-086 | static analysis | ● active (corrected after two independent falsifications) |
+| HERO-GENERAL-086 | static analysis | ● active (amended) |
 | HERO-GENERAL-087 | mixed | ● active |
-| HERO-GENERAL-088 | static analysis | ● active (corrected after two independent falsifications) |
-| HERO-GENERAL-089 | mixed | ● active (expanded after independent falsification) |
+| HERO-GENERAL-088 | static analysis | ● active (amended) |
+| HERO-GENERAL-089 | mixed | ● active (amended) |
 | HERO-GENERAL-090 | static analysis | ● active |
 | HERO-GENERAL-091 | static analysis | ● active |
-| HERO-GENERAL-092 | static analysis | ● active (corrected after independent falsification) |
-| HERO-GENERAL-093 | static analysis | ● active (corrected after four independent falsifications) |
+| HERO-GENERAL-092 | static analysis | ● active (amended) |
+| HERO-GENERAL-093 | static analysis | ● active (amended) |
 | HERO-ITEMSKILL-096 | static analysis | ● active |
 | HERO-104 | static analysis | ● active |
 | HERO-CADENCE-112 | static analysis | ● active |
 | HERO-CADENCE-113 | static analysis | ● active |
 | HERO-CADENCE-114 | static analysis | ● active |
-| HERO-CADENCE-115 | static analysis | ● active (start/reach clause corrected) |
+| HERO-CADENCE-115 | static analysis | ● active (amended, partially retracted) |
 | HERO-JOIN-120 | static analysis | ● active |
 | HERO-JOIN-121 | mixed | ● active |
 | HERO-JOIN-122 | mixed | ● active |
@@ -767,6 +767,8 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | HERO-FIGURE-144 | static analysis | ● active |
 | HERO-DYINGTICK-145 | static analysis | ● active |
 | HERO-CROSSHOLD-146 | static analysis | ● active |
+| HERO-163 | static analysis | ● active |
+| HERO-164 | static analysis | ● active |
 
 ## Ledger inv
 
@@ -1379,6 +1381,8 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | PARTY-M20-032 | mixed | ● active |
 | PARTY-M100-033 | static analysis | ● active |
 | PARTY-M100-034 | static analysis | ● active |
+| PARTY-037 | static analysis | ● active |
+| PARTY-038 | static analysis | ● active |
 
 ## Ledger reg
 
@@ -2535,6 +2539,9 @@ Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 | SHOP-119 | static analysis | ✔ promoted |
 | SHOP-120 | static analysis | ✔ promoted |
 | SHOP-121 | static analysis | ✔ promoted |
+| SHOP-124 | static analysis | ● active |
+| SHOP-125 | static analysis | ● active (amended) |
+| SHOP-126 | static analysis | ● active (amended) |
 
 ## Ledger spr16a
 

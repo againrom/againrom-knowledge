@@ -110,6 +110,13 @@ fresh campaign, so actual item presence at mission 10 start is Unknown (`ITEM-DO
 `ITEM-DOC-069`). The campaign record already contains text documents 1, 2, and 3; a non-empty
 collection does not establish item possession or panel access.
 
+No mission-start routine read moves an item between party members on the campaign's
+mission-to-mission edge: the carried actors keep their own containers, and an existing primary
+hero is not given a second stack. The negative is bounded by 11 unread owners in the start closure,
+the untraced SAV-load start path and the unfollowed indirect calls (`PARTY-037`). A member removed
+by the mission-end culls takes its stack out of the party, and a second `Quest Documents` stack is
+made only when a primary hero is constructed fresh (`PARTY-038`).
+
 The class-14 code uses the low byte as its row; this UI gate uses only five
 low bits. Rows `28+32n` therefore alias at the gate. The packed representation
 allows at most 255 nonzero class-14 rows. The item producer, destination and

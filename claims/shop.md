@@ -1496,3 +1496,67 @@ A customised row changes what a shelf offers through its mask, price, `Slot` and
 **Unknown.** The class field and armour-shelf fate of an `Armors` row with `Slot` above 12, and whether the error branch returns at all; settled by listing the base constructor `R0884` for the initial `item+0x40` and the calls at `L13839` and `L13840` on the error branch.
 
 **Confidence.** High. Each input is the operand of a read instruction in the listings `SHOP-118` and `SHOP-119` cite.
+
+## Shelf names and shop screen text
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-124 | No text the shop's own paint routines draw names the selected shelf: the 18 text draws in `L09774..L14000` are grid quantities and prices, button captions and numbers and the identify modal, and none reads `view+0x132`. | High / Medium | ● active | [EXP-0518](../experiments/EXP-0518-shop-shelf-text/) |
+| SHOP-125 | A shelf is named only by hover help: the merchant panel's hover getter `R1861` returns `main.txt` slot `62+i` for the shelf hit rect `i` under the pointer, whether or not that shelf is open, and the shared hover box draws it. | Medium | ● active (amended) | [EXP-0518](../experiments/EXP-0518-shop-shelf-text/) |
+| SHOP-126 | The merchant panel paint draws text only inside the identify modal: slots 79 and 80, and the executable literals `Yes` and `No`, which are the same bytes on both roots. | Medium / Unknown | ● active (amended) | [EXP-0518](../experiments/EXP-0518-shop-shelf-text/) |
+
+### SHOP-124
+
+The selected shelf is the u16 `view+0x132` (`SHOP-SCREEN-034`'s standing clause). A raw `.text` scan for every dword equal to `0x12f`..`0x135` (`evidence/sweep-b-disp132.txt`) finds displacement `0x132` in eight instructions, all in `L09774..L14000`: two stores, the initial `0x64` (`L09749`) and the selector's `i` (`L09747`), and six word reads. The selector `R1523` reads it three times, to compare it with `i` and to set the previous rack's frame to 9 (`L14001`, `L14002`, `L14003`). The hit loop `R1526` passes it to the grid binding `R0343` (`L14004`). `L09947` rebinds the shelf grid to list `0x2100 + 20*index` (`L14005`). `L09868` returns it plus 5 as the container code (`L14006`). None of these routines calls a text routine or loads a font object (`evidence/listings.txt`).
+
+The text draws in the same range number 18 (`evidence/sweep-a-text-sites.txt`: every `E8` to `R0571`, `R0767`, `R1854` or `R0766`, and every dword naming a font-object global at any start from global-3 to global+3):
+
+| routine | draws | font | strings |
+|---|---|---|---|
+| grid paint `R0994` | 2, `R0571` | font2 | element quantity and price (`SHOP-106`) |
+| button panel `R1027` | 12, font vt `+0x14` | font4 | slots `0x46`..`0x49` and `view+0x150`..`+0x15c` (`SHOP-050`, `SHOP-051`) |
+| merchant paint `R1539` | 4, font vt `+0x14` | font2 | identify modal (`SHOP-126`) |
+
+No other routine in the range loads a font global or calls one of the four text routines. The same scan with the string accessors `R1773` and `R0668`, the formatters `R1196` and `R0567`, and the message-line posts `R0588` and `R1193` finds string-table lookups only in `R1861` (`SHOP-125`), the merchant paint and the button panel; the formatter calls outside the two painters are not read here: the speech request at `L09858` is `SHOP-116`'s and the `npc31m` name at `L03611` is `DIALOGUE-048`'s, and neither post routine is called in the range.
+
+The shelf grid's text is the quantity and the price of the elements of the bound list, which is the selected shelf's list; no draw labels that list.
+
+**Confidence.** High within `L09774..L14000` for the direct call forms and font-global loads: both scans print every hit, and each reader of `view+0x132` is read in a complete window. Medium for the whole screen. Three paths were not read: a font pointer copied into a field before a draw; the shop view's inherited paint `R1311` and its child walk; and the children of other classes, the tip popup (`SHOP-TIP-045`) and the borrowed character panel (`SHOP-FIGURE-041`). No instruction outside the range carries displacement `0x132`; the accesses at `+0x130` outside the range belong to other owners whose base objects were not traced.
+
+**Unknown.** Whether a draw outside the range receives the shelf index through an argument or a copied field; settled by tracing the virtual callers of the shelf grid's slot `+0xa8` (`L09868`) and the paints of the two foreign children.
+
+### SHOP-125
+
+`R1861` is slot `+0x14` of the merchant panel's vtable `L09658`, the slot the hover controller calls on the widget under the pointer after the 500 ms idle crossing (`TEXT-HOVER-048`). It returns 0 when `view+0x148` is 0 (`L14007`) and when panel `+0x240` bit `0x80`, the identify modal, is set (`L14008`..`L14009`). Otherwise it takes the cursor `[L01257]`, `[L01258]` (getters `R2197`, `R2198` on `L01181`) less the view origin and tests the four shelf hit rects `panel+0x60 + 0x10*i` for `i = 0..3` (`L14010`, `L14011`); the first rect that contains the point returns string-table entry `0x3e + i` (`L14012`, `L14013`). After the four, the rect `panel+0xe0` returns entry `0x3d` (`L14014`..`L14015`); otherwise the getter returns 0. It reads neither `view+0x132` nor the open-shelf bits, so an open shelf and a closed one give the same name.
+
+With the hit rects and folders of `SHOP-SHELF-047` and the per-root strings of `TEXT-UI-039`:
+
+| i | hit rect | folder | `main.txt` slot | EN | RU |
+|---|---|---|---|---|---|
+| 0 | 354,110,459,295 | `shopanim\04` | 62 | Armor | Броня |
+| 1 | 169,110,274,295 | `shopanim\03` | 63 | Weapons | Оружие |
+| 2 | 314,5,454,105 | `shopanim\02` | 64 | Magic items | Магические предметы |
+| 3 | 172,5,314,105 | `shopanim\01` | 65 | Scrolls, books & potions | Свитки, книги и пузырьки |
+| — | `panel+0xe0`: 274,110,354,295 | — | 61 | Shopkeeper | Продавец |
+
+The text is shown in the shared hover box, not in the room picture: above the pointer, font2 `[L02677]` through `R0571`, flag 0, ramp `L13390`, shadow 1, first line at `(L+5, T+4)` (`MENU-128`, `TEXT-HOVERPAINT-053`; the calls `L14016` and `L14017` of `R0371` in `evidence/listings.txt`). The hover index `i` is the hit-loop index the selector stores in `view+0x132` on a click (`L14018`..`L14019`), so the selected shelf's name is the hover name of the same `i`.
+
+**Confidence.** Medium. The getter's gates, rect order, slot arithmetic and the box's call operands were read in complete windows, but those windows (`R1861`, `R0371`, `R2197`, `R2198`) were first read after the window budget was spent. The strings are `TEXT-UI-039`'s per-root measurement; EN and RU `rom.exe` are one image, so only the strings differ. Medium also that the box shows the name everywhere inside each hit rect: the controller asks the deepest child under the pointer (`TEXT-HOVERSET-049`), and the tip popup child at view `(164,162,476,298)` overlaps the lower parts of the rects for `i = 0` and `i = 1` while it exists.
+
+**Unknown.** The tip popup's own hover getter, and so what the box shows over the overlap; settled by reading slot `+0x14` of vtable `L06362`.
+
+The getter and the merchant paint both gate on `view+0x148 != 0`, so a visible shelf implies a nonzero value; the meaning of `view+0x148` stays Unknown in the claims that name it.
+
+**Amended.** The grade was High for the getter, the box operands and the rect order; it is Medium because the windows they rest on were read after the preregistered window budget was spent (`EXP-0518`, Budget).
+
+### SHOP-126
+
+All four text draws of the merchant paint `R1539` lie after its test of panel `+0x240` bit `0x80` (`L14020`..`L14021`); with the bit clear the paint skips to its end. Each draw is font2 `[L02677]` vt `+0x14` with flag 2. Two lines are string-table entries `0x4f` and `0x50` (`L14022`, `L14023`), drawn with ramp `L03614` at `y` = modal top + 5 and + 15 and `x` at the middle of the modal rect `panel+0xf0` (`L14024`..`L14025`); `TEXT-UI-040` holds their text. The other two are the executable literals `Yes` (`L14026`, 3 bytes) and `No` (`L14027`, 2 bytes), each at the horizontal middle and one pixel below the top of its button rect, built from `panel+0x100` and `panel+0x110` (`L14028`..`L14029`, `L14030`..`L14031`). Each draws with ramp `L03616` when the cursor is inside its rect and `L03614` otherwise (`L08034`, `L14032`, `L08035`, `L14033`). The literals are in `rom.exe`, one image on both roots, so the RU install draws the English `Yes` and `No`.
+
+Every modal coordinate in the paint is offset by the cursor `[L01257]`, `[L01258]` (`L14034`..`L14035`), while the left-down slot tests the same Yes and No rects offset by the view origin (`L14036`..`L14037`).
+
+**Confidence.** Medium. The gate, the operands of each call, the ramp choice and the two offsets are in one complete window; the literal bytes are in two further complete windows.
+
+**Unknown.** Which routine sets bit `0x80` and whether the modal is reachable on the shipped game; the displayed colours of the two ramps after the pixel-format mapping.
+
+**Amended.** The grade was High for the gate, the call operands, the literal bytes, the ramp choice and the two offsets; it is Medium because the literal windows at `L14026` and `L14027` were first read after the preregistered window budget was spent (`EXP-0518`, Budget). The gate and call operands are in the tail window of `R1539`, read before the budget was spent.

@@ -164,7 +164,7 @@ arm; that is not a general relation to restored Body. The direct weight-delta
 helper adds a 16-bit delta and recalculates load. Its 64000 threshold is a
 signed compare; a wrapped negative load removes the speed penalty in the
 located arithmetic; native acceptance of such loaded values remains Unknown.
-— SAV-UNITFLD-049, UNIT-CTOR-004, SAV-635, ITEM-LOAD-005, HERO-SIGHT-007,
+— SAV-UNITFLD-049, UNIT-CTOR-004, SAV-635, ITEM-LOAD-005, HERO-SIGHT-007 (amended),
 AI-SIGHT-092, SAV-792, SAV-793, SAV-REGENWIDTH-528, SAV-REGENWIRE-532
 
 A stored load of 181 with own weight 178 and an empty container can survive

@@ -6,9 +6,9 @@ Human state includes four primary attributes, six skill/experience slots,
 equipment, modifiers and derived combat fields. Character generation and
 map placement populate different initial inputs; the derive routine and
 later consumers have explicit ordering. — HERO-STAT-001, HERO-COST-002,
-HERO-BUDGET-004, HERO-EQUIP-017, HERO-MOD-016
+HERO-BUDGET-004, HERO-EQUIP-017 (amended), HERO-MOD-016
 
-Combat cadence is specified by HERO-CADENCE-112 through HERO-CADENCE-115.
+Combat cadence is specified by HERO-CADENCE-112 through HERO-CADENCE-115 (amended).
 Spell behavior is in [MAGIC](../magic/format.md); saved raw state is in
 [SAV](../sav/format.md).
 
@@ -25,7 +25,7 @@ Character generation assigns class/sex/name and purchased attributes; map
 placement has separate overrides. Equipment, spell effects and experience
 can change inputs later. Apply each producer's specified recompute order;
 restoring serialized state is a separate path, not a request to recreate all
-fields from definitions. — HERO-STAT-001, HERO-EQUIP-017, HERO-MOD-016
+fields from definitions. — HERO-STAT-001, HERO-EQUIP-017 (amended), HERO-MOD-016
 
 ## Reference map
 

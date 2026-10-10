@@ -250,5 +250,13 @@ carried container before runtime-id assignment. The campaign construction path e
 first gate. The second gate was not measured in a fresh campaign, so actual item presence remains
 Unknown (`ITEM-DOC-069`).
 
+When the constructor finds no `Humans` row with the template name, it skips every row-dependent
+store, takes no other row and reports no error; the loop's exit and the skipped stores are read
+instruction by instruction (`HERO-163`). The actor then keeps constructor defaults: by inference
+from the constructor bodies read, a fighter type id of the chosen sex and zero mana, with the
+purchased stats, the direct weapon and no template equipment. That inference depends on
+constructor callees not read, and neither shipped root reaches the arm, since each ships the four
+template names once (`HERO-164`).
+
 The character-generation command carries no purse value. The selected template, stats, appearance,
-name, and weapon do not change the owning `Player` purse (`HERO-START-081`).
+name, and weapon do not change the owning `Player` purse (`HERO-START-081`, amended).

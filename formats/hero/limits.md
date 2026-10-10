@@ -19,7 +19,7 @@ The [purchase arithmetic table](experience.md) specifies the first signed,
 storage-width and x87 conversion boundaries. Native execution downstream of
 unexecuted crossings remains Unknown, and the six-slot total can cross a
 dword boundary earlier depending on the other slots. Derive clamps do not
-remove these transitions. — HERO-SKILLUP-073, HERO-SKILLBUY-076,
+remove these transitions. — HERO-SKILLUP-073, HERO-SKILLBUY-076 (amended),
 HERO-GENERAL-089
 
 The school Train widget directly produces purchases for slots 1–5, not
