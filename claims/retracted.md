@@ -1,5 +1,11 @@
 # Overturn history
 
+## Binder slot 0 for a condition above opcode 0x10002
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TRIG-BIND-010` (the slot-0 clause for conditions above opcode `0x10002` only; the pass structure, drop rule, 5000 threshold, `CMap` indirection and corpus figures stand) | Verbatim: "Node ids are mapped to subscripts through two `CMap<int,int>`s (`R2053`), so a trigger slot naming an id that was never built resolves to **slot 0** rather than to nothing." | High | [EXP-0513](../experiments/EXP-0513-binder-list-order/), TRIG-BINDORDER-101 | The condition pass stores `map[id] = current register` before the build (`L13841`). A condition above `0x10002` jumps to the loop end (`L13842` to `L13843`) without building, without storing 0 and without incrementing, so its id reads the register the next condition takes. Slot 0 holds for actions and for unbuilt conditions below `0x10002` (`L13844`). No such condition occurs on the eight maps EXP-0513 decoded. | **REFUTED** — partially retracted |
+
 ## ROM2 sold-item placement fallback
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

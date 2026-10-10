@@ -121,6 +121,7 @@ executable surface is five instant arms and four check arms.
 build time   trig[0] has a zero left id in its first condition pair -> TRIG-BIND-010 drops
              the whole trigger. Its drop-location node still reaches the start, because
              the drop table is built from the node array, not through the trigger.
+             (TRIG-BIND-010's slot-0 clause is partially retracted; this drop rule stands.)
 
 start        trig[7]  constant 0 <= constant 0        (always true, once=1)
                  do   instant 12  Unit=10001 Item=6   create item, add to hero ordinal 1

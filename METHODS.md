@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3275. Observation: 95. Static analysis: 2723. Mixed: 457.
+Claims labelled: 3279. Observation: 95. Static analysis: 2725. Mixed: 459.
 
 ## Ledger ai
 
@@ -3224,7 +3224,7 @@ Claims labelled: 3275. Observation: 95. Static analysis: 2723. Mixed: 457.
 | TRIG-FIRE-007 | static analysis | ● active |
 | TRIG-SAVE-008 | static analysis | ● active (partially retracted, amended) |
 | TRIG-END-009 | static analysis | ● active (partially retracted, amended, superseded) |
-| TRIG-BIND-010 | static analysis | ● active (amended) |
+| TRIG-BIND-010 | static analysis | ● active (amended, partially retracted) |
 | TRIG-REC-011 | static analysis | ● active |
 | TRIG-INI-012 | static analysis | ● active |
 | TRIG-DROP-013 | static analysis | ● active (amended) |
@@ -3280,8 +3280,12 @@ Claims labelled: 3275. Observation: 95. Static analysis: 2723. Mixed: 457.
 | TRIG-TIPS-087 | static analysis | ✔ promoted (branch candidate) |
 | TRIG-TIPS-088 | mixed | ✔ promoted (branch candidate) |
 | TRIG-M100-095 | static analysis | ● active |
-| TRIG-M100-096 | static analysis | ● active |
-| TRIG-M100-097 | static analysis | ● active |
+| TRIG-M100-096 | static analysis | ● active (amended) |
+| TRIG-M100-097 | static analysis | ● active (amended) |
+| TRIG-BINDORDER-101 | static analysis | ● active |
+| TRIG-SUBZERO-102 | static analysis | ● active |
+| TRIG-UNBUILTRUN-103 | mixed | ● active |
+| TRIG-M130WIN-104 | mixed | ● active |
 
 ## Ledger unit
 

@@ -33,6 +33,16 @@ the corresponding bound on pattern indices remains Unknown. The exclusive-
 slot 93 literal-write clause of partially retracted `SAV-651` is narrowed to
 runtime writes. — SAV-650, SAV-651, SAV-658
 
+## Numbering
+
+The builder walks the map's action and condition lists in file order; the loader appends each
+node at the tail. Actions below opcode `0x10002` take instant subscripts 0, 1, … only when built.
+Conditions take registers 0, 1, …: an opcode `0x10002` condition always, any other below it
+only when built. A trigger slot naming an action that took no subscript runs subscript 0, and a
+pair naming an unbuilt condition reads register 0. A condition above `0x10002` takes no register
+and its id reads the next condition's. Triggers become patterns in array order, and each
+pattern's instants keep slot order. — TRIG-BINDORDER-101
+
 ## Evaluation pass
 
 Once per **full tick** — before any actor is walked, ≈ 992 ms at the shipped speed default
@@ -136,4 +146,5 @@ labels agree: `V = 11` is `"Add item35 …"`, `V = 13` is `"Add item Tooth(37) �
 231 carries into the class nibble and the factory returns null.
 
 **No arm null-tests a reference field**, and none needs to: a node whose reference fails to
-resolve is dropped whole at build time and logged (`TRIG-BIND-010`).
+resolve is dropped whole at build time and logged (`TRIG-BIND-010`; its slot-0 clause is
+partially retracted for a condition above `0x10002`, see Numbering).

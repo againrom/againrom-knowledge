@@ -28,7 +28,7 @@ Vocabulary note, because the engine's own words differ from the editor's: a cond
 | TRIG-FIRE-007 | Firing is latched per trigger by a byte on the session, and `ALM-TRIG-047`'s `+0xb4` word is the switch between fire-once and fire-every-tick. | High | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-SAVE-008 | The world-half session block is restored before the map trigger programme is rebuilt; the formerly published load order was reversed. | High / Medium / Unknown | ● active (partially retracted, amended) | [EXP-0080](../experiments/EXP-0080-mission-triggers/), [EXP-0086](../experiments/EXP-0086-saves/), [EXP-0252](../experiments/EXP-0252-sav-world-reconstruction/), [EXP-0254](../experiments/EXP-0254-sav-reconstruction-sufficiency/) |
 | TRIG-END-009 | Script actions increment win/loss counters; reporting is ordered and mode-qualified. | High | ● active (partially retracted, amended, superseded) | [EXP-0080](../experiments/EXP-0080-mission-triggers/), [EXP-0101](../experiments/EXP-0101-mission-end/), [EXP-0274](../experiments/EXP-0274-defeat-modes/) |
-| TRIG-BIND-010 | What the binder keeps, drops and never checks. | High | ● active (amended) | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
+| TRIG-BIND-010 | What the binder keeps, drops and never checks. | High | ● active (amended, partially retracted) | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-REC-011 | The three runtime records, and why the runtime's field offsets are four bytes below the file's. | High / Medium | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-INI-012 | `World\Mission\<n>.ini` is a mission-authoring text overlay, its absence costs nothing, and no part of the trigger machinery reads it. | High / Medium | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-DROP-013 | The one authored action the engine consumes at load time rather than at runtime is the drop table, and the two halves meet exactly. | High / Unknown | ● active (amended) | [EXP-0080](../experiments/EXP-0080-mission-triggers/), **[EXP-0096](../experiments/EXP-0096-campaign-mission/)** |
@@ -104,7 +104,7 @@ Instant 4 increments `session+0xb3ac`; instant 5 and check 18 increment `+0xb3b4
 
 **Confidence.** High for the pass structure, the drop rule, the 5000 threshold and the `CMap` indirection (one routine read whole, every quoted test a named instruction) / High for the corpus figures (whole-corpus, 38/38, and the resolver's own three bands are what make the count exceptionless)
 
-**Amended.** The unit clause of the corpus statement (0 unresolved unit references, exceptionless) holds for the three bands as a static count. A `Target_Unit` in the hero band is resolved from the roster at binding (`TRIG-HEROORD-075`, `TRIG-HEROBIND-077`), so whether a node naming one is built depends on the roster (`TRIG-HEROFAIL-078`); the 196 hero-band references of the published EN table are not covered by the exceptionless count.
+**Amended.** The unit clause of the corpus statement (0 unresolved unit references, exceptionless) holds for the three bands as a static count. A `Target_Unit` in the hero band is resolved from the roster at binding (`TRIG-HEROORD-075`, `TRIG-HEROBIND-077`), so whether a node naming one is built depends on the roster (`TRIG-HEROFAIL-078`); the 196 hero-band references of the published EN table are not covered by the exceptionless count. The slot-0 clause is narrowed (`retracted.md`): it holds for an action and for an unbuilt condition below opcode `0x10002`; a condition above `0x10002` is never built but keeps `map[id] = current register` (`L13841`, then `L13842` to `L13843`), so a pair naming it reads the next condition's register (`TRIG-BINDORDER-101`).
 
 ### TRIG-REC-011
 
@@ -605,8 +605,8 @@ The fire-once latch is `session+0xbec4+index` (`TRIG-FIRE-007`). It is saved in 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TRIG-M100-095 | In 100.alm no trigger slot names action 2, 16 or 35, on EN or RU, and no binder parameter arm resolves an action; action 2 still runs as subscript 0, and the servant's escort is started by T1 and T2 only. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
-| TRIG-M100-096 | A trigger slot naming an unbuilt node runs instant subscript 0, the first built action below opcode 0x10002; in 100.alm that is action 2, so each unresolved role of T16 sends the servant group to (13,14) at the win. | High / Medium / Unknown | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
-| TRIG-M100-097 | The pattern pass walks every pattern to the list end and never reads the win or loss counter, so 100.alm's T3 and T16 run in one pass and instant 36 runs in the win pass, after instant 9 in slot order. | High / Medium | ● active | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| TRIG-M100-096 | A trigger slot naming an unbuilt node runs instant subscript 0, the first built action below opcode 0x10002; in 100.alm that is action 2, so each unresolved role of T16 sends the servant group to (13,14) at the win. | High / Medium / Unknown | ● active (amended) | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
+| TRIG-M100-097 | The pattern pass walks every pattern to the list end and never reads the win or loss counter, so 100.alm's T3 and T16 run in one pass and instant 36 runs in the win pass, after instant 9 in slot order. | High / Medium | ● active (amended) | [EXP-0511](../experiments/EXP-0511-m100-servant-amulet/) |
 
 ### TRIG-M100-095
 
@@ -636,9 +636,11 @@ The binder `R0067` sizes the instant array to the count of action opcodes below 
 
 In 100.alm the action list opens with action 1 (opcode `0x10002`, drop location), which takes no subscript, then action 2. Action 2 names group 21. When the type-2 lookup finds group 21 at binding, action 2 is built and holds subscript 0; otherwise subscript 0 passes to the next built action, action 3 (group 11). T16 "mission complit 2" has the same conditions as T3 and runs actions 37, 38, 39 and 40: opcode 13 on ordinals 10002, 10003, 10004 and 10005. An ordinal with no qualifying actor leaves its node unbuilt (`TRIG-HEROFAIL-078`). Each such slot runs action 2, a Move group command for group 21 to (13,14). Action 2 is named "D - servant flees to deploy area".
 
-**Confidence.** **High** for the binder rule and the zero value of a missed lookup (instructions read in the routines above). **Medium** that action 2 is built and holds subscript 0: the type-2 arm calls `R0421` on the group map (`L01837`, `L01838`) and marks the node unbuilt on a null result; that map is filled at `L01811` from each player's group list `player+0x24` at binding; `R0421` was not read, and group 21 is attested by the authored type-6 record, not by the bind-time list. `TRIG-BIND-010`'s static count of 0 unresolved group references supports it. **Medium** that subscript order equals file order for 100.alm (the list is walked in order; no load-time reordering was read). **Unknown** which of 10002..10005 resolve in a given run: the result depends on the roster and on the named actors in the registry scan (`TRIG-HEROORD-075`).
+**Confidence.** **High** for the binder rule and the zero value of a missed lookup (instructions read in the routines above). **Medium** that action 2 is built and holds subscript 0: the type-2 arm calls `R0421` on the group map (`L01837`, `L01838`) and marks the node unbuilt on a null result; that map is filled at `L01811` from each player's group list `player+0x24` at binding; `R0421` was not read, and group 21 is attested by the authored type-6 record, not by the bind-time list. `TRIG-BIND-010`'s static count of 0 unresolved group references supports it. **Medium** that subscript order equals file order for 100.alm: the load and the walk are read (`TRIG-BINDORDER-101`), but a change to the list between load and binding is not excluded. **Unknown** which of 10002..10005 resolve in a given run: the result depends on the roster and on the named actors in the registry scan (`TRIG-HEROORD-075`).
 
 **Unknown.** Any visible movement before the mission ends. The win pass precedes the mission-end arm, which destroys the servant (`PARTY-M100-033`).
+
+**Amended.** The Medium that subscript order equals file order is narrowed: the case-7 loader appends each node at the tail and the binder walks from the head (`TRIG-BINDORDER-101`). It stays Medium because a writer between load and binding that the direct-call scan cannot see is not excluded.
 
 ### TRIG-M100-097
 
@@ -646,4 +648,80 @@ The pattern pass `R0428` (196 instructions, read whole) loads the pattern list a
 
 In 100.alm, T3 (index 3) runs actions 30 (message 8), 28 (unit 245 to player 1), 9 (Mission Complete) and 36 (opcode 13, item 11 from 10001). T16 (index 16) has the same two condition pairs and runs in the same pass.
 
-**Confidence.** **High** for the pass structure, the absence of a counter read and instant 36 running in the win pass (one body read whole, `stores.tsv` and `outcome-reads.tsv`). **Medium** that instant 36 runs after instant 9: the pass walks a pattern's instant list head to tail (`L13803`..`L13804`), and the list is built by `R2177` (`L13805`) and copied through `R2178` and `R2179`, none read. **Medium** that the pattern list order is the file order of the triggers.
+**Confidence.** **High** for the pass structure, the absence of a counter read and instant 36 running in the win pass (one body read whole, `stores.tsv` and `outcome-reads.tsv`). **High** that instant 36 runs after instant 9: the pass walks a pattern's instant list head to tail (`L13803`..`L13804`), the list is built in slot order by `R2177` (`L13805`), an AddTail, and the copy `R2178` keeps order (`TRIG-BINDORDER-101`). **Medium** that the pattern list order is the file order of the triggers: the patterns are built in trigger-array order and appended at the tail, but no scan covers a change to the trigger array `map+0x78` between load and binding.
+
+**Amended.** The instant-order clause is raised to High: `R2177` appends at the tail and the copy `R2178` keeps order (`TRIG-BINDORDER-101`), so instant 36 runs after instant 9. The pattern-order clause stays Medium: the trigger array `map+0x78` is not covered by a scan between load and binding.
+
+## Binder list order and the unbuilt-node fallback
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-BINDORDER-101 | The binder numbers actions and conditions in the ALM file's order; an unbuilt action's id reads instant subscript 0, an unbuilt condition's id is stored as register 0, and a condition above opcode 0x10002 aliases the next register. | High / Medium | ● active | [EXP-0513](../experiments/EXP-0513-binder-list-order/) |
+| TRIG-SUBZERO-102 | On eight campaign maps, EN and RU alike, subscript 0 and register 0 do not change between rosters; with the primary alone 31 action slots and 33 pair ids name an unbuilt node, with five heroes 5 and 10, all in 151.alm. | High / Medium | ● active | [EXP-0513](../experiments/EXP-0513-binder-list-order/) |
+| TRIG-UNBUILTRUN-103 | With the primary alone, unbuilt slots re-run a message, take unit 70 off the map, reset a diplomacy pair or order a group; unbuilt pairs keep 60, 81, 90 and 120 triggers shut and open 151.alm's T5..T9 at once. | High / Medium | ● active | [EXP-0513](../experiments/EXP-0513-binder-list-order/) |
+| TRIG-M130WIN-104 | In 130.alm instant subscript 0 is the win instant; with the primary alone T2 sets variable 50 to 2 in the first pass and T9 runs subscript 0 in the second, so the win counter rises at the mission's start. | High / Medium | ● active | [EXP-0513](../experiments/EXP-0513-binder-list-order/) |
+
+### TRIG-BINDORDER-101
+
+Load. `R0478` case 7 reads a count, then for each node allocates `0x31c` bytes, reads the seven fields of `TRIG-REC-011` and passes the node to `R2186` on `map+0x40` (actions, `L13845`, `L13846`) and on `map+0x5c` (conditions, `L13847`, `L13848`). `R2186` is the list's AddTail: it calls the node allocator `R2187` with the old tail as previous and 0 as next (`L13849`..`L13850`), links the old tail's next to the node (`L13851`) or sets the head when empty (`L13852`), and stores the node as tail (`L13853`). Nothing in the loop compares ids, so a repeated id is kept. Triggers are read into an array at `map+0x78` by index (`L02404`, `L13854`).
+
+Bind. Both passes of `R0067` start at the head (`R2188` returns `list+4`) and step with `R2189`, which follows `node+0`. The action pass starts the subscript at 0 (`L13791`), skips an opcode of `0x10002` or more, maps a built node's id to the subscript and increments it (`L13794`, `L13795`). Only built ids enter the action map. The condition pass also starts at 0 (`L08637`) but stores `map[id] = current register` before the build (`L13855`, `L13841`). Opcode `0x10002` presets the register (`L07782`) and increments it. A built condition is appended to the session check list (`L13856`) and increments it. An unbuilt condition stores `map[id] = 0` (`L13844`) and does not increment. An opcode above `0x10002` neither builds nor increments, so its id keeps the register the next condition takes. The pattern pass walks the trigger array by index (`L13857`, `L13858`), reads both ids of each pair and each non-zero action slot through `operator[]` (a miss reads 0, `TRIG-M100-096`), appends instants with `R2177` and patterns with `R2179`, both AddTail; the copy `R2178` walks head to tail and appends at the tail.
+
+So the order the binder sees is the file order, filtered by the build rule. A built action's instant record is written in place at the current subscript (`L13859` and the other `R2190` calls); an unbuilt action's partial writes stay in that element until the next built action overwrites the fields of its own parameter types.
+
+Search. `R2187` has one direct caller, `L13850` in AddTail. AddTail has three: the two case-7 sites and `L13860`, inside a count loop of `L13861` that reads one element per pass (`serialize-loop.tsv`), reached only through the `.rdata` dword at `L13862` (`callers.tsv`).
+
+**Confidence.** **High** for the load order, the walk order, both numbering rules, the explicit 0 for an unbuilt condition and the order of instant and pattern lists: each is a named instruction in a body read whole, one image (EN and RU identical by hash). The live alternatives of head insertion, keyed insertion and deduplication are excluded by AddTail being the list class's only allocator caller. **Medium** that nothing changes the two lists between load and binding: the caller scan sees direct calls only, and `R2178` shows the compiler inlining a list append, which the scan cannot see.
+
+**Unknown.** Whether `L13861` (reached through the dword at `L13862`) ever loads a map's lists, and in which order its stream was written: only its count loop was read; identifying the vtable that holds `L13862` and its callers settles it. Whether anything writes the two lists between load and binding: only direct calls to the allocator and AddTail were scanned; a `disp:`/`imm:` sweep of `+0x40` and `+0x5c` on map objects settles it. Whether any instant arm reads a field outside its own parameter types, which would expose the leftover writes of an unbuilt action: the 34 arms were not read for that; reading them settles it.
+
+### TRIG-SUBZERO-102
+
+Population: the type-7 sections of `30.alm`, `60.alm`, `81.alm`, `90.alm`, `120.alm`, `130.alm`, `131.alm` and `151.alm` in the EN and RU `scenario.res`, decoded by `tools/bindorder` under `TRIG-BINDORDER-101`. The two roots give identical output. Every map has capacity 1, so ordinals are resolved (`TRIG-HEROORD-075`). Roster A: 10001 resolves, 10002..10006 do not. Roster B: 10001..10005 resolve, 10006 does not. No map repeats an id; no condition has an opcode above `0x10002`; each map has exactly one action above `0x10002` (the drop location, file position 0).
+
+| map | subscript 0 | register 0 | unbuilt under A | unbuilt under B |
+|---|---|---|---|---|
+| 30 | A2, op 2, message 4 | C1, op 1, group 8 | A14 | none |
+| 60 | A2, op 16, unit 70 | C1, variable 10 | A56 A57 A59 A60; C39 C62..C65 | none |
+| 81 | A2, op 10, diplomacy (2,1,0) | C2, variable 4 | A21..A23 A26..A28; C22..C24 C28..C30 C35..C37 C39..C41 | none |
+| 90 | A2, op 2, message 1 | C1, variable 10 | A44..A46; C36 C37 | none |
+| 120 | A2, op 16, unit 150 | C1, variable 0 | C5 | none |
+| 130 | A8, op 4, win | C28, op 5, unit 110 | A39 A40; C45 | none |
+| 131 | A2, op 6, Move group 4 to (14,15) | C1, op 7, 10001 to (11,14) | A76..A78 A81..A83 | none |
+| 151 | A2, op 6, group command 3, group 1 | C1, variable 1 | A42..A46; C6..C11 | A42..A46; C6..C11 |
+
+Slots naming an unbuilt node under A: 30 T6 slot 2; 60 T6 slots 2, 3 and T28 slots 1, 2; 81 T8 slot 3, T11..T13 slot 2, T15..T17 slots 1, 2; 90 T4 slots 2, 3 and T19 slot 0; 130 T8 and T9 slot 0; 131 T28 and T29 slots 0..2; 151 T5..T9 slot 0. Pairs: 60 T16..T18 pairs 0 and 1 (left); 81 T11..T13, T15..T17 pairs 0 and 1 (left); 90 T13 pairs 0 and 1 (left); 120 T4 pair 0 (left); 130 T2 and T3 pair 0 (left); 151 T5..T9 pairs 0 and 1 (left). Under B only 151.alm's are left. An unbuilt condition moves every later register down by one. In 60.alm instants 36 and 37 increment indices 33 and 32 and checks 46 and 51 copy them; those indices hold condition registers, C45 and C44 under A and C44 and C43 under B.
+
+**Confidence.** **High** for the decode and for the slot and pair lists and their counts (whole sections, both roots, the binder rule read; the counts do not depend on order). **Medium** for which node holds subscript 0 and register 0, the per-roster numbering and the 60.alm register owners: they rest on file order at binding, which `TRIG-BINDORDER-101` grades Medium; the open alternative is a writer of `map+0x40` or `map+0x5c` between load and binding that the direct-call scan cannot see. **Medium** for every reference other than an ordinal resolving at binding: groups resolve only through the bind-time map of the players' group lists (`L01812`, `R0421`), and `TRIG-BIND-010`'s static census is the support. **Medium** that the rosters are exact: an actor of a role can be absent or a second ordinal can match one actor (`TRIG-HEROTPL-076`).
+
+### TRIG-UNBUILTRUN-103
+
+Under roster A (opcode meanings `TRIG-ACT-004`, `TRIG-COND-003`; comparison codes `TRIG-CMP-006`):
+
+- 30.alm T6 (C11, distance from 10001 to unit 56, <= 3): instants A8, A13, A2 in place of A14 (message 4 again), then A10 (win).
+- 60.alm T6 and T28 (group 1 empty and variable 70 != 0): T6 runs A12 (win), A55, then A2 twice; T28 runs A58, then A2 twice. A2 takes unit 70 off the map. T16..T18 compare register 0 (10) == C6 (1): they never pass.
+- 81.alm T8 (item 20 present and 10001 within 2 of (60,62)): A16 (win), A25, A20, then A2, which writes 0 into the low bits of diplomacy (2,1). T11..T13 and T15..T17 compare register 0 (4) == C11 (1): they never pass.
+- 90.alm T4 (groups 36, 34, 35 empty): A8 (win), A43, then A2 twice (message 1). T19 (same conditions): A2 once. T13 compares register 0 (10) <= C40 (6): it never passes.
+- 120.alm T4 compares register 0 (0) == C8 (1): it never passes; its message 5 is not shown.
+- 131.alm T28 and T29 (C11 == C24): each runs A2 three times, the Move of group 4 to (14,15), plus A79 in T28.
+- 130.alm: `TRIG-M130WIN-104`.
+
+151.alm, rosters A and B: T5..T9 compare register 0 with C1, which is register 0 itself (1 == 1), and register 0 < C26 (2). Both hold in the first pass, so the five once-triggers fire together. Each runs A2 (group command 3 on group 1) in place of A42..A46, A17 (variable 60 + 1) and A50 (opcode 24, unit 205, (130,13)). Variable 60 reaches 5 when it starts at 0. In the next pass C12 copies it, T10 (variable 60 == 5) runs A18 (message 3) and A49 (Move of group 42 to (130,12)), and the repeating T11 (variable 60 < 5) stops.
+
+**Confidence.** **High** that each listed slot and pair names an unbuilt node and so runs subscript 0 or reads register 0 (`TRIG-BINDORDER-101`). **Medium** for which instant that is and which condition holds that register, since the identities rest on file order at binding (`TRIG-SUBZERO-102`; open alternative: a writer of `map+0x40` or `map+0x5c` between load and binding that the direct-call scan cannot see). **Medium** for the run-time course: it assumes variables 50, 60 and 70 hold 0 when the pass first reads them (the register file's initial value was not read), and it rests on arm meanings that `TRIG-ACT-004` grades Medium for opcode 24.
+
+**Unknown.** Whether the five group-command-3 instants of 151.alm and the duplicated messages are visible to a player: no presentation routine of opcodes 2 and 6 was read for repeats; reading them or a native run settles it. Which roster a real campaign run brings to each map: no save or run of these maps was examined; a native run per map settles it. The register file's initial value: the new-mission and SAV-restore writers of `session+0xbd34` were not read; reading them settles it.
+
+### TRIG-M130WIN-104
+
+130.alm (EN and RU identical): position 0 is the drop location, position 1 is A8, opcode 4, so A8 holds subscript 0 under every roster (`TRIG-SUBZERO-102`). C28 (opcode 5, unit 110) holds register 0: 1 while unit 110 lives. C45 (distance from unit 135 to 10002) and A39 (opcode 19, 10002 to player 8) are unbuilt with the primary alone. C47 copies variable 50; C39..C44 preset registers to 0..5.
+
+- First pass: T2 (once) tests register 0 < C42 (3) and C47 == C39 (0). With unit 110 alive and variable 50 at 0, it runs A33 (message 3) and A49 (variable 50 = 2). T1 needs C28 == 0 and does not run.
+- Second pass: C47 reads 2. T9 (once, C47 == C41 (2)) runs slot 0, A39, which is subscript 0: A8, `session+0xb3ac` + 1 (`TRIG-END-009`). T4 also needs C28 == 0.
+- T8 (C47 == 4) runs A39 the same way but needs T3, which needs variable 50 == 1.
+
+With the primary alone, the win counter therefore rises about two full ticks after the script starts (`TRIG-EVAL-001`). With 10002 present, A39 is built and T9 hands that hero to player 8 instead.
+
+**Confidence.** **High** that T8 and T9 run subscript 0 when they pass, because A39 is unbuilt with the primary alone (rule and decode). **Medium** that A8 is subscript 0: it rests on file order at binding (`TRIG-BINDORDER-101`; open alternative: a writer of `map+0x40` or `map+0x5c` between load and binding that the direct-call scan cannot see). **Medium** for the timing at the start: it assumes variable 50 holds 0 at the first pass and unit 110 is alive then.
+
+**Unknown.** The register file's content before the first pass on the new-mission and SAV-restore paths: the writers of `session+0xbd34` on those paths were not read; reading them, or a native run, settles it. Whether the reporter announces the win: its gates (`TRIG-END-009`) were not evaluated for this state; a native run of 130.alm with the primary alone settles it.
