@@ -8,8 +8,10 @@ position, world-present byte and trailer with ROM1; the world half, the
 Player body and the physical tail differ. This page lists the differences
 only; where it says "as ROM1", the [ROM1 SAV references](../sav/format.md)
 apply. Four original save points have measured envelope, head and physical-tail
-coverage. Complete Group/actor programmes and current-party identity remain Unknown.
-— R2-SESSION-017, R2-SESSION-018, R2-SESSION-075, R2-SESSION-078
+coverage. The first Group member is walked to its payload end; later Group
+bytes, other actors and current-party identity remain Unknown.
+— R2-SESSION-017, R2-SESSION-018, R2-SESSION-075, R2-SESSION-078,
+R2-SESSION-099
 
 ## Envelope
 
@@ -115,6 +117,57 @@ and items in its own inline loop; the writer body's separate reader branch
 is not reached by this Group path. Reference/body helpers, native class,
 alias and membership grammar, actual hero/party and complete LOAD remain
 Unknown. — R2-ENGINE-192
+
+### First Group member
+
+Every archive object reference is a u16 tag, or 0x7fff and a u32 tag. A
+clear top bit is an earlier object index, 0 for null, with no payload.
+0xffff introduces a class: u16 schema, u16 name length (below 64) and the
+name. Other tags name an earlier class. A new class and then the new object
+take the next two indices of one shared counter, before the object's own
+payload. Load matches the name against registered class records and checks
+the caller's expected class. — R2-ENGINE-207
+
+Human adds no bytes to Humanoid. Humanoid is the Unit programme, 24 raw
+bytes, then twelve Item references for slots 1..12. — R2-ENGINE-208
+
+| Unit part | Bytes |
+|---|---|
+| base | raw 12, u32, u16, u16, u32, u16, u32, u32 saved address, u32 (38) |
+| references +0x20 | u32 count, then references |
+| two word lists | count (u16, or 0xffff then u32), 2 bytes per element, each |
+| raw blocks | 24, 22, 24, 64, 180, 184, then a third word list |
+| scalars | 4 x u8, 3 x raw 4, 3 x u8 |
+| references | +0x74, +0x78 |
+| name | counted string |
+| scalars | 14 x u16, 2 x u8, 2 x u16, u8, u32, 3 x u8, u32, u8 |
+| packed | u32 (u16 +0x14c, two flags), u32 |
+| reference | +0x68 |
+| gate +0x7c | u8; if set: u32 count, references, u32, u32 |
+| gate +0x140 | u8; if set: u32, u32 n, references for 1..n-1 |
+| tail | 4 x u32, u8 |
+
+The gate +0x140 list with n > 0 is Medium; the rest is High.
+— R2-ENGINE-209
+
+An Item writes the 38-byte base programme that Unit also calls first,
+then u32-counted references and
+u16, u16, u8, u8, u8, u16, u16, u8. Weapon adds raw 24, raw 22, u8 and a
+reference; Armor adds raw 22 and u8. — R2-ENGINE-210
+
+In all four saves the first member is a new Human (class index 3, object
+index 4). Its payload runs 2806..4024 in A/C and 2807..4025 in B/D,
+1218 bytes. The byte fit is High; reading it as the native LOAD result
+inherits the conditional Group framing above. — R2-SESSION-099
+
+Unit +0x74 holds a new Weapon (103 bytes). Humanoid slot 7 holds a new
+Armor (77 bytes); slots 8, 9, 10 and 12 hold Armor by earlier class.
+All other references are null; no earlier-object alias occurs.
+— R2-SESSION-100
+
+A/C and B/D member bytes are equal. A and B differ only in the raw 12,
+raw 180, raw 184 and +0x50 raw 4 Unit blocks. Field meanings, including
+stats and the purse, remain Unknown. — R2-SESSION-101
 
 ## Physical tail
 
@@ -262,11 +315,12 @@ The first reference introduces schema 1 class `Player`, shared class index 1
 and object index 2 under shared archive-index framing; those indices are
 inferred protocol state. Its admitted prefix and raw2560 block lead to Group count 1
 in all four. The selected construction/full-transfer model extends the
-conditional Group walk to its first member operation. Complete Group/member
-programmes and the remaining document are opaque. Subsequent Players, actor references, world-present flag,
-inventory/equipment, stats and progression are unparsed. Player-list counts
+conditional Group walk to its first member operation, and the first member
+is walked to its payload end. The rest of the Group and the remaining
+document are opaque. Subsequent Players, world-present flag and progression
+are unparsed; first-member field meanings are Unknown. Player-list counts
 and equal saved-address words do not establish active-party roles.
-— R2-SESSION-078, R2-SESSION-091
+— R2-SESSION-078, R2-SESSION-091, R2-SESSION-099
 
 A/C decoded documents compare byte-for-byte equal. B/D have equal parsed
 first Player state but different first head DWORDs and opaque document bytes.

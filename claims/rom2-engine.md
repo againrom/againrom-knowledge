@@ -2029,6 +2029,159 @@ controls are instrument sanity checks and add no native evidence.
 and invalid-input behavior, transport/refill semantics and original LOAD.
 
 
+## Selected RU first Group member programme
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-207 | The selected RU archive object reference is a u16 tag with u32 escape: null, earlier object, earlier class or new class with schema and name; class and object share one index counter before the payload call. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-ENGINE-208 | The RU Human class record chains to Humanoid and Unit; Human adds no stream bytes, and Humanoid writes the Unit programme, 24 raw bytes and twelve Item references. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-ENGINE-209 | The RU Unit serializer writes a 38-byte base, counted references, three counted word lists, six raw blocks of 498 bytes, scalars, three references, a name and two gated nested payloads in one fixed order. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-ENGINE-210 | The RU Item serializer writes the shared 38-byte base, counted references and eight scalars; Weapon adds 24 and 22 raw bytes, a byte and a reference, and Armor adds 22 raw bytes and a byte. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+
+### R2-ENGINE-207
+
+Object load L2.01148 calls tag reader L2.01149; store L2.01150 calls
+L2.01151. The tag is a u16 w. When w is 0x7fff, a u32 follows and is the
+tag; otherwise the tag is (w & 0x7fff) | ((w & 0x8000) << 16).
+
+- High bit clear: an object index. 0 is null. Load checks the index against
+  the map size and checks the stored object against the expected class.
+  No payload follows.
+- w = 0xffff: a new class. New-class reader L2.01152 reads u16 schema,
+  u16 name length and the name bytes; length 64 or more is refused. It finds
+  the registered class record by exact name through imported lstrcmpA.
+  The writer measures the name through imported lstrlenA.
+- Other high-bit tags: an earlier class index (index | 0x80000000).
+
+A new class enters the shared map at counter archive+0x30, then the new
+object enters at the next counter value, then the object's virtual +8
+serializer runs. An earlier class creates a new object the same way.
+Load checks the actual class against the caller's expected class record
+through L2.01153. A saved schema different from the class record's schema
+is accepted only when the record's schema word has its top bit set;
+otherwise the reader reports error 7.
+
+A class record is 24 bytes: name pointer, object size, schema, factory,
+base record and one more pointer, which is 0 in every record read.
+
+**Confidence.** High for the stream grammar: the complete load CFGs of
+L2.01148 and L2.01149 were read, and the four frozen saves exercise the
+null, new-class and earlier-class forms at exact predicted offsets
+(R2-SESSION-099, R2-SESSION-100). Medium for runtime acceptance: error
+reporter L2.01154, the schema-mapping store and the registry walk inside
+L2.01152 beyond the name compare were not followed. The earlier-object and
+u32-escape forms were read but not exercised by any save.
+
+**Unknown.** Registry insertion order and duplicate names; the effect of
+an error report; the 0x7fff escape in real saves.
+
+### R2-ENGINE-208
+
+Class record L2.00230 names Human: object size 0x254, schema 1, factory
+L2.00232, base record L2.01155. Record L2.01155 names Humanoid: size 0x254,
+schema 1, base L2.01156, the Unit record. The factory allocates 0x254 bytes
+and calls constructor L2.00234, which first calls L2.01157 (unread) and
+then stores vtable L2.00218. Slot +8 is L2.01158.
+
+The Human serializer L2.01158 calls Humanoid serializer L2.01159 and adds
+no stream bytes. On load it stores in +0x3c the result of the unread
+method L2.01160 on object L2.00149, passed u16 +0x0c when +0x0e is below
+0x21 and 5 otherwise. That call receives no archive pointer.
+
+Humanoid L2.01159 calls Unit serializer L2.01161, transfers 24 raw bytes
+at +0x23c, then references at +0x208+4*i for i = 1..12. Slot 0 is not
+written. Load reads each reference through L2.01162, whose expected class
+record is L2.01163 (Item).
+
+**Confidence.** High. The record bytes, factory, constructor store,
+vtable cell and both complete serializer CFGs were read. The Human name
+search over the RU .data section found one string, and the pointer search
+over the same section found one record pointer. Pointers in other sections,
+in instruction operands or in records built at runtime were not searched;
+the byte fit rules out a different programme for this name.
+The four saves place the following Unit and Humanoid fields with exact
+class-name alignment (R2-SESSION-100).
+
+**Unknown.** The meaning of the 24 raw bytes and of the twelve slots; the
+result of L2.01160; the effects of L2.01157 and the rest of the Human
+constructor.
+
+### R2-ENGINE-209
+
+Unit serializer L2.01161 transfers, on load and store in the same order:
+
+1. Base L2.01164: raw 12 bytes at pointer +0x10, then u32 +4, u16 +0xc,
+   u16 +0xe, u32 +8, u16 +0x18, u32 +0x1c, u32 saved object address,
+   u32 +0x14: 38 bytes.
+2. +0x20: u32 count, then that many references (expected record L2.01165).
+3. Two counted word lists at +0x1c8 and +0x1e4: count u16, or 0xffff and
+   u32, then 2 bytes per element (R2-ENGINE-200 programme).
+4. Raw 24 (+0xa6), 22 (+0xbe), 24 (+0x114), 64 (+0xd4), 180 (pointer
+   +0x1c0), 184 (pointer +0x1c4) bytes, then a counted word list rebuilt on
+   load for the +0x1c4 object.
+5. u8 +0x49, +0x4a, +0x4b, +0x4c; raw 4 at +0x50, +0x54, +0x58; u8 +0x60,
+   +0x61, +0x6c.
+6. References +0x74 and +0x78 (expected Item L2.01163).
+7. A counted string at +0x80.
+8. Fourteen u16 at +0x84..+0x9e; u8 +0xa2, +0xa3; u16 +0xa0, +0xa4.
+9. u8 +0x12c; u32 +0x130; u8 +0x134, +0x135, +0x136; u32 +0x138; u8 +0x13c.
+10. u32 packing u16 +0x14c, flag +0x204 (bits 16..23) and flag +0x1a0
+    (bits 24..31); u32 +0x144.
+11. Reference +0x68 (expected Item).
+12. u8 gate; when nonzero, the +0x7c object: u32 count, that many
+    references, u32 +0x1c, u32 +0x20.
+13. u8 gate; when nonzero, load allocates a 0x1c-byte object and reads
+    u32 +0x18, u32 size n, then references for indices 1..n-1.
+14. u32 +0x5c, +0x64, +0x44, +0x40; u8 +0x48.
+
+Store writes each gate as 1 when the pointer is nonnull, else 0.
+
+**Confidence.** High for order and widths on the load branch: complete
+CFGs of L2.01161, its base, raw, count and reference helpers, and both
+gated helpers L2.01166/L2.01167. The unread callees in these bodies,
+L2.00338, L2.01168 and L2.01169 in the base, the Unit virtual +0x30 call
+and the +0x3c setter L2.01170 on L2.00147, receive no archive pointer, so
+they cannot read or write the stream. The four saves fit this programme
+with exact class names at predicted offsets (R2-SESSION-099). Medium for
+step 13 with n > 0: the resize call L2.01171 and element accessor
+L2.01172 are unread and no save exercises it.
+
+**Unknown.** Field meanings; nonempty lists and gate-13 contents in real
+saves; transport short reads and refill.
+
+### R2-ENGINE-210
+
+Class record L2.01163 names Item: size 0x58, schema 1, factory L2.01173,
+base L2.01174. Weapon record L2.01175 (size 0x8c) and Armor record
+L2.01176 (size 0x70) have schema 1 and base L2.01163.
+
+Item serializer L2.01177: first the 38-byte base programme L2.01164 that
+Unit and Item both call first, then +0x20 counted
+references, then u16 +0x40, u16 +0x42, u8 +0x44, +0x45, +0x46, u16 +0x48,
+u16 +0x4a, u8 +0x47: 54 bytes when the count is 0.
+
+Weapon serializer L2.01178 (vtable L2.01179 slot +8): Item programme, raw
+24 at +0x5a, raw 22 at +0x72, u8 +0x58, reference +0x88 (load expects
+record L2.01180). Armor serializer L2.01181 (vtable L2.01182 slot +8):
+Item programme, raw 22 at +0x5a, u8 +0x58. On load, Item stores in +0x3c
+the result of unread L2.01183 on object L2.01184 when unread L2.01185
+returns more than u16 +0x0c, otherwise 0, and Weapon and Armor the
+result of unread L2.01186 on L2.01187 and L2.01188, each passed u16 +0x0c;
+none of these calls receives an archive pointer.
+
+**Confidence.** High. Names come from exact searches over the RU .data
+section: Weapon has four string hits and Armor five; for each, exactly one
+hit has a record pointer in the .data section. Pointers in other sections,
+in instruction operands or in records built at runtime were not searched;
+the byte fit rules out a different programme for these names. Factories,
+constructors, vtable cells and
+serializer CFGs were read completely. The saves fit 103-byte Weapon and
+77-byte Armor payloads.
+
+**Unknown.** Item field meanings; other Item subclasses; the L2.01180
+class.
+
+
 ## Inn option contract and town 2 TALK
 
 | ID | Claim | Confidence | Status | Evidence |

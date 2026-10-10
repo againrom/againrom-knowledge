@@ -781,6 +781,86 @@ Players, current participant, actual hero/roster/items/purse; original
 acceptance, actor/World LOAD and post-load behavior.
 
 
+## RU first Group member in four frozen saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-099 | In four frozen RU saves the first Group member is a new Human object, class index 3 and object index 4, whose 1218-byte payload ends at 4024 in A/C and 4025 in B/D. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-SESSION-100 | The four first members each carry a Weapon at Unit+0x74 and five Armor objects in Humanoid slots 7..10 and 12; every other reference is null and no reference aliases an earlier object. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-SESSION-101 | First-member bytes are equal in A/C and in B/D; A and B differ only in four raw Unit blocks. No field of the walked member is identified as the purse. | High / Unknown | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+
+### R2-SESSION-099
+
+The walk starts at the first member operation that R2-SESSION-091 places
+at 2795 (A/C) and 2796 (B/D), with the first Player as class index 1 and
+object index 2. The tag is 0xffff: schema 1, name length 5, name Human.
+The class takes index 3 and the object index 4. The payload starts at
+2806/2807 and follows the Human programme (R2-ENGINE-208, R2-ENGINE-209,
+R2-ENGINE-210). It ends at 4024/4025: 1218 bytes in all four. The next
+free archive index is 13. The walk stops there; later bytes are not
+interpreted.
+
+**Confidence.** High for the byte fit: the nested class names Weapon and
+Armor and four earlier-class tags 0x8007 fall exactly where the programme
+predicts in all four buffers, the last at 3945/3946, so the anchors hold
+through 3947/3948. The last 77 bytes follow the Armor width that the three
+earlier 79-byte Armor intervals fix, the complete Armor CFG L2.01181 and
+the complete Human CFG, which adds no bytes after Humanoid. Bytes after the
+end are not parsed or checked. Two fresh replay roots
+reproduce every product byte for byte. Medium for reading this as the
+native LOAD result: it inherits the conditional R2-SESSION-091 framing,
+assumes complete raw transfers, and the inline Group insertion call
+L2.00361 after the member load is unread.
+
+**Unknown.** Group bytes after the member; the second and later Players;
+which member is the current participant; original acceptance and
+post-load repair.
+
+### R2-SESSION-100
+
+Identical in A..D, with offsets for A/C (B/D one more):
+
+| Reference | Start | Form | Class | Object index | Payload bytes |
+|---|---:|---|---|---:|---:|
+| Unit +0x74 | 3371 | new class 5 | Weapon | 6 | 103 |
+| Weapon +0x88 | 3484 | null | | | |
+| Unit +0x78 | 3486 | null | | | |
+| Unit +0x68 | 3549 | null | | | |
+| Humanoid slots 1..6 | 3606..3616 | null | | | |
+| Humanoid slot 7 | 3618 | new class 7 | Armor | 8 | 77 |
+| Humanoid slots 8, 9, 10 | 3706, 3785, 3864 | earlier class 7 | Armor | 9, 10, 11 | 77 each |
+| Humanoid slot 11 | 3943 | null | | | |
+| Humanoid slot 12 | 3945 | earlier class 7 | Armor | 12 | 77 |
+
+The +0x20 reference counts of the Human, Weapon and Armor objects are 0.
+All three counted word lists are empty. Gate +0x7c is 1 with a reference
+count of 0; gate +0x140 is 0. No earlier-object form occurs, so no
+reference points back to the Player, the Human or another object.
+
+**Confidence.** High for these forms and counts in the four buffers.
+
+**Unknown.** What Unit +0x74 and the twelve Humanoid slots mean for play,
+for example wielded weapon or worn equipment; Item field meanings.
+
+### R2-SESSION-101
+
+All 219 recorded member fields have equal SHA256 in A and C, and in B and
+D. Between A and B four fields differ: the base raw 12 bytes at pointer
++0x10, the 180 raw bytes at pointer +0x1c0, the 184 raw bytes at pointer
++0x1c4 and raw 4 at +0x50. Every scalar, string and nested object field is
+equal. The packed u32 holds +0x14c = 21 (R2-ENGINE-105 names 21 as the
+selected new-actor value) and the counted string at +0x80 has 5 bytes.
+
+No walked field has a purse label, and none was matched to a gold value.
+The four symbols have no established role.
+
+**Confidence.** High for the equality measurements. Unknown for field
+meanings, including stats, experience and money.
+
+**Unknown.** Where the purse is stored; whether the Player prefix's
+obfuscated fields hold it.
+
+
 ## Inn stage progression and early bank scope
 
 | ID | Claim | Confidence | Status | Evidence |
