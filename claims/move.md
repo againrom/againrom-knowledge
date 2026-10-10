@@ -215,7 +215,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 
 **Evidence.** [EXP-0055](../experiments/EXP-0055-tick-order/)
 
-**Amended.** Building membership remains contested: no Building insert was found over the named insert surface, but untraced wrappers and other tick containers remain open. The record-array to file-order link also remains Medium.
+**Amended.** Building membership remains contested: no Building insert was found over the named insert surface, but untraced wrappers and other tick containers remain open. The record-array to file-order link also remains Medium. The party-first clause is contested by EXP-0514 (`TRIG-MAPORD-105`): the session start `R0512` loads the map, spawns the type-6 records and runs the binder without calling the placement walk `R0065`, whose session-path caller is the join arm of the command executor. Two readings stand: the party is inserted first (this card), or after the map's records, when the join command executes. Neither experiment read when the join command executes relative to the session start, and the walk's caller `L13863` is unclassified.
 
 ### MOVE-TICK-015
 

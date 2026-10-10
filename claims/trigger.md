@@ -436,9 +436,9 @@ Former headline: Corpus census and limit analysis for check opcodes 4, 16 and 21
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TRIG-BIND-063 | The selected Trigger-binding block reads condition IDs at R+0x80/+0x84+8*i, comparison words at R+0xa8+4*i, action IDs at R+0x98+4*i and once at R+0xb4, then publishes separate compiled records. | High / Unknown | ✔ promoted | [EXP-0353](../experiments/EXP-0353-trigger-storage/) |
-| TRIG-HEROORD-075 | A hero ordinal is a role test, not a roster position: `R0508` returns the first named actor of the first player's flat list, then of the actor registry, that passes a typeID, class-bit and face test. | High / Medium | ● active | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
+| TRIG-HEROORD-075 | A hero ordinal is a role test, not a roster position: `R0508` returns the first named actor of the first player's flat list, then of the actor registry, that passes a typeID, class-bit and face test. | High / Medium | ● active (amended) | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
 | TRIG-HEROTPL-076 | Ordinal k >= 1 applies the `Flags` tokens of registry section `npc(21+k)`, so 10002..10006 name five roles, not five roster slots; the template table is indexed by section number. | High / Medium | ● active | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
-| TRIG-HEROBIND-077 | A hero ordinal is resolved only in the script binder, once per node reference, at map load and again in the world serializer's restore arm after players and actors load, so a SAV load re-resolves from loaded state. | High / Medium | ● active | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
+| TRIG-HEROBIND-077 | A hero ordinal is resolved only in the script binder, once per node reference, at map load and again in the world serializer's restore arm after players and actors load, so a SAV load re-resolves from loaded state. | High / Medium | ● active (amended) | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
 | TRIG-HEROFAIL-078 | An ordinal with no qualifying actor resolves to 0, logs `Can't resolve hero %d.` and leaves its node unbuilt without stopping the load; a missing template record, an ordinal above 234 and an empty player list are unguarded. | High / Medium | ● active | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
 
 ### TRIG-BIND-063
@@ -462,6 +462,8 @@ The original instructions of `R0508`, `R0908`, the accessors and the iterator ra
 **Confidence.** **High** for the gates' branches, the accessors' bit tests, the scan order and the ordinal-0 predicate: the routines are read whole, and the emulation of the original instructions agrees with a separately written model of the rule, with five loss controls that each fail. **Medium** that the list head is the human player (insertion order read from `PARTY-PERSIST-014`, not from the list writer). **Medium** for the meaning of the world flag as a map capacity (set at map load and by the server constructor; whether the restore arm rewrites it before binding is not read). **Medium** for what typeID sex and the class bit mean for a shipped companion (their values at the binder are not read). **Medium** for the lists' contents on the new-mission path (not read; `TRIG-HEROBIND-077` covers the SAV restore path).
 
 **Unknown.** Whether the list head is always the human player of a single-player session. What `Player+0x20` and the registry hold at the call on the new-mission path. Whether the restore arm rewrites the world flag `+0xc` before the binder runs. The typeID and class bit of the shipped companion rows at the binder.
+
+**Amended.** EXP-0514 narrows the clause on the new-mission lists. The type-6 contribution to the registry is read: at map load the spawner inserts the placed actors of every owner in record order just before the binder (`TRIG-MAPORD-105`, at its grades), and among them only npc-arm placements are named (`TRIG-MAPNAME-106`). Two parts stay open: whether the registry still holds the previous mission's actors (Unknown) and whether a carried companion is in `Player+0x20` at binding (Medium, `TRIG-MAPORD-108`). The Medium for the lists' contents and the matching Unknown stand for those two parts.
 
 ### TRIG-HEROTPL-076
 
@@ -501,6 +503,8 @@ In the restore arm the order is `R1372` on the player list (`L08155`), the actor
 
 **Unknown.** Whether the script state in a SAV carries resolved pointers or is rebuilt only by this binding. Whether any code between the unit load and the binder rewrites `+0x0e`, `+0x4b` or `+0x4c`. The lifetime of a resolved pointer after its actor is torn down.
 
+**Amended.** EXP-0514 reads the map-load arm's roster: the spawner runs immediately before the binder, and the session start does not call the party placement walk (`TRIG-MAPORD-105`, High); that the party is placed after the binder is Medium there, against the party-first reading of `MOVE-TICK-014`. On the map-load path no routine between the Humans constructor and the binder stores to `+0x0e`, `+0x4b` or `+0x4c` at those exact displacements; wider overlapping stores are unswept (`TRIG-MAPNAME-106`). The restore-arm Unknown stands.
+
 ### TRIG-HEROFAIL-078
 
 `R0507` tests the result (`L12549`, a compare of the result with zero), formats `L12550` for any value of 10001 or more (`L12551`, `Can't resolve unit %d.`, below it), passes the text to `R0422` (`L12552`, callee not read) and returns 0. `TRIG-BIND-010` states what 0 does next: the node is not built, takes no slot, and a trigger naming it resolves to slot 0. A one-Human roster produced `cant resolve hero 10002` and a loaded mission (`SAV-ORIGMISSION-400`); in emulation a roster of the primary alone returns 0 for 10002 (`npc22`).
@@ -512,6 +516,57 @@ A scan that finds the actor under one condition and not another, such as a prima
 **Confidence.** **High** for the 0 result, the world-flag and null-primary gates and the log format string (instructions read whole, emulated). **Medium** for the unbuilt-node and continued-load consequence (cited from `TRIG-BIND-010` and one owner-observed load; the log function is unread). **Medium** for the unguarded inputs (instruction reading only).
 
 **Unknown.** What the log function does besides writing the text. The slot-0 value in any specific map.
+
+## Hero ordinals over map-placed actors
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-MAPORD-105 | At map load the type-6 spawner puts every placed actor of every owner into the registry and its owner's flat list, in record order, just before the binder; the party placement walk is not called from the session start. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
+| TRIG-MAPNAME-106 | A map-placed actor is named for the ordinal scan only on the npc arm, from a line of `text/npcnames.txt`; no shipped Humans row is named by its constructor, and the Units arm writes no name. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
+| TRIG-MAPORD-107 | Of the npc placements `100.alm` 245, `30.alm` 56, `81.alm` 52 and `151.alm` 205 and 589, EN and RU, only unit 245 resolves an ordinal at map load, 10004 for every primary, if each placement and the registry hold as read. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
+| TRIG-MAPORD-108 | A companion in player 1's flat list that satisfies an ordinal is taken before any map-placed actor that also satisfies it: the flat list is scanned before the registry, and the companion precedes player 1's map actors in it. | High / Medium | ● active | [EXP-0514](../experiments/EXP-0514-map-actor-ordinals/) |
+
+### TRIG-MAPORD-105
+
+- `R0128` calls the spawner `R0151` at `L00958` and the binder `R0067` at `L00959`; only argument pushes lie between.
+- The spawner walks records 1..count. A record is dropped when its owner does not resolve (`L01836`, log `Can't resolve player %d for unit %d.`), when `[[L00285]+0x11c]` and `Player+0x28` are both nonzero (`L13864`..`L13865`), when the built actor's `+0x0e` is 0 (`L12640`, deleted) or when the cell placement `R1145` fails (`L13866`, deleted). Every other actor gets `actor+8` = the record's unit id (`L06792`), is appended to the registry `[L00240]` (`L01792`), gets its owner at `+0x14` (`L06024`) and is appended to the owner's `[Player+0x20]` (`L06603`). Health is not tested: an authored health of 0 is stored at `+0x94` and the actor is inserted.
+- The placement walk `R0065` has three direct callers: `L06675` in `R0131`, the join that refuses a player without a primary (`You can't enter mission without Hero`), `L06590` (revive, `PARTY-INSTALL-012`) and `L13863` (not classified). `R0131` has one caller, `L06672` in the command executor `R0061`. The session start `R0512` calls `R0128` once (`L07873`) and then seven routines, none of them the walk.
+- At binding no sub-tick has run, so neither instant 16 nor the dead sweep has removed a placed actor.
+
+**Confidence.** **High** for the spawner's gates, inserts and record order, the spawner-then-binder sequence and the absence of a walk call in the session start (routines read whole at instruction level, windows `w01`, `w07`). **Medium** that the party is placed after the binder: two readings stand. (a) The walk runs when the join command executes, after the session start returns, so the party is not in the registry at binding. (b) The join command, or the unclassified caller `L13863`, runs before `R0512` loads the map, so the party is inserted first (`MOVE-TICK-014`). The direct-caller census misses computed calls, and the containing routines are located by `55 8b ec` prologue scans. Either way the scan reaches the party through player 1's flat list before the registry, so `TRIG-MAPORD-107` and `TRIG-MAPORD-108` do not depend on it.
+
+**Unknown.** When the join command executes relative to `R0512` and what `L13863` is: searched were the direct callers of the walk and of `R0131`; reading the routine that holds `L13863` and the command queue's producer of the join command settles it. The value of `[[L00285]+0x11c]` in a campaign session: its writers were not enumerated; were it nonzero, the records of every player above slot 1 would be dropped on campaign maps (`ALM-PLAYER-069`); a `disp:0x11c` sweep of the server object's writers, or a campaign save holding type-6 actors of players above slot 1, settles it. Whether the registry still holds actors of the previous mission at the new map load: the registry's removals at the mission end were not read; reading the mission-end teardown of `[L00240]` settles it.
+
+### TRIG-MAPNAME-106
+
+- The spawner writes `actor+0x80` at one site, `L04513`, on the npc arm (`rec+0x48 & 1` in the Humans band). The value is `R0918`'s output: the text `main\text\npcnames.txt` (`L13867`) with leading lines removed, cut at the next CR. For a fixed `DataBinID` it is line n of npc section n (`L13868`..`L13869`); for `DataBinID` 26 it is line `selector + 21` (`L13870`..`L13871`).
+- The Humans constructor `R0656` writes `+0x80` only when the Humans row name begins `Hero` (`L09561`..`L13872`): `Unknown`, then a default-name element (`L13873`..`L13874`, `SESS-DEFNAME-032`). The same test forces the constructor mode to 1 (`L13875`).
+- 0 of the 215 Humans rows begin `Hero` (EN and RU), so no definition-id or type-key placement is named. The Units arm writes no name in the spawner (`UNIT-INSTNAME-040`; `HERO-NAME-079`'s four writers).
+- Between the constructor and the binder, `vt+0x50` `R0280`, `vt+0x54` `R0978`, `R0899`, `R1145` and the spawner's post-constructor block store nothing to `+0x0c`, `+0x0e`, `+0x4b`, `+0x4c` or `+0x80` at those exact displacements.
+- The scan's other inputs on the npc arm: the constructor mode is the npc record's exact `Hero` token; a positive `ManaMax` sets class bit `+0x4c & 4`; the face is the Humans face column, replaced by a positive `.N` suffix of the row name; mode 1 writes `+0x0e = gender + 0x21/0x23`, mode 0 keeps the table typeID.
+
+**Confidence.** **High** for the spawner and constructor name writes and the mode, face, class and type rules (routines read whole, `w01`..`w04`). **High** for the corpus count (every Humans row of both roots). **Medium** that Units actors are unnamed (the Units constructor `R0501` is not read; `HERO-NAME-079`'s writer census is Medium) and for the absence of other writers: the field-store search matches exact displacements only; overlapping wider stores (for example a dword at `+0x48` or `+0x7e`), `LEA reg, [reg+0x80]` and stores through an advanced pointer are unswept.
+
+**Unknown.** The base `+0x4b` value when the face column is -1 and the row name has no face suffix; reading the base actor constructor's `+0x4b` store settles it. A Units-arm name writer; reading `R0501` settles it.
+
+### TRIG-MAPORD-107
+
+- Binding inputs (`tools/mapordinals`, EN and RU equal except name lengths): `30.alm` unit 56 (owner 2, `npc53`), `81.alm` unit 52 (owner 3, `npc69`), `151.alm` unit 205 (owner 2, `npc68`) are mode 0, typeID 1, no class bit, faces 28, 19 and 18. `151.alm` unit 589 (owner 1, `npc29`) is mode 0, typeID `0x18`, class bit set, face 5. `100.alm` unit 245 (owner 7, `npc24`, authored health 0) is mode 1, Humans row 36, 37, 34 or 35 for a male fighter, female fighter, male mage or female mage primary: typeID `0x23`, `0x24`, `0x21`, `0x22`, class bit set for the first two, faces 3, 1, 5, 1. All seven npc placements of the four maps have a non-empty name.
+- The original `R0508` ran (unicorn, `EXP-0427` harness) on these actors in record order, with the primary in player 1's flat list and an unnamed control actor in both lists. With the primary alone and any primary face 0..63 (5,120 calls), 10004 returns unit 245 for all four primaries, and no map-placed actor is returned for any other ordinal 10002..10006. The primary itself takes 10005 when it is a male fighter with face 1 and 10006 when it is a male mage with face 4; every other ordinal returns 0. The control is never returned.
+- Nodes naming 10002..10006 (identical on both roots): `30.alm` action 14; `81.alm` actions 21..23, 26..28 and checks 22..24, 28..30, 35..37, 39..41; `100.alm` actions 37..40; `151.alm` actions 42..46 and checks 6..11. With the primary alone, `100.alm` action 39 (opcode 13, item 11 from 10004) is built and bound to unit 245. A male fighter primary with face 1 also builds the 10005 nodes (`81.alm` actions 23, 28, checks 23, 29, 37, 41; `100.alm` action 40) bound to itself; a male mage primary with face 4 also builds the 10006 nodes of `151.alm`. The other nodes are unbuilt (`TRIG-HEROFAIL-078`).
+
+**Confidence.** **High** that the original resolver returns these results on lists with these inputs (original instructions; the primary-face sweep covers the six bits the face accessor keeps). **Medium** for the headline as a statement about the running game, because four inputs are not read at binding: (a) a nonzero `[[L00285]+0x11c]` in a campaign session would drop unit 245 (owner 7, `Player+0x28 = 1`) and every other placement above slot 1 (`TRIG-MAPORD-105`); (b) a failed cell placement `R1145` at a placement's cell would delete it; (c) a named actor left in the registry from a previous mission would be scanned before unit 245 and could take 10004 or another ordinal; (d) the faces and class bits are derived by `TRIG-MAPNAME-106`'s rules, not read from a built actor, and unit 589's derived face 5 is all that keeps it from 10004 for a male fighter primary. **High** for the data inputs: npc sections, flags tokens, Humans rows.
+
+**Unknown.** Settling (a) and (c) is as in `TRIG-MAPORD-105`; (b) is settled by evaluating `R1145` on the four maps' occupancy at load, or by a save written at mission start; (d) by reading the built actors' `+0x4b`, `+0x4c` and `+0x0e` in such a save. What becomes of unit 245 (health 0) at the first sub-tick: the binding precedes it; reading the sub-tick's health-0 handling settles it.
+
+### TRIG-MAPORD-108
+
+- `R0508` scans the head player's `[+0x20]+4` before `[L00240]+4` (`TRIG-HEROORD-075`). A map actor owned by player 1, such as `151.alm` unit 589, sits in the same flat list, but the spawner appends it with AddTail (`L06603`) after the party already in the list, so a companion precedes it.
+- In emulation, a companion satisfying ordinal k in player 1's flat list is returned for ordinal k in all 80 companion cases per root (four maps, four default-face primaries, five ordinals), including 10004 on `100.alm`, where unit 245 also satisfies it.
+
+**Confidence.** **High** for the precedence given the lists (original instructions). **Medium** that a carried companion is in player 1's flat list when the binder runs: it rests on the campaign memory carry (`PARTY-PERSIST-014`, `PARTY-PERSIST-028`), not on a read of the list at the binder, and on the list head being the human player (`TRIG-HEROORD-075`).
+
+**Unknown.** Whether a companion that arrives only through the `0xbe` carry command, after the binder, is ever the companion at binding: searched were the carry arm's writes (`PARTY-INSTALL-012`), not when the command executes; reading the command's producer settles it.
 
 ## Original mission survey: dragon, bridge brigands and the interrogation
 

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3279. Observation: 95. Static analysis: 2725. Mixed: 459.
+Claims labelled: 3283. Observation: 95. Static analysis: 2729. Mixed: 459.
 
 ## Ledger ai
 
@@ -3270,10 +3270,14 @@ Claims labelled: 3279. Observation: 95. Static analysis: 2725. Mixed: 459.
 | TRIG-CHECK-053 | static analysis | ● active |
 | TRIG-CHECK-054 | static analysis | ● active |
 | TRIG-BIND-063 | static analysis | ✔ promoted |
-| TRIG-HEROORD-075 | static analysis | ● active |
+| TRIG-HEROORD-075 | static analysis | ● active (amended) |
 | TRIG-HEROTPL-076 | static analysis | ● active |
-| TRIG-HEROBIND-077 | static analysis | ● active |
+| TRIG-HEROBIND-077 | static analysis | ● active (amended) |
 | TRIG-HEROFAIL-078 | static analysis | ● active |
+| TRIG-MAPORD-105 | static analysis | ● active |
+| TRIG-MAPNAME-106 | static analysis | ● active |
+| TRIG-MAPORD-107 | static analysis | ● active |
+| TRIG-MAPORD-108 | static analysis | ● active |
 | TRIG-DRAGON-079 | mixed | ● active |
 | TRIG-BRIGAND-080 | mixed | ● active |
 | TRIG-VIP-081 | mixed | ● active |
