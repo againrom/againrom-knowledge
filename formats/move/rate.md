@@ -129,7 +129,11 @@ step. The non-self unit-target and point-target act gates need the current
 facing on the 8-way heading; a self-target cast skips them. A new target
 continues from the current byte; the stop reset ends the turn at the current
 byte and leaves the active flag set, so the next short fresh turn steps by
-rate — MOVE-107.
+rate — MOVE-107. The stepper's desired byte comes from the signs alone of the
+next cell's centre minus the actor's fine point; a coincident point returns
+(facing & 7) * 32 — MOVE-115. Every direct turn call takes its byte from one
+of three heading routines, a stored desired byte or a caller's argument —
+MOVE-116.
 
 **The clock.** One `R0047` per actor per **sub-tick** — the counter `server+0x04`, paced by
 `R0454` against `timeGetTime` at `campaign+0x3f0 = 1000/R` ms, `R` from the nine-arm ladder

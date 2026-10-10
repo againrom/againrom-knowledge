@@ -194,6 +194,15 @@ that subtracts both token sizes, so two touching actors measure 1. Reach is re-r
 `actor+0x12c` at the test; `ord+0x14` is used only as the mover's stop distance, inside which the
 actor turns to face and stands still.
 
+The heading those turns aim at is the byte the facing test compares. Rows `5` and `8` turn through
+the approach, row `6` turns in place, and all three call `R0051(actor, target)` with the gate's pair (`AI-443`). Row `6` can leave before the gate and the turn through a guard on actor bytes `+0x4c` and `+0x12c`; which attackers take it is not read. That helper takes the difference
+between the two footprint centres, each the fine point plus `(size-1)*128` in 16 bits, and returns one
+of eight bytes: within each sign quadrant the axis byte when one magnitude exceeds twice the other,
+otherwise the diagonal, so an exact 2:1 is diagonal; the zero vector gives 224 (`AI-444`). A Building target is measured toward its position record `+0x10`, not its rectangle; for the Building vtable the token size is 1 (`AI-445`; the size routine and the record's layout are Medium). Rows `9` and `0xf` turn at the walk's stop arm to `R0089(actor, cell)`, the same
+law on whole-cell differences from the anchor cell (`AI-446`). A shot's flight direction is a
+different 16-way helper; on one difference vector it equals the unit heading or is one sixteenth off
+(`AI-447`).
+
 Worked example — the sack pick-up, which is the whole chain in one order:
 
 1. order `0x21` → `R0010`: `actor+0x50 = 2`, `ord+0x0a` = the sack's cell, `ord+0x08 = 0`.

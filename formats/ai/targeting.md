@@ -144,8 +144,8 @@ winner, so the last surviving tied candidate wins; a farther admitted actor
 can beat a nearer one on turn cost (`AI-361`).
 The same claim retains all 81 replayed heading outputs for equal size-1
 footprints at centred cells with target dx/dy from -4 through 4. Its
-coincident-centre result is 224. Arbitrary fraction, footprint, wrapping and
-floating-point sector boundaries remain unestablished (`AI-361`).
+coincident-centre result is 224. The helper's law for every fraction, footprint
+and 16-bit wrap, with no floating-point step, is `AI-444`.
 
 This scan follows the bound manager from head to tail. Selected creation and
 return paths append, while unlink preserves survivor order (`AI-362`). The

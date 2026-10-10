@@ -1274,6 +1274,56 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 
 **Unknown.** The callers of `R0192`, and so whether a companion hired in town enters the registry before the next map's type-6 records; enumerating them, or a save written in town after a hire, settles it. The order on the SAV restore path, which inserts through `L12539` (`MOVE-TICK-017`).
 
+## Step heading and turn sources
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-115 | Before a step the stepper turns to `R1356(actor, next cell)`: eight bytes from the signs alone of the cell centre minus the actor's fine point; the zero vector returns `(facing << 5) & 0xff`. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| MOVE-116 | Each of the 11 direct calls of the turn `R0056` takes its desired byte from `R0051`, `R0089`, `R1356`, the stored `mover+1`, a caller's argument or the idle draw. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+
+### MOVE-115
+
+- The stepper `R0054` copies the route head node's cell word to `mover+6` (`L14205`..`L00957`), calls `R1356(actor, mover+6)` at `L07008` and stores the low byte at `mover+1` (`L14206`). When `mover+0` equals it, it takes the rate and steps (`L06858`, `L06896`); otherwise it calls the turn at `L07010` (`MOVE-090`, `MOVE-084`).
+- `R1356` (`w05`, 70 instructions, no call): `dx = (cell low byte << 8) - ((pos[0] << 8) + pos[4]) + 0x80` (`L14207`..`L14208`), `dy` likewise from the cell's bits 8..15, `pos[1]` and `pos[5]` (`L14209`..`L14210`). The result:
+
+  | | `dy < 0` | `dy = 0` | `dy > 0` |
+  |---|---|---|---|
+  | `dx > 0` | 32 | 64 | 96 |
+  | `dx = 0` | 0 | see below | 128 |
+  | `dx < 0` | 224 | 192 | 160 |
+
+- There is no magnitude test: any vector strictly inside a quadrant gives the diagonal, so a cell two right and one down gives 96 where `AI-444` gives 64.
+- Zero vector: the routine loads the current facing `mover+0` into AL at `L14211`; the arm `L14212`..`L14213` keeps it and shifts left by 5, returning `(facing & 7) * 32`, so 0 for every facing that is a multiple of 8 (`s4300-zero-vector.tsv`, all 256 facings).
+- The actor's anchor fine point is used, with no footprint term.
+- A transit starts at sub-cell 0x80/0x80 (`MOVE-084`). From there an adjacent cell gives `dx`, `dy` in {-256, 0, 256}, and the result equals `AI-444`'s for the same vector.
+- Replay: 24,760 inputs equal the table: cell offsets in [-2,2]^2 with own sub bytes {0, 1, 0x7f, 0x80, 0x81, 0xff}^2 and five facings (4,500), the zero vector at every facing (256), 20,000 seeded draws and 4 map-corner extremes (the committed `summary.tsv` set label says 8). EN and RU `rom.exe` have one SHA-256.
+
+**Confidence.** **High** for the law (complete body and instruction replay) and for the stepper's call site and store. **Medium** that every step turns through this site: `R1356` has 11 direct callers (`s01`), and the ten besides `L07008` (`L14214`, `L14215`, `L14216`, `L14217`, `L14218`, `L14219`, `L14220`, `L14221`, `L14222`, `L14223`) were not read.
+
+**Unknown.** Whether a route head node can be the centred actor's own cell, which would reach the zero-vector arm.
+
+### MOVE-116
+
+The 11 direct calls (`s01`; no dword in any section holds `R0056`) and the source of the desired byte at each:
+
+| call | routine | desired byte |
+|---|---|---|
+| `L00752` | pending order 0xa | `mover+1`, the last stored desired byte; the wait arm sets pending 0xa at `L13340` after its turn |
+| `L13266` | `L13333` | its stack argument; no direct caller and no dword reference (`s02`) |
+| `L00751` | idle turn `R0205` | `mover+1` when it differs from `mover+0`, else a rand-based byte (`L14224`..`L00997`) |
+| `L13267` | face-and-mark arm | `R0051(actor, ord+0x0c)` at `L14175` |
+| `L00753` | `R0250` | its argument; callers `L13335` (`R0051` at `L14168`) and `L14174` |
+| `L01933` | walk stop arm | `R0089(actor, cell)` at `L14194` |
+| `L01934` | walk wait arm | `R0089(actor, next cell)` at `L14202` |
+| `L00754` | approach `R0043` | `R0051(actor, target)` at `L06115` |
+| `L07010` | stepper | `R1356(actor, mover+6)` at `L07008` |
+| `L13268` | wrapper `R2199` | `R0051`; no direct caller and no dword reference |
+| `L13269` | wrapper `R2200` | `R0089`; no direct caller and no dword reference |
+
+So a turn before an act or a step aims at one of three heading routines (`AI-444`, `AI-446`, `MOVE-115`), a byte one of them stored earlier, or a byte a caller supplies.
+
+**Confidence.** **High** for the enumeration of direct calls and for the source at each site read (`w07`..`w16`). **Medium** for `L14174`, placed by the adjacent `R0051` call at `L14173` without a read of its body, and for the argument of `L13333`, whose caller is unknown. A computed call of `R0056` is outside the instrument.
+
 ## Mover state at mission start
 
 | ID | Claim | Confidence | Status | Evidence |

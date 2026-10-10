@@ -202,7 +202,7 @@ Existing-Player search `L00181..L00182` compares the incoming CString with Playe
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-STRUCTUSE-306 | Order0x24 schedules approach and one local actor use action. | High / Unknown | ✔ promoted | [EXP-0325](../experiments/EXP-0325-structure-use/) |
+| AI-STRUCTUSE-306 | Order0x24 schedules approach and one local actor use action. | High / Unknown | ✔ promoted (amended) | [EXP-0325](../experiments/EXP-0325-structure-use/) |
 | AI-SPELLIDENT-286 | Valid book cell `i` in 0..23 is a signed controller index. | High | ✔ promoted | [EXP-0294](../experiments/EXP-0294-quick-spell-identity/) |
 | AI-SPELLPOP-287 | Selection recomputation `R0082` accepts each selected node's object only when object+7c is nonnull, increments view+140, and ORs object+18 into availability view+148 before session/class/type predicates. | High | ✔ promoted | [EXP-0294](../experiments/EXP-0294-quick-spell-identity/) |
 | AI-SPELLCAP-288 | For session+3dc equal1 or carrying bit2, every accepted selected object is tested: runtime class-name `CUnit`, object+20 in17h/18h, nonzero object+18 OR200h into view+144. | High | ✔ promoted | [EXP-0294](../experiments/EXP-0294-quick-spell-identity/) |
@@ -218,6 +218,8 @@ Existing-Player search `L00181..L00182` compares the incoming CString with Playe
 Complete `R0085` sets actor state `+50=15`, clears action `+54`, writes Building pointer to order `+68`, and sets destination from Building Position. Width byte `+60` selects range/packed-cell offset: widths1/2 use1/+0; widths3/4 use2/+0x101; other widths use3/+0x202. State15 copies to order15. Its pending arm `L00195..L00010` calls `R0086`; failure schedules movement through `R0087` and action1, success sets action15 unless already15, in which case it clears/completes through `R0007` and `R0088`. The complete admission helper requires the byte returned by unexpanded `R0089` to equal Mover byte0, then unsigned Chebyshev cell distance no greater than the supplied range. Actor action15 maps through two raw tables to `L00196`.
 
 **Confidence.** High for named local stores, tables and branches, calibrated against the original PE. Unknown for the nested orientation helper, complete scheduling, interruption and first dispatch after LOAD. No claim of instant completion or exact visible delay.
+
+**Amended.** The Unknown for the nested orientation helper closes for `R0089` alone: `AI-446` states its law (the `AI-444` branch tree on whole-cell differences from the anchor cell, sub-cell and size ignored) and that the point gate and the walk's stop arm use it. Complete scheduling, interruption and first dispatch after LOAD stay Unknown.
 
 ### AI-SPELLIDENT-286
 
@@ -2522,7 +2524,7 @@ the rest of the brief's ten questions. A returned range stays retired; the next 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-360 | In R0004, a later diplomacy-rejected or dead candidate can lower the running-nearest gate; permuting the same actors can change the surviving list and winner. | High | ● active | [EXP-0420](../experiments/EXP-0420-reacquisition-cycle/) |
-| AI-361 | Reacquisition scores admitted candidates by the circular byte turn cost alone; equal scores replace the winner, so the last surviving equal-score candidate wins. | High | ● active | [EXP-0420](../experiments/EXP-0420-reacquisition-cycle/) |
+| AI-361 | Reacquisition scores admitted candidates by the circular byte turn cost alone; equal scores replace the winner, so the last surviving equal-score candidate wins. | High | ● active (amended) | [EXP-0420](../experiments/EXP-0420-reacquisition-cycle/) |
 | AI-362 | Reacquisition traverses the bound actor manager head to tail; the selected creator, return and unlink paths append or preserve survivor order, rather than sorting by actor ID. | High / Medium | ● active | [EXP-0420](../experiments/EXP-0420-reacquisition-cycle/) |
 | AI-363 | The selected original load rebuild appends on-map actors in player, group and member order; it does not preserve the pre-load global actor-list sequence as a separate ordering input. | Medium | ● active | [EXP-0420](../experiments/EXP-0420-reacquisition-cycle/) |
 | AI-364 | Group order 0 dispatches command state 0x16 without a progress gate; an executor invocation that clears nonzero progress skips pending dispatch, while the next invocation entered at zero can execute it. | High / Medium / Unknown | ● active | [EXP-0420](../experiments/EXP-0420-reacquisition-cycle/) |
@@ -2608,6 +2610,8 @@ footprints, wrapping coordinates or floating-point states.
 
 **Unknown.** Native facing reachability, native actor arrangement, and other
 acquisition or group scorers, which are separate routines.
+
+**Amended.** The closing statement that the 81-cell table does not establish the sector boundary for arbitrary fractions, different footprints, wrapping coordinates or floating-point states is narrowed by `AI-444`: the law of `R0051` over fine points, footprints and 16-bit wrap, replayed on 84,842 inputs, with no floating-point instruction in the bodies (`w01`..`w03`). The bound is that population; which sizes and coordinates occur in play stays Unknown (`AI-444`). The 81 outputs and the score law stand.
 
 ### AI-362
 
@@ -3517,3 +3521,88 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 **Confidence.** **High** for writers 2 to 5 and for the withdraw tails' store set. **Medium** for writer 1: the group order it writes is read, its effect on the members is not. **Medium** for the death clause, a lower bound bounded to the searches of `AI-FOLLOWDEATH-119` and the bodies read here. **Medium** for completeness: `AI-STATE-043`'s sweep is Medium, and the callees of the withdraw tails (`R0022`, `R0104` and others) were not read.
 
 **Unknown.** Whether `R0108` rewrites the members' `actor+0x50` or `ord+0x10`, and so whether a later Move ends the follow or only suspends it. `R0003` (spell apply) also calls `R0063`; which group it passes was not read. Behaviour when the subject leaves the map was not read.
+
+## Heading before an act
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-443 | Before an attack (executor rows 5, 6) or a cast at an actor (row 8) a unit turns to `R0051(actor, target)`, the byte the act gate compares; rows 5 and 6 call it with the gate's pair, and row 6 can leave before the gate and the turn. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| AI-444 | `R0051` heads between the two centres, fine point plus (size-1)*128 in 16 bits: eight bytes from the axis signs and 2:1 tests, an exact 2:1 to the diagonal, the zero vector 224; replayed on 84,842 inputs. | High | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| AI-445 | An attack on a Building heads by `R0051` toward the position record `obj+0x10`; no rectangle or size byte enters, and for vtable `R0492` the token size is 1 (`UNIT-STRUCTREACH-063`). | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| AI-446 | Before a cast at a cell (row 9) or a structure use (row 0xf) the walk's stop arm turns the unit to `R0089(actor, cell)`: the `AI-444` law on whole-cell differences from the anchor cell, sub-cell and size ignored. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| AI-447 | Unit headings come from three routines and a shot's from a fourth, the 16-way `L02828`; on every nonzero fine vector in [-64,64]^2 the shot index equals the unit heading on 8,320 and is one sixteenth off on 8,320. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+
+### AI-443
+
+- Row 5 (`L00101`) calls the gate `R0041(actor, ord+0x0c, actor+0x12c)` at `L00743`. On failure it calls `R0042(actor, ord+0x0c)` at `L00106`, which calls `R0043(actor, ord+0x0c, ord+0x14)` at `L06113`.
+- Row 8 (`L00108`) skips the gate when the target `ord+0x28` is the caster (`L06104`). Otherwise it calls the gate with `ord+0x28` and reach `ord+0x14` at `L00742`; on failure it calls `R0042(actor, ord+0x28)` at `L06107`.
+- `R0043` returns through `R0039` when the actor's sub-cell bytes are not both 0x80 (`L01890`..`L01891`). At a centre, with the edge distance `R0036` at most the stop byte (`L00580`), it calls `R0051(actor, target)` at `L06115` and passes the byte to the turn `R0056` at `L00754`. Beyond the stop byte it routes (`AI-414`).
+- Row 6 (`L00581`) calls the gate with `ord+0x0c` and `actor+0x12c` at `L00744`. On failure it calls `R0051(actor, ord+0x0c)` at `L14168` and passes the byte to `R0250` at `L13335`, which calls the turn at `L00753`: it turns in place and does not approach.
+- The gate calls `R0051(actor, target)` at `L14169` and compares the byte with `mover+0` at `L00577`. In rows 5, 6 and 8 the turn and the gate receive the same actor and the same order field, so a completed turn meets the facing test while both positions are unchanged.
+- Row 6's entry (`L00581`..`L14170`, `w07`) tests byte `[esi+0x4c]` against `dl` and, when that test is nonzero, compares byte `[esi+0x12c]` with `bl`. When the byte is below `bl` it reads `[[esi+0x14]+0x28]`; on a null it stores 0 to `ord+8` (`L00109`) and jumps to `L00010` without the gate (`L00744`) and without the turn (`L14168`). Every other path reaches the gate at `L14171`. Rows 5 and 6 call `R0051` with the actor and the order field the gate receives, so the heading value is one function of that pair. Which attacker class takes row 5 or row 6, and which can take the row 6 exit, is not shown: `w07` begins after the loads of `dl` and `bl`.
+- `R0051` has 15 direct callers and no dword reference in any section (`s01`). Besides the gate, the approach and row 6: acquisition `L01750`, `L01751` (`AI-ACQUIRE-002`); the Acid Stream and Teleport cell `L05167` (`MAGIC-238`); reacquisition `L14172` (`AI-361`); `L14173`, followed by a call of `R0250` at `L14174`; the face-and-mark arm `L14175`, turned at `L13267`; the group scorer `L14176`, `L14177` (`AI-COST-071`); the Prismatic Spray selector `L14178`, `L14179`, `L14180` (`MAGIC-242`); and the wrapper `R2199` at `L14181`.
+- EN and RU `rom.exe` have one SHA-256, so every clause holds for both.
+
+**Confidence.** **High** for each named call, argument and branch: `w06`, `w07`, `w08`, `w09` and `w14` list them. **Medium** that rows 5, 6 and 8 are the only routes that turn a unit before an attack or a unit-target cast. Population of `R0043` callers (`s02`, four): `L06113` (rows 5 and 8 approach) and `L06939` (read in `w07`: target `ord+0x18`, reach `ord+0x14`, a different order field) are read; `L14182` and `L14183` were not read. The reacquisition pair `L14173`/`L14174` is placed by adjacency and its body was not read; pending order 2 (`L06163`) installs action 3 with no gate and no turn (`AI-411`).
+
+**Unknown.** Which attacker class (melee, ranged or neither) takes row 5 or row 6, and which can leave row 6 without turning. The writers of `[esi+0x4c]` and of `actor+0x12c`, and the values of `dl` and `bl` at `L00581`, settle it; none was read. Whether `R2199` is reached by a computed call; a direct `CALL` sweep and a raw dword scan find none.
+
+### AI-444
+
+- The centre helpers `R0862` and `R0863` (`w02`) return, for an object's position record `obj+0x10`, the fine coordinate `(cell << 8) + sub` from bytes `+0`/`+4` (x) or `+1`/`+5` (y) (`R0165`, `R0166`, `w03`), plus `(size - 1) << 7`, where size is the low byte of `obj->vt+0x1c` (`L14184`..`L06158`). The sum is truncated to 16 bits (`L14185`, `MOV ax, si`).
+- `dx` = centre x of the target minus centre x of the actor (`L14186`); `dy` likewise (`L14187`), with y growing downward. With `a = |dx|` and `b = |dy|`, the branch tree `L14188`..`L06160` and the tail `L06161`..`L06092` give:
+
+  | quadrant | `b > 2a` | otherwise | `a > 2b` |
+  |---|---|---|---|
+  | `dx > 0`, `dy <= 0` | 0 | 32 | 64 |
+  | `dx > 0`, `dy > 0` | 128 | 96 | 64 |
+  | `dx <= 0`, `dy > 0` | 128 | 160 | 192 |
+  | `dx <= 0`, `dy <= 0` | 0 | 224 | 192 |
+
+  The middle column applies when neither strict test holds, so `b = 2a` and `a = 2b` give the diagonal. A vertical vector gives 0 or 128, a horizontal one 64 or 192. The zero vector falls in the last row's middle column and gives 224; it is not a separate branch.
+- The branch tree produces a 16-way index with boundaries at slopes 1/2, 1 and 2; the tail adds 1 to a non-zero index, clears bit 0 and shifts left by 4, so the slope-1 boundary vanishes and eight bytes remain.
+- The difference is taken between the two footprint centres. The anchor is the record's cell; a size-n footprint's centre lies `(n-1)*128` fine units right of and below the anchor's fine point. A centred size-1 actor sees a size-2 target anchored on its own cell at `(128, 128)`, heading 96. A size-4 actor sees a size-1 target anchored one cell right and down at `(-128, -128)`, heading 224 (`a680-footprint-near.tsv`, `a680-wrap.tsv`).
+- There is no clamp and no rounding to cells: a sub-cell offset moves the heading only through the signs and the 2:1 tests.
+- A centre past 65,535 wraps: a size-3 target anchored at cell x 255, sub 200, has centre x 200, so an actor at cell x 10 heads 192 toward it (`a680-wrap.tsv`).
+- Replay populations, each run of the original instructions equal to the table above (`summary.tsv`): cell offsets in [-12,12]^2 at sub 128, size 1 (625); offsets in [-2,2]^2 with sub bytes {0, 1, 127, 128, 129, 255} on each of four axes (32,400); offsets in [-12,12]^2 with 8 seeded sub draws each (5,000); sizes {1,2,3}^2 over offsets in [-6,6]^2 (1,521); vectors on and one unit beside slopes 2, 1/2 and 1 out to 65,280 fine units in four quadrants (8,544); axes and the zero vector (40); wrap and size-0/255 tokens (6); 20,000 seeded draws over every cell and sub byte with sizes 1 to 3; the 16,641 comparison vectors of `AI-447`; the 65 calls of its slope sweep (`shot-vs-unit-sweep.tsv`). The list totals 84,842. The [-4,4]^2 part of the 625-cell grid equals `AI-361`'s 81 outputs.
+- `R0051`, `R0862`, `R0863`, `R0165` and `R0166` use no floating-point instruction: no x87 or SSE mnemonic appears in `w01`..`w03`.
+- EN and RU `rom.exe` have one SHA-256.
+
+**Confidence.** **High.** The three bodies are complete (`w01`..`w03`; `R0051` is 106 instructions whose only calls are the four centre calls), and the instruction replay equals the integer law on every input above. The boundary vectors out to 65,280 exclude a cell-based difference, a clamp and a magnitude limit; the axis and zero rows exclude a special axis or no-direction case.
+
+**Unknown.** Which sizes and coordinates occur in play, and whether any shipped map places a footprint centre past 65,535. A census of the sizes and anchor cells in the shipped placements, with the size routine of each class, settles it.
+
+### AI-445
+
+- A Building is a rows 5 and 6 target like an actor (`UNIT-STRUCTREACH-063`), so its heading is `R0051(actor, building)` (`AI-443`). No listing of this experiment shows a Building target entering rows 5 and 6.
+- `R0862` and `R0863` are called directly, not through the vtable, on the target pointer (`L06155`..`L06156`). They read `obj+0x10` and `obj->vt+0x1c`. `UNIT-STRUCTREACH-063` gives the Building vtable `R0492` with `+0x1c` = `R1827`, which returns 1, so the Building's centre would be its position fine point with no footprint term. This experiment did not list `R1827` or the vtable, although the preregistration promised that re-read.
+- No instruction in `w01` or `w02` reads `+0x60`, `+0x61` or another field of the target besides `+0x10` and the vtable.
+
+**Confidence.** **High** that `R0051` reads `obj+0x10` and `obj->vt+0x1c` and no other field of the target, so the rectangle does not enter: the bodies are complete (`w01`, `w02`). **Medium** that the token size of a Building is 1 (reused from `UNIT-STRUCTREACH-063`; `R1827` and the vtable were not re-read here, and other structure classes were not read) and that `+0x10` is a Building position record laid out like an actor's (that layout was not read).
+
+**Unknown.** Which cell of the Building's rectangle its position record names, and its sub-cell bytes, so the heading relative to the drawn building.
+
+### AI-446
+
+- Row 9 (`L05042`) calls the point gate `R0086(actor, ord+0x3c, ord+0x14)` at `L06108`. On failure it jumps to `L14189` and calls `R0087(actor, ord+0x3c, ord+0x14)` at `L06112`. Row 0xf (`L00195`, `AI-STRUCTUSE-306`) does the same with `ord+0x0a` (`L13336`, `L14190`..`L06112`).
+- `R0087` calls the walk `R0178(actor, cell, reach)` at `L06117` (`w15`). The walk takes the larger axis distance between the position word `+2` and the cell (`L14191`..`L14192`). At a cell centre with that distance at most reach and reach non-zero (`L14193`..`L07003`) it calls `R0089(actor, cell)` at `L14194` and the turn at `L01933` (`w16`). Off centre it calls `R0039` and returns (`L06897`..`L06898`).
+- The point gate compares `mover+0` with `R0089(actor, cell)` at `L06109` (`w06`): the turn and the gate use one routine and one pair.
+- `R0089` (`w04`, 99 instructions, no call): `dx` = the cell argument's low byte minus position byte `+0`, `dy` = its bits 8..15 minus position byte `+1` (`L14195`..`L14196`). Its branch tree and tail (`L14197`..`L14198`) are those of `AI-444`, so the `AI-444` table holds with whole-cell `dx`, `dy`. The sub-cell bytes, the position word `+2`, the argument's upper 16 bits and the footprint size do not enter. A target cell equal to the anchor cell gives 224.
+- Replay: every cell difference in [-255,255]^2 (261,121) with seeded sub-cell bytes and `+2` word, and 20,000 seeded draws with a random upper word, all equal the model.
+- `R0089` has six direct callers (`s01`): the wall direction `L14199` (`MAGIC-AREACELL-039`), the point gate `L14200`, the stop arm `L14194`, the wait arm `L14201`/`L14202` (`MOVE-WAIT-008`), and the wrapper `R2200` at `L14203`, which has no direct caller and no dword reference (`s02`).
+- A size-n caster heads from its anchor cell, where `AI-444` would use its centre. EN and RU `rom.exe` have one SHA-256.
+
+**Confidence.** **High** for the routine, its law and the call sites named. **Medium** that the stop arm is the only turn toward the cell before the cast: the walk was read through `L14204` and at its wait arm, and its reach-0 branch `L07004` was not read.
+
+**Unknown.** The reach-0 arm, and whether the position word `+2` can differ from bytes `+0`/`+1` while the walk runs, which would let the distance and the heading name different cells.
+
+### AI-447
+
+- Four routines produce a direction, each its own body with no call to another (`bodies.tsv`): `R0051` between actor centres (`AI-444`); `R0089` between anchor cells (`AI-446`); `R1356` from the actor's fine point to a cell centre, by signs alone (`MOVE-115`); and the projectile helper `L02828` (`ANIM-138`), 16 values with boundaries at slopes 1/4, 3/4, 4/3 and 4. `L02828` has two direct callers, `L13633` and `L02827` (`s01`).
+- `R0051` and `L02828` were both run on every fine vector in [-64,64]^2, in their own coordinate arguments. The shot index equals the unit byte divided by 16 on 8,320 nonzero vectors and differs by one sixteenth on 8,320; no vector differs by more (`shot-vs-unit.tsv`). The zero vector gives 4 for the shot and 224 (14) for the unit.
+- Every comparison in both helpers is homogeneous in `|dx|` and `|dy|`, so agreement depends on the direction alone while the products do not wrap. For `0 < b <= a` the two agree when `b <= a/4` or `b > 3a/4`, and differ by one sixteenth when `a/4 < b <= 3a/4`. For `b > a` they agree when `b < 4a/3` or `b >= 4a`, and differ when `4a/3 <= b < 4a`. At `dx = 64` the shot turns from 4 to 3 at `|dy| = 17` and the unit from 64 to 32 at `|dy| = 32` (`shot-vs-unit-sweep.tsv`).
+- EN and RU `rom.exe` have one SHA-256.
+
+**Confidence.** **High** for the routine identities and for the comparison on the replayed vectors and the homogeneous extension. **Medium** for what a player sees: the shot's vector runs from its launch point (`MAGIC-263`, `ANIM-139`) and the unit's between centres, so in play the two are not measured on one vector.
+
+**Unknown.** Whether shot coordinates and unit fine centres share one unit and origin; the comparison here holds only for equal difference vectors.

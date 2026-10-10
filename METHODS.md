@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3327. Observation: 95. Static analysis: 2769. Mixed: 463.
+Claims labelled: 3334. Observation: 95. Static analysis: 2776. Mixed: 463.
 
 ## Ledger ai
 
@@ -28,7 +28,7 @@ Claims labelled: 3327. Observation: 95. Static analysis: 2769. Mixed: 463.
 | AI-FORMCMD-315 | static analysis | ✔ promoted |
 | AI-FORMTRIGGER-316 | static analysis | ✔ promoted |
 | AI-FORMACTIVE-317 | static analysis | ✔ promoted |
-| AI-STRUCTUSE-306 | static analysis | ✔ promoted |
+| AI-STRUCTUSE-306 | static analysis | ✔ promoted (amended) |
 | AI-SPELLIDENT-286 | static analysis | ✔ promoted |
 | AI-SPELLPOP-287 | static analysis | ✔ promoted |
 | AI-SPELLCAP-288 | static analysis | ✔ promoted |
@@ -232,7 +232,7 @@ Claims labelled: 3327. Observation: 95. Static analysis: 2769. Mixed: 463.
 | AI-340 | static analysis | ● active |
 | AI-341 | static analysis | ● active |
 | AI-360 | static analysis | ● active |
-| AI-361 | static analysis | ● active |
+| AI-361 | static analysis | ● active (amended) |
 | AI-362 | static analysis | ● active |
 | AI-363 | static analysis | ● active |
 | AI-364 | static analysis | ● active |
@@ -278,6 +278,11 @@ Claims labelled: 3327. Observation: 95. Static analysis: 2769. Mixed: 463.
 | AI-418 | static analysis | ● active |
 | AI-437 | static analysis | ● active |
 | AI-438 | static analysis | ● active |
+| AI-443 | static analysis | ✔ promoted |
+| AI-444 | static analysis | ✔ promoted |
+| AI-445 | static analysis | ✔ promoted |
+| AI-446 | static analysis | ✔ promoted |
+| AI-447 | static analysis | ✔ promoted |
 
 ## Ledger alm
 
@@ -1321,6 +1326,8 @@ Claims labelled: 3327. Observation: 95. Static analysis: 2769. Mixed: 463.
 | MOVE-107 | static analysis | ✔ promoted |
 | MOVE-113 | static analysis | ● active |
 | MOVE-114 | static analysis | ● active |
+| MOVE-115 | static analysis | ✔ promoted |
+| MOVE-116 | static analysis | ✔ promoted |
 | MOVE-119 | static analysis | ✔ promoted |
 | MOVE-120 | static analysis | ✔ promoted |
 | MOVE-121 | static analysis | ✔ promoted |
