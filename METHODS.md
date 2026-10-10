@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3218. Observation: 95. Static analysis: 2669. Mixed: 454.
+Claims labelled: 3228. Observation: 95. Static analysis: 2679. Mixed: 454.
 
 ## Ledger ai
 
@@ -454,7 +454,7 @@ Claims labelled: 3218. Observation: 95. Static analysis: 2669. Mixed: 454.
 | ANIM-119 | static analysis | ● active |
 | ANIM-120 | static analysis | ● active |
 | ANIM-PROJ-025 | static analysis | ● active |
-| ANIM-PROJ-026 | static analysis | ● active |
+| ANIM-PROJ-026 | static analysis | ● active (partially retracted) |
 | ANIM-CAST-027 | static analysis | ● active |
 | ANIM-PHASECLOCK-028 | static analysis | ● active (amended, partially retracted) |
 | ANIM-BOLTDRAW-034 | static analysis | ✔ promoted (partially retracted) |
@@ -518,8 +518,12 @@ Claims labelled: 3218. Observation: 95. Static analysis: 2669. Mixed: 454.
 | ANIM-135 | static analysis | ✔ promoted |
 | ANIM-136 | static analysis | ✔ promoted |
 | ANIM-138 | static analysis | ✔ promoted |
-| ANIM-139 | static analysis | ✔ promoted |
-| ANIM-140 | static analysis | ✔ promoted |
+| ANIM-139 | static analysis | ✔ promoted (amended) |
+| ANIM-140 | static analysis | ✔ promoted (amended) |
+| ANIM-142 | static analysis | ✔ promoted |
+| ANIM-143 | static analysis | ✔ promoted |
+| ANIM-144 | static analysis | ✔ promoted |
+| ANIM-145 | static analysis | ✔ promoted |
 
 ## Ledger databin
 
@@ -2312,13 +2316,19 @@ Claims labelled: 3218. Observation: 95. Static analysis: 2669. Mixed: 454.
 | SAV-1172 | static analysis | ● active (amended) |
 | SAV-1173 | static analysis | ● active |
 | SAV-1180 | static analysis | ✔ promoted |
-| SAV-1188 | static analysis | ✔ promoted |
-| SAV-1189 | static analysis | ✔ promoted |
-| SAV-1190 | static analysis | ✔ promoted |
+| SAV-1188 | static analysis | ✔ promoted (amended) |
+| SAV-1189 | static analysis | ✔ promoted (amended) |
+| SAV-1190 | static analysis | ✔ promoted (amended) |
 | SAV-1191 | static analysis | ✔ promoted |
 | SAV-1192 | static analysis | ✔ promoted |
 | SAV-1193 | static analysis | ✔ promoted |
 | SAV-1194 | static analysis | ● active |
+| SAV-1196 | static analysis | ✔ promoted |
+| SAV-1197 | static analysis | ✔ promoted |
+| SAV-1198 | static analysis | ✔ promoted |
+| SAV-1199 | static analysis | ✔ promoted |
+| SAV-1200 | static analysis | ✔ promoted |
+| SAV-1201 | static analysis | ✔ promoted |
 
 ## Ledger session
 

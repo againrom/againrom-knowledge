@@ -1,5 +1,11 @@
 # Overturn history
 
+## Projectile trail array fields
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ANIM-PROJ-026` (trail-array field roles only; frame formula, refusals and smoke-sheet clauses stand) | Verbatim: "(`+0x13c` count, `+0x140` pointer)" | Medium | [EXP-0508](../experiments/EXP-0508-shot-remainder/), ANIM-140, ANIM-142 | The trail loop tests and bounds the count at `+0x140` and indexes the data pointer at `+0x13c`; the projectile constructor's CArray at `+0x138` has data `+0x13c` and count `+0x140`. | **REFUTED** — partially retracted |
+
 ## Tip reader callers and the pre-create cycle
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

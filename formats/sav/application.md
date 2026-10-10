@@ -141,6 +141,16 @@ a mission entry or a collect-all clear; the client-world constructor is
 reached only from one virtual method.
 — SAV-1189, SAV-1190
 
+Four searches over the whole `.text` decode, by any-base operand, derived
+base, callee and bulk write, find no other writer; 1,909 bulk-write sites
+with an unresolved destination or length remain unsearched. — SAV-1200
+
+The client world is built once, from the application object's InitInstance
+slot. The mission loader's two non-LOAD callers pass flag 0, which skips the
+FreeIndex arm; only the LOAD path passes 1. Within the found writers the counter is
+therefore 0 once per process and is replaced only by a LOAD. This is Medium;
+a native watch across a mission change would settle it. — SAV-1201
+
 The sixteen leaves are the whole saved record. The projectile trail, which the
 driver fills for pictures 10 and 12, is not saved and starts empty after LOAD. The start point is not saved
 either: `x/y` is the current point. A dead shooter's pending damage is not part

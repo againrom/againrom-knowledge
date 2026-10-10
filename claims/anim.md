@@ -1121,7 +1121,7 @@ type.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | ANIM-PROJ-025 | The projectile's own driver, read — closing `ANIM-VT-012`'s Unknown. A cast's map object lives by a COUNTDOWN the spawner sets, and a homing shot re-aims every tick. | High / Medium | ● active | [EXP-0139](../experiments/EXP-0139-spell-pictures/) |
-| ANIM-PROJ-026 | The projectile's draw: the frame index is `Phases * facing + phase`, `Flip` HALVES the sheet exactly as it does for a unit, and two sprites outside the registry are the smoke. | High / Medium | ● active | [EXP-0139](../experiments/EXP-0139-spell-pictures/) |
+| ANIM-PROJ-026 | The projectile's draw: the frame index is `Phases * facing + phase`, `Flip` HALVES the sheet exactly as it does for a unit, and two sprites outside the registry are the smoke. | High / Medium | ● active (partially retracted) | [EXP-0139](../experiments/EXP-0139-spell-pictures/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
 | ANIM-CAST-027 | (rom.exe) The projectile draw is not uniform: `R0556` switches on the picture id, with six special arms and a smoke trail in the default one. | High / Unknown | ● active | [EXP-0140](../experiments/EXP-0140-cast-art-drawn/) |
 | ANIM-PHASECLOCK-028 | (rom.exe) A projectile advances one sheet frame every TWO game ticks, and four picture ids replace that clock with their own. | High | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
 | ANIM-BOLTDRAW-034 | Each 8-byte bolt point is stamped once; all points of one link share its sheet frame, with picture 36 adding five times the link tag and both arms centring by eight pixels. | High | ✔ promoted (partially retracted) | [EXP-0178](../experiments/EXP-0178-bolt-path/); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
@@ -1210,6 +1210,11 @@ shipped `.16a` or `.256`'s bytes
 `SUB` or `CMP` in a dumped listing, and the two refusals are their own
 conditional jumps) / Medium (the palette fork, the lazy load and the smoke
 trail, which are decompiled)
+
+**Amended.** The clause "(`+0x13c` count, `+0x140` pointer)" is retracted
+([`retracted.md`](retracted.md)): the trail count is `+0x140` and the data
+pointer `+0x13c` (`ANIM-140`). `ANIM-142` gives the frame each trail point
+draws. The rest of the claim stands.
 
 ### ANIM-CAST-027
 
@@ -2586,8 +2591,8 @@ writer or audibility census.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | ANIM-138 | The direction helper `L02828` maps a coordinate difference to one of 16 values by signed integer slope comparisons with quadrant boundaries 1/4, 3/4, 4/3 and 4; the zero vector gives 4. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
-| ANIM-139 | Every action-1 projectile driver call with non-zero actionsegments that resolves actiontarget recomputes actiondir from the shot's current x/y to the target's current centre, then copies actiondir to dir. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
-| ANIM-140 | The projectile driver's trail arm appends the pre-move point to the trail array at `+0x138` for pictures 10 and 12 only, keeping at most six points and dropping the oldest; other trail writers were not searched. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| ANIM-139 | Every action-1 projectile driver call with non-zero actionsegments that resolves actiontarget recomputes actiondir from the shot's current x/y to the target's current centre, then copies actiondir to dir. | High | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| ANIM-140 | The projectile driver's trail arm appends the pre-move point to the trail array at `+0x138` for pictures 10 and 12 only, keeping at most six points and dropping the oldest; other trail writers were not searched. | High | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
 
 ### ANIM-138
 
@@ -2653,6 +2658,11 @@ missing target while `+28/+2c` hold unrelated values.
 **Unknown.** Which call comes first after a LOAD relative to the first draw;
 no native run was made. The direction writes of the picture-13+ arms.
 
+**Amended.** `ANIM-143` settles the picture-13+ Unknown: no picture-13+ arm
+writes actiondir or stores into dir anything other than actiondir; arm 51 and
+the travel arm repeat the copy made at `L13256`. `ANIM-144` gives the
+producers' values.
+
 **Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
 `evidence/disasm-direction-start.txt`, `evidence/direction/later-direction.tsv`.
 
@@ -2688,5 +2698,168 @@ gives pictures 1, 2 or 5 a trail. A typed census of stores to those fields over
 `.text` would settle it. What the
 drawer's slot `+0x18` does with the index argument was not read.
 
+**Amended.** `ANIM-142` settles the drawer Unknown: the index is the frame
+number in the smoke sheet, and the loop is reached only for a
+Palette-non-zero row.
+
 **Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
 `evidence/disasm-smoke.txt`, `evidence/vtables.txt`, `evidence/smoke-replay.txt`.
+
+## Projectile trail frame and direction for pictures 13 and above
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-142 | Trail point i, oldest first, draws frame i of the smoke0 sheet for picture 10 or smoke1 for picture 12, only for a Palette-non-zero row; slot `R1785` reads the frame without a bound and centring uses frame 0's size. | High | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| ANIM-143 | The projectile driver writes actiondir only at `L13444` and dir only as a copy of actiondir; arm 51 and the travel arm repeat the copy made at `L13256`, and a call with actionsegments 0 writes neither. | High | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| ANIM-144 | The cast producer sets a record's dir and actiondir to the caster's dir, then, when the caster has a target, actiondir toward the caster's actionx/y; client arms 0x86, 0x8b and 0x8c leave both at the constructor's 0. | High | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| ANIM-145 | All 21 shipped projectile rows at picture 13 or above have RotationPhases 1 and Flip 0, so dir selects neither their frame nor a mirror and actiondir is not read by the draw; a customised row could make dir select both. | High | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+
+### ANIM-142
+
+- The trail loop of the draw `R0556` (`L13448..L13609`) runs for
+  i = 0..count−1, count at `+0x140`, data at `+0x13c`. For each point it calls
+  the sheet's slot `+0x18` with five arguments: x, y, frame = i, the surface
+  argument `[esp+0x40]`, and 0 (`L13610..L13611`).
+- The loop is reached only from the default draw arm's Palette-non-zero path
+  (`L13612..L13448`). A row with Palette 0 blits its body at
+  `L13449..L13613` and returns at `L13614` without the loop. Shipped rows
+  10 and 12 have Palette 1.
+- The sheet is `[L02869 + 4k]`, k = 0 for picture 10 and 1 for picture 12
+  (`L13615..L13616`). The loader loop `L13617..L13618` fills
+  `[L02869]` and `[L13619]` from `graphics\projectiles\smoke%d\sprites.16a`
+  for d = 0 and 1.
+- The sheet vtable `L07521` has slot `+0x18` = `R1785`. It loads the frame
+  record `[this+0xc][i]` (`L13620`) with no count test, takes the surface from
+  the fourth argument or `this+0x1c` when it is 0, and blits through
+  `R1518` when the fifth argument is 0, otherwise `R1784`.
+- Centring: before each point the loop calls slot `+0x20` (`R1787`) and
+  slot `+0x24` (`R0817`) with frame 0, which return frame 0's width and
+  height, and subtracts half of each. The frame drawn and the frame used for
+  centring differ when frame sizes differ.
+- Sheets (EN and RU, same SHA-256): smoke0 holds 6 frames of 12x12 and smoke1
+  6 frames of 24x24.
+- With the driver's six-point bound (`ANIM-140`), the newest point draws
+  frame count−1 and, once six points are held, each append shifts every older
+  point's frame down by one, so a point fades from frame 5 to frame 0.
+
+**Confidence.** High: complete listings of the loop, the slot, the two size
+slots and the loader; the sheet frame counts are read from both installs.
+
+**Unknown.** A customised trail sheet with fewer frames than trail points:
+the slot reads past the frame array. What `R1518` does with the frame was
+not read.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q4-listings.txt`, `evidence/inputs.txt`.
+
+### ANIM-143
+
+- A store census of the driver `R0558..L13621` finds four stores to dir
+  `+0x6c` or actiondir `+0x85`:
+  - `L13444`: actiondir := `L02828` from the shot's current x/y to the
+    found target's `+0x58/+0x5c`, on an action-1 call whose target lookup
+    succeeds (`ANIM-139`);
+  - `L13256`: dir := actiondir, before the picture switch, for every picture;
+  - `L13622`: dir := actiondir in arm 51;
+  - `L13445`: dir := actiondir in the travel arm.
+- The driver returns before any of them when actionsegments `+0xa0` is 0
+  (`L02817`).
+- Picture switch (bias 13, byte table `L02879`, dword table `L03000`):
+  13 → `L03001`; 20, 30 → `L05684`; 18, 24, 28, 40, 44, 48, 52, 54, 56,
+  62, 64 → `L05687`; 60 → `L02880`; 34, 36 → `L05580`; 51 → `L13623`;
+  every other picture from 14 to 63 → `L13624`, which enters the travel arm
+  at `L05578`.
+- No picture-13+ arm writes actiondir or stores into dir anything other than
+  actiondir. Arm 51 (`L13622`) and the travel arm (`L13445`), which the
+  default arm `L13624` enters for every picture from 14 to 63 without its
+  own arm, store dir := actiondir; nothing writes actiondir after `L13256`
+  on the same call, so they repeat the value already stored.
+- The driver calls two routines with the record as `this`: the direction
+  helper `L02828` at `L02827`, and the record's vtable `L02587` slot
+  `+0x50` = `R1089` at `L05519`, on every action-1 call with non-zero
+  actionsegments. `L02828` (73 instructions) has no memory store.
+  `R1089` (212 instructions, intra-procedural) has no operand at `+0x6c`
+  or `+0x85`; its direct callees `L05558`, `R1093`, `L13625`,
+  `L13626`, `L13627`, `R1090` and `R0525` were not read. The other
+  driver calls take another object as `this`.
+- So for every picture the record's dir after a driver call with
+  actionsegments non-zero equals its actiondir, and actiondir changes only
+  when an action-1 target is found. Without a found target, both keep the
+  values the producer or LOAD gave.
+
+**Confidence.** High, bounded to direct stores in the driver body and in
+`L02828` and `R1089`; the switch tables are read in full.
+
+**Unknown.** Stores by the callees of `R1089`, by writers outside the
+driver and by the producers of `ANIM-144`; no census of `+0x6c`/`+0x85` stores
+on projectile records over all of `.text` was made.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q5-listings.txt`.
+
+### ANIM-144
+
+- The base constructor `R1652`, called by the projectile constructor at
+  `L13628`, stores 0 into `+0x6c` (`L13629`) and `+0x85` (`L13630`).
+- Cast producer `R0620`: `L13393..L13631` copies the caster's dir
+  `+0x6c` into the record's actiondir (low byte) and dir. When the caster's
+  target word `+0x86` is non-zero (`L13632`), the record takes the target's
+  `+0x58/+0x5c/+0x10` as actionx/y/z and `L13633` sets actiondir :=
+  `L02828` with the caster as object, so from the caster's current
+  `+08/+0c` to the caster's own actionx/y `+0x88/+0x8c`. With target 0 the
+  record copies the caster's actionx/y/z and actiondir stays the caster's dir.
+  The record's action is 1 (`L05376`); actionsegments comes from a picture
+  switch and is 0 for pictures outside its arms (`L13634..L03010`).
+- The picture-60 second record is built by the copy constructor `L03008`,
+  whose base `R2159` copies `+0x6c` (`L13635`) and `+0x85` (`L13636`)
+  from the first record.
+- Client arms 0x86 (`L03098..L13637`), 0x8b (`L05320..L13638`) and 0x8c
+  (`L05321..L13639`) build records with `R0609` and store neither field.
+  Arm 0x86 builds only for an odd picture, sets target 0 and actionx/y equal to
+  x/y; arms 0x8b and 0x8c are `SAV-1199`.
+- Combined with `ANIM-143`: a cast record with a found target turns toward it
+  on each driver call; a 0x86, 0x8b or 0x8c record without a found target
+  keeps dir 0, and a cast record without a target keeps the caster's dir.
+
+**Confidence.** High: listings of the constructor stores, the producer
+windows, the copy constructor and the three client arms.
+
+**Unknown.** The unit shot `R0603`'s own direction store was not part of
+this question; `SAV-1130` lists its leaves.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q5-listings.txt`, `evidence/q2-listings.txt`.
+
+### ANIM-145
+
+- Draw switch on picture (bias 7, byte table `L02868`, dword table
+  `L05529`): 7 → `L13640`, 34 → `L05530`, 36 → `L05531`,
+  51 → `L13641`, 60 → `L13642`, 20 → `L13614` (the routine's exit: no
+  body is drawn), every other picture → `L13612`.
+- Before the switch (`L02852..L13643`) the draw computes facing =
+  (dir − 8) & 15; with `Flip` non-zero and facing above 8 it sets a mirror flag
+  and uses 16 − facing. Frame = Phases × facing + phase, or frame = phase when
+  RotationPhases `+0x18` is 1 (`ANIM-PROJ-026`). The loader
+  `L13644..L13645` reads RotationPhases with default 16. actiondir is not
+  read by the draw.
+- The default arm passes that frame and the mirror flag to the sheet. The
+  special arms read neither: arm 7 calls `R0605` with no frame, arms 34 and
+  36 draw a point list with frames from phase `+0x70`, arms 51 and 60 pass a
+  frame from phase.
+- EN `projectiles/projectiles.reg` (31 rows; RU has the same SHA-256) has 21
+  rows at picture 13 or above: 13, 15, 17, 18, 20, 23, 24, 25, 27, 28, 30, 34,
+  36, 40, 44, 47, 51, 52, 54, 60, 62. Each has RotationPhases 1 and Flip 0.
+- So no shipped picture-13+ row selects a frame or a mirror from dir; a
+  customised row with RotationPhases other than 1 or with Flip set would
+  through the default arm.
+
+**Confidence.** High: the facing computation, both switch tables and every
+special arm are complete listings, and the registry rows are measured on both
+installs.
+
+**Unknown.** The frame the special arms 7, 34, 36, 51 and 60 select is outside
+this question.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q5-listings.txt`, `evidence/q5-projectile-rows.tsv`,
+`evidence/q4-listings.txt`.

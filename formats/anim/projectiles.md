@@ -4,7 +4,8 @@
 
 ## Projectile state
 
-`ANIM-PROJ-025`, `ANIM-PROJ-026`. `CProjectile` overrides body draw, shadow and driver,
+`ANIM-PROJ-025`, `ANIM-PROJ-026` (its trail-array field clause is retracted;
+`ANIM-140` gives count `+0x140` and data `+0x13c`). `CProjectile` overrides body draw, shadow and driver,
 so nothing above this heading applies to it. The engine's own field names come from its savegame
 section `[Prj%d]`:
 
@@ -74,16 +75,67 @@ actiondir and aim point. dir follows actiondir on every action-1 call with
 non-zero actionsegments; the finished return and the non-action-1 arm leave
 dir unchanged. — ANIM-139
 
+That recompute is the driver's only actiondir write, and its dir writes only
+copy actiondir: before the picture switch, in arm 51 and in the travel arm.
+No arm for pictures 13 and above writes actiondir or stores into dir anything
+other than actiondir; arm 51 and the travel arm repeat the copy made before
+the switch on the same call. A call with actionsegments 0 writes neither. The
+statement is bounded to direct stores in the driver, the direction helper and
+the record's slot `+0x50`, whose callees are unread. — ANIM-143
+
+Producers give the starting values. The projectile constructor sets both to
+0. The cast producer copies the caster's dir into both; with a caster target
+it then sets actiondir from the caster's x/y toward the caster's actionx/y.
+The picture-60 second record copies both from the first. Client arms 0x86,
+0x8b and 0x8c leave both 0, so such a record without a found target keeps
+dir 0. — ANIM-144
+
+The draw reads dir only, through facing = (dir - 8) & 15, and only the default
+arm uses it, for the frame and, with Flip, a mirror. All 21 shipped rows at
+picture 13 or above have RotationPhases 1 and Flip 0, so their frame is the
+phase and dir selects nothing; a customised row with RotationPhases other than
+1 or Flip set would select by dir. — ANIM-145
+
 A unit shot starts at `shooter.x/y + 8 * (ShootOffset[pair] - Center)`, where
 the class array holds eight XY pairs and `pair = ((dir - 8) & 14) / 2`, so
 S, SW, W, NW, N, NE, E and SE use pairs 0..7. Its base is the shooter's current
 x/y; a cast uses the cached centre and has a fallback. — SAV-1188
+
+An empty ShootOffset re-reads the key from the parent's own section, one
+level only. A class still without dwords has data pointer 0, and the unit
+shot's start window reads address 0x00..0x38 after it built the record. On
+Win32 that null region is never mapped, so the read faults; what follows the
+fault is Unknown. Every class in EN and RU `units/units.reg` with a resolved
+Projectile, nine classes, holds its own 16 dwords. — SAV-1196
+
+The unit shot admits any target the client hash holds. A structure is in that
+hash, so a ranged attack at a structure builds an ordinary record whose
+segments come from the structure's `+08/+0c` and whose driver homes on its
+`+0x58/+0x5c`; whether that is the same anchor as a unit's is Unknown, and
+that play sends such an attack is Medium. — SAV-1197
+
+The release test checks only that the class Projectile is non-zero and copies
+it into the picture unbounded, so a class picture of 13 or above builds a
+record that the driver and draw arms for that picture then govern; no shipped
+class has one. — SAV-1198
+
+Client arms 0x8b and 0x8c build records themselves, not through the unit
+shot. The spell senders emit 0x8b, picture 2 × spell + 8, when the source has
+no client ID, from actor states 0xd (target) and 0xe (cell); 0x8c builds
+picture 36. The record starts at the cell centre with actionphase -1, action
+1, the message's segments and the next counter ID. — SAV-1199
 
 The driver appends trail points for pictures 10 and 12 only: at most six
 pre-move points, packed `(y << 16) | x`, appended after each travel step with
 the oldest dropped. The draw visits the trail oldest first at x/8, y/8 and the
 shot's current height. The driver appends none for pictures 1, 2 and 5 (arrow,
 bolt, rock); other trail writers were not searched. — ANIM-140
+
+Trail point i draws frame i of smoke0 for picture 10 or smoke1 for picture
+12, so the oldest point draws frame 0 and the newest frame count - 1; each
+sheet holds 6 frames (12x12 and 24x24). The receiver reads the frame without a
+bound, and every point is centred on frame 0's size. The trail loop runs only
+for a row with Palette non-zero; rows 10 and 12 have Palette 1. — ANIM-142
 
 SAVE does not write the trail; a loaded record starts with an empty one, and
 the driver refills it for pictures 10 and 12. — SAV-1193

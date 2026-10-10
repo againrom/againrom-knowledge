@@ -15020,9 +15020,9 @@ occurrence. No first-archive value is supplied.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1188 | The unit shot starts at the shooter's current x/y plus 8 × (ShootOffset pair − Center), the pair chosen by ((dir − 8) & 14) / 2 from eight XY pairs; the cast producer reads the same class data from the cached centre. | High / Medium | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
-| SAV-1189 | Eight instructions store the projectile counter at client world `+0xa0c`: zero in the world constructor, old + 1 at six record insertions and the low u16 of FreeIndex at LOAD; no other writer was found in the decoded population. | High / Medium | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
-| SAV-1190 | No found writer resets the projectile counter at a mission boundary: its one zero store is in the client-world constructor, reached only from virtual method `R0326`, and the collect-all clears do not write it. | Medium | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1188 | The unit shot starts at the shooter's current x/y plus 8 × (ShootOffset pair − Center), the pair chosen by ((dir − 8) & 14) / 2 from eight XY pairs; the cast producer reads the same class data from the cached centre. | High / Medium | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1189 | Eight instructions store the projectile counter at client world `+0xa0c`: zero in the world constructor, old + 1 at six record insertions and the low u16 of FreeIndex at LOAD; no other writer was found in the decoded population. | High / Medium | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1190 | No found writer resets the projectile counter at a mission boundary: its one zero store is in the client-world constructor, reached only from virtual method `R0326`, and the collect-all clears do not write it. | Medium | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
 | SAV-1191 | LOAD sets the projectile counter to the low u16 of `Projectiles/FreeIndex`, 0 when absent, before it inserts the saved records under their document IDs; SAVE writes the same counter. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
 | SAV-1192 | A shooter's pending attack damage, ranged included, is never applied once an actor tick sees its HP at or below 0: that tick overwrites the countdown and both damage evaluators refuse an attacker at HP 0 or less. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
 | SAV-1193 | SAVE writes no projectile trail point and LOAD builds each record with an empty trail; the driver's trail arm then refills it for pictures 10 and 12, and other trail writers were not searched. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
@@ -15056,6 +15056,11 @@ Medium for 8 fine units per map pixel, the scale `SAV-1130` already grades.
 
 **Unknown.** The first drawn position after the shot is built; a customised
 registry with fewer than 16 dwords (the window reads without a bound).
+
+**Amended.** `SAV-1196` narrows the inheritance clause: an empty array
+re-reads the key from the parent's own section, one level only, rather than
+taking the parent's resolved array. `SAV-1196` gives the start window with
+no array.
 
 **Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
 `evidence/disasm-direction-start.txt`, `evidence/class-key-names.txt`,
@@ -15091,6 +15096,10 @@ or a width other than a 16-bit MOV at `+0x38` would not be seen.
 **Unknown.** A writer outside the decoded population. A native watchpoint on
 the two bytes would settle it.
 
+**Amended.** `SAV-1200` widens the search population with derived-base,
+callee and bulk-write searches; the writer list is unchanged and its
+completeness stays Medium.
+
 **Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
 `evidence/identity/counter-census.txt`, `evidence/identity/counter-ranges.txt`.
 
@@ -15120,6 +15129,10 @@ and a whole-object copy of the world were not excluded.
 
 **Unknown.** Whether `R0326` runs more than once per process. A watchpoint
 across a mission change would settle the reset question.
+
+**Amended.** `SAV-1201` identifies `R0326` as the application object's
+InitInstance slot and reads the mission loader's three callers; the grade
+stays Medium.
 
 **Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
 `evidence/identity/counter-census.txt`, `evidence/identity/counter-ranges.txt`,
@@ -15224,3 +15237,213 @@ a pending hit (no destructor census).
 
 **Evidence.** [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/),
 `evidence/disasm-shooter-death.txt`.
+
+## Unit-shot admission, empty shoot offsets and the projectile counter
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1196 | With no ShootOffset dwords after the one-level parent re-read, the data pointer is 0 and `L13646` reads address 0x00..0x38, in the Win32 null region, after the record is built and before x is stored. | High / Unknown | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1197 | A ranged attack whose target word names a structure builds an ordinary unit-shot record: the structure is in the same client hash, `R0603` measures segments from its `+08/+0c` and the driver homes on its `+0x58/+0x5c`. | High / Medium | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1198 | A shooter whose class Projectile is 13 or above is admitted like any other: the release test checks only Projectile non-zero and `R0603` copies the value into the record's picture with no bound. | High | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1199 | Client arms 0x8b and 0x8c build records directly, not through `R0603`; the simulation sends 0x8b from the spell senders `R0617`/`R0618` when the source has no client ID and 0x8c from `R0619`, in actor states 0xd and 0xe. | High | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1200 | Four searches over a 554,699-instruction linear `.text` decode find the same eight writers of the projectile counter as `SAV-1189`; 1,909 bulk-write sites with an unresolved destination or length remain unsearched. | High / Medium | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+| SAV-1201 | The client world is built once, from the application object's InitInstance slot; the mission loader's two non-LOAD callers pass flag 0, skipping the FreeIndex arm, so no found writer resets the counter at a mission start or end. | Medium | ✔ promoted | [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
+
+### SAV-1196
+
+- The class constructor `L13647` builds the ShootOffset CArray at `+0xe8`
+  through `L05586`, which sets data `+0xec` and count `+0xf0` to 0.
+- The array reader `R1061` returns 0 without touching the array when the
+  key is absent. A present key with no values calls SetSize(0) (`R1198`),
+  which frees the data and stores 0.
+- Inheritance `L13457..L13459`: when the own count is 0 and the parent
+  index is not −1, the loader re-reads the `ShootOffset` key from the parent's
+  own `Unit%d` section, whose path `L13648..L13649` builds from the
+  parent's section index. It does not copy the parent's resolved array, so a
+  class two levels below the class that holds the key gets none. Projectile
+  `+0xd4` instead defaults to the parent's resolved value
+  (`L13650..L13651`).
+- Unit shot `R0603`: the record is allocated and constructed
+  (`L13652..L03005`) before the window `L13450..L13451`. At
+  `L13258` it loads data `+0xec`, and `L13646` reads `[data + 4i]` with
+  i = (dir − 8) & 14.
+- The original window, run in Unicorn with page 0 unmapped and data 0 for all
+  16 facings, stops at `L13646` on the emulator's unmapped-read hook,
+  reading 0x00..0x38, and stores no x. The run adds no discrimination beyond
+  the listing.
+- That the original faults rests on a platform premise: the lowest pages of a
+  Win32 process are never mapped, so a read of 0x00..0x38 raises an access
+  violation. The Unicorn run models that premise by leaving page 0 unmapped.
+- EN and RU `units/units.reg` (34 sections, same SHA-256): every class with a
+  resolved Projectile (14, 15, 24, 26, 27, 65, 70, 71, 79) holds its own 16
+  ShootOffset dwords, so the case needs a customised registry.
+
+**Confidence.** High for the loader, the inheritance rule and the faulting
+read, given the Win32 null-region premise. Unknown what follows the access
+violation.
+
+**Unknown.** Whether a structured exception handler catches the fault and
+what the record and the shooter then hold. A run of the original with such a
+registry would settle it. A non-empty array shorter than 16 dwords stays
+`SAV-1188`'s Unknown.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q1-listings.txt`, `evidence/q1-null-array-run.tsv`,
+`evidence/q1-units-registry.tsv`.
+
+### SAV-1197
+
+- Client arm 0x82 (`L04899`) inserts a structure object (constructors
+  `L03225`, `R1842` over the drawable base `R1652`) into the client
+  hash at world `+0x9b8`, keyed by message `+0xa`. The simulation sender
+  `L13653..L13654` writes the building's `+4` there.
+- The 0x72 builder `R1064` writes the actor's target `+0x5c` word `+4` at
+  message `+0xe` with no type test; `R0549` chooses 0x72 when the reach is
+  above 1.
+- Client arm 0x72 (`L09206`) looks up the shooter in `+0x9b8`; a missing
+  shooter logs "Invalid unit #%d. Command Ranged Attack." and builds nothing.
+  It sets the shooter's action to 7 (`L05332`) and copies message `+0xe` to
+  its target word `+0x86` (`L13655`).
+- The unit shot `R0603` looks up `+0x86` in the same hash
+  (`L13656..L13657`). A structure is found like a unit; a missing ID
+  builds nothing (`L13658`). Segments are the integer distance from the
+  shooter's `+08/+0c` to the found object's `+08/+0c` divided by 200
+  (`L13659..L13660`); the picture and the other leaves are those of
+  `SAV-1130`.
+- The driver homes on the found object's `+0x58/+0x5c` (`ANIM-139`), which
+  for a structure the post-load helper `R0614` derives as for any
+  drawable.
+
+**Confidence.** High for the client path: complete listings. Medium that the
+simulation sends 0x72 with a structure target during play: the builder takes
+any target word, but the actor states that set a structure as the target were
+not read.
+
+**Unknown.** Whether a structure's `+08/+0c` and `+0x58/+0x5c` are the same
+anchor as a unit's; a run against a structure would show the drawn path.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q2-listings.txt`.
+
+### SAV-1198
+
+- The action-7 release test `L02711..L02716` calls the unit's slot
+  `+0x58` when the phase `+0x94` equals the class's `+0xfc` and
+  the class Projectile `+0xd4` is non-zero. No other test applies. Slot
+  `+0x58` of the unit vtables `L02468` and `L02585` is the unit shot
+  `R0603`.
+- `L13661/L13662` copies Projectile into the record's picture `+0x20`
+  with no bound. The record takes the `SAV-1130` leaves and the
+  `SAV-1196`/`SAV-1188` start point.
+- After that, the driver arm for the picture (`ANIM-143`) and the draw arm
+  (`ANIM-145`) govern the record; a picture with no defined projectile row is
+  refused by the draw (`ANIM-PROJ-026`).
+- No shipped class has a resolved Projectile of 13 or above (EN and RU
+  `units/units.reg`: 1, 2, 3, 4, 5, 6, 7, 10, 12).
+
+**Confidence.** High: complete listings of the test and the copy.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q1-listings.txt`, `evidence/q1-units-registry.tsv`,
+`evidence/q2-listings.txt`.
+
+### SAV-1199
+
+- Simulation side: `R0268` is called only at `L01994` (actor state 0xd,
+  a target) and `L01995` (state 0xe, a cell) in the actor tick. State 3 with
+  a weapon-spell item (`L13663..L13664`) switches to 0xd instead of the
+  swing `R0245`, which sends 0x72.
+- The senders `R0617` and `R0618` build message 0x86 and rewrite the
+  opcode to 0x8b when the source's word `+0xe` is 0 (`L05307..L03021`),
+  the source having no client ID (`MAGIC-DELIVER-035`). The picture byte
+  `+0xc` is 2 × spell + 8 (`L05310`). With a target argument the message
+  carries the target's `+4` at `+0xd` and a word at `+0xf`. `R0619` sends
+  0x8c.
+- With a client ID the message stays 0x86 with an even picture. Client arm
+  0x86 builds a record only for an odd picture (`L05315..L05316`); the
+  even path `L03013..L05320` looks up the source unit, sets its action
+  `+0x84` to 8 and its target fields, so the cast producer builds the record
+  (`ANIM-144`).
+- Client arm 0x8b (`L05320..L13638`) constructs the record with
+  `R0609`: picture = message `+0xc`; x/y = cell × 256 + 128; the target is
+  message `+0xd` when the registry slot's `+0x2c` is non-zero, otherwise the
+  aim cell; segments = message `+0xf`; actionphase −1; action 1; ID = counter,
+  then counter + 1, inserted through `L13665`.
+- Client arm 0x8c (`L05321..L13639`) builds a picture-36 record the same
+  way.
+
+**Confidence.** High: complete listings of the two call sites, the senders
+and the three client arms.
+
+**Unknown.** Which shipped sources have no client ID in play.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q2-listings.txt`.
+
+### SAV-1200
+
+| Search | Population | Found |
+|---|---|---|
+| 1 | memory operands of any base whose bytes overlap `+0xa0c..+0xa0d` | 17 operands, 7 writes |
+| 2 | `reg := base + K`, K 0x10..0xa0d, then `[reg + d]` overlapping the word within 60 instructions | 10,868 derivation sites, 1 hit: `L13465` (K 0x9d4, d 0x38) |
+| 3 | direct callees reached with ecx = base + K from search 2, intra-procedural bodies | 1,537 pairs, 0 hits |
+| 4 | REP STOS/MOVS and calls of memset `L02418` or memmove `R0544`, destination and length resolved within 25 instructions | 2,111 sites: 195 resolved and not covering, 7 covering, 1,909 unresolved |
+
+- The eight writers are `SAV-1189`'s: `L13460`, `L13461`, `L13462`,
+  `L13463`, `L13464`, `L13465`, `L13466`, `L13467`.
+- None of the 7 covering bulk writes targets the client world (0x3f78 bytes):
+  `L13666` clears 614,400 bytes, larger than the world; `L13667` is in
+  `L13668` (four direct callers `L13669`, `L13670`, `L13671`,
+  `L13672`), a display-mode object: it releases an interface held at
+  `+0x838`, copies one 0x13c-byte entry of a table at `+0x9a4`, and its failure
+  string is "Could not fit the rendering surfaces in video memory for this
+  hardware device."; `L13673` is in the AI
+  session constructor; `L13674` clears a 0x271-dword table; `L13675` writes
+  `[esi+0xa50]+0x92ef4` (from `L13676`); `L13677` has no reference;
+  `L13678` writes the stack.
+- Population: Capstone linear decode of `.text` with skipdata; EN and RU
+  `rom.exe` have the same SHA-256.
+
+**Confidence.** High for each search over its population. Medium that the
+list is complete: the 1,909 unresolved bulk sites, indirect callees and
+stores through a pointer read from memory are not excluded.
+
+**Unknown.** A writer in the unresolved population. A native watchpoint on
+the two bytes across a mission change would settle it.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q3-counter-census.txt`, `evidence/q3-listings.txt`.
+
+### SAV-1201
+
+- The world constructor `R0391` has one call site, `L06468` in
+  `R0315`, whose one call site is `L13470` in `R0326`. `R0326` is
+  slot `+0x58` of vtable `L01179`, which the constructor `L01312` installs
+  in the global application object `L13679`. Slot `+0x58` is the MFC
+  InitInstance slot: the startup routine calls `+0x8c`, then `+0x58`, then
+  `+0x5c` or `+0x70` (`L13680..L13681`).
+- The mission loader `R0099` reaches the FreeIndex arm only when campaign
+  `+0x6bc` is 2 and its flag argument is non-zero (`L13682`,
+  `L13472..L13473`). It has three callers:
+  - `L03842` and `L07366` push edi, which is 0 from `L11306`; the other
+    edi writes in `R0701..L13683` do not reach them by direct flow,
+    indirect jumps not followed;
+  - `L06711` pushes 1 in `R1284`, which sets `+0x6bc` to 2 and is called
+    at `L13684` after the collect-all `R1301` (`L13685`). This is the
+    LOAD path (`SAV-1191`).
+- `L13686..L03821` copies "game9999.sav" to campaign `+0x234` and calls
+  the SAVE routine `R0084`. Its intra-procedural body (565 instructions)
+  has one counter operand, the read `L13687`.
+- So, within the `SAV-1200` writers: the counter is 0 once per process, counts
+  across mission entries and collect-all clears, and is replaced only by a
+  LOAD.
+
+**Confidence.** Medium. The call chain is direct, but that InitInstance runs
+once rests on the MFC startup shape, and the reset conclusion rests on
+`SAV-1200`'s Medium completeness.
+
+**Unknown.** Another indirect call of slot `+0x58` on the application object;
+a native watchpoint across a mission change would settle both.
+
+**Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
+`evidence/q3-listings.txt`, `evidence/q3-counter-census.txt`.
