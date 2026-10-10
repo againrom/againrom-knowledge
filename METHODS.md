@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3321. Observation: 95. Static analysis: 2764. Mixed: 462.
+Claims labelled: 3327. Observation: 95. Static analysis: 2769. Mixed: 463.
 
 ## Ledger ai
 
@@ -270,7 +270,7 @@ Claims labelled: 3321. Observation: 95. Static analysis: 2764. Mixed: 462.
 | AI-410 | static analysis | ● active |
 | AI-411 | static analysis | ● active |
 | AI-412 | static analysis | ● active (partially retracted) |
-| AI-413 | static analysis | ● active |
+| AI-413 | static analysis | ● active (amended) |
 | AI-414 | static analysis | ● active |
 | AI-415 | static analysis | ● active |
 | AI-416 | static analysis | ● active |
@@ -1317,10 +1317,14 @@ Claims labelled: 3321. Observation: 95. Static analysis: 2764. Mixed: 462.
 | MOVE-099 | static analysis | ● active |
 | MOVE-100 | static analysis | ● active |
 | MOVE-105 | static analysis | ✔ promoted |
-| MOVE-106 | static analysis | ✔ promoted |
+| MOVE-106 | static analysis | ✔ promoted (amended) |
 | MOVE-107 | static analysis | ✔ promoted |
 | MOVE-113 | static analysis | ● active |
 | MOVE-114 | static analysis | ● active |
+| MOVE-119 | static analysis | ✔ promoted |
+| MOVE-120 | static analysis | ✔ promoted |
+| MOVE-121 | static analysis | ✔ promoted |
+| MOVE-122 | static analysis | ✔ promoted |
 
 ## Ledger pal
 
@@ -2387,6 +2391,8 @@ Claims labelled: 3321. Observation: 95. Static analysis: 2764. Mixed: 462.
 | SAV-1203 | static analysis | ✔ promoted |
 | SAV-1204 | static analysis | ✔ promoted |
 | SAV-1210 | mixed | ● active |
+| SAV-1213 | static analysis | ✔ promoted |
+| SAV-1214 | mixed | ✔ promoted |
 
 ## Ledger session
 

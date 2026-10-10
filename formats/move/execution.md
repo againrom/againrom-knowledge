@@ -186,6 +186,25 @@ frontend, phase-dependent full-tick, command and world-object callbacks remain
 between LOAD and the selected actor consumer. Absolute first producer/read order,
 the byte at that read and native resume timing remain Unknown. — SAV-FIRSTMOVE-880
 
+## Mover state at mission start
+
+The actor base constructor builds every spawned actor's Mover: zero bytes, mask `+0x05` 0x41,
+`+0x08` 5, `+0x09` 0xff, rate `+0x0a` 0x10 then 8, and facing `+0x00` equal to wanted facing
+`+0x01` = 0x40 plus one `rand()` draw over 0..0x80. Of the image's four Mover constructor calls
+only this one stores a facing. — MOVE-119
+
+A type-6 placement then takes its mask from its movement domain, its rate from the Units table or,
+for a Human, from the derive the spawner runs before placing it, and five fields from the occupy:
+word `+0x72` from the speed word and the cell's cost byte, `+0x82`/`+0x83` the cell and
+`+0x84`/`+0x85` the sub-cell. The spawner places at radius 0, which draws no random value, and
+the occupy enters the footprint's cell-record slots. — MOVE-120, MOVE-121
+
+The join walk places a carried member the same way, then replaces its Mover and order block
+with constructor-state ones: facing 0, mask 0x41, no cell fields, and rate 0x10. All 22 carried
+members in the original restart-slot saves hold the derived rate instead (15..20, 16 of 22 differ
+from 0x10); the writer of that value is Unknown. The walk leaves the two embedded route lists as
+they were. — MOVE-122
+
 ## Walk step at order recovery
 
 A fresh call of the walk routine writes a sub-cell step in that call only when the facing byte already equals

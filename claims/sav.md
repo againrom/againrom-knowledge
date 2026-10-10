@@ -15591,3 +15591,37 @@ is a unit shot between its last move and its removal call, as for
 no file of the later dated directories was read.
 
 **Evidence.** [EXP-0521](../experiments/EXP-0521-session-clock/), `evidence/c01-save-counters.txt`.
+
+## Mover records in the restart slot
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1213 | In 9 distinct original `game9999.sav`, 421 spawner-placed Unit records hold exactly the Mover placement predicts; 22 carried player-1 Humans hold the join walk's constructor Mover with rate = their speed's low byte. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| SAV-1214 | One restart slot holds a hero whose static (13) and dynamic (4) embedded route lists lie 42..50 cells from its saved cell; every other record of the 443 holds two empty lists. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+
+### SAV-1213
+
+- Population: every `game9999.sav` under the owner save root, 10 files in 10 directories, 9 distinct by SHA-256 (one directory holds a byte copy of another's file). `tools/savdoc -mode mover-start` decodes all 443 Unit records (443 walks complete) and reads the 180-byte block `*(Unit+0x154)` that `unit()` already bounds, the route-list counts, order bytes `+0x08`/`+0x09` and the speed word `+0x8c` (`evidence/c01/units.tsv`, `evidence/c01/offsets.tsv`, `evidence/c03-census-summary.txt`). The restart slot is saved after the mission start's one sub-tick (`SESS-086`); `SAV-1210` reads sub-tick 1, full tick 0 in the five files of `2026-08-02`, `-08-12`, `-08-14`, `-08-15` and `-08-24`. The counters of the other four distinct files (`2026-08-27`, `2026-09-27`, its `oldsaves7` and `2027-09-07`) were not read.
+- Spawner-pattern, 421 records (312 Unit, 109 Human; players 1..6), Mover `+0x82..+0x84` not all zero:
+  - `+0x00` = `+0x01` on 421, values 0x40..0xBF (Unit 64..191, Human 64..190), none at 0xC0;
+  - `+0x05` 0x41 on 318, 0x44 on 73, 0x82 on 30; `+0x08` 5, `+0x09` 0xff, word `+0x06` 0 on all;
+  - `+0x0a` equals the low byte of `+0x8c` on 109 of 109 Humans and on 68 of 312 Units;
+  - `+0x82`/`+0x83` equal the saved cell and `+0x84`/`+0x85` the saved sub-cell 0x80, 0x80 on 421;
+  - word `+0x72` equals `+0x8c` on 103 of 103 records with mask 0x44 or 0x82; on the 318 with mask 0x41 an integer cost byte k with `(speed * 8) // k = +0x72` exists for every record, k from 6 to 15;
+  - every other Mover byte is 0 on 421; both route lists are empty, order bytes `+0x08`/`+0x09` are 0, no Effect is attached.
+- Walk-pattern, 22 records, all player 1 Humans (9 of them `*(Player+0x34)`): `+0x00`/`+0x01` 0, `+0x05` 0x41, `+0x08` 5, `+0x09` 0xff, `+0x72` and `+0x82..+0x85` 0, every other byte 0, order bytes 0; `+0x0a` equals the low byte of `+0x8c` on 22 of 22, 15..20, which differs from the constructor's 0x10 on 16 of them.
+- Fit: the spawner-pattern records match `MOVE-119`, `MOVE-120` and `MOVE-121` field for field: facing from the constructor draw, mask by domain, the Human rate from derive, the five occupy fields, and the constructor's zero elsewhere. The walk-pattern records match `MOVE-122`'s replacement except byte `+0x0a`.
+- Contradiction with the walk alone: byte `+0x0a` of the 22 carried records holds the derived rate, so a producer wrote it after `L14157` and before the save. The Human derive store `L03932` is the producer of that value named in `MOVE-RATE-053`; its call site on this path is not identified.
+- Within this population no write between placement and the save left a spawner-placed Mover byte different from its placement value.
+
+**Confidence.** High for the measurement over these 9 files. Medium for the inference that nothing changed a spawner-placed Mover between placement and the save, over the five files with a recorded sub-tick 1 (`SAV-1210`): a write of the same value is invisible. Unknown for the same inference over the other four files, whose sub-tick is not recorded, and for same-value writes. The 3 player-1 spawner-pattern records are all in the `2026-08-15` file. Under independent uniform `rand()` values about 3.3 of 421 facings would be 0xC0 (`MOVE-119`); none is, an outcome of probability about 0.04.
+
+**Unknown.** The mission number, edition and sub-tick of the four files outside `SAV-1210` are not recorded by this census; the edition of the other five is not recorded either. Which call runs Human derive on the carried members before the save.
+
+### SAV-1214
+
+- The census (`SAV-1213`) finds one record with non-empty embedded lists: the `*(Player+0x34)` hero of the `2026-08-02` restart slot, a mission-20 file in `SAV-1210`, with 13 static (`Unit+0x15c`) and 4 dynamic (`Unit+0x178`) elements. The other 8 heroes, 13 carried companions and 421 spawner placements hold 0 and 0.
+- `tools/savdoc -mode mover-route` over that directory (`evidence/c03-census-summary.txt`, distances only): every consecutive element pair is Chebyshev distance 1, and the elements lie 42..50 cells from the hero's saved cell (static) and 42..45 (dynamic).
+- Reading: these lists are a route the hero held before the walk placed it, carried across the mission edge. The join walk does not access the lists (`MOVE-122`) and the end-of-mission cull resets other actor fields only (`PARTY-ENDCULL-026`).
+
+**Confidence.** High for the counts and distances. Medium for the reading that the lists come from the previous mission: the route's cells were not compared with the previous map and no other restart slot carries a non-empty list.

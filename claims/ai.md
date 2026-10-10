@@ -3409,7 +3409,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-413 | In the pursuit pass `mover+0x8a` is a word holding the static route count after the last full search or single-node rebuild, set to 0x00ff when the victim differs from `mover+0x7c`; the mover constructor zeroes it. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
+| AI-413 | In the pursuit pass `mover+0x8a` is a word holding the static route count after the last full search or single-node rebuild, set to 0x00ff when the victim differs from `mover+0x7c`; the mover constructor zeroes it. | High / Medium | ● active (amended) | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
 | AI-414 | On a pass by a centred mover whose victim differs from `mover+0x7c` and whose edge distance exceeds the stop distance, the full static search runs (threshold 5); an off-centre mover finishes its step and a mover within stop turns. | High | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
 | AI-415 | For an unchanged victim a re-search is a full search only while the last count exceeds 5; at 5 or less it rebuilds the old route end as one node, count 1, until a route-end match clears `mover+0x7c` and forces a full search. | High / Medium | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
 | AI-416 | With an empty dynamic list the stepper takes no step and only turns `mover+0` toward `mover+1`; position, claim and `mover+0x90` stay, and unless the near search set `mover+0x98` (`AI-373`) the next sub-tick passes again. | High | ● active | [EXP-0494](../experiments/EXP-0494-pursuit-search-cadence/EXP-0494.md) |
@@ -3427,6 +3427,8 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 **Confidence.** High for the two writers, the two readers and their values in `R0043`, read whole. Medium for "only": a displacement scan of `.text` finds 11 other word stores at `+0x8a` (`L13293`..`L13294`), all outside the movement routines; their base objects were not resolved.
 
 **Unknown.** Whether a save load or a script writes `mover+0x8a` or `mover+0x7c`. Other constructors of a mover than the call at `L13291` were not enumerated.
+
+**Amended.** The constructor enumeration is narrowed by `MOVE-119`: the image holds four direct calls of `R0206` (`L00964`, `L14119`, `L14120`, `L13291`) and no stored address of it, from a capstone operand sweep of `.text` plus a raw dword scan of every section. Medium over the unreached bytes; the base objects of the 11 other `+0x8a` word stores are still unresolved.
 
 ### AI-414
 

@@ -1197,7 +1197,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MOVE-105 | A fresh turn of at most two sixteenths sets the facing byte in the calling sub-tick; a larger turn advances it by the mover rate byte per actor sub-tick and ends after ceil(arc/rate) sub-ticks. | High / Medium | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
-| MOVE-106 | The turn rate is mover byte +0x0a; each Human derive copies the low byte of the speed word into it, and Units-table RotationSpeed is 8..23; whether a Human holds the derived value at every turn is Medium, its first turn Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
+| MOVE-106 | The turn rate is mover byte +0x0a; each Human derive copies the low byte of the speed word into it, and Units-table RotationSpeed is 8..23; whether a Human holds the derived value at every turn is Medium, its first turn Unknown. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
 | MOVE-107 | A turning unit does not step; the non-self unit and point act gates need the current facing on the heading; a self-target cast skips them; a new target continues from the current byte; a stop reset leaves the active flag. | High / Medium | ✔ promoted | [EXP-0498](../experiments/EXP-0498-hero-turn-rate/EXP-0498.md) |
 
 ### MOVE-105
@@ -1229,6 +1229,8 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 **Confidence.** High for the derive's store and the shipped table values. Medium that a Human holds its derived value when it turns: table equality does not show when derive ran, and neither the derive trigger set nor post-LOAD recomputation is closed (`SAV-1116`).
 
 **Unknown.** Whether derive runs at Human spawn before the first turn, so whether a fresh Human turns once at its table value. The derived value of a given hero in play, which depends on that hero's Reaction, load and modifiers.
+
+**Amended.** `MOVE-120` narrows the spawn-derive question for a type-6 Human placement only: the spawner calls vtable `+0x50` before placing the actor, so such a Human holds its derived rate from the spawn on, Medium over the unread Human constructor. For the carried party the derive time is Unknown (`SAV-1213`, `MOVE-122`), and the first-turn question is unread.
 
 ### MOVE-107
 
@@ -1271,3 +1273,57 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and C
 **Confidence.** **High** that the members the join walk places enter after the type-6 records on the new-mission path: the session start, the sender's position and the walk's callers are read at instruction level, the raw scans exclude table dispatch, and the order does not depend on whether `R0545` queues the command or runs it. **Medium** for the whole party's order, open to the AddHero alternative above. **Medium** for the insert site and the grid-held skip of the walk: `w08` lies past the fourteenth range of the preregistered window budget.
 
 **Unknown.** The callers of `R0192`, and so whether a companion hired in town enters the registry before the next map's type-6 records; enumerating them, or a save written in town after a hire, settles it. The order on the SAV restore path, which inserts through `L12539` (`MOVE-TICK-017`).
+
+## Mover state at mission start
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-119 | The actor base constructor sets Mover facing `+0x00` and wanted facing `+0x01` to 0x40 plus one rand() draw over 0..0x80; of the image's four Mover constructor calls only this one stores a facing. | High | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-120 | The type-6 spawner has no Mover access of its own; it runs the class derive at `L04446`, so a placed Human holds its derived rate, then places the actor through `R1145` at radius 0, which draws no random value. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-121 | The occupy `R0050` writes Mover `+0x72` (a step-cost word), `+0x82`/`+0x83` (cell) and `+0x84`/`+0x85` (sub-cell) before it enters the footprint's cell-record slots; its own body writes no other Mover byte. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-122 | The join walk places each carried member, then deletes its Mover and order block and installs constructor-state ones (facing 0, mask 0x41, rate 0x10); all 22 saved carried members hold the derived rate instead, its writer Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+
+### MOVE-119
+
+- `R0185`, the actor base constructor (`w02`): `new(0xb4)` at `L00963`, `R0206` at `L00964`, the store into `actor+0x154` at `L06970`. It then calls `R0861(0x80)` (`L14121`, `L14122`), adds 0x40 (`L14123`), stores the low byte at Mover `+0x00` (`L14124`) and copies that byte to `+0x01` (`L14125`, `L14126`). It calls the stat defaults `R0160` at `L06971`, which writes Mover `+0x0a` = 8 (`L06973`), and the Units-table spawn `R0184` at `L00493` when `L04697` returns a positive value.
+- `R0206` (`w01`, whole): `REP STOSD` of 0x2d zero dwords (`L14127`), then `+0x05` = 0x41, `+0x0a` = 0x10, `+0x09` = 0xff, `+0x08` = 5 (`L06852`..`L00587`).
+- `R0861(n)` (`w12`, whole): 0 without a call when n is 0, otherwise `(rand() * (n + 1)) >> 15` with the signed rounding at `L14128`..`L06614` (`MAGIC-284`). With n = 0x80 the draw is 0..0x80, so the facing is 0x40..0xC0, and 0xC0 needs a `rand()` of at least 32514. Each actor construction consumes one value of the shared `rand()` stream here.
+- Callers of `R0206` (`s01`, a capstone operand sweep of `.text` plus a raw dword scan of every section): four direct calls and no stored address. `L00964` is this constructor. `L14119` is the join walk (`MOVE-122`). `L14120` is the carry importer (`PARTY-LOSS-006`). `L13291` is in `R0825` (`w09`), which deletes the actor's Mover and installs a constructor-state one (`L14129`..`L13292`) and a new order block (`L14130`..`L14131`); `PARTY-037` names it as the revive repair arm's call. The other three install the constructor's facing 0 and rate 0x10 and write no facing.
+- `R0471`, the mask install (`MOVE-DOM-025`), has two direct calls, `L06850` in `R0184` and `L06851` in `R0876`, and no stored address (`s01`).
+- This enumeration answers the open item of `AI-413`, which named only the call at `L13291`.
+- EN and RU `rom.exe` are one image (SHA-256 `942e9b72…7d03`, `image-hashes.txt`).
+
+**Confidence.** High. The stores are named instructions in whole listings. The caller set rests on two instruments: the operand sweep misses a call from bytes the linear decode does not reach, and the raw dword scan covers every table, callback array and stored address; an indirect call needs the address as data, which the scan finds nowhere.
+
+### MOVE-120
+
+- `R0151`, the type-6 spawner (`w04`, read whole to its return at `L14132`), contains no access to `actor+0x154`. Per record it resolves the owner and class, constructs the actor (Human constructor `R0497` at `L02316`, `L02314`, `L02315`; Unit `new(0x198)` and `R0501` at `L02317`), applies the Units-arm difficulty changes, destroys the actor when `actor+0x0e` is 0 (`L12640`..`L14133`), writes the authored overrides, calls vtable `+0x50` (`L04446`), then calls `R1145(rec+0x00 >> 8, rec+0x04 >> 8, 0)` (`L12752`..`L11042`). A zero return logs and destroys the actor through vtable `+0x04` (`L13866`..`L14134`); otherwise the actor enters the registry (`L01792`), its owner and its group.
+- Vtable `+0x50` is `R0836` for Unit and `R0280` for Humanoid and Human (`t01`). `R0280` stores the low byte of `actor+0x8c` into Mover `+0x0a` (`MOVE-RATE-053`); `R0836` has no such store. A placed Human therefore holds its derived rate from the spawn on, and a placed Unit holds the Units-table byte or the default 8 (`MOVE-RATE-052`). This settles `MOVE-106`'s open question for type-6 Human placements: derive runs at spawn, before the first turn.
+- `R1145(x, y, r)` (`w05`, read to `L14135`): the position store `R0289(x, y, grid)` (`L14136`), then attempts at `x - r/2 + R0861(r)`, `y - r/2 + R0861(r)` through `R0290` and the test `R1287` (`L14137`..`L06650`), `(r*r)/2 + 2` attempts. With r = 0 `R0861(0)` returns without a draw, so both attempts test the placement cell, and a refusal returns 0 (`L14138`..`L14139`, `L14140`). An admitted cell calls the occupy `R0050` (`L06653`, `MOVE-121`). With r above 0 a refusal goes on to a scan of the square (`L14141`..`L14142`).
+- `R1287` (`w06`, whole) only reads: for each of the n by n footprint cells it tests the bytes at `grid + 0x20000` and `grid + 0x10000` against Mover byte `+0x05` and returns 0 on any common bit.
+
+**Confidence.** High for the spawner's lack of Mover access, its call order and the radius-0 path of `R1145`, each read in whole listings. Medium that `R1145` returns the occupy's result: the epilogue after `L14135` was not read. Medium for the Units-table rate source (table byte or default 8): `MOVE-RATE-052` leaves final spawned rates Unknown, and the census (`SAV-1213`) holds 312 Unit rates, none equal to 8, and compares none to the table.
+
+**Unknown.** The Human constructor `R0497`, the Unit constructor `R0501`, the Humanoid defaults `R0876` (caller of the second `R0471` call) and the vtable `+0x50` bodies other than the rate store were not read. The first `R0471` call at `L06850` follows a test of `L04697`'s result (`w02`, `L14143`..`L00493`), also unread. `MOVE-119` bounds who builds the Mover (no other Mover constructor call), not who stores into it afterwards.
+
+### MOVE-121
+
+- `R0050` (`w07`, whole) reads the footprint side through vtable `+0x1c` and the domain through `R1851`, takes the cell bytes from the Position object (`R0299`, `R0300`), and stores, in order: Mover word `+0x72` = `R1345(actor, x, y)` (`L07074`, `L07161`); `+0x82` and `+0x83` = cell x and y (`L02490`, `L02491`); `+0x84` and `+0x85` = the low bytes of `R0165` and `R0166`, the sub-cell (`L02488`, `L09282`). When `R1287` refuses the cell and Mover word `+0x80` differs from the packed cell it calls the two one-return stubs `R1361` and `R0459` (`MOVE-088`). It then calls `R0458` for each footprint cell in row-major order and stops at the first refusal.
+- `R0458` (`w07`, whole) contains no Mover access. It writes the actor into cell-record slot `+0x04` (domains 1 and 2, `L07121`, `L14144`) or `+0x08` (domain 3, `L07122`, `L14145`), creating a missing record through `R1351`, and runs the recompute `R0453` (`TERR-CELLREC-146`, `MOVE-088`).
+- `R1345` (`w08`, whole): for domain 1, `(signed word actor+0x8c * 8)` divided by the byte at `grid[y * 256 + x]` (`L14146`..`L07076`); for domains 2 and 3, the word `actor+0x8c`; otherwise 0.
+- A placement through `R1145` therefore leaves the Mover with these five fields set from the placement cell, the speed word and the cost byte, and the cell-record slots of its footprint holding the actor.
+
+**Confidence.** High for the stores and their sources, read whole. Medium that the occupy writes no other Mover byte: its callees `R0453`, `R1342`, `R1362`, `R1351` and the trigger builders `R1137`/`R1138` were not read here. The census in `SAV-1213` finds no other nonzero Mover byte in 421 placed records.
+
+### MOVE-122
+
+- `R0065`, the join walk (`w10`; the member loop `L14147`..`L14148` read whole): for each actor of `player+0x20` it skips the actor when the grid's slot accessor `R1826` already returns it at its cell (`L14149`..`L14150`); otherwise it stores the start cell through `R0289` (`L14151`), places `player+0x34` first with `R1145(x, y, 0)` (`L06656`) and any member still unplaced with `R1145(x, y, r)` (`L06655`), r computed from the member count (`L14152`..`L06586`); a failure only logs (`L14153`..`L14154`).
+- After the registry AddTail (`L14155`) it deletes the Mover (`R0525` at `L14156`), constructs a new one (`new(0xb4)`, `R0206` at `L14119`) and stores it in `actor+0x154` (`L14157`); it releases the order block (`R1379(1)` at `L14158`) and installs a new one (`R0286` at `L14159`, `actor+0x158` at `L14160`); it calls `R0063` on `actor+0x70` (`L14161`).
+- The occupy's Mover stores (`MOVE-121`) go into the deleted Mover. The new Mover holds the constructor's values only: `+0x00`/`+0x01` 0, `+0x05` 0x41 whatever the member's domain, `+0x08` 5, `+0x09` 0xff, `+0x0a` 0x10, every other byte 0. The walk contains no facing store and no `R0471` call.
+- The walk body has no access to `actor+0x15c` or `+0x178`, the two embedded route lists (`SAV-630`).
+- The start cell is `player+0x60` when `server+0x0c` and that word are nonzero, else a random entry of the list at `this+0x6c`, else `0x1e + R0861(0x46)` per axis with a log line (`L14162`..`L14163`). A placement with r above 0 draws two `rand()` values per attempt.
+- The walk runs from the join command the mission start sends at `L03843` (`MOVE-114`); in the census the carried members' Movers already hold the walk's values at the restart save (`SAV-1213`).
+
+**Confidence.** High for the walk's own stores and calls, read whole, and for the walk's installation of rate 0x10. Medium that the route lists survive the walk (the walk body has no access to them): the callees `R0289`, `R0063` and `R1379` were not read; one census record agrees (`SAV-1214`). A member the grid already holds at its cell keeps its old Mover (`L14150`); whether that occurs at a mission start is Unknown. The rate clause is Medium as a statement about the saved carried member: the census contradicts rate 0x10 on 16 of 22 carried records, which hold the derived value (15..20, `SAV-1213`), so the walk's rate is not the value a carried member holds at the save.
+
+**Unknown.** The first writer of Mover `+0x0a` after `L14157`. The census shows the derived value before the restart save (`SAV-1213`); the call that runs Human derive on a carried member between the walk and that save was not identified. Read without finding it: the join entry `L14164`..`L14165` (it calls the walk at `L06675` and goes on to `L14166`, `R1626`, `R1625`, `R0081`, `R0127`, `R0299`, `R0300`, `R0217`, `R0059`) and `R1626`..`L14167`; both hold no derive call and no Mover store, and their callees are unread. The settling read is outside that range (the actor tick `R0037`, the order executor `R0016`, or a watchpoint on Mover `+0x0a`).

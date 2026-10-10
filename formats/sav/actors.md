@@ -297,6 +297,12 @@ terminates the original with an integer divide by zero at `L09136` on the
 first turn of an ordinary move. Original Humans carry 15..22 and Units 8..22.
 A written mover block needs a nonzero rate. — SAV-1092
 
+Original restart-slot saves (`game9999.sav`) hold, for
+every map-placed Unit record, exactly the Mover the placement builds, and, for the
+carried party, the join walk's constructor-state Mover with the derived rate in
+`+0x0a`. Both route lists are empty except on one carried hero, whose lists lie
+42..50 cells from its cell. — SAV-1213, SAV-1214
+
 ### Start state a written mission document needs
 
 Hero control on the first LOAD depends on the document, not on the process
