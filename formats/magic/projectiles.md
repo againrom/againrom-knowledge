@@ -72,7 +72,8 @@ picture 36   SetSize(0)  -> the list is CLEARED
 The generator uses the full source-to-target segment as its constraint; no
 argument carries a partial length. A resolved live call produces the complete
 sampled figure, whose terminal fit endpoint is excluded. Native first-draw
-and cache-refresh order remain Unknown. — MAGIC-277, MAGIC-281 The `+0xac` array is copied word by word
+and cache-refresh order remain Unknown; MAGIC-281 is partially retracted
+for its direct-route spell set only. — MAGIC-277, MAGIC-281 The `+0xac` array is copied word by word
 onto the projectile by the cast spawner from the caster's own array of the same offsets.
 
 `MAGIC-SPRAY-134`…`MAGIC-SPRAY-137` close that array's producer. After applying the selected list, simulation opcode `0x8a`
@@ -157,9 +158,11 @@ Lightning and Prismatic Spray have 13 successful driver steps with phases
 `40,30,20,10,0,10,20,10,0,10,20,30,40`. The following zero-countdown call
 returns finished; the shared updater unlinks and destroys the object.
 The direct `0x8b` message route supplies `actionsegments` from its message
-counter: 5 for spells 13 and 14, starting `actionphase=-1`, giving
-`0,4,3,2,1`, then removal. The former direct sequence in MAGIC-272 is
-partially retracted; MAGIC-281 measures its original initializer.
+counter: 5 for spell 13, starting `actionphase=-1`, giving `0,4,3,2,1`, then
+removal. Spell 14 never sends `0x8b`; its sources without a client ID send
+`0x8c`. The former direct sequence in MAGIC-272 is partially retracted;
+MAGIC-281 measures its original initializer, and its spell set "13/14" is
+partially retracted for spell 14. — MAGIC-287
 A loaded object resumes from its saved `actionsegments` and `actionphase`.
 Fire Arrow and Fire Ball retain their fixed levels while present; the
 normal explosion receives 22 ticks and follows its two-tick sheet clock.
@@ -347,7 +350,7 @@ with no reference. — MAGIC-283, SESS-082
 | Construction route | Initial actionphase | Successful calls | Phase sequence |
 |---|---:|---:|---|
 | Normal caster 34/36 | 0 | 13 | 4,3,2,1,0,1,2,1,0,1,2,3,4 |
-| Direct 0x8b, spells 13/14 | -1 | 5 | 0,4,3,2,1 |
+| Direct 0x8b, spell 13 | -1 | 5 | 0,4,3,2,1 |
 | Source-cell 0x8c, picture 36 | -1 | 13 | 0,4,3,2,1,0,1,2,1,0,1,2,3 |
 | Loaded Prj | saved | saved positive counter | Ramp when incremented actionphase is 1..13; otherwise retained phase |
 
@@ -355,7 +358,9 @@ Every live action-1 driver call invokes geometry after increment/phase
 selection and before counter decrement. The next zero-counter call returns
 finished. Missing targets can prevent a fresh set; picture 34 retains its
 old list, picture 36 clears before resolved links are appended. Exact
-native spawn/update/draw/removal frame order remains Unknown. — MAGIC-281
+native spawn/update/draw/removal frame order remains Unknown. The direct row
+holds for spell 13 only; MAGIC-281's "13/14" is partially retracted.
+— MAGIC-281, MAGIC-287
 
 The drawer supplies one own-table forward .16a stamp per stored point, in
 list order, with no interpolation. Normal insertion joins the software

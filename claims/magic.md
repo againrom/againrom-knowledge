@@ -2425,7 +2425,7 @@ The direct Prj writer in R0084, L13430..L08365, and loader in R0099, L13431..L13
 | MAGIC-278 | The bolt builder rejects a completed sampled figure only when a sampled ordinate exceeds the stored 0.15-times-length band; retry consumes the continued random stream and rebuilds every point. | High | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-279 | The bolt walk reads the current thread's CRT seed, shared with same-thread callers; the bounded direct-call census names potential consumers but does not determine the native interval between bolt ticks. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-280 | The selected software bolt drawer stamps each stored point once, in list order, using the own-table forward .16a receiver; sequential table blending and rectangle clipping preserve that order. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
-| MAGIC-281 | Normal caster, direct 0x8b and source-cell 0x8c bolt routes have different initial phase/countdown pairs; every live action-1 driver call invokes geometry after phase selection and before countdown decrement. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
+| MAGIC-281 | Normal caster, direct 0x8b and source-cell 0x8c bolt routes have different initial phase/countdown pairs; every live action-1 driver call invokes geometry after phase selection and before countdown decrement. | High / Unknown | ✔ promoted (partially retracted) | [EXP-0504](../experiments/EXP-0504-bolt-figure/); [EXP-0509](../experiments/EXP-0509-flight-records/) |
 | MAGIC-282 | Finite bolt length uses a scaled PC64 hypot with explicit binary64 spills and restores the incoming control word; later arithmetic inherits that word, whose precision and rounding can change integer points. | High / Unknown | ✔ promoted | [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 
 ### MAGIC-275
@@ -2671,6 +2671,11 @@ Unknown for native spawn/update/draw/removal ordering, redraw counts per
 tick and loaded first draw. A timed native cast or live-object LOAD trace
 would settle the selected route's visible-frame schedule.
 
+**Amended.** The spell set "13/14" of the direct 0x8b row is retracted
+([`retracted.md`](retracted.md)): spell apply sends spell 14 through
+`R0269` as 0x8a or 0x8c and never as 0x8b (`MAGIC-287`), so the direct
+0x8b row with message counter 5 holds for spell 13, picture 34, only.
+
 ### MAGIC-282
 
 L05533 delegates the finite hypot to L13439. For differences of
@@ -2852,3 +2857,127 @@ family list is complete: it is bounded by the MAGIC-279 direct-call census.
 when the service's stop call runs.
 
 **Unknown.** The service's stream-end conditions that reach `L13585`.
+
+## Cast messages and Fire Ball target size
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-287 | Spell apply sends a cast through the target sender when Spell Target is 1 and the cell sender otherwise; Prismatic Spray sends 0x8a or 0x8c, and 0x8b is stored only by those two senders, so spell 14 never sends 0x8b. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| MAGIC-288 | The client picks a cast's target word or aim cell by the picture's Homing key: Shield's cell bytes are read as a unit ID; a 0x8b of a picture with no row reads a null or out-of-array slot; a null target leaves the segment word stale. | High / Unknown | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| MAGIC-289 | Fire Ball's transport and burst use one position; the burst record sits at that cell's centre without the fine byte, and no stage stores the target's size: AreaEffect `+0x49` holds the spell's Radius. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+
+### MAGIC-287
+
+- Spell apply `R0268(caster, target, x byte, y byte)`, `this` = spell
+  (`+8` ID). Data.bin spell parameter k is the Spells title k + 1: p4 Spell
+  Target, p5 Delivery, p7 Speed, p8 Distribution, p9 Radius.
+- The segment word starts at 0 (`L05387`). For Delivery 2 it is
+  distance / Speed (`L13752..L13753`), set to 5 for spells 13 and 14
+  (`L05061`). For any other Delivery, `R0416` (caster `+0x3c` == 0)
+  makes the routine return with no message (`L03033..L03035`).
+- Spell 14 calls `R0269` (`L03028..L03027`), whose only sender is
+  `R0619`: 0x8a (`L05305`), or 0x8c (`L03023`) for a source without a
+  client ID. Every other spell calls `R0621`: p4 == 1 selects the target
+  sender `R0617` (`L03024`), else the cell sender `R0618`
+  (`L03025`).
+- Both senders write 0x86 into the shared buffer `L03042` with picture
+  byte `+0xc` = 2 × spell + 8, and rewrite it to 0x8b when the source word
+  `+0xe` is 0, putting the source cell at `+0xa/+0xb`. The target sender
+  puts the target ID word at `+0xd` and the segment word at `+0xf` only for a
+  non-null target. The cell sender puts the point's cell bytes at
+  `+0xd/+0xe` and the segment word at `+0xf`.
+- The `.text` opcode sweep finds 0x8b stored as an immediate only at
+  `L03021` and `L03022`, and each sender has one rel32 caller.
+  Register-form opcode writers and senders that reuse the shared buffer
+  without writing `+9` are closed by `ANIM-110` and `ANIM-122`.
+- Shipped routing (28 spells): target sender for 1, 5, 6, 10, 11, 13, 15,
+  16, 20, 22, 23, 24, 27, 28; cell sender for 2, 3, 4, 7, 8, 9, 12, 17, 18,
+  19, 21, 25, 26; 0x8a/0x8c for 14.
+
+**Confidence.** High: the branch, both senders and the immediate sweep are
+listed, and `ANIM-110` and `ANIM-122` close the register-form and
+buffer-reuse cases. The spell-14 clause is read directly at
+`L03028..L03026`. The sweep does not see an opcode copied by a message
+relay.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q1-listings.txt`, `evidence/q1-opcode-sweep.txt`,
+`evidence/q1-spell-routes.tsv`.
+
+### MAGIC-288
+
+- Client arm 0x86, even picture: with the picture at or above the registry
+  count, or a null slot, the caster aims at its own x/y with target 0. With
+  slot `+0x2c` (Homing) non-zero, the target is the word at `+0xd`. Otherwise
+  the aim is cell `+0xd/+0xe` × 256 + 128 with target 0.
+- Client arm 0x8b (`L05320`) takes the slot through `L13754` with no
+  bound and no null test and reads `[slot + 0x2c]` at `L13755`. Homing
+  selects the target word `+0xd`, else the aim cell. Segments = word `+0xf`,
+  actionphase −1, action 1.
+- `projectiles.reg` (EN = RU) Homing 1 rows: 10, 18, 20, 28, 30, 34, 36, 40,
+  44, 52, 54, 62. Cast pictures with no row: 14, 16, 22, 26, 32, 38, 42, 46,
+  48, 50, 56, 58, 64.
+- Shield (18) has Spell Target 2, so the cell sender fills `+0xd/+0xe` with
+  cell bytes, and picture 44 has Homing 1: the client reads the packed cell
+  as a unit ID.
+- A 0x8b of a picture with no row: `L13754` returns array + 4 × picture
+  with no bound. For a picture below the array count (spells 3, 4, 7, 9, 12,
+  15, 17, 19, 20, 21, 24 and 25, pictures 14 to 58) the slot is null and
+  `L13755` reads `[0 + 0x2c]`. The highest row ID is 62, so picture 64
+  (spell 28) is past the last row; unless the array is larger, the read
+  takes whatever lies past it, not a null slot. The array count (the global
+  `L02840` that arm 0x86 tests) was not measured.
+- The target sender with a null target writes 0 into `+0xd/+0xe` and leaves
+  `+0xf` holding the shared buffer's previous value.
+
+**Confidence.** High for the arm and sender code (listings). Unknown which
+shipped sources lack a client ID, so whether play reaches the null read or
+the stale segment word.
+
+**Unknown.** What a Shield caster does with a unit ID made of cell bytes
+beyond the cast producer's missing-target return. The registry array count,
+which the loader's allocation sets. Which shipped sources lack a client ID:
+an owner save taken while such a source casts would show it.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q1-listings.txt`, `evidence/q1-projectile-rows.tsv`,
+`evidence/q1-spell-routes.tsv`.
+
+### MAGIC-289
+
+- Spell apply and the effect creator compute the point by the same
+  branches (`MAGIC-245`). The effect creator's default arm (`L03046`), which
+  takes Fire Ball, builds for Distribution other than 1 an AreaEffect
+  `R0652` with the local point and parameter 9 (`L05354..L03047`).
+  For Delivery 2 it wraps that object in a SpellTransport `R0633` with
+  the caster's position and parameter 7, Speed (`L05108..L03052`). The
+  call site `L13756..L03052` pushes Speed, the caster's `+0x10`
+  Position and the AreaEffect (stored to that local at `L13757`), and no
+  target, so the transport receives no point and no size of its own; its
+  constructor was not read.
+- The AreaEffect constructor stores `+0x44`, `+8` = 0, `+0x48` = 0,
+  `+0x49` = parameter 9 (Radius, 1 for Fire Ball), `+0x4b` = 0 and `+0x4c` =
+  0. Its base `L05979` and the token `R1009` keep a copy of the point at
+  `+0x10`.
+- Position (`R0287`): cell x `+0`, cell y `+1`, packed word `+2`, fine x
+  `+4`, fine y `+5`, dword `+8`. The constructor and both copies
+  (`R1010`, `L05872`) never write bytes 6 and 7.
+- The blast sends the cell bytes of `+0x10` (`ANIM-148`); client arm 0x86
+  places the record at cell × 256 + 128 on each axis, so the fine byte is
+  lost. The record has no size field (`ANIM-123`).
+- Per axis, anchor cell c (`evidence/q4-points.tsv`): a size-2 target at
+  fine 128 gives word c × 256 + 255, burst at the anchor cell's centre; a
+  size-3 target at fine 128 gives cell c + 1, the footprint centre. A homing
+  client record aims at `+0x58` = cached x + 128 × (TileSize − 1), which is
+  c × 256 + 256 for a size-2 unit at fine 128.
+
+**Confidence.** High for the burst cell and for the absence of a stored
+size: the constructor stores, the Position helpers and the client build are
+complete listings. Medium that the transport flies to that same position:
+it receives no point of its own, but its constructor was not read.
+
+**Unknown.** A saved Fire Ball with a multi-cell target remains unread
+(`MAGIC-245`).
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q4-listings.txt`, `evidence/q4-points.tsv`.

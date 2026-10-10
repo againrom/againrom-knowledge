@@ -263,7 +263,10 @@ value in the cast routine — 0, or `distance / Data.bin parameter 7` when `Deli
 5 for spell ids 13 and 14 — and puts it in `msg+0xf`. On a normal cast that value is discarded,
 because the even picture routes the message to the caster-animation branch and the projectile is
 built later by the table above. The simulation's value is used only when the source has no
-client-side runtime id, which rewrites the opcode to `0x8b`.
+client-side runtime id, which rewrites the opcode to `0x8b`. Spell 14 never reaches that sender:
+it sends `0x8a`, or `0x8c` with its own 13 calls, so the value 5 reaches a record for spell 13
+only. With a null target the target sender leaves `msg+0xf` holding the shared buffer's previous
+value. — MAGIC-287, MAGIC-288
 
 `Delivery System == 2` holds for exactly `fire_arrow`, `fire_ball`, `lightning` and
 `prismatic_spray`, which are exactly the four spells the client's own table gives a travelling or

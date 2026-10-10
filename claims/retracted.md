@@ -1,5 +1,11 @@
 # Overturn history
 
+## Direct 0x8b bolt route spell set
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-281` (spell set of the direct 0x8b row only; initializers, counters, phase sequences and the other rows stand) | Verbatim: "Direct 0x8b, spells 13/14" | High / Unknown | [EXP-0509](../experiments/EXP-0509-flight-records/), MAGIC-287 | Spell apply branches spell 14 to `R0269`, whose only sender writes 0x8a or 0x8c; 0x8b is stored only by the target and cell senders, which spell 14 never reaches. The direct 0x8b row applies to spell 13 only. | **REFUTED** — partially retracted |
+
 ## Projectile trail array fields
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

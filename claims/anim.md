@@ -2863,3 +2863,186 @@ this question.
 **Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
 `evidence/q5-listings.txt`, `evidence/q5-projectile-rows.tsv`,
 `evidence/q4-listings.txt`.
+
+## Records in flight: producers, life and the burst's last tick
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-147 | A cast by a caster with a client ID reaches the cast producer (through 0x86, or 0x8a for spell 14), which builds one record of picture 2 × spell + 8 (two for 60); 21 of the 28 get 0 segments and die in that 0x401 pass. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| ANIM-148 | Odd records come only from Fire Ball's blast (13, 22 segments) and the staged arm of spells 4, 9 and 21 (17, 27, 51; 16, 18, 16 segments); the bursts of 3, 7, 8, 12, 17 and 19 build no record. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| ANIM-149 | At picture 13 or above, shipped producers give non-zero segments only to 13, 17, 20, 27, 30, 34, 36, 51 and 60, so the eleven-picture mark arm `L05687` runs only for a 0x8b record with a non-zero segment word. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| ANIM-150 | The picture-13 burst record returns 1 on driver calls 1 to 22 and is destroyed in the sweep of call 23, which also sets view `+0x74`; a SAVE between calls 22 and 23 holds it with 0 segments. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+
+### ANIM-147
+
+- Spell apply `R0268` sends one message per cast for every spell. Its two
+  call sites `L01994` and `L01995` are in the actor tick `R0037`
+  (`ANIM-110`). Spell 14 goes to `R0269` (0x8a or 0x8c, `MAGIC-287`).
+  Every other spell goes to the target sender `R0617` or the cell sender
+  `R0618`, which write 0x86 with picture byte 2 × spell + 8, or 0x8b when
+  the source has no client ID.
+- Client arm 0x86, even picture (`L03013`): the caster is looked up in the
+  unit hash `+0x9b8`. The message is dropped when the caster's run counter
+  `+0xa0` is non-zero or its class word `+0x1c` is 0. Otherwise the caster
+  gets action 8, actionphase 0, run counter = class `+0x68`, and
+  actionspell := picture; its aim is described in `MAGIC-288`. Arm 0x8a
+  (`L03097`) does the same for spell 14 with actionspell 36 (`ANIM-122`).
+- Cast producer `R0620` builds the record at the cast frame. It is slot
+  `+0x5c` of the CUnit and CAirUnit vtables, called by the action-8 arm of
+  the actor driver `R0548` (`MAGIC-261`; `evidence/tables.txt` shows no
+  rel32 caller and two vtable dwords). When the caster's target `+0x86` is
+  non-zero and not in the unit hash it returns with no record. It reads no
+  registry row. It copies the caster's word list `+0xa8` into the record,
+  sets action 1 and actionphase 0, and takes segments from the switch
+  `L05380`/`L05382`: picture 10 dist/200, 12 dist/384, 20 and 30: 1,
+  34 and 36: 13, 60: 21, every other picture 0. Picture 60 gets a second
+  record by the copy constructor `L03008`.
+- Over the 28 shipped spells (EN and RU Data.bin Spells rows equal), the
+  pictures with non-zero segments are 10, 12, 20, 30, 34, 36 and 60 (spells
+  1, 2, 6, 11, 13, 14, 26). The 0x401 pass `R0334` sweeps the actor map,
+  which runs `R0548` and so the producer, before the record map
+  (`ANIM-113`). The other 21 records therefore return 0 on their first
+  driver call (`L02817`) in the same pass and are destroyed by its record
+  sweep (`L13423`), after consuming a counter ID.
+- `CProjectile` (vtable `L02587`) is built at seven call sites only: arms
+  0x86 (`L03002`), 0x8b (`L03003`), 0x8c (`L03004`), the unit shot
+  (`L03005`), the cast producer (`L03006`, `L03009`) and LOAD
+  (`L03007`). The vtable dword occurs only in the two constructors.
+- Unit shots: nine EN `units/units.reg` sections hold their own Projectile,
+  values 1 to 7, 10 and 12 (RU file identical). All are below 13.
+
+**Confidence.** High for the routes, the segment table and the same-pass
+death of a 0-segment cast record: listings, jump-table reads, the builder
+enumeration by rel32 and raw-dword passes, and the pass order of `ANIM-113`
+and `MAGIC-261`. Medium that every cast enters `R0268`: its callers are
+in the actor tick (`ANIM-110`), but no census of casts that bypass that
+tick was made.
+
+**Unknown.** Inheritance of Projectile by the 25 sections without their own
+key is `SAV-1196`'s scope, not read here.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q1-listings.txt`, `evidence/tables.txt`,
+`evidence/q1-spell-routes.tsv`, `evidence/q1-shot-classes.tsv`.
+
+### ANIM-148
+
+- The opcode sweep over `.text` finds 11 immediate byte stores of 0x86,
+  0x87, 0x8a, 0x8b or 0x8c at displacement 9. The 0x86 stores are the two
+  cast senders, the staged sender `R0638` (`L05303`) and the blast
+  sender `R0635` (`L03055`), plus the static constructor of the shared
+  buffer `L03042`. Register-form writers and senders that reuse that
+  buffer without writing `+9` are closed by `ANIM-110` and `ANIM-122`.
+- Blast sender `R0635`: for an effect whose byte `+0xc` is 2 it sends
+  0x86 with picture = effect `+0xe` (13 for Fire Ball), the cell bytes of the
+  effect position and segment word 22 (`ANIM-123`). For any other effect it
+  sends the 0x87 mask from `L13741`.
+- Staged sender `R0638` has one caller, `L03060`, in the ring walker
+  `R0639`. Its lifetime byte is 16, or 18 for spell 9 (`L02925`,
+  `L02926`). The walker runs for an AreaEffect whose mode `+0x08` is 2,
+  which the builder stores for Distribution 5 (`L05400`,
+  `MAGIC-AREATICK-036`); that rule is read from that claim, not from a
+  listing here. Spells with Distribution 5 are 4, 9 and 21: pictures 17, 27
+  and 51.
+- Client arm 0x86, odd picture with an in-range non-null registry slot,
+  builds the record at the cell centre with actionx/y/z = x/y/z, target 0,
+  actionphase −1, action 1 and segments from the message, and plays sound
+  500 + picture except for 51.
+- Spells 3, 7, 8, 12, 17 and 19 build an AreaEffect in cloud mode with a
+  map layer (`MAGIC-BURST-031`, `MAGIC-AREATICK-036`, `MAGIC-MAPLAYER-040`).
+  No 0x86 writer carries a burst picture for them, so their burst builds no
+  record; their cast still builds a 0-segment record (`ANIM-147`). In the
+  effect creator's spell switch (`evidence/tables.txt`) spell 3 takes the
+  default arm `L03046`, and 7, 8, 12, 17 and 19 take their own arms
+  `L13012`, `L13013`, `L05462`, `L05463` and `L05129`, which were
+  not listed.
+- Odd rows 15, 23, 25 and 47 exist in `projectiles.reg` but no found 0x86
+  writer carries them.
+
+**Confidence.** High for the odd producers: the sweep, the caller pass and
+the listings agree, with `ANIM-110` and `ANIM-122` closing register-form
+writes and buffer reuse. The sweep does not see an opcode copied by a relay
+of a received message. Medium for the class and mode of the six non-burst
+spells, which rest on the cited claims and not on listings here.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q1-opcode-sweep.txt`, `evidence/q1-listings.txt`,
+`evidence/tables.txt`.
+
+### ANIM-149
+
+Life of each record at picture 13 or above, from the driver `R0558`
+(`ANIM-143` gives the switch map):
+
+| Picture | Producer, segments | Per call | Last call |
+|---|---|---|---|
+| 13 | blast, 22, actionphase −1 | phase (ap/2) mod 11; no move; ap 4 registers 3 × 3 cells in view hash `+0xa7c`; ap 8 ORs 0x2000 into 3 × 3 tile words | call 23 sets view `+0x74` (`ANIM-150`) |
+| 17, 27 | staged, 16 or 18, −1 | travel arm with zero step; phase (ap/2) mod Phases | call 17 or 19 returns 0 |
+| 51 | staged, 16, −1 | arm `L13623`: phase = ap; sound 551 at ap 8 | call 17 returns 0 |
+| 20, 30 | cast, 1, 0 | target found: snap to actionx/y, phase 1, put (picture << 16) or 0x20 into the target's `+0x124` array | call 2 returns 0 |
+| 34, 36 | cast 13, 0; 0x8b 5, −1; 0x8c 13, −1 | ramp `L02881`; `R1089` rebuilds `+0x110` | call 14 or 6 returns 0 |
+| 60 | cast, 21, 0, two records | phase = ap − 1; no move | call 22 returns 0 |
+| 18, 24, 28, 40, 44, 48, 52, 54, 56, 62, 64 | cast, 0 | arm `L05687` not reached | call 1 returns 0 |
+| other even 14 to 64 | cast, 0 | none | call 1 returns 0 |
+
+- Every call, including the one that returns 0, first calls `R0347` and,
+  when it returns an object, that object's slot `+0x7c`
+  (`L13742..L13743`), then `CALL [L13744]` at `L13745` with view
+  `+0xf4` passed twice and a local rectangle built from `+0x50/+0x54/+0x68`;
+  neither callee nor the import was resolved. After the zero test
+  at `L02817`, the returning path stores only picture 13's view `+0x74`
+  and allocates and sends nothing.
+- The record's end also runs its destructor through vtable `+4`
+  (`L13746`) in the record sweep; that routine was not listed.
+- A 0x8b record's segment word is the message's `+0xf`: dist/Speed for
+  spells 1 and 2, 5 for spell 13, 0 otherwise, or a stale value when the
+  target sender has a null target (`MAGIC-288`). Only such a record reaches
+  arm `L05687`.
+
+**Confidence.** High for the arms (complete driver listing). Medium for
+reachability of `L05687`: which sources send 0x8b is Unknown.
+
+**Unknown.** What draws pictures 18, 24, 28, 40, 44, 52, 54 and 62 on their
+target, if anything; how the `+0x124` mark of 20 and 30 is removed, which
+the destructor `L13746` could touch. A listing of `L13746` and a
+resolution of the import at `L13744` settle both.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q2-listings.txt`, `evidence/q2-life.tsv`,
+`evidence/tables.txt`.
+
+### ANIM-150
+
+- Arm 0x86 builds the picture-13 record with actionphase −1 and segments 22.
+  Each driver call with non-zero segments increments actionphase and ends
+  with segments − 1 and return 1 (`L05583`, `L13747`). Call 22 leaves
+  segments 0 and actionphase 21.
+- Call 23 tests segments at `L02817`; with 0 and picture 13 it stores 1
+  into view `+0x74` (`L13748`) and returns 0.
+- The 0x401 pass collects every record whose driver returned 0, unlinks it
+  and calls its destructor through vtable `+4` at `L13423`, in the same
+  step. The record therefore leaves the store in the 23rd sweep that calls
+  it.
+- In the timer entries `R0260` and `R0454` the client dispatcher runs
+  before the 0x401 pass (`ANIM-113`), so a record built by a message arm
+  gets call 1 in the step that dispatches the message and call 23, its
+  removal, 22 steps later.
+- View `+0x74` is read at `L13749` and `L13750` in the view frame
+  `R0379`, and set to 1 by `L13751` before it calls that frame.
+- SAVE between calls 22 and 23 writes the record like any other
+  (`SAV-1202`), with segments 0; LOAD rebuilds it and its first call is the
+  removal call.
+- Corpus: `game0024` holds picture 13 at actionphase 7, segments 14 and
+  phase 3, which is the build state after 8 calls.
+
+**Confidence.** High: the zero test precedes the decrement in one routine,
+and the sweep's collection and destroy are listed.
+
+**Unknown.** What a redraw request through view `+0x74` repaints. The step
+count from the message's arrival through the timer entries `R0455` and
+`R0640` and the other callers of `R0509` (`R0644`, `R0645`),
+which `ANIM-113` leaves open.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q2-listings.txt`, `evidence/q3-listings.txt`,
+`evidence/corpus-projectiles.txt`.

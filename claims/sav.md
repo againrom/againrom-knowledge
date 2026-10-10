@@ -15447,3 +15447,115 @@ a native watchpoint across a mission change would settle both.
 
 **Evidence.** [EXP-0508](../experiments/EXP-0508-shot-remainder/),
 `evidence/q3-listings.txt`, `evidence/q3-counter-census.txt`.
+
+## Saved form of records in flight
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1202 | SAVE writes the 16 Prj leaves of every record with no filter; LOAD reads the 16, rebinds `+0x14`, `+0xe0`, the ID and the map node, and loses the word list `+0xa8`, the point array, the trail and the cached x/y `+0x28/+0x2c`. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| SAV-1203 | A loaded record's derived cell is (0,0) until `R0614` next runs after a driver call, so a loaded picture-13 record at saved actionphase 7 marks the 3 × 3 around map cell (0,0), four of them words before the tile plane. | Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| SAV-1204 | A cast record with 0 segments takes a counter ID and dies in the 0x401 pass that built it, so no SAV holds it; the 133-file corpus holds 8 distinct records, pictures 1, 2, 5, 10 and 13. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+
+### SAV-1202
+
+- SAVE Prj loop `L13430..L08366` walks the record map `+0x9d4` and writes
+  x, y, z, picture, dir, phase, lastaction, action, actiondir, actiontarget,
+  actionx, actiony, actionz, actionphase, actionsegments and actionspell for
+  each record; no picture, segment or action test skips one.
+- LOAD loop `L13477..L13432` constructs a record with `R0609`, reads
+  the 16 leaves into `+08, +0c, +10, +20, +6c, +70, +74, +84, +85, +86, +88,
+  +8c, +90, +94, +a0, +a4` with the constructed values as defaults, sets
+  `+0xe0` (view) and `+0x14` (view `+0x9b4`), takes the ID from IDs, links
+  the node and calls `R0614` (`L13758`).
+- Not in the leaves and not rebuilt by LOAD: the word list `+0xa8` (data
+  `+0xac`, count `+0xb0`), the point array `+0x110` (`MAGIC-274`), the trail
+  `+0x138` (`SAV-1193`), and the cached x/y `+0x28/+0x2c`, which the base
+  constructor sets to 0 (`L13759`, `L13760`). Outside the record: the
+  picture-13 entries in hash view `+0xa7c`, tile bit 0x2000 (`SAV-1150`) and
+  the `+0x124` marks of pictures 20 and 30 on their target.
+- Rebuilt later by the driver: the point array of picture 34 on each call
+  whose target is found; for picture 36 the array is cleared and rebuilt from
+  the empty word list, so a loaded 36 draws no segment.
+
+**Confidence.** High: both loops and the constructors are complete
+listings.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q5-listings.txt`, `evidence/q2-listings.txt`.
+
+### SAV-1203
+
+- `R0614` derives the cell `+0x34/+0x38` (cached x/y >> 8) and the screen
+  fields `+0x3c..+0x68` from `+0x28/+0x2c`. The producers store x/y into
+  `+0x28/+0x2c` before calling it; LOAD does not, so LOAD's call derives from
+  (0,0). The view rebuild `R1657` (from the view frame `R0379`) calls
+  `R0614` for every record and then slot `+0x40` (`R2160`), which does
+  not write `+0x28`.
+- The driver writes `+0x28/+0x2c` := x/y only in its tail (`L13400`,
+  `L13401`), after the picture switch, and returns. It does not call
+  `R0614` (none of that routine's 12 rel32 callers in
+  `evidence/tables.txt` lies in `R0558..L13621`) and stores nothing at
+  `+0x34/+0x38`. So the derived cell stays (0,0) after LOAD until
+  `R0614` next runs after a driver tail, for example in the view rebuild.
+  The first call after LOAD always runs its arm with cell (0,0); the second
+  does too when no rebuild ran between the two calls.
+- Arm 13 reads `+0x34/+0x38` at actionphase 4 (hash registration) and 8
+  (burn), after the increment. A record saved at actionphase 3 or 7 reaches
+  that value on its first call after LOAD; one saved at 2 or 6 reaches it on
+  its second call, displaced when no rebuild intervened.
+- Unicorn run of the original window `L03001..L13761`, map 64 × 64,
+  zero planes: derived cell (0,0) writes 0x2000 at tile indices −65, −1, 63,
+  −64, 0, 64, −63, 1, 65; control cell (10,12) writes the 3 × 3 at 713..843.
+  For width w the indices are −w−1, −w, −w+1 and −1 before the plane, and 0,
+  1, w−1, w, w+1 in it, w−1 being cell (w−1, 0). A word is skipped only when
+  (word >> 6) & 0x7f is 8 to 11 and the terrain byte at the same index is 0.
+- Corpus: `game0024` holds picture 13 at saved actionphase 7, so its first
+  call after LOAD is the burn call.
+
+**Confidence.** Medium: the loader, the derivation and the driver tail are
+listed and the arithmetic is run, but writers of `+0x28/+0x2c` outside the
+loader, the producers and the driver were not enumerated over `.text`.
+
+**Unknown.** The order of the view frame `R0379`, and so of the
+rebuild, against the 0x401 pass after LOAD, which decides the actionphase 2
+and 6 case. What the four words before the tile plane hold and what the OR
+does to them; whether a frame drawn between LOAD and the first call shows
+the record at the (0,0) screen position. A native watchpoint on the tile
+plane after loading `game0024` settles the first and the last.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/q5-listings.txt`, `evidence/q5-arm13-run.txt`,
+`evidence/q4-listings.txt`, `evidence/corpus-projectiles.txt`.
+
+### SAV-1204
+
+- The cast producer and arm 0x8b take the record ID from the counter at
+  view `+0xa0c` before the first driver call; a record with 0 segments
+  returns 0 on that call and is destroyed in that sweep. The counter is not
+  given back.
+- Cast producer: it runs in the actor sweep of the 0x401 pass, which comes
+  before the record sweep (`ANIM-113`, `MAGIC-261`), so the record dies in
+  the pass that built it (`ANIM-147`) and no SAVE can fall between.
+- Arm 0x8b: in the timer entries `R0260` and `R0454` the client
+  dispatcher runs before the 0x401 pass (`ANIM-113`), so the record dies in
+  the same timer step. The other timer entries and the other callers of
+  `R0509` were not read.
+- Corpus scan, owner saves read in place, one engine-written file excluded:
+  133 files, 90 with a Projectiles store, 1 reader failure, 7 files with a
+  record, 6 distinct by hash, 8 distinct records. Pictures: 1 (one), 2
+  (four), 5 (one), 10 (one), 13 (one). Every held record has non-zero
+  segments except `game0022`'s picture 1, saved with 0 segments.
+- Raw class names in the same files: SpellTransport 3, AreaEffect 5,
+  PointEffect 3.
+
+**Confidence.** High for the cast-producer clause (listings and the pass
+order of `ANIM-113` and `MAGIC-261`). Medium for arm 0x8b outside the two
+timer entries `ANIM-113` reads. The corpus counts are measurements of the
+present corpus.
+
+**Unknown.** Whether `game0022`'s picture-1 record, saved with 0 segments,
+is a unit shot between its last move and its removal call, as for
+`ANIM-150`.
+
+**Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
+`evidence/corpus-projectiles.txt`, `evidence/q1-listings.txt`.

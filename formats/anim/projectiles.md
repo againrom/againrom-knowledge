@@ -52,6 +52,86 @@ the sheet is loaded on FIRST DRAW, not at start-up
 picture 10 and 12 also blit a smoke sheet once per point of the object's trail array
 ```
 
+## Records in flight and their saved form
+
+Seven call sites build a record: client arms 0x86, 0x8b and 0x8c, the unit
+shot, the cast producer (twice, for picture 60's copy) and LOAD. Unit-shot
+pictures are the class Projectile values 1 to 7, 10 and 12. A cast by a
+caster with a client ID sends 0x86 with picture 2 × spell + 8 (0x8a for
+spell 14, picture 36); the caster then takes the cast action, and the cast
+producer builds the record with segments from its own picture switch:
+
+```
+picture 10 dist/200   12 dist/384   20, 30 -> 1   34, 36 -> 13   60 -> 21 (two records)
+every other picture   0: the record returns finished on its first call and
+                      is destroyed in the 0x401 pass that built it, after taking a counter ID
+```
+
+21 of the 28 cast pictures get 0. No record is built when the caster is busy
+or has class word `+0x1c` 0 when 0x86 arrives, or when the caster's target is
+missing from the unit hash at the cast frame. The producer runs in the
+pass's actor sweep, before its record sweep. A 0-segment 0x8b record dies in
+the timer step that dispatched it for the two timer entries read; elsewhere
+that is Medium. — ANIM-147, SAV-1204
+
+Spell apply picks the target sender when Spell Target is 1 and the cell
+sender otherwise. Both rewrite 0x86 to 0x8b for a source without a client ID;
+that arm builds the record itself with the message's segment word (dist/Speed
+for spells 1 and 2, 5 for spell 13, else 0). Prismatic Spray sends 0x8a, or
+0x8c for a source without a client ID, and never 0x8b. — MAGIC-287
+
+The `Homing` key is read by client arms 0x86 and 0x8b, not by the driver:
+non-zero takes the message word as the target ID, zero takes the message
+bytes as an aim cell. Shield's cell sender meets picture 44's Homing 1, so
+its cell bytes are read as a unit ID. A 0x8b of a picture with no row reads
+the registry slot without a bound or null test: a null slot below the array
+count, past the array for picture 64 unless the array is larger; the count
+was not measured. — MAGIC-288
+
+Odd pictures come only from Fire Ball's blast (13, 22 segments) and the
+staged arm of spells 4, 9 and 21 (17, 27, 51; 16, 18, 16 segments). The
+bursts of spells 3, 7, 8, 12, 17 and 19 build no record; their cast still
+builds a 0-segment record. Rows 15, 23, 25 and 47 have no shipped
+producer. — ANIM-148
+
+At picture 13 or above only pictures 13, 17, 20, 27, 30, 34, 36, 51 and 60
+receive non-zero segments, so the mark arm of the eleven pictures 18, 24,
+28, 40, 44, 48, 52, 54, 56, 62 and 64 runs only for a 0x8b record whose
+segment word is non-zero. After its zero test a finished call builds and
+sends nothing, and only picture 13's sets a view redraw request; every call
+first runs an unresolved import call with the view, and the record's
+destructor was not read. — ANIM-149
+
+The picture-13 record starts at actionphase -1 with 22 segments. Driver
+calls 1 to 22 return 1; call 9 (actionphase 8) burns the 3 × 3 tiles. Call 23
+finds 0 segments, sets view `+0x74` and returns 0, and the same step's
+sweep destroys the record. A SAVE between calls 22 and 23 holds it with 0
+segments and actionphase 21; after LOAD its first call removes it. — ANIM-150
+
+Fire Ball's burst record sits at the cell centre of the transport's point,
+without the fine byte. For a size-2 target at fine 128 that is the anchor
+cell, while a homing record aims at the footprint centre. No stage stores the
+target's size: the Position has no size byte, AreaEffect `+0x49` holds the
+Radius, and the record has no size field. That the transport flies to the
+same point is Medium. — MAGIC-289
+
+SAVE writes the 16 leaves of every record. LOAD reads them, rebinds the view,
+the ID and the map node, and loses the word list `+0xa8` (a loaded picture
+36 draws no segment), the point array, the trail and the cached x/y
+`+0x28/+0x2c`. — SAV-1202
+
+The cached x/y stays 0 after LOAD until the first driver call writes it,
+and the derived cell stays (0,0) until the derivation routine next runs
+after that, for example in a view rebuild. The first call after LOAD always
+works with cell (0,0), the second too when no rebuild ran between them. A
+loaded picture-13 record at saved actionphase 7 burns the 3 × 3 around map
+cell (0,0), four of those words before the tile plane, instead of its own
+cell; at actionphase 3 it registers the cells around (0,0). Saved at 6 or 2
+it does so on its second call when no rebuild intervened. This is Medium:
+writers of `+0x28/+0x2c` outside the loader, producers and driver were not
+enumerated, and the rebuild's order against the driver pass is
+Unknown. — SAV-1203
+
 ## Direction, unit-shot origin and trail
 
 The direction helper takes `dx = targetX - x`, `dy = targetY - y`, `a = |dx|`,
@@ -295,8 +375,9 @@ bucket/node traversal before selector-3 bodies, markers/bars and shroud;
 inside a bolt, indices ascend. Native buffer, packing masks, clip, stride,
 tables and current collection were not captured. — MAGIC-280
 
-Normal caster construction gives the full ramp. Direct 0x8b starts phase
--1 and supplies five successful calls, giving 0,4,3,2,1. Source-cell 0x8c
+Normal caster construction gives the full ramp. Direct 0x8b, spell 13 only
+(MAGIC-281's spell-14 clause is retracted; MAGIC-287), starts phase -1 and
+supplies five successful calls, giving 0,4,3,2,1. Source-cell 0x8c
 picture 36 starts -1 with thirteen calls, giving
 0,4,3,2,1,0,1,2,1,0,1,2,3. Loaded Prj state uses its saved phase/counter.
 Geometry is invoked on each live action-1 call after phase selection and

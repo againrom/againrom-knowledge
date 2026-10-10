@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3243. Observation: 95. Static analysis: 2691. Mixed: 457.
+Claims labelled: 3253. Observation: 95. Static analysis: 2701. Mixed: 457.
 
 ## Ledger ai
 
@@ -524,6 +524,10 @@ Claims labelled: 3243. Observation: 95. Static analysis: 2691. Mixed: 457.
 | ANIM-143 | static analysis | ✔ promoted |
 | ANIM-144 | static analysis | ✔ promoted |
 | ANIM-145 | static analysis | ✔ promoted |
+| ANIM-147 | static analysis | ✔ promoted |
+| ANIM-148 | static analysis | ✔ promoted |
+| ANIM-149 | static analysis | ✔ promoted |
+| ANIM-150 | static analysis | ✔ promoted |
 
 ## Ledger databin
 
@@ -1051,12 +1055,15 @@ Claims labelled: 3243. Observation: 95. Static analysis: 2691. Mixed: 457.
 | MAGIC-278 | static analysis | ✔ promoted |
 | MAGIC-279 | static analysis | ✔ promoted (amended) |
 | MAGIC-280 | static analysis | ✔ promoted |
-| MAGIC-281 | static analysis | ✔ promoted |
+| MAGIC-281 | static analysis | ✔ promoted (partially retracted) |
 | MAGIC-282 | static analysis | ✔ promoted |
 | MAGIC-283 | static analysis | ✔ promoted |
 | MAGIC-284 | static analysis | ✔ promoted |
 | MAGIC-285 | static analysis | ✔ promoted |
 | MAGIC-286 | static analysis | ✔ promoted |
+| MAGIC-287 | static analysis | ✔ promoted |
+| MAGIC-288 | static analysis | ✔ promoted |
+| MAGIC-289 | static analysis | ✔ promoted |
 
 ## Ledger menu
 
@@ -2340,6 +2347,9 @@ Claims labelled: 3243. Observation: 95. Static analysis: 2691. Mixed: 457.
 | SAV-1199 | static analysis | ✔ promoted |
 | SAV-1200 | static analysis | ✔ promoted |
 | SAV-1201 | static analysis | ✔ promoted |
+| SAV-1202 | static analysis | ✔ promoted |
+| SAV-1203 | static analysis | ✔ promoted |
+| SAV-1204 | static analysis | ✔ promoted |
 
 ## Ledger session
 
