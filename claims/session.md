@@ -677,3 +677,191 @@ unresolved); the runtime order of consumers between reseeds. A message-hook
 trace of the frame window and a breakpoint on `R1733` would settle the
 first two.
 
+
+## Counter start values
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SESS-084 | `server+0x00`/`+0x04` have eight stores in server routines and two archive reads: the constructor, the fresh-map mission start and the mission end store 0, two increments advance them, and SAV LOAD reads both. | High / Medium | ✔ promoted | [EXP-0521](../experiments/EXP-0521-session-clock/) |
+| SESS-085 | When `R0099` loads a map (argument 0) it forces the fresh-map arm of `R0512`, which stores sub-tick 0 and full tick 0 after the map load; the restore arm skips both stores. | High / Medium | ✔ promoted | [EXP-0521](../experiments/EXP-0521-session-clock/) |
+| SESS-086 | `R0099` runs one stepper call itself after the map load or SAV restore, so a mission's first sub-tick runs inside its start; from (0, 0) it leaves sub-tick 1, full tick 0. | High / Medium | ✔ promoted | [EXP-0521](../experiments/EXP-0521-session-clock/) |
+| SESS-087 | LOAD replaces the server, restores both counters from the file and enters the mission without the map load, so a loaded mission starts from the file's pair; that a defeat restart is such a LOAD is Medium. | High / Medium | ✔ promoted | [EXP-0521](../experiments/EXP-0521-session-clock/) |
+| SESS-088 | The server outlives a mission on the town and mission-to-mission edges, but no route carries a counter into the next mission: mission end stores 0 in both, and the next start stores 0 again. | High / Medium | ✔ promoted | [EXP-0521](../experiments/EXP-0521-session-clock/) |
+
+### SESS-084
+
+- Population: EN `rom.exe` (SHA-256 `942e9b72…7d03`, identical to RU), capstone linear decode of
+  `.text`, 554 722 instructions, 14 468 routine starts. Instrument `flow.py`: an intra-routine
+  register and EBP-frame-slot tracker seeded by every load of `[L00285]`, by ECX at the entry
+  of each server method (fixed point, 29 routines) and by the argument slot of each routine that
+  receives the pointer as a pushed argument (7 routines). It reports stores, read-modify-writes and
+  string stores at displacement 0..7 of a tracked base, address arithmetic of 1..7, and every push
+  of the tracked pointer.
+- Stores found (9: eight in server routines, one in the archive reader):
+
+  | Site | Routine | Field | Value |
+  |---|---|---|---|
+  | `L14079` | constructor `R0967` | `+0x04` | 0 |
+  | `L14080` | constructor `R0967` | `+0x00` | 0 |
+  | `L14081` | mission load `R0512`, fresh-map arm | `+0x00` | 0 |
+  | `L14082` | mission load `R0512`, fresh-map arm | `+0x04` | 0 |
+  | `L14083` | mission end `R0826` | `+0x00` | 0 |
+  | `L14084` | mission end `R0826` | `+0x04` | 0 |
+  | `L04050` | stepper `R0147` | `+0x00` | `+0x00 + 1` when the new `+0x04 % 16 == 15` |
+  | `L05394` | sub-tick `R0193` | `+0x04` | `+0x04 + 1` |
+  | `L14085` | archive reader `L09854` | `+0x00` | the next file dword |
+
+- The SAV load arm of `R0414` passes `server+4` (`L14086` adds 4) to the dword reader
+  `R0686` at `L14087`, then `server` itself at `L14088`; `R0686` forwards the pointer to
+  `L09854`, whose store `L14085` is the row above. So `+0x04` is read first and `+0x00` second,
+  in `SAV-HEAD-025`'s order, before the world-half flag.
+- The mission end `R0826` also stores 0 at `+0x80` and `+0x2c` (`L14089`, `L06209`) and
+  then sends opcode `0x64` with the value `+0x04 + 1`, that is 1, through `R0611` (`L14090`…`L14091`).
+- The other pushes are classified: the queue drain `R0191` (twice), operator delete `R0525`
+  (teardown `R1303`), the CString helpers `R0473` and `L09565` and an unpaired `PUSH ECX`
+  frame reservation (`L14092`, `L14093`, `L14094`, `L14095`), and `L14096`, which never
+  reads its stack slot.
+
+**Confidence.** High for the stores at `L14079`, `L14080`, `L14081`, `L14082`, `L14083`,
+`L14084` and `L04050`, their routines and values: each is a named instruction in a window read in
+this experiment (`w01`, `w03`, `w13`, `w12`). High for `L05394` and its value `+0x04 + 1` by
+`SESS-TICK-004`, whose windows this experiment did not re-read. Medium for the archive reader's
+store `L14085`, the value "the next file dword" and the forwarding `R0686` -> `L09854`:
+they are scan lines of `s03-flow-writers.txt` without a listing, and the `+0x04`-then-`+0x00` read
+order rests on `w06` (`L14086`…`L14088`) and that scan. Medium that the list is complete: the tracker is linear across
+branches, does not follow the pointer through another global, a heap field, an indirect call or an
+argument of a routine without an EBP frame (the queue drain `R0191` receives the pointer that
+way, so the command dispatcher `R0061` and its arms are covered only where they load
+`[L00285]` themselves), and does not see a bulk copy whose destination register was not
+tracked. `SESS-TICK-004`'s Medium on the uniqueness of its two increments is unchanged; this scan
+found no third.
+
+**Unknown.** A writer in the untracked population above. A native write watchpoint on the first
+eight bytes of the server object across new game, mission start, mission end and LOAD would settle
+it.
+
+### SESS-085
+
+- `R0099` reads its argument into EBP at `L13682`. With 0, and campaign `+0x6b8` nonzero
+  (`L14097`), it stores the difficulty at `server+0x84` (`L12630`), stores 0 at `server+0x154`
+  (`L14098`) and calls `R0512` at `L06688`.
+- `R0512` branches on `server+0x154` at `L14099`. Zero takes the fresh-map arm: the map
+  loader `R0128` at `L07873`, then on success the conditional readers of `L08255`…`L14100`
+  and the stores of 0 at `L14081` (`+0x00`) and `L14082` (`+0x04`). Nonzero takes the restore
+  arm: `R1305("game0000.sav")` at `L14101`, whose success jumps from `L14102` to `L14103`,
+  past both stores.
+- `R0512` has two direct callers, `L06688` and `L09338` (`R1662`); it is referenced
+  by no stored address (raw dword scan, all sections, 0 hits). The map loader's only caller is
+  `L07873` (`SESS-LOAD-009`). So every mission whose map is loaded from its `.alm` passes the two
+  zero stores after the load.
+- `R0099` has three direct callers and no stored-address reference: `L03842` and `L07366`,
+  which push EDI, 0 from `L11306` (`SAV-1201`), and `L06711` in LOAD, which pushes 1
+  (`SESS-087`). A mission that loads its map therefore starts through one of the first two, or
+  through the unsearched `L09338`.
+- Original corpus witness: the restart slot `game9999.sav` holds sub-tick 1, full tick 0 in 5 of 5
+  saves of the five census directories (missions 10, 10, 20, 30, 41; `SAV-1210`), the pair `SESS-086` predicts from (0, 0).
+
+**Confidence.** High for the forced `+0x154 = 0`, the branch, the two stores and the restore arm's
+jump past them, and for (0, 0) on the five corpus missions. Medium that no other writer runs
+between `L14082` and the first sub-tick on every map: that rests on `SESS-084`'s Medium
+completeness.
+
+**Unknown.** Whether `R1662`, the second caller of `R0512`, is ever reached (no direct or
+stored-address caller was searched for it here); on that path, with `server+0x154` nonzero, the
+counters would keep `game0000.sav`'s pair.
+
+### SESS-086
+
+- After the map load or restore, `R0099` tests campaign `+0x6b8` at `L08408` and, when it is
+  nonzero, calls the stepper `R0147` on the server at `L03780`, for either argument value.
+- The stepper returns unless `server+0x2c != 0` (`L02033`); the fresh-map arm stores 1 there at
+  `L06208`. It tests the phase slots 6 and 12 on the old sub-tick (`L12296`…`L00281`,
+  `L14104`…`L14105`), calls the sub-tick `R0193` at `L01863`, then increments the full
+  tick only when the new sub-tick modulo 16 is 15 (`L09325`…`L04050`).
+- From (0, 0) one call leaves sub-tick 1, full tick 0, and runs neither phase slot nor the full-tick
+  slot. A LOADed pair (s, f) becomes (s + 1, f), or (s + 1, f + 1) when s + 1 is 15 modulo 16.
+- The automatic restart save is requested after that call: `L03825` posts message `0x442`, whose
+  arm copies `"game9999.sav"` to campaign `+0x234` and calls the SAVE routine `R0084`
+  (`SAV-1201`), when the argument equals EDI (`L14106`).
+
+**Confidence.** High for the call and its order after the load (`w07`, `w12`). High for the
+stepper's modulo-16 test on the full tick (`w12`). The one-increment step of `R0193`, which "from
+(0, 0) one call leaves sub-tick 1" rests on, is `SESS-TICK-004`'s (its windows were not re-read
+here); the 5 of 5 (1, 0) census (`SAV-1210`) agrees with it. Medium for the restart save's gate: EDI's value at
+`L14106` is not traced in `L14107`…`L14108`; the corpus's 5 of 5 `game9999.sav` at (1, 0)
+agrees with a post on the argument-0 path and a save before the next sub-tick.
+
+**Unknown.** Whether campaign `+0x6b8` is nonzero on every single-player route; it is set by the
+allocator from the server initialiser's return (`L09334`, `L09335`), and `R0119`'s return was
+not read. A mission without it would load no map at `L14097`.
+
+### SESS-087
+
+- LOAD is message `0x419`. The linear sweep finds one immediate, the post at `L14109` in the
+  close handler, when the save-selection dialog held at campaign `+0x128` closes with result `0x445`
+  (`L14110`…`L14111`). The four other raw `.text` hits and three `.data` hits of the dword were
+  not classified. `R1284`'s only caller is the `0x419` arm (`L13684`; 0 stored-address hits).
+- The `0x419` arm tears the server down (`R1303` at `L14112`, which deletes it and stores 0 in
+  `[L00285]`) and calls `R1284` at `L13684`.
+- `R1284` stores phase 2 at campaign `+0x6bc`, allocates and constructs a new server
+  (`R1304` at `L09302`, constructor stores 0 in both counters), and restores the file named at
+  campaign `+0x234` through `R1305` at `L08427`, which reads the archive with `R0414`
+  (`SESS-084`: `+0x04`, then `+0x00`, before the world-half flag). When `R1578` returns nonzero
+  it calls `R0099(1)` at `L06711`; with EBP 1 `R0099` skips `R0512` (`L14113`), so the
+  restored pair is the pair at the first sub-tick (`SESS-086`).
+- When `R1578` returns zero, `R1284` takes the other branch (`L14114`…`L14115`): the same
+  callees as the mission end's town path (`R1670`, `R0192`) and message `0x42e`, with no
+  `R0099` call. A town SAV's pair is restored and then replaced by (0, 0) when the next mission
+  starts (`SESS-085`). The two original mission-0 saves hold (0, 0) (`SAV-1210`).
+- A defeat offers Exit to Main Menu and Load Game only (`MISSION-DEFEAT-046`,
+  `MISSION-VICTORY-035`); Load Game opens the save selection and its OK is this `0x419`. The
+  selection list routine `L14116` skips the entry whose name `R2080` matches
+  `"game9999.sav"` only when its second argument is 0 (`L14117`…`L14118`). If the selection a
+  defeat opens passes a nonzero second argument, restarting the last mission is a LOAD of
+  `game9999.sav`, whose pair is (1, 0) in 5 of 5 saves of the census. That the defeat's selection
+  does so is Medium. The 5 of 5 census fixes the file's content, not the route that reads it: the
+  file is saved after the first sub-tick on the argument-0 path (`SESS-086`), so it holds (1, 0)
+  whichever route reads it.
+
+**Confidence.** High for the arm, the teardown, the construction, the restore order and the skipped
+map load. Medium that a defeat restart is a LOAD: the live alternatives are R1 (the restart runs
+`R0099(0)` and a fresh start, which would give (0, 0)) and a restart reached from a surface other
+than the defeat panel. The caller of `L14116` with a nonzero second argument would settle it.
+Medium that no writer runs between the restore and the first sub-tick (`SESS-084`); that
+the `R1578`-zero branch is the town (`R1578` was not read; the branch is identified by its
+callees); and that the restart slot is offered through `L14116` (`R2080` is read as a name
+compare from its use).
+
+**Unknown.** Which dialog instance passes a nonzero second argument to `L14116`, that is, where
+the restart slot is offered, and so which route a defeat restart takes.
+
+### SESS-088
+
+- The server is allocated only by `R1304`, whose five callers are the new campaign
+  `L07363`, LOAD `L09302` and the three network starts `L09303`, `L09304`, `L09305`
+  (direct-call scan, 0 stored-address hits). The mission start `R0099` is not among them and
+  reuses `[L00285]` (`PARTY-PERSIST-014`, `PARTY-PERSIST-028`).
+- The constructor `R0967` stores 0 at `+0x04` (`L14079`) and `+0x00` (`L14080`).
+- The mission end `R0826`, called from the `0x41d` arm after campaign `+0x66c` has taken the
+  elapsed sub-ticks divided by 16 (`SESS-END-011`), stores 0 in both (`L14083`, `L14084`).
+- Per route, before the first sub-tick:
+
+  | Route | Sub-tick | Full tick | Decided by |
+  |---|---|---|---|
+  | New game, first mission | 0 | 0 | constructor, then `L14081`/`L14082` |
+  | Mission from town or world map | 0 | 0 | `L14083`/`L14084`, then `L14081`/`L14082` |
+  | Restart after defeat (`game9999.sav`), Medium: R1 (0, 0) is live | file: 1 | file: 0 | `L14087`/`L14088` |
+  | LOAD of a mission SAV | file | file | `L14087`/`L14088` |
+  | LOAD of a town SAV, then a mission | 0 | 0 | `L14081`/`L14082` |
+
+- The first sub-tick itself runs inside `R0099` (`SESS-086`).
+- EN and RU `rom.exe` have the same SHA-256, so every code clause is one answer for both.
+
+**Confidence.** High for the allocator's callers, the constructor stores, the mission-end stores
+and the route table's deciding stores. Medium for the defeat-restart row (`SESS-087`). Medium that nothing else writes the pair on any route
+(`SESS-084`).
+
+**Unknown.** The client day-clock mirror campaign `+0x3e0` (`SESS-TICK-026`) is set from each
+sub-tick's opcode `0x64` and from the mission end's value 1; its value on each route before the
+first `0x64` arrives was not read (the two resets in `R0701` are outside this experiment's
+windows).

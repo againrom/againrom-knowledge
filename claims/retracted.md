@@ -1290,3 +1290,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `R2-ENGINE-050` (the source-file clause only; key construction, substring rule, empty body and `npc` test stand) | Verbatim: "find its first substring in the loaded mission source" | Medium | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/), R2-ENGINE-344 | The lookup searches the shared text buffer, which holds `town.txt`, `globalmap.txt`, `quest.txt` or a mission file, whichever loader ran last. Which file the buffer holds when TALK runs is Unknown (R2-ENGINE-344). | **NARROWED** |
+
+## Head tick relation
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SAV-HEAD-025` (the `world+0x00 == world+0x04 >> 4` relation only; the field order, the field meanings and the other four probe checks stand) | Verbatim: "Probe, 4/4: the head parses, `world+0x00 == world+0x04 >> 4`, the eleven dwords are all zero" | High | [EXP-0521](../experiments/EXP-0521-session-clock/), SAV-1210 | In the 28 saves of five owner-directory dates the full tick is `(world+0x04 + 1) >> 4`. `2026-08-02/game0003.sav` has sub-tick 9343 (15 modulo 16) and full tick 584, where `sub >> 4` is 583; the other 27 files fit both formulas. | **CORRECTED** |

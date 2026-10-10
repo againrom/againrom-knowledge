@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3315. Observation: 95. Static analysis: 2759. Mixed: 461.
+Claims labelled: 3321. Observation: 95. Static analysis: 2764. Mixed: 462.
 
 ## Ledger ai
 
@@ -2025,7 +2025,7 @@ Claims labelled: 3315. Observation: 95. Static analysis: 2759. Mixed: 461.
 | SAV-CODEC-022 | static analysis | ● active |
 | SAV-SHAPE-023 | static analysis | ● active (amended) |
 | SAV-ROSTER-024 | static analysis | ● active |
-| SAV-HEAD-025 | static analysis | ● active |
+| SAV-HEAD-025 | static analysis | ● active (amended) |
 | SAV-TRAIL-026 | static analysis | ● active |
 | SAV-FLAG-027 | static analysis | ● active |
 | SAV-PLAYER-028 | static analysis | ● active |
@@ -2386,6 +2386,7 @@ Claims labelled: 3315. Observation: 95. Static analysis: 2759. Mixed: 461.
 | SAV-1202 | static analysis | ✔ promoted |
 | SAV-1203 | static analysis | ✔ promoted |
 | SAV-1204 | static analysis | ✔ promoted |
+| SAV-1210 | mixed | ● active |
 
 ## Ledger session
 
@@ -2441,6 +2442,11 @@ Claims labelled: 3315. Observation: 95. Static analysis: 2759. Mixed: 461.
 | SESS-075 | static analysis | ✔ promoted |
 | SESS-082 | static analysis | ✔ promoted |
 | SESS-083 | static analysis | ✔ promoted |
+| SESS-084 | static analysis | ✔ promoted |
+| SESS-085 | static analysis | ✔ promoted |
+| SESS-086 | static analysis | ✔ promoted |
+| SESS-087 | static analysis | ✔ promoted |
+| SESS-088 | static analysis | ✔ promoted |
 
 ## Ledger shop
 

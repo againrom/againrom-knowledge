@@ -3561,7 +3561,7 @@ gates.
 | SAV-CODEC-022 | Codec `R1515` reads a word-count dword, then run and literal opcodes until the source ends; the four opcodes shipped saves never use are all legal. | High | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
 | SAV-SHAPE-023 | A save is a campaign half plus an optional world half: `R0414` writes one byte from `world+0x2c`, and the world snapshot follows only when that byte is 1. | High / Medium | ● active (amended) | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
 | SAV-ROSTER-024 | The roster is written in the campaign half, before the shape byte, so every save carries the player list and every `Player`, group and actor. | High / Unknown | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
-| SAV-HEAD-025 | The decoded head is named field for field: two tick counters, the map name, eleven u32 fields, mission number and difficulty, then two player-list dwords. | High / Unknown | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
+| SAV-HEAD-025 | The decoded head is named field for field: two tick counters, the map name, eleven u32 fields, mission number and difficulty, then two player-list dwords. | High / Unknown | ● active (amended) | [EXP-0077](../experiments/EXP-0077-party-and-save/), [EXP-0521](../experiments/EXP-0521-session-clock/) |
 | SAV-TRAIL-026 | The stream ends with three writes after the world half: marker `0xbadface1`, the dword `[L07886]`, and `world+0x118`'s serializer, measured as 400 zero bytes. | High / Unknown | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
 
 ### SAV-FRAME-021
@@ -3711,6 +3711,11 @@ identity holds 4/4, and `SESS-TICK-004` read both increments and the pacing
 independently from a listing.
 
 **Unknown.** What `playerList+0x20`'s `6` is.
+
+**Amended.** The relation `world+0x00 == world+0x04 >> 4` is corrected: `SAV-1210` finds it false
+on `2026-08-02/game0003.sav` (sub-tick 9343, full tick 584) and true on the other 27 of 28 files.
+The full-tick count the stepper reaches is `(world+0x04 + 1) >> 4` on all 28 (`SESS-086`). The
+field order, the field meanings and the other four checks stand.
 
 ### SAV-TRAIL-026
 
@@ -15559,3 +15564,30 @@ is a unit shot between its last move and its removal call, as for
 
 **Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
 `evidence/corpus-projectiles.txt`, `evidence/q1-listings.txt`.
+
+## Stored counter pair at mission start
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1210 | In 28 saves of five owner directories the head's full tick equals floor((sub-tick + 1) / 16) (one file is 15 modulo 16); the restart slot `game9999.sav` holds sub-tick 1, full tick 0 in 5 of 5, and the two mission-0 saves hold 0, 0. | High | ● active | [EXP-0521](../experiments/EXP-0521-session-clock/) |
+
+### SAV-1210
+
+- Population: every `.sav` in five dated directories of the owner save root (`2026-08-02`, `-08-12`,
+  `-08-14`, `-08-15`, `-08-24`), 28 files, read in place with `tools/savflag`; the head's first two
+  dwords are `world+0x04` and `world+0x00` (`SAV-HEAD-025`). The five are the fixed list in the
+  experiment's `regen.sh`; no selection rule is recorded. The save root holds later dated
+  directories, which were not read. The census output does not record the files' edition.
+- floor((sub-tick + 1) / 16) is the full-tick count the stepper reaches from (0, 0) after that many
+  sub-ticks (`SESS-086`); it differs from `SAV-HEAD-025`'s `sub-tick >> 4` only when the sub-tick
+  is 15 modulo 16. One file of the 28, `2026-08-02/game0003.sav` (sub-tick 9343, 15 modulo 16, full
+  tick 584), is such a file: it is the file that separates the two formulas and fits only
+  `(sub + 1) >> 4` (`sub >> 4` is 583). The other 27 fit both.
+- `game9999.sav`, the slot whose default label is "Restart last mission": (1, 0) for missions 20,
+  10, 10, 41 and 30. Sub-ticks over the other 21 mission saves range from 40 to 15 017.
+- `game0010.sav` in `2026-08-02` and `2026-08-15`, mission number 0: (0, 0).
+
+**Confidence.** High for the measurement over these 28 files. The edition of the files is not recorded by the census, and
+no file of the later dated directories was read.
+
+**Evidence.** [EXP-0521](../experiments/EXP-0521-session-clock/), `evidence/c01-save-counters.txt`.

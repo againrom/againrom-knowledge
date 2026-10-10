@@ -104,6 +104,14 @@ delivery chronology remain Unknown (MENU-093).
 A consumer that treats the two as one will run regeneration sixteen times too often or the shop
 restock sixteen times too slowly.
 
+**Start values.** The constructor, the mission end and the fresh-map mission start each store 0 in
+both counters; SAV LOAD reads both from the file (`SESS-084`). A mission whose map is loaded holds
+(0, 0) before its first sub-tick on every route that loads the map: new game, town, world map and
+mission-to-mission (`SESS-085`, `SESS-088`). LOAD keeps the file's pair and loads no map. `game9999.sav` is saved at (1, 0);
+a defeat restart is probably a LOAD of it, but a restart through `R0099(0)` would give (0, 0), and
+the caller of `L14116` that offers the slot settles which (`SESS-087`, Medium). The mission start itself runs the
+first sub-tick, so the first playable state is one sub-tick later (`SESS-086`).
+
 <a id="the-rate"></a>
 
 ## Tick rate
