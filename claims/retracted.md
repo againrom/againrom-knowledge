@@ -1284,3 +1284,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `TOWN-233` (the `R0877` argument description only; the vtable slots, the background blit and the `+0x78` clauses stand) | Verbatim: "followed by an undecompiled call `R0877(&stack)` passing three literal small values (`0,0,0xc`) built after the blit's own coordinates are already consumed" | High | [EXP-0520](../experiments/EXP-0520-chargen-panel-branch/), `TOWN-539` | The call passes `&C`, a four-dword rectangle (L + 12, T, R + 12, B) built at `L14038..L14039` from the child's accumulated rectangle, with ECX `[[this+0x5c]+0x94]`. `R0877` is the shared character sheet that draws text at rows from C[1] and C[2]. | **REFUTED** — partially retracted |
+
+## ROM2 dialogue lookup source file
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-050` (the source-file clause only; key construction, substring rule, empty body and `npc` test stand) | Verbatim: "find its first substring in the loaded mission source" | Medium | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/), R2-ENGINE-344 | The lookup searches the shared text buffer, which holds `town.txt`, `globalmap.txt`, `quest.txt` or a mission file, whichever loader ran last. Which file the buffer holds when TALK runs is Unknown (R2-ENGINE-344). | **NARROWED** |

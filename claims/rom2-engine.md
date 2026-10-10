@@ -641,7 +641,7 @@ The RU result consumer L2.00127 requires player byte+0x41 nonzero and DWORD+0x2c
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-049 | Both ROM2 campaign loaders select mission text by scenario location; substring spans feed briefing, failure and contiguous subobjective caches, and mission 10 has no subobjective section. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
-| R2-ENGINE-050 | In both ROM2 clients, UI message `0x433` selects `event%d` for ordinary IDs or defers the ID under UI bit eight; IDs 250, 253, 254 and 255 take separate branches. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
+| R2-ENGINE-050 | In both ROM2 clients, UI message `0x433` selects `event%d` for ordinary IDs or defers the ID under UI bit eight; IDs 250, 253, 254 and 255 take separate branches. | Medium | ✔ promoted (branch candidate, amended) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 | R2-ENGINE-051 | Both ROM2 dialogue consumers select ordered part/header alternatives, present text and optional portrait/speech, and advance on `0x470`; mission 10 selects no speech name through this page route. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 | R2-ENGINE-052 | Both ROM2 mission loaders call `CharToOemA`; font1 uses selector-gated byte remapping before glyph/advance indexing, with Windows conversion results and glyph labels still Unknown. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 
@@ -715,6 +715,8 @@ shared-image assumption.
 deferred-event replay ordering and all bit-eight writers, behavior under
 overlapping dialogs, other callers of the key-based builder, and dynamic
 screen presentation.
+
+**Amended.** A correction pass changed this claim; the overturned wording is in [`retracted.md`](retracted.md) under "ROM2 dialogue lookup source file".
 
 ### R2-ENGINE-051
 
@@ -5490,6 +5492,8 @@ in a committed listing.
 | R2-ENGINE-339 | ROM2 stores SoundRandom, SoundMusPos, SoundSfxPos, SoundSpeechPos and MusicEnabled in HKLM; volume defaults to -700, MusicEnabled to 1; -nomusic or a music.res mount failure disables screen and mission music requests. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-341 | A ROM2 dialogue tag tune=N cross-fades music to list index N, which repeats only while no area pick exists; no data file or archive entry in either root contains tune=, so shipped dialogue never changes music. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-343 | On a -1 find the ROM2 dialogue loader leaves a one-byte empty body, a clear flag and no error (EN High, RU Medium); that absent means -1, and the TALK body ignoring the result (TalkTo), are Medium. | High / Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
+| R2-ENGINE-344 | The `#<key>` lookup is reached via the dialogue builder (21 direct call sites, 10 functions per image; register calls unseen); only TALK formats `npc%dtalk%d`; no save-load read found. | Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
 
 ### R2-ENGINE-335
 
@@ -5755,3 +5759,110 @@ path (R2-ENGINE-058).
 **Confidence.** High for the parser and page path in both locales and for
 the absence within the census population. A compressed payload or a file
 outside the two roots is outside it.
+
+### R2-ENGINE-343
+
+The section loader EN `R2.0042` / RU `R2.0041` (R2-ENGINE-050) formats
+`#%s` (EN `L2.01455`) from the dialogue key at object +0x6c, lowercases it
+and calls `strstr`-shaped find EN `L2.00997` on the shared text buffer (EN
+`L2.01191`, RU `L2.01456`). The EN `L2.00997` listing (in the lane notes,
+not in `evidence/`) tests its callee `L2.01457` result and returns -1 for
+NULL and the offset otherwise; `L2.01457` was not read, so "returns -1 when
+the section is absent" rests on an unread callee. The RU find `L2.01289`
+was not read. On -1 the loader
+stores +0x78 = 1, allocates one byte, stores the pointer at +0x74, writes
+NUL to it, clears +0x7c and returns. No error call, no exit and no second
+lookup follow. The found arm sets +0x7c to 1 only when the cut body holds
+`npc` (R2-ENGINE-050). The EN dialogue builder `R2.0038` / RU `R2.0037`
+tests +0x7c right after the constructor: when clear it takes a different
+construction arm (EN `L2.01458`, one 0x98-byte child instead of a 0x64-byte
+and a 0x98-byte child). The arm contents, the constructor `R2.0040` and
+its loader call `L2.01459` were read in the lane notes and are not in
+`evidence/`. The parser EN `R2.0048` scans the body for `<` and
+jumps to `L2.01460` on a NUL; that target was not read.
+
+The TALK body EN `L2.00554` / RU `L2.00555` formats `npc%dtalk%d` (EN
+`L2.01461`, RU `L2.01462`), calls the builder, overwrites `eax` at once
+and then calls the import slot EN `L2.01463` / RU `L2.01464` that
+R2-ENGINE-073 identifies as DLL TalkTo, with the same packed value. No
+test follows the builder call. The conversation therefore reaches TalkTo
+with an empty body when `npc517talk10` is missing, and the kind-3 unlock
+of R2-ENGINE-073 does not depend on the section.
+
+EN and RU agree: the 124-instruction loader, the three-instruction
+builder branch and the 31-instruction TALK tail are identical after
+address normalisation (0 mismatches of 158). The comparison is over
+normalised instruction text; callees are not compared, so it states shape,
+not the callee each call reaches.
+
+**Confidence.** EN High for the loader's not-found stores (`L2.01465` to
+`L2.01466`) and the builder branch (`L2.01467`): both were read in hand
+windows 1 and 4 within the preregistered budget of 12. Medium for: the find
+returning -1 when the section is absent (unread `L2.01457`); the builder
+arm, the constructor and the loader call (listings not committed); the
+TALK tail (`L2.01468` to `L2.01469`), whose span was first read as a
+generator window past the budget (the EXP-2011 listing also holds those
+instructions); the EN/RU shape identity (the RU spans were read in hand
+windows 9 and 10, the TALK tail only by the generator); and the whole RU
+half, because for RU -1 means absent only if `L2.01289` returns it. Medium
+for the displayed result: the page code after `L2.01460` (the target of
+the parser's NUL exit, not read), the constructor base and the page
+handlers were not read, so an empty box versus an immediate close is not
+decided.
+
+**Unknown.** Each with its settling step: what the page draws or does with
+an empty body (read the page code after `L2.01460` and the constructor
+base `L2.01470`); whether a missing `town.txt` and an empty buffer reach
+the same arm (read `L2.01457` and `L2.01289` on an empty string); sections
+whose header exists but whose body is empty (read the cut and parser on a
+zero-length body); the RU find result for absent (read `L2.01289`).
+
+### R2-ENGINE-344
+
+Every `#<key>` lookup the census saw runs in the one loader of
+R2-ENGINE-343, called once from the dialogue constructor EN `R2.0040`,
+which the builder EN `R2.0038` / RU `R2.0037` calls once. That constructor
+and loader chain is EN only and from the lane notes (not in `evidence/`).
+A raw census of `call rel32` and of every dword offset in every section
+(`callers.tsv`, `refs.tsv`) finds 21 builder call sites in 10 functions in
+each image and no dword reference to the builder or TALK; constructor and
+loader callers and dword scans were run for EN only, in the notes. The
+formats pushed near the sites are
+`event%d`, `npc%dabout`, `quest%d`, five `treasure*` keys, `npc%daccept%d`,
+`npc%dreject%d`, `npc%dtalk%d`, `shop\npc31m%d`, `plagatguard`,
+`druidinnkeeper%d`, `druidshopkeeper%d`, `kaargguard%d`, `kaargwoman%d`
+and `kaargman%d`. `npc%dtalk%d` has one code reference per image, in TALK,
+which has two direct call sites per image. The bytes `npc517` and `talk10`
+occur in neither `allods2.exe` nor `Scenario.dll` of either root
+(`literals.tsv`).
+
+The buffer is a global string filled by the text loader EN `R2.0056` /
+RU `R2.0055` (R2-ENGINE-052). The EN code passes the buffer address to it
+for `globalmap.txt` (`L2.01471`), `town.txt` (three sites: `L2.01472`,
+`L2.01473`, `L2.01474`), `quest.txt` (`L2.01475`) and `mission%d.txt`
+(`L2.01476`). `help.txt` goes to another destination (`L2.01477`,
+`refs.tsv`); the destination of `Docs\%d.txt` is Unknown (its pushed
+operand is blank in `refs.tsv`). The lookup of a key therefore searches whichever of those files was loaded
+last. The RU census finds the same path strings with the pushed buffer
+`L2.01456` for `globalmap.txt`, `town.txt` x3 and `quest.txt`; its
+`mission%d.txt` site was not decoded.
+
+No site of the census belongs to a save-load routine by its format string,
+and the first-town section name is built only by TALK. Loading a first-town
+save therefore reads `npc517talk10` only if the load path reaches TALK;
+no such route was found.
+
+**Confidence.** Medium. The census is a raw `call rel32` and dword-offset
+scan of `.text` and all sections; it misses a call through a register
+holding a computed address. The save-load routines themselves were not
+read, and the town screen's reload of `town.txt` on every entry was not
+established (the three loader sites are inside screen message handlers).
+
+**Unknown.** Each with its settling step: which routine reaches the two
+TALK call sites (find the callers of `L2.00743` and `L2.00755`, including
+register calls); whether any load path posts the town screen messages that
+call TALK (read the save-load routines); the RU `mission%d.txt`
+destination (decode that RU site); the 14 dword references to the EN
+buffer between `L2.01478` and `L2.01479` and the two in the text loader
+(`L2.01480`, `L2.01481`), which are not classified; the `Docs\%d.txt`
+destination; which file the buffer holds when TALK runs.
