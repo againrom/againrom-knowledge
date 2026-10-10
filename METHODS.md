@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3239. Observation: 95. Static analysis: 2688. Mixed: 456.
+Claims labelled: 3243. Observation: 95. Static analysis: 2691. Mixed: 457.
 
 ## Ledger ai
 
@@ -3005,7 +3005,7 @@ Claims labelled: 3239. Observation: 95. Static analysis: 2688. Mixed: 456.
 | TOWN-117 | static analysis | ● active |
 | TOWN-118 | static analysis | ● active |
 | TOWN-119 | static analysis | ● active (amended, superseded) |
-| TOWN-120 | static analysis | ● active |
+| TOWN-120 | static analysis | ● active (amended) |
 | TOWN-121 | static analysis | ● active |
 | TOWN-122 | static analysis | ● active |
 | TOWN-123 | static analysis | ● active |
@@ -3177,6 +3177,10 @@ Claims labelled: 3239. Observation: 95. Static analysis: 2688. Mixed: 456.
 | TOWN-521 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-522 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-523 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-528 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-529 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-530 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-531 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger trigger
 

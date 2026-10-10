@@ -916,7 +916,7 @@ Negative result scoped to the routines `EXP-0186` §1-§9 read; no whole-registr
 | TOWN-117 | World-map enter unconditionally precomputes an all-node route-segment matrix from `PathMap.bmp`, transfers it into the view, and destroys the bitmap-bearing builder before activation; the bitmap is never blitted. | High | ● active | [EXP-0188](../experiments/EXP-0188-pathmap/) |
 | TOWN-118 | A mission is selected by clicking its scroll entry, not by clicking a map region. | High | ● active | [EXP-0188](../experiments/EXP-0188-pathmap/) |
 | TOWN-119 | The chosen travel route is the chain of precomputed segments whose accumulated segment point count is least over the PathMap node graph, expanded back into a pixel-coordinate list. | High | ● active (amended, superseded) | [EXP-0188](../experiments/EXP-0188-pathmap/) |
-| TOWN-120 | World-map paint composes travel in this order: `GMap.bmp`; cached mission markers; `BallMap.bmp` stamps at every eighth revealed route coordinate; animated destination `Cross`; hovered-scroll `Flag1` while at town… | High | ● active | [EXP-0188](../experiments/EXP-0188-pathmap/) |
+| TOWN-120 | World-map paint composes travel in this order: `GMap.bmp`; cached mission markers; `BallMap.bmp` stamps at every eighth revealed route coordinate; animated destination `Cross`; hovered-scroll `Flag1` while at town… | High | ● active (amended) | [EXP-0188](../experiments/EXP-0188-pathmap/), [EXP-0510](../experiments/EXP-0510-worldmap-markers/) |
 | TOWN-121 | Travel completes before the destination opens, and it is skippable after it starts. | High / Unknown | ● active | [EXP-0188](../experiments/EXP-0188-pathmap/) |
 | TOWN-122 | Each offered mission is a three-part scroll card with state-selected normal/pressed art, a title, wrapped map briefing, and an optional payment line. | High | ● active | [EXP-0188](../experiments/EXP-0188-pathmap/) |
 | TOWN-123 | The map-rectangle gate's campaign list is the same persisted 0x14-byte marker cache world-map paint draws, not the sub-mission offer array. | High | ● active | [EXP-0188](../experiments/EXP-0188-pathmap/) |
@@ -953,6 +953,8 @@ In `R1409`, allocation and `R1531` construction occur before the current-positio
 World-map paint composes travel in this order: `GMap.bmp`; cached mission markers; `BallMap.bmp` stamps at every eighth revealed route coordinate; animated destination `Cross`; hovered-scroll `Flag1` while at town; animated current-position `Flag`; then scroll cards. `R1530` is world-map vtable `L11605+0x2c` and contains every listed consumer in that order. `PathMap.bmp` and `Hero.bmp` are not read by this own-paint routine. Route progress increases by 8 coordinates per paint, while Cross/Flag counters advance one frame per paint. This is spatial/presentation progress, not `TOWN-045`'s absent campaign aggregate
 
 **Confidence.** High (full paint and corrected vtable slot read directly; draw-order claim is instruction order, not inferred from asset names)
+
+**Amended.** amended by EXP-0510. "Hovered-scroll `Flag1`" is narrowed: after a scroll is chosen, the stored index stays on the chosen entry whatever the pointer does (`TOWN-528`). "Counters advance one frame per paint" is narrowed: `Flag1` and `Flag` wrap modulo their frame counts (`TOWN-529`); the `Cross` counter advances only on paints that draw it, and the drawn index clamps at the last frame (`TOWN-530`).
 
 ### TOWN-121
 
@@ -3020,3 +3022,80 @@ The pre-create enter calls `R0320` with `[L06217]` at `L13558`. That is cursor s
 **Confidence.** High for the calls and slots read.
 
 **Unknown.** Which routine sets `dice` on the detailed page. Searched: the committed detailed-page listings, where the `dice` slot `[L06731]` is read only by the paint compare at `L06734`; no image-wide census of `L06731` was run. Settled by that census.
+
+## World-map task flag and destination cross
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-528 | World-map paint draws `Flag1` only when the stored scroll object index is above zero and the party is on the first MapPoint; within the searched window a click freezes that index through the route it starts. | High / Medium | ✔ promoted (branch candidate) | [EXP-0510](../experiments/EXP-0510-worldmap-markers/) |
+| TOWN-529 | `Flag1` and `Flag` frames are counters that wrap modulo their sheet's frame count and advance once per world-map paint, drawn or not; `Flag1`'s is zeroed at view init and `Flag`'s at each enter. | High / Medium | ✔ promoted (branch candidate) | [EXP-0510](../experiments/EXP-0510-worldmap-markers/) |
+| TOWN-530 | `Cross` draws only while a route exists, from a counter zeroed at each enter that advances on drawn paints; the drawn index clamps at the last frame, and arrival waits until that counter exceeds frame count plus one. | High / Medium | ✔ promoted (branch candidate) | [EXP-0510](../experiments/EXP-0510-worldmap-markers/) |
+| TOWN-531 | `Flag1` has 9 frames of 32x32, `Flag` 4 of 20x24 and `Cross` 13 of 20x24, identical in both installs; `Cross`'s drawn-pixel count rises on every frame to its maximum at the last frame, index 12. | High / Medium | ✔ promoted (branch candidate) | [EXP-0510](../experiments/EXP-0510-worldmap-markers/) |
+
+### TOWN-528
+
+World-map view fields: `+0x74` `Flag1`, `+0x78` `Flag`, `+0x7c` `Cross` (asset loader stores `L13688`, `L13689`, `L13690`, each after the matching `sprites.16a` path), `+0x118` stored scroll object index, `+0xc4` MapPoint array of `(x,y)` pairs indexed by MapObject index, `+0xf8/+0xfc` current point, `+0x100/+0x104` destination, `+8/+0xc` view left and top.
+
+Paint `R1530` reads `+0x118` and skips the draw when it is zero or negative (signed `jle` at `L13691`). It then compares the current point with MapPoint 0 and skips unless both coordinates match (`L13692`..`L13693`). Otherwise it draws `+0x74` through slot `+0x18` with arguments `(left + MapPoint[i].x - 4, top + MapPoint[i].y - 32, +0x11c, 0, 0)`, `i = +0x118`. Above these, the whole paint is gated by `+0x188`: paint reads it at `L13694` and returns at once when it is 0 (`L13695` to `L13696`), before every marker draw and counter update. Enter stores 1 there (`L13697`) and slot `+0x84` `L13698` stores 0 (`L13699`). No other field gates the `Flag1` draw: not the selected mission, the destination, route count, route progress or the Cross counter.
+
+Writers of `+0x118` in the bounded sweep (`L13700`..`L13701`, every `0x118` displacement): init `L13702` stores −1 at `L13703`; scroll hit test `R1946` stores the hovered entry's object index (entry `+0x2c`) at `L13704`, or −1 at `L13705` when no entry contains the point. The hit test first scans every entry and returns −1 at once when any entry's chosen word `+0x48` is nonzero (`L13706`..`L13707`, return `L13708`); that return writes no field. Mouse-move slot `+0x4c` `L13709` calls the hit test on each delivered move (`L13710`). Click slot `+0x54` `R1945` calls it with the click point (`L13711`), then on a hit sets that entry's `+0x48` to 1 (`L13712`), stores the destination and builds the route.
+
+Writers of entry `+0x48` in the same window `L13700`..`L13701`: the click (`L13712`, 1), the entry constructor (`L13713`, 0), the entry copy (`L13714`, copied from the source entry), and enter's rebuild, which clears the entry array (`L13715`) and appends entries built from a local whose `+0x48` is 0 (`L13716`).
+
+Consequences, from these instructions:
+
+1. Before any choice, `Flag1` follows the pointer: it shows at the hovered scroll's MapPoint and disappears when the pointer leaves every scroll.
+2. A click on a scroll leaves `+0x118` on that scroll's object. Later moves return early and do not change it. Within the window, no writer clears `+0x48` or rewrites `+0x118` before enter, so on a click-started route the flag stays on the chosen destination, independent of the pointer. The campaign arm `L13717` in `R0701` sets a destination and builds a route without a click and without a `+0x48` or `+0x118` store; on such a route `Flag1` follows whatever `+0x118` last held.
+3. Current position stays MapPoint 0 until arrival copies the destination into it (`L13718`/`L13719`). From that paint on a mission destination fails the MapPoint 0 test and `Flag1` is not drawn.
+4. Object index 0 never draws `Flag1`.
+5. World-map enter `R1409` clears the entry array but does not write `+0x118`. At the next enter at the town, `+0x118` still holds the last chosen object until a hit test runs.
+
+**Confidence.** High for the gate, anchor, writers in the swept window and the freeze mechanism on a click-started route inside that window: raw instructions bound by `evidence/instructions.tsv`. The window pass covers displacements `0x118`..`0x128`, immediates and narrow stores; bulk copies are the named blind spot (`EXP-0510.md`). Medium for consequence 5's visible effect: it depends on whether a mouse-move reaches the hit test before the first paint, which was not observed.
+
+**Unknown.** Writers of `+0x118` or entry `+0x48` outside the window, which would end the freeze during a route; settled by an image-wide `disp:`/`imm:` census of `0x118`..`0x128` and `+0x48` together with the code that holds the view pointer. Native mouse-move delivery against the first paint after enter; settled by a runtime trace of the first mouse-move and the first paint after enter.
+
+### TOWN-529
+
+`Flag1`'s counter `+0x11c` is drawn as the third argument and then replaced by `(+0x11c + 1) mod Flag1.count` with unsigned `div` against `[+0x74]+4` (`L13720`..`L13721`). Both the draw and skip paths reach this update, so the counter advances on every paint that passes the `+0x188` gate (`TOWN-528`), whether the flag is drawn or not. Its only other store in the swept range is 0 at init (`L13722`).
+
+`Flag` (`+0x78`) is drawn unconditionally at the current point with `(left + cur.x - 10, top + cur.y - 24, +0x124, 0, 0)` (`L13723`..`L13724`), then `+0x124 = (+0x124 + 1) mod Flag.count` (`L13725`..`L13726`). Enter `R1409` stores 0 in `+0x124` at `L13727`.
+
+Draw order within one paint: `Cross`, then `Flag1`, then `Flag` (`TOWN-120`).
+
+**Confidence.** High for the counter arithmetic, reset sites in the swept range and anchors. Medium that the third argument of sheet slot `+0x18` selects that frame index: the paint bounds it by the sheet's count word at `+4` (`SPR16A-TRLR-012`, `TOWN-486`), but the slot's body was not read within this experiment's budget.
+
+**Unknown.** The wall-clock paint rate (`TOWN-121`); settled by a native paint-cadence measurement. The meaning of slot `+0x18`'s arguments; settled by reading that slot's body.
+
+### TOWN-530
+
+Paint skips the whole route block, including `Cross`, while route count `+0xdc` is 0 (`L13728`/`L13729`). Route count is 0 after construction and after arrival clears the route (`L13730`). With a route, `Cross` is drawn unless the destination equals the current point and the current point equals MapPoint 0 (`L13731`..`L13732`).
+
+The drawn index is `+0x128` while it is below `Cross.count - 1`, otherwise `Cross.count - 1` (`L13733`..`L13734`). The counter is then incremented (`L13735`) without a bound. The increment is inside the draw block; a paint that does not draw `Cross` does not advance it. Anchor: `(left + dest.x - 10, top + dest.y - 12)`.
+
+Stores to `+0x128` in the swept range: 0 at enter (`L13736`), the paint increment, and the input helper's `Cross.count + 1` (`L13737`, `TOWN-486`). The click path, route builder `R1947` and the two campaign destination arms (`L13717`, `L13738`) do not write it. The animation therefore starts from frame 0 on the first paint with a route after enter, plays each frame once, and holds the last frame.
+
+Arrival (`L13739`..`L13740`) requires progress, already advanced by 8, above route count, and `+0x128` above `Cross.count + 1`. After its last drawn paint the counter equals the number of drawn paints. Arrival therefore needs at least `Cross.count + 2` drawn paints since enter, besides the route reveal. The helper's assignment of `Cross.count + 1` meets the bound after one more drawn paint.
+
+**Confidence.** High for the gate, clamp, increment placement, reset sites in the swept range and the arrival predicate. Medium that the clamped value selects the last frame (slot `+0x18` body not read, as in `TOWN-529`).
+
+**Unknown.** Native paint cadence (`TOWN-121`); settled by a native paint-cadence measurement. `+0x128` writers outside the swept window; settled by the image-wide census named in `TOWN-528`.
+
+### TOWN-531
+
+`tools/mapmarkers` reads `graphics.res` and `patch.res` of the EN and RU installs. `patch.res` holds none of the three paths in either install. In `graphics.res` each sheet is byte-identical across installs: `Flag1` 9578 bytes, `Flag` 3348, `Cross` 6690 (SHA256 in `evidence/sheets.tsv`). Each has the 1024-byte leading palette, and every frame's word RLE closes exactly at its width and height (`SPR16A-RLE-003`).
+
+A drawn pixel below is one literal word of the RLE; a literal may still blend with the destination (`SPR16A-PIX-011`). Extents are frame-relative, inclusive.
+
+| sheet | frames | frame size | drawn extent | drawn pixels per frame |
+|---|---|---|---|---|
+| `Flag1` | 9 | 32x32 | (1,1)-(29,31) on every frame | 348..354 |
+| `Flag` | 4 | 20x24 | (4,0)-(16,23) on every frame | 209..212 |
+| `Cross` | 13 | 20x24 | grows from (1,0)-(6,5) at frame 0 to (0,0)-(17,22) from frame 7 | 29, 55, 81, 102, 123, 141, 149, 170, 194, 209, 210, 235, 250 |
+
+`Cross`'s drawn-pixel count rises strictly on every frame. Frames 7 to 12 share the full extent; frame 12 has the most drawn pixels. Frame 12 is `Cross.count - 1`, the index `TOWN-530`'s clamp holds.
+
+With the paint offsets of `TOWN-528` to `TOWN-530`, and if slot `+0x18` places a frame's top-left corner at its first two arguments, `Cross`'s 20x24 frame is centred on the destination, `Flag`'s 20x24 frame stands with its bottom row one pixel above the current point, and `Flag1`'s 32x32 frame ends one row above its MapPoint with its first drawn column three pixels left of it.
+
+**Confidence.** High for counts, sizes, extents and pixel counts, measured on both installs. Medium for "frame 12 shows the whole cross": it rests on drawn-pixel count and extent, not on a pixel-by-pixel comparison of frames. Medium for the placement paragraph: slot `+0x18` was not read.
+
+**Unknown.** Whether earlier `Cross` frames are pixel subsets of frame 12; settled by a per-pixel comparison of each frame against frame 12, which `tools/mapmarkers` can make from the installs. The colours of the three sheets; settled by decoding their literals through the palette path of `SPR16A-PIX-011`.

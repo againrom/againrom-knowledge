@@ -33,6 +33,36 @@ main/keypad Return translation, system keys and the campaign key-up route
 remain Unknown. The instruction-bound input does not establish native paint
 cadence or a completed transition. (`TOWN-487`)
 
+## World-map task flag and destination cross
+
+`Flag1` is drawn at the MapPoint of the stored scroll object index while that
+index is above zero and the party stands on MapPoint 0, offset (-4,-32) from
+the view origin plus the point. The whole paint runs only while the view's
+paint-enable word is set: enter sets it and the view's slot `+0x84` clears
+it. The pointer's hit test sets the index to the hovered scroll's object or
+-1 only while no scroll is chosen. A click marks its scroll chosen. In the
+searched code window no writer clears that mark or rewrites the index before
+the next enter, so on a click-started route the flag stays on the chosen
+destination until arrival moves the party off MapPoint 0. A campaign-started
+route sets no index; writers outside the window remain Unknown. World-map
+enter does not reset the index. (`TOWN-528`)
+
+`Flag1` and the current-position `Flag` draw from counters that wrap modulo
+their sheet's frame count and advance on every enabled paint, drawn or not.
+`Flag1`'s counter is zeroed at view init, `Flag`'s at each enter. `Flag` is
+drawn on every enabled paint at the current point, offset (-10,-24).
+(`TOWN-529`)
+
+`Cross` is drawn only while a route exists, at the destination offset
+(-10,-12). Its counter is zeroed at each enter and advances only on paints
+that draw it. The drawn index is the counter clamped to the last frame, so the
+animation plays once and holds its last frame. Arrival needs route progress
+above route count and the counter above frame count plus one. (`TOWN-530`)
+
+In both installs `Flag1` has 9 frames of 32x32, `Flag` 4 of 20x24 and `Cross`
+13 of 20x24. `Cross`'s drawn-pixel count rises on every frame and peaks at
+frame 12, the held frame. (`TOWN-531`)
+
 ## Tavern entry ordering boundary
 
 The located campaign tavern helper calls the command 37 sender before its
