@@ -1166,3 +1166,82 @@ admission of that speaker is not observed.
 
 **Unknown.** The live order of inn talks and gate clicks in play. An
 authorized runtime trace would settle it.
+
+## Character generator state at town 1
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-131 | After the ROM2 generator, a town-1 save carries slots 776 (mage) and 781 (female) at bank offsets 0xC20/0xC34 and the Player gold 1000 at +0x3c; the hero record's SAV bytes remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+
+### R2-SESSION-131
+
+Detail Accept in campaign mode calls the DLL SetVar with (776, 1 when the
+code has 0x40) and (781, 1 when it has 0x80) (R2-ENGINE-283). SetVar
+stores a DWORD at bank base `D2.00003` + 4·index (R2-ENGINE-045), the
+same base ScenarioSave transfers as 4096 bytes (R2-SESSION-031), so the
+two choices sit at bank offsets 0xC20 and 0xC34.
+
+Gold is owner Player +0x3c: shop buy `L2.00831` compares q·P with hero
+owner (+0x14) +0x3c and debits it. Player constructor `R2.0079` writes 0;
+server get-or-create `L2.00195` (RU `L2.00196`) sets +0x3c to 1000 when it
+is 0. The four frozen saves store 1000 at the first Player's +0x3c
+(R2-SESSION-079). No selected generator body writes gold.
+
+The client session (`L2.00805`) stores difficulty index+1 at +0xd8. The
+hero's attributes, skills, HP, mana and items belong to the actor in the
+Player's group (R2-ENGINE-105; group count 1, R2-SESSION-078), whose
+serialized bytes remain unidentified (R2-SESSION-083, R2-SESSION-091).
+
+**Confidence.** High for the slot offsets: both addresses are the same
+installed base. Medium for gold 1000 at town 1: the static setter and
+the four saves agree, but the get-or-create call order before the first
+save was not traced. Unknown for the hero record and the difficulty in
+the SAV.
+
+**Unknown.** Which SAV bytes carry the actor and whether +0xd8 is saved;
+a save written after a known attribute redistribution would settle the
+first. Whether `L2.00195` runs before the first save; a census of its
+call sites would settle gold 1000.
+
+## Cheat state persistence
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-135 | The ROM2 cheat flag, Player byte +0xa78, is absent from the SAV Player body and zeroed by the constructor; a campaign load recreates the server in mode 2, so the unlock must be typed again. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-SESSION-136 | ROM2 cheat money (Player +0x3c) is saved and loaded; +god, inventory and spellbook fields are in unit serializer L2.01090; the map-reveal global is not saved and is reset at application message 0x421. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+
+### R2-SESSION-135
+
+The EN Player serializer `R2.0084` names no +0xa78 among its memory
+displacements and added offsets; its fields match R2-SESSION-020's list
+for RU `R2.0085`, which has no +0xa78 either. The only stores to +0xa78 are the constructor's 0 (`L2.01039`, RU
+`L2.01091`), the unlock's 0xff and `#kill cheaters`' 0 (R2-ENGINE-297). The
+load path `L2.00826` sets application mode 2, creates the server with it
+at `L2.01005`, which leaves +0x74 clear (R2-ENGINE-296), and then passes
+application +0x248, the save file name (R2-ENGINE-271), to the server's
+`L2.00289` (`L2.01092..L2.01093`).
+
+**Confidence.** High that a SAV does not carry the flag. Medium that LOAD
+builds the Player through that constructor, so that a loaded Player starts
+locked: the load-time object creation path was not read. Medium that
+`L2.00826` is the LOAD path: it rests on the save-name hand-off and
+R2-ENGINE-271.
+
+### R2-SESSION-136
+
+| State | Serializer | Reach |
+|---|---|---|
+| Money +0x3c (`#create Gold`, `#pickup all`) | Player body, XOR 0x5c073f4d (R2-SESSION-020) | saved and loaded |
+| +god words and bytes +0x102..+0x113 | unit serializer `L2.01090` transfers +0xd4..+0x113 raw through `L2.01094`, store and load | Medium |
+| Inventory +0x7c, spellbook +0x140 | named by `L2.01090`; item and spell bodies not read | Medium |
+| Map reveal `L2.00989` | none of the 7 instructions naming it is in a serializer; `L2.01095` in the 0x421 arm `L2.01096` stores 0 | not saved |
+| Summoned and killed units, debug toggles | not read | Unknown |
+
+**Confidence.** High for money and the map-reveal global. Medium for the
+unit rows: the class that writes the hero's unit into a SAV is not
+established (R2-ENGINE-192), and the `&YA1` roots `Character`, `SpellBook`
+and `Inventory` were not read. Unknown for the rest.
+
+**Unknown.** The hero's SAV path; reading the Group member class and the
+`&YA1` writers would settle it. Whether the client grid +0x80 reveal bits
+persist.

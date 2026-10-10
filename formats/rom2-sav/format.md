@@ -69,6 +69,10 @@ fields. After it, ROM2 writes 2,560 raw bytes, then the group list, then 36 raw
 bytes. ROM1 has the group list, 32 raw bytes and a Diary; ROM2 has no Diary.
 — R2-SESSION-020
 
+The body does not write the cheat flag (Player +0xa78); the constructor
+sets it to 0. That a loaded Player therefore starts with cheats locked is
+Medium: the load-time construction path was not read. — R2-SESSION-135
+
 ## Selected RU Group boundary
 
 The selected RU Player list calls each Group body directly. Group first
@@ -219,6 +223,13 @@ and group collections, then stores owner +0x38=actor. Session +0x74==0 selects
 actor WORD(+0x14c)=21. The measured EN command uses opcode 0x48; indirect
 delivery, template contents and the complete initial roster remain Unknown.
 — R2-ENGINE-105
+
+After the character generator, a town-1 save carries scenario slots 776
+(mage) and 781 (female) at bank offsets 0xC20 and 0xC34. The Player's
+gold 1000 at +0x3c is Medium: the order of the setting call before the
+first save was not traced. The template contents are recorded on the
+data.bin page; the hero record's SAV bytes remain Unknown.
+— R2-SESSION-131
 
 The selected EN location-leave arm passes nonzero scenario slot 773 and stage
 slot 768 to an addition producer. Its EN/RU branch for IDs 21..30 skips new

@@ -4112,3 +4112,513 @@ and +0x260 and for what constructor `L2.00984` stores.
 
 **Unknown.** Their first values; an executable-wide writer census or a
 read of the view allocation would settle them.
+
+## Character generator
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-283 | ROM2 New Game (0x425) shows pre-create, then on OK the detail screen; detail Accept (0x445) commits the hero, sets slots 776/781 and difficulty, then posts 0x42e to the town; Cancel and Back (0x446) step back. | High / Unknown | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-284 | The ROM2 pre-create screen has three difficulty, four hero, Cancel and OK rectangles under mask values 20..180 and one campaign name field; selected and hover states draw level, h-on, h-sel and pair art. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-285 | ROM2 hero indexes 0..3 select Start_MF, Start_FF, Start_FM and Start_MM through code table {0,2,3,1}; defaults are hero 0, difficulty index 1 and npcnames 20; a hero click names npcnames 23/24/26/25. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-286 | The ROM2 detail screen has stats, stat-sheet, skill, button and inventory children; EN Reset sets four 25s and pool 100, while RU Reset rebuilds the template with pool 0. | High / Unknown | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-287 | ROM2 attributes cost F(v)=trunc(0.349*1.15^(v-1)+0.5); plus needs the pool and v<45, minus v>15; the producer accepts 140-sum(F)>=0 else sets 25s; each Start row sums exactly 140. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-288 | The ROM2 skill click tests four mask bytes: fighters sword/axe/mace/pike, mages fire/water/air/earth; bow and astral are never tested or drawn; the template main skill 1 is lit until a click. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-289 | ROM2 generator tips are town.txt #tips8/#tips9/#tips10 on pre-create and #tips5 or #tips6 and #tips7 on detail under the tips mode; two cycles light controls; pre-create sets the select cursor, detail the default. | High / Medium | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ENGINE-290 | The ROM2 producer sets the chosen school skill 20, skill 5 to 10, others 0, a skill weapon (the mage staff by sex) and HP/mana at max; recompute gives 142, 123, 29/157, 42/99 and speed 19, 19, 16, 16 for the templates before items. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+
+### R2-ENGINE-283
+
+Route, EN entries (RU in the experiment's alignment table). Main-menu
+release `L2.01097` maps button index 0 to message 0x425. Handler
+`L2.01098` loads town tips, calls the scenario DLL NewGame, enters
+campaign mode 2 through `L2.01084` (application +0x5d8, RU +0x63c), sets
+difficulty control +0x598 index 1, creates the client unit and shows the
+pre-create view (table `L2.01099`) through `L2.01100`, which starts
+`music\chrgen.wav`.
+
+| Screen | Leaves by | Result |
+|---|---|---|
+| Pre-create | OK click or Enter with name length > 0 | 0x445: name, difficulty and code<<6 (0x40 mage, 0x80 female) stored; preview hero built from the template; detail view (table `L2.01101`) |
+| Pre-create | Cancel click or Esc | 0x446: main menu (0x421) |
+| Detail | Accept click or Enter | 0x445: application +0x480 gains bit value 4; in mode 2 commit `L2.00168`, SetVar(776, mage) and SetVar(781, female) through `[L2.00450]` (RU `[L2.00448]`), session difficulty = index+1, post 0x42e |
+| Detail | Back click | 0x446: pre-create again |
+
+Message 0x42e shows the town the current location selects (R2-ENGINE-231);
+the fresh campaign enters town ID 1 (R2-SESSION-077). Town 1 is a square
+screen (R2-ENGINE-239), so the generator assigns no town-1 map position.
+Every selected EN body with an RU entry except pre-create OK is equal
+after normalizing addresses or differs only in numeric operands
+(application fields +0x18, mode 0x5d8→0x63c, allocation sizes +4).
+
+Pre-create OK `L2.01102` (RU `L2.01103`) has the same mode-2 arm, the
+New Game path, in both: the name length goes through `setg`, and only a
+length above 0 plays the +0x1d4 sound and posts 0x445. The RU arm for
+other modes also requires length 1, or 3 when application +0x3f4 and
++0x3bc are both nonzero, and answers a name that begins with a space or a
+short name with a message window. Esc `L2.01104` (RU `L2.01105`) plays
+the +0x1d8 sound and posts 0x446. The detail screen handles Enter only.
+A byte search of each `.text` section finds `push 0x308` and
+`push 0x30d` followed by `call [cell]` once each: EN `L2.01106` and
+`L2.01107` through `[L2.00450]`, RU `L2.01108` and `L2.01109` through
+`[L2.00448]`. Commit `L2.00168` returns 0 on a timeout; the Accept arm
+ignores the result and posts 0x42e.
+
+**Confidence.** High for the static route and messages. Unknown for live
+timing, including the commit's wait for the server reply.
+
+**Unknown.** The RU entries of the application command, new-game,
+new-game mode, detail show, detail commit and cursor-loader bodies were
+not located, so their RU equality is not measured; only the RU SetVar
+pair is placed, by byte pattern. An RU call-site walk from the aligned
+dispatcher would settle them.
+
+### R2-ENGINE-284
+
+Pre-create init `L2.01110`, loader `L2.01111`, hover `L2.01112`, click
+`L2.01113` and paint `L2.01114`. Positions are screen coordinates.
+
+| Control | Rectangle | Mask | Art by state |
+|---|---|---|---|
+| Difficulty 0..2 | (8,0), (296,0), (580,0), 48x72 | 20, 40, 60 | state bit 0 selected, bit 1 hover: `level{n}on`, `level{n}l`, `level{n}lon`; drawn only in mode 2 |
+| Heroes 0..3 | (116,44), (180,44), (392,44), (456,44), 64x244 | 80, 100, 120, 140 | hover `h{n}on`; selected `h{n}sel` 268x340 at (112,44) for 0/1, (260,44) for 2/3; `h1sel2`, `h2sel1`, `h3sel4`, `h4sel3` while the pair neighbour is hovered |
+| Cancel | (16,400), 64x76 | 160 | `cancell` while hovered or lit |
+| OK | (548,400), 80x76 | 180 | `okl` while hovered or lit |
+| Name | (300,433)-(464,449) | – | label main.txt 365 ten pixels left of the field |
+
+Index n of the art is the hero index plus 1. Outside mode 2 a name field
+at (300,422) and a clan field at (300,444), labelled main.txt 366, replace
+the campaign field. Mask value 200 covers (173,404)-(480,478) and has no
+arm in the selected bodies. The paint runs after more than 67 ms and draws
+`mainarea`, `torch1` at (4,200) and `torch2` at (588,200) at frames
+counter mod 15 and (counter+8) mod 15, and the `blind` sprite at a random
+point of a random rectangle of the levels, Cancel and OK, stepping after
+more than 63 ms and replaying after 500+rand()/65 ms. `tablol` is loaded
+and not drawn. Sounds: `Char.wav` on a hero click, `Level1..3.wav` on a
+difficulty click, `Ok.wav` on OK and Cancel.
+
+**Confidence.** High: rectangles, mask values and art fields come from
+the selected init, loader and paint bodies and the mask census.
+
+### R2-ENGINE-285
+
+Code table EN `L2.01115` / RU `L2.01116` holds 0, 2, 3, 1. Hero index i
+stores code<<6 in application +0x484 (RU +0x49c); the template is
+Start_MF (0), Start_MM (0x40), Start_FF (0x80) or Start_FM (0xc0).
+Indexes 0..3 are therefore male fighter, female fighter, female mage and
+male mage. Activation `L2.01117` selects index 0, takes the difficulty
+from control +0x598 (set to 1 by New Game) and, when the name is a default
+(`L2.01118`), loads npcnames line 20. A hero click replaces a default name
+(npcnames 23..26 or "Unnamed") with line 23, 24, 26 or 25. The name is
+typed in the field; OK refuses an empty name. Difficulty has three levels
+and changes no other control.
+
+**Confidence.** High for the table, defaults and name lines.
+
+### R2-ENGINE-286
+
+| Child | Rectangle | Art |
+|---|---|---|
+| Stats 0x457 | (0,0,160,238) | `main\graphics\chrgen\leftup.bmp`, localized with labels in the art |
+| Stat sheet 0x458 | (0,238,160,480) | `FullStatsL`, then shared painter `L2.01119` |
+| Skills 0x45a | (160,0,480,480) | `fighter\column` or `mag\column` |
+| Buttons 0x459 | (480,0,640,238) | `interface\inn\ButtonsArea`, `button{1,2,3}{on,off}` |
+| Inventory | (480,238,640,480) | the application inventory panel, reparented |
+
+Stats row i (Body, Agility, Mind, Spirit; main.txt 15..18) has a value
+cell at (82,54+32i), plus at (107,54+32i), minus at (132,54+32i), all
+20x20, and a label rectangle at (16,57+33i); the pool cell is (46,181)
+77x22. Plus art is `plon` hovered and held, `ploff` hovered, `pnloff`
+normal, `pdisable` disabled; `pnlon` is loaded and not drawn; minus uses
+the `m*` set. Buttons (484,44), (484,91), (484,138), 140x46: Accept
+main.txt 238, Reset 239, Back 260; each fires on release over the pressed
+button. Activation shows the template values with pool 0. EN Reset
+`L2.01120` sets all four values to 25 and the pool to 100. RU Reset
+`L2.01121` sets the pool to 0, calls `L2.01122`, which zeroes the
+attribute and skill overrides and rebuilds the template hero, then
+reloads values and relights the template skill. The detail paint draws
+children only while detail +0x104 is set by activation.
+
+**Confidence.** High for layout, art and both Reset bodies. Unknown for
+the stat-sheet and inventory content.
+
+**Unknown.** `RollStatsR` and `FullStatsR` are loaded into skill-child
++0x68/+0x6c with no drawing site in the selected bodies.
+
+### R2-ENGINE-287
+
+Cost helper `L2.01123`: F(v) = trunc(0.349·1.15^(v−1) + 0.5), constants
+at EN `L2.01124`/`L2.01125`. Plus `L2.01126` requires pool ≥ F(v+1)−F(v)
+and v < 45 and takes that cost; minus `L2.01127` requires v > 15 and adds
+F(v)−F(v−1). Each change plays `+_-.wav` and passes the four values and
+the skill to `L2.01128`, which rebuilds the preview hero. Producer
+`L2.00160` receives the values in packet bytes +0xa..+0xd and accepts
+them when 140 − ΣF ≥ 0; otherwise all four become 25. Start_MF 40/36/25/17,
+Start_FF 37/39/21/25, Start_FM 19/23/30/42 and Start_MM 28/20/41/32 each
+give ΣF = 140, equal to 4·F(25) + 100. The pool cell shows the free
+points; tooltips give "%+d" of the plus cost and of the minus refund.
+
+**Confidence.** High for the formula, limits, budget and template sums.
+
+### R2-ENGINE-288
+
+Loader `L2.01129` chooses fighter or mage art by hero +0x1b8 bit 1 and
+stores five mask bytes at skill-child +0x104..+0x108: fighter 255, 191,
+152, 127, 102; mage 127, 102, 255, 152, 191. Hit test `L2.01130` reads
+the mask at (x−160, y) and compares +0x104..+0x107 only, so the fifth
+skill (bow, astral) cannot be clicked; the paint draws indexes 0..3 only.
+
+| Class | Index 0..3 | Positions | Fifth |
+|---|---|---|---|
+| Fighter | sword, axe, mace, pike | (248,93), (252,126), (248,182), (244,225) | bow (248,250), column art only |
+| Mage | fire, water, air, earth | (360,150), (232,165), (292,98), (300,228) | astral (296,158), column art only |
+
+Art: state 1 `on`, 2 `shine_off`, 3 `shine_on` (bit 0 selected, bit 1
+hover). A click selects the skill, plays its `SFX\ChrGen\Skill` sound,
+sends skill index+1 and raises `#tips7` once. Activation lights index
+(application skill − 1); with no click that skill is the template main
+skill, the argmax of skills 1..5, which is 1 for all four templates:
+sword or fire.
+
+**Confidence.** High for the tested bytes, art and default skill.
+
+### R2-ENGINE-289
+
+| Event | Text |
+|---|---|
+| Pre-create activation | `#tips8` in panel 0x467 (232,48)-(640,184) |
+| Hero click at stage 0 (mask 80..140) | `#tips9`, stage 1 |
+| Difficulty click at stage 1 (mask 20..60) | `#tips10`, stage 2 |
+| Detail activation | `#tips5` fighter or `#tips6` mage, panel 0x467 (0,280)-(312,480) |
+| First skill click | `#tips7` |
+
+The tips need the tips mode (`L2.00713`). Pre-create cycle `L2.01131`
+lights stage 0 heroes, stage 1 levels or stage 2 Cancel/OK in turn: it
+starts 500 ms after the pointer leaves that stage's targets and steps
+after more than 300 ms. Skill cycle `L2.01132` lights the four skills the
+same way until the first click. Tooltips: stats labels main.txt 155..158,
+pool 273, value "%s = %d"; skills main.txt 171+i fighter, 176+i mage. The
+pre-create paint sets cursor `graphics\cursors\select`; the detail paint
+sets `graphics\cursors\default` unless the cursor is default or dice.
+
+**Confidence.** High for the keys, events and cycles. Medium for the
+cursor: other bodies can set it between paints.
+
+**Unknown.** Which cursor shows on the detail screen between paints. A
+census of the direct callers of the cursor setter `L2.01133`, which the
+detail paint `L2.01134` calls, and of their screens would settle it.
+
+### R2-ENGINE-290
+
+Producer `L2.00160` builds `Start_XX` from the flags, loads it through
+`R2.0088` and `L2.00219` (−1 keeps a field), applies chosen-skill
+`L2.01135(skill, 20)`, runs recompute `L2.00318` and sets HP and mana to
+their maxima. `L2.01135` deletes the hand item, zeroes school skills
+1..5, sets the chosen skill to 20 and skill 5 to 10, computes
+E(s) = trunc((1.1^s − 1)·1000) per school skill (s capped at 149) and
+equips Iron Long Sword, Iron Axe, Iron Mace, Iron Pike or Uncommon Wood
+Long Bow for a fighter, or for a mage a staff with castSpell Fire_Arrow,
+Ice_Missile, Lightning, Diamond_Dust or Drain_Life at 20. Experience is
+E(20)+E(10) = 7320.
+
+Class and sex come from two predicates. `L2.01136` returns hero byte
++0x4c & 4 (mage). `L2.01137` returns 1 when hero word +0xe is 0x22 or
+0x24 (female). Template load `R2.0088` reads Humans parameter 0x12
+(`gender ( is female? )`, 0 or 1) and writes +0xe = gender+0x23 for a
+mage (`L2.01138`/`L2.01139`) and gender+0x21 for a fighter
+(`L2.01140`/`L2.01141`): MF 0x21, FF 0x22, MM 0x23, FM 0x24. The mage
+arm of `L2.01135` calls `L2.01137` at `L2.01142`: the female mage gets
+`Wood Staff {castSpell=<spell>:20}` and the male mage
+`Uncommon Wood Staff {castSpell=<spell>:20}`. Recompute calls the same
+two predicates (`L2.01143`, `L2.01144`) to choose the caps below.
+
+The producer appends ".f5" to the template name when the code byte is 0
+(Start_MF) and otherwise the string at `L2.01145` or `L2.01146` plus
+code & 0x3f, which is 0 for the generator's codes. Template load writes a
+positive parsed number to hero byte +0x4b (`L2.01147`), so only Start_MF
+receives +0x4b = 5.
+
+Recompute caps Body/Agility/Mind/Spirit at 52/50/48/46 for a male
+fighter, 50/52/46/48 female fighter, 48/46/52/50 male mage and
+46/48/50/52 female mage. HPmax = trunc(trunc(Body·k + log1.1(exp/5000+1)·k)
+·(1.1^Body/100+1)), k = 2 fighter, 1 mage; mana uses Spirit·2 with k = 1
+fighter, 2 mage, only when the mana field is nonzero. Speed is Agility (title Reaction)
+when below 12, else Agility/5+12, +10 when +0xe is 0x13 or 0x15 (none of
+the four heroes), minus the
+load term, minimum 6. Sight word +0xa4 = trunc(((Mind+Agility)/25+4)·256);
++0xbe = Agility/3; resistances Spirit/2; item modifiers `L2.01058` follow.
+After restoring the school skills recompute adds the +0xe8 skill
+modifiers.
+The template values give HP 142, 123, 29, 42, mana –, –, 157, 99, speed
+19, 19, 16, 16 and sight byte 6 for MF, FF, FM, MM before modifiers.
+
+**Confidence.** High for the arithmetic, the predicates and the weapon
+table. Medium for the listed values at town 1: item modifiers and load are
+not applied, and a fighter's mana field is assumed zero. Medium for the
+name suffix: the string parse inside `R2.0088` was not traced beyond the
++0x4b write. Unknown for item effects.
+
+**Unknown.** Item modifier totals, including +0xe8 skill modifiers, and
+the load term; the item-effect tables or a live save would settle them.
+
+## Cheat and debug commands
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-295 | ROM2 parses chat lines that start with # in the client's in-process server (EN L2.00987, RU L2.00988, equal): 24 distinct texts in 27 string instances, case-sensitive prefix match in fixed order; no chat relay. | High | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-296 | The ROM2 server offers cheats only when created in mode 2, which only the campaign new and load paths pass; other modes offer #kick and #locate to the host connection and the two latency commands to others. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-297 | In ROM2 campaign mode a locked Player's chat line whose first 7 bytes are ##Cowar sets its flag byte +0xa78 to 0xff and broadcasts reply 5; other lines are dropped and the unlock line runs no command. | High | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-298 | ROM2 command replies are message 0x92 to every client with code 5, 6 or 7 and a Player ID; the client shows that Player's name with main.txt lines 221-222, 223-224 or 225-226 for 5 seconds. | High | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-299 | ROM2 #create [N] Gold adds N to Player +0x3c; #create [N] name puts the named item with quantity N in the hero's inventory; both refuse with reply 6 when hero kind byte +0x13c is nonzero. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-300 | ROM2 #modify self or army +god sets six words +0x102.. and six bytes +0x10e.. to 100 and re-derives; +spell N and +spells fill the hero's book; +knowledge only sends the Player its 2,560-byte block. | High / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-301 | ROM2 #summon [N] [hero] name builds N creatures or humans by name near the hero in a new group owned by the hero's owner; #pickup all gives every world sack's money and items to the hero. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-302 | ROM2 #killall and #kill all set word +0x94 to -50 on every unit of each Player whose diplomacy byte toward the sender has bit 0; #kill cheaters also clears their flags; #kill name hits one Player. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-303 | ROM2 #show map and #hide map send message 0xaa to the Player, setting client global L2.00989 and on show marking its grid; #victory posts the normal completion message 0x430; #event N sends 0xb6. | High / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-304 | ROM2 Alt+B..Y in the mission view send message 0x46 sub 0x80; the server acts only for an unlocked Player: D turn tracing, H help, I last turn, Q safe mode, T script tracing, U experience. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-305 | ROM2 allods2.exe has no cheat switch: the only 0xff store to the flag is the chat unlock, and no command-line test in the substring census (EN 32, RU 31 sites) feeds a flag or mode store. | High | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-306 | RU a2server.exe holds the client's 24 command texts plus #ready, the same password object and the flag at +0xa98; a Player identity pair at +0x10 reaches the cheat path in any mode. | High / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+
+### R2-ENGINE-295
+
+Chat entry: Enter in the game view (key switch `L2.00990`) opens child
++0x138 (`L2.00991`); its result 0x445 is read at `L2.00992`. A `=` prefix
+sends the rest as type 3, a `-` prefix sends type 1 or 2, other text type 0;
+`L2.00993` builds message 0x91 (text at +0xf) and sends it to the remote
+server or, without one, to the local connection layer `L2.00994`, which
+passes it to the server object held in global `L2.00805` when that global
+is nonzero. Server switch `L2.00995` routes 0x91 to `L2.00996`, which resolves the sender from +5,
+logs the line and calls the parser `L2.00987` when the first byte is `#`.
+
+The 24 distinct texts, in test order: `#kick `, `#locate `, `#set latency `,
+`#show latency`, `#create ` (argument `Gold`), `#modify ` (target `self`
+or `army`; modifier `+god`, `+spell `, `+spells`, `+knowledge`),
+`#summon ` (option `hero`), `#killall`, `#kill all`, `#kill cheaters`,
+`#kill `, `#pickup all`, `#show map`, `#hide map`, `#victory`, `#event `.
+Each is found by `L2.00997` at offset 0, removed (`L2.00998`) and the rest
+left-trimmed (`L2.00999`). `Gold` is compared case-insensitively with the
+whole argument (`L2.01000`); Player names exactly (`L2.01001`). Count
+parser `L2.01002`: a positive `atoi` token before a space is the count,
+otherwise 1. Each image stores 27 string instances of these texts (`self`,
+`army` and `+spell ` twice each); every instance has exactly one code
+reference, inside the parser, in EN and RU. The 12 texts tested after the
+unlock gate are the cheat commands (`#create` through `#event `); the
+four before it are the host and latency commands.
+
+**Confidence.** High: the EN and RU parser bodies are equal at level 0
+(1,293 instructions) and the string census covers every non-code section.
+
+### R2-ENGINE-296
+
+Server init `L2.00221(mode)` stores +0x74 = (mode < 2). Creation
+`L2.01003` passes application mode +0x5d8 at `L2.01004` and `L2.01005`,
+each right after that mode is set to 2 (the new-campaign path reached by
+application message 0x425, and a load path); 0 at `L2.01006` and
+`L2.01007`; the mode at `L2.01008` after `L2.01009` stores 1. Mode 3
+(`L2.01010`, `L2.01011`) creates with 0. The only +0x74 stores in the
+server-code span (EN `L2.01012..L2.01013`) are constructor `L2.01014` (0),
+init `L2.01015`, and `L2.01016` on another object.
+
+RU agrees through its own census: application mode +0x63c is stored 2 at
+`L2.01017` and `L2.01018`, each followed by creation `L2.01019` with that
+mode; 0 at `L2.01020`, `L2.01021`, `L2.01022`, `L2.01023`; 3 at `L2.01024`,
+`L2.01025`; 1 at `L2.01026`. RU init `R2.0010` and creation `L2.01019`
+equal the EN bodies (levels 0 and 1); +0x74 stores in RU
+`L2.01027..L2.01028` are `L2.01029` (0), `L2.01030` and `L2.01031`.
+
+With +0x74 set the parser tests the sender's connection +0x29c
+(`L2.01032`), which the one setter call `L2.01033` sets to 1 on the
+server's own local connection. That connection may use `#kick name`
+(message 0x93 through `L2.01034` when the target's connection is not the
+host's) and `#locate name` (a `"%s (%d,%d)"` line when the target's +0x2c is
+0). Any other connection may use `#set latency N` (N = 0 or 50..10000, else
+reply 6; stored through `L2.01035`, `L2.01036`) and `#show latency`. The
+parser then returns.
+
+**Confidence.** High for the code paths in EN and RU. Medium that mode 2
+means the single-player campaign: it rests on the two creation sites and
+the campaign reading of application mode 2 in R2-ENGINE-271.
+
+### R2-ENGINE-297
+
+Flag getter `L2.01037` returns byte +0xa78 > 50; setter `L2.01038`. The
+constructor `L2.01039` stores 0; the unlock stores 0xff; `#kill cheaters`
+stores 0. No other EN or RU instruction names +0xa78.
+
+With +0x74 clear and the flag not above 50, the line goes to check
+`L2.01040` on the object at server +8 (constructor `L2.01041`, 0x68 bytes
+zeroed). Entry 0 is `39 20 59 7c 02 11 5d 40 46 00`; entry 1 is
+`##Coward  ` minus entry 0, byte 7 then set to 0. The check accepts when
+entry1[j] + entry0[j] equals input[j] for every j before the first zero of
+entry 1 and j > 2: the first 7 input bytes must be `##Cowar`. On a match
+the parser logs the unlock (printed only in application mode 3 by
+`L2.01042`), sets 0xff and sends reply 5 (R2-ENGINE-298). On no match it
+sends nothing. Both cases return.
+
+With the flag above 50 the parser goes straight to the command tests.
+`#create`, `#summon`, the three kill forms, `#pickup all`, `#show map`,
+`#hide map` and `#victory` re-test the flag; that failure branch cannot be
+reached after the gate.
+
+The check returns the first matching entry index and tests entry 1
+first. The parser accepts only a result of exactly 1 (`cmp eax, 1` at EN
+`L2.01043`, RU `L2.01044`, server `L2.01045`). A line that fails entry 1
+can match only at i >= 10, which returns a value other than 1 and is
+rejected; entries 2..9 are zero, and entry 10 is the check's own result
+field, which ends before j > 2. The loop also reads 10-byte entries past
+the 0x68-byte object for i >= 11; no such match can be accepted.
+
+**Confidence.** High that only a line whose first 7 bytes are `##Cowar`
+unlocks, in EN, RU and `a2server.exe` (byte-identical constructor and
+check, the same result test).
+
+### R2-ENGINE-298
+
+`L2.01046(code, id)` calls `L2.01047(0x92, code, id, 0)`; target 0 sends to
+every client. Client switch `L2.01048` (code - 1, bound 0x7f) sends code 5
+to `L2.01049`, 6 to `L2.01050` and 7 to `L2.01051`. Each formats the
+Player's name between two `main.txt` lines (221/222, 223/224, 225/226) and
+shows it for 0x1388 ms. Code 5 is the unlock, 6 a refusal, 7 a success.
+EN and RU hold all six lines.
+
+**Confidence.** High.
+
+### R2-ENGINE-299
+
+`#create` requires the hero's kind byte +0x13c to be 0, else reply 6.
+`Gold`: `L2.01052(N)` adds N to Player +0x3c and sends message 0x67 with
+the new value; reply 7. Other text: `L2.01053` builds an item by name;
+validity `L2.01054` fails: the item is deleted, reply 6. Else item +0x42 =
+N, the item goes into hero +0x7c through `L2.01055`, unit update
+`L2.01056`, reply 7.
+
+**Confidence.** High for the stores and messages. Medium for the names
+money and inventory, read from field use and R2-SESSION-020.
+
+### R2-ENGINE-300
+
+`#modify` takes `self` (the hero) or `army` (every unit in Player +0x24);
+other text returns. `+god` calls `L2.01057` on each target: words
++0x102..+0x10c and bytes +0x10e..+0x113 = 100, all inside the 0x40-byte
+block at +0xd4, then vtable +0x58 (derive `L2.00318`, which folds the block
+through `L2.01058` and clamps resistances as R2-ENGINE-029). `+spell N`
+(self, book +0x140 present, 0 < N < spell count) builds spell N
+(`L2.01059`) and stores it at index N (`L2.01060`), replacing what was
+there. `+spells` does the same for 1..29. `+knowledge` calls
+`L2.01061(0, Player)`, which sends message 0xba with the Player's
+2,560-byte +0x44 block; no store. All reply 7 except `+knowledge`.
+
+**Confidence.** High for the stores and calls. Unknown for which unit values
+the six bytes reach.
+
+**Unknown.** `L2.01058`; reading it would settle the bytes' effect.
+
+### R2-ENGINE-301
+
+`#summon` requires Player +0x38 (hero). After the count, a `hero` token
+sets the hero option. `L2.01062` tries a creature by name (`L2.01063`,
+0x208 bytes), then a human (`L2.00214`, 0x254 bytes); a name neither knows
+is deleted. A built unit is placed within 3 cells of the hero
+(`L2.00312`) when server +0x94 is set, owned by the hero's owner, put in a
+new group and added to the World. No reply. `#pickup all` (hero required)
+removes every sack listed at server +0x7c from the world and calls
+`L2.01064`: sack money to Player +0x3c through `L2.01052`, items to the
+inventory; reply 7.
+
+**Confidence.** High for the calls. Medium for the creature and human
+naming, read from object sizes and constructors.
+
+### R2-ENGINE-302
+
+`L2.01065` stores -50 in word +0x94 of every unit in the Player's +0x24
+list; +0x94 is the current value bounded by +0x96 (R2-ENGINE-086).
+`#killall`/`#kill all` apply it to each Player P whose byte at World
+`L2.01066` + 0xa8c4 + P.id*0x46 + sender.id has bit 0 set; reply 7.
+`#kill cheaters` applies it to every other Player whose flag is above 50,
+after storing flag 0. `#kill name` applies it to the Player with that
+exact name; reply 7 with that Player's ID.
+
+**Confidence.** High for the stores and selection. Medium that bit 0 marks
+hostility and that -50 kills, both inferred.
+
+### R2-ENGINE-303
+
+`#show map` and `#hide map` send message 0xaa to the Player with argument
+1 or 0; reply 7. Client arm `L2.01067`: 0 stores global `L2.00989` = 0; 1
+stores 1 and ORs 0xc000 into every word of the grid at client +0x80. Its
+readers skip the periodic `L2.01068` (`L2.01069`) and force visibility
+level 7 (`L2.01070`, `L2.01071`). `#victory` sends argument 2: the client
+posts application message 0x430, which normal completion message 0xb5
+also posts. Arm `L2.01072` posts 0x41d when Scenario slot 0x300 is at
+least 120, else opens the dialog with `main.txt` line 140. No server
+completion state is written. `#event N` sends message 0xb6 with N to the
+Player through `L2.00458`, read as application message 0x433
+(R2-ENGINE-047).
+
+**Confidence.** High for the messages and stores. Unknown for the grid's
+meaning.
+
+**Unknown.** What client +0x80 holds. Searched: the 0xaa arm only; the
+grid's other readers and writers were not censused. A census of client
++0x80 users and the visibility test at `L2.01070` would settle it.
+
+### R2-ENGINE-304
+
+Key handler `L2.01073`: Alt (lParam bit 0x2000), VK 0x42..0x59 and
+application +0x404 bit 0 (`L2.01074` stores 1 when the mission view is
+built) call `L2.01075`, which sends message 0x46 sub 0x80 with VK - 0x41.
+Server switch `L2.01076` calls World method `L2.01077(Player, index)`,
+which returns unless flag > 50, then switches on index - 3:
+
+| Key | Index | Store or output |
+|---|---|---|
+| D | 3 | server +0x170 word +0 toggled |
+| H | 7 | six help lines |
+| I | 8 | `L2.01078` |
+| Q | 0x10 | World +0xbbe8 toggled |
+| T | 0x13 | server +0x170 word +4 toggled |
+| U | 0x14 | `L2.01079` |
+
+Output goes to chat through `L2.00513`.
+
+**Confidence.** High for the route and stores. Medium for the names, read
+from the help lines.
+
+### R2-ENGINE-305
+
+Census: every call of the substring search (EN `L2.01080`, RU `L2.01081`)
+whose 8-instruction window reads application +0x70. Switches found:
+`-saveonserver`, `-internetserver`, `-latency`, `-timeout`, `-nomusic`,
+`-trace`, `-safevideo`, `-cfg"`, `-window`, `-startserver`, `-cfg`, `.asl`,
+`-800`, `-1024`, `-640`, `-protocol`, `-map"`, `-protocol0..4`, `-female`,
+`-mage`, `-name`, `-waitforever`, `-ip"`. `-trace` (`L2.01082`) stores
+`L2.01083` = 1, which enables diagnostic logging. `-female`, `-mage` and
+`-name` are read in the new-campaign path `L2.01084`. The flag stores, the
++0x74 init and the +0x5d8 stores take no value from these tests.
+
+The claim that no switch enables cheats rests on the flag-writer census,
+not on the switch census alone: every EN and RU instruction naming +0xa78
+is the constructor, the getter or the setter (R2-ENGINE-297), and the
+setter's two calls push 0xff (the chat unlock) and 0 (`#kill cheaters`).
+
+**Confidence.** High. The switch census alone is bounded: a switch read
+through a routine other than the substring search is outside it.
+
+### R2-ENGINE-306
+
+Parser `L2.01085` (1,849 instructions) references the 24 client texts (28
+string instances with `#ready`) and
+`#ready` (`L2.01086`), each once. Password constructor `L2.01087` and check
+`L2.01088` equal the client's byte for byte. The flag is Player +0xa98.
+After the +0x74 block, a Player whose DWORDs at +0x10 are `0xf6d04773` and
+4 continues to the unlock and commands instead of returning; the same
+pair suppresses replies 5 and 6. The pair is compared at 22 sites.
+`#ready` tests global `L2.01089` == 2 and Player +0xa6c.
+
+**Confidence.** High for the inventory and gate code. Unknown for which
+Player carries the pair, the modes the server reaches and `#ready`'s effect.
+
+**Unknown.** Searched: the server's compares of the pair (22 sites) and the
+parser body. Not searched: writers of Player +0x10 in the server, the
+server's creation calls and `#ready`'s callees. Reading the server writers
+of Player +0x10 would identify the pair's holder; a census of the server's
+creation calls with their modes would settle the modes; reading the
+`#ready` arm would settle its effect.

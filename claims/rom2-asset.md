@@ -681,3 +681,63 @@ Unknown for the effect of loading an absent key.
 
 **Unknown.** What the slot loader stores when the key is absent; a read of
 the sound object constructor on a missing entry would settle it.
+
+## Character generator resources and templates
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-075 | ROM2 graphics.res holds 114 interface/chrgen keys, equal EN and RU; the detail stats art main.res graphics/chrgen/leftup.bmp is localized; generator buttons reuse 7 Inn keys and 17 sfx chrgen keys are equal. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+| R2-ASSET-076 | The ROM2 Start_MF, Start_FF, Start_MM and Start_FM Humans rows carry attributes 40/36/25/17, 37/39/21/25, 28/20/41/32, 19/23/30/42, school skill 1 at 20 and fighter armour or mage robe items. | High | ● active (branch candidate) | [EXP-2035](../experiments/EXP-2035-rom2-chargen/) |
+
+### R2-ASSET-075
+
+`graphics.res` `interface/chrgen/` holds 114 keys in both locales with
+equal bytes: pre-create `mainarea` 640x480, `mask` 640x480 8-bit,
+`cancell` 64x76, `okl` 80x76, `tablol` 312x84, `blind\sprites.16a`,
+heroes `h{1..4}on` 64x244 and `h{1..4}sel`, `h1sel2`, `h2sel1`,
+`h3sel4`, `h4sel3` 268x340, levels `level{0..2}{on,l,lon}` 48x72, 15
+frames each of `torch1` and `torch2` 48x72; stats buttons `{p,m}{lon,loff,
+nlon,nloff,disable}` 20x20; `fullstatsl` 160x242, `fullstatsr` 16x242,
+`rollstatsl` 160x238, `rollstatsr` 16x238, `buttonsarea` 160x238,
+`centerarea` 320x480; per class `column` 320x480, `mask` 320x480 8-bit
+and five skills of `on`, `shine_off`, `shine_on`; `cube\sprites.16a` and
+`loader\*`. `main.res` `graphics/chrgen/leftup.bmp` 160x238 differs
+between EN and RU. The detail buttons use `interface/inn/button{1,2,3}
+{on,off}` and `buttonsarea`, 7 keys. `sfx.res` holds 17 `chrgen` keys
+(`+_-`, `char`, `fire`, `level1..3`, `ok`, ten `skill\*`), equal in both
+locales, one channel, 16 bits, 22050 Hz.
+
+Mask censuses (raw indexes, bounding boxes half-open): pre-create values
+20, 40, 60 at the three level rectangles, 80, 100, 120, 140 inside the
+hero columns, 160 (16,400)-(80,476), 180 (548,400)-(628,476), 200
+(173,404)-(480,478). The fighter mask holds 255, 191, 152, 127, 102 in
+five bands at x 83..225; the mage mask holds 255, 191, 152, 127, 102 and
+24 stray pixels of 103, 138 and 153.
+
+**Confidence.** High for the populations, dimensions, equality and
+censuses.
+
+### R2-ASSET-076
+
+Humans rows 26..29 of the client data.bin (EN and RU `world.res`, equal
+bytes) and of RU `world_srv.res` hold the four rows with identical values. Parameter n carries
+title n+1; the first title names the entry and the last (`EquipItem`) the
+ten strings.
+
+| Row | Body/Reaction/Mind/Spirit | HealthMax | ManaMax | Speed/Rotation | Scan/Defence | typeID/face/gender | serverID | knownSpells |
+|---|---|---|---|---|---|---|---|---|
+| Start_MF | 40/36/25/17 | 50 | −1 | 19/19 | 6/7 | 3/32/0 | 10210 | −1 |
+| Start_FF | 37/39/21/25 | 20 | −1 | 20/20 | 6/8 | 14/11/1 | 10211 | −1 |
+| Start_MM | 28/20/41/32 | 30 | 70 | 16/16 | 6/4 | 24/15/0 | 10212 | 150994944 |
+| Start_FM | 19/23/30/42 | 30 | 70 | 17/17 | 6/5 | 24/6/1 | 10213 | 150994944 |
+
+All four store Skill.General 0, school skill 1 (Blade or Fire) 20 and −1
+for school skills 2..5. Start_FF stores AttackChargeTime 20 and
+AttackRelaxTime 5; the mage rows DyingTime 12; other timing fields −1.
+Fighter items: Iron Long Sword, Iron Plate Cuirass, Iron Plate Boots, Iron
+Plate Bracers, Iron Scale Gauntlets, Hard Leather Mail. Mage items: Wood
+Staff with castSpell Fire_Arrow:1, Uncommon Robe, Uncommon Cloak. Loader
+`R2.0088` compares the requested name with each Humans row name
+(R2-ENGINE-126 names the rows).
+
+**Confidence.** High for the stored rows in the three payloads.

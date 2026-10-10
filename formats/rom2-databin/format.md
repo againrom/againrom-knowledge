@@ -132,3 +132,11 @@ transformation would yield 21 for each, conditional on the unclosed native
 table load-time join and name normalization. Stored parameter values and
 runtime object words remain distinct identities. No EN server payload or
 complete constructor acceptance was measured. — R2-ENGINE-126
+
+The four rows store Body/Reaction/Mind/Spirit 40/36/25/17 (Start_MF),
+37/39/21/25 (Start_FF), 28/20/41/32 (Start_MM) and 19/23/30/42
+(Start_FM), Skill.General 0, school skill 1 at 20 and −1 for skills 2..5,
+with equal values in the three payloads. Fighter rows list six iron and
+leather items; mage rows a Fire_Arrow wood staff, a robe and a cloak.
+Humans parameter n carries title n+1; the last title, `EquipItem`, names
+the ten strings. — R2-ASSET-076
