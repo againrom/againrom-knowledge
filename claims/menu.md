@@ -1891,3 +1891,144 @@ Input:
 - Move `L13518` stores the hover.
 
 **Confidence.** High: draw and input slots read at instruction level.
+
+## Double-click source and four double-click slots
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-143 | A double click is the operating system's `0x203`: the frame's window class carries `CS_DBLCLKS` and the frame forwards `0x203` to the control tree; no routine read compares press times to form a double click. | High / Medium | ✔ promoted (branch candidate) | [EXP-0517](../experiments/EXP-0517-double-click/) |
+| MENU-144 | In the Load dialog the list's double-click slot sends `0x444` with the stored selection and no hit test; the dialog treats `0x444` as Load, so the row the first press selected is loaded. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0517](../experiments/EXP-0517-double-click/) |
+| MENU-145 | In the shop a backpack double click selects the hit item and, for a carried item, runs the borrowed character panel's item action; the press slot only scrolls on an arrow or enters the grid's base press. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0517](../experiments/EXP-0517-double-click/) |
+| MENU-146 | The tavern roster's and the chargen statistic panel's double-click slots run their own press slot first at the `0x203` point: the roster selects again, the statistic panel attempts a second step within the step's own bounds. | High / Medium | ✔ promoted (branch candidate) | [EXP-0517](../experiments/EXP-0517-double-click/) |
+
+### MENU-143
+
+- The frame registers its class at `L13897`: style `0xb` is the first
+  argument of the class helper `R2191`, which registers through `L13898`
+  (`RegisterClassA` at `L13899`); the frame is created with that class at
+  `L13900`. `0xb` is `CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS`.
+- The frame's window procedure `R0701` switches mouse messages through the
+  table at `L13901`: `0x201` to `L13902`, `0x202` to `L13903`,
+  `0x203`..`0x206` to `L13904`. The `0x203` arm passes the message, `wParam`
+  and `lParam` to the root control's `vt+0x48`, calls `R2192` and calls
+  `R1202`. It writes no left-button flag `[L12191]`; the `0x201` arm sets
+  that flag to 1 and the `0x202` arm writes it from `EDI`.
+- `R2192` is the game's press timer: it stores the `timeGetTime` value and a
+  150 ms delay, and the cursor tick compares elapsed `timeGetTime` with that
+  delay to post the held-button repeat (`VIDEO-SFX-059`). The `0x201`, `0x202`
+  and `0x203` arms all restart it. It serves the held repeat; no routine read
+  compares the times of two presses.
+- The base router `R0390` sends `0x203` to slot `+0x5c` (`TOWN-211`,
+  `TOWN-406`).
+- The import directory, 472 entries and identical on both roots, has no
+  `GetDoubleClickTime`, no `SetDoubleClickTime` and no DirectInput import.
+  `SystemParametersInfoA` is called at `L13905` with action `0x30` and at
+  `L13906` with `0x68`; its thunk `L13907` has no direct call and no dword
+  reference. `GetSystemMetrics` is called with indices `0xb`, `0xc`, `2`, `3`
+  (twice) and `0x2a` (twice); no call passes `0x24` or `0x25`, the double-click
+  rectangle.
+- The image holds 14 occurrences of the dword `0x203` in `.text`: the router's
+  compare `L13908`, an MFC message-filter compare `L13909`, four rectangle
+  coordinates pushed to `R1525` (`L13910`, `L13911`, `L13912`,
+  `L13913`) and eight instruction interiors: five `rel32` displacements and
+  three `imm 2` operands (`L13914`, `L13915`, `L13916`). None builds a
+  `0x203` message.
+- The list, shop backpack and statistic panel double-click slots (`MENU-144`,
+  `MENU-145`, `MENU-146`) read no clock and keep no press time; the roster
+  slot as `TAVERN-CLICK-019` reads it calls no clock either.
+
+Under the documented Win32 contract of `CS_DBLCLKS`, the system replaces a
+second left press inside its double-click time and rectangle with `0x203`, so
+the sequence is press, release, `0x203`, release. That order is the contract,
+not read from the game or observed. Interval and distance are the system's
+settings.
+
+**Confidence.** High for the class style, the frame's `0x203` arm, the press
+timer's role and the import set: each is a direct read; the import set does not
+see a USER32 entry resolved by name through `GetProcAddress`. Medium that the
+game builds no `0x203` itself, since the immediate scan sees only a literal
+message id and the frame's own switch shows that an id can be computed. Medium
+that no game routine recognises a double click from press times: the readers of
+`timeGetTime` and `GetTickCount`, the one `GetMessageTime` call `L13917`
+(beside `GetMessagePos` `L13918`) and the shop's base press `R1753` were
+not read. Medium for the `GetSystemMetrics` index list: three of its reads fall
+past the preregistered window budget.
+
+**Unknown.** The double-click time and rectangle on a given machine. Whether
+the install's DirectDraw wrapper changes message delivery; it was not read.
+
+### MENU-144
+
+- Shared list class `L13377` (`MENU-120`): `+0x4c` `L13919`, `+0x50` stub,
+  press `+0x54` `L13920`, release `+0x58` `L12177`, double click `+0x5c`
+  `L13921`, `+0x60` stub.
+- The Load dialog builder `R1220` (class `L06375`, `MENU-096`)
+  constructs it through `R0762` with id 3 (`L13922`).
+- Press: `L11167` turns y into a visible row; a row below the visible count
+  `+0x8c` sets selection `+0x88` to `min(top + row, count - 1)`, repaints and
+  sends `0x46d` (id, selection) through the parent's `vt+0x48` at `+0x30`. On
+  an empty list that selection is -1.
+- Release sends `0x472`. Double click sends `0x444` with the id and the stored
+  selection `+0x88`; it reads no point.
+- The dialog's handler `R0737` runs `0x444` through its Load arm
+  (`MISSION-067`): a selection of 0 or more copies the label and file name and
+  ends the dialog with `0x445`; a negative selection ends it with `0x446`.
+- A double click therefore loads the row the first press selected, and on an
+  empty list ends the dialog with `0x446`. The save dialog builds the same list
+  (`MENU-121`) and gives `0x444` its own arm (`SAV-SAVELABEL-1017`).
+- On a row at or beyond the visible count the press stores a stack local
+  (`[ebp-4]`) that this path does not write (`L13923` to `L13924`).
+
+**Confidence.** High for the slots, sends and Load arm. Medium that the
+parent at `+0x30` is the dialog: shown by the construction call, the store was
+not read.
+
+**Unknown.** The value stored on the unwritten-local path, and whether a press
+reaches it: the list bottom is rounded to whole rows plus 2 pixels
+(`MENU-120`).
+
+### MENU-145
+
+- Shop backpack class `L09923` (constructor `L13142`, `ITEM-USE-112`):
+  `+0x4c` `L13925`, `+0x50` `L13926`, press `+0x54` `L10005`, release
+  `+0x58` `L13927`, double click `+0x5c` `L09947`, `+0x60` `L13928`.
+- Press: `PtInRect` on the rectangle at `+0x20cc` scrolls through `R1751`,
+  on `+0x20dc` through `R1752`, each with a sound request; any other point
+  goes to the base press `R1753`.
+- Double click: the hit index comes from `vt+0x8c` with the point. When it lies
+  in `0 .. count-1` the slot calls `vt+0xa0(hit, 1)`, which selects it
+  (`ITEM-USE-112`; `vt+0xa0` was not read here). When the session's selected
+  item `+0x3cc` is set, source code `+0x3d4` decides: 2 calls the borrowed
+  character panel's `vt+0x7c` (`[shop+0x20ac]+0x7c`) with
+  `((item+6 >> 8) & 0xf) - 1`, the carried-item action of `ITEM-USE-112`;
+  4 dispatches on `item+0x18` through an 8-way table; any other code tests
+  `L01290` and moves the item to the grid at `[shop+0x20ac]+0x70`. Every path
+  returns 1. No clock is read.
+
+**Confidence.** High for the slot words and both bodies, read to their returns.
+
+**Unknown.** What the base press `R1753` does on the first press, and the
+meaning of the source-4 and other-source arms.
+
+### MENU-146
+
+- Roster `+0x5c` `R1437` runs the roster press `+0x54` first at the `0x203`
+  point and acts only on its hit (`TAVERN-CLICK-019`): the cell is selected
+  again and its sound `+0xa8` requested again, then the hire, dismiss or talk
+  routine runs.
+- Statistic panel `+0x5c` `R2193` calls its own `vt+0x54` with the same
+  three arguments, so the press hit-tests the `0x203` point through `R0835`.
+  It then attempts an increase `R0830` or a decrease `R0831`. Each obeys
+  the step's own bounds (`VIDEO-SFX-059`): an increase applies only when its
+  cost fits the free points and the value is below 45, a decrease only above
+  15, and a refused step requests no sound. A double click on `+` or `-` is a
+  second step attempt: two steps and two sounds when both fit, one of each when
+  the first step reaches a bound.
+- The other character-generation panels and pages hold a stub at `+0x5c`, so a
+  double click there acts only through its first press and its releases.
+- The double click leaves the left-button flag clear (`MENU-143`), so a button
+  held after it posts no held-button repeat until the next press.
+
+**Confidence.** High for both slots, the forwarding and the step bounds. Medium
+for the held repeat: the writers of `[L12191]` outside the frame's mouse arms
+were not enumerated.

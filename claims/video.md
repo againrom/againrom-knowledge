@@ -426,7 +426,7 @@ list population, fade audibility and registry lifetime remain Unknown.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | VIDEO-SFX-058 | On the pre-create page each left press restarts a difficulty button's `level1..3.wav` or a hero button's `char.wav`; Back, Escape, and OK or Enter with a non-empty name request `ok.wav` just before the page's close stops it. | High / Unknown | ✔ promoted | [EXP-0407](../experiments/EXP-0407-chargen-sounds/) |
-| VIDEO-SFX-059 | On the detailed page each applied statistic step restarts `+_-.wav`, also on double-click and held-button repeat; a skill press requests its class's member for that skill slot unless it plays, as the school room does. | High / Medium / Unknown | ✔ promoted | [EXP-0407](../experiments/EXP-0407-chargen-sounds/) |
+| VIDEO-SFX-059 | On the detailed page each applied statistic step restarts `+_-.wav`, also on double-click and held-button repeat; a skill press requests its class's member for that skill slot unless it plays, as the school room does. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0407](../experiments/EXP-0407-chargen-sounds/) |
 | VIDEO-SFX-060 | Every `chrgen` request found passes SFX volume, pan 0, no loop and priority 128; at most one instance of each member plays, and members share 16 channels, displacing only a lower-priority sound when all are busy. | High / Medium / Unknown | ✔ promoted | [EXP-0407](../experiments/EXP-0407-chargen-sounds/) |
 
 ### VIDEO-SFX-058
@@ -489,6 +489,11 @@ of each skill index and school column: the hit masks were not rendered.
 set the repeat cadence and decide when a second click counts as a
 double-click. The meaning of the school room field that blocks its press when
 non-zero.
+
+**Amended.** `MENU-143` settles whose interval it is: the operating system's
+double-click time and rectangle, with no game-set value; the value on a given
+machine stays Unknown. `MENU-146` adds that a held button after a double click
+posts no repeat until the next press.
 
 ### VIDEO-SFX-060
 

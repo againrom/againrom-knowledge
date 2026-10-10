@@ -136,6 +136,31 @@ reaches byte converter `R0793`. This establishes an in-image renderer;
 native glyph pixels and malformed-label clipping remain Unknown.
 — MENU-122
 
+## Double clicks
+
+A double click is the operating system's `0x203`. The frame's window class
+carries `CS_DBLCLKS` (style `0xb`), and the frame forwards `0x203` to the root
+control, whose router calls slot `+0x5c`. The game sets no double-click time
+or rectangle, so the system's settings decide. Under the documented Win32
+contract for a class with `CS_DBLCLKS` the message order is press, release,
+`0x203`, release; that order was not read from the game or observed. The
+game's press timer (`timeGetTime`, 150 ms delay), restarted by the press,
+release and `0x203` arms, serves the held-button repeat; no routine read
+compares press times to form a double click, a negative bounded to the routines
+read. The `0x203` arm sets no left-button flag, so no held-button repeat
+follows it. The game building a `0x203` of its own is excluded for literal
+message ids only. — MENU-143
+
+| Screen | First press (`+0x54`) | Double click (`+0x5c`) |
+|---|---|---|
+| Load list | selects the row under the pointer, sends `0x46d` | sends `0x444` with the stored selection; the dialog loads it, or cancels on a negative selection (an empty list) |
+| Shop backpack | scroll arrow, else the grid's base press | selects the hit item; a carried item runs the borrowed character panel's item action |
+| Tavern roster | selects an occupied cell | runs the press again at the `0x203` point, then hires, dismisses or opens the talk dialogue |
+| Chargen statistic panel | attempts one `+` or `-` step | runs the press again at the `0x203` point: a second step attempt within the cost and 15..45 bounds; a refused step is silent |
+
+The list's double click reads no point. The other character-generation panels
+have no double-click action. — MENU-144, MENU-145, MENU-146
+
 ## Radio buttons and check boxes
 
 The common art is `graphics.res::interface/radiob.256`. Normal radio and

@@ -1475,7 +1475,7 @@ The base Control class's generic message handler (`TOWN-139`'s already-named `vt
 | TOWN-232 | `R1224`/`R1212` is a general ancestor-chain rectangle accumulator, not a plain copy as `TOWN-224` read it, and for all four of the final/detailed stage's own top-level children the chain is empty at construction… | High / Medium | ● active (amended, partially retracted) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/) |
 | TOWN-233 | The final stage's `+0x74` and `+0x78` children (`TOWN-232`) paint through `R1992` and `R1993`, confirmed at vtable slots `L11774` and `L11775` (each child's own vtable `+0x2c`)… | High / Medium / Unknown | ● active (amended) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/), [EXP-0202](../experiments/EXP-0202-chargen-page-geometry/) |
 | TOWN-234 | The final stage's `+0x7c` child (`TOWN-232`, absolute rect `(160,0)-(480,480)`) paints through `R1871`, confirmed at vtable slot `L11776`… | High / Medium / Unknown | ● active | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
-| TOWN-235 | `TOWN-224`'s unresolved icon-loop virtual dispatch in `R0833` (the final stage's `+0x70` stats-panel child) is `vt+0x24`/`vt+0x20` called on the icon object itself — `GetHeight()`/`GetWidth()`… | High / Unknown | ● active | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
+| TOWN-235 | `TOWN-224`'s unresolved icon-loop virtual dispatch in `R0833` (the final stage's `+0x70` stats-panel child) is `vt+0x24`/`vt+0x20` called on the icon object itself — `GetHeight()`/`GetWidth()`… | High / Unknown | ● active (amended) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 | TOWN-236 | `TOWN-223`'s precreate-stage Levels (3-slot, `+0x124`) and Heroes (4-slot, `+0x110`) loops read POINTERS to an external rectangle table, not embedded rectangle arrays: `+0x124`/`+0x110` hold addresses… | High / Unknown | ● active (partially retracted) | [EXP-0201](../experiments/EXP-0201-chargen-destinations/) |
 
 ### TOWN-214
@@ -1613,6 +1613,8 @@ The three X-anchors and the shared row Y come from a 12-dword table `R1210` (thi
 `this+0xb4`/`this+0xb8` (the row's own first two dwords, read as the label's X/Y offsets) are written by `R1210` as part of the same 12-dword row block. `R1210` also writes four literal fields read elsewhere in `R0833`'s tail (`this+0xa4=0x2e`, `this+0xa8=0xb5`, `this+0xac=0x7b`, `this+0xb0=0xcb`), not traced further in this experiment (`evidence/R0833_R0833.c`, `evidence/disasm-R0833-full.txt`, `evidence/R1210_R1210.c`, `evidence/R2007_R2007.c`, `evidence/R2008_R2008.c`, `evidence/R1176_R1176.c`)
 
 **Confidence.** High for the two virtual calls' identity as `GetWidth`/`GetHeight` and for all twelve resolved coordinates (full raw-disassembly stack-offset trace of the whole loop body, cross-checked against `R1210`'s own literal writes); Unknown for what the sprintf-like call at `L11791` formats and for the four tail fields' consumer
+
+**Amended.** `TOWN-534` corrects the per-row draw count and closes both Unknowns. Each loop row issues two text calls, not one: the value (`L13929`) and, after the two icon blits, the remaining-points counter (`L13930..L13931`), so the counter is drawn 4 times a paint. The four fields `+0xa4..+0xb0` are the pool rectangle (46, 181, 123, 203); they are read inside the loop to centre the counter, not in a tail after it. The format at `L02664` is `"%d"`.
 
 ### TOWN-236
 
@@ -3099,3 +3101,64 @@ With the paint offsets of `TOWN-528` to `TOWN-530`, and if slot `+0x18` places a
 **Confidence.** High for counts, sizes, extents and pixel counts, measured on both installs. Medium for "frame 12 shows the whole cross": it rests on drawn-pixel count and extent, not on a pixel-by-pixel comparison of frames. Medium for the placement paragraph: slot `+0x18` was not read.
 
 **Unknown.** Whether earlier `Cross` frames are pixel subsets of frame 12; settled by a per-pixel comparison of each frame against frame 12, which `tools/mapmarkers` can make from the installs. The colours of the three sheets; settled by decoding their literals through the palette path of `SPR16A-PIX-011`.
+
+## Character generator stat panel numbers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-534 | The detailed generator's four stat values and remaining-points counter are font4 text with a 1-px shadow, ink table `[[L09928]+8]`; values left-aligned at (84, 58+32k), the counter centred on (84, 194) and drawn 4 times a paint. | High | ✔ promoted (branch candidate) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/); answers TOWN-235's format and tail-field Unknowns |
+| TOWN-535 | The ink table `[[L09928]+8]` is built by mode 4 from a palette whose entry i is (185, 159, 73)·i/255; on the `/16` (normal-memory) table an opaque font4 pixel is RGB(185, 159, 73) before packing; the shadow table is black. | High / Medium | ✔ promoted (branch candidate) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/) |
+| TOWN-536 | The panel paint draws no text but the five numbers; the stat names and the pool caption are pixels of the root's `leftup.bmp`; font, ink and positions are the same in EN and RU, and the row icons' roots were not compared. | High | ✔ promoted (branch candidate) | [EXP-0516](../experiments/EXP-0516-chargen-stat-ink/) |
+
+### TOWN-534
+
+The stat panel paint `R0833` (vtable `L06316` slot `+0x2c`, `TOWN-235`) blits the background, then runs one loop of 4 rows (`L13932`, back edge `L13933`). Every text call is `R0571` with `ECX = [L06186]`, font4 (`TEXT-API-007`), table `[[L09928]+8]` and shadow offset 1. The paint holds 2 such calls and no other text call.
+
+| text | source | format | flags | x | y | calls |
+|---|---|---|---|---|---|---|
+| value of row k | `[this+0x1d0+4k]` | `"%d"` (`L02664`), not grouped | 0 | L + `[this+0xb4+0x30k]` + 2 = L + 84 | T + `[this+0xb8+0x30k]` + 4 = T + 58 + 32k | `L13929` |
+| remaining points | `[this+0x1f0]` | `"%d"`, then `R0807` (`TOWN-469`) | `0xa` | L + 46 + (123 − 46)/2 = L + 84 | T + 181 + (203 − 181)/2 + 2 = T + 194 | `L13931` |
+
+- The format call is `R0567(L11791, L02664, value)`; the drawn string is `[L11791]`.
+- The rectangle literals come from `R1210`: value rectangles left 82, top 54 + 32k; the pool rectangle `+0xa4..+0xb0` = (46, 181, 123, 203). Halving is `CDQ; SUB; SAR 1`.
+- `R0571` calls the font's slot `+0x14` twice: at (x+1, y+1) with the table that slot `+0x18` returns, then at (x, y) with the caller's table (`R0571..L13934`). Font4's vtable `L11368` holds `R1854` at `+0x14` and `L13935` at `+0x18`.
+- `R1854` reads flag bit 1 as x − width/2 and bit 3 as y − (frame 0 width)/2 (`TEXT-078`). Font4 frame 0 is 16 wide (`TEXT-077`), so the counter's cell top is T + 186 and the string is centred on x.
+- `R1854` draws each character through the glyph sheet's slot `+0x18` with the table as its source-table argument (`L13936..L11106`, `SPR16A-078`).
+- The counter block (`L13930..L13931`) lies inside the row loop. Each paint draws the counter 4 times at the same place with the same string, over one background blit.
+- L and T are the panel origin `[this+8]`, `[this+0xc]` through `R1224`; (0, 0) for this child (`TOWN-232`, `TOWN-235`).
+
+**Confidence.** High: operands, font global, table and anchors are named instructions in the complete paint listing, and the rectangle values are immediates of the initialiser. EN and RU `rom.exe` are byte-identical.
+
+### TOWN-535
+
+`R0572` fills three 256-entry `[B,G,R,0]` palettes in one loop (`L13937..L13938`), entry i channel = c·i/255 truncated, and builds one colour object from each with `R1107(palette, 16, 4, 0)` (`L13939..L13940`).
+
+| object | store | palette | (R, G, B) at entry 255 | role |
+|---|---|---|---|---|
+| `[L09928]` | `L13941` | `L13942` | (185, 159, 73) | stat numbers, normal captions (`SHOP-107`) |
+| `[L09922]` | `L13943` | `L13944` | (255, 255, 116) | hover captions, not read by this paint |
+| `[L13945]` | `L13946` | `L13947` | (0, 0, 0) for every entry | font4 shadow (`L13935`) |
+
+- `R1107` stores 16 at `+4` and the allocated table at `+8` (`L13948`, `L13949`). Mode 4 (`L10380`) writes 16 rows of 256 words; row L holds entry·(L+1)/16, or entry·(L+1)/18 when `[L03346]` is non-zero (`PAL-MODE4-010`).
+- A glyph word of level L reads row L (`SPR16A-PIX-011`). Font4 inks entry 255 in every inked word except four words at 254 in record 6 (`TEXT-077`).
+- Emulated (`evidence/ink.tsv`), entry 255, `/16` table: row 15 RGB(185, 159, 73), row 7 (92, 79, 36), row 0 (11, 9, 4). On the normal-memory branch a level-15 glyph pixel is row 15 with no background term (`SPR16A-ALPHA-025`), so its colour before packing is RGB(185, 159, 73).
+- `/18` table row 15 is (164, 141, 64). That branch's blit reads destination row L rather than 1 + L, so a level-15 pixel also adds a sixteenth of the quantized background (`TEXT-077`, `SPR16A-080`); (164, 141, 64) is the table term, not the pixel.
+- Packed level 15, entry 255, `/16` arm: `0xbce9` in 5-6-5 and `0x5e69` in 5-5-5 (`evidence/packed.tsv`).
+- The shadow table is zero in every row and index. On the normal-memory branch the shadow glyph adds no colour and keeps (15 − L)/16 of the background (`SPR16A-ALPHA-025`).
+- Entry 255 of `L13942` equals entry 15 of the gold ink ramp `L03616` (`MISSION-MSGLINE-056`).
+- Whole-image dword scan of every section: every exact dword `L09928` and `L13945` is one store in `R0572` plus loads; no dword starts 1..3 bytes either side of either global (`L13950..L13951`, `L13952..L13953`, overlapping stores of any width). Every dword inside the three palettes lies in `L13954..L13955`, except one `CALL` opcode interior at `L13956`. `R0572` has one caller (`L13957`).
+
+**Confidence.** High for the builder's operands, the palette constants, the mode-4 arithmetic and the emulated table values: the immediates are read in the listing and the executable's own loop and builder were run. Medium that the paint reads this object: nothing else is found to rewrite the global `L09928` or the table, but a store through an indexed or computed base, or a bulk copy, has no displacement for the scan to find.
+
+**Unknown.** Which pixel layout and memory arm a given machine runs; the displayed colour is the packed value of that layout, and on the `/18` branch also depends on the background.
+
+### TOWN-536
+
+- The paint's two text calls draw only the numbers (`TOWN-534`). The names Body, Agility, Mind, Spirit and the pool caption are pixels of `main.res::graphics\chrgen\leftup.bmp`, blitted first (`TEXT-CHARGEN-027`).
+- `R1210` measures each name `[this+0x1c0][i]` with font4 (`R0766`, slot `+0x24`) only to size the hover rectangle (`MENU-066`). No routine of this paint draws it.
+- EN and RU run one byte-identical `rom.exe` (SHA-256 `942e9b72…7d03`), and `font4.16a` and `font4.dat` are byte-identical across the roots (`TEXT-077`). Font, table, anchors and ink are the same in both. The `leftup.bmp` nodes differ (`TEXT-CHARGEN-027`).
+- The paint also blits two icon objects per row, `[this+0x174+8k]` and `[this+0x178+8k]` (`TOWN-235`). Their archive paths were not identified and their bytes were not compared between the roots.
+
+**Confidence.** High for the two text calls (complete paint listing) and for the root comparison of `rom.exe`, the font4 files and `leftup.bmp` (file hashes).
+
+**Unknown.** Whether the row icons differ between EN and RU; settled by tying their load paths to the both-root resource census behind `TEXT-CHARGEN-027`.

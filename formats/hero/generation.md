@@ -217,6 +217,26 @@ loaded but never drawn (`MENU-138`). Accept, Reset and Back are
 `Inn\button{1,2,3}{on,off}.bmp` at x 484..624. `on` draws only while the
 button is pressed and hovered. The buttons have no disabled state (`MENU-139`).
 
+## Stat panel numbers (`TOWN-534`…`TOWN-536`)
+
+The four stat values and the remaining-points counter are font4 text, drawn
+with a 1-pixel black shadow at (x+1, y+1) and then the ink. Values are `%d`,
+left-aligned with the cell top at panel (84, 58 + 32k). The counter is `%d`
+comma-grouped, centred on x 84 with the cell top at y 186, and drawn four
+times per paint (`TOWN-534`).
+
+The ink table is the normal caption colour object: a 256-entry ramp to
+RGB(185, 159, 73), scaled by glyph level as `.16a` art is. Font4 inks entry
+255. On the normal-memory (`/16`) branch an opaque glyph pixel is
+RGB(185, 159, 73) before packing. (164, 141, 64) is the low-memory table's
+row 15; that branch's blit also adds a sixteenth of the background
+(`TEXT-077`). The shadow table is all black; on the normal-memory branch a
+shadow pixel keeps (15 − L)/16 of the background (`TOWN-535`).
+
+The stat names and the pool caption are pixels of each root's `leftup.bmp`,
+not text. Font, ink and positions are the same in EN and RU; whether the
+row icons differ between the roots was not compared (`TOWN-536`).
+
 ## Starting templates and non-item state
 
 The four class/sex combinations select `PC_Danath`, `PC_Naira`, `PC_Fergard`, or `PC_Reniesta`.

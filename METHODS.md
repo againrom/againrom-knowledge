@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
+Claims labelled: 3303. Observation: 95. Static analysis: 2747. Mixed: 461.
 
 ## Ledger ai
 
@@ -1175,6 +1175,10 @@ Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
 | MENU-137 | static analysis | ✔ promoted (branch candidate) |
 | MENU-138 | static analysis | ✔ promoted (branch candidate) |
 | MENU-139 | static analysis | ✔ promoted (branch candidate) |
+| MENU-143 | static analysis | ✔ promoted (branch candidate) |
+| MENU-144 | static analysis | ✔ promoted (branch candidate) |
+| MENU-145 | static analysis | ✔ promoted (branch candidate) |
+| MENU-146 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger mission
 
@@ -2642,7 +2646,7 @@ Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
 | TAVERN-ORDER-015 | static analysis | ● active |
 | TAVERN-TALKPIC-016 | static analysis | ● active |
 | TAVERN-TALKSTATS-017 | static analysis | ● active |
-| TAVERN-CLICK-019 | static analysis | ● active |
+| TAVERN-CLICK-019 | static analysis | ● active (amended) |
 | TAVERN-BUTTON-020 | static analysis | ● active |
 | TAVERN-FIGURE-021 | static analysis | ● active |
 | TAVERN-LINES-022 | static analysis | ● active |
@@ -3107,7 +3111,7 @@ Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
 | TOWN-232 | static analysis | ● active (amended, partially retracted) |
 | TOWN-233 | static analysis | ● active (amended) |
 | TOWN-234 | static analysis | ● active |
-| TOWN-235 | static analysis | ● active |
+| TOWN-235 | static analysis | ● active (amended) |
 | TOWN-236 | static analysis | ● active (partially retracted) |
 | TOWN-242 | static analysis | ● active |
 | TOWN-243 | static analysis | ● active |
@@ -3221,6 +3225,9 @@ Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
 | TOWN-529 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-530 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-531 | mixed | ✔ promoted (branch candidate) |
+| TOWN-534 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-535 | static analysis | ✔ promoted (branch candidate) |
+| TOWN-536 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger trigger
 
@@ -3433,7 +3440,7 @@ Claims labelled: 3296. Observation: 95. Static analysis: 2740. Mixed: 461.
 | VIDEO-MUSIC-056 | mixed | ✔ promoted |
 | VIDEO-OPTIONS-057 | mixed | ✔ promoted |
 | VIDEO-SFX-058 | observation | ✔ promoted |
-| VIDEO-SFX-059 | observation | ✔ promoted |
+| VIDEO-SFX-059 | observation | ✔ promoted (amended) |
 | VIDEO-SFX-060 | observation | ✔ promoted |
 | VIDEO-MUSIC-061 | static analysis | ● active |
 | VIDEO-MUSIC-062 | static analysis | ● active |

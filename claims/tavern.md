@@ -531,7 +531,7 @@ term.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| TAVERN-CLICK-019 | In the tavern a click on an occupied roster cell selects it and a double click hires or dismisses a mercenary or opens a talk dialogue; no routine read gives the candle, cauldron or tender a click test. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/) |
+| TAVERN-CLICK-019 | In the tavern a click on an occupied roster cell selects it and a double click hires or dismisses a mercenary or opens a talk dialogue; no routine read gives the candle, cauldron or tender a click test. | High / Medium | ● active (amended) | [EXP-0409](../experiments/EXP-0409-town-figures/) |
 | TAVERN-BUTTON-020 | The three tavern buttons are rectangles that act on release over the pressed one: the upper hires or dismisses, the middle opens the bio or talk dialogue, the lower leaves for the town. | High | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/) |
 | TAVERN-FIGURE-021 | Without the tip popup, a press on the tavern's candle, cauldron or tender reaches the roster; only occupied-cell pixels select: none on the candle, 5456/15120 on the cauldron and 13680/38160 on the tender with 18 cells. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/figure-presses.tsv`, `evidence/windows.tsv`, `evidence/d-tavern.txt`, `evidence/d-dispatch.txt`, `evidence/popup-presses.tsv`; extends TAVERN-CLICK-019, TOWN-467, TOWN-468 |
 | TAVERN-LINES-022 | Read hire refusals request sound alone, and read training refusal branches post no message line. No Sleep action was found in the inspected room handlers, import callers or either shipped text corpus. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/d-tavern.txt`, `evidence/d-school.txt`, `evidence/d-shop.txt`, `evidence/d-town.txt`, `evidence/poster-callers.tsv`, `evidence/api-summary.tsv`, `evidence/text-search.tsv`, `evidence/exe-ascii-search.tsv`, `evidence/code-anchors.tsv`; extends TAVERN-CLICK-019, TAVERN-BUTTON-020, MISSION-MSGPOST-058 |
@@ -583,12 +583,16 @@ program (`evidence/rom-program-digest.tsv`). Rival excluded: a hit test on the
 candle, cauldron or tender inside the roster child, whose click slots are the
 two above and stubs. Medium that no other routine acts on a click in the figure
 rectangles: the tavern view's own message handler `R1808` (`vt+0x48`) and the
-controls of the tip popup were not read for mouse messages. Medium that a double
+controls of the tip popup were not read for mouse messages. High that a double
 click reaches `+0x5c`: the base dispatcher maps message `0x203` to it
-(`TOWN-211`, `TOWN-406`), and the window class was not read.
+(`TOWN-211`, `TOWN-406`), and the frame's window class requests it (`MENU-143`).
 
 **Unknown.** The files bound to the sounds `+0x98` to `+0xb4`, the voice nodes of
 the talk family, and what the tip popup's controls do with a left click.
+
+**Amended.** `MENU-143` reads the window class style and the frame's `0x203`
+arm; the double-click routing clause rises from Medium to High. `MENU-146`
+states that the double click repeats the roster press before acting.
 
 ### TAVERN-BUTTON-020
 
