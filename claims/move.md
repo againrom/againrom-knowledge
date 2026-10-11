@@ -1331,9 +1331,9 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MOVE-119 | The actor base constructor sets Mover facing `+0x00` and wanted facing `+0x01` to 0x40 plus one rand() draw over 0..0x80; of the image's four Mover constructor calls only this one stores a facing. | High | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
-| MOVE-120 | The type-6 spawner has no Mover access of its own; it runs the class derive at `L04446`, so a placed Human holds its derived rate, then places the actor through `R1145` at radius 0, which draws no random value. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-120 | The type-6 spawner has no Mover access of its own; it runs the class derive at `L04446`, so a placed Human holds its derived rate, then places the actor through `R1145` at radius 0, which draws no random value. | High / Medium | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 | MOVE-121 | The occupy `R0050` writes Mover `+0x72` (a step-cost word), `+0x82`/`+0x83` (cell) and `+0x84`/`+0x85` (sub-cell) before it enters the footprint's cell-record slots; its own body writes no other Mover byte. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
-| MOVE-122 | The join walk places each carried member, then deletes its Mover and order block and installs constructor-state ones (facing 0, mask 0x41, rate 0x10); all 22 saved carried members hold the derived rate instead, its writer Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-122 | The join walk places each carried member, then deletes its Mover and order block and installs constructor-state ones (facing 0, mask 0x41, rate 0x10); all 22 saved carried members hold the derived rate instead, its writer Unknown. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 
 ### MOVE-119
 
@@ -1358,6 +1358,8 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 
 **Unknown.** The Human constructor `R0497`, the Unit constructor `R0501`, the Humanoid defaults `R0876` (caller of the second `R0471` call) and the vtable `+0x50` bodies other than the rate store were not read. The first `R0471` call at `L06850` follows a test of `L04697`'s result (`w02`, `L14143`..`L00493`), also unread. `MOVE-119` bounds who builds the Mover (no other Mover constructor call), not who stores into it afterwards.
 
+**Amended.** `MOVE-141` narrows the radius-0 clause: the placement's own attempts draw nothing at radius 0, but its occupy constructs a temporary caster, with one facing draw, for a footprint cell that carries a cell-entry tail. At the spawner no tail is expected before `R0461` runs (Medium).
+
 ### MOVE-121
 
 - `R0050` (`w07`, whole) reads the footprint side through vtable `+0x1c` and the domain through `R1851`, takes the cell bytes from the Position object (`R0299`, `R0300`), and stores, in order: Mover word `+0x72` = `R1345(actor, x, y)` (`L07074`, `L07161`); `+0x82` and `+0x83` = cell x and y (`L02490`, `L02491`); `+0x84` and `+0x85` = the low bytes of `R0165` and `R0166`, the sub-cell (`L02488`, `L09282`). When `R1287` refuses the cell and Mover word `+0x80` differs from the packed cell it calls the two one-return stubs `R1361` and `R0459` (`MOVE-088`). It then calls `R0458` for each footprint cell in row-major order and stops at the first refusal.
@@ -1379,6 +1381,8 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 **Confidence.** High for the walk's own stores and calls, read whole, and for the walk's installation of rate 0x10. Medium that the route lists survive the walk (the walk body has no access to them): the callees `R0289`, `R0063` and `R1379` were not read; one census record agrees (`SAV-1214`). A member the grid already holds at its cell keeps its old Mover (`L14150`); whether that occurs at a mission start is Unknown. The rate clause is Medium as a statement about the saved carried member: the census contradicts rate 0x10 on 16 of 22 carried records, which hold the derived value (15..20, `SAV-1213`), so the walk's rate is not the value a carried member holds at the save.
 
 **Unknown.** The first writer of Mover `+0x0a` after `L14157`. The census shows the derived value before the restart save (`SAV-1213`); the call that runs Human derive on a carried member between the walk and that save was not identified. Read without finding it: the join entry `L14164`..`L14165` (it calls the walk at `L06675` and goes on to `L14166`, `R1626`, `R1625`, `R0081`, `R0127`, `R0299`, `R0300`, `R0217`, `R0059`) and `R1626`..`L14167`; both hold no derive call and no Mover store, and their callees are unread. The settling read is outside that range (the actor tick `R0037`, the order executor `R0016`, or a watchpoint on Mover `+0x0a`).
+
+**Amended.** `MOVE-142` names a writer for the Unknown above: the start's `0x46` subtype-3 command, executed after the join, runs `vt+0x50` on every actor of `player+0x20`, and the Human derive stores the low byte of `+0x8c` at Mover `+0x0a`. That it is the first write after `L14157` is Medium.
 
 ## Motion executor relations
 
@@ -1700,3 +1704,34 @@ callees through route headers and frees, plus all destruction callers, to settle
 [w45](../experiments/EXP-0528-death-lifecycle/evidence/w45-unit-scalar-destructor.txt),
 [w60](../experiments/EXP-0528-death-lifecycle/evidence/w60-unit-destructor.txt),
 [w67](../experiments/EXP-0528-death-lifecycle/evidence/w67-route-list-clear.txt).
+
+## Mission-start construction order and the carried rate
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-141 | A fresh-map start constructs the type-6 actors in record order, one facing draw each, and constructs no carried member; a placement onto a cell-entry tail also constructs a temporary caster, with its own facing draw. | High / Medium | ✔ promoted | [EXP-0540](../experiments/EXP-0540-start-draws/) |
+| MOVE-142 | The start's `0x46` subtype-3 command runs `vt+0x50` on every actor of the sending player's list after the join; for a carried Human that derive writes Mover `+0x0a` from the speed word before the restart save. | High / Medium | ✔ promoted | [EXP-0540](../experiments/EXP-0540-start-draws/) |
+
+### MOVE-141
+
+- Construction sites on the fresh-map path whose closure reaches the base constructor `R0185` (`EXP-0540` `s02`): the spawner's Human constructor `R0497` (`L02316`, `L02314`, `L02315`) and Unit constructor `R0501` (`L02317`) (`MOVE-120`); the per-cell occupy `R0458`, which calls `R1137` (`L06049`) or `R1138` (`L06050`), both reaching `R0914` → `new(0x198)` + `R0901` → `R0185` (`TRIG-CASTACTOR-044`); the walk's `Humans` tail (`L12808`, `L12809` Human, `L09220` Unit; `AI-453`); `R1575` → `R0429` → `R0062`; and the multiplayer-only `R1603`. Each constructor closure has one draw site, the facing `L14122` (`MOVE-119`).
+- The join walk constructs no carried member: it replaces the member's Mover with `R0206`, whose closure has no draw site, and its order block (`MOVE-122`).
+- On a shipped single-player map the order is: the type-6 records ascending (`MOVE-TICK-014`, `TRIG-MAPORD-105`), each construction drawing its facing before the next construction starts; then, inside the first stepper call, the carried members' placements. The occupy builds a caster for a footprint cell whose record byte `+0x2c` is nonzero and not 0x1a, in the domain 1 and 2 arm, before the slot test (`MOVE-088`); that construction draws one facing between two placements. The type-9 tails are written by `R0461` after the spawner (`TERR-228`), so the spawner's placements meet none unless an earlier writer exists.
+- No routine of `R0512` or `R0099` constructs on a map without a mission `.ini`: `R1575` reaches `R0429` only for a name whose section lookup returns nonzero (`b1`, `L14415`..`L14416`; `TRIG-INI-012`).
+
+**Confidence.** High for the construction sites, their callers and the single draw site of each constructor closure: named call sites in a linear decode and in committed listings. Medium for the absence of any other construction on the path (computed calls are not followed), for the absence of cell-entry tails before the spawner (writers outside `R0461` were not enumerated), for the absent `Humans` key (`AI-453`) and for the per-construction count of one (constructor bodies `R0497`, `R0902`, `R0901` not read for a loop).
+
+**Unknown.** Which shipped maps place a carried member on a cell-entry tail.
+
+### MOVE-142
+
+- `R0099` (`EXP-0521` `w07`) calls, with no branch between them, the join sender `R0545` at `L03843`, then `R1191(view+0xa9c)` at `L14417`, `R0078(view+0xa98)` at `L14418`, `R1192([L06258])` at `L14419`, then the stepper at `L03780`. Each of the three builds record `0x46` with one of the subtypes 1, 2 and 3, the state at `+0x0e` and the sending player's word, and hands it to `R0217` on `L00625` (`MENU-057`); the sender-to-subtype mapping is `R1191` = 1, `R0078` = 2, `R1192` = 3 (`MENU-074`), so the start sends subtype 3 once.
+- Executor opcode `0x46` is arm `L00565` (`b1`). The arm returns when `[L00004]` is 0, resolves the player from word `+5` through `R0079`, and dispatches dword `+0x0a` − 1 over 0x80 subtypes (`b3`): 1 → `L07739`, 2 → `L00172`, 3 → `L07740`, 5 → `L09405`, every other value → the log arm `L09401`.
+- Subtype 3 (`b2`, `L07740`..`L14420`): a state of 0..2 stores `(2 − state) × 50` at `player+0x58`, otherwise a state of 0..100 stores the state; then the loop `L08635`..`L14421` walks `player+0x20` and calls each element's `vt+0x50` at `L08636`. For Humanoids and Humans that slot is the derive `R0280` (`UNIT-DERIVE-003`, `EXP-0523` `t01`), which stores the low byte of `actor+0x8c` at Mover `+0x0a` (`MOVE-RATE-053`); the Unit slot `R0836` stores no Mover byte. The derive's closure (17 routines) has no draw site and no computed call (`s02`).
+- The join walk iterates the same list `player+0x20` (`MOVE-122`), so every carried member is in it when the subtype-3 command executes after the join, and its replaced Mover then receives the derived rate.
+- Fit: all 22 carried records of the restart-slot census hold the low byte of `+0x8c` in `+0x0a` (`SAV-1213`).
+- Other `vt+0x50` call sites (`s02` `root-computed.tsv`): the sub-tick's direct-call closure holds 19; `L08636` is the only one in the `0x46` arm, and the others lie under the arms of other opcodes, under constructors or under item generation. The actor tick `R0037` reaches three: `L08234` in the load routine `R0451`, which calls derive only when load over capacity changes (`b1`), through the pickup `R0448` (`AI-382`); `L14422` through the sack routine `R0003`; `L14423` and `L14424` in `R0930` through `R0014` on the death arm.
+
+**Confidence.** High for the senders' order in `R0099`, the opcode and subtype maps, and the subtype-3 store and loop with its `vt+0x50` call. Medium that this derive is the first write after `L14157`: the delivery of the `0x46` records into the server queue (`R0217`, 10 computed calls not followed), the queue's first-in first-out order, the subtype-1 and subtype-2 arms' callees (`R0186`, `R0187`, `R0080`) and the join entry's callees after the walk were not read for a derive. Medium for its time: inside the first stepper call's drain, where commands execute (`SESS-TICK-006`), or earlier if delivery is synchronous; in both cases before the restart save, which is requested after the stepper (`SESS-086`).
+
+**Unknown.** What `player+0x58` governs and what the `[L06258]` setting is called.

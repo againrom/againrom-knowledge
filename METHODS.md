@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3505. Observation: 99. Static analysis: 2923. Mixed: 483.
+Claims labelled: 3509. Observation: 99. Static analysis: 2927. Mixed: 483.
 
 ## Ledger ai
 
@@ -1387,9 +1387,9 @@ Claims labelled: 3505. Observation: 99. Static analysis: 2923. Mixed: 483.
 | MOVE-115 | static analysis | ✔ promoted |
 | MOVE-116 | static analysis | ✔ promoted |
 | MOVE-119 | static analysis | ✔ promoted |
-| MOVE-120 | static analysis | ✔ promoted |
+| MOVE-120 | static analysis | ✔ promoted (amended) |
 | MOVE-121 | static analysis | ✔ promoted |
-| MOVE-122 | static analysis | ✔ promoted |
+| MOVE-122 | static analysis | ✔ promoted (amended) |
 | MOVE-125 | static analysis | ✔ promoted |
 | MOVE-126 | static analysis | ✔ promoted |
 | MOVE-127 | static analysis | ✔ promoted |
@@ -1403,6 +1403,8 @@ Claims labelled: 3505. Observation: 99. Static analysis: 2923. Mixed: 483.
 | MOVE-135 | static analysis | ● active (branch candidate) |
 | MOVE-136 | static analysis | ● active (branch candidate) |
 | MOVE-137 | static analysis | ● active (branch candidate) |
+| MOVE-141 | static analysis | ✔ promoted |
+| MOVE-142 | static analysis | ✔ promoted |
 
 ## Ledger pal
 
@@ -2613,6 +2615,8 @@ Claims labelled: 3505. Observation: 99. Static analysis: 2923. Mixed: 483.
 | SESS-086 | static analysis | ✔ promoted |
 | SESS-087 | static analysis | ✔ promoted |
 | SESS-088 | static analysis | ✔ promoted |
+| SESS-090 | static analysis | ✔ promoted |
+| SESS-091 | static analysis | ✔ promoted |
 
 ## Ledger shop
 

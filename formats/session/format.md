@@ -291,6 +291,26 @@ before the order build. An order build draws 2n times (n swaps of two
 `rand()%n` indices) only in Random Order mode, and the start track does not
 depend on the order. — MAGIC-286
 
+On a fresh-map mission start the `timeGetTime` reseed opens the load, and no
+direct draw follows it before the map loader's `time(0)` reseed, which comes
+after the world and the type-4 walker. The first direct draws after that reseed
+are the type-6 spawner's constructions, one facing each, in record order; the
+binder, the later map passes, the mission-start readers and the start's own
+sends add none on a single-player map without a mission `.ini`. Computed calls
+on the path are not excluded (Medium). — SESS-090
+
+In the first stepper call only the sub-tick runs, and only its command drain
+draws: the join walk draws for its start cell (one draw when the start list
+holds two or more entries, two when the chosen cell is zero) and two per
+placement attempt above radius 0, plus a facing for each cell-entry caster its
+placements build. The three `0x46` settings commands draw nothing directly (Medium: their subtype
+callees were not rooted and their delivery is unread), and
+an actor with positive health, no effect, no order and action 0 draws nothing in
+its tick; order 11 draws one or two values per tick. Delivery order of the
+queued commands, the ownerless `rand` site `L13438` and direct calls outside the
+scan's inventory (uncounted) are not closed (Medium); the dead-actor arm is Unknown.
+— SESS-091
+
 ## Map-load sequence
 
 `R0128` receives `server+0x44` as its map sub-object. Its

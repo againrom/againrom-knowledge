@@ -15623,7 +15623,7 @@ no file of the later dated directories was read.
 
 **Unknown.** The mission number, edition and sub-tick of the four files outside `SAV-1210` are not recorded by this census; the edition of the other five is not recorded either. Which call runs Human derive on the carried members before the save.
 
-**Amended.** `SAV-1221` records sub-tick 1, full tick 0 in all 9 distinct files, the four outside `SAV-1210` included, and `SAV-1225` lists their missions (30, 141, 141 and 30). The inference over those four files (nothing changed a spawner-placed Mover between placement and the save) moves from Unknown to Medium, the grade of the five files `SAV-1210` read; same-value writes stay invisible. Their edition stays unrecorded.
+**Amended.** `SAV-1221` records sub-tick 1, full tick 0 in all 9 distinct files, the four outside `SAV-1210` included, and `SAV-1225` lists their missions (30, 141, 141 and 30). The inference over those four files (nothing changed a spawner-placed Mover between placement and the save) moves from Unknown to Medium, the grade of the five files `SAV-1210` read; same-value writes stay invisible. Their edition stays unrecorded. `MOVE-142` identifies the call that runs Human derive on the carried members before the save: the start's `0x46` subtype-3 command, executed after the join (Medium as the first write).
 
 ### SAV-1214
 

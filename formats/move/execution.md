@@ -343,14 +343,26 @@ only this one stores a facing. — MOVE-119
 A type-6 placement then takes its mask from its movement domain, its rate from the Units table or,
 for a Human, from the derive the spawner runs before placing it, and five fields from the occupy:
 word `+0x72` from the speed word and the cell's cost byte, `+0x82`/`+0x83` the cell and
-`+0x84`/`+0x85` the sub-cell. The spawner places at radius 0, which draws no random value, and
-the occupy enters the footprint's cell-record slots. — MOVE-120, MOVE-121
+`+0x84`/`+0x85` the sub-cell. The spawner places at radius 0, so the placement's own attempts
+draw no random value, and the occupy enters the footprint's cell-record slots. — MOVE-120,
+MOVE-121
+
+The start constructs the type-6 actors in record order, each drawing its facing before the next
+construction, and constructs no carried member. A footprint cell that carries a cell-entry tail
+makes the occupy construct a temporary caster, one more facing draw; the type-9 tails are written
+after the spawner, so on the fresh-map path such a draw falls between the carried members'
+placements (Medium for tails before the spawner). — MOVE-141
 
 The join walk places a carried member the same way, then replaces its Mover and order block
-with constructor-state ones: facing 0, mask 0x41, no cell fields, and rate 0x10. All 22 carried
-members in the original restart-slot saves hold the derived rate instead (15..20, 16 of 22 differ
-from 0x10); the writer of that value is Unknown. The walk leaves the two embedded route lists as
-they were. — MOVE-122
+with constructor-state ones: facing 0, mask 0x41, no cell fields, and rate 0x10. The walk leaves
+the two embedded route lists as they were. — MOVE-122
+
+After the join, the start's settings command `0x46` subtype 3 runs `vt+0x50` on every actor of
+the sending player's list, so the Human derive stores the low byte of the speed word at `+0x0a`
+of each carried member's new Mover before the restart save (Medium: delivery of the command is
+unread). All 22 carried members in the
+original restart-slot saves hold that derived rate (15..20, 16 of 22 differ from 0x10). That this
+command is the first write after the walk is Medium as well. — MOVE-142, MOVE-122
 
 ## Other step routine and death
 
