@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3456. Observation: 95. Static analysis: 2885. Mixed: 476.
+Claims labelled: 3462. Observation: 95. Static analysis: 2890. Mixed: 477.
 
 ## Ledger ai
 
@@ -1284,7 +1284,7 @@ Claims labelled: 3456. Observation: 95. Static analysis: 2885. Mixed: 476.
 | MISSION-DEFEAT-059 | static analysis | ● active (amended) |
 | MISSION-LOAD-060 | static analysis | ● active |
 | MISSION-LOAD-061 | static analysis | ● active (amended) |
-| MISSION-063 | static analysis | ● active |
+| MISSION-063 | static analysis | ● active (amended, partially retracted) |
 | MISSION-064 | static analysis | ● active |
 | MISSION-065 | static analysis | ● active |
 | MISSION-066 | static analysis | ● active |
@@ -1295,6 +1295,12 @@ Claims labelled: 3456. Observation: 95. Static analysis: 2885. Mixed: 476.
 | MISSION-MAP-073 | static analysis | ● active |
 | MISSION-DROP-074 | static analysis | ● active |
 | MISSION-M100-079 | static analysis | ● active |
+| MISSION-083 | static analysis | ● active |
+| MISSION-084 | static analysis | ● active |
+| MISSION-085 | static analysis | ● active |
+| MISSION-086 | static analysis | ● active |
+| MISSION-087 | static analysis | ● active |
+| MISSION-088 | mixed | ● active |
 
 ## Ledger move
 

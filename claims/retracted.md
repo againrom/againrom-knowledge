@@ -1370,3 +1370,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `TEXT-096` (universal per-cast-at-actor-power clause only) | Verbatim: "The hover value for a spell is therefore the per-cast value at the actor's own power, not the Data.bin column." | High | [EXP-0535](../experiments/EXP-0535-cast-damage-source/), TEXT-117 | The universal cast-input clause is withdrawn: low skill-plus-Mind gives popup power100 and ordinary cast power0. Record-field and formula clauses retain High. | **REFUTED** — retained formula clauses stand |
+
+## EXP-0536 — minimap colour storage and closing primitive
+
+| Claim | Former clause | Former confidence | Correcting evidence | Correction | Disposition |
+|---|---|---|---|---|---|
+| MISSION-063 (colour-storage identity and closing same-fill clause only) | Verbatim: "The colour is the word at +0x1148 of the owner's player record" and "draws the viewport rectangle through the same fill" | High for local load/call facts; owner-word identity had no separate grade | [EXP-0536](../experiments/EXP-0536-minimap-paint/); MISSION-085, MISSION-086 | obj+0x14 is interface CPlayer; its +8 selects a palette-derived shade object and +0x1148 is in that object's storage. The closing call is outline R0311, not fill R0718. Walk, class set, fog conditions, colour load and white composition stand. | **REFUTED** — these two identities only; retained clauses stand |

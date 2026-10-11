@@ -1453,7 +1453,7 @@ original shows an error before the menu.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MISSION-063 | `[view+0x9bc]` in the minimap paint is the bucket array of the map view's object map; the paint calls every node's slot `+0x34`: structures, bridges, units and air units draw a one-colour rectangle, three classes nothing. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
+| MISSION-063 | `[view+0x9bc]` in the minimap paint is the bucket array of the map view's object map; the paint calls every node's slot `+0x34`: structures, bridges, units and air units draw a one-colour rectangle, three classes nothing. | High / Medium / Unknown | ● active (amended, partially retracted)  | [EXP-0455](../experiments/EXP-0455-mission-screen/), [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
 | MISSION-064 | The minimap's masked pixel loop works per fog block: four tile words with no bit in `0xc000` replace the block from a second pixel buffer, an OR of `0x8000` averages it with that buffer, any other value leaves it. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
 | MISSION-065 | A structure with `Indestructible` clear is selected by a plain click, never by a rectangle, through the ordinary `+0x7c` flag write (`R1306`); hit-mask bit `0x20` is read at four sites, all in `R0219`. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
 | MISSION-066 | No direct load applies cursor slot 25 `dice`; its one non-registry read is a default-or-`dice` guard, slot `+0x2c` of the view at `campaign+0x358`. Slot 26 `wait` is loaded in 12 campaign view entries, 11 of which also load default. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
@@ -1463,13 +1463,14 @@ original shows an error before the menu.
 - `R0310` (`evidence/disasm-minimap-paint-R0310.txt`) reads the map view through `[this+0x5c]` (`L06712`). Its displacements `+0x80` (tile plane), `+0x9bc`, `+0x9c0`, `+0x9c4` and `+0xa70` match the view layout of `AI-SELECT-065`, `AI-CURSOR-231` and `AI-CURSOR-202`. The array is therefore the bucket array of the object map `view+0x9b8` (count `+0x9c0`), not a field of the widget.
 - The walk at `L01170`..`L01171` is the `GetNextAssoc` bucket scan of that map: for every node it calls `[[node+0xc]]+0x34` with a destination point from `this+0x60`/`+0x64`/`+0x68` and the scale `this+0x68`, then loops back (branch to `L06713`). `AI-MINIMAP-156` took the first non-empty entry only and left the array's identity open.
 - Slot `+0x34` per class (`evidence/dwords-vtables-slot34.txt`, `evidence/disasm-getruntimeclass-L13155.txt`): `R1307` for `CStructure`, `CBridge` and both wooden bridges; `R1308` for `CUnit` and `CAirUnit`; `R1309` (a bare return popping 0xc argument bytes, no code) for `CGameObject`, `CBackPack` and `CProjectile`.
-- `R1307` ORs the fog words of the four cells at the object's position (object fields `+8` and `+0xc`, each shifted right by 8) and draws only when the OR masked with `0xc000` equals `0xc000`; `R1308` adds two conditions, byte `+0x15a` at most 1 and `+0x18c` bit `0x80` clear. Both call `R0718(x0, y0, x1, y1, colour)`, a clipped solid fill of a 16-bit rectangle in the surface `[L01168]`. The colour is the word at `+0x1148` of the owner's player record, found through `[L05816][[obj+0x14]+8]` and `[record+8]`.
-- After the walk one of two closing arms draws the viewport rectangle through the same fill with a white colour built from the channel masks (`L01173`..`L01174`, `L01175`..`L01160`).
+- `R1307` ORs the fog words of the four cells at the object's position (object fields `+8` and `+0xc`, each shifted right by 8) and draws only when the OR masked with `0xc000` equals `0xc000`; `R1308` adds two conditions, byte `+0x15a` at most 1 and `+0x18c` bit `0x80` clear. Both call `R0718(x0, y0, x1, y1, colour)`, a clipped solid fill of a 16-bit rectangle in the surface `[L01168]`. The colour load follows the owner's interface CPlayer shade selector into palette-derived storage; its exact chain is MISSION-085.
+- After the walk one of two closing arms draws the viewport outline through R0311 with white built from the channel masks (`L01173`..`L01174`, `L01175`..`L01160`).
 
 **Confidence.** High for the walk, the three slot targets, the conditions and the fill arguments (instructions read). Medium that `this+0x5c` is the `CMapView` itself: five displacements agree with that view's layout, but the store of `this+0x5c` is not read here. The fog reading of `0xc000` as visible is `TERR-FOG-082`'s, Medium.
 
-**Unknown.** The size of a blip in map cells (the extent arguments come from the object's slots `+0x20` and `+0x24`, not read); whether `+0x1148` is the player's chosen colour.
+**Unknown.** Null-owner behaviour remains untraced. MISSION-085 supplies the extent getters and shade-storage colour chain.
 
+**Amended.** MISSION-085 retracts the player-record identity of the +0x1148 storage; the owner selector and colour load stand. MISSION-086 retracts the closing same-fill clause: it calls the outline primitive. The walk, class set and fog conditions stand. See retracted.md.
 
 ### MISSION-064
 
@@ -1647,3 +1648,179 @@ At the end the amulet's fate follows its holder:
 **Confidence.** **High** for the authored placement, triggers and nodes (decoded whole, both roots; the comparison codes read from the pass's table, `compare-table.tsv`). **Medium** for outcomes 2 to 4 within the culls, which depend on `ITEM-170`'s closure and on which roles resolve. **Unknown** for the amulet's fate after the culls.
 
 **Unknown.** Which hero a role resolves to in a given roster (`TRIG-HEROORD-075`). No original save of mission 100 exists in the searched corpus of 134 files, so no outcome was observed.
+
+## Mission minimap raster contract
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MISSION-083 | ROM1 mission minimap terrain comes from tile words and MiniMapData.bmp, excludes eight cells per edge and uses 4, 2, 1 or half pixels per cell around (72,82). | High / Medium | ● active | [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
+| MISSION-084 | Dirty minimap fog restores CrystalR.bmp for OR zero, averages it with terrain for OR 0x8000 and keeps terrain otherwise; finished pixels refresh a separate cache. | High | ● active | [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
+| MISSION-085 | Structure and bridge marks use scaled extent getters; unit and air-unit marks use a scaled one-cell square. Colour follows the owner CPlayer shade selector; null-owner output is Unknown. | High / Unknown | ● active | [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
+| MISSION-086 | The white minimap view outline follows cell origin and spans, halves them separately at half scale and clips original edges per pixel to the global clip; the widget-edge clip is untraced. | High / Medium | ● active | [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
+| MISSION-087 | Minimap paint requires an absolute counter difference of at least 11; background, base and dirty fog precede object marks and view outline. Local rebuild arms are read; all senders remain open. | High / Medium | ● active | [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
+| MISSION-088 | ROM1 EN/RU executables and the consulted MiniMapData.bmp, CrystalR.bmp and human.pal payloads are byte-identical; maps, display format and runtime paint delivery were not compared. | High / Unknown | ● active | [EXP-0536](../experiments/EXP-0536-minimap-paint/) |
+
+### MISSION-083
+
+The static builder R2203 reads light landscape P=[view+0x80]:
+W/H at +4/+8, tile words at +0xc and brightness bytes at +0x18
+(ALM-TILEVIEW-122, TERR-LIGHT-012). Tile t&0x1fff samples top-origin
+(t>>4,t&15) from [L14402], loaded as graphics/interface/MiniMapData.bmp.
+The selected resource is 52x14 BGR24 on both ROM1 roots. It is a colour
+lookup image, separate from the main view's rendered pixels.
+
+With d=max(W,H), e is 2 at d<=48, 1 at 48<d<=80, 0 at 80<d<=144,
+and -1 above 144. Interior source dimensions are W-16,H-16. Nonnegative
+e replicates each source cell into a 2^e square. Negative e allocates half
+dimensions and adds four adjacent source words after each right-shift by
+two and per-channel mask. The builder samples brightness at stride one
+or two, derives factor=96-trunc(four leading adjacent bytes/4), multiplies
+quantized channels by factor, shifts by five, expands, saturates and repacks.
+
+Absolute widget origin (L,T) receives picture offset (72-width/2,
+82-height/2) for nonnegative e. Negative e instead uses
+(72-((W-16)>>2),82-((H-16)>>2). These are native arithmetic shifts.
+The terrain excludes the eight-cell border and keeps aspect ratio.
+
+**Confidence.** High for named lookup, dimensions, scale thresholds and
+local arithmetic in committed build/paint/converter listings. A shipped
+preview and a reduction of the main rendered view are excluded by the
+tile lookup and independent allocations. Medium for a complete native
+mission raster: only the consulted paths and resources were measured.
+
+**Unknown.** Shipped tile-ID population against the unchecked 52x14 lookup,
+odd interior-dimension raster bounds, brightness refresh timing and actual
+native pixels. A bounded map census and a named original mission frame
+would settle these inputs and presentation outcomes.
+
+### MISSION-084
+
+R0310 first blits [L01161], loaded from
+graphics/interface/CrystalR.bmp: 160x158 BGR24, identical in ROM1 EN/RU.
+MISSION-064's second raw buffer is this object's converted pixels at
+[[L01161]+0x10]+8. Two different RGB samples exclude a flat black buffer.
+
+Dirty flag view+0xdc selects fresh shaded base widget+0x60; zero selects
+fog cache widget+0x64 and skips the masked loop. At i=y*W+x, the exact
+masked words are i,i+1,i+W+1,i+W+2. The lower pair is shifted right;
+these are not the ordinary object-mark quad. OR 0 copies the aligned
+background block, OR 0x8000 stores ((background>>1)&mask)+((terrain>>1)&mask),
+and OR 0x4000/0xc000 preserves terrain. The channel mask prevents cross-channel
+carry. Block side is 1<<max(e,0); map stride is one or two from MISSION-083.
+The completed raster rows enter the bottom-up cache before view+0xdc is cleared.
+Object marks and the view outline are drawn after that copy and are not cached.
+
+TERR-TILE-079 and the retained TERR-FOG-082 mapping supply ordinary state
+names. ALM-TILEVIEW-122 admits raw01; mixed raw01/raw10 can produce OR 0xc000
+without a raw11 sample. The exact OR cases do not require global raw01 absence.
+
+**Confidence.** High for the constructor/path, representative resource values,
+complete local fog branches and row-cache copy. Terrain/uniform-shroud rivals
+are excluded by the concrete background resource and pixel-pointer chain.
+
+**Unknown.** Complete alias-based background writers and first dirty-event
+delivery were not searched. Runtime entry or a bounded writer/notification
+trace would settle them.
+
+### MISSION-085
+
+MISSION-063 supplies the object-map traversal and class set. Fresh vtables
+bind CStructure/CBridge/wooden bridges to R1307, and CUnit/CAirUnit
+to R1308. Object fixed-point coordinates +8/+0xc shift right by eight.
+For e>=0, mark origin is picture origin plus (cell-8)<<e. For e<0 it uses
+arithmetic (cell-8)>>1.
+
+R2204/R2205 obtain structure extent fields +0x10/+0x14
+from [L01425][obj+0x20]. Bridge getters R2206/R2207
+read obj+0x138/+0x13c. Nonnegative e shifts extents left by e;
+negative e leaves extent results unscaled. Unit paint uses side 1<<e
+or literal one for negative e. R0718 fills [left,right)x[top,bottom)
+intersected with the current global clip.
+
+Structures/bridges require the ordinary four-corner OR&0xc000==0xc000.
+Units additionally require byte +0x15a<=1 and +0x18c&0x80==0.
+The raw01/raw10 mixing alternative remains admitted by this OR too.
+
+Colour is word[[[L05816][[obj+0x14]+8]+8]+0x1148]. The owner is
+interface CPlayer (UNIT-VPLAYER-022), and its +8 is the shade selector
+(PAL-OWN-007, PAL-SHADE-012). The selected object is palette-derived
+shade storage, not another player record. Both local paint routines
+dereference the owner without a null test or ownerless fallback.
+
+**Confidence.** High for the fresh dispatch/getter readings, every local
+gate, scale branch, colour load and half-open clipping. Fixed-pixel
+structures and halved negative-scale extents are excluded by those branches.
+Unknown for the picture of a null-owner object: the successful upstream
+population and any neutral assignment have not been traced.
+
+**Unknown.** Null-owner reachability, neutral ownership assignment and its
+colour. A bounded construction/registration trace or an original frame
+with a named ownerless structure would distinguish the live alternatives.
+
+### MISSION-086
+
+R0310 uses view scroll +0x5c/+0x60 and visible spans +0x64/+0x68
+(SESS-VIEW-028). At nonnegative e, left/top are picture origin plus
+(scroll-8)*(1<<e), and inclusive right/bottom add span*(1<<e)-1.
+At negative e, origin-minus-eight and span are each divided toward zero
+by two separately, then one is subtracted from the far endpoint.
+This differs from halving the summed far origin when values are odd.
+
+Colour packs full white through the live channel widths/shifts.
+The closing calls are R0311, not R0718. The outline calls
+R0769 for four inclusive axis-aligned edges; each pixel satisfies
+the half-open global rectangle L01503..L01506. A clipped edge is
+removed pixel by pixel; it does not move to the clipping boundary.
+The minimap paint contains no picture/widget clip setter. Its Lock/Unlock
+are surface operations (AI-CURSOR-225).
+
+**Confidence.** High for arguments, rounding, white and primitive clipping,
+read through both paint arms and the complete outline/line routines.
+Separate origin/span halves and original-edge clipping rule out the
+summed-half and newly-clamped-outline alternatives. Medium for the
+complete widget-edge clipping result because the active caller clip is untraced.
+
+**Unknown.** The active clip through the complete widget traversal and
+native pixels outside picture/widget edges. Trace that caller population
+or inspect a named mission frame with an edge-positioned view.
+
+### MISSION-087
+
+R0310 returns for null view, session+0x3dc&2, missing landscape,
+or signed abs(widget+0x6c-view+0xa70)<11. After the counter gate it stores
+view+0xa70 in widget+0x6c before testing the landscape. ANIM-CLOCK-001
+identifies that source as presentation ticks; no 11-ms timer is read here.
+
+Admitted layer order is CrystalR background, fresh shaded terrain or fog
+cache, conditional dirty fog/cache refresh, object-map marks, white view
+outline and unlock. Only terrain/fog pixels enter the cache.
+R1204 and its seven-entry message table map 0x404 to builder
+R2203, 0x403 to the bound-view store and 0x408 to widget+0x6c=-100.
+TERR-TILECLEAR-169 establishes one fog-dirty writer, not the complete set.
+
+**Confidence.** High for local gates/order/message dispatch in committed
+listings. Every-frame and timer-only rivals are excluded locally by
+the explicit counter and dirty gates. Medium for a complete runtime
+trigger inventory: notification senders and aliased dirty writers were not swept.
+
+**Unknown.** First admitted paint, elapsed-time cadence, all terrain rebuild
+notifications and all fog-dirty writers. A bounded sender/writer inventory
+or timed original observation would settle them.
+
+### MISSION-088
+
+The two lawful ROM1 rom.exe files are 1,977,344 bytes and share SHA-256
+942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03.
+Only EN instructions were decoded; RU equality is an identity check, not
+independent corroboration. Both graphics.res directories were parsed and
+exactly these payloads measured: interface/MiniMapData.bmp (2,240 bytes),
+interface/CrystalR.bmp (75,896 bytes), units/humans/human.pal (16,384 bytes).
+Their corresponding SHA-256 hashes agree even though archive offsets differ.
+
+**Confidence.** High for this complete executable and selected-member
+population; hashes exclude a locale code/resource difference there.
+Unknown for equal runtime pictures, which also depend on unmeasured inputs.
+
+**Unknown.** Map tile/fog/brightness/owner populations, display-format
+selection and native frame delivery. A matched-state map/input comparison
+and original runtime observation would settle those differences.

@@ -272,3 +272,76 @@ Neither is Restart, Continue or a dead-primary repair command. The neighboring c
 (amended), `MISSION-DEFEAT-046`). The shown panel sets screen bit 8, which pauses campaign idle stepping
 even while the run dword stays 1 (`MISSION-STOP-016` (amended), `SESS-DEFEAT-065`). Runtime delay, packet
 backlog and ordinary-UI delivery of a repair command after fall remain Unknown.
+
+## Mission minimap paint
+
+The terrain picture uses the light landscape tile-word plane and brightness
+plane. `t=tile&0x1fff` selects top-origin `(t>>4,t&15)` in the 52×14
+`graphics.res::interface/MiniMapData.bmp` colour image. Its BGR24 samples are
+converted to the live 16-bit display channel layout. The terrain texture
+palette and the main rendered view do not supply this picture. — MISSION-083
+
+Let map dimensions be W,H and d=max(W,H). The exponent e is 2 at d<=48,
+1 at 48<d<=80, 0 at 80<d<=144, and -1 above 144. Excluding eight cells per
+edge, nonnegative e allocates `((W-16)<<e,(H-16)<<e)` and replicates source
+cells. Negative e allocates half dimensions and combines each 2×2 source
+block with per-channel masked quarter sums. Brightness uses four adjacent
+leading vertices, factor `96-trunc(sum/4)`, channel multiplication and shift
+by five, expansion, saturation and repacking. The map sampling stride is one
+for nonnegative e and two for negative e. — MISSION-083
+
+At absolute widget origin L,T, picture placement is
+`(L+72-((W-16)<<e)/2,T+82-((H-16)<<e)/2)` for nonnegative e with arithmetic
+shifts; half scale uses `(L+72-((W-16)>>2),T+82-((H-16)>>2))`. It keeps aspect
+ratio. The unchecked colour lookup's complete shipped tile-ID population,
+odd-dimension raster bounds and native pixels remain Unknown. — MISSION-083
+
+The first layer is the 160×158 `interface/CrystalR.bmp`. This nonuniform
+background is also the second pixel buffer for fog. A nonzero view+0xdc selects
+the fresh shaded terrain and applies fog; zero selects a separate cached result.
+For map index i, fog OR reads `i,i+1,i+W+1,i+W+2`, each masked by 0xc000:
+the lower pair is one cell right of an ordinary quad. OR zero restores the
+aligned background block; OR 0x8000 stores
+`((background>>1)&channelMask)+((terrain>>1)&channelMask)`; OR 0x4000 or 0xc000
+keeps terrain. Block side is `1<<max(e,0)`. Finished rows enter the fog cache
+before the dirty flag is cleared. Raw01 remains possible; mixed raw01/raw10
+can produce OR 0xc000 without a raw11 word. — MISSION-084
+
+Object marks follow the object-map traversal. At object cell cx,cy, their origin
+is picture origin plus `((cx-8)<<e,(cy-8)<<e)` for nonnegative e, or arithmetic
+`((cx-8)>>1,(cy-8)>>1)` at half scale. — MISSION-085
+
+| Class | extent source | nonnegative e | negative e |
+|---|---|---|---|
+| Structure | type-selected record fields +0x10/+0x14 | extents << e | unscaled extents |
+| Bridge and wooden bridges | object fields +0x138/+0x13c | extents << e | unscaled extents |
+| Unit and air unit | literal one | (1<<e) square | 1×1 |
+
+Marks require their ordinary four-corner OR&0xc000==0xc000. Units additionally
+require byte +0x15a<=1 and +0x18c&0x80==0. Fills are half-open and use the global
+clip. Colour follows object+0x14 to interface CPlayer, its +8 shade selector,
+the selected shade object and word +0x1148 in that object's +8 storage.
+The local paints have no null-owner test. Ownerless reachability, neutral
+assignment and resulting pixels remain Unknown. — MISSION-085
+
+The final white outline uses view scroll origin and visible cell spans. For
+nonnegative e, left/top add `(scroll-8)*(1<<e)` to picture origin and inclusive
+right/bottom add `span*(1<<e)-1`. Half scale divides origin-minus-eight and
+span separately toward zero by two, then subtracts one at the far endpoint.
+Each pixel of the four original inclusive edges is tested against the half-open
+global clip; a removed side is not moved to the clip boundary. The paint sets
+no separate picture or widget clip. The caller's active clip, and therefore
+widget-edge clipping, remain untraced. — MISSION-086
+
+Paint returns for null view, session+0x3dc&2, missing landscape or absolute
+counter difference below 11. The counter is presentation ticks. An admitted
+paint draws background, fresh terrain or fog cache, conditional dirty fog/cache
+refresh, object marks, white outline, then unlocks. Marks and outline are not
+cached. Local messages 0x404 rebuild terrain, 0x403 bind the view, and 0x408
+set the remembered counter to -100. Complete rebuild senders, dirty writers,
+first paint and elapsed-time cadence remain Unknown. — MISSION-087
+
+The complete ROM1 EN/RU executables and the consulted MiniMapData.bmp,
+CrystalR.bmp and human.pal payloads are byte-identical. Equal runtime pictures
+also require equal map state and display format, which were not compared.
+— MISSION-088
