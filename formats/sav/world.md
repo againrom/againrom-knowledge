@@ -56,6 +56,25 @@ map-only low block bits and cells outside the sweep are omitted. Construct
 ALM planes first, then apply the saved rows. A zero baseline loses terrain
 blocking. — SAV-BLOCK-011, SAV-BLOCK-012, TERR-PASS-049, TERR-PASS-053
 
+At mission start the array is consistent with the placed objects. In 9
+distinct restart-slot files (5 maps; 5 original-authored by class, 1 resave of
+project input, 3 unclassified), saved at sub-tick 1, full tick 0, every row
+equals the row predicted from the ingest plus the saved Buildings, the saved
+live actors' footprints, the type-9 cell casters and the saved Sacks: the
+8-cell border (`0x1f`, 16,449 of 18,102 rows, a constant) and one row per cell
+record (1,653), nothing else. Independent of the save: the border, the ingest
+base bytes, the type-9 casters and the Building and Sack anchors (checked
+against the map). Taken from the save: Building sizes and masks, actor cells,
+masks and footprint side. The record set and bits 5, 6 and 7 therefore show
+the save agreeing with its own objects, not a prediction from the map. Bit 5
+marks the record and dynamic bits 6/7 the occupant. Bits 0 and 2 off the
+border come from the ingest or the structure `|5` arm; a row clears an ingest
+low bit only on a structure cell the `&0xfa` arm opens. The cell table holds
+the same record set: baselines equal the ingest bytes, with cost from the
+map.reg `Cost` values (376 baselines discriminate the cost source), layer
+counts are 0, and the tail `+2c..+33` is a type-9 caster's six bytes or zero.
+EN and RU give identical results. — SAV-1223, SAV-1224, SAV-1225, SAV-1226
+
 Water (terrain class 8) is blocked at ingest by a hardcoded test, never from
 the registry `Pass*` values — but not independent of this array: LOAD applies
 every saved row's static/dynamic byte raw over both planes after ingest, so a

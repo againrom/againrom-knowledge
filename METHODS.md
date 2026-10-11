@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3344. Observation: 95. Static analysis: 2785. Mixed: 464.
+Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 
 ## Ledger ai
 
@@ -2030,7 +2030,7 @@ Claims labelled: 3344. Observation: 95. Static analysis: 2785. Mixed: 464.
 | SAV-SIZE-008 | mixed | ● active (amended) |
 | SAV-EXT-009 | mixed | ● active (amended) |
 | SAV-STREAM-010 | mixed | ● active (amended) |
-| SAV-BLOCK-011 | static analysis | ● active |
+| SAV-BLOCK-011 | static analysis | ● active (amended) |
 | SAV-BLOCK-012 | static analysis | ● active |
 | SAV-STREAM-013 | mixed | ● active (amended, superseded) |
 | SAV-OBJ-014 | mixed | ● active (amended) |
@@ -2404,12 +2404,16 @@ Claims labelled: 3344. Observation: 95. Static analysis: 2785. Mixed: 464.
 | SAV-1203 | static analysis | ✔ promoted |
 | SAV-1204 | static analysis | ✔ promoted |
 | SAV-1210 | mixed | ● active |
-| SAV-1213 | static analysis | ✔ promoted |
+| SAV-1213 | static analysis | ✔ promoted (amended) |
 | SAV-1214 | mixed | ✔ promoted |
 | SAV-1218 | static analysis | ✔ promoted |
 | SAV-1219 | static analysis | ✔ promoted |
 | SAV-1220 | static analysis | ✔ promoted |
 | SAV-1221 | mixed | ✔ promoted |
+| SAV-1223 | mixed | ✔ promoted |
+| SAV-1224 | mixed | ✔ promoted |
+| SAV-1225 | mixed | ✔ promoted |
+| SAV-1226 | mixed | ✔ promoted |
 
 ## Ledger session
 
@@ -2875,6 +2879,9 @@ Claims labelled: 3344. Observation: 95. Static analysis: 2785. Mixed: 464.
 | TERR-225 | static analysis | ● active (branch candidate) |
 | TERR-226 | static analysis | ● active (branch candidate) |
 | TERR-227 | static analysis | ● active (branch candidate) |
+| TERR-228 | static analysis | ✔ promoted |
+| TERR-229 | static analysis | ✔ promoted |
+| TERR-230 | static analysis | ✔ promoted |
 
 ## Ledger text
 

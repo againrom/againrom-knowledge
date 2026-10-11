@@ -3276,7 +3276,7 @@ the start moves, by the four bytes the codec reads as its own header
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | SAV-STREAM-010 | The decoded body opens with two counters where `+0x04 == (+0x00) >> 4` (4/4) and the map name at `+0x08`, and carries `CArchive` new-class records naming 11 classes. | High / Medium / Unknown | ● active (amended) | [EXP-0046](../experiments/EXP-0046-sav-body/), [EXP-0048](../experiments/EXP-0048-sav-stream/) |
-| SAV-BLOCK-011 | The decoded body carries `TERR-PASS-053`'s predicted block array: a `u16` count, then u32 records packing cell, dynamic and static bytes inside `R1360`'s window. | High / Medium / Unknown | ● active | [EXP-0046](../experiments/EXP-0046-sav-body/) |
+| SAV-BLOCK-011 | The decoded body carries `TERR-PASS-053`'s predicted block array: a `u16` count, then u32 records packing cell, dynamic and static bytes inside `R1360`'s window. | High / Medium / Unknown | ● active (amended) | [EXP-0046](../experiments/EXP-0046-sav-body/) |
 | SAV-BLOCK-012 | The block array is a delta over the terrain ingest, not a plane: a cell whose only block bits are the map's own `0x01` or `0x05` is never written. | High / Medium / Low | ● active | [EXP-0046](../experiments/EXP-0046-sav-body/) |
 | SAV-STREAM-013 | The decoded stream is one object graph under one index counter shared by classes and objects, from 1 in stream order; the walk closes on 393/393 tags in four saves. | High / Medium | ● active (amended, superseded) | [EXP-0048](../experiments/EXP-0048-sav-stream/), [EXP-0251](../experiments/EXP-0251-sav-full-reader/) |
 | SAV-OBJ-014 | The corpus's two equal cell words are one packed cell stored twice inside the raw position object (413/413 instances), under `SAV-TOKENPOS-074`'s layout. | High / Medium | ● active (amended) | [EXP-0048](../experiments/EXP-0048-sav-stream/), [EXP-0145](../experiments/EXP-0145-save-members/), [EXP-0224](../experiments/EXP-0224-sav-token-position/) |
@@ -3352,6 +3352,8 @@ as building footprints: the distance evidence is strong against a stated null,
 and the mechanism is not read.
 
 **Unknown.** The 9 cells where the save clears bit 0 the map sets.
+
+**Amended.** `SAV-1226` measures the cleared bits on two other mission-10 restart slots: 9 cells per file, each a structure footprint cell the `&0xfa` arm opens. Medium that these are the 9 cells this claim left Unknown: its four saves are not identified with those two files by hash, and the census does not count the 119 cells whose bits 0..3 differ from the ingest, which were measured on other saves of the map.
 
 ### SAV-BLOCK-012
 
@@ -15596,7 +15598,7 @@ no file of the later dated directories was read.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1213 | In 9 distinct original `game9999.sav`, 421 spawner-placed Unit records hold exactly the Mover placement predicts; 22 carried player-1 Humans hold the join walk's constructor Mover with rate = their speed's low byte. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| SAV-1213 | In 9 distinct original `game9999.sav`, 421 spawner-placed Unit records hold exactly the Mover placement predicts; 22 carried player-1 Humans hold the join walk's constructor Mover with rate = their speed's low byte. | High / Medium | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 | SAV-1214 | One restart slot holds a hero whose static (13) and dynamic (4) embedded route lists lie 42..50 cells from its saved cell; every other record of the 443 holds two empty lists. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 
 ### SAV-1213
@@ -15617,6 +15619,8 @@ no file of the later dated directories was read.
 **Confidence.** High for the measurement over these 9 files. Medium for the inference that nothing changed a spawner-placed Mover between placement and the save, over the five files with a recorded sub-tick 1 (`SAV-1210`): a write of the same value is invisible. Unknown for the same inference over the other four files, whose sub-tick is not recorded, and for same-value writes. The 3 player-1 spawner-pattern records are all in the `2026-08-15` file. Under independent uniform `rand()` values about 3.3 of 421 facings would be 0xC0 (`MOVE-119`); none is, an outcome of probability about 0.04.
 
 **Unknown.** The mission number, edition and sub-tick of the four files outside `SAV-1210` are not recorded by this census; the edition of the other five is not recorded either. Which call runs Human derive on the carried members before the save.
+
+**Amended.** `SAV-1221` records sub-tick 1, full tick 0 in all 9 distinct files, the four outside `SAV-1210` included, and `SAV-1225` lists their missions (30, 141, 141 and 30). The inference over those four files (nothing changed a spawner-placed Mover between placement and the save) moves from Unknown to Medium, the grade of the five files `SAV-1210` read; same-value writes stay invisible. Their edition stays unrecorded.
 
 ### SAV-1214
 
@@ -15679,3 +15683,50 @@ no file of the later dated directories was read.
 - With `SESS-086`, every restart-slot save of this root was written after the mission start's one sub-tick and before a second.
 
 **Confidence.** **High** for the measurement over these files. The edition of each file is not recorded.
+
+## Cell planes in the restart slot
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1223 | In 9 distinct `game9999.sav` (5 maps), the 1,653 record rows and 16,449 constant border rows equal the rows the model builds from the map ingest, saved Buildings, actors and Sacks, and type-9 casters. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+| SAV-1224 | In the same 9 files the 1,653 cell records are the set the saved objects predict; baselines, occupant slots and the +0x2c..+0x33 tail match, and every cost baseline holds the map.reg value. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+| SAV-1225 | The four distinct restart-slot files `SAV-1210` did not read are missions 30, 141, 141 and 30; each is at sub-tick 1, full tick 0 (`SAV-1221`). | High | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+| SAV-1226 | Every saved row whose static byte lacks a low bit the ingest sets is a structure cell opened by the &0xfa arm: bit 0 on 64 rows and bit 2 on 15 rows over 9 files, 9 bit-0 rows per mission-10 file. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+
+### SAV-1223
+
+- Population: every `game9999.sav` under the owner save root, 10 files, 9 distinct by SHA-256 (the `2026-08-30` file is a byte copy of `2026-08-24`'s); maps 20, 10 (2 files), 41, 30 (3 files) and 141 (2 files), so the 9 files cover 5 distinct maps. Authorship by `SAV-1221`'s classes: 5 files original-authored, 1 original resave of a project input, 3 in directories with no recorded class. All 9 decode completely with `tools/savdoc -mode start-planes` (`evidence/export-list.txt`).
+- Model (`tools/startplanes`): the map's ingest (`TERR-PASS-049`, the `tools/terrpass` transcription, map.reg costs), then the saved Buildings' footprints through the recompute rule of `TERR-CELLREC-146` and `TERR-STRUCT-071`, the 443 live actors over their n by n footprints (slot by Mover mask: 0x41 and 0x44 ground, 0x82 air), the type-9 cell casters (`TERR-229`) and the Sacks. Predicted rows: window cells `[0x807, 0xedee)` with dynamic above 0x0f (`TERR-PASS-053`).
+- Result (`evidence/census/summary.tsv`): rows saved 18,102, predicted 18,102, equal in both bytes 18,102; rows differing, missing or extra 0 in every file.
+- Composition: 16,449 border rows (0x1f static, 0x1f dynamic, a constant on the 8-cell border) and 1,653 record rows; every non-border row is a cell record. A constant matches the border rows, so the discriminating rows are the 1,653 record rows (9.1 percent of 18,102).
+- Input origin. Independent of the save: the border, the ingest base bytes (map and `map.reg`, including the cost), the type-9 casters (`TERR-229`, read from the map) and the anchors of the type-4 and ground type-8 records, which equal the saved Building anchors (220 of 220) and Sack cells (37 of 37). Taken from the saved file: each Building's size, `Present` and `Pass` masks; each actor's cell, Mover mask and key; the Sack cells; and the actor footprint side (read from the saved cell table's slots). The census compares the save with a model built from the save's own objects for the record set, bit 5, bits 6 and 7 and the Building slot, and the `Present` and `Pass` masks that decide the `|5` outcome (762 and 876 rows) and the `&0xfa` outcome (64 and 15 rows) are not compared with install data.
+- Bit attribution of the saved rows (`evidence/census/bits.tsv`): bit 5 by record source: structure 1,113, live actor 487, structure and actor 8, Sack 37, type-9 caster 4, structure and caster 4. Dynamic bit 6 on 449 ground-actor cells and bit 7 on 46 air-actor cells, none elsewhere. Bits 0 and 2 off the border come from the ingest (187 and 38) or the structure `|5` arm (762 and 876). Bits 1, 3 and 4 occur only on border rows. No saved bit lacks a model source.
+- Map-file checks (`evidence/census/crosscheck.tsv`): the type-4 anchors equal the saved Building anchors (220 of 220) and the ground type-8 anchors equal the saved Sack cells (37 of 37).
+- EN and RU: one `rom.exe` (SHA-256 `942e9b72…7d03`), the five maps byte-identical on both roots, the map.reg Cost values identical, and the census output identical row for row.
+
+**Confidence.** High for the measurement over these 9 files (5 maps) and for the inputs independent of the save: the border, the ingest base bytes and the type-9 casters. Medium for the rest, which is the save's consistency with its own objects: given the saved Buildings, actors and Sacks, whose masks and footprints are not compared with install data, the model leaves no row, record or bit unexplained (0 found). That excludes an unexplained record or bit; it does not separate the recompute and placement rule from a different rule that fits the same saved objects. The actor footprint side comes from the saved slots (`SAV-1224`), so bit 6 and 7 placement checks the recompute rule, not the footprint size.
+
+**Unknown.** The edition each file was written in; both roots give the same inputs.
+
+### SAV-1224
+
+- The 9 files (5 maps) hold 1,653 cell records (174 to 197 per file). The model predicts the same 1,653 cells, none more or fewer (`evidence/census/records.tsv`). The record set is derived from the saved Buildings, actors and Sacks plus the map's type-9 casters (`SAV-1223`'s input origin), so its equality is the save's consistency with its own objects.
+- Per record, against the model: static baseline `+0x01` equal 1,653; cost baseline `+0x00` equal to the map.reg ingest cost 1,653, and on the 376 records where rom.exe's default costs differ, equal to the map.reg value 376 and to the default 0; layer count `+0x02` and all six layer slots 0 on 1,653; ground slot equal on 449, air slot on 46, Sack slot on 37, Building slot set exactly on the 1,125 predicted cells; tail `+0x2c..+0x33` equal to the type-9 prediction on 1,653, nonzero on 8.
+- Footprints: every live actor's key fills an n by n block of slots anchored at its saved cell: n = 1 for 429 actors, 2 for 12, 3 for 2. No actor lies in the dead list.
+
+**Confidence.** High for the baselines, the cost baselines and the tails, which are rebuilt from the map and `map.reg` (the cost baselines discriminate on 376 records, `TERR-230`). Medium for the record set, the occupant slots and the Building slot, which are derived from the saved objects.
+
+### SAV-1225
+
+- The sub-tick 1, full tick 0 of these files is `SAV-1221`'s measurement (10 files, 9 distinct; `evidence/census/summary.tsv`, columns `head_dword0`, `head_dword1`, agree). This claim adds the mission of each file.
+- The four files outside `SAV-1210`'s five directories: `2026-08-27/EXP-0261-owner-runs` (mission 30), `2026-09-27` and its `oldsaves7` (mission 141) and `2027-09-07` (mission 30).
+
+**Confidence.** High for the measurement.
+
+### SAV-1226
+
+- A saved row clears a low bit the ingest sets only on a structure footprint cell whose Passability bit is clear, which the `&0xfa` arm opens (`TERR-STRUCT-071`): bit 0 on 3, 9, 9, 3, 10, 5, 10, 10 and 5 rows and bit 2 on 0, 0, 0, 1, 2, 4, 2, 2 and 4 rows of the 9 files (`evidence/census/bits.tsv`). No other cleared low bit occurs.
+- Each such cell also has its cost replaced by `CostCracked` in the model (`TERR-230`); the save carries the opened bytes, which LOAD applies over a fresh ingest (`SAV-LOAD-057`).
+- On scn:10.alm both mission-10 files clear bit 0 on 9 cells, the count `SAV-BLOCK-011` left as its Unknown.
+
+**Confidence.** High for this population. Medium that the 9 cells are the same 9 `SAV-BLOCK-011` measured: its four mission-10 saves are not identified with these two files by hash here.

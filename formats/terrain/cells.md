@@ -9,7 +9,7 @@ writes. A placed structure never goes through it. The sim class is the one the i
 `Building` (`CRuntimeClass L10454`, `0x6c` bytes, vptr `R0492`; `Shop` derives from it), and it
 attaches **in its own constructor**, after the ingest, to a per-cell record:
 
-- Map load, `R0128`: the world constructor is called at `L00242` (`R0116`, which runs `R0278` and `R0470`). The world pointer is published to the global at `L04624` at `L10488`, with no null check later. `R0489`, the `.alm` type-4 walker, is called at `L09682`.
+- Map load, `R0128`: the world constructor `R0118` is called at `L00242`; it calls `R0116` and then the ingest `R0278`, which stamps the border through `R0470` (`TERR-228`). The world pointer is published to the global at `L04624` at `L10488`, with no null check later. `R0489`, the `.alm` type-4 walker, is called at `L09682`.
 - `Building` constructor: `R0485` calls `R0486`, then `R0488`, `R1357` and `R0453`.
 - `~Building`: `R1833` calls `R1358`, which sets `payload+0x0c` to 0, runs `R0453` and frees the record.
 
@@ -25,6 +25,21 @@ attaches **in its own constructor**, after the ingest, to a per-cell record:
   - Which slot is which (`TERR-CELLREC-146`): the slot is `+0x14 + 4*R1074(spellId)`, and the two tables that function dispatches on are read out of the shipped image by `tools/areamove`. `+0x14` is spell 3 Wall of Fire; `+0x18` spell 7 Freezing Cloud; `+0x1c` spell 8 Poison Cloud; `+0x20` spell 19 Wall of Earth, the blocking one; `+0x24` spell 12 Light; `+0x28` spell 17 Darkness.
   - So a Wall of Earth is the only area effect that writes passability, and it does so through this arm rather than through anything in the area module. The registration is `R1075`, which then calls the recompute at `L05479` or `L05480`; the removal is `R1078`, whose slot clear is at `L05489` and recompute at `L05490` (`MAGIC-WALLBLOCK-045`, `MAGIC-AREACOST-046`, `MOVE-085`).
 - `+0x2c`, u8.
+
+**Mission start** (`TERR-228`, `TERR-229`, `TERR-230`). A fresh mission writes the two block
+planes in this order: the ingest, the Building attach, the type-6 occupy, the type-9 cell casters
+(`R0461`'s first loop: a record with X or Y nonzero and A below 4 calls `R0227`,
+which makes a record carrying six caster bytes at `+0x2c..+0x31`), the Sack loop (its place after
+the casters is Medium: the listing of `R0461` stops before it), and in the first sub-tick
+the join walk's occupy. The walk `R0067` removes actors from the planes only for a `0x10003`
+node; none occurs in the 28 maps per root of the trigger fixture table, and 10 EN maps are outside
+it (Medium). The ingest cost of the 1,653 record cells in the restart slots is the map.reg `Cost`
+value (High; 376 baselines discriminate it from the defaults). That the recompute is the only cost
+writer after the ingest, writing `CostCracked` on structure cells the `&0xfa` arm opens, and that
+no area layer exists yet, are Medium: the basis is a caller scan, not a sweep of stores into the
+cost plane, and the cost plane outside record cells is not saved. Completeness of this writer list
+is bounded by the routines read; the bodies of `R0474` and `R1575` and the rest of
+`R0461` are unread (`TERR-228`).
 
 **Cost byte order and persistence** (`MOVE-084`, `MOVE-085`, `MOVE-086`). `R1087` divides a
 cell's cost byte by four once per read whenever the record's count at `+0x02` is non-zero, for every
