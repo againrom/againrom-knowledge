@@ -15625,3 +15625,57 @@ no file of the later dated directories was read.
 - Reading: these lists are a route the hero held before the walk placed it, carried across the mission edge. The join walk does not access the lists (`MOVE-122`) and the end-of-mission cull resets other actor fields only (`PARTY-ENDCULL-026`).
 
 **Confidence.** High for the counts and distances. Medium for the reading that the lists come from the previous mission: the route's cells were not compared with the previous map and no other restart slot carries a non-empty list.
+
+## Group and order blocks in the restart slot
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1218 | In 9 distinct owner-root `game9999.sav`, 133 map Groups at order 1 hold the guard setter's AI block (centroid and spread recomputed; `+0x2b`, `+0x2c` within bounds); 19 add `+0x48` 1, and no other AI byte is nonzero. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| SAV-1219 | In the same files all 13 Player-1 Groups hold order 3; the one map Group holds only `+0x20` 3 and `+0x45` 1, while 12 carried Groups hold AI bytes no store read here writes, from about four independent lineages, and 4 hold 3 or 4 members. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| SAV-1220 | In the same files all 443 members hold order `+0x00` = their saved cell word, `+0x08` = `+0x09` = 0 and an empty `+0x90` list; their other nonzero order bytes are only `+0x14`, `+0x71` and, on Units, `+0x40`, `+0x44` and one spell slot. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| SAV-1221 | All 10 `game9999.sav` under the owner save root, 9 distinct by SHA-256, hold sub-tick 1 and full tick 0, the four distinct files `SAV-1210` did not read among them. | High | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+
+### SAV-1218
+
+- Population: every `game9999.sav` under the owner save root, 10 files, 9 distinct (`SAV-1221`), read in place with `tools/savdoc -mode group-start` (`evidence/c01`, summary `evidence/c02-census-summary.txt`). The census reads the 80 AI bytes that `group()` bounds and masks the list pointer `+0x4c`..`+0x4f`; it recomputes three fields from the members' saved cell and sub-cell (the member sight `actor+0xa5` is not read, so `+0x2b` is not recomputed and `+0x2c` is only bounded): fine = cell * 256 + sub-cell, the per-axis mean truncated, `+0x28` = the means' high bytes, `+0x24` = (y << 16) + x, and `+0x2a` = the largest Chebyshev cell distance to that cell.
+- 146 Groups (443 members): 133 map Groups of Players 2 and above at order 1, 1 map Group of Player 1 and 12 carried Groups of Player 1 (`SAV-1219`). A Group is a map Group when every member holds the spawner Mover pattern of `SAV-1213` and carried when every member holds the walk pattern.
+- On 133 of 133 guard Groups: `+0x24`/`+0x28` equal the recomputed centroid; `+0x2a` equals the recomputed spread (the Chebyshev rule is empirical: `R0167` was not read); max(`+0x2a`, `+0x2b`) <= `+0x2c` <= `+0x2a` + `+0x2b`; word `+0x00` equals word `+0x28`; `+0x2d` = `+0x38` = max(`+0x2c`, 8), with 47 Groups floored to 8; `+0x39` 0; `+0x45` 1; `+0x48` 1 on 19 and 0 on 114. `+0x2b` takes 4, 5, 6, 7, 8 and 12. Every other AI byte is 0, both word lists are empty, `Group+0x40` is 0 and `Group+0x44` nonzero. Member counts run from 1 (51 Groups) to 15.
+- Fit: `AI-450` (setter and centroid), `AI-449` (`+0x45` 1 from the constructor), `AI-452` (`+0x48`), `AI-454` (no dispatch or rebuild before the save).
+- SAVE writes the 80 bytes raw from the live block, then the `+0x4c` list's values; `+0x4c` itself holds the live allocation address, which LOAD replaces (`SAV-GRPSAVENEXT-572`, `SAV-1113`). `Group+0x1c` is written literally (`SAV-GRPFIRSTSAVE-579`). What SAVE writes for `+0x40`/`+0x44` is not re-read here; their remap through the identity map is LOAD's (`SAV-GRPLOAD-560`).
+
+**Confidence.** **High** for the measurement over these 9 files and for the fit of `+0x24`, `+0x28`, `+0x00`, `+0x2a` and the derived fields. **Medium** for `+0x2b` (not recomputed), `+0x2c` (bounded only) and the `+0x2a` rule (empirical). **Medium** that no routine wrote these fields between the setter and the save: a write of the same value is invisible to the census. Authorship: 5 files original-authored, 1 original resave of a project input, 3 in directories with no recorded class (`SAV-1221`).
+
+**Unknown.** The edition of each file; the census does not record it.
+
+### SAV-1219
+
+- Player 1 holds 13 Groups over the 9 files, all at order 3. Population and instrument as `SAV-1218`.
+- The map Group (file `e0515abeb683`, 3 Humans of the spawner pattern): every AI byte 0 except `+0x20` 3 and `+0x45` 1, both lists empty. This is `AI-449`'s constructor block with `AI-451`'s order.
+- The 12 carried Groups (22 members, 9 holding `*(Player+0x34)`): word `+0x00`, `+0x2d`, `+0x38` and `+0x39` 0 on 12. `+0x48` 1 on 11. `+0x45` 1 on 10 and 0 on 2 (files `8da6bec86028` and `29aea649c788`). On 7 Groups `+0x24`/`+0x28` hold a cell that is not the members' recomputed centroid, with `+0x2b` 6 and `+0x2c` 6 or 7, and word `+0x0a` nonzero; on 6 of them `+0x44` is 0x10 or 0x13. The other 5 hold 0 in those fields. Member counts: 1 on 8 Groups, 3 on 2, 4 on 2. `Group+0x1c` is nonzero on 7 and 0 on 5; `Group+0x40` 0 on 12.
+- No store read here writes a carried Group's `+0x0a`, `+0x24`..`+0x2c` or `+0x44`, and none writes `+0x45` 0: the Stand Ground setter stores only `+0x20` (`AI-451`), the constructor writes `+0x45` 1 (`AI-449`) and the binder only `+0x48` (`AI-452`). These are not the guard setter's output either: it writes `+0x00` = `+0x28` and `+0x2d` = `+0x38` of at least 8 (`AI-450`), and the 7 stale Groups hold 0 there. The producer of the stale bytes is Unknown. They fit values left from before this mission start (the reuse of the surviving Player and its Groups, `PARTY-PERSIST-028`, and the walk's use of each member's existing `actor+0x70`, `AI-449`); a write earlier in this same mission start, at a position the member later left, is not excluded.
+- Independence: the 7 stale Groups are not 7 observations. `d954bd394473` Groups 1 and 2, `349726ca4569` Groups 1 and 2 and `d8e6f1d21a7d` Group 1 share centroid, `+0x0a`/`+0x0b` and `+0x44` values (`+0x24` 192942208 and 209719424), so about four lineages remain with `5822c37e8fa5` and `e0515abeb683`. The 5 other carried Groups (`f7bc275c0eca`, `48a2a2669b7d`, `d8e6f1d21a7d` Group 2, `8da6bec86028`, `29aea649c788`) are the constructor + Stand Ground + `+0x48` shape and discriminate nothing between a carried and a fresh Group.
+- Provenance: both Groups with `+0x45` 0 (`8da6bec86028`, `29aea649c788`) come from files in directories with no recorded authorship class (`2026-09-27`, `oldsaves7`); `349726ca4569`, a stale-value file, is the third such file (`2027-09-07`).
+- SAVE writes these Groups as `SAV-1218` states.
+
+**Confidence.** **High** for the measurement over 9 files and 12 carried Groups. **Medium** for the reading that a carried member keeps the reused Player's Group, and **Unknown** for where the stale bytes were written: the carry arm `L07346` (with its Group build `L14238`), the routines that carry the Player across the edge and the AI slot of the previous mission were not read here, and the 7 stale Groups form about four independent lineages.
+
+**Unknown.** Which routine writes `+0x24`..`+0x2c` and `+0x0a` without `+0x2d` (before the mission start or earlier in this one). Whether a carried Group's `+0x48` 1 was set by this mission's binder through a hero reference or carried. Which routine left `+0x45` 0 on two Groups; `AI-ACTIVITY-324`'s rebuild is one producer of that value.
+
+### SAV-1220
+
+- Population and instrument as `SAV-1218`; the census reads the 148 order bytes that `unit()` bounds and masks the list pointer `+0x90`..`+0x93`.
+- On 443 of 443 members: word `+0x00` equals the record's saved cell word, `+0x08` 0, `+0x09` 0, and the `+0x90` list count 0.
+- 312 map Units (order 1): `+0x14` 1, 4, 5 or 8; `+0x71` 0 (9), 1 (194), 2 (51), 3 (36), 4 (20) or 6 (2); `+0x40` and `+0x44` one value pair per type word over 13 type words (`+0x44` 3, 4, 5, 8, 0xa or 0x3f; `+0x40` 0xf, 0x1e or 0x3c); on 24 Units one spell slot, `+0x78` a spell id and `+0x84` 3270 = 10 * 0x147.
+- 106 map Humans (order 1), 3 map Humans of Player 1 and 22 carried Humans (order 3): `+0x14` 1, 4, 5 or 6, `+0x71` 1, no other nonzero byte.
+- Fit: the constructor's zero block with `+0x71` 1 (`AI-449`); the post and `+0x08` from the stance setters (`AI-450`, `AI-451`); `+0x40`, `+0x44` and `+0x71` from the Units table stream (`AI-WITHDRAW-027`), which leaves a Human's `+0x71` at the constructor's 1; the spell slot from the spawn setup (`AI-341`; `w04` holds its only two order-block stores, `L12607` and `L12609`).
+- SAVE writes the 148 bytes raw from the live block, then the `+0x90` list's values; `+0x90` holds the live allocation address (`SAV-GRPSAVENEXT-572`, `SAV-GRPPATROL-570`).
+
+**Confidence.** **High** for the measurement. **Medium** that no routine wrote these fields between the setters and the save (same-value writes are invisible) and that `+0x14` is `actor+0x12c`: the census does not read a saved reach to compare.
+
+### SAV-1221
+
+- `evidence/c01/files.tsv`: the head's first two dwords (`SAV-HEAD-025`) are (1, 0) in all 10 files: `2026-08-02`, `-08-12`, `-08-14`, `-08-15`, `-08-24`, `-08-27/EXP-0261-owner-runs`, `-08-30/EXP-0278-human-runtime-en` (a byte copy of `2026-08-24`'s file), `2026-09-27`, `2026-09-27/oldsaves7` and `2027-09-07`.
+- `tools/savdoc`'s authorship classes: 5 original-authored, 1 original resave of project input (`2026-08-27`), 3 in directories without a recorded class (`2026-09-27`, its `oldsaves7`, `2027-09-07`). The decoded walk completes on all 10. Both carried Groups with `+0x45` 0 come from the first two unclassified files.
+- With `SESS-086`, every restart-slot save of this root was written after the mission start's one sub-tick and before a second.
+
+**Confidence.** **High** for the measurement over these files. The edition of each file is not recorded.

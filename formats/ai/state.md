@@ -78,6 +78,32 @@ word-list payload; this is not a whole-call-tree absence. Group+20 semantics,
 unnamed AI fields and original LOAD-to-dispatch-to-SAVE chronology remain
 Unknown. — SAV-GRPSAVENEXT-572
 
+## Group and order blocks at mission start
+
+The order constructor zeroes 148 bytes and sets `+0x71` 1; the AI constructor
+zeroes 80 bytes and sets `+0x45` 1. The type-6 spawner builds a map Group on a
+group-id miss. The join walk builds a Group only when its Player has none; no Group
+build for a carried member was found in the routines read, so a carried member
+appears to keep its existing Group (Medium: the carry arm and ten other
+callers of the Group constructor are unread). — AI-449
+
+The stance walk sets every map Group: Groups of the first type-5 record get
+the Stand Ground setter, which stores only AI `+0x20` (3); all others get the guard setter
+with argument 0, which writes `+0x20` 1, the centroid `+0x24`/`+0x28`, word
+`+0x00`, `+0x2a`..`+0x2c`, `+0x2d` = `+0x38` = max(`+0x2c`, MinimalGuardRange)
+and `+0x39` 0. Both setters store every member's post `ord+0x00`, `ord+0x14`
+and `ord+0x08` 0. — AI-450, AI-451
+
+The trigger binder writes AI `+0x48` = 1 for a Group it resolves directly or
+through a unit; it writes no other AI field and no order field. — AI-452
+
+After the carried members, the join walk places the entries of key `Humans`
+into the head Group and gives that Group the Stand Ground setter. — AI-453
+
+The first sub-tick runs no Group dispatch and no activity rebuild; the
+executor stores no order byte for an idle member while Mover `+0x98` is 0.
+— AI-454
+
 ## Scope
 
 | | owner |

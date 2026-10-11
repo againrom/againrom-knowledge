@@ -384,7 +384,7 @@ non-effect on ownership are untouched.
 |---|---|---|---|---|
 | PARTY-ORIGIN-010 | The party is two `Player` containers: the group list `+0x24` is saved, and the flat index `+0x20` is derived from it on load and is the list the placement walk places from. | High | ● active (partially retracted) | [EXP-0100](../experiments/EXP-0100-party-origin/) |
 | PARTY-WRITE-011 | Eleven routines write the player's two containers by call, and the group-list and group-member appends share one owner set, so the two containers are always written together. | High / Medium / Unknown | ● active (amended) | [EXP-0100](../experiments/EXP-0100-party-origin/) |
-| PARTY-INSTALL-012 | Giving a player a unit is one straight-line sequence of five writes, duplicated rather than shared at every entry point; a mercenary spawn writes four, without the hero pointer. | High / Medium | ● active | [EXP-0100](../experiments/EXP-0100-party-origin/) |
+| PARTY-INSTALL-012 | Giving a player a unit is one straight-line sequence of five writes, duplicated rather than shared at every entry point; a mercenary spawn writes four, without the hero pointer. | High / Medium | ● active (amended) | [EXP-0100](../experiments/EXP-0100-party-origin/) |
 | PARTY-GATE-013 | No hero, no mission: `R0131` rejects a client whose `Player+0x34` is null, and that is the only membership test on the way in. | High | ● active | [EXP-0100](../experiments/EXP-0100-party-origin/) |
 | PARTY-PERSIST-014 | The single-player carry has a memory arm: `R0423` can reuse the surviving `Player` for the new map's slot 1, and the campaign start selects that arm. | Medium | ● active (amended) | [EXP-0100](../experiments/EXP-0100-party-origin/) |
 
@@ -521,6 +521,14 @@ fact about two listings, not a reading. Medium for the reading of `+0x13c` as
 the flag that separates "repair a dead hero" from "leave a carried one alone":
 the two states are inferred from `PARTY-LOSS-006`'s zeroing and from the revive
 caller, and the field itself was not read.
+
+**Amended.** Narrowed by EXP-0524: "a carried character therefore arrives in a
+group of its own" holds for an actor these arms install. At a mission start a
+carried member keeps the Group of the reused Player, which can hold 3 or 4
+carried members and AI bytes that appear to predate that mission
+(`SAV-1219`, `AI-449`). Medium for the mechanism: 9 distinct restart-slot
+files and 12 carried Groups were read, and the carry arm `L07346` with its
+Group build `L14238` was not.
 
 ### PARTY-GATE-013
 
@@ -711,7 +719,7 @@ copies remain a blind spot. The start chain does not depend on that universal.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| PARTY-JOIN-025 | A mid-mission join is one routine, `R0064`, reached from trigger instants 19 and 22: `PARTY-INSTALL-012`'s install sequence without the hero pointer or a fresh runtime id. | High | ● active | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
+| PARTY-JOIN-025 | A mid-mission join is one routine, `R0064`, reached from trigger instants 19 and 22: `PARTY-INSTALL-012`'s install sequence without the hero pointer or a fresh runtime id. | High | ● active (amended) | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
 | PARTY-ENDCULL-026 | The server's end-of-mission cull `R0826` decides which players and actors exist on the next map; it keeps an actor iff `0x21 <= word[actor+0x0e] < 0x40`. | High | ● active (partially retracted) | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
 | PARTY-BAND-027 | Withdrawn: the server survival band `[0x21,0x40)` was said to be the Humans creation arm's typeID range; the band is real, but that arm's output is conditional (`PARTY-M20-031`). | High | ✖ retracted | [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
 | PARTY-PERSIST-028 | The campaign's mission-to-mission edge preserves the surviving human `Player`, its name and every actor that first passes the client and server filters, not an unfiltered roster. | High | ● active (amended, superseded) | [EXP-0165](../experiments/EXP-0165-join-persistence/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
@@ -741,6 +749,12 @@ copies remain a blind spot. The start chain does not depend on that universal.
 **Confidence.** High. One routine read end to end; every field is named by its
 own instruction, and the two absences are two of the five writes
 `PARTY-INSTALL-012` lists for the other entry points.
+
+**Amended.** Narrowed by EXP-0524: the comparison "as a carried character
+does" holds for the install arms of `PARTY-INSTALL-012`, not for a carried
+member at a mission start, which appears to keep its existing Group
+(`SAV-1219`, `AI-449`; Medium: 9 distinct files and 12 carried Groups, the
+carry arm `L07346` unread). The joined actor's own Group stands.
 
 ### PARTY-ENDCULL-026
 

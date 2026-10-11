@@ -115,6 +115,28 @@ Group list store precedes member serialization; the selector read follows
 it. Callback mutation can therefore affect different fields at different
 points in one SAVE. — SAV-GRPSAVENEXT-572, SAV-GRPFIRSTSAVE-579
 
+## Restart-slot values
+
+All ten restart-slot saves of the owner root hold sub-tick 1, full tick 0.
+— SAV-1221
+
+In them a map Group of Player 2 or above holds order 1 and the guard setter's
+block: centroid `+24`/`+28` and `+00` and spread `+2a` recomputed from its
+members' cells, sight `+2b` and notice `+2c` fitting their bounds, `+2d` = `+38` = max(`+2c`, 8), `+39` 0, `+45` 1,
+`+48` 0 or 1, every other byte 0 and both lists empty. — SAV-1218, AI-450,
+AI-452
+
+Every Player-1 Group holds order 3. A map Group of Player 1 holds only `+20`
+3 and `+45` 1. In 12 carried Groups of 9 distinct files, 7 hold AI bytes (`+0a`,
+`+24`..`+2c`, `+44`) that no store read writes, from about four independent
+lineages; `+45` is 0 on two. Their producer is Unknown, and whether they predate
+the mission start is Medium (the carry arm is unread). A carried Group can hold
+several carried members. — SAV-1219, AI-449, AI-451
+
+Every member's order block holds `+00` = its cell word, `+08` = `+09` = 0,
+an empty `+90` list, `+14` and `+71`; a Unit adds `+40`/`+44` and up to one
+spell slot. — SAV-1220
+
 The selected dispatcher does not directly read Group `+20` elements or AI
 `+4c` elements. Transitive callbacks, genuine first-SAVE values and a graph-wide
 atomic snapshot remain Unknown; skipping the initial-stance branch proves no

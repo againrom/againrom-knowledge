@@ -3606,3 +3606,80 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 **Confidence.** **High** for the routine identities and for the comparison on the replayed vectors and the homogeneous extension. **Medium** for what a player sees: the shot's vector runs from its launch point (`MAGIC-263`, `ANIM-139`) and the unit's between centres, so in play the two are not measured on one vector.
 
 **Unknown.** Whether shot coordinates and unit fine centres share one unit and origin; the comparison here holds only for equal difference vectors.
+
+## Group and order blocks at mission start
+
+`grpAI` is the 80-byte block at `Group+0x3c` (`AI-GROUP-009`); `ord` is the 148-byte order block at
+`actor+0x158`. Evidence is a static read of `rom.exe` (one image on both lawful installs, SHA-256
+`942e9b72…`); no process was run.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-449 | The order constructor zeroes 148 bytes but sets `+0x71` 1; the AI constructor zeroes 80 but sets `+0x45` 1; a map Group comes from the spawner's miss arm; the join walk builds a Group only for a Player with none. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| AI-450 | The load-time guard setter `R0125(grp, 0)` writes AI `+0x20` 1, the members' centroid `+0x24`/`+0x28` and `+0x00`, `+0x2a`..`+0x2c`, `+0x2d` = `+0x38` = max(`+0x2c`, MinimalGuardRange) and `+0x39` 0. | High | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| AI-451 | The Stand Ground setter `R0063` stores only byte `+0x20` of the AI block (0, 0, then 3); every other AI byte of a Group it sets keeps its earlier value. | High | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| AI-452 | The trigger binder `R0067` stores no Group-AI field but dword `+0x48` = 1, at eight sites that resolve a unit's Group or a Group; its body has no order-block access. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| AI-453 | After placing the carried members the join walk reads key `Humans`; each entry becomes a Human or Unit placed into the head Group, which then gets `R0063`; a nonzero read result skips both. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| AI-454 | The first sub-tick runs no Group dispatch and no activity rebuild, and the executor's tail stores no order byte for an idle member while Mover `+0x98` is 0, its value at placement. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+
+### AI-449
+
+- `R0286` (`w01`, whole) clears `0x25` dwords (`L00962`), stores bytes `+0x08`, `+0x09`, `+0x4c` 0 and `+0x71` = 1 (`L14225`), and puts a new `0x1c`-byte word list (vtable `L08172`, grow-by 10) at `+0x90` (`L14226`), or 0 when the allocation fails (`L14227`). Direct callers (`s01`, operand sweep plus raw dword scan): `L14228` (carry importer, `PARTY-LOSS-006`), `L14159` (join walk, `MOVE-122`), `L14229` (actor constructor, `AI-LOAD-099`), `L14230`; no stored address.
+- `R0150` (`w01`, whole) clears `0x14` dwords, stores bytes `+0x08`, `+0x09`, `+0x20` 0 and `+0x45` = 1 (`L14231`), and puts a new word list at `+0x4c` (`L00291`). Its one caller is `L14232` in the Group constructor `R0149`.
+- `R0149` (`w02`, whole) builds the base and the `+0x20` list, stores `+0x40` = `+0x44` = 0 and `+0x3c` = the new AI block; it writes no AI field itself. `s01` finds 13 direct callers and no stored address. `R0152` (`w02`) detaches the actor from its old Group, appends it, stores `actor+0x70` and `Group+0x44` = `actor+0x14`; it has no AI access.
+- Map placements: the type-6 spawner joins each unit to the Player's Group whose `+0x1c` equals the record's group id, or builds one (`L00294`..`L00296`, `w03`; `AI-GROUP-009`, `SAV-GRPFIRSTSAVE-579`).
+- Carried members: the join walk `R0065` builds no Group for a member (bounded to the routines read: the walk head and its member loop). Its head (`w10`) takes the first Group of `player+0x24` (`L14233`); when there is none it logs `Oops - player has no groups` (string `L07360`, `t01`) and builds and appends one (`L14234`..`L14235`). While that Group's `R0197` returns 0 and the list holds more than one Group (`L14236` above 1) it calls `R1582` on it and takes the new first Group (`L14237`..`L07334`). Each member keeps its `actor+0x70` Group, the reused Player's (`PARTY-PERSIST-028`). Callers of `R0149` not read: `L14238` (the Group build in the carry arm `L07346`, a planned window never read), `L07379`, `L14239`, `L14240`, `L14241`, `L14242`, `L07279` (the Group LOAD), `L14243`, `L14244`, `L14245`, `L14246`.
+
+**Confidence.** **High** for the constructor stores, the caller sets and the walk head's branches (complete bodies, `CALL rel32` targets from the bytes). **Medium** for the reading of `R0197` as an empty test, `R1582` as removal from the list and `L14233` as the first element: their bodies were not read. **Medium** for "no mission-start routine builds a Group for a carried member": it covers the routines read (the spawner arm and the join walk), and eleven of the thirteen direct callers of `R0149` were not read, the carry arm's `L14238` among them.
+
+**Unknown.** The routine around `L14230`. Whether a Group the walk head removes is freed. The unread callers of `R0149` named above, of `R0063` (`L01873`, `L14247`, `L01874`) and of `R0125` (`L00378`, `L00596`, `L00949`, `L00388`, `L00950`) as to whether any runs at a mission start.
+
+### AI-450
+
+- `R0125(grp, n)` (`w06`, whole). First member walk: `R0007`, `ord+0x50` = 0, `ord+0x38` = 0 (`L14248`, `L14249`). Then `grpAI+0x20` = 0 (`L14250`).
+- Second member walk: `mover+0x01` = `mover+0x00` when they differ; `R0045` only when Mover word `+0x80` is nonzero; `ord+0x14` = `actor+0x12c` (`L14251`); `ord+0x60` = 0; `mover+0x7c` = 0; `actor+0x54` = 0; `ord+0x50` = 0; `actor+0x50` = `0xb` (`L00377`); `ord+0x00` = the position word `+0x02` when `R0040` finds the actor centred, else Mover word `+0x06` (`L00829`, `L00830`); `ord+0x08` = 0 (`L00945`).
+- Then `grpAI+0x20` = 1 (`L00314`) and `R0140(grp)` (`w09`, whole): for a nonempty Group it sums the members' fine coordinates (`R0165`, `R0166`) and divides each by the low byte of the member count; it stores the cell word `+0x28` from the two quotients' high bytes (`L14252`) and dword `+0x24` = (y << 16) + x (`L00353`). A second walk stores `+0x2a` = max `R0167(member cell, +0x28)`, `+0x2b` = max `actor+0xa5`, `+0x2c` = max (that distance + `actor+0xa5`) in bytes (`L00357`..`L00359`). An empty Group returns at `L14253` with no store.
+- Then word `+0x00` = word `+0x28` (`L14254`), `+0x2d` = `+0x2c` (`L00360`), `+0x38` = `+0x2c` (`L00838`). With `n` = 0, when `+0x2d` is below `session+0xa9b8` both take that value (`L00844`, `L00361`); with `n` nonzero, when `+0x2d` is below `n` both take `n` (`L00843`, `L00839`). `+0x39` = 0 on both paths (`L14255`, `L14256`). `session+0xa9b8` is `MinimalGuardRange`, 8 in the shipped `ai.reg` (`AI-RADIUS-014`).
+- The stance walk calls it with `n` = 0 for every Group of a Player other than the first type-5 record (`Player+0x04` 1) in single player (`L14257`..`L00384`, `w05`; `AI-AUTHOR-015`, `AI-GATE-100`).
+- `R0007` (`w08`, whole) stores `mover+0x01`, `ord+0x14` = `actor+0x12c` (`L00155`), `ord+0x60` = 0, `mover+0x7c` = 0 and `actor+0x54` = 0, and calls `R0045` under the same test.
+
+**Confidence.** **High**: the setter, the centroid routine and `R0007` are read whole and every store is a cited instruction. The restart-slot census recomputes `+0x24`, `+0x28` (hence `+0x00`) and `+0x2a` from the members' cells and matches them on 133 of 133 guard Groups; `+0x2b` is not recomputed and `+0x2c` is only bounded; `+0x2d`, `+0x38`, `+0x39` and `+0x45` follow from the stored values (`SAV-1218`). The Chebyshev rule for `+0x2a` rests on that fit (`R0167` was not read): Medium.
+
+### AI-451
+
+- `R0063(grp)` (`w07`, whole). Its member walks store `ord+0x14`, `ord+0x60`, `ord+0x50`, `ord+0x38`, `ord+0x00` (`L00151`) and `ord+0x08` = 0 (`L00152`), `actor+0x54` = 0 and `actor+0x50` = `0xc`, as `AI-351` lists.
+- Its AI stores are three byte stores to `+0x20`: 0 at `L00147`, 0 at `L14258`, 3 at `L00153`. It loads `[grp+0x3c]` only for these, and calls neither `R0140` nor any other routine with the Group but the member walkers `R0069`, `R0070` and `R0071`.
+- Calls on the mission-start path (`s01`): `L00154` in the stance walk for the Groups of the first type-5 record (`AI-AUTHOR-015`); `L14161` in the join walk, once per placed member on its `actor+0x70` (`MOVE-122`); `L14259` in the join walk's tail on the head Group (`AI-453`).
+
+**Confidence.** **High**: one routine read whole; the restart-slot census holds order 3 and no other changed AI byte on the one map Group and the twelve carried Groups of Player 1 (`SAV-1219`).
+
+**Unknown.** The bodies of the three member walkers, which receive the Group pointer (`AI-351` reads `R0069`, `R0070` and `R0071` whole).
+
+### AI-452
+
+- `R0067` was decoded from its entry to its `RET 8` at `L14260`, 1,428 instructions (`w05`, one window and four extensions). After the stance loop (`L01802`..`L14261`) it is the trigger binder (`TRIG-BINDORDER-101`).
+- Its Group-AI stores are eight `MOV dword [x+0x48], 1` through a just-loaded `[g+0x3c]`: `L03530` and `L03531` (a unit reference, through `actor+0x70`); `L01828` and `L14262` (a Group reference); `L14263` and `L14264` (a unit reference) and `L14265` and `L14266` (a Group reference), these four in the binder's second record pass (`L14267`..) and only when that record's opcode `+0x40`, copied to `[ebp-0x1f8]` at `L14268`, is not 1 (`TRIG-BINDORDER-101`). Each needs a nonzero resolved reference and, for a unit, a nonzero `actor+0x70`.
+- The body loads no `[x+0x158]` and makes no other store through a loaded Group-AI pointer. Its calls into the AI module are the two stance setters (`L00154`, `L00384`) and the trigger record helpers `R0506`..`R2178`.
+- `AI-ACTIVITY-324`: a Group whose `+0x48` is nonzero counts every represented member as active in each rebuild.
+
+**Confidence.** **High** for the eight stores and their gates, and for the absence of any other AI or order-block access in the body's own instructions (linear decode, every hit of `+0x3c]`, `+0x70]` and `+0x158]` read). **Medium** that the binder's callees write no AI or order field: `R2190`, `R0421`, `R0507`, the `00538xxx` helpers, `R0288`, `R1388`, `R0865` and `L14269` were not read.
+
+### AI-453
+
+- `w11` (`L14161`..`L08258`, the walk after its member loop). `L06602` calls `R0475(this+0x44, "Humans", list)` (string `L06600`, `t01`). A nonzero result jumps to the exit `L14270`, past the `R0063` call.
+- Otherwise, per entry: a name, cut at `#` (`0x23`, `L14271`) into a name and a number; `new(0x1e8)` + `R0497` (Human); if its type word `+0x0e` is 0, it is deleted and `new(0x198)` + `R0501` (Unit) is tried; a second 0 deletes it and skips the entry. With a number, `R0907`; with `this+0x134` nonzero, `R1562`. Placement `R1145`: at the walk's start cell with radius 8 when the entry's first field is -1, else at the entry's three fields. A failed placement deletes the actor.
+- A placed actor: `R0411` on `[L00240]`, `actor+0x14` = Player, AddTail to `player+0x20`, `R0152(G, actor)` with `G` the walk head's Group (`AI-449`); then `R0044(actor)` when `this+0x128` is 0 (`AI-350`: `ord+0x08` = 0, `actor+0x50` = `0xc`, the post), else `R0308(actor, player+0x34, 0)`; then `R0993(actor)`.
+- When the list is empty, `R0063(G)` at `L14259`.
+
+**Confidence.** **High** for the branch structure and the calls (one range read whole). **Medium** for which `R0475` result means an absent key: its body was not read.
+
+**Unknown.** The `Humans` key's source object `this+0x44`, the meaning of `this+0x128` and `this+0x134`, and the stores of `R0308`, `R0907`, `R1562` and `R0993`. No restart-slot save in `SAV-1218`'s population holds a spawner-pattern member in Player 1's first Group.
+
+### AI-454
+
+- From (0, 0) the mission start's one stepper call runs no phase slot (`SESS-086`); the AI slot `R0076` holds the Group dispatch (`AI-TICK-008`) and the activity rebuild (`AI-ACTIVITY-324`), so neither runs before the restart save.
+- The executor `R0016` sends an idle member (`ord+0x09` 0) whose Group has `grpAI+0x45` nonzero, with `ord+0x08` 0, to the shared tail `L00010` (`AI-350`). The tail (`w12`, read to `L00614`) stores nothing and jumps to `L00614` when Mover dword `+0x98` is 0 (`L14272`..`L00613`). Otherwise it clears it and, by `actor+0x50`: 1, the stand (`ord+0x50`, `actor+0x50` = `0xc`, the post, `ord+0x08` = 0); `0xa`, `ord+0x04` = 1, `ord+0x08` = 0 and, when `R0162` returns below 3, the patrol cursor `ord+0x02`; `0x17`, `ord+0x09` = `0xff`; other values `ord+0x08` = 0 and `R0004`.
+- Mover `+0x98` is the constructor's 0 for both placement routes (`MOVE-119`, `MOVE-122`) and every other Mover byte is 0 in the restart-slot census (`SAV-1213`).
+- With `grpAI+0x45` 0 and `receiver+0xb388` 0 the executor parks `actor+0x54` = `0x1a` and returns before any order store (`AI-350`).
+
+**Confidence.** **High** for the tail's branch and stores (`w12`) and for the slot order (cited claims). **Medium** that nothing else in the first sub-tick writes a Group or order field: the actor tick `R0037` before `L00086`, its dispatch on `actor+0x54`, the drain `R0191` and `R0426` were not read. The census finds no AI or order byte that differs from the start path's stores (`SAV-1218`, `SAV-1219`, `SAV-1220`); a same-value write is invisible to it.

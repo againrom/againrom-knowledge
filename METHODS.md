@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3334. Observation: 95. Static analysis: 2776. Mixed: 463.
+Claims labelled: 3344. Observation: 95. Static analysis: 2785. Mixed: 464.
 
 ## Ledger ai
 
@@ -283,6 +283,12 @@ Claims labelled: 3334. Observation: 95. Static analysis: 2776. Mixed: 463.
 | AI-445 | static analysis | ✔ promoted |
 | AI-446 | static analysis | ✔ promoted |
 | AI-447 | static analysis | ✔ promoted |
+| AI-449 | static analysis | ✔ promoted |
+| AI-450 | static analysis | ✔ promoted |
+| AI-451 | static analysis | ✔ promoted |
+| AI-452 | static analysis | ✔ promoted |
+| AI-453 | static analysis | ✔ promoted |
+| AI-454 | static analysis | ✔ promoted |
 
 ## Ledger alm
 
@@ -1374,7 +1380,7 @@ Claims labelled: 3334. Observation: 95. Static analysis: 2776. Mixed: 463.
 | PARTY-GROUP-009 | static analysis | ● active (amended) |
 | PARTY-ORIGIN-010 | static analysis | ● active (partially retracted) |
 | PARTY-WRITE-011 | static analysis | ● active (amended) |
-| PARTY-INSTALL-012 | static analysis | ● active |
+| PARTY-INSTALL-012 | static analysis | ● active (amended) |
 | PARTY-GATE-013 | static analysis | ● active |
 | PARTY-PERSIST-014 | static analysis | ● active (amended) |
 | PARTY-MONEY-015 | static analysis | ● active (partially retracted) |
@@ -1382,7 +1388,7 @@ Claims labelled: 3334. Observation: 95. Static analysis: 2776. Mixed: 463.
 | PARTY-ADDHERO-017 | static analysis | ● active |
 | PARTY-MONEY-018 | mixed | ● active (partially retracted) |
 | PARTY-MONEY-024 | static analysis | ✔ promoted |
-| PARTY-JOIN-025 | static analysis | ● active |
+| PARTY-JOIN-025 | static analysis | ● active (amended) |
 | PARTY-ENDCULL-026 | static analysis | ● active (partially retracted) |
 | PARTY-BAND-027 | static analysis | ✖ retracted |
 | PARTY-PERSIST-028 | static analysis | ● active (amended, superseded) |
@@ -2400,6 +2406,10 @@ Claims labelled: 3334. Observation: 95. Static analysis: 2776. Mixed: 463.
 | SAV-1210 | mixed | ● active |
 | SAV-1213 | static analysis | ✔ promoted |
 | SAV-1214 | mixed | ✔ promoted |
+| SAV-1218 | static analysis | ✔ promoted |
+| SAV-1219 | static analysis | ✔ promoted |
+| SAV-1220 | static analysis | ✔ promoted |
+| SAV-1221 | mixed | ✔ promoted |
 
 ## Ledger session
 
