@@ -3087,3 +3087,56 @@ world.res equality is not asserted.
 are equal; the route-selecting data compares equal under the cited ROM1
 registry/Data.bin reader. No runtime locale environment, external mod,
 asset appearance or native scheduling equality is claimed.
+
+## Death and departure lifecycle
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-297 | Prepared spell source cleanup tests owner+14 rather than HP: the global effect still ticks after attribution clear, PointEffect retains its victim, and transport expiry has no local caster-HP gate. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### MAGIC-297
+
+Manager `R0641` zeros effect source attribution `+3c` if the retained actor's owner `+14` is zero, then calls effect virtual `+18` regardless. PointEffect `R0266` separately tests the child source `+44` and clears it on owner loss; its own victim `+44` remains. Actor delivery calls the retained victim's type predicate, then tests victim owner `+14`, invokes child virtual `+3c` and retires. Its local actor branch has no HP/range/off-map test.
+
+DirectDamage `R0564` receives the prepared block and retained victim, invokes victim virtual `+4c` and subtracts HP. This local body does not require living caster HP. Transport `R0634` decrements its word counter, enqueues retained children on expiry, clears child pointers and retires, without reading actor HP in that body. MAGIC-293/294 supply the prepared child and application contract; virtual callees remain a separate boundary.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries. Unknown for the whole-lifetime or scheduling alternatives named below.
+
+**Unknown.** Complete source/victim allocation lifetime, null-victim safety and reached virtual side effects. Close referring-pointer owners and delivery/destructor callees; local absence of an HP gate is not a global safe-dead-caster promise.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w27-effect-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w27-effect-manager.txt), [w34-effect-vtables.txt](../experiments/EXP-0528-death-lifecycle/evidence/w34-effect-vtables.txt), [w52-effect-input-cleanup.txt](../experiments/EXP-0528-death-lifecycle/evidence/w52-effect-input-cleanup.txt), [w53-direct-damage-input.txt](../experiments/EXP-0528-death-lifecycle/evidence/w53-direct-damage-input.txt), [w55-spell-transport-tick.txt](../experiments/EXP-0528-death-lifecycle/evidence/w55-spell-transport-tick.txt)
+
+## Retained actor-cast policy target
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-298 | The selected actor-cast policy uses a nonnull target without local HP, terminal-action or off-map rejection and queues it in Orders+28; null target instead triggers acquisition. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### MAGIC-298
+
+The 27-entry policy table binds policy `0x0d` to `R0018`. Its nonnull
+argument branches from `L06086` to `L06087`, bypassing candidate acquisition.
+A retained nonnull target queues command `Orders+8=8`, target `+28`, spell `+30`
+and range derived from the spell. This complete local body contains no target
+HP, action `+54=0x10` or off-map bit 8 rejection. Null target follows candidate
+acquisition and `R0021` filtering instead.
+
+Attack/follow terminal checks in AI-469 are separate from this cast policy.
+Actor-cast application reads current actor `+5c` as AI-471 states; the queued
+policy target is not an immutable released-effect target. MAGIC-297 bounds the
+prepared PointEffect's later target-owner delivery gate.
+
+**Confidence.** High for the table identity, complete local target branch and
+queued stores. The weakest dependency is the selected argument and policy-arm
+identity. Unknown for eligibility through callers and target pointer lifetime.
+
+**Unknown.** Complete cast-policy callers, invalidation callbacks, replacement
+cast input setter and pointer safety after destruction. Trace those entries and
+retained-target transitions before asserting a universal dead/off-map cast result.
+The provisional `w64-queued-cast` label is an attack setter, not cast evidence.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md),
+[w41](../experiments/EXP-0528-death-lifecycle/evidence/w41-actor-policy.txt),
+[w65](../experiments/EXP-0528-death-lifecycle/evidence/w65-cast-policy.txt),
+[w66](../experiments/EXP-0528-death-lifecycle/evidence/w66-actor-policy-dispatch.txt),
+[w42](../experiments/EXP-0528-death-lifecycle/evidence/w42-candidate-filter.txt).

@@ -338,3 +338,32 @@ every other order that has a "walk there, then do a thing" shape.
 A mid-transit walk call reaches the step with no destination check. A crossing into a cell a live unit holds releases
 blind at the old footprint, rewrites the position into the held cell and has the occupy refused with no slot store;
 the step does not test the refusal or roll back (`AI-387`).
+
+## Retained targets at death and departure
+
+Selected attack/follow policy prechecks test target action `0x10`, not HP or
+off-map bit8. A match stands the actor down on its next eligible evaluation,
+without directly zeroing its queued target or current strike pointer. Group
+cadence and callback notification remain bounded. — AI-469
+
+The normal actor manager clears source attribution on referred owner loss;
+it has no direct sweep of other actors' order targets. Acquisition can select
+a corpse alternative. Full notification and pointer lifetime remain Unknown.
+— AI-470
+
+A selected new attack changes Orders victim while retaining current target,
+phase and countdown in its direct stores. Expiry uses current actor `+5c`.
+Executor acquisition can relatch that pointer without clearing phase/countdown;
+occurrence during a concrete replacement command remains Unknown. — AI-471
+
+Departure removes the actor from the measured normal walker and retains its
+pending fields locally. Global effects before normal actors is a composed
+inference at Medium; the two procedure-local orders are High. Each actor's
+attached effects locally precede its HP/order processing. Full-frame,
+pixel-paint and remaining caller paths stay Unknown. Prepared spell source
+cleanup uses owner loss rather than HP death. — MOVE-136, AI-474 (amended), MAGIC-297
+
+The selected actor-cast policy queues a nonnull target without local HP,
+terminal-action or off-map rejection; null target uses acquisition instead.
+Replacement cast input, caller eligibility and pointer lifetime remain Unknown.
+— MAGIC-298

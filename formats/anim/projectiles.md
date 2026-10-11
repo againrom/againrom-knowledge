@@ -472,3 +472,27 @@ later: marker/bar calls, then shroud
 The complete projectile insertion/type population and native pixel overlap in
 that collection remain Unknown. A dispatch order does not promise a particular
 Meteor-over-unit pixel result (`ANIM-047`, amended).
+
+## Target and source lifetime
+
+Client aim uses only the target word key. A miss keeps the last aim; a later
+hit on a replacement under that key supplies its point. Corpse stage5 releases
+the numeric ID without freeing the simulation actor in that body. Native
+same-key replacement before flight expiry and heap reuse remain Unknown.
+— ANIM-164
+
+Physical expiry uses the current simulation target. A selected new attack
+retains that latch locally; executor acquisition can change it. Prepared spell
+source cleanup uses owner loss rather than caster HP, and PointEffect retains
+its victim pointer. — AI-471, MAGIC-297
+
+The complete client sweep establishes actor drivers, deferred hash deletion,
+surviving actor postpass and then projectile drivers at High. Full-frame,
+dispatch-to-sweep and pixel-paint timing remain Unknown. Installed EN/RU
+executables are byte-identical; unsearched lifecycle data and runtime locale
+outcomes remain Unknown. — AI-474 (amended), ANIM-166
+
+The selected client stage 5 branch unlinks and deletes its actor drawable;
+stages 2..4 use a shared arm. The selected creation/update path
+writes its supplied drawable on key hit as well as miss. Upstream allocation,
+the complete sender/decoder link and native timing remain Unknown. — ANIM-163

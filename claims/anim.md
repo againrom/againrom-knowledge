@@ -3147,3 +3147,70 @@ No global target-lifetime or removal-set absence is claimed.
 Static closure of all actor deletion paths, or a native identity watchpoint
 from release through death/leave-map, would settle it. The projectile
 destructor and the prologue callback remain unread.
+
+## Death and departure lifecycle
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-164 | A client flight resolves only its target word key: miss keeps the last aim, a same-key replacement supplies new aim; corpse stage 5 makes the simulation numeric ID eligible for reuse without freeing that actor. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+| ANIM-166 | The measured lifecycle windows use byte-identical installed EN/RU executables; unsearched lifecycle data and locale runtime outcomes remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### ANIM-164
+
+`L05558` compares the 16-bit key only. CProjectile `R0558` looks up actiontarget word `+86` each call. Hit copies the found drawable point; miss retains aim and direction and continues countdown. A replacement resolving under that key therefore supplies the next aim, conditionally on hash contents.
+
+Corpse `R0867` at HP<-600 sets stage 5 and HP=-10001, emits an update, clears its ID bit through `R0868`, then stores identity `+4=0`. Its body does not free the actor; HP<-10000 returns on later calls. `R0936` selects and sets the lowest free bitmap bit when a clear bit exists. It has no generation read. Simulation strike/PointEffect pointers are not these word-key lookups.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries. Unknown for the whole-lifetime or scheduling alternatives named below.
+
+**Unknown.** Native same-key replacement before flight expiry, all client hash mutation paths, full bitmap exhaustion and simulation heap-address reuse. Trace a live flight across delete/create timing and close pointer owners; an ID reuse alone does not change stored pointer bits.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w23-actor-lookup.txt](../experiments/EXP-0528-death-lifecycle/evidence/w23-actor-lookup.txt), [w39-identity-bitmap.txt](../experiments/EXP-0528-death-lifecycle/evidence/w39-identity-bitmap.txt), [w06-decay.txt](../experiments/EXP-0528-death-lifecycle/evidence/w06-decay.txt), [w54-client-projectile-driver.txt](../experiments/EXP-0528-death-lifecycle/evidence/w54-client-projectile-driver.txt), [w52-effect-input-cleanup.txt](../experiments/EXP-0528-death-lifecycle/evidence/w52-effect-input-cleanup.txt), [w35-physical-expiry.txt](../experiments/EXP-0528-death-lifecycle/evidence/w35-physical-expiry.txt)
+
+### ANIM-166
+
+The probe reads both installed ROM1 `rom.exe` files and compares full bytes and SHA-256. Equal bytes make the selected branch, table and pointer measurements one shared code witness, not independent confirmation. MAGIC-295 supplies existing equality for its projectile/spell route-selecting data population. No new data-member census or runtime is performed here.
+
+**Confidence.** High for full executable byte equality, with recorded hashes. This is one shared code witness. Unknown for unsearched data and runtime.
+
+**Unknown.** Data consumed by unread lifecycle paths and locale runtime outcomes. Enumerate their native data reads and compare those members before claiming whole-lifecycle locale equality.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [image-hashes.txt](../experiments/EXP-0528-death-lifecycle/evidence/image-hashes.txt), [instrument.txt](../experiments/EXP-0528-death-lifecycle/evidence/instrument.txt)
+
+## Selected client stage and key updates
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-163 | The selected client stage 5 arm deletes the word-key actor drawable; the selected creation/update path writes its supplied drawable on both key hit and miss. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### ANIM-163
+
+The six-entry table at `L02543` maps stages 2..4 to `L02767` and stage 5
+to `L02768`. The stage 5 body unlinks the `view+9b8` word-key association,
+recycles its node, decrements count and calls the drawable scalar destructor
+through slot `+4` with argument 1 at `L14303`. The measured CUnit driver
+returns 1 on its local exits; expiry alone is not this deletion path.
+
+The selected creation/update path at `L14304` calls word-key lookup. A hit
+skips node allocation. Both hit and miss write the supplied frame-local drawable
+pointer into node `+c` at `L14305`. Thus a different supplied drawable can
+become the next word-key lookup result, without a generation check. ANIM-164
+states the conditional projectile consequence and simulation ID allocator.
+
+**Confidence.** High for the aligned branch, stage table, hash writes and
+scalar-delete call in the committed windows. The weakest dependency is the
+selected dispatch object's decoded stage and supplied drawable identity.
+Unknown for upstream allocation, the full sender/decoder link and occurrence.
+
+**Unknown.** Complete wire decode from simulation actor `+13c` to the selected
+client `+15a`, all client hash mutation paths and native replacement timing.
+Trace that decode and a retained flight across delete/create before asserting
+native same-ID retarget occurrence.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md),
+[w40](../experiments/EXP-0528-death-lifecycle/evidence/w40-actor-sync.txt),
+[w58](../experiments/EXP-0528-death-lifecycle/evidence/w58-stage-tail.txt),
+[w59](../experiments/EXP-0528-death-lifecycle/evidence/w59-stage-dispatch.txt),
+[w62](../experiments/EXP-0528-death-lifecycle/evidence/w62-actor-create-update.txt),
+[w22](../experiments/EXP-0528-death-lifecycle/evidence/w22-client-unit-driver.txt),
+[w57](../experiments/EXP-0528-death-lifecycle/evidence/w57-actor-message-sender.txt).

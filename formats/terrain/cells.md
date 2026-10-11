@@ -47,7 +47,7 @@ slot including Wall of Earth, and two reads with no recompute between them divid
 resets the byte from `+0x00`, or from `CostCracked` on the footprint-clearing arm (`TERR-STRUCT-071`), and shifts it left by two per non-null slot in 8 bits. A transit start reads
 the cost before any recompute of its cells, and the crossing recompute follows by at least one tick.
 No cost plane is saved: a loaded layered cell keeps the ingest byte until the next recompute, and a byte decayed to 0 reaches the two unguarded dividers. Two
-inline readers, `R0039` and `R1345`, divide by the byte with no zero guard.
+inline readers, `R0039` and `R1345`, divide by the byte with no zero guard. The every-actor-before-every-area-effect clause of MOVE-084 is retracted; its cost and crossing facts stated here stand. Global effects before normal actors is a Medium inference joining two High procedure-local orders; full-frame and pixel-paint order remain Unknown (AI-474, amended).
 
 **Who takes `+0x04` and who takes `+0x08`** (`TERR-CELLREC-146`). Not *ground* and *air*
 as such: the selector is the actor's movement-domain byte, read through `vt+0x20` in both directions

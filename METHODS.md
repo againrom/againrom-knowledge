@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
+Claims labelled: 3389. Observation: 95. Static analysis: 2824. Mixed: 470.
 
 ## Ledger ai
 
@@ -299,6 +299,10 @@ Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
 | AI-462 | static analysis | ✔ promoted |
 | AI-463 | static analysis | ✔ promoted |
 | AI-464 | static analysis | ✔ promoted |
+| AI-469 | static analysis | ● active (branch candidate) |
+| AI-470 | static analysis | ● active (branch candidate) |
+| AI-471 | static analysis | ● active (branch candidate) |
+| AI-474 | static analysis | ● active (amended, branch candidate) |
 
 ## Ledger alm
 
@@ -554,6 +558,9 @@ Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
 | ANIM-155 | static analysis | ✔ promoted |
 | ANIM-156 | static analysis | ✔ promoted |
 | ANIM-157 | static analysis | ✔ promoted |
+| ANIM-164 | static analysis | ● active (branch candidate) |
+| ANIM-166 | mixed | ● active (branch candidate) |
+| ANIM-163 | static analysis | ● active (branch candidate) |
 
 ## Ledger databin
 
@@ -1097,6 +1104,8 @@ Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
 | MAGIC-293 | static analysis | ✔ promoted |
 | MAGIC-294 | static analysis | ✔ promoted |
 | MAGIC-295 | mixed | ✔ promoted |
+| MAGIC-297 | static analysis | ● active (branch candidate) |
+| MAGIC-298 | static analysis | ● active (branch candidate) |
 
 ## Ledger menu
 
@@ -1328,7 +1337,7 @@ Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
 | MOVE-081 | static analysis | ● active |
 | MOVE-082 | static analysis | ● active |
 | MOVE-083 | static analysis | ● active |
-| MOVE-084 | static analysis | ● active |
+| MOVE-084 | static analysis | ● active (partially retracted) |
 | MOVE-085 | static analysis | ● active |
 | MOVE-086 | static analysis | ● active |
 | MOVE-087 | static analysis | ● active |
@@ -1364,6 +1373,9 @@ Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
 | MOVE-132 | static analysis | ✔ promoted |
 | MOVE-133 | static analysis | ✔ promoted |
 | MOVE-134 | static analysis | ✔ promoted (amended, partially retracted) |
+| MOVE-135 | static analysis | ● active (branch candidate) |
+| MOVE-136 | static analysis | ● active (branch candidate) |
+| MOVE-137 | static analysis | ● active (branch candidate) |
 
 ## Ledger pal
 

@@ -739,7 +739,7 @@ quoted instruction is asserted byte for byte on both editions' `rom.exe`, which 
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MOVE-084 | A transit start reads the cell costs with R1088 before any R0453 recompute, and every actor tick runs before every area-effect tick; the recompute comes later, at the cell-crossing step. | High / Medium / Unknown | ● active | [EXP-0434](../experiments/EXP-0434-area-cost-order/) |
+| MOVE-084 | A selected transit start reads cell costs before crossing recompute; the former every-actor-before-every-area-effect clause is retracted. | High / Medium / Unknown | ● active (partially retracted) | [EXP-0434](../experiments/EXP-0434-area-cost-order/); [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
 | MOVE-085 | R1087 divides a layered cell's cost byte by four once per read, whatever the layer count, Wall of Earth included; two reads with no recompute between them divide twice, and no call-graph edge forbids that. | High / Medium / Unknown | ● active | [EXP-0434](../experiments/EXP-0434-area-cost-order/) |
 | MOVE-086 | The cost byte is restored from payload+0 or the CostCracked constant and no cost plane is saved, so a loaded layered cell keeps its ingest value until a recompute; two inline readers divide by it with no zero guard, and decay can zero it. | High / Medium / Unknown | ● active | [EXP-0434](../experiments/EXP-0434-area-cost-order/) |
 
@@ -787,7 +787,7 @@ R1078, the layer add and removal, has one root, R0629, in `+0x18` of the vtable 
 R0637 when the word at `+0x4c` reaches 0 (`L05599`, `L03058`).
 
 **Confidence.** High for the call order inside R0054, the dynamic-plane stores of the claim
-routines, the getter bodies and the tick order, each a quoted instruction. Medium for the absence of
+routines, the getter bodies and the transient-list-before-effect call order, each a quoted instruction. Medium for the absence of
 a direct-call chain from the claim routines to R0453, since each makes two indirect calls
 that are not followed, and for the closures
 and the cell-crossing bound: the instrument is direct `CALL rel32` plus aligned data dwords, so
@@ -796,8 +796,10 @@ the actor vtables' objects and the direction tables at `world+0x58eb0` and `worl
 immediates written by the world constructor, are not re-read here. The sub-cell bound assumes their
 entries have magnitude at most 1.
 
-**Unknown.** Observed ticks. An effect added to the area list during the actor walk of the same
+**Unknown.** Observed ticks. An effect added to the area list during the quoted manager+0x2c walk of the same
 tick. On which tick of a transit the crossing falls, which depends on the speed.
+
+**Amended.** The every-actor-before-every-area-effect clause is partially retracted. AI-474 (amended) supports global effects before the normal actor walk as a composed inference at Medium, joining two High procedure-local orders; full-frame and paint order remain Unknown. The `this+0x2c` walk quoted here is a separate transient population. Transit-start cost, dynamic-plane stores and crossing/recompute facts and their grades stand. See [retracted.md](retracted.md#exp-0528-normal-actor-order).
 
 ### MOVE-085
 
@@ -1633,3 +1635,68 @@ headers at actor+0x15c/+0x178. That probe has not been run.
 [`retracted.md`](retracted.md). The supported release guard, conditional
 claim-field clears and local recentre facts stand. Complete death aftermath
 remains Medium; route-list cleanup across unexpanded callees remains Unknown.
+
+## Death and departure lifecycle
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-135 | The selected footprint removal caches Position before death recenter and clears reservation words only after successful cell releases and a nonzero different reservation cell. | High | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+| MOVE-136 | Death teardown sets terminal action and centers the retained cell; map departure instead sets off-map bit8 and unlinks the normal actor without directly resetting its pending order or strike fields. | High / Medium | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### MOVE-135
+
+`R0865` visits the current footprint through `R0057`. A zero return exits before reservation cleanup. A nonzero Mover word `+a6` different from Position word `+2` calls `R0046`, then zeros Mover words `+a6/+80/+76`; equal or zero skips these stores. `R0046` clears domain bits 0x40/0x80 only outside the current footprint. The caller `R0208` ignores release failure and then calls `R0866`.
+
+The complete cell-release body clears its selected nonempty occupancy slot without comparing it with the actor pointer. It recomputes planes through `R0453`, optionally restores base planes/hash state, and caches Position bytes into Mover `+86..+89` before the later recenter. This does not guarantee that a released slot was owned by the supplied actor.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries.
+
+**Unknown.** Partial-release repair and callback effects outside these bodies. Close reached virtual/container callbacks and trace a failed footprint release to settle whole-map behavior.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w03-cell-release.txt](../experiments/EXP-0528-death-lifecycle/evidence/w03-cell-release.txt), [w04-remove-motion.txt](../experiments/EXP-0528-death-lifecycle/evidence/w04-remove-motion.txt), [w12-claim-clear.txt](../experiments/EXP-0528-death-lifecycle/evidence/w12-claim-clear.txt), [w13-cell-recompute.txt](../experiments/EXP-0528-death-lifecycle/evidence/w13-cell-recompute.txt), [w02-death-teardown.txt](../experiments/EXP-0528-death-lifecycle/evidence/w02-death-teardown.txt), [w61-recenter.txt](../experiments/EXP-0528-death-lifecycle/evidence/w61-recenter.txt)
+
+### MOVE-136
+
+`R0208` writes actor policy `+50` and action `+54` to 0x10, removes the footprint through `R0865`, then centers Position through `R0866`. Base Unit virtual death cleanup `+44` is `R0980`, a RET. Human `R0981` strips equipment indexes 1..12. Neither virtual body directly resets Orders or frees routes.
+
+`R0121` first tests actor `+4c` bit8, calls footprint removal, sets bit8, unlinks the actor through `R1133`, and emits two0x74 updates. Its direct stores retain identity `+4`, HP, policy, strike phase `+58`, target `+5c`, countdown `+6c` and Orders. Return entries `R0122/R0123` place, append and clear bit8 without calling the allocator. MOVE-133 supplies the selected dead-HP executor exclusion and countdown replacement. On the measured normal actor walker, an unlinked actor no longer advances its retained strike.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries. Medium for the composed lifecycle or eligible-evaluation result across callbacks; native occurrence is not measured.
+
+**Unknown.** All tick callers, list-helper callbacks, return-time execution and complete death/departure order retention. Follow those callbacks and remaining actor-tick callers. MOVE-134 route-free clause remains retracted.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w02-death-teardown.txt](../experiments/EXP-0528-death-lifecycle/evidence/w02-death-teardown.txt), [w05-leave-return.txt](../experiments/EXP-0528-death-lifecycle/evidence/w05-leave-return.txt), [w08-actor-vtables.txt](../experiments/EXP-0528-death-lifecycle/evidence/w08-actor-vtables.txt), [w10-unit-virtual-cleanup.txt](../experiments/EXP-0528-death-lifecycle/evidence/w10-unit-virtual-cleanup.txt), [w36-human-death-strip.txt](../experiments/EXP-0528-death-lifecycle/evidence/w36-human-death-strip.txt), [w14-actor-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w14-actor-manager.txt), [w33-actor-death-tick.txt](../experiments/EXP-0528-death-lifecycle/evidence/w33-actor-death-tick.txt), [w61-recenter.txt](../experiments/EXP-0528-death-lifecycle/evidence/w61-recenter.txt)
+
+## Actor destruction boundary
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-137 | The measured Unit destructor passes its Mover and Orders to separate cleanup callees and zeros both actor pointers; internal route-node disposal remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### MOVE-137
+
+Scalar destructor `R2201` calls the complete Unit body `R1136`, then
+conditionally frees the actor on argument bit 1. Unit `R1136` passes nonzero
+Mover `+154` to `R0525` at `L14306`, then zeros `+154` at `L14307`.
+It passes nonzero Orders `+158` to `R1379` with argument 1 at `L14308`,
+then zeros `+158` at `L14309`. These steps occur after special object cleanup
+and before remaining owned-object and embedded-container cleanup.
+
+This is object destruction, separate from the death virtual slot and footprint
+removal in MOVE-136. The generic list clear `R0251` resets its own list
+fields, but the measured destructor/footprint bodies do not establish a route
+path into it. MOVE-134's route-free clause remains retracted. No internal
+static/dynamic route-node disposal is inferred from the cleanup call names.
+
+**Confidence.** High for complete local destructor call order and pointer stores.
+The weakest dependency is the scalar-destructor-to-Unit-body link and the known
+Mover/Orders field identity. Unknown for the unexpanded cleanup callees.
+
+**Unknown.** The `R0525` and `R1379` closure, static/dynamic route node
+ownership and when destruction follows corpse/departure. Follow these exact
+callees through route headers and frees, plus all destruction callers, to settle it.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md),
+[w45](../experiments/EXP-0528-death-lifecycle/evidence/w45-unit-scalar-destructor.txt),
+[w60](../experiments/EXP-0528-death-lifecycle/evidence/w60-unit-destructor.txt),
+[w67](../experiments/EXP-0528-death-lifecycle/evidence/w67-route-list-clear.txt).

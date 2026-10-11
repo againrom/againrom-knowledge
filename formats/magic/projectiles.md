@@ -415,3 +415,32 @@ ascending points. Later stamps blend with current earlier output and clip
 each rectangle separately. Native clip/stride/tables, packing, current
 collection and pre-draw framebuffer are additional reproduction inputs.
 — MAGIC-280
+
+## Prepared effect lifetime
+
+The global effect manager clears source attribution on source-owner loss and
+still calls the tick. PointEffect separately clears its child source under
+that owner test, retains its victim pointer and locally gates actor delivery
+on victim owner, without HP/range/off-map tests. Transport countdown expiry
+has no local caster-HP gate. Pointer safety and reached virtual side effects
+remain Unknown. — MAGIC-297
+
+Actor-cast expiry uses current actor `+5c`, with the same distinction between
+queued victim and current latch as physical expiry. A client word-ID reuse
+does not itself change a retained simulation pointer. — AI-471, ANIM-164
+
+Existing global effects before normal actors is a composed inference at
+Medium. The two procedure-local orders are High. Insertion during the walk,
+full-frame and pixel-paint timing remain Unknown. The measured EN/RU
+executable is one shared code witness; unsearched data/runtime outcomes
+remain Unknown. — AI-474 (amended), ANIM-166
+
+The selected client stage 5 branch unlinks and deletes its actor drawable;
+stages 2..4 use a shared arm. The selected creation/update path
+writes its supplied drawable on key hit as well as miss. Upstream allocation,
+the complete sender/decoder link and native timing remain Unknown. — ANIM-163
+
+The selected actor-cast policy uses a nonnull target directly and queues it
+in Orders `+28`, without local HP, terminal-action or off-map rejection.
+Null target uses acquisition. Caller eligibility and pointer lifetime remain
+Unknown. — MAGIC-298

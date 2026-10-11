@@ -1314,3 +1314,9 @@ on evidence already committed.
 | Claim | Verbatim clause | Original confidence | Evidence | Correction | Verdict |
 |---|---|---|---|---|---|
 | `MOVE-134` (the route-list freeing clause only) | "Removal frees the route lists, then releases the current footprint." | High / Medium | [EXP-0526](../experiments/EXP-0526-motion-executor/) | The complete committed `R0865` body establishes footprint release and guarded claim clear, not route-list freeing. The route-free clause is withdrawn. Identity, release guard and local recentre facts stand; complete death aftermath remains Medium. Route-list cleanup across unexpanded callees is Unknown; trace reached release/claim-clear and virtual teardown callees through downstream route-header reset/free operations to settle it. | **RETRACTED** |
+
+## EXP-0528 normal actor order
+
+| Claim | Previous clause | Previous confidence | Overturned by | What the evidence says | Verdict |
+|---|---|---|---|---|---|
+| `MOVE-084` (every-actor-before-every-area-effect clause only) | "and every actor tick runs before every area-effect tick" | High | [EXP-0528](../experiments/EXP-0528-death-lifecycle/), AI-474 | The quoted `R0426` walk is the transient list at manager+0x2c, locally before `R0641` (High). `R0193` locally calls `R0426` before normal actors `R0427` (High). Their joined global-effect-before-normal-actor order is a composed inference at Medium; full-frame and paint order remain Unknown. The withdrawn clause stays retracted. Transit-cost, dynamic-plane stores and crossing/recompute clauses and their grades stand. | **REFUTED** — partially retracted |

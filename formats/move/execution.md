@@ -375,3 +375,28 @@ These local branches are High; later repairs and other-actor consequences
 remain Unknown. The route-list freeing clause of MOVE-134 is withdrawn;
 route-list cleanup across unexpanded callees remains Unknown, and complete
 death aftermath remains Medium. — MOVE-134, MOVE-095, MOVE-089
+
+## Death and map departure fields
+
+Footprint release caches Position before recenter. A release refusal skips the
+reservation tail; success clears words `+a6/+80/+76` only when the nonzero
+reservation differs from the retained current cell. Occupancy clearing selects
+a nonempty slot without comparing its actor pointer. — MOVE-135
+
+Death teardown selects action/policy `0x10` and centers the retained cell.
+Departure instead sets off-map bit8 and unlinks the normal actor without direct
+stores to its queued order, current strike target, phase or countdown. Return
+bodies place, append and clear bit8. Complete callback cleanup and all tick
+callers remain Unknown. — MOVE-136
+
+Inside `R0193`, `R0426` precedes normal-actor manager
+`R0427` (High). Inside `R0426`, the manager `+2c` list precedes
+global-effect manager `R0641` (High). Joining these local orders gives
+manager `+2c`, global effects, then normal actors (Medium). Terminal actors
+are reaped immediately after their own slot. The every-actor-before-every-area-effect
+clause of MOVE-084 is retracted; its transit-cost and crossing facts stand.
+Full-frame and pixel-paint order remain Unknown. — AI-474 (amended)
+
+The measured Unit destructor passes Mover `+154` and Orders `+158` to separate
+cleanup callees and zeros both pointers. Internal static/dynamic route-node
+disposal and destruction timing remain Unknown. — MOVE-137

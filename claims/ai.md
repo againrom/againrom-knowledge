@@ -3943,3 +3943,88 @@ an additional local HP/off-map gate; it does not enumerate pointer clearing.
 **Unknown.** Whether other death, teardown or departure paths clear or
 invalidate another actor's +0x5c before expiry. A native pointer-lifetime
 trace, or complete static teardown closure, is required.
+
+## Death and departure lifecycle
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-469 | The selected attack/follow policy precheck reacts to target action0x10, not HP death or off-map bit8, and stands the actor down without directly zeroing its queued target or active strike pointer. | High / Medium | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+| AI-470 | The selected normal actor manager clears source attribution on owner loss but has no direct sweep of other actors' order targets; acquisition can retain a corpse alternative. | High / Unknown | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+| AI-471 | A selected attack setter changes the queued victim but retains the current strike latch; expiry uses current actor+5c, which the executor acquisition tail can relatch without clearing phase or countdown. | High / Medium | ● active (branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+| AI-474 | Two local orders and the client sweep are High; manager `+2c`, global effects, then normal actors is a Medium composed inference; full-frame and paint order remain Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-0528](../experiments/EXP-0528-death-lifecycle/) |
+
+### AI-469
+
+`R0008` reads Orders victim `+c` for policy 3 and follow target `+10` for policies8/0x11. A nonnull target with action `+54=0x10` invokes `R0007`, selects own policy `+50=0xc`, clears pending Orders command `+8`, sets Orders `+50=1` and anchors Orders word0 to the current cell. These branches do not directly zero the retained target or actor `+5c`, and do not test HP or off-map bit8.
+
+The 27-entry dispatch table at `L00322` binds the named policy arms. `R0009` attack and `R0138/R0139` follow remain separate local policies. A dying target whose action is 0 does not satisfy the terminal-action check. The reaction is on an eligible policy evaluation, not a demonstrated next-game-tick notification.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries. Medium for the composed lifecycle or eligible-evaluation result across callbacks; native occurrence is not measured.
+
+**Unknown.** Complete eligible evaluation cadence and any reference notification through departure/list callbacks. Trace group evaluation and all target invalidation callers to settle timing.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w41-actor-policy.txt](../experiments/EXP-0528-death-lifecycle/evidence/w41-actor-policy.txt), [w66-actor-policy-dispatch.txt](../experiments/EXP-0528-death-lifecycle/evidence/w66-actor-policy-dispatch.txt), [w30-attack-policy.txt](../experiments/EXP-0528-death-lifecycle/evidence/w30-attack-policy.txt), [w68-follow-policy.txt](../experiments/EXP-0528-death-lifecycle/evidence/w68-follow-policy.txt), [w69-follow-policy-alt.txt](../experiments/EXP-0528-death-lifecycle/evidence/w69-follow-policy-alt.txt), [w50-order-reset.txt](../experiments/EXP-0528-death-lifecycle/evidence/w50-order-reset.txt), [w47-ai-step.txt](../experiments/EXP-0528-death-lifecycle/evidence/w47-ai-step.txt)
+
+### AI-470
+
+`R0427` clears actor attribution `+40` when its referred actor's owner `+14` is zero. It invokes each nonterminal actor slot, then immediately reaps terminal action0x10 through player/group unlink, active-list unlink and corpse-list append. Its body contains no sweep that zeros another actor's `+5c`, Orders `+c/+10/+28`, or a PointEffect victim.
+
+`R0004` partitions candidates with signed HP<1 into a corpse list and can select from that list when the live list is empty. `R0021` provides owner/diplomacy/visibility filtering, not a local HP gate. Departure retains the simulation actor identity and raw pointers in its direct body. Absence of a direct sweep is bounded to the named bodies, not their entire callback closure.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries. Unknown for the whole-lifetime or scheduling alternatives named below.
+
+**Unknown.** Other actors' notification and raw-pointer lifetime across all removal/destructor callbacks. Close those callbacks and every referring pointer owner before inferring global retention or safety.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w14-actor-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w14-actor-manager.txt), [w32-target-acquire.txt](../experiments/EXP-0528-death-lifecycle/evidence/w32-target-acquire.txt), [w42-candidate-filter.txt](../experiments/EXP-0528-death-lifecycle/evidence/w42-candidate-filter.txt), [w44-group-member-remove.txt](../experiments/EXP-0528-death-lifecycle/evidence/w44-group-member-remove.txt), [w05-leave-return.txt](../experiments/EXP-0528-death-lifecycle/evidence/w05-leave-return.txt)
+
+### AI-471
+
+`R0006` calls `R0007` for selected actors, then its valid attack branch sets policy 3, Orders victim `+c`, range and pending command 0. Neither complete body directly writes actor target `+5c`, phase `+58`, countdown `+6c` or Orders progress `+9`. Physical expiry at `L05241` and actor-cast expiry at `L14302` read current actor `+5c`, not the queued victim or a release-time immutable pointer.
+
+Executor `R0016` has a tail conditional on Mover refusal `+98` that calls `R0004`. Its in-position selected target reaches `R0005`, which writes Orders progress1/age0, actor action3 and actor `+5c=Orders+c`, without a phase/countdown store. Therefore local retention by the input setter does not establish an unconditional old-target guarantee.
+
+**Confidence.** High for the named local stores, branch predicates and call order. The weakest new dependency is aligned x86 decoding and the selected branch/table identity; the committed windows preserve those boundaries. Medium for the composed lifecycle or eligible-evaluation result across callbacks; native occurrence is not measured.
+
+**Unknown.** Feasibility and occurrence of tail relatching during a concrete pending strike under a replacement input. Execute a bounded synthetic command/executor/expiry state, then test native occurrence if runtime is authorized.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w49-attack-setter.txt](../experiments/EXP-0528-death-lifecycle/evidence/w49-attack-setter.txt), [w50-order-reset.txt](../experiments/EXP-0528-death-lifecycle/evidence/w50-order-reset.txt), [w28-executor.txt](../experiments/EXP-0528-death-lifecycle/evidence/w28-executor.txt), [w32-target-acquire.txt](../experiments/EXP-0528-death-lifecycle/evidence/w32-target-acquire.txt), [w31-attack-load.txt](../experiments/EXP-0528-death-lifecycle/evidence/w31-attack-load.txt), [w35-physical-expiry.txt](../experiments/EXP-0528-death-lifecycle/evidence/w35-physical-expiry.txt)
+
+### AI-474
+
+`R0147` uses pre-increment phase6 for AI `R0076`, phase12 for
+live/corpse service and owner detachment, then invokes subtick `R0193`.
+Inside that subtick, the counter increment and command drain precede
+`R0426`, which precedes normal-actor manager `R0427` and flush
+`R0611`. Inside `R0426`, the manager `+2c` list precedes
+global-effect manager `R0641`. These are two separate High local orders.
+Joining them gives manager `+2c`, global effects, then normal actors as a
+composed inference at Medium. Attached effects locally precede each actor's
+HP/order processing. The manager reaps a terminal actor immediately after its
+slot. An existing global effect before an ordinary actor's death check is part
+of the Medium composition.
+
+The two read paced handlers execute server step, message dispatch and
+synchronous 0x401. The complete client sweep `R0334` runs actor drivers,
+deferred hash unlink/deletion, surviving actor postpass and then projectile
+drivers. This single-listing sequence is High. The postpass is not established
+as pixel paint. MOVE-084's every-actor-before-area-effect clause is retracted;
+its transient-list evidence did not identify the normal actor walk.
+
+**Confidence.** High for the procedure-local orders in w15 and w26, the
+complete client sequence in w21, and the other named local stores, branches
+and orders. Medium for joining w15 and w26 into the three-stage simulation
+order. No retained High needs a scan hit set or negative after the six-scan
+limit; the committed listings remain within the window budget. Unknown for
+the full-frame and lifetime alternatives below.
+
+**Unknown.** Full-frame order, other paced modes, complete dispatch-to-sweep
+linkage, all AI/tick callers, insertion during iterator walks and actual paint
+order. Trace these paths separately; SESS-PACE-018 supplies bounded mode
+differences.
+
+**Amended.** The joined simulation order is narrowed from High to a composed
+inference at Medium. The two procedure-local orders and the complete client
+sweep keep High. MOVE-084's withdrawn actor-before-effect clause stays
+retracted; its retained cost/crossing grades stand.
+
+**Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w15-subtick-body.txt](../experiments/EXP-0528-death-lifecycle/evidence/w15-subtick-body.txt), [w16-phase-stepper.txt](../experiments/EXP-0528-death-lifecycle/evidence/w16-phase-stepper.txt), [w26-transient-effect-step.txt](../experiments/EXP-0528-death-lifecycle/evidence/w26-transient-effect-step.txt), [w27-effect-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w27-effect-manager.txt), [w14-actor-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w14-actor-manager.txt), [w21-client-sweep.txt](../experiments/EXP-0528-death-lifecycle/evidence/w21-client-sweep.txt), [w25-paced-play.txt](../experiments/EXP-0528-death-lifecycle/evidence/w25-paced-play.txt)
