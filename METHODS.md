@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3434. Observation: 95. Static analysis: 2866. Mixed: 473.
+Claims labelled: 3443. Observation: 95. Static analysis: 2875. Mixed: 473.
 
 ## Ledger ai
 
@@ -1159,10 +1159,10 @@ Claims labelled: 3434. Observation: 95. Static analysis: 2866. Mixed: 473.
 | MENU-070 | static analysis | ● active |
 | MENU-071 | static analysis | ● active |
 | MENU-072 | static analysis | ● active |
-| MENU-073 | static analysis | ● active |
-| MENU-074 | static analysis | ● active |
+| MENU-073 | static analysis | ● active (amended) |
+| MENU-074 | static analysis | ● active (amended) |
 | MENU-075 | static analysis | ● active |
-| MENU-076 | static analysis | ● active |
+| MENU-076 | static analysis | ● active (partially retracted, amended) |
 | MENU-077 | static analysis | ● active |
 | MENU-078 | static analysis | ● active |
 | MENU-079 | static analysis | ● active |
@@ -1222,6 +1222,12 @@ Claims labelled: 3434. Observation: 95. Static analysis: 2866. Mixed: 473.
 | MENU-144 | static analysis | ✔ promoted (branch candidate) |
 | MENU-145 | static analysis | ✔ promoted (branch candidate) |
 | MENU-146 | static analysis | ✔ promoted (branch candidate) |
+| MENU-147 | static analysis | ● active (branch candidate) |
+| MENU-148 | static analysis | ● active (branch candidate) |
+| MENU-149 | static analysis | ● active (branch candidate) |
+| MENU-150 | static analysis | ● active (branch candidate) |
+| MENU-151 | static analysis | ● active (branch candidate) |
+| MENU-152 | static analysis | ● active (branch candidate) |
 
 ## Ledger mission
 
@@ -3591,8 +3597,8 @@ Claims labelled: 3434. Observation: 95. Static analysis: 2866. Mixed: 473.
 | VIDEO-082 | static analysis | ● active |
 | VIDEO-083 | static analysis | ● active |
 | VIDEO-084 | static analysis | ● active |
-| VIDEO-075 | static analysis | ● active |
-| VIDEO-076 | static analysis | ● active |
+| VIDEO-075 | static analysis | ● active (partially retracted, amended) |
+| VIDEO-076 | static analysis | ● active (amended) |
 | VIDEO-077 | static analysis | ● active |
 | VIDEO-078 | static analysis | ● active |
 | VIDEO-079 | static analysis | ● active |
@@ -3603,3 +3609,6 @@ Claims labelled: 3434. Observation: 95. Static analysis: 2866. Mixed: 473.
 | VIDEO-SFX-089 | static analysis | ● active |
 | VIDEO-SFX-090 | static analysis | ● active |
 | VIDEO-SFX-091 | static analysis | ● active |
+| VIDEO-093 | static analysis | ● active (branch candidate) |
+| VIDEO-094 | static analysis | ● active (branch candidate) |
+| VIDEO-095 | static analysis | ● active (branch candidate) |

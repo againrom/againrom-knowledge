@@ -879,23 +879,25 @@ Registry values named here sit under `HKLM\SOFTWARE\1C\Allods` (TOWN-186). The d
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| VIDEO-075 | The cutscene list (message `0x436`, class `L12929`) shows `cutscene.txt` rows 0..N, N the registry dword at `L12930` (floor 2); OK plays that row's `cutpaths.txt` directory. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
-| VIDEO-076 | Among the nine request owners of the EXP-0229 census, the 21 music tracks form nine literal lists, one 12-entry list shared by every mission; no direct reference copies the registry `SoundRandom` value to the player. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
+| VIDEO-075 | The cutscene list (message `0x43b`, class `L12929`) shows `cutscene.txt` rows 0..N, N the registry dword at `L12930` (floor 2); OK plays that row's `cutpaths.txt` directory. | High / Medium | ● active (partially retracted, amended) | [EXP-0457](../experiments/EXP-0457-settings/), [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| VIDEO-076 | Among the nine request owners of the EXP-0229 census, the 21 music tracks form nine literal lists, one 12-entry list shared by every mission; no direct reference copies the registry `SoundRandom` value to the player. | High / Medium | ● active (amended) | [EXP-0457](../experiments/EXP-0457-settings/), [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
 | VIDEO-077 | Shadows, Dynamic lighting, Object animations and Smoothing are 0/1 dwords defaulting to 1, cleared by command-line switches and replaced by a registry load that runs later; they persist with nine other option values. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
 
 ### VIDEO-075
 
-The campaign arm `L12931` handles message `0x436`; the message is posted at `L12932` by an arm whose own trigger was not traced. The arm does nothing when the byte `[L12933]` is 0. The byte's image initial value is 1, so the gate is open unless something clears it; the only store found by the 4-byte sweep is 1 at `L12934`, in the video-resource setup of the application start (`L07629`..`L12934`).
+The campaign arm `L12931` handles message `0x43b` (VIDEO-094). The former `0x436` identification is retracted. The arm does nothing when the byte `[L12933]` is 0. The byte's image initial value is 1, so the gate is open unless something clears it; the only store found by the 4-byte sweep is 1 at `L12934`, in the video-resource setup of the application start (`L07629`..`L12934`).
 
 The arm fills a string array with `cutscene.txt` rows 0 to N inclusive, through accessor `R0668` on the table object `L11471` (loaded from that file at `L11469`). N is the dword `L12930`. It is read from the registry value named `Using VxD` (`L12935`), raised to 2 when lower (`L12936`, `L12937`), and written back at save (`L12938`). The arm then builds the dialog `L12939` (arguments `(0x11, 100, 30, 540, 450, ...)`, a 440 by 420 rectangle; MENU-077). The dialog's builder `L12940` adds a list box (`R1183`, id 2, initial row `[L12941]`) and a scrollbar (`R1185`, id `0x29b`).
 
-On OK (`0x445`) the handler stores the selected row at `[L12941]` (`L12942`) and calls the cutscene routine `R1658` with it. That routine saves the settings (`L12943`), then forms the path `%s\%s\%02d.smk` from the video directory string `L07641`, the row's `cutpaths.txt` text (object `L11472`) and a part number from 1 to 99 (`L12944`, `L12945`). A part that cannot be opened is skipped; a part whose playback routine `R0719` returns 0 ends the sequence. When called with row -1, the routine builds `m%d` from the current mission number (campaign `+0x660`), compares it with each `cutpaths.txt` row (`R0751`) and, on a match at row k, plays row k and raises `L12930` to k when it is lower (`L12946`..`L12947`). **Medium:** N is then a high-water mark of the `cutpaths.txt` row of the mission movies played, with a floor of 2; the callers that pass -1 were not traced.
+On OK (`0x445`) the handler stores the selected row at `[L12941]` (`L12942`) and calls the cutscene routine `R1658` with it. That routine saves the settings (`L12943`), then forms the path `%s\%s\%02d.smk` from the video directory string `L07641`, the row's `cutpaths.txt` text (object `L11472`) and a part number from 1 to 99 (`L12944`, `L12945`). A part that cannot be opened is skipped; a part whose playback routine `R0719` returns 0 ends the sequence. When called with row -1, the routine builds `m%d` from the current mission number (campaign `+0x660`), compares it with each `cutpaths.txt` row (`R0751`) and, on a match at row k, plays row k and raises `L12930` to k when it is lower (`L12946`..`L12947`). N is a high-water mark raised by a matched mission-movie attempt before video open, with a floor of 2 (VIDEO-095). The former successful-playback condition is retracted; complete callers remain bounded.
 
 The two tables have 14 rows each on both roots (TEXT-100). The video directory string is `video4` or `video8`; the `-8x` and `-4x` tests (`L12948`..`L12949`) choose between them, and the rule was not traced further. Archive contents are VIDEO-074.
 
-**Confidence.** **High** for the arm, the list source and bound, the floor, the persistence and the path format. **Medium** that the menu is the owner's media menu (it is the only list dialog that reads a movie table), and for the high-water-mark reading, because the callers that pass -1 were not traced.
+**Confidence.** **High** for the arm, the list source and bound, the floor, the persistence and the path format. **Medium** that the menu is the owner's media menu (it is the only list dialog that reads a movie table). The amended local attempt/high-water branch and bounded direct callers are VIDEO-095.
 
-**Unknown.** The poster of `0x436`. The caller set of `R1658`. What sets `[L12933]` besides `L12934`'s branch condition. Whether N can exceed 13: no clamp was found, and the scan raises it only to a matched row index.
+**Unknown.** The exact initial player action for the corrected `0x43b` sender (VIDEO-094), and the complete indirect caller set of `R1658` (VIDEO-095). What sets `[L12933]` besides `L12934`'s branch condition. Whether N can exceed 13: no clamp was found, and the scan raises it only to a matched row index.
+
+**Amended.** The message 0x436 and successful-playback high-water-mark clauses are REFUTED in retracted.md. VIDEO-094 establishes list message 0x43b and its named senders. VIDEO-095 establishes a matched -1 attempt before open, with the invocation save preceding the raise. Other source, geometry, path and bound facts retain their grades.
 
 ### VIDEO-076
 
@@ -903,11 +905,13 @@ Request lists are literals in nine owner routines. The nine owners, their addres
 
 A mission therefore has one list, shared by all missions (VIDEO-MUSIC-064). The other selection path in the recovered code is the numeric music-candidate selector of text markup (VIDEO-MUSIC-009). The Sound Options list shows the player's current candidate bank (VIDEO-OPTIONS-057), so in a mission it shows the 12 mission tracks. Progression is VIDEO-MUSIC-007: ordinary mode plays a randomized order and advances at stream end, fixed-source mode repeats the chosen candidate. The player constructor sets ordinary mode (`+0x20 = 1`).
 
-The stored `SoundRandom` value is `config+0` (default 0). Only four instructions in the image reference `L03126`: the registry load (`L03128`), the registry save (`L03129`), the static initialiser (`L03127`) and the Sound Options constructor call (`L03130`). None copies `config+0` to the player, so the value changes the player only when the Random Order checkbox is clicked (MENU-076); the checkbox is built unchecked from the default 0 while the player starts in ordinary mode.
+The stored `SoundRandom` value is `config+0` (default 0). Only four instructions in the image reference `L03126`: the registry load (`L03128`), the registry save (`L03129`), the static initialiser (`L03127`) and the Sound Options constructor call (`L03130`). None of these direct sites copies `config+0` to the player. A checkbox click applies it conditionally (MENU-152); exclusive application at click is not proved. The fresh default imports unchecked while the player constructor sets ordinary mode; stored values import into the checkbox and complete startup transfer remains Unknown (VIDEO-093).
 
 **Confidence.** **High** for the nine owners and their list sizes as the EXP-0229 census states them, and for the four references of `L03126` (`sweeps.py`: a 4-byte scan of the section bytes, plus the call-site scans for `R1230`, regenerated by `regen.sh`). **Medium** that no other per-mission selection exists: the claim is bounded by the nine owners and the markup selector. **Medium** for the unchecked-checkbox observation, which assumes no computed access to `config+0` (none was found among the direct references).
 
 **Unknown.** Case handling and the exact identity of the title lookup (`Mid(6)` then lowercase, then a dictionary at `L12950`). The consumer of player `+0x68` (MENU-075).
+
+**Amended.** VIDEO-093 narrows the direct-reference absence to the decoded sites and leaves computed startup transfer Unknown. MENU-152 distinguishes config preference, checkbox import and conditional player update.
 
 ### VIDEO-077
 
@@ -1224,3 +1228,107 @@ operations. No global caller/lifetime census is claimed.
 
 **Unknown.** Native clock wrap cadence, later caller retries/restarts,
 intervening world/view updates, device HRESULTs and actual audibility.
+
+## Cutscene dispatch and stored Random Order
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| VIDEO-093 | SoundRandom is loaded into config and imported by Sound Options; its zero fresh default does not itself prove player initialization, and clicks persist on a later settings save rather than at click or OK. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| VIDEO-094 | The read cutscene-list arm is message 0x43b, initially posted by R0820 and reposted after list OK; 0x436 selects another arm, and the initial player action remains unidentified. | High / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| VIDEO-095 | Only the read -1 branch can raise the cutscene row bound; it matches the current mission path and writes before video open, after that invocation saved settings; five decoded direct callers have bounded event identities. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+
+### VIDEO-093
+
+Load R0660 queries SoundRandom into config+0. Save L03134 writes
+that field. Wrappers R1985 and R1984 invoke load/save on L03126.
+The configuration field is virtual zero-fill and initializer R0658
+does not replace +0; VIDEO-077 supplies the fresh zero default and load
+ordering. The builder imports config+0 (MENU-152), so stored 0 or 1
+reaches the checkbox at build. The player's ordinary-mode constructor
+default 1 is a separate fact under VIDEO-076/VIDEO-MUSIC-007.
+
+The read click, OK and Esc arms contain no registry-save call. The linear
+.text scan records direct wrapper-save callers L12953 in teardown and
+L12943 in cutscene entry. Stored config therefore has an observed later
+save route; indirect save callers and process termination outcomes remain
+outside the traced population.
+
+The scan records four decoded references to the exact address L03126:
+L03128, L03129, L03127 and L03130. Direct setter callers are
+L14385 (checkbox) and L14386 (row setter using player mode). No
+direct copy from config into player initialization occurs in these sites.
+Computed aliases, pointer tables, skipped code and bulk copies are not
+closed; the stored value's exclusive application at click is not proved.
+
+**Confidence.** High for the read load/save and checkbox import. Medium
+for fresh-default interpretation, decoded caller/reference absence and
+deferred persistence beyond local click/OK. EN/RU share this executable.
+
+**Unknown.** Full startup transfer and indirect save timing. Trace fresh,
+stored 0 and stored 1 at launch, dialog build, click, track replacement and
+normal exit, then reopen the original profile, to settle them. No profile
+or registry was read or modified here.
+
+### VIDEO-094
+
+The custom dispatcher subtracts 0x416, bounds the result at 0x6f and
+uses byte selectors at L12997 into targets L12998. The committed
+tables map 0x43b to L12931 and 0x436 to L14384. The latter is not
+the list builder. At L14387 the 0x432 arm posts 0x436; it cannot serve
+as the list poster claimed in the withdrawn clause of VIDEO-075.
+
+Routine R0820 reads this+0xdc, bounds selector at 7 and dispatches.
+At L14388 it tests bit 4 of this+0xe4; with that bit clear it selects
+EDI=0x43b at L14389. Its common tail obtains the application's
+window through virtual +0x7c, loads HWND+0x1c and posts EDI with zero
+parameters at L14390. The table at L14391 was not read as data, so
+the numeric selector of this arm is not asserted.
+
+The list's OK close path L12942 stores selected row L12941, calls
+R1658 at L14392 and reposts 0x43b at L14393. It rebuilds rows
+0..N inclusive, so N is the maximum included row index, not the number
+of displayed rows (VIDEO-075, amended; TEXT-100 gives 14 source rows).
+
+**Confidence.** High for the two-table mapping, the named sender branch,
+post target and rebuild post. No exhaustive poster enumeration is claimed.
+
+**Unknown.** Initial selector number, UI label and exact input action;
+upstream caller/vtable and the sender switch data are unread. Owner action:
+activate the original main-menu movie-list entry while tracing R0820,
+selector+0xdc and message 0x43b. Other computed posters remain unexcluded.
+
+### VIDEO-095
+
+At L12943 the player first calls settings save R1984. For argument
+-1 it formats m%d using campaign+0x660 and matches cutpaths rows.
+A match k raises unsigned dword L12930 when lower, at L12947,
+before video-open R0535. Positive row selection does not execute that
+write. Thus a matching attempt can unlock a row even if no video part
+opens; successful viewing is not a prerequisite. The save in this
+invocation precedes the increase, so it does not persist the new value.
+
+| Direct CALL site | Argument | Read event/condition |
+|---|---|---|
+| L14394 | EBX, unresolved here | startup movie path; incoming EBX value not closed |
+| L14395 | 1 | custom message 0x425 |
+| L14396 | -1 | custom message 0x41d; bypass phases 0/1/3, otherwise requires +0x3bc nonzero |
+| L14397 | 2 | non-Cancel result of dialog field +0x358, phase 2 |
+| L14392 | selected row | list OK; then repost 0x43b |
+
+The 0x41d route invokes transition helpers R0809, R1302,
+R0826 and R1660 before the -1 call. Interpreting it as a mission
+transition is Medium; its exact menu/action label is not in this window.
+The read non--1 arguments 1, 2 and selected row do not raise the bound.
+The startup EBX is not assigned a value by the selected caller slice.
+
+**Confidence.** High for the local -1 branch, raise/open/save ordering,
+known arguments and message mappings. Medium for five decoded direct
+caller coverage and mission-transition interpretation. Linear decoding,
+indirect callers and bulk writes do not establish a closed caller/writer set.
+
+**Unknown.** Full caller set, exact player labels of 0x425/0x41d and
+dialog+0x358, startup argument, and when a newly raised bound reaches the
+registry beyond a later named save. Owner action: begin/finish a mission
+with a matching movie, including missing-video failure, trace argument and
+L12930, open the list, exit normally and relaunch. Source rows/default
+floor/persistence fields remain VIDEO-075, with its false clauses retracted.

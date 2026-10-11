@@ -68,7 +68,14 @@ Track down and drag use that mapping. Endcaps and focused Left/Right
 step `max(trunc(N/16),1)`, so speed `N=8` steps one level. Changes post
 `0x46d`; release posts `0x473` and clears capture. Volume attenuation
 conversion and speed-at-OK application are separate owner contracts.
-— MENU-118, MENU-074, MENU-076
+The speed setter clamps 0..8 and uses rates `8,10,12,14,16,20,24,28,32`,
+with integer `1000/rate` sub-tick intervals. — MENU-148
+
+The read slider/base bodies contain no direct shared-click request. Captured
+effects/speech release invokes the dialog preview; music release has no
+dialog-local preview. Associated focus calls and the effects change's posted
+`0x484` receiver prevent complete sound closure. — MENU-149, MENU-150
+— MENU-118, MENU-074 (amended), MENU-076 (amended; row-retention clause partially retracted)
 
 The sound configuration initializer sets all three volume maxima to 5000
 and initial attenuation to -700. Their default arrow/endcap step is therefore

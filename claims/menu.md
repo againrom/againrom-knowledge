@@ -555,10 +555,10 @@ Both dialogs are modal children of the campaign window. Rectangles are dialog-lo
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MENU-073 | The Game Options dialog holds 19 controls: 5 labels, a 0..8 speed slider, 8 checkboxes, 3 radio groups, OK and Cancel; each non-label control id imports and exports one stored option. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
-| MENU-074 | Game Options writes its options only on OK, in a fixed order with Animation 0 forcing Lighting 0, then sends three party commands; Cancel and Esc forward the close with no export; the dialog's own code restores nothing. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
+| MENU-073 | The Game Options dialog holds 19 controls: 5 labels, a 0..8 speed slider, 8 checkboxes, 3 radio groups, OK and Cancel; each non-label control id imports and exports one stored option. | High / Medium | ● active (amended) | [EXP-0457](../experiments/EXP-0457-settings/), [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| MENU-074 | Game Options writes its options only on OK, in a fixed order with Animation 0 forcing Lighting 0, then sends three party commands; Cancel and Esc forward the close with no export; the dialog's own code restores nothing. | High / Medium | ● active (amended) | [EXP-0457](../experiments/EXP-0457-settings/), [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
 | MENU-075 | The Sound Options dialog holds 15 controls (track list with scrollbar, Play, Stop, Random Order, Acknowledgments, three volume sliders, OK, 5 labels) and has no Cancel button. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
-| MENU-076 | In Sound Options every control but Acknowledgments applies at the click or slider move; Acknowledgments is exported by OK only; OK and Esc both close and neither restores the earlier values. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
+| MENU-076 | In Sound Options volumes, Random Order and playback commands apply immediately; row selection is local; OK alone exports Acknowledgments; Esc closes without rolling back config/player changes. | High / Medium | ● active (partially retracted, amended) | [EXP-0457](../experiments/EXP-0457-settings/), [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
 | MENU-077 | Game Options, Sound Options and the cutscene list share the dialog base: size snaps to `96k+8` by `64k+104`, centred, drawn as the `lm.256` nine-piece frame with an 8 px shadow; title and buttons are builder controls. | High / Medium | ● active | [EXP-0457](../experiments/EXP-0457-settings/) |
 
 ### MENU-073
@@ -597,6 +597,8 @@ A checkbox control (vtable `L06340`) holds its value or bitmask at `+0x80`. Impo
 
 **Unknown.** The meaning of campaign `+0x6bc` values 0 and 1. Whether the Esc menu is the only poster of `0x41b`: the arm's posters were not swept image-wide.
 
+**Amended.** MENU-147 bounds phase 0/1 writer meaning and poster coverage; MENU-148 resolves the speed position/rate table. Complete playable-screen reachability remains Unknown.
+
 ### MENU-074
 
 The handler `R1226` acts only on message `0x445` (OK). Every message, including `0x445` after the exports, is then forwarded to the base handler `R0716`, which for `0x445` and `0x446` closes the dialog with the message as result code (`R1228`).
@@ -611,9 +613,11 @@ On OK the handler exports, in this order:
 
 The commands are sent on every OK, whether or not the value changed. A checkbox or radio click only changes the control's own copy: the handler does not act on `0x46d`, so no option is written before OK. Cancel (button message `0x446`) and Esc (`R0818` sends `0x446` to vtable `+0x48`) reach the base handler without any export, so every stored option keeps the value it had when the dialog opened and no restore code exists. A speed change takes effect inside the OK arm; the Smoothing, Shadows, Lighting and Animation flags take effect at their consumers (TOWN-GRAPHICS-459, TOWN-SMOOTH-460).
 
-**Confidence.** **High** for the export order, the Animation to Lighting coupling, the clamp and the absence of an export on `0x446` (instructions read; TOWN-OPTIONS-457 bounds the same arm by measurement). **Medium** that nothing outside the dialog restores a value on Cancel: the dialog's own code does not, the `0x44c` receiver `R0709` was not read, and no other writer was swept.
+**Confidence.** **High** for the export order, the Animation to Lighting coupling, the clamp and the absence of an export on `0x446` (instructions read; TOWN-OPTIONS-457 bounds the same arm by measurement). **Medium** that nothing outside the dialog restores a value on Cancel: the dialog and the now-read generic `0x44c` close tail do not, but other writers and the visible opening-menu lifetime remain unclosed (MENU-151).
 
-**Unknown.** What `0x44c`, sent by the base close routine after the dialog ends, does with the result code (`R0709` not read; it compares the result against `0x445` in at least one arm). Which key a control uses for Enter: the base key handler `R0717` does not handle it.
+**Unknown.** The visible mission-menu destination after the generic close tail (MENU-151). Which key a control uses for Enter: the base key handler `R0717` does not handle it.
+
+**Amended.** MENU-151 traces follow-up 0x44c through the campaign close tail. It clears modal bit 8 and destroys the dialog; exact visible mission-menu destination remains Unknown.
 
 ### MENU-075
 
@@ -661,11 +665,13 @@ Handler `L03131` indexes messages `0x466..0x477` through the byte table at `L064
 
 The gain setter `R1231` clamps to -10000..0. Slider positions map to volumes by `volume = trunc(-max * ((position - max) / max)^2)`; the inverse, used when the dialog is built, is `max - trunc(max * sqrt(-volume / max))` (`L06449`, `R0659`; truncation by `R0279`).
 
-Volumes, Random Order and the row selection are therefore applied at the control event, and Esc, which has no export, leaves them as moved. Acknowledgments is the only control written by OK alone, so Esc discards its change. Esc and OK both close; only OK clears player `+0x68`.
+Volumes and Random Order are applied at the control event, and Esc has no rollback for them. Row selection changes only dialog+0x6c; it is not retained after the dialog is destroyed (MENU-151). Acknowledgments is the only control written by OK alone, so Esc discards its change. Esc and OK both close; only OK clears player `+0x68`.
 
 **Confidence.** **High** for the per-message arms, the slider formula and the closing paths (instructions read). **Medium** that the Play and Stop calls reach the music player as VIDEO-OPTIONS-057 states: the receivers are the dialog's player field, not an independent trace.
 
-**Unknown.** Whether Esc leaving player `+0x68` at 1 changes player behaviour. How registry persistence of the volumes is triggered after a slider move (VIDEO-077 names the save routine only).
+**Unknown.** Whether Esc leaving player `+0x68` at 1 changes player behaviour. Complete indirect save timing after a slider move; VIDEO-093 traces the named later saves.
+
+**Amended.** The row-selection retention clause is REFUTED in retracted.md: id 3 changes only dialog+0x6c, which dies on close. MENU-151 corrects that clause. MENU-149 and MENU-150 extend event/request coverage; VIDEO-093 bounds deferred registry saving.
 
 ### MENU-077
 
@@ -2032,3 +2038,201 @@ meaning of the source-4 and other-source arms.
 **Confidence.** High for both slots, the forwarding and the step bounds. Medium
 for the held repeat: the writers of `[L12191]` outside the frame's mouse arms
 were not enumerated.
+
+## Settings remainder
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-147 | In the read Game Options builder, phase 0 or 1 disables speed; the named writers are transport setup/shutdown and session construction paths, while playable-screen reachability remains unresolved. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| MENU-148 | The read speed setter clamps positions to 0..8 and selects rates 8,10,12,14,16,20,24,28,32 with integer 1000/rate sub-tick intervals; actual native cadence is unmeasured. | High / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| MENU-149 | The read slider paths emit value-change 0x46d and captured-release 0x473; no direct click request appears in the selected input/base bodies, but inherited and asynchronous sound closure remains incomplete. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| MENU-150 | Captured effects/speech release requests units/sword or the fixed mf_merc select2 recording through the DirectSound sample service at effects/speech attenuation; music has no dialog-local release preview. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| MENU-151 | Esc exports no Game Options control and discards Sound Acknowledgments and local row selection; immediate sound/player changes remain, while the read close path clears modal state without proving the visible destination. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+| MENU-152 | Random Order clicks copy the checkbox value to config and call the player setter: with a buffer it rebuilds sequential order or performs n random swaps; without a buffer config changes but the setter leaves player state unchanged. | High / Unknown | ● active (branch candidate) | [EXP-0534](../experiments/EXP-0534-settings-remainder/) |
+
+### MENU-147
+
+Builder R1217 loads campaign +0x6bc at L06430. Comparisons at
+L14369 and L14370 select exactly 0 and 1 for the enabled-flag clear
+at L06431. Other values bypass this clear. MENU-073 supplies the control
+binding. This predicate does not enumerate other possible disable writers.
+
+The read writes of 0 are literal store L09317 in transport shutdown
+R1323, L09318 in transport acquisition R1664, and L09315 in
+the shared menu/modal tail. The acquisition path has a message loop, a
+15000 time-unit bound and a successful 0x426 post. Writer L09321 sets
+1, selects transport object L00522, calls session constructor R1304
+with 1 and tests party method R0912. Success posts 0x459; failure
+forwards 0x446 to the root and posts 0x45c. SESS-PHASE-002 supplies the
+previous phase-2 and phase-3 scope. Neither 0 nor 1 is proved to name one
+player-visible screen or one network role.
+
+The Game Options 0x41b arm at L06414 requires +0x3dc == 1, without
+testing +0x6bc. Attachment R0361 adds modal bit 8. The linear .text
+scan records one immediate 0x41b poster, L06415, the mission-menu
+button in MENU-073. Indirect/computed messages are outside that census.
+
+**Confidence.** High for the local predicate and named writes. Medium
+for setup/shutdown/session interpretation and the decoded writer/poster
+population. The linear decoder is not a repaired function graph.
+
+**Unknown.** Phase-0/1 mission-menu reachability and the exact role of
+phase 1. Live alternatives include a playable network session and a
+transitional setup/shutdown state. An owner run of Host and Join, then
+mission menu -> Game Options, recording +0x6bc at each write/open, would
+settle the named route. No original was run.
+
+### MENU-148
+
+The slider maximum is 8 (MENU-073). Setter R0559 clamps signed input
+below 0 to 0 and above 8 to 8, then stores +0x3f4. The nine dwords at
+L02620 select the literal rates below. At L02621..L02623 the
+setter computes signed integer 1000/rate and stores +0x3f0.
+
+| Position | Selected rate | Sub-tick interval, ms |
+|---|---:|---:|
+| 0 | 8 | 125 |
+| 1 | 10 | 100 |
+| 2 | 12 | 83 |
+| 3 | 14 | 71 |
+| 4 | 16 | 62 |
+| 5 | 20 | 50 |
+| 6 | 24 | 41 |
+| 7 | 28 | 35 |
+| 8 | 32 | 31 |
+
+It clears +0x3e4, +0x400 and +0x404 and refreshes the clock fields
++0x3fc/+0x3ec. Game Options calls it only on OK (MENU-074). Slider
+Left/Right and endcap steps are one for maximum 8 (MENU-118).
+
+**Confidence.** High: both clamping branches, all nine table targets,
+rate literals and division are in committed bounded listings.
+
+**Unknown.** The selected rate is not a measured frame rate or wall-clock
+simulation cadence. An owner run at each position with elapsed-time and
+simulation-tick measurements would settle cadence and pacing effects.
+
+### MENU-149
+
+Sound sliders 6, 7 and 8 use constructor R1185 and table L06344.
+The input bodies are press R1235, move R1236, held move L14371
+and release R1237. Press/drag post 0x46d when position changes.
+Release posts 0x473 only with capture field +0x60 nonzero, then releases
+capture. Keyboard Left/Right posts 0x46d without a local release preview.
+
+The selected bodies, flag/capture R0772/R0776, focus R0777
+and base routing R0390 contain no direct call to shared click
+L03645 or terminal request R0386. Base routing invokes slider
+virtual slots +0x4c/+0x50/+0x54/+0x58; the slider table binds those to
+the four input bodies. The routing switch table was not read as dwords,
+so its exact Windows-message arm mapping is not asserted here.
+
+Focus R0777 can call associated control +0x58 through unread
+L14372 at L14373/L14374. The slider constructor initializes
++0x58 to zero; later rebinding is not excluded. Shared click L03645,
+when invoked with a nonzero argument, falls through to registry selector
+2, click01, and requests effects volume, pan 0, repeat 0, priority 220,
+frequency 0 at L12956. Its presence is not proof that a slider invokes it.
+
+Dialog L03131 maps 0x46d to L14375 and 0x473 to L14376.
+Music updates config+8 and player gain except when player state is 2.
+Effects posts 0x484 to the main-window HWND before storing L02733;
+speech stores L02739. MENU-076 supplies attenuation arithmetic.
+
+**Confidence.** High for event instructions and dialog stores. Medium
+for absence of a direct sound call in the named bodies. This excludes
+neither virtual callees nor posted-message effects.
+
+**Unknown.** Complete press/drag sound requests. The associated-control
+callee L14372, label binding L14377 and receiver of 0x484 are unread. Sound candidate/stream operations
+can also change already-playing music. An owner run pressing, dragging
+and releasing each slider with request-site tracing, including 0x484
+delivery, would settle complete request timing. Silence is not established.
+
+### MENU-150
+
+Release arm L14376 tests slider id. Id 7 resolves registry selector
+100 via L14378 and requests R0386 at L12955 with [L02733].
+Id 8 requests the fixed object [L14379] at L13060 with [L02739].
+Both use pan 0, repeat 0, priority 220 and frequency 0. Id 6 has no
+dialog-local preview arm. This does not assert global silence (MENU-149).
+
+The named recording recipes are units/sword and sfx/mf_merc/select2.wav
+from VIDEO-SFX-085. The read initialization R0585 constructs mf_merc
+from descriptor f_merc and prefix m, passes bank L02748 to R0583,
+and that helper stores its second select object at bank+8. It is a fixed
+bank field, not random class selection.
+
+Service R0386 checks device [L02703], sample loaded flag +0xc and
+buffer array +0x10, selects an idle duplicate, clamps attenuation below
+-10000, applies volume/pan and requests R1919. VIDEO-SFX-086 and
+VIDEO-SFX-087 identify the DirectSound device/buffer route. Request recipe
+identity is reused evidence, not an audio playback observation.
+
+**Confidence.** High for local release ids, pointers, tuple values and
+volume sources. Medium for recording/device binding reused from the named
+SFX claims and confirmed bank route. Successful playback is not proved.
+
+**Unknown.** Native audibility, lazy-load/device failure effects and EN/RU
+payload-byte or recording differences. A lawful owner request trace plus
+recording/payload comparison would settle them without confusing identical
+code with identical media.
+
+### MENU-151
+
+Base key handler R0818 maps Esc to 0x446. Handler R0716 stores
+the close result, hides the dialog and posts 0x44c with its pointer.
+The custom table at L12998/L12997 maps 0x44c to L03311, which
+calls campaign close R0709.
+
+Game Options exports all controls only on 0x445; Cancel and Esc export
+none (MENU-074). Sound OK 0x475 exports only Acknowledgments, clears
+player+0x68 and forwards 0x445. Esc forwards 0x446 without that export
+or flag clear. Immediate volumes, config Random Order, and issued Play/Stop
+changes remain. Selecting row id 3 changes only dialog+0x6c, not playback;
+that local selection dies with the dialog. Sound has no Cancel button.
+
+For either options dialog the generic close tail L03359 clears bit 8
+of campaign+0x3dc and destroys the dialog at L14380..L14381.
+The mission opening arm required +0x3dc == 1, so that bit operation
+returns 9 to 1. The read tail to L03639 sends 0x408 to campaign+0xd4
+and conditionally redraws the root. It does not post 0x416 to rebuild
+the mission menu in that tail.
+
+**Confidence.** High for export, local-selection lifetime, close mapping
+and modal-bit operations. Medium for interpreting state 1 as return to the
+underlying map-session root. No native screen was observed.
+
+**Unknown.** Whether the opening mission menu remains beneath the options
+dialog: its callback R1167/upstream destruction was not read. Thus the
+exact visible menu/map destination is Unknown. Owner action: mission menu
+-> each options dialog -> change controls -> Esc, compared with Game
+Options Cancel/OK and Sound OK, recording screen and stored/player state.
+The consumer of player+0x68 is also unread; its Esc effect remains Unknown.
+
+### MENU-152
+
+Builder L06329 imports config+0 into checkbox id 2 through slot +0x44
+at L14382. MENU-073 supplies checkbox import/toggle behavior. It does
+not call the shuffle setter in the read builder. Changed id 2 reaches
+L14383: store config+0, then call player setter R1230 with the value.
+
+Setter R1230 first tests buffer+0x9c. Null returns without changing
+player mode+0x20, flag+0x18 or permutation. With a buffer it stores the
+value to +0x20, clears +0x18 and initializes entries 0..n-1. Zero stops
+there. Nonzero performs n swaps using two CRT rand()%n indices per swap.
+It does not replace the currently playing buffer in this body. Row setter
+R1232 calls it again with player+0x20, not config+0 (VIDEO-MUSIC-056).
+
+The checkbox is imported from the same config field for fresh and stored
+profiles; VIDEO-093 distinguishes their initial values and save timing.
+Clicking applies the new control value in either case. OK is not a shuffle
+trigger and Esc does not roll back the already-written config.
+
+**Confidence.** High for these conditional branches and writes in the
+read handler/setter. The reused checkbox contract is a separate authority.
+
+**Unknown.** Immediate audible sequence, permutation distribution across
+runs, and automatic stored-value application through unexamined aliases.
+An owner run with a fresh profile and stored 0/1, tracing config+0,
+player+0x20 and permutation at build/click/next-track, would settle timing.

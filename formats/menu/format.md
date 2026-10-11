@@ -418,26 +418,49 @@ calls the MFC default, so a return of 0 only lets the root offer the key to its 
 
 <a id="open--not-established"></a>
 
-## Game Options and Sound Options dialogs (`MENU-073`...`MENU-077`)
+## Game Options and Sound Options dialogs
 
-Both dialogs are modal children of the campaign window and share one dialog base (`MENU-077`).
-The base snaps a requested rectangle to a width of `96k + 8` and a height of `64k + 104`, centres
-it, and paints a nine-piece frame with an 8 px shadow; the title and the buttons are controls the
-builder adds. Esc closes any dialog of the base with message `0x446`.
+Both dialogs are modal children of the campaign window and share one dialog
+base. The base snaps width to `96k+8` and height to `64k+104`, centres
+the frame and paints an 8 px shadow. Esc sends `0x446`. — MENU-077
 
-Game Options has 19 controls: five labels, a speed slider, eight checkboxes, three radio groups
-and OK and Cancel (`MENU-073`). Each control keeps a local copy of its bound option. Only OK
-writes them: the speed level, the flags, Smoothing, the graphics flags, the party display values
-and the autohealing mode, in a fixed order, with Animation 0 forcing Lighting 0, and then three
-party commands. Cancel and Esc write nothing; the dialog's own code restores nothing, and the receiver of the follow-up close message was not read (`MENU-074`).
+Game Options has 19 controls with local option copies. Only OK exports them,
+in fixed order, with Animation 0 forcing Lighting 0 and three party commands.
+Cancel and Esc export nothing. The speed maximum is 8; positions 0..8 select
+rates `8,10,12,14,16,20,24,28,32` and integer sub-tick intervals
+`125,100,83,71,62,50,41,35,31` ms. Native cadence is unmeasured.
+The builder disables speed exactly for campaign phase 0 or 1. Named writes
+place 0 on transport setup/shutdown and a shared menu tail, and 1 on a
+transport-backed session-construction path. These are bounded interpretations,
+not complete screen or network-role names. Opening Game Options requires
+screen mask 1; whether phase 0/1 can reach that route remains Unknown.
+— MENU-073 (amended), MENU-074 (amended), MENU-147, MENU-148
 
-Sound Options has 15 controls and no Cancel button (`MENU-075`). Random Order, the track
-selection, the three volume sliders, Play and Stop act when the control changes. OK exports only
-the Acknowledgments checkbox and closes; Esc closes without it and leaves the moved volumes in
-place (`MENU-076`). The speech slider (id 8) sets `[L02739]`, the speech attenuation of the
-sound configuration object (default -700, saved as `SoundSpeechPos`); the effects slider sets
-`[L02733]`. Voices add the speech setting once to the distance term and effects add theirs; no
-instruction combines them (`ANIM-128`).
+Sound Options has 15 controls and no Cancel button. Volumes and Random Order
+change config immediately. Selecting a track changes only the dialog-local
+row; Play separately applies playback selection. OK exports only Acknowledgments
+and clears player flag `+0x68`. Esc discards Acknowledgments and local row
+selection, retaining immediate config and issued player changes. MENU-076's
+row-retention clause is partially retracted. — MENU-075, MENU-076 (amended), MENU-151, MENU-152
+
+Slider changes send `0x46d`; captured release sends `0x473`. Effects release
+requests `units/sword` at effects attenuation and speech release requests the
+fixed `sfx/mf_merc/select2.wav` at speech attenuation, through the DirectSound
+sample service. Both use pan 0, repeat 0, priority 220 and frequency 0.
+Music has no dialog-local release preview. The read input/base bodies contain
+no direct shared-click request, but associated-control calls and the effects
+change's posted `0x484` receiver remain unread. Complete press/drag requests
+and native audibility are Unknown. — MENU-149, MENU-150
+
+Speech slider id 8 sets `[L02739]`, default -700, saved as `SoundSpeechPos`;
+effects id 7 sets `[L02733]`. Voices add speech once to distance attenuation;
+effects add effects attenuation. No read instruction combines them. — ANIM-128
+
+The close follow-up `0x44c` reaches the campaign, clears modal bit 8 and
+destroys the dialog. On the mission opening route the mask returns 9 to 1.
+The read tail refreshes the underlying root without rebuilding the mission
+menu. Whether that opening menu remains beneath the dialog, and therefore
+the exact visible destination after Esc, is Unknown. — MENU-151
 
 ## Unknowns
 
@@ -465,7 +488,8 @@ instruction combines them (`ANIM-128`).
 - Whether a phase-3 or networked session delivers the settings keys, the interval of the tick
   message that expires message-line lines, and the receiver's use of the `0x46` records
   (`MENU-057`, `MENU-059`).
-- Whether the Esc menu is the only poster of the Game Options message, the meaning of campaign
-  `+0x6bc` values 0 and 1, and what the base close routine's follow-up message does with the
-  result code (`MENU-073`, `MENU-074`); the consumer of the music player flag that the Sound
-  Options dialog sets to 1 at build and clears only on OK (`MENU-075`, `MENU-076`).
+- Complete Game Options poster coverage and phase-0/1 playable-screen reachability;
+  exact visible mission-menu destination after options Esc; and the consumer of the
+  music player flag set at build and cleared only on OK. MENU-073 and MENU-074
+  are amended; MENU-076's row-retention clause is partially retracted.
+  — MENU-147, MENU-151, MENU-075, MENU-076 (amended)

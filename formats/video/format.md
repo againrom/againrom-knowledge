@@ -228,21 +228,43 @@ make no direct sound request. — TOWN-434
 
 <a id="unknown--bounded-areas"></a>
 
-## Cutscene list, music lists and stored options (`VIDEO-075`...`VIDEO-077`)
+## Cutscene list, music lists and stored options
 
-The cutscene list is the only list dialog that reads a movie table. It shows the titles of
-`cutscene.txt` rows 0 to N, where N is a registry dword with a floor of 2 that a played mission
-movie is read to raise to its own `cutpaths.txt` row (the callers were not traced). OK plays the numbered parts of that row's directory
-in order (`VIDEO-075`).
+The cutscene list uses message `0x43b`. Routine `R0820` selects it when
+bit 4 of its `+0xe4` is clear and posts at `L14390`; the exact initial
+input action remains Unknown. List OK plays the selected row and reposts
+`0x43b`. Message `0x436` selects another arm. VIDEO-075's old message
+clause is partially retracted. — VIDEO-094, VIDEO-075 (amended)
 
-The 21 music tracks come from nine literal request lists in nine owner routines. The mission
-owner's 12-entry list is shared by every mission; among those nine owners and the markup
-selector no per-mission list exists. No direct reference copies the registry random-order value
-to the player at start (`VIDEO-076`).
+The list shows `cutscene.txt` rows 0..N inclusive, where the registry dword
+has floor 2. N is the maximum included row index. A matching `-1` movie
+request uses the current mission's `m%d` path and may raise N before any
+video part opens. Its entry save precedes that raise, so it saves the old N;
+new persistence needs a later save. Positive explicit rows do not take the
+raise branch. Five decoded direct callers include one conditional `0x41d`
+mission-transition route with `-1`; complete callers and exact player action
+labels remain Unknown. VIDEO-075's successful-playback clause is partially
+retracted. — VIDEO-095, VIDEO-075 (amended)
 
-Shadows, Dynamic lighting, Object animations and Smoothing are 0 or 1, default 1, and persist in
-the registry with nine other option values and five sound values. Command-line switches clear the
-graphics flags before the registry load, which then replaces them (`VIDEO-077`).
+The 21 music tracks come from nine literal request lists. The mission owner's
+12-entry list is shared by every mission; among those owners and the markup
+selector no per-mission list exists. The direct-reference startup absence is
+bounded; computed transfer of stored Random Order remains Unknown.
+— VIDEO-076 (amended), VIDEO-093
+
+SoundRandom loads into config and is imported into the checkbox at build.
+Fresh config defaults to zero, separately from the player's ordinary-mode
+default. Click copies the new value into config and invokes the player setter;
+with a buffer it rebuilds sequential order or performs n random swaps, and
+without a buffer it leaves player state unchanged. Click/OK do not save the
+registry in their read arms; named later saves are teardown and cutscene entry.
+Complete startup transfer and indirect save timing remain Unknown.
+— VIDEO-093, MENU-152
+
+Shadows, Dynamic lighting, Object animations and Smoothing are 0 or 1,
+default 1, and persist with nine other option values and five sound values.
+Command-line switches clear graphics flags before registry load replaces them.
+— VIDEO-077
 
 ## Unknowns
 

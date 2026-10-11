@@ -169,6 +169,17 @@ rewinds to position zero. These local paths do not clear the channel or
 destroy its sample. Future caller retries, loop restarts and device success
 remain Unknown. — VIDEO-SFX-091
 
+## Sound Options event boundary
+
+Captured effects/speech release requests the two terminal rows below. The
+music slider has no dialog-local release-preview arm. Press/drag send value
+changes; the read slider/base bodies contain no direct shared-click request.
+Associated focus calls and the effects change's posted `0x484` receiver remain
+unread, so complete press/drag requests are Unknown. Shared click01 is not
+established as a slider request. Local previews use the DirectSound sample
+service at their current effects/speech attenuation; output success and EN/RU
+payload equality are unmeasured. — MENU-149, MENU-150
+
 ## Terminal request tuples
 
 Every row is the reviewed request tuple under VIDEO-SFX-085. Filename family

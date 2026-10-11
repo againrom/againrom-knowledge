@@ -167,9 +167,14 @@ The pacing is a **deadline** loop with catch-up, so the figure is a ceiling. Und
 | `+0x660` | mission number; `% 10 == 0` is a main mission |
 | `+0x66c` | accumulated play time, in **full ticks** |
 | `+0x6b8` | this process owns the simulation |
-| `+0x6bc` | phase, `{0,1,2,3}` |
+| `+0x6bc` | phase, `{0,1,2,3}`; Game Options speed is locally disabled for 0/1 (MENU-147) |
 
 <a id="the-lifecycle"></a>
+
+Phase 0 appears on the named transport setup/shutdown and shared menu-tail
+writes. Phase 1 appears on transport-backed session construction. These local
+paths do not establish complete player-facing phase names or Game Options
+reachability; the opening arm checks screen mask 1 separately. — MENU-147
 
 ## Lifecycle
 

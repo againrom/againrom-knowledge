@@ -1355,4 +1355,12 @@ on evidence already committed.
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
-| `TOWN-502` (constructor reset-call attribution only) | R2021 calls L12282 twice. | High / Medium | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/), TOWN-543 | The listing has one call at L14351 from constructor R2021 and one at L14352 from constructor L14353. Between-visit and new-game reset remain Unknown; speech keys, command-return ordering and common teach request stand. | **REFUTED** ? partially retracted |
+| `TOWN-502` (constructor reset-call attribution only) | R2021 calls L12282 twice. | High / Medium | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/), TOWN-543 | The listing has one call at L14351 from constructor R2021 and one at L14352 from constructor L14353. Between-visit and new-game reset remain Unknown; speech keys, command-return ordering and common teach request stand. | **REFUTED** — partially retracted |
+
+## Settings row retention and cutscene dispatch
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MENU-076` | Esc leaves the row selection as moved. | High | [EXP-0534](../experiments/EXP-0534-settings-remainder/) | Id 3 changes only dialog+0x6c; close destroys that local selection. Issued Play/Stop and volume/config changes remain (MENU-151). | REFUTED |
+| `VIDEO-075` | List message 0x436; arm L12931 handles it. | High | [EXP-0534](../experiments/EXP-0534-settings-remainder/) | Two-table dispatch maps 0x43b to L12931 and 0x436 to L14384 (VIDEO-094). | REFUTED |
+| `VIDEO-075` | N is a high-water mark of mission movies played. | Medium | [EXP-0534](../experiments/EXP-0534-settings-remainder/) | A matched -1 attempt raises N before video open. The invocation saves before the raise, not afterwards (VIDEO-095). | REFUTED |
