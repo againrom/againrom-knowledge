@@ -1,148 +1,157 @@
 # ROM2 automatic casting
 
-The selected RU support routine reads a level from the actor's owning Player
-preferences. The level is separate from the command's selected offensive spell.
-Three cumulative masks select Minimum, Average and Maximum. The local EN/RU
-cycle and constructor stores agree; full policy equivalence between the two
-images remains Unknown. — R2-ENGINE-345, R2-ENGINE-350, R2-SESSION-150
+The selected RU human support routine reads the owning Player's preference
+byte. Three cumulative masks select Minimum, Average and Maximum; the
+command's selected offensive spell is separate. Control, receiving byte
+stores and candidate/order routes have bounded static evidence. Final
+lifecycle values and whole-policy EN/RU parity remain Unknown.
+— R2-ENGINE-345, R2-ENGINE-350, R2-ENGINE-361, R2-ENGINE-366,
+R2-SESSION-152, R2-SESSION-153
 
-Retained local High and bounded Medium grades use first observations before
-the 160-window hard limit. Acquisition later reached a conservative minimum
-of 169 windows and breached the reserve and stopping rules; the completed
-late reproduction is excluded from grade rationales. Coordinate-getter
-meanings and units remain Unknown; High range evidence is the local packed-byte
-arithmetic. — R2-ENGINE-345, R2-ENGINE-346, R2-ENGINE-347, R2-ENGINE-348,
-R2-ENGINE-349, R2-ENGINE-350, R2-ENGINE-351, R2-SESSION-150, R2-ASSET-085
-
-## Control and setting
+## Controls and feedback
 
 | Level | Level mask | EN label | RU source view |
 |---|---|---|---|
-| Minimum | `0x08` | Minimum | Минимальный |
-| Average | `0x18` | Average | Средний |
-| Maximum | `0x38` | Maximum | Максимальный |
+| Minimum | 0x08 | Minimum | Минимальный |
+| Average | 0x18 | Average | Средний |
+| Maximum | 0x38 | Maximum | Максимальный |
 
-The installed `text/dialogs.txt` zero-based physical rows 171..173 supply these labels; row 170
-is `AutoCast mode:` in EN and `Автокастинг:` in a CP1251 view of RU source.
-That view does not establish rendered glyphs or the runtime code page. The
-selected RU options code populates control `0x8d` with rows 171..173 and applies
-selection indices 0/1/2 as these masks. The source-to-native-table join is
-Medium. — R2-ASSET-085, R2-ENGINE-345
+The selected RU options combo 0x8d uses dialogs source indices 171..173 and
+applies selected indices 0/1/2 as these masks. Controls 0x83/0x84/0x85 use
+indices 167/168/169, named Own/Allies/Neutral in EN and Своих персонажей /
+Союзников / Нейтральных in a CP1251 RU view. Apply independently adds target
+masks 1/2/4 to the selected level mask. The selected loader binds the dialogs
+receiver to main/text/dialogs.txt; complete native encoding and rendered RU
+glyphs remain Unknown. — R2-ENGINE-345, R2-ENGINE-360, R2-ASSET-085,
+R2-ASSET-088
 
-Option apply independently adds affinity masks `0x01`, `0x02` and `0x04`
-from the three checkbox values to the selected level mask. Previous affinity
-bits are replaced by those values. This interpretation is Medium.
-— R2-ENGINE-345
+The selected EN/RU third key maps route input 0x55 (U) to the cycle arm.
+That arm cycles only when an unnamed global flag is nonzero. Its physical
+modifier/state and earlier routing are not fully joined. The local cycle
+preserves target bits 0..2 and changes 8 -> 24 -> 56 -> 8. This is a bounded
+numeric input route, with Medium physical-control confidence. The separate
+object+0x54 storage clause of R2-ENGINE-359 is partially retracted.
+— R2-ENGINE-345, R2-ENGINE-359, R2-ENGINE-366
 
-The cycle routines EN `L2.01501` and RU `L2.01502` change masked level
-`0x08 -> 0x18 -> 0x38 -> 0x08` and preserve low affinity bits 0..2. The global
-DWORD is EN `L2.01503`, RU `L2.01504`. The selected RU input arm calls the
-cycle, but its physical key is Unknown. The support reader reaches byte
-`+0x20` through actor owner `+0x14`, Player pointer `+0x34`. This supports a
-Player preference scope at Medium; a complete selection, Group or unit-control
-contract is Unknown. Class eligibility and per-unit setting availability are
-Unknown; the selected admission helper requires the named spell in the actor's
-book. — R2-ENGINE-345, R2-ENGINE-348
+After cycling, the selected RU arm requests patch-pool indices 115..117
+and passes the text with argument 2000 to the view's text-state helper.
+The receiver loads patch/patch.txt, separate from main.txt. The text helper
+loads its third argument and forwards it with receiver+0x2c to L2.01545,
+outside the acquired ranges. The final field holding the value, its units,
+actual feedback strings, persistent panel state and sound remain Unknown;
+main.txt autohealing labels do not supply this binding. The object+0x54
+storage clause of R2-ENGINE-359 is partially retracted.
+— R2-ENGINE-359, R2-ASSET-088
 
-Global constructors initialize preference DWORD `+0x24` to `0x19`, which
-combines the Average mask and own-target bit. This is High for the local
-constructor stores. Registry overrides and per-Player initialization prevent
-using that store as the proved default of a new hero, hire, summon or converted
-unit. Those defaults remain Unknown. — R2-SESSION-150, R2-ENGINE-345
+## Owner scope and lifetime sources
 
-## Support policy
+The sender carries a Player identity and application preference DWORD.
+Compatible local EN/RU receive arms use packet word +5 to look up a Player,
+then copy packet byte +0xe to that Player's preferences+0x20. No actor or
+Group identity occurs in the sender payload. This supports owner scope at
+Medium; complete subtype dispatch, selection/Group interaction and ownership
+changes remain Unknown. — R2-ENGINE-345, R2-ENGINE-361
 
-RU `L2.01512` stops after its first prepared support order. Admission requires
-the spell in actor book `+0x140` and signed current mana `+0x9a` at least its
-signed cost `+0x0c`. Each stage also has the independent minimum-mana gate
-below. These are thresholds on the same current value, not additional mana
-charges. Behavior is Medium because list construction, call reachability and
-later execution remain incomplete. — R2-ENGINE-346, R2-ENGINE-347,
-R2-ENGINE-348
+Application constructors set DWORD+0x24 to 0x19 (Average plus own target),
+and registry AutoCasting transfers four bytes there. The acquired RU Player
+preferences constructor instead sets byte+0x20 to 0xff. Player serialization
+includes that byte in a 36-byte raw block. A selected RU mission-setup excerpt
+resends the application DWORD. These are distinct sources; none alone
+establishes the final new-game or cold-LOAD value. Mission/town preservation
+and later overrides remain Unknown. — R2-ENGINE-345, R2-SESSION-150,
+R2-SESSION-152, R2-SESSION-153
 
-| Stage | Additional gate | Attempt order |
+## Casters and support attempts
+
+The sampled RU idle and attack callers test mage flag actor+0x4c &4 and
+owner Player kind+0x2c == 0 before human support. The attack route can attempt
+support after ordinary attack preparation when command range+0x14 is below 2.
+Nonzero owner kind reaches separate computer policy. These routes do not
+establish admission for every class, hire, summon, converted unit or current
+order. Support in all moving, holding and retreating states and attempts per
+simulation tick remain Unknown. — R2-ENGINE-351, R2-ENGINE-362
+
+RU support stops after the first prepared order. Every attempt needs the
+spell in actor book+0x140 and current mana at least its spell cost. Each stage
+has an independent threshold on the same current mana; thresholds are not
+additional deductions. — R2-ENGINE-346, R2-ENGINE-347, R2-ENGINE-348
+
+| Stage | Additional gate | Ordered attempts |
 |---|---|---|
-| Minimum | level bit `0x08`; mana >=5 | self Heal 24 if HP differs from maximum; self Shield 27 if absent; Heal 24 on a selected candidate |
-| Average | level bit `0x10`; mana >=10 | for each candidate, Bless 20 then Haste 21 |
-| Maximum | level bit `0x20`; mana >=40 | for each candidate, Protection from Air 13, Earth 19, Fire 4, Water 8, then Invisibility 12; fallback self Invisibility 12 |
+| Minimum | bit 0x08; mana >=5 | self Heal 24 if HP differs from maximum; self Shield 27 if absent; listed Heal target |
+| Average | bit 0x10; mana >=10 | for each candidate, Bless 20 then Haste 21 |
+| Maximum | bit 0x20; mana >=40 | for each candidate, Air protection 13, Earth 19, Fire 4, Water 8, Invisibility 12; fallback self Invisibility 12 |
 
-The candidate Heal path requires the selected list count to exceed one. It
-chooses the first strict minimum of signed integer `HP / maximumHP`, then
-requires that integer quotient to be below 1. Equal scores keep the first
-candidate. It does not rank wounded targets by a floating health fraction.
-Complete list membership and order remain Unknown. — R2-ENGINE-346
+Candidate Heal requires list count greater than one. It retains the first
+strict minimum of signed integer HP/maximumHP and requires that quotient
+below 1. Equal scores preserve the first candidate. Average/Maximum are
+target-major. Effect absence and spell range also constrain each attempt;
+Bless has an additional unread predicate and candidate Invisibility excludes
+self with its recorded relation condition. — R2-ENGINE-346, R2-ENGINE-347
 
-Average and Maximum are target-major: all listed spells for one candidate are
-tried before advancing to another candidate. Their corresponding effect bit
-must be absent. Bless has an additional predicate; target Invisibility excludes
-self and needs a nonzero masked relation value. The fallback self Invisibility
-is a separate attempt. — R2-ENGINE-347
+## Candidates, relation and range
 
-## Affinity and range
+The selected support body feeds caster+0x70 to a spatial candidate builder,
+then filters that result with a second builder. The population at +0x70 is
+not proved to be the UI selection or Group. The spatial marker's callees
+prevent a complete sight, occlusion or physical-radius contract.
+— R2-ENGINE-364
 
-RU `L2.01519` accepts the same actor unconditionally. Other acceptance branches
-use the same owner pointer with preference mask `0x01`, relation mask `0x02`
-with preference mask `0x02`, or `(relation & 3) == 0` with preference mask
-`0x04`. The selected options
-labels bind these bits to Own, Allies and Neutral at Medium. They do not define
-every relation-matrix value. — R2-ENGINE-348, R2-ASSET-085
+The second builder excludes candidate state 0x10, separates relation bit 1
+into a different list, and conditionally filters effect 0x1000. With that
+effect, relation byte exactly 2 passes; otherwise a member of caster+0x70
+must pass an unread helper comparison against its command byte+0x71.
+Support consumes the relation-bit-1-clear list. These are local predicates,
+with Medium complete membership confidence. — R2-ENGINE-364
 
-RU `L2.01520` passes the packed values returned by `L2.01521` to `L2.01522`.
-The metric isolates each value's two unsigned low bytes, takes their absolute
-differences through `L2.01523` and returns the maximum. The wrapper compares
-that byte with spell range byte `+9`. Exact local arithmetic is High. The
-getter's returned-value meaning, coordinate units, candidate visibility and
-any sight filtering inside the list builders remain Unknown. Self Heal, self
-Shield and fallback self Invisibility bypass this range wrapper.
-— R2-ENGINE-348
+The selected second-stage list appends at its tail and iterates next nodes,
+so it preserves that builder's input order among admitted support candidates.
+Heal ties and target-major buffs inherit this order. Upstream creation,
+selection, distance, ID and LOAD priority remain Unknown. — R2-ENGINE-365
 
-## Prepared order and pending condition
+Later affinity accepts self unconditionally. Other observed branches accept
+same owner with preference bit 1, relation bit 2 with preference bit 2, or
+relation&3 == 0 with preference bit 4. The named self attempts bypass these
+target toggles. Other consumers and the full relation grammar remain Unknown.
+— R2-ENGINE-348, R2-ENGINE-360
 
-RU `L2.01524` prepares actor command byte `+8 = 8`, target pointer `+0x28` and
-spell pointer `+0x30`. It records the spell ID at target command `+0xa4` and the
-current tick at target command `+0xa8`; actor command `+0x14` ends with the
-spell range byte. These local writes are explicit; resulting behavior is Medium.
-Successful preparation does not
-establish that an effect has already occurred. — R2-ENGINE-349
+Range uses the word returned by the position getter and compares a packed-byte
+Chebyshev metric to spell byte+9. The getter reads its object's word+2; the
+metric returns the maximum absolute difference between the unsigned low-byte
+pairs. Physical coordinate units and complete sight semantics remain Unknown.
+Self Heal, self Shield and fallback self Invisibility bypass this wrapper.
+— R2-ENGINE-348, R2-ENGINE-364
 
-The listed Bless, Haste and extended attempts skip a candidate when its pending
-field equals literal 20 and the absolute difference from the current tick is
-at most 20. This is a pending-target condition, not a proved universal spell
-cooldown. Self Heal, self Shield and fallback self Invisibility do not contain
-it. Movement to cast, cast cadence, player-order interruption and resumption
-remain Unknown in the selected preparation and partial command-eight paths.
-— R2-ENGINE-349
+## Prepared support and player orders
 
-## Offensive spell and computer Players
+Support marks command+0x60 = 1 and prepares byte+8 = 8, target+0x28,
+spell+0x30 and spell range+0x14. It records target pending spell ID and tick.
+Successful preparation is not an applied effect. Buff attempts suppress
+literal pending ID 20 within absolute tick difference 20; this is not a
+universal per-spell cooldown. — R2-ENGINE-349, R2-ENGINE-363
 
-RU `L2.01527` handles the already-selected spell ID in command byte `+0x78`.
-Its tables dispatch IDs 1..28. It does not iterate the book to choose another
-offensive spell. Its selected target arms and the support level are distinct;
-the complete user-selection and execution contract remains Unknown.
-— R2-ENGINE-350
+The dispatcher handles a nonzero primary byte+9 before a prepared byte+8.
+Prepared byte 8 indexes slot 7 and reaches RU L2.01552. The local self/pass
+branch initializes primary cast byte 2, phase 0, actor state 13, target and
+spell. The other branch prepares an approach and actor state 1. The approach
+helpers and successful movement remain unread, and the cast-completion route
+is not established. — R2-ENGINE-363
 
-The selected dispatch branches distinguish owner Player DWORD `+0x2c == 0`
-from nonzero. The nonzero path reaches RU `L2.00056`, which builds an
-affordable non-defensive book-spell list and calls an unread index helper.
-Its distribution is Unknown. A Mind-dependent early branch calls `L2.01530`
-and returns zero; the recursive outcome is Unknown. Separate support routines
-are `L2.01533`/`L2.01513`. These selected branches do not establish
-that every computer Player shares the three human support levels. — R2-ENGINE-351
+Several sampled setters clear pending byte+8 and the support flag. Their
+player-input callers and interruption after primary cast initialization are
+not joined. Whether the former order resumes and how often support tries
+remain Unknown. — R2-ENGINE-362, R2-ENGINE-363
 
-## Persistence and locale boundary
+## Selected offense, computer policy and locales
 
-EN Player pointer `+0x34` reaches a preferences serializer that transfers 36
-raw bytes. That interval includes the support preference byte `+0x20`.
-The local width is High; ordinary SAV reach and the field interpretation are
-Medium. Global Windows registry `AutoCasting` is a four-byte value for global
-preferences `+0x24`. Mission and town preservation and later overrides remain
-Unknown. — R2-SESSION-150
+RU selected-spell policy reads command byte+0x78 and dispatches IDs 1..28;
+it does not iterate the book to choose a replacement spell in that body.
+The selected owner-kind branches use different computer offensive and
+support routines. Random distribution and admission of every computer unit
+remain Unknown. — R2-ENGINE-350, R2-ENGINE-351
 
-The paired EN/RU constructor and level-cycle sequences agree after address
-normalization. The 389-instruction registry spans have one non-address
-difference: an embedded-base addition is `0x41c` in EN and `0x434` in RU.
-The local AutoCasting transfers still have the same width and offset; this
-does not prove equivalent external callees. Label source strings differ by locale. The full support,
-offense, command execution, SAV and lifecycle paths were not compared across
-both images, so whole-policy equivalence remains Unknown. — R2-ENGINE-345,
-R2-SESSION-150, R2-ASSET-085
+EN/RU acquired third maps, cycles, receiving byte widths and 36-byte preference
+widths agree. The earlier paired constructors and registry transfers remain
+bounded local evidence. Full options, support, target, command execution,
+SAV precedence, feedback and lifecycle equivalence was not measured.
+— R2-ENGINE-345, R2-SESSION-150, R2-ENGINE-366, R2-ASSET-085

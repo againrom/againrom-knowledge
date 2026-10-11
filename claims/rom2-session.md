@@ -1530,3 +1530,57 @@ the selected Player call, preference block serializer, registry paths,
 cycle sender, and RU policy bodies; no lifecycle receiver or town transition
 was read. Read those paths or save/load and enter/leave town in an owner run
 with distinct global and saved values to settle precedence.
+
+## Automatic-casting constructor and lifetime sources
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-152 | RU Player construction stores 0xff in preferences byte +0x20; its Player serializer transfers that byte within a 36-byte block. This is separate from the application default DWORD 0x19. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-SESSION-153 | RU selected mission setup resends the application AutoCasting DWORD to the view sender; the final preference value after new game, mission entry, town or cold LOAD remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+
+### R2-SESSION-152
+
+Player constructor R2.0080 allocates 0x24 bytes, calls L2.01591 at
+L2.01592 and stores its result in Player+0x34 at L2.01593. Preference
+constructor L2.01591 explicitly stores byte+0x20 = 0xff at L2.01594.
+The zero-fill-shaped helper call is not needed to establish that store.
+Application preference constructor 0x19 is R2-ENGINE-345, a different object.
+
+RU Player suffix L2.01595..L2.01596 passes Player+0x34 to R2.0175.
+That serializer transfers 0x24 bytes in either archive direction and includes
+byte+0x20. The paired EN preferences serializer has the same block width.
+R2-SESSION-150 supplies the containing ordinary SAV join. A Player preference
+therefore has constructor and archive inputs; the final live value cannot be
+read from the application constructor alone.
+
+**Confidence.** High for the RU constructor store and selected serializer
+width/caller. Medium for ordinary SAV identity through the reused containing
+record. Unknown for the final value in a new game or after cold LOAD.
+
+**Unknown.** Later creation/load overrides and final scheduling. Trace the
+ordinary LOAD/creation chain with distinct saved and application bytes, or
+use an owner SAV/cold-LOAD witness with different settings.
+
+### R2-SESSION-153
+
+RU excerpt L2.01597..L2.01598 invokes several view setup senders,
+loads global preference DWORD L2.01504 at L2.01599 and calls L2.01562
+on application view+0xd0 at L2.01600. This is a possible application-to-Player
+refresh. R2-ENGINE-361 supplies the local receiving byte copy; it does not
+establish the complete subtype route or when this setup is reached.
+
+The inherited registry input remains a four-byte AutoCasting value at
+application preferences+0x24 (R2-SESSION-150). R2-SESSION-152 adds a different
+Player constructor default and serialization source. The setting has both
+install-level configuration and Player/save carriers; declaring exclusive
+install, Player or SAV ownership would omit one of those observed carriers.
+
+**Confidence.** High for the selected RU global load/sender call. Medium
+for its mission setup interpretation. Unknown for entry reachability,
+transition preservation and cold-load precedence. No preference-writer census
+or native lifecycle observation was made.
+
+**Unknown.** Final bytes on new game, mission start, town entry/exit and cold
+LOAD, including whether a saved byte is overwritten by this application send.
+Read transition/load callers and receiver dispatch, then use an owner run
+whose registry/application and saved values differ.

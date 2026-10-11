@@ -408,3 +408,17 @@ or actor identity. Opaque differences have no assigned field meaning.
 ## Related
 
 The character file is a separate format: [ROM2 character file](../rom2-a2c/format.md).
+
+## Automatic-casting value sources
+
+The acquired RU Player preferences constructor sets byte+0x20 to 0xff.
+The Player serializer passes pointer+0x34 to a 36-byte transfer, which includes
+that byte. The separate application constructor's DWORD 0x19 is not the
+Player constructor value. Final ordinary-SAV LOAD precedence remains Unknown.
+— R2-SESSION-152
+
+A selected RU mission-setup excerpt resends the application's AutoCasting
+DWORD. Its complete transition/receiver schedule was not established.
+Constructor, saved value, registry/application input and later resend remain
+distinct carriers; final new-game, mission, town and cold-LOAD bytes are Unknown.
+— R2-SESSION-153

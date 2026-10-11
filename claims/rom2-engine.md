@@ -6246,3 +6246,218 @@ these routines would exceed the evidence.
 **Unknown.** Index distribution, all computer-unit dispatch, summon/default
 policy and EN equivalents. Read the helper and callers or perform a
 controlled owner observation of a computer mage.
+
+## Automatic-casting control, admission and prepared orders
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-359 | EN/RU selected third key maps route input 0x55 to the level-cycle arm; cycling also needs an unnamed nonzero global flag and requests patch-pool feedback indices 115..117. | High / Medium | ✔ promoted (branch candidate, partially retracted) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-360 | RU options controls 0x83/0x84/0x85 supply target bits 1/2/4; the support affinity helper accepts self, same-owner, relation-bit-2 and relation-low-bits-zero cases with the recorded masks. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-361 | Selected EN/RU receive arms use packet word +5 to find a Player and copy packet byte +0xe into that Player preferences +0x20; the cycle sender carries no actor or Group identity. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-362 | RU sampled idle and attack routes admit human support through actor flags +0x4c mask 4, owner kind zero and spell-book affordability; invocation cadence and move/hold/retreat coverage remain Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-363 | RU prepared support byte 8 dispatches to L2.01552 when primary byte +9 is zero; it initializes a cast phase or a target approach, while sampled setters clear a pending support order. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-364 | RU support builds candidates from a caster +0x70 population and a spatially marked world list, excludes state 0x10 and relation bit 1, and conditionally filters effect 0x1000 before affinity and range. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-365 | RU selected candidate insertion appends at the list tail and traversal follows next nodes; Heal ties and target-major buffs inherit that list order, whose world-population provenance remains Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-366 | EN/RU acquired third key tables, cycle masks and receive-arm byte widths agree; full options, caster, target, command and lifetime equivalence was not measured. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+
+### R2-ENGINE-359
+
+The RU third key switch subtracts 0x20 and indexes the byte map at
+L2.01553. Input 0x55 maps to slot 13; pointer L2.01554 is L2.01509.
+EN uses map L2.01555 and pointer L2.01556 to arm L2.01557. The selected
+arms require global L2.01558 (RU) or L2.01559 (EN) to be nonzero before
+calling L2.01502 / L2.01501. The other arm calls a different helper.
+
+After cycling, RU chooses index 0/1/2 from bits 0x10/0x20, adds 0x73,
+looks up pool L2.01550 and passes the result with literal 0x7d0 to the
+text helper L2.01560 on view+0xa28. At L2.01544 the helper loads its third
+argument, then forwards it with receiver+0x2c to L2.01545 at L2.01546.
+That callee lies outside the acquired ranges; the final field that holds
+the value is Unknown. R2-ASSET-088 identifies the pool path. The U-labelled
+input code is not an unconditional U shortcut.
+
+**Confidence.** High for the local third-map cells, gated cycle calls,
+feedback pool indices, literal argument and forwarding instructions.
+Medium for the end-to-end physical input and visible
+feedback: earlier routing and global-flag meaning are not completely joined.
+
+**Unknown.** Exact modifier or state represented by the global flag, rendered
+feedback text, the final field holding the forwarded argument, its units,
+persistent panel state and sound. An owner run
+with U and named modifier variants plus a feedback screenshot would settle
+the physical binding; reading flag writers, L2.01545 and the text painter
+would settle the static joins.
+
+**Amended.** The object+0x54 storage clause is partially retracted in
+[the overturn entry](retracted.md#rom2-cycle-feedback-argument-forwarding).
+Other clauses and grades stand.
+
+### R2-ENGINE-360
+
+RU construction associates controls 0x83, 0x84 and 0x85 with dialogs
+indices 0xa7, 0xa8 and 0xa9. Their checked states read application masks
+1, 2 and 4. Apply L2.01561 starts from the selected level mask and ORs
+those three control values into global L2.01504. It then calls sender
+L2.01562. R2-ASSET-085 supplies Own, Allies and Neutral source labels;
+R2-ASSET-088 closes the selected RU pool-path binding.
+
+RU L2.01519 accepts equal actor pointers without testing a preference bit.
+For other actors it accepts equal owner pointers with bit 1, relation mask
+2 with preference bit 2, or relation&3 == 0 with bit 4. These bits gate the
+candidate attempts; they do not disable the named self attempts. The selected
+support body and wrappers do not prove all other consumers of these bits.
+
+**Confidence.** High for the explicit control/mask and local affinity
+instructions. Medium for the player-facing relation categories and full
+candidate admission; R2-ENGINE-364 supplies additional builder gates.
+
+**Unknown.** All relation-matrix values, other bit consumers and EN checkbox
+construction. A matrix-writer census and paired EN options read would settle
+those alternatives.
+
+### R2-ENGINE-361
+
+RU arm L2.01563..L2.01564 calls L2.01565 with packet word +5.
+It requires a nonnull result and nonnull Player+0x34, then stores byte
+packet+0xe at preferences+0x20. EN L2.01566..L2.01567 performs the same
+local lookup/null-check/byte-store contract through L2.01568.
+
+The acquired cycle sender uses type 0x46, subtype 3, the current Player
+word and application preference DWORD. Its local payload names no actor,
+selection or Group. Human support reads the caster's owner preferences
+(R2-ENGINE-345). These joins support a shared owner preference rather than
+a separate setting in each caster.
+
+**Confidence.** High for both local receiving byte stores and the acquired
+sender fields. Medium for the complete sender-to-receiver and owner-scope
+contract: the subtype selector, lookup bodies and indirect transport were
+not completely read. No absence census of other preference writers is claimed.
+
+**Unknown.** Complete packet dispatch, every ownership-change route and
+selection/Group UI interactions. Read the type/subtype tables and Player
+lookup, then compare two units with the same owner in an owner run.
+
+### R2-ENGINE-362
+
+RU predicate L2.00044 returns actor byte+0x4c &4. The sampled idle
+wrapper L2.01531 calls human support L2.01512 only for this predicate
+and owner Player+0x2c == 0; nonzero kind reaches separate computer support.
+The attack route L2.01530 also tests the predicate. After its ordinary
+attack preparation it calls support when command range+0x14 is below 2.
+R2-ENGINE-348 supplies per-spell book and mana admission.
+
+The selected alive actor-update excerpt calls L2.00506 at L2.01569 when
+L2.01570 returns zero. That predicate returns true when actor+0x3c is zero.
+The update callers and complete scheduling are not joined. The support
+body has no separate class test; that does not remove the sampled caller gate.
+
+**Confidence.** High for the local flag test and branch predicates. Medium
+for caster eligibility and semantic idle/attack coverage. The class name
+reuses the ROM2 mage flag established by R2-ENGINE-018; book-only universal
+admission is not established.
+
+**Unknown.** Human creation/hire/summon/conversion coverage, all moving,
+holding and retreating orders, and attempts per simulation tick. Read the
+update scheduling and all order dispatch, or observe a fixed-book unit under
+each named order in the original.
+
+### R2-ENGINE-363
+
+The support body sets command+0x60 = 1 before preparation. R2-ENGINE-349
+supplies byte+8 = 8, target+0x28, spell+0x30 and range+0x14. Dispatcher
+L2.00506 prioritizes nonzero primary byte+9; otherwise it indexes table
+L2.01571 with prepared byte minus 1. Slot 7 at L2.01572 leads through
+L2.01573 to L2.01552. The formerly sampled L2.01526 is byte 7's handler,
+not this byte 8 route.
+
+L2.01552 calls unread L2.01574 for a non-self target. Nonzero or self
+calls L2.01575, which sets primary+9 = 2, phase+0x15 = 0, actor state+0x54
+= 13, actor+0x5c = target and actor+0x64 = spell. With support flag+0x60
+nonzero it skips reset/replan L2.01576. Zero takes L2.01577, calls unread
+L2.01578 and sets actor state 1. These are cast/approach preparations,
+not observations of a successful spell or movement.
+
+Sampled setters L2.01579, L2.01580, L2.01581, L2.01582 and L2.01583
+call reset L2.01584 and clear prepared+8. Reset reaches L2.01585, which
+clears support flag+0x60. The named setters do not directly clear primary+9.
+
+**Confidence.** High for table indexing and the acquired local writes.
+Medium for cast/approach and interruption semantics. The relevant range/path
+helpers, player-input callers and completed cast lifecycle remain unread.
+
+**Unknown.** Guaranteed movement, cast completion, restoration of the prior
+order, and interruption after primary cast initialization. Read the approach
+helpers, setter callers and completion handler; an owner move/attack order
+between preparation and application would distinguish cancellation states.
+
+### R2-ENGINE-364
+
+L2.01512 calls L2.01514 with caster+0x70, then L2.01515 with the
+caster and session+0xa64. The first builder traverses the supplied list,
+calls spatial marker L2.01586 / L2.01587 for its members and admits world
+list members whose position-indexed marker byte is nonzero. Its additional
+helper and fallback calls are visible, but its full spatial grammar depends
+on unread callees of L2.01587. The population at caster+0x70 is not proved
+to be the UI selection or Group.
+
+The second builder clears session+0xac8 and +0xaa8. It excludes candidate
+state+0x54 == 0x10. For effect mask 0x1000, relation byte exactly 2 passes;
+otherwise some member of caster+0x70 must satisfy helper L2.01588 result
+<= its command byte+0x71. The helper's sight/distance meaning is unread.
+Relation predicate L2.01589 returns relation bit 1. That bit routes a
+candidate to +0xac8; other candidates append to +0xaa8, which support uses.
+Affinity and spell range are later filters (R2-ENGINE-348).
+Getter L2.01521 returns its position object's word+2; physical units remain
+Unknown.
+
+**Confidence.** High for explicit exclusion, relation and effect predicates.
+Medium for complete candidate membership, visibility and spatial scope.
+Unexamined marker/path helpers prevent a physical sight or radius claim.
+
+**Unknown.** Exact sight/range units, occlusion, hidden-target admission,
+selection/Group identity and relation producers. Read marker callees and
+caster+0x70 writers, or observe isolated targets across sight and relation
+boundaries in an owner run.
+
+### R2-ENGINE-365
+
+Candidate builder L2.01515 inserts accepted non-hostile candidates
+through L2.01590, which calls L2.00207. The latter writes a new node's
+payload, links it after the previous tail and replaces the tail pointer.
+Iterator L2.00209 / L2.00213 delegates to L2.00211, which returns the
+current node payload and advances the cursor to node+0. Thus the selected
+second-stage list preserves the order in which that builder appends.
+
+Heal retains the first strict minimum integer HP/max score; Average and
+Maximum iterate targets before spells (R2-ENGINE-346, R2-ENGINE-347).
+Those decisions therefore inherit this second-stage order. The first builder's
+world list and caster+0x70 ordering were not tied to creation order, selection
+order, distance or a stable player-visible priority.
+
+**Confidence.** High for the local append and next-node traversal. Medium
+for the resulting target order contract; upstream list provenance is open.
+
+**Unknown.** Reproducible world/party order across creation, LOAD and selection
+changes. Read the upstream insertion producers or use two tied wounded
+candidates in an owner run with reversed creation/selection order.
+
+### R2-ENGINE-366
+
+Both selected third key maps have one slot-13 entry at input 0x55.
+Both level cycles preserve low bits 0..2 and use the established 8/24/56
+masks. Both acquired receive arms load Player identity as a word and store
+the payload's low byte at Player preferences+0x20. The preference serializers
+in both images transfer 36 bytes. R2-ASSET-085 records localized source labels.
+
+This comparison is of explicit local operands and selected tables, not an
+address-alias claim that external callees are equivalent. The attempted EN
+mission fragment begins inside an instruction and supplies no mission
+comparison. DLLs were identified and their PE headers acquired; no DLL
+routine body was read.
+
+**Confidence.** High for the named local table values, masks and widths.
+Medium for shared end-to-end control/scope, whose joins remain incomplete.
+Unknown for full options, support, targeting, command and lifecycle parity.
+
+**Unknown.** All unpaired bodies and native feedback/glyph behavior. Pair the
+remaining EN routes and observe the same controlled action in both originals.

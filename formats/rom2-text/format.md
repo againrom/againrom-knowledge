@@ -212,3 +212,11 @@ The separate `text/main.txt` rows 218..220 name EN `Autohealing off`,
 `Occasional autohealing on`, `Frequent autohealing on`; they are not established
 as the three options labels by the selected binding. Their input-dispatch and
 feedback correspondence remain Unknown. — R2-ASSET-085
+
+The selected RU loader binds the options dialogs receiver to
+main/text/dialogs.txt. Target checkbox IDs 0x83/0x84/0x85 use source indices
+167/168/169; combo 0x8d uses 171/172/173. A separate key-feedback receiver
+loads patch/patch.txt and requests indices 115..117. That patch text population
+was not read, so its feedback labels remain Unknown. The main.txt autohealing
+labels cannot supply those values. Native pool mutation, conversion and
+rendered glyphs remain Unknown. — R2-ASSET-088

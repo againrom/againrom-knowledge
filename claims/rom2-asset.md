@@ -920,3 +920,34 @@ not every installed text source.
 EN options construction. Read the loader and glyph conversion or observe
 the original options dialog; a CP1251 viewing transform alone does not
 prove native display encoding.
+
+## Automatic-casting options and feedback pools
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-088 | RU options label access uses the dialogs pool, while selected key feedback uses the patch/patch.txt pool at indices 115..117; the actual feedback text was not read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+
+### R2-ASSET-088
+
+RU selected loader sequence pushes the dialogs path at L2.01547 and
+loads receiver L2.01500 through L2.01548. The acquired .data ASCII-string
+pass identifies that path as main/text/dialogs.txt. Options construction uses
+that receiver with indices 167..174 for target choices, levels and a combo
+caption/tooltip argument. R2-ASSET-085 supplies the short EN/RU source labels;
+new source row 174 is also measured, without asserting its visible role.
+
+The same selected loader pushes L2.01549 to receiver L2.01550.
+The bounded NUL-terminated string read at that address gives patch/patch.txt.
+Accessor L2.01551 adds the argument to the pool's base index. The selected key
+arm uses receiver L2.01550 with indices 0x73..0x75, not the main.txt pool.
+No patch archive node or patch text file was acquired.
+
+**Confidence.** High for local receiver/path operands, the explicit patch
+path string and requested indices. Medium for complete source-to-native-label
+binding and caption/tooltip role; live pool mutation and encoding are not
+closed. Unknown for actual patch feedback text and rendered glyphs.
+
+**Unknown.** Patch source values, runtime text conversion and display.
+Acquire the named patch text population or inspect an owner screenshot after
+the named cycle input. The unrelated main.txt autohealing labels cannot be
+substituted as this feedback evidence.

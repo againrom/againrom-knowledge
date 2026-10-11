@@ -1,5 +1,11 @@
 # Overturn history
 
+## ROM2 cycle feedback argument forwarding
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-359` | The complete helper stores its third argument in object+0x54. | High | [EXP-2044 helper listing](../experiments/EXP-2044-rom2-autocast-scope/evidence/measured/listings/ru-status-text-store.txt) | At L2.01544 the helper loads its third argument and forwards it with receiver+0x2c to L2.01545 at L2.01546. That callee is outside the acquired ranges; the final field holding the value is Unknown. Other clauses and grades stand. | REFUTED (storage-field clause only) |
+
 ## Terminal corpse consultation eligibility
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
