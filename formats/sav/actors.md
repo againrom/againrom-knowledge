@@ -475,3 +475,29 @@ for every save or the runtime drawable values. — SAV-1243
 
 The measured EN/RU executables are byte-identical. No RU save or localized
 definition census establishes equal runtime initialization. — SAV-1245
+
+### Terminal decay and the next SAVE
+
+The standing ordinary local decay rule reaches stage 5, health -10001 and
+runtime ID 0 (Medium for this conditional composition). Retention through
+notification and until SAVE is Unknown; other stage-5 health residues remain
+possible. The exclusive direct-write and cursor/no-unlink clauses are
+partially retracted. — SAV-1238
+
+If the actor remains archived with state 5/-10001/0 and intervening archive
+operations preserve it, the standing current-field list/scalar STORE contracts
+predict those saved values (Medium). The actual original post-decay SAVE is
+Unknown. New document ordering, accessor/filter, source-site, mutation and
+identity details are partially retracted. — SAV-1239
+
+The standing dead-list LOAD, scalar restoration and rebind contracts predict
+the same values from that retained record, conditional on later callbacks
+preserving it (Medium). The completed original LOAD and the zero-ID helper
+bypass are Unknown here. The new bypass, exact call-site/table-target and
+helper-prefix clauses are partially retracted. — SAV-1240
+
+Unit, Humanoid and Human inherit the base scalar wire programme (Medium for
+conditional composition). Successful live-death transfer, Hero lifecycle and
+EN/RU equivalence are Unknown here. The new table/selector, no-suffix,
+predicate-absence, transfer-wrapper and image-equality clauses are partially
+retracted. — SAV-1241

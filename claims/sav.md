@@ -15890,3 +15890,130 @@ runtime card contents.
 
 **Unknown.** RU-created save census, locale-dependent definitions, heap
 history and first-draw timing. Identical code does not make those equal.
+
+## Terminal corpse SAVE and LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1238 | Standing ROM1 claims support the ordinary local terminal stores 5/-10001/0; retention until the next SAVE remains Unknown. | Medium / Unknown | ● active (partially retracted) | [EXP-0531](../experiments/EXP-0531-corpse-decay-save/) |
+| SAV-1239 | If the actor remains archived with state 5/-10001/0, the standing dead-list and scalar STORE contracts predict those saved values. | Medium / Unknown | ● active (partially retracted) | [EXP-0531](../experiments/EXP-0531-corpse-decay-save/) |
+| SAV-1240 | The standing dead-list LOAD and rebind contracts predict restoration of a retained 5/-10001/0 record; the zero-ID helper bypass is Unknown in this experiment. | Medium / Unknown | ● active (partially retracted) | [EXP-0531](../experiments/EXP-0531-corpse-decay-save/) |
+| SAV-1241 | Unit, Humanoid and Human inherit the standing scalar wire programme; successful live-death transfer and EN/RU equivalence remain Unknown in this experiment. | Medium / Unknown | ● active (partially retracted) | [EXP-0531](../experiments/EXP-0531-corpse-decay-save/) |
+
+The consultation record charges at least 32 passes against the fixed limit of
+16: 29 unambiguous plus three mixed commands counted conservatively.
+Chronological membership of the first 16 is not recoverable. These cards use
+only ROM1 authorities standing at base `9ebf07b4`; no new listing clause is
+retained solely on an unplaced consultation. The clause audit is published in
+[support.tsv](../experiments/EXP-0531-corpse-decay-save/support.tsv).
+
+### SAV-1238
+
+HERO-DEATH-026 and HERO-DECAY-069 already identify `R0860`'s dead-list
+call to `R0867`. SAV-DEADLOAD-129 supplies the signed-health entry exit
+below -10000 and the ordinary -10/-20/-40/-600 stage ladder. Its single local
+terminal health assignment is -10001. HERO-DEATH-026 supplies stage 5,
+bitmap release and actor `+04 = 0` at that arm. Its amended cadence is one
+health subtraction on every second full tick.
+
+These are local operations, conditional on reaching the ordinary arm.
+SAV-DEADLOAD-129 leaves external stage-5 residue producers open;
+HERO-DEATH-026's standing amendment excludes a universal saved-health -10001
+rule. The local assignment does not prove retained dead-list membership or
+unchanged fields through notification and later play.
+
+**Confidence.** Medium for this conditional composition of standing
+authorities. Unknown for retention and the actual next-SAVE state. No new
+listing interpretation is used as an admissible premise.
+
+**Unknown.** Notification mutation, later removal and whether the loaded actor
+reaches this arm. No original runtime observation was made.
+
+**Amended.** The exclusive direct-write census, cursor/no-unlink clause and
+retention inference are partially retracted in [retracted.md](retracted.md).
+Their support cannot be assigned to the preregistered first 16 consultations.
+
+### SAV-1239
+
+SAV-DEADLOAD-124 supplies manager `R1589`, its embedded-list serializer
+`R1341`, the count and each actor object reference. SAV-DEADLOAD-126
+supplies the current Unit health `+94` and stage `+13c` scalar STORE
+destinations. SAV-TOKEN-034 supplies the current Token runtime-ID dword
+`this+04`. These standing contracts support a current-field prediction,
+conditional on the actor remaining archived with the stated fields and on
+intervening archive operations preserving them.
+
+Under that condition, SAV-1238's local tuple yields saved scalars 5/-10001/0.
+This does not establish an atomic whole SAVE, absence of later filtering or
+successful retention until STORE. It does not prove preservation of every
+other actor field.
+
+**Confidence.** Medium for the conditional list/scalar STORE composition.
+Unknown for the actual next original SAVE. Standing authorities, rather than
+the unplaced new accessor consultations, supply each retained premise.
+
+**Unknown.** Cleanup before SAVE, intervening mutations, and a complete
+original-written post-decay SAVE.
+
+**Amended.** Document ordering, the new accessor/filter exclusion, exact
+scalar-source instruction sites, the `+14c` to `+148` SAVE mutation and the
+saved-address/deduplication explanation are partially retracted in
+[retracted.md](retracted.md). Their first-16 eligibility is unestablished.
+
+### SAV-1240
+
+SAV-DEADLOAD-124 supplies creation/resolution and dead-list append on LOAD.
+SAV-DEADLOAD-126 supplies independent stored health and stage restoration.
+MOVE-ID-016 supplies runtime-ID readback and round-trip identity; its broad
+re-mark wording is not used to infer a zero-ID helper call or bypass.
+SAV-DEADLOAD-125 supplies post-world dead-manager `R1599`, actor slot
+`+24`, Position and five reference repairs. SAV-DEADLOAD-126 excludes health,
+stage and timer changes in that post-load routine and confines unrelated
+embedded-object repair to stage 0.
+
+For a retained 5/-10001/0 record, these contracts predict the same scalars in
+the dead list, conditional on later callbacks preserving the actor and fields.
+The zero-ID helper bypass has no admissibly placed new support here.
+
+**Confidence.** Medium for the conditional restoration/rebind composition.
+Unknown for the zero-ID bypass and the completed original LOAD endpoint.
+New primitive prefixes supply no retained helper-purity premise.
+
+**Unknown.** A complete original LOAD of the post-decay SAVE, later world
+callbacks, Human lookup/string helpers and malformed-record behavior.
+
+**Amended.** The newly read zero-ID bypass, exact scalar-reader and document
+call sites, reread class-table targets and helper-prefix claims are partially
+retracted in [retracted.md](retracted.md). The standing scalar and rebind
+contracts remain the conditional premises.
+
+### SAV-1241
+
+SAV-DEADLOAD-126 supplies the Unit scalar programme. SAV-UNITPROG-156 and
+SAV-HUMAN-043 establish that Humanoid/Human records include the Unit programme,
+then 24 raw bytes and thirteen references. This inheritance supports the same
+base scalar encoding, conditional on the remaining class operations preserving
+those fields. It does not establish that every derived serializer or callback
+is free of normalization.
+
+HERO-DEATH-026 supplies living-tick teardown `R0208` and its call to the
+same decay routine. HERO-DECAY-069 distinguishes the live and dead loops and
+places live-list removal after the teardown action state. These authorities
+do not close the new dead-insertion wrapper or successful generic transfer.
+Once an actor is in the dead archive with the stated fields, SAV-1239/1240's
+conditional contracts apply; actual entry into that archive remains open.
+
+**Confidence.** Medium for inherited scalar encoding and the standing local
+live-death/decay connection. Unknown for successful live-death transfer,
+Hero-specific lifecycle equivalence and EN/RU equivalence in this experiment.
+Retained image measurements are not an eligible new claim premise because
+their interpretation cannot be placed inside the first 16 consultations.
+
+**Unknown.** Other derived classes, Hero-specific effects, full live-death
+SAVE/LOAD witnesses, and executable/data/runtime locale equivalence.
+
+**Amended.** Exact reread serializer tables/selectors, the Human no-suffix or
+no-normalization assertion, absence of class/death-origin predicates, new
+transfer-wrapper details and image-equality conclusion are partially retracted
+in [retracted.md](retracted.md). The withdrawal concerns admissibility and
+does not establish that those local observations are false.
