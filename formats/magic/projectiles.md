@@ -2,6 +2,52 @@
 
 [Reference](format.md)
 
+## Moving targets and the application destination
+
+The client travel step is `trunc((currentAim-currentPosition)/remaining)`
+on each axis. Actor-target records refresh aim and direction every successful
+lookup, while missing targets retain the previous values until completion.
+The last positive-count call reaches the current or held aim. Unit shots
+including picture 12 carry a target word; Fire Ball spell picture 12 instead
+carries a fixed cell-centre point. — ANIM-155, ANIM-156, ANIM-157
+
+The ordinary physical application rereads the simulation target actor+0x5c
+at countdown expiry and tests its current footprint-aware reach. Its live
+damage calculation is separate from the visual endpoint. A dead shooter is
+refused; an already dead or off-map target is not refused solely for that
+state while its pointer/Player owner and reach remain valid. — AI-463, AI-464
+
+Distribution 1's PointEffect retains raw actor pointer+0x44 and a snapshot
+Position+0x10. Its actor tick dispatches to that pointer with a bound Player
+owner, without a local position, footprint, distance or HP test. Fire Ball's
+AreaEffect instead retains a fixed Position and Radius 1. At delivery its
+blast visits the destination's inclusive 3x3 square and applies to current
+cell occupants, including actors that were not the selected target. No
+client-path interception supplies those recipients. Each reached Fire Ball
+application divides its copied base/spread by target size squared; aliases
+are not deduplicated. — MAGIC-293
+
+SpellTransport is a stationary wrapper. Its constructor sets a word counter
+to low16(trunc(XY distance(caster Position, child Position)/Speed)). Its tick
+decrements the word and transfers the child when the signed result is <=0,
+then clears child references and retires. It does not follow an actor or
+move toward its child point. The shared caller overwrites Lightning/Spray's
+transport counter with 10 after construction. Positive damage enters the shared shape/delivery
+suffix at L14298; MAGIC-289's default-entry and transport-flight clauses
+are partially retracted. — MAGIC-293
+
+DirectDamage's base/spread/school are fixed before the transport wait. The
+child application calls the victim resolver with those fields, consumes RNG
+and current resistance, then subtracts HP. The physical dead-shooter/range
+guards are outside this prepared-payload route. Its local actor applier has
+no HP or distance gate. Complete pointer lifetime after death/removal and
+native alignment of visual release, simulation delivery and burst drawing
+remain Unknown. — MAGIC-294, MAGIC-293
+
+The EN/RU executable, unit/projectile registries and all 28 spell parameter
+rows compare equal. These inputs select the same measured branches; visible
+timing and external locale state were not observed. — MAGIC-295
+
 ## Projectile trajectories
 
 Settled by `MAGIC-BOLTGATE-069`, `MAGIC-BOLTSHAPE-070` (partially retracted and superseded for interpolation), `MAGIC-BOLTLIST-071` (superseded in part in the ledger),

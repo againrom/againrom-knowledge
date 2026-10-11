@@ -52,6 +52,50 @@ the sheet is loaded on FIRST DRAW, not at start-up
 picture 10 and 12 also blit a smoke sheet once per point of the object's trail array
 ```
 
+## Moving targets and independent application
+
+On the default travel arm, each axis advances by signed
+`trunc((currentAim-currentPosition)/remainingSegments)`. A resolved target
+refreshes its current centre/height and actiondir before that step. The last
+positive-count call reaches that call's aim; the next zero-count call finishes.
+The initial count is set at release and is not extended when a target moves,
+so movement changes the path and per-call distance. No successful lookup
+means the last aim/direction is kept, including initial zero aim.
+— ANIM-155, ANIM-157
+
+Unit shots of pictures 1 through 7, 10 and 12 retain a client target word.
+Their count uses shooter/target current x/y distance divided by 200; the
+ShootOffset changes the start point, not that distance calculation. A Fire
+Ball spell of picture 12 instead has target zero and a fixed cell-centre aim.
+Fire Arrow spell picture 10 has an actor target. Homing selects message
+interpretation at construction, not a per-tick movement mode. — ANIM-156
+
+The client endpoint does not select physical damage. At actor countdown
+expiry, the ordinary Unit strike rereads actor+0x5c and current footprint-aware
+reach, computes damage from the live combat block/current target and subtracts
+HP. It refuses a dead shooter but does not refuse a dead/off-map target solely
+for that state while its pointer and Player owner remain valid. Bystanders
+along the client path are not replacement targets in this route. — AI-463, AI-464
+
+Prepared spell effects have their own delivery. PointEffect retains the
+actor pointer; Fire Ball AreaEffect retains a point and visits current
+occupants of the radius-1 square at that point. The stationary SpellTransport
+only counts down and enqueues the child. Damage base/spread/school are prepared
+before the wait. The shared caller overrides Lightning/Spray's transport
+counter to 10, independently of their visual count. RNG, current victim
+resistance and HP subtraction occur at application. The transport-flight/
+default-entry clauses of MAGIC-289 are partially retracted. — MAGIC-293, MAGIC-294
+
+Opcode 0x74 changes the target's client visibility flag, not a projectile.
+Later hash deletion, corpse/ID-reuse lifetime and retained simulation-pointer
+validity remain Unknown. The pre-zero-test import is USER32!UnionRect;
+ANIM-149 is amended for that import only. Its separate prologue callback and
+destructor remain unresolved. — ANIM-157
+
+The measured executable, unit/projectile registries and numeric parameters of
+all 28 Spells rows are equal between EN and RU. That is one code witness and
+equal route inputs, not a native locale/scheduling comparison. — MAGIC-295
+
 ## Records in flight and their saved form
 
 Seven call sites build a record: client arms 0x86, 0x8b and 0x8c, the unit
@@ -98,9 +142,9 @@ At picture 13 or above only pictures 13, 17, 20, 27, 30, 34, 36, 51 and 60
 receive non-zero segments, so the mark arm of the eleven pictures 18, 24,
 28, 40, 44, 48, 52, 54, 56, 62 and 64 runs only for a 0x8b record whose
 segment word is non-zero. After its zero test a finished call builds and
-sends nothing, and only picture 13's sets a view redraw request; every call
-first runs an unresolved import call with the view, and the record's
-destructor was not read. — ANIM-149
+sends nothing, and only picture 13's sets a view redraw request; every call first merges its rectangle with the view through USER32!UnionRect.
+ANIM-149 is amended for this import; the separate prologue callback and
+destructor remain unresolved. — ANIM-157
 
 The picture-13 record starts at actionphase -1 with 22 segments. Driver
 calls 1 to 22 return 1; call 9 (actionphase 8) burns the 3 × 3 tiles. Call 23
@@ -108,12 +152,12 @@ finds 0 segments, sets view `+0x74` and returns 0, and the same step's
 sweep destroys the record. A SAVE between calls 22 and 23 holds it with 0
 segments and actionphase 21; after LOAD its first call removes it. — ANIM-150
 
-Fire Ball's burst record sits at the cell centre of the transport's point,
+Fire Ball's burst record sits at the cell centre of the child AreaEffect's point,
 without the fine byte. For a size-2 target at fine 128 that is the anchor
 cell, while a homing record aims at the footprint centre. No stage stores the
 target's size: the Position has no size byte, AreaEffect `+0x49` holds the
-Radius, and the record has no size field. That the transport flies to the
-same point is Medium. — MAGIC-289
+Radius, and the record has no size field. MAGIC-289's transport-flight/default-entry clauses are partially retracted;
+the stationary wrapper and fixed child destination are specified by MAGIC-293.
 
 SAVE writes the 16 leaves of every record. LOAD reads them, rebinds the view,
 the ID and the map node, and loses the word list `+0xa8` (a loaded picture

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
+Claims labelled: 3377. Observation: 95. Static analysis: 2813. Mixed: 469.
 
 ## Ledger ai
 
@@ -262,7 +262,7 @@ Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 | AI-393 | mixed | ● active |
 | AI-397 | static analysis | ✔ promoted (branch candidate) |
 | AI-398 | static analysis | ✔ promoted (branch candidate) |
-| AI-405 | static analysis | ● active |
+| AI-405 | static analysis | ● active (amended, partially retracted) |
 | AI-406 | static analysis | ● active |
 | AI-407 | static analysis | ● active |
 | AI-408 | static analysis | ● active |
@@ -278,7 +278,7 @@ Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 | AI-418 | static analysis | ● active |
 | AI-437 | static analysis | ● active |
 | AI-438 | static analysis | ● active |
-| AI-443 | static analysis | ✔ promoted |
+| AI-443 | static analysis | ✔ promoted (amended) |
 | AI-444 | static analysis | ✔ promoted |
 | AI-445 | static analysis | ✔ promoted |
 | AI-446 | static analysis | ✔ promoted |
@@ -289,6 +289,16 @@ Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 | AI-452 | static analysis | ✔ promoted |
 | AI-453 | static analysis | ✔ promoted |
 | AI-454 | static analysis | ✔ promoted |
+| AI-455 | static analysis | ✔ promoted |
+| AI-456 | static analysis | ✔ promoted |
+| AI-457 | static analysis | ✔ promoted |
+| AI-458 | static analysis | ✔ promoted |
+| AI-459 | static analysis | ✔ promoted |
+| AI-460 | static analysis | ✔ promoted |
+| AI-461 | static analysis | ✔ promoted |
+| AI-462 | static analysis | ✔ promoted |
+| AI-463 | static analysis | ✔ promoted |
+| AI-464 | static analysis | ✔ promoted |
 
 ## Ledger alm
 
@@ -539,8 +549,11 @@ Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 | ANIM-145 | static analysis | ✔ promoted |
 | ANIM-147 | static analysis | ✔ promoted |
 | ANIM-148 | static analysis | ✔ promoted |
-| ANIM-149 | static analysis | ✔ promoted |
+| ANIM-149 | static analysis | ✔ promoted (amended) |
 | ANIM-150 | static analysis | ✔ promoted |
+| ANIM-155 | static analysis | ✔ promoted |
+| ANIM-156 | static analysis | ✔ promoted |
+| ANIM-157 | static analysis | ✔ promoted |
 
 ## Ledger databin
 
@@ -1080,7 +1093,10 @@ Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 | MAGIC-286 | static analysis | ✔ promoted |
 | MAGIC-287 | static analysis | ✔ promoted |
 | MAGIC-288 | static analysis | ✔ promoted |
-| MAGIC-289 | static analysis | ✔ promoted |
+| MAGIC-289 | static analysis | ✔ promoted (partially retracted) |
+| MAGIC-293 | static analysis | ✔ promoted |
+| MAGIC-294 | static analysis | ✔ promoted |
+| MAGIC-295 | mixed | ✔ promoted |
 
 ## Ledger menu
 
@@ -1338,6 +1354,16 @@ Claims labelled: 3351. Observation: 95. Static analysis: 2788. Mixed: 468.
 | MOVE-120 | static analysis | ✔ promoted |
 | MOVE-121 | static analysis | ✔ promoted |
 | MOVE-122 | static analysis | ✔ promoted |
+| MOVE-125 | static analysis | ✔ promoted |
+| MOVE-126 | static analysis | ✔ promoted |
+| MOVE-127 | static analysis | ✔ promoted |
+| MOVE-128 | static analysis | ✔ promoted |
+| MOVE-129 | static analysis | ✔ promoted |
+| MOVE-130 | static analysis | ✔ promoted |
+| MOVE-131 | static analysis | ✔ promoted |
+| MOVE-132 | static analysis | ✔ promoted |
+| MOVE-133 | static analysis | ✔ promoted |
+| MOVE-134 | static analysis | ✔ promoted (amended, partially retracted) |
 
 ## Ledger pal
 

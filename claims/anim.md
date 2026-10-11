@@ -2870,7 +2870,7 @@ this question.
 |---|---|---|---|---|
 | ANIM-147 | A cast by a caster with a client ID reaches the cast producer (through 0x86, or 0x8a for spell 14), which builds one record of picture 2 × spell + 8 (two for 60); 21 of the 28 get 0 segments and die in that 0x401 pass. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 | ANIM-148 | Odd records come only from Fire Ball's blast (13, 22 segments) and the staged arm of spells 4, 9 and 21 (17, 27, 51; 16, 18, 16 segments); the bursts of 3, 7, 8, 12, 17 and 19 build no record. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
-| ANIM-149 | At picture 13 or above, shipped producers give non-zero segments only to 13, 17, 20, 27, 30, 34, 36, 51 and 60, so the eleven-picture mark arm `L05687` runs only for a 0x8b record with a non-zero segment word. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| ANIM-149 | At picture 13 or above, shipped producers give non-zero segments only to 13, 17, 20, 27, 30, 34, 36, 51 and 60, so the eleven-picture mark arm `L05687` runs only for a 0x8b record with a non-zero segment word. | High / Medium | ✔ promoted (amended) | [EXP-0509](../experiments/EXP-0509-flight-records/); [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
 | ANIM-150 | The picture-13 burst record returns 1 on driver calls 1 to 22 and is destroyed in the sweep of call 23, which also sets view `+0x74`; a SAVE between calls 22 and 23 holds it with 0 segments. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 
 ### ANIM-147
@@ -2989,7 +2989,7 @@ Life of each record at picture 13 or above, from the driver `R0558`
   when it returns an object, that object's slot `+0x7c`
   (`L13742..L13743`), then `CALL [L13744]` at `L13745` with view
   `+0xf4` passed twice and a local rectangle built from `+0x50/+0x54/+0x68`;
-  neither callee nor the import was resolved. After the zero test
+  the `R0347` result/callback remains unresolved; ANIM-157 resolves the import as `USER32!UnionRect`. After the zero test
   at `L02817`, the returning path stores only picture 13's view `+0x74`
   and allocates and sends nothing.
 - The record's end also runs its destructor through vtable `+4`
@@ -3004,12 +3004,14 @@ reachability of `L05687`: which sources send 0x8b is Unknown.
 
 **Unknown.** What draws pictures 18, 24, 28, 40, 44, 52, 54 and 62 on their
 target, if anything; how the `+0x124` mark of 20 and 30 is removed, which
-the destructor `L13746` could touch. A listing of `L13746` and a
-resolution of the import at `L13744` settle both.
+the destructor `L13746` could touch. A listing of `L13746` and closure of the mark lifecycle are still required.
 
 **Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
 `evidence/q2-listings.txt`, `evidence/q2-life.tsv`,
 `evidence/tables.txt`.
+
+
+**Amended.** ANIM-157 identifies the pre-zero-test import as `USER32!UnionRect`; the separate prologue callback and projectile destructor remain unresolved. The arm/lifetime conclusions and their grades stand.
 
 ### ANIM-150
 
@@ -3046,3 +3048,102 @@ which `ANIM-113` leaves open.
 **Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
 `evidence/q2-listings.txt`, `evidence/q3-listings.txt`,
 `evidence/corpus-projectiles.txt`.
+
+## Flight with a moving target
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-155 | On the client driver's default travel arm, each positive-count call adds trunc((current aim - current position)/remaining) per axis; a resolved target refreshes aim and direction before the step. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| ANIM-156 | Unit-shot records retain a client target word even for picture 12; a normal Fire Ball spell record instead retains a cell-centre point with target word zero. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| ANIM-157 | A missing client target preserves aim and direction until countdown completion; opcode 0x74 changes the target's visibility flag, without removing a projectile in that arm. | High / Medium | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+
+### ANIM-155
+
+In action 1 of `R0558`, a nonzero word `actiontarget +0x86` is resolved
+through view `+0x9b8`. A found node supplies its drawable pointer. The driver
+copies target `+0x58/+0x5c/+0x10` into `actionx/y/z +0x88/+0x8c/+0x90` and
+recomputes byte `actiondir +0x85` using `L02828` from projectile current
+`x/y +8/+0xc`. These are the target's current horizontal footprint centre
+and height, not a release line (`ANIM-101`, `ANIM-139`).
+
+For each axis, signed subtraction and `IDIV` produce
+`step = trunc((aim-position)/actionsegments)`. The default arm at `L05578`
+adds those steps to `x/y/z`. It copies actiondir to dword `dir +0x6c`.
+The tail decrements the counter. At remaining 1 the step reaches the aim
+used by that call exactly. The following call sees zero and returns
+finished before movement. The counter is not extended when the target moves.
+
+The direction helper and draw frame rule remain `ANIM-138` and
+`ANIM-PROJ-026`, whose trail-field clause is partially retracted. A step can
+be zero because division truncates. A moving target can change both speed
+and direction. The final point is the last resolved aim, or the retained
+aim when resolution fails.
+
+**Confidence.** High for this local default arm: the complete driver,
+direction helper and fixed synthetic fragment bounds are committed.
+Twenty steps in five trajectories reproduce stationary, moving, missing
+and cached-zero-HP targets. Countdown decrement in those fragment trials
+is supplied by the harness; the native decrement and zero test are listed.
+This is not a native schedule or whole-image writer enumeration.
+
+**Unknown.** Exact native update/draw ordering and coordinate arithmetic
+outside the measured ordinary signed-coordinate population. Other driver
+arms use the separate rules of ANIM-149.
+
+### ANIM-156
+
+`R0603` writes the shooter's client target word into record `+0x86`.
+It sets action 1, actionphase 0 and segments to the truncated source-to-target
+distance divided by 200. Its distance uses shooter and target current x/y
+and excludes the class ShootOffset adjustment in the projectile start
+point. The new record's aim starts at the constructor's zero values and is
+refreshed by the first successful target lookup (`SAV-1130`, `SAV-1188`).
+
+The shipped unit registry's resolved shot pictures are 1 through 7, 10 and
+12 (`ANIM-147`). Every one takes the default travel arm. Picture 12 alone
+therefore does not imply a point cast. Unit-shot target identity survives
+independently of that picture's absent Homing key.
+
+For spell messages, the producer obeys the source's actiontarget and aim.
+Client arms 0x86 and 0x8b use registry Homing: nonzero selects a target word;
+zero selects packed cell bytes and expands each coordinate to cell*256+128
+(`MAGIC-288`). Shipped Fire Arrow picture 10 has Homing 1 and target sender;
+Fire Ball picture 12 has Homing 0 and cell sender. Its normal spell record
+has target zero and a fixed point. The spell sender/point calculation and
+the simulation destination are distinct from the unit-shot producer.
+
+**Confidence.** High for the named release branches and installed EN/RU
+registries/28 spell parameter rows. Listings and `spell-routes.tsv` preserve
+the selection facts. This does not claim that all sources without a client
+ID have been observed, or that every target pointer survives release.
+
+### ANIM-157
+
+When actiontarget lookup fails at `L14296..L13254`, the driver does not
+write actionx/y/z or actiondir. The default arm continues toward that held
+point, including zero when no successful lookup has ever occurred. Target
+cached HP is not an admission test in this lookup/movement path. A resolved
+synthetic target with cached HP word `+0xfc` zero takes the same four steps
+as a resolved positive-HP target.
+
+Client opcode 0x74 resolves the actor at `L14297` and sets or clears bit
+0x80 of its `+0x18c` flags. This arm does not unlink the actor hash node,
+read a projectile or cancel a projectile. The read layer selector and
+minimap gate consume that bit. An actor becoming hidden is therefore not
+the same local operation as its target word becoming unresolvable.
+
+The import at `L13744`, called before the driver's zero test, is
+`USER32!UnionRect`. Its call merges rectangles; it is not an unresolved
+damage callback. The separate `R0347`/slot +0x7c prologue callback remains
+unresolved. ANIM-149's import Unknown is amended by this result.
+
+**Confidence.** High for the named local driver, opcode arm, flag consumers
+and PE import identity. Medium for continued target resolvability after
+death or leave-map: the linear displacement/immediate scan preserves 237
+hits, but their ownership and indirect/bulk-copy paths are not closed.
+No global target-lifetime or removal-set absence is claimed.
+
+**Unknown.** The client hash's complete corpse/removal/ID-reuse lifetime.
+Static closure of all actor deletion paths, or a native identity watchpoint
+from release through death/leave-map, would settle it. The projectile
+destructor and the prologue callback remain unread.

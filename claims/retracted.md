@@ -1,5 +1,11 @@
 # Overturn history
 
+## Fire Ball shape entry and transport interpretation
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MAGIC-289` (default-entry and transport-flight/no-own-Position clauses only; burst cell, fine-byte loss and no-target-size clauses stand) | Verbatim: "The effect creator's default arm (`L03046`), which takes Fire Ball"; "the transport receives no point and no size of its own"; "the transport flies to that same position" | High / Medium | [EXP-0527](../experiments/EXP-0527-projectile-flight/), MAGIC-293 | Positive damage jumps `L14299` to the shared shaping suffix `L14298`, bypassing default entry `L03046`. The wrapper's base receives the caster Position. Its tick changes a countdown, child references and a retirement flag; it does not move. The child AreaEffect retains the fixed destination. No target size is added. | **REFUTED** — partially retracted |
+
 ## Party placement order at map load
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
@@ -1296,3 +1302,15 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `SAV-HEAD-025` (the `world+0x00 == world+0x04 >> 4` relation only; the field order, the field meanings and the other four probe checks stand) | Verbatim: "Probe, 4/4: the head parses, `world+0x00 == world+0x04 >> 4`, the eleven dwords are all zero" | High | [EXP-0521](../experiments/EXP-0521-session-clock/), SAV-1210 | In the 28 saves of five owner-directory dates the full tick is `(world+0x04 + 1) >> 4`. `2026-08-02/game0003.sav` has sub-tick 9343 (15 modulo 16) and full tick 584, where `sub >> 4` is 583; the other 27 files fit both formulas. | **CORRECTED** |
+
+## EXP-0526 executor admission
+
+| Claim | Verbatim clause | Original confidence | Evidence | Correction | Verdict |
+|---|---|---|---|---|---|
+| `AI-405` (the actor+0x3c caller-gate sense only) | "`R0016` runs once per actor tick before the body (`L00086`, gated at `L13241` by `+0x3c == 0`)." | High | [EXP-0526](../experiments/EXP-0526-motion-executor/), AI-455 | The complete `R0416` getter returns 1 for zero actor+0x3c; caller `L01796 JNE` skips the executor on that result. The selected positive-HP call admits nonzero actor+0x3c. Load-gate, progress and bounded step-turn-load clauses stand. | **REFUTED** |
+
+## EXP-0526 death route-list cleanup
+
+| Claim | Verbatim clause | Original confidence | Evidence | Correction | Verdict |
+|---|---|---|---|---|---|
+| `MOVE-134` (the route-list freeing clause only) | "Removal frees the route lists, then releases the current footprint." | High / Medium | [EXP-0526](../experiments/EXP-0526-motion-executor/) | The complete committed `R0865` body establishes footprint release and guarded claim clear, not route-list freeing. The route-free clause is withdrawn. Identity, release guard and local recentre facts stand; complete death aftermath remains Medium. Route-list cleanup across unexpanded callees is Unknown; trace reached release/claim-clear and virtual teardown callees through downstream route-header reset/free operations to settle it. | **RETRACTED** |

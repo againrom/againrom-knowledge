@@ -20,13 +20,18 @@ helper remain Unknown; native clock appearance has not been established.
 | +0x6c / +0x70 | Facing / phase |
 | +0x74 / +0x84 | Draw state / action code |
 | +0x94 / +0xa0 | Action clock / remaining ticks |
-| +0x88 / +0x8c | Remaining X/Y displacement in 1/256-cell units |
+| +0x88 / +0x8c | Move: remaining X/Y displacement; death: absolute drawable X/Y snapshot |
 
 Action messages populate the drawable. The paced0x401 tick advances it;
 idle/attack/cast/death timelines use ticks, while walking accumulates distance
 and advances once per 1/16 cell. Drawing resolves the resulting state through
 class phase blocks. Registration selects the collection and composition pass.
 — ANIM-CLOCK-001, ANIM-OBJ-008 (unreachability clause withdrawn), ANIM-WALK-013
+
+Standing, turning and stepping use the drawable's state and facing, rather than
+the simulation actor's action word. A death action freezes the drawable position
+sampled when its stage-1 sync is handled; it does not copy the simulation's
+sub-cell position at that point. — AI-460, AI-461
 
 ## Reference map
 

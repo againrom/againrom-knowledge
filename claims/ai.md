@@ -3313,7 +3313,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-405 | High: the load gate `R0041` tests sim byte `mover+0` equal to the 8-way heading (tolerance 0) and edge distance at most reach. Medium: a walker finishes its step and turns before it loads, for the five gated writers, not `L06163`. | High / Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
+| AI-405 | High: the load gate `R0041` tests sim byte `mover+0` equal to the 8-way heading (tolerance 0) and edge distance at most reach. Medium: a walker finishes its step and turns before it loads, for the five gated writers, not `L06163`. | High / Medium | ● active (amended, partially retracted) | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md), [EXP-0526](../experiments/EXP-0526-motion-executor/) |
 | AI-406 | A move order during a loaded cycle does not interrupt it; an attack order given during the following walk acts at the next cell centre, then turn, load and shot follow in that order. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
 | AI-407 | Among read routines, automatic acquisition (`R0004`) loads through the same gate or turns without loading and none replaces the victim or resets the phase while `ord+9` is 1; five writers and `R0008` are unread. | Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
 | AI-408 | No `mover` access in the state-3 body, swing start and strike ranges or their 16 direct callees (five virtual calls unread); the countdown continues, the strike tests reach only, and 0x72 carries `(facing + 8) >> 4` at load. | High / Medium | ● active | [EXP-0493](../experiments/EXP-0493-ranged-release-facing/EXP-0493.md) |
@@ -3325,13 +3325,19 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 ### AI-405
 
 - `R0041(actor, target, reach)` compares `mover+0` with the result of `R0051` at `L00577`. `R0051` returns a multiple of 32 (pairs of 16-way sub-sectors, output shifted left by 4, boundaries at a 2:1 slope), so the equality is exact and a facing one heading off fails. Edge distance from `R0036` must be at most the reach (`L00578`).
-- `R0016` runs once per actor tick before the body (`L00086`, gated at `L13241` by `+0x3c == 0`). The pending-order switch is read only at `ord+9 == 0`. Pending 5 and 6 (`L00101`, `L00581`) are the pursuit arms; each stores `ord+9 = 1` only after a passing gate (`L00743`, `L00744`).
+- On the positive-HP actor-tick path, `R0016` runs before the body at `L00086` only when `actor+0x3c != 0` (`AI-455`). `R0416` returns 1 for a zero dword at `actor+0x3c`, and `L01796 JNE` skips the call on that result. The pending-order switch is read only at `ord+9 == 0`. Pending 5 and 6 (`L00101`, `L00581`) are the pursuit arms; each stores `ord+9 = 1` only after a passing gate (`L00743`, `L00744`).
 - Outside the stop distance the arm paths; at a cell centre inside it `R0043` calls `R0051` then `R0056`. `R0056` snaps `mover+0 := mover+1` when `mover+0xa0 == 0` and the arc is below 0x21 (`L00749`, `L00750`), so a one-heading turn completes in one call; larger arcs rotate by the rotation speed `mover+0xa` and set `mover+0xa4` to ceil(arc / rate).
 - A step already begun continues through `R0039` and ends at a cell centre (progress 3), so the turn follows the step.
 
-**Confidence.** High for the gate's two tests and tolerance (on the sim byte `mover+0`, not the client drawn facing) and for the single executor call per tick. Medium for the sequence step, turn, load: the callees `R0039`, `R2130` and `R0036` were read for their effect, not end to end. Turn-before-load holds for the five gated `ord+9 = 1` writers, not for pending order 2 (`L06163`, `AI-411`).
+**Confidence.** High for the gate's two tests and tolerance (on the sim byte `mover+0`, not the client drawn facing) and for the single executor call on the admitted positive-HP actor-tick path. Medium for the sequence step, turn, load: the callees `R0039`, `R2130` and `R0036` were read for their effect, not end to end. Turn-before-load holds for the five gated `ord+9 = 1` writers, not for pending order 2 (`L06163`, `AI-411`).
 
 **Unknown.** Register-form or indirect stores to `ord+9` and `ord+8`, and orders restored from a save.
+
+
+**Amended.** The caller-gate sense is refuted by `AI-455`: zero
+actor+0x3c skips the executor; nonzero admits the selected positive-HP call.
+The load gate, progress dispatch and bounded step-turn-load clauses stand.
+The false gate clause is recorded in [`retracted.md`](retracted.md).
 
 ### AI-406
 
@@ -3526,7 +3532,7 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-443 | Before an attack (executor rows 5, 6) or a cast at an actor (row 8) a unit turns to `R0051(actor, target)`, the byte the act gate compares; rows 5 and 6 call it with the gate's pair, and row 6 can leave before the gate and the turn. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| AI-443 | Before an attack (executor rows 5, 6) or a cast at an actor (row 8) a unit turns to `R0051(actor, target)`, the byte the act gate compares; rows 5 and 6 call it with the gate's pair, and row 6 can leave before the gate and the turn. | High / Medium | ✔ promoted (amended) | [EXP-0522](../experiments/EXP-0522-target-heading/), [EXP-0526](../experiments/EXP-0526-motion-executor/) |
 | AI-444 | `R0051` heads between the two centres, fine point plus (size-1)*128 in 16 bits: eight bytes from the axis signs and 2:1 tests, an exact 2:1 to the diagonal, the zero vector 224; replayed on 84,842 inputs. | High | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
 | AI-445 | An attack on a Building heads by `R0051` toward the position record `obj+0x10`; no rectangle or size byte enters, and for vtable `R0492` the token size is 1 (`UNIT-STRUCTREACH-063`). | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
 | AI-446 | Before a cast at a cell (row 9) or a structure use (row 0xf) the walk's stop arm turns the unit to `R0089(actor, cell)`: the `AI-444` law on whole-cell differences from the anchor cell, sub-cell and size ignored. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
@@ -3539,13 +3545,18 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 - `R0043` returns through `R0039` when the actor's sub-cell bytes are not both 0x80 (`L01890`..`L01891`). At a centre, with the edge distance `R0036` at most the stop byte (`L00580`), it calls `R0051(actor, target)` at `L06115` and passes the byte to the turn `R0056` at `L00754`. Beyond the stop byte it routes (`AI-414`).
 - Row 6 (`L00581`) calls the gate with `ord+0x0c` and `actor+0x12c` at `L00744`. On failure it calls `R0051(actor, ord+0x0c)` at `L14168` and passes the byte to `R0250` at `L13335`, which calls the turn at `L00753`: it turns in place and does not approach.
 - The gate calls `R0051(actor, target)` at `L14169` and compares the byte with `mover+0` at `L00577`. In rows 5, 6 and 8 the turn and the gate receive the same actor and the same order field, so a completed turn meets the facing test while both positions are unchanged.
-- Row 6's entry (`L00581`..`L14170`, `w07`) tests byte `[esi+0x4c]` against `dl` and, when that test is nonzero, compares byte `[esi+0x12c]` with `bl`. When the byte is below `bl` it reads `[[esi+0x14]+0x28]`; on a null it stores 0 to `ord+8` (`L00109`) and jumps to `L00010` without the gate (`L00744`) and without the turn (`L14168`). Every other path reaches the gate at `L14171`. Rows 5 and 6 call `R0051` with the actor and the order field the gate receives, so the heading value is one function of that pair. Which attacker class takes row 5 or row 6, and which can take the row 6 exit, is not shown: `w07` begins after the loads of `dl` and `bl`.
+- Row 6's entry (`L00581`..`L14170`, `w07`) tests byte `[esi+0x4c]` against `dl` and, when that test is nonzero, compares byte `[esi+0x12c]` with `bl`. When the byte is below `bl` it reads `[[esi+0x14]+0x28]`; on a null it stores 0 to `ord+8` (`L00109`) and jumps to `L00010` without the gate (`L00744`) and without the turn (`L14168`). Every other path reaches the gate at `L14171`. Rows 5 and 6 call `R0051` with the actor and the order field the gate receives, so the heading value is one function of that pair. The complete entry path establishes `dl=4` and `bl=2`, so row 6 exits on actor mask 4, reach below 2 and Player+0x28 zero (`AI-462`). The native attacker-class occurrence and row-5/row-6 writer choice remain separate.
 - `R0051` has 15 direct callers and no dword reference in any section (`s01`). Besides the gate, the approach and row 6: acquisition `L01750`, `L01751` (`AI-ACQUIRE-002`); the Acid Stream and Teleport cell `L05167` (`MAGIC-238`); reacquisition `L14172` (`AI-361`); `L14173`, followed by a call of `R0250` at `L14174`; the face-and-mark arm `L14175`, turned at `L13267`; the group scorer `L14176`, `L14177` (`AI-COST-071`); the Prismatic Spray selector `L14178`, `L14179`, `L14180` (`MAGIC-242`); and the wrapper `R2199` at `L14181`.
 - EN and RU `rom.exe` have one SHA-256, so every clause holds for both.
 
 **Confidence.** **High** for each named call, argument and branch: `w06`, `w07`, `w08`, `w09` and `w14` list them. **Medium** that rows 5, 6 and 8 are the only routes that turn a unit before an attack or a unit-target cast. Population of `R0043` callers (`s02`, four): `L06113` (rows 5 and 8 approach) and `L06939` (read in `w07`: target `ord+0x18`, reach `ord+0x14`, a different order field) are read; `L14182` and `L14183` were not read. The reacquisition pair `L14173`/`L14174` is placed by adjacency and its body was not read; pending order 2 (`L06163`) installs action 3 with no gate and no turn (`AI-411`).
 
-**Unknown.** Which attacker class (melee, ranged or neither) takes row 5 or row 6, and which can leave row 6 without turning. The writers of `[esi+0x4c]` and of `actor+0x12c`, and the values of `dl` and `bl` at `L00581`, settle it; none was read. Whether `R2199` is reached by a computed call; a direct `CALL` sweep and a raw dword scan find none.
+**Unknown.** Which attacker class (melee, ranged or neither) takes row 5 or row 6 at runtime. The writers of `[esi+0x4c]` and `actor+0x12c` remain untraced here; the reached constants and exit condition are `AI-462`. Whether `R2199` is reached by a computed call; a direct `CALL` sweep and a raw dword scan find none.
+
+
+**Amended.** `AI-462` supplies the complete entry-path register flow
+and exact row-6 suppression condition. The heading contracts and bounded
+caller confidence stand; attacker-class occurrence remains Unknown.
 
 ### AI-444
 
@@ -3683,3 +3694,252 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 - With `grpAI+0x45` 0 and `receiver+0xb388` 0 the executor parks `actor+0x54` = `0x1a` and returns before any order store (`AI-350`).
 
 **Confidence.** **High** for the tail's branch and stores (`w12`) and for the slot order (cited claims). **Medium** that nothing else in the first sub-tick writes a Group or order field: the actor tick `R0037` before `L00086`, its dispatch on `actor+0x54`, the drain `R0191` and `R0426` were not read. The census finds no AI or order byte that differs from the start path's stores (`SAV-1218`, `SAV-1219`, `SAV-1220`); a same-value write is invisible to it.
+
+## Motion execution and presentation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-455 | The selected positive-HP actor tick admits the order executor when actor+0x3c is nonzero and skips it when zero. | High | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-456 | The listed executor dispatches all retained-progress bytes before pending orders; turning uses action 1 with progress 0, crossing action 1 with progress 3. | High | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-457 | The listed stop and move setters preserve crossing progress, reset desired facing to current and install pending 0 or 1 respectively. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-458 | An admitted non-self attack command installs policy 3, queued target and pending 0; it preserves motion progress and requires a later policy evaluation to install attack execution. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-459 | A retained crossing's centre-clear invocation goes to the common tail and cannot dispatch a new pending order until a later entered-zero executor call. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-460 | The listed drawable driver clocks idle and death separately, derives move phase from displacement and draws turn action 5 with the standing frame. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-461 | The reached death-stage sync snapshots drawable coordinates, and drawable action 6 restores that snapshot rather than reading simulation Position. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| AI-462 | On the listed progress-zero executor path, pending row 6 clears pending before facing checks when actor mask 4, reach below 2 and Player+0x28 zero coincide. | High | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+
+### AI-455
+
+`R0416` returns 1 exactly when DWORD actor+0x3c is zero (`L14288` CMP,
+`L14289` SETE). The selected positive-HP caller `R0037` calls it at
+`L13241`; `L01796` JNE skips `R0016` at `L00086` when the result is
+nonzero. Nonzero actor+0x3c therefore admits this call. Actor death/torn-down
+paths and the executor's own entry guards are separate. This partially
+retracts the opposite gate sense formerly stated by `AI-405`.
+
+**Confidence.** High for the complete getter and load-bearing caller branch.
+No completeness claim about all callers or actor+0x3c writers is made.
+
+**Unknown.** Runtime frequency and field producers. EN/RU are one code image.
+
+### AI-456
+
+Actor DWORD+0x154/+0x158 point to Mover/order; policy DWORD+0x50, action DWORD+0x54,
+phase DWORD+0x58 and active target DWORD+0x5c are distinct. Order BYTE+8 is pending,
+BYTE+9 retained progress, WORD+0x0a queued cell, DWORD+0x0c queued target,
+BYTE+0x14 reach and BYTE+0x15 invocation counter. Mover facing/turn state is
+`MOVE-125`; crossing fields are `MOVE-126`.
+
+`R0016` evaluates retained progress before its fifteen pending-table entries.
+Entered progress 0 admits pending dispatch. Progress 1 restores action 3 and
+progress 2 action 0x0d/0x0e according to order DWORD+0x5c. Both increment BYTE+0x15
+and clear progress/action when the incremented counter>2 and completion
+actor BYTE+0x136 is nonzero. Progress 3 calls crossing then sets action 1;
+centre clears progress/action. Progress 4 parks at action 0x1a until actor
+effect bit 0x100000 disappears, clearing progress only. Values 5..254 clear
+progress and park at 0x1a; 255 parks but remains 255. All reached retained
+paths go directly to the common tail, including clear paths.
+
+With zero progress the activity guard can park/return before pending dispatch;
+effect bit 0x100000 can install progress 4. Pending 1 is walk, 4 approach,
+5/6 strike gate with approach/turn fallback, 8 actor cast, 9 cell cast, 10
+continued desired turn, 11 idle turn, 12 pickup walk and 15 point/structure
+gate. Pending 0, 3, 13, 14 and 16..255 have no active table arm. Turning is
+ord progress 0/action 1; crossing is ordinarily progress 3/action 1. The actor
+action-1 body clears phase+0x58 and uses the movement sender. Progress 0 alone
+does not prove centred Position for malformed/restored input.
+
+**Confidence.** High for the complete executor and all 256 progress-byte
+dispatch mappings, including jump/remap tables. This enumerates dispatch
+inputs, not every writer or reached gameplay combination.
+
+**Unknown.** Policy/second-caller occurrence and arbitrary restored combinations.
+
+### AI-457
+
+Complete stop `R0088` and move `R0301` copy desired facing from current,
+clear actor action, order DWORD+0x60 and Mover DWORD+0x7c, and directly preserve
+order progress BYTE+9, turn DWORD+0xa0, Position and current strides. Reserved
+cell release is called only at centre, with a nonzero reserved cell different
+from current cell. Off centre it skips. Stop sets policy 0x0c, post=current
+command-time cell, pending 0 and clears order DWORD+0x50. Move clamps the queued
+cell to the playable rectangle, sets policy 1, pending 1 and Mover DWORD+0x90=0.
+
+A turn's old desired heading is cancelled at setter time without restoring
+its earlier facing. A progress-zero mover can take the replacement on its next
+admitted executor call. Retained progress 3 executes its old crossing vector
+until centre; pending replacement waits through the centre-clear call (`AI-459`).
+Ordinary crossing ends at the current step destination with fractions 0x80;
+cell-trigger relocation is separate (`MOVE-129`). The stop post captured before
+cell change can differ from that centre and does not establish a return to it.
+
+**Confidence.** High for direct setter stores and retained-progress precedence.
+Medium for the composed whole-command outcome through policy, search, cell
+callbacks and the common tail. The fixed-vector conclusion assumes a quiet
+tail and no intervening external writer.
+
+**Unknown.** Native queue-to-call delay and later policy changes. Leaving turn
+activity set can suppress the next short-turn snap (`MOVE-125`, `MOVE-107`).
+
+### AI-458
+
+Complete group attack setter `R0006` first resets its members and group
+order. A non-self target admitted by the scorer receives actor policy 3,
+queued target order DWORD+0x0c, reach and pending BYTE+8=0. Self/refused targets
+end at policy 0x0c, post=current cell and pending 0. Its direct stores do not
+change progress, active target, Position, current facing, phase or countdown.
+Reset copies desired=current without clearing turn activity. The prior policy
+state-3 path installs pending 5 at a later evaluation (`AI-355`). Thus the
+attack setter itself starts no new attack-facing turn. If progress 3 remains,
+that crossing is selected first (`AI-459`).
+
+**Confidence.** High for setter stores and executor precedence. Medium for
+the command-to-strike composition through the reused policy/scorer contracts.
+
+**Unknown.** Native delay to policy evaluation and every accepted target class.
+The common outcome tail can reacquire a target, so the old active target is
+not unconditionally preserved across a tick.
+
+### AI-459
+
+Entered progress 3 calls `R0039`, sets action 1, and tests centre. On centre
+it clears progress/action then jumps to `L00010`, after pending dispatch.
+The centre-clear invocation T therefore cannot execute the newly queued order.
+Only a later admitted call entered at progress 0 can read pending. This applies
+to direct stop/move/attack progress preservation (`AI-457`, `AI-458`). It also
+distinguishes final turn completion: the next-cell stepper returns after turn
+completion and translates on a later call (`MOVE-125`).
+
+At the common tail, nonzero DWORD Mover+0x98 is consumed and cleared. Policy 1
+resets into policy 0x0c/post=current/pending 0; patrol has its own advance;
+policy 0x17 writes progress 255; other policies clear pending and call
+`R0004`. That acquisition can replace retained target/progress (`AI-354`).
+
+**Confidence.** High for the complete executor's branch order and direct stores;
+Medium for future entered-zero timing and tail composition. T+1 means the next
+admitted executor invocation, not an unconditional next world or presentation tick.
+
+**Unknown.** Quiet-tail occurrence, external field mutation and every scheduler.
+
+### AI-460
+
+Simulation action 1 includes turning and crossing (`AI-456`); drawable actions
+are separate. `R0548` reads remaining ticks DWORD+0xa0 and action BYTE+0x84,
+and selects draw state+0x74. Drawable action 0 uses
+clock+0x94 and phase+0x70 when IdlePhases is nonzero, otherwise
+zeroes both; idle/standing/corpse frame selection has separate stage gates.
+Action 1 divides remaining signed displacement by remaining ticks, advances
+drawable position and accumulates truncated Euclidean displacement at clock
++0x94. It uses floor(odometer/16) as Move phase
+through the class timeline. Action 5 interpolates facing via DWORD+0xbc and
+draws the standing frame, with no separate turning timeline. Action 6 advances
+its death clock and body/shadow select dying phase/2. Facing quantization,
+class phase offsets and Flip determine the directional frame (`ANIM-DIR-006`,
+`ANIM-PHASE-003`). A reached stone-curse override can replace the state frame.
+
+**Confidence.** High for the reached drawable branch/clock relations and body/
+shadow table selection; Medium for the fully composed final sprite, which
+also depends on class timelines, facing/messages and the prior override contracts.
+Those data inputs were reused, not newly censused. It is not a frame-per-world-tick law.
+
+**Unknown.** Complete consumed timeline/data equality across EN/RU, rendering
+occurrence, diagonal trajectory rounding under every message and override lifecycle.
+
+### AI-461
+
+The reached state-sync branch `L02764` stores drawable X/Y DWORD+8/+0x0c into
+snapshot DWORD+0x88/+0x8c when stage changes 0->1 (`L14290`, `L14291`) and
+when a repeated stage-1 sync resets it (`L14292`, `L14293`). Drawable action
+6 restores those snapshot coordinates on every presentation-driver call
+(`L14294`, `L14295`). They are client coordinates at handling time, not
+simulation Position read directly by this death branch. Simulation freeze and
+later teardown recentre are separate (`MOVE-133`, `MOVE-134`).
+
+**Confidence.** High for those direct snapshot and restore stores; Medium for
+their relation to the visible body at death, because message timing, masks and
+other stage transitions can affect the coordinates before handling. No runtime
+frame proves agreement with source or destination cell.
+
+**Unknown.** Death-message timing and every producer of the snapshot under
+other stage transitions. No whole-image writer enumeration was performed.
+
+### AI-462
+
+On the complete `R0016` progress-zero entry path, EBX=2 at `L00541` and
+DL=4 at `L05746`; neither is changed before row 6 tests. Pending row 6 tests
+actor+0x4c mask 4, live reach BYTE+0x12c<2 and Player DWORD+0x28==0. If all hold
+it clears pending and enters the tail before the facing/reach gate or turn.
+This settles the unread-register boundary formerly left by `AI-443`.
+
+**Confidence.** High for the complete reached register flow and suppression
+branch. The row-5/row-6 writer choice is reused prior research, not inferred
+from these constants.
+
+**Unknown.** Native class occurrence and policy choice at an actual command.
+
+## Physical application after projectile release
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-463 | At ordinary Unit strike countdown expiry, actor+0x5c supplies the target; current footprint-aware range gates a fresh damage calculation, independently of the client projectile endpoint. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| AI-464 | The ordinary Unit strike rejects a dead shooter, but not a dead target or its off-map bit alone, conditional on valid target/source pointers with Player owners and current reach passing. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+
+### AI-463
+
+Phase 5 decrements actor byte `+0x6c`. At zero, `L05241..L00006`
+passes the current actor target pointer `+0x5c` to `R0001`. Its Unit
+arm calls `R0246`. This simulation pointer is not the client record's
+16-bit actiontarget or last aim (`SAV-1132`, `AI-354`). A replacement of
+`+0x5c` would change this local application's argument; reachability of a
+replacement during a running strike remains Unknown.
+
+Let raw point P be cell*256+fine, footprint side s and
+`C = uint16(P+(s-1)*128)` per axis. `R0247` computes
+`E=max(abs(CxA-CxT),abs(CyA-CyT))-((sA+sT)*128-256)`.
+It returns d=1 for E<=384, otherwise `(E+64)>>8`. Application requires
+current attacker reach byte `+0x12c >= d` (`AI-444`, `HERO-REACH-025`).
+The release-time extra delay is 0 for d<=1, otherwise
+`trunc((d*256+128)/200)`; phase 0 stores low8(charge+extra).
+The target moving does not recalculate that pending delay.
+
+The successful application passes the live attacker combat block `+0xa6`
+and attacker pointer to target virtual `+0x4c`, computes damage and then
+subtracts its low word from target HP. Target defence/resistance and RNG
+are application-time inputs (`HERO-DAMAGE-022`). No client endpoint or path
+occupant supplies the target to this ordinary physical strike.
+
+**Confidence.** High for the named local actor tick, dispatch, reach helper,
+delay and strike bodies, committed as instruction listings. This excludes
+endpoint-cell and path-interception damage in that route. Completeness of
+actor-target writers, Building-specific damage and native scheduling are
+outside this clause.
+
+### AI-464
+
+`R0246` refuses null pointers, a null Player owner `+0x14` on either
+actor, attacker signed HP `+0x94 <= 0`, and insufficient current reach.
+Target HP is read only to remember whether the target was already dead;
+damage calculation and low-word HP subtraction still follow. The later
+notification gate for an already dead target is HP above -10, not a damage
+admission test (`ANIM-125`, `HERO-FINISH-066`).
+
+This complete local body tests neither target off-map bit `+0x4c & 8` nor
+the global on-map list. The read script leave-map route preserves owner,
+Position and HP while releasing occupancy and removing the actor from
+that list (`TRIG-OFFMAP-041`, `SAV-1194`). Thus a retained valid target
+pointer with sufficient current reach is not refused solely for being
+dead or off-map. This does not prove that every departure retains it.
+
+A shooter death is different: the death tick bypasses physical application
+and the strike independently refuses a dead attacker (`SAV-1192`). The
+visual record has no shooter reference (`SAV-1130`). A prepared spell
+payload uses the separate MAGIC-294 route and must not inherit these
+physical-attacker gates.
+
+**Confidence.** High for this conditional guard set and the cited named
+leave-map state-preservation route. The complete strike listing excludes
+an additional local HP/off-map gate; it does not enumerate pointer clearing.
+
+**Unknown.** Whether other death, teardown or departure paths clear or
+invalidate another actor's +0x5c before expiry. A native pointer-lifetime
+trace, or complete static teardown closure, is required.

@@ -2864,7 +2864,7 @@ when the service's stop call runs.
 |---|---|---|---|---|
 | MAGIC-287 | Spell apply sends a cast through the target sender when Spell Target is 1 and the cell sender otherwise; Prismatic Spray sends 0x8a or 0x8c, and 0x8b is stored only by those two senders, so spell 14 never sends 0x8b. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 | MAGIC-288 | The client picks a cast's target word or aim cell by the picture's Homing key: Shield's cell bytes are read as a unit ID; a 0x8b of a picture with no row reads a null or out-of-array slot; a null target leaves the segment word stale. | High / Unknown | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
-| MAGIC-289 | Fire Ball's transport and burst use one position; the burst record sits at that cell's centre without the fine byte, and no stage stores the target's size: AreaEffect `+0x49` holds the spell's Radius. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| MAGIC-289 | Fire Ball's area and burst retain one target point; the burst sits at its cell centre without the fine byte, and AreaEffect +0x49 stores spell Radius rather than target size. | High | ✔ promoted (partially retracted) | [EXP-0509](../experiments/EXP-0509-flight-records/); [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
 
 ### MAGIC-287
 
@@ -2946,15 +2946,13 @@ an owner save taken while such a source casts would show it.
 ### MAGIC-289
 
 - Spell apply and the effect creator compute the point by the same
-  branches (`MAGIC-245`). The effect creator's default arm (`L03046`), which
-  takes Fire Ball, builds for Distribution other than 1 an AreaEffect
+  branches (`MAGIC-245`). The shared shape/delivery suffix beginning at `L14298` builds for Distribution other than 1 an AreaEffect
   `R0652` with the local point and parameter 9 (`L05354..L03047`).
   For Delivery 2 it wraps that object in a SpellTransport `R0633` with
   the caster's position and parameter 7, Speed (`L05108..L03052`). The
   call site `L13756..L03052` pushes Speed, the caster's `+0x10`
   Position and the AreaEffect (stored to that local at `L13757`), and no
-  target, so the transport receives no point and no size of its own; its
-  constructor was not read.
+  target. MAGIC-293 measures the constructor and stationary countdown; the child owns the destination and no target size is added.
 - The AreaEffect constructor stores `+0x44`, `+8` = 0, `+0x48` = 0,
   `+0x49` = parameter 9 (Radius, 1 for Fire Ball), `+0x4b` = 0 and `+0x4c` =
   0. Its base `L05979` and the token `R1009` keep a copy of the point at
@@ -2971,13 +2969,121 @@ an owner save taken while such a source casts would show it.
   client record aims at `+0x58` = cached x + 128 × (TileSize − 1), which is
   c × 256 + 256 for a size-2 unit at fine 128.
 
-**Confidence.** High for the burst cell and for the absence of a stored
-size: the constructor stores, the Position helpers and the client build are
-complete listings. Medium that the transport flies to that same position:
-it receives no point of its own, but its constructor was not read.
+**Confidence.** High for the retained burst cell and absence of a target-size field. The former Medium transport-flight interpretation is partially retracted; MAGIC-293 gives the stationary wrapper, child destination and shared-tail entry.
 
 **Unknown.** A saved Fire Ball with a multi-cell target remains unread
 (`MAGIC-245`).
 
 **Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
 `evidence/q4-listings.txt`, `evidence/q4-points.tsv`.
+
+
+**Amended.** The default-entry and transport-flight/no-own-Position clauses are partially retracted in `claims/retracted.md`. Positive damage enters `L14298`; SpellTransport is a stationary countdown whose child retains the destination (MAGIC-293). The burst cell, fine-byte loss and no-target-size clauses stand.
+
+## Flight destination and application
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-293 | Ordinary actor PointEffect delivery retains an actor pointer; Fire Ball AreaEffect retains a fixed Position and applies to current occupants of its radius-1 square after a separate transport countdown. | High / Unknown | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| MAGIC-294 | Prepared DirectDamage fixes base/spread/school before its transport wait, then resolves RNG and current victim resistance and subtracts HP at application; its local actor applier has no HP or distance gate. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| MAGIC-295 | The inspected ROM1 EN/RU executables, unit/projectile registries and all 28 spell parameter rows are equal; these inputs select the same measured flight and application branches. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+
+### MAGIC-293
+
+Positive damage preparation jumps from `L14299` to shared suffix
+`L14298`. It bypasses default constructor entry `L03046`, then reads
+Distribution and Delivery in the common tail. This corrects the default
+entry shorthand in MAGIC-289 without changing its burst-cell/size facts.
+
+Distribution 1 constructs PointEffect `R1046`. It stores raw target
+pointer `+0x44`, child effect `+0x48`, and a copy of target Position at
+`+0x10`. Its tick `R0266` uses the retained actor pointer, not that copy
+or a cell occupant lookup. For an actor-type target with Player owner
+`+0x14` nonzero it calls child virtual `+0x3c` and retires. No range,
+footprint or HP test precedes that local dispatch. A moved actor can
+receive the prepared effect at its new position while the pointer remains
+valid and bound. The Building branch has its separate type test and lacks
+the actor owner guard.
+
+Fire Ball Distribution 3 constructs an AreaEffect holding the fixed point
+computed at preparation (`MAGIC-245`), radius byte `+0x49=1` and child
+`+0x44`. Delivery 2 constructs SpellTransport with that child. Constructor
+`R0633` sets child `+0x44`, second child `+0x48=0`, and word countdown
+`+0x4c=low16(trunc(distance(caster Position, child Position)/Speed))`.
+The helper measures XY Euclidean point distance with native integer/FPU
+boundaries. The tick decrements the word and, at signed result <=0,
+enqueues the child, clears both child fields and sets retirement byte
+`+0x40=1` (`MAGIC-DELIVERY-170`). It neither moves a point nor tests a
+target, path or collision. A zero initial count transfers on its first tick.
+After construction, the shared caller overwrites this counter with 10 for
+spell IDs 13 and 14 at `L03086`, before enqueueing the wrapper. Lightning
+and Prismatic Spray therefore use this simulation count, independently of
+their normal 13-call visual records.
+
+The blast `R0630` sends the burst and visits the fixed destination's
+inclusive square X=cx-1..cx+1, Y=cy-1..cy+1. Each visited cell supplies
+ordinary unit, second unit and Building occupancy in that order; every
+non-null pointer is passed to `R0267`. There is no pointer deduplication
+across cells (`UNIT-AREAVISIT-071`, `UNIT-AREADIRECT-072`). Fire Ball copies
+the DirectDamage block and divides its base/spread by target size squared
+per reached call. Moving the originally selected actor out of this square
+does not move the area; another current occupant can be affected. This is
+cell/footprint occupancy, not collision along the visual flight or a radial
+distance test. The burst record's cell centre drops the fine byte
+(`MAGIC-289`, whose transport-flight/default-entry clauses are partially
+retracted here).
+
+**Confidence.** High for the complete named constructors/ticks/blast,
+shared-tail branch, local occupancy application and prepared-actor guard.
+Unknown for pointer lifetime and native scheduling, as bounded below.
+Four PointEffect trials execute the tick with type/apply services stubbed;
+18 transport calls execute the tick with enqueue stubbed. These establish
+dispatch/countdown, not native child scheduling or damage. Existing area
+claims establish occupancy aliases and size normalization.
+
+**Unknown.** Complete lifetime of the retained actor pointer after death,
+deletion, ID reuse or leave-map; null restored-pointer behavior; native
+ordering of child enqueue/tick versus client flight and burst draw. A
+native pointer/schedule trace or full static lifetime closure would settle
+these. The separate latent second-child constructor is not generalized.
+
+### MAGIC-294
+
+The prepared effect's combat block is at `+0x48`. Its base, spread and
+school are bytes `+0x5b/+0x5c/+0x5d`, filled from the cast's power-scaled
+spell scratch before wrapping/delay (`MAGIC-DMG-005`). This is preparation
+time, not necessarily the client visual-release frame.
+
+`R0564` calls target virtual `+0x4c` with this prepared block and source
+pointer `effect+0x44`, then immediately subtracts the returned low word from
+actor HP `+0x94`. The complete applier has no actor HP, source HP, current
+range, endpoint or path-occupant guard. The complete actor resolver
+`R0265` has no direct HP operand or position/reach admission predicate.
+Its elemental damage roll and current target protection remain
+`MAGIC-RESIST-006`: random base+spread, school-specific current protection,
+native rounding and clamp. The source's and victim's current effect state
+can affect the resolver (`HERO-DAMAGE-022`).
+
+The physical dead-shooter refusal is in `R0246`, which this payload route
+does not call. A prepared payload reaching a surviving valid actor pointer
+is therefore not cancelled by that physical gate. PointEffect's bound-owner
+gate and AreaEffect's occupancy selection are separate (MAGIC-293).
+
+**Confidence.** High for the named complete applier/resolver's local fields,
+calls and absence of direct HP/flight predicates, and the reused damage
+preparation/resistance contracts. This is not a global absence claim about
+all called effect services or a proof of pointer validity after death.
+
+### MAGIC-295
+
+SHA-256 and byte comparison identify one EN/RU executable witness, not
+independent locale corroboration. Both installed unit registries and both
+projectile registries parse to equal values. All numeric parameters of
+the 28 Spells rows compare equal. `inputs.txt`, `unit-shots.tsv` and
+`spell-routes.tsv` record the population and equality; whole Data.bin and
+world.res equality is not asserted.
+
+**Confidence.** High for these read input populations. The executable bytes
+are equal; the route-selecting data compares equal under the cited ROM1
+registry/Data.bin reader. No runtime locale environment, external mod,
+asset appearance or native scheduling equality is claimed.

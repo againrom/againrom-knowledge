@@ -20,7 +20,7 @@ cell. — ANIM-CLOCK-001, ANIM-WALK-013, ANIM-AMBIENT-016
 +0x70  phase, consumed by the frame switch  +0xa0  ticks the action still has to run
 +0x74  draw state = a copy of +0x84         +0xbc  turn accumulator, 1/16 of a facing step
 +0x84  action code, one byte                +0x15a corpse stage (the server's, shipped)
-+0x85  the facing the action ends on        +0x88/+0x8c  remaining position delta, 1/256 cell
++0x85  the facing the action ends on        +0x88/+0x8c  move delta or death X/Y snapshot
 ```
 
 ## Tick driver
@@ -77,6 +77,33 @@ cover the same distance and holds each frame longer; it never skips one.
 - **The clock is not reset when a walk starts**, so consecutive cells continue one odometer. It
   *is* zeroed by any turn, attack, shoot or death message, and by standing still for a single tick
   when `IdlePhases == 0` (`ANIM-WALK-013`…`015`).
+
+## Motion frames
+
+The simulation actor's action word does not select the frame directly. The
+drawable driver copies its own action byte to draw state after an active pass,
+then decrements its own remaining count. A zero count selects state 0 on the
+next pass. — AI-460
+
+| Drawable state | Phase and frame |
+|---|---|
+| 0, no idle art and stage 0 | Standing frame `(facing - 8) & 15` |
+| 0, idle art | Idle timeline at `clock % timeline length`; the driver increments the clock once per presentation tick |
+| 5, turn | Standing frame at the interpolated facing; no turn timeline |
+| 1, step | Move timeline at `phase % timeline length`, after the move-begin block; `phase = trunc(clock / 16)` |
+| 6, death | Dying class's frame at `trunc(phase / 2)`; the driver samples the clock, then increments it |
+
+The move driver divides each remaining axis delta by the remaining ticks with
+signed division. It updates drawable X/Y, subtracts those shares from the
+deltas, and stores `trunc(clock + sqrt(shareX^2 + shareY^2))`. The phase therefore
+depends on travelled distance. A turn instead divides the shortest wrapped
+arc by the remaining ticks in its facing accumulator. These are presentation
+updates, separate from the simulation Mover's turn and step fields. — AI-460
+
+Both body and shadow compute these frame arms. With stone-curse kind `0x30`
+present and corpse stage at most 2, their later override selects the standing
+frame at the current facing instead. Flip mirrors the upper directions.
+— AI-460, MAGIC-STONEDRAW-084
 
 ## Idle and fidget
 
@@ -156,6 +183,21 @@ replace it after an "Overriding ... segments lost" log line. The shoot arm
 returns without applying its message in that state — ANIM-135.
 
 ## Death and corpse phases
+
+Stage 0 to 1 replaces any current drawable action with action 6. It sets the
+remaining count to twice the dying class's phase count, clears the action clock
+and both axis odometers, and stores the drawable's current absolute X/Y in
+`+0x88/+0x8c`. Each death driver pass restores X/Y from that snapshot. Stage
+1 to 1 takes a new snapshot, sets four remaining ticks and resumes the last two
+dying frames. — AI-461
+
+The simulation's death send uses mask `0x409`, without the position or facing
+bits. The snapshot therefore freezes the drawable coordinates when the sync
+is handled. The simulation freezes its existing Position and later recentres
+it on its stored cell during teardown. Equality of these two positions and the
+message-to-presentation-tick delay remain Unknown. MOVE-134's route-list freeing
+clause is withdrawn; its supported local recentre relation stands, with
+route-list cleanup across unexpanded callees Unknown. — AI-461, MOVE-133, MOVE-134
 
 ```
 server   actor+0x13c = 1 at death; R0867 raises it to 2 / 3 / 4 as health passes

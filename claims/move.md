@@ -1377,3 +1377,259 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 **Confidence.** High for the walk's own stores and calls, read whole, and for the walk's installation of rate 0x10. Medium that the route lists survive the walk (the walk body has no access to them): the callees `R0289`, `R0063` and `R1379` were not read; one census record agrees (`SAV-1214`). A member the grid already holds at its cell keeps its old Mover (`L14150`); whether that occurs at a mission start is Unknown. The rate clause is Medium as a statement about the saved carried member: the census contradicts rate 0x10 on 16 of 22 carried records, which hold the derived value (15..20, `SAV-1213`), so the walk's rate is not the value a carried member holds at the save.
 
 **Unknown.** The first writer of Mover `+0x0a` after `L14157`. The census shows the derived value before the restart save (`SAV-1213`); the call that runs Human derive on a carried member between the walk and that save was not identified. Read without finding it: the join entry `L14164`..`L14165` (it calls the walk at `L06675` and goes on to `L14166`, `R1626`, `R1625`, `R0081`, `R0127`, `R0299`, `R0300`, `R0217`, `R0059`) and `R1626`..`L14167`; both hold no derive call and no Mover store, and their callees are unread. The settling read is outside that range (the actor tick `R0037`, the order executor `R0016`, or a watchpoint on Mover `+0x0a`).
+
+## Motion executor relations
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-125 | The listed turn driver uses a rate-scaled shortest arc, with an inactive snap for gaps at most 32 and positive rotation at the 128 tie. | High | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-126 | The listed crossing routine increments elapsed, adds signed fine-position strides, applies the direction-1/5 tie adjustment and recentres at duration. | High | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-127 | Successful crossing boundaries move actor slots to the new footprint and retain a source-plane reservation until centred cleanup; release and entry failures are partial. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-128 | A centred crossing arrival clears duration, elapsed, magnitude, source claim and dynamic route while retaining next cell, source cell, direction and strides locally. | High | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-129 | After centred arrival, cell payload kind 0x1a can relocate to its stored destination and reset the order; notification and callback effects remain unresolved. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-130 | The ordinary walk continues an off-centre crossing before search and conditionally waits or searches at a blocked next cell using byte refresh counters. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-131 | The listed pursuit path finishes an off-centre crossing and uses target identity, route count and wrapping refresh counters for centred search admission. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-132 | The blocked-verdict body distinguishes centred and moving occupants and reads the requesting actor's target/step fields; its fallback lookup is only partly read. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-133 | The reached dying branch bypasses the motion executor, preserves its direct motion fields and delays teardown until a later nonpositive-countdown invocation. | High / Medium | ✔ promoted | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+| MOVE-134 | Death teardown recentres Position on its stored cell; motion removal clears claims only through a successful-release and differing-source-claim guard. | High / Medium / Unknown | ✔ promoted (amended, partially retracted) | [EXP-0526](../experiments/EXP-0526-motion-executor/) |
+
+### MOVE-125
+
+`R0056` stores the target in BYTE Mover+1. Facing is BYTE+0, rate BYTE+0x0a,
+turn activity DWORD+0xa0, call counter BYTE+0x9d and estimate BYTE+0xa4.
+Let d=min(abs(facing-target),256-abs(facing-target)). An inactive driver call
+with d<=32 snaps to target and stores estimate 1. Otherwise `R0249` takes
+one rate-sized step on the shortest arc modulo 256, snapping when d<rate.
+The addition test comes first, so d=128 increases facing. The driver stores
+ceil(pre-step d/rate), not a countdown after the step. It increments the call
+counter, resetting it first only when the activity dword was zero, and clears
+activity when facing equals target. An active equal-facing call stores estimate
+0. Under a fixed positive rate/target, completion needs one admitted call for
+the inactive snap, otherwise ceil(d/rate) calls. The next-cell stepper returns
+after a finishing turn; it starts translation on a later call. Its empty-route
+arm calls only the leaf and does not update the driver fields.
+
+**Confidence.** High for the complete listed driver/leaf and stepper return
+relation. A synthetic original-instruction replay checks 33,792 one-call cases:
+four initial facings, every relative heading, eleven positive rates and activity
+dwords 0, 1 and 256. Six completion traces also match. No callee is stubbed.
+The formula extends by the read integer branches, not by a runtime witness.
+
+**Unknown.** Rate zero on the nonsnap driver path reaches division by zero;
+its production in play is not established. Calendar duration and interruption
+by external producers remain separate from admitted-call arithmetic.
+
+### MOVE-126
+
+Position is the object at actor DWORD+0x10: BYTE+0/+1 cell, WORD+2 packed cell,
+BYTE+4/+5 fractions. `R0047` increments WORD Mover+0xac, then adds signed
+BYTE+0xb0/+0xb1 to the low 16-bit fine axes. WORD+0xae is direction. For direction
+1 or 5, when both resulting fractions are zero it subtracts one from fine X.
+It writes the cell and fractions, then forces both fractions to 0x80 when
+elapsed>=WORD duration+0xaa. Magnitude WORD+0xa8 and the stride/duration producer
+remain the separately established rate contract.
+
+For a centred straight crossing with positive stride magnitude s and duration
+ceil(256/s), the positive axis changes cell on call ceil(128/s); the negative
+axis changes on floor(128/s)+1. For equal-magnitude diagonals dividing 128,
+direction 1 (+s,-s) changes both axes on 128/s+1, direction 5 (-s,+s) on 128/s.
+Directions 3 and 7 use the positive and negative thresholds respectively.
+
+**Confidence.** High for the listed Position/progress law. A synthetic replay
+checks all eight directions and magnitudes 1..127: 1,016 crossings and 11,648
+position ticks, zero mismatches. The footprint getter returns 1 and three
+occupancy services are explicit stubs. That replay establishes Position stores
+and boundary call order, not occupancy mutation or native stride reachability.
+
+**Unknown.** External Position writers, native occurrence of the synthetic
+stride population and interrupted/malformed starting fractions are not measured.
+
+### MOVE-127
+
+Before a route step, `R0054` installs the next cell at WORD Mover+6, records
+the source at WORD+0x70, and updates the reserved target at WORD+0x80. It can
+reserve before turning. The first half keeps the source cell-record slots.
+When `R0047` changes a cell byte it calls `R0057` for the old footprint,
+calls `R0058` with the old packed cell, writes new Position, then calls
+`R0050`. `R0058` records WORD+0xa6 and ORs source-plane bit 0x40 for domains
+1/2 or 0x80 for domain 3. With successful services, the second half therefore
+has new cell-record slots and an old-plane reservation. Centred cleanup clears
+the source-only footprint difference (`MOVE-128`). Wide overlapping footprints
+and later plane recomputation must be treated separately.
+
+The release prefix refuses a missing record or empty selected slot. A nonempty
+slot is cleared without comparing its actor pointer with the requesting actor.
+A false release ends the release loop only: Position still changes and entry
+is still called. Entry can succeed on earlier footprint cells then fail on a
+taken slot. Neither failure rolls Position back. Domain 1/2 entry reaches a
+trigger-building path before its slot test.
+
+**Confidence.** High for the listed branch/call sequence and partial-failure
+control flow, composed with prior cell-record/claim contracts. Medium for the
+whole slot/plane phase relation: the release body after `L14300` and reached
+trigger callbacks were not read, and later recomputation can replace plane bits.
+
+**Unknown.** Atomicity under trigger callbacks and complete release-after-recompute
+effects. A census cannot settle the exact boundary tick.
+
+### MOVE-128
+
+`R0039` calls the live step once. If the packed cell changed, it refreshes
+WORD Mover+0x72 from new-cell cost for domain 1, speed for domains 2/3, zero
+otherwise. It does not replace the frozen stride bytes. When both Position
+fractions are 0x80 it clears WORD+0xa8/+0xaa/+0xac, calls `R0046` with source
+WORD+0x70, clears WORD+0x80/+0xa6, and frees the dynamic list embedded at actor+0x178.
+These ordinary cleanup instructions retain WORD+6/+0x70/+0xae and BYTE+0xb0/+0xb1.
+Claim clearing skips cells inside the current footprint. No ordinary cleanup
+instruction returns Position to the source. Progress/pending timing is `AI-459`.
+
+**Confidence.** High for the listed stores, exact source-claim argument and
+local retained fields. This is the ordinary branch before `MOVE-129` and does
+not enumerate every external writer of these fields.
+
+### MOVE-129
+
+After `MOVE-128`, `R0039` reads the completed cell record. Payload kind at
++0x2c equal to 0x1a selects destination bytes+0x30/+0x31. Both footprint checks
+`R0048`, first dynamic then static, must pass. It calls footprint release
+`R0049`; irrespective of that return it rewrites Position to the destination
+cell with fractions 0x80 and calls `R0050`, `R0044` and `R0059(actor,0,-1)`.
+The occupy return is untested. Ordinary cleanup has already zeroed+0xa6, so
+the extra conditional differing-source-claim release normally skips.
+
+The complete reset `R0044` sets desired facing=current, reach=actor BYTE+0x12c,
+clears order DWORD+0x60/+0x50, Mover DWORD+0x7c and actor action+0x54, then sets
+policy+0x50=0x0c, post=current cell and pending BYTE+8=0. Its direct body leaves
+progress BYTE+9 and turn DWORD+0xa0 unchanged.
+
+**Confidence.** High for the reached checks, direct stores and untested return
+relations; Medium for the final player-visible relocation/reset because entry
+callbacks and `R0059` are untraced. No shipped-map occurrence is asserted.
+
+**Unknown.** Trigger meaning, destination entry failure and notification effects.
+
+### MOVE-130
+
+`R0178` finishes an off-centre crossing and returns before route admission.
+At centre outside the stop radius it increments BYTE Mover+0x78 modulo 256.
+A changed requested target versus WORD+0x74, or BYTE+9>StaticRefreshRate, runs
+static search, stores target+0x74/resolved+0x76, resets+9 and frees dynamic route.
+An empty result stores the current cell to+0x76 and sets DWORD+0x98=1; equality
+with that resolved cell sets DWORD+0x90=1 and returns.
+
+Empty dynamic count or+0x78>DynamicRefreshRate selects dynamic admission. The
+next static waypoint is tested only when exactly Chebyshev distance 1 away;
+otherwise the blocked test uses packed cell 0. A blocked footprint with nonzero
+`R0402` result takes a wait/turn branch: unequal facing turns and stores
+pending 0x0a, equal facing stores pending 0. Zero verdict allows near search.
+The read body does not push or swap an occupant. The prior configured refresh
+values are 16/32, strict comparisons, not elapsed seconds (`MOVE-PARAM-006`).
+
+**Confidence.** High for local branch and counter relations. Medium for whole
+waiting/retry behavior through policy reissue, search services and `MOVE-132`'s
+partly read fallback. Empty routes raise an outcome, not a measured timeout.
+
+**Unknown.** Reissue duration, every reached search failure and a whole-order
+abandonment threshold. No global absence of such a threshold is claimed.
+
+### MOVE-131
+
+`R0043` finishes an off-centre crossing before stop/search logic. At centre
+outside stop distance it increments BYTE+0x78. A changed target pointer versus
+DWORD+0x7c sets BYTE+9=0xff, WORD+0x8a=0x00ff and clears static route. A strict
++9>signed(static count/3)+1 selects full search when cached+0x8a>StaticIsntNeeded,
+otherwise a one-node rebuild, then resets+9. Empty static count raises DWORD+0x98.
+Matching current/resolved+0x76 and target/cached+0x8c increments+9, clears+0x7c
+and returns. Empty dynamic count or+0x78>DynamicRefreshRate allows near search
+only when current facing equals desired. Near search increments+9, clears+0x78,
+stores victim/actor cells+0x94/+0x96, then the stepper is called. Byte counters
+wrap; thresholds count admitted passes/searches. Unlike the ordinary walk, this
+complete approach body does not call `R0402`.
+
+**Confidence.** High for this complete local control flow; Medium for search
+result and future policy/tail continuation, reused from the prior search claims.
+
+**Unknown.** A fixed wait duration or native whole-order give-up schedule.
+
+### MOVE-132
+
+`R0402(A,C)` returns zero unless A's virtual footprint side is 1, its
+Player DWORD+0x28 is zero, and A's reserved WORD Mover+0x80 differs from C.
+For a nonzero direct ground occupant B it returns zero when signed HP<1.
+A centred B with pending other than 1/4 also returns zero. A centred B with
+pending 1/4 returns 2 exactly when A's queued WORD order+0x0a differs from C.
+An off-centre B returns 1 exactly when A's next-step WORD Mover+6 differs from C.
+The two comparisons read A, not B. The reached ordinary walk treats both
+nonzero results alike (`MOVE-130`).
+
+With no direct occupant it obtains a list from `R0020(world,C,1)` and returns
+2 when a listed actor is off centre with source WORD Mover+0x70=C, zero otherwise.
+Position helper `R0019` is the pure packed-word getter.
+
+**Confidence.** High for the complete verdict body's conditional comparisons
+and return values. Medium for their complete occupancy population: `R0020`
+was read only to `L14301`, and the direct-slot getter and virtual footprint
+contract are reused from prior research, not freshly enumerated.
+
+**Unknown.** Every list admitted by the unread fallback tail and runtime retry
+cadence. Reading the rest of `R0020` would settle that static frontier.
+
+### MOVE-133
+
+The reached `R0037` signed-HP<=0 branch sets actor DWORD+0x50/+0x54=0 and
+bypasses `R0016`. Its direct instructions leave Position, Mover, order
+progress/pending, active target and actor phase+0x58 untouched. Thus the motion
+executor itself makes no further turn or crossing step there. Position can be
+on either crossing cell according to the boundary call already executed.
+
+On the first death pass T0 it calls `R0014`, copies the low byte D-1 of actor
+dyingTime+0x12e to countdown BYTE+0x6c and exits. Each later positive signed-byte
+countdown pass decrements and exits, including 1->0. The guard is first reached
+at T0+max(s8(low8(D-1)),0)+1; for 1<=D<=128 this is T0+D. A health guard can
+continue delaying teardown. Corpse/animation timing is separate (`AI-460`,
+`AI-461`, `ANIM-DEATH-007`). This clarifies, rather than retracts, the older
+approximate dwell lower bound.
+
+**Confidence.** High for the direct branch, executor bypass and byte arithmetic.
+Medium for unchanged motion/order state across the whole dying tick because
+effects precede the HP test and the cast-interrupt/helper frontier can affect
+other actor state. No whole-image absence of a motion writer is asserted.
+
+**Unknown.** Death-time state across external damage/effect callbacks, exact
+body coordinates before presentation handles its stage message, and teardown
+delay under every guard. No original runtime was observed.
+
+### MOVE-134
+
+`R0208` sets actor DWORD+0x50/+0x54=0x10 and calls motion removal `R0865`.
+After removal, regardless of its result, it calls `R0866` on Position,
+setting fractions+4/+5 to 0x80 without changing cell bytes. A crossing therefore
+recentres on the currently stored cell, not unconditionally its departure or
+destination; a turn keeps its stored cell.
+
+Removal releases the current footprint. A release
+refusal returns before claim cleanup. After success, a nonzero source claim
+WORD Mover+0xa6 differing from Position packed cell selects claim clear and
+zeroes WORD+0xa6/+0x80/+0x76. Equality/zero skips these stores. It does not
+directly clear the turn activity dword or translation vector. These are local
+stores, not a guarantee that every teardown callee preserves those fields.
+
+**Confidence.** High for the complete removal guard, teardown's direct recentre
+order and untested return. Medium for complete cell/plane/drop aftermath:
+per-cell release after `L14300`, actor virtual teardown slots and notification
+effects remain unread. Prior `MOVE-095`, `MOVE-096` bound the composition.
+Route-list cleanup across unexpanded callees is Unknown.
+
+**Unknown.** Complete virtual teardown effects and occupancy under partial
+release failure; a corpse snapshot alone cannot identify its death-time cell.
+Route-list cleanup is not established by the committed `R0865` body.
+Its reached release/claim-clear callees and the teardown's virtual/effect
+calls remain unexpanded. The settling probe is to trace these reached callees
+from `R0865` and `R0208`, resolve virtual teardown targets, and follow
+downstream cleanup for resets/frees of the embedded static/dynamic route
+headers at actor+0x15c/+0x178. That probe has not been run.
+
+**Amended.** The clause "Removal frees the route lists" is withdrawn in
+[`retracted.md`](retracted.md). The supported release guard, conditional
+claim-field clears and local recentre facts stand. Complete death aftermath
+remains Medium; route-list cleanup across unexpanded callees remains Unknown.

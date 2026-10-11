@@ -98,13 +98,53 @@ local flag in both cases.
 
 ## Order execution
 
-Between the state machine and the actor tick sits `R0016`, called once per actor per tick at
-`L00086` — four instructions before the tick dispatches on `actor+0x54`. It preserves
-`actor+0x54` only when it is `2` or `0xf` and clears it otherwise, then dispatches on the order
-object's **progress** byte `ord+0x09` (255 in range, four live) and, when that is 0, on its
-**pending order** byte `ord+0x08` (15 slots, three empty). "When that is 0" means, in practice, the
-tick the actor is standing exactly on a cell centre: the state machine re-decides the order at group
-rate, the order machine executes it at cell rate.
+The positive-HP actor-tick path calls `R0016` at `L00086` before dispatching
+`actor+0x54`, only when the dword `actor+0x3c` is nonzero. Zero skips that call. The
+opposite gate clause in `AI-405` is partially retracted and corrected by `AI-455`.
+The actor's effect list and health test precede the executor (`AI-455`).
+
+The executor distinguishes command policy, actor action, pending order and retained
+progress. Their fields are separate (`AI-456`).
+
+| field | width | executor meaning |
+|---|---|---|
+| `actor+0x154` | dword pointer | Mover |
+| `actor+0x158` | dword pointer | order block |
+| `actor+0x50` | dword | command policy evaluated by the AI |
+| `actor+0x54` | dword | action dispatched by the actor tick |
+| `actor+0x58` | dword | attack/cast phase |
+| `actor+0x136` | byte | cycle completion |
+| `ord+0x08` | byte | pending order |
+| `ord+0x09` | byte | retained progress |
+| `ord+0x15` | byte | strike/cast progress counter |
+| `ord+0x5c` | dword | actor-target versus cell-target cast selector |
+
+When progress is zero and both manager `+0xb388` and group-AI byte `+0x45` are zero,
+the executor sets action `0x1a` and returns. Nonzero progress bypasses that activity
+refusal. Otherwise it preserves actions `2` and `0xf` and clears other actions.
+Effect bit `actor+0x144 & 0x100000` installs progress `4` only from progress zero
+(`AI-456`).
+
+| entered `ord+0x09` | operation | exit |
+|---:|---|---|
+| `0` | dispatch pending `ord+0x08` | common tail |
+| `1` | action `3`; increment byte counter `ord+0x15` | counter above `2` and completion nonzero clear progress and action, then tail |
+| `2` | action `0xd` for nonzero `ord+0x5c`, else `0xe`; same byte counter | same completion gate, then tail |
+| `3` | call `R0039`; action `1` | cell centre clears progress and action, then tail |
+| `4` | action `0x1a` | effect bit `0x100000` absent clears progress, then tail |
+| `5..254` | clear progress; action `0x1a` | tail |
+| `0xff` | action `0x1a`; retain progress | tail |
+
+This is the complete byte dispatch, including default values (`AI-456`). A turn
+can have action `1` and progress `0`; a crossing has progress `3`. Action `1` alone
+does not identify a crossing. Its actor-body arm clears attack/cast phase
+`actor+0x58` to zero (`AI-456`). Progress zero has no general centre test; centre checks
+belong to individual pending paths.
+
+A progress-`3` call that reaches the next centre clears progress and jumps to the
+common tail. It runs no pending-order row on that call. The next admitted call
+entered at zero can dispatch the pending order. The tail or another writer can
+replace that order before this happens (`AI-459`).
 
 | `ord+0x08` | what it does | inputs |
 |---|---|---|
@@ -133,6 +173,34 @@ Row `5` re-reads `ord+0x0c` on every pass (`AI-350`). Read from the code and not
 observed at run time, a pursuit stored at one group evaluation therefore keeps stepping toward its
 victim until the next evaluation reissues or replaces it, or until a stand or a refused route ends
 it (`AI-353`).
+
+### Commands during motion
+
+Stop `R0088`, move `R0301` and the attack setter's common reset
+replace requested facing byte `mover+1` with current facing byte `mover+0`.
+They clear the action but do not directly clear progress `ord+9`, current facing,
+position or the active-turn dword `mover+0xa0`. A turn loses its old requested
+heading at the command-time facing; a retained crossing keeps its progress
+selector (`AI-457`, `AI-458`).
+
+| command | immediate stored order | effect on a retained crossing |
+|---|---|---|
+| stop | policy `0xc`, pending `0`, post equal to the command-time packed cell | crossing continues to its next centre; with no intervening replacement, pending `0` starts no further walk (`AI-457`, `AI-459`) |
+| move | policy `1`, pending `1`, queued cell `ord+0x0a` | old crossing finishes before a later entered-zero call takes the new destination (`AI-457`, `AI-459`) |
+| admitted non-self attack | policy `3`, queued target `ord+0x0c`, pending `0` | crossing retains progress; policy evaluation must install pending `5` before its gate/approach can run (`AI-458`, `AI-459`) |
+
+Reset and move release a reserved cell only when `mover+0x80` is nonzero, the actor
+is centred and that reserved cell differs from its current packed cell. An
+off-centre command skips that release. These setters do not reverse the crossing
+or stop it at the command-time sub-cell. Its final centre is the old step
+destination, subject to the crossing and common-tail handling (`AI-457`, `AI-459`).
+
+The stop's post is its packed cell when the command arrives, which can precede the
+crossing's cell-boundary change. It need not equal the centre reached afterwards.
+The stop does not itself order a return to that post (`AI-457`). Move installs its
+pending order immediately; attack only replaces policy and queued target. The
+native delay until attack policy reissues pending `5`, external writers and
+command/tick interleaving remain Unknown (`AI-458`).
 
 ### Commands during a running cycle
 
@@ -195,7 +263,16 @@ that subtracts both token sizes, so two touching actors measure 1. Reach is re-r
 actor turns to face and stands still.
 
 The heading those turns aim at is the byte the facing test compares. Rows `5` and `8` turn through
-the approach, row `6` turns in place, and all three call `R0051(actor, target)` with the gate's pair (`AI-443`). Row `6` can leave before the gate and the turn through a guard on actor bytes `+0x4c` and `+0x12c`; which attackers take it is not read. That helper takes the difference
+the approach, row `6` turns in place, and all three call
+`R0051(actor, target)` with the gate's pair (`AI-443`).
+
+Row `6` clears pending order and leaves before the gate and the turn when actor
+byte `+0x4c` has bit `4`, reach byte `+0x12c` is below `2`, and the owning Player
+dword `+0x28` is zero. The complete executor fixes the entry constants missing
+from `AI-443`'s bounded read (`AI-462`). Which policy writer selected row `5` or
+`6`, and native occurrence of that exit, remain separate bounds.
+
+`R0051` takes the difference
 between the two footprint centres, each the fine point plus `(size-1)*128` in 16 bits, and returns one
 of eight bytes: within each sign quadrant the axis byte when one magnitude exceeds twice the other,
 otherwise the diagonal, so an exact 2:1 is diagonal; the zero vector gives 224 (`AI-444`). A Building target is measured toward its position record `+0x10`, not its rectangle; for the Building vtable the token size is 1 (`AI-445`; the size routine and the record's layout are Medium). Rows `9` and `0xf` turn at the walk's stop arm to `R0089(actor, cell)`, the same
