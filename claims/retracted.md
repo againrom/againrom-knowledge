@@ -1364,3 +1364,9 @@ on evidence already committed.
 | `MENU-076` | Esc leaves the row selection as moved. | High | [EXP-0534](../experiments/EXP-0534-settings-remainder/) | Id 3 changes only dialog+0x6c; close destroys that local selection. Issued Play/Stop and volume/config changes remain (MENU-151). | REFUTED |
 | `VIDEO-075` | List message 0x436; arm L12931 handles it. | High | [EXP-0534](../experiments/EXP-0534-settings-remainder/) | Two-table dispatch maps 0x43b to L12931 and 0x436 to L14384 (VIDEO-094). | REFUTED |
 | `VIDEO-075` | N is a high-water mark of mission movies played. | Medium | [EXP-0534](../experiments/EXP-0534-settings-remainder/) | A matched -1 attempt raises N before video open. The invocation saves before the raise, not afterwards (VIDEO-095). | REFUTED |
+
+## Spell record formulas and cast preparation inputs
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TEXT-096` (universal per-cast-at-actor-power clause only) | Verbatim: "The hover value for a spell is therefore the per-cast value at the actor's own power, not the Data.bin column." | High | [EXP-0535](../experiments/EXP-0535-cast-damage-source/), TEXT-117 | The universal cast-input clause is withdrawn: low skill-plus-Mind gives popup power100 and ordinary cast power0. Record-field and formula clauses retain High. | **REFUTED** — retained formula clauses stand |

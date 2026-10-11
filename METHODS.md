@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3443. Observation: 95. Static analysis: 2875. Mixed: 473.
+Claims labelled: 3450. Observation: 95. Static analysis: 2879. Mixed: 476.
 
 ## Ledger ai
 
@@ -1111,6 +1111,12 @@ Claims labelled: 3443. Observation: 95. Static analysis: 2875. Mixed: 473.
 | MAGIC-295 | mixed | ✔ promoted |
 | MAGIC-297 | static analysis | ● active (branch candidate) |
 | MAGIC-298 | static analysis | ● active (branch candidate) |
+| MAGIC-300 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-301 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-302 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-303 | mixed | ✔ promoted (branch candidate) |
+| MAGIC-304 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-305 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 
@@ -3034,7 +3040,7 @@ Claims labelled: 3443. Observation: 95. Static analysis: 2875. Mixed: 473.
 | TEXT-083 | static analysis | ● active |
 | TEXT-084 | static analysis | ● active (amended) |
 | TEXT-085 | static analysis | ● active (amended) |
-| TEXT-096 | static analysis | ● active |
+| TEXT-096 | static analysis | ● active (partially retracted) |
 | TEXT-097 | static analysis | ● active |
 | TEXT-098 | static analysis | ● active |
 | TEXT-105 | static analysis | ● active |
@@ -3072,6 +3078,7 @@ Claims labelled: 3443. Observation: 95. Static analysis: 2875. Mixed: 473.
 | TEXT-110 | mixed | ● active |
 | TEXT-111 | static analysis | ✔ promoted (branch candidate) |
 | TEXT-112 | static analysis | ✔ promoted (branch candidate) |
+| TEXT-117 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger town
 

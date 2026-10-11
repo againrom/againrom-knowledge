@@ -1132,7 +1132,7 @@ data stands as corroboration: the line-pair strings are separate files in each r
 | TEXT-083 | Map-list hover `L11131` chooses by cursor x alone: the row's description left of 300 px, then `dialogs.txt[134]`, `[135]`, `[136]` per column; no map field selects 135 or 136. | High | ● active | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-084 | The inherited hover hint at `+0x3c` has writers found by the traced pattern in three base constructors and setter `L11132`; 252 vslot-6 call sites exist, of which 8 pass a `dialogs.txt` lookup. | High / Medium | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-085 | The 172 hint-forwarding constructor call sites pass null (63), a static address (54) or a text-table entry (55, in `dialogs.txt` and `patch.txt`); 17 final classes inherit the getter. | High / Medium | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
-| TEXT-096 | Spell record byte +9 is Max Range plus a power term, bytes +0xe and +0xf are the damage minimum and spread scaled by power/30 + 1, while word +0x10 is a duration in sixteenths; `R0625` fills all four from Data.bin spell columns. | High | ● active | [EXP-0454](../experiments/EXP-0454-hover-help/) |
+| TEXT-096 | Spell record byte +9 is Max Range plus a power term, bytes +0xe and +0xf are the damage minimum and spread scaled by power/30 + 1, while word +0x10 is a duration in sixteenths; `R0625` fills all four from Data.bin spell columns. | High | ● active (partially retracted) | [EXP-0454](../experiments/EXP-0454-hover-help/), [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
 | TEXT-097 | In fold `R0082` an actor with +0x7c zero is skipped before it is counted; with +0x3dc not 1 and bit 2 clear a counted actor sets flags 8 and skips the cell fold; the record level wraps as a byte (sum below 30, or 286 and up). | High | ● active | [EXP-0454](../experiments/EXP-0454-hover-help/) |
 | TEXT-098 | Routine `R0807` groups a decimal string in threes from the right with commas and keeps a leading sign with the first group: `-123` is unchanged, `-1234` becomes `-1,234` and `+1234567` becomes `+1,234,567`. | Medium | ● active | [EXP-0454](../experiments/EXP-0454-hover-help/) |
 | TEXT-105 | Constructor `L11133` (class `L11134`, five uses, `dialogs.txt` 111..115) passes its hint to itself and two child controls but gives the third an empty one, and sets flag 0x20, which empties the getter's answer, on one child. | High / Medium | ● active | [EXP-0489](../experiments/EXP-0489-troll-hints/) |
@@ -1446,11 +1446,13 @@ the literal-text controls are reachable in play.
 
 Data.bin spell rows, parsed with `tools/placedb` from both roots (the 28-row tables are identical): the base of `+9` is nonzero for 26 ids and 0 for ids 4 and 18. `+0xe` and `+0xf` are nonzero at power 0 for ids 1, 2, 3, 6, 9, 11, 13, 14 and 21 and 0 for the other 19; parameter 17 exceeds parameter 16 in all nine. `+0x10` takes the parameter 14 path for ids 5, 8, 10, 15, 16, 18, 20, 22, 23, 24, 27 and 28, the parameter 11 path for ids 3, 7, 12, 17, 19 and 21 and 0 for ids 1, 2, 4, 6, 9, 11, 13, 14, 25 and 26.
 
-The fold `R0082` reads `+9` plus word `+0x10` for the Range and Duration pairs (TEXT-081); `+0xe` and `+0xf` feed the damage sums. The hover value for a spell is therefore the per-cast value at the actor's own power, not the Data.bin column.
+The fold `R0082` reads `+9` plus word `+0x10` for the Range and Duration pairs (TEXT-081); `+0xe` and `+0xf` feed the damage sums. The hover uses scaled record numbers rather than raw Data.bin columns. Popup byte power can differ from ordinary signed cast power (TEXT-117).
 
 **Confidence.** **High** for every branch, formula and constant: the whole of `R0463`, `R0624`, `R0904`, `L11152` and `R0625` is listed and the sites are reproduced from both roots, which share one executable. The row populations are exact applications of the branch conditions to the parsed table.
 
 **Unknown.** The per-id parameter values behind the two `+0x10` paths are in the private evidence only. Whether `+0x10` has a reader outside the spellbook fold in a routine that takes no `Spell*`.
+
+**Amended.** The universal per-cast-at-actor-power clause is partially retracted. TEXT-117 establishes the byte-power counterexample and other application conditions; the retraction entry withdraws only that clause. The record fields, encoded formulas and remaining High observations stand.
 
 ### TEXT-097
 
@@ -2364,3 +2366,64 @@ The other five sites:
 The image holds no raw pointer to `R1293`. This count corrects TOWN-188's "remaining callers" clause ([`retracted.md`](retracted.md)).
 
 **Confidence.** High: a byte-level rel32 scan of `.text` with every hit inside the recursive map.
+
+## ROM1 cast damage and duration sources
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TEXT-117 | The ROM1 popup can disagree with applied damage or lifetime through byte power, target resolution, separate HP arms and separate counters; its record formulas do not prove cast equality. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+
+### TEXT-117
+
+For the fold's client skill/Mind bytes, popup power is
+min(u8(skill+Mind-30),100). For ordinary caster+68 zero, Apply power is
+clamp(s16(skill)+s16(Mind)-30,0,100), using live actor values. With unchanged
+values in 0..100, sums 0..29 give popup power 100 and cast power 0; sums 30..200
+give equal power. For wider client bytes use the modulo 256 expression:
+sums 286 and above can wrap again (TEXT-097). The alternate caster+68
+power is signed16 and unclamped; fill uses its low byte while status arms
+use the full signed value. A changed caster/client snapshot can also differ.
+
+For equal power 0..100, the row-driven harmful ids 1,2,3,9,13,14,21 copy the
+same encoded B/S formula that feeds the popup's minimum B and maximum B+S.
+That is agreement on the pre-resistance pair, not on HP removed: the
+Fire Ball 2 area path first divides a copied B/S by the product of two
+target virtual+1c byte results; the unit path uses MAGIC-301's target resistance; the building path tests
+spread and subtracts five. Random draws and word HP storage further
+separate a range caption from a landed result. Pure elemental accuracy
+does not veto this damage. For Heal 6 and positive S, the minimum requested
+amount is B+1, and missing-HP capping can reduce it. Fire Sacrifice 4 and
+Poison 8 display no positive damage pair but use MAGIC-302's separate HP
+operands. Non-book Drain 11 is outside the offered-id answer.
+
+For ordinary protections 5/10/16/22, Shield 18, Bless 23, Haste 24 and
+Invisibility 15 with equal inputs, popup and applied word use the same
+encoded duration formula. Equality of exact floating boundaries is not
+proved without the native pow/control-state contract. Stone 20 additionally
+applies signed target Earth resistance; for ordinary r0..100 the resulting
+word can differ by floor(D*(100-r)/100), replacing zero by one.
+
+Wall 3/19 and Freezing 7 have an area counter 240+trunc(16*power/10).
+Light 12 has 320+trunc(16*power/10). These agree with their popup counter
+formula at equal inputs, but Freezing's inner status counter is 320 and
+Light's is 16. Poison 8 instead shows u16(T(5*16*pow(1.025,popupPower)))
+while its area counter is 240+trunc(16*power/10) and inner continuous
+counter 128. Meteor 21 has a popup counter 160+trunc(16*popupPower/10),
+but distribution 5 explicitly starts a staged area at counter zero; its
+total lifetime is Unknown. Fire Sacrifice 4 and Acid 9 also use that staged
+path and have no popup duration. Others have no duration line.
+
+The conditional counter mismatches are arithmetic inequalities between
+these named operands, not evidence of native elapsed seconds. Even when
+the initial words agree, refresh/last area attachment or the ordinary
+timer's counter>9600 guard can change the applied lifetime (MAGIC-304).
+
+**Confidence.** High for encoded power conditions, local formula inputs
+and counter stores. Medium for full popup/cast/parser/receiver joins,
+reusing TEXT-080, TEXT-081, TEXT-096 and TEXT-097. No engine comparison
+or runtime population is part of this result.
+
+**Unknown.** Reach of the low-sum/wrapped actor population, native pow
+boundary outputs, client-refresh chronology and staged total lifetimes.
+An admitted character/client trace, bounded pow/control-state witness and
+stage-helper decode would settle these.

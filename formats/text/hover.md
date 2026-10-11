@@ -97,6 +97,9 @@ the caption level. — TEXT-097
 The record fields behind the value lines: byte `+9` is the Max Range column plus power/30
 (power/3 for id 26), `+0xe` and `+0xf` the damage minimum and spread times power/30 + 1, plus word
 `+0x10` a duration in sixteenths from the Spell Duration or Area Effect Duration column. — TEXT-096
+TEXT-096's universal per-cast-at-actor-power clause is partially retracted;
+its popup record-field formulas remain valid. Applied power and separate
+damage/lifetime operands can differ from the popup. — TEXT-117
 
 ## Attribute rows in character generation
 

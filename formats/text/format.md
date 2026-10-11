@@ -135,6 +135,9 @@ rows, the map-list columns and the binding of inherited hints.
 TEXT-HOVERROOM-051, TEXT-HOVERTEXT-052, TEXT-HOVERPAINT-053, TEXT-080,
 TEXT-081, TEXT-082, TEXT-083, TEXT-084, TEXT-085, TEXT-096, TEXT-097, TEXT-098,
 TEXT-105, TEXT-106, MENU-066, MENU-067, MENU-068, MENU-069, MENU-096
+TEXT-096's universal per-cast-at-actor-power clause is partially retracted;
+its popup record-field formulas remain valid. Applied power and separate
+damage/lifetime operands can differ from the popup. — TEXT-117
 
 The game loads multiple CRLF-delimited text resources into positional tables. Entries
 are addressed by table-local or global numeric indices depending on the consumer.

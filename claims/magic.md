@@ -3140,3 +3140,298 @@ The provisional `w64-queued-cast` label is an attack setter, not cast evidence.
 [w65](../experiments/EXP-0528-death-lifecycle/evidence/w65-cast-policy.txt),
 [w66](../experiments/EXP-0528-death-lifecycle/evidence/w66-actor-policy-dispatch.txt),
 [w42](../experiments/EXP-0528-death-lifecycle/evidence/w42-candidate-filter.txt).
+
+## ROM1 cast damage and duration sources
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-300 | The seven row-driven harmful ROM1 book ids copy freshly scaled Spell bytes into DirectDamage before delivery; target application reads that payload, not the popup aggregate. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+| MAGIC-301 | The decoded ROM1 DirectDamage unit path narrows scaled damage to bytes, draws inclusive CRT spread, then applies signed resistance with a 0.75 bias; buildings use a separate minus-five rule. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+| MAGIC-302 | ROM1 Fire Sacrifice, Poison Cloud and Heal bypass the ordinary row-driven harmful damage rule; their decoded arms use caster HP/mana, periodic magnitude, or a shifted healing interval. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+| MAGIC-303 | ROM1 popup duration is Spell+10; status arms recompute Effect+42, while template counters and AreaEffect+4c give separate lifetimes for several offered ids. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+| MAGIC-304 | The decoded ROM1 ordinary timer decrements counters only at 9600 or below; active ordinary areas decrement by one before pulsing, so a stored duration word alone does not prove elapsed lifetime. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+| MAGIC-305 | The two installed ROM1 EN/RU executables and all 28 parsed Spells rows match, including Effects strings; their whole Data.bin payload hashes differ. | High | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+
+### MAGIC-300
+
+The 24 book ids are the dwords at L00199. Their row-driven harmful
+DirectDamage ids are 1, 2, 3, 9, 13, 14 and 21. The positive damage-column
+population also contains Heal 6 and non-book Drain Life 11; these ids skip
+the generic allocation and enter separate arms. Fire Sacrifice 4 and Poison
+Cloud 8 are additional HP-damage paths without positive damage columns
+(MAGIC-302). The other offered ids are 5, 7, 10, 12, 15, 16, 18, 19, 20,
+22, 23, 24, 25 and 26. Rows 11, 17, 27 and 28 are not book cells.
+
+Spell::Apply at R0003 obtains Sphere from the row reference at Spell+4.
+For caster+68 zero it reads signed i16 school skill at caster+a8+2*Sphere
+and signed i16 Mind at+88, adds them in signed32, subtracts 30 and clamps
+to 0..100. The alternate caster+68 branch obtains an effect and reads its
+signed i16+42, or uses zero for a missing effect; that branch has no power
+clamp. At L14398 it fills the Spell using the low byte of this power.
+It separately computes signed32 power/30+1 with a binary64 spill for later
+status arms. These are Apply preparation reads, not reads of the popup.
+
+When zero-extended Spell+0e plus+0f is positive, except ids 6 and 11,
+Apply constructs a 0x60-byte DirectDamage at L14399..L14400. Its
+constructor initializes the combat block at+48. Setters copy Spell+0e/+0f
+to payload+5b/+5c and write kind at+5d. Sphere 1..5 selects kind 1..5.
+The payload carries id at+c and a conditional caster source at+44.
+It contains no Spell reference used by the decoded damage consumer.
+
+PointEffect construction at R1046 stores its Effect pointer at+48 and
+target at+44. The read Tick invokes Effect virtual+3c; the transport Tick
+releases the child through the known registration path. Area application
+at R0267 invokes the same Effect virtual+3c for admitted targets.
+DirectDamage virtual+3c is R0564: a unit receives the payload combat
+block+48 and source+44 through target virtual+4c. Resistance and random
+spread are resolved there. No row or current caster power is reread by
+this complete consumer (MAGIC-301).
+
+The reused MAGIC-CASTCLOCK-171 places ordinary Apply preparation in actor
+phase 5; id 14 prepares per selected victim in the admission fan at R0269.
+The decoded cast-entry window agrees with that exception. The values are
+copied before the decoded point/transport consumer reaches the target.
+
+**Confidence.** High for the complete listed local reads, stores, table
+population and id grouping. Medium for the whole cast/release schedule and
+dynamic receiver join, reusing MAGIC-DELIVERY-170, MAGIC-CASTCLOCK-171 and
+HERO-DAMAGE-022. This does not establish an image-wide absence of later
+payload writers or a runtime sampling witness.
+
+**Unknown.** Every possible payload mutation, receiver class and exact
+elapsed interval between admission, Apply and HP application. A bounded
+writer/receiver census and authorized whole-cast trace would settle these.
+
+### MAGIC-301
+
+In R0625, power is u8 and row p16/p17 are signed32. Let T denote
+R0279's signed64 truncation toward zero, and u8/u16 denote low bits.
+The encoded sequence is f=binary64(power/30+1), then B=u8(T(p16*f))
+when p16>0, otherwise B=0. For p17>0, S=u8(T(p17*f-B)); otherwise S=0.
+The subtraction uses the already narrowed, zero-extended B before T.
+The qword f spill is binary64; the following products/subtraction are
+x87 operations, not a demonstrated float 32 computation.
+
+R0279 saves the x87 control word, sets rounding-control bits to 11,
+FISTP-converts to signed64, restores the word and returns EDX:EAX.
+Damage storage takes AL. Other callers take AX or EAX. This fixes
+conversion rounding, not the precision or rounding of prior operations.
+
+R(n) at R0861 returns zero without a draw for n=0. Otherwise it calls
+R0179 once. The CRT updates its state by 214013*x+2531011 modulo 2^32
+and returns (state>>16)&32767. The wrapper computes signed32 low product
+r*(n+1), adds the sign correction and arithmetic-shifts by 15, implementing
+truncation toward zero of that product/32768. For the spell's u8 spread,
+there is no product overflow: R(S)=floor(r*(S+1)/32768), in 0..S inclusive.
+Equal raw-r weights do not give exactly equal endpoint buckets unless
+S+1 divides 32768. The state is the current CRT context's+14, as in
+MAGIC-284; this experiment did not enumerate every RNG consumer.
+
+DirectDamage's combat initializer zeroes its physical base/spread.
+Nevertheless R0265 runs the preceding physical calculation: zero physical
+spread skips that draw; active Bless/Curse can each consume R(100); the
+accuracy step always consumes R(200)-100. Elemental damage is admitted when
+its byte pair is nonzero and either the hit succeeds or the physical pair
+is zero. Thus pure DirectDamage is not vetoed by that accuracy result,
+but its spread draw follows those earlier calls in the shared stream.
+
+Fire Ball id 2 has a target-side AreaEffect exception before that resolver.
+R0267 copies its DirectDamage, obtains two zero-extended byte results
+from target virtual+1c and multiplies them in signed32. It signed-IDIV
+divides each zero-extended copied B/S byte by that product and writes the
+low bytes, then applies the copy. Thus stable equal virtual results q
+give divisor q*q; the original payload is retained. Zero product would
+fault at IDIV. Receiver meaning and admitted nonzero values need the
+virtual-method contract; no global nonzero guard is claimed.
+
+Elemental v=B+R(S) is signed32. Kind 1..5 selects signed i16 target resistance
+at+c4,+c6,+c8,+ca,+cc, respectively. Zero resistance keeps v directly.
+Nonzero resistance computes the x87 sequence v*(100-r)/100+0.75, takes
+T's low EAX and signed max(result,0). Only a positive component enters
+the aggregate, whose return is also clamped at zero. The elemental branch
+does not subtract the physical branch's flat absorption. The three recorded
+unit virtual+4c slots all point to R0265 (HERO-DAMAGE-022).
+R0564 subtracts the low 16 return from target HP word+94 without a local
+HP floor. The word operation can wrap for arbitrary extreme HP states.
+
+For a target admitted as Building, R0564 calls R0653 instead. A null
+combat block or zero signed i16 building+44 gives zero. Only positive u8
+spread admits B+R(S); it subtracts five and returns zero when the signed
+result is nonpositive. The complete body reads no elemental resistance or
+kind. The caller subtracts low 16 from building HP+42, then clamps the
+signed i16 stored result at zero. A zero spread therefore suppresses even
+a positive base on this building path.
+
+**Confidence.** High for ordered instructions, widths, constants and local
+branches in the committed windows. Medium for the full dynamic unit/Building
+dispatch join. The arithmetic is an encoded operation contract, not a claim
+that host floating-point evaluation reproduces every native integer boundary.
+
+**Unknown.** Entry x87 precision/rounding state, intervening RNG consumers,
+and receiver classes outside the three recorded unit slots. A control-state
+witness and bounded receiver/consumer census would settle these.
+
+### MAGIC-302
+
+Fire Sacrifice 4 has p16=p17=-1. Its Apply arm sums signed i16 caster
+HP+94 and mana+9a in signed32. B=min(HP+mana,255). It computes
+S=min(min(HP+mana+power,512)-B,255), without lower clamps, and writes their
+low bytes to Spell scratch. It resets caster HP to 1 and mana to zero,
+constructs a DirectDamage and copies the pair through the fire setter.
+These HP/mana reads occur in Apply preparation, after admission's separate
+mana-cost path, not in the target's damage resolver. Target resolution then
+uses MAGIC-301. No positive row damage pair is displayed for this id.
+
+Poison Cloud 8 also has p16=p17=-1. Its Effects string is
+health=-2:continuous 8. The parsed template carries signed word magnitude
+at+40 and a word counter at+42. Apply scales magnitude using the signed
+full-power f=power/30+1 and takes T's low 16; it does not create a positive
+damage-column pair. In the complete id 8 branch of R0565, v=-s16(Effect+40).
+Zero water resistance at target+c6 keeps v; otherwise signed32 low IMUL
+v*(100-s16(resistance)) is loaded into x87, divided by 100, biased by 0.5
+and truncated to low EAX. A nonzero result is subtracted from target HP+94
+as a word. This branch has no random draw or local HP floor. The retained
+template counter is 128; continuous timer admission uses the old counter
+modulo eight before decrement (MAGIC-303, MAGIC-304; MAGIC-POISONINPUT-157,
+MAGIC-POISONPHASE-159).
+
+Heal 6 uses row-driven B/S but calls R1715(S), which is 1+R(S-1).
+For positive S the result is B+1..B+S, rather than the popup's B..B+S.
+For S=0 the wrapper calls R(-1), consumes a CRT draw, multiplies by zero
+and returns one; Heal therefore still requests B+1. Its arm caps the
+requested amount at signed maxHP-currentHP before calling R0671.
+The read target gates include HP>-10, nonzero maxMana and a diplomacy
+branch. Native HP-update helper R0671 was not newly decoded.
+
+Drain Life 11 is outside the book population. Its Apply arm also draws
+B+1..B+S, narrows to signed16 and caps against signed current targetHP+10.
+A positive amount subtracts the target HP word and calls the caster's
+R0671 helper. Neither the Heal nor Drain arm reads elemental resistance.
+They do not share the generic DirectDamage target calculation.
+
+**Confidence.** High for the complete Apply/id 8 branches, table values and
+R wrapper. Medium for the template parser's string/decimal helper join and
+the unread healing helper, reusing MAGIC-EFFECT-015 and MAGIC-SING-019.
+
+**Unknown.** Full native healing-helper behavior and parser helper edge
+inputs outside the retained shipped strings. Their complete local decodes
+would settle those joins. Runtime target eligibility was not observed.
+
+### MAGIC-303
+
+At Apply preparation, signed32 power is the clamped skill+Mind-30
+for caster+68 zero, or an unclamped signed i16 effect power for its alternate
+branch (MAGIC-300). T is the truncating signed64 helper. Ordinary book status
+ids 5, 10, 16, 18, 22, 23 and 24 compute D=u16(T(pow(1.025,power)*p14*16))
+and store it into Effect+42. The p14 row values are 30 for protections and
+15 for Shield, Bless and Haste. This overwrites the Effects-string duration;
+these arms do not read Spell+10. The same arm families cover non-book
+Curse 27 and Slow 28.
+
+Invisibility 15 uses literal 3*16*pow(1.05,power), compares the result with
+65000, chooses the cap when not below it, spills the chosen binary64 and
+stores u16(T(value)). Its positive p14=20 is a gate, not the multiplier.
+Popup filling has the same encoded formula with its u8 power input.
+
+Stone Curse 20 first computes D=u16(T(pow(1.025,power)*10*16)). For an
+admitted unit it multiplies zero-extended D by 100-signed i16 Earth
+resistance+ca using signed32 low IMUL, signed IDIV 100, then low 16 storage.
+A resulting zero is replaced by one. For resistance 0..100 and ordinary
+power this is floor(D*(100-r)/100), with a minimum of one. There is no
+general positive cap for arbitrary signed resistance. A separate mode-4
+charge branch divides the word by seven and adds ten; ordinary book
+duration mode is distinct.
+
+Freezing Cloud 7 retains its Effects-string duration 20 counter 320. Light 12
+retains duration 1 counter 16. Poison 8 retains continuous 8 counter 128.
+Their Apply arms scale signed word magnitude but do not overwrite that
+template counter. The parser scans the whole Effects string; its decimal
+duration path multiplies the integer by 16 and stores a low word. Darkness 17
+is outside the book and shares Light's counter arm.
+
+For area distributions 3/4, Apply initializes AreaEffect+4c to u16(p11<<4).
+If nonzero, it adds signed (power<<4)/10 and narrows the sum to u16;
+AreaEffect mode+8 is then 1. Thus Wall of Fire 3, Freezing 7, Poison 8 and
+Wall of Earth 19 use 240+trunc(16*power/10); Light 12 uses
+320+trunc(16*power/10), before word narrowing. This counter is separate
+from the inner Effect+42. Distribution 5 instead sets mode 2 and clears+4c
+to zero, even for Meteor Storm 21 whose p11=10 gives a popup duration.
+Acid Stream 9 and Fire Sacrifice 4 share this staged distribution.
+
+The remaining book ids 1,2,6,13,14,25,26 have no popup duration. Teleport 26
+sets a delivery transition counter to 10; this is not a popup Effect lifetime.
+Control Spirit 25's separate actor construction is not a duration-line arm.
+The full staged-area transition helpers were not read (MAGIC-304).
+
+**Confidence.** High for local formulas, row populations and stores. Medium
+for the shipped Effects-string parser/helper join and complete native
+lifecycle. The ordinary sequence converts signed p14 to a binary64 spill, calls
+pow with the base and binary64 signed power, multiplies the return by
+the spilled p14 and then by binary64 16, calls T, and stores AX.
+All pow calls are identified by the reused native contract;
+their encoded bases are reconstructable immediates in the listings.
+
+**Unknown.** CRT pow internals, entry x87 state, and exact boundary values
+of the transcendental formulas. A bounded pow decode/control-state witness
+would settle them. Total staged-area lifetime needs its transition helpers.
+
+### MAGIC-304
+
+R0674 admits a timer only for mode bits 1 or 2. A mode 4 charge count
+is not decremented by that timer. At R0673, continuous bit 2 invokes its
+virtual+40 pulse when the old zero-extended Effect+42 is divisible by 8,
+before the decrement guard. The guard skips decrement for a word>9600.
+Otherwise it subtracts one as a word. A resulting zero invokes inverse
+virtual+44 only for a noncontinuous effect, clears the target spell bit,
+notifies when appropriate, and ORs retirement bit 128 into the mode.
+An initial zero wraps to 65535 and subsequent calls skip decrement.
+Values>9600 therefore cannot expire through this decrement alone; other
+removal paths were not enumerated. For a continuous value>9600 divisible
+by 8 the pulse can recur on every admitted timer call.
+
+In the complete ordinary-area Tick branch at R0629, active+48 equal 1
+and positive zero-extended+4c cause a word subtraction of one (L14401 SUB dx, 1). A pulse
+occurs when the new counter is divisible by 16, including zero. Entry
+counter zero performs expiry instead. The final pulse at counter zero can invoke the inner Effect application
+before area expiry. That Effect has its own counter; the area counter
+does not establish the remaining duration of a refreshed attachment. The selected timer contracts do not prove total
+wall-clock seconds or frame cadence.
+
+The attachment body at R0612 can refresh an existing same-id Effect
+instead of introducing an independent lifetime. Continuous refresh retains
+the old source and replaces counter state; noncontinuous refresh applies
+the inverse/new values. Bless/Curse conflict handling is reused from
+MAGIC-ATTACH-016 and MAGIC-POISONPHASE-159. PointEffect marks completion
+after applying its payload; the recorded transport reaches its child
+through its separate arrival branch (MAGIC-DELIVERY-170).
+
+**Confidence.** High for complete local counter and branch windows. Medium
+for admitted scheduler/attachment joins, not a runtime lifetime measurement.
+
+**Unknown.** Other removal writers, the full scheduler, staged mode 2
+area-transition bodies and persistence across SAVE/LOAD. Bounded local
+decodes of the scheduler/stage bodies and an authorized lifecycle witness
+would settle them. No save or runtime population was searched.
+
+### MAGIC-305
+
+The EN and RU rom.exe SHA 256 is
+942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03.
+The final reproduction hashes each executable independently. Code equality
+is identity of one image, not independent corroboration of its behavior.
+
+The complete derived Spells population has stored rows 28, in-memory count 29
+and ids 1..28 in each root. The schema and all row dictionaries match,
+including signed parameter arrays, names, spans and retained trailing
+strings. The book table offers 24 of those ids. Data.bin is 88327 bytes in
+each root, but hashes differ: EN
+96a10beb71b0657f867a75a1ff4c4d4a536210b2d63c692a0755017a6f1b6dde;
+RU 3b65650d3fd00b418ebbb3e4a6f0a3082975e2356e96f8a3eb4df7615002c27f.
+The parser completes eight schema groups and eleven collections with zero
+terminal residue. It validates nested table dimensions, element counts,
+string lengths and monotonic cursor bounds.
+
+**Confidence.** High for hashes and exact derived equality in the two named
+installed roots. This excludes a root-specific code or Spells-input
+difference for MAGIC-300..304; it does not establish identical entire
+archives, display locales or runtime state.

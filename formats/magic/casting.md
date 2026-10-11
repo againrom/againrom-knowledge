@@ -5,8 +5,12 @@
 ## Arithmetic
 
 `ftol` truncates toward zero (`R0279`, rounding-control 11); `IDIV` truncates toward zero.
-`rand(n)` is `R0861`: `rand() * (n+1) >> 15`, uniform on `[0, n]` **inclusive**, 0 when
-`n == 0`. Runtime `Data.bin` column *i* is title *i+1* throughout.
+`rand(n)` is `R0861`. For spell byte bounds it maps the CRT 15-bit draw
+r to `floor(r*(n+1)/32768)` on `[0,n]` inclusive. Bound zero returns zero
+without a draw. Exactly equal buckets require n+1 to divide 32768; a shared
+CRT stream can have preceding consumers. — MAGIC-284, MAGIC-301
+
+Runtime `Data.bin` column *i* is title *i+1* throughout.
 
 ## Spell definitions
 
@@ -63,7 +67,8 @@ Spell        0x14 bytes, vtable L05044
   +0x10  u16  per-cast scratch: duration times 16 -- no routine that takes a Spell* reads it
               (each arm that needs a duration recomputes it from the column; over those
               twelve routines the only `word ptr [reg + 0x10]` is a stack argument); the
-              spellbook hover fold reads it from a record (TEXT-096).
+              spellbook hover fold reads it from a record (TEXT-096, partially retracted
+              only for universal popup/cast equality).
 Serialize stores +0x08, +0x09, +0x0a as bytes and +0x0c as a word. Nothing else.
 
 Spellbook    0x1c bytes, at actor+0x140
@@ -357,3 +362,26 @@ to 16 bits: a ranking term (`MAGIC-242`). No facing test is found in the three r
 helper and the selector. Book and scroll casts are gated before the cast by the executor's unit-target
 and point-target rows, a weapon cast by the attack rows but not by the plain row that installs action 3
 (`MAGIC-243`, the arm-to-row map Medium). Which code issues that plain row is Unknown.
+
+## Cast damage operands and popup agreement
+
+The 24 book ids contain seven row-driven harmful DirectDamage ids:
+1,2,3,9,13,14,21. Apply reads the row and current signed caster power,
+fills Spell+0e/+0f with low-byte base/spread, and copies those bytes into
+payload+5b/+5c with elemental kind at+5d. The target consumer reads that
+payload, not the popup aggregate. Fire Sacrifice 4, Poison 8 and Heal 6 have
+separate HP arms. The whole release-to-target timing join is Medium.
+— MAGIC-300, MAGIC-302
+
+For ordinary actor input, power is signed skill[Sphere]+Mind-30 clamped
+to 0..100. Popup preparation instead keeps byte addition before its clamp:
+unchanged 0..100 inputs with skill+Mind<30 give popup power 100 and cast
+power 0. The alternate item-power arm is signed16 and unclamped; Spell
+fill receives its low byte, while status scaling receives the full value.
+Equal power proves only matching pre-resistance formula inputs. Applied
+HP can differ through resistance, building reduction or Heal's interval;
+duration can use separate counters. — MAGIC-300, TEXT-117
+
+The two installed EN/RU executable images and 28 Spells rows, including
+Effects strings, match. Whole Data.bin hashes differ. The agreement is
+limited to those code and Spells inputs. — MAGIC-305

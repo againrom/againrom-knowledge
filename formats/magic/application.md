@@ -486,3 +486,61 @@ The conditional proof executes separated original fragments with explicit
 predicate, occupancy, visibility and message-service stubs. It does not certify
 native reachability of every synthetic actor state, footprint-edge behavior or
 exact rendered frames. — MAGIC-TELEPORT-174
+
+## Landed damage arithmetic
+
+For row-driven harmful book ids 1,2,3,9,13,14,21, Apply fills a DirectDamage
+combat block before delivery. Let T be signed64 truncation toward zero.
+The encoded preparation is binary64 f=power/30+1, B=low 8(T(p16*f))
+for positive p16, then S=low 8(T(p17*f-B)) for positive p17; otherwise
+the respective byte is zero. B is narrowed before the subtraction.
+The x87 entry precision and rounding state remain Unknown.
+— MAGIC-300, MAGIC-301
+
+Fire Ball 2 area application first divides a copied B/S by the product
+of two target virtual+1c byte results, then applies that copy. The
+meaning and nonzero reach of that divisor remain bounded to the receiver
+contract. Unit resolution draws B+R(S) after any Bless/Curse draws and the accuracy
+draw. Pure elemental payloads are not vetoed by accuracy. Kind 1..5 reads
+signed16 resistance at+c4,+c6,+c8,+ca,+cc. Nonzero resistance computes
+T(v*(100-r)/100+0.75), then signed max 0. Zero resistance keeps v.
+The caller subtracts low 16 from HP+94 without a local HP floor.
+Building resolution instead requires positive spread, subtracts five
+from B+R(S), clamps damage at zero, then word-subtracts HP+42 and clamps
+its signed stored result at zero. These are local receiver contracts;
+the full dynamic receiver join is Medium. — MAGIC-301
+
+Fire Sacrifice 4 derives its pair from current signed caster HP and mana,
+resets those fields to 1 and 0, then uses fire DirectDamage. Poison 8 scales
+its signed template health magnitude and applies water resistance with
+a0.5 bias on periodic HP subtraction; its decoded branch has no random
+draw. Heal 6 requests B+1..B+S for positive S, then caps against missing
+HP. None of these is the generic harmful row-pair path. — MAGIC-302
+
+## Applied lifetime operands
+
+Ordinary protections 5/10/16/22, Shield 18, Bless 23 and Haste 24 recompute
+Effect+42 as low 16(T(pow(1.025,signedPower)*p14*16)); Spell+10 is not
+their lifetime operand. Invisibility 15 uses literal 48*pow(1.05,power),
+capped at 65000 before truncation. Stone 20 additionally scales the word
+by signed Earth resistance and replaces zero by one. Exact native pow
+integer boundaries and entry x87 state remain Unknown. — MAGIC-303
+
+Freezing 7, Poison 8 and Light 12 retain inner template counters 320,128,16.
+Their ordinary areas use a separate+4c word:240+trunc(16*power/10) for
+Freezing/Poison,320+trunc(16*power/10) for Light. Wall 3/19 also use the
+240 formula. Distribution 5 clears+4c and selects staged mode 2, including
+Meteor 21 despite its positive popup duration. Total staged lifetime is
+Unknown. The popup duration therefore has different consumers and can
+describe a different word. — MAGIC-303, TEXT-117
+
+The ordinary Effect timer pulses continuous mode before decrement and
+skips decrement for counters>9600. Initial zero wraps to 65535. An active
+ordinary area subtracts one before its modulo 16 pulse, including the pulse
+at zero; expiry occurs on a later entry at zero. Refresh and late area
+attachment can change remaining duration. Counter arithmetic does not
+establish elapsed native seconds, other removal paths or SAVE/LOAD
+persistence. — MAGIC-304
+
+These local code and Spells inputs match in the two installed EN/RU roots;
+the whole Data.bin payloads do not. — MAGIC-305
