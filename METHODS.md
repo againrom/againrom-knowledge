@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3427. Observation: 95. Static analysis: 2859. Mixed: 473.
+Claims labelled: 3434. Observation: 95. Static analysis: 2866. Mixed: 473.
 
 ## Ledger ai
 
@@ -2640,7 +2640,7 @@ Claims labelled: 3427. Observation: 95. Static analysis: 2859. Mixed: 473.
 | SHOP-115 | static analysis | ● active (branch candidate) |
 | SHOP-116 | static analysis | ● active (branch candidate) |
 | SHOP-106 | static analysis | ● active (branch candidate) |
-| SHOP-107 | static analysis | ● active (branch candidate) |
+| SHOP-107 | static analysis | ● active (branch candidate, partially retracted) |
 | SHOP-108 | static analysis | ● active (branch candidate) |
 | SHOP-109 | static analysis | ● active (branch candidate) |
 | SHOP-110 | static analysis | ● active (branch candidate) |
@@ -2653,6 +2653,9 @@ Claims labelled: 3427. Observation: 95. Static analysis: 2859. Mixed: 473.
 | SHOP-124 | static analysis | ● active |
 | SHOP-125 | static analysis | ● active (amended) |
 | SHOP-126 | static analysis | ● active (amended) |
+| SHOP-128 | static analysis | ● active (branch candidate) |
+| SHOP-129 | static analysis | ● active (branch candidate) |
+| SHOP-130 | static analysis | ● active (branch candidate) |
 
 ## Ledger spr16a
 
@@ -3330,9 +3333,9 @@ Claims labelled: 3427. Observation: 95. Static analysis: 2859. Mixed: 473.
 | TOWN-506 | static analysis | ● active (branch candidate) |
 | TOWN-507 | static analysis | ● active (branch candidate) |
 | TOWN-499 | static analysis | ● active (branch candidate) |
-| TOWN-500 | static analysis | ● active (branch candidate) |
+| TOWN-500 | static analysis | ● active (branch candidate, partially retracted) |
 | TOWN-501 | static analysis | ● active (branch candidate) |
-| TOWN-502 | static analysis | ● active (branch candidate) |
+| TOWN-502 | static analysis | ● active (branch candidate, superseded, partially retracted) |
 | TOWN-MARKER-508 | static analysis | ● active |
 | TOWN-516 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-517 | static analysis | ✔ promoted (branch candidate) |
@@ -3352,6 +3355,10 @@ Claims labelled: 3427. Observation: 95. Static analysis: 2859. Mixed: 473.
 | TOWN-538 | static analysis | ● active |
 | TOWN-539 | static analysis | ● active |
 | TOWN-540 | static analysis | ● active |
+| TOWN-541 | static analysis | ● active (branch candidate) |
+| TOWN-542 | static analysis | ● active (branch candidate) |
+| TOWN-543 | static analysis | ● active (branch candidate) |
+| TOWN-544 | static analysis | ● active (branch candidate) |
 
 ## Ledger trigger
 

@@ -1342,3 +1342,17 @@ on evidence already committed.
 |---|---|---|---|---|---|
 | `AI-449` | The type-6 spawner joins each unit to the matching Player Group or builds one. | High / Medium | [EXP-0529](../experiments/EXP-0529-ownerless-units/) | AI-476 narrows admission: the owner lookup must resolve an existing Player. A miss skips before construction. Constructor facts, grades and matched-record counts stand. | SUPERSEDED |
 | `AI-GROUP-009` | The type-6 spawner adds each actor to the world and its owner/group-id membership. | High / Medium | [EXP-0529](../experiments/EXP-0529-ownerless-units/) | AI-476 narrows the rule to admitted actors. An unresolved Player produces no actor or Group. The EN 38-map/8094-unit corpus figures stand. | SUPERSEDED |
+
+## Shop caption source population and school timing
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SHOP-107` (source-table size only) | The source tables hold 16 entries of three bytes. | High / Medium / Unknown | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/), SHOP-130 | The initializer fills 256 source records at stride 4, assigning three channel bytes per record. Pressed-pass, object selection and one-pixel offsets stand; final pixels remain Unknown. | **REFUTED** — partially retracted |
+| `TOWN-500` (500 ms cycle period only) | It advances the counter modulo 5 every 500 ms or more while no slot has bit 1. | High / Medium | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/), TOWN-542 | 500 ms admits idle processing. After draw or its local skip, elapsed B strictly greater than 300 ms advances once. State and picture clauses stand. | **REFUTED** — partially retracted |
+| `TOWN-502` (paid-step completion timing only) | The handler requests teacher speech after a paid training step. | High / Medium | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/), TOWN-544 | The skill byte is read after command return; completion of paid training before that read is unproved because delegated transport consumers remain unread. Keys and teach request stand. | **SUPERSEDED** |
+
+## School speech reset constructor attribution
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TOWN-502` (constructor reset-call attribution only) | R2021 calls L12282 twice. | High / Medium | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/), TOWN-543 | The listing has one call at L14351 from constructor R2021 and one at L14352 from constructor L14353. Between-visit and new-game reset remain Unknown; speech keys, command-return ordering and common teach request stand. | **REFUTED** ? partially retracted |

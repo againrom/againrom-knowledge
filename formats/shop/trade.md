@@ -391,3 +391,33 @@ therefore hold duplicate random draws as separate objects — 200 draws from at 
 triples — while literal-Potion additions and returned equal items merge (partially retracted
 `SHOP-DUP-028`; random append, return-path merge and caller counts stand, while universal
 enchantment separation is withdrawn).
+
+## Shelf names, readout origin and caption colours
+
+The merchant hover getter uses the hit shelf rectangle to read main-table
+entry 62+i. It does not select the name from the open shelf or an item record.
+Entries 62..65 are Armor, Weapons, Magic items and Scrolls, books & potions;
+the RU resources are Броня, Оружие, Магические предметы and Свитки, книги и
+пузырьки. Books share the fourth entry. A permanent selected-shelf label on
+the complete screen remains Unknown: the bounded own-painter search leaves
+inherited and foreign child painters open, and the tip child may intercept
+lower-shelf hover. (`SHOP-128`, `TEXT-UI-039`, `SHOP-124`, `SHOP-125`, `SHOP-126`)
+
+The campaign constructs the L06494 grid separately from the shop backpack.
+Its mission-pack identity is Medium; delivered activation and paint remain
+Unknown. For mapped rectangle `(L,T,R,B)`, cell i's icon origin is
+`(L+pad+32+80*i,T+6)`, where
+`pad=trunc(((screenWidth-240) remainder 80)/2)`. Purse and stack-count text
+starts at icon-left plus 3 and mapped bottom minus 14. Final screen coordinates,
+empty text and native visibility require the coordinate mapper and root
+delivery. (`SHOP-129`, `SHOP-108`)
+
+Shop and school use the same normal/hover colour objects and block 0.
+Mode 4 builds 16 blocks of 256 packed words from 256 four-byte source records.
+For source index k, normal RGB bytes are `floor(k*(185,159,73)/255)` and hover
+bytes are `(k,k,floor(116*k/255))`. A block-b channel is
+`floor(c*(b+1)/D)` before pixel-format packing, with D=18 when the divisor
+switch is nonzero and 16 otherwise. Final caption-pixel RGB remains Unknown:
+glyph indices, runtime format and destination blending are unresolved.
+The 16-source-entry clause of SHOP-107 is retracted; its pressed-pass and
+offset clauses stand. (`SHOP-130`, `SHOP-107`)

@@ -2826,9 +2826,9 @@ A case-insensitive substring sweep of every node path in 12 EN and 11 RU archive
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TOWN-499 | School global `L11666` is written and read only in school paint `R1487`, which gates the column step at more than 83 ms; paint frequency is Unknown, with one idle-handler repaint request path found. | High / Unknown | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
-| TOWN-500 | The ten school state dwords start at -1 and a hit test turns 2 into -1 and 3 into 1; the main loop skips -1 and `R1964` paints the idle icon; the readers of the marker, timestamp and flag bit 3 are listed. | High / Medium | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
+| TOWN-500 | The ten school state dwords start at -1 and a hit test turns 2 into -1 and 3 into 1; the main loop skips -1 and `R1964` paints the idle icon; the readers of the marker, timestamp and flag bit 3 are listed. | High / Medium | ● active (branch candidate, partially retracted) | [EXP-0456](../experiments/EXP-0456-shop-school/), [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
 | TOWN-501 | A pressed-and-hovered school button draws its on picture and captions one pixel lower in the hover colour object; every other state draws the off picture in the object chosen by hover. | High / Medium | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
-| TOWN-502 | The school mouse-up handler `R1548` requests the teacher speech `training\npc33s%dl%d` or `npc34s%dl%d` after a paid training step, once per latch, then posts `teach.wav`. | High / Medium | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
+| TOWN-502 | The school mouse-up handler `R1548` requests the teacher speech `training\npc33s%dl%d` or `npc34s%dl%d` after the training command returns, once per latch, then posts `teach.wav`. | High / Medium | ● active (branch candidate, superseded, partially retracted) | [EXP-0456](../experiments/EXP-0456-shop-school/), [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
 
 ### TOWN-499
 
@@ -2840,11 +2840,13 @@ An image-wide scan for displacement and immediate `L11666` finds three hits, all
 
 ### TOWN-500
 
-The ten state dwords are the fighter slots at `view+0x2a4`..`0x2b4` and the mage slots at `view+0x2f4`..`0x304`. The constructor `R1940` and the enter routine `R0706` (loop `L12259`..`L12260`) store -1 in all ten. The hit test `R1477` visits every dword not equal to -1, clears bit 1, and stores -1 when the value is then 0: 2 becomes -1 and 3 becomes 1; `R1968(slot, flag)` sets the target's bit 1. The main paint loop (`L12261`..`L12262`) skips a -1 dword and picks the state picture by `[view+(state+3*slot)*4+0x264]` (fighter) or `+0x2b4` (mage). `R1964` (called at `L12263`) paints the idle shine icon of the cycling slot: it advances `[L12253]` modulo 5 every 500 ms or more while no slot has bit 1, and uses the shine picture (`+0x2bc` or `+0x26c`) for -1 or bit 0 clear and the shine-on picture (`+0x2c0`, `+0x270`) when bit 0 is set. Timestamp `view+0x340` is read only at `L12264` (against `0xc8`) in the school range and written by paint, enter and the picker steps `R1959` and `R1958`; the class-change marker `view+0x348` is read only at `L12265` and cleared at `L12266`. The picker steps write -1 to all ten dwords, set `+0x340` to the time, and OR bit 3 into the new element's flag `+0x18c`; the enter routine ORs bit 3 into the hero element at `L12267`. Direct tests of element flag bit 3 are at `L12268`, `L12269`, `L09798` and `L12270` (info-window builders). Other readers of the states are `R1954` (training quote) and `L11143` (hover cursor).
+The ten state dwords are the fighter slots at `view+0x2a4`..`0x2b4` and the mage slots at `view+0x2f4`..`0x304`. The constructor `R1940` and the enter routine `R0706` (loop `L12259`..`L12260`) store -1 in all ten. The hit test `R1477` visits every dword not equal to -1, clears bit 1, and stores -1 when the value is then 0: 2 becomes -1 and 3 becomes 1; `R1968(slot, flag)` sets the target's bit 1. The main paint loop (`L12261`..`L12262`) skips a -1 dword and picks the state picture by `[view+(state+3*slot)*4+0x264]` (fighter) or `+0x2b4` (mage). `R1964` (called at `L12263`) paints the idle shine icon of the cycling slot: its former 500 ms cycle-period clause is retracted: TOWN-542 distinguishes the 500 ms idle eligibility delay from the strict elapsed >300 ms post-draw step, and uses the shine picture (`+0x2bc` or `+0x26c`) for -1 or bit 0 clear and the shine-on picture (`+0x2c0`, `+0x270`) when bit 0 is set. Timestamp `view+0x340` is read only at `L12264` (against `0xc8`) in the school range and written by paint, enter and the picker steps `R1959` and `R1958`; the class-change marker `view+0x348` is read only at `L12265` and cleared at `L12266`. The picker steps write -1 to all ten dwords, set `+0x340` to the time, and OR bit 3 into the new element's flag `+0x18c`; the enter routine ORs bit 3 into the hero element at `L12267`. Direct tests of element flag bit 3 are at `L12268`, `L12269`, `L09798` and `L12270` (info-window builders). Other readers of the states are `R1954` (training quote) and `L11143` (hover cursor).
 
 **Confidence.** High for the dword values, the hit test and the painter routines. Medium for the reader lists: the direct bit-3 tests were found at four sites in the list of 232 `+0x18c` accesses of all classes (`evidence/scan-element-flags-18c.txt`); indirect consumers (register copies, whole-dword copies and pushes such as `L12271`, `L12272`, `L12273`, `L12274`, `L12275`) were not classified.
 
-**Unknown.** The mage branch of `R1964` calls `R1862` and then indexes by the cycle counter directly; its purpose was not resolved. The consumers of copied flag words.
+**Unknown.** TOWN-541 establishes that the mage idle arm discards the permutation return and uses the counter for picture and destination; final native geometry remains Unknown. The consumers of copied flag words.
+
+**Amended.** TOWN-541 resolves the local mage selector. TOWN-542 and the retraction ledger replace only the 500 ms cycle-period clause. State words, picture alternatives and the bounded reader lists stand.
 
 ### TOWN-501
 
@@ -2856,11 +2858,13 @@ The school button painter `R1905` loops over rectangles `0x360`..`0x368` of the 
 
 ### TOWN-502
 
-The mouse-up handler `R1548` (slot `L12076` of the button child) reads the pressed index `[this+0xac]` (0..2), confirms release by `R1978`, and for button 0 runs the training step `R1957`. If the purse and price fields (`+0x358`, `+0x354`) allow it, it sets `+0x264`, issues the command `R1932`, and reads the hero element `[L11629][view+0x33c]`, the skill byte `[hero+slot+0x14a]` and flag `+0x18c` bit 1 (mage). The tier is 0 up to 20, 1 up to 50, else 2. A latch dword at `view+0x36c+4*(class + 6*slot0 + 2*tier)` must be non-zero, where class is 0 or 2; the latches are set to 1 by `L12282` and zeroed after the request (`L12283`). The key is `training\npc33s%dl%d` (fighter, `L12284`, `L12285`) or `training\npc34s%dl%d` (mage, `L12286`, `L12287`), with slot code 1..5 and tier plus 1, prefixed `Speech\` and suffixed `.wav`; the sound object is built by `R0584` and requested through `R0386` (`L12288`). Then `SFX\Town\School\teach.wav` is posted (`L12289`). The three key literals each have one immediate reference, all in `R1548`.
+The mouse-up handler `R1548` (slot `L12076` of the button child) reads the pressed index `[this+0xac]` (0..2), confirms release by `R1978`, and for button 0 calls `R1957`. If the purse and price fields (`+0x358`, `+0x354`) allow it, it sets `+0x264`, issues the command `R1932`, and reads the hero element `[L11629][view+0x33c]`, the skill byte `[hero+slot+0x14a]` and flag `+0x18c` bit 1 (mage). The tier is 0 up to 20, 1 up to 50, else 2. A latch dword at `view+0x36c+4*(class + 6*slot0 + 2*tier)` must be non-zero, where class is 0 or 2; the latches are set to 1 by `L12282` and zeroed after the request (`L12283`). The key is `training\npc33s%dl%d` (fighter, `L12284`, `L12285`) or `training\npc34s%dl%d` (mage, `L12286`, `L12287`), with slot code 1..5 and tier plus 1, prefixed `Speech\` and suffixed `.wav`; the sound object is built by `R0584` and requested through `R0386` (`L12288`). Then `SFX\Town\School\teach.wav` is posted (`L12289`). The three key literals each have one immediate reference, all in `R1548`.
 
 **Confidence.** High for the routine, the keys and the request. Medium for the latch index: the arithmetic gives the mage tier t and the fighter tier t plus 1 of one slot the same dword, and the next slot's first fighter tier follows the last mage tier; no run was made. The `training\npc34m%d` movie key belongs to the enter routine (`DLG-RECT-037`).
 
-**Unknown.** Who unlatches between visits (`R2021` calls `L12282` twice); the role of `[L02739]`.
+**Unknown.** Who unlatches between visits; the role of `[L02739]`.
+
+**Amended.** TOWN-544 supersedes the paid-step timing clause with the observed command-return order. Paid-step completion is Unknown. Speech keys and the common teach request stand; TOWN-543 bounds reset callers. The claim that constructor `R2021` calls the reset twice is retracted: `L14351` is its single call, and `L14352` belongs to constructor `L14353`. TOWN-543 and the retraction ledger preserve this correction. Visit and new-game reset remain Unknown.
 
 ## World-map mission marker lifecycle
 
@@ -3227,3 +3231,62 @@ The `+0x74` child of the final stage (`TOWN-232`, rectangle (0, 238)-(160, 242))
 - The card's strings are read from the hero record at `+0xe4`, `+0xf0`, `[L04369]+0x14c` and `+0x150` and from `R0668`. Positions do not depend on them except through the x centring of flag 2.
 
 **Confidence.** High for the identical image and operands. The archives were not opened, so the strings themselves were not compared between the roots.
+
+## School shine and teacher speech boundaries
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-541 | School idle shine uses the cycling slot rectangle; mage discards the permutation result, whereas fighter uses it minus one, with final native geometry still Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+| TOWN-542 | School shine has a 500 ms idle eligibility delay and a strict elapsed >300 ms post-draw counter step; its two clocks and remembered slot do not establish native paint cadence. | High / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+| TOWN-543 | School constructors and one session-child stream path call the 30-dword speech-latch reset; reset coverage between visits and at a new game remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+| TOWN-544 | The teacher handler reads the skill byte after command return, changes tiers at 21 and 51, and requests teach.wav on a clear speech latch; paid-step completion remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+
+### TOWN-541
+
+The complete idle painter `R1964..L14361` requires a non-null school `+0x7c`. In the eligible mage arm it calls `R1862(counter,1)` at `L14362`, discards the return and reloads the raw counter. Mage slot i reads state `+0x2f4+4*i`, picture `+0x2bc+12*i` when state is -1 or bit 0 is clear, and `+0x2c0+12*i` otherwise. Its rectangle is `+0x10c+16*i`.
+
+Fighter uses j=`R1862(counter,0)-1`, state `+0x2a4+4*j`, picture `+0x26c+12*j` or `+0x270+12*j`, and rectangle `+0x1c0+16*j`. Both read permutation tables contain `(1,2,4,3,5)`. Therefore the mage call selects neither the eventual picture nor destination in this arm; fighter visits zero-based slots `(0,1,3,2,4)`.
+
+The shared blit at `L14363` requests source `(0,0)`, width `right-left`, height `bottom-top`, and destination `(schoolOriginX+left,schoolOriginY+top)`. It does not request the fixed class-preview anchor.
+
+The initializer `R1940` assigns these mage rectangles in counter order: `(264,232,284,260)`, `(192,240,216,224)`, `(228,272,256,298)`, `(224,200,252,224)`, `(224,236,256,262)`. Fighter rectangles in counter order are `(200,196,280,228)`, `(200,216,280,252)`, `(200,248,280,276)`, `(200,272,280,288)`, `(200,288,280,308)`. The second mage rectangle has height -16 as initialized; it is not normalized in the idle blit arguments.
+
+**Confidence.** High for local selector, picture offsets, rectangle arithmetic and initialized values. The committed instruction listing and both tables exclude a fixed-preview destination and a mage destination permuted by the call result.
+
+**Unknown.** Later rectangle writers, negative-height handling in sprite slot `+0x38`, final native destination and visible picture. The original was not run. Read all rectangle owners/writers and that blitter, or observe a named class and cycle slot, to settle native geometry.
+
+### TOWN-542
+
+`R1964` initializes clock A `L12251` and clock B `L12252` once under masks 1 and 2 of `L12256`, using `timeGetTime`. It then requires school `+0x7c` and scans the selected class's five state words for bit 1. A marked slot is converted by `R1862` and remembered as return minus one.
+
+Unsigned elapsed A below 500 ms refreshes B and returns. At elapsed A at least 500 ms, a previously remembered slot `L12254 != -1` seeds counter `L12253=(remembered+1)%5` and modulus `L12255=5`. If a marked slot is currently found, it becomes the remembered slot, both clocks reset to now, and the routine returns. Otherwise the counter is reduced modulo five and the modulus is five.
+
+Drawing additionally requires school `+0x328=0` and rotation column `+0x31c=15` for mage or 0 for fighter. After the draw or its local skip, the remembered slot is set to -1. Only then does unsigned elapsed B strictly greater than 300 ms set B=now and advance the counter once modulo the stored modulus. Equality at 300 does not advance. Delayed calls do not catch up with multiple steps.
+
+**Confidence.** High for these branches and stores in the complete committed idle body. The 500 ms comparison controls admission, whereas the 300 ms comparison controls the subsequent increment. TOWN-500's former 500 ms slot-period clause is retracted.
+
+**Unknown.** Native invocation frequency, cross-visit clock lifetime and indirect writers of these globals. The combined raw five-section reference scan is navigation, not an exhaustive writer census. Resolve root paint delivery, alias/bulk-copy writers and school object lifetime to establish native cadence and persistence.
+
+### TOWN-543
+
+Reset routine `L12282..L14364` writes 1 to 30 consecutive dwords at school `+0x36c..+0x3e0` and clears school `+0x7c`. School constructors `R2021` and `L14353` call it at `L14351` and `L14352`. The located call at `L14365` passes the school child from session `+0x104`; its surrounding stream-like path is not evidence of a new-game reset.
+
+The read enter/leave ranges and campaign reset `R0757..L14366` establish no direct call to this reset in those bodies. Their indirect callees and virtual child lifecycle are not complete. This is a bounded local observation, not an exhaustive reset-writer absence.
+
+**Confidence.** High for the reset's 30 stores and the three confirmed callers. The raw E8 candidates were checked against committed instructions before attribution. These prove construction and the named session-child caller only.
+
+**Unknown.** Which routine resets speech between school visits, whether a new game reconstructs this child, and whether alias or bulk stores reset the same fields. Resolve the session-child stream routine, complete new-game lifecycle, enter/leave virtual targets and width/embedded-base/alias writers. Native visits and a new-game witness would settle persistence.
+
+### TOWN-544
+
+The button-0 training handler calls `R1932` at `L12074` before reading the actor's selected skill byte at `L14367`. The command wrapper submits code `0x3d` through `R0217`. That transport's virtual and delegated consumers were not resolved, so command return does not establish completion of a paid training step.
+
+The unsigned skill-byte tiers are 0 for 0..20, 1 for 21..50, and 2 for 51..255. The latch address is `school+0x36c+24*(selectedSkill-1)+8*tier+4*(actor[+0x18c]&2)`. A nonzero latch permits the teacher speech request; the handler then clears it. The teacher keys remain TOWN-502's `training\npc33s%dl%d` and `training\npc34s%dl%d`, prefixed with Speech and suffixed with .wav.
+
+For five skills, three tiers and class masks 0/2, this arithmetic gives 16 distinct even dword indices 0..30 for 30 combinations. Fighter tier 1 aliases mage tier 0 of the same skill. The skill-5 mage tier-2 address is `+0x3e4`, one dword beyond TOWN-543's 30 reset positions. This is address arithmetic; its live initialization and gameplay effect are unproved.
+
+A clear latch jumps to `L14368`, which still calls `L13110` at `L12289` with the measured literal `SFX\Town\School\teach.wav`. That helper calls `L13113` and the sound request `R0386` through school `+0x80`. Thus the clear latch suppresses the teacher speech branch, not the common teach request.
+
+**Confidence.** High for command/read order, exact byte comparisons, latch arithmetic and the reachable teach request. The complete handler, wrapper, transport prefix and request helper are committed. TOWN-502's paid-step timing clause is superseded by the narrower command-return fact.
+
+**Unknown.** Whether the skill byte already reflects successful paid training, every transport mode's completion order, initialization of `+0x3e4`, native consequences of latch aliases, sound-object preparation and audible playback. Resolve the complete command consumers, that trailing field's lifecycle and the sound prepare/request consumers, or use controlled native training and audio observation.

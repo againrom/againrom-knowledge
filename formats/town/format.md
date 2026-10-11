@@ -611,3 +611,39 @@ mission start, at the sack cell, at the rogue, bee and ghost kills, and near
 the woman and her destination; m20 at start and at the squirrel kill. The
 trigger latch is in SAV, so a tip shown before SAVE does not return after
 LOAD. — TRIG-TIPS-087, TRIG-TIPS-088
+
+## School idle slot and speech boundaries
+
+Idle shine draws into a slot rectangle with the school origin added.
+Mage uses its raw cycle counter for state, picture and rectangle; it discards
+the permutation return. Fighter uses the permutation minus one. Both tables
+are `(1,2,4,3,5)`. The initialized second mage rectangle has height -16;
+later writers, negative-height handling and final native geometry remain
+Unknown. (`TOWN-541`)
+
+The two clocks have distinct roles. Below 500 ms of clock A, processing returns
+and refreshes clock B. A marked slot resets both clocks; a remembered slot
+seeds the next counter. Drawing requires the class column endpoint and a
+non-null tip child. After draw or its local skip, elapsed B strictly greater
+than 300 ms advances the counter once. The 500 ms cycle-period clause of
+TOWN-500 is retracted. Native paint cadence and cross-visit clock lifetime
+remain Unknown. (`TOWN-542`, `TOWN-500`)
+
+Shop and school select the same two caption colour objects and block 0.
+Each mode-4 object contains 16 blocks of 256 words; source records have
+stride 4. The initialized source law and conditional divisor are established,
+but final caption-pixel RGB remains Unknown. (`SHOP-130`)
+
+The reset writes 1 to 30 speech-latch dwords. Each of two constructors calls
+it once; one session-child stream path also calls it. The double-call clause
+for one constructor in TOWN-502 is retracted. Reset coverage between visits
+and at a new game remains Unknown; indirect lifecycle and alias writers
+are open. (`TOWN-543`, `TOWN-502`)
+
+The handler reads the skill byte after training-command return. Its tiers
+are 0..20, 21..50 and 51..255. A clear speech latch still reaches the common
+teach.wav request. The paid-step completion clause of TOWN-502 is superseded:
+delegated command consumers have not established whether the skill has
+already changed. Latch arithmetic aliases several class/tier combinations
+and can address one dword beyond the reset's 30 positions; initialization
+and native consequences remain Unknown. (`TOWN-544`, `TOWN-502`)

@@ -1317,7 +1317,7 @@ The tray arm therefore differs from the backpack and shelf arms (`SHOP-115`): af
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | SHOP-106 | The shop stock-grid painter draws quantity text in font 2 with flag 0 (left) and price text with flag 1 (right), both with ramp `L03616` and shadow 1; the purse cell goes through the quantity run, never the price run. | High | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
-| SHOP-107 | The shop button panel redraws a pressed-and-hovered button's picture and both captions one pixel lower in the hover colour object `[L09922]`; the final RGB of the two caption colour objects is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
+| SHOP-107 | The shop button panel redraws a pressed-and-hovered button's picture and both captions one pixel lower in the hover colour object `[L09922]`; the final RGB of the two caption colour objects is Unknown. | High / Medium / Unknown | ● active (branch candidate, partially retracted) | [EXP-0456](../experiments/EXP-0456-shop-school/), [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
 | SHOP-108 | The mission pack readout (class vtable `L06494`, `campaign+0xe8`) draws its purse figure and its stack counts with font 2, flag 0, shadow 1 and the gold ramp `L03616`, as the shop grid does. | High | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
 | SHOP-109 | The shop speech is requested by tray slot `+0xa4` (`L09858`) on a scaled 30 percent draw from held-item keys; no tavern routine requests a speech-prefixed file of its own (tavern sound requests are slot objects). | High / Medium | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
 | SHOP-110 | The backpack strip's own paint (vtable `L09923` slot `+0x2c`, `L09924`) blits an arrow only while parent dword +0x148 is nonzero, the art is loaded, and base > 0 (left) or count - base > 5 (right); at a bound no arrow bitmap is blitted. | High / Medium | ● active (branch candidate) | [EXP-0482](../experiments/EXP-0482-shop-strip/) |
@@ -1334,11 +1334,13 @@ The grid painter `R0994` (vtable `L09925` slot `+0x2c`) holds exactly two calls 
 
 ### SHOP-107
 
-The shop button panel `R1027` draws each button's two captions in its unconditional pass through the font-4 primitive `[L06186]` (`vt+0x14`, flag `0xa`), choosing the colour object `[L09922]` when the hovered index `+0xfc` equals the button and `[L09928]` otherwise (`SHOP-050` holds the four rectangles). The pressed-and-hovered pass (`L09929`..`L09930`) runs only when `+0xf8` and `+0xfc` are both non-negative and equal. It re-blits the button child at `[this+idx*4+0x64]` through `vt+0x38` (`L09931`), then redraws both captions in `[L09922]` with the caption y one pixel lower (`+7` against `+6` from a quarter of the height; `-1` against `-2` from three quarters); x is unchanged. The two objects are built by `R0572` through `R1107` mode 4: 16 shade blocks of 256 words, and the captions read block 0 (`L09932(obj, 0)`). The source tables hold 16 entries of three bytes (`evidence/colours.txt`): hover entry 15 holds (15, 15, 6) and normal entry 15 holds (10, 9, 4).
+The shop button panel `R1027` draws each button's two captions in its unconditional pass through the font-4 primitive `[L06186]` (`vt+0x14`, flag `0xa`), choosing the colour object `[L09922]` when the hovered index `+0xfc` equals the button and `[L09928]` otherwise (`SHOP-050` holds the four rectangles). The pressed-and-hovered pass (`L09929`..`L09930`) runs only when `+0xf8` and `+0xfc` are both non-negative and equal. It re-blits the button child at `[this+idx*4+0x64]` through `vt+0x38` (`L09931`), then redraws both captions in `[L09922]` with the caption y one pixel lower (`+7` against `+6` from a quarter of the height; `-1` against `-2` from three quarters); x is unchanged. The two objects are built by `R0572` through `R1107` mode 4: 16 shade blocks of 256 words, and the captions read block 0 (`L09932(obj, 0)`). The former 16-entry source-table clause is retracted. SHOP-130 establishes 256 source records at stride 4; the old entry-15 values sampled only the start of that population.
 
 **Confidence.** High for the pass condition, the picture re-blit, the object choice and the one-pixel offsets. Medium for the object roles: the hover and normal names follow the `+0xfc` comparison. Unknown for the displayed colour: block 0 scales the source by a shade term (`L09933`..`L09934`) and maps it through the pixel format, which the probe sets to zero.
 
 **Unknown.** The displayed RGB of either caption colour object; the glyph index range that selects entries of the 256-word block.
+
+**Amended.** SHOP-130 and the retraction ledger replace the source-table size clause. The pressed-pass, object-choice and offset clauses stand; final caption RGB remains Unknown.
 
 ### SHOP-108
 
@@ -1560,3 +1562,47 @@ Every modal coordinate in the paint is offset by the cursor `[L01257]`, `[L01258
 **Unknown.** Which routine sets bit `0x80` and whether the modal is reachable on the shipped game; the displayed colours of the two ramps after the pixel-format mapping.
 
 **Amended.** The grade was High for the gate, the call operands, the literal bytes, the ramp choice and the two offsets; it is Medium because the literal windows at `L14026` and `L14027` were first read after the preregistered window budget was spent (`EXP-0518`, Budget). The gate and call operands are in the tail window of `R1539`, read before the budget was spent.
+
+## Shop and campaign readout presentation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-128 | The merchant hover getter selects main-table entry 62+i from the hit shelf rectangle, independently of the selected shelf; complete-screen selected-shelf label absence remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+| SHOP-129 | The campaign builds the L06494 grid separately from the shop backpack; its purse/count text uses x=cell-left+3 and y=mapped-bottom-14, while mission-screen visibility remains unproved. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+| SHOP-130 | Shop and school captions select the same two colour objects; mode 4 builds 16 blocks from 256 four-byte source records, while final caption-pixel RGB remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
+
+### SHOP-128
+
+The complete local getter `R1861..R1539` reads its parent at `+0x5c`. It returns zero when parent `+0x148` is zero or panel `+0x240` has mask `0x80`. Otherwise it subtracts the view origin from the cursor and tests four rectangles at panel `+0x60+16*i`. A hit supplies index `62+i` to `R1773` with main-table receiver `L09841`. The index addition is `L14012`; the accessor call is `L14013`. The getter does not read the selected-shelf field.
+
+TEXT-UI-039 supplies the resource names: 62 Armor / Броня; 63 Weapons / Оружие; 64 Magic items / Магические предметы; 65 Scrolls, books & potions / Свитки, книги и пузырьки. Books share entry 65. TEXT-090's item description is a separate source. Those resource names are reused evidence, not fresh archive measurements.
+
+**Confidence.** High for this getter's four-rectangle selection and table index. The committed Capstone listing covers its entry, every local branch and return. The selected-shelf and item-record alternatives are excluded for this getter alone.
+
+**Unknown.** A permanent selected-shelf label anywhere on the complete screen. SHOP-124..SHOP-126 bound the shop's own painters and hover delivery; inherited paint, copied font pointers and foreign child painters remain open. The overlapping tip child may intercept lower-shelf hover. Resolving those child getters and the complete paint walk, or observing the original with each named shelf selected, would settle delivery and screen-wide absence.
+
+### SHOP-129
+
+The campaign child builder `R0315` allocates `0x20ac` bytes, calls `L09896` at `L09895`, and stores the result at campaign `+0xe8` at `L14354`. The constructor installs vtable `L06494` at `L14355`. The shop constructor instead builds a `0x20ec` backpack object at shop `+0x6c` (`L09722..L09723`). These are distinct allocations and class paths.
+
+The campaign constructor call supplies control ID 2, left 0, top `mapview[+0x14]-90`, right `screenWidth-160`, and bottom `mapview[+0x14]`. Its neighboring mapview construction receives width `screenWidth-160` and height `screenHeight`. Interpreting the grid as the lower mission pack is Medium: the child adoption, activation and delivered paint walk were not resolved.
+
+Let `(L,T,R,B)` be the four mapped rectangle values returned to the painter by `R1224`. Let `pad=trunc(((screenWidth-240) remainder 80)/2)`, using signed division. Cell i advances by 80 pixels. The icon draw origin is `(L+pad+32+80*i,T+6)`. Purse and stack-count font calls use `(L+pad+35+80*i,B-14)` at `L09935` and `L14356`. Thus their x is icon-left plus 3, and their y follows the mapped object's bottom rather than each icon's top. The font, flags and ramp remain SHOP-108's contract.
+
+**Confidence.** High for allocation, vtable, store and local painter arithmetic in the committed listings. Medium for mission-pack screen identity. A final screen coordinate is conditional on the coordinate mapper and inherited rectangle storage.
+
+**Unknown.** Which delivered player screen activates and paints this object, its native screen origin, empty-list text and final text pixels. Read the complete coordinate mapper, ID-2 child activation/adoption and root paint dispatch, or observe the original's mission pack and character inventory, to settle them. The ranges named pack-activation and campaign-pack-binding contain unrelated or partial neighboring instructions and are not evidence of activation.
+
+### SHOP-130
+
+The source accumulator reset `L13954..L14357` and fill `L14358..L13938` establish 256 records at stride 4. For k=0..255 the assigned RGB bytes are normal `floor(k*(185,159,73)/255)` at `L13942` and hover `(k,k,floor(116*k/255))` at `L13944`. Only three bytes of each four-byte record are assigned as channels. SHOP-107's entry-15 values sampled the start of this population.
+
+Initialization stores the normal object at `L09928` and the hover object at `L09922`; both use `R1107`, count 16 and mode 4. The read mode table routes mode 4 to `L10380`. The builder emits 16 blocks of 256 packed words. For block b=0..15 and source channel c it computes `floor(c*(b+1)/D)`, clamped to 255. D is 18 when `[L03346]` is nonzero and 16 otherwise. Packing uses the current channel bit-count and shift globals. The PE's initial globals describe RGB565; runtime writers and the meaning of the divisor switch were not established.
+
+`L09932(obj,b)` returns `obj[+8]+512*b`. The shop caption calls request block 0. The school painter at `L14359..L14360` selects the same normal/hover objects and uses their `+8` pointer, also block 0. For block-0 source endpoint k=255, prepack RGB is normal `(11,9,4)` and hover `(15,15,7)` when D=16; normal `(10,8,4)` and hover `(14,14,6)` when D=18. These are conditional table-entry values, not the RGB of every caption pixel.
+
+The font virtual method `R0767` passes the colour-table pointer to glyph sprite slot `+0x34` at `L11099`. That sprite consumer was not read.
+
+**Confidence.** High for the initialized source law, builder arithmetic and shared object/block selection. The zero seeds, complete mode-4 branch and both painters are committed. These exclude a 16-source-record population and independent school colour objects.
+
+**Unknown.** Final caption-pixel RGB, glyph table indices, possible encoded access to later blocks, runtime pixel format and destination blending. Reading the glyph sprite `+0x34` consumer, pixel-format writers and native caption samples would settle these alternatives. The conditional prepack endpoints must not be used as final RGB.
