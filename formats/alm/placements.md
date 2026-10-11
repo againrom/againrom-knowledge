@@ -476,3 +476,18 @@ via a generic named-node accessor family (`R0475` find-by-name, `R0476`
 get-param, `R0477`/`IsEmpty` iterate). This historical cross-reference
 does not classify types 8/9 as named-node trees: their distinct record consumers
 are `ALM-SACK-065`, `ALM-EFFREC-071` and `UNIT-M10CELL-054`.
+
+## Missing Player admission
+
+The installed ROM1 EN/RU map population contains 8094/3991 existing unit
+records in 38/34 maps. Every owner selector matches its map roster; values
+are 1 through 9. This is a bounded population result. RU Horror has no
+Player, unit or script record despite nonzero metadata declarations
+(`AI-475`).
+
+The selected type-6 start path looks up the owner among existing Players.
+A miss skips the record before actor construction, placement, Group lookup
+or any actor/order stores. It creates no Player and assigns no substitute
+owner (`AI-476`). The owner/group-id membership rule applies after that
+admission check (`AI-449`, `AI-GROUP-009`).
+ The unconditional map admission reading of `AI-449` and `AI-GROUP-009` is superseded by `AI-476`; constructor facts and matched-record membership stand.

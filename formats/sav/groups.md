@@ -131,7 +131,7 @@ Every Player-1 Group holds order 3. A map Group of Player 1 holds only `+20`
 `+24`..`+2c`, `+44`) that no store read writes, from about four independent
 lineages; `+45` is 0 on two. Their producer is Unknown, and whether they predate
 the mission start is Medium (the carry arm is unread). A carried Group can hold
-several carried members. — SAV-1219, AI-449, AI-451
+several carried members. — SAV-1219, AI-449, AI-451 The unconditional map admission reading of `AI-449` is superseded by `AI-476`; constructor facts and matched-record membership stand.
 
 Every member's order block holds `+00` = its cell word, `+08` = `+09` = 0,
 an empty `+90` list, `+14` and `+71`; a Unit adds `+40`/`+44` and up to one

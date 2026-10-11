@@ -242,3 +242,21 @@ call sites, i.e. whether any path creates a unit without the fold; `R0146`, the 
 routine outside the equip pair that writes reach; `R0590`, the client-side consumer of
 the prototype cache; `Player+0x5c`, the second gate on the experience payout; and whether
 anything changes `Player+0x28` after setup.
+
+## Missing Player and temporary casters
+
+The selected map start path refuses a type-6 record whose owner names no
+existing Player before actor construction. That record has no actor, Group
+or order fields (`AI-476`).
+
+The composed script-cast creation interpretation is Medium: a temporary
+Unit retains null Player `+0x14`, Group `+0x70` and admission `+0x3c` through
+the named route. The local zero stores, explicit separate-list append and
+direct action stores `0xd`/`0xe` remain High. Unread same-actor calls
+`R1624` and `R0184`, and builder helpers `R0289`, `R0462`,
+`R0463`, `R0915` and `R0464`, leave later assignment or registration
+open. Conversion binding to a resolved Player is Medium; its parameter
+table `L12450` is not decoded as semantic table values. Resolver miss,
+publication predicate and transfer/removal instructions remain High.
+Full scheduling, indirect registration, null-owner spell outcomes and
+persistence remain Unknown (`AI-477`).

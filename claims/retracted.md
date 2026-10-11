@@ -1320,3 +1320,10 @@ on evidence already committed.
 | Claim | Previous clause | Previous confidence | Overturned by | What the evidence says | Verdict |
 |---|---|---|---|---|---|
 | `MOVE-084` (every-actor-before-every-area-effect clause only) | "and every actor tick runs before every area-effect tick" | High | [EXP-0528](../experiments/EXP-0528-death-lifecycle/), AI-474 | The quoted `R0426` walk is the transient list at manager+0x2c, locally before `R0641` (High). `R0193` locally calls `R0426` before normal actors `R0427` (High). Their joined global-effect-before-normal-actor order is a composed inference at Medium; full-frame and paint order remain Unknown. The withdrawn clause stays retracted. Transit-cost, dynamic-plane stores and crossing/recompute clauses and their grades stand. | **REFUTED** — partially retracted |
+
+## Missing Player admission scope
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `AI-449` | The type-6 spawner joins each unit to the matching Player Group or builds one. | High / Medium | [EXP-0529](../experiments/EXP-0529-ownerless-units/) | AI-476 narrows admission: the owner lookup must resolve an existing Player. A miss skips before construction. Constructor facts, grades and matched-record counts stand. | SUPERSEDED |
+| `AI-GROUP-009` | The type-6 spawner adds each actor to the world and its owner/group-id membership. | High / Medium | [EXP-0529](../experiments/EXP-0529-ownerless-units/) | AI-476 narrows the rule to admitted actors. An unresolved Player produces no actor or Group. The EN 38-map/8094-unit corpus figures stand. | SUPERSEDED |

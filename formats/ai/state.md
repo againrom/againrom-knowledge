@@ -85,7 +85,7 @@ zeroes 80 bytes and sets `+0x45` 1. The type-6 spawner builds a map Group on a
 group-id miss. The join walk builds a Group only when its Player has none; no Group
 build for a carried member was found in the routines read, so a carried member
 appears to keep its existing Group (Medium: the carry arm and ten other
-callers of the Group constructor are unread). — AI-449
+callers of the Group constructor are unread). — AI-449 The unconditional map admission reading of `AI-449` is superseded by `AI-476`; constructor facts and matched-record membership stand.
 
 The stance walk sets every map Group: Groups of the first type-5 record get
 the Stand Ground setter, which stores only AI `+0x20` (3); all others get the guard setter
@@ -143,3 +143,21 @@ The named bodies establish the refresh and its driver position, not every
 actor-list enrollment/removal path, the first native post-LOAD event, or
 acceptance of source coordinates beyond the measured safe grid.
 — AI-ACTIVITY-324
+
+## Missing Player admission and evaluation
+
+An unresolved map owner is refused before an actor or Group exists, so the
+record reaches no actor, activity or Group pass (`AI-476`).
+
+The composed temporary-caster creation/evaluation interpretation is Medium.
+Local calls, explicit separate-list append and Unit vtable slot `+0x18`
+binding to actor tick remain High. On the positive-HP actor path, the
+executor bypass is High conditional on `actor+0x3c` still zero at its getter.
+The constructor's earlier zero does not establish this later field value.
+Unread same-actor calls `R1624`/`R0184` and builder helpers `R0289`,
+`R0462`, `R0463`, `R0915` and `R0464` can change fields or
+registration. Actor tables `L01775`/`L01776` are not
+decoded as semantic values. Conversion binding is separately Medium because
+parameter table `L12450` is undecoded. Full scheduling, indirect
+registration, null-owner spell outcomes and persistence remain Unknown
+(`AI-477`, `AI-478`).

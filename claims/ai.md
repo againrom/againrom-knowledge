@@ -482,7 +482,7 @@ And `R0146` (state 0x17) **overwrites both radii on the actor**: the byte stores
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-TICK-008 | The AI is one slot of the full tick, it is driven per group, and the per-actor state machine is a single arm inside it. | High / Medium | ● active (contested) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
-| AI-GROUP-009 | The unit of AI is a runtime *group*: a `0x48`-byte `CObList` subclass owning a `0x50`-byte AI record, formed at spawn by equality of the `.alm` type-6 group id. | High / Medium | ● active | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
+| AI-GROUP-009 | The unit of AI is a runtime *group*: a `0x48`-byte `CObList` subclass owning a `0x50`-byte AI record, formed at spawn by equality of the `.alm` type-6 group id. | High / Medium | ● active (superseded) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
 | AI-ORDER-010 | `grpAI+0x20` is the group order byte and it has eight live values; `0` is what hands control to the members' own states. | High / Medium | ● active | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
 | AI-STATE-011 | `actor+0x50` is the per-actor AI state, its switch has 27 arms of which 12 are distinct, and its value at construction is `0xb` — guard. | High / Medium | ● active (amended, superseded) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
 | AI-GUARD-012 | Guard is the whole of “motion without an order”, and home is the cell the actor stood on when guard first ran. | High / Medium / Unknown | ● active (amended, partially retracted, superseded) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
@@ -508,6 +508,9 @@ Constructor `R0149`: `grp+0x40 = 0`, `grp+0x44 = 0`, then `new(0x50)` then `R015
 The struct's `+0x40` is the file's `+0x42` at instruction level — case 6 reads 4 bytes into `struct+0x40` at `L00297` and keeps its running maximum at `mapObj+0x90` (`L00298`/`L00299`) — so this is `ALM-UNIT-048`'s **group id** with a consumer, not a label from the trigger grammar. `R0152` (AddMember, 15 sites / 11 owners) also writes `grp+0x44 = actor+0x14`, the owning `Player`. **Corpus, 38 maps / 8094 placed units** (`tools/aibehav`, replaying that rule per owner-and-groupId pair): **2264 groups**, mean **3.58** members, **686 singletons (30.3 %)**, largest **133** (`Horror.alm`), most groups in one map **362** (`Forester.alm`), and only **5** units carry group id 0
 
 **Confidence.** High (the allocation sizes, the ctor defaults, the match instruction and the loader's own store are cited instructions; the file-to-struct binding is a read boundary, not an inference). **Medium** that the corpus figures describe what the engine builds — they replay the match rule but do not observe the engine doing it
+
+
+**Amended.** AI-476 supersedes the unconditional map-record admission reading. The membership rule applies after the owner lookup resolves an existing Player; a miss skips the record before construction. The existing constructor facts, grades and matched-record corpus counts stand. See the SUPERSEDED entry in `retracted.md`.
 
 ### AI-ORDER-010
 
@@ -3626,7 +3629,7 @@ caller confidence stand; attacker-class occurrence remains Unknown.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-449 | The order constructor zeroes 148 bytes but sets `+0x71` 1; the AI constructor zeroes 80 but sets `+0x45` 1; a map Group comes from the spawner's miss arm; the join walk builds a Group only for a Player with none. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
+| AI-449 | The order constructor zeroes 148 bytes but sets `+0x71` 1; the AI constructor zeroes 80 but sets `+0x45` 1; a map Group comes from the spawner's miss arm; the join walk builds a Group only for a Player with none. | High / Medium | ✔ promoted (superseded) | [EXP-0524](../experiments/EXP-0524-group-start/) |
 | AI-450 | The load-time guard setter `R0125(grp, 0)` writes AI `+0x20` 1, the members' centroid `+0x24`/`+0x28` and `+0x00`, `+0x2a`..`+0x2c`, `+0x2d` = `+0x38` = max(`+0x2c`, MinimalGuardRange) and `+0x39` 0. | High | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
 | AI-451 | The Stand Ground setter `R0063` stores only byte `+0x20` of the AI block (0, 0, then 3); every other AI byte of a Group it sets keeps its earlier value. | High | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
 | AI-452 | The trigger binder `R0067` stores no Group-AI field but dword `+0x48` = 1, at eight sites that resolve a unit's Group or a Group; its body has no order-block access. | High / Medium | ✔ promoted | [EXP-0524](../experiments/EXP-0524-group-start/) |
@@ -3644,6 +3647,9 @@ caller confidence stand; attacker-class occurrence remains Unknown.
 **Confidence.** **High** for the constructor stores, the caller sets and the walk head's branches (complete bodies, `CALL rel32` targets from the bytes). **Medium** for the reading of `R0197` as an empty test, `R1582` as removal from the list and `L14233` as the first element: their bodies were not read. **Medium** for "no mission-start routine builds a Group for a carried member": it covers the routines read (the spawner arm and the join walk), and eleven of the thirteen direct callers of `R0149` were not read, the carry arm's `L14238` among them.
 
 **Unknown.** The routine around `L14230`. Whether a Group the walk head removes is freed. The unread callers of `R0149` named above, of `R0063` (`L01873`, `L14247`, `L01874`) and of `R0125` (`L00378`, `L00596`, `L00949`, `L00388`, `L00950`) as to whether any runs at a mission start.
+
+
+**Amended.** AI-476 supersedes the unconditional map-record admission reading. The membership rule applies after the owner lookup resolves an existing Player; a miss skips the record before construction. The existing constructor facts, grades and matched-record corpus counts stand. See the SUPERSEDED entry in `retracted.md`.
 
 ### AI-450
 
@@ -4028,3 +4034,175 @@ sweep keep High. MOVE-084's withdrawn actor-before-effect clause stays
 retracted; its retained cost/crossing grades stand.
 
 **Evidence.** [EXP-0528](../experiments/EXP-0528-death-lifecycle/EXP-0528.md), [w15-subtick-body.txt](../experiments/EXP-0528-death-lifecycle/evidence/w15-subtick-body.txt), [w16-phase-stepper.txt](../experiments/EXP-0528-death-lifecycle/evidence/w16-phase-stepper.txt), [w26-transient-effect-step.txt](../experiments/EXP-0528-death-lifecycle/evidence/w26-transient-effect-step.txt), [w27-effect-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w27-effect-manager.txt), [w14-actor-manager.txt](../experiments/EXP-0528-death-lifecycle/evidence/w14-actor-manager.txt), [w21-client-sweep.txt](../experiments/EXP-0528-death-lifecycle/evidence/w21-client-sweep.txt), [w25-paced-play.txt](../experiments/EXP-0528-death-lifecycle/evidence/w25-paced-play.txt)
+
+## Missing Player admission and temporary casters
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-475 | The installed ROM1 EN/RU maps contain 8094/3991 existing units in 38/34 maps; no owner selector is absent from its map roster, and all 28 conversion destinations per locale resolve. | High | ✔ promoted (branch candidate) | [EXP-0529](../experiments/EXP-0529-ownerless-units/) |
+| AI-476 | The selected ROM1 type-6 start path skips a record whose owner names no Player before actor construction, placement, Group lookup or order stores. | High | ✔ promoted (branch candidate) | [EXP-0529](../experiments/EXP-0529-ownerless-units/) |
+| AI-477 | ROM1 script casts are interpreted at Medium as creating temporary Units that retain null Player/Group; the composed conversion-binding interpretation is also Medium. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0529](../experiments/EXP-0529-ownerless-units/) |
+| AI-478 | The composed ROM1 temporary-caster evaluation route is Medium; the local executor bypass is High conditional on actor+0x3c still being zero at its getter. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0529](../experiments/EXP-0529-ownerless-units/) |
+
+### AI-475
+
+The census traverses all regular files in the lawful ROM1 EN and RU installs:
+139/42 files, 12/11 archives, 38/34 loose or archived maps, and 8094/3991
+existing type-6 unit records. It includes unreachable archive member nodes.
+No input error or directory exclusion remains. Every map's unmatched count
+is zero. Raw owner values are 1 through 9 in each locale. The spawner uses
+the signed low word of type-6 `+0x14`; the roster selector is the physical
+type-5 ordinal plus one, joined to `Player+8` by ALM-PLAYER-069 and the fresh
+roster/lookup instructions. Wire type-5 `+0` is SHADE, not Player identity.
+
+Each locale has 14 opcode-19 and 14 opcode-22 nodes; all 28 Player
+destinations match a roster selector. Triggers reference 12 and 8 of those
+nodes respectively. Opcode-21/24 cast nodes total 35/20, with 28/19 trigger
+references. Numeric selected-node IDs, types, values and references are equal
+between locales. A referenced node is not a runtime execution observation.
+
+RU Horror has no type-5, type-6 or type-7 record despite metadata declarations
+of 7 Players and 1815 units. It contributes zero existing units. EN has four
+extra loose maps. Of 34 paired maps, 33 have equal type-6 hashes; Horror is
+the exception. Broader measured numbers differ in Horror and scenario members
+100 and 140; no whole-map or whole-game locale equality is inferred.
+
+**Confidence.** High for the bounded traversal and measurements, reproduced
+byte for byte by the corrected generator. Per-map counts, input hashes and
+selected script nodes are retained in the linked evidence.
+
+**Unknown.** External maps, owner saves, computed runtime creation and trigger
+reachability were not searched. Missing records inferred from metadata are
+not instantiated records.
+
+### AI-476
+
+The complete map spawner `R0151` reads the loader owner word at `L02121`
+and calls `R0425` at `L01836`. The complete lookup compares the signed
+argument with existing `Player+8` and returns zero on a miss. The null arm
+at `L14310` enters an error path and jumps at `L14311` to the next record
+at `L11044`. It precedes class lookup, allocations, constructors, placement,
+registration and Group search/build at `L08176`..`L08177`.
+
+That record gets no constructed actor, Player, Group or order block. No
+actor, Group-AI or order field is written for it. The branch neither creates
+a Player nor assigns another Player. AI-449 and AI-GROUP-009's map membership
+clauses apply to records admitted by this lookup; their constructor facts and
+matched-record corpus counts stand.
+
+**Confidence.** High for this selected static branch: the retained complete
+spawner and lookup exclude the named reassignment, Player-creation and
+ownerless-placement alternatives before construction.
+
+**Unknown.** No shipped unmatched placement or original runtime refusal was
+observed. Other loaders and in-play creators are outside this branch.
+
+### AI-477
+
+`R0914` allocates a `0x198`-byte Unit and calls `R0901`. Retained
+local stores clear Player `+0x14` at `L06039`, admission `+0x3c` at
+`L06151` and Group `+0x70` at `L06040`. The builder explicitly appends
+the actor through receiver list `+0x2c` at `L06032`, calling `R0292`.
+Its own instructions contain no explicit Player/Group assignment or ordinary
+membership registration. Its clear of `+4` is runtime identity, not owner.
+Wrapper `R1137` directly writes action `+0x54=0xd` and target `+0x5c`;
+`R1138` writes action `0xe` and cell bytes `+0x60/+0x61`. Instant 21's
+target `L12470` calls the cell wrapper; instant 24's target `L14312` calls
+the actor wrapper. The retained instant table uses opcode minus one.
+`R1139` calls the same wrappers at `L06047` and `L06048`.
+
+The composed creation interpretation is Medium: the actor retains null
+Player/Group pointers and stays outside ordinary membership through this
+route. After the owner clear, the base constructor calls unread `R1624`
+with the same actor. After the Group/admission stores, the initializer can
+call unread `R0184` with that actor. The builder also calls unread helpers
+`R0289`, `R0462`, `R0463`, `R0915` and `R0464`. Local absence
+of assignment or registration does not exclude either through those calls.
+Computed pointers, bulk copies, indirect calls and caller continuation remain
+open. MAGIC-235's Medium bound does not close these calls at High.
+
+Conversion instants 19/22 are interpreted at Medium as reaching `R0064`
+with a resolved Player. Locally, resolver `L00177` returns an existing
+Player or zero; null-result branches clear the node build flag, and
+`L13793` requires that flag before publication. The binder's parameter
+dispatch table at `L12450` is not retained as semantic table values: the
+window stops decoding there with a two-byte suffix. The kind-3-to-Player
+resolver association and composed binding therefore remain Medium.
+The transfer's retained instructions remove old membership, assign its passed
+Player, append the actor, call Group construction/AddMember and Stand Ground.
+TRIG-BINDORDER-101's unresolved-node/ID alias limit remains. Console summon
+`R0066` copies its source's Player and calls membership, Group and Stand
+Ground helpers. MAGIC-236 supplies the separate Medium Spell::Apply reading.
+
+`R1132` calls unregister helpers before clearing Player `+0x14` and
+writing HP `-50`. These local transfer/removal instructions remain High.
+The removal is teardown-shaped; unread caller conditions do not establish
+an ordinary live conversion. No whole-image owner-writer scan was performed.
+TRIG-CASTACTOR-044's authored cell-entry route is reused rather than freshly
+read here.
+
+**Confidence.** High for the named direct stores and calls, explicit list
+append, resolver miss result, publication flag predicate, console owner copy
+and transfer/removal instructions. Medium for composed temporary-caster
+creation, retention of null pointers and absence of indirect registration,
+the conversion-binding interpretation and the reused Spell::Apply reading.
+Unknown for exhaustive in-play creation, full scheduling, indirect registration,
+null-owner spell outcomes and persistence.
+
+**Unknown.** Other creators, computed or indirect writers, bulk copies,
+removal callers, actual trigger/event execution and temporary-caster
+persistence. The unread same-actor/helper calls and parameter dispatch table
+leave the composed route open. A bounded callee/table/lifecycle study or
+native actor-identity/list trace would test those alternatives. No new native
+read or runtime observation supports this correction.
+
+### AI-478
+
+Subtick `R0193` calls `R0426` before ordinary actor pass `R0427`.
+The former walks receiver list `+0x2c` and invokes vtable slot `+0x18` at
+`L07024`. The retained Unit vtable binds that slot to actor tick `R0037`.
+A completion-byte branch calls `L09224`, whose body is unread.
+These local calls, list dispatch and Unit vtable binding remain High.
+
+On the positive-HP actor path, getter `R0416` returns `actor+0x3c == 0`.
+The branch at `L01796` skips executor `R0016` if `+0x3c` is still zero
+at that getter. The constructor's earlier zero store does not establish
+the field at the getter. The cast wrappers directly store actions `0xd`
+or `0xe`; the local constructor stores policy `+0x50=0xb`. Actor action
+dispatch indexes `L01775` and `L01776`; the retained window prints their
+data as instructions rather than semantic table values. The instant-opcode
+table and Unit vtable are retained, but do not close those action tables.
+
+The composed temporary-caster evaluation interpretation is Medium: the actor
+retains null Player/Group and zero admission, receives ticks through the
+separate list and evaluates the direct cast action without a Group order.
+The builder's own instructions add no ordinary membership or fallback Group
+order. Unread same-actor calls `R1624` and `R0184`, and builder helpers
+`R0289`, `R0462`, `R0463`, `R0915` and `R0464`, can change fields
+or registration before evaluation. The conversion-binding interpretation is
+separately Medium because parameter table `L12450` is undecoded. No High absence of indirect
+registration or later assignment is inferred from the explicit append.
+An unmatched start record in AI-476 has no actor and reaches no actor,
+activity or Group pass.
+
+The Group driver walks Player Groups at `+0x24`. The ordinary activity
+rebuild locally dereferences `actor+0x14` then `Player+0x28` without a null
+guard. With override zero, the ordinary executor dereferences `actor+0x70`
+then `Group+0x3c` before its progress gate. These local dereferences remain
+High and supply no null-owner fallback in the named instructions. Executor
+bypass for a temporary actor requires `+0x3c` still zero at its getter.
+Effects and health precede the gate; MAGIC-241's spell-specific bound remains
+separate. EN/RU executable hashes identify one code image's instructions.
+
+**Confidence.** High for the named local stores and calls, explicit append,
+Unit vtable binding, conditional actor gate and ordinary-pass dereferences.
+Medium for composed temporary-caster creation/evaluation, retained fields,
+ordinary-membership absence, cast-action dispatch and conversion binding. Unknown
+for full scheduling, indirect registration, null-owner spell outcomes,
+persistence and other hypothetical null-owner actors' live outcomes.
+
+**Unknown.** Disposal helper semantics, null-owner spell outcomes, ordinary
+list lifecycle beyond the named builder, trigger execution, persistence and
+original runtime behavior. The unread same-actor/helper calls and action
+tables require a bounded callee/table/lifecycle study or native identity/list
+trace. No null-pointer fault was observed at runtime.

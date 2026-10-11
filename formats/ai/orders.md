@@ -367,3 +367,23 @@ The selected actor-cast policy queues a nonnull target without local HP,
 terminal-action or off-map rejection; null target uses acquisition instead.
 Replacement cast input, caller eligibility and pointer lifetime remain Unknown.
 — MAGIC-298
+
+## Temporary caster actions
+
+The composed temporary-caster creation/evaluation interpretation is Medium. Direct
+action stores `+0x54=0xd`/`0xe`, local calls, explicit separate-list append
+and Unit vtable binding remain High. The positive-HP executor bypass is
+High conditional on `actor+0x3c` still zero at its getter. Earlier zero
+stores do not close unread same-actor calls `R1624`/`R0184` or builder
+helpers. Action tables `L01775`/`L01776` are not decoded as semantic
+values. The builder's own instructions assign no fallback Group order;
+indirect assignment or registration remains open. Local ordinary activity
+dereferences the Player, and the executor with override zero dereferences
+the Group before its progress gate; these instructions remain High (`AI-478`).
+
+Conversion binding is Medium because parameter table `L12450` is
+undecoded; resolver miss, publication predicate and transfer/removal
+instructions remain High. Builder helpers `R0289`, `R0462`,
+`R0463`, `R0915` and `R0464` remain unread. Full scheduling,
+indirect registration, null-owner spell outcomes and persistence remain
+Unknown (`AI-477`, `AI-478`).
