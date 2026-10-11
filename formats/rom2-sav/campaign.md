@@ -318,3 +318,17 @@ hashes, bank slot 769 and availability. B/D differ at bank slot 754 and the firs
 additional opaque document and registry differences. The slot values are
 preserved; no complete producer, actor state or progression meaning is assigned.
 — R2-SESSION-079
+
+### Shop parameters and current stock
+
+Town-2 shop parameters occupy relative Scenario-prefix bytes
+0x10a0..0x10ef and town-3 parameters occupy 0x10f0..0x113f. Each row holds
+four 20-byte category cells after the 4096-byte bank. The selected paired
+EN/RU transfer and offset arithmetic are High; these are not absolute
+SAV-file offsets (`R2-SESSION-156`).
+
+Current stock persistence, rebuilding and cold LOAD remain Unknown. The
+selected owner/base serializers do not directly access the shop pointer,
+but another serializer does access the same field offset and raw client
+payload producers remain unclosed. No SAV byte range has been identified
+as current stock (`R2-SESSION-157`).

@@ -6572,3 +6572,43 @@ callbacks, delivered text, any multi-step order or end condition outside
 this branch. Close the pending-field and pointer-cell writer graph, or
 have the owner enter the druid shop in a fresh campaign and record whether
 any dialogue appears before clicking. No original runtime was executed.
+
+## Town shop stock and saved state
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-373 | Selected EN/RU town-2/3 shop selectors reach the shop-entry request despite a zero EnterShop result; completed trading is unobserved. | Medium | ● active (branch candidate) | [EXP-2046](../experiments/EXP-2046-rom2-town-shops/) |
+| R2-ENGINE-374 | The selected EN shop-owner constructors allocate one shop at +0x6c; its local entry and refill paths share four category lists, with per-town delivery at Medium. | Medium | ● active (branch candidate) | [EXP-2046](../experiments/EXP-2046-rom2-town-shops/) |
+| R2-ENGINE-375 | Selected EN stack-transfer helpers leave Q-n units in a category source and n in the transferred clone for valid positive requests; full UI-to-pending delivery is unverified. | Medium | ● active (branch candidate) | [EXP-2046](../experiments/EXP-2046-rom2-town-shops/) |
+
+### R2-ENGINE-373
+
+The EN selector at L2.00602 and RU selector at L2.01629 choose town 2 at application+0x100 and town 3 at application+0xfc. Each selected page receives virtual +0x80. The common subsequent call is EN L2.01630 / RU L2.01631. EN writes message kind 0x32 and sends through L2.00871.
+
+The selected page entries are EN L2.00954 / L2.01200 and RU L2.01203 / L2.01202. Their late EnterShop test controls the nonzero dialogue branch after inventory setup. The installed zero stub of R2-ENGINE-369 does not locally skip the common selector sender.
+
+**Confidence.** Medium for composition from selected calls and page fields. The original was not run. The RU selector has one trailing undecoded requested byte after the relevant calls; no assertion uses that byte.
+
+**Unknown.** Dynamic export replacement, message delivery, populated panels and completed purchases or sales. An owner town-2/town-3 shop click and a completed buy/sell would settle delivered reachability.
+
+### R2-ENGINE-374
+
+EN constructors L2.01632, L2.01633 and L2.01634 install vtable L2.01635, allocate 0x98 bytes through shop constructor L2.01636 and store the resulting pointer at owner+0x6c. Shop construction initializes four list objects from +0xc with stride 0x1c, open-deal count +4 and pending-refill field +8.
+
+Owner entry L2.01637 forwards to L2.00823; category-0 emptiness requests fill L2.00803 before a deal is created. Owner refill L2.00825 forwards to the same fill. The selected RU entry/fill paths are L2.01638, L2.01639 and L2.01640. The local paths do not select a separate shop object by town ID. R2-ENGINE-263, R2-ENGINE-266 and R2-ENGINE-334 retain the assortment getter, fill conditions and campaign/deal-source distinction.
+
+**Confidence.** Medium for one shared pool in composed town operation. The selected constructor and forwarders show one owner pointer; they do not enumerate every live owner or all pointer replacements.
+
+**Unknown.** Stock equality across consecutive town visits, campaign refill-event meaning and delivery, unrestricted owner replacement and cold-load reconstruction. An owner comparison across town changes, or closure of every live owner producer, would settle those alternatives.
+
+### R2-ENGINE-375
+
+EN category removal L2.01641 bounds the source index and clamps n to its WORD quantity Q at +0x42. It subtracts n-1, invokes virtual +0x40 and assigns n to the returned object. The measured clone methods L2.01642, L2.01643, L2.01644 and L2.01645 each subtract one more unit from the source and set the clone quantity to one. Their selected item tables bind slot +0x40 to those methods. For successful allocation and 1 <= n <= Q, the local arithmetic is Q-n and n. The category source pointer is not removed by this helper when Q becomes zero.
+
+Pending take L2.01646 removes the list object when Q <= n; otherwise it uses the same subtract-(n-1), clone, assign-n sequence. Deal transfer L2.01647 selects category removal or pending take by source kind and inserts destination-kind zero into the pending list through L2.01648 / L2.01649. RU category and pending helpers at L2.01650 and L2.01651 have the corresponding local operations.
+
+EN inventory input L2.01652 supplies either one or the displayed quantity under global L2.01653 to virtual +0xa0. The stock-widget table maps that slot to L2.01654, which forwards to L2.01655. That routine passes the item and n to virtual +0x84, bound to L2.01656. The latter searches a matching display object, passes n to unclosed predicate L2.01657, chooses a copy/move branch and assigns n at display+0x10. The selected display object is stored at application+0x3f4; message 0x46e is posted.
+
+**Confidence.** Medium for the composed selection contract. Native item arithmetic and the display producer are distinct operations; a copied display item is not proof of an accepted server transfer.
+
+**Unknown.** The quantity predicate and copy-helper internals, full UI-to-server delivery, nonpositive requests, allocation failure, unmeasured item subclasses and RU UI/clone bindings. An owner split of a known stack followed by buy and undo, or a closed producer-to-consumer trace, would settle these limits.

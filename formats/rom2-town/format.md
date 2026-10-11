@@ -930,3 +930,26 @@ TipsMode is the HKLM value `TipsMode` under EN `SOFTWARE\Rage of Mages 2` and RU
 Every tip popup is one panel class: an `lm.256` frame tiled over the panel less 8 pixels at the right and bottom, `font2` gold text, a Close button and a checked Show-tips box. The panel never sizes to its text, and no room or mission tip lights another control (`R2-ENGINE-313`, High; `R2-ASSET-081`, High).
 
 Text splits at CR LF, drops blank lines, wraps greedily at spaces to the panel width minus 48, indents each paragraph 6 pixels, justifies non-final lines and clips past (panel height minus 60)/12 lines. No shipped tip clips: the longest, RU `#tips5` and `#tips6`, fill 11 of 11 lines on a 312x200 panel (`R2-ENGINE-314`, High for the rules; Medium for the line counts). Live pixels are Unknown.
+
+## Selected town-2 and town-3 shop operation
+
+The selected Kaarg and druid-town selectors enter their shop page and then
+reach the common shop-entry request. The installed zero EnterShop result
+controls the later dialogue branch. Composed trading reachability is Medium;
+completed buy/sell and dynamic binding replacement remain Unknown
+(`R2-ENGINE-373`).
+
+Selected shop-owner constructors hold one shop pointer with four category
+lists. Entry fills when category 0 is empty; the named explicit and deferred
+refill paths share that pool. Per-town delivery, all owner replacements and
+the meaning of every campaign event remain Medium or Unknown
+(`R2-ENGINE-374`). A Scenario record change alone is not
+evidence of an immediate list refill.
+
+For valid positive requests and successful allocation, the selected category
+split subtracts n-1 and its clone subtracts one, leaving Q-n in the source
+and n in the clone. An exhausted category slot remains present. Pending
+whole-stack removal removes the object. The selected display producer
+receives n and assigns it to the selected display object; its branch
+predicate, full server delivery and RU UI/clone bindings remain Unknown.
+The composed contract is Medium (`R2-ENGINE-375`).

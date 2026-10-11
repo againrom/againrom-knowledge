@@ -1655,3 +1655,30 @@ accepted town-3 entry, arbitrary restored lists and post-load scheduling.
 Close the availability and admission caller graph, or have the owner follow
 the named fresh route through Leave50 and enter town 3 before and after a
 cold LOAD. No original game was launched.
+
+## Town shop stock and saved state
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-156 | Selected EN/RU ScenarioSave/ScenarioLoad transfer town-2 shop parameters at relative prefix 0x10a0..0x10ef and town-3 parameters at 0x10f0..0x113f. | High | ● active (branch candidate) | [EXP-2046](../experiments/EXP-2046-rom2-town-shops/) |
+| R2-SESSION-157 | Current shop-stock persistence and SAV bytes remain Unknown after the selected owner/base serializers and Scenario record transfers; cold LOAD was not run. | Unknown | ● active (branch candidate) | [EXP-2046](../experiments/EXP-2046-rom2-town-shops/) |
+
+### R2-SESSION-156
+
+EN/RU ScenarioSave D2.00102 first transfers 0x1000 bank bytes, then four rows of four 0x14-byte cells from D2.00104. Row stride is 0x50; cells are transferred in row-major order through stream slot +0x40. ScenarioLoad D2.00103 has the same loop and widths through slot +0x3c.
+
+For location L and category C, the relative prefix start is 0x1000 + L*0x50 + C*0x14. Location 2 therefore occupies 0x10a0..0x10ef and location 3 occupies 0x10f0..0x113f, inclusive. R2-ENGINE-263, R2-ENGINE-329 through R2-ENGINE-331 and R2-SESSION-031 establish the record meanings and preceding bank.
+
+**Confidence.** High for these selected paired transfers and integer offsets. Committed EN/RU listings show complete requested Save/Load spans and equal loop operands. This is a positive transfer contract, not an absence census.
+
+**Unknown.** Absolute SAV-file offsets, arbitrary loaded record values, delivered cold LOAD and subsequent writers. These bytes hold assortment parameters, not an identified list of current stock objects.
+
+### R2-SESSION-157
+
+The selected EN owner table L2.01635 binds serializer slot +8 to L2.01658. That body calls L2.01659 and transfers owner+0xc0. Neither selected body directly accesses owner+0x6c, where the constructors in R2-ENGINE-374 store the shop pointer. The separate serializer at L2.01660 does transfer +0x6c; its object relation and delivered SAVE graph are not closed here.
+
+Scenario transfers in R2-SESSION-156 preserve parameters and do not identify current stock objects. The nine raw client-buffer payloads of R2-SESSION-036 retain unknown producer cones. This population is selected owner/base/alternate serializer bodies, shop constructors and refill paths, paired Scenario transfers and the previously measured client-tail boundaries. No owner SAV or runtime original was read.
+
+**Confidence.** Unknown for current list preservation, omission, rebuilding and cold-load delivery. A local missing pointer access does not rule out referenced objects, raw payloads, callbacks, indirect or bulk transfers elsewhere.
+
+**Unknown.** No SAV byte range is identified as current shop stock. Close all writer/reader and post-load stock producers, or have the owner record stock quantities and item keys, SAVE, terminate the original, cold LOAD and compare before a mission or refill event. Static parameter transfer alone cannot settle that observation.

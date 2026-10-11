@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3462. Observation: 95. Static analysis: 2890. Mixed: 477.
+Claims labelled: 3467. Observation: 95. Static analysis: 2895. Mixed: 477.
 
 ## Ledger ai
 
@@ -1907,6 +1907,9 @@ Claims labelled: 3462. Observation: 95. Static analysis: 2890. Mixed: 477.
 | R2-ENGINE-367 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-368 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-369 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-373 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-374 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-375 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 
@@ -1984,6 +1987,8 @@ Claims labelled: 3462. Observation: 95. Static analysis: 2890. Mixed: 477.
 | R2-SESSION-153 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-154 | static analysis | ● active (branch candidate) |
 | R2-SESSION-155 | static analysis | ● active (branch candidate) |
+| R2-SESSION-156 | static analysis | ● active (branch candidate) |
+| R2-SESSION-157 | static analysis | ● active (branch candidate) |
 
 ## Ledger sav
 
