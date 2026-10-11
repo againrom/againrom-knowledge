@@ -199,12 +199,61 @@ modulo 20. Flags 0x10/0x20 choose a1/a2 with filename index counter+1;
 otherwise it uses a10000. Counter zero clears episode flags outside the
 low nibble (`R2-ENGINE-237`, amended, High).
 
-The Kaarg inn page and center call common inn bases. The Kaarg shop
-center calls the common shop base. These calls and shared inn art establish
-shared structure. Layout reuse is Medium; complete layout equality and
-differences limited to art are unproven. The taverner, fire and keeper
-destinations and schedules follow (`R2-ENGINE-237`, `R2-ASSET-052`,
-amended).
+The Kaarg inn page/center and shop page/center/header call shared bases.
+Selected page builds retain the corresponding child rectangle arguments;
+Kaarg centers are larger and the shop center constructs five rectangle
+members again after the base call. Shared structure does not establish
+whole room field equality. The bounded construction operands are High;
+whole room reuse remains Medium (`R2-ENGINE-237`, amended,
+`R2-ENGINE-353`, `R2-ENGINE-354`). The taverner, fire and keeper
+schedules follow (`R2-ASSET-052`, amended).
+
+### Shared child construction and Kaarg fields
+
+The table gives the four bounds arguments in the selected shared and
+Kaarg page builds. It does not give observed screen coordinates. Inn
+center allocation changes 0x3cc to 0x4d0 and shop center 0x25c to 0x304;
+other listed child allocations are equal. The derived inn page, shop
+page and header forward their shared constructor arguments and replace
+the class table (`R2-ENGINE-353`, `R2-ENGINE-354`, High).
+
+| Room / page member | Child ID | Bounds arguments (left,top,right,bottom) |
+|---|---|---|
+| inn +0x70 | 0x44d | (0,0,160,480) |
+| inn +0x74 | 0x44e | (480,0,640,238) |
+| inn +0x7c | 0x450 | (160,0,480,480) |
+| shop +0x70 | 0x3eb | (0,303,480,390) |
+| shop +0x6c | 0x3e9 | (0,390,480,480) |
+| shop +0x68 | 0x3ea | (0,0,164,303) |
+| shop +0x74 | 0x3ed | (164,0,480,303) |
+| shop +0x78 | 0x3ee | (464,0,640,238) |
+
+Kaarg inn center adds five frame objects +0x3cc/+0x3fc/+0x42c/+0x45c/+0x48c
+and initializes ambience clocks/waits +0x4c0..+0x4cc. Shared page and
+center state initialization remains on the base path
+(`R2-ENGINE-353`, High for the named direct fields).
+
+For the shop, let P be the center's stored first two rectangle dwords
+at +8/+0xc. EN constructs each of these rectangles from a point and size,
+then calls USER32 OffsetRect(5,5). The operation translates the bounds;
+it preserves their size. The values below subtract P. The shared
+constructor passes different four operands to its unread rectangle helper;
+its final output is unproved (`R2-ENGINE-354`, High for EN Kaarg arithmetic).
+
+| Center member | Kaarg EN bounds relative to P |
+|---|---|
+| +0x60 | (5,5,65,207) |
+| +0x70 | (65,63,113,213) |
+| +0x80 | (65,5,189,63) |
+| +0x90 | (195,5,293,265) |
+| +0xe0 | (125,113,197,209) |
+
+Seventeen construction bodies and six geometry helpers have matching
+relocated EN/RU shapes and small operands. RU external import identities,
+shared header/inventory initialization, nested helpers and later writers
+remain unread. Extending these local matches to complete layout equality
+is Medium; final coordinate reference and live pixels remain Unknown
+(`R2-ENGINE-353`, `R2-ENGINE-354`).
 
 ### Kaarg inn taverner
 

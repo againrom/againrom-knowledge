@@ -2818,7 +2818,7 @@ Only-art differences and complete layout equality are not proven.
 and trigger conditions. These need the later derived room painter
 and scheduling probe; native play would settle live presentation.
 
-**Amended.** R2-ENGINE-277 answers the inn taverner destinations and triggers; R2-ENGINE-278 and R2-ENGINE-279 answer the shop fire and keeper destinations, triggers and the 100 ms tick rule; delivered paint and tick cadence stays Unknown.
+**Amended.** R2-ENGINE-277 answers the inn taverner destinations and triggers; R2-ENGINE-278 and R2-ENGINE-279 answer the shop fire and keeper destinations, triggers and the 100 ms tick rule; delivered paint and tick cadence stays Unknown. R2-ENGINE-353 establishes the shared inn child rectangle arguments and added center fields; R2-ENGINE-354 establishes shared shop child arguments and five changed shop-center rectangles. Whole room field equality remains unproven.
 
 ## Kaarg view rectangle and shell boundary
 
@@ -5866,3 +5866,126 @@ destination (decode that RU site); the 14 dword references to the EN
 buffer between `L2.01478` and `L2.01479` and the two in the text loader
 (`L2.01480`, `L2.01481`), which are not classified; the `Docs\%d.txt`
 destination; which file the buffer holds when TALK runs.
+
+
+## Kaarg selected room construction
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-353 | Selected ROM2 Kaarg inn construction retains the shared page arguments and three child rectangle vectors; its larger center adds five frame objects and four ambience fields. | High / Medium | ● active (branch candidate) | [EXP-2043](../experiments/EXP-2043-rom2-kaarg-schedules/) |
+| R2-ENGINE-354 | Selected Kaarg shop construction retains five shared child rectangle vectors but rebuilds five center rectangles; EN calls OffsetRect(5,5), preserving their sizes. | High / Medium | ● active (branch candidate) | [EXP-2043](../experiments/EXP-2043-rom2-kaarg-schedules/) |
+
+### R2-ENGINE-353
+
+EN Kaarg inn page constructor `L2.00605` calls base `L2.00607` at
+`L2.01482`, forwards its arguments and replaces the table with `L2.00741`.
+Center constructor `L2.00609` calls `L2.00610` at `L2.01483` with the
+forwarded arguments. RU constructors are `L2.00606` and `L2.01484`.
+Both locales' selected constructor/build shapes retain the same small
+operands after address relocation.
+
+Build EN `L2.01246` retains these corresponding generic-build arguments.
+Bounds are the four constructor arguments, not observed screen rectangles.
+
+| Page member | Child ID | Bounds arguments (left,top,right,bottom) | Shared / Kaarg allocation bytes | Shared / Kaarg constructor |
+|---|---|---|---|---|
+| +0x70 | 0x44d | (0,0,160,480) | 0x190 / 0x190 | L2.00736 / same |
+| +0x74 | 0x44e | (480,0,640,238) | 0xc8 / 0xc8 | L2.00737 / same |
+| +0x7c | 0x450 | (160,0,480,480) | 0x3cc / 0x4d0 | L2.00610 / L2.00609 |
+
+The common builds zero +0x110, +0x80, every dword +0x84..+0xb4 and
++0xb8. The shared center stores the owner argument at +0x5c and calls
+its shared initialization. Kaarg additionally constructs frame objects at
++0x3cc/+0x3fc/+0x42c/+0x45c/+0x48c. It writes clock returns at +0x4c0/+0x4c8
+and 2000+R(2000) at +0x4c4/+0x4cc. The meaning of these four fields and
+R(n) is the existing R2-ENGINE-277 schedule contract.
+
+`L2.00636` forwards four bounds to `L2.00637` with this+8. The bounded EN
+import population identifies `L2.00638` as USER32 SetRect. This joins the
+previous R2-ENGINE-238 rectangle contract; it does not establish a child's
+final coordinate reference after parent/child registration.
+
+Evidence: EXP-2043 `evidence/measured/layout/` constructor/build listings,
+`class-tables.tsv`, `stores.tsv` and `locale-shapes.tsv`; geometry follow-up
+in `measured/helpers/` and EN import/wrapper evidence in `measured/leaf/`.
+The direct branch targets in selected contiguous constructor/build bodies
+lie on decoded boundaries. No global enumeration is claimed.
+
+**Confidence.** High for the positive direct base calls, unchanged forwarded
+arguments, three matching child vectors, allocation sizes, direct added
+fields and EN SetRect identity. High for equality of the selected EN/RU
+small operands, not for all relocated callees. Medium for whole-room
+layout reuse: shared registration, nested constructors and later writers
+are not exhaustively read. The weakest dependency is the supplied parent
+and its unexamined registration path, not the equal literals.
+
+**Unknown.** Full field-by-field equality after every initializer or later
+callback, final screen coordinates, dynamic tip/portrait children and live
+pixels. Read shared child constructors, `L2.00738`, registration and later
+layout writers to settle additional fields. No owner render was required.
+
+### R2-ENGINE-354
+
+EN Kaarg shop page `L2.00604` calls shared page `L2.00735` at `L2.01485`;
+header `L2.01486` calls `L2.00765` at `L2.01487`. Each forwards the received
+arguments and replaces its class table. Center `L2.00615` calls shared
+`L2.00617` at `L2.01488`, then runs its geometry construction. Corresponding
+RU entries are `L2.01489`, `L2.01490`, `L2.00616` and shared `L2.00618`.
+
+Kaarg build `L2.01248` and shared build `L2.00762` retain these arguments.
+The page builds also zero +0x88, +0x7c/+0x80/+0x84 and dwords +0x90..+0xd8.
+
+| Page member | Child ID | Bounds arguments (left,top,right,bottom) | Shared / Kaarg allocation bytes | Shared / Kaarg constructor |
+|---|---|---|---|---|
+| +0x70 | 0x3eb | (0,303,480,390) | 0x2108 / 0x2108 | L2.00763 / same |
+| +0x6c | 0x3e9 | (0,390,480,480) | 0x20ec / 0x20ec | L2.00764 / same |
+| +0x68 | 0x3ea | (0,0,164,303) | 0x2150 / 0x2150 | L2.00765 / L2.01486 |
+| +0x74 | 0x3ed | (164,0,480,303) | 0x25c / 0x304 | L2.00617 / L2.00615 |
+| +0x78 | 0x3ee | (464,0,640,238) | 0x100 / 0x100 | L2.00766 / same |
+
+Let P=(center+8,center+0xc), the first two dwords returned by `L2.01491`.
+Point constructor `L2.01492` stores two operands; size constructor
+`L2.01493` stores width/height. `L2.01494` constructs bounds
+(x,y,x+width,y+height). After copying them into each member, `L2.01495`
+forwards (5,5) to EN import `L2.01496`, USER32 OffsetRect. It translates
+all four bounds by 5; it does not reduce the rectangle size. The shared column records the four arguments to unread `L2.01497`; its
+returned bounds are not established here. The Kaarg column subtracts P
+from the resulting bounds.
+
+| Center member | Shared L2.01497 arguments as P offsets | Kaarg EN bounds after OffsetRect, relative to P |
+|---|---|---|
+| +0x60 | (190,110,295,295) | (5,5,65,207) |
+| +0x70 | (5,110,110,295) | (65,63,113,213) |
+| +0x80 | (150,5,290,105) | (65,5,189,63) |
+| +0x90 | (8,5,150,105) | (195,5,293,265) |
+| +0xe0 | (110,110,190,295) | (125,113,197,209) |
+
+The four +0x60 stride-0x10 members receive OffsetRect at `L2.01498`;
++0xe0 receives it at `L2.01499`. The derived body makes no later direct
+assignment to +0xa0/+0xb0/+0xc0/+0xd0/+0xf0/+0x100/+0x110; that is local
+instruction coverage, not a no-writer claim. Shared center construction
+zeroes +0x120/+0x124/+0x128/+0x12c and flags/counters +0x240..+0x254.
+Additional Kaarg arrays and later fire state belong to R2-ENGINE-278.
+
+Evidence: EXP-2043 constructor/build listings in `measured/layout/`, the
+six geometry helpers per locale in `measured/helpers/`, and positive EN
+PE import bindings in `measured/leaf/imports.tsv`. All new High dependencies
+were generated within the 160-window budget. The relocated helpers have
+matching instruction shapes, but address masking is not a callee-identity
+proof. The private evidence preserves exact operands and addresses.
+
+**Confidence.** High for the shared factory vectors, type/allocation
+changes, selected direct stores and EN rectangle arithmetic/import bindings.
+These positive helpers exclude an inset/shrink interpretation of (5,5).
+High for matching small operands in the selected EN/RU construction bodies
+and helpers. Medium for extending EN geometry semantics to all RU calls
+or claiming whole-room equality: RU import identities, shared header and
+inventory initialization, nested helpers and later writers remain unread.
+
+**Unknown.** Complete field equality after all callbacks, the RU external
+import identities, coordinate reference outside the stored center bounds,
+shared rectangle helper `L2.01497`, header-derived fields +0x88/+0x8c,
+floating-constant helpers at center
++0x100/+0x110 and live pixels. Read the bounded RU import table and named
+header/inventory/registration paths to settle them. The native budget is
+exhausted; no further native read belongs to this candidate.
