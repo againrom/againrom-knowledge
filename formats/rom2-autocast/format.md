@@ -2,11 +2,13 @@
 
 The selected RU human support routine reads the owning Player's preference
 byte. Three cumulative masks select Minimum, Average and Maximum; the
-command's selected offensive spell is separate. Control, receiving byte
-stores and candidate/order routes have bounded static evidence. Final
-lifecycle values and whole-policy EN/RU parity remain Unknown.
+command's selected offensive spell is separate. Local order routes, attack
+range and primary dispatch have static evidence. Update cadence, physical
+cycle modifier, final lifecycle values and whole-policy EN/RU parity remain
+Unknown.
 — R2-ENGINE-345, R2-ENGINE-350, R2-ENGINE-361, R2-ENGINE-366,
-R2-SESSION-152, R2-SESSION-153
+R2-SESSION-152, R2-SESSION-153, R2-ENGINE-396, R2-ENGINE-397,
+R2-ENGINE-400, R2-ENGINE-401, R2-SESSION-163, R2-SESSION-164
 
 ## Controls and feedback
 
@@ -27,11 +29,20 @@ R2-ASSET-088
 
 The selected EN/RU third key maps route input 0x55 (U) to the cycle arm.
 That arm cycles only when an unnamed global flag is nonzero. Its physical
-modifier/state and earlier routing are not fully joined. The local cycle
+modifier/state and complete writer population are not joined. The local cycle
 preserves target bits 0..2 and changes 8 -> 24 -> 56 -> 8. This is a bounded
 numeric input route, with Medium physical-control confidence. The separate
 object+0x54 storage clause of R2-ENGINE-359 is partially retracted.
-— R2-ENGINE-345, R2-ENGINE-359, R2-ENGINE-366
+— R2-ENGINE-345, R2-ENGINE-359, R2-ENGINE-366, R2-ENGINE-400
+
+The acquired EN/RU key bodies require application DWORD+0x404 (EN) or
++0x41c (RU) to equal 1 and view+0x80 to be nonnull. Nonzero application+0xc0
+forwards input through another object's virtual+0x6c before the key arms.
+Paired options fragments form the same level masks 8/24/56 and add target
+choices 1/2/4. These local tests and writes are High; complete physical input
+and transport composition remain Medium. Direct flag and reduced adjacent-base
+scans do not establish a complete indexed or overlapping writer census.
+— R2-ENGINE-400
 
 After cycling, the selected RU arm requests patch-pool indices 115..117
 and passes the text with argument 2000 to the view's text-state helper.
@@ -54,22 +65,59 @@ changes remain Unknown. — R2-ENGINE-345, R2-ENGINE-361
 
 Application constructors set DWORD+0x24 to 0x19 (Average plus own target),
 and registry AutoCasting transfers four bytes there. The acquired RU Player
-preferences constructor instead sets byte+0x20 to 0xff. Player serialization
-includes that byte in a 36-byte raw block. A selected RU mission-setup excerpt
-resends the application DWORD. These are distinct sources; none alone
-establishes the final new-game or cold-LOAD value. Mission/town preservation
-and later overrides remain Unknown. — R2-ENGINE-345, R2-SESSION-150,
-R2-SESSION-152, R2-SESSION-153
+preferences constructor instead sets byte+0x20 to 0xff. Paired EN/RU
+serializers request a 36-byte raw block in both directions. Complete successful
+preference-block LOAD restores the saved byte; later refresh and the final
+cold-LOAD byte remain Unknown. Aligned EN/RU setup excerpts both resend the
+application policy, but complete delivery and transition precedence are
+unjoined. New-game, mission-entry, town and postmission winning values remain
+Unknown. No complete town/departure parent chain was acquired.
+— R2-ENGINE-345, R2-SESSION-150, R2-SESSION-152, R2-SESSION-153,
+R2-ENGINE-401, R2-SESSION-163, R2-SESSION-164
 
 ## Casters and support attempts
 
-The sampled RU idle and attack callers test mage flag actor+0x4c &4 and
+The acquired RU idle and attack callers test mage flag actor+0x4c &4 and
 owner Player kind+0x2c == 0 before human support. The attack route can attempt
 support after ordinary attack preparation when command range+0x14 is below 2.
 Nonzero owner kind reaches separate computer policy. These routes do not
 establish admission for every class, hire, summon, converted unit or current
 order. Support in all moving, holding and retreating states and attempts per
-simulation tick remain Unknown. — R2-ENGINE-351, R2-ENGINE-362
+simulation tick remain Unknown. — R2-ENGINE-351, R2-ENGINE-362,
+R2-ENGINE-396, R2-ENGINE-398
+
+The attack helper chooses the selected spell's range when the spell exists
+and current mana covers its cost; otherwise it uses actor attack range+0x12c.
+The attack planner writes this range to command+0x14 before its conditional
+support call. The unsigned byte below 2 is a range gate. Support execution
+relative to the actor's strike in one parent update remains Unknown.
+— R2-ENGINE-397
+
+## Scheduling, orders and actor states
+
+The acquired RU scheduler traverses the reached actor collection and calls
+its order selector. The qualifying idle human mage path has one support call
+per wrapper invocation. The scheduler's parent and interval are unjoined.
+The wrapper and support body do not test primary+9; primary dispatch still
+takes priority over prepared+8. Local calls do not establish attempts per
+tick or a universal busy/cooldown contract. — R2-ENGINE-396
+
+The acquired numeric order table routes order 2 to coordinate movement,
+3 to attack, 12 to idle, 13 to targeted cast and 14 to another cast helper.
+Order 27 sets actor state 27 without a planner; default routes through the
+idle wrapper. The order-2 branch prepares movement while destination differs
+and an arrival order when equal. It does not directly call human support.
+Named hold and retreat input bindings and other support events while visibly
+walking remain Unknown. — R2-ENGINE-398
+
+Actor state 16 exits the acquired actor step. Its living branch requires
+positive health; actor+0x3c = 0 makes the acquired command-skip predicate true.
+The dispatcher tests effect mask 0x40000, then installs primary 4 only when
+primary+9 is zero. Its primary-4 branch sets actor state 27 and tests the mask
+again, retaining the command while present and clearing it when absent.
+Named stun mapping, Slow timing and invisible-caster admission remain Unknown.
+The proposed Invisibility effect's absence gate is not a universal caster
+suppression rule. — R2-ENGINE-399
 
 RU support stops after the first prepared order. Every attempt needs the
 spell in actor book+0x140 and current mana at least its spell cost. Each stage
@@ -134,8 +182,10 @@ The dispatcher handles a nonzero primary byte+9 before a prepared byte+8.
 Prepared byte 8 indexes slot 7 and reaches RU L2.01552. The local self/pass
 branch initializes primary cast byte 2, phase 0, actor state 13, target and
 spell. The other branch prepares an approach and actor state 1. The approach
-helpers and successful movement remain unread, and the cast-completion route
-is not established. — R2-ENGINE-363
+helpers and successful movement remain unread. The acquired primary branch
+increments phase and calls an unread cast-delivery helper at phase 3.
+Nonzero actor completion byte+0x136 clears primary+9. Complete effect
+application and parent timing remain Unknown. — R2-ENGINE-363, R2-ENGINE-396
 
 Several sampled setters clear pending byte+8 and the support flag. Their
 player-input callers and interruption after primary cast initialization are
@@ -150,11 +200,14 @@ The selected owner-kind branches use different computer offensive and
 support routines. Random distribution and admission of every computer unit
 remain Unknown. — R2-ENGINE-350, R2-ENGINE-351
 
-EN/RU acquired third maps, cycles, receiving byte widths and 36-byte preference
-widths agree. The earlier paired constructors and registry transfers remain
-bounded local evidence. Full options, support, target, command execution,
+EN/RU acquired third maps, cycles, receiving byte widths, options masks and
+36-byte preference widths agree. Their key-mode field offsets differ:
+EN+0x404 and RU+0x41c; both test literal 1. Both aligned setup excerpts resend
+application policy. The earlier paired constructors and registry transfers
+remain bounded local evidence. Full support, order/status admission, cadence,
 SAV precedence, feedback and lifecycle equivalence was not measured.
-— R2-ENGINE-345, R2-SESSION-150, R2-ENGINE-366, R2-ASSET-085
+— R2-ENGINE-345, R2-SESSION-150, R2-ENGINE-366, R2-ASSET-085,
+R2-ENGINE-400, R2-ENGINE-401, R2-SESSION-164
 
 ## Blizzard candidate boundary
 

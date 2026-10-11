@@ -426,9 +426,12 @@ The character file is a separate format: [ROM2 character file](../rom2-a2c/forma
 
 The acquired RU Player preferences constructor sets byte+0x20 to 0xff.
 The Player serializer passes pointer+0x34 to a 36-byte transfer, which includes
-that byte. The separate application constructor's DWORD 0x19 is not the
-Player constructor value. Final ordinary-SAV LOAD precedence remains Unknown.
-— R2-SESSION-152
+that byte. Paired EN/RU preference serializers request 36 bytes in both
+archive directions. Complete successful preference-block LOAD restores its
+saved byte+0x20 over the constructor byte. Short transfer handling, later
+application refresh and final ordinary-SAV cold-LOAD precedence remain Unknown.
+The separate application constructor's DWORD 0x19 is not the Player constructor
+value. — R2-SESSION-152, R2-SESSION-164
 
 A selected RU mission-setup excerpt resends the application's AutoCasting
 DWORD. Its complete transition/receiver schedule was not established.

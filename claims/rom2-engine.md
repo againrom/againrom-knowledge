@@ -6959,3 +6959,160 @@ committed Git blobs; no runtime meaning is inferred from the titles alone.
 alone do not establish Blizzard lifetime or sampled extent.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+## Human support scheduling
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-396 | In acquired RU paths, support preparation and primary dispatch are separate; a nonzero primary command has dispatch priority. Update cadence remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+| R2-ENGINE-397 | In the acquired RU attack route, command+0x14 is the chosen attack range; support is called after attack-preparation writes only when its unsigned byte is below 2. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+| R2-ENGINE-398 | The acquired RU numeric order table gives coordinate movement, idle, attack and explicit cast distinct local routes; named hold and retreat admission remain Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+| R2-ENGINE-399 | The acquired RU actor step exits for state 16; effect mask 0x40000 installs primary command 4 only when primary+9 is zero. Named status admission remains Unknown. | High / Unknown | ✔ promoted (partially retracted, branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+| R2-ENGINE-400 | Paired EN/RU input bodies test different application mode offsets but matching values; paired options paths form the same level masks. The cycle modifier remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+| R2-ENGINE-401 | Aligned EN/RU setup excerpts both resend application policy; the final new-game and mission-entry Player preference value and winning writer remain Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+
+### R2-ENGINE-396
+
+The complete RU loop L2.01724..L2.01725 traverses the reached actor
+collection and calls L2.01726, whose acquired body calls L2.01725.
+The order-12 idle planner reaches L2.01531; the qualifying human mage path
+then calls support L2.01512. The complete wrapper has one support call on
+that path. Neither that wrapper nor the complete support body tests primary
+command byte+9. Their local calls do not establish an update frequency.
+
+Dispatcher L2.00506 processes primary+9 before prepared+8. Cast initializer
+L2.01575 writes primary 2, phase+0x15 = 0 and actor state 13. The primary
+branch increments phase and, at phase 3, calls L2.01727 with its cast fields.
+Nonzero actor completion byte+0x136 clears primary+9. Actor step L2.00028
+calls the dispatcher before its acquired cast/strike arms.
+
+**Confidence.** High for the complete local branch, call and field facts in
+ru-scheduler-loop, ru-idle-planner, ru-idle-wrapper, ru-support,
+ru-command-dispatch, ru-cast-initialization and ru-actor-step listings.
+Medium for composed preparation/execution meaning; L2.01727 was not read.
+Unknown for clock cadence and a whole-program busy/cooldown contract.
+
+**Unknown.** Scheduler and actor-step parents are unjoined. The standing
+pending-ID gate of R2-ENGINE-349 is not a universal cooldown. Join those
+parents and count attempts and applications over 100 actor steps on mission
+10 with one wounded caster, then repeat during a cast.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+### R2-ENGINE-397
+
+Helper L2.01728 returns selected command spell+9 when the spell exists
+and current mana covers its cost; otherwise it returns actor attack
+range+0x12c. Attack planner L2.01530 writes prepared+8 = 5, target+0xc
+and that range+0x14. Its human mage branch then calls support only for
+unsigned range below 2. A selected available spell with range at least 2
+fails this local gate even if the ordinary actor range is shorter.
+
+**Confidence.** High for ru-attack-range and ru-attack-planner complete
+listings. This is a range test, not an order enumeration. A support call may
+reject every candidate; preparation is not effect application.
+
+**Unknown.** The planner applies no ordinary strike in this body. Support's
+execution order relative to a strike in one parent update is Unknown. Join
+the scheduler and actor-step parent order and count a strike and support
+application over ten eligible updates on mission 10.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+### R2-ENGINE-398
+
+The 28-cell table at L2.01729 indexes actor DWORD+0x50. Order 2 reaches
+L2.01730, order 3 reaches attack L2.01530, order 12 reaches idle L2.01731,
+order 13 reaches L2.01524, and order 14 calls L2.01732. Order 27 writes actor
+state 27 without a planner. The default reaches L2.01733 with argument zero,
+then the idle planner.
+
+Coordinate setter L2.01580 writes order 2 and clears prepared+8. Reset
+L2.01585 clears support flag+0x60. The acquired order-2 route compares packed
+destination and position; it prepares byte 1 while they differ and byte 7
+on arrival. That branch does not directly call human support. The acquired
+order-13 body prepares the targeted cast fields rather than the idle route.
+
+**Confidence.** High for ru-order-selector, ru-order-targets,
+ru-movement-preparation, ru-reset-setters and ru-cast-order local facts.
+Medium for complete player-order meanings. Order 14's body was not acquired
+in generation; its call target alone is High.
+
+**Unknown.** Named hold and retreat producers and other event routes while
+visibly walking are unjoined. Trace their player-input setters, then count
+support attempts over 100 actor steps for move, hold, retreat and explicit
+cast separately on mission 10.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+### R2-ENGINE-399
+
+Actor step L2.00028 exits for actor state+0x54 = 16 and requires positive
+health for its living branch. Command-skip L2.01570 returns true when
+actor+0x3c is zero. Dispatcher L2.00506 tests effect DWORD+0x144 &0x40000,
+then installs primary 4 only when primary+9 is zero. Its primary-4 branch
+sets actor state 27 and tests the mask again, retaining primary 4 while
+present and clearing it when absent.
+This local test does not replace an already active primary command.
+
+**Confidence.** High for ru-actor-step, ru-command-skip,
+ru-command-dispatch, ru-primary-map and ru-primary-targets local facts.
+
+**Unknown.** The mapping of named stun to 0x40000, Slow's complete timing
+effects and invisible-caster admission are Unknown. The support Invisibility
+absence gate concerns a proposed effect, not universal caster suppression.
+Trace the mask producer and count support attempts for stun, Slow and
+Invisibility over 100 actor steps each on mission 10.
+
+**Amended.** The mask-test exclusivity clause is partially retracted in
+[the overturn history](retracted.md#rom2-primary-4-effect-mask-tests).
+The headline, other clauses and confidence grades stand.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+### R2-ENGINE-400
+
+The complete acquired EN and RU key bodies each decode 688 instructions.
+They test application DWORD+0x404 (EN) or +0x41c (RU) for literal 1 and
+view+0x80 for nonnull. Nonzero application+0xc0 forwards input through another
+object's virtual+0x6c before the acquired key arms. Their third tables route
+0x55 to the standing cycle arm, gated by EN global L2.01559 or RU L2.01558.
+
+Paired options fragments each decode 89 instructions. Combo 0/1/2 supplies
+level masks 8/24/56; independent target choices add 1/2/4. Both call their
+policy sender. Compatible acquired receive arms copy packet byte+0xe to
+found Player preferences+0x20. R2-ENGINE-360 and R2-ENGINE-361 retain the
+control binding and unjoined full transport scope.
+
+**Confidence.** High for en/ru-key-handler, key tables, options-apply,
+cycle-sender and receiver local instructions. Medium for composed physical
+control and message delivery. Unknown for the global flag's writer and
+meaning and for complete locale input equivalence.
+
+**Unknown.** Direct flag references and reduced adjacent-base .text scans
+did not join a writer. Those scans are not a complete indexed, overlapping
+or bulk-copy census. Repair that population; in each original on mission
+10 try U, Shift+U, Ctrl+U and Alt+U three times and record level changes and
+intercepted inputs.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+### R2-ENGINE-401
+
+Aligned EN L2.01734..L2.01735 and RU L2.01597..L2.01598 setup excerpts
+load the application policy and call their senders after other acquired
+preference senders. The compatible receive arms copy a byte into Player
+preferences+0x20. This possible overwrite is distinct from the RU constructor
+0xff, application constructor 0x19 and registry source of R2-ENGINE-345,
+R2-SESSION-150 and R2-SESSION-152.
+
+**Confidence.** High for en/ru-setup-send and en/ru-receiver local field
+and call facts. Medium for the composed overwrite path. Unknown for parent
+reachability, complete subtype delivery and transition precedence. The two
+setup excerpts do not establish full setup parity.
+
+**Unknown.** Join new-game and mission parents to delivery. On mission 10
+use saved 0x09 and application 0x39, then reverse them; record the Player
+byte after new game and mission entry. No original run was made.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)

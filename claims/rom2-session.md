@@ -1791,3 +1791,51 @@ A native placement/template/item binding plus an original named cast would
 settle eligibility and player-visible locale behavior.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+## Human support scheduling
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-163 | Town and postmission preference preservation remain Unknown over the acquired EN/RU executable windows; complete transition and writer chains were not joined. | Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+| R2-SESSION-164 | Paired EN/RU serializers request a 36-byte preference block in both archive directions; complete successful LOAD restores its saved byte+0x20, but the final cold-LOAD value remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/) |
+
+### R2-SESSION-163
+
+The acquired population contains EN/RU key, options, setup-send, receiver
+and preference serializer windows, plus RU Player construction and order
+paths. It contains no Scenario.dll body, preserved save or complete
+town/departure/load parent chain. These local executable writers do not
+determine the Player byte at town entry or after a mission.
+
+**Confidence.** Unknown for preservation and the final winning writer.
+No absence of town or postmission writers is claimed.
+
+**Unknown.** Join town/departure dispatch and preference delivery. In an
+owner run record Player preferences+0x20 on town return and after mission 10
+with saved 0x09 and application 0x39, then reverse the two values.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+### R2-SESSION-164
+
+EN L2.01536..L2.01736 and RU R2.0175..R2.0001 each decode 22
+instructions and pass size 0x24 and their receiver pointer to both archive
+direction arms. The acquired Player suffix subsequences pass Player+0x34
+to these serializers. Their trailing partial instructions are not evidence
+for a complete Player LOAD program. R2-SESSION-152 supplies the standing
+archive-direction binding and RU constructor byte 0xff.
+
+Under a complete successful raw preference-block LOAD, the saved byte+0x20
+replaces that constructor byte. This conditional stored-byte result does not
+select the final byte after later application policy delivery.
+
+**Confidence.** High for en/ru-preference-serializer size, pointer and branch
+facts, and the aligned Player suffix subsequences. Medium for composed LOAD
+restoration conditional on complete successful transfer. Unknown for short
+transfer handling, later refresh and the final cold-LOAD value.
+
+**Unknown.** Join ordinary LOAD parent ordering and later client sends.
+Cold-load a SAV with preference 0x09 against application 0x39 on mission 10,
+then reverse the values and record the final Player byte in each locale.
+
+**Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)

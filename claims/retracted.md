@@ -1,5 +1,11 @@
 # Overturn history
 
+## ROM2 primary-4 effect-mask tests
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-399` | Dispatcher L2.00506 tests effect DWORD+0x144 &0x40000 only when primary+9 is zero. | High | [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/): ru-command-dispatch L2.01720..L2.01721 and L2.01722..L2.01723. | The dispatcher tests the effect mask, installs primary 4 only if primary+9 is zero, and its primary-4 arm tests the mask again to keep or clear that command. Only the mask-test exclusivity clause is withdrawn; the headline, active-primary preservation, state and health predicates, numeric High grades and named-status Unknowns stand. | REFUTED |
+
 ## ROM2 cycle feedback argument forwarding
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
