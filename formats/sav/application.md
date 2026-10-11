@@ -96,6 +96,17 @@ four corner words can draw a different extent from the set cells;
 that rendering extent is not established by SAV framing.
 — SAV-FOG-061, TERR-FOG-087 (partially retracted), TERR-FOG-145, SAV-LOAD-057
 
+
+The light-parser result is published at view `+0x80`; Fog restoration reads
+its tile plane at `+0x0c`. Parse clears bit 13 only. Canonical Fog restoration
+ORs bit 15 and preserves bits 13/14 already in the plane. This narrows the
+parser/Fog field-ownership gap in SAV-1150 to the same field path with parse before
+the Fog OR on the acquired path. A pointer replacement or another writer of view
+`+0x80` through unread callbacks, and the unread dispatch of the message to the landscape handler
+`R0514`, remain open. Its bit-13 final-unmarked clause remains
+Medium because messages and indirect callbacks can write later; exact marks
+at LOAD completion and the first drawn frame remain Unknown. — SAV-1246, SAV-1150
+
 ## Projectiles
 
 World SAVE always emits the Projectiles root, even for an empty manager.

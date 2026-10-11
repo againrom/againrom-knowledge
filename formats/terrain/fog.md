@@ -138,3 +138,35 @@ the map load `R0278` as `(8, 8, W-9, H-9)`, with the same corners packed as word
 `+0x58ee4` = `0x808` and `+0x58ee6`. Every sight ring cell is tested against them; the compares
 are **byte-wide** while the height and visibility indices are exact 32-bit, so on a 256-wide map a
 true column of `-9..-11` wraps to `245..247`, passes, and reads the previous row.
+
+## LOAD and the first drawn frame
+
+The acquired LOAD root keeps the existing view and replaces its map pointer.
+The light parser clears tile bit 13, publishes the plane at view `+0x80`,
+and Fog restoration reaches that plane through `+0x0c`. Canonical Fog input
+ORs explored bit 15 only; it preserves current bit 14 and bit 13 at that
+operation. Later messages and indirect callbacks leave the final cell words
+and last writers at LOAD completion Unknown. — SAV-1246
+
+The local counter is initialized to zero at view construction and increments
+before its clear test. For starting counter c, the next enabled clear is
+on counted presentation call `32-(c&31)`, provided no other writer changes c
+and the global gate is zero. Zero means the 32nd call from construction,
+not an established 32nd call after cold LOAD. Retained process phase is
+Medium; cold-LOAD end phase is Unknown. — TERR-FOG-234
+
+Unit presentation calls slot `+0x44`, whose movement and sight guards can
+reach the stamp between clears. Repeated-position units can fail that route.
+An enabled periodic clear has a separate restamp route through slot `+0x48`.
+Neither route establishes the first post-LOAD stamp without eligible units
+and message ordering. — TERR-FOG-235
+
+The acquired paint path rebuilds the vertex grid at `+0xa0` and copies it to
+`+0xa4` from the tile high pair. The stamp's `+0x17cc` LOS accumulator and
+drawable `+0x78/+0x7c` gates are distinct stores. Their last values at LOAD
+completion and the first rendered picture remain Unknown. — TERR-FOG-236
+
+The two acquired executables are byte-identical. The bounded raw `.text`
+decode and selected `.rdata` pointer scan leave computed pointers, bulk
+copies, indirect targets and cast/teleport/structure writers open. No EN/RU
+runtime or data-dependent first-frame equality is established. — TERR-FOG-237

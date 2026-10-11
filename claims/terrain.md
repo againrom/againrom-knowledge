@@ -2721,3 +2721,148 @@ negative current values and overflowing products is not established.
 - `R1087`'s divide needs a nonzero layer count (`MOVE-085`), which no start record holds.
 
 **Confidence.** High that the ingest cost of the 1,653 record cells uses the map.reg values on these five maps: 376 discriminating baselines (counted per file over 9 files; between 219 and 376 distinct cells). Medium that the recompute is the only cost writer after the ingest among the routines of `TERR-228`: the basis is the caller scan `s01`, and a baseline captured at record creation cannot show a later write. Medium for the `Cost` key reads of `R0116` (`ALM-TERR-043`, not re-read), for the cost plane outside record cells and for the opened cells: no cost plane is saved, so those values are the model's, not an observation. A sweep of stores into the cost plane would bound the writer set.
+
+## Fog across LOAD
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-FOG-234 | ROM1's local fog-clear phase is 32-(counter&31) counted calls when enabled; the acquired LOAD root keeps the view, but the first cold-LOAD phase is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+| TERR-FOG-235 | ROM1's acquired presentation path can stamp moved units between periodic clears; the first post-LOAD stamp still depends on guards and callback order. | High / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+| TERR-FOG-236 | ROM1's acquired frame path rebuilds two vertex shroud grids from the tile high pair; the end-of-LOAD picture and last writers remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+| TERR-FOG-237 | The two acquired ROM1 executables are byte-identical; their bounded writer census does not exclude additional visible-bit writers or locale-data timing differences. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+
+### TERR-FOG-234
+
+The view constructor stores zero at `+0xa70` (`L02611`). The presentation
+driver reads, increments and stores that field (`L02475..L02476`). It
+calls the clear at `L01627` only when `L01661` is zero and the incremented
+counter's low five bits are zero. This closes the local phase calculation,
+not the meaning or lifetime of the global gate.
+
+For counter value c immediately before a counted driver call, the first
+clear is on call `32-(c&31)` if every call increments once, no other writer
+changes c, and the global gate is zero at every test. A newly constructed
+view with c=0 clears on its 32nd counted call from construction. A blocked
+multiple of 32 does not clear; a later opportunity is 32 counted calls away.
+
+The acquired application LOAD root (`R0099..L14408`) obtains the existing
+view at application `+0xd0` and clears its map pointer `+0x80`. It has no
+explicit `+0xa70` reset or Fog-counter decode. Its wait loop processes
+messages before Fog decode. The bounded displacement census and its population are specified
+by TERR-FOG-237; it finds constructor initialization and driver increment
+as the two explicit writes.
+
+**Confidence.** High for these local stores, gates and conditional formula.
+Medium that LOAD retains the running counter rather than restoring or
+resetting it: aliases, bulk copies, indirect callbacks and code decoding
+limits remain. Retention does not mean the counter cannot advance during
+LOAD. Unknown for c at the end of a cold LOAD and its first clear tick.
+
+**Unknown.** Full message/callback ordering and counter changes from view
+construction through cold LOAD were not observed. A mission-150 cold/warm
+LOAD trace of the counter and clear entry would settle the phase.
+
+### TERR-FOG-235
+
+The acquired driver calls drawable slot `+0x3c` at `L02473` and `L02474`.
+The ground and air unit vtables at `L02468` and `L02585` map that slot to
+`R0548`, slot `+0x44` to `R1402`, and slot `+0x48` to `R0554`.
+The unit presentation routine calls slot `+0x44` at `L02573` and
+`L02574` on its acquired branches.
+
+The slot-44 wrapper admits decay stage below 3, then reaches `L14409`.
+That body requires permission bit 3, nonzero sight, both fine coordinates'
+low five bits equal to 16, and a position different from the last stamped
+pair at drawable `+0xc0/+0xc4`. It calls slot `+0x48` at `L02579`.
+The admitted stamp ORs `0xc0` into four tile high bytes for every cell
+with a positive accumulator value, and stores the last position. It sets both current bit 14 and explored bit 15.
+
+The periodic clear masks tile words with `0xbfff` at `L01659`, then calls
+slot `+0x48` for visited objects in the view's `+0x9b8` container at
+`L02577` (container membership: TERR-DRAWSTAMP-170, TERR-FOG-085). Enumeration and each stamp's guards still apply. These are
+positive local routes, supplementing TERR-FOG-085 and TERR-DRAWSTAMP-170.
+
+**Confidence.** High that a guarded movement stamp can occur on a presentation
+call between clears, and that the clear has a restamp route. Unknown whether
+LOAD callbacks stamp earlier or the first post-LOAD call admits a stamp.
+
+**Unknown.** Standing/repeated-position units can fail slot 44. Conditional
+on TERR-FOG-234's phase and an eligible visited party unit, a periodic
+restamp can be on counted call 1..32, with 0..31 earlier calls without that
+clear. A nonzero global gate, no eligible unit, or unobserved callbacks
+prevent an unconditional finite first-stamp bound. Mission-150 cold/warm
+LOAD with tile-write and presentation-entry traces would distinguish them.
+
+### TERR-FOG-236
+
+The acquired paint entry calls `R1818` at `L14410` and the projection
+`R1657` at `L13409`. The projection clears the vertex grid at view
+`+0xa0` (`L10578`), classifies the tile plane's high pair, and copies that
+grid to view `+0xa4` (`L10579`). The local levels are 0 for `0xc000`, 8
+for `0x8000`, and 16 for both `0x0000` and raw `0x4000`, as bounded by
+TERR-FOG-082 and TERR-DRAWGATE-171.
+
+The stamp also rebuilds a 41x41 accumulator at view `+0x17cc`: its acquired
+head `R0284..L14411` zeroes 6724 bytes and seeds the center. This is
+scratch for stamping, distinct from the two per-vertex shroud grids and
+the persistent tile bits. The acquired consumer `R0378..L14409`
+stores the aggregate four-corner gate at drawable `+0x78`, with its latch
+at `+0x7c`; TERR-FOG-086's individual-corner equivalence remains retracted.
+
+**Confidence.** High for the acquired frame/projection order and these local
+store effects. They do not prove the last writer at the end of LOAD, the
+initial contents of allocated vertex grids, a completed first draw, or
+the player-visible first-frame extent. Those are Unknown.
+
+**Unknown.** LOAD processes messages and performs indirect callbacks before
+and after Fog restoration. Their full effects and the first consumed tile
+state were not closed. Trace tile bits, both vertex grids, drawable gates,
+stamp/clear entries and first paint on a named cold/warm LOAD to settle it.
+
+### TERR-FOG-237
+
+Both acquired ROM1 `rom.exe` files are 1,977,344 bytes with SHA-256
+`942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`.
+Python 3.12.10 and Capstone 5.0.7 x86-32 provide one shared code witness.
+No new save, map, registry, asset or runtime input was acquired.
+
+One raw linear decode covered the 1,660,928-byte `.text` section. Selected
+direct targets, fog immediates, grid displacements and memory displacements
+overlapping `+0xa70` were collected in that same pass. The latter filter
+has 21 hits: two explicit writes and 19 reads. All 21 are classified. These hits are encoding
+candidates, not proof that every base register denotes a view. The decoded
+local tile writers include four high-byte OR-`0xc0` stores in `L02578`
+and the word AND-`0xbfff` store in `R0374`.
+
+Population of the census (filters in `probe.py`, rows in `text-hits.tsv`). Fog
+immediates: an instruction with an immediate operand equal to one of `0xbfff`,
+`0x3fff`, `0x7fff`, `0xc0`, `0xc000`, `0x8000` or `0x2000`. Grid displacements:
+a memory operand with a nonzero base register and displacement `0xa0`, `0xa4`,
+`0x17cc` or `0x24ec`. Counter window: a memory operand with a nonzero base
+register and displacement `0xa6d..0xa73`; an index-only or absolute operand is
+not matched. Not searched: the immediate `0x4000`, the byte masks `0x40` and
+`0xbf`, wider 32-bit forms of the masks, and register-sourced masks. The scan
+found 265 immediate rows, 473 grid-displacement rows and 21 counter rows.
+Classified: 5 of 265 immediate rows (the four OR-`0xc0` stores and the AND-`0xbfff`
+store named above), 0 of 473 grid-displacement rows, 21 of 21 counter rows. The
+other immediate rows, for example the `or` at `L14412`, `L08927` and
+`L14413` and the word store of `0x8000` at `L14414`, and all grid rows are
+unclassified, not excluded.
+
+One byte-position dword scan covered 132,096 bytes of `.rdata` for selected
+function addresses. It found 18 pointers: seven pairs of base movement/
+stamp bodies and two pairs of unit wrappers. The other vtables were not
+classified into cast, teleport or structure events. Decoding reported 23
+skipped bytes; raw linear decode can also misinterpret embedded data.
+
+**Confidence.** High for executable equality and the acquired positive
+local effects. Medium for the bounded explicit-writer census, which rests on the
+21 classified counter rows and on the 5 classified tile-plane immediate rows;
+the remaining 260 immediate rows and 473 grid rows are unclassified. This is
+not a repaired control-flow or alias-complete search. Unknown for additional
+register-sourced masks, computed pointers, bulk copies, indirect targets,
+casts, teleports, structure changes and EN/RU data-dependent timing.
+
+**Unknown.** A writer trace during cast, teleport and structure-change
+controls on the same mission would test the remaining event alternatives.
+Code equality alone cannot establish equal first pictures in both roots.

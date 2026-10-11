@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3500. Observation: 99. Static analysis: 2918. Mixed: 483.
+Claims labelled: 3505. Observation: 99. Static analysis: 2923. Mixed: 483.
 
 ## Ledger ai
 
@@ -2494,7 +2494,7 @@ Claims labelled: 3500. Observation: 99. Static analysis: 2918. Mixed: 483.
 | SAV-1146 | static analysis | ● active |
 | SAV-1147 | static analysis | ● active |
 | SAV-1149 | static analysis | ● active (amended) |
-| SAV-1150 | static analysis | ● active |
+| SAV-1150 | static analysis | ● active (amended) |
 | SAV-1151 | static analysis | ● active |
 | SAV-1152 | mixed | ● active |
 | SAV-1153 | static analysis | ● active (amended) |
@@ -2552,6 +2552,7 @@ Claims labelled: 3500. Observation: 99. Static analysis: 2918. Mixed: 483.
 | SAV-1239 | static analysis | ● active (partially retracted) |
 | SAV-1240 | static analysis | ● active (partially retracted) |
 | SAV-1241 | static analysis | ● active (partially retracted) |
+| SAV-1246 | static analysis | ● active (branch candidate) |
 
 ## Ledger session
 
@@ -3023,6 +3024,10 @@ Claims labelled: 3500. Observation: 99. Static analysis: 2918. Mixed: 483.
 | TERR-228 | static analysis | ✔ promoted |
 | TERR-229 | static analysis | ✔ promoted |
 | TERR-230 | static analysis | ✔ promoted |
+| TERR-FOG-234 | static analysis | ● active (branch candidate) |
+| TERR-FOG-235 | static analysis | ● active (branch candidate) |
+| TERR-FOG-236 | static analysis | ● active (branch candidate) |
+| TERR-FOG-237 | static analysis | ● active (branch candidate) |
 
 ## Ledger text
 

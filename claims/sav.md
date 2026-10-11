@@ -14307,7 +14307,7 @@ Medium: five saves; the money mechanism is a hypothesis.
 | SAV-1146 | In the same three saves FreeIndex (28, 29, 31) equals max(IDs) + 1 and ids 27 and 28 were free when 29 and 30 were built, so one shared counter allocates and no id is reused; the pair 29, 30 is saved newest first. | High / Medium | ● active | [EXP-0430](../experiments/EXP-0430-physical-projectiles/) |
 | SAV-1147 | A unit shot starts with actionphase 0, so its built segment count is actionphase plus actionsegments; a record built by client arm 0x86 or 0x8b starts at -1, so that count is actionphase plus actionsegments plus 1. | High | ● active | [EXP-0430](../experiments/EXP-0430-physical-projectiles/) |
 | SAV-1149 | In `game0024` the catapult shot starts a SpellTransport countdown of 1448/384 = 3 ticks before the Fire_Ball blast; the observed 4-tick gap to the burst record is that countdown plus one tick whose cause was not read. | Medium / Unknown | ● active (amended) | [EXP-0432](../experiments/EXP-0432-projectile-pictures/) |
-| SAV-1150 | A SAV does not carry tile-word bit 0x2000: the Fog store writes bit 15 only and no other tile-plane store was found; the clear at `L02344` is the view-plane parser's loop, so that a load starts unmarked is Medium. | High / Medium | ● active | [EXP-0432](../experiments/EXP-0432-projectile-pictures/) |
+| SAV-1150 | A SAV does not carry tile-word bit 0x2000: the Fog store writes bit 15 only and no other tile-plane store was found; the clear at `L02344` is the view-plane parser's loop, so that a load starts unmarked is Medium. | High / Medium | ● active (amended) | [EXP-0432](../experiments/EXP-0432-projectile-pictures/), [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
 | SAV-1151 | No instruction of the SAV store or load routines addresses the view hash at +0xa7c; 13 instructions in 8 other routines do (the driver and view code), so the hash is not saved. | Medium | ● active | [EXP-0432](../experiments/EXP-0432-projectile-pictures/) |
 | SAV-1152 | Of the 121 `.sav` files under the saves root, 80 have a Projectiles store and 5 of those hold a record (6 records, pictures 1, 2, 5, 10, 13); none holds picture 14 or more. | Medium | ● active | [EXP-0432](../experiments/EXP-0432-projectile-pictures/) |
 | SAV-1153 | A unit shot's first driver call is on its creation tick, and the three saved shots fit creation = swing start (inferred) + ShootDelay if the swing message is delivered in the start tick's own timer step. | High / Medium | ● active (amended) | [EXP-0441](../experiments/EXP-0441-shot-timing/) |
@@ -14422,15 +14422,18 @@ Medium: five saves; the money mechanism is a hypothesis.
 - Bit 0x2000 of the tile word is set by the client mask arm for wall_of_fire (`L05664`, `MAGIC-WALLFIRE-058`) and by the Fire_Ball burst's driver arm (`ANIM-103`); it is tested at `L05660`.
 - The SAV Fog store writes `tile & 0x8000` only and the load ORs the state back (`SAV-FOG-061`). So the Fog section cannot carry bit 0x2000. No other store of the tile plane into a SAV was found.
 - Clears of the bit (`evidence/imm-clear-mask-dfff-e000.txt`, immediates 0xdfff, 0xe000 and 0xffffdfff over `.text`): `L02344 AND word [edi+ecx*2], 0xdfff` in the loop that ends the light landscape parser (`L02343` to `L09238`, `evidence/disasm-alm-tile-clear-L02343.txt`), once per cell over width times height; and `L09239` in the client 0x9b arm, which clears and rewrites the bit from the server's static plane bit 0x10 (`R1655`, `R1656`; `evidence/disasm-resync-R1655.txt`). The other two hits (`L09240`, `push 0xe000` at `L09241`) are not tile words.
-- `ALM-TILEVIEW-122` scopes the parser's loop to the view plane and leaves later ownership and ordering Unknown. Whether that plane is the one the Fog store reads (`L07964`), and whether the clear runs before a SAV's state is applied, was not shown.
+- `SAV-1246` binds the parser result to the view field used by Fog restoration. Parse clears bit 13 before that handler publishes the plane. Intervening pointer replacement and later message/callback writes remain Unknown.
 - Bit 13 is also ALM-authored on 7 464 cells over 38 maps (`TERR-TILE-044`), so the clear is not by itself evidence about a burst mark.
 - `evidence/imm-2000-tile-bit.txt` lists the 23 `.text` hits of the immediate 0x2000. The setters and tests read here are `R1656`, `R0483` and the driver arm; `L09242` and `L09243` act on window flag words. The other hits were not classified.
 - The player-join routine `R0131` sends the 0x9b resync (`L09244`).
 - Method step 3 (compare saved terrain words around the burst cell) did not apply: a SAV carries no tile plane except the Fog runs.
 
-**Confidence.** High that the Fog runs hold bit 15 only. Medium that no other producer writes the plane into a SAV, the scope `SAV-FOG-061` already states, and Medium that a load starts without the mark: that rests on the view-plane clear and the 0x9b resync, whose ownership against the Fog plane is open.
+**Confidence.** High that the Fog runs hold bit 15 only. Medium that no other producer writes the plane into a SAV, the scope `SAV-FOG-061` already states, and Medium that a load starts without the mark. `SAV-1246` narrows the parser/Fog field-ownership gap: the parser and Fog use the same field path, and on the acquired path parse precedes the Fog OR. The remainder stays open: a pointer replacement or another writer of view `+0x80` through unread callbacks, and the unread dispatch from the wait loop's message to `R0514` (its only direct caller `L14403` lies in `R0509`, outside every committed window). No census of other stores to view `+0x80` was run. The root's message and callback ordering also leaves final marks open.
 
 **Unknown.** Whether a SAV taken between the burst's call 4 and call 8 resumes with the cells unmarked: no corpus save was taken in that window. A save held after the 0x86 burst's call 8 (tick 3103 or later in the mission-150 battle) would test it directly.
+
+**Amended.** `SAV-1246` narrows the parser/Fog field-ownership gap; the remainder above stays open. It does not promote the final-unmarked clause or retract the Fog-only-bit-15 clause.
+
 
 ### SAV-1151
 
@@ -16017,3 +16020,43 @@ no-normalization assertion, absence of class/death-origin predicates, new
 transfer-wrapper details and image-equality conclusion are partially retracted
 in [retracted.md](retracted.md). The withdrawal concerns admissibility and
 does not establish that those local observations are false.
+
+## Fog-plane ownership across LOAD
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1246 | ROM1's acquired LOAD binds the light-parser tile plane to Fog restoration: parse clears bit 13, Fog ORs explored bit 15, and the final pre-frame marks remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+
+### SAV-1246
+
+The landscape message handler calls the light parser `R0480` at
+`L14404`, publishes its result at view `+0x80` (`L10922`), then calls
+the binder `R0515` at `L14405`. That binder stores the map pointer and
+dimensions; it has no fog stamp or counter reset. The parser's word loop
+at `L02344` ANDs plane `map+0x0c` with `0xdfff`, clearing bit 13 while
+preserving bits 14 and 15.
+
+LOAD obtains the existing view from application `+0xd0`, clears its map
+pointer, and processes messages until the pointer is nonzero. Fog restoration
+resolves that view's `+0x80` at `L14406`, then its tile plane `+0x0c` at
+`L14407`. Thus the parser and Fog use the same published field path.
+An intervening pointer replacement through an unread callback is not ruled out.
+
+The Fog decoder ORs its state into each word at `L07966`, alternating
+by XOR `0x8000`; the canonical producer masks `0x8000`. For records from
+that producer, the OR changes explored bit 15 only and preserves whatever
+bits 13 and 14 already hold. It does not clear current visibility. The
+acquired tile-resync loop `R1656..R0483` clears and rewrites bit 13
+from a server-plane field while preserving bits 14 and 15.
+
+**Confidence.** High for the local parser, publication/binder, Fog field path
+and masks under canonical Fog input. Unknown for the last writer and every
+cell's bit 13/14 at LOAD completion: the root pumps messages and has later
+indirect callbacks. SAV-1150's no-other-producer and final-unmarked clauses
+remain Medium; this claim narrows the earlier field-ownership gap only. Open: a pointer replacement or another writer of view `+0x80` through unread callbacks, and the unread dispatch from the wait loop's message to `R0514`.
+
+**Unknown.** Mission 150: save a state with visible party cells, explored
+cells outside sight, and never-explored cells; cold LOAD before any input,
+then warm LOAD. Capture the first frame and writes to the named plane from
+parse through first paint. For SAV-1150's burst clause, also save between
+Fire_Ball calls 4 and 8 and compare after call 8 (tick 3103 or later).
