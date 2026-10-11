@@ -161,3 +161,14 @@ decoded as semantic values. Conversion binding is separately Medium because
 parameter table `L12450` is undecoded. Full scheduling, indirect
 registration, null-owner spell outcomes and persistence remain Unknown
 (`AI-477`, `AI-478`).
+
+## Empty Group prefix at join
+
+The join walk's head emptiness/count checks, first-element selection, direct
+removal invocation and selected Group destructor/deallocation call sequence
+are High. Successful unlink, leading-prefix progression and the remaining-list
+interpretation are Medium, conditional on unread collection helpers `L14318`
+and `L14320` finding and unlinking the selected entry as assumed. Under that
+condition, the loop destroys leading empty Groups until a nonempty head or one
+Group remains; it does not sweep later empty Groups behind a nonempty head.
+Transitive callback mutations remain Unknown. — AI-479

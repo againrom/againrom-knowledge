@@ -319,3 +319,12 @@ calls belong to four network owners; the shipped text search found no tavern
 Sleep action. These are bounded searches and instruction-level sound requests,
 not observations of native playback or every indirect caller.
 (`TAVERN-LINES-022`)
+
+## Group allocation on hire
+
+The command-0x38 handler creates one fresh Player Group per nonzero hired type,
+then appends every new actor of that type to it. A mixed vector creates as many
+Groups as it has positive type counts. Catapult and Ballista use Unit constructors
+and the same Group insertion suffix as the Human types. These are successful
+local allocation/insertion rules; failure and later callbacks remain Unknown.
+— PARTY-040

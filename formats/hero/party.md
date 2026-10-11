@@ -46,3 +46,10 @@ source actor rather than reset to the source-initial value. The transferred type
 capabilities. The join does not make the companion primary.
 
 Claims: `HERO-JOIN-120` through `HERO-JOIN-128`.
+
+## Group destination
+
+Owner-transfer instant 19 gives its actor a fresh Group in the destination
+Player. Instant 22 repeats that operation per member and creates separate Groups.
+A successful town AddHero grant also creates a separate Group for its new actor.
+These insertion paths do not choose an existing destination Group. — PARTY-039

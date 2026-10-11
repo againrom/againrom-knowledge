@@ -142,3 +142,31 @@ The selected dispatcher does not directly read Group `+20` elements or AI
 atomic snapshot remain Unknown; skipping the initial-stance branch proves no
 whole-linker or first-tick preservation. — SAV-GRPAI-563,
 SAV-GRPSAVENEXT-572, SAV-GRPFIRSTSAVE-579
+
+## Join membership and empty Groups
+
+Owner-transfer instants 19/22 give each transferred actor a separate fresh
+Group. A successful town AddHero grant also receives a fresh Group per actor.
+The command-0x38 hire loop creates one Group per nonzero type and appends all
+actors of that type to it. Catapult and Ballista share that Group path.
+— PARTY-039, PARTY-040
+
+The Player Group archive writes every currently listed Group, including an
+empty one, and LOAD reconstructs that partition in order. The named loops do
+not merge Groups or renumber the literal +1c selector. Runtime allocation
+addresses are new on LOAD. — SAV-1234
+
+At the next join walk, head emptiness/count checks, first-element selection,
+direct removal invocation and the selected Group's destructor/deallocation
+call sequence are High. Successful unlink, leading-prefix progression and
+the remaining-list interpretation are Medium, conditional on unread collection
+helpers `L14318` and `L14320` finding and unlinking the selected entry as
+assumed. Under that condition, leading empty Groups are destroyed until a
+nonempty head or one Group remains; later empty Groups behind a nonempty head
+are not swept. Transitive callback mutations remain Unknown. — AI-479
+
+Whether death, dismissal or return removes the emptied Group before a town
+SAVE remains Unknown. The read member-detach body, selected cull windows and
+reuse arm do not close Player removal and its downstream callbacks. A paired
+original town SAVE or a complete removal-path read would settle that population.
+— SAV-1234

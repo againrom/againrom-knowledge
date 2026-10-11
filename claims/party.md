@@ -1078,3 +1078,65 @@ not traced.
   of `+0x13c` is named: the mission-end cull sets it to 0 on every survivor
   (`PARTY-ENDCULL-026`), the state that makes the repair arm return a carried
   hero untouched. What sets it non-zero, other than corpse decay, is not read.
+
+## Group membership on joins
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| PARTY-039 | Owner-transfer instants 19/22 give each transferred actor a fresh Group; successful town AddHero grants also receive one fresh Group per actor. | High | ● active | [EXP-0530](../experiments/EXP-0530-group-joins/) |
+| PARTY-040 | The command-0x38 hire loop creates one Player Group per nonzero type and puts all actors of that type in it; Catapult and Ballista use the same Group path. | High | ● active | [EXP-0530](../experiments/EXP-0530-group-joins/) |
+
+### PARTY-039
+
+`R0064` detaches the actor, changes its owner, appends the owner's flat
+index, allocates a Group at `L14322`, constructs it at `L07379`, appends it
+to Player+24 at `L07380` and inserts the actor at `L07381`. It does not
+select an existing destination Group. Instant 19 calls it once at `L01871`;
+instant 22 calls it separately per source member at `L01872`. The latter
+therefore splits the transferred population into separate new Groups.
+
+Town `AddHero[]` reaches command 0x49 through the already established
+PARTY-ADDHERO-017 path. Its successful `R0066` branch constructs a Group
+at `L14240`, appends it at `L14323` and inserts its new actor at `L14324`.
+PARTY-JOIN-025 and PARTY-ADDHERO-017 supply script/command identity; the native
+listings reread destination construction and insertion. Both paths use the
+ordinary member append and its ownership stores, SAV-GRPLOAD-560.
+
+**Confidence.** High for the named normal successful insertion paths. Complete
+transfer and grant destination sequences exclude selection of an existing
+Group and a successful actor left without a Group. Instant 22's repeated call
+excludes transfer of its original Group as one object. EN/RU executable hashes
+are equal; this is one code witness. Linear Capstone listings do not establish
+all script producers or whole-runtime preservation after insertion.
+
+**Unknown.** Allocation failure, later callbacks and the first town SAVE after
+an arbitrary script join. No new script-data census or runtime observation was
+made. Group+1c initialization retains SAV-GRPNEW-576/SAV-GRPFIRSTSAVE-579's limits.
+
+### PARTY-040
+
+`R1142` removes the mission element, then iterates the remaining u16
+counts in type order. A zero count branches back at `L14325`. Each nonzero
+entry constructs one 0x48-byte Group at `L14241` and appends it to Player+24
+at `L07342`, before the inner actor loop starts. That loop runs i=1..n
+(`L14326..L14327`) and appends every actor to that same local Group at
+`L07345`. Its back edge reaches no Group allocation. The next type reaches
+a new allocation. For vector counts n[t], the local result is exactly
+sum(n[t]>0) fresh Groups, with n[t] new actors in each corresponding Group.
+
+Indices 0 and 1 use `Unit(0x198)` at `L14328..L09219`; higher indices use
+`Human(0x1e8)` at `L14329..L03123`. Both join the common owner/flat-index/Group
+suffix at `L14330..L07345`. MERC-LEVEL-005 identifies types 1/2 as Catapult
+and Ballista; those literal names were reused, not remeasured. Command identity
+and mission-vector framing reuse MERC-CMD-007. SAV-617's one-type/three-actor
+witness is compatible with this per-type rule; it is not a mixed-type witness.
+
+**Confidence.** High for allocation count and membership in the complete named
+hire loop on valid input and successful allocations. The allocation lies outside
+the actor loop and inside the nonzero-type branch, excluding per-command,
+per-actor and shared-existing-Group models. The two constructor branches meet
+before the same membership call, excluding a separate siege Group policy.
+No repaired Ghidra project or whole-image negative enumeration is claimed.
+
+**Unknown.** Failure paths, callbacks beyond the local Group-insertion boundary,
+malformed vectors, multiplayer hire, and a native mixed/siege hire SAVE witness.

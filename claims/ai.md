@@ -4206,3 +4206,46 @@ list lifecycle beyond the named builder, trigger execution, persistence and
 original runtime behavior. The unread same-actor/helper calls and action
 tables require a bounded callee/table/lifecycle study or native identity/list
 trace. No null-pointer fault was observed at runtime.
+
+## Empty Group prefix at mission join
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-479 | The join head loop checks emptiness and count, selects the first Group and invokes removal, destruction and deallocation; successful unlink and prefix progression depend on unread collection helpers. | High / Medium | ● active | [EXP-0530](../experiments/EXP-0530-group-joins/) |
+
+### AI-479
+
+`R0065` selects the first Player+24 Group. If the list has none, it
+constructs and appends one at `L14234..L14235`, as AI-449 already records.
+The loop `L14237..L07334` tests the head Group's member count, tests that the
+Group list has more than one entry, calls `R1582` on that head and selects
+the first element again. A nonempty head or count one exits. Selecting the first
+element again does not establish that the list changed or the loop progressed.
+
+The wrappers `R0197 -> R1369` read Group count, and
+`L14236 -> L14313` read the embedded Player-list count. `R1582` calls
+`L14314` at `L14315`, then calls `R2060(Group,1)`. That helper calls
+Group destructor `R2061` at `L14316` and deallocation `R0525` at `L14317`.
+This call sequence excludes an unlink-only interpretation.
+
+`L14314` calls `L14318` at `L14319`, tests its return and conditionally
+calls `L14320` at `L14321`. It contains no direct link, head or count store.
+Both collection-helper bodies are unread. The wrapper alone does not rule out
+failure to find the selected entry or a different list mutation.
+
+**Confidence.** High for head emptiness/count checks, first-element selection,
+direct removal invocation and the selected Group's destructor/deallocation
+call sequence. Medium for successful unlink, leading-prefix progression and
+the resulting remaining-list interpretation, conditional on unread `L14318`
+and `L14320` finding and unlinking the selected entry as assumed. Under that
+condition, the loop destroys the leading empty prefix until a nonempty head or
+one Group remains; it does not sweep later empty Groups behind a nonempty head.
+Listings are Capstone raw windows from the identified image; the relevant call
+and branch addresses are internal boundaries. No global caller completeness
+is asserted.
+
+**Unknown.** Transitive callback mutations, other transition cleanup callers
+and an original before/after mission-start witness. A bounded native read of
+`L14318` and `L14320`, or an original before/after list-identity trace, would
+settle the collection edge. AI-449's broader unread carry/start alternatives
+are not amended by this narrower result.

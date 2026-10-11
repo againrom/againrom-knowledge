@@ -15730,3 +15730,44 @@ no file of the later dated directories was read.
 - On scn:10.alm both mission-10 files clear bit 0 on 9 cells, the count `SAV-BLOCK-011` left as its Unknown.
 
 **Confidence.** High for this population. Medium that the 9 cells are the same 9 `SAV-BLOCK-011` measured: its four mission-10 saves are not identified with these two files by hash here.
+
+## Empty Groups at the archive boundary
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1234 | The named Player Group serializers emit and rebuild every listed Group, including empty ones, retaining its partition and literal +1c selector locally. | High | ● active | [EXP-0530](../experiments/EXP-0530-group-joins/) |
+
+### SAV-1234
+
+`R1340` writes the Player's Group count at `L14331` and calls Group
+serialization for each entry at `L14332`. This outer store has no member-count
+filter. `R1341` writes Group's actor count at `L14333`, including zero.
+`R1143` then writes the Group's +1c/+40/+44 fields.
+
+LOAD allocates, constructs, deserializes and appends each of the saved Groups
+at `L07278..L08192`. The actor loop at `L14334..L14335` admits count zero;
+the literal selector is then restored at `L14336`. There is no local merge,
+split or +1c renumbering in these named serializer loops. LOAD creates fresh
+runtime objects; this statement concerns saved partition/order and the literal
+selector, not equality of allocation addresses. Ownership-key remapping remains
+SAV-GRPOWNER-561's separate operation.
+
+**Confidence.** High for the conditional local archive program. Complete outer
+Group and inner member loops discriminate against automatic omission or merging
+of empty Groups by these serializers. The count and branches are load-bearing
+raw instructions. Their generated listings reproduce byte-for-byte. Callback
+mutation/atomic-snapshot limits remain SAV-GRPFIRSTSAVE-579's limits.
+
+**Unknown.** Whether a Group emptied by death, dismissal or return remains in
+Player+24 when SAVE is reached. The ordinary member-detach body, selected
+client/server cull windows, reuse arm and next-start head cleanup were read;
+Player removal `R2059` and its downstream event paths were not. A paired
+original town SAVE before/after removal, or a complete raw read through that
+helper and its reached callbacks, would settle the retained population.
+
+### Archive scope
+
+SAV-1234 is conditional on membership of the Player's current Group list.
+AI-479 specifies a different next-start operation that can destroy leading
+empty Groups. Neither claim establishes whole mission-end-to-town chronology
+or automatic retention of every empty Group.
