@@ -6612,3 +6612,69 @@ EN inventory input L2.01652 supplies either one or the displayed quantity under 
 **Confidence.** Medium for the composed selection contract. Native item arithmetic and the display producer are distinct operations; a copied display item is not proof of an accepted server transfer.
 
 **Unknown.** The quantity predicate and copy-helper internals, full UI-to-server delivery, nonpositive requests, allocation failure, unmeasured item subclasses and RU UI/clone bindings. An owner split of a known stack followed by buy and undo, or a closed producer-to-consumer trace, would settle these limits.
+
+## Campaign party producers and transition boundary
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-378 | The two installed ROM2 client Data.bin payloads contain 33 Humans and 22 Units records in the measured campaign-key ranges, covering internal template families for hire IDs 1..7 and controlled identities 21..23. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-380 | Selected ROM2 departure and TALK arms enable hire IDs1..7 through bank availability/town gates; NPC22/topic30 enables hireID2 rather than constructing controlled identity22. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-381 | The reached EN mission-entry loop selects a subset of 20 hire IDs from nonzero selection and availability; its paired EN/RU creator writes each input identity and has no additional numeric list cap in the read body. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-382 | Selected EN campaign transition cleanup tests actor class WORD+0x0e: classes33..63 take a reset path and other classes take detach/destroy calls; the predicate is not controlled identity WORD+0x14c. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+
+### R2-ENGINE-378
+
+The byte-identical EN/RU world.res payloads contain 289 Humans and 241 Units rows. Complete u32 Humans parameter24 and Units parameter55 selections in 10000..10399 return 33 and 22 rows. Five Humans and 61 Units rows have no such parameter. The payload walk ends without residue. Values, names, row hashes and literal title coordinates are in the measured data TSVs.
+
+The Humans families are Start_MF/FF/MM/FM (10210..10213), Fighter_Hero (10220), Mage_Hero (10230), 2MercenaryXBowman (10010..10019), 2MercenaryKnight (10020..10029), and 2MercenaryMage (10060, 10064..10069). Units has MercenaryDruid (10030, 10034..10039), MercenaryTroll (10040, 10045..10049), MercenaryOrc (10050, 10054..10059), and CatapultBase/MercenaryCatapult (10070/10079). These are internal row names. The grouping coordinate (value/10)%1000 is derived, not a membership observation.
+
+The Humans transfer/transformation is separately bounded by R2-ENGINE-072 and R2-ENGINE-319. R2-ENGINE-381 overwrites the created hire actor's identity with the input ID. Neither fact proves the native lookup table's complete join to this client database.
+
+**Confidence.** Medium for the catalog-to-producer association. The two equal payloads are one data basis, not independent runtime witnesses. The instrument preserves parameter coordinates rather than assigning all current actor statistics from titles.
+
+**Unknown.** Displayed character names, server/loose-table overrides, constructor acceptance, complete live statistics and templates outside these two selected client collections. A closed native table-load/lookup join and an entry save would settle the association.
+
+### R2-ENGINE-379
+
+R2-SESSION-048 supplies the mission-ID40 writer bank773=23. The acquired EN departure body and selector table confirm that arm at D2.00249 and store at D2.00250. The selected client location-leave branch reads nonzero bank773 and stage768 and calls L2.00174. R2-ENGINE-106 supplies its paired EN/RU addition contract: IDs21..30 are compared against owner-list actor WORD+0x14c before construction.
+
+The measured client Humans row Mage_Hero carries parameter24=10230, conditionally associated with identity23 by R2-ENGINE-378. This does not establish its displayed name or the complete native table join. The producer's requested identity is distinct from its entity key and from an inn NPC conversation key.
+
+**Confidence.** Medium. The writer-to-consumer link discriminates a deferred actor request from an availability-list addition. The acquired EN caller and paired addition bodies do not close every dispatch and registration callee.
+
+**Unknown.** Exact join timing, runtime delivery, mission/script producers of identity22, other callers of the addition producer and an unconditional roster. A preserved save after Leave40 with actor14c and owner membership would settle acceptance.
+
+### R2-ENGINE-380
+
+Reuse R2-SESSION-047, R2-SESSION-048 and R2-ENGINE-219/221 for the common normalization and offer contract. For hire h=1..20, selection is bank[511+h], availability bank[531+h], and town bank[551+h]. The acquired EN mission-ID table and departure body map ID20 to hire1/town2, ID50 to hire3/town3, ID60 to hire6/town2, ID70 to hire4/town3, and ID100 to hire7/town2. Each stores availability1.
+
+Kind3 TALK with NPC22/topic30 stores hire2 availability1/town2. Kind0 TALK with low-word ID5 stores hire5 availability1/town3 and bank774=2. The ordinary ID5/topic79 offer requires signed stage768>60, current town3 and bank774=1. The writer itself does not test that topic. Mission-ID60 sets bank774=1. The dedicated NPC22/topic30 offer is at stage30, not a rule that missionID30 occurred.
+
+The acquired Talk body toggles selection for kind1. Its kind2 path reaches the join without that toggle. Availability and talk changes do not themselves create actors. R2-ENGINE-381 gives the separate selection-to-actor producer. Four paired EN/RU DLL body hashes match; whole DLL hashes differ.
+
+**Confidence.** Medium for the conditional producer synthesis. The named bodies and EN tables exclude conflating the NPC22 talk effect with a controlled-identity22 creation. They do not establish the history of those flags at every stage.
+
+**Unknown.** Complete availability writers, restored/bulk-written flag states, hire8..20 producers and recruitment acceptance. Named-stage saves plus the unread direct/indirect writers would settle those populations.
+
+### R2-ENGINE-381
+
+The EN range L2.00827..L2.01206 reaches the loop only after a preceding call returns 1. For i=0..19 it selects i+1 iff bank[512+i] and bank[532+i] are both nonzero. No town test occurs in that loop. A nonempty list and stage768 are passed to L2.00175.
+
+The complete acquired creator bodies are EN L2.00175..L2.01661 and RU L2.00177..L2.01662. Each masks the input ID to low16 and looks up base10000+10*ID, trying a second table if the first lookup returns zero. If the chosen table has any positive suffix lookup among 1..9, it tries 9998+10*ID+trunc(stage/10); a nonzero result replaces the base. It constructs from that selected record, writes actor WORD+0x14c=inputID, assigns a separate entity key and owner pointer, and registers actor/group collections. It iterates the supplied length without an additional numeric cap or owner-identity deduplication in this body.
+
+The EN placement call L2.01663 supplies actor, owner, -1, 0xffb and two zeros. These are call arguments, not established coordinates. R2-ENGINE-107 separately maps literal10001+k to identity21+k. Consequently hire IDs1..20 are not those controlled literal identities.
+
+**Confidence.** Medium. The body excludes an additional local numeric cap but does not exclude a caller, constructor or destination limit. The native template-table join remains bounded by R2-ENGINE-378.
+
+**Unknown.** Preceding mode predicate, all entering retained members, other callers, final placement and admission failure. The placement/retained-registration cones and a named entry save would settle these.
+
+### R2-ENGINE-382
+
+The acquired EN transition body L2.01664..L2.01665 is called from the selected location-leave arm before the DLL departure/addition consumer. In its later owner+0x24 loop, L2.01666..L2.01667 compares zero-extended actor WORD+0x0e against33 and 64. In-range actors copy WORD+0x96 to+0x94 and WORD+0x9c to+0x9a, clear BYTE+0x13c, callL2.01668, then zero DWORDs+0x5c,+0x64,+0x44,+0x68,+0x40. Their WORD+0x14c is not tested or rewritten by this local reset branch.
+
+The other branch callsL2.01669 with actor and owner. The acquired L2.01670..L2.01052 body passes the actor to its group+0x70 removal helper, conditionally removes the group from owner+0x28, calls the owner+0x24 list helper with the actor, then invokes actor virtual slot+4 with argument1. This is a static detach/destroy route; the list helpers and virtual body were not separately closed.
+
+**Confidence.** Medium. The local predicate excludes identity14c as its selection field. Earlier transition calls, the reset callee and indirect destructor effects remain live alternatives for complete membership.
+
+**Unknown.** Combat-death removal, dismissal, script/talk removals, surviving full roster, re-entry after removal and the RU transition counterpart. A complete caller/removal cone and exit/re-entry saves would settle these.

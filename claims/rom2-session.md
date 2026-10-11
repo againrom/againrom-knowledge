@@ -1682,3 +1682,19 @@ Scenario transfers in R2-SESSION-156 preserve parameters and do not identify cur
 **Confidence.** Unknown for current list preservation, omission, rebuilding and cold-load delivery. A local missing pointer access does not rule out referenced objects, raw payloads, callbacks, indirect or bulk transfers elsewhere.
 
 **Unknown.** No SAV byte range is identified as current shop stock. Close all writer/reader and post-load stock producers, or have the owner record stock quantities and item keys, SAVE, terminate the original, cold LOAD and compare before a mission or refill event. Static parameter transfer alone cannot settle that observation.
+
+## Campaign party bank and actor persistence boundary
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-158 | The selected ROM2 scenario SAVE/LOAD bank carries hire selection, availability, town gates and deferred identity requests separately from serialized Player/Group/Unit members; cold LOAD preserving the same binding is unobserved. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+
+### R2-SESSION-158
+
+R2-SESSION-031 supplies the 4096-byte raw scenario bank transfer. Slot773 is bytes0xC14..0xC17. Selection512..531 spans0x800..0x84F; availability532..551 spans0x850..0x89F; town552..571 spans0x8A0..0x8EF. R2-ENGINE-379/380 identify their selected producers. These fields are flags/request values, not a serialized vector of actors.
+
+The acquired paired DLL SAVE/LOAD body ranges have equal hashes. R2-ENGINE-209 serializes actor identity14c and owner14. R2-ENGINE-323 supplies Player/Group registration and saved-address resolution; R2-SESSION-144/145 supply the stored one-hero membership and pointer equalities in four frozen RU town-1 saves. Those existing witnesses were reused, not newly acquired save inputs.
+
+**Confidence.** Medium for the party-state synthesis and native restoration relation. Raw bank transfer does not prove the same actor membership or literal resolution after executed LOAD. The acquired RU Player fragment covers903 of its planned905 bytes and is not a complete serializer witness; the load relation relies on the separately scoped existing card.
+
+**Unknown.** Cold LOAD with the same members and first-match identity binding, later-stage save rosters, saved-address map semantics and EN Player restoration. A named-stage save followed by an owner cold LOAD and identity/owner-list observation would settle these.

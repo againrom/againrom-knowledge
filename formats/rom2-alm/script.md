@@ -330,3 +330,13 @@ Unknown. The indirect call, unexpanded eligible callees, the store of the saved
 receiver to a fixed global and the store through [Session+0x7c]+0x0c leave
 mutations and runtime aliases open; no composed numeric value or
 ordinary-start path is proved. — R2-SESSION-068
+
+## Conditional hire admission
+
+A reached EN mission-entry loop selects hire IDs1..20 only when both
+bank[511+ID] and bank[531+ID] are nonzero. Its creator assigns the input
+ID to actor WORD+0x14c and registers the actor under the selected owner.
+These hire identities1..20 differ from the 21+k compared by literal
+10001+k. The body has no additional numeric cap on its supplied list,
+but complete mission admission and placement remain Unknown.
+— R2-ENGINE-381

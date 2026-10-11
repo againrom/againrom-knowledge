@@ -332,3 +332,36 @@ selected owner/base serializers do not directly access the shop pointer,
 but another serializer does access the same field offset and raw client
 payload producers remain unclosed. No SAV byte range has been identified
 as current stock (`R2-SESSION-157`).
+
+## Conditional party producers
+
+Mission-ID40 writes bank773=23. The selected EN location-leave consumer
+passes the request and stage768 to the addition producer; an existing
+owner-list identity23 bypasses creation. This conditional link does not
+establish exact joining time or an unconditional roster. — R2-ENGINE-379
+
+For hire h=1..20, selection is bank[511+h], availability is bank[531+h],
+and town is bank[551+h]. Read mission-ID writers enable1/3/6/4/7 after
+IDs20/50/60/70/100, with town gates2/3/2/3/2. NPC22/topic30 TALK enables
+hire2/town2; the kind0/ID5 writer enables hire5/town3. These writes do
+not construct controlled identity22 or prove recruitment. Stage768 and
+mission-ID remain separate selectors. — R2-ENGINE-380
+
+The reached EN entry loop requires nonzero selection and availability,
+selects a subset of 20 hire slots, and passes the nonempty list and stage
+to the actor creator. The paired creator bodies assign each input ID
+to actor WORD+0x14c and register it. The supplied list has no extra local
+numeric cap; complete entering membership and placement remain Unknown.
+— R2-ENGINE-381
+
+The read EN transition instead selects its reset branch by actor class
+WORD+0x0e in 33..63. Other classes take detach/destroy calls. Identity
+WORD+0x14c is not that predicate. Unread earlier callees, combat-death
+removal, dismissal and return remain Unknown. — R2-ENGINE-382
+
+The scenario SAVE/LOAD bank carries the selection, availability, town
+gates and deferred request separately from Player/Group/Unit members.
+Bank773 is at 0xC14, selection512..531 at 0x800..0x84F, availability532..551
+at 0x850..0x89F and town552..571 at 0x8A0..0x8EF. Native transfer and saved
+pointer relations do not establish executed cold LOAD preserving the
+same roster or literal binding. — R2-SESSION-158

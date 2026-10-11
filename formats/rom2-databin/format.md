@@ -140,3 +140,14 @@ with equal values in the three payloads. Fighter rows list six iron and
 leather items; mage rows a Fire_Arrow wood staff, a robe and a cloak.
 Humans parameter n carries title n+1; the last title, `EquipItem`, names
 the ten strings. — R2-ASSET-076
+
+## Campaign-key template population
+
+The equal installed EN/RU client payloads contain289 Humans and 241 Units
+rows. A full-u32 selection of Humans parameter24 and Units parameter55
+in 10000..10399 selects 33 and 22 rows respectively. The internal hire
+families cover keys for identities1..7: XBowman, Knight, Druid, Troll,
+Orc, Mage and Catapult. Controlled families include the four Start rows,
+Fighter_Hero and Mage_Hero, with derived identities21,22,23. Row presence
+does not prove admission; displayed names, native lookup-table joins,
+overrides and complete live statistics remain Unknown. — R2-ENGINE-378

@@ -377,8 +377,9 @@ The selected EN location-leave arm passes nonzero scenario slot 773 and stage
 slot 768 to an addition producer. Its EN/RU branch for IDs 21..30 skips new
 creation when the selected owner's actor list already contains the same
 WORD(+0x14c). A missing match constructs and registers a human with that word.
-Slot-773 authorship, the join schedule and runtime acceptance remain Unknown.
-— R2-ENGINE-106
+The mission-ID40 departure arm supplies slot773=23; the selected consumer
+can construct identity23 or reuse its existing match. The join schedule
+and runtime acceptance remain Unknown. — R2-ENGINE-379, R2-ENGINE-106
 
 Selected EN/RU map owner construction can reuse the existing owner for its
 first row under a Session +0x74 and count-wrapper condition. A fresh owner
@@ -448,3 +449,19 @@ selected owner/base serializers do not directly access the shop pointer,
 but another serializer does access the same field offset and raw client
 payload producers remain unclosed. No SAV byte range has been identified
 as current stock (`R2-SESSION-157`).
+
+## Campaign membership and serialized state
+
+The scenario bank carries availability and selection flags, not the actor
+objects. Slot773 occupies bytes0xC14..0xC17 of the 4096-byte bank. Hire
+selection slots512..531 occupy0x800..0x84F, availability532..551 occupies
+0x850..0x89F, and town gates552..571 occupy0x8A0..0x8EF. The selected
+scenario SAVE/LOAD pair transfers these bytes; the actors and controlled
+pointer use the Player/Group/Unit programs. Cold LOAD preserving the same
+roster and literal binding remains Unknown. — R2-SESSION-158
+
+The selected EN transition tests actor class WORD+0x0e, retaining the
+reset branch for 33..63 and calling the detach/destroy route otherwise.
+It does not test identity WORD+0x14c here. Earlier cleanup callees and
+combat-death removal remain unclosed; this branch alone cannot identify
+all surviving campaign members. — R2-ENGINE-382
