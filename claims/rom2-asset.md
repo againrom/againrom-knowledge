@@ -951,3 +951,46 @@ closed. Unknown for actual patch feedback text and rendered glyphs.
 Acquire the named patch text population or inspect an owner screenshot after
 the named cycle input. The unrelated main.txt autohealing labels cannot be
 substituted as this feedback evidence.
+
+## Shared inn lower-right literal resources
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-089 | Selected EN/RU shared loader chains bind HumanBackL.bmp and TextBackL.bmp to the two globals used by the druid inn lower-right crop; allocation and delivered pixels remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+
+### R2-ASSET-089
+
+The selected EN loader pushes `graphics\interface\HumanBackL.bmp`
+at `L2.01601`, calls constructor `L2.00573` at `L2.01602`, and stores
+its result at global `L2.00747` at `L2.01603`. The second chain pushes
+`graphics\interface\TextBackL.bmp` at `L2.01604`, calls the same
+constructor at `L2.01605`, and stores at `L2.00748` at `L2.01606`.
+The allocation-null arms store zero instead.
+
+RU pushes the same two literal keys at `L2.01607` and `L2.01608`, calls
+`L2.01609` at `L2.01610` and `L2.01611`, and stores at globals `L2.01612`
+and `L2.01613` at `L2.01614` and `L2.01615`. R2-ENGINE-368 maps the first
+global to nonzero child+0x70 and the second to zero, with the same crop.
+
+The four strings are in `.data`, at EN `L2.01616` / `L2.01617` and RU
+`L2.01618` / `L2.01619`. A bounded 128-byte file window at each address
+finds the NUL-terminated ASCII key. The first pair of window SHA256 hashes
+agrees between locales, as does the second pair; this is not an archive
+payload or whole-image equality claim.
+
+Evidence: `evidence/measured/g2/` call-minus-8/11/16 listings preserve all
+failed selection attempts and the constructor/store operands.
+`evidence/measured/g3/strings.tsv` holds the literal keys and bounded
+window hashes. The G2 selector rejected `.data` and emitted no strings.
+G3 uses committed G1 section metadata and prior full-file identities,
+opens each native file for exactly one 128-byte seek/read, and checks size.
+It does not establish an independent current whole-file identity.
+
+**Confidence.** High for the selected key pushes, result/store chains and
+bounded literal contents. Unknown for allocation, later replacement and
+delivered pixels. The leading partial instruction in some retained
+attempts supports no fact; the named push/call/store sequence is decoded.
+
+**Unknown.** Constructor failure, later global replacement, actual archive
+payload selection and live crop appearance. Trace these bounded dependencies
+or have the owner toggle the inn panel and observe its lower-right crop.

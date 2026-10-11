@@ -3413,8 +3413,8 @@ the delivered timing; no game execution occurred in this experiment.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-257 | Selected ROM2 inn/shop pages and centers reuse native room bases; per-town overrides mix data and control flow, while five changed shop cleanup methods retain equivalent native algorithms. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
-| R2-ENGINE-258 | Selected druid inn methods add water and taverner state transitions over shared widgets; ten water names feed a nine-cursor loop, and taverner cursor reset preserves its cached bitmap. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
-| R2-ENGINE-259 | Selected druid shop methods gate the fourth category through campaign query 0x302 and use a modulo-30 keeper counter; native paint, click and selection differ from the shared shop base. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-258 | Selected druid inn methods add water and taverner state transitions over shared widgets; ten water names feed a nine-cursor loop, and taverner cursor reset preserves its cached bitmap. | High / Medium | ● active (amended, branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-259 | Selected druid shop methods gate the fourth category through campaign query 0x302 and use a modulo-30 keeper counter; native paint, click and selection differ from the shared shop base. | High / Medium | ● active (amended, branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 | R2-ENGINE-260 | Selected inn/shop pages reuse shared native child classes; EN construction binds app+0xe0 to a panel with 33 nonzero targets, while changed callback purposes and its null boundary remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 
 ### R2-ENGINE-257
@@ -3503,6 +3503,8 @@ lower-right edge art and every shared child presentation were not identified.
 **Unknown.** Lower-right global bitmap identities, physical hover, audible
 delivery and live timing. Trace their loaders or observe authorized output.
 
+**Amended.** R2-ENGINE-368 and R2-ASSET-089 extend the lower-right global selection and literal resource evidence. Complete child-field semantics and runtime presentation remain open; the original animation clauses stand.
+
 ### R2-ENGINE-259
 
 Druid center L2.00688 and header L2.00689 reuse shop/widget bases.
@@ -3544,6 +3546,8 @@ all shared shell/button resources and sibling message paths were not closed.
 **Unknown.** Complete bank770 campaign progression and restoration, pending dialogue, shared
 shell art, audible delivery and live pixels. Additional scenario producers
 and authorized native observation would settle those boundaries.
+
+**Amended.** R2-ENGINE-367, R2-ENGINE-369 and R2-SESSION-154 extend selected bank writers, raw SAV transfer and the pending-entry branch. They do not establish all producers or a delivered dialogue sequence; the original keeper and category clauses stand.
 
 ### R2-ENGINE-260
 
@@ -6461,3 +6465,110 @@ Unknown for full options, support, targeting, command and lifecycle parity.
 
 **Unknown.** All unpaired bodies and native feedback/glyph behavior. Pair the
 remaining EN routes and observe the same controlled action in both originals.
+
+## Druid town state and pending entry
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-367 | Selected EN/RU Scenario paths set bank 770 to 1 on Leave70 and 2 on druid inn TalkTo; NewGame clears it and ScenarioLoad restores raw bank bytes, while indexed writers remain open. | High / Medium | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+| R2-ENGINE-368 | Selected druid inn painters choose lower-right shared globals by zero/nonzero child+0x70 and draw a 16x242 crop at page+(464,238); the field meaning remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+| R2-ENGINE-369 | Installed EN/RU ScenarioEnterShop returns 0; the selected druid pending branch formats shop\npc31m%d and acknowledges the same handle immediately, with no progression counter in that branch. | High / Medium | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+
+### R2-ENGINE-367
+
+Bank slot 770 is DWORD `D2.00215`, relative to bank base `D2.00003`.
+GetVar `D2.00001` reads bank[index]. SetVar `D2.00002` writes its supplied
+value to bank[index], without a local index limit. Ordinary Leave70 stores
+1 at `D2.00217`, including the arm that skips movie output 3. TalkTo kind
+0, NPC `0x2a3`, topic `0x4e` stores 2 at `D2.00243` and adds the class-4
+stock mask, as R2-ENGINE-331 states. Kind-1 TalkTo toggles bank[511+NPC];
+a supplied NPC 259 would address slot 770. Its ordinary producer is not proved.
+
+NewGame clears the 4096-byte bank before setting stage 768 to 10.
+R2-SESSION-023 establishes the DLL-return state, rather than the complete
+client initialization. ScenarioSave and ScenarioLoad transfer that bank
+verbatim on their selected paths (R2-SESSION-154).
+
+The EN/RU `.text` scan covers `D2.00244..D2.00245`, 164352 raw bytes per
+locale, in one linear skipdata pass. It finds three exact operand references
+to `D2.00215`: Leave70, the EnterInn comparison and the TalkTo store.
+Indexed GetVar/SetVar, bank clearing and raw save/load are separate
+positive base references. The scan does not enumerate all effective addresses.
+
+Evidence: `evidence/measured/g1/` GetVar-SetVar, Leave70, TalkTo,
+NewGame-Save-Load and section-refs listings, in both locales.
+
+**Confidence.** High for the selected positive stores, indexed address
+algebra and paired bank transfer. Medium for the bounded direct-reference
+census. Matching locale paths are one dependency, not two observations.
+
+**Unknown.** All SetVar callers, kind-1 producers, overlapping or bulk
+writes, script/callback producers and post-load client mutations. A bounded
+effective-address/caller census would settle these alternatives. An owner
+cold LOAD followed by druid square/shop entry would test delivered state.
+
+### R2-ENGINE-368
+
+EN center painter `L2.00682` and RU `L2.01620` retain the parent page
+at center+0x5c and obtain the page origin. They call the child at page+0x6c.
+Getter EN `L2.01621` / RU `L2.01622` returns the DWORD at child+0x70,
+without boolean normalization. The painter tests zero versus nonzero.
+
+Nonzero selects EN global `L2.00747` / RU `L2.01612`; zero selects
+EN `L2.00748` / RU `L2.01613`. Both arms request source (0,0), extent
+16x242, at page origin+(464,238), through bitmap virtual slot +0x38.
+R2-ASSET-089 bounds the constructor/store and resource-string evidence.
+
+Evidence: `evidence/measured/g1/` druid-inn-painter and inn-edge-condition
+listings for each locale. The RU painter range ends one byte before its
+last instruction completes; the measured origin and selection arms are
+decoded before that boundary. The trailing instruction supports no claim.
+
+**Confidence.** High for the complete predicate getter and these decoded
+draw operands. Unknown for the child field's gameplay meaning. Native draw
+requests do not establish live pixels or a successful bitmap allocation.
+
+**Unknown.** The producers and semantic meaning of child+0x70, later
+global replacement and delivered visibility. Trace that field's bounded
+writer/caller graph, or have the owner enter the druid inn and toggle the
+corresponding panel state while observing the lower-right crop.
+
+### R2-ENGINE-369
+
+ScenarioEnterShop `D2.00020..D2.00246` unconditionally clears EAX and
+returns in both installed DLLs. ScenarioLeaveShop `D2.00246..D2.00089`
+returns without a state operation. Neither body reads the bank.
+
+The client ordinal-binding windows bind ordinal 7 to EN `L2.01623` /
+RU `L2.01624` and ordinal 3 to EN `L2.01463` / RU `L2.01464`.
+R2-ENGINE-034 identifies these exports as EnterShop and TalkTo.
+At druid entry EN `L2.01625..L2.01626` / RU `L2.01627..L2.01628`,
+application mode 2 calls the first pointer and stores its result at
+page+0x160. Other modes store zero. A nonzero result extracts
+(handle>>16)&0xfff and formats literal `shop\npc31m%d`.
+The selected branch requests show through EN `R2.0038` / RU `R2.0037`,
+then calls the second pointer with the same handle immediately.
+It contains no local dialogue-step counter or ordered multi-key loop.
+
+With these selected bindings, ordinary entry gets zero from the installed
+EnterShop body and bypasses the nonzero branch. There is no positive
+ordered pending-dialogue sequence for that path. A dormant conditional
+client branch is not evidence of a delivered dialogue.
+
+Evidence: `evidence/measured/g1/` EnterShop-LeaveShop,
+scenario-ordinal-bindings, shop-pending-branch and strings outputs in EN/RU.
+The retained client section scans include all numeric-operand hits for
+these pointer cells and displacement 0x160; those broad hits are not all
+classified as writers or callers.
+
+**Confidence.** High for the complete DLL stubs, selected binding operands,
+literal key format and immediate acknowledgement. Medium for their composed
+ordinary-entry consequence because all later pointer writers and callbacks
+are not closed. EN/RU application fields differ (+0x5d8/+0x63c), while the
+selected operations and key format agree.
+
+**Unknown.** A nonzero producer, dynamic pointer replacement, other
+callbacks, delivered text, any multi-step order or end condition outside
+this branch. Close the pending-field and pointer-cell writer graph, or
+have the owner enter the druid shop in a fresh campaign and record whether
+any dialogue appears before clicking. No original runtime was executed.

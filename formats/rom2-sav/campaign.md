@@ -19,6 +19,18 @@ The native export names identify the availability list and current pointer.
 They do not assign meanings to the bank, grid or 16-byte payload. These producer
 cones and arbitrary live values remain Unknown. — R2-SESSION-031, R2-SESSION-032
 
+Bank slot 770 occupies prefix bytes 0xC08..0xC0B. The selected paired
+writer/reader transfers the saved DWORD verbatim before catalog rebuilding.
+NewGame's reset and later campaign writers are separate operations. Native
+cold LOAD and post-load mutation remain Unknown (`R2-SESSION-154`, High
+for the transfer and offset).
+
+Town 3 has record ID 3 and kind 2. Its writer node contains these two
+DWORDs followed by raw 16 bytes; current remains a list ordinal, not a
+fixed value 3. The named fresh route offers towns 1, 2, then 3 on Leave50;
+nonzero bank 775 can restore towns 2/3 independently of stage. The route
+is conditional and full membership remains Medium (`R2-SESSION-155`).
+
 ## List restoration and current
 
 After reading the raw bank and grid, the reader clears availability and rebuilds

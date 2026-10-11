@@ -1126,7 +1126,7 @@ availability/event graph or record an authorized original route.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-123 | Selected native campaign paths add druid town3 on ordinary Leave50 or nonzero bank775 restoration; the named fresh town1-to-town2-to-town3 route remains conditional. | High / Medium | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-SESSION-123 | Selected native campaign paths add druid town3 on ordinary Leave50 or nonzero bank775 restoration; the named fresh town1-to-town2-to-town3 route remains conditional. | High / Medium | ● active (amended, branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 
 ### R2-SESSION-123
 
@@ -1171,6 +1171,8 @@ dependency and supplies no original playthrough.
 the client's accepted-visit conditions, actual town3 visit scheduling
 and exhaustive town order. Closing the availability/caller graph or an
 authorized original route would settle those alternatives.
+
+**Amended.** R2-SESSION-155 extends the named fresh route with the town-3 SAV identity and current-ordinal boundary. Accepted visits, complete flag producers and exhaustive order remain open; the original conditional additions stand.
 
 ## Town-1 gate flag
 
@@ -1584,3 +1586,72 @@ or native lifecycle observation was made.
 LOAD, including whether a saved byte is overwritten by this application send.
 Read transition/load callers and receiver dispatch, then use an owner run
 whose registry/application and saved values differ.
+
+## Druid town bank and SAV identity
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-154 | Selected EN/RU ScenarioSave/Load transfers bank 770 at Scenario-prefix byte offset 0xC08 as raw SAV state; native cold-LOAD delivery and later client writes remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+| R2-SESSION-155 | The named fresh route offers towns 1, 2, then 3 on Leave50; SAV availability stores town 3 as ID 3, kind 2, with a list ordinal rather than a fixed current-town value. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+
+### R2-SESSION-154
+
+The first ScenarioSave `D2.00102` transfer writes 4096 bytes from
+`D2.00003` through stream virtual slot +0x40 at `D2.00247`.
+ScenarioLoad `D2.00103` reads 4096 bytes into that same bank through
+slot +0x3c at `D2.00248`, before catalog-list reconstruction.
+Slot 770 therefore occupies bytes 3080..3083 (`0xC08..0xC0B`) relative
+to this Scenario record's bank prefix. This is not an absolute SAV-file offset.
+
+The paired positive transfer restores the saved slot; a new mission result
+or script is not required by this transfer. R2-ENGINE-367 names NewGame
+reset and selected later writers. R2-SESSION-031 gives the prefix grammar;
+R2-SESSION-033 separates bank transfer from availability reconstruction.
+
+Evidence: EN/RU `evidence/measured/g1/` NewGame-Save-Load and
+GetVar-SetVar listings. The selected complete transfer is static evidence.
+
+**Confidence.** High for byte counts, order and slot-offset arithmetic.
+Unknown for I/O success, delivered cold LOAD and intervening client writes.
+Paired code agreement is one dependency.
+
+**Unknown.** Post-load mutation, all alternate load routes and native
+visibility. A bounded loader/caller trace or an owner save at bank 770=1/2,
+cold LOAD, then druid square/shop entry would settle delivered persistence.
+
+### R2-SESSION-155
+
+R2-SESSION-107/112/113/115/123 supply the named fresh route: NewGame
+offers town 1 at stage 10; initial TALK admits mission 10; town-1 departure
+removes that town; Leave10 gives stage 20; Leave20 admits town 2 at stage 30.
+The named continuation takes Leave30, then Leave40, which admits missions
+50 and 60. Ordinary Leave50 adds town 3. With no intervening stage writer,
+that continuation reaches stage 60. Playing or postponing other admitted
+missions can change the stage or timing; this is not an exhaustive order.
+
+Town-3 constructor `D2.00205` supplies kind 2, ID 3 for object `D2.00039`.
+Leave50 calls AddTown(3) at `D2.00219`. Nonzero bank 775 restoration clears
+that flag and can append towns 2 and 3 independently of stage. Its complete
+producer set remains Unknown; bank 775 is not necessary for the named Leave50.
+
+The availability writer emits each record as u32 ID, u32 kind, raw 16 bytes.
+Town 3 is consequently ID 3 followed by kind 2, not one exclusive bank flag.
+The final current value is an availability-list ordinal with default zero;
+it is not a fixed value 3 for town 3. The reader matches catalog kind/ID and
+deduplicates pointers; it does not copy the raw 16 payload bytes into the
+selected catalog object (R2-SESSION-032/033/034).
+
+Evidence: `evidence/measured/g1/` town3-constructor, AddTown, Leave50,
+restore-towns, record-fields-and-serialization and NewGame-Save-Load
+listings in EN/RU. The early route reuses the cited claims' evidence.
+
+**Confidence.** High for the local addition and record identity/width.
+Medium for the conditional composed fresh route and full restored membership.
+Unknown for accepted visits and allocation/I/O behavior. EN/RU selected
+DLL paths agree; no original playthrough supplies an independent witness.
+
+**Unknown.** All bank 775 producers, exhaustive mission/town order,
+accepted town-3 entry, arbitrary restored lists and post-load scheduling.
+Close the availability and admission caller graph, or have the owner follow
+the named fresh route through Leave50 and enter town 3 before and after a
+cold LOAD. No original game was launched.

@@ -271,6 +271,18 @@ Unknown. — R2-SESSION-021
 
 ### Scenario campaign state
 
+Bank slot 770 is at bytes 0xC08..0xC0B of the Scenario record's first
+4096-byte bank, not at an absolute SAV-file offset. Selected ScenarioLoad
+reads its saved raw bytes before catalog reconstruction. Native cold-LOAD
+delivery and later client writes remain Unknown (`R2-SESSION-154`,
+High for transfer and offset).
+
+Town-3 availability records store u32 ID 3, u32 kind 2, then raw 16 bytes.
+The final current index is a list ordinal with default zero, not a fixed
+town-3 value. Reconstruction uses catalog kind/ID matching; complete
+membership and accepted visits remain open (`R2-SESSION-155`, High for
+identity and representation, Medium for full membership).
+
 The 4,096-byte bank holds 1,024 DWORD slots. At DLL NewGame return all are
 zero except slot 768=10. The initial current/available record has raw type 2
 and ID 1. Later client character choice writes slots 776/781 from its flag

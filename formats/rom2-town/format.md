@@ -773,7 +773,12 @@ Type-2 town ID 3 departure preserves its availability. The measured EnterLocatio
 setter stores the supplied current pointer without an admission test;
 the preceding client's accepted visit remains Unknown. The named fresh
 town1-to-town2 path plus the later Leave50 addition is a conditional route,
-not an exhaustive visit order (`R2-SESSION-123`, High / Medium).
+not an exhaustive visit order (`R2-SESSION-123`, amended, High / Medium).
+The named continuation takes Leave30 and Leave40 before Leave50. With no
+intervening stage writer it offers town 3 at stage 60; admitted side missions
+can change the timing. SAV availability represents this town by ID 3, kind 2.
+Current is a list ordinal, not a fixed town value (`R2-SESSION-155`, High for
+identity, Medium for the composed route).
 
 ## Druid rooms and shared children
 
@@ -829,8 +834,16 @@ taverner art. Let P be the page origin and C=(160,0) the center offset.
 Background is P+C, water P+C+(168,144), taverner a1/a2 P+C+(40,128)
 and static a30001 P+C+(104,152). Shared portraits, selection/quest
 presentation, edges and children follow. The lower-right edge chooses
-one of two global bitmaps whose identities remain Unknown
-(`R2-ENGINE-258`, High for bounded draw rules).
+one of two global bitmaps. The page+0x6c child's DWORD +0x70 selects
+EN `L2.00747` / RU `L2.01612` when nonzero and EN `L2.00748` / RU
+`L2.01613` when zero. Both draw source (0,0), extent 16x242, at P+(464,238).
+The field's gameplay meaning and live visibility remain Unknown
+(`R2-ENGINE-258`, amended, `R2-ENGINE-368`, High for bounded draw rules;
+`R2-ASSET-089` for the literal resource evidence).
+The first chain pushes `graphics\interface\HumanBackL.bmp`; the second
+pushes `graphics\interface\TextBackL.bmp`, in both locales. Allocation-null
+arms store zero. Both keys are shared interface resources
+(`R2-ASSET-089`, High for the selected binding).
 
 | Animation | Installed files | Native rule |
 |---|---|---|
@@ -863,8 +876,12 @@ children. Campaign query 0x302 admits elven paint/click/selection only
 on nonzero return; outside campaign the predicate admits it. Tooltip
 still scans four rectangles. Original ScenarioGetVar reads bank770 for
 0x302; ordinary Leave70 stores it to 1. This enables the gate without
-an intervening writer. Other producers and restoration remain Unknown
-(`R2-ENGINE-259`, High for these local rules). The stock in that category is
+an intervening writer. Druid inn TalkTo kind 0, NPC 0x2a3, topic 0x4e
+sets it to 2. NewGame clears it; the selected ScenarioLoad transfers its
+saved raw bytes from Scenario-prefix offset 0xC08. Indexed SetVar and
+kind-1 TalkTo can also address it. Complete producers and post-load client
+mutation remain Unknown (`R2-ENGINE-259`, amended, `R2-ENGINE-367`,
+`R2-SESSION-154`, High for positive local operations). The stock in that category is
 empty until the druid inn talk adds class 4 (`R2-ENGINE-331`).
 
 Keeper ticks require at least 100 ms. Each tick samples a fresh
@@ -874,8 +891,17 @@ counter+1 as the a1/a2 filename. Zero clears the episode; default is
 a10001. An initialized episode starts its updated sequence at file 2,
 passes file 30 and returns to default file 1. Kaarg instead uses modulus
 20/default a10000 and additional fire transitions. Shared shell/button
-art, pending dialogue, audible timing and live pixels remain Unknown
-(`R2-ENGINE-259`).
+art, audible timing and live pixels remain Unknown (`R2-ENGINE-259`, amended).
+
+The selected campaign entry stores EnterShop's return at page+0x160.
+Installed EN/RU EnterShop returns zero, so the named ordinary entry does
+not initiate pending dialogue. The client's nonzero branch formats
+`shop\npc31m%d` from bits 16..27 and immediately calls TalkTo with the
+same handle after requesting show. It contains no local progression
+counter or ordered multi-key loop. Nonzero producers, pointer replacement,
+other callbacks and a delivered sequence remain Unknown. The complete
+DLL stub and local branch are High; composed entry is Medium
+(`R2-ENGINE-369`).
 
 ## Tip popups
 
