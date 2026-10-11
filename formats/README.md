@@ -73,6 +73,7 @@ in `claims/rom2-engine.md` have no standalone stored format page.
 | **Session frame** | `Socket and DirectPlay receive paths` | [Reference](rom2-net/format.md) | Eight-byte header and admission/decompression bounds; payload/opcode grammar and ROM1 equivalence remain Unknown (`R2-SESSION-003`) |
 | **SAV** | `game*.sav` | [Reference](rom2-sav/format.md) | Four original save points: exact envelope/tail and bounded first Player decode; Group/actor/current-party identity Unknown (`R2-SESSION-075`, `R2-SESSION-078`) |
 | **Character** | `*.a2c` | [Reference](rom2-a2c/format.md) | Six scrambled sections, checksum, plus a byte-run codec; section meanings Unknown (`R2-SESSION-022`) |
+| **Automatic casting** | `Player preferences and spell orders` | [Reference](rom2-autocast/format.md) | Three cumulative support levels, selected offensive spell and separate computer paths; execution, lifecycle defaults and full EN/RU equivalence remain Unknown (`R2-ENGINE-345`, `R2-SESSION-150`) |
 
 <a id="explicitly-out-of-scope-not-rom1-native"></a>
 

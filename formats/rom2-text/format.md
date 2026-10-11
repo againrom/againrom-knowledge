@@ -192,3 +192,23 @@ their constructed commands are 0x41d and 0x446. Selected EN strings are
 differ; a named encoding or rendered correspondence is not established.
 The CRLF loader calls CharToOemA. Live table mutation, the full startup
 schedule and complete generic input bindings remain Unknown. — R2-ENGINE-093
+
+## Automatic-casting labels
+
+The installed `main.res:text/dialogs.txt` source uses zero-based rows 167..169
+for EN `Own`, `Allies`, `Neutral`; row 170 is `AutoCast mode:` and rows
+171..173 are `Minimum`, `Average`, `Maximum`. A CP1251 view of the corresponding
+RU source gives `Своих персонажей`, `Союзников`, `Нейтральных`, `Автокастинг:`,
+`Минимальный`, `Средний`, `Максимальный`. Selected RU options code requests
+rows 171..173 for control `0x8d`. The source-to-native-table binding is Medium;
+runtime code page and rendered RU glyphs remain Unknown. — R2-ASSET-085
+
+EN stored ASCII labels and indices retain High. The explicit RU source view
+and source-to-native binding retain Medium. Their first support predates the
+160-window limit; the later completed comparison at a conservative minimum
+of 169 windows is excluded from confidence. — R2-ASSET-085
+
+The separate `text/main.txt` rows 218..220 name EN `Autohealing off`,
+`Occasional autohealing on`, `Frequent autohealing on`; they are not established
+as the three options labels by the selected binding. Their input-dispatch and
+feedback correspondence remain Unknown. — R2-ASSET-085

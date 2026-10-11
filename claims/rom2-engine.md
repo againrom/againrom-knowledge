@@ -5989,3 +5989,260 @@ floating-constant helpers at center
 +0x100/+0x110 and live pixels. Read the bounded RU import table and named
 header/inventory/registration paths to settle them. The native budget is
 exhausted; no further native read belongs to this candidate.
+
+## Automatic casting
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-345 | EN/RU local AutoCasting cycles preserve target bits 0..2 and cycle policy masks 0x08, 0x18 and 0x38; their preference constructors set 0x19. RU options select the same three masks. | High / Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-346 | RU minimum support first tries self Heal, self Shield, then a listed Heal target; it requires mana at least 5 and spell affordability, and compares integer HP/max against 1. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-347 | RU average support adds Bless then Haste with mana at least 10; maximum adds Air, Earth, Fire and Water protection then Invisibility with mana at least 40, in target-major order. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-348 | RU admission requires a book spell and enough mana; affinity uses preference bits 1/2/4 and accepts self; range compares a packed-byte Chebyshev metric with spell +9. Getter meanings remain Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-349 | RU support prepares command 8 with a target and spell pointer; candidate buff checks suppress recent pending spell ID 20, not a proved cooldown for every spell. Movement and interruption remain Unknown. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-350 | RU selected-spell policy reads command byte +0x78, admits one affordable spell and dispatches IDs 1..28; it does not choose another spell from the book in that body. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-351 | RU nonzero-Player-kind branches use a distinct offensive book-choice routine and separate support routines; equality with the player three-level policy is not established. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+
+### R2-ENGINE-345
+
+EN `L2.01501` and RU `L2.01502` read global DWORDs `L2.01503` and
+`L2.01504`. They cycle `(value & 0x38)` as 8 -> 24 -> 56 -> 8 and replace
+the value with `(old & 7) | new_policy`. An unrecognised policy mask is not
+coerced to one of these three by this body. The following sender builds
+packet type `0x46`, subtype 3, with the current Player word from app
+`+0x9cc` and the global DWORD. It does not name an actor or selection.
+
+EN `L2.01505` and RU `L2.01506` set preference `+0x24` to 25 (`0x19`):
+target bit 1 and policy bits 8 and 16. This is the constructor default,
+before registry loading. RU static initializer `L2.01507` binds that
+constructor to global object `L2.01508`. RU options control `0x8d` maps
+indices 0, 1 and 2 to policy masks 8, 24 and 56. Apply starts from mask
+8 and independently adds target masks 1, 2 and 4 from three checkboxes. The key arm `L2.01509` calls the cycle; its key
+dispatch table was not read.
+
+The paired constructor and level-cycle listings contain 17 and 57 instructions
+per image and agree after address normalization. The 389-instruction registry
+spans differ at one non-address operand: EN `L2.01510` adds `0x41c`, RU
+`L2.01511` adds `0x434` to a returned object base. The local AutoCasting
+transfer width and offset still agree. Start-relative local targets and
+first-seen external address aliases are compared by the evidence script;
+external callee bodies and whole-policy equivalence remain Unknown.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-engine-345-348.tsv)
+records first support at cumulative windows 15..99. RU/EN cycles and senders
+are at 44/54, constructors at 15/66, options apply at 46, and the paired
+comparisons by 99. These precede the 160-window hard limit; windows after 60
+still breach the navigation reserve. Late reproduction supplies no High
+rationale. Local High and bounded Medium grades remain.
+
+**Confidence.** High for the complete local cycle, sender and constructor
+instructions in both images, and the bounded paired-span comparison. Medium for the options interpretation and a
+shared Player policy: the options excerpt has an invalid prefix and the
+packet receiver linking the global value to Player preferences was not read.
+The support reader uses `[[actor+0x14]+0x34]+0x20`, not an actor level byte.
+
+**Unknown.** Exact key, native control appearance, receiver semantics,
+eligibility of every unit class, and defaults after creating, hiring,
+summoning or converting a unit. Read the receiver and creation paths;
+an owner run can verify the interface and inherited defaults. No original
+runtime observation was made.
+
+### R2-ENGINE-346
+
+RU `L2.01512..L2.01513` reads actor owner `+0x14`, its preference pointer
+`+0x34` and preference byte `+0x20`. It stops when signed mana `+0x9a`
+is below 5 or bit 8 is clear. Each attempt also uses the book/cost
+admission of R2-ENGINE-348. The first attempt is spell 24 (Heal) on self
+when signed HP `+0x94` differs from maximum `+0x96`. Next is spell 27
+(Shield) on self when effect mask `+0x144` lacks bit `0x08000000`.
+
+The body builds a candidate list through `L2.01514` and `L2.01515` and
+examines it only when its count is above one. It filters candidates by
+affinity and range, chooses the first strict minimum of signed integer
+`HP/max` (IDIV before FILD), and orders Heal when the result is below the
+double 1.0 at `L2.01516`. Equal quotient scores retain the first candidate;
+this is not a continuous health-percentage ranking. Successful attempts
+return after one prepared order. Self Heal and Shield bypass the range
+wrapper in this body.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-engine-345-348.tsv)
+records the support body at cumulative window 18, admission meaning at 28,
+the double-1.0 threshold at 73, and the source-label join at 84. Spell names
+reuse R2-ENGINE-017 and R2-ENGINE-018 at base `77b94c82`. All first support
+precedes the 160-window hard limit. Medium and the named Unknowns remain;
+late reproduction supplies no confidence rationale.
+
+**Confidence.** Medium for the support policy. The complete body and
+admission/affinity/range wrappers were read; the list builders and command
+executor were not. The label-to-mask pairing is R2-ASSET-085 and
+R2-ENGINE-345, not an assumption that minimum means disabled.
+
+**Unknown.** Candidate-list membership, sight filtering and iterator order
+as a player-visible priority. Read the two builders and execute the original
+with two wounded candidates of different HP to settle the visible choice.
+
+### R2-ENGINE-347
+
+After the minimum attempts, RU `L2.01512` requires policy bit `0x10` and
+signed mana at least 10. For each listed, affinity-accepted candidate it
+tries Bless (20), then Haste (21). Bless additionally calls unread
+`L2.01517`. Each spell must exist and be affordable, pass the range
+wrapper and lack its corresponding active-effect bit.
+
+Then bit `0x20` and signed mana at least 40 permit, for each candidate,
+Protection from Air (13), Earth (19), Fire (4), Water (8), then Invisibility
+(12). The same book, cost, range and absent-effect tests apply. Candidate
+Invisibility excludes self and requires a nonzero relation cell masked
+with 3. A final self Invisibility attempt needs an affordable spell and no
+bit `0x1000`, and bypasses the range wrapper. The first successful order
+ends the body. The loops are target-major: an earlier target's Haste is
+tried before a later target's Bless.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-engine-345-348.tsv)
+records ordered attempts at cumulative window 18, admission meaning at 28,
+and the source-label join at 84. Spell names reuse R2-ENGINE-017 and
+R2-ENGINE-018 at base `77b94c82`. All first support precedes the 160-window
+hard limit. Medium and the named Unknowns remain; late reproduction supplies
+no confidence rationale.
+
+**Confidence.** Medium. The complete native body fixes the gates and order;
+candidate builders, the extra Bless predicate, relation grammar and command
+execution remain unexamined. No enum of every spell the whole game can
+automatically cast is claimed.
+
+**Unknown.** Visibility, live candidate order, the extra Bless predicate,
+and execution outcomes. Read those callees or observe named levels with a
+controlled book and target population.
+
+### R2-ENGINE-348
+
+RU admission `L2.01518` calls the established book getter `L2.00040`
+on actor `+0x140`, with the requested ID. It returns the spell only when
+nonnull and signed current mana `+0x9a` is at least signed spell cost
+`+0x0c` (R2-ENGINE-017, R2-ENGINE-018).
+
+Affinity `L2.01519` uses a relation byte at
+`this+0xa8c4 + casterPlayerWord4*0x46 + targetPlayerWord4` and the caster
+preference byte `[[actor+0x14]+0x34]+0x20`. It accepts relation&3 == 0 with
+bit 4, relation&2 with bit 2, equal owner pointers with bit 1, or equal actor
+pointers unconditionally. UI labels name target choices Own, Allies and
+Neutral (R2-ASSET-085); the relation-matrix grammar was not independently
+read.
+
+Range `L2.01520` obtains two packed values via `L2.01521`, calls
+`L2.01522`, masks the result to a byte and accepts it when <= spell byte
+`+9`. The complete metric extracts each value's two unsigned low bytes and
+computes the maximum absolute difference of corresponding bytes.
+`L2.01523` computes the integer absolute value. This is packed-byte
+Chebyshev arithmetic; the getter's physical coordinate meanings are Unknown.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-engine-345-348.tsv)
+records admission, affinity and wrapper instructions at cumulative window
+28, complete metric/helper arithmetic by 72, and target labels at 84. Book
+and spell-field meanings reuse R2-ENGINE-017 and R2-ENGINE-018 at base
+`77b94c82`. Local High and candidate-contract Medium remain. The unsupported
+attribution of coordinate-getter meanings to standing evidence becomes
+Unknown. Metric/helper re-reads at 165/166 are excluded from High rationales.
+
+**Confidence.** High for the local signed comparisons, bit tests and
+packed-byte Chebyshev arithmetic. Standing evidence establishes the book
+getter and spell fields, not coordinate-getter meanings. Medium for the
+complete candidate contract: builders may apply additional gates. No absence
+of sight filtering is claimed.
+
+**Unknown.** Coordinate-getter meanings and units, hidden/occluded
+targets, pathological coordinate/HP inputs, and relation-matrix semantics
+beyond the observed labels and bit tests.
+Read the builders, matrix writers and coordinate getter to settle them.
+
+### R2-ENGINE-349
+
+RU `L2.01524..L2.01525` prepares caster command (`[actor+0x1c4]`) byte
+`+8` = 8, target pointer `+0x28`, spell pointer `+0x30` and range byte
+`+0x14` = spell `+9`. It writes target command DWORD `+0xa4` = spell ID
+and `+0xa8` = session tick `[L2.01317]+4`. Null-target selection uses
+different helpers according to spell defensive byte `+0x0a`.
+
+The support buff attempts compare the candidate's pending ID against
+literal `0x14` (20). When equal, absolute timestamp difference <=20 skips
+the attempt. The same literal check appears for other buffs; it is not a
+per-spell cooldown test. Self Heal, self Shield and fallback self
+Invisibility do not use this check in the complete support body.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-other.tsv)
+records preparation and pending predicates in navigation run 5, ending at
+cumulative window 19; the complete absolute-value helper in run 12 closes
+the timestamp interpretation by 73. Generation ends at 121 and supplies
+only the sampled execution-gap witnesses. Medium and the named Unknowns
+remain; late reproduction supplies no confidence rationale.
+
+**Confidence.** Medium for resulting behaviour. The local preparation and
+timestamp predicates are explicit; command execution and its full dispatch
+were not read. A sampled command table and `L2.01526` do not close that gap.
+
+**Unknown.** Whether the caster moves, how orders interrupt or resume the
+policy, update cadence and any additional cooldown. Read command 8's full
+dispatch/executor and order setters; an owner run can settle visible movement
+and interruption without treating a prepared order as an applied spell.
+
+### R2-ENGINE-350
+
+RU `L2.01527..L2.01528` reads selected ID byte
+`[actor+0x1c4]+0x78`. Zero or failed book/cost admission returns 0.
+The unsigned switch bound admits IDs 1..28. Its 28-byte map at `L2.01529`
+and 16 pointer cells at `L2.01528` were read as data, not instructions.
+The body dispatches that selected spell; it performs no book-ID iteration
+or fallback to a second spell. It has direct-target, self, effect-tested,
+integer-health and candidate-area-score arms. Those mechanics do not prove
+optimal visible targeting or an automatic offensive-spell catalogue.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-other.tsv)
+records the selected-byte reader and ID bound in navigation run 5 (run-end
+minimum 19), correct admission in run 7 (30), and data tables plus the
+complete-body comparison in generation (121). The earlier instruction
+decoding of table bytes is excluded. Medium and the named Unknowns remain;
+late reproduction supplies no confidence rationale.
+
+**Confidence.** Medium for policy meaning. The complete body and bounded
+tables distinguish selected-spell handling from level-gated support. The
+selected-ID writer, candidate builders and execution remain unread.
+
+**Unknown.** Where the offensive spell is selected, all arm target semantics,
+and behaviour for spell 29. Read the selected-ID writer and executor; no
+universal absence of automatic offensive casts is claimed.
+
+### R2-ENGINE-351
+
+In RU `L2.01530`, nonzero Player DWORD `+0x2c` routes a mage's offensive
+attempt to `L2.00056`; zero routes it to `L2.01527`. Idle `L2.01531`
+similarly chooses `L2.01513` versus `L2.01512`. This is evidence for a
+distinct computer-policy branch, not the same three-level setting.
+
+`L2.00056` iterates IDs 1..28, collects book spells with cost <= current
+mana and defensive byte `+0x0a` clear, and obtains a list index from unread
+`L2.01532`. Mind above 59 adds an earlier random test with limit 100 and
+threshold 30; that path calls `L2.01530` and returns 0. The index helper's
+distribution and the recursive path's outcome are not established here.
+
+`L2.01513` requires a book, mana above 10 and Heal (24), tries self Heal,
+then a candidate health test, then `L2.01533`. The latter tries self Heal
+and Shield, then a selected same-owner candidate; additional defensive-book
+selection requires current mana == maximum and excludes IDs 24 and 27.
+Its general defensive selection also iterates IDs 1..28 and uses the unread
+index helper. These bodies do not read the player's level-gated support
+sequence.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-other.tsv)
+records first choice/dispatch support in navigation runs 2..7 (run-end
+minima 4..30); generation completes the bounded bodies by 121. Field and
+spell meanings reuse R2-ENGINE-017, R2-ENGINE-018 and R2-ENGINE-021 at base
+`77b94c82`. Medium and the named Unknowns remain; late reproduction supplies
+no confidence rationale.
+
+**Confidence.** Medium. The complete bounded branch and choice bodies were
+read. Calling the index uniformly random, equating Player kind with every
+computer-controller configuration, or claiming every computer unit uses
+these routines would exceed the evidence.
+
+**Unknown.** Index distribution, all computer-unit dispatch, summon/default
+policy and EN equivalents. Read the helper and callers or perform a
+controlled owner observation of a computer mage.

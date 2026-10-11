@@ -1486,3 +1486,47 @@ identities: +0x0c, +0x1c and +0x4a were not tied to an item table.
 
 **Unknown.** Which items these are; reading the Item base writers or an
 item table would settle it.
+
+## Automatic-casting preferences
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-150 | EN Player +0x34 preferences serialize 36 raw bytes; RU support reads their byte +0x20. EN/RU registry paths transfer the AutoCasting DWORD at application preferences +0x24. Town and mission survival remain Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+
+### R2-SESSION-150
+
+EN Player serializer excerpt `L2.01534..L2.01535` passes
+`[Player+0x34]` and the archive to `L2.01536`. That complete body writes
+or reads `0x24` raw bytes from its object, using archive mode `L2.01537`
+and transfer calls `L2.01538` / `L2.01539`. The object block therefore
+includes byte `+0x20`. RU support reads that byte via actor owner pointer
+`+0x14`, Player preference pointer `+0x34` (R2-ENGINE-346).
+
+EN `L2.01540` / `L2.01541` and RU `L2.01542` / `L2.01543` transfer
+four bytes of application preference `+0x24` under registry value name
+`AutoCasting`. This is a DWORD, not an actor byte. R2-ENGINE-345 gives its
+constructor value and cycle masks. A key/option sender passes it with the
+current Player ID; the receiving copy into live Player byte `+0x20` was
+not read. Do not equate the application DWORD with a SAV offset.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-other.tsv)
+records width/direction arms in navigation run 10 (run-end minimum 55), the
+Player call in run 11 (68), and the RU reader in run 5 (19). RU registry
+code and strings join by run 5; generation supplies both EN registry arms
+by 121. The containing record reuses R2-SESSION-020 at base `77b94c82`.
+Local High, semantic-join Medium and lifecycle Unknown remain. Late
+reproduction supplies no High rationale.
+
+**Confidence.** High for local block width, direction arms and registry
+transfer width/offset. Medium for AutoCasting's complete SAV identity:
+the EN Player call and RU preference reader are separate locale witnesses,
+and receiver/load-time application paths were not read. Existing Player
+serialization establishes the containing record (R2-SESSION-020); an
+absolute decoded SAV offset is not supplied.
+
+**Unknown.** Whether a cold LOAD, mission change or town visit preserves
+the chosen policy or overwrites it from application preferences. Searched:
+the selected Player call, preference block serializer, registry paths,
+cycle sender, and RU policy bodies; no lifecycle receiver or town transition
+was read. Read those paths or save/load and enter/leave town in an owner run
+with distinct global and saved values to settle precedence.

@@ -85,6 +85,21 @@ read. — R2-ENGINE-323
 The four frozen saves store gold at decoded offset 113 (A/C) and 114 (B/D)
 as 1543978149, which unmasks to 1000. — R2-SESSION-146
 
+### Automatic-casting preferences
+
+The selected EN Player call passes its `+0x34` pointer to preferences
+serializer `L2.01536`, which transfers 36 raw bytes. This interval includes
+the support preference byte `+0x20` read through the owning Player in the
+selected RU support policy. The local transfer width is High; ordinary SAV
+reach and the autocast field join are Medium. Mission and town preservation,
+per-Player initialization and later overrides remain Unknown.
+— R2-SESSION-150
+
+The retained High local-width and Medium field-join grades use first support
+before the 160-window limit. Acquisition later reached a conservative minimum
+of 169 windows; the completed late comparison is excluded from those grades.
+— R2-SESSION-150
+
 ## Selected RU Group boundary
 
 The selected RU Player list calls each Group body directly. Group first

@@ -877,3 +877,46 @@ so their mission music is always a theme of an area or of the head
 
 **Confidence.** High for the record shape over the 142 maps and for the
 field meanings, which the loader and area select read.
+
+## Automatic-casting text
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-085 | EN/RU main.res dialogs.txt lines 171..173 name Minimum/Average/Maximum and Минимальный/Средний/Максимальный; RU options request those indices for control 0x8d. The main.txt autohealing labels are a separate population. | High / Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+
+### R2-ASSET-085
+
+The selected `main.res:text/dialogs.txt` nodes have label at physical line
+170 (`AutoCast mode:` / `Автокастинг:`), followed by lines 171..173:
+Minimum / Average / Maximum; Минимальный / Средний / Максимальный.
+Lines 167..169 are Own / Allies / Neutral and Своих персонажей /
+Союзников / Нейтральных. Indices are zero-based physical source lines.
+Input and selected-node hashes are in the experiment evidence.
+
+RU options request native table indices `0xab`, `0xac`, `0xad` for
+control `0x8d` and apply indices 0/1/2 to masks 8/24/56. The table-loader
+binding of object `L2.01500` to dialogs.txt was not read. A matching label
+sequence and the explicit indices support the pairing, at Medium.
+
+Both roots' `text/main.txt` lines 218..220 instead say Autohealing off /
+Occasional autohealing on / Frequent autohealing on and Режим автолечения
+выкл. / Режим автолечения редко / Режим автолечения часто. No control
+binding for those main.txt lines was established. They are not the label
+evidence for the three masks.
+
+**Acquisition support.** The [clause table](../experiments/EXP-2042-rom2-autocast/evidence/support-other.tsv)
+records first main.txt labels in navigation run 8 (run-end minimum 40),
+options indices/masks by run 10 (55), and the selected dialogs.txt nodes in
+generation (121). EN stored-source High and RU-view/native-binding Medium
+remain; rendered glyphs remain Unknown. Late reproduction supplies no High
+rationale.
+
+**Confidence.** High for EN ASCII stored labels and source indices.
+Medium for RU labels viewed with CP1251 and for the options-to-source
+binding. The short-label population is two selected nodes per root,
+not every installed text source.
+
+**Unknown.** Native RU conversion/glyph identity, table-loader binding and
+EN options construction. Read the loader and glyph conversion or observe
+the original options dialog; a CP1251 viewing transform alone does not
+prove native display encoding.
