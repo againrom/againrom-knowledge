@@ -300,3 +300,22 @@ Each Effect node adds its own operand to the modifier word, so two Defence nodes
 there; the recompute into displayed defence is not established (`ITEM-156`). The campaign
 equipment cells and the linked campaign map recipes repeat no kind; the loose-map records' item
 links are not established (`ITEM-156`).
+
+## Numerical modes and use
+
+The mode suffix consumes one character after its selected keyword before
+requesting a decimal prefix. A successful integer N gives low16(16*N) at
+Effect+42, without a positive clamp. Empty helper input gives zero; a
+nonempty no-assignment input has no determined result. The signed decimal
+dispatch and stores are explicit, while locale, CString and exceptional
+support retain Medium. Kind41 uses power rather than this mode path.
+— MAGIC-306
+
+The same element parser supplies the inspected item-use route. A numerical
+mode reaches Effect virtual+3c and the ordinary unit attachment copy/refresh;
+equipment instead walks+40 for apply and+44 for removal. Neither shared
+parsing nor a stored counter establishes an equipped timer. Across the
+2386 installed Humans/Units equipment cells per locale, 260 have a brace
+tail and none has a numerical mode outside kind 41's power suffix.
+This bounded absence excludes no map/shop/Potion input outside those cells.
+EN/RU selected strings and executable identity match. — MAGIC-309

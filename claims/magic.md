@@ -3435,3 +3435,150 @@ string lengths and monotonic cursor bounds.
 installed roots. This excludes a root-specific code or Spells-input
 difference for MAGIC-300..304; it does not establish identical entire
 archives, display locales or runtime state.
+
+## Effects-string duration and attached counters
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-306 | ROM1 numerical modes discard one character after the keyword and use a decimal prefix; a successful integer N is stored as low16(16*N), while initially empty input selects zero. | High / Medium | ✔ promoted (branch candidate) | [EXP-0538](../experiments/EXP-0538-effect-lifetimes/) |
+| MAGIC-307 | The 14 installed ROM1 count-bearing Spells rows use different lifetime routes: four retain the parsed word, other status arms replace or bypass it, and Stone's second element is not built. | High / Medium | ✔ promoted (branch candidate) | [EXP-0538](../experiments/EXP-0538-effect-lifetimes/) |
+| MAGIC-308 | A fresh unrefreshed ROM1 attachment with word W in 1..9600 retires on ordinary timer call W; retained words predict 320 calls for Freezing, 128 for Poison and 16 for Light or Darkness. | High / Medium | ✔ promoted (branch candidate) | [EXP-0538](../experiments/EXP-0538-effect-lifetimes/) |
+| MAGIC-309 | ROM1 item use reaches the ordinary attachment path, while equipment dispatches apply/remove directly; no numerical mode occurs in the 2386 equipment cells per installed locale. | High / Medium | ✔ promoted (branch candidate) | [EXP-0538](../experiments/EXP-0538-effect-lifetimes/) |
+
+### MAGIC-306
+
+The complete mode helper prioritizes exact permanent/singleuse, then searched
+charges/duration/continuous substrings. Their requested suffix lengths are
+total length minus match position minus 8/9/11. One following character is
+discarded without a delimiter test. The selected Right helper clamps a
+negative length to zero; its zero-length copy path selects an empty string.
+
+The integer helper returns zero for initially empty input. Otherwise it
+retains a span from +-1234567890 and requests native %d conversion. The
+measured dispatch selects the signed decimal route, without the auto-radix
+path. Its default size is 32 bits. For consumed decimal digits, the local
+accumulator recurrence is (10*a+digit) modulo 2^32; optional negation and
+dword assignment are explicit. No overflow clamp appears in that loop.
+The caller ignores the conversion return. No assignment leaves its
+destination local unwritten rather than selecting the empty-input zero.
+
+On a successful result N, modes 1/2/4 write low16(16*N) to Effect+42.
+Scalar magnitude remains the low word at+40; range operands retain their
+two low bytes. Kind 41 instead uses its suffix as power, and modes 0/8
+retain the scalar dword. Under the small-decimal support contract, helper
+inputs 010, 0x10, 20s and 1.5 yield 10, 0, 20, 1. Complete suffix duration20
+requests 0, duration=20 requests 20, and duration1 or bare duration request
+empty input. These are conditional static predictions.
+
+**Confidence.** High for literal tables, local dispatch, character-skipping,
+widths, integer recurrence and stores. Medium for complete installed-text
+conversion through mutable locale/classification, end-of-buffer, pushback
+and CString/heap support. The raw byte decoder examines only selected
+ranges; no global parser/writer or runtime census is claimed.
+
+**Unknown.** Arbitrary malformed/overflow acceptance and concrete values after
+no assignment; the remaining support joins. A bounded helper/initialization
+trace or authorized native watchpoint on input 20, 2147483648 and a lone
+plus sign would settle them. No such execution was performed.
+
+### MAGIC-307
+
+Each installed EN/RU Data.bin has 28 Spells rows, 14 with a numerical
+mode and 15 text elements. Their selected rows match exactly.
+IDs 7/8/12/17 retain the text-derived Effect+42 word, conditionally
+320/128/16/16. Their arms change magnitude or identity, not that word.
+
+IDs 5/10/16/22 overwrite it with u16(T(pow(1.025,power)*30*16)).
+IDs 18/24/28 use the corresponding 15 multiplier. IDs 23/27 bypass
+the Effects text, use the default constructor, and write that 15 formula.
+ID 20 parses only its first absorbtion element; the second defence
+element constructs no Effect. Its first counter is the reused power-10
+word followed by signed Earth-resistance arithmetic and zero-to-one
+replacement. Invisibility 15 has no numerical mode in its Effects text
+and is outside this row population. MAGIC-303 supplies its separate formula.
+
+The row-string constructor copies the operand dword. Fresh unit attachment
+also copies it through the Effect copy constructor. Refresh writes the new
+word directly; continuous refresh leaves the old source/magnitude, and
+noncontinuous refresh also replaces magnitude. These explicit stores
+introduce no rescale or positive clamp.
+
+**Confidence.** High for complete row enumeration, named arm dispatch,
+constructor/copy/refresh stores and the one-element parser. Medium for
+the native string conversion and complete delivery/callback/target joins.
+MAGIC-300/303 supply the signed power, T and resistance contracts.
+
+**Unknown.** Later callback mutations, exact pow integer boundaries and the
+whole native lifecycle. A bounded receiver/callback trace and authorized
+last-counter-write through retirement witness would settle them.
+
+### MAGIC-308
+
+MAGIC-304's ordinary timer reads the word before decrement. For an admitted
+attachment with W in 1..9600 and no intervening refresh or removal, it
+subtracts one per call and sets retirement on call W. Initial zero wraps
+to 65535; words above 9600 skip the decrement. This is not exclusion of
+other removal paths. Continuous mode pulses on the old counter modulo
+eight before decrement and skips inverse application at retirement.
+
+MAGIC-306/307's retained-word predictions give 320 calls for Freezing Cloud
+7, 128 for Poison Cloud 8 and 16 for Light 12/Darkness 17. Recomputed status
+rows last W calls only within the same word domain. Stone's second text
+element has no timer because no Effect is built. Area+4c, popup Spell+10,
+refresh and the last area pulse remain separate contracts. Poison's
+retirement is not a promise to undo cumulative HP changes.
+
+**Confidence.** High for the local counter recurrence and its conditional
+call count. Medium for joined retained input values and the entire admitted
+scheduler/attachment lifecycle. No elapsed-seconds or SAVE/LOAD result is
+claimed.
+
+**Unknown.** Scheduler cadence/suppression, refresh, cancellation and other
+removal. An authorized mission 1 Freezing Cloud cast on a
+stationary unit, then departure from the area and a count of admitted
+timer calls after the last+42 write through retirement, would settle the
+320-call prediction. A corresponding Light witness predicts16 calls;
+Darkness needs a script/mission source. These owner runs are unperformed.
+
+Persistence remains Unknown. No save or runtime population was searched.
+Unrun settling probe: in ROM1 mission 1, create a fresh Freezing Cloud or
+Light attachment and prevent further area refresh. Record its effect ID,
+target association, mode, initial counter word W0 and affected-unit state.
+SAVE at a measured remaining word R in 1..9600 with R<W0. Cold LOAD in a
+fresh original process. At the first restored state, before an admitted
+timer call, compare attachment identity, mode, counter and affected-unit
+state with the saved state. Count subsequent admitted timer calls through
+retirement, without refresh, counter mutation or other removal. The same
+attachment and unit state with counter R and retirement after R calls
+identify preservation. A restored counter W0>R and retirement after W0
+calls identify restart. No attachment in the first restored state identifies
+attachment loss; record any lingering unit-state change separately. Other
+counter or state combinations leave persistence Unknown. This probe was
+not run.
+
+### MAGIC-309
+
+Item construction sends a text list into the same element parser.
+The inspected item-use body changes mode zero to 8, but preserves an
+existing numerical mode and calls Effect virtual+3c. The measured slot
+is the ordinary unit attachment body, with the same copied/refreshed
+duration word. Charges4 alone still fails ordinary timer admission.
+Equipment walks virtual+40 directly for application and+44 for removal;
+this direct walker does not itself establish a timed unit attachment.
+
+The complete installed Humans/Units equipment-string population has
+2386 cells and 260 first-brace effect tails per locale. No numerical mode
+occurs outside kind 41's power suffix in those tails. Corresponding
+equipment strings and Spells rows match between EN/RU. Their independently
+hashed executables match; this is identity of one code image.
+
+**Confidence.** High for local item-list/use/equipment dispatch, slot identity,
+the bounded cell inventory and selected EN/RU input equality. Medium for
+the complete item-input/use/target and equipment callback joins. The earlier
+timed Potion population is reused from MAGIC-CONSUME-142..144.
+
+**Unknown.** MagicItems recipes, map-authored items, shop products, saves and
+arbitrary equipped callback behavior are outside this census. Decode the
+five known timed Potion recipes and count one fresh id 0 attachment after
+the inspected use route to settle that input-to-lifetime join. No native
+owner use was observed.

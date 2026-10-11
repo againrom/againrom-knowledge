@@ -544,3 +544,50 @@ persistence. — MAGIC-304
 
 These local code and Spells inputs match in the two installed EN/RU roots;
 the whole Data.bin payloads do not. — MAGIC-305
+
+## Effects-string counts and unit timers
+
+A numerical mode skips its matched keyword and one following character,
+without a delimiter test, then requests a signed-decimal prefix. A successful
+integer N stores low16(16*N) in Effect+42. Initially empty input selects zero;
+a nonempty failed conversion leaves an unwritten local. Plain %d uses the
+decimal branch. Full CString/CRT locale and exceptional support remains
+Medium. — MAGIC-306
+
+The installed 14 count-bearing Spells rows supply15 elements. Freezing 7,
+Poison 8 and Light 12/Darkness 17 retain conditional words320, 128, 16, 16.
+Protections 5/10/16/22 replace them with the power-30 formula; Shield 18,
+Haste 24 and Slow 28 use15. Bless 23/Curse 27 bypass the text and use15.
+Stone 20 replaces its first counter with the power/resistance result and
+does not construct its second defence element. Copy/refresh word stores
+do not rescale. Exact pow boundaries and full delivery/callback joins
+remain bounded. — MAGIC-307
+
+A fresh admitted unrefreshed word W in 1..9600 reaches retirement on ordinary
+timer call W. The retained words therefore predict320, 128, 16, 16 calls.
+Initial zero wraps to 65535, and values above 9600 skip decrement; other removal
+paths remain open. These are conditional counts of timer calls, not elapsed
+seconds. Area refresh and continuous stat changes have separate lifecycles.
+— MAGIC-308
+
+Persistence remains Unknown. No save or runtime population was searched.
+Unrun settling probe: in ROM1 mission 1, create a fresh Freezing Cloud or
+Light attachment and prevent further area refresh. Record its effect ID,
+target association, mode, initial counter word W0 and affected-unit state.
+SAVE at a measured remaining word R in 1..9600 with R<W0. Cold LOAD in a
+fresh original process. At the first restored state, before an admitted
+timer call, compare attachment identity, mode, counter and affected-unit
+state with the saved state. Count subsequent admitted timer calls through
+retirement, without refresh, counter mutation or other removal. The same
+attachment and unit state with counter R and retirement after R calls
+identify preservation. A restored counter W0>R and retirement after W0
+calls identify restart. No attachment in the first restored state identifies
+attachment loss; record any lingering unit-state change separately. Other
+counter or state combinations leave persistence Unknown. This probe was
+not run. — MAGIC-308
+
+Item use calls the same unit attachment surface for a numerical mode;
+equipment dispatches apply/remove directly. The two installed roots have
+matching Spells/equipment strings and one executable image. No numerical
+mode occurs in their 2386 equipment cells per locale; item inputs outside
+that population remain open. — MAGIC-309
