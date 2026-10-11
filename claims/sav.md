@@ -15771,3 +15771,122 @@ SAV-1234 is conditional on membership of the Player's current Group list.
 AI-479 specifies a different next-start operation that can destroy leading
 empty Groups. Neither claim establishes whole mission-end-to-town chronology
 or automatic retention of every empty Group.
+
+## Enemy Human card storage after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1242 | The inspected type-9/24 creation constructors omit direct primary/combat cache stores; their embedded helper and bulk clear do not cover those bytes, but first-draw initialization remains Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0532](../experiments/EXP-0532-enemy-card-bytes/) |
+| SAV-1243 | Unit SAVE/LOAD transfers actor primary words and raw combat blocks; all 50 non-owned type-9/24 Humans in each of three mission-151 SAV inputs have four nonzero saved primary words. | High / Medium | ✔ promoted (branch candidate) | [EXP-0532](../experiments/EXP-0532-enemy-card-bytes/) |
+| SAV-1244 | The located copy constructor and character-screen routine fill card bytes from another drawable or a temporary actor; their execution before the first enemy card draw after LOAD is Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0532](../experiments/EXP-0532-enemy-card-bytes/) |
+| SAV-1245 | The measured ROM1 EN and RU executables are byte-identical, including the named LOAD, SAVE and card paths; locale-specific data and first-draw runtime contents remain Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0532](../experiments/EXP-0532-enemy-card-bytes/) |
+
+### SAV-1242
+
+Client creation at L09187/L09188 requests 0x1b0 bytes through
+R0747. Both the default R0593 and alternate R0594 path
+reach base constructor R1652. Direct stores in these bodies omit
+primary +138..+13b and combat/extended +142..+154. R0593 clears twelve
+dwords from +15c, ending at +18b. Its +155/+156/+158 clears are adjacent,
+not overlapping. The base constructor calls L05586 with inner base
++124; that complete helper writes its vptr and four dwords at inner
++4/+8/+c/+10, covering only outer +124..+137.
+
+The allocation wrapper calls R0722, then R0748 and
+R1567. These inspected wrapper bodies do not clear the returned
+payload. R1567 rounds to 16 bytes and calls R1568 when the
+rounded request is at most the small-block cutoff; its measured initial
+value is 480. The 0x1b0 request is 432 bytes. The fallback at L08241
+calls the measured HeapAlloc import with flags 0. The small-block listing
+includes the allocation helper L08173. Fresh-region helper
+R2202, lock callbacks, allocator teardown and runtime cutoff changes
+were not followed. Actual returned storage and heap history remain separate
+from this local observation. Entry mask omission is SAV-1125/SAV-1126; the constructor
+observation does not upgrade it to a complete first-draw law.
+
+**Confidence.** High for the stated direct stores, embedded-helper extent,
+and bulk-clear extent in committed base-constructor, drawable-constructor-copy,
+alternate-constructor, embedded-constructor and allocator-body listings.
+This is a finite positive extent check, not a repaired image-wide absence
+census. Unknown for full initialization and the contents when first drawn.
+
+**Unknown.** Allocator return bytes, prior object history, prior mission/menu
+state, callback side effects and any intervening writer. Allocation reuse is
+a viable Medium explanation. No SAV-order/count-to-cache-byte mapping was
+established.
+
+### SAV-1243
+
+R0210's named scalar SAVE sites read actor +84/+86/+88/+8a at
+L08886/L14337/L14338/L14339. Its LOAD sites write the same words at
+L14340/L14341/L14342/L14343. Calls at L08376 and L08881 pass
+actor +a6 and +be to R1594 and R1630. The complete helpers
+select raw write R0271 or read R0272 with lengths 24 and 22.
+These named SAVE stores take actor storage, not drawable storage.
+
+The explicit tools/savfull census selects 61 sorted corpus paths and three
+owner mission-151 inputs. It measures 63 paths / 45 exact digests, preserving
+one refused project-written input separately; all reads cover 46 digests.
+All three owner inputs close exactly. Each has 24 type-9 Humans and 27
+type-24 Humans; one type-24 Human is first-Player-owned. Every one of the
+remaining 50 has four nonzero saved primary words. Every aggregate +a6/+be
+block is also nonzero; this does not mean each combat field is nonzero.
+
+The 28 testified original-authored corpus paths contain 15 non-owned
+type-9 Humans with primary 30/30/20/25 and no type-24 Human. Their dated
+manifests establish original-written provenance. The owner identifies
+native151 as independently original-created, and the resave as original-
+written after 546 ticks of a project-seeded session. Project inputs and
+17 copies with unverified directory authorship remain separate. Seventy-
+three later corpus paths were excluded by the preregistered selection.
+
+**Confidence.** High for the named transfers in committed unit-serializer,
+attack-raw-serializer and defence-raw-serializer listings. Medium for the
+finite corpus and owner-reported authorship. Exact parser closure,
+read-time owner lookup, synthetic wire-order checks and regenerated numeric
+rows exclude a byte-tag scan or retroactive owner-resolution interpretation.
+Other-player ownership is relative to the first document Player, not proof
+of hostility. The original runtime was not observed.
+
+**Unknown.** The first-draw drawable values, a complete original-SAVE default
+population, and the refused generated input's actor fields. The comparison
+cannot isolate SAVE from 546 intervening ticks or prior client state.
+
+### SAV-1244
+
+R0595 copies primary +138..+13b, armour +142, defence/attack
++144/+146, damage +148/+149 and the indexed extended run +14a..+154 from
+source drawable EBX to destination EBP. Stores L14344..L14345 include
+six bytes copied through an inner +14a base and five through +150. A direct
+caller at L02805 is outside the default creation call at L02807.
+
+R0808 obtains its destination from the application manager's +d0
+object, then +3f54. Primary stores L14346/L12627/L14347/L03866
+use character-screen fields +90/+94/+98/+9c through a temporary actor.
+Combat stores L14348..L14349 read that actor after virtual slot +50;
+loops L14350 and L12628 copy its low-byte protections and skills.
+The source is not a direct read of the selected enemy's SAV record.
+
+**Confidence.** High for these positive source/destination transfers in
+committed drawable-constructor-copy and character-screen listings.
+Unknown for their execution or destination identity before the first enemy
+card draw after LOAD. The mixed-owner displacement scan is navigation only.
+
+**Unknown.** Complete callers and pointer-table reachability; whether the
+selected destination can be the enemy drawable at that time; other packet,
+embedded-base or bulk-copy writers. No complete writer count is published.
+
+### SAV-1245
+
+The two measured 1,977,344-byte ROM1 executables compare byte for byte.
+Both have SHA-256
+942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03.
+The image manifest records the PE sections and identities. All named code
+windows therefore belong to the same static image in both locales.
+
+**Confidence.** High for executable identity. The two locales are one code
+witness, not independent corroboration. Unknown for localized data and
+runtime card contents.
+
+**Unknown.** RU-created save census, locale-dependent definitions, heap
+history and first-draw timing. Identical code does not make those equal.

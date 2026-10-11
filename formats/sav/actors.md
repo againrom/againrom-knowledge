@@ -450,3 +450,28 @@ Effect's counter `+42=1` and source `+44=0` before its tick callback. This is
 not a global walk of Effects referring to the removed actor. Nested removal,
 derived Effect and notification callbacks, actual destruction, full LOAD
 ordering and the `+68` second lookup remain open. — SAV-962
+
+### Bounds on enemy card initialization
+
+The selected creation constructors directly omit +138..+13b and
++142..+154. Their embedded helper covers +124..+137; their twelve-dword
+clear covers +15c..+18b. The requested allocation is 0x1b0 bytes. These
+local extents do not establish the allocator's returned contents or exclude
+an intervening writer. Allocation history, saved allocation workload and
+first-draw contents remain Unknown. — SAV-1242
+
+Two located writers have other sources: the copy constructor transfers
+another drawable, and the character-screen routine transfers values through
+a temporary actor into the manager's selected drawable. Their execution
+before the first enemy card draw after LOAD is Unknown. — SAV-1244
+
+The named SAVE/LOAD programme transfers four actor primary words and raw
+24-byte/22-byte combat blocks. In each of three mission-151 inputs, all 50
+Human type-9/24 records owned by another Player have four nonzero primary
+words, including the original-created control and original resave. A zero
+card does not imply zero actor primary fields in SAV. This is a finite,
+exactly parsed input population; it does not establish original defaults
+for every save or the runtime drawable values. — SAV-1243
+
+The measured EN/RU executables are byte-identical. No RU save or localized
+definition census establishes equal runtime initialization. — SAV-1245

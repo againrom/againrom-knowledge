@@ -91,3 +91,23 @@ wrong language.
 
 An **instance** name exists as well — `actor+0x80`, an MFC `CString` on every actor — but no shipped
 surface draws it for a non-hero, so two units of one class are not distinguishable by name.
+
+## Bounds on enemy card storage
+
+The selected constructors' direct stores, embedded helper +124..+137 and
+bulk clear +15c..+18b do not fill +138..+13b or +142..+154. The 0x1b0
+allocation's contents and later initialization before first draw remain
+Unknown. — SAV-1242
+
+The copy constructor can transfer another drawable's cache. The character
+screen can transfer primary values from its own fields and combat values
+from a temporary actor into the manager's selected drawable. Neither path
+has been placed before the first enemy card draw after LOAD. — SAV-1244
+
+All 50 non-owned Human type-9/24 records in each of the three measured
+mission-151 inputs have four nonzero SAV primary words. The named original
+SAVE stores actor fields; a reported zero card does not imply zero saved
+primary words. Complete runtime causation remains Unknown. — SAV-1243
+
+The measured EN/RU code images are identical. Localized definitions, RU save
+populations and runtime heap history remain Unknown. — SAV-1245
