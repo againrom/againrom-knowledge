@@ -953,3 +953,14 @@ whole-stack removal removes the object. The selected display producer
 receives n and assigns it to the selected display object; its branch
 predicate, full server delivery and RU UI/clone bindings remain Unknown.
 The composed contract is Medium (`R2-ENGINE-375`).
+
+## Command image population
+
+The graphics.res interface basename filter button/buttonsarea/panel has
+24 BMP keys per locale, with equal EN/RU payloads. The two ButtonsArea
+pictures are 160x238. Inn button1..3 on/off pictures are 140x46; its
+left/right navigation pictures are 32x28. Generic, druid and Kaarg shops
+each ship ShopButton1..4: 1/4 are 120x52 and 2/3 are 140x46. These are
+High header and equality measurements over that filtered registry
+population. Names outside the filter, other town/menu consumers and
+shop caption font/ink remain Unknown (R2-ASSET-090).

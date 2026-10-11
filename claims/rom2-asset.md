@@ -994,3 +994,21 @@ attempts supports no fact; the named push/call/store sequence is decoded.
 **Unknown.** Constructor failure, later global replacement, actual archive
 payload selection and live crop appearance. Trace these bounded dependencies
 or have the owner toggle the inn panel and observe its lower-right crop.
+
+## Generator presentation
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-090 | ROM2 graphics.res has 24 interface BMP keys per locale matching basename button/buttonsarea/panel; their EN/RU pairs agree, with 160x238 panels and Inn or four-button shop image sets. | High | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+
+### R2-ASSET-090
+
+The full graphics.res registry is traversed in each locale. Reduction selects interface/ entries whose basename contains button, buttonsarea or panel; all 24 hits per locale are BMPs and every selected header was read. EN/RU payload SHA-256 agrees for every pair. The header safety cap48 is not reached.
+
+Panels interface/chrgen/buttonsarea.bmp and interface/inn/buttonsarea.bmp are 160x238. Inn button{1,2,3}{on,off}.bmp are 140x46; lbutton/rbutton{on,off}.bmp are 32x28. The generic interface/shopbutton{1..4}.bmp, interface/shop_druid/shopbutton{1..4}.bmp and interface/shop_kaarg/shopbutton{1..4}.bmp use 120x52 for 1/4 and 140x46 for 2/3. All measured BMPs are 24bpp.
+
+R2-ENGINE-286 and R2-ENGINE-246 bind three generator/selected inn slots; R2-ENGINE-249 binds four selected generic shop slots. R2-ENGINE-387 proves native generator captions are drawn separately. No absence of additional words in art is asserted.
+
+**Confidence.** High for the exact filtered registry population, headers and equality. The RES traversal validates registry ownership and extents; unnamed filtered hits are retained. No function-discovery instrument is involved. The reduction excludes names without the three substrings and resources outside graphics.res:interface/, so it cannot exclude other command panels.
+
+**Unknown.** Other panel names and archive roots, all town/menu consumers, druid/Kaarg command-slot binding and shop caption font/ink. A loader-key census and native caption painters would settle them.

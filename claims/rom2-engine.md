@@ -6678,3 +6678,78 @@ The other branch callsL2.01669 with actor and owner. The acquired L2.01670..L2.0
 **Confidence.** Medium. The local predicate excludes identity14c as its selection field. Earlier transition calls, the reset callee and indirect destructor effects remain live alternatives for complete membership.
 
 **Unknown.** Combat-death removal, dismissal, script/talk removals, surviving full roster, re-entry after removal and the RU transition counterpart. A complete caller/removal cone and exit/re-entry saves would settle these.
+
+## Generator presentation
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-384 | ROM2 pre-create help uses fixed main.txt lines 247..256; hero indexes select 250,252,253,251, Cancel 255 and OK 254; detail skill help uses 171+i or 176+i. | Medium | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+| R2-ENGINE-385 | The selected ROM2 EN hover receiver draws font2 help with a dark fill, gold two-tone border and fixed # line splitting; cursor placement clamps right and top, and movement restores the saved background. | Medium | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+| R2-ENGINE-386 | The selected ROM2 EN name field uses font4, a gold prompt and yellow typed name with a blinking caret; both locale character paths cap appended input at 10, and RU additionally rejects ~. | Medium | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+| R2-ENGINE-387 | The selected ROM2 detail values use font4 gold text with black +1,+1 shadow; the pool and separately drawn three command captions use measured centering, with hovered captions yellow. | Medium | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+| R2-ENGINE-388 | The selected ROM2 EN shared statistics sheet uses font2, gold labels, green values and brown section headings at fixed rectangle-relative anchors; downstream clipping and the RU sheet binding remain Unknown. | Medium | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+| R2-ENGINE-389 | ROM2 EN/RU generator activation passes fixed parent-relative guidance bounds: pre-create (232,48)-(640,184), detail (0,280)-(312,480); TipsMode admits construction. | High | ● active (branch candidate) | [EXP-2048](../experiments/EXP-2048-rom2-generator-look/) |
+
+### R2-ENGINE-384
+
+The pre-create getter EN L2.01671 / RU L2.01672 requires page +0x21c. Campaign mode 2 admits difficulty mask 20/40/60 and lines 247/248/249. The measured 101-byte selectors and seven dword destinations map mask 80/100/120/140 to 250/252/253/251 and 160/180 to 255/254. The name child getter EN L2.01673 / RU L2.01674 supplies 256 under the same admission word. These getters return the text lookup pointer directly, without formatting. The starting text-table and mask authorities are R2-ASSET-010 and R2-ENGINE-284.
+
+Detail skill getter EN L2.01675 / RU L2.01676 requires an active detail parent and a successful mask hit. It returns main.txt 171+i for fighters or 176+i for mages, i=0..3. R2-ENGINE-288 bounds the four hit indexes.
+
+**Confidence.** Medium for the composed control-to-installed-text contract. Native getters, finite selector tables and text-line hashes support the fixed mapping. Text collection startup and all page admission writers were not reread.
+
+**Unknown.** Complete loader/registration admission and runtime disappearance. The loader and page writer paths would settle them.
+
+### R2-ENGINE-385
+
+EN receiver L2.00714, line builder L2.00717, bounds L2.00718, painter L2.00719 and movement L2.01677 are preserved. The requested fill RGB is (36,44,39); border inputs are (160,120,50) and (80,60,24). Font2 foreground has 16 shades floor((160,120,50)*i/15); its virtual shadow getter L2.01678 returns the constant (8,8,8) table. Shadow offset is (1,1).
+
+With cursor (x,y), N # separated lines and measured maximum width W, nominal bounds are (x,y-5-14N,x+W+11,y). Text anchors are (left+5,top+4+14i). Right overflow shifts left and top overflow shifts down. These selected bodies have no width budget, word-wrap call or left/bottom clamp. Empty segments contribute lines. The four corners use an unclosed 4x4 virtual image call.
+
+Appearance requires a crossing from accumulated ticks below 500 to at least 500 and below 25500, plus receiver/application gates and nonempty getter text. Movement resets the timer and restores background through L2.01679; timeout 25500 restores it too. R2-ENGINE-239 supplies the earlier millisecond interpretation. Generic virtual +0x14 dispatch admits the generator and weapon getters measured in R2-ENGINE-384; complete page registration is not proved.
+
+**Confidence.** Medium for the composed EN look and lifecycle. Direct selected instructions exclude word wrapping and adaptive width within these bodies. Primitive endpoint inclusivity and downstream dispatch remain dependencies.
+
+**Unknown.** Corner resource, primitive endpoints, resolved timer symbol, button-driven hide, complete page registration and RU shared receiver. Read their loaders, IAT and callers or observe the original.
+
+### R2-ENGINE-386
+
+EN name painter L2.01680 uses graphics/font4/font4.16a and .dat, spacing 2. Campaign field bounds are (300,433)-(464,449). It draws at (300,449-h), with h obtained from the first glyph height. Prompt main.txt 365 is right-aligned ten pixels before the field at its top, using source palette endpoint RGB (185,159,73). The typed name uses (255,255,116). Both calls bypass the shadow wrapper.
+
+An admitted field appends | while its caret bit is set; paint toggles the bit after elapsed ticks exceed 500. The character path resets the bit and timestamp. EN L2.01681 checks length below 10, converts input and calls L2.01682, which admits converted bytes at least 32. Corrected RU entries L2.01683 and L2.01684 preserve that length gate but reject byte 0x7e; full-name RU input returns 1, EN returns 0.
+
+**Confidence.** Medium for the complete display/input contract. EN painter, font and palette constructors are positive evidence; the corrected RU character/add bodies exclude locale-equal acceptance of ~. Three initial RU name address guesses are excluded from interpretation.
+
+**Unknown.** Exact first-glyph height, code-page conversion and complete RU name initialization. Read the glyph header and conversion table and follow the RU constructor's direct call.
+
+### R2-ENGINE-387
+
+EN stats painter L2.01685 / RU L2.01686 draws the four values at (84,58+32i), i=0..3, with font4, normal palette source endpoint (185,159,73) and black shadow offset (1,1). Pool cell (46,181), extent 77x22, supplies anchor (84,194). Mode 10 subtracts half measured text width and half first-glyph width from the y anchor; the latter is the actual virtual +0x20 operand.
+
+Right painter EN L2.01687 / RU L2.01688 draws main.txt 238,239,260 on three 140x46 Inn button images. The caption mode is 10, normal palette endpoint (185,159,73), hover endpoint (255,255,116). Pressed caption anchors gain (1,1). Direct caption calls have no shadow wrapper. The selected palette constructor writes a zero-RGB source for font4 shadows.
+
+**Confidence.** Medium for composed device output and centering. Selected painters, rectangle accessors, font4 virtual draw and palette constructors close the supplied coordinate/colour operands; native palette conversion and final pixels were not observed.
+
+**Unknown.** Device packing, first-glyph dimensions, all other command-panel caption painters and final clipping. Read the relevant glyph and native image/palette paths.
+
+### R2-ENGINE-388
+
+Shared EN painter L2.01119 supplies font2, label/name shades of RGB (185,159,73), values (107,154,120) and section headings (150,90,0), floor(component*i/15). Every text uses the (8,8,8) shadow at offset (1,1). Mode 0 is left aligned, 1 right and 2 centred by measured width.
+
+For supplied rectangle L,T,R: name and optional second heading are centred at R-88 with y=T+18/28. Attributes use label x=L+6, value right anchor L+80 and y=T+44+10i. Health/mana centre x=L+115 with labels at T+44/64 and values T+54/74. Damage/attack use x=L+6/70, absorption/defence L+74/140, y=T+88/98. Section headings are L+6/74,T+112. Five row pairs use labels L+6/74, right values L+70/140, y=T+122+10i. Weight/experience use L+16/127,T+174/186. Sight/speed use L+40/106,T+200/210.
+
+Label main.txt lines are 15..18 attributes,19/20 health/mana,21/22 sight/speed,23..26 damage/absorption/attack/defence,27/28 headings,30..34 or 36..40 skills,41..45 resistances,35 weight and 46 experience. Display-record state and flags gate blocks. R2-ENGINE-286 supplies the detail child bounds; translating with L=0,T=238,R=160 is Medium until its caller rectangle and display-record join are read.
+
+The selected painter and font draw pass complete strings without a local shortening, ellipsis, wrapping or per-row clip rectangle.
+
+**Confidence.** Medium for the detail-page composition. The full selected EN painter closes local row/column/font/colour alternatives, not every generator caller or downstream image edge.
+
+**Unknown.** Generator visibility grade and display record, exact caller rectangle conversion, downstream clipping/overlap and RU sheet binding. Trace those callers and glyph primitives.
+
+### R2-ENGINE-389
+
+Selected activation EN L2.01117 / RU L2.01212 passes panel ID 0x467 and bounds (232,48,640,184) with tips8. EN L2.01208 / RU L2.01209 passes (0,280,312,480) with tips5 or tips6. Extents are 408x136 and 312x200. R2-ENGINE-307 binds the shared panel constructor and later retext sites; R2-ENGINE-313 supplies the shared panel class. TipsMode gates creation. These supplied bounds do not depend on cursor or measured text.
+
+**Confidence.** High for these four literal constructor-argument sequences. Committed contiguous listings decode completely and have local direct branch boundaries; the named gates and fixed operands exclude text/cursor-adaptive bounds at these activation sites. Capstone/PE translation can miss other callers and does not prove live visibility. The weakest dependency for actual on-screen placement is the reused parent-relative panel constructor contract.
+
+**Unknown.** Live admission and final pixels; native execution with the original would settle them.

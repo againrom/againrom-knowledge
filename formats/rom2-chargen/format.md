@@ -115,5 +115,15 @@ traced. Which bytes hold the hero record remains Unknown. — R2-SESSION-131
 ## Unknown boundaries
 
 Item modifiers and load on HP, mana and speed, a displayed level, the
-stat-sheet and inventory content, the hero record in the SAV and live
-timing remain Unknown.
+inventory content, the hero record in the SAV and live timing remain
+Unknown. The sheet now has Medium local presentation contracts; its
+caller admission and downstream clipping remain Unknown (R2-ENGINE-388).
+
+## Presentation contracts
+
+[Generator presentation](presentation.md) supplies the fixed help keys,
+help-box drawing, name input, detail values, sheet anchors and tip bounds.
+Local composed drawing contracts are Medium; literal guidance bounds are
+High. Downstream clipping, RU shared help/sheet bindings and other panel
+consumers remain Unknown. — R2-ENGINE-384, R2-ENGINE-385, R2-ENGINE-386,
+R2-ENGINE-387, R2-ENGINE-388, R2-ENGINE-389
