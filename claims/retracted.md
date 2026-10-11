@@ -1376,3 +1376,9 @@ on evidence already committed.
 | Claim | Former clause | Former confidence | Correcting evidence | Correction | Disposition |
 |---|---|---|---|---|---|
 | MISSION-063 (colour-storage identity and closing same-fill clause only) | Verbatim: "The colour is the word at +0x1148 of the owner's player record" and "draws the viewport rectangle through the same fill" | High for local load/call facts; owner-word identity had no separate grade | [EXP-0536](../experiments/EXP-0536-minimap-paint/); MISSION-085, MISSION-086 | obj+0x14 is interface CPlayer; its +8 selects a palette-derived shade object and +0x1148 is in that object's storage. The closing call is outline R0311, not fill R0718. Walk, class set, fog conditions, colour load and white composition stand. | **REFUTED** — these two identities only; retained clauses stand |
+
+## EXP-2049: Blizzard positive-damage route
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| R2-ENGINE-024 (blank/default clause for positive filled Blizzard damage only) | Damage spells without a named switch arm reach the blank-effect default. | High / Medium | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), R2-ENGINE-390 | Positive row-7 cached damage creates a damage object and jumps from L2.01689 to L2.01690, bypassing default L2.00085. The other arms and clauses stand. | **REFUTED** — partially retracted |

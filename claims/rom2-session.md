@@ -1698,3 +1698,96 @@ The acquired paired DLL SAVE/LOAD body ranges have equal hashes. R2-ENGINE-209 s
 **Confidence.** Medium for the party-state synthesis and native restoration relation. Raw bank transfer does not prove the same actor membership or literal resolution after executed LOAD. The acquired RU Player fragment covers903 of its planned905 bytes and is not a complete serializer witness; the load relation relies on the separately scoped existing card.
 
 **Unknown.** Cold LOAD with the same members and first-match identity binding, later-stage save rosters, saved-address map semantics and EN Player restoration. A named-stage save followed by an owner cold LOAD and identity/owner-list observation would settle these.
+
+## Blizzard: EXP-2049
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-161 | Both inspected ROM2 AreaEffect serializers preserve a six-byte local scalar suffix including Blizzard pulse count and countdown; ordinary SAV reachability and LOAD resume remain Unknown. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-SESSION-162 | The selected EN/RU Blizzard loops agree locally; all 46 campaign maps per root parse, but Blizzard caster counts and complete locale parity remain Unknown. | High / Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+
+### R2-SESSION-161
+
+Both inspected ROM2 AreaEffect serializers preserve a six-byte local scalar suffix including Blizzard pulse count and countdown; ordinary SAV reachability and LOAD resume remain Unknown.
+
+**Fact.** RU AreaEffect vtable L2.01710 slot +8 resolves to L2.01711; the
+class table identifies AreaEffect, size 0x54, schema 1. EN vtable L2.01712
+slot +8 independently resolves to L2.01713. Both serializers
+call a base serializer, then serialize bytes +0x4c,+0x4d,+0x4e,+0x4f and word
++0x50, then the embedded effect at +0x48. The inverse branch restores those
+fields. RU writer helpers L2.01714 and L2.01715 advance the archive cursor by
+one and two respectively. This local suffix is six bytes after the base prefix,
+before nested-object encoding; these are object-relative fields, not absolute
+SAV offsets.
+
+Area fields are initialization state +0x4c, radius +0x4d, direction +0x4e,
+pulse counter +0x4f, countdown +0x50 and owned effect pointer +0x48. RU base
+L2.01716 writes completion +0x40 and +0x41 as bytes after an unread ancestor
+serializer. Nested write/read dispatch L2.00356/L2.01717 and the damage
+payload serializer are not in the interpreted population.
+
+**Inference.** If ordinary SAVE reaches this class and LOAD recreates it,
+the serializer has local fields needed to preserve pulse/countdown state.
+This conditional support is not proof that an unfinished Blizzard is stored
+in an ordinary SAV or resumes after cold LOAD.
+
+**Confidence.** Medium for the local serializer and six-byte suffix. Unknown
+for ordinary SAVE/LOAD behavior and full object encoding.
+
+**Unknown.** No preserved save was read. World-list reachability, ancestor
+prefix, nested damage payload, factory recreation, RNG-state preservation and
+cold LOAD continuation remain Unknown. An original mid-Blizzard SAVE followed
+by fresh-process LOAD with parsed state would settle them.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+### R2-SESSION-162
+
+The selected EN/RU Blizzard loops agree locally; all 46 campaign maps per root parse, but Blizzard caster counts and complete locale parity remain Unknown.
+
+**Fact.** Independent scenario.res registry walks parse every .alm-named
+campaign node: 46 EN maps with 4212 type-6 placement records and 46 RU maps
+with 4234. No declared map has a structural parse failure. Paired map hashes
+agree for 42/46. The differing pairs are 110.alm, 42.alm, 52.alm and 74.alm;
+each has EN formatVersion 1600 and RU 1300. Only 110.alm differs in placement
+count, 259 EN versus 281 RU. Hash inequality does not identify a Blizzard
+difference. Loose maps and magic-based payload discovery were not searched.
+
+Both authored strings in all 241 Units templates per root have zero exact
+case-insensitive matches to Blizzard. This excludes only that exact name
+filter. Each root has nine Weapons rows containing numeric 7 at main parameter
+12: Dagger, Short Sword, Long Sword, Bastard Sword, Club, Spiked Club, Mace,
+Morning Star and Pick Hammer. No native spell binding was established for
+that field; these are not nine identified Blizzard weapons. The probe did not
+establish a placement spellbook offset/bit or creature/item join.
+
+R2-ENGINE-390 through R2-ENGINE-392 independently establish matching selected
+area routes, pulse counts, countdown logic and placement RNG in both executables.
+R2-ENGINE-395 establishes identical selected client data. Executable hashes
+differ; no same-address or whole-game equivalence is inferred.
+
+RU navigation-only listing L2.00056+0x660 contains the offensive candidate loop
+L2.01718..L2.01719. It iterates spell IDs 1..28, requires a nonnull spell lookup
+from caster+0x140, cost word +0x0c no greater than caster mana +0x9a, and
+spell flag byte +0x0a=0. Row 7 has no explicit exclusion. The read population
+does not bind stored Defensive signed -1 to that cached byte, so actual row-7
+admission remains Unknown. A selected entry can reach cast dispatch L2.01524.
+An earlier branch can divert the choice;
+candidate admission is not guaranteed selection. This navigation listing is
+preserved with its input/window provenance but was not part of final reproduction.
+
+**Confidence.** High for the bounded campaign population/counts and byte-hash
+comparisons, reproduced against Git blobs. Medium for selected static runtime
+parity and the conditional RU candidate test. Unknown for actual row-7 admission,
+Blizzard campaign
+caster eligibility and complete locale parity.
+
+**Unknown.** Which campaign maps give row 7 to which placements, creature
+spells or weapon spells remains Unknown. Player/owner fields were not measured.
+Actual computer selection and EN AI admission/parity require further evidence.
+Presentation, full damage parity, ordinary SAVE/LOAD
+parity and world_srv.res are outside the reproduced selected population.
+A native placement/template/item binding plus an original named cast would
+settle eligibility and player-visible locale behavior.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.

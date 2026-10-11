@@ -151,3 +151,16 @@ Orc, Mage and Catapult. Controlled families include the four Start rows,
 Fighter_Hero and Mage_Hero, with derived identities21,22,23. Row presence
 does not prove admission; displayed names, native lookup-table joins,
 overrides and complete live statistics remain Unknown. — R2-ENGINE-378
+
+## Blizzard stored row
+
+Independent EN and RU client data.bin walks give the same 22 parameters for
+row 7, Blizzard: Distribution 5, Radius 4, area-duration value 8, Spell
+Duration 0 and damage bounds 10..30. The complete selected payload hashes agree.
+These are stored values; they do not establish runtime lifetime or extent.
+world_srv.res was not read (R2-ENGINE-395).
+
+Zero exact Blizzard-name matches in the 241 Units templates and nine Weapons
+numeric-7 candidates per root do not bind creature or weapon spells. The
+placement/template/item joins needed to count Blizzard casters remain Unknown
+(R2-SESSION-162).

@@ -173,3 +173,13 @@ The selected initialization does not establish the numeric Session DWORD+0x174
 used by the map-actor insertion predicate. Its local stores, pointer-mediated
 write, unexpanded eligible callees and opaque/indirect calls leave field
 production and runtime aliases Unknown. — R2-SESSION-068
+
+## Blizzard placement eligibility
+
+The .alm-named campaign archive population has 46 parsed maps per root, with
+4212 EN and 4234 RU type-6 placements. Map hashes agree for 42 pairs; 110.alm,
+42.alm, 52.alm and 74.alm differ. Only 110.alm differs in placement count,
+259 versus 281. These structural counts do not establish Blizzard casters.
+The placement spellbook offset/bit and creature/item joins remain Unknown;
+loose maps and magic-based discovery were outside this population
+(R2-SESSION-162).

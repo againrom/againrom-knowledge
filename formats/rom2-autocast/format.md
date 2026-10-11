@@ -155,3 +155,12 @@ widths agree. The earlier paired constructors and registry transfers remain
 bounded local evidence. Full options, support, target, command execution,
 SAV precedence, feedback and lifecycle equivalence was not measured.
 — R2-ENGINE-345, R2-SESSION-150, R2-ENGINE-366, R2-ASSET-085
+
+## Blizzard candidate boundary
+
+The inspected RU offensive candidate loop tests IDs 1..28, a nonnull spell,
+sufficient mana and cached spell flag +0x0a=0. Row 7 has no explicit exclusion.
+The stored Defensive value -1 is not bound to that cached flag in the read
+population. Actual Blizzard admission, selected choice, caller reachability
+and EN choice parity remain Unknown. The local conditional test is Medium;
+no original cast was observed (R2-SESSION-162).

@@ -92,3 +92,11 @@ RU reader bodies were not decoded separately (`R2-ENGINE-270`,
 `R2-ASSET-070`).
 Related ROM1 references: [SPR16A](../spr16a/format.md),
 [SPR256](../spr256/format.md), [PAL](../pal/format.md).
+
+## Blizzard presentation boundary
+
+The inspected RU producer sends a cell event with opcode 0x86, effect
+identifier 23 and argument 16. Neither value establishes an archive sprite
+key, frame count, timing or sound. The presentation consumer and a native-bound
+art key were not read. Final presentation and EN parity remain Unknown
+(R2-ENGINE-394).

@@ -465,3 +465,14 @@ reset branch for 33..63 and calling the detach/destroy route otherwise.
 It does not test identity WORD+0x14c here. Earlier cleanup callees and
 combat-death removal remain unclosed; this branch alone cannot identify
 all surviving campaign members. — R2-ENGINE-382
+
+## AreaEffect local scalar suffix
+
+Both inspected AreaEffect serializers write four bytes for object fields
++0x4c..+0x4f, then a little-endian countdown word +0x50, after the base prefix
+and before the owned effect +0x48. Pulse counter +0x4f and countdown +0x50
+are local state needed by a running Blizzard. The RU base locally writes
+completion +0x40 and +0x41 as two bytes after an unexamined ancestor prefix.
+These are object-relative fields, not absolute SAV offsets. Ordinary SAVE
+reachability, nested damage encoding, RNG persistence and cold LOAD continuation
+remain Unknown; no preserved save was read (R2-SESSION-161).

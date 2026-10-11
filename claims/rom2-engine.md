@@ -227,7 +227,7 @@ ROM1 states the same one-term use of the skill (`MAGIC-POWER-004`), with its cei
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active (partially retracted) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-025 | Stone Curse draws a random duration up to `4.8*P` units for a spell cast (`2.4*P` for an item cast), cut by Earth resistance; its Effects string begins with a quote that probably stops the kind parsing. | Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-027 | Prismatic Spray hits min(P/20 + 2, 7) victims, where P for a book cast comes from the power byte and for an item cast from the castSpell effect. | High | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
@@ -254,6 +254,9 @@ Wall of Earth (17) and the damage spells use a blank effect; damage spells carry
 ROM1 has the same arm-per-rule structure, 28 spells in 17 rules (`MAGIC-ARM-014`, `MAGIC-EFFECT-015`). The protection, Shield, Haste, Slow, Bless and Curse magnitudes equal ROM1's (`MAGIC-CEIL-013`). The duration law is ROM1's 1.025 (`R2-ENGINE-022`). ROM2 differs in Invisibility and in Poison Cloud, which ROM1 computes as `ftol(effect+0x40 * f)` with `f = P/30 + 1`.
 
 **Confidence.** High for the arm addresses and the integer expressions. Medium for the Poison Cloud scale (the template value -2 was read, its consumer was not) and for the unsigned Bless and Curse arm (the sign handling is inferred from the resolver).
+
+
+**Amended.** R2-ENGINE-390 partially retracts the blank/default route for positive filled Blizzard damage. The row-7 damage arm jumps around L2.00085 to common shaping L2.01690. Other rows, effect arms and the original confidence levels stand. See the EXP-2049 overturn entry in retracted.md.
 
 ### R2-ENGINE-025
 
@@ -6753,3 +6756,206 @@ Selected activation EN L2.01117 / RU L2.01212 passes panel ID 0x467 and bounds (
 **Confidence.** High for these four literal constructor-argument sequences. Committed contiguous listings decode completely and have local direct branch boundaries; the named gates and fixed operands exclude text/cursor-adaptive bounds at these activation sites. Capstone/PE translation can miss other callers and does not prove live visibility. The weakest dependency for actual on-screen placement is the reused parent-relative panel constructor contract.
 
 **Unknown.** Live admission and final pixels; native execution with the original would settle them.
+
+## Blizzard: EXP-2049
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-390 | Positive filled Blizzard damage bypasses the blank-effect default and creates a mode-2 AreaEffect owning a damage object in both inspected ROM2 roots. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-391 | The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-392 | The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-393 | The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-394 | Each accepted RU Blizzard cell sends presentation opcode 0x86 with effect identifier 23 and argument 16; its archive art, frame timing and sound remain Unknown. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-395 | Independent ROM2 EN/RU client data.bin parses give identical Blizzard row-7 stored parameters, including Distribution 5, Radius 4 and damage bounds 10..30. | High | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+
+### R2-ENGINE-390
+
+Positive filled Blizzard damage bypasses the blank-effect default and creates a mode-2 AreaEffect owning a damage object in both inspected ROM2 roots.
+
+**Fact.** In RU apply L2.00034, positive cached base+spread and a row other
+than 24/26 allocate a 0x60-byte damage object. Sphere 2 selects L2.00096,
+which writes damage kind 2. The row-7 path jumps from L2.01689 to the common
+suffix L2.01690, bypassing blank default L2.00085. Distribution 5 creates a
+0x54-byte AreaEffect through L2.01691, owns the damage object at +0x48,
+stores row 7 at +0x0c, sets mode +8=2 and countdown +0x50=0, and registers
+it in map collection +0x92ecc. EN apply L2.01692 independently resolves to
+common suffix L2.01693 and area constructor L2.01694 with the same stores.
+
+**Inference.** The inspected route produces a persistent area controller with
+repeated cell applications, rather than entering the blank default or creating
+one projectile per cell. R2-ENGINE-017, R2-ENGINE-019, R2-ENGINE-020 and
+R2-ENGINE-022 supply the cast, power and cached-fill rules. The positive-damage
+blank-default clause of R2-ENGINE-024 is refuted for Blizzard.
+
+**Confidence.** Medium for the composed cast-to-area route. Both roots have
+independent raw listings. No original process was run.
+
+**Unknown.** Allocation failure, global scheduler integration and complete
+player-visible lifetime were not observed.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+### R2-ENGINE-391
+
+The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3.
+
+**Fact.** RU stage L2.01695 and EN stage L2.01696 select row 7, draw x then
+y, subtract 2, and use the one-entry cell tables at RU L2.01697 and EN
+L2.01698. The cell iterator adds these offsets to the fixed area position.
+The row-7 branch reads neither power nor direction +0x4e. The direction read
+belongs to row 9. Coordinates become bytes before the cell-validity call.
+
+RU range routine R2.0021 and EN L2.00939 return
+floor(r*(n+1)/32768), where the core returns r in 0..32767. The independent
+cores at RU L2.01699 and EN L2.00729 update
+s=(214013*s+2531011) mod 2^32 and return (s>>16)&32767. Each positive range
+call consumes one core draw. Thus a completed 32-pulse cast consumes 64
+placement draws, including pulses whose candidate cell is rejected. Occupant
+damage can consume additional draws.
+
+**Inference.** The potential interior footprint is 6 by 6 cells, offsets
+-2..3 on each axis. Sampling can repeat cells and does not guarantee coverage.
+The local branch is independent of caster power and direction after the target
+area position has been established. The global RNG stream interleaves with
+other consumers; this is not a private Blizzard sequence.
+
+**Confidence.** Medium for the composed coordinate and draw interpretation.
+
+**Fact.** RU validity L2.01700 rejects a byte-coordinate candidate if either
+axis needs clamping outside 8..(map dimension-9). Rejection skips presentation
+and occupant queries but still consumes placement draws and advances the pulse.
+
+**Unknown.** RNG seed policy, interleaving with other objects, EN map-edge
+acceptance and the final admitted-cell sequence. An original cast with recorded
+RNG/coordinates would settle the final sequence.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+### R2-ENGINE-392
+
+The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown.
+
+**Fact.** RU L2.01695 and EN L2.01696 decrement word +0x50 but test its
+old value. Old zero resets it to 2 and attempts a pulse. Constructor pulse
+counter +0x4f is zero; each attempt increments it, including a rejected cell.
+At 32 the code sets completion byte +0x40=1. Mode 2 in the area tick selects
+this loop before the mode-1 loop.
+
+**Inference.** Starting at countdown zero, the first attempt occurs on the
+first area update and subsequent attempts are three area updates apart.
+The last attempt is on update 94, 93 update intervals after the first. The
+cached duration zero in R2-ENGINE-022 is an initial countdown, not evidence
+of an instantaneous or zero-pulse Blizzard. The authored area-duration value
+8 in R2-ENGINE-395 does not replace this row-specific loop.
+
+**Confidence.** Medium for the local lifecycle composed from both roots.
+
+**Unknown.** Wall-clock update rate, time from cast request to first area
+update, collection removal delay and presentation lifetime after completion.
+An original time-stamped cast would settle these. No runtime was observed.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+### R2-ENGINE-393
+
+The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver.
+
+**Fact.** Row 7 stores damageMin=10 and damageMax=30 in both client tables
+(R2-ENGINE-395). R2-ENGINE-020 and R2-ENGINE-022 give cached fill: for book
+power P clamped to 0..255, f=1+P/30, base B=uint8(trunc(10*f)) and spread
+S=uint8(trunc(30*f-B)). RU item fill reads a signed power word P_item, passes
+its low byte and masks the argument before scaling: Q=uint8(P_item),
+f=1+Q/30, then the same B and S formulas. The byte reduction precedes the
+damage factor, not just the cached-byte stores. The inherited x87 near-integer
+rounding boundary remains Medium.
+
+RU water setter L2.00096 writes payload kind 2. Resolver L2.00101 maps kind
+2 through switch L2.01701 to target resistance word +0xc6. Reusing
+R2-ENGINE-028, actor damage is B+U[0,S], reduced to
+max(trunc(v*(100-p)/100+0.75),0) for matching resistance p. This magic branch
+has no hit roll and does not use the physical absorption branch. Target flag
++0x4c bit 8 can reject the application. Damage object L2.01702 subtracts the
+returned low word from actor health +0x94.
+
+For the alternate target type admitted by vtable+0x34, L2.01702 calls
+L2.01703 and subtracts from health word +0x42, clamping it at zero. That
+resolver requires nonnull payload and signed target word +0x44 nonzero.
+When S>0 it returns max(B+U[0,S]-5,0); when S=0 it returns zero. It does
+not consult the actor water-resistance field.
+
+Each accepted cell queries RU L2.01704, L2.01705 and L2.01706, which require
+cell flag 0x20 and retrieve entries +4,+8,+0x0c from lookup L2.01707.
+Area occupant routine L2.01708 sends every nonnull row-7 result to damage
+vtable+0x3c before its source/allegiance bookkeeping. It has no pre-damage
+caster or ally exclusion and no per-cast visited set. Only row 2 divides
+damage by target size squared.
+
+**Inference.** A returned occupant can be damaged again when a later pulse
+selects it. Caster/allies are not excluded by this local caller. The alternate
+health resolver is interpreted as the structure path; class identities were
+not enumerated.
+
+**Confidence.** Medium for RU local damage, repeated applications and the
+structure interpretation. Unknown for complete occupant admission, exact
+multi-cell multiplicity and EN damage-resolver parity.
+
+**Unknown.** Final caster/ally immunity in uninspected target types, the exact
+classes of the three query results, maximum hits for multi-cell occupants,
+EN structure/resistance parity and player-visible health deltas. An original
+cast covering caster, ally, enemy and structure would settle these.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+### R2-ENGINE-394
+
+Each accepted RU Blizzard cell sends presentation opcode 0x86 with effect identifier 23 and argument 16; its archive art, frame timing and sound remain Unknown.
+
+**Fact.** The row-7 stage stores effect identifier 2*row+9=23 in the embedded
+object. Valid-cell success calls RU L2.01709 with the object and argument
+0x10 before occupant queries. That sender writes opcode 0x86, cell coordinates,
+the identifier and the argument. The client row has an empty authored Effects
+key list (R2-ENGINE-395).
+
+**Inference.** Identifier 23 names a presentation request, not an established
+archive key or a verified sprite frame. Argument 16 is not established as a
+frame count, delay or sound identifier.
+
+**Confidence.** Medium for the producer-side packet interpretation. Unknown
+for the consumer and final presentation.
+
+**Unknown.** No presentation-consumer mapping or native-bound archive key was
+read. No art payload or audio was played. Archive key, frames, frame cadence,
+visual duration, sound key and EN presentation parity remain Unknown. A bounded
+consumer trace and key lookup, or an owner recording of an original cast,
+would settle them.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
+
+### R2-ENGINE-395
+
+Independent ROM2 EN/RU client data.bin parses give identical Blizzard row-7 stored parameters, including Distribution 5, Radius 4 and damage bounds 10..30.
+
+**Fact.** Each selected world.res is 160108 bytes, SHA256
+863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9.
+Each selected data/data.bin payload is 149971 bytes, SHA256
+aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6.
+The independent complete 11-collection walks close without residue and contain
+34 spell rows, 241 Units templates and 27 Weapons templates.
+
+Row 7, Blizzard, occupies payload interval [147290,147390). Its 22 unsigned
+parameters at indices 0..21 are
+20,100,2,0,2,1,10,0,5,4,0,8,1,1,0,0,10,30,4294967295,0,500,1000000.
+The authored titles identify Mana Cost 100, Sphere 2, Max Range 10,
+Distribution system 5, Radius 4, Area Effect Duaration 8, Area Effect Frequency
+1, Spell Duration 0, damageMin 10, damageMax 30 and Defensive signed -1.
+The Effects key list is empty. Titles use the stored spelling. Numeric index
+i corresponds to title index i+1, reusing R2-ASSET-024.
+
+**Confidence.** High for the measured stored values, bounded table population
+and identical selected payload identities. Both parses reproduced against
+committed Git blobs; no runtime meaning is inferred from the titles alone.
+
+**Unknown.** world_srv.res was not read. Stored duration and radius values
+alone do not establish Blizzard lifetime or sampled extent.
+
+**Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
