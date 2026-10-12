@@ -1353,3 +1353,43 @@ Weapons table, which rests on R2-ASSET-107's rule and the eight parameter
 reads agreeing with it; the parameter accessor `L2.02312` was not read.
 
 **Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+## Inn dialogue sections
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-115 | ROM2 text/town.txt finds every inn talk key exactly, holds about for hires 1..7 and accept/reject by hire and stage; RU lacks npc520talk7, its #npc2006talk110 is not line-leading, and five talk sections differ in headers. | High | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+
+### R2-ASSET-115
+
+The census reads `main.res:text/town.txt` in each root (EN 103816 bytes,
+SHA256 `0b934e34987a372e55667f8aa83bfbd6f7e320b9099a4fb4d36020ca886880e7`;
+RU 99082 bytes,
+`a24079a569bf3e979681846ec16c1df8eb867cdcbad5c392b9f75a5248e24f56`). It
+lists line-leading `#` tags matching `npc<digits><letters><digits>` and,
+for each of the 46 talk keys the EnterInn constants form
+(R2-ENGINE-494), the first `strstr`-shaped hit of `#<key>`.
+
+| Family | EN sections | RU sections | Keys |
+|---|---:|---:|---|
+| talk | 47 | 45 | the 46 option keys; EN also `npc520talk7` |
+| about | 7 | 7 | `npc1about`..`npc7about` |
+| accept | 41 | 41 | hires 1, 2 at stages 30..110; 3, 6 at 60..110; 4, 5 at 70..110; 7 at 110 |
+| reject | 41 | 41 | as accept |
+
+In EN all 46 keys hit their own line-leading tag; none hits inside a longer
+key. In RU 45 do. The first RU `#npc2006talk110` is at offset 98402 and is
+not at a line start; the census assigns that offset to the
+`npc2005talk103` span. RU lacks `npc520talk7`, which no EnterInn option
+names. Header counts differ in `npc22talk40`, `npc2111talk42`,
+`npc2022talk84`, `npc2003talk92` and `npc2005talk103`, the last because the
+RU span includes the `npc2006talk110` headers. RU `npc5accept100` has one
+`sound=` header. No header in either root's census carries `npcalive=`,
+`npcdead=` or `tips=`.
+
+**Confidence.** High for the counts, keys and offsets: a committed derived
+census reproduced from Git blobs. The native lookup is not line-anchored
+(R2-ENGINE-050); which RU body that lookup cuts for `npc2006talk110` is not
+claimed.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)

@@ -2235,3 +2235,38 @@ through tables, or an owner run (shop in game 1, menu, New Game, shop),
 would settle it. The RU New Game start was not read.
 
 **Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+## Inn hire selection
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-191 | A ROM2 Hire or Fire body on a kind 1 entry toggles bank 511+ID, the hire selection slot 512..531; callers were read for the generic inn page only. Kind 2 marks availability 2, written at departure; Hire on it stores nothing. | High / Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+
+### R2-SESSION-191
+
+Hire and Fire (R2-ENGINE-495) send the copied word to TalkTo, whose kind 1
+arm stores `bank[511+ID]==0` into bank 511+ID (R2-ENGINE-493). The tail
+emits low IDs i+1 for i=0..19 (R2-ENGINE-221), so the toggle addresses
+slots 512..531, the selection slots the mission entry reads with
+availability 532..551 (R2-ENGINE-380, R2-ENGINE-381). Bit 31 of the copied
+word is a client copy: EnterInn sets it when slot 512+i is above zero, Hire
+sets it and Fire clears it. The bank carries the selection in the raw SAV
+bank (R2-SESSION-158).
+
+The tail emits kind 2 when availability 532+i is 2. Ordinary departure
+writes 2 into a nonzero availability slot whose selection slot is nonzero
+(R2-SESSION-047), unless its case stores another value (R2-SESSION-048).
+Hire on a kind 2 entry shows the reject text and stores nothing. Fire on a
+kind 2 entry clears only the client bit, because TalkTo kind 2 stores
+nothing.
+
+**Confidence.** High for the toggle and the kind 2 no-store, both from
+complete bodies in both roots. Medium for the composed meaning of kind 2
+and for the mission-entry use, which rests on R2-ENGINE-381.
+
+**Unknown.** A hire's live party membership after LOAD; R2-SESSION-158
+leaves it open. Whether the Kaarg and druid inn pages reach Hire and Fire
+(R2-ENGINE-496): the bodies are read, their callers for the generic inn
+page only.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)

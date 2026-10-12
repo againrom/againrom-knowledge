@@ -123,8 +123,7 @@ vector; other kinds, including 0/3, enter its talk vector. The TALK action
 finds the first word matching the selected actor's low16 key, formats
 npc%dtalk%d, dispatches text, then sends the same full word to TalkTo.
 The stage30 keys are npc22talk30, npc2108talk31 and npc2110talk39.
-Rendered rows, actor lookup success, dialogue alternatives and event
-scheduling remain Unknown. The independently measured ID2 music arm is
+Rendered rows, actor lookup success and event scheduling remain Unknown. The independently measured ID2 music arm is
 separate from this option contract. — R2-ENGINE-160, R2-ENGINE-220,
 R2-SESSION-059
 
@@ -265,6 +264,64 @@ packet-key writers, aliases, raw restoration and other operations remain
 outside that population. A complete writer/availability graph or authorized
 original observation would settle the exhaustive pre-50 state set.
 — R2-SESSION-114, R2-SESSION-112
+
+## Inn hire, fire and talk choice
+
+TalkTo has two kind 0 arms and tests no stage, bank or current record in
+them. NPC 5 at any topic stores 536=1, 556=3 and 774=2. NPC 0x2a3 with
+topic 0x4e stores 770=2 and ORs 0x80000 into the record-3 category-3 mask.
+Kind 1 toggles bank 511+NPC; kinds 2 and 4..7 store nothing; bit 31 is not
+read. — R2-ENGINE-493
+
+EnterInn makes 48 option stores: 46 constants and two tail stores. Of the
+seven kind 0 constants, 5/79 reaches the NPC 5 arm and 675/78 the 0x2a3
+arm; 207/9, 2108/8, 2110/39, 2108/48 and 23/49 reach none. — R2-ENGINE-494
+
+| Action | Kind 1 entry | Other entry |
+|---|---|---|
+| Hire | text `npc<ID>accept<stage>`, set bit 31, TalkTo | text `npc<ID>reject<stage>` only |
+| Fire | clear bit 31, TalkTo, no text | clear bit 31, TalkTo (no store for kind 2) |
+| Button 1 on a hire seat | text `npc<key>about` | text `npc<key>about` |
+
+The stage is bank 768. The table lists what the Hire and Fire bodies do
+(High; whether the text is shown Medium, R2-ENGINE-343, R2-ENGINE-051). On
+the generic inn page `L2.00744`, the center pointer routine `L2.00755` after
+its hit slot returns nonzero, and button 0 on release, run Fire when the
+copied word has bit 31, else Hire. EN and RU agree after masking addresses
+and register names, except that RU skips the about text when the selection
+is negative. The Kaarg and druid inn pages, the event class and the callers
+of `L2.00755` are Unknown. — R2-ENGINE-495, R2-ENGINE-496
+
+On the generic inn page, hire seats come before talk seats. For a hire seat
+whose copied word has bit 31 the painter passes main-text key 257's string
+to `L2.00720`; the text and what appears on screen are Unknown. No hire
+seat is seated while the selection is -1. The Kaarg and druid painters also
+read bit 31 and push key 257 and are not graded. — R2-ENGINE-497
+
+The kind 1 toggle addresses the selection slots 512..531 that the mission
+entry reads. Kind 2 marks availability 2, which departure writes for a
+selected hire; Hire on it formats the reject text and stores nothing.
+Medium for the composed meaning of kind 2: it rests on R2-SESSION-047 and
+R2-ENGINE-381. — R2-SESSION-191
+
+Every action takes the first copied option with the seat's low 16 bits, and
+constants precede the tail (High). A speaker therefore speaks its first
+option (Medium). Medium, from the stage-to-body map of R2-ENGINE-161: only
+NPC 2022 can have two options in one call (74..77 with 93..96 when the
+current ID is 2, 959 is nonzero, 970..973 are 0, any of 980..983 is nonzero
+and 989..992 are 0). Medium: at stage 50, with 533 at 1 or 2, 947 at 0 and
+the current ID equal to 553, the topic 51 word with NPC key 2 precedes
+hire 2, so Hire on hire 2 formats its reject text. — R2-ENGINE-498
+
+Medium: within one visit of the page, a repeated TALK with the same hero
+selects the same alternatives, because each builds a new dialogue from part
+1. No inn section header carries `npcalive=`, `npcdead=` or `tips=`; other
+header tokens were not enumerated. The file the buffer holds when TALK runs
+is Unknown (R2-ENGINE-344). — R2-ENGINE-499
+
+In `text/town.txt` each of the 46 talk keys first hits its own line-leading
+tag in EN; in RU 45 do, and `#npc2006talk110` is not at a line start. It holds `about` for hires 1..7
+and accept and reject sections by hire and stage. — R2-ASSET-115
 
 ## Selected client tail
 

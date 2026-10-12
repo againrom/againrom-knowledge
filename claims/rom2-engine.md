@@ -9929,6 +9929,209 @@ settle these.
 
 **Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
 
+## Inn hire, fire and talk choice
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-493 | ROM2 TalkTo has two kind 0 arms: NPC 5 at any topic sets banks 536=1, 556=3, 774=2; NPC 0x2a3 with topic 0x4e sets 770=2 and ORs 0x80000 into D2.00240. Kinds 2 and 4..7 store nothing; bit 31 is not read. | High | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-494 | ROM2 EnterInn makes 48 option stores: 46 constant words (7 kind 0, 39 kind 3) and two tail words. Of the kind 0 words only NPC 5/topic 79 and NPC 675/topic 78 reach a TalkTo effect arm. | High | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-495 | ROM2 Hire on a kind 1 entry formats `npc<ID>accept<stage>`, sets bit 31 of the copied word and calls TalkTo; any other kind formats `npc<ID>reject<stage>` only. Fire clears bit 31 and calls TalkTo, with no format. | High / Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-496 | On the generic inn page `L2.00744`, the center pointer routine `L2.00755` after its hit slot returns nonzero, and button 0 on release, run Fire if the hire's copied word has bit 31, else Hire. Button 1 formats `npc<key>about`. | High / Medium / Unknown | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-497 | The generic inn page's center painter `L2.00746` seats hire entries before talk entries and, on a hire seat whose copied word has bit 31, passes key 257's string to `L2.00720`; no hire is seated while the selection is -1. | High / Unknown | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-498 | Every ROM2 inn action takes the first copied option with the seat's low 16 bits, and constants precede hire entries (High). Medium: a speaker speaks its first option, and hire 2 meets topic 51's word at stage 50. | High / Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-499 | Within one visit of the page, a repeated ROM2 inn TALK with the same hero selects the same alternatives. No inn section header in either root carries `npcalive=`, `npcdead=` or `tips=`; other header tokens were not enumerated. | Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+
+### R2-ENGINE-493
+
+TalkTo `D2.00137` is 61 instructions with one range hash in EN and RU. It
+takes NPC from bits 0..15, topic from bits 16..27 and kind from bits
+28..30; bit 31 is not read. Kind 0 runs two tests in order:
+
+1. `CMP NPC,5` at `D2.00266`. Equal stores 1 at `D2.00267` (bank 536), 3 at
+   `D2.00268` (bank 556) and 2 at `D2.00269` (bank 774). The topic is not
+   tested.
+2. `CMP NPC,0x2a3` at `D2.00270` and `CMP topic,0x4e` at `D2.00271`. Both
+   equal store 2 at `D2.00215` (bank 770) and OR `0x80000` into
+   `D2.00240` (R2-ENGINE-331).
+
+Bank N is the dword at `D2.00003+4N` (R2-ENGINE-367). The kind 0 path
+calls nothing and tests no stage, bank or current record. Kind 1 stores
+`bank[511+NPC]==0` into bank 511+NPC. Kind 2 and kinds 4..7 return at
+`D2.00272` without a store. Kind 3 is R2-ENGINE-219 and R2-ENGINE-229.
+
+**Confidence.** High: the complete body, decoded in both roots from one
+committed and reproduced listing; its two arm tests have no other entry.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+### R2-ENGINE-494
+
+EnterInn `D2.00089..D2.00098` is 698 instructions with one range hash in
+EN and RU. Its memory stores outside the stack frame are 48 array stores
+`[base+count*4]` and 49 count writes. Of the 48, 46 store constants and
+two store the tail word of R2-ENGINE-221 (`D2.00273` kind 1, `D2.00274`
+kind 2). The constants are 39 kind 3 and 7 kind 0 words:
+
+| Store | NPC / topic | TalkTo arm (R2-ENGINE-493) |
+|---|---|---|
+| `D2.00275` | 207 / 9 | none |
+| `D2.00276` | 2108 / 8 | none |
+| `D2.00126` | 2110 / 39 | none |
+| `D2.00148` | 2108 / 48 | none |
+| `D2.00156` | 23 / 49 | none |
+| `D2.00099` | 5 / 79 | NPC 5 |
+| `D2.00100` | 675 / 78 | NPC 0x2a3, topic 0x4e |
+
+The client sends TalkTo only the words EnterInn copied, or the EnterShop
+result at the shop (R2-ENGINE-421). Predicates for each store are
+R2-ENGINE-216, R2-ENGINE-217 and R2-ENGINE-223 to R2-ENGINE-228.
+
+**Confidence.** High for the store census over the complete export range,
+in both roots. The inn-route population rests on R2-ENGINE-421, which is
+Medium.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+### R2-ENGINE-495
+
+Hire EN `L2.02380` / RU `L2.02381` and Fire EN `L2.02382` / RU `L2.02383`
+agree after masking addresses. The names are the caption keys 258 (Hire) and
+259 (Fire) of R2-ENGINE-246 joined to the bit-31 test of the refresh; the
+refresh's condition depends on the unread `L2.02384`. Each indexes the hire vector page+0xc0 with
+the selection page+0xb8 and takes the first copied word whose low 16 bits
+equal the actor's u16+0x1dc (`L2.00556`, R2-ENGINE-220).
+
+Hire tests `word & 0x70000000`. For `0x10000000` (kind 1) it formats
+`npc%daccept%d` with the low ID and GetVar(0x300), the stage bank 768,
+calls the dialogue builder `R2.0038`, ORs `0x80000000` into the copied
+word and calls TalkTo with it. For any other value it formats
+`npc%dreject%d` with the same values and calls the builder; no TalkTo call
+or word change follows. It then calls `L2.00941` with page+0x98.
+
+Fire ANDs the copied word with `0x7fffffff`, calls TalkTo with it, then
+calls `L2.00941` with page+0x9c. It builds no dialogue.
+
+**Confidence.** High for the format arguments, the word change and the
+TalkTo call, from both complete bodies in both roots. Medium for the text
+being shown: the builder `R2.0038` and the section lookup were not read
+(R2-ENGINE-343, R2-ENGINE-051).
+
+**Unknown.** What appears on screen; what `L2.00941` plays, as its callees
+were not read; which callers reach these bodies (R2-ENGINE-496).
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+### R2-ENGINE-496
+
+The two direct callers act only in campaign mode (client +0x5d8 EN, +0x63c
+RU). Both are routines of the generic inn page `L2.00744`:
+
+- Center pointer EN `L2.00755`, after its hit slot returns nonzero: a
+  selection below the hire count runs Fire when the copied word has bit 31,
+  else Hire, then refreshes the captions `L2.00750`; a talk seat runs TALK
+  `L2.00554`.
+- Button release EN `L2.00743`: index 0 on a hire seat runs Fire or Hire by
+  the same test, then refreshes the captions; on a talk seat it does
+  nothing. Index 1 runs TALK on a talk seat; on a hire seat it formats
+  `npc%dabout` with the actor's u16+0x1dc and builds that dialogue. Index 2
+  calls the exit receiver `L2.00751`.
+
+Captions are R2-ENGINE-246: key 259 Fire with bit 31, 258 Hire without, 242
+Talk. RU `L2.02385..L2.02386` skips the about branch when the selection is
+negative; EN has no such test. Otherwise the two roots agree after masking
+addresses and register names.
+
+A call-target pass over each `.text` finds two direct callers each of Hire,
+Fire and TALK, these two routines, and no `.rdata` dword equal to them.
+
+**Confidence.** High for both caller bodies in both roots. Medium for the
+two-caller census: a register call or a pointer outside `.rdata` is not
+seen.
+
+**Unknown.** The event class (press, release, move) and the callers of
+`L2.00755`, which R2-ENGINE-344 leaves open. The Kaarg and druid inn pages:
+their painters `L2.02387` and `L2.02388` read bit 31 and push key 257 in
+windows kept as receipts only (nav3), and their pointer and release slots
+were not read. The `add ecx,0xfc` pass (43 hits per root) left unclassified
+the EN hits `L2.02389`, `L2.02390`, `L2.02391`, `L2.02392`, `L2.02393` and
+`L2.02394`. Whether those classes reach Hire and Fire only through these two
+routines or not at all is Unknown.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+### R2-ENGINE-497
+
+Generic inn page center painter EN `L2.00746` / RU `L2.02395` agree after
+masking. In campaign mode it loops i over the hire vector at row i/6 and column i%6,
+then over the talk vector from index n (R2-ENGINE-246). When the page
+selection is -1 the hire loop skips every seat. For a hire seat whose
+copied word has bit 31 it fetches main-text key 257 through `L2.02396` on
+`L2.02397` and passes that string to `L2.00720` on `L2.01249`, with the seat
+rectangle (EN `L2.02398..L2.02399`).
+
+**Confidence.** High for the branch, the key and the call to `L2.00720` in
+both roots. Unknown for the text of key 257 and for what appears on screen.
+
+**Unknown.** Reading `L2.02396`'s callee `L2.02400`, the table at
+`L2.02397` and `L2.00720` would settle the label and the drawing. The Kaarg
+and druid painters (`L2.02387`, `L2.02388`) also read bit 31 and push key 257
+and are receipts only; this claim grades nothing on them.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+### R2-ENGINE-498
+
+TALK, Hire, Fire, the captions and the painter resolve a seat through the
+first-match helper of R2-ENGINE-220. EnterInn's constant stores precede its
+tail stores (R2-ENGINE-494), and the client copies in order (R2-ENGINE-247).
+
+Keys repeat among the 46 constants for NPC 22, 681, 2004, 2006, 2022, 2108
+and 2109. Medium: except NPC 2022, the repeats sit in different stage case
+bodies, and one EnterInn call runs one case body and the continuation
+(R2-ENGINE-161, Medium); NPC 22's continuation topic 62 needs stage 60 or
+more and no case body at those stages names NPC 22. The NPC 2022 families
+each emit one topic; 74..77 exclude 84..87 and 84..87 exclude 93..96, but
+74..77 and 93..96 are emitted together when the current ID is 2, 959 is
+nonzero, all 970..973 are 0, any 980..983 is nonzero and all 989..992 are 0
+(R2-ENGINE-217); the 74..77 topic then speaks.
+
+The only constant keys at most 20 are NPC 2 (topic 51) and NPC 5 (topic
+79). With stage 50, 533 at 1 or 2, 947 at 0 and current ID equal to 553,
+both topic 51 and hire 2 are emitted (R2-ENGINE-224, R2-ENGINE-221). Hire on
+hire 2 then finds the kind 3 word and shows `npc2reject50`; the caption
+stays Hire. Topic 79 needs 774=1 and its TALK sets 774=2, 536=1 and 556=3,
+so on the published writer paths it is not emitted beside hire 5.
+
+**Confidence.** High for the order and first match. Medium for the two
+composed bank patterns: they are conditional derivations, and no visit
+reaching either was examined.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+### R2-ENGINE-499
+
+Each TALK, Hire and about calls the dialogue builder anew. The dialogue
+walks parts from 1 and takes the first admissible alternative of each part
+(R2-ENGINE-051). In the `npc<id><word><n>` sections of `text/town.txt`
+(R2-ASSET-115), no header in either root carries `npcalive=`, `npcdead=`
+or `tips=`. The census counted `iamfemale`, `iammage`, `iammale`,
+`iamfighter` and `sound=`; it recorded no other header content, so other
+tokens (R2-ENGINE-051 reads `npc=`) and per-header token sets were not
+enumerated. 14 EN and 16 RU talk sections have a part with more than one
+alternative. With the same hero and the same copied option list, that is
+within one visit of the page, a repeated TALK selects the same alternatives;
+after EnterInn runs again the first option for a key can change
+(R2-ENGINE-498).
+
+**Confidence.** Medium: the builder and part parser were not read here,
+and R2-ENGINE-051 is Medium.
+
+**Unknown.** Which file the buffer holds when TALK runs (R2-ENGINE-344); this
+claim takes `text/town.txt` as the source. The rendered page, its sound and
+its end.
+
+**Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
 ## Skill growth and spell experience
 
 | ID | Public functional claim | Confidence | Status | Evidence |

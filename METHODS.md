@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3607. Observation: 99. Static analysis: 3013. Mixed: 495.
+Claims labelled: 3616. Observation: 99. Static analysis: 3018. Mixed: 499.
 
 ## Ledger ai
 
@@ -1667,6 +1667,7 @@ Claims labelled: 3607. Observation: 99. Static analysis: 3013. Mixed: 495.
 | R2-ASSET-103 | static analysis | ● active |
 | R2-ASSET-107 | mixed | ● active |
 | R2-ASSET-111 | static analysis | ● active |
+| R2-ASSET-115 | mixed | ● active |
 
 ## Ledger rom2-engine
 
@@ -2016,6 +2017,13 @@ Claims labelled: 3607. Observation: 99. Static analysis: 3013. Mixed: 495.
 | R2-ENGINE-481 | static analysis | ● active |
 | R2-ENGINE-482 | static analysis | ● active |
 | R2-ENGINE-483 | static analysis | ● active |
+| R2-ENGINE-493 | static analysis | ● active |
+| R2-ENGINE-494 | static analysis | ● active |
+| R2-ENGINE-495 | static analysis | ● active |
+| R2-ENGINE-496 | static analysis | ● active |
+| R2-ENGINE-497 | static analysis | ● active |
+| R2-ENGINE-498 | mixed | ● active |
+| R2-ENGINE-499 | mixed | ● active |
 | R2-ENGINE-485 | static analysis | ● active |
 | R2-ENGINE-486 | static analysis | ● active |
 | R2-ENGINE-487 | static analysis | ● active |
@@ -2116,6 +2124,7 @@ Claims labelled: 3607. Observation: 99. Static analysis: 3013. Mixed: 495.
 | R2-SESSION-179 | static analysis | ● active |
 | R2-SESSION-187 | static analysis | ● active |
 | R2-SESSION-188 | static analysis | ● active |
+| R2-SESSION-191 | mixed | ● active |
 
 ## Ledger sav
 
