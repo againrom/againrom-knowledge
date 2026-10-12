@@ -10,6 +10,8 @@
 
 `actor+0x144` is a bitmask of the effect ids currently attached to the actor; authored Potion effects carry id 0, so it is not a set of spell ids alone (`MAGIC-ATTACH-016` (amended, partially retracted and superseded in part in the ledger)).
 `R0016`, the per-actor order machine, reads it before it reads anything about the order.
+The bit `0x100000` the order machine tests is in `actor+0x144`; the `or 0x100000` at `L14772` in the
+apply dispatcher writes `actor+0x150` instead. — MAGIC-324
 
 The gate at `L05213` applies these rules in order:
 

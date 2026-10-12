@@ -3597,6 +3597,8 @@ owner use was observed.
 | MAGIC-316 | Caster mana word `actor+0x9a` has 17 word stores in 13 segments (census); one subtracting store among the sites read (`L05057`); `R0654` (a quotient of a division by 100, body unread) is not read. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-317 | A scroll cast pays no mana at admission (`actor+0x68` nonzero skips the subtraction); at the end of application the item and the Spell are released and the pointers cleared. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-318 | The application routine `R0003` stores caster health 1 and mana 0 at `L05228`/`L05229` after preparing its pair; the spell-id condition rests on `MAGIC-302`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-323 | Arm `L05759..L05760` stores `+0x3d`, then `+0x42` four times (the `MAGIC-303` formula steps), then `+0xc` := spell id and `+0xe` := 2*id+8; its operands come from `MAGIC-303`, the tick from `MAGIC-304`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| MAGIC-324 | Bit `0x100000` set at `L14772` in the effect apply dispatcher `R0843` lands in `actor+0x150`, not `actor+0x144`; the executor tests `[actor+0x144]` (`L00543..L05747`) (High). | High | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 
 ### MAGIC-310
 
@@ -3785,6 +3787,61 @@ executable is the same image, one SHA-256); Medium for the id condition (reused 
 
 **Unknown.** The branch that selects the arm, settled by reading `R0003` between
 `L14740` and `L14738`.
+
+### MAGIC-323
+
+The arm `L05759..L05760` is the arm that `MAGIC-ACTKEY-080` (High) identifies as the builder of
+the spell 20 effect. Read whole, it stores `+0x3d |= [L04012]`, then the word `+0x42` four times
+(`L14919`, `L14920`, `L14921`, `L14922`), then `+0xc` := the spell id byte `[spell+8]` and
+`+0xe` := `2 * id + 8`. The four `+0x42` stores are the steps of the Stone Curse 20 formula
+`MAGIC-303` gives: `ftol(p14 * 1.025^power * 16.0)`, divided by 7 plus 10 on the mode-4 charge
+branch, scaled by `(100 - word [target+0xca]) / 100`, and raised to 1 when zero. This card adds
+the instruction-level order of the stores and the constants. It adds no formula and no tick
+figure (High for the stores read; Medium for the operand meanings, which are inherited).
+
+**Observation.** `z14-spell20-arm` (`L05759..L05760`, 118 instructions). The doubles read from
+the PE in both roots are `L05072` = 16.0 (`0x4030000000000000`) and `L05225` = 0.03
+(`0x3f9eb851eb851eb8`), and the base 1.025 is the immediate `0x3ff0666666666666`. The 0.03 is
+multiplied with the signed word `[object+0x96]` and the converted result goes to a virtual
+`[vt+0x64]` of the object `[ebp+8]` with the spell id byte (`L14923..L14924`); it is not part of
+the countdown. The stores guarded by `[caster+0x68]` and the local `[ebp-0x28]` (nonzero) and by
+the target's virtual `+0x2c` (nonzero) are the `/7 + 10` and scaling steps.
+
+**Inherited, not read here.** `power` is the local `[ebp-0x3c]` and `[ebp-0x28]` the second flag;
+neither is assigned in `z14`, and their meaning is `MAGIC-303`'s (the clamped power and the mode-4
+charge branch). `[caster+0x68]` nonzero is a scroll cast (`MAGIC-317`). `L09843` is `pow` and
+`R0279` the truncating conversion `T` by call shape and `MAGIC-303`'s reading; neither body is
+read here. `p14` is `R0476(..., 0xe)`, the row word `MAGIC-303` calls `p14`.
+
+**Tick.** The countdown is consumed by `R0673`, entry `+0x38` of the Effect tables `L02981` and
+`L02980` (`MOVE-EVENT-061`, High), invoked from the actor tick `R0037` before its health
+branch (`MAGIC-CONSUME-144`, High). The tick subtracts one per call when the word is not above
+9600 (`L05209`, compare with `0x2580`); an initial zero wraps to 65535 (`MAGIC-304`,
+`MAGIC-308`). The arm's minimum of 1 is what avoids that wrap for spell 20. Dword hits at
+`L14915` and `L14916` (`dwords-run6.tsv`) are `+0x38` of those two tables.
+
+**Confidence.** High for the order of stores, constants and guards in `z14` (one image, one
+witness; the EN and RU images are byte-equal). Medium for the operand meanings inherited from
+`MAGIC-303`, whose own grade is High for local formulas. The card claims no figure that
+`MAGIC-ACTKEY-080` or `MAGIC-303` does not already state at High or Medium.
+
+**Unknown.** The bodies of `pow` (`L09843`) and `T` (`R0279`); the assignment of `[ebp-0x3c]`
+and `[ebp-0x28]` in the application routine, which `MAGIC-303` reads; the virtual `[vt+0x64]` at
+`L14924` and the virtual `+0x2c` at `L14925`.
+
+### MAGIC-324
+
+The `or ecx, 0x100000` at `L14772` (`q02`, window `L14926..L14927`) writes `actor+0x150` after adding
+to `actor+0x10c`; the executor's progress-4 arm loads `[actor+0x144]` and tests `0x100000`
+(`y05`, `L00543..L05747`). The hold bit the order machine reads is therefore the
+timed-effect bit of `actor+0x144` (`MAGIC-ATTACH-016`; the bit for spell 20 is set by the attach
+`L05674..L05675` and cleared by the tick `R0673`, `MAGIC-ACTKEY-080`), and this other writer
+does not set it.
+
+**Confidence.** High for the two sites (one image, one witness). The arm of `R0843` that
+contains `L14772` is not identified (its jump-table index is unread).
+
+**Unknown.** Which effect kind the `+0x10c` / `+0x150` arm applies.
 
 ## Casting without a player order
 

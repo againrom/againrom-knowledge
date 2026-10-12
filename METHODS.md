@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3729. Observation: 99. Static analysis: 3127. Mixed: 503.
+Claims labelled: 3742. Observation: 99. Static analysis: 3140. Mixed: 503.
 
 ## Ledger ai
 
@@ -326,6 +326,15 @@ Claims labelled: 3729. Observation: 99. Static analysis: 3127. Mixed: 503.
 | AI-514 | static analysis | ✔ promoted (branch candidate) |
 | AI-515 | static analysis | ✔ promoted (branch candidate) |
 | AI-516 | static analysis | ✔ promoted (branch candidate) |
+| AI-527 | static analysis | ✔ promoted (branch candidate) |
+| AI-528 | static analysis | ✔ promoted (branch candidate) |
+| AI-529 | static analysis | ✔ promoted (branch candidate) |
+| AI-530 | static analysis | ✔ promoted (branch candidate) |
+| AI-531 | static analysis | ✔ promoted (branch candidate) |
+| AI-532 | static analysis | ✔ promoted (branch candidate) |
+| AI-533 | static analysis | ✔ promoted (branch candidate) |
+| AI-534 | static analysis | ✔ promoted (branch candidate) |
+| AI-535 | static analysis | ✔ promoted (branch candidate) |
 | AI-517 | static analysis | ● active |
 | AI-518 | static analysis | ● active |
 | AI-519 | static analysis | ● active |
@@ -1168,6 +1177,8 @@ Claims labelled: 3729. Observation: 99. Static analysis: 3127. Mixed: 503.
 | MAGIC-316 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-317 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-318 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-323 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-324 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-320 | static analysis | ● active |
 | MAGIC-321 | static analysis | ● active |
 | MAGIC-322 | static analysis | ● active |
@@ -1456,6 +1467,8 @@ Claims labelled: 3729. Observation: 99. Static analysis: 3127. Mixed: 503.
 | MOVE-141 | static analysis | ✔ promoted |
 | MOVE-142 | static analysis | ✔ promoted |
 | MOVE-144 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-148 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-149 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger pal
 

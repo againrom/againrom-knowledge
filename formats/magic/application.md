@@ -381,7 +381,9 @@ counter refreshed; `MAGIC-ATTACH-016` (amended, partially retracted and supersed
 annihilate**: casting either on an actor carrying the other removes that one and applies nothing.
 `R0673` ticks `+0x42` down, clears the id bit on expiry and ORs in a fifth `+0x3d` bit
 (`[L05210] = 128`) that is not one of the five duration words; a `+0x42` above 9600 never counts
-down at all, which no shipped spell can reach.
+down at all, which no shipped spell can reach. One arm (`L05759..L05760`, the spell 20 effect of MAGIC-ACTKEY-080) stores `+0x3d`, then `+0x42`
+four times (the formula steps of MAGIC-303), then `+0xc` and `+0xe`; the operands are inherited from
+MAGIC-303 and the tick, entry `+0x38` of the Effect tables, from MAGIC-304 and MAGIC-308. — MAGIC-323
 
 See [overlap rules](overlap.md) for Fire Wall/Poison Cloud and
 [training and weapon casting](training.md) for award producers.

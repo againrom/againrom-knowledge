@@ -248,6 +248,14 @@ Its own body leaves turn active `+a0` and order progress `+09` untouched.
 The relocation/reset clauses are local; their whole outcome is Medium because
 the final notification and callback effects remain Unknown. — MOVE-129
 
+The arrival block of the step calls that relocation after it looks up the cell record in the
+hash table, copies the record, and finds type `0x1a` and two passing guards; the call site
+is at `L00117`. — MOVE-149
+
+The step and its stepper touch these mover words: reads `+70`, `+80`, `+a6`, `+aa`, `+ac`, `+ae`,
+`+b0`, `+b1`; writes `+72`, `+76`, `+80`, `+a6`, `+a8`, `+aa`, `+ac`; neither body has an operand at the
+order record. — MOVE-148
+
 ## Blocked routes and retries
 
 An off-centre ordinary walk or pursuit continues `R0039` and returns

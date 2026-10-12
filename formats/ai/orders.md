@@ -291,6 +291,26 @@ Worked example — the sack pick-up, which is the whole chain in one order:
 So a unit told to pick something up ends the order **hunting**, not idle. The same relay carries
 every other order that has a "walk there, then do a thing" shape.
 
+### Setter stores, group-pass kinds and the route flag
+
+- The setters of 0x14, 0x18, 0x19, 0x1e and 0x1f and the member reset `R0007` store a closed set
+  of order, actor and mover words and the group byte `+0x20`; none stores the position bytes, mover
+  `+0x98`, progress `ord+0x09` or `actor+0x144` (`AI-527`, High for the bodies read, Medium for the
+  unread callees listed there). They touch the mover words the step reads or writes only at `+0x80`,
+  `+0xa6`, `+0x76`, through the claim release, which runs for a unit at a cell centre (`AI-528`, Medium).
+- Command state 8 leaves pending 4 or 1 itself and 8, 5, 6, 0xb, 0, 9 or 1 through its helpers
+  (`AI-529`); states 0xa and 0xc leave 1, 5, 6, 0xb, 0 or 8 (`AI-530`). Both sets are Medium: six callees
+  are unread. `R0046` saves `ebx` and stores only map-flag bytes (`AI-531`).
+- Among the census rows in `L08481..L14887`, mover `+0x98` is set to 1 at three sites after a
+  route search: two after `actor+0x168` is zero, one after `actor+0x184` is zero in mode 1; the
+  executor reads and clears it every pass (`AI-532`). The 83 census rows outside that range are
+  not classified. The five state functions of `AI-516` have no
+  rel32 call or jump, `0F 8x` jump or dword in `.text`, `.rdata`, `.data` (`AI-533`, Medium).
+- Progress 1 and 2 count `ord+0x15` and clear when it exceeds 2 with completion set; among the `prog`
+  census rows progress 0xff is stored at `L00545` and cleared in `R0146` (`AI-534`, Medium for
+  the "only" clauses). `R0044` stores the reset words and, in its body, no progress or
+  position (High); through its calls that absence is Medium (`AI-535`).
+
 ### Setter origins, tick order and route refusal
 
 - The script Stand Ground sub-command is its own arm: it stands each member through `R0088` and

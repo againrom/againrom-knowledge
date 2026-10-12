@@ -1747,6 +1747,8 @@ callees through route headers and frees, plus all destruction callers, to settle
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MOVE-144 | The census of byte stores to the position bytes `+4` and `+5` finds the stepper, the arrival block, a routine before the stepper and two other routines in the movement module; two are read, the others are receipts (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
+| MOVE-148 | The step bodies `R0039` and `R0047` read mover `+0x70`, `+0x80`, `+0xa6`, `+0xaa`, `+0xac`, `+0xae`, `+0xb0`, `+0xb1` and write `+0x72`, `+0x76`, `+0x80`, `+0xa6`, `+0xa8`, `+0xaa`, `+0xac`; no order-record operand (High). | High | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| MOVE-149 | The step's arrival block calls the relocation routine `R0044` at `L00117` when the cell record copied from the hash table at manager `+0x540b8` has type 0x1a and two `R0048` checks pass (High for the site). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 
 ### MOVE-144
 
@@ -1775,3 +1777,44 @@ are receipts classified from context, not read.
 `L07128` and `R1055`. The card lists byte stores only: of the 319 rows, 23 are byte stores,
 13 word and 283 dword, and the 296 word and dword rows are not classified here, among them two
 dword stores in the movement segment `R0043` (`L14810`, `L14811`).
+
+### MOVE-148
+
+The step `R0039` and its stepper `R0047` touch these mover (`actor+0x154`) words: reads `+0x70`,
+`+0x80`, `+0xa6`, `+0xaa`, `+0xac` (incremented), `+0xae`, `+0xb0`, `+0xb1`; writes `+0x72`, `+0x76`,
+`+0x80`, `+0xa6`, `+0xa8`, `+0xaa`, `+0xac`. They read and write the position record bytes `0`, `1`,
+`2` (word), `4` and `5`, and the actor words `+0x8c`, `+0x17c..+0x18c`. Neither has an operand at
+`actor+0x158`.
+
+**Observation.** `R0039L14743` (`z01`, 187 instructions) and `R0047L14745` (`z02`, 139
+instructions), both whole, EN image. `R0039` calls `R0047` (`L02036`), recomputes the stride
+word `+0x72` when the cell word changed, and when the position bytes `4` and `5` are both 0x80
+zeroes `+0xaa`, `+0xac`, `+0xa8`, calls `R0046`, zeroes `+0x80` and `+0xa6`, frees the list at
+`actor+0x17c`, and looks up the cell record (hash of the cell word at manager `+0x540b8`).
+`R0047` increments `+0xac`, adds the signed bytes `+0xb0` and `+0xb1` to the sub-cell bytes,
+tests the target cell with `R0057` and stores the position bytes and calls `R0050` when the
+cell changes, and stores 0x80 to both sub-cell bytes when `+0xac` is not below `+0xaa`.
+
+**Confidence.** High for the two bodies (one image, one witness). The callees `R0057`,
+`R0058`, `R0050`, `R0049`, `R0048` are not part of the set (`AI-528`). Mover `+0x76`
+is in the written set only; the bodies do not read it.
+
+**Unknown.** The mover words the unread callees touch.
+
+### MOVE-149
+
+At arrival at a cell centre (position bytes `4` and `5` both 0x80) `R0039` looks up the cell
+record in the hash table at manager `+0x540b8`, copies 13 dwords to manager `+0x5402c`, and, when
+the type byte at manager `+0x54058` is 0x1a and two calls of `R0048` (second with flag 1) are
+nonzero, drops a stale claim (`R0046`, words `+0xa6`, `+0x80`, `+0x76` := 0), stores the
+destination cell bytes (`L14928..L00974`, sub-cell 0x80 both), calls `R0050` and `R0044`
+(`L00117`). The body stores the reset words and, in the body, no progress or position byte (`AI-535`, High); through its calls (`R0045`, `R0046` and its two virtuals) that absence is Medium.
+
+**Observation.** `z01` (`L14929..L14930`), `w03` (`R0048`, first window only).
+
+**Confidence.** High for the call site and its guards in `R0039`. Medium for the meaning of
+the record type 0x1a as the relocation kind (reused from `MOVE-129`), for the guard bodies
+(`R0048`, `R0049` read in first windows only) and for the absence of progress and position
+stores through the calls of `R0044` (`AI-535`).
+
+**Unknown.** The remainder of `R0048` and `R0049`.
