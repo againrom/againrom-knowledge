@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3673. Observation: 99. Static analysis: 3072. Mixed: 502.
+Claims labelled: 3681. Observation: 99. Static analysis: 3080. Mixed: 502.
 
 ## Ledger ai
 
@@ -60,7 +60,7 @@ Claims labelled: 3673. Observation: 99. Static analysis: 3072. Mixed: 502.
 | AI-DIPLO-005 | static analysis | ● active |
 | AI-SIGHT-006 | static analysis | ● active (amended, partially retracted, superseded, contested) |
 | AI-GUARD-007 | static analysis | ● active |
-| AI-TICK-008 | static analysis | ● active (contested) |
+| AI-TICK-008 | static analysis | ● active (contested, amended) |
 | AI-GROUP-009 | static analysis | ● active (superseded) |
 | AI-ORDER-010 | static analysis | ● active |
 | AI-STATE-011 | static analysis | ● active (amended, superseded) |
@@ -308,6 +308,11 @@ Claims labelled: 3673. Observation: 99. Static analysis: 3072. Mixed: 502.
 | AI-477 | static analysis | ✔ promoted (branch candidate) |
 | AI-478 | static analysis | ✔ promoted (branch candidate) |
 | AI-479 | static analysis | ● active |
+| AI-487 | static analysis | ✔ promoted (branch candidate) |
+| AI-488 | static analysis | ✔ promoted (branch candidate) |
+| AI-489 | static analysis | ✔ promoted (branch candidate) |
+| AI-490 | static analysis | ✔ promoted (branch candidate) |
+| AI-491 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger alm
 
@@ -1079,7 +1084,7 @@ Claims labelled: 3673. Observation: 99. Static analysis: 3072. Mixed: 502.
 | MAGIC-237 | static analysis | ✔ promoted |
 | MAGIC-238 | static analysis | ✔ promoted |
 | MAGIC-239 | static analysis | ✔ promoted (amended) |
-| MAGIC-240 | static analysis | ✔ promoted |
+| MAGIC-240 | static analysis | ✔ promoted (amended) |
 | MAGIC-245 | static analysis | ● active |
 | MAGIC-246 | static analysis | ● active |
 | MAGIC-247 | mixed | ● active |
@@ -1134,6 +1139,9 @@ Claims labelled: 3673. Observation: 99. Static analysis: 3072. Mixed: 502.
 | MAGIC-307 | observation | ✔ promoted (branch candidate) |
 | MAGIC-308 | observation | ✔ promoted (branch candidate) |
 | MAGIC-309 | observation | ✔ promoted (branch candidate) |
+| MAGIC-310 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-311 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-312 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 

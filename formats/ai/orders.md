@@ -387,3 +387,44 @@ instructions remain High. Builder helpers `R0289`, `R0462`,
 `R0463`, `R0915` and `R0464` remain unread. Full scheduling,
 indirect registration, null-owner spell outcomes and persistence remain
 Unknown (`AI-477`, `AI-478`).
+
+## A new order during a cast
+
+Player order setters write the command state `actor+0x50` and the pending kind
+`ord+0x08` at once. Only the move setter (opcodes 0x16, 0x1a, 0x1c) stores a
+nonzero pending kind, 1; the other admitted setters store pending 0 and leave
+the kind to the group pass. No setter read stores progress `ord+0x09`, phase
+`actor+0x58`, countdown `actor+0x6c`, completion `actor+0x136` or the active
+target and Spell (`AI-487`). The pre-arm helper acts only on a scroll pointer
+(`AI-490`).
+
+| progress `ord+0x09` | executor arm | action word set before the body |
+|---|---|---|
+| 0 | pending switch on `ord+0x08` | 0 unless 2 or 0xf |
+| 1 | strike counter | 3 |
+| 2 | cast counter | 0xd, or 0xe when `ord+0x5c` is 0 |
+| 3 | step to the cell centre | 1 |
+| 4 | status hold | 0x1a |
+| 0xff | park, progress kept | 0x1a |
+| 5..0xfe | progress cleared | 0x1a |
+
+Progress 1 and 2 clear only when `ord+0x15 > 2` and `actor+0x136` is set
+(`AI-488`). A player's cast installs once: the install pass stores progress 2,
+then command state 0xc and pending 0, and the action body idles that tick
+(`AI-489`). The next pass runs phase 0, where the mana is subtracted before
+phase 5 and the wind-up countdown (`MAGIC-310`).
+
+An order arriving while the cast is queued or approaching replaces it with no
+mana spent, because the subtraction runs only at phase 0 (`MAGIC-310`). No
+setter stores progress or phase, so an order arriving from the install pass to
+the exit leaves the cast running; that it stays charged and unrefunded, and
+that a repeated cast is charged again at its own admission, are Medium: the
+application callees `R0002`, `R0003` and `R0001` are unread, no
+image-wide census of `actor+0x9a` was made, and the executor tail of `AI-354`
+can rewrite the active target in some states (`MAGIC-311`). A move
+acts at the first executor pass entered at progress 0; other orders act after
+the group pass also writes their pending kind (Medium, `AI-491`). The scroll
+pre-arm helper tests the action word and completion, not the cast, so the
+install-to-admission gap and the exit tick are unprotected (`AI-490`). A
+player's cast refused for mana stays at progress 2 with pending 0 and is
+dropped or retried by the completion byte (`MAGIC-312`).

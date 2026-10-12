@@ -1755,7 +1755,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 | MAGIC-237 | A slot-drawn spell is aimed by its `R0209` arm: 7 ids at the engage victim, 9 at the caster, 8 at the victim's cell, Acid Stream and Teleport at the cell next to the caster, 2 at nothing. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 | MAGIC-238 | A drawn Acid Stream or Teleport orders a kind-9 cast at the cell one step from the caster toward the victim; Teleport's nine-cell search is overwritten by that store. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 | MAGIC-239 | Kind-8/9 reach or facing failure selects approach rather than release; approach with a non-empty route retries, while route-search failure or the point obstacle branch can replace the pending kind. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md), [EXP-0497](../experiments/EXP-0497-out-of-range-cast/EXP-0497.md) |
-| MAGIC-240 | `ord+0x60` is a retention flag read by the two cast install arms: zero runs the stop-and-reset at install, nonzero keeps the order armed; the eight stores of 1 found in the AI module are in creature cast selectors. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
+| MAGIC-240 | `ord+0x60` is a retention flag read by the two cast install arms: zero runs the stop-and-reset at install, nonzero keeps the order armed; the eight stores of 1 found in the AI module are in creature cast selectors. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 
 ### MAGIC-237
 
@@ -1887,6 +1887,8 @@ The stores of the literal 1 at displacement `0x60` over the whole image (`eviden
 **Confidence.** High for the reads, the two arms' branch, `R0401`'s stores and the ten literal stores (complete-body reads and a whole-image displacement sweep for the stores). Medium for the retained-repeat consequence: it composes the arm, the progress arm and the unit tick's state dispatch (`MAGIC-CADENCE-127`) and no run was observed.
 
 **Unknown.** Register-source stores to `ord+0x60` are outside the sweep: `L01143`, a 32-bit store of a register value at `+0x60`, in `R0305` is one that `AI-FOLLOWHEAL-118` cites, and its register value was not traced. Readers of `ord+0x60` outside the three sites named were not enumerated, so "the arms" is the population read, not a census. Stores of other nonzero values were not swept. Which value player-issued cast orders leave in `ord+0x60` was not traced.
+
+**Amended.** The last Unknown is answered: both manual cast setters store `ord+0x60 = 0` (`MAGIC-253`, `AI-489`), so a player's cast order runs one cycle. The grades and the other Unknowns stand.
 
 **Evidence.** [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md), `evidence/asserts-en.txt`, `evidence/listing.txt`, `evidence/spell-arms.tsv`
 
@@ -3582,3 +3584,101 @@ arbitrary equipped callback behavior are outside this census. Decode the
 five known timed Potion recipes and count one fresh id 0 attachment after
 the inspected use route to settle that input-to-lifetime join. No native
 owner use was observed.
+
+## Cast phases and a new order
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-310 | A cast's mana is subtracted in phase 0, on the pass that stores phase 5 and the wind-up countdown (High); the admission returns 1 on every path after it, so a charged cast enters wind-up (Medium, window over cap). | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| MAGIC-311 | No setter read stores progress or phase for a new order (High); that the running cast stays charged and unrefunded, and that a repeated cast pays again, is composed from bodies read (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| MAGIC-312 | A player's cast refused for mana stays at progress 2 with pending 0: with completion byte 1 progress clears after three passes and the cast is dropped uncharged; with 0 the retry repeats on every pass (Medium). | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+
+### MAGIC-310
+
+In the shared body `L00005`, phase 0 (`actor+0x58 == 0`) of action 0xd calls `R0268` at
+`L01994` with the active Spell, the caster and target `actor+0x5c`; action 0xe calls it at
+`L01995` with the cell bytes `actor+0x60/+0x61`. A zero return leaves through `L14659`
+with phase, countdown and completion unchanged. A nonzero return stores completion
+`actor+0x136 = 0` (`L14660`), phase 5 (`L08582`) and countdown `actor+0x6c` = charge
+`actor+0x134` (`L04379`). `R0268` tests the mage predicate `R0442` and
+`actor+0x68 == 0`, returns 0 only when the Spell cost word `+0xc` exceeds mana `+0x9a`
+(`L05054..L01999`), and otherwise subtracts it (`L05055..L05057`). The rest of the
+routine, read to its return at `L14661`, returns 1 at `L14662`, `L06150`, `L14663`
+and `L14664` and 0 nowhere. Phase 5 decrements the countdown each pass and at zero calls
+`R0002` (actor target, `L00007`) or `R0003` (cell, `L00008`), then stores phase 7
+and the recovery countdown (`L05340`, `L04382`), adding the Complication Level while the
+Spell pointer is set (`MAGIC-CADENCE-126`). Phase 7 at zero stores phase 0 and completion 1
+(`L08584`, `L04544`). Over the 28 windows read, three of them (`w26`, `w27`, `w28`)
+past the budget, the only store to `+0x9a` is `L05057`. For a player's order cast, the
+admission pass is the pass after the install (`AI-489`).
+
+**Confidence.** High for the compare and subtraction (`L05054..L05057`, window `w24`),
+the phase 0 call sites and the stores after a nonzero return, all within the budget.
+Medium for the return census after the subtraction (`L14665..L06122`, window `w26`,
+read past the budget) and for the `+0x9a` negative, which is bounded to the windows read,
+three of them over budget, and is not an image-wide census.
+
+**Unknown.** Whether another routine writes `+0x9a` between admission and application; a
+`disp:9a` census over the image would settle it.
+
+### MAGIC-311
+
+Phases of a player's cast, with the fields that mark them: queued (command state 0xd/0xe,
+pending 0, `AI-487`); approach (pending 8/9 at progress 0, or progress 3 while a step
+runs, `MAGIC-239`); install (progress 2, then command state 0xc and pending 0, `AI-489`);
+admission (phase 0, mana, `MAGIC-310`); wind-up (phase 5); release (countdown 0,
+application call); recovery (phase 7); exit (phase 0 with completion 1, then progress 0 once
+`ord+0x15 > 2`). The queue drain runs before the executor in a tick (`AI-371`).
+
+| new order | queued or approach (progress 0 or 3) | install to exit (progress 2) |
+|---|---|---|
+| same Spell, same target (0x1e/0x1f) | queued fields rewritten, pending 0; the cast restarts from the next group pass; no mana | running cast kept; the new cast installs after exit and is charged at its own admission |
+| other Spell or target | as above with the new fields | as above; the running cast keeps its own `actor+0x5c`/`+0x60`/`+0x64` |
+| move (0x16, 0x1a, 0x1c) | pending 1 at once; walks at the first progress-0 pass; no mana | running cast kept; walk after exit |
+| attack (0x19) | command state 3, pending 0; pursuit after the group pass; no mana | running cast kept; attack after exit and the group pass |
+| stand 0x18, 0x17, retreat 0x14 | cast order dropped; no mana | running cast kept to exit; no refund |
+
+No setter, the pre-arm helper for a book cast, or the executor stores progress, phase,
+countdown or completion on an order's arrival (`AI-487`, `AI-490`, `AI-491`). The
+subtraction is made once per admitted cycle and is not reversed in the windows read
+(`MAGIC-310`; Medium, see Confidence). A release's delivery runs on its own countdown (`MAGIC-DELIVERY-170`),
+outside the order record. The map-view cancel message 0x405 clears the armed cursor mode
+and stores no order (`AI-CURSOR-177`).
+
+**Confidence.** High for the stores of the setters, which write no progress, phase,
+countdown or completion. Medium for "the subtraction is made once per cycle and not
+reversed", for "the running cast is kept" and for "a repeated cast pays again". Open
+alternatives: a second charge or a refund inside the application callees `R0002`,
+`R0003` and `R0001` or the recovery cleanup, none of which is in a window, with no
+image-wide `+0x9a` census; the executor tail of `AI-354`, which can write progress 1, action 3
+and `actor+0x5c` for a command state other than 1, 0xa and 0x17 (a player cast leaves 0xc)
+when `mover+0x98` is nonzero. The repeat is composed through the group pass that writes
+pending 8 (`AI-491`, Medium) and is no stronger. The timing column entries compose the
+group pass cadence, the over-budget command-state table and unread callees (`AI-491`).
+
+**Unknown.** Native tick placement of a command, settled by a native trace of command and
+tick order; the `AI-354` tail during a player's cycle, settled by a read of the writers of
+`mover+0x98` (`MAGIC-239`, `AI-373`) against the cycle; the application callees, settled by
+reading `R0002`, `R0003`, `R0001` with the `disp:9a` census; scroll casts, whose
+pointer cleanup is `AI-357`, settled by reading `R0011` and `R0012` from the scroll
+arm; what the group pass makes a hero in command state 0xc do after the cycle (`R0022`,
+read over budget, writes kind 6 for an enemy within reach + 1), settled by a second read of
+that routine inside the budget.
+
+### MAGIC-312
+
+After install, a player's cast has pending 0 (`AI-489`). A refused admission leaves phase 0
+(`MAGIC-310`), so each pass at progress 2 retries it. Progress arm 2 clears progress only
+when `ord+0x15 > 2` and `actor+0x136` is set (`AI-488`); `actor+0x136` is cleared only at an
+admission (`L14660`, `L14666`) and set only at recovery end (`L04544`) in the windows
+read. With the byte set by an earlier completed cycle, the third pass clears progress and the
+cast is gone with no charge. With the byte clear, the retry repeats until mana suffices, and
+because the executor reads pending only at progress 0, a later order waits for it
+(`MAGIC-CADENCE-127`, `AI-491`).
+
+**Confidence.** Medium: a composition of read bodies and `MAGIC-CADENCE-127`, without a
+native run.
+
+**Unknown.** The constructor's value of `actor+0x136` and other writers outside the windows
+read, which decide whether a never-cycled hero takes the repeating branch; whether input
+refuses a cast order for missing mana before the command record is sent.

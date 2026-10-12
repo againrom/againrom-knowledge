@@ -481,7 +481,7 @@ And `R0146` (state 0x17) **overwrites both radii on the actor**: the byte stores
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-TICK-008 | The AI is one slot of the full tick, it is driven per group, and the per-actor state machine is a single arm inside it. | High / Medium | ● active (contested) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
+| AI-TICK-008 | The AI is one slot of the full tick, it is driven per group, and the per-actor state machine is a single arm inside it. | High / Medium | ● active (contested, amended) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
 | AI-GROUP-009 | The unit of AI is a runtime *group*: a `0x48`-byte `CObList` subclass owning a `0x50`-byte AI record, formed at spawn by equality of the `.alm` type-6 group id. | High / Medium | ● active (superseded) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
 | AI-ORDER-010 | `grpAI+0x20` is the group order byte and it has eight live values; `0` is what hands control to the members' own states. | High / Medium | ● active | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
 | AI-STATE-011 | `actor+0x50` is the per-actor AI state, its switch has 27 arms of which 12 are distinct, and its value at construction is `0xb` — guard. | High / Medium | ● active (amended, superseded) | [EXP-0082](../experiments/EXP-0082-ai-behaviour/) |
@@ -500,6 +500,8 @@ Nothing in it iterates actors. The per-actor state machine `R0008` has **2 calle
 **Confidence.** High (the slot, the two walks, the per-group gate and both caller enumerations are named instructions and printed counts on the repaired function table). **Medium** that the caller sets are complete — `callto:` sees direct calls and `.rdata` code pointers, so an indirect call through a computed pointer would be missed
 
 **Amended.** Two readings of the cadence clause stand. The row reads it from `R0147`, which reaches the AI walk at `L00279` behind the signed `% 16 == 6` test. `AI-CLOCK-080` finds a second call to the walk, `L00163` in `R0075`, with no modulo in front of it; whether that routine runs in ordinary play is Unknown, and if it does the AI decision rate is not once per full tick.
+
+**Amended.** The raw rel32 scan of `.text` for `R0008` lists five call sites (`L14643`, `L14644`, `L14645`, `L14646`, `L00284`) against the two callers recorded above. Two sites fall in `R0148` and `R0023`; the other three are not classified, so the caller set is Medium. The grades stand.
 
 ### AI-GROUP-009
 
@@ -4249,3 +4251,168 @@ and an original before/after mission-start witness. A bounded native read of
 `L14318` and `L14320`, or an original before/after list-identity trace, would
 settle the collection edge. AI-449's broader unread carry/start alternatives
 are not amended by this narrower result.
+
+## A new order during a running cycle
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-487 | Of the 15 live player order opcodes (14 distinct arm targets), only the move setter (0x16, 0x1a, 0x1c) stores pending kind 1 at once; the others store a command state with pending 0; no setter read stores progress or phase. | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| AI-488 | The executor reads the pending kind only at progress 0; progress 1, 2, 3, 4 and 0xff run their own arms, 5..0xfe clear progress, and the action word is rebuilt from progress before the action body runs. | High | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| AI-489 | A cast order whose ord+0x60 is 0, as both manual cast setters leave it, is installed once: the install pass sets progress 2, then resets command state to 0xc and pending to 0, and the action body idles on that tick. | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| AI-490 | The dispatcher calls R0014 on every commanded member before the opcode arm; it acts only on a scroll pointer of effect kind 0x29, not while the action word is 0xd or 0xe with completion 0, and stores no progress, phase or action. | High | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| AI-491 | No player order read cuts or restarts a running strike or cast; a move acts at the first progress-0 executor pass, and the other orders after a group pass writes their pending kind (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+
+### AI-487
+
+The order space of `R0061` (`cmd+4 >= 1`) resolves each listed member through `R0195`,
+adds it to a new group from `R0196` through `R0152`, calls `R0014` on it (`AI-490`),
+then jumps on opcode minus 0x14 through the 19 dwords at `L00529`. The table, read from the
+PE, sends 0x15, 0x20, 0x22 and 0x23 to the exit `L00528`, so 15 opcodes are live. Their
+arms reach 14 distinct targets: 0x25 and 0x26 share `L00038`, and the arms of 0x16 and
+0x1c are two arms that both call `R0108`. The live arms and the per-member
+stores of the setters, read whole unless marked:
+
+| opcode | setter | command state `actor+0x50` | pending `ord+0x08` | other fields |
+|---|---|---|---|---|
+| 0x14 | `R0103` | 0x16 | 0 | (`AI-RETREAT-271`) |
+| 0x16, 0x1c | `R0108` then `R0301` | 1 | 1 | cell `ord+0x0a` clamped between world bytes `+0x58ee0..+0x58ee3`, `mover+0x90 = 0`; group order 4 |
+| 0x17 | `R0125(group, 0)` | 0xb | 0 | post word = current cell, or `mover+6` off a cell centre; group order 1 |
+| 0x18 | `R0060` | 0xc | 0 | group order 3 (`AI-351`) |
+| 0x19 | `R0006` | 3, or 0xc for self or a `R0225` refusal | 0 | `ord+0x0c` victim; group order 0 (`AI-355`) |
+| 0x1a | `R0157` then `R0301` | 1 | 1 | formation cell; group order 5 |
+| 0x1b | `R0190` (window ends at `L14647`) | target 0xc, others 8 | 0 | `ord+0x10`; group order 0 |
+| 0x1d | `R0174` then `R0172` (read to `L14648`) | 0xa | not reached | group order 0 |
+| 0x1e | `R0011` | 0xd, or 0xc without a member Spell | 0 | `ord+0x28`, Spell `ord+0x30`, `ord+0x14` = Spell+9, `ord+0x60 = 0` |
+| 0x1f | `R0012` after cell check `L13144` | 0xe, or 0xc | 0 | cell `ord+0x3c`, Spell `ord+0x30`, `ord+0x60 = 0` |
+| 0x21 | `R0010` on the last resolved member | 2 | 0 | cell `ord+0x0a` (`AI-356`) |
+| 0x24 | `R0085` | 0xf | 0 | cell `ord+0x0a` |
+| 0x25, 0x26 | scroll arm `L00038`, then `R0011`/`R0012` | as 0x1e/0x1f | 0 | `actor+0x68` (`AI-357`) |
+
+The Spell a cast setter stores is the member's own `actor+0x44`, which the dispatcher fills
+per member from `actor+0x140` through `R0017` for 0x1e/0x1f (`L14649..L14650`); the
+setter clears `actor+0x44` after use. Every setter writes the command state and the pending
+kind of the member at once. The rel32 scan finds four calls of `R0301`, all in `R0108`
+and `R0157`. Over the windows read, stores to `ord+0x09`, `ord+0x15`, `actor+0x58`,
+`actor+0x5c`, `actor+0x64`, `actor+0x6c` and `actor+0x136` occur only in the executor, the
+two cast installs, the action body, the actor tick head and `R0014`, never in a setter.
+
+**Confidence.** High for the table, the arm targets and each listed store: raw Capstone
+listings of the whole bodies, from one image read through both roots (not a second
+witness). Medium for 0x1b and 0x1d, whose bodies
+continue past the read windows, and for the composed statement that nothing in a setter's
+callees stores progress or phase: `R0068`, `R0069`, `R0140`, `R0167`,
+`R0045`, `R0040`, `R0019`, `R0225`, `R0010`'s callees, the group routines
+`R0196`, `R0152`, `R0198` and the resolver `R0195` are not read here.
+
+**Unknown.** The pending kind `R0172` writes for patrol, settled by reading
+`L14648` onward; the session-space arms (`cmd+4 == 0`) of the same dispatcher, outside
+this population, settled by a window at those arms of `R0061`; the bodies of 0x1b past
+`L14647`, settled by reading on from there; the callees named above, each settled by its
+own window.
+
+### AI-488
+
+`R0016` returns at once, storing action 0x1a, for an actor at progress 0 whose receiver
+`+0xb388` and group `+0x45` are both zero (`L00088..L00089`). Otherwise it clears the
+action word unless it is 2 or 0xf (`L00539..L00540`), sets progress 4 from progress 0
+when effect bit 0x100000 is set, and branches on progress `ord+0x09` (`L00547`). The index
+bytes at `L00090` and the six dwords at `L00091` give: progress 1 to `L00092` (action 3),
+2 to `L00093` (action 0xd when `ord+0x5c` is nonzero, else 0xe), 3 to `L00096` (step,
+action 1), 4 to `L00543` (status hold, action 0x1a), 0xff to `L00544` (action 0x1a,
+progress kept) and 5..0xfe to `L00542` (progress cleared, action 0x1a). Arms 1 and 2
+increment `ord+0x15` and clear progress and action only when it exceeds 2 and
+`actor+0x136` is set. Only progress 0 reaches the pending switch at `L00099` (`AI-ORDER-039`).
+
+The actor tick `R0037` calls the executor at `L00086` and then dispatches on the action
+word minus 1 through the 15 index bytes at `L01775` and the six dwords at `L01776`:
+action 1 to `L01777` (walk, which stores phase `actor+0x58 = 0` each pass), 2 to
+`L00009` (pickup), 3, 0xd and 0xe to `L00005` (the shared strike/cast body), 0xf to
+`L00196`, and 4..0xc to `L02936`, the same exit as action 0 and values above 0xf. The
+bytes after the 15th index entry are code.
+
+**Confidence.** High: the tables are decoded from the containing PE section of the image (read through both roots, one witness)
+and the branch, test and store instructions are in the whole listings of the executor head,
+rows and actor tick head.
+
+### AI-489
+
+Row 8 (`L00108`) installs at progress 0 when the target is the caster or `R0041`
+passes: progress 2, counter 0, action 0xd, `actor+0x5c` from `ord+0x28`, active Spell
+`actor+0x64` from `ord+0x30`, `ord+0x5c = 1` (`L00034..L00035`). With `ord+0x60 == 0`
+it calls `R0401` (`L06125`), read whole, which stores `ord+0x14`, `ord+0x60 = 0`,
+`mover+0x7c = 0`, action 0, `ord+0x50 = 0`, command state 0xc (`L06130`), the post word,
+pending 0 (`L06131`) and `ord+0x50 = 1`. Row 9's install `R0013` stores progress 2,
+action 0xe, the cell bytes, the Spell and `ord+0x5c = 0`, and holds the same reset inline
+(`L14651`, `L14652`). Both then reach the tail `L00010`. The actor tick reads the
+action word after the executor (`L00538`), finds 0 and leaves through `L02936`; on the
+next pass progress arm 2 restores 0xd or 0xe and the action body runs phase 0
+(`MAGIC-310`). The two manual cast setters store `ord+0x60 = 0` (`MAGIC-253`). The
+group-pass arm for command state 13 with a non-null target (`L01993`, then `R0018` to
+`L14653`) and the arm for state 14 (`L13503`) store kind 8 or 9 and no `ord+0x60`. A player's cast order therefore runs one cycle and leaves command state 0xc.
+
+**Confidence.** High for the install stores, the reset, the call order and the idle action
+on the install tick. Medium that `ord+0x60` is still 0 at install for every player cast:
+the approach callees of rows 8 and 9 and writers outside the windows read were not swept;
+the selectors that store 1 (`MAGIC-240`) are not on the command-state 13/14 path read.
+
+### AI-490
+
+`R0014`, read whole (`R0014..L14654`), returns at once when `actor+0x68` is zero, when
+the item's byte `+0x44` is 2, when the item's effect from `R2173` is absent or not kind
+0x29, and when the action word is 0xd or 0xe with `actor+0x136` zero. Otherwise, when the
+active Spell's id byte equals the effect's word `+0x40`, it deletes the active Spell, stores
+`actor+0x64 = 0`, returns the item to the inventory through `R0929` and stores
+`actor+0x68 = 0`; on a mismatch it logs a message. The dispatcher calls it at `L14655` and
+`L14656`; the rel32 scan of `.text` finds three more calls, at `L14657`, at the death
+branch `L14658` and at `L13775`, and the aligned-dword scan of all sections finds no
+pointer to it. A book cast has `actor+0x68` zero and is untouched.
+
+The test is on the action word and completion, not on the cast itself. At the install tick
+the action word is reset to 0 (`AI-489`, `AI-356`) and at the exit completion is 1, so a
+scroll order given in the gap between install and admission, or after the exit, passes
+the test; if the active Spell's id equals the scroll's effect word `+0x40`, the helper
+deletes the active Spell. The install-to-admission gap and the exit tick are not protected.
+
+**Confidence.** High: the whole body is read, from one image read through both roots (not a
+second witness); the call census is a rel32 scan
+whose hits all fall on call instructions of windows read, except `L14657` and `L13775`.
+
+### AI-491
+
+Every setter in `AI-487` leaves progress, phase, countdown, completion, active target and
+active Spell to the executor and the action body, and the pre-arm helper does not write
+them for a book cast (`AI-490`). The executor reaches the pending switch only at progress 0
+(`AI-488`), and a running strike or cast keeps progress until its recovery ends and the
+counter exceeds 2. A move's pending kind 1 is therefore acted on at the first executor pass
+entered at progress 0 after the running cycle exits. Every other order stores pending 0, and
+its pending kind is written by the group pass: for group order 0 the per-actor arm
+`R0008`, which runs once per 16 ticks (`AI-385`, `AI-TICK-008`). The command-state table
+at `L00322` (27 dwords, read over budget) sends 1 to kind 1, 2 to kind 1 or 7, 3 to
+`R0009`, 13 to `R0018` (kind 8), 14 to kind 9, 15 to kind 0xf, 12 to `R0022`, and
+5, 6, 7, 9, 16, 18..21 to `R0022` after clearing the action.
+The per-actor arm `R0008` has five rel32 call sites in the scan (`L14643`, `L14644`,
+`L14645`, `L14646`, `L00284`); two map to the callers `AI-TICK-008` names (`R0148`,
+`R0023`) and three are unclassified, so the cadence is Medium. A move is acted on at the first
+executor pass entered at progress 0 only when `R0016` does not return at the gate of
+`L00088..L00089` (`[manager+0xb388]` and `[group+0x45]` both zero); the constructor
+default of the group byte is 1 (`AI-TICK-008`), but a group made by `R0152` was not shown
+to carry it.
+The new order acts on the later of the next group pass and the running cycle's exit, plus
+the executor pass after it. The old order's queued fields are overwritten where the new
+setter writes them and kept elsewhere; the setters read delete no Spell object. The
+executor tail exception of `AI-354` is the one path read that can change active fields
+during a cycle.
+
+**Confidence.** High for the absence of a progress, phase, countdown or active-field store
+in the setter and helper bodies read. Medium for the timing statements: they compose the AI
+pass cadence, the group order each setter leaves, the over-budget state table and the
+unread callees named in `AI-487`, with no native tick observed.
+
+**Unknown.** Native command/tick interleaving, settled by a native trace of command and tick
+order; whether the `AI-354` tail prerequisite occurs during a player's cycle, settled by a
+read of the writers of `mover+0x98` against the cycle; session-space commands, settled by
+a window at those arms of `R0061`. The three `R0008` call sites outside every window
+(`L14644`, `L14645`, `L14646`) are each settled by a window at the site that names
+its owner and gate. The progress-0 gate is settled by reading the group constructor path
+`R0152` for the `+0x45` byte. The state table's arm `R0022` is settled by a second
+read inside the budget.
