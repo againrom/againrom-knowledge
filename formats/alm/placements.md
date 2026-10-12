@@ -27,8 +27,8 @@ bytes, plus an eight-byte extension when `kind == 0x21`.
 | +0x04 | u32 | **Y** | `/256`. The other axis: the grid's row index and the plane key's high byte |
 | +0x08 | u32 | **kind** | Installed values are `1..66` (65 distinct, none zero). Full u32 equality to `0x21` selects the eight-byte extension; the loader stores low16, the walker tests that word for `0x22`/`0x23`, and either constructor receives low8. These are three different width boundaries (`ALM-127`) |
 | +0x0c | two raw bytes | **placement word** | Preserved at placement-record+0x06 on complete input transfer. Shop interprets signed i16 ×1000 as its stock price cap; Building only tests zero versus nonzero here. The universal durability label is retracted (`ALM-127`, `ALM-128`, `SHOP-CAP-004`) |
-| +0x0e | u32 | **owner** | low u16 used: a **1-based physical slot** in the type-5 array |
-| +0x12 | u16 | **trigger target id** | sign-extended into the live object's `+0x10`; it is the id a type-7 `Target_Structure` parameter names (`ALM-TRIG-046`) |
+| +0x0e | u32 | **owner** | low u16 used: a **1-based physical slot** in the type-5 array; the loader drops the high word, which is 0 on every installed record (`ALM-STRUCTREAD-228`) |
+| +0x12 | u16 | **trigger target id** | sign-extended into placement-record `+0x10`, which the walker stores at the live object's `+0x08`; `obj+0x10` is the position-object pointer (`ALM-STRUCTREAD-228`; `TERR-STRUCT-075`, whose axis clause is superseded). It is the id a type-7 `Target_Structure` parameter names (`ALM-TRIG-046`); the binder `R0067` keys the structure map on `obj+0x08` and the `Target_Structure` arm resolves against it (Medium; `ALM-STRUCTREAD-228`) |
 | +0x14 | u32 | *ext, low axis* | present iff `kind == 0x21`. **Low byte only** → `obj+0x60`, the extent along the `+0x00` axis (`ALM-OBJ-062`). Bytes `+0x16`/`+0x17` are not consumed |
 | +0x18 | u32 | *ext, high axis* | **low byte only** → `obj+0x61`, the extent along the `+0x04` axis; overrides the definition's own footprint — `structures.reg`'s `VariableSize`. Bytes `+0x1a`/`+0x1b` are not consumed |
 
@@ -101,7 +101,7 @@ separate predicates below.
 |-----|------|-------|-------|
 | +0x00 | u32 | **colour slot** | → `player+0x08`, carried `+1` to `Player+0x44`; the unit body draw indexes the 17 shade objects with it (`ALM-PLAYER-069` (amended), `PAL-SHADE-012`, `PAL-SHADE-013`). Sparse and unordered, e.g. `Cross.ALM` `8 2 3 5 1 6 4 13`. The owner lookup `R0425` compares the record's own 1-based ordinal (below), **not** this word |
 | +0x04 | u32 | **control word** | Four-byte Read destination `CPlayer+0x30`; complete copies reach `Player+0x28`. No Boolean validation occurs in these local transfers. The old 0/1 inventory is a corpus result; `UNIT-OWNER-009` is partially retracted for treating it as a general value/authorship bound. `ALM-139`, `SESS-072`, retained corpus/ordinal chain in `ALM-PLAYER-069` |
-| +0x08 | u32 | **scalar; gameplay effect Unknown** | Loaded into CPlayer+0x0c. Preserve all four bytes. The installed 0/5000 values are a corpus observation, not a two-value schema. — ALM-SCALAR-087 (partially retracted), ALM-SCALAR-089 |
+| +0x08 | u32 | **scalar; gameplay effect Unknown** | Loaded into CPlayer+0x0c. The loaded map's holders read CPlayer `+0x04`, `+0x08`, `+0x10`, `+0x30` and `+0x34`, not `+0x0c` (`ALM-ROSTERREAD-231`). Preserve all four bytes. The installed 0/5000 values are a corpus observation, not a two-value schema. — ALM-SCALAR-087 (partially retracted), ALM-SCALAR-089 |
 | +0x0c | char[32] | **name** | NUL-terminated ASCII: `Self, Monsters, Villagers, Neutral, Enemy, Beasts, Guards, Peasants, Orcs, Trolls, …` |
 | +0x2c | u16[16] | **relations** | one per editor player slot (the editor caps at 16) — the diplomacy row |
 
@@ -206,7 +206,7 @@ loader itself, the placement spawner `R0151`, and the map object's destructor,
 which frees the record without reading a field. Between them they read `+0x00`, `+0x04`,
 `+0x08`, `+0x0c`, `+0x10`, `+0x14`, `+0x20`, `+0x24`, `+0x28`…`+0x2b`, `+0x2d`, `+0x2e`,
 `+0x31+i` (`i=1..5`), `+0x37+i` (`i=0..4`), `+0x3c`, `+0x40`, `+0x44` and `+0x48` of the
-runtime record — nothing else (`ALM-TAILHOLD-080`). The no-reader statements are limited to this placed-record holder family.
+runtime record — nothing else (`ALM-TAILHOLD-080`). The stream read slot those reads go through keeps no record pointer, so file `+0x1c`, `+0x22`, `+0x26`, `+0x28`, `+0x2a`, `+0x30`, `+0x33`, `+0x34` and `+0x35` have no reader among the holders; the array append that receives each record pointer was not read (`ALM-UNITREAD-227`). The map object that owns the array is created, read and destroyed by the routines `ALM-MAPLIFE-226` lists. The no-reader statements are limited to this placed-record holder family.
 
 Installed placements leave the current-mana and actor+0xbe overrides
 absent. Other tail overrides are active, so the full field program is
@@ -310,10 +310,12 @@ by its own `u32` count:
 | +0x000 | `char[64]` | editor label | the map author's own name; NUL-terminated inside a fixed buffer whose tail is uninitialised editor memory |
 | +0x040 | `u32` | **opcode** | the `ID` declared in the `.ini` (`EDITOR-023`) |
 | +0x044 | `u32` | **id** | unique within each installed list; what a trigger references |
-| +0x048 | `u32` | — | installed value 0 |
+| +0x048 | `u32` | — | installed value 0; loaded to runtime `+0x318` and read for conditions only, into the compiled check's `+0x48` (`ALM-NODEREAD-232`) |
 | +0x04c | `u32[10]` | `value[Par0..Par9]` | **indexed by slot, not packed** |
 | +0x074 | `u32[10]` | `type[Par0..Par9]` | `0` = slot unused |
 | +0x09c | `char[64][10]` | `pname[Par0..Par9]` | the `.ini`'s `Par<i>_NAME`; `"<None>"` when unused |
+
+At runtime the node is `0x31c` bytes: the label, opcode and id keep their file offsets, file `+0x048` moves to `+0x318`, and the values, types and names move to `+0x048`, `+0x070` and `+0x098`. After load only the binder reads nodes: opcode, id, values and types, and runtime `+0x318` for conditions. The label is read only as text in two failure logs, and the parameter names are never read (`ALM-NODEREAD-232`).
 
 Parameter **type codes** (`ALM-TRIG-046`), and what a value of that type names:
 
@@ -335,7 +337,7 @@ Parameter **type codes** (`ALM-TRIG-046`), and what a value of that type names:
 | Off | Type | Field |
 |-----|------|-------|
 | +0x00 | `char[64]` | name |
-| +0x40 | 64 B | opaque bytes; typed role and native producer Unknown (ALM-TRIGSTORAGE-163) |
+| +0x40 | 64 B | opaque bytes; typed role and native producer Unknown (ALM-TRIGSTORAGE-163). No holder of the loaded map reads them or the name (ALM-TRIGREAD-233) |
 | +0x80 | `u32[3][2]` | three `(left, right)` **condition ids** — complete pairs in installed records |
 | +0x98 | `u32[4]` | up to four **action ids** |
 | +0xa8 | `u32[3]` | one **comparison code** per pair — `0 ==`, `1 !=`, `2 >`, `3 <`, `4 >=`, `5 <=`, dispatched through a 6-entry table; the three pairs are **ANDed with short-circuit** and a code above 5 is permanently false (`TRIG-CMP-006`) |

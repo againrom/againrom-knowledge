@@ -1418,3 +1418,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | R2-ENGINE-024 (blank/default clause for positive filled Blizzard damage only) | Damage spells without a named switch arm reach the blank-effect default. | High / Medium | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), R2-ENGINE-390 | Positive row-7 cached damage creates a damage object and jumps from L2.01689 to L2.01690, bypassing default L2.00085. The other arms and clauses stand. | **REFUTED** — partially retracted |
+
+## EXP-0542: type-4 structure id destination
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ALM-OBJ-019` (the `+0x12` destination clause only) | Verbatim: "`+0x12` = sign-extended into `obj+0x10`" | Medium (contested under registry C-7) | [EXP-0542](../experiments/EXP-0542-map-field-readers/), ALM-STRUCTREAD-228 | The loader sign-extends `+0x12` into record `+0x10` (`L14618`); walker `R0489` stores it at `obj+0x08` (`L14613`) in both arms. `obj+0x10` is the position-object pointer (TERR-STRUCT-075). The field role (ALM-TRIG-046) and the other clauses stand. | **REFUTED** — partially retracted |

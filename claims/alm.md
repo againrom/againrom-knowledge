@@ -75,7 +75,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/alm/format.
 | ALM-TERR-016 | The runtime **passability/occupancy grid** (`sim+0x10000`, 256×256, copied to `+0x20000`) is derived per cell from type1+type3 (`rom.exe R0278`): **1** = terrain-impassable (Mountain, Water, or a bit-13 tile), **5** = type3 ... | High | ● active (amended, partially retracted) | [EXP-0020](../experiments/EXP-0020-alm-grid-semantics/), **[EXP-0041](../experiments/EXP-0041-terrain-passability/)** |
 | ALM-CNT-017 | The type-0 metadata is a **manifest of the fixed-record content-section counts**: `type0 payload +0x24 = #type5`, `+0x28 = #type4`, `+0x2c = #type6` (38/38 maps); the variable sections (type7/8/9) carry their own count word instead. | High | ● active (amended) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
 | ALM-UNIT-018 | type6 = placed units | High / Medium | ● active (amended, partially retracted) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
-| ALM-OBJ-019 | type4 = placed objects/structures | High / Medium | ● active (amended, contested) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0037](../experiments/EXP-0037-alm-class-binding/), **[EXP-0081](../experiments/EXP-0081-bridge-crossing/)** |
+| ALM-OBJ-019 | type4 = placed objects/structures | High / Medium | ● active (amended, partially retracted) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0037](../experiments/EXP-0037-alm-class-binding/), **[EXP-0081](../experiments/EXP-0081-bridge-crossing/)**, [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
 | ALM-GRP-020 | type5 = player/group roster | High / Medium | ● active (amended) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/) |
 | ALM-TRIG-021 | type7 = the trigger effect/instant list | Medium | ● active (amended) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), **[EXP-0045](../experiments/EXP-0045-alm-triggers/)** |
 | ALM-TRIG-022 | type8 / type9 = serialized marker trees | Medium / Low / Unknown | ● active (amended) | [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), **[EXP-0045](../experiments/EXP-0045-alm-triggers/)** |
@@ -132,11 +132,11 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/alm/format.
 | ALM-EFFPOP-073 | Every positive type-8→type-9 link in the shipped campaign is enumerated: 74 per root. | Medium | ● active | [EXP-0227](../experiments/EXP-0227-authored-enchantments-death-drops/) |
 | ALM-M40-074 | Mission 40's type-8 element at cell `(96,84)` is record 2 element 1, code `0x0e1f`: class 14, runtime row 31, `Quest Item31`, value 10,000, link zero and no linked Effect. | High / Medium | ● active | [EXP-0227](../experiments/EXP-0227-authored-enchantments-death-drops/) |
 | ALM-TAILMAP-079 | The type-6 record's file→runtime map, re-derived: 28 stream reads, not 27, and 18 of them are not the identity. | High / Medium | ● active | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
-| ALM-TAILHOLD-080 | Exactly three routines can hold a pointer to a type-6 runtime record, and between them they dereference 20 distinct displacements of it. | High / Medium | ● active | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
-| ALM-TAILDIR-081 | The type-6 file `+0x1c` is a `u32` whose domain is exactly `0..14`, and no routine that can hold a record pointer reads where it lands. | Medium | ● active | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
-| ALM-TAILU16-082 | The four type-6 `u16` at file `+0x20`…`+0x27` use `0xFFFF` as the absent value, and only two of the four are read by anything that can hold the record. | Medium | ● active | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
-| ALM-TAILRUN-083 | `ALM-UNIT-018`'s `0xFF`-sentinel inventory reading of the type-6 byte runs is wrong on both the values and the role. | High / Medium | ● active | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
-| ALM-TAILVER-084 | The version-gated type-6 pair at file `+0x28`/`+0x2a` lands at `rec+0x4c`/`rec+0x4e`, and no routine that can hold a record pointer reads either. | High / Medium | ● active | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
+| ALM-TAILHOLD-080 | Exactly three routines can hold a pointer to a type-6 runtime record, and between them they dereference 20 distinct displacements of it. | High / Medium | ● active (amended) | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
+| ALM-TAILDIR-081 | The type-6 file `+0x1c` is a `u32` whose domain is exactly `0..14`, and no routine that can hold a record pointer reads where it lands. | Medium | ● active (amended) | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
+| ALM-TAILU16-082 | The four type-6 `u16` at file `+0x20`…`+0x27` use `0xFFFF` as the absent value, and only two of the four are read by anything that can hold the record. | Medium | ● active (amended) | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
+| ALM-TAILRUN-083 | `ALM-UNIT-018`'s `0xFF`-sentinel inventory reading of the type-6 byte runs is wrong on both the values and the role. | High / Medium | ● active (amended) | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
+| ALM-TAILVER-084 | The version-gated type-6 pair at file `+0x28`/`+0x2a` lands at `rec+0x4c`/`rec+0x4e`, and no routine that can hold a record pointer reads either. | High / Medium | ● active (amended) | [EXP-0296](../experiments/EXP-0296-unit-placement-tail/) |
 | ALM-SCALAR-087 | The type-5 `+0x08` word lands in `CPlayer+0x0c`; within the seven-function CPlayer family the field has one direct read, in copy constructor `R0503`, and that constructor has two direct call sites. | High / Unknown | ● active (amended, partially retracted) | [EXP-0297](../experiments/EXP-0297-roster-scalar-reader/), [EXP-0352](../experiments/EXP-0352-cplayer-scalar-lifetime/EXP-0352.md) |
 | ALM-SCALAR-088 | A provenance-selected direct-displacement population contains 17 map-side routines plus 7 CPlayer-family routines; no map-side hit was attributed to a read of the map-loaded `CPlayer+0x0c`, while the family contains `ALM-SCALAR-087`'s ... | Medium / Unknown | ● active (amended, partially retracted) | [EXP-0297](../experiments/EXP-0297-roster-scalar-reader/), [EXP-0352](../experiments/EXP-0352-cplayer-scalar-lifetime/EXP-0352.md) |
 | ALM-SCALAR-089 | The type-5 `+0x08` word takes exactly two values over both preserved roots, every record 0 authors `0`, and the loader's absent-section default authors `5000` into the record-0 position. | High / Unknown | ● active (amended) | [EXP-0297](../experiments/EXP-0297-roster-scalar-reader/), [EXP-0352](../experiments/EXP-0352-cplayer-scalar-lifetime/EXP-0352.md) |
@@ -369,13 +369,13 @@ The type-0 metadata is a **manifest of the fixed-record content-section counts**
 
 **type4 = placed objects/structures**: 20-B base record (`+0x00 u16`≈100, `+0x02 u16` kind/owner, `+0x06 u16` incrementing id, `+0x08 X`, `+0x0c Y` (`u32`/256), `+0x10 value`), count `= meta+0x28`; a minority of objects carry an extra 8 B = a second `[u32 /256 coord][u32 value]` pair. An adaptive base-20+extension walk consumes each payload **exactly** (36/37 maps; scn:81's trailing 8 B = last-record extension); base-20 alone tiles 34/37 (the 3 with in-stream extensions are Cross/Horror/scn:81). **Amended by [EXP-0030]: offsets −8 and the field order is read from the loader** — `X @ rec+0x00`, `Y @ rec+0x04`, `kind @ rec+0x08` (u32), `+0x0c` u16, `+0x0e` u32, `+0x12` u16 (the loader reads 4,4,4,2,4,2 = 20 B); count `= meta+0x20`. The **extension discriminator is `kind == 0x21`** (`ALM-OBJ-034`), with which the walk tiles **38/38** — Cross/Horror were mis-walks, not anomalies (**the earlier 36/37 and 34/37 tiling figures in this row are superseded and should not be quoted**) **Amended by [EXP-0037]: the "objects/structures" label is wrong and the fields are named.** Every type-4 record resolves against **`structures.reg` alone** — `kind` is that registry's `ID` (`ALM-CLS-036`) — and the object/structure split is between two C++ classes chosen by `kind ∈ {0x22,0x23}` (`ALM-CLS-037`), not between two registries. Field roles: `+0x0c` = a `×1000` scalar the structure arm stores at `obj+0x70` — **not a durability: [EXP-0057] reads its consumer and it is the shop's stock value cap** (`SHOP-CAP-004`), `+0x0e` = the **owner** slot (`ALM-OWN-039`), `+0x12` = sign-extended into `obj+0x10` (**role answered by [EXP-0045]: it is the id a type-7 `Target_Structure` parameter names — 16/16 references land in this field's value set, `ALM-TRIG-046`**; **not** the per-map incrementing id this row guessed — sequential on only 5/38 maps; **the DESTINATION `obj+0x10` is CONTESTED by [EXP-0081] — `registry.md` C-7**: that field is a pointer to a 12-byte position object, written by the base actor constructor at `L02083` and dereferenced by both footprint routines, so a sign-extended `i16` cannot live there. The field's *role* is untouched; where it is stored is now unsourced on both sides), extension = the footprint override `w×h` in tiles — **and also [EXP-0081] names the class it belongs to: `kind == 0x21` is class id 33, `Vertical Wooden Bridge`, whose whole rectangle is opened rather than blocked (`TERR-STRUCT-077`)**
 
-**Confidence.** High (base layout/count/tiling — the loader reads `4,4,4,2,4,2` = 20 B and branches on `rec+0x08 == 0x21`; with that rule the walk consumes every payload exactly, 38/38) / ✖ (the "objects *or* structures" label) / **Medium, was unstated** (the `+0x12` destination — see the contested note above)
+**Confidence.** High (base layout/count/tiling — the loader reads `4,4,4,2,4,2` = 20 B and branches on `rec+0x08 == 0x21`; with that rule the walk consumes every payload exactly, 38/38) / ✖ (the "objects *or* structures" label) / **Medium, was unstated** (the `+0x12` destination, which is refuted: see Amended)
 
 **Original status.** ● active (amended, contested)
 
 **Evidence.** [EXP-0019](../experiments/EXP-0019-alm-content/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0037](../experiments/EXP-0037-alm-class-binding/), **[EXP-0081](../experiments/EXP-0081-bridge-crossing/)**
 
-**Amended.** The table ledger carried the status "● active (amended, contested)". `retracted.md` records a correction against this claim.
+**Amended.** The table ledger carried the status "● active (amended, contested)". `retracted.md` records a correction against this claim. `ALM-STRUCTREAD-228` reads the `+0x12` destination: the walker stores it at `obj+0x08` (`L14613`), not `obj+0x10`. The destination clause "sign-extended into `obj+0x10`" is refuted in `retracted.md`, which closes registry contest C-7; the field's role (`ALM-TRIG-046`) stands.
 
 ### ALM-GRP-020
 
@@ -617,7 +617,7 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Evidence.** [EXP-0037](../experiments/EXP-0037-alm-class-binding/)
 
-**Amended.** The table ledger carried the status "● active (amended)". `retracted.md` records a correction against this claim. The qualifier follows that record.
+**Amended.** The table ledger carried the status "● active (amended)". `retracted.md` records a correction against this claim. The qualifier follows that record. `ALM-UNITREAD-227` reads the stream read slot behind the "read destinations only" caveat of the Medium clause: no holder dereferences `rec+0x1c`, `+0x22`, `+0x26` or `+0x4c`; the caveat that remains is array append `L02248` and the accessors.
 
 ### ALM-GRP-041
 
@@ -1001,6 +1001,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Evidence.** [EXP-0296](../experiments/EXP-0296-unit-placement-tail/)
 
+**Amended.** `ALM-UNITREAD-227` reads the stream read slot (`R0533`, `R0534`) that this card lists as unread: it keeps no record pointer. The grades keep the remaining caveat, array append `L02248` and the accessors `R1338` and `R2121`, which `ALM-UNITREAD-227` also names.
+
 ### ALM-TAILDIR-081
 
 **The type-6 file `+0x1c` is a `u32` whose domain is exactly `0..14`, and no routine that can hold a record pointer reads where it lands.** Read at `L02255` into `rec+0x1c`. Over 12 085 records of both preserved roots it takes 15 distinct values, `0..14` with no gap and nothing above. Even values dominate by margins that differ sharply between the roots: EN authors 6967 even against 1127 odd (`0:1203 2:735 4:611 6:1023 8:816 10:1143 12:710 14:726` against `1:140 3:134 5:174 7:203 9:159 11:148 13:169`, 5.1× counting only the nonzero), RU 3857 against 134 (24.5× nonzero), although both roots ship the same `scenario.res`. The per-map parity split was not measured, so which maps carry the odd values is Unknown. 6891/8094 EN and 3421/3991 RU records are nonzero. `disp:1c` returns 3276 hits over 1236 owners image-wide, of which exactly two are owned by a routine that can hold a record pointer — `L00292` and `L00296`, both based on `[EBP-0x10]`, the object the same block compares against `rec+0x40` at `L00293`. Ten hits sit in orphan runs and are listed rather than dropped; four of those are `[ESP + 0x1c]` stack locals. The surviving explanation is a field written for a consumer outside this image: `Map Editor.exe` carries a second, unread `.alm` loader (`ALM-RDR-059`)
@@ -1010,6 +1012,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Original status.** ● active
 
 **Evidence.** [EXP-0296](../experiments/EXP-0296-unit-placement-tail/)
+
+**Amended.** `ALM-UNITREAD-227` reads the stream read slot (`R0533`, `R0534`) that this card lists as unread: it keeps no record pointer. The grades keep the remaining caveat, array append `L02248` and the accessors `R1338` and `R2121`, which `ALM-UNITREAD-227` also names.
 
 ### ALM-TAILU16-082
 
@@ -1021,6 +1025,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Evidence.** [EXP-0296](../experiments/EXP-0296-unit-placement-tail/)
 
+**Amended.** `ALM-UNITREAD-227` reads the stream read slot (`R0533`, `R0534`) that this card lists as unread: it keeps no record pointer. The grades keep the remaining caveat, array append `L02248` and the accessors `R1338` and `R2121`, which `ALM-UNITREAD-227` also names.
+
 ### ALM-TAILRUN-083
 
 **`ALM-UNIT-018`'s `0xFF`-sentinel inventory reading of the type-6 byte runs is wrong on both the values and the role.** No byte of file `+0x2c`…`+0x3f` is `0xFF` on any of the 12 085 type-6 records of the two preserved roots — the same population that row was measured over. The record's only `0xFFFF` sentinels are the four `u16` at `+0x20`…`+0x27` (`ALM-TAILU16-082`), which is where `EXP-0019`'s pre-`EXP-0030` offsets land after that correction's −8 shift. The two runs are stat vectors: file `+0x35` (6 B) → `rec+0x31` is the skill override run (`UNIT-PLACESKILL-086`) and file `+0x3b` (5 B) → `rec+0x37` the elemental-resistance override run (`UNIT-PLACERESIST-087`), each read by one indexed loop of `R0151` behind a zero guard and stored into the actor's own stat vectors; no inventory structure is touched by either. The shipped corpus authors them sparsely: `+0x35`…`+0x3a` are nonzero on 3, 4, 4, 4, 4 and 119 records and `+0x3b`…`+0x3f` on 7, 6, 8, 26 and 4 (EN). The three byte positions between and after the runs are the record's remaining holes, each with its own bounded negative and each `0` on 12 085/12 085 records: file `+0x30` → `rec+0x2c` (`disp:2c`, 1025 hits over 423 owners, 3 in orphan runs, **0** owned by a record-pointer holder), file `+0x33` → `rec+0x2f` (`disp:2f`, 13 over 10, 0 holder hits), and file `+0x34` → `rec+0x30` (`disp:30`, 1206 over 457, 2 in orphan runs, and **2 hits inside a holder** that are not record reads — `L02146`, an indirect call through a vtable slot at `+0x30`, and `L02258`, a dword store of 0 at `+0x30` — both outside case 6's `L02239`…`L02240` and neither among the loader's 12 resolved record dereferences, which use `+0x08`, `+0x0c`, `+0x14`, `+0x3c`, `+0x40` and `+0x44` only)
@@ -1031,6 +1037,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Evidence.** [EXP-0296](../experiments/EXP-0296-unit-placement-tail/)
 
+**Amended.** `ALM-UNITREAD-227` reads the stream read slot (`R0533`, `R0534`) that this card lists as unread: it keeps no record pointer. The grades keep the remaining caveat, array append `L02248` and the accessors `R1338` and `R2121`, which `ALM-UNITREAD-227` also names.
+
 ### ALM-TAILVER-084
 
 **The version-gated type-6 pair at file `+0x28`/`+0x2a` lands at `rec+0x4c`/`rec+0x4e`, and no routine that can hold a record pointer reads either.** Read at `L02259` and `L02260` behind a version check that skips them below `0x3b7`. `disp:4c` returns 414 hits over 219 owners with 1 in an orphan run and **none** owned by a record-pointer holder; `disp:4d` and `disp:4e` return **0 hits in the whole image**. Corpus, 12 085 records over both roots: `+0x28` is `0` on 12 085/12 085; `+0x2a` is nonzero on 348 per root with exactly four values (`1` ×117, `111` ×117, `64464` ×75, `64768` ×39) over seven maps (`scn:40` ×39, `scn:60` ×3, `scn:71` ×75, `scn:80` ×106, `scn:90` ×11, `scn:100` ×113, `scn:131` ×1), every one inside `scenario.res`, which is why the two roots agree exactly
@@ -1040,6 +1048,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Original status.** ● active
 
 **Evidence.** [EXP-0296](../experiments/EXP-0296-unit-placement-tail/)
+
+**Amended.** `ALM-UNITREAD-227` reads the stream read slot (`R0533`, `R0534`) that this card lists as unread: it keeps no record pointer. The grades keep the remaining caveat, array append `L02248` and the accessors `R1338` and `R2121`, which `ALM-UNITREAD-227` also names.
 
 ### ALM-SCALAR-087
 
@@ -1842,3 +1852,227 @@ the editor's dialogs write these fields by design, and no census of other writer
 
 **Unknown.** Reader cases 4, 5, 7, 8 and 9 were not read here; their round trip rests on
 `ALM-PLACEEDITOR-112`, `ALM-129` and `ALM-TRIGEDITOR-164` where those apply.
+
+## Map field readers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ALM-MAPLIFE-226 | Three callers of loader R0478 create the map object; each passes it to a fixed set of readers and destroys it, and only R0277 stores its pointer, at world+0x540d0. EN and RU rom.exe are identical. | High / Unknown | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-UNITREAD-227 | No holder of a type-6 runtime record reads unit file +0x1c, +0x22, +0x26, +0x28, +0x2a, +0x30, +0x33, +0x34 or +0x35, and the stream read slot keeps no record pointer. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-STRUCTREAD-228 | Type-4 file +0x12 is sign-extended into record+0x10 and stored at the Shop or Building object's +0x08 (L14613), not +0x10; +0x0c and +0x0e reach the shop cap, obj+0x42 and the owner at obj+0x14. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-HDRTEXT-229 | After the loader stores the 0x200 header block at M+0xdc, no holder of the map object reads it; the map browser reads the block up to the first NUL, below +0x40 on 72 map instances (38 EN, 34 RU; 28 scenario.res members per root). | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-HDRSLOT-230 | Header text slot 4 equals a trigger name on the same 13 scenario maps in EN and RU; no instruction found reads a slot, so no runtime reference from a script record to a slot exists in the holder set. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-ROSTERREAD-231 | The loaded map's holders read roster CPlayer +0x04, +0x08, +0x10, +0x30 and +0x34 only; the type-5 +0x08 scalar at CPlayer+0x0c is read only by the copy constructor that R0504 calls. | High / Unknown | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-NODEREAD-232 | After load only binder R0067 reads script nodes: opcode, id, values and types, and file +0x48 for conditions only; the label is read only as text in two failure logs, and the parameter names are never read. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-TRIGREAD-233 | After load only binder R0067 reads the 184-byte triggers: condition pairs, action ids, comparison codes and the once flag; no holder reads the name or the +0x40..+0x7f span. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+
+### ALM-MAPLIFE-226
+
+Population: EN and RU `rom.exe`, byte-identical (SHA-256
+`942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`); 27 ranges decoded or dumped,
+each compared EN against RU, all equal. M is the `0x32c`-byte map object that `R0478`
+constructs and loads.
+
+- `R0478` has three direct callers and no dword reference in any section: `R0128` (the
+  mission map load), `R0414` (the save-restore arm) and `R0277` (the world constructor).
+- `R0128` passes M to `R0423` (roster), `R0118`, `R0489` (type-4 walker), `R0151`
+  (type-6 spawner), `R0067` (script binder) and `R0461` (types 8 and 9), then deletes it
+  through `L14427`, which calls destructor `R0522`.
+- `R0414` passes M to `R0118` and `R0067`, then deletes it through `L14427`.
+- `R0277` stores M at `world+0x540d0` (`L02291`), passes it to `R0278`, calls `R0522`
+  and frees M. `R0118` passes M only to `R0278`, which reads M `+0x00`, `+0x04`, `+0x0c`,
+  `+0x10` and `+0x14` only.
+- Displacement `0x540d0` occurs twice in the decoded image, both in `R0277`.
+- M's containers: roster list `+0x28`, action nodes `+0x40`, condition nodes `+0x5c`, triggers
+  `+0x78` (`0xb8`-byte elements), type 8 `+0x2dc`, type 9 `+0x2f0`, type-4 records `+0x304`,
+  type-6 records `+0x318`.
+- The other map constructors `R0523`, `R0504` and `R0524` have no direct call and no
+  dword reference in any section.
+
+This is the holder set the other claims of this topic search: M's creators, the routines they
+pass M to, and the destructor.
+
+**Confidence.** **High** for the three creators, what each passes M to and the destruction:
+named instructions in ranges read in both roots; `R0525`, the destructor's only escape of each
+record, is read as a free by its pairing with allocator `R0747` and its body was not read here
+(`ALM-TAILHOLD-080`) / **Unknown** for a computed alias of `world+0x540d0` used after `R0277`
+returns (`ALM-ALIAS-154`) and for indirect entry into the three uncalled constructors.
+
+**Unknown.** A computed call or alias that reaches M or a map constructor without a direct call,
+a displacement or a dword reference.
+
+### ALM-UNITREAD-227
+
+Loader case 6 reads each record into a `0x50`-byte heap record that is not zeroed. The fields
+asked about land at: file `+0x1c` → `rec+0x1c`, `+0x22` → `rec+0x22`, `+0x26` → `rec+0x26`,
+`+0x28` → `rec+0x4c`, `+0x2a` → `rec+0x4e`, `+0x30` → `rec+0x2c`, `+0x33` and `+0x34` →
+`rec+0x2f` and `rec+0x30`, `+0x35` → `rec+0x31`.
+
+- The holders are the loader, spawner `R0151` and destructor `R0522` (`ALM-TAILHOLD-080`,
+  re-read here).
+- Spawner slot `[ebp-0x30]`: written once (`L14614`), loaded 50 times, every load
+  dereferenced, no load passed on. Displacements: `+0x00`, `+0x04`, `+0x08`, `+0x0c`, `+0x10`,
+  `+0x14`, `+0x20`, `+0x24`, `+0x28`..`+0x2b`, `+0x2d`, `+0x2e`, `+0x31+i` (`i=1..5`),
+  `+0x37+i` (`i=0..4`), `+0x3c`, `+0x40`, `+0x48`.
+- Loader slot `[ebp-0x90]`: 39 loads. It dereferences `+0x08`, `+0x0c`, `+0x14`, `+0x3c`,
+  `+0x40` and `+0x44`, passes interior addresses to the stream read slot, passes the record to
+  array append `L02248` (`L02252`) and frees the spare record after the loop (`L14615`).
+- The stream read slot: vtable `L02300` slot `+0x3c` is `R0533`. It seeks the inner
+  object at `this+0x10` through that object's `+0x30` and reads through its `+0x3c`, and keeps
+  no copy of the buffer address. `R0534` passes the buffer to the `ReadFile` import. That the
+  inner object is the file object rests on `ALM-STALE-196`.
+- No holder dereferences `rec+0x1c`, `+0x22`, `+0x26`, `+0x2c`, `+0x2f`, `+0x30`, `+0x31`,
+  `+0x4c` or `+0x4e`.
+- Census of records whose value is not the absent value (0, or `0xffff` for `+0x22` and
+  `+0x26`), EN of 8094 / RU of 3991: `+0x1c` 6891 / 3421, `+0x22` 30 / 30, `+0x2a` 348 / 348,
+  `+0x35` 3 / 3; `+0x26`, `+0x28`, `+0x30`, `+0x33`, `+0x34` 0 / 0.
+
+**Confidence.** **High** for the three holders and the stream read slot: every load of each
+record slot is listed / **Medium** for no reader anywhere in the image: array append
+`L02248`, which receives each record pointer, and the accessors `R1338` and `R2121`
+were not read.
+
+**Unknown.** Whether `L02248` or an accessor copies a record. An authored `+0x35`, `+0x22`,
+`+0x2a` or `+0x1c` value has no game effect found; the editor's use is outside this population.
+
+### ALM-STRUCTREAD-228
+
+- Loader case 4 reads `+0x00`, `+0x04`, `+0x08` (4 bytes each), `+0x0c` (2), `+0x0e` (4) and
+  `+0x12` (2) (`L02165`..`L14616`). It calls `R0481`, or `R0482` when `+0x08` is
+  `0x21`, with X shifted right by 8, Y shifted right by 8, the kind word, the `+0x0c` word, the
+  `+0x0e` low word and `+0x12` sign-extended (`L14617`).
+- The `0x14`-byte record: `+0x00` X, `+0x02` Y, `+0x04` kind, `+0x06` file `+0x0c`, `+0x08`
+  file `+0x0e` low word, `+0x10` file `+0x12` as a dword (`L14618`), `+0x0a` and `+0x0c` the
+  extension words or 0.
+- Walker `R0489`, record slot `[ebp-0x18]`: kind `0x22` or `0x23` builds a Shop (`R0490`)
+  and passes `(i16)rec+0x06 × 1000` to `R0494` (`SHOP-CAP-004`). Any other kind builds a
+  Building (`R0485`); when `(i16)rec+0x06` is 0 it stores 0 at `obj+0x42` (`L02330`).
+- Both arms then pass the `rec+0x08` word to `R0425` and store the result at `obj+0x14`
+  (`L02119`), logging a message when it is 0. Then `obj+0x08 = rec+0x10`
+  (`L14619`/`L14613`), the object goes to `R1337`, and the record is freed (`L02327`)
+  and its array slot cleared.
+- File `+0x12` therefore reaches `obj+0x08`. `obj+0x10` holds the position-object pointer
+  (`TERR-STRUCT-075`). The high word of `+0x0e` is dropped.
+- Census: `+0x0e` high word 0 and `+0x12` non-zero on all 3141 EN and 1681 RU records. Building
+  `+0x0c` values EN `0`:162, `1`:1, `3`:2, `5`:4, `10`:1, `100`:2921; RU `0`:92, `1`:1, `3`:2,
+  `5`:4, `10`:1, `100`:1557. Shop records: EN 50 with 23 values, RU 24 with 15 values.
+
+- Readers of `obj+0x08`: binder `R0067` takes the manager object at `[[this+0x24]]` that the
+  walker hands every structure to (`L14620`, `R1337`), iterates it (`L14621`, `L14622`)
+  and pushes `elem+8` as the key of the map at `[ebp-0x5c]` (`L14623`..`L14624`, call
+  `L14625`), then stores the element in the map slot (`L14626`). The type-9 arm
+  (`L14627`..`L14628`) looks the parameter value up in that map and logs a failure when the
+  result is 0 (`L14629`), which is the `Target_Structure` resolution of `ALM-TRIG-046`.
+
+**Confidence.** **High** for the loader reads, the record constructors and the walker stores,
+which are named instructions in ranges read in both roots; the walker's in-memory record is
+`ALM-CLS-037` / **Medium** for the readers of `obj+0x08`: the binder chain is read, but that
+`[[this+0x24]]` is the list `R1337` fills, and what the map helper `L14625` does with the key
+address, rest on routines not read.
+
+**Unknown.** Whether `R1337` changes `obj+0x08`; the bodies of `R1337`, `L14625`,
+`L14621` and `L14622`; any reader of `obj+0x08` outside the binder.
+
+### ALM-HDRTEXT-229
+
+- Loader case 0 reads the `0x200` bytes at type-0 `+0x78` into `M+0xdc` (`L14630`); the
+  absent-section arm writes 0 there (`L14631`).
+- The decoded-image scan finds 96 displacement and 65 immediate hits of `0xdc`. In M's holder
+  set (`ALM-MAPLIFE-226`) only the loader touches `M+0xdc`. Of the uncalled constructors,
+  `R0523` and `R0524` zero it and `R0504` copies it through `R1604`.
+- The map browser's reader `R0479` (one direct caller, `R0511`) reads the `0x200` bytes
+  from the file into a stack buffer, rewrites each `'\n'` to `'#'` up to the first NUL and
+  assigns the buffer to a CString (`ALM-META-028`).
+- Census: the block's first NUL lies below `+0x40` on 72 map instances (38 EN, 34 RU; 28
+  `scenario.res` members per root), so the
+  browser's string ends inside the description and contains no text slot.
+
+**Confidence.** **High** for the holder set and the browser reader / **Medium** for no other
+reader in the image: a reader that opens the file itself was searched only through the direct
+calls to `R0479` and the `0xdc` displacement. That the string ends at the first NUL rests on
+the rewrite loop, which stops there, and on the assignment `R1774`, whose body was not read
+(`ALM-META-058`).
+
+**Unknown.** A file reader of the block outside the browser, found by neither scan.
+
+### ALM-HDRSLOT-230
+
+- Census per root of the seven slots (text at slot `+12`): EN 90 slot texts that are neither
+  empty nor `"<None>"`, RU 91. EN: 13 equal a trigger name of the same map (all slot 4; one also
+  equals a node label), 8 equal another slot, 69 equal nothing. RU: 13, 8 and 70.
+- The 13 maps are the `scenario.res` members `10`, `30`, `40`, `41`, `50`, `51`, `60`, `70`,
+  `91`, `100`, `111`, `150` and `151`, in both roots.
+- No instruction in M's holder set reads `M+0xdc` after the loader (`ALM-HDRTEXT-229`). No
+  script parameter type code is a text reference (`ALM-TRIG-046`).
+
+**Confidence.** **High** for the counts: one walk of every map of both roots / **Medium** for no
+runtime reference from a script record to a slot, which rests on `ALM-HDRTEXT-229`'s Medium.
+
+**Unknown.** Whether the map editor uses the slot texts; `Map Editor.exe` was outside this
+population.
+
+### ALM-ROSTERREAD-231
+
+- `R0423` reads each roster CPlayer's `+0x04`, `+0x08` and `+0x30` and passes the address
+  of `+0x10`, the name.
+- `R0128` passes each player's `+0x34` to `R0130` with an index below 16 and copies the
+  returned byte into the session table at `[L00004]+0xa9c4`.
+- The destructor deletes each player through its virtual `+4`.
+- No holder reads `+0x0c`. Its one read is in copy constructor `R0503`, whose two call sites
+  are in `R0504` (`ALM-SCALAR-087`); `R0504` has no direct call and no dword reference
+  (`ALM-MAPLIFE-226`, `ALM-COPY-151`).
+
+**Confidence.** **High** for the holders' reads; the destructor's virtual `+4` (`R0528`) was
+not read, and "no holder reads `+0x0c`" leans on the four access sites of `ALM-SCALAR-087` for
+it / **Unknown** for indirect entry into `R0504` and for any effect of the scalar
+(`ALM-SCALAR-089`).
+
+**Unknown.** A computed call into `R0504`, and a reader of a copied CPlayer.
+
+### ALM-NODEREAD-232
+
+Loader case 7 allocates each node as `0x31c` bytes, runs `R2209` and reads, in order:
+`0x40` bytes to `+0x000`, 4 to `+0x040`, 4 to `+0x044`, 4 to `+0x318`, `0x28` to `+0x048`,
+`0x28` to `+0x070` and `0x280` to `+0x098`. So file `+0x48` lands at runtime `+0x318`, the ten
+values at `+0x48`, the ten types at `+0x70` and the parameter names at `+0x98`. Actions are
+appended to `M+0x40`, conditions to `M+0x5c` (`R2186`).
+
+- Binder `R0067` (`TRIG-BIND-010`) reads M only at `+0x40`, `+0x5c` and `+0x78`. Action slot `[ebp-0xa4]` and
+  condition slot `[ebp-0xa0]` dereference runtime `+0x40` (opcode), `+0x44` (id; its address is
+  the key passed to map lookup `R2053`), `+0x48`..`+0x6f` (values) and `+0x70`..`+0x97`
+  (types).
+- Runtime `+0x318` is read for conditions only (`L14632`) and goes to the compiled check's
+  `+0x48`.
+- The label `+0x000` is read only as the `%s` of `"Failed to create instant %d %s"`
+  (`L14633`) and `"Failed to create check %d %s"` (`L14634`).
+- No holder reads the parameter names `+0x098`..`+0x317`.
+- Node constructor `R2209` zeroes the label's first byte, `+0x40`, the values, the types,
+  each name's first byte and `+0x318`. The node copies `L14635` and `L14636` and the
+  node-list serializer `L13861` have no direct call; `L13861` is referenced only from a
+  vtable slot at `L13862`.
+
+**Confidence.** **High** for the loader layout and the binder's reads, taking the appended
+pointer as what the accessors `R2189` and `L14637` return (appends `R2186`; the walker's
+in-memory record is `ALM-CLS-037`) / **Medium** for no other reader: the map lookups `R2053`
+and `L14625`, node delete `L14638` and the serializer reached through `L13862` were not
+read. The binder's failure strings and the `0x1388` threshold are `TRIG-BIND-010`.
+
+**Unknown.** Whether any code dispatches the node list's serializer slot.
+
+### ALM-TRIGREAD-233
+
+- Loader case 7 sizes the trigger array at `M+0x78` (`L14639`) and reads `0xb8` bytes into
+  each element (`L02405`, `ALM-TRIGSTORAGE-163`).
+- Binder slot `[ebp-0x230]` dereferences `+0x80`, `+0x84` (condition id pairs), `+0x98`
+  (action ids, compared with `0x1388`), `+0xa8` (comparison codes) and `+0xb4` (once flag,
+  `TRIG-FIRE-007`). The read order and the once flag in the pattern are `TRIG-REC-011`; the
+  comparison codes are `TRIG-CMP-006`; the binder's strings and threshold are `TRIG-BIND-010`.
+- No holder reads the name `+0x00`..`+0x3f` or `+0x40`..`+0x7f`.
+- The trigger array's serializer `L14640` writes whole elements through `L14641`; it has no
+  direct call and is referenced only from a vtable slot at `L14642`.
+
+**Confidence.** **High** for the binder's reads and the holder set, taking the appended pointer
+as what the accessors return / **Medium** for no other reader: the serializer slot's callers were
+not found and the element accessors (`R2189`, `L14637`) were not read.
+
+**Unknown.** The role of `+0x40`..`+0x7f` stays Unknown (`ALM-TRIGSTORAGE-163`).

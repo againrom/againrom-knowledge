@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3650. Observation: 99. Static analysis: 3051. Mixed: 500.
+Claims labelled: 3658. Observation: 99. Static analysis: 3058. Mixed: 501.
 
 ## Ledger ai
 
@@ -333,7 +333,7 @@ Claims labelled: 3650. Observation: 99. Static analysis: 3051. Mixed: 500.
 | ALM-TERR-016 | static analysis | ● active (amended, partially retracted) |
 | ALM-CNT-017 | static analysis | ● active (amended) |
 | ALM-UNIT-018 | mixed | ● active (amended, partially retracted) |
-| ALM-OBJ-019 | static analysis | ● active (amended, contested) |
+| ALM-OBJ-019 | static analysis | ● active (amended, partially retracted) |
 | ALM-GRP-020 | mixed | ● active (amended) |
 | ALM-TRIG-021 | mixed | ● active (amended) |
 | ALM-TRIG-022 | static analysis | ● active (amended) |
@@ -390,11 +390,11 @@ Claims labelled: 3650. Observation: 99. Static analysis: 3051. Mixed: 500.
 | ALM-EFFPOP-073 | mixed | ● active |
 | ALM-M40-074 | mixed | ● active |
 | ALM-TAILMAP-079 | static analysis | ● active |
-| ALM-TAILHOLD-080 | static analysis | ● active |
-| ALM-TAILDIR-081 | static analysis | ● active |
-| ALM-TAILU16-082 | static analysis | ● active |
-| ALM-TAILRUN-083 | static analysis | ● active |
-| ALM-TAILVER-084 | static analysis | ● active |
+| ALM-TAILHOLD-080 | static analysis | ● active (amended) |
+| ALM-TAILDIR-081 | static analysis | ● active (amended) |
+| ALM-TAILU16-082 | static analysis | ● active (amended) |
+| ALM-TAILRUN-083 | static analysis | ● active (amended) |
+| ALM-TAILVER-084 | static analysis | ● active (amended) |
 | ALM-SCALAR-087 | static analysis | ● active (amended, partially retracted) |
 | ALM-SCALAR-088 | static analysis | ● active (amended, partially retracted) |
 | ALM-SCALAR-089 | mixed | ● active (amended) |
@@ -456,6 +456,14 @@ Claims labelled: 3650. Observation: 99. Static analysis: 3051. Mixed: 500.
 | ALM-SAVE-238 | static analysis | ✔ promoted |
 | ALM-SAVE-239 | static analysis | ✔ promoted |
 | ALM-SAVE-240 | static analysis | ✔ promoted |
+| ALM-MAPLIFE-226 | static analysis | ✔ promoted |
+| ALM-UNITREAD-227 | static analysis | ✔ promoted |
+| ALM-STRUCTREAD-228 | static analysis | ✔ promoted |
+| ALM-HDRTEXT-229 | static analysis | ✔ promoted |
+| ALM-HDRSLOT-230 | mixed | ✔ promoted |
+| ALM-ROSTERREAD-231 | static analysis | ✔ promoted |
+| ALM-NODEREAD-232 | static analysis | ✔ promoted |
+| ALM-TRIGREAD-233 | static analysis | ✔ promoted |
 
 ## Ledger anim
 
@@ -3050,7 +3058,7 @@ Claims labelled: 3650. Observation: 99. Static analysis: 3051. Mixed: 500.
 | TERR-STRUCT-072 | static analysis | ● active |
 | TERR-PASS-073 | static analysis | ● active (amended, partially retracted) |
 | TERR-STRUCT-074 | static analysis | ● active (amended) |
-| TERR-STRUCT-075 | static analysis | ● active (superseded, contested) |
+| TERR-STRUCT-075 | static analysis | ● active (superseded) |
 | TERR-STRUCT-076 | static analysis | ● active |
 | TERR-STRUCT-077 | static analysis | ● active (amended, superseded) |
 | TERR-STRUCT-078 | static analysis | ● active |

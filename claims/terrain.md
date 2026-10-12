@@ -83,7 +83,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/terrain/for
 | TERR-STRUCT-072 | When it happens, and that it is undone. | High / Medium | ● active | [EXP-0070](../experiments/EXP-0070-structure-passability/) |
 | TERR-PASS-073 | The two block planes' complete writer list, the instrument, and where the bit semantics stop. | High / Unknown | ● active (amended, partially retracted) | [EXP-0070](../experiments/EXP-0070-structure-passability/), [EXP-0174](../experiments/EXP-0174-area-movement/) |
 | TERR-STRUCT-074 | A bridge deck is free to a ground mover, and the crossing is load-bearing — the model's own prediction, measured. | High / Medium | ● active (amended) | [EXP-0081](../experiments/EXP-0081-bridge-crossing/), **[EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/)** |
-| TERR-STRUCT-075 | `obj+0x10` is a POINTER to a 12-byte position object — not two coordinate bytes — and with it the footprint anchor is read from the image instead of fitted to the corpus. | High | ● active (superseded, contested) | [EXP-0081](../experiments/EXP-0081-bridge-crossing/) |
+| TERR-STRUCT-075 | `obj+0x10` is a POINTER to a 12-byte position object — not two coordinate bytes — and with it the footprint anchor is read from the image instead of fitted to the corpus. | High | ● active (superseded) | [EXP-0081](../experiments/EXP-0081-bridge-crossing/) |
 | TERR-STRUCT-076 | The attach chain reaches the recompute on ONE of `R1357`'s two paths, not unconditionally. | High / Unknown | ● active | [EXP-0081](../experiments/EXP-0081-bridge-crossing/) |
 | TERR-STRUCT-077 | The `.alm` extension kind is a bridge class, and it opens its whole rectangle. | High / Medium | ● active (amended, superseded) | [EXP-0081](../experiments/EXP-0081-bridge-crossing/), [EXP-0091](../experiments/EXP-0091-placement-axes/) |
 | TERR-STRUCT-078 | The recompute's polarity, decided by one branch displacement — a SET `Passability` bit BLOCKS, and the shipped column title is the inverse of what the code does with it. | High / Medium | ● active | [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/) |
@@ -909,7 +909,7 @@ The affected former wording below is partially retracted. See the
 
 **Evidence.** [EXP-0081](../experiments/EXP-0081-bridge-crossing/)
 
-**Amended.** The table ledger carried the status "● active (contested — `registry.md` C-7 against `ALM-OBJ-019`'s destination for the `.alm` `+0x12` field; the *pointer* is not what is contested, the other row's destination is)". `retracted.md` records a correction against this claim, which adds `superseded`. The `contested` qualifier is kept: the table ledger's status named a contest (`registry.md` C-7 against `ALM-OBJ-019`'s destination for the `.alm` `+0x12` field), and no record in this ledger or in `retracted.md` closes it.
+**Amended.** The table ledger carried the status "● active (contested — `registry.md` C-7 against `ALM-OBJ-019`'s destination for the `.alm` `+0x12` field; the *pointer* is not what is contested, the other row's destination is)". `retracted.md` records a correction against this claim, which adds `superseded`. `ALM-STRUCTREAD-228` closes `registry.md` C-7: the type-4 `+0x12` field is stored at `obj+0x08`, so the pointer at `obj+0x10` stands and `contested` is removed.
 
 ### TERR-STRUCT-076
 

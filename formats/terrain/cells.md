@@ -271,7 +271,7 @@ what to do about it. The recompute's callers are eleven routines, not two:
 `R0458` (×4), `R0057`, `R0938`, `R0447`, `R1357`, `R1358`,
 `R1075` (×2), `R1078`, `R0227`, `R1359`, `R1835`.
 
-**The position object** (`TERR-STRUCT-075` (superseded, contested)). `obj+0x10` is a pointer, allocated and stored by the
+**The position object** (`TERR-STRUCT-075` (superseded)). `obj+0x10` is a pointer, allocated and stored by the
 base actor constructor (a `0xc`-byte allocation at `L07893` and `L07894` through `R0747`, and the store into `obj+0x10` at `L02083`) and written whole by `R0288`:
 
 ```
