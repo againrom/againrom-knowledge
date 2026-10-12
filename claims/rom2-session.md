@@ -397,8 +397,8 @@ World serializer or networking claim is made.
 | R2-SESSION-048 | Per-ID bank stores: 20 sets 532, 552; 40 sets 773=23; 50 sets 771, 534, 554; 60 sets 537, 557, 774; 70 sets 535, 555, 777, 770; 80 sets 778; 100 sets 538, 558; only the output 3 store is gated. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-SESSION-049 | Slot 768 gains ten when the incoming ID is divisible by ten, whether or not the ID has a case body, and the stage switch runs only when the resulting slot 768 is 30, 40, ..., 110. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-SESSION-050 | Stage cases and ID cases store immediate values into an eight-entry, 20-byte-stride array at D2.00112..D2.00007, outside the bank; the field meaning and consumers are Unknown. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-SESSION-051 | Ordinary departure reads bank slots 512+i, 532+i, 768, 772, 775..781 as gates and writes 512..551, 552, 554, 555, 557, 558, 768, 770, 771, 773..775, 777, 778 and 896+ID; no other bank slot is written in the measured routine. | Medium | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-SESSION-052 | The store of 1 at slot 896+ID in the measured ordinary routine has no bound check on the ID argument, so an ID of 128 or above, or a negative ID, addresses outside the 1,024-DWORD bank. | Medium | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
+| R2-SESSION-051 | Ordinary departure reads bank slots 512+i, 532+i, 768, 772, 775..781 as gates and writes 512..551, 552, 554, 555, 557, 558, 768, 770, 771, 773..775, 777, 778 and 896+ID; no other bank slot is written in the measured routine. | Medium | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
+| R2-SESSION-052 | The store of 1 at slot 896+ID in the measured ordinary routine has no bound check on the ID argument, so an ID of 128 or above, or a negative ID, addresses outside the 1,024-DWORD bank. | Medium | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-SESSION-059 | EN text/town.txt holds each of the sections #npc22talk30 and #npc2108talk31 once; their keys match the stage-30 kind-3 packed entries NPC 22 topic 30 and NPC 2108 topic 31. | Medium | ● active | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 | R2-SESSION-060 | In EN, all 4 EnterInn call windows (call sites L2.00399, L2.00400, L2.00401, L2.00402) contain a compare of client member +0x5d8 with 2; the RU gate was not measured. | Low | ● active (amended) | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 
@@ -452,6 +452,8 @@ R2-SESSION-023 notes that the client writes slots 776 and 781 after character ch
 
 **Unknown.** The writers of slots 772, 775, 776, 779, 780 and 781 and the identity of the records appended by the restoration.
 
+**Amended.** R2-ENGINE-419 identifies the restored records and R2-ENGINE-425 bounds the writers of slot 775; slots 772, 779 and 780 are map-script writes (R2-SESSION-114) and 776/781 the character choice (R2-SESSION-023).
+
 ### R2-SESSION-052
 
 At D2.00119 the routine loads the ID argument and at D2.00120 stores 1 to [edx*4+D2.00115] with no compare of the ID. The ID compare that follows (ID minus 10 against 100) selects the switch and does not guard this store. The bank spans D2.00003..D2.00032, so ID 127 addresses slot 1023, ID 128 addresses the first DWORD of the catalog list object at D2.00032 and a negative ID addresses lower memory. IDs of 10 to 110 are the ones with case bodies in branch-matrix.tsv.
@@ -459,6 +461,8 @@ At D2.00119 the routine loads the ID argument and at D2.00120 stores 1 to [edx*4
 **Confidence.** Medium: the missing compare is a local instruction fact. No claim covers which IDs the client passes or how the objects after the bank are laid out.
 
 **Unknown.** The runtime ID range and the effect of an out-of-range store.
+
+**Amended.** R2-ENGINE-418 bounds the catalog IDs to 1..110, so a departure from a catalog record stays inside the bank.
 
 ### R2-SESSION-059
 
@@ -1938,3 +1942,60 @@ bag were not reached): an owner save after buying one stackable
 and one magic item would settle count, item and effect records.
 
 **Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
+
+## Campaign graph after mission 20
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-173 | Each ROM2 inn mission option whose body tests a completion flag is withheld once slot 896+topic is nonzero; options 30, 40, 90, 100 and 110 carry no such test; 62, 74..77, 84..87, 93..96 and 103 open on another mission's flag. | High | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-SESSION-174 | The exact-stage inn options (High) are 31 at 30; 41..43 at 40; 51, 53 at 50; 61, 63 at 60; 72, 73 at 70; 81 or 82 and 83 at 80; 91, 92 at 90; 101..103 at 100; that each is offered only until the next decade departure is Medium. | High / Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+
+### R2-SESSION-173
+
+Ordinary departure stores 1 at slot 896+ID for the departed mission
+(R2-SESSION-047), and the client departs only on a victory
+(R2-ENGINE-422). The inn predicates of R2-ENGINE-217 and
+R2-ENGINE-223..R2-ENGINE-227 test these slots, each equal to 896 plus a
+mission ID: 927 (31), 937..939 (41..43), 947 (51), 949 (53), 957..959
+(61..63), 966..969 (70..73), 970..973 (74..77), 977..979 (81..83), 980..983
+(84..87), 987 and 988 (91, 92), 989..992 (93..96), 997..999 (101..103).
+Each option in that list (31, 41..43, 51, 53, 61..63, 70..77, 81..87, 91..96,
+101..103) is offered only while its own slot is zero. Option 62 needs
+949 (53 completed); 74..77 need 959 (63 completed); 84..87 need one of
+970..973; 93..96 need one of 980..983; 103 needs 987 (91 completed).
+Mission options 30, 40, 90, 100 and 110 have no completion gate and are not
+withheld by a flag; the exact stage closes them (R2-SESSION-174).
+
+**Confidence.** High: the slot arithmetic and the predicates are native
+reads in the cited claims; this claim joins them.
+
+**Unknown.** Whether LOAD or a script restores a nonzero completion slot
+for an uncompleted mission.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-SESSION-174
+
+Slot 768 rises by ten only on a decade departure (R2-ENGINE-424). The
+inn bodies of R2-ENGINE-161 and R2-ENGINE-223..R2-ENGINE-227 give these
+exact-stage offers: 31 at 30; 41, 42, 43 at 40; 51 and 53 at 50; 61 and 63
+at 60 in town 2; 72 and 73 at 70 in town 2; 81 or 82 at 80 in town 2 and
+83 at 80 in town 3; 91 and 92 at 90 in town 3; 101 at 100 in town 3 and
+102, 103 at 100 in town 2. A kind-3 TALK admits the mission to the list,
+and no read writer removes an admitted mission except its own departure,
+the restoration's clear and LOAD (R2-ENGINE-420). An admitted side mission
+therefore stays available after the stage moves on; an option not taken
+before the next decade departure is not offered again. Options 70 and 71
+span stages 60..80, option 62 stage 60 or more, and the 2022 families any
+stage.
+
+**Confidence.** High: the exact-stage gates of the list above. Medium: the
+lead consequence that an option is offered only until the next decade
+departure and an admitted mission stays available, because it needs slot
+768 to change only by a decade departure and the slot-768 writer census is
+Medium (R2-ENGINE-424).
+
+**Unknown.** Presentation of an option already admitted, and whether the
+original warns the player before a window closes.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)

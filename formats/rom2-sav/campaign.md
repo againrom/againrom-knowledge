@@ -62,16 +62,17 @@ join without a case body. — R2-ENGINE-143, R2-ENGINE-144, R2-ENGINE-145
 
 Ordinary departure adds available records by ID: 10 adds type-1 ID 20, 20 adds
 type-2 ID 2 and, when slot 772 is nonzero, type-1 ID 21, 31 adds type-1 ID 32,
-40 adds type-1 IDs 50 and 60, 50 adds type-2 ID 3 and, when slot 780 is nonzero, a fixed record whose type
-and ID are unresolved, and 60 adds type-1 ID 80. The
+40 adds type-1 IDs 50 and 60, 50 adds type-2 ID 3 and, when slot 780 is nonzero, type-1 ID 52, and 60 adds
+type-1 ID 80. The
 add helpers append a catalog pointer only when no node holds it. The output
 DWORD is 1 for ID 10, 2 for ID 30, 3 for IDs 70 and 80 only under opposite
 slot 777/778 gates, and 5 or 4 for ID 110 by slot 779. — R2-ENGINE-146,
-R2-ENGINE-147, R2-ENGINE-148
+R2-ENGINE-147, R2-ENGINE-148, R2-ENGINE-419
 
 A nonzero slot 775 first clears availability and appends 42 unconditional fixed
-records and one of four records chosen by slots 776 and 781. The types and IDs behind those records are not
-resolved. The earlier controller/list closure excluded two allocation wrappers;
+records and one of four records chosen by slots 776 and 781: towns 2 and 3,
+missions 21, 30..32, 40..43, 50..53, 60..63, 70..77, 80..87, 90..92 and
+100..103, 110, and one of 93..96. — R2-ENGINE-419 The earlier controller/list closure excluded two allocation wrappers;
 their selected local contracts are now measured. Their failure callbacks,
 small-block internals and aliasing remain open. — R2-ENGINE-149,
 R2-ENGINE-150, R2-ENGINE-218
@@ -365,3 +366,62 @@ Bank773 is at 0xC14, selection512..531 at 0x800..0x84F, availability532..551
 at 0x850..0x89F and town552..571 at 0x8A0..0x8EF. Native transfer and saved
 pointer relations do not establish executed cold LOAD preserving the
 same roster or literal binding. — R2-SESSION-158
+
+## Catalog and campaign graph
+
+The catalog holds 49 records: towns 1, 2 and 3 (type 2) and 46 missions
+(type 1) with IDs 10, 20, 21, 30..32, 40..43, 50..53, 60..63, 70..77,
+80..87, 90..96, 100..103 and 110. Each record carries a map x and y; three
+further type-1 records with IDs 10, 20 and 30 are built but not in the
+catalog. — R2-ENGINE-418
+
+The available list changes only through departure, TalkTo kind 3, NewGame
+and LOAD by direct call; EnterLocation sets current only. The stage switch
+writes shop records, not the list. One list method reached through a
+pointer table stays open. — R2-ENGINE-420, R2-ENGINE-421
+
+| Record | Producer | Condition |
+|---|---|---|
+| town 2 | Leave20 | none |
+| town 3 | Leave50 | none |
+| 21 | Leave20 | slot 772 nonzero |
+| 30, 31 | inn at stage 30 | 31: slot 927 zero |
+| 32 | Leave31 | none |
+| 40..43 | inn at stage 40 | 41..43: slots 937..939 zero |
+| 50, 60 | Leave40 | none |
+| 51 | inn at stage 50 | slot 533 nonzero, 947 zero |
+| 52 | Leave50 | slot 780 nonzero |
+| 53 | inn at stage 50 | slot 949 zero |
+| 61, 63 | inn at stage 60, town 2 | slots 957, 959 zero |
+| 62 | town 2, stage 60 or more | 949 nonzero, 958 zero |
+| 70, 71 | inn at stages 60..80, town 3 | 771 nonzero, 966 zero; 71 also 967 zero |
+| 72, 73 | inn at stage 70, town 2 | 968, 969 zero |
+| 74..77 | town 2, any stage | 959 nonzero, 970..973 zero; one by 776/781 |
+| 80 | Leave60 | none |
+| 81 or 82 | inn at stage 80, town 2 | 776 nonzero or zero; 977 or 978 zero |
+| 83 | inn at stage 80, town 3 | 536 nonzero, 979 zero |
+| 84..87 | town 2, any stage | one of 970..973 nonzero, 980..983 zero; one by 776/781 |
+| 90 | inn at stage 90, town 2 | none |
+| 91, 92 | inn at stage 90, town 3 | 987, 988 zero |
+| 93..96 | town 2, any stage | one of 980..983 nonzero, 989..992 zero; one by 776/781 |
+| 100, 102, 103 | inn at stage 100, town 2 | 102: 998 zero; 103: 987 nonzero, 999 zero |
+| 101 | inn at stage 100, town 3 | 997 zero |
+| 110 | inn at stage 110, town 2 | none |
+
+Inn rows are kind-3 options that TALK admits. The slot-775 restoration
+appends 43 of the 49 records (not town 1, missions 10 and 20, or three of
+93..96) and LOAD adds any record whose ID the bank holds. Slot 896+ID is
+the completion flag of mission ID; each option whose body tests it (all
+inn options except 30, 40, 90, 100 and 110) is withheld once its own flag
+is set. Options gated by an exact stage are offered only until the next
+decade departure (High for the gates, Medium for that consequence). — R2-ENGINE-424, R2-SESSION-173, R2-SESSION-174
+
+Slot 775 has no writer in the read population except clears and LOAD.
+— R2-ENGINE-425
+
+After a campaign victory the client calls LeaveLocation, plays the movie
+the output selects, then shows the credits when slot 768 is at least 120,
+enters the first available record when no town is available, and
+otherwise opens the global map. Outputs 1..5 select the cutpaths rows
+teleport, stars, crown, knights and druids. In the read client
+call sites a defeat does not call LeaveLocation (Medium). — R2-ENGINE-422, R2-ENGINE-423

@@ -1581,12 +1581,12 @@ consumer.
 | R2-ENGINE-143 | The EN/RU ScenarioLeaveLocation export writes -1 to its output DWORD, returns 0 without further effect when current is null, routes type 2 to a type-2 routine and every other type to an ordinary routine. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-144 | The type-2 departure routine removes the current record available node only for ID 1 (without a null check on the found node) and clears current for every ID; it writes no output and no bank slot. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-145 | The ordinary departure routine is one 2383-byte body with a 12-case ID switch (IDs 10..110) and a 9-case stage switch on bank slot 768 (values 30..110); every other selector takes the join without a case body. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-ENGINE-146 | Ordinary departure adds: 10 mission 20; 20 town 2, plus mission 21 if bank772; 31 mission 32; 40 missions 50, 60; 50 town 3, plus fixed record D2.00015 (type and ID unresolved) if bank780; 60 mission 80; other IDs none. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
+| R2-ENGINE-146 | Ordinary departure adds: 10 mission 20; 20 town 2, plus mission 21 if bank772; 31 mission 32; 40 missions 50, 60; 50 town 3, plus fixed record D2.00015 (type and ID unresolved) if bank780; 60 mission 80; other IDs none. | High | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-147 | The add helpers scan the catalog for matching type and ID, append the record pointer to the available list only when no node already holds that pointer, and the remove and clear helpers unlink or empty that doubly linked list. | High | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-ENGINE-148 | The departure output DWORD is -1 by default, 1 for ID 10, 2 for ID 30, 3 for IDs 70 and 80 only under opposite bank777/bank778 gates (the gate skips only the store), 5 or 4 for ID 110 by bank779, unchanged otherwise and for type 2. | High | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-ENGINE-149 | A nonzero bank775 makes ordinary departure clear the available list and append 42 fixed record pointers plus one of four bank776/bank781-selected records before the normal path; the types and IDs behind those pointers are not resolved here. | Medium | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
+| R2-ENGINE-148 | The departure output DWORD is -1 by default, 1 for ID 10, 2 for ID 30, 3 for IDs 70 and 80 only under opposite bank777/bank778 gates (the gate skips only the store), 5 or 4 for ID 110 by bank779, unchanged otherwise and for type 2. | High | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
+| R2-ENGINE-149 | A nonzero bank775 makes ordinary departure clear the available list and append 42 fixed record pointers plus one of four bank776/bank781-selected records before the normal path; the types and IDs behind those pointers are not resolved here. | Medium | ● active (amended) | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
 | R2-ENGINE-150 | In the 23-routine EN/RU population no direct callee is unresolved except two unread excluded callees of the node shells, and no indirect edge exists in the controller or list helpers. | Medium | ● active | [EXP-2018](../experiments/EXP-2018-rom2-campaign-departure/) |
-| R2-ENGINE-159 | Catalog record kind 2 / ID 2 is built by one constructor, D2.00016, calling the record initializer D2.00017 on object D2.00018; it is one of 52 constant-argument initializer call sites in EN and RU scenario.dll. | Medium | ● active | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
+| R2-ENGINE-159 | Catalog record kind 2 / ID 2 is built by one constructor, D2.00016, calling the record initializer D2.00017 on object D2.00018; it is one of 52 constant-argument initializer call sites in EN and RU scenario.dll. | Medium | ● active (amended) | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 | R2-ENGINE-160 | The client body that selects per-ID town data has a separate arm for ID 2 beside arms for IDs 1 and 3; the ID 2 arm pushes the resource key music\b16.wav in EN (arm L2.00264) and RU (arm L2.00265). | Medium | ● active | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 | R2-ENGINE-161 | The EnterInn export has 10 stage case bodies (8 distinct) and a default; stage 20 and other unlisted stages select the shared continuation D2.00019 (295 instructions), which holds 15 packed-entry stores behind bank-slot compares. | Medium | ● active (amended) | [EXP-2020](../experiments/EXP-2020-rom2-second-town/) |
 
@@ -1624,6 +1624,8 @@ Case bodies in branch-matrix.tsv: ID 10 AddMission(20); ID 20 AddTown(2), then A
 
 **Unknown.** Catalog contents at runtime; a missing catalog record adds nothing.
 
+**Amended.** R2-ENGINE-418 lists the catalog; R2-ENGINE-419 resolves the slot-780 record D2.00015 as type 1, mission 52.
+
 ### R2-ENGINE-147
 
 add-mission (D2.00014) and add-town (D2.00031) are identical except the type compare constant (1 versus 2) and local branch targets. Each walks the catalog list at D2.00032 with the begin and next helpers, and for every record whose type and ID match calls find (D2.00021) with a null start: find walks from the list head and compares each node payload pointer with the record pointer. When none matches, append (D2.00033) adds the record at the tail. The loop continues past a match, so every matching catalog record is considered. Remove (D2.00022) unlinks a node by head, tail and neighbor pointers and returns it to a free chain, calling clear (D2.00034) when the count reaches zero.
@@ -1642,6 +1644,8 @@ The output DWORD is stored only by case bodies. ID 10 stores 1. ID 30 stores 2. 
 
 **Unknown.** Meaning of values 1..5 beyond that consumer, and how a gated case that stores no value is handled by the caller.
 
+**Amended.** R2-ENGINE-422 and R2-ENGINE-423 read the client consumer: a value of 0 or more selects cutpaths row value (1 teleport, 2 stars, 3 crown, 4 knights, 5 druids); -1 plays nothing.
+
 ### R2-ENGINE-149
 
 At D2.00037, when bank775 (D2.00038) is nonzero, the routine zeroes it, clears the available list and appends in order the records at D2.00018, D2.00039, D2.00040, D2.00041, D2.00042, D2.00043, D2.00044, D2.00045, D2.00046, D2.00047, D2.00048, D2.00049, D2.00015, D2.00050, D2.00051, D2.00052, D2.00053, D2.00054, D2.00055, D2.00056, D2.00057, D2.00058, D2.00059, D2.00060, D2.00061, D2.00062, D2.00063, D2.00064, D2.00065, D2.00066, D2.00067, D2.00068, D2.00069, D2.00070, D2.00071, D2.00072, D2.00073. It then appends one arm record: D2.00074 (bank776 and bank781 nonzero), D2.00075 (bank776 nonzero, bank781 zero), D2.00076 (bank776 zero, bank781 nonzero) or D2.00077 (both zero). Every arm then appends the five common records D2.00078, D2.00079, D2.00080, D2.00081, D2.00082 at D2.00083 and continues into the normal path, which then removes current. The region holds 46 append calls: 37 fixed, 4 arm records (one per arm) and 5 common, so 42 are unconditional and 43 run per arm.
@@ -1649,6 +1653,8 @@ At D2.00037, when bank775 (D2.00038) is nonzero, the routine zeroes it, clears t
 **Confidence.** Medium: order, conditions and pointers are native. The type and ID of each static record come from separate initializer routines that were not read, because they would exceed the routine cap.
 
 **Unknown.** The type and ID of every appended record and therefore the restored membership by mission or town.
+
+**Amended.** R2-ENGINE-419 resolves every appended record: towns 2 and 3, missions 21..110 except 93..96, and one of 93..96 by arm.
 
 ### R2-ENGINE-150
 
@@ -1667,6 +1673,8 @@ Selector controls recover kind 2 / ID 1 and kind 1 / ID 10 and 20 in both locale
 **Confidence.** Medium: the call-site scan is complete for direct calls in .text. A constructor reached only through static-initializer registration, a record built at run time with a non-constant ID, or a save-loaded record is not excluded. EN and RU .text and .data are identical, so this is one dependency. Method: the experiment exceeded its preregistered inputs cap (20 reported and 24 conservative against 16), so this claim is bounded by an incomplete method record.
 
 **Unknown.** Constructors outside the D2.00017 call-site population that store the immediates 2 and 2 directly (the preregistered selector population) were not searched. How the constructor is registered and invoked, the body of helper D2.00087 beyond its 8 instructions, and the x and y arguments of the record.
+
+**Amended.** R2-ENGINE-418 reads all 52 initializer calls with their map x and y arguments; 49 objects form the catalog and three are referenced only by their constructors.
 
 ### R2-ENGINE-160
 
@@ -7681,3 +7689,268 @@ of an effect with tag 42: slot 18 reads +0x40 only, and no body read
 shows whether +0x42 matters for tag 42.
 
 **Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
+
+## Campaign graph after mission 20
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-418 | The ROM2 catalog rebuild appends 49 records in EN and RU: towns 1..3 and missions 10, 20, 21, 30..32, 40..43, 50..53, 60..63, 70..77, 80..87, 90..96, 100..103, 110; three more type-1 records (IDs 10, 20, 30) are built outside it. | High | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-419 | The bank775 restoration appends towns 2 and 3 and missions 21, 30..32, 40..43, 50..53, 60..63, 70..77, 80..87, 90..92, one of 93..96 chosen by slots 776/781, then 100..103 and 110; the slot-780 record of Leave50 is mission 52. | High | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-420 | In both scenario.dll images only departure, TalkTo kind 3, NewGame and Load call the availability writers directly; an appending list method reached only through an `.rdata` pointer keeps the whole set Medium. | High / Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-421 | The ROM2 client calls LeaveLocation only from the 0x41d and 0x42d arms and TalkTo only from three inn sites (EnterInn words) and three shop sites (the EnterShop result); IsMissionAvailable has no caller. | Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-422 | After a campaign victory the ROM2 client calls LeaveLocation and plays the output movie, then shows credits at stage768 120 or more, enters the first available record when no town is available, or opens the global map. | High / Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-423 | The departure output indexes `cutpaths.txt` rows 0..5 intro, teleport, stars, crown, knights, druids (EN = RU); outputs 1..5 select teleport after mission 10, stars after 30, crown after the second of 70/80, knights or druids after 110. | High | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-424 | Every catalog mission after 20 has a producer: a departure case, an inn kind-3 option under stage, town and completion gates, the bank775 restoration or LOAD; the decade missions 10..110 form the only stage chain. | Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-425 | Slot 775 has no writer in the read population except the restoration's own clear, NewGame's clear and Load's raw restore, so a fresh campaign reaches the restoration only through a loaded bank. | Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+
+### R2-ENGINE-418
+
+The constructor span `D2.00203..D2.00014` holds 52 constant calls of the
+record initializer `D2.00017`. Each pushes type, ID, map x, map y and two
+zeros and loads the object into ECX; the field setter `D2.00086` stores
+type at +0 and ID at +4 (`out/graph/en-records.tsv`, `ru-records.tsv`,
+equal). The catalog rebuild `D2.00005..D2.00251` clears the list at
+`D2.00032` and appends 49 objects; all 49 have a constructor. Positions 0..2
+are towns 1, 2, 3; positions 3..48 are 46 missions. Town 1 has map position
+(215,234); missions 93..96 share (306,148).
+
+The three objects `D2.00236`, `D2.00252` and `D2.00253` are initialized as
+type 1 with IDs 10, 20 and 30 and positions equal to catalog missions 20, 50
+and 60. A raw dword scan of the EN `.text` finds each object address once,
+in its constructor; they are not in the rebuild, so the add helpers, which
+walk the catalog, cannot select them.
+
+**Confidence.** High for the 52 initializer calls, the 49 rebuild requests
+and the join, read in EN and RU (instruction sequences equal). The
+`.text` reference count of the three extra objects is High for direct
+operands in EN; RU gave the same scan result in navigation only.
+
+**Unknown.** The role of the three extra records, and whether code outside
+scenario.dll reaches them through GetAllLocations' catalog pointer. The
+49 is the set the rebuild body appends, not a proven runtime set: the list
+method `D2.00254` appends archive items through the same append helper
+`D2.00033` and is reached through `.rdata` `D2.00255` (R2-ENGINE-420); that
+it never runs on the catalog list `D2.00032` is not established. An
+indirect-call census of scenario.dll and of the client would settle it.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-419
+
+The departure body (`D2.00012`, 0x94f bytes, EN = RU) has 47 appends to
+the available list `D2.00105` (`out/graph/*-departure-appends.tsv`). The
+restoration branch holds 46 appends, 42 unconditional and four arm
+alternatives of which one runs; the 43 records it appends are, in order: town 2, town 3, missions 21,
+30, 31, 32, 40, 41, 42, 43, 50, 51, 52, 53, 60, 61, 62, 63, 70, 71, 72, 73,
+74, 75, 76, 77, 80, 81, 82, 83, 84, 85, 86, 87, 90, 91, 92; one arm record;
+then 100, 101, 102, 103, 110. The arm records are 95 (slots 776 and 781
+nonzero), 96 (776 only), 94 (781 only) and 93 (neither), the same
+776/781 selection as the NPC2022 family of R2-ENGINE-217. The restored list
+lacks town 1 and missions 10 and 20. The forty-seventh append, at
+`D2.00256` in the ID-50 case under slot 780, is mission 52.
+
+**Confidence.** High: each appended object is a constant push read in both
+roots and joined to R2-ENGINE-418.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-420
+
+A linear EN `.text` scan for E8 calls (`out/code/en-dll-text-census.tsv`)
+lists every direct call of the availability writers:
+
+| Writer | Callers |
+|---|---|
+| add-mission `D2.00014` | departure IDs 10, 20 (slot 772), 31, 40 (two), 60; TalkTo kind 3 `D2.00138`; Load `D2.00257` |
+| add-town `D2.00031` | departure IDs 20 and 50; Load `D2.00258` |
+| append `D2.00033` on `D2.00105` | the two add helpers; NewGame `D2.00259` (town 1); the restoration (46 sites: 42 unconditional, four arm alternatives); ID 50 slot 780 (`D2.00256`) |
+| clear `D2.00034` on `D2.00105` | NewGame `D2.00260`; restoration `D2.00210`; Load `D2.00261`; the remove helper `D2.00262` when the count reaches zero; the destructor `D2.00263` |
+| remove `D2.00022` | type-2 departure (ID 1); ordinary departure (current) |
+
+The other append calls target the catalog in the rebuild, which NewGame
+and Load call. EnterLocation stores current only. The exports 14, 16, 17
+and 19 return the list, test for an available type-2 record (argument 0:
+any town), test for an available type-1 ID, and return the catalog head.
+The stage switch `D2.00027..D2.00030` holds no writer call.
+
+The method `D2.00254` appends items read through two unread archive calls
+and has no E8 caller; its address occurs once outside `.text`, at `.rdata`
+`D2.00255`. Indirect calls were not censused.
+
+**Confidence.** High for the EN direct-call census (one linear `.text` pass,
+every hit read in the listed bodies). Medium for the RU census: it is the
+navigation receipt `evidence/navigation/nav1-ru-dll-text-census.tsv`,
+identical to the EN file after the locale field but not regenerated, and a
+navigation receipt carries no High. The pass lists `E8 rel32` calls and
+absolute dwords only; a `jmp rel32` tail jump to a writer and an `E8` byte
+inside another instruction are outside what it classifies. Medium that no
+other writer exists: the `.rdata` method and indirect calls remain open.
+
+**Unknown.** The table holding `D2.00254` and any indirect call reaching it;
+a `jmp rel32` pass over both images would settle the tail-jump edge.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-421
+
+A raw dword scan of each client `.text` for the eleven ordinal cells of
+GetVar, SetVar, TalkTo, EnterLocation, LeaveLocation, NewGame, Load,
+GetAvailableLocations, IsTownAvailable, IsMissionAvailable and
+GetAllLocations found 65 references per root. Apart from the binding span:
+LeaveLocation is called at EN `L2.01911` (0x41d arm) and `L2.01912` (0x42d
+arm), RU `L2.01913` and `L2.01914`. TalkTo is called at three inn sites
+(EN `L2.00417`, `L2.00418`, `L2.01469`), each passing a word from the inn
+vector +0xfc, and at three shop pages (EN `L2.01915`, `L2.01916`,
+`L2.01917`) passing page +0x160, which only the EnterShop result or zero
+writes (R2-ENGINE-369). EnterLocation is called from the map selection
+(`L2.01918`, `L2.01919`) and the 0x41d arm (`L2.01920`). The map's
+GetAvailableLocations and GetAllLocations sites walk the lists with the
+begin/next helpers and read records. IsMissionAvailable is referenced only
+by its binding.
+
+**Confidence.** Medium: the cell scan is a navigation receipt (its output
+is not regenerated within the scan budget); the listed call bodies are
+committed listings in both roots.
+
+**Unknown.** A second load of scenario.dll by name, and code that copies a
+cell value through memory not scanned; a census of module-name strings and
+loader calls, and of reads of the cell addresses, would settle them.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-422
+
+The 0x430 arm (EN `L2.01072`) sets the win flag and posts 0x41d at once
+when GetVar(768) is at least 120 (`L2.01921`); otherwise it builds the
+victory dialog with main row 140. The 0x41d arm in campaign mode with the
+win flag set (EN `L2.01922..L2.01923`, RU `L2.01924..L2.01925`):
+
+1. runs the transition (R2-ENGINE-412) and calls LeaveLocation with a
+   local output;
+2. reads slot 773 (`L2.00173`, GetVar(0x305)) and, when nonzero, passes it
+   and stage768 to the addition producer (R2-ENGINE-106);
+3. calls the movie dispatcher with the output when it is 0 or more;
+4. if GetVar(768) is at least 120, posts 0x428 (credits);
+5. otherwise, if IsTownAvailable(0) returns 0, calls EnterLocation on the
+   first available record and posts 0x468, which enters it;
+6. otherwise clears the map route flag and opens the global map
+   (`L2.00876`); its selection path calls EnterLocation on the available
+   record that passes the map's position test (`L2.01926`).
+
+DLL export 16 returns 1 for argument 0 when any available record has
+type 2. In the bodies read, a defeat does not reach LeaveLocation: the 0x41d arm
+with the win flag clear (EN `L2.01858` fail-cleanup, then 0x421), the 0x41e
+arm and the failure-report close branches of R2-ENGINE-074 (see also
+R2-ENGINE-412, R2-ENGINE-421). The mission keeps its place in the list and its completion
+slot stays zero. Leaving a town (0x42d) calls LeaveLocation and opens the
+map (R2-ENGINE-272).
+
+**Confidence.** High for steps 1..6 in both roots and the export body; the
+EN and RU arms differ only in application offsets and RU's mode-0 branch.
+EN only for the 0x430 arm. Medium that no other path calls LeaveLocation
+after a mission, and Medium for the defeat negative: it covers the three
+bodies named above and the call sites of the cell census (R2-ENGINE-421).
+
+**Unknown.** The live dialog, the map's presentation and the 0x430 arm in
+RU.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-423
+
+The dispatcher (EN `L2.00875`, RU `L2.01927`) returns at once when the
+movie global (EN `L2.01928`) is zero; otherwise it sets bit `1<<output` in
+a seen mask and formats `video\%s\%02d.smk` for 1..99 with the stem from
+the cutpaths table at base + output (EN `L2.01929`, RU `L2.01551`); that
+the table object is the one bound to `main\text\cutpaths.txt`, and that its
+base is the first row, is R2-ENGINE-075. The
+`main.res` member `text/cutpaths.txt` (48 bytes, SHA256
+`dce91e81be015d2413a665c75ba5d25de23acf792b2d694dd07ce4821ef4c720` in both
+roots) has CRLF rows 0 intro, 1 teleport, 2 stars, 3 crown, 4 knights,
+5 druids. With R2-ENGINE-148: Leave10 plays teleport, Leave30 stars,
+Leave70 or Leave80 crown when the other of the two was completed first,
+Leave110 knights when slot 779 is 0 and druids otherwise. Map 110 writes
+779 to 0 or 1 (R2-SESSION-114). Row 0 is not selected by a departure.
+
+**Confidence.** High for the index arithmetic, the rows and the mapping; the
+join of the string table to `cutpaths.txt` rests on R2-ENGINE-075.
+
+**Unknown.** The movies' content and the reader of the seen mask; a census
+of reads of the seen-mask global would settle the second.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-424
+
+Producers of the records after mission 20, composed from R2-ENGINE-146,
+R2-ENGINE-217, R2-ENGINE-219, R2-ENGINE-223..R2-ENGINE-229 and
+R2-ENGINE-418..R2-ENGINE-420. "Inn N" means an inn option offered while
+slot 768 equals N; town 2 or 3 is the current town where the option tests
+it. Slot 896+ID is the completion flag of mission ID (R2-SESSION-173).
+
+| Record | Producer | Condition |
+|---|---|---|
+| town 2 | Leave20 | none |
+| town 3 | Leave50 | none |
+| 21 | Leave20 | slot 772 nonzero (map 20 script) |
+| 30, 31 | inn 30 | 31: not completed |
+| 32 | Leave31 | none |
+| 40..43 | inn 40 | 41..43: not completed |
+| 50, 60 | Leave40 | none |
+| 51 | inn 50 | slot 533 nonzero (topic-30 TALK), not completed |
+| 52 | Leave50 | slot 780 nonzero (map 50 script) |
+| 53 | inn 50 | not completed |
+| 61, 63 | inn 60, town 2 | not completed |
+| 62 | town 2, stage 60 or more | 53 completed, 62 not |
+| 70, 71 | inn 60..80, town 3 | slot 771 (Leave50); 70 not completed; 71 also not completed |
+| 72, 73 | inn 70, town 2 | not completed |
+| 74..77 | town 2, any stage | 63 completed, none of 74..77; one by 776/781 |
+| 80 | Leave60 | none |
+| 81 or 82 | inn 80, town 2 | 776 nonzero gives 81, zero gives 82; not completed |
+| 83 | inn 80, town 3 | slot 536 (NPC5 TALK in town 3 after Leave60), not completed |
+| 84..87 | town 2, any stage | one of 74..77 completed, none of 84..87; one by 776/781 |
+| 90 | inn 90, town 2 | none |
+| 91, 92 | inn 90, town 3 | not completed |
+| 93..96 | town 2, any stage | one of 84..87 completed, none of 93..96; one by 776/781 |
+| 100, 102, 103 | inn 100, town 2 | 102, 103 not completed; 103 also 91 completed |
+| 101 | inn 100, town 3 | not completed |
+| 110 | inn 110, town 2 | none |
+
+The restoration appends 43 of the 49 records (R2-ENGINE-419; not town 1,
+missions 10 and 20, or three of 93..96), and LOAD adds any record whose ID
+the bank holds. No catalog mission lacks a producer. Slot 768 changes only by
+NewGame (10) and +10 on a departure of an ID divisible by ten (two direct
+stores in the EN `.text` census), so the stage equals 10 plus 10 per
+completed mission 10, 20, ..., 110. Each stage after 20 offers its next
+decade mission or receives it from a departure, and mission 70 needs town
+3, which Leave50 adds before 70 can be offered, so the read graph has no
+dead end. Leave110 gives 120, and the same 0x41d arm then posts the credits
+(R2-ENGINE-422).
+
+**Confidence.** Medium: every row rests on High local predicates, but no
+playthrough or simulation of every order was run, and the writer census
+is Medium (R2-ENGINE-420, R2-ENGINE-421).
+
+**Unknown.** Live bank values in a played campaign and the map scripts'
+trigger outcomes for slots 772, 779 and 780. An owner save after each
+decade mission would test the stage and list.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+### R2-ENGINE-425
+
+The EN `.text` census finds slot 775 (`D2.00038`) at two sites, both in
+departure: the test `D2.00209` and the zero store at `D2.00264`. NewGame
+clears the bank and Load restores it raw (R2-SESSION-127). The client
+SetVar indices are 531+key, 776, 781 and the literal targets of map
+instants 35 and 36 (R2-SESSION-127), none 775 over the 46 maps
+(R2-SESSION-114). The other indexed DLL stores address 752..767, 512..551,
+896+ID and 511+low16 (R2-SESSION-127).
+
+**Confidence.** Medium: the population excludes indexed stores with
+unbounded indices, other modules and scripts outside the installed maps.
+
+**Unknown.** Whether any shipped route sets slot 775; a save carrying a
+nonzero slot 775 would show its source.
+
+**Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
