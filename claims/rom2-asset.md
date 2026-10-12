@@ -1118,3 +1118,37 @@ the RU roles: they rest on the same indices in RU bodies equal to EN.
 **Unknown.** What the RU-only patch.txt rows 119..213 hold.
 
 **Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+## Spell rows 5, 16, 18 and 25 and the Summon units
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-107 | ROM2 client Spells rows 5 and 16 equal row 1 except Sphere (2, 4); row 18's Effects string opens with a quote before absorbtion; Units rows 109..123 hold Squirrel, Foot_Animated and Turtle, bare and .2 to .5. | High | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+
+### R2-ASSET-107
+
+The client `data/data.bin` inside `world.res` (RU read in full; the EN and RU
+world.res and data.bin hashes are equal, R2-ENGINE-395) holds 34 Spells rows
+and 241 Units rows through the grammar of R2-ASSET-029. Parameter n carries
+title n+1.
+
+| Row | Name | Cost | Sphere | Target | Delivery | Max Range | Effect Speed | Distribution | damage | Defensive | Effects |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Fire Arrow | 3 | 1 | 1 | 2 | 7 | 200 | 1 | 5..10 | -1 | empty |
+| 5 | Ice Missile | 3 | 2 | 1 | 2 | 7 | 200 | 1 | 5..10 | -1 | empty |
+| 16 | Diamond Dust | 3 | 4 | 1 | 2 | 7 | 200 | 1 | 5..10 | -1 | empty |
+| 18 | Stone Curse | 40 | 4 | 1 | 1 | 5 | 0 | 1 | -1..-1 | -1 | two pieces |
+| 25 | Summon | 100 | 5 | 2 | 1 | 0 | 0 | 1 | -1..-1 | -1 | empty |
+
+Rows 1, 5 and 16 agree in all 22 stored values except Sphere. Row 18's Effects
+string has two comma pieces: the first opens with byte 0x22 (a quote), key
+`"absorbtion`, value `+5:duration 8`; the second is key `defence`, value
+`-20:duration 8` followed by a closing quote. Row 18 Spell Duration is 10 and
+Apply on Unit Method 2.
+
+Units rows 109..113 are Squirrel, Squirrel.2 .. Squirrel.5; 114..118
+Foot_Animated and .2 .. .5; 119..123 Turtle and .2 .. .5. Units titles 49..54
+are Spell 1, Probability 1, Spell 2, Probability 2, Spell 3, Probability 3.
+
+**Confidence.** High: the committed derived rows reproduce byte for byte, and
+the archive and table grammar leave zero residue.

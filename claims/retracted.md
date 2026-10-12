@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-2057: Summon placement
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-026` (Summon placement clause only; the other arms, the Summon level and roll, and the grades stand) | Verbatim: "the creature is built from name strings, placed at the target cell and flagged" | High | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md), R2-ENGINE-455 | Arm L2.00082 calls placement L2.00313 with the caster's cell and radius 6: 20 random tries at offsets -3..3 (bound 19, counter from 0), then the 7 by 7 square, rejecting a byte value below 12 while the flag `[[L2.01317]+0x74]` is nonzero (meaning unread); failure aborts the cast. The target cell is not read for placement. | **REFUTED** — partially retracted |
+
 ## ROM2 world-map record choice
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

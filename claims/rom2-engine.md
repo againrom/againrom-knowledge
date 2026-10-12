@@ -228,8 +228,8 @@ ROM1 states the same one-term use of the skill (`MAGIC-POWER-004`), with its cei
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active (partially retracted) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-025 | Stone Curse draws a random duration up to `4.8*P` units for a spell cast (`2.4*P` for an item cast), cut by Earth resistance; its Effects string begins with a quote that probably stops the kind parsing. | Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-025 | Stone Curse draws a random duration up to `4.8*P` units for a spell cast (`2.4*P` for an item cast), cut by Earth resistance; its Effects string begins with a quote that probably stops the kind parsing. | Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active (partially retracted) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-027 | Prismatic Spray hits min(P/20 + 2, 7) victims, where P for a book cast comes from the power byte and for an item cast from the castSpell effect. | High | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-024
@@ -268,6 +268,8 @@ ROM1 gives Stone Curse a `pow(1.025, P)` duration (`MAGIC-CEIL-013`).
 
 **Unknown.** The runtime consumer of the effect; whether kind 0 is a silent no-op or a default.
 
+**Amended.** R2-ENGINE-453 reads the comparator chain and confirms the blank effect at Medium; R2-ENGINE-454 names its consumer, the actor-mask bit 18 that holds primary command 4 until the timer clears it. The duration clauses stand.
+
 ### R2-ENGINE-026
 
 - Heal (24, `L2.00081`): amount `base + U[1, spread]` (`L2.00092` draws 1..n; a spread of 0 still gives 1), capped at maximum minus current health; refused when target health is -10 or lower or +0x98 is zero.
@@ -281,6 +283,8 @@ ROM1's unique-spell arms are listed in `MAGIC-SING-019`; they were not compared 
 **Confidence.** High for Heal, Drain Life, Summon level and Teleport range (full arms read). Medium for Control Spirit: the template construction and the owner transfer were read once, not cross-checked, and the kind and sprite filters were not mapped to named creatures.
 
 **Unknown.** The Control Spirit template contents; the Summon creature names and statistics.
+
+**Amended.** R2-ENGINE-455 partially retracts the Summon placement clause: the creature is placed by a search around the caster's cell, not at the target cell. It also names the creatures (R2-ASSET-107). The other arms, the level rule and the grades stand. See the EXP-2057 entry in retracted.md.
 
 ### R2-ENGINE-027
 
@@ -8622,3 +8626,260 @@ rows (R2-ASSET-098).
 **Unknown.** What RU `L2.02070` does. The RU web popup's content.
 
 **Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+## Spell rows without a published rule
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-452 | In RU, ROM2 Ice Missile (5) and Diamond Dust (16) take Fire Arrow's single-target projectile damage route with water and earth damage kinds; the read bodies hold no row-specific branch or attached effect; EN delivery bodies are Unknown. | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-453 | ROM2 Stone Curse attaches a timed effect with spell id 18 built from its Effects string; the quoted first key matches no effect name, so the effect is blank (tag 0, magnitude 0). | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-454 | In the RU image, a ROM2 Stone Curse effect sets actor mask bit 18, which holds primary command 4 (state 27, no move, attack or cast) until its timer clears the bit; a repeat cast keeps the larger duration; damage taken is unchanged. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-455 | ROM2 Summon creates Squirrel, Turtle or Foot_Animated at level 1..4 for the caster's Player in a new group, placed by a search around the caster's cell; a failed placement aborts the cast; when it leaves is Unknown. | High / Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-456 | In RU, a ROM2 creature's template special spell is aimed by a 29-cell per-row table: the victim, its cell, itself, a cell toward the victim (9), a free cell beside it (23) or nothing (22); cells 9 and 23 are Medium. | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-457 | The RU computer-mage offensive book choice aims at the victim and support at self or a same-owner unit; a separate Prismatic, Stone Curse, Lightning, Fire Arrow priority routine aims at the victim but has no found caller. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-458 | Each admitted RU selected-spell policy arm aims at the victim, except Summon and Shield at the caster and Heal at the lowest-health candidate; area and point spells cast at a unit apply at its cell. | Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-459 | The ROM2 EN and RU unique spell arms agree after address masking except an RU-only virtual test before reusing a pooled dead unit in Summon and Control Spirit; EN AI, delivery and effect bodies were not read. | High / Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+
+### R2-ENGINE-452
+
+Client data.bin rows 5 and 16 equal row 1 in every stored value except Sphere
+(R2-ASSET-107). Their apply-table cells (`L2.00069` + 4*id) name the blank
+default `L2.00085`, which positive cached damage bypasses for the common suffix
+`L2.01690` (R2-ENGINE-390). The apply head `L2.00034` builds a 0x60-byte damage
+object (`L2.02071`) when base + spread > 0 and the id is not 24 or 26. The
+sphere switch maps Sphere 2 to setter `L2.00096` (damage kind 2) and Sphere 4
+to `L2.00098` (kind 4); the resolver's kind switch at `L2.01701` reads
+resistance word +0xc6 for kind 2 and +0xca for kind 4 (R2-ENGINE-028).
+
+Distribution 1 builds the single-target object `L2.02072` (vtable `L2.02073`;
++0x48 target unit, +0x4c payload), which applies its payload once through
+payload vtable+0x3c and runs the hostility bookkeeping `L2.02074`. Delivery 2
+wraps it in the projectile `L2.02075` (vtable `L2.02076`); +0x50 is a countdown
+of distance over Effect Speed, and the tick `L2.02077` registers the carried
+object at zero. Only ids 10 and 11 set their own countdown (10) and a cast
+delay of 5. Rows 1, 5, 10 and 16 therefore share one route, and the hit lands
+on the bound target unit only. The Effects strings of rows 5 and 16 are empty,
+so no effect is attached.
+
+**Confidence.** High for the dispatch cells (both roots) and for the damage
+kinds, single-target and projectile route in RU: committed reproduced listings
+of this experiment and EXP-2049. Medium for the absence of a row-5 or row-16
+test elsewhere: the search covers the apply head, unique arms, delivery
+objects, spell object and cast routine read here and the resolver, which tests
+only ids 20 and 28 through the mask routines `L2.00042`/`L2.00043`
+(navigation; id 12 is tested in other routines, R2-ENGINE-454).
+
+**Unknown.** The EN damage-kind setters, delivery objects and resolver were
+not read; reading the EN counterparts of `L2.00096`, `L2.00098`, `L2.02072`
+and `L2.02075` would settle EN parity. The presentation of the two projectiles:
+the projectile tick `L2.02077` and the Effect Speed fields were read; no
+sprite, sound or animation consumer of the projectile object was searched, and
+reading the projectile's draw method (vtable `L2.02076`) would settle it.
+
+### R2-ENGINE-453
+
+Arm `L2.00076` allocates a 0x48-byte effect and builds it with
+`L2.00086(row Effects string)`, then ORs the timed flag byte `[L2.01906]` into
++0x3d, draws the duration of R2-ENGINE-025, writes spell id 18 to +0xc and
+2*18+8 = 44 to +0xe, and continues at the common suffix `L2.01690` as a
+single-target, instant cast (Delivery 1). A drawn duration of 0 deletes the
+effect and leaves the arm without a cast.
+
+The build `L2.00087` finds the first `=` (0x3d; `L2.02078..L2.02079`) and takes
+the text before it as the key, trims the key with `L2.02080` and `L2.02081`,
+and looks it up through `L2.02082` and `L2.00091`
+in the 50-name table of R2-ENGINE-414. The stored row-18 key is `"absorbtion`
+with a leading quote byte 0x22; no name carries that byte, the lookup returns
+no tag, and the build leaves the effect blank (tag 0, magnitude 0). The value
+piece is searched for a comma only later (`L2.02083`) and is not reached. Tag-switch cell 0 at `L2.01909` jumps to
+`L2.02084`.
+
+**Confidence.** High for the arm, the flags, the id stamp and the stored key:
+committed reproduced listings and data rows. Medium for the blank outcome: the
+comparator chain and trims are navigation listings, the final compare
+`L2.02085` was not read, `L2.02086` is presumed a whitespace test, and
+`L2.02084` was not read.
+
+**Unknown.** Whether tag 0 runs any code after `L2.02084`. Searched: the
+tag-switch cell 0 and its target address only; the body at `L2.02084` was not
+read. A 0x40-byte window at `L2.02084` in the RU image would settle it.
+
+### R2-ENGINE-454
+
+Attach (effect vtable `L2.01905` slot 15, `L2.00480`): when the target already
+holds an effect with the same spell id, the existing object is kept (`L2.02087..L2.02088`):
+it runs its slot 17, takes the larger magnitude and the larger duration, and
+runs slot 16 again; the new object is not joined. Otherwise the copy runs
+slot 16, joins the unit's list +0x20 and sets bit id of the actor mask +0x144. Timer (slot 14, `L2.00482`): a duration above 0x2580 never counts down;
+otherwise each tick decrements it and at zero runs slot 17, removes the effect
+and clears the bit.
+
+The actor dispatcher `L2.00506` installs primary command 4 when mask & 0x40000
+is set and primary +9 is zero; its primary-4 arm sets actor state 27 and keeps
+command 4 while the bit stays set (R2-ENGINE-399). While a primary command is
+nonzero the dispatcher skips its move, attack and cast switch, so the target
+stops acting until the timer clears bit 18. An already active primary command
+is not replaced. State 27 also has five other writers.
+
+The RU `.text` holds 31 dword immediates 0x00040000 and no 0xfffbffff (the EN
+`.text` holds 30, R2-ENGINE-459). Of the 31, 15 were read in a committed
+window: the dispatcher (2), the effect core (5), the computer Stone Curse
+choice `L2.02089`, which skips a victim with the bit, target scoring
+`L2.02090`, which adds 0x7f to a victim with the bit, and six in the
+mask-read windows; ORs into +0x150 are presentation dirty flags. Sixteen were
+not classified: `L2.02091`, `L2.02092`, `L2.02093`, `L2.02094`, `L2.02095`,
+`L2.02096` and ten `mov [reg+disp], 0x40000` stores. The mask-test calls
+`L2.00042`/`L2.00043` have six call sites in three routines with literal ids
+12 (`L2.02097`, `L2.02098`), 20 (`L2.02099`, `L2.02100`) and 28 (`L2.02101`,
+`L2.02102`); the hit resolver `L2.00101` tests 20 and 28 only. "Damage taken
+is unchanged" is the result of those three routines and the 15 read
+immediates; it does not cover the 16 unclassified ones.
+
+**Confidence.** Medium, all in RU. The effect core and the computer choice are
+committed reproduced listings; the dispatcher is an EXP-2050 listing; the
+dword scans, mask reads, call sites and target score are navigation listings.
+The EN effect core, dispatcher and readers were not read (Unknown).
+Unknown for appearance.
+
+**Unknown.** The EN effect core and dispatcher: the EN counterparts of
+`L2.00480`, `L2.00482` and `L2.00506`, located from the EN bit-18 hits
+(R2-ENGINE-459), would settle it. The 16 unclassified immediates: a window
+around each would settle whether any reads the bit as damage input. The
+petrified appearance and any presentation message: searched only the mask
+readers above; the presentation dirty flags at +0x150 were not followed to a
+draw routine, and reading that routine would settle it. The seconds per timer
+tick: the timer decrements per call; the caller of slot 14 and the game clock
+rate were not read, and reading that caller, or an owner run of the original
+timing a Stone Curse, would settle it.
+
+### R2-ENGINE-455
+
+Arm `L2.00082` (RU): the owner is the caster's Player (+0x14). The arm first
+walks the global unit list `[L2.02103]+4` (`L2.02104..L2.02105`) for a dead
+unit (kind byte +0x13c >= 5); RU also requires that unit's vtable+0x30 to
+return zero (R2-ENGINE-459). Without one it builds a 0x208-byte unit
+(`L2.01273`); the unit is given the Player afterwards. A roll `L2.00092(3)` picks Squirrel,
+Turtle or Foot_Animated (1, 2, 3); the level of R2-ENGINE-026 above 1 appends
+`.` and the digit, so `.5` is never produced although Units holds it
+(R2-ASSET-107). The built name is passed to `L2.01794`; its window (0xff bytes)
+only zeroes and allocates unit fields and never reads its stack argument, so
+that the name selects a Units row is inferred from the call signature and is not
+read. +0x1a0 is set to 1 and +0x148 to the caster's +4.
+
+Placement `L2.00313(x, y, 6)` takes the caster's cell: 20 random tries at
+offsets -3..3 (the bound is 19 and the counter runs from 0 while it is at most
+19), then a scan of the 7 by 7 square; a candidate must pass the cell tests
+`L2.01700` and `L2.02106`, which were not read. Both loops also reject a
+candidate whose byte value is below 12 while the flag `[[L2.01317]+0x74]` is
+nonzero (`L2.02107..L2.02108`, `L2.02109..L2.02110`); what the value and the
+flag mean was not read (Unknown). Failure aborts the cast. The unit joins a new group under the caster's Player.
+
+**Confidence.** High for the roll, names, level suffix, owner, reuse loop and
+placement call: committed reproduced listings in both roots. Medium for the
+binding of the built name to a Units row and for the search order, from the
+placement listing and the template window (navigation). Unknown for leaving.
+
+**Unknown.** When or whether the creature leaves: searched the RU `.text` for
+the dword `0x1a0`, 68 hits, none classified, and no timer or death rule was
+found. Classifying the 68 hits, or reading the group-removal routine, would
+settle it; so would an owner run of the original that casts Summon and waits
+for the creature to go. The binding of the name to a Units row and the template
+statistics: reading `L2.01794` past its 0xff-byte window would settle
+them.
+
+### R2-ENGINE-456
+
+In RU, the attack route `L2.01530` rolls each of the template's three special spells
+(slots +0x7c[3], chances +0x88[3]) and on success calls `L2.02111(caster,
+victim, id)`. That routine requires the spell in the caster's book
+(`L2.00040`) and dispatches id-1 through the 29-cell table `L2.02112`:
+
+| Aim | Ids |
+|---|---|
+| victim unit | 1, 5, 10, 11, 16, 18, 26, 28, 29 |
+| victim cell (order 14, `L2.01732`) | 2, 3, 6, 7, 14, 15, 17 |
+| caster | 4, 8, 12, 13, 19, 20, 21, 24, 25, 27 |
+| cell beside the caster toward the victim | 9 |
+| first free cell in the 3 by 3 around the victim, only when the distance exceeds 2 | 23 |
+| none | 22 |
+
+Unit casts go through `L2.01524`, which sets command 8 with the target at +0x28
+and the spell at +0x30.
+
+**Confidence.** All in RU. High for the 29 table cells and for which argument
+each group pushes: committed reproduced listing and table. Medium for the cell
+meaning of ids 9 and 23, which rests on the unread `L2.02113` and the byte
+tables at `+0x58e88`/`+0x58e90` (id 9) and on `L2.02114` (what makes a cell
+free) and `L2.01522` (distance; id 23 also has a distance test in the caller at
+`L2.02115`); Medium for the slot roll (`+0x7c[3]`, `+0x88[3]`), which is read
+from the EXP-2042 listing `ru-player-kind-policy` graded Medium there; Medium
+for binding the slots to the Units titles "Spell 1..3" and "Probability 1..3"
+(indices 49..54), inferred from order.
+
+**Unknown.** The EN table and callers: the EN counterpart of `L2.02111`, found
+from the EN apply table, would settle EN parity. The cell meanings of ids 9 and
+23: reading `L2.02113`, `L2.02114` and `L2.01522` would settle them. The
+template loader binding of the slots: the loader of the Units rows, not
+searched, would settle it.
+
+### R2-ENGINE-457
+
+With nonzero Player kind (+0x2c), the RU offensive choice `L2.00056`
+(R2-ENGINE-351) casts its chosen book spell at the victim through `L2.01524`.
+Support `L2.01533` tries Heal on the caster, Shield on the caster, then a
+same-owner candidate. Routine `L2.02116` tries Prismatic Spray (11), Stone
+Curse (18, skipped when the victim has mask bit 18), Lightning (10) and Fire
+Arrow (1) in that order, each at the victim; with Player kind 0 it calls the
+selected-spell policy instead. The cast-callers scan finds no direct call to
+`L2.02116`. When the target is null, `L2.01524` takes one from `L2.02117`
+(offensive) or `L2.02118` (defensive), both scanning a radius list through
+filter `L2.02119`.
+
+**Confidence.** Medium: committed reproduced listings, but the index helper
+`L2.01532` and the reachability of `L2.02116` are open.
+
+**Unknown.** Whether `L2.02116` runs. Searched: one callto scan of RU `.text`
+for seven routine addresses (`ru-cast-callers.tsv`), which finds no direct
+call; virtual and table dispatch were not searched. A dword scan for the
+address `L2.02116` over `.text` and the data sections, with the vtables that
+hold it traced, would settle it. The distribution of the random book choice:
+searched the helper `L2.01532` and the generator window only; reading the
+initialiser of the divisor `[this]` and `L2.01699` would settle it.
+
+### R2-ENGINE-458
+
+In the selected-spell policy `L2.01527` (map `L2.01529`, arms `L2.01528`;
+R2-ENGINE-350) every admitted arm aims at the victim except Summon (25) and
+Shield (27, when bit 27 is clear) at the caster and Heal (24) at the
+lowest-health candidate. The area-score arms for 2, 3, 6 and 7 gate on the
+score and still name the victim. Ids 4, 8, 9, 12..15, 17, 19..23 and 29 cast
+nothing there. When an area or point spell is cast at a unit, the apply uses
+the target's cell, size-adjusted by `L2.02120`.
+
+**Confidence.** Medium: EXP-2042 committed listings and tables reread as
+listings; the arms were classified, not reproduced here.
+
+### R2-ENGINE-459
+
+The EN and RU world.res and data.bin hashes are equal (R2-ENGINE-395). The EN
+apply table `L2.02121` has the RU structure. The EN unique arms
+`L2.02122+0x1297` and the RU arms `L2.00082+0x12bc` differ after masking
+addresses only in register allocation and in the RU-only
+`call [vtable+0x30]; test; jne` before reusing a pooled dead unit, in Summon
+(`L2.02123`) and Control Spirit (`L2.02124`). The Stone Curse arm is equal
+after masking. The EN `.text` holds 30 dword immediates 0x00040000 and the RU `.text` 31.
+Aligned by order, RU has one extra store (`mov [reg+0x118], 0x40000` at `L2.02125` and
+`L2.02126` against one at `L2.02127` in EN) and two pairs differ in the encoding of the instruction
+(`L2.02128` against `L2.02129`, `L2.02130` against `L2.02131`); no EN body at
+these sites was read.
+
+**Confidence.** High for the arms and data: committed reproduced listings in
+both roots. Medium for the EN to RU correspondence of the bit-18 immediates,
+which rests on the two scans and their four context bytes alone. Unknown for
+the EN AI, delivery-object and effect-core bodies, which were not read.
+
+**Unknown.** What RU vtable+0x30 tests: the call sits in `L2.02123` and
+`L2.02124` and its result is only compared with zero; the slot was not
+followed. Reading the unit class vtable (set by the constructor `L2.01273`) at
+offset 0x30 would settle it. The EN bodies: reading the EN routines around the
+30 EN hits would settle EN parity of the AI, delivery objects and effect core.
