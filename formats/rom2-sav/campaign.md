@@ -448,8 +448,13 @@ message 0x446 and an application arm that sends it were not read). — R2-ENGINE
 Route mode draws `Umoir.bmp` and select mode `GMap.bmp`. BallMap dots
 show the route; Flag, Cross, FlagOnMap, MissionFlag and YourFlag sprites
 mark the party, the travel target and records. Flag1 is loaded, but the
-record loop that would draw it is not reached. Palette and blending are
-Unknown. — R2-ENGINE-429, R2-ASSET-093
+record loop that would draw it is not reached. — R2-ENGINE-429, R2-ASSET-093
+
+Each paint runs inside one surface lock. The background is an opaque copy
+of the picture converted to the device format at load; BallMap dots skip
+converted value 0; the sprites go through the .16a word-run painter with
+the sprite's 16-row mode-4 shade table. Cross has 13 frames and its own
+palette, byte-equal in EN and RU. — R2-ENGINE-465, R2-ASSET-109
 
 Only GetAvailableLocations records are drawn, at their catalog points,
 and only in select mode while no travel runs: the pointed record carries
@@ -467,6 +472,19 @@ map closes, posts 0x468 and calls EnterLocation on the target record (the
 first available record in route mode). A click or key skips to the end.
 — R2-ENGINE-432
 
+In the bodies read, Point2 starts first; each later start is the other
+sound, once the current one has no channel, while the route still grows.
+Pointing and the press start no sound in them; the arrival, retarget and
+skip bodies were not read, so that nothing else starts one is Medium.
+ScrollUp and ScrollDn are loaded and never started in the bodies read.
+The map plays `music\map.wav` from its start. — R2-ENGINE-463
+
+The idle message 0x402 paints the map at most once per 100 ms of
+timeGetTime, with no catch-up. If the helpers `L2.02239` and `L2.02240`
+both return the route's point count L, a travel ends on paint
+max(15, floor((L-8)/8)+1); the helpers are unread and other paint
+sources were not enumerated (Medium). — R2-ENGINE-464
+
 Routes run between the index-2 pixels of `PathMap.bmp` (100) or
 `UmoirPath.bmp` (81) by least summed segment length. In the EN image town 1 and
 mission 10 lie on UmoirPath nodes; the other 47 catalog points lie on PathMap
@@ -476,9 +494,21 @@ Names come from `globalmap.txt` sections `#title<ID>` and `#town<ID>`,
 descriptions from `#briefing<ID>` and `#description<ID>`; town 1 and
 missions 10 and 20 have no section of their own. — R2-ENGINE-434
 
+The lookup is a substring search that takes the first occurrence, so
+`#title10` finds `#title100`; mission 10 is shown only in route mode,
+which draws no text. A key found nowhere leaves the name empty and the
+text block undrawn. — R2-ENGINE-462
+
 EN and RU run the same bodies with the same resource names; the text
 files differ in bytes and share their keys. — R2-ENGINE-435
 
-The party point is set by an ended travel and, by inference, by leaving a
-town (Medium). Whether a victory sets it, and so its value after mission
-20's victory, is Unknown. — R2-SESSION-177
+Of 47 presentation body pairs, 43 are equal after masking and four differ
+only in application-field displacements. — R2-ENGINE-466
+
+Set-point stores the point it is given, and the 0x42d arm (for a type-2
+record) and the 0x41d arm pass the catalog point of the current record:
+the town for 0x42d, the won mission for 0x41d; after mission 20's victory
+it is mission 20's point, a PathMap node. That every opening does so is
+Medium: other openers of the map were not enumerated. Two LOAD bodies
+store no party point; the rest of the load is unread (Medium). —
+R2-SESSION-177, R2-SESSION-185

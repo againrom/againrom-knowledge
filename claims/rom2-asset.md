@@ -1017,7 +1017,8 @@ R2-ENGINE-286 and R2-ENGINE-246 bind three generator/selected inn slots; R2-ENGI
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ASSET-093 | ROM2 global-map art is GMap.bmp, Umoir.bmp and text/globalmap.txt in main.res and 17 global.map/ members in graphics.res; PathMap.bmp (EN, RU) and UmoirPath.bmp (EN) are 640x480 8-bit images with 100 and 81 index-2 pixels. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ASSET-093 | ROM2 global-map art is GMap.bmp, Umoir.bmp and text/globalmap.txt in main.res and 17 global.map/ members in graphics.res; PathMap.bmp (EN, RU) and UmoirPath.bmp (EN) are 640x480 8-bit images with 100 and 81 index-2 pixels. | High / Medium | ● active (amended) | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ASSET-109 | ROM2 graphics.res `global.map/cross/sprites.16a` is 6690 bytes at offset 25578479, byte-equal in EN and RU, with 13 frames and its own palette. | High | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
 
 ### R2-ASSET-093
 
@@ -1054,7 +1055,26 @@ Umoir) are a navigation receipt (`evidence/navigation/nav3-members.tsv`).
 **Unknown.** RU UmoirPath.bmp and the backgrounds' RU bytes; the .16a frame
 counts.
 
+**Amended.** R2-ASSET-109 gives Cross's frame count and its EN/RU byte
+equality; the other five .16a frame counts stay Unknown.
+
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ASSET-109
+
+The member is read at the registry offset and size R2-ASSET-093 lists, in
+both roots. Its SHA256 is
+`62d40f76601af4952822627cd776d0d6224050ba2e6a5818dc2542644aa005ab` in EN
+and RU. Its last dword holds the frame count in the low 31 bits, 13, and
+the own-palette flag in the top bit, set (the trailer R2-ASSET-008
+describes and loader `L2.00643` reads, R2-ASSET-066). The map draws Cross with frames 0..12 during a travel and
+holds frame 12 (R2-ENGINE-464).
+
+**Confidence.** High for the size, hash and trailer values in both roots.
+
+**Unknown.** The palette's colours and the frames' sizes.
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
 
 ## Main menu and save page resources
 

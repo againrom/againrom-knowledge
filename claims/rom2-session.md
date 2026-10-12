@@ -2004,7 +2004,8 @@ original warns the player before a window closes.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-177 | The ROM2 global map's party point map+0x104/+0x108 is set by an ended travel (the target) and, by inference, by leaving a town (its point); that second store runs through a callee that the victory arm also calls and that was not read. | Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-SESSION-177 | The ROM2 global map's party point map+0x104/+0x108 is set by an ended travel (the target) and, by inference, by leaving a town (its point); that second store runs through a callee that the victory arm also calls and that was not read. | Medium | ● active (amended) | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-SESSION-185 | In the ROM2 global-map opening arms 0x42d (type-2 record) and 0x41d, set-point stores the current record's catalog point at map+0x104/+0x108 (Medium for every opening); the two LOAD bodies read store none. | High / Medium | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
 
 ### R2-SESSION-177
 
@@ -2038,7 +2039,74 @@ read bodies (the 0x468 arm, the mission entry, LOAD) and whether SAV stores
 the point; a `.text` census of `+0x104` stores, or an owner save at the map
 after mission 20, would settle them.
 
+**Amended.** R2-SESSION-185 reads the callee EN `L2.01990` and RU
+`L2.02293`: the 0x42d arm (type-2 record) and the 0x41d arm set the party point, the 0x41d arm to the
+won mission's point, so the point after mission 20's victory is mission
+20's point. It also bounds the other writers with a `.text` census and
+reads the LOAD path. Whether SAV stores the point stays Unknown.
+
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-SESSION-185
+
+Set-point EN `L2.01990` (RU `L2.02293`) stores [arg] and [arg+4] into
+map+0x104 and map+0x108 with no test. Both opening arms call it on the map
+view app+0xf0 with `L2.01491(L2.01965(GetCurrentLocation()))`, the
+current record's point at record+8 (R2-ENGINE-418), before LeaveLocation:
+
+| Arm | EN window | RU window | Condition of the call |
+|---|---|---|---|
+| 0x42d | `L2.00873` | `L2.00874` | current record is type 2 (town) |
+| 0x41d | `L2.01991` | `L2.02294` | the victory path (R2-ENGINE-422) |
+
+`L2.01491` returns its argument. In the 0x42d arm a current record that
+is not type 2 jumps (`jne L2.02295`, RU `L2.02296`) to the map open with
+no store. The map open (EN `L2.00876`) and the map enter (EN `L2.00880`)
+store no point. `calls.tsv` lists one call of the map open, from this
+arm; the openers of `L2.00876` were not enumerated. The 0x42d condition
+and the cells `L2.00270`, `L2.02297` (RU `L2.00110`, `L2.02298`) come from
+R2-ENGINE-272, the 0x41d victory path from R2-ENGINE-422, and
+`L2.02299` (GetAllLocations) from R2-ENGINE-466 and the EXP-2011
+exports; this experiment's windows hold the calls, not those bindings. A travel's end stores the target
+(R2-ENGINE-432), but the map closes on that paint. So an opening by the type-2 0x42d arm or the 0x41d arm shows
+the party at the town just left or the mission just won; an opening by
+the 0x42d arm for another record type shows whatever map+0x104 held. After mission
+10's victory the map does not open (R2-ENGINE-422); after mission 20's
+victory the party point is mission 20's catalog point, which is a
+PathMap node (R2-ENGINE-433).
+
+The load entry EN `L2.00826` (RU `L2.00119`) ends by calling app+0xf0
+`L2.02300`, which calls `L2.02301` (RU `L2.02302`, `L2.02303`). That body
+walks scenario.dll ordinal 19, ScenarioGetAllLocations (export names read
+in both roots), appends each record's point to the list at map+0xcc and a
+zero word to the list at map+0xa4, and stores nothing at map+0x104 or
++0x108. These two bodies are the whole LOAD read: the load entry's other
+fourteen callees are unread, so a LOAD store elsewhere is not excluded.
+
+A `.text` census of direct dword stores at displacement 0x104 or 0x108
+(`mov` and `mov imm`, with and without an index byte, both roots) finds
+57 rows per root. Two are the travel end (EN `L2.02304`, `L2.01989`; RU
+`L2.02305`, `L2.02306`) and two set-point (EN `L2.02307`, `L2.02308`; RU
+`L2.02309`, `L2.02310`); the other 53 lie in bodies not read.
+
+**Confidence.** High for set-point storing its argument unconditionally,
+both arms' calls with the current record's point, the two LOAD bodies
+and the census rows, read in both roots (equal after masking except the
+load entry's application-field displacements, R2-ENGINE-466). Medium
+for "each opening" (the type-2 condition, the unenumerated openers, the
+bindings from earlier experiments) and for the absence of another writer
+or a LOAD store: the census
+covers direct displacement stores only, not stores through a computed
+pointer, and its other 53 rows were not classified.
+
+**Unknown.** Whether SAV stores the party point (a save read); whether
+a writer outside the census reaches map+0x104 between the arm's call and
+the open (classifying the 53 rows, one window per root each, and an
+`add reg,0x104` census); the callers of the map open `L2.00876` (a rel32
+`call` scan per root); the load entry's other fourteen callees (one
+window per root each).
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
 
 ## Save file names and listing
 

@@ -7998,12 +7998,12 @@ nonzero slot 775 would show its source.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-428 | The ROM2 global map opens only from the 0x41d and 0x42d arms (EN `L2.00876`, RU `L2.00877`): route mode after leaving town 1, select mode otherwise; no cancel control closes it; a travel's end closes it with 0x445. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
-| R2-ENGINE-429 | The ROM2 global map draws a background bitmap, Umoir.bmp in route mode or GMap.bmp in select mode, then BallMap.bmp route dots and the .16a sprites Flag, Cross, FlagOnMap, MissionFlag and YourFlag; Flag1 is loaded, not drawn. | High / Unknown | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-429 | The ROM2 global map draws a background bitmap, Umoir.bmp in route mode or GMap.bmp in select mode, then BallMap.bmp route dots and the .16a sprites Flag, Cross, FlagOnMap, MissionFlag and YourFlag; Flag1 is loaded, not drawn. | High / Unknown | ● active (amended) | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-430 | The ROM2 global map marks only GetAvailableLocations records at their catalog points: in select mode with no travel, MissionFlag for the pointed one, FlagOnMap for others; route mode and travels draw none; the party flag. | High | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-431 | In select mode the ROM2 map targets the available record nearest the pointer, with no hit area, previews its route and shows its name and description; a left-button press starts the travel, and no confirmation follows. | High | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
-| R2-ENGINE-432 | A ROM2 map travel grows the dotted route 8 points per paint while Cross animates at the target; at its end the map closes, posts 0x468 and calls EnterLocation; a click or key during travel skips to the end. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
-| R2-ENGINE-433 | ROM2 map routes run between node pixels (index 2) of PathMap.bmp (100 nodes) or UmoirPath.bmp (81, EN) by least summed segment length; 47 catalog records sit on PathMap nodes, town 1 and mission 10 on UmoirPath nodes in the EN image. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
-| R2-ENGINE-434 | The ROM2 map names a mission by `globalmap.txt` section `#title<ID>` and a town by `#town<ID>`, describes them by `#briefing<ID>` and `#description<ID>`; town 1 and missions 10 and 20 have no section of their own. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-432 | A ROM2 map travel grows the dotted route 8 points per paint while Cross animates at the target; at its end the map closes, posts 0x468 and calls EnterLocation; a click or key during travel skips to the end. | High / Medium | ● active (amended) | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-433 | ROM2 map routes run between node pixels (index 2) of PathMap.bmp (100 nodes) or UmoirPath.bmp (81, EN) by least summed segment length; 47 catalog records sit on PathMap nodes, town 1 and mission 10 on UmoirPath nodes in the EN image. | High / Medium | ● active (amended) | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-434 | The ROM2 map names a mission by `globalmap.txt` section `#title<ID>` and a town by `#town<ID>`, describes them by `#briefing<ID>` and `#description<ID>`; town 1 and missions 10 and 20 have no section of their own. | High / Medium | ● active (amended) | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-435 | The 39 ROM2 global-map bodies read in both clients are equal after masking except the map open's application flag field; resource names, the path image and the text keys agree; `globalmap.txt` bytes differ. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 
 ### R2-ENGINE-428
@@ -8102,6 +8102,11 @@ BMP and .16a loaders and the sprite draw slot +0x18 were not read.
 reached by an indirect call; the view origin's value. The backgrounds'
 size is R2-ASSET-093.
 
+**Amended.** R2-ENGINE-465 reads the BMP and .16a draw slots, the
+shade table and the paint's lock order, settling palette, transparency
+and blending; R2-ASSET-109 gives Cross's frame count. R2-ENGINE-463
+bounds ScrollUp and ScrollDn by a dword census.
+
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
 
 ### R2-ENGINE-430
@@ -8199,6 +8204,10 @@ alternation reading: `L2.01971` and `L2.00941` were not read.
 calls slot +0x34 at most once per 100 ms (slot +0x48, EN `L2.01974`), and
 whether that drives the paint was not read.
 
+**Amended.** R2-ENGINE-463 reads `L2.01971` and `L2.00941`: the
+alternation stands and Point2 sounds first. R2-ENGINE-464 settles the
+paint rate and the travel's paint count.
+
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
 
 ### R2-ENGINE-433
@@ -8233,6 +8242,10 @@ the read body of `L2.01978` leaves its start index unset in that case
 (R2-SESSION-177), so whether a select-mode start can be such a point
 is not settled.
 
+**Amended.** R2-SESSION-185 settles the party point after a victory:
+after mission 20's it is mission 20's point, a PathMap node. The search
+result for a point that matches no node stays Unknown.
+
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
 
 ### R2-ENGINE-434
@@ -8265,6 +8278,10 @@ masking. Medium for the wrap: `L2.01257` was not read.
 `#title10` finds `#title100`. Mission 10 is drawn only in route mode,
 which draws no text.
 
+**Amended.** R2-ENGINE-462 reads the find, settles the prefix Unknown
+(a substring search, so `#title10` finds `#title100`) and reads the RU
+key formats; the wrap `L2.01257` stays unread.
+
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
 
 ### R2-ENGINE-435
@@ -8289,6 +8306,210 @@ navigation receipt (R2-ASSET-093).
 equality of the backgrounds.
 
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+## Global map presentation
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-462 | The ROM2 map text lookup finds its key in `globalmap.txt` as a substring, first occurrence in buffer order, and takes the text to the next `#`; `#title10` first matches `#title100`; an absent key leaves the name empty and no text is drawn. | High / Medium | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
+| R2-ENGINE-463 | In the bodies read, ROM2 global-map SFX Point2 and Point1 start alternately, Point2 first, while a travel's route grows; pointing and the press start none; Medium that no unread body (arrival, retarget, skip) does; the leave frees all four. | High / Medium | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
+| R2-ENGINE-464 | Idle message 0x402 paints the ROM2 global map at most once per 100 ms of timeGetTime, without catch-up; if `L2.02239` and `L2.02240` return the point count L, a travel ends on paint max(15, floor((L-8)/8)+1) (Medium). | High / Medium | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
+| R2-ENGINE-465 | The ROM2 global map paints inside one surface lock: an opaque copy of the converted background, BallMap dots that skip converted value 0, and .16a sprites through a word-run painter with the sprite's 16-row mode-4 shade table. | High | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
+| R2-ENGINE-466 | Of 47 ROM2 EN/RU global-map presentation body pairs, 43 are equal after masking and four differ only in application-field displacements; the tick import, the location exports, the SFX and music names and the Cross sprite agree. | High | ● active | [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md) |
+
+### R2-ENGINE-462
+
+Name body EN `L2.01983` (RU `L2.02241`) empties its output string
+(`L2.02242`, RU `L2.02243`), formats `#title%d` for record type 1 and
+`#town%d` otherwise, and calls Find EN `L2.00997` (RU `L2.01289`) on the
+loaded text. Find calls EN `L2.01457` (RU `L2.02244`). With the multibyte
+flag EN `L2.02245` zero it calls `strstr` EN `L2.01080` (RU `L2.01081`);
+otherwise it compares the key at each character position, advancing one
+multibyte character at a time (`L2.02246`). Both branches return the
+first occurrence of the key as a substring, in buffer order. On a hit the
+name runs from the hit + key length + 2 to the next `#`; on a miss the
+name stays empty, and the paint skips the text block (`L2.01986` tests
+the length, R2-ENGINE-434). The description body uses the same Find
+(R2-ENGINE-434). The format strings read are:
+
+| Root | Strings | Values |
+|---|---|---|
+| EN | `L2.02247`..`L2.02248` | `#title%d`, `#town%d`, `#briefing%d`, `#description%d` |
+| RU | `L2.01987`..`L2.02249` | `#title%d`, `#town%d`, `#briefing%d`, `#description%d` |
+
+Over the 92 keys of both files (R2-ENGINE-434), `#title10` and
+`#briefing10` occur first inside `#title100` and `#briefing100`, so a
+mission 10 name and description would begin inside mission 100's section;
+mission 10 is shown only in route mode, which draws no text. `#title20`, `#briefing20`,
+`#town1` and `#description1` occur in no key, so town 1 and mission 20
+show no text.
+
+**Confidence.** High for the bodies, the formats in both roots and the
+first-occurrence rule. Medium for the key consequences: the key lists
+count `#` at line starts, and whether a key string also occurs inside a
+text line was not searched.
+
+**Unknown.** The wrap `L2.01257`.
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
+
+### R2-ENGINE-463
+
+Bind EN `L2.01961` (RU `L2.02250`) loads `SFX\ScrollUp.wav`,
+`SFX\ScrollDn.wav`, `SFX\Point1.wav` and `SFX\Point2.wav` into map+0x180,
++0x184, +0x188 and +0x18c through `L2.00980`; the names are equal in both
+roots. The enter sets map+0x190 to 0.
+
+After a travel's step (R2-ENGINE-464) the paint, while map+0x12c is below
+the count `L2.02240` of the route list at map+0xe0, tests the slot at
+map+0x188 + 4*map+0x190 with `L2.01971`, which returns whether
+`L2.00976` gives a channel for it. With none, it toggles map+0x190 between
+0 and 1 and calls `L2.00941` on the new slot. `L2.00941` starts the sound
+through `L2.02166` with the global `L2.02251` only when `L2.00976` gives no
+channel. So Point2 starts first, and each later start is the other sound
+after the current one has no channel.
+
+No other body read starts a map sound. Pointer move EN `L2.01938` and
+hover `L2.02252` set the cursor `L2.01940` through `L2.00587`; the target
+body `L2.01970`, left down `L2.01941` (map+0x12c = 8 or nothing) and the
+travel end start none. Not read here: the route builder EN `L2.01978`
+(called from `L2.01970` at `L2.02253` and from the paint at `L2.02254`),
+the arrival EN `L2.01952` (called from the paint at `L2.02255`) and the
+skip EN `L2.01973` (called from `L2.02256`); EXP-2054 listings read them
+as navigation only. The leave EN `L2.01953` calls `L2.02257`, which
+releases all four slots through `L2.00981`: it calls `L2.00982` on a
+channel `L2.00976` returns, clears the channel's +8 and deletes the sound.
+No dword reference to the scroll draw EN `L2.01962` or its caller
+`L2.01963` exists in EN `.text` and `.rdata`, nor to RU `L2.02258` or
+`L2.02259` in RU `.text`, and no read body uses +0x180 or +0x184 except
+bind and release.
+
+Map music is R2-ENGINE-335, R2-ENGINE-337 and R2-ENGINE-338: the map open
+EN `L2.00876` (RU `L2.00877`), when the music word EN `L2.00878` is set,
+sets a one-entry list of `music\map.wav` (EN `L2.02260`, RU `L2.02261`)
+and starts it, and the mission end EN `L2.01424` (RU `L2.02262`) stops
+music; both bodies were read whole in both roots.
+
+**Confidence.** High for the slots, the toggle, the call order and the
+absence of a start in the bodies listed, in both roots. Medium that no
+other body starts a sound (the word "only"), for the arrival, the
+retarget and the skip: their bodies and the scroll draw are unread, and
+the dword census cannot see a `call rel32`. Medium that a
+sound plays once: `L2.02166` and `L2.00976` were not read, so play-once
+and channel-playing are inferred from the toggle. Medium that the leave
+silences a playing sound: `L2.00982` was not read.
+
+**Unknown.** Starts in the unread bodies `L2.01978`, `L2.01952`,
+`L2.01973`, the scroll draw `L2.01962` and its caller `L2.01963`, and
+starts reached through a call outside the bodies read. One window per
+root for each body and one `.text` rel32 `call` scan per root for
+`L2.00941`, `L2.02166` and `L2.00980` would settle them. The audible
+overlap at a toggle needs the play body `L2.02166` (one window per root).
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
+
+### R2-ENGINE-464
+
+The application idle body EN `L2.01222` (RU `L2.01223`; its address is a
+`.rdata` dword at EN `L2.02263`) returns 1. Unless application+0x5d8 (RU +0x63c) is 3 with the static EN `L2.00805`
+(RU `L2.01317`) nonzero, which skips the rest (EN `L2.02264..L2.02265`,
+to `L2.02266`), and when application+0x404 bit 0
+(RU +0x41c) is clear and application+0xbc is nonzero, it sends 0x402 to
+the view stack application+0xcc through slot +0x48; the stack offers it
+to its children in order and stops at the first child that returns
+nonzero (EN `L2.00915`, RU `L2.02267`). Map slot +0x48 EN
+`L2.01974` (RU `L2.02268`) sets a static stamp EN `L2.02269` to
+timeGetTime − 100 on its first call. On 0x402, when the unsigned
+difference timeGetTime − stamp is at least 100, it calls slot +0x34 and
+then stores a fresh timeGetTime in the stamp. Missed intervals are not
+repeated. timeGetTime is the WINMM import at EN `L2.02270`, RU
+`L2.02271`. Slot +0x34 EN `L2.02272` (RU `L2.02273`) calls the paint
++0x2c and the present +0x38 unless its own test of flag 0x20 is set or
+EN `L2.00624` (RU `L2.02274`) is nonzero.
+
+Each paint draws the route to map+0x12c and Cross with frame
+min(map+0x134, frames − 1), then adds 1 to map+0x134 and 8 to map+0x12c
+(R2-ENGINE-432). The enter sets map+0x134 to 0; left down sets map+0x12c
+to 8. The travel ends on the paint where map+0x12c exceeds the value of
+`L2.02239` on the route list at map+0xe0 and map+0x134 exceeds the Cross
+frame count plus 1, 14 (R2-ASSET-109). After paint n, map+0x12c = 8 + 8n
+and map+0x134 = n, so, if `L2.02239` and `L2.02240` both return the
+point count L, the end is paint max(15, floor((L − 8)/8) + 1). Paints 13
+onward show frame 12. The EXP-2054 skip listing sets map+0x12c = L + 1
+and map+0x134 = 14; this experiment holds no window of it.
+
+**Confidence.** High for the idle send with its early exit, the 100 ms
+gate, the stamp rule and the paint's counters, in both roots. Medium for
+the paint-count formula: `L2.02239` and `L2.02240` are unread and may
+differ by one. Medium for the wall-clock rate: seven other `push 0x402` sites per root (EN `L2.02275`,
+`L2.02276`, `L2.02277`, `L2.02278`, `L2.02279`, `L2.02280`, `L2.02281`)
+were not read, and a parent's child paint (EN `L2.00579`) also calls the
+map's +0x2c; another paint source would shorten the travel.
+
+**Unknown.** The bodies `L2.02239` and `L2.02240` (one window per root
+each), which settle the paint count; the time a paint takes, which adds
+to each interval (a timed run); the lengths of the routes the shipped
+records produce (one read of the route builder `L2.01978` per root and
+the records).
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
+
+### R2-ENGINE-465
+
+Paint EN `L2.00881` (RU `L2.00882`) locks the surface with `L2.02282`,
+draws, unlocks with `L2.02283` and then calls the child paint `L2.00579`.
+The draw slots, read in both roots through the class tables:
+
+| Object | Class table EN / RU | Slot | Wrapper EN / RU | Body EN / RU | Rule |
+|---|---|---|---|---|---|
+| background +0x68 | `L2.00574` / `L2.02284` | +0x18 | `L2.00575` / `L2.02285` | `L2.00576` / `L2.02286` | opaque copy of the converted 16-bit picture |
+| BallMap +0x70 | `L2.00574` / `L2.02284` | +0x38 | `L2.00704` / `L2.02287` | `L2.00705` / `L2.02288` | copy that skips converted word 0 |
+| .16a sprites | `L2.00640` / `L2.02289` | +0x18 | `L2.00641` / `L2.02290` | `L2.00642` / `L2.02291` | word-run painter |
+
+The BMP loader `L2.00573` converts the 24-bit picture to the device
+format when it loads. The sprite wrapper passes palette row 0
+(`L2.02292(0)`, the table base; row n is base + 512n). The table is built
+by `L2.00644(16, 4, 0)`, which the art loader calls after each .16a load
+(R2-ENGINE-429): 16 rows of mode 4, whose per-pixel blend R2-ASSET-059
+and R2-ASSET-066 give.
+
+Draw order: background; in select mode with no travel the route preview
+dots and the record flags (R2-ENGINE-430); during a travel the route dots
+and Cross (R2-ENGINE-432); the party flag, Flag in route mode and YourFlag
+in select mode; the text block in select mode (R2-ENGINE-434); unlock;
+child paint.
+
+**Confidence.** High: every slot, wrapper and body in the table is read in
+both roots and equal after masking.
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
+
+### R2-ENGINE-466
+
+The body pairs, matched by masked instruction sequence (addresses of six
+or more hex digits and frame offsets masked), cover the opening arms, the
+LOAD path, the text lookup, the sound slots, the idle chain and the draw
+path: 47 pairs, 43 equal instruction for instruction. Four differ only in
+application-field displacements:
+
+| Pair EN / RU | Instructions | Differing | Fields EN / RU |
+|---|---|---|---|
+| idle `L2.01222` / `L2.01223` | 145 | 8 | +0x5d8/+0x63c, +0x404/+0x41c, +0x5d4/+0x638, +0x434/+0x44c |
+| load entry `L2.00826` / `L2.00119` | 94 | 4 | +0x460/+0x478, +0x3ec/+0x404, +0x5d8/+0x63c |
+| map open `L2.00876` / `L2.00877` | 86 | 3 | +0x44c/+0x464, +0x404/+0x41c |
+| mission end `L2.01424` / `L2.02262` | 46 | 2 | +0x404/+0x41c |
+
+Both roots import timeGetTime from WINMM, and both scenario.dll files
+export ordinals 5, 6, 14, 18 and 19 as ScenarioEnterLocation,
+ScenarioLeaveLocation, ScenarioGetAvailableLocations,
+ScenarioGetCurrentLocation and ScenarioGetAllLocations. The four SFX names
+and `music\map.wav` are equal, and Cross is byte-equal (R2-ASSET-109).
+The executables are the R2-ENGINE-435 inputs, with the SHA256 values
+R2-ENGINE-435 lists.
+
+**Confidence.** High for the pairs and the import and export names.
+
+**Evidence.** [EXP-2058](../experiments/EXP-2058-rom2-map-presentation/RESULTS.md)
 
 ## Main menu and save and load screens
 
