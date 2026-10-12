@@ -588,7 +588,7 @@ current account.
 | MAGIC-BLESS-064 | (rom.exe) `bless` and `curse` each place twenty marks on a rotating circle, and the two rotate in opposite senses. | Medium | ✔ promoted | [EXP-0177](../experiments/EXP-0177-effect-marks/) |
 | MAGIC-CLOUD-065 | (rom.exe) `poison_cloud` puts one mark above the actor; `heal` and `drain_life` append no mark and instead carry the previous rebuild's records forward. | Medium | ● active (partially retracted) | [EXP-0177](../experiments/EXP-0177-effect-marks/), [EXP-0189](../experiments/EXP-0189-spell-visual-algorithms/) |
 | MAGIC-ACTOR-066 | (rom.exe) `stone_curse` and `invisibility` change the actor's own sprite instead of adding a mark, and the unit draw tests for them by kind directly. | High / Medium | ✔ promoted (amended, superseded) | [EXP-0177](../experiments/EXP-0177-effect-marks/) |
-| MAGIC-ACTGATE-079 | (rom.exe) An actor carrying spell 20 runs no arm of the order switch, and the refusal is one byte above the choice of action; it has one bounded escape. | High / Medium | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
+| MAGIC-ACTGATE-079 | (rom.exe) An actor carrying spell 20 runs no arm of the order switch, and the refusal is one byte above the choice of action; it has one bounded escape. | High / Medium | ● active (amended) | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MAGIC-ACTKEY-080 | (rom.exe) The refusal is keyed to the spell id, and to nothing about the effect. | High / Medium | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MAGIC-MASKREAD-081 | (rom.exe) The reader set of `actor+0x144` is nine routines, and `MAGIC-ATTACH-016`'s enumeration names six of them. | High / Medium | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MAGIC-AIBIT-082 | (rom.exe) Two AI decisions read bit 20, neither of them gates an action, and the second is one case of a general no-restack rule. | High / Medium | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
@@ -1121,9 +1121,11 @@ on this code read is not independent corroboration.
 
 **Confidence.** **High** (every cited instruction re-read from the raw image bytes at its own address, 65/65, and every cited branch target recomputed from the branch's own displacement, 10/10, by `tools/effectgate -mode asserts`; both switch tables are read out of the PE with no disassembler in the path; the rival reading "the gate is movement-specific" is excluded by the fixed order of two reads inside one routine, not by plausibility) / **Medium** for the completeness of the `ord+0x09` writer set — the sweep is complete for byte stores through a register base, and the wide-store check at displacements 6..9 (`EnumRefs re:`, 2765 hits, filtered to non-stack bases inside the order module, 20 candidates, all linked-list nodes from the allocator at `R0052`) came back empty, but neither can see a store through a pointer offset by address arithmetic, and both `ord+0x08` and `ord+0x09` sit inside the order object's serialized `0x94`-byte raw block, which is `AI-PROGRESS-034`'s own blind spot
 
-**Original status.** ● active
+**Original status.** ● active (amended)
 
 **Evidence.** [EXP-0179](../experiments/EXP-0179-effect-action/)
+
+**Amended.** `AI-513`, with `AI-510` and `AI-516`, narrows "it has one bounded escape" and "the tail can admit at most one re-decision per refusal, on the first parked tick". The instructions named and the three setters of `mover+0x98` stand (High). The escape needs `mover+0x98` nonzero at the entry of the parked pass, and no path read produces that (Medium for the entry value: six state functions have no `E8` or `E9` caller found). The escape is a bound, not a shown path; it is not reached with the flag zero at entry.
 
 ### MAGIC-ACTKEY-080
 

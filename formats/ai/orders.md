@@ -410,11 +410,22 @@ target and Spell (`AI-487`). The pre-arm helper acts only on a scroll pointer
 
 The progress-3 arm clears progress when the mover test is nonzero after the
 step (the mover at a cell centre, `AI-350`), and the progress-4 arm when
-actor bit 0x100000 is clear; the 0xff arm keeps progress (`AI-499`). These
-are the arm exits (High). Every arm ends in the executor tail, which for a
+actor bit 0x100000 is clear; the 0xff arm keeps progress (`AI-499`, whose clause that the step
+stores `mover+0x98` is partially retracted). These are the arm exits (High). Every arm ends in the executor tail, which for a
 nonzero `mover+0x98` can store progress 0xff (command state 0x17) or call
-`R0004`, whose callee stores progress 1, so the end of progress 3, 4 and
-0xff is Medium; the writers of bit 0x100000 are unread (`AI-499`, `AI-500`).
+`R0004`, whose callee stores progress 1 (`AI-511`). The arms of progress 3, 4
+and 0xff call no routine read that sets the flag, and every pass clears it, so the
+tail's branch is not taken in such a pass through any path read; the callees
+not read rest on the census and `MAGIC-ACTGATE-079` at their grade, and the entry
+value of the flag is Medium (`AI-510`, `AI-516`). The step bodies read hold no
+order-record operand (High); that a move, attack, cast or stop stored during a
+step leaves it running to the cell centre, to be read at the first pass entered
+at progress 0, is Medium: the setters of 0x14, 0x18, 0x19, 0x1e and 0x1f are
+unread, the setters read store mover bytes, and the tail depends on the flag
+(`AI-509`). Bit 0x100000 is set by the effect attach and cleared at expiry
+(`L05766`, the only clear read); the attach also clears the bits of ids 0x17
+and 0x1b when those two effects replace each other (`AI-512`). While the bit is
+set no stored order is read (`AI-513`, Medium across ticks).
 Progress 1 and 2 clear only when `ord+0x15 > 2` and
 `actor+0x136` is set (`AI-488`). A player's cast installs once: the install pass stores progress 2,
 then command state 0xc and pending 0, and the action body idles that tick
@@ -437,8 +448,11 @@ pre-arm helper tests the action word and completion, not the cast, so the
 install-to-admission gap and the exit tick are unprotected (`AI-490`). A
 player's cast refused for mana stays at progress 2 with pending 0 and is
 dropped or retried by the completion byte (`MAGIC-312`). The setter of
-opcode 0x1b stores pending 0 if its callees keep `ebx` and the setter of 0x1d
-reaches a member routine that stores pending 0 (Medium, `AI-501`); the pending
-kind the group pass writes for their command states is unread. The group pass
+opcode 0x1b stores pending 0, as no direct callee read names `ebx` (`AI-514`),
+and the setter of 0x1d reaches a member routine that stores command state 0xa and
+pending 0 on every path (`AI-515`); the group-pass stores read are pending 4 and 1
+for command state 8, 6 and 0xb for state 0xc and 1 for state 0xa, and the helpers
+can leave other kinds, including 5 to 9 (Medium, `AI-514`, `AI-515`; these amend
+`AI-501`). The group pass
 writes pending 1 or 7 for command state 2 and 0xf for state 0xf (`AI-502`). A scroll cast pays no mana
 (`MAGIC-317`).

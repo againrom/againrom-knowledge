@@ -63,7 +63,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 | MOVE-FORM-036 | A group move DOES distribute destinations: there is a formation, there is a per-member offset table, and there is a spread test — `MOVE-ORDER-023`'s headline is refuted, through the blind spot that row's own confidence cell named. | High | ● active | [EXP-0094](../experiments/EXP-0094-group-rate/) |
 | MOVE-GROUP-037 | The complete writer set of `grpAI+0x44`, and the finding that NOTHING clears it — so a group keeps a rate it can no longer justify. | High / Medium | ● active | [EXP-0094](../experiments/EXP-0094-group-rate/) |
 | MOVE-AREA-038 | The complete movement-side reader set for both block planes, and the one channel through which an area effect reaches it. | High / Medium | ● active | [EXP-0174](../experiments/EXP-0174-area-movement/) |
-| MOVE-GATE-039 | (rom.exe) No actor is displaced except from inside one call of the order machine, so an actor the machine refuses cannot move at all. | High / Medium | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
+| MOVE-GATE-039 | (rom.exe) No actor is displaced except from inside one call of the order machine, so an actor the machine refuses cannot move at all. | High / Medium | ● active (amended) | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MOVE-STEP-040 | (rom.exe) The refusal begins on a cell centre, so a step already in flight completes. | High | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MOVE-EFFLIST-041 | (rom.exe) No routine in the movement path reads the drawable's effect list, so the list is not a second immobilisation mechanism. | High | ● active | [EXP-0182](../experiments/EXP-0182-effect-at-actor/) |
 | MOVE-072 | Movement rule recorded under MOVE-072. | High / Medium | ● active | [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md) |
@@ -474,6 +474,12 @@ plane that carries occupancy. Each produces its own route list on the actor.
 **Original status.** ● active
 
 **Evidence.** [EXP-0179](../experiments/EXP-0179-effect-action/)
+
+**Amended.** `EXP-0546` (`AI-510`): a rel32 scan finds 5 call sites of `R0178` and 4 of
+`R0043`, not the 2 and 2 listed above; `L14756`, `L14757`, `L14758`, `L14182` and
+`L14183` lie in six state functions with no rel32 caller found (`AI-516`). The three setters of
+`mover+0x98` stand (census family `m98`); "all three sit inside executors the closure puts behind
+an order arm" is Medium until those callers are found.
 
 ### MOVE-STEP-040
 
@@ -1735,3 +1741,37 @@ callees through route headers and frees, plus all destruction callers, to settle
 **Confidence.** High for the senders' order in `R0099`, the opcode and subtype maps, and the subtype-3 store and loop with its `vt+0x50` call. Medium that this derive is the first write after `L14157`: the delivery of the `0x46` records into the server queue (`R0217`, 10 computed calls not followed), the queue's first-in first-out order, the subtype-1 and subtype-2 arms' callees (`R0186`, `R0187`, `R0080`) and the join entry's callees after the walk were not read for a derive. Medium for its time: inside the first stepper call's drain, where commands execute (`SESS-TICK-006`), or earlier if delivery is synchronous; in both cases before the restart save, which is requested after the stepper (`SESS-086`).
 
 **Unknown.** What `player+0x58` governs and what the `[L06258]` setting is called.
+
+## The position bytes of the step
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-144 | The census of byte stores to the position bytes `+4` and `+5` finds the stepper, the arrival block, a routine before the stepper and two other routines in the movement module; two are read, the others are receipts (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
+
+### MOVE-144
+
+The census of byte stores to the position record's sub-cell bytes `+4` and `+5` finds the
+stepper, the arrival block, a routine before the stepper, and two other routines in the movement
+module; the stepper and the arrival block are read, the others are receipts (Medium).
+
+**Observation.** One linear pass over EN `.text` (`evidence/census.tsv`, family `posb`; rule in
+`preregistration.md`) lists writes overlapping `+4..+5` in segments with an actor operand, three
+mover displacements or a call of a movement routine: 319 rows. In the movement module (the
+segments at `L07101`, `L07128`, `R0043`, `R1055`) the byte stores are: `L14794`,
+`L14795`, `L14796`, `L14797`; `L14798`, `L14799`, `L14800`, `L14801`, `L14802`,
+`L07159` (stores of 0x80 at `L14802` and `L07159`); the stepper `L07097`, `L14803`,
+`L14804`, `L14746`, `L14805`, `L07100`; the recentre leaf `L14806`, `L14807`; the
+arrival block `L00973`, `L00974`; and `L14808`, `L14809`. The stepper's stores and the
+arrival stores are read in windows `a04` and `a03`. The census does not list the placement
+routines of `AI-CENTRE-101` (`R0287`, `R0288`, `R0289`, `R0290`): their segments hold
+none of the three flags.
+
+**Confidence.** High for the stores in `a03` and `a04`. Medium for the list of routines in the
+movement module: the segment flags and the displacement census have the blind spots in the
+preregistration, and the stores at `L07101`, `L14798..L07159`, `L14806` and `L14808`
+are receipts classified from context, not read.
+
+**Unknown.** The callers of the recentre leaf `R0866`, and the bodies at `L07101`,
+`L07128` and `R1055`. The card lists byte stores only: of the 319 rows, 23 are byte stores,
+13 word and 283 dword, and the 296 word and dword rows are not classified here, among them two
+dword stores in the movement segment `R0043` (`L14810`, `L14811`).

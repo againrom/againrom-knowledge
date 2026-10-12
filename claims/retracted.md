@@ -1424,3 +1424,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `ALM-OBJ-019` (the `+0x12` destination clause only) | Verbatim: "`+0x12` = sign-extended into `obj+0x10`" | Medium (contested under registry C-7) | [EXP-0542](../experiments/EXP-0542-map-field-readers/), ALM-STRUCTREAD-228 | The loader sign-extends `+0x12` into record `+0x10` (`L14618`); walker `R0489` stores it at `obj+0x08` (`L14613`) in both arms. `obj+0x10` is the position-object pointer (TERR-STRUCT-075). The field role (ALM-TRIG-046) and the other clauses stand. | **REFUTED** — partially retracted |
+
+## EXP-0546: step routine and mover flag
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `AI-499` (the step-routine store clause only; the arms, the entry test and the tail stores stand) | Verbatim: "The step `R0039` stores `mover+0x98` (`L00161`, `L00162`, `L01720` in the window of `R0178`)" | Medium | [EXP-0546](../experiments/EXP-0546-order-machine-step/), AI-510 | `R0039` is read whole (window `a03`) and stores no `mover+0x98`; the three stores are in `R0043`, `R0055` and `R0178`. | **REFUTED** - partially retracted |

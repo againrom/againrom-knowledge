@@ -8,18 +8,18 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3707. Observation: 99. Static analysis: 3105. Mixed: 503.
+Claims labelled: 3716. Observation: 99. Static analysis: 3114. Mixed: 503.
 
 ## Ledger ai
 
 | ID | Method | Status |
 |---|---|---|
-| AI-354 | static analysis | ● active |
+| AI-354 | static analysis | ● active (amended) |
 | AI-355 | static analysis | ● active |
 | AI-356 | static analysis | ● active |
 | AI-357 | static analysis | ● active |
 | AI-349 | static analysis | ● active |
-| AI-350 | static analysis | ● active |
+| AI-350 | static analysis | ● active (amended) |
 | AI-351 | static analysis | ● active |
 | AI-352 | static analysis | ● active (amended, partially retracted) |
 | AI-353 | static analysis | ● active |
@@ -313,11 +313,19 @@ Claims labelled: 3707. Observation: 99. Static analysis: 3105. Mixed: 503.
 | AI-489 | static analysis | ✔ promoted (branch candidate) |
 | AI-490 | static analysis | ✔ promoted (branch candidate) |
 | AI-491 | static analysis | ✔ promoted (branch candidate, amended) |
-| AI-499 | static analysis | ✔ promoted (branch candidate) |
+| AI-499 | static analysis | ✔ promoted (branch candidate, amended, partially retracted) |
 | AI-500 | static analysis | ✔ promoted (branch candidate) |
-| AI-501 | static analysis | ✔ promoted (branch candidate) |
+| AI-501 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-502 | static analysis | ✔ promoted (branch candidate) |
 | AI-503 | static analysis | ✔ promoted (branch candidate) |
+| AI-509 | static analysis | ✔ promoted (branch candidate) |
+| AI-510 | static analysis | ✔ promoted (branch candidate) |
+| AI-511 | static analysis | ✔ promoted (branch candidate) |
+| AI-512 | static analysis | ✔ promoted (branch candidate) |
+| AI-513 | static analysis | ✔ promoted (branch candidate) |
+| AI-514 | static analysis | ✔ promoted (branch candidate) |
+| AI-515 | static analysis | ✔ promoted (branch candidate) |
+| AI-516 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger alm
 
@@ -1037,7 +1045,7 @@ Claims labelled: 3707. Observation: 99. Static analysis: 3105. Mixed: 503.
 | MAGIC-BLESS-064 | static analysis | ✔ promoted |
 | MAGIC-CLOUD-065 | static analysis | ● active (partially retracted) |
 | MAGIC-ACTOR-066 | static analysis | ✔ promoted (amended, superseded) |
-| MAGIC-ACTGATE-079 | static analysis | ● active |
+| MAGIC-ACTGATE-079 | static analysis | ● active (amended) |
 | MAGIC-ACTKEY-080 | static analysis | ● active |
 | MAGIC-MASKREAD-081 | static analysis | ● active |
 | MAGIC-AIBIT-082 | static analysis | ● active |
@@ -1377,7 +1385,7 @@ Claims labelled: 3707. Observation: 99. Static analysis: 3105. Mixed: 503.
 | MOVE-FORM-036 | static analysis | ● active |
 | MOVE-GROUP-037 | static analysis | ● active |
 | MOVE-AREA-038 | static analysis | ● active |
-| MOVE-GATE-039 | static analysis | ● active |
+| MOVE-GATE-039 | static analysis | ● active (amended) |
 | MOVE-STEP-040 | static analysis | ● active |
 | MOVE-EFFLIST-041 | static analysis | ● active |
 | MOVE-072 | static analysis | ● active |
@@ -1434,6 +1442,7 @@ Claims labelled: 3707. Observation: 99. Static analysis: 3105. Mixed: 503.
 | MOVE-137 | static analysis | ● active (branch candidate) |
 | MOVE-141 | static analysis | ✔ promoted |
 | MOVE-142 | static analysis | ✔ promoted |
+| MOVE-144 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger pal
 
