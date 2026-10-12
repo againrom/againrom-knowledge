@@ -160,7 +160,9 @@ from low-word ID and 12-bit topic, then immediately forwards that packed
 value to TalkTo. Its three-bit kind 3 unlocks type-1 ID 10. Both town
 resources contain that header once. Page acknowledgement is not the unlock
 gate in this selected body. Availability supplies the location pointer and
-its ID supplies the mission path; the two IDs are distinct. — R2-ENGINE-073
+its ID supplies the mission path; the two IDs are distinct. R2-ENGINE-073 is
+partially retracted only for its world-map record-choice clause; the clauses
+here stand. — R2-ENGINE-073
 
 In both selected result ticks, the session failure register takes priority
 over the win counter. Victory's general-table report uses slot 0x8c and

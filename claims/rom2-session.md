@@ -1999,3 +1999,43 @@ Medium (R2-ENGINE-424).
 original warns the player before a window closes.
 
 **Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+## Global map party point
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-177 | The ROM2 global map's party point map+0x104/+0x108 is set by an ended travel (the target) and, by inference, by leaving a town (its point); that second store runs through a callee that the victory arm also calls and that was not read. | Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+
+### R2-SESSION-177
+
+Writers in the bodies read: the paint stores the target at the end of a
+travel (EN `L2.01988..L2.01989`, R2-ENGINE-432). The 0x42d arm passes the
+current town record's point to the map view app+0xf0 through the callee EN
+`L2.01990` before LeaveLocation (R2-ENGINE-272); the callee was not read,
+so that it stores the party point is inferred. The 0x41d arm (EN
+`L2.01991..L2.01992`, R2-ENGINE-422) makes the same call sequence with the
+current record's point on app+0xf0 before LeaveLocation. The map enter,
+its art loader, the init slot +0x78 and the leave slot +0x84 show no store
+to the point in the listings read. The open body reuses the view at
+app+0xf0 without constructing it, so the point is kept between openings.
+
+A route search starts at the node equal to the party point
+(R2-ENGINE-433). Mission 10's point (302,158) is not a PathMap node. After
+mission 10's victory no town is available and mission 20 is entered
+without the map (R2-ENGINE-422), and after mission 20's victory the map
+opens in select mode.
+
+**Confidence.** Medium. The end-of-travel store is read directly in EN;
+the 0x42d arm's store and the 0x41d arm both go through the unread callee,
+and no displacement census of map+0x104 was run. Unknown what the party
+point is after a victory, mission 20's included.
+
+**Unknown.** The body of EN `L2.01990` and its RU equivalent: whether the
+0x41d arm's call sets the party point to the finished mission's point, or
+leaves it, and so the party point at the map after mission 20's victory.
+One disassembly window per root would settle it. Also a writer outside the
+read bodies (the 0x468 arm, the mission entry, LOAD) and whether SAV stores
+the point; a `.text` census of `+0x104` stores, or an owner save at the map
+after mission 20, would settle them.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)

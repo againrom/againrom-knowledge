@@ -12,7 +12,9 @@ LeaveLocation output route. The enabled movie dispatcher indexes cutpaths.txt,
 uses stem 1 `teleport`, tries numbered files 01..99, skips missing resources
 and stops the batch on player return zero. Startup logos have a separate
 dispatcher. The source families and index meaning are conditional native
-contracts. — R2-ENGINE-073, R2-ENGINE-074, R2-ENGINE-075
+contracts. R2-ENGINE-073 is partially retracted only for its world-map
+record-choice clause; the clauses here stand. — R2-ENGINE-073, R2-ENGINE-074,
+R2-ENGINE-075
 
 The success report uses general flat text slot 0x8c. The selected startup
 join identifies main.res:text/main.txt row 140 and dialogs.txt rows 43/154.

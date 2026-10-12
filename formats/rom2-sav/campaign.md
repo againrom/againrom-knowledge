@@ -425,3 +425,48 @@ enters the first available record when no town is available, and
 otherwise opens the global map. Outputs 1..5 select the cutpaths rows
 teleport, stars, crown, knights and druids. In the read client
 call sites a defeat does not call LeaveLocation (Medium). — R2-ENGINE-422, R2-ENGINE-423
+
+## Global map
+
+The 0x41d and 0x42d arms open the global map. It runs in route mode after
+leaving town 1 and in select mode otherwise. No map control or key
+closes it; it closes itself when a travel ends (Medium for other closers:
+message 0x446 and an application arm that sends it were not read). — R2-ENGINE-428
+
+Route mode draws `Umoir.bmp` and select mode `GMap.bmp`. BallMap dots
+show the route; Flag, Cross, FlagOnMap, MissionFlag and YourFlag sprites
+mark the party, the travel target and records. Flag1 is loaded, but the
+record loop that would draw it is not reached. Palette and blending are
+Unknown. — R2-ENGINE-429, R2-ASSET-093
+
+Only GetAvailableLocations records are drawn, at their catalog points,
+and only in select mode while no travel runs: the pointed record carries
+MissionFlag and the others FlagOnMap; a record at the party point is not
+drawn. Route mode and a running travel draw no record marker. — R2-ENGINE-430
+
+The pointer targets the nearest available record by squared distance;
+there is no hit area. The route to it is previewed, and the name and
+description are shown. A left-button press starts the travel without a
+confirmation. — R2-ENGINE-431
+
+The travel extends the dotted route 8 points per paint while Cross
+animates at the target, with Point1 and Point2 footsteps. At its end the
+map closes, posts 0x468 and calls EnterLocation on the target record (the
+first available record in route mode). A click or key skips to the end.
+— R2-ENGINE-432
+
+Routes run between the index-2 pixels of `PathMap.bmp` (100) or
+`UmoirPath.bmp` (81) by least summed segment length. In the EN image town 1 and
+mission 10 lie on UmoirPath nodes; the other 47 catalog points lie on PathMap
+nodes. — R2-ENGINE-433
+
+Names come from `globalmap.txt` sections `#title<ID>` and `#town<ID>`,
+descriptions from `#briefing<ID>` and `#description<ID>`; town 1 and
+missions 10 and 20 have no section of their own. — R2-ENGINE-434
+
+EN and RU run the same bodies with the same resource names; the text
+files differ in bytes and share their keys. — R2-ENGINE-435
+
+The party point is set by an ended travel and, by inference, by leaving a
+town (Medium). Whether a victory sets it, and so its value after mission
+20's victory, is Unknown. — R2-SESSION-177

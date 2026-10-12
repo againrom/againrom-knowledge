@@ -936,7 +936,7 @@ or complete constructor census was performed.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-073 | The selected EN/RU fresh campaign starts with DLL type 2/ID 1; packed inn TALK unlocks type 1/ID 10, whose record ID supplies the first mission path. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
+| R2-ENGINE-073 | The selected EN/RU fresh campaign starts with DLL type 2/ID 1; packed inn TALK unlocks type 1/ID 10, whose record ID supplies the first mission path. | Medium | ● active (partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/), [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-074 | In selected EN/RU campaign result paths, victory acknowledgement calls DLL LeaveLocation; the first failure report instead offers menu or save-slot selection. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-075 | The enabled EN/RU movie dispatcher indexes cutpaths by DLL output; output 1 selects teleport files 01..99, skips missing files and stops on player return zero. | High | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-076 | Selected EN/RU additional-unit entry filters two bank ranges and uses stage-sensitive native templates; those paths do not establish the complete entering party. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
@@ -953,6 +953,8 @@ Type-2 ID-1 Leave removes the initial record without selecting a movie. Both sel
 **Confidence.** Medium for the composed first route. Raw constructors, packed decoding, client ordinal bindings, pointer-table targets and selected calls identify the sources without a mission-number assumption. The entire input/event schedule was not executed. DLL section equality is one code dependency.
 
 **Unknown.** Automatic initial briefing dispatch, every town interaction, arbitrary availability mutations, and the complete character-selection schedule. The selected campaign path is not a native playthrough witness.
+
+**Amended.** The clause that the world-map consumers choose a record "by rectangle" is refuted (retracted.md): the select path enters the available record whose point equals the target, the record nearest the pointer (R2-ENGINE-431, R2-ENGINE-432); the route path enters the first record. Other clauses stand.
 
 ### R2-ENGINE-074
 
@@ -3849,7 +3851,7 @@ and device output.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-271 | ROM2 message 0x442 sets a patch.txt label, names game(9999-wParam).sav and calls the save driver: mode word 2 saves and appends the label, other modes send the name in a type-7 record; the gate gives game9998.sav. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
-| R2-ENGINE-272 | ROM2 message 0x42d leaves a current town through LeaveLocation and opens the global map; leaving town ID 1 sets a map mode that routes to and enters the first available location. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
+| R2-ENGINE-272 | ROM2 message 0x42d leaves a current town through LeaveLocation and opens the global map; leaving town ID 1 sets a map mode that routes to and enters the first available location. | High / Medium | ● active (branch candidate, amended) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/), [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-273 | ROM2 global L2.00713 is the TipsMode option: the options constructor sets 1, and registry load, the options Tips checkbox and the tips-panel checkbox write it; the client has no other writer. | High | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
 | R2-ENGINE-274 | ROM2 town child 0x467 is a 312x200 tips panel framed from lm.256 with town.txt section #tips1, a Close button and a checked Show-tips checkbox at fixed panel-relative rectangles. | High / Medium | ● active (amended, branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
 | R2-ENGINE-275 | The ROM2 tips panel takes mouse input: Close posts 0x45a, which makes the town square delete the panel; the checkbox state is stored into TipsMode and decides the panel at later town entries. | High / Medium | ● active (branch candidate) | [EXP-2033](../experiments/EXP-2033-rom2-town-gate/) |
@@ -3949,6 +3951,12 @@ content is a static derivation, not an observed map. Medium for labelling
 
 **Unknown.** The map's appearance in route mode and the live route
 duration. An authorized capture would settle them.
+
+**Amended.** R2-ENGINE-429, R2-ENGINE-430 and R2-ENGINE-432 give the
+route-mode art and travel and show that route mode draws no record
+marker; town 1 and mission 10 are the only catalog points on UmoirPath
+nodes in the EN image (R2-ENGINE-433). The live route
+duration stays Unknown.
 
 ### R2-ENGINE-273
 
@@ -7698,7 +7706,7 @@ shows whether +0x42 matters for tag 42.
 | R2-ENGINE-419 | The bank775 restoration appends towns 2 and 3 and missions 21, 30..32, 40..43, 50..53, 60..63, 70..77, 80..87, 90..92, one of 93..96 chosen by slots 776/781, then 100..103 and 110; the slot-780 record of Leave50 is mission 52. | High | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
 | R2-ENGINE-420 | In both scenario.dll images only departure, TalkTo kind 3, NewGame and Load call the availability writers directly; an appending list method reached only through an `.rdata` pointer keeps the whole set Medium. | High / Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
 | R2-ENGINE-421 | The ROM2 client calls LeaveLocation only from the 0x41d and 0x42d arms and TalkTo only from three inn sites (EnterInn words) and three shop sites (the EnterShop result); IsMissionAvailable has no caller. | Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
-| R2-ENGINE-422 | After a campaign victory the ROM2 client calls LeaveLocation and plays the output movie, then shows credits at stage768 120 or more, enters the first available record when no town is available, or opens the global map. | High / Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
+| R2-ENGINE-422 | After a campaign victory the ROM2 client calls LeaveLocation and plays the output movie, then shows credits at stage768 120 or more, enters the first available record when no town is available, or opens the global map. | High / Medium | ● active (amended) | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/), [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-423 | The departure output indexes `cutpaths.txt` rows 0..5 intro, teleport, stars, crown, knights, druids (EN = RU); outputs 1..5 select teleport after mission 10, stars after 30, crown after the second of 70/80, knights or druids after 110. | High | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
 | R2-ENGINE-424 | Every catalog mission after 20 has a producer: a departure case, an inn kind-3 option under stage, town and completion gates, the bank775 restoration or LOAD; the decade missions 10..110 form the only stage chain. | Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
 | R2-ENGINE-425 | Slot 775 has no writer in the read population except the restoration's own clear, NewGame's clear and Load's raw restore, so a fresh campaign reaches the restoration only through a loaded bank. | Medium | ● active | [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/) |
@@ -7854,6 +7862,10 @@ bodies named above and the call sites of the cell census (R2-ENGINE-421).
 **Unknown.** The live dialog, the map's presentation and the 0x430 arm in
 RU.
 
+**Amended.** R2-ENGINE-428..R2-ENGINE-434 give the map's presentation,
+selection and travel; the position test is point equality with the
+target nearest the pointer (R2-ENGINE-431).
+
 **Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
 
 ### R2-ENGINE-423
@@ -7954,3 +7966,300 @@ unbounded indices, other modules and scripts outside the installed maps.
 nonzero slot 775 would show its source.
 
 **Evidence.** [EXP-2053](../experiments/EXP-2053-rom2-campaign-graph/)
+
+## Global map screen
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-428 | The ROM2 global map opens only from the 0x41d and 0x42d arms (EN `L2.00876`, RU `L2.00877`): route mode after leaving town 1, select mode otherwise; no cancel control closes it; a travel's end closes it with 0x445. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-429 | The ROM2 global map draws a background bitmap, Umoir.bmp in route mode or GMap.bmp in select mode, then BallMap.bmp route dots and the .16a sprites Flag, Cross, FlagOnMap, MissionFlag and YourFlag; Flag1 is loaded, not drawn. | High / Unknown | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-430 | The ROM2 global map marks only GetAvailableLocations records at their catalog points: in select mode with no travel, MissionFlag for the pointed one, FlagOnMap for others; route mode and travels draw none; the party flag. | High | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-431 | In select mode the ROM2 map targets the available record nearest the pointer, with no hit area, previews its route and shows its name and description; a left-button press starts the travel, and no confirmation follows. | High | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-432 | A ROM2 map travel grows the dotted route 8 points per paint while Cross animates at the target; at its end the map closes, posts 0x468 and calls EnterLocation; a click or key during travel skips to the end. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-433 | ROM2 map routes run between node pixels (index 2) of PathMap.bmp (100 nodes) or UmoirPath.bmp (81, EN) by least summed segment length; 47 catalog records sit on PathMap nodes, town 1 and mission 10 on UmoirPath nodes in the EN image. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-434 | The ROM2 map names a mission by `globalmap.txt` section `#title<ID>` and a town by `#town<ID>`, describes them by `#briefing<ID>` and `#description<ID>`; town 1 and missions 10 and 20 have no section of their own. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+| R2-ENGINE-435 | The 39 ROM2 global-map bodies read in both clients are equal after masking except the map open's application flag field; resource names, the path image and the text keys agree; `globalmap.txt` bytes differ. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+
+### R2-ENGINE-428
+
+A direct `call rel32` census of each client `.text` lists the open body's
+callers: EN `L2.01930` (0x41d arm) and `L2.01931` (0x42d arm), RU
+`L2.01932` and `L2.01933`. The open body pushes the map view app+0xf0 on
+room stack app+0xcc and calls its slot +0x80, the map enter (EN
+`L2.00880`, RU `L2.01934`), which has no direct caller. The map vtable (EN
+`L2.01935`, RU `L2.01936`, 34 slots) holds both roots' bodies at the same
+slots.
+
+Map+0x1b0 is the mode: the 0x42d arm sets it to 1 for town ID 1
+(R2-ENGINE-272) and the 0x41d arm stores 0 before the open
+(R2-ENGINE-422). Nonzero is route mode, zero select mode.
+
+The window message body EN `L2.00913` sends 0x200 to slot +0x4c, 0x400 to
++0x50, 0x201..0x206 through the jump table `L2.01937` to +0x54, +0x58,
++0x5c, +0x60, +0x64 and +0x68, 0x100 to +0x6c, 0x101 to +0x70 and 0x102 to
++0x74. The map overrides these input slots:
+
+| Slot | Message | Map body (EN / RU) | Action |
+|---|---|---|---|
+| +0x4c | pointer move | `L2.01938` / `L2.01939` | target the nearest record (R2-ENGINE-431) unless travelling, then set cursor `L2.01940` |
+| +0x54 | left down | `L2.01941` / `L2.01942` | start the travel, or skip it when one runs |
+| +0x58 | left up | `L2.01943` (EN) | returns 0 |
+| +0x60 | right down | `L2.01944` / `L2.01945` | inside the Hero.bmp rectangle at map+0xfc, store a rectangle at map+0x114 |
+| +0x64 | right up | `L2.01946` / `L2.01947` | clear map+0x114 |
+| +0x6c | key down | `L2.01948` / `L2.01949` | skip a running travel |
+| +0x74 | character | `L2.01950` / `L2.01951` | skip a running travel |
+
+No map slot closes the map or returns to a town. The map closes when a travel
+ends: EN `L2.01952` sends 0x445 to the map's own slot +0x48, which hands it
+to `L2.00782`; that body calls leave slot +0x84 (EN `L2.01953`: map+0x194
+= 0, art, sounds and route graph released) and posts 0x44c with the map
+pointer. The dispatcher `L2.00782` closes the view on message 0x446 as
+on 0x445 when `[this+0x5c]` is nonzero. The EN 0x42d arm window holds an
+application arm (`L2.01954..L2.01955`) that sends 0x446 or 0x445 to
+app+0xcc by the flag bits of app+0x404; its senders were not read, nor
+whether the room-stack top is the map when it runs. Init slot +0x78 (EN `L2.01956`) adds one child, button class
+`L2.00901` with ID 4, a zero-size rectangle at (540,450), a caption
+shorter than two printable characters, message 0x7fff and no hotkey.
+
+**Confidence.** High for the direct callers, the vtable, the EN message
+mapping and every map slot body with an RU listing (slot +0x58 is EN
+only). Medium that no other path opens the map: indirect calls were not
+censused. Medium that no key, control or message closes it: the
+application's own key handling, the senders of 0x446 and 0x445 in the
+application arm at `L2.01954` and the zero-size button's paint were not
+read, and the RU jump table was not read (the RU dispatcher body is
+equal after masking).
+
+**Unknown.** Base bodies EN `L2.01957` (+0x5c, left double click),
+`L2.01958` (+0x68) and `L2.01959` (+0x70); what map+0x114 is used for,
+since no read paint draws it.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-429
+
+Map enter calls EN `L2.01960`, which releases old art and loads by
+direct path string:
+
+| Field | Resource | Loader | Use in the paint body |
+|---|---|---|---|
+| +0x68 | `main\graphics\Global.Map\Umoir.bmp` (route) or `GMap.bmp` (select) | BMP `L2.00573` | background at the view origin |
+| +0x70 | `graphics\Global.Map\BallMap.bmp` | BMP | route dots |
+| +0x74 | `...\Flag1\sprites.16a` | 16a `L2.00639` | frame count for map+0x128; its draw sits in the record loop, which route mode does not reach (R2-ENGINE-430) |
+| +0x78 | `...\Flag\sprites.16a` | 16a | party marker, route mode |
+| +0x7c | `...\Cross\sprites.16a` | 16a | travel target |
+| +0x80 | `...\MissionFlag\sprites.16a` | 16a | pointed record, select mode, no travel |
+| +0x84 | `...\FlagOnMap\sprites.16a` | 16a | other records, select mode, no travel |
+| +0x88 | `...\YourFlag\sprites.16a` | 16a | party marker, select mode |
+| +0x6c | `...\Hero.bmp` | BMP | not drawn; its size sets the right-button rectangle |
+| +0x8c..+0xa0 | `Scroll01..03.bmp`, `ScrollP1..3.bmp` | BMP | not drawn by the paint body |
+
+Each .16a load is followed by `L2.00644(16,4,0)`. EN `L2.01961` loads
+`SFX\ScrollUp.wav`, `SFX\ScrollDn.wav`, `SFX\Point1.wav` and
+`SFX\Point2.wav` into +0x180..+0x18c. The enter also loads
+`main\text\globalmap.txt` into the shared text buffer (R2-ENGINE-344) and
+builds the route graph (R2-ENGINE-433).
+
+Paint EN `L2.00881` returns until the enter has set map+0x194. It draws
+the background, the route dots, the record markers (R2-ENGINE-430), the
+travel figure (R2-ENGINE-432), the party marker and, in select mode, the
+text block (R2-ENGINE-434), all at the view origin from map+8 plus fixed
+offsets. Scroll pieces are drawn only by EN `L2.01962`, called only from
+`L2.01963`, which has no direct caller in either `.text`; ScrollUp and
+ScrollDn have no use in the bodies read.
+
+**Confidence.** High for the paths, loaders, fields and the paint's draw
+calls in both roots. Unknown for palette, transparency and blending: the
+BMP and .16a loaders and the sprite draw slot +0x18 were not read.
+
+**Unknown.** Whether Hero.bmp, the scroll pieces or ScrollUp/ScrollDn are
+reached by an indirect call; the view origin's value. The backgrounds'
+size is R2-ASSET-093.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-430
+
+The paint body walks the list returned by GetAvailableLocations (client
+cell EN `L2.01964`, R2-ENGINE-421, R2-ENGINE-422) and reads each record's
+point at record+8 (`L2.01965`). It never reads the catalog list. Offsets
+are from the record point; frames advance one per paint.
+
+The record loop (EN `L2.01966..L2.01967`) runs behind the test
+`map+0x12c != 0` at `L2.01968`, which jumps past it. Map+0x12c is a
+travel's progress (R2-ENGINE-432). In route mode (map+0x1b0 nonzero) the
+code at `L2.01969` raises it to 8 unless it is already 8 or more, so it
+is nonzero on every paint and the loop, with its Flag1 draw at (x-4,
+y-32), is not reached. In select mode the loop runs only while no travel
+runs; a travel draws the route dots, Cross and the party marker and no
+record marker.
+
+| Mode | Drawn | Sprite and offset | Frame |
+|---|---|---|---|
+| route | records | nothing (record loop not reached) | |
+| select, no travel | record whose point equals the target | MissionFlag at (x-5, y-41) | map+0x128 |
+| select, no travel | other records not at the party position | FlagOnMap at (x-5, y-37) | map+0x128 |
+| select, no travel | record at the party position | nothing | |
+| select, travel | records | nothing | |
+| route | party | Flag at (px-10, py-24) | map+0x130 |
+| select | party | YourFlag at (px-20, py-44) | map+0x130 |
+
+The party point is map+0x104/+0x108. Map+0x128 cycles modulo the frame
+count of Flag1, map+0x130 modulo that of Flag. A record's point is its
+catalog x and y (R2-ENGINE-418); each lies on a node of the mode's path
+image (R2-ENGINE-433).
+
+**Confidence.** High: the paint body is read whole in both roots (equal
+after masking); it holds no other record loop, and the test at
+`L2.01968` is the only path to the loop. A completed or not-yet-available record is not
+drawn, because only the available list is walked.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-431
+
+Target body EN `L2.01970` runs on pointer move and on every paint while
+no travel runs and no route is held. It converts the pointer to
+view-relative coordinates and walks the available list for the least
+(dx*dx + dy*dy); a tie keeps the earlier record. There is no distance
+limit and no rectangle. The winner's point becomes the target
+map+0x10c/+0x110. When the new target differs from the previous target the body
+recomputes the route from the party point (R2-ENGINE-433); a target equal
+to the party point gives a two-point route. The paint draws the route as
+BallMap dots on every eighth route point. It then fetches the record's name and
+description (R2-ENGINE-434).
+
+A left-button press with no travel running sets map+0x12c = 8, which
+starts the travel to the current target (R2-ENGINE-432). Nothing else
+gates it: no confirmation, and a single press suffices (the base
+double-click body is unread, R2-ENGINE-428). The pointer body also sets
+the cursor object EN `L2.01940`. During a travel the pointer move does
+not retarget.
+
+**Confidence.** High for the selection rule, the click and the cursor
+call in both roots.
+
+**Unknown.** The cursor image `L2.01940` holds.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-432
+
+A travel runs while map+0x12c is nonzero. Each paint draws the route dots
+up to map+0x12c, draws Cross at (tx-10, ty-12) with frame map+0x134
+(held at its last frame), then adds 1 to map+0x134 and 8 to map+0x12c.
+While map+0x12c is below the route length the body plays SFX Point1 and
+Point2 alternately, starting the other one when the current one is
+silent (`L2.01971`, `L2.00941`). The travel ends when map+0x12c exceeds
+the route length and map+0x134 exceeds the Cross frame count plus 1.
+
+At the end the party point becomes the target, map+0x12c = 0 and the
+route is cleared. The map then closes (R2-ENGINE-428), posts 0x468 to the
+application and calls EnterLocation (client cell EN `L2.01972`): in
+route mode on the first available record, in select mode on the first
+available record whose point equals the target (`L2.01926`). The 0x468
+arm enters the location (R2-ENGINE-272). In route mode the paint starts
+the travel itself, with the first available record as target.
+
+Skip EN `L2.01973` sets map+0x12c to the route length plus 1 and
+map+0x134 to the Cross frame count plus 1, so the next paint ends the
+travel. It is called from left down, key down and character. The map
+plays no movie.
+
+**Confidence.** High for the sequence in both roots. Medium for the
+alternation reading: `L2.01971` and `L2.00941` were not read.
+
+**Unknown.** The paint rate, so the travel's duration; message 0x402
+calls slot +0x34 at most once per 100 ms (slot +0x48, EN `L2.01974`), and
+whether that drives the paint was not read.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-433
+
+EN `L2.01975` loads `graphics\Global.Map\UmoirPath.bmp` in route mode and
+`PathMap.bmp` in select mode through the 8-bit loader `L2.00583`, whose
+picture index is top-origin (R2-ENGINE-233). The graph builder EN
+`L2.01976` scans 640x480 pixels at x + 640*y and makes every pixel of
+value 2 a node; `L2.01977` traces each node's road from the node and
+stores a point list per connected node pair, both directions. Route EN
+`L2.01978` finds the nodes equal to the start and end points; equal points
+give a two-point route. Search `L2.01979` is a depth-first search over
+nodes not yet on the path that keeps the path of least summed list
+length. The route is the concatenation of the pair lists.
+
+Node pixels counted in the installed images (`out/map/node-counts.tsv`):
+PathMap.bmp 100 (EN and RU, equal SHA256), UmoirPath.bmp 81 (EN). Of the
+49 catalog records (R2-ENGINE-418), 47 lie on PathMap nodes in both roots;
+town 1 (215,234) and mission 10 (302,158) lie only on UmoirPath nodes (EN
+image). Route mode starts at town 1 (R2-ENGINE-272), so its route runs on
+UmoirPath. A select-mode start is the party point (R2-SESSION-177); a
+start or target at mission 10's point matches no PathMap node.
+
+**Confidence.** High for the loaders, the node rule, the search and the
+node match (UmoirPath: EN image only). Medium for the road rule: tracer `L2.01980` was not read, so
+which pixel values carry a road (2552 pixels of value 1 in PathMap) is
+inferred.
+
+**Unknown.** The search result for a start or target that matches no node:
+the read body of `L2.01978` leaves its start index unset in that case
+(`L2.01981..L2.01982`), and the party point after a victory is Unknown
+(R2-SESSION-177), so whether a select-mode start can be such a point
+is not settled.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-434
+
+Name body EN `L2.01983` formats `#title%d` for record type 1 and
+`#town%d` otherwise with the record ID; description body `L2.01984`
+formats `#briefing%d` and `#description%d`. Each finds the key in the
+loaded `globalmap.txt` and returns the text from two bytes past the key
+to the next `#`, or an empty string when the key is absent. The target
+body trims two characters from the name and wraps the description with
+font `L2.01249` into rectangle (70,48)-(390,200) (`L2.01257`). In select
+mode, when the name is not empty, the paint draws the name with font
+`L2.01985` at (230,27) and each description line with font `L2.01249` at
+(230, 48+10i), the last line less two characters.
+
+The EN and RU files hold the same 92 keys: #title and #briefing for
+missions 21, 30..32, 40..43, 50..53, 60..63, 70..77, 80..87, 90..96,
+100..103 and 110, and #town and #description for towns 2 and 3
+(`out/map/record-nodes.tsv`). Town 1 and missions 10 and 20 have no key
+of their own; for town 1 and mission 20 no key begins with theirs, so the
+lookup is empty and the paint skips the text block (`L2.01986` tests the
+length).
+
+**Confidence.** High for the EN key formats, the lookup and the draw
+positions, and for the key sets. Medium for RU key formats: the RU format
+strings (`L2.01987`..) were not read; the RU bodies are equal after
+masking. Medium for the wrap: `L2.01257` was not read.
+
+**Unknown.** Whether the find `L2.00997` matches a prefix: if it does,
+`#title10` finds `#title100`. Mission 10 is drawn only in route mode,
+which draws no text.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+### R2-ENGINE-435
+
+`out/code/pairs.tsv` compares 39 EN/RU body pairs with addresses of six or
+more hex digits and frame offsets masked: 38 are equal instruction for
+instruction; the map open differs in three instructions, the application
+flag field +0x404 (RU +0x41c, R2-ENGINE-272). The RU vtable holds the RU
+bodies at the EN slots. The 23 resource and text path strings are equal.
+`graphics.res` lists the same 17 `global.map/` members at the same offsets
+and sizes in both roots, and PathMap.bmp is byte-equal. `main.res`
+`gmap.bmp` is 921654 bytes in both, `umoir.bmp` 921656 EN and 921654 RU,
+not compared by hash. `globalmap.txt` is 5179 bytes EN and 5403 RU, with
+the same keys.
+
+**Confidence.** High for the body pairs, the path strings, the PathMap
+hash and the text keys. Medium for the EN `graphics.res` registry
+equality and the background sizes: they rest on the EN registry listing, a
+navigation receipt (R2-ASSET-093).
+
+**Unknown.** The RU UmoirPath.bmp node set (not read) and the pixel
+equality of the backgrounds.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)

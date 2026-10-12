@@ -1012,3 +1012,46 @@ R2-ENGINE-286 and R2-ENGINE-246 bind three generator/selected inn slots; R2-ENGI
 **Confidence.** High for the exact filtered registry population, headers and equality. The RES traversal validates registry ownership and extents; unnamed filtered hits are retained. No function-discovery instrument is involved. The reduction excludes names without the three substrings and resources outside graphics.res:interface/, so it cannot exclude other command panels.
 
 **Unknown.** Other panel names and archive roots, all town/menu consumers, druid/Kaarg command-slot binding and shop caption font/ink. A loader-key census and native caption painters would settle them.
+
+## Global map resources
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-093 | ROM2 global-map art is GMap.bmp, Umoir.bmp and text/globalmap.txt in main.res and 17 global.map/ members in graphics.res; PathMap.bmp (EN, RU) and UmoirPath.bmp (EN) are 640x480 8-bit images with 100 and 81 index-2 pixels. | High / Medium | ● active | [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
+
+### R2-ASSET-093
+
+`main.res` (RU registry, EN offsets from the same reader):
+`graphics/global.map/gmap.bmp` 921654 bytes in both roots,
+`graphics/global.map/umoir.bmp` 921656 EN and 921654 RU, and
+`text/globalmap.txt` 5179 bytes EN (184 CRLF rows, SHA256
+`32e720979da07860fdc570436d0900c839de20b98ebe8e654a109586fc6baa21`) and
+5403 RU (185 rows, the last empty, SHA256
+`5a39b88acd42878875eddb73998ee8c1792a474ac64b8880e55cd8fab5294fdc`).
+
+`graphics.res` lists 17 `global.map/` members at equal offsets and sizes
+in both roots: ballmap, flag, hero, pathmap, umoirpath, scroll01..03 and
+scrollp1..3 (`.bmp`), and cross, flag, flag1, flagonmap, missionflag and
+yourflag (`sprites.16a`). `flag.bmp` has no path in the read string block of
+the map (R2-ENGINE-429).
+
+| Member | Size | Header | Index 0..3 pixels | SHA256 |
+|---|---|---|---|---|
+| `pathmap.bmp` (EN, RU) | 307272 | 640x480, 8 bit | 304548, 2552, 100, 0 | `d6f4f1a3c590fd6e66a11f8d74b32eaa072dd2241f16de2e53e89f298096e988` |
+| `umoirpath.bmp` (EN) | 308278 | 640x480, 8 bit | 304042, 3077, 81, 0 | `c2b9357a647c36bcd253b70b7e609d2baca2e6c9e2db2ba5e95660bf789d2b86` |
+
+The node coordinates are `out/code/nodes.tsv`.
+
+**Confidence.** High for the RU registry listings, the path images and
+the text files read by the final plan. Medium for the EN registry
+listing, a navigation receipt (`evidence/navigation/nav2-registry.tsv`);
+the EN members read at its offsets have the sizes it lists. Medium for
+the backgrounds: their 640x480 24-bit headers
+(EN SHA256 `4d4533eafc1772e4a1f84b54f3ced0ed9fb0342d3d85db8e937a58865f3ebb58`
+GMap, `f80aaaa994886ae5fddd27b16b6caa93efdba229840ca17fadf22180b4db7c4e`
+Umoir) are a navigation receipt (`evidence/navigation/nav3-members.tsv`).
+
+**Unknown.** RU UmoirPath.bmp and the backgrounds' RU bytes; the .16a frame
+counts.
+
+**Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)

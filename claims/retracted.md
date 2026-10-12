@@ -1,5 +1,11 @@
 # Overturn history
 
+## ROM2 world-map record choice
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-073` (world-map choice clause only; the start record, TALK unlock, Leave and path clauses stand) | Verbatim: "Both selected world-map consumers choose an available record by rectangle or first entry" | Medium | [EXP-2054](../experiments/EXP-2054-rom2-global-map/), R2-ENGINE-431, R2-ENGINE-432 | Select mode takes the available record nearest the pointer by squared distance, with no rectangle; at the travel end it enters the first available record whose point equals that target. Route mode enters the first available record. | **REFUTED** — partially retracted |
+
 ## ROM2 shop buy owner
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
