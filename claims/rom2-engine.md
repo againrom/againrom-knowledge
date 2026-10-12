@@ -10433,3 +10433,298 @@ accessors, `L2.02356`, the character-file loaders, the producer at
 would settle parity.
 
 **Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+## Computer-unit target choice, pursuit and flight
+
+Shared terms. Addresses are RU `allods2.exe`; the EN body sits at RU -
+0x9ff0 below `L2.01527` and at RU - 0xa039 from `L2.02401` upward
+(R2-ENGINE-508). The actor's command object is actor +0x1c4 ("cmd"), its
+movement block actor +0x1c0 ("block"). The order is actor +0x50
+(R2-ENGINE-398); the activity is cmd byte +8, run by the unit tick
+`L2.00506` through the 15 dwords at `L2.01571`. Owner +0x2c is the Player
+kind, nonzero for computer-owned units (R2-ENGINE-457). Attack range is
+`L2.01728`: the range byte +9 of the spell in cmd byte +0x78 when the
+spellbook +0x140 holds it and mana +0x9a covers its cost word +0xc, else
+the weapon range byte +0x12c. "Kind" is the byte `L2.02402` returns; that
+it is byte +0x4a (R2-ENGINE-482) rests on navigation reads only. The cards
+state executable behaviour and no stored-file layout.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-501 | A ROM2 idle unit attacks the nearest hostile it marks within attack range, least turn on a tie, turning to it without stepping. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-502 | ROM2 idle candidates: hostile units on cells a ScanRange ray scan marks (creature ScanRange Medium), plus a computer unit's last attacker cell for 21 builder runs. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-503 | ROM2 group members take the enemy with the least score (cells x 256 + turn), scaled by a 16-byte kind table whose 0 excludes. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-504 | A ROM2 unit holds a target for one activity, then re-picks, from units each nearer than those kept before, the hostile of least turn, or stands or looks around. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-505 | A ROM2 attack order's activity-5 body has no distance bound (Medium); a guard's walk-back gives way to an attack on a hostile within the picker radius of its post. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-506 | ROM2 Human-table units (slot +0x30 nonzero) back off at health <= +0x40, flee at <= +0x44: HPmax, HPmax/4 with a spellbook; HPmax/2, 0 if ranged. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-507 | A ROM2 active group's programme byte picks one of ten routes; guard handlers leash enemies to a jittered radius and return idle members. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-508 | EN and RU ROM2 agree on 64 of 65 masked targeting, flight and group bodies; EN has a wrapper `L2.02403` (RU Unknown). | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+
+### R2-ENGINE-501
+
+The idle planner `L2.01731` (order 12, and every order the table does not
+name, through `L2.01733`) runs the list builder `L2.02404` (R2-ENGINE-502)
+and walks session list +0xa64. A candidate whose score `L2.00057`
+(R2-ENGINE-503) is 0xffffff is skipped. For the rest, d is `L2.01588`, plus
+1 when the candidate's kind is 3 and the actor's is not, and t is the turn
+`L2.02405` from block byte +0 (facing) to the direction `L2.02113`. The
+best starts at d = range + 1, t = 0xff. A smaller d replaces it; an equal d
+not above range with t not above the best t replaces it, so the later
+candidate wins a full tie. With live candidates but no result, and a
+nonempty list +0xa88 (R2-ENGINE-502), list +0xa84 is walked the same way
+without the score filter or the kind adjustment. A result above range is dropped.
+
+`L2.01588` is an edge-to-edge distance: per axis |a - b| in position units
+minus (size a + size b) x 128, floored at 0; the larger axis divided by 256,
+plus 1. Size is virtual slot +0x1c, and each coordinate is offset by
+(size - 1) x 128.
+
+A found target goes to `L2.01525`: a player-owned mage first tries
+`L2.01527`; otherwise activity 6 with cmd +0xc = target and cmd byte +0x14
+= range. Activity 6 (`L2.02406`) strikes through `L2.02407` when `L2.01574`
+admits the target at that range; otherwise `L2.02408` passes the
+direction to the target to `L2.02409`, the call the look-around uses to
+turn (R2-ENGINE-504), and sets state +0x54 to 1 when the facing changed.
+Activity 6 makes no call to the step routine `L2.01577` of activity 5.
+A player-owned mage with range below 2 drops the activity there. With no
+target the idle planner calls support `L2.01531`. It then sends a unit
+standing centred in its cell (`L2.00490`) whose block word +0x80 is nonzero
+and differs from its cell back to that cell through `L2.02410`.
+
+**Confidence.** High for the choice rule and the activity-6 body in RU, and
+for the choice rule in EN (equal masked bodies, reproduced listings).
+Medium: `L2.01525` was read in navigation only; the position units behind
+`L2.02411` and `L2.02412`, and the bodies of `L2.01574` and `L2.02409`,
+were not read, so "without stepping" rests on activity 6 calling no step
+routine; EN activity 6 is generation only (R2-ENGINE-508).
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-502
+
+The list builder `L2.02404` clears and fills the sight grid at map
++0x58ec0 through `L2.02413` and `L2.01586`. `L2.01586` calls `L2.01587`:
+the budget is (ScanRange byte +0xa5 << s) + (1 << (s - 1)), s the map dword
++0x2a004. Byte +0xa5 is the ScanRange copied by the hero template load for
+Humans (R2-ENGINE-319); for creatures it is the byte the creature row
+reader stores in the Units column position (R2-ENGINE-483). It marks the actor's cell, then walks square rings 1 to 19 and
+stops after a ring in which every in-bounds cell (`L2.02414`) is marked.
+Cell test `L2.02415` steps toward the actor through the direction table
++0x22000 and sets the cell's remaining budget to the previous cell's minus
+(terrain height byte at +0x944f4 minus the actor's height, plus the cost
+word at +0x28000); it marks the cell when the remainder is above 0.
+
+For a computer-owned actor with a remembered cell in cmd word +0x58, the
+builder marks that cell too, increments cmd byte +0x5a and clears +0x58
+when the count passes 20: builder runs 1 to 21 mark the cell, run 21
+clears it after marking. World units on marked cells form list +0xa64.
+Filter `L2.02119` removes units whose owner relation mask 1 (`L2.01589`
+returns byte & 1, the predicate R2-ENGINE-364 calls the hostility bit)
+does not mark hostility, and units with effect 0x1000 that no member of the
+actor's +0x70 list sees within its cmd byte +0x71 (R2-ENGINE-364). Then
+`L2.02416` moves units with health +0x94 below 1 to lists +0xa84 and
++0xa88. When no live candidate remains, the builder moves list +0xa84 into
++0xa64 and clears +0xa88 (`L2.02417`..`L2.02418`).
+
+Being hit sets the memory: `L2.02074` (attacker, victim) writes the
+victim's cmd +0x54 = 1, +0x58 = attacker cell and +0x5a = 0, runs relation
+`L2.02419`, posts event 1, stores the attacker at cmd +0x94 and the time
+`[L2.01317]+4` at +0x98, and stores at word +0x9c the cell a fixed distance
+(the double at `L2.02420`) from the victim directly away from the attacker.
+
+**Confidence.** High for the ring walk, the cell-test arithmetic, the
+remembered cell, the filter and the hit memory in RU, and all but the hit
+memory in EN. Medium for the ScanRange of a creature (R2-ENGINE-483 grades
+its stream source Medium) and for the jitter draw `L2.02421`. Medium: the contents and writers of the direction, height and
+cost tables, `L2.02413`, the world list, and the value 10.0 at `L2.02420`
+(navigation read) were not read in generation; EN `L2.02074` is generation
+only.
+
+**Unknown.** The bodies of `L2.02402` (kind; navigation window
+`L2.02422` only) and `L2.02421`; whether the creature +0xa5 equals the
+title ScanRange of its Units row.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-503
+
+Score `L2.00057` (actor, candidate): d is the Chebyshev cell distance
+`L2.01522`. The candidate kind k becomes 0 when it is 1 and the candidate's
+own range exceeds 1. A ranged actor (range above 1) reads preference
+p = T[k] and uses d - range + 1 beyond range, else 1; a melee actor reads
+p = T[k + 4 x its own kind] and keeps d. The score is d x 256 plus the turn
+to the candidate. p = 0 returns 0xffffff (excluded); p = 1 adds half the
+score and p = 4 subtracts a quarter, both only when the actor's size slot
++0x1c is below 2 and its Mind word +0x88 is at least 15. A candidate with
+effect bit 0x40000 adds 0x7f (floor 1).
+
+The session constructor writes T at session +0xa54 (`L2.02423`): 2, 1, 2,
+4 / 4, 2, 1, 0 / 2, 1, 4, 0 / 2, 1, 2, 4. Group assignment `L2.02424` gives
+each member cmd +0x20 = the enemy of list +0xa68 with the strictly least
+score (first on a tie), or 0, and posts event 4 when enemies exist, for active groups only (R2-ENGINE-057;
+R2-ENGINE-507). The
+idle planner uses the score only to exclude (R2-ENGINE-501).
+
+**Confidence.** High for the arithmetic and the table values in RU and EN.
+Medium for what the kind values name.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-504
+
+When block dword +0x98 is set at the end of an activity, the unit tick
+clears it and, unless the order is 1, 10 or 24, sets activity 0 and runs
+`L2.02425`. That routine walks the world unit list and keeps a unit only when its
+distance d (`L2.02426`) is at most the range and at most a running
+minimum seeded at 0xff and lowered to d after each kept unit
+(`L2.02427`, `L2.02428`, `L2.02429`), so a unit later in list order than a
+nearer one is dropped, a nearer non-hostile unit included. It then
+filters list +0xa64 with `L2.02119` and `L2.02416`, falls back to list +0xa84 as the idle planner does, and takes the unit
+needing the least turn (the later one on a tie). A result becomes activity
+6 on that target (R2-ENGINE-501). With none, a computer-owned unit takes
+activity 11, the look-around `L2.02430`, and a player-owned unit activity
+0.
+
+The look-around turns toward block byte +1 while it differs from the
+facing; otherwise, when cmd +0x54 is set or `L2.02431` returns below 0xcd,
+it sets a new heading facing + 0x21 + `L2.01532`(0xbe) and clears +0x54.
+The order dispatch `L2.01725` resets through `L2.01576` an attack whose
+target has state +0x54 = 0x10, and a follow order whose leader has. A group
+member's target is reassigned on every tick of an active group
+(R2-ENGINE-503, R2-ENGINE-057).
+
+**Confidence.** High for the bodies in RU. Medium in EN (generation only)
+and for the random helpers `L2.02431` and `L2.01532`, which were not read.
+
+**Unknown.** When block +0x98 is set: its three writers (`L2.02432`,
+`L2.02433`, `L2.02434`) lie in unread movement code. Reading them would
+settle how long one activity holds a target.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-505
+
+The attack planner `L2.01530` sends a target with byte +0x4c bit 8 to the
+default route. It casts the last of the three template spell entries cmd
++0x7c..+0x84, in index order, for which `L2.02431` returns less than the
+entry's dword at +0x88 + 4i (nonzero entries only; the loop has no exit on
+a hit, `L2.02435`..`L2.02436`; spell 23 only beyond 2 cells). With no target, or itself as target, it takes the first unit of
+`L2.02117` around itself. It then sets activity 5 with cmd +0xc and range
++0x14; a computer mage first tries `L2.00056` (R2-ENGINE-457). Activity 5
+(`L2.02437`) strikes when `L2.01574` admits the target at range, else steps
+toward it through `L2.01577` (`L2.01578`); the activity-5 body itself has
+no distance bound. Whether the step helper or the movement code gives up
+is open.
+
+Order 11 reaches `L2.02438` through `L2.02439`, and order 4 reaches the
+planner through `L2.02440`; neither is in a committed listing, and the
+link rests on the scan receipt `planner-calls` (`L2.02441`). The guard
+(`L2.02438`) keeps a post in cmd word +0, set to the current cell when 0.
+At a distance `L2.02442` (`L2.02443`) of at least ScanRange from the post
+the unit walks back (`L2.02401`, activity 1). When `L2.02117` finds a
+hostile within block byte +8 of the post (R2-ENGINE-457), `L2.01530` sets
+activity 5 and replaces the walk, so the effective bound is the picker
+radius around the post; with none the unit walks to the post, or stands
+there. ScanRange is R2-ENGINE-319 for Humans and R2-ENGINE-483 for
+creatures.
+
+**Confidence.** High for the bodies in RU. Medium in EN for activity 5 (the
+EN tail was generated once and not reproduced) and for the order mapping.
+Medium for the order 4 and 11 identification, for `L2.02442` (navigation
+only; Chebyshev by reading), for the creature ScanRange and for the
+clause that activity 5 has no distance bound. Medium for what
+`L2.01574` and `L2.01578` test. Medium for what `L2.02431` is: a random
+draw by comparison with 0xcd in R2-ENGINE-504, not read; not established
+as a time.
+
+**Unknown.** Whether an unordered computer unit enters activity 5 other
+than through orders 3, 4 and 11 and the group handlers; the writers of
+activity 5 were not censused. The bodies of `L2.01574`, `L2.01578`,
+`L2.02431`, `L2.02442`, `L2.01576` and the three block +0x98 writers
+(`L2.02432`, `L2.02433`, `L2.02434`) were not read.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-506
+
+`L2.02444` sets class byte cmd +0x4c and two health thresholds when virtual
+slot +0x30 returns nonzero, which R2-ENGINE-477 and R2-ENGINE-478 give as
+the Human table (the creature table returns 0, and then `L2.02444` stores
+nothing, so +0x40 and +0x44 keep their constructor values and the
+predicates have no threshold from this routine): with a spellbook, class 2, +0x40 = HPmax +0x96
+and +0x44 = HPmax/4; else with range above 1 and kind not 3, class 1,
+HPmax/2 and 0; else class 0, 0 and 0. `L2.02445`(a, b, c, 0) rewrites +0x40
+for player-owned units as HPmax x {a, b, c}[class] / 100. The group
+post-step `L2.02446` calls `L2.02447` per member: when health +0x94 <= +0x44
+and `L2.02448` finds a hostile within block byte +8 + 5, flee `L2.02449`;
+else when health <= +0x40 and `L2.02450` finds a hostile within 2,
+`L2.02451`. Flee casts spell 23 through `L2.02452` when `L2.01518` admits
+it; else it walks 3 cells away from the hostiles' centre (`L2.02453`,
+`L2.02454`); with no living hostile it takes the default route. Order 22
+also reaches `L2.02449`.
+
+**Confidence.** High for the thresholds, the two predicates and the flee
+body in RU and EN. Medium: the direct-call scan over RU `.text` finds
+`L2.02448`, `L2.02450` and `L2.02451` called only from `L2.02447`, with
+virtual dispatch not searched; the centre and away helpers and
+`L2.02451`'s destination rest on navigation reads.
+
+**Unknown.** Whether units outside a group run `L2.02447`; its callers
+beyond `L2.02446` were not scanned. Whether creature-table members have
+thresholds from another writer: the only caller of `L2.02444` found
+(`L2.02455`, scan `ru-flee-calls.tsv`) and the other +0x40/+0x44 store
+sites (`ru-cmd-fields-2.tsv`) were not read. The body of `L2.01518`
+(spell admission in flee) was not read.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-507
+
+The group tick `L2.00504` calls `L2.02456` only when session +0xbbe8 is
+nonzero or the programme record's byte +0x45 is nonzero (R2-ENGINE-057;
+`L2.02457`..`L2.02458`); the unit tick sets state 0x1b for a unit of an
+inactive group with command byte 9 equal to 0 (`L2.02459`..`L2.02460`).
+So group assignment (R2-ENGINE-503) and the guard handlers run for active
+groups only. Group tick `L2.02456` sets the programme byte [+0x3c]+0x20 to 0xff when the
+group is empty, switches on it, then runs the post-step (R2-ENGINE-506).
+The values (tables `L2.02461` and `L2.02462`): 0, each member through
+`L2.02463`; 1, guard A `L2.02464`; 2, `L2.02465` at point +0xa; 3, in-range
+targeting `L2.02466`; 4, move `L2.02467`; 5, `L2.02468` (attack, else
+move); 17, wander `L2.02469`; 18, guard B `L2.02470`; 19, support
+`L2.02471`; 0xff, each member through the idle planner (`L2.02472`); 6 to
+16 and 20 to 254 run no route, only the post-step. Group sight `L2.02473` joins the members' sight and remembered
+cells under the hostile filter. `L2.02474` keeps enemies within radius
++0x38 + U{-1, 0, 1}, plus 4 while enemies remain, of point +0x28. Members
+without a target return to cmd word +0 and stand.
+
+**Confidence.** High in RU for the dispatch, the value mapping and the
+handler bodies; High in EN for the handler bodies read; Medium in EN for
+the value-to-route mapping (the EN jump tables were not read). Medium for
+the jitter draw `L2.02421` (U{-1, 0, 1}) and for the leash radius and the return clauses, interpreted from
+navigation reads of the same bytes, and for what the programme values mean
+to a mission script.
+
+**Unknown.** The bodies of `L2.02421`, `L2.02475` and the area helper
+`L2.02476` were not read.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+### R2-ENGINE-508
+
+The comparison takes 65 pairs from the start to the first `ret` with
+immediates at or above 0x400000 masked; 64 are equal. The RU dispatch
+`L2.01725` (206 instructions) and EN `L2.02477` agree for the 194 the EN
+window holds. EN `L2.02403` calls `L2.02478` for a nonzero owner kind and
+`L2.02477` otherwise, and `L2.02478` only calls `L2.02477`. Whether RU has
+a wrapper at the corresponding address (about `L2.01726`) is neither found
+nor excluded. The 13 pairs
+from `L2.02430` to `L2.02406` rest on the EN listing of the second
+generation run, which was not reproduced.
+
+**Confidence.** High for the 51 reproduced pairs. Medium for the 13 tail
+pairs.
+
+**Unknown.** The last 12 EN dispatch instructions, the EN jump tables and
+the RU code before `L2.01725`; reading those windows would settle them.
+
+**Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
