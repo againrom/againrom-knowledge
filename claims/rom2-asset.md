@@ -1055,3 +1055,66 @@ Umoir) are a navigation receipt (`evidence/navigation/nav3-members.tsv`).
 counts.
 
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+## Main menu and save page resources
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-097 | ROM2 main.res MenuMask.bmp is a byte-equal 640x480 8-bit image in EN and RU whose values 128..240 in steps of 16 mark eight button regions (screen position Medium); the menu also loads menu_.bmp, button, text and sprite pictures. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ASSET-098 | ROM2 dialogs.txt holds 176 rows in EN and RU with the menu, load and save page texts at the same rows; patch.txt holds 119 EN and 214 RU rows, with the delete confirmation at rows 50 and 51 and the web list at rows 102 and 103. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+
+### R2-ASSET-097
+
+The menu art body EN `L2.01993` loads
+`main\graphics\MainMenu\MenuMask.bmp`, `menu_.bmp`,
+`graphics\interface\sprites.16a` and, for eight buttons,
+`button%d.bmp` (normal), `button%dp.bmp` (pressed) and `text%d.bmp`.
+main.res `graphics/mainmenu/menumask.bmp` is 308280 bytes in both
+roots with SHA256
+`c0fba12987dfca80f5406fe41129e556ee853cb1851eacf848cb29720af8700e`
+(`out/code/members.tsv`). Its value regions (pixel count summary
+`bbox8`, top-origin x0,y0-x1,y1):
+
+| value | button | box |
+|---:|---:|---|
+| 128 | 0 | 203,49-303,136 |
+| 144 | 1 | 123,153-231,220 |
+| 160 | 2 | 124,250-220,331 |
+| 176 | 3 | 207,340-310,427 |
+| 192 | 4 | 343,54-427,142 |
+| 208 | 5 | 424,150-501,227 |
+| 224 | 6 | 411,258-508,339 |
+| 240 | 7 | 337,345-417,422 |
+
+Value 0 fills the rest. Values 16..30 form small regions that the
+mouse rule maps to no button (R2-ENGINE-436).
+
+**Confidence.** High for the paths, the hash, the size and the value
+boxes as top-origin pixel counts. Medium for the box position on screen:
+the loader's row order and the base constructor EN `L2.01470` are
+unread, and the hit test reads the surface at x + 640*y.
+
+**Unknown.** The button pictures' content and size were not read.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ASSET-098
+
+main.res `text/dialogs.txt` is 3117 bytes EN and 3248 bytes RU, 176
+rows each, every row ending in CRLF (`out/code/members.tsv` counts the
+empty piece after the last CRLF as a 177th). The screens use rows 0 and 1
+(Ok, Cancel), 24..28 (load page texts and the Empty Slot), 29..33
+(save page texts), 34, 35, 37, 40 and 77 (in-game menu buttons), 144,
+151, 153 (View Cutscenes), 157 and 158 (Delete and its tip). patch.res
+`patch.txt` is 2786 bytes EN with 119 rows and 7521 bytes RU with 214
+rows, counted the same way. EN rows 50 and 51 are the two halves of the
+delete confirmation around the label; EN rows 102 and 103 are the web
+list's status text and its address prompt. The row texts are not
+quoted.
+
+**Confidence.** High for the row counts, sizes and EN roles. Medium for
+the RU roles: they rest on the same indices in RU bodies equal to EN.
+
+**Unknown.** What the RU-only patch.txt rows 119..213 hold.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)

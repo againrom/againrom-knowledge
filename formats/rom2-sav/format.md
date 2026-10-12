@@ -454,6 +454,28 @@ The equal name length/hash and raw2560 hash across all four establish no hero
 or actor identity. Opaque differences have no assigned field meaning.
 — R2-SESSION-079
 
+## Save and load screens
+
+Both pages enumerate `\game*.sav` in the directory an unread call returns
+(read as the current directory, Medium) and list a file only when its first
+four bytes are `Bsg&`; the row shows the 256-byte label read at `blobEnd`.
+In EN, rows run newest last-write time first; the RU order is Medium, since
+its comparator is unread. A file without `Bsg&` is not listed and cannot be
+loaded from the page. The load page lists `game9998.sav` and `game9999.sav`;
+the save page does not (Medium: the name compare is an unread call).
+— R2-SESSION-179, R2-ENGINE-438, R2-ENGINE-439
+
+The save page's first row is `<<< Empty Slot >>>`. Saving there writes
+`gameNNNN.sav`, four digits, with the smallest number not used by a listed
+file (Medium: the sort comparator is unread). Saving over a listed row, or
+typing a name equal to a listed label (the compare rule is unread), rewrites
+that row's file with no confirmation. In application mode 2 the save driver
+appends the typed label after the blob (Medium); in other modes the name
+travels in a type-7 record and no label is appended. The save page runs in
+any mode. Delete asks for confirmation and removes the file. The main menu
+disables Load Game when no `game*.sav` exists in that directory.
+— R2-SESSION-179, R2-ENGINE-440, R2-ENGINE-437
+
 ## Related
 
 The character file is a separate format: [ROM2 character file](../rom2-a2c/format.md).

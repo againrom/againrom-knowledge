@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3542. Observation: 99. Static analysis: 2954. Mixed: 489.
+Claims labelled: 3553. Observation: 99. Static analysis: 2964. Mixed: 490.
 
 ## Ledger ai
 
@@ -1659,6 +1659,8 @@ Claims labelled: 3542. Observation: 99. Static analysis: 2954. Mixed: 489.
 | R2-ASSET-089 | static analysis | ● active (branch candidate) |
 | R2-ASSET-090 | mixed | ● active (branch candidate) |
 | R2-ASSET-093 | mixed | ● active |
+| R2-ASSET-097 | static analysis | ● active |
+| R2-ASSET-098 | mixed | ● active |
 
 ## Ledger rom2-engine
 
@@ -1799,7 +1801,7 @@ Claims labelled: 3542. Observation: 99. Static analysis: 2954. Mixed: 489.
 | R2-ENGINE-231 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-232 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-233 | static analysis | ● active (branch candidate, partially retracted) |
-| R2-ENGINE-234 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-234 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-235 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-236 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-237 | static analysis | ● active (amended, branch candidate) |
@@ -1968,6 +1970,14 @@ Claims labelled: 3542. Observation: 99. Static analysis: 2954. Mixed: 489.
 | R2-ENGINE-433 | static analysis | ● active |
 | R2-ENGINE-434 | static analysis | ● active |
 | R2-ENGINE-435 | mixed | ● active |
+| R2-ENGINE-436 | static analysis | ● active |
+| R2-ENGINE-437 | static analysis | ● active |
+| R2-ENGINE-438 | static analysis | ● active |
+| R2-ENGINE-439 | static analysis | ● active |
+| R2-ENGINE-440 | static analysis | ● active |
+| R2-ENGINE-441 | static analysis | ● active |
+| R2-ENGINE-442 | static analysis | ● active |
+| R2-ENGINE-443 | static analysis | ● active |
 
 ## Ledger rom2-session
 
@@ -2057,6 +2067,7 @@ Claims labelled: 3542. Observation: 99. Static analysis: 2954. Mixed: 489.
 | R2-SESSION-173 | mixed | ● active |
 | R2-SESSION-174 | mixed | ● active |
 | R2-SESSION-177 | static analysis | ● active |
+| R2-SESSION-179 | static analysis | ● active |
 
 ## Ledger sav
 

@@ -2545,7 +2545,7 @@ an authorized original visit and click would settle that composed route.
 | R2-ENGINE-231 | Selected ROM2 town IDs 1/2/3 bind generic/Kaarg/druid views and music b14/b16/b15; their measured loaders select different square art. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-232 | The active Kaarg square paints background, shop/inn highlight, girl1, girl2, guard, dervish and gates in that order, then delegates overlays and children. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-233 | The selected town sampler maps nine mask bytes to selectors; eight occur in the Kaarg mask, and hit testing uses the view-relative pixel rather than figure bounds. | High | ● active (branch candidate, partially retracted) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
-| R2-ENGINE-234 | Kaarg mask clicks open shop, inn, mission navigation or the main menu; its four person regions request stage-keyed dialogue, with no school click arm. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-234 | Kaarg mask clicks open shop, inn, mission navigation or the in-game menu popup (0x41f); its four person regions request stage-keyed dialogue, with no school click arm. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-235 | Kaarg person animation starts use separate elapsed-time intervals; frame advancement admits one step only after more than 100 ms, while scheduling runs on every active paint. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-236 | Kaarg gates advance toward frame 10 while the pointer samples selector 8 and toward frame 0 otherwise; they use their frame series rather than a separate highlight bitmap. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-237 | Campaign town ID 2 selects Kaarg inn and shop pages with shared native bases; the inn mixes generic overlays with Kaarg art, while the shop selects Kaarg frame, fire and keeper art. | High / Medium | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
@@ -2713,6 +2713,11 @@ all physical input handlers or popup controls.
 **Unknown.** Full gate receiver flow, person dialogue contents and
 runtime input/admission. Following those native receiver paths or an
 authorized original observation would settle them.
+
+**Amended.** R2-ENGINE-441 narrows the 0x41f popup clause: its
+constructor creates five buttons (save, load, sound options, abort game,
+return) and no exit button, and the popup is the in-game menu, not the
+eight-button main menu of R2-ENGINE-436.
 
 ### R2-ENGINE-235
 
@@ -8263,3 +8268,357 @@ navigation receipt (R2-ASSET-093).
 equality of the backgrounds.
 
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+## Main menu and save and load screens
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-436 | The ROM2 main menu picks button i where MenuMask.bmp holds 0x80+0x10*i; a release on the pressed button posts that button's message unless bit i of disable byte +0xf8 is set; keys acting on the menu are Unknown. | High | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-437 | ROM2 main-menu buttons 0..7 post 0x425, 0x426, 0x43b, 0x428, 0x418, 0x487, 0x429 and WM_CLOSE; Load is disabled when a test built on two unread calls finds no game*.sav; button 1 is unnamed, and new game and hall of fame are inferred names. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-438 | The ROM2 Load Saved Game page lists each game*.sav that starts with Bsg&, from a directory an unread call returns, newest first in EN (RU Medium), by its 256-byte label in a 10-row list, with Ok, a confirmed Delete and Cancel. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-439 | ROM2 load Ok stores the chosen label and file name and posts 0x419, which loads the file and enters a mission or town; Cancel without a session opens the main menu; a file without Bsg& is not listed. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-440 | The ROM2 save page has a name box, an Empty Slot row and the listed saves except game9998/9999; Ok writes the selected row's file without confirmation, the Empty Slot to gameNNNN.sav with the smallest unused number (Medium). | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-441 | The ROM2 in-game menu popup (0x41f) creates five buttons: Save (0x41a), Load (0x418), Sound Options (0x422), Abort Game (0x41c) and Return (0x446), with hotkeys S, L, N, E, R at Medium; one save page serves every 0x41a. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-442 | ROM2 Credits reads main\text\credits.txt with pictures under main\graphics\logo\; Cut Scenes lists seen scenes in a View Cutscenes popup; the 0x429 view's init loads famehall\hall.bmp; the hall's data is Unknown. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+| R2-ENGINE-443 | Of 32 ROM2 EN/RU body pairs for the menu, load and save screens, 26 are equal after masking; RU adds a call in 0x426, gives web popup arguments (40,100,600,480) against EN (0,100,640,300) and the save name box 0x80 bytes against 0x7c. | High | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+
+### R2-ENGINE-436
+
+The main menu is the view the 0x421 arm shows (EN `L2.01994`, RU
+`L2.01995`) when application flags +0x404 (RU +0x41c) are zero. Its
+mouse body EN `L2.01996` reads the MenuMask.bmp pixel at x + 640*y
+(R2-ASSET-097), subtracts 0x80 and maps the result through the byte
+table EN `L2.01997` (113 cells, `out/code/tables.tsv`): cells 0x00,
+0x10 .. 0x70 give buttons 0..7 and every other cell gives 8, no button.
+The result is the hover index +0xec. A press stores the hover index in
++0xf4; the release stores it in +0xf0 only when the release lands on
+the pressed button. The mouse body clears the drawn image +0xd8 when
+the hovered button's bit in byte +0xf8 is set.
+
+The release body EN `L2.01097` / RU `L2.01998` dispatches +0xf0
+through the 8-entry jump table EN `L2.01999` and skips index i when bit
+(1 << i) of +0xf8 is set. R2-ENGINE-437 names the posted messages. The
+two release bodies are equal instruction for instruction (110 of 110,
+`out/code/pairs.tsv`).
+
+**Confidence.** High for the mask rule, the press and release match and
+the disable test (EN). Medium for the RU index order: the RU jump table
+was not read; the RU body is equal to EN. Medium for the screen
+position of a mask box: the hit test reads x + 640*y, and the row order
+of the loaded surface is unread (R2-ASSET-097).
+
+**Unknown.** Which keys act on the main menu: the read windows hold no
+key handler, and the menu vtable slot that would receive keys (the
+release is reached from slot `L2.02000`) was not read.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-437
+
+The release jump table EN `L2.01999` posts, in index order:
+
+| index | message | receiver read | name |
+|---:|---|---|---|
+| 0 | 0x425 | new-session arm EN `L2.01098` | New Game (Medium) |
+| 1 | 0x426 | sets mode +0x5d8 to 0 and shows view app+0x370 (EN `L2.02001`, RU `L2.02002`) | no name (Unknown) |
+| 2 | 0x43b | View Cutscenes popup (R2-ENGINE-442) | Cut Scenes |
+| 3 | 0x428 | credits view EN `L2.01369` / RU `L2.00268` | Credits |
+| 4 | 0x418 | load page (R2-ENGINE-438) | Load Game |
+| 5 | 0x487 | popup EN `L2.02003` / RU `L2.02004` with patch.txt rows 102 and 103 (R2-ASSET-098) | web server list |
+| 6 | 0x429 | shows view app+0x11c and sets flag 0x1000 in +0x404 (EN `L2.02005`, RU `L2.02006`) | Hall of Fame (Medium) |
+| 7 | 0x10 | WM_CLOSE | Exit |
+
+The menu show body EN `L2.01096` / RU `L2.01367` starts the disable
+byte from [EN `L2.02007`, RU `L2.02008`] and ORs 0x10 into it when the
+save test EN `L2.02009` / RU `L2.02010` returns 0; it stores the byte
+in +0xf8 through EN `L2.02011` / RU `L2.02012`. It plays the path
+string at EN `L2.02013` only when [EN `L2.00878`] is nonzero (the
+flag's writers were not read). The text `music\menu.wav` was read in a
+navigation window whose output is not committed (Medium).
+
+The save test calls EN `L2.02014`(0x103, buffer) and EN
+`L2.02015`(buffer, `\game*.sav`), then returns 1 when FindFirstFileA
+finds any match, whatever its content. Neither callee was read: they
+are read as the current directory and an append (Medium). So Load Game
+is disabled when no file matches.
+
+Index names: the button labels are pictures (text%d.bmp,
+R2-ASSET-097), so each name above is read from the receiver. Cut
+Scenes, Credits, Load Game and the web server list rest on receiver text
+or paths (High). New Game rests on the 0x425 arm starting a session
+that ends in mission or town entry, and Hall of Fame on the credits
+close posting 0x429 when Scenario variable 768 is at least 120
+(`evidence/navigation/nav5-view-close-excerpt.txt`) (both Medium).
+Button 1 has no name: its arm clears mode +0x5d8, which moves away from
+the value 0x425 tests for 3, and the shown view app+0x370 holds no
+text or path read here (Unknown).
+
+**Confidence.** High for the posted messages, the receivers, the OR of
+bit 0x10 when the save test returns 0 and the FindFirstFileA pattern
+(EN tables; RU bodies equal after masking). Medium for the two
+inferred names, the RU index order (R2-ENGINE-436), the directory the
+save test searches and the menu sound path. Unknown for the name of
+button 1.
+
+**Unknown.** The other bits of the stored disable byte [EN `L2.02007`]:
+its writers were not searched. Calls EN `L2.02014` and `L2.02015`
+(reading them would settle the directory), the writers of flag
+`L2.00878`, the bytes of the `menu.wav` string (a committed window
+would settle them) and what view app+0x370 shows.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-438
+
+Arm 0x418 (EN `L2.02016`, RU `L2.02017`) clears app+0x248 (file name)
+and app+0x148 (label), creates a 0x98-byte page with constructor EN
+`L2.01860` / RU `L2.02018` and arguments (1, 100, 30, 600, 450, 0,
+app+0x148), vtable EN `L2.02019` / RU `L2.02020`, stores it at
+app+0x13c and shows it. The four numbers are read as x, y, width and
+height; the base constructor EN `L2.01470` is unread, so x, y, right
+and bottom is the live alternative (Medium). A direct-call census of EN `.text` finds the
+constructor called only from this arm. 0x418 is posted by the main menu
+(R2-ENGINE-437), the in-game menu (R2-ENGINE-441) and the failure
+report (R2-ENGINE-074).
+
+The page init (vtable slot 30, EN `L2.02021` / RU `R2.0164`) draws
+dialogs.txt row 151 at (40,32) and row 24 at (40,68), and a list (id 3)
+at (40,92) with 10 visible rows, header row 25 and a scroll bar. It
+fills the list from the enumerator EN `L2.02022` / RU `L2.02023` in
+mode 1: FindFirstFileA and FindNextFileA over the directory EN
+`L2.02014` returns and the pattern `\game*.sav` EN `L2.02015` appends
+(both callees unread), directories skipped; mode 0 also skips
+`game9999.sav` and `game9998.sav` by two calls of EN `L2.02024`
+(unread). The list is sorted with qsort and comparator EN `L2.02025`,
+which returns CompareFileTime(second, first) on the last write time:
+newest first in EN. The RU comparator was not read.
+
+The init opens each file "rb" and reads 8 bytes. A file starting with
+`Bsg&` (R2-SESSION-017) is read at its blob end for the 256-byte label;
+the label becomes the list row, the file name goes to +0x6c and the
+string `%s  %02d.%02d.%d  %02d:%02d:%02d` (label, day, month, year,
+hour, minute, second of the last write time) to +0x80. Other files are
+not listed. Entries with an empty name are removed.
+
+Buttons: Ok (id 4, row 0, posts 0x479, tip row 26), Delete (id 6, row
+157, 0x475, tip row 158) and Cancel (id 5, row 1, 0x47a, tip row 27).
+Ok is disabled when no file is listed.
+
+The command body (vtable slot 18, EN `L2.02026` / RU `L2.02027`,
+tables EN `L2.02028` and `L2.02029`, read) handles 0x444 and 0x479 as
+Ok, 0x46e with wParam 3 as a selection, 0x475 as Delete and 0x47a as
+Cancel. The RU tables were not read.
+Delete opens the confirmation box EN `L2.02030` with patch.txt row 50,
+the label and row 51; on reply 0x447 it calls DeleteFileA and removes
+the row, and when the list is empty it disables Ok and Delete.
+
+**Confidence.** High for the pattern string and Find calls, the Bsg&
+test, the label read, the row text, the buttons' ids, rows and posted
+messages, the EN order and EN Delete. Medium for the page geometry
+(argument order), the directory, the RU order, the RU command bindings
+and the role of the +0x80 string: slot 5 (EN `L2.02031`) returns it
+for the row under the pointer, read as hover text.
+
+**Unknown.** The page's sounds: no sound call was found in the read
+windows. Keyboard handling inside the list. The scroll bar body
+(EN `L2.02032`) was not read. Reads that would settle the Medium
+clauses: EN `L2.01470`, `L2.02014`, `L2.02015`, `L2.02024`, the RU
+comparator and the RU command tables.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-439
+
+Load Ok with a selection copies the row label to app+0x148 and the file
+name to app+0x248 and closes the page with 0x445; Ok with no selection
+and Cancel close it with 0x446. The view-close body (EN `L2.00787`,
+page branch EN `L2.02033` / RU `L2.02034`) posts 0x419 on 0x445.
+Otherwise it posts 0x421, the main menu, when no session exists
+([EN `L2.00805`] zero), and 0x41e when app+0x43c (RU +0x454) is 0xff.
+
+Arm 0x419 (EN `L2.02035`) leads to the load entry EN `L2.00826` / RU
+`L2.00119`: it sets mode 2 and loads app+0x248 through the session
+object [EN `L2.00805`] (EN `L2.00289`). When EN `L2.01829` returns 0 it
+posts 0x421; for a mission it calls EN `R2.0026(1)`; otherwise it posts
+0x42e, the town entry.
+
+A save without `Bsg&` at offset 0 never reaches the load path: the page
+does not list it (R2-ENGINE-438). A listed file whose blob is unreadable
+is handled by the session load and EN `L2.01829`, not by the page.
+
+**Confidence.** High for the Ok and Cancel routing and the 0x419 entry
+(EN). Medium for the RU page-close routing: the pair compared 121 RU
+instructions against a differently cut 129-instruction EN window
+(R2-ENGINE-443). Medium for the failure branch: what EN `L2.01829` tests was not read,
+read here as the load result.
+
+**Unknown.** The page close in a session when app+0x43c is not 0xff.
+What a listed file with a valid magic and a damaged body shows.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-440
+
+Arm 0x41a (EN `L2.02036`, RU `L2.02037`) acts only when app+0x404 is 0
+or 1. It creates a 0x9c-byte page, constructor EN `L2.02038` / RU
+`L2.02039` (called only from this arm in EN), with the load page's
+geometry, vtable EN `L2.02040` / RU `L2.02041`, +0x98 = dialogs row 28
+`<<< Empty Slot >>>`, stored at app+0x140.
+
+The init (slot 30, EN `L2.02042` / RU `R2.0165`) draws row 29 at
+(40,32), a name box (EN `L2.02043`, id 1) at (40,68) with prompt row
+30, row 144 at (40,104) and a list (id 3) at (40,128) with 10 rows and
+header row 31. Row 0 is the Empty Slot; the other rows come from the
+enumerator in mode 0 with the load page's Bsg& rule and order.
+
+The init converts four characters of each listed file's name, read as
+name characters 4..7 (offsets 0..3 of the pointer plus 4 that call EN
+`L2.02044` returns; the callee is unread), with inline arithmetic
+`(c - 0x30) * weight`, weights 1000, 100, 10 and 1 (EN `L2.02045`
+.. `L2.02046`). It sorts the numbers with qsort and comparator EN
+`L2.02047` (unread) and picks the smallest unused number from 0, or 0
+with no file. It formats the Empty Slot's name with
+`game000%ld.sav`, `game00%ld.sav`, `game0%ld.sav` or `game%ld.sav`, a
+four-digit `gameNNNN.sav` for numbers below 10000. Buttons: Ok (id 4,
+0x479, tip row 32), Delete (id 6, 0x475, tip row 158), Cancel (id 5,
+0x47a, tip row 33).
+
+The command body (slot 18, EN `L2.02048` / RU `L2.02049`): selecting a
+row puts its label in the name box (row 0 gives an empty box). Ok, when
+id 4 is enabled, copies the box text to the label app+0x148; when a
+compare (call EN `L2.02024`, unread, so its case rule is Unknown) finds
+the text equal to the label of a row i >= 1 it selects row i; it copies that row's file name to app+0x248 and closes with 0x445.
+No confirmation precedes an overwrite in the read body. Delete acts on
+rows i >= 1 with the load page's confirmation. On 0x445 the page close
+(EN `L2.02033`) calls the save driver EN `L2.00860` / RU `R2.0166`.
+By R2-ENGINE-271 the driver appends the 256-byte label to app+0x248
+only when app+0x5d8 is 2 (Medium there) and otherwise sends the name in
+a type-7 record without a label. The driver was not read here, and the
+save page runs for app+0x404 of 0 or 1 in any mode.
+
+**Confidence.** High for the layout rows, the file name format and the
+absence of an overwrite confirmation in the read command body. Medium
+for the selection rule (compare unread), the exclusion of game9998 and
+game9999 (compare unread), the number sort (comparator unread), the
+bindings of 0x479, 0x475 and 0x47a to Ok, Delete and Cancel (the EN
+tables `L2.02050` and `L2.02051` and the RU tables are unread; read
+from the arm contents) and the label write (mode 2). The enable rule
+of Ok (EN `L2.02052`) was not read.
+
+**Unknown.** When Ok is disabled (for example an empty name). Sounds.
+Reads that would settle the Medium clauses: EN `L2.02024`, `L2.02047`,
+`L2.02044`, `L2.02014`, `L2.02015`, the command tables, driver
+`L2.00860`.
+Where a mission save reaches this page: the 0x41f menu posts 0x41a
+(R2-ENGINE-441), and the 0x404 values a mission sets were not read.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-441
+
+Arm 0x41f (EN `L2.02053`, RU `L2.02054`) creates the popup EN
+`L2.00592` / RU `L2.00593`: mode 1, arguments 100, 100, 440, 340 (read
+as x, y, width and height; EN `L2.01470` is unread), vtable EN
+`L2.02055`. The constructor creates five buttons from dialogs.txt rows,
+each with a posted message and a hotkey:
+
+| row | text (EN) | message | hotkey |
+|---:|---|---|---|
+| 34 | ~Save Game | 0x41a | S |
+| 35 | ~Load Game | 0x418 | L |
+| 37 | Sou~nd Options | 0x422 | N |
+| 77 | Abort Game | 0x41c | E |
+| 40 | ~Return to Game | 0x446 | R |
+
+The EN and RU constructors are equal instruction for instruction (185 of
+185). The application has one 0x41a arm and one save page class
+(R2-ENGINE-440). The hotkey letters were read from the data block EN
+`L2.02056` (+0x20) in a navigation window whose output is not
+committed. Row 77 carries no tilde, so its letter is not recoverable
+from the row text.
+
+**Confidence.** High for the five buttons and their posted messages.
+Medium for the hotkeys S, L, N, E and R and for the popup geometry.
+Medium for town and mission sharing one save page: the 0x41a arm is the
+only constructor caller, but which states reach 0x41f from a mission was
+not read.
+
+**Unknown.** The 0x41c and 0x422 receivers were read only to their
+popups. A committed listing of the block EN `L2.02056` would settle the
+hotkeys; EN `L2.01470` would settle the geometry.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-442
+
+Credits (0x428): the show body EN `L2.01369` / RU `L2.00268` shows view
+app+0x130 and plays the path string at EN `L2.02057` only when [EN
+`L2.00878`] is nonzero (flag unread); the text `music\credit.wav` was
+read in a navigation window whose output is not committed (Medium). The loader EN `L2.02058` reads
+`main\text\credits.txt`; a row starting with `"` names a picture under
+`main\graphics\logo\`. The view close posts 0x429 when Scenario variable
+768 is at least 120 and 0x421 otherwise (navigation excerpt).
+
+Hall of Fame (0x429): view app+0x11c. Its init EN `L2.02059` loads
+`main\graphics\famehall\hall.bmp` and
+`graphics\interface\Docs\OK\Ok_l_off.bmp` / `Ok_l_on.bmp`. The view
+close posts 0x421. A routine EN `L2.02060` opens `famehall.dat` (string
+`L2.02061`) with flag 0x1001 and calls `L2.02062` on app+0x598. The
+routine has no caller or vtable link here, so its identity as the
+application exit is Unknown; the flag is not decoded and the call's
+direction is unread, so a write of the file is a Medium reading at
+most. A second string `L2.02063` also names `famehall.dat` and has no
+read.
+
+Cut Scenes (0x43b, EN `L2.02064`): when [EN `L2.01928`, RU `L2.02065`]
+is nonzero, the arm builds a list from pool EN `L2.02066`, one row per
+set bit of [EN `L2.02067`], and opens popup EN `L2.02068` / RU
+`L2.02069` titled dialogs row 153 `View Cutscenes`. Ok plays the
+selection through EN `L2.00875` and posts 0x43b again; the close
+otherwise posts 0x421. With the flag zero the arm posts 0x421.
+`cutscene.txt` holds 6 titles and `cutpaths.txt` 6 directories, read in
+a navigation window whose output is not committed (count Medium).
+
+**Confidence.** High for the credits and hall paths, the credits row
+rule and the cut scene list mechanism. Medium for the sound paths, the
+cut scene counts, the `famehall.dat` open and its direction, and for
+the view close branches (navigation excerpt only), for init EN `L2.02059` belonging to view app+0x11c (the
+link was not read; the init is named by its hall.bmp path), and for pool
+`L2.02066` holding the cutscene.txt titles.
+
+**Unknown.** What the Hall of Fame shows and the layout of
+famehall.dat. What sets the cut scene flag and the seen mask. Reads
+that would settle the Medium clauses: the callers of EN `L2.02060`,
+the flag 0x1001 in the file routine, the direction of `L2.02062`, and
+committed windows of the sound strings, `cutscene.txt` and
+`cutpaths.txt`.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+### R2-ENGINE-443
+
+`out/code/pairs.tsv` compares 32 EN/RU body pairs with addresses of six
+or more hex digits and frame offsets masked: 14 are equal instruction
+for instruction and 12 more are equal once every hex value is masked
+(field offsets moved, such as +0x404 to +0x41c). The six others:
+
+| pair | difference |
+|---|---|
+| arm-421 | flag field +0x404 against +0x41c (4 of 6 equal) |
+| arm-425 | RU passes one more argument, 1, to the call on app+0x468 |
+| arm-426 | RU adds a call of RU `L2.02070` on app+0x598 when +0x3f4 or +0x3bc is zero, then shows the same view |
+| arm-487 | web popup arguments (0,100,640,300) in EN, (40,100,600,480) in RU, read as x, y, width, height (Medium) |
+| menu-show | RU adds stores; the disable byte logic is the same |
+| page-close | fixed 0x255-byte windows cut different instruction runs; 121 RU instructions match inside a 129-instruction EN window, so the comparison is partial |
+
+The save page name box is allocated with 0x80 bytes in RU and 0x7c in
+EN; that is the one differing instruction of the save init pair.
+MenuMask.bmp is byte-equal (R2-ASSET-097). The dialogs.txt rows used
+here hold the same roles in both roots; patch.txt has 119 EN and 214 RU
+rows (R2-ASSET-098).
+
+**Confidence.** High for the pair counts and the listed differences.
+
+**Unknown.** What RU `L2.02070` does. The RU web popup's content.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)

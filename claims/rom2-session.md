@@ -2039,3 +2039,49 @@ the point; a `.text` census of `+0x104` stores, or an owner save at the map
 after mission 20, would settle them.
 
 **Evidence.** [EXP-2054](../experiments/EXP-2054-rom2-global-map/)
+
+## Save file names and listing
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-179 | ROM2 save and load pages list game*.sav files that start with Bsg& from a directory an unread call returns; a new save is gameNNNN.sav with the smallest unused number (Medium), where game9998 and game9999 count as unused. | High / Medium | ● active | [EXP-2055](../experiments/EXP-2055-rom2-menu-load/) |
+
+### R2-SESSION-179
+
+Both pages enumerate `\game*.sav` in the directory EN `L2.02014`
+returns (EN `L2.02022`, RU `L2.02023`; the callee is unread, read as the
+current directory) and list a file only when its first four bytes are
+`Bsg&` (R2-SESSION-017), by the 256-byte label at its blob end, newest
+last-write time first in EN; the RU order is Medium (R2-ENGINE-438). The load page lists
+every such file. The save page skips `game9999.sav` and
+`game9998.sav` by two calls of EN `L2.02024` (unread), the names
+message 0x442 writes (R2-ENGINE-271); the load page lists them like any
+other save.
+
+The save page converts name characters 4..7 of each listed file to a
+number (R2-ENGINE-440) and names its Empty Slot `gameNNNN.sav` with the smallest unused
+number from 0. Because 9998 and 9999 are not listed
+there, the search returns either only when 0..9997 are all used. A
+save chosen over a listed row keeps that row's file name. In
+application mode 2 (Medium, R2-ENGINE-271) the driver appends the typed
+label; in other modes it sends the name in a type-7 record and appends
+no label, and the driver was not read here. The Main menu Load button is disabled when no
+`game*.sav` exists, whether or not it starts with `Bsg&`
+(R2-ENGINE-437).
+
+**Confidence.** High for the name pattern, the Bsg& filter, the Find
+calls and the EN order (RU bodies equal after masking). Medium for the
+directory, the RU order (its comparator is unread), the exclusion of
+9998 and 9999 (compare unread), the smallest-unused rule (the sort
+comparator EN `L2.02047` is unread) and the label write (mode 2).
+
+**Unknown.** A name whose characters 4..7 are not digits: the inline
+arithmetic (EN `L2.02045` .. `L2.02046`) adds `(c - 0x30) * weight`
+for each character, weights 1000, 100, 10 and 1, with no digit test in
+that window, so a non-digit adds a value that is negative below `0`.
+Whether another test precedes it, and how the unread comparator orders
+such a number, are Unknown. Reads that would settle the Medium
+clauses: EN `L2.02014`, `L2.02015`, `L2.02024`, `L2.02047`, `L2.02044`,
+the RU comparator and the driver `L2.00860`.
+
+**Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)

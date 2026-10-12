@@ -195,6 +195,20 @@ differ; a named encoding or rendered correspondence is not established.
 The CRLF loader calls CharToOemA. Live table mutation, the full startup
 schedule and complete generic input bindings remain Unknown. — R2-ENGINE-093
 
+## Menu, save and load page rows
+
+`main.res:text/dialogs.txt` has 176 CRLF rows in EN and RU. The save and
+load pages use zero-based rows 0 and 1 (`Ok`, `Cancel`), 24..28 (load page
+texts and `<<< Empty Slot >>>`), 29..33 (save page texts), 144, 151
+(`Load Saved Game`), 157 and 158 (`Delete` and its tip). The in-game menu
+uses rows 34, 35, 37, 77 and 40 for Save, Load, Sound Options, Abort Game and
+Return; the Cut Scenes popup uses row 153 (`View Cutscenes`).
+`patch.res:patch.txt` has 119 EN and 214 RU rows; rows 50 and 51 belong to
+the delete confirmation around the save label, and rows 102 and 103 to the
+web server list popup. The row texts are not quoted. The RU row roles are
+Medium.
+— R2-ASSET-098, R2-ENGINE-441
+
 ## Automatic-casting labels
 
 The installed `main.res:text/dialogs.txt` source uses zero-based rows 167..169
