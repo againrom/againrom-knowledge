@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
+Claims labelled: 3643. Observation: 99. Static analysis: 3045. Mixed: 499.
 
 ## Ledger ai
 
@@ -317,22 +317,22 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | ALM-T9ACTOR-176 | static analysis | ✔ promoted |
 | ALM-HDR-001 | static analysis | ● active (amended) |
 | ALM-SEC-002 | static analysis | ● active (amended) |
-| ALM-SEC-003 | static analysis |  |
+| ALM-SEC-003 | static analysis | ● active (partially retracted) |
 | ALM-SEC-004 | static analysis | ● active (amended) |
 | ALM-TRL-005 | mixed | ✖ retracted |
 | ALM-HDR-006 | mixed | ✖ retracted |
 | ALM-LOC-007 | mixed | ● active |
 | ALM-META-008 | mixed | ● active (amended) |
-| ALM-META-009 | static analysis |  |
+| ALM-META-009 | static analysis | ● active (partially retracted) |
 | ALM-META-010 | mixed | ● active (amended) |
-| ALM-GRID-011 | mixed |  |
-| ALM-GRID-012 | static analysis | ● active (amended) |
+| ALM-GRID-011 | mixed | ● active (partially retracted) |
+| ALM-GRID-012 | static analysis | ● active (amended, superseded) |
 | ALM-GRID-013 | static analysis | ● active |
 | ALM-GRID-014 | static analysis | ● active (amended) |
-| ALM-TERR-015 | static analysis | ● active (amended) |
-| ALM-TERR-016 | static analysis | ● active (amended) |
+| ALM-TERR-015 | static analysis | ● active (amended, superseded, partially retracted) |
+| ALM-TERR-016 | static analysis | ● active (amended, partially retracted) |
 | ALM-CNT-017 | static analysis | ● active (amended) |
-| ALM-UNIT-018 | mixed | ● active (amended) |
+| ALM-UNIT-018 | mixed | ● active (amended, partially retracted) |
 | ALM-OBJ-019 | static analysis | ● active (amended, contested) |
 | ALM-GRP-020 | mixed | ● active (amended) |
 | ALM-TRIG-021 | mixed | ● active (amended) |
@@ -340,38 +340,38 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | ALM-CODE-023 | static analysis | ● active |
 | ALM-META-024 | static analysis | ● active (amended) |
 | ALM-META-025 | static analysis | ● active (amended) |
-| ALM-META-026 | static analysis | ● active (amended) |
-| ALM-META-027 | mixed |  |
+| ALM-META-026 | static analysis | ● active (amended, superseded, partially retracted) |
+| ALM-META-027 | mixed | ● active (partially retracted) |
 | ALM-META-028 | static analysis | ● active (amended) |
-| ALM-HDR-029 | mixed | ✖ retracted (superseded by ALM-FRAME-031) |
+| ALM-HDR-029 | mixed | ✖ retracted (superseded) |
 | ALM-TRL-030 | static analysis | ✖ retracted |
-| ALM-FRAME-031 | static analysis |  |
+| ALM-FRAME-031 | static analysis | ● active (partially retracted) |
 | ALM-GRID-032 | static analysis | ● active |
 | ALM-PLACE-033 | static analysis | ● active |
-| ALM-OBJ-034 | static analysis | ● active (amended) |
+| ALM-OBJ-034 | static analysis | ● active (amended, superseded) |
 | ALM-CLS-035 | static analysis | ● active (amended) |
 | ALM-CLS-036 | static analysis | ● active (amended) |
 | ALM-CLS-037 | static analysis | ● active (amended) |
-| ALM-CLS-038 | static analysis | ● active (amended) |
+| ALM-CLS-038 | static analysis | ● active (amended, partially retracted) |
 | ALM-OWN-039 | static analysis | ● active |
-| ALM-UNIT-040 | static analysis | ● active (amended) |
-| ALM-GRP-041 | static analysis |  |
+| ALM-UNIT-040 | static analysis | ● active (amended, superseded) |
+| ALM-GRP-041 | static analysis | ● active (partially retracted, superseded) |
 | ALM-CLS-042 | mixed | ● active (amended) |
 | ALM-TERR-043 | static analysis | ● active |
 | ALM-TRIG-044 | static analysis | ● active |
 | ALM-TRIG-045 | static analysis | ● active |
 | ALM-TRIG-046 | static analysis | ● active |
-| ALM-TRIG-047 | static analysis |  |
+| ALM-TRIG-047 | static analysis | ● active (partially retracted) |
 | ALM-UNIT-048 | mixed | ● active |
-| ALM-TRIG-049 | mixed | ● active (amended) |
+| ALM-TRIG-049 | mixed | ● active (amended, partially retracted) |
 | ALM-TRIG-050 | static analysis | ● active (amended) |
 | ALM-CLS-051 | static analysis | ● active |
 | ALM-CLS-052 | static analysis | ● active |
 | ALM-CLS-053 | static analysis | ● active |
-| ALM-CLS-054 | static analysis | ● active (corrected) |
+| ALM-CLS-054 | static analysis | ● active (amended, partially retracted) |
 | ALM-REQ-055 | static analysis | ● active |
-| ALM-REQ-056 | static analysis |  |
-| ALM-ORD-057 | static analysis |  |
+| ALM-REQ-056 | static analysis | ● active (partially retracted) |
+| ALM-ORD-057 | static analysis | ● active (partially retracted) |
 | ALM-META-058 | static analysis | ● active |
 | ALM-RDR-059 | static analysis | ● active (amended) |
 | ALM-CORP-060 | mixed | ● active |
@@ -381,9 +381,9 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | ALM-LIM-064 | static analysis | ● active |
 | ALM-SACK-065 | static analysis | ● active |
 | ALM-SACK-066 | static analysis | ● active |
-| ALM-LIM-067 | static analysis | ● active (amended) |
+| ALM-LIM-067 | static analysis | ● active (amended, partially retracted) |
 | ALM-ORD-068 | static analysis | ● active |
-| ALM-PLAYER-069 | static analysis | ● active (amended) |
+| ALM-PLAYER-069 | static analysis | ● active (amended, superseded) |
 | ALM-MODE-070 | static analysis | ● active |
 | ALM-EFFREC-071 | mixed | ● active |
 | ALM-EFFLINK-072 | mixed | ● active |
@@ -395,8 +395,8 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | ALM-TAILU16-082 | static analysis | ● active |
 | ALM-TAILRUN-083 | static analysis | ● active |
 | ALM-TAILVER-084 | static analysis | ● active |
-| ALM-SCALAR-087 | static analysis | ● active (amended) |
-| ALM-SCALAR-088 | static analysis | ● active (amended) |
+| ALM-SCALAR-087 | static analysis | ● active (amended, partially retracted) |
+| ALM-SCALAR-088 | static analysis | ● active (amended, partially retracted) |
 | ALM-SCALAR-089 | mixed | ● active (amended) |
 | ALM-CPLAYER-090 | static analysis | ● active (amended) |
 | ALM-META-091 | static analysis | ● active |
@@ -427,7 +427,7 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | ALM-METACOPY-183 | static analysis | ✔ promoted |
 | ALM-METALIFE-184 | static analysis | ✔ promoted |
 | ALM-METAEDITOR-185 | static analysis | ✔ promoted |
-| ALM-METADEFAULT-186 | static analysis | ✔ promoted (amended control population) |
+| ALM-METADEFAULT-186 | static analysis | ✔ promoted (amended, partially retracted) |
 | ALM-COUNT-195 | static analysis | ● active |
 | ALM-STALE-196 | static analysis | ● active |
 | ALM-HDRREAD-197 | static analysis | ● active |
@@ -451,6 +451,11 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | ALM-CATAPULT-213 | mixed | ● active |
 | ALM-LOOT-214 | mixed | ● active |
 | ALM-VIEW-215 | mixed | ● active |
+| ALM-NEWMAP-236 | static analysis | ✔ promoted |
+| ALM-NEWMAP-237 | static analysis | ✔ promoted |
+| ALM-SAVE-238 | static analysis | ✔ promoted |
+| ALM-SAVE-239 | static analysis | ✔ promoted |
+| ALM-SAVE-240 | static analysis | ✔ promoted |
 
 ## Ledger anim
 
@@ -3156,6 +3161,11 @@ Claims labelled: 3633. Observation: 99. Static analysis: 3035. Mixed: 499.
 | TERR-238 | static analysis | ✔ promoted |
 | TERR-239 | static analysis | ✔ promoted |
 | TERR-240 | static analysis | ✔ promoted |
+| TERR-242 | static analysis | ✔ promoted |
+| TERR-243 | static analysis | ✔ promoted |
+| TERR-244 | static analysis | ✔ promoted |
+| TERR-245 | static analysis | ✔ promoted |
+| TERR-246 | static analysis | ✔ promoted |
 
 ## Ledger text
 

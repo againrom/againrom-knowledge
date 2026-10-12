@@ -60,15 +60,15 @@ Sizes by type (`ALM-SEC-004`):
 | typeId | payloadSize | Role |
 |--------|-------------|------|
 | 0 | 632 (constant) | **metadata** — decoded below (`ALM-META-008…ALM-META-010`) |
-| 1 | `2·W·H` | **grid: tile word** (u16/cell) — decoded below (`ALM-GRID-012`, `ALM-GRID-032`) |
+| 1 | `2·W·H` | **grid: tile word** (u16/cell) — decoded below (`ALM-GRID-012` (amended), `ALM-GRID-032`) |
 | 2 | `W·H` | **grid: relief/height** (u8/cell) — decoded below (`ALM-GRID-013`, `ALM-GRID-032`) |
 | 3 | `W·H` | **grid: static-object placement layer** (u8/cell) — cell code `c ≠ 0` is `objects.reg` section index `c − 1` (`ALM-GRID-014`, `ALM-CLS-035`) |
 | 4 | `20·#4` (+8·ext) | **placed structures/buildings** — 20-B records, `#4 = meta+0x20` (the loader's own case-4 loop bound); every record is a `structures.reg` class (`ALM-OBJ-019`, `ALM-PLACE-033`, `ALM-CLS-036`) |
 | 5 | `76·#5` | **player/group roster** — 76-B named records, `#5 = meta+0x1c` (`ALM-GRP-020`, `ALM-PLACE-033`) |
-| 6 | `70·#6` | **placed units** — 70-B records, `#6 = meta+0x24` (`ALM-UNIT-018`, `ALM-PLACE-033`) |
+| 6 | `70·#6` | **placed units** — 70-B records, `#6 = meta+0x24` (`ALM-UNIT-018` (partially retracted), `ALM-PLACE-033`) |
 | 7 | variable | **trigger effect/instant list + Drop table** — `[u32 entryCount][named blocks]` (`ALM-TRIG-021`) |
 | 8 | variable, sometimes **0** | **authored loot**, `meta+0x2c` records with no count word. The box/circle reading in `ALM-TRIG-022` is retracted; use `ALM-SACK-065` |
-| 9 | variable (small) | **caster list** — `[u32 count@+0][records]` (`ALM-CODE-023`, `ALM-TRIG-049`) |
+| 9 | variable (small) | **caster list** — `[u32 count@+0][records]` (`ALM-CODE-023`, `ALM-TRIG-049` (partially retracted)) |
 
 The three fixed-record sections carry their **count in the type-0 metadata**
 (`+0x1c`=type 5, `+0x20`=type 4, `+0x24`=type 6, `ALM-CNT-017`); the variable trigger
@@ -211,6 +211,39 @@ the standard complete form. Types 1 and 2 are required by the primary loader;
 the complete installed type set is not an acceptance requirement.
 — ALM-FRAME-031 (amended; framing retained), ALM-ORD-057, ALM-ORD-068, ALM-TRIG-044,
 ALM-TRIG-045, ALM-TRIG-046, ALM-TRIG-047 (amended: opaque-region gloss withdrawn), ALM-CORP-060
+
+## Map editor writer
+
+The EN map editor's writer emits types 4 and 6 only when the map holds at least
+one object. A new map therefore has 8 records in the order `0,1,2,3,5,9,8,7`:
+type 0 632 bytes, type 1 `2*W*H`, types 2 and 3 `W*H`, type 5 152 (two
+players), type 9 4, type 8 0 and type 7 12. Every record header carries the
+map's tag word: 5 for a new map, and for a loaded map the tag read from its
+type-1 record header (7 in every installed record header). W and H are the
+dialog values plus 16: 32..256 in steps of 8, 80 by default. — ALM-NEWMAP-237
+
+The writer applies the tile and count normalisations of the
+[metadata page](metadata.md) on every save. All 72 installed maps (38 EN, 34 RU)
+carry `dataSize = 4*W*H+72` and one record-header `+0x10` value per map.
+— ALM-SAVE-238
+
+A save can also change records of a loaded map:
+
+- A loaded map whose objects were all deleted is written without types 4 and 6.
+- A unit's wire `+0x18` is stored minus 1 on load and written plus 1, so it
+  round-trips; wire `+0x08` and `+0x0a` are widened to signed 32 bits and
+  written back as 16 bits.
+- A unit whose wire owner matched no player is bound on load to the player at
+  `E+0x3c`, whose identity on a loaded map is Unknown, and is written with that
+  player's id.
+- A loot record whose owner unit is not found raises a message and is moved to
+  unit 1.
+- Type-9 caster-list entries with the three-field predicate (`+8` non-zero, `+4`
+  zero, the 16-bit `+0x16` zero) are passed to the unread helper `L14474` and
+  left out of the size sum; whether the helper deletes the entry is Unknown.
+
+The first two are High; the last three rest on helpers that were not read and
+are Medium. — ALM-SAVE-239
 
 ## Unknowns and compatibility
 

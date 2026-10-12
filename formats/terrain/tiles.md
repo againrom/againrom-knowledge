@@ -137,7 +137,7 @@ replace it with `(word & 0xdfff) | runFlag`, where `runFlag` is 0 or
 while first-message timing and subsequent native ordering remain Unknown.
 — TERR-RLEBIT-168
 
-Mapping of strip group → file group → terrain (terrain names via `ALM-TERR-015`):
+Mapping of strip group → file group → terrain (terrain names via `ALM-TERR-015` (partially retracted)):
 
 ```
 g  0  tile1-00..03  Grass  / Land        g  4  tile2-00..03  Stones          / Land
@@ -207,3 +207,57 @@ The water group is animated on a fixed-timestep logic clock (all from `rom.exe`)
   keys and config key 2 change it. Per-frame ms = `4·(1000/tps)`, per-cycle = `16·(1000/tps)`.
 - **Enable.** the global at `L05659` (static default `1`); cleared by `-noanimation` / `-detail0` (then
   `phase=0`, water static). Each phase selects a present tile3 resource. — TERR-ANIM-006…TERR-ANIM-010
+
+## Map editor terrain painting
+
+The EN map editor's terrain tool writes the tile plane only; it writes no
+height. One paint step stores the selected palette word into the clicked cell
+with a plain 16-bit store and then runs the neighbour fixer on that cell. During
+a drag, a mouse move in any cell other than the button-down cell repeats the step:
+the listing compares the cell under the cursor with the cell stored at button-down
+and shows no later store to that cell. That no store exists elsewhere is Medium; a
+displacement scan of the two anchor words settles it. — TERR-242
+
+| tool id | base word | new-map list name of the same word |
+|---|---|---|
+| `0x8013` | `0x11` | Grass |
+| `0x8014` | `0x14` | Land |
+| `0x8015` | `0x91` | Sand |
+| `0x8017` | `0x51` | Cracks |
+| `0x8018` | `0x191` | Flowers |
+| `0x8019` | `0x111` | Rocky |
+| `0x801a` | `0xd1` | Savanna |
+| `0x801e` | `0x1d1` | High Rocks |
+| `0x8020` | `0x211` | Water |
+| `0x8054` | `0x311` | not in the list |
+| any other id | `0x11` | Grass |
+
+The names are the new-map dialog's list entries whose item word equals the base
+word; the tool ids were not matched to menu or toolbar text.
+— TERR-242, TERR-246
+
+The fixer works inside `2 <= x <= W-2`, `2 <= y <= H-2`. It visits the 3x3
+neighbourhood of its centre. Each neighbour whose terrain class differs from the
+centre's class is rewritten with a transition word from a pair table indexed by
+the two classes and the neighbour's position; a flagged transition word makes
+the fixer recurse on that neighbour; the centre is then rewritten with its own
+class word. While the random-variant toggle is off, every word written is the
+head of its variant row, so the result depends on the neighbourhood only (Medium:
+the writers of the toggle word come from one displacement scan); when the toggle is
+on, a row member is drawn at random. Every written word has bits
+12..15 clear. At `y = H-2` a corner test reads two rows past the centre, outside
+the plane. — TERR-243
+
+Run on the installed planes at every palette-centred interior cell, the fixer
+changes no terrain class at 494,382 of 516,207 EN and 384,191 of 400,596 RU cells.
+Of those cells, 45 percent (EN) and 47 percent (RU) have a uniform 3x3 class
+neighbourhood: the fixer then writes only the centre, so they pass under any rule
+that writes nothing. On the cells with a differing-class neighbour the fixer
+changes no class at 261,669 of 283,494 EN and 196,071 of 212,476 RU cells (92.3
+percent); 7.7 percent are not reproduced. The test compares terrain classes, not
+words. The shuffled-plane control (1,490 of 527,940 EN and 1,419 of 410,314 RU) is
+a coherence control: it excludes a spatially incoherent plane and does not bound
+the uniform share. Cells centred on a transition word have no pair-table entry and
+are not a test of the rule. This agreement is Medium evidence that the installed
+maps were painted with this fixer; it does not identify the edits that produced
+the remaining cells. — TERR-244

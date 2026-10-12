@@ -166,7 +166,7 @@ at is per-registry, and only `objects.reg`'s is the section index** (the all-thr
 | `structures.reg` | `Count` = 66 | `Structure0..Structure65` | `1..66`, 66 distinct | ID=index+1 |
 
 So a `.alm` placement's `ID` (a type-4 record's `kind` is a `structures.reg` `ID`, a
-type-6 record's `+0x08` a `units.reg` `ID` — `ALM-CLS-036`, `ALM-CLS-038`) is used
+type-6 record's `+0x08` a `units.reg` `ID` — `ALM-CLS-036`, `ALM-CLS-038` (partially retracted)) is used
 **directly as the array subscript; no translation.** A units-array consumer must
 null-check instead, because 47 of the 81 slots are empty. **No lookup by `ID` over these
 arrays exists anywhere in the image** — and for units and structures none is needed,

@@ -16,7 +16,7 @@ anchors in the loader itself (`SAR ,8`) and the unit anchors when it walks the l
 unit list. Combined with the grid base above, a placement at `(X,Y)` stands on tile
 `(X>>8, Y>>8)` of every grid layer.
 
-### type 4 — placed structures/buildings (`ALM-OBJ-019`, `ALM-OBJ-034`, `ALM-CLS-036/037`)
+### type 4 — placed structures/buildings (`ALM-OBJ-019`, `ALM-OBJ-034` (amended), `ALM-CLS-036/037`)
 
 `count = meta+0x20` is the loader's case-4 loop bound. Each record is 20
 bytes, plus an eight-byte extension when `kind == 0x21`.
@@ -99,9 +99,9 @@ separate predicates below.
 
 | Off | Type | Field | Notes |
 |-----|------|-------|-------|
-| +0x00 | u32 | **colour slot** | → `player+0x08`, carried `+1` to `Player+0x44`; the unit body draw indexes the 17 shade objects with it (`ALM-PLAYER-069`, `PAL-SHADE-012`, `PAL-SHADE-013`). Sparse and unordered, e.g. `Cross.ALM` `8 2 3 5 1 6 4 13`. The owner lookup `R0425` compares the record's own 1-based ordinal (below), **not** this word |
+| +0x00 | u32 | **colour slot** | → `player+0x08`, carried `+1` to `Player+0x44`; the unit body draw indexes the 17 shade objects with it (`ALM-PLAYER-069` (amended), `PAL-SHADE-012`, `PAL-SHADE-013`). Sparse and unordered, e.g. `Cross.ALM` `8 2 3 5 1 6 4 13`. The owner lookup `R0425` compares the record's own 1-based ordinal (below), **not** this word |
 | +0x04 | u32 | **control word** | Four-byte Read destination `CPlayer+0x30`; complete copies reach `Player+0x28`. No Boolean validation occurs in these local transfers. The old 0/1 inventory is a corpus result; `UNIT-OWNER-009` is partially retracted for treating it as a general value/authorship bound. `ALM-139`, `SESS-072`, retained corpus/ordinal chain in `ALM-PLAYER-069` |
-| +0x08 | u32 | **scalar; gameplay effect Unknown** | Loaded into CPlayer+0x0c. Preserve all four bytes. The installed 0/5000 values are a corpus observation, not a two-value schema. — ALM-SCALAR-087, ALM-SCALAR-089 |
+| +0x08 | u32 | **scalar; gameplay effect Unknown** | Loaded into CPlayer+0x0c. Preserve all four bytes. The installed 0/5000 values are a corpus observation, not a two-value schema. — ALM-SCALAR-087 (partially retracted), ALM-SCALAR-089 |
 | +0x0c | char[32] | **name** | NUL-terminated ASCII: `Self, Monsters, Villagers, Neutral, Enemy, Beasts, Guards, Peasants, Orcs, Trolls, …` |
 | +0x2c | u16[16] | **relations** | one per editor player slot (the editor caps at 16) — the diplomacy row |
 
@@ -112,7 +112,7 @@ session `Player` type. The game destinations are `+0x08` colour, `+0x30`
 control word, `+0x0c` scalar, `+0x10` name, `+0x34` diplomacy array and
 `+0x04` loader ordinal. Non-copy constructors initialize the scalar to zero;
 the loader supplies the authored word or its absent-section default. —
-ALM-CPLAYER-090, ALM-SCALAR-087, ALM-EDITOR-152, UNIT-VPLAYER-022
+ALM-CPLAYER-090, ALM-SCALAR-087 (partially retracted), ALM-EDITOR-152, UNIT-VPLAYER-022
 
 The game map-copy constructor can allocate independent scalar-bearing
 CPlayers in a second map. Destroying the original roster does not destroy
@@ -120,7 +120,7 @@ those copies. Native reach of that constructor and any later gameplay
 consumer remain Unknown. A world field also retains an address after map
 destruction; the address does not establish a live object. The earlier
 selected direct-displacement absence is not a whole-image exclusion. —
-ALM-COPY-151, ALM-ALIAS-154, ALM-SCALAR-088
+ALM-COPY-151, ALM-ALIAS-154, ALM-SCALAR-088 (partially retracted)
 
 The EN editor copies this scalar and writes its current four-byte value.
 Roster dialog control `0x407` is bound to a signed integer with a requested
@@ -161,7 +161,7 @@ copy. Native arbitrary-map admission, transfer/join identity, later UI and
 editor property authoring remain Unknown. The separate wire+0x08 scalar
 lifetime is unchanged by these control-word results. — SESS-075
 
-### type 6 — placed units (`ALM-UNIT-018`)
+### type 6 — placed units (`ALM-UNIT-018` (partially retracted))
 
 `count = meta+0x24`. Version 990 uses 70-byte records. File offsets differ
 from runtime offsets: file+0x2c..+0x40 maps with displacement−4, so file+0x35
@@ -180,7 +180,7 @@ runs are stat overrides, and installed bytes+0x2c..+0x3f do not use 0xff.
 | +0x0c | u32 | flags | arm-specific: bit 0 selects NPC inside the Human band; ordinary Human bit 2 controls actor+0x4b high bit behind the secondary-key rule below; bit 7 supplies a constructor equipment gate (`ALM-FLAGPATH-109`, `UNIT-PLACEGEAR-098`) |
 | +0x10 | u32 | **definition id** | present only when `formatVersion > 0x3da`; when nonzero and `!= 0xcdcdcdcd` it **overrides** `+0x08`/`+0x0a` (matched on the definition's parameter `0x18`). **But it is read only when `+0x0c` bit 0 is clear** — `R0151` tests the NPC flag *outside* the definition-id test, so a record carrying both takes the npc arm and this field is never read (`MISSION-ARM-006`) |
 | +0x14 | u32 | **owner** | low u16 used: 1-based physical slot in the type-5 array |
-| +0x18 | u32 | **type-8 link** | 1-based, bounded by `meta+0x2c`; `0` = none. The loader writes this record's `+0x40` word into entry `[value−1]` of `mapObj+0x2dc` |
+| +0x18 | u32 | **type-8 link** | 1-based, bounded by `meta+0x2c`; `0` = none. The loader writes this record's `+0x40` word into entry `[value−1]` of `mapObj+0x2dc`. The EN map editor stores the value minus 1 on load and writes it plus 1, so it round-trips (`ALM-SAVE-239`) |
 | +0x1c | u32 | — | installed values 0..14; not a field-width limit. No direct reader in the established game record-holder family; stream escape remains bounded. The editor reads, copies and writes an opaque dword. Meaning Unknown (`ALM-TAILDIR-081`, `ALM-PLACESTREAM-111`, `ALM-PLACEEDITOR-112`) |
 | +0x20 | u16 | **current health** | absent value `0xFFFF`; applied to `actor+0x94` (`UNIT-PLACE-034`), signed and unclamped, with no skip for 0 (`UNIT-144`). Optional in installed maps (`ALM-TAILU16-082`): 30 records authored, 21 at 0 and 9 at -10 (`UNIT-143`). A 0 enters the death arm of `HERO-DEATH-026` (amended); the frame-0 draw is Unknown |
 | +0x22 | u16 | — | absent value `0xFFFF`; authored on exactly the records `+0x20` is and with a different value set, and **no reader** (`ALM-TAILU16-082`) |
@@ -198,7 +198,7 @@ runs are stat overrides, and installed bytes+0x2c..+0x3f do not use 0xff.
 
 The record is **70 bytes only at `formatVersion == 990`**: three of the reads above are
 version-gated (`> 0x3b6`, `> 0x3d8`, `> 0x3da`), so a different version yields a different
-stride (`ALM-UNIT-040`).
+stride (`ALM-UNIT-040` (amended)).
 
 **Who ever reads a placed-unit record.** The loader stores the record's *pointer* into a
 4-byte-element `CObArray` at `mapObj+0x318`, and exactly three routines can hold one: the
@@ -354,7 +354,7 @@ dialog+0x378..0x3b7. The writer submits one184-byte item per record. Native
 creation, UI/name-copy behavior and a durable editor round trip remain Unknown.
 — ALM-TRIGSTORAGE-163, ALM-TRIGEDITOR-164, ALM-TRIGZERO-165
 
-### type 8 — authored loot, and type 9 — caster payload (`ALM-SACK-065`, `ALM-TRIG-049`)
+### type 8 — authored loot, and type 9 — caster payload (`ALM-SACK-065`, `ALM-TRIG-049` (partially retracted))
 
 Neither is a named-node tree, and **type 8 has no count word at all**. Both walks consume
 the complete payload.

@@ -45,17 +45,17 @@ The offsets below are relative to the payload. The fixed reads total 632 bytes. 
 | +0x04 | u32 | **H** | map height (`W≠H` occurs, e.g. 112×144) — read into the map object | ALM-HDR-001, ALM-META-024 |
 | +0x08 | f32 | **angle** | Radians; loaded into map `M+0x18` and terrain `P+0x20`. The terrain store fills four bytes of a double. Forced relight replaces it from the sun globals before the known read. Installed angles are whole degrees: `±45, ±44, ±18, 36, 28, 25, 22`; the common π/4 encoding is `0x3f490fda`. | ALM-META-027 (amended; payload-angle clause retained), ALM-META-091, ALM-META-092, ALM-CORP-093, TERR-LIGHT-149, TERR-LOAD-152 |
 | +0x0c | 32-bit word; signed integer in editor arithmetic | **Starting Time (editor minutes)** | Loaded into `M+0x1c`, terrain `P+0x2c` and the editor `E+0x1c`. The editor requests slider positions0..96, loads signed `value/15` and accepts `position*15`. Its `(value/60)%24` lighting path reaches palette colors and render-buffer stores. Default360 is 06:00. The identified normal game M/P paths do not read this scalar; a universal or native game effect remains unestablished. Native editor transactions are unobserved; slider bounds are not an ALM validation range. | ALM-EDITTIME-205, ALM-SCALAR-198, ALM-EDITORSCALAR-203 |
-| +0x10 | u32 | scalar (stored) | Loaded into map `M+0x20` and terrain ambient byte `P+0x1c`. Forced relight overwrites the terrain value before its known read. Installed values span `0..33`; this is not a validation bound. | ALM-META-026, ALM-META-091, ALM-META-092, ALM-CORP-093 |
-| +0x14 | u32 | scalar (stored) | Loaded into map `M+0x24` and terrain range byte `P+0x1d`; the four-byte terrain store also writes `P+0x1e/0x1f/0x20`. Relight replaces the range before its known read. Installed values span `27..64`; this is not a validation bound. | ALM-META-026, ALM-META-091, ALM-META-092, ALM-CORP-093 |
-| +0x18 | u32 | bitmask | **Terrain tile-group mask.** The map loader discards its local copy; terrain stores it at `P+0x28`. Bit i selects group `(i>>2)+1`, variants `(i&3)*4 .. +3`. Installed values use bits `0..12`: groups 1–3 and group 4 variants 0–3. | ALM-META-026, TERR-LOAD-152 |
+| +0x10 | u32 | scalar (stored) | Loaded into map `M+0x20` and terrain ambient byte `P+0x1c`. Forced relight overwrites the terrain value before its known read. Installed values span `0..33`; this is not a validation bound. | ALM-META-026 (partially retracted), ALM-META-091, ALM-META-092, ALM-CORP-093 |
+| +0x14 | u32 | scalar (stored) | Loaded into map `M+0x24` and terrain range byte `P+0x1d`; the four-byte terrain store also writes `P+0x1e/0x1f/0x20`. Relight replaces the range before its known read. Installed values span `27..64`; this is not a validation bound. | ALM-META-026 (partially retracted), ALM-META-091, ALM-META-092, ALM-CORP-093 |
+| +0x18 | u32 | bitmask | **Terrain tile-group mask.** The map loader discards its local copy; terrain stores it at `P+0x28`. Bit i selects group `(i>>2)+1`, variants `(i&3)*4 .. +3`. Installed values use bits `0..12`: groups 1–3 and group 4 variants 0–3. | ALM-META-026 (partially retracted), TERR-LOAD-152 |
 | +0x1c | u32 | **#players** | player-record count = `type5_size / 76` ; installed values `3..9` (editor caps at 16) | ALM-META-025 |
 | +0x20 | u32 | **#objects** | object-record count (base records; extensions are additional bytes, not records) | ALM-META-025 |
 | +0x24 | u32 | **#units** | unit-record count = `type6_size / 70` in the version-990 form | ALM-META-025 |
 | +0x28 | raw 32-bit word | count-local residue, purpose Unknown | Read4 into EBP-0x50, overwritten by each complete internal type-7 count read. Short reads can retain prior bytes; this does not make it an external type-7 count | ALM-META-025 (discard shorthand narrowed), ALM-COUNT-195, ALM-STALE-196 |
 | +0x2c | u32 | **#type 8 records** | count used as the case-8 loop bound; `0 ⟺ type8 empty` | ALM-META-025 |
 | +0x30 | char[64] | **name** | NUL-terminated ASCII. Installed names use at most 21 bytes and can be empty; 21 is not a field-width limit. | ALM-META-010 |
-| +0x70 | u32 | scalar (stored) → `map+0xd4` | **Multiplayer-mode source:** `[L00285]+0xc = (map+0xd4 > 1)`, read during player construction. A value 1 selects single-player loading even in a loose map such as RU `Horror.alm`; it does not identify `scenario.res` membership. The map-selection list loads it into a record column and lists a map only when it is above 1. A player-slot/MP-capacity interpretation beyond these consumers remains unestablished. | ALM-META-026, ALM-MODE-070, TEXT-083 |
-| +0x74 | u32 | scalar (stored) | standalone `1..5`, campaign `1`; the map-selection list shows it in its last column | ALM-META-026, TEXT-083 |
+| +0x70 | u32 | scalar (stored) → `map+0xd4` | **Multiplayer-mode source:** `[L00285]+0xc = (map+0xd4 > 1)`, read during player construction. A value 1 selects single-player loading even in a loose map such as RU `Horror.alm`; it does not identify `scenario.res` membership. The map-selection list loads it into a record column and lists a map only when it is above 1. A player-slot/MP-capacity interpretation beyond these consumers remains unestablished. | ALM-META-026 (partially retracted), ALM-MODE-070, TEXT-083 |
+| +0x74 | u32 | scalar (stored) | standalone `1..5`, campaign `1`; the map-selection list shows it in its last column | ALM-META-026 (partially retracted), TEXT-083 |
 | +0x78 | char[64] | **description** | NUL-terminated code-page text (ASCII or Windows-1251). Installed text uses at most 36 bytes; 36 is not a field-width limit. The map-selection list hover returns it, with line feeds read as `#`. | ALM-META-010, TEXT-083 |
 | +0xb8 | 7×64 B | **text slots** | fixed array of 7 slots `[3×u32 prefix][char[52] text @+12]`, default `"<None>"`. Loaded (part of a 512-B block read from +0x78). Campaign maps fill slots 4/6 with trigger/quest text (`"mission complit"`, `"Start1"`, …) | ALM-META-028 |
 
@@ -73,7 +73,7 @@ stored scalars, the discarded bitmask, the five content-record counts), `0x40` (
 two `u32`, and one `0x200` block covering `description` + the 7 text slots. The `π/4`
 constant is `+0x08` (`0x3F490FDA`).
 
-## Grid layers type 1 / type 2 / type 3 — `ALM-GRID-012`, `ALM-GRID-013`,
+## Grid layers type 1 / type 2 / type 3 — `ALM-GRID-012` (amended), `ALM-GRID-013`,
 `ALM-GRID-014`, `ALM-GRID-032`
 
 Each grid record stores **`W·H` cells starting at payload+0** — the payload being the
@@ -94,7 +94,7 @@ The world ingest addresses `tiles[row*W+col]`, `heights[row*W+col]` and
 
 | Layer | Name | Cell | Encoding | Claim |
 |-------|------|------|------------------------------------------------|-------|
-| type 1 | **Tiles** | u16 LE | Bits 0–9 feed the simulation classifier; bits 0–12 feed graphics selection. Bit 13 feeds the simulation block assignment but is cleared by the light parser. Bits 14/15 carry render visibility state. An installed absence is not an unused-bit rule. | ALM-GRID-012, ALM-TILEMAIN-121, ALM-TILEVIEW-122 |
+| type 1 | **Tiles** | u16 LE | Bits 0–9 feed the simulation classifier; bits 0–12 feed graphics selection. Bit 13 feeds the simulation block assignment but is cleared by the light parser. Bits 14/15 carry render visibility state. An installed absence is not an unused-bit rule. | ALM-GRID-012 (amended), ALM-TILEMAIN-121, ALM-TILEVIEW-122 |
 | type 2 | **Altitudes** | u8 | Height/altitude, copied to the simulation height buffer. Installed heights are below `0x80`; this is not a general u8 limit. The earlier range derived from the displaced grid origin is retracted. | ALM-GRID-013, TERR-LIGHT-016, TERR-LIGHT-028 |
 | type 3 | **Objects** | u8 | Static-object code: 0 is empty; nonzero `c` selects `objects.reg` section `c-1`. Missing type 3 is zero-filled. World ingest additionally derives runtime block value 5 for nonzero cells. | ALM-GRID-014, ALM-CLS-035 |
 
@@ -115,7 +115,7 @@ The world ingest addresses `tiles[row*W+col]`, `heights[row*W+col]` and
 
 **Terrain enum** (1-based in the lookup; = `world.res:data/map.reg` `Terrain` record
 order): `1 Land · 2 Grass · 3 Flowers · 4 Sand · 5 Cracked · 6 Stones · 7 Savanna ·
-8 Mountain · 9 Water · 10 Road` (`ALM-TERR-015`). `map.reg` supplies a per-terrain `Cost`
+8 Mountain · 9 Water · 10 Road` (`ALM-TERR-015` (partially retracted)). `map.reg` supplies a per-terrain `Cost`
 and `Pass` scalar; `rom.exe` reads **only the ten `Cost*` keys**, into the byte table
 `world+0x54176+class` (slot 0 = `0xff`), with its own hardcoded defaults
 `[8,8,9,14,6,12,11,16,8,6]`.
@@ -238,7 +238,7 @@ Starting Time control reads signed minutes/15 and accepts position*15.
 Its time-to-color consumer identifies the default as 06:00. The earlier
 sixteen-command search did not include this established control chain.
 Native control returns and SAVE transactions remain unobserved.
-— ALM-METADEFAULT-186, ALM-EDITORSCALAR-203, ALM-EDITTIME-205
+— ALM-METADEFAULT-186 (partially retracted), ALM-EDITORSCALAR-203, ALM-EDITTIME-205
 
 Landscape P is a distinct 0x30-byte object. Its binder stores the pointer at
 view+0x80 and copies dimensions, without copying the header. A subsequent
@@ -307,3 +307,64 @@ use dimensions, planes and angle, with no scalar reader. Nonzero app+0x20
 still overrides the primary frame, and the host fallback is not a primary-frame
 identity proof. Native selection and external member replacement remain
 unobserved. — ALM-FRONTIER-200
+
+## Map editor new map, height painting and save
+
+These statements cover the EN map editor, read statically; no editor session
+was observed.
+
+A new map is built by one constructor. It fills every cell of the type-1 plane
+with the tile word chosen in the new-map dialog (Grass `0x11` by default), every
+cell of the type-2 height plane with the dialog's slider height (64 by default,
+range 0..126) and the type-3 object plane with 0. Two unchecked-by-default
+options add `rand()/0xaaa - 6` to heights between 7 and 120 and draw a random
+variant for every cell. — TERR-246
+
+The new map's type-0 payload, as the writer emits it:
+
+| Off | new-map value |
+|-----|---------------|
+| +0x00, +0x04 | W, H from the dialog (`ALM-NEWMAP-237`) |
+| +0x08 | `0x3f490fda` |
+| +0x0c | 360 |
+| +0x10 | 21 |
+| +0x14 | 63 |
+| +0x18 | the mask recomputed from the tile plane |
+| +0x1c | 2 |
+| +0x20, +0x24, +0x28, +0x2c | 0 |
+| +0x30 | `Multiplayer Map` |
+| +0x70 | 4 |
+| +0x74 | 1 |
+| +0x78 | first byte 0 |
+
+The name's tail and `+0x79..+0x277`, which hold the rest of the description
+and the seven text slots, are written by no store on the paths read; their
+content is Unknown. — ALM-NEWMAP-236
+
+The height tool is separate from terrain painting. A drag sets the anchor
+cell's height to the vertical drag in pixels added to the anchor height,
+clamped to 0..127 (High); the anchor height is read after the plane is restored
+from the undo copy by an unread copy routine (Medium). The height spreads over a
+radius of the horizontal drag divided by 32, at least 1, with a fall-off
+presumed to be a cosine; the radius, the fall-off shape and the region below
+depend on unread routines (presumed absolute value, square root, cosine and
+conversion) and are Medium. In the cells nearer the anchor's column than its
+row, the step from a cell to the cell below it is bounded: lower minus upper is
+at most 31 (High for the compare and store; Medium for the region test).
+— TERR-245
+
+Every save normalises the plane and recomputes the counts, also for a loaded
+map:
+
+1. The top 8 rows of the tile plane take the word of the last cell.
+2. Every tile word is ANDed with `0x23ff`.
+3. `+0x18` is the OR of `1 << ((w & 0x3ff) >> 6)` over all cells; a value above
+   `0xff` gains `0xf00`; a value above `0x1fff` becomes `0x1fff`.
+4. `+0x1c`..`+0x2c` are written from the editor's own lists; the loaded words
+   are not kept.
+
+All 38 EN and 34 RU installed maps satisfy steps 1 to 3. — ALM-SAVE-238
+
+The loaded `+0x08`..`+0x14`, name, `+0x70`, `+0x74` and the 512-byte block at
+`+0x78` are stored where the writer reads them, so a save without an edit to
+these fields writes them back unchanged. — ALM-SAVE-240
