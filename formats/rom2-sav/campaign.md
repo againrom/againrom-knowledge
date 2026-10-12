@@ -437,10 +437,14 @@ pointer relations do not establish executed cold LOAD preserving the
 same roster or literal binding. — R2-SESSION-158
 
 The hire loop runs only in the mission-entry case whose current location
-record has type 1. A pass over `E8` calls and `.rdata` words finds one
-creator caller per root, so LOAD creates no hire among the routes the pass
-sees (Medium; `E9` jumps, `.data` words, immediates and the RU section
-`.st1073` are unscanned). EN and RU agree on the entry case. — R2-ENGINE-523
+record has type 1. A pattern pass finds two sites per root that post message
+0x468 (Medium for the enumeration): the end of a global-map travel and the
+victory arm when no town is available. The two sender bodies are read in both
+roots (High). Passes over `E8` calls, `E9` jumps and `.rdata`, `.text`,
+`.data` and RU `.st1073` dwords find one creator caller per root, so LOAD
+creates no hire among the routes searched (Medium; register calls are not
+excluded). EN and RU agree on the entry case and the senders.
+— R2-ENGINE-523, R2-ENGINE-533
 
 A hire takes the Humans row with serverID 10000+10*ID, else the Units row,
 highest index first; when its family has suffix rows, the row keyed
@@ -454,9 +458,35 @@ Players collection's head getter returns (the hero's where the map build
 reuses it, Medium). Every hire class is outside 33..63, so the victory
 transition detaches hires (Medium). The unit-state sender clears the field
 bit that sends +0x14c when Session +0x74 is nonzero (Humans hires always,
-Units hires when the key is 0x6000 or more; EN only, Medium for play). The
-cell a hire starts on is Unknown. — R2-ENGINE-525, R2-ENGINE-526,
-R2-ENGINE-527
+Units hires when the key is 0x6000 or more; EN only). The creator writes no
+cell. A store census finds no campaign writer that sets Session +0x74, so in
+a campaign the bit stays set (Medium). — R2-ENGINE-525, R2-ENGINE-526,
+R2-ENGINE-527, R2-SESSION-198
+
+Party placement and positioning bodies are read, and that a campaign hire
+reaches them is Unknown. Party placement fixes one start point for the
+party: a random word of a drop list (x low byte, y high byte), or x and y
+each rand(70)+30 when the list gives 0. It reads its +0x74 and drop list
+through the receiver of the join, assumed the Session object (identity not
+read). The radius is trunc(max(5, sqrt(n)+4)) for n actors in the owner's
+list (Medium; the constants are read in EN only). In list order, each actor
+whose returned cell pointer is not itself starts at the point (Medium; RU
+calls two routines where EN calls one wrapper, and the behaviour of all
+three is not read); the hero is tried at radius 0 first, every other actor,
+hires included, at the party radius. A search tries trunc(r*r/2)+2 random
+cells within r/2 of the point, y drawn before x in both roots (the range of
+each draw is read in EN only), then the square x-major; a failure leaves the
+actor unplaced on the last cell tried and logs an error. A join routine
+runs this placement when its flag is set and the owner's placed byte +0x41
+is 0; the victory transition clears that byte for every owner it keeps. No
+read ties a campaign hire to the join: the packet that drives it, its
+sender, its dword +0xa and its order against the creator are unread, and
+two EN callers of positioning are unclassified. The source of the drop list
+is Unknown. — R2-ENGINE-529, R2-ENGINE-530, R2-ENGINE-531, R2-ENGINE-532
+
+Scenario.dll stores availability and town literals only for hires 1..7.
+After NewGame hires 8..20 stay unavailable (Medium), so every hire that
+enters has template rows. — R2-SESSION-199, R2-ENGINE-524
 
 At mission end a client update of a unit with +0x1dc in 1..20 and signed
 health word below -10 sets availability bank[531+ID] to 0 where the update
@@ -466,7 +496,9 @@ the 2 of an unselected hire turns to 1 at the next ordinary departure, and
 selection is cleared. A dead hire's availability stays 0 until another
 writer of R2-SESSION-048 or R2-ENGINE-380 stores a nonzero value; a
 selected survivor rests one departure (Medium as a composition; the
-victory-arm link is not read here). — R2-SESSION-195
+victory-arm link is not read here). Session +0x74, whose nonzero value
+would block the update, is 0 in a campaign (Medium). — R2-SESSION-195,
+R2-SESSION-198
 
 In RU the hire's Group is, at Medium, in the Player group list a mission
 save writes and LOAD rebuilds (the list's caller and collection identity

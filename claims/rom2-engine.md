@@ -472,7 +472,7 @@ Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evid
 | R2-ENGINE-057 | ROM2 instant 39 clears a group's forced-activity DWORD; actor-proximity marking and ordinary group/unit ticks determine its later activity. | High / Medium | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-058 | In both verified ROM2 executors, declared instant 37 takes Bad instant default, optionally sends diagnostic packet 0x91 and returns normally; no campaign map contains it. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-059 | Both ROM2 trigger runners compare map result registers with signed comparisons, short-circuit their conjunction, then set a pass latch and run actions in stored order. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-060 | ROM2 result actions increment the session win counter or store a failure reason; the verified RU result tick converts those fields into0xb5/0xb4 packets. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-060 | ROM2 result actions increment the session win counter or store a failure reason; the verified RU result tick converts those fields into0xb5/0xb4 packets. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 
 ### R2-ENGINE-041
 
@@ -647,6 +647,8 @@ The RU result consumer L2.00127 requires player byte+0x41 nonzero and DWORD+0x2c
 **Confidence.** High for both action bodies and the stated RU result-consumer/receiver boundary. Failure priority and counter increment follow raw instructions, not a boolean-win convention inferred from labels.
 
 **Unknown.** EN's ordinary mission-result tick was not independently followed. Full victory-window acknowledgement scheduling into LeaveLocation and other failure sources remain frontier;048 supplies the independently established DLL continuation only.
+
+**Amended.** R2-ENGINE-532 names the writers of player byte +0x41: the owner constructor stores 0, the join stores 1, the victory transition stores 0, two constructors of the class with vtable `L2.02693` store 1.
 
 ## Mission text consumers
 
@@ -946,7 +948,7 @@ or complete constructor census was performed.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-073 | The selected EN/RU fresh campaign starts with DLL type 2/ID 1; packed inn TALK unlocks type 1/ID 10, whose record ID supplies the first mission path. | Medium | ● active (partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/), [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
-| R2-ENGINE-074 | In selected EN/RU campaign result paths, victory acknowledgement calls DLL LeaveLocation; the first failure report instead offers menu or save-slot selection. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
+| R2-ENGINE-074 | In selected EN/RU campaign result paths, victory acknowledgement calls DLL LeaveLocation; the first failure report instead offers menu or save-slot selection. | Medium | ● active (amended) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-075 | The enabled EN/RU movie dispatcher indexes cutpaths by DLL output; output 1 selects teleport files 01..99, skips missing files and stops on player return zero. | High | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-076 | Selected EN/RU additional-unit entry filters two bank ranges and uses stage-sensitive native templates; those paths do not establish the complete entering party. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-077 | The selected EN/RU movie-open path reads Common, Fading and Panaraming keys from a same-stem inline REG before opening the SMK through its native import. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
@@ -976,6 +978,8 @@ The first failure report reads cached mission text at reason minus two and const
 **Confidence.** Medium for the composed report/choice routes. Instructions, actual UI/packet jump tables and report-object vtable targets distinguish victory continuation from the selected failure choice. The local EN tick closes the earlier RU-only result-consumer boundary. No whole-image no-call claim is made.
 
 **Unknown.** Runtime presentation/timing, later loading from the failure selector, other failure selectors/sources and the complete dispatch population. Initial automatic briefing scheduling remains Unknown.
+
+**Amended.** R2-ENGINE-532 names the writers of player byte +0x41 that the result tick requires: the owner constructor stores 0, the join stores 1, the victory transition stores 0, two constructors of the class with vtable `L2.02693` store 1.
 
 ### R2-ENGINE-075
 
@@ -3652,6 +3656,8 @@ constructor writes 0 and init writes (mode < 2) (High); campaign start
 passing mode 2, which leaves it 0, and network paths setting it to 1 are
 Medium. R2-ENGINE-329 and R2-ENGINE-330 give the other location records.
 
+**Amended.** R2-SESSION-198 is the census of `[L2.00805]+0x74` writers this Unknown asks for: one Session-global store (the map build's), the rest unattributed; +0x74 is 0 in a campaign at Medium.
+
 ### R2-ENGINE-264
 
 Kind builder `L2.00806` decodes the mask: bits 0..14 select materials (bit 13
@@ -5134,7 +5140,7 @@ one RU section on the owner's system, or a capture, would settle it.
 | R2-ENGINE-320 | RU ROM2 keeps school skills at hero +0xa8+2i, their base at +0x116+2i, the main skill at +0x23c, per-skill experience E(s) at +0x23c+4i (i=1..5), their sum at +0x130 and trunc(0.01 x sum) at +0x1c. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-321 | RU ROM2 recompute L2.00052 derives speed, HP and mana maxima, sight, defence and resistances, then adds the item modifier totals kept at hero +0xd8..+0x113 through L2.00102. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-322 | RU ROM2 equip puts a Weapon at hero +0x74 and its modifiers into +0xd4 block fields, an Armor at slot +0x208+4·(armor +0x58), and a refused item into the bag at +0x7c; the spellbook +0x140 exists only with ManaMax > 0. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
-| R2-ENGINE-323 | The RU ROM2 Player body stores +0x3c and +0xa48 XORed with 0x5c073f4d (L2.01271); Player and Unit store their own address, which load registers in one saved-address map and uses to resolve Player +0x38 and Unit +0x14. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-323 | The RU ROM2 Player body stores +0x3c and +0xa48 XORed with 0x5c073f4d (L2.01271); Player and Unit store their own address, which load registers in one saved-address map and uses to resolve Player +0x38 and Unit +0x14. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-324 | After its members the RU ROM2 Group body writes u32 +0x1c, +0x40 and +0x44 and ends; the Player body then writes 36 raw bytes of [+0x34] through R2.0175 and ends. Load resolves +0x40 and +0x44 as saved addresses. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 
 ### R2-ENGINE-319
@@ -5296,6 +5302,8 @@ up.
 of both arms. Medium that `L2.01168` registers and `L2.01323` resolves
 saved addresses: neither callee was read.
 
+**Amended.** The Player prefix stores byte +0x41; after LOAD the join's `+0x41 == 0` gate (R2-ENGINE-532) follows the saved value.
+
 ### R2-ENGINE-324
 
 Group body `R2.0123` (R2-ENGINE-191, R2-ENGINE-192) writes, after the
@@ -5321,7 +5329,7 @@ are read.
 | R2-ENGINE-331 | ROM2 shop record 3 category 3 has no class bit until TalkTo kind 0, NPC 0x2a3, topic 0x4e ORs in class 4; EnterInn offers that word at location 3 when stage > 60 and bank 770 is 1. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 | R2-ENGINE-332 | Under the record values the Scenario.dll direct stores write, ROM2 shops admit 458 data.bin keys (190 armour, 35 shield, 146 weapon, 64 MagicItems, 23 books); none selects class 5 or 6. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 | R2-ENGINE-333 | ROM2 sold-item placement L2.00804 tests the item tag, type and stackability and the category kind bits and bit 29, never class, material or row; a stackable item prefers a category without bit 29. | High | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
-| R2-ENGINE-334 | The ROM2 server object's init sets +0x74 to (mode < 2); campaign start passes mode 2 (Medium), so shop fills read the Scenario.dll record; network paths pass 0; other +0x74 stores are unclassified. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-334 | The ROM2 server object's init sets +0x74 to (mode < 2); campaign start passes mode 2 (Medium), so shop fills read the Scenario.dll record; network paths pass 0; other +0x74 stores are unclassified. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 
 ### R2-ENGINE-327
 
@@ -5526,6 +5534,8 @@ in a committed listing.
 
 **Unknown.** The owners of the unclassified +0x74 stores and the mode
 `L2.01008` passes in a campaign.
+
+**Amended.** R2-SESSION-198 adds the map build's store (EN `L2.02694`, RU `L2.02695`) to the unclassified +0x74 stores; the other EN 142 and RU 139 stores stay unattributed, the init store among them, and R2-ENGINE-296's three server-span stores are among them.
 
 ## Music selection and playback
 
@@ -7483,7 +7493,7 @@ whether EN sends the undo update from another body.
 |---|---|---|---|---|
 | R2-ENGINE-410 | ROM2 Unit initialization builds the hero bag at +0x7c; 9 of 18 direct item-list constructor calls per root are followed within 0x60 bytes by a +0x7c store; the other nine are unclassified. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-411 | On the read ROM2 departure path mission entry clears Session +0x1ac before the map caller, whose only LOAD runs when +0x1ac is set; that the hero and its items cross into the mission as the same objects is Medium. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
-| R2-ENGINE-412 | ROM2 victory runs a transition that keeps class 0x21..0x3f units and clears ground lists; the bodies read do not write their bag or worn items (Medium, ten callees unread); defeat runs it only when app +0x404 bit 0 is set. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-412 | ROM2 victory runs a transition that keeps class 0x21..0x3f units and clears ground lists; the bodies read do not write their bag or worn items (Medium, ten callees unread); defeat runs it only when app +0x404 bit 0 is set. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-413 | ROM2 opcode 0x22 reaches the item-move arm in the dispatcher branch for packet byte +4 below 1 (no map test); that it is the only 0x22 arm is Medium, the sibling branch table being unread; one client builder, seven callers per root. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-414 | ROM2 effect tags index a 50-name table equal in EN and RU (41 castspell, 42 teachspell); effect apply scales s16 or u32 +0x40 by its argument; item +0x47, +0x50, RU +0x54 and +0x0e have no reader in the read bodies. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 
@@ -7641,6 +7651,8 @@ Unknown for the meaning of app +0x404 bit 0.
 first-loop callees, the delete callees, the 0x41d arm's callees listed
 above and RU `L2.01836` would settle whether the hero's items and the
 absence of a LOAD hold beyond the bodies read.
+
+**Amended.** R2-ENGINE-529 reads one of the ten first-loop callees listed as unread: `L2.01851`, the party placement routine (R2-ENGINE-529 to R2-ENGINE-531). Nine remain unread. Whether that routine runs in the first loop depends on the +0x74 gate, which R2-SESSION-198 finds 0 in a campaign (Medium).
 
 **Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
 
@@ -11196,11 +11208,16 @@ generator of R2-ASSET-123 over them would settle which kinds they build.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-523 | The ROM2 hire loop runs in the 0x468 case only when the current location record's DWORD +0 is 1; a call and .rdata-word pass finds one creator caller per root, so LOAD creates no hire (Medium). | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
-| R2-ENGINE-524 | The ROM2 hire creator looks up 10000+10*ID in Humans (parameter 24), then Units (parameter 55), highest index first; a stage row 9998+10*ID+stage/10 replaces it when the family has suffix rows. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-523 | The ROM2 hire loop runs in the 0x468 case only when the current location record's DWORD +0 is 1; a call and .rdata-word pass finds one creator caller per root, so LOAD creates no hire (Medium). | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-524 | The ROM2 hire creator looks up 10000+10*ID in Humans (parameter 24), then Units (parameter 55), highest index first; a stage row 9998+10*ID+stage/10 replaces it when the family has suffix rows. | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-525 | A ROM2 hire actor is built by row name, gets WORD +0x14c = ID, joins owner +0x24 in its own new Group, and keeps its row's typeID as class +0xe: 15, 5, 23, 100, 102, 101 or 26. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-526 | ROM2 victory's last owner loop resets actors of class 33..63 and detaches every other actor through L2.01670 and its virtual slot +4 with 1; every installed hire row's class is outside 33..63. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
-| R2-ENGINE-527 | The hire creator's last call is the EN unit-state sender: argument 3 is a field mask, 0xffb and two zeros feed two field helpers; the creator writes no coordinate, and the hire's cell is Unknown. | High / Unknown | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-527 | The hire creator's last call is the EN unit-state sender: argument 3 is a field mask, 0xffb and two zeros feed two field helpers; the creator writes no coordinate, and the hire's cell is Unknown. | High / Unknown | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-529 | ROM2 party placement starts at a random word of the receiver's +0xc0 drop list (x low, y high), or rand(70)+30 per axis when x*y is 0; radius trunc(max(5, sqrt(n)+4)), Medium, EN constants. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-ENGINE-530 | ROM2 party placement walks owner +0x24 in list order, tries the hero at radius 0 first and every other actor at the party radius, and logs a failure; its skip rule is Medium, and no read ties a campaign hire to it. | High / Medium / Unknown | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-ENGINE-531 | ROM2 positioning(x, y, r) tests trunc(r*r/2)+2 random cells (rand ranges EN only), then the r-wide square x-major; a fit places the actor on the ground grid, a failure returns 0. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-ENGINE-532 | A ROM2 join routine runs party placement only when its flag is set and owner byte +0x41 is 0, then sets +0x41 to 1; victory sets +0x41 to 0 for kept owners; whether a campaign hire reaches it is Unknown. | High / Medium / Unknown | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-ENGINE-533 | The two ROM2 senders of 0x468 (map travel end, victory arm) are High; that two push sites per root post it, and that the creator's direct call is its one route, are Medium. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 
 ### R2-ENGINE-523
 
@@ -11243,6 +11260,11 @@ roots plus the RU `.st1073` section would settle the single route. The
 senders of 0x468 are settled by a scan of the calls that post the literal
 0x468.
 
+**Amended.** R2-ENGINE-533 lists the senders of 0x468 (map travel end and
+the victory arm) and adds `E9`, `.data` and RU `.st1073` passes that find no
+other reference to the creator; the single route stays Medium because
+register calls are not excluded.
+
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
 
 ### R2-ENGINE-524
@@ -11281,6 +11303,10 @@ stage-range reach of R2-SESSION-112 or a named-stage save settles it);
 whether a hire ID above 7 is ever selected (the writers of selection and
 availability 8..20, the unread part of R2-ENGINE-380); the native join
 (a read of `L2.02664`, `L2.02667` and the collection filler).
+
+**Amended.** R2-SESSION-199 narrows the Unknown on hire IDs above 7: no
+immediate DLL store makes hires 8..20 available, and after NewGame they stay
+unavailable at Medium.
 
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
 
@@ -11404,4 +11430,226 @@ callees `L2.02685` and `L2.02686`, mission entry `R2.0026` and the map
 build's per-actor calls (`L2.00201`, `L2.02687`, `L2.02688`) would settle
 it.
 
+**Amended.** R2-ENGINE-529 to R2-ENGINE-532 read the placement bodies: the
+join's party placement puts each actor of the owner's list near the party's
+start point through the positioning search. That a campaign hire reaches
+those bodies is Unknown (R2-ENGINE-530, R2-ENGINE-532).
+
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-ENGINE-529
+
+The party placement routine (EN `L2.01851`, RU `L2.02696`) takes an owner.
+It first makes sure the owner's group collection at +0x28 has a first group:
+with none it logs `Oops - player has no groups`, builds a 0x50-byte group and
+adds it; while the first group is empty and the collection holds more than
+one, it removes that group. Then it fixes one start point (x, y) for the whole
+party:
+
+- when the receiver's +0x74 is nonzero and owner WORD +0xa6c is nonzero, x is
+  its low byte and y its high byte;
+- otherwise, when the word list at the receiver's +0xc0 is not empty, it draws
+  i = rand(count-1) (`L2.00939`) and takes x and y from the low and high byte
+  of word i;
+- when x*y is 0 after that, x = rand(70)+30 and y = rand(70)+30, drawn x
+  first, and it logs `Warning - no drop location in .alm - random used`.
+
+The receiver is the object whose method this is: assumed the Session object;
+its identity with `[L2.00805]` is not read (R2-ENGINE-532). In the EN `rand`
+body, rand(n) is 0 for n = 0 and otherwise (rand()*(n+1))>>15, so 0..n; the
+RU `rand` (`R2.0021`) is not read. The radius is r = trunc(max(5.0,
+sqrt(n)+4.0)) for n = the count of the owner's +0x24 actor list, with the
+constants 4.0 and 5.0 read in EN (`L2.02697`, `L2.02698`): 5 for 1..3
+actors, 6 for 4..8, 7 for 9..15, if the two unread helpers are the square
+root and the truncation. The join (R2-ENGINE-532) clears owner +0xa6c
+before it calls this routine.
+
+Three call sites per root reach the routine: the join (EN `L2.02699`, RU
+`L2.02700`), the victory transition's first owner loop (EN `L2.02701`, RU
+`L2.02702`) and a respawn routine (EN `L2.02703`, RU `L2.02704`). In the EN
+bodies read, the last two run only when the +0x74 they test is nonzero.
+
+**Confidence.** High for the control flow, the draw order and the two log
+strings (EN `L2.02705`, RU `L2.02706`), read in both roots and equal after
+masking addresses and frame slots except the block of R2-ENGINE-530. Medium
+for the radius formula: the square root `L2.02707` and the conversion
+`L2.02708` were not read in either root and are taken from their use, and
+its constants were read in EN only. The `rand` body, and so each draw's
+range, is read in EN only. Medium for the caller set: it rests on call-target passes, navigation receipts that see `E8`
+calls only, and the +0x74 gates of the two other callers were read in EN
+only, in navigation.
+
+**Unknown.** The writer of the +0xc0 drop list and which map record fills it;
+the log string names `.alm`. The EN victory transition clears the list
+through `L2.02709`, whose callee `L2.02710` was not read. A census of calls
+on +0xc0 by every encoding settles it. The RU radius constants (the `fadd`
+and `fcomp` operands in `L2.02696` and the 8-byte table they name) and the
+RU `rand` `R2.0021` are unread; a window on each settles the RU radius and
+draw ranges. The identity of the receiver with the Session object is
+unread; the source of `ecx` in the join arm's dispatching routine settles
+it.
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+### R2-ENGINE-530
+
+After fixing the start point and radius (R2-ENGINE-529), the party placement
+routine walks the owner's +0x24 actor list from its head. For each actor:
+
+1. EN calls one wrapper (`L2.02711` on the ground grid `L2.01839`, callee
+   `L2.02712`) and skips the actor when the returned pointer is that actor.
+   RU calls two routines (`L2.01704`, `L2.01705`, on `L2.02538`) after a
+   position getter (`L2.01521`). The behaviour of `L2.02712`, `L2.01704` and
+   `L2.01705` is not read.
+2. It sets the actor's position to (x, y) on the ground grid (`L2.02713`).
+3. For the hero, owner +0x38, it calls positioning (R2-ENGINE-531) with
+   radius 0; when that fails, and for every other actor, it calls positioning
+   with the party radius.
+4. On failure it logs `Error - can't place hero from previous mission o...`
+   and continues.
+5. In every case it appends the actor to the global list `L2.00325`, replaces
+   the actor's +0x1c0 object with a new 0xb4-byte object and its +0x1c4
+   object with a new 0xb8-byte object (keeping byte +0x78 of the old +0x1c4),
+   and passes actor +0x70 to the map `L2.01066` through `L2.02714`.
+
+The hire creator appends each hire to owner +0x24 (R2-ENGINE-525) and writes
+no cell (R2-ENGINE-527). If the join runs this routine after the creator,
+each hire is placed after the actors already in the list, around the same
+start point as the hero; no read shows that order in a campaign.
+
+**Confidence.** High for the loop, the order and the calls other than the
+skip, read in both roots. Medium for the skip rule: what its returned
+pointer means is not read. Unknown whether a campaign hire is placed here:
+no read ties a hire to these bodies. The links are the packet that drives
+the join arm, its sender, its dword +0xa in a campaign and the order of the
+join and the creator (R2-ENGINE-532), and that no other routine places a
+hire. A positioning call-target pass (navigation, `E8` only) found 12
+callers per root; two EN callers (`L2.02715`, `L2.02716`) are not
+classified and no RU caller is, so another placement of a hire is not
+excluded. The creator's writing no cell (R2-ENGINE-527) excludes only one
+alternative.
+
+**Unknown.** What `L2.02712`, `L2.01704` and `L2.01705` return and test;
+whether an actor whose placement failed is drawn or acts; the route of a
+campaign hire to this routine. The arm's packet type and sender, the
+dword +0xa and the join-creator order (reads of the dispatching routine and
+of the creator's call chain), and the two EN callers, settle the route.
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+### R2-ENGINE-531
+
+Positioning (EN `L2.00312`, RU `L2.00313`) takes x, y and r as bytes.
+With half = trunc(r/2) it sets the actor's position to (x, y), then for
+k = 0..trunc(r*r/2)+1:
+
+1. draws y' = y - half + rand(r), then x' = x - half + rand(r) (the range of
+   each draw is the EN `rand` body's; RU `rand` `R2.0021` is not read);
+2. sets the position through the clamp `L2.02717`, which keeps x in [8, W-9]
+   and y in [8, H-9];
+3. skips the test when the clamped y is below 12 and Session +0x74
+   (read through `[L2.00805]`) is nonzero; otherwise a passing cell test ends the search.
+
+When no random cell passed and r > 0, it scans x' from x-half to x+half
+(outer) and y' from y-half to y+half (inner), skipping y' below 12 when
+Session +0x74 is nonzero, clamping and testing each. A pass calls the ground
+grid's place routine `L2.00314` and returns its result; a failure returns 0
+and leaves the actor at the last candidate set, not placed on the grid. With
+r = 0 the search tries (x, y) twice and does no scan.
+
+The cell test `L2.02718` reads the actor's footprint size from its virtual
+slot +0x1c and runs `L2.02719` for layer 0 and layer 1: each footprint cell
+(x+i, y+j) of the layer is checked by `L2.02720`, and any nonzero result
+fails the test.
+
+**Confidence.** High for the positioning body's control flow and the order
+of the two draws, read in both roots and equal through its `ret` after
+masking. The range of each draw is read in EN only: the `rand` body is
+unread in RU. High for the EN cell test, its layer loop,
+the clamp and the position set; those helpers were read in EN only. Medium
+for the meaning of a failed cell: `L2.02720` and the two layer accessors
+(`L2.02721`, `L2.02722`) were not read.
+
+**Unknown.** Whether a failed check means another actor, impassable terrain
+or both. The RU draw ranges: a window on RU `R2.0021` settles them. Whether
+party placement's receiver is the object at `[L2.00805]` (R2-ENGINE-532).
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+### R2-ENGINE-532
+
+The join routine (EN `L2.02723`, RU `L2.00132`) takes an owner and a flag.
+Its receiver (assumed the Session object; its identity with `[L2.00805]` is
+not read) supplies the +0x74 test and the +0xc0 list that party placement
+reads through `ecx`. It clears owner WORD +0xa6c, and when owner +0x38 (the hero) is null it logs
+and returns. After its Session +0x74 branch it calls party placement
+(R2-ENGINE-529) when the flag is nonzero and owner byte +0x41 is 0, and then
+sets +0x41 = 1 and +0x43 = 1. Its one call site per root (EN `L2.02724`, RU
+`L2.02725`) lies in an arm that looks the owner up from WORD +5 in
+`L2.00292` and passes flag = (dword +0xa == 0). The arm window begins
+inside an instruction and holds no dispatch compare, packet type or class
+identity; the arm is not shown to be a server arm.
+
+Writers of byte +0x41 found by a byte-store pattern pass over the EN `.text`:
+the victory transition's owner loop (EN `L2.02726`, RU `L2.02727`) stores 0
+for every owner it keeps; the owner constructor (`L2.02728`) stores 0; the
+join stores 1; two constructors of the class with vtable `L2.02693`
+(`L2.02729`, `L2.02730`) store 1. So after a victory every kept owner's next
+join with the flag set places its party again.
+
+**Confidence.** High for the join body, the call site read in the arm window
+and the transition store, in both roots (the join differs only in one
+allocation size, 0x40f EN and 0x410 RU). Medium that the arm holds the
+join's only caller: the call-target receipt (navigation 6) is an `E8`-only
+pass; jumps, dword references and register calls were not searched. Medium
+for the writer list: the pattern pass is an EN navigation receipt, and the
+vtable `L2.02693` class is not identified. Unknown that a campaign mission
+start reaches the join with the flag set after the hire creator: the packet
+that drives the arm, its sender and its dword +0xa were not read. The
++0x74-dependent clauses hold if the receiver is the Session object.
+
+**Unknown.** The packet type of the join arm, its class and when it is sent;
+the dword +0xa in a campaign; the order of the join and the creator; the
+`ecx` source of the call in the dispatching routine. The population
+searched is the two arm windows (46 and 47 lines) and the `E8` call-target
+receipt; a window on the dispatching routine's compare and the sender of
+the packet settles the first three.
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+### R2-ENGINE-533
+
+A pattern pass for the bytes `68 04 00 00` over each `allods2.exe` `.text`
+finds 3 EN and 41 RU hits. The three `push 0x468` sites per root are:
+
+- map travel end (EN `L2.02731`, RU `L2.02732`), which posts 0x468 with two
+  zero arguments and then calls EnterLocation (R2-ENGINE-432);
+- the victory arm (EN `L2.02228`, RU `L2.02230`), which posts 0x468 after
+  EnterLocation on the first available record when IsTownAvailable(0)
+  returns 0 (R2-ENGINE-422);
+- EN `L2.02733`, an allocation size passed to operator new, not a message;
+  RU `L2.02734` has equal context bytes.
+
+The other 38 RU hits are `add reg, 0x468` field offsets. Passes for the hire
+creator's entry (EN `L2.00175`, RU `L2.00177`) as an `E9` target over `.text`
+and as a dword over `.text` and `.data` in both roots, and as both over the
+RU `.st1073` section, find no hit. With R2-ENGINE-523's single `E8` caller
+and empty `.rdata` pass, the 0x468 case is the creator's only route among the
+forms searched.
+
+**Confidence.** High for the two sender bodies, read in both roots (map
+travel end equal after masking; victory arm equal with frame slots masked).
+Medium for the enumeration of three immediate sites per root: the 3 EN and
+41 RU hits are navigation receipts, the third EN site is classified from a
+navigation window, and the 38 RU `add reg, 0x468` hits are classified from
+the bytes before the immediate. Medium that no other code posts 0x468: a
+computed or table-held message number is outside the pattern. Medium for the single route: the creator
+passes are navigation receipts, and register calls are not excluded. RU
+`L2.02734` was not read.
+
+**Unknown.** Register calls that could reach the creator, over `.text` of
+both roots; a census of indirect calls whose target register is loaded from
+a creator-address source settles them. RU `L2.02734` is unread; a window on
+it settles its class.
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)

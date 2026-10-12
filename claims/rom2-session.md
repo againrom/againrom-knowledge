@@ -2275,8 +2275,10 @@ page only.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-195 | A ROM2 client unit update with +0x1dc 1..20 and signed health word below -10 sets bank 531+that value to 0; ordinary departure then makes a nonzero availability 2 if selected, 1 if not, and clears selections. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-SESSION-195 | A ROM2 client unit update with +0x1dc 1..20 and signed health word below -10 sets bank 531+that value to 0; ordinary departure then makes a nonzero availability 2 if selected, 1 if not, and clears selections. | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-SESSION-196 | In RU a ROM2 hire's Group is written and rebuilt by the Player group list with the creator's append method, its Unit body carrying class, owner and hire ID; LOAD does not run the hire creator. | Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-SESSION-198 | A ROM2 store census finds one Session-global store to +0x74 per root, the map build's; the rest stay unattributed, so +0x74 is 0 in a campaign (Medium) and the dead-hire update keeps bit 0x80. | Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-SESSION-199 | Scenario.dll stores availability and town literals only for ROM2 hires 1..7, equal in EN and RU; with the indexed and client writers, hires 8..20 never become available after NewGame (Medium). | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 
 ### R2-SESSION-195
 
@@ -2333,6 +2335,10 @@ order settles the first Medium. Whether a later writer restores a dead
 hire's availability is a search of the writers of R2-SESSION-048 and
 R2-ENGINE-380 against that hire.
 
+**Amended.** R2-SESSION-198 finds the map build's store as the only
+Session-global store to +0x74 in a store census and reads +0x74 as 0 in a
+campaign (Medium), so the bit-0x80 gate does not block the update there.
+
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
 
 ### R2-SESSION-196
@@ -2355,3 +2361,83 @@ body and the collection identity at owner +0x28 settle the first; a saved
 mission state with a hire, read back after LOAD, settles the second.
 
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-SESSION-198
+
+A store-displacement pass over each `allods2.exe` `.text` (one linear
+decode with skipdata) lists every memory write whose bytes overlap
++0x74..+0x77 through a base register other than `ebp` and `esp`, plus those
+through `ebp` and `esp` as frame stores. Each hit is classed by the last
+writer of its base register within eight earlier instructions. EN and RU
+counts: base loaded from the Session global 1 and 1; base loaded from a frame
+slot 117 and 119; another writer 9 and 9; no writer found 11 and 10; frame
+base 5 and 1.
+
+The Session-global hit is the map build's store (EN `L2.02694`, RU
+`L2.02695`; R2-ENGINE-509). The init store of R2-ENGINE-334 writes through
+`this` loaded from a frame slot and is among the unattributed hits, as are
+the three server-span stores of R2-ENGINE-296 and R2-ENGINE-334 (EN
+`L2.01014`, `L2.01015`, `L2.01016`; RU `L2.01029`, `L2.01030`, `L2.01031`),
+which the receipts reproduce. With the
+map build's value 0 on all 46 campaign maps (R2-ENGINE-509) and campaign
+start passing mode 2 to init (R2-ENGINE-334), Session +0x74 is 0 throughout
+a campaign unless an unattributed hit writes it.
+
+Then, in a campaign, the unit-state sender keeps field bit 0x80 on the hire
+creator's call (R2-ENGINE-525, R2-ENGINE-527), so the client's dead-hire bank
+update (R2-SESSION-195) is reachable where the update arrives, and
+positioning, which reads +0x74 through `[L2.00805]`, does not skip rows
+below 12 (R2-ENGINE-531). Party placement reads +0x74 and +0xc0 through the
+receiver of the join (assumed the Session object; its identity with
+`[L2.00805]` is not read). If it is that object, party placement starts from
+the drop list, not owner +0xa6c (R2-ENGINE-529), and the transition and
+respawn calls of party placement do not run.
+
+**Confidence.** Medium. The census is a navigation receipt; 141 EN and 138
+RU hits have no owner from this experiment, and a write through a pointer
+computed outside eight instructions is classed by the nearest writer only.
+
+**Unknown.** The owners of the unattributed hits. Reading each frame-load
+hit's function entry and its `this` source settles them. The identity of the
+join's receiver with the Session object: the `ecx` source in the routine
+that dispatches the join arm settles it.
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+### R2-SESSION-199
+
+A dword pass over each `Scenario.dll` `.text` for the bank addresses of
+slots 512..571 (`D2.00003` + 4N: selection 512..531, availability
+532..551, town 552..571) finds 26 hits per root at equal addresses:
+
+- 14 immediate stores: availability and town of hires 1..7 (slots 532..538
+  and 552..558), at the departure and TalkTo writers of R2-SESSION-048 and
+  R2-ENGINE-380;
+- 2 compares, on availability of hires 2 and 5;
+- 10 indexed operands based at 512 (4), 532 (5) and 552 (1).
+
+No immediate store reaches slots 539..551 or 559..571. Four indexed
+operands lie in the loops over 512..551 that R2-SESSION-127 lists as the
+DLL's indexed stores in this range: three in the departure loops (`D2.00277`,
+`D2.00278`, `D2.00279`), which rewrite a nonzero availability as 1 or 2 and
+leave 0 as 0 (R2-SESSION-195), and one in the NewGame loop (`D2.00280`),
+which runs after NewGame clears the bank. The other six are not in that
+list. The SetVar export stores at a client index; the client's indices are
+the ones R2-SESSION-127 enumerates, and they reach 531+key only with value 0
+(R2-SESSION-195). So, if the NewGame loop stores no nonzero availability,
+no hire 8..20 becomes available after NewGame, and the hire loop
+(R2-ENGINE-523) passes only IDs 1..7. Each of those takes its own family's template row at stages 30..110
+and a neighbouring family's row at stage 10 or 120 (R2-ENGINE-524,
+R2-ASSET-125); a victory at stage 120 or more ends in credits
+(R2-ENGINE-422).
+
+**Confidence.** High for the census and its classification, generated and
+reproduced from Git blobs in both roots. Medium for "hires 8..20 never become
+available": the NewGame loop's stored value and the other loop bodies were
+not read in this experiment, LOAD
+restores the bank as saved, and the TalkTo selection toggle at base 511 lies
+outside the scanned range (R2-SESSION-127).
+
+**Unknown.** Whether a hire enters at stage 10.
+
+**Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
