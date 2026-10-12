@@ -6796,7 +6796,7 @@ Selected activation EN L2.01117 / RU L2.01212 passes panel ID 0x467 and bounds (
 | R2-ENGINE-391 | The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-392 | The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-393 | The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
-| R2-ENGINE-394 | Each accepted RU Blizzard cell sends presentation opcode 0x86 with effect identifier 23 and argument 16; its archive art, frame timing and sound remain Unknown. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-394 | Each accepted RU Blizzard cell sends opcode 0x86 with effect identifier 23 and argument 16; the client draws it as the 9-frame `Meteor\sprites` type for 16 updates with Sfx 523 at the ninth update; the update period is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-395 | Independent ROM2 EN/RU client data.bin parses give identical Blizzard row-7 stored parameters, including Distribution 5, Radius 4 and damage bounds 10..30. | High | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 
 ### R2-ENGINE-390
@@ -6939,7 +6939,7 @@ cast covering caster, ally, enemy and structure would settle these.
 
 ### R2-ENGINE-394
 
-Each accepted RU Blizzard cell sends presentation opcode 0x86 with effect identifier 23 and argument 16; its archive art, frame timing and sound remain Unknown.
+Each accepted RU Blizzard cell sends opcode 0x86 with effect identifier 23 and argument 16; the client draws it as the 9-frame `Meteor\sprites` type for 16 updates with Sfx 523 at the ninth update; the update period is Unknown.
 
 **Fact.** The row-7 stage stores effect identifier 2*row+9=23 in the embedded
 object. Valid-cell success calls RU L2.01709 with the object and argument
@@ -6959,6 +6959,20 @@ read. No art payload or audio was played. Archive key, frames, frame cadence,
 visual duration, sound key and EN presentation parity remain Unknown. A bounded
 consumer trace and key lookup, or an owner recording of an original cast,
 would settle them.
+
+**Amended.** R2-ENGINE-445, R2-ENGINE-446 and R2-ENGINE-447 resolve the
+art, timing and sound clause for both roots. Identifier 23 is the
+`projectiles.reg` type `Meteor\sprites` (9 frames, 64x64). Argument 16 is
+the client effect's lifetime in updates. The piece falls for 8 updates as
+frame 8, then shows frames 0..7, and plays Sfx 523 `magic\blizzard` at its
+ninth update. The update period in seconds remains Unknown.
+
+**Amended confidence.** Medium for the producer packet and for the binding
+of opcode 0x86 to the client arm (R2-ENGINE-445); High for the type,
+lifetime and frame arithmetic of identifier 23 in the client
+(R2-ENGINE-447) and the Sfx 523 arithmetic (R2-ENGINE-446); Unknown for the
+update period. A cast of row 7 shows these only as far as the Medium
+producer link holds.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -8626,6 +8640,287 @@ rows (R2-ASSET-098).
 **Unknown.** What RU `L2.02070` does. The RU web popup's content.
 
 **Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+## Spell presentation
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-444 | ROM2 item text and spell lists name row r by spell.txt line r-1; the spellbook hover shows spells.txt line s for slot s with main.txt labels, and the 24-entry table EN L2.02137 gives a row number per slot (Medium join). | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-445 | ROM2 spells use identifier 2*row+8 at cast and 30 for Prismatic chains; an area cell uses 2*row+9, read for row 7 only (formula, Medium, elsewhere); the client draws the projectiles.reg type of that ID, or nothing without one. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-446 | ROM2 spell sounds are sfx.reg Sfx(500+ID): the caster plays 500+2*row+8, a typed cell effect 500+ID at creation except Blizzard 523 at the ninth update; an absent slot is silent at the sites read (Medium that no other site plays). | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-447 | A ROM2 typed spell effect lives for its packet argument in updates; its frame and draw follow per-ID switch tables: (update/2) mod Phases by default, falling Blizzard pieces, swinging lightning and unit-attached marks. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-448 | In the effect method EN L2.02138, ROM2 spell effects write the per-cell light byte map for IDs 10, 12, 13, 18, 28, 30 and 40 (radius argument up to 3); other writers are not excluded (Medium) and the footprint is Unknown. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-449 | ROM2 EN and RU spell presentation data are byte-equal and the read routines and switch tables agree; text bytes and one per-slot spellbook flag table, at Summon and Wall of Earth, differ. | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+
+### R2-ENGINE-444
+
+Item description EN `L2.02139` (RU `L2.02140`), the tag 41 and 42 arms of
+R2-ENGINE-267, formats `spell.txt` line value-1 between `main.txt` lines
+0x5a/0x5b (cast spell) or 0x5c/0x5d (taught spell) with `" %s %s%s"` or
+`"#%s %s%s"`. The spell list EN `L2.02141` (RU near `L2.02142`, approximate) walks
+bits 0..31 of a mask at object +0x1c and appends `spell.txt` line b-1 for
+each set bit b, separated by `", "` with `",#"` as a periodic line break;
+`main.txt` line 192 is `Spells: ` (R2-ASSET-103). Spell row r and mask bit
+r therefore show line r-1.
+
+The spellbook (EN class at `L2.02143`, RU `L2.02144`) has 24 slots drawn as
+a 12 by 2 grid at a 38-pixel pitch from slot mod 12 and slot div 12; a slot
+whose bit is clear in the hero masks +0x148 or +0x150 gets a cover sprite.
+The hover EN `L2.02145` (RU `L2.02146`, approximate) takes slot s from the cursor
+(`L2.02147`), requires bit s of +0x148 and a per-slot mana cost +0x2d4
+below 0xffff, and formats `"%s#%s: %d"` from `spells.txt` line s,
+`main.txt` 117 and that cost. Further `"#%s: ..."` lines use `main.txt`
+118 (damage from +0x154/+0x1b4), 123, 124, 182..187 and 217 with further
+per-slot arrays.
+
+The 24 dwords at EN `L2.02137` (RU `L2.02148`) are, for slots 0..23: 1, 2,
+3, 4, 24, 20, 21, 26, 13, 12, 11, 10, 5, 6, 7, 8, 25, 22, 23, 27, 19, 18,
+17, 16. The values are read from the binary. That each value is the
+data.bin row whose name matches the slot's `spells.txt` line is Medium: it
+rests on the `spells.txt` name order, which is not committed, and on the
+fit that the 24 values are distinct and equal rows 1..29 without 9, 14, 15,
+28 and 29. Rows 9 (Acid Stream), 14 (Darkness), 15 (Light), 28
+(Curse) and 29 (Slow) have no slot and no hover line. The 'A' key handler
+EN `L2.02149` reads this table when the per-slot flag table EN `L2.02150`
+admits the slot. A slot click calls EN `L2.02151` with slot+1 when the flag
+table EN `L2.02152` admits it.
+
+**Confidence.** High for the item and list text selections, the grid, the
+hover text lines and the table values, in both roots. Medium that the table
+entries are spell rows (the slot-to-row binding), which rests on the
+uncommitted `spells.txt` name order (R2-ASSET-103) and on the unread
+consumer EN `L2.02136` of the 'A' key handler. Medium that the hover's
+per-slot arrays are filled through this table: their filler was not read.
+
+**Unknown.** The writer of the hover's per-slot arrays, the text of
+`main.txt` line 217 in the hover, the order of the `spells.txt` names as a
+committed list and the consumer EN `L2.02136` of the 'A' key handler.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ENGINE-445
+
+Server senders EN `L2.02153`/`L2.02154` (RU `L2.02155`/`L2.02156`) write
+opcode 0x86 with the caster key at +0xa, or 0x8b with the caster cell at
++0xa/+0xb when the caster word +0xe is zero; +0xc = 2*row+8
+(`lea ecx,[eax+eax+8]`), +0xd the target key or cell, +0xf the argument.
+The cell sender RU `L2.01709` writes 0x86 with the cell at +0xd/+0xe and
++0xc from the stage object +0xe, which is 2*row+9 for row 7
+(R2-ENGINE-394). The Prismatic sender RU `L2.02157` writes 0x8a (0x8c for a
+non-unit caster) with a target list.
+
+Client handler EN `L2.02158` (RU `L2.02159`): an odd identifier below the
+type count with a type in the map EN `L2.02134` creates a 0x158-byte effect
+object at the cell centre (cell*256+128), with lifetime +0xa8 = argument.
+Any other identifier reaches the caster arm: an idle caster whose unit type
+has +0x1c set enters state 8 for unit-type +0x68 updates and stores the
+identifier at +0xac; its target is its own position without a type, the
+target key with Homing, else the cell centre. The chain arm stores 30 at
++0xac; the non-unit chain arm creates effect 30 with lifetime 13.
+
+| Row | Cast ID, type | Cell ID, type (formula; traced for row 7 only) |
+|---|---|---|
+| 1 Fire Arrow | 10 firebolt | - |
+| 2 Fire Ball | 12 fireball | 13 fireexpl |
+| 3 Wall of Fire | - | 15 firewall |
+| 4, 8, 13, 19 protections | 16, 24, 34, 46 p_fire, p_water, p_air, p_earth | - |
+| 5 Ice Missile | 18 icemissile | - |
+| 6 Poison Cloud | 20 poison_d | 21 poison |
+| 7 Blizzard | - | 23 Meteor |
+| 9 Acid Stream | - | 27 acid |
+| 10 Lightning | 28 lightnin | - |
+| 11 Prismatic Spray | 30 chain | - |
+| 16 Diamond Dust | 40 meteorit | - |
+| 17 Wall of Earth | - | 43 wall |
+| 20, 27, 28 Bless, Shield, Curse | 48, 62, 64 bless, shield, Curse | - |
+| 23 Teleport | 54 teleport | - |
+| 24 Heal | 56 healing | - |
+| 26 Drain Life | 60 Drain | - |
+
+Rows 12, 14, 15, 18, 21, 22, 25 and 29 have no type at either identifier.
+Diamond Dust draws `meteorit`, not the archive's `diamonddust`
+(R2-ASSET-101).
+
+**Confidence.** High for the cast identifier arithmetic in both roots'
+senders, the client type lookup in the cell arm and the non-unit arms, and
+the identifier-to-type join. Medium for the cell identifier 2*row+9 of
+every row but 7 (only row 7's stage object was read; the other cell
+identifiers are the formula), for the bindings of identifier 13 to Fire
+Ball, 15 to Wall of Fire, 21 to Poison Cloud, 27 to Acid Stream and 43 to
+Wall of Earth, which rest on that formula, for which rows' area stages send
+cell effects, for the binding of opcodes to client arms, which rests on
+matching packet layouts, and for the type drawn for a unit caster's even
+cast identifier, because the flying object is created after state 8 by
+unread code.
+
+**Unknown.** Where the client creates the flying object at the end of a
+caster's state 8, and which type it draws.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ENGINE-446
+
+Sounds are looked up in the `sfx.reg` table (EN `L2.02160`, getter
+`L2.02161`); a missing slot yields no sound. Every play passes the source
+position and the volume (10000 - d)/100, with d from EN `L2.02162`.
+
+- Caster: the unit method EN `L2.02163` (RU `L2.02164`) plays
+  Sfx(500 + unit +0xac), the identifier stored by the caster arm of
+  R2-ENGINE-445; its caller was not read.
+- Effect creation: the typed-cell arm and the non-unit arms play
+  Sfx(500 + ID) at creation, except ID 23. The non-unit chain plays 530.
+- Effect update: for ID 23 the update EN `L2.02165` plays Sfx 523 when the
+  update counter, -1 at creation and incremented first, reaches 8.
+
+Per row (R2-ASSET-102 keys): cast 510 arrow (1), 512 fireball (2), 516
+pfire (4), 518 icemissile (5), 520 poison (6), 524 pwater (8), 526 acid
+(9), 528 lightning (10), 530 spray (11), 532 invisib (12), 534 plight (13),
+536 darkness (14), 538 light (15), 540 dust (16), 542 wall (17), 544 stone
+(18), 546 pearth (19), 548 bless (20), 550 haste (21), 552 spirit (22), 554
+teleport (23), 556 heal (24), 558 summon (25), 560 drain (26), 562 pfield
+(27), 564 curse (28), 566 slow (29). Rows 3 and 7 have no cast slot in `sfx.reg`. Cell:
+513 explosion (row 2) at creation and 523 blizzard (row 7) per piece; the
+cells of rows 3, 6, 9 and 17 have typed pictures and no Sfx(500+ID) slot
+in `sfx.reg`. The cell sound of row 2 follows the cell formula of
+R2-ENGINE-445.
+
+**Confidence.** High for the slot arithmetic, the ID 23 exception and the
+counter value at the three play sites read. Medium for when the caster
+method runs, and Medium for every absence ("no cast slot", "no sound slot",
+"absent slots are silent"): no census of the callers of the getter EN
+`L2.02161` or of the player EN `L2.02166` was made, so another source of a
+spell sound is not excluded. No looping flight sound occurs in the read
+effect update.
+
+**Unknown.** The caller and moment of the caster sound; which path, if any,
+plays Sfx90 `firewall`, which no read site places; the census of the
+callers of `L2.02161` and `L2.02166`.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ENGINE-447
+
+The effect update EN `L2.02165` (RU `L2.02167`) increments counter +0x9c,
+switches on ID-13 (byte table EN `L2.02168`, jump table `L2.02169`), then
+decrements lifetime +0xa8; at lifetime 0 the effect ends. Frame +0x74:
+
+| IDs | Update arm |
+|---|---|
+| default | moves toward the target, frame (counter/2) mod Phases |
+| 13 | default frame; at counter 4 adds the 3x3 cells around it to a world list, at counter 8 sets tile bit 0x2000 on them |
+| 23 | frame = counter |
+| 28, 30 | for counter 1..13 frame 4, 3, 2, 1, 0, 1, 2, 1, 0, 1, 2, 3, 4 |
+| 54 | frame = counter-1 |
+| 16, 20, 24, 34, 44, 46, 48, 50, 62, 64, 66 | follows the target unit; frame = counter; adds mark (ID<<16) or 0xffff to unit +0x130 |
+| 56, 60 | follows the target unit; sets or adds mark (ID<<16) or 0x20 |
+
+The draw EN `L2.02170` centres the sprite by Width/2 and Height/2 and
+switches on ID-7 (byte table `L2.02171`, jump table `L2.02172`). Default:
+direction = (facing-8) and 15; Flip mirrors directions above 8 as 16-d;
+frame index = Phases*direction + frame, or frame when RotationPhases is 1.
+A type with Palette draws through the sprite's own palette path plus a
+second draw from `L2.02173`; without Palette it uses palette object EN
+`L2.02174`. The lazy loader EN `L2.02175` prepares a palette type's sprite
+palette through EN `L2.00644` with (16, 4, 0) for `.16a` and (16, 2, 1)
+for both `.256` sprites; the two projectile palettes get (16, 2, 0) through
+EN `L2.00645`. IDs 10 and 12 keep their last six positions and draw trail
+sprite 0 or 1 of the array EN `L2.02176` at each, with frame = position
+index; the array is filled by a two-pass loop formatting the unread key
+string EN `L2.02177`. ID 23 draws frame 8 lifted 28-4*frame pixels while
+frame < 8, then frame-8. IDs 28 and 30 draw type 28 or 30 sprites at each
+point of list +0x11c, chains adding 5 times the point's byte 6 to the
+frame. ID 54 draws its frame directly. ID 56 draws nothing itself. Units
+draw overlays from projectile types listed at unit +0x11c (EN `L2.02178`).
+
+For row 7 the cell effect lives 16 updates (argument 16): a falling piece
+for 8 updates, then shatter frames 0..7 (R2-ENGINE-394).
+
+**Confidence.** High for the switch tables, counter arithmetic, frame
+sequences, direction and Flip rule in both roots. Medium for the tile-mark
+and unit-mark meanings and for the trail sprite keys (`smoke0` and `smoke1`
+match the two passes and six frames, R2-ASSET-101). Unknown for the update
+period in seconds and the link from unit marks +0x130 to overlays +0x11c.
+
+**Unknown.** The update rate; the trail key string; the overlay list filler;
+what the palette preparation arguments select, including any translucency.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ENGINE-448
+
+The effect method EN `L2.02138` (RU `L2.02179`) switches on ID-10 (byte
+table EN `L2.02180`, jump table `L2.02181`). Writer EN `L2.02182` (RU
+`L2.02183`) stores a byte value into the world byte map at world +0xa8
+(row width map width + 7) and counts the writes at +0x108. R is an
+argument of the call. A cell is admitted when a word of the table EN
+`L2.02184` (stride 0x52, row dy+0x14) is below R*(R+1), or below 1 for
+R 0; that table is unread, and the committed listing ends at `L2.02185`
+while the function runs to `L2.02186`, so the footprint shape is not
+known. Only the writer tests flag EN `L2.02187` (at `L2.02188`); the
+lightning and chain arm `L2.02189..L2.02190` stores its bytes inline
+without that test. When flag EN `L2.02191` is clear the writer also
+invalidates the area.
+
+| ID | Radius R | Value |
+|---|---|---|
+| 10, 18, 40 | 0 | 16 |
+| 12 | 1 | 16 |
+| 13, frame 0 | 1 | 16 |
+| 13, frame 1 | 2 | 8 |
+| 13, frames 2, 3 and above 10 | 3 | 0 |
+| 13, frames 4..10 (table `L2.02192`) | 3 | 8, 16, 24, 32, 40, 46, 46 |
+| 28, 30 | 2 by 2 cells at each list point | frame*10 |
+
+Every other identifier only invalidates a 5 by 5 cell area when
+`L2.02191` is clear. Rows: 1 (10),
+2 (12, 13), 5 (18), 10 (28), 11 (30), 16 (40). Light (row 15) and Darkness
+(row 14) have no effect type; their effect is the sight change of
+R2-ENGINE-024.
+
+**Confidence.** High for the arms, the radius arguments and the values in
+both roots, within the method EN `L2.02138` and its three calls of
+`L2.02182` (`L2.02193`, `L2.02194`, `L2.02195`). Medium that no other
+site writes the map: no census of the callers of `L2.02182` or of the
+stores to world +0xa8 was made, and the navigation scans that located the
+code exceeded their budget. Medium that the map is the ground light map and that a lower value is brighter:
+the Fire Ball blast grows from 16 to 0 and fades to 46, and lightning
+reaches 0 at its middle frame, and structure registries carry
+`LightRadius` and `LightPulse` keys. Unknown for the map's reader, the
+flag's setting and durations in seconds.
+
+**Unknown.** The light-map reader and blend, the option behind `L2.02187`,
+and whether unit marks light units. The cell footprint of the writer: the
+contents of the table `L2.02184` and the tail of `L2.02182` after
+`L2.02185`. The other callers of `L2.02182` and the other stores to the
++0xa8 map; a caller and displacement census would settle both. The
+binding of identifier 13 to Fire Ball is the cell formula of
+R2-ENGINE-445.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ENGINE-449
+
+Byte-equal in EN and RU: `projectiles.reg`, `sfx.reg`, the 29 projectile
+`.16a` payloads, the 33 magic WAV payloads, the client `data.bin` payload
+(SHA256 `aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`),
+the slot-to-row table and four of the five per-slot flag tables. The eight
+effect switch tables have equal index bytes in both roots; RU jump targets
+are the EN targets plus 0x5473. The read senders, client arms, item
+description, spell list, hover and effect methods match in structure,
+constants and offsets.
+
+Different: `spell.txt`, `spells.txt` and `main.txt` text bytes
+(R2-ASSET-103), and the per-slot flag table EN `L2.02150`, RU `L2.02196`,
+whose slots 16 (Summon) and 22 (Wall of Earth) are 1 in EN and 0 in RU. That
+table gates the 'A' key handler of R2-ENGINE-444.
+
+**Confidence.** High for data equality and the table values. Medium for
+code parity: the routines were compared by structure, constants and
+offsets, not as equal bytes.
+
+**Unknown.** The player-visible effect of the flag-table difference.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
 ## Spell rows without a published rule
 

@@ -93,10 +93,32 @@ RU reader bodies were not decoded separately (`R2-ENGINE-270`,
 Related ROM1 references: [SPR16A](../spr16a/format.md),
 [SPR256](../spr256/format.md), [PAL](../pal/format.md).
 
-## Blizzard presentation boundary
+## Spell effect sprites
 
-The inspected RU producer sends a cell event with opcode 0x86, effect
-identifier 23 and argument 16. Neither value establishes an archive sprite
-key, frame count, timing or sound. The presentation consumer and a native-bound
-art key were not read. Final presentation and EN parity remain Unknown
-(R2-ENGINE-394).
+`graphics.res` `projectiles/projectiles.reg` names 31 effect types by `ID`,
+`File`, `Phases`, `RotationPhases`, `Width`, `Height`, `Palette`, `Homing`,
+`Flip`, `A16` and `SFX`. An `A16` type loads `<File>.16a`; others load
+`<File>.256` and `<File>b.256`. A type with RotationPhases 16 and Flip
+stores Phases frames for each of nine directions; directions above 8 are
+drawn mirrored. A type with RotationPhases 1 stores Phases frames. The
+installed `healing` sprite has one frame more than its Phases; `diamonddust`,
+`freeze`, `smallxpl`, `smoke0` and `smoke1` have no type. EN and RU sprites
+and registry are byte-equal. — R2-ASSET-101, R2-ENGINE-447, R2-ENGINE-449
+
+A spell row selects type 2*row+8 when cast; Prismatic chains use type 30.
+An area cell uses 2*row+9: that value is read for row 7 only, and for the
+other rows, including the bindings of identifiers 13, 15, 21, 27 and 43 to
+their rows, it is the formula (Medium). The client draws the type with the
+identifier in its cell and non-unit arms; the type drawn by the flying
+object of a unit caster's even identifier is unread. An identifier without
+a type draws nothing. Frame choice is per identifier: (update/2) mod Phases
+by default, the lightning and chain swing 4..0..4, and the teleport
+counter. — R2-ENGINE-445, R2-ENGINE-447
+
+## Blizzard presentation
+
+The Blizzard cell effect, identifier 23 with argument 16, is the type
+`Meteor\sprites`, 9 frames of 64x64. The client effect lives 16 updates:
+frame 8 falls for 8 updates, then frames 0..7 play and Sfx 523 sounds once.
+R2-ENGINE-394 is amended by these facts. The update period in seconds
+remains Unknown. — R2-ENGINE-394, R2-ENGINE-446, R2-ENGINE-447

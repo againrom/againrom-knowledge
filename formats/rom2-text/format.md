@@ -236,3 +236,16 @@ loads patch/patch.txt and requests indices 115..117. That patch text population
 was not read, so its feedback labels remain Unknown. The main.txt autohealing
 labels cannot supply those values. Native pool mutation, conversion and
 rendered glyphs remain Unknown. — R2-ASSET-088
+
+## Spell text
+
+`spell.txt` holds 29 spell names and a final empty line in both roots; spell
+row r is line r-1 on items, in spell lists and in the mask-driven `Spells: `
+list. The EN names of lines 15 and 21 differ from the data rows' names.
+`spells.txt` holds 24 hover entries and a final empty line, in spellbook
+slot order; a fixed 24-entry executable table lists one row number for each
+slot, and the match of those numbers to the `spells.txt` names, which rests
+on an uncommitted name order, is Medium. Rows 9, 14, 15, 28 and 29 have no
+slot. Hover lines add `main.txt` labels 117, 118,
+123, 124, 182..187 and 217. Both files have the same line counts in EN and
+RU and differ in text bytes. — R2-ASSET-103, R2-ENGINE-444, R2-ENGINE-449

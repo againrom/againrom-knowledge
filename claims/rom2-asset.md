@@ -1119,6 +1119,147 @@ the RU roles: they rest on the same indices in RU bodies equal to EN.
 
 **Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
 
+## Spell presentation resources
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-101 | ROM2 graphics.res projectiles.reg is byte-equal in EN and RU and defines 31 effect types by ID, File, Phases and draw flags; the 29 projectile .16a sprites are equal between roots and five of them no type names. | High | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ASSET-102 | ROM2 sfx.reg is byte-equal in EN and RU; it names magic sounds at Sfx90 and at 30 slots from Sfx508 to Sfx566, and the 33 magic WAV keys are equal mono 16-bit 22050 Hz PCM in both roots. | High | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ASSET-103 | ROM2 main.res spell.txt holds 29 spell names in spell-row order and spells.txt holds 24 hover entries whose spellbook-slot order is Medium (the names are not committed); both have the same line counts in EN and RU and differ in text bytes. | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+
+### R2-ASSET-101
+
+`graphics.res` node `projectiles/projectiles.reg` is 9584 bytes with SHA256
+`97dc39049a41b3709b0d1e199e3565ac2c6962a6bd1ce8af9316e6a159dd187a` in both
+roots. It is an inline REG store (R2-ASSET-006): `Global/Count` = 31 and
+sections `Projectile0`..`Projectile30`. The native loader (EN `L2.02132`,
+RU in `L2.02133+0x800`) reads `File` and `A16`, then `ID` (default -1),
+`Phases` (-1), `RotationPhases` (16), `Width` (64), `Height` (64), `Palette`,
+`Homing`, `Flip` and `SFX` (0 each) into a 0x3c-byte type object and adds it
+to the type map (EN `L2.02134`, RU `L2.02135`) under `ID`.
+
+| ID | File | Phases | Size | RotationPhases | Homing | Flip |
+|---:|---|---:|---|---:|---:|---:|
+| 1, 2, 3 | archer, xbowman, orc `arrow` | 1 | 64x64 | 16 | 0 | 0 |
+| 4 | goblin `arrow` | 1 | 64x64 | 1 | 0 | 0 |
+| 5, 6, 7 | catap1, catap2, catap2 `sprites` | 1 | 64x64 | 16 | 0 | 0 |
+| 8 | steam | 9 | 64x96 | 1 | 0 | 0 |
+| 10 | firebolt | 4 | 64x64 | 16 | 1 | 1 |
+| 12 | fireball | 4 | 128x128 | 16 | 0 | 1 |
+| 13 | fireexpl | 11 | 128x128 | 1 | 0 | 0 |
+| 15 | firewall | 11 | 128x128 | 1 | 0 | 0 |
+| 16, 24, 34, 46 | p_fire, p_water, p_air, p_earth | 6 | 12x12 | 1 | 1 | 0 |
+| 18 | icemissile | 6 | 16x16 | 1 | 1 | 0 |
+| 20 | poison_d | 8 | 12x12 | 1 | 0 | 0 |
+| 21 | poison | 15 | 64x64 | 1 | 0 | 0 |
+| 23 | Meteor | 9 | 64x64 | 1 | 0 | 0 |
+| 27 | acid | 9 | 64x96 | 1 | 0 | 0 |
+| 28 | lightnin | 5 | 16x16 | 1 | 1 | 0 |
+| 30 | chain | 35 | 16x16 | 1 | 1 | 0 |
+| 40 | meteorit | 4 | 64x64 | 16 | 1 | 1 |
+| 43 | wall | 1 | 32x64 | 1 | 0 | 0 |
+| 48, 62, 64 | bless, shield, Curse | 5 | 12x12 | 1 | 1 | 0 |
+| 54 | teleport | 21 | 96x96 | 1 | 0 | 0 |
+| 56 | healing | 7 | 16x16 | 1 | 1 | 0 |
+| 60 | Drain | 9 | 12x12 | 1 | 1 | 0 |
+
+Every type from ID 8 up sets `Palette` 1 and `A16` 1; `SFX` is 1 for every
+type from ID 8 up except 23 (Meteor). The `File` value is joined under
+`graphics\projectiles\` with `.16a` when `A16` is set, else `.256` and
+`b.256`.
+
+`graphics.res` has 46 `projectiles/` keys in each root. The 29 `.16a`
+sprites read (R2-ASSET-007 envelope) all set the palette bit and are
+byte-equal between roots. Types 10, 12 and 40 (RotationPhases 16 with Flip)
+have 36 frames, Phases 4 times nine directions. Every other named `.16a`
+has Phases frames, except `healing` with 8 frames for Phases 7. Five `.16a`
+sprites no type names: `diamonddust` (5 frames, 32x32), `freeze` (15,
+64x64), `smallxpl` (11, 64x64), `smoke0` (6, 12x12) and `smoke1` (6, 24x24).
+
+**Confidence.** High for the registry values, defaults, keys, frame counts
+and root equality.
+
+**Unknown.** Whether the executable names `diamonddust`, `freeze` or
+`smallxpl` outside this registry; no executable string census was made.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ASSET-102
+
+`sfx.res` node `sfx.reg` is 9864 bytes with SHA256
+`ee0ecdc9bfc118e74ba79d446d3ee63661a0240e8ed9d2405e6ea0aaa8da2b06` in both
+roots. `Global/SfxCount` is 660; the `Sfx` section holds 200 `Sfx<N>`
+string entries, each a path under `sfx.res` without the `.wav` suffix. The
+31 entries under `magic\` are:
+
+| N | Key | N | Key | N | Key |
+|---:|---|---:|---|---:|---|
+| 90 | firewall | 528 | lightning | 548 | bless |
+| 508 | ex-water | 530 | spray | 550 | haste |
+| 510 | arrow | 532 | invisib | 552 | spirit |
+| 512 | fireball | 534 | plight | 554 | teleport |
+| 513 | explosion | 536 | darkness | 556 | heal |
+| 516 | pfire | 538 | light | 558 | summon |
+| 518 | icemissile | 540 | dust | 560 | drain |
+| 520 | poison | 542 | wall | 562 | pfield |
+| 523 | blizzard | 544 | stone | 564 | curse |
+| 524 | pwater | 546 | pearth | 566 | slow |
+| 526 | acid | | | | |
+
+Between 508 and 566 the even slots 514 and 522 and every odd slot except
+513 and 523 are absent. `sfx.res` holds 33 `magic/` WAV keys per root; no
+`sfx.reg` entry names `freeze` or `sacrifice`. Every one is RIFF WAVE format
+tag 1, one channel, 16 bits, 22050 Hz, byte-equal between roots. Durations
+in milliseconds (data bytes over byte rate): acid 1892, arrow 505, bless
+1949, blizzard 485, curse 1147, darkness 1738, drain 1403, dust 791,
+ex-water 1799, explosion 856, fireball 888, firewall 1623, freeze 2559,
+haste 946, heal 2093, icemissile 621, invisib 1614, light 1425, lightning
+942, pearth 1065, pfield 1413, pfire 1025, plight 1100, poison 2552, pwater
+696, sacrifice 1973, slow 1102, spirit 1929, spray 1384, stone 526, summon
+516, teleport 1071, wall 881.
+
+**Confidence.** High for the registry entries, the archive population, the
+WAVE fields and root equality.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
+### R2-ASSET-103
+
+`main.res` `text/spell.txt` splits on CRLF into 30 lines in both roots:
+lines 0..28 are nonempty and line 29 is empty. EN line i names the client
+`data.bin` Spells row i+1 for 26 of the 29 rows; line 1 reads `Fireball`
+where row 2 is `Fire Ball`, line 15 reads `Stone Missile` where row 16 is
+`Diamond Dust`, and line 21 reads `Animate Dead` where row 22 is `Control
+Spirit`. RU line lengths differ from EN.
+
+`text/spells.txt` splits into 25 lines in both roots: lines 0..23 are
+nonempty and line 24 is empty. Each EN line is a spell name with a
+parenthesized kind, a `#`, and a description. EN line order: Fire Arrow,
+Fireball, Wall of Fire, Protection from Fire, Heal, Bless, Haste, Drain
+Life, Protection from Air, Invisibility, Prismatic Spray, Lightning, Ice
+Missile, Poison Cloud, Blizzard, Protection from Water, Summon, Animated
+Dead, Teleport, Shield, Protection from Earth, Stone Curse, Wall of Earth,
+Stone Missile. No line names Acid Stream, Darkness, Light, Curse or Slow.
+
+`text/main.txt` EN lines used by spell text: 90 `of`, 92 `casts`, 91 and
+93 empty, 117 `Mana cost`, 118 `Damage`, 123 `Range`, 124 `Duration`, 182
+`Speed`, 183 `Resistance`, 184 `Sight`, 185 `Maximum Damage Probability`,
+186 `rays`, 187 `Minimum Damage Probability`, 192 `Spells: `. RU lines 91
+and 93 are also empty.
+
+**Confidence.** High for line counts, empty lines, lengths, hashes and the
+EN `spell.txt` and `main.txt` labels in the committed evidence. Medium for
+the `spells.txt` line shape and name order, which were read from a
+navigation pass whose text stays outside the repository. R2-ENGINE-444
+supplies a slot table whose values fit that order; that fit is
+consistency, not an independent read, so the join of hover lines to spell
+rows is Medium.
+
+**Unknown.** The 24 `spells.txt` names as a committed list, and the
+consumer EN `L2.02136` of the 'A' key handler.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+
 ## Spell rows 5, 16, 18 and 25 and the Summon units
 
 | ID | Public functional claim | Confidence | Status | Evidence |

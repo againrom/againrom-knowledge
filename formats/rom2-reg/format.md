@@ -72,3 +72,19 @@ the plan index; Panaraming sets/clears stored steps at start/end equality
 and updates destination coordinates after the next-frame call. Missed
 equality, visual interpolation, malformed lookup and timing remain Unknown.
 — R2-ENGINE-097
+
+## Effect type and sound registries
+
+`graphics.res` `projectiles/projectiles.reg` (9584 bytes) and `sfx.res`
+`sfx.reg` (9864 bytes) are byte-equal in EN and RU. The effect registry
+holds `Global/Count` = 31 and sections `Projectile0..30`; the native loader
+reads `File`, `A16`, `ID` (default -1), `Phases` (-1), `RotationPhases`
+(16), `Width` (64), `Height` (64), `Palette`, `Homing`, `Flip` and `SFX`
+(0 each) and keys the type by `ID`. — R2-ASSET-101
+
+The sound registry holds `Global/SfxCount` = 660 and 200 `Sfx<N>` string
+entries; each names a `sfx.res` path without `.wav`. Spell sounds are
+`Sfx(500+ID)` for the effect identifiers of R2-ENGINE-445; the magic
+entries are Sfx90 and 30 slots from Sfx508 to Sfx566, and an absent slot
+gives no sound at the play sites read; no census of other sound sites was
+made (Medium), and no read site places Sfx90. — R2-ASSET-102, R2-ENGINE-446
