@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3586. Observation: 99. Static analysis: 2995. Mixed: 492.
+Claims labelled: 3594. Observation: 99. Static analysis: 3003. Mixed: 492.
 
 ## Ledger ai
 
@@ -1666,6 +1666,7 @@ Claims labelled: 3586. Observation: 99. Static analysis: 2995. Mixed: 492.
 | R2-ASSET-102 | mixed | ● active |
 | R2-ASSET-103 | static analysis | ● active |
 | R2-ASSET-107 | mixed | ● active |
+| R2-ASSET-111 | static analysis | ● active |
 
 ## Ledger rom2-engine
 
@@ -1693,7 +1694,7 @@ Claims labelled: 3586. Observation: 99. Static analysis: 2995. Mixed: 492.
 | R2-ENGINE-025 | static analysis | ● active (amended) |
 | R2-ENGINE-026 | static analysis | ● active (partially retracted) |
 | R2-ENGINE-027 | static analysis | ● active |
-| R2-ENGINE-028 | static analysis | ● active |
+| R2-ENGINE-028 | static analysis | ● active (amended) |
 | R2-ENGINE-029 | static analysis | ● active |
 | R2-ENGINE-030 | static analysis | ● active |
 | R2-ENGINE-031 | static analysis | ● active |
@@ -2008,6 +2009,13 @@ Claims labelled: 3586. Observation: 99. Static analysis: 2995. Mixed: 492.
 | R2-ENGINE-473 | static analysis | ● active |
 | R2-ENGINE-474 | static analysis | ● active |
 | R2-ENGINE-475 | static analysis | ● active |
+| R2-ENGINE-477 | static analysis | ● active |
+| R2-ENGINE-478 | static analysis | ● active |
+| R2-ENGINE-479 | static analysis | ● active |
+| R2-ENGINE-480 | static analysis | ● active |
+| R2-ENGINE-481 | static analysis | ● active |
+| R2-ENGINE-482 | static analysis | ● active |
+| R2-ENGINE-483 | static analysis | ● active |
 
 ## Ledger rom2-session
 

@@ -298,7 +298,7 @@ ROM1: the capped argument and ranked victim selector are in `MAGIC-SPRAY-134`; t
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-028 | A magic hit resolves as `base + U[0, spread]`, cut by the matching elemental resistance as `ftol(v*(100-p)/100 + 0.75)`; spells never roll to hit and absorption does not touch the magic part. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-028 | A magic hit resolves as `base + U[0, spread]`, cut by the matching elemental resistance as `ftol(v*(100-p)/100 + 0.75)`; spells never roll to hit and absorption does not touch the magic part. | High / Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-029 | Each elemental resistance word is Spirit/2 plus effect modifiers, clamped to 0..min(Spirit/2 + 70, 100), in the same derive order as ROM1. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-028
@@ -314,6 +314,8 @@ ROM1 resolves a spell the same way, as read here against `MAGIC-RESIST-006` (sam
 **Confidence.** High for the damage block, the kind map, the resistance arithmetic and the absorption split. Medium for Bless and Curse in the resolver: the meaning was read in this lane and the ROM1 counterpart was not re-read.
 
 **Unknown.** The fold `L2.00102`; how a protection spell's magnitude (`R2-ENGINE-024`) reaches the resistance word in the resolver path.
+
+**Amended.** R2-ENGINE-478 narrows "when the physical swing hit": the magic part is admitted when attack value plus roll exceeds defence or the block has no physical bytes; a hit by the roll of 90 or more or by unit flag 0x10 does not admit it. R2-ENGINE-477 gives the roll.
 
 ### R2-ENGINE-029
 
@@ -9594,3 +9596,330 @@ leave, 180-tick, pending-refill and sell bodies, which were read in EN
 only; reading them in RU would settle it.
 
 **Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+## Physical attack resolution and experience
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-477 | A ROM2 weapon blow on a unit hits when attack value + U[0,200] - 100 exceeds the target's defence word, when that roll term is at least 90, or when the attacker has unit flag 0x10; a blow on a structure takes no roll. | High / Medium | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-478 | A ROM2 weapon hit deals base + U[0,spread], minus absorption, then cut by the target's percentage byte for the attack type as trunc(v(100-a)/100 + 0.75); the unit strike subtracts the sum of the block's parts from health +0x94. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-479 | In RU, a ROM2 human's attack value is trunc((1.1^Body + 1.1^Reaction)/5) + 3 skill[t] + weapon toHit; damage base trunc(1.1^Body/20) + skill[t]/5 + weapon base; spread trunc(1.1^Body/20) + weapon spread. (Medium.) | Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-480 | A ROM2 weapon hit pays a fighter trunc(V x 0.5 x D / HPmax + 1), V victim value +0x1c, scaled by Mind/30 + 0.25, cut for repeated victim kinds (Medium) and off-main skills, into the weapon's skill; a mage's weapon hit pays none (Medium). | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-481 | The ROM2 strike body `L2.02313` resolves a melee or ranged weapon blow within range byte +0x12c, calls no object constructor and subtracts the damage in the same call (no projectile object and a cast object on a surviving target: Medium). | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-482 | ROM2 EN and RU strike, resolver, structure resolver, damage object, experience and recompute attack bodies agree after address masking, except an RU-only refusal against a target whose byte +0x4a is 3 and an RU-only bookkeeping gate. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-483 | In RU, a ROM2 creature's attack block is read from its Units row: toHit, physicalMin and max - min (scaled by 15 above byte range); attackKind 3 sets unit flag 0x10 and kinds 1 and 2 fill the other damage parts. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+
+### R2-ENGINE-477
+
+The resolver `L2.00101` is virtual +0x54 of the Human table `L2.00218` and
+of the table `L2.02314`, whose +0x30 cell returns 0 and whose +0x64 cell is
+the creature award of R2-ENGINE-480; it runs on the target. It takes a 0x18-byte
+attack block and the attacker. It returns 0 for a null block or a target
+whose byte +0x4c has bit 8. Block word +0 is the attack value A. The roll is
+r = U[0,200] - 100, where U[0,n] is `(rand15 x (n+1)) >> 15` from
+`R2.0021`, 0 for n = 0, and rand15 is the 15-bit output of the linear
+generator `L2.01699` (multiplier 214013, increment 2531011, bits 16..30).
+With d the target's word +0xbe (defence, R2-ENGINE-321):
+
+- A + r > d, or the attacker's byte +0x4c has bit 0x10: the physical part
+  hits;
+- otherwise r >= 90 hits (11 of the 201 values of r);
+- every other blow misses and the physical part is 0.
+
+The strike dispatcher `L2.02315` sends a target whose virtual +0x2c is
+nonzero to the unit strike `L2.02313` and else one whose +0x34 is nonzero to
+the structure strike `L2.02316`. The structure strike requires an attacker
+with an owner and health above 0 within range, then calls `L2.01703` on the
+structure with the attacker's block. That resolver returns 0 unless the
+block is not null and the structure's word +0x44 is nonzero; it computes
+v = block +0x13 + U[0,+0x14] when +0x14 > 0, else 0, then v - 5, and returns
+0 when that is not positive. It takes no roll and reads no physical byte of
+the block. The strike subtracts the result from the structure's word +0x42
+(R2-ENGINE-393) and pays no experience. A weapon's block bytes +0x13/+0x14
+come from the weapon's bytes copied at equip (R2-ENGINE-479), so a weapon
+whose copied bytes are zero deals a structure 0.
+
+**Confidence.** High for the roll, the comparison and the three hit cases,
+and for the structure route, in both roots: committed listings reproduced
+from the Git blobs, RU read in full and EN equal after address masking with
+the immediates 0xc8, 0x64, 0x5a and 5 compared (R2-ENGINE-482). The
+generator body was read in RU only: Medium for its EN arithmetic. The state
+address `L2.02317` returns was not read.
+
+**Unknown.** Whether another routine damages a structure by a weapon blow:
+no census of +0x42 writers was run.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+### R2-ENGINE-478
+
+The resolver reads block bytes +0xe (base B) and +0xf (spread S):
+
+1. When B has bit 7 and the attacker's virtual +0x30 returns 0 (the
+   creature table's `L2.02318`; the Human table's `L2.02319` returns 1),
+   B = (B & 0x7f) x 15 and S = S x 15 (R2-ENGINE-483).
+2. Bless (effect 20) and Curse (effect 28) on the attacker follow
+   R2-ENGINE-028: when the effect's magnitude exceeds U[0,100], Bless makes
+   v = B + S and Curse v = B without a draw. Otherwise v = B + U[0,S].
+3. On a hit (R2-ENGINE-477): v minus the target's absorption word +0xc0,
+   skipped when the attacker has flag 0x10, floored at 0. Then, when the
+   target's byte at +0xce + block byte +0x10 (the attack type) is a nonzero
+   a, v = trunc(v(100-a)/100 + 0.75), with no floor after the cut.
+4. Block bytes +0x11 (base) and +0x12 (spread) add B2 + U[0,S2] on every
+   call, with no hit test, cut by word +0xc6 in the same form when it is
+   nonzero and floored at 0.
+5. The magic part, bytes +0x13/+0x14/+0x15 (R2-ENGINE-028), is admitted
+   only when A + r > d or block bytes +0xe and +0xf are both 0; a hit by
+   r >= 90 or by flag 0x10 does not admit it.
+6. A sum at or below 0 returns 0.
+
+The unit strike and the damage object (`L2.01702`) subtract the result from
+health word +0x94 with no clamp. The truncation helper `L2.01309` stores
+with rounding set to chop. RU constants: 100.0 at `L2.01307`, 0.75 at
+`L2.02320`. After the parts, when the attacker's +0x3c is nonzero, the
+target stores the attacker at +0x40 (0 when the attacker has no owner) and
+the block's kind byte at +0x48 when the predicate `L2.00044` holds, else 0;
+the hostility bookkeeping of R2-ENGINE-482 follows.
+
+**Confidence.** High for steps 1 to 6 in RU and for the arithmetic shape in
+EN (R2-ENGINE-482). Medium in EN for the constant values, which were read in
+RU only.
+
+**Unknown.** Which bytes fill a creature's +0xce array and its attack type
++0x10 (R2-ENGINE-483), and what the human +0xce array holds; reading the
+writers of +0xce..+0xd3 would settle it.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+### R2-ENGINE-479
+
+Recompute (`L2.00052`, R2-ENGINE-321) writes the human's attack block at
++0xa6, with Body +0x84 and Reaction +0x86 (R2-ENGINE-021):
+
+- spread +0xb5 = trunc(1.1^Body / 20), and base +0xb4 = the same value;
+- attack value +0xa6 = trunc((1.1^Body + 1.1^Reaction) / 5);
+- the school skills are restored, clamped to 0..100 and given their +0xe8
+  modifiers (R2-ENGINE-320);
+- when the attack type t = byte +0xb6 is above 0: +0xa6 += 3 x skill[t] and
+  +0xb4 += skill[t] / 5 (integer), skill[t] being word +0xa8 + 2t;
+- bytes +0xb7..+0xba are zeroed. The fold `L2.00102` of R2-ENGINE-321 then
+  adds the record block +0xe6 into +0xa6 through `L2.02321`, which adds word
+  +0 and bytes +0xe, +0xf, +0x11, +0x12, +0x13 and +0x14 (the rest of
+  `L2.02321` was not read).
+
+`1.1^x` is `L2.00109`, which pushes 1.1 and calls the library power routine
+`L2.02322` (not read). Divisors: 5.0 at `L2.02323`, 20.0 at `L2.02324`.
+
+Weapon equip `L2.01314` (R2-ENGINE-322) reads weapon parameter 5 as t. For t
+below 10 it adds the weapon's toHit word +0x5a to +0xe6, base byte +0x68 and
+spread byte +0x69 to +0xf4/+0xf5 (block +0xe/+0xf) and defence word +0x72 to
++0xfe, stores the weapon's bytes +0x6d..+0x6f into +0xf9..+0xfb (block
++0x13..+0x15) and writes +0xb6 = t. For t 11 or 12 it adds base and spread
+to +0xf9/+0xfa with kind 1 or 2 into +0xfb; for every t of 10 or more it
+writes +0xe6 = word +0xa8 and +0xb6 = 0. Then recompute runs. The weapon
+fill `L2.02311` derives these from the Weapons row (R2-ASSET-111) and two
+class records chosen by item bytes +0x45 and +0x46: base =
+trunc(physicalMin x f + 0.5), spread = trunc(physicalMax x f - base + 0.5),
+with f the product of the records' doubles at +0x40; toHit with +0x48,
+defence with +0x50 and parameter 3 (weight) with +0x38, each + 0.5; range
+byte +0x58 = the row's range, 1 when -1. 0.5 is the double at `L2.02325`.
+
+**Confidence.** High in RU for the stores, operands and constants listed.
+Medium for every term containing 1.1^x: R2-ENGINE-290 and R2-ENGINE-320 give
+E(s) = trunc((1.1^s - 1) x 1000) and R2-ENGINE-321 the recompute arithmetic
+by instruction shape with its helpers (`L2.00109`, `L2.01309`) unread, so none
+of them establishes `L2.02322` as pow(1.1, x) in RU. Medium for every term
+that passes through the fold tail of `L2.02321` past `L2.02326` (unread),
+where the magic kind byte would be carried. Medium in EN for the recompute
+section, equal after masking with its constants unread. Unknown in EN for the
+weapon fill, equip and fold, which were not located.
+
+**Unknown.** The body of `L2.02322`; the fold tail of `L2.02321`; the
+class-record doubles per item byte value; the binding of BareHands (Weapons
+row 1, attack type 3) to an unarmed human; the EN fill, equip and fold.
+Reading `L2.02322` and the fold tail would settle the RU terms; reading the
+EN counterparts of `L2.02311` and `L2.01314` would settle EN.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+### R2-ENGINE-480
+
+The unit strike calls the attacker's virtual +0x6c (`L2.02327`) with the
+target, the damage D and spell 0 when D > 0, the target had health above 0
+before the blow and has health above -10 after it. A blow that takes the
+target to -10 or lower pays nothing. `L2.02327` requires the victim's owner
++0x14 to have +0x2c nonzero and calls the award (+0x64, `L2.00055`) with
+X = trunc(V x 0.5 x D / H + 1.0), V the victim's dword +0x1c, H its HPmax
+word +0x96. With a nonzero spell it returns unless the predicate `L2.00044`
+holds, and then passes parameter 2 of the spell's row as the skill. The
+damage object `L2.01702` calls the same +0x6c with its spell id when that id
+and its source are nonzero. The virtual +0x68 (`L2.02328`) awards
+trunc(V x 0.5) and counts the victim's kind word +0x14c in the attacker's
+list +0x1a8: a found kind adds 0x10000 to its entry, a new kind is
+appended, and at five entries the first is removed before appending.
+
+The award, for attacker type word +0xe in 0x21..0x3f and a victim without
++0x1a0:
+
+1. X = trunc(X x (Mind/30 + 0.25)), Mind word +0x88 (R2-ENGINE-021).
+2. If the victim's kind is in the list with count n (high word):
+   X = 10X / (n + 10).
+3. Unless the victim's health is below 0: no award when the victim's owner
+   is the attacker's, the attacker has no owner, or the diplomacy byte of
+   the two owners has bit value 2 set.
+4. School skills are reset to their base words +0x116 + 2i.
+5. When `L2.00044` holds, the skill s is the passed spell skill and must be
+   above 0; otherwise the passed skill must be 0 and s = attack type +0xb6,
+   above 0. Skill s must be below 100.
+6. If s is neither the main skill +0x23c nor 5: X = ceil(X / 8).
+7. With L the base level of s: X = min(X, T(L+1) - T(L)) (`L2.02329`; the
+   difference is divided by 5 when global +0x74 is nonzero), T the dword
+   table at `L2.02330`, index capped at 149.
+8. E(s) at +0x23c + 4s and the sum +0x130 grow by X (R2-ENGINE-320). When
+   E(s) reaches T(L+1), s rises by 1 and recompute (virtual +0x58) runs;
+   otherwise the skills are restored as recompute restores them.
+
+A creature attacker's +0x64 (`L2.02331`) adds X to its +0x130 and, when the
+victim's health is below 0, adds 1 to its owner's +0xa48. A human victim's V
+is trunc(0.01 x the sum of its skill experience) (R2-ENGINE-320).
+
+**Confidence.** High for the arithmetic, gates and stores of the bodies read
+in RU, except the repeated-victim list; RU constants 0.5 at `L2.02325`, 1.0
+at `L2.00067`, 30.0 at `L2.00066` and 0.25 at `L2.02332`. EN bodies are
+equal after masking: Medium in EN for the constants. Medium for the
+repeated-victim list (count, index, remove and append): its roles are
+inferred from the call shape of `L2.02333`, `L2.02334`, `L2.02335` and
+`L2.01545`, none read. The predicate `L2.00044` returns actor byte +0x4c & 4
+(read in RU, High, R2-ENGINE-362); that this byte is the mage class is
+Medium (R2-ENGINE-362; R2-ENGINE-021 and R2-ENGINE-322 name it), so the
+headline clause "a mage's weapon hit pays none" is Medium and rests on
+R2-ENGINE-362. Medium for +0x68 as the kill award: two byte-pattern scans
+over RU `.text` for calls through virtual slot +0x68 (`ff 52 68` 85 matches,
+`ff 50 68` 189 matches; receipts under `evidence/navigation/scans/`) were
+read but no match was classified. Medium for T: the table lies in
+uninitialized `.data` and its writer was not read.
+
+**Unknown.** The callers of +0x68: the two scans returned 274 matches in
+all (many are slot-0x68 calls of other classes and `push eax; push 0x68`
+sequences), none classified; a call-target pass keyed on the Human class slot
+or a triage of the 274 matches would settle it. The roles of `L2.02333`,
+`L2.02334`, `L2.02335` and `L2.01545`; the creature V; a creature
+attacker's +0x6c; the writer of `L2.02330`; spell row parameter 2's title.
+Reading those four routines, the writer of `L2.02330` and the creature row
+reader past `L2.02336` would settle these.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+### R2-ENGINE-481
+
+In the actor update (RU `L2.02337`), state 3 calls the strike
+`L2.02315(attacker, attacker +0x5c)`, except that an attacker whose weapon
++0x74 has a cast object (+0x88 nonzero, `L2.02338`) and for which
+`L2.00044` holds stores the object at +0x64, the weapon at +0x68 and enters
+state 13.
+
+The unit strike requires the target and its owner, the attacker and its
+owner, attacker health above 0, and range byte +0x12c at least the distance
+`L2.02339`. The distance is the larger absolute axis difference of the two
+positions minus ((size1 + size2) x 128 - 256); at or below 0x180 it is 1,
+else (d + 0x40) >> 8. The strike then calls the target's virtual +0x54
+(R2-ENGINE-477, R2-ENGINE-478) with block +0xa6 and subtracts the result
+from health +0x94 in the same call. Its body calls no object constructor:
+melee and ranged weapons share it, and the damage lands when the strike
+runs. When the attacker's weapon has a cast object and the predicate
+`L2.01517` (not read) admits the attacker, the object is cast through
+`L2.00035` on a blow with damage above 0 that leaves the target above 0
+health, and on any blow
+when the object's byte +8 is 2. `L2.00035` passes the object to the apply
+head `L2.00034` (R2-ENGINE-452) unless its byte +8 is 11. Weapon equip adds
+range - 1 to +0x12c (R2-ENGINE-322); R2-ASSET-111 gives the ranges.
+
+**Confidence.** High for the bodies read in RU, which show that the strike
+body `L2.02313` calls no object constructor and subtracts the damage in the
+same call. Medium that a ranged blow creates no projectile object: the body
+also calls the notification `L2.02340` with the target and the damage (not
+read), the actor update before `L2.02337` (what runs on entering state 3) was
+not read, and pointer tables were not searched for callers of `L2.02315`.
+Medium for the cast-object clause: the predicate `L2.01517` was not read.
+Medium that this strike is the only weapon-damage route: a call-target pass
+over RU `.text` found one call of `L2.02315` (navigation), and pointer-table
+routes were not searched. Medium for the distance units: the position,
+absolute-value and size helpers were not read.
+
+**Unknown.** Whether a ranged blow creates a projectile object, picture or
+sound, which may come from the notification `L2.02340` (not read) or from the
+actor update before `L2.02337`; what counts the attack time before state 3
+strikes; the predicate `L2.01517`; the EN caller. Reading `L2.02340`, the
+actor update before `L2.02337` and a pointer-table search for callers of
+`L2.02315` would settle these.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+### R2-ENGINE-482
+
+With absolute addresses masked, the committed EN and RU listings are equal
+instruction for instruction for the strike dispatcher (70), the structure
+strike (70), the structure resolver (81), the award (464), the threshold
+(9), the cap (50), the +0x68 route (105), the +0x6c route (65), the damage
+object constructor (26) and apply (103), the random range (16) and the
+recompute attack section (160). The resolver (449 EN, 460 RU) and the unit
+strike (138 EN, 159 RU) differ in two RU-only tests:
+
+- the RU unit strike returns without a blow when the attacker's virtual
+  +0x30 is nonzero, `L2.00044` does not hold, the attack type is not 5 and
+  the target's byte +0x4a is 3; EN strikes;
+- the RU resolver skips the hostility bookkeeping `L2.02074` when global
+  +0x74 is nonzero, the attacker's owner has +0x2c nonzero and the target's
+  owner has +0x2c zero; EN always calls it.
+
+The unit strike reads the weapon's cast object at +0x84 in EN and +0x88 in
+RU, the item shift of R2-ENGINE-407. The EN +0x70 window is shorter than the
+RU one; that pair is not compared.
+
+**Confidence.** High for the pairs named. The meaning of target byte +0x4a
+is not established here: the only ROM2 statement names MovementType at
++0x49, +0x4a in the template-load field list. The masked comparison does not
+compare the values behind masked constant addresses.
+
+**Unknown.** The value table of MovementType and the writers of +0x4a; EN constants, the EN generator, weapon fill, equip, fold,
+creature row reader, actor update and distance. Reading them in EN would
+settle EN parity.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+### R2-ENGINE-483
+
+The RU creature row reader `L2.02341` reads one value per field from a
+stream and stores, in this order: Body, Reaction, Mind, Spirit (+0x84..+0x8a),
+HPmax +0x96 and health +0x94, +0x98, mana +0x9c (copied to +0x9a and +0xa0),
++0x9e, speed +0x8c, a byte at [+0x1c0]+0xa, byte +0xa5, then min, max and
+kind as dwords, toHit into +0xa6 (copied to +0xa8), defence +0xbe,
+absorption +0xc0, bytes +0x134 and +0x135, and five words +0xc4..+0xcc. The
+order equals the Units column titles 1 to 24 (healthMax to prot Astral).
+
+With spread = max - min, kind decides the attack bytes:
+
+- kind 0 or below: when min < 128 and spread <= min + 255, base +0xb4 = min
+  and spread +0xb5 = spread; otherwise +0xb4 = min(min/15, 127) | 0x80 and
+  +0xb5 = min(spread/15, 255), the encoding R2-ENGINE-478 step 1 undoes;
+- kind 1: min and spread into +0xb7/+0xb8 (block +0x11/+0x12);
+- kind 2: their negated bytes into +0xb9/+0xba (the magic part
+  +0x13/+0x14);
+- kind 3: unit flag 0x10 and min and spread into +0xb4/+0xb5 unencoded;
+- any other kind stores no attack byte.
+
+In the RU client Units table, 180 of the 241 rows carry values; 165 carry
+attackKind -1 and 15 carry 3 (the five levels of Bat_Sonic, Bee and
+Spider). No named row carries kind 1 or 2.
+
+**Confidence.** High for the stores and their order in RU. Medium that the
+stream is the unit's Units row: the order matches the titles and the stream
+source was not traced. Medium for the meaning of kinds 1 and 2: no client
+row uses them. EN: not read.
+
+**Unknown.** The rest of the reader past `L2.02336`, which would show the
+res.Blade..res.Shooting bytes, typeID and XPvalue; the creature's attack
+type +0xb6. Reading the reader to its end and its EN counterpart would
+settle these.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)

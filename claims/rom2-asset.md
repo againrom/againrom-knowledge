@@ -1313,3 +1313,43 @@ are Spell 1, Probability 1, Spell 2, Probability 2, Spell 3, Probability 3.
 
 **Confidence.** High: the committed derived rows reproduce byte for byte, and
 the archive and table grammar leave zero residue.
+
+## Weapons attack fields
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-111 | ROM2 client Weapons rows (27) give attackType 1 for swords and the dagger, 2 axes, 3 clubs, maces, hammers, staves and BareHands, 4 pole arms, 5 bows and the crossbow; range is 4 to 6 for bows, crossbow and staves, -1 for melee. | High / Medium | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+
+### R2-ASSET-111
+
+The client `data/data.bin` inside `world.res` (RU read; the EN and RU
+world.res and data.bin hashes are equal, `out/inputs.tsv` of the experiment;
+R2-ENGINE-395 corroborates) holds 27 Weapons
+rows under the shared Armors/Shields/Weapons titles Item, Shape, Material,
+Price, weight, Slot, @.attackType, @.physicalMin, @.physicalMax, @.toHit,
+#.deIrnce, #.absorbtion, @.range, @.charge, @.relax, 2 handed, sutableFor and
+Other Parameter (titles 0 to 17), read through the grammar of R2-ASSET-029.
+
+- attackType 1: Dagger, Short Sword, Long Sword, Bastard Sword, Two Handed
+  Sword, Plasma Sword; 2: Axe, Two Handed Axe; 3: BareHands, Club, Spiked
+  Club, Mace, Morning Star, Pick Hammer, War Hammer, Staff, Shaman Staff;
+  4: Pike, Halberd, Lance; 5: Short Bow, Long Bow, Crossbow, Sonic Beam,
+  Boulder Thrower; 11: Flame Thrower. Row 23 (`rem`) holds -1 in every
+  field.
+- range: Short Bow 4, Long Bow 5, Crossbow 6, Staff 6, Shaman Staff 5,
+  Sonic Beam 4, Flame Thrower 8, Boulder Thrower 20; every other row -1.
+- The two staves carry physicalMin and physicalMax 0; BareHands 1 and 2.
+- 2 handed is 2 for the Two Handed Sword, War Hammer, Two Handed Axe, both
+  staves, the two bows and the crossbow, else -1.
+
+The RU weapon fill `L2.02311` reads parameters 6, 7, 8, 9, 3 and 11 and
+equip reads parameter 5 (R2-ENGINE-479); with parameter n carrying title n+1
+(R2-ASSET-107) these are physicalMin, physicalMax, toHit, defence, weight,
+range and attackType.
+
+**Confidence.** High for the row values: committed derived rows reproduced
+from the Git blobs. Medium for the parameter-to-title binding in the
+Weapons table, which rests on R2-ASSET-107's rule and the eight parameter
+reads agreeing with it; the parameter accessor `L2.02312` was not read.
+
+**Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
