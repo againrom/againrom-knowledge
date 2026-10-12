@@ -2270,3 +2270,88 @@ leaves it open. Whether the Kaarg and druid inn pages reach Hire and Fire
 page only.
 
 **Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+## Hire bank at mission end and hires in a mission save
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-195 | A ROM2 client unit update with +0x1dc 1..20 and signed health word below -10 sets bank 531+that value to 0; ordinary departure then makes a nonzero availability 2 if selected, 1 if not, and clears selections. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-SESSION-196 | In RU a ROM2 hire's Group is written and rebuilt by the Player group list with the creator's append method, its Unit body carrying class, owner and hire ID; LOAD does not run the hire creator. | Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+
+### R2-SESSION-195
+
+The client unit arm (EN `L2.02689..L2.02690`, RU `L2.02691..L2.02692`; the
+packet 108 and 110..112 arm of R2-ENGINE-069) stores the word of field bit 1
+into the client unit's +0x104 and the word of field bit 0x80 into +0x1dc. It
+then sets the state byte +0x184 from signed +0x104: 5 below -600, 4 below
+-40, 3 below -20, 2 below -10, 1 at or below 0, and 0 above 0. When +0x1dc
+is at least 1 and at most 20 and the state byte is above 1, it calls the
+Scenario bank write through the import cell (EN `L2.00450`, RU `L2.00448`)
+with index 0x213 + the +0x1dc word and value 0. With the server sender's
+field bit 1 sending actor +0x94 and bit 0x80 sending actor +0x14c
+(R2-ENGINE-527), and a hire's +0x14c holding its ID (R2-ENGINE-525), a hire
+whose health word reached below -10 at its last update gets bank 531+ID,
+its availability slot 532+i with i = ID-1, set to 0, where the update
+reaches the client with field bit 0x80 set. The EN sender clears that bit
+when Session +0x74 is nonzero, for a Humans hire on every pass and for a
+Units hire when its key +4 is 0x6000 or more (R2-ENGINE-527); +0x74 was read
+as 0 in the map build only, and the key is Unknown. The block from the
++0x104 read to the bank call is equal in EN and RU with addresses and frame
+slots masked; the rest of the arm differs (604 of 773 lines after masking
+frame slots, from register allocation and app-field offsets).
+
+The departure algebra (R2-SESSION-047, R2-SESSION-191, R2-SESSION-023) then
+rewrites every hire pair: a nonzero availability 532+i becomes 2 when the
+selection 512+i is nonzero and 1 when it is zero; the 2 of an unselected
+hire turns to 1 at the next ordinary departure (a kind-2 departure cannot
+hire, R2-SESSION-191); a zero availability stays zero until another writer
+of R2-SESSION-048 or R2-ENGINE-380 stores a nonzero value; selection 512+i
+is zeroed. A type-2 departure writes no bank slot (R2-ENGINE-144). The
+other client bank writes of R2-SESSION-127 do not take an index in
+532..551. A selected hire that did not enter the mission meets the same
+algebra as a survivor.
+
+**Confidence.** High for the client block in both roots and for the store
+of bits 1 and 0x80. Medium that +0x104 is the actor's health and that a
+dead hire's update reaches the client before the departure: +0x94 is read
+as health from the sender's bit only, the delivery order was not read, and
+the packet writer `L2.02684` that R2-ENGINE-527 uses for "sends" was not
+read. Medium for the +0x74 gate on bit 0x80 (read in the EN sender's body;
++0x74 and the key are not established for play). Medium for the
+composition: the DLL departure prefix and the bank write export were not
+read again in this experiment, and the mission-end link (victory arm to
+the ordinary departure of type 1) rests on R2-ENGINE-382, R2-ENGINE-412 and
+R2-SESSION-047, not on a read here.
+
+**Unknown.** Whether a hire at health -10..0 at its last update counts as
+dead elsewhere; a non-hire unit whose +0x1dc is in 1..20 would trigger the
+same store, and whether any exists is not established. A census of the
+`data.bin` rows whose parameter-24 word (as /10 % 1000) or parameter-55
+word is in 1..20 (the template walker exists) would settle the second. The
+key `L2.02670` and Session +0x74 at play settle the gate; the delivery
+order settles the first Medium. Whether a later writer restores a dead
+hire's availability is a search of the writers of R2-SESSION-048 and
+R2-ENGINE-380 against that hire.
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-SESSION-196
+
+The RU Player group list (`R2.0122`) writes each Group of the collection
+at owner +0x28 through `R2.0123`; on load it allocates a Group
+(`L2.00349`), reads it and appends it with `L2.01781`, the method the hire
+creator uses to add its new Group (R2-ENGINE-525). The Unit body written in
+a mission save carries class +0xe, owner +0x14 and +0x14c (R2-ENGINE-209).
+LOAD reaches mission entry without the 0x468 case (R2-ENGINE-523), so it
+does not create hires again; the hire's selection and availability stay in
+the bank (R2-SESSION-158).
+
+**Confidence.** Medium: the group list body was read in RU only, and the
+mission save path that calls it was not traced in this experiment.
+
+**Unknown.** The EN group list; whether a hire's map registration is
+rebuilt on LOAD. The EN counterpart of `R2.0122`, the caller of the list
+body and the collection identity at owner +0x28 settle the first; a saved
+mission state with a hire, read back after LOAD, settles the second.
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)

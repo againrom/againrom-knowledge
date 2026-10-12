@@ -436,6 +436,43 @@ at 0x850..0x89F and town552..571 at 0x8A0..0x8EF. Native transfer and saved
 pointer relations do not establish executed cold LOAD preserving the
 same roster or literal binding. — R2-SESSION-158
 
+The hire loop runs only in the mission-entry case whose current location
+record has type 1. A pass over `E8` calls and `.rdata` words finds one
+creator caller per root, so LOAD creates no hire among the routes the pass
+sees (Medium; `E9` jumps, `.data` words, immediates and the RU section
+`.st1073` are unscanned). EN and RU agree on the entry case. — R2-ENGINE-523
+
+A hire takes the Humans row with serverID 10000+10*ID, else the Units row,
+highest index first; when its family has suffix rows, the row keyed
+9998+10*ID+stage/10 (stage bank 768, truncated) replaces it. Installed rows
+exist for hires 1..7 only; hires 8..20 get Units index 0. The join is
+Medium. — R2-ENGINE-524, R2-ASSET-125
+
+A hire actor carries WORD+0x14c = ID and its row's typeID as class WORD+0x0e
+(15, 5, 23, 100, 102, 101 or 26, Medium) in its own Group under the owner the
+Players collection's head getter returns (the hero's where the map build
+reuses it, Medium). Every hire class is outside 33..63, so the victory
+transition detaches hires (Medium). The unit-state sender clears the field
+bit that sends +0x14c when Session +0x74 is nonzero (Humans hires always,
+Units hires when the key is 0x6000 or more; EN only, Medium for play). The
+cell a hire starts on is Unknown. — R2-ENGINE-525, R2-ENGINE-526,
+R2-ENGINE-527
+
+At mission end a client update of a unit with +0x1dc in 1..20 and signed
+health word below -10 sets availability bank[531+ID] to 0 where the update
+carries +0x14c (Medium). The ordinary departure then turns a nonzero
+availability to 2 when the selection is nonzero and to 1 when it is zero,
+the 2 of an unselected hire turns to 1 at the next ordinary departure, and
+selection is cleared. A dead hire's availability stays 0 until another
+writer of R2-SESSION-048 or R2-ENGINE-380 stores a nonzero value; a
+selected survivor rests one departure (Medium as a composition; the
+victory-arm link is not read here). — R2-SESSION-195
+
+In RU the hire's Group is, at Medium, in the Player group list a mission
+save writes and LOAD rebuilds (the list's caller and collection identity
+are unread); the Unit body carries class, owner and hire ID. EN is
+Unknown. — R2-SESSION-196
+
 ## Catalog and campaign graph
 
 The catalog holds 49 records: towns 1, 2 and 3 (type 2) and 46 missions

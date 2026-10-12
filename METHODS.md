@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3658. Observation: 99. Static analysis: 3058. Mixed: 501.
+Claims labelled: 3666. Observation: 99. Static analysis: 3065. Mixed: 502.
 
 ## Ledger ai
 
@@ -1687,6 +1687,7 @@ Claims labelled: 3658. Observation: 99. Static analysis: 3058. Mixed: 501.
 | R2-ASSET-122 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-123 | static analysis | ✔ promoted (branch candidate) |
 | R2-ASSET-124 | mixed | ✔ promoted (branch candidate) |
+| R2-ASSET-125 | mixed | ● active |
 
 ## Ledger rom2-engine
 
@@ -1949,7 +1950,7 @@ Claims labelled: 3658. Observation: 99. Static analysis: 3058. Mixed: 501.
 | R2-ENGINE-378 | mixed | ● active (branch candidate) |
 | R2-ENGINE-379 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-380 | mixed | ● active (branch candidate) |
-| R2-ENGINE-381 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-381 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-382 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-384 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-385 | static analysis | ● active (branch candidate) |
@@ -2068,6 +2069,11 @@ Claims labelled: 3658. Observation: 99. Static analysis: 3058. Mixed: 501.
 | R2-ENGINE-519 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-520 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-521 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-523 | static analysis | ● active |
+| R2-ENGINE-524 | static analysis | ● active |
+| R2-ENGINE-525 | static analysis | ● active |
+| R2-ENGINE-526 | static analysis | ● active |
+| R2-ENGINE-527 | static analysis | ● active |
 
 ## Ledger rom2-session
 
@@ -2162,6 +2168,8 @@ Claims labelled: 3658. Observation: 99. Static analysis: 3058. Mixed: 501.
 | R2-SESSION-187 | static analysis | ● active |
 | R2-SESSION-188 | static analysis | ● active |
 | R2-SESSION-191 | mixed | ● active |
+| R2-SESSION-195 | static analysis | ● active |
+| R2-SESSION-196 | static analysis | ● active |
 
 ## Ledger sav
 

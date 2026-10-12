@@ -6662,7 +6662,7 @@ EN inventory input L2.01652 supplies either one or the displayed quantity under 
 | R2-ENGINE-378 | The two installed ROM2 client Data.bin payloads contain 33 Humans and 22 Units records in the measured campaign-key ranges, covering internal template families for hire IDs 1..7 and controlled identities 21..23. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-380 | Selected ROM2 departure and TALK arms enable hire IDs1..7 through bank availability/town gates; NPC22/topic30 enables hireID2 rather than constructing controlled identity22. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
-| R2-ENGINE-381 | The reached EN mission-entry loop selects a subset of 20 hire IDs from nonzero selection and availability; its paired EN/RU creator writes each input identity and has no additional numeric list cap in the read body. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-381 | The reached EN mission-entry loop selects a subset of 20 hire IDs from nonzero selection and availability; its paired EN/RU creator writes each input identity and has no additional numeric list cap in the read body. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-382 | Selected EN campaign transition cleanup tests actor class WORD+0x0e: classes33..63 take a reset path and other classes take detach/destroy calls; the predicate is not controlled identity WORD+0x14c. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 
 ### R2-ENGINE-378
@@ -6699,6 +6699,12 @@ The acquired Talk body toggles selection for kind1. Its kind2 path reaches the j
 
 **Unknown.** Complete availability writers, restored/bulk-written flag states, hire8..20 producers and recruitment acceptance. Named-stage saves plus the unread direct/indirect writers would settle those populations.
 
+**Amended.** R2-SESSION-195 adds a client writer of availability 532+i
+(value 0, for a hire whose client unit health word is below -10). It
+narrows the "Complete availability writers" Unknown above: the stores of
+R2-SESSION-048 and this claim can replace that zero with a nonzero value, so
+a dead hire's availability is 0 until one of them runs.
+
 ### R2-ENGINE-381
 
 The EN range L2.00827..L2.01206 reaches the loop only after a preceding call returns 1. For i=0..19 it selects i+1 iff bank[512+i] and bank[532+i] are both nonzero. No town test occurs in that loop. A nonempty list and stage768 are passed to L2.00175.
@@ -6710,6 +6716,8 @@ The EN placement call L2.01663 supplies actor, owner, -1, 0xffb and two zeros. T
 **Confidence.** Medium. The body excludes an additional local numeric cap but does not exclude a caller, constructor or destination limit. The native template-table join remains bounded by R2-ENGINE-378.
 
 **Unknown.** Preceding mode predicate, all entering retained members, other callers, final placement and admission failure. The placement/retained-registration cones and a named entry save would settle these.
+
+**Amended.** R2-ENGINE-523 reads the preceding predicate: the loop runs only when the current location record's DWORD +0 is 1, and the creator has one direct caller per root. R2-ENGINE-527 shows the call named placement above is the unit-state sender; its arguments are a field mask and two field values, and final placement stays Unknown.
 
 ### R2-ENGINE-382
 
@@ -11183,3 +11191,217 @@ call-site scan of `call [reg+0x14]` over `.text` and the callers of the
 Building slot-5 body. The root `.alm` maps (R2-ASSET-084), where the
 multiplayer shops and inns would be placed, are not censused; the census
 generator of R2-ASSET-123 over them would settle which kinds they build.
+
+## Hire entry, mission and mission end
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-523 | The ROM2 hire loop runs in the 0x468 case only when the current location record's DWORD +0 is 1; a call and .rdata-word pass finds one creator caller per root, so LOAD creates no hire (Medium). | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-524 | The ROM2 hire creator looks up 10000+10*ID in Humans (parameter 24), then Units (parameter 55), highest index first; a stage row 9998+10*ID+stage/10 replaces it when the family has suffix rows. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-525 | A ROM2 hire actor is built by row name, gets WORD +0x14c = ID, joins owner +0x24 in its own new Group, and keeps its row's typeID as class +0xe: 15, 5, 23, 100, 102, 101 or 26. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-526 | ROM2 victory's last owner loop resets actors of class 33..63 and detaches every other actor through L2.01670 and its virtual slot +4 with 1; every installed hire row's class is outside 33..63. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-527 | The hire creator's last call is the EN unit-state sender: argument 3 is a field mask, 0xffb and two zeros feed two field helpers; the creator writes no coordinate, and the hire's cell is Unknown. | High / Unknown | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+
+### R2-ENGINE-523
+
+The 0x468 case (EN `L2.00827`, RU `L2.02658`; the case named by
+R2-ENGINE-076 and R2-ENGINE-411) calls the Scenario current-location
+pointer, then the record getter (EN `L2.02659`, RU `L2.02660`), which
+returns DWORD +0 of the record. When it is 1 the case reads GetVar(512+i)
+and GetVar(532+i) for i=0..19, appends i+1 when both are nonzero, calls the
+creator (EN `L2.00175`, RU `L2.00177`) with GetVar(0x300) and the list when
+the list is nonempty, calls `L2.00466` with 0 on app +0xd0, then calls
+mission entry with 0 in either case. Any other value calls `L2.02197` with
+two zeros on app +0xd0 and the town entry `L2.00266`. The DLL record setter
+`D2.00086` stores its first argument at +0 and its second at +4;
+ScenarioGetCurrentLocation returns the current pointer `D2.00007`;
+ScenarioIsMissionAvailable accepts records whose getter `D2.00010` returns 1
+and ScenarioIsTownAvailable those that return 2. ScenarioLeaveLocation
+sends type 2 to `D2.00013` and every other type to the ordinary departure
+`D2.00012`.
+
+A call-target pass over each `.text` found one direct call of the creator
+per root, at EN `L2.02661` and RU `L2.02662`, and a dword pass over each
+`.rdata` found no entry address. The pass sees `E8` calls and `.rdata`
+words only. The load entry and the 0x42f and 0x457 routes into mission
+entry (R2-ENGINE-411) therefore create no hire among the routes the pass
+can see.
+
+**Confidence.** High for the predicate, the loop, the order of the calls
+and the DLL bodies, read in both roots (entry case equal after masking
+addresses and frame slots, except one exception-state byte). Medium that
+type 1 means a mission: the getter `D2.00010` was not read and the meaning
+rests on the export names. Medium for the single route: the call-target
+pass is a navigation receipt and sees no register call or pointer outside
+`.rdata`.
+
+**Unknown.** Which senders post 0x468 and whether the 0x42f and 0x457
+routes can follow a hire selection. The caller pass does not see `E9`
+jumps, `.data` words, immediate operands, register calls, or the RU
+section `.st1073`; an `E9`, `.data` and immediate-operand scan of both
+roots plus the RU `.st1073` section would settle the single route. The
+senders of 0x468 are settled by a scan of the calls that post the literal
+0x468.
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-ENGINE-524
+
+The creator's object `L2.00811` (RU `L2.02561`) holds the Humans collection
+at +0xa0 (`L2.00148`) and the Units collection at +0x8c (`L2.00146`). Lookup
+`L2.02663` (RU `L2.02560`) walks Humans from the last index down to index 1
+and returns the first index whose row passes `L2.02664` and whose parameter
+0x18 (24) equals the key; `L2.02665` (RU `L2.02666`) does the same on Units
+with parameter 0x37 (55). Index 0 is never returned. For each input word
+masked to 16 bits the creator looks up 10000+10*ID in Humans, then in Units,
+and remembers which answered. In that table it probes 10000+10*ID+k for
+k=1..9 and stops at the first positive index. When one answered it looks
+up 9998+10*ID+trunc(stage/10), with the stage signed and divided by 10, and
+a nonzero index replaces the base index. A Humans index builds a 0x254-byte
+Human from the row's name (`L2.00214`, RU `L2.00130`); a Units index builds
+a 0x208-byte Unit (`L2.01063`, RU `L2.00129`).
+
+Applied to the installed rows (R2-ASSET-125), hires 1..7 take the rows of
+`hire-template-join.tsv`: at stages 30..110 the row whose name carries the
+stage when the family has one (XBowman30, Knight30, Druid60, Troll70, Orc60,
+Mage60, MercenaryCatapult at 110), the Base row below it, and at stage 10
+or 120 a row of the neighbouring family when its serverID equals the stage
+key (hire 2 at stage 10 takes XBowman110, hire 1 at stage 120 KnightBase).
+Hires 8..20 have no row in either table, so both lookups return 0 and a Unit
+is built from Units index 0.
+
+**Confidence.** High for the lookup bodies and the key arithmetic, read in
+both roots and equal after masking. Medium for the join: `L2.02664` and the
+parameter accessor `L2.02667` were not read (R2-ENGINE-072 reads the
+accessor as base plus 4*index), and the join assumes the native collections
+hold the `world.res` rows in census order.
+
+**Unknown.** Whether a hire enters a mission at stage 10 or 120 (the
+stage-range reach of R2-SESSION-112 or a named-stage save settles it);
+whether a hire ID above 7 is ever selected (the writers of selection and
+availability 8..20, the unread part of R2-ENGINE-380); the native join
+(a read of `L2.02664`, `L2.02667` and the collection filler).
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-ENGINE-525
+
+The Human constructor passes the row name with two zero arguments to the
+Humans template load (`R2.0088`, RU `R2.0089`). The load stores +0xe = 0,
+takes the hero class rule (+0xe = 0x21 or 0x23 plus gender) only when its
+second argument is nonzero or the name starts at `Hero`, and otherwise ORs
+gender into +0x4b. Its parameter routine (`L2.00219`, RU `L2.00220`) moves
+the row's word into +0xe through `L2.02668` after the school skills and
+before +0x4b, +0x134, +0x135, +0x49 and +0x4a: the typeID position
+(R2-ENGINE-319). The Unit constructor calls the Unit initializer (`L2.01793`,
+RU `L2.01794`), which stores +0xe = 0 and calls the Units name parser
+(`R2.0086`, RU `R2.0087`); that parser selects the row by name, writes
++0x14c from parameter 55 and calls the Units parameter routine (`L2.02669`,
+RU `L2.02341`), whose +0xe reader precedes +0x4b, +0x49 and +0x4a, the
+titles typeID, face, tokenSize and movementType at parameters 29..32. The
+installed typeIDs are 15 (XBowman), 5 (Knight), 23 (Mage), 100 (Druid), 102
+(Troll), 101 (Orc) and 26 (both Catapult rows) (R2-ASSET-125).
+
+The creator then writes WORD +0x14c = ID, +4 = the low word of `L2.02670`,
++0x14 = the owner from `L2.00310` on `L2.00292` (RU `L2.00311` on its
+counterpart), appends the actor to owner +0x24, builds a 0x50-byte Group,
+appends it to the collection at owner +0x28 and the actor to the Group,
+registers both with the map at `L2.01066`, and calls the unit-state sender
+(R2-ENGINE-527). The map build's owner builder (`R2.0081`, RU `R2.0024`)
+reuses the owner from the same getter for its first row when Session +0x74
+is 0 and `L2.00223` returns 1. The Humans template load stores the
+parameter-24 word at +0x14c and, for a word above 10000, replaces it with
+(word/10)%1000 (`L2.02671..L2.02672`), which equals the hire ID for the
+Humans hire rows (hires 1, 2, 6). The Units name parser stores the low word
+of parameter 55 unchanged (`L2.02673..L2.02674`), so a Units hire row
+(hires 3, 4, 5, 7) leaves the serverID word (10030, 10040, 10050, 10070 ...)
+until the creator overwrites it with the ID.
+
+Hires are treated apart from other party members in three read bodies: the
+victory transition by class (R2-ENGINE-526); the client availability store
+for +0x1dc 1..20 (R2-SESSION-195); and the EN sender. The sender splits on
+a virtual call `[obj+0x30]` at `L2.02675`. When it returns zero, a key +4
+below 0x6000 with +0x14c above 20 reduces the mask by `&= 0x800000fb` and
+`&= ~0x20` (a test hires, 1..20, do not meet and the hero, 21, does), and a
+key at or above 0x6000 with Session +0x74 nonzero clears field bit 0x80
+(`and al, 0x7f`, `L2.02676..L2.02677`). When it returns nonzero, an actor
+whose owner equals the recipient reaches `L2.02678`, where Session +0x74
+nonzero clears the same bit. Bit 0x80 is the bit that sends +0x14c
+(R2-ENGINE-527). The creator passes the actor's own owner as recipient.
+
+**Confidence.** High for the stores, the reader order and the branch, from
+bodies read in both roots (the Humans load and Units parser differ only in
+item allocation sizes). Medium for the class values: the parameter index
+each sequential reader takes rests on the title order, as in R2-ENGINE-319.
+Medium that the owner is the hero's: the getter `L2.00310` returns zero for
+an empty collection and otherwise the head element of the Players
+collection (`L2.02679..L2.02680`); its callees `L2.02681` and `L2.02682`
+and `L2.00223` were not read, so "the hero's" holds only where the map
+build's first row reuses it. The sender's mask tests are EN only; the
+virtual body behind `[obj+0x30]` and the key `L2.02670` (navigation only)
+were not read.
+
+**Unknown.** Other writers of +0xe between creation and the mission end (a
+scan of word stores to +0xe and of calls to `L2.02668` would settle it);
+the RU sender (its counterpart of `L2.01056`, found by a caller pass over
+the RU creator); the owner (a read of `L2.02681`, `L2.02682`, `L2.00223`).
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-ENGINE-526
+
+The victory transition (EN `L2.01664`, RU `L2.01833`; R2-ENGINE-412) ends
+with a loop over the owners of `L2.00292`. An owner with +0x2c nonzero or a
+matching name is removed. For every other owner it walks the +0x24 actor
+list: an actor whose zero-extended class +0xe is at least 0x21 and below
+0x40 gets HP and mana set to their maxima, +0x13c = 0, the reset `L2.01668`
+and five cleared fields; every other actor is passed to `L2.01669` (RU
+`L2.01841`), which calls `L2.01670` with it and then the actor's virtual
+slot +4 with argument 1. The hire classes 5, 15, 23, 26, 100, 101 and 102
+(R2-ENGINE-525) are all outside 33..63, so every installed hire row takes
+the detach branch. R2-ENGINE-412 states classes 33..63 only; how Start_
+heroes are built, and so their class, is Unknown here.
+
+**Confidence.** High for the loop, the predicate and the detach body, read
+in both roots (the RU transition pushes one more argument before a late
+call). Medium that each hire is removed from the party: it composes the
+class values, which no census of +0xe writers backs, and rests on steps
+not read here: `L2.01670` (R2-ENGINE-382 read it at Medium), virtual slot
++4, the world clear (EN `L2.01837`), the map deletion and the first owner
+loop that calls ten unread functions (R2-ENGINE-412). Medium that slot +4
+with 1 destroys the actor: that body was not read. Defeat reaches the
+transition only under R2-ENGINE-412's gate.
+
+**Unknown.** What `L2.01670` removes beyond R2-ENGINE-382's reading (a read
+of `L2.01670` and the slot +4 body settles it); the fate of a hire actor
+that died earlier in the mission (a read of the death path and of the
+first owner loop's ten callees); the class of a Start_ hero (a read of
+the hero build path).
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+### R2-ENGINE-527
+
+The creator's last call per hire passes actor, owner +0x14, -1, 0xffb, 0
+and 0 to `L2.01056` on `L2.00994`. In the EN body, a null owner argument
+repeats the call for every owner; otherwise the third argument is a field
+mask: bit 1 sends +0x94, bit 0x80 sends +0x14c, and the mask is reduced for
+some actors: two reductions on the path where the virtual call `[obj+0x30]`
+at `L2.02675` returns zero, and a clear of bit 0x80 when Session +0x74 is
+nonzero (R2-ENGINE-525). Under bit 0x400000 the fourth argument goes to
+`L2.02683`; under bit 0x200000, and only when the actor's owner equals the
+recipient, the fifth and sixth go to `L2.00497`. The creator writes no
+coordinate, and neither does the sender's body. The hire's cell at mission
+start is set elsewhere.
+
+**Confidence.** High for the EN sender's use of its arguments, from its
+complete body. The RU sender was not read. The packet writer `L2.02684`
+behind "sends" and the virtual body behind `[obj+0x30]` were not read.
+Unknown for the cell.
+
+**Unknown.** The cell where a hire stands. Reading the map registration
+callees `L2.02685` and `L2.02686`, mission entry `R2.0026` and the map
+build's per-actor calls (`L2.00201`, `L2.02687`, `L2.02688`) would settle
+it.
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)

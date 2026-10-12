@@ -1671,3 +1671,44 @@ the kind to the collection.
 code path from kind to Buildings entry: a call-target scan of the
 Buildings collection accessor and a read of its callers in the type-4 pass
 and the structure constructors would settle it.
+
+## Hire template rows in world.res
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-125 | ROM2 world.res has hire-keyed rows only for hires 1..7, equal in EN and RU: Humans XBowman, Knight and Mage (typeID 15, 5, 23) and Units Druid, Troll, Orc and Catapult (100, 102, 101, 26). | High | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+
+### R2-ASSET-125
+
+A census of `data/data.bin` in each root's `world.res` lists every Humans
+row whose parameter 24 and every Units row whose parameter 55 is in
+10000..10399. The EN and RU payloads have one SHA-256, so the rows are
+equal. Humans ordinals 263..272 are 2MercenaryXBowmanBase and
+2MercenaryXBowman30..110 (serverIDs 10010..10019), 273..282 the Knight rows
+(10020..10029) and 283..289 2MercenaryMageBase and 2MercenaryMage60..110
+(10060, 10064..10069). Units ordinals 27 and 28 are CatapultBase (10070) and
+MercenaryCatapult (10079), 221..227 MercenaryDruidBase and
+MercenaryDruid60..110 (10030, 10034..10039), 228..233 the Troll rows (10040,
+10045..10049) and 234..240 the Orc rows (10050, 10054..10059). The other rows
+in the range are the hero rows Start_MF, Start_FF, Start_MM, Start_FM
+(10210..10213), Fighter_Hero (10220) and Mage_Hero (10230). No row has a key
+in 10080..10209, so hires 8..20 have no base row and no suffix row. RU
+`world_srv.res` adds DM_ rows with serverIDs 10300..10308; EN has no
+`world_srv.res`.
+
+The typeID parameter (Humans parameter 16, Units parameter 29, each named by
+the title at the following index) is 15 for XBowman, 5 for Knight, 23 for
+Mage, 100 for Druid, 102 for Troll, 101 for Orc and 26 for both Catapult
+rows. The Humans gender parameter is 1 for XBowman and 0 for Knight and
+Mage. For comparison, the Start_ hero rows carry typeID 3 (MF), 14 (FF), 24
+(MM) and 24 (FM), and Fighter_Hero 5 and Mage_Hero 23.
+
+**Confidence.** High for the row census and the values: derived from the
+committed census over both roots and reproduced byte for byte. The title
+naming of each parameter follows R2-ENGINE-319.
+
+**Unknown.** Rows of other archives the game might load in place of
+`world.res` (the loader's archive list and a census of each archive's
+`data.bin` settle it).
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
