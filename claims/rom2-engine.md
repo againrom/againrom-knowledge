@@ -6315,7 +6315,7 @@ controlled owner observation of a computer mage.
 | R2-ENGINE-360 | RU options controls 0x83/0x84/0x85 supply target bits 1/2/4; the support affinity helper accepts self, same-owner, relation-bit-2 and relation-low-bits-zero cases with the recorded masks. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
 | R2-ENGINE-361 | Selected EN/RU receive arms use packet word +5 to find a Player and copy packet byte +0xe into that Player preferences +0x20; the cycle sender carries no actor or Group identity. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
 | R2-ENGINE-362 | RU sampled idle and attack routes admit human support through actor flags +0x4c mask 4, owner kind zero and spell-book affordability; invocation cadence and move/hold/retreat coverage remain Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
-| R2-ENGINE-363 | RU prepared support byte 8 dispatches to L2.01552 when primary byte +9 is zero; it initializes a cast phase or a target approach, while sampled setters clear a pending support order. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
+| R2-ENGINE-363 | RU prepared support byte 8 dispatches to L2.01552 when primary byte +9 is zero; it initializes a cast phase or a target approach, while sampled setters clear a pending support order. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
 | R2-ENGINE-364 | RU support builds candidates from a caster +0x70 population and a spatially marked world list, excludes state 0x10 and relation bit 1, and conditionally filters effect 0x1000 before affinity and range. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
 | R2-ENGINE-365 | RU selected candidate insertion appends at the list tail and traversal follows next nodes; Heal ties and target-major buffs inherit that list order, whose world-population provenance remains Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
 | R2-ENGINE-366 | EN/RU acquired third key tables, cycle masks and receive-arm byte widths agree; full options, caster, target, command and lifetime equivalence was not measured. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2044](../experiments/EXP-2044-rom2-autocast-scope/) |
@@ -6449,6 +6449,8 @@ helpers, player-input callers and completed cast lifecycle remain unread.
 order, and interruption after primary cast initialization. Read the approach
 helpers, setter callers and completion handler; an owner move/attack order
 between preparation and application would distinguish cancellation states.
+
+**Amended.** Cast completion and interruption after primary cast initialization are read in R2-ENGINE-543 and R2-ENGINE-545 (Medium); the two order-1 setters (L2.02806, L2.02807) store prepared byte +8 = 1 rather than clearing it (R2-ENGINE-541). The completed cast lifecycle beyond 543 and the unread items above stay open.
 
 ### R2-ENGINE-364
 
@@ -12003,3 +12005,115 @@ the per-category loop is the one R2-ENGINE-263, R2-ENGINE-265 and
 R2-ENGINE-471 read.
 
 **Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+## Player order machine
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-541 | Each ROM2 player-order setter read resets the unit (state 0), replaces order code +0x50 and its parameters at once and stores prepared byte +8 (0; 1 in the two order-1 setters); none writes primary byte +9. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-542 | The ROM2 unit executor (RU L2.00506, EN L2.00507) handles a nonzero primary byte +9 first (1 strike, 2 cast, 3 step, 4 hold) and reads prepared byte +8 only when +9 is zero; other +9 values: 16 of 255 table cells read. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-543 | A ROM2 cast passes init (+9 = 2, state 13 or 14), a try at the cast routine, wind-up (substate 5) and recovery (substate 7); completion byte +0x136 = 1 lets the executor end it. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-544 | A ROM2 mage's mana is subtracted at the entry of the cast routine (RU L2.02808), before the wind-up, once per call that reaches the delivery; one path returns 0 after it (reachability unread); no refund read. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-545 | A new order during a ROM2 cast replaces the stored order but, in the setter windows read, does not stop, restart or refund the cast; order 1 acts at the next executor call after +9 is 0, others after a planner pass. | Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-546 | A ROM2 step between cells is primary +9 = 3 with state 1; it ends when the position object's offset bytes +4 and +5 both read 0x80; an arriving order waits for that end. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-547 | The ROM2 actor step runs one of five arms by state: 1 step, 2 lookup, 3/13/14 action substates, 15 structure, others none; the executor writes states 0, 1, 2, 3, 13, 14, 15 and 27 (27 for hold and an unread arm). | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-548 | In EN and RU the executor, prepared handlers, cast routine, cast check, session methods and cast planner are equal after masking; actor step, setters, selector and message handler differ in listed fields only. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-549 | The planner schedule and bodies, command word +0xb0, the phase-3 record L2.01727, the apply bodies, the movement helpers and the strike, hold and structure cells of the order table are Unknown. | Unknown | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+
+### R2-ENGINE-541
+
+Population read: RU `ru-order-setters-a` (L2.02806..L2.02809), `ru-order-setters-b` (L2.02809..L2.00506), `ru-session-methods` (L2.02810..L2.02811) and `ru-message-handler`; EN `en-order-setters-b`. The RU setter windows hold 22 stores of an immediate into `[reg+0x50]` (3 and 19); two are the command-object stores of the helpers L2.01576 and L2.01584. The others write the order code on unit +0x50: 1 (L2.02806, L2.02807), 3 (L2.02812), 0xf and 4 (L2.02809 window), 0xd (L2.02813), 0xe (L2.02814), 0xb (L2.02815), 0xc (L2.02637), 0x17 (L2.02816), 8 (L2.02817), 0x11 (L2.02818), 0xa (L2.02819, L2.02820, L2.02821), 0x16 (L2.01579), 2 (L2.01580), 0x1a (L2.01581), 0x18 (L2.01582), 0x19 (L2.01583).
+
+Each setter calls reset L2.01584 first. Reset calls L2.01585, which copies block byte 0 to byte 1, calls L2.02822 when block word +0x80 is nonzero and differs from the cell, recomputes range byte +0x14, clears support flag +0x60 and block +0x7c, and writes unit state +0x54 = 0; L2.01584 then writes command +0x50 = 0. The setter then writes its parameters (cell word +0xa for orders 2 and 4; target +0x28, spell +0x30 and range +0x14 for order 0xd; point word +0x3c, spell +0x30 and range for order 0xe; a target pointer for the others) and prepared byte +8: 0 at the ends of all setters read except the two order-1 setters (L2.02806, L2.02807), which store 1 at RU L2.02823 and L2.02824 (17 stores of 0 in the b window, L2.02825 to L2.02826, and one at L2.02827). All fields belong to one command object, so a write replaces the stored order at once; the setter windows hold no write to a pending-order field.
+
+Primary byte +9 stores in all RU windows read: 4 (L2.01721); 0 (L2.02828, L2.02829, L2.02830, L2.01723, L2.02831; L2.02832 and L2.02833 clear it only from 0xff); 0xff (L2.02834); 3 (L2.02835, L2.02836); 1 (L2.02837); 2 (L2.02838, L2.02839). None is in a setter.
+
+Input chain: the message handler (RU L2.02840, jump table L2.02841, 21 entries indexed by message byte +9 minus 0x12, 17 of them not the default) calls session methods that apply L2.02842 to the selected list (reset L2.01584 and command +0x38 = 0 per unit) and then a setter: type 0x12 reaches L2.02816 (0x17), 0x13 reaches L2.01581 (0x1a), 0x14 reaches L2.01579 (0x16), 0x17 reaches L2.02815 (0xb), 0x18 reaches L2.02637 (0xc), 0x1d reaches L2.02819 (0xa), 0x1f (cast) reaches L2.02814 (0xe), 0x21 reaches L2.01580 (2), 0x24 reaches L2.02809. Types 0x16, 0x19, 0x1a and 0x1c reach L2.02843, L2.02844 or L2.02845, which call L2.02806 or L2.02812 (orders 1 and 3); their inner arms were read as call lists only. No window read calls L2.02813 (order 0xd).
+
+**Confidence.** High for the setter bodies and the reset in RU; the EN setters of the b window (`en-order-setters-b`) are equal after masking (R2-ENGINE-548); the EN setters of orders 1 and 3 were not read. Medium that no pending-order field exists outside the setter windows (command word +0xb0, below) and that these are all the input routines: the callers rest on RU handler arms and one call-target receipt of navigation run 1; a call through a pointer is outside them.
+
+**Unknown.** The inner arms of L2.02843, L2.02844, L2.02845; the callers of L2.02813; the EN jump table. Command word +0xb0: the executor, with +9 zero and `L2.00490` returning nonzero (RU L2.02846..L2.02847), passes the word's two bytes to L2.00093 and clears it; L2.02848 calls L2.00093 too. No setter, session or message-handler window writes +0xb0; its writer and L2.00093 are unread, so it may hold a queued target the setters do not touch. Reading the writer and L2.00093 settles it.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-542
+
+RU `ru-executor` (L2.00506..L2.02849, 467 instructions, 1719/1719 bytes decoded) and EN `en-executor` (467) are equal after masking. The actor step calls it at RU L2.01569 when `L2.01570` returns 0 (R2-ENGINE-399). It sets unit state +0x54 = 0 unless the state is 2 or 15, installs primary 4 when effect mask +0x144 & 0x40000 and +9 is 0 (R2-ENGINE-399), then indexes jump table L2.02849 (6 arms) through byte table L2.02850 by +9 minus 1, guarding only values above 0xfe (L2.02851): 1 reaches the strike arm L2.02852 (state 3), 2 the cast arm L2.02853 (state 13 when command +0x5c is nonzero, else 14), 3 the step arm L2.02854 (call L2.02848, state 1), 4 the hold arm L2.01722 (state 27, clears +9 when the mask bit is gone). The 16 cells read (L2.02850..L2.02855) hold 0, 1, 2, 3 and twelve 5s, which select the clear arm L2.02856 for +9 from 5 to 16. The sixth arm L2.02857 (state 27, +9 kept) is reached by no cell read. The strike and cast arms increment phase byte +0x15 and clear +9 and state when the phase is above 2 and completion byte +0x136 is nonzero. With +9 zero it indexes the 15-entry table L2.01571 by prepared byte +8 minus 1; prepared 3, 13 and 14 do nothing. After a handler it clears block +0x98 when set and replans: order 1 calls L2.02858, order 0xa re-aims, order 0x18 writes +9 = 0xff, otherwise +8 = 0 and L2.02425 runs.
+
+**Confidence.** High for the control flow of the executor and the arms for +9 of 1 to 4 (complete local listing; cells read in both roots, EN equal RU minus 0xa039). Medium that any other +9 value clears: 239 of the 255 byte-table cells (L2.02855..L2.01571) were not read, and the executor itself stores +9 = 0xff at L2.02834 (order 0x18). Medium for the meaning of L2.02848 and L2.00490 (R2-ENGINE-546).
+
+**Unknown.** The 239 unread byte-table cells (L2.02855..L2.01571) in both roots, which fix the arm for +9 from 17 to 255, including 0xff and the sixth arm L2.02857. The planner call schedule (R2-ENGINE-549).
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-543
+
+Prepared byte 8 (handler L2.01552) and 9 (L2.02859) call the cast initializer L2.01575 or L2.02860 when the range helper (L2.01574, L2.02567) admits, else an approach step (L2.01577, L2.02634). The initializers write +9 = 2, phase +0x15 = 0, state 13 (target) or 14 (point), unit +0x5c (target) or +0x60/+0x61 (point), +0x64 (spell), and, when the support flag +0x60 is zero, call L2.01576 (state 0, command +0x50 = 1). Each later executor step sets state 13 or 14 and increments the phase. At phase 3 the arm posts a 21-dword record through L2.01727 (type 2 with a target, type 3 with a point); that callee was not read.
+
+The actor step (RU L2.00028), substate +0x58: substate 0 calls the cast routine L2.00027 (target: L2.00029; point: L2.00030); a nonzero return sets +0x136 = 0, substate 5 and counter +0x6c = byte +0x134; a zero return leaves substate 0 and the call repeats at the next step. Substate 5 decrements +0x6c; at 0 it calls L2.00035 (target) or L2.00034 (point), clears unit +0x64 and +0x68, sets substate 7 and a count from byte +0x135, weapon and speed terms and the result of R2.0021(3); substate 7 decrements and at 0 sets substate 0 and +0x136 = 1. The executor then ends the cast. State 3 (strike) shares the substate machine; a mage with a staff in state 3 enters state 13 with the staff spell.
+
+**Confidence.** High for the local control flow in RU (actor step, executor and cast routine complete; EN executor and cast routine equal after masking; EN actor step differs in two item-field offsets and two allocation sizes). Medium for the stage meaning: L2.01727, L2.00035 and L2.00034 were not read.
+
+**Unknown.** What L2.01727 does at phase 3 and what the apply routines do.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-544
+
+The cast routine L2.00027(spell, caster, target, x, y) (RU `ru-cast-routine`, 329 instructions; EN equal after masking): when the caster is a mage (L2.00044) and has no item (+0x68 zero), it returns 0 if spell cost word +0xc is above signed mana +0x9a, else subtracts the cost at RU L2.02808..L2.02861. It then builds the delivery, L2.02155 for a target spell and L2.02156 for a point spell, with a delay from distance and speed (R2-ENGINE-017), or the Prismatic path for kind 11. The subtraction precedes the wind-up and is made once per call that reaches the delivery. One path returns 0 after the subtraction: at RU L2.02862..L2.02863 the routine returns 0 when the spell object's +4 (the row pointer of R2-ENGINE-017) is 0. After a zero return the actor step calls the routine again at its next step, so on that path the subtraction would repeat; whether +4 can be 0 for a spell the book holds is unread. The executor, actor step and cast routine windows hold no instruction that adds to +0x9a.
+
+**Confidence.** High for the subtraction point and, for a call that reaches the delivery, once. Medium for the zero return after the subtraction (reachability unread) and for "no refund": the windows are not a census of writers of +0x9a (mana regeneration, R2-ENGINE-030, adds to it in the actor tick).
+
+**Unknown.** A census of writers of +0x9a; whether the spell object's +4 is ever 0 at the cast routine.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-545
+
+Composed from R2-ENGINE-541, 542 and 543, each read in RU. The setters replace the stored order and store +8 (0, but 1 in the two order-1 setters) but not +9; the executor ignores +8 while +9 is 2; the cast keeps its target and spell in unit +0x5c and +0x64, taken at init, so a later order's spell or target in the command object does not reach the running cast. The setter's reset writes state 0; the next executor step sets state 13 or 14 again and substate +0x58 is not touched, so wind-up and recovery continue. The cast ends through +0x136 after recovery.
+
+Per input, for the kinds whose setter and planner bodies were read (the cast, planner L2.01524, and orders 0x18, 0x19 and 0x1a, planners L2.02864 and L2.02865): the same spell at the same target again, another spell or target, and those three stop or cancel orders are stored at once and take effect after the cast has ended; order 1, prepared by its setter (+8 = 1), acts at the next executor call after +9 returns to 0, and the other kinds wait for the planner. For a move, an attack and the orders 0x16, 0x17 and 0xc the setter stores the order at once and the cast arm ignores it; their planners were not decoded; none restarts the cast, subtracts mana before the new cast's own routine call succeeds, or refunds. In init and substate 0 (+9 = 2, routine not yet succeeded) the same holds; a mage short of mana gets a zero return each step and the executor ends the cast at the first step with phase above 2 and +0x136 nonzero, with no subtraction.
+
+**Confidence.** Medium: the planner pass that turns the stored order into prepared byte +8 was not read for timing, and most planners were not decoded (R2-ENGINE-549); an unread planner may write +9 or +8, and L2.02866 calls the cast initialiser L2.01575 directly; no instruction comparing a new order with the running cast is in the windows read; the end of a failed cast depends on the earlier value of +0x136.
+
+**Unknown.** The planner schedule; the unread planners as possible writers of +9 and +8 (list in R2-ENGINE-549); the per-input result for a move or attack whose planner bodies were not read; the behaviour when +0x136 is 0 at a failed cast.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-546
+
+Prepared handlers L2.01577 (approach) and L2.02634 (step) call a path helper (L2.01578, L2.02867) and, when `L2.00490` on unit +0x10 returns 0, set +9 = 3 and phase 0, and state 1. `L2.00490` returns 1 only when the position object's bytes +4 and +5 both equal 0x80 (RU `ru-position-idle`). The executor step arm (+9 = 3) calls L2.02848 each step, sets state 1 and, once `L2.00490` returns nonzero, clears +9 and sets state 0. An order of any kind arriving during the step is stored by its setter (state 0, +8 = 0); the arm keeps +9 = 3 and sets state 1 again, so the new order acts after the position offsets return to 0x80. The setters and reset write no position-object field; reset calls L2.02822 (a wrapper of L2.02410, unread) when block +0x80 differs from the current cell.
+
+**Confidence.** High for the executor and handler control flow and the L2.00490 test. Medium for the position staying unchanged and the step running on: L2.02848, L2.02410 and L2.01578 were not read.
+
+**Unknown.** The bodies of L2.02848 and L2.02410.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-547
+
+Byte table L2.02590 (15 cells for states 1..15) and jump table L2.02591 (6 entries), equal in EN after the constant 0x9c03: state 1 to arm L2.02868 (step L2.00157, then +0x58 = 0), state 2 to L2.02869 (a lookup by position in the collection at `L2.02538`, then L2.02870; bodies unread), states 3, 13 and 14 to L2.02871, state 15 to L2.02594 (R2-ENGINE-518), states 4..12 to the empty arm. The executor writes state 0 (baseline), 1 (steps), 2 (prepared 7 via L2.01526: set once, a second call resets the order), 3 (strike), 13/14 (cast), 15 (structure, L2.02632, R2-ENGINE-519) and 27 (hold, and the sixth executor arm L2.02857, which no byte-table cell read reaches; the cells L2.02855..L2.01571 are unread, R2-ENGINE-542). The actor step returns at once in state 16 and writes state 0 when health is not above zero (R2-ENGINE-518).
+
+**Confidence.** High for the tables and the arm control flow (RU actor step 2808/2819 bytes decoded; the undecoded tail is the jump table). Medium for the meaning of state 2 (arm bodies unread).
+
+**Unknown.** The state-2 arm and L2.02870.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-548
+
+Masked comparison (hex numbers at or above 0x400000 replaced; `evidence/compare_en_ru.py`, output `evidence/en-ru-compare.tsv`) over the generation listings: executor 467 of 467 instructions equal; prepared handlers 861 of 861; cast routine 329; cast check 45; session methods 1107; cast planner 298. Order setters: 778 of 786 RU instructions equal, the rest one jump table decoded as code. Order selector: 263 equal, one jump-table block. Message handler: 28 blocks differ only in `[ebp - N]` frame slots. Actor step: 814 of 821 equal; the differences are two item-field reads (+0x88 RU, +0x84 EN, at the staff-spell copy), two allocation sizes (0x58 RU, 0x54 EN) and the jump table. The primary, prepared and state tables read in both roots are equal after a constant shift per table (`evidence/en-ru-tables.tsv`). Branch distances are masked in this comparison.
+
+**Confidence.** High for equality of the listed bodies as masked instruction text. Medium for behavioural equality of the masked differences.
+
+**Unknown.** EN setters of orders 1 and 3, the EN jump table L2.02841 and the EN planners L2.02401 and L2.01530 were not read.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
+
+### R2-ENGINE-549
+
+Cells of the order-by-state table that stay Unknown, each settled by reading the named body: (1) how often the planner L2.01725 runs (R2-ENGINE-396 joins its scheduler loop but not the cadence), which fixes the delay between a cast end and the new order; (2) what the phase-3 record posted to L2.01727 changes; (3) the apply routines L2.00035 and L2.00034; (4) the movement helpers L2.02848, L2.02410, L2.01578; (5) a player order in a strike (state 3), in hold (+9 = 4) and at a structure (state 15), beyond the executor structure shared with the cast; (6) the inner arms of L2.02843, L2.02844, L2.02845 and the callers of the order-0xd setter; (7) the planners of orders 0x16, 0x17, 0x18, 0x19 and 0x1a (L2.02449, L2.02864, L2.02872, L2.02865 were decoded but not read for meaning); (8) the planners of the selector table L2.01729 not decoded, each a possible writer of +9 and +8: L2.02401, L2.01530, L2.02440, L2.01732, L2.02439, L2.01731, L2.02873, L2.02874, L2.02875, L2.01733, L2.01730, L2.02449 and the idle path (L2.02866 calls the cast initialiser L2.01575 directly); (9) command word +0xb0, its writer and its consumer L2.00093 (R2-ENGINE-541); (10) the 239 byte-table cells L2.02855..L2.01571 and the sixth executor arm L2.02857 (R2-ENGINE-542); (11) whether strike and hold share the cast's non-interruption beyond the executor structure.
+
+**Confidence.** Unknown.
+
+**Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)

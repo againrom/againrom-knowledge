@@ -187,10 +187,11 @@ increments phase and calls an unread cast-delivery helper at phase 3.
 Nonzero actor completion byte+0x136 clears primary+9. Complete effect
 application and parent timing remain Unknown. — R2-ENGINE-363, R2-ENGINE-396
 
-Several sampled setters clear pending byte+8 and the support flag. Their
-player-input callers and interruption after primary cast initialization are
-not joined. Whether the former order resumes and how often support tries
-remain Unknown. — R2-ENGINE-362, R2-ENGINE-363
+Several sampled setters clear pending byte+8 and the support flag; the two
+order-1 setters store byte+8 = 1. Interruption after primary cast
+initialization is read in R2-ENGINE-545. Whether the former order resumes and
+how often support tries remain Unknown. — R2-ENGINE-362, R2-ENGINE-363,
+R2-ENGINE-541, R2-ENGINE-545
 
 ## Selected offense, computer policy and locales
 
@@ -217,3 +218,20 @@ The stored Defensive value -1 is not bound to that cached flag in the read
 population. Actual Blizzard admission, selected choice, caller reachability
 and EN choice parity remain Unknown. The local conditional test is Medium;
 no original cast was observed (R2-SESSION-162).
+
+## Player order machine
+
+A player order reaches the unit through a setter that resets the unit state,
+replaces the order code and parameters at once and stores prepared byte +8: 0,
+except in the two order-1 setters, which store 1; no setter writes primary
+byte +9 (R2-ENGINE-541). The executor reads +9 first (1 strike, 2 cast, 3 step,
+4 hold; the 239 byte-table cells for other values are unread) and prepared
+byte +8 only when +9 is zero (R2-ENGINE-542). A cast passes init, the
+cast-routine try, wind-up and recovery (R2-ENGINE-543); the mage's mana is
+subtracted at the cast routine's entry, once per call that reaches the delivery
+(R2-ENGINE-544). A new order during a cast or a step between cells is stored
+and, in the setter windows read, acts after the running action ends; order 1
+acts at the next executor call, the other kinds after a planner pass
+(R2-ENGINE-545, R2-ENGINE-546). Most planners, the command word +0xb0 and the
+strike and hold cells are unread. States, EN/RU equality and Unknowns:
+R2-ENGINE-547, R2-ENGINE-548, R2-ENGINE-549.
