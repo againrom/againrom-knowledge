@@ -10939,3 +10939,247 @@ a helper, or a copy of the row, would escape it.
 
 **Unknown.** What the collection at `L2.02501` and the 0x1e4 object are;
 an EN call-target scan of the getters would bound the EN readers.
+
+## Map structure objects: Pointer, Shop and Inn
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-517 | The ROM2 0x70 structure class is Pointer, a Building subclass built for type-4 kinds 0x46..0x4b; it overrides only vtable slots 0 (runtime class), 1 and 2 (Serialize), and Serialize transfers dword +0x6c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-518 | At health above 0, a ROM2 actor step in state 15 looks up a building within distance 2 of (x-1, y-1) (Medium); a Pointer with +0x6c above 0 calls the executor with +0x6c each step; Shop and Inn call L2.02566 with 0x83, 0x84. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-519 | ROM2 unit state 15 is set by one order handler when `L2.02567` returns nonzero (Medium: arrival in range); its next call in state 15 calls `L2.01576`, which sets [r+0x50] to 1. One state-15 store per root found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-520 | ROM2 compiled action slots follow node order over nodes below 0x10002; Pointer +0x6c counts the same nodes. That a slot advances only on a successful compile is Medium; +0x6c names node e2 only if no earlier node failed. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-521 | In the RU bodies read, Shop slot 5 calls a method of its 0x98 helper and Inn slot 5 walks a member list and a call counter; neither body reads the 11b or 11a fields; no campaign map has a Shop or Inn. No slot-5 caller was read. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+
+### R2-ENGINE-517
+
+The 0x70 objects of R2-ENGINE-512 belong to the class whose record is RU
+`L2.02568` and EN `L2.02569`: name "Pointer" (RU `L2.02570`, EN
+`L2.02571`), size 0x70, base record RU `L2.02572` and EN `L2.02573`, named
+"Building", size 0x6c. The ctor (RU `L2.02548`, EN `L2.02574`) calls the
+Building ctor (RU `L2.02550`, EN `L2.02575`, which stores the Building
+vtable RU `L2.02576`, EN `L2.02577`), stores the Pointer vtable (RU
+`L2.02549`, EN `L2.02578`) and sets +0x6c to -1.
+
+The two vtables have 15 slots each and differ in three: slot 0 returns the
+class record (RU `L2.02579`), slot 1 (RU `L2.02580`) is called the
+destructor on a navigation window only, with no committed listing of its
+body, and slot 2 is Serialize (RU `L2.02581`). Serialize calls the
+Building Serialize (`L2.02582`), then, when `R2.0017` on the archive
+returns nonzero, passes dword +0x6c to `L2.00354`, else passes the address
+of +0x6c to `L2.02583`. Every other slot, slot 5 included, is the Building
+method. The Shop record (RU `L2.02584`, size 0xc4, name "Shop") and the
+Inn record (RU `L2.02585`, size 0xec, name "Inn") have the same base record.
+
+**Confidence.** High for the class identity, the slot comparison and the
+ctor and Serialize bodies: the ctor (22 instructions), Building ctor (39),
+slot 0 (8) and Serialize (26) are equal in EN and RU after address
+masking, and both vtables and both records were read in each root. Medium
+that Serialize writes +0x6c to a save and reads it back: the archive
+helpers `R2.0017`, `L2.00354` and `L2.02583` were not read here.
+
+**Unknown.** Which save sections carry these objects; reading `R2.0017`,
+`L2.00354` and `L2.02583` and the caller of the collection's Serialize
+slot would settle it. The body of slot 1 is unread in a committed
+listing.
+
+### R2-ENGINE-518
+
+The actor step (RU `L2.00028`, EN `L2.00263`, both 0xaeb bytes; R2-ENGINE-030
+and R2-ENGINE-399 call the same function the actor tick or step) returns at
+once in state 0x10. It reaches the switch only when signed word unit +0x94
+is above 0 (RU `L2.02586`..`L2.02587`: `movsx`, `jg L2.02588`); otherwise
+the path at `L2.02589` writes unit +0x54 = 0, the same gate R2-ENGINE-399
+reads. The switch is on unit +0x54 minus 1 through the byte
+table RU `L2.02590` and jump table RU `L2.02591` (EN `L2.02592`,
+`L2.02593`, equal in content). State 15 reaches the arm RU `L2.02594`
+(EN `L2.02595`):
+
+1. The building lookup (RU `L2.02596`, EN `L2.02597`) on the collection
+   at [[[`L2.01317`]+0x7c]] forms a point from the position at unit +0x10
+   minus 1 in x and y (getters `L2.00486`, `L2.00487`; point helpers
+   `L2.02598` and `L2.02599`, unread) and calls `L2.02600`, which returns the first object in the
+   collection (the iterator helpers `L2.02601`, `L2.02602` and `L2.02603`
+   are unread) whose position gives `L2.02426` at or below 2, with no class
+   test. The arm then tests Shop, Inn and Pointer in that order
+   (`L2.02604`, `L2.02605`, `L2.02606`); an object of another class found
+   first ends the Pointer path, which continues at `L2.02607`. `L2.02426`
+   is the larger of the absolute x and y differences of two byte
+   coordinates (`L2.01523` is absolute value).
+2. A Shop (record `L2.02584`) calls `L2.02566` (unread; "packet" is the
+   first argument's name here, and R2-ENGINE-058 and R2-ENGINE-047 name
+   the different functions `L2.00512` and `L2.00457` as packet producers)
+   on `L2.02608` with 0x83,
+   byte +0x40, 0 and unit +0x14. An Inn (`L2.02585`) calls it with 0x84,
+   byte +0x40, dword +4 and unit +0x14.
+3. A Pointer (`L2.02568`) with signed +0x6c above 0 (`cmp`, `jle` skips
+   0 and -1) passes +0x6c to the action executor `L2.02490` on
+   [`L2.02609`]. The executor copies compiled slot +0x6c (R2-ENGINE-520)
+   and runs its operation through the table of R2-ENGINE-058.
+
+The arm stores nothing to the building and does not change the unit state;
+the step returns after it. So each actor step in state 15 that reaches a
+Pointer calls the executor; nothing in the arm limits the call to once.
+The executor head (151 instructions, ending at the jump into the
+operation table) and the operation arms are not read here; a latch inside
+an operation is excluded only for operation 2, by R2-ENGINE-047 (no latch
+seen at the event producer).
+
+Readers of Pointer +0x6c: a navigation dword scan of RU `.text`, `.rdata`
+and `.data` for the record `L2.02568` has four hits, all in `.text`: the
+arm's class test at `L2.02610`, slot 0 at `L2.02611` and two short
+functions at `L2.02612` and `L2.02613` whose bodies were not read. The ctor,
+Serialize and the type-4 pass store are the other reads and writes found. The executor has
+four direct callers in each root (RU `L2.02614` this arm, `L2.02615` and
+`L2.02616` of the type-10 object, R2-ENGINE-510, and `L2.02617` of the
+trigger runner; EN `L2.02618`, `L2.02619`, `L2.02620`, `L2.02621`).
+
+**Confidence.** High for the arm's tests, branches and its call of the
+executor with +0x6c, and for the lookup and the executor head: the
+actor step is 818 instructions in both roots and equal after masking except
+two reads of +0x84 (EN) against +0x88 (RU) before the switch (RU `L2.02622`,
+`L2.02623`) and two `push 0x54` (EN `L2.02624`, `L2.02625`) against `push
+0x58` (RU `L2.02626`, `L2.02627`). The two pushes lie inside the arm, in
+the non-Pointer branches for building byte +0x40 = 0xf and 0x10 after the
+second lookup, and size an object those branches build. The Shop, Inn and
+Pointer paths (`L2.02604`..`L2.02628`) are equal. The lookups (31 and 27 instructions) and
+the executor head (151) are equal; the switch tables are equal. Medium that
+the arm is the only reader of +0x6c: the record scan ran in RU only, and a
+Pointer reached through a Building field or a virtual slot would escape it.
+Medium for the class tests and the distance origin (x-1, y-1): `L2.02629`,
+`L2.02598`, `L2.02599`, `L2.00486` and `L2.00487` were not read. Medium for
+"first" in the lookup (`L2.02601`, `L2.02602`, `L2.02603` unread) and for
+the packet meaning of 0x83 and 0x84 (`L2.02566` unread). The step function
+has no direct RU caller (a call-target scan found none), so it is reached
+through a pointer.
+
+**Unknown.** Which units run this step and how often: a dword scan of RU
+and EN `.rdata` and `.data` for `L2.00028` and for the vtable that holds it,
+then the caller of that slot, would settle it. What `L2.02566` does with 0x83
+and 0x84 and what their receivers open: a read of `L2.02566` in both roots.
+
+### R2-ENGINE-519
+
+A pattern scan for `mov dword [reg+0x54], 15` with an 8-bit displacement
+(`c7 ?? 54 0f 00 00 00`) over `.text` finds one site per root: RU
+`L2.02630`, EN `L2.02631`. It is in the order handler RU `L2.02632`, EN
+`L2.02633` (47 instructions, equal after masking). With the order record
+r = [unit+0x1c4] the handler calls `L2.02567(unit, word r+0xa, byte r+0x14)`
+on [this+0xa50]:
+
+- nonzero: state 15 when the unit is not in state 15; when it is,
+  `L2.01576(unit)`;
+- zero: `L2.02634(unit, r+0xa, r+0x14)` and state 1.
+
+`L2.02567` returns 1 when the first byte of the record at [unit+0x1c0]
+equals the low byte of `L2.02635(unit, word)` and the low byte of
+`L2.01522` applied to `L2.01521(word)` on the unit's position object is at
+or below the byte argument; it returns 0 otherwise. It calls `L2.00490`
+first and ignores its result. Its helpers `L2.00490`, `L2.02635`,
+`L2.01521` and `L2.01522` are unread, so "arrival" and "range" are names
+for this comparison, not read facts. `L2.01576` calls `L2.01585`
+and `L2.02636`, which calls `L2.01584` (clears r+0x50) and the unread
+`L2.02637`, then stores r+0x50 = 1. It does not store to unit +0x54, and
+nothing read shows that the order ends. R2-ENGINE-363 calls `L2.01576`
+"reset/replan" and R2-ENGINE-504 says the order dispatch `L2.01725` resets
+through it; this claim reads the same function and adds the store of 1. The handler's one direct caller
+is the arm `L2.02638`..`L2.02639` of an order dispatch, which passes r+0x68
+as the second argument. A dword scan of RU `.rdata` for the handler finds
+no table entry and a call-target scan finds one direct caller; both scans
+are generation-1 receipts that were not reproduced, and `.data` was not
+scanned for the handler.
+
+So a unit in state 15 reaches the Pointer lookup of R2-ENGINE-518 on the
+actor steps between the handler call that sets state 15 and the next
+handler call.
+
+**Confidence.** High for the handler body, read in both roots. Medium that
+it is the only producer of state 15: the pattern covers one encoding; a
+store from a register or with a 32-bit displacement is outside it. Medium
+for "arrives" and "range" (the helpers of `L2.02567` are unread), for the
+scan results above and for the reading of the `L2.01576` call as an order
+finish (R2-ENGINE-363 and R2-ENGINE-504 read it as reset or replan). The
+handler's order code, the dispatch head and the helpers `L2.02634` and
+`L2.02637` were not read; the dispatch window and the helpers are RU only.
+
+**Unknown.** Which order code reaches this handler and which producer
+issues it (a player command, computer play or a script): a window over
+the dispatch head (RU `L2.02640`) and a call-target scan of its function
+would settle it. Whether the actor step runs once or more between two
+handler calls: the callers of the step (R2-ENGINE-518 Unknown). What
+`L2.02567` tests: reading `L2.00490`, `L2.02635`, `L2.01521`, `L2.01522`.
+
+### R2-ENGINE-520
+
+The compiler (RU `L2.00116`, EN `L2.00201`) counts the action nodes of
+map+0x40 whose signed dword +0x40 is below 0x10002 (`cmp`, `jge` at RU
+`L2.02641`) and sizes the compiled array [[`L2.02609`]+0xeab0] to that
+count (through `L2.02642`, unread). Its compile loop skips nodes at or above 0x10002
+(0x10002 goes to the u16 collection of R2-ENGINE-042) and fills slot s.
+After the parameter loop, when the compile flag is 1 it maps node ID +0x44
+to s, stores the operation at slot+4 and s at slot+0, and adds 1 to s (RU
+`L2.02643`..`L2.02644`). A failed reference clears the flag (R2-ENGINE-044).
+The increment at `L2.02645` follows `cmp [ebp-0x11c], 1; jne L2.02646`
+(`L2.02643`); the target `L2.02646`, the compile loop between `L2.02647`
+and `L2.02648` and the log path are in navigation windows only, so that
+the flag test is the only increment and that a failed node keeps s are
+Medium. The executor's copy `L2.02520` takes slot i at array +4 + 0x74*i
+with no bound test; the slot accessor `L2.02565` that the compiler uses
+against it is unread.
+
+The type-4 pass counts the first e2 nodes with the same signed test
+(R2-ENGINE-512). Pointer +0x6c therefore equals the slot of node e2 when
+every earlier node below 0x10002 compiled; with f earlier failures, slot
++0x6c holds a later node, or a slot no node filled (Medium, as above).
+That the slot "names node e2" rests on `L2.02565` against `L2.02520`. The pass walks the
+nodes with `L2.02498` without a null test, so an e2 above the node count
+has no defined result in the bodies read.
+
+**Confidence.** High for the count loop (70 instructions), the commit
+(41) and `L2.02520` (20), which are equal in EN and RU after masking.
+Medium for the compile-slot rule (only a successful compile advances s;
+a failed node keeps s) and for a campaign entry's node: whether earlier
+nodes compile depends on the references each resolves at mission start.
+
+**Unknown.** Whether another store to the slot counter exists and what the
+failure branch does: a generation window over `L2.02647`..`L2.02649` in
+both roots with a census of the stores to `[ebp-0x9c]` would settle it.
+
+### R2-ENGINE-521
+
+The Shop vtable (RU `L2.02546`) differs from the Building vtable in slots
+0, 1, 2 and 5; the Inn vtable (RU `L2.02544`) in slots 0, 1 and 5. Shop
+slot 2 (`L2.02551`) transfers only +0xc0 after the Building Serialize
+(R2-ENGINE-512). Shop slot 5 (`L2.02650`) calls method `L2.02651` (unread) of the
+0x98 helper at +0x6c. Inn slot 5 (`L2.02652`) calls
+`L2.02366(member, -1)` (unread) for each member of the list at +0xa8 whose [+0x14]
+byte +0x43 is 0, adds 1 to +0xd8, and when +0xd8 is above 0x78 (unsigned: `ja`) and
+`L2.02502(+0xa8)` is 0 calls `L2.02653` for each entry of +0x6c and clears
++0xd8. `L2.02502`, `L2.02653` and `L2.02366` are unread, and the unit of
+the +0xd8 count is unknown. The Building slot 5 (`L2.02654`), used by Pointer, does its work when dword
+[[`L2.01317`]] modulo 60 is 0 (`L2.02655`..`L2.02656`, a fact of that body;
+the Shop and Inn bodies carry no such test): when byte +0x40 is 15 or 16 and signed word
++0x42 is at or above 0 and below word +0x44, it adds 1 to +0x42 and calls
+`L2.02657(object, 0, 0)` on `L2.02608`.
+
+None of these bodies reads Shop +0x70..+0xbc (the 11b fields) or Inn
++0xc4..+0xd4 (the 11a fields). No type-4 record of the Shop or Inn kinds
+occurs in the 46 campaign maps per root (R2-ASSET-123), so the campaign
+builds no object of either class from its maps.
+
+**Confidence.** High for the bodies listed, read in RU. No call site of
+virtual slot 5 (`call [reg+0x14]`) and no caller of these bodies was read,
+so nothing here says when slot 5 runs. Unknown for the readers of the 11b
+and 11a fields and for their effect; EN was not read for these classes.
+
+A navigation listing past Shop slot 5 shows further short Shop methods
+that pass +0x6c to helper methods; they carry no confidence here.
+
+**Unknown.** The helper methods `L2.02651`, `L2.02366`, `L2.02653` and
+`L2.02502`, the receivers of packets 0x83 and 0x84, and the other methods
+of both classes. A displacement scan of `.text` for +0x70..+0xbc and
++0xc4..+0xd4 with the receivers classified by class, and the helper
+methods in both roots, would settle them. The event that runs slot 5: a
+call-site scan of `call [reg+0x14]` over `.text` and the callers of the
+Building slot-5 body. The root `.alm` maps (R2-ASSET-084), where the
+multiplayer shops and inns would be placed, are not censused; the census
+generator of R2-ASSET-123 over them would settle which kinds they build.

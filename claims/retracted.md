@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-2065: type-4 kind vocabulary
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ASSET-019` (kind vocabulary sentence only; the 20/28-byte condition, its replay and the 64/83 contrast stand) | Verbatim: "This corpus's own type-4 `kind` vocabulary is exactly two values, `0x21` and `0x1000021`" | High | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/), R2-ASSET-123 | The sentence holds for the files that census described. The type-4 census of the 46 campaign maps per root finds kinds 0x46..0x4b on 13 records per root. Whether those maps are in the 83-file population is not established. | **NARROWED** |
+
 ## EXP-2059: shop refill sender
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

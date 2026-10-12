@@ -118,6 +118,41 @@ word 0x12:
 The 46 campaign maps per root carry no 11a or 11b entry and 40 11c
 entries in 10 maps. — R2-ASSET-121, R2-ASSET-122, R2-ENGINE-512
 
+The kinds that receive type-11 fields build structure classes: 0x46..0x4b
+Pointer (0x70 bytes), 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b Shop (0xc4) and
+0x43..0x45, 0x63..0x65, 0x6f..0x71 Inn (0xec), each a subclass of the 0x6c
+Building class. The Data.bin Buildings entry at the same index carries the
+matching name, "Pointer 1".."Pointer 6", "Shop", "Shop 2" and the
+Multiplayer shops and inns (that the kind indexes Buildings is Medium).
+— R2-ENGINE-517, R2-ASSET-124
+
+A Pointer stores the 11c count at +0x6c; its Serialize slot transfers the
+dword (that this writes a save is Medium). An actor step with health above
+0 and unit state 15 looks up the first building within distance 2 of the
+point (x-1, y-1) of the unit position (the origin and "first" are Medium).
+When that building is a Pointer with +0x6c above 0, the arm calls the
+action executor with +0x6c on each such step and stores nothing; a latch
+inside the executor is excluded only for operation 2. For a Shop and an Inn
+the arm calls `L2.02566` with 0x83 and 0x84 (what the call does is unread).
+One order handler sets state 15 when `L2.02567` returns nonzero (arrival in
+range is Medium) and calls `L2.01576`, which sets [r+0x50] to 1, on its next
+call in state 15. Compiled slots follow node order; that a slot advances
+only on a successful compile is Medium, so +0x6c names the 11c node only if
+no earlier node below 0x10002 failed. — R2-ENGINE-517, R2-ENGINE-518,
+R2-ENGINE-519, R2-ENGINE-520
+
+The 46 campaign maps per root hold 13 Pointers and no Shop or Inn. The 35
+gate-1 11c entries name 12 Pointers; for each, the action node at index
+position exists and has operation 2. That the Pointer selects that node at
+run time is Medium; the thirteenth Pointer has only a gate-0 entry. The
+root `.alm` maps were not censused. Type-4 kinds 0x46..0x4b occur in these
+maps, so the two-value kind vocabulary of R2-ASSET-019 holds only for the
+files it described. — R2-ASSET-123, R2-ENGINE-520, R2-ASSET-019
+
+The Shop and Inn slot-5 bodies read in RU do not read the 11b or 11a
+fields; no caller of slot 5 was read, so when they run is Unknown, and so
+are the readers of those fields. — R2-ENGINE-521
+
 <a id="music-areas-type-12"></a>
 
 ## Music areas (type 12)
@@ -183,9 +218,11 @@ R2-ASSET-003, R2-ASSET-024
 ## Authoring limits and Unknowns
 
 Type 10 and 11 fields are decoded to the program fields that receive
-them above; what the type-11 receiving objects do with those fields during
-a mission is Unknown, and so is the reader of unit-record 0x0a and 0x20
-outside the two bodies read. EN and RU differ in one type-10 store: the
+them above. The 11c count reader is the state-15 arm (R2-ENGINE-518; that it
+is the only reader is Medium). Which order code puts a unit in state 15, and what the Shop and Inn
+classes do with the 11b and 11a fields, are Unknown (R2-ENGINE-519,
+R2-ENGINE-521). So is the reader of unit-record 0x0a and 0x20 outside the
+two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0
 there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The writer's reason
 for declaring 644 bytes while the metadata programme transfers 660 is also

@@ -38,7 +38,7 @@ Unknown field meanings, consumers and codepage assignments remain Unknown.
 | R2-ASSET-012 | `world.res` and `world_srv.res` hold the identical 5 top-level `data/` entry names (`ai.reg`, `data.bin`, `itemname.bin`, `itemname.pkt`, `map.reg` — 0 client-only, 0 server-only entries), diffed with the unmodified ROM1… | High | ✔ promoted | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
 | R2-ASSET-017 | ROM2's per-map `typeId` set and record order strictly contain ROM1's own (Q1; `R2-ASSET-003` already publishes ROM2's own flat order and set — this row adds the cross-game RELATION and one population exception). | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-018 | Nine of the ten shared `typeId`s parse ROM1's own unmodified per-type formula/walk to exactly 0 residue on all 83 ROM2 maps and both `formatVersion` groups (1300, 1600) uniformly, or fail on all 83 maps and both groups… | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
-| R2-ASSET-019 | The condition that selects ROM2's 28-byte extended type-4 (placed object) record layout over the 20-byte base layout, read directly from `allods2.exe`'s decompiled dispatcher `R2.0002` (case 4), is `kind==0x21 ||…` | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
+| R2-ASSET-019 | The condition that selects ROM2's 28-byte extended type-4 (placed object) record layout over the 20-byte base layout, read directly from `allods2.exe`'s decompiled dispatcher `R2.0002` (case 4), is `kind==0x21 ||…` | High | ✔ promoted (amended) | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-020 | `allods2.exe`'s ALM record dispatcher `R2.0002` enforces a widened, code-verified acceptance ceiling, not merely a corpus that happens to ship higher values. | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-021 | `R2.0002` (`allods2.exe`, entry `R2.0002`) is ROM2's own record-body dispatcher, the counterpart of ROM1's `R0478` (`ALM-META-024`). | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-022 | ROM2-only types 10, 11 and 12's element counts are read from the type-0 (metadata) record's own version-gated fields, never from the type's own record payload. | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
@@ -142,6 +142,8 @@ Nine of the ten shared `typeId`s parse ROM1's own unmodified per-type formula/wa
 The condition that selects ROM2's 28-byte extended type-4 (placed object) record layout over the 20-byte base layout, read directly from `allods2.exe`'s decompiled dispatcher `R2.0002` (case 4), is `kind==0x21 || (kind&0x1000000)!=0` — `kind` at the same record `+0x08` offset ROM1's own `ALM-CLS-036`/`ALM-OBJ-034` already document. `ALM-CLS-036` already publishes `kind==0x21` as ROM1's own extension trigger; ROM2's dispatcher extends that exact-match test with an independent bit-24 flag that also triggers the same 28-byte layout regardless of the low byte. Replaying this exact condition reaches 0 residue on 83/83 ROM2 records (`structure-summary.txt`). **Correction, finding 5:** the stated discriminator for this reading was wrong and is replaced, not merely softened. This corpus's own type-4 `kind` vocabulary is exactly two values, `0x21` and `0x1000021` (`type4-kind-census.tsv`), so a low-byte mask `(kind&0xff)==0x21` classifies every one of the 83 files identically to this ground-truth condition — both reach 83/83 at both `formatVersion` groups (`type4-rule-crosstab.txt`); the corpus cannot discriminate the two. What the corpus DOES separate this condition from is ROM1's own unmodified literal `kind==0x21` exact-match test, which reaches only 64/83 (`R2-ASSET-018`) — that is the one rule whose pass rate differs by `formatVersion`, not the low-byte mask
 
 **Confidence.** High for the condition itself — read directly from the decompiled dispatcher body (cross-checked against the function's own raw, byte-free disassembly, not the decompiled C alone), and its own replay reaches 0 residue on the full 83-map/all-type-4-records population, which a materially wrong condition could not achieve by chance. Explicitly not claiming more: this experiment's own corpus cannot separate this exact condition from a simpler low-byte mask, since no observed record carries a kind that would make the two disagree (one sharing the `0x21` low byte with bit 24 clear, or vice versa) — the code read, not a corpus discrimination, is this row's basis
+
+**Amended.** The sentence "This corpus's own type-4 `kind` vocabulary is exactly two values, `0x21` and `0x1000021`" holds for the files that census described and no wider. R2-ASSET-123 reads the same field (low word of dword 0x08) in the 46 campaign maps per root and finds kinds 0x46..0x4b on 13 records per root, in maps 10, 20, 21, 30, 40, 50 and 76. Both walks end at their payload end under the 20/28-byte rule, which is not in question. Whether those maps are in the 83-file population of this claim is not established here; the low-byte-mask remark stands for that population only. See retracted.md.
 
 ### R2-ASSET-020
 
@@ -1560,3 +1562,112 @@ maps per root; they are not format limits and do not extend to the root
 committed census generator (`evidence/maps.py` through `regen.sh`) run
 over those files would settle whether any of them has dword 0x84 above 1
 or a type-10 or type-11 entry.
+
+## Map structure kinds and type-11c entries in the campaign
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-123 | The 46 ROM2 campaign maps per root hold 13 Pointer structures and no Shop or Inn; 35 gate-1 11c entries name 12 Pointers, each with its action node at index position present and of operation 2 (High); run-time selection is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ASSET-124 | ROM2 Data.bin Buildings (180 stored entries, EN = RU) names entries 0x46..0x4b "Pointer 1".."Pointer 6", 0x22/0x23 "Shop"/"Shop 2" and the other R2-ENGINE-512 Shop and Inn kinds as Multiplayer shops and inns. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+
+### R2-ASSET-123
+
+Population: the 46 `.alm` members of `scenario.res` in each of the EN and
+RU ROM2 roots, walked as R2-ASSET-002/003, type-4 records as R2-ASSET-019
+(20 bytes, or 28 when dword 0x08 is 0x21 or has bit 0x1000000; kind is the
+low word of dword 0x08; the vocabulary sentence of that claim is amended
+by this population, see its Amended paragraph), type-7 as 796-byte action and check nodes and
+184-byte triggers, type 11 split as R2-ASSET-121.
+Every walk ends exactly at its payload end.
+
+Totals per root: 1721 type-4 records, 1334 action nodes, 986 check nodes,
+40 type-11c entries (R2-ASSET-122); triggers 715 EN and 714 RU, the one EN/RU difference
+being `52.alm` (25 EN, 24 RU). In all 92 maps the type-4 record count
+equals type-0 header dword 8.
+
+Of the kinds R2-ENGINE-512 builds as structures, only Pointer kinds occur:
+0x46 three times, 0x48 four, 0x49 one, 0x4a four and 0x4b one, 13 records
+per root. Kinds 0x22, 0x23, 0x43..0x45, 0x47, 0x5d..0x5f, 0x63..0x65,
+0x69..0x6b and 0x6f..0x71 occur in no map of either root.
+
+The 40 type-11c entries (id, gate, position) are in 10 maps. The 35 with
+gate 1 name 12 Pointer records by type-4 id (file word 0x12); repeated entries carry the same id, gate
+and position. For each, the type-4 record with that id is unique, action
+node `position` exists, and its operation is 2 (instant 2, R2-ENGINE-047).
+The count column is the number of action nodes before `position` whose
+operation is below 0x10002 compared as unsigned. The type-4 pass and the
+compiler count with a signed test (`jge`, R2-ENGINE-520), so the column
+equals the value the pass stores only if no action node has operation
+0x80000000 or above. The tables list the operation of the selected nodes
+only; the operation range over the 1334 action nodes per root is not
+committed, so that equality is an assumption.
+
+| map | id | kind | x | y | entries | position | node ID | count |
+|---|---|---|---|---|---|---|---|---|
+| 10 | 42 | 0x4a | 3712 | 10368 | 3 | 25 | 26 | 24 |
+| 20 | 87 | 0x4a | 9600 | 14208 | 4 | 23 | 25 | 22 |
+| 20 | 88 | 0x48 | 9088 | 14208 | 3 | 24 | 26 | 23 |
+| 20 | 89 | 0x48 | 12160 | 6784 | 4 | 25 | 27 | 24 |
+| 21 | 30 | 0x4b | 13184 | 12160 | 2 | 23 | 24 | 22 |
+| 21 | 31 | 0x48 | 12416 | 11392 | 3 | 21 | 22 | 20 |
+| 21 | 32 | 0x46 | 11648 | 12160 | 2 | 22 | 23 | 21 |
+| 30 | 74 | 0x46 | 7040 | 9088 | 3 | 48 | 50 | 47 |
+| 40 | 168 | 0x4a | 15232 | 19584 | 4 | 48 | 49 | 47 |
+| 40 | 169 | 0x49 | 21376 | 16512 | 3 | 48 | 49 | 47 |
+| 40 | 170 | 0x48 | 25728 | 15232 | 2 | 48 | 49 | 47 |
+| 50 | 46 | 0x46 | 33408 | 7296 | 2 | 35 | 36 | 34 |
+
+The five gate-0 entries are `53.alm` id 29 (kind 0x4c), `62.alm` id 64
+(0x4d), `76.alm` id 13 (0x4d), `76.alm` id 28 (0x4a) and `86.alm` id 10
+(0x4c). The thirteenth Pointer, `76.alm` id 28, has only the gate-0 entry.
+The three Pointers of `40.alm` select the same node. The tables are equal
+in EN and RU.
+
+**Confidence.** High for the counts, the join by node index (the node at
+index `position` exists and has operation 2) and the EN/RU equality: one
+census generator over the full `scenario.res` of each root, reproduced
+against its committed output. Medium that a Pointer selects that node at
+run time: it rests on the compiled-slot rule of R2-ENGINE-520 (Medium for a
+campaign entry's node) and on the unread `L2.02565`. Medium that the count
+column is the stored value, for the signed comparison above.
+
+**Unknown.** The event ID each instant-2 node passes and its text: reading
+the operation-2 arm of the executor and tabulating the fields of the 12
+selected nodes would settle it. The behaviour of the gate-0 entries: the
+copy body of R2-ENGINE-512 read for the gate test. The operation range of
+the 1334 action nodes per root: one table from the committed generator
+would settle the signed comparison. The root `.alm` maps (R2-ASSET-084) are
+not censused; the same generator over them would settle which structure
+kinds and 11c entries they hold.
+
+### R2-ASSET-124
+
+`world.res` is byte-identical in the EN and RU roots (SHA-256
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`). Its
+`data/data.bin`, walked with the grammar of R2-ASSET-029 to its exact end,
+has a Buildings collection with titles Building, sizeX, sizeY, scanRange,
+healthMax, Passability, BuildingPresent, Start ID and Tiles and a stored
+count of 180. At the R2-ENGINE-512 structure kinds used as indices:
+
+| index | name | parameters |
+|---|---|---|
+| 0x22, 0x23 | Shop, Shop 2 | 3,3,4,0,447,511 |
+| 0x43..0x45 | Multiplayer Inn 1..3 | 3,3,3,0; 191, 511, 447; 511 |
+| 0x46..0x4b | Pointer 1..6 | 1,1,0,0,1,1 |
+| 0x5d..0x5f | Multiplayer Kaarg Shop 1..3 | 4,4,5,0; 61439, 28671, 65535; 65535 |
+| 0x63..0x65 | Multiplayer Kaarg Inn 1..3 | 3,3,3,0; 447, 191, 511; 511 |
+| 0x69..0x6b | Multiplayer Druid Shop 1..3 | 4,3,7,0; 3839, 4095, 4095; 4095 |
+| 0x6f..0x71 | Multiplayer Druid Inn 1..3 | 4,3,7,0; 1791, 1791, 2047; 4095 |
+
+The parameter array has six values; where they differ across a range, the
+fifth value is listed per entry.
+
+**Confidence.** High for the names and parameters at these indices. Medium
+that a type-4 kind indexes Buildings: the names match the structure class
+of R2-ENGINE-512 at every listed kind, but no read body was followed from
+the kind to the collection.
+
+**Unknown.** The meaning of the parameter values beyond the titles. The
+code path from kind to Buildings entry: a call-target scan of the
+Buildings collection accessor and a read of its callers in the type-4 pass
+and the structure constructors would settle it.

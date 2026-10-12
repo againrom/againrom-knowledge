@@ -35,6 +35,27 @@ their distinct roles. Group C's constructor initializes seven u16 values in
 its raw block; wider field meanings are not supplied by that initialization.
 — R2-ASSET-029
 
+The Buildings entry at the index of a map structure kind carries the
+entry name and the six-value parameter array below, read in EN and RU
+(`world.res` is byte-identical). The names line up with the structure
+classes of R2-ENGINE-512 at all 24 indices; that a type-4 kind indexes
+Buildings is Medium, because no read body was followed from the kind to the
+collection.
+
+| Index | Name | Parameters |
+|---|---|---|
+| 0x22, 0x23 | Shop, Shop 2 | 3,3,4,0,447,511 |
+| 0x43..0x45 | Multiplayer Inn 1..3 | 3,3,3,0; 191, 511, 447; 511 |
+| 0x46..0x4b | Pointer 1..6 | 1,1,0,0,1,1 |
+| 0x5d..0x5f | Multiplayer Kaarg Shop 1..3 | 4,4,5,0; 61439, 28671, 65535; 65535 |
+| 0x63..0x65 | Multiplayer Kaarg Inn 1..3 | 3,3,3,0; 447, 191, 511; 511 |
+| 0x69..0x6b | Multiplayer Druid Shop 1..3 | 4,3,7,0; 3839, 4095, 4095; 4095 |
+| 0x6f..0x71 | Multiplayer Druid Inn 1..3 | 4,3,7,0; 1791, 1791, 2047; 4095 |
+
+Where the values differ across a range, the fifth value is listed per entry.
+The meaning of the parameter values beyond the titles is Unknown.
+— R2-ASSET-124
+
 <a id="column-title-schema-vs-dat-schema-007"></a>
 
 ## Parameter and title schema
