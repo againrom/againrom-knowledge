@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3690. Observation: 99. Static analysis: 3088. Mixed: 503.
+Claims labelled: 3698. Observation: 99. Static analysis: 3096. Mixed: 503.
 
 ## Ledger ai
 
@@ -308,11 +308,16 @@ Claims labelled: 3690. Observation: 99. Static analysis: 3088. Mixed: 503.
 | AI-477 | static analysis | ✔ promoted (branch candidate) |
 | AI-478 | static analysis | ✔ promoted (branch candidate) |
 | AI-479 | static analysis | ● active |
-| AI-487 | static analysis | ✔ promoted (branch candidate) |
+| AI-487 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-488 | static analysis | ✔ promoted (branch candidate) |
 | AI-489 | static analysis | ✔ promoted (branch candidate) |
 | AI-490 | static analysis | ✔ promoted (branch candidate) |
-| AI-491 | static analysis | ✔ promoted (branch candidate) |
+| AI-491 | static analysis | ✔ promoted (branch candidate, amended) |
+| AI-499 | static analysis | ✔ promoted (branch candidate) |
+| AI-500 | static analysis | ✔ promoted (branch candidate) |
+| AI-501 | static analysis | ✔ promoted (branch candidate) |
+| AI-502 | static analysis | ✔ promoted (branch candidate) |
+| AI-503 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger alm
 
@@ -1139,9 +1144,12 @@ Claims labelled: 3690. Observation: 99. Static analysis: 3088. Mixed: 503.
 | MAGIC-307 | observation | ✔ promoted (branch candidate) |
 | MAGIC-308 | observation | ✔ promoted (branch candidate) |
 | MAGIC-309 | observation | ✔ promoted (branch candidate) |
-| MAGIC-310 | static analysis | ✔ promoted (branch candidate) |
-| MAGIC-311 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-310 | static analysis | ✔ promoted (branch candidate, amended) |
+| MAGIC-311 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-312 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-316 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-317 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-318 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 

@@ -4256,11 +4256,16 @@ are not amended by this narrower result.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-487 | Of the 15 live player order opcodes (14 distinct arm targets), only the move setter (0x16, 0x1a, 0x1c) stores pending kind 1 at once; the others store a command state with pending 0; no setter read stores progress or phase. | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| AI-487 | Of the 15 live player order opcodes (14 distinct arm targets), only the move setter (0x16, 0x1a, 0x1c) stores pending kind 1 at once; the others store a command state with pending 0; no setter read stores progress or phase. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | AI-488 | The executor reads the pending kind only at progress 0; progress 1, 2, 3, 4 and 0xff run their own arms, 5..0xfe clear progress, and the action word is rebuilt from progress before the action body runs. | High | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
 | AI-489 | A cast order whose ord+0x60 is 0, as both manual cast setters leave it, is installed once: the install pass sets progress 2, then resets command state to 0xc and pending to 0, and the action body idles on that tick. | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
 | AI-490 | The dispatcher calls R0014 on every commanded member before the opcode arm; it acts only on a scroll pointer of effect kind 0x29, not while the action word is 0xd or 0xe with completion 0, and stores no progress, phase or action. | High | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
-| AI-491 | No player order read cuts or restarts a running strike or cast; a move acts at the first progress-0 executor pass, and the other orders after a group pass writes their pending kind (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| AI-491 | No player order read cuts or restarts a running strike or cast; a move acts at the first progress-0 executor pass, and the other orders after a group pass writes their pending kind (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| AI-499 | Progress 3 and 4 have arm exits (mover test `R0040` nonzero; bit 0x100000 clear) and the 0xff arm keeps progress (High); the executor tail can also change progress (Medium, writers of `mover+0x98` unread). | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| AI-500 | Order-record stores of progress `ord+0x09` outside the executor lie in 12 segments (values 0 to 3); the clears of 0xff read are in `R0146`; mover-record stores are separate; displacement census. | Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| AI-501 | Setter `R0190` (0x1b) stores pending `bl` (0 if callees keep `ebx`, Medium) and state 8 or 0xc; `R0174` (0x1d) calls `R0172`, which stores pending 0 at `L14667`; the group-pass kind is Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| AI-502 | Group-pass arm of command state 2 stores pending 1 or 7 and state 0xf stores 0xf; each pending kind maps to one executor arm; `R0008` runs once per actor of the list `R0148` walks. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| AI-503 | Outside the cast action body, the stores read to actor phase `+0x58` and completion `+0x136` are in `R0185`, `R0672` and the cut routine `R1380` (two callers, restore sequences); the census lists unread rows. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 
 ### AI-487
 
@@ -4309,6 +4314,11 @@ callees stores progress or phase: `R0068`, `R0069`, `R0140`, `R0167`,
 this population, settled by a window at those arms of `R0061`; the bodies of 0x1b past
 `L14647`, settled by reading on from there; the callees named above, each settled by its
 own window.
+
+**Amended.** The 0x1d row's pending kind "not reached" is read: `R0172` stores `ord+0x08`
+= 0 at `L14667` on the path read (`AI-501`). The 0x1b body ends at `L14668` (`AI-501`),
+which settles the Medium on 0x1b and the Unknown on its bodies past `L14647`. The pending
+kind the group pass writes for the command states 8, 0xc and 0xa stays unread.
 
 ### AI-488
 
@@ -4416,3 +4426,175 @@ a window at those arms of `R0061`. The three `R0008` call sites outside every wi
 its owner and gate. The progress-0 gate is settled by reading the group constructor path
 `R0152` for the `+0x45` byte. The state table's arm `R0022` is settled by a second
 read inside the budget.
+
+**Amended.** Two of the three unclassified call sites of `R0008` are the wrappers `L14669`
+and `L14670` (`L14644`, `L14645`, `AI-502`), and windows `x21` and `x22` read the other
+two: `L14646` lies in a one-actor stub at `L14671` and `L00284` in the walker `R0023`
+(`AI-502`). The Unknown on the three sites narrows to the callers of the wrappers, the stub
+and the walker; the cadence stays Medium.
+
+### AI-499
+
+At progress 3 the executor (`L00096`) calls the step `R0039` on `[manager+0xa50]` with
+the actor, stores action 1 and calls the mover test `R0040` on
+`[actor+0x10]`. A nonzero return stores progress 0 and action 0 (`L13305..L04569`); a zero
+return leaves progress 3 and exits through the tail. `R0040`, read whole, returns 1 only
+when the mover bytes `+4` and `+5` both equal 0x80 and 0 otherwise. At progress 4 (`L00543`)
+the arm stores action 0x1a and keeps progress while actor `+0x144` has bit 0x100000; with the
+bit clear it stores progress 0 (`L05749`). The executor head enters progress 4 from progress
+0 when that bit is set (`L05743..L00546`); the census (`AI-500`) finds no other store of 4
+in the order-record segments read, and the stores in `R0509` are unclassified. The arm for
+progress 0xff (`L00544`) stores action 0x1a, no progress and no pending read. The pending
+kind is not read at progress 3, 4 or 0xff; it is read only at progress 0 (`L00548`,
+`AI-488`).
+
+Every progress arm ends in `jmp L00010` (`L14672`, `L14673`, `L13306`, `L05748`,
+`L14674`, `L14675`). The tail (`L00010..L00614`) tests `[mover+0x98]`; a nonzero value
+is cleared (`L05750`) and the tail then branches on `actor+0x50`: states 1 and 0xa rewrite
+the order (no progress store), state 0x17 stores progress 0xff (`L00545`), and any other
+state stores pending 0 and calls `R0004` (`L00011`). The listing of `R0004` (window
+`b09`) stores the order target `ord+0xc`, the pending byte 6, 0 or 0xb and the action word 1
+or 3, and calls `R0005`, whose first instruction stores progress 1 (`L00747`, `AI-500`),
+and `R0250`, `R0205` and `R0041`, which are not read. So a walking unit with
+`mover+0x98` nonzero when its progress-3 or progress-4 arm exits can leave that progress by
+the tail instead of the arm: to 0xff for state 0x17, or to progress 1 through `R0004`. The
+step `R0039` stores `mover+0x98` (`L00161`, `L00162`, `L01720` in the window of
+`R0178`); whether it does so for a unit at progress 3 is not read.
+
+**Confidence.** High for the arms, the entry test, `R0040` and the tail's stores as listed:
+the bodies are in the windows read in the EN root and the RU root (equal listing hashes; `b09`
+EN and RU). Medium for the "ends when" clauses of progress 3, 4 and 0xff: the tail and
+`R0004` are an open alternative, settled by the writers of `mover+0x98` against a unit at
+progress 3 or 4 and by the callees `R0250`, `R0205` and `R0041`. Medium for what the
+step `R0039` changes (its window ends at `L14676`).
+
+**Unknown.** The remainder of `R0039`, settled by a window from `L14676`; the writers of
+the status bit 0x100000 (the name and the label "status hold" are inherited from the
+`AI-488` table; no body read here sets or clears the bit), so the duration of a hold is open;
+the meaning "cell centre" of `R0040` is that of `AI-350`, not re-derived here; native
+timing.
+
+### AI-500
+
+The census (`evidence/census.tsv`, one linear pass over EN `.text`, instrument and blind spots
+in the experiment record) lists byte stores at displacement 9 in 15 segments that hold an
+operand at `+0x158`, `+0x136` or `+0x9a`: the executor `R0016` and 14 others. The base
+register's source, read from the census context and the windows, splits them.
+
+- Order record (`[actor+0x158]`, the progress byte `ord+0x09`): the executor and 12 other
+  segments, `L14677` (progress 2 at `L14678`, window `x19`), `L00091` region,
+  `R0005`, `L14679`, `R0013`, `R0042`, `L13263`, `L14680`, `L14681`,
+  `L14682`, `L13265` and `R0146`. The values stored are 1, 2 and 3 in the 11 state
+  functions, and 0 in `R0146`. The executor stores 0xff through the order pointer at
+  `L00545` for command state 0x17 when `mover+0x98` is set (tail, `L00010`). The two
+  stores that clear 0xff in the segments read are `L05751` and `L05752` of `R0146`,
+  each behind a compare of the byte with 0xff, which the group-pass arm of command state
+  0x17 (`L14683`) calls (`L14684`). The tail callee `R0004` calls `R0005`, which
+  stores progress 1 (`L00747`) over whatever the byte holds (`AI-499`).
+- Mover record (`[actor+0x154]`, byte `+9` of the mover, not the order progress): `L05753`
+  in the executor, `L05754`, `L14685`, `L14686` and `L14687` (0xff each, windows
+  `x01`, `x02`) and `L14688` and `L02021` in `R0178` (a clear and an increment of a
+  mover byte, window `x20`).
+- Unclassified: `R0509`, where the bases are `[ebp - N]` locals (stores of 0 and of a
+  register copied from a byte at `+5`, and an `add byte ptr [esi + 9], dl`).
+
+Stores of a word or dword at displacement 8 found by the census in the setters' segments
+write list objects reached through `ord+0x90` (read in `R0172`), not the order record. The
+brief's other populations are not closed: 1,701 stores overlapping `+9` through a base other
+than `esp`/`ebp` in segments with no operand at those three displacements, a record reached
+through a pointer argument, and block copies are not classified.
+
+**Confidence.** Medium: the census is a displacement census with stated blind spots. The
+base split is read for the stores named above from windows `x01`, `x02`, `x19`, `x20` (EN
+root; the images are byte-equal, one SHA-256) and the census context.
+
+**Unknown.** The stores of `R0509`, settled by a window at each store that names the base's
+source; the 1,701 stores outside the actor segments; the gate of `R0146` on
+`[manager+0xb39c]`; whether the state functions run for a unit at progress 0xff.
+
+### AI-501
+
+The setter `R0190` (opcode 0x1b) resets the member through `R0007`, stores action 0
+(`L14689`), then ends in one of two branches: command state 0xc with the unit's cell
+(`R0019`) stored at `ord+0` and pending `ord+0x08` = `bl` (`L00649..L14690`), or command
+state 8 with `ord+0x10` and pending `bl` (`L00650..L14691`). `bl` is the low byte of `ebx`,
+zeroed at `L14692` and not assigned again in the body (the callees are assumed to preserve
+`ebx`), so the pending kind is 0 only under that assumption. The body ends at `L14668`.
+
+The setter `R0174` (opcode 0x1d; window `b15`, whole body to `L14693`) calls `R0007`
+on each member of the group list, stores `ord+0x50` = 0 and `ord+0x38` = 0 for it, stores the
+group byte `[group+0x3c]+0x20` = 0 (`L00429`) and calls `R0172` on each member
+(`L14694`). It stores no `ord+0x08` and no `ord+0x09`. The member routine `R0172`
+rebuilds the waypoint list at `ord+0x90`, stores `ord+4` = 0 and the pending byte `ord+0x08` =
+0 at `L14667` on the path read (to `L14695`). Neither `R0190` nor `R0172` stores
+progress `ord+0x09`, phase or completion: the census finds no byte store at `+9` in their
+segments and the stores at `+8` land on list objects.
+
+The pending kind that the group pass writes afterwards for the command states these setters
+leave (8, 0xc and 0xa, `t04` indices 8, 12 and 10, arms `L14696`, `L14697`, `L14698`)
+is not read.
+
+**Confidence.** High for the stores read. Medium for "the setter stores pending 0" of 0x1b
+(the callee-preserves-`ebx` step) and for the part of `R0172` after `L14695`. Unknown for
+the pending kind the group pass writes for 0x1b and 0x1d.
+
+**Unknown.** The group-pass arms at `L14696`, `L14697` and `L14698`, settled by a window
+at each; the command state 0xa of 0x1d, which rests on `AI-487`: `R0174` stores no `actor+0x50` in its own body,
+so the store is in `R0172` past the path read or in a callee; the part of `R0172` after
+`L14695`.
+
+### AI-502
+
+The group-pass arm of command state 2 (`L14699`) compares the unit's cell (`R0019`) with
+`ord+0x0a`: it stores pending 1 when they differ and pending 7 when they are equal, and the
+arm of command state 0xf (`L14700`) stores pending 0xf. Pending kinds are read only by the
+executor at progress 0 through the 15 dwords at `L00099`: 1 to `L07145`, 2 to `L06163`,
+3 to the tail, 4 to `L14701`, 5 to `L00101`, 6 to `L00581`, 7 to `L00549`, 8 to
+`L00108`, 9 to `L05042`, 10 to `L06983`, 11 to `L14702`, 12 to `L14703`, 13 and 14
+to the tail, 15 to `L00195`. The per-actor arm `R0008` has five call sites. `L14643` lies in `R0148`, which calls it
+for each actor of the list `[mover group+0xa4554]` (window `b21`); `L14644` and `L14645`
+lie in the wrappers `L14669` and `L14670` (window `b21`); `L14646` lies in a stub
+`L14671` that passes one actor (window `x21`); `L00284` lies in the walker `R0023`,
+which dispatches on the group state byte `[group+0x3c]+0x20` and calls the arm for a member
+(window `x22`). The statement that the arm runs once per actor of the list holds for
+`R0148` only; the callers of the wrappers, the stub and the walker are not read. How often
+`R0148` runs is not read here and rests on `AI-385` and `AI-TICK-008`.
+
+**Confidence.** High for the two arms and the table; Medium for the cadence.
+
+**Unknown.** The callers of `R0148`, `L14669`, `L14670`, `L14671` and `R0023`,
+each settled by a window at its call sites.
+
+### AI-503
+
+Outside the cast action body (`L00005`), the stores read to actor phase `+0x58` and
+completion `+0x136` are in `R0185` (it allocates an order record of 0x94
+bytes, stores phase 0, completion 1, action 0 and command state 0, and calls the default stats
+`R0160`; five direct call sites `L00495..L00503`), in `R0672` (phase 0, completion 1,
+effect flags, health clamped to at least 1) and in the cut routine `R1380`. The cut routine calls `R0014`, releases a scroll and the
+active Spell when completion is 0 and the item kind is 0xe, stores `+0x64` = 0, phase 0,
+completion 1, action 0 and command state 0. Its only callers are `L14704` and `L14705`,
+inside the two restore sequences `R1378` and `R0826`, which then store health and mana
+from the maxima. `R0672` is called from `L03253` and `L14706`. The writers `L14707`
+(`L14708`, `L14709`) and `R0967` (`L08247`) were not read.
+
+The census rows of families `phase` and `complete` outside these routines are classified as
+follows. Six word stores at `+0x58` (`L14710` in `R0114`, `L00653` in `R0226`,
+`L14711` in `L14712`, `L00758` in `R0110`, `L14713` in `L14714`, `L00880` in
+`R0109`) follow a load of `[actor+0x158]` in the three preceding instructions, so they store
+to the order record at `ord+0x58` (receipt context, not a window); two dword stores at
+`[esp+0x58]` (`L14715` in `R0734`, `L14716` in `R0433`) are stack locals. Fourteen
+dword stores at `+0x134` in 13 segments with no other actor operand (`R0391`, `R1821`,
+`R0379`, `R2210`, `R2170`, `R1870`, `R1556`, `L03685` twice, `L14717`,
+`L14718`, `L12192`, `R0602`, `L14719`) are not classified; a dword store at `+0x134`
+also writes `+0x136`, and the neighbouring stores at `+0x100`, `+0x124`, `+0x128`, `+0x130`
+in several of them suggest another record, which is not shown.
+
+**Confidence.** High for the bodies read (windows `x05`, `x06`, EN root). Medium for the
+statement about the whole image: a displacement census with blind spots as in `AI-500`, six
+rows classified from the receipt context, and the dword rows unclassified.
+
+**Unknown.** The gates of the restore sequences and whether they run for a unit in a cast; the
+bodies of `L14707` and `R0967` (window `x07`, `R0967..L07402`, is committed and not
+examined here); the 14 dword stores at `+0x134`, each settled by a window from the routine's
+entry to the store that names the base's source.

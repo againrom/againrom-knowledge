@@ -7785,6 +7785,65 @@ and 60. A raw dword scan of the EN `.text` finds each object address once,
 in its constructor; they are not in the rebuild, so the add helpers, which
 walk the catalog, cannot select them.
 
+**Records.** The 49 catalog records in rebuild order, with the type, ID and map
+position each constructor pushes (`out/graph/en-records.tsv` and `ru-records.tsv`,
+equal in EN and RU).
+
+| position | type | ID | x | y |
+|---|---|---|---|---|
+| 0 | 2 | 1 | 215 | 234 |
+| 1 | 2 | 2 | 370 | 305 |
+| 2 | 2 | 3 | 194 | 225 |
+| 3 | 1 | 10 | 302 | 158 |
+| 4 | 1 | 20 | 380 | 364 |
+| 5 | 1 | 21 | 423 | 367 |
+| 6 | 1 | 30 | 331 | 395 |
+| 7 | 1 | 31 | 443 | 225 |
+| 8 | 1 | 32 | 457 | 202 |
+| 9 | 1 | 40 | 339 | 226 |
+| 10 | 1 | 41 | 403 | 228 |
+| 11 | 1 | 42 | 531 | 207 |
+| 12 | 1 | 43 | 454 | 358 |
+| 13 | 1 | 50 | 210 | 260 |
+| 14 | 1 | 51 | 450 | 240 |
+| 15 | 1 | 52 | 132 | 303 |
+| 16 | 1 | 53 | 292 | 191 |
+| 17 | 1 | 60 | 511 | 301 |
+| 18 | 1 | 61 | 475 | 312 |
+| 19 | 1 | 62 | 253 | 169 |
+| 20 | 1 | 63 | 385 | 221 |
+| 21 | 1 | 70 | 86 | 193 |
+| 22 | 1 | 71 | 337 | 306 |
+| 23 | 1 | 72 | 530 | 255 |
+| 24 | 1 | 73 | 343 | 347 |
+| 25 | 1 | 74 | 595 | 313 |
+| 26 | 1 | 75 | 356 | 359 |
+| 27 | 1 | 76 | 111 | 227 |
+| 28 | 1 | 77 | 406 | 117 |
+| 29 | 1 | 80 | 554 | 299 |
+| 30 | 1 | 81 | 510 | 182 |
+| 31 | 1 | 82 | 424 | 186 |
+| 32 | 1 | 83 | 521 | 372 |
+| 33 | 1 | 84 | 552 | 377 |
+| 34 | 1 | 85 | 393 | 360 |
+| 35 | 1 | 86 | 67 | 213 |
+| 36 | 1 | 87 | 509 | 161 |
+| 37 | 1 | 90 | 283 | 244 |
+| 38 | 1 | 91 | 477 | 269 |
+| 39 | 1 | 92 | 93 | 269 |
+| 40 | 1 | 93 | 306 | 148 |
+| 41 | 1 | 94 | 306 | 148 |
+| 42 | 1 | 95 | 306 | 148 |
+| 43 | 1 | 96 | 306 | 148 |
+| 44 | 1 | 100 | 388 | 140 |
+| 45 | 1 | 101 | 273 | 300 |
+| 46 | 1 | 102 | 351 | 190 |
+| 47 | 1 | 103 | 575 | 362 |
+| 48 | 1 | 110 | 448 | 140 |
+
+The three objects outside the rebuild are type 1: ID 10 at (380,364), ID 20 at
+(210,260) and ID 30 at (511,301).
+
 **Confidence.** High for the 52 initializer calls, the 49 rebuild requests
 and the join, read in EN and RU (instruction sequences equal). The
 `.text` reference count of the three extra objects is High for direct

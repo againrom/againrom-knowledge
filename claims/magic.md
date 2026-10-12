@@ -3589,9 +3589,12 @@ owner use was observed.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-310 | A cast's mana is subtracted in phase 0, on the pass that stores phase 5 and the wind-up countdown (High); the admission returns 1 on every path after it, so a charged cast enters wind-up (Medium, window over cap). | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
-| MAGIC-311 | No setter read stores progress or phase for a new order (High); that the running cast stays charged and unrefunded, and that a repeated cast pays again, is composed from bodies read (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| MAGIC-310 | A cast's mana is subtracted in phase 0, on the pass that stores phase 5 and the wind-up countdown (High); the admission returns 1 on every path after it, so a charged cast enters wind-up (Medium, window over cap). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-311 | No setter read stores progress or phase for a new order (High); that the running cast stays charged and unrefunded, and that a repeated cast pays again, is composed from bodies read (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-312 | A player's cast refused for mana stays at progress 2 with pending 0: with completion byte 1 progress clears after three passes and the cast is dropped uncharged; with 0 the retry repeats on every pass (Medium). | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
+| MAGIC-316 | Caster mana word `actor+0x9a` has 17 word stores in 13 segments (census); one subtracting store among the sites read (`L05057`); `R0654` (a quotient of a division by 100, body unread) is not read. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-317 | A scroll cast pays no mana at admission (`actor+0x68` nonzero skips the subtraction); at the end of application the item and the Spell are released and the pointers cleared. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-318 | The application routine `R0003` stores caster health 1 and mana 0 at `L05228`/`L05229` after preparing its pair; the spell-id condition rests on `MAGIC-302`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 
 ### MAGIC-310
 
@@ -3620,6 +3623,11 @@ three of them over budget, and is not an image-wide census.
 
 **Unknown.** Whether another routine writes `+0x9a` between admission and application; a
 `disp:9a` census over the image would settle it.
+
+**Amended.** The census named as missing exists: `MAGIC-316` lists 17 word stores, one
+subtracting store among the sites read (`L05057`). Its population is not closed (the
+blind spots, the 61 dword stores and the unread site `R0654` in `MAGIC-316`), so the
+Unknown is answered in part.
 
 ### MAGIC-311
 
@@ -3665,6 +3673,13 @@ arm; what the group pass makes a hero in command state 0xc do after the cycle (`
 read over budget, writes kind 6 for an enemy within reach + 1), settled by a second read of
 that routine inside the budget.
 
+**Amended.** The "no image-wide `+0x9a` census" and the `disp:9a` census named in the
+Confidence and Unknown exist as `MAGIC-316` (population not closed). "Not reversed in the
+windows read" stands, narrowed: the census finds one subtracting store among the sites read,
+and `MAGIC-318` reads one arm of `R0003` (health 1, mana 0); `R0002` and `R0001`
+stay unread. The scroll-cast Unknown stays open for the setters `R0011` and `R0012`;
+`MAGIC-317` reads the admission skip and the release at the end of application.
+
 ### MAGIC-312
 
 After install, a player's cast has pending 0 (`AI-489`). A refused admission leaves phase 0
@@ -3682,3 +3697,89 @@ native run.
 **Unknown.** The constructor's value of `actor+0x136` and other writers outside the windows
 read, which decide whether a never-cycled hero takes the repeating branch; whether input
 refuses a cast order for missing mana before the command record is sent.
+
+### MAGIC-316
+
+The census (`evidence/census.tsv`, one linear pass over EN `.text`) lists 17 stores of a word
+at displacement `0x9a` (bytes `+0x9a..+0x9b`), all `mov word ptr [reg + 0x9a]`, in 13
+segments. Classes, with the context read:
+
+- admission `R0268`: the one subtraction (`L05055`, store `L05057`), read whole in
+  `MAGIC-310`;
+- application `R0003`: one store of 0 (`L05229`, `MAGIC-318`);
+- virtual routines (only `.rdata` slots, no direct call): regeneration `R0654` (two stores,
+  slots `L04033`, `L04034`, `L04035`), the recompute `R0280` (two stores: zero when
+  the `ManaMax` column is zero, and a clamp of mana to the maximum, `L14720`, `L14721`;
+  slots `L03967`, `L03968`) and the potion routine `R0843` (two adding stores clamped to
+  the maximum or gated by the mage predicate, `L14722`, `L14723`; slots `L04015`,
+  `L04016`);
+- construction and stream fills (`R0160`, `R0180`, `R0656`, `R0657`, `R0151`),
+  which set mana from a maximum, from a stream field or to 0;
+- restore sequences `R1378`, `R0826`, `R0823`, which store health and mana from the
+  maxima; the first two first call the cut routine (`AI-503`).
+
+Read in a window (EN root): 15 of the 17 store sites, `L05057` (`b01`, both roots),
+`L05229` (`x04`), `L14724` (`x05`) and the sites of the restore, fill, recompute and potion
+routines in `x08` to `x18` (`L14725`, `L14726`, `L04480`, `L04518`, `L12695`,
+`L14727`, `L14720`, `L14721`, `L14728`, `L14729`, `L14722`, `L14723`). Those
+windows cover the store site, not the routine body. Among the 15, one store subtracts
+(`L05057`); `L14723` stores a sum of the mana word and a local; the others store an
+immediate or a value loaded from a register or memory (receipt context). Not read in a window:
+the two stores of `R0654`, `L08220` (the receipt shows `mov ecx, 0x64 ; idiv ecx` before
+the store of `ax`: a quotient of a division by 100, not a loaded or immediate value) and
+`L04040`. The class "regeneration" of that routine comes from `HERO-REGEN-021`, and the
+classes "recompute" (`R0280`) and "potions" (`R0843`) from `HERO-MP-006` and the store
+sites, not from a read of the routine bodies. Stores of a dword at `+0x98` also cover `+0x9a`: 61 were
+found, 7 in actor-bearing segments (five zero stores in `R0509` beside a store at `+0x9c`,
+`L05750`, which clears a field of the mover reached through `[actor+0x154]`, and `L01720`)
+and 54 in segments with no actor-bearing operand; they are not classified. Block copies, a
+record reached through a pointer argument and the deserializer (`R0210`, which reaches the
+field through `add ecx, 0x9a` and a helper call) are outside the census.
+
+**Confidence.** High that the 17 stores are all the word stores of the census; Medium for the
+classes of the sites not read (`R0654` and `R0280` by `HERO-REGEN-021` and
+`HERO-MP-006`, the restore and fill callers) and for the absence of any other writer.
+
+**Unknown.** Whether a restore sequence can run for a unit in a cast; the 61 dword stores;
+whether the recompute or a potion runs between admission and exit; the body of `R0654` and
+its two stores. Receipt rows not classified: `add eax, 0x9a` at `L14730` in `R0572`, the
+two `lea ... + 0x9b` at `L14731` and `L14732` in `L14733`, and `add ecx, 0x9a`
+(`L14734`) and `add eax, 0x136` (`L14735`) in `R0210`. The census marks a segment
+actor-bearing when it holds an operand at `0x158`, `0x136` or `0x9a`, so a segment with a
+`+0x9a` store is bearing by construction; the 13 segments are not evidence that the base is an
+actor.
+
+### MAGIC-317
+
+The admission `R0268` subtracts only when the mage predicate `R0442` holds and
+`actor+0x68` is zero (`L01998..L14736`), so a cast with a scroll pointer pays no mana. The
+scroll arm `L00038` stores `actor+0x68` = the item (`L00039`) and parks a Spell in
+`actor+0x44` (`L00040`) before `R0011` or `R0012`; it requires the item's effect kind
+0x29 (`L14737`). The application tail (`L06168..L00044`) releases the item through its
+virtual method `+4` when the item kind from `R1056` is 0xe, releases the active Spell the
+same way, and stores `actor+0x68` = 0 and `actor+0x64` = 0. The pre-arm helper `R0014`,
+re-read in this experiment, returns at once for a zero `+0x68`, for an item byte `+0x44` of 2,
+for an effect kind other than 0x29 and for action 0xd or 0xe with completion 0 (`AI-490`).
+
+**Confidence.** High for the admission skip and the tail stores (windows read in both roots);
+Medium for the meaning of the item kind 0xe, which the bodies do not name.
+
+**Unknown.** What a new order does to a scroll cast in each executor state beyond `AI-490`;
+the setters `R0011` and `R0012` (window `R0011..R0108` generated, not examined).
+
+### MAGIC-318
+
+In the application routine `R0003` (callers `L00008`, `L03043`, `L03044`), the arm
+read in window `L14738..L14739` computes a pair from the caster's health `+0x94` and mana
+`+0x9a`, stores two bytes at the Spell record offsets `+0xe` and `+0xf`, then stores caster
+health `+0x94` = 1 (`L05228`) and mana `+0x9a` = 0 (`L05229`) and allocates an object of
+0x48 bytes. The spell-id test that selects this arm lies before the window and is not read; the
+arm matches the Fire Sacrifice description of `MAGIC-302`. This is the only mana store in
+`R0003` found by the census.
+
+**Confidence.** High for the stores in the EN root (window `x04`, read in EN only; the RU
+executable is the same image, one SHA-256); Medium for the id condition (reused from
+`MAGIC-302`).
+
+**Unknown.** The branch that selects the arm, settled by reading `R0003` between
+`L14740` and `L14738`.
