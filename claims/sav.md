@@ -15691,7 +15691,7 @@ no file of the later dated directories was read.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1223 | In 9 distinct `game9999.sav` (5 maps), the 1,653 record rows and 16,449 constant border rows equal the rows the model builds from the map ingest, saved Buildings, actors and Sacks, and type-9 casters. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+| SAV-1223 | In 9 distinct `game9999.sav` (5 maps), the 1,653 record rows and 16,449 constant border rows equal the rows the model builds from the map ingest, saved Buildings, actors and Sacks, and type-9 casters. | High / Medium | ✔ promoted (amended) | [EXP-0525](../experiments/EXP-0525-start-planes/), [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
 | SAV-1224 | In the same 9 files the 1,653 cell records are the set the saved objects predict; baselines, occupant slots and the +0x2c..+0x33 tail match, and every cost baseline holds the map.reg value. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
 | SAV-1225 | The four distinct restart-slot files `SAV-1210` did not read are missions 30, 141, 141 and 30; each is at sub-tick 1, full tick 0 (`SAV-1221`). | High | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
 | SAV-1226 | Every saved row whose static byte lacks a low bit the ingest sets is a structure cell opened by the &0xfa arm: bit 0 on 64 rows and bit 2 on 15 rows over 9 files, 9 bit-0 rows per mission-10 file. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
@@ -15710,6 +15710,13 @@ no file of the later dated directories was read.
 **Confidence.** High for the measurement over these 9 files (5 maps) and for the inputs independent of the save: the border, the ingest base bytes and the type-9 casters. Medium for the rest, which is the save's consistency with its own objects: given the saved Buildings, actors and Sacks, whose masks and footprints are not compared with install data, the model leaves no row, record or bit unexplained (0 found). That excludes an unexplained record or bit; it does not separate the recompute and placement rule from a different rule that fits the same saved objects. The actor footprint side comes from the saved slots (`SAV-1224`), so bit 6 and 7 placement checks the recompute rule, not the footprint size.
 
 **Unknown.** The edition each file was written in; both roots give the same inputs.
+
+**Amended.** The Building sizes and masks are now compared with install data
+(`SAV-1249`, `SAV-1250`): in these 9 files every saved Building equals the
+type-4 anchor with the size and the Pass and Present masks of its `Data.bin`
+Buildings row, and a model with no input from the save predicts every
+non-actor row and record. The Medium clause remains for the actor-derived
+record set and bits 5, 6 and 7 on actor cells.
 
 ### SAV-1224
 
@@ -16060,3 +16067,129 @@ cells outside sight, and never-explored cells; cold LOAD before any input,
 then warm LOAD. Capture the first frame and writes to the named plane from
 parse through first paint. For SAV-1150's burst clause, also save between
 Fire_Ball calls 4 and 8 and compare after call 8 (tick 3103 or later).
+
+## Restart slots against the install alone
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1248 | Of 134 .sav files under the owner save root (105 streams), 10 decoded documents are at head (1,0) or (0,0) with a world half: 9 restart slots and one 6,400-row file. 23 head (0,0) documents carry no world half. | High | ✔ promoted | [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
+| SAV-1249 | In 9 distinct restart slots (6 classified on 4 maps, High; 3 unclassified, Medium) a model from the install alone predicts 17,615 rows and 1,166 records, all saved; every row or record it misses is on a live actor's cell. | High / Medium | ✔ promoted | [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
+| SAV-1250 | Over 62 decoded documents with a world half, 1,724 of 1,807 saved Buildings equal the install's anchor, size and both masks; the other 83 lie in 8 unclassified files whose every Building has Pass equal to Present. | High / Unknown | ✔ promoted | [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
+
+### SAV-1248
+
+Population: every `.sav` under the owner save root, 134 files in 29
+directories, 105 distinct by SHA-256 (`evidence/saves.tsv`, one row per file
+with its SHA-256, authorship class and outcome). `tools/savdoc -mode
+start-planes -start-planes-all` decodes one document per stream: 104 decode, 1
+is refused by its header magic (`Bsg&`, a project-written file).
+
+Classes per decoded document (`tools/startcells`, `census/population.tsv`):
+
+| class | rule | documents | files |
+|---|---|---:|---:|
+| start | head sub-tick at most 1, full tick 0 (`SAV-1221`), with a world half | 10 | 11 |
+| later | any other head, with a world half | 52 | 72 |
+| no world half | a map name, no block rows, cell records or Buildings | 23 | 30 |
+| no map | no stored map name | 12 | 12 |
+| walk incomplete | the object walk does not finish | 7 | 8 |
+
+The start class holds the 9 distinct restart slots at head (1,0), on maps 20,
+10 (2), 41, 30 (3) and 141 (2): 5 original-authored, 1 original resave of
+project input, 3 in directories with no class. The 6 classified streams lie
+on maps 20, 10, 41 and 30; the 3 unclassified on map 141 (2) and map 30. One stream lies in two
+directories, hence 11 files. The tenth start document,
+`2026-10-05/exp-skillcap-danat/game0000.sav` (head (0,0), map 10, no authorship class),
+holds 6,400 block rows; the original serializer writes only rows whose
+dynamic byte is above `0x0f` (`TERR-PASS-053`), and 3,911 of its rows have no
+saved record and no model row. It is not counted in `SAV-1249`.
+
+All 23 no-world-half documents sit at head (0,0) and hold 1 to 36 units.
+Near the start but outside the rule: `2027-09-07/game0043.sav` at head (6,0)
+and `2027-09-07/game0036.sav` at (21,1), both later; two walk-incomplete files
+at heads (51,0) and (63,1).
+
+**Confidence.** High: the classes are fixed rules over decoded heads and
+counts; every file is listed.
+
+**Unknown.** The edition each file was written in, and the program that wrote
+the 3 unclassified restart streams and the 6,400-row file: the owner's record
+of where each file came from would settle both; for the edition, a header field
+that differs between editions would too.
+
+### SAV-1249
+
+Model L1 (`tools/startcells`), with no input from the save: the map's ingest
+(`TERR-PASS-049`) with the installed `map.reg` costs; the type-4 Buildings in
+file order, each sized and masked from the `Data.bin` Buildings row of its
+kind (or the extension's size for kind `0x21`, `TERR-STRUCT-090`), attached
+first per cell with an abort on collision (`UNIT-STRUCTCELL-070`) and the
+recompute (`TERR-STRUCT-071`); the type-9 casters (`TERR-229`); the ground
+type-8 Sacks, refused on dynamic bit 0. Predicted rows are window cells
+`[0x807, 0xedee)` with dynamic above `0x0f`.
+
+Result over the 9 restart slots (`census/census.tsv`, `census/diffs.tsv`):
+
+| layer | rows saved | predicted | equal | differ | saved only | predicted only | records saved | predicted | both | saved only |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| L1 install only | 18,102 | 17,615 | 17,607 | 8 | 487 | 0 | 1,653 | 1,166 | 1,166 | 487 |
+| L2 plus saved live actors | 18,102 | 18,102 | 18,102 | 0 | 0 | 0 | 1,653 | 1,653 | 1,653 | 0 |
+
+- The 487 saved-only rows and records are cells whose saved record holds an
+  actor and nothing else; the 8 differing rows hold an actor and a structure
+  or Sack.
+- Actors (`census/actors.tsv`): 443 live, 0 in the dead list. 421 stand on a
+  type-6 record's cell, one per record, and every type-6 record cell holds one.
+  22 stand on no type-6 cell (1, 1, 1, 3, 2, 4, 2, 4, 4 per file), all of
+  domain 1.
+- The 238 saved Buildings of the 10 start documents (220 in the 9 slots) equal
+  the install's anchor, size, Pass and Present masks (`SAV-1250`).
+- EN and RU: one `rom.exe`, the same `map.reg` costs, 66 Buildings rows in each
+  `Data.bin` (the files differ by SHA-256), and identical census rows.
+
+**Confidence.** High for this measurement and for the install-only prediction
+of every non-actor row and record in the 6 classified streams (original-authored
+or original resave; maps 20, 10, 41, 30): their L1 differences are 2 rows, both
+on actor cells, and L2 leaves 0. Medium for the 3 unclassified streams (map 141
+twice, map 30; map 141 is therefore Medium): they agree with the install-only
+model, but no authorship class covers their directories and `SAV-1250` finds a
+program in unclassified directories that writes Pass equal to Present. A0 is
+not refuted: 421 of 443 live actors are on type-6 cells; the 22 off-cell actors
+are domain 1, origin Medium: the census shows their cells and domain, not
+their origin (`MOVE-122` places the carried party).
+
+**Unknown.** The edition each file was written in; a header field that differs
+between editions, or the owner's record of the install each was played on,
+would settle it. Which program wrote the 3 unclassified streams: the owner's
+record of where each came from, or a header field comparison with the
+classified streams. Whether the 22 off-cell actors are the carried party: a
+window on the join walk's placement settles it.
+
+### SAV-1250
+
+Comparison by anchor (`census/buildings.tsv`, `tools/startcells`) of every
+saved Building with the Building the install builds from the map's type-4
+record and `Data.bin`, over the 62 decoded documents with a world half (10
+start, 52 later), joined with `tools/savdoc -mode authorship`
+(`evidence/authorship.tsv`):
+
+| authorship | documents | matched | equal | Pass differs |
+|---|---:|---:|---:|---:|
+| original-authored | 25 | 536 | 536 | 0 |
+| original resave of project input | 3 | 84 | 84 | 0 |
+| no class (directory) | 34 | 1,187 | 1,104 | 83 |
+
+- Every saved anchor has a type-4 record and every type-4 record a saved
+  Building: 0 unmatched either way. Size and Present differ on 0 Buildings.
+- The 83 lie in 8 files: `2026-09-24/exp-engine-lineage/game0000-original-resave9250.sav`,
+  `2026-09-23/exp0397-r2/game0000.sav`, `game0001.sav`, `game0002.sav`,
+  `2026-09-23/exp0397-r3/game0003.sav` (8 of 18 each), `2026-09-27/oldsaves7/game0005.sav`,
+  `game0006.sav` (17 of 43 each) and `game9272.sav` (9 of 23). In each of the 8 every saved Building's Pass mask equals its
+  Present mask; the 83 are the Buildings whose install Pass differs from
+  Present.
+- EN and RU give identical rows.
+
+**Confidence.** High for the measurement. Unknown which program wrote the 8
+files: no authorship class covers their directories; the owner's record of
+where each of the 8 came from, or a header field comparison with the classified
+files, would settle it.

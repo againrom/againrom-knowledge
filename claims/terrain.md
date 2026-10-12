@@ -2676,9 +2676,9 @@ negative current values and overflowing products is not established.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| TERR-228 | A fresh mission writes the static and dynamic planes in this order: ingest, Building attach, type-6 occupy, type-9 cell casters, Sacks, then the join walk's occupy in the first sub-tick. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+| TERR-228 | A fresh mission writes the static and dynamic planes in this order: ingest, Building attach, type-6 occupy, type-9 cell casters, Sacks, then the join walk's occupy in the first sub-tick. | High / Medium | ✔ promoted (amended) | [EXP-0525](../experiments/EXP-0525-start-planes/), [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
 | TERR-229 | A map's type-9 record with X or Y nonzero and A below 4 creates a cell record at map load; on mission 10 two such cells carry rows 20/20 that no structure, actor or Sack explains. | High | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
-| TERR-230 | The ingest cost of the 1,653 record cells at mission start is the map.reg Cost value; the recompute is the only later cost writer reached, writing CostCracked on structure cells the &0xfa arm opens. | High / Medium | ✔ promoted | [EXP-0525](../experiments/EXP-0525-start-planes/) |
+| TERR-230 | The ingest cost of the 1,653 record cells at mission start is the map.reg Cost value; the recompute is the only later cost writer reached, writing CostCracked on structure cells the &0xfa arm opens. | High / Medium | ✔ promoted (amended) | [EXP-0525](../experiments/EXP-0525-start-planes/), [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
 
 ### TERR-228
 
@@ -2703,6 +2703,17 @@ negative current values and overflowing products is not established.
 
 **Unknown.** The owners of `L06784` and `L01945` and whether they run before the restart save. The body of `R0461` from `L14279` (the type-9 loop's tail, the loop body between `L14283` and `L02209`, and the Sack loop) and the bodies of `R0474` and `R1575`, which could write a plane. Whether the 10 EN maps and the RU maps outside the `EXP-0155` table carry a `0x10003` node.
 
+**Amended.** Three Unknowns are narrowed (`TERR-239`, `TERR-240`). Both
+`L06784` and `L01945` lie in `R0053`, which the start-path closures do
+not reach; only the actor tick `R0037` does. `R0461` was read from
+`L14279` to its return: the Sack loop over `map+0x2dc` starts at the caster
+loop's exit `L02209` and calls `R0472` at `L02084` for a record whose
+dword `+0x3c` is zero, so the Sacks follow the casters (High); type-9 records
+outside the caster rule build objects through `L02077` with no plane call within the window.
+`R0474` reads a `.ini` section `Outposts` and constructs each entry through
+`L14269`, which reaches the Building attach. The walk's `0x10003` arm also
+calls `L14269` (`L14439`). `R1575` stays unread.
+
 ### TERR-229
 
 - `R0461`'s first loop walks the list at `map+0x2f0` (`w02`, `L14276`..`L14277`). A record whose dword `+0x08` or `+0x0c` is nonzero and whose word `+0x10` is below 4 (`L12573`..`L14284`) builds six bytes: record `+0x16` and `+0x18`, then bytes 0 and 2 of the first two tail elements (`L14285`..`L14286`), and calls `R0227` with the cell `(low byte +0x0c << 8) | low byte +0x08` (`L14287`..`L12574`). This is `ALM-T9CONTROL-175`'s first write; `R0227` creates or reuses the record, refuses a cell whose dynamic bit 0 is set and stores the six bytes at `+0x2c..+0x31` (`TRIG-CELLTAIL-035`).
@@ -2721,6 +2732,13 @@ negative current values and overflowing products is not established.
 - `R1087`'s divide needs a nonzero layer count (`MOVE-085`), which no start record holds.
 
 **Confidence.** High that the ingest cost of the 1,653 record cells uses the map.reg values on these five maps: 376 discriminating baselines (counted per file over 9 files; between 219 and 376 distinct cells). Medium that the recompute is the only cost writer after the ingest among the routines of `TERR-228`: the basis is the caller scan `s01`, and a baseline captured at record creation cannot show a later write. Medium for the `Cost` key reads of `R0116` (`ALM-TERR-043`, not re-read), for the cost plane outside record cells and for the opened cells: no cost plane is saved, so those values are the model's, not an observation. A sweep of stores into the cost plane would bound the writer set.
+
+**Amended.** The `Cost` key reads of `R0116` are now in a window read
+whole, with their defaults and slots (`TERR-238`): that clause is High. A
+sweep of displacement-free byte stores in the map module over the start-path
+closures finds 45 sites; the ingest's and the recompute's four cost stores are
+classified and 31 sites are not (`TERR-239`), so "the recompute is the only
+later cost writer" stays Medium.
 
 ## Fog across LOAD
 
@@ -2866,3 +2884,202 @@ casts, teleports, structure changes and EN/RU data-dependent timing.
 **Unknown.** A writer trace during cast, teleport and structure-change
 controls on the same mission would test the remaining event alternatives.
 Code equality alone cannot establish equal first pictures in both roots.
+
+## Cell planes at a fresh-map start
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-238 | ROM1's world constructor R0116 fills four 64 KiB cell planes (cost 1; static, dynamic and height 0), empties the 100-bucket record map and reads the ten map.reg Cost keys; it fills no fifth plane. | High / Medium | ✔ promoted | [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
+| TERR-239 | At a fresh-map start the plane-displacement byte stores reached lie in four routines; in the 6 classified restart slots the block planes depart from the install-only rule only on live actors' cells; cost and height are Medium. | High / Medium | ✔ promoted | [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
+| TERR-240 | The 56-routine direct-call closure of ROM1's Building constructors lists no computed call; a covered cell with no record gets the attach's record writes and the recompute. Four map-load routes can construct an attaching Building. | High / Medium | ✔ promoted | [EXP-0541](../experiments/EXP-0541-start-cell-planes/) |
+
+### TERR-238
+
+`R0116`, read whole from `R0116` to `R0278` (`w01`, EN; the RU
+`rom.exe` is the same image by SHA-256, `s01/image-hashes.tsv`), writes, in
+order:
+
+1. The map size defaults: `0x80` into `+0x50000` and `+0x50004`
+   (`L14440`..`L14441`).
+2. Four `REP STOSD` of `0x4000` dwords: `0x01010101` from `world+0x00000`
+   (the cost plane, `L14442`..`L14443`), and 0 from `+0x10000` (static,
+   `L14444`), `+0x20000` (dynamic, `L14445`) and `+0x9451c` (height,
+   `L14446`).
+3. The cell-record map at `+0x540b4`: it frees the bucket array at `+0x540b8`
+   when one exists, allocates `0x190` bytes, zeroes 100 dwords and stores the
+   bucket count 100 at `+0x540bc` (`L14447`..`L14448`). No record exists
+   after the constructor.
+4. Byte constants at `+0x58eb0`..`+0x58ebc` and `+0x54186`..`+0x5419d`; they
+   are not 256-stride planes.
+5. `0xff` into `+0x54176` (`L14449`), then ten keys of section `Terrain`
+   (`L14450`) through `R0452`, each with its pushed default, into
+   `+0x54177`..`+0x54180`: `CostLand` 8, `CostGrass` 8, `CostFlowers` 9,
+   `CostSand` 14, `CostCracked` 6 (`+0x5417b`), `CostStones` 12,
+   `CostSavanna` 11, `CostMountain` 16, `CostWater` 8, `CostRoad` 6
+   (`L02133`..`L14451`; key strings in `w02`). Then section
+   `Path Finding`: `SpeedMultiplier` (default 8) into `+0x58db4`, and
+   `StaticScanAhead` 5, `DynamicScanAhead` 3, `StaticRefreshRate` 16,
+   `DynamicRefreshRate` 32, `DynamicByStaticLookup` 3 and `StaticIsntNeeded`
+   5 into `+0x585b4`..`+0x585c8`.
+
+Both installed `map.reg` files give `Cost` 8, 8, 8, 14, 6, 12, 8, 16, 8, 6 in
+that class order (`census/population.tsv`); `CostFlowers` and `CostSavanna`
+differ from the defaults. `TERR-230`'s 376 baselines show the installed
+values are used.
+
+No instruction in the window fills a fifth `0x10000`-byte region. The four
+`REP STOSD` with count `0x4000` are the plane fills; the fifth `REP STOSD`
+zeroes the 100 buckets. No ROM1 claim names a "known cost" plane, and none of
+the four planes has that role in this constructor.
+
+**Confidence.** High for the fills, the record-map reset and the key-to-slot
+map: these are instructions in a window read whole. High that this
+constructor fills no fifth plane. Medium that no other routine allocates a
+further 256-stride plane in the world object: only this window and the
+plane-displacement population of `TERR-239` were searched.
+
+### TERR-239
+
+Writers at a fresh-map start, in `TERR-228`'s order, with their inputs:
+
+| plane | writer and site | input | value |
+|---|---|---|---|
+| cost | constructor (`TERR-238`) | none | 1 |
+| cost | ingest `L14452` | tile class, `map.reg` `Cost` | class cost; `0xff` for class 13 and above (`TERR-PASS-049`) |
+| cost | recompute `R0453`: `L05492`, `L07046`, `L05495` | record baseline, `CostCracked`, layer slots | baseline; `CostCracked` on an opened structure cell; a shift per layer (none at start) |
+| height | ingest `L10699` | type-2 grid | the grid byte |
+| static | ingest `L14453`, `L14454`, `L14455`, `L14456`; border `R0470` | tile word, class, type-3 grid, map size | 1, 5, `0x1f` |
+| dynamic | ingest copy of static | static plane | same bytes |
+| static, dynamic | recompute from the Building attach, type-6 occupy, type-9 casters (`R0227`), ground Sacks (`R0938`), join-walk occupy | `Data.bin` Buildings row, type-4/6/8/9 records, live actors | bit 5 on a record cell; `\|5` or `&0xfa` on a structure cell; dynamic bit 6 or 7 on an occupied cell |
+
+Writer population (`s01`: a capstone decode of 5,743 inventory routines below
+`L13600`, closures over direct calls and tail jumps from the roots of six
+start-path groups, `load`, `fresh`, `start`, `join`, `derive`, `subtick`):
+
+- Byte stores with displacement `0x10000`, `0x20000` or `0x9451c` lie in four
+  routines: the ingest `R0278`, the recompute `R0453`, the slot clear
+  `R0057` (reached only through the walk's `0x10003` arm, `TERR-228`) and
+  the Sack registration `R0938`. The only height store is `L10699`.
+- Inside the map module (`L07036`..`L07037`), 45 displacement-free byte
+  stores are reachable. 14 are classified: the ingest cost store, the
+  recompute's three cost stores, the border's seven `0x1f` stores, the
+  direction-table store `L14457`, and the attach's baseline snapshot
+  `L10468` and bit-5 store `L10493` (`TERR-STRUCT-076`). 31 are
+  unclassified, among them 15 in `R0273`, reached only through
+  `R0274` from the world constructor, and seven one-store routines
+  `R0287`..`L05872`. `R0288` stores into a frame-local object at
+  its two listed call sites (`L14458`, `L14459`).
+- The detach `R1358`, the layer add and remove `R1075`/`R1078` and
+  the bit-4 writer `R1080` lie in no start-path closure. `R0447`,
+  `R1087` and the claim writers `R0058`/`R1332`/`R0257` are reached
+  only from the actor tick `R0037`.
+
+Dependence on input, measured over the 9 distinct restart slots (`SAV-1249`):
+6 are classified (original-authored or an original resave; maps 20, 10, 41, 30) and
+3 have no authorship class (map 141 twice, map 30). On the 6 classified streams a
+model from the install alone reproduces every saved row and record off actor
+cells; the 3 unclassified streams agree too, but their writer is unknown. The
+runtime-dependent cells are the footprints of live actors: their record, bit 5
+on both planes and dynamic bit 6 or 7. 421 of 443 live actors stand on their
+type-6 record's cell; the other 22 (domain 1) are off type-6 cells, and that
+they are the carried party placed by the join walk (`MOVE-122`) is Medium.
+Building order matters only for a collision, and that order is the type-4
+order of the map file.
+
+**Confidence.** High that the plane-displacement byte stores reached (byte
+stores with displacement `0x10000`, `0x20000` or `0x9451c`) lie in four
+routines, scoped to the instrument: `planes.py`, one capstone decode of the
+5,743 inventory routines below `L13600`, closures over direct calls and
+tail jumps. Its blind spots: word and dword stores, stores through a register
+built by `LEA` or `SHL/ADD` outside the module, the callers of the
+address-of-cell getters, `REP MOVS/STOS` bulk copies, and computed calls (206
+in `load`, 55 in `fresh`, 69 in `start`, 59 in `join`), which are listed and
+not followed. High for the block-plane rows and records off actor cells on the
+6 classified streams (4 maps: 20, 10, 41, 30): 2 rows differ under the
+install-only model, both on actor cells, and the saved actors remove them.
+Medium for the same rows on the 3 unclassified streams (map 141 twice, map 30;
+map 141 is therefore Medium): the program that wrote them is unknown, and
+`SAV-1250` finds a program in unclassified directories that writes Pass equal
+to Present. Medium for the cost plane and Medium for the height plane: neither
+is saved (`TERR-PASS-053`), so the census observes neither; their writer sets
+rest on the instrument above and leave 31 unclassified displacement-free
+stores, among them `R0046`, which `MOVE-PLANE-005` and `TERR-PASS-073` list
+as a writer of the dynamic plane's claim bits. Medium that type-6 actors stand
+on their record cells in every mission: 9 files, 5 maps. A0 is not refuted:
+421 of 443 live actors are on type-6 cells; the 22 off-cell actors are domain 1
+and their origin is Medium.
+
+**Unknown.** Targets of the 31 unclassified displacement-free stores and of
+the computed calls in the closures (206 in `load`); a named window per store
+owner, `R0273` first (15 stores), would settle the stores. Whether
+`R0045`, called from the join walk, clears a claim bit at start; the
+census shows none, and one window on `R0045` settles it. What `R0046`
+(two stores, in the `load`, `fresh` and `join` closures) writes; one window on
+it settles it. Whether the 3 unclassified restart streams were written by the
+original: the owner's record of where each came from, or a header field
+comparison with the classified streams, would settle it.
+
+### TERR-240
+
+Constructor chain (`s02`: decode call sites plus a raw scan of every section
+for the target as a dword and as an `E8`/`E9` target; `s03`: decode only):
+
+- The attach entry `R0486` has two call sites, `L02200` in `R0485` and
+  `L10485` in `R0693`. `R0488` has one, `L10455`; `R1357` has
+  one, `L10907`. No target is stored as a dword anywhere in the image.
+- `R0485` is called by the type-4 walker `R0489` (`L02201`) and the
+  Shop constructor `R0490` (`L02198`), which only `R0489` calls
+  (`L02195`). `R0494`, called at `L07842`, calls only `R1503`.
+- `R0693` is called by `R1834` (`L14460`; the `CreateObject` path,
+  which skips the attach by name, `TERR-STRUCT-072`), `L14461`
+  (`L14462`) and `L14463` (`L14464`). `L14463`'s one caller
+  `L14465` lies in no start-path closure.
+- `L14461` is called by `L14269` only (`L14466`). `L14269` is called by
+  `R0431` (`L14467`), the walk `R0067` (`L14439`, the `0x10003`
+  arm) and `R0474` (`L14468`).
+- `R0474`, read whole (`w04`, `w05`), looks up the section `Outposts`
+  through the line parser `R0475` (`L14469`), allocates `0xac` bytes per
+  entry (`L14470`) and calls `L14269` with the world global and two
+  coordinate bytes. Its message string is `Invalid outpost production!`. No
+  mission `.ini` ships (`TRIG-INI-012`).
+
+So at map load four routes can attach a Building: the type-4 walker's
+Building arm, its Shop arm, `R0474`'s Outposts on the fresh-map arm, and the
+walk's `0x10003` arm. Only the first two run on a shipped map with no `.ini`
+and no `0x10003` node (`TERR-228`).
+
+What reaches a covered cell: the direct-call closure of the six constructor
+entries holds 56 routines and lists 0 computed calls (`s02/root-summary.tsv`).
+Its plane writes are the recompute's. Its displacement-free module stores are
+`R1357`'s two (`L10468` cost baseline, `L10493` bit 5) and two
+unclassified one-store routines (`L07102`, `R1010`). Its `REP MOVSD`,
+`STOSD` and `STOSB` sites in `s02/stores.tsv` (`buildingctor`) number 16: 8 in
+`R1357` and 8 in its callees (`L14471` 1, `R0453` 1, `L14472` 2,
+`L14473` 3, `R1596` 1). A bulk copy carries no plane displacement, and
+none of the 16 sites was read. `R1357`'s callees are `R1537`, `L14472`,
+`R1596`, `L14473` and the recompute at `L07176`. For a cell with no
+record the payload is zeroed before the stores (`TERR-STRUCT-076`), so the
+tail `+0x2c..+0x33` stays zero; the saved structure records hold a zero tail
+except where a type-9 caster wrote it (`SAV-1224`). For a cell that already
+holds a record whose `payload+0x0c` is null, `TERR-STRUCT-076` states a second
+exit: the attach stores the building, copies the payload back and returns,
+writing no plane byte and not calling the recompute. At map load no record
+exists before the type-4 walk, so 0 of the 17,057 shipped attachments take
+it; whether it is reachable in play is Unknown (`TERR-STRUCT-076`).
+
+**Confidence.** High for the call sites and for the listing of 0 computed
+calls in the direct-call closure: decode and raw scan agree. Medium that no
+callback runs from these constructors: the body of `R1357`, on which the
+closure turns, was not read; no listing covers the 56 routines; and the
+instrument has blind spots: `call dword ptr [absolute]` is taken as an import
+without checking, `jmp reg` and `jmp [table]` are not listed, and computed
+calls are not followed, so a pointer-table dispatch is absent by
+construction. Medium for the tail on a reused record: the copy-back path rests
+on `TERR-STRUCT-076`. Medium for "only two routes on a shipped map": the
+absent section's result in `R0475` was not read.
+
+**Unknown.** What `R0431` and `L14465` build; one window on each settles
+it. The targets of `L07102` and `R1010`; one window on each. The body of
+`R1357` and the 16 bulk-copy sites; one whole window on `R1357` settles
+the callback clause. What `R0475` returns for a missing `Outposts` section;
+one window. Whether the existing-record exit is reachable in play.

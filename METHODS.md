@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3594. Observation: 99. Static analysis: 3003. Mixed: 492.
+Claims labelled: 3600. Observation: 99. Static analysis: 3006. Mixed: 495.
 
 ## Ledger ai
 
@@ -2626,7 +2626,7 @@ Claims labelled: 3594. Observation: 99. Static analysis: 3003. Mixed: 492.
 | SAV-1219 | static analysis | ✔ promoted |
 | SAV-1220 | static analysis | ✔ promoted |
 | SAV-1221 | mixed | ✔ promoted |
-| SAV-1223 | mixed | ✔ promoted |
+| SAV-1223 | mixed | ✔ promoted (amended) |
 | SAV-1224 | mixed | ✔ promoted |
 | SAV-1225 | mixed | ✔ promoted |
 | SAV-1226 | mixed | ✔ promoted |
@@ -2640,6 +2640,9 @@ Claims labelled: 3594. Observation: 99. Static analysis: 3003. Mixed: 492.
 | SAV-1240 | static analysis | ● active (partially retracted) |
 | SAV-1241 | static analysis | ● active (partially retracted) |
 | SAV-1246 | static analysis | ● active (branch candidate) |
+| SAV-1248 | mixed | ✔ promoted |
+| SAV-1249 | mixed | ✔ promoted |
+| SAV-1250 | mixed | ✔ promoted |
 
 ## Ledger session
 
@@ -3110,13 +3113,16 @@ Claims labelled: 3594. Observation: 99. Static analysis: 3003. Mixed: 492.
 | TERR-225 | static analysis | ● active (branch candidate) |
 | TERR-226 | static analysis | ● active (branch candidate) |
 | TERR-227 | static analysis | ● active (branch candidate) |
-| TERR-228 | static analysis | ✔ promoted |
+| TERR-228 | static analysis | ✔ promoted (amended) |
 | TERR-229 | static analysis | ✔ promoted |
-| TERR-230 | static analysis | ✔ promoted |
+| TERR-230 | static analysis | ✔ promoted (amended) |
 | TERR-FOG-234 | static analysis | ● active (branch candidate) |
 | TERR-FOG-235 | static analysis | ● active (branch candidate) |
 | TERR-FOG-236 | static analysis | ● active (branch candidate) |
 | TERR-FOG-237 | static analysis | ● active (branch candidate) |
+| TERR-238 | static analysis | ✔ promoted |
+| TERR-239 | static analysis | ✔ promoted |
+| TERR-240 | static analysis | ✔ promoted |
 
 ## Ledger text
 

@@ -26,20 +26,37 @@ attaches **in its own constructor**, after the ingest, to a per-cell record:
   - So a Wall of Earth is the only area effect that writes passability, and it does so through this arm rather than through anything in the area module. The registration is `R1075`, which then calls the recompute at `L05479` or `L05480`; the removal is `R1078`, whose slot clear is at `L05489` and recompute at `L05490` (`MAGIC-WALLBLOCK-045`, `MAGIC-AREACOST-046`, `MOVE-085`).
 - `+0x2c`, u8.
 
-**Mission start** (`TERR-228`, `TERR-229`, `TERR-230`). A fresh mission writes the two block
-planes in this order: the ingest, the Building attach, the type-6 occupy, the type-9 cell casters
-(`R0461`'s first loop: a record with X or Y nonzero and A below 4 calls `R0227`,
-which makes a record carrying six caster bytes at `+0x2c..+0x31`), the Sack loop (its place after
-the casters is Medium: the listing of `R0461` stops before it), and in the first sub-tick
-the join walk's occupy. The walk `R0067` removes actors from the planes only for a `0x10003`
-node; none occurs in the 28 maps per root of the trigger fixture table, and 10 EN maps are outside
-it (Medium). The ingest cost of the 1,653 record cells in the restart slots is the map.reg `Cost`
-value (High; 376 baselines discriminate it from the defaults). That the recompute is the only cost
-writer after the ingest, writing `CostCracked` on structure cells the `&0xfa` arm opens, and that
-no area layer exists yet, are Medium: the basis is a caller scan, not a sweep of stores into the
-cost plane, and the cost plane outside record cells is not saved. Completeness of this writer list
-is bounded by the routines read; the bodies of `R0474` and `R1575` and the rest of
-`R0461` are unread (`TERR-228`).
+**Mission start** (`TERR-228`, `TERR-229`, `TERR-230`, `TERR-238`, `TERR-239`, `TERR-240`). The
+world constructor `R0116` fills four 64 KiB planes, cost with 1 and static, dynamic and height
+with 0, empties the 100-bucket record map and reads the ten `map.reg` `Cost` keys into
+`world+0x54177..0x54180` (defaults 8, 8, 9, 14, 6, 12, 11, 16, 8, 6; `CostCracked` is the fifth).
+It fills no other plane (High for the constructor; Medium for any other
+routine allocating a further plane, `TERR-238`). A fresh mission then writes the two block planes in this order: the
+ingest, the Building attach, the type-6 occupy, the type-9 cell casters (`R0461`'s first
+loop: a record with X or Y nonzero and A below 4 calls `R0227`, which makes a record
+carrying six caster bytes at `+0x2c..+0x31`), the ground Sacks (`R0461`'s second loop,
+`R0472`), and in the first sub-tick the join walk's occupy. The height plane is the
+ingest's copy of the type-2 grid; no other height store of the displacement form
+is reached (Medium: the height plane is not saved, and a store through an alias
+or a bulk copy is not excluded). The cost plane is the ingest
+cost from the `map.reg` values (High on 376 discriminating record baselines), changed after the
+ingest only by the recompute on record cells (Medium: 31 displacement-free stores reached at start
+are unclassified, and no cost plane is saved). In the 6 classified restart slots (maps 20, 10, 41, 30) every saved block-plane
+row and record off an actor's cell follows from the install alone (High); the 3
+unclassified slots (map 141 twice, map 30) agree and are Medium. Among saved
+rows only actor cells depend on the run. A covered cell with no record gets the
+attach's record writes and the recompute; a cell that already holds a record
+with a null `+0x0c` gets the building stored and no plane byte
+(`TERR-STRUCT-076`; at map load no record exists before the type-4 walk). The
+direct-call closure of the constructors lists no computed call (Medium that no
+callback runs: the body of `R1357` is unread, and the instrument follows
+neither computed calls nor `jmp reg`). Four routes construct an attaching Building at map load: the
+type-4 walker's Building and Shop arms, the `.ini` `Outposts` reader `R0474`, and the walk
+`R0067`'s `0x10003` arm; no shipped mission has the `.ini`, and no `0x10003` node occurs in
+the 28 maps per root of the trigger fixture table (10 EN maps are outside it, Medium). The writer list is bounded by the routines
+read: the body of `R1575`, a root of the fresh-start group with computed
+calls, is unread, as are the 31 unclassified displacement-free stores and
+`R0046`.
 
 **Cost byte order and persistence** (`MOVE-084`, `MOVE-085`, `MOVE-086`). `R1087` divides a
 cell's cost byte by four once per read whenever the record's count at `+0x02` is non-zero, for every

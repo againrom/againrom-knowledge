@@ -75,6 +75,20 @@ map.reg `Cost` values (376 baselines discriminate the cost source), layer
 counts are 0, and the tail `+2c..+33` is a type-9 caster's six bytes or zero.
 EN and RU give identical results. — SAV-1223, SAV-1224, SAV-1225, SAV-1226
 
+Against the install alone (the map, `map.reg` and the `Data.bin` Buildings
+rows, nothing from the save), the 9 restart slots match (High for the 6 streams of classified
+authorship on maps 20, 10, 41, 30; Medium for the 3 streams without class, map 141
+twice and map 30) on every row and
+record that no live actor occupies: 17,607 rows equal, 0 predicted rows
+missing, and the 487 saved-only rows and records plus 8 differing rows all on
+actor cells. 421 of the 443 live actors stand on their type-6 record's cell; the other 22 are
+domain 1, origin Medium.
+Over 62 decoded documents with a world half, every saved Building has its
+type-4 anchor and its install size and Present mask; Pass equals the install
+in all but 8 files without an authorship class, where Pass equals Present on
+every Building. 23 documents at head (0,0) carry no world half. — SAV-1248,
+SAV-1249, SAV-1250
+
 Water (terrain class 8) is blocked at ingest by a hardcoded test, never from
 the registry `Pass*` values — but not independent of this array: LOAD applies
 every saved row's static/dynamic byte raw over both planes after ingest, so a
