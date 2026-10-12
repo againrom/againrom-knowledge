@@ -257,6 +257,16 @@ are not stored; LOAD rebuilds +0x3c from +0xc. The order and widths are
 High; constructor values for the unstored fields are Medium; no save with
 a nonempty bag was read. — R2-SESSION-165, R2-ENGINE-403
 
+Unit initialization builds the bag. An empty bag stores count 0, +0x1c
+32767 and +0x20 0, the constructor values; the four frozen saves hold
+exactly this for their one hero. No first-Player Group member of the four
+frozen saves holds a nonempty bag; the bag of S01 was not reached and
+other Players were not walked (138 files examined by magic). In the
+bodies read, unit death, a character file load and two script instants
+replace the bag with a new empty list; respawn and the victory transition
+create a bag only when the pointer is null.
+— R2-ENGINE-410, R2-SESSION-169
+
 EN and RU write the same bytes at Medium: the EN serializer bodies were
 read, their list and reference callees were not. RU items carry one more runtime dword
 (+0x54, not stored), so RU Weapon and Armor fields sit 4 bytes above EN's.

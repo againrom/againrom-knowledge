@@ -7127,11 +7127,11 @@ byte after new game and mission entry. No original run was made.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-402 | The ROM2 hero bag at Unit +0x7c is a 0x24-byte item list: entries, insert index +0x1c (0x7fff appends) and weight sum +0x20; stackable items merge on equal ID +0x40, and a list merge refuses at 1024 entries (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
-| R2-ENGINE-403 | ROM2 items are Item objects (RU 0x58, EN 0x54 bytes) with ID +0x40, quantity +0x42, type +0x44, class +0x45, material +0x46, unit weight +0x4a, price +0x1c and owner +0x14; magic is a list of Effect objects at +0x20; factories nav-only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-402 | The ROM2 hero bag at Unit +0x7c is a 0x24-byte item list: entries, insert index +0x1c (0x7fff appends) and weight sum +0x20; stackable items merge on equal ID +0x40, and a list merge refuses at 1024 entries (Medium). | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-403 | ROM2 items are Item objects (RU 0x58, EN 0x54 bytes) with ID +0x40, quantity +0x42, type +0x44, class +0x45, material +0x46, unit weight +0x4a, price +0x1c and owner +0x14; magic is a list of Effect objects at +0x20; factories nav-only. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
 | R2-ENGINE-404 | ROM2 buy moves the shop's own item object into the hero bag by direct insert, sets its owner to the Player and +0x4c to 0; a sold item leaves the bag earlier, when the move message takes it into the deal; the shop hop is navigation-only. | High / Medium | ● active (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
-| R2-ENGINE-405 | ROM2 worn items sit outside the bag: weapon +0x74, second hand +0x78, armour slots +0x208+4i; one item-move message moves items among body, bag, ground and shop and equips through Human vtable +0x40. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
-| R2-ENGINE-406 | On the read ROM2 reuse path the producer returns the existing hero Unit (Player +0x38) without allocation; the two bodies read do not touch its items and nine callees were not read; unload at mission end and town return remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-405 | ROM2 worn items sit outside the bag: weapon +0x74, second hand +0x78, armour slots +0x208+4i; one item-move message moves items among body, bag, ground and shop and equips through Human vtable +0x40. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-406 | On the read ROM2 reuse path the producer returns the existing hero Unit (Player +0x38) without allocation; the two bodies read do not touch its items and nine callees were not read; unload at mission end and town return remain Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
 | R2-ENGINE-407 | ROM2 EN and RU inventory serializer, bag method and shop buy/sell bodies agree in 18 pairs (whole-stream equality Medium); RU items carry 4 more runtime bytes (+0x54), shifting RU Weapon and Armor fields by 4; RU undo sends a hero update. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
 
 ### R2-ENGINE-402
@@ -7190,6 +7190,8 @@ stores with displacement 0x7c across the Unit constructors and the template
 loader in both roots would settle it. Also unknown: the third I/O caller (RU
 `L2.01749`) and a limit elsewhere. A save with a nonempty bag would show the
 stored +0x1c value.
+
+**Amended.** The Unknown on the allocation site is settled by R2-ENGINE-410: Unit initialization stores +0x7c. A limit in a caller stays Unknown.
 
 **Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
 
@@ -7259,6 +7261,8 @@ contents and the +0x3d flag meanings.
 
 **Unknown.** Reading the effect-name table and `L2.01761`/`L2.01760`/
 `L2.01762` would name the tags and their value pairs.
+
+**Amended.** R2-ENGINE-414 names the 50 effect tags, the slot-18 use of +0x40 and the +0x42 reads of slot 14 (duration count) and slot 19 (tag 41 price); +0x42 of tag 42 stays Unknown, as do +0x47, +0x50, RU +0x54 and +0x0e.
 
 **Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
 
@@ -7345,6 +7349,8 @@ it tests no location, but its dispatch from each mode was not traced.
 **Unknown.** The writer of +0x78; the ground-pickup completion after
 source 3 sets bag +0x1c and unit +0x50 = 2.
 
+**Amended.** The town-and-mission dispatch Unknown is narrowed by R2-ENGINE-413: R2-ENGINE-413 reads one dispatcher branch without a map test that reaches this arm; a second 0x22 target in the unread table of the map branch is not excluded (Medium).
+
 **Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
 
 ### R2-ENGINE-406
@@ -7378,6 +7384,8 @@ saved document.
 **Unknown.** Reading the map unload and the town re-entry, or an owner
 save before and after a mission with a marked bag item, would settle the
 carry back.
+
+**Amended.** R2-ENGINE-411 shows the departure path skips LOAD; R2-ENGINE-412 finds no write to the hero's bag or worn slots in the transition bodies read, with ten first-loop callees unread (Medium). Ground-item fate stays Medium.
 
 **Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
 
@@ -7413,3 +7421,263 @@ claim covers unmeasured code. Unknown for the meaning of RU +0x54 and
 whether EN sends the undo update from another body.
 
 **Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+## Hero inventory across a mission
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-410 | ROM2 Unit initialization builds the hero bag at +0x7c; 9 of 18 direct item-list constructor calls per root are followed within 0x60 bytes by a +0x7c store; the other nine are unclassified. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-411 | On the read ROM2 departure path mission entry clears Session +0x1ac before the map caller, whose only LOAD runs when +0x1ac is set; that the hero and its items cross into the mission as the same objects is Medium. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-412 | ROM2 victory runs a transition that keeps class 0x21..0x3f units and clears ground lists; the bodies read do not write their bag or worn items (Medium, ten callees unread); defeat runs it only when app +0x404 bit 0 is set. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-413 | ROM2 opcode 0x22 reaches the item-move arm in the dispatcher branch for packet byte +4 below 1 (no map test); that it is the only 0x22 arm is Medium, the sibling branch table being unread; one client builder, seven callers per root. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-414 | ROM2 effect tags index a 50-name table equal in EN and RU (41 castspell, 42 teachspell); effect apply scales s16 or u32 +0x40 by its argument; item +0x47, +0x50, RU +0x54 and +0x0e have no reader in the read bodies. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+
+### R2-ENGINE-410
+
+Unit initialization (EN `L2.01793`, RU `L2.01794`; 180 instructions,
+equal after masking: instruction shape with hex values of six or more
+digits masked, callee identity not compared) allocates 0x24 bytes, runs the item-list constructor
+(EN `L2.01737`, RU `L2.01738`) and stores the result at +0x7c (EN
+`L2.01795`, RU `L2.01796`). It also clears +0x50, +0x54, +0x58, +0x5c,
++0x64, +0x68, +0x70, +0x74, +0x78 and +0x140 and sets +0x136 = 1. The RU
+Unit constructor `L2.01273` calls it at `L2.01797`. One linear pass over
+each `.text` finds 9 direct calls to initialization and 18 to the item-list
+constructor per root; the pattern that stores +0x1c = 0x7fff (one encoding,
+`c7401cff7f0000`, register eax only; another register or encoding is
+not excluded) occurs once, inside the constructor.
+
+A direct constructor call followed within 0x60 bytes by a store with
+displacement 0x7c (EN ↔ RU):
+
+| Call | Containing body | Effect on +0x7c |
+|---|---|---|
+| `L2.01798` ↔ `L2.01799` | Unit initialization | first bag |
+| `L2.01800` ↔ `L2.01801` | transition (R2-ENGINE-412) | a new bag when +0x7c is null, under hero +0x13c > 0 and Session +0x74 ≠ 0 |
+| `L2.01802` ↔ `L2.01803` | result tick `L2.00524` ↔ `L2.00127` | a new bag when +0x7c is null, on a respawn at HP ≤ −40 |
+| `L2.01804` ↔ `L2.01805` | unit death `L2.01806` ↔ `L2.01807` | old bag destroyed, new bag |
+| `L2.01808` ↔ `L2.01809` | unit death | after the old bag is dropped as a ground sack (`L2.01810` ↔ `L2.01811`) |
+| `L2.01812` ↔ `L2.01813` | character-file loader `L2.01814` ↔ `L2.01815` | worn items stripped, bag deleted, new bag, refill |
+| `L2.01816` ↔ `L2.01817` | character-file loader `L2.01818` ↔ `L2.01819` | new bag |
+| `L2.01820` ↔ `L2.01821` | script instant `L2.01822` ↔ `L2.01823` | bag dropped to the ground, new bag |
+| `L2.01824` ↔ `L2.01825` | script instant `L2.01826` ↔ `L2.01827` | bag merged into another unit's bag, new bag |
+
+The other nine calls per root have no store to +0x7c within 0x60 bytes;
+that proximity rule is the only test applied. The census holds 94 EN and
+98 RU stores with displacement 0x7c; nine per root were classified, and
+the other 85 EN and 89 RU were not classified by receiver or source. A
+store beyond 0x60 bytes or of a constructor result kept in a temporary
+would not be found. Only EN `L2.01740` (the item-move ground destination
+of R2-ENGINE-405) has a window; the roles of the other eight calls per
+root (ground, shop, script or other) are not shown. Unit death first moves
++0x78, then +0x74 when row parameter 0xf is nonzero, then slots 1..12
+(Human vtable +0x4c) into the bag. When the template name contains the
+string at `L2.00405` or +0x1a0 is set, the bag is destroyed and replaced;
+otherwise a nonempty bag goes to the ground sack and a new empty bag
+replaces it. LOAD fills the existing +0x7c object (R2-SESSION-165).
+
+**Confidence.** High for the census, the initialization store and the
+listed bodies, read in both roots (`unit-init`, `unit-death`, `drop-bag`,
+`result-tick`, `script-drop`, `script-merge` and `charfile-server` equal
+after masking; `charfile-client` and `transition` differ in local
+branches). Medium for the nine role names death, respawn, character file and
+script instant, taken from what each body does, and for the 9 of 18
+split, which is a proximity-rule result. Unknown for a count or weight
+bound in a caller of the bag methods: no census of direct calls to bag
+insert and merge was run and no caller was searched; none occurs in these
+bodies. That census and a read of each caller would settle it.
+
+**Unknown.** The string at `L2.00405` and the meaning of Unit +0x1a0.
+
+**Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
+
+### R2-ENGINE-411
+
+Mission entry (EN `R2.0026`, RU `R2.0023`), called with argument 0 by
+the 0x42f, 0x457 and 0x468 message arms, tests app +0x5d4; when it is
+set it stores Session +0x1ac = 0 and calls the map caller (EN
+`L2.00222`, RU `L2.00112`). The map caller's only LOAD call (EN
+`L2.01828` to `L2.00289`) runs when Session +0x1ac is nonzero. Map build
+reuses the existing owner under R2-ENGINE-108's conditions and the
+producer returns the existing hero (R2-ENGINE-406). After the map loads,
+mission entry posts 0x442 with wParam 0, the autosave. The 0x468 arm
+calls mission entry on its first branch, after `L2.00175` and `L2.00466`
+when a location list is built.
+
+The load entry (EN `L2.00826`, RU `L2.00119`) calls LOAD (`L2.00289`,
+RU `R2.0121`) on the save named at app +0x248; it then posts 0x421 when
+`L2.01829` returns 0, calls mission entry with argument 1 when `L2.01830`
+returns nonzero, and otherwise posts 0x42e (town). Among the bodies read,
+LOAD is called only there and in the map caller.
+
+The saved hero address 262270312 is equal in all four frozen saves A to D
+(R2-SESSION-169); it does not discriminate between the same object and a
+rebuilt one.
+
+**Confidence.** High for the cleared flag, the gated LOAD and the
+absence of a LOAD call in mission entry and the 0x42f, 0x457 and 0x468
+arms, read in both roots (map caller equal after masking: shape only, callee identity not compared). Medium that
+the hero's item objects survive the unread callees of map build and the
+producer (R2-ENGINE-406). The saved address gives no support for object
+identity; that the hero is the same object rests on the code reading alone
+(Medium).
+
+**Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
+
+### R2-ENGINE-412
+
+The 0x41d arm (EN `L2.01831`, RU `L2.01832`) branches on app mode
++0x5d8. Modes 1 and 3 call the transition (EN `L2.01664`, RU `L2.01833`)
+and post 0x459. In EN mode 0 posts 0x452 without it; RU mode 0 first tests +0x3f4, +0x3bc
+and +0x3c8 (`L2.01834..L2.01835`) and can call `L2.01836` (unread),
+skipping the 0x452 post, a branch EN lacks. Other modes call it when
+the Session exists and the win flag (EN app +0x3e4, RU +0x3fc) is set,
+then post 0x428 or 0x468 or call `L2.00876`. The transition, read in
+both roots (RU pushes one more argument before its last call):
+
+1. expires unit effects (+0x42 = 1, vtable +0x38, remove);
+2. calls world-clear (EN `L2.01837`, RU `L2.01838`) on Session +0x7c;
+3. deletes the map `L2.01066` and the global ground list `L2.01839` and
+   zeroes both pointers;
+4. removes owners with +0x2c ≠ 0 or a matching name;
+5. for each unit of class +0x0e in 0x21..0x3f: HP and mana to maximum,
+   +0x13c = 0, reset (EN `L2.01668`, RU `L2.01840`), and +0x5c, +0x64,
+   +0x44, +0x68, +0x40 = 0; other units are detached through EN
+   `L2.01669` (RU `L2.01841`).
+
+Reset calls `L2.01842` (RU `L2.01843`), which returns an in-progress tag-41
+scroll at +0x68 to the bag, destroys a +0x68 item of kind 0xe when +0x136
+is 0 and the cast object +0x64, then sets +0x136 = 1 and clears +0x50,
++0x54, +0x58 and +0x64. Steps 1 to 5 and the reset bodies read write none
+of +0x7c, +0x74, +0x78 or the slots. The transition's first loop (EN
+`L2.01844..L2.01845`), which runs for every owner whose +0x38 unit exists,
+is not among the five steps: it calls ten unread functions (EN `L2.01846`,
+`L2.01847`, `L2.00830`, `L2.01848`, `L2.01849`, `L2.01850`, `L2.01001`,
+`L2.00160`, `L2.01851`, `L2.01852`) with the hero or its owner, and it
+stores +0x7c at EN `L2.01853` after the null test of the R2-ENGINE-410
+table row. That store creates a bag for a null pointer and does not
+replace an existing one, which agrees with that row. No LOAD call occurs
+in the bodies read; the 0x41d arm also calls `L2.01424` (0xa5 bytes below
+the load entry `L2.00826`), `L2.00876`, `L2.01854`, `L2.00875` and
+`L2.01855`, none read, and the delete callees `L2.01856` and `L2.01857`
+were not read.
+
+Without the win flag the arm calls fail-cleanup (EN `L2.01858`, RU
+`L2.01859`) and posts 0x421. The 0x41e arm does the same. Fail-cleanup
+calls the transition only when the mode is 1 or 2, the Session exists
+and app +0x404 bit 0 is set. The 0x418 arm builds the save-slot page
+(`L2.01860`, mode 1).
+
+**Confidence.** High for the arm structure and steps 1 to 5 as read in both
+roots (the arms, fail-cleanup, transition, reset, reset helper, detach and
+world-clear read; `arm-418`, `arm-41e`, `reset-callee`, `reset-helper`,
+`owner-detach` and `world-clear` equal after masking: instruction shape
+with hex values of six or more digits masked, callee identity not
+compared; `arm-41d` is not in that statement, RU has a mode-0 branch EN
+lacks). Medium that the hero keeps its bag and worn items across the
+victory transition and that no LOAD follows: both negatives are bounded
+to the bodies read. Medium that ground items are destroyed:
+world-clear's list callees and the deletes were not followed. Medium that
+the save-slot page restores a hero only through LOAD (R2-ENGINE-074).
+Unknown for the meaning of app +0x404 bit 0.
+
+**Unknown.** Reading world-clear's callees (`L2.01861`, `L2.01862`,
+`L2.01863`, `L2.01864`, `L2.01865`, `L2.01866`, `L2.01867`) and the writers of app
++0x404 would settle ground-item fate and the defeat gate. Reading the ten
+first-loop callees, the delete callees, the 0x41d arm's callees listed
+above and RU `L2.01836` would settle whether the hero's items and the
+absence of a LOAD hold beyond the bodies read.
+
+**Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
+
+### R2-ENGINE-413
+
+The server dispatcher (EN `L2.00171`, RU `R2.0119`) has two branches on
+packet byte +4. For byte +4 < 1 it indexes opcode byte +9 − 2 through a
+byte table (EN `L2.01868`, RU `L2.01869`) into a dword table (EN
+`L2.01870`, 32 entries; RU `L2.01871`, 31). Opcode 0x22 reaches the
+item-move arm (EN `L2.01769`, RU `L2.01770`; R2-ENGINE-405); opcodes
+0x32..0x35 reach shop enter, buy, sell and undo (R2-ENGINE-404). This
+branch tests no map pointer. The other branch (byte +4 at least 1) exits
+when `L2.01066` is null, otherwise takes opcode byte +9 − 0x12, bounds it
+at 0x14 and jumps through a table at EN `L2.01872` (`L2.01873..L2.01874`);
+that range includes opcode 0x22. The table was not read and its RU
+counterpart was not located. The arm's ground source uses the global list
+`L2.01839`.
+
+One client builder (EN `L2.01875`, RU `L2.01876`; equal after masking)
+fills record `L2.01877`: +9 = 0x22, +5 owner, +0xa unit [app +0x138] +4,
++0xc source kind, +0xe source index, +0xd destination kind, +0x10
+destination index, +0x12 quantity, and sends it through `L2.00871` on
+`L2.00872`. A linear `.text` pass finds seven direct calls per root:
+
+| EN call | EN body | RU call | RU body |
+|---|---|---|---|
+| `L2.01878` | `L2.01879` | `L2.01880` | `L2.01881` |
+| `L2.01882` | `L2.01883` | `L2.01884` | `L2.01885` |
+| `L2.01886` | `L2.01887` | `L2.01888` | `L2.01889` |
+| `L2.01890` | `L2.01887` | `L2.01891` | `L2.01889` |
+| `L2.01892` | `L2.01893` | `L2.01894` | `L2.01895` |
+| `L2.01896` | `L2.01897` | `L2.01898` | `L2.01899` |
+| `L2.01900` | `L2.01901` | `L2.01902` | `L2.01903` |
+
+**Confidence.** High for the dispatch in the byte +4 < 1 branch, the arm
+address, the builder record and the direct-call census in both roots
+(builder equal after masking: shape only, callee identity not compared).
+Medium that this is the only server arm for opcode 0x22: a mission-only
+0x22 arm may sit in the unread table of the other branch. Medium that
+the town and the mission both reach this arm: no location test occurs in
+the dispatcher branch, the arm or the builder, but no runtime was
+observed. Indirect calls to the builder are outside the census.
+
+**Unknown.** The entry for opcode 0x22 (and the entries up to 0x12 + 0x14)
+in the table at EN `L2.01872` and its RU counterpart; reading the table
+and its targets would settle whether a second 0x22 arm exists.
+
+**Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
+
+### R2-ENGINE-414
+
+The effect-name table (EN `L2.01904`, RU `L2.00088`; 50 pointers, equal
+strings) is used by effect build (EN `L2.01757`, RU `L2.00087`; equal
+after masking):
+
+| Tags | Names |
+|---|---|
+| 0..1 | unused_value_0, price |
+| 2..5 | body, mind, reaction, spirit |
+| 6..11 | health, healthmax, healthregeneration, mana, manamax, manaregeneration |
+| 12..19 | tohit, damagemin, damagemax, defence, absorbtion, speed, rotationspeed, scanrange |
+| 20..25 | protection0, protectionfire, protectionwater, protectionair, protectionearth, protectionastral |
+| 26..31 | fighterskill0, skillblade, skillaxe, skillbludgeon, skillpike, skillshooting |
+| 32..37 | mageskill0, skillfire, skillwater, skillair, skillearth, skillastral |
+| 38..40 | itemlore, magiclore, creaturelore |
+| 41..42 | castspell, teachspell |
+| 43..49 | damage, damagefire, damagewater, damageair, damageearth, damageastral, damagebonus |
+
+Effect vtable RU `L2.01905`, 20 slots. Slot 18 (`L2.00054`) computes a
+value as its argument times s16 +0x40 when flags +0x3d share a bit with
+one of three masks (`L2.01906`, `L2.01907`, `L2.01908`), else times u32
++0x40, then switches on tag +0x3c (≤ 0x31, table `L2.01909`). Tag 41 does
+nothing there; tag 42 tests the unit's +0x140 list with `L2.00040` and,
+when absent, builds a 0x14-byte object from the value's low byte and adds
+it with `L2.00039`, then sets unit +0x150 |= 0x100000. Slot 14
+(`L2.00482`) counts +0x42 down as a duration. Slot 19 (`L2.01910`, price)
+reads +0x42 for tag 41 only.
+
+No reader of item +0x47, +0x50, RU +0x54 or +0x0e occurs in the 21 RU
+item vtable methods read (slots 0, 1, 3..13, 15..19 and 21..23 of
+`L2.01751`), the EN item describe body `L2.00841`, which reads EN +0x54
+as the armour slot byte, or the bodies of R2-ENGINE-410..413.
+
+**Confidence.** High for the names, the table identity in EN and RU and
+the slot-18 value rule. RU only for the effect vtable slots. Medium that
+the high word of a tag-42 value is unused: `L2.00039` and `L2.00040` were
+not read. Unknown for the four item fields: the search covers the listed
+bodies, not the executable.
+
+**Unknown.** A `.text` census of reads with displacements 0x47, 0x50,
+0x54 and 0x0e on Item registers would narrow the four fields. Item +0x42
+of an effect with tag 42: slot 18 reads +0x40 only, and no body read
+shows whether +0x42 matters for tag 42.
+
+**Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)

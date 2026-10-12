@@ -1847,7 +1847,7 @@ then reverse the values and record the final Player byte in each locale.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-165 | A ROM2 SAV stores the hero bag as a gate byte, u32 count, Item references in list order, u32 insert index and u32 weight; an Item is the base, counted Effect references and eight scalars; LOAD appends in saved order (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-SESSION-165 | A ROM2 SAV stores the hero bag as a gate byte, u32 count, Item references in list order, u32 insert index and u32 weight; an Item is the base, counted Effect references and eight scalars; LOAD appends in saved order (Medium). | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
 
 ### R2-SESSION-165
 
@@ -1894,4 +1894,47 @@ ROM2 save was read.
 read at the hero's gate +0x7c, would show count, item and effect bytes,
 +0x1c and +0x20.
 
+**Amended.** R2-SESSION-169 gives the stored +0x1c (32767) and +0x20 (0) of the empty bags in the four frozen saves; nonempty bag bytes stay Unknown.
+
 **Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+## Hero inventory across a mission
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-169 | The four frozen ROM2 saves each store one first-Player Group hero (class 0x21) with bag gate 1, count 0, +0x1c 32767 and +0x20 0; S01's bag and other Players were not walked. | High | ✔ promoted (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+
+### R2-SESSION-169
+
+Population: the four frozen ROM2 saves of R2-SESSION-099 and R2-SESSION-100
+(A 6348, B 26886, C 6372 and D 26503 bytes, full SHA256 equal to their
+receipts) and the 134 `.sav` files under the preserved saves tree, of
+which one carries the ROM2 envelope magic (S01, 1850 bytes, SHA256
+`92f7b77f552252c70f37ba7817e95fb62b037e08a8714dcb2587cad15af453e4`).
+That is 134 + 4 = 138 files (S01 is one of the 134). Five saves were
+decoded with the R2-SESSION-017 envelope and walked only through the first
+Player's Group members with the R2-SESSION-165 bag layout: one member in
+each of A to D, none in S01. B and D hold 8 Players; the other 7 Players
+and every unit outside the first Player's Group were not walked.
+
+| Save | Mission | Players | Group members | Hero row, class | Saved address | Gate | Count | +0x1c | +0x20 |
+|---|---|---|---|---|---|---|---|---|---|
+| A | 0 | 1 | 1 | 26, 0x21 | 262270312 | 1 | 0 | 32767 | 0 |
+| B | 10 | 8 | 1 | 26, 0x21 | 262270312 | 1 | 0 | 32767 | 0 |
+| C | 0 | 1 | 1 | 26, 0x21 | 262270312 | 1 | 0 | 32767 | 0 |
+| D | 10 | 8 | 1 | 26, 0x21 | 262270312 | 1 | 0 | 32767 | 0 |
+| S01 | 10 | 1 | — | — | — | — | — | — | — |
+
+S01's first Player has no Group, so no hero bag was reached. The stored
++0x1c and +0x20 of an empty bag equal the item-list constructor's values
+(R2-ENGINE-402).
+
+**Confidence.** High for these bytes in the four first-Player Group members;
+the walk reached every member of that Group without a frontier. The bag
+of S01 is not known, and nothing is claimed for other Players or units.
+
+**Unknown.** Nonempty bag bytes (the other Players of B and D and S01's
+bag were not reached): an owner save after buying one stackable
+and one magic item would settle count, item and effect records.
+
+**Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
