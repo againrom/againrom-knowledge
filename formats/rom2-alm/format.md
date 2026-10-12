@@ -69,7 +69,7 @@ uses other fields.
 | 0x08 | i16 | +0x08 | read by the mission-load row loop, as a lookup index into a collection whose record chooses the object build; no actor-builder read (Medium) |
 | 0x0a | u16 | +0x0c | no reader found |
 | 0x0c | u32 | +0x48 | flags; bit 0x10 selects the person arm |
-| 0x10 | u32 | +0x50 | bits 1, 2, 4, 8 set four actor fields; read at version 0x47e and above |
+| 0x10 | u32 | +0x50 | bits 1, 2, 4, 8 set actor +0x194, +0x19c, +0x198, +0x1a0; read at version 0x47e and above. Bits 1, 2 and 4 put the unit in Inn offer populations; bit 8 removes its death drop and the experience a human attacker is paid for it (Medium) |
 | 0x14 | u32 | +0x10 | definition id; read at version 0x3db and above |
 | 0x18 | u32 | +0x14 | owner, low word only |
 | 0x1c | u32 | +0x44 | 1-based type-8 index; that type-8 element takes the record's 0x28 low word |
@@ -79,9 +79,22 @@ uses other fields.
 | 0x2c | u32 | +0x40 | group number; the map keeps the maximum |
 
 "No reader found" is bounded to the actor builder and the mission-load
-row loop. Installed values: 0x08 1..107, 0x0a 1..6, 0x0c {0, 16}, 0x10
-{0, 8}, 0x1c 0..4, 0x20 0..14 (10 in nearly every record), 0x2c 0..38.
-— R2-ASSET-119, R2-ASSET-122, R2-ENGINE-038, R2-ENGINE-513
+row loop. Installed values in the campaign maps: 0x08 1..107, 0x0a 1..6,
+0x0c {0, 16}, 0x10 {0, 8}, 0x1c 0..4, 0x20 0..14 (10 in nearly every
+record), 0x2c 0..38. In the root `.alm` maps: 0x0a 0..7, 0x0c {0, 4, 16,
+20}, 0x10 {0, 1, 2, 3, 4, 5, 8, 9, 11, 12} in EN and also 10 in RU (the builder tests each bit separately; R2-ENGINE-513), 0x18 2..15 with high
+word 0, 0x1c 0..58, 0x20 0..14, 0x2c 0..555.
+— R2-ASSET-119, R2-ASSET-122, R2-ASSET-132, R2-ENGINE-038, R2-ENGINE-513
+
+Actor +0x1a0 also receives 1 from two unique-spell arms and, when
+Session+0x74 is set, from the map build for the units of owners whose
+diplomacy toward the owner named "Self" has bits 0..2 clear. An actor with
++0x1a0 set drops no bag or gold at death and pays no experience to a human
+attacker (R2-ENGINE-480; Medium here; a creature attacker's award was not
+read for the flag). The unit copy omits the flag (Medium: its head is
+unread); the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
+Inn offer blocks 2, 4 and 6 (Medium: the receiver of the offer generator is
+the Inn by address inference); RU and EN agree in those blocks. — R2-ENGINE-535, R2-ENGINE-537
 
 <a id="group-and-object-records-types-10-and-11"></a>
 
@@ -98,13 +111,24 @@ Type 10 entries are four i32, keyed on a unit group number:
 
 The program runs the type-10 pass when type-0 payload dword 0x84 exceeds 1
 (gate body High; "only" Medium, other writers of the gate are open). Then
-each unit group of an owner with a nonzero +0x2c, for which a guard
-routine (`L2.02502`, unread) returns nonzero, gets a group object, with
-defaults when no entry matches; every matching entry applies in file
-order. The 46 `scenario.res` campaign maps per root have dword 0x84 = 1
-and no type-10 entry; the root `.alm` maps were not read. Type-0 payload
-dword 0x88 is stored in the map and the session; its meaning is Unknown.
-— R2-ASSET-120, R2-ASSET-122, R2-ENGINE-509, R2-ENGINE-510
+each unit group of an owner with a nonzero +0x2c whose dword +0xc is not 0
+(read by `L2.02502`; that it is the member count is Medium) gets a group
+object, with defaults when no entry matches; every matching entry applies
+in file order. The 46 `scenario.res` campaign maps per root have dword
+0x84 = 1 and no type-10 entry. The 13 EN and 37 RU root `.alm` maps have
+dword 0x84 of 4..16, above 1, and type-10 entries; the gate opens for them
+if they are built by this routine (Medium: the loader of a root map is
+unread). Type-0 payload dword 0x88 is
+stored in the map and the session; its meaning is Unknown.
+— R2-ASSET-120, R2-ASSET-122, R2-ASSET-130, R2-ENGINE-509, R2-ENGINE-510,
+R2-ENGINE-538
+
+Flag 4 and flag 8 also put the group in Inn offer blocks 3 and 5 through
+group +0x48 and +0x4c. In block 3 RU skips groups of the Inn's own owner
+and EN does not. The object re-creates members only when the group's
+dword +0xc is 0 or below (Medium, R2-ENGINE-510: no slot-5 body was read
+for this page); RU places them over the member spread, EN at
+radius 0 (Medium). — R2-ENGINE-537, R2-ENGINE-538
 
 Type 11 entries key on a type-4 object id, the sign-extended type-4 file
 word 0x12:
@@ -112,11 +136,27 @@ word 0x12:
 | Array | Width | Fields | Receiving type-4 kinds |
 |---|---:|---|---|
 | 11a | 12 | id, flags (2, 4, 0x10, 0x20, 0x40), word used under flag 2 | 0x43..0x45, 0x63..0x65, 0x6f..0x71; last match wins |
-| 11b | 84 | id, five runs of four i32 forming four groups of five | 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b; first match |
+| 11b | 84 | id, then per category i (0..3): mask 0x04+4i, minimum price 0x14+4i, maximum price 0x24+4i, draws 0x34+4i, quantity bound 0x44+4i | 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b; first match |
 | 11c | 12 | id, nonzero gate, position in the type-7 first array | 0x46..0x4b; last nonzero match wins |
 
 The 46 campaign maps per root carry no 11a or 11b entry and 40 11c
-entries in 10 maps. — R2-ASSET-121, R2-ASSET-122, R2-ENGINE-512
+entries in 10 maps. The root `.alm` maps carry 376 EN and 477 RU 11a
+entries, all on Inn kinds, and 452 EN and 555 RU 11b entries, all on Shop
+kinds except five per root (entries 1, 4, 11, 16 and 19, all with id 265)
+that name no type-4 record; their 11c entries
+all have gate 0. 11a flag 1 occurs there and no field receives it; under
+flag 2 the word is 3661..3680. — R2-ASSET-121, R2-ASSET-122,
+R2-ASSET-130, R2-ASSET-132, R2-ENGINE-512
+
+An Inn uses its 11a fields to build a player's offer list: flags 0x20,
+0x40 and 0x10 admit unit class ranges, flag 4 enables one block and the
+flag-2 word is the argument of another (Medium: the receiver of the
+offer generator is the Inn by address inference); what an offer is to the
+player is Unknown, and so are other readers of Inn +0xc4..+0xd4 and Shop
++0x70..+0xbf, for which no displacement scan ran. When Session+0x74 is set, a Shop fill takes its four category
+entries from the Shop's 11b fields, in the order of the Scenario.dll
+ordinal-15 record; otherwise from that record. — R2-ENGINE-536,
+R2-ASSET-131, R2-ENGINE-539
 
 The kinds that receive type-11 fields build structure classes: 0x46..0x4b
 Pointer (0x70 bytes), 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b Shop (0xc4) and
@@ -150,8 +190,8 @@ maps, so the two-value kind vocabulary of R2-ASSET-019 holds only for the
 files it described. — R2-ASSET-123, R2-ENGINE-520, R2-ASSET-019
 
 The Shop and Inn slot-5 bodies read in RU do not read the 11b or 11a
-fields; no caller of slot 5 was read, so when they run is Unknown, and so
-are the readers of those fields. — R2-ENGINE-521
+fields; no caller of slot 5 was read, so when they run is Unknown.
+— R2-ENGINE-521
 
 <a id="music-areas-type-12"></a>
 
@@ -207,6 +247,11 @@ gate refer to the same field remains Unknown. — R2-ASSET-024
 3. Retain metadata dimensions and all count fields before their dependent cases.
 4. Use each record's own case grammar and version conditions. For the
    preserved versions, the other record payloads use their declared extents.
+   The loader itself reads types 10, 11 and 12 by their type-0 counts in
+   signed loops and never consults the payload size: a count of 0 or below
+   reads nothing, and a count that disagrees with the size misframes the
+   records after it (Medium). Below versions 0x47e, 0x4ce and 0x514 the
+   respective counts are 0. — R2-ASSET-129
 5. Check each payload and complete record-chain endpoint against the input.
 
 The ROM1 version ceiling of 1001 rejects the preserved ROM2 versions. Shared
@@ -219,10 +264,10 @@ R2-ASSET-003, R2-ASSET-024
 
 Type 10 and 11 fields are decoded to the program fields that receive
 them above. The 11c count reader is the state-15 arm (R2-ENGINE-518; that it
-is the only reader is Medium). Which order code puts a unit in state 15, and what the Shop and Inn
-classes do with the 11b and 11a fields, are Unknown (R2-ENGINE-519,
-R2-ENGINE-521). So is the reader of unit-record 0x0a and 0x20 outside the
-two bodies read. EN and RU differ in one type-10 store: the
+is the only reader is Medium). Which order code puts a unit in state 15 is
+Unknown (R2-ENGINE-519); so are what an Inn offer is and which event
+builds the offer list (R2-ENGINE-536). So is the reader of unit-record
+0x0a and 0x20 outside the two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0
 there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The writer's reason
 for declaring 644 bytes while the metadata programme transfers 660 is also

@@ -1404,9 +1404,9 @@ claimed.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ASSET-119 | ROM2 ALM type 6: the loader moves each field of the 48-byte unit record to a fixed slot of a 0x54-byte row, equal in EN and RU allods2.exe; offsets, widths and slots are tabled for versions 1300 and 1600. | High | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ASSET-120 | ROM2 ALM type 10 entries are four i32: group number, a percent scaling the slot-5 countdown reload value, flags 1/2/4/8 and a type-7 node position; the loader copies each entry whole and the group pass reads all four. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ASSET-121 | ROM2 ALM type 11 arrays key on a type-4 object id (file word 0x12): 11a holds flags and a word, 11b twenty i32 in four groups of five, 11c a nonzero gate and a type-7 node position. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ASSET-122 | Over the 46 scenario.res campaign maps per root, types 10, 11a and 11b are empty, 11c has 40 entries in 10 maps and type-0 dword 0x84 is 1; EN and RU differ in dword 0x88 on 3 maps, in version on 4 and in unit counts. | High | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ASSET-120 | ROM2 ALM type 10 entries are four i32: group number, a percent scaling the slot-5 countdown reload value, flags 1/2/4/8 and a type-7 node position; the loader copies each entry whole and the group pass reads all four. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ASSET-121 | ROM2 ALM type 11 arrays key on a type-4 object id (file word 0x12): 11a holds flags and a word, 11b twenty i32 in four groups of five, 11c a nonzero gate and a type-7 node position. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ASSET-122 | Over the 46 scenario.res campaign maps per root, types 10, 11a and 11b are empty, 11c has 40 entries in 10 maps and type-0 dword 0x84 is 1; EN and RU differ in dword 0x88 on 3 maps, in version on 4 and in unit counts. | High | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
 
 ### R2-ASSET-119
 
@@ -1486,6 +1486,8 @@ R2-ENGINE-510 grades Medium. The node-iterating helpers `L2.02497` and
 
 **Unknown.** The EN image was not scanned for other readers of map+0x310.
 
+**Amended.** R2-ENGINE-537: group +0x48 and +0x4c, set by e2 bits 4 and 8, select the groups of Inn offer blocks 3 and 5. R2-ENGINE-538 reads `L2.02502`. R2-ASSET-132 gives the root-map values.
+
 ### R2-ASSET-121
 
 The loader reads each type-11 entry whole, in three loops, and appends
@@ -1525,6 +1527,8 @@ bases were left unclassified, and a pointer to an entry could pass through
 a getter. A call-target scan of the eight type-10/11 element getters and a
 displacement scan in EN would settle it for EN.
 
+**Amended.** R2-ASSET-131 names the 11b fields (mask, minimum and maximum price, draws and quantity bound per category) and R2-ENGINE-536 a reader of the 11a fields. Flag 1 occurs in the root maps and no field receives it (R2-ASSET-132).
+
 ### R2-ASSET-122
 
 The census reads the 46 maps of `scenario.res` in each root (EN 5548580
@@ -1563,11 +1567,13 @@ committed census generator (`evidence/maps.py` through `regen.sh`) run
 over those files would settle whether any of them has dword 0x84 above 1
 or a type-10 or type-11 entry.
 
+**Amended.** R2-ASSET-130 and R2-ASSET-132 census the root `.alm` maps this card's Unknown names: dword 0x84 is above 1 in all of them, and all carry type-10 and 11b entries.
+
 ## Map structure kinds and type-11c entries in the campaign
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ASSET-123 | The 46 ROM2 campaign maps per root hold 13 Pointer structures and no Shop or Inn; 35 gate-1 11c entries name 12 Pointers, each with its action node at index position present and of operation 2 (High); run-time selection is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ASSET-123 | The 46 ROM2 campaign maps per root hold 13 Pointer structures and no Shop or Inn; 35 gate-1 11c entries name 12 Pointers, each with its action node at index position present and of operation 2 (High); run-time selection is Medium. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 | R2-ASSET-124 | ROM2 Data.bin Buildings (180 stored entries, EN = RU) names entries 0x46..0x4b "Pointer 1".."Pointer 6", 0x22/0x23 "Shop"/"Shop 2" and the other R2-ENGINE-512 Shop and Inn kinds as Multiplayer shops and inns. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 
 ### R2-ASSET-123
@@ -1639,6 +1645,8 @@ the 1334 action nodes per root: one table from the committed generator
 would settle the signed comparison. The root `.alm` maps (R2-ASSET-084) are
 not censused; the same generator over them would settle which structure
 kinds and 11c entries they hold.
+
+**Amended.** R2-ASSET-130: the root `.alm` maps hold Shop and Inn kinds (every 11a entry names an Inn, every 11b entry but five per root a Shop), and all their 11c entries have gate 0.
 
 ### R2-ASSET-124
 
@@ -1712,3 +1720,191 @@ naming of each parameter follows R2-ENGINE-319.
 `data.bin` settle it).
 
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+
+## Map record loading and the root-map census
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-129 | The ROM2 ALM loader reads types 10, 11 and 12 by their type-0 counts in signed loops and never by payload size: a count of 0 or below reads nothing; a count that disagrees with the size misframes later records (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ASSET-130 | The 13 EN and 37 RU ROM2 root .alm maps are version 1600 with every counted payload exact; all hold type-10 and 11b entries, type-0 dword 0x84 is 4..16, and each EN file equals its RU namesake byte for byte. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ASSET-131 | A ROM2 ALM 11b entry is a shop stock record: for category i (0..3) mask 0x04+4i, minimum price 0x14+4i, maximum price 0x24+4i, draws 0x34+4i, quantity bound 0x44+4i; the Shop holds it in the Scenario.dll record layout. | High | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ASSET-132 | In the ROM2 root .alm maps type-6 0x10 uses bits 1, 2, 4 and 8 and 0x0a takes 0..7; 11a flag 1 occurs although the type-4 pass stores nothing from it; the 11a word is 3661..3680 whenever flag 2 is set. | High | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+
+### R2-ASSET-129
+
+The record dispatcher (RU `R2.0002`, EN `L2.02484`) reads the 20-byte
+file header and stores an error code in map+0x8c: 2 when the magic
+differs from the string at RU `L2.00002`, 3 when the record count is below
+3, 4 when the version is above 0x640 (1600), and 1 when the archive does
+not open. After the record loop it stores 5 when map+0xc is 0 and 6 when
+map+0x14 is 0. Map+0xd8 and map+0xdc stay 1 unless a type-0 record sets
+them.
+
+The record loop runs while its index is below the record count (unsigned
+`jae`). The header reader (RU `R2.0003`, EN `L2.02735`) reads 20 bytes,
+except at version 0x3e8 (1000), where it reads none. The type is header
++0x0c: a type above 12 takes the default, 0..12 go through a 13-entry
+table (RU `L2.02736`, EN `L2.02737`). The default skips header +0x08
+bytes through archive slot +0x30.
+
+Type 0 reads the counts the later cases use, each only from a version on:
+the type-10 count at version 0x47e and above, the three type-11 counts at
+0x4ce and above, the type-12 count at 0x514 and above (unsigned `jb`
+tests). The dispatcher zeroes the five counts before the loop, so a map
+below those versions loads no element of those types.
+
+| Case | Loop test | Element read | Destination |
+|---|---|---|---|
+| 10 | `cmp i, count; jge` (signed) | 0x10 bytes | appended to map+0x310 |
+| 11 | three loops, each `jge` | 0x0c, 0x54, 0x0c bytes | map+0x338 (11a), map+0x324 (11b), map+0x34c (11c) |
+| 12 | `jge` | a 0x1c head, then count x 0x1c bytes | head at map+0x374, elements to map+0x360 |
+
+Each element is read whole through archive slot +0x3c into a new
+allocation. A count of 0 or a negative count reads no element. After each
+case control returns to the loop head; no instruction of these cases or
+of the loop compares the bytes read with header +0x08 or seeks to the
+record end. So a count above the payload reads into the next record
+header, and a count below it leaves payload bytes that the loop reads as
+the next header. In both map populations of R2-ASSET-122 and R2-ASSET-130
+every type-6, 10, 11 and 12 payload has exactly its counted size, so no
+installed map exercises a mismatch.
+
+**Confidence.** High for the error codes, the version gates, the signed
+count loops and the absence of a size check: the dispatcher (1740
+instructions) and the header reader (14) were read in both roots and are
+equal after address masking, and both jump tables were read. Medium for
+the misframing: that slot +0x3c reads sequentially from the current
+position is inferred from its use; the archive class and its slots +0x30
+and +0x3c were not read.
+
+**Unknown.** What the archive does on a read past the end of the file, and
+whether the loader then refuses the map. Reading the archive slots +0x30
+and +0x3c settles both.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ASSET-130
+
+Population: every file under each install root whose name ends in `.alm`
+in any case and any subdirectory, walked with the record framing of
+R2-ASSET-002 and R2-ASSET-003 and checked as in R2-ASSET-122.
+
+| Root | Maps | Type 4 | Type 6 | Type 10 | 11a | 11b | 11c | Type 12 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| EN | 13 | 1549 | 3249 | 674 | 376 | 452 | 28 | 16 |
+| RU | 37 | 4360 | 11248 | 1696 | 477 | 555 | 31 | 58 |
+
+- Every map is version 1600. Every type-6, 10, 11 and 12 payload size
+  equals the size its type-0 counts give, and every type-4 walk ends at
+  its payload end.
+- Maps holding entries, EN and RU: type 10 in 13 and 37, 11a in 12 and
+  29, 11b in 13 and 37, 11c in 6 and 8, type 12 in 2 and 6.
+- Type-0 dword 0x84: EN 4 in 7 maps, 8 in 3, 16 in 3; RU 4 in 15, 6 in 1,
+  8 in 9, 16 in 12. Dword 0x88: EN 1 in 6, 2 in 3, 3 in 2, 4 in 2; RU 1
+  in 10, 2 in 8, 3 in 7, 4 in 12.
+- Every 11a entry names a type-4 record of an Inn kind (0x43..0x45,
+  0x63..0x65, 0x6f..0x71). Every 11b entry names a type-4 record of a Shop
+  kind (0x22, 0x23, 0x5d..0x5f, 0x69..0x6b), except five per root: entries
+  1, 4, 11, 16 and 19 of the 11b array of `SHALLOW.ALM`, all with id 265,
+  which no type-4 record of that map carries. Every root 11c entry has gate 0 and position 0, on kinds
+  0x46..0x4d.
+- Matched by name without case, each of the 13 EN files has the SHA-256
+  of its RU namesake; 24 RU files have no EN namesake.
+
+Dword 0x84 is above 1 in every root map. R2-ENGINE-509 runs the type-10
+pass and sets Session+0x74 in the map build it reads, so the gate opens if
+the root maps are built by that routine; that they are was not read
+(Medium).
+
+**Confidence.** High: a committed derived census over both roots,
+reproduced byte for byte from Git blobs. The counts are installed values,
+not format limits. Medium for the sentence on the gate: it rests on the
+root maps passing through the map build of R2-ENGINE-509, which carries
+Medium in R2-ENGINE-108.
+
+**Unknown.** Maps inside archives other than `scenario.res`: searched every
+`.alm` file under each install root and `scenario.res`; listing the other
+archives' directories settles it. The loader of a root map: no read shows
+which routine builds it; reading the callers of the build RU `L2.00113`
+settles it.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ASSET-131
+
+The type-4 pass (R2-ENGINE-512) stores entry dword 0x14+4i at Shop
++0x70+0x14i, 0x24+4i at +0x74+0x14i, 0x34+4i at +0x78+0x14i, 0x44+4i at
++0x7c+0x14i and 0x04+4i at +0x80+0x14i. Shop +0x70..+0xbf is therefore
+four 0x14-byte entries ordered minimum price, maximum price, draws,
+quantity bound and mask: the category entry of the Scenario.dll
+ordinal-15 record (R2-ENGINE-263). The Shop fill reads Shop +0x70 in place
+of that record when Session+0x74 is not 0 (R2-ENGINE-539). The field roles
+are those R2-ENGINE-263, R2-ENGINE-265 and R2-ENGINE-471 read for the
+record.
+
+Values in the root maps of R2-ASSET-130 (EN 452 entries, RU 555), over
+the four categories:
+
+| Field | EN | RU |
+|---|---|---|
+| minimum price | 0..1000000 | 0..5000000 |
+| maximum price | 0..10000000 | 0..20000000 |
+| draws | 0..100 | 0..100 |
+| quantity bound | 0..20 | 0..20 |
+
+Draws 20 is the most frequent value in every category, and the masks take
+24 to 43 distinct dwords per category in EN and 56 to 110 in RU.
+
+**Confidence.** High for the field order: the stores of R2-ENGINE-512 and
+the record layout of R2-ENGINE-263 were read in both roots, and
+R2-ENGINE-539 reads the source switch in both roots. The values are a
+reproduced census. How each field acts in a draw is stated by the cited
+fill claims, not read here.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ASSET-132
+
+Values over the root maps of R2-ASSET-130. Type 6 (EN 3249 records, RU
+11248):
+
+| Offset | EN | RU |
+|---:|---|---|
+| 0x0a | 0..7 | 0..7 |
+| 0x0c | 0 x2786, 16 x448, 20 x13, 4 x2 | 0 x10004, 16 x1229, 20 x13, 4 x2 |
+| 0x10, records with bit 1 / 2 / 4 / 8 | 316 / 30 / 27 / 218 | 786 / 131 / 57 / 567 |
+| 0x18 | 2..15; high word 0 in every record | same |
+| 0x1c | 0 in 3191, 1..58 once each | 0 in 10937, 1..58 |
+| 0x20 | 0..14; 10 in 3122, 0 in 85 | 0..14; 10 in 6103, 0 in 4900 |
+| 0x24, 0x26 | -1..12000, equal distributions | -1..18432, equal distributions |
+| 0x2c | 0..360 | 0..555 |
+
+Dword 0x10 never has a bit above 8. The high word of dword 0x28 has the
+same number of distinct values, range and twelve most frequent values as
+dword 0x00 in both roots; per-record equality was not computed. In the
+campaign maps 0x10 is 8 in 8 records per root and 0 in the rest.
+
+Type 10 (EN 674 entries, RU 1696): e1 takes 22 values in 5..7500 in EN
+and 72 in 5..30000 in RU, 120 in 494 and 1009 entries. e2 is in {0, 2, 3,
+6, 10, 14} in EN, and also 4 and 7 in RU; bit 1 is set in 7 EN and 26 RU
+entries, each with e3 at 0 or above. e3 is -1 in 666 EN and 1668 RU
+entries, otherwise 0..3 (EN) or 0..9 (RU).
+
+11a (EN 376, RU 477): the flags dword uses only bits 1, 2, 4, 0x10, 0x20
+and 0x40; bit 1 is set in 143 EN and 158 RU entries. The type-4 pass
+stores no field from bit 1 (R2-ENGINE-512). With flag 2 set (223 EN, 250
+RU) the word at 0x08 is 3662..3679 in EN and 3661..3680 in RU; without it
+the word is -1, 0 or a value in the same range and is not used.
+
+11c: the 28 EN and 31 RU root entries all have gate 0, which the type-4
+pass skips, so no root-map Pointer takes a count from 11c.
+
+**Confidence.** High: a committed derived census reproduced byte for byte
+from Git blobs. These are installed values, not format limits.
+
+**Unknown.** What the 11a word values 3661..3680 identify (R2-ENGINE-536
+passes the word to an offer constructor): searched the 11a words of the 13
+EN and 37 RU root maps and the generator's pass of the word to block 10;
+reading the block-10 constructor `L2.02738` settles it.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)

@@ -3613,7 +3613,7 @@ observe an authorized original session. The panel probe is EN only.
 | R2-ENGINE-263 | ROM2 town-1 shop stock is parameterized by the Scenario.dll ordinal-15 record: four categories with prices 0..1500, draws 100/100/20/20, quantity bounds 2/2/1/1 and fixed masks. | High / Unknown | ● active (amended, branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-264 | Town-1 category masks admit 70 armor/shield rows, 44 weapon rows, 4 enchantable weapon rows and 5 books plus scroll rows per fill from data.bin tables, by price, class and material. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-265 | A town-1 shop fill draws random admitted candidates with stackable quantities, preloads six potions and the books, and enchants category 2 into 160 possible spell-level variants. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
-| R2-ENGINE-266 | ROM2 shop buy moves affordable pending items to the hero, sale and undo return items into categories, and refills replace all lists only while no deal is open; finite stock is implied. | High / Medium / Unknown | ● active (branch candidate, partially retracted) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-266 | ROM2 shop buy moves affordable pending items to the hero, sale and undo return items into categories, and refills replace all lists only while no deal is open; finite stock is implied. | High / Medium / Unknown | ● active (amended, branch candidate, partially retracted) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-267 | ROM2 shop text and prices come from text tables, item attributes and data.bin factors; cells show unit P or (P+1)/2, pending totals P*q and ceil(P/2)*q, sale credit floor(P*q/2+0.5). | High / Medium | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-268 | The ROM2 generic shop keeper updates after 100 ms, resamples a 5000+1000*(rand()%5) ms idle threshold, plays Pose2-3 through counter 28 and responses through counter 12. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-269 | Generic shop responses start the keeper's Yes on category change, affordable buy or credited sale and No on an unaffordable buy; first category choice and exit clear all episode bits, not the counter. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
@@ -3657,6 +3657,8 @@ passing mode 2, which leaves it 0, and network paths setting it to 1 are
 Medium. R2-ENGINE-329 and R2-ENGINE-330 give the other location records.
 
 **Amended.** R2-SESSION-198 is the census of `[L2.00805]+0x74` writers this Unknown asks for: one Session-global store (the map build's), the rest unattributed; +0x74 is 0 in a campaign at Medium.
+
+**Amended.** R2-ENGINE-539 names the deal source: [helper+0x94]+0x70 is the Shop's own 11b fields (R2-ASSET-131), used when Session+0x74 is not 0 (High for the chain). When that applies stays Medium: R2-ASSET-130 and R2-ENGINE-509 tie the gate to the root maps only if they are built by the map build (not read). The grades above stay.
 
 ### R2-ENGINE-264
 
@@ -3769,6 +3771,8 @@ refill clauses stand. The refill sender label is partially retracted there
 as well: `L2.00826` is the load entry, New Game sends no 0x3f, and
 R2-ENGINE-470 gives the senders. R2-ENGINE-471 and R2-SESSION-187 answer
 the refill events and the stock's SAV round trip at their own grades.
+
+**Amended.** R2-ENGINE-539 and R2-ASSET-131 name the deal source: the Shop's own 11b fields at [helper+0x94]+0x70, used when Session+0x74 is not 0. When that applies stays Medium (R2-ASSET-130, R2-ENGINE-509). The grades above stay.
 
 ### R2-ENGINE-267
 
@@ -7491,7 +7495,7 @@ whether EN sends the undo update from another body.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-410 | ROM2 Unit initialization builds the hero bag at +0x7c; 9 of 18 direct item-list constructor calls per root are followed within 0x60 bytes by a +0x7c store; the other nine are unclassified. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-410 | ROM2 Unit initialization builds the hero bag at +0x7c; 9 of 18 direct item-list constructor calls per root are followed within 0x60 bytes by a +0x7c store; the other nine are unclassified. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-411 | On the read ROM2 departure path mission entry clears Session +0x1ac before the map caller, whose only LOAD runs when +0x1ac is set; that the hero and its items cross into the mission as the same objects is Medium. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-412 | ROM2 victory runs a transition that keeps class 0x21..0x3f units and clears ground lists; the bodies read do not write their bag or worn items (Medium, ten callees unread); defeat runs it only when app +0x404 bit 0 is set. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-413 | ROM2 opcode 0x22 reaches the item-move arm in the dispatcher branch for packet byte +4 below 1 (no map test); that it is the only 0x22 arm is Medium, the sibling branch table being unread; one client builder, seven callers per root. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
@@ -7552,6 +7556,8 @@ insert and merge was run and no caller was searched; none occurs in these
 bodies. That census and a read of each caller would settle it.
 
 **Unknown.** The string at `L2.00405` and the meaning of Unit +0x1a0.
+
+**Amended.** R2-ENGINE-535 states what Unit +0x1a0 does: set, the bag is replaced and no gold or item is rolled (High); the human attacker's experience skips the victim (Medium); the writers are type-6 0x10 bit 8, two unique-spell arms and the map build, and the unit copy omits it (Medium). The grades above stay.
 
 **Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
 
@@ -9178,7 +9184,7 @@ offsets, not as equal bytes.
 | R2-ENGINE-452 | In RU, ROM2 Ice Missile (5) and Diamond Dust (16) take Fire Arrow's single-target projectile damage route with water and earth damage kinds; the read bodies hold no row-specific branch or attached effect; EN delivery bodies are Unknown. | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-453 | ROM2 Stone Curse attaches a timed effect with spell id 18 built from its Effects string; the quoted first key matches no effect name, so the effect is blank (tag 0, magnitude 0). | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-454 | In the RU image, a ROM2 Stone Curse effect sets actor mask bit 18, which holds primary command 4 (state 27, no move, attack or cast) until its timer clears the bit; a repeat cast keeps the larger duration; damage taken is unchanged. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
-| R2-ENGINE-455 | ROM2 Summon creates Squirrel, Turtle or Foot_Animated at level 1..4 for the caster's Player in a new group, placed by a search around the caster's cell; a failed placement aborts the cast; when it leaves is Unknown. | High / Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-455 | ROM2 Summon creates Squirrel, Turtle or Foot_Animated at level 1..4 for the caster's Player in a new group, placed by a search around the caster's cell; a failed placement aborts the cast; when it leaves is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-456 | In RU, a ROM2 creature's template special spell is aimed by a 29-cell per-row table: the victim, its cell, itself, a cell toward the victim (9), a free cell beside it (23) or nothing (22); cells 9 and 23 are Medium. | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-457 | The RU computer-mage offensive book choice aims at the victim and support at self or a same-owner unit; a separate Prismatic, Stone Curse, Lightning, Fire Arrow priority routine aims at the victim but has no found caller. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-458 | Each admitted RU selected-spell policy arm aims at the victim, except Summon and Shield at the caster and Heal at the lowest-health candidate; area and point spells cast at a unit apply at its cell. | Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
@@ -9330,6 +9336,8 @@ settle it; so would an owner run of the original that casts Summon and waits
 for the creature to go. The binding of the name to a Units row and the template
 statistics: reading `L2.01794` past its 0xff-byte window would settle
 them.
+
+**Amended.** R2-ENGINE-535 states what +0x1a0 does: no bag or gold drop at death, no experience to a human attacker (Medium), and the unit copy omits it (Medium). When the creature leaves stays Unknown. The grades above stay.
 
 ### R2-ENGINE-456
 
@@ -10756,11 +10764,11 @@ the RU code before `L2.01725`; reading those windows would settle them.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-509 | ROM2 map build sets Session+0x74 when type-0 payload dword 0x84 exceeds 1 and runs the type-10 group pass under that test; the dword is 1 in the 46 campaign maps per root, so none runs it unless another writer sets +0x74. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ENGINE-510 | The ROM2 type-10 pass builds a 0xcc object with defaults for each group that passes the owner +0x2c test and a L2.02502 guard, then applies matching entries; the object re-creates the group's members after a countdown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ENGINE-511 | ROM2 RU stores the group's member spread in the type-10 object +0xbc at build; EN has no such store and keeps +0xbc at 0, so the two roots differ when a type-10 pass runs. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ENGINE-512 | The ROM2 type-4 pass gives three object classes their type-11 fields by kind: 0xec objects from every matching 11a, 0xc4 objects from the first matching 11b, 0x70 objects from every nonzero 11c. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
-| R2-ENGINE-513 | ROM2 unit rows are read by the actor builder and the mission-load row loop; row +0x08 selects a L2.02501 record there (read only by the loop, Medium); no read of +0x0c or +0x1c was found in either body. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-509 | ROM2 map build sets Session+0x74 when type-0 payload dword 0x84 exceeds 1 and runs the type-10 group pass under that test; the dword is 1 in the 46 campaign maps per root, so none runs it unless another writer sets +0x74. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-510 | The ROM2 type-10 pass builds a 0xcc object with defaults for each group that passes the owner +0x2c test and a L2.02502 guard, then applies matching entries; the object re-creates the group's members after a countdown. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-511 | ROM2 RU stores the group's member spread in the type-10 object +0xbc at build; EN has no such store and keeps +0xbc at 0, so the two roots differ when a type-10 pass runs. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-512 | The ROM2 type-4 pass gives three object classes their type-11 fields by kind: 0xec objects from every matching 11a, 0xc4 objects from the first matching 11b, 0x70 objects from every nonzero 11c. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-513 | ROM2 unit rows are read by the actor builder and the mission-load row loop; row +0x08 selects a L2.02501 record there (read only by the loop, Medium); no read of +0x0c or +0x1c was found in either body. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
 
 ### R2-ENGINE-509
 
@@ -10803,6 +10811,8 @@ of the 13 EN and 37 RU root `.alm` maps has dword 0x84 above 1
 (R2-ASSET-122). An EN call-target scan of the pass, a dword scan of
 `.rdata` for its address, and reading the two further builders and the
 other `[reg+0x74]` stores would settle the gate.
+
+**Amended.** R2-ASSET-130 reads the root `.alm` maps: type-0 dword 0x84 is 4..16, above 1, in all 13 EN and 37 RU of them; the gate opens if the root maps are built by this routine, which was not read (Medium). The loader of a root map is Unknown; reading the callers of the build RU `L2.00113` settles it. Dword 0x88 is 1..4 there.
 
 ### R2-ENGINE-510
 
@@ -10870,6 +10880,8 @@ which skip re-creation; the caller and call rate of slot 5; the units of
 default; the key string at `L2.02529`. Reading `L2.02502` and the slot-5
 caller would settle the first two; the EN store would settle the last.
 
+**Amended.** R2-ENGINE-538 reads `L2.02502`: it returns dword +0xc of its receiver (High); that the value is a member count is Medium. The third argument of `L2.00313` is the positioning radius of R2-ENGINE-531.
+
 ### R2-ENGINE-511
 
 At RU `L2.02531` the group function stores the spread it computed (the
@@ -10890,6 +10902,8 @@ re-creates members (R2-ENGINE-510), and that helper was not read. Under
 R2-ENGINE-509 the pass is not run on the 46 campaign maps per root unless
 another writer opens the gate (Medium), so the difference is not reached
 there.
+
+**Amended.** R2-ENGINE-538 states the player effect through R2-ENGINE-531: RU re-creates members over the spread, EN tests the centre cell at radius 0 (Medium).
 
 ### R2-ENGINE-512
 
@@ -10920,6 +10934,8 @@ not interpreted, and the 0xec and 0x70 vtables were not walked.
 mission, and what global `L2.02538` is. Interpreting the 0x98 helper
 listing and reading the methods of vtables `L2.02544` and `L2.02549` that
 touch these offsets would settle the first.
+
+**Amended.** R2-ENGINE-536 reads a reader of 0xec +0xc4, +0xc8, +0xcc, +0xd0 and word +0xd4 (the Inn offer generator; that its receiver is the Inn is Medium, inferred from addresses), and R2-ENGINE-539 a reader of 0xc4 +0x70..+0xbf (the Shop fill, as its stock record when Session+0x74 is set; R2-ASSET-131). Other readers of Inn +0xc4..+0xd4 and Shop +0x70..+0xbf are Unknown: no displacement scan ran for those offsets, and one `.text` displacement scan over both roots, classified against the class bodies, settles it. 11a flag 1 is stored by no field and occurs in the root maps (R2-ASSET-132).
 
 ### R2-ENGINE-513
 
@@ -10960,6 +10976,8 @@ a helper, or a copy of the row, would escape it.
 **Unknown.** What the collection at `L2.02501` and the 0x1e4 object are;
 an EN call-target scan of the getters would bound the EN readers.
 
+**Amended.** R2-ENGINE-535 states the effect of +0x1a0 (bit 8) and R2-ENGINE-537 the Inn offer reads of +0x194, +0x19c and +0x198 (bits 1, 2 and 4). The bound on row +0x0c and +0x1c readers is unchanged (the two bodies of this card; EXP-2068 ran no displacement scan for those row offsets, and one over `.text` classified against the row consumers settles it): a displacement scan for +0x3a4 finds 21 sites per root, and only the dispatcher and teardown sites lie in windows read for it.
+
 ## Map structure objects: Pointer, Shop and Inn
 
 | ID | Public functional claim | Confidence | Status | Evidence |
@@ -10968,7 +10986,7 @@ an EN call-target scan of the getters would bound the EN readers.
 | R2-ENGINE-518 | At health above 0, a ROM2 actor step in state 15 looks up a building within distance 2 of (x-1, y-1) (Medium); a Pointer with +0x6c above 0 calls the executor with +0x6c each step; Shop and Inn call L2.02566 with 0x83, 0x84. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 | R2-ENGINE-519 | ROM2 unit state 15 is set by one order handler when `L2.02567` returns nonzero (Medium: arrival in range); its next call in state 15 calls `L2.01576`, which sets [r+0x50] to 1. One state-15 store per root found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 | R2-ENGINE-520 | ROM2 compiled action slots follow node order over nodes below 0x10002; Pointer +0x6c counts the same nodes. That a slot advances only on a successful compile is Medium; +0x6c names node e2 only if no earlier node failed. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
-| R2-ENGINE-521 | In the RU bodies read, Shop slot 5 calls a method of its 0x98 helper and Inn slot 5 walks a member list and a call counter; neither body reads the 11b or 11a fields; no campaign map has a Shop or Inn. No slot-5 caller was read. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-521 | In the RU bodies read, Shop slot 5 calls a method of its 0x98 helper and Inn slot 5 walks a member list and a call counter; neither body reads the 11b or 11a fields; no campaign map has a Shop or Inn. No slot-5 caller was read. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 
 ### R2-ENGINE-517
 
@@ -11203,6 +11221,8 @@ call-site scan of `call [reg+0x14]` over `.text` and the callers of the
 Building slot-5 body. The root `.alm` maps (R2-ASSET-084), where the
 multiplayer shops and inns would be placed, are not censused; the census
 generator of R2-ASSET-123 over them would settle which kinds they build.
+
+**Amended.** R2-ENGINE-536 reads a reader of Inn +0xc4..+0xd4 (the offer generator, called from one Inn method whose receiver is inferred from addresses, Medium) and R2-ENGINE-539 a reader of Shop +0x70..+0xbf (the fill, through helper +0x94). Other readers are Unknown (R2-ENGINE-512). The root `.alm` maps hold Shops and Inns (R2-ASSET-130). The slot-5 caller stays unread.
 
 ## Hire entry, mission and mission end
 
@@ -11653,3 +11673,274 @@ a creator-address source settles them. RU `L2.02734` is unread; a window on
 it settles its class.
 
 **Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+## Map flags, Inn offers and the Shop stock source
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-535 | A ROM2 actor with +0x1a0 set drops no bag or gold at death and pays no human attacker experience (Medium); type-6 0x10 bit 8, two spell arms and the map build (diplomacy byte toward "Self" bits 0..2 clear) set it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ENGINE-536 | A ROM2 Inn builds a player's offer list from ten blocks gated by its 11a fields +0xc4, +0xc8, +0xcc, +0xd0 and word +0xd4 (receiver Medium), each candidate within a level window of the hero's top skill; an offer stays Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ENGINE-537 | ROM2 Inn offer blocks draw from flagged actors and groups: +0x194, +0x19c and +0x198 (type-6 0x10 bits 1, 2, 4) and group +0x48, +0x4c (type-10 e2 bits 4, 8); RU block 3 skips the Inn owner's groups, EN does not. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ENGINE-538 | ROM2 L2.02502 returns its receiver's dword +0xc: a group with 0 there gets no type-10 object, and slot 5 (Medium, R2-ENGINE-510) re-creates only at 0 or below; RU re-creates over the member spread, EN at radius 0 (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ENGINE-539 | When Session+0x74 is not 0, a ROM2 Shop fill reads its stock record from the Shop's own 11b fields (+0x70) through helper +0x94, which the Shop constructor sets to the Shop; otherwise from Scenario.dll ordinal 15. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+
+### R2-ENGINE-535
+
+Readers of actor +0x1a0:
+
+- Unit death (RU `L2.01807`, EN `L2.01806`; the body of R2-ENGINE-410):
+  when +0x1a0 is not 0, or the name test `L2.01289` against the string at
+  RU `L2.00408` matches, it replaces the bag at +0x7c with a new empty bag
+  (`L2.01738`). Only for unit word +0xe at 0x40 or above with +0x1a0 = 0
+  does it roll gold (chance parameter 0x26 against rand(100), amount
+  parameter 0x27 plus rand(parameter 0x28)) and an item (chance parameter
+  0x29, generator parameters 0x2a..0x2c). A nonempty bag or gold drops a
+  sack through `L2.01811`. With +0x1a0 set nothing drops.
+- The human attacker's experience award skips a victim with +0x1a0 set
+  (R2-ENGINE-480; the site RU `L2.02739` lies in a navigation window here,
+  Medium). A creature attacker's award (R2-ENGINE-480: its `+0x64`, RU
+  `L2.02331`, adds X to its +0x130 and, below 0 health, adds 1 to its
+  owner's +0xa48, with no +0x1a0 test in that card) was not read here for
+  +0x1a0.
+- The Unit save packs +0x1a0 into bits 24..31 of one dword (R2-ENGINE-209;
+  RU `L2.02740`); the load sets +0x1a0 to 1 when those bits are not 0 (RU
+  `L2.02741`).
+
+Writers:
+
+- Unit init (RU `L2.02742`, EN `L2.02743`) stores 0 in +0x194, +0x198,
+  +0x19c and +0x1a0, with +0x138 and +0x148.
+- The actor builder stores type-6 0x10 bit 8 (R2-ENGINE-513).
+- Two unique-spell arms (R2-ENGINE-459) store 1: RU `L2.02744` (EN
+  `L2.02745`) after `L2.01794` and before a placement with radius 6, and
+  RU `L2.02746` (EN `L2.02747`) after a successful placement.
+- The map build, after the actor builder (RU `L2.02748`..`L2.02749`, EN
+  from `L2.02750`), makes the string "Self" (RU `L2.02751`, EN
+  `L2.02752`) and passes it to `L2.02753` on the owner collection
+  `L2.00293`. When that returns an owner S and Session+0x74 is not 0, then
+  for every owner O whose +0x2c is not 0 and whose diplomacy byte
+  [`L2.02609`]+0xa8c4+O.id*0x46+S.id has bits 0..2 clear, every unit in
+  O's list +0x24 gets +0x1a0 = 1.
+
+The tails of the two unit copy windows (RU `L2.02754`, EN `L2.02755`) are
+equal up to register allocation: both free the old +0x200 object, test the
+source +0x200, allocate a 0xc-byte object, store it, then copy +0x194,
++0x198, +0x19c and +0x204, and neither copies +0x1a0. Both windows start
+inside the function; the head of the copy is unread. In the campaign maps 8
+type-6 records per root carry bit 8 (R2-ASSET-132).
+
+A displacement scan of `.text` for 0x1a0 finds 59 sites per root (44
+displacements, 15 immediates). The sites above are inside windows read
+here, and the actor builder store at RU `L2.02756` (`mov [eax+0x1a0], edx`;
+R2-ENGINE-513). Windows at RU `L2.02757` and `L2.02758` show their sites on
+Session fields, and `L2.02759` lies in a navigation window. The sites at RU
+`0x42a..0x439`, `L2.02760`, `L2.02761` and `0x4d4..0x4da` stay
+unclassified.
+
+**Confidence.** High for the death body, the init, the two spell stores
+and the map-build loop: committed listings in both roots, equal after
+address masking (death body prefix 275 instructions, the window ending at
+RU `L2.02762` without a `ret` and the rest of the body resting on
+R2-ENGINE-410; init 13, spell stores 20 and 21, map-build window 70).
+Medium that the copy omits +0x1a0 in both roots: only the tail windows were
+read, the head is unread, and the supporting displacement scan (59 sites
+per root, none in this function) is a navigation receipt that does not see
+a block copy or register arithmetic. Medium for the award, save and load
+sites: navigation windows and the cited claims; the award bounds only the
+human attacker's. Medium that `L2.02753` looks up an owner by name (unread),
+and for "no other reader or writer" (unclassified sites). The map-build
+writer runs only with Session+0x74 set: 0 in a campaign at Medium
+(R2-SESSION-198); set in the root maps if they are built by the routine of
+R2-ENGINE-509 (Medium; R2-ASSET-130).
+
+**Unknown.** What the name test at `L2.01289` matches: searched the death
+window and the string at RU `L2.00408`; reading `L2.01289` in both roots
+settles it. What diplomacy bits 0..2 and owner +0x2c mean, and whether the
+owner named "Self" flags its own units (the loop does not exclude O = S and
+the byte for S toward S is unread): searched the 70-instruction map-build
+window in both roots; reading the writers of the table at
+[`L2.02609`]+0xa8c4 settles it. The head of the unit copy (RU before
+`L2.02754`, EN before `L2.02755`): not read; a window from the function's
+first instruction in both roots settles whether it copies +0x1a0. Whether a
+creature attacker's award tests +0x1a0: no site of the 59-site RU scan lies
+in the code-region range and the body at RU `L2.02331` was not read; reading
+it settles it.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ENGINE-536
+
+Entry: the Inn method starting at RU `L2.02763` (EN `L2.02764`; the
+windows are equal, 60 instructions) takes a unit U and
+works on its player P = U+0x14. It calls `L2.02765(P)` and `L2.02766(P)`.
+When the second returns nonzero it calls `L2.00058(P)`, looks up P's id
+in Inn+0x88 and, when found, sends message 9 through `L2.02767` on
+`L2.02608`. Otherwise it calls the generator (RU `L2.02768`, EN
+`L2.02769`) with P and then `L2.02770(Inn+0xe0, P, 1)` on `L2.02608`. A
+call-target scan of `.text` finds this one call site of the generator per
+root (RU `L2.02771`, EN `L2.02772`), and a dword scan of `.rdata` finds no
+pointer to it.
+
+The generator gets or creates P's 0x84 list in Inn+0x6c, keyed by P's
+id, and leaves it at Inn+0xe0. It returns when `L2.02773(0x11, P id,
+Inn+4)` on `L2.02774` or `L2.02775(P)` is nonzero. With H the hero
+(P+0x38) and M the largest of 0 and H's words +0xaa..+0xb2, a candidate
+unit passes the level window when 3M-50 < L < 3M+75 (both strict), L =
+`L2.02776(unit)`. The distance bound B is 0x40 when
+`L2.02777([L2.02538])` - 0x10 is below 0x80, else half that value; a
+candidate needs the low byte of `L2.02426` (Inn+0x10 to unit +0x10) below
+its block's bound.
+
+The class gate on unit word +0xe admits 0x40..0x51 and 0x67..0x6a when
+Inn+0xc8 is set, 0x52 up to 0x62 (block 1) or 0x63 (blocks 2 and 4) when
+Inn+0xcc is set, and, in blocks 2 and 4 only, values below 0x40 when
+Inn+0xc4 is set.
+
+| Block | Ctor | Candidates | Value argument |
+|---:|---|---|---|
+| 1 | `L2.02778` | units of owners with +0x2c set and unit +0x148 = 0; class gate, level window; counted per class and level byte +0x4b | count 1..9 times a template value |
+| 2 | `L2.02779` | see R2-ENGINE-537; class gate, bound B, level window; at most 0x100 | 2 x unit +0x1c |
+| 3 | `L2.02780` | see R2-ENGINE-537 | |
+| 4 | `L2.02781` | see R2-ENGINE-537; class gate, bound 0x40, level window | 3 x unit +0x1c |
+| 5 | `L2.02782` | see R2-ENGINE-537 | 6 x largest member +0x1c |
+| 6 | `L2.02783` | see R2-ENGINE-537; needs `L2.02784(Inn+4)` | H +0x130 / 0x21 |
+| 7 | `L2.02785`, `L2.02786` or `L2.02787` by a rand draw | needs H to pass `L2.00044` (R2-ENGINE-362), Inn+0xd0 set and `L2.02788(H+0x140)` bit 0x400000 | rand(6)+3 |
+| 8 | `L2.02789` | owners with +0x2c set, diplomacy bit 1 toward the Inn's owner, +0xa60 set and `L2.02790` nonzero | 10 x largest +0x1c |
+| 9 | `L2.02791` | needs `L2.02784(Inn+4)` and `L2.02792` | from distance and H +0x8c; H +0x130 / 50 |
+| 10 | `L2.02738` | needs `L2.02784` nonzero and Inn word +0xd4 nonzero; the word is an argument | H +0x130 / 100 |
+
+A block with candidates allocates one 0x30 offer, picks one candidate by a
+rand draw, stores the offer at Inn+0xe4, calls its slots +0x28 and +0x24
+and `L2.02793(3)`, and appends it to Inn+0xe0 with `L2.02794`.
+
+With the stores of R2-ENGINE-512, 11a flag 0x20 opens classes 0x40..0x51
+and 0x67..0x6a, flag 0x40 the 0x52 range, flag 0x10 the classes below 0x40
+in blocks 2 and 4, flag 4 block 7, and flag 2 with its word block 10. With
+flags 0x10, 0x20 and 0x40 all clear, blocks 1, 2 and 4 admit no
+candidate (Medium: this mapping rests on the receiver of the entry method
+being the Inn). Campaign maps build no Inn (R2-ASSET-123); the root maps carry
+11a entries (R2-ASSET-130).
+
+**Confidence.** High for the call order, the tests and the comparisons: the
+generator (1944 RU and 1940 EN instructions) and the entry window were read
+in both roots and are equal after address masking except block 3
+(R2-ENGINE-537). Medium for which Inn field gates which block: the entry
+method `L2.02763` has no read caller and no vtable link, so that its
+receiver is the 0xec Inn object of R2-ENGINE-512 is inferred from the
+offsets it reads (+0xc4..+0xd4, +0x6c, +0x88, +0xe0) and from its address
+between the Inn constructor (`L2.02543`) and Inn slot 5 (`L2.02652`).
+Medium for every
+term that rests on an unread helper: L, the distance, `L2.02773`,
+`L2.02784`, `L2.02790`, `L2.02792`, `L2.02775`, `L2.02766`, the rand draw,
+the template value and the ten constructors; and Medium that the one
+direct call is the generator's only route, since a register-indirect
+call is not excluded. Unknown what an offer is to the player and which
+event calls the Inn method.
+
+**Unknown.** The offer constructors and the receiver of `L2.02770` would
+settle what an offer is. The caller of the Inn method: only the generator
+`L2.02768` was scanned (`.text` call targets and `.rdata` dwords: one call
+site, no pointer), the method's own address was not; a scan for it in
+`.rdata` and `.text` settles it. The receiver of `L2.02763`: the Inn vtable
+`L2.02544` slots and the callers of `L2.02763` settle it. Other readers of
+Inn +0xc4..+0xd4: the preregistered scans cover actor +0x194..+0x1a3, map
++0x310..+0x35f and +0x3a4 only; a `.text` displacement scan for those Inn
+offsets in both roots, classified against the Inn class, settles it.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ENGINE-537
+
+The actor builder stores type-6 0x10 bits 1, 2 and 4 in actor +0x194,
++0x19c and +0x198 (R2-ENGINE-513); the type-10 pass stores e2 bits 4 and
+8 in group +0x48 and +0x4c (R2-ASSET-120), only when Session+0x74 is set
+(R2-ENGINE-509). The Inn offer generator (R2-ENGINE-536) reads them as
+block populations:
+
+| Block | Population |
+|---:|---|
+| 2 | units with +0x194 set, of owners with +0x2c set other than the Inn's owner (Inn+0x14) |
+| 3 | groups of owner +0x28 lists with +0x48 set; members need the level window, the distance bound and `L2.02773(0xd, group +0x1c)` = 0 |
+| 4 | units with +0x19c set, of owners whose diplomacy byte toward P has bit 1; `L2.02773(0xc, unit id)` = 0 |
+| 5 | groups with +0x4c set, under the same diplomacy rule |
+| 6 | units of the Inn's owner with +0x198 set, +0x13c = 0 and `L2.02773(0xc, id)` = 0 |
+
+EN and RU differ in block 3 only. RU compares the group's owner with the
+Inn's owner (RU `L2.02795`, `cmp` with Inn+0x14) and skips the Inn
+owner's groups before the +0x48 test at RU `L2.02796`; EN tests +0x48 at
+`L2.02797` with no owner test, so EN also offers the Inn owner's groups.
+The masked comparison counts 14 differing instructions, all in this
+block.
+
+Unit init clears the three actor flags and the unit copy keeps them
+(R2-ENGINE-535). In the root maps (R2-ASSET-132) bit 1 is set in 316 EN
+and 786 RU type-6 records, bit 2 in 30 and 131, bit 4 in 27 and 57; e2 bit
+4 in 358 EN and 937 RU type-10 entries, bit 8 in 67 and 109. The campaign
+maps set none of these.
+
+**Confidence.** High for the reads and the EN/RU difference: the
+generator was read in both roots. Medium that its receiver is the Inn of
+R2-ENGINE-512 (R2-ENGINE-536), so the block populations are the Inn's by
+that inference. Medium that the generator is the only reader: the displacement scans for +0x194, +0x198 and +0x19c (22, 15 and
+19 RU displacement sites) were classified only inside windows read here,
+and group +0x48 and +0x4c were not scanned.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ENGINE-538
+
+`L2.02502` (EN `L2.02798`) calls `L2.02799` (EN `L2.02800`) on the same
+receiver, which returns its dword +0xc; both bodies are 9 instructions,
+equal in the two roots. In the type-10 group function (R2-ENGINE-510) a
+group whose value is 0 gets no object; in the object's slot 5 the
+re-creation proceeds only when the value is 0 or below (signed; Medium,
+from R2-ENGINE-510, whose slot-5 behaviour is Medium: no slot-5 body was
+read here). Inn slot
+5 calls it on its member list +0xa8 (R2-ENGINE-521).
+
+Slot 5 passes object +0xbc as the third argument of `L2.00313`, the
+radius r of the positioning routine of R2-ENGINE-531. RU stores the
+group's member spread there and EN keeps 0 (R2-ENGINE-511). So RU places
+re-created members by trunc(r*r/2)+2 random cells and then the r-wide
+square around the object position; with r = 0 EN tests the centre cell
+twice and has no square to scan.
+
+**Confidence.** High for `L2.02502`: both bodies read in both roots.
+Medium for the slot-5 re-creation clause (R2-ENGINE-510). Medium that
+dword +0xc is a member count: its writers were not read.
+Medium for the placement effect: it rests on R2-ENGINE-531 (its rand
+ranges were read in EN only) and on slot 5, whose caller is unread.
+
+**Unknown.** Which code calls slot 5 and how often: searched the `.text`
+dword scans for the Shop and Inn class records (navigation receipts), whose
+hits no window read classifies; reading the callers of the slot-5 entry in
+the type-10 object, Shop and Inn vtables settles it.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+### R2-ENGINE-539
+
+The Shop constructor (RU `L2.02545`, EN `L2.01634`) builds its 0x98 helper
+with `L2.02547(this)` and stores it at +0x6c (R2-ENGINE-512). The helper
+constructor (RU `L2.02547`, EN `L2.01636`) calls `L2.02801` (EN
+`L2.02802`) with the Shop, which stores the Shop at helper +0x94 and
+passes `L2.02803(Shop)` to `L2.02804` (both unread). The fill (RU
+`L2.01640`, EN `L2.00803`) returns 0 when helper +4 is above 0. Otherwise,
+when Session (`[L2.01317]`, EN `[L2.00805]`) +0x74 is not 0, its record
+pointer is [helper+0x94]+0x70, the Shop's 11b fields (R2-ASSET-131);
+else it is the return of `[L2.00802]`, Scenario.dll ordinal 15
+(R2-ENGINE-263).
+
+The four bodies are equal in the two roots after address masking
+(constructor 48 instructions, helper constructor 55, `L2.02801` 15, fill
+window 35). The sold-item placement reads the same source
+(R2-ENGINE-263).
+
+**Confidence.** High for the chain from the Shop to the record pointer:
+read in both roots. Medium for when it applies: Session+0x74 is 0 in a
+campaign at Medium (R2-SESSION-198), and a root map sets it if it
+is built by the routine of R2-ENGINE-509 (R2-ASSET-130; not read). The fill window ends at RU `L2.02805`;
+the per-category loop is the one R2-ENGINE-263, R2-ENGINE-265 and
+R2-ENGINE-471 read.
+
+**Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
