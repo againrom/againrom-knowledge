@@ -207,6 +207,15 @@ School skills sit at +0xa8+2i, their base at +0x116+2i, the main skill at
 +0x23c, each school skill's experience at +0x23c+4i (i = 1..5) and the sum
 at +0x130. — R2-ENGINE-320
 
+A hero taken from a character record or through the reuse path derives each
+school skill from its experience E through the threshold table
+T(L) = trunc((1.1^L - 1) x 1000), and the loaders and the reuse path
+rebuild the sum from E; at template load E = T(skill). The level from E is
+the largest L with T(L) <= E for E below the dword past the table, which was
+not read. — R2-ENGINE-485 (High for the law, Medium for the exact values and
+for the set of readers), R2-ENGINE-489 (High for the arithmetic of the
+bodies read, Medium for the roles)
+
 Recompute derives HP and mana maxima, speed, sight (+0xa4), defence
 (+0xbe) and resistances (+0xc2+2i) from the attributes, then adds the item
 modifier totals held at +0xd8..+0x113. — R2-ENGINE-321

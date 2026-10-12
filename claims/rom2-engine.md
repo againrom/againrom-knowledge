@@ -9604,7 +9604,7 @@ only; reading them in RU would settle it.
 | R2-ENGINE-477 | A ROM2 weapon blow on a unit hits when attack value + U[0,200] - 100 exceeds the target's defence word, when that roll term is at least 90, or when the attacker has unit flag 0x10; a blow on a structure takes no roll. | High / Medium | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-478 | A ROM2 weapon hit deals base + U[0,spread], minus absorption, then cut by the target's percentage byte for the attack type as trunc(v(100-a)/100 + 0.75); the unit strike subtracts the sum of the block's parts from health +0x94. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-479 | In RU, a ROM2 human's attack value is trunc((1.1^Body + 1.1^Reaction)/5) + 3 skill[t] + weapon toHit; damage base trunc(1.1^Body/20) + skill[t]/5 + weapon base; spread trunc(1.1^Body/20) + weapon spread. (Medium.) | Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
-| R2-ENGINE-480 | A ROM2 weapon hit pays a fighter trunc(V x 0.5 x D / HPmax + 1), V victim value +0x1c, scaled by Mind/30 + 0.25, cut for repeated victim kinds (Medium) and off-main skills, into the weapon's skill; a mage's weapon hit pays none (Medium). | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-480 | A ROM2 weapon hit pays a fighter trunc(V x 0.5 x D / HPmax + 1), V victim value +0x1c, scaled by Mind/30 + 0.25, cut for repeated victim kinds (Medium) and off-main skills, into the weapon's skill; a mage's weapon hit pays none (Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-481 | The ROM2 strike body `L2.02313` resolves a melee or ranged weapon blow within range byte +0x12c, calls no object constructor and subtracts the damage in the same call (no projectile object and a cast object on a surviving target: Medium). | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-482 | ROM2 EN and RU strike, resolver, structure resolver, damage object, experience and recompute attack bodies agree after address masking, except an RU-only refusal against a target whose byte +0x4a is 3 and an RU-only bookkeeping gate. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-483 | In RU, a ROM2 creature's attack block is read from its Units row: toHit, physicalMin and max - min (scaled by 15 above byte range); attackKind 3 sets unit flag 0x10 and kinds 1 and 2 fill the other damage parts. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
@@ -9808,6 +9808,11 @@ attacker's +0x6c; the writer of `L2.02330`; spell row parameter 2's title.
 Reading those four routines, the writer of `L2.02330` and the creature row
 reader past `L2.02336` would settle these.
 
+**Amended.** R2-ENGINE-485 reads the writer of T: `L2.02342` fills `L2.02330` with
+trunc((1.1^L - 1) x 1000) for L 0..149. R2-ENGINE-487 identifies spell row
+parameter 2 as the Sphere (Medium; R2-ENGINE-019 gives the column order and
+R2-ENGINE-028 ties the damage kind to the Sphere column). The other clauses and grades stand.
+
 **Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
 
 ### R2-ENGINE-481
@@ -9923,3 +9928,305 @@ type +0xb6. Reading the reader to its end and its EN counterpart would
 settle these.
 
 **Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
+
+## Skill growth and spell experience
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-485 | The ROM2 skill threshold table `L2.02330` holds T(L) = trunc((1.1^L - 1) x 1000) for L 0..149, filled by `L2.02342`; a skill's level from experience E is the largest L with T(L) <= E for E below the dword at `L2.02343`, which was not read. | High / Medium | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-486 | A ROM2 award raises a school skill by one when its experience reaches T(L+1), L the base level; each award is capped at T(L+1) - T(L), none is paid at base 100 or above, and a raise runs recompute. | High / Medium | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-487 | A ROM2 caster with `+0x4c` bits 2 and 4 who casts without an item offers trunc(row parameter 1 x 0.5 + 0.5) to the award, which scales it by Mind, cuts it off the main skill and caps it. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-488 | ROM2 spell damage pays a mage trunc(V x 0.5 x D / HPmax + 1) into the spell's Sphere skill through slot +0x6c, called by the damage object, the Drain Life arm and the health effect tick (as spell 6); no call census (Medium). | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-489 | Outside the award, ROM2 sets skill experience on the hero reuse path (x 9/10), in the character-file loaders, in an experience-from-skill producer, and for item class 0xfffe, which spreads 250 x its word +0x42. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-490 | ROM2 recompute reads the experience sum +0x130 in the HP and mana term log1.1(sum/5000 + 1); two routines read it through Player +0x38; +0x1c feeds the award routes and slot +0x50. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-491 | ROM2 EN and RU table writer, threshold, skill-from-experience, award, cap, slots +0x68, +0x6c, +0x70 and +0x50, reuse, raise, apply head and Heal/Drain arms agree after address masking; the item cases agree with frame offsets masked. | High / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+
+### R2-ENGINE-485
+
+The writer `L2.02342` (EN `L2.02344`) loops L = 0..149 (`cmp 0x96`) and
+stores `ftol((pow(1.1, L) - 1.0) x 1000.0)` at `L2.02330 + 4L`. The power
+helper `L2.00109` pushes the double 1.1 (`0x3ff199999999999a`) and calls the
+library routine `L2.02322`. Constants: 1.0 at `L2.00067`, 1000.0 at
+`L2.02345` (RU; the EN table at `L2.01124` holds the same 40 dwords).
+`ftol` (`L2.01309`) truncates (R2-ENGINE-478). The one direct call of the
+writer in RU `.text` is at `L2.02346` (EN `L2.02347`), next to a block of
+startup stores; the containing routine was not read further.
+
+Three routines read the table among the bodies read (Medium, below):
+
+- the threshold `L2.02348` returns T(min(L, 149));
+- skill-from-experience `L2.01782` returns the first i from 0 with
+  T(i+1) > E; past i = 149 it returns the dword at `L2.02349` (T(149)),
+  a value, not an index, and the comparison at i = 149 reads `L2.02343`,
+  one dword past the table. Its result is the largest L with T(L) <= E for
+  E below the dword at `L2.02343`, which was not read;
+- experience-from-skill `L2.01285`, through the threshold, writes E(s) = T(skill s) for s = 1..5,
+  their sum to +0x130 and copies each skill to its base word +0x116+2s
+  (R2-ENGINE-320).
+
+A RU `.text` dword pass for L2.02330, L2.02350, L2.02351 and L2.02343
+finds four sites: the writer store, the two readers and an immediate
+L2.02343 at `L2.02352`, which lies in no window read here and may read or
+write the table. The pass searches four values and cannot enumerate the
+readers of the table.
+Evaluated in doubles (`out/threshold.tsv`): T(1) = 100, T(10) = 1,593,
+T(20) = 5,727, T(50) = 116,390, T(99) = 12,526,829, T(100) = 13,779,612,
+T(149) = 1,470,651,577. The step T(L+1) - T(L) is 100 at L 0, 260 at 10,
+11,739 at 50 and 1,378,061 at 100.
+
+**Confidence.** High for the law, the loop bound, the constants and the
+three bodies, read in RU and EN and equal after masking (R2-ENGINE-491).
+Medium that these are the only readers: the four-value dword pass cannot
+enumerate readers (the skill-from-experience body also reads `L2.02349`,
+which was not a target) and the site at `L2.02352` is unread.
+Medium for each exact value: the power routine `L2.02322` (EN `L2.02353`)
+and the x87 precision were not read, and the doubles of L = 1, 2 and 3 lie
+within 1e-6 of an integer. Control: the RU town-1 hero holds E 5727 and
+1593 for skills 20 and 10 (R2-SESSION-144), T(20) and T(10) here. Medium
+that the writer runs once at startup: one direct call in RU `.text`
+(navigation receipt), pointer tables not searched for it. Medium that no
+other routine writes the table: the dword pass sees only these encodings.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+### R2-ENGINE-486
+
+The award `L2.00055` (Human slot +0x64) takes X, the victim and a skill
+(R2-ENGINE-480 gives its gates and scaling). It first restores the five
+skill words from their base words +0x116+2i, so L is the base level of s.
+It pays nothing when L is 100 or more. After the off-main cut, the cap
+`L2.02329` sets X = min(X, T(L+1) - T(L)); when global +0x74 at
+`[L2.01317]` is nonzero the difference is divided by 5 first. E(s) and the
+sum +0x130 grow by X. Then:
+
+- E(s) >= T(L+1): skill s and its base rise by one. When the owner's +0x2c
+  is zero, message `L2.02354(2, s | kind << 16, owner)` is sent; a mage's
+  spell book (+0x140) is refreshed through `L2.00041`; recompute (slot
+  +0x58, `L2.00052`) runs; notification `L2.00060` carries
+  `(0x100 << (s-1)) | 0x3000c`.
+- otherwise: notification `L2.00060` with `0x100 << (s-1)` when X is
+  nonzero, and each skill word becomes min(base, 100) + its modifier
+  +0xe8+2i, without recompute.
+
+When X is nonzero and global +0x74 is set, the award calls `L2.00059` if
+more than 15,000 ms (tick source `[L2.02355]`) passed since owner
++0xa74. One award raises a skill by at most one level, and no award lifts
+a base level above 100.
+
+**Confidence.** High for the stores, branches and order, read in RU and EN
+and equal after masking. Medium for the names of the message, the
+notification and `L2.00041`, which were not read; their arguments are as
+listed.
+
+**Unknown.** The meaning of global +0x74 and the body of `L2.00059`.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+### R2-ENGINE-487
+
+A caster whose `+0x4c` has bits 2 and 4 (template load sets both when
+ManaMax is positive, R2-ENGINE-319) and who casts without an item offers
+trunc(row parameter 1 x 0.5 + 0.5) to the award, which scales it by Mind,
+cuts it off the main skill and caps it. The credit is the award's result,
+below the offered amount; a cost of 10 at Mind 24 offers 5 and credits 1 on
+an off-main Sphere.
+
+The apply head `L2.00034` (R2-ENGINE-024) sets a flag from `L2.02356`
+(caster byte +0x4c & 2), computes P (R2-ENGINE-020) from the skill named
+by row parameter 2, runs the fill, and then, when that byte bit is set and
+the caster's +0x68 (item cast, R2-ENGINE-020) is zero, calls the caster's
+slot +0x70 with the target and the spell id before any per-spell arm.
+Slot +0x70 (`L2.02357`) returns unless `L2.00044` holds (byte +0x4c & 4,
+the mage test of R2-ENGINE-362). It then reads the spell row through
+`L2.02358` (row = table +4 + 32 x id) and `L2.02312` (dword i of the row's
+parameter array at row +8, `L2.02359`): s = parameter 2, and when s is
+nonzero it calls the award with X = trunc(parameter 1 x 0.5 + 0.5), no
+victim and skill s. With no victim the award skips the repeated-victim
+cut and the owner gates, keeps the Mind scaling, the off-main cut (ceil
+X/8 unless s is the main skill or 5) and the cap (R2-ENGINE-486). The
+call is made only when bit 2 is set and +0x68 is zero.
+
+Parameter 2 is the Sphere: the apply head reads the power skill through
+the same accessor and index, and R2-ENGINE-020 names that skill
+caster +0xa8 + 2 x Sphere. Parameter 1 is the Mana Cost under the column
+numbering of R2-ENGINE-018 (column 1); costs run 3 to 100, so the offered amount
+before scaling runs 2 to 50. The Heal arm (`L2.00081`) calls no award
+slot in its own instructions; its callees `L2.00092`, `L2.02360` and
+`L2.00060` were not read, so a Heal pays the cast payment only as far as
+those bodies are not paying (Medium). R2-ENGINE-027 applies the head
+once per Prismatic Spray victim, so that spell pays once per victim. A
+non-mage caster reaches +0x70 and is paid nothing.
+
+**Confidence.** High for the call, its gates and the arithmetic, read in
+RU and EN and equal after masking. Medium for the Heal clause and for the
+statement that an item cast pays no cast payment beyond the gate read
+(the callees above are unread). Medium for the column names: the spell
+loader was not read, and the Mana Cost binding rests on R2-ENGINE-018.
+Medium for the meaning of +0x4c bit 2, which is read but not named.
+
+**Unknown.** Whether the arms of Summon, the protections and the other
+non-damage spells call an award slot (not read here); whether `L2.02360`,
+`L2.00092` or `L2.00060` reaches an award slot; the route of the damage of
+an item cast (+0x68 nonzero): the damage object was not read for it, and a
+mage's item-cast damage may reach the award with the spell's Sphere; when
+the apply head runs for a delivered spell (at cast or at arrival;
+R2-ENGINE-452 reads the damage route of two projectile spells in RU, not
+the timing of the head). No census of the callers of slots +0x6c and +0x70
+was made; a linear pass over RU `.text` for `ff /2` calls with
+displacement 0x6c or 0x70 would settle it: modrm `0x50`..`0x57` followed
+by `6c` or `70` (a SIB byte `24` after `0x54`) and modrm `0x90`..`0x97`
+followed by `6c 00 00 00` or `70 00 00 00`, each hit classified by the
+class of its receiver.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+### R2-ENGINE-488
+
+Slot +0x6c (`L2.02327`, R2-ENGINE-480) with a nonzero spell id returns
+unless `L2.00044` holds; for a mage it passes s = row parameter 2 (the
+Sphere, R2-ENGINE-487). It pays only when the victim has an owner whose
++0x2c is nonzero, with X = trunc(V x 0.5 x D / HPmax + 1), V the victim's
++0x1c and HPmax its +0x96. Three callers found in the bodies read pass a
+spell (Medium: no call census of slots +0x6c and +0x70 was made):
+
+- the damage object `L2.01702` with its spell id when the id and its
+  source are nonzero (R2-ENGINE-480);
+- the Drain Life arm (`L2.00083`): v = (base + U[1, spread]) x (100 - word
+  +0xcc) / 100, capped at target health + 10 (R2-ENGINE-026); when v > 0
+  the caster's +0x6c runs with v and the spell id before the target's
+  health falls by v;
+- the effect tick `L2.02361` for effect kind 6: d = -magnitude, cut when
+  the target's word +0xc6 is nonzero to trunc(d(100 - p)/100 + 0.5); when d
+  is nonzero health +0x94 falls by d, and the effect's source +0x44, unless
+  `L2.02362` holds for it, receives +0x6c with d and spell id 6.
+
+The Heal arm calls no slot in its own instructions; its callees
+`L2.00092`, `L2.02360` and `L2.00060` were not read. A non-mage source with a spell id is paid
+nothing.
+
+**Confidence.** High for the RU bodies (Drain Life and Heal also in EN,
+equal after masking). Medium for the three-caller statement and for the
+Heal clause: the callees named above are unread and no census of the calls
+through slots +0x6c and +0x70 was made. Medium in EN for the effect tick, which was read in
+RU only. Medium that kind 6 is the Poison Cloud health effect: the tick
+passes 6 whatever spell created the effect.
+
+**Unknown.** The callers of the kill slot +0x68 (R2-ENGINE-480), so
+whether a spell kill pays its trunc(V x 0.5) is not established; the
+meaning of `L2.02362`; the callers of slots +0x6c and +0x70 beyond the
+three above (the census and its byte patterns are in R2-ENGINE-487); the
+damage object's route for an item cast.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+### R2-ENGINE-489
+
+Bodies that write E(s) (+0x23c + 4s) besides the award, all read in RU.
+"Level from E" below is bounded as in R2-ENGINE-485: for E below the dword
+at `L2.02343`, which was not read.
+
+- reuse `L2.01779` (R2-ENGINE-406, which grades Medium that a mission entry
+  reaches the reuse path, so how often the cut applies is open):
+  E(s) = trunc(9 E(s) / 10), the sum
+  recomputed, skill s = level from E (R2-ENGINE-485), bases copied; it
+  calls no recompute itself (`L2.01780` unread);
+- the character-file loaders (R2-ENGINE-410; client `L2.02363`, server
+  `L2.02364`): E(1..5) from record dwords +0x20..+0x30, skill s = level
+  from E, and the sum rebuilt from E; the server loader takes the main
+  skill from byte +0x2e of a second record;
+- an experience-from-skill producer, whose window at `L2.02365` starts
+  inside its function (the function entry was not read), stores +0x14c (replaced by (value / 10) mod
+  1000 when above 10,000), sets +0x4b bit 0x80 when the unit's row
+  parameter 0x12 is nonzero, then runs experience-from-skill and
+  recompute;
+- item routine `L2.02366`, item class word +0x40: 0xfffe gives
+  A = 250 x word +0x42 and walks s = 1..5 with a carry c: c += A/5 for the
+  main skill or 5, else c = (c >> 3) + A/40; E(s) is capped at T(100) and
+  the excess carries to the next skill; when the level from E exceeds the
+  base, message `L2.02354(2, s, owner)` is sent, the base takes it and the
+  skill word becomes min(base, 100) + modifier. This case writes neither
+  the sum +0x130 nor runs recompute. Class 0xffff adds 250 x word +0x42 to
+  the owner's +0x3c through `L2.02367`;
+- raise-one `L2.02368`: skill s + 1, E(s) = T(new level) + 1, the sum
+  grows by the difference, recompute runs. A RU `.text` call-target pass
+  and a `.rdata` dword pass find no reference to it.
+
+A RU `.text` pattern pass for the bytes of displacement 0x23c finds 56
+sites. Ten are indexed stores into E: the award (2), reuse,
+experience-from-skill, raise-one, the item case (3), an immediate store at
+`L2.02369` and a copy at `L2.02370` (bytes only, bodies unread). The
+character-file loaders store E(1..5) with the displacements 0x240..0x250,
+which this pass does not see; no pass searched those displacements
+elsewhere.
+
+**Confidence.** High for the arithmetic of the bodies read (reuse, raise
+and the item cases also in EN). Medium for the roles: "character-file
+loader" follows R2-ENGINE-410; what places an item of class 0xfffe and
+what runs the item routine (pickup or use) was not read. Medium for the
+population: the 46 other 0x23c sites and the direct 0x240..0x250 stores
+were not classified.
+
+**Unknown.** The join of the loaders' records (dwords +0x20..+0x30, byte
++0x2e of the second record) to a section of the `.a2c` page is Unknown.
+Script and `scenario.dll` sources: neither was searched.
+Mission-end awards: no census of award-slot callers was run. The caller of
+`L2.02368`.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+### R2-ENGINE-490
+
+Recompute `L2.00052` reads +0x130 twice (`L2.02371`, `L2.02372`) as
+log1.1(+0x130 / 5000 + 1) (`L2.00108`, 5000.0 at `L2.00107`), the HP and
+mana terms of R2-ENGINE-290. Two RU routines read the hero's sum through
+Player +0x38: `L2.02373` copies it to a local, and `L2.02374` tests it
+against 18,000,000 together with a local against 1,000,000. Three more
+sites (`L2.02375`, `L2.02376`, `L2.02377`) show the same Player +0x38 load
+in their bytes and were not read.
+
++0x1c is V of the hit and kill slots (R2-ENGINE-480). Slot +0x50
+(`L2.02378`), when global +0x74 is set, for an argument whose slot +0x30
+returns 0 and for a holder for which `L2.02362` does not hold, adds the
+argument's +0x1c to the holder's owner +0x3c through `L2.02367` (owner
++0x3c += amount, then message 0x67). The EN Alt+U body `L2.01079`
+(R2-ENGINE-304) sums units' +0x1c and prints chat lines; no experience
+field is stored in the part read.
+
+**Confidence.** High for the recompute reads and the slot +0x50 body (RU
+and EN). Medium for the two Player readers (only the reads were read) and
+for the Alt+U body (navigation read, EN, not committed). Medium for
+completeness: a RU `.text` pattern pass for the bytes of displacement
+0x130 finds 166 sites; 22 lie in bodies read here (the character-file
+loaders, award, reuse, experience-from-skill, raise-one, recompute and the
+two readers) and 144 were not classified, among them other classes'
+fields at +0x130.
+
+**Unknown.** What the two Player readers decide; the callers of slot +0x50
+and the meaning of owner +0x3c.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
+
+### R2-ENGINE-491
+
+With absolute addresses masked, the committed EN and RU listings are equal
+instruction for instruction for the power helper (11), the log helper
+(18), the table writer (23), skill-from-experience (20), the threshold
+(9), the award (464), the cap (50), slots +0x68 (105), +0x6c (65), +0x70
+(46) and +0x50 (27), reuse (124), experience-from-skill (49), raise-one
+(77), the apply head to the +0x70 call (103) and the Heal and Drain Life
+arms (190). In the item routine (EN `L2.01850`, RU `L2.02366`) the dispatch
+(78) and the 0xffff and 0xfffe cases (144) are equal with frame offsets
+also masked; the frame size and later code differ. The 40 dwords at
+`L2.02379` (RU) and `L2.01124` (EN) are equal.
+
+**Confidence.** High for the pairs named. The masked comparison masks every
+hex value at or above 0x400000, immediates and message ids included, and
+does not compare the values behind them other than the constant table. Slot
++0x50 is the gold slot, not an award slot.
+
+**Unknown.** EN counterparts of the effect tick, the row and element
+accessors, `L2.02356`, the character-file loaders, the producer at
+`L2.02365`, the Player readers and the recompute reads; reading them in EN
+would settle parity.
+
+**Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
