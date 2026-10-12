@@ -456,3 +456,45 @@ can leave other kinds, including 5 to 9 (Medium, `AI-514`, `AI-515`; these amend
 `AI-501`). The group pass
 writes pending 1 or 7 for command state 2 and 0xf for state 0xf (`AI-502`). A scroll cast pays no mana
 (`MAGIC-317`).
+
+## A unit acting without a new order
+
+The routine that can start an attack or a cast for a unit without a new order
+is chosen by its group's order byte (`AI-517`): order 0 runs the unit's own
+state arm, orders 1, 2, 3, 4, 5 and 0x11 run a group arm, once per AI pass (`AI-526`). The table and the
+arms are read (High); that no other path acts for a unit is Medium, because 7 of the 37 call sites of the three
+acting routines are unplaced (`AI-517`). A player's own groups start at order 3, so the default idle unit runs the
+order 3 arm (scorer `R0153`, veto `R0252`) and engages what is already in reach; the standing acquisition
+below applies after an order that leaves group order 0 or 4 (`AI-517`, `AI-518`). Standing
+acquisition builds its candidate set from the sight stamp, caps the pick at
+reach, and stores pending 6, the target and the reach; it stores no progress,
+phase, action word or completion, and the strike or cast starts at the next
+executor pass at progress 0 (`AI-518`). A human owner's unit with no pick runs
+the heal arm (`MAGIC-320`); a unit left in state 0xb engages what stands near its
+post and returns to it otherwise; Guard stores 0xb with group order 1, so only the
+patrol or a group of order 0 reaches that evaluator (`AI-525`, Medium). The engage
+rolls the unit's spell slots each time it runs, and a hit stores a cast on the order
+record (`MAGIC-322`; Medium that a human owner's unit casts this way in play); an armed cast cursor stores nothing on the unit (`MAGIC-321`).
+
+The group pass of order 4 (Move) stores the move again for a member that has not
+arrived and runs no acquisition before arrival or before the route ends on the
+member's own cell; after arrival every pass runs acquisition and none re-issues
+the move (`AI-519`). There is no group-pass attack-move; the executor tail path
+is open (Medium): a member stood down to state 0xc is reacquired by the tail on a
+later raise of the refusal word (`AI-524`). Orders 1 and 3 engage a scored victim
+with pending 5; order 1 walks a member away from its post home, order 3 stores no
+walk (`AI-520`). Order 5 runs the order 3 split when the candidate build found
+something and the order 4 arm when it found nothing (`AI-520`, `AI-519`). Order 0
+maps the command states to engage, acquire, re-issue and cast arms, and a
+victim at action 0x10 stands a state 3 member down to state 0xc and acquisition
+in the same call (`AI-521`). The executor tail reacquires for every state except
+1, 0xa and 0x17 when the mover raises its refusal word (`AI-524`, Medium). A
+Move stores `ord+0x50` = 0 for every member (`AI-519`).
+
+A strike starts at progress 0 behind a gate that needs the facing byte equal to
+the direction to the target and the edge distance within reach; the action body
+then winds up, releases on a reach test with no facing or mover access, and
+recovers, while progress 1 and 2 hold the unit (`AI-522`). The hit hook sets the
+turn flag, the attacker's cell and the diplomacy flip and stores no pending kind
+or target; the hit routine body, two of the hook's callers and the readers of the
+attacker pointer are unread (`AI-523`, Medium).

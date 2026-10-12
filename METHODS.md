@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3716. Observation: 99. Static analysis: 3114. Mixed: 503.
+Claims labelled: 3729. Observation: 99. Static analysis: 3127. Mixed: 503.
 
 ## Ledger ai
 
@@ -74,7 +74,7 @@ Claims labelled: 3716. Observation: 99. Static analysis: 3114. Mixed: 503.
 | AI-PATROL-019 | static analysis | ● active |
 | AI-GROUPCMD-020 | static analysis | ● active (amended, superseded) |
 | AI-GUARD-021 | static analysis | ● active (amended) |
-| AI-SWARM-022 | static analysis | ● active |
+| AI-SWARM-022 | static analysis | ● active (amended) |
 | AI-MOVE-023 | static analysis | ● active (superseded) |
 | AI-SWARM2-024 | static analysis | ● active (amended, superseded) |
 | AI-ROAM-025 | static analysis | ● active (amended) |
@@ -326,6 +326,16 @@ Claims labelled: 3716. Observation: 99. Static analysis: 3114. Mixed: 503.
 | AI-514 | static analysis | ✔ promoted (branch candidate) |
 | AI-515 | static analysis | ✔ promoted (branch candidate) |
 | AI-516 | static analysis | ✔ promoted (branch candidate) |
+| AI-517 | static analysis | ● active |
+| AI-518 | static analysis | ● active |
+| AI-519 | static analysis | ● active |
+| AI-520 | static analysis | ● active |
+| AI-521 | static analysis | ● active |
+| AI-522 | static analysis | ● active |
+| AI-523 | static analysis | ● active |
+| AI-524 | static analysis | ● active |
+| AI-525 | static analysis | ● active |
+| AI-526 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -1158,6 +1168,9 @@ Claims labelled: 3716. Observation: 99. Static analysis: 3114. Mixed: 503.
 | MAGIC-316 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-317 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-318 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-320 | static analysis | ● active |
+| MAGIC-321 | static analysis | ● active |
+| MAGIC-322 | static analysis | ● active |
 
 ## Ledger menu
 

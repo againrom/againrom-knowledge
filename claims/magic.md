@@ -3785,3 +3785,79 @@ executable is the same image, one SHA-256); Medium for the id condition (reused 
 
 **Unknown.** The branch that selects the arm, settled by reading `R0003` between
 `L14740` and `L14738`.
+
+## Casting without a player order
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-320 | The heal arm `R0015` casts spell id 6 from a human owner's unit's book on itself, else on the most damaged ally in range, without an order; stored as pending 8 with `ord+0x60` = 1. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| MAGIC-321 | The armed cast mode stores nothing on the unit; a unit that cast returns to state 0xc, and the cast states 0xd and 0xe only re-issue the stored cast, so the mode adds no automatic cast. | Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| MAGIC-322 | The engage `R0009` rolls the unit's spell slots on every call and, on a hit, `R0209` stores a cast (pending 8 or 9, spell, reach; an arm for ids 4 and 25 stores no order); a mage-mask unit in melee reach of a human owner skips it. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+
+### MAGIC-320
+
+`R0015(session, actor)` (window `b08`, read whole) stores pending `ord+8` = 0 and returns on five paths:
+spell book `actor+0x140` null (`L00054`), mana word `actor+0x9a` zero (`L00055`), `+0x9a` not above the word
+`+0xa0` (`L00056`), no book record for id 6 from `R0017` (`L00057`), and no ally whose health quotient is
+below 1 (`L00058`). When the word `+0x94` differs from `+0x96` (health, maximum) it stores `ord+0x60` = 1 and calls
+the cast install `R0018(actor, actor, record)` (`L00060`..`L00062`). Otherwise it takes the actor's cell, builds
+the block of cells of radius `record+9` through `R0020`, keeps allies with the diplomacy filter `R0021` and wanted
+bit 1, and picks the candidate with the lowest integer quotient `+0x94 / +0x96` whose word `+0x98` is nonzero; a pick
+stores `ord+0x60` = 1 and calls `R0018` with it (`L00063`..`L00064`). `R0018` (window `b09`) stores pending 8
+(`L00071`; the caster arm of `R0209` aims at the caster, `MAGIC-237`), `ord+0x28` = target, `ord+0x30` = the record, `ord+0x14` = reach and then `record+9` (`L00072`..`L00075`); its
+`R0022` branch needs a zero target and is not reached from here. The heal arm is called by the walker for order 3
+(`L00051`), by the order 1, 2 and 5 arms (`L00078`, `L00079`, `L00080`), by the order 4 arm and the state
+arms through `R0022` (`L00077`) and by the two small wrappers at `L14879` and `L14880` (`L14881`,
+`L14882`); the rel32 scan lists the eight sites `L00077`, `L14881`, `L14882`, `L00051`, `L00078`,
+`L00079`, `L00080` and `L14883` (the last lies between `R0155` and `R0154`, the region of the order `0x11` arm, and is not read). The sites read are
+guarded by `Player+0x28` equal to zero, the human-participant test. Pending 8 is then run by the executor row `L00108`:
+it casts at once when the target is the caster or the gate passes at reach `ord+0x14` and otherwise approaches.
+
+**Confidence.** High for the bodies and call sites read. The heal arm is not the only cast an owner's unit starts
+without an order: the engage `R0009` draws a spell slot from `ord+0x78..0x83` and casts through `R0209`
+(`MAGIC-322`). Medium that a human owner's unit casts that way in play, as in `MAGIC-322`. The caster arm `R0113` is reached for `Player+0x28` nonzero only. What spell id 6 is stays
+unresolved (`AI-349`, `AI-FOLLOWHEAL-118`), and `+0xa0` is unidentified.
+
+**Unknown.** The callee iterators `R0027`, `R0028`, `R0029`.
+
+### MAGIC-321
+
+The panel's cast mode is a cursor state that clears after the consuming click (`AI-PANEL-123`); the cast setters
+store a command state `0xd` or `0xe` with pending 0 (`AI-487`) and the install pass resets the state to `0xc`
+with pending 0 once the cast is installed (`AI-489`). The state arm for `0xd` calls `R0018` with the stored
+target and Spell (`L01993`..`L14884`), which re-stores pending 8; the arm for `0xe` stores pending 9 and the stored
+cell (`L13503`..`L13505`). No arm read stores a cast for a state other than these, so a unit that holds a spell in
+the cast mode behaves as any unit in questions 1 to 5 until a click arrives (the slot draw of `MAGIC-322` does not read the mode), and a caster after its cast is a state `0xc`
+unit that acquires like any other (`AI-518`).
+
+**Confidence.** Medium: the arms are read (window `b02`), the setters and the install pass rest on `AI-487` and
+`AI-489`, and nothing here reads the cast panel's own fields.
+
+**Unknown.** Whether a cast-mode cursor can be armed and left across a group pass without a click is a panel fact, not read.
+
+### MAGIC-322
+
+`R0009(session, actor, target)` (window `b07`, read whole) first skips the draw when the actor's mask `+0x4c` has bit 4,
+its reach byte `+0x12c` is below 2 and `Player+0x28` is zero, running standing acquisition `R0022` instead
+(`L01736`..`L01737`). Otherwise it visits the three slots at `ord+0x78`, `+0x7c`, `+0x80`: for a nonzero id it calls `rand()` and keeps the
+id when the draw is below the dword at slot `+0xc` (`L01738`..`L14885`; a later hit overwrites an earlier one); a kept id calls
+`R0209(actor, target, id)` (`L01739`) and returns. `R0209` (window `e09`, `R0209`..`L14886`) looks the id up in the
+actor's book `actor+0x140` through `R0017` and returns when the record is null (`L05152`); it switches on the id (28 arms,
+table `L05156`, all read by `MAGIC-237`: the caster arm aims at the caster, the victim arm at the victim, and an arm for ids 4 and 25 stores no
+order and only `ord+0x60` = 1): the unit-target arms call the cast install `R0018` (pending 8, `AI-349`); the point-target arms store `ord+8` = 9,
+the cell word `ord+0x3c` (a free neighbour cell found by `R0144` when the target is more than 2 cells away, else a cell offset
+from the heading of `R0051`), the record in `ord+0x30` and `ord+0x14` = `record+9`; every arm that reaches `L05163` ends with `ord+0x60` = 1
+(`L06098`). The slots are filled at spawn from the class's spell columns for the twelve spellbook classes (`AI-341`,
+`UNIT-SPELL-007`); whether a class a human owner plays has a nonzero probability is class data, not read here (the corpus of `UNIT-SPELL-007` is 12 of 56 classes with a nonzero `Spell 1`, both roots). `R0009` is called for a
+member that has a scored victim under group orders 1, 2, 3 and 5 (`AI-520`) and from the state arm for state 3 (the player's Attack
+order, `AI-521`) every pass, so each pass re-rolls the slots. The cast starts only at the executor row for pending 8 or 9,
+under the same gate and hold as an ordered cast (`AI-522`). `L14679` (window `b18`) is a cast install pass: it stores progress 2,
+`ord+0x15` = 0, action `0xd`, `actor+0x5c` = `ord+0x28`, `actor+0x64` = `ord+0x30` and `ord+0x5c` = 1, and when `ord+0x60` is zero it stands
+the unit down (three resets, state `0xc`, `ord+8` = 0, `ord+0x50` = 1); its caller was not read.
+
+**Confidence.** High for the bodies of `b07`, `e09` and the stores listed (one image, one witness). Medium that a human owner's unit casts
+this way in play: the slot contents of the classes a human owner plays, the scale of the probability dword and the value of
+`rand()` bound are data and the CRT routine, not read here; the caller of `L14679` is not read.
+
+**Unknown.** The probability data of the classes a human owner plays (`UNIT-SPELL-007` reads the columns and counts 12 of 56 classes with a nonzero `Spell 1`; the
+installed class data of the classes a human owner plays would settle it); the caller of `L14679`.

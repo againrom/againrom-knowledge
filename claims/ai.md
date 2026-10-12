@@ -655,7 +655,7 @@ In `R0024`: `L00438` loads the group's member count, the latch at `+0x30` is rea
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-SWARM-022 | Group order 2 (`Swarm`) is *walk to the commanded cell and fight what you see*. | High | ● active | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
+| AI-SWARM-022 | Group order 2 (`Swarm`) is *walk to the commanded cell and fight what you see*. | High | ● active (amended) | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
 | AI-MOVE-023 | Group order 4 (`Move`) walks each member to its *own* `ord+0x0a` and re-acquires on arrival. | High | ● active (superseded) | **[EXP-0087](../experiments/EXP-0087-group-arms/)**, [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md) |
 | AI-SWARM2-024 | Group order 5 (`Swarm 2`) is `Swarm` minus the walk, and falls back to `Move`. | High / Medium | ● active (amended, superseded) | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
 | AI-ROAM-025 | Group order `0x11` (`Roam`) updates a Group-AI cell and counter, then invokes Swarm 2 evaluation; the measured corpus contains no authored Roam nodes. | High / Medium | ● active (amended) | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
@@ -671,6 +671,8 @@ In `R0024`: `L00438` loads the group's member count, the latch at `+0x30` is rea
 `R0025(grp, cell)` — the cell is the dispatcher's `grpAI+0x0a` (`L00306`). It calls `R0110(grp)` (build the candidate list) then `R0177(grp)` (score, winner into each member's `ord+0x20`), then per member: `L00444` target non-null → `R0009(member, target)`; else `L00445` compares the current cell with the commanded one and `L00446` calls `R0040` for idle — not both → `L00447` stores 1 into `ord+0x08` and `L00448` stores the commanded cell into `ord+0x0a`, an ordinary move order to that cell; both → `L00449` on `[member+0x14]+0x28` (`UNIT-OWNER-009`): non-zero (scenario owner) → `L00450` stores `0xb` into `ord+0x08` and, if `actor+0x4c` bit 2, `R0113`; zero (human participant) → `R0015`, the heal AI. **No formation, no spread, no per-member offset**
 
 **Confidence.** High — one routine read end to end; every store cited; the entry the arm is reached by is the PE-read table `L00303[2]` = `L00306`
+
+**Amended.** The label only: the arm named `Swarm` here is group order 2, which no player command stores (`AI-487`); the player's Swarm command leaves group order 5 (`AI-520`, `AI-SWARM2-024`). The body and its stores are untouched (EXP-0547).
 
 ### AI-MOVE-023
 
@@ -4956,3 +4958,318 @@ an immediate address pushed or moved, or a callee reached by fallthrough are out
 
 **Unknown.** How the state functions are reached; a dword scan and an immediate scan for their
 addresses would settle it.
+
+## What a unit does by itself when it sees an enemy
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-517 | Of 37 call sites of `R0008`, `R0022`, `R0009` (7 unplaced), the group order byte selects the routine through table `L00303` (High); that no other path acts is Medium. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-518 | Standing acquisition `R0022` stores pending 6, target and reach and no progress, phase, action or completion; its candidate set is the sight stamp, reach caps the pick; with no pick a human owner's unit runs the heal arm. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-519 | The group pass of order 4 (Move) re-issues the move for a member that has not arrived and runs no acquisition before arrival or route end; the tail path (`AI-524`) is open (Medium). | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-520 | Group orders 1 and 3 give a member that has a scored victim an engage (pending 5, stop distance = reach); without one, order 1 walks the member to its post and order 3 stores nothing that walks. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-521 | The unit's own state arm (group order 0) maps the player-order states to engage, acquire, re-issue or cast arms; a victim whose action word is 0x10 sends state 3 to state 0xc and acquisition in the same call. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-522 | An auto-started strike or shot begins only at executor progress 0 behind a gate that needs exact facing and reach; the action body then counts a wind-up and releases with no facing or mover access and a reach test only. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-523 | The hit hook `R0226` stores the turn flag, the attacker's cell and the diplomacy flip and no pending kind or target; the hit routine body, two callers and the readers of `actor+0x40` are unread (Medium). | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-524 | The executor tail reacquires through `R0004` for every command state except 1, 0xa and 0x17 when the mover raises `+0x98`; a pick in position starts the strike in that same pass. | Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-525 | The guard evaluator `R0137` engages a hostile found near the post without an order, walks an actor off its post back to it, and runs standing acquisition on the post; state `0xb` is the construction value. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-526 | Group order `0x11` re-posts the group at random when its members are near the post, then runs the order-5 arm; `R2211` and `R2212` run the order-3 split and standing acquisition per member. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+
+### AI-517
+
+The group walker `R0023` reads the group order byte `[grp+0x3c]+0x20` (`L08179`), forces `0xff`
+for an empty group (`L00300`), and for values 0 to 5 jumps through the table `L00303` (PE read:
+`L00304 L00305 L00306 L00307 L00308 L00309`). Order 0 (`L00304`) calls the per-actor state arm
+`R0008` for every member (`L00284`). Order 1 calls `R0024`, order 2 `R0025`, order 4
+`R0154`, order 5 `R0026` (which runs the order 4 arm when the candidate build found nothing, `AI-520`). Order 3 is inline (`L00307`..`L00840`): the candidate builder
+`R0110`, the scorer `R0153`, then per member a scored victim (`ord+0x20`) goes to the engage
+`R0009` (`L00842`); without one an owner with `Player+0x28` nonzero gets pending `0xb` and, on
+actor mask 4, `R0113`; an owner with `Player+0x28` zero gets `R0015`. Order `0x11` calls
+`R0155` and `0xff` calls `R0022` per member. After every arm a tail calls `R0105` and then
+`R0100`, or `R0106` and `R0107`, for every member (`L00312`..`L00313`). The walker and
+its table are the same for every player's groups (`AI-ARBITER-057`).
+
+The player orders map to group orders by `AI-487` (read there, not re-read here): Attack 0x19,
+Defend 0x1b, Patrol 0x1d and the cast orders leave order 0; Move 0x16 and 0x1c leave 4; Guard 0x17
+leaves 1; Stand Ground 0x18 leaves 3; Swarm 0x1a leaves 5. The player's own groups start at order 3 on
+load (`AI-STAND-076`).
+
+The executor parks a unit at progress 0 with action `0x1a` when the manager flag `+0xb388` and the
+group byte `+0x45` are both zero (`L00088`..`L00089`), so the arms act only for an enabled group.
+
+A player's own groups start at order 3, so a default idle unit runs the order 3 arm: the scorer `R0153` with the
+veto `R0252`, which refuses anything past reach (`AI-REACH-072`, High). It engages what is already in reach; the
+standing acquisition of `AI-518`, with the sight stamp as its candidate set, applies after an order that leaves group
+order 0 or 4.
+
+**Call-site population.** `evidence/calls.tsv` (rel32 scan of `.text`) lists 37 sites of the three routines that act
+for a unit: 5 of `R0008`, 18 of `R0022`, 14 of `R0009`. Placed: `R0008` at the walker (`L00284`);
+`R0148` (`L14643`) is dead (`AI-DEAD-035`, High); the sites of `R0022` and `R0009` that lie in windows read here
+(`b01`, `b02`, `b07`, `b09`, `b10`..`b13`, `e02`, `e07`, `e08`); `L14812` lies in the state 0x17 routine `R0146`
+(`AI-521`, body unread) and `L01992` is placed by `MAGIC-237`. Unplaced: `L14813` and `L14814`, which lie in the
+withdrawal bodies the tail runs for every member whatever the order (`AI-WITHDRAW-026`; bodies unread here); `L14815` and
+`L14816`, in no function this experiment or the registry places; the callers of the wrappers `L14669` (`L14644`),
+`L14670` (`L14645`) and the stub `L14671` (`L14646`), unplaced since `AI-502`. That is 7 of 37 sites.
+
+**Confidence.** High for the walker, the table and each arm target (window `b01`, table `t02`). Medium
+for the composed statement and for the closed set (no other path acts for a unit; the population above): the tail routines, `R0155`, `R0113` and the cost of each arm's
+callees are not read; the pass cadence of 16 ticks rests on `AI-385` and `AI-TICK-008` and was not
+re-read; whether `grpAI+0x45` is set on a player's group made by `R0152` stays open (`AI-491`).
+EN and RU `rom.exe` are one image (one SHA-256): one image, one witness.
+
+**Unknown.** The tail routines `R0105`, `R0100`, `R0106`, `R0107`; the arm `R0155`;
+the value of `grpAI+0x45` for a group a player order builds; the seven unplaced call sites above.
+
+### AI-518
+
+`R0022(actor)` seeds the best distance with `actor+0x12c` plus 1 (`L00222`..`L02063`), calls
+`R0114`, and walks the candidate collection at `+0xba4`. `R0114` clears the sight map (`R0145`),
+stamps the actor's sight from its cell (`R0135`), then, for an actor whose `Player+0x28` is nonzero
+only, marks the remembered attacker cell `ord+0x58` and counts `ord+0x5a` up to 0x14 (`L14817`..`L14710`).
+It walks the world list `+0xa4554`, adds every actor on a stamped cell to the collection
+(`L14818`..`L14819`), removes by the diplomacy filter `R0021` with wanted bit 0 (`L14820`),
+and moves candidates with health below 1 to the second collection `+0xbc4`; when no living candidate
+is left the dead are moved back (`L14821`..`L14822`). Per candidate `R0022` takes the edge
+distance `R0036`, adds 1 when the candidate's virtual byte (`vt+0x20`) is 3 and the actor's is not, and
+the turn cost `R0115` of `R0051` against the actor's facing; a smaller distance wins, an equal
+distance wins when it is at most reach and its turn cost is not higher (`L01745`..`L14823`). A pick
+farther than reach is cleared (`L14824`..`L14825`). A pick stores `ord+8` = 6, `ord+0xc` = target and
+`ord+0x14` = reach (`L00576`..`L14776`) and nothing else; it stores no progress, phase, action word
+or completion. With no pick an owner with `Player+0x28` nonzero gets `ord+8` = `0xb` and, on actor mask 4,
+`R0113`; an owner with `Player+0x28` zero gets `R0015` (`L01760`..`L00077`). At a cell centre,
+when the mover word `+0x80` is nonzero and differs from the current cell, the exit calls `R0046` and
+clears the word (`L14826`..`L14827`). Pending 6 is acted on by the executor row `L00581`: it
+needs the gate `R0041` (AI-522) and turns in place through `R0250` when the gate fails; it never
+approaches. An actor with mask 4, reach below 2 and `Player+0x28` zero gets pending 0 there
+(`L14828`..`L00109`).
+
+**Confidence.** High for the bodies read (windows `b04`, `b05`, `b20`, `b16`; one image). Medium that the
+candidate set is the whole of the sight stamp for a player's unit: `R0036`, `R0051`, `R0115`,
+`R0145`, `R0135`, `R0021`, `R0032`, the list iterators `005181xx` and `R0046` are not read
+in this experiment (`AI-ACQUIRE-002`, `AI-SIGHT-006`, `AI-FILTER-001` read most of them).
+
+**Unknown.** The callees above; `ord+0x58` for a human participant is never stamped (read), what else
+reads it.
+
+### AI-519
+
+The order-4 arm `R0154(group, cell)` recomputes the notice radius (`L14829`..`L00451`), then per
+member takes one of three paths. (a) The member's cell equals `ord+0xa` (`L00452`), it is at a cell
+centre (`R0040`) and `ord+0x50` is 0 (`L01876`): the arm cancels a stale mover destination
+(`R0045` when `mover+0x80` is set), stores reach into `ord+0x14`, clears `ord+0x60`, `mover+0x7c` and
+`actor+0x54`, resets the member, calls `R0088`, stores `ord+0x50` = 1 and `mover+0x90` = 0. (b) Not
+arrived, `mover+0x90` nonzero and the mover word `+0x76` equal to the current cell (`L06958`..`L01714`):
+resets the member three times, stores `actor+0x50` = `0xc`, the post `ord+0` = current cell, `ord+8` = 0,
+`ord+0x50` = 1 and `mover+0x90` = 0. (c) Otherwise nothing changes. After the path (`L01711`), a member
+with `ord+0x50` nonzero runs `R0022` (`L00455`..`L14830`); a member with `ord+0x50` zero gets
+`ord+0x6c` = 1 when `[grp+0x3c]+0x44` is nonzero and the move is re-issued: `ord+8` = 1 with the same
+`ord+0xa` (`L14831`..`L14832`). So a member that has not arrived, and whose route has not ended on
+its own cell, receives no acquisition from the group pass; the executor reads the pending kind only at
+progress 0 and the step arm (progress 3) does not read it (`AI-499`, window `b16`
+`L07145`..`L14833`). Once `ord+0x50` is 1 the arm runs `R0022` on every pass wherever the member
+stands, including after a pursuit moved it off `ord+0xa`; it does not write `ord+8` = 1 again.
+
+**Move setter.** `R0108` (window `e04`, `R0108`..`R0157`, 259 instructions) walks the members and gives
+each the member reset `R0007` (`L14834`), `ord+0x50` = 0 (`L14835`) and `ord+0x38` = 0 (`L14836`); a second
+walk repeats the reset and the `ord+0x50` = 0 store (`L14837`..`L14838`); a third walk calls `R0301` per member
+(`L06927`, `L14839`); the last store is the group order byte `[grp+0x3c]+0x20` = 4 (`L00433`). `R0301` is read in
+`AI-375` (High): it stores `ord+0x50` = 0, `ord+8` = 1, the queued cell `ord+0xa`, `mover+0x90` = 0 and `actor+0x50` = 1.
+The member reset `R0007` (window `e05`, `R0007`..`L08746`) stores `mover+1` := `mover+0`, which sets the desired
+facing to the current facing and cancels a pending turn (`MOVE-105`, `AI-351`), cancels a stale
+destination claim through `R0045`, and stores `ord+0x14`, `ord+0x60`, `mover+0x7c` and `actor+0x54`; it stores no
+`ord+0x50`. A second reset body at `L14840` stores `ord+0x50` = 0 (`L14841`; the window ends inside its last
+instruction). So a new Move leaves `ord+0x50` = 0 in every member, including a member that arrived under an earlier move,
+and the arm above re-issues the walk for it until it arrives.
+
+**Tail path.** "No acquisition before arrival" holds for the group pass only. A Move leaves `actor+0x50` = 1 (`AI-375`). On the
+first raise of `mover+0x98` the executor tail stands the member down to state `0xc` (`L14842`..`L00112`, `AI-524`); arm 4
+path (b) also stores `0xc` (`L00454`). A later raise meets a state other than 1, 0xa and 0x17, so the tail stores `ord+8` = 0 and
+calls `R0004`, which picks a target and, when the gate `R0041` passes, starts the strike in that pass (`AI-524`, Medium).
+So there is no group-pass attack-move; whether a Move whose route is refused twice strikes before arrival is open (Medium).
+
+**Confidence.** High for the arm body (window `b13`; the final instructions of the walk-back `L14843`.. are outside
+the window), the executor reads and the setter stores (windows `e04`, `e05`; EN and RU listing hashes equal, one image,
+one witness). Medium for the composition across passes and ticks (no native tick observed) and for the tail path above; the meaning of
+`mover+0x90` and `+0x76` is that of `AI-MOVE-023` (`MOVE-072`).
+
+**Unknown.** The tail of the arm past `L14844`; the callee `R0088`.
+
+### AI-520
+
+Order 1 (`R0024`): `R0141`, then the candidate builder `R0110`, then a radius clip by `R0167`
+against `grp+0x2d` (`L00372`..`L00374`), then the scorer `R0177` (window `b15`: per member the
+minimum of `R0225` over the candidates, `0xffffff` means none, the winner goes to `ord+0x20`
+`L00773`). Per member with a scored victim: `R0009(member, victim)` (`L00336`), which stores
+pending 5, the target and `ord+0x14` = reach (`L00018`..`L00159`). Without one, a member at its post
+(`ord+0` equals the cell, `L14845`) and at a cell centre: `Player+0x28` nonzero stores pending `0xb`
+(+ `R0113` on mask 4), zero runs `R0015`; a member away from its post stores `ord+8` = 1 and
+`ord+0xa` = `ord+0` (`L14846`..`L00828`). Order 3 is inline in the walker (`AI-517`) with the scorer
+`R0153` (window `b14`, per member the minimum of `R0252`, winner to `ord+0x20`): a scored victim
+goes to `R0009`, no victim stores no walk (`ord+8` = 1 is not stored in the arm). The engage
+`R0009` first sends a mage-mask actor with reach below 2 and `Player+0x28` zero to `R0022`
+(`L01996`..`L01737`), draws a spell slot from `ord+0x78..0x83` against `rand()` (`L01738`..`L01764`) and casts
+through `R0209` on a hit, and otherwise stores pending 5. Pending 5 differs from pending 6 in the
+executor: row 5 (`L00101`) approaches through `R0042` when the gate fails; row 6 only turns.
+
+Order 2 (`R0025(group, cell)`, window `b11`) calls the scorers `R0110` and `R0177`, then per member: a scored
+victim in `ord+0x20` runs `R0009`; no victim and the member on the cell at a cell centre runs the `Player+0x28` split
+(nonzero: `ord+8` = `0xb`, plus `R0113` for the mage-mask bit; zero: the heal arm `R0015`); no victim and off
+the cell stores `ord+8` = 1 with `ord+0xa` = the cell (`L14847`..`L00448`). Order 5 (`R0026`, window `b12`) runs `R0110` and reads the
+dword at `+0xbb4`, the element count of the candidate collection (`AI-CANDCOUNT-105`, High). When the build found something it
+runs `R0177` and the per-member split of order 3 (victim to `R0009`, else the `Player+0x28` split); when it found nothing it
+tail-calls the order 4 arm `R0154` (`L00463`, `AI-SWARM2-024`, listed in `calls.tsv` as the second caller `AI-372` names),
+which acquires only after arrival (`AI-519`). The player's Swarm command stores order 5; the arm `AI-SWARM-022` calls `Swarm` is
+order 2, which no player command stores (`AI-487`).
+
+**Confidence.** High for the stores and branches read (windows `b10`, `b11`, `b12` through `L14848`, `b14`, `b15`,
+`b07`, `b16`). Medium for "scored victim" meaning anything beyond the scorers' stores: the cost routines `R0225` and
+`R0252` are not read here (veto at reach is `AI-STAND-076`, `AI-REACH-072`), nor are `R0141`,
+`R0110`, `R0177` and `R0167`; `R0209` is read (`MAGIC-322`).
+
+**Unknown.** The cost routines.
+
+### AI-521
+
+The per-actor arm `R0008` (window `b02`, table `t01`) first stands a state 3 member down when its victim's
+action word is `0x10`: three resets, `actor+0x50` = `0xc`, post = current cell, `ord+8` = 0, `ord+0x50` = 1
+(`L14849`..`L01878`); states 8 and 0x11 do the same when the protected unit's action word is `0x10`
+(`L14850`..`L14851`). State 1 stands down the same way when `mover+0x90` is nonzero and the mover word
+`+0x76` equals the cell (`L14852`..`L14853`). It then dispatches on `actor+0x50` through the 27 dwords at
+`L00322`: 0 clears `actor+0x54`; 1 stores `ord+8` = 1 with the same `ord+0xa`; 2 stores 1 (walk) or 7 (pick
+up) by the cell; 3 calls `R0009(member, ord+0xc)`; 4 filters an occupancy block and engages the first
+survivor or walks; 8 and 0x11 are the follow pair `R0138`/`R0139`; 0xa patrol `R0159`; 0xb guard
+`R0137`; 0xc `R0022`; 0xd calls the cast install `R0018`; 0xe stores `ord+8` = 9; 0xf stores
+`ord+8` = 0xf; 0x16 `R0100`; 0x17 `R0146`; 0x18 stores `ord+8` = 1 toward the fixed cell `0x4f5b`
+(or state 4 with cell `0x2f52` past a byte test, `AI-STATE-011`); 0x19 builds a list through `R0142` and
+stores `ord+8` = `0xc` with a listed cell; 0x1a stores `actor+0x54` = `0x1a`;
+states 5, 6, 7, 9, 0x10 and 0x12..0x15 clear `actor+0x54` and run `R0022` (`L00321`). So a unit left
+in state 0xc, as the stand `R0044` leaves it, is a unit that acquires at every group pass of order 0.
+
+**Confidence.** High for the arm, the table and the stand-down stores (windows `b02`, `b03`, `t01`); the guard
+`R0137` is read whole (window `e07`, `AI-525`); the bodies of the follow pair (`e02`) and patrol (`e03`) were read by
+their stores and calls only, so their target tests are Medium. The writers of state `0xc` include the stand `R0044` (callers by rel32
+scan: `L14854`, `L14855`, `L09295`, `L14856`, `L00117`, `L14857`), the order-4 arm and the
+stand-down paths above.
+
+**Unknown.** The target tests of patrol `R0159`, follow `R0138` and `R0139`
+beyond their stores and calls; five of the six `R0044` callers (only `L00117` is placed, by `AI-350`).
+
+### AI-522
+
+An auto-acquired target (pending 5 or 6) is acted on at executor progress 0 only (`L00092` table
+dispatch, `L00547`). Row 5 and row 6 call the gate `R0041(self, target, reach)`: it needs
+`mover+0` (the facing) equal to the direction byte of `R0051` (`L00577`) and the edge distance
+`R0036` not above reach (`L00578`). On success they store progress 1, counter `ord+0x15` = 0,
+action word `actor+0x54` = 3 and `actor+0x5c` = target (`L00103`..`L00104`, `L00746`..`L04073`). On a failed
+gate row 5 approaches through `R0042`/`R0043`, row 6 turns through `R0250`; the turn routine
+`R0056` sets the desired facing `mover+1` and either snaps `mover+0` to it (angle below `0x21` of 256,
+mover word `+0xa0` zero, `L00749`..`L14858`) or starts the multi-step turn through `R0249`; the gate
+therefore stays closed until the facing byte is equal. The action body `L00005` then runs the
+swing: phase 0 with action 3 calls the swing start `R0245` (`L05237`); phase 5 counts `actor+0x6c`
+down (`L13484`..`L14859`) and at zero calls `R0001` (`L00006`), which calls the strike
+`R0246` (`L02046`); phase 7 counts `+0x6c` down and at zero stores phase 0 and completion 1
+(`L04543`..`L04544`). The executor progress arms 1 and 2 only count `ord+0x15` and clear progress
+when it exceeds 2 and `actor+0x136` is set (`L00093`..`L00095`), so the unit holds from the gate to the end of
+recovery. The range `L00005`..`L00009`, the swing start window and the wrapper `R0001` contain no
+operand at `+0x154` (the mover), and the strike tests reach only (`AI-408`, `HERO-CADENCE-115`).
+A cast starts the same way: action `0xd`/`0xe`, admission `R0268`, phase 5, countdown `+0x134`
+(`L14860`..`L14861`); application `R0002`/`R0003` at zero (`L14302`..`L00008`).
+
+The swing start `R0245` (window `b25`, `R0245`..`L14862`) is the release routine: it tests both records and the
+attacker's health, takes the edge distance `R0247`, marks the target record when its kind byte is `0xf`
+(`L14863`..`L14864`), stores a flight delay `(distance * 256 + 0x80) / 200` through its third argument when the
+distance exceeds 1 (`L09262`..`L14865`) and calls `R0549` on the object `L00522` with attacker and target
+(`L02725`). The strike `R0246` (window `b26`) repeats the edge-distance test against the reach byte `+0x12c`
+(`L02045`, return when the target is farther), subtracts the damage computed by the target's virtual `+0x4c` from its
+health word `+0x94`, and calls `R0561` and the attacker's virtual `+0x64`. The application `R0563` (window `e06`)
+has the same reach test and subtracts the damage from the target's word `+0x42`. None of `b25`, `b26`, `e06` has an
+operand at `+0x154` (mover) or `+0x158` (order record): once released, a shot or a strike is resolved by the reach test
+only, not by the facing or the progress. A multi-step turn ends after ceil(arc / rate) calls and a short arc in one
+(`MOVE-105`, High), and the gate stays closed until `mover+0` equals the heading.
+
+**Confidence.** High for the executor rows, the gate, the action body and the absence of a `+0x154` or `+0x158`
+operand in the ranges read (windows `b16`, `b20`, `b22`, `b24`, `b25`, `b26`, `e01`, `e06`; one image, one witness).
+Medium that a release cannot happen between cells: progress 0 is entered after the step arm clears progress at a cell
+centre (`AI-499`), and no mover writer other than the step and turn routines was enumerated. Medium for the virtual
+calls `L13251`, `L13252` and `L13253` of the action body and the callees `R0549`, `R0561` (`AI-408`).
+
+**Unknown.** The callees of the release (`R0549`, `R0561`); mover writers outside the step and turn.
+
+### AI-523
+
+The claim is bounded to the hook `R0226`. The hit routine `R0265` ends with a store of the attacker pointer in the target's `+0x40`
+(`L04123`) and, when both actors have a player, a call of `R0226` (`L04126`..`L00875`); the rest of the routine was
+read by a search for `+0x154` and `+0x158` operands only.
+`R0226` stores in the victim's order block `ord+0x54` = 1, `ord+0x58` = the attacker's cell and
+`ord+0x5a` = 0, then calls the diplomacy flip `R0126` (window `b28`). It stores no `ord+8`, `ord+0xc`,
+`actor+0x50`, `actor+0x5c` or progress. The rel32 scan finds three callers of `R0226`: `L00875` (read),
+`L00876` and `L00877` (not read). The remembered cell `ord+0x58` enters the sight stamp only for an
+actor whose `Player+0x28` is nonzero (`L14817`..`L14710`), so the hook gives a human participant's victim the turn
+flag (`AI-RETAL-056`) and hostility and no target; at the sites read, its next target comes from the arm its
+group order selects (`AI-517`).
+
+**Confidence.** High for the stores of the hook `R0226` and the call site `L04126` (windows `b28`, `b27`). Medium
+for everything else the hit does: the body of `R0265`, the two other callers and every reader of `actor+0x40` were not read.
+
+**Unknown.** The body of `R0265` past `L00875`; the callers `L00876`, `L00877`; every reader of `actor+0x40`.
+
+### AI-524
+
+The executor epilogue (`L00010`..`L00011`) reads `mover+0x98`, clears it when nonzero, and for
+`actor+0x50` equal to 1 stands the member down to state `0xc` (`L14842`..`L00112`), for 0xa advances the
+patrol, for 0x17 stores progress `0xff`, and for every other state stores `ord+8` = 0 and calls the reacquisition
+`R0004` (`L00114`..`L00011`). The reacquisition stores the pick in `ord+0xc` and `ord+8` = 6
+(`L00121`..`L00122`), clears `ord+8` for a mage-mask actor with reach below 2 and `Player+0x28` zero
+(`L00811`..`L00123`), and, when the gate `R0041` passes, calls `R0005` (progress 1, action 3,
+`actor+0x5c`) at once (`L00741`..`L00740`); otherwise it turns in place through `R0250`, which approaches nowhere (`AI-518`; `AI-511` lists no walk call there). A member stood down to state `0xc` by this tail on its first raise, or by the order 4 path (b) (`AI-519`), meets this branch on a later raise. With no
+pick an AI owner's unit gets `ord+8` = `0xb`, a human owner's `ord+8` = 0 (`L00810`..`L00125`). Whether
+`mover+0x98` is raised for a unit that is not walking is answered by `AI-510`: the nonzero stores of the flag found are in
+the walk `R0178`, the approach `R0043` and `R0055`, inside executor passes, and the tail clears it; `AI-511`
+reads the same epilogue and `R0004` (window `a07` there) and agrees with the stores listed here.
+
+**Confidence.** Medium: the epilogue and the stores listed are read (window `b16`, `b17` from `L14866`) and match
+`AI-511`; the first half of `R0004` (`R0004`..`L14866`) was read here by its calls only (its body is `AI-511`'s
+at its grade), `R0005` is read (window `b18`: progress 1, `ord+0x15` = 0, action 3, `actor+0x5c` = `ord+0xc`),
+`R0250` is named, and the entry value of the flag is Medium (`AI-510`).
+
+**Unknown.** Callers of the state functions that store the flag (`AI-510`); the candidate loop of `R0004`.
+
+### AI-525
+
+`R0137(session, actor)` (window `e07`, `R0137`..`L14867`, read whole) is the guard state's evaluator, run by
+the state arm for `actor+0x50` = `0xb` (table entry 11 is `L14868`, which calls it at `L14869`; `AI-521`) and by the
+patrol (`L00345`, `L14870`). It sets the post word `ord+0` to the current cell when it is zero; measures a distance
+through `R0162` against the byte `actor+0xa5` and, when the measure is not below it, stores `ord+8` = 1 with `ord+0xa`
+= the post (`L14871`..`L00331`); builds the block of cells around the post with radius `mover+8` through
+`R0020`, filters it by the diplomacy filter `R0021` and, when the filtered list is not empty, calls the engage
+`R0009(actor, first victim)` (`L14872`..`L00586`); with an empty list and the actor off its post it stores
+`ord+8` = 1 with `ord+0xa` = the post (`L00334`..`L14873`), and on its post it runs standing acquisition
+`R0022` (`L00335`). The companion `R0306` (same window, `R0306`..`L14874`), called from the follow
+arm when `actor+0x140` is null (`L01062`, window `e02`), takes the block around the actor's own cell with radius `mover+8`, filters it (`R0021`, `R0460`) and engages the
+nearest entry whose virtual `+0x20` returns 3 (`R0036` distances) or, with none, runs standing acquisition. So an actor
+left in state `0xb` engages what stands near its post without a new order, within the radius `mover+8`, and returns
+to the post otherwise.
+
+**Confidence.** High for the body of `R0137` (window `e07`; EN and RU listing hashes equal, one image, one witness).
+Medium that a player's unit reaches state `0xb`: `0xb` is the construction value of `actor+0x50` (`AI-STATE-011`); Guard stores
+`0xb` with group order 1 (`AI-487`), so the state arm does not run for it, and a player's unit reaches `R0137` only through the
+patrol or as a state-`0xb` unit in a group of order 0 (`AI-517`); the callee `R0162`, the filter `R0021` and the meaning of `actor+0xa5`
+are not read. `R0306` is read whole but its kind-3 test (virtual `+0x20`) is named only.
+
+**Unknown.** `R0162`, `R0021`, `actor+0xa5`; the caller of `L14875` (the point-and-state-`0xc` routine after
+`L14874`, window `e07`).
+
+### AI-526
+
+The order-`0x11` arm `R0155(group, cell)` (window `e08`, `R0155`..`R2211`) is a roaming group: it takes the
+largest distance (`R0167`) of any member from the group's post `[grp+0x3c]+0xa`; when that distance is below 10, or
+the counter `[grp+0x3c]+0x15` is above `0x32`, it draws `rand()` (`R0179`) for one of eight directions from the
+bytes at `world+0x58eb0` and `+0x58eb8`, moves the post by 20 cells along it, retries while the cell falls outside the
+playable rectangle `world+0x58ee0..0x58ee3`, stores the post and clears the counter; then it runs the order-5 arm
+`R0026` on the post and increments the counter (`L14876`..`L14877`). `R2211` (same window) is the per-member
+split of order 3 as a function (`R0110`, `R0153`; a victim in `ord+0x20` to `R0009`, else the `Player+0x28` split)
+and `R2212` runs standing acquisition `R0022` for every member (`L14878`); their callers were not read here.
+
+**Confidence.** High for the body of `R0155` (window `e08`; one image, one witness). Medium for the roles of `R2211`
+and `R2212` beyond their stores and calls. No player command stores group order `0x11` (`AI-487`).
+
+**Unknown.** The callers of `R2211` and `R2212`; the data that selects order `0x11` (`AI-ORDER-010`).
