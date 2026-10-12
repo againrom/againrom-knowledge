@@ -511,6 +511,18 @@ but another serializer does access the same field offset and raw client
 payload producers remain unclosed. No SAV byte range has been identified
 as current stock (`R2-SESSION-157`).
 
+A load through the load entry (`L2.00826` / `L2.00119`, reached from the
+load page) does not keep the stock. In a town the load entry sends shop
+refill 0x3f before the town entry, so all four categories are drawn again
+from the restored current location's restored record; in a mission the next
+town arrival draws. The `.text` references to the static shop owner are
+four per root; the alternate owner serializer `L2.01660` transfers `+0x6c`
+and is unclosed. The shop vtable's slots 2..4 are no-op stubs, read as
+serialize slots by analogy to the owner table, so no SAV byte is expected to
+hold the lists (`R2-SESSION-187`, High for the load order, Medium for the
+absence). Callers of the session load that bypass the load entry were not
+scanned.
+
 ## Campaign membership and serialized state
 
 The scenario bank carries availability and selection flags, not the actor

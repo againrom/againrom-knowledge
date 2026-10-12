@@ -3754,7 +3754,10 @@ would settle them.
 claims/retracted.md; R2-ENGINE-333 gives the placement rule. The
 bought-item owner clause is partially retracted there too;
 R2-ENGINE-404 gives the Player as owner. Buy, sell credit, undo and
-refill clauses stand.
+refill clauses stand. The refill sender label is partially retracted there
+as well: `L2.00826` is the load entry, New Game sends no 0x3f, and
+R2-ENGINE-470 gives the senders. R2-ENGINE-471 and R2-SESSION-187 answer
+the refill events and the stock's SAV round trip at their own grades.
 
 ### R2-ENGINE-267
 
@@ -9178,3 +9181,195 @@ the EN AI, delivery-object and effect-core bodies, which were not read.
 followed. Reading the unit class vtable (set by the constructor `L2.01273`) at
 offset 0x30 would settle it. The EN bodies: reading the EN routines around the
 30 EN hits would settle EN parity of the AI, delivery objects and effect core.
+
+## Shop stock events
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-470 | ROM2 shop refill 0x3f has one client builder per root, called only by the 0x468 arm on a non-mission arrival and by the load entry in a town; New Game sends none; the server refills the static shop owner only when +0x74 is zero. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-471 | Every ROM2 shop fill empties and redraws all four categories from the current location's record, on refill 0x3f, on an entry with category 0 empty and on a tick-raised pending refill; EN bodies, other shop+8 writers unread. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-472 | In a ROM2 campaign every town's shop entry and refill reach one static shop owner; each arrival in a town draws its stock again from that town's record, and an earlier visit's stock does not come back. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-473 | ROM2 departure and stage writes to a shop record reach the shelves at the next town arrival's draw; the druid inn TalkTo write reaches them only at the next fill while town 3 is current. | Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-474 | An item sold to the ROM2 shop stays through shop entries and leaves until the next fill, which empties all four lists; buying out category 0 makes the next entry draw the whole stock again. EN bodies; RU bodies unread. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-475 | ROM2 EN and RU refill builder, its two callers, server cases 0x32 and 0x3f, owner lookup and static owner wrappers agree after masking addresses and frame or field offsets; RU +0x1a4 writers and RU New Game start are unread. | High / Unknown | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+
+### R2-ENGINE-470
+
+The refill message is built by EN `L2.02197` / RU `L2.02198`: kind byte
+0x3f at +9, the two arguments at +0xa and +0xe and the client's word at +5,
+sent through EN `L2.00871` / RU `L2.00459`. A pattern pass over each
+`.text` for `c6 ?? 09 3f` finds that store once per root, inside the
+builder. A call-target pass finds two callers per root:
+
+| Site | EN | RU | Branch |
+|---|---|---|---|
+| 0x468 arm | `L2.02199` | `L2.02200` | current location type not 1, before the town dispatcher |
+| load entry | `L2.02201` | `L2.02202` | `L2.01830` zero (not a mission), before posting 0x42e |
+
+New Game's campaign start EN `L2.01084` creates the server in mode 2 and
+calls neither the builder nor the fill. Server case 0x3f (EN `L2.00824`,
+RU `L2.02203`) leaves when server +0x74 is nonzero, else calls owner
+refill EN `L2.00825` / RU `L2.02204` on the static owner EN `L2.00822` / RU
+`L2.02205`. The EN `.text` holds no dword equal to the builder, owner
+refill, fill, shop entry or owner entry address.
+
+The 0x468 arm is the travel-end handler (R2-ENGINE-432). The mission-end
+arm 0x41d calls EnterLocation and posts 0x468 directly only when
+IsTownAvailable(0) returns 0; otherwise it opens the map, whose travel ends
+in 0x468 (R2-ENGINE-422, R2-ENGINE-473). The arm sends no refill itself;
+the 0x468 it posts or the map's travel end does. A 0x468 arrival at a
+mission (type 1) takes the mission entry and sends no refill.
+The load entry is R2-ENGINE-439's path for a load from the load page.
+
+**Confidence.** High for the builder, both callers, the 0x3f case and the
+New Game body: committed listings in EN (this experiment, EXP-2032,
+EXP-2052) and RU (this experiment, EXP-2052). Medium for the sender set:
+the passes see direct `E8` calls and one store encoding; a call through a
+register or a table (no RU pointer pass, no `.rdata` pass) or a kind byte
+written another way would escape them. Medium that a campaign keeps +0x74
+zero (R2-ENGINE-334).
+
+**Unknown.** Senders of 0x3f outside the direct-call census. Pointer scans
+of `.rdata` and `.data` for the builder address in both roots, and an
+immediate scan of each `.text` for `3f` stored at `+9` including SIB
+encodings, would settle it; none was run.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+### R2-ENGINE-471
+
+Fill EN `L2.00803` / RU `L2.01640` returns without change while the
+open-deal count shop+4 is above 0. Otherwise it empties the four category
+lists (`L2.02206`), takes the record from ordinal 15 (R2-ENGINE-263), which
+indexes the record by the ID of Scenario's current location `D2.00007` at
+that moment, and draws each of the four categories (R2-ENGINE-265). It
+draws no category alone and adds nothing to a kept list.
+
+The call-target pass finds three fill callers per root: owner refill
+(message 0x3f, R2-ENGINE-470), shop entry EN `L2.00823` (call `L2.02207`,
+RU call `L2.02208`) when category 0's list is empty, and pending refill EN
+`L2.00829` (call `L2.02209`, RU call `L2.02210`) when counter shop+8 is
+above 0. The tick EN `L2.00828` raises shop+8, every 180 ticks, and only
+while server +0x74 is nonzero; other writers of shop+8 were not enumerated.
+Shop leave calls the pending refill.
+
+In a single-player campaign the draws therefore happen at a town arrival
+through 0x468, at a load in a town, and at a shop entry with category 0
+empty. A mission's end, an arrival at a mission, time spent in the shop and
+a shop leave draw nothing.
+
+**Confidence.** High for the EN fill, entry, pending-refill and tick bodies
+(EXP-2032 listings) and the three callers in both roots (call-target
+scans); the RU fill is equal after normalization. RU entry, leave, tick and
+pending-refill bodies were not read: Unknown. Medium for the campaign event
+list: it composes the sender set of R2-ENGINE-470 and +0x74 = 0 of
+R2-ENGINE-334, and the shop+8 writers were not enumerated beyond these
+bodies.
+
+**Unknown.** Other writers of shop+8. A scan of each `.text` for stores at
+displacement `+8` on the shop object would settle it; none was run.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+### R2-ENGINE-472
+
+Owner lookup EN `L2.01846` / RU `L2.02211`, which server case 0x32 uses to
+find the shop owner for a customer, returns the static owner (EN
+`L2.00822`, RU `L2.02205`) whenever server +0x1a4 is nonzero; otherwise it
+searches the server's owner list by ID and type. The server constructor
+stores +0x1a4 = 1 (EN `L2.02212`); the routine ending at EN `L2.02213`
+stores +0x1a4 = (+0x74 == 0) (EN `L2.02214`). With +0x74 zero both give 1,
+so shop entry and refill 0x3f act on one shop object. The static
+initializer builds the static owner once (EN `L2.02215` calls `L2.01632`;
+RU `L2.02216`) and a registered exit routine destroys it.
+
+The shop object holds no town: its constructors (EN `L2.01636`,
+`L2.02217`) store the open-deal count, the pending counter, the category
+tags 1..4, +0x90 = 1000 and +0x94, and the fill writes only the lists and
+item tags. Arriving in a town redraws all four categories from that town's
+record (R2-ENGINE-471). Returning to the first town redraws it again; the
+stock seen there before does not come back.
+
+**Confidence.** High for the lookup in both roots, the EN constructor and
+setter stores and the shop constructors. Medium for the composed campaign
+result: two pattern passes over EN `.text` for stores at displacement
+0x1a4 found these two server stores and 23 other hits (7 frame stores that
+only match the bytes, 6 word stores, 10 dword stores on other bases, not
+read); RU writers of +0x1a4 were not read.
+
+**Unknown.** The ten EN dword stores to displacement 0x1a4 on other bases,
+at `L2.02218`, `L2.02219`, `L2.02220`, `L2.02221`, `L2.02222`,
+`L2.02223`, `L2.02224`, `L2.02225`, `L2.02226` and `L2.02227`
+(listed in `evidence/navigation/nav3/scans/en-store-imm-1a4.tsv` and
+`en-store-reg-1a4.tsv`). A disassembly window at each, naming the base
+object, would settle whether any writes the server's `+0x1a4`.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+### R2-ENGINE-473
+
+Departure writes (R2-ENGINE-330), the stage maxima included, run inside
+LeaveLocation, which the mission-end arm 0x41d calls (EN `L2.01911`)
+before it calls EnterLocation and posts 0x468 (EN `L2.01920`,
+`L2.02228`), or before it opens the map, whose travel ends in 0x468
+(R2-ENGINE-432). The direct EnterLocation and 0x468 post run only when
+IsTownAvailable(0) returns 0 (R2-ENGINE-422); otherwise the map opens and
+the travel's end posts 0x468. Either way the arrival's refill reads the
+written record, as it runs after LeaveLocation; an arrival at a mission
+draws nothing, and the change waits for the next town arrival.
+
+The druid inn TalkTo write (R2-ENGINE-331) happens in town 3 after the
+arrival's draw. It reaches the shelves at the next fill while town 3 is
+current: the next arrival in town 3, a load of a save made in town 3 (the
+record is saved, R2-SESSION-156), or a shop entry with category 0 empty.
+It does not reach them at once.
+
+**Confidence.** High for the order inside the 0x41d arm (EXP-2052 listing).
+Medium for the result: it composes R2-ENGINE-470 and R2-ENGINE-471, and the
+map path depends on 0x468 being handled after EnterLocation returns.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+### R2-ENGINE-474
+
+A sold item enters a category list through `L2.00804` (R2-ENGINE-333).
+Shop entry keeps the lists while category 0 is not empty, and leave
+removes only quantity-0 entries with no deal reference (R2-ENGINE-266),
+so the sold item stays through entries and leaves. The next fill empties
+all four lists, so the item is gone after the next town arrival, the next
+load in a town, or an entry with category 0 empty. When the player buys
+every category-0 entry, leave removes the quantity-0 placeholders and the
+next entry draws all four categories again.
+
+**Confidence.** High for the EN bodies (sell, buy, entry, leave). RU
+bodies were not read: Unknown. Medium for the event set, which is
+R2-ENGINE-471's.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+### R2-ENGINE-475
+
+With absolute addresses masked, these pairs read in both roots are equal
+instruction for instruction: the refill builder (27), the owner lookup (37)
+and the static owner wrappers (19). The server 0x3f case (9) and 0x32 case
+(42, to the owner entry call) differ only in the frame offset of the server
+pointer (EN -0xd1c, RU -0xd00). Of the EXP-2052 listings, the 0x468 arm (64)
+differs only in frame offsets and the load entry (94) only in
+application-field offsets (+0x3ec/+0x5d8/+0x460 in EN, +0x404/+0x63c/+0x478
+in RU). The 0x41d arm differs in register allocation and length (191 EN, 207
+RU instructions) and keeps the order LeaveLocation (RU `L2.01913`),
+EnterLocation (`L2.02229`), post 0x468 (`L2.02230`), else map open. The fill
+is equal after normalization (EXP-2032). The call-target and pattern passes
+give the same two builder callers and one kind store per root.
+
+The mask rule is every address at or above 0x400000; the one differing
+constant outside frame and field offsets is an exception-state value in the
+0x468 arm (0x22 EN, 0x23 RU).
+
+**Confidence.** High for the bodies named, by the masked comparison of
+committed listings. Unknown for the RU +0x1a4 writers, the RU New Game
+start, the RU shop constructors, the RU shop vtable and the RU shop entry,
+leave, 180-tick, pending-refill and sell bodies, which were read in EN
+only; reading them in RU would settle it.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)

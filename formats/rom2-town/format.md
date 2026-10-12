@@ -546,15 +546,18 @@ Category 2 adds one tag-41 spell effect from five usable spells at a
 random level, giving 160 possible variants priced 649..1442 (`R2-ENGINE-265`,
 High). Every fill is random.
 
-A fill replaces all four lists, only while no deal is open: on entering with an empty category 0, and on refill message 0x3f
-sent at campaign start and from the client's 0x468 handler. Buy stops at
+A fill replaces all four lists, only while no deal is open: on entering with an empty category 0, and on refill message 0x3f,
+which the client's 0x468 handler sends on a non-mission arrival and the
+load entry sends in a town; New Game sends none (`R2-ENGINE-470`, High /
+Medium). The former campaign-start label of the load entry is partially
+retracted. The stock events are in Shop stock events below. Buy stops at
 the first pending shop item the hero cannot afford, debits q*P and moves
 each bought item to the hero. Sale credits floor(q*P/2+0.5) and places the
 item on a shelf, merging with an equal stackable entry.
 Undo returns pending items. Finite stock is implied by these bodies, not
-read as one. How a selection splits a stack into the pending list and
-whether the lists survive a save remain Unknown (`R2-ENGINE-266`,
-partially retracted, High / Medium / Unknown). Its former fallback rule
+read as one. How a selection splits a stack into the pending list remains
+Unknown (`R2-ENGINE-266`, partially retracted, High / Medium / Unknown);
+a load draws the lists again (`R2-SESSION-187`). Its former fallback rule
 for a sold item is retracted; the shelf rule is in Shop pool in every
 town.
 
@@ -945,6 +948,38 @@ refill paths share that pool. Per-town delivery, all owner replacements and
 the meaning of every campaign event remain Medium or Unknown
 (`R2-ENGINE-374`). A Scenario record change alone is not
 evidence of an immediate list refill.
+
+### Shop stock events
+
+In a campaign every town's shop entry and refill reach one static shop
+owner, built once per process; the shop holds no town (`R2-ENGINE-472`,
+High / Medium). Every fill empties all four category lists and draws all
+four from the record of Scenario's current location at that moment; it
+skips while a deal is open (`R2-ENGINE-471`, High / Medium).
+
+| Event | Draw |
+|---|---|
+| travel end through the map, opened by a mission end or a town exit, then 0x468 in a town (the mission-end arm posts 0x468 directly only when IsTownAvailable(0) returns 0) | all four categories, from that town's record |
+| arrival at a mission | none |
+| load of a save made in a town | all four, from the restored town's restored record |
+| load of a save made in a mission | none until the next town arrival |
+| New Game | none; the first entry draws only if category 0 is empty |
+| shop entry with category 0 empty | all four |
+| shop entry otherwise, shop leave, time in the shop | none in a campaign; the 180-tick pending refill needs server +0x74 nonzero |
+
+The refill message 0x3f has one builder per root and two callers, the 0x468
+arm and the load entry (`R2-ENGINE-470`, High / Medium). Returning to a
+town draws its stock again; an earlier visit's stock does not come back
+(`R2-ENGINE-472`). Departure and stage writes to a record reach the
+shelves at the next town arrival; the druid inn TalkTo write reaches them
+only at the next fill while town 3 is current (`R2-ENGINE-473`, Medium).
+A sold item stays through entries and leaves until the next fill
+(`R2-ENGINE-474`, High / Medium for EN bodies; RU bodies unread). A SAVE and
+a load through the load entry do not keep the stock; the `.text` references
+to the static shop owner are four per root and the alternate owner
+serializer `L2.01660` is unclosed (`R2-SESSION-187`, High / Medium). Whether a New Game after an earlier game in the same process
+shows the earlier stock is Unknown (`R2-SESSION-188`). EN and RU agree in
+the bodies read in both roots (`R2-ENGINE-475`, High / Unknown).
 
 For valid positive requests and successful allocation, the selected category
 split subtracts n-1 and its clone subtracts one, leaving Q-n in the source

@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-2059: shop refill sender
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-266` (refill sender label only; buy, sell credit, undo, refill body and finite-stock clauses stand) | Verbatim: "the client sends it from campaign start `L2.00826` and its 0x468 handler `L2.00827`" | Medium | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/RESULTS.md), R2-ENGINE-470 | `L2.00826` is the load entry (R2-ENGINE-439), which sends 0x3f only when the loaded location is not a mission. New Game's campaign start `L2.01084` sends no 0x3f. The 0x468 handler sends it only on a non-mission arrival. | **REFUTED** — partially retracted |
+
 ## EXP-2057: Summon placement
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

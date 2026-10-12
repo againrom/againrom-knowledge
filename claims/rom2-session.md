@@ -2085,3 +2085,85 @@ clauses: EN `L2.02014`, `L2.02015`, `L2.02024`, `L2.02047`, `L2.02044`,
 the RU comparator and the driver `L2.00860`.
 
 **Evidence.** [EXP-2055](../experiments/EXP-2055-rom2-menu-load/)
+
+## Shop stock across SAVE, LOAD and New Game
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-187 | A ROM2 load through the load entry does not keep the shop stock: in a town it sends refill 0x3f and redraws all four categories; in a mission the next town arrival draws. Serializer L2.01660 is unclosed. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-SESSION-188 | ROM2 New Game sends no shop refill; the static shop lives for the whole process, so the first town-1 entry draws only when category 0 is empty; whether a stock from an earlier game in the same process is emptied first is Unknown. | Medium / Unknown | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+
+### R2-SESSION-187
+
+The load entry (EN `L2.00826`, RU `L2.00119`, R2-ENGINE-439) loads the save,
+then, when the restored location is not a mission, sends refill 0x3f (EN
+`L2.02201`, RU `L2.02202`) and posts 0x42e, the town entry. ScenarioLoad
+restores the bank, the four shop records (R2-SESSION-156) and the current
+location (`D2.00265` stores `D2.00007`). The fill therefore draws all four
+categories again, by `rand()`, from the restored current town's restored
+record (R2-ENGINE-471). The stock shown before the SAVE, and any item sold
+to the shop, are not restored. When the save was made in a mission the load
+takes the mission entry, sends no refill, and the next town arrival draws.
+
+The SAV carries the shop records and the current location through the
+Scenario prefix. It carries no shop list, open-deal count or pending
+counter by any route these passes see: the static owner (EN `L2.00822`, RU
+`L2.02205`) has four `.text` references per root (initializer, exit
+routine, owner lookup, 0x3f case); the shop vtable's slots 2..4 (EN
+`L2.02231..68`) are the no-op stubs `L2.02232`, `L2.02233`, `L2.02234`;
+the selected owner serializers write no +0x6c (R2-SESSION-157); the
+alternate serializer `L2.01660` does transfer `+0x6c` as a value, and its
+callers and relation are unread. The shop holds no town field
+(R2-ENGINE-472).
+
+**Confidence.** High for the load-entry order in both roots and the
+ScenarioLoad restore (committed EXP-2032 and EXP-2052 listings). High for
+the four direct references per root and the EN vtable stubs. Medium that no
+SAV byte holds the lists: the passes do not see a save reaching the owner
+through the server's owner list or a bulk copy, the owner list's contents
+were not read, and `L2.01660` is unclosed. The four references per root are
+`.text` dword scans (EN and RU); the RU owner-global scan covered `.text`
+only. The stub finding reads vtable slots 2..4 as serialize slots by
+analogy to the owner table's slot 2; shop vtable slots 7 and 8 (`L2.02235`,
+`L2.02236`) are non-stubs and were not read. Medium that the shown stock after a load differs
+from the saved one: the draws are random, and equality would need the same
+`rand()` state.
+
+**Unknown.** Whether the static owner sits in the server's owner list that
+a save walks; reading the save walk, or an owner SAVE, cold LOAD and stock
+comparison in a town, would settle it. The fill does not depend on it.
+The callers and delivered SAVE graph of the alternate serializer
+`L2.01660`, and shop vtable slots 7 and 8, are unread. The callers of the
+session load `L2.00289` were not scanned; a call-target scan of each `.text`
+would settle whether a load route bypasses the load entry and so sends no
+0x3f (R2-ENGINE-411 bounds LOAD callers to the bodies read).
+The fill skips while the in-process shop still counts an open deal
+(shop+4 > 0); whether a load can start while a deal is open was not read.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+### R2-SESSION-188
+
+New Game's campaign start EN `L2.01084` creates the server in mode 2 and
+sets application flags; it calls neither the refill builder nor the fill,
+and the builder's only callers are the 0x468 arm and the load entry
+(R2-ENGINE-470). The static owner and its shop are built once per process
+with four empty lists (shop constructor EN `L2.01636`). The first shop
+entry draws only when category 0 is empty (R2-ENGINE-471).
+
+In a fresh process that holds. After an earlier game in the same process,
+the lists keep whatever the last fill and trades left unless something
+empties them. The list-emptying calls found are in the fill, in owner
+routine EN `L2.02237`, which no direct call reaches, and in an unread shop
+routine EN `L2.02238`.
+
+**Confidence.** High for the New Game body (EN) and the static owner build.
+Medium for the absence of a refill at New Game (the census of
+R2-ENGINE-470). Unknown for the carried stock.
+
+**Unknown.** Whether a New Game after an earlier game in the same process
+shows the earlier stock in town 1. Finding the callers of EN `L2.02237`
+through tables, or an owner run (shop in game 1, menu, New Game, shop),
+would settle it. The RU New Game start was not read.
+
+**Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
