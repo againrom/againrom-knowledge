@@ -1298,7 +1298,7 @@ gold position.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-135 | The ROM2 cheat flag, Player byte +0xa78, is absent from the SAV Player body and zeroed by the constructor; a campaign load recreates the server in mode 2, so the unlock must be typed again. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
-| R2-SESSION-136 | ROM2 cheat money (Player +0x3c) is saved and loaded; +god, inventory and spellbook fields are in unit serializer L2.01090; the map-reveal global is not saved and is reset at application message 0x421. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-SESSION-136 | ROM2 cheat money (Player +0x3c) is saved and loaded; +god, inventory and spellbook fields are in unit serializer L2.01090; the map-reveal global is not saved and is reset at application message 0x421. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
 
 ### R2-SESSION-135
 
@@ -1323,7 +1323,7 @@ R2-ENGINE-271.
 |---|---|---|
 | Money +0x3c (`#create Gold`, `#pickup all`) | Player body, XOR 0x5c073f4d (R2-SESSION-020) | saved and loaded |
 | +god words and bytes +0x102..+0x113 | unit serializer `L2.01090` transfers +0xd4..+0x113 raw through `L2.01094`, store and load | Medium |
-| Inventory +0x7c, spellbook +0x140 | named by `L2.01090`; item and spell bodies not read | Medium |
+| Inventory +0x7c, spellbook +0x140 | named by `L2.01090`; bag, item and effect bodies in R2-SESSION-165; spell bodies not read | Medium |
 | Map reveal `L2.00989` | none of the 7 instructions naming it is in a serializer; `L2.01095` in the 0x421 arm `L2.01096` stores 0 | not saved |
 | Summoned and killed units, debug toggles | not read | Unknown |
 
@@ -1335,6 +1335,9 @@ and `Inventory` were not read. Unknown for the rest.
 **Unknown.** The hero's SAV path; reading the Group member class and the
 `&YA1` writers would settle it. Whether the client grid +0x80 reveal bits
 persist.
+
+**Amended.** R2-SESSION-165 reads the bag, Item and Effect programmes
+behind the Inventory row.
 
 ## Tip state persistence
 
@@ -1839,3 +1842,56 @@ Cold-load a SAV with preference 0x09 against application 0x39 on mission 10,
 then reverse the values and record the final Player byte in each locale.
 
 **Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+## Hero inventory in SAV
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-165 | A ROM2 SAV stores the hero bag as a gate byte, u32 count, Item references in list order, u32 insert index and u32 weight; an Item is the base, counted Effect references and eight scalars; LOAD appends in saved order (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+
+### R2-SESSION-165
+
+The Unit body (R2-ENGINE-209 step 12) writes a gate byte, 1 when +0x7c is
+set, then bag I/O RU `L2.01166`: list I/O `L2.01790` writes u32 count and
+each entry head to tail as an object reference (`L2.00356`), then u32 +0x1c
+(insert index) and u32 +0x20 (weight sum). LOAD reads the gate and, when it
+is nonzero, fills the existing +0x7c object: list I/O removes all entries
+(`L2.01791`), reads count references with expected class Item (`L2.01162`)
+and appends each at the tail (`L2.01748`), so saved order is kept; +0x1c
+and +0x20 are read back, not recomputed. Medium: `L2.01791` as remove-all
+and `L2.01748` as append are inferred from position, with no listing.
+
+| Record | Bytes in order |
+|---|---|
+| Item | base 38 (R2-ENGINE-210; u32 +0x1c is the price, u32 +0x14 the owner's saved address); u32 effect count and Effect references (`L2.01792`, expected class `L2.01165`); u16 ID +0x40; u16 quantity +0x42; u8 type +0x44; u8 class +0x45; u8 material +0x46; u16 +0x48; u16 weight +0x4a; u8 +0x47 |
+| Effect | base 38; u8 tag +0x3c; u8 flags +0x3d; u32 +0x40 (both u16 values); u16 +0xc |
+| Weapon, Armor | the Item record, then R2-ENGINE-210's additions |
+
+An Item without effects is 54 bytes after its reference tag; each Effect
+adds its reference tag and 46 bytes. A second reference to an already
+written object is an earlier-object index (R2-ENGINE-207). Worn items are
+the references +0x74, +0x78 and Humanoid slots 1..12 (R2-ENGINE-208,
+R2-ENGINE-209); a worn item is not in the bag list.
+
+On LOAD the Item record rebuilds descriptor +0x3c from +0xc
+(R2-ENGINE-210). Item +0x3c, +0x4c, +0x4d, +0x50, RU +0x54 and Effect +0x44
+are not in the stream. EN and RU streams are equal at Medium (R2-ENGINE-407).
+
+**Confidence.** High for order, widths and the load branch of the RU
+bodies: complete bag I/O, list I/O, Item, Effect and base serializers in both
+directions. Medium that LOAD empties the list and keeps saved order
+(`L2.01791` and `L2.01748` have no listing and no earlier claim). Medium that
+the EN stream equals the RU stream: the EN list I/O, effect-list I/O, Effect
+reference reader and base programme were not read; the EN Unit, Item,
+Humanoid and Effect serializers were. Medium that the unsaved fields keep constructor values
+(R2-ENGINE-403): the object-reference reader `L2.01162` and its callees
+were not read, so construction through the class factory is inferred.
+Unknown for the stored +0x1c and +0x20 of a real bag and for nonempty bag
+bytes: the four saves of R2-SESSION-100 hold an empty bag, and no other
+ROM2 save was read.
+
+**Unknown.** An owner save after buying one stackable and one magic item,
+read at the hero's gate +0x7c, would show count, item and effect bytes,
++0x1c and +0x20.
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)

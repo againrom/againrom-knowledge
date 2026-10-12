@@ -3704,7 +3704,8 @@ leave `L2.00830`.
 
 Buy (0x33, `L2.00831`) walks the pending deal list and stops at the first
 shop item whose q*P exceeds hero gold; each bought item debits q*P, takes
-the hero as owner and enters the hero inventory. Sell (0x34, `L2.00832`)
+the hero's owner, the Player, as owner and enters the hero inventory
+(R2-ENGINE-404). Sell (0x34, `L2.00832`)
 credits trunc(q*P*0.5+0.5) for each hero item with nonzero P, clears its
 owner and places it through `L2.00804` by the rule of R2-ENGINE-333;
 `L2.00833` merges into an equal stackable
@@ -3731,8 +3732,10 @@ SAV round trip; reading the client transfer message and the save writer
 would settle them.
 
 **Amended.** The sold-item fallback clause is partially retracted in
-claims/retracted.md; R2-ENGINE-333 gives the placement rule. Buy, sell
-credit, undo and refill clauses stand.
+claims/retracted.md; R2-ENGINE-333 gives the placement rule. The
+bought-item owner clause is partially retracted there too;
+R2-ENGINE-404 gives the Player as owner. Buy, sell credit, undo and
+refill clauses stand.
 
 ### R2-ENGINE-267
 
@@ -5097,7 +5100,7 @@ one RU section on the owner's system, or a capture, would settle it.
 | R2-ENGINE-319 | RU ROM2 template load R2.0089 and its parameter routine L2.00220 copy the Humans row into the hero record by a sequential cursor; the producer L2.00162 then writes attributes, name, key, owner and +0x14c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-320 | RU ROM2 keeps school skills at hero +0xa8+2i, their base at +0x116+2i, the main skill at +0x23c, per-skill experience E(s) at +0x23c+4i (i=1..5), their sum at +0x130 and trunc(0.01 x sum) at +0x1c. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-321 | RU ROM2 recompute L2.00052 derives speed, HP and mana maxima, sight, defence and resistances, then adds the item modifier totals kept at hero +0xd8..+0x113 through L2.00102. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
-| R2-ENGINE-322 | RU ROM2 equip puts a Weapon at hero +0x74 and its modifiers into +0xd4 block fields, an Armor at slot +0x208+4·(armor +0x58), and a refused item into the bag at +0x7c; the spellbook +0x140 exists only with ManaMax > 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
+| R2-ENGINE-322 | RU ROM2 equip puts a Weapon at hero +0x74 and its modifiers into +0xd4 block fields, an Armor at slot +0x208+4·(armor +0x58), and a refused item into the bag at +0x7c; the spellbook +0x140 exists only with ManaMax > 0. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-323 | The RU ROM2 Player body stores +0x3c and +0xa48 XORed with 0x5c073f4d (L2.01271); Player and Unit store their own address, which load registers in one saved-address map and uses to resolve Player +0x38 and Unit +0x14. | High / Medium | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 | R2-ENGINE-324 | After its members the RU ROM2 Group body writes u32 +0x1c, +0x40 and +0x44 and ends; the Player body then writes 36 raw bytes of [+0x34] through R2.0175 and ends. Load resolves +0x40 and +0x44 as saved addresses. | High | ✔ promoted (branch candidate) | [EXP-2038](../experiments/EXP-2038-rom2-hero-fields/) |
 
@@ -5232,7 +5235,10 @@ Template load allocates +0x140 only when ManaMax > 0.
 **Confidence.** High for the stores. Medium for parameter 0xe = 2 as a
 two-handed weapon and +0x78 as the off hand: no weapon row was read.
 
-**Unknown.** The writer of +0x78 and the bag object's fields.
+**Unknown.** The writer of +0x78.
+
+**Amended.** R2-ENGINE-402 gives the bag object's fields and
+R2-ENGINE-405 the item-move routes into and out of the slots.
 
 ### R2-ENGINE-323
 
@@ -7116,3 +7122,294 @@ use saved 0x09 and application 0x39, then reverse them; record the Player
 byte after new game and mission entry. No original run was made.
 
 **Evidence.** [EXP-2050](../experiments/EXP-2050-rom2-autocast-cadence/)
+
+## Hero inventory
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-402 | The ROM2 hero bag at Unit +0x7c is a 0x24-byte item list: entries, insert index +0x1c (0x7fff appends) and weight sum +0x20; stackable items merge on equal ID +0x40, and a list merge refuses at 1024 entries (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-403 | ROM2 items are Item objects (RU 0x58, EN 0x54 bytes) with ID +0x40, quantity +0x42, type +0x44, class +0x45, material +0x46, unit weight +0x4a, price +0x1c and owner +0x14; magic is a list of Effect objects at +0x20; factories nav-only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-404 | ROM2 buy moves the shop's own item object into the hero bag by direct insert, sets its owner to the Player and +0x4c to 0; a sold item leaves the bag earlier, when the move message takes it into the deal; the shop hop is navigation-only. | High / Medium | ● active (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-405 | ROM2 worn items sit outside the bag: weapon +0x74, second hand +0x78, armour slots +0x208+4i; one item-move message moves items among body, bag, ground and shop and equips through Human vtable +0x40. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-406 | On the read ROM2 reuse path the producer returns the existing hero Unit (Player +0x38) without allocation; the two bodies read do not touch its items and nine callees were not read; unload at mission end and town return remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+| R2-ENGINE-407 | ROM2 EN and RU inventory serializer, bag method and shop buy/sell bodies agree in 18 pairs (whole-stream equality Medium); RU items carry 4 more runtime bytes (+0x54), shifting RU Weapon and Armor fields by 4; RU undo sends a hero update. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2051](../experiments/EXP-2051-rom2-inventory/) |
+
+### R2-ENGINE-402
+
+The item-list constructor (EN `L2.01737`, RU `L2.01738`) runs the base list
+constructor, then stores +0x1c = 0x7fff and +0x20 = 0. The item-move
+message's ground destination allocates 0x24 bytes and calls the same
+constructor (EN `L2.01739`..`L2.01740`).
+
+Methods, RU addresses (EN = RU − 0x9d22; EN bodies were read and found equal only for the constructor, insert, extract, merge and bag I/O; EN insert-at, find, take and list I/O were not read):
+
+| Method | RU | Effect |
+|---|---|---|
+| insert | `L2.01313` | calls insert-at with index +0x1c |
+| insert-at | `L2.01741` | clears item +0x4d; a stackable item (vtable +0x50) whose ID +0x40 equals a stackable entry's adds its quantity +0x42 to that entry, ORs its +0x8 into the entry and is destroyed; otherwise index ≥ count appends, a smaller index inserts before that entry; +0x20 gains +0x4a × +0x42 |
+| find | `L2.01742` | first entry whose u16 +0x40 equals the argument |
+| extract | `L2.00494` | find; quantity ≤ 1 unlinks the entry, else vtable +0x40 splits one unit off; +0x20 loses weight × quantity of the result |
+| take | `L2.01651` | R2-ENGINE-375 pending take |
+| merge | `L2.01743` | refuses when the bag count is 0x400 or more; else takes entries from the source list head and inserts each, then destroys the source list |
+| I/O | `L2.01166` | R2-SESSION-165 |
+
+Stackability (`L2.01744`, slot +0x50 of Item, Weapon and Armor): type byte
++0x44 equal to 3 or 4, or an empty effect list +0x20. Entry order is list
+order. No count or weight test occurs in insert-at; the 1024 test is in
+merge only. The bag has no owner field in these bodies; items carry their
+owner (R2-ENGINE-403).
+
+One linear pass over each `.text` section found 62 direct calls to seven of
+these methods in each locale with equal counts per method: insert 35,
+insert-at 4, merge 3, find 5, extract 4, take 8, I/O 3. The population
+includes shop, ground and script lists; indirect calls are not counted.
+
+**Confidence.** High for the RU constructor and RU method bodies read, and
+for the five EN bodies read (constructor, insert, extract, merge, bag I/O),
+which equal their RU bodies after address masking. Medium for EN insert-at,
+find, take and list I/O: no EN window was read, and equal EN and RU
+direct-call counts show equal call sites, not equal bodies. Medium for the
+stackability rule of an item without effects, the 1024 test, the append
+position and the saved order: they rest on helpers `L2.01745` (taken as nonzero
+for a non-empty effect list), `L2.01746` (taken as the entry count) and
+`L2.01747`, none of which has a listing or an earlier claim, and on `L2.01748` as
+append, whose role is inferred from its use after an index-against-count
+test. The type 3 or 4 stackability rule stays High. Medium that the hero's
++0x7c object is this class: every method read on [+0x7c] is a method of this
+class and the bag I/O transfers +0x1c and +0x20, but the store that allocates
+the hero's bag was not found. Unknown for a count or weight limit enforced by
+a caller outside these bodies.
+
+**Unknown.** The hero bag's allocation site. Searched for a store to Unit
++0x7c: the RU Unit constructor `L2.01273` and RU Humanoid constructor
+`L2.01157` (committed listings, no store with displacement 0x7c) and one RU
+template-load window (`R2.0089`, a navigation receipt searched with grep,
+not committed). Not searched: any EN window, the template parameter routine,
+and no `disp:`/`imm:` census of stores with displacement 0x7c. A census of
+stores with displacement 0x7c across the Unit constructors and the template
+loader in both roots would settle it. Also unknown: the third I/O caller (RU
+`L2.01749`) and a limit elsewhere. A save with a nonempty bag would show the
+stored +0x1c value.
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+### R2-ENGINE-403
+
+The Item constructor (RU `L2.01750`, factory `L2.01173`, class record
+`L2.01163` "Item", vtable `L2.01751`) stores +0x3c = 0, +0x40 = 0,
++0x42 = 1, +0x44..+0x46 = 0, +0xc = 0, +0x4a = 1, +0x8 = 0, +0x4c = 0,
++0x4d = 0, +0x50 = 0 and +0x54 = 0. The EN base constructor `L2.01752`
+makes the same stores up to +0x50 and none at +0x54.
+
+| Offset | Width | Use in the read bodies |
+|---|---|---|
+| +0x08 | u32 | flags; ORed into a merged entry; #pickup all sets 1 |
+| +0x0c | u16 | row in the kind's data table; LOAD rebuilds +0x3c from it |
+| +0x14 | u32 | owner Player |
+| +0x1c | u32 | unit price P read by buy and sell |
+| +0x20 | list | Effect objects |
+| +0x3c | ptr | row descriptor, not saved |
+| +0x40 | u16 | item ID (R2-ENGINE-327 armour form); bag find and stack key |
+| +0x42 | u16 | quantity |
+| +0x44 | u8 | type (R2-ENGINE-333); 3 and 4 always stack |
+| +0x45 | u8 | class: indexes the row's mask words at descriptor +0x1c |
+| +0x46 | u8 | material: the bit tested in that word |
+| +0x47 | u8 | saved, not interpreted |
+| +0x48 | u16 | saved; weapon level (R2-ENGINE-265) |
+| +0x4a | s16 | unit weight added to bag +0x20 and to the holder's load |
+| +0x4c | u8 | deal reference count (R2-ENGINE-266), not saved |
+| +0x4d | u8 | shop category tag, cleared on bag insert, not saved |
+
+Name build EN `L2.01053` parses class and material bytes, finds the row in
+the armour (`L2.00808`, 0x6c bytes), weapon (`L2.00807`, 0x88), shield
+(`L2.00809`, 0x6c) or magic (`L2.01753`, 0x54, kind 0xe) table and constructs
+the item with (class, material, row); the armour constructor `L2.01754`
+stores them at +0x45, +0x46 and +0xc. Validity `L2.01054` tests bit
+material of descriptor word +0x1c + 2·class. A braced effect string goes
+to `L2.01755`: parser `L2.01756` splits it at commas, `L2.01757` builds one
+Effect per `name=value` token and appends it to +0x20, then item vtable
++0x4c recomputes the price.
+
+Effect: class record RU `L2.01165` "Effect", size 0x48, factory
+`L2.01758`, constructor `L2.00089`, which zeroes +0xe, +0x3c, +0x3d, +0x40,
++0xc and +0x44. +0x3c is the tag, the index of the token's name in a table
+of at most 50 names; +0x3d is a flag byte; +0x40 and +0x42 are two u16
+values. Tags 41 and 42 store a spell number at +0x40 from `L2.01759`; the
+consumer R2-ENGINE-267 reads +0x40 of those tags as a spell key. For tag 41
+the writer also stores +0x42 from `L2.01760` (a level, inferred from the
+cast constructor argument only: Medium). For tag 42 the writer clears +0x42
+or sets it to value<<4 by the flags, and its second word is unnamed. Tags
+43..48 use `L2.01761`, `L2.01760` and `L2.01762`. The factories `L2.01173`
+and `L2.01758` are navigation-only: their windows are not in the committed
+listings, so the addresses and the class records named with them are
+Medium.
+
+Item use (Item slot +0x38, RU `L2.01763`): while the holder's HP word
++0x94 is positive, each effect gets +0x3d |= 8 when zero and its vtable
++0x3c with the holder, the holder's vtable +0x5c runs and the item is
+destroyed; at HP ≤ 0 the item is returned unused.
+
+**Confidence.** High for constructor stores, offsets, widths and the
+effect object layout in the constructors read. Medium for the names class,
+material, type, weight and price: they come from use in these bodies and
+R2-ENGINE-264, R2-ENGINE-327 and R2-ENGINE-333. Medium for the factory
+addresses and for +0x42 of tag 41 as a level. Unknown for the second word
+of tag 42, +0x47, +0x50, RU +0x54, +0x0e on items, the tag-name table
+contents and the +0x3d flag meanings.
+
+**Unknown.** Reading the effect-name table and `L2.01761`/`L2.01760`/
+`L2.01762` would name the tags and their value pairs.
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+### R2-ENGINE-404
+
+Buy EN `L2.00831` / RU `L2.01764` walks the deal list +0x78 and skips an
+item with an owner. For each other item it compares q·P with the money of
+the customer's owner ([+0x74]+0x14, the Player of R2-SESSION-145) and
+stops at the first it cannot pay. It debits q·P, removes the item from the
+deal list (`L2.01765`), stores item +0x14 = the customer's +0x14, item
++0x4c = 0 and inserts the same object into the customer's bag through
+`L2.01055` (R2-ENGINE-402): a stackable item can merge into an equal bag
+entry and be destroyed. Buy does not equip, copy or rebuild the item and
+writes no other item field. It then sends the money and unit updates
+(`L2.01052`, `L2.01766`, `L2.01056` with mask 0x282000).
+
+A hero item reaches a deal through the item-move message (R2-ENGINE-405):
+source 2 takes n units from the bag at an index with `L2.01646`, the whole
+object when its quantity is at most n, else a split of n; destination 4
+stores item +0x14 = the unit's +0x14 and passes the item to the shop
+(`L2.01767` → `L2.01768`, navigation-only: neither window is in the
+committed listings). Sell (R2-ENGINE-266) credits and clears the
+owner. Undo `L2.00839` returns each owned pending item to the bag through
+`L2.01055` and places the rest through `L2.00804`.
+
+**Confidence.** High for the buy, move-arm and undo bodies, equal in EN and
+RU except the undo tail (R2-ENGINE-407). Medium for the hop `L2.01767` →
+`L2.01768` and the shop-side accept `L2.01768`, which rest on navigation
+receipts and were not read in a committed listing; R2-ENGINE-375 gives the
+pending insert. Medium for the stack merge on insert (the helpers named in
+R2-ENGINE-402).
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+### R2-ENGINE-405
+
+Humanoid initialization zeroes 13 slots +0x208+4i (i = 0..12); the
+serializer writes slots 1..12 (R2-ENGINE-208). Worn items are referenced
+from +0x74, +0x78 and these slots, not from the bag.
+
+The item-move arm (EN from `L2.01769`, RU from `L2.01770`; equal sequences after
+masking except R2-ENGINE-407) reads packet byte +0xc (source), byte +0xd
+(destination), word +0xe (source index), word +0x10 (destination index)
+and word +0x12 (quantity). Kinds: 1 body, 2 bag, 3 ground, 4 shop.
+
+- Body source index i: i+1 = 1 takes +0x74, 2 takes +0x78, 3..12 takes slot
+  i+1 when the unit's vtable +0x30 returns nonzero; each through Human
+  vtable +0x48 (RU `L2.01771`: item vtable +0x3c, then return the item).
+- Bag source: take at the index and quantity.
+- Body destination: bag +0x1c = source index, then Human vtable +0x40
+  (`L2.01311`); the item it returns, displaced or refused, is inserted into
+  the bag at that index.
+- Bag destination: insert-at the destination index. Ground: a new item
+  list holding the item. Shop: R2-ENGINE-404.
+
+Equip test `L2.01311` accepts Armor, Weapon and Shield classes when row
+parameter 0xf has bit 0 for a holder where `L2.00044` is zero and bit 1 for
+one where it is nonzero, then calls item vtable +0x38. Armor +0x38 RU
+`L2.01315` refuses slot byte +0x58 = 0 with a message, unequips the slot's
+occupant through its vtable +0x3c and returns it, stores the armour, adds
+block +0x5a into +0xfe and +0xbe, adds weight +0x4a to the holder's load
+and sets holder +0x150 |= 0xc000. Unequip `L2.01772` reverses these.
+Weapon +0x38 follows R2-ENGINE-322. Any other class reaches Item use
+(R2-ENGINE-403): an item dropped on the body is consumed.
+
+Human vtable RU `L2.00218`: +0x40 `L2.01311`, +0x44 `L2.01310` (+0x40, then
+the returned item into the bag), +0x48 `L2.01771`, +0x4c `L2.01773` (slots
+1..12 into the own bag), +0x58 recompute `L2.00052`. `L2.01774` moves +0x74,
++0x78 and slots 1..12 into a given list; `L2.01775` takes each item of a
+list, equips it and bags the remainder. EN `L2.01776`, `L2.01777` and
+`L2.01778` apply, equip with the displaced item to the bag, and unequip,
+each followed by the holder's vtable +0x5c.
+
+The bag source arm also handles a tag-41 first effect: unit +0x68 = the
+taken item and a cast object at unit +0x44; if it cannot start, the item
+returns to the bag at its index and +0x68 = 0.
+
+**Confidence.** High for the move-arm branches and the equip, unequip and
+vtable bodies. Medium for the kind names, read from the targets each kind
+reaches, for the +0x68 cast use, and for the binding of `L2.00044` to mages
+(R2-ENGINE-322). Unknown whether the arm serves town and mission alike:
+it tests no location, but its dispatch from each mode was not traced.
+
+**Unknown.** The writer of +0x78; the ground-pickup completion after
+source 3 sets bag +0x1c and unit +0x50 = 2.
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+### R2-ENGINE-406
+
+RU producer `L2.00162` tests Player +0x38. When it is set and hero byte
++0x13c is above 0, it calls `L2.01779` (each school-skill experience
+×9/10, new total +0x130, skills from experience, new +0x1c0 and +0x1c4
+objects, `L2.01780`), sets HP and mana to their maxima, appends the hero
+to Player +0x24 and builds a group when +0x70 is null. In either case it
+returns the existing hero. None of these bodies touches +0x7c, +0x74,
++0x78 or the slots. Nine callees of the path have no listing (`L2.00205`,
+`L2.00349`, `L2.00361`, `L2.01781`, `L2.01782`, `L2.01783`, `L2.01784`, `L2.01785`,
+`L2.01780`), so that the hero keeps its own item objects on this path is
+Medium.
+
+Map build reuses the existing Player under the conditions of
+R2-ENGINE-108. In a mission, ground items reach the bag through the
+item-move message and `#pickup all` merges sack lists into it
+(R2-ENGINE-301, EN `L2.01064` → `L2.01786`). Victory acknowledgement calls
+LeaveLocation and failure offers menu or save selection (R2-ENGINE-074).
+
+**Confidence.** High for the reuse path's stores and calls in the two bodies
+read and for the returned identity of the Unit (`L2.01787`..`L2.01788`).
+Medium that the hero keeps its item objects on this path (nine callees
+unread). Medium that a
+mission entry reaches this path, which R2-ENGINE-105 and R2-ENGINE-108
+support only conditionally. Unknown whether map unload at a mission's end
+keeps or destroys the hero Unit, and whether the town is rebuilt from a
+saved document.
+
+**Unknown.** Reading the map unload and the town re-entry, or an owner
+save before and after a mission with a marked bag item, would settle the
+carry back.
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)
+
+### R2-ENGINE-407
+
+Eighteen EN/RU listing pairs were compared with addresses and frame
+offsets masked. Equal: bag insert, extract and merge, item-list
+constructor, unit bag I/O, Unit, Item, Humanoid and Effect serializers,
+Effect constructor, shop buy and sell.
+
+- RU items have a runtime dword +0x54 that EN lacks: the RU constructor
+  zeroes it, and the EN builders allocate Item 0x54, Armor and Shield 0x6c
+  and Weapon 0x88 bytes against RU Item 0x58, Weapon 0x8c (clone
+  `L2.01789`) and Armor 0x70 (R2-ENGINE-210).
+  Weapon and Armor fields shift by 4: EN slot byte +0x54, armour block
+  +0x56, weapon raw blocks +0x56 and +0x6e, weapon reference +0x84; RU
+  +0x58, +0x5a, +0x5a and +0x72, +0x88.
+- The RU item-move arm stores item +0x54 = 0 after a bag take and after a
+  body take; its body-source compare order differs with the same targets.
+- RU undo apply adds a unit update (`L2.00060`, mask 0x282000, as buy
+  and sell send) after the part equal to EN; the EN undo body ends
+  without it.
+
+The serializer bodies compared transfer the same fields in the same order
+and widths. An item's whole stream has one layout in both roots at Medium
+only: the EN insert-at, find, take, list I/O, effect-list I/O, Effect
+reference reader and 38-byte base programme were not read
+(R2-SESSION-165).
+
+**Confidence.** High for these differences in the measured bodies; Medium
+for the equality of the whole EN and RU stream. No
+claim covers unmeasured code. Unknown for the meaning of RU +0x54 and
+whether EN sends the undo update from another body.
+
+**Evidence.** [EXP-2051](../experiments/EXP-2051-rom2-inventory/)

@@ -236,6 +236,32 @@ candidate writers of the base fields, +0xbb..+0xbd, +0x114..+0x12b and
 +0xd4..+0xd7. The main skill +0x23c is set from the row only when the
 template name contains `_Hero` or `Start_`. — R2-ENGINE-319
 
+#### Hero inventory
+
+The bag at gate +0x7c is an item list: u32 count, Item references head to
+tail, u32 insert index (+0x1c, 0x7fff appends) and u32 weight sum (+0x20).
+LOAD empties the existing list and appends the references in saved order
+(Medium: the clear and append helpers were not read); +0x1c and +0x20 are
+read back, not recomputed. Worn items are the
+references +0x74, +0x78 and slots 1..12, never bag entries. — R2-SESSION-165,
+R2-ENGINE-402
+
+| Record | Bytes in order |
+|---|---|
+| Item | base 38 (u32 +0x1c price, u32 +0x14 owner); u32 count and Effect references; u16 ID +0x40, u16 quantity +0x42, u8 type +0x44, u8 class +0x45, u8 material +0x46, u16 +0x48, u16 weight +0x4a, u8 +0x47 |
+| Effect | base 38; u8 tag +0x3c, u8 flags +0x3d, u32 +0x40 (two u16 values), u16 +0xc |
+
+An Item without effects is 54 bytes after its reference tag; each Effect
+adds its reference tag and 46 bytes. Item +0x3c, +0x4c, +0x4d and +0x50
+are not stored; LOAD rebuilds +0x3c from +0xc. The order and widths are
+High; constructor values for the unstored fields are Medium; no save with
+a nonempty bag was read. — R2-SESSION-165, R2-ENGINE-403
+
+EN and RU write the same bytes at Medium: the EN serializer bodies were
+read, their list and reference callees were not. RU items carry one more runtime dword
+(+0x54, not stored), so RU Weapon and Armor fields sit 4 bytes above EN's.
+— R2-ENGINE-407
+
 ### After the first member
 
 After its members the Group writes u32 +0x1c, +0x40 and +0x44 (a saved

@@ -1,5 +1,11 @@
 # Overturn history
 
+## ROM2 shop buy owner
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-266` (bought-item owner clause only; buy, sell credit, undo, refill and finite-stock clauses stand) | Verbatim: "each bought item debits q*P, takes the hero as owner and enters the hero inventory" | High | [EXP-2051](../experiments/EXP-2051-rom2-inventory/), R2-ENGINE-404 | Buy `L2.00831` stores item +0x14 = the customer's +0x14, the Player (R2-SESSION-145), not the hero, before inserting the same object into the hero bag. | **REFUTED** — partially retracted |
+
 ## ROM2 primary-4 effect-mask tests
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
