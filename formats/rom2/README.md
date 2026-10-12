@@ -9,7 +9,7 @@ semantics and writer boundaries remain explicit on each page.
 | Surface | Reference | Defined boundary |
 |---|---|---|
 | Archives | [RES](../rom2-res/format.md) | Header, node array and payload geometry; payload identity separate |
-| Maps | [ALM](../rom2-alm/format.md) | Headers, 660-byte metadata programme, version rules, type 0–12 extents and type-12 music areas |
+| Maps | [ALM](../rom2-alm/format.md) | Headers, 660-byte metadata programme, version rules, type 0–12 extents, unit-record and type 10/11 fields, and type-12 music areas |
 | Definitions | [Data.bin](../rom2-databin/format.md) | Eight groups, 14-byte C block, client/server counts and parameter schema |
 | Inline registry | [REG](../rom2-reg/format.md) | Header, record array and pool; value and lookup meanings Unknown |
 | Sprites and palettes | [Sprite/palette](../rom2-spr/format.md) | Frame container and palette shapes; pixel decoding Unknown |

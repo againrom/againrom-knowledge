@@ -43,7 +43,7 @@ Unknown field meanings, consumers and codepage assignments remain Unknown.
 | R2-ASSET-021 | `R2.0002` (`allods2.exe`, entry `R2.0002`) is ROM2's own record-body dispatcher, the counterpart of ROM1's `R0478` (`ALM-META-024`). | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-022 | ROM2-only types 10, 11 and 12's element counts are read from the type-0 (metadata) record's own version-gated fields, never from the type's own record payload. | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-023 | ROM2 extended the dispatcher's existing generic per-element read/allocate mechanism to serve its 3 new types; it did not add a second dispatch mechanism. | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
-| R2-ASSET-024 | `R2.0002`'s case 0, case 6, case 8 and case 9 each gate one or more field reads on `formatVersion` thresholds, read directly from the decompiled body in source order: case 0 has four (`0x47d`/1149, `0x4cd`/1229… | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
+| R2-ASSET-024 | `R2.0002`'s case 0, case 6, case 8 and case 9 each gate one or more field reads on `formatVersion` thresholds, read directly from the decompiled body in source order: case 0 has four (`0x47d`/1149, `0x4cd`/1229… | High | ✔ promoted (amended) | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-025 | No literal reference to `templates.bin` (or two plausible variant spellings) exists anywhere in `allods2.exe`'s image, by direct string search — confirmed, and its bound corrected, below. | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-026 | `allods2.exe` contains its own copy of the exact Data.bin loading shape `DAT-LOC-001` already publishes for ROM1's `rom.exe`: a guard flag at a fixed offset (`+0xf0`) on a long-lived object makes the load run at most once… | High | ✔ promoted | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
 | R2-ASSET-027 | ROM2's own corpus does not exceed ROM1's own corpus maximum in `W`, `H`, or `#objects`/`#units` (record-0 metadata, `ALM-META-024`/`ALM-META-025`), and exceeds it in `#players` — but within an already-published structural… | High | ✔ promoted (partially retracted) | [EXP-2003](../experiments/EXP-2003-rom2-alm-records/) |
@@ -172,6 +172,9 @@ ROM2 extended the dispatcher's existing generic per-element read/allocate mechan
 `R2.0002`'s case 0, case 6, case 8 and case 9 each gate one or more field reads on `formatVersion` thresholds, read directly from the decompiled body in source order: case 0 has four (`0x47d`/1149, `0x4cd`/1229, `0x513`/1299, `0x487`/1159, all "if `formatVersion>t` read one more field", no else) — one `u32` (4 B), three `u32` (12 B), one `u32` (4 B) and two `u32` (8 B) respectively, summing to exactly 28 bytes, which is exactly record 0's own TRUE span growth over ROM1 (632→660, `R2-ASSET-002`'s +16-over-declared overhang plus the +12 declared difference, `4+12+4+8=28=660-632`) — a directly-computable arithmetic check against already-published span numbers, not a new probe; this does not determine which specific bytes of that 28 the file's own declared `payloadSize` (644) counts and which land in the undeclared overhang, since that split is a property of the SAVE path this experiment's Ghidra pass (load path only, `R2.0002`) did not read; case 6 has six (`0x47e`/1150 and `0x3db`/987, both "if `formatVersion>t` read, else zero", same direction; `0x456`/1110, selects 2-byte vs 4-byte field width, wider above; and `0x44c`/1100, an outer branch taken only BELOW the threshold, with no else arm at all — the block it wraps, including two nested sub-thresholds `0x3b6`/950 and `0x3d8`/984, is emitted only when `formatVersion<0x44c` and is skipped entirely, not zero-filled, at or above 1100); case 8 and case 9 each gate one field on the same `0x3dd`/989 threshold (read only above it) — the identical numeric threshold `ALM-SACK-065` already publishes for ROM1's own type-8 20-byte-head gate, consistent with the same version-gated-growth lineage `ALM-META-024`/`ALM-SACK-065` document for ROM1, not a new mechanism (case 6's own `0x3db`/987 is close to but not identical to `ALM-META-024`'s listed `0x3da`/986; this experiment does not resolve whether that is a one-version difference or two coincident fields, and asserts neither). Every file in this corpus has `formatVersion` 1300 or 1600 (`R2-ASSET-003`) — above every threshold in this section except case 6's own `0x44c` (and its two nested sub-thresholds), so this corpus takes the newer/larger branch uniformly at every one of those gates, and takes the OTHER (absent) branch, uniformly, at `0x44c` and its nested sub-thresholds: that whole block is provably absent from every one of the 83 files' own type-6 records, not merely absent from some. **Correction, finding 1: the no-confidence clause below is closed.** Reading case 0's and case 6's raw disassembly straight through (not only their threshold gates) finds every field either case reads, in order (`dispatcher-findings.md`, "Case 0's complete field layout" and "Case 6's complete field layout" sections), and summing them closes both reconciliations this row previously declined to attempt. Case 0: twelve unconditional 4-byte fields (48) + the first three gated groups (4+12+4) + three further unconditional fields (64+4+4=72) + the fourth gated group at `0x488`/1160 (8) + one closing unconditional 512-byte field = **660 bytes at any `formatVersion` clearing all four gates** (every file in this corpus) and **632 bytes when none fire** (ROM1's own 990) — replayed per file against every declared type-0 `payloadSize` (`case0-width-check.tsv`): **155/155** (83 ROM2 + 38 ROM1 EN + 34 ROM1 RU, including RU `Horror.alm`'s own 4-record file; every file carries a type-0 record). 660 matches ROM2's own declared 644 plus exactly the already-published `rom2Type0Overhang` (16, `R2-ASSET-002`), now reproduced from the code rather than only fitted to the corpus; 632 matches ROM1's own declared constant (`ALM-SEC-004`) exactly, 0 slack. Case 6: eleven unconditional fields (36) + the `0x47e` and `0x3db` gated fields (4 each, fire uniformly on this corpus) + the `0x44c` block (0, corpus-uniformly absent, as already published) + the `0x456` width selector (4, wide branch) = **48 bytes/unit at this corpus's own `formatVersion`s**; at ROM1's 990, the `0x44c` block fires (28) and the `0x456` selector takes its narrow 2-byte form, giving `36+0+4+28+2=` **70 bytes/unit**: 990 clears the `0x3db`/987 gate, while the `0x47e`/1150 field is absent. Replayed per file against every declared type-6 `payloadSize`, both games (files with no type-6 record, i.e. RU `Horror.alm`, excluded from the denominator, not scored as failing) (`case6-field-check.tsv`): **154/154** (83 ROM2 at 48, 71 ROM1 at 70). The public-edition maintenance corrects three explanatory transcription errors above: the former ROM1 equation omitted the present `0x3db` field; the former case-0 prose counted its fourth gate twice as a fifth; and the former 155-file parenthetical mislabelled the population. The existing experiment summary, complete field table, canonical ALM equations and 155/154 result summaries already give these totals; no measurement or confidence changes. This closes `R2-ASSET-003`'s initial byte-width Unknown and `formats/rom2-alm/format.md`'s **Not yet surveyed** entry for the same question. What remains genuinely open is not the byte count but the semantics: why the writer's own declared `payloadSize` (644) omits exactly 16 of the 660 bytes the loader itself reads, and what (if anything) occupies that gap — this experiment reads the load path only and does not answer it; the declared/overhang split stays Unknown. **N6, checked, not narrowed:** case 0's own four `>`-form thresholds (decompiler-synthesized) each run exactly one below their own raw `>=`-form `JC` constant, confirmed on all four gates with no exception — a real candidate explanation for a one-apart pair, but case 6's OTHER two nested thresholds (`0x3b6`/950, `0x3d8`/984) are already published as EXACT matches to `ALM-META-024`'s own listed values, on gates in the same function and the same nested block as the disputed `0x3db`/`0x3da` pair — so the pattern that would explain the third does not hold for the two adjacent ones this pass could check directly. Whether case 6's `0x3db` and `ALM-META-024`'s `0x3da` are the same field stays Unknown
 
 **Confidence.** High for every threshold value, its direction, and the corpus-uniform branch each one takes (all read directly from decompiled control flow, cross-checked against the corpus's own two `formatVersion` values by direct arithmetic). High for the case-0 and case-6 field-by-field reconciliation: both sums are read from the same raw disassembly already cited for the threshold facts, not fitted to the target numbers, and each is validated per file against the full declared-`payloadSize` population at 155/155 and 154/154 with 0 exceptions — a wrong field list could not reproduce both games' own constants simultaneously by chance. Unknown, unchanged, for whether case 6's `0x3db` and `ALM-META-024`'s `0x3da` are the same field, and for which specific bytes of case 0's 28-byte growth the writer's own declared `payloadSize` counts versus which land in the 16-byte undeclared overhang
+
+**Amended.** The case 6 thresholds `0x47e`/1150, `0x3db`/987 and `0x456`/1110 are tested as `cmp`, `jb`: the two reads are present at the value and above, and the four-byte form is taken at `0x456` and above, not only above it (`ru-dispatcher.txt` `L2.02479`, `L2.02480`, `L2.02481`, read by R2-ASSET-119). The text "if `formatVersion>t`" for these three values is read as "at or above t". The case 0 values are not re-read here. No installed map (1300, 1600) is affected.
+
 
 ### R2-ASSET-025
 
@@ -1393,3 +1396,167 @@ census reproduced from Git blobs. The native lookup is not line-anchored
 claimed.
 
 **Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+## Map records 10 and 11 and the unit record
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-119 | ROM2 ALM type 6: the loader moves each field of the 48-byte unit record to a fixed slot of a 0x54-byte row, equal in EN and RU allods2.exe; offsets, widths and slots are tabled for versions 1300 and 1600. | High | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ASSET-120 | ROM2 ALM type 10 entries are four i32: group number, a percent scaling the slot-5 countdown reload value, flags 1/2/4/8 and a type-7 node position; the loader copies each entry whole and the group pass reads all four. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ASSET-121 | ROM2 ALM type 11 arrays key on a type-4 object id (file word 0x12): 11a holds flags and a word, 11b twenty i32 in four groups of five, 11c a nonzero gate and a type-7 node position. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ASSET-122 | Over the 46 scenario.res campaign maps per root, types 10, 11a and 11b are empty, 11c has 40 entries in 10 maps and type-0 dword 0x84 is 1; EN and RU differ in dword 0x88 on 3 maps, in version on 4 and in unit counts. | High | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+
+### R2-ASSET-119
+
+The type-6 case of the map loader (RU `L2.02482`..`L2.02483` in the
+dispatcher `R2.0002`; EN dispatcher `L2.02484`) reads each record into a
+fresh 0x54-byte row and appends the row to map+0x3a4 (`L2.02485`). File
+offsets are for the 48-byte record at versions 1300 and 1600, the two
+versions in the installed campaign maps; the version-conditioned rows
+below hold at those versions only, and the block read below version 0x44c
+uses other fields (R2-ASSET-024).
+
+| File offset | Width | Row slot | Transfer |
+|---:|---|---:|---|
+| 0x00 | i32 | +0x00 | x; the actor builder shifts it right by 8 into `L2.00313`, unread |
+| 0x04 | i32 | +0x04 | y; shifted likewise |
+| 0x08 | i16 | +0x08 | sign-extended to a dword |
+| 0x0a | u16 | +0x0c | word |
+| 0x0c | u32 | +0x48 | flags; bit 0x10 selects the person arm (R2-ENGINE-038) |
+| 0x10 | u32 | +0x50 | read at version 0x47e and above, else 0 |
+| 0x14 | u32 | +0x10 | definition id (R2-ENGINE-038); read at version 0x3db and above, else 0 |
+| 0x18 | u32 | +0x14 | low word only; the high word is dropped |
+| 0x1c | u32 | +0x44 | stored minus 1 |
+| 0x20 | u32 | +0x1c | dword |
+| 0x24 | i16 | +0x20 | word |
+| 0x26 | i16 | +0x22 | word |
+| 0x28 | u32 | +0x3c | four bytes at version 0x456 and above, else two |
+| 0x2c | u32 | +0x40 | group number |
+
+The three thresholds are tested as `cmp`, `jb`: below the value the field
+is skipped (0x47e, 0x3db) or the two-byte form is read (0x456), so the
+value itself takes the later form (`L2.02479`..`L2.02486`,
+`L2.02480`..`L2.02487`, `L2.02481`..`L2.02488`).
+
+After each row the loader sets map+0x90 to the largest row +0x40. When row
++0x44 is not -1 and is below the type-8 count, the type-8 element it
+indexes (map+0x2e8, getter `L2.02489`) receives row WORD +0x3c,
+sign-extended, at its +0x3c; otherwise row +0x44 becomes -1. The readers of
+the row are in R2-ENGINE-513.
+
+**Confidence.** High: the RU dispatcher body was read, and the EN body
+matches it instruction for instruction after address masking (1623 of 1623
+instructions). Medium that x and y are in 1/256 tile: the shift is read,
+its consumer `L2.00313` is not, and R2-ENGINE-336 grades the same scale
+Medium. Field names other than the transfers and the cited claims are not
+established here.
+
+### R2-ASSET-120
+
+The loader reads each 16-byte type-10 entry in one read into a 16-byte
+allocation and tail-appends it to map+0x310; it splits no field. The
+type-10 group pass (R2-ENGINE-510) reads the fields of every entry whose
+e0 matches a group:
+
+| Offset | Field | Use |
+|---:|---|---|
+| 0x00 | e0 | compared with the group number (unit record 0x2c, R2-ASSET-119) |
+| 0x04 | e1 | object +0xb0 and +0xb4 = e1 * S / 100, S the scale of R2-ENGINE-510; +0xb0 is the reload value of the slot-5 countdown on +0xb4 (Medium) |
+| 0x08 | e2 | bit 1: object +0xb8 from e3, else -1; bit 4: object +0xc4 and group +0x48 = 1, else 0; bit 8: object +0xc8 and group +0x4c likewise; bit 2 clear: object +0xbc = 0 |
+| 0x0c | e3 | type-7 first-array position: the number of leading nodes scanned; object +0xb8 = count of those with dword +0x40 below 0x10002, passed to `L2.02490` |
+
+Every entry whose e0 matches applies in file order; a later entry
+overwrites the fields an earlier one set. A group with no matching entry
+keeps the object defaults of R2-ENGINE-510. The pass runs under the gate
+of R2-ENGINE-509, whose "only" clause is Medium. The bit masks are the
+dwords 1, 2, 4, 8 at RU `L2.02491` and EN `L2.02492`.
+
+**Confidence.** High for the field use: the pass bodies RU `L2.02493` and
+EN `L2.02494` were read in both roots. Medium that no other code reads the
+entries: the census of map+0x310 is a displacement scan over the RU image
+and a call-target scan of the RU element getters `L2.02495` and
+`L2.02496`; its hits outside the map ctors, dispatcher, teardown and two
+consumer passes were classified after the receipt was read, and rows on
+other bases at 0x310..0x31c stay unclassified. Medium for the role of
++0xb0 as a countdown reload value: it rests on the slot-5 body, which
+R2-ENGINE-510 grades Medium. The node-iterating helpers `L2.02497` and
+`L2.02498` of the e3 count are unread.
+
+**Unknown.** The EN image was not scanned for other readers of map+0x310.
+
+### R2-ASSET-121
+
+The loader reads each type-11 entry whole, in three loops, and appends
+11a (12 bytes) to map+0x338, 11b (84 bytes) to map+0x324 and 11c
+(12 bytes) to map+0x34c. The type-4 object pass (R2-ENGINE-512) matches
+entry e0 against the type-4 element id at element +0x10, which the
+element ctor (RU `L2.02499`, EN `L2.02500`) takes from type-4 file word
+0x12, sign-extended. The same ctor puts file word 0x0c at element +6 and
+the low word of file dword 0x0e at element +8.
+
+| Array | Offset | Use |
+|---|---:|---|
+| 11a | 0x00 | type-4 id |
+| 11a | 0x04 | flags: 2 enables the 0x08 word; 0x10, 0x20, 0x40 and 4 each set one object field |
+| 11a | 0x08 | low word, used only under flag 2 |
+| 11b | 0x00 | type-4 id |
+| 11b | 0x04..0x53 | five runs of four i32 (0x04, 0x14, 0x24, 0x34, 0x44), interleaved into four object groups of five |
+| 11c | 0x00 | type-4 id |
+| 11c | 0x04 | read only as nonzero; a zero entry is skipped |
+| 11c | 0x08 | number of leading type-7 first-array nodes scanned |
+
+The type-10 e3 and type-11c 0x08 fields refer to positions in the type-7
+first array (map+0x40). The reverse reference was searched by a
+displacement scan of map+0x310..+0x35f over the RU image: its classified
+hits are the three map ctors, the dispatcher, the teardown, unwind
+funclets and the two consumer passes, with no script compiler or action
+site among them.
+
+**Confidence.** High for the layout and the id join: the loader, the
+element ctor and the type-4 pass were read in both roots. Unknown for what
+the receiving objects do with these fields (R2-ENGINE-512). The node-iterating helpers
+`L2.02497` and `L2.02498` of the 11c count are unread.
+
+**Unknown.** Whether a script record refers to a type-10 or type-11
+entry stays Medium-bounded for RU and unsearched for EN: scan rows on other
+bases were left unclassified, and a pointer to an entry could pass through
+a getter. A call-target scan of the eight type-10/11 element getters and a
+displacement scan in EN would settle it for EN.
+
+### R2-ASSET-122
+
+The census reads the 46 maps of `scenario.res` in each root (EN 5548580
+bytes, SHA256
+`388c955f49c02ecfed765340ff3a5b3e8f37210e2c85c8d877bc04b949d60d7f`; RU
+5549452 bytes,
+`c19950690570d94b40c68acffd210cdab94c2a12b5d6ad5718730392c6b6e08b`) by
+the ALM walk of R2-ASSET-002 and splits each type-10 and type-11 entry
+into i32 fields at every fourth byte. These are the campaign maps; the
+root `.alm` maps (R2-ASSET-084) are outside it.
+
+- 46 maps per root; versions EN 1300 x41 and 1600 x5, RU 1300 x45 and
+  1600 x1.
+- Types 10, 11a and 11b: 0 entries in every map of both roots.
+- Type 11c: 40 entries per root in maps 10, 20, 21, 30, 40, 50, 53, 62,
+  76 and 86 (3, 11, 7, 3, 9, 2, 1, 1, 2, 1). 0x00 takes 17 values in
+  10..170; 0x04 is 0 or 1; 0x08 takes 8 values in 0..48. Per-map type-10
+  and type-11 hashes are equal in EN and RU.
+- Type-0 payload dword 0x84 is 1 in all 92 maps. Dword 0x88 is 1 except
+  EN 110 (4), 52 (2), 74 (3), 95 (3) and RU 95 (3): the roots differ on
+  maps 110, 52 and 74; map 95 is equal. The roots also differ in the
+  version of four maps and in unit counts.
+- Type 6: EN 4212 records, RU 4234. Distinct values per field (EN; RU
+  equal ranges): 0x08 53 in 1..107; 0x0a 6 in 1..6; 0x0c {0, 16};
+  0x10 {0, 8}; 0x14 205 in 600..10230; 0x18 9 in 1..9; 0x1c 5 in 0..4;
+  0x20 6 in 0..14, 10 in 4199 records; 0x24 and 0x26 -1 or 15..4992;
+  0x28 EN 3834 and RU 3856 distinct dwords; 0x2c 39 in 0..38.
+
+**Confidence.** High: a committed derived census reproduced byte for byte
+from Git blobs. The counts bound which fields vary in the 46 campaign
+maps per root; they are not format limits and do not extend to the root
+`.alm` maps.
+
+**Unknown.** The 13 EN and 37 RU root `.alm` maps were not read. The
+committed census generator (`evidence/maps.py` through `regen.sh`) run
+over those files would settle whether any of them has dword 0x84 above 1
+or a type-10 or type-11 entry.

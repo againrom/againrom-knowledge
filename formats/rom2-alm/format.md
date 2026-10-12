@@ -53,6 +53,71 @@ The campaign type7 grammar is exactly consumed for all 46 maps per preserved
 root. Full-word operation values, compilation and the supported added arms are
 specified in [Campaign scripts](script.md). — R2-ENGINE-041
 
+<a id="unit-record-type-6"></a>
+
+## Unit record (type 6)
+
+Each 48-byte record becomes a 0x54-byte row in the map's unit list. The
+row slot is where the program keeps the field; readers are named where
+the read bodies show one. The table holds for versions 1300 and 1600, the
+two in the installed campaign maps; the block read below version 0x44c
+uses other fields.
+
+| Offset | Width | Row slot | Use |
+|---:|---|---:|---|
+| 0x00, 0x04 | i32 | +0x00, +0x04 | x, y; shifted right by 8 into the placement call (the 1/256 tile unit is Medium) |
+| 0x08 | i16 | +0x08 | read by the mission-load row loop, as a lookup index into a collection whose record chooses the object build; no actor-builder read (Medium) |
+| 0x0a | u16 | +0x0c | no reader found |
+| 0x0c | u32 | +0x48 | flags; bit 0x10 selects the person arm |
+| 0x10 | u32 | +0x50 | bits 1, 2, 4, 8 set four actor fields; read at version 0x47e and above |
+| 0x14 | u32 | +0x10 | definition id; read at version 0x3db and above |
+| 0x18 | u32 | +0x14 | owner, low word only |
+| 0x1c | u32 | +0x44 | 1-based type-8 index; that type-8 element takes the record's 0x28 low word |
+| 0x20 | u32 | +0x1c | no reader found |
+| 0x24, 0x26 | i16 | +0x20, +0x22 | actor words +0x94 and +0x96; -1 keeps the default |
+| 0x28 | u32 | +0x3c | low word read; two bytes below version 0x456, four from 0x456 |
+| 0x2c | u32 | +0x40 | group number; the map keeps the maximum |
+
+"No reader found" is bounded to the actor builder and the mission-load
+row loop. Installed values: 0x08 1..107, 0x0a 1..6, 0x0c {0, 16}, 0x10
+{0, 8}, 0x1c 0..4, 0x20 0..14 (10 in nearly every record), 0x2c 0..38.
+— R2-ASSET-119, R2-ASSET-122, R2-ENGINE-038, R2-ENGINE-513
+
+<a id="group-and-object-records-types-10-and-11"></a>
+
+## Group and object records (types 10 and 11)
+
+Type 10 entries are four i32, keyed on a unit group number:
+
+| Offset | Field |
+|---:|---|
+| 0x00 | group number (unit record 0x2c) |
+| 0x04 | percent, scaled by a global setting; the product is the reload value of the group object's countdown (Medium) |
+| 0x08 | flags 1, 2, 4, 8 |
+| 0x0c | position in the type-7 first array; the count of nodes before it with dword +0x40 below 0x10002 is passed to the routine `L2.02490` (Medium) |
+
+The program runs the type-10 pass when type-0 payload dword 0x84 exceeds 1
+(gate body High; "only" Medium, other writers of the gate are open). Then
+each unit group of an owner with a nonzero +0x2c, for which a guard
+routine (`L2.02502`, unread) returns nonzero, gets a group object, with
+defaults when no entry matches; every matching entry applies in file
+order. The 46 `scenario.res` campaign maps per root have dword 0x84 = 1
+and no type-10 entry; the root `.alm` maps were not read. Type-0 payload
+dword 0x88 is stored in the map and the session; its meaning is Unknown.
+— R2-ASSET-120, R2-ASSET-122, R2-ENGINE-509, R2-ENGINE-510
+
+Type 11 entries key on a type-4 object id, the sign-extended type-4 file
+word 0x12:
+
+| Array | Width | Fields | Receiving type-4 kinds |
+|---|---:|---|---|
+| 11a | 12 | id, flags (2, 4, 0x10, 0x20, 0x40), word used under flag 2 | 0x43..0x45, 0x63..0x65, 0x6f..0x71; last match wins |
+| 11b | 84 | id, five runs of four i32 forming four groups of five | 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b; first match |
+| 11c | 12 | id, nonzero gate, position in the type-7 first array | 0x46..0x4b; last nonzero match wins |
+
+The 46 campaign maps per root carry no 11a or 11b entry and 40 11c
+entries in 10 maps. — R2-ASSET-121, R2-ASSET-122, R2-ENGINE-512
+
 <a id="music-areas-type-12"></a>
 
 ## Music areas (type 12)
@@ -86,10 +151,10 @@ neither. Theme values are -1..16. — R2-ASSET-084
 | 0 | version>0x4cd | Three extra u32 |
 | 0 | version>0x513 | One extra u32 |
 | 0 | version>0x487 | Two extra u32 |
-| 6 | version>0x47e | Extra u32; otherwise zero in memory |
-| 6 | version>0x3db | Extra u32; otherwise zero in memory |
+| 6 | version at or above 0x47e | Extra u32; otherwise zero in memory |
+| 6 | version at or above 0x3db | Extra u32; otherwise zero in memory |
 | 6 | version<0x44c | Legacy block, including nested 0x3b6/0x3d8 gates; otherwise omitted |
-| 6 | above 0x456 | Four-byte final field instead of the two-byte form |
+| 6 | version at or above 0x456 | Four-byte final field instead of the two-byte form |
 | 8, 9 | version>0x3dd | One extra field on each named case |
 
 Type0's ordered width sum at the preserved versions is
@@ -117,9 +182,12 @@ R2-ASSET-003, R2-ASSET-024
 
 ## Authoring limits and Unknowns
 
-The meaning of the new type 10/11 fields is Unknown. Their known counts,
-widths and target arrays do not supply semantic defaults. Type 12 is
-decoded above (R2-ASSET-084). The writer's reason
+Type 10 and 11 fields are decoded to the program fields that receive
+them above; what the type-11 receiving objects do with those fields during
+a mission is Unknown, and so is the reader of unit-record 0x0a and 0x20
+outside the two bodies read. EN and RU differ in one type-10 store: the
+RU group object stores the group's spread at +0xbc, the EN object keeps 0
+there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The writer's reason
 for declaring 644 bytes while the metadata programme transfers 660 is also
 Unknown; no complete original-compatible ROM2 ALM writer follows from this
 loader grammar. — R2-ASSET-023, R2-ASSET-024

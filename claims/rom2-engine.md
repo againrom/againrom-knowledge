@@ -376,7 +376,7 @@ ROM1 caps P at 100 with the same base 1.025 (`MAGIC-POWER-004`, `MAGIC-CEIL-013`
 | R2-ENGINE-037 | Each campaign map has one `main.res` file `text/mission<N>.txt`, loaded in campaign mode; briefing, subobjective, failure and event are section families across the corpus; ROM1's `text/battle/m<N>/` family is absent. | High / Medium | ● active (amended) | [EXP-2007](../experiments/EXP-2007-rom2-mission/), [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 | R2-ENGINE-038 | RU build: unit placement resolves the record's definition id against the Units column `serverID` (slot 55) or, for the person arm, the Humans column `serverID` (slot 24); ROM1 keyed Units on other columns. | Medium | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 | R2-ENGINE-039 | ROM1's byte-run (`.256`) and the word-run (`.16a`) frame grammars parse every frame of every ROM2 sprite file: 40,570 and 2,865 frames, no failure; pixel meaning is not tested. | High / Medium | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
-| R2-ENGINE-040 | Among the 46 campaign maps the axes disagree: map 83 has the fewest triggers and declared operations and no ROM2-only operation; map 32 has the fewest units and objects; the ten-map Pareto set is the same with or without opcode 65538. | High | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
+| R2-ENGINE-040 | Among the 46 campaign maps the axes disagree: map 83 has the fewest triggers and declared operations and no ROM2-only operation; map 32 has the fewest units and objects; the ten-map Pareto set is the same with or without opcode 65538. | High | ● active (amended) | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 
 ### R2-ENGINE-033
 
@@ -446,9 +446,12 @@ In the RU build `L2.00115`, a bit `0x10` of the placement record's in-memory fla
 
 Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evidence/pareto-rom2-ru.tsv`). The maps not dominated on triggers, distinct script operations, ROM2-only operations, units, objects, unit class values and cells are 94, 96, 85, 87, 83, 81, 82, 84, 43 and 32 in both roots. Map 83 has 2 triggers, 3 declared operations (5 with opcode 65538) and no ROM2-only operation, on 144 by 144 cells with 2 players, 21 objects and 92 units; it has a win action and no lose action. Map 32 has the fewest units (20) and objects (2) on 80 by 80 cells with 3 players, 6 triggers and 12 distinct operations. Recomputed with opcode 65538 left out of the operation count (`evidence/pareto-declared-rom2-ru.tsv`, EN likewise), the non-dominated set is the same ten maps and map 83 stays the unique minimum on triggers and on operations. That the one action and one check of map 83 carrying 65538 need nothing outside ROM1's vocabulary is not shown. No single map is smallest on every axis (alternative G2).
 
-**Confidence.** High for the census. The unit class value axis reads the type 6 field `+0x08` under a ROM1 reading that was not checked in ROM2.
+**Confidence.** High for the census. The unit class value axis reads the type 6 field `+0x08` under a ROM1 reading that was not checked in ROM2. R2-ENGINE-513 reads that field in ROM2 as an index into the `L2.02501` collection.
 
 **Unknown.** Which map plays shortest; the census measures records and script features, not play time.
+
+**Amended.** The ROM1 reading of type 6 `+0x08` as a unit class value is narrowed for ROM2 by R2-ENGINE-513: the loader's mission-load loop uses it as an index into the `L2.02501` collection, whose record chooses the object class; the class meaning of the collection stays Unknown.
+
 
 ## ROM2 campaign script contracts
 
@@ -10728,3 +10731,211 @@ pairs.
 the RU code before `L2.01725`; reading those windows would settle them.
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+## Map type-10 group objects and type-11 object fields
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-509 | ROM2 map build sets Session+0x74 when type-0 payload dword 0x84 exceeds 1 and runs the type-10 group pass under that test; the dword is 1 in the 46 campaign maps per root, so none runs it unless another writer sets +0x74. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-510 | The ROM2 type-10 pass builds a 0xcc object with defaults for each group that passes the owner +0x2c test and a L2.02502 guard, then applies matching entries; the object re-creates the group's members after a countdown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-511 | ROM2 RU stores the group's member spread in the type-10 object +0xbc at build; EN has no such store and keeps +0xbc at 0, so the two roots differ when a type-10 pass runs. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-512 | The ROM2 type-4 pass gives three object classes their type-11 fields by kind: 0xec objects from every matching 11a, 0xc4 objects from the first matching 11b, 0x70 objects from every nonzero 11c. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+| R2-ENGINE-513 | ROM2 unit rows are read by the actor builder and the mission-load row loop; row +0x08 selects a L2.02501 record there (read only by the loop, Medium); no read of +0x0c or +0x1c was found in either body. | High / Medium | ✔ promoted (branch candidate) | [EXP-2064](../experiments/EXP-2064-rom2-map-records/) |
+
+### R2-ENGINE-509
+
+In the map build (RU `L2.00113`, EN `L2.00186`; R2-ENGINE-108) the
+instruction at RU `L2.02503` compares map+0xd8 with 1 and stores the
+result of `> 1` in Session(`[L2.01317]`)+0x74; Session+0x178 receives its
+negation and Session+0x1cc receives map+0xdc. The dispatcher fills
+map+0xd8 and map+0xdc from type-0 payload dwords 0x84 and 0x88. After the
+owner, type-4, actor and two further builders, RU `L2.02504` calls the
+type-10 pass `L2.00118` only when Session+0x74 is not 0. The actor builder
+scales actor word +0x96 by difficulty constants in its Units arm only
+when Session+0x74 is 0.
+
+Over the census of R2-ASSET-122, the 46 `scenario.res` campaign maps per
+root, type-0 dword 0x84 is 1 in every map, so the store at `L2.02503`
+leaves the gate closed on them and their type-10 entries would have no
+effect if present. Session+0x74 has other writers: R2-ENGINE-334 gives
+the server init store +0x74 = (mode < 2) and leaves 119 EN and 121 RU
+other dword `[reg+0x74]` stores unclassified, and R2-ENGINE-125 states
+all other writers and the persistence of the gate across the call as
+Unknown. So "no campaign map runs the pass" is Medium.
+
+**Confidence.** High for the gate: the store at `L2.02503` and the test at
+`L2.02504` are in `out/listings/ru-world-build.txt` and equal in EN; the
+map build, dispatcher and actor builder bodies were read in both roots and
+match after address masking; the census is reproduced from Git blobs.
+Medium for "only" and for "no campaign map runs the pass": that `L2.00118`
+has one caller rests on a RU call-target scan (a navigation receipt, hit
+`L2.02505`); no EN call-target scan and no dword scan of `.rdata` for the
+address ran, so a pointer-table call is not excluded; the other writers
+of Session+0x74 are open (above); and the two further builders between the
+store and the test (RU `L2.00116`, `L2.00117`) were not read for stores
+to +0x74.
+
+**Unknown.** Which code writes Session+0x74 besides the store at
+`L2.02503` and the init of R2-ENGINE-334. What a value above 1 in dword
+0x84 means beyond these two uses. What type-0 dword 0x88 means; it is
+stored in map+0xdc and Session+0x1cc (`L2.02506`..`L2.02507`). Whether any
+of the 13 EN and 37 RU root `.alm` maps has dword 0x84 above 1
+(R2-ASSET-122). An EN call-target scan of the pass, a dword scan of
+`.rdata` for its address, and reading the two further builders and the
+other `[reg+0x74]` stores would settle the gate.
+
+### R2-ENGINE-510
+
+For every owner (global RU `L2.00293`) whose +0x2c is not 0 (`L2.02508`..
+`L2.02509` skips an owner with 0) and every group in owner+0x28, the pass
+calls the group function (RU `L2.02493`, EN `L2.02494`). The function
+calls `L2.02502(group)` at `L2.02510` and returns when the result is 0
+(`L2.02511`..`L2.02512`), before any object exists; the helper is unread.
+Otherwise it computes the members' centroid and spread through member+0x10
+(`L2.00486`, `L2.00487`), allocates a 0xcc object (ctor RU `L2.02513`, EN
+`L2.02514`; vtable RU `L2.02515`) at the centroid and sets:
+
+| Object field | Value |
+|---:|---|
+| +0x14 | group +0x44 |
+| +0xac | group +0x1c, the group number from unit row +0x40 |
+| +0xb0, +0xb4 | 120 * S / 100 |
+| +0xb8 | -1 (init) |
+| +0xbc | see R2-ENGINE-511 |
+| +0xc0, +0xc4, +0xc8 | 0 (init) |
+
+The ctor's init (RU `L2.02516`) also sets +0x68 = 0, and `L2.02517`
+stores a copy of each member as a template. The type-10 entries then
+apply as in R2-ASSET-120. The object is registered (`L2.02518`), the
+group gets `L2.02519(group, 0)`, and `L2.02490(+0xb8)` runs when +0xb8 is
+at least 0. `L2.02519` sets byte +0x20 of the group's programme ([group+0x3c]) to
+0x12 (R2-ENGINE-507 route 18), raises its bytes +0x2d and +0x38 to a
+floor and clears +0x39. `L2.02490(i)` is read to its dispatch table, with
+i the +0xb8 value; the lookup helper `L2.02520` and the iterator helpers
+`L2.02497` and `L2.02498` are unread, so what i selects is not
+established.
+
+Vtable slot 5 (RU `L2.02521`) sets +0xc0 = 1 once every member in +0x6c
+has byte +0x13c of at least 3, and decrements +0xb4 once per call. At 0 or
+below it looks up the group with number +0xac; when `L2.02502` of that
+group is above 0 (`L2.02522`..`L2.02523`) the call ends. Otherwise it
+re-creates each member from its template, places it at object+0x10 with
++0xbc as the third argument of `L2.00313`, resets +0xb4 to +0xb0,
+re-forms the group with number +0xac, sets group +0x48 and +0x4c from
++0xc4 and +0xc8, and repeats the two calls above. The member loop at
+`L2.02524` also calls `L2.02525` on members with byte +0x13c below 5 and
+stores 0xfda7 at object +0x42.
+
+S is the first dword of RU `L2.02526` and EN `L2.02527`. In RU the only
+absolute store found by the writer scan is at `L2.02528`, by a key/value
+parser (key string `L2.02529`, unread) that clamps the value to 20..500;
+the ctor RU `L2.02530` writes 100 to this+0.
+
+**Confidence.** High for the build: the group function, ctor, init and
+template copy were read in both roots (the group function differs only as
+R2-ENGINE-511 states), and the owner and `L2.02502` guards are read in RU
+listings; the EN slot-5 body equals the RU body after masking (152 of 152
+instructions), and the EN group function head was not compared by hand.
+Medium for the slot-5 behaviour: the body was read in both roots, but the
+caller of slot 5 and the helpers `L2.02502`, `L2.00313`, `L2.02525`,
+`L2.02520`, `L2.02497`, `L2.02498` and the tail of `L2.02490` were not,
+so when it runs, when members are re-created and what the third argument
+does rest on unread code. Medium for S = 100 by default in RU: that the
+ctor `L2.02530` runs on `L2.02526` was not read. The RU writer census of
+`L2.02526` is a navigation scan.
+
+**Unknown.** What `L2.02502` tests, and so which groups get an object and
+which skip re-creation; the caller and call rate of slot 5; the units of
++0xb0 (ticks or another clock); the EN writer of `L2.02527` and its
+default; the key string at `L2.02529`. Reading `L2.02502` and the slot-5
+caller would settle the first two; the EN store would settle the last.
+
+### R2-ENGINE-511
+
+At RU `L2.02531` the group function stores the spread it computed (the
+larger of the x and y extents of the members) in object +0xbc. The EN body
+`L2.02494` stores +0xb4 at `L2.02532` and calls the template copy
+`L2.02533` next, with no +0xbc store; its only +0xbc store is the bit-2
+clear at `L2.02534`, which writes 0. The EN init `L2.02535` sets +0xbc to
+0. So in EN a type-10 object always has +0xbc = 0, and in RU it has the
+spread unless a matching entry with bit 2 clear sets it to 0. The only
+content difference found in the EN lines read (`L2.02536`..`L2.02537`) is
+this one store of three instructions; the masked comparison of the two
+bodies (330 EN and 333 RU instructions) counts 139 differing instructions
+after it by alignment.
+
+**Confidence.** High for the stores: both bodies were read. Medium for the
+player effect: +0xbc reaches `L2.00313` as its third argument when slot 5
+re-creates members (R2-ENGINE-510), and that helper was not read. Under
+R2-ENGINE-509 the pass is not run on the 46 campaign maps per root unless
+another writer opens the gate (Medium), so the difference is not reached
+there.
+
+### R2-ENGINE-512
+
+The type-4 pass (RU `L2.00114`, EN `L2.00189`) runs only when global
+`L2.02538` is not 0 (`L2.02539`..`L2.02540`, `cmp`, `jne`; otherwise it
+ends), then calls `L2.02541` (`L2.02542`). The same global is passed to
+the constructors as an argument; its meaning is Unknown. The pass builds
+an object per type-4 element by kind (element word +4):
+
+| Kinds | Object | Type-11 source | Fields |
+|---|---|---|---|
+| 0x43..0x45, 0x63..0x65, 0x6f..0x71 | 0xec, ctor RU `L2.02543`, vtable `L2.02544` | every 11a entry with e0 = element +0x10; the last wins | word +0xd4 = low word of e2 when e1 & 2, else 0; +0xc4 = e1 & 0x10; +0xc8 = e1 & 0x20; +0xcc = e1 & 0x40; +0xd0 = e1 & 4 |
+| 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b | 0xc4, ctor RU `L2.02545`, vtable `L2.02546`; +0xc0 = 10000000, +0x6c = a 0x98 helper (`L2.02547`) | the first 11b entry with e0 = element +0x10 | for i in 0..3: +0x80+0x14i = e[0x04+4i], +0x70+0x14i = e[0x14+4i], +0x74+0x14i = e[0x24+4i], +0x78+0x14i = e[0x34+4i], +0x7c+0x14i = e[0x44+4i] |
+| 0x46..0x4b | 0x70, ctor RU `L2.02548`, vtable `L2.02549`; +0x6c = -1 | every 11c entry with e0 = element +0x10 and e1 not 0; the last wins | +0x6c = count of the first e2 type-7 first-array nodes with dword +0x40 below 0x10002 |
+| other | 0x6c (`L2.02550`) | none | none from type 11 |
+
+The 11a loop applies its stores four times per entry with the same
+values. Every byte of a matching 11b entry is read. Slot 2 of the 0xc4
+class (`L2.02551`) serializes only the base and +0xc0.
+
+**Confidence.** High for the kind split and the stores: the pass and the
+three ctors were read in both roots. Unknown for the consumers of 0xc4
++0x70..+0xbc, 0xec +0xc4..+0xd4 and 0x70 +0x6c: those methods were not
+read. The listing of the 0x98 helper's methods is in the evidence but was
+not interpreted, and the 0xec and 0x70 vtables were not walked.
+
+**Unknown.** What the three classes do with these fields during a
+mission, and what global `L2.02538` is. Interpreting the 0x98 helper
+listing and reading the methods of vtables `L2.02544` and `L2.02549` that
+touch these offsets would settle the first.
+
+### R2-ENGINE-513
+
+Two bodies take rows from map+0x3a4 through the getters `L2.02552` and
+`L2.02553`: the actor builder (RU `L2.00115`, EN `L2.00192`) and the
+mission-load row loop (RU `L2.02554`, EN `L2.02555`).
+
+| Row slot | Actor builder | Mission-load loop |
+|---:|---|---|
+| +0x00, +0x04 | shifted right by 8, placement `L2.00313` | read |
+| +0x08 | not read | pushed to `L2.02556` on `L2.02501`; a nonzero +0x124 in the result builds a 0x1e4 object with `L2.02557`, zero builds a 0x1e4 object with `R2.0068` (`L2.02558`..`L2.02559`) |
+| +0x10 | definition id (R2-ENGINE-038) | read, passed to `L2.02560` on `L2.02561` |
+| +0x14 | owner lookup; a miss logs text `L2.02562` | read |
+| +0x20, +0x22 | person arm: equal and not -1 makes both -1; +0x22 not -1 to actor word +0x96, +0x20 not -1 to word +0x94, else +0x94 = +0x96 | read |
+| +0x3c | word, sign-extended, to actor dword +8 | word + 0x6000 |
+| +0x40 | matched against group +0x1c | read |
+| +0x48 | bit 0x10 selects the person arm (0x254) or the Units arm (0x208) | bit 0x10 arm |
+| +0x50 | bits 1, 2, 4, 8 to actor +0x194, +0x19c, +0x198, +0x1a0 | not read |
+
+In ROM2 row +0x08 indexes the `L2.02501` collection, and the +0x124 of
+the record found chooses which constructor builds the 0x1e4 object; what
+the collection and the class are stays Unknown. R2-ENGINE-040 reads the
+same field as a unit class value under a ROM1 reading.
+
+Neither body reads row +0x0c, +0x1c or +0x44; the loader uses +0x44 for
+the type-8 join (R2-ASSET-119). The two mission-load bodies differ in four
+constants only, none a row offset. The other callers of the getters are the
+teardown (RU `L2.02563`, `L2.02564`).
+
+**Confidence.** High for the reads listed: both bodies were read in both
+roots and match after masking (the loop with four differing constants).
+Medium for the absence of +0x0c and +0x1c readers and for "+0x08 is read
+only by the loop": the census lists every use of the row local in the two
+bodies, and the caller census is an RU call-target scan of the two getters
+plus `add ecx, 0x3a4` sites (a navigation receipt); a row passed whole to
+a helper, or a copy of the row, would escape it.
+
+**Unknown.** What the collection at `L2.02501` and the 0x1e4 object are;
+an EN call-target scan of the getters would bound the EN readers.
