@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3845. Observation: 99. Static analysis: 3243. Mixed: 503.
+Claims labelled: 3850. Observation: 99. Static analysis: 3248. Mixed: 503.
 
 ## Ledger ai
 
@@ -575,8 +575,11 @@ Claims labelled: 3845. Observation: 99. Static analysis: 3243. Mixed: 503.
 | ALM-EDITCAST-297 | static analysis | ● active |
 | ALM-EDITLINK-298 | static analysis | ● active |
 | ALM-EDITDEL-299 | static analysis | ● active |
-| ALM-EDITPASTE-300 | static analysis | ● active |
+| ALM-EDITPASTE-300 | static analysis | ● active (amended) |
 | ALM-EDITCLONE-301 | static analysis | ● active |
+| ALM-EDITOBJ-302 | static analysis | ● active |
+| ALM-EDITSTRUCT-303 | static analysis | ● active |
+| ALM-EDITUNIT-304 | static analysis | ● active |
 | ALM-DLGPLAYERS-286 | static analysis | ● active |
 | ALM-DLGPLAYERS-287 | static analysis | ● active |
 | ALM-DLGPLAYERS-288 | static analysis | ● active |
@@ -1709,6 +1712,8 @@ Claims labelled: 3845. Observation: 99. Static analysis: 3243. Mixed: 503.
 | REG-INNCLOSE-116 | mixed | ● active |
 | REG-118 | static analysis | ● active (partially retracted) |
 | REG-INNSTAGE-117 | static analysis | ● active |
+| REG-EDLOAD-121 | static analysis | ● active |
+| REG-INMAP-122 | static analysis | ● active |
 
 ## Ledger res
 

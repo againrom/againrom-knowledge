@@ -17,7 +17,7 @@ Per-class keys are listed below. — REG-UNITS-018, REG-ROSTER-052
 | `DescText` | human-readable name (`Human Two-Handed Swordsman`, `Ogre (Lord)`). **Nothing in `rom.exe` reads it** (`UNIT-NAME-039`), installed strings are ASCII and fit 31 bytes plus NUL in the 0x20 inline field — so it is editor-facing metadata with a 31-character ceiling (`REG-DESC-096`) |
 | `InfoPicture` | portrait leaf, **without directory or extension** — the engine builds `graphics\infowindow\<InfoPicture>.bmp`, or `<InfoPicture><tier>.bmp` with the digit dropped at tier 1, from `class+0xd8` (`UNIT-PICT-036`). Read only when the drawable's `+0x18c & 0x11` is clear, i.e. for `ID >= 0x1a`; on the thirteen human classes below that it is **dead data** (`UNIT-PICT-035`) |
 | `Parent` | inherit-from class |
-| `InMapEditor` | editor-visible flag |
+| `InMapEditor` | read by the EN map editor only from its objects loader, where 0 keeps the class out of the Select objects list; the editor's units loader does not read it, so the unit dialog lists every class. Both negatives are bounded by the editor scans and are Medium beyond them, and the units loader's file is inferred (`REG-INMAP-122`) |
 | `MovePhases`, `MoveBeginPhases` | walk / walk-start phase counts |
 | `AttackPhases`, `DyingPhases`, `BonePhases`, `IdlePhases` | per-state phase counts |
 | `Flip` | **selects the sheet layout, not a blit option** — see *The loaded class record* below (`REG-UNITS-051`) |
