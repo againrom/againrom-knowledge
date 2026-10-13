@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3833. Observation: 99. Static analysis: 3231. Mixed: 503.
+Claims labelled: 3845. Observation: 99. Static analysis: 3243. Mixed: 503.
 
 ## Ledger ai
 
@@ -566,9 +566,17 @@ Claims labelled: 3833. Observation: 99. Static analysis: 3231. Mixed: 503.
 | ALM-TRIGREAD-233 | static analysis | ✔ promoted |
 | ALM-EDITDISP-277 | static analysis | ● active (amended) |
 | ALM-EDITUNIT-276 | static analysis | ● active (amended) |
-| ALM-EDITUNIT-278 | static analysis | ● active |
-| ALM-EDITDISP-279 | static analysis | ● active |
-| ALM-EDITNODE-280 | static analysis | ● active |
+| ALM-EDITUNIT-278 | static analysis | ● active (amended) |
+| ALM-EDITDISP-279 | static analysis | ● active (amended) |
+| ALM-EDITNODE-280 | static analysis | ● active (amended) |
+| ALM-EDITCAST-294 | static analysis | ● active |
+| ALM-EDITCAST-295 | static analysis | ● active |
+| ALM-EDITCAST-296 | static analysis | ● active |
+| ALM-EDITCAST-297 | static analysis | ● active |
+| ALM-EDITLINK-298 | static analysis | ● active |
+| ALM-EDITDEL-299 | static analysis | ● active |
+| ALM-EDITPASTE-300 | static analysis | ● active |
+| ALM-EDITCLONE-301 | static analysis | ● active |
 | ALM-DLGPLAYERS-286 | static analysis | ● active |
 | ALM-DLGPLAYERS-287 | static analysis | ● active |
 | ALM-DLGPLAYERS-288 | static analysis | ● active |
@@ -3837,6 +3845,10 @@ Claims labelled: 3833. Observation: 99. Static analysis: 3231. Mixed: 503.
 | TRIG-SUBZERO-102 | static analysis | ● active |
 | TRIG-UNBUILTRUN-103 | mixed | ● active |
 | TRIG-M130WIN-104 | mixed | ● active |
+| TRIG-EDITTRIG-117 | static analysis | ● active |
+| TRIG-EDITDEF-118 | static analysis | ● active |
+| TRIG-EDITVAL-119 | static analysis | ● active |
+| TRIG-EDITDEL-120 | static analysis | ● active |
 
 ## Ledger unit
 
