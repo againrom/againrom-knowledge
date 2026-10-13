@@ -422,3 +422,14 @@ cleanup callees and zeros both pointers. Internal static/dynamic route-node
 disposal and destruction timing remain Unknown. — MOVE-137
 
 The step's callees store mover `+0xa6`, `+0x86`..`+0x89`, `+0x72`, `+0x82`..`+0x85`, claim-flag bits and cell-record slots; `R0048` stores nothing (`MOVE-156`). `R1544`, which has no inventory path to the step, stores mover `+1` and links a dynamic-list node at `actor+0x17c` (tail) and `actor+0x180` (head) (`MOVE-156`). The pickers `R0392` and `R0435` store nothing outside their stack frames (`MOVE-157`, `MOVE-ALT-019`, `MOVE-ALT-020`). The cell-record hash at manager `+0x540b4` and the position record builder are read in `MOVE-158`.
+
+## Teleport position and command reset
+
+The read relocation centres Position even when old-cell release or new-cell
+entry reports failure. A successful release saves the old cell and fine
+bytes at Mover +0x86..+0x89; occupy writes +0x72 and +0x82..+0x85. The stand
+helper resets command state and pending kind, anchors a current-cell post
+and reconciles wanted facing. Local reset stores do not establish complete
+transit, route or target cleanup through the unread call closure.
+— MOVE-087 (its located-writer Unknown is narrowed), MAGIC-TELEPORT-356,
+MAGIC-TELEPORT-357

@@ -8,8 +8,11 @@ are 20 bytes in the version-990 form. Payloads start after their record
 headers; there is no separate trailer. — ALM-HDR-001, ALM-FRAME-031 (amended; framing retained),
 ALM-GRID-032
 
-The primary loader requires Tiles and Altitudes. Other records have individual
-absence, version and order rules. A map browser uses a different acceptance
+The primary reader records missing Tiles/Altitudes as status; the mission caller
+checks only the Altitudes pointer. Other records have individual absence, version
+and order rules. — ALM-OUTCOME-323
+
+A map browser uses a different acceptance
 test. — ALM-REQ-055, ALM-REQ-056 and ALM-ORD-057 (type-7 count clauses
 partially retracted), ALM-RDR-059
 
@@ -34,7 +37,8 @@ ALM-SEC-004, ALM-PLACE-033, ALM-TRIG-044, ALM-SACK-065
 ## Read and write order
 
 Read the header, then dispatch records by typeId. The primary loader gates
-recordCount>=3 and version<=1001 and requires types 1/2. Metadata precedes
+recordCount>=3 and version<=1001. Missing types1/2 set reader status; the
+mission caller has the separate ALM-OUTCOME-323 pointer gate. Metadata precedes
 its dependent records; type 2 precedes type 3. For the complete version 990
 form, write types `0,1,2,3,5,4,9,8,6,7`, derive the documented counts for types 5/4/6/8 from their
 payloads and retain the documented caster/loot/unit ordering. A missing
@@ -65,3 +69,7 @@ The record-header final word has no established numeric interpretation. The
 selected editor writer supplies a local frame slot without initializing it;
 within-map equality alone does not identify semantics. — ALM-HEADER-098,
 ALM-WRITER-099, ALM-CENSUS-101
+
+[Mission-load bounds](load-bounds.md) states the signed loop counts, local link
+arithmetic, invalid-placement decisions, shipped ranges and bounded Unknowns.
+— ALM-LOAD-320, ALM-OUTCOME-323, ALM-CORP-326

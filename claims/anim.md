@@ -267,7 +267,7 @@ reaches it, whether or not its mask carries bit 3 (`ANIM-095`).
 | ANIM-IDLE-009 | The fidget is draw state 0 forking on `IdlePhases`, and it runs on the drawable's own clock — one animation tick per timeline step. | High / Medium | ● active | [EXP-0084](../experiments/EXP-0084-idle-animation/) |
 | ANIM-IDLE-010 | Five of the 34 `units.reg` classes carry idle art; the other 29 stand on a single frame per facing, and the cadence is data. | High / Medium | ● active | [EXP-0084](../experiments/EXP-0084-idle-animation/) |
 | ANIM-TICK-011 | The animation tick has a second job — and it is the writer of tile bits 15..14 that `TERR-TILE-044` looked for and could not find. | High / Medium / Unknown | ● active | [EXP-0084](../experiments/EXP-0084-idle-animation/) |
-| ANIM-VT-012 | `CAirUnit` shares the driver and both draw passes verbatim; `CProjectile` shares none of them. | High / Unknown | ● active | [EXP-0084](../experiments/EXP-0084-idle-animation/) |
+| ANIM-VT-012 | `CAirUnit` shares the driver and both draw passes verbatim; `CProjectile` shares none of them. | High / Unknown | ● active (partially retracted, amended) | [EXP-0084](../experiments/EXP-0084-idle-animation/), [EXP-0569](../experiments/EXP-0569-teleport/) |
 
 ### ANIM-OBJ-008
 
@@ -436,6 +436,23 @@ of 33 slots without a function in each, and each base established from an
 instruction or an RTTI referrer rather than from where a run of pointers happens
 to start) / **Unknown** (what `R0558` does — the projectile's own driver
 is located and unread)
+
+**Amended.** EXP-0569 reads `R0558` whole in
+[drive.txt](../experiments/EXP-0569-teleport/evidence/out/drive.txt), through the
+return at `L16006`. ANIM-TELEPORT-168 establishes its local countdown and phase
+operands. The own driver instructions are no longer unread. The virtual helper
+`R1089`, other unread callees, complete object lifetime, scheduling and
+native frames remain Unknown; the standing High / Unknown grades are retained.
+
+**Amended.** Only the CProjectile component of the three-whole-table and
+zero-of-33-unattributed-function enumeration is partially retracted. The acquired
+[projectile_vtable.txt](../experiments/EXP-0569-teleport/evidence/out/projectile_vtable.txt)
+attributes a prefix of 21 slots through `+0x50` (`R1089`). Twelve following
+dwords have no class attribution, including zero at `L16007` (`+0x54`).
+This does not establish the table's exact extent. The CUnit and CAirUnit
+33-slot facts stand, as do the projectile body `R0556` at `+0x28`, shadow
+`R0557` at `+0x2c` and driver `R0558` at `+0x3c`. The scoped entry in
+[retracted.md](retracted.md) withdraws only that CProjectile enumeration.
 
 ## Walk cadence and the pacer
 
@@ -1120,7 +1137,7 @@ type.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ANIM-PROJ-025 | The projectile's own driver, read — closing `ANIM-VT-012`'s Unknown. A cast's map object lives by a COUNTDOWN the spawner sets, and a homing shot re-aims every tick. | High / Medium | ● active | [EXP-0139](../experiments/EXP-0139-spell-pictures/) |
+| ANIM-PROJ-025 | The projectile driver uses a countdown and refreshes a resolved target each positive-count call. | High / Medium | ● active (amended, partially retracted) | [EXP-0139](../experiments/EXP-0139-spell-pictures/) |
 | ANIM-PROJ-026 | The projectile's draw: the frame index is `Phases * facing + phase`, `Flip` HALVES the sheet exactly as it does for a unit, and two sprites outside the registry are the smoke. | High / Medium | ● active (partially retracted) | [EXP-0139](../experiments/EXP-0139-spell-pictures/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
 | ANIM-CAST-027 | (rom.exe) The projectile draw is not uniform: `R0556` switches on the picture id, with six special arms and a smoke trail in the default one. | High / Unknown | ● active | [EXP-0140](../experiments/EXP-0140-cast-art-drawn/) |
 | ANIM-PHASECLOCK-028 | (rom.exe) A projectile advances one sheet frame every TWO game ticks, and four picture ids replace that clock with their own. | High | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
@@ -1158,7 +1175,7 @@ address, the arms are: `0x0d` writes tile bit `0x2000` over a 3x3 block at tick
 8; `0x12 0x18 0x1c 0x28 0x2c 0x30 0x34 0x36 0x38 0x3e 0x40` snap to the target
 and notify it; `0x14 0x1e` do the same into the target's own slot array at
 `+0x128`; `0x22 0x24` take `phase` from a fixed 13-step ramp; `0x33` travels and
-raises a quake at tick 8; `0x3c` sets `phase = actionphase` with no modulus; the
+raises a quake at tick 8; the former `0x3c` phase=actionphase clause is withdrawn (ANIM-TELEPORT-168); the
 default travels with `phase = (actionphase / 2) % Phases`. **So caster-attached,
 target-attached, travelling and area are one mechanism**: one class, one array,
 one driver, and a `switch` on the picture id. The other spawner of the same
@@ -1172,6 +1189,8 @@ no shipped file
 switch bias and the exit are each their own instructions in a dumped listing,
 and the field names are the game's own registry keys rather than ours) / Medium
 (the per-arm reading, which is decompiled)
+
+**Amended.** The former decompiled picture-60 phase=actionphase clause is partially retracted. ANIM-TELEPORT-168 reads the increment followed by phase=actionphase-1 and direct phase draw. The entry countdown, target refresh, division and remaining per-arm grades stand.
 
 ### ANIM-PROJ-026
 
@@ -3214,3 +3233,43 @@ native same-ID retarget occurrence.
 [w62](../experiments/EXP-0528-death-lifecycle/evidence/w62-actor-create-update.txt),
 [w22](../experiments/EXP-0528-death-lifecycle/evidence/w22-client-unit-driver.txt),
 [w57](../experiments/EXP-0528-death-lifecycle/evidence/w57-actor-message-sender.txt).
+
+## Teleport relocation and presentation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-TELEPORT-167 | The read geometry uses cached drawable coordinates; Teleport's copied source cache can still feed projection. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| ANIM-TELEPORT-168 | The read picture-60 driver sets phase to incremented actionphase minus one; its drawer uses that phase directly. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| ANIM-TELEPORT-169 | The read caster body uses the Attack timeline at draw state 8; first post-relocation frames remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+
+### ANIM-TELEPORT-167
+
+R0614 reads cached Position +0x28/+0x2c. It stores screen +0x50 = arithmetic_shift_right(cacheX,3)-32*viewOriginX and +0x54 analogously for y. Footprint-centre +0x58/+0x5c is cache plus 128*(virtual tile extent-1); view-relative centre +0x60/+0x64 follows the same shift and scroll subtraction. Signed terrain-corner interpolation supplies +0x68.
+
+The complete geometry body has no own raw +8/+0xc read. MAGIC-TELEPORT-358's second object copies source cache, changes its raw point to the destination-derived point, then calls this geometry body. R0558 later copies current +8/+0xc to cache at L13400/L13401. Its slot +0x50 is R1089, not this geometry routine. MAGIC-BOLTGATE-069 bounds that different slot at its existing grade.
+
+**Confidence.** High for direct cache operands, coordinate arithmetic and the driver-tail stores. Medium for the composed old-point projection and local absence of a raw-coordinate term: virtual extent getters and external geometry scheduling were not read. No field-reader census or section scans were run.
+
+**Unknown.** When each caster/projectile cache and geometry are refreshed relative to reception and paint. Current-state interpolation in R0548 and view scrolling are distinct inputs; actual first frames, camera follow, global cache writers and indirect scheduling remain Unknown. A complete Teleport reception/frame trace through R0509 and its view frame would settle this.
+
+### ANIM-TELEPORT-168
+
+The decoded driver selector for picture 60 is index 47, value 15, target L02880. With action 1 and nonzero remaining count, R0558 increments actionphase +0x94 first, then stores phase +0x70 = actionphase-1. The common tail decrements remaining +0xa0, copies raw current coordinates into cache and returns 1. Entry with remaining 0 returns 0 before the arm.
+
+The normal producer initializes actionphase 0 and remaining 21 for both Teleport records (MAGIC-TELEPORT-358). The local countdown model gives phases 0..20 over 21 positive-count calls and a terminal zero-count call. This counts driver calls, not measured frames or elapsed time. R1089 is an unread virtual callee here; MAGIC-BOLTGATE-069 supplies its picture-60 no-work branch as prior evidence.
+
+The decoded drawer selector for picture 60 is index 53, value 5, target L13642. R0556 passes +0x70 directly as frame to sprite slot +0x18. It bypasses the default folded-direction frame expression. ANIM-PROJ-025's former decompiled phase=actionphase clause is partially retracted.
+
+**Confidence.** High for the freshly read dispatch tables, phase stores and draw arguments. Medium for the 21-call composed lifetime because the virtual callee and destruction/scheduling sweep were not freshly read. Sprite virtual implementation and actual visible stamps were not observed.
+
+**Unknown.** Removal pass, first successful call relative to spawn/paint, loaded first draw, redraw count and sprite asset frame availability. ANIM-150's picture-13 timer/sweep proof is not generalized to Teleport scheduling.
+
+### ANIM-TELEPORT-169
+
+The nine decoded state pointers of R0552 map state +0x74 = 8 to L16008, also used by states 3 and 7. This arm reads phase +0x70 through class timeline +0x58, with the class direction/block expression and Flip handling. Body positioning reads view-relative cached centre +0x60/+0x64, class sizing/centre differences, z +0x10 and terrain lift +0x68. Hero sheets +0x194/+0x198 and ordinary class sheets use their own sprite calls.
+
+The complete body also reads stone and invisibility effects; these can replace frame/palette or suppress the body by ownership. No direct actionspell +0xa4 test was found in this body. R0548's action-8 arm stores the current clock as phase, increments it and copies current position to cache. Its action-1 arm instead divides remaining x/y displacement by ticks remaining before storing current position.
+
+**Confidence.** High for the state table, positive frame/position operands and action-driver stores. Medium for the bounded absence of a Teleport-specific hide or interpolation branch in these two bodies: no section scans or indirect-call census were run. Unknown for the exact first post-relocation sprite.
+
+**Unknown.** Reception of R0059's updates in R0509, synchronization of raw/current/cache/action, geometry-versus-paint order, view/camera updates, helper effects and sprite virtuals. These bodies cannot establish immediate disappearance, a trail from the old point or the first visible new-point frame.

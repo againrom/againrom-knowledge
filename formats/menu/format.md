@@ -493,3 +493,11 @@ the exact visible destination after Esc, is Unknown. — MENU-151
   music player flag set at build and cleared only on OK. MENU-073 and MENU-074
   are amended; MENU-076's row-retention clause is partially retracted.
   — MENU-147, MENU-151, MENU-075, MENU-076 (amended)
+
+## Map cast cursor refusal
+
+The armed-mode-5 and selected-cast hover paths replace cast with move when
+capability 0x400 is set. A following click dispatches by its current cursor,
+so the move arm calls the move builder; a silent refusal is not established.
+Modifiers, panel/held-item overrides, cursor pixels, message/sound and delivery
+remain bounded by unread helpers and runtime. — MENU-CAST-153

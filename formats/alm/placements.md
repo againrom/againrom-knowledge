@@ -192,7 +192,7 @@ runs are stat overrides, and installed bytes+0x2c..+0x3f do not use 0xff.
 | +0x0c | u32 | flags | arm-specific: bit 0 selects NPC inside the Human band; ordinary Human bit 2 controls actor+0x4b high bit behind the secondary-key rule below; bit 7 supplies a constructor equipment gate (`ALM-FLAGPATH-109`, `UNIT-PLACEGEAR-098`) |
 | +0x10 | u32 | **definition id** | present only when `formatVersion > 0x3da`; when nonzero and `!= 0xcdcdcdcd` it **overrides** `+0x08`/`+0x0a` (matched on the definition's parameter `0x18`). **But it is read only when `+0x0c` bit 0 is clear** — `R0151` tests the NPC flag *outside* the definition-id test, so a record carrying both takes the npc arm and this field is never read (`MISSION-ARM-006`) |
 | +0x14 | u32 | **owner** | low u16 used: 1-based physical slot in the type-5 array |
-| +0x18 | u32 | **type-8 link** | 1-based, bounded by `meta+0x2c`; `0` = none. The loader writes this record's `+0x40` word into entry `[value−1]` of `mapObj+0x2dc`. The EN map editor stores the value minus 1 on load and writes it plus 1, so it round-trips (`ALM-SAVE-239`) |
+| +0x18 | u32 | **type-8 link** | Subtract one modulo 2^32, then reject -1 or signed index >= signed `meta+0x2c`; high-bit wire values can pass. `0` = none (ALM-LINK-321; ALM-UNIT-040 guard clause partially retracted). The loader writes this record's `+0x40` word into entry `[value−1]` of `mapObj+0x2dc`. The EN map editor stores the value minus 1 on load and writes it plus 1, so it round-trips (`ALM-SAVE-239`) |
 | +0x1c | u32 | — | installed values 0..14; not a field-width limit. No direct reader in the established game record-holder family; stream escape remains bounded. The editor reads, copies and writes an opaque dword. Meaning Unknown (`ALM-TAILDIR-081`, `ALM-PLACESTREAM-111`, `ALM-PLACEEDITOR-112`) |
 | +0x20 | u16 | **current health** | absent value `0xFFFF`; applied to `actor+0x94` (`UNIT-PLACE-034`), signed and unclamped, with no skip for 0 (`UNIT-144`). Optional in installed maps (`ALM-TAILU16-082`): 30 records authored, 21 at 0 and 9 at -10 (`UNIT-143`). A 0 enters the death arm of `HERO-DEATH-026` (amended); the frame-0 draw is Unknown |
 | +0x22 | u16 | — | absent value `0xFFFF`; authored on exactly the records `+0x20` is and with a different value set, and **no reader** (`ALM-TAILU16-082`) |
@@ -540,3 +540,22 @@ or any actor/order stores. It creates no Player and assigns no substitute
 owner (`AI-476`). The owner/group-id membership rule applies after that
 admission check (`AI-449`, `AI-GROUP-009`).
  The unconditional map admission reading of `AI-449` and `AI-GROUP-009` is superseded by `AI-476`; constructor facts and matched-record membership stand.
+## Mission-load invalid-value boundary
+
+[Mission-load bounds](load-bounds.md) distinguishes local skip, continuation,
+truncation and pointer-index arithmetic from completed native behavior.
+Building setup can skip a definition without refusing the map; a missing
+structure owner continues registration, while a missing unit owner skips
+construction. Item classes0/15 skip an element. Nonzero loot-to-caster links
+use unchecked local slot arithmetic, and missing stock actors reach local
+dereferences. These are bounded code paths, not observed faults.
+— ALM-STRUCT-324, ALM-127 (amended), ALM-CLS-036 (amended),
+ALM-OWN-039 (amended), UNIT-LOAD-159, ITEM-LOAD-180,
+ITEM-OWNED-028 (amended), ALM-LINK-321, ALM-LINK-322,
+ALM-EFFLINK-072 (amended)
+
+Type8 record and element counts are u32 on wire but signed loop operands;
+the 2^32-1 execution-limit clauses of ALM-LIM-067 are partially retracted.
+The selected corpus reaches seven elements per loot record. Arbitrary
+numeric text/script reference bounds remain Unknown at the unread binder.
+— ALM-LOAD-320, ALM-CORP-326, ALM-SCRIPT-327

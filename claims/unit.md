@@ -597,3 +597,21 @@ Evidence is `rom.exe` static analysis and the installed Data.bin Units collectio
 **Confidence.** Medium: loader reuse and cull are cited reads, but the path of every mission entry was not traced.
 
 **Unknown.** Whether town entry and exit rebuild the Player; the first send after mission entry (the send is gated on a change of `count>>1`, so an unchanged Diary may send nothing).
+
+## Mission-load bounds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| UNIT-LOAD-159 | The ROM1 unit walker skips a missing owner, zero actor id or failed placement result. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+
+### UNIT-LOAD-159
+
+R0151 tests owner lookup R0425 before construction. Zero reports through R0422 and skips the placement. After construction, actor word +0x0e == 0 reports, deletes the object through virtual +4 and skips. A zero return from R1145 likewise reports, deletes and skips; each branch continues the placement walk rather than returning a map error.
+
+The walker splits signed class <26 versus the other band, while type lookup R0495 receives low-byte keys. That lookup searches Humans parameter16 for primary below 64 except 26/27, otherwise Units parameters29/30, starts at 1 and returns 0 on a miss. Definition lookup R0498 searches Humans backwards above 0 and returns 0 on a miss. The walker passes the returned row to table accessors; completed fallback through row0 depends on unread accessors/constructors. The NPC arm forwards low8 secondary through R1285 to unread R2246 and dereferences the result. The whole wrapper proves no table-bound semantics.
+
+Coordinates are shifted arithmetically by 8; R1145 keeps low8 x/y/r. The radius0 path attempts twice through RNG R0861 and setters before predicate R1287 and commit R0050. Predicate admission and RNG behavior are not newly established. The walker compares raw group dwords for equality and requests a new group on no match.
+
+**Confidence.** High for these local tests, branches, key narrowing and lookup miss returns in complete bodies. Medium for absence of a class/group/coordinate bound in the selected walker and lookups, and for completed skipped/fallback mission outcomes. Zero section scans; callees, computed offsets, copied pointers and indirect calls bound the negative.
+
+**Unknown.** Arbitrary invalid class/NPC/definition admission, row0 content, group allocation, R1287's out-of-map rule, message receiver and actual running mission. No global clamp or universal refusal is established.

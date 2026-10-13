@@ -149,8 +149,9 @@ actionsegments  = a hard-coded switch on the picture id (below)
 is copied target `+88/+8c` plus the Selection fallback. Its construction
 cache `+28/+2c` still holds the first object's source-derived point; the
 driver later copies raw coordinates into it. The caster-centre placement
-clause of MAGIC-CASTSPAWN-033 is partially retracted. Native first draw and
-external geometry/draw ordering remain Unknown. — MAGIC-265
+clause of MAGIC-CASTSPAWN-033 is partially retracted. The construction
+geometry reads the copied source cache (ANIM-TELEPORT-167).
+Native paint ordering remains Unknown. — MAGIC-265
 
 ### Cast origin and human equipment
 
@@ -284,3 +285,17 @@ simulation transport's counter10. Prismatic victim preparation runs during
 admission; ordinary phase5 preparation follows charge. Native first-frame
 ordering and visible impact alignment remain unmeasured. — MAGIC-DELIVERY-170,
 MAGIC-CASTCLOCK-171
+
+## Teleport records and cast cue
+
+The inspected normal caster producer creates two picture-60 records with
+remaining count 21 and actionphase 0. The first uses the source fallback;
+the second changes raw position to the destination fallback after copying
+the first record. Its copied source cache is the input to its construction
+geometry call. The count measures driver calls, not native visible frames.
+— MAGIC-TELEPORT-358, ANIM-TELEPORT-167, ANIM-TELEPORT-168
+
+The CUnit cast cue hook selects bank entry 60 and supplies the caster's raw
+point when the action clock equals class AttackDelay. The two records do not
+prove two sounds. Cue filename, actual audible start and alignment with the
+relocation remain Unknown. — MAGIC-TELEPORT-359

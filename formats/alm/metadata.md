@@ -159,14 +159,14 @@ road; bit-13 tiles composite over `dirt.bmp`.
 
 ### Main and light-parser tile storage
 
-The main type-1 arm requests `2*W*H` bytes into `M+0x0c`, with dimensions
+The main type-1 arm requests `(2*W*H) modulo 2^32` bytes into `M+0x0c`, with dimensions
 at `M+0/+4`. With a complete lower read, it preserves the word before the
 simulation ingest. The light parser has dimensions at `P+4/+8` and its own
 tile pointer at `P+0x0c`; after reading, it applies `word &= 0xdfff` to every
 tile. View binding stores `P` at `view+0x80`, and renderers use that pointer.
 The binder copies dimensions, not the tile plane. Equal member offsets do
 not prove that the two reader layouts share an allocation.
-— ALM-TILEMAIN-121, ALM-TILEVIEW-122
+— ALM-TILEMAIN-121, ALM-TILEVIEW-122, ALM-LOAD-320, ALM-GRID-325
 
 The light parser preserves `0x4000` as well as `0x8000` and `0xc000`.
 Later render-grid updates can replace bit 13, stamp bits 14/15 together or
@@ -362,7 +362,8 @@ The editor's Global description dialog (menu 0x8057) writes the name at `E+0x94`
 program-side length bound (Medium: the edit controls' limits are unread), and each is stored through its NUL only, so the
 bytes after the NUL keep their earlier values. The Map Information dialog (menu 0x8056) displays counts and stores nothing
 into the map object (Medium: its helpers are unread). The reader's defaults for name, text, `+0x70` and `+0x74` run only
-when no type-0 record was read (Medium). — ALM-DLGINFO-290, ALM-DLGINFO-291, ALM-STRCOPY-293
+when no type-0 arm was entered (Medium retained). The local flag store and final test are directly read.
+— ALM-DLGINFO-290, ALM-DLGINFO-291, ALM-STRCOPY-293
 
 The new map has two players, `Self` and `Enemy`. A player record is 76 bytes:
 `+0x08` (1, then 2), `+0x30` (0, then 1), `+0x0c` (0, 0), the 32-byte name

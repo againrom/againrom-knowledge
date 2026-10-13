@@ -174,3 +174,13 @@ water cells. These counts exclude objects, stamped simulation borders,
 occupants and runtime flags. Every measured altitude is signed 0..127;
 all 216 map/resolution camera bands are nonempty. Native blocked-versus-open
 frame differences remain Unknown. — TERR-220
+
+## Player click coordinate boundary
+
+Hover x is arithmetic_shift_right(screenX,5)+viewOriginX. The projected-row
+helper searches rows -3 through visibleRows+6 and returns the first inclusive
+vertical span; no match returns visibleRows+4. Hover adds viewOriginY.
+The point builder keeps low words and the setter low bytes. This does not
+establish a clamp or refusal against actual map width/height. Projected-grid
+producers, viewport/input and server boundaries remain Unknown.
+— TERR-CLICK-263

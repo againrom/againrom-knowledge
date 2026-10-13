@@ -4,7 +4,7 @@
 
 ## Projectile state
 
-`ANIM-PROJ-025`, `ANIM-PROJ-026` (its trail-array field clause is retracted;
+`ANIM-PROJ-025` (its picture-60 phase clause is partially retracted), `ANIM-PROJ-026` (its trail-array field clause is retracted;
 `ANIM-140` gives count `+0x140` and data `+0x13c`). `CProjectile` overrides body draw, shadow and driver,
 so nothing above this heading applies to it. The engine's own field names come from its savegame
 section `[Prj%d]`:
@@ -496,3 +496,20 @@ The selected client stage 5 branch unlinks and deletes its actor drawable;
 stages 2..4 use a shared arm. The selected creation/update path
 writes its supplied drawable on key hit as well as miss. Upstream allocation,
 the complete sender/decoder link and native timing remain Unknown. — ANIM-163
+
+## Teleport cached origin and phase
+
+Picture 60 increments actionphase, then assigns phase = actionphase - 1.
+Its special drawer passes that phase directly, bypassing folded-direction
+frame arithmetic. Normal construction starts remaining at 21 and actionphase
+at 0; the bounded countdown model gives phases 0..20 and a later zero-count
+return. This is Medium as a complete lifetime, with scheduling and the
+unexpanded virtual callee remaining bounded. — ANIM-TELEPORT-168
+
+The second record's destination-derived raw point coexists with the copied
+source cache. Shared geometry reads that cache; the driver tail later copies
+current raw coordinates into it. Actual first draw and external geometry/paint
+order remain Unknown. — ANIM-TELEPORT-167
+
+ANIM-PROJ-025's former decompiled picture-60 phase=actionphase clause is
+partially retracted; the remaining driver clauses stand. — ANIM-TELEPORT-168

@@ -35,7 +35,7 @@ Vocabulary note, because the engine's own words differ from the editor's: a cond
 | TRIG-DIST-014 | Every distance a check computes is CHEBYSHEV, all five arms share one helper, and the editor's "circle" is a square. | High / Medium | ● active | [EXP-0101](../experiments/EXP-0101-mission-end/) |
 | TRIG-COUNT-015 | Check opcode 1 — the editor's *"How many units contains this group"* — is FIVE instructions and walks nothing. | High | ● active | [EXP-0107](../experiments/EXP-0107-group-count/) |
 | TRIG-GRPLIST-016 | `group+0x0c` is the group's own `CObList` element count, and the counted list is the group itself — not the embedded list at `group+0x20`. | High | ● active | [EXP-0107](../experiments/EXP-0107-group-count/) |
-| TRIG-REAP-017 | Teardown takes an actor out of its group in the same sub-tick teardown itself fires, so the population checks are living-of-the-torn-down-only behaviourally while containing no health test. | High / Medium | ● active (amended) | [EXP-0107](../experiments/EXP-0107-group-count/), [EXP-0385](../experiments/EXP-0385-dying-and-crossing-tick/EXP-0385.md) |
+| TRIG-REAP-017 | Teardown takes an actor out of its group in the same sub-tick teardown itself fires, so the population checks are living-of-the-torn-down-only behaviourally while containing no health test. | High / Medium / Unknown | ● active (amended) | [EXP-0107](../experiments/EXP-0107-group-count/), [EXP-0385](../experiments/EXP-0385-dying-and-crossing-tick/EXP-0385.md), [EXP-0570](../experiments/EXP-0570-empty-groups/EXP-0570.md) |
 | TRIG-EMPTY-018 | The shipped scripts of both roots author this check almost exclusively as *"is this group wiped out"*, and under a count-everything reading 81 of their 92 comparisons would be permanently false. | High | ● active | [EXP-0107](../experiments/EXP-0107-group-count/) |
 
 ### TRIG-EVAL-001
@@ -157,6 +157,19 @@ The arm is `table[0]` of `TRIG-COND-003`'s 22-entry table, **`L12353`**, taken f
 **Confidence.** High for the removal, the sub-tick placement and the ordering (three routines read whole, every quoted test a named instruction, each caller set a `callto:` sweep on the repaired table with 0 orphan) / **Medium** for the human-vs-scenario split, whose discriminating content is the *meaning* of `Player+0x28` — that is `UNIT-OWNER-009`'s and is cited, not re-derived; only the branch polarity at `L12374` is read here. **Not established:** whether a save can restore an actor already dead and still in a group — the `re:` sweep that found the two immediate writers of `+0x54 = 0x10` cannot see a deserialized value, and nothing above rests on that writer set being complete, because the reaper's test reads the field whoever wrote it
 
 **Amended.** Narrowed; the living-only and no-corpse-in-group clause is recorded in `claims/retracted.md`.
+
+**Amended.** EXP-0570 narrows the empty-Group lifetime clause through
+PARTY-042 and AI-628. High applies to the zero member count, zero +28 on
+the Player reached through Group+44, the reached cleanup call and teardown
+ordering. Invoking R1582 -> R2060 -> R2061 does not prove
+completed destruction. Skipping that explicit arm for nonzero Player+28
+does not prove survival or pointer validity; flat-index removal still follows.
+Composed lifetime effects are Medium. Final Group lifetime and post-callback
+list identity remain Unknown pending the four Group-destructor callees
+L16019/L16020/L08741/L16021, pool release R1355,
+flat-index comparator/release R0072/R0303 and actor virtual targets.
+The existing corpse-stage narrowing, timing, owner-meaning Medium and
+corpse-stage retraction stand.
 
 ### TRIG-EMPTY-018
 
@@ -465,7 +478,7 @@ Former headline: Corpus census and limit analysis for check opcodes 4, 16 and 21
 | TRIG-HEROORD-075 | A hero ordinal is a role test, not a roster position: `R0508` returns the first named actor of the first player's flat list, then of the actor registry, that passes a typeID, class-bit and face test. | High / Medium | ● active (amended) | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
 | TRIG-HEROTPL-076 | Ordinal k >= 1 applies the `Flags` tokens of registry section `npc(21+k)`, so 10002..10006 name five roles, not five roster slots; the template table is indexed by section number. | High / Medium | ● active | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
 | TRIG-HEROBIND-077 | A hero ordinal is resolved only in the script binder, once per node reference, at map load and again in the world serializer's restore arm after players and actors load, so a SAV load re-resolves from loaded state. | High / Medium | ● active (amended) | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
-| TRIG-HEROFAIL-078 | An ordinal with no qualifying actor resolves to 0, logs `Can't resolve hero %d.` and leaves its node unbuilt without stopping the load; a missing template record, an ordinal above 234 and an empty player list are unguarded. | High / Medium | ● active | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
+| TRIG-HEROFAIL-078 | An ordinal with no qualifying actor resolves to 0, logs `Can't resolve hero %d.` and leaves its node unbuilt without stopping the load; a missing template record, an ordinal above 234 and an empty player list are unguarded. | High / Medium | ● active (amended) | [EXP-0427](../experiments/EXP-0427-hero-ordinals/) |
 
 ### TRIG-BIND-063
 
@@ -542,6 +555,8 @@ A scan that finds the actor under one condition and not another, such as a prima
 **Confidence.** **High** for the 0 result, the world-flag and null-primary gates and the log format string (instructions read whole, emulated). **Medium** for the unbuilt-node and continued-load consequence (cited from `TRIG-BIND-010` and one owner-observed load; the log function is unread). **Medium** for the unguarded inputs (instruction reading only).
 
 **Unknown.** What the log function does besides writing the text. The slot-0 value in any specific map.
+
+**Amended.** ALM-OUTCOME-323 reads R0422: session+0x0c nonzero selects R1347 and the message0x471 sender; zero selects unread R0443. Visible text delivery and other logger behavior remain Unknown, so the composed consequence stays Medium.
 
 ## Hero ordinals over map-placed actors
 

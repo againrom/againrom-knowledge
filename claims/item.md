@@ -1032,7 +1032,7 @@ on this code read is not independent corroboration.
 |---|---|---|---|---|
 | ITEM-SPAWN-026 | A sack has a sixth origin, the `.alm`, and on a single-player campaign map it is the only one that runs at load. | High | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
 | ITEM-SPAWN-027 | The random treasure scatter runs on multiplayer maps only, at both of its call sites, so a campaign map has authored sacks and no random ones. | High | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
-| ITEM-OWNED-028 | A `.alm` type-8 record whose `+0x04` is non-zero is not a sack: it stocks an actor that already exists. | High / Medium | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
+| ITEM-OWNED-028 | A `.alm` type-8 record whose `+0x04` is non-zero is not a sack: it stocks an actor that already exists. | High / Medium | ● active (amended) | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
 | ITEM-CODE-029 | An authored item is a packed `u16`, and its bits 8..11, the nibble below the top one, pick the C++ class. | High / Unknown | ● active (amended) | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
 
 ### ITEM-SPAWN-026
@@ -1121,6 +1121,8 @@ field `ITEM-CONT-004` independently identified as the carrier. Medium for what
 the ids identify: the key is `actor+0x8` and the map is built from the
 registry, but nothing here reads what writes `actor+0x8` or what the shipped
 values 1..N correspond to in the `.alm`'s own record sets.
+
+**Amended.** ITEM-LOAD-180 adds the missing-actor boundary: the selected nonempty stock path dereferences the lookup result without a local null branch. Empty element lists do not reach that operation. No native fault is asserted; existing destinations and corpus facts stand.
 
 ### ITEM-CODE-029
 
@@ -3583,7 +3585,7 @@ changes to slots, non-Weapon overrides and exceptional completion.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ITEM-MAGROW-177 | The class-14 initializer checks the MagicItems row count and assigns an in-range code word; completed row binding and code persistence are Medium. Its invalid-row path posts an error; the composed row-less outcome is Medium. | High / Medium | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
+| ITEM-MAGROW-177 | The class-14 initializer checks the MagicItems row count and assigns an in-range code word; completed row binding and code persistence are Medium. Its invalid-row path posts an error; the composed row-less outcome is Medium. | High / Medium | ● active (amended) | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
 
 ### ITEM-MAGROW-177
 
@@ -3598,3 +3600,21 @@ Population: EN `rom.exe` (SHA-256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14
 **Confidence.** **High** for the initial stores, comparison, message-post sequence, observed in-range code-word assignment and subsequent calls. **Medium** for the completed in-range object and row binding, the completed invalid-row object and item 5. The body extents do not establish the missing return instructions. Count 49 is reused at Medium; the downstream add path cannot raise the composed grade.
 
 **Unknown.** `R0891` past `L15949`, `R0520` past `L15951`, row accessor `L15948`, `R0992`, virtual `[vtable+0x4c]`, base constructor `R0923`, the three kind strings, message `0x471`'s handler, and `R0930`'s virtual `[vtable+0x50]` and later readers on a row-less item. Complete these bodies to settle object completion and code persistence; no further acquisition is made here.
+
+**Amended.** ITEM-LOAD-180 reads factory R0520 through its final return, closing only the factory-epilogue Unknown. Initializer R0891 past L15949 and all other listed callees remain unread here; neither completed-object grade is raised.
+
+## Mission-load bounds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-LOAD-180 | ROM1 loot build skips null factory results; its stock path locally dereferences the actor. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+
+### ITEM-LOAD-180
+
+R0519 keeps the item's low16 bits: class bits8..11, material bits12..15, shape bits5..7 and row bits0..4, except class14 uses low8 as row. The complete factory R0520 returns null for class0/15 and calls constructors R0969,R0970,R0971,R0972 for classes1,2,3..13,14.
+
+In complete consumer R0461, a null factory result skips only the element and continues the loot record. Nonzero owner looks up the actor; the selected stock path subsequently reads its vtable +0x3c or carrier +0x7c without a local null-result branch. An empty element list does not reach that dereference. Ground loot uses owner zero and forwards low-byte shifted coordinates to unread sack maker R0472. Type9 actor/building target misses, in contrast, are tested, reported and skipped. The cell arm (X or Y nonzero and unsigned A<4) requests tail entries0/1 without a local count test before calling R0227.
+
+**Confidence.** High for masks, null factory returns and caller branches in whole bodies. Medium for missing stock/cell-entry bounds and possible faults: no section scans or runtime tests, and the lookup, item constructors, virtual calls and sack/cell helpers remain unread. ITEM-MAGROW-177's class14 initialization conclusions retain their published grades; reading the factory's final return does not close the initializer.
+
+**Unknown.** Invalid rows/materials/shapes inside constructors, null lookup representation, effects of insufficient type9 tails, later item validity and native fault/display outcome.

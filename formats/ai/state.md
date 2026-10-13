@@ -164,11 +164,11 @@ registration, null-owner spell outcomes and persistence remain Unknown
 
 ## Empty Group prefix at join
 
-The join walk's head emptiness/count checks, first-element selection, direct
-removal invocation and selected Group destructor/deallocation call sequence
-are High. Successful unlink, leading-prefix progression and the remaining-list
-interpretation are Medium, conditional on unread collection helpers `L14318`
-and `L14320` finding and unlinking the selected entry as assumed. Under that
-condition, the loop destroys leading empty Groups until a nonempty head or one
-Group remains; it does not sweep later empty Groups behind a nonempty head.
-Transitive callback mutations remain Unknown. — AI-479
+The join prefix tests zero head members and Group-list count above one, calls
+removal and selects the head again. The read pointer lookup, unlink, count and
+head getters close the former collection edge. These local operations are High.
+With no transitive list mutation, leading empty Groups are removed until a
+nonempty head or one Group remains. Remaining-list progression after cleanup
+callbacks stays Medium; full carry/start and exceptional effects stay Unknown.
+AI-449's map-admission clause is superseded; its constructor facts stand.
+— AI-449, AI-479, AI-628, AI-629

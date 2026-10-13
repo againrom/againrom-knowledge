@@ -302,3 +302,13 @@ animation clock, and separately replaces the shade table with a greyscale one; b
 effect record's `+0x0e` rather than on `actor+0x144` (`MAGIC-STONEDRAW-084`). The two are separate
 mechanisms in the two hierarchies this ledger's header keeps apart: the draw substitution is
 presentation and is not serialized, the action refusal is simulation and is.
+
+## Teleport caster projection and first-frame boundary
+
+The shared geometry body projects cached drawable +0x28/+0x2c and the view
+origin; its centre adds the virtual tile extents. The read caster body uses
+that cached centre, lift and sprite/class sizing. State 8 selects the class
+Attack timeline; movement's separate driver arm divides remaining displacement
+by ticks remaining. No Teleport-specific hide was found in these own bodies
+(Medium). Reception, cache refresh, camera updates and the first post-relocation
+sprite remain Unknown. — ANIM-TELEPORT-167, ANIM-TELEPORT-169

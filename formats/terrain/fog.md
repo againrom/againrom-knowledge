@@ -93,7 +93,7 @@ tile word directly: `R1657` projects the pair onto a **per-vertex** dword grid e
   Raw `01` takes the same default arm as `00`. The known stamp writes `11`; the periodic clear maps `01` to `00` and `11` to `10`. This does not rule out raw authored `01` or an additional writer.
 - **Dispatch.** `R0379` reads the four corner vertices (`L10580` to `L10581`) and branches (`L10582` to `L10583`) on all four equal to 0, all equal to `0x10`, all equal to 8, or otherwise. A cell whose corners disagree is a gradient; one fog value per cell cannot draw it.
 - **Table.** The pointer at `L03341` is built once by `R0788`: 17 rows (L = 0..16) of `stride` 16-bit entries, where stride is 65536 or 8192 depending on the flag at `L03346` (row addressing at `L07810`). `LUT[L][px]` scales each channel index by `v * (16-L) >> 4`, saturates at `0xff` and repacks. Row 0 is the identity, row 8 is `(px>>1) & [L07813]`, row 16 is 0. These were checked against the engine's own two table-free fast paths over all 65536 pixel values, RGB565 (mask `0x7bef`) and RGB555 (`0x3def`): 65536/65536 on all three rows. The word at `L07813` is the sum over channels of `(0x7f >> (8-bits)) << shift` (`L10585` to `L10586`).
-- **Clock.** `R0374` clears bit 14 over the whole map (W*H words), then re-stamps every drawable in `+0x9b8`. Its one caller `R0334` gates it twice: a non-zero word at `L01661` skips the clear and freezes the layer (`L02610`); and the counter at `CMapView+0xa70` (`ANIM-CLOCK-001`) must be a multiple of 32 (mask `0x1f` at `L10588`). So the clear runs once every 32 presentation ticks, about 2 s at the default speed index and about 4 s at the slowest. Neither `server+0x00` nor `server+0x04` appears on this path: the fog is not simulation state, is not hashed, and stops when rendering stops.
+- **Clock.** `R0374` clears bit 14 over the whole map (W*H words), then re-stamps every drawable in `+0x9b8`. Its one caller `R0334` gates it twice: a non-zero word at `L01661` skips the clear and freezes the layer (`L02610`); and the counter at `CMapView+0xa70` (`ANIM-CLOCK-001`) must be a multiple of 32 (mask `0x1f` at `L10588`). So the clear runs once every 32 presentation ticks, about 2 s at the default speed index and about 4 s at the slowest. Neither `server+0x00` nor `server+0x04` appears on this acquired clear/stamp path, whose update stops when rendering stops. This local path does not settle direct simulation reads or hashing of the tile pair. — TERR-FOG-086
 - **Gates.**
   1. The shroud pixels above.
   2. `R0378` ORs the four corner words; when the top two bits of the result are not both set it writes `drawable+0x78 = 1`, the sprite pass's guard (`L10595` to `L10597`). Aggregate `0xc000` stores 0. One `0xc000` corner suffices but is not necessary: separate `0x8000` and `0x4000` corners also pass. `+0x7c` latches `+0x10c` on change.
@@ -102,9 +102,18 @@ tile word directly: `R1657` projects the pair onto a **per-vertex** dword grid e
 - **Edge.** The map border is black because it is never seen: level 16, the same mechanism at its maximum, and the 7-cell stamp margin of `TERR-FOG-080` (superseded) is why it is never lit. There is no separate edge treatment.
 - **Reveal.** Permission to stamp is bit 3 of `[[mapView+0x9b4]+0x38][player]`, and that array has three writers: the setup store in `R0709`; dispatcher opcode 33 (`0x21`, arm `L07808`), which writes one entry at `L07804`; and dispatcher opcode 45 (`0x2d`, arm `L07805`), which resizes the array and copies it wholesale out of the message body at `L07807` (destination `[[view+0x9b4]+0x38]`, source `msg+0xe`, length `[msg+0xa]*2` bytes). The opcode is `3 + (slot - L02524)/4`, from the dispatcher's own jump-table indexing. A wholesale copy carries no displacement in the bulk copy.
 
-TERR-FOG-086 is partially retracted only for its individual-corner equivalence.
-The aggregate gate, field stores and latch described above remain supported;
-the admitted raw domain is separate from the known stamp/clear-produced states.
+TERR-FOG-086 is partially retracted for its individual-corner equivalence and
+its exhaustive two-effect and global simulation-negative meanings. Its two
+render effects are limited to the acquired render population. The aggregate
+gate, field stores and latch remain High; the immediate-reference
+simulation-reader negative remains Medium. The admitted raw domain is
+separate from known stamp/clear-produced states.
+The tile pair also gates client command choice. The read hover arms can
+replace cast with move, and a later click dispatches by the current cursor
+and can call the move builder. These local branches are High; player
+outcome and feedback are Medium. Native delivery, runtime feedback and
+direct simulation-field use remain unsettled.
+— TERR-FOG-086, TERR-CLICK-262, MENU-CAST-153
 
 **The AI's vision is a second implementation of this same algorithm, not this one**
 (`TERR-FOG-088`). It lives in an object embedded at `world+0x58ee8` — so `AI-SIGHT-006`'s byte
@@ -170,3 +179,13 @@ The two acquired executables are byte-identical. The bounded raw `.text`
 decode and selected `.rdata` pointer scan leave computed pointers, bulk
 copies, indirect targets and cast/teleport/structure writers open. No EN/RU
 runtime or data-dependent first-frame equality is established. — TERR-FOG-237
+
+## Player cast hover predicate
+
+The cast hover guard ORs the high pairs of four neighbouring tile words.
+Aggregate 0xc000 passes; every other aggregate sets capability 0x400.
+Four unseen corners and four explored-only corners both fail. One visible
+corner passes; separate raw 0x8000 and 0x4000 corners also pass. The clicked
+word alone does not decide, and no individual-visible-corner equivalence is
+claimed. Arming, scheduling and unread downstream predicates remain open.
+— TERR-CLICK-262

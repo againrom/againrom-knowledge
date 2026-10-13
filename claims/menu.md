@@ -2236,3 +2236,19 @@ read handler/setter. The reused checkbox contract is a separate authority.
 runs, and automatic stored-value application through unexamined aliases.
 An owner run with a fresh profile and stored 0/1, tracing config+0,
 player+0x20 and permutation at build/click/next-track, would settle timing.
+
+## Map cast cursor refusal
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-CAST-153 | The read armed and selected-cast hover arms replace cast with move for capability 0x400; a later click dispatches by the current cursor and can call the move builder. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+
+### MENU-CAST-153
+
+In R0219's decoded armed-mode table, mode 5 selects the cast pointer at L16028. Its 0x400 guard changes that pointer to move at L16029. The separate selected-cast path sets cast at L01556 and replaces it at L01561 for the same capability. It can also replace cast when mask&3 is zero and R0094 is nonzero. Modifiers, eligibility, child rectangles and held-item state can override the selected-cast result. Changed nonzero pointers call unread R0320.
+
+The complete R0211 reads the current cursor handle. The move-handle arm calls R0215 with +0x994/+0x998. Its cast arm selects the point/unit builder. Drag-size and empty-selection branches call the selection helper. The cast tail can clear armed mode and invoke panel/reset helpers. There is no repeated own fog test in this click body; zero displacement, rel32 and dword scans were run.
+
+**Confidence.** High for the literal cursor replacements and branch/call targets. Medium for visible refusal feedback or another order: the cursor adapter, move builder, panel helpers, preceding input dispatcher and runtime timing are unread. A fog refusal is not established as a silent no-op.
+
+**Unknown.** Message, sound, actual cursor pixels and native order delivery. Read R0320, R0215, R0317, R0335, L00204 and the input dispatcher to settle those effects.

@@ -3677,14 +3677,18 @@ caller confidence stand; attacker-class occurrence remains Unknown.
 - `R0150` (`w01`, whole) clears `0x14` dwords, stores bytes `+0x08`, `+0x09`, `+0x20` 0 and `+0x45` = 1 (`L14231`), and puts a new word list at `+0x4c` (`L00291`). Its one caller is `L14232` in the Group constructor `R0149`.
 - `R0149` (`w02`, whole) builds the base and the `+0x20` list, stores `+0x40` = `+0x44` = 0 and `+0x3c` = the new AI block; it writes no AI field itself. `s01` finds 13 direct callers and no stored address. `R0152` (`w02`) detaches the actor from its old Group, appends it, stores `actor+0x70` and `Group+0x44` = `actor+0x14`; it has no AI access.
 - Map placements: the type-6 spawner joins each unit to the Player's Group whose `+0x1c` equals the record's group id, or builds one (`L00294`..`L00296`, `w03`; `AI-GROUP-009`, `SAV-GRPFIRSTSAVE-579`).
-- Carried members: the join walk `R0065` builds no Group for a member (bounded to the routines read: the walk head and its member loop). Its head (`w10`) takes the first Group of `player+0x24` (`L14233`); when there is none it logs `Oops - player has no groups` (string `L07360`, `t01`) and builds and appends one (`L14234`..`L14235`). While that Group's `R0197` returns 0 and the list holds more than one Group (`L14236` above 1) it calls `R1582` on it and takes the new first Group (`L14237`..`L07334`). Each member keeps its `actor+0x70` Group, the reused Player's (`PARTY-PERSIST-028`). Callers of `R0149` not read: `L14238` (the Group build in the carry arm `L07346`, a planned window never read), `L07379`, `L14239`, `L14240`, `L14241`, `L14242`, `L07279` (the Group LOAD), `L14243`, `L14244`, `L14245`, `L14246`.
+- Carried members: the join walk `R0065` builds no Group for a member (bounded to the routines read: the walk head and its member loop). Its head (`w10`) takes the first Group of `player+0x24` (`L14233`); when there is none it logs `Oops - player has no groups` (string `L07360`, `t01`) and builds and appends one (`L14234`..`L14235`). While that Group's `R0197` returns 0 and the list holds more than one Group (`L14236` above 1) it calls `R1582` on it and takes the new first Group (`L14237`..`L07334`). Each member keeps its `actor+0x70` Group, the reused Player's (`PARTY-PERSIST-028`). Callers of `R0149` not read by the original window set: `L14238` (the Group build in the carry arm `L07346`, a planned window never read), `L07379`, `L14239`, `L14240`, `L14241`, `L14242`, `L07279` (the Group LOAD), `L14243`, `L14244`, `L14245`, `L14246`.
 
-**Confidence.** **High** for the constructor stores, the caller sets and the walk head's branches (complete bodies, `CALL rel32` targets from the bytes). **Medium** for the reading of `R0197` as an empty test, `R1582` as removal from the list and `L14233` as the first element: their bodies were not read. **Medium** for "no mission-start routine builds a Group for a carried member": it covers the routines read (the spawner arm and the join walk), and eleven of the thirteen direct callers of `R0149` were not read, the carry arm's `L14238` among them.
+**Confidence.** **High** for the constructor stores, the caller sets and the walk head's branches (complete bodies, `CALL rel32` targets from the bytes). **Medium** for the reading of `R0197` as an empty test, `R1582` as removal from the list and `L14233` as the first element: their bodies were not read in that window set. **Medium** for "no mission-start routine builds a Group for a carried member": it covers the routines read (the spawner arm and the join walk), and eleven of the thirteen direct callers of `R0149` were not read, the carry arm's `L14238` among them.
 
 **Unknown.** The routine around `L14230`. Whether a Group the walk head removes is freed. The unread callers of `R0149` named above, of `R0063` (`L01873`, `L14247`, `L01874`) and of `R0125` (`L00378`, `L00596`, `L00949`, `L00388`, `L00950`) as to whether any runs at a mission start.
 
 
 **Amended.** AI-476 supersedes the unconditional map-record admission reading. The membership rule applies after the owner lookup resolves an existing Player; a miss skips the record before construction. The existing constructor facts, grades and matched-record corpus counts stand. See the SUPERSEDED entry in `retracted.md`.
+
+
+
+**Amended.** AI-628 and AI-629 now read the count/head/find/unlink edge and the destructor/deallocation invocation. The remaining-list result still depends on transitive cleanup. The local owner-transfer, hire, ordinary replacement and Group-LOAD caller bodies are read in PARTY-041, PARTY-043 and SAV-1252. The broader carry/start absence, constructor facts and existing grades stand.
 
 ### AI-450
 
@@ -4248,44 +4252,40 @@ trace. No null-pointer fault was observed at runtime.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-479 | The join head loop checks emptiness and count, selects the first Group and invokes removal, destruction and deallocation; successful unlink and prefix progression depend on unread collection helpers. | High / Medium | ● active | [EXP-0530](../experiments/EXP-0530-group-joins/) |
+| AI-479 | The join head loop checks emptiness/count and invokes Group removal, destruction and deallocation; the collection edge is read, while transitive prefix progression remains bounded. | High / Medium | ● active (amended) | [EXP-0530](../experiments/EXP-0530-group-joins/) |
 
 ### AI-479
 
 `R0065` selects the first Player+24 Group. If the list has none, it
-constructs and appends one at `L14234..L14235`, as AI-449 already records.
-The loop `L14237..L07334` tests the head Group's member count, tests that the
-Group list has more than one entry, calls `R1582` on that head and selects
-the first element again. A nonempty head or count one exits. Selecting the first
-element again does not establish that the list changed or the loop progressed.
+constructs and appends one at `L14234..L14235`, as AI-449 records.
+The loop `L14237..L07334` tests head member count and Group-list count
+above one, calls `R1582` and selects the head again. A nonempty head
+or count at most one exits the prefix.
 
-The wrappers `R0197 -> R1369` read Group count, and
-`L14236 -> L14313` read the embedded Player-list count. `R1582` calls
-`L14314` at `L14315`, then calls `R2060(Group,1)`. That helper calls
-Group destructor `R2061` at `L14316` and deallocation `R0525` at `L14317`.
-This call sequence excludes an unlink-only interpretation.
+`R0197 -> R1369` reads member count;
+`L14236 -> L14313` reads the embedded Player-list count.
+`R1582` calls `L14314`, then `R2060(Group,1)`.
+The latter calls Group destructor `R2061` and `R0525`.
+This selected call sequence excludes an unlink-only interpretation.
 
-`L14314` calls `L14318` at `L14319`, tests its return and conditionally
-calls `L14320` at `L14321`. It contains no direct link, head or count store.
-Both collection-helper bodies are unread. The wrapper alone does not rule out
-failure to find the selected entry or a different list mutation.
+The now-read `L14318` finds a pointer-equal node from the head.
+`L14320` repairs head/tail links and `R2280` decrements count.
+AI-628 supplies complete native bodies and the cleanup bounds.
+AI-629 supplies the whole join body and head getter chain.
 
-**Confidence.** High for head emptiness/count checks, first-element selection,
-direct removal invocation and the selected Group's destructor/deallocation
-call sequence. Medium for successful unlink, leading-prefix progression and
-the resulting remaining-list interpretation, conditional on unread `L14318`
-and `L14320` finding and unlinking the selected entry as assumed. Under that
-condition, the loop destroys the leading empty prefix until a nonempty head or
-one Group remains; it does not sweep later empty Groups behind a nonempty head.
-Listings are Capstone raw windows from the identified image; the relevant call
-and branch addresses are internal boundaries. No global caller completeness
-is asserted.
+**Confidence.** High for the local head/count tests, selection, valid-head
+find/unlink and destructor/deallocation invocation. Medium for resulting
+prefix progression after transitive cleanup. With no callback list mutation,
+the loop removes the leading empty prefix until a nonempty head or one Group
+remains; it does not visit later empty Groups behind a nonempty head.
 
-**Unknown.** Transitive callback mutations, other transition cleanup callers
-and an original before/after mission-start witness. A bounded native read of
-`L14318` and `L14320`, or an original before/after list-identity trace, would
-settle the collection edge. AI-449's broader unread carry/start alternatives
-are not amended by this narrower result.
+**Unknown.** Transitive callback mutation, exceptional paths and an original
+before/after mission-start witness. AI-449's broader carry/start population
+remains bounded.
+
+**Amended.** AI-628 and AI-629 settle the formerly unread collection/helper
+edge. The remaining-list interpretation retains Medium for transitive effects,
+rather than for an unread find/unlink. The High / Medium index grade stands.
 
 ## A new order during a running cycle
 
@@ -4317,7 +4317,7 @@ are not amended by this narrower result.
 | AI-532 | Among the `m98` census rows in `L08481..L14887`, mover `+0x98` := 1 is stored at `L01720`, `L00161` (after `R0053`, `actor+0x168` = 0) and `L00162` (`actor+0x184` = 0); the executor clears it at `L05750`. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | AI-533 | No rel32 call or jump, `0F 8x` jump or dword at any byte offset in `.text`, `.rdata`, `.data` equals the entries of the five state functions `L13263`..`L14682` (Medium; short jumps and RVA-form dwords are outside). | Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | AI-534 | Progress 1 and 2 increment `ord+0x15` and, above 2 with `actor+0x136` nonzero, store progress 0, action 0; among the `prog` census rows 0xff is written at `L00545`, cleared at `L05751`, `L05752` (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| AI-535 | `R0044` stores `ord+0x14`, `ord+0x60`, mover `+0x7c`, `actor+0x54`, `ord+0x50`, `actor+0x50` := 0xc, `ord[0]`, `ord+8` := 0; no progress or position store in the body (High), none through its calls (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-535 | `R0044` stores `ord+0x14`, `ord+0x60`, mover `+0x7c`, `actor+0x54`, `ord+0x50`, `actor+0x50` := 0xc, `ord[0]`, `ord+8` := 0; no progress or position store in the body (High), none through its calls (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/), [EXP-0569](../experiments/EXP-0569-teleport/) |
 | AI-553 | `R0021` and `R0460` only unlink candidates from a collection (by relation bit, a flagged candidate out of range, or a flier at reach below 2) and store nothing to an actor, order record or mover in their own instructions. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
 | AI-554 | `R0393` at listing level over `MAGIC-AI-012`: engage on a 30 in 100 draw above a stat threshold, else a draw from affordable ids 1..28; with id 28 in the book an empty list still stores `ord+0x60` := 1 and casts. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
 | AI-555 | The geometry leaves `R0036`, `R0051`, `R0115`, `R0167`, `R0162`, `R0040`, `R0019` and the coordinate getters store only in their own frames (virtual calls: `AI-557`). | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
@@ -4349,7 +4349,7 @@ are not amended by this narrower result.
 | AI-609 | Immediate stores of the cast-start fields sit in the executor installs, the manual setters, `R0018`, `R0008`, `R0209`, `R0037` and two wrappers; gap stores (`L15262`, `R1677`) are unreduced (Medium). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
 | AI-610 | Callers of the cast starts by decoded rel32 site: manual setters only from `R0061`; `R0018` from the group pass, creature selectors, heal arms and escort healer; wrappers `R1137`/`R1138` from cell and script code (Medium). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
 | AI-611 | Six cast-field stores in gap code (`L15263`, `L15264`, `L15265`, `L15266`, `L15267`, `L15268`) have no decoded rel32 site from outside the gap into their pieces; reach by dword or register stays open (Medium). | Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
-| AI-617 | The scroll arm of `R0061` (commands 0x25, 0x26) tests the item, stores `actor+0x68` and `+0x44`, undoes both for a non-cell Spell, then calls a setter (Medium). | High / Medium | ● active | EXP-0559 |
+| AI-617 | The scroll arm of `R0061` (commands 0x25, 0x26) tests the item, stores `actor+0x68` and `+0x44`, undoes both for a non-cell Spell, then calls a setter (Medium). | High / Medium | ● active (amended) | EXP-0559 |
 | AI-618 | The wrappers `R1137`, `R1138` store the cast action word in a newly built actor; callers are `R0458`, `R1139`, a `R0262` arm and two gap pieces, one read from a mid-function jump target (Medium). | High / Medium | ● active | EXP-0559 |
 | AI-619 | Seven gap stores are setters or install copies, no outside rel32 caller except `L00012 -> R0005` (reach to `L15264` not shown); `R1677` stores a stack argument (Medium). | High / Medium | ● active | EXP-0559 |
 | AI-620 | No dword in any section equals 28 cast-entry addresses except `R0037`, held by three `.rdata` slots (Medium for other reach). | High / Medium | ● active | EXP-0559 |
@@ -5303,6 +5303,16 @@ read (`AI-531`).
 
 **Amended.** `EXP-0550` reads the two virtuals of `R0046` and its flag loop (`AI-557`, `AI-558`). The bounded form is: for the 20 vtables of `AI-557` the calls of `R0045` store no progress or position word. The grade is Medium: the class population of the virtuals.
 
+**Amended.** EXP-0569 reads two more callers of `R0044`: the call at
+`L14857` in the whole
+[relocate.txt](../experiments/EXP-0569-teleport/evidence/out/relocate.txt) and the
+call at `L14856` in the whole
+[apply.txt](../experiments/EXP-0569-teleport/evidence/out/apply.txt). The remaining
+listed caller bodies `L14854`, `L14855` and `L09295` remain unread.
+The existing AI-557 / AI-558 amendment and its bounded 20-vtable population
+stand; unread helper and runtime effects remain Unknown. High / Medium grades
+are retained.
+
 ### AI-553
 
 `R0021` (`a01`, whole, 142 instructions; thiscall on the manager, arguments actor, candidate list, wanted bit) reads the byte `[manager + 0xa9c4 + owner(candidate) + 50 * owner(actor)]` (owner is the word `[[x+0x14]+4]`), masks bit 0 and compares it with the wanted bit; an equal bit marks the candidate for removal (`L00215..L14931`). When the bits differ and bit 15 of `[candidate+0x144]` is set, the candidate is marked unless one member of the list `[actor+0x70]` has a `R0036` distance not above the byte at `+0x71` of that member's order record (`L00219..L14932`). A marked candidate is unlinked: the stores are the list's own fields (`list+8`, `+0xc`, `+0x10`, `+0x14`, `+0x18`), the two neighbouring node links and, when the list empties, a call of `R1355`, which walks the node chain and calls `R0525` for it (`L00218..L14933`; `e11`, whole; "frees" is a label by that call's use, the callee is unread). `R0460` (`a02`, whole, 99 instructions; arguments actor, candidate list) acts only when `[actor+0x12c]` is below 2: each candidate whose virtual `[vt+0x20]` returns 3 is unlinked with the same list stores (`L14934..L14935`). The virtual targets are in `AI-557`. Neither body stores through the actor, an order record or a mover in its own instructions; neither stores a pending kind.
@@ -5662,6 +5672,8 @@ Population: the lawful ROM1 `rom.exe` (EN; the RU `ROM.EXE` has the same SHA256)
 **Confidence.** High for the instruction text and branch targets of the arm. Medium for the composed outcome: the helpers `R0095`, `R2173`, `R0463`, `R0930` and the rest of `R0625` (read to `L15371` only) are unread, and the word `msg+0x10` is taken as an item id from the call shape.
 
 **Unknown.** The bodies of `R0095`, `R2173`, `R0463`, `R0930`; `R0625` past `L15371`; the sender of commands 0x25 and 0x26. The windows `L15358..L15359` and `L15372..L15371` start at instruction boundaries after the instructions at `L15373` and `L15374` (`EXP-0559.md` D2).
+
+**Amended.** MAGIC-TELEPORT-365 reads a complete sender of cell command 0x26: R0090 changes the opcode on nonnegative selected +0x74 and stores item-selected +0x78 at command +0x10. Opcode 0x25 sender R0091, item selection provenance and lower serialization remain unread. The existing reception grades and clauses stand.
 
 ### AI-618
 
@@ -6298,3 +6310,94 @@ If dword[unit.owner+0x28] is zero, it returns after the relocation call. Otherwi
 **Confidence.** High for these branches, widths and own stores: the 259-byte body and centre, position and claim-release helpers were read whole in the equal EN/RU image. Medium for the composed relocation/order effect: the relocation's downstream calls and AI-558's virtual population remain bounded. Own stores neither test nor depend on relocation success.
 
 **Unknown.** The next executed order, full relocation admission, transitive client effects and malformed/null pointers. No catalogue label supplies those facts. The unread addresses and indirect sites are those of TRIG-CELLRESULT-133.
+
+
+## Empty Group collection and bounded callers
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-628 | The read Group collection chain finds pointer-equal entries, repairs head/tail links and decrements count; its delete wrapper calls cleanup even when lookup fails. | High / Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+| AI-629 | Join cleanup tests the current head for zero members and removes it while the observed Group count exceeds one; the collection helpers are now read. | High / Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+| AI-630 | Three raw-section scans find five E8 candidates to Group deletion and two to its scalar wrapper; four deletion callers and both scalar callers were read. | Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+
+### AI-628
+
+`L14318` starts at the head for a zero starting position, otherwise
+at the starting node's successor. It walks next pointers and compares the
+payload at node+8 with the requested pointer through `R2281`.
+That complete comparator returns dword equality.
+
+`L14314` searches with starting position zero and calls
+`L14320` only when found. The latter updates head or previous.next,
+then tail or next.previous. `R2280` invokes the no-op payload loop
+`R2282`, links the node into the free chain and decrements count.
+At zero count it calls `R2283`, which clears the list fields and
+calls unread pool release `R1355`.
+
+`R1582` calls the pointer removal, then calls `R2060`
+for any nonnull Group, without testing lookup success. That scalar wrapper
+calls `R2061` and, when flag bit 0 is set, `R0525`.
+AI-479 and TRIG-REAP-017 supply the existing destructor/deallocation roles.
+
+**Confidence.** High for pointer equality, normal local unlink/count stores,
+lookup-failure behavior and the read call sequence on a valid finite list.
+Every named body was read whole. Medium for completed cleanup and list state
+after the unread pool, Group-destructor and allocation closures. No runtime
+library layout is used as evidence.
+
+**Unknown.** Corrupt lists, duplicate pointer invariants, exceptional returns,
+pool release and the four Group-destructor callees listed in the edge ledger.
+Reading those bodies would settle the transitive cleanup boundary.
+
+### AI-629
+
+The complete `R0065` first obtains the Group through
+`L14233`. That wrapper tests list count through `R2273`,
+then reads the head payload through `R2274`.
+It constructs/appends a Group on the zero result, as AI-449 already states.
+
+Its prefix calls `R0197` on the selected head and
+`L14236` on the list. The latter calls `L14313`, which
+returns list+0c. While head count is zero and list count exceeds one,
+it calls `R1582`, selects the head again and repeats.
+A nonzero head count or list count at most one leaves this prefix.
+Later code can insert successfully created script actors into that head.
+
+**Confidence.** High for the complete prefix, getters and successful local
+find/unlink of its selected valid head. AI-628 closes the helpers that AI-479
+left unread. Medium for the remaining-list interpretation after destruction:
+with no transitive list mutation, this removes the leading empty prefix until
+a nonempty head or one Group remains, without visiting later empty Groups
+behind a nonempty head. Unread callees prevent an unconditional lifetime claim.
+
+**Unknown.** Destruction callbacks, the later join callees and whole-runtime
+survival/termination. All normal branches of the join body were read;
+every unreached callee/indirect dispatch is listed by address in the edge ledger.
+The carry importer `L07346` remains a separate unread settling window.
+
+### AI-630
+
+The Python 3.12.10 / Capstone 5.0.7 instrument ran one combined E8/E9 rel32
+and unaligned-dword pass over each raw .text, .rdata and .data section for
+the EN-02 target set. It found five E8 candidates to `R1582`:
+`L16011`, `L16012`, `L16013`, `L12373`, `L16014`.
+Four containing bodies were read whole. `R0067` remains unread.
+
+The same pass found two E8 candidates to `R2060`:
+`L16015` and `L16016`, in two wholly read bodies.
+The read `R0196` requests removal and scalar cleanup of its first
+selected zero-count Group, then allocates/constructs a replacement.
+The read `R2284` repeatedly takes a head and calls Group deletion
+without a member-count predicate. Its callers `L16017` and
+`L16018` were navigation only and remain unread.
+
+**Confidence.** Medium. All scan hits and zero-hit raw-section receipts are
+preserved, but this is not a repaired-project caller census. No displacement
+or immediate-field sweep was run. Rel32 candidates can start inside data or
+instructions; register/memory indirect calls, computed jumps, copied pointers,
+bulk operations and unscanned tables can bypass the target scan.
+
+**Unknown.** The binder caller `R0067:L12450`, collection-clear callers,
+additional unlink/free entry points and the complete town/script population.
+A repaired inventory plus pointer-table and field/embedded-base coverage,
+followed by complete caller reads, would settle completeness.

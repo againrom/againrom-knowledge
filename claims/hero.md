@@ -878,7 +878,7 @@ area is `R0824`'s `+0.5` before its truncate.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| HERO-163 | When `R0656` finds no `Humans` row with the template name, it neither fails nor takes another row: it skips every row-dependent store and finishes the actor from constructor defaults. | High / Medium | ● active | [EXP-0519](../experiments/EXP-0519-hero-build-fallbacks/) |
+| HERO-163 | When `R0656` finds no `Humans` row with the template name, it neither fails nor takes another row: it skips every row-dependent store and finishes the actor from constructor defaults. | High / Medium | ● active (amended) | [EXP-0519](../experiments/EXP-0519-hero-build-fallbacks/) |
 | HERO-164 | A hero built without its template row is a fighter-class actor of the chosen sex with the purchased stats, zero mana and no template equipment; no shipped root reaches that arm. | Medium / Unknown | ● active | [EXP-0519](../experiments/EXP-0519-hero-build-fallbacks/) |
 
 ### HERO-163
@@ -941,6 +941,8 @@ followed. The EN and RU `rom.exe` are one image, so their agreement on this code
 independent corroboration.
 
 **Unknown.** The value of `actor+0x0c` on this path; what `R1347` does.
+
+**Amended.** ALM-OUTCOME-323 settles what R1347 itself does: it calls R2275, which copies text and submits message0x471 to the window at[L06446]. The handler and visible outcome remain Unknown. Constructor and missing-template clauses retain their grades.
 
 ### HERO-164
 

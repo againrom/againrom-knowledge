@@ -50,7 +50,7 @@ complete reader set of `+0x20` is Unknown (`PARTY-ORIGIN-010`, as partially retr
                                           ; then a once-latch, byte player+0x3d, which is SAVED
 1. compile the script      R0067   ; also appends the 0x10002 cells to server+0x6c
 2. group hygiene           R0065   ; no groups -> make one ("Oops - player has no groups");
-                                          ; then drop empty groups off the head, keeping the last
+                                          ; then remove zero-count heads while group-list count exceeds one
 3. decide the drop cell    R0065   ; player+0x60 override IF server+0x0c != 0 -- which the
                                           ; campaign path never is -- else a RANDOM array element,
                                           ; else rand 30..100 on each axis + a logged warning
@@ -345,3 +345,16 @@ The complete ROM1 EN/RU executables and the consulted MiniMapData.bmp,
 CrystalR.bmp and human.pal payloads are byte-identical. Equal runtime pictures
 also require equal map state and display format, which were not compared.
 — MISSION-088
+
+
+## Empty Group boundaries
+
+The read join prefix tests the current head's member count for zero and the
+Group-list count for more than one before invoking removal. A nonempty head or
+count at most one leaves that prefix. Collection unlink is read; post-callback
+progression remains Medium. — AI-479, AI-629
+
+The server's discarded-actor path reaches Player removal. It requests deletion
+of a newly empty Group when the Player reached through Group+44 has +28 zero.
+This local predicate does not establish every town-return callback or a complete
+Group reorder/rebuild rule. Those wider boundaries remain Unknown. — PARTY-042

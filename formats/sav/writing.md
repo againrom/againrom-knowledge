@@ -71,18 +71,21 @@ SAV-PROJSTORE-428, SAV-CAMPPROG-071, SAV-CAMPPOS-072
 
 ## What the original write path drops or mutates
 
-Three places in the write path emit fewer elements than the structure holds.
-Two of them are not losses and one is.
+Three places in the write path can emit fewer elements than the structure
+holds. The equipment skip is a non-loss and the spellbook skip is a loss.
+The empty-Group prune has a bounded final population.
 
-The empty-group prune is not a serialization loss. The writer removes, from a
-qualifying Player's group collection, every group whose element count is 0. The
-argument to the removal is the group; the receiver is reloaded from the Player
-in the two instructions before the call, and is the Player's own live group
-collection — the same object the iterator is walking. The removal therefore
-mutates live memory rather than a serialization copy, memory loses the group
-too, and file and memory agree afterwards. A consumer must treat this as a live
-mutation of the save action, not as a wire omission.
-— SAV-1029, SAV-ROSTER-024, SAV-CITYSTORE-516
+The writer selects Player+28-zero lists. A zero Group member count reaches
+removal with the live Player+24 receiver before file/archive construction.
+The iterator saves its successor before returning the current Group.
+These predicates, receiver and local call order are High. The prune targets
+live memory rather than a serialization copy; its composed final saved
+population is Medium. Complete empty-Group exclusion and post-SAVE file/memory
+agreement remain unestablished through unread Player iteration, Group cleanup
+callbacks and archive/file effects. Atomic snapshot and failed-save memory
+state remain Unknown. The inner serializer still includes every Group its
+current list presents, including an empty one.
+— SAV-1029, SAV-ROSTER-024, SAV-1251, SAV-1234, SAV-CITYSTORE-516
 
 The equipment array's skipped index 0 is not a loss. Over the whole image, the
 indexed form of that displacement is 18 instructions in 10 owners; exactly two

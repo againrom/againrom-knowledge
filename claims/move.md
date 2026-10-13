@@ -913,7 +913,7 @@ The next free `move.md` id is `MOVE-090`.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MOVE-087 | A mover of footprint side n stores the footprint's top-left cell and a sub-cell offset; the fine point P = cell*256 + sub is that corner, and the centre read for range, edge gap and bearing is P + (n-1)*128 per axis. | High / Medium / Unknown | ● active | [EXP-0443](../experiments/EXP-0443-footprint-slot/EXP-0443.md) |
+| MOVE-087 | Mover Position anchors the footprint corner; range and bearing use its size-adjusted centre. | High / Medium / Unknown | ● active (amended) | [EXP-0443](../experiments/EXP-0443-footprint-slot/EXP-0443.md) |
 | MOVE-088 | A cell crossing releases the old footprint, claims, rewrites the position and occupies the new one in one R0047 call; an empty release slot or a taken occupy slot skips that cell's recompute, and no deferral exists in those bodies. | High / Medium / Unknown | ● active (amended) | [EXP-0443](../experiments/EXP-0443-footprint-slot/EXP-0443.md) |
 | MOVE-089 | Actor removal through R0865 releases the footprint at the stored position, recomputing each held cell, and clears the claim bits only after every release succeeds; release is blind to which actor holds the slot. | High / Medium / Unknown | ● active | [EXP-0443](../experiments/EXP-0443-footprint-slot/EXP-0443.md) |
 
@@ -972,6 +972,8 @@ record, computed indices and indirect callers.
 
 **Unknown.** Which shipped or authored actors have n above 1; no census was run. Observed positions of a size
 above 1 in play. The full bodies of the 13 writers other than `R0047`, which were located and only their quoted stores asserted.
+
+**Amended.** MAGIC-TELEPORT-356 reads R1055 whole and distinguishes its mask veto, old-cell release, centred Position stores and nontransactional entry failure. The other located writer bodies remain outside that new reading.
 
 ### MOVE-088
 
@@ -1339,7 +1341,7 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MOVE-119 | The actor base constructor sets Mover facing `+0x00` and wanted facing `+0x01` to 0x40 plus one rand() draw over 0..0x80; of the image's four Mover constructor calls only this one stores a facing. | High | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
-| MOVE-120 | The type-6 spawner has no Mover access of its own; it runs the class derive at `L04446`, so a placed Human holds its derived rate, then places the actor through `R1145` at radius 0, which draws no random value. | High / Medium | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-120 | The type-6 spawner has no Mover access of its own; it runs the class derive at `L04446`, so a placed Human holds its derived rate, then places the actor through `R1145` at radius 0, which draws no random value. | High / Medium | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/); [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
 | MOVE-121 | The occupy `R0050` writes Mover `+0x72` (a step-cost word), `+0x82`/`+0x83` (cell) and `+0x84`/`+0x85` (sub-cell) before it enters the footprint's cell-record slots; its own body writes no other Mover byte. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 | MOVE-122 | The join walk places each carried member, then deletes its Mover and order block and installs constructor-state ones (facing 0, mask 0x41, rate 0x10); all 22 saved carried members hold the derived rate instead, its writer Unknown. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 
@@ -1362,11 +1364,19 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 - `R1145(x, y, r)` (`w05`, read to `L14135`): the position store `R0289(x, y, grid)` (`L14136`), then attempts at `x - r/2 + R0861(r)`, `y - r/2 + R0861(r)` through `R0290` and the test `R1287` (`L14137`..`L06650`), `(r*r)/2 + 2` attempts. With r = 0 `R0861(0)` returns without a draw, so both attempts test the placement cell, and a refusal returns 0 (`L14138`..`L14139`, `L14140`). An admitted cell calls the occupy `R0050` (`L06653`, `MOVE-121`). With r above 0 a refusal goes on to a scan of the square (`L14141`..`L14142`).
 - `R1287` (`w06`, whole) only reads: for each of the n by n footprint cells it tests the bytes at `grid + 0x20000` and `grid + 0x10000` against Mover byte `+0x05` and returns 0 on any common bit.
 
-**Confidence.** High for the spawner's lack of Mover access, its call order and the radius-0 path of `R1145`, each read in whole listings. Medium that `R1145` returns the occupy's result: the epilogue after `L14135` was not read. Medium for the Units-table rate source (table byte or default 8): `MOVE-RATE-052` leaves final spawned rates Unknown, and the census (`SAV-1213`) holds 312 Unit rates, none equal to 8, and compares none to the table.
+**Confidence.** High for the spawner's lack of Mover access, its call order and the radius-0 path of `R1145`, each read in whole listings. Medium for the occupy result's meaning and completed placement: the complete caller epilogue now returns the EAX left by `R0050`, but this does not close the occupy-callee boundary. Medium for the Units-table rate source (table byte or default 8): `MOVE-RATE-052` leaves final spawned rates Unknown, and the census (`SAV-1213`) holds 312 Unit rates, none equal to 8, and compares none to the table.
 
 **Unknown.** The Human constructor `R0497`, the Unit constructor `R0501`, the Humanoid defaults `R0876` (caller of the second `R0471` call) and the vtable `+0x50` bodies other than the rate store were not read. The first `R0471` call at `L06850` follows a test of `L04697`'s result (`w02`, `L14143`..`L00493`), also unread. `MOVE-119` bounds who builds the Mover (no other Mover constructor call), not who stores into it afterwards.
 
 **Amended.** `MOVE-141` narrows the radius-0 clause: the placement's own attempts draw nothing at radius 0, but its occupy constructs a temporary caster, with one facing draw, for a footprint cell that carries a cell-entry tail. At the spawner no tail is expected before `R0461` runs (Medium).
+
+**Amended.** EXP-0568's complete `unit-seat.asm` closes the epilogue after
+`L14135`: the admitted arm calls `R0050` at `L06653`, then returns at
+`L16005` without another EAX write. This settles the caller's propagation of
+the callee's EAX, not its meaning or native placement completion. The earlier
+RNG amendment, the occupy-callee boundary and all other clauses and grades remain.
+See [EXP-0568](../experiments/EXP-0568-map-load-bounds/).
+
 
 ### MOVE-121
 

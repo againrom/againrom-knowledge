@@ -720,7 +720,7 @@ copies remain a blind spot. The start chain does not depend on that universal.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | PARTY-JOIN-025 | A mid-mission join is one routine, `R0064`, reached from trigger instants 19 and 22: `PARTY-INSTALL-012`'s install sequence without the hero pointer or a fresh runtime id. | High | ● active (amended) | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
-| PARTY-ENDCULL-026 | The server's end-of-mission cull `R0826` decides which players and actors exist on the next map; it keeps an actor iff `0x21 <= word[actor+0x0e] < 0x40`. | High | ● active (partially retracted) | [EXP-0165](../experiments/EXP-0165-join-persistence/) |
+| PARTY-ENDCULL-026 | The server's end-of-mission cull `R0826` decides which players and actors exist on the next map; it keeps an actor iff `0x21 <= word[actor+0x0e] < 0x40`. | High / Medium / Unknown | ● active (partially retracted, amended) | [EXP-0165](../experiments/EXP-0165-join-persistence/), [EXP-0570](../experiments/EXP-0570-empty-groups/EXP-0570.md) |
 | PARTY-BAND-027 | Withdrawn: the server survival band `[0x21,0x40)` was said to be the Humans creation arm's typeID range; the band is real, but that arm's output is conditional (`PARTY-M20-031`). | High | ✖ retracted | [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
 | PARTY-PERSIST-028 | The campaign's mission-to-mission edge preserves the surviving human `Player`, its name and every actor that first passes the client and server filters, not an unfiltered roster. | High | ● active (amended, superseded) | [EXP-0165](../experiments/EXP-0165-join-persistence/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
 | PARTY-JOINCORPUS-029 | The shipped join corpus holds 28 runtime instant-19/22 nodes on 16 maps, 22 of which hand actors to player 1; the handed Humans are not all on the kept side. | High / Medium | ● active (amended, partially retracted) | [EXP-0165](../experiments/EXP-0165-join-persistence/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
@@ -800,6 +800,20 @@ under the three conditions `PARTY-M100-034` names (item byte `+0x44` not 2,
 state not 0xd or 0xe with `+0x136` = 0, matching spell id), and `R1380`
 deletes a class-14 item still in the cast slot. The pack and worn slots are
 otherwise unwritten, and every other clause stands.
+
+**Amended.** EXP-0570 narrows the empty-Group lifetime clause through
+PARTY-042 and AI-628. The outside-type-band discard calls R1388,
+which calls Player removal before actor virtual +4. Group cleanup is invoked
+only after zero members and zero +28 on the Player reached through Group+44.
+High applies to these local predicates, calls and order, including the existing
+type-band evidence. Cleanup invocation does not establish completed destruction;
+skipping its explicit arm does not establish survival or pointer validity.
+Composed Group lifetime effects are Medium. Final lifetime and post-callback
+list identity remain Unknown pending L16019/L16020/L08741/L16021,
+R1355, R0072/R0303 and actor virtual targets. Full return-to-town
+chronology also remains Unknown. The inventory retraction stands; its earlier
+"every other clause stands" wording does not preserve the now-narrowed Group
+lifetime assertion.
 
 ### PARTY-BAND-027
 
@@ -1140,3 +1154,92 @@ No repaired Ghidra project or whole-image negative enumeration is claimed.
 
 **Unknown.** Failure paths, callbacks beyond the local Group-insertion boundary,
 malformed vectors, multiplayer hire, and a native mixed/siege hire SAVE witness.
+
+
+## Empty Group lifetime in the read paths
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| PARTY-041 | The read member-detach clears actor+70; owner transfer and tavern roster rebuild use it without a local empty-Group destruction arm. | High / Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+| PARTY-042 | Player removal invokes Group deletion after a zero member count and zero owning Player+28; teardown and the mission-end discard arm reach this helper. | High / Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+| PARTY-043 | The named tavern hire commits Groups before one debit; roster rebuild credits the last tracked cost and detaches marked mercenaries without a local Group-delete arm. | High / Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+
+### PARTY-041
+
+`R1140` calls `R1133` on the member collection, then clears
+actor+70. `R0152` first calls this detach when actor+70 is nonzero,
+then appends to its destination and stamps the new Group and owner pointers.
+`R0064` uses the same detach before changing owner and constructing
+the destination Group. Its later event path remains unread. PARTY-039's
+destination rule stands.
+
+`R1555` selects actors whose server mercenary-type byte +14c is
+nonzero, calls the detach, then calls `L09224` on the flat index.
+MERC-TYPE-001 supplies the byte's type meaning. All four caller/helper bodies
+named above were read whole. Their local detach sequences contain no
+member-count test followed by a Group-delete call.
+
+**Confidence.** High for the calls, order and actor+70 store. Medium for
+retention of a newly emptied source Group through the composed paths.
+The bounded negative covers these complete bodies, not the image.
+The member lookup comparator `R0072`, node release `R0303`,
+flat destruction `L09224` and event closures were not read.
+
+**Unknown.** Whether these callees or later callbacks remove the source Group,
+and the complete town dismissal/sale and script-removal populations.
+A read through the listed helpers and the reached town/script dispatches,
+or a before/after original list trace, would settle retention.
+
+### PARTY-042
+
+`R2059` captures actor+70 and calls `R1140`.
+It reads the resulting member count through `R0197` and
+`R1369`. It calls `R1582` on this Player's +24 list only
+if that count is zero and the Player reached through Group+44 has +28 zero.
+It then removes the actor from the Player's flat index.
+
+The complete `R0427` sweep calls this helper after actor+54 equals
+10, including a second test after virtual +18. TRIG-REAP-017 distinguishes
+teardown from the preceding dying interval at its existing grade.
+`R1388` calls the helper before actor virtual +4.
+The complete `R0826` discard arm calls that wrapper for actors
+outside type word 21..3f. PARTY-ENDCULL-026 supplies the mission-end role.
+
+**Confidence.** High for the exact local predicates and reached calls.
+The count getters and removal wrapper were read whole. No meaning for
+Player+28 is inferred from its position. Medium for the retained/destroyed
+population after transitive node, actor, Group and event callbacks.
+AI-628 states the collection edge separately.
+
+**Unknown.** Actual post-callback list identity, whole return-to-town chronology,
+actor virtual targets and general town/script removal. The full continuation
+`R0701:L13901`, the callback addresses in the experiment's edge ledger,
+and a paired original town SAVE would settle those different boundaries.
+
+### PARTY-043
+
+The complete `R1142` constructs and appends a Group before each
+nonzero type's actor loop. It commits owner, flat-index and Group membership
+before calling `R0449` once with the negated accumulated Tavern+9c.
+PARTY-040 supplies the already established per-type Group partition.
+
+The complete `R1555` first calls the same purse helper with positive
+Tavern+9c, then detaches each selected actor with nonzero +14c and destroys
+its flat-index entry. It later resets Tavern+9c to zero and builds stock.
+`R0449` adds its delta to Player+38, stores the result and posts
+event 67 through unread `R0623`. The addition is a dword operation.
+
+The read entry `R1318` calls command-37 sender `R0645`
+before its activation dispatch. The read exit `R0786` calls
+command-38 sender `R1653` before closing its panels.
+MERC-CMD-007 supplies the senders' reached server-command identities.
+
+**Confidence.** High for local commit-before-debit and refund-before-detach
+order and purse arithmetic. Medium for source-Group retention through unread
+flat destruction and event closures. The whole bodies contain no explicit
+empty-Group deletion arm; that negative has this body population only.
+
+**Unknown.** A same-visit control that sends rebuild after a hire, transport and
+callback effects, repeated-visit refund identity and failure recovery.
+The UI activation/message dispatch reached from `L16022`, `L16023`
+and `R0217` would settle same-visit undo. No runtime visit was observed.

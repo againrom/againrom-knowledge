@@ -328,3 +328,15 @@ Groups as it has positive type counts. Catapult and Ballista use Unit constructo
 and the same Group insertion suffix as the Human types. These are successful
 local allocation/insertion rules; failure and later callbacks remain Unknown.
 — PARTY-040
+
+
+## Hire commit and rebuild refund
+
+The read handler commits Group creation, ownership and membership before one
+debit. Rebuild credits the last tracked cost before detaching marked mercenaries.
+The local detach paths contain no explicit empty-Group deletion arm; retention
+through flat destruction and event callbacks is Medium. — PARTY-041, PARTY-043
+
+Entry sends rebuild before activation; exit sends hire before closing. A
+same-visit undo control and its runtime delivery remain Unknown. The command
+refund alone does not establish that UI operation. — PARTY-043

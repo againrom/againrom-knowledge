@@ -3562,7 +3562,7 @@ gates.
 | SAV-FRAME-021 | The container is a 16-byte header and a self-describing compressed blob from `0x10`, not a 20-byte header and a body; `u32@0x0C` is the read length. | High | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
 | SAV-CODEC-022 | Codec `R1515` reads a word-count dword, then run and literal opcodes until the source ends; the four opcodes shipped saves never use are all legal. | High | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
 | SAV-SHAPE-023 | A save is a campaign half plus an optional world half: `R0414` writes one byte from `world+0x2c`, and the world snapshot follows only when that byte is 1. | High / Medium | ● active (amended) | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
-| SAV-ROSTER-024 | The roster is written in the campaign half, before the shape byte, so every save carries the player list and every `Player`, group and actor. | High / Unknown | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
+| SAV-ROSTER-024 | The roster is written in the campaign half, before the shape byte, so every save carries the player list and every `Player`, group and actor. | High / Medium / Unknown | ● active (amended) | [EXP-0077](../experiments/EXP-0077-party-and-save/), [EXP-0570](../experiments/EXP-0570-empty-groups/EXP-0570.md) |
 | SAV-HEAD-025 | The decoded head is named field for field: two tick counters, the map name, eleven u32 fields, mission number and difficulty, then two player-list dwords. | High / Unknown | ● active (amended) | [EXP-0077](../experiments/EXP-0077-party-and-save/), [EXP-0521](../experiments/EXP-0521-session-clock/) |
 | SAV-TRAIL-026 | The stream ends with three writes after the world half: marker `0xbadface1`, the dword `[L07886]`, and `world+0x118`'s serializer, measured as 400 zero bytes. | High / Unknown | ● active | [EXP-0077](../experiments/EXP-0077-party-and-save/) |
 
@@ -3679,6 +3679,17 @@ branch, and the zeroing and the prune are each a short named sequence.
 
 **Unknown.** `Player+0x28`, the flag that decides whether a player is pruned at
 all.
+
+**Amended.** EXP-0570 narrows the empty-Group pruning clause through
+SAV-1251. The read writer selects Player+28 zero; a zero member count
+reaches R1582 with the live Player+24 receiver before file/archive
+construction. The iterator saves its successor before returning the current
+Group. High applies to these local predicates, receiver and call order.
+The composed final saved population is Medium. The earlier unconditional
+empty-Group file exclusion is not established beyond this local call/iterator
+boundary. Player iteration, Group cleanup callbacks and archive/file effects
+remain unread; atomic snapshot and failed-save memory state remain Unknown.
+The campaign placement, serializer and load-zeroing evidence retains its grade.
 
 ### SAV-HEAD-025
 
@@ -10638,7 +10649,7 @@ and no confirmed document-loader body.
 | SAV-1026 | An original town save holds campaign progress in two scalars, `campaign +0x04` and one byte per `Player` at `+0x3c`; no counted collection in the file is sized or indexed by the mission space. | High / Medium | ● active | [EXP-0375](../experiments/EXP-0375-sav-town-roster/) |
 | SAV-1027 | The two progress-bearing fields, `Player+0x3c` and `campaign +0x04`, are written and read by two serializers in two halves of the file through different archive primitives; a consumer implementing one restores half. | High | ● active | [EXP-0375](../experiments/EXP-0375-sav-town-roster/) |
 | SAV-1028 | A town save's roster is measured end to end with no roster count, and the array `Humanoid::Serialize` emits twelve of its references from is thirteen dwords wide, not twelve. | High / Medium | ● active | [EXP-0375](../experiments/EXP-0375-sav-town-roster/) |
-| SAV-1029 | Of two skipped-index-0 save arrays, the equipment slot is never filled (`Armor::Equip` refuses 0 at `L04755`) but the `Spellbook`'s is writable; the empty-group prune loses nothing. | High / Medium / Unknown | ● active | [EXP-0375](../experiments/EXP-0375-sav-town-roster/) |
+| SAV-1029 | Of two skipped-index-0 save arrays, equipment refuses 0 but the Spellbook slot is writable; empty-Group pruning uses a live list, with final SAVE population bounded. | High / Medium / Unknown | ● active (amended) | [EXP-0375](../experiments/EXP-0375-sav-town-roster/), [EXP-0570](../experiments/EXP-0570-empty-groups/EXP-0570.md) |
 | SAV-1030 | The document load arm `R0414` never refuses: it has one exit instruction, and every conditional branch after the `IsStoring` split is a forward skip inside the arm. | High / Unknown | ● active | [EXP-0375](../experiments/EXP-0375-sav-town-roster/) |
 
 ### SAV-1026
@@ -10863,20 +10874,14 @@ serializer's own operands, not an independent consumer's.
 
 ### SAV-1029
 
-- The empty-group prune is not a loss.
-  - `SAV-ROSTER-024` establishes the file side: the save-file writer
-    `R0804` removes from a qualifying player's group collection every
-    group whose count is 0 (`L08278`, `R0197`, `R1582`), so an
-    empty group never reaches the file.
-  - The memory side is the removal's operands, which no ledger names
-    (`claim -k "L08814"` over the base commit's claims tree returns no row).
-    `L08815` / `L08816`, a push of the group pointer, pushes the group; the receiver is reloaded
-    from the player at `L08817`, loading the player pointer from the frame local at -0xa4, and
-    `L08814`, loading the field at offset 0x24 of it, the player's own live group collection, the
-    object the iterator at `L08818` was constructed over (`L08819`).
-  - The removal mutates live memory, not a serialization copy, so after SAVE
-    file and memory agree: memory lost the group too. This is the writer cleanup
-    `SAV-CITYSTORE-516` left outside its alias proof.
+- The empty-Group prune invokes removal on a live list, not a serialization
+    copy. The writer selects Player+28 zero and zero Group member count.
+    At L08815/L08816 it pushes the Group; L08817 reloads the Player from
+    frame local -0xa4 and L08814 loads its live +0x24 collection, the same
+    object used at iterator construction L08819/L08818.
+    SAV-1251 states the saved-successor and pre-archive call boundaries.
+    Complete empty-Group exclusion and post-SAVE file/memory agreement are
+    not established through the unread mutation/archive closure.
 - `Humanoid+0x198` index 0 is not a loss.
   - Whole-image census `EnumRefs disp:198`: 78 hits, 41 distinct owners, 0 in
     orphan or undisassembled code. The indexed form `[base + index*4 + 0x198]`
@@ -10957,9 +10962,9 @@ alternative, that both skipped slots are unreachable storage and neither skip
 can lose anything, is the status `Humanoid+0x198[0]` does have. The two bodies
 discriminate: the equipment writer refuses index 0 at a named instruction
 between entry and store, and the spellbook writer has no instruction of that
-kind anywhere between entry and store. High for both non-losses: each rests on
-the named instructions above (the reloaded live receiver, the refusal) plus a
-whole-image displacement census with its own totals. High that nothing on the
+kind anywhere between entry and store. High for equipment non-loss: the refusal and displacement census retain
+their evidence. High for the local live prune receiver; composed SAVE
+population is Medium as bounded below. High that nothing on the
 traced path filters a zero index, the headline's claim. The live alternative,
 some test between the product and the store that rejects 0 as `Armor::Equip`
 does, is excluded by enumeration: the index local (the frame local at -0x10) is assigned
@@ -10977,6 +10982,14 @@ read the image and the preserved save corpus only, never the shipped data
 tables. The census is bounded: `EnumRefs disp:198` finds instructions whose
 encoded displacement is `0x198`, and a write through an address computed into a
 register beforehand carries no such displacement and would not appear.
+
+**Amended.** EXP-0570 narrows the empty-Group non-loss clause through
+SAV-1251. High applies to the literal predicates, live receiver, iterator
+rule and pre-archive call order; final saved population is Medium.
+Complete empty-Group exclusion and post-SAVE file/memory agreement are not
+established through unread Player iteration, Group cleanup and archive/file
+effects. Atomic snapshot and failed-save memory state remain Unknown.
+Equipment and spellbook evidence and grades stand.
 
 ### SAV-1030
 
@@ -15745,7 +15758,7 @@ record set and bits 5, 6 and 7 on actor cells.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1234 | The named Player Group serializers emit and rebuild every listed Group, including empty ones, retaining its partition and literal +1c selector locally. | High | ● active | [EXP-0530](../experiments/EXP-0530-group-joins/) |
+| SAV-1234 | The named Player Group serializers emit and rebuild every listed Group, including empty ones, retaining its partition and literal +1c selector locally. | High | ● active (amended) | [EXP-0530](../experiments/EXP-0530-group-joins/) |
 
 ### SAV-1234
 
@@ -15768,12 +15781,15 @@ of empty Groups by these serializers. The count and branches are load-bearing
 raw instructions. Their generated listings reproduce byte-for-byte. Callback
 mutation/atomic-snapshot limits remain SAV-GRPFIRSTSAVE-579's limits.
 
-**Unknown.** Whether a Group emptied by death, dismissal or return remains in
-Player+24 when SAVE is reached. The ordinary member-detach body, selected
-client/server cull windows, reuse arm and next-start head cleanup were read;
-Player removal `R2059` and its downstream event paths were not. A paired
-original town SAVE before/after removal, or a complete raw read through that
-helper and its reached callbacks, would settle the retained population.
+**Unknown.** PARTY-042 now reads Player removal's zero-count and owning
+Player+28 predicate. SAV-1251 reads the outer writer's live prune and iterator
+edge. Whether a death, dismissal, script transfer or return reaches SAVE with
+a particular post-callback population remains Unknown. A paired original town
+SAVE or complete reached callback/transition reads would settle that boundary.
+
+**Amended.** PARTY-042 and SAV-1251 narrow the lifetime Unknown that named unread
+Player removal. Every local serializer inclusion, partition and selector fact
+and its High grade stands.
 
 ### Archive scope
 
@@ -16193,3 +16209,70 @@ start, 52 later), joined with `tools/savdoc -mode authorship`
 files: no authorship class covers their directories; the owner's record of
 where each of the 8 came from, or a header field comparison with the classified
 files, would settle it.
+
+
+## Empty Group pruning and count bounds
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1251 | The read file writer invokes live empty-Group pruning for Player+28 zero before archive creation; the inner Group serializer's inclusion rule remains separate. | High / Medium | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+| SAV-1252 | The named Group/member append and archive bodies show no explicit upper-count rejection; allocation failures, encoded extremes and an image-wide bound remain Unknown. | Medium / Unknown | ● active | [EXP-0570](../experiments/EXP-0570-empty-groups/) |
+
+### SAV-1251
+
+The complete `R0804` first walks selected Players.
+For Player+28 zero, its Group loop calls `R0197`; count zero
+reaches `R1582` with the live Player+24 receiver at `L08814`.
+The file/archive construction follows this loop. A later file-open failure
+therefore does not precede the local cleanup requests.
+
+The read Group iterator `L01806` starts at the head through
+`R2285`. `R2286` saves node.next into the cursor before
+returning node+8. `L01807` uses that saved successor. This excludes
+rereading the removed current node as the iterator's local progression rule.
+
+SAV-1029 already establishes the live-receiver distinction.
+SAV-1234 still establishes that `R1340` /
+`R1143` / `R1341` serialize every Group/member that
+their current list presents, including count zero. Those bodies were reread
+whole. Writer pruning and inner serializer inclusion are different boundaries.
+
+**Confidence.** High for the exact predicate, live receiver, cursor order and
+pruning-before-file/archive call order. Medium for the population ultimately
+saved: Player iteration, Group cleanup callbacks, archive routines and file
+effects are not closed by these bodies.
+
+**Unknown.** Atomic snapshot, failed-save memory state, full town-entry ordering
+and a post-callback before/after native SAVE witness. The unread addresses are
+listed in the edge ledger. No owner save or runtime was read.
+
+### SAV-1252
+
+The complete append paths `R0198` -> `R0419` ->
+`R2287` and `R0292` -> `R0412` ->
+`R0302` link one tail node and increment the list's dword count.
+If their free chain is empty, the node routines request a block using the
+list's +18 value and node size 0c. These bodies contain no explicit rejection
+against a maximum Group/member count.
+
+The complete `R1340`, `R1143` and
+`R1341` store/load arms likewise contain no explicit upper-count
+rejection. Their load loops use signed comparisons of dword frame locals.
+The Group and Group-owned member loops start at one; the generic member-list
+load starts at zero. They do not establish acceptance of every encoded value.
+
+`R0685` forwards to unread `L05946`;
+`R0686` forwards to unread `L09854`.
+The wire count framing is reused from SAV-1234, not re-proved by these wrappers.
+
+**Confidence.** Medium for absence of an explicit count-cap test within exactly
+these nine complete append/archive bodies and two complete forwarding wrappers.
+No image-wide displacement, immediate, wider-store or embedded-base census
+was performed. Register-relative/computed access, indirect dispatch and bulk
+operations remain blind spots. Unknown for a program-wide numeric limit.
+
+**Unknown.** Pool allocator `R0540`, accessor `R2248`, payload
+initializers `L16024` / `L09081`, the two archive primitives,
+allocation failure, count overflow and encoded extreme-count behavior.
+Complete reads of those bodies plus a controlled original malformed-archive
+probe would settle these separate boundaries.

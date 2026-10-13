@@ -17,16 +17,16 @@ ALM-CORP-060
 0        0x14                                               EOF
 ```
 
-**Required: types 1 and 2 only.** See *Acceptance contract* before implementing a reader.
+**Reader status and mission admission differ.** Missing types1/2 set reader status; the mission caller tests only the Altitudes pointer. See *Acceptance contract*. — ALM-OUTCOME-323
 
 ## File header (20 bytes)
 
 | Off | Type | Field | Notes | Claim |
 |-----|------|-------|-------|-------|
 | 0x00 | char[4] | magic | `4D 37 52 00` = `"M7R␀"` — compared by the selected readers | ALM-HDR-001 |
-| 0x04 | u32 | **hdrLen** | `= 20` — this header's **own length**, and it is *used*: the header helper peeks 8 bytes, seeks back, then reads `dword[cursor+4]` bytes. At offset 0 that reads 20 | ALM-HDR-001, ALM-FRAME-031 (amended; framing retained) |
+| 0x04 | u32 | **hdrLen** | Stored header length. The primary reader requests a fixed 20 bytes; the separate helper named by ALM-HDR-001 follows this field. | ALM-HDR-001 (amended), ALM-FRAME-031 (framing retained), ALM-LOAD-320 |
 | 0x08 | u32 | dataSize | Installed version-990 value `4·W·H + 72`; the loader ignores it. The writer-side meaning of 72 is Unknown | ALM-HDR-001 |
-| 0x0C | u32 | **recordCount** | the loader's loop bound, gated `≥ 3` and nothing more; `= 10` in every authored map, `= 4` in `ru/Horror.alm` | ALM-META-024, ALM-FRAME-031 (amended; framing retained), ALM-CORP-060 |
+| 0x0C | u32 | **recordCount** | the loader's loop bound, gated unsigned `≥ 3` in the selected body; `= 10` in every authored map, `= 4` in `ru/Horror.alm` | ALM-META-024, ALM-FRAME-031 (amended; framing retained), ALM-CORP-060 |
 | 0x10 | u32 | **formatVersion** | Installed value990; primary/editor unsigned upper gate1001 and conditional payload thresholds951,985,987,989,990. The 1000 helper rule differs by reader; see below | ALM-META-024, ALM-FRAME-031 (amended; framing retained) |
 
 `W`,`H` themselves live in the [type 0 record payload](metadata.md), not the header.
@@ -50,8 +50,8 @@ the header's typeId. A payload may be empty or shorter than eight bytes.
 ## Record roster — what the writer emits, and what the loader requires
 
 The complete authored order is `0,1,2,3,5,4,9,8,6,7`. The primary loader
-dispatches the declared recordCount, requires only types 1/2 and permits
-other record sets. The four-record RU Horror.alm satisfies these structural
+dispatches the declared recordCount and reports missing types1/2 through status.
+The mission caller separately tests the Altitudes pointer (ALM-OUTCOME-323). The four-record RU Horror.alm satisfies these structural
 checks. — ALM-SEC-003 (amended; type dispatch retained), ALM-REQ-055, ALM-REQ-056, ALM-ORD-057,
 ALM-META-058, ALM-RDR-059, ALM-CORP-060
 
@@ -91,15 +91,20 @@ scheduler and derived-class overrides remain Unknown in this bounded route
 (`UNIT-STRUCTSTOP-066`); no new type-4 byte layout is implied.
 
 Read from `R0478` and its consumers (`ALM-REQ-055`, `ALM-REQ-056`, `ALM-ORD-057`,
-`ALM-RDR-059`). The engine's own names for the two mandatory records are in its error strings.
+`ALM-RDR-059`). Program text names the missing records. ALM-OUTCOME-323 narrows ALM-REQ-055's acceptance scope to reader status; its mission caller uses a separate pointer gate.
 The type-7 count clauses of ALM-REQ-056 and ALM-ORD-057 are partially retracted;
 the unrelated requirements below are retained.
 
+ALM-RDR-059 is partially retracted only for the unconditional absent-grid
+null-dereference clause. Cell-plane loads in `R0278` require positive
+signed W/H and returning preceding calls; earlier loads must complete before
+Altitudes. Actual fault and save-restore completion remain Unknown. — ALM-GRID-325
+
 | record | absent → | why |
 |---|---|---|
-| **type 1** *(“Tiles”)* | **reject** — loader status 5, `"Tiles block not found"` | the world builder `R0278` reads `map+0x0c` as u16/cell with no null test |
-| **type 2** *(“Altitudes”)* | **reject** — loader status 6, `"Altitudes block not found"` | same, `map+0x14` as u8/cell |
-| type 3 | **default**: a `W·H` plane of zeroes | same consumer reads `map+0x10` as i8/cell; nonzero = “an object blocks this cell”, so all-zero is a valid empty plane |
+| **type 1** *(program text: Tiles)* | Reader status 5; nonnull Altitudes still passes the caller gate | With positive signed W/H, grid ingest can reach the null Tiles dereference if preceding calls return; native fault Unknown — ALM-OUTCOME-323, ALM-GRID-325 |
+| **type 2** *(program text: Altitudes)* | Null pointer takes caller report-and-return-1; status 6 is set only after the Tiles check passes | Display and upstream menu return Unknown — ALM-OUTCOME-323 |
+| type 3 | **default**: allocation using the prior type2 payloadSize, followed by signed-count zero fill | The selected requests do not validate size against W/H — ALM-LOAD-320 |
 | type 5 | **default**: one group record — `new(0x48)`, `R0510(1,1)`, then `CPlayer+0x0c = 5000` (`ALM-REQ-056`, type-7 clause partially retracted; player-default clause retained), which is the field a record's own `+0x08` fills (`ALM-SCALAR-087`). Every shipped map authors `0` in that position on record 0 (`ALM-SCALAR-089`) | the group list must be non-empty |
 | type 0 | **default**: `W = H = 16`, empty name and text, `+0x70 = +0x74 = 1` | see the actual dimension and metadata-count dependencies below; no type-7/type-9 count dependency on type 0 is established |
 | type 4, 6, 8 | **skip when absent** | their present-record loops use metadata counts; absence does not itself run a loop |
@@ -121,7 +126,8 @@ lengths and four metadata-count bounds are carried in state from earlier records
    the false count dependency, not other object/pointer ordering requirements.
    — ALM-COUNT-195; ALM-ORD-057 (type-7 clause partially retracted)
 
-**Four readers ship, with three different acceptance tests** (`ALM-RDR-059`). Beside the loader,
+**Four readers ship, with three different acceptance tests** (ALM-RDR-059;
+its unconditional absent-grid fault clause is partially retracted, while the reader-family clause stands). Beside the loader,
 `rom.exe` has the `*.alm` browser scan's accept test — magic, `recordCount >= 2`, a type-0 record,
 and type-0 payload **`+0x70 >= 2`**, so a map below that threshold is silently unlisted
 (`ALM-META-058`) — and a light parser that handles typeIds 0..3 only, walks to EOF rather than by
@@ -445,3 +451,8 @@ frame release ends local ownership. The editor writer's last word has no
 defined initializer on the shown path. These conclusions assume ordinary ABI,
 DF=0, constructor-produced receivers and in-bounds buffers. They establish
 neither a numeric type nor native I/O values. — ALM-HDRLIFE-206
+
+Local signed counts, allocation arithmetic, link predicates and player-outcome
+boundaries are stated in [Mission-load bounds](load-bounds.md). Missing-check
+claims there are Medium over the selected whole bodies, with zero section scans.
+— ALM-LOAD-320, ALM-OUTCOME-323

@@ -548,7 +548,7 @@ current account.
 | MAGIC-CASTTICK-030 | The tick a spell is applied, in units a consumer can implement: tick `actor+0x134` of the action, counting the tick that started it as 0. | High / Medium | ● active (partially retracted) | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-BURST-031 | `MAGIC-PIC-027`'s Unknown is answerable: the `Distribution system` column decides the burst picture, and 10 of 28 shipped spells reach it. | High / Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-SENDER-032 | Two corrections to `MAGIC-PIC-027`'s sender enumeration, one of which changes what a consumer must build. | Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
-| MAGIC-CASTSPAWN-033 | (rom.exe) The object a cast puts on the map is built by the CASTER, not by the message, and its flight length comes from a hard-coded switch on the picture id -- non-zero for 7 picture ids and zero for the other 44. | High / Medium | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
+| MAGIC-CASTSPAWN-033 | The caster builds the cast map object; seven picture IDs get a nonzero countdown. | High / Medium | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
 | MAGIC-BURSTLIFE-034 | (rom.exe) A burst is stationary, and its sender chooses its lifetime. | High | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/), [EXP-0175](../experiments/EXP-0175-ring-geometry/) |
 | MAGIC-DELIVER-035 | (rom.exe) The simulation and the client each compute a cast projectile's flight length, by different rules, and on the normal path the client's wins. | High / Medium | ● active | [EXP-0167](../experiments/EXP-0167-spell-art/) |
 | MAGIC-AREATICK-036 | (rom.exe) The `AreaEffect` per-tick entry is vtable slot `+0x18`, and `effect+0x08` selects one of three exclusive per-tick modes. | High / Medium | ● active | [EXP-0172](../experiments/EXP-0172-area-tick/) |
@@ -675,6 +675,8 @@ draw remains Unknown. Construction, timing and lifetime clauses stand.
 **Original status.** ● active
 
 **Evidence.** [EXP-0167](../experiments/EXP-0167-spell-art/)
+
+**Amended.** MAGIC-TELEPORT-358 and ANIM-TELEPORT-167 read the complete producer/copy and cached-coordinate geometry. ANIM-TELEPORT-168 bounds the picture-60 phase and countdown by driver calls. The earlier caster-centre clause remains partially retracted; first native draw remains Unknown.
 
 ### MAGIC-BURSTLIFE-034
 
@@ -1414,7 +1416,7 @@ on this code read is not independent corroboration.
 |---|---|---|---|---|
 | MAGIC-DELIVERY-170 | A simulation SpellTransport delivers by a saved signed countdown, not by the visible projectile reaching a collision point. | High | ● active | [EXP-0362](../experiments/EXP-0362-cast-delivery/) |
 | MAGIC-CASTCLOCK-171 | Cast admission, prepared simulation effects and client flight use different clocks. | High / Medium | ● active | [EXP-0362](../experiments/EXP-0362-cast-delivery/) |
-| MAGIC-TELEPORT-174 | A destination veto can leave an admitted teleport in place after mana was spent and cast presentation was produced. | High / Medium | ● active | [EXP-0363](../experiments/EXP-0363-blocked-teleport/) |
+| MAGIC-TELEPORT-174 | A destination veto can keep Teleport in place after mana payment and cast presentation. | High / Medium | ● active (amended) | [EXP-0363](../experiments/EXP-0363-blocked-teleport/) |
 
 ### MAGIC-DELIVERY-170
 
@@ -1445,6 +1447,10 @@ on this code read is not independent corroboration.
 **Original status.** ● active
 
 **Evidence.** [EXP-0363](../experiments/EXP-0363-blocked-teleport/)
+
+**Amended.** MAGIC-TELEPORT-356 reads the complete relocation and separates pre-store mask veto from a release/entry failure that still stores Position. MAGIC-TELEPORT-360 retains the Unknown player-click exploration and fog boundary. Existing payment and unconditional-update clauses stand.
+
+**Amended.** MENU-CAST-153 and TERR-CLICK-262 narrow the click/cursor Unknown to the compiled aggregate gate and its cursor fallback. MAGIC-TELEPORT-365/366 add bounded sender, setter and executor evidence. Native delivery, presentation and complete refusal effects remain Unknown; the payment and later destination-veto clauses stand.
 
 ## Fire Wall and Poison Cloud overlap (continued)
 
@@ -2100,7 +2106,7 @@ with MAGIC-240; no native repetition count is observed.
 | MAGIC-262 | Human state 8 uses idle weapon/shield name selection in R0551; the class-store path maps an unshielded empty-handed mage to 23 and staff categories to 24. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
 | MAGIC-263 | EN/RU units.reg has three distinct human ShootOffset arrays for mage/xbowman, mage_st and archer; the other 12 human class IDs use delta (-48,-57), with exact eight-direction integer vectors established. | High / Medium | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
 | MAGIC-264 | Among the 12 EN/RU Units rows with positive spell slots, Goblin_Sling.4, Orc_Bow.4 and Bat_Sonic.4 have ShootOffset arrays; the other nine use the normal cast producer's Selection fallback. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
-| MAGIC-265 | The inspected cast and cell-effect producers have different origins: Teleport forces the fallback and its second object's raw point is destination-derived; three message arms use cell centres. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
+| MAGIC-265 | Teleport's second raw point is destination-derived; inspected cell-effect arms use cell centres. | High | ● active (amended) | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
 | MAGIC-266 | Direct simulation delivery-2 admission copies caster Position into SpellTransport; its tick leaves Position unchanged, while the nested PointEffect copies the target Position. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
 | MAGIC-267 | The visible projectile SAV writer stores current +08/+0c as Prj<ID>/x and /y; its sixteen leaves have no separate launch-point copy from +28/+2c, so a moved projectile does not preserve its original point there. | High | ● active | [EXP-0502](../experiments/EXP-0502-spell-launch-point/EXP-0502.md) |
 
@@ -2271,6 +2277,8 @@ distinguish caster, destination and message-cell alternatives.
 geometry/draw ordering and the first displayed Teleport point remain unknown.
 A native capture or complete draw-order trace would settle that presentation
 boundary; no native game was run here.
+
+**Amended.** ANIM-TELEPORT-167 narrows external geometry: the producer's second geometry call reads the copied source cache. This is an instruction-bound input result, not a native first-visible-frame result. MAGIC-TELEPORT-358 rereads the producer and copy scalar stores.
 
 ### MAGIC-266
 
@@ -3591,11 +3599,11 @@ owner use was observed.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-310 | A cast's mana is subtracted in phase 0, on the pass that stores phase 5 and the wind-up countdown (High); the admission returns 1 on every path after it, so a charged cast enters wind-up (Medium, window over cap). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-310 | Phase-0 admission subtracts mana before wind-up (High); its own charged return paths yield 1 (Medium, bounded to the read body). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/), [EXP-0569](../experiments/EXP-0569-teleport/) |
 | MAGIC-311 | No setter read stores progress or phase for a new order (High); that the running cast stays charged and unrefunded, and that a repeated cast pays again, is composed from bodies read (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-312 | A player's cast refused for mana stays at progress 2 with pending 0: with completion byte 1 progress clears after three passes and the cast is dropped uncharged; with 0 the retry repeats on every pass (Medium). | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
 | MAGIC-316 | Caster mana word `actor+0x9a` has 17 word stores in 13 segments (census); one subtracting store among the sites read (`L05057`); `R0654` (a quotient of a division by 100, body unread) is not read. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
-| MAGIC-317 | A scroll cast pays no mana at admission (`actor+0x68` nonzero skips the subtraction); at the end of application the item and the Spell are released and the pointers cleared. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-317 | A scroll cast pays no mana at admission (`actor+0x68` nonzero skips the subtraction); at the end of application the item and the Spell are released and the pointers cleared. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-318 | The application routine `R0003` stores caster health 1 and mana 0 at `L05228`/`L05229` after preparing its pair; the spell-id condition rests on `MAGIC-302`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-323 | Arm `L05759..L05760` stores `+0x3d`, then `+0x42` four times (the `MAGIC-303` formula steps), then `+0xc` := spell id and `+0xe` := 2*id+8; its operands come from `MAGIC-303`, the tick from `MAGIC-304`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | MAGIC-324 | Bit `0x100000` set at `L14772` in the effect apply dispatcher `R0843` lands in `actor+0x150`, not `actor+0x144`; the executor tests `[actor+0x144]` (`L00543..L05747`) (High). | High | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
@@ -3633,6 +3641,15 @@ three of them over budget, and is not an image-wide census.
 subtracting store among the sites read (`L05057`). Its population is not closed (the
 blind spots, the 61 dword stores and the unread site `R0654` in `MAGIC-316`), so the
 Unknown is answered in part.
+
+**Amended.** EXP-0569 reads the complete admission body in
+[admit.txt](../experiments/EXP-0569-teleport/evidence/out/admit.txt), within its
+preregistered window budget. The post-subtraction joins at `L14662`,
+`L06150`, `L14663` and `L14664` set EAX to 1 before the local return
+at `L14661`. The own return census therefore has an in-budget acquisition;
+the historical `w26` cap receipt remains unchanged. High / Medium grades are
+retained. This does not close unread helper or runtime effects, or the
+incomplete mana-writer population of the existing MAGIC-316 amendment.
 
 ### MAGIC-311
 
@@ -3778,6 +3795,8 @@ Medium for the meaning of the item kind 0xe, which the bodies do not name.
 **Unknown.** What a new order does to a scroll cast in each executor state beyond `AI-490`;
 the setters `R0011` and `R0012` (window `R0011..R0108` generated, not examined).
 
+**Amended.** MAGIC-TELEPORT-365 reads the complete cell setter R0012 and the client point sender; MAGIC-TELEPORT-366 reacquires the complete payment body. The unread actor setter R0011, arming and interruption cases remain Unknown. Existing grades and cleanup clauses stand.
+
 ### MAGIC-318
 
 In the application routine `R0003` (callers `L00008`, `L03043`, `L03044`), the arm
@@ -3867,7 +3886,7 @@ This card adds, at instruction level, the three mana stores that `MAGIC-316` lef
 | MAGIC-320 | The heal arm `R0015` casts spell id 6 from a human owner's unit's book on itself, else on the most damaged ally in range, without an order; stored as pending 8 with `ord+0x60` = 1. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-321 | The armed cast mode stores nothing on the unit; a unit that cast returns to state 0xc, and the cast states 0xd and 0xe only re-issue the stored cast, so the mode adds no automatic cast. | Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-322 | The engage `R0009` rolls the unit's spell slots on every call and, on a hit, `R0209` stores a cast (pending 8 or 9, spell, reach; an arm for ids 4 and 25 stores no order); a mage-mask unit in melee reach of a human owner skips it. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
-| MAGIC-340 | For a cast started through pending kind 8 or 9: selectors test mana cost, the executor gate tests facing and reach, the admission refuses only on mana; a refusal retries until the progress-2 exit (High bodies, Medium outcome). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| MAGIC-340 | For a cast started through pending kind 8 or 9: selectors test mana cost, the executor gate tests facing and reach, the admission refuses only on mana; a refusal retries until the progress-2 exit (High bodies, Medium outcome). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/), [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
 | MAGIC-341 | A cast start is reached at executor progress 0 only; a new order during a step or a cast leaves progress alone and waits; one read path ends a cast, command state 0x17 with `mover+0x98` set, cause unread (Medium). | Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
 | MAGIC-348 | `R2078` returns 1; `L13144`, `R0621` test Spell row parameter 4; `R0904`, `R0269`, `R0617`, `R0618`, `R0254` test no range or sight (Medium). | High / Medium | ● active | EXP-0559 |
 
@@ -3945,13 +3964,15 @@ Population: windows read in EN, listed under `evidence/run1/listings`: the sette
 
 **Observation.** The setters test only whether the member holds a parked Spell (`actor+0x44`, `L15291`, `L15292`); with none they stand the member (state 0xc, `ord+8` 0). They test no mana, range, sight, target state or progress. The group pass arms for states 0xd and 0xe store kind 8 (through `R0018`) or kind 9 without a test (`L01993`, `L13503`). The selectors test, before parking a cast: `R0305` spell cost `+0xc` against mana `+0x9a` (`L01141`); `R0393` cost against mana and spell byte `+0xa` equal 0 for each id 1..28 (`L05138`, `L05139`); `R0394` the same with `+0xa` nonzero and mana equal to the maximum `+0x9c` (`L15293`), and an ally's flag bit (`L05214`); `R1048` cost against mana for ids 0xe, 0x14, 0xd, 1; `R0015` mana nonzero and above the word `+0xa0` (`L00056`); `R0113` mana above 10 (`L15294`); `R0009` a random draw per slot against the dword at the slot's `+0xc`. `R0018` tests only for a null target (then `R0022`). The executor tests, at progress 0 and kind 8 (`L00108`), that the target is the caster or the gate `R0041` passes (facing byte equal to the heading and edge distance within the reach `ord+0x14`), and at kind 9 (`L05042`) the gate `R0086` (facing equal to the heading to the cell and Chebyshev distance within reach). A failing gate calls the approach wrapper `R0042` or `R0087` and stores action 1; the wrappers store progress 3 and `ord+0x15` 0 when the caster is not at a cell centre. The install stores progress 2, action 0xd or 0xe and the Spell. The admission `R0268` refuses at one place: for a caster with the mage mask (`byte +0x4c` bit 4) and no scroll pointer (`+0x68` zero) whose mana word `+0x9a` is below the Spell cost word `+0xc` it returns 0 (`L15295`); otherwise it subtracts the cost and returns 1 on the four paths read. The action body leaves a refused cast at phase 0 (`L04575`, `L04576`) and stores no `actor+0x136`, so the admission is evaluated again on the next pass of the slot; an admitted cast stores completion 0 (`L14660`), phase 5 and the countdown (`L15296..L04379`). The install (`L15297..L06125`) stores progress 2 and calls `R0401` when `ord+0x60` is zero. The progress-2 arm (`L00093..L00095`) ends the cast once `ord+0x15` exceeds 2 and `actor+0x136` is nonzero. The weapon-backed conversion in the action body (`L15298..L13664`, `L15299..L15270`) tests action word 3, the weapon pointer `actor+0x74` nonzero, `R0408` on it and the mage mask `R0442` on the actor, then stores the Spell from weapon `+0x80`, the weapon in `+0x68` and action 0xd; it reaches the admission without the executor gate. The wrappers `R1137` and `R1138` and the four gap action-word stores (`AI-609`) are not part of this path and their checks are unread.
 
-**Inference.** For a manual cast the checks before the Spell is parked are the member's parked Spell only; range and facing are tested at the executor install and mana at the admission, one pass later (`AI-489`). The outcomes for a cast started through kind 8 or 9: a setter without a Spell stands the member (replace); a gate failure approaches and the order stays. After an admission refusal the progress-2 arm runs again on the next pass and ends the cast (progress 0) once `ord+0x15` exceeds 2 and `actor+0x136` is nonzero; the byte is cleared at an admitted pass and set at phase 7 (`MAGIC-311`). A refused manual cast therefore retries for about three passes when the byte holds 1 from an earlier cast, and until mana suffices when it holds 0; the manual cast's order is not kept (command state 0xc after `R0401`). The order is kept only for `ord+0x60` nonzero (heal and creature casts). The retry bound depends on `actor+0x136`.
+**Inference.** In the read server setters `R0011` and `R0012`, the pre-parking check tests only the member's parked Spell; range and facing are tested at the executor install and mana at the admission, one pass later (`AI-489`). The outcomes for a cast started through kind 8 or 9: a setter without a Spell stands the member (replace); a gate failure approaches and the order stays. After an admission refusal the progress-2 arm runs again on the next pass and ends the cast (progress 0) once `ord+0x15` exceeds 2 and `actor+0x136` is nonzero; the byte is cleared at an admitted pass and set at phase 7 (`MAGIC-311`). A refused manual cast therefore retries for about three passes when the byte holds 1 from an earlier cast, and until mana suffices when it holds 0; the manual cast's order is not kept (command state 0xc after `R0401`). The order is kept only for `ord+0x60` nonzero (heal and creature casts). The retry bound depends on `actor+0x136`.
 
 **Confidence.** High for the instructions and the paths listed (read whole bodies, EN, one image for both roots). Medium for the composed statements about outcomes, including the refusal retry, which add the pass order of `AI-371` and the progress arms; the callee bodies `R0051`, `R0036`, `R0089`, `R0043`, `R0178`, `R0617`, `R0618` and `R0254` are not read here.
 
 **Unknown.** The meaning of the words `actor+0xa0` and `+0x9c` beyond their use as operands; whether the admission callees test range or sight (`R0621`, `R0904`, `R0269` unread); the checks of a cast started through the wrappers `R1137` and `R1138` and the four gap action-word stores; the checks before the scroll arm's setter call.
 
 **Amended.** `MAGIC-348` reads `R0621`, `R0904`, `R0269`, `R0617`, `R0618`, `R0254` (no range or sight test); `AI-617` reads the scroll arm; `AI-618` the wrapper starts.
+
+**Amended.** EXP-0571 bounds the parked-Spell-only observation to server setters `R0011` and `R0012`, not the full manual-cast path. TERR-CLICK-262 and MENU-CAST-153 establish earlier client hover predicates and cursor dispatch (High local branches; Medium player outcome/feedback). MAGIC-TELEPORT-364 and MAGIC-TELEPORT-365 establish earlier selected-value, target-form and builder actor-inclusion checks (High instructions/stores; Medium Teleport identification and book/item composition). Setter, executor, admission, retry and cleanup facts retain their existing grades. Arming, complete reception and native delivery remain Unknown.
 
 ### MAGIC-341
 
@@ -3978,3 +3999,105 @@ Population: EN `rom.exe`, windows `R2078..L15362`, `R0269..R0002`, `R0617..R0619
 **Confidence.** High for the instructions. Medium for the whole: `R0625` past `L15371`, `R0619`, `R0646`, `R0003`, `R0109`, `R0253` and the use of `R0254` at `L15399` are unread.
 
 **Unknown.** Those bodies; what the bit set in `actor+0x144` means.
+
+## Teleport relocation and presentation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-TELEPORT-356 | The read relocation recentres Position even when old-cell release or new-cell entry reports failure. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| MAGIC-TELEPORT-357 | The relocation's read stand helper resets command state and pending kind, but retains open movement effects. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| MAGIC-TELEPORT-358 | The read normal producer builds two Teleport records; the copy's raw point changes while its source cache stays. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| MAGIC-TELEPORT-359 | The read Teleport cast cue hook uses bank entry 60 and the caster's raw point at the class AttackDelay. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| MAGIC-TELEPORT-360 | Teleport's read relocation checks two footprint masks; exploration, fog and full click admission stay Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+
+### MAGIC-TELEPORT-356
+
+R1055 first tests the destination footprint in plane +0x20000 and then calls R0048 with flag 1. Either veto returns 1 before Position stores. With both guards passed, each successful R0057 call caches the old Position in mover +0x86..+0x89. A release refusal sets the result to 0 and still reaches the stores.
+
+The own store order is Position byte +0 (x), word +2 (packed cell), bytes +4 and +5 (both 0x80), then byte +1 (y), at L05856..L05857. This path has no old-sub-cell test before those stores. It calls R0050, R0044 and R0059(actor,0,-1). An occupy refusal changes the result, without restoring Position. The Teleport arm in R0003 calls this routine at L16009, ignores its result and requests R0059(actor,0,0x20) at L05854.
+
+**Confidence.** High for these complete-body branches and own stores in the equal EN/RU image. Medium for the composed footprint and publication effect: downstream cell-record, trigger and virtual bodies remain unread.
+
+**Unknown.** Native mid-step reachability, later movement, packet reception and rollback outside these bodies. An admitted call overwrites the old fine bytes locally; this does not prove a complete transit cancellation. The unexpanded calls and indirect sites are enumerated in the experiment.
+
+### MAGIC-TELEPORT-357
+
+After Position stores, R1055 calls R0044. The complete helper copies mover +0 to wanted facing +1 when different. Twice it conditionally calls R0045 when the claim is nonzero, R0040 reports a centre and the claim differs from current packed Position. The read centre getter tests fine bytes +4/+5 against 0x80; R0019 returns word +2. Claim release clears mover words +0x80, +0xa6 and +0x76 after R0046.
+
+The stand helper writes order +0x14 from actor +0x12c, clears order +0x60, mover +0x7c, actor +0x54 and order +0x50, then sets actor +0x50 to 12, order word +0 to the current packed cell and order byte +8 to 0. R0050 writes mover +0x72 and +0x82..+0x85 from the destination's cost and Position before footprint registration. The successful old-cell release writes mover +0x86..+0x89 from the preceding Position.
+
+**Confidence.** High for the own stores and call order in the complete read bodies. Medium for the bounded negative: no own store to current facing, route-list nodes, target pointer, transit duration or elapsed counter was found in relocate, stand, occupy, release, claim-clear and claim-word release. No displacement, rel32 or dword census was run.
+
+**Unknown.** A later executor pass and the unread cell/trigger/publication callees can change movement or target state. Copied-pointer accesses, computed offsets, bulk copies and indirect calls bound the negative. Stopping the command is not proof that every movement field was cleared.
+
+### MAGIC-TELEPORT-358
+
+R0620 constructs a 0x14c-byte projectile through R0609. Picture +0x20 comes from caster actionspell +0xa4. Picture 60 forces MAGIC-261's Selection fallback at the cached caster centre. The first object's raw +8/+0xc are copied to cache +0x28/+0x2c. Aim +0x88/+0x8c/+0x90 comes from the action point on the point-target route.
+
+The decoded picture-10 selector table maps picture 60 to selector 6 and arm L16010, which stores remaining +0xa0 = 21. The producer stores action +0x84 = 1 and actionphase +0x94 = 0, calls R0614 and inserts the first object in the view's +0x9d4 store.
+
+For picture 60 it allocates a second 0x14c-byte object through L03008. R2159 copies raw position, cache, action, aim, phase and remaining scalars. The producer then overwrites the second raw x/y with copied aim plus the Selection fallback and z with actionz, calls R0614 and inserts it in the same store. It does not itself replace the second cache before that geometry call. ANIM-TELEPORT-167 gives the geometry input; ANIM-TELEPORT-168 gives the driver.
+
+**Confidence.** High for the producer stores, decoded selection and copy-body scalar stores. Medium for the whole constructed state because base constructor R1652 and subsidiary collection-copy helpers are unread. This supports two records on this producer route, not a global object census.
+
+**Unknown.** Additional objects created inside allocation/copy helpers, non-normal producers, allocation failure and first native draw. Program text used elsewhere to name picture 60 does not establish an asset filename here.
+
+### MAGIC-TELEPORT-359
+
+The decoded CUnit vtable places L13062 at slot +0x60 and R0620 at +0x5c. In R0548's action-8 arm, clock +0x94 equal to class +0x100 calls slot +0x60. Picture 60 separately calls +0x5c at clock 0. MAGIC-CASTANIM-029 supplies the class Attack timeline and AttackDelay names at their published grade.
+
+L13062 selects the pointer at [L01636]+0x7d0+4*actionspell. Thus actionspell 60 selects entry 60. It passes caster raw +8/+0xc and its view to R0574. For a nonnull cue it calls R0386 with the returned spatial terms and the setting at L02733. VIDEO-SFX-088 supplies the spatial helper's established arithmetic; it was navigation, not a new body read.
+
+**Confidence.** High for the clock condition, slot identity, bank index and coordinate operands in the read bodies. Medium for the sound-start interpretation because the cue loader and R0386 were not read. No second sound invocation was found in the own normal spawn or picture-60 driver arm; that is a local negative without scans.
+
+**Unknown.** Cue filename, actual audible start, device success and relative timing against relocation. The two projectile records do not themselves prove two sounds. Unread constructors, indirect calls and sound helpers bound that conclusion.
+
+### MAGIC-TELEPORT-360
+
+R1055 tests every footprint cell's dynamic byte at manager +0x20000 against mover byte +5. It then calls R0048(destination,1), whose complete nonzero-flag branch tests the static byte at +0x10000 against the same mask. Either hit returns before Position stores. The footprint coordinates use low-byte arithmetic; input x/y are narrowed to bytes.
+
+The complete R0086 requires mover current facing +0 to equal R0089's returned heading, then max(abs(cellX-destX),abs(cellY-destY)) <= the supplied reach byte. MAGIC-340 supplies this predicate's executor location and approach behavior; its caller was not reread here. R0268 performs its mana subtraction before the ordinary presentation sender. MAGIC-TELEPORT-174 and MAGIC-CASTTICK-030 retain their bounded payment/application ordering.
+
+**Confidence.** High for the two local mask predicates and point-distance arithmetic. Medium for the composed destination and payment outcome. No direct exploration, current-fog, actual-map-size or connected-area predicate was found in relocation and preflight; no section scans or complete caller/callee census were run. Unknown for the player-click-to-arm admission table.
+
+**Unknown.** An in-range unexplored cell, an explored cell under fog, cells outside actual map dimensions and a different connected area remain unsettled for a player cast. Occupancy is refused when its dynamic bit meets the mover mask; every class/bit population was not reread. Read the Teleport click/cursor arm and its predecessors in R0509, the executor R0016 and named helper population to settle the full table. MAGIC-REACH-181's Fire Ball aggregate visibility clause is not evidence of Teleport equivalence.
+
+**Amended.** MAGIC-TELEPORT-364 and MENU-CAST-153 read the client cast/cursor bodies; TERR-CLICK-262 establishes their four-corner visibility guard and TERR-CLICK-263 the coordinate conversion. MAGIC-TELEPORT-366 reads the point executor gate. The full admission Unknown is narrowed to unread arming, reception, lower route/heading/install and runtime edges. The existing footprint and grade clauses stand.
+
+## Player point-cast admission
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-TELEPORT-364 | The read client slot-18 cast route selects a point over an actor or empty ground; its wire selector 19 maps to Teleport ID 26 through the established command remap. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+| MAGIC-TELEPORT-365 | Book and item point casts share the read client coordinate builder; item selection changes opcode 0x1f to 0x26 before sending, while lower reception stays bounded. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+| MAGIC-TELEPORT-366 | The read kind-9 executor tests a heading result and byte-coordinate reach before install; its failure approaches, while shared admission separately tests and subtracts book mana. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+
+### MAGIC-TELEPORT-364
+
+R0211 uses selected +0x74 when nonnegative and otherwise +0x60. A negative selection exits the cast arm. With an actor hit, a zero R0094 selector chooses R0090; without a hit only that zero selector calls the point builder. Both decoded target tables have zero at index 18 (L16025 and L16026). The caller passes selection+1, so slot 18 supplies 19. The decoded remap dword at L16027 is 26. AI-CMD-032 supplies the dispatcher use of that table at its existing grade; its body was not reacquired.
+
+**Confidence.** High for the complete client branches and decoded selected values in the equal EN/RU image. Medium for identifying slot 18 with a player's Teleport: the remap use is reused navigation, and the book/scroll arming producers are unread. No global target-form census is claimed.
+
+**Unknown.** Which producer sets each selected slot, forged or out-of-range selectors, and the unread unit builder R0091. The complete dispatcher R0061 and arming producers would settle the representation chain.
+
+### MAGIC-TELEPORT-365
+
+R0090 stores destination words at command +0x0a/+0x0c. A nonnegative selected +0x74 stores opcode 0x26 and word +0x10 from selected-object +0x78. Otherwise it stores opcode 0x1f and byte +0x10 from selection+1. Member inclusion requires actor +0x7c nonzero and either its +0x18 spell bit or the item-selected condition. The builder invokes R0217; that complete sender branches on command +7 and calls unread record virtuals and connection helpers. No own cell admission test was found in these two complete bodies. Displacement, rel32 and dword section scans: zero.
+
+AI-CMD-032 and AI-617 supply the separate ordinary and item reception arms and their convergence on R0012 at their published grades. MAGIC-317 supplies the later scroll-pointer payment skip. The read cell setter takes the low byte of each coordinate, packs y in the high byte of order +0x3c, stores command state 0x0e and the parked Spell at order +0x30, then clears parked actor +0x44. A null parked Spell takes the stand branch.
+
+**Confidence.** High for the own builder opcode/coordinate stores and setter stores. Medium for book/item interpretation and the composed player admission, which depends on unread arming, serialization, dispatcher and reset helpers. Shared storage does not prove identical scroll/item validation.
+
+**Unknown.** Opcode 0x25's unit sender, item selection provenance, packet reception and feedback. Read R0091, complete R0061, R0092, L02443 and the record virtual +8/+0x10 implementations to close those edges.
+
+### MAGIC-TELEPORT-366
+
+The decoded R0016 kind table maps kind 9 to L05042. At progress zero this block passes order +0x3c and reach +0x14 to R0086. A nonzero return calls unread R0013. A zero return reaches R0087 through L14189 and stores action +0x54 = 1. The complete approach wrapper calls unread R0178 and R0040, and can store progress 3 and counter 0.
+
+R0086 first requires mover current-facing byte to equal R0089's returned byte. It computes absolute differences between Position's packed-cell bytes and destination bytes, takes their maximum by unsigned byte comparisons, and returns 1 when that maximum is at most reach. No own walking-route, region or on-foot-distance term was found in the read client click, point builder, sender, cell setter, point gate or admission body. This is a body-local negative with zero displacement, rel32 and dword scans.
+
+R0268 applies its cost branch only when R0442 returns nonzero and actor +0x68 is zero. It sign-extends Spell +0x0c and actor mana +0x9a for the signed comparison at L05054; equality passes. Insufficient mana returns 0 before subtraction. Otherwise L05055..L05057 subtracts the cost before point construction and presentation calls. Its own later returns set 1. MAGIC-310 and MAGIC-317 retain the established phase and scroll semantics; MAGIC-TELEPORT-360 retains the later footprint masks.
+
+**Confidence.** High for the own comparisons, stores, complete-body call order and kind-table value. Medium for full reachability, cost and refusal outcomes. The heading, approach, install, phase and presentation helpers are not newly read. No connected-region acceptance or global lack of pathfinding is established.
+
+**Unknown.** R0089, R0178, R0013, parent R0008 and phase body R0037 are settling reads for reachability and ordering. Full destination admission and runtime feedback remain open. All other unread direct and indirect sites are in the experiment's generated callee receipt.

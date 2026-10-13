@@ -385,3 +385,26 @@ duration can use separate counters. — MAGIC-300, TEXT-117
 The two installed EN/RU executable images and 28 Spells rows, including
 Effects strings, match. Whole Data.bin hashes differ. The agreement is
 limited to those code and Spells inputs. — MAGIC-305
+
+## Player Teleport destination admission
+
+The read client slot 18 selects a point over actor hits and empty ground;
+selection+1 supplies wire selector 19. The decoded remap value is Teleport
+ID 26 under the established dispatcher contract. The arming producers and
+complete dispatcher representation chain remain Medium. — MAGIC-TELEPORT-364
+
+Book and item point casts share the coordinate builder. Ordinary selection
+writes opcode 0x1f; nonnegative item selection writes 0x26 and its stored
+item selector. The complete cell setter keeps coordinate low bytes and parks
+the Spell. The 0x26 sender Unknown is narrowed; unit sender 0x25 and lower
+reception remain unread. — MAGIC-TELEPORT-365, AI-617
+
+Pending kind 9 at progress zero tests the returned heading and maximum
+unsigned-byte coordinate difference against reach. Failure calls approach;
+success calls the install helper. Shared admission subsequently compares
+sign-extended cost and mana words and subtracts before presentation on its
+book branch. A nonzero scroll pointer skips that branch. The cell setter
+and admission are read, while interruption and the actor setter remain open.
+No global absence of walking reachability is established: the heading,
+lower approach, install and phase bodies are outside the acquired set.
+— MAGIC-TELEPORT-366, MAGIC-317

@@ -593,3 +593,23 @@ equipment dispatches apply/remove directly. The two installed roots have
 matching Spells/equipment strings and one executable image. No numerical
 mode occurs in their 2386 equipment cells per locale; item inputs outside
 that population remain open. — MAGIC-309
+
+## Teleport relocation writes and admission boundary
+
+After the two footprint mask guards, relocation writes cell x, packed cell,
+fine x 0x80, fine y 0x80 and cell y. A release or entry failure does not
+restore Position. Successful release caches the old position in Mover
++0x86..+0x89; occupy fills +0x72 and +0x82..+0x85. The following stand helper
+sets command state 12, pending kind 0 and a post from current Position,
+and reconciles wanted facing with current facing. Complete transit, route
+and target effects through unread callees remain Medium.
+— MAGIC-TELEPORT-356, MAGIC-TELEPORT-357
+
+The arm first checks dynamic footprint bytes against mover +5, then static
+footprint bytes against that mask. The point-order predicate separately tests
+heading and maximum-axis cell distance against reach. The acquired client
+cursor/click bodies narrow the admission Unknown, but arming, reception,
+actual-map bounds and lower route/install/runtime effects remain open.
+Mana and presentation precede the later arm on the established cast path;
+the point gate and shared payment body do not establish global acceptance.
+— MAGIC-TELEPORT-360, MAGIC-TELEPORT-174, MAGIC-TELEPORT-366

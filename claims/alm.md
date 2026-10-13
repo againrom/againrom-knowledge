@@ -95,8 +95,8 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/alm/format.
 | ALM-CLS-036 | type4 `kind` (file `+0x08`) is the class-selecting field, and its domain is `structures.reg`'s `ID`. | High | ● active (amended) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/), **[EXP-0049](../experiments/EXP-0049-placeable-db/)** |
 | ALM-CLS-037 | The type-4 object/structure discriminator is `kind ∈ {0x22, 0x23}`, read from the walker. | High / Medium | ● active (amended) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
 | ALM-CLS-038 | type6 names its unit class by `units.reg`'s `ID`, and resolves it through a definition collection, not a registry subscript. | High | ● active (amended, partially retracted) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/), **[EXP-0049](../experiments/EXP-0049-placeable-db/)** |
-| ALM-OWN-039 | Owner, both record types: type-4 file `+0x0e` and type-6 file `+0x14` are the same field — a 1-based physical slot in the type-5 array. | High / Medium | ● active | [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
-| ALM-UNIT-040 | The type-6 70-byte record, field by field, from the loader's own read sequence | High / Medium | ● active (amended, superseded) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
+| ALM-OWN-039 | Owner, both record types: type-4 file `+0x0e` and type-6 file `+0x14` are the same field — a 1-based physical slot in the type-5 array. | High / Medium | ● active (amended) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
+| ALM-UNIT-040 | The type-6 70-byte record, field by field, from the loader's own read sequence | High / Medium | ● active (amended, superseded, partially retracted) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/) |
 | ALM-GRP-041 | The type-5 76-byte record, field by field | High / Unknown | ● active (partially retracted, superseded) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/), [EXP-0074](../experiments/EXP-0074-target-acquisition/), [EXP-0180](../experiments/EXP-0180-shade-select/), [EXP-0297](../experiments/EXP-0297-roster-scalar-reader/), [EXP-0351](../experiments/EXP-0351-authored-player-control/) |
 | ALM-CLS-042 | Shipped maps place `objects.reg` *fire* variants, and those classes' art does not ship. | High / Medium / Unknown | ● active (amended) | [EXP-0037](../experiments/EXP-0037-alm-class-binding/) (added 2026-07-27) |
 | ALM-TERR-043 | `world.res:data/map.reg` in full — and the half of it the engine never reads. | High / Medium | ● active | [EXP-0041](../experiments/EXP-0041-terrain-passability/) |
@@ -111,11 +111,11 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/alm/format.
 | ALM-CLS-052 | The type-6 → definition resolution, closed over the shipped file. | High / Medium | ● active | [EXP-0049](../experiments/EXP-0049-placeable-db/) |
 | ALM-CLS-053 | The type-4 `kind` law, completed: `kind` subscripts the Buildings table of `Data.bin`, 1-based because the file skips entry 0. | High | ● active | [EXP-0049](../experiments/EXP-0049-placeable-db/) |
 | ALM-CLS-054 | The client creation message's class byte becomes drawable `+0x20` at `L02143`, and its server source is `actor+0x0e`. | High / Medium | ● active (amended, partially retracted) | [EXP-0049](../experiments/EXP-0049-placeable-db/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
-| ALM-REQ-055 | The open path requires exactly two records: `type1` and `type2`. Nothing else, and never a count. | High | ● active | [EXP-0056](../experiments/EXP-0056-alm-record-set/) |
-| ALM-REQ-056 | Per-section behaviour on absence, section by section. | High | ● active (partially retracted) | [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0358](../experiments/EXP-0358-alm-headers-metadata/) |
+| ALM-REQ-055 | The open path requires exactly two records: `type1` and `type2`. Nothing else, and never a count. | High | ● active (amended) | [EXP-0056](../experiments/EXP-0056-alm-record-set/) |
+| ALM-REQ-056 | Per-section behaviour on absence, section by section. | High | ● active (partially retracted, amended) | [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0358](../experiments/EXP-0358-alm-headers-metadata/) |
 | ALM-ORD-057 | The physical order `0,1,2,3,5,4,9,8,6,7` is not enforced, but three precedence relations are | High | ● active (partially retracted) | [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0358](../experiments/EXP-0358-alm-headers-metadata/) |
 | ALM-META-058 | type-0 payload `+0x70` (→ `map+0xd4`) is a gate operand twice over, and the `+0x78` text region is consumed as one string. | High / Medium | ● active | [EXP-0056](../experiments/EXP-0056-alm-record-set/) |
-| ALM-RDR-059 | Four `.alm` readers ship, with three different acceptance tests — and only one of them acts on the loader's status word. | High / Medium / Unknown | ● active (amended) | [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0298](../experiments/EXP-0298-map-scalar-consumers/) |
+| ALM-RDR-059 | Four `.alm` readers ship, with three different acceptance tests — and only one of them acts on the loader's status word. | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0298](../experiments/EXP-0298-map-scalar-consumers/); [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
 | ALM-CORP-060 | `ru/Horror.alm` is `en/Horror.alm`'s first 262 876 bytes with two bytes changed — and it fixes what the 38-map corpus actually was. | High | ● active | [EXP-0056](../experiments/EXP-0056-alm-record-set/) |
 | ALM-OBJ-061 | Which of a type-4 placement's two fixed-point coordinates is the column, read from the image end to end — `TERR-STRUCT-075`'s "the instructions do not say" is withdrawn. | High | ● active | [EXP-0091](../experiments/EXP-0091-placement-axes/) |
 | ALM-OBJ-062 | The type-4 extension's eight bytes, field by field — and three quarters of them are dead. | High / Medium | ● active | [EXP-0091](../experiments/EXP-0091-placement-axes/) |
@@ -166,6 +166,8 @@ File header (12 B): `char[4]` magic `4D 37 52 00` ("M7R␀") + `u32 version = 20
 **Evidence.** [EXP-0007](../experiments/EXP-0007-alm-container/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/)
 
 **Amended.** The table ledger carried the status "● active (amended)".
+
+**Amended.** ALM-LOAD-320 distinguishes the primary reader's fixed 20-byte request in R0466 from the length-following helper R0465 named here. The latter is not the primary reader's header helper. Existing framing and measured dataSize clauses retain their grades.
 
 ### ALM-SEC-002
 
@@ -435,6 +437,8 @@ In `rom.exe` the `.alm` reader `R0478` reads a 20-byte file header, `strcmp`s th
 
 **Amended.** The table ledger carried the status "● active (amended)".
 
+**Amended.** ALM-LOAD-320 states the signed payload loops and modulo-2^32 grid requests. ALM-OUTCOME-323 retains the pointer-only caller gate and bounds player-visible refusal separately from reader status. Existing header gates stand.
+
 ### ALM-META-025
 
 The type-0 scalars `+0x24/+0x28/+0x2c/+0x30/+0x34` are **element counts** the loader uses as loop bounds for the content records. Corpus-universal size-identities: **`+0x24` = #player records (type5, 76 B each, 38/38)**, **`+0x2c` = #unit records (type6, 70 B each, 38/38)**, `+0x28` = #object records (type4, ≈20 B), `+0x34` = #type8 records (`0 ⟺ type8 empty`, explaining EXP-0007's empty type8), `+0x30` = #type7 records. **Amended by [EXP-0030]: offsets −8** — `+0x1c`=#type5, `+0x20`=#type4, `+0x24`=#type6, `+0x28`=(claimed #type7), `+0x2c`=#type8. **Also corrected by [EXP-0030]: `+0x28` is NOT the case-7 loop bound and is not the type-7 record count.** Case 7 (`L02086`) does `Read(&[EBP-0x50], 4)` — it reads its own count **from the stream** into the very local the metadata value was parked in, and loops on that; the two differ on **32/38** maps (`scn:10` 57 vs 28, `scn:100` 97 vs 36). Case 9 likewise reads its own stream count; only case 8's bound is the metadata value (`+0x2c`). So `+0x28` is read-and-discarded, like the `+0x18` bitmask — its meaning is **Unknown** **Amended by [EXP-0037]: `+0x20` is High** — it is the local `[EBP-0x10]` that case 4 loops on (`L02082`) — and **`+0x2c` does double duty**: besides bounding case 8 it is the range check on every type-6 record's `+0x18` field (`ALM-UNIT-040`) **Narrowed by EXP-0358 (ALM-COUNT-195/ALM-STALE-196): read-and-discarded presumes subsequent complete count reads. Successful-short/EOF reads can retain metadata or prior-count bytes in the reused local; that malformed-input effect is not metadata count semantics.**
@@ -575,6 +579,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Amended.** The table ledger carried the status "● active (amended)".
 
+**Amended.** ALM-STRUCT-324 establishes that the failing kind guard skips setup stores; it is not a map-refusal result. The constructor's local zero definition remains, conditional on its callees. The definition-table and valid-kind clauses stand.
+
 ### ALM-CLS-037
 
 **The type-4 object/structure discriminator is `kind ∈ {0x22, 0x23}`, read from the walker.** `R0489` walks `mapObj+0x304` and tests the in-memory record's `u16` at `+0x04`: the sign-extended 16-bit value is read at `L02105` and compared with `0x22` at `L02106`, taking the structure arm on equality, and otherwise compared with `0x23`, taking the object arm on inequality. On a match it builds a **`0x74`-byte `CStructure`** (`R0490`, vtable `PTR_R0491`, plus a `0x98`-byte sub-object at `+0x6c` and `obj+0x70 = (i16)rec+0x06 × 1000`); otherwise a **`0x6c`-byte `CObject`** (`R0485`, `PTR_R0492`). **`kind == 0x21` — `ALM-OBJ-034`'s *extension* discriminator — takes the OBJECT arm**, so the two discriminators are different questions with adjacent immediates. `0x22`/`0x23` are `structures.reg` `ID` 34/35 = `Shop 1`/`Shop 2`, the two `Usable` shops. Corpus: 50 of 3141 records (26 + 24) take the structure arm. **Amended by [EXP-0057] on two points.** (a) The two classes are named **`Shop`** (`0x74`) and **`Building`** (`0x6c`) by the MFC runtime-class table `Shop::GetRuntimeClass` returns (`R0493` returns the class-table address `L02107`); "`CStructure`"/"`CObject`" were this experiment's own labels (`SHOP-CLS-001`). (b) **`+0x0c` is not a durability and is not the constant `10000`** — this row's "they carry `+0x0c = 10000`, i.e. `obj+0x70` = the ctor default `0x989680`" is withdrawn: `L02108` sign-extends the 16-bit value at record `+0x06`, multiplies it by `0x3e8` and passes it to `R0494`, which forwards it to the stock generator's **value cap** `template+0x90`, and over those same 50 EN records it takes 23 distinct values (caps 4 000 … 10 000 000) with only 12 at `10000` (`SHOP-CAP-004`, retracted.md). Consequence for `ALM-OBJ-019`'s label: **type-4 is not "objects *or* structures resolved against two registries"** — every record is a `structures.reg` class, and the split is between two C++ classes
@@ -609,6 +615,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Evidence.** [EXP-0037](../experiments/EXP-0037-alm-class-binding/)
 
+**Amended.** ALM-STRUCT-324 and UNIT-LOAD-159 distinguish the miss branches: the structure walker reports and continues registration, whereas the unit walker reports and skips before construction. Owner-field and corpus clauses retain their grades; native message/display effects remain bounded by ALM-OUTCOME-323.
+
 ### ALM-UNIT-040
 
 **The type-6 70-byte record, field by field, from the loader's own read sequence** (`R0478` case 6: `new(0x50)` then 27 sequential reads summing to exactly `0x46` at `formatVersion == 990`; the three version gates are `CMP …,0x3db`/`0x3b7`/`0x3d9` at `L02123`/`L02124`/`L02125`, so at other versions the record is a different length). `+0x00` X, `+0x04` Y (`/256`); `+0x08` i16 class key, `+0x0a` u16 secondary key (`ALM-CLS-038`); `+0x0c` flag word → `rec+0x48` (bit 0 = NPC path, bit 2 → `unit+0x4b` high bit, bit 7 passed on); `+0x10` definition id (present only when version > 0x3da); `+0x14` owner (`ALM-OWN-039`); **`+0x18` a 1-based index bounded by `meta+0x2c`** — the loader stores it minus one, sets it to `-1` when `0` or `≥ meta+0x2c`, and otherwise writes the record's `+0x40` word into entry `[value−1]` of `mapObj+0x2dc` (`L02126`…`L02127`); `+0x1c` u32; `+0x20/+0x22/+0x24/+0x26` u16; `+0x28/+0x2a` u16 (version > 0x3b6); `+0x2c..+0x34` nine bytes (`+0x32` version > 0x3d8); `+0x35` six bytes and `+0x3b` five bytes — `ALM-UNIT-018`'s `0xFF`-sentinel region; `+0x40` u16; **`+0x42` u32, a unique id whose running maximum the map keeps at `mapObj+0x90`** (`L00299`). Corpus, 8094 records / 38 maps: the `+0x18` guard is satisfied **8094/8094** (43 records use a nonzero value). **Amended by [EXP-0045]: `+0x40` and `+0x42` are labelled the wrong way round here.** `+0x40` is the **unit id** and `+0x42` the **group id**: on `scn:110` `+0x40` takes 39 distinct values over 39 records and `+0x42` takes 19, and the type-7 trigger parameters resolve `Target_Unit` against `+0x40` and `Target_Group` against `+0x42` (169/169, `ALM-TRIG-046`). The instruction fact stands — `L00299` does keep a running maximum of `+0x42` at `mapObj+0x90` — but what it maximises is the **group** id, which is what an engine that allocates groups at runtime needs. `ALM-UNIT-048` **Amended by [EXP-0296]: the read count is 28, not 27.** The widths still sum to exactly 70 and every field label here stands, but 18 of the 28 mappings are not the identity — 17 land in the record at a different offset and one passes through a stack local — so file offset and runtime offset must not be used interchangeably. From file `+0x2c` to `+0x40` the shift is `−4`, which puts the six-byte run listed above at `rec+0x31`…`+0x36` and the five-byte run at `rec+0x37`…`+0x3b` (`ALM-TAILMAP-079`). The `0xFF`-sentinel label those two runs carry above is refuted, not merely inherited: they are the skill and elemental-resistance override vectors, and no byte of file `+0x2c`…`+0x3f` is `0xFF` on any of the 12 085 records of the two preserved roots (`ALM-TAILRUN-083`, `UNIT-PLACESKILL-086`, `UNIT-PLACERESIST-087`). The Medium clause below — the roles of `+0x1c` and `+0x20`…`+0x2b` — is answered by `ALM-TAILDIR-081`, `ALM-TAILU16-082`, `ALM-TAILVER-084` and `UNIT-PLACE-034`
@@ -620,6 +628,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Evidence.** [EXP-0037](../experiments/EXP-0037-alm-class-binding/)
 
 **Amended.** The table ledger carried the status "● active (amended)". `retracted.md` records a correction against this claim. The qualifier follows that record. `ALM-UNITREAD-227` reads the stream read slot behind the "read destinations only" caveat of the Medium clause: no holder dereferences `rec+0x1c`, `+0x22`, `+0x26` or `+0x4c`; the caveat that remains is array append `L02248` and the accessors.
+
+**Amended.** ALM-LINK-321 partially retracts the +0x18 guard wording: subtraction precedes the signed comparison. For a positive count n, wire n is admitted, and values 0x80000001..0xffffffff also pass. The record layout, version gates and existing amendments remain unchanged.
 
 ### ALM-GRP-041
 
@@ -785,6 +795,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Evidence.** [EXP-0056](../experiments/EXP-0056-alm-record-set/)
 
+**Amended.** ALM-OUTCOME-323 narrows the two-record requirement to reader status writes. Caller R0128 tests only map+0x14, so status5 with nonnull Altitudes proceeds to world build. ALM-LOAD-320 bounds the missing-check statements to the complete selected bodies (Medium; no section census). No complete native acceptance or player refusal follows from the post-loop tests alone.
+
 ### ALM-REQ-056
 
 **Per-section behaviour on absence, section by section.** `type1`,`type2`: **fail** inside the loader (`ALM-REQ-055`). `type3`: **defaulted** — `malloc(<frame local at -0x4c>)` plus a byte-by-byte zero fill (`L02149`), where the frame local at `-0x4c` is the type-2 record's `payloadSize`, i.e. `W·H`; semantically exact, since `R0278` reads a nonzero byte of that plane as “an object blocks this cell” (`TERR-PASS-050`), so an all-zero plane is a valid empty one. `type5`: **defaulted** — `new(0x48)`, ctor `R0510(1,1)`, `+0x0c = 5000`, `+0x30 = 0`, appended to the list at `this+0x28` (`L02150`..`L02151`). `type0`: **defaulted** — `name[0] = 0`, text block `[0] = 0`, `this+0xd8 = 1`, `this+0xd4 = 1` (`L02152`..`L02153`), on top of the constructor's `W = H = 16`; but see `ALM-ORD-057`, because a type-0-less file with any of 1 or 4..9 present is undefined, not defaulted. `type4`,`type6`,`type7`,`type8`: **skipped**, their loops being bounded by type-0 count fields that are 0 when the records are absent. `type9`: **skipped**, its count being the first word of its own payload. `typeId >= 10`: **skipped by seek**. Corroboration that the count-vs-size coupling holds in shipped data: over 72 `.alm` files, 15 zero-length records exist (2 type-4, 13 type-8) and every one has a zero bound — **0 disagreements** either way; had any disagreed, the sequential parse would desynchronise and `ALM-FRAME-031`'s tiling would fail **Partially retracted by EXP-0358 (ALM-COUNT-195/ALM-STALE-196): type7 is not bounded by metadata+0x28 after complete reads, and the type0-less safety statement must not use that false count dependency for type7 or type9. Their own stream counts are separate; incomplete reads may preserve old local bytes. Other absence/default/corpus clauses stand.**
@@ -796,6 +808,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Evidence.** [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0358](../experiments/EXP-0358-alm-headers-metadata/)
 
 **Amended.** The table ledger carried the status "● partially retracted". `retracted.md` records a correction against this claim.
+
+**Amended.** ALM-OUTCOME-323 distinguishes reader status from the caller's altitude-pointer gate. ALM-LOAD-320 distinguishes an absent roster's default from a present type5 with nonpositive signed count: the latter still accesses slot0 after its loop. The previous type7 retraction and other default facts stand.
 
 ### ALM-ORD-057
 
@@ -821,7 +835,7 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 ### ALM-RDR-059
 
-**Four `.alm` readers ship, with three different acceptance tests — and only one of them acts on the loader's status word.** (1) `R0478`, the ten-case loader: magic, `recordCount >= 3`, `version <= 1001`, then `{type1,type2}` (`ALM-REQ-055`). Three callers: `R0128` (map load, via `R0512`), `R0414` (the world `Serialize`'s restore arm, `SAV-*`), and `R0277`, which `EnumRefs callto:` reports with **0 hits** including `.rdata` code pointers. **Only `R0128` tests anything** — `[map+0x14] != 0`, refusing at open with “Map error : ‹reason›, in ‹path›”; the other two hand the object straight to the world builder, so on the save-restore path an absent type-1/2 becomes a **null dereference in `R0278`**, i.e. downstream. (2) `R0479`, the `*.alm` browser's accept test: magic (a second “M7R” literal, `L02162`), `recordCount >= 2`, a type-0 record must exist, and `+0x70 >= 2` (`ALM-META-058`); it walks **to EOF**, not by count. (3) `R0480`, the light parser, reached from a `switch` on byte `+9` of the items `R0513` yields inside `R0509` (case 6 → `R0514`, which hands the object to `R0515` and `R0516` — **amended by [EXP-0298] (`TERR-LOAD-152`): only `R0515` receives the object; `R0516` receives a value read out of it, `P+0x28` (`L02163` reads it and `L02164` passes it as the argument), which is the terrain tile-group mask**): magic and `recordCount >= 2`, both reported by `AfxGetApp()->DoMessageBox` (`R0517`) which **does not stop the parse**; handles typeIds 0..3 only (case 0 reads 7 fields then falls through to a `Seek(0x25c)`, 28 + 604 = 632), seeks past everything else, walks to EOF, and finishes by clearing bit 13 across the type-1 grid. (4) `Map Editor.exe` carries **this** family's two literals (`0xe84a4`, `0xe84c4`) and none of the ten-case loader's six — a byte-level observation only; its loader is unread
+**Four `.alm` readers ship, with three different acceptance tests — and only one of them acts on the loader's status word.** (1) `R0478`, the ten-case loader: magic, `recordCount >= 3`, `version <= 1001`, then `{type1,type2}` (`ALM-REQ-055`). Three callers: `R0128` (map load, via `R0512`), `R0414` (the world `Serialize`'s restore arm, `SAV-*`), and `R0277`, which `EnumRefs callto:` reports with **0 hits** including `.rdata` code pointers. **Only `R0128` tests anything** — `[map+0x14] != 0`, refusing at open with “Map error : ‹reason›, in ‹path›”; the other two hand the object straight to the world builder. The unconditional save-restore null-dereference conclusion for an absent type-1/2 is partially retracted; the conditional cell-load mechanism is bounded below. (2) `R0479`, the `*.alm` browser's accept test: magic (a second “M7R” literal, `L02162`), `recordCount >= 2`, a type-0 record must exist, and `+0x70 >= 2` (`ALM-META-058`); it walks **to EOF**, not by count. (3) `R0480`, the light parser, reached from a `switch` on byte `+9` of the items `R0513` yields inside `R0509` (case 6 → `R0514`, which hands the object to `R0515` and `R0516` — **amended by [EXP-0298] (`TERR-LOAD-152`): only `R0515` receives the object; `R0516` receives a value read out of it, `P+0x28` (`L02163` reads it and `L02164` passes it as the argument), which is the terrain tile-group mask**): magic and `recordCount >= 2`, both reported by `AfxGetApp()->DoMessageBox` (`R0517`) which **does not stop the parse**; handles typeIds 0..3 only (case 0 reads 7 fields then falls through to a `Seek(0x25c)`, 28 + 604 = 632), seeks past everything else, walks to EOF, and finishes by clearing bit 13 across the type-1 grid. (4) `Map Editor.exe` carries **this** family's two literals (`0xe84a4`, `0xe84c4`) and none of the ten-case loader's six — a byte-level observation only; its loader is unread
 
 **Confidence.** High (the three readers in `rom.exe` are read end to end, and the “only one caller checks” clause is the presence or absence of a compare at three named sites) / **Medium** (`R0277` being dead — instrument `EnumRefs callto:`, which sees `.rdata` code pointers and attributes orphan hits by address, but is blind to bytes Ghidra never disassembled) / **Unknown** (`Map Editor.exe`'s own reader: its own area, and the literal search bounds nothing but the strings)
 
@@ -830,6 +844,18 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Evidence.** [EXP-0056](../experiments/EXP-0056-alm-record-set/), [EXP-0298](../experiments/EXP-0298-map-scalar-consumers/)
 
 **Amended.** The table ledger carried the status "● active (amended)".
+
+**Amended.** The unconditional absent-type-1/2 null-dereference clause is
+partially retracted in [retracted.md](retracted.md). ALM-GRID-325 establishes that
+`R0278` tests full signed W/H and bypasses cell-plane loads when either
+dimension is nonpositive. Reaching a missing Tiles or Altitudes dereference
+requires positive W/H and returning preceding calls; earlier loads must also
+complete before the Altitudes load. Actual fault and save-restore completion
+remain Unknown. Reading the restore route at `R0414`, base `R0116`,
+border `R0470` and classifier `R0469`, followed by a separate lawful
+native observation, would settle the corresponding outcome. The reader-family,
+caller pointer gate and all other supported clauses retain their evidence and grade.
+
 
 ### ALM-CORP-060
 
@@ -913,6 +939,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 
 **Amended.** The table ledger carried the status "● active (amended)". `retracted.md` records a correction against this claim. The qualifier follows that record.
 
+**Amended.** ALM-LOAD-320 partially retracts clauses (2) and (3) as execution limits of 2^32-1: these are raw u32 fields but signed loops skip high-bit counts. ALM-CORP-326 measures 0..7 elements in the selected current installed records; the earlier 0..3 sentence is not a bound on that population. Other width, code and link-convention clauses retain their stated scope and grade.
+
 ### ALM-ORD-068
 
 **The shipped physical record order is `0,1,2,3,5,4,9,8,6,7`, and it is not a writer's habit - two forward references in the loader require it.** `ALM-ORD-057` established three precedence relations carried by stack slots; there are two more, and both are cross-section pointer writes. Case **6** at `L02228`..`L02127` takes the unit object's `+0x3c` word, indexes `map+0x2dc` - the **type-8** list - by the placement's already-decremented `+0x18` link, and stores the id into that record's `+0x3c`, the same in-memory slot the type-8 record's own file `+0x04` lands in (`ALM-SACK-065`); the guard is `link < meta+0x2c` and the else arm writes `unit+0x44 = -1` (`L02229`). Case **8** at `L02230`..`L02231` indexes `map+0x2f0` - the **type-9** list - by an element's `+0x06` and writes both the element index and the owning type-8 object into it. Neither indexed read is defined unless the filling case has already run, so **9 must precede 8 and 8 must precede 6**. The corpus obeys exactly that: **38 of 38** maps on the larger root and **33 of 33** full maps on the smaller carry the physical order `0,1,2,3,5,4,9,8,6,7` (the 34th is `ALM-CORP-060`'s truncated four-record file, `0,1,2,3`). The two orders differ from the typeId sequence in two places, and **both** are exactly where a dependency exists - `5` before `4`, and `9,8` before `6`. **The cross-write is a bijection with a file field.** Over the whole corpus there are **43** type-6 records with a non-zero `+0x18` and **43** type-8 records with a non-zero file `+0x04`, and each of the 43 is the one the other names: **0** disagreements in either direction, on both roots. Because case 8 runs first, the file's `+0x04` is then **overwritten** by case 6 for every linked record, so the engine's effective value is the type-6-derived one and the file field is redundant on exactly the 43 records it is non-zero on. A consumer needs only one of the two, but must not read a non-zero `+0x04` as a ground sack
@@ -966,6 +994,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Evidence.** [EXP-0227](../experiments/EXP-0227-authored-enchantments-death-drops/)
 
 **Amended.** `ALM-T9TAG-312` commits the case-8 loop (`w18`): for each linked element the loader stores the element ordinal at `T9(link-1)+0x00` (`L15874`) and the type-8 object at `+0x04` (`L02231`). The backlink write, which this card grades Medium for want of a committed listing, is now read in a committed listing; the grade here is not changed.
+
+**Amended.** ALM-LINK-322 adds the complete accessor arithmetic for nonzero type8 links. It does not validate a link against type9 count in the selected reader/consumer/accessor bodies (Medium; zero section scans). The one-based convention and established effect construction stand.
 
 ### ALM-EFFPOP-073
 
@@ -1244,7 +1274,7 @@ The editor readerL02303 case0 requests four bytes for payload+0x0c into its obje
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ALM-127 | The type4 placement word retains 16 raw bits, while the class path has three width boundaries. | High / Unknown | ✔ promoted | [EXP-0350](../experiments/EXP-0350-structure-placement-word/) |
+| ALM-127 | The type4 placement word retains 16 raw bits, while the class path has three width boundaries. | High / Unknown | ✔ promoted (amended) | [EXP-0350](../experiments/EXP-0350-structure-placement-word/) |
 | ALM-128 | Building's placement word is a zero override at this load stage. | High / Unknown | ✔ promoted | [EXP-0350](../experiments/EXP-0350-structure-placement-word/) |
 | ALM-129 | The selected editor read/write path preserves the type4 word. | High / Unknown | ✔ promoted | [EXP-0350](../experiments/EXP-0350-structure-placement-word/) |
 | ALM-130 | Confirming an existing editor structure property has a different word rule from direct writing. | High / Unknown | ✔ promoted | [EXP-0350](../experiments/EXP-0350-structure-placement-word/) |
@@ -1258,6 +1288,8 @@ The editor readerL02303 case0 requests four bytes for payload+0x0c into its obje
 **Original status.** ✔ promoted
 
 **Evidence.** [EXP-0350](../experiments/EXP-0350-structure-placement-word/)
+
+**Amended.** ALM-STRUCT-324 partially settles invalid-definition admission: Building setup returns early for kind0 or kind above count-1, while its constructor has an object-return path and the walker continues registration. Completed objects and later behavior remain Medium/Unknown through unread callees. All three width boundaries stand.
 
 ### ALM-128
 
@@ -1293,17 +1325,25 @@ The editor readerL02303 case0 requests four bytes for payload+0x0c into its obje
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ALM-TILEMAIN-121 | The main type-1 arm at L02283 requests 2 * M.width * M.height bytes, stores the allocated pointer at M+0x0c, and submits that destination and count to stream virtual +0x3c at L02341. | High | ✔ promoted | [EXP-0349](../experiments/EXP-0349-tile-word-consumers/), `evidence/instructions.tsv`, `evidence/controls.tsv`, `evidence/boundaries.tsv` |
+| ALM-TILEMAIN-121 | The main type-1 arm requests (2 * M.width * M.height) modulo 2^32 bytes, stores the allocated pointer at M+0x0c, and submits that destination and count to stream virtual +0x3c. | High | ✔ promoted (amended) | [EXP-0349](../experiments/EXP-0349-tile-word-consumers/), `evidence/instructions.tsv`, `evidence/controls.tsv`, `evidence/boundaries.tsv`; [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
 
 ### ALM-TILEMAIN-121
 
-The main type-1 arm at L02283 requests 2 * M.width * M.height bytes, stores the allocated pointer at M+0x0c, and submits that destination and count to stream virtual +0x3c at L02341. M.width/height are at +0/+4. No tile-bit operation occurs in this arm. In 136 supplied-memory cases with a complete synthetic read, all 16 word bits survive into M+0x0c, and the simulation ingest leaves that source word unchanged. This is conditional transfer, not evidence that an incomplete read, every reader, or a native load succeeds.
+The main type-1 arm at L02283 requests (2 * M.width * M.height) modulo 2^32 bytes, stores the allocated pointer at M+0x0c, and submits that destination and count to stream virtual +0x3c at L02341. M.width/height are at +0/+4. No tile-bit operation occurs in this arm. In 136 supplied-memory cases with a complete synthetic read, all 16 word bits survive into M+0x0c, and the simulation ingest leaves that source word unchanged. This is conditional transfer, not evidence that an incomplete read, every reader, or a native load succeeds.
 
 **Confidence.** High for the named original caller and conditional transfer; lower read and native transaction excluded
 
 **Original status.** ✔ promoted
 
 **Evidence.** [EXP-0349](../experiments/EXP-0349-tile-word-consumers/), `evidence/instructions.tsv`, `evidence/controls.tsv`, `evidence/boundaries.tsv`
+
+**Amended.** ALM-LOAD-320 and ALM-GRID-325 refine the allocation request:
+`L02080` keeps the low 32 bits of W*H and `L02081` shifts that value left once,
+again modulo 2^32. The allocated pointer and stream destination clauses stand.
+The complete synthetic-read transfer, prior evidence and High grade are retained.
+Failed allocation, lower-read completion and native load or ingest completion remain
+outside that conditional transfer.
+
 
 ## ALM claims (continued)
 
@@ -2794,7 +2834,7 @@ reading. The RU root has no editor program in the name listings of earlier exper
 | ALM-DLGINFO-290 | The Global description dialog (menu 0x8057) writes the map name at E+0x94, the text region at E+0xdc, E+0xd8 (1..9999) and E+0xd4 (1..50) and nothing else; strings have no program-side length bound. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
 | ALM-DLGINFO-291 | The Map Information dialog (menu 0x8056) is a display of counts the handler computes; its handler stores nothing into the map object and ignores the modal result. | Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
 | ALM-ROSTERIO-292 | The type-5 reader and writer copy +0x08, +0x30, +0x0c, the 32-byte name and exactly 16 relation words without normalising them; 357 installed records (38 EN, 33 RU maps) hold 0, 1 or 2 words only. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
-| ALM-STRCOPY-293 | Copy R0260 stores a string through its NUL and nothing after it, so a dialog edit or a new map leaves the bytes after a name's or text's NUL as they were; the reader's type-0 defaults run only when no type-0 record was read. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-STRCOPY-293 | Copy R0260 stores through NUL and nothing after it; a dialog edit or new map leaves later bytes unchanged. Reader type-0 defaults run only if its type-0 arm was not entered. | High / Medium | ● active (amended) | [EXP-0561](../experiments/EXP-0561-editor-players/); [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
 
 ### ALM-DLGPLAYERS-286
 
@@ -2944,12 +2984,20 @@ normalisation anywhere": the reader's record-count bound and the code before `L1
    the NUL. In 72 installed maps, 58 type-0 names (29 EN, 29 RU) hold a non-zero byte after the NUL; the text region
    has its first NUL at byte 0 in 67 maps and at byte 1..63 in 5.
 3. The reader's defaults (name byte 0 and text byte 0 set to 0, `E+0xd4` and `E+0xd8` set to 1) are stored only when no
-   type-0 record was read; a second initialiser at `L15712` stores the same defaults.
+   type-0 arm was entered; a second initialiser at `L15712` stores the same defaults.
 
-**Confidence.** High for item 1 and the corpus counts of item 2. Medium for item 3: the reader window that shows
-the condition lies beyond the window cap; that `[ebp-0x1c]` is the type-0 flag is an inference from the stores.
+**Confidence.** High for item 1 and the corpus counts of item 2. Medium for item 3's combined reader and second-initialiser statement. The reader's former
+window-cap and inferred-flag boundaries are closed by the amendment below; the grade and other clauses are retained.
 
 **Unknown.** Whether another code path writes these strings.
+
+**Amended.** EXP-0568's complete `map-reader.asm` reads the type-0 arm's flag store at
+`L02282` and its final test at `L02152`. The defaults at `L16004`..`L02153`
+run only when no type-0 arm was entered. This closes the earlier unread-condition
+and inferred-flag boundaries without establishing successful reads or other string writers.
+The second initialiser and all other clauses retain their prior evidence and grade.
+See [EXP-0568](../experiments/EXP-0568-map-load-bounds/) and ALM-LOAD-320.
+
 
 ## Game-side consumers of the editor's unexplained map fields
 
@@ -3120,3 +3168,94 @@ walk consumes the payload exactly. Counts are maps with the value in at least on
 
 **Confidence.** **High** for the shipped files under the rule. The counts say nothing about values an editor session
 writes.
+
+## Mission-load bounds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ALM-LOAD-320 | ROM1 payload counts use signed loops; grid requests use 32-bit arithmetic. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-LINK-321 | The ROM1 unit-to-loot gate admits negative decremented indices other than -1. | High | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-LINK-322 | ROM1 type8 links subtract one and form a type9 pointer-slot address locally. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-OUTCOME-323 | ROM1 mission load tests the altitude pointer, not the reader status, before world build. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-STRUCT-324 | An invalid Building kind skips definition setup; a missing owner does not stop its walker. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-GRID-325 | The read ROM1 grid-ingest body narrows source and destination indices to 16 bits. | High / Medium | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-CORP-326 | The selected installed corpus has 38 EN maps and 34 RU maps, all version 990. | High / Unknown | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+| ALM-SCRIPT-327 | ROM1 script/text reference rejection remains unresolved beyond the selected loader bodies. | Unknown | ● active | [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
+
+### ALM-LOAD-320
+
+The complete EN/RU byte-equal body R0478 reads a fixed 20-byte file header through R0466. The record helper R0467 reads 20 bytes except at version 1000. Header count is compared unsigned against 3 and drives an unsigned loop; version is compared unsigned against 1001. Types above 9 submit payloadSize to stream seek with origin 1.
+
+Type0 submits the fixed 632-byte field sequence and stores W/H directly. Type1 requests (W * H * 2) modulo 2^32 bytes from R0747 and from the stream. Type2 uses its payloadSize; type3 uses the preceding type2 size. Types4/5/6/8 use metadata +0x20/+0x1c/+0x24/+0x2c in signed loops. Type7 has three internal signed counts; its third is first sent to L14639. That resize body requests count * 184 modulo 2^32 on its null-buffer/nonzero-count arm. Its 4..1024 growth increment is not a maximum requested count. Type8 element counts and type9 outer/element counts also use signed comparisons. Counts 0 and 0x80000000..0xffffffff execute no iteration of these signed loops; allocation or post-loop work can still run.
+
+Type4 requests 20 bytes plus eight for full kind32 == 33. Type5 requests 76 bytes and then dereferences roster slot 0 even after a nonpositive loop. Accessor R0129 forwards to R2276, which returns backing + 4 * index modulo 2^32. Type6 requests 70 bytes at version 990, with thresholds 951/985/987, allocates before its loop and leaves a spare allocation to free. Type7 first/second records request 796 bytes, third records 184. Type8 heads are 16 bytes plus four at version >=989, elements ten bytes. Type9 heads are 22 bytes plus four at version >=990, elements six bytes. Fixed strings in type0/type5/type7 have fixed read widths; this claim assigns them no text semantics.
+
+**Confidence.** High for the listed instructions, widths, signed comparisons and allocation arguments in the complete bodies. Medium for missing size, overflow, read-result and maximum-count validation: the searched population is those bodies, with zero section scans. The called stream, allocation, growth and initialization routines can add behavior.
+
+**Unknown.** Short-read effects, failed allocations, arbitrary map completion and exception handling. Complete the address-listed unread callees in the experiment before extending the local bounds to the whole loader.
+
+### ALM-LINK-321
+
+For type6 wire +0x18 value v, R0478 subtracts one modulo 2^32, rejects index == -1, then rejects signed(index) >= signed(metadata +0x2c). At a positive count n in 1..0x7fffffff, the admitted wire set is exactly [1,n] union [0x80000001,0xffffffff]. Zero and [n+1,0x80000000] take the rejection branch.
+
+R2277 forwards to R2278; that whole leaf returns collection backing at +4 plus 4 * index modulo 2^32. The caller reads the pointer there and writes the sign-extended unit-id word to its +0x3c. For v=0xffffffff the pointer-slot address is backing-8 modulo 2^32. For v=0x80000001 multiplication wraps to zero and aliases slot 0. Therefore not every admitted high-bit value addresses outside the array.
+
+**Confidence.** High for this local branch predicate and effective-address arithmetic: the complete reader, wrapper and leaf are committed, and the arithmetic does not depend on an unread helper. The old ALM-UNIT-040 clause comparing the wire value itself with the count is partially retracted.
+
+**Unknown.** Whether a crafted map reaches this path, what the selected memory contains, and whether native execution faults. No runtime or allocator-layout observation was made.
+
+### ALM-LINK-322
+
+For a nonzero type8 element wire +0x06, reader R0478 subtracts one and calls L15904. That wrapper calls R2279, which returns backing + 4 * index modulo 2^32. The reader dereferences the slot and writes the element ordinal and type8 pointer to target +0x00/+0x04. The complete loot consumer R0461 repeats the same accessor arithmetic. Its linked-item arm skips the element when target X/Y is nonzero or the backlink is zero.
+
+**Confidence.** High for the subtraction, pointer arithmetic, stores and linked-item branch in the complete bodies. Medium for the absence of a bound against type9 count: no such comparison occurs in these selected bodies or the two accessor bodies, but no displacement, rel32 or dword section census was run.
+
+**Unknown.** Upstream reachability and native memory/fault outcome for out-of-range links; aliasing is possible through 32-bit multiplication. Indirect callers, computed offsets, copied pointers and unread allocation/append helpers are outside the negative population.
+
+### ALM-OUTCOME-323
+
+Reader R0478 returns its map-object pointer on every ordinary exit. Status at +0x8c is initialized to 1; open failure leaves 1, magic failure stores 2, count failure 3 and version failure 4. After records it stores 5 for null Tiles at +0x0c, else 6 for null Altitudes at +0x14. The successful path does not set status to zero.
+
+Caller R0128 tests map +0x14. Null selects a message using status 1..6, calls R1347, destroys the map and returns 1. Nonnull proceeds through players, world, structures, AI, units, script binding and loot, destroys the map and returns 0 if those calls complete. Thus status 5 alone does not make this caller refuse a map with nonnull Altitudes.
+
+Program-text short names are File not found, Not a map file, Wrong block number, Map version too new, Tiles block not found, Altitudes block not found and Map error. They name messages, not field semantics. R1347 calls R2275; that body copies a NUL-terminated text to a new buffer and calls import [L03535] with window [L06446], message 0x471, buffer, 0. ITEM-MAGROW-177 supplies the previously established import name PostMessageA. R0422 chooses that route when session +0x0c is nonzero, otherwise sends a formatted text to unread R0443.
+
+**Confidence.** High for the local status writes, pointer test, ordinary return values and message-call arguments in the complete bodies. Medium for the composed reporting/build outcome because string/allocation, stream, world-build and message-receiver callees remain unread here.
+
+**Unknown.** Message 0x471 handler, actual error box, return to menu through upstream R0512, and any running-mission or fault outcome. No original executable was run.
+
+### ALM-STRUCT-324
+
+R0485 stores the low kind byte, initializes definition +0x3c and id word +0x0e to zero, calls R0486 and returns the object. The setup body exits for kind zero or kind greater than R0487's result; that leaf returns collection +8 minus one. The failing branch skips definition and footprint stores rather than returning a map-refusal result. Valid setup calls unread R0488 and does not test its return.
+
+R0489 selects Shop for stored kind word 34/35, Building otherwise. It passes low-byte coordinates, kind and extension dimensions to the constructors. Lookup R0425 compares a sign-extended owner word with each node's +8 and returns a matching node or zero, using unread iteration helpers. A zero owner result is stored, reported through R1347, and ordinary control continues to registration R1337, placement destruction and slot clearing.
+
+**Confidence.** High for local branches, stores, truncations and continued control in the complete bodies. Medium for completed invalid objects, geometric admission and later consequences: base/Shop constructors, definition accessors, footprint registration and world registration were not followed. Zero section scans; a local missing coordinate check is not global absence.
+
+**Unknown.** Rendering, ticking and destruction with a zero definition or owner; out-of-map footprint behavior through R0488 and later registration. ALM-127's width distinctions stand; its invalid-definition question is answered only to this local boundary.
+
+### ALM-GRID-325
+
+World constructor R0118 calls base R0116 and then R0278 with the map. The ingest body copies full W/H into world fields, forms edge bounds from low8(W-9) and low8(H-9), and uses positive signed dimensions to enter its cell loops. Source linear indices and destination x+256*y are narrowed to low16. Tiles, Altitudes and the object-plane pointers are dereferenced along these loops.
+
+**Confidence.** High for the arithmetic, narrowing and pointer loads in the complete constructor/ingest bodies. Medium for missing dimension or null-pointer protection: only these bodies were read, zero section scans. The earlier ALM-TILEMAIN-121 allocation rule is refined by ALM-LOAD-320's explicit modulo-2^32 request.
+
+**Unknown.** Allocation and base-world setup R0116, border R0470, classifier R0469, termination for dimensions beyond the narrowed loop counters, and actual faults. With positive dimensions and missing Tiles, a dereference is reached if the preceding calls return; no native fault was observed.
+
+### ALM-CORP-326
+
+The preregistered population is every loose .alm directly under each lawful root plus every .alm member of scenario.res, without byte deduplication. The committed Python corpus instrument records every selected input's size and full SHA256. All 72 headers report version 990. EN has 3141 structures, 191 players, 8094 units, 180 loot records and 792 type9 records; RU has 1681,166,3991,176,334. No selected framing, truncation, duplicate-type or unsupported-version counter is nonzero. RU has one map lacking each of types4/5/6/8/9.
+
+Both roots: W/H 72..256; structure kind 1..66, owner 1..8; unit class 1..80, secondary 0..69, owner 1..9, group 0..436; raw item code 271..64635, decoded class 1..14, row 1..49. Definition dwords reach 1086 EN and 1085 RU. Loot element counts are 0..7, not a universal limit of three. Unit-to-loot links are 0..22 and item-to-caster links 0..37. Raw/effective values, per-field populations and all minima/maxima are in the committed ranges table; per-map coordinate/count differences are in the margins table.
+
+No measured owner lies outside 1..its map's roster count. No measured structure/unit/loot coordinate lies outside its own map rectangle. No unit link passes the local gate with a negative index, and no item link exceeds the decoded type9 count. The rejected-link counters 8051 EN /3948 RU count the zero/no-link branch, not malformed maps; each root has 43 nonzero unit links. Script/text reference availability is explicitly zero, with unavailable counters 38/34.
+
+**Confidence.** High for these derived measurements over the input-hash population, reproduced byte-for-byte against committed Git blobs. Unknown for unmeasured definition-table capacities, semantic target/text/script resolution and native acceptance. The output label type9_target_word is an instrument naming error: it measures raw u32 at +0x0e, combining two wire words; it is not a semantic target-word range and is excluded from that interpretation.
+
+**Unknown.** Editor-session output, other installs/versions, malformed-input behavior and runtime margins. Geometric and count differences are arithmetic comparisons, not inferred native rejection thresholds.
+
+### ALM-SCRIPT-327
+
+The complete reader R0478 establishes three internal type7 count reads and their loops. Mission load R0128 calls AI builder R0077 and binder R0067. Neither body was selected. The 32-window static specification includes the reader and selected structure/unit/loot consumers, not the script binder family; no section scans were made.
+
+**Unknown.** Rejection, substitution, node skipping and player outcome for arbitrary numeric text/script references. Read R0077 and R0067 whole, query their registry dossiers and follow their reference resolvers under a new preregistration. Type7 corpus references were declared unavailable before acquisition; no range or native limit is inferred from their position or nearby program text.

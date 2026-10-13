@@ -94,7 +94,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/terrain/for
 | TERR-FOG-083 | What the shroud pass consumes is not the tile word but a per-frame projection of it: `CMapView+0xa0`, one dword per lattice vertex, memset and rebuilt every frame. | High | ● active | [EXP-0088](../experiments/EXP-0088-fog-of-war/) |
 | TERR-FOG-084 | The shroud table `[L03341]` is 17 rows and its law is one line: `out_channel = (in_channel × (16 − L)) >> 4`. This CLOSES `TERR-FOG-037`'s Medium — level 16 is exactly black and level 8 exactly half. | High | ● active | [EXP-0088](../experiments/EXP-0088-fog-of-war/) |
 | TERR-FOG-085 | The clock: the map-wide clear runs on the PRESENTATION tick with period 32 — neither simulation clock touches the fog — and one global can freeze it. | High / Unknown | ● active | [EXP-0088](../experiments/EXP-0088-fog-of-war/) |
-| TERR-FOG-086 | The fog gates two things — the shroud pixels and whether a drawable is drawn at all — and reaches nothing in the simulation. | High / Medium | ● active (partially retracted) | [EXP-0088](../experiments/EXP-0088-fog-of-war/), [EXP-0349](../experiments/EXP-0349-tile-word-consumers/) |
+| TERR-FOG-086 | Within the read render population, fog gates shroud pixels and drawable visibility; the immediate-reference search found no simulation reader, with byte-wide and displacement reads outside its coverage. | High / Medium | ● active (amended, partially retracted) | [EXP-0088](../experiments/EXP-0088-fog-of-war/), [EXP-0349](../experiments/EXP-0349-tile-word-consumers/), [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
 | TERR-FOG-087 | No shipped map authors either fog bit | High | ● active (partially retracted) | [EXP-0088](../experiments/EXP-0088-fog-of-war/), [EXP-0150](../experiments/EXP-0150-save-fog-record/) |
 | TERR-FOG-088 | The engine implements the same line-of-sight algorithm TWICE, on two objects, and only one of them is the player's fog — so the AI's vision and the fog are two mechanisms that a consumer must not merge. | High | ● active (amended) | [EXP-0088](../experiments/EXP-0088-fog-of-war/), **[EXP-0120](../experiments/EXP-0120-sight-writers/)** |
 | TERR-FOG-089 | The reveal-permission array has THREE writers, not two, and the one `TERR-TILE-079` could not see is a wholesale `memcpy` — so the two message opcodes are now named. | High / Medium | ● active | [EXP-0088](../experiments/EXP-0088-fog-of-war/) |
@@ -1021,15 +1021,19 @@ The affected former wording below is partially retracted. See the
 
 ### TERR-FOG-086
 
-**The fog gates two things — the shroud pixels and whether a drawable is drawn at all — and reaches nothing in the simulation.** Beside the renderer, the consumer that matters is `R0378`: it **ORs** the four corner tile words (`L10595`…`L10596`), a mask with `0xc000`, a comparison with `0xc000`, a non-zero flag result, and stores the result into the drawable's `+0x78` (`L10597`) — the field `TERR-SPR-048` names as the sprite pass's guard — then latches `+0x10c` on the transition via `+0x7c`. So **a unit on a cell with no currently-visible corner is not drawn**, and the test is an OR over the corners, i.e. one visible corner suffices. `imm:c000` returns 85 hits / 21 owners and **every game-module owner lies in `R1657 … L10598`** — the client/view modules; the others are CRT `0xc0000000` status constants **Partially retracted by EXP-0349 (ALM-TILEVIEW-122, TERR-DRAWGATE-171): the no-individually-visible-corner implication is false over the admitted raw-word domain. The original OR-before-compare expression stands. One 0xc000 corner suffices but is not necessary: separate 0x8000 and 0x4000 corners also aggregate to0xc000. The stated immediate-reference census and its bounded simulation-negative limits are retained.**
+**Within the read render population, fog gates shroud pixels and drawable visibility; the immediate-reference search found no simulation reader, with byte-wide and displacement reads outside its coverage.** Beside the renderer, the consumer that matters is `R0378`: it **ORs** the four corner tile words (`L10595`…`L10596`), a mask with `0xc000`, a comparison with `0xc000`, a non-zero flag result, and stores the result into the drawable's `+0x78` (`L10597`) — the field `TERR-SPR-048` names as the sprite pass's guard — then latches `+0x10c` on the transition via `+0x7c`. So **a unit on a cell with no currently-visible corner is not drawn**, and the test is an OR over the corners, i.e. one visible corner suffices. `imm:c000` returns 85 hits / 21 owners and **every game-module owner lies in `R1657 … L10598`** — the client/view modules; the others are CRT `0xc0000000` status constants **Partially retracted by EXP-0349 (ALM-TILEVIEW-122, TERR-DRAWGATE-171): the no-individually-visible-corner implication is false over the admitted raw-word domain. The original OR-before-compare expression stands. One 0xc000 corner suffices but is not necessary: separate 0x8000 and 0x4000 corners also aggregate to0xc000. The stated immediate-reference census and its bounded simulation-negative limits are retained.**
 
-**Confidence.** High for the drawable gate (one function read end to end, five cited instructions). **Medium** for the negative "no simulation routine reads the fog": `imm:c000` excludes displacements and cannot see a byte-wide test on the word's high half — the exact shape that hid this pair's own writer for three experiments. The sweep-immune half of the argument is that the simulation's visibility input is a **different array**, `fog+0x2a008`, whose 9 hits / 5 owners under `disp:2a008` all lie in `R0114…L10599` (`TERR-FOG-088`), and that passability reads the block planes, bounded by `MOVE-DOM-027` to `R0144…R0227` High applies to the exact aggregate operations; the individual-corner equivalence is withdrawn.
+**Confidence.** High for the drawable gate (one function read end to end, five cited instructions). **Medium** for no simulation reader found in the stated immediate-reference population: `imm:c000` excludes displacements and cannot see a byte-wide test on the word's high half — the exact shape that hid this pair's own writer for three experiments. The sweep-immune half of the argument is that the simulation's visibility input is a **different array**, `fog+0x2a008`, whose 9 hits / 5 owners under `disp:2a008` all lie in `R0114…L10599` (`TERR-FOG-088`), and that passability reads the block planes, bounded by `MOVE-DOM-027` to `R0144…R0227` High applies to the exact aggregate operations; the individual-corner equivalence is withdrawn.
 
 **Original status.** ● partially retracted
 
-**Evidence.** [EXP-0088](../experiments/EXP-0088-fog-of-war/), [EXP-0349](../experiments/EXP-0349-tile-word-consumers/)
+**Evidence.** [EXP-0088](../experiments/EXP-0088-fog-of-war/), [EXP-0349](../experiments/EXP-0349-tile-word-consumers/), [EXP-0571](../experiments/EXP-0571-teleport-admission/)
 
 **Amended.** The table ledger carried the status "● partially retracted". `retracted.md` records a correction against this claim.
+
+**Unknown.** Native command delivery, runtime feedback and direct simulation-field use of this render tile pair remain unsettled. The input dispatcher, cursor adapter and move builder named by MENU-CAST-153 bound delivery and feedback. The immediate-reference search does not settle byte-wide, displacement or copied-pointer simulation reads.
+
+**Amended.** EXP-0571 limits the two-effect description to the original render population. TERR-CLICK-262 and MENU-CAST-153 establish an additional client command-choice gate: High for the aggregate predicate, cursor replacements and branch targets; Medium for player outcomes and feedback. The exhaustive two-effect and global simulation-negative meanings are partially retracted in `retracted.md`. The drawable predicate remains High and the bounded simulation-reader negative remains Medium. The earlier individual-corner partial retraction, including the admitted raw01 boundary, is retained.
 
 ### TERR-FOG-087
 
@@ -3580,3 +3584,30 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 the `L15252` branch is unread; it is reachable only when the entry control word is not `0x27f`.
 
 **Unknown.** `L15252` and `L15261`; the control word at the spread's entry.
+
+## Player point selection and corner visibility
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-CLICK-262 | The read hover gate distinguishes four-corner aggregate 0xc000 from every other pair value; an unexplored or fogged clicked corner alone does not decide the cast cursor. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+| TERR-CLICK-263 | The read hover maps x by arithmetic shift plus view origin and y by a projected-row search; its no-match row is visible-row count+4, not a demonstrated actual-map clamp. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+
+### TERR-CLICK-262
+
+R0218 ORs the high pair of four tile words at idx, idx+1, idx+1+stride and idx+stride. It sets capability 0x400 exactly when the result differs from 0xc000 (L16030..L01592). The selected cast arms of R0219 consume that capability. Four raw 0 corners and four raw 0x8000 corners both fail this guard. One 0xc000 corner passes it. Separate 0x8000 and 0x4000 corners also pass; no single-visible-corner equivalence follows.
+
+TERR-FOG-082 supplies the standing explored/current-sight interpretation and the partial retraction of global raw01 unreachability. This guard tests the pair's OR, not an independent exploration bit or the clicked word alone.
+
+**Confidence.** High for the literal aggregate predicate and these algebraic cases in complete read bodies. Medium for a player's unexplored/fogged destination outcome: neighbouring corners, state producers, previous cursor and later overrides are inputs, and runtime was not observed. No map-wide field-reader census or section scans were run.
+
+**Unknown.** Actual corner values and the arming/hover scheduling for an individual click. Additional exploration/sight predicates in unread reception or callees remain open.
+
+### TERR-CLICK-263
+
+R0218 writes map x = arithmetic_shift_right(screenX,5)+view +0x5c and map y = R0377(screenX,screenY)+view +0x60 to +0x994/+0x998. The complete row helper searches candidates -3 through view +0x68+6. It uses the +0xb8/+0xbc bounds and linearly interpolated +0xb4 vertices with x's low five bits; an inclusive vertical span returns the first candidate. No match returns view +0x68+4.
+
+The client point builder stores the resulting low words; the cell setter later keeps each low byte (MAGIC-TELEPORT-365). No own comparison against actual map width/height or actual-map coordinate clamp was found in hit, row helper, click, point builder or setter. Displacement, rel32 and dword scans: zero.
+
+**Confidence.** High for the complete conversion body and own stores. Medium for the local absence of actual-extent validation. Unknown for a click beyond actual width/height or on the map border: projected-grid producers, viewport bounds, serialization and server dispatcher can change which input reaches these bodies.
+
+**Unknown.** Read projected-grid/viewport producers and complete R0061, then the coordinate consumers and R0178, to decide border/outside-map admission. No out-of-grid lookup safety or universal wrap/clamp rule is claimed.

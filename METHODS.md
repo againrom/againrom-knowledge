@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
+Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
 
 ## Ledger ai
 
@@ -307,7 +307,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | AI-476 | static analysis | ✔ promoted (branch candidate) |
 | AI-477 | static analysis | ✔ promoted (branch candidate) |
 | AI-478 | static analysis | ✔ promoted (branch candidate) |
-| AI-479 | static analysis | ● active |
+| AI-479 | static analysis | ● active (amended) |
 | AI-487 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-488 | static analysis | ✔ promoted (branch candidate) |
 | AI-489 | static analysis | ✔ promoted (branch candidate) |
@@ -366,7 +366,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | AI-609 | static analysis | ● active (amended) |
 | AI-610 | static analysis | ● active (amended) |
 | AI-611 | static analysis | ● active (amended) |
-| AI-617 | static analysis | ● active |
+| AI-617 | static analysis | ● active (amended) |
 | AI-618 | static analysis | ● active |
 | AI-619 | static analysis | ● active |
 | AI-620 | static analysis | ● active |
@@ -391,6 +391,9 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | AI-549 | static analysis | ● active |
 | AI-550 | static analysis | ● active |
 | AI-SCRIPTGUARD-625 | static analysis | ● active |
+| AI-628 | static analysis | ● active |
+| AI-629 | static analysis | ● active |
+| AI-630 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -436,8 +439,8 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ALM-CLS-036 | static analysis | ● active (amended) |
 | ALM-CLS-037 | static analysis | ● active (amended) |
 | ALM-CLS-038 | static analysis | ● active (amended, partially retracted) |
-| ALM-OWN-039 | static analysis | ● active |
-| ALM-UNIT-040 | static analysis | ● active (amended, superseded) |
+| ALM-OWN-039 | static analysis | ● active (amended) |
+| ALM-UNIT-040 | static analysis | ● active (amended, superseded, partially retracted) |
 | ALM-GRP-041 | static analysis | ● active (partially retracted, superseded) |
 | ALM-CLS-042 | mixed | ● active (amended) |
 | ALM-TERR-043 | static analysis | ● active |
@@ -452,11 +455,11 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ALM-CLS-052 | static analysis | ● active |
 | ALM-CLS-053 | static analysis | ● active |
 | ALM-CLS-054 | static analysis | ● active (amended, partially retracted) |
-| ALM-REQ-055 | static analysis | ● active |
-| ALM-REQ-056 | static analysis | ● active (partially retracted) |
+| ALM-REQ-055 | static analysis | ● active (amended) |
+| ALM-REQ-056 | static analysis | ● active (partially retracted, amended) |
 | ALM-ORD-057 | static analysis | ● active (partially retracted) |
 | ALM-META-058 | static analysis | ● active |
-| ALM-RDR-059 | static analysis | ● active (amended) |
+| ALM-RDR-059 | static analysis | ● active (amended, partially retracted) |
 | ALM-CORP-060 | mixed | ● active |
 | ALM-OBJ-061 | static analysis | ● active |
 | ALM-OBJ-062 | static analysis | ● active |
@@ -495,11 +498,11 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ALM-FLAGCORP-110 | mixed | ✔ promoted |
 | ALM-PLACESTREAM-111 | static analysis | ✔ promoted |
 | ALM-PLACEEDITOR-112 | static analysis | ✔ promoted |
-| ALM-127 | static analysis | ✔ promoted |
+| ALM-127 | static analysis | ✔ promoted (amended) |
 | ALM-128 | static analysis | ✔ promoted |
 | ALM-129 | static analysis | ✔ promoted |
 | ALM-130 | static analysis | ✔ promoted |
-| ALM-TILEMAIN-121 | static analysis | ✔ promoted |
+| ALM-TILEMAIN-121 | static analysis | ✔ promoted (amended) |
 | ALM-TILEVIEW-122 | static analysis | ✔ promoted |
 | ALM-139 | static analysis | ✔ promoted |
 | ALM-140 | static analysis | ✔ promoted |
@@ -588,13 +591,21 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ALM-DLGINFO-290 | static analysis | ● active |
 | ALM-DLGINFO-291 | static analysis | ● active |
 | ALM-ROSTERIO-292 | static analysis | ● active |
-| ALM-STRCOPY-293 | static analysis | ● active |
+| ALM-STRCOPY-293 | static analysis | ● active (amended) |
 | ALM-MAPLIST-310 | static analysis | ● active |
 | ALM-META-311 | static analysis | ● active |
 | ALM-T9TAG-312 | static analysis | ● active |
 | ALM-UNITREAD-313 | static analysis | ● active |
 | ALM-CPLAYERC-314 | static analysis | ● active |
 | ALM-CORP-315 | mixed | ● active |
+| ALM-LOAD-320 | static analysis | ● active |
+| ALM-LINK-321 | static analysis | ● active |
+| ALM-LINK-322 | static analysis | ● active |
+| ALM-OUTCOME-323 | static analysis | ● active |
+| ALM-STRUCT-324 | static analysis | ● active |
+| ALM-GRID-325 | static analysis | ● active |
+| ALM-CORP-326 | mixed | ● active |
+| ALM-SCRIPT-327 | static analysis | ● active |
 
 ## Ledger anim
 
@@ -611,7 +622,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ANIM-IDLE-009 | static analysis | ● active |
 | ANIM-IDLE-010 | mixed | ● active |
 | ANIM-TICK-011 | static analysis | ● active |
-| ANIM-VT-012 | static analysis | ● active |
+| ANIM-VT-012 | static analysis | ● active (partially retracted, amended) |
 | ANIM-WALK-013 | static analysis | ● active |
 | ANIM-WALK-014 | static analysis | ● active |
 | ANIM-WALK-015 | static analysis | ● active |
@@ -629,7 +640,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ANIM-096 | static analysis | ✔ promoted (amended) |
 | ANIM-119 | static analysis | ● active |
 | ANIM-120 | static analysis | ● active |
-| ANIM-PROJ-025 | static analysis | ● active |
+| ANIM-PROJ-025 | static analysis | ● active (amended, partially retracted) |
 | ANIM-PROJ-026 | static analysis | ● active (partially retracted) |
 | ANIM-CAST-027 | static analysis | ● active |
 | ANIM-PHASECLOCK-028 | static analysis | ● active (amended, partially retracted) |
@@ -710,6 +721,9 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ANIM-164 | static analysis | ● active (branch candidate) |
 | ANIM-166 | mixed | ● active (branch candidate) |
 | ANIM-163 | static analysis | ● active (branch candidate) |
+| ANIM-TELEPORT-167 | static analysis | ● active (branch candidate) |
+| ANIM-TELEPORT-168 | static analysis | ● active (branch candidate) |
+| ANIM-TELEPORT-169 | static analysis | ● active (branch candidate) |
 
 ## Ledger databin
 
@@ -947,7 +961,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | HERO-FIGURE-144 | static analysis | ● active |
 | HERO-DYINGTICK-145 | static analysis | ● active |
 | HERO-CROSSHOLD-146 | static analysis | ● active |
-| HERO-163 | static analysis | ● active |
+| HERO-163 | static analysis | ● active (amended) |
 | HERO-164 | static analysis | ● active |
 
 ## Ledger inv
@@ -995,7 +1009,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ITEM-APPEAR-025 | static analysis | ● active |
 | ITEM-SPAWN-026 | static analysis | ● active |
 | ITEM-SPAWN-027 | static analysis | ● active |
-| ITEM-OWNED-028 | static analysis | ● active |
+| ITEM-OWNED-028 | static analysis | ● active (amended) |
 | ITEM-CODE-029 | static analysis | ● active (amended) |
 | ITEM-HUMEQ-030 | static analysis | ● active |
 | ITEM-ARMSLOT-031 | static analysis | ● active |
@@ -1069,7 +1083,8 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | ITEM-170 | static analysis | ● active |
 | ITEM-161 | static analysis | ✔ promoted |
 | ITEM-162 | static analysis | ✔ promoted |
-| ITEM-MAGROW-177 | static analysis | ● active |
+| ITEM-MAGROW-177 | static analysis | ● active (amended) |
+| ITEM-LOAD-180 | static analysis | ● active |
 
 ## Ledger magic
 
@@ -1188,7 +1203,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | MAGIC-CLOUDEND-163 | static analysis | ✔ promoted |
 | MAGIC-DELIVERY-170 | static analysis | ● active |
 | MAGIC-CASTCLOCK-171 | static analysis | ● active |
-| MAGIC-TELEPORT-174 | static analysis | ● active |
+| MAGIC-TELEPORT-174 | static analysis | ● active (amended) |
 | MAGIC-TARGETID-182 | static analysis | ● active |
 | MAGIC-TICKGATE-183 | static analysis | ● active (partially retracted) |
 | MAGIC-SIBLINGREF-184 | static analysis | ● active |
@@ -1227,7 +1242,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | MAGIC-262 | static analysis | ● active |
 | MAGIC-263 | static analysis | ● active |
 | MAGIC-264 | mixed | ● active |
-| MAGIC-265 | static analysis | ● active |
+| MAGIC-265 | static analysis | ● active (amended) |
 | MAGIC-266 | static analysis | ● active |
 | MAGIC-267 | static analysis | ● active |
 | MAGIC-269 | static analysis | ● active (amended) |
@@ -1270,7 +1285,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | MAGIC-311 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-312 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-316 | static analysis | ✔ promoted (branch candidate, amended) |
-| MAGIC-317 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-317 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-318 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-323 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-324 | static analysis | ✔ promoted (branch candidate) |
@@ -1281,6 +1296,14 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | MAGIC-340 | static analysis | ● active (amended) |
 | MAGIC-341 | static analysis | ● active (amended) |
 | MAGIC-348 | static analysis | ● active |
+| MAGIC-TELEPORT-356 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-357 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-358 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-359 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-360 | static analysis | ● active (branch candidate, amended) |
+| MAGIC-TELEPORT-364 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-365 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-366 | static analysis | ● active (branch candidate) |
 
 ## Ledger menu
 
@@ -1398,6 +1421,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | MENU-150 | static analysis | ● active (branch candidate) |
 | MENU-151 | static analysis | ● active (branch candidate) |
 | MENU-152 | static analysis | ● active (branch candidate) |
+| MENU-CAST-153 | static analysis | ● active (branch candidate) |
 
 ## Ledger mission
 
@@ -1527,7 +1551,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | MOVE-084 | static analysis | ● active (partially retracted) |
 | MOVE-085 | static analysis | ● active |
 | MOVE-086 | static analysis | ● active |
-| MOVE-087 | static analysis | ● active |
+| MOVE-087 | static analysis | ● active (amended) |
 | MOVE-088 | static analysis | ● active (amended) |
 | MOVE-089 | static analysis | ● active |
 | MOVE-090 | static analysis | ● active |
@@ -1623,7 +1647,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | PARTY-MONEY-018 | mixed | ● active (partially retracted) |
 | PARTY-MONEY-024 | static analysis | ✔ promoted |
 | PARTY-JOIN-025 | static analysis | ● active (amended) |
-| PARTY-ENDCULL-026 | static analysis | ● active (partially retracted) |
+| PARTY-ENDCULL-026 | static analysis | ● active (partially retracted, amended) |
 | PARTY-BAND-027 | static analysis | ✖ retracted |
 | PARTY-PERSIST-028 | static analysis | ● active (amended, superseded) |
 | PARTY-JOINCORPUS-029 | mixed | ● active (amended, partially retracted) |
@@ -1636,6 +1660,9 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | PARTY-038 | static analysis | ● active |
 | PARTY-039 | static analysis | ● active |
 | PARTY-040 | static analysis | ● active |
+| PARTY-041 | static analysis | ● active |
+| PARTY-042 | static analysis | ● active |
+| PARTY-043 | static analysis | ● active |
 
 ## Ledger reg
 
@@ -2499,7 +2526,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | SAV-FRAME-021 | static analysis | ● active |
 | SAV-CODEC-022 | static analysis | ● active |
 | SAV-SHAPE-023 | static analysis | ● active (amended) |
-| SAV-ROSTER-024 | static analysis | ● active |
+| SAV-ROSTER-024 | static analysis | ● active (amended) |
 | SAV-HEAD-025 | static analysis | ● active (amended) |
 | SAV-TRAIL-026 | static analysis | ● active |
 | SAV-FLAG-027 | static analysis | ● active |
@@ -2739,7 +2766,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | SAV-1026 | static analysis | ● active |
 | SAV-1027 | static analysis | ● active |
 | SAV-1028 | static analysis | ● active |
-| SAV-1029 | static analysis | ● active |
+| SAV-1029 | static analysis | ● active (amended) |
 | SAV-1030 | static analysis | ● active |
 | SAV-1031 | static analysis | ● active |
 | SAV-1032 | static analysis | ● active |
@@ -2872,7 +2899,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | SAV-1224 | mixed | ✔ promoted |
 | SAV-1225 | mixed | ✔ promoted |
 | SAV-1226 | mixed | ✔ promoted |
-| SAV-1234 | static analysis | ● active |
+| SAV-1234 | static analysis | ● active (amended) |
 | SAV-1242 | static analysis | ✔ promoted (branch candidate) |
 | SAV-1243 | static analysis | ✔ promoted (branch candidate) |
 | SAV-1244 | static analysis | ✔ promoted (branch candidate) |
@@ -2885,6 +2912,8 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | SAV-1248 | mixed | ✔ promoted |
 | SAV-1249 | mixed | ✔ promoted |
 | SAV-1250 | mixed | ✔ promoted |
+| SAV-1251 | static analysis | ● active |
+| SAV-1252 | static analysis | ● active |
 
 ## Ledger session
 
@@ -3258,7 +3287,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | TERR-FOG-083 | static analysis | ● active |
 | TERR-FOG-084 | static analysis | ● active |
 | TERR-FOG-085 | static analysis | ● active |
-| TERR-FOG-086 | static analysis | ● active (partially retracted) |
+| TERR-FOG-086 | static analysis | ● active (amended, partially retracted) |
 | TERR-FOG-087 | static analysis | ● active (partially retracted) |
 | TERR-FOG-088 | static analysis | ● active (amended) |
 | TERR-FOG-089 | static analysis | ● active |
@@ -3377,6 +3406,8 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | TERR-252 | static analysis | ● active |
 | TERR-253 | static analysis | ● active |
 | TERR-254 | static analysis | ● active |
+| TERR-CLICK-262 | static analysis | ● active (branch candidate) |
+| TERR-CLICK-263 | static analysis | ● active (branch candidate) |
 
 ## Ledger text
 
@@ -3842,7 +3873,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | TRIG-HEROORD-075 | static analysis | ● active (amended) |
 | TRIG-HEROTPL-076 | static analysis | ● active |
 | TRIG-HEROBIND-077 | static analysis | ● active (amended) |
-| TRIG-HEROFAIL-078 | static analysis | ● active |
+| TRIG-HEROFAIL-078 | static analysis | ● active (amended) |
 | TRIG-MAPORD-105 | static analysis | ● active (amended) |
 | TRIG-MAPNAME-106 | static analysis | ● active |
 | TRIG-MAPORD-107 | static analysis | ● active (amended) |
@@ -3963,6 +3994,7 @@ Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 | UNIT-146 | static analysis | ● active |
 | UNIT-147 | static analysis | ● active (amended) |
 | UNIT-148 | static analysis | ● active |
+| UNIT-LOAD-159 | static analysis | ● active |
 
 ## Ledger video
 

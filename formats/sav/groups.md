@@ -156,17 +156,36 @@ empty one, and LOAD reconstructs that partition in order. The named loops do
 not merge Groups or renumber the literal +1c selector. Runtime allocation
 addresses are new on LOAD. — SAV-1234
 
-At the next join walk, head emptiness/count checks, first-element selection,
-direct removal invocation and the selected Group's destructor/deallocation
-call sequence are High. Successful unlink, leading-prefix progression and
-the remaining-list interpretation are Medium, conditional on unread collection
-helpers `L14318` and `L14320` finding and unlinking the selected entry as
-assumed. Under that condition, leading empty Groups are destroyed until a
-nonempty head or one Group remains; later empty Groups behind a nonempty head
-are not swept. Transitive callback mutations remain Unknown. — AI-479
+At the next join walk, the read collection helpers find the selected head,
+repair links and decrement count. The prefix tests zero head members and list
+count above one. With no transitive list mutation, it removes the leading empty
+prefix until a nonempty head or one Group remains. Later empty Groups behind a
+nonempty head are not visited by this prefix. Local selection/unlink is High;
+post-callback progression remains Medium. AI-449's map-admission clause is
+superseded; its constructor facts stand. — AI-449, AI-479, AI-628, AI-629
 
-Whether death, dismissal or return removes the emptied Group before a town
-SAVE remains Unknown. The read member-detach body, selected cull windows and
-reuse arm do not close Player removal and its downstream callbacks. A paired
-original town SAVE or a complete removal-path read would settle that population.
-— SAV-1234
+Player removal requests Group deletion after count zero only when the Player
+reached through Group+44 has +28 zero. Teardown and the mission-end discard arm
+reach that path. Ordinary member detach clears actor+70; the read owner-transfer
+and tavern rebuild paths have no local empty-Group destruction arm. Retention
+through their unread callbacks is Medium. — PARTY-041, PARTY-042
+
+The file writer invokes live empty-Group pruning for selected Player+28-zero
+lists before archive construction. Its iterator saves the successor before
+returning the current Group. This is separate from the inner serializers'
+inclusion of every currently listed Group, including empty ones. Final saved
+population and full town chronology remain bounded. — SAV-1234, SAV-1251
+
+The named tavern handler commits Groups and members before one debit. Rebuild
+credits the last tracked cost before detaching marked mercenaries; same-visit
+undo activation and source-Group retention through callbacks remain Unknown.
+— PARTY-043
+
+The three raw sections' rel32/dword target scans give bounded caller candidates,
+not a complete unlink/free census. The binder caller and transitive clear paths
+remain unread. — AI-630
+
+No explicit upper-count rejection was found in the named append/archive bodies
+and forwarding wrappers. Pool allocation, actual archive primitives, overflow
+and a program-wide Group/member limit remain Unknown. This negative is Medium
+over the read bodies. — SAV-1252
