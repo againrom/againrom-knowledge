@@ -101,7 +101,7 @@ separate predicates below.
 |-----|------|-------|-------|
 | +0x00 | u32 | **colour slot** | → `player+0x08`, carried `+1` to `Player+0x44`; the unit body draw indexes the 17 shade objects with it (`ALM-PLAYER-069` (amended), `PAL-SHADE-012`, `PAL-SHADE-013`). Sparse and unordered, e.g. `Cross.ALM` `8 2 3 5 1 6 4 13`. The owner lookup `R0425` compares the record's own 1-based ordinal (below), **not** this word |
 | +0x04 | u32 | **control word** | Four-byte Read destination `CPlayer+0x30`; complete copies reach `Player+0x28`. No Boolean validation occurs in these local transfers. The old 0/1 inventory is a corpus result; `UNIT-OWNER-009` is partially retracted for treating it as a general value/authorship bound. `ALM-139`, `SESS-072`, retained corpus/ordinal chain in `ALM-PLAYER-069` |
-| +0x08 | u32 | **scalar; gameplay effect Unknown** | Loaded into CPlayer+0x0c. The loaded map's holders read CPlayer `+0x04`, `+0x08`, `+0x10`, `+0x30` and `+0x34`, not `+0x0c` (`ALM-ROSTERREAD-231`). Preserve all four bytes. The installed 0/5000 values are a corpus observation, not a two-value schema. — ALM-SCALAR-087 (partially retracted), ALM-SCALAR-089 |
+| +0x08 | u32 | **scalar; gameplay effect Unknown** | Loaded into CPlayer+0x0c. The loaded map's holders read CPlayer `+0x04`, `+0x08`, `+0x10`, `+0x30` and `+0x34`, not `+0x0c` (`ALM-ROSTERREAD-231`, `ALM-CPLAYERC-314`). Preserve all four bytes. The installed 0/5000 values are a corpus observation, not a two-value schema. — ALM-SCALAR-087 (partially retracted), ALM-SCALAR-089 |
 | +0x0c | char[32] | **name** | NUL-terminated ASCII: `Self, Monsters, Villagers, Neutral, Enemy, Beasts, Guards, Peasants, Orcs, Trolls, …` |
 | +0x2c | u16[16] | **relations** | one per editor player slot (the editor caps at 16) — the diplomacy row |
 
@@ -218,7 +218,7 @@ loader itself, the placement spawner `R0151`, and the map object's destructor,
 which frees the record without reading a field. Between them they read `+0x00`, `+0x04`,
 `+0x08`, `+0x0c`, `+0x10`, `+0x14`, `+0x20`, `+0x24`, `+0x28`…`+0x2b`, `+0x2d`, `+0x2e`,
 `+0x31+i` (`i=1..5`), `+0x37+i` (`i=0..4`), `+0x3c`, `+0x40`, `+0x44` and `+0x48` of the
-runtime record — nothing else (`ALM-TAILHOLD-080`). The stream read slot those reads go through keeps no record pointer, so file `+0x1c`, `+0x22`, `+0x26`, `+0x28`, `+0x2a`, `+0x30`, `+0x33`, `+0x34` and `+0x35` have no reader among the holders; the array append that receives each record pointer was not read (`ALM-UNITREAD-227`). The map object that owns the array is created, read and destroyed by the routines `ALM-MAPLIFE-226` lists. The no-reader statements are limited to this placed-record holder family.
+runtime record — nothing else (`ALM-TAILHOLD-080`). The stream read slot those reads go through keeps no record pointer, so file `+0x1c`, `+0x22`, `+0x26`, `+0x28`, `+0x2a`, `+0x30`, `+0x33`, `+0x34` and `+0x35` have no reader among the holders; the array append that receives each record pointer and its accessors store, return or count a pointer and dereference no record, except the unread grow routine `L15875` (`ALM-UNITREAD-313`). The map object that owns the array is created, read and destroyed by the routines `ALM-MAPLIFE-226` lists. The no-reader statements are limited to this placed-record holder family.
 
 Installed placements leave the current-mana and actor+0xbe overrides
 absent. Other tail overrides are active, so the full field program is
@@ -384,7 +384,7 @@ ALM-LIM-067, ALM-ORD-068
 
 ```
 type9: [u32 count] then count records of 26 + 6*n bytes
-       +0x00 u32 tag
+       +0x00 u32 tag   (runtime: ALM-T9TAG-312)
        +0x04 u32 X · +0x08 u32 Y
        +0x0c u16 A · +0x0e u16 B · +0x10 u16 C
        +0x12 u32 spellRaw · +0x16 u32 n
@@ -421,7 +421,7 @@ type8: no count word - the record count is meta+0x2c (the loader's case-8 bound)
 `ALM-EFFLINK-072` and `ALM-EFFPOP-073` read the link operation and type 9 consumer end to end. The loader and consumer each
 subtract one from a positive file link before indexing the type 9 list; zero means none and file
 value one reaches zero-based record zero. Case 8 writes the referring element ordinal and owning
-type 8 pointer to the target type 9 object's runtime `+0x00/+0x04`; these are runtime fields, not
+type 8 pointer to the target type 9 object's runtime `+0x00/+0x04` (`ALM-T9TAG-312`); these are runtime fields, not
 wire offsets.
 The consumer accepts a linked recipe only when its file X/Y are both zero and the backlink exists.
 It then appends Effects in this order:

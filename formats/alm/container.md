@@ -328,19 +328,20 @@ a map file are Unknown. — ALM-SAVE-239, ALM-SAVE-252, ALM-SAVE-272, ALM-SAVE-2
 |---|---|
 | Header dataSize | Installed `4*W*H+72`; ignored by the loader; writer accounting of 72 Unknown |
 | Type0 +0x0c | Editor Starting Time in minutes and its color consumer are established; complete ROM1 gameplay effect and native transactions remain Unknown — ALM-EDITTIME-205 |
-| Type0 scalars +0x10/+0x14/+0x74 | Exact widths/destinations retained; general authoring meanings Unknown |
-| Type5 +0x08 | Loaded to `CPlayer+0x0c`; copy use is known, complete gameplay consumer effect Unknown |
-| Type6 +0x1c/+0x22/+0x26/+0x28/+0x2a/+0x30/+0x33/+0x34/+0x35 | Known stored fields; no named read in the described original field-consumer set; authoring roles Unknown |
+| Type0 scalars +0x10/+0x14/+0x74 | Exact widths/destinations retained. `+0x74` is shown as the last column of the map list (ALM-MAPLIST-310; the chain from the enumerator's post to the displayed row is Medium); no game read of `M+0x20`, `M+0x24` or `M+0xd8` found (ALM-META-311, Medium); installed `+0x74` is 1..5 (ALM-CORP-315). General authoring meanings Unknown |
+| Type5 +0x08 | Loaded to `CPlayer+0x0c`; copy use is known; the roster holders read no `+0x0c` (ALM-CPLAYERC-314, Medium); complete gameplay consumer effect Unknown |
+| Type6 +0x1c/+0x22/+0x26/+0x28/+0x2a/+0x30/+0x33/+0x34/+0x35 | Known stored fields; the record-array helpers copy no record, except the unread grow routine `L15875` (ALM-UNITREAD-313); no named read in the described original field-consumer set; installed values in ALM-CORP-315; authoring roles Unknown |
 | Trigger +0x40 | 64 raw bytes; no meaningful text grammar established |
 | Trigger Target_Item | Authored values exist; complete value domain/meaning Unknown |
-| Type9 +0x00 | Exact tag width known; meaning Unknown |
+| Type9 +0x00 | Kept from format 990 on; overwritten on a record a type-8 element links; an unlinked building record's low byte goes to a caster byte read only by its serializer among the caster class's slot bodies; Medium for any other reader (ALM-T9TAG-312). Run-time meaning Unknown |
 | Type0 text slots | Fixed layout; complete trigger-to-slot relation Unknown |
 | Editor reader | Separate reader; complete acceptance contract Unknown |
 
 — ALM-HDR-001, ALM-META-091, ALM-META-092, ALM-CORP-093,
 ALM-SCALAR-087, ALM-SCALAR-088, ALM-SCALAR-089, ALM-CPLAYER-090,
 ALM-TAILDIR-081, ALM-TAILU16-082, ALM-TAILVER-084,
-UNIT-PLACESKILL-086, ALM-TRIG-047 (amended: opaque-region gloss withdrawn), ALM-TRIG-049, ALM-TRIG-050
+UNIT-PLACESKILL-086, ALM-TRIG-047 (amended: opaque-region gloss withdrawn), ALM-TRIG-049, ALM-TRIG-050,
+ALM-MAPLIST-310, ALM-META-311, ALM-T9TAG-312, ALM-UNITREAD-313, ALM-CPLAYERC-314, ALM-CORP-315
 
 The placeable-definition source is [Data.bin](../databin/format.md), including
 footprints and actor fields. The earlier unknown source-file clause is

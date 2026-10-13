@@ -1129,7 +1129,7 @@ data stands as corroboration: the line-pair strings are separate files in each r
 | TEXT-080 | Spellbook hover getter `R1207` joins a title and mana line with damage, range and duration lines and at most one caption of `main[182..187,217]`; the last caption with a value replaces earlier ones. | High | ● active | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-081 | Spellbook values come from fold `R0082` over the selected actors: per cell, sums or minima and maxima of spell-record fields; captions follow level formulas for ten spell ids; in the spellbook, ids 17, 27 and 28 never fill a caption. | High / Medium | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-082 | Generator attribute hover `R1211` tests five rectangles per attribute row: `main[155+i]`, `main[273]`, `%s = %d`, then `%+d` of the next-point cost and of the refund, the last two comma-grouped. | High / Medium | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
-| TEXT-083 | Map-list hover `L11131` chooses by cursor x alone: the row's description left of 300 px, then `dialogs.txt[134]`, `[135]`, `[136]` per column; no map field selects 135 or 136. | High | ● active | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
+| TEXT-083 | Map-list hover `L11131` chooses by cursor x alone: the row's description left of 300 px, then `dialogs.txt[134]`, `[135]`, `[136]` per column; no map field selects 135 or 136. | High | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-084 | The inherited hover hint at `+0x3c` has writers found by the traced pattern in three base constructors and setter `L11132`; 252 vslot-6 call sites exist, of which 8 pass a `dialogs.txt` lookup. | High / Medium | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-085 | The 172 hint-forwarding constructor call sites pass null (63), a static address (54) or a text-table entry (55, in `dialogs.txt` and `patch.txt`); 17 final classes inherit the getter. | High / Medium | ● active (amended) | [EXP-0435](../experiments/EXP-0435-tooltip-sources/) |
 | TEXT-096 | Spell record byte +9 is Max Range plus a power term, bytes +0xe and +0xf are the damage minimum and spread scaled by power/30 + 1, while word +0x10 is a duration in sixteenths; `R0625` fills all four from Data.bin spell columns. | High | ● active (partially retracted) | [EXP-0454](../experiments/EXP-0454-hover-help/), [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
@@ -1376,6 +1376,11 @@ label.
 
 **Unknown.** What values
 `+0x74` takes beyond ALM-META-026 is outside this read.
+
+**Amended.** `ALM-CORP-315` states the values of `+0x74` in the shipped files (1..5 over 72 maps; browser population
+EN 10 maps, RU 5), which answers the Unknown above for them. `ALM-MAPLIST-310` reads the chain from the entry the
+loader fills to the displayed row; the hover text for the fourth column is `dialogs.txt[136]` (text 0x88 of table
+`L06197`). The reads of this card stand.
 
 ### TEXT-084
 
