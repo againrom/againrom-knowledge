@@ -310,8 +310,8 @@ every other order that has a "walk there, then do a thing" shape.
   event record (`AI-561`).
 - Among the census rows in `L08481..L14887`, mover `+0x98` is set to 1 at three sites after a
   route search: two after `actor+0x168` is zero, one after `actor+0x184` is zero in mode 1; the
-  executor reads and clears it every pass (`AI-532`). The 83 census rows outside that range are
-  not classified. The five state functions of `AI-516` have no
+  executor reads and clears it every pass (`AI-532`). The 83 census rows outside that range
+  were each read in a window and store into no mover found (`AI-545`, Medium). The five state functions of `AI-516` have no
   rel32 call or jump, `0F 8x` jump or dword in `.text`, `.rdata`, `.data` (`AI-533`, Medium), no rel8 jump
   to an entry and no VA or RVA dword in five sections; their bodies are executor-row shaped (`AI-562`).
   The dword stores at `+0x134` outside the cast body are in other classes in 13 of 15 segments (`AI-563`).
@@ -338,7 +338,8 @@ every other order that has a "walk there, then do a thing" shape.
   the path list empty or by a near search aimed at the final destination; `R0178` also stores it. An empty waypoint search retries on the next pass. Whether
   another unit's cell blocks the contact ring is Unknown (`AI-373`).
 - The full search's own body leaves the static list empty in three cases: start equals goal, picker A
-  answers 0, or picker A answers the start cell; the route extractor's 1000-step cap is a fourth exit not excluded. Picker A scans rings up to Chebyshev radius `(D>>2)+3` around
+  answers 0, or picker A answers the start cell. The extractor's 1000-step cap and its one-node path (`L14986`) are two
+  further static exits, and the dynamic form has its own cap and an unreached-goal exit (`AI-544`, amending `AI-394`). Picker A scans rings up to Chebyshev radius `(D>>2)+3` around
   the goal, `D` being the start-goal distance. The search labels the start cell 0, and that cell is inside the
   scan only for `D` of 1 to 4. For rings inside the map, an unlabelled goal therefore leaves the list empty when no cell within
   `min(D-1, (D>>2)+3)` of it is labelled; near the border probes alias (`AI-394`).
@@ -494,8 +495,8 @@ writes pending 1 or 7 for command state 2 and 0xf for state 0xf (`AI-502`). A sc
 The routine that can start an attack or a cast for a unit without a new order
 is chosen by its group's order byte (`AI-517`): order 0 runs the unit's own
 state arm, orders 1, 2, 3, 4, 5 and 0x11 run a group arm, once per AI pass (`AI-526`). The table and the
-arms are read (High); that no other path acts for a unit is Medium, because 7 of the 37 call sites of the three
-acting routines are unplaced (`AI-517`). A player's own groups start at order 3, so the default idle unit runs the
+arms are read (High); that no other path acts for a unit is Medium: the 7 of the 37 call sites of the three
+acting routines that were unplaced lie in withdrawal actions and in bodies with no caller (`AI-517`, `AI-549`). A player's own groups start at order 3, so the default idle unit runs the
 order 3 arm (scorer `R0153`, veto `R0252`) and engages what is already in reach; the standing acquisition
 below applies after an order that leaves group order 0 or 4 (`AI-517`, `AI-518`). Standing
 acquisition builds its candidate set from the sight stamp, caps the pick at
@@ -513,20 +514,37 @@ arrived and runs no acquisition before arrival or before the route ends on the
 member's own cell; after arrival every pass runs acquisition and none re-issues
 the move (`AI-519`). There is no group-pass attack-move; the executor tail path
 is open (Medium): a member stood down to state 0xc is reacquired by the tail on a
-later raise of the refusal word (`AI-524`). Orders 1 and 3 engage a scored victim
+later raise of the refusal word (`AI-524`, `AI-541`). Orders 1 and 3 engage a scored victim
 with pending 5; order 1 walks a member away from its post home, order 3 stores no
 walk (`AI-520`). Order 5 runs the order 3 split when the candidate build found
 something and the order 4 arm when it found nothing (`AI-520`, `AI-519`). Order 0
 maps the command states to engage, acquire, re-issue and cast arms, and a
 victim at action 0x10 stands a state 3 member down to state 0xc and acquisition
-in the same call (`AI-521`). The executor tail reacquires for every state except
-1, 0xa and 0x17 when the mover raises its refusal word (`AI-524`, Medium). A
-Move stores `ord+0x50` = 0 for every member (`AI-519`).
+in the same call (`AI-521`). The executor tail body `R0016` names no group order operand (High for that body; its
+callees `R0019` and `R0162` are unread, Medium); when the mover raises its refusal word it stands state 1 down to
+0xc through three member resets (desired facing := current facing, `actor+0x54`, `ord+0x60` and mover `+0x7c` := 0, a
+possible claim release; no direct store to `actor+0x54`), advances the patrol for 0xa, stores progress 0xff for 0x17 and
+reacquires for every other state (`AI-541`, `AI-527`). The reacquisition picks the candidate with the least `R0115`
+value (turn cost, Medium: `R0115`, `R0051` and `R0021` are unread), installs the strike (progress 1, action 3)
+when facing and reach hold and turns in place otherwise; a mage-mask actor with reach below 2 and `Player+0x28` zero
+stores pending 0 and neither strikes nor turns. The six bodies read (`R0016`, `R0004`, `R0005`, `R0250`,
+`R0205`, `R0041`) call no walk routine and name no group order operand (High for those bodies, Medium for their
+unread callees) (`AI-542`). The word is raised at three sites (`AI-543`); the other 83 census rows that write at
+`+0x98` store into no mover found (`AI-545`, Medium); the path
+search leaves its list empty at the exits `AI-544` lists. A Move stores `ord+0x50` = 0
+for every member (`AI-519`).
 
 A strike starts at progress 0 behind a gate that needs the facing byte equal to
 the direction to the target and the edge distance within reach; the action body
 then winds up, releases on a reach test with no facing or mover access, and
-recovers, while progress 1 and 2 hold the unit (`AI-522`). The hit hook sets the
-turn flag, the attacker's cell and the diplomacy flip and stores no pending kind
-or target; the hit routine body, two of the hook's callers and the readers of the
-attacker pointer are unread (`AI-523`, Medium).
+recovers, while progress 1 and 2 hold the unit (`AI-522`). The hit routine is a
+damage computation called by the strike executor and the effect applier; it stores
+the attacker pointer and calls the hook, which sets the turn flag, the attacker's
+cell and the diplomacy flip and stores no pending kind or target (`AI-523`,
+`AI-546`). The turn flag forces one random idle turn; no reader of the attacker
+pointer found starts or changes an order, a strike, a cast or a withdrawal (`AI-547`,
+Medium). The withdrawal tests run for every member of every group order byte
+(`AI-548`); their thresholds start from the authored `Withdraw` and `Wimpy` values (`AI-WITHDRAW-027`) and the Wimpy
+command overwrites both (`AI-CLASS-030`), other writers being Unknown (`AI-548`, Medium). The earlier unplaced call sites
+are placed (`AI-549`).
+The refused-route and hit responses per command state are summarised in `AI-550`.
