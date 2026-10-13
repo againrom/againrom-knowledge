@@ -3687,6 +3687,8 @@ stay unread. The scroll-cast Unknown stays open for the setters `R0011` and `R00
 
 **Amended.** `MAGIC-341` reads the executor tail: for command state 0x17 with `mover+0x98` set, the tail stores progress 0xff (`L00545`), which selects the arm `L00544` (action 0x1a); the alternative above excluded state 0x17 from the tail's writes. "Running cast kept" for a stand order (0x17) holds only when `mover+0x98` is zero; the writers of `mover+0x98` stay unread. The scroll-cast Unknown is settled for the setters `R0011` and `R0012` (read whole, no progress, phase, countdown or completion store) and stays open for the scroll arm of `R0061` (`L00038..L15283`).
 
+**Amended.** `AI-617` reads the scroll arm of `R0061`: within the arm it stores `actor+0x68` and `actor+0x44` and no progress, phase, action or command state (its helpers `R0095`, `R2173`, `R0463`, `R0930` and `R0625` past `L15371` are unread, Medium). `MOVE-171` reads 4 of the 72 exact `mover+0x98` stores, so the alternative that the executor tail ends a cast when `mover+0x98` is nonzero stays open for the 68 unread stores.
+
 ### MAGIC-312
 
 After install, a player's cast has pending 0 (`AI-489`). A refused admission leaves phase 0
@@ -3865,8 +3867,9 @@ This card adds, at instruction level, the three mana stores that `MAGIC-316` lef
 | MAGIC-320 | The heal arm `R0015` casts spell id 6 from a human owner's unit's book on itself, else on the most damaged ally in range, without an order; stored as pending 8 with `ord+0x60` = 1. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-321 | The armed cast mode stores nothing on the unit; a unit that cast returns to state 0xc, and the cast states 0xd and 0xe only re-issue the stored cast, so the mode adds no automatic cast. | Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-322 | The engage `R0009` rolls the unit's spell slots on every call and, on a hit, `R0209` stores a cast (pending 8 or 9, spell, reach; an arm for ids 4 and 25 stores no order); a mage-mask unit in melee reach of a human owner skips it. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
-| MAGIC-340 | For a cast started through pending kind 8 or 9: selectors test mana cost, the executor gate tests facing and reach, the admission refuses only on mana; a refusal retries until the progress-2 exit (High bodies, Medium outcome). | High / Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
-| MAGIC-341 | A cast start is reached at executor progress 0 only; a new order during a step or a cast leaves progress alone and waits; one read path ends a cast, command state 0x17 with `mover+0x98` set, cause unread (Medium). | Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| MAGIC-340 | For a cast started through pending kind 8 or 9: selectors test mana cost, the executor gate tests facing and reach, the admission refuses only on mana; a refusal retries until the progress-2 exit (High bodies, Medium outcome). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| MAGIC-341 | A cast start is reached at executor progress 0 only; a new order during a step or a cast leaves progress alone and waits; one read path ends a cast, command state 0x17 with `mover+0x98` set, cause unread (Medium). | Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| MAGIC-348 | `R2078` returns 1; `L13144`, `R0621` test Spell row parameter 4; `R0904`, `R0269`, `R0617`, `R0618`, `R0254` test no range or sight (Medium). | High / Medium | ● active | EXP-0559 |
 
 ### MAGIC-320
 
@@ -3948,6 +3951,8 @@ Population: windows read in EN, listed under `evidence/run1/listings`: the sette
 
 **Unknown.** The meaning of the words `actor+0xa0` and `+0x9c` beyond their use as operands; whether the admission callees test range or sight (`R0621`, `R0904`, `R0269` unread); the checks of a cast started through the wrappers `R1137` and `R1138` and the four gap action-word stores; the checks before the scroll arm's setter call.
 
+**Amended.** `MAGIC-348` reads `R0621`, `R0904`, `R0269`, `R0617`, `R0618`, `R0254` (no range or sight test); `AI-617` reads the scroll arm; `AI-618` the wrapper starts.
+
 ### MAGIC-341
 
 Population: the windows of `MAGIC-340` plus the progress map (`L00090`, 255 bytes), the progress switch (`L00091`, 6 dwords), the kind switch (`L00099`, 15 dwords) and the group-pass table (`L00322`, 27 dwords).
@@ -3959,3 +3964,17 @@ Population: the windows of `MAGIC-340` plus the progress map (`L00090`, 255 byte
 **Confidence.** Medium: the arms and the stores are read whole (High), but the claim composes them with the unit tick and the step code, which are not read, and `R0039` and `R0040` are labels by use; a cast order for an unclaimed mid-step state with progress 0 is not excluded.
 
 **Unknown.** The writers of `mover+0x98` against a cast (named by `MAGIC-311`); a caster between two cells with progress 0; the writers of progress outside the executor; the native tick order of a command and the executor.
+
+**Amended.** `MOVE-171` reads the writers of `mover+0x98` among the stores preceded by a `+0x154` load: the step starts `R0178`, `R0043`, `R0055`.
+
+### MAGIC-348
+
+Population: EN `rom.exe`, windows `R2078..L15362`, `R0269..R0002`, `R0617..R0619`, `R0254..R1050`.
+
+**Observation.** `R2078` returns 1 and ignores its stack argument. `L13144` and `R0621` read the Spell row's parameter 4 and return 1 when it equals 2 and 1 (neither uses the cell arguments of the 0x26 call). `R0904(caster)` clamps `word[caster+0xa8+2*param2] + word[caster+0x88] - 0x1e` to 0..100 and calls `R0625`. `R0269` takes a radius from the scroll item (`actor+0x68`, type byte 0x29, word `+0x42` / 0x14 + 2) or `R0253`, clamps it to 7, collects cells through `R0109` and calls `R0619` and, per entry, `R0003`; it has no refusal. `R0617` and `R0618` fill the record at `L03042` (type 0x86 or 0x8b when the target word is zero, caster cell bytes) and call `R0646`; their branches all continue. `R0254(n)` returns `(1 << n) & dword[this+0x144]`.
+
+**Inference.** None of the six refuses by range, sight, target state or the caster's action in the windows read; the admission's mana refusal stays the one (`MAGIC-340`). `R0254`'s result is used at `L15399` (admission), not re-read here.
+
+**Confidence.** High for the instructions. Medium for the whole: `R0625` past `L15371`, `R0619`, `R0646`, `R0003`, `R0109`, `R0253` and the use of `R0254` at `L15399` are unread.
+
+**Unknown.** Those bodies; what the bit set in `actor+0x144` means.

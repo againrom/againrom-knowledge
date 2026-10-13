@@ -4334,9 +4334,13 @@ are not amended by this narrower result.
 | AI-598 | The 11 VA dwords equal to a gap start are 8 `push imm32`, one `mov [eax+0x1034], imm32`, one `cmp [ecx+4], imm32` and one `.rdata` slot beside `0x19930520` (role not discriminated); the 32 `jmp` sites end short stubs. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
 | AI-599 | Four gap tail blocks are function epilogues with no actor, order-record or mover operand, and their owners are not in the depth-3 closure; 85 unreferenced gap nodes hold actor operands. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
 | AI-600 | The `AI-574`/`AI-589` table keeps its answers: no tail moves a cell to R; the gap-code reach cell stays U with 313 unreferenced roots found; the 85 operand-holding nodes are unread whole. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
-| AI-609 | Immediate stores of the cast-start fields sit in the executor installs, the manual setters, `R0018`, `R0008`, `R0209`, `R0037` and two wrappers; gap stores (`L15262`, `R1677`) are unreduced (Medium). | High / Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
-| AI-610 | Callers of the cast starts by decoded rel32 site: manual setters only from `R0061`; `R0018` from the group pass, creature selectors, heal arms and escort healer; wrappers `R1137`/`R1138` from cell and script code (Medium). | High / Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
-| AI-611 | Six cast-field stores in gap code (`L15263`, `L15264`, `L15265`, `L15266`, `L15267`, `L15268`) have no decoded rel32 site from outside the gap into their pieces; reach by dword or register stays open (Medium). | Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| AI-609 | Immediate stores of the cast-start fields sit in the executor installs, the manual setters, `R0018`, `R0008`, `R0209`, `R0037` and two wrappers; gap stores (`L15262`, `R1677`) are unreduced (Medium). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| AI-610 | Callers of the cast starts by decoded rel32 site: manual setters only from `R0061`; `R0018` from the group pass, creature selectors, heal arms and escort healer; wrappers `R1137`/`R1138` from cell and script code (Medium). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| AI-611 | Six cast-field stores in gap code (`L15263`, `L15264`, `L15265`, `L15266`, `L15267`, `L15268`) have no decoded rel32 site from outside the gap into their pieces; reach by dword or register stays open (Medium). | Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| AI-617 | The scroll arm of `R0061` (commands 0x25, 0x26) tests the item, stores `actor+0x68` and `+0x44`, undoes both for a non-cell Spell, then calls a setter (Medium). | High / Medium | ● active | EXP-0559 |
+| AI-618 | The wrappers `R1137`, `R1138` store the cast action word in a newly built actor; callers are `R0458`, `R1139`, a `R0262` arm and two gap pieces, one read from a mid-function jump target (Medium). | High / Medium | ● active | EXP-0559 |
+| AI-619 | Seven gap stores are setters or install copies, no outside rel32 caller except `L00012 -> R0005` (reach to `L15264` not shown); `R1677` stores a stack argument (Medium). | High / Medium | ● active | EXP-0559 |
+| AI-620 | No dword in any section equals 28 cast-entry addresses except `R0037`, held by three `.rdata` slots (Medium for other reach). | High / Medium | ● active | EXP-0559 |
 
 ### AI-487
 
@@ -5605,6 +5609,8 @@ The routines named by address are `R0011`, `R0012`, `R1137` and `R1138` (the man
 
 **Unknown.** Register-source stores of the pending kind, the action word and the command state; the 30 `+0x64` stores outside the windows read; which of the 137 `+0x68` functions hold the scroll pointer of an actor; the bodies and callers of `L15262`, `R1677` and the four gap action-word stores.
 
+**Amended.** `AI-619` reads the store at `R1677`: it writes the stack argument `[ebp+8]` of a viewport clamp, not a pending kind; the other gap stores are read there.
+
 ### AI-610
 
 Population: the S2 receipt (`sites.tsv`: 555089-instruction decode, rel32 `call`/`jmp`/`jcc` sites with targets), the VA-dword scans S3 to S6 (aligned dwords equal to a start routine or root entry in `.text`, `.rdata`, `.data`, `.idata`+`.rsrc`), `indirect-sites.tsv` and `chain-1.txt`; windows of the bodies read in EN.
@@ -5617,6 +5623,8 @@ Population: the S2 receipt (`sites.tsv`: 555089-instruction decode, rel32 `call`
 
 **Unknown.** The six gap and script callers' own callers; whether a register call or a dword reference reaches `R1048`, `R0268`, `R0617`, `R0618` or `R0269`; the sources of the `R0441` and `R0023` gap callers.
 
+**Amended.** `AI-618` reads the wrappers, `R1139`, `R0458` and the `R0262` arm; `AI-620` runs the dword scan for `R1048`, `R0268`, `R0617`, `R0618`, `R0269` (no hit).
+
 ### AI-611
 
 Population: the six gap functions that hold an immediate store of 0xd/0xe at `+0x54` or `+0x50` (`AI-609`): the pieces at `L15057..L15284`, `L15285..L15286`, `L15287..L15288`, `L15289..L15290`; the decoded rel32 sites (S2) and the dword scans (S3 to S6, run for the start routines and the roots only).
@@ -5628,6 +5636,56 @@ Population: the six gap functions that hold an immediate store of 0xd/0xe at `+0
 **Confidence.** Medium: only the decoded rel32 population for these entries; dwords, register calls and computed jumps are open.
 
 **Unknown.** Reach by a VA dword, a register call or a fall-through from an inventory function (`AI-597` class A); the reading of the bodies in this experiment; the reach of the kind-9 store at `L15262` (gap code after `R0441`), which this claim does not cover.
+
+**Amended.** `AI-619` reads the bodies of the eight gap stores named in the Unknown; `AI-620` runs dword scans for the piece starts (no hit). The decoded sites there include one outside rel32 caller, `L00012 -> R0005`, whose reach to `L15264` is not shown.
+
+### AI-617
+
+Population: the lawful ROM1 `rom.exe` (EN; the RU `ROM.EXE` has the same SHA256), windows `R0061..L15357`, `L15358..L15359`, `L00038..L15283`, `L15360..L15361`, the jump table `L00529` (19 dwords) and `R2078..L15362` of `evidence/run1/listings`.
+
+**Observation.** The switch at `L15363` subtracts 0x14 from the command code `msg+9`, bounds it at 0x12 and jumps through `L00529`; the entries for 0x25 and 0x26 (indexes 17 and 18) are both `L00038`. The arm: `[L00004]` zero ends it (`L15364`); the helper `R0095` on `actor+0x7c` with the word `msg+0x10` returns the item, null ends it (`L15365`); `R2173` on the item gives a type record, null or a type byte `+0x3c` not equal to 0x29 ends it (`L14737`). It then stores `actor+0x68` := item (`L00039`), builds a 0x14-byte Spell object from the type byte `+0x40` (`L15366`), stores it in `actor+0x44` (`L00040`) and calls `R0625` with the type byte `+0x42`. For command 0x25 it calls `R0011` with the group list, `[ebp-0x28]` and the Spell (`L15280`). For 0x26 it calls `L13144` on the Spell (`L15367`): zero (the Spell row's parameter 4 is not 2, `MAGIC-348`) calls `R0930` on `actor+0x7c`, stores `actor+0x68` := 0, deletes the Spell object through its virtual slot +4 and stores `actor+0x44` := 0 (`L15368..L15369`); nonzero calls `R0012` with the group list, `msg+0xc`, `msg+0xa` and the Spell (`L15282`). The arm stores no progress, phase, action or command state; `L15370` ends it.
+
+**Inference.** A scroll cast is marked as begun by `actor+0x68` and `actor+0x44` set before the setter runs; the arm tests the item and the scroll type byte 0x29, not mana, range, sight or target state. For 0x26 the cell Spell test is the only branch that undoes the stores. The setters then test only the parked Spell (`MAGIC-340`).
+
+**Confidence.** High for the instruction text and branch targets of the arm. Medium for the composed outcome: the helpers `R0095`, `R2173`, `R0463`, `R0930` and the rest of `R0625` (read to `L15371` only) are unread, and the word `msg+0x10` is taken as an item id from the call shape.
+
+**Unknown.** The bodies of `R0095`, `R2173`, `R0463`, `R0930`; `R0625` past `L15371`; the sender of commands 0x25 and 0x26. The windows `L15358..L15359` and `L15372..L15371` start at instruction boundaries after the instructions at `L15373` and `L15374` (`EXP-0559.md` D2).
+
+### AI-618
+
+Population: EN `rom.exe`, windows `R0914..R0075`, `R1139..R1048`, `R0458..L15375`, `L12470..L15376`, `R0262..L15377`, `L15378..L15379`; the decoded rel32 sites of scan S2 (`evidence/run1/sites.tsv`, 555089 instructions).
+
+**Observation.** `R0914` allocates a new 0x198-byte actor, constructs it (`R0901`), stores `actor+4` := 0, adds it to the session list, places it on the cell given by two bytes, builds a spell book (`+0x140`) and a Spell object, stores the power as a word at `+0xa8` plus twice the school, and stores `+0x64` := Spell and `+0x134`, `+0x135` := 1; its only tests are allocation nulls. `R1137` stores `+0x54` := 0xd and `+0x5c` := the target pointer argument in the new actor; `R1138` stores `+0x54` := 0xe and the bytes `+0x60`, `+0x61` := the cell. The rel32 sites into `R1137` are `L06043`, `L06046`, `L06047`, `L06049`; into `R1138` `L06041`, `L06042`, `L06044`, `L06045`, `L06048`, `L06050`. `R0458` (per cell, the arriving actor, x, y): the domain byte of `R1851` 0 ends, 1 or 2 enters the ground branch (3 `L07119`, read in `UNIT-M10ENTRY-055` as a separate air-slot branch without a cast); with a cell record present and its spell byte `+0x2c` nonzero and not 0x1a it indexes the Spell table and calls `R2078`, which returns 1 (`MAGIC-348`), then `R1137` with the record's power, spell and cell bytes; no allegiance, range, sight or structure test lies in `R0458..L15375`. `R1139` loops the record list of `[[L00285]+0x14]+0x10`; per record `R0293` (unread) returns an actor, null skips; `R2078` (always 1) leads to `R1137` (`L06047`). The `R1138` arms at `L06050` and `L06048` follow the zero return of `R2078`; no decoded rel32 branch reaches these arms except the `je` after the `R2078` test, and indirect jumps into them were not searched. `R0262` (head: a 0x48-byte record from `L00179`) calls `R1138` at `L06041` with the given power and at `L06042` with 0x63 when the power is zero, and `R1137` at `L06043`. The window `L15378..L15379` starts at a decoded `je` (`L15378 -> L15380`): its first piece, read from that jump target, unpacks a record and calls `R1138` at `L06044` and, after pushing the power 0x63 at `L15381`, at `L06045`; the function entry and the test that selects the two calls lie before the window and are unread, and `L15378` was not a dword-scan target (`AI-620`). `L15382` is a function start after padding: a one-argument body (`ret 4`) that unpacks a record and calls `R1137` (`L06046`).
+
+**Inference.** The stores in the three bodies read (`R0914`, `R1137`, `R1138`) write only the new actor and its Spell objects. The callees `R0292` (appends to the session list), `R0289` (places the actor on a cell), `R0901`, `R0463`, `R0464` and `R0915` are unread, so an effect on other actors through the session list or the cell record is not excluded, and no read shows the new actor being removed. Sources: cell-entry records and the record list (from their bodies), script actions for `R0262` (as `TRIG-CASTACTOR-044`, not re-read), the two gap pieces unknown. Each wrapper start is unchecked for range, sight or allegiance in the windows read.
+
+**Confidence.** High for the instruction text of the wrapper and `R0914` bodies and for the sites. Medium for the inference above (six callees unread), for sources and for the two unread arms of `R0262` (only the `L12470..L15376` arm was read), `R0293` and the ground-branch tail of `R0458`.
+
+**Unknown.** The case value that selects the `L12470` arm; the entry and the arm-selecting test of the piece at `L15378` (not a scan target); the callers of `L15382` (`AI-620`: no dword hit); the callees `R0292`, `R0289`, `R0901`, `R0463`, `R0464`, `R0915` and whether the new actor is ever removed; indirect jumps into the arms `L15383` and `L15384`; `R0293`; `R0458` past `L15375`; the caller `R0076` of `R1139`. Reach of the pass `R0262` from `R0431`, `R0432`, `R0428` is a rel32 fact only.
+
+### AI-619
+
+Population: EN `rom.exe`, windows `L15385..R0138`, `R1677..R0318`, `L15386..L15387`, `L15388..L15389`, `L15390..L15391`, `L15392..L15393`, `L15394..L15395`; sites S2 and dword scan of `AI-620`.
+
+**Observation.** `L15262`: the function `L15396` stores pending kind 9, the cell word `+0x3c`, the record `+0x30` and reach `+0x14` := record byte `+9`, with no test. `R1677` is an inventory function (254 bytes, viewport clamp against `+0x84`, `+0x88`): its `L15274` store writes 8 into the stack argument `[ebp+8]`, not a cast field; one rel32 caller `L09535`. `L15263`: after the book lookup `R0017`, the record cost word `+0xc` above mana `+0x9a` leaves (`L15397`), else it stores progress 2, `ord+0x15` := 0, action 0xd, `+0x5c`, `+0x64` and `ord+0x5c` := 1. `L15264` (function `L14679`): the same stores with no test before them. `L15265`: reached after the gate `R0041` passes (failure calls `R0043`, action 1). `L15266`: reached after the gate `R0086`; stores progress 2, action 0xe, `+0x60`, `+0x61` from `ord+0x3c`, `ord+0x3d`. `L15267` and `L15268` are setters (`ret 0xc`, `ret 0x10`) that reset the member (action 0, `ord+0x60` 0, `mover+0x7c` 0) and store command state 0xd or 0xe, the target or cell, the record and reach `ord+0x14` := record `+9`, with pending 0. The rel32 sites into `L15057..L15284`, `R0005..L15286` (one outside call, `L00012` to `R0005`, a state-3 setter), `L15287..L15288`, `L15289..L15290`, `L15396..R0138` come from inside the piece (`evidence/run1/sites.tsv`) except that one call: no outside rel32 caller reaches the pieces except `L00012 -> R0005`, whose reach to `L15264` is not shown.
+
+**Inference.** The gap bodies repeat the kind 8/9 installs and the manual setters with a Spell record argument. They are entered by a path not found among rel32 and dword references (`AI-620`).
+
+**Confidence.** High for the instructions. Medium for reach (rel32 and dwords only; register calls, fall-through and computed jumps are open) and for the install copies' roles.
+
+**Unknown.** The entry and callers of each piece; the tail of `L14679`; the code before `L15386`, `L15390`, `L15392`, `L15394`. Window `L15385..R0138` begins mid-function.
+
+### AI-620
+
+Population: EN `rom.exe` (RU the same SHA256), scans S3 to S6 of `evidence/run1/census` over 28 targets: the 11 start routines, `R0061`, `R0268`, `R0617`, `R0618`, `R0269`, `R0621`, `R0904`, `R0254`, and the gap starts `L15396`, `L15285`, `L14679`, `R0005`, `L15398`, `L15057`, `L15289`, `L15287`, `L15382`; every byte offset, aligned or not.
+
+**Observation.** `dword-counters.tsv` prints 28 counters: `R0037` 3 (`.rdata` `L03030`, `L03031`, `L03032`, aligned), all others 0. The S1 sweep sees 7053 indirect calls and 722 indirect jumps; the S2 scan sees 6441 interior `E8` and 2136 interior `E9` bytes (`site-counters.tsv`).
+
+**Inference.** The action body `R0037` is reached through virtual slots, so the admission `R0268`, called from it by rel32, is reached for a unit whose class table holds it. No other listed entry is referenced as an address constant.
+
+**Confidence.** High for the counters (scan receipts). Medium for the absence of other references: an address built by arithmetic, a `call reg` target or fall-through is outside the scan.
+
+**Unknown.** Which three class tables hold `R0037`; indirect calls into the gap entries; callers of `L15382`; `L15378` (a jump target inside an unread function) was not among the 28 scan targets.
 
 ## What a unit does by itself when it sees an enemy
 

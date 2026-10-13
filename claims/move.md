@@ -1754,6 +1754,7 @@ callees through route headers and frees, plus all destruction callers, to settle
 | MOVE-156 | `R0058`, `R1332`, `R0057`, `R0049`, `R0048`, `R1544` read whole store mover `+0xa6`, `+0x86`..`+0x89`, `+1`, `actor+0x17c`, `+0x180`, claim bits and cell-record slots; `R0048` none. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | MOVE-157 | `R0392` and `R0435`, read whole in `MOVE-ALT-019` and `MOVE-ALT-020`, store nothing outside their stack frames; both read the label word array at manager `+0x30000` and return the cell of the least word or 0. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | MOVE-158 | The cell-record hash at manager `+0x540b4` has the helpers `L14473` (find or create, 13 zeroed dwords), `R2259` (remove) and `L14472` (set buckets); `L07102` builds a position record (bytes `+0`..`+5`, `+8`). | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
+| MOVE-171 | `mover+0x98` := 1 is stored in the step starts `R0178`, `R0043`, `R0055`; the executor tail clears it; 68 other exact stores unread (Medium). | High / Medium | ● active | EXP-0559 |
 
 ### MOVE-144
 
@@ -1868,3 +1869,15 @@ Bodies read whole (EN, windows `q-<entry>`; the RU image is the same file). `mov
 **Confidence.** High for the bodies. Medium for `R0540`, `R1355`, `R0747`, `R0525` (`AI-573`) The roles of record dwords `+4` (ground occupant) and `+8` (air occupant) are those of `TERR-CELLREC-146`; the bodies here show only the stores.
 
 **Unknown.** The callers of `L14472` and `R2250`; the body of `R1537`.
+
+### MOVE-171
+
+Population: EN `rom.exe`, scan S1 (555089 instructions): 72 exact stores with displacement 0x98, 0 overlapping; 4 carry a preceding load of displacement 0x154 within 16 instructions (`via154` 1: `L05750`, `L01720`, `L00161`, `L00162`); windows `L15400..L15401`, `L01898..L15402`, `L15403..L15404`, `L15405..L15406`.
+
+**Observation.** In `R0178` (`L01720`) and `R0043` (`L00161`), after `R0053` and the mover fields `+0x90`, `+0x74`, `+0x76` (or `+0x8a`, `+0x8c`), a zero `actor+0x168` stores `mover+0x98` := 1. In `R0055` (`L00162`) the store follows when `actor+0x184` is zero and the mode byte is 1. In `R0016` (`L14272..L05750`) a nonzero `mover+0x98` is cleared and, for command state 1, the member is reset (`R0007`); the later command-state 0x17 store is `MAGIC-341`. Rel32 callers: `R0178` from `R0016` (`L01932`), `R0087` (`L06117`) and gap sites `L14756`, `L14757`, `L14758`; `R0043` from `R0016` (`L06939`), `R0042` and gap `L14182`, `L14183`; `R0055` from the other two.
+
+**Inference.** A step start by these passes sets the flag the executor tail consumes, so a cast in progress (progress 2) ends through the tail only if one of these passes runs for that actor while the cast runs. The executor's own calls lie in its progress-0 arms; the gap callers (`AI-619`) are not reached by rel32 from outside.
+
+**Confidence.** High for the four stores and their windows. Medium for the claim that no other path sets the flag: 68 exact stores with `via154` 0 were not read, `rep movs` copies and register-based stores through other bases are open.
+
+**Unknown.** The 68 unread stores; the meaning of `actor+0x168` and `+0x184`; the branch at `L15407..` of the tail.
