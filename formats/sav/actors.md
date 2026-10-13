@@ -257,10 +257,11 @@ HERO-DYINGTICK-145, HERO-CROSSHOLD-146
 
 A creature's three class-spellbook slot pairs (`ord+0x78`..`+0x8c`, [MAGIC](../magic/casting.md),
 `AI-341`) sit inside `Order::Serialize`'s own raw `0x94`-byte span but are not among the
-key-repaired offsets above, so LOAD carries whatever the archive stored there unrepaired. No writer
-other than `R0184`'s spawn setup and `Order::Serialize`'s own raw LOAD copy was found; the
-disambiguation covers the AI module — so the carried value and a hypothetical class-derived rebuild
-are currently byte-identical whenever nothing else has changed the slots since spawn (`SAV-1066`).
+key-repaired offsets above, so LOAD carries whatever the archive stored there unrepaired.
+AI-341's two R0169 typed classifications are partially retracted. Its no-writer
+inference remains Medium, bounded to the literal-displacement sweep; the two untyped
+accesses cannot support it. A carried value equals a hypothetical class-derived rebuild
+only while nothing else has changed those slots since spawn (`SAV-1066`).
 
 Exact Humanoid's null definition is not established as safe: its shared Unit
 `vt+58` uses `+3c+8` without a local null guard. Exact-class acceptance, loaded

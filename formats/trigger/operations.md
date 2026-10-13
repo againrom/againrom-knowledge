@@ -5,7 +5,9 @@
 ## Operation vocabulary
 
 The promoted core state and outcome operations below are `TRIG-ACT-004` (instants
-3, 8, 4 and 5) and `TRIG-COND-003` (check 19 and build-time opcode `0x10002`):
+3, 8, 4 and 5) and `TRIG-COND-003` (check 19 and build-time opcode `0x10002`).
+TRIG-COND-003 is partially retracted for its separate check-22 movement implication;
+the variable operations below retain their evidence:
 
 ```
 instant 3   slot[p0] = p1        set a mission variable

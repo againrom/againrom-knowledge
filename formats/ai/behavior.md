@@ -197,7 +197,8 @@ default path, so a dying-but-not-torn-down candidate there is engaged ahead of a
 placed later in the interleave — three named exceptions (a low-reach human-owned mage, a
 class-spellbook slot draw, an AI-owned mage's own cast check) leave that default path (`AI-337`;
 the slot draw is a creature's own `Spell 1..3`/`Probability 1..3` columns, not a target cache,
-`AI-341`).
+`AI-341`). AI-341's two script-payload classifications are partially retracted;
+the class-spellbook identity retains its prior evidence.
 
 **This is what ends a pursuit.** Nothing inside a pursuit order measures elapsed time, health, or
 the distance the pursuer has covered; the decision is re-taken from scratch every group tick, and

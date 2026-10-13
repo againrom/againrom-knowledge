@@ -320,7 +320,7 @@ by its own `u32` count:
 | Off | Type | Field | Notes |
 |-----|------|-------|-------|
 | +0x000 | `char[64]` | editor label | the map author's own name; NUL-terminated inside a fixed buffer whose tail is uninitialised editor memory |
-| +0x040 | `u32` | **opcode** | the `ID` declared in the `.ini` (`EDITOR-023`) |
+| +0x040 | `u32` | **opcode** | Numeric runtime vocabulary and catalogue declarations differ: condition 11/12/13 and action 9/14/15 are undeclared in the EN catalogues; action 6 has eleven variants (`EDITOR-023`, `TRIG-ARMCENSUS-134`). |
 | +0x044 | `u32` | **id** | unique within each installed list; what a trigger references |
 | +0x048 | `u32` | — | installed value 0; loaded to runtime `+0x318` and read for conditions only, into the compiled check's `+0x48` (`ALM-NODEREAD-232`) |
 | +0x04c | `u32[10]` | `value[Par0..Par9]` | **indexed by slot, not packed** |
@@ -354,6 +354,41 @@ Parameter **type codes** (`ALM-TRIG-046`), and what a value of that type names:
 | +0x98 | `u32[4]` | up to four **action ids** |
 | +0xa8 | `u32[3]` | one **comparison code** per pair — `0 ==`, `1 !=`, `2 >`, `3 <`, `4 >=`, `5 <=`, dispatched through a 6-entry table; the three pairs are **ANDed with short-circuit** and a code above 5 is permanently false (`TRIG-CMP-006`) |
 | +0xb4 | `u32` | the **once flag**: `1` = fire at most once per session (the byte latch at `session+0xbec4+index` gates re-entry), `0` = re-evaluate and re-fire every full tick (`TRIG-FIRE-007`) |
+
+### Script vocabulary and compiled readers
+
+The installed source-entry census counts all authored nodes, including those
+no trigger names: EN has 38 maps, 797 actions and 680 conditions; RU has
+34 maps, 792 actions and 678 conditions. The EN catalogues declare 22 check
+variants and 44 action variants. Group constants 17 and 18 each have one
+catalogue variant and no installed node. These are installed-file counts,
+not predictions about a live editor session (`TRIG-ARMCENSUS-134`).
+
+The consulted claim coverage retains 39 initially mixed or open effect rows.
+A campaign reachability census does not close every editor-declared effect
+(`TRIG-ARMCOVER-129`, `TRIG-CLOSURE-037`). The primary dispatch tables retain
+22 check and 34 action arms (`TRIG-COND-003`, `TRIG-ACT-004`). TRIG-CLOSURE-037
+is superseded for vocabulary-wide closure. TRIG-COND-003 is partially retracted
+for its check-22 completed-movement implication.
+
+| Compiled reader | Parameter width and result |
+|---|---|
+| Check 2 | Signed dword p0..p3 bound the unit's byte coordinates inclusively; writes 0 or 1 (`TRIG-CHECKGEOM-130`). |
+| Checks 3/6/7 | Coordinate inputs to the distance helper truncate to bytes. Check 3 compares against signed dword p2; check 6 uses 255 for state 0x10 on either unit (`TRIG-CHECKGEOM-130`). |
+| Check 5 | Dword state 0x10 gives 0; every other value gives 1 (`TRIG-CHECKGEOM-130`). |
+| Check 8 | Player pointer +0x38 selects nested lists; counts returned payloads, with zero for empty lists (`TRIG-LISTREAD-131`, `AI-351`). |
+| Check 20 | Counts matching payload +0x14 dwords whose signed word +0x42 is positive; payload class remains Unknown (`TRIG-CHECKCOUNT-132`). |
+| Check 22 | Source key is 16-bit shifted addition of p0/p1; destination p2/p3 are bytes. Result 1 means a found object, including relocation refusal (`TRIG-CELLRESULT-133`). |
+| Action 1 | Increments two session dwords; their game meaning remains Unknown (`TRIG-ACTIONWRITE-135`). |
+| Action 27 | Unit pointer +0x30 and byte p0/p1 feed relocation; owner-gated order writes follow without checking its result (`AI-SCRIPTGUARD-625`, `AI-STANCE-098`). |
+| Action 31 | Virtual predicate plus dword payload +0x80 == p0 gates dword +0x88 := p1. Field identities remain Unknown; the former Mind-word classification is partially retracted (`TRIG-ACTIONWRITE-135`, `AI-341`). |
+| Action 6 | Dword p0 selects a subcommand; coordinate/range arguments are bytes. The empty-group path of subcommand 17 has no null guard (`TRIG-GROUPBOUNDS-136`, `TRIG-GROUP-005`). Subcommand 3 retains a Medium transitive setter-exclusion clause (`AI-370`). |
+
+Compiled scalar p0 starts at +0x08 and follows the builder's packing rule;
+these offsets do not replace the authored value-array layout above.
+Unresolved binding and pointer lifetime retain their earlier bounds
+(`TRIG-PARAM-030`, `TRIG-BIND-010`). TRIG-BIND-010 is partially retracted;
+only its surviving binding clauses apply. The item value domain is not changed.
 
 Trigger references contain node IDs, not array indices. Resolve action
 IDs within the action list and condition IDs within the condition list.

@@ -1436,3 +1436,10 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `AI-568` (the reach inference only; the counts and the call-site comparison stand) | Verbatim: "the inventory's closure (`AI-567`) omits code that the order machine owns, reached by pointer tables or by no direct site" | Medium | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/), AI-586 | In the scans of `AI-586` no VA, RVA or offset slot holds a gap function's entry except 11 VA dwords, and no inventory instruction start is shown to call into the gap code (2 of 3 inventory sites are instruction interiors, 1 unchecked); that the order machine owns the code, and that tables reach it, are not shown. The 159 of 182 gap functions without an incoming edge have no known reach. | **NARROWED** - partially retracted |
+
+## Script result and payload-width corrections
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TRIG-COND-003` (check 22 movement implication only) | "22 moves an object it finds at a cell before answering" | High | [EXP-0566](../experiments/EXP-0566-script-arms/), TRIG-CELLRESULT-133 | The arm attempts relocation, discards its result and writes 1 whenever lookup found an object. A blocked relocation returns before the position stores. The table and other arm facts stand. | **REFUTED** — partially retracted |
+| `AI-341` (the two R0169 typed classifications) | Classifies one access as the pre-create control and L01769 as an actor+0x88 Mind word. | High | [EXP-0566](../experiments/EXP-0566-script-arms/), TRIG-ACTIONWRITE-135 | L01769 writes a dword at +0x88 on a global-list payload selected by virtual +0x38 and dword +0x80. The word-width claim is refuted; payload type and both field identities are Unknown. Those two accesses no longer support the typed no-writer inference. Other sites and spellbook conclusions retain their prior evidence. | **REFUTED / NARROWED** — partially retracted |

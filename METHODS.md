@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
+Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 
 ## Ledger ai
 
@@ -20,7 +20,7 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | AI-357 | static analysis | ● active |
 | AI-349 | static analysis | ● active |
 | AI-350 | static analysis | ● active (amended) |
-| AI-351 | static analysis | ● active |
+| AI-351 | static analysis | ● active (amended) |
 | AI-352 | static analysis | ● active (amended, partially retracted) |
 | AI-353 | static analysis | ● active |
 | AI-ACTIVITY-324 | static analysis | ✔ promoted |
@@ -153,7 +153,7 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | AI-POST-095 | static analysis | ● active |
 | AI-POST-096 | static analysis | ● active |
 | AI-POST-097 | static analysis | ● active |
-| AI-STANCE-098 | static analysis | ● active |
+| AI-STANCE-098 | static analysis | ● active (amended) |
 | AI-LOAD-099 | static analysis | ● active |
 | AI-GATE-100 | static analysis | ● active |
 | AI-CENTRE-101 | static analysis | ● active |
@@ -230,7 +230,7 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | AI-336 | static analysis | ● active |
 | AI-337 | static analysis | ● active |
 | AI-340 | static analysis | ● active |
-| AI-341 | static analysis | ● active |
+| AI-341 | static analysis | ● active (amended, partially retracted) |
 | AI-360 | static analysis | ● active |
 | AI-361 | static analysis | ● active (amended) |
 | AI-362 | static analysis | ● active |
@@ -239,7 +239,7 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | AI-365 | static analysis | ● active |
 | AI-366 | static analysis | ● active |
 | AI-367 | static analysis | ● active |
-| AI-370 | static analysis | ● active |
+| AI-370 | static analysis | ● active (amended) |
 | AI-371 | static analysis | ● active |
 | AI-372 | static analysis | ● active |
 | AI-373 | static analysis | ● active |
@@ -285,7 +285,7 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | AI-447 | static analysis | ✔ promoted |
 | AI-449 | static analysis | ✔ promoted (superseded) |
 | AI-450 | static analysis | ✔ promoted |
-| AI-451 | static analysis | ✔ promoted |
+| AI-451 | static analysis | ✔ promoted (amended) |
 | AI-452 | static analysis | ✔ promoted |
 | AI-453 | static analysis | ✔ promoted |
 | AI-454 | static analysis | ✔ promoted |
@@ -390,6 +390,7 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | AI-548 | static analysis | ● active (amended) |
 | AI-549 | static analysis | ● active |
 | AI-550 | static analysis | ● active |
+| AI-SCRIPTGUARD-625 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -3781,9 +3782,9 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 |---|---|---|
 | TRIG-EVAL-001 | static analysis | ● active (contested) |
 | TRIG-STORE-002 | static analysis | ● active |
-| TRIG-COND-003 | static analysis | ● active |
-| TRIG-ACT-004 | static analysis | ● active |
-| TRIG-GROUP-005 | static analysis | ● active |
+| TRIG-COND-003 | static analysis | ● active (amended, partially retracted) |
+| TRIG-ACT-004 | static analysis | ● active (amended) |
+| TRIG-GROUP-005 | static analysis | ● active (amended) |
 | TRIG-CMP-006 | static analysis | ● active |
 | TRIG-FIRE-007 | static analysis | ● active |
 | TRIG-SAVE-008 | static analysis | ● active (partially retracted, amended) |
@@ -3860,6 +3861,14 @@ Claims labelled: 3856. Observation: 99. Static analysis: 3254. Mixed: 503.
 | TRIG-EDITDEF-118 | static analysis | ● active |
 | TRIG-EDITVAL-119 | static analysis | ● active |
 | TRIG-EDITDEL-120 | static analysis | ● active |
+| TRIG-ARMCOVER-129 | mixed | ● active |
+| TRIG-CHECKGEOM-130 | static analysis | ● active |
+| TRIG-LISTREAD-131 | static analysis | ● active |
+| TRIG-CHECKCOUNT-132 | static analysis | ● active |
+| TRIG-CELLRESULT-133 | static analysis | ● active |
+| TRIG-ARMCENSUS-134 | mixed | ● active |
+| TRIG-ACTIONWRITE-135 | static analysis | ● active |
+| TRIG-GROUPBOUNDS-136 | static analysis | ● active |
 
 ## Ledger unit
 

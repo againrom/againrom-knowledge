@@ -29,7 +29,8 @@ patterns. A pattern ANDs up to three comparisons; on success it sets its
 latch and executes up to four actions in slot order. The once flag retains
 the latch or clears it for the next pass. Winning and losing are actions
 that update outcome state. — TRIG-EVAL-001, TRIG-COND-003, TRIG-ACT-004,
-TRIG-CMP-006, TRIG-FIRE-007
+TRIG-CMP-006, TRIG-FIRE-007. TRIG-COND-003 is partially retracted for its
+check-22 completed-movement implication; the dispatch and evaluation facts remain.
 
 ## Reference map
 

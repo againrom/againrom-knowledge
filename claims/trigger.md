@@ -21,9 +21,9 @@ Vocabulary note, because the engine's own words differ from the editor's: a cond
 |---|---|---|---|---|
 | TRIG-EVAL-001 | One pass per full tick evaluates the whole script, and it runs on the full-tick clock, not the actor clock. | High | ● active (contested) | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-STORE-002 | The script compiles into three flat stores on the session and a 100-int register file, and both caps are stated twice. | High | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
-| TRIG-COND-003 | The condition vocabulary is a 22-arm jump table at `L12295`, opcodes 1..22, and two of its arms are dead. | High / Medium | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
-| TRIG-ACT-004 | The action vocabulary is a 34-arm jump table at `L00566`, opcodes 1..34, one arm dead, and an out-of-range opcode is a logged no-op. | High / Medium | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
-| TRIG-GROUP-005 | Action opcode 6 is a second dispatch on its own first parameter, and the editor can author one form the engine does not implement. | High | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
+| TRIG-COND-003 | The condition vocabulary is a 22-arm jump table at `L12295`, opcodes 1..22, and two of its arms are dead. | High / Medium | ● active (amended, partially retracted) | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
+| TRIG-ACT-004 | The action vocabulary is a 34-arm jump table at `L00566`, opcodes 1..34, one arm dead, and an out-of-range opcode is a logged no-op. | High / Medium | ● active (amended) | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
+| TRIG-GROUP-005 | Action opcode 6 is a second dispatch on its own first parameter, and the editor can author one form the engine does not implement. | High | ● active (amended) | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-CMP-006 | The six comparison codes are `==` `!=` `>` `<` `>=` `<=` in exactly that order, the three pairs are ANDed with short-circuit, and a code above 5 is permanently false. | High | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-FIRE-007 | Firing is latched per trigger by a byte on the session, and `ALM-TRIG-047`'s `+0xb4` word is the switch between fire-once and fire-every-tick. | High | ● active | [EXP-0080](../experiments/EXP-0080-mission-triggers/) |
 | TRIG-SAVE-008 | The world-half session block is restored before the map trigger programme is rebuilt; the formerly published load order was reversed. | High / Medium / Unknown | ● active (partially retracted, amended) | [EXP-0080](../experiments/EXP-0080-mission-triggers/), [EXP-0086](../experiments/EXP-0086-saves/), [EXP-0252](../experiments/EXP-0252-sav-world-reconstruction/), [EXP-0254](../experiments/EXP-0254-sav-reconstruction-sufficiency/) |
@@ -58,17 +58,23 @@ Vocabulary note, because the engine's own words differ from the editor's: a cond
 
 **Confidence.** High for the table, its extent, the dead arms and the three structural oddities (the bound is the routine's own `CMP`, the table was read out of the PE, and each arm was read at instruction level) / **Medium** for the *meaning* of arms 4, 9 and 20, whose fields (`unit+0x94`, `unit+0x158`'s sub-object, `actor+0x42`) are located and not interpreted
 
+**Amended.** TRIG-CHECKGEOM-130, TRIG-LISTREAD-131 and TRIG-CHECKCOUNT-132 state the bounded operations of checks 2/3/5/6/7, 8 and 20. The unconditional movement implication for check 22 is partially retracted: TRIG-CELLRESULT-133 proves that it attempts relocation and records lookup success even on a relocation refusal. The table, dead arms and other supported clauses stand.
+
 ### TRIG-ACT-004
 
 `R0262` copies the 72-byte instant record (a 0x12-dword block copy at `L12307`), reads the opcode at `rec+0x04`, bounds it (opcode − 1 compared with 0x21, above jumping to `L12308`) and dispatches (`L12309`); the default arm formats `"Script: Bad instant %d"` (`L08498`) and returns. Table read out of the PE: 34 entries, the two dwords past it decode as code. **Arm 9 points at `L00892`**, the routine's own epilogue. The complete effect list is `evidence/rom-vocabulary.md`; the four a consumer cannot do without are **4 = `session+0xb3ac++` (win)**, **5 = `session+0xb3b4++` (lose)**, **3 = `slot[p0] = p1`** and **8 = `slot[p0]++`**. Two opcodes never reach this dispatch: `0x10002` (the drop table, `TRIG-DROP-013`) and `0x10003` are consumed by the builder; any other opcode `>= 0x10002` — the catalog declares `0x10004` — falls through the jump to `L12310` at `L12311` and is **silently discarded with no message at all**
 
 **Confidence.** High for the table, its extent, the dead arm, the default arm and the four named effects (each is a named instruction; the table was read out of the PE) / **Medium** for arms 7, 21, 23, 24 and the four a routine in the same code region calls, whose callees were located and not read — arm 21 is *the* spawn call `R1138(p0,p1,p2,p3,p4, p5 ? p5 : 99)` and its six-argument order is **not** interpreted here
 
+**Amended.** TRIG-ACTIONWRITE-135 adds the own-body effects of actions 1 and 31; the latter remains Medium through its unresolved virtual predicate. AI-SCRIPTGUARD-625 adds action 27 with a bounded relocation dependency. The original table and other grades stand.
+
 ### TRIG-GROUP-005
 
 Arm 6 calls `R0156(rec)`, which switches on `p0 − 1` and returns without acting for any value outside its ten cases. Implemented `p0`: **1, 2, 3, 4, 5, 10, 11, 14, 15, 17** (`evidence/rom-vocabulary.md`). The shipped catalog declares **eleven** signatures sharing opcode 6 with `Par0` `Const` literals `1 2 3 4 5 10 11 14 15 17 18` — so literal **18 is authorable and inert**. Shipped maps use nine of the eleven (135 nodes; `evidence/sub6.txt`), never 17 and never 18, so the inert form is not exercised by anything that ships. This is the mechanism behind `ALM-TRIG-045`'s "the literal that selects among the eleven signatures sharing opcode 6": the literal is a **runtime** subscript, not only an editor label
 
 **Confidence.** High for the sub-dispatch and its ten cases (one routine read whole; the fall-through is the switch's own missing case) / High for the 11-vs-10 difference (the catalog is a shipped file this repo did not author and the literals were parsed from it, `evidence/sub6.txt`)
+
+**Amended.** TRIG-GROUPBOUNDS-136 fixes the compiled parameter widths and the empty-group path of subcommand 17. The eleven-versus-ten catalogue distinction remains; later movement is not established by this dispatch.
 
 ### TRIG-CMP-006
 
@@ -322,6 +328,8 @@ A parser that bounds the archive registry and requires every ALM and type-7 payl
 **Confidence.** High for framing, vocabulary and reachability (all 56 ALM and type-7 payloads tile exactly; every fixture carries archive, map, type-7 and node offsets; deliberately removing the zero-left and packed-slot rules changes the matrix) / Medium for claim completeness, which is a cross-ledger judgement and not a property the bytes alone discriminate
 
 **Amended.** Amended by `EXP-0160`; the completeness clause was false for instant 13, and `TRIG-TAKEITEM-038` closes it.
+
+**Amended.** TRIG-ARMCOVER-129 is a wider editor/runtime vocabulary audit. Its 39 initially mixed or open effect rows are not the campaign reachability population counted here. The coverage judgement remains Medium; it does not mean every declared arm has an end-to-end High effect claim.
 
 ### TRIG-TAKEITEM-038
 
@@ -879,3 +887,96 @@ Population: as `TRIG-EDITTRIG-117`; read in compressed form (the lines of `PUSH 
 **Confidence.** **High** for the slot move, count, combo line and cursor of item 1 and for item 2 as read (instructions read, EN). **Medium** that Delete changes no other trigger, node or list, because the exchange callees `L15573`, `L15799` and `L15752` are unread. **Medium** for item 3: the reload at selection change and the display of a condition id without a node are read from `OnInit`/`L15782`; whether the stale ids reach the file (the next OK or selection change stores the working record) follows from those bodies and was not traced end to end.
 
 **Unknown.** Whether the stale condition id is stored as 0 or the item data of a no-selection combo at the next OK; the exchange routine's behaviour at count 0; `L15573`, `L15799`, `L15752`.
+
+## Script arm coverage and bounded bodies
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-ARMCOVER-129 | The consulted ROM1 cards leave 39 script-effect rows partly open. | Medium | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-CHECKGEOM-130 | Checks 2, 3, 5, 6 and 7 use distinct bounds and result rules. | High | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-LISTREAD-131 | Check 8 counts nested list payloads through eight read-only helpers. | High | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-CHECKCOUNT-132 | Check 20 counts owner-matching payloads with a positive signed word. | High / Unknown | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-CELLRESULT-133 | Check 22 reports a found object even when relocation is refused. | High / Medium | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-ARMCENSUS-134 | The installed script census covers 38 EN and 34 RU maps. | High | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-ACTIONWRITE-135 | Actions 1 and 31 update counters or a virtually selected payload. | High / Medium / Unknown | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+| TRIG-GROUPBOUNDS-136 | Group dispatch retains byte parameters and an unchecked empty-17 path. | High / Medium | ● active | [EXP-0566](../experiments/EXP-0566-script-arms/) |
+
+### TRIG-ARMCOVER-129
+
+The navigation matrix covers condition opcodes 1..22, action opcodes 1..34 and action-6 values 0..18. It distinguishes an implemented arm from an end-to-end effect. The initial population with a relevant Medium or Unknown effect clause is 11 conditions (2, 3, 5, 6, 7, 9, 14, 15, 20, 21, 22), 19 actions (1, 2, 11, 12, 13, 17, 18, 20, 21, 23, 24, 25, 26, 27, 28, 29, 31, 33, 34) and nine group commands (1, 2, 3, 4, 5, 11, 14, 15, 17). A Medium corpus count alone does not put an otherwise High effect in that population.
+
+**Confidence.** Medium for coverage: it is a judgement over the consulted ROM1 cards, not an exhaustive absence claim over all ledgers. The evidence matrix identifies the cards and the weaker clause per row. TRIG-CLOSURE-037's campaign reachability judgement does not establish every editor-declared arm at High.
+
+**Unknown.** Unconsulted cards are listed separately. Full transitive closure remains open for the effect rows whose concrete call boundaries the experiment records. No global claim that another effect claim does not exist is made.
+
+### TRIG-CHECKGEOM-130
+
+R0433 reads compiled scalar p0..p3 at record +0x08..+0x14 as dwords; the first and second unit pointers are +0x30 and +0x3c. The result is a dword at session +0xbd34 + 4*record[0]. The result index is not checked in this body.
+
+Check 2 reads unsigned byte coordinates through R0299 and R0300 from the first unit's +0x10 object. It writes 1 iff p0 <= x <= p2 and p1 <= y <= p3, using signed dword comparisons against the scalar bounds; otherwise 0. Bounds do not truncate to bytes. Reversed bounds give 0 for every coordinate.
+
+Check 3 passes the unit coordinates and p0/p1 to R0162, masks the returned value to a byte, and writes whether it is <= signed p2. The helper masks each of its four coordinate arguments to a byte and returns max(abs(dx), abs(dy)) in AL. Check 7 stores that byte distance without a threshold. Check 6 reads both unit pointers and stores 255 when either unit's dword +0x54 equals 0x10; otherwise it stores their byte-coordinate distance. Check 5 writes 0 for the same state value and 1 for every other dword state.
+
+**Confidence.** High for these operations, widths and branches. The complete dispatcher and all three geometry leaves were read in the byte-identical EN/RU image. All called bodies here store only within their frames; these paths send no message. Catalogue labels are not needed for the result rules.
+
+**Unknown.** Null or stale unit/position pointers are not rejected by these arms. TRIG-BIND-010 supplies the earlier binding gate at its amended grade; lifetime guarantees and a general meaning for every other state value are not established.
+
+### TRIG-LISTREAD-131
+
+In R0433, check 8 reads the dword player pointer at compiled +0x38 and follows the list object at player +0x24. L14233 gets its first payload; R0070 gets each group list's first payload. R0071 advances the inner list and R2272 advances the outer list by finding the current payload pointer, then returning the next node's payload. Each returned inner payload increments a dword count. The arm stores the count, including zero, in its own result slot. It does not inspect health.
+
+The complete helpers R0073 and R2273 return whether list +0x0c is zero. R0074 and R2274 return head +8 from list +4. The two head wrappers return null for count zero; otherwise they dereference that payload address. All eight helper bodies were read, including every direct callee. Their stores are confined to their own stack frames; there are no indirect calls or client sends.
+
+**Confidence.** High for the whole-body operations in the identical EN/RU image. This closes only AI-351's two named unread list leaves, not its other transitive Unknowns.
+
+**Unknown.** A null payload terminates its walk. Counts and head pointers are not cross-validated; cyclic or inconsistent lists are outside the well-formed-list interpretation. No population-lifetime guarantee follows from this count.
+
+### TRIG-CHECKCOUNT-132
+
+L00401, called by check 20 at L15940, traverses the list reached through global L00285, +0x14, then +0. The head is list +4, next is node +0, and payload is node +8. For each non-null payload it counts dword[payload+0x14] == dword[compiled+0x38] AND signed word[payload+0x42] > 0. It stores a dword count in session +0xbd34 + 4*compiled[0], including zero. It reads no scalar selector, makes no calls and sends no message. A null payload ends the walk.
+
+**Confidence.** High for the traversal, comparisons, result and widths: the 91-byte body was read whole in the identical EN/RU image. Unknown for the payload class and the semantic identity of its +0x42 word. Neither a catalogue caption nor a neighbouring actor field establishes those identities.
+
+**Unknown.** Null root/list pointers, cyclic lists and result indices are unchecked in this body. Identifying the list producer and the payload's constructors/word writers would settle the typed meaning; those paths were not acquired.
+
+### TRIG-CELLRESULT-133
+
+R1616 forms a 16-bit source key by adding low16(p0) to low16(p1) shifted left by 8, with 16-bit wrap. R1071 tests flag 0x20 at manager +0x10000+key, uses (key>>4) modulo manager +0x540bc to select a bucket, matches the node's word +8, copies 13 dwords from node +0x0c to manager +0x5402c, and returns the copied dword +4; missing flag, bucket or node returns zero. The whole 105-byte lookup has no calls.
+
+A null lookup stores result 0. A non-null lookup calls R1055 with that payload and low8(p2), low8(p3), discards its return, and stores result 1. The relocation body's L15941 refusal is reached on a destination mask hit, before its position stores. Therefore result 1 proves lookup success only. On the later path the body writes position bytes +0/+1, word +2 and centre bytes +4/+5, calls R0050 and R0044, then requests state publication through R0059(payload, 0, -1). Intermediate callee failure is not a transactional guarantee.
+
+**Confidence.** High for lookup, source/destination widths, result rule and the refusal counterexample; all three bodies were read whole in the equal EN/RU image. Medium for complete relocation and publication behavior: virtual +0x1c at L15942/L15943 and direct callees R0048, R0057, R0046, R0050, R0044 and R0059 were not read here. AI-558 supplies only its bounded claim-release effect.
+
+**Unknown.** Typed payload class, all virtual targets, complete admission/occupancy changes and packet contents. A zero bucket divisor or malformed manager/list has no defensive path in the lookup. Reading the named callees and the reachable virtual-target population settles the remaining closure.
+
+### TRIG-ARMCENSUS-134
+
+The preregistered source-entry census parses every recursive loose .alm file plus every .alm entry in each root's scenario.res. EN has 28 archive and 10 loose maps: 797 actions, 680 conditions, 421 triggers. RU has 28 archive and six loose maps: 792 actions, 678 conditions, 418 triggers. One RU loose map has no type 7 and contributes zero nodes. All maps and type-7 payloads tile exactly; malformed and skipped counts are zero. Duplicate source entries remain separate maps; no trigger-reachability filter is applied.
+
+The EN catalogues have 22 condition and 44 action variants. In 1..22, condition 11/12/13 are undeclared; opcode 0x10002 has three variants. In 1..34, action 9/14/15 are undeclared; action 6 has eleven variants and every other declared action has one. The three additional action IDs 0x10002/0x10003/0x10004 each have one. Group constants 1/2/3/4/5/10/11/14/15/17/18 each have one variant. Group 17/18 have zero installed nodes; each root has 135 action-6 nodes. The per-opcode tables retain all zero counters and all observed out-of-range values.
+
+**Confidence.** High for this installed population under the declared counting rule, with input hashes, exact tiling and committed-output reproduction. Both 1977344-byte programs have SHA256 942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03 and compare byte-equal. This is one image, not two independent code witnesses.
+
+**Unknown.** Counts do not describe maps authored in a live editor, runtime binder survival, trigger reachability, save-resident scripts or files outside the two installed populations.
+
+### TRIG-ACTIONWRITE-135
+
+Action 1 in R0262 increments the dwords session +0xbcb0 and +0xbe9c and reads no compiled parameter. Its arm makes no call. The counters' game meaning is Unknown.
+
+Action 31 calls R0169. It walks the same global-root list as TRIG-CHECKCOUNT-132. Each non-null payload receives a virtual call through slot +0x38 at L15944. If its result is nonzero and dword[payload+0x80] equals the dword p0 at compiled +8, it stores the dword p1 at compiled +0x0c to payload +0x88. It continues after a match, does not clamp p1 and has no own packet call. The field width at L01769 is four bytes, not a word.
+
+**Confidence.** High for the complete 97-byte body's local traversal, gate and store, and for action 1's inline increments, in the equal EN/RU image. Medium for action 31's composed effect because its virtual call was not resolved. Unknown for the payload class, virtual predicate and +0x80/+0x88 semantic identities. The +0x88 address alone does not identify actor Mind.
+
+**Unknown.** The call at L15944 and the list-producing/constructor population must establish the virtual targets and typed fields. Null root/list pointers and cyclic lists have no local handling. No statement that the virtual call sends nothing is made.
+
+### TRIG-GROUPBOUNDS-136
+
+R0156 bounds dword p0-1 by 16 and decodes 17 table entries at L00408. Values 1, 2, 3, 4, 5, 10, 11, 14, 15 and 17 have bodies; 6, 7, 8, 9, 12, 13 and 16 return. Value 0 and values >=18 also return. This is a bounded dispatch fact, not a whole-image absence claim.
+
+The compiled group pointer is +0x34. Command 1 passes low8(p1) to R0125. Commands 2/4/5/14 take low8(p1), low8(p2); 11/15 take low8(p1) plus unit pointer +0x30; 10 takes that unit pointer without a scalar range. Command 3 takes only the group pointer. Command 2 writes group AI +0x20=2 and packs its destination into word +0x0a after resetting members. The other setters retain the grades in the coverage matrix.
+
+Command 17 calls R0171, writes group AI +0x20=0x11, selects null when group +0x0c is zero, then dereferences the selected pointer at L15945. There is no empty-group guard between that selection and the dereference. For a nonempty group it reads the first member's position word through R0019 into group AI +0x0a and clears byte +0x15. The complete reset body clears member fields and group AI +0x20 before that code; its nested flag-clear remains bounded by AI-558.
+
+**Confidence.** High for the whole dispatcher, table, widths and empty-path instruction sequence in the equal EN/RU image. Medium for composed order behavior; this does not establish that command 17 causes movement or that a well-formed authored group is empty at execution.
+
+**Unknown.** Later executors and command-specific callee limits retain their published bounds. No runtime fault was induced. Unresolved indirect calls and unexamined group lifetimes preclude a universal safety claim.
