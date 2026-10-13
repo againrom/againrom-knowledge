@@ -4326,10 +4326,14 @@ are not amended by this narrower result.
 | AI-573 | `R0747`, `R0525` and `R0228` read whole are an allocator with a new-handler retry, a one-call wrapper and a thread-data getter; none stores an order, actor or mover word. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | AI-574 | The table of `AI-550` keeps every answer; the step-callee, shared-mover-word, candidate-list and threshold-writer cells widen from U to R (`MOVE-156`, `AI-571`, `AI-572`); gap code, indirect calls, unread callees stay U. | Medium | ● active (amended) | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | AI-585 | The 162 inventory gaps of `L15031..L14887` hold 43736 bytes in 483 sweep segments (High for that census); by the preregistered rule 148 gaps carry code, not 160; the 182-function grouping and the byte split are Medium. | High / Medium | ● active | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
-| AI-586 | Of 3 inventory sites aimed at gap code, 2 are instruction interiors, 1 unchecked; 159 of 182 grouped entries have no incoming rel32 edge (fall-through and rel8 from the preceding function not examined); 11 VA dwords unclassified. | Medium | ● active | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
+| AI-586 | Of 3 inventory sites aimed at gap code, 2 are instruction interiors, 1 unchecked; 159 of 182 grouped entries have no incoming rel32 edge (fall-through and rel8 from the preceding function not examined); 11 VA dwords unclassified. | Medium | ● active (amended) | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
 | AI-587 | 51 grouped gap functions hold an operand at the ten actor displacements, none a store-form operand there (operand search over linear-sweep listings, base untyped; 2 `lea` at `+0x178`); 48 of the 51 are not read whole. | Medium | ● active | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
 | AI-588 | `R1352` stores `actor+0x50` := 1, the word `ord+0xa` and clears `ord+0x60`, mover `+0x7c`, `actor+0x54`; `L13333` sets turn flag `actor+0x54` or clears `ord+8`; neither has a site in the scans. | High / Medium | ● active | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
-| AI-589 | The gap code leaves the reach cells and, by operand search (Medium), the move-setter, group-pass and shared-mover cells of the `AI-574` table at U; the census adds no R and no pending-kind answer. | Medium | ● active | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
+| AI-589 | The gap code leaves the reach cells and, by operand search (Medium), the move-setter, group-pass and shared-mover cells of the `AI-574` table at U; the census adds no R and no pending-kind answer. | Medium | ● active (amended) | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/) |
+| AI-597 | In 182 gap entries (43668 bytes) of `L15031..L14887`, descent and raw scans reach 299 bytes from inventory functions, 420 by callback or data pointers, 37740 only from other gap code or nothing, 1292 are tables. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
+| AI-598 | The 11 VA dwords equal to a gap start are 8 `push imm32`, one `mov [eax+0x1034], imm32`, one `cmp [ecx+4], imm32` and one `.rdata` slot beside `0x19930520` (role not discriminated); the 32 `jmp` sites end short stubs. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
+| AI-599 | Four gap tail blocks are function epilogues with no actor, order-record or mover operand, and their owners are not in the depth-3 closure; 85 unreferenced gap nodes hold actor operands. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
+| AI-600 | The `AI-574`/`AI-589` table keeps its answers: no tail moves a cell to R; the gap-code reach cell stays U with 313 unreferenced roots found; the 85 operand-holding nodes are unread whole. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
 
 ### AI-487
 
@@ -5396,7 +5400,7 @@ Instrument: `gen.py --calls` (EN `rom.exe`, sha256 `942e9b72610eeba2f3d74930ee47
 
 **Unknown.** Which of the 86 ranges with no eight-digit address are reached at run time; each range would be settled by a window and a pointer-table search.
 
-**Amended.** `AI-586` narrows the Inference: the scans of that experiment find no pointer-table slot (VA, RVA or offset form) that holds a gap function's entry beyond 11 VA dwords, and show no inventory instruction start that calls into the gap code; that the order machine owns the code is not shown. The counts and the call-site comparison stand.
+**Amended.** `AI-586` narrows the Inference: the scans of that experiment find no pointer-table slot (VA, RVA or offset form) that holds a gap function's entry beyond 11 VA dwords, and show no inventory instruction start that calls into the gap code except one: `AI-597` finds that the inventory function `R2230` calls a gap entry (its call at `L15061` reaches `L15135`); that the order machine owns the code is not shown. The counts and the call-site comparison stand.
 
 ### AI-569
 
@@ -5492,6 +5496,8 @@ Population: the 483 segments and 182 grouped entries of `AI-585`; the 17 roots o
 
 **Unknown.** How the order machine reaches the 159 grouped entries, or whether it does; what each of the 11 VA dwords is (a callback pointer, a constant or data); whether fall-through or a rel8 jump from the preceding inventory function reaches the 160 tail-attributed entries: a decode of every `call reg` and `call [reg+disp]` site of the image and the value flow into it would settle it.
 
+**Amended.** `AI-598` classifies the 11 VA dwords (10 `.text` operands of visited instructions and one `.rdata` slot beside `0x19930520`) and the 32 `jmp` sites (short stubs); `AI-597` adds fall-through, `jmp` and table reach from the preceding function: of the 182 entries 3 are continuations that begin at the entry, 6 more are entered inside by the descent of the preceding inventory function, 9 are tables. The third inventory site, `L15061` in `R2230`, is a call that the Observation above leaves unchecked: its descent reaches `L15135`, the effective address of the gap entries `L15136` and `L15135` (class G); the 2 interiors stand. The statement that 159 entries have no incoming edge stands for rel32 edges only (Medium).
+
 ### AI-587
 
 Population: the 483 segment listings of `AI-585` (EN, `evidence/run1/listings`), 182 grouped entries. Instruments: `gapfn.py` (operand displacement and Capstone access flag per memory operand with a base or index register), `storedisp.py` (store forms by mnemonic and displacement over the listing text), `digest.py` (stores and calls per function).
@@ -5527,6 +5533,60 @@ The table of `AI-550` and `AI-574` re-stated with the reads of `AI-585` to `AI-5
 No answer of the table is reversed and no cell widens to R on the gap code.
 
 **Confidence.** Medium: a cell is no stronger than its weakest link, and the reach of the gap code is Unknown (`AI-586`).
+
+**Amended.** `AI-600` re-states the table with the tails and the descent of `AI-597`; no cell changes.
+
+### AI-597
+
+Population: the 182 grouped gap entries of `EXP-0553` (`entryfunctions.tsv`, 43668 bytes in these entry ranges), EN `rom.exe`, sha256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, equal to RU. Instruments: `tails.py` passes P1 (`.text` rel32 `E8`/`E9`/`0F 8x`), P2 to P5 (VA dwords in the five sections), P6 (Capstone recursive descent from the 7646 inventory functions), P6b (descent from call targets in non-inventory space, 11 functions), P6c (descent from 354 starts inside the entry ranges: rel32 targets, aligned `.rdata`/`.data` dwords, `.text` immediates, entry and segment starts). Descent follows fall-through, `jcc`, `jmp` and `jmp [reg*4+disp]` tables, not calls; a jump table or index table is a `disp` reference from a visited instruction.
+
+**Observation.** Of 43668 bytes: 299 are reached by descents of inventory or call-discovered functions, 191 by nodes that those functions reach through a call, jump or `.text` immediate, 229 by nodes whose only reference is an aligned `.rdata`/`.data` dword, 37740 by nodes with no reference from live code, 1292 are table (22 jump tables and 3 index tables, referenced by `jmp [reg*4+T]` or `mov r8, [reg+T]`), 3626 padding and 291 unreached other bytes (`residual.tsv`). Of the 354 island starts, 339 are unreferenced by live code (313 of them with no reference from any start, 35431 bytes), 11 live, 3 data-referenced, 1 inside a table (`nodes.tsv`). Entry classes by the effective address under the final rule (observations under that rule, see Confidence): 160 island-only, 9 table, 4 reached by a `.text` immediate, 3 continuations of the preceding function by fall-through or `jmp` that begin at the entry (`L15137`, `L15138`, `L15139`), 2 data-referenced (`L15077`, `L15140`), 2 call-discovered (`L15136`, `L15135`, reached by the call at `L15061` of the inventory function `R2230`), 1 inside a continuation (`L15141`), 1 inventory function start (`L15142`, one padding byte). The preregistered classes, applied to the descent from inventory functions alone (`entry-classes-inventory.tsv`), give 3 A, 6 A-inside and 1 B. The six A-inside entries are `L15141`, `L15143`, `L15144`, `L15145`, `L15146` and `L15147`: the descent of the preceding inventory function enters five of them by a `jmp` or table (`edges.tsv`: `L15148` to `L15149`, `L15150` to `L15151`, `L15152` and `L15153` to `L15154`, table edges to `L15155` and `L15156`), and for `L15141` the edge lands in the middle of an instruction. The final rule tests island-only before A-inside and so labels those five island-only. The preregistered run-1 split (before the call-discovery pass P6b) was 3 A, 25 C, 15 D, 131 E. Function extents of the continuations are in `extents.tsv`.
+
+**Inference.** Most gap bytes are in nodes that no scan run connects to an inventory function: no E8, E9, `0F 8x` site, VA dword in five sections or `.text` immediate in a visited instruction reaches their entries. Of the 182 entries, 3 are continuations that begin at the entry, 6 more are entered inside by the descent of the preceding inventory function, and the rest have no reference in the scans run. Whether those are tails of inventory functions is not decided: `call reg`, computed jumps and 16-bit tables were not scanned. Why the image keeps them is not established.
+
+**Confidence.** Medium. The island, table, liveness and class rules were fixed after data (D2: after run 3) and the call-discovery pass P6b after the classes of run 1 were read (D1); the class counts (160, 9, 4, 3, 2, 2, 1, 1), the byte split, the 1292 table bytes and the 339/313 node counts are observations of the committed instrument under that final rule, and no class count carries a grade for whose tail an entry is. The scan passes ran many times over (deviation D3 of the experiment), the function extents rest on a descent that stops at an indirect `jmp` or `call` target built at run time (7037 indirect rows in `indirect.tsv`), and the bytes of a table are bounded by the next start, at most 0x400.
+
+**Unknown.** Whether a pointer built by arithmetic, a 16-bit table, or a `call reg` target reaches an unreferenced node: a decode of the value flow into every `call reg` and `call [reg+disp]` site would settle it.
+
+### AI-598
+
+Population: the 11 VA dwords of `AI-586` and the 32 rel32 `jmp` sites at `L15062..L15063`; EN image; `tails.py` P1 to P6c, one window of `L15157..L15158` (`q2-jmp-region.txt`) and the dword neighbours in `data-refs.tsv`.
+
+**Observation.** Each of the 10 `.text` hits lies inside a visited instruction as its operand: `push L15068` at `L15159`, `L15160`, `L15161`, each beside `push L15162`; `push L15163` at `L15164` and `cmp dword ptr [ecx+4], L15163` at `L15165`; `push L15166` at `L15167`; `push L15168` at `L15169`, `L15170`, `L15171`; `mov dword ptr [eax+0x1034], L15172` at `L15173`. The `.rdata` hit `L15076` holds `L15077`; the dwords around it are `L15174 0`, `L15175 L15176`, `L15177 8`, `L15178 19930520`, `L15179 4` (`data-refs.tsv`); the listing of `L15077` ends `mov eax, L15180; ret`. The 32 `jmp` sites end short stubs of the forms `mov ecx, [ebp-N]; add ecx, K; jmp target` and `mov eax, imm; jmp L15181` in a region of 1239 decoded lines; their targets are `L15182` (6 sites), `L15183` (6), `L15184` (1), `L15185` (9), `L15186` (5) and `L15187` (5), each a gap node of one decoded instruction.
+
+**Inference.** The 10 `.text` hits are function-pointer arguments or stored callbacks (live, reached from inventory functions); `L15077` is a slot beside the dword `0x19930520`; its role (catch-handler address or unwind action) is not discriminated, and `L15077` returns a code address in `eax`. That the stub region is a set of unwind funclets is an inference from the stub shape and from the layout of the compiler runtime, not a read of the runtime; the stub addresses were not a scan target, so what references them is Unknown.
+
+**Confidence.** Medium (the scan count of deviation D3; the unwind-funclet reading is an inference from the stub shape and the runtime layout).
+
+**Unknown.** What reaches the stubs and what the slot at `L15076` is: a dword scan for the stub addresses in `.rdata` and `.data`, and a read of the record around `L15076` against the runtime that consumes `0x19930520`.
+
+### AI-599
+
+Population: the continuations and callbacks of `AI-597`; the 85 unreferenced nodes with an actor operand; the closure of the 17 roots of `AI-567` recomputed over `calls.tsv` to depth 3 with Medium or High library marks as leaves (173 functions, `closure.tsv`; `AI-567` counts 179: the same roots at depth 3 plus six Unknown functions at their own distance, `R0181`, `R0186`, `R1544`, `R0747`, `R0525` and `L14677`; 173 + 6 = 179); EN image, `extents.tsv`, `nodes.tsv` and the listings under `evidence/run1/listings`.
+
+**Observation.** The tail blocks `L15137..R0295`, `L15138..L15188`, `L15189..L15190` (the epilogue in the descent of `R0116`; `L15141` is the middle of an instruction there, `decode-fails.tsv`) and `L15139..L15191` are function epilogues: `call L10925` on a stack object, restore of the frame chain at `fs:[0]`, register pops, `ret`; the first three belong to `R0124`, `R0274` and `R0116`, the last to `L15192` (register pops and `ret` after an indirect `jmp [ebx+0x18]`; its role is not read). None holds an operand at the actor, order-record, mover or group displacements. None of the four owner functions is in the recomputed closure at depth 3. The callbacks `L15068`, `L15162`, `L15193`, `L15166`, `L15168`, `L15172` and `L15163` hold no operand at those displacements; `L15194` (data-referenced) holds two operands with an `esp` base (`[esp+0x28]`, `[esp+0x14]`), stack words, none at those displacements. Among the 339 unreferenced nodes, 85 (22579 bytes) hold an actor-displacement operand and 77 an order-record store (`nodes.tsv`, a displacement census, base untyped). The jump-table starts that the descent decoded as code (for example `L15195`) are excluded as tables; their census is not counted.
+
+**Inference.** Of the four tail blocks read, none touches the order record, and none belongs to a function of the depth-3 closure. A statement about the 85 unreferenced nodes would need their reach, which AI-597 leaves open.
+
+**Confidence.** Medium. The four epilogues are read in the printed listing windows only; the 85 nodes are not read whole.
+
+**Unknown.** The bodies of the 85 nodes (`nodes.tsv`, `listings/n*.txt`) and the callers of `L15194`; whether the four owners are reached at a depth over 3 over the direct rel32 edges (the closure here stops at depth 3); the 68 bytes between 43736 (`AI-585`, 162 ranges) and 43668 (182 entry ranges here) are not explained by this experiment (the sizes of `gapfunctions.tsv` sum to 43644, a third figure).
+
+### AI-600
+
+The table of `AI-574` and `AI-589` re-stated with `AI-597` to `AI-599`.
+
+| cell | answer |
+|---|---|
+| gap code, reach | U: 313 unreferenced roots and 26 nodes referenced only from other unreferenced nodes; no raw scan reaches them; pointers built by arithmetic and `call reg` targets are outside the scans |
+| gap code, move setters and group-pass kinds | U: the 85 nodes with an actor operand are not read whole; the tails reached from inventory functions hold none |
+| `L14677` reach | U: unchanged |
+| shared mover words, thresholds | U: unchanged; the mover and order-record stores of the unreferenced nodes are a census, not a read |
+| step callees, candidate list, release delivery tail | unchanged from `AI-574` |
+
+No answer of the table is reversed and no cell widens to R.
+
+**Confidence.** Medium; a cell is no stronger than its weakest link.
 
 ## What a unit does by itself when it sees an enemy
 
