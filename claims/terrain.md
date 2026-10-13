@@ -3088,11 +3088,17 @@ one window. Whether the existing-record exit is reachable in play.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| TERR-242 | The EN map editor's terrain tool stores one palette word into the clicked cell with a plain store, then runs fixer L14533 on that cell; it writes no height; on a drag it reruns for every cell other than the button-down cell. | High / Medium | ✔ promoted | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
-| TERR-243 | Fixer L14533 rewrites each 3x3 neighbour whose terrain class differs from the centre's with a pair-table transition word, recurses on flagged words and rewrites the centre; words are row heads while [L14534] is 0 (Medium). | High / Medium | ✔ promoted | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
-| TERR-244 | Of 283,494 EN and 212,476 RU palette-centred cells with a differing-class neighbour, the fixer changes no terrain class at 261,669 and 196,071 (92.3 percent); the other 45 and 47 percent of cells pass trivially. | Medium | ✔ promoted | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
-| TERR-245 | The editor's height tool, separate from terrain painting, sets the anchor height plus the vertical drag (0..127), spreads it over a drag-set radius, and bounds row steps at 31 (radius, region, falloff shape Medium). | High / Medium | ✔ promoted | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
-| TERR-246 | A new EN-editor map holds one dialog-chosen tile word in every cell (Grass 0x11 by default) and one slider height in every cell (64 by default), unless the dialog's two options randomise them. | High / Medium | ✔ promoted | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
+| TERR-242 | The EN map editor's terrain tool stores one palette word into the clicked cell with a plain store, then runs fixer L14533 on that cell; it writes no height; on a drag it reruns for every cell other than the button-down cell. | High / Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
+| TERR-243 | Fixer L14533 rewrites each 3x3 neighbour whose terrain class differs from the centre's with a pair-table transition word, recurses on flagged words and rewrites the centre; words are row heads while [L14534] is 0 (Medium). | High / Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
+| TERR-244 | Of 283,494 EN and 212,476 RU palette-centred cells with a differing-class neighbour, the fixer changes no terrain class at 261,669 and 196,071 (92.3 percent); the other 45 and 47 percent of cells pass trivially. | Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
+| TERR-245 | The editor's height tool, separate from terrain painting, sets the anchor height plus the vertical drag (0..127), spreads it over a drag-set radius, and bounds row steps at 31 (radius, region, falloff shape Medium). | High / Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
+| TERR-246 | A new EN-editor map holds one dialog-chosen tile word in every cell (Grass 0x11 by default) and one slider height in every cell (64 by default), unless the dialog's two options randomise them. | High / Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
+| TERR-248 | The EN editor draws tile variants with the CRT rand (LCG, seed 1; no srand caller in the direct-call scan) in pick L14577, column-major; at least 85% of up to 60 cells match the seed-1 stream in 72 map instances (38 EN, 34 RU). | High / Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-249 | Of 21,810 EN and 16,390 RU palette-centred cells the fixer test did not reproduce, 80 each differ only through the 2x2 transition words; the rest differ at a ring neighbour and stay unexplained. | Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-250 | Five sites store the editor's anchor words L14540/L14541: initialisation, three button-down or drag handlers and the bit-0x2000 arm; the terrain arm stores none (High), so a drag reruns per cell (Medium). | High / Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-251 | The height spread blends h+(anchor-h)*cos(d*3.1415926/2R) in the ring (k-1)^2<d^2<=k^2, truncated to a byte, limits steps to 31; High for the loop, ring, limiter, arithmetic, Medium for the cos and sqrt values. | High / Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-252 | The pair table's 288 of 311 entries fit a per-block 13-entry rule, 11 differ in one word, 12 are zero; 97.6 percent of 998,330 EN on-rule first lookups agree in class; 34 EN entries (32 RU) never do. | Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-253 | With L14608 set, L14609 sets the footprint of each object of one class in the dragged box to its origin cell's height through L15099; the class test L14492 is unread. | Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
 
 ### TERR-242
 
@@ -3140,6 +3146,11 @@ button-down.
 **Unknown.** Whether `L14563` writes tile words by the same rule; its body was not read past
 its start. Whether anything stores the anchor words after button-down: one displacement scan of
 `L14540` and `L14541` over `.text` settles it.
+
+**Amended.** The displacement scan of `L14540` and `L14541` named in the Unknown was run
+(`TERR-250`): stores exist outside the terrain arm, so the repeat rule is Medium for the terrain
+tool only if the other store sites are not reached during a terrain drag. `L14563` is read
+(`TERR-248`).
 
 ### TERR-243
 
@@ -3194,6 +3205,12 @@ new-map option `L14587` and its restore, and reads; none is a further writer.
 **Unknown.** The native result of an out-of-plane read; native recursion depth. One `imm` scan
 and one raw dword scan for `L14534` settle the other-writer clause.
 
+**Amended.** The random branch of `pick` and `L14558` is read (`TERR-248`): `L14578` is the
+CRT `rand`. `L14585` is read: it is the absolute value (`TERR-251`), so the corner selection no
+longer rests on a presumption. The writers of `[L14534]` were scanned by displacement, immediate
+and raw dword over `.text` and by raw dword over `.data` and `.rdata`: no further writer found by
+the three scans beyond the three commands named above (`TERR-248`, Medium for the exclusivity). The pair table is described by `TERR-252`.
+
 ### TERR-244
 
 Population: 38 EN maps (10 loose `.alm`, 28 `scenario.res` members) and 34 RU maps (6 loose, 28
@@ -3240,6 +3257,10 @@ cells are not reproduced; which later edits produced them is Unknown.
 tools, or hand placement). A read of `L14563` past its start, compared with the per-map
 unreproduced cells in `corpus.txt`, settles whether the transition tool accounts for them.
 
+**Amended.** The 21,810 EN and 16,390 RU unreproduced cells are recounted in `TERR-249`: the
+transition words explain 80 of each; the rest are not explained. The recount reproduced the counts
+above with the same rule (a rerun, not an independent check).
+
 ### TERR-245
 
 1. The terrain arms of `TERR-242` call no height setter; tool `0x8008` is a separate arm. Left
@@ -3279,6 +3300,14 @@ first corpus run and does not test the tool.
 `L14604` settles the Medium clauses; a read of `L14609` and `L14610` settles the
 last.
 
+**Amended.** The helpers are read (`TERR-251`): `L14585` is the absolute value, `L14603` a
+truncating float-to-integer conversion, `L14601` a square root and `L14602` a cosine
+(`FSQRT`, `FCOS` with error handling), the constant `L14604` is the double `3.1415926`,
+and `L14591` is a block copy with an overlap test; the fall-off is therefore a cosine in the arithmetic
+read, while the wrapper values are Medium (`TERR-251`). What
+`L14609` changes is in `TERR-253`. The drag handler also contains a second spread at radius 2
+after a different tool's store (`L15100`); its tool was not identified.
+
 ### TERR-246
 
 The new-map command `L14475` opens dialog `0x82`, then calls `L02380`, whose constructor
@@ -3304,3 +3333,218 @@ Medium for Grass as the default: it follows from the sort style and the standard
 insertion order, not from a run. Medium for the relief range (`L14578` not read).
 
 **Unknown.** The variant drawn per cell by option `0x431` (random).
+
+**Amended.** `L14578` is the CRT `rand` (`TERR-248`). The relief option adds `rand()/0xaaa - 6`,
+a value from -6 to 6, to a cell whose height is above 6 and below 0x79. Option `0x431` writes, in
+column-major order, a row member drawn by `pick` for every cell whose word is in a variant row.
+Of the 72 installed map instances, 14 show a column-order pass starting at stream position 0 and 26
+at width times height (a start at width times height is a second pass, not the new-map option
+alone); the other 32 maps show another start position. Medium (`TERR-248` item 4, a rule added after
+the preregistration, and the one-draw-per-row assumption behind the start positions).
+
+### TERR-248
+
+Population: `Map Editor.exe` (EN, SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`)
+read statically; 38 EN and 34 RU installed maps (loose `.alm` and `scenario.res` `M7R` members) for
+derived values. No program ran.
+
+1. Random source. Direct callers of the CRT `rand` thunk `L14578` (rel32 scan of `.text`): six
+   sites, `L15101` (new-map relief), `L15102` and `L15103` (object placement), `L06504`
+   (height noise), `L15104` (`L14572`, the 3x7 table) and `L15105` (`pick`). The `srand`
+   thunk `L15106` has no direct caller in that scan. `rand` is the linear congruence
+   214013 / 2531011 on the per-thread seed, result `(state >> 16) & 0x7fff`; the per-thread
+   initialiser `L15107` sets the seed to 1. A fresh editor process therefore draws the stream
+   that starts 41, 18467, 6334, 26500.
+2. Variant draw. `pick` (`L14577`): the row whose head equals the word (130 rows of 7 words at
+   `L14568`); with `[L14534]` zero it returns the head; otherwise `k` is the number of words
+   before the first `0xffff` (7 becomes 6) and the result is the row word at `rand() * k / 0x7fff`,
+   redrawn while that word is `0xffff`. Rows have 2 words (108 rows), 4 (1), 5 (1) or 7 (20), so
+   columns 0 to k-1 are drawn with equal weight and column 6 of a 7-word row only for the value
+   `0x7fff`. The cell step `L14558` finds the first row holding the cell's word in any column;
+   with the toggle zero it moves to the next column (wrapping to column 0, and reaching column 6
+   of a 7-word row), otherwise it writes `pick` of the row head; it keeps bit `0x2000` and leaves a
+   word that is in no row as `word & 0xfff`.
+3. Writers of `[L14534]`: the toggle command `L14581`, the whole-map command `L14582` and the
+   new-map variant option (`L15108` to `L15109`), the last two saving and restoring it. These are
+   the five stores found (`L14587`, `L15109`, `L15110`, `L15111`, `L15112`); the other eight
+   hits of the displacement scan read or compare it. Scans: displacement (72 hits for the four words
+   `L14534`, `L14540`, `L14541` and `L14608`, 13 of them for `[L14534]`), immediate (0),
+   raw dword over `.text` (65 hits for three words), raw dword over `.data` and `.rdata` (0 each).
+   Both commands visit x in the outer loop and y in the inner loop and call `L14558` with the
+   toggle set.
+4. Corpus (a rule added after the preregistration: Medium at most). For every installed map and
+   every column the cells from row 8 down (rows 0 to 7 are overwritten at save), as `(k, column)`,
+   were matched against the seed-1 stream at all 2^22 starting positions, windows of 12 cells at
+   offsets 0, 20 and 40; a position is accepted when at least 85 percent of up to 60 cells equal the
+   stream (sequences of 52 cells or more are admitted). All 72 map instances (38 EN, 34 RU, which
+   largely share maps and are not 72 independent maps) hold an accepted position for column 0;
+   1,755 of 5,256 EN and 1,078 of 4,408 RU columns hold one (the rest were rewritten by later steps
+   or begin before the window). The same test along rows finds none in 4,984 EN and 4,168 RU rows.
+   The column-0 start position `p` is reported as `p - 8`, the draws consumed before the column
+   pass if each of the eight overwritten rows (0 to 7) consumed exactly one draw; that is assumed,
+   not read. It is 0 in 14 maps, width times height in 26, and another value in 32.
+5. Inference (not a read): installed 7-word rows hold column 6 in 424 EN and 406 RU cells of about
+   377,000 and 296,000, far above the about 11.5 expected from the `0x7fff` draw alone, so the step
+   route (`L14558` with the toggle zero), which reaches column 6, probably also left variants.
+   Medium.
+
+**Confidence.** High for items 1 to 3 as read for the positive route: the three commands write
+`[L14534]`, `rand` is the LCG, the per-thread seed starts at 1, and the draw and the constants of
+`pick`. Medium for the exclusivity clauses, that no other writer of `[L14534]` exists and that no
+`srand` call runs: the scans (displacement, immediate, raw dword) leave computed calls, pointer
+tables and bulk copies unexamined. Medium for item 4 and for item 5, and for which of the
+whole-map command and the new-map option produced a map (both run the same loop); Medium that no
+other generator wrote installed variants, since the match covers 33 percent of EN columns.
+Alternatives excluded: interactive painting with the toggle on writes only fixer-touched cells and
+would not give a 60-cell column run.
+
+**Unknown.** The `srand` thunk's computed callers; any further writer of `[L14534]` through a
+computed address, pointer table or bulk copy; the draws consumed before the column pass in the
+32 maps with another start position, and the one-draw-per-row assumption behind `p - 8`.
+
+### TERR-249
+
+Population: the palette-centred interior cells of `TERR-244` (EN 516,207, RU 400,596), the same
+fixer rule re-run with the tables read from the image; the counts reproduce `TERR-244` (21,810 EN
+and 16,390 RU class changes, 15 out-of-plane reads in each). The fixer body was read whole
+(`L14533`, bounds `2 <= x <= W-2`, `2 <= y <= H-2`).
+
+Each changed cell was compared under the key `cls(word, 1)` (the 2x2 transition words
+`L14573` mapped onto `L14574`) as well as the key `cls(word, 0)`:
+
+| | EN | RU |
+|---|---|---|
+| changed under key 0 | 21,810 | 16,390 |
+| not changed under key 1 (transition words only) | 80 | 80 |
+| first changed cell is a ring neighbour whose word is a row head | 8,986 | 6,992 |
+| the same, the word is a non-head row member (variant) | 12,719 | 9,295 |
+| the same, the word is in no row | 25 | 23 |
+| of the ring cells, runs that recursed | 12,277 | 9,521 |
+
+No first changed cell was the centre or farther than the ring. The class comparison is blind to
+the variant a row word carries, so the variant route of `TERR-248` explains none of the 21,730 EN
+and 16,310 RU cells: they differ in class at a ring neighbour. Whether later paint steps, other
+tools or hand placement produced them is Unknown.
+
+**Confidence.** Medium: the counts depend on the corpus re-implementation of the fixer, which
+reproduced `TERR-244` with the same rule and is not an independent oracle; a branch that differs from
+the program would move them.
+
+**Unknown.** The cause of the 21,730 EN and 16,310 RU cells. A native replay of the fixer is the
+instrument that would settle it.
+
+### TERR-250
+
+Population: displacement scan of `L14540` and `L14541` over `.text` (`L08454`..`L14586`, linear
+decode with 9 undecodable bytes skipped), an immediate scan (0 hits) and a raw dword scan of `.text`
+(26 hits each); `.data` raw dword scan (0 hits).
+
+Stores of both words: `L15113` and `L15114` (set to -1), `L15115` and `L15116` (the tail of
+the mouse-move handler: the arm that toggles bit `0x2000` of the cell under the cursor through
+`L14567`, read in the window), `L15117` and `L15118`, `L14544` and `L14545` (the left button-down
+handler), `L15119` and `L15120`. That is five sites in all (initialisation, the bit-0x2000 arm and
+three button-down or drag handlers: four besides the button-down handler at `L14544`). The terrain
+arm of `TERR-242` (`L14542`..`L14543`) only reads the words. The sites `L15117` and `L15119`
+were not attributed to a tool. The handler at `L15117` also sets the pressed flag `[L14539]` to 1
+(`L15121`) and stores the mouse x (`[L14588]`, `L15122`), as the handler at `L14544` does,
+so it is a second button-down path; the terrain tool's handler is one of the two, which is not read.
+
+**Confidence.** High that the terrain arm stores nothing; Medium that a terrain drag reruns the
+fixer for every cell other than the button-down cell, since the dispatch that keeps the other arms'
+stores out of a terrain drag was not read.
+
+**Unknown.** The tools owning `L15117` and `L15119`; a dispatch window settles it.
+
+### TERR-251
+
+Population: `Map Editor.exe` (EN) `L14599` read whole (`L14551`..`L14572`), the helpers and the
+constant, and 38 EN and 34 RU installed height planes.
+
+1. Helpers: `L14585` negates a negative argument (absolute value); `L14603` sets rounding control to
+   truncation around `FISTP` (float to integer, toward zero); `L14601` and `L14602` are `FSQRT`
+   and `FCOS` with CRT error handling (the error callees were not read); `L14591` is a block copy
+   with an overlap test (forward `REP MOVSD`, backward branch at `L15123`; its tails were not
+   decoded). The constant at `L14604` is the double `3.1415926`.
+2. Spread: with `R = [L14595]` (default 6; at least 1 for the loop bound), for `k = 1..R`, `dx` from `-k`
+   to `k`, `dy` from 0 down to `-(k+4)` and then 1 to `k+4`, each cell `c` is changed when
+   `[L14600] != 0` (initial 1) and `(k-1)^2 < dx^2 + dy^2 <= k^2`:
+   `h(c) = trunc(h(c) + (h(anchor) - h(c)) * cos(sqrt(dx^2 + dy^2) * 3.1415926 / (2R)))`.
+   Heights are read as signed bytes, the difference is cut to a signed byte, the result is stored as
+   a byte and not clamped (the cosine argument is at most pi/2 in the ring).
+3. Limiter: for a cell with `|dx| < |dy|`, above the anchor (`dy < 0`) when `h(c+W) - h(c) > 30` the cell
+   becomes `h(c+W) - 31` (`L14607`); below it, when `h(c) - h(c-W) > 30`, it becomes `h(c-W) + 31`
+   (`L06449`). The row step `h(y+1) - h(y)` is therefore at most 31 in that region.
+4. Drag arm (`L14590`): the radius is `max(1, |mouseX - [L14588]| / 32)`, truncated toward zero;
+   the anchor height is `h(anchor) + ([L14589] - mouseY)` clamped to 0..127.
+5. Installed heights: EN 880,704 cells, minimum 0, maximum 127, none above 127 (45,948 are 0, 2,692
+   are 127); vertical pairs 875,448: step `h(y+1) - h(y)` above 31 in 192, equal to 31 in 14,925, below
+   -31 in 15,372; the largest rise 92, the largest fall 127. RU 677,696 cells, same range; above 31 in
+   179 of 673,288 pairs, equal to 31 in 11,754, below -31 in 11,416.
+
+**Confidence.** High for the loop structure, the ring test, the limiter and the arithmetic of items 2
+and 3 as read (named instructions, constant bytes) and for the absolute value, the truncating
+conversion and the constant. Medium for "the cos and sqrt values" of item 2: each wrapper
+(`L14602`, `L14601`) loads its operand through the unread `CALL L15124` and leaves its normal
+path through the unread `L15125`, so the values returned are not read; they stay Medium until
+`L15124` and `L15125` are read (two windows). Medium also for `L14591` as a copy (tails unread),
+and for item 4's restore of the plane from the undo copy before the spread. Census item 5 is a census, not a test of the tool: steps above 31
+exist (192 EN), so other tools or the noise command also write heights.
+
+**Unknown.** The second spread at radius 2 after the store at `L15100`: its tool and trigger. The
+bodies at `L15124` and `L15125` (the operand loader and the exit of the `FSQRT`/`FCOS` wrappers).
+
+### TERR-252
+
+Population: the 311-entry, 11-word pair table at `L14569` read from the image (SHA-256
+`c75860dd422ea0925fc754410d7d715e2dda20ff6b5c2a230d1df420cf637197` of the words), the lookup
+`L14576` read whole, and 38 EN and 34 RU installed type-1 planes.
+
+Lookup: the first entry with word 0 equal to the centre class (`cls(centre, 1)`) and word 1 equal to
+the neighbour class, scanned from index 0 over 22-byte entries; word `pos` (2 to 10, row-major
+north-west to south-east, position 6 the centre) is the replacement for the neighbour at that
+position, else `0xffff`.
+
+Structure: 23 blocks of 13 consecutive entries (299 entries) followed by 12 all-zero entries (indices
+299 to 310). Words are a family base plus a state code of four corner occupancies; the rule
+(`or` blocks: the code names the corners of the centre terrain; `orc` blocks: the complement) generates
+8 neighbour words of 288 entries exactly: 156 of 156 entries in the 12 `or` blocks and 132 of 143 in
+the 11 `orc` blocks. The 11 other entries each differ in position 10 (south-east) only. The block
+parameters (family base, pure-class mask, output word) were fitted per block, so the rule describes
+the table and is not a held-out test. 288 distinct keys exist: 23 entries share a key with an earlier
+one (11 of them zero entries) and are never reached by a first match.
+
+Census (first lookup per differing-class neighbour, interior palette-centred cells): EN 1,015,655
+neighbours: 998,330 hit an on-rule entry word, 8,157 an off-rule word, 9,168 no entry (the second
+lookup with `base(cc)` then found an entry). RU 760,589: 746,946, 6,172, 7,471. The installed
+neighbour's class equals the class of the looked-up word at 973,962 of 998,330 EN (97.6 percent) and
+729,484 of 746,946 RU (97.7 percent) on-rule lookups; at 0 of 8,157 EN and 0 of 6,172 RU off-rule
+lookups. Non-palette centres (EN 2,470,167 and RU 1,858,342 neighbours) have no entry. Among entries
+with 20 or more hits, 34 EN and 32 RU entries have an agreement below 50 percent, 0 in each; per-entry
+counts are in the evidence. Of the 34 EN entries 18 are pure-class rows; the other 16 lie in blocks
+13 and 21, the two blocks whose fitted row family differs from the block's first base. Later steps rewrite
+neighbours, so the census is an agreement rate, not a test of one lookup.
+
+**Confidence.** Medium: the rule is fitted per block; the census agreement is high but the entries with
+no agreement are unexplained.
+
+**Unknown.** Why the pure-class entries and the 11 off-rule words never agree; a replay of the
+fixer on a painted cell would settle it.
+
+### TERR-253
+
+`L14609` (thunk `L15126`) is called after the spread at `L15127` and `L15128`, only when
+`[L14608]` is nonzero. For `k = 1..R` (R = `[L14595]`, at least 1), `dx` from `-k` to `k` and `dy`
+from `k+4` down to `-(k+4)`, it asks `L15129` (thunk to `L15130`, window `w09`) for the structure
+at `(x+dx, y+dy)`, probes the hash at `E+0x304` (bucket `(id >> 4) mod [E+0x30c]`, chain compare of the
+16-bit id), and for a found object calls `L14492` with the class record `L14482` (body unread);
+when it returns nonzero, `L14610` (thunk to `L15099`) runs with the object's cell
+(`(obj+6 - 0x80) >> 8`, `(obj+0xa - 0x80) >> 8`) and plane index `obj+0x1a`. `L15099` saves
+`[L14595]`, sets it to 1, sets every cell of the rectangle from the origin cell to the origin plus
+the plane-table extents (`[L15131][p] +0x10` and `+0x14`, both ends inclusive) to the height read at the origin
+cell (`L15132`, thunk to `L14592`; `L15133`, thunk to `L14557`, a plain byte store), and restores
+`[L14595]`. `[L14608]` has one store in `.text` (`L15134`, in a command not read) and four compares.
+
+**Confidence.** Medium: the class test `L14492`, the lookup `L15130`'s return value and the
+command that sets `[L14608]` are unread.
+
+**Unknown.** Which objects pass the class test; the command at `L15134`.

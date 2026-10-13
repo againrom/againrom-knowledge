@@ -344,14 +344,18 @@ content is Unknown. — ALM-NEWMAP-236
 The height tool is separate from terrain painting. A drag sets the anchor
 cell's height to the vertical drag in pixels added to the anchor height,
 clamped to 0..127 (High); the anchor height is read after the plane is restored
-from the undo copy by an unread copy routine (Medium). The height spreads over a
-radius of the horizontal drag divided by 32, at least 1, with a fall-off
-presumed to be a cosine; the radius, the fall-off shape and the region below
-depend on unread routines (presumed absolute value, square root, cosine and
-conversion) and are Medium. In the cells nearer the anchor's column than its
-row, the step from a cell to the cell below it is bounded: lower minus upper is
-at most 31 (High for the compare and store; Medium for the region test).
-— TERR-245
+from the undo copy by a block copy whose tails are unread (Medium). The height spreads over a
+radius of the horizontal drag divided by 32, at least 1, with a cosine
+fall-off (the square-root and cosine wrappers are identified, their returned values
+are Medium): a cell at distance `d` in the ring `(k-1)^2 < d^2 <= k^2` becomes its
+height plus the difference to the anchor times `cos(d * 3.1415926 / (2R))`,
+truncated. In the cells nearer the anchor's column than its row, the step from
+a cell to the cell below it is bounded: lower minus upper is at most 31. Every
+installed height lies in 0..127. — TERR-245, TERR-251
+
+When a flag at `L14608` is set, a height drag then sets the footprint of each
+object of one class inside the dragged box to the height at the object's origin
+cell; the class test is unread (Medium). — TERR-253
 
 Every save normalises the plane and recomputes the counts, also for a loaded
 map:

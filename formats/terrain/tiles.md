@@ -215,8 +215,11 @@ height. One paint step stores the selected palette word into the clicked cell
 with a plain 16-bit store and then runs the neighbour fixer on that cell. During
 a drag, a mouse move in any cell other than the button-down cell repeats the step:
 the listing compares the cell under the cursor with the cell stored at button-down
-and shows no later store to that cell. That no store exists elsewhere is Medium; a
-displacement scan of the two anchor words settles it. — TERR-242
+and shows no store to that cell in the terrain arm. Five sites store the two anchor
+words in all: the initialisation, three button-down or drag handlers (one is not
+attributed to a tool) and an arm that toggles bit `0x2000` of a cell; that none runs
+during a terrain drag, and so that a drag reruns the step per cell, is Medium.
+— TERR-242, TERR-250
 
 | tool id | base word | new-map list name of the same word |
 |---|---|---|
@@ -242,9 +245,9 @@ centre's class is rewritten with a transition word from a pair table indexed by
 the two classes and the neighbour's position; a flagged transition word makes
 the fixer recurse on that neighbour; the centre is then rewritten with its own
 class word. While the random-variant toggle is off, every word written is the
-head of its variant row, so the result depends on the neighbourhood only (Medium:
-the writers of the toggle word come from one displacement scan); when the toggle is
-on, a row member is drawn at random. Every written word has bits
+head of its variant row, so the result depends on the neighbourhood only (three commands
+write the toggle word in the scans made; no further writer was found, Medium); when the toggle is on, a row member
+is drawn with the C runtime `rand`. Every written word has bits
 12..15 clear. At `y = H-2` a corner test reads two rows past the centre, outside
 the plane. — TERR-243
 
@@ -260,4 +263,21 @@ a coherence control: it excludes a spatially incoherent plane and does not bound
 the uniform share. Cells centred on a transition word have no pair-table entry and
 are not a test of the rule. This agreement is Medium evidence that the installed
 maps were painted with this fixer; it does not identify the edits that produced
-the remaining cells. — TERR-244
+the remaining cells. The 2x2 transition words explain 80 of the unreproduced cells
+in each root; the rest differ in class at a neighbour of the centre and stay
+unexplained. — TERR-244, TERR-249
+
+Random variants. A variant row holds 2, 4, 5 or 7 words. With the variant toggle
+set, the cell step draws the column `rand() * k / 0x7fff` of the row (`k` the
+number of words, 6 for a 7-word row); the generator is the linear congruence
+214013 / 2531011 and the thread seed starts at 1. The whole-map variant command
+and the new-map variant option visit the plane column by column. In every
+installed map instance (38 EN, 34 RU, overlapping) at least 85 percent of up to 60 cells
+in column 0 equal that stream from some position below 2^22 (Medium); the same test along
+rows finds none. The start positions are counted as `p - 8` draws on the assumption that
+each of the eight overwritten rows consumed one draw. — TERR-248
+
+The pair table has 23 blocks of 13 entries and 12 zero entries; 288 of 311 entries
+fit one rule of corner occupancy codes, fitted per block and not a held-out test, 11
+differ in one word, and the first entry for a class pair is the one used. On the
+installed maps 97.6 percent of the on-rule first lookups agree in class. — TERR-252
