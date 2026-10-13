@@ -3594,11 +3594,12 @@ owner use was observed.
 | MAGIC-310 | A cast's mana is subtracted in phase 0, on the pass that stores phase 5 and the wind-up countdown (High); the admission returns 1 on every path after it, so a charged cast enters wind-up (Medium, window over cap). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-311 | No setter read stores progress or phase for a new order (High); that the running cast stays charged and unrefunded, and that a repeated cast pays again, is composed from bodies read (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0544](../experiments/EXP-0544-order-machine/), [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-312 | A player's cast refused for mana stays at progress 2 with pending 0: with completion byte 1 progress clears after three passes and the cast is dropped uncharged; with 0 the retry repeats on every pass (Medium). | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0544](../experiments/EXP-0544-order-machine/) |
-| MAGIC-316 | Caster mana word `actor+0x9a` has 17 word stores in 13 segments (census); one subtracting store among the sites read (`L05057`); `R0654` (a quotient of a division by 100, body unread) is not read. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| MAGIC-316 | Caster mana word `actor+0x9a` has 17 word stores in 13 segments (census); one subtracting store among the sites read (`L05057`); `R0654` (a quotient of a division by 100, body unread) is not read. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-317 | A scroll cast pays no mana at admission (`actor+0x68` nonzero skips the subtraction); at the end of application the item and the Spell are released and the pointers cleared. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-318 | The application routine `R0003` stores caster health 1 and mana 0 at `L05228`/`L05229` after preparing its pair; the spell-id condition rests on `MAGIC-302`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-323 | Arm `L05759..L05760` stores `+0x3d`, then `+0x42` four times (the `MAGIC-303` formula steps), then `+0xc` := spell id and `+0xe` := 2*id+8; its operands come from `MAGIC-303`, the tick from `MAGIC-304`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | MAGIC-324 | Bit `0x100000` set at `L14772` in the effect apply dispatcher `R0843` lands in `actor+0x150`, not `actor+0x144`; the executor tests `[actor+0x144]` (`L00543..L05747`) (High). | High | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| MAGIC-328 | `R0654`, slot `+0x14` of the three actor vtables, stores mana word `+0x9a` and fraction byte `+0xa3` for a living actor with mana below the maximum; adds the instruction-level stores to `HERO-REGEN-021`. | High | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
 
 ### MAGIC-310
 
@@ -3753,6 +3754,8 @@ actor-bearing when it holds an operand at `0x158`, `0x136` or `0x9a`, so a segme
 `+0x9a` store is bearing by construction; the 13 segments are not evidence that the base is an
 actor.
 
+**Amended.** `EXP-0550` reads `R0654` at instruction level (`MAGIC-328`; `HERO-REGEN-021` reads it whole): its mana stores are the byte `+0xa3` at `L08219`, the word `+0x9a` at `L08220` and the clamp at `L04040`, for a living actor whose action word is not 0x10 with mana below the maximum.
+
 ### MAGIC-317
 
 The admission `R0268` subtracts only when the mage predicate `R0442` holds and
@@ -3842,6 +3845,16 @@ does not set it.
 contains `L14772` is not identified (its jump-table index is unread).
 
 **Unknown.** Which effect kind the `+0x10c` / `+0x150` arm applies.
+
+### MAGIC-328
+
+`R0654` (`d01`, whole, 188 instructions; `ecx` is the actor) is the regeneration routine that `HERO-REGEN-021` (High, amended by EXP-0284) reads whole. The factor test, the health arm gated by the counter's two low bits, the mana arm gated only on `mana < manaMax`, the divisors and the remainder bytes `+0xa2` and `+0xa3` are its. `SAV-REGENWIDTH-528`..`SAV-REGENWIRE-532` (High) give the operand widths, stores, faults and serialization, `SAV-REGENORDER-531` (High) the callback order and the factor test, `HERO-EFFECT-019` (High) the writers of the modifier words `+0xde` and `+0xe2`, `SESS-CLOCK-005` (High) the clock pacing, and `UNIT-REGEN-130` and `HERO-DECAY-069` the call cadence and the dying arm. The branches read here agree with them: return at once when `[actor+0x54]` is 0x10 (`L12771`), factor 3 when `R0547` exceeds 0x50 (`L04036..L14983`), no counter gate on mana, health decreased by 1 for negative health (`L04420`).
+
+This card adds, at instruction level, the three mana stores that `MAGIC-316` left as an Unknown: the byte `+0xa3` at `L08219`, the word `+0x9a` at `L08220` and the clamp at `L04040`, taken only when mana `[+0x9a]` is below the maximum `[+0x9c]` (`L14984..L14985`). The stamp `+0x138` behind the factor is stored by the release `R0549` (`AI-561`), and the three vtables with slot `+0x14` = `R0654` are those of `AI-557` (`vtscan.tsv`).
+
+**Confidence.** High for the stores, branches and gates read in `d01` (one image, one witness). The meanings of the fields, periods, modifiers and the clock are those of the cited claims at their grade.
+
+**Unknown.** The effects of the callee `R0059` (`SAV-REGENORDER-531` excludes them).
 
 ## Casting without a player order
 

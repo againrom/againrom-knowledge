@@ -295,17 +295,29 @@ every other order that has a "walk there, then do a thing" shape.
 
 - The setters of 0x14, 0x18, 0x19, 0x1e and 0x1f and the member reset `R0007` store a closed set
   of order, actor and mover words and the group byte `+0x20`; none stores the position bytes, mover
-  `+0x98`, progress `ord+0x09` or `actor+0x144` (`AI-527`, High for the bodies read, Medium for the
-  unread callees listed there). They touch the mover words the step reads or writes only at `+0x80`,
+  `+0x98`, progress `ord+0x09` or `actor+0x144` (`AI-527`, High for the bodies read; the callees of the five
+  setter windows are now read, `AI-559`, `AI-560`, `AI-555`, `AI-557`; Medium for the class population of the
+  virtual calls). They touch the mover words the step reads or writes only at `+0x80`,
   `+0xa6`, `+0x76`, through the claim release, which runs for a unit at a cell centre (`AI-528`, Medium).
 - Command state 8 leaves pending 4 or 1 itself and 8, 5, 6, 0xb, 0, 9 or 1 through its helpers
-  (`AI-529`); states 0xa and 0xc leave 1, 5, 6, 0xb, 0 or 8 (`AI-530`). Both sets are Medium: six callees
-  are unread. `R0046` saves `ebx` and stores only map-flag bytes (`AI-531`).
+  (`AI-529`); states 0xa and 0xc leave 1, 5, 6, 0xb, 0 or 8 (`AI-530`). The six callees `R0021`,
+  `R0460`, `R0393`, `R0036`, `R0051` and `R0115` are read whole and add no
+  kind in their own instructions (`AI-553`, `AI-554`, `AI-555`, `AI-556`); the sets stay Medium for the helpers' indirect calls and
+  utilities. `R0046` saves `ebx` and stores only map-flag bytes (`AI-531`, `AI-558`); for the 20 vtables of
+  `AI-557` its virtual calls return a size and a domain byte and store nothing. `R0476`, `R0069` and
+  `R0140` store a list cursor, the group AI block words `+0x24`..`+0x2c` and nothing in a member
+  (`AI-559`); the scorers store only in their frames for the 20 vtables of `AI-557` (`AI-560`); the release `R0549` stores `actor+0x138` and an
+  event record (`AI-561`).
 - Among the census rows in `L08481..L14887`, mover `+0x98` is set to 1 at three sites after a
   route search: two after `actor+0x168` is zero, one after `actor+0x184` is zero in mode 1; the
   executor reads and clears it every pass (`AI-532`). The 83 census rows outside that range are
   not classified. The five state functions of `AI-516` have no
-  rel32 call or jump, `0F 8x` jump or dword in `.text`, `.rdata`, `.data` (`AI-533`, Medium).
+  rel32 call or jump, `0F 8x` jump or dword in `.text`, `.rdata`, `.data` (`AI-533`, Medium), no rel8 jump
+  to an entry and no VA or RVA dword in five sections; their bodies are executor-row shaped (`AI-562`).
+  The dword stores at `+0x134` outside the cast body are in other classes in 13 of 15 segments (`AI-563`).
+- The caster mana word `+0x9a` and fraction byte `+0xa3` are stored by the regeneration virtual `R0654`
+  (slot `+0x14` of the three actor vtables) on every call for a living actor with mana below the maximum; the
+  factor is 3 when 0x50 ticks have passed since the release stamp `actor+0x138` (`MAGIC-328`).
 - Progress 1 and 2 count `ord+0x15` and clear when it exceeds 2 with completion set; among the `prog`
   census rows progress 0xff is stored at `L00545` and cleared in `R0146` (`AI-534`, Medium for
   the "only" clauses). `R0044` stores the reset words and, in its body, no progress or

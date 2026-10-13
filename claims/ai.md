@@ -4284,24 +4284,35 @@ are not amended by this narrower result.
 | AI-500 | Order-record stores of progress `ord+0x09` outside the executor lie in 12 segments (values 0 to 3); the clears of 0xff read are in `R0146`; mover-record stores are separate; displacement census. | Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | AI-501 | Setter `R0190` (0x1b) stores pending `bl` (0 if callees keep `ebx`, Medium) and state 8 or 0xc; `R0174` (0x1d) calls `R0172`, which stores pending 0 at `L14667`; the group-pass kind is Unknown. | Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/), [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-502 | Group-pass arm of command state 2 stores pending 1 or 7 and state 0xf stores 0xf; each pending kind maps to one executor arm; `R0008` runs once per actor of the list `R0148` walks. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
-| AI-503 | Outside the cast action body, the stores read to actor phase `+0x58` and completion `+0x136` are in `R0185`, `R0672` and the cut routine `R1380` (two callers, restore sequences); the census lists unread rows. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
+| AI-503 | Outside the cast action body, the stores read to actor phase `+0x58` and completion `+0x136` are in `R0185`, `R0672` and the cut routine `R1380` (two callers, restore sequences); the census lists unread rows. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | AI-509 | The step bodies read hold no order-record operand (High); that no order kind changes the step, so a stored order waits for the first progress-0 pass, is Medium (five setters unread, tail depends on `AI-510`). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-510 | In a pass entered at progress 3, 4 or 0xff the tail's `mover+0x98` branch is not taken through any path read; unread callees rest on the `m98` census and `MAGIC-ACTGATE-079`; the entry value is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
-| AI-511 | When the tail's `mover+0x98` branch runs it writes progress 0xff (state 0x17) or 1 (`R0005`) and pending 0, 6 or 0xb; in the ranges read, `R0250`, `R0205` and `R0041` write no progress or pending (helpers unread). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
+| AI-511 | When the tail's `mover+0x98` branch runs it writes progress 0xff (state 0x17) or 1 (`R0005`) and pending 0, 6 or 0xb; in the ranges read, `R0250`, `R0205` and `R0041` write no progress or pending (helpers unread). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-512 | Bit 0x100000 of `actor+0x144` is set at `L05675` and cleared at expiry `L05766`, the only clear read; `L05769` clears the bits of ids 0x17 and 0x1b when those effects replace each other; the initial countdown is Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-513 | While bit 0x100000 is set no stored order is read: progress 0 becomes 4 before the pending switch, arm 4 reads no pending kind, and the pass that finds the bit clear ends in the tail. | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-514 | Setter 0x1b stores pending 0 (`ebx` is zero from `L14692`, no direct callee read names it); the group-pass stores read are 4, 1 (state 8) and 6, 0xb (state 0xc); the helpers can leave other kinds, 5 to 9 included (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-515 | `R0172` ends at `L14741` and stores state 0xa and pending 0 on every path; the group pass of state 0xa stores pending 1 unless `R0137` leaves another kind. Amends `AI-501`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | AI-516 | No `E8` or `E9` rel32 call or jump targets the state functions `L13263`, `L14680`, `L14681`, `L14742`, `L14682` or their block entries (Medium; conditional and short jumps, computed calls are outside the scan). | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
-| AI-527 | The setters of 0x14, 0x18, 0x19, 0x1e, 0x1f and `R0007` store the order, actor, mover words and group byte `+0x20` listed in the card; none stores the position bytes, mover `+0x70`, `+0xaa`..`+0xb1`, `+0x98`, `ord+9`, `ord+0x15`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-527 | The setters of 0x14, 0x18, 0x19, 0x1e, 0x1f and `R0007` store the order, actor, mover words and group byte `+0x20` listed in the card; none stores the position bytes, mover `+0x70`, `+0xaa`..`+0xb1`, `+0x98`, `ord+9`, `ord+0x15`. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | AI-528 | The setters' stores touch the mover words the step reads or writes only at `+0x80`, `+0xa6`, `+0x76`, through the claim release, which runs for a unit at a cell centre whose claimed cell differs from its own (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| AI-529 | Command state 8 (`R0138`) stores pending 4 or 1 itself and leaves 8, 5, 6, 0xb, 0, 9 or 1 through `R0305`, `R0306`, `R0009`, `R0022`; the table `L00323` sends kinds 5, 6, 8, 9 to the exit (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| AI-530 | State 0xa (`R0159`) stores pending 0, calls `R0137`, then pending 1 and the next waypoint when the kind left is 0 or 0xb; state 0xc reaches `R0022`, `R0113`, `R0015`, leaving 6, 0xb, 0 or 8 (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| AI-531 | `R0046` saves and restores `ebx` and stores only map-flag bytes (`[map+cell+0x20000]` and 0x7f or 0xbf) plus two virtual calls; `R0072` compares two dwords, stores nothing and does not use `ebx` (High for the bodies). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-529 | Command state 8 (`R0138`) stores pending 4 or 1 itself and leaves 8, 5, 6, 0xb, 0, 9 or 1 through `R0305`, `R0306`, `R0009`, `R0022`; the table `L00323` sends kinds 5, 6, 8, 9 to the exit (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-530 | State 0xa (`R0159`) stores pending 0, calls `R0137`, then pending 1 and the next waypoint when the kind left is 0 or 0xb; state 0xc reaches `R0022`, `R0113`, `R0015`, leaving 6, 0xb, 0 or 8 (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-531 | `R0046` saves and restores `ebx` and stores only map-flag bytes (`[map+cell+0x20000]` and 0x7f or 0xbf) plus two virtual calls; `R0072` compares two dwords, stores nothing and does not use `ebx` (High for the bodies). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | AI-532 | Among the `m98` census rows in `L08481..L14887`, mover `+0x98` := 1 is stored at `L01720`, `L00161` (after `R0053`, `actor+0x168` = 0) and `L00162` (`actor+0x184` = 0); the executor clears it at `L05750`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| AI-533 | No rel32 call or jump, `0F 8x` jump or dword at any byte offset in `.text`, `.rdata`, `.data` equals the entries of the five state functions `L13263`..`L14682` (Medium; short jumps and RVA-form dwords are outside). | Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-533 | No rel32 call or jump, `0F 8x` jump or dword at any byte offset in `.text`, `.rdata`, `.data` equals the entries of the five state functions `L13263`..`L14682` (Medium; short jumps and RVA-form dwords are outside). | Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | AI-534 | Progress 1 and 2 increment `ord+0x15` and, above 2 with `actor+0x136` nonzero, store progress 0, action 0; among the `prog` census rows 0xff is written at `L00545`, cleared at `L05751`, `L05752` (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| AI-535 | `R0044` stores `ord+0x14`, `ord+0x60`, mover `+0x7c`, `actor+0x54`, `ord+0x50`, `actor+0x50` := 0xc, `ord[0]`, `ord+8` := 0; no progress or position store in the body (High), none through its calls (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-535 | `R0044` stores `ord+0x14`, `ord+0x60`, mover `+0x7c`, `actor+0x54`, `ord+0x50`, `actor+0x50` := 0xc, `ord[0]`, `ord+8` := 0; no progress or position store in the body (High), none through its calls (Medium). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| AI-553 | `R0021` and `R0460` only unlink candidates from a collection (by relation bit, a flagged candidate out of range, or a flier at reach below 2) and store nothing to an actor, order record or mover in their own instructions. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-554 | `R0393` at listing level over `MAGIC-AI-012`: engage on a 30 in 100 draw above a stat threshold, else a draw from affordable ids 1..28; with id 28 in the book an empty list still stores `ord+0x60` := 1 and casts. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-555 | The geometry leaves `R0036`, `R0051`, `R0115`, `R0167`, `R0162`, `R0040`, `R0019` and the coordinate getters store only in their own frames (virtual calls: `AI-557`). | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-556 | With the six group-pass callees read, none stores a pending kind outside the sets of `AI-529` and `AI-530`; the sets stay Medium for the helpers' unread indirect calls and utilities. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-557 | Vtable slots `+0x1c` and `+0x20` return one byte and store nothing for the 20 vtables read: the three actor vtables (slot `+0x14` = `R0654`) return `[this+0x49]` and `[this+0x4a]`, 17 other vtables return 1 and 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-558 | `R0046` clears map-flag bit 0x80 (domain 3) or 0x40 (domains 1, 2) over the footprint and stores nothing else for the 20 vtables of `AI-557`; with `R0045` the claim release stores the three mover words and flag bytes only. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-559 | `R0476` and `R0069` store nothing but a list cursor; `R0140` stores only group AI block words `+0x24`, `+0x28`, `+0x2a`..`+0x2c`; none of the five order setters calls `R0069` or `R0140`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-560 | The scorers `R0225` and `R0252` store only in their frames for the 20 vtables of `AI-557`; `R0252` returns 0xffffff when the reach-adjusted distance term exceeds 1 or the matrix byte is 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-561 | The release `R0549` stores `actor+0x138` := clock + `+0x134` + `+0x135` and a static event record; `R0561` stores an event record and, for a non-actor target, the or-ed word `+0x18` of the target; delivery callees are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-562 | The five state functions `L13263`, `L14680`, `L14681`, `L14742`, `L14682` have no reaching site over rel32, `0F 8x`, rel8 and VA or RVA dwords in all five sections; their bodies store progress and action words. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
+| AI-563 | 13 of the 15 segments with a dword store at `+0x134` outside the cast body write a record that is not the actor (panels, buffers, other classes); `R0967` and `L14718` are unidentified; the actor constructor is `R0185`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
 
 ### AI-487
 
@@ -4364,6 +4375,8 @@ command states 8, 0xc and 0xa: pending 4 and 1 (state 8), 6 and 0xb (state 0xc) 
 stands for the kinds the helpers leave. `AI-509` records that the setters read also store the
 mover bytes `+1` and `+0x7c` and call `R0045`; the Medium on "nothing in a setter's callees
 stores progress or phase" is unchanged.
+
+**Amended.** `EXP-0550` reads `R0069` and `R0140` (`AI-559`, High / Medium), `R0167` (`AI-555`, High / Medium) and the two virtuals inside `R0046` (`AI-557`, `AI-558`, High / Medium): High for the instructions of the bodies read, Medium for the class population of the virtuals and for unread utility callees. The callees of `R0010`, the group routines `R0196`, `R0152`, `R0198` and the resolver `R0195` stay unread.
 
 ### AI-488
 
@@ -4667,6 +4680,8 @@ bodies of `L14707` and `R0967` (window `x07`, `R0967..L07402`, is committed and 
 examined here); the 14 dword stores at `+0x134`, each settled by a window from the routine's
 entry to the store that names the base's source.
 
+**Amended.** `EXP-0550` reads the segments of the dword stores at `+0x134` (`AI-563`). `AI-503` listed 13 segments; with the writers `L14707` (store `L14709`) and `R0967` there are 15. Thirteen of them (12 of the listed ones, among them the stack local `L14717`, and `L14707`) write another class, a buffer or a stack local; `L14718` and `R0967` stay unidentified. The actor constructor is `R0185` (`AI-FLIER-073`). The unknown about the 14 dword stores narrows to those two segments.
+
 ### AI-509
 
 The step bodies read at progress 3 hold no order-record operand (High). That no order kind
@@ -4825,6 +4840,8 @@ Medium for completeness of the list of callees' stores: `R0179`, `R0056`, `R0126
 `R0028`, `R0032`, `R0021` and the list helpers are not read.
 
 **Unknown.** Whether those helpers write the order record.
+
+**Amended.** `EXP-0550` reads `R0021` (`AI-553`, High / Medium): it stores list fields only, no order record, in its own instructions. `R0179` is the rand read whole in `AI-554` (High / Medium). `R0056`, `R0126`, `R0028`, `R0032` and the list helpers stay unread; the Unknown stands for them.
 
 ### AI-512
 
@@ -5026,6 +5043,8 @@ which `AI-487` lists among the setters' unread callees and no window of this exp
 **Unknown.** The bodies of `R0476`, `R0115`, `R0051`, `R0167`, `R0069`, `R0140` and
 the virtuals named. The member routines of opcodes 0x1b and 0x1d are `AI-501` and `AI-515`.
 
+**Amended.** `EXP-0550` reads the remaining callees of the five setter windows and the member reset: `R0068`, `R0040`, `R0019`, the scorer `R0225` with `R0167`, `R0051`, `R0115` and the virtual targets (`AI-555`, `AI-557`, `AI-559`, `AI-560`); `R0069` and `R0140` are not called from these windows. The bounded form is: for the 20 vtables of `AI-557` the five setters and `R0007` store the set listed. The grade is Medium: the class population of the virtuals and the release's own body (`AI-558`) are Medium.
+
 ### AI-528
 
 The setters' stores (`AI-527`) touch the mover words the step bodies read or write (`MOVE-148`) only at
@@ -5091,6 +5110,8 @@ stores and {8, 5, 6, 0xb, 0, 9, 1} through the helpers.
 **Unknown.** The bodies named. Whether `L14677` (no rel32 caller; its body stores pending 0 with
 `ord+0x50` := 1 and calls `R0306`) is reached through a table.
 
+**Amended.** `EXP-0550` reads `R0021`, `R0460`, `R0393`, `R0036`, `R0051`, `R0115` whole (`AI-553`..`AI-556`): none adds a pending kind in its own instructions; `R0393` stores `ord+0x60` := 1 before `R0018`, and `MAGIC-AI-012` had read it whole. The set stays Medium for the reasons in `AI-556`, not for unread callees of these six.
+
 ### AI-530
 
 State 0xa runs `R0159`: pending 0, then `R0137`, then pending 1 and the next waypoint only if the
@@ -5119,6 +5140,8 @@ unread; rel32 call graph only).
 
 **Unknown.** As `AI-529`.
 
+**Amended.** `EXP-0550` reads `R0036`, `R0051` and `R0115` whole (`AI-555`); `R0021` and `R0460` (`AI-553`) store no pending kind. The set stays Medium for the reasons in `AI-556`.
+
 ### AI-531
 
 `R0046` (`h6`, whole, `R0046L14906`) pushes and pops `ebx` and writes only bytes of the
@@ -5131,6 +5154,8 @@ dwords of two records and returns `sete al`; it has no store and no `ebx`.
 nothing else: the virtuals are unread.
 
 **Unknown.** The two virtuals.
+
+**Amended.** `EXP-0550` resolves the two virtual calls of `R0046` (`AI-557`) and reads the loop that clears the flag bits (`AI-558`): the virtuals store nothing for the 20 vtables of `AI-557`; the Medium narrows to the class population.
 
 ### AI-532
 
@@ -5188,6 +5213,8 @@ and RVA-form dwords were not scanned, and a computed call is outside any scan.
 **Unknown.** Whether any code reaches the five functions; a rel8 scan and an RVA-dword scan would
 settle it.
 
+**Amended.** `EXP-0550` adds rel8 `EB` and `70..7F` sites in `.text` and VA and RVA dwords at every byte offset in all five sections for the five entries and seven block entries, and reads the six functions of `R0042..R0004`: no site reaches an entry (`AI-562`). Medium is kept for computed addresses.
+
 ### AI-534
 
 Progress 1 (`L00092`, action 3) and progress 2 (`L00093`, action 0xd, or 0xe by `ord+0x5c`) both
@@ -5228,16 +5255,106 @@ read (`AI-531`).
 
 **Unknown.** The callers other than `L00117` are not read. The bodies of the two virtuals.
 
+**Amended.** `EXP-0550` reads the two virtuals of `R0046` and its flag loop (`AI-557`, `AI-558`). The bounded form is: for the 20 vtables of `AI-557` the calls of `R0045` store no progress or position word. The grade is Medium: the class population of the virtuals.
+
+### AI-553
+
+`R0021` (`a01`, whole, 142 instructions; thiscall on the manager, arguments actor, candidate list, wanted bit) reads the byte `[manager + 0xa9c4 + owner(candidate) + 50 * owner(actor)]` (owner is the word `[[x+0x14]+4]`), masks bit 0 and compares it with the wanted bit; an equal bit marks the candidate for removal (`L00215..L14931`). When the bits differ and bit 15 of `[candidate+0x144]` is set, the candidate is marked unless one member of the list `[actor+0x70]` has a `R0036` distance not above the byte at `+0x71` of that member's order record (`L00219..L14932`). A marked candidate is unlinked: the stores are the list's own fields (`list+8`, `+0xc`, `+0x10`, `+0x14`, `+0x18`), the two neighbouring node links and, when the list empties, a call of `R1355`, which walks the node chain and calls `R0525` for it (`L00218..L14933`; `e11`, whole; "frees" is a label by that call's use, the callee is unread). `R0460` (`a02`, whole, 99 instructions; arguments actor, candidate list) acts only when `[actor+0x12c]` is below 2: each candidate whose virtual `[vt+0x20]` returns 3 is unlinked with the same list stores (`L14934..L14935`). The virtual targets are in `AI-557`. Neither body stores through the actor, an order record or a mover in its own instructions; neither stores a pending kind.
+
+**Confidence.** High for the instructions of the bodies read (`a01`, `a02`, `e11`). Medium that no virtual or unread utility callee stores: `R0021` calls `R0036` (its virtual `[vt+0x1c]`), `R0460` calls the virtual `[vt+0x20]` (`L14936`), both bounded by the 20 vtables of `AI-557`, and `R0525` is unread. The relation byte beyond bit 0 is inherited from `AI-FILTER-001`.
+
+**Unknown.** `R0525`; the classes of the 220 other anchor positions (`AI-557`).
+
+### AI-554
+
+`R0393` (`a03`, whole, 142 instructions; thiscall on the manager, arguments actor, target). If word `[actor+0x88]` exceeds 0x3b and `rand() * 100 / [manager+0]` is below 0x1e it calls `R0009(actor, target)` and returns 0 (`L01768..L05143`). Otherwise it walks spell ids 1..28 (`L14937..L14938`): the record `R0017(id)` on the book `[actor+0x140]` qualifies when its word `+0xc` is not above the word `[actor+0x9a]` and its byte `+0xa` is zero; qualifying records go into a stack list (`R2213`). It draws an index `rand() * count / [manager+0]`. A drawn record is passed to `R0018(actor, target, record)` after `[actor+0x158]+0x60` := 1 (`L06138`), and the routine returns 1. With an empty list `ebp` (head) and `edi` (count) are 0 and `L14939..L05148` jumps to `L05149`, which tests `esi`, the record the last `R0017` call returned (id 28, `L14940`; unfiltered by the mana and flag tests, preserved by `R0179`): a nonzero `esi` falls to `L14941..L14942` (`[actor+0x158]+0x60` := 1, `R0018`, return 1), and the routine returns 0 with no order store (`L14943`) only when the book holds no id 28. The routine's own order store is `ord+0x60` := 1; the pending kind left is that of `R0009` (`AI-520`, `AI-529`) or pending 8 from `R0018` (`AI-529`). `rand()` is `R0179` (`e12`, whole): seed `[ptd+0x14]` := seed * 0x343fd + 0x269ec3, result `(seed >> 16) & 0x7fff`, the seed in the per-thread block `R0228` returns (unread). `MAGIC-AI-012` (High) reads the same routine whole: the walk of ids 1 to 0x1c, the `Defensive` and mana filters, the divisor `[manager+0]` = 0x8000 (30 in 100 and a uniform draw) and the direct `R0018` call at `L05147`; `MAGIC-221` (High) places `R0018` as the shared cast-order writer. This card adds the listing-level order of the stores and the calls `R2214` (`L14944`) and `R2213` (`L14945`).
+
+**Confidence.** High for the instructions of the body and the windows `e12`..`e15`. The meaning of word `+0x88`, the divisor `[manager+0]` and the spell record fields `+0xa` (`Defensive`) and `+0xc` (mana cost) are those of `MAGIC-AI-012` (High). Medium that no unread utility callee stores (`R0747`, `R0228`; the allocator and the per-thread block are labels by their use).
+
+**Unknown.** `R0228` and `R0747`.
+
+### AI-555
+
+The group-pass and scorer geometry routines are leaf computations (`a04`, `a05`, `a06`, `b02`, `c03`, `z02`, `e01`..`e05`, all whole). `R0036(a, b)` calls the virtual `[vt+0x1c]` of both objects and reads the position record bytes `+0, +1, +4, +5` of `[obj+0x10]`; it returns an edge distance. `R0051(a, b)` takes the centres from `R0862` and `R0863` (the fine position word plus `(size-1) * 128`) and returns a heading byte, eight octants times 0x20. `R0115(x, y)` returns `|x - y|` folded to 0..0x80. `R0167(x, y)` and `R0162(x1, y1, x2, y2)` return the larger of the two byte differences. `R0040` tests that bytes `+4` and `+5` of a position record are both 0x80. `R0019` returns the word at `+2`; `R0165` and `R0166` return the fine X and Y words. None of the bodies writes memory outside its stack frame in its own instructions; `R0036` (`L14946`, `L14947`) and the centre getters `R0862` and `R0863` (`e01`, `e02`) call virtuals, bounded by the 20 vtables of `AI-557`. The virtual targets are in `AI-557`; the return formulas are those of `AI-444`, `AI-COST-071` and `AI-ACQUIRE-002`.
+
+**Confidence.** High for the instructions of the bodies read (the operand lists and the absence of stores in them; one image, one witness). Medium that no virtual callee stores (bounded form: the 20 vtables of `AI-557`).
+
+**Unknown.** The exact return formula of `R0036` beyond its operands.
+
+### AI-556
+
+The callees `R0021`, `R0460`, `R0393`, `R0036`, `R0051` and `R0115` are read whole (`AI-553`, `AI-554`, `AI-555`). `R0393` is the only one that reaches an order store: `ord+0x60` := 1 and the callees `R0009` and `R0018`, whose pending kinds are in `AI-529`. The other five store no pending kind. The sets of `AI-529` (state 8: 4, 1 itself; 8, 5, 6, 0xb, 0, 9, 1 through helpers) and `AI-530` (states 0xa and 0xc: 1, 5, 6, 0xb, 0, 8) take no new member.
+
+**Confidence.** High for the instructions of the six bodies, which add no kind. Medium that no virtual or unread utility callee stores a kind (the virtuals are bounded by the 20 vtables of `AI-557`), and Medium for the sets: the helper bodies read in `EXP-0548` were not re-read, their indirect calls were not enumerated, and the CRT and collection utilities `R0747`, `R0525`, `R0228` stay unread.
+
+**Unknown.** As in `AI-529`: whether `L14677` is reached through a table.
+
+### AI-557
+
+The table read `t10` (`L13147..L14948`, both roots equal) and the vtable scan (`vtscan.tsv`: aligned dwords of `.rdata` and `.data`, anchor `R0531`, `L04402` at slots 3 and 4; 240 positions, not all vtables) list three vtables with slot `+0x14` = `R0654` (`L00001`, `L00002`, `L00003`; the actor classes of `MAGIC-316`) whose slots `+0x1c` and `+0x20` are `R0256` and `R1344`, and 17 vtables whose slots are `R1827` and `R1828`. `R0256` returns byte `[this+0x49]` and `R1344` byte `[this+0x4a]` (`f03`, `f04`); `R1827` returns 1 and `R1828` returns 0 (`f01`, `f02`). The first is read as the footprint side and the second as the domain byte (`AI-FLIER-073`: actor bytes `+0x49` and `+0x4a`, domain 3 a flier) that `R0460` compares with 3 and `R0046` with 1, 2 and 3. None of the four bodies has a store. The virtual `[vt+0x2c]` of the event routine (`L04905`, `L14949`) is not read.
+
+**Confidence.** High for the four bodies. Medium that every object the callers pass belongs to one of these 20 vtables: 220 anchor positions carry other slot 7 and 8 pairs and a class whose vtable lacks the anchor is not excluded.
+
+**Unknown.** The classes of the other 220 anchor positions.
+
+### AI-558
+
+`R0046` (`b06`, whole, 148 instructions; thiscall on the manager, arguments unit and cell word): `[vt+0x1c]` is the loop bound n, `[vt+0x20]` the domain d. Domain 0 returns at once (`L14950..L14951`). Domain 3 runs the loop of `L14952..L14953`, domains 1 and 2 the loop of `L14954..L14955`; each visited cell that fails the rectangle compares (`L14956..L14957`, `L14958..L14959`) gets `and 0x7f` (`L07013`) or `and 0xbf` (`L07014`) on the byte `[manager + cell + 0x20000]`. The virtual targets are in `AI-557`. With the stores of `R0045` (`AI-527`: words 0 to mover `+0x80`, `+0xa6`, `+0x76`), the release stores exactly those mover words and the flag bytes. The absence of a progress or position store in `R0044` (`AI-535`) and in the setters through the release follows for the 20 vtables of `AI-557`.
+
+**Confidence.** High for the stores and the virtual bodies. Medium that every object reaches only the 20 vtables of `AI-557`; the compares that exempt cells are read as operand order, not interpreted.
+
+**Unknown.** Which cells the exempting compares cover.
+
+### AI-559
+
+`R0476(i)` returns `[this+4] + 4*i` through `L09150` (`b01`, `e06`, whole) and stores nothing. `R0069(&cursor)` (`b03`, whole) stores `[cursor] := [[cursor]]` and returns the old node plus 8: a list step that writes the caller's cursor variable only. `R0140(group)` (`b04`, whole, 139 instructions) averages the member positions (`R0165` and `R0166` of `[member+0x10]`), stores the centroid dword `[grp+0x3c]+0x24` and word `+0x28`, then the largest member distance (`R0019`, `R0167`) as byte `+0x2a` and bytes `+0x2b`, `+0x2c` from locals, and returns the centroid; it stores nothing in a member's order record, mover or actor. The setter windows `s14`, `s18`, `s19`, `s1e`, `s1f`, `r00` and `c1f` call, besides `R0225` (`AI-560`), only `R0068` (`z01`, whole: a list find, no store), `R0007`, `R0019`, `R0040`, `R0045` and `R0476` (at `L14960`; the cell check `L13144` compares `[elem] == 2` and stores nothing). The call scan `calls-run7.tsv` (rel32 and `0F 8x`, `.text`) finds `R0069` at 16 sites, `R0140` at 7 (`L14961`, `L14962`, `L14963`, `L14964`, `L14965`, `L14966`, `L00451`) and `R0476` at 182.
+
+**Confidence.** High for the three bodies and the setter call lists. "Centroid" and "spread" (`names.tsv`) are labels for the average member position and the largest member distance, not read meanings. Medium for what the cursor variable of `R0069` is at its 16 sites and for what its callers do with the centroid (callers not read).
+
+**Unknown.** The callers' windows.
+
+### AI-560
+
+`R0225` (`b05`, whole, 116 instructions; arguments actor, victim) and `R0252` (`b07`, whole, 104 instructions) compute the cell distance `R0167` of the two `R0019` words, read the reach byte `+0x12c` of both objects, the virtual `[vt+0x20]` (and `[vt+0x1c]` in `R0225`), the heading `R0051` against the first byte of the actor's mover (`[actor+0x154]`) through `R0115`, and the matrix byte at `[manager + 0xb94 + ...]`. `R0225` returns `(distance << 8) + turn cost`, scaled by the matrix byte (0 returns 0xffffff), adjusted when `[vt+0x1c]` is below 2 and word `+0x88` is at least 0xf, and raised by 0x7f (minimum 1) when `[victim+0x144]` has bit 0x100000. `R0252` returns 0xffffff when the distance term after the reach adjustment exceeds 1 (`L00793..L14967`), scales by the matrix byte (0 gives 0xffffff, 1 doubles, 4 halves) and otherwise returns `(distance << 8) + turn cost`. Neither body has a store outside its frame, an order store or a mover store in its own instructions. The virtual targets are in `AI-557`.
+
+**Confidence.** High for the instructions of the bodies read (the absence of stores in them, the operands and the 0xffffff exits). Medium that no virtual or unread utility callee stores: `R0225` calls virtuals at four sites and `R0252` at two, bounded by the 20 vtables of `AI-557`. The meaning of the matrix and of word `+0x88` is that of `AI-REACH-072`, `AI-FLIER-073` and `MAGIC-AI-012`.
+
+**Unknown.** The matrix contents.
+
+### AI-561
+
+`R0549(attacker)` (`c01`, whole) tests the reach byte `[attacker+0x12c]`: above 1 it calls `R1064` (`e08`, whole), else `R0622(attacker, sector, delay, 0x71)` (`e09`, whole), both on the object `L00522`, with sector `R2131([attacker+0x154])` (`(byte0 + 8) >> 4`, `e07`) and delay `byte [attacker+0x134] + byte [attacker+0x135]`. Both fill a static event record (event byte 0x72, or the fourth argument and 0x6b when zero; actor word `+4`, target word, sector, delay), store the dword `actor+0x138` := `[[L00285]+4] + delay` (`L02469`, `L02470`) and pass the record to `R1661` (`f07`, whole), which sends it to every recipient, an object of the list `[L00380]` whose byte `+0x3f` is set (`L09285`, `f10`) through `R0675` (`f05`) and `R0217` (`f06`). `R0547` returns `clock[+4] - [this+0x138]` (`f08`). `R0561(target)` (`c02`) calls `R0562` (`e10`, whole, 252 instructions) with source 0 and event 0x73: for each recipient and an actor target the routine fills the static record at `L14968` (event, recipient word, target word `+4`, health word `+0x94`) and calls `R0217`; for other targets it builds events 0x7a and 0x82 and ors the source word `+0x2c` into the target's word `+0x18` (`L14969`, `L14970`). Callers (`calls-run7.tsv`): `R0549` at `L02725` only; `R0561` at `L02654`, `L03108`, `L02979`, `L03110`, `L03109`. `R0561` therefore stores the event record and, for a non-actor target, `0xffff` (source 0) into the target's word `+0x18`; whether that word is an order or mover word of the target is not read (the 0x82 arm is the Building arm of `UNIT-STRUCTCONT-078`). In the actor path of the bodies read neither release stores a pending kind, progress, an order word or a mover word. "Event record" and "source" are this card's labels; the ledger (`UNIT-STRUCTCONT-078`) calls the second argument of `R0562` the recipient and the first byte of the record the message tag.
+
+**Confidence.** High for the bodies named. Medium for the whole: the delivery tail (`L02443`, `R0611`, `R0676`, `R0059`, `L08057`, `L13194`, `R2215`, `L13193`, the recipient list routines `R2075` read and `R2216` read with its callees `R2217`, `R2218`, `R2219`, `R2220`, `R2221`, `R2222`..`L01801` unread) is unread.
+
+**Unknown.** The delivery tail.
+
+### AI-562
+
+Window `g01` (`R0042..R0004`, 516 instructions) shows six functions separated by `nop` padding: `R0042` (called from the executor, `AI-533`) and the five, `L13263`, `L14680`, `L14681`, `L14742` and `L14682`. Each takes the actor and ends in `ret 4` or `ret 8`. They are shaped like executor rows: `L13263` tests the gate `R0041` and stores progress 1, `ord+0x15` := 0, `actor+0x54` := 3, `actor+0x5c` := `ord+0xc`, else approaches through `R0043`; `L14680` compares the cell with `ord+0xa` and stores `actor+0x54` := 2 or, on the second pass, 0 with `ord+8` := 0; `L14681` stores progress 2, `actor+0x54` := 0xd and runs the member reset `R0007` twice; `L14742` (gate `R0086`) does the same with `actor+0x54` := 0xe; `L14682` (gate `R0086`) stores `actor+0x54` := 0xf and, on the second pass, the reset sequence. Scans, 12 targets (the five entries and the block entries `L14786`, `L14787`, `L14788`, `L14789`, `L14790`, `L14791`, `L14792`): rel8 `EB` and `70..7F` in `.text` (`rel8.tsv`) 8 hits, all between `L14971` and `L14972`, inside the five bodies, on block entries and on no function entry; VA and RVA dwords at every byte offset in `.text`, `.rdata`, `.data`, `.idata`, `.rsrc` (`dwords2.tsv`): none; with `AI-533` (rel32 `E8` and `E9`, `0F 8x`): no site. The preceding function ends in `ret` and padding, so no fall-through reaches an entry. This amends `AI-533`.
+
+**Confidence.** High for the bodies and the scans listed. Medium that the five are unreachable: a computed address (an offset table from a base, an address built by arithmetic) is outside every scan, and the indirect `jmp` and `call` sites of `.text` were not enumerated.
+
+**Unknown.** Whether a computed call forms an entry address.
+
+### AI-563
+
+Windows `h01`..`h15`, `x01`..`x03` and `y01` classify the stores of `AI-503`. `R0391` (constructor, class vtable `L03067`: `[this+0x134]` := 0), `R1821` (`[this+0x134]` incremented as the count of a container at `this+0x120`), `R0379` (`[this+0x134]` := 0 at `L14973`, through the register loaded from the local `[ebp-0x5c0]` at `L14974`, `h03` plus `x01`; the object has a sub-object at `+0x80`), `R2210` and `R2170` (a five-dword array at `this+0x10c` and a selected index at `+0x134`), `R1870` (the same index in the object `[this+0x7c]`), `R1556` (`[this+0x134]` := 0 beside `+0x130`), `L03685` (two `+0x134` stores, `L14975` and `L14976`, each an allocated block of count * 16 bytes and each followed by a `+0x138` store, `L14977` and `L14978`, the count), `L12192`, `R0602` and `L14719` (constructors of the class with vtable `L11548`), `L14717` (a stack local at `[esp+0x134]`) and `L14709` (a constructor of vtable `L14979`, `x03`; the routine `L14707` itself is 15 instructions long). `L14718` zeroes the dwords `+0x12c`, `+0x130`, `+0x134`, `+0x138` of an element and is called at `L14980`, `L14981`, `L14982` in an array construction loop (`y01`); the class is unidentified. `R0967` (`L08247`; `h15`, whole) has an SEH frame, builds collections at `+0x30` and `+0x44`, stores 0 into the globals `[L00004]`, `[L00240]`, `[L00380]`, `[L04624]` (`L07318..L07320`; `UNIT-REGEN-130` names `[L00240]` the on-map list manager), stores 0 into `[this]`, allocates 0x190 bytes into `+0x118`, stores dword 0 at `+0x120..+0x134` and zero at `+0x154` and `+0x158`, and stores no actor vtable; the function is unidentified. The actor constructor is `R0185` (`AI-503`, `AI-FLIER-073`). None of the windows stores an actor vtable (`L00001`, `L00002`, `L00003`).
+
+**Confidence.** High for the operand reads in the bodies. Medium for the class of the eight non-constructor methods (read from their field neighbours, callers not read). `R0967` and `L14718` are unidentified.
+
+**Unknown.** The element class of `L14718`; the class of `R0967`, which may be a constructor of the actor class (it zeroes `+0x154` and `+0x158`, displacements the census used to select segments, `MAGIC-316`), though the read supports no such identity, and its caller `L07364`, unread; the callers of the methods named.
+
 ## What a unit does by itself when it sees an enemy
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-517 | Of 37 call sites of `R0008`, `R0022`, `R0009` (7 unplaced), the group order byte selects the routine through table `L00303` (High); that no other path acts is Medium. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
-| AI-518 | Standing acquisition `R0022` stores pending 6, target and reach and no progress, phase, action or completion; its candidate set is the sight stamp, reach caps the pick; with no pick a human owner's unit runs the heal arm. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-518 | Standing acquisition `R0022` stores pending 6, target and reach and no progress, phase, action or completion; its candidate set is the sight stamp, reach caps the pick; with no pick a human owner's unit runs the heal arm. | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-519 | The group pass of order 4 (Move) re-issues the move for a member that has not arrived and runs no acquisition before arrival or route end; the tail path (`AI-524`) is open (Medium). | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
-| AI-520 | Group orders 1 and 3 give a member that has a scored victim an engage (pending 5, stop distance = reach); without one, order 1 walks the member to its post and order 3 stores nothing that walks. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-520 | Group orders 1 and 3 give a member that has a scored victim an engage (pending 5, stop distance = reach); without one, order 1 walks the member to its post and order 3 stores nothing that walks. | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-521 | The unit's own state arm (group order 0) maps the player-order states to engage, acquire, re-issue or cast arms; a victim whose action word is 0x10 sends state 3 to state 0xc and acquisition in the same call. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
-| AI-522 | An auto-started strike or shot begins only at executor progress 0 behind a gate that needs exact facing and reach; the action body then counts a wind-up and releases with no facing or mover access and a reach test only. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-522 | An auto-started strike or shot begins only at executor progress 0 behind a gate that needs exact facing and reach; the action body then counts a wind-up and releases with no facing or mover access and a reach test only. | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-523 | The hit hook `R0226` stores the turn flag, the attacker's cell and the diplomacy flip and no pending kind or target; the hit routine body, two callers and the readers of `actor+0x40` are unread (Medium). | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-524 | The executor tail reacquires through `R0004` for every command state except 1, 0xa and 0x17 when the mover raises `+0x98`; a pick in position starts the strike in that same pass. | Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-525 | The guard evaluator `R0137` engages a hostile found near the post without an order, walks an actor off its post back to it, and runs standing acquisition on the post; state `0xb` is the construction value. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
@@ -5319,6 +5436,8 @@ in this experiment (`AI-ACQUIRE-002`, `AI-SIGHT-006`, `AI-FILTER-001` read most 
 **Unknown.** The callees above; `ord+0x58` for a human participant is never stamped (read), what else
 reads it.
 
+**Amended.** `EXP-0550` reads `R0036`, `R0051` and `R0115` (`AI-555`, High / Medium), `R0021` (`AI-553`, High / Medium) and `R0046` with its virtuals (`AI-557`, `AI-558`, High / Medium). `R0145`, `R0135`, `R0032` and the list iterators `005181xx` stay unread; the Unknown stands for them.
+
 ### AI-519
 
 The order-4 arm `R0154(group, cell)` recomputes the notice radius (`L14829`..`L00451`), then per
@@ -5396,6 +5515,8 @@ order 2, which no player command stores (`AI-487`).
 
 **Unknown.** The cost routines.
 
+**Amended.** `EXP-0550` reads the cost routines `R0225` and `R0252` (`AI-560`, High / Medium) and `R0167` (`AI-555`, High / Medium): they store only in their frames in their own instructions, and `R0252` returns 0xffffff beyond reach. `R0141`, `R0110` and `R0177` stay unread; the Unknown on them stands.
+
 ### AI-521
 
 The per-actor arm `R0008` (window `b02`, table `t01`) first stands a state 3 member down when its victim's
@@ -5462,6 +5583,8 @@ centre (`AI-499`), and no mover writer other than the step and turn routines was
 calls `L13251`, `L13252` and `L13253` of the action body and the callees `R0549`, `R0561` (`AI-408`).
 
 **Unknown.** The callees of the release (`R0549`, `R0561`); mover writers outside the step and turn.
+
+**Amended.** `EXP-0550` reads the release `R0549` and the strike's `R0561` (`AI-561`): `R0549` stores `actor+0x138` and a static event record; `R0561` stores an event record and, for a non-actor target, the or-ed word `+0x18` of the target. In the actor path of the bodies read neither stores a pending kind, progress, an order word or a mover word; whether the word `+0x18` of the non-actor target is one is not read. Their delivery callees stay unread (Medium).
 
 ### AI-523
 

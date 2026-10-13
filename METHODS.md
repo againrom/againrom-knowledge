@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3742. Observation: 99. Static analysis: 3140. Mixed: 503.
+Claims labelled: 3754. Observation: 99. Static analysis: 3152. Mixed: 503.
 
 ## Ledger ai
 
@@ -317,30 +317,41 @@ Claims labelled: 3742. Observation: 99. Static analysis: 3140. Mixed: 503.
 | AI-500 | static analysis | ✔ promoted (branch candidate) |
 | AI-501 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-502 | static analysis | ✔ promoted (branch candidate) |
-| AI-503 | static analysis | ✔ promoted (branch candidate) |
+| AI-503 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-509 | static analysis | ✔ promoted (branch candidate) |
 | AI-510 | static analysis | ✔ promoted (branch candidate) |
-| AI-511 | static analysis | ✔ promoted (branch candidate) |
+| AI-511 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-512 | static analysis | ✔ promoted (branch candidate) |
 | AI-513 | static analysis | ✔ promoted (branch candidate) |
 | AI-514 | static analysis | ✔ promoted (branch candidate) |
 | AI-515 | static analysis | ✔ promoted (branch candidate) |
 | AI-516 | static analysis | ✔ promoted (branch candidate) |
-| AI-527 | static analysis | ✔ promoted (branch candidate) |
+| AI-527 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-528 | static analysis | ✔ promoted (branch candidate) |
-| AI-529 | static analysis | ✔ promoted (branch candidate) |
-| AI-530 | static analysis | ✔ promoted (branch candidate) |
-| AI-531 | static analysis | ✔ promoted (branch candidate) |
+| AI-529 | static analysis | ✔ promoted (branch candidate, amended) |
+| AI-530 | static analysis | ✔ promoted (branch candidate, amended) |
+| AI-531 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-532 | static analysis | ✔ promoted (branch candidate) |
-| AI-533 | static analysis | ✔ promoted (branch candidate) |
+| AI-533 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-534 | static analysis | ✔ promoted (branch candidate) |
-| AI-535 | static analysis | ✔ promoted (branch candidate) |
+| AI-535 | static analysis | ✔ promoted (branch candidate, amended) |
+| AI-553 | static analysis | ✔ promoted (branch candidate) |
+| AI-554 | static analysis | ✔ promoted (branch candidate) |
+| AI-555 | static analysis | ✔ promoted (branch candidate) |
+| AI-556 | static analysis | ✔ promoted (branch candidate) |
+| AI-557 | static analysis | ✔ promoted (branch candidate) |
+| AI-558 | static analysis | ✔ promoted (branch candidate) |
+| AI-559 | static analysis | ✔ promoted (branch candidate) |
+| AI-560 | static analysis | ✔ promoted (branch candidate) |
+| AI-561 | static analysis | ✔ promoted (branch candidate) |
+| AI-562 | static analysis | ✔ promoted (branch candidate) |
+| AI-563 | static analysis | ✔ promoted (branch candidate) |
 | AI-517 | static analysis | ● active |
-| AI-518 | static analysis | ● active |
+| AI-518 | static analysis | ● active (amended) |
 | AI-519 | static analysis | ● active |
-| AI-520 | static analysis | ● active |
+| AI-520 | static analysis | ● active (amended) |
 | AI-521 | static analysis | ● active |
-| AI-522 | static analysis | ● active |
+| AI-522 | static analysis | ● active (amended) |
 | AI-523 | static analysis | ● active |
 | AI-524 | static analysis | ● active |
 | AI-525 | static analysis | ● active |
@@ -1174,11 +1185,12 @@ Claims labelled: 3742. Observation: 99. Static analysis: 3140. Mixed: 503.
 | MAGIC-310 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-311 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-312 | static analysis | ✔ promoted (branch candidate) |
-| MAGIC-316 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-316 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-317 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-318 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-323 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-324 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-328 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-320 | static analysis | ● active |
 | MAGIC-321 | static analysis | ● active |
 | MAGIC-322 | static analysis | ● active |
