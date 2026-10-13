@@ -343,15 +343,15 @@ The block comes from the CRT small-block heap, which does not clear it (the
 threshold value is the image's; a runtime store through an indirect call is not
 excluded), and the writer saves all 64 and 512 bytes unchanged, so they can
 carry heap residue. High that no store clears the text region; Medium for the
-name tail (the copy `R0260` is not read) and for a session's bytes being
+name tail (the copy `R0260` is read except its tail) and for a session's bytes being
 non-zero. In the shipped maps the bytes after the first NUL of the name are
 non-zero in 29 of 38 EN and 29 of 34 RU maps; that is a shipped-file
-observation, not the editor's output. — ALM-NEWMAP-236, ALM-NEWMAP-257
+observation, not the editor's output. — ALM-NEWMAP-236, ALM-NEWMAP-257, ALM-SAVE-263
 
 The new map has two players, `Self` and `Enemy`. A player record is 76 bytes:
 `+0x08` (1, then 2), `+0x30` (0, then 1), `+0x0c` (0, 0), the 32-byte name
-(bytes after its NUL not stored by the copy, Medium: the copy is not read) and sixteen 2-byte words (player 1:
-2 then fifteen 1; player 2: 1, 2, then fourteen 1). — ALM-NEWMAP-258
+(bytes after its NUL not stored by the copy, Medium: the copy's tail is unread) and sixteen 2-byte words (player 1:
+2 then fifteen 1; player 2: 1, 2, then fourteen 1). — ALM-NEWMAP-258, ALM-SAVE-263
 
 The height tool is separate from terrain painting. A drag sets the anchor
 cell's height to the vertical drag in pixels added to the anchor height,

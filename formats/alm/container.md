@@ -254,8 +254,31 @@ A save can also change records of a loaded map:
   entry meets the predicate (0 of 792 EN and 334 RU). — ALM-SAVE-254
 - On load, a type-9 entry with `+8` and `+0xc` non-zero and the word `+0x10`
   equal to 4 is dropped when `L15129` returns 0; whether it does for any of
-  the 206 EN and 60 RU installed entries meeting the condition is Unknown. —
-  ALM-SAVE-253
+  the 206 EN and 60 RU installed entries meeting the condition is bounded: the
+  helper keeps an entry only if an object exists whose rectangle holds the cell
+  and whose key is non-zero. 48 EN and 11 RU entries sit on a type-4 record's
+  cell, but none is proved kept (the reader may have made no object for the
+  record, its key may be 0, its footprint is unread); 158 EN and 49 RU stay
+  undecided because the footprint tables are filled at runtime; none is proved
+  dropped. — ALM-SAVE-253, ALM-SAVE-260
+- A type-4 record is 20 bytes, or 28 when its dword at `+8` is `0x21`. The
+  reader creates no structure for a cell of 7 or less or beyond the map bounds,
+  and stores a position of `256 * cell + 0x80`. All 71 installed type-4
+  payloads parse exactly this way. — ALM-SAVE-262
+- The owner lookup at save returns the first object whose word at `+4` equals
+  the loot owner, including 0; no installed unit has id 0 and no plain type-4
+  record has wire id 0 (a type-4 object's id is inferred from that wire id), so
+  the 137 EN and 133 RU owner-0 loot are Medium. — ALM-SAVE-261
+- The reader stores a loaded player's `+4`, `+8`, `+0xc`, `+0x10`, `+0x30` and
+  first 16 words from the wire; the array count 0x20, the vtables and the 16
+  words after the first 16 are constructor values, and whether the writer's
+  emission depends on them is Unknown. The block copy takes its backward path
+  when the destination lies inside the source range; its byte tails are unread
+  (Medium). Five rel32 call sites of the caster removal exist (the writer and
+  four loops that compare a type-9 entry's `+0x12` with an object's `+4` or walk
+  a loot's dword array, Medium); no pointer-table caller search was run. A name
+  listing for `Map Editor*` and `*edit*` to depth 2 finds no map editor program
+  in the RU root. — ALM-SAVE-263, ALM-SAVE-264
 - Every action node, condition node and trigger of type 7 is requested whole
   from the same offsets by the reader and the writer, so a load and save without
   an edit writes them unchanged (High for the instruction pairs, Medium end to
