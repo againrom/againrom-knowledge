@@ -337,21 +337,33 @@ The new map's type-0 payload, as the writer emits it:
 | +0x74 | 1 |
 | +0x78 | first byte 0 |
 
-The name's tail and `+0x79..+0x277`, which hold the rest of the description
-and the seven text slots, are written by no store on the paths read; their
-content is Unknown. — ALM-NEWMAP-236
+The 48 bytes after the name's NUL and the 511 bytes after the first text byte,
+which hold the seven text slots, are written by no store in the creation path.
+The block comes from the CRT small-block heap, which does not clear it (the
+threshold value is the image's; a runtime store through an indirect call is not
+excluded), and the writer saves all 64 and 512 bytes unchanged, so they can
+carry heap residue. High that no store clears the text region; Medium for the
+name tail (the copy `R0260` is not read) and for a session's bytes being
+non-zero. In the shipped maps the bytes after the first NUL of the name are
+non-zero in 29 of 38 EN and 29 of 34 RU maps; that is a shipped-file
+observation, not the editor's output. — ALM-NEWMAP-236, ALM-NEWMAP-257
+
+The new map has two players, `Self` and `Enemy`. A player record is 76 bytes:
+`+0x08` (1, then 2), `+0x30` (0, then 1), `+0x0c` (0, 0), the 32-byte name
+(bytes after its NUL not stored by the copy, Medium: the copy is not read) and sixteen 2-byte words (player 1:
+2 then fifteen 1; player 2: 1, 2, then fourteen 1). — ALM-NEWMAP-258
 
 The height tool is separate from terrain painting. A drag sets the anchor
 cell's height to the vertical drag in pixels added to the anchor height,
 clamped to 0..127 (High); the anchor height is read after the plane is restored
 from the undo copy by a block copy whose tails are unread (Medium). The height spreads over a
 radius of the horizontal drag divided by 32, at least 1, with a cosine
-fall-off (the square-root and cosine wrappers are identified, their returned values
-are Medium): a cell at distance `d` in the ring `(k-1)^2 < d^2 <= k^2` becomes its
+fall-off (the square-root and cosine wrappers apply the FPU's `FSQRT` and `FCOS` to the
+finite operand on their normal path; the control word at entry is not observed, and the bound of the cosine argument is Medium): a cell at distance `d` in the ring `(k-1)^2 < d^2 <= k^2` becomes its
 height plus the difference to the anchor times `cos(d * 3.1415926 / (2R))`,
 truncated. In the cells nearer the anchor's column than its row, the step from
 a cell to the cell below it is bounded: lower minus upper is at most 31. Every
-installed height lies in 0..127. — TERR-245, TERR-251
+installed height lies in 0..127. — TERR-245, TERR-251, TERR-254
 
 When a flag at `L14608` is set, a height drag then sets the footprint of each
 object of one class inside the dragged box to the height at the object's origin

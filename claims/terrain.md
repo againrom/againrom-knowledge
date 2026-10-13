@@ -3096,9 +3096,10 @@ one window. Whether the existing-record exit is reachable in play.
 | TERR-248 | The EN editor draws tile variants with the CRT rand (LCG, seed 1; no srand caller in the direct-call scan) in pick L14577, column-major; at least 85% of up to 60 cells match the seed-1 stream in 72 map instances (38 EN, 34 RU). | High / Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
 | TERR-249 | Of 21,810 EN and 16,390 RU palette-centred cells the fixer test did not reproduce, 80 each differ only through the 2x2 transition words; the rest differ at a ring neighbour and stay unexplained. | Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
 | TERR-250 | Five sites store the editor's anchor words L14540/L14541: initialisation, three button-down or drag handlers and the bit-0x2000 arm; the terrain arm stores none (High), so a drag reruns per cell (Medium). | High / Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
-| TERR-251 | The height spread blends h+(anchor-h)*cos(d*3.1415926/2R) in the ring (k-1)^2<d^2<=k^2, truncated to a byte, limits steps to 31; High for the loop, ring, limiter, arithmetic, Medium for the cos and sqrt values. | High / Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-251 | The height spread blends h+(anchor-h)*cos(d*3.1415926/2R) in the ring (k-1)^2<d^2<=k^2, truncated to a byte, limits steps to 31; High for the loop, ring, limiter, arithmetic, Medium for the cos and sqrt values. | High / Medium | ● active (amended) | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
 | TERR-252 | The pair table's 288 of 311 entries fit a per-block 13-entry rule, 11 differ in one word, 12 are zero; 97.6 percent of 998,330 EN on-rule first lookups agree in class; 34 EN entries (32 RU) never do. | Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
 | TERR-253 | With L14608 set, L14609 sets the footprint of each object of one class in the dragged box to its origin cell's height through L15099; the class test L14492 is unread. | Medium | ● active | [EXP-0552](../experiments/EXP-0552-editor-unknowns/) |
+| TERR-254 | The editor's cos and sqrt wrappers L14602 and L14601 load a finite operand with FLD and apply FCOS and FSQRT; their exit returns ST(0) unchanged when the entry control word is 0x27f, so the spread's values are the FPU's. | High / Medium | ● active | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
 
 ### TERR-242
 
@@ -3493,6 +3494,9 @@ exist (192 EN), so other tools or the noise command also write heights.
 **Unknown.** The second spread at radius 2 after the store at `L15100`: its tool and trigger. The
 bodies at `L15124` and `L15125` (the operand loader and the exit of the `FSQRT`/`FCOS` wrappers).
 
+**Amended.** The Medium clause for the cos and sqrt values is settled on the normal path: `L15124` and `L15125` were read (`TERR-254`). The value is the FPU's `FCOS` and `FSQRT` of the operand; the Medium that remains is the control word at entry and the unread branch `L15252`. The Unknown on the two bodies is answered.
+
+
 ### TERR-252
 
 Population: the 311-entry, 11-word pair table at `L14569` read from the image (SHA-256
@@ -3548,3 +3552,31 @@ cell (`L15132`, thunk to `L14592`; `L15133`, thunk to `L14557`, a plain byte sto
 command that sets `[L14608]` are unread.
 
 **Unknown.** Which objects pass the class test; the command at `L15134`.
+
+### TERR-254
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): `L14602`..`L06437`, `L15253`..`L15254`, the spread
+`L14599`..`L14609` and three constants, read statically.
+
+1. Operand. The spread stores `dx*dx + dy*dy` as an integer with `FILD`, passes it as a double on the stack to
+   `L14601` (`L15255`, `L15256`), multiplies the result by the double at `L14604`, divides by `2R` (an integer
+   `FILD`) and passes the quotient to `L14602` (`L15257`, `L15258`). The sqrt operand is a non-negative integer. The cosine argument stays at most
+   `3.1415926 / 2` inside the ring only given the ring test and `R >= 1` of `TERR-251`; the loop head and the ring test were
+   read by call lines here, not line by line (Medium).
+2. Loader `L15124(edx = &double)`: a finite operand (exponent field not `0x7ff`) is loaded with
+   `FLD qword [edx]` and the routine returns with ZF clear; the wrappers' `JE` after `FNSTCW` is then not taken.
+   An infinity or NaN builds an extended value and sets ZF.
+3. `L14602`: when the saved control word is not `0x27f` it loads the constant `0x027f`, then `FCOS`; the status
+   word's C2 bit is clear for an operand below 2^63, so the `FPREM1` loop (modulus the extended constant 2^62 * pi) is
+   not used. `L14601`: `FSQRT` for a non-negative operand (a negative non-zero operand returns the real
+   indefinite). Both then test `[L15259]` and leave through `L15125` (zero) or `L15260`.
+4. Exit. `L15260` restores a control word other than `0x27f` and returns. `L15125` returns at once when the saved
+   control word is `0x27f`; otherwise it restores it, or, when the saved word masks the precision exception and the
+   status word has the precision flag set, calls `L15252` with 8 (a dispatcher that is not read). Neither exit
+   writes ST(0) except through that call.
+
+**Confidence.** High that the normal-path value is the FPU's `FCOS` and `FSQRT` of a finite operand loaded in item 2
+(named instructions). Medium for the bound of the cosine argument (item 1). Medium that it holds in every run: the control word at entry is not observed (no runtime) and
+the `L15252` branch is unread; it is reachable only when the entry control word is not `0x27f`.
+
+**Unknown.** `L15252` and `L15261`; the control word at the spread's entry.

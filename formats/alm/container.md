@@ -231,19 +231,42 @@ A save can also change records of a loaded map:
 
 - A loaded map whose objects were all deleted is written without types 4 and 6.
 - A unit's wire `+0x18` is stored minus 1 on load and written plus 1, so it
-  round-trips; wire `+0x08` and `+0x0a` are widened to signed 32 bits and
+  round-trips when the stored value is below the loot count; otherwise it is
+  stored as -1 and written as 0 (the number of installed units out of range was
+  not measured; ALM-SAVE-255). Wire `+0x08` and `+0x0a` are widened to signed 32 bits and
   written back as 16 bits.
-- A unit whose wire owner matched no player is bound on load to the player at
-  `E+0x3c`, whose identity on a loaded map is Unknown, and is written with that
-  player's id.
-- A loot record whose owner unit is not found raises a message and is moved to
-  unit 1.
-- Type-9 caster-list entries with the three-field predicate (`+8` non-zero, `+4`
-  zero, the 16-bit `+0x16` zero) are passed to the unread helper `L14474` and
-  left out of the size sum; whether the helper deletes the entry is Unknown.
+- A player's id is its record ordinal plus 1 and is not stored in the file. A
+  unit whose wire owner matched no player is bound on load to the first
+  player and is written with owner 1; none of the 12,085 installed units is
+  unmatched. — ALM-SAVE-256
+- A loot record whose owner object is not found raises a message and is moved
+  to unit 1. Its position is written from the owner object, not from the loaded
+  position; the owner is written as 0 for one object class. Of the installed
+  loot (180 EN, 176 RU), 43 records per root have an owner equal to a unit id
+  and the same position as that unit; 137 EN and 133 RU have owner 0, and
+  whether the lookup finds an object for owner 0 is Unknown (Medium: the
+  thunk `L14519` of the owner lookup is not read). A loot referenced
+  by a unit takes that unit's id; a unit's `+0xd6` at or above the loot count is
+  written as 0. — ALM-SAVE-255
+- Type-9 entries with `+8` non-zero, `+4` zero and the 16-bit `+0x16` zero are
+  removed from the list by `L14474` and not written; the entry that moves into
+  the removed slot is written but not added to the record size. No installed
+  entry meets the predicate (0 of 792 EN and 334 RU). — ALM-SAVE-254
+- On load, a type-9 entry with `+8` and `+0xc` non-zero and the word `+0x10`
+  equal to 4 is dropped when `L15129` returns 0; whether it does for any of
+  the 206 EN and 60 RU installed entries meeting the condition is Unknown. —
+  ALM-SAVE-253
+- Every action node, condition node and trigger of type 7 is requested whole
+  from the same offsets by the reader and the writer, so a load and save without
+  an edit writes them unchanged (High for the instruction pairs, Medium end to
+  end). — ALM-SAVE-252
+- The writer `L02295` stores the file version word 990 whatever the loaded
+  version. — ALM-SAVE-255
 
-The first two are High; the last three rest on helpers that were not read and
-are Medium. — ALM-SAVE-239
+The first two are High. The statements on players, loot and type-9 entries are
+High for the reader and writer instructions read and Medium for code outside
+the windows read. The body of the virtual read primitive behind the node reads
+and any other writer of a map file are Unknown. — ALM-SAVE-239, ALM-SAVE-252
 
 ## Unknowns and compatibility
 

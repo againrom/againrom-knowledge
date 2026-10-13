@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3790. Observation: 99. Static analysis: 3188. Mixed: 503.
+Claims labelled: 3798. Observation: 99. Static analysis: 3196. Mixed: 503.
 
 ## Ledger ai
 
@@ -526,11 +526,18 @@ Claims labelled: 3790. Observation: 99. Static analysis: 3188. Mixed: 503.
 | ALM-CATAPULT-213 | mixed | ● active |
 | ALM-LOOT-214 | mixed | ● active |
 | ALM-VIEW-215 | mixed | ● active |
-| ALM-NEWMAP-236 | static analysis | ✔ promoted |
+| ALM-NEWMAP-236 | static analysis | ✔ promoted (amended) |
 | ALM-NEWMAP-237 | static analysis | ✔ promoted |
 | ALM-SAVE-238 | static analysis | ✔ promoted |
-| ALM-SAVE-239 | static analysis | ✔ promoted |
-| ALM-SAVE-240 | static analysis | ✔ promoted |
+| ALM-SAVE-239 | static analysis | ✔ promoted (amended) |
+| ALM-SAVE-240 | static analysis | ✔ promoted (amended) |
+| ALM-SAVE-252 | static analysis | ● active |
+| ALM-SAVE-253 | static analysis | ● active |
+| ALM-SAVE-254 | static analysis | ● active |
+| ALM-SAVE-255 | static analysis | ● active |
+| ALM-SAVE-256 | static analysis | ● active |
+| ALM-NEWMAP-257 | static analysis | ● active |
+| ALM-NEWMAP-258 | static analysis | ● active |
 | ALM-MAPLIFE-226 | static analysis | ✔ promoted |
 | ALM-UNITREAD-227 | static analysis | ✔ promoted |
 | ALM-STRUCTREAD-228 | static analysis | ✔ promoted |
@@ -3310,9 +3317,10 @@ Claims labelled: 3790. Observation: 99. Static analysis: 3188. Mixed: 503.
 | TERR-248 | static analysis | ● active |
 | TERR-249 | static analysis | ● active |
 | TERR-250 | static analysis | ● active |
-| TERR-251 | static analysis | ● active |
+| TERR-251 | static analysis | ● active (amended) |
 | TERR-252 | static analysis | ● active |
 | TERR-253 | static analysis | ● active |
+| TERR-254 | static analysis | ● active |
 
 ## Ledger text
 
