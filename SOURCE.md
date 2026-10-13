@@ -2,12 +2,12 @@
 
 ## Snapshot
 
-Snapshot k296, exported from the private research repository at commit
-`ecd80fb1643d1e0d8830432eec8daf6ac5ef007a`.
+Snapshot k297, exported from the private research repository at commit
+`b28e30ccb083be40726f76a8946fc9026d01d55e`.
 
 | Field | Count |
 |---|---:|
-| Claim ids | 3798 |
+| Claim ids | 3803 |
 | Retracted ids | 536 |
 | Format pages | 129 |
 

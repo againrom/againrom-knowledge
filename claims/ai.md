@@ -4334,6 +4334,9 @@ are not amended by this narrower result.
 | AI-598 | The 11 VA dwords equal to a gap start are 8 `push imm32`, one `mov [eax+0x1034], imm32`, one `cmp [ecx+4], imm32` and one `.rdata` slot beside `0x19930520` (role not discriminated); the 32 `jmp` sites end short stubs. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
 | AI-599 | Four gap tail blocks are function epilogues with no actor, order-record or mover operand, and their owners are not in the depth-3 closure; 85 unreferenced gap nodes hold actor operands. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
 | AI-600 | The `AI-574`/`AI-589` table keeps its answers: no tail moves a cell to R; the gap-code reach cell stays U with 313 unreferenced roots found; the 85 operand-holding nodes are unread whole. | Medium | ● active | [EXP-0555](../experiments/EXP-0555-order-machine-tails/) |
+| AI-609 | Immediate stores of the cast-start fields sit in the executor installs, the manual setters, `R0018`, `R0008`, `R0209`, `R0037` and two wrappers; gap stores (`L15262`, `R1677`) are unreduced (Medium). | High / Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| AI-610 | Callers of the cast starts by decoded rel32 site: manual setters only from `R0061`; `R0018` from the group pass, creature selectors, heal arms and escort healer; wrappers `R1137`/`R1138` from cell and script code (Medium). | High / Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
+| AI-611 | Six cast-field stores in gap code (`L15263`, `L15264`, `L15265`, `L15266`, `L15267`, `L15268`) have no decoded rel32 site from outside the gap into their pieces; reach by dword or register stays open (Medium). | Medium | ● active | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
 
 ### AI-487
 
@@ -5587,6 +5590,44 @@ The table of `AI-574` and `AI-589` re-stated with `AI-597` to `AI-599`.
 No answer of the table is reversed and no cell widens to R.
 
 **Confidence.** Medium; a cell is no stronger than its weakest link.
+
+### AI-609
+
+Population: the lawful ROM1 `rom.exe` (EN; the RU `ROM.EXE` has the same SHA256), `.text`, 555089 instructions decoded by a Capstone linear sweep inside each of the 7646 inventory functions and each gap between them (scan S1, `evidence/run1/census-receipt.tsv`). A store is an instruction with a memory destination, a nonzero base register and the displacement of the field; the base is untyped, so the counts are a displacement census.
+
+**Observation.** Stores of the immediate `0x0d` or `0x0e` at `+0x54` (action word): `R0016` at `L13337` (0xd), `R0013` at `L15269` (0xe), `R0037` at `L13664` and `L15270` (0xd), `R1137` at `L06036` (0xd), `R1138` at `L06037` (0xe) and four gap addresses (`L15263`, `L15264`, `L15265`, `L15266`). At `+0x50` (command state): `R0011` at `L13497` (0xd), `R0012` at `L13498` (0xe) and the gap addresses `L15267`, `L15268`. Stores of the immediate 8 or 9 at `+0x08` (pending kind): `R0018` at `L00071` (8), `R0008` at `L15271` (9), `R0209` at `L15272`, `L15273`, `L06096` (9), the gap address `L15262` (9) and `R1677` at `L15274` (not classified). Stores of the immediate 1 at `+0x60` (retention flag) in the AI module: `R0209`, `R0015` (two), `R0113` (two), `R0393`, `R0394` (two). Stores at `+0x64` (active Spell) from a register in the order machine: `R0016` (`L15275`), `R0013` (`L15276`), `R0037` (`L00045`, `L00047`; zero at `L00044`), `R0914`'s wrapper path (`L06034`), `R0246` (`L00049`, zero at `L15277`). The receipt has 30 exact `spell` (`+0x64`) stores in `L06029..L15278` and 137 inventory functions with an exact `scroll` (`+0x68`) store over the whole image (the `SR-scroll` rows of `start-routines.tsv`); the ones outside the order machine are not classified.
+
+The routines named by address are `R0011`, `R0012`, `R1137` and `R1138` (the manual setters and the two script wrappers). The writers of the pending kind 8 or 9 reduce, among the immediate stores read, to `R0018` (kind 8) and `R0008`, `R0209` (kind 9); the kind-9 store at `L15262` (gap code) and the store at `R1677` (kind 8, base register `ebp`, not classified) are not reduced. The writers of the action word 0xd or 0xe reduce to the two executor installs, the actor body's weapon-backed conversion and the two wrappers `R1137` and `R1138`, except the four gap stores (`L15263`, `L15264`, `L15265`, `L15266`), which are not reduced.
+
+**Inference.** The set of routines that begin a unit cast is these writers and their callers (`AI-610`). Stores whose source is a register (a kind or state value passed in) are not seen by an immediate census: a start through a computed value is outside it.
+
+**Confidence.** High for each listed store (instruction text in the receipt and, for the order-machine functions, in the windows read). Medium for the completeness of the set: register-source stores, `rep movs` copies and data decoded as code are not covered (`docs/INSTRUMENT.md` blind spots), and the `+0x64`/`+0x68` hits outside the order machine are not read.
+
+**Unknown.** Register-source stores of the pending kind, the action word and the command state; the 30 `+0x64` stores outside the windows read; which of the 137 `+0x68` functions hold the scroll pointer of an actor; the bodies and callers of `L15262`, `R1677` and the four gap action-word stores.
+
+### AI-610
+
+Population: the S2 receipt (`sites.tsv`: 555089-instruction decode, rel32 `call`/`jmp`/`jcc` sites with targets), the VA-dword scans S3 to S6 (aligned dwords equal to a start routine or root entry in `.text`, `.rdata`, `.data`, `.idata`+`.rsrc`), `indirect-sites.tsv` and `chain-1.txt`; windows of the bodies read in EN.
+
+**Observation.** The manual cast setters `R0011` and `R0012` have rel32 sites only in `R0061` (`L15279`, `L15280`; `L15281`, `L15282`); the two scroll-arm sites lie at `L15280` (inside `L00038..L15283`). The group pass `R0008` (read whole) sends command state 0xd to `R0018` (`L14884`) and state 0xe to a kind-9 store (`L13503`..`L13505`), and states 3, 4 and 8 to `R0009`, `R0009` and `R0138`. `R0018` has 13 rel32 sites in 8 functions: `R0008`, `R0305` (the escort healer, reached from `R0138`, itself called from `R0008` only), `R0209` (two), `R0015` (two), `R0113` (two), `R1048` (no rel32 site found; no dword scan was run for it), `R0393` and `R0394` (three). `R0209` (the creature spell-slot cast launcher) is called from `R0009` only; `R0009` is called by `R0008`, `R0441`, `R0137`, `R0306`, `R0023`, `R0024`, `R0025`, `R0026`, one gap site and `R0393`. `R0015` and `R0113` have eight sites each (`R0022`, two gap wrappers, `R0023`, `R0024`, `R0025`, `R0026` and one gap site); `R0113` ends in `R0394`. The executor `R0016` has two sites: `R0037` (`L00086`) and `R0038` (`L00087`; `R0038` has no rel32 site). `R0013` and `R0401` are called from `R0016` only. The admission `R0268` is called from `R0037` only (`L01994`, `L01995`); the spell effect dispatchers `R0617` and `R0618` and the cell application `R0269` are called from `R0268` only; `R0002` from `R0037` and `R0246`; `R0246` is reached from `R0037` through `R0001` (`L00006`, `L02046`). For `R1048`, `R0617`, `R0618`, `R0269` and `R0268` the callers are rel32 only; no dword scan was run for these targets. The wrappers `R1137` and `R1138` are called from `R0262`, `R1139`, `R0458` and a gap function (`L06044`..`L06046`).
+
+**Inference.** By caller: a player's order reaches a cast through `R0061` and the setters (`AI-487`); the group pass re-issues a parked cast (`MAGIC-253`) and starts creature and escort casts through `R0009`, `R0209`, `R0138`, `R0305`; a human owner's unit and a computer player's unit have separate heal arms (`R0015`, `R0113`, the guard `Player+0x28` is cited from `MAGIC-320` and not re-read here); the cell and script casts enter through the wrappers `R1137` and `R1138` (`UNIT-M10ENTRY-055`, `TRIG-CASTACTOR-044`, not re-read here). Among the decoded rel32 sites no admission, effect dispatcher or application caller lies outside `R0037` and `R0246` (the latter through `R0001`), so a unit cast that reaches an effect through a decoded rel32 call passes the action body; indirect calls to these entries are open.
+
+**Confidence.** High for the sites and the bodies read (`R0016`, `R0013`, `R0011`, `R0012`, `R0008`, `R0018`, `R0009`, `R0209`, `R0015`, `R0113`, `R0305`, `R0138`, `R0393`, `R0394`, `R1048`, `R0268`, `R0037` cast arms). Medium for the source of a caller taken from its place in a caller chain or from a cited claim, and for every negative: indirect calls through a register or memory (`indirect-sites.tsv`), computed jumps and the unscanned callers of `R0023` (called from `R0076` and one gap site) bound it. The bodies of `R0262`, `R1139`, `R0458`, `R0914`, `R1137` and `R1138` are not read here (Medium).
+
+**Unknown.** The six gap and script callers' own callers; whether a register call or a dword reference reaches `R1048`, `R0268`, `R0617`, `R0618` or `R0269`; the sources of the `R0441` and `R0023` gap callers.
+
+### AI-611
+
+Population: the six gap functions that hold an immediate store of 0xd/0xe at `+0x54` or `+0x50` (`AI-609`): the pieces at `L15057..L15284`, `L15285..L15286`, `L15287..L15288`, `L15289..L15290`; the decoded rel32 sites (S2) and the dword scans (S3 to S6, run for the start routines and the roots only).
+
+**Observation.** The decoded sites whose target lies in these ranges are 19, 13, 8 and 17 short `jcc`/`jmp` sites, all inside the gap and none from an inventory function or from outside the range. No `call` site targets the range. The dword scans were not run for these entries.
+
+**Inference.** This is consistent with `AI-562`, `AI-570` and `AI-588` (no reaching site over rel32, `0F 8x`, rel8 and dwords) for the same bodies, and narrows nothing in them.
+
+**Confidence.** Medium: only the decoded rel32 population for these entries; dwords, register calls and computed jumps are open.
+
+**Unknown.** Reach by a VA dword, a register call or a fall-through from an inventory function (`AI-597` class A); the reading of the bodies in this experiment; the reach of the kind-9 store at `L15262` (gap code after `R0441`), which this claim does not cover.
 
 ## What a unit does by itself when it sees an enemy
 
