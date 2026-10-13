@@ -84,7 +84,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/alm/format.
 | ALM-META-025 | The type-0 scalars `+0x24/+0x28/+0x2c/+0x30/+0x34` are **element counts** the loader uses as loop bounds for the content records. | High / Unknown | ● active (amended) | [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0358](../experiments/EXP-0358-alm-headers-metadata/) |
 | ALM-META-026 | The type-0 `+0x20` low-bit bitmask is **read into a local and discarded** by the map loader (`local_60`, referenced nowhere else) — read-but-unused by `rom.exe`'s map parse. | High / Medium / Unknown | ● active (amended, superseded, partially retracted) | [EXP-0018](../experiments/EXP-0018-alm-metadata/) — offsets −8 per [EXP-0030]: discarded bitmask `@+0x18`, stored `+0x0c/+0x10/+0x14` and `+0x70/+0x74`, [EXP-0298](../experiments/EXP-0298-map-scalar-consumers/) |
 | ALM-META-027 | The type-0 float `+0x10` (`angle`, ≈±π/4) is read into the map object as a stored **light/sun angle** (corroborated by the Map-Editor Help "Show Time / Light" settings). | High / Medium | ● active (partially retracted) | [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/), [EXP-0298](../experiments/EXP-0298-map-scalar-consumers/) |
-| ALM-META-028 | The type-0 `+0xc0` region (**`+0xb8` per [EXP-0030]**) is a fixed **array of 7 × 64-byte text slots** (`[3×u32 prefix][char[52] text @slot+12]`, default `"<None>"`), read into the map object as the tail of the 512-byte description block. | High / Unknown | ● active (amended) | [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0056](../experiments/EXP-0056-alm-record-set/) |
+| ALM-META-028 | The type-0 `+0xc0` region (**`+0xb8` per [EXP-0030]**) is a fixed **array of 7 × 64-byte text slots** (`[3×u32 prefix][char[52] text @slot+12]`, default `"<None>"`), read into the map object as the tail of the 512-byte description block. | High / Unknown | ● active (amended, partially retracted) | [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0056](../experiments/EXP-0056-alm-record-set/) |
 | ALM-HDR-029 | For sections other than type0, the 20-byte header words `f0/f1` are **not map fields**: `0` where the writer's source buffer was zeroed (type1/4/5), and adjacent record-framing / uninitialised residue elsewhere — decisively ... | High | ✖ retracted (superseded) | [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/) |
 | ALM-TRL-030 | The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly `count` records and returns; no trailing read). | — | ✖ retracted | [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0030](../experiments/EXP-0030-alm-grid-origin/) |
 | ALM-FRAME-031 | Corrected container framing (supersedes the EXP-0007 split). | High | ● active (partially retracted) | [EXP-0030](../experiments/EXP-0030-alm-grid-origin/) |
@@ -473,15 +473,17 @@ The type-0 float `+0x10` (`angle`, ≈±π/4) is read into the map object as a s
 
 ### ALM-META-028
 
-The type-0 `+0xc0` region (**`+0xb8` per [EXP-0030]**) is a fixed **array of 7 × 64-byte text slots** (`[3×u32 prefix][char[52] text @slot+12]`, default `"<None>"`), read into the map object as the tail of the 512-byte description block. Standalone maps leave slots default/empty; campaign maps fill slots 4/6 with in-game trigger/quest strings (`"mission complit"`, `"Start1"`, `"1st Finger"`, …)
+The type-0 `+0xc0` region (**`+0xb8` per [EXP-0030]**) is a fixed **array of 7 × 64-byte text slots** (`[3×u32 prefix][char[52] text @slot+12]`, default `"<None>"`), read into the map object as the tail of the 512-byte description block. ~~Standalone maps leave slots default/empty~~ (partially retracted by TEXT-MAPCORP-119); campaign maps fill slots 4/6 with in-game trigger/quest strings (`"mission complit"`, `"Start1"`, `"1st Finger"`, …)
 
-**Confidence.** High (slot layout + loaded — the region is inside case 0's read sequence, whose lengths sum to exactly 632, and the 7×64 B sub-structure is fixed by the `"<None>"` defaults landing at `slot+12` in every slot of every map) / Unknown (per-slot role) / **[EXP-0056]: neither consumer subdivides the region.** The loader reads payload `+0x78`..`+0x277` as **one 0x200 read** into `map+0xdc` — description and the seven slots together — and the `*.alm` browser's reader `R0479` reads the same 0x200 block, rewrites every `'\n'` to `'#'`, and assigns it as **one NUL-terminated CString**. The 7×64 sub-structure is not refuted (the `"<None>"` defaults still land where this row says) but it is a writer's model with no consumer behind it
+**Confidence.** High (slot layout + loaded — the region is inside case 0's read sequence, whose lengths sum to exactly 632, and the 7×64 B sub-structure is fixed by the `"<None>"` default positions; ~~defaults land at `slot+12` in every slot of every map~~ is partially retracted by TEXT-MAPCORP-119) / Unknown (per-slot role) / **[EXP-0056]: neither consumer subdivides the region.** The loader reads payload `+0x78`..`+0x277` as **one 0x200 read** into `map+0xdc` — description and the seven slots together — and the `*.alm` browser's reader `R0479` reads the same 0x200 block, rewrites every `'\n'` to `'#'`, and assigns it as **one NUL-terminated CString**. The 7×64 sub-structure is not refuted (the `"<None>"` defaults still land where this row says) but it is a writer's model with no consumer behind it
 
 **Original status.** ● active (amended)
 
 **Evidence.** [EXP-0018](../experiments/EXP-0018-alm-metadata/), [EXP-0056](../experiments/EXP-0056-alm-record-set/)
 
 **Amended.** The table ledger carried the status "● active (amended)".
+
+**Amended.** TEXT-MAPCORP-119 partially retracts only the standalone default/empty generalization: RU LUMOIR.ALM slot 5 has one nonempty byte under the fixed field measurement. The claim's every-slot/every-map default-coverage wording is also narrowed: the fixed census finds only 14 EN and 10 RU exact defaults. The stored layout, whole-block load and Unknown slot roles stand.
 
 ### ALM-HDR-029
 
@@ -2291,8 +2293,8 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 | ALM-MAPLIFE-226 | Three callers of loader R0478 create the map object; each passes it to a fixed set of readers and destroys it, and only R0277 stores its pointer, at world+0x540d0. EN and RU rom.exe are identical. | High / Unknown | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
 | ALM-UNITREAD-227 | No holder of a type-6 runtime record reads unit file +0x1c, +0x22, +0x26, +0x28, +0x2a, +0x30, +0x33, +0x34 or +0x35, and the stream read slot keeps no record pointer. | High / Medium | ✔ promoted (amended) | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
 | ALM-STRUCTREAD-228 | Type-4 file +0x12 is sign-extended into record+0x10 and stored at the Shop or Building object's +0x08 (L14613), not +0x10; +0x0c and +0x0e reach the shop cap, obj+0x42 and the owner at obj+0x14. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
-| ALM-HDRTEXT-229 | After the loader stores the 0x200 header block at M+0xdc, no holder of the map object reads it; the map browser reads the block up to the first NUL, below +0x40 on 72 map instances (38 EN, 34 RU; 28 scenario.res members per root). | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
-| ALM-HDRSLOT-230 | Header text slot 4 equals a trigger name on the same 13 scenario maps in EN and RU; no instruction found reads a slot, so no runtime reference from a script record to a slot exists in the holder set. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-HDRTEXT-229 | Only the loader touches M+0xdc in the holder set; browser text ends at NUL below +0x40 on 72 maps. | High / Medium | ✔ promoted (amended) | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
+| ALM-HDRSLOT-230 | Header text slot 4 equals a trigger name on the same 13 scenario maps in EN and RU; no instruction found reads a slot, so no runtime reference from a script record to a slot exists in the holder set. | High / Medium | ✔ promoted (amended) | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
 | ALM-ROSTERREAD-231 | The loaded map's holders read roster CPlayer +0x04, +0x08, +0x10, +0x30 and +0x34 only; the type-5 +0x08 scalar at CPlayer+0x0c is read only by the copy constructor that R0504 calls. | High / Unknown | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
 | ALM-NODEREAD-232 | After load only binder R0067 reads script nodes: opcode, id, values and types, and file +0x48 for conditions only; the label is read only as text in two failure logs, and the parameter names are never read. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
 | ALM-TRIGREAD-233 | After load only binder R0067 reads the 184-byte triggers: condition pairs, action ids, comparison codes and the once flag; no holder reads the name or the +0x40..+0x7f span. | High / Medium | ✔ promoted | [EXP-0542](../experiments/EXP-0542-map-field-readers/) |
@@ -2441,8 +2443,15 @@ address, rest on routines not read.
 **Confidence.** **High** for the holder set and the browser reader / **Medium** for no other
 reader in the image: a reader that opens the file itself was searched only through the direct
 calls to `R0479` and the `0xdc` displacement. That the string ends at the first NUL rests on
-the rewrite loop, which stops there, and on the assignment `R1774`, whose body was not read
-(`ALM-META-058`).
+the rewrite loop, which stops there, and on the complete assignment entry `R1774`
+(`TEXT-BROWSER-121`).
+
+**Amended.** TEXT-BROWSER-121 reads the complete assignment entry `R1774`.
+For a non-null source, the entry calls IAT `L16001` and passes the source and returned
+length to `R2037`. The imported target and helper body were not acquired here;
+the owned-string copy remains inherited from TOWN-393 at High. This narrows the prior
+unread-entry boundary without changing the High/Medium split, the prior holder set
+or the 72-map census. Readers outside the browser and prior holder set remain Unknown.
 
 **Unknown.** A file reader of the block outside the browser, found by neither scan.
 
@@ -2461,6 +2470,8 @@ runtime reference from a script record to a slot, which rests on `ALM-HDRTEXT-22
 
 **Unknown.** Whether the map editor uses the slot texts; `Map Editor.exe` was outside this
 population.
+
+**Amended.** TEXT-MAPCORP-119 retains the 90/91 counts and records their measurement boundary: 32 fields per root reach 52 bytes without NUL. These counts describe stored fields, not 52-byte strings proved to reach a renderer. The trigger-name matches and bounded holder-set result stand.
 
 ### ALM-ROSTERREAD-231
 

@@ -19,7 +19,7 @@ shipped-content tables. The private research snapshot named by
 | VIDEO-MUSIC-006 | Recovered music requests replace candidate **lists**, not isolated one-shot tracks. | High / Medium | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
 | VIDEO-MUSIC-007 | With an initialized player buffer, ordinary mode chooses a randomized candidate order and advances through it at stream end; fixed-source mode retains/reloads the selected candidate. | High | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
 | VIDEO-MUSIC-008 | The researched school-state bit changes the order of the two school candidates, not which of the two is permitted; ordinary playback still uses the common randomized/list progression rules. | High | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
-| VIDEO-MUSIC-009 | Text markup includes a numeric music-candidate selector that enters persistent fixed-source mode. | High / Medium | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
+| VIDEO-MUSIC-009 | Text markup includes a numeric music-candidate selector that enters persistent fixed-source mode. | High / Medium | ✔ promoted (amended) | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
 | VIDEO-MUSIC-010 | Request availability, playback enable and music volume are distinct controls. | High / Unknown | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
 | VIDEO-MUSIC-011 | Music uses a streaming audio buffer. | High | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
 | VIDEO-MUSIC-012 | Archive capacity and request reachability are separate: adding a valid music payload does not by itself create a request for it. | High / Medium | ✔ promoted | [EXP-0229](../experiments/EXP-0229-music-runtime/) |
@@ -89,6 +89,8 @@ remains possible.
 
 **Confidence.** High for the parser-to-player mechanism / Medium for bounded
 shipped absence.
+
+**Amended.** TEXT-TAGFIELDS-120 bounds the tag-side input: a five-byte substring request follows tune=; the conversion return is unchecked, and an absent tune search stores -1. Numeric failure is unresolved. The existing player mechanism and bounded shipped absence stand.
 
 ### VIDEO-MUSIC-010
 

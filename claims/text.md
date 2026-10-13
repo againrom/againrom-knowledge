@@ -300,7 +300,7 @@ What this does **not** establish is whether anything downstream — a save file,
 | TEXT-FONT-015 | Every value the converter can produce reaches a record that has ink, on every 224-record atlas, on both roots — so "converts correctly, then draws nothing" does not happen. | High / Medium | ● active | [EXP-0103](../experiments/EXP-0103-ru-text-domain/) |
 | TEXT-FONT2-016 | `font2` is the only atlas the roots do not share, and the RU build blanked its entire Latin high half — which is free under selector 1 and destroys text under selector 0. | High / Medium | ● active | [EXP-0103](../experiments/EXP-0103-ru-text-domain/) |
 | TEXT-TILDE2-017 | The two byte loops do not test `~` at the same point: the measurer tests the raw byte, the draw tests the converted one. The conclusion survives; the published reason does not. | High | ● active | [EXP-0103](../experiments/EXP-0103-ru-text-domain/) |
-| TEXT-079 | A lone `~` in the font1-3 draw underlines the next glyph and takes no pen advance: a line from x, that glyph's advance-table width long, one row below frame 0, in ramp entry 15. `~~` is one literal glyph; the font4 draw has no tilde arm. | High / Unknown | ● active | [EXP-0410](../experiments/EXP-0410-dialogue-layout/) |
+| TEXT-079 | A lone `~` in the font1-3 draw underlines the next glyph and takes no pen advance: a line from x, that glyph's advance-table width long, one row below frame 0, in ramp entry 15. `~~` is one literal glyph; the font4 draw has no tilde arm. | High / Unknown | ● active (amended) | [EXP-0410](../experiments/EXP-0410-dialogue-layout/) |
 
 ### TEXT-API-007
 
@@ -484,6 +484,8 @@ missing arm in `R1854`, read whole, which holds no compare against 0x5e.
 
 **Unknown.** The read past the end of the advance table for a final tilde, what lies after the
 table, and whether any shipped string outside the searched population reaches the arm.
+
+**Amended.** TEXT-MAPCORP-119 extends the searched stored-field population to the 72 installed map headers. Five tilde bytes per root end their measured slot spans; no map name or description contains one. No new slot-to-draw route is established.
 
 ## Draw routines
 
@@ -2432,3 +2434,108 @@ or runtime population is part of this result.
 boundary outputs, client-refresh chronology and staged total lifetimes.
 An admitted character/client trace, bounded pow/control-state witness and
 stage-helper decode would settle these.
+
+## Map header text fields and tag outputs
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TEXT-MAPCORP-119 | The 38 EN and 34 RU maps have 90 and 91 nonempty, non-default slot fields. | High | ● active | [EXP-0567](../experiments/EXP-0567-map-texts/) |
+| TEXT-TAGFIELDS-120 | The part parser passes five-byte numeric substrings and retains absent tips. | High / Medium | ● active | [EXP-0567](../experiments/EXP-0567-map-texts/) |
+| TEXT-BROWSER-121 | The map browser rewrites description LF to # up to NUL without selecting a slot. | High / Medium | ● active | [EXP-0567](../experiments/EXP-0567-map-texts/) |
+
+### TEXT-MAPCORP-119
+
+The fixed walk covers every loose recursive ALM and every scenario.res ALM
+member in both measured installs: 38 EN and 34 RU, with 28 archive members
+per root. All 72 record chains tile; all 72 type-0 payloads are 632 bytes.
+The measurement uses seven 64-byte fields at payload+0xb8+64*i, numbered
+0..6, with the text measurement limited to 52 bytes from field+12.
+It stops at the first NUL or the field boundary. It does not establish that
+these bytes reach a text consumer.
+
+- EN: 266 slots, 14 exact program-text "<None>" defaults, 162 empty,
+  90 other nonempty fields; 252 non-default fields when empties count.
+- RU: 238 slots, 10 defaults, 137 empty, 91 other nonempty fields;
+  228 non-default fields when empties count.
+- Nonempty/non-default counts by slot 0..6 are EN 9, 10, 9, 11, 23, 8, 20 and
+  RU 9, 10, 9, 11, 23, 9, 20. Each root has 32 fields without NUL inside 52 bytes,
+  on the same six archive members: 31, 71, 81, 90, 121, 131.
+- EN names/descriptions have maximum lengths 21/36; RU 14/11. All names
+  and descriptions terminate inside 64 bytes. Slot lengths span0..52.
+  These are measured lengths, not authored or accepted limits.
+- Both roots have five tilde bytes: one in slot 2 and four in slot 3.
+  Each is the last byte of its measured span. That span can end at NUL
+  or the fixed field boundary; this is not proof of a terminal tilde sent
+  to a draw routine. No name or description contains tilde.
+- ASCII-lowercased closed angle spans in these fields contain zero
+  occurrences of each of the fifteen parser token names. The 14 EN/10 RU
+  closed spans are the default marker. There are zero unterminated angle
+  spans. CR counts are 13/13; LF counts are 0/1.
+- All EN loose slots are default or empty. RU LUMOIR.ALM has one nonempty
+  byte in slot 5, which corrects ALM-META-028's standalone generalization.
+
+**Confidence.** High for this fixed, bounded byte measurement: every selected
+input is hashed, every record and field is retained, and all zero counters
+are emitted. The generator output reproduces against committed Git blobs.
+No grade is assigned to a slot's authoring intent or runtime visibility.
+
+**Unknown.** Slot consumers outside the previously measured holder set;
+whether any measured nonempty or unterminated field is interpreted as text.
+
+### TEXT-TAGFIELDS-120
+
+The complete body R0712 reads panel+0x74 and scans NUL-terminated
+bytes for angle tags. Its fifteen program-text search literals are part=%d,
+npc=, iamfemale, iammale, iammage, iamfighter, npcalive=, npcdead=, female,
+male, mage, fighter, sound=, tune= and tips=. The full literal table and
+body were read from the EN image, byte-equal to the RU image.
+
+The npc= arm passes a substring length 5 starting at match+4 to L16002.
+The npcalive=/npcdead= arms pass length 5 at match+9. The tune=/tips=
+arms pass length 5 at match+5. Each numeric path calls R1270 with program
+text "%d"; none checks that call's return. The parser does not preinitialize
+the supplied tune output on its matched arm. When its tune search returns
+-1, it stores -1 to that output. When its tips search is negative, it leaves
+panel+0x80 unchanged. Successful tag processing can therefore update outputs
+before the later LF scan returns 0 for an absent header LF.
+
+A missing closing '>' before NUL returns 0 before the tag copy. Unknown tag
+content has no dedicated rejection branch; the fixed substring predicates
+still determine whether the part is accepted. Missing LF returns 0. For an
+accepted part, the body begins after LF and ends at NUL or the backward-found
+CR before the next '<'; the backward scan has no body-start check
+(DIALOGUE-068). No local byte path interprets a multibyte encoding.
+
+**Confidence.** High for own-body branches, constants, stores and unchecked
+helper returns. Medium for interpreting substring/search/conversion results:
+L16002, R0996, R1270 and lowercase helper R0723 were not read here.
+The previously established tag vocabulary and its conditional grades stand.
+A five-byte request is not proof of five successful numeric digits.
+
+**Unknown.** Malformed numbers, absent delimiters inside sound values,
+locale-sensitive lowercasing and helper allocation failures. Audible tune
+selection remains VIDEO-MUSIC-009's existing result; the music player was
+not re-read. No new end-to-end High rests on these unread helpers.
+
+### TEXT-BROWSER-121
+
+The complete R0479 body requests a 64-byte name and 512-byte text
+block, then calls R1774 for entry+4 and entry+8 respectively. Its text
+rewrite loop at L16003 stops at the first NUL; LF becomes byte 0x23.
+Every other byte passes that loop unchanged. No branch selects one of
+the seven metadata slots. R1774 was also read whole: it computes a
+length through IATL16001 for a non-null source and passes source/length
+to R2037; TOWN-393 already establishes the owned-string copy at High.
+
+**Confidence.** High for the complete browser body's rewrite and absence
+of a slot selector in that body. Medium for the complete file-to-display
+route, which depends on unread virtual stream methods and the message
+delivery boundary retained by ALM-MAPLIST-310. Both program images are
+byte-equal, so this is one code population.
+
+**Unknown.** Other slot readers. The fresh scans retain952 displacement,
+247 immediate, 184 direct-call and 2 dword matches, mostly unclassified.
+They cover linear decoded .text and unaligned dwords in .rdata/.data.
+They are not a reader census and do not strengthen the prior holder-set
+negative to an image-wide absence. Copied pointers, computed offsets,
+indirect calls, computed jumps, bulk copies and other tables remain open.

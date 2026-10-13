@@ -1451,3 +1451,9 @@ on evidence already committed.
 |---|---|---|---|---|---|
 | `TRIG-COND-003` (check 22 movement implication only) | "22 moves an object it finds at a cell before answering" | High | [EXP-0566](../experiments/EXP-0566-script-arms/), TRIG-CELLRESULT-133 | The arm attempts relocation, discards its result and writes 1 whenever lookup found an object. A blocked relocation returns before the position stores. The table and other arm facts stand. | **REFUTED** — partially retracted |
 | `AI-341` (the two R0169 typed classifications) | Classifies one access as the pre-create control and L01769 as an actor+0x88 Mind word. | High | [EXP-0566](../experiments/EXP-0566-script-arms/), TRIG-ACTIONWRITE-135 | L01769 writes a dword at +0x88 on a global-list payload selected by virtual +0x38 and dword +0x80. The word-width claim is refuted; payload type and both field identities are Unknown. Those two accesses no longer support the typed no-writer inference. Other sites and spellbook conclusions retain their prior evidence. | **REFUTED / NARROWED** — partially retracted |
+
+## Standalone map header slot population
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ALM-META-028` (standalone clause and every-map default coverage only) | Standalone maps leave slots default/empty; defaults land in every slot of every map. | High / Unknown; corpus clause not separately graded | [EXP-0567](../experiments/EXP-0567-map-texts/), TEXT-MAPCORP-119 | All EN loose slots are default/empty, but RU LUMOIR.ALM slot5 has one nonempty byte. Only 14 EN and 10 RU exact defaults occur. The slot layout and whole-block read stand; runtime slot meaning remains Unknown. | **PARTIALLY RETRACTED** |

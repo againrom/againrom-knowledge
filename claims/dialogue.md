@@ -286,6 +286,8 @@ to their effects, and `DLG-SOUND-028` follows `sound=` to the pager; neither
 follows `npcalive=`, `npcdead=` or `tune=`, and for those three the Medium
 clause stands.
 
+**Amended.** TEXT-TAGFIELDS-120 records the five-byte numeric substring requests, unchecked conversion returns, absent-tune store and retained absent-tips field from the complete parser body. Numeric failure and helper semantics remain Medium/Unknown; the conditional and corpus grades above stand.
+
 ### DLG-FACE-008
 
 - The constructor's `R0720` lowercases the entire payload and sets

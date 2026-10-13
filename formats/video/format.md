@@ -40,6 +40,12 @@ The context-list assignment to named surface transitions retains Medium
 confidence. — VIDEO-MUSIC-003, VIDEO-MUSIC-004, VIDEO-MUSIC-005,
 VIDEO-MUSIC-006, VIDEO-MUSIC-056, TOWN-372
 
+The dialogue tune tag supplies a numeric candidate selector. Its parser
+requests five bytes after tune= and ignores the numeric conversion return;
+an absent tune search stores -1. Malformed numeric input remains unresolved.
+This does not establish that a metadata slot reaches the music selector.
+— VIDEO-MUSIC-009, TEXT-TAGFIELDS-120
+
 Archive mounting follows the resource resolver and working-directory rules.
 A missing music archive is a recoverable resource condition. Enable/disable
 and volume are independent settings. The player uses a streaming buffer.

@@ -363,6 +363,14 @@ files: on EN `sound=` occurs 7 times, all in `text/inn`, while `npcalive=`, `npc
 narrowed to event files), `DLG-NPCTAG-019` (its reason for the RU raw-file census partially
 retracted; the counts stand)
 
+The numeric npc, npcalive/npcdead, tune and tips branches request
+five-byte substrings before their numeric conversion. The conversion
+returns are unchecked. A missing tune search stores -1 to its output;
+a missing tips search preserves the panel field. Malformed numbers and
+substring-helper behavior remain Medium/Unknown. Tag outputs can change
+before the later missing-LF path returns 0. The missing closing-angle path
+returns 0 before copying the tag. — TEXT-TAGFIELDS-120, DLG-MARKUP-007
+
 Two different `npc` tests decide the face: the constructor's `Find("npc")` over the **whole
 lowercased file** picks the layout once, and the per-part `Find("npc=")` refreshes the portrait.
 

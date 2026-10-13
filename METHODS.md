@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
+Claims labelled: 3875. Observation: 99. Static analysis: 3270. Mixed: 506.
 
 ## Ledger ai
 
@@ -425,7 +425,7 @@ Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
 | ALM-META-025 | static analysis | ● active (amended) |
 | ALM-META-026 | static analysis | ● active (amended, superseded, partially retracted) |
 | ALM-META-027 | mixed | ● active (partially retracted) |
-| ALM-META-028 | static analysis | ● active (amended) |
+| ALM-META-028 | static analysis | ● active (amended, partially retracted) |
 | ALM-HDR-029 | mixed | ✖ retracted (superseded) |
 | ALM-TRL-030 | static analysis | ✖ retracted |
 | ALM-FRAME-031 | static analysis | ● active (partially retracted) |
@@ -560,8 +560,8 @@ Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
 | ALM-MAPLIFE-226 | static analysis | ✔ promoted |
 | ALM-UNITREAD-227 | static analysis | ✔ promoted (amended) |
 | ALM-STRUCTREAD-228 | static analysis | ✔ promoted |
-| ALM-HDRTEXT-229 | static analysis | ✔ promoted |
-| ALM-HDRSLOT-230 | mixed | ✔ promoted |
+| ALM-HDRTEXT-229 | static analysis | ✔ promoted (amended) |
+| ALM-HDRSLOT-230 | mixed | ✔ promoted (amended) |
 | ALM-ROSTERREAD-231 | static analysis | ✔ promoted |
 | ALM-NODEREAD-232 | static analysis | ✔ promoted |
 | ALM-TRIGREAD-233 | static analysis | ✔ promoted |
@@ -3399,7 +3399,7 @@ Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
 | TEXT-FONT-015 | static analysis | ● active |
 | TEXT-FONT2-016 | mixed | ● active |
 | TEXT-TILDE2-017 | static analysis | ● active |
-| TEXT-079 | static analysis | ● active |
+| TEXT-079 | static analysis | ● active (amended) |
 | TEXT-065 | static analysis | ● active |
 | TEXT-066 | static analysis | ● active |
 | TEXT-067 | static analysis | ● active |
@@ -3483,6 +3483,9 @@ Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
 | TEXT-111 | static analysis | ✔ promoted (branch candidate) |
 | TEXT-112 | static analysis | ✔ promoted (branch candidate) |
 | TEXT-117 | mixed | ✔ promoted (branch candidate) |
+| TEXT-MAPCORP-119 | mixed | ● active |
+| TEXT-TAGFIELDS-120 | static analysis | ● active |
+| TEXT-BROWSER-121 | static analysis | ● active |
 
 ## Ledger town
 
@@ -3973,7 +3976,7 @@ Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
 | VIDEO-MUSIC-006 | observation | ✔ promoted |
 | VIDEO-MUSIC-007 | observation | ✔ promoted |
 | VIDEO-MUSIC-008 | observation | ✔ promoted |
-| VIDEO-MUSIC-009 | observation | ✔ promoted |
+| VIDEO-MUSIC-009 | observation | ✔ promoted (amended) |
 | VIDEO-MUSIC-010 | observation | ✔ promoted |
 | VIDEO-MUSIC-011 | observation | ✔ promoted |
 | VIDEO-MUSIC-012 | observation | ✔ promoted |

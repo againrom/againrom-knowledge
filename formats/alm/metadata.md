@@ -57,7 +57,17 @@ The offsets below are relative to the payload. The fixed reads total 632 bytes. 
 | +0x70 | u32 | scalar (stored) → `map+0xd4` | **Multiplayer-mode source:** `[L00285]+0xc = (map+0xd4 > 1)`, read during player construction. A value 1 selects single-player loading even in a loose map such as RU `Horror.alm`; it does not identify `scenario.res` membership. The map-selection list loads it into a record column and lists a map only when it is above 1. A player-slot/MP-capacity interpretation beyond these consumers remains unestablished. | ALM-META-026 (partially retracted), ALM-MODE-070, TEXT-083 |
 | +0x74 | u32 | scalar (stored) → `map+0xd8` | standalone `1..5`, campaign `1`; the map-selection list shows it in its last column; the chain from the enumerator's post to the displayed row is Medium, and among the callers of the entry-array routines no other reader of the list entry reads it (Medium). No game read of `map+0xd8` was found (Medium). | ALM-META-026 (partially retracted), TEXT-083, ALM-MAPLIST-310, ALM-META-311 |
 | +0x78 | char[64] | **description** | NUL-terminated code-page text (ASCII or Windows-1251). Installed text uses at most 36 bytes; 36 is not a field-width limit. The map-selection list hover returns it, with line feeds read as `#`. | ALM-META-010, TEXT-083 |
-| +0xb8 | 7×64 B | **text slots** | fixed array of 7 slots `[3×u32 prefix][char[52] text @+12]`, default `"<None>"`. Loaded (part of a 512-B block read from +0x78). Campaign maps fill slots 4/6 with trigger/quest text (`"mission complit"`, `"Start1"`, …); slot 4 equals a trigger name on 13 scenario maps of each root. No holder of the loaded map reads the block after the loader, and the map browser's text ends at the first NUL, below `+0x40` on all 72 maps, so no runtime reader of a slot was found | ALM-META-028, ALM-HDRTEXT-229, ALM-HDRSLOT-230 |
+| +0xb8 | 7×64 B | **text slots** | fixed array of 7 slots `[3×u32 prefix][char[52] text @+12]`, default `"<None>"`. Loaded (part of a 512-B block read from +0x78). Campaign maps fill slots 4/6 with trigger/quest text (`"mission complit"`, `"Start1"`, …); slot 4 equals a trigger name on 13 scenario maps of each root. No holder of the loaded map reads the block after the loader, and the map browser's text ends at the first NUL, below `+0x40` on all 72 maps, so no runtime reader of a slot was found | ALM-META-028 (standalone/default-coverage clauses partially retracted), ALM-HDRTEXT-229, ALM-HDRSLOT-230 |
+
+The measured slot strings are bounded byte fields. Across 38 EN and 34 RU
+maps, 90 and 91 fields are nonempty and differ from program text "<None>".
+Each root has 32 fields with no NUL inside the 52-byte text area. All EN
+loose slots are default or empty; RU LUMOIR.ALM slot 5 has one nonempty byte.
+These are stored-byte counts, not proof of displayed text or authoring
+limits. The browser rewrites LF to # until NUL without selecting a slot.
+The prior map-holder result is not an image-wide reader census.
+— TEXT-MAPCORP-119, TEXT-BROWSER-121, ALM-META-028 (standalone clause
+partially retracted), ALM-HDRSLOT-230
 
 The negative consumer statements above are limited to the named map/terrain
 paths. Indirect calls, aliases and the skipped-relight/message-path cases

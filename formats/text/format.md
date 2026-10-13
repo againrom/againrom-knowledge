@@ -105,7 +105,11 @@ A text measurer must mirror the draw path's markup handling or widths can diverg
 draw has no tilde arm: it draws the byte as glyph 0x5e, so a font4 string that holds a tilde is
 measured narrower than it is drawn. A tilde in the last byte of a string reads the advance table
 one entry past its end. No shipped dialogue text or dialogue button label holds a tilde; each root's help text holds one
-doubled tilde and no lone tilde (`TEXT-089`); other text was not searched. — `TEXT-TILDE-009` (underline extent partially retracted),
+doubled tilde and no lone tilde (`TEXT-089`). The installed map-header census
+adds five tilde bytes per root, all in slot fields and at the end of their
+bounded measured spans; no map name or description contains one. Whether
+a slot reaches either draw remains Unknown. — TEXT-MAPCORP-119
+Other text was not searched. — `TEXT-TILDE-009` (underline extent partially retracted),
 `TEXT-TILDE2-017`, `TEXT-079`
 
 ## Draw anchors
