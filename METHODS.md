@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3764. Observation: 99. Static analysis: 3162. Mixed: 503.
+Claims labelled: 3775. Observation: 99. Static analysis: 3173. Mixed: 503.
 
 ## Ledger ai
 
@@ -327,7 +327,7 @@ Claims labelled: 3764. Observation: 99. Static analysis: 3162. Mixed: 503.
 | AI-515 | static analysis | ✔ promoted (branch candidate) |
 | AI-516 | static analysis | ✔ promoted (branch candidate) |
 | AI-527 | static analysis | ✔ promoted (branch candidate, amended) |
-| AI-528 | static analysis | ✔ promoted (branch candidate) |
+| AI-528 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-529 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-530 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-531 | static analysis | ✔ promoted (branch candidate, amended) |
@@ -346,6 +346,14 @@ Claims labelled: 3764. Observation: 99. Static analysis: 3162. Mixed: 503.
 | AI-561 | static analysis | ✔ promoted (branch candidate) |
 | AI-562 | static analysis | ✔ promoted (branch candidate) |
 | AI-563 | static analysis | ✔ promoted (branch candidate) |
+| AI-567 | static analysis | ● active |
+| AI-568 | static analysis | ● active |
+| AI-569 | static analysis | ● active |
+| AI-570 | static analysis | ● active |
+| AI-571 | static analysis | ● active |
+| AI-572 | static analysis | ● active |
+| AI-573 | static analysis | ● active |
+| AI-574 | static analysis | ● active |
 | AI-517 | static analysis | ● active (amended) |
 | AI-518 | static analysis | ● active (amended) |
 | AI-519 | static analysis | ● active (amended) |
@@ -363,7 +371,7 @@ Claims labelled: 3764. Observation: 99. Static analysis: 3162. Mixed: 503.
 | AI-545 | static analysis | ● active |
 | AI-546 | static analysis | ● active |
 | AI-547 | static analysis | ● active |
-| AI-548 | static analysis | ● active |
+| AI-548 | static analysis | ● active (amended) |
 | AI-549 | static analysis | ● active |
 | AI-550 | static analysis | ● active |
 
@@ -1489,8 +1497,11 @@ Claims labelled: 3764. Observation: 99. Static analysis: 3162. Mixed: 503.
 | MOVE-141 | static analysis | ✔ promoted |
 | MOVE-142 | static analysis | ✔ promoted |
 | MOVE-144 | static analysis | ✔ promoted (branch candidate) |
-| MOVE-148 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-148 | static analysis | ✔ promoted (branch candidate, amended) |
 | MOVE-149 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-156 | static analysis | ● active |
+| MOVE-157 | static analysis | ● active |
+| MOVE-158 | static analysis | ● active |
 
 ## Ledger pal
 

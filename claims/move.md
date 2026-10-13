@@ -1747,8 +1747,11 @@ callees through route headers and frees, plus all destruction callers, to settle
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MOVE-144 | The census of byte stores to the position bytes `+4` and `+5` finds the stepper, the arrival block, a routine before the stepper and two other routines in the movement module; two are read, the others are receipts (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
-| MOVE-148 | The step bodies `R0039` and `R0047` read mover `+0x70`, `+0x80`, `+0xa6`, `+0xaa`, `+0xac`, `+0xae`, `+0xb0`, `+0xb1` and write `+0x72`, `+0x76`, `+0x80`, `+0xa6`, `+0xa8`, `+0xaa`, `+0xac`; no order-record operand (High). | High | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| MOVE-148 | The step bodies `R0039` and `R0047` read mover `+0x70`, `+0x80`, `+0xa6`, `+0xaa`, `+0xac`, `+0xae`, `+0xb0`, `+0xb1` and write `+0x72`, `+0x76`, `+0x80`, `+0xa6`, `+0xa8`, `+0xaa`, `+0xac`; no order-record operand (High). | High | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | MOVE-149 | The step's arrival block calls the relocation routine `R0044` at `L00117` when the cell record copied from the hash table at manager `+0x540b8` has type 0x1a and two `R0048` checks pass (High for the site). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| MOVE-156 | `R0058`, `R1332`, `R0057`, `R0049`, `R0048`, `R1544` read whole store mover `+0xa6`, `+0x86`..`+0x89`, `+1`, `actor+0x17c`, `+0x180`, claim bits and cell-record slots; `R0048` none. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
+| MOVE-157 | `R0392` and `R0435`, read whole in `MOVE-ALT-019` and `MOVE-ALT-020`, store nothing outside their stack frames; both read the label word array at manager `+0x30000` and return the cell of the least word or 0. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
+| MOVE-158 | The cell-record hash at manager `+0x540b4` has the helpers `L14473` (find or create, 13 zeroed dwords), `R2259` (remove) and `L14472` (set buckets); `L07102` builds a position record (bytes `+0`..`+5`, `+8`). | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 
 ### MOVE-144
 
@@ -1801,6 +1804,8 @@ is in the written set only; the bodies do not read it.
 
 **Unknown.** The mover words the unread callees touch.
 
+**Amended.** `EXP-0551` reads the callees `R0057`, `R0049`, `R0048`, `R0050` and `R0058` whole (`MOVE-156`, `MOVE-158`): they store mover `+0x86`..`+0x89`, `+0xa6`, `+0x72` and `+0x82`..`+0x85`, and `R0048` stores nothing. The step set of this claim is the step bodies' own words; the callees add those words.
+
 ### MOVE-149
 
 At arrival at a cell centre (position bytes `4` and `5` both 0x80) `R0039` looks up the cell
@@ -1818,3 +1823,46 @@ the record type 0x1a as the relocation kind (reused from `MOVE-129`), for the gu
 stores through the calls of `R0044` (`AI-535`).
 
 **Unknown.** The remainder of `R0048` and `R0049`.
+
+**Amended.** `EXP-0551` reads `R0048` and `R0049` whole (`MOVE-156`): `R0048` tests the footprint's plane bytes against mover byte `+5` and stores nothing; `R0049` runs `R0057` over the footprint and returns 0 at the first 0. The Unknown and the Medium for these two guard bodies are settled for their own instructions; the callees named in `MOVE-156` stay unread.
+
+### MOVE-156
+
+Bodies read whole (EN, windows `q-<entry>`; the RU image is the same file). `mover` is `actor+0x154`, `pos` the position record at `actor+0x10`. `n` is the low byte of the actor virtual `[vt+0x1c]` and `kind` the low byte of `[vt+0x20]`; both virtuals resolve to bodies without stores for the 20 vtables of `AI-557`.
+
+**Observation.**
+- `R0058(cell)`: mover word `+0xa6` := `cell`, then for the `n` by `n` cells `cell + col + (row << 8)` (wrapped to 16 bits) the byte `[map+cell+0x20000]` |= 0x80 for kind 3, |= 0x40 for kinds 1 and 2, nothing for other kinds. Callers: `R0053`, `R0047`, and one site in a gap range (`L07126`).
+- `R1332(cell)`: the same cells, the same byte, `&= 0x7f` for kind 3, `&= 0xbf` for kinds 1 and 2; no mover store. Caller: `R0053` (unread).
+- `R0057(x, y)`: key = `y * 256 + x`; `R1537` looks the key up in the hash at manager `+0x540b4`; absent returns 0. It copies the 13-dword record to manager `+0x5402c`; kind 3 returns 0 when record dword `+8` is zero and clears it, kinds 1 and 2 do the same with dword `+4`; it writes the record back through `L14473`, calls `R0453(key)`, and when record dwords `+4`, `+8`, `+0xc`, `+0x10` and bytes `+2`, `+0x2c` are all zero it looks the record up again, stores `[map+key]` := record byte `+0`, `[map+key+0x10000]` := record byte `+1`, calls `R2259(key)` and, when bit 0x10 of the old `[map+key+0x10000]` was set, sets 0x10 in `[map+key+0x10000]` and `[map+key+0x20000]`. It ends with mover `+0x86` := `pos+0`, `+0x87` := `pos+1`, `+0x88` := `pos+4`, `+0x89` := `pos+5` and returns 1. Callers: `L07101`, `R0049`, `R0865`, `R0047`, `R1055`, and a gap site (`L07125`).
+- `R0049`: calls `R0057(actor, x + j, y + i)` over `n` by `n` and returns 0 at the first 0 (no rollback), else 1. Caller: `R0039`.
+- `R0048(cellword, flag)`: for the `n` by `n` cells it tests the byte at `[map + cell + 0x10000]` (flag nonzero) or `[map + cell + 0x20000]` (flag zero), with the row added to the high byte and the column to the low byte of the cell word, against mover byte `+5`; returns 0 at the first nonzero test, else 1. No store. Callers: `R0039`, `R1055`.
+- `R1544`: returns 0 at once when `actor+0x168` is zero. Otherwise, when `pos` bytes `+4`, `+5` are not both 0x80 and mover word `+6` is nonzero, it calls `R0052` on the list object `actor+0x178` with the old `actor+0x17c`, stores the cell (mover word `+6` when `pos` is off centre) in word `+8` of the node it returns and links the node: when `actor+0x17c` is nonzero the node goes to `[actor+0x17c]+4`, otherwise to `actor+0x180`, and `actor+0x17c` := the node (`+0x17c` the tail and `+0x180` the head, as the dynamic list of `MOVE-PLANE-005`); when `actor+0x184` is zero it calls `R1356` and, when mover byte `+0` differs from the answer, stores mover byte `+1` := the answer; it returns 1. Caller: `R2223` only, which has no caller in the registry's edges (`calls.tsv`).
+- `R0050` (`MOVE-121`) is re-read whole: mover `+0x72` := the answer of `R1345`, `+0x82` and `+0x83` := the `pos` cell bytes, `+0x84` and `+0x85` := the `pos` sub-cell bytes; when `R1287` answers 0 and mover word `+0x80` differs from the cell word it calls `R1361` and `R0459`; then it calls `R0458(actor, x, y)` over `n` by `n`; on a 0 answer it stores 0 in the frame local `[ebp-0x20]` and returns 0, else 1. The compiled assertion branch after a 0 answer (`mov edx, 1; test edx, edx; je L15047`, `L15048..L15049`) is not taken, so the stub call of `R2255` at `L15050` is not reached.
+
+**Prior readings.** `MOVE-DOM-024` and `MOVE-100` (High) give the plane byte at `world+0x20000`, the bit rule (class 1 or 2 bit 0x40, class 3 bit 0x80, class 0 neither) and the writers: `R0058` and `R0257` set, `R1332` and `R0046` clear. `TERR-PASS-073` (amended and partially retracted; its writer lists are incomplete) lists the writers of the two block planes. `TERR-STRUCT-069` (High / Unknown) reads the cell record as an MFC map of `0x34`-byte payloads at `world+0x540b4` keyed by the `u16` cell index (`R1537` the find), and `TERR-CELLREC-146` (High / Medium) the payload slots (`+4` the ground occupant, `+8` the air occupant). This card adds the store lists of each body, the mover stores and the callers.
+
+**Inference.** Added to the step set of `MOVE-148` through the step callees of `AI-528`: mover `+0x86`..`+0x89` (`R0057`), `+0xa6` (`R0058`), plus `+0x72`, `+0x82`..`+0x85` (`R0050`). `R1332` is a callee of `R0053`, which is unread. `R1544` (mover `+1`, `actor+0x17c`, `+0x180`) has one caller, `R2223`, and the inventory has no caller of that; the closure connects it to no step body, so `+1` is not added to the step set. The setters of `AI-527` touch `+1`, `+0x7c`, `+0x80`, `+0xa6`, `+0x76`; the shared word with the step callees is `+0xa6`.
+
+**Confidence.** High for the stores of the bodies. Medium for the whole: the path search `R0053` (the only caller of `R1332`) is unread, and so are the callees `R1537`, `R0453`, `R0052`, `R1356`, `R1345`, `R1287`, `R1361`, `R0459`, `R0458`, `R0540` and the virtuals outside the 20 vtables are not read.
+
+**Unknown.** The bodies named; the gap-range sites of `R0058`, `R0057`, `R0050` are read by `MOVE-093` only as a step body.
+
+### MOVE-157
+
+`R0392` and `R0435` are read whole in `MOVE-ALT-019` (High: rings, strict minimum, the `0xffff` sentinel, return 0) and `MOVE-ALT-020` (High / Medium, narrowed by `MOVE-098`: box, 8 rings, two walkers, the 12-entry byte table at `world+0x54186`, the four jump tables read out of the image); `MOVE-097` reads `R0436` (High) and `MOVE-098` the entry arithmetic with `R0279` as truncation. This card re-reads both bodies for stores and adds one fact: neither stores outside its stack frame.
+
+`R0392` (`q-R0392`, `R0392..L15051`, 174 instructions) takes the actor (virtual `[vt+0x1c]`), a centre cell and a limit, scans expanding square rings of cells around the centre, reads the word at `[map + 0x30000 + 2 * (cell & 0xffff)]` for the four mirrored cells of each ring step, keeps the least word and its cell, stops after the first ring whose least word is below 0xffff, and returns that cell, or 0 when the least stays 0xffff. The two halves of its body (footprint 2 and other) are instruction-identical. `R0435` (`q-R0435`, `R0435..L15052`, 429 instructions) takes two actors, reads `pos` bytes `+0`, `+1` and the sizes `[vt+0x1c]` of both, computes the direction code with `R0436` and floating-point offsets (`R0862`, `R0863`, `R0279`), walks up to eight rectangles around the target while reading the same word array (index `((y + 0x180) << 8) + x`, doubled) and the signed byte pairs at manager `+0x54186` and `+0x54187` by direction code, and returns the cell word `y * 256 + x` of the least word found or 0. Neither stores outside its stack frame; callers: `R0053` only (registry and scan agree).
+
+**Confidence.** High for the instructions of both bodies, the four jump tables of `R0435` (`MOVE-ALT-020`), `R0436` (`MOVE-097`) and `R0279` (`MOVE-098`). Medium for `R0862` and `R0863` (cited by `AI-445`; not read here). The entry cell of picker B is narrowed by `MOVE-098`.
+
+**Unknown.** The bodies of `R0862` and `R0863`.
+
+### MOVE-158
+
+`TERR-STRUCT-069` (High / Unknown) reads the cell record as an MFC map at manager `+0x540b4` of `0x34`-byte payloads keyed by the `u16` cell index, `R1537` the find and `R1596` the new node; `TERR-CELLREC-146` (High / Medium) gives the payload slots. This card reads the helpers below.
+
+`L14473` (`q-L14473`, 109 instructions; this = the hash, key word): bucket = `(key & 0xffff) >> 4` modulo `[this+8]`; returns `node+0xc` of the node whose word `+8` equals the key; when absent it allocates the bucket array (`R0747`, zeroed) if `[this+4]` is null, takes a node from the free list `[this+0x10]` (or allocates a block of `[this+0x18]` nodes of 0x40 bytes through `R0540`), increments `[this+0xc]`, zeroes the node, builds 13 zeroed dwords with `L14471`, stores the bucket index at `+4`, the key at `+8` and links it at the bucket head. `R2259` (`q-R2259`, 102 instructions): the same bucket, unlinks the node, calls `L08162` (a `ret`) on the 13-dword value, pushes the node on the free list, decrements `[this+0xc]`; when the count reaches zero it frees every block (`R0525`, `R1355`) and clears `[this+4]`, `+0xc`, `+0x10`, `+0x14`; returns 1, or 0 for an absent key. `L14472` frees `[this+4]`, allocates `n * 4` zeroed bytes when its second argument is nonzero and stores `n` at `[this+8]`. `L14471` zeroes 13 dwords; `R2250` zeroes `n * 0x34` bytes and runs `L14471` per element. `L07102(cellword, tail)` stores the position record: `+0` := low byte, `+1` := high byte, word `+2` := `high * 256 + low`, `+4` := 0x80, `+5` := 0x80, dword `+8` := `tail`; caller `R0923` only.
+
+**Confidence.** High for the bodies. Medium for `R0540`, `R1355`, `R0747`, `R0525` (`AI-573`) The roles of record dwords `+4` (ground occupant) and `+8` (air occupant) are those of `TERR-CELLREC-146`; the bodies here show only the stores.
+
+**Unknown.** The callers of `L14472` and `R2250`; the body of `R1537`.
