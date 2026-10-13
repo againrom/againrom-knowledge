@@ -131,6 +131,18 @@ after a modal result other than `1`. Actual accept/cancel, validation and
 file round-trips remain unobserved. These producer facts establish no game
 currency or gameplay interpretation. — ALM-EDITOR-152, ALM-EDITOR-153
 
+The editor's Players dialog requests the colour word in 0..15, the scalar in 0..2147483647, the control word from a radio
+(0 or 1) and a name of at most 32 characters; the validation result is not tested before OK writes all four for the current player and sets each player's loader ordinal to
+its index plus 1. Add appends a player with control word 1, scalar 5000, colour word and name number equal to the new
+count, and a relation row of 2 at its own slot and 1 elsewhere; the body has no 16-player test. Delete (never the first
+player) drops the pointer without destroying the object, renumbers the ordinals and changes no other player's colour word,
+relation row or any unit or structure owner. An object writes the ordinal of the player object it points to, so the
+objects of a deleted player write its old ordinal and, at reload, bind to whichever player then holds that ordinal
+(Medium; the type-4 structure arm of the reader is unread). The Diplomacy dialog edits the current player's own 16-word row only, through 0->1, 1->0, 2->2 and any other
+value->0 in both directions, mirrors nothing into other rows, and writes word 0 for a row at or beyond the roster count.
+The reader and writer copy the 16 words without normalising them; the installed 357 records hold only 0, 1 and 2.
+— ALM-DLGPLAYERS-286, ALM-DLGPLAYERS-287, ALM-DLGPLAYERS-288, ALM-DLGPLAYERS-289, ALM-ROSTERIO-292
+
 A record's **physical slot + 1** is what type-4 `+0x0e` and type-6 `+0x14` store
 (`ALM-OWN-039`); the loader itself writes `slot+1` to `player+0x04`. The
 `+0x00` color slot is a separate value.

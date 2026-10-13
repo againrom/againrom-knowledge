@@ -304,7 +304,9 @@ A save can also change records of a loaded map:
   when the destination lies inside the source range; its byte tails are unread
   (Medium). Five rel32 call sites of the caster removal exist (the writer and
   four loops that compare a type-9 entry's `+0x12` with an object's `+4` or walk
-  a loot's dword array, Medium); no pointer-table caller search was run. A name
+  a loot's dword array, Medium); a dword scan of the program sections for the editor's dialog handlers found only
+  message maps and vtables (`ALM-DLGPLAYERS-286`). The writer emits exactly 16 relation words per player
+  (`ALM-ROSTERIO-292`). A name
   listing for `Map Editor*` and `*edit*` to depth 2 finds no map editor program
   in the RU root. — ALM-SAVE-263, ALM-SAVE-264
 - Every action node, condition node and trigger of type 7 is requested whole

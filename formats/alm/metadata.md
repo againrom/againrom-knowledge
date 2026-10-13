@@ -342,16 +342,22 @@ which hold the seven text slots, are written by no store in the creation path.
 The block comes from the CRT small-block heap, which does not clear it (the
 threshold value is the image's; a runtime store through an indirect call is not
 excluded), and the writer saves all 64 and 512 bytes unchanged, so they can
-carry heap residue. High that no store clears the text region; Medium for the
-name tail (the copy `R0260` is read except its tail) and for a session's bytes being
+carry heap residue. High that no store clears the text region and that the name copy `R0260` stores nothing after the NUL (it is read whole); Medium for a session's bytes being
 non-zero. In the shipped maps the bytes after the first NUL of the name are
 non-zero in 29 of 38 EN and 29 of 34 RU maps; that is a shipped-file
-observation, not the editor's output. — ALM-NEWMAP-236, ALM-NEWMAP-257, ALM-SAVE-263
+observation, not the editor's output. — ALM-NEWMAP-236, ALM-NEWMAP-257, ALM-SAVE-263, ALM-STRCOPY-293
+
+The editor's Global description dialog (menu 0x8057) writes the name at `E+0x94`, the text region at `E+0xdc`, `E+0xd4`
+(file `+0x70`, range 1..50) and `E+0xd8` (file `+0x74`, range 1..9999) on OK and no other type-0 field. The two strings have no
+program-side length bound (Medium: the edit controls' limits are unread), and each is stored through its NUL only, so the
+bytes after the NUL keep their earlier values. The Map Information dialog (menu 0x8056) displays counts and stores nothing
+into the map object (Medium: its helpers are unread). The reader's defaults for name, text, `+0x70` and `+0x74` run only
+when no type-0 record was read (Medium). — ALM-DLGINFO-290, ALM-DLGINFO-291, ALM-STRCOPY-293
 
 The new map has two players, `Self` and `Enemy`. A player record is 76 bytes:
 `+0x08` (1, then 2), `+0x30` (0, then 1), `+0x0c` (0, 0), the 32-byte name
-(bytes after its NUL not stored by the copy, Medium: the copy's tail is unread) and sixteen 2-byte words (player 1:
-2 then fifteen 1; player 2: 1, 2, then fourteen 1). — ALM-NEWMAP-258, ALM-SAVE-263
+(bytes after its NUL not stored by the copy, High) and sixteen 2-byte words (player 1:
+2 then fifteen 1; player 2: 1, 2, then fourteen 1). — ALM-NEWMAP-258, ALM-SAVE-263, ALM-STRCOPY-293
 
 The height tool is separate from terrain painting. A drag sets the anchor
 cell's height to the vertical drag in pixels added to the anchor height,

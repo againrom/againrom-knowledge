@@ -1714,7 +1714,7 @@ In 140.alm the Rood Glaen body (unit 443, authored hp 0) and the tower near it a
 | ALM-SAVE-260 | Reader case 9 drops a type-9 entry when L15129 (L15130) finds no object whose footprint holds the cell; of 206 EN and 60 RU entries, 48 and 11 sit on a type-4 record's cell, 158 and 49 are undecided; none is proved kept or dropped. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
 | ALM-SAVE-261 | L14520 returns the first object whose word +4 equals its argument, 0 included; no installed unit or plain type-4 record has id 0 (the type-4 object id is inferred), so 137 EN and 133 RU owner-0 loot are Medium. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
 | ALM-SAVE-262 | A type-4 record is 20 bytes, or 28 when its dword +8 is 0x21; the reader makes no structure for a cell at or below 7 or outside the width-8 and height-8 bounds; all 71 installed payloads parse exactly. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
-| ALM-SAVE-263 | L15212 takes the backward path when dest lies inside the source range, R0260 copies to the NUL, L15251 zero-fills a new array, and L15219 gives a loaded player a vtable, +0x0c, +0x30 and a zeroed 32-word array. | High / Medium | ● active | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
+| ALM-SAVE-263 | L15212 takes the backward path when dest lies inside the source range, R0260 copies to the NUL, L15251 zero-fills a new array, and L15219 gives a loaded player a vtable, +0x0c, +0x30 and a zeroed 32-word array. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
 | ALM-SAVE-264 | L14524 has five rel32 callers in .text; four sit in loops over the type-9 array or a loot's dword array; the open handler L02376 builds the map through L02308 and L15303 (unread); the RU root has no map editor program. | Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
 | ALM-SAVE-268 | Reader case 4 builds a plain structure via L02332: +4 and the hash key are the wire id, +0x1a the kind, +6/+0xa cell*256+0x80, +0x12 the owner; class text "CStructure", 0x106 bytes; the body read has no test refusing id 0. | High / Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
 | ALM-SAVE-269 | A kind 0x21 record is built by L02333: +4 is the smallest unused id from 1, the hash key the first free key from 1, never the wire id; its two extra dwords become +0x106 and +0x10a; the class name text "CVerticalWoodenBridge" is Medium. | High / Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
@@ -2071,7 +2071,7 @@ middle (`L15242`..`L15243`) was read by its call list only.
 **Unknown.** Other writers of `E+0x94` and `E+0xdc` between creation and save (the map-properties dialogs write
 them by design; no census of writers was made). The allocator's callee `L15244` past `L15245`. The copy `R0260` and the player base constructor `L15246` (not read).
 
-**Amended.** `ALM-SAVE-263` reads `R0260` as a copy to the NUL (the part from `L15304` to the exit `L15305` is unread, so the Medium for the name tail stays) and `L15246` (a vtable and four zero words).
+**Amended.** `ALM-SAVE-263` reads `R0260` as a copy to the NUL (the part from `L15304` to the exit `L15305` is unread, so the Medium for the name tail stays) and `L15246` (a vtable and four zero words). `ALM-STRCOPY-293` reads the copy whole: the name tail is not stored by it (High).
 
 ### ALM-NEWMAP-258
 
@@ -2091,7 +2091,7 @@ comes from `L15251`, not read) and for the copy semantics of `R0260` (not read; 
 
 **Unknown.** The constructor `L15219` that the reader uses for loaded players. The copy `R0260` and the player base constructor `L15246` (not read).
 
-**Amended.** `ALM-SAVE-263` reads `L15251`, `L15246` and `L15219`. Item 1's "0x20 bytes" is a count of 0x20 words: `L15251(this+0x34, 0x20, -1)` allocates `2n` bytes (0x40) and sets size and capacity to `n = 0x20`, zero-filled before `L14488` sets sixteen words. The Medium for the copy `R0260` stays (its tail is unread). Reservation: whether the writer's sixteen-word emission depends on the array count 0x20 or on the 16 words after the first 16 is Unknown.
+**Amended.** `ALM-SAVE-263` reads `L15251`, `L15246` and `L15219`. Item 1's "0x20 bytes" is a count of 0x20 words: `L15251(this+0x34, 0x20, -1)` allocates `2n` bytes (0x40) and sets size and capacity to `n = 0x20`, zero-filled before `L14488` sets sixteen words. The Medium for the copy `R0260` stays (its tail is unread; `ALM-STRCOPY-293` reads it whole, and the writer's emission is 16 words, `ALM-ROSTERIO-292`). Reservation: whether the writer's sixteen-word emission depends on the array count 0x20 or on the 16 words after the first 16 is Unknown.
 
 ### ALM-SAVE-260
 
@@ -2157,6 +2157,8 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 **Unknown.** The jump-table tails of `L15212` and the tail of `R0260`. Whether the writer's sixteen-word emission depends on the array count 0x20 or on the 16 words after the first 16.
 
 **Answers.** The Unknowns of `ALM-SAVE-254` on the backward branch of `L15212`, of `ALM-SAVE-256` and `ALM-NEWMAP-258` on `L15219`, `L15246`, `L15251`, and of `ALM-NEWMAP-257` on the copy `R0260`, are answered here as stated.
+
+**Amended.** `ALM-STRCOPY-293` reads `R0260` whole: it stores through the NUL and nothing past it, so the unread tail of item 2 is settled. `ALM-ROSTERIO-292` reads the writer's type-5 emission: 16 words from the data pointer with bound 0x10, independent of the array count 0x20.
 
 ### ALM-SAVE-264
 
@@ -2576,3 +2578,173 @@ Population: the EN `Map Editor.exe` (SHA-256 as in `ALM-EDITDISP-277`), static: 
 
 **Unknown.** The owner of the list at `this+0xdc` (the map's script lists, or a copy) and whether it is written back; the two routines that call the managers (`L15643`, `L15642`) and the command that reaches them; the selection handlers (`L15661`, `L15662`), the Validate handlers (`L15644`, `L15645`), the type-combo handlers (`L15663`, `L15664`), the other edit handlers; the literals `L15652`, `L15653`, `L15650`, `L15651`; the opcode lists and defaults; how a working node's type code and ten codes are set; every question on triggers (no trigger dialog, handler or record write was located: `TRIG-*-113`..`116` are not used).
 
+## Map editor: players and map-information dialogs
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`), static
+reading. The RU root has no editor program in the name listings of earlier experiments. Addresses are the editor's.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ALM-DLGPLAYERS-286 | The EN editor's Players command (menu 0x8042) runs L02360, which opens the template-225 dialog; its radios, combo, Add, Delete and Diplomacy controls reach L15665, L15666, L15667, L02367, L15668 and L15669. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-DLGPLAYERS-287 | The Players dialog requests +0x08 in 0..15, +0x0c in 0..0x7fffffff and a name of at most 32 characters; OK stores +0x30, +0x0c, +0x08 and the name and sets +0x04 to index+1, validated or not (Medium). | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-DLGPLAYERS-288 | Add appends a player (+0x30 1, +0x0c 5000, name New Player N) with no 16-player test; Delete drops a non-first player's pointer without destroying it and touches no owner; a deleted slot's objects rebind at reload (Medium). | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-DLGPLAYERS-289 | The Diplomacy dialog (template 270) shows and writes the current player's 16 relation words only, through 0->1, 1->0, 2->2 and other->0 on both directions; it mirrors nothing into other rows and Cancel writes nothing. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-DLGINFO-290 | The Global description dialog (menu 0x8057) writes the map name at E+0x94, the text region at E+0xdc, E+0xd8 (1..9999) and E+0xd4 (1..50) and nothing else; strings have no program-side length bound. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-DLGINFO-291 | The Map Information dialog (menu 0x8056) is a display of counts the handler computes; its handler stores nothing into the map object and ignores the modal result. | Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-ROSTERIO-292 | The type-5 reader and writer copy +0x08, +0x30, +0x0c, the 32-byte name and exactly 16 relation words without normalising them; 357 installed records (38 EN, 33 RU maps) hold 0, 1 or 2 words only. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+| ALM-STRCOPY-293 | Copy R0260 stores a string through its NUL and nothing after it, so a dialog edit or a new map leaves the bytes after a name's or text's NUL as they were; the reader's type-0 defaults run only when no type-0 record was read. | High / Medium | ● active | [EXP-0561](../experiments/EXP-0561-editor-players/) |
+
+### ALM-DLGPLAYERS-286
+
+Message-map entries `{0x111, 0, id, last id, sig 0xc, pfn}` with a `JMP rel32` thunk in code-region as the pfn.
+
+1. Menu 129 (`&Players` 0x8042, `&Map Information` 0x8056, `Global des&cription and settings` 0x8057) is routed
+   by entries at `L15670`, `L15671` and `L15672` to thunks `L15673`, `L15674` and `L15675`, then to
+   handlers `L02360`, `L15505` and `L15506`.
+2. Handler `L02360` builds the dialog on the stack (thunk `L15676` to constructor `L15677`, template 225,
+   program text `Modify Player`), stores the map object's roster array address in dialog `+0x198` and the current
+   index in `+0x19c`, and calls the modal loop (`L15570`).
+3. Dialog message map `L15678`: control 0x405 (Computer radio) to `L15665`, 0x404 (Human radio) to `L15666`,
+   0x40d with code 1 (selection change) to `L15667`, 0x40e (Add) to `L02367`, 0x40f (Delete) to `L15668`,
+   0x444 (Diplomacy) to `L15669`. OnInitDialog is `L15679`, OnOK `L15680`, data exchange `L02365`.
+4. Raw scans over the program: a rel32 scan of `.text` for 25 values finds 24 bodies, each referenced once, from its
+   thunk; `L15681` (the 25th value) has no reference and was not dword-scanned. Dword scans of `.text` and `.data` for
+   the 49 values (24 bodies, 24 thunks, `L15682`) find 0 hits; the `.rdata` scan finds 19 hits, all message maps and
+   vtables: 17 lie in tables listed in windows `w04`, `w11`, `w20`, `w27` and `w31`, and two (`L15683`, `L15684`)
+   lie past the end of `w11` and are classified by position.
+
+**Confidence.** High for the routing and the handler bodies read whole. Medium for "no other reference": the scans
+see a rel32 target or a four-byte equal value, not a computed address or a base-plus-offset reference.
+
+**Unknown.** Vtable slots `L15685`, `L15686`, `L15687` and `L15688` (not read); the edit controls' own
+text limits; the 148 `.text` hits of the displacement scan for `+0x94`/`+0xdc` (not classified).
+
+### ALM-DLGPLAYERS-287
+
+Dialog members and their targets: `+0x188` (control 0x40a, spin 0..15) to player `+0x08`; `+0x18c` (0x407, 0..0x7fffffff)
+to `+0x0c`; `+0x190` (CString, combo 0x40d, `DDV_MaxChars` 0x20) to the name at `+0x10`. `+0x194` is a plain integer
+that `L15665` sets to 1 and `L15666` to 0, that initialisation and selection set from `+0x30`, and that OK writes back
+to `+0x30`; the data exchange `L02365` has no routine for it. The ranges and the limit are arguments of the validation
+calls `L15689` and `L15690`. The spin messages carry a 16-bit upper bound in the lParam low word, 0x9680, which is
+10,000,000 truncated to 16 bits (the meaning of that message is an inference).
+
+- Selection change (`L15667`): saves `+0x30`, `+0x0c`, `+0x08` of the current player, writes the name only for
+  index other than 0, refreshes the combo item and reloads the fields.
+- OK (`L15680`): `UpdateData(TRUE)` (`L15573`, unread); its result is not tested (`L15691` is followed at once by the
+  member loads), as in the selection handler and Add. Then `+0x30`, `+0x0c`, `+0x08` and the name for the current player
+  unconditionally, then `+0x04 = i + 1` for every player, then the base OK (`L15571`). The map object's current
+  player index (`E+0x328`) becomes the dialog's index + 1 only on OK.
+- A 32-character name leaves no room for a NUL inside the 32 bytes; the copy (`ALM-STRCOPY-293`) then stores its NUL
+  on the low byte of `+0x30` (inference; the validity of `DDV_MaxChars` in the library body was not read).
+
+**Confidence.** High for the dialog members, the validation arguments and the OK order. Medium for what OK stores when
+validation fails, and for the ranges and the 32-character limit as enforced values: `L15573` and the failure tails of
+`L15689` and `L15690` are unread (entry bodies of `L15692`, `L15693`, `L15690`, `L15689` read, tails not),
+as is the name-overflow inference. Nothing was run.
+
+**Unknown.** `L15573` and the library tails above; the edit controls' own limits; what OK stores after a refused value.
+
+### ALM-DLGPLAYERS-288
+
+Let n be the roster count before the action.
+
+- Add (`L02367`): saves the current player (name unconditionally), builds `new(0x48)` through `L15219`, appends it
+  with array SetSize(n+1) (`L14490`, `L15694`), then sets `+0x30` 1, `+0x0c` 5000, `+0x04` n+2 (OK renumbers it to
+  n+1), `+0x08` n+1, relation word `i` 2 when `i` equals n and 1 otherwise, and the name `New Player %d` (program
+  text at `L15695`) with n+1. The other players are untouched. The body has no test of n against 16; a word at
+  index n of 16 or more is not on the wire (`ALM-ROSTERIO-292`).
+- Delete (`L15668`): does nothing when the current index is 0 or less. Otherwise it moves the pointer array down over
+  the slot and lowers the count by 1, with no destructor and no free; then sets `+0x04 = i + 1` for the remaining
+  players. The other players' `+0x08` and relation words, and every unit and structure, are not touched.
+- The writer emits an object's owner as the dword `+0x04` of the player object at `[object+0x12]` (windows for
+  structures and units). A deleted player's objects keep the pointer, so they write its old `+0x04`; objects of later
+  players write the shifted ordinal. For a unit, the reader (type-6 arm, window `w47`) binds `+0x12` to the roster entry
+  whose ordinal matches, else to `E+0x3c`, the first roster entry (type-5 window `w41` and `ALM-SAVE-256`). The type-4
+  structure arm of the reader was not read (`ALM-SAVE-268` states `+0x12` as the owner without the lookup).
+
+**Confidence.** High for the Add and Delete bodies and the writer's emission. Medium for the composed outcome at reload
+(units of a deleted player rebind to whichever player holds that ordinal, else to the first): the unit arm window lies
+beyond the experiment's window cap. Unknown for structures at reload (arm unread).
+
+**Unknown.** Whether the pointer to a deleted player is freed elsewhere; the SetSize branch for a size above the
+current capacity (branch at `L15696`).
+
+### ALM-DLGPLAYERS-289
+
+- The dialog (class constructor `L15697`, template 270: program text `Diplomacy relations`, radios `Enemy`,
+  `Neutral`, `Aliance`) holds 16 int members, each starting at -1; its message map `L15698` is empty.
+- Handler `L15669` shows 16 rows: a name for each index below the roster count, each radio set from the current
+  player's word through `f` (`L15699`): 0 to 1, 1 to 0, 2 to 2, anything else to 0.
+- OK writes all 16 words of the current player's row through `g` (`L15700`): 0 to 1, 1 to 0, 2 to 2, anything else
+  to 0. A row at or beyond the roster count is unchecked (-1) and so writes word 0. The player's own row is editable.
+  Other players' rows are not written. Cancel writes nothing.
+- A stored word above 2 shows as radio 0 and is written back as 1.
+
+**Confidence.** High for the handler read whole to its return and for both mappings. Medium for the library DDX
+bodies.
+
+**Unknown.** The order of the three radios in the template against the member values 0, 1, 2; the tails of the library
+exchange routines.
+
+### ALM-DLGINFO-290
+
+Handler `L15506` (read whole to `L15701`) copies `E+0x94` and `E+0xdc` into CStrings and `E+0xd8`, `E+0xd4` into
+ints, opens the dialog (class `L15702`, template 274: program text `Global map settings`, labels `Map Name`,
+`Map Description`, `Rec. Players`, `Min. Level`), and on OK calls `R0260(E+0x94, name)`, `R0260(E+0xdc,
+text)`, then stores `E+0xd8` and `E+0xd4`.
+
+- Data exchange `L15703`: CString controls 0x457 (name) and 0x458 (text) with no `DDV_MaxChars`; int 0x459 for
+  `E+0xd4` with range 1..50 and int 0x45a for `E+0xd8` with range 1..9999 (file `+0x70` and `+0x74`; `ALM-NEWMAP-236`).
+- No other type-0 field (`E+0x18`..`E+0x24`) is written by the dialog.
+- The name area is 64 bytes and the text region 512: a name of 64 or more characters spills through `E+0xd4`,
+  `E+0xd8` and into the text region; a text of 512 or more characters spills beyond `E+0x2db` (inference from the
+  copy, the sizes and the missing bound).
+
+**Confidence.** High for the writes and ranges. Medium for the absence of any bound: the edit controls' own text
+limits were not read.
+
+**Unknown.** The edit controls' limits; the order of the dialog's own controls on screen.
+
+### ALM-DLGINFO-291
+
+Handler `L15505` (read whole) counts tiles and objects, passes the counts into the dialog's members (class
+`L15704`, template 269, 16 int-only exchange entries, empty message map, base OK), opens it, ignores the result
+and stores nothing into the map object.
+
+**Confidence.** Medium: helpers `L15705`, `L15706`, `L15707`, `L15708`, `L15709` and the target of thunk
+`L15682` were not read, so a store through them is not excluded.
+
+**Unknown.** What the 16 members display.
+
+### ALM-ROSTERIO-292
+
+1. Reader case 5 (`L15710` and its window) copies `+0x08`, `+0x30`, `+0x0c`, the 32-byte name and 16 words from
+   the stream into the player. The writer (`L02295`, emission from `L15711`) writes the same fields, the 16 words
+   from the data pointer with bound 0x10, whatever the array count (0x20). No diagonal forcing, resizing or clamping
+   was seen in these windows. This answers the Unknown of `ALM-SAVE-263` on the emission.
+2. Corpus, 72 installed maps (38 EN, 34 RU; one RU map has no type 5), derived counts: 357 type-5 records (191 EN, 166
+   RU); every payload a multiple of 76; 9 records whose word at their own index is not 2 (5 EN, 4 RU); 0 words above
+   2; all 357 records hold a word 0; 105 asymmetric pairs (59 EN, 46 RU); `+0x30` 0 in 56 and 1 in 301, no other
+   value; `+0x0c` 0 in 97 and non-zero in 260; 123 names with a non-zero byte after the NUL; 0 names without a NUL.
+   The map's count word equals the type-5 record count in 71 of 71 maps with a type 5.
+
+**Confidence.** High for the reader and writer windows read and for the corpus counts. Medium for "no
+normalisation anywhere": the reader's record-count bound and the code before `L15710` were not read.
+
+**Unknown.** Other writers of roster fields (no displacement scan for roster offsets was run).
+
+### ALM-STRCOPY-293
+
+1. `R0260` (read whole) is an unbounded string copy: it stores bytes through the NUL and nothing past it, no
+   padding. This settles the unread tail of `ALM-SAVE-263` item 2 and the Medium for the name tail of
+   `ALM-NEWMAP-257`.
+2. A dialog edit of the name or text region (`ALM-DLGINFO-290`, `ALM-DLGPLAYERS-287`) leaves the earlier bytes after
+   the NUL. In 72 installed maps, 58 type-0 names (29 EN, 29 RU) hold a non-zero byte after the NUL; the text region
+   has its first NUL at byte 0 in 67 maps and at byte 1..63 in 5.
+3. The reader's defaults (name byte 0 and text byte 0 set to 0, `E+0xd4` and `E+0xd8` set to 1) are stored only when no
+   type-0 record was read; a second initialiser at `L15712` stores the same defaults.
+
+**Confidence.** High for item 1 and the corpus counts of item 2. Medium for item 3: the reader window that shows
+the condition lies beyond the window cap; that `[ebp-0x1c]` is the type-0 flag is an inference from the stores.
+
+**Unknown.** Whether another code path writes these strings.

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3825. Observation: 99. Static analysis: 3223. Mixed: 503.
+Claims labelled: 3833. Observation: 99. Static analysis: 3231. Mixed: 503.
 
 ## Ledger ai
 
@@ -548,7 +548,7 @@ Claims labelled: 3825. Observation: 99. Static analysis: 3223. Mixed: 503.
 | ALM-SAVE-260 | static analysis | ● active (amended) |
 | ALM-SAVE-261 | static analysis | ● active (amended) |
 | ALM-SAVE-262 | static analysis | ● active (amended) |
-| ALM-SAVE-263 | static analysis | ● active |
+| ALM-SAVE-263 | static analysis | ● active (amended) |
 | ALM-SAVE-264 | static analysis | ● active (amended) |
 | ALM-SAVE-268 | static analysis | ● active |
 | ALM-SAVE-269 | static analysis | ● active |
@@ -569,6 +569,14 @@ Claims labelled: 3825. Observation: 99. Static analysis: 3223. Mixed: 503.
 | ALM-EDITUNIT-278 | static analysis | ● active |
 | ALM-EDITDISP-279 | static analysis | ● active |
 | ALM-EDITNODE-280 | static analysis | ● active |
+| ALM-DLGPLAYERS-286 | static analysis | ● active |
+| ALM-DLGPLAYERS-287 | static analysis | ● active |
+| ALM-DLGPLAYERS-288 | static analysis | ● active |
+| ALM-DLGPLAYERS-289 | static analysis | ● active |
+| ALM-DLGINFO-290 | static analysis | ● active |
+| ALM-DLGINFO-291 | static analysis | ● active |
+| ALM-ROSTERIO-292 | static analysis | ● active |
+| ALM-STRCOPY-293 | static analysis | ● active |
 
 ## Ledger anim
 
