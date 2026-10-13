@@ -66,7 +66,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 | MOVE-GATE-039 | (rom.exe) No actor is displaced except from inside one call of the order machine, so an actor the machine refuses cannot move at all. | High / Medium | ● active (amended) | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MOVE-STEP-040 | (rom.exe) The refusal begins on a cell centre, so a step already in flight completes. | High | ● active | [EXP-0179](../experiments/EXP-0179-effect-action/) |
 | MOVE-EFFLIST-041 | (rom.exe) No routine in the movement path reads the drawable's effect list, so the list is not a second immobilisation mechanism. | High | ● active | [EXP-0182](../experiments/EXP-0182-effect-at-actor/) |
-| MOVE-072 | Movement rule recorded under MOVE-072. | High / Medium | ● active | [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md) |
+| MOVE-072 | Movement rule recorded under MOVE-072. | High / Medium | ● active (amended) | [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md) |
 | MOVE-073 | Movement rule recorded under MOVE-073. | High / Medium / Unknown | ● active | [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md) |
 
 ### MOVE-SEARCH-001
@@ -510,6 +510,8 @@ an order arm" is Medium until those callers are found.
 **Original status.** ● active
 
 **Evidence.** [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md)
+
+**Amended.** `AI-588` reads `R1352` whole and finds the `mover+0x90` := 0 store at `L06949` in its body, so the routine attribution of that one site, Medium above, is read in the body. The other four sites' attribution stays Medium.
 
 ### MOVE-073
 

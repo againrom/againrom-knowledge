@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3775. Observation: 99. Static analysis: 3173. Mixed: 503.
+Claims labelled: 3780. Observation: 99. Static analysis: 3178. Mixed: 503.
 
 ## Ledger ai
 
@@ -347,13 +347,18 @@ Claims labelled: 3775. Observation: 99. Static analysis: 3173. Mixed: 503.
 | AI-562 | static analysis | ✔ promoted (branch candidate) |
 | AI-563 | static analysis | ✔ promoted (branch candidate) |
 | AI-567 | static analysis | ● active |
-| AI-568 | static analysis | ● active |
+| AI-568 | static analysis | ● active (partially retracted) |
 | AI-569 | static analysis | ● active |
 | AI-570 | static analysis | ● active |
 | AI-571 | static analysis | ● active |
 | AI-572 | static analysis | ● active |
 | AI-573 | static analysis | ● active |
-| AI-574 | static analysis | ● active |
+| AI-574 | static analysis | ● active (amended) |
+| AI-585 | static analysis | ● active |
+| AI-586 | static analysis | ● active |
+| AI-587 | static analysis | ● active |
+| AI-588 | static analysis | ● active |
+| AI-589 | static analysis | ● active |
 | AI-517 | static analysis | ● active (amended) |
 | AI-518 | static analysis | ● active (amended) |
 | AI-519 | static analysis | ● active (amended) |
@@ -1442,7 +1447,7 @@ Claims labelled: 3775. Observation: 99. Static analysis: 3173. Mixed: 503.
 | MOVE-GATE-039 | static analysis | ● active (amended) |
 | MOVE-STEP-040 | static analysis | ● active |
 | MOVE-EFFLIST-041 | static analysis | ● active |
-| MOVE-072 | static analysis | ● active |
+| MOVE-072 | static analysis | ● active (amended) |
 | MOVE-073 | static analysis | ● active |
 | MOVE-TURN-044 | static analysis | ✔ promoted |
 | MOVE-RATE-052 | static analysis | ✔ promoted |

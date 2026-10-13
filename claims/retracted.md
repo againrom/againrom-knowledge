@@ -1430,3 +1430,9 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `AI-499` (the step-routine store clause only; the arms, the entry test and the tail stores stand) | Verbatim: "The step `R0039` stores `mover+0x98` (`L00161`, `L00162`, `L01720` in the window of `R0178`)" | Medium | [EXP-0546](../experiments/EXP-0546-order-machine-step/), AI-510 | `R0039` is read whole (window `a03`) and stores no `mover+0x98`; the three stores are in `R0043`, `R0055` and `R0178`. | **REFUTED** - partially retracted |
+
+## EXP-0553: reach of the gap code
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `AI-568` (the reach inference only; the counts and the call-site comparison stand) | Verbatim: "the inventory's closure (`AI-567`) omits code that the order machine owns, reached by pointer tables or by no direct site" | Medium | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/), AI-586 | In the scans of `AI-586` no VA, RVA or offset slot holds a gap function's entry except 11 VA dwords, and no inventory instruction start is shown to call into the gap code (2 of 3 inventory sites are instruction interiors, 1 unchecked); that the order machine owns the code, and that tables reach it, are not shown. The 159 of 182 gap functions without an incoming edge have no known reach. | **NARROWED** - partially retracted |
