@@ -339,7 +339,7 @@ Parameter **type codes** (`ALM-TRIG-046`), and what a value of that type names:
 | 4 | `Target_Unit` | the type-6 record's `+0x40` unit id |
 | 5 / 6 | `X` / `Y` | a plain tile coordinate in `[0,W)×[0,H)` for installed records |
 | 7 | `Const` | the literal the `.ini` declares for this variant; it is what selects among the eleven signatures sharing opcode 6 |
-| 8 | `Target_Item` | domain Unknown (values 2..36) |
+| 8 | `Target_Item` | the binder stores the low word of `V + 0xe18` (High, `TRIG-ITEMBIND-121`); V 0..231 decodes to class 14, row 24 + V; completed creation, pack traversal, first-match order and whole-pack absence are Medium (`TRIG-ITEMKEY-124`); installed values 2..36, rows 26..60 (`TRIG-ITEMCORPUS-125`) |
 | 9 | `Target_Structure` | the type-4 record's `+0x12` word |
 
 `Target_Building` is declared by the editor and placed by no shipped map.

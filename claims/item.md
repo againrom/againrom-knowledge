@@ -1033,7 +1033,7 @@ on this code read is not independent corroboration.
 | ITEM-SPAWN-026 | A sack has a sixth origin, the `.alm`, and on a single-player campaign map it is the only one that runs at load. | High | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
 | ITEM-SPAWN-027 | The random treasure scatter runs on multiplayer maps only, at both of its call sites, so a campaign map has authored sacks and no random ones. | High | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
 | ITEM-OWNED-028 | A `.alm` type-8 record whose `+0x04` is non-zero is not a sack: it stocks an actor that already exists. | High / Medium | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
-| ITEM-CODE-029 | An authored item is a packed `u16`, and its bits 8..11, the nibble below the top one, pick the C++ class. | High / Unknown | ● active | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
+| ITEM-CODE-029 | An authored item is a packed `u16`, and its bits 8..11, the nibble below the top one, pick the C++ class. | High / Unknown | ● active (amended) | [EXP-0128](../experiments/EXP-0128-alm-items-section/) |
 
 ### ITEM-SPAWN-026
 
@@ -1151,6 +1151,8 @@ a class table read from `CRuntimeClass` records in another experiment.
 
 **Unknown.** The meaning of the three ctor arguments: they are read here and
 not followed into `Data.bin`.
+
+**Amended.** `ITEM-MAGROW-177` reads the class-14 constructor `R0972`: its arguments are the kind 14 and the index byte, which the read instructions of `R0891` check against the MagicItems count. Completed row binding and code persistence remain Medium: `L15948`, `R0992`, `[vtable+0x4c]` and the initializer tail past `L15949` are unread. The constructors of classes 1 to 13 stay unread.
 
 ## Humans spawn equipment and armour slots
 
@@ -3576,3 +3578,23 @@ an image-wide admission, alias or UI census.
 
 **Unknown.** Ordinary reach of nonnull mismatched-slot arguments, callback
 changes to slots, non-Weapon overrides and exceptional completion.
+
+## Class-14 item row binding
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-MAGROW-177 | The class-14 initializer checks the MagicItems row count and assigns an in-range code word; completed row binding and code persistence are Medium. Its invalid-row path posts an error; the composed row-less outcome is Medium. | High / Medium | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
+
+### ITEM-MAGROW-177
+
+Population: EN `rom.exe` (SHA-256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`; RU `ROM.EXE` has the same SHA-256). Read: class-14 constructor `R0972` (`w08`), partial `R0891` through `L15949 MOV esp,ebp` (`w09`), `R0667`, `R0925`, `L09148`, `R1347` and program text `L15950` (`w10`), `R2275` (`w11`), import slot `L03535` and its name (`w12`, `w13`). The initializer's remaining epilogue and the factory `R0520` past `L15951 POP ebp` are unread.
+
+1. `R0972(this, 0xe, row)` calls base constructor `R0923`, sets vtable `L04580`, `+0x3c` = 0, word `+0x40` = 0, word `+0x42` = 1, bytes `+0x44`, `+0x45`, `+0x46` = 0, byte `+0x0c` = row, word `+0x48` = 0, word `+0x4a` = 1, `+0x08` = 0 and byte `+0x4c` = 0, calls `R0891(0xe)` and has an object-return path. Completion of its callee is not established by that path.
+2. `R0891` compares row byte `+0x0c` with `R0925` on collection `L04587` (MagicItems, `ITEM-DEF-002`), which returns the dword at collection `+8`.
+3. Row at or past that count: `Error - creating invalid Item` (`L15950`, program text) goes to `R1347`, which calls `R2275`: the text is copied into a new buffer (`R0722`) and posted with `PostMessageA` (import slot `L03535`) to window `[L06446]` as message `0x471`. The branch skips the in-range stores and virtual `[vtable+0x4c]` and jumps to the partial tail. Before the unread tail, `+0x3c`, `+0x40` and `+0x44` retain the constructor's 0. A completed object retaining these zeros is Medium, conditional on completion of the unread tail.
+4. Row below the count: `+0x3c` = `L09148(row)` (delegating to unread `L15948`); byte `+0x44` = 3, 5 or 4 by three compares on the row's `+4` text; at `L04652`, word `+0x40` = `R0667(0xe, +0x45, +0x46, row)` = `(material << 12) | (class << 8) | (shape << 5) | row`, each argument masked to 8 bits, giving the observed assignment `0x0e00 | row`. This precedes unread `R0992` when the row's count at `+0x3c` is positive, then unread virtual `[vtable+0x4c]`. Completed row binding and final code-word persistence are Medium.
+5. With shipped count 49 (`ITEM-NAMELIMIT-042`, Medium), rows 49..255 take item 3's branch: V 25..231 in `TRIG-ITEMKEY-124`. The composed result that instant 12 hands an object with code 0 and no row to `R0929` is Medium; the add virtual and later behavior of that object are unread.
+
+**Confidence.** **High** for the initial stores, comparison, message-post sequence, observed in-range code-word assignment and subsequent calls. **Medium** for the completed in-range object and row binding, the completed invalid-row object and item 5. The body extents do not establish the missing return instructions. Count 49 is reused at Medium; the downstream add path cannot raise the composed grade.
+
+**Unknown.** `R0891` past `L15949`, `R0520` past `L15951`, row accessor `L15948`, `R0992`, virtual `[vtable+0x4c]`, base constructor `R0923`, the three kind strings, message `0x471`'s handler, and `R0930`'s virtual `[vtable+0x50]` and later readers on a row-less item. Complete these bodies to settle object completion and code persistence; no further acquisition is made here.

@@ -57,7 +57,11 @@ check   15   slot = min over every unit the Target_Player owns of
 Check 15 returns 0xff when no qualifying actor exists. Comparing that result
 with `<=constant` differs from treating an empty result as zero.
 
-### The three item arms (`TRIG-TAKEITEM-038`, `TRIG-XFERITEM-039`, `TRIG-ITEMTEST-040`)
+### The three item arms
+
+The image-wide caller clauses of `TRIG-TAKEITEM-038` and `TRIG-XFERITEM-039` are partially
+retracted; their dispatcher behavior remains supported. `TRIG-ITEMTEST-040` bounds its
+lookup population to its named direct callers.
 
 Instants 11, 12 and 13 all end by resyncing a unit's inventory to its owner, and they are
 easy to confuse. They differ in what they do to the container and in how many packets they

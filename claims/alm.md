@@ -102,7 +102,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/alm/format.
 | ALM-TERR-043 | `world.res:data/map.reg` in full — and the half of it the engine never reads. | High / Medium | ● active | [EXP-0041](../experiments/EXP-0041-terrain-passability/) |
 | ALM-TRIG-044 | The type-7 payload is THREE counted arrays, not one. | Medium | ● active | [EXP-0045](../experiments/EXP-0045-alm-triggers/) |
 | ALM-TRIG-045 | The 796-byte node record, field by field | Medium / Unknown | ● active | [EXP-0045](../experiments/EXP-0045-alm-triggers/) |
-| ALM-TRIG-046 | The nine parameter type codes, and the identifier domain each names. | Medium / Unknown | ● active | [EXP-0045](../experiments/EXP-0045-alm-triggers/) |
+| ALM-TRIG-046 | The nine parameter type codes, and the identifier domain each names. | Medium / Unknown | ● active (amended) | [EXP-0045](../experiments/EXP-0045-alm-triggers/) |
 | ALM-TRIG-047 | The 184-byte trigger record, field by field. | Medium / Unknown | ● active (partially retracted) | [EXP-0045](../experiments/EXP-0045-alm-triggers/) |
 | ALM-UNIT-048 | The type-6 record's two id words, corrected: `+0x40` (u16) is the UNIT id and `+0x42` (u32) is the GROUP id. | Medium | ● active | [EXP-0045](../experiments/EXP-0045-alm-triggers/) |
 | ALM-TRIG-049 | type-9 = `[u32 count]` + `count` records of `26 + 6n` bytes | Medium | ● active (amended, partially retracted) | [EXP-0045](../experiments/EXP-0045-alm-triggers/), [EXP-0227](../experiments/EXP-0227-authored-enchantments-death-drops/) |
@@ -682,6 +682,8 @@ The 8-byte file trailer is **not read by the map parser** (`R0478` reads exactly
 **Original status.** ● active
 
 **Evidence.** [EXP-0045](../experiments/EXP-0045-alm-triggers/)
+
+**Amended.** EXP-0565 settles the `Target_Item` domain at instruction level: the binder stores `(V + 0xe18) mod 0x10000` as an item code (`TRIG-ITEMBIND-121`); for V 0..231 that code names MagicItems row 24 + V, with completed creation/binding and pack traversal, first-match order and whole-pack absence graded Medium (`TRIG-ITEMKEY-124`); the installed values 2..36 are rows 26..60 (`TRIG-ITEMCORPUS-125`). The type-4 `+0x12` comparison above does not bear on that domain.
 
 ### ALM-TRIG-047
 
@@ -2601,6 +2603,7 @@ Population: the EN `Map Editor.exe` (SHA-256 as in `ALM-EDITDISP-277`), static: 
 
 ### ALM-EDITNODE-280
 
+
 Population: the EN `Map Editor.exe` (SHA-256 as in `ALM-EDITDISP-277`), static: the DIALOG resources 272, 277, 282, 283, 284 (`r03`, program text), the dword scans `s05` and `s08`, the immediate scan `s06`, the `rel32` call scan `s07` (`.text`, four values), the constructor heads `L15618`..`L15619` and `L15620`..`L15621` (`w25`, mostly padding before the constructors), the callers `L15622`..`R1873` and `L15623`..`L15624` (`w26`), the message maps `L15625`..`L15626` and `L15627`..`L15628` (`w27`), the Instance manager handlers Add new `L15629` and Delete `L15630` (`w28`), the node copy routine `L15631` (`w29`), the Check manager handlers Add new `L15632` and Delete `L15633` (`w30`, `w31`).
 
 1. Resources (program text). 272 `Instance Manager` and 277 `Check manager` hold the same control set: a list box (1109) captioned `Instance types` / `Check types`, a combo (1197), the lists `Defined Instances` / `Defined Checks`, the buttons `Add new` (1180), `Delete` (1181), `Validate Instances` / `Validate Checks` (1220), a check box `Execute once` (1138), five edit pairs 1115..1119 and 1127..1131 under `Parameters`, and `Done!`.
@@ -2615,7 +2618,7 @@ Population: the EN `Map Editor.exe` (SHA-256 as in `ALM-EDITDISP-277`), static: 
 
 **Unknown.** The owner of the list at `this+0xdc` (the map's script lists, or a copy) and whether it is written back; the two routines that call the managers (`L15643`, `L15642`) and the command that reaches them; the selection handlers (`L15661`, `L15662`), the Validate handlers (`L15644`, `L15645`), the type-combo handlers (`L15663`, `L15664`), the other edit handlers; the literals `L15652`, `L15653`, `L15650`, `L15651`; the opcode lists and defaults; how a working node's type code and ten codes are set; every question on triggers (no trigger dialog, handler or record write was located: `TRIG-*-113`..`116` are not used).
 
-**Amended.** EXP-0562 locates the trigger dialog this card found none of: the Trigger Manager (resource 273, `TRIG-EDITTRIG-117`) edits the saved trigger array, and its Manage Instances and Manage Checks buttons open these two managers on the lists `E+0x40` and `E+0x5c` themselves, so the managers edit the saved node lists (Medium: the base-class paths were not read). Item 7 stays true for the dialogs 282, 283 and 284: their `<<` and `>>` buttons (1208, 1209) add and remove type-9 entries, not triggers (`ALM-EDITCAST-295`, `296`). The caller of the managers is the Trigger Manager (`L15715`, `L15716`), which settles the Unknown on `L15643` and `L15642`.
+**Amended.** EXP-0562 locates the trigger dialog this card found none of: the Trigger Manager (resource 273, `TRIG-EDITTRIG-117`) edits the saved trigger array, and its Manage Instances and Manage Checks buttons open these two managers on the lists `E+0x40` and `E+0x5c` themselves, so the managers edit the saved node lists (Medium: the base-class paths were not read). Item 7 stays true for the dialogs 282, 283 and 284: their `<<` and `>>` buttons (1208, 1209) add and remove type-9 entries, not triggers (`ALM-EDITCAST-295`, `296`). The caller of the managers is the Trigger Manager (`L15715`, `L15716`), which settles the Unknown on `L15643` and `L15642`. EXP-0565 reads the type-combo, selection and Validate handlers (Check manager by outline) and partial catalogue paths: the observed type assignments use `Par<i>_value` text; the display call passes radix 10; write handlers pass text to conversion and store its returned 32-bit value. No type-8 comparison appears in these handlers. Instance manager instructions are High, Check manager and decimal-conversion semantics Medium; accepted syntax and range are Unknown. Second catalogue-loop completion past `L15946` including `L15947` is unread (`TRIG-EDITITEM-126`).
 
 ### ALM-EDITCAST-294
 

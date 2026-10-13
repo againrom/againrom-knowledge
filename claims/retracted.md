@@ -1437,6 +1437,14 @@ on evidence already committed.
 |---|---|---|---|---|---|
 | `AI-568` (the reach inference only; the counts and the call-site comparison stand) | Verbatim: "the inventory's closure (`AI-567`) omits code that the order machine owns, reached by pointer tables or by no direct site" | Medium | [EXP-0553](../experiments/EXP-0553-order-machine-gap-code/), AI-586 | In the scans of `AI-586` no VA, RVA or offset slot holds a gap function's entry except 11 VA dwords, and no inventory instruction start is shown to call into the gap code (2 of 3 inventory sites are instruction interiors, 1 unchecked); that the order machine owns the code, and that tables reach it, are not shown. The 159 of 182 gap functions without an incoming edge have no known reach. | **NARROWED** - partially retracted |
 
+## EXP-0565: item-helper caller populations
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TRIG-ADDITEM-027` (image-wide three-caller clause only) | `EnumRefs callto:R0519` = **3 hits / 3 owners / 0 orphan** as the image-wide caller set. | High | [EXP-0565](../experiments/EXP-0565-trigger-item/), `evidence/w06-arm-routines.txt`, call at `L15952`; `TRIG-ITEMREAD-123` | The retained listing contains another call to `R0519` at `L15952`. The earlier instrument count is a bounded receipt, not an image-wide census. Dispatcher behavior, the existing tail amendment and corpus grades stand. No replacement global census is claimed. | REFUTED (caller completeness only) |
+| `TRIG-TAKEITEM-038` (image-wide caller clause only) | Arms 11 and 13 are the helper's complete caller set image-wide. | High | [EXP-0565](../experiments/EXP-0565-trigger-item/), `evidence/w06-arm-routines.txt`, calls at `L15953` and `L15954`; `TRIG-ITEMREAD-123` | Both addresses also call `R1522` in the out-of-line copies. No incoming reference found for a copy does not erase its call instruction. Dispatcher behavior and historical grades stand; no replacement global census is claimed. | REFUTED (caller completeness only) |
+| `TRIG-XFERITEM-039` (complete-caller-set clause only) | `EnumRefs callto:R1522` = 2 hits / 1 owner / **0 orphan** makes arms 11 and 13 the take helper's complete caller set. | High | [EXP-0565](../experiments/EXP-0565-trigger-item/), `evidence/w06-arm-routines.txt`, calls at `L15953` and `L15954`; `TRIG-ITEMREAD-123` | Both call instructions lie outside the named dispatcher arms. The local arm and builder evidence stands; the image-wide completeness rationale is withdrawn. No replacement global census is claimed. | REFUTED (caller completeness only) |
+
 ## Script result and payload-width corrections
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

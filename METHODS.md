@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
+Claims labelled: 3872. Observation: 99. Static analysis: 3268. Mixed: 505.
 
 ## Ledger ai
 
@@ -443,7 +443,7 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | ALM-TERR-043 | static analysis | ● active |
 | ALM-TRIG-044 | static analysis | ● active |
 | ALM-TRIG-045 | static analysis | ● active |
-| ALM-TRIG-046 | static analysis | ● active |
+| ALM-TRIG-046 | static analysis | ● active (amended) |
 | ALM-TRIG-047 | static analysis | ● active (partially retracted) |
 | ALM-UNIT-048 | mixed | ● active |
 | ALM-TRIG-049 | mixed | ● active (amended, partially retracted) |
@@ -996,7 +996,7 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | ITEM-SPAWN-026 | static analysis | ● active |
 | ITEM-SPAWN-027 | static analysis | ● active |
 | ITEM-OWNED-028 | static analysis | ● active |
-| ITEM-CODE-029 | static analysis | ● active |
+| ITEM-CODE-029 | static analysis | ● active (amended) |
 | ITEM-HUMEQ-030 | static analysis | ● active |
 | ITEM-ARMSLOT-031 | static analysis | ● active |
 | ITEM-ARMFILL-032 | static analysis | ● active |
@@ -1069,6 +1069,7 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | ITEM-170 | static analysis | ● active |
 | ITEM-161 | static analysis | ✔ promoted |
 | ITEM-162 | static analysis | ✔ promoted |
+| ITEM-MAGROW-177 | static analysis | ● active |
 
 ## Ledger magic
 
@@ -3806,10 +3807,10 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | TRIG-DROPALL-024 | static analysis | ● active (amended) |
 | TRIG-GIVEALL-025 | static analysis | ● active |
 | TRIG-CAT-026 | mixed | ● active |
-| TRIG-ADDITEM-027 | static analysis | ● active (amended, superseded) |
+| TRIG-ADDITEM-027 | static analysis | ● active (amended, partially retracted, superseded) |
 | TRIG-MONEY-028 | static analysis | ● active |
 | TRIG-NEAREST-029 | static analysis | ● active |
-| TRIG-PARAM-030 | static analysis | ● active |
+| TRIG-PARAM-030 | static analysis | ● active (amended) |
 | TRIG-ESCORT-031 | static analysis | ● active |
 | TRIG-TARGETID-032 | mixed | ● active |
 | TRIG-CAST-033 | static analysis | ● active |
@@ -3817,9 +3818,9 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | TRIG-CELLTAIL-035 | static analysis | ● active (amended, partially retracted) |
 | TRIG-PROPERTY-036 | static analysis | ● active |
 | TRIG-CLOSURE-037 | mixed | ✔ promoted (amended, superseded) |
-| TRIG-TAKEITEM-038 | static analysis | ● active |
-| TRIG-XFERITEM-039 | static analysis | ● active |
-| TRIG-ITEMTEST-040 | static analysis | ● active |
+| TRIG-TAKEITEM-038 | static analysis | ● active (amended, partially retracted) |
+| TRIG-XFERITEM-039 | static analysis | ● active (amended, partially retracted) |
+| TRIG-ITEMTEST-040 | static analysis | ● active (amended) |
 | TRIG-OFFMAP-041 | static analysis | ● active |
 | TRIG-RETURN-042 | static analysis | ● active |
 | TRIG-MAPGROUP-043 | static analysis | ● active |
@@ -3831,7 +3832,7 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | TRIG-MSGCORPUS-049 | mixed | ● active |
 | TRIG-MSGLIMIT-050 | static analysis | ● active |
 | TRIG-CHECK-051 | static analysis | ● active |
-| TRIG-CHECK-052 | static analysis | ● active |
+| TRIG-CHECK-052 | static analysis | ● active (amended) |
 | TRIG-CHECK-053 | static analysis | ● active |
 | TRIG-CHECK-054 | static analysis | ● active |
 | TRIG-BIND-063 | static analysis | ✔ promoted |
@@ -3861,6 +3862,12 @@ Claims labelled: 3865. Observation: 99. Static analysis: 3261. Mixed: 505.
 | TRIG-EDITDEF-118 | static analysis | ● active |
 | TRIG-EDITVAL-119 | static analysis | ● active |
 | TRIG-EDITDEL-120 | static analysis | ● active |
+| TRIG-ITEMBIND-121 | static analysis | ● active |
+| TRIG-ITEMREAD-122 | static analysis | ● active |
+| TRIG-ITEMREAD-123 | static analysis | ● active |
+| TRIG-ITEMKEY-124 | static analysis | ● active |
+| TRIG-ITEMCORPUS-125 | static analysis | ● active |
+| TRIG-EDITITEM-126 | static analysis | ● active |
 | TRIG-ARMCOVER-129 | mixed | ● active |
 | TRIG-CHECKGEOM-130 | static analysis | ● active |
 | TRIG-LISTREAD-131 | static analysis | ● active |
