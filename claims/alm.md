@@ -1711,11 +1711,17 @@ In 140.alm the Rood Glaen body (unit 443, authored hp 0) and the tower near it a
 | ALM-SAVE-256 | On load a player's id is its file ordinal (+4 = index + 1), not a stored field, and E+0x3c is the first player, so a unit whose owner matches none is bound to player 1 and saved with owner 1; none of 12,085 installed units is unmatched. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
 | ALM-NEWMAP-257 | A new EN-editor map's text region after its first byte comes from an allocation nothing in the path clears (High), and its name after the NUL does unless copy R0260 pads (Medium), so saved blocks can carry heap residue. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
 | ALM-NEWMAP-258 | The two players of a new EN-editor map are built by L14488 with id and +0x08 equal to 1 and 2, names Self and Enemy, +0x30 equal to 0 and 1, +0x0c equal to 0 and a 16-word relation row holding 2 at its own slot and 1 elsewhere. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
-| ALM-SAVE-260 | Reader case 9 drops a type-9 entry when L15129 (L15130) finds no object whose footprint holds the cell; of 206 EN and 60 RU entries, 48 and 11 sit on a type-4 record's cell, 158 and 49 are undecided; none is proved kept or dropped. | High / Medium | ● active | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
-| ALM-SAVE-261 | L14520 returns the first object whose word +4 equals its argument, 0 included; no installed unit or plain type-4 record has id 0 (the type-4 object id is inferred), so 137 EN and 133 RU owner-0 loot are Medium. | High / Medium | ● active | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
-| ALM-SAVE-262 | A type-4 record is 20 bytes, or 28 when its dword +8 is 0x21; the reader makes no structure for a cell at or below 7 or outside the width-8 and height-8 bounds; all 71 installed payloads parse exactly. | High / Medium | ● active | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
+| ALM-SAVE-260 | Reader case 9 drops a type-9 entry when L15129 (L15130) finds no object whose footprint holds the cell; of 206 EN and 60 RU entries, 48 and 11 sit on a type-4 record's cell, 158 and 49 are undecided; none is proved kept or dropped. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
+| ALM-SAVE-261 | L14520 returns the first object whose word +4 equals its argument, 0 included; no installed unit or plain type-4 record has id 0 (the type-4 object id is inferred), so 137 EN and 133 RU owner-0 loot are Medium. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
+| ALM-SAVE-262 | A type-4 record is 20 bytes, or 28 when its dword +8 is 0x21; the reader makes no structure for a cell at or below 7 or outside the width-8 and height-8 bounds; all 71 installed payloads parse exactly. | High / Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
 | ALM-SAVE-263 | L15212 takes the backward path when dest lies inside the source range, R0260 copies to the NUL, L15251 zero-fills a new array, and L15219 gives a loaded player a vtable, +0x0c, +0x30 and a zeroed 32-word array. | High / Medium | ● active | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
-| ALM-SAVE-264 | L14524 has five rel32 callers in .text; four sit in loops over the type-9 array or a loot's dword array; the open handler L02376 builds the map through L02308 and L15303 (unread); the RU root has no map editor program. | Medium | ● active | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
+| ALM-SAVE-264 | L14524 has five rel32 callers in .text; four sit in loops over the type-9 array or a loot's dword array; the open handler L02376 builds the map through L02308 and L15303 (unread); the RU root has no map editor program. | Medium | ● active (amended) | [EXP-0557](../experiments/EXP-0557-editor-helpers/) |
+| ALM-SAVE-268 | Reader case 4 builds a plain structure via L02332: +4 and the hash key are the wire id, +0x1a the kind, +6/+0xa cell*256+0x80, +0x12 the owner; class text "CStructure", 0x106 bytes; the body read has no test refusing id 0. | High / Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
+| ALM-SAVE-269 | A kind 0x21 record is built by L02333: +4 is the smallest unused id from 1, the hash key the first free key from 1, never the wire id; its two extra dwords become +0x106 and +0x10a; the class name text "CVerticalWoodenBridge" is Medium. | High / Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
+| ALM-SAVE-270 | The writer emits each structure from +6, +0xa, +0x1a, +0xf6, the owner's +4 and +4 (a bridge adds +0x106 and +0x10a, Medium), keys from 1 so key 0 is last; the round trip is Medium: kind range, footprint rejection and record order are open. | High / Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
+| ALM-SAVE-271 | At load each loot whose +0x3c is 0 when the fix-up loop runs, up to the count [ebp-0x18], gets an object (class text "CBackPack") with kind 3, a new id and its loaded position; the save then writes owner 0 and that position. | Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
+| ALM-SAVE-272 | L15303 is the reader L02303; its first file object (CreateFileA/ReadFile) reads into the records unchanged; L02308, L14494, L14495 touch two map-size buffers in the code read; L15252, L15261 look like floating-point code. | High / Medium | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
+| ALM-SAVE-273 | [L15131] is a pointer array indexed by an entry key and filled with entry objects built field by field by a keyed reader; its source, key text and footprint derivation are unread, so footprints and the type-9 load test stay undecided. | Medium / Unknown | ● active | [EXP-0558](../experiments/EXP-0558-editor-structures/) |
 
 ### ALM-NEWMAP-236
 
@@ -1875,6 +1881,8 @@ the editor's dialogs write these fields by design, and no census of other writer
 
 **Amended.** Case 4 (structures) is read for the reader in `ALM-SAVE-262`: a type-4 record is 20 bytes, or 28 when its dword at `+8` is `0x21`, and `L02332` and `L02333` create no object for a cell of 7 or less or beyond the width-8 and height-8 bounds. The writer's type-4 emission was not re-read there, so the type-4 round trip stays Unknown.
 
+**Amended.** `ALM-SAVE-270` reads the writer's type-4 emission: the round trip of a plain record is Medium (the kind range, the footprint rejection and the record order are open). The reader-side statements here are unchanged.
+
 
 ### ALM-SAVE-252
 
@@ -1999,6 +2007,8 @@ matches the loot owner against the unit id, the 16-bit word at unit wire offset 
 
 **Amended.** `ALM-SAVE-261` reads the thunk `L14519` and the class test; no installed unit has id 0 and no plain type-4 record has wire id 0 (the type-4 object id is an inference, Medium). `ALM-SAVE-262` explains the type-4 size check (28-byte kind `0x21`).
 
+**Amended.** `ALM-SAVE-271` bounds the Unknown on owner 0 (Medium): the reader builds a class `L15216` object for each loot whose `+0x3c` is 0 when the fix-up loop runs, up to the count `[ebp-0x18]`, so the save lookup finds it, writes owner 0 and writes that object's position, which is the loaded `+0x40` and `+0x44`; item 4's statement that the loaded position is not written back holds for loot with an owner object of another origin, and for owner-0 loot the fix-up reaches. The loop bound, the loop body `L15408`..`L15409` and the interaction with the unit link `+0xd6` are unread. The class test objects are answered there.
+
 ### ALM-SAVE-256
 
 Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): reader head, cases 5 and 6, the new-map constructor
@@ -2025,6 +2035,8 @@ preceded the type-5 record, `E+0x3c` would still be 0 when case 6 runs (not seen
 **Unknown.** The constructor `L15219`; `E+0x3c` stores outside the windows read.
 
 **Amended.** `ALM-SAVE-263` item 4 reads the constructor `L15219`: it stores the vtable `L02281`, `+0x0c` = 0, `+0x30` = 0 and the base `L15246` at `+0x34`, and sizes that array to a count of 0x20 words. The reader stores `+0x04`, `+0x08`, `+0x0c`, `+0x10`, `+0x30` and the first 16 words from the wire; the array count, the vtables and the 16 words after the first 16 are constructor values. The `E+0x3c` stores outside the windows read stay Unknown (`ALM-SAVE-264`: no displacement scan was run).
+
+**Amended.** `ALM-SAVE-268` item 4 and `ALM-SAVE-272` item 3 read two more stores to `E+0x3c`: the creation body `L02332` (`L15410`) and the reader's post-loop default player (`L15411`), each building a player by `L14488(1, 1)` when `E[0x3c]` is 0. Item 2's "no other store" holds for the windows of this card only. Item 3's "an unmatched owner becomes player 1" and "`E+0x3c` is the first player" hold for a file whose type-5 record precedes the use; otherwise the default player, built with `+4` = 1, is the one stored.
 ### ALM-NEWMAP-257
 
 Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): new-map handler `L14475`, wrapper `L02380`, constructor
@@ -2096,6 +2108,8 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 
 **Answers.** The Unknown of `ALM-SAVE-253` on whether `L15129` returns 0 for an installed entry: the helper is read, and the answer is bounded in item 4.
 
+**Amended.** `ALM-SAVE-268` reads the constructor chain: a plain type-4 object is of class `L14482` (item 1 no longer an inference), its key is the wire id (0 for no installed record) and a bridge's key is the first free key from 1 (`ALM-SAVE-269`), so condition (b) of item 4 holds for every installed type-4 record; conditions (a) and (c) still depend on the unread footprint table (`ALM-SAVE-273`). The counts 48, 11, 158 and 49 are unchanged.
+
 ### ALM-SAVE-261
 
 Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): `L14519`, `L14520`, `L14492`, `L15323`, the class records at `L14482`, `L15216`, `L14483`, reader cases 4 and 6 and the structure-add routines `L02332` and `L02333`; 38 EN and 34 RU installed maps (`corpus2.txt`, R4 and R5).
@@ -2111,6 +2125,8 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 
 **Answers.** `ALM-SAVE-255` items 2 and 3: the thunk `L14519` is read (item 1); the Unknown on which objects pass the class test is answered in item 2 as far as the class chain.
 
+**Amended.** `ALM-SAVE-268` settles item 3: the plain type-4 object's word `+4` is the wire id word (`L02334`); `ALM-SAVE-269` reads `L15322` and the kind `0x21` ids. `ALM-SAVE-271` finds the code that makes a class `L15216` object: the loot fix-up at load, so the owner-0 lookup at save finds an object.
+
 ### ALM-SAVE-262
 
 Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): reader case 4 (`L15332`..`L15333`), `L02332`, `L02333` (read to `L15334`); 38 EN and 33 RU type-4 payloads (one RU map has none) (`corpus2.txt`, rules R1 and R2). The format surface is the type-4 record of `formats/alm/container.md`.
@@ -2124,6 +2140,8 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 **Unknown.** The writer's type-4 record layout; what a structure whose key is already in the hash does to the earlier object (the node's object pointer is replaced, `L15336`..`L15337`).
 
 **Answers.** The Unknown of `ALM-SAVE-240` on reader case 4 (structures) is answered for the reader; `ALM-SAVE-255` item 5: the type-4 size check is explained by the 28-byte kind.
+
+**Amended.** `ALM-SAVE-268` and `ALM-SAVE-269` read `L15309` (`L02334`) and `L15335`: the wire id is the object's `+4` and the hash key for a plain record; a bridge takes both from allocators and its wire id is not used. A repeated key replaces the node's object pointer without freeing it in that body. `ALM-SAVE-270` gives the writer's type-4 layout. Item 2's `e` clause (the owner player) stays as stated.
 
 ### ALM-SAVE-263
 
@@ -2154,6 +2172,101 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 **Unknown.** `L15303`, `L14494`, `L14495`, the read primitive at slot `+0x34` and the branches `L15252` and `L15261` (not reached); the other writers of `E+0x3c`, `E+0x94`, `E+0xdc` (no displacement scan was run); the pointer-table callers of `L14524` and `L14474` (no dword scan was run).
 
 **Answers.** The Unknown of `ALM-SAVE-254` on the four other call sites: located in item 1, loops read at the call sites only. The Medium of `ALM-SAVE-252` for the unedited load and save stays: the load handler's calls are unread.
+
+**Amended.** `ALM-SAVE-272` reads `L15303` (the reader `L02303`), `L02308`, `L14494`, `L14495`, `L15252`, `L15261` and the class behind slot `+0x34` (a `ReadFile` file object): items 2 and 3 are answered there. The dword scan for pointer callers of `L14524` and `L14474` was not run in `EXP-0558` either.
+
+### ALM-SAVE-268
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): reader case 4 (`L15332`..`L15412`, w05), `L02332` whole (w03, w04), the init `L02334` (w02), the thunk and constructor chain `L15413`, `L15310`, `L15414`, `L15415`, `L15416` (to `L15417`, w10 to w12), the class getters `L15418` (w39) and the class test `L14492` (w38), the default-player constructor `L14488` (w20); rel32 scans of `.text` (s01, s02); 38 EN and 34 RU installed maps (`corpus.txt`, C1, C2, C4, C5).
+
+1. Call path. Reader case 4 reads per record X u32, Y u32, K u32, A u16, I u32 and ID u16 (20 bytes). For K other than `0x21` it calls the thunk `L15413` (to `L02332`) as `L02332(E, cx, cy, byte K, sign-extended A, I, sign-extended ID)`, with `cx = (X - 0x80 + (0xff if negative)) >> 8` and `cy` likewise from Y. The only rel32 caller of `L15413` in `.text` is `L15419` (scan s02; pointer tables, indirect calls and computed jumps are not covered, and no dword scan was run).
+2. Creation gate. `L02332` returns without an object when `cx <= 7`, `cy <= 7`, `cx` plus the dword `+0x10` of the record `[L15131][K]` reaches `E[0] - 8`, or `cy` plus its dword `+0x14` reaches `E[4] - 8` (unsigned compares). The table contents are unread (`ALM-SAVE-273`).
+3. Object. It allocates `0x106` bytes and runs `L15310` (to `L15414`: the base constructor `L15415` to `L15416`, then the vtable `L15420`) and `L15309` (to `L02334`). Slot 0 of that vtable returns the class record `L14482` (program text name `CStructure`, size word `0x106`). `L02334` stores `+4` = the low word of the id argument, `+0x1a` = the kind (a sign-extended byte), `+6` and `+0x22` = `cx*256+0x80`, `+0xa` and `+0x26` = `cy*256+0x80`, `+0xe`, `+0x66`, `+0x6a` and `+0xfe` = 0, `+0xfa` and `+0xf6` = the low word of A. The base constructor was read to `L15417`; its remaining stores are unread.
+4. Owner. `+0x12` = `E[0x2c][I-1]` when `E[0x30] >= I`, otherwise `E[0x3c]`; when `E[0x3c]` is 0 a player is built by `L14488(1, 1)` (its `+4` and `+8` are 1) and appended to the list at `E+0x28`. An I of 0 indexes `E[0x2c][-1]`; no installed record has it.
+5. Hash. The object is stored in the hash at `E+0x304` under the key `low16(ID)` (bucket `(key >> 4)` modulo the bucket count `[hash+8]`; node word `+8` the key, node `+0xc` the object). A key already present keeps its node and its object pointer is replaced by the new object; nothing in the body frees the old object. No test refuses key 0.
+6. Installed maps (`corpus.txt`, shipped files only). Plain records: 3,133 EN and 1,680 RU. Wire id 0: 0 and 0. Distinct ids: 3,133 and 1,680 (no repeated key). I of 0: 0 and 0; I above the type-5 player count: 0 and 0 (type 5 precedes type 4 in 38 of 38 EN maps and in 33 of 33 RU maps that carry both, so `E+0x3c` is player 0 as in `ALM-SAVE-256`). X or Y off `cell*256+0x80`: 0 and 0. Cell of 7 or less: 0 and 0. The dimension bounds of item 2 were not measured: the corpus counters for them took W and H from the type-1 payload, which is the wrong record (the reader case that stores `E[0]` and `E[4]` is the type-0 record), so those counters are void.
+
+**Confidence.** High for items 1, 4 and 5 and for item 3 as far as read, for the EN program. Medium for the base constructor tail (item 3) and for whether a footprint rejects a record (item 2). Item 6 speaks for the shipped files, not for what the editor produces in a session.
+
+**Unknown.** The stores of `L15416` from `L15417`; the footprint tables; whether any installed record is rejected by the dimension bounds; whether an editor command, outside the load path, changes an object's `+6` or `+0xa` before a save.
+
+**Answers.** The Unknown of `ALM-SAVE-262` on the stores of `L15309` and on a repeated key, and the Medium of `ALM-SAVE-261` item 3 on the type-4 object id: `+4` is the wire id word.
+
+### ALM-SAVE-269
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): reader case 4 (`L15332`..`L15412`, w05), `L02333` whole (w06, w07), `L15421` whole (w07, w08), `L15422` whole (w08, w09), the thunks `L15423`, `L15335`, `L15322`, `L15424` (w02, w07), `L15425` (w11), the vtable getters `L15426`, `L15427` and `L15428`, `L15429` (w39, w41, w42), the class records and name strings (w37, w42); rel32 scans s01 and s02; 38 EN and 34 RU installed maps (`corpus.txt`, C3, C5).
+
+1. Call path. For K equal to `0x21` the reader reads two more dwords E1 and E2 and calls the thunk `L15423` (to `L02333`) as `L02333(E, cx, cy, sign-extended A, I, E1, E2)`. The ID word is read and not passed. The only rel32 caller of `L15423` in `.text` is `L15430` (scan s02; same blind spots as `ALM-SAVE-268` item 1).
+2. Gate. `L02333` returns 0 without an object when `cx <= 7`, `cy <= 7`, `cx + E1 >= E[0] - 8` or `cy + E2 >= E[4] - 8` (unsigned). No table is read.
+3. Object. It allocates `0x10e` bytes, runs `L15335` (to `L15425`: the plain constructor `L15310`, vtable `L15431`, `+0x106` = E1, `+0x10a` = E2), stores the vtable `L15432` and runs `L15309` with the kind `0x21`, position `cell*256+0x80` and A as in `ALM-SAVE-268` item 3. Slot 0 of `L15432` (`L15433` to `L15426`) returns the class record `L15434` (size `0x10e`; its name pointer `L15435` is read in `w37`, `w39`). The name text `CVerticalWoodenBridge` and the base names `CBridge` and `CStructure` are program text read in `w42`, past the declared window cap, and are Medium. The getters in slots `+0x18` and `+0x1c` (`L15428`, `L15429`, read in `w41`, `w42`, past the cap) return `+0x106` and `+0x10a`; that reading is Medium.
+4. Ids. The id argument is `L15424(E)` (to `L15422`): the loop returns the smallest integer from 1 that no object in the hash holds in its word `+4` (1 for an empty hash). The hash key is the word returned by `L15322(E)` (to `L15421`): the smallest key from 1 absent from the hash; it also raises `E[0x8c]` to the key plus 1 when the key reaches it. Neither is 0. `+0x12` is set as in `ALM-SAVE-268` item 4. The node is stored as in item 5 there (an existing key is reused).
+5. Installed maps (`corpus.txt`). Kind `0x21` records: 8 EN, 1 RU; wire id 0: 0 and 0; the dimension bounds of item 2 were not measured (the corpus counter used the wrong record, see `ALM-SAVE-268` item 6). For 9 of 9 the wire id equals the id the allocation gives when every plain record of the map already holds its wire id (counter C3, counted over all plain wire ids of the map as `corpus.py` does, not over earlier records only) (type 4 precedes type 6 in 38 of 38 EN and 33 of 33 RU maps that carry both). That rule offers the allocator more used ids than a record order would, so the equality of the allocated and wire ids is Medium.
+
+**Confidence.** High for items 1, 2 and 4 and for the stores of item 3 for the EN program (every branch of `L02333`, `L15421` and `L15422` read). Medium for the class name text, the base names and the getters of slots `+0x18` and `+0x1c` in item 3: the windows that read them (`w41` after its first lines, `w42`) lie past the window cap of the preregistration, which was passed in `w41` (`EXP-0558.md` Deviations). Medium for item 5.
+
+**Unknown.** The file order of the plain records against the bridge records inside the payload; whether an editor command creates a bridge of the horizontal class (`L15436`, name text `CHorisontalWoodenBridge`); the stores of `L15416` from `L15417`.
+
+**Answers.** The Unknown of `ALM-SAVE-261` on `L15322` and the Unknown of `ALM-SAVE-262` on the hash key of a kind `0x21` record.
+
+### ALM-SAVE-270
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): the writer `L02295` from its head to `L15437` (w13 to w18), the class test `L14492`, the getters `L15428`, `L15429`, the player constructor `L14488` (w20); 38 EN and 34 RU installed maps (`corpus.txt`, C1 to C5). The part of the writer from `L15437` to `L15438` (units tail and later records) is unread.
+
+1. Key walk. The writer finds objects by looking keys up one after another: `t` starts at 1 (`L15439`, `L15440`, `L15441`) and the lookup uses the low word of `t`, so the objects are met in ascending key order and a key-0 object only when `t` reaches 65536. The pre-pass stops when `E[0x310]` objects were found; the structure emission stops after the number of objects of class `L14482` counted by the pre-pass.
+2. Record. The type-4 record is written only when `E[0x310]` is not 0, with the size `0x1c` for each object of class `L15442` (the bridge) and `0x14` for each other object of class `L14482`. Per object it writes, with the 4- or 2-byte size shown: `+6` (4), `+0xa` (4), `+0x1a` (4), `+0xf6` (2), the owner's `+4` (`[obj+0x12]+4`, 4), `+4` (2); for a bridge also the results of the slots `+0x18` and `+0x1c` (`+0x106`, `+0x10a`, 4 each; Medium: the getters `L15428` and `L15429` were read in `w41`, `w42`, past the window cap).
+3. Consequences. X and Y come from the object, not from the file. The id written for a bridge is its allocated `+4` (`ALM-SAVE-269`), not the wire id. I is the `+4` of the owner player, which is the record ordinal plus 1 (`ALM-SAVE-256`) or 1 for the default player (`ALM-SAVE-268` item 4). The kind is the sign-extended low byte read.
+4. Round trip. A plain record created by `ALM-SAVE-268` is written with the X, Y, A and ID it was read with, the same I when the player of ordinal I exists, and the same kind when the kind fits a signed byte. In the installed maps the position, id, I and A conditions hold for every plain record (`ALM-SAVE-268` item 6; A is non-zero in 2,979 EN and 1,589 RU records and the word survives the sign extension); the kind range, the creation rejection by footprint (`ALM-SAVE-273`) and the order of the records were not measured: the writer orders them by key, and whether the installed payloads are in ascending id order was not counted.
+
+**Confidence.** High for items 1 and 3 and for item 2 except the bridge extent fields (Medium, see item 2) for the bodies read in the EN program. Medium for item 4: it composes the reader, the writer and shipped-file counts, and the kind range, the footprint rejection and the record order are open.
+
+**Unknown.** Whether the installed type-4 payloads are in ascending id order; the kind range of the installed records; the writer from `L15437`.
+
+**Answers.** The Unknown of `ALM-SAVE-262` on the writer's type-4 record layout; the Unknown of `ALM-SAVE-263` on whether the writer's emission depends on the constructor values stays open (the player records were not re-read); the Unknown of `ALM-SAVE-240` on the type-4 round trip, which is Medium here (kind range and record order open).
+
+### ALM-SAVE-271
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): the reader's end (`L15203`..`L15408`, `L15409`..`R1507`, w32 to w35; the list-resize code `L15408`..`L15409` is unread), the writer's type-8 emission (`L15205`..`L15215`, w17, w18), the constructor `L15443` and the getter `L15444` (w36, w39), the class records and name strings (w37); 38 EN and 34 RU installed maps (`corpus.txt`, C6).
+
+1. Load fix-up (Medium). When the reader has read all records and the loot count `[ebp-0x18]` is above 0, the loop (`L15445`..`L15446`) runs while its index is below `[ebp-0x18]`; for each loot `L` (the array at `E+0x2e0`) whose `+0x3c` is 0 at that moment it builds an object: `0x106` bytes, constructor `L15443` (base `L15415`, vtable `L15447`), whose slot 0 (`L15444`) returns the class record `L15216` (program text `CBackPack`). `L15309` stores the kind 3, `+6` and `+0x22` = `L[+0x40]`, `+0xa` and `+0x26` = `L[+0x44]`, `+4` = `L15424(E)` (the smallest unused id from 1). `+0x12` = `E[0x3c]` (a default player is built if absent), `+0xd6` = the loot index, `L[+0x3c]` = the new id, and the object is stored in the hash under the key of `L15322` (`ALM-SAVE-269` item 4).
+2. Save (High for the object it names). For each loot the writer looks the owner up by `L[+0x3c]`. For the object of item 1 the lookup succeeds; the class test `L14492(owner, L15216)` holds, so the owner is written as 0, and the position is the object's `+6` and `+0xa`. The count `L[+8]`, the dword `L[+0x48]` and per item the dword `L[+4][j]`, the word `L[+0x2c][j]` and the dword `L[+0x18][j]` follow (10 bytes per item). Only when a lookup fails does the writer show the message at `L14521`, take the object with id 1, store the loot index in its `+0xd6` and set `L[+0x3c]` to 1.
+3. Installed maps (`corpus.txt`). Loot: 180 EN, 176 RU. Owner 0: 137 and 133. Owner equal to a unit id: 43 and 43. Owner equal to a plain structure id or only to a bridge wire id: 0 and 0. Owner matching nothing: 0 and 0. The counts are of the wire owner. The fix-up tests `+0x3c` after the record loop, and reader case 6 stores a unit's id into `loot[unit+0xd6].+0x3c` (`ALM-SAVE-255` item 4); a loot with wire owner 0 that a unit references would not be tested as 0, and no count of owner-0 loot referenced by a unit was made. So the failed-lookup branch is not taken for any installed loot, and the 137 EN and 133 RU owner-0 loot are written with owner 0 and the position they were read with only for the loot the fix-up reaches, if `L[+0x40]` and `L[+0x44]` hold the wire position (`ALM-SAVE-255` item 4; the case 8 reads were not re-read here).
+
+**Confidence.** Medium for item 1 and for the statement that each loot with wire owner 0 gets an object: the source of the loop bound `[ebp-0x18]`, the loop body `L15408`..`L15409` and the unit link `+0xd6` are unread. High for item 2 for the object it names. Medium for item 3 (the case 8 stores of `+0x40` and `+0x44` are unread; the census is of shipped files and of the wire owner).
+
+**Unknown.** The source of `[ebp-0x18]` and whether it equals the number of loot read; the loop body `L15408`..`L15409` (the inline list-resize code, entered by the jump at `L15448`..`L15449`); the interaction of the unit link `+0xd6` (reader case 6) with the `+0x3c` test, and the number of owner-0 loot a unit references; the stores of `L15416` from `L15417`.
+
+**Answers.** The Unknown of `ALM-SAVE-255` on whether `L14520` finds an object for owner 0 and on which objects pass the class test: the object of item 1 does (Medium, bounded as above). The Unknown of `ALM-SAVE-261` on the code that makes a class `L15216` object.
+
+### ALM-SAVE-272
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): the reader `L02303` head and sections jump (`L02303`..`L15450`, w22), the loop end and post-processing (`L15203`..`L15451`, `L15452`..`L15408`, `L15409`..`R1507`, w32 to w35), the thunks (w21), the file objects (w23 to w27), `L02308` (w28), `L14494` (w29), `L14495` (w30), `L15252` and `L15261` (w31).
+
+1. `L15303` is a thunk to the reader `L02303(E, path)`. It sets the sub-objects of `E` to empty states (`E[0]`, `E[4]` = 0x10, `E[0x8c]` = 1, `E[0x3c]` = 0, the hash at `E+0x304` with `0x11` buckets), opens the file and reads a header that must match the string at `L15453`, hold at least 3 records and a version of `0x3e9` or less. It then loops over the records, each dispatched on its type word through the table at `L15454`.
+2. File object. The first object tried (0x10 bytes, constructor `L15455`, vtable `L02304`) opens by slot `+0x20` (`L15456`) with `CreateFileA` for reading; the read primitive of slot `+0x34` (`L02305`) calls `ReadFile` straight into the destination buffer and returns the byte count. In this object's open and read bodies no byte is changed; a short read leaves the rest of the destination as it was (High for the first file object only). Only if that open fails does the reader try a second object (0x20 bytes, constructor `L15457`, vtable `L15458`) whose open (`L15459`) and read (`L15460`, a read from an inner buffer) were read to their first lines only.
+3. After the records, the reader requires the cell array `E[0xc]` and `E[0x14]`, zero-fills `E[0x10]` if absent, builds a default player if `E[0x3c]` is still 0 and appends it to the list at `E+0x28`, sets `E[0x94]` and `E[0xdc]` to 0 and `E[0xd4]`, `E[0xd8]` to 1 when no type-0 record came (the flag `[ebp-0x1c]` is cleared at `L15461` and set to 1 by the first dispatch target, the case at `L14531`, which reads W and H into `E[0]` and `E[4]`; the same flag guards these stores at `L15462`..`L15463`), and runs the loot fix-up of `ALM-SAVE-271` (Medium).
+4. `L02308` calls `L15303`, then allocates two buffers of `E[0] * E[4]` bytes at `E+0x320` and `E+0x324`. `L14494` computes one byte per cell from the height bytes `E[0x14]` and writes only `E+0x320`; `L14495` passes `E+0x324`, `E+0x320` and `E[0] * E[4]` to `L14591` (`L15464`), read as a copy from the call's arguments (inference; the body is unread). In the code read, none of them reads or writes a structure, loot, type-9 entry, player, node or trigger; the unread callees keep that negative Medium (the nine call sites of `L14494` reach six routines, `L02308` calls `L14476`, `L15465` and `L15466`, and `L14495` calls `L14591`).
+5. `L15252` stores the registers and ST0, calls `L15261` and restores the control word unless it is `0x27f`; `L15261` switches on an exception code and calls `L15467` and `L15468`. They hold no map record (C runtime floating-point exception code is an inference from the control-word handling and the code switch).
+6. Between the file read and a later save, the structure records change only as `ALM-SAVE-268`, `ALM-SAVE-269` and `ALM-SAVE-271` state; no other step of the paths read edits them.
+
+**Confidence.** High for items 1 and 2 for the bodies read of the first file object, for the buffer sizes and for the per-cell byte store of item 4. Medium for the negatives of item 4 and for "unchanged" beyond the first file object (callees unread, second file object read to its first lines only), for item 3 and for item 5 (callees unread) and for item 6 (the second file object, the inline list-resize code `L15408`..`L15409`, the open handler `L02376` and `L02361` are unread; the node and unit bodies were read by other claims).
+
+**Unknown.** `L15459` and `L15460` beyond the windows; `L15469`; `L15467`, `L15468`; `L15408`..`L15409`; `L02361`; the callees `L15470`, `L15471`, `L14602`, `L15472`, `L15473`, `L14603` of `L14494` (nine call sites); `L14591` (called at `L15464`); `L14476`, `L15465`, `L15466` (called by `L02308`); the second file object's open and read (`L15459`, `L15460`), reached when the first open fails.
+
+**Answers.** The Unknown of `ALM-SAVE-264` on `L15303`, `L14494`, `L14495`, the read primitive at slot `+0x34` and the branches `L15252` and `L15261`. The Medium of `ALM-SAVE-252` for the unedited load and save stays for the nodes (this claim reads no node code).
+
+### ALM-SAVE-273
+
+Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a81e3cee31b407fa5d3e6f6526bcb9e`): the readers of the table in `L02332` (w03) and `L15474` (w11), the routine around the stores `L15318`..`L15475` (`L15476`..`L15477`, `L15478`..`L15476`, `L15479`..`L15480`, `L15481`..`L15478`; w43, w45 to w47); the second block `L15482`..`L15319` and the routine start before `L15478` are unread. A first window `L15483` decoded nothing (w44).
+
+1. Shape. `[L15131]` is a pointer array with the count `[L15484]` and capacity `[L15485]`. The stores at `L15318` (free), `L15486` (allocate) and `L15475` (grow) manage the array. The store of an element is `L15487`: `[[L15131] + m*4] = S`, where `S` is the entry object built in the current loop pass and `m` is its dword `+0xc`.
+2. Entry. A loop over entry numbers builds `S` (`0xa4` bytes, constructor `L15488`) from a keyed reader (calls with a section name and a key string; whether it reads a file is not shown by the windows): `S+0xc` (default -1), `+0x10` (-1), `+0x14` (-1), `+0x18`, `+0x1c`, `+0x20`, `+0x24`, `+0x28`, `+0x2c` (-1), `+0x30` (0), strings at `+0x54` and `+0x68`, and `+0x64`, `+0x88`, `+0x8c`, `+0x94`, `+0x98`, `+0x90`, each through a key string in `.rdata` (`L15489`.. `L15490`); the key text, the section name format at `L15491` and the file name are unread. `S+0x10` and `S+0x14` are the dwords `L02332` adds to the cell; a text buffer of `S+0x10 * S+0x18 + 1` characters is read when `S+0x1c` is above 1 and `S+0x38` counts its characters other than `-`.
+3. Not reached. The values of `S+0x10` and `S+0x14` for any entry, the file they come from, the stores of `[L15308]` (`L15315`, `L15316`, `L15317`; the routine `L15492`..`L15493` was read by an earlier experiment and is not re-read here), the type-9 load test on the 206 EN and 60 RU entries (no rule was fixed, no corpus step run), and the hashes of the data files of both roots.
+
+**Confidence.** Medium for items 1 and 2 as the reading of the windows named. Unknown for item 3.
+
+**Unknown.** Everything in item 3; the window that settles the file name is the prologue of the routine before `L15478` and the strings at `L15491` to `L15494`.
+
+**Answers.** Part of the Unknown of `ALM-SAVE-260` item 3: the stores `L15318`..`L15475` are array management and an element store, not footprint values.
 
 ## Map field readers
 

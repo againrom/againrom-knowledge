@@ -237,17 +237,21 @@ A save can also change records of a loaded map:
   written back as 16 bits.
 - A player's id is its record ordinal plus 1 and is not stored in the file. A
   unit whose wire owner matched no player is bound on load to the first
-  player and is written with owner 1; none of the 12,085 installed units is
-  unmatched. — ALM-SAVE-256
+  player and is written with owner 1, for a file whose type-5 record precedes
+  the unit records (otherwise the default player, built with id 1, is the one
+  stored); none of the 12,085 installed units is unmatched. — ALM-SAVE-256
 - A loot record whose owner object is not found raises a message and is moved
   to unit 1. Its position is written from the owner object, not from the loaded
   position; the owner is written as 0 for one object class. Of the installed
   loot (180 EN, 176 RU), 43 records per root have an owner equal to a unit id
-  and the same position as that unit; 137 EN and 133 RU have owner 0, and
-  whether the lookup finds an object for owner 0 is Unknown (Medium: the
-  thunk `L14519` of the owner lookup is not read). A loot referenced
+  and the same position as that unit; 137 EN and 133 RU have wire owner 0; at load
+  each loot whose `+0x3c` is 0 when the fix-up loop runs, up to the count
+  `[ebp-0x18]`, gets an object of the class with program text `CBackPack` at its
+  loaded position, so the save lookup finds it and writes owner 0 and that
+  position (Medium: the loop bound, the loop body and the unit link `+0xd6` are
+  unread, and the counts are of the wire owner). A loot referenced
   by a unit takes that unit's id; a unit's `+0xd6` at or above the loot count is
-  written as 0. — ALM-SAVE-255
+  written as 0. — ALM-SAVE-255, ALM-SAVE-271
 - Type-9 entries with `+8` non-zero, `+4` zero and the 16-bit `+0x16` zero are
   removed from the list by `L14474` and not written; the entry that moves into
   the removed slot is written but not added to the record size. No installed
@@ -265,10 +269,34 @@ A save can also change records of a loaded map:
   reader creates no structure for a cell of 7 or less or beyond the map bounds,
   and stores a position of `256 * cell + 0x80`. All 71 installed type-4
   payloads parse exactly this way. — ALM-SAVE-262
+- A plain type-4 record (kind other than `0x21`) makes an object whose word
+  `+4` and hash key are the wire id word, whose position is
+  `256 * cell + 0x80`, whose owner is the player of ordinal I (the first player
+  when I is above the player count) and whose kind is the low byte
+  sign-extended; a repeated key replaces the earlier object in the hash and the
+  body read has no test that refuses id 0. A record of kind `0x21` makes an
+  object of the class with program text `CVerticalWoodenBridge` (Medium) whose id is the
+  smallest id from 1 that no object holds and whose key is the first free key
+  from 1; the wire id word is not used and the two extra dwords are its extent
+  (the getter reading is Medium). — ALM-SAVE-268, ALM-SAVE-269
+- The writer emits the structures in ascending key order (key 0 last) from the
+  objects: X, Y, kind, A, the owner's id and the object's own `+4`, and the
+  extent of a bridge (Medium). A plain record therefore round-trips (Medium) when its object was
+  made; the footprint-table rejection and the order of the installed records
+  are not measured. All 3,133 EN and 1,680 RU plain records have a non-zero,
+  distinct id, an owner within the player count and a position on a cell
+  centre. — ALM-SAVE-270, ALM-SAVE-268
+- After the records the reader builds a default player when none exists and an
+  object of class text `CBackPack` for each loot whose `+0x3c` is 0 (Medium); the
+  two buffers it allocates after the read are one byte per cell from the height
+  bytes and, in the code read, touch no record (Medium: their callees are
+  unread). — ALM-SAVE-272,
+  ALM-SAVE-271
 - The owner lookup at save returns the first object whose word at `+4` equals
   the loot owner, including 0; no installed unit has id 0 and no plain type-4
-  record has wire id 0 (a type-4 object's id is inferred from that wire id), so
-  the 137 EN and 133 RU owner-0 loot are Medium. — ALM-SAVE-261
+  record has wire id 0 (a plain type-4 object's id is that wire id), and the
+  137 EN and 133 RU owner-0 loot find the object made at load (Medium, as above).
+  — ALM-SAVE-261, ALM-SAVE-268, ALM-SAVE-271
 - The reader stores a loaded player's `+4`, `+8`, `+0xc`, `+0x10`, `+0x30` and
   first 16 words from the wire; the array count 0x20, the vtables and the 16
   words after the first 16 are constructor values, and whether the writer's
@@ -288,8 +316,9 @@ A save can also change records of a loaded map:
 
 The first two are High. The statements on players, loot and type-9 entries are
 High for the reader and writer instructions read and Medium for code outside
-the windows read. The body of the virtual read primitive behind the node reads
-and any other writer of a map file are Unknown. — ALM-SAVE-239, ALM-SAVE-252
+the windows read. The read primitive behind the record reads is a `ReadFile` call into the
+destination buffer (ALM-SAVE-272); the footprint tables and any other writer of
+a map file are Unknown. — ALM-SAVE-239, ALM-SAVE-252, ALM-SAVE-272, ALM-SAVE-273
 
 ## Unknowns and compatibility
 
