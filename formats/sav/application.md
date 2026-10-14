@@ -134,6 +134,11 @@ therefore save a point different from its origin; SAVE does not freeze the
 original cast point in a second field. Native in-flight SAVE/LOAD and
 post-load cache restoration remain unobserved. — MAGIC-267
 
+A Teleport cast stores two picture-60 `Prj` records whose actionphase and
+actionsegments advance with the head sub-tick while x/y stay fixed. The save
+holds no client drawable state of the caster and no Teleport effect record
+(Medium). — SAV-1255, SAV-1257
+
 LOAD is less restrictive than the producer. Missing FreeIndex defaults to 0;
 missing IDs leaves the constructed vector empty. Kind 6 yields `size/4`
 elements, taking each low u16; kind 2 has a one-element compatibility arm.

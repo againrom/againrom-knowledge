@@ -3238,9 +3238,11 @@ native same-ID retarget occurrence.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ANIM-TELEPORT-167 | The read geometry uses cached drawable coordinates; Teleport's copied source cache can still feed projection. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
-| ANIM-TELEPORT-168 | The read picture-60 driver sets phase to incremented actionphase minus one; its drawer uses that phase directly. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
-| ANIM-TELEPORT-169 | The read caster body uses the Attack timeline at draw state 8; first post-relocation frames remain Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| ANIM-TELEPORT-167 | The read geometry uses cached drawable coordinates; Teleport's copied source cache can still feed projection. | High / Medium | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| ANIM-TELEPORT-168 | The read picture-60 driver sets phase to incremented actionphase minus one; its drawer uses that phase directly. | High / Medium | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| ANIM-TELEPORT-169 | The read caster body uses the Attack timeline at draw state 8; first post-relocation frames remain Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| ANIM-TELEPORT-171 | The read client state-sync arm moves an existing drawable's raw point and cache from mask bit 0x20; the arm's own stores change action, clock and remaining only when the stage byte changes. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+| ANIM-TELEPORT-172 | Over a Teleport cast the source record keeps its point while the caster body keeps its Attack run; from the relocation step the body's cache holds the destination. | Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
 
 ### ANIM-TELEPORT-167
 
@@ -3251,6 +3253,8 @@ The complete geometry body has no own raw +8/+0xc read. MAGIC-TELEPORT-358's sec
 **Confidence.** High for direct cache operands, coordinate arithmetic and the driver-tail stores. Medium for the composed old-point projection and local absence of a raw-coordinate term: virtual extent getters and external geometry scheduling were not read. No field-reader census or section scans were run.
 
 **Unknown.** When each caster/projectile cache and geometry are refreshed relative to reception and paint. Current-state interpolation in R0548 and view scrolling are distinct inputs; actual first frames, camera follow, global cache writers and indirect scheduling remain Unknown. A complete Teleport reception/frame trace through R0509 and its view frame would settle this.
+
+**Amended.** SAV-1255 observes both records' first driver call in their creation step (one call per head sub-tick from sub-tick 10656), so the driver tail replaces the copied source cache in that step. Paint order relative to the sweep stays Unknown.
 
 ### ANIM-TELEPORT-168
 
@@ -3264,6 +3268,8 @@ The decoded drawer selector for picture 60 is index 53, value 5, target L13642. 
 
 **Unknown.** Removal pass, first successful call relative to spawn/paint, loaded first draw, redraw count and sprite asset frame availability. ANIM-150's picture-13 timer/sweep proof is not generalized to Teleport scheduling.
 
+**Amended.** SAV-1255 observes, in one owner series, actionphase plus remaining equal to 21 and phase equal to actionphase - 1 in all ten stored records, with one driver call per head sub-tick from the creation step. The removal pass and native frames stay Unknown.
+
 ### ANIM-TELEPORT-169
 
 The nine decoded state pointers of R0552 map state +0x74 = 8 to L16008, also used by states 3 and 7. This arm reads phase +0x70 through class timeline +0x58, with the class direction/block expression and Flip handling. Body positioning reads view-relative cached centre +0x60/+0x64, class sizing/centre differences, z +0x10 and terrain lift +0x68. Hero sheets +0x194/+0x198 and ordinary class sheets use their own sprite calls.
@@ -3273,3 +3279,27 @@ The complete body also reads stone and invisibility effects; these can replace f
 **Confidence.** High for the state table, positive frame/position operands and action-driver stores. Medium for the bounded absence of a Teleport-specific hide or interpolation branch in these two bodies: no section scans or indirect-call census were run. Unknown for the exact first post-relocation sprite.
 
 **Unknown.** Reception of R0059's updates in R0509, synchronization of raw/current/cache/action, geometry-versus-paint order, view/camera updates, helper effects and sprite virtuals. These bodies cannot establish immediate disappearance, a trail from the old point or the first visible new-point frame.
+
+**Amended.** ANIM-TELEPORT-171 reads the Unknown's reception arm in R0509: a 0x20 update moves raw point and cache and keeps action 8. ANIM-TELEPORT-172 composes the post-relocation Attack frames at Medium. The first visible sprite stays Unknown.
+
+### ANIM-TELEPORT-171
+
+Opcodes 0x6c, 0x6e, 0x6f and 0x70 select arm L02530 (ANIM-MSG-005), read whole to the next arm at L04899. It decodes mask dword msg +0x14; bit 0x20 supplies two words to [L02531]/[L16031]. A drawable found in view +0x9b8 joins the creation path at L16032. There bit 0x20 stores raw +8 and +0xc (L09189, L09190). For every message the arm then copies raw to cache +0x28/+0x2c and stores +0x10 = 0 (L16033..L16034). Bit 0x10 stores facing +0x6c.
+
+The arm's only stores to +0x84, +0xa0 and +0x94 follow the stage switch at L02769. Its decoded table L02543 sends stage 0 to L16035, 1 to L16036, 2 to 4 to L02767 and 5 to L02768. Stage 0 after an old stage of 0 stores none of them; after a nonzero old stage it stores +0x84 = 0. Stage 1 after 0 starts action 6. The tail calls R0614 when view +0x3dc bit 0 and view +0x80 are set.
+
+The relocation sends R0059 with mask -1 from the stand helper and 0x20 from the arm (MAGIC-TELEPORT-356); bit 0x20 survives the sender's reductions (SAV-1118). A living caster therefore takes the destination point in the client in the timer step its sync is dequeued, keeping action 8, its clock and its remaining count.
+
+**Confidence.** High for the arm's own stores, the decoded stage table and the absence of other +0x84/+0xa0/+0x94 stores inside the arm, from the whole-arm listing (evidence/out/state_arm.txt) of displacements 0x81 to 0x84, 0x91 to 0x97 and 0x9d to 0xa3. The arm's callees and pointers it copies into registers were not followed, and no section scan ran, so the claim covers the arm's own instructions only. Medium for the caster effect: the stage byte sent for a living caster and the dequeue step are cited, not read here.
+
+**Unknown.** Other client writers of drawable +0x84 between the sync and the sweep; the dispatcher's other arms were not read. The arm's callees were not read: R0551 (4 sites), R1196 (5), R0588 (5), R0082 (3), R0747 (2), R0544, R0589, R0594, R0590, R0593 and others. Paint order.
+
+### ANIM-TELEPORT-172
+
+Record 652, the first picture-60 record (MAGIC-TELEPORT-358), holds raw (5200, 15943) in all five saves of SAV-1255, including the save after the relocation. That is the source cell centre (5248, 16000) offset by (-48, -57); MAGIC-TELEPORT-358 routes picture 60 through MAGIC-261's Selection fallback, whose per-class value was not read here. The driver changes phase and count only (ANIM-TELEPORT-168), and phase k falls on driver call k + 1: phases 0 to 20 over steps S to S + 20, independent of the caster. Record 653 holds the destination raw point; its copied source cache is replaced on its first driver call (ANIM-TELEPORT-167).
+
+The caster runs action 8, the Attack run of ANIM-TELEPORT-169's state-8 arm, with phase = clock: phases 0 to 11 for Attack length 12. At the relocation step S + 8 the sync sets raw and cache to the destination (ANIM-TELEPORT-171) before the sweep, and R0548 copies raw to cache on each call (MAGIC-TELEPORT-371). Phases 0 to 7 thus have a source cache and phases 8 to 11 a destination cache. At S + 12 the driver takes its idle branch. At the relocation step the records draw phase 8 of 21.
+
+**Confidence.** Medium. Paint order relative to the sweep, the body centre +0x60/+0x64 derived from the cache, the cue's audibility and sprite virtuals are not read. No read body draws a trail or hides the caster; this is a local negative without section scans.
+
+**Unknown.** The first native frame at each end, and any camera or view update.

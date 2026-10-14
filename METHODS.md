@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
+Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 
 ## Ledger ai
 
@@ -721,9 +721,11 @@ Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
 | ANIM-164 | static analysis | ● active (branch candidate) |
 | ANIM-166 | mixed | ● active (branch candidate) |
 | ANIM-163 | static analysis | ● active (branch candidate) |
-| ANIM-TELEPORT-167 | static analysis | ● active (branch candidate) |
-| ANIM-TELEPORT-168 | static analysis | ● active (branch candidate) |
-| ANIM-TELEPORT-169 | static analysis | ● active (branch candidate) |
+| ANIM-TELEPORT-167 | static analysis | ● active (branch candidate, amended) |
+| ANIM-TELEPORT-168 | static analysis | ● active (branch candidate, amended) |
+| ANIM-TELEPORT-169 | static analysis | ● active (branch candidate, amended) |
+| ANIM-TELEPORT-171 | static analysis | ● active (branch candidate) |
+| ANIM-TELEPORT-172 | static analysis | ● active (branch candidate) |
 
 ## Ledger databin
 
@@ -1131,7 +1133,7 @@ Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
 | MAGIC-PIC-027 | static analysis | ● active (amended, superseded) |
 | MAGIC-CAST-028 | static analysis | ● active (partially retracted) |
 | MAGIC-CASTANIM-029 | static analysis | ● active |
-| MAGIC-CASTTICK-030 | static analysis | ● active (partially retracted) |
+| MAGIC-CASTTICK-030 | static analysis | ● active (partially retracted, amended) |
 | MAGIC-BURST-031 | static analysis | ● active |
 | MAGIC-SENDER-032 | static analysis | ● active |
 | MAGIC-CASTSPAWN-033 | static analysis | ● active (amended, partially retracted) |
@@ -1202,7 +1204,7 @@ Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
 | MAGIC-AREAOVERLAP-162 | mixed | ✔ promoted |
 | MAGIC-CLOUDEND-163 | static analysis | ✔ promoted |
 | MAGIC-DELIVERY-170 | static analysis | ● active |
-| MAGIC-CASTCLOCK-171 | static analysis | ● active |
+| MAGIC-CASTCLOCK-171 | static analysis | ● active (amended) |
 | MAGIC-TELEPORT-174 | static analysis | ● active (amended) |
 | MAGIC-TARGETID-182 | static analysis | ● active |
 | MAGIC-TICKGATE-183 | static analysis | ● active (partially retracted) |
@@ -1296,14 +1298,16 @@ Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
 | MAGIC-340 | static analysis | ● active (amended) |
 | MAGIC-341 | static analysis | ● active (amended) |
 | MAGIC-348 | static analysis | ● active |
-| MAGIC-TELEPORT-356 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-356 | static analysis | ● active (branch candidate, amended) |
 | MAGIC-TELEPORT-357 | static analysis | ● active (branch candidate) |
 | MAGIC-TELEPORT-358 | static analysis | ● active (branch candidate) |
-| MAGIC-TELEPORT-359 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-359 | static analysis | ● active (branch candidate, amended) |
 | MAGIC-TELEPORT-360 | static analysis | ● active (branch candidate, amended) |
 | MAGIC-TELEPORT-364 | static analysis | ● active (branch candidate) |
 | MAGIC-TELEPORT-365 | static analysis | ● active (branch candidate) |
-| MAGIC-TELEPORT-366 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-366 | static analysis | ● active (branch candidate, amended) |
+| MAGIC-TELEPORT-370 | static analysis | ● active (branch candidate) |
+| MAGIC-TELEPORT-371 | static analysis | ● active (branch candidate) |
 
 ## Ledger menu
 
@@ -2914,6 +2918,10 @@ Claims labelled: 3907. Observation: 99. Static analysis: 3301. Mixed: 507.
 | SAV-1250 | mixed | ✔ promoted |
 | SAV-1251 | static analysis | ● active |
 | SAV-1252 | static analysis | ● active |
+| SAV-1254 | mixed | ● active (branch candidate) |
+| SAV-1255 | mixed | ● active (branch candidate) |
+| SAV-1256 | static analysis | ● active (branch candidate) |
+| SAV-1257 | mixed | ● active (branch candidate) |
 
 ## Ledger session
 

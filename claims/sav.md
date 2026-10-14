@@ -16276,3 +16276,66 @@ initializers `L16024` / `L09081`, the two archive primitives,
 allocation failure, count overflow and encoded extreme-count behavior.
 Complete reads of those bodies plus a controlled original malformed-archive
 probe would settle these separate boundaries.
+
+## Teleport cast series
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1254 | In the owner's five EN saves of one mission-110 Teleport cast only Human 217 changes: countdown 6, 4, 3, 2 at sub-ticks 10658 to 10662, then at 10664 Position moves from cell 20,62 to 12,62 with sub-phase 7. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+| SAV-1255 | In the same saves two picture-60 Prj records keep their points and aim; actionphase 3, 5, 6, 7, 9 and remaining 18, 16, 15, 14, 12 move one for one with the head sub-tick. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+| SAV-1256 | The series dates the cast's admission to sub-tick 10656 three ways; the read countdown arithmetic then puts the relocation at 10664, the first save that shows it, after 10662, the last that does not. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+| SAV-1257 | The five saves store no client drawable state of the caster and no Teleport effect record; of the cast's client state only the two Prj records are stored. | Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+
+### SAV-1254
+
+Inputs: the owner's EN files game0023, game0025, game0026, game0027 and game0028, written in that order during one cast; full hashes are in the experiment. Head (SAV-HEAD-025): mission 110, difficulty 2, full tick 666, sub-ticks 10658, 10660, 10661, 10662 and 10664. tools/savsiege walks 44 Unit and Human records per file; Human 217 is the only record that differs between files.
+
+| file | sub-tick | Position cell | +0x54 | +0x58 | +0x6c | mover +0x72 | mover +0x82, +0x86 x | order +0 cell x | order +0x15 | order +0x50 | +0x130 |
+|---|---:|---|---:|---:|---:|---:|---|---:|---:|---:|---:|
+| game0023 | 10658 | 20,62 | 14 | 5 | 6 | 12 | 20, 12 | 20 | 3 | 1 | 1882057 |
+| game0025 | 10660 | 20,62 | 14 | 5 | 4 | 12 | 20, 12 | 20 | 5 | 1 | 1882057 |
+| game0026 | 10661 | 20,62 | 14 | 5 | 3 | 12 | 20, 12 | 20 | 6 | 1 | 1882057 |
+| game0027 | 10662 | 20,62 | 14 | 5 | 2 | 12 | 20, 12 | 20 | 7 | 1 | 1882057 |
+| game0028 | 10664 | 12,62 | 0 | 7 | 10 | 14 | 12, 20 | 12 | 9 | 0 | 1882104 |
+
+In all five: fine bytes 0x80/0x80, actor +0x50 = 12, destination bytes +0x60/+0x61 = 12/62, charge +0x134 = 8, recovery +0x135 = 4, send sub-tick +0x138 = 10656, mana 125 of 274, health 122, mover +0 and +1 = 192, order +0x3c = 15884 (cell 12,62), order +0x14 = 4, order +0x30 nonzero, typeword 0x23. Mover +0x83..+0x85 and +0x87..+0x89 hold 62, 128, 128. game0025 is the first file that differs from game0023 (+0x6c and order +0x15); game0028 is the first with any other change. game0028 also differs at offset 0x14 of the Humanoid raw block.
+
+The changes in game0028 are the stores MAGIC-TELEPORT-357 reads in the relocation, occupy, release and stand helpers, together with MAGIC-TELEPORT-370's sub-phase 7 entry. Field sources: Position byte order MAGIC-TELEPORT-356; scalar run 1 SAV-UNITPROG-156; stat words SAV-UNITFLD-049; +0x60/+0x61/+0x64 roles MAGIC-TELEPORT-370; +0x138 MAGIC-TELEPORT-371. The format stores the caster's server state; its client action clock, phase and actionspell are not stored (SAV-1257).
+
+**Confidence.** High for the stored values under the cited decoders. Medium for roles no read store names: order +0x15, which rises by the sub-tick difference, +0x130 and the Humanoid raw-block offset, which both rise by 47. Medium that Human 217 is the caster: it is the only changed record, and its drawn class is derived from equipment (HERO-APPEAR-042) and not stored. EN only; one cast.
+
+**Unknown.** The caster's drawn class; what order +0x15 counts.
+
+### SAV-1255
+
+Projectiles in all five files: FreeIndex 654, IDs 653, 652. Both records: picture 60, z 0, dir 12, action 1, lastaction 1, actiondir 12, actiontarget 0, actionx 3200, actiony 16000, actionz 0, actionspell 0. Prj652 x, y = 5200, 15943; Prj653 x, y = 3152, 15943.
+
+| file | sub-tick | phase | actionphase | actionsegments |
+|---|---:|---:|---:|---:|
+| game0023 | 10658 | 2 | 3 | 18 |
+| game0025 | 10660 | 4 | 5 | 16 |
+| game0026 | 10661 | 5 | 6 | 15 |
+| game0027 | 10662 | 6 | 7 | 14 |
+| game0028 | 10664 | 8 | 9 | 12 |
+
+Both records hold the same row in each file. actionphase equals sub-tick - 10655 and actionphase + actionsegments equals 21 in all ten records. Under ANIM-TELEPORT-168's driver (one actionphase per call, construction at 0 and 21) the first call fell on sub-tick 10656. The aim is the destination cell centre (12 * 256 + 128, 62 * 256 + 128). Neither record's x, y changes in game0028, after the caster's relocation. Leaves per SAV-1202.
+
+**Confidence.** High for the stored leaves. Medium that one call per sub-tick holds between the sampled sub-ticks 10656 to 10664; EN only.
+
+### SAV-1256
+
+Three stored witnesses give the admission sub-tick S = 10656. The caster's +0x138 is 10656, the send sub-tick R0618 stores (MAGIC-TELEPORT-371). The attack release of AI-561 also writes +0x138, as the sub-tick plus +0x134 plus +0x135; with the stored 8 and 4 that value would mean a release at 10644. This witness alone does not exclude that writer; the next two do not depend on +0x138. Countdown +0x6c is 6 at 10658, and MAGIC-TELEPORT-370 loads charge 8 at admission and removes one per later actor tick, so it was loaded at 10656. The records' actionphase is 3 at 10658 with the first call in the creation step (SAV-1255, ANIM-113).
+
+Static prediction: relocation on actor tick S + 8 = 10664, in sub-phase 5's zero branch, followed in that tick by sub-phase 7 and a new countdown. Stored: game0027 at 10662 keeps countdown 2 and the source cell; game0028 at 10664 holds the destination cell, sub-phase 7 and countdown 10. The two agree. The series alone brackets the relocation in 10663 to 10664; the arithmetic selects 10664. No compared field disagrees with the prediction. The charge (8) equals the class AttackDelay (8, MAGIC-TELEPORT-371), so the series agrees equally with a relocation at the client AttackDelay call S + 8; it does not separate the two. The separation is the read caller: the actor tick calls the application and the cue hook makes no relocation call (MAGIC-TELEPORT-359). At the relocation step the records stored phase 8, actionphase 9, remaining 12.
+
+**Confidence.** High for the stored values. Medium for the composed date: one actor tick per sub-tick, the head sub-tick as the counter +0x138 copies and the client's same-step creation are cited, and whether R0618's store condition held for this caster was not tested. A save stores the state at its sub-tick, not the tick that produced it. EN only. The series does not discriminate between relocation at charge expiry and relocation at the client AttackDelay, because both are 8 here; that discrimination rests on the read callers and is Medium for the per-id branch and for one actor tick per sub-tick.
+
+**Unknown.** The recovery countdown's terms (10 = 4 + weapon term + random + Spell element 0) were not separated.
+
+### SAV-1257
+
+The series' &YA1 top-level keys are Character, CurrentState, Fog, GameOptions, Inventory, Objects, Prj652, Prj653, Projectiles, SpellBook and View in all five files. No key holds a drawable's action, clock, phase, actionspell or cache. A leaf listing of game0023 outside Prj and Fog found 17 leaves, none of them a drawable field. The stored client records are the two Prj records (SAV-1255). The object class census of tools/savsiege was observed to give the same counts in all five files and to show no SpellTransport, PointEffect or AreaEffect record; the caster's effect list is empty. The census counts are unrecorded: no committed output holds them.
+
+**Confidence.** Medium: the leaf listing covers one file and the class census is a navigation receipt, not a committed output; the negative is bounded by these two decoders. Equal class counts across the five files exclude a change after sub-tick 10658 only. They do not exclude an Effect record created at the admission step 10656, before the first save.
+
+**Unknown.** Client state restored after LOAD for an interrupted cast.

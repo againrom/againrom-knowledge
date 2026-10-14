@@ -545,7 +545,7 @@ current account.
 |---|---|---|---|---|
 | MAGIC-CAST-028 | (rom.exe) Four `projectiles.reg` sheets are also drawn as per-unit status overlays, by flag bits and not by a cast. | High / Unknown | ● active (partially retracted) | [EXP-0140](../experiments/EXP-0140-cast-art-drawn/), [EXP-0176](../experiments/EXP-0176-area-draw/) |
 | MAGIC-CASTANIM-029 | A cast always animates the caster, and the even picture is what makes it do so. | High / Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
-| MAGIC-CASTTICK-030 | The tick a spell is applied, in units a consumer can implement: tick `actor+0x134` of the action, counting the tick that started it as 0. | High / Medium | ● active (partially retracted) | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
+| MAGIC-CASTTICK-030 | The tick a spell is applied, in units a consumer can implement: tick `actor+0x134` of the action, counting the tick that started it as 0. | High / Medium | ● active (partially retracted, amended) | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-BURST-031 | `MAGIC-PIC-027`'s Unknown is answerable: the `Distribution system` column decides the burst picture, and 10 of 28 shipped spells reach it. | High / Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-SENDER-032 | Two corrections to `MAGIC-PIC-027`'s sender enumeration, one of which changes what a consumer must build. | Medium | ● active | [EXP-0163](../experiments/EXP-0163-cast-picture/) |
 | MAGIC-CASTSPAWN-033 | The caster builds the cast map object; seven picture IDs get a nonzero countdown. | High / Medium | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
@@ -639,6 +639,8 @@ current account.
 **Evidence.** [EXP-0163](../experiments/EXP-0163-cast-picture/)
 
 **Amended.** The table ledger carried the status "● partially retracted". `retracted.md` records a correction against this claim.
+
+**Amended.** MAGIC-TELEPORT-370 reads the same sub-phase machine again and SAV-1256 stores it for one cast: in an owner EN series of one Teleport cast (mission 110, one caster) the countdown is 6 at sub-tick 10658 and the relocation is first stored at 10664, eight actor ticks after the admitting tick 10656. That is a stored-value observation of this card's tick `actor+0x134`, counting the admitting tick as 0. The grades above are unchanged.
 
 ### MAGIC-BURST-031
 
@@ -1415,7 +1417,7 @@ on this code read is not independent corroboration.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MAGIC-DELIVERY-170 | A simulation SpellTransport delivers by a saved signed countdown, not by the visible projectile reaching a collision point. | High | ● active | [EXP-0362](../experiments/EXP-0362-cast-delivery/) |
-| MAGIC-CASTCLOCK-171 | Cast admission, prepared simulation effects and client flight use different clocks. | High / Medium | ● active | [EXP-0362](../experiments/EXP-0362-cast-delivery/) |
+| MAGIC-CASTCLOCK-171 | Cast admission, prepared simulation effects and client flight use different clocks. | High / Medium | ● active (amended) | [EXP-0362](../experiments/EXP-0362-cast-delivery/) |
 | MAGIC-TELEPORT-174 | A destination veto can keep Teleport in place after mana payment and cast presentation. | High / Medium | ● active (amended) | [EXP-0363](../experiments/EXP-0363-blocked-teleport/) |
 
 ### MAGIC-DELIVERY-170
@@ -1437,6 +1439,8 @@ on this code read is not independent corroboration.
 **Original status.** ● active
 
 **Evidence.** [EXP-0362](../experiments/EXP-0362-cast-delivery/)
+
+**Amended.** For Teleport, an actor in phase 5 reaches the application at the charge tick: MAGIC-TELEPORT-370 reads the sub-phase machine and SAV-1256 stores the relocation at 10664, eight actor ticks after the admitting tick 10656, in one EN series of one cast. That is a one-cast, stored-value observation of the same tick; the grades above are unchanged, and end-to-end timing for other spells stays Medium.
 
 ### MAGIC-TELEPORT-174
 
@@ -4004,10 +4008,10 @@ Population: EN `rom.exe`, windows `R2078..L15362`, `R0269..R0002`, `R0617..R0619
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-TELEPORT-356 | The read relocation recentres Position even when old-cell release or new-cell entry reports failure. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| MAGIC-TELEPORT-356 | The read relocation recentres Position even when old-cell release or new-cell entry reports failure. | High / Medium | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 | MAGIC-TELEPORT-357 | The relocation's read stand helper resets command state and pending kind, but retains open movement effects. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 | MAGIC-TELEPORT-358 | The read normal producer builds two Teleport records; the copy's raw point changes while its source cache stays. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
-| MAGIC-TELEPORT-359 | The read Teleport cast cue hook uses bank entry 60 and the caster's raw point at the class AttackDelay. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+| MAGIC-TELEPORT-359 | The read Teleport cast cue hook uses bank entry 60 and the caster's raw point at the class AttackDelay. | High / Medium | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 | MAGIC-TELEPORT-360 | Teleport's read relocation checks two footprint masks; exploration, fog and full click admission stay Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 
 ### MAGIC-TELEPORT-356
@@ -4019,6 +4023,8 @@ The own store order is Position byte +0 (x), word +2 (packed cell), bytes +4 and
 **Confidence.** High for these complete-body branches and own stores in the equal EN/RU image. Medium for the composed footprint and publication effect: downstream cell-record, trigger and virtual bodies remain unread.
 
 **Unknown.** Native mid-step reachability, later movement, packet reception and rollback outside these bodies. An admitted call overwrites the old fine bytes locally; this does not prove a complete transit cancellation. The unexpanded calls and indirect sites are enumerated in the experiment.
+
+**Amended.** MAGIC-TELEPORT-370 places this call in the actor tick, on the tick whose countdown reaches 0. ANIM-TELEPORT-171 reads the client reception of the 0x20 update. SAV-1254 observes the listed stores in an owner save taken after the relocation. The store-order, veto and failure clauses stand.
 
 ### MAGIC-TELEPORT-357
 
@@ -4052,6 +4058,8 @@ L13062 selects the pointer at [L01636]+0x7d0+4*actionspell. Thus actionspell 60 
 
 **Unknown.** Cue filename, actual audible start, device success and relative timing against relocation. The two projectile records do not themselves prove two sounds. Unread constructors, indirect calls and sound helpers bound that conclusion.
 
+**Amended.** MAGIC-TELEPORT-371 narrows the relative timing: the cue falls AttackDelay driver calls after the cast message's step. For classes 23 and 24 with charge 8 that is the relocation's timer step, after the simulation step (Medium). Audible start, filename and device success stay Unknown.
+
 ### MAGIC-TELEPORT-360
 
 R1055 tests every footprint cell's dynamic byte at manager +0x20000 against mover byte +5. It then calls R0048(destination,1), whose complete nonzero-flag branch tests the static byte at +0x10000 against the same mask. Either hit returns before Position stores. The footprint coordinates use low-byte arithmetic; input x/y are narrowed to bytes.
@@ -4070,7 +4078,7 @@ The complete R0086 requires mover current facing +0 to equal R0089's returned he
 |---|---|---|---|---|
 | MAGIC-TELEPORT-364 | The read client slot-18 cast route selects a point over an actor or empty ground; its wire selector 19 maps to Teleport ID 26 through the established command remap. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
 | MAGIC-TELEPORT-365 | Book and item point casts share the read client coordinate builder; item selection changes opcode 0x1f to 0x26 before sending, while lower reception stays bounded. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
-| MAGIC-TELEPORT-366 | The read kind-9 executor tests a heading result and byte-coordinate reach before install; its failure approaches, while shared admission separately tests and subtracts book mana. | High / Medium | ● active (branch candidate) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
+| MAGIC-TELEPORT-366 | The read kind-9 executor tests a heading result and byte-coordinate reach before install; its failure approaches, while shared admission separately tests and subtracts book mana. | High / Medium | ● active (branch candidate, amended) | [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
 
 ### MAGIC-TELEPORT-364
 
@@ -4101,3 +4109,46 @@ R0268 applies its cost branch only when R0442 returns nonzero and actor +0x68 is
 **Confidence.** High for the own comparisons, stores, complete-body call order and kind-table value. Medium for full reachability, cost and refusal outcomes. The heading, approach, install, phase and presentation helpers are not newly read. No connected-region acceptance or global lack of pathfinding is established.
 
 **Unknown.** R0089, R0178, R0013, parent R0008 and phase body R0037 are settling reads for reachability and ordering. Full destination admission and runtime feedback remain open. All other unread direct and indirect sites are in the experiment's generated callee receipt.
+
+**Amended.** MAGIC-TELEPORT-370 reads the Unknown's phase body R0037 whole: sub-phase 0 calls the admission and loads the charge countdown; the countdown's zero tick calls the application. R0089, R0178, R0013 and R0008 stay unread.
+
+## Teleport cast time line
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-TELEPORT-370 | The read actor tick applies a point cast, Teleport's relocation included, on the actor tick whose countdown reaches 0: charge byte +0x134 ticks after the tick that admitted the cast. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+| MAGIC-TELEPORT-371 | An admitted point cast sends message 0x86 and stores the send sub-tick in actor +0x138; from that message the client starts the Attack run and both picture-60 records, and calls the cue AttackDelay calls later. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+
+### MAGIC-TELEPORT-370
+
+R0037 is read whole. With signed health +0x94 above 0 it calls R0016 when R0416 returns 0, then indexes byte table L01775 with actor +0x54 - 1 and jumps through L01776. States 3, 13 and 14 reach the sub-phase machine at L00005. Sub-phase +0x58 values 0, 5 and 7 select L16037, L13484 and L04543.
+
+In sub-phase 0, state 14 calls R0268 at L01995 with the Spell at +0x64, target 0 and the destination bytes +0x60/+0x61. A zero return stores nothing. Otherwise L14660..L04379 store +0x136 = 0, +0x58 = 5 and +0x6c = byte +0x134.
+
+In sub-phase 5, L05337 decrements byte +0x6c and leaves while it is nonzero. At zero, state 14 calls R0003 at L00008 with the same arguments. L05340 then stores +0x58 = 7, and L04382 loads +0x6c with byte +0x135 plus a weapon term and R0861(3); for states 13 and 14 with a Spell, L04383 adds the byte R0476 returns for element 0. Sub-phase 7 counts +0x6c down, then stores +0x58 = 0 and +0x136 = 1.
+
+R0003's read entry dispatches Spell byte +8 through table L03242, unless Spell bytes +0xe + +0xf are positive and the id is not 6 or 11; that branch builds a 0x60-byte object and jumps to L14298. The arm MAGIC-TELEPORT-356 places at L05853 calls R1055 with the point's bytes at L16009, then R0059(actor, 0, 0x20), and leaves through L05879. The actor tick has one call of R0003 and one point call of R0268.
+
+MAGIC-CASTTICK-030 reads the same sub-phase machine's stores and the point call at L00008, and MAGIC-CASTCLOCK-171 left its end-to-end timing Medium; SAV-1256 is a one-cast stored observation of that tick.
+
+The relocation therefore runs inside the actor tick. A picture-60 record is a client object (MAGIC-TELEPORT-358) and its driver arm makes no simulation call (ANIM-TELEPORT-168). Counting the admitting actor tick as 0, the relocation runs on actor tick +0x134.
+
+**Confidence.** High for the complete actor tick, its two decoded tables, the admission call and the read application entry, Teleport arm and epilogue. Medium that Teleport takes the per-id branch: Spell bytes +0xe/+0xf of id 26 were not read; SAV-1254 shows the relocation with no added Effect record. Medium that this tick runs once per sub-tick: SAV-1254's countdown falls by the head sub-tick difference, and the scheduler was not read here.
+
+**Unknown.** R0416 (it skips the executor and, in admission, the packet), R0861's range, R0003's other 28 per-id arms and the branch at L14298 were not read. The application entry also calls R1051, R2288, R0858, R0625 and an actor virtual at +0x68 (L02776) before its dispatch; none was read. The default arm at L03046 and the five-way switch through table L05081 were not read. R0621, R0617 and the sender of R0617 were not read (MAGIC-TELEPORT-371).
+
+### MAGIC-TELEPORT-371
+
+R0268 is read whole. When R0442 returns nonzero and actor +0x68 is 0 it compares the signed Spell cost +0xc with mana +0x9a, returns 0 when the cost is larger and otherwise subtracts it. When Spell element 5 is not 2 and R0416 returns nonzero it returns 1 without a packet. For an id other than 14 it sends through R0617 when R0621 returns nonzero, else through R0618 with the built point.
+
+R0618 is read whole. It fills message 0x86, or 0x8b when actor typeword +0xe is 0: id +4 at +0xa, picture 2 * id + 8 at +0xc, the point's cell bytes at +0xd/+0xe and its fourth argument at +0xf. When actor virtual +0x2c returns nonzero, L16038 stores dword [[L00285]+4] in actor +0x138. [L00285] is the server singleton (SAV-657); its +4 is the sub-tick counter (SESS-TICK-004).
+
+The even branch of client arm 0x86 (L05322..L05320) finds the drawable by id. If drawable +0xa0 is nonzero, or the class AttackPhases is 0, it stores nothing. Otherwise it stores +0xa0 = class +0x68 (Attack timeline length), +0x84 = 8 and +0x94 = 0. Aim +0x88/+0x8c is the destination cell centre (byte * 256 + 0x80), the drawable's own point or a target id, chosen by picture table L16039. It stores the picture in +0xa4.
+
+R0548 is read whole. In action 8 it calls slot +0x60 when clock +0x94 equals class +0x100 (AttackDelay), and slot +0x5c when picture +0xa4 is 60 and the clock is 0. It stores phase +0x70 = clock, increments the clock, copies raw +8/+0xc to cache +0x28/+0x2c, stores +0x74 = action and decrements +0xa0. The slot identities are MAGIC-TELEPORT-359's.
+
+On the local path the packet is dequeued in its own timer step (ANIM-121), and the sweep that runs R0548 follows the dispatcher (ANIM-113). For admission step S, the producer and the records' first driver call fall on S, the cue on S + AttackDelay, and the last action-8 call on S + Attack length - 1. EN units.reg classes 23 and 24, the classes HERO-APPEAR-042 gives a mage hero, have AttackDelay 8, ShootDelay 8 and Attack length 12. With charge 8 the cue falls in the relocation's timer step. That step's simulation runs first, so the cue reads the destination point when the relocation sync is dequeued in that step (ANIM-TELEPORT-171). AttackDelay and charge are separate fields; their equality here is a value of these classes, not a rule.
+
+**Confidence.** High for the stores and call conditions of R0268, R0618 and R0548, each read whole, and for the two class rows. High for the stores of the even branch of arm 0x86 from L05322; its head, the opcode 0x86 dispatch and the parity branch are cited from MAGIC-CASTANIM-029, which was not re-read. R0548 is read whole, but its action table at L02482 was not decoded here: that the caster is in action 8 is cited from MAGIC-CASTANIM-029 and ANIM-TELEPORT-169. Medium for the composed alignment: scheduling, delivery and the hero's drawn class, which the client derives from equipment and the save does not store, are cited, not read here.
+
+**Unknown.** Audible cue start, paint order, and casters of other classes or with a charge other than 8. R0621, whose result selects R0617 instead of R0618, and the sender of R0617 were not read. The application entry's pre-dispatch callees (R1051, R2288, R0858, R0625, the actor virtual at +0x68), its default arm at L03046 and the five-way switch through table L05081 were not read (MAGIC-TELEPORT-370).

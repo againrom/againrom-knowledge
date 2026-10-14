@@ -613,3 +613,16 @@ actual-map bounds and lower route/install/runtime effects remain open.
 Mana and presentation precede the later arm on the established cast path;
 the point gate and shared payment body do not establish global acceptance.
 — MAGIC-TELEPORT-360, MAGIC-TELEPORT-174, MAGIC-TELEPORT-366
+
+## Teleport relocation tick
+
+The actor tick runs the point cast in two steps. Its admitting tick calls the
+admission, then loads countdown +0x6c from charge +0x134. Each later actor tick
+decrements it; the tick that reaches 0 calls the application, whose Teleport arm
+relocates the caster and sends a 0x20 update, then starts the recovery countdown.
+Admission sends message 0x86 and stores the send sub-tick in actor +0x138.
+— MAGIC-TELEPORT-370, MAGIC-TELEPORT-371
+
+In one owner EN series, +0x138 holds 10656, the countdown 6 at 10658, and the
+relocation is first stored at 10664 = 10656 + 8. One actor tick per sub-tick and
+the per-id branch for Teleport are Medium. — SAV-1256

@@ -299,3 +299,23 @@ The CUnit cast cue hook selects bank entry 60 and supplies the caster's raw
 point when the action clock equals class AttackDelay. The two records do not
 prove two sounds. Cue filename, actual audible start and alignment with the
 relocation remain Unknown. — MAGIC-TELEPORT-359
+
+## Teleport cast time line
+
+From the 0x86 message the client starts the caster's action 8 with clock 0 and
+remaining equal to the class Attack length, and the producer builds both records
+at clock 0. The cue is called when the clock equals class AttackDelay. Classes 23
+and 24 have AttackDelay 8 and Attack length 12, so with charge 8 the cue falls in
+the relocation's timer step, after the simulation step (Medium).
+— MAGIC-TELEPORT-371
+
+The caster keeps its Attack run across the relocation: phases 0..7 draw from the
+source cache, 8..11 from the destination (Medium). The source record stays at its point
+for all 21 driver calls (Medium: the five stored samples cover driver calls 3, 5,
+6, 7 and 9, and the phase split depends on the relocation sync being dequeued
+before the sweep in its timer step). Paint order and native frames remain
+Unknown.
+— ANIM-TELEPORT-172
+
+An owner series stores both records with actionphase advancing one per head
+sub-tick and fixed points across the relocation. — SAV-1255

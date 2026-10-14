@@ -513,3 +513,7 @@ order remain Unknown. — ANIM-TELEPORT-167
 
 ANIM-PROJ-025's former decompiled picture-60 phase=actionphase clause is
 partially retracted; the remaining driver clauses stand. — ANIM-TELEPORT-168
+
+In one owner series both picture-60 records keep their stored points across the
+caster's relocation, and actionphase plus remaining equals 21 in every stored
+record. — SAV-1255, ANIM-TELEPORT-172

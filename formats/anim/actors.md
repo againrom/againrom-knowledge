@@ -312,3 +312,17 @@ Attack timeline; movement's separate driver arm divides remaining displacement
 by ticks remaining. No Teleport-specific hide was found in these own bodies
 (Medium). Reception, cache refresh, camera updates and the first post-relocation
 sprite remain Unknown. — ANIM-TELEPORT-167, ANIM-TELEPORT-169
+
+## Teleport caster after relocation
+
+The client state-sync arm's own stores move an existing drawable's raw point and
+cache from mask bit 0x20 and change action, clock and remaining only when the
+stage byte changes. This is the arm's own instructions in a whole-arm listing;
+its callees and the pointers it copies were not followed and no section scan
+ran. A living Teleport caster therefore keeps action 8 when its relocation
+update arrives (Medium). — ANIM-TELEPORT-171
+
+The body plays Attack phases 0..7 at the source cache and 8..11 at the
+destination, then idles (Medium: the split depends on the relocation sync being
+dequeued before the sweep in its timer step). Paint order, the body centre derivation and the first
+native frame at each end remain Unknown. — ANIM-TELEPORT-172
