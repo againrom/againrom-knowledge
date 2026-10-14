@@ -320,6 +320,24 @@ Sleep action. These are bounded searches and instruction-level sound requests,
 not observations of native playback or every indirect caller.
 (`TAVERN-LINES-022`)
 
+Slot files and request events:
+
+| slot | file | requested when |
+|---|---|---|
+| `+a4` | `SFX\Town\Inn\enter.wav` | once per enter; the enter opens no dialogue |
+| `+90` | `SFX\Town\Inn\water.wav` | room slot `+2c`, repeat 1 |
+| `+a8` | `SFX\Town\Inn\Helper.wav` | press of a roster cell, and the previous and next steppers; the double click repeats the press; that both cell kinds reach it is Medium (cell test unread) |
+| `+b0` | `SFX\Out.wav` | press of the lower button; its release and Escape request nothing in the bodies read |
+| `+a0` | `SFX\Town\Shop\nofit.wav` | hire with too little money |
+| `+98` | `SFX\Add.wav` | hire after the hire command |
+| `+9c` | `SFX\NoAdd.wav` | dismiss after the dismiss command |
+| `+b4` | `SFX\Talk.wav` | requested after builder `R0695` returns, for the talk or bio dialogue |
+
+Every request uses effects volume and priority 128 and is skipped while the
+sample plays. Presses of the upper and middle buttons request nothing in the bodies read; the
+lower-button hit test, the builder's callee `R0361` and virtual callees are unread, which
+keeps these absences and the order of `Talk.wav` Medium. The tip popup's sounds are the town page's. (`TAVERN-027`, `TAVERN-028`)
+
 ## Group allocation on hire
 
 The command-0x38 handler creates one fresh Player Group per nonzero hired type,

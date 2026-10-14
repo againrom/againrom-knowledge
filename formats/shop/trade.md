@@ -221,13 +221,9 @@ remain Unknown (`SHOP-ANIMATION-084`).
 The sound hook runs before frame advancement. While idle it requests view+b4
 at index 1, view+94 at 10/14/18/22, and view+b8 at 24. With no merchant mode it can
 request view+b0 after its separate redrawn 30-second-base threshold,
-`L09665(view+70+20b0)==0`, and non-null/guard tests. The table-query helper's
-meaning is unexpanded. Shelf selection requests+a0; sell+a8;
-affordable buy+a4; refusal+90; entry+ac and conditionally+b0. The common request
+`L09665(view+70+20b0)==0`, and non-null/guard tests. The common request
 helper requires a non-null sample and guard result 0. Its priority128 argument
-is not a sound id. Sample identity, audible overlap, presentation timing and
-the unexpanded entry+bc helper remain Unknown
-(`SHOP-ANIMATION-085`, `VIDEO-SFX-013`).
+is not a sound id (`SHOP-ANIMATION-085`, `VIDEO-SFX-013`).
 
 The button panel's four rects, top to bottom, are `(494,15,614,67)` clear the table with the purse
 printed on it, `(483,67,623,113)` **buy** with the buy total, `(483,114,623,160)` **sell** with the
@@ -261,6 +257,44 @@ replaces `shop1.txt` at most once per visit, behind the latch `view+0x8c` (`SHOP
 The money cell — an element whose `+0x6` is `0xffff` — draws `backinv.bmp` and then
 `graphics\interface\money\money.16a`, a single 80x80 `.16a` frame that
 composites over it (`SHOP-MONEY-048`).
+
+### Shop sounds
+
+The view binds 14 samples by name: `+0x90` nofit, `+0x94` step1, `+0x98` step2,
+`+0x9c` breath, `+0xa0` depart, `+0xa4` buy, `+0xa8` sell, `+0xac` enter, `+0xb0`
+start, `+0xb4` Povorot1, `+0xb8` Povorot2, `+0xbc` InShop, `+0xc0` Out, `+0xc4` Undo.
+The shelf, backpack strip and trade table each bind Put_On, Put_Off and Scroll.
+step2 and breath have no request site in the census (Medium) (`SHOP-SOUND-134`).
+
+| event | sound |
+|---|---|
+| entering the shop | depart, enter, InShop (looping), start at speech volume |
+| idle 30 to 60 s, merchant still | start at speech volume, unless the table's item speech plays |
+| merchant animation frames 1; 10, 14, 18, 22; 24 | Povorot1; step1; Povorot2 |
+| shelf tab changes the shelf | depart, restarted |
+| shelf or backpack arrow, shelf Page Up/Down | Scroll, restarted per step |
+| item into the trade table (drop, double click from a shelf, return to the table) | Put_On, restarted; then, on a 30 percent draw for a shelf-stamped item, the item speech at speech volume |
+| item out of the trade table (drag or double click, clearing the table) | Put_Off, restarted, once per element |
+| item between shelf, backpack and cursor | no request found in the read population |
+| release refused | the item returns to its origin, then nofit |
+| button 0 or 3 pressed | Undo or Out |
+| buy | buy; nofit when the purse is short; no request found for an empty table |
+| sell | sell when the sale value is nonzero; no request found otherwise |
+| money total changes | no request found in the read population |
+| party panel picker rects and message 0x412 | click00 |
+| spellbook shown or hidden (panel button, leaving the shop) | ibook |
+
+Every request uses pan 0 and frequency 0; shop samples use priority 128 and
+click00 and ibook 220. Restarted samples are stopped and rewound before the
+request; the others are skipped while playing; click00 and ibook are requested
+every time. A row reading "no request found" is Medium: the population is the direct-call closure from the shop classes' methods, which does not follow posted messages, command execution or indirect calls (`SHOP-SOUND-135`, `SHOP-SOUND-136`, `SHOP-SOUND-137`,
+`SHOP-SOUND-138`, `SHOP-SOUND-139`, `VIDEO-SFX-099`).
+
+The item speech name is `effects/<tag>` for the first attribute tag in 2..11,
+27..31 or 33..37, else `books/<value>` for tag 0x2a, else
+`s<class>i<row>p<1..3>` from the packed item code (`ITEM-SOUND-183`). Over the
+416 installed item keys the last form yields 276 names, 110 present on each
+root; class 14 has none (`ITEM-SOUND-184`).
 
 ### The character panel, `+0x7c`
 
@@ -346,7 +380,7 @@ stamp and the origin code agree for a shelf or backpack object and differ for a 
 pick-up writes the stamp itself (shown shelf index + 5, on the held copy) and a shelf insert writes it from
 the object's own shelf index; a tray pick-up writes none (`SHOP-114`).
 
-The panel's button-up slot routes by the stamp alone (`SHOP-098`):
+The panel's button-up slot routes by the stamp alone (`SHOP-098`; its cursor-sound clause is retracted, the routing stands):
 
 ```
 stamp 1, 2        equip arm  panel vt+0x7c(slot = item class nibble - 1)
@@ -362,8 +396,9 @@ codes 1, 2, 4 and 5..8 set a dirty bit on `shop+0x14c` (0x8 panel, 0x1 backpack,
 instructions contain no call to the move command. The backpack and shelf drops insert the held object
 into the shown member's pack list or the shelf list (merging equal id and stamp), issue command `0x22` (always for the backpack drop; for the shelf drop when the origin code differs from the shown shelf's), clear the cursor and post `0x46d`; a held coin element adds its quantity to the purse on
 the backpack drop; no member equipment slot is written (`SHOP-115`). The tray arm calls the tray's
-`vt+0xa4`, which only requests the shop speech: the tray-origin object is stored in no list and no command
-is issued; its pointer is dropped by the cursor clear (`SHOP-116`, consequence Medium). A tray object stamped 2 takes the equip arm with origin
+`vt+0xa4`, which requests Put_On and the item speech and then reinserts the tray-origin object at its
+index, issues command `0x22` with source code 4, clears the cursor and posts `0x46d`; the earlier
+reading that it stores the object in no list is retracted (`SHOP-116`, `SHOP-SOUND-135`). A tray object stamped 2 takes the equip arm with origin
 code 4 and issues command `0x22` with source code 4 (acceptance Unknown).
 
 For the shop's literal child rectangles, the shop view hands a release to the panel only when no

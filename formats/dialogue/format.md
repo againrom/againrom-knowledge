@@ -321,6 +321,11 @@ arm shows `m<mission>\tips<NN>.txt` in a tip popup (`TRIG-TIPS-087`).
 — `DLG-KEYS-040`, `DLG-LIFE-005` (amended for the routing of Enter; its clear enumeration partially
 retracted)
 
+The press of the button requests `click01.wav` through the shared click routine, priority 220 and
+no status check; the release, Enter and Escape request no sound. Each turned page requests only
+the part's voice. Whether the pager's own body requests anything else is Medium.
+— DIALOGUE-080
+
 ### Captured mouse input
 
 The captured panel gives mouse messages to its own children. A left press

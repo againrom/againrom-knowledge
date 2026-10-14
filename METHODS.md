@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
+Claims labelled: 3936. Observation: 99. Static analysis: 3325. Mixed: 512.
 
 ## Ledger ai
 
@@ -811,6 +811,7 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | DLG-VOICE-074 | mixed | ● active |
 | DLG-SPEAKER-075 | mixed | ● active |
 | DLG-VOICE-076 | mixed | ● active |
+| DIALOGUE-080 | static analysis | ● active (branch candidate) |
 
 ## Ledger fame
 
@@ -1087,6 +1088,8 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | ITEM-162 | static analysis | ✔ promoted |
 | ITEM-MAGROW-177 | static analysis | ● active (amended) |
 | ITEM-LOAD-180 | static analysis | ● active |
+| ITEM-SOUND-183 | static analysis | ● active (branch candidate) |
+| ITEM-SOUND-184 | mixed | ● active (branch candidate) |
 
 ## Ledger magic
 
@@ -3066,17 +3069,17 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | SHOP-105 | static analysis | ✔ promoted |
 | SHOP-096 | static analysis | ● active |
 | SHOP-097 | static analysis | ● active |
-| SHOP-098 | static analysis | ● active |
-| SHOP-099 | static analysis | ● active |
+| SHOP-098 | static analysis | ● active (partially retracted) |
+| SHOP-099 | static analysis | ● active (amended) |
 | SHOP-100 | static analysis | ● active |
 | SHOP-101 | static analysis | ● active |
 | SHOP-114 | static analysis | ● active (branch candidate) |
-| SHOP-115 | static analysis | ● active (branch candidate) |
-| SHOP-116 | static analysis | ● active (branch candidate) |
+| SHOP-115 | static analysis | ● active (amended) |
+| SHOP-116 | static analysis | ● active (partially retracted) |
 | SHOP-106 | static analysis | ● active (branch candidate) |
 | SHOP-107 | static analysis | ● active (branch candidate, partially retracted) |
 | SHOP-108 | static analysis | ● active (branch candidate) |
-| SHOP-109 | static analysis | ● active (branch candidate) |
+| SHOP-109 | static analysis | ● active (partially retracted) |
 | SHOP-110 | static analysis | ● active (branch candidate) |
 | SHOP-111 | static analysis | ● active (branch candidate) |
 | SHOP-112 | static analysis | ● active (branch candidate) |
@@ -3090,6 +3093,12 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | SHOP-128 | static analysis | ● active (branch candidate) |
 | SHOP-129 | static analysis | ● active (branch candidate) |
 | SHOP-130 | static analysis | ● active (branch candidate) |
+| SHOP-SOUND-134 | static analysis | ● active (branch candidate) |
+| SHOP-SOUND-135 | static analysis | ● active (branch candidate) |
+| SHOP-SOUND-136 | static analysis | ● active (branch candidate) |
+| SHOP-SOUND-137 | static analysis | ● active (branch candidate) |
+| SHOP-SOUND-138 | static analysis | ● active (branch candidate) |
+| SHOP-SOUND-139 | static analysis | ● active (branch candidate) |
 
 ## Ledger spr16a
 
@@ -3202,11 +3211,13 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | TAVERN-TALKPIC-016 | static analysis | ● active |
 | TAVERN-TALKSTATS-017 | static analysis | ● active |
 | TAVERN-CLICK-019 | static analysis | ● active (amended) |
-| TAVERN-BUTTON-020 | static analysis | ● active |
+| TAVERN-BUTTON-020 | static analysis | ● active (amended) |
 | TAVERN-FIGURE-021 | static analysis | ● active |
 | TAVERN-LINES-022 | static analysis | ● active |
 | TAVERN-023 | static analysis | ✔ promoted |
 | TAVERN-024 | static analysis | ✔ promoted |
+| TAVERN-027 | static analysis | ● active (branch candidate) |
+| TAVERN-028 | static analysis | ● active (branch candidate) |
 
 ## Ledger terrain
 
@@ -3732,7 +3743,7 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | TOWN-345 | static analysis | ● active |
 | TOWN-346 | static analysis | ● active |
 | TOWN-347 | static analysis | ● active (amended, partially retracted) |
-| TOWN-348 | static analysis | ● active |
+| TOWN-348 | static analysis | ● active (partially retracted) |
 | TOWN-349 | static analysis | ● active |
 | TOWN-350 | static analysis | ● active |
 | TOWN-351 | static analysis | ● active (amended, partially retracted) |
@@ -3764,7 +3775,7 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | TOWN-SMOOTH-460 | static analysis | ✔ promoted |
 | TOWN-473 | static analysis | ● active |
 | TOWN-474 | static analysis | ● active |
-| TOWN-475 | static analysis | ● active |
+| TOWN-475 | static analysis | ● active (amended) |
 | TOWN-476 | static analysis | ● active |
 | TOWN-477 | static analysis | ● active |
 | TOWN-478 | static analysis | ● active |
@@ -3818,6 +3829,14 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | TOWN-542 | static analysis | ● active (branch candidate) |
 | TOWN-543 | static analysis | ● active (branch candidate) |
 | TOWN-544 | static analysis | ● active (branch candidate) |
+| TOWN-547 | static analysis | ● active (branch candidate) |
+| TOWN-548 | static analysis | ● active (branch candidate) |
+| TOWN-549 | static analysis | ● active (branch candidate) |
+| TOWN-550 | static analysis | ● active (branch candidate) |
+| TOWN-551 | static analysis | ● active (branch candidate) |
+| TOWN-552 | static analysis | ● active (branch candidate) |
+| TOWN-553 | mixed | ● active (branch candidate) |
+| TOWN-554 | static analysis | ● active (branch candidate) |
 
 ## Ledger trigger
 
@@ -4084,3 +4103,5 @@ Claims labelled: 3915. Observation: 99. Static analysis: 3306. Mixed: 510.
 | VIDEO-093 | static analysis | ● active (branch candidate) |
 | VIDEO-094 | static analysis | ● active (branch candidate) |
 | VIDEO-095 | static analysis | ● active (branch candidate) |
+| VIDEO-SFX-099 | static analysis | ● active (branch candidate) |
+| VIDEO-SFX-100 | static analysis | ● active (branch candidate) |

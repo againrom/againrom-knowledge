@@ -1037,13 +1037,13 @@ not the whole image.
 |---|---|---|---|---|
 | SHOP-096 | Five direct stores write `session+0x3cc`, and origin fields `+0x3d0` and `+0x3d4` beside it; the pick-up routines, cursor setter and clear contain no store to `+0x18`. | High / Medium | ● active | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
 | SHOP-097 | Element `+0x18` is its own stamp: contents load gives shelf index + 5, tray 2 or 5 by flag 0x80, new party equipment 1; insert slots give backpack 2 and keep other tray values; it is not the origin code for tray objects. | High / Medium | ● active | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
-| SHOP-098 | The panel left-up routes stamps 1 and 2 to the equip arm and 5 to 8 to `R1781`, whatever the origin code; other values leaving the object held and return 1 on every path are Medium. | High / Medium | ● active | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
-| SHOP-099 | `R1781` dispatches on the origin code; its own instructions contain no call to `R0238`, but origin 1 calls the equip arm (SHOP-101); drop and refresh bodies were not read; dirty bits vary by code. | High / Medium | ● active | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
+| SHOP-098 | The panel left-up routes stamps 1 and 2 to the equip arm and 5 to 8 to `R1781`, whatever the origin code; other values leaving the object held and return 1 on every path are Medium. | High / Medium | ● active (partially retracted) | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md), [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| SHOP-099 | `R1781` dispatches on the origin code; its own instructions contain no call to `R0238`, but origin 1 calls the equip arm (SHOP-101); drop and refresh bodies were not read; dirty bits vary by code. | High / Medium | ● active (amended) | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
 | SHOP-100 | For the supplied shop child rectangles, a button-up reaches the panel only with no capture child set and the point in `(480,238)-(640,480)`; focus is irrelevant; the shop's use of `R0390` is inherited. | High / Medium | ● active | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
 | SHOP-101 | The panel equip arm `R0240` equips through command `0x22` from the origin container or rejects through grid `session+0xe8` (identity with the shop backpack Unknown); 14 replay rows are not a full gate matrix. | High / Medium / Unknown | ● active | [EXP-0424](../experiments/EXP-0424-panel-release/EXP-0424.md) |
 | SHOP-114 | Held `+0x18` is not one place code: a shelf pick-up stamps the held copy with the shown shelf code (`L09857`), a tray pick-up stores none and keeps the tray element's own stamp, so a tray object carries 2 or 5, not 4. | High / Medium | ● active (branch candidate) | [EXP-0484](../experiments/EXP-0484-shop-release/) |
-| SHOP-115 | Return arm for origin 2 and 5..8 (`R1781`): the held object is inserted into the shown member's pack or a shelf list; command `0x22` is always sent for the pack and for a shelf only when the codes differ; no equipment slot is written. | High / Medium | ● active (branch candidate) | [EXP-0484](../experiments/EXP-0484-shop-release/) |
-| SHOP-116 | Return arm for origin 4: tray slot `+0xa4` (`L09858`) only requests a speech sound and never reads the index; no instruction of these routines stores the tray-origin object into a list; the cursor clear drops its pointer. | High / Medium | ● active (branch candidate) | [EXP-0484](../experiments/EXP-0484-shop-release/) |
+| SHOP-115 | Return arm for origin 2 and 5..8 (`R1781`): the held object is inserted into the shown member's pack or a shelf list; command `0x22` is always sent for the pack and for a shelf only when the codes differ; no equipment slot is written. | High / Medium | ● active (amended) | [EXP-0484](../experiments/EXP-0484-shop-release/) |
+| SHOP-116 | Return arm for origin 4: tray slot `+0xa4` (`L09858`) requests Put_On and the item speech and reinserts the tray-origin object at its index through `R0244`; the no-insert clauses are retracted (EXP-0573). | High / Medium | ● active (partially retracted) | [EXP-0484](../experiments/EXP-0484-shop-release/), [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
 
 ### SHOP-096
 
@@ -1157,6 +1157,8 @@ recorders here; SHOP-099 and SHOP-101 replay them separately.
 a point inside the panel is not replayed; they act on the cursor-mode bits
 `session+0x3dc`.
 
+**Amended.** `EXP-0573`: `L09893` calls `R0320` with `[L01211]`, the cursor manager's set call (`AI-CURSOR-172`). It requests no sound; "plays the cursor sound" above is retracted (`claims/retracted.md`). The routing clauses stand.
+
 ### SHOP-099
 
 `R1781` fetches the session, calls `L09894` with `[L01211]`
@@ -1187,6 +1189,8 @@ not replayed, so placement, merging and quantity are not claimed.
 
 **Unknown.** The `vt+0xa4` bodies and the origin-index meaning for a
 tray that was reordered while the object was held.
+
+**Amended.** The tray body `L09858` is read, not replayed: `EXP-0573` lists it whole and `R0244` (`SHOP-SOUND-135`), and it inserts the held object into the tray (`SHOP-116`, partially retracted). The Medium and the Unknown above stand for `R0242` and `R0243` as far as placement, merging and quantity go.
 
 ### SHOP-100
 
@@ -1300,6 +1304,8 @@ Pack list: the destination is the member shown at release (`session+0xd0+0x138`)
 
 **Unknown.** Server handling of `0x22` with a shelf or tray source; whether the held object is freed elsewhere after a home-slot copy.
 
+**Amended.** The part of the Answered paragraph that credits `SHOP-099`'s Medium for `L09858` is withdrawn. The tray body was not read when this claim was written, and `SHOP-116`, on which the credit rested, is partially retracted: `L09858` ends with `R0244`, which inserts the held object into the tray (`SHOP-SOUND-135`, `EXP-0573`). The credit for `R0242`, `R0243` and the cursor clear stands.
+
 ### SHOP-116
 
 For origin 4 `R1781` calls the tray class `vt+0xa4` (`L09858`) with the origin index, then the refresh `R1767`, sets dirty bit 4 only when `shop+0x84` is 0 (`SHOP-099`), and clears the cursor. Slot `L09858` is `SHOP-109`'s speech request. It never reads its index argument, never calls the tray's list or the held element, and its only stores are the sound object at `[this+0x20b0]` and its own locals. The one `+0x3cc` read is the stamp test for 5..8 (`L09918`..`L09919`).
@@ -1312,6 +1318,8 @@ The tray arm therefore differs from the backpack and shelf arms (`SHOP-115`): af
 
 **Unknown.** Whether the server or a later view reload restores the tray contents; whether a tray object stamped 5 can be released over the panel in play beyond the instruction path read here.
 
+**Amended.** `EXP-0573` read `L09858` whole (`L09858`..`L16047`). After the speech draw it restarts and requests Put_On (`L09945`) and then calls `R0244` with its index argument (`L16048`..`L16042`). `R0244` inserts the held object through tray `vt+0x78`, binds the list through `vt+0x90`, calls `R0238` with the origin code, the source index, code 4, the insert result and the quantity, clears the cursor through `R0340` and posts `0x46d` to `[session+0xcc]`. The sentences above that say the slot never reads its index, stores nothing into a list, issues no `0x22` command and no `0x46d` post, and that the cursor clear drops the pointer, are retracted (`claims/retracted.md`). A tray-origin object returned through `R1781` is reinserted into the tray. The take and cursor-clear facts stand.
+
 ## Shop grid, button panel, pack readout and speech presentation
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -1319,7 +1327,7 @@ The tray arm therefore differs from the backpack and shelf arms (`SHOP-115`): af
 | SHOP-106 | The shop stock-grid painter draws quantity text in font 2 with flag 0 (left) and price text with flag 1 (right), both with ramp `L03616` and shadow 1; the purse cell goes through the quantity run, never the price run. | High | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
 | SHOP-107 | The shop button panel redraws a pressed-and-hovered button's picture and both captions one pixel lower in the hover colour object `[L09922]`; the final RGB of the two caption colour objects is Unknown. | High / Medium / Unknown | ● active (branch candidate, partially retracted) | [EXP-0456](../experiments/EXP-0456-shop-school/), [EXP-0533](../experiments/EXP-0533-shop-school-presentation/) |
 | SHOP-108 | The mission pack readout (class vtable `L06494`, `campaign+0xe8`) draws its purse figure and its stack counts with font 2, flag 0, shadow 1 and the gold ramp `L03616`, as the shop grid does. | High | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
-| SHOP-109 | The shop speech is requested by tray slot `+0xa4` (`L09858`) on a scaled 30 percent draw from held-item keys; no tavern routine requests a speech-prefixed file of its own (tavern sound requests are slot objects). | High / Medium | ● active (branch candidate) | [EXP-0456](../experiments/EXP-0456-shop-school/) |
+| SHOP-109 | The shop speech is requested by tray slot `+0xa4` (`L09858`) on a scaled 30 percent draw from held-item keys; no tavern routine requests a speech-prefixed file of its own (tavern sound requests are slot objects). | High / Medium | ● active (partially retracted) | [EXP-0456](../experiments/EXP-0456-shop-school/), **[EXP-0574](../experiments/EXP-0574-town-sounds/)** |
 | SHOP-110 | The backpack strip's own paint (vtable `L09923` slot `+0x2c`, `L09924`) blits an arrow only while parent dword +0x148 is nonzero, the art is loaded, and base > 0 (left) or count - base > 5 (right); at a bound no arrow bitmap is blitted. | High / Medium | ● active (branch candidate) | [EXP-0482](../experiments/EXP-0482-shop-strip/) |
 | SHOP-111 | The strip's click steps move the scroll base by one cell: left only when base is not 0, right only when count > base + 5, so for 5 or fewer elements neither changes it; the base moves only inside 0..count-5 through these two steps. | High / Medium | ● active (branch candidate) | [EXP-0482](../experiments/EXP-0482-shop-strip/) |
 | SHOP-112 | A click inside either strip edge rect is consumed at every base: at a bound the step is a no-op and the sound branch's conditions do not read the base; the edge cursor's conditions do not read base or count. | High | ● active (branch candidate) | [EXP-0482](../experiments/EXP-0482-shop-strip/) |
@@ -1357,6 +1365,10 @@ The tray class (vtable `L09938`, `view+0x70`) fills slot `+0xa4` with `L09858`. 
 **Confidence.** High for the routine, the file-name formats and the draw. Medium for the call-site list: the receiver classes of `L09946`, `L09947` and `L09951` were not identified, so which of those sites reach `L09858` is Unknown. Medium for the tavern clause: the image data holds `speech\` strings only at `L09968`, `L09969`, `L09970`, `L09971` and `L03598` (`evidence/strings-speech.txt`), and the `R0386` census lists no tavern request outside the slots above; a computed path would not appear.
 
 **Unknown.** Receiver classes of the three unattributed sites; the item word bits that fill `s%.2di%.2d`; the role of the sound manager `[L02739]`; whether any tavern dialogue is voiced, which depends on the `main.res` text nodes (22 EN and 29 RU `inn\NPC` nodes, `DLG-RECT-037`) that this experiment did not read in either language.
+
+**Amended.** The tavern clause's list of 13 tavern request sites omits three: TAVERN-027 adds the `Helper.wav` request sites `L13068`, `L13070` and `L13072`, all slot objects. The clause's conclusion (tavern requests are slot objects, none a speech-prefixed path) and the grades stand.
+
+**Amended.** The clause that `L09858` stores the object at `[this+0x20b0]` and `[this+0x20b4]` is refuted (`SHOP-SOUND-135`, `EXP-0573`). The routine stores `[this+0x20b0]` only (`L16043`). `[this+0x20b4]` is the Put_On sample bound at activation by `R2289` and is read at `L16044`, `L16045` and `L16046`; the request at `L09945` names that bound sample, and the request at `L09944` names the speech object. The routine, the file-name formats, the draw and the grades otherwise stand.
 
 ### SHOP-110
 
@@ -1606,3 +1618,111 @@ The font virtual method `R0767` passes the colour-table pointer to glyph sprite 
 **Confidence.** High for the initialized source law, builder arithmetic and shared object/block selection. The zero seeds, complete mode-4 branch and both painters are committed. These exclude a 16-source-record population and independent school colour objects.
 
 **Unknown.** Final caption-pixel RGB, glyph table indices, possible encoded access to later blocks, runtime pixel format and destination blending. Reading the glyph sprite `+0x34` consumer, pixel-format writers and native caption samples would settle these alternatives. The conditional prepack endpoints must not be used as final RGB.
+
+## Shop sound requests
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-SOUND-134 | The shop room, its four grids, its figure and button panels and the borrowed party panel reach 27 sound request sites through `R0386` and its two wrappers; step2 and breath are loaded and never requested by a read site. | High / Medium | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| SHOP-SOUND-135 | A move of an item into the trade table plays Put_On and may add a 30 percent item speech; a pick-up from the table plays Put_Off; shelf and backpack moves: no request found; a refused release returns the item and plays nofit. | High / Medium | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| SHOP-SOUND-136 | Buy plays buy.wav, or nofit when the purse falls short, and nothing for an empty purchase; sell plays sell.wav only for a nonzero sale value; Undo and Out play on button press; no request is found for the money change. | High / Medium | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| SHOP-SOUND-137 | Shop entry requests depart, enter, the looping InShop and start.wav; idle repeats start.wav after 30 to 60 s; the figure animation plays Povorot1, step1 and Povorot2 on fixed frames; a shelf change plays depart. | High / Medium | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| SHOP-SOUND-138 | Scroll.wav, restarted from its start, accompanies every shelf and backpack scroll by arrow click, shelf key 0x21/0x22 and shelf slot `+0x50`. | High / Medium | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| SHOP-SOUND-139 | Inside the shop the party panel plays click00 for message 0x412 and its three picker rectangles, and the spellbook button and leaving the shop with the spellbook shown play ibook; equipping and the cursor manager call play nothing. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+
+### SHOP-SOUND-134
+
+The census reads every direct call of `R0386` (112 sites), of the not-playing wrapper `R1701` (10) and of the looping wrapper `R2104` (1) in the EN image (`evidence/scan-request-callers.txt`). It keeps the sites whose owner is a method of the shop room's classes or a routine those methods reach by direct calls. The classes are the grid base `L09925`, shelf `L09867`, backpack strip `L09923`, trade table (tray) `L09938`, room view `L03649`, figure panel `L09658`, button panel `L16049`, spellbook popup `L16050` and the party panel `L00722` at `view+0x7c` (`evidence/table-grid-vtables-L16051.txt`, `evidence/table-view-vtables-L03649.txt`, `evidence/table-panel-vtable-L16052.txt`). The image is one byte sequence on both roots (`evidence/image-hashes.txt`).
+
+| site | event | sample | selection |
+|---|---|---|---|
+| `L13078` | grid release refused (`view+0x144` = 0), after the return to origin | nofit | `view+0x90`, if not playing |
+| `L13079` | shelf slot `+0x50` with flag 1 inside an arrow rect | Scroll | shelf `+0x20bc`, restart |
+| `L13080` | shelf arrow left-down | Scroll | shelf `+0x20bc`, restart |
+| `L13081` | shelf key 0x21 or 0x22 | Scroll | shelf `+0x20bc`, restart |
+| `L10018` | backpack strip arrow left-down | Scroll | strip `+0x20bc`, restart |
+| `L09944` | drop into the trade table, draw below 30 | item speech | name built from the held item (`ITEM-SOUND-183`), if the previous one is not playing |
+| `L09945` | drop into the trade table | Put_On | tray `+0x20b4`, restart |
+| `L13082` | pick-up from the trade table | Put_Off | tray `+0x20b8`, restart |
+| `L13115` | room activation | enter | `view+0xac`, if not playing |
+| `L13087` | room activation | InShop, repeat 1 | `view+0xbc`, if not playing |
+| `L13083` | room activation | start | `view+0xb0`, if not playing |
+| `L13084` | idle timer in the figure paint | start | `view+0xb0`, if not playing |
+| `L13119` | figure animation frame 1 | Povorot1 | `view+0xb4`, if not playing |
+| `L13120` | figure animation frames 10, 14, 18, 22 | step1 | `view+0x94`, if not playing |
+| `L13121` | figure animation frame 24 | Povorot2 | `view+0xb8`, if not playing |
+| `L13116` | sell, nonzero sale value | sell | `view+0xa8`, if not playing |
+| `L13117` | buy refused, purse short | nofit | `view+0x90`, if not playing |
+| `L13118` | buy accepted | buy | `view+0xa4`, if not playing |
+| `L13122` | shelf changed (tab click, room activation) | depart | `view+0xa0`, restart |
+| `L13123` | button 0 left-down | Undo | `view+0xc4`, if not playing |
+| `L13124` | button 3 left-down | Out | `view+0xc0`, if not playing |
+| `L13074` | party panel message 0x412 | click00 | registry slot 1, no test |
+| `L13075` | party panel picker rect 1 (posts 0x414) | click00 | registry slot 1, no test |
+| `L13076` | party panel picker rect 2 (posts 0x415) | click00 | registry slot 1, no test |
+| `L13077` | party panel rect 3 (posts 0x416) | click00 | registry slot 1, no test |
+| `L13038` | spellbook hidden: on leaving (`R1758`), or party panel rect B (0x40f to the map view) with the spellbook shown | ibook | registry slot 7, no test |
+| `L13037` | spellbook shown: party panel rect B (0x40f to the map view) with the spellbook absent | ibook | registry slot 7, no test |
+
+The samples are bound by name: the grid loader `R2289` binds `SFX\Put_On.wav`, `SFX\Put_Off.wav` and `SFX\Scroll.wav` to `+0x20b4`, `+0x20b8`, `+0x20bc` of the shelf, the strip and the tray at activation (`R0705`); the view loader `R2290` binds 14 names to `view+0x90`..`+0xc4` (`evidence/strings-sound-names.txt`). Registry slots 1 and 7 are click00 and ibook (`VIDEO-SFX-016`). The direct-call closure from every method of the nine classes reaches no other request owner (`evidence/closure-request-owners.txt`: 155 methods, 78 owners of the 123 sites, 19 reached). Two routes leave the census: the dialogue opened at activation through `R0695` when `L03650(session+0x548)` is nonzero (`shop\npc31m%d`), whose sound the dialogue pager plays (`DLG-SOUND-028`), and the tip window at `view+0x88`, which `EXP-0574` reads.
+
+`view+0x98` (step2) and `view+0x9c` (breath) are bound by the loader and no direct call, wrapper call or immediate operand in the census reads them.
+
+**Confidence.** High for each listed site, its sample and its selection: every owning routine is in one complete listing. Medium for the two ibook sites on the rect-B route, which rest on `TOWN-351` (`panel+0x5c` is the map view) and `AI-CURSOR-234` (its 0x40f arm calls the two toggles); the map view's arm was not read here. Medium for the census being complete and for step2 and breath being unplayed: the closure follows direct calls only, and an indirect call through an object outside the nine classes is not followed.
+
+**Unknown.** The event that delivers shelf slot `+0x50` with flag 1.
+
+**Answered here.** `SHOP-ANIMATION-085`'s Unknown sample names: `+0x90` nofit, `+0x94` step1, `+0xa0` depart, `+0xa4` buy, `+0xa8` sell, `+0xac` enter, `+0xb0` start, `+0xb4` Povorot1, `+0xb8` Povorot2; the entry helper on `+0xbc` is the looping InShop ambience (`R2104`, repeat 1). `SHOP-112`'s Unknown sample at `L10018` is the strip's Scroll.wav.
+
+### SHOP-SOUND-135
+
+The trade table's pick slot `+0xa0` (`L09903`) stops and rewinds a playing Put_Off, requests it, then calls the base pick `R1264`; the request comes before the pick and stands when the pick refuses. The table's drop slot `+0xa4` (`L09858`) runs the speech draw of `SHOP-109`, restarts and requests Put_On, then inserts the item through `R0244`. The base pick `R1264`, base drop `R0242`, shelf drop `R0243` and the takes `R1271`, `R1742`, `L16053` request nothing, so no read body of a move between a shelf or the backpack strip and the cursor requests a sound.
+
+The events that reach those slots:
+
+1. Drag pick-up: grid mouse move `+0x4c` (`L16054`) with the button held, nothing held and a valid pressed cell calls `vt+0xa0`. From the trade table it plays Put_Off.
+2. Double click (`+0x5c`, `L09947`, message 0x203 by `MENU-143`) picks one unit through `vt+0xa0`, then moves it. The pick from the table plays Put_Off; the moves after it request no sound: stamp 2 to the strip, stamps 5..8 to the shelf, stamp 1 to the panel. From the strip: the panel equip arm, no request. From a shelf: into the table when it is not full, Put_On and the speech draw.
+3. Release (`+0x58`, `L09946`). With drop permission `view+0x144` = 0 the item returns to its origin through `R1781`, then nofit plays if it is not playing (`L13078`). Otherwise the target code selects: the table (4) calls its drop, Put_On and the speech draw; the strip drops silently; a shelf 5..8 drops silently when the item's class passes its test and otherwise returns the item silently.
+4. Clearing the table (`R1738`, button 0, button 3 and Esc) picks every table element through the table's `vt+0xa0`, one Put_Off restart per element, and drops each silently on the strip or shelf.
+
+Drop permission is set by the mouse move over each grid: the shelf allows stamps 5..8, the strip stamps 1 and 2, the table an item with a positive price tag when it is not full (`L01290`). An item without a price tag is refused over every target but the strip. A return to origin 4 (the table) runs the table's drop: Put_On, the speech draw, and the reinsertion; a refused release from the table therefore plays Put_On and then nofit.
+
+**Confidence.** High for the sound each read slot requests and for the switch targets: the slot bodies named (`L09903`, `L09858`, `R0244`, `R1264`, `R0242`, `R0243`, `R1271`, `R1742`, `L16053`, `L09946`, `L09947`, `R1738`) are in complete listings. Medium for every silence (shelf, backpack strip, base grid, takes, clears, panel equip, spellbook release, and the return arm): the instrument is the direct-call edges of `docs/functions/data/calls.tsv` from the 155 vtable methods plus the scan of the 123 request call sites (`evidence/closure-request-owners.txt`, `evidence/scan-request-callers.txt`). It finds no request owner under `R1781`, `R0238`, `R0320`, `R0340` and `R1767`, none of which has a listing here. Its blind spots are the receivers of the posted message `0x46d` and of command `0x22`, the execution of commands behind `R0238`, indirect calls and routines outside the registry's edges. Medium for the event names of `+0x4c` and `+0x58`, which rest on the slot roles of the router read by `MENU-143` and on the operands of the bodies.
+
+**Unknown.** Whether a stamp-5 item can reach the table's speech draw outside the paths read here; the audible result when Put_On and Put_Off overlap on different channels.
+
+### SHOP-SOUND-136
+
+The button panel's left-down `L12179` requests Undo for button 0 and Out for button 3; buttons 1 and 2 request nothing. Its left-up `R1757` dispatches through the table at `L09750` (`evidence/table-button-switch-L09750.txt`): 0 clears the table, 1 buys (`R1736`), 2 sells (`R1737`), 3 clears the table and leaves (`R1758`).
+
+Buy recomputes the totals (`R1028`) and returns with no sound when the cost `view+0x154` is 0. When the purse `view+0x150` plus the cost (stored negative) is below 0 it sets figure bit 0x40 and requests nofit; otherwise it sends the trade command `R1739`, sets figure bit 0x20 and requests buy.wav. Sell requests sell.wav after the command `R1740` when the sale value `view+0x158` is nonzero, and nothing otherwise. The trade commands `R1739` and `R1740` and the totals routine reach no request owner by direct calls.
+
+**Confidence.** High for the requests of the two handlers (`L12179`, `R1757`), the switch table and `R1736` and `R1737`, which are complete listings. Medium for the absence of any other request on a purchase, a sale or a change of the money total: `R1739` and `R1740` have no listing here, and the instrument (the direct-call edges of `docs/functions/data/calls.tsv` plus the scan of the 123 request call sites, `evidence/closure-request-owners.txt`) does not follow the execution of a command or the receivers of a posted message, nor indirect calls.
+
+### SHOP-SOUND-137
+
+Room activation `R0705` sets `view+0x132` to 0x64 and calls `R1523(0)`, which stops and requests depart because the shelf index changed. It then binds the grid and view samples, requests enter (`L13115`) and the InShop loop (`L13087`), and requests start at speech volume when start is not playing (`L13083`).
+
+The figure paint calls `L09659`. With figure bits 0x10, 0x20 and 0x40 clear, it requests start when the time since the last request exceeds `30000 + L09664(30000)` ms and the trade table's speech `tray+0x20b0` is not playing (`L13084`), then stores the time. With bit 0x10 set it reads the animation frame `B+0x254`: frame 1 requests Povorot1, frames 10, 14, 18 and 22 step1, frame 24 Povorot2. Each of those three requests only when its sample is not playing.
+
+A click on a shelf tab of the figure (`R1526`) calls `R1523(i)`, which stops a playing depart and requests it when `i` differs from the shown shelf. The figure's left-up returns a held item through `R1781` with no sound of its own.
+
+**Confidence.** High for the order, the operands and the frame values. Medium for the delay range: `L09664` was read only by its role as a bounded random draw in `SHOP-ANIMATION-085`.
+
+### SHOP-SOUND-138
+
+The shelf's left-down `R1750` and slot `+0x50` (`R1749`, flag 1) call the step routine `R1751` (rect `+0x20cc`) or `R1752` (rect `+0x20dc`) twice on a hit in an arrow rect and request Scroll (`L13080`, `L13079`). The shelf key slot `+0x6c` (`L10016`) calls the same routines six times for codes 0x21 and 0x22 and requests Scroll (`L13081`). The strip's left-down `L10005` calls one of them once and requests Scroll (`L10018`); its slot `+0x50` with flag 1 forwards to the left-down. Each site first stops and rewinds a playing Scroll, so every step restarts the sample. The request does not depend on whether the step moved the base (`SHOP-112`).
+
+**Confidence.** High for the sites and the restart. Medium for codes 0x21 and 0x22 as Page Up and Page Down, an inference from the virtual-key values.
+
+### SHOP-SOUND-139
+
+The party panel's message handler `R1205` requests click00 for message 0x412 when its size flag is clear (`L13074`). Its left-up `R0332` requests click00 for the picker rects 1 and 2 under mode bits 0x226 (`L13075`, `L13076`) and for rect 3 under mode bit 1 (`L13077`). A held item stamped 1 or 2 goes to `L09893`, which calls the cursor manager `R0320` (`AI-CURSOR-172`) and the equip arm `R0240`; neither requests a sound. The equip arm reaches `R0097(0xa)`, whose switch index for 0xa falls outside its table, so no spellbook toggle and no ibook follows on that call; the mapped mode equals 5 (`L16055`), which also keeps the call out of the toggle.
+
+Leaving the shop (`R1758`, button 3 or Esc `R1732`) hides a shown spellbook through `R0335`, which requests ibook with no playing test (`L13038`). The party panel's rect B under mode bits 3 (`L16056`..`L11888`) sends 0x40f to the panel, to `[panel+0x5c]` and, in shop mode, to `[session+0xf0]`. `[panel+0x5c]` is the map view (`TOWN-351`), whose 0x40f arm shows or hides the spellbook under `[session+0xf0]` and requests ibook (`L13037` or `L13038`, `AI-CURSOR-234`). The room view's own 0x40f handler (`L16057`) swaps the spellbook popup and the trade table without a sound. The spellbook popup's left-up `L09951` calls `R0320`; in shop mode (`session+0x3dc` bit 2) it returns the item through `R1781` on `session+0xf0`, otherwise it drops into `[session+0xe8]` slot `+0xa4`.
+
+**Confidence.** High for each site and branch read here. Medium for the rect-B ibook, which rests on `TOWN-351` and `AI-CURSOR-234`, and for the absence of ibook on the equip path, which rests on `R0097`'s switch bound for one argument.
+
+**Unknown.** The combined result of the map view's toggle and the room view's swap on the same 0x40f click.
+
+**Answered here.** `SHOP-109`'s unattributed `[reg+0xa4]` receivers: at `L09946` it is the grid released over (the trade table when the target code is 4); at `L09947` it is the strip, the shelf or the table chosen by origin and stamp; at `L09951` it is `[session+0xe8]`, not the trade table. The item word bits that fill `s%.2di%.2d` are `ITEM-SOUND-183`'s; `[L02739]` is the speech volume (`MENU-149`).

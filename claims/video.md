@@ -1334,3 +1334,35 @@ registry beyond a later named save. Owner action: begin/finish a mission
 with a matching movie, including missing-video failure, trace argument and
 L12930, open the list, exit normally and relaunch. Source rows/default
 floor/persistence fields remain VIDEO-075, with its false clauses retracted.
+
+## Shop request parameters and sample lifetime
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| VIDEO-SFX-099 | Shop requests use pan 0, frequency 0, priority 0x80 (click00 and ibook 0xdc); only InShop loops; item speech and start.wav use speech volume; Put_On, Put_Off, Scroll and depart restart; click00 and ibook never test; others skip if playing. | High | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| VIDEO-SFX-100 | Binding a sample by name stops and destroys the previous one and constructs a new object that holds only the name; no file is opened at bind time. | High / Unknown | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+
+### VIDEO-SFX-099
+
+The arguments of `R0386` are volume, pan, repeat, priority and frequency after the sample in `ECX` (`VIDEO-SFX-013`). Over the 27 sites of `SHOP-SOUND-134`:
+
+- Volume: `[L02739]` (speech, `MENU-149`) at `L09944` and the two start.wav sites `L13083`, `L13084`; `[L02733]` (effects, `TOWN-504`) at the other 24.
+- Pan 0 and frequency 0 at all 27.
+- Repeat 1 only through `R2104` at `L13087` (InShop); 0 elsewhere.
+- Priority 0x80 at the 21 shop sites; 0xdc at the four click00 sites and the two ibook sites.
+
+Overlap is decided per site before the request:
+
+- Restart: Put_On (`L09945`), Put_Off (`L13082`), Scroll (four sites) and depart (`L13122`) first find a channel playing the sample with `R1476`, call buffer slots `+0x48` and `+0x34` with 0 on it, and then request. The slots are read as `Stop` and `SetCurrentPosition` by the DirectSound buffer layout, an inference.
+- Skip while playing: every `R1701` and `R2104` site, the start.wav sites and nofit at `L13078` request only when `R1476` returns 0. The item speech at `L09944` skips when its previous speech object is still playing, and then plays only Put_On.
+- No test: click00 and ibook request each time, so a second request takes another buffer of the same sample (`VIDEO-SFX-086`).
+
+**Confidence.** High: every site's pushes are in complete listings.
+
+### VIDEO-SFX-100
+
+`R2107(&field, name)` stops a playing sample in `*field` through `R2046`, destroys it, allocates 0x14 bytes and constructs the new sample with `R0584(name)`, which stores the name at `+8` and zeroes `+0xc` and `+0x10`. `R1476` returns 0 while `+0xc` is 0. The grid release `L16081` and the view loader `R2290` call this binder before every rebinding, so each activation stops the previous shop samples first.
+
+**Confidence.** High for the binder and the constructor.
+
+**Unknown.** Where the file is opened and buffers are created, and what a request does for a name with no file in the archive.

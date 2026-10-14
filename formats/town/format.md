@@ -180,6 +180,33 @@ of audible output. Null pointers, status lookup, audio availability and indirect
 buffer operations can prevent playback. Latch behavior is separate from the
 animation frame. (`TOWN-399`, `TOWN-400`, `TOWN-401`, `TOWN-402`, `TOWN-403`)
 
+## Town screen sounds by event
+
+The square's sounds follow pointer updates. The click slot requests none; a
+sound after a click belongs to the screen it opens. The statue selector arms
+`Stars.wav`. Entry requests `Crowd.wav` with repeat 1. The timed hub step arms
+`Flag.wav` on a draw above 94 and `Flugel.wav` on a draw above 97; entry
+priming requests nothing because the sound fields are still null.
+(`TOWN-549`, `TOWN-550`)
+
+| school event | sample | condition |
+|---|---|---|
+| enter | `School\Enter.wav` | once per enter |
+| class-panel press | the icon's `ChrGen\Skill` sample | press only; hover is silent |
+| figure turn | `School\Rotate.wav` | direction-latch change; old object replaced |
+| press of the leave button | `SFX\Out.wav` | release and refusals request nothing in the bodies read; the presentation and input callees around them are unread |
+| yard, 1.5 s after a fight ends | `Command1` | once |
+| yard, after 3500..4499 ms | `Command2` and looping `Fight1` or `Fight2` | rotation column decides the fight |
+| yard, after 40000..79999 ms of fight | `Command3` | both fights stopped first |
+
+(`TOWN-551`, `TOWN-552`)
+
+At the sites these claims cover, room and square effects request only an idle sample at priority 128.
+`click01.wav` (220), `Rotate.wav`/`teach.wav` and teacher speech have no status
+check; the last two replace their old object. All 78 requested paths exist in
+both roots' `sfx.res` or `speech.res`, none in `patch.res`; 48 effect files are
+byte-equal EN/RU and the 30 teacher voices differ. (`TOWN-553`, `TOWN-554`)
+
 ## Room return, gate latches and dialogue
 
 Town enter calls a synchronous repaint before queued pointer delivery. When
@@ -611,6 +638,14 @@ mission start, at the sack cell, at the rogue, bee and ghost kills, and near
 the woman and her destination; m20 at start and at the squirrel kill. The
 trigger latch is in SAV, so a tip shown before SAVE does not return after
 LOAD. — TRIG-TIPS-087, TRIG-TIPS-088
+
+The popup's one sound is `click01.wav`, requested when Close is pressed, by
+the shared click routine at priority 220 with no status check. The release
+that posts `45ah`, Enter, the check box, the list, opening and the `shop2`
+retext request none in the bodies read; unread virtual callees keep that
+absence Medium. Every press of the base button class and of the town menu's table
+(reached from the statue) requests the same file, and (Medium) so does a press
+of two more tables that reuse its press slot. — TOWN-547, TOWN-548
 
 ## School idle slot and speech boundaries
 

@@ -532,7 +532,7 @@ term.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TAVERN-CLICK-019 | In the tavern a click on an occupied roster cell selects it and a double click hires or dismisses a mercenary or opens a talk dialogue; no routine read gives the candle, cauldron or tender a click test. | High / Medium | ● active (amended) | [EXP-0409](../experiments/EXP-0409-town-figures/) |
-| TAVERN-BUTTON-020 | The three tavern buttons are rectangles that act on release over the pressed one: the upper hires or dismisses, the middle opens the bio or talk dialogue, the lower leaves for the town. | High | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/) |
+| TAVERN-BUTTON-020 | The three tavern buttons are rectangles that act on release over the pressed one: the upper hires or dismisses, the middle opens the bio or talk dialogue, the lower leaves for the town. | High | ● active (amended) | [EXP-0409](../experiments/EXP-0409-town-figures/) |
 | TAVERN-FIGURE-021 | Without the tip popup, a press on the tavern's candle, cauldron or tender reaches the roster; only occupied-cell pixels select: none on the candle, 5456/15120 on the cauldron and 13680/38160 on the tender with 18 cells. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/figure-presses.tsv`, `evidence/windows.tsv`, `evidence/d-tavern.txt`, `evidence/d-dispatch.txt`, `evidence/popup-presses.tsv`; extends TAVERN-CLICK-019, TOWN-467, TOWN-468 |
 | TAVERN-LINES-022 | Read hire refusals request sound alone, and read training refusal branches post no message line. No Sleep action was found in the inspected room handlers, import callers or either shipped text corpus. | High / Medium | ● active | [EXP-0412](../experiments/EXP-0412-town-square/EXP-0412.md), `evidence/d-tavern.txt`, `evidence/d-school.txt`, `evidence/d-shop.txt`, `evidence/d-town.txt`, `evidence/poster-callers.tsv`, `evidence/api-summary.tsv`, `evidence/text-search.tsv`, `evidence/exe-ascii-search.tsv`, `evidence/code-anchors.tsv`; extends TAVERN-CLICK-019, TAVERN-BUTTON-020, MISSION-MSGPOST-058 |
 
@@ -593,6 +593,11 @@ the talk family, and what the tip popup's controls do with a left click.
 **Amended.** `MENU-143` reads the window class style and the frame's `0x203`
 arm; the double-click routing clause rises from Medium to High. `MENU-146`
 states that the double click repeats the roster press before acting.
+TAVERN-028 binds the sounds: `+0x98` `SFX\Add.wav`, `+0x9c` `SFX\NoAdd.wav`,
+`+0xa0` `SFX\Town\Shop\nofit.wav`, `+0xa4` `SFX\Town\Inn\enter.wav`, `+0xa8`
+`SFX\Town\Inn\Helper.wav`, `+0xac` `SFX\Town\Shop\Breath.wav`, `+0xb0`
+`SFX\Out.wav` and `+0xb4` `SFX\Talk.wav`. TOWN-547 reads the tip popup's
+controls: a press on its Close button requests `click01.wav`.
 
 ### TAVERN-BUTTON-020
 
@@ -642,6 +647,10 @@ out.
 
 **Unknown.** The sound files bound to `parent+0xb0` and `+0xb4`, and what
 `R0695` shows for a bio node that does not exist.
+
+**Amended.** TAVERN-028 settles the sound files: `parent+0xb0` is
+`SFX\Out.wav`, requested on the press of the lower button, and `+0xb4` is
+`SFX\Talk.wav`. The release actions stand.
 
 ### TAVERN-FIGURE-021
 
@@ -748,3 +757,72 @@ read here. No reward-count or native-play conclusion is drawn.
 **Unknown.** Mutation by external aliases, preexisting duplicate campaign side
 records or journal records, native interleaving and later reward effects. The
 selected flow does not prove all repeated registrations are globally harmless.
+
+## Tavern sound requests
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TAVERN-027 | Pressing a roster cell requests the one sample `Helper.wav` when idle, at three sites (press, previous and next stepper); a double click repeats the press first. That both cell kinds reach it is Medium (test `R1528` unread). | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TAVERN-028 | The tavern requests `Inn/enter` on enter, `Out.wav` on pressing the lower button, `Add`, `Shop/nofit` or `NoAdd` on hire, refusal or dismissal, and `Talk.wav` once builder `R0695` returns; leaving requests none in the bodies read. | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+
+### TAVERN-027
+
+- Roster press `R1806` runs cell test `R1528` and, on a hit, calls
+  `R1807` with the cell index. That routine stores the selection, refreshes the caption and
+  requests `+0xa8` (`SFX\Town\Inn\Helper.wav`) at `L13072` when the sample is
+  idle, with effects volume, pan 0, repeat 0 and priority 128. No test of the
+  cell kind precedes that request, so it requests the same file for every index it receives. Which
+  pointer positions `R1528` turns into an index, and whether a mission-giver position is one,
+  is that routine's behaviour, which was not read.
+- Roster double click `R1437` calls the press slot first, which requests
+  `Helper.wav` again when idle, then dismisses (`R1440`), hires
+  (`R1441`) or talks (`R0702`) as TAVERN-CLICK-019 states.
+- Steppers `L13069` (previous cell, wrapping to count minus one) and
+  `L13071` (next cell) request the same sample at `L13068` and `L13070`.
+  The function index records no direct caller for either.
+
+**Confidence.** High for the three request sites, the idle gate and the press and double-click
+routing: committed instruction listings. Medium that any occupied cell of either kind reaches
+the request: that rests on cell test `R1528`, which lies outside every committed window.
+
+**Unknown.** What invokes the two steppers, perhaps a key or virtual slot. Resolve their table
+references to settle it. Which pointer positions cell test `R1528` maps to an index, and
+whether a mission-giver position is one; a window of `R1528` would settle it.
+
+### TAVERN-028
+
+The loader `L11544` first calls cleanup `L11542`, then binds `+0x84`
+`drink`, `+0x88` `glotok`, `+0x8c` `steam`, `+0x90` `water`, `+0x94` `chair`
+under `SFX\Town\Inn`, `+0x98` `SFX\Add.wav`, `+0x9c` `SFX\NoAdd.wav`, `+0xa0`
+`SFX\Town\Shop\nofit.wav`, `+0xa4` `SFX\Town\Inn\enter.wav`, `+0xa8`
+`SFX\Town\Inn\Helper.wav`, `+0xac` `SFX\Town\Shop\Breath.wav`, `+0xb0`
+`SFX\Out.wav` and, at `L16058`, `+0xb4` `SFX\Talk.wav`. Leave calls the same
+cleanup at `L16059`.
+
+| event | routine | site | sample |
+|---|---|---|---|
+| enter | `R1412` | `L09960` | `Inn\enter.wav`, once per enter |
+| room slot `+0x2c` | `R1935` | `L09959` | `water.wav`, repeat 1 |
+| press of the lower button (index 2) | `R1811` | `L09952` | `Out.wav` |
+| hire with money `[+0x138]` below the price | `R1441` | `L09962` | `Shop\nofit.wav` |
+| hire after command `R1442` | `R1441` | `L09961` | `Add.wav` |
+| dismiss after command `R1443` | `R1440` | `L09963` | `NoAdd.wav` |
+| mission-giver talk, requested after builder `R0695` returns | `R0702` | `L09964` | `Talk.wav` |
+| mercenary bio, requested after builder `R0695` returns (middle button) | `R0703` | `L09953` | `Talk.wav` |
+
+Each request uses effects volume, pan 0 and priority 128 and is skipped while
+the sample plays. Presses of the upper and middle buttons request nothing in the bodies read. The
+release of the lower button and the Escape key slot `L16060` both call leave
+`L10201` and request nothing in the bodies read. The enter routine builds the tip popup when
+`TipsMode` is set (TOWN-516) and opens no dialogue. The `0x45a` arm `L11615`
+removes the popup with no request.
+
+**Confidence.** High for every request site, slot binding and argument listed: committed
+instruction and string listings, and EN and RU run one byte-equal program. Medium for the
+negatives (the upper and middle buttons, leaving) and for the order of `Talk.wav` against the
+dialogue's display. Hit test `R1810` lies one byte past the end of window c05, builder
+`R0695` ends in the unread `R0361`, and virtual callees were not read. A blocking show
+inside the builder would move `Talk.wav` to the close.
+
+**Unknown.** Native audibility; hit test `R1810`; `R0361`; requests in virtual callees of
+these routines.

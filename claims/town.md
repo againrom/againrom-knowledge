@@ -1981,7 +1981,7 @@ No widget using both fields, and no third mechanism, was found, but this experim
 | TOWN-345 | Every rectangle this widget tests is expressed relative to an ancestor-accumulated origin, not in absolute screen coordinates, and the widget's own stored rect is parent-local. | High | ● active | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/) |
 | TOWN-346 | The six rectangles of `R0332` and their gates, panel-relative to the accumulated rect `(L,T,R,B)`. | High | ● active | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/) |
 | TOWN-347 | What each of the six rectangles does: five post an engine message through `vt+0x48`, one posts a Win32 message through `PostMessageA`, and one also writes a map-view field directly. | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/), **[EXP-0230](../experiments/EXP-0230-non-music-sfx-events/)** |
-| TOWN-348 | A held item pre-empts all six rectangles: `R0332` inspects `[sess+0x3cc]+0x18` before any point-in-rect call and returns early on six of its values, in two arms. | High | ● active | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/) |
+| TOWN-348 | A held item pre-empts all six rectangles: `R0332` inspects `[sess+0x3cc]+0x18` before any point-in-rect call and returns early on six of its values, in two arms. | High | ● active (partially retracted) | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/), [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
 | TOWN-349 | The widget's principal control surface is not a rectangle: it is a per-pixel slot-id map in the second of its two `0xa0` x `0xf0` surfaces, sampled by double-click and by left-button drag. | High | ● active | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/) |
 | TOWN-350 | `vt+0x78` (`R0339`) is the slot pick-up and it names every field it moves; `vt+0x7c` (`R0240`) is its inverse. | High / Medium | ● active | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/) |
 | TOWN-351 | `this+0x5c` is the map view, not the parent: it is written only by message `0x403`, posted with `wParam = campaign+0xd0` to `campaign+0xd4` from three call sites of one shape. | High | ● active (amended, partially retracted) | [EXP-0210](../experiments/EXP-0210-figure-panel-controls/), **[EXP-0230](../experiments/EXP-0230-non-music-sfx-events/)** |
@@ -2038,6 +2038,8 @@ No table and no data operand participates anywhere in the window, so the populat
 At `L11897` the routine tests `sess+0x3cc`, the cursor-held item. When non-zero it reads `[sess+0x3cc]+0x18`: on 1 or 2 it plays `[L01211]` through `R0320`, computes `slot = ((*(u16 *)([sess+0x3cc]+6) >> 8) & 0xf) - 1`, calls `this->vt+0x7c(slot)` (`L11898`) and returns 1; on a value in the inclusive range 5 to 8 it calls `R1781` with `this = [sess+0xf0]` (`L11899`) and returns 1; on 0, 3, 4 or above 8 it falls through to the rectangle tests at `L03375`. The drop slot is therefore taken from the held item's own bytes, not from the cursor position (`evidence/listing-R0332-lbuttonup.txt`)
 
 **Confidence.** High (every branch and operand read at instruction level)
+
+**Amended.** `EXP-0573`: `R0320` is the cursor manager's set call (`AI-CURSOR-172`), not a sound request; "plays `[L01211]`" above means it sets that cursor (`claims/retracted.md`). The branch and operand facts stand.
 
 ### TOWN-349
 
@@ -2327,7 +2329,7 @@ LoaderR1057 assigns graphics/backpack/sprites.256 and spritesb.256 to its respec
 |---|---|---|---|---|
 | TOWN-473 | In the town view slot `+0x54` (`R0704`) decides a left click by the picture `townmask.bmp` alone and tests no figure; while the tip popup is shown (`TOWN-185`), the popup and its controls are offered the click first. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/d-town-click.txt`, `evidence/d-capstone.txt`, `evidence/mask-histogram.tsv`, `evidence/mask-regions.tsv`, `evidence/sampler-table.tsv`; extends TOWN-163, TOWN-211, TOWN-406 |
 | TOWN-474 | Ten painted town figures lie on one click region each: tavern `0x80`, shop `0x90`, gate and guards `0xa0`, statue star `0xb0`, school `0xc0`; horses 2 and 4 reach two regions with 7 and at most 167 pixels; the other figures reach none. | High | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/overlap-summary.tsv`, `evidence/overlap.tsv`, `evidence/figures.tsv`, `evidence/exe-anchors.tsv` |
-| TOWN-475 | Each town click region posts one message that opens a screen: tavern `0x42b`, shop `0x42a`, school `0x42c`, gate `0x42d`, statue `0x41f`; only the gate depends on quest state, and answers with the `npc35` line when nothing is on offer. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/click-arms.tsv`, `evidence/campaign-arms.tsv`, `evidence/r-campaign.txt`, `evidence/node-families.tsv`, `evidence/nodes.tsv`, `evidence/d-capstone.txt`; extends TOWN-163, TOWN-164 |
+| TOWN-475 | Each town click region posts one message that opens a screen: tavern `0x42b`, shop `0x42a`, school `0x42c`, gate `0x42d`, statue `0x41f`; only the gate depends on quest state, and answers with the `npc35` line when nothing is on offer. | High / Medium | ● active (amended) | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/click-arms.tsv`, `evidence/campaign-arms.tsv`, `evidence/r-campaign.txt`, `evidence/node-families.tsv`, `evidence/nodes.tsv`, `evidence/d-capstone.txt`; extends TOWN-163, TOWN-164 |
 | TOWN-476 | A delivered pointer message starts the guards' halberd sweep and the paint hub steps it one frame per admitted hub: the gate with nothing on offer sweeps frames 7 to 0, other messages sweep back; no clock or return trigger was found. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/d-town-guards.txt`, `evidence/model-vectors.tsv`, `evidence/gate-step-domain.tsv`, `evidence/refs-reduction.tsv`, `evidence/refs-cluster-hits.tsv`, `evidence/refs-outside-writers.tsv`; extends TOWN-399, TOWN-403, TOWN-404 |
 | TOWN-477 | A room click leaves the town view through message `0x445`, which frees the guard sheet and sounds but writes no frame, step or latch; the return runs enter `R1383`, which sets frame 7, step 0, latch 0 and reloads the sheet. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/d-town-guards.txt`, `evidence/d-campaign.txt`, `evidence/model-vectors.tsv`, `evidence/refs-cluster-hits.tsv`; extends TOWN-164, TOWN-403, TOWN-412 |
 | TOWN-478 | In the shop and school panels read, the painted merchant, trainers, diamond and column frame have no click test; the shop panel tests four shelf and two prompt rectangles, the school two class masks in two states. | High / Medium | ● active | [EXP-0409](../experiments/EXP-0409-town-figures/EXP-0409.md), `evidence/d-shop.txt`, `evidence/d-school.txt`, `evidence/d-capstone.txt`, `evidence/rooms.tsv`, `evidence/school-masks.tsv`, `evidence/refs.txt`; extends SHOP-SHELF-047, TOWN-154, TOWN-428 |
@@ -2375,6 +2377,8 @@ The tavern click posts no text of its own; its dialogues belong to the tavern sc
 **Confidence.** High for the arms, posted messages, conditions, the gate test and the literal sources: each was read at instruction level, and both roots run one program. Medium that these five are the only town click outcomes: the immediates `0x41f`, `0x428`..`0x42f` and `0x445` were enumerated over the whole image and reduced to the town cluster `L12192`..`L12090` (`evidence/refs-reduction.tsv`), and a post built from a computed id would not appear in that census. Medium that `-1` means nothing on offer: the helper was read here, its meaning comes from `REG-SCN-065`.
 
 **Unknown.** Whether the tavern's enter routine speaks on entry (not read), whether a state exists in which a room arm's condition fails while the town view receives the click (the town view has already been left by then), and physical pointer delivery.
+
+**Amended.** TAVERN-028 reads the tavern's enter routine `R1412`: it opens no dialogue and requests `SFX\Town\Inn\enter.wav` once per enter when that sample is idle. The first Unknown is settled; the click arms stand.
 
 ### TOWN-476
 
@@ -3290,3 +3294,150 @@ A clear latch jumps to `L14368`, which still calls `L13110` at `L12289` with the
 **Confidence.** High for command/read order, exact byte comparisons, latch arithmetic and the reachable teach request. The complete handler, wrapper, transport prefix and request helper are committed. TOWN-502's paid-step timing clause is superseded by the narrower command-return fact.
 
 **Unknown.** Whether the skill byte already reflects successful paid training, every transport mode's completion order, initialization of `+0x3e4`, native consequences of latch aliases, sound-object preparation and audible playback. Resolve the complete command consumers, that trailing field's lifecycle and the sound prepare/request consumers, or use controlled native training and audio observation.
+
+## Town screen sound requests
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-547 | The tip window requests one sound, `click01.wav`, when its Close button is pressed; release, Enter, the check box, the list, opening and retexting request none, in every room and the mission tip. | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-548 | Every press of the base button class and of the `L13371` table requests `click01.wav` without a status check at priority 220; two more tables reuse the press slot (Medium); no release read requests a sound. | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-549 | Town square sounds follow the pointer, not the click: hovering shop, tavern, school and statue leads to `Shop/enter`, `Point`, `School/Point` and `Stars`; the click slot requests none. | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-550 | `Flag.wav` and `Flugel.wav` start from random draws in the square's timed hub step, not from input; the entry loader primes their animations while the sound fields are still null. | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-551 | The school requests `Enter` on enter, a skill sample on a class-panel click, `Rotate` on a figure turn and `Out.wav` on the leave press; leaving and refusals request none in the bodies read (`R1957`, `R1954`, `R1932` unread). | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-552 | The school yard requests `Command1`, then `Command2` with a looping `Fight1` or `Fight2`, then stops the fight and requests `Command3`, on timers drawn as 3500..4499 ms and 40000..79999 ms. | High / Unknown | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-553 | All 78 town, tavern and school sound paths read here exist in both roots' `sfx.res` or `speech.res` and none in `patch.res`; 48 effect files are byte-equal EN/RU, the 30 teacher voices differ. | High | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+| TOWN-554 | Among the sites of TOWN-547 to 552, TAVERN-027, 028 and DIALOGUE-080, effects request only an idle sample at priority 128; `click01`, `Rotate`/`teach` and teacher speech skip that check, the last two after deleting the old object. | High / Unknown | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+
+### TOWN-547
+
+One popup class serves every tip window. Its table is `L06362` and its constructor `R1261`; `R1974` builds three controls: a list with table `L06234`, a Close button through the base button constructor `R0700` (table `L03644`, call at `L16061`) and a check box through `R1981` (table `L12175`, call at `L16062`). The town (`L12114`), tavern (`L10197`), school (`L12169`) and shop (`L12174`) enter routines build it (TOWN-480, TOWN-516). The campaign's `0x45b` arm `L03630` builds the mission tip as child `0x10` of the same class (TRIG-TIPS-087).
+
+- Close press, slot `+0x54` = `R0778`: with the button enabled and pressed flag `+0x6c` clear, it calls shared click `L03645(1)`. That routine selects registry sound slot 2 (`SFX\click01.wav`) through lookup `L14378` on `L02755` and calls request `R0386` at `L12956` with effects volume `[L02733]`, pan 0, repeat 0, priority 220 and frequency 0. No status check precedes the call. It then sets `+0x6c`.
+- Close release, slot `+0x58` = `R0779`: it calls `L03645(0)`, which requests nothing, and posts the command `[+0x70]` = `0x45a` only when the point is inside the button.
+- Enter key `R0713` (key `0x0d`) and accelerator `R0780` post the same command with no request.
+- The `0x45a` arms read here remove and delete the popup with no direct request: town `L12182`, tavern `L11615`, school `L11626` and campaign `L12180`. The destructor `L16063` has no direct request.
+- The check box press `L06426` and double click `L16064`, the list release `L12177`, the popup paint, the child helper `R1987` that retexts the shop tip (TOWN-517) and slot `R1478`, which stores the check box state, contain no direct call to `R0386` or `L03645`.
+- The constructor and control builder contain no direct request, so opening is silent at this level.
+
+The sound heard when a tip window closes by mouse is therefore `click01.wav`, requested at the press, before the release posts the close. A close by Enter requests no sound.
+
+**Confidence.** High for every listed body, slot and argument: the ranges are committed instruction listings and the three tables are committed dword listings; EN and RU run one byte-equal program. Medium that the window requests nothing else: the search was direct calls to `R0386` and `L03645` inside the listed bodies. Virtual callees such as the repaint slot and base routing were not read, and the shop's close arm `L12181` was not read.
+
+**Unknown.** Native audibility and timing of the press request, and whether an unread virtual path requests a sound on a press elsewhere on the window. A native run with request tracing on press, release and Enter would settle it.
+
+### TOWN-548
+
+The base button table `L03644` binds press `R0778` and release `R0779` (TOWN-547). Three more tables reuse that press:
+
+| table | press | release | release action |
+|---|---|---|---|
+| `L13371` | wrapper `R2137` calls `R0778` | `R2138` | `L03645(0)`, then posts `0x47a` with the command when inside |
+| `L11228` | wrapper `L16065` calls `R0778` | `L16066` | `L03645(0)`, then sends the command to the parent's `vt+0x48` when inside |
+| `L16067` | `R0778` at `L16068` | `R0779` at `L16069` | as the base button |
+
+Each press therefore requests `click01.wav` once per press, guarded only by the pressed flag. No release read requests a sound. The tables `L11228` and `L16067` and their wrappers were read in lane navigation and no listing of them is committed; the statement for those two tables is an unrecorded read. The direct callers of `L03645` found by an E8 scan of the program (receipt `evidence/out/scans/s1.txt`) are `L16070`, `L16071`, `L16072`, `L16073`, `L16074` and `L16075`; the first two lie outside the town screens.
+
+Users on the town screens: the town menu constructor `R0363`, reached from the statue (TOWN-475), builds five `L13371` buttons through `R1167` with commands `0x41a`, `0x418`, `0x422`, `0x41c` and `0x446`. The dialogue page button (DIALOGUE-080) and the tip Close button (TOWN-547) are base buttons. The town view initializer `R1942` builds a base button with id 4, rectangle (0,0)-(0,0) and command `0x445`. The tavern and school buttons are not these classes; their own children request `Out.wav` (TAVERN-028, TOWN-551).
+
+**Confidence.** High for `L03644` and `L13371`: bodies and tables are committed listings. Medium for `L11228` and `L16067`, whose slots and wrapper were read in lane navigation and are not in the committed listings. The caller list of `L03645` comes from the scan receipt `evidence/out/scans/s1.txt` and the table references from `s2.txt` to `s4.txt`; they are navigation, not a closed census, and the scans are not regenerated by `regen.sh`.
+
+**Unknown.** Whether the zero-rectangle button 4 can receive a press, and other classes that may call `R0778` through an unscanned indirect path.
+
+### TOWN-549
+
+The square's pointer slot `L11549` calls `L11546`, which reads target selector `R1914` and dispatches through table `L16076` by selector plus one. The selector values follow TOWN-475's click mapping.
+
+| selector | target | sound effect of a delivered pointer update |
+|---|---|---|
+| 1 | shop | `Shop\enter.wav` (`+0x94`) at `L11556` while latch `+0xac` is 0, after stopping a playing `School\Point.wav`; sets `+0xac`, clears `+0xb0` (TOWN-400) |
+| 2 | tavern | sets bit 2; at that animation's frame 0 `R1922` stops playing `Shop\enter.wav` and `School\Point.wav` and requests `Point.wav` (`+0x90`) at `L11557` (TOWN-401) |
+| 4 | school | `School\Point.wav` (`+0x98`) at `L11561` while latch `+0xb0` is 0, after stopping a playing `Shop\enter.wav`; sets `+0xb0`, clears `+0xac` (TOWN-402) |
+| 8 | gate | guard step only (TOWN-403) |
+| `0x10` | statue | sets bit `0x10`; `R1918` requests `Stars.wav` (`+0x9c`) at `L13097` at frame 0 (TOWN-418) |
+| -1 | outside | clears both latches |
+
+The click slot `R0704` (TOWN-475) contains no direct request. A click on a building therefore adds no sound of its own; any sound that follows belongs to the screen it opens. Entry `R1383` requests `Crowd.wav` with repeat 1 through `L11529` at `L13099`. Every request listed here uses effects volume and priority 128 and is skipped while its sample plays.
+
+**Confidence.** High for the dispatch, latches and request sites: the handler, hub helpers and pointer table are committed listings. Medium for the target names, which rest on TOWN-475's selector mapping.
+
+**Unknown.** Native pointer-update delivery, which decides how often an arm runs while the pointer rests.
+
+### TOWN-550
+
+The square painter `R1489` runs the hub step at `L11692` when more than `0x43` ms have elapsed. In that step a scaled random draw above 94 sets view bit `0x40` and a draw above 97 sets bit `0x20`. The hub `R1908` then calls `R1928` for bit `0x40` (10 frames, `Flag.wav` at frame 0, request at `L13094`) and `R1929` for bit `0x20` (8 frames, `Flugel.wav` at frame 0, request at `L13098`). Both requests are skipped while the sample plays.
+
+Enter `R1383` calls the sheet loader `R1906` before the sound loader `L11517`. The sheet loader primes the hub helpers. Initializer `R1942` and leave cleanup `R1913` zero the sound fields, so a priming call finds a null field and requests nothing.
+
+**Confidence.** High for the draw thresholds, bits, frame counts and sites. Medium that priming requests nothing: it rests on the call order and on no other writer of the fields between leave and enter, which was not enumerated.
+
+**Unknown.** Native paint cadence, and so the real rate of these sounds.
+
+### TOWN-551
+
+School enter `R0706` requests `SFX\Town\School\Enter.wav` (`+0xc0`) at `L13100` when idle, once per enter. The loader `R2120` binds `+0x84..+0xa8` to `SFX\ChrGen\Skill` `FSword`, `FAxe`, `FClub`, `FPike`, `FBow`, `MFire`, `MWater`, `MAir`, `MEarth`, `MAstral`, then `+0xac` `Command1`, `+0xb0` `Command2`, `+0xb4` `Command3`, `+0xb8` `Fight1`, `+0xbc` `Fight2`, `+0xc0` `Enter` under `SFX\Town\School`, and `+0xc4` `SFX\Out.wav`.
+
+- Class panels: hit routine `R1477(flag)` requests the icon's skill sample at `L07697` or `L13102` only when flag is 1, the press from slot `+0x54`, and the sample is idle. Hover passes 0 and requests nothing.
+- Figure turns: steppers `R1962` (23 frames, at frame 5 or later) and `R1963` (19 frames, at frame 6 or later) call `L13110` with `SFX\Town\School\Rotate.wav` when direction latch `+0x320` changes. `L13110` calls `L13113`, which stops and deletes the object at `+0x80` and builds a new one through `R0584`, then requests it at `L13109` without a status check.
+- Buttons: press `L12172` requests `Out.wav` at `L13114` for index 1 when idle. Release `R1548` leaves through `L12147` for index 1 with no request and does nothing for index 2. Index 0 requests nothing on each refusal in the bodies read; as TAVERN-LINES-022 states for refusals, a normal button's preceding presentation or input work (`R1957`, `R1932`) is outside this statement. A paid step requests the teacher speech at `L12288` with speech volume `[L02739]` and then `teach.wav` through `L13110` (TOWN-544).
+
+**Confidence.** High for every request site, the loader bindings and the gate: committed listings and committed string listings. Medium for "a skill sample only on a class-panel click", "leaving is silent" and "refusals are silent": the release `R1548` calls `R1957` and `R1932` before and after its refusal tests, and the class-panel press calls `R1954` (`L16077`, `L16078`, `L16079`). `R1957` and `R1954` lie between windows c10 and c11, and `R1932` outside both; none was read (TOWN-502 records `R1957` as called and unread).
+
+**Unknown.** Native press delivery and audibility; the bodies of `R1957`, `R1954` and `R1932`.
+
+### TOWN-552
+
+Scheduler `R1971` runs from every school paint and acts only while rotation column `+0x31c` is 0 or `[+0x310]-1`. All requests use effects volume and priority 128 and are skipped while their sample plays.
+
+1. Not fighting (`+0xd8` = 0): with e = now − `[+0xcc]`, when e > 1500 and `+0xdc` is 0 it requests `Command1` at `L13104` and sets `+0xdc`.
+2. Otherwise, when e > `[+0xd0]`, it requests `Command2` (`L13105` or `L13107`) and `Fight1` with repeat 1 at `L13106` when column `+0x31c` is 0, else `Fight2` with repeat 1 at `L13108`; it sets `+0xc8` = now and `+0xd8` = 1.
+3. Fighting: when now − `[+0xc8]` > `[+0xd4]` it stops and rewinds `Fight1` and `Fight2`, requests `Command3` at `L13103`, sets `+0xcc` = now, clears `+0xd8` and draws a new `+0xd4`.
+
+Enter sets `+0xd0` = draw mod 1000 + 3500 and `+0xd4` = draw mod 40000 + 40000; a fight start draws `+0xd0` again.
+
+**Confidence.** High for the sequence, the per-site sample fields and repeat arguments, which are read from the committed listing. The body after `L16080` was not read; it contains no further request site in the committed range.
+
+**Unknown.** Native paint cadence and the scaling inside the random draw, which decide the real intervals.
+
+### TOWN-553
+
+Population: the `sfx.res`, `speech.res` and `patch.res` archives of the EN and RU roots, matched against 78 requested paths: 13 tavern, 16 square, 10 skill, 8 school, `click01.wav` and 30 teacher speech files. Presence means an exact lowercased file node at that path in the archive the first path component names.
+
+- All 78 are present on both roots. None is in `patch.res`, and no requested node also occurs in another archive of the population.
+- The 48 effect files are byte-equal between EN and RU by SHA-256. The 30 teacher speech files differ.
+- The two programs are byte-equal (SHA-256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, 1977344 bytes), so every site and binding is the same on both roots.
+- Archive sizes: EN `sfx.res` 10917975, `speech.res` 100243020, `patch.res` 1474 bytes; RU `SFX.RES` 10192111, `SPEECH.RES` 119983188, `patch.res` 1536 bytes.
+
+Prefix listings:
+
+| prefix | EN nodes | EN shape matches | RU nodes | RU shape matches |
+|---|---|---|---|---|
+| `inn/npc/` | 136 | 85 | 133 | 84 |
+| `inn/mercenary/` | 21 | 21 | 19 | 19 |
+| `training/` | 40 | 10 | 40 | 10 |
+
+The shapes are `npc<d><d>m<d>p<d>.wav`, `npc<d><d>p<d>.wav` and `npc34m<d>p<d>.wav`. On EN, 51 `inn/npc/` nodes fall outside the shape, among them gendered `ff_`, `fm_`, `mf_` and `mm_` variants. The 30 other `training/` nodes are the teacher files.
+
+Shares: one file serves several sites. `Helper.wav` serves every occupied tavern cell; `Talk.wav` serves the talk dialogue and the mercenary bio; `Out.wav` serves the tavern and school leave buttons; `Shop\nofit.wav` serves the tavern's hire refusal; `click01.wav` serves every press of TOWN-548's classes.
+
+**Confidence.** High: an archive walk over the named population with sizes and hashes, regenerated into scratch and compared.
+
+**Unknown.** Archives outside the population, and how the program resolves a path across archives.
+
+### TOWN-554
+
+Gate and priority per site, for the requests in TOWN-547 to TOWN-552, TAVERN-027, TAVERN-028 and DIALOGUE-080:
+
+| sites | status check before request | priority | volume |
+|---|---|---|---|
+| every other effect in those claims | skipped while the sample plays (`R1476`) | 128 | effects |
+| `click01.wav` at `L12956` | none | 220 | effects |
+| `Rotate.wav` and `teach.wav` at `L13109` | none; the old `+0x80` object is stopped and deleted first | 128 | effects |
+| teacher speech at `L12288` | none; the old `+0xa8` object is stopped and deleted first | 128 | speech |
+
+Explicit overlap rules: `Shop\enter.wav` and `School\Point.wav` stop each other, and the tavern `Point` animation stops both (TOWN-549); the yard stops both fights before `Command3` (TOWN-552). `Crowd.wav`, the fights and the tavern water loop use repeat 1. The request service takes a free duplicate buffer of the sample, so an ungated `click01.wav` can overlap its own earlier copy. With all 16 channels busy, a request evicts only a lower priority, so a 128 request is dropped against 128 samples while a 220 `click01.wav` can evict one (VIDEO-SFX-086).
+
+Coverage: the table covers the sites of those claims. It does not cover the eight request sites in window c08 for the birds, the gate, the guard and the horse (`L13088`, `L13089`, `L13090`, `L13091`, `L13092`, `L13093`, `L13095`, `L13096`; TOWN-415, TOWN-403, TOWN-445), nor the five tavern ambience sites `L09954` to `L09958` (TOWN-413). Each of the eight is preceded in the listing by the idle test `R1476` and passes priority 128 with effects volume; the five tavern sites are in no committed window. A text count over the 28 committed listings finds 39 calls to `R0386`; 36 have a call to `R1476` within the 30 preceding instructions, and the three without it are `L13109`, `L12288` and `L12956`, the sites in the table above.
+
+**Confidence.** High for each covered site's gate and arguments. The overlap and eviction consequences rest on VIDEO-SFX-086.
+
+**Unknown.** Native mixing, the number of channels in use at the time, and audibility.

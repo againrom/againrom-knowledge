@@ -34,7 +34,7 @@ commits or returns items through their distinct load-update paths.
 | Reference | Contents |
 |---|---|
 | <a id="at-a-glance"></a><a id="structure"></a><a id="actor-state-across-trade-boundaries"></a><a id="where-a-shop-comes-from"></a><a id="the-one-per-shop-parameter"></a><a id="the-campaign-chain"></a><a id="when-the-ceiling-is-applied"></a><a id="the-stock-lifecycle"></a><a id="persistence"></a><a id="the-candidate-pool"></a><a id="the-draw"></a><a id="the-enchantment-stage"></a><a id="randomness"></a> [Stock and generation](stock.md) | Providers, cap, candidate pool and enchantment generation |
-| <a id="trading"></a><a id="where-the-price-comes-from-and-every-rounding"></a><a id="which-shelf-an-item-returns-to"></a><a id="the-counter--the-table-the-two-buttons-the-move"></a><a id="shop-interior-progression"></a><a id="the-character-panel-0x7c"></a><a id="duplicates"></a> [Trading and shop interface](trade.md) | Prices, tray movement, payment, refusal and return |
+| <a id="trading"></a><a id="where-the-price-comes-from-and-every-rounding"></a><a id="which-shelf-an-item-returns-to"></a><a id="the-counter--the-table-the-two-buttons-the-move"></a><a id="shop-interior-progression"></a><a id="shop-sounds"></a><a id="the-character-panel-0x7c"></a><a id="duplicates"></a> [Trading and shop interface](trade.md) | Prices, tray movement, payment, refusal, return and sound requests (SHOP-SOUND-134) |
 | <a id="consumer-notes"></a><a id="the-runtime-class-table"></a><a id="state-requirements"></a><a id="document-access-item-exclusion"></a> [Classes and state requirements](state.md) | Classes, persistence and retained state |
 
 Runtime member offsets identify original in-memory fields. Wire offsets and

@@ -3618,3 +3618,38 @@ In complete consumer R0461, a null factory result skips only the element and con
 **Confidence.** High for masks, null factory returns and caller branches in whole bodies. Medium for missing stock/cell-entry bounds and possible faults: no section scans or runtime tests, and the lookup, item constructors, virtual calls and sack/cell helpers remain unread. ITEM-MAGROW-177's class14 initialization conclusions retain their published grades; reading the factory's final return does not close the initializer.
 
 **Unknown.** Invalid rows/materials/shapes inside constructors, null lookup representation, effects of insufficient type9 tails, later item validity and native fault/display outcome.
+
+## Shop speech selection
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-SOUND-183 | The shop item speech names an effects file by the first attribute tag in 2..11, 27..31 or 33..37, else a books file by the value of tag 0x2a, else `s<class>i<row>p<1..3>` from the packed item code; tags 12..26 and 32 never name a file. | High | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+| ITEM-SOUND-184 | Over the 416 installed item keys the class-and-row speech forms 276 names, of which 110 exist on each root; the effects form finds 10 of its 20 tags and the books form 24 values; class 14 has no speech file. | High | ● active (branch candidate) | [EXP-0573](../experiments/EXP-0573-shop-sounds/) |
+
+### ITEM-SOUND-183
+
+The trade table's drop `L09858` builds the name in this order (`evidence/listing-L09858-tray-drop.txt`):
+
+1. `R1025(item)` walks the attribute stream of `ITEM-PRICETAG-144` from the start and returns the first tag `t` with `2 <= t <= 0x25` whose byte `[L16040 + t - 2]` selects a returning case of the jump table `L16041`. The byte map returns for tags 2..11, 27..31 and 33..37 and skips 12..26 and 32 (`evidence/table-effect-tags-L16041.txt`). A nonzero result `t` gives `speech\shop\effects\%.2d.wav` with `t`.
+2. Otherwise `R0997(item, 0x2a)` returns the value of the last tag 0x2a in the stream, a byte. A nonzero value `v` gives `speech\shop\books\%.2d.wav` with `v`.
+3. Otherwise the packed code `w` = word `item+6` gives `speech\shop\s%.2di%.2dp%d.wav` with class `(w >> 8) & 0xf`, row `w & 0x1f` (`ITEM-NAMEKEY-037`) and variant `((rand() * 3) / 32767) % 3 + 1`.
+
+The draw that gates the whole name (`SHOP-109`) and the stamp test 5..8 run first. A tag with value 0 is still returned by step 1, because `R1025` returns the tag, not its value. For class 14 the row field `w & 0x1f` keeps 5 of the 8 row bits `ITEM-NAMEKEY-037` assigns that class.
+
+**Confidence.** High: the three routines and both tables are complete reads; the format strings are read from the image.
+
+### ITEM-SOUND-184
+
+Rule: `amendment-1.md`. Population: the 416 u16 keys of `main.res` `text/itemname.bin` on each root, read as packed item codes. Instrument: `corpus.py` over the `&YA1` archives `main.res`, `speech.res` and `sfx.res`, with the first path component naming the archive (`RES-SET-032`). Output: `evidence/corpus-shop-speech.txt`.
+
+- The class-and-row form gives 92 distinct (class, row) pairs and 276 names. 110 exist under `speech.res` `shop/` on each root and 166 do not. 77 pairs are shared by more than one key, so many items speak the same lines. By class, present names over pairs: 1, 46 over 21; 2, 19 over 9; 4, 0 over 1; 5, 0 over 1; 6, 12 over 8; 7, 7 over 5; 8, 4 over 4; 9, 6 over 3; 10, 8 over 4; 12, 8 over 4; 14, 0 over 32.
+- The effects form (20 tags of `ITEM-SOUND-183`) finds files for tags 2..11. The archive also holds `shop/effects/21.wav`..`25.wav`, which no tag forms. Tags 27..31 and 33..37 form names with no file.
+- The books form (values 0..255) finds 24 files: 1..10, 12..16, 18..26.
+- `speech.res` holds 158 nodes under `shop/` on EN and 157 on RU. The EN extra is `shop/s01i9p2.wav`, which the `%.2d` format never forms. Eight `shop/npc31m*` nodes belong to the dialogue `shop\npc31m%d`, not to the item speech.
+- The 17 names the grid and view loaders bind exist in `sfx.res` on both roots with equal size and SHA-256 on EN and RU; click00 and ibook each exist once. The archives themselves differ: `speech.res` EN 100 243 020 bytes, RU 119 983 188; `sfx.res` EN 10 917 975, RU 10 192 111.
+
+A missing name reaches the request service with a sample whose file does not exist; what the sample object does with it is not read (`VIDEO-SFX-100`).
+
+**Confidence.** High for the counts: one run per root, reproduced byte for byte. The key population is the item name table, not the stock the shops carry.
+
+**Unknown.** Which keys a shop shelf can hold in play; the audible result of a request for a missing file.

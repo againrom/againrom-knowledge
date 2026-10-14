@@ -2445,3 +2445,39 @@ intended, and which actor name and portrait appear for RU Part5 at run time (not
 text: the excess over the RU rate is inside delivery variation and no transcript was made.
 
 **Unknown.** The words of the RU voice tail; a listening check settles it.
+
+## Dialogue panel button sound
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| DIALOGUE-080 | Pressing the dialogue panel's page button requests `click01.wav`; Enter and Escape turn the page with no click, and only the part's voice follows each turn. | High / Medium | ● active (branch candidate) | [EXP-0574](../experiments/EXP-0574-town-sounds/) |
+
+### DIALOGUE-080
+
+- Builder `R0695` creates the page button with the base button constructor
+  `R0700`: id 11, command `0x46f` (DLG-BUTTON-039). Its table `L03644`
+  binds press `R0778`, which calls shared click `L03645(1)` and so
+  requests `SFX\click01.wav` at `L12956` with effects volume, priority 220
+  and no status check (TOWN-547, TOWN-548). The release `R0779` posts
+  `0x46f` with no request.
+- Enter is answered by the button's key routine `R0713`, which posts
+  `0x46f` with no request. Escape reaches the panel's key slot `R0714`,
+  which sends `0x46f` to the panel's `vt+0x48` and requests nothing
+  (DLG-KEYS-040).
+- Panel slot `R0715` answers `0x46f` with pager `R0711`, which requests
+  the part's voice with speech volume (DLG-SOUND-028). When the pager returns
+  0 the slot posts `0x45b` if tips value `+0x80` is set, then closes the panel
+  through `0x445`; the read slot body requests no sound on that close.
+- The builder, the panel constructor `R0696`, the show slot and the leave
+  routine contain no direct request.
+
+The same panel serves the town's dialogues: the tavern talk and bio, the
+school's mission line and the gate's `npc35` line (TAVERN-028, TOWN-475).
+
+**Confidence.** High for the button class, its press and release, the two key
+paths and the panel slot: committed instruction listings. Medium that no other
+request accompanies a page turn, because the pager's own body is outside the
+committed listings and only its voice request is established (DLG-SOUND-028). The pager body was read in lane navigation and no listing of it is committed; no High here rests on that read.
+
+**Unknown.** Whether a click elsewhere on the panel requests a sound, and
+native audibility. Request tracing on press, Enter and Escape settles it.

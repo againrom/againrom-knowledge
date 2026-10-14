@@ -266,7 +266,7 @@ fall filename or timing rule is added. — VIDEO-SFX-085
 | `L13080` | `R1750` | `owner sample field` | `this+0x20bc: SFX/Scroll.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
 | `L13081` | `L10016` | `owner sample field` | `this+0x20bc: SFX/Scroll.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
 | `L10018` | `L10005` | `owner sample field` | `this+0x20bc: SFX/Scroll.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
-| `L09944` | `L09858` | `owner field with computed path` | `this+0x20b0: speech/shop/effects/%.2d.wav, books/%.2d.wav or s%.2di%.2dp%d.wav; SHOP-109` | `speech` | `setting` | `0` | `0` | `128` | `0` |
+| `L09944` | `L09858` | `owner field with computed path` | `this+0x20b0: speech/shop/effects/%.2d.wav, books/%.2d.wav or s%.2di%.2dp%d.wav; SHOP-109, whose clause that the routine stores `+0x20b4` is retracted` | `speech` | `setting` | `0` | `0` | `128` | `0` |
 | `L09945` | `L09858` | `owner sample field` | `this+0x20b4: SFX/Put_On.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
 | `L13082` | `L09903` | `owner sample field` | `this+0x20b8: SFX/Put_Off.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
 | `L13083` | `R0705` | `owner sample field` | `shop+0xb0: SFX/Town/Shop/start.wav` | `speech` | `setting` | `0` | `0` | `128` | `0` |
@@ -325,6 +325,19 @@ not add another eleven terminal sites to the 112-site census.
 | `L13122` | `R1523` | `R1701` | `L13085` | `parent+0xa0` | `SFX/Town/Shop/depart.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
 | `L13123` | `L12179` | `R1701` | `L13085` | `parent+0xc4` | `SFX/Undo.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
 | `L13124` | `L12179` | `R1701` | `L13085` | `parent+0xc0` | `SFX/Out.wav` | `effects` | `setting` | `0` | `0` | `128` | `0` |
+
+## Shop room overlap policy
+
+The shop room's 27 sites decide overlap before the request. Put_On, Put_Off,
+Scroll and depart stop and rewind a channel already playing the sample, then
+request it. The wrapper sites, both start.wav sites, nofit at `L13078` and the
+item speech request only when the sample is not playing. click00 and ibook test
+nothing, so a repeat takes another buffer of the same sample. Only InShop
+repeats. — VIDEO-SFX-099
+
+Binding a sample by name stops and destroys the previous sample and stores
+only the name in the new object; where the file is opened is Unknown.
+— VIDEO-SFX-100
 
 ## Source and ownership boundaries
 
