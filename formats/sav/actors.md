@@ -408,6 +408,21 @@ not prove its survival. Ordinary item-cast completion clears `+64/+68`.
 — SAV-908, MAGIC-ITEMKILL-117, ITEM-CASTSTATE-056 (its `+68`-only remap clause
 is retracted; the cast lifetime stands)
 
+World lifecycle also repairs `+5c` and `+44` through the old-address map, with
+the same miss clear; action `+54`, phase `+58`, countdown `+6c`, `+134..+136` and
+the order block are restored raw, and order `+30` keeps its stored word on a
+miss. A Spell record enters its old address into that map. The executor replaces
+the stored action word on every pass. At order progress 2, before the exit test
+passes, a `+64` that restores to 0 is dereferenced at phase 0 or when the phase-5
+countdown reaches zero, and the original faults; a weapon-borne cast rewrites
+`+64` from the weapon first (Medium; observed at phase 0 only; the phase-5 path
+with order `+5c` 0 is Unknown). The rule and its case table are in SAV-1264.
+— SAV-1262, SAV-1263, SAV-1264
+
+LOAD keeps `+8e`, `+90` and the modifier object as stored and runs no equip
+routine (Medium); the first derive and a later weapon or shield removal start
+from the stored values. — HERO-170, HERO-171
+
 Actor word `+50`, the AI state, is rewritten at death in two steps. The per-tick routine returns at once for
 `+54` = `0x10`; otherwise it stores 0 into `+50` and `+54` on every tick with signed health at or below 0. Teardown
 stores `0x10` into both and the actor moves to the dead list. A dying record therefore stores 0 and a dead-list

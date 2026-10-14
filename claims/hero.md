@@ -981,6 +981,37 @@ constructor path was enumerated, so whether the first such reader faults, and wh
 Settling it needs a `disp:3c` reader census over the `Human` vtable and the actor routines, or a
 runtime with a modified `Data.bin`.
 
+## Equipment-derived state across LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-170 | LOAD keeps equipment-derived state as stored: no LOAD body read calls an equip or remove routine, R0451 or the derive, and +0x8e, +0x90 and the modifier object come from the file. | Medium | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+| HERO-171 | After LOAD the first derive reads the stored +0x8e, and removing a worn weapon or shield subtracts that item's weight from it and the shield's block from the stored modifier object. | Medium | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+
+### HERO-170
+
+Inputs: EN windows f08 (lifecycle R1482 and its callee list) and f09 (Humanoid and Human Serialize R0954 and L08212) in `out/native/`; the direct call edges of `docs/functions/data/calls.tsv` (program SHA256 942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03).
+
+**Observation.** The lifecycle calls R1560, R1108 (twice), L04868 (twice), L04869, L08765 and R0170. Humanoid Serialize calls R0210 (Unit::Serialize), R1123, R0271, R1110 (twice), R0272, R2291 (the 12 equipment references) and L08077 (the diary). Human Serialize calls R0954, R1123, R0496 (twice) and R0996. In the registry R0210 has 28 direct callees, among them the modifier-object archive R1570 (HERO-MODDK-161); R2291 and L08077 each call only L05928. None of these callees is an equip or remove routine (R0850, R0853, R0848, R0851, R0849, R0852), R0451 or the derive R0280. The six equip and remove routines and the derive have no direct caller in the registry. Unit::Serialize's load arm reads +0x8e and +0x90 from the file and the original keeps them (SAV-794).
+
+**Inference.** LOAD does not run an equip routine for a worn item and does not recompute +0x8e, +0x90 or the modifier object; it keeps the stored values.
+
+**Confidence.** Medium. The bodies listed are exact, but the equip routines and the derive are reached only through indirect calls, which the registry's direct edges do not show, and R0210's other callees were not read. SAV-794's runtime witness covers +0x8e and +0x90 only.
+
+**Unknown.** An indirect call to an equip routine or to vt+0x50 below R0210's callees.
+
+### HERO-171
+
+Inputs: HERO-170, SAV-792 (R0451), ITEM-LOAD-005 (the derive), HERO-EQUIP-017 and HERO-MODDK-161 (the equip, remove and fold routines), and `out/pair/pair.txt`.
+
+**Observation.** The derive R0280 stores +0x90 from +0x8e (ITEM-LOAD-005). The weapon and shield remove routines R0853 and R0852 call R0451 with the item weight negated, which adds to +0x8e and recomputes +0x90 (SAV-792, HERO-EQUIP-017). The Shield remove routine subtracts the shield's 0x16-byte block from the modifier object through R0845 or R0847; the weapon remove routine stores no byte of the block (HERO-MODDK-161). In A of SAV-1263, Human 4 carries a worn weapon and +0x8e = 0; the seven Orc_Bow, Goblin_Sling and Goblin_Pike Units the pair lists carry a worn weapon and equal +0x8e and +0x90 (6, 5 and 0x14 by name).
+
+**Inference.** After LOAD the first derive and every remove start from the stored +0x8e and modifier object. A SAV whose +0x8e or modifier object lacks a worn item's contribution gives, after that item's removal, a value below the one the same actor holds after the original's own equip and remove.
+
+**Confidence.** Medium: the chain composes cited claims and HERO-170; no remove after LOAD was observed at run time.
+
+**Unknown.** What makes Human 4's +0x8e zero with a worn weapon; the weapon remove routine's other modifier stores after LOAD.
+
 ## Open items
 
 1. **The magnitude's provenance** — `effect+0x3c` / `+0x3d` / `+0x40` are read by `HERO-EFFECT-019`

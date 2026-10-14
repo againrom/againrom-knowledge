@@ -219,6 +219,8 @@ current account.
 
 **Amended.** The table ledger carried the status "● partially retracted". `retracted.md` records a correction against this claim.
 
+**Amended.** EXP-0575 adds the null case: the cost read at `L05056` dereferences the Spell `this` without a test, so a mage with `+0x68` zero faults there with a null Spell, and the other paths read `[this+4]` at `L16082` (`MAGIC-376`). The mana arithmetic stands.
+
 ### MAGIC-POWER-004
 
 *(**the "exactly four expressions" clause is RETRACTED by EXP-0066** — the power is read 21 times inside `R0003` alone, in twelve distinct expressions; `MAGIC-CEIL-013` carries the corrected enumeration. Amended by EXP-0066 twice more: `R0253` has **no upper clamp**, so the `clamp(…, 0, 100)` in this headline is `R0003`'s and `R0904`'s and not the Prismatic victim cap's, and the sum can reach **170**, so the clamp binds in play.)* **What a magic school skill buys — `power = clamp(skill[school] + Mind − 30, 0, 100)`, and it is not the weapon skill's term.** `R0253(actor, school)` is `max(skill[school] + Mind − 30, 0)` in six instructions: `L05062` reads the signed 16-bit skill of the school from the array at `+0xa8` of the actor, `L05063` reads the signed 16-bit Mind at `+0x88`, `L05064` forms `skill + Mind − 0x1e`, and a branch-free clamp at zero follows, returned as a byte. `R0003` repeats it at `L05065..L05066` with a `[0,100]` clamp. The school is the spell's own `Sphere` column (`getParam(row, 2)`, `L05067`) and indexes the very array the five weapon skills live in (`HERO-SKILL-009`). The power is consumed in **twelve** distinct expressions, all outside `R0280` (`MAGIC-CEIL-013`), of which four are the shared cast quantities: damage `f = power/30 + 1` (`L05068`, `[L05069] = 30`, `[L04115] = 1`); duration `ftol(1.025^power × durationColumn × 16)` (`L05070`, `L05071`, `[L05072] = 16`); cast range `+ power/30`, or `+ power/3` for Teleport (`L05073`, `L05074`); Prismatic victim cap `min(power/20 + 2, 7)` (`L05075`). **So Mind is worth exactly as much as the school skill, one for one, and there is no `+3 × skill` to-hit term and no `skill/5` damage floor for a spell** — a spell's damage does not pass the to-hit roll at all (`MAGIC-RESIST-006`). Instrument for the absence: `EnumRefs disp:a8`, whole image — a `disp:` sweep, which is the mode a structure field needs and the only one that sees the indexed form `word ptr [reg + i*2 + 0xa8]` these two readers use — **260 hits / 118 distinct owners / 1 in orphan code**, that one being `L05076`, a `dword` store in the unrelated orphan run `L05077..L05078`. Inside the actor family the readers are `R0253`, `R0003`, `R0904`, `R0280` (`HERO-COMBAT-011`'s weapon terms), the four experience routines and `Weapon::Equip`'s ranged arm; blind only to bytes never disassembled. For an **item** cast the power is not this expression at all: it is the item's `castSpell` effect's `+0x42` (`MAGIC-ITEM-007`)
@@ -3978,6 +3980,8 @@ Population: windows read in EN, listed under `evidence/run1/listings`: the sette
 
 **Amended.** EXP-0571 bounds the parked-Spell-only observation to server setters `R0011` and `R0012`, not the full manual-cast path. TERR-CLICK-262 and MENU-CAST-153 establish earlier client hover predicates and cursor dispatch (High local branches; Medium player outcome/feedback). MAGIC-TELEPORT-364 and MAGIC-TELEPORT-365 establish earlier selected-value, target-form and builder actor-inclusion checks (High instructions/stores; Medium Teleport identification and book/item composition). Setter, executor, admission, retry and cleanup facts retain their existing grades. Arming, complete reception and native delivery remain Unknown.
 
+**Amended.** `MAGIC-377` adds that no progress arm stores `+0x64`, that the executor replaces the stored action word on every pass, and that phase 5 clears `+0x64` only when `+0x68` is nonzero; `MAGIC-376` shows that a null `+0x64` at phase 0 faults in the admission. The retry and exit facts stand.
+
 ### MAGIC-341
 
 Population: the windows of `MAGIC-340` plus the progress map (`L00090`, 255 bytes), the progress switch (`L00091`, 6 dwords), the kind switch (`L00099`, 15 dwords) and the group-pass table (`L00322`, 27 dwords).
@@ -4152,3 +4156,67 @@ On the local path the packet is dequeued in its own timer step (ANIM-121), and t
 **Confidence.** High for the stores and call conditions of R0268, R0618 and R0548, each read whole, and for the two class rows. High for the stores of the even branch of arm 0x86 from L05322; its head, the opcode 0x86 dispatch and the parity branch are cited from MAGIC-CASTANIM-029, which was not re-read. R0548 is read whole, but its action table at L02482 was not decoded here: that the caster is in action 8 is cited from MAGIC-CASTANIM-029 and ANIM-TELEPORT-169. Medium for the composed alignment: scheduling, delivery and the hero's drawn class, which the client derives from equipment and the save does not store, are cited, not read here.
 
 **Unknown.** Audible cue start, paint order, and casters of other classes or with a charge other than 8. R0621, whose result selects R0617 instead of R0618, and the sender of R0617 were not read. The application entry's pre-dispatch callees (R1051, R2288, R0858, R0625, the actor virtual at +0x68), its default arm at L03046 and the five-way switch through table L05081 were not read (MAGIC-TELEPORT-370).
+
+## Cast admission with a null Spell
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-376 | The owner's dump faults at L05056: the admission R0268 reads the cost [Spell+0xc] with Spell 0 for a mage whose +0x68 is zero, called from the tick's action-0xd site L01994. | High | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+| MAGIC-377 | Progress 2 of R0016 sets action 0xd or 0xe on every pass without storing +0x64 and ends only when ord+0x15 exceeds 2 and +0x136 is nonzero; a book cast keeps its Spell in +0x64 after phase 5. | High / Medium | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+| MAGIC-378 | Read stores put into actor +0x64 an order Spell (ord+0x30), the worn weapon's +0x80, a new Spell or zero; the readers read are the tick's phase-0 and phase-5 sites, where the weapon conversion rewrites +0x64 first. | Medium | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+
+### MAGIC-376
+
+Inputs: the owner's minidump of the fault (SHA256 1883909c16e81656e8710c2b9c1877e875b780559dfaba62c1d694a6821d1666), decoded by `evidence/dump.py` into `out/dump/dump.txt`; EN `rom.exe` windows f01, f02, f03, f06 and f23 in `out/native/`. EN `rom.exe` and RU `ROM.EXE` have one SHA256, 942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03 (1977344 bytes). The dump's module record for `rom.exe` gives image size 0x239000 and time stamp 35c8443a, the values in the install's PE header.
+
+**Observation, dump.** Exception c0000005, a read of address 0x0000000c, at EIP L05056. ecx, edx and esi hold 0; eax holds 122088a0. The ebp chain returns to L16083 (the call at L01994), L12369 (the call through vt+0x18 in R0427), L16084 (in R0193) and L09144 (in R0147). The admission frame holds the arguments caster 122088a0, target 0, x 0 and y 0. The decode prints these four argument dwords of the first frame and the full register context; none of the four lies inside `rom.exe`. A stale dword L16085 in the caller's frame equals the return address of R0016's call at L16086.
+
+**Observation, code.** R0268 is a this-call with this = Spell (ret 0x10; arguments caster, target, x byte, y byte). At L01998 it calls R0442, which returns caster byte +0x4c & 4, the mage mask. For a mage it tests caster +0x68 at L05053; when that is zero it loads this into ecx (L05833) and reads the signed word [ecx+0xc], the cost, at L05056. With this = 0 the read address is 0xc. The other paths with this = 0: a mage with +0x68 nonzero, and a non-mage, read [this+4] at L16082 (address 4); a non-mage whose +0x74 is nonzero and equal to +0x68 returns 1 at L14662 with no Spell read. The direct callers (`EnumRefs callto`, MAGIC-CAST-003) are L01994 and L01995 in the actor tick R0037, both with ecx = actor +0x64. L01994 serves action word 0xd with arguments (actor, +0x5c, 0, 0); L01995 serves 0xe with (actor, 0, +0x60, +0x61). The tick reaches both only at phase +0x58 = 0, through its switch on +0x54 - 1 (byte table L01775, dword table L01776), in which actions 3, 0xd and 0xe share the phase code at L00005.
+
+**Inference.** The faulting pass called the admission from the action-0xd site with a null Spell for a mage whose +0x68 was zero. The zero x and y equal that site's constant arguments.
+
+**Confidence.** High for the fault site, the faulting read, the call site and the arguments: the dump's EIP, registers and return chain agree with the bodies read. The caster's address 122088a0 and four other requested addresses are not in the captured ranges, so the dump does not name the caster (SAV-1263 gives the inference). The High on the fault does not depend on the caller count: the dump's return address names the site.
+
+**Unknown.** The roles of R0193 and R0147 beyond the observed chain. No dword scan for R0268 was run; a table or virtual caller of the admission is not excluded.
+
+### MAGIC-377
+
+Inputs: EN windows f01 (actor init and tick, R0185..L01776), f13, f14 to f17 (R0016 and its tables L00091, L00090, L00099), f18 and f19, in `out/native/`.
+
+**Observation, executor.** R0037 calls R0016 (ecx = server, argument actor) before its action switch when R0416 returns 0, that is when actor +0x3c is nonzero. R0016 stores +0x54 = 0 at L00539 unless the action word is 2 or 0xf. With progress ord+9 nonzero it switches through byte table L00090 and dword table L00091: 1 stores action 3 (L00092); 2 stores action 0xd when ord+0x5c is nonzero and 0xe otherwise (L00093); 3 walks; 4 stores action 0x1a; 5 to 0xfe store progress 0 and action 0x1a; 0xff stores action 0x1a. After arms 1 and 2 (L16087) it increments ord+0x15 and, when ord+0x15 exceeds 2 and +0x136 is nonzero, stores progress 0 and action 0. No progress arm stores +0x64. With progress 0 it dispatches on kind ord+8 (table L00099). Kind 8 (L00108) installs at L06105..L06125 progress 2, ord+0x15 = 0, action 0xd, +0x5c = ord+0x28, +0x64 = ord+0x30 and ord+0x5c = 1, and calls R0401 when ord+0x60 is zero. Kind 9 installs through R0013: action 0xe, +0x64 = ord+0x30, ord+0x5c = 0.
+
+**Observation, phase code (L00005).** Phase 0: for action 3, a worn weapon +0x74 whose +0x80 is nonzero (R0408) and the mage mask, it stores +0x64 = weapon +0x80, +0x68 = weapon and action 0xd (L15298..L13664). Then action 0xd or 0xe calls the admission. A refusal leaves phase 0; an admission stores +0x136 = 0, phase 5 and countdown +0x6c = +0x134. Phase 5 decrements +0x6c. At zero it repeats the weapon conversion for action 3 and, for 0xd or 0xe, calls R0002 (L00007) or R0003 (L00008) with ecx = +0x64 and no null test; R0002 reads [this+4] at L16088. When +0x68 is nonzero (test at L16089) it deletes both objects for an item of kind 0xe and then stores +0x68 = 0 and +0x64 = 0 (L04547..L00044). When +0x68 is zero it stores neither. It then stores phase 7 and the recovery countdown, whose Spell term is read only when +0x64 is nonzero. Phase 7 at zero stores phase 0 and +0x136 = 1.
+
+**Inference.** While progress is 2 and the exit test fails, every pass sets action 0xd or 0xe from ord+0x5c alone; the stored action word is replaced before the switch reads it. A pass at phase 0 then passes +0x64 to the admission, and a pass whose phase-5 countdown reaches zero passes it to R0002 or R0003. A book cast (+0x68 zero) keeps its Spell in +0x64 through phase 7 and after it.
+
+**Confidence.** High for the stores, tests and calls listed: the bodies were read whole in EN, and the RU program is the same image. Medium for the per-pass composition, which assumes one executor call before each tick switch and no other writer of +0x64, +0x136 or ord+9 between them (MAGIC-378 bounds the +0x64 writers).
+
+**Unknown.** R0003 with this = 0, whose body was not read.
+
+### MAGIC-378
+
+Inputs: scan s01 in `out/scans/` (86 hits: a dword write to [register+0x64], base not esp or ebp, linear sweep of EN `.text`) and windows f01, f04, f05, f13, f14, f18, f19, f21 and f24.
+
+**Observation.** 19 of the 86 hits were read in their routines:
+
+| store | routine | value stored |
+|---|---|---|
+| L16090 | actor init R0185 | 0 |
+| L16091 | R1136 | 0, after deleting the Spell |
+| L00045, L00047 | tick phase 0 and phase 5 | weapon +0x80, for action 3, a mage and a nonzero weapon +0x80 |
+| L00044 | tick phase 5 | 0, only when +0x68 is nonzero |
+| L16092, L16093 | cancel R1380 | 0, with phase 0, +0x136 = 1 and action 0 |
+| L16094 | R0014 | 0, after deleting the Spell |
+| L00049, L15277 | strike R0246 | weapon +0x80, then 0 in the same call |
+| L16095 | Unit::Serialize load arm | the stored u32 |
+| L06034 | R0914 | a new Spell, null only on allocation failure |
+| L16096, L15275, L16097, L15276, L16098, L16099 | installs: after L14677's entry, R0016 kind 8, L14679, R0013, L14681, L14742 | ord+0x30 |
+| L16100 | R2292 | 3, into an object whose +0x90 is 1000 (not an actor field, inference) |
+
+The install at L16096 reads [ord+0x30]+0xc before its store; the other five copy ord+0x30 without a read through it.
+
+**Inference.** The readers read are the tick's phase-0 and phase-5 sites. At those sites a loaded +0x64 reaches a read for an order-borne cast: an actor at progress 2 (MAGIC-377) or the caster R0914 builds, whose wrappers R1137 and R1138 store the action word. A weapon-borne cast at action 3 replaces +0x64 from the weapon at phases 0 and 5 before those reads.
+
+**Confidence.** Medium: 67 of the 86 hits were not read and may include actor stores; the sweep misses stores through a computed offset, a stack base or a bulk copy.
+
+**Unknown.** The 67 unread hits; whether an executor pass replaces the action word of the R0914 caster. No read census of +0x64 was run (no sweep of loads from +0x64), so a reader beyond the tick's two sites is not excluded. No store census of +0x136 was run.

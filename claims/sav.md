@@ -16339,3 +16339,80 @@ The series' &YA1 top-level keys are Character, CurrentState, Fog, GameOptions, I
 **Confidence.** Medium: the leaf listing covers one file and the class census is a navigation receipt, not a committed output; the negative is bounded by these two decoders. Equal class counts across the five files exclude a change after sub-tick 10658 only. They do not exclude an Effect record created at the admission step 10656, before the first save.
 
 **Unknown.** Client state restored after LOAD for an interrupted cast.
+
+## Cast fields across LOAD
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1262 | LOAD restores the cast fields +0x54, +0x58, +0x6c, +0x134 to +0x136 and the order bytes raw, maps +0x5c, +0x64 and +0x44 to a new pointer or 0, and keeps order +0x30 raw on a map miss. | High | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+| SAV-1263 | The stimulus SAV keeps Human 4, a mage, at progress 2 with ord+0x5c 1, ord+0x15 0xc and +0x136 0 but stores +0x64 0 and +0x5c 0; game0030 stores Spell 17's key in +0x64 at phase 7. | High / Medium | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+| SAV-1264 | A Unit at progress 2 whose cast has not passed the exit test faults at phase 0 or at the phase-5 zero when its +0x64 restores to 0; in the sites read, weapon casts, ended casts and casts without a Spell do not reach that read. | Medium | ● active (branch candidate) | [EXP-0575](../experiments/EXP-0575-load-cast-fault/) |
+
+### SAV-1262
+
+Inputs: EN windows f07 (Spell::Serialize R1013), f08 (lifecycle R1482 and thunk R1569), f09 (Humanoid and Human Serialize R0954, L08212), f11 and f12 (the three map helpers), f20 (order post-load R0170) and f22 (mover post-load L08765), in `out/native/`; scans s04 and s05 in `out/scans/`. Spans and widths: the `tools/savfull` walk (SAV-UNITPROG-156).
+
+| field | stored as | LOAD |
+|---|---|---|
+| +0x54 action, +0x58 phase | Unit.scalar-run-1, u32 each | raw; the executor's next pass replaces +0x54 (MAGIC-377) |
+| +0x60, +0x61 cell, +0x6c countdown | Unit.scalar-run-1, u8 each | raw |
+| +0x134 charge, +0x135 recovery, +0x136 completion | Unit.scalar-run-2, u8 each | raw |
+| +0x5c target | Unit.scalar-tail, u32 | R1108 |
+| +0x64 Spell | Unit.scalar-tail, u32 | L04868 |
+| +0x44 parked Spell | Unit.scalar-tail, u32 | L04868 |
+| +0x40 credit | Unit.scalar-tail, u32 | R1108 (SAV-908) |
+| +0x68 item | archive object reference | resolved, then L04869 on the resolved word (SAV-908) |
+| order block +0x158 (148 bytes: ord+8 kind, ord+9 progress, ord+0x15, ord+0x5c, ord+0x60) | raw block | raw |
+| ord+0xc, +0x10, +0x18, +0x20, +0x28, +0x30, +0x68 | inside the raw block | R0170: zero skipped, map hit replaced, miss keeps the stored word |
+| a Spell record | Spell::Serialize: bytes +8, +9, +0xa, word +0xc, then its old address | L08312 enters old address to new object in the map at [L00285]+0x88; +4 is set from the table row of id +8 |
+
+R1108, L04868 and L04869 look the stored word up in the same map through R1488; a hit stores the mapped pointer and a miss stores 0. The lifecycle R1482 is Unit vt+0x24; Humanoid and Human vt+0x24 is the thunk R1569, which calls it (the dword scans find R1482 once, at L16101, and R1569 twice, at L16102 and L16103). It calls R1560 (Position), then repairs +0x5c (L08770), +0x64 (L16104), +0x44 (L16105), +0x68 (L16106) and +0x40 (L08130), and, when +0x13c is zero, calls the mover post-load L08765 (mover +0x7c, a miss keeps the stored word) and the order post-load R0170. The lifecycle runs after the archive has created every record (SAV-DEADLOAD-124 and the dead-actor repair on the actors page), so a Spell record anywhere in the file is in the map.
+
+**Inference.** A +0x64 or +0x44 that is zero, or that is not the old address of a Spell record in the same file, is 0 after LOAD. An order +0x30 that is not such an address stays a stale pointer, which the next kind-8 or kind-9 install copies into +0x64.
+
+**Confidence.** High for the bodies, map selection and stores listed. The call order of lifecycles across records was not read.
+
+### SAV-1263
+
+Inputs: A, the original's own `game0030` SAV (41859 bytes, SHA256 4bbb6f47fe54b97988c60d2748deea34990e85346567a071031d982086ed9c51), and B, the stimulus SAV another program wrote from it (225838 bytes, SHA256 7e393a0d0a04969bbd8d48913e2d1a45d448bc001b616dd6c96ebcd554a3b53b). Instrument: `tools/savfull -pair`, output `out/pair/pair.txt`. Both files walk exactly to 3184 spans; 218 spans differ. The 29 Spell records carry the same keys in both files.
+
+Human 4, mage mask set, worn weapon record 6, +0x68 null in both files:
+
+| file | +0x54 | +0x58 | +0x6c | +0x5c | +0x60, +0x61 | +0x64 | +0x44 | +0x136 | ord+8 | ord+9 | ord+0x15 | ord+0x5c | ord+0x60 | ord+0x30 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A | 0xd | 7 | 9 | 0x0ff6e760 | 0x28, 0xf | Spell 17 key | Spell 17 key | 0 | 8 | 2 | 0xc | 1 | 1 | Spell 17 key |
+| B | 0 | 0 | 0 | 0 | 0, 0 | 0 | Spell 17 key | 0 | 0xb | 2 | 0xc | 1 | 1 | Spell 17 key |
+
+The pair's cast census lists every Unit with ord+9 nonzero or action 3, 0xd or 0xe: Humans 4, 33, 74 and 117 and Unit 158. In both files Humans 33, 74 and 117 and Unit 158 are at progress 1. Human 33 is a mage with weapon record 34; A stores +0x64 = Spell 36 key and +0x68 = weapon 34 at phase 5, B stores +0x64 = 0 and +0x68 null at phase 7. Humans 74 and 117 and Unit 158 have no mage mask. In A every nonzero +0x64, +0x44 and ord+0x30 in the census is the key of a Spell record of the same file.
+
+**Inference.** Under SAV-1262, LOAD of B gives Human 4 +0x64 = 0 and +0x5c = 0. Under MAGIC-377 its first pass increments ord+0x15 to 0xd, fails the exit test because +0x136 is 0, and stores action 0xd from ord+0x5c; the tick at phase 0 calls the admission with this = 0 and arguments (Human 4, 0, 0, 0). Human 4 is a mage with +0x68 zero, so the read is the one at L05056 (MAGIC-376), with the dump's target, x and y. In A the same Human restores +0x64 to Spell 17 and is at phase 7, which reads no Spell. Human 33 at progress 1 gets action 3 and the weapon conversion, so its null +0x64 in B is not read.
+
+**Confidence.** High for the stored values: both files decode exactly. Medium that Human 4 is the faulting caster: the caster's address 122088a0 and four other requested addresses are not in the dump's captured ranges, the executor run needs a nonzero +0x3c (f11, f01 at L13241) that the pair output does not list, and the census omits Units at progress 0, where a kind-8 or kind-9 install with a zero ord+0x30 would also give a null Spell.
+
+**Unknown.** Which change of B a program made deliberately; the actor at 122088a0.
+
+### SAV-1264
+
+Inputs: SAV-1262, SAV-1263, MAGIC-376, MAGIC-377, MAGIC-378 and AI-617 (the scroll arm's +0x44 and +0x68 stores). The rule is a composition of read code; no SAV other than A and B was loaded or decoded.
+
+**Rule.** For a Unit whose executor runs (+0x3c nonzero after LOAD) and whose stored progress ord+9 is 2, every pass that fails the exit test (ord+0x15, after its increment, above 2 and +0x136 nonzero) sets action 0xd or 0xe. On such a pass the restored +0x64 is read at phase 0, and at phase 5 when the countdown reaches zero; at either read it must be the old address of a Spell record in the same file. At phase 7 nothing reads it. The readers read are the tick's phase-0 and phase-5 sites, and the admission is reached through its two direct callers L01994 and L01995 (MAGIC-376); a table or virtual caller is not excluded. The original stores +0x136 = 0 at admission and 1 when phase 7 ends, at a cancel (phase 0) and in the actor init (windows f01 and f04), so its own phase-5 state does not pass the exit test in the stores read.
+
+| case | stored state | first passes after LOAD | outcome |
+|---|---|---|---|
+| book cast saved by the original (A, Human 4) | progress 2; +0x64 the key of a Spell record | mapped to the Spell | admission or apply with that Spell |
+| book cast after its apply | progress 2, phase 7; +0x64 kept (MAGIC-377) | phase 7 reads no Spell; the pass after phase 7 ends meets the exit test | no Spell read |
+| weapon-borne cast saved by the original (A, Human 33) | progress 1; +0x64 a Spell record's key; +0x68 the weapon | action 3; the conversion rewrites +0x64 from weapon +0x80 at phases 0 and 5 | no read of the loaded +0x64 at those sites |
+| weapon-borne cast after its apply | progress 1, phase 7; +0x64 and +0x68 zero | as above | no read at those sites |
+| no Spell | progress 0, 1 or 3, or action 0xd or 0xe without progress 2 | the executor replaces the action word; progress 0 installs +0x64 from ord+0x30 | the loaded +0x64 is not read at those sites |
+| progress 2 past the exit test | ord+0x15 at least 2, +0x136 nonzero | progress 0, action 0 | no read at those sites |
+| B, Human 4 | progress 2, exit test failed, phase 0, +0x64 0, mage, +0x68 0 | admission with this 0 | fault at L05056, address 0xc |
+| progress 2 at phase 0, +0x68 nonzero or no mage mask | exit test failed, +0x64 0 | admission with this 0 | fault at L16082, address 4, except a non-mage with +0x74 = +0x68 nonzero |
+| progress 2 at phase 5, ord+0x5c 1 | +0x136 0, +0x64 0 | at the countdown's zero, R0002 with this 0 | fault at L16088, address 4 |
+| progress 2 at phase 5, ord+0x5c 0 | +0x136 0, +0x64 0 | at the countdown's zero, R0003 with this 0 | Unknown |
+| scroll cast at progress 2, phase 0 or 5 | Unknown: whether its Spell gets a record and what +0x64 holds | Unknown | Unknown |
+
+**Inference.** In the stores read (MAGIC-378), the original clears +0x64 at progress 2 only at the item branch of phase 5, which moves to phase 7, and in the cancel R1380, which stores +0x136 = 1. The original's own SAVE therefore writes a +0x64 that restores to 0 at phase 0 or 5 of a progress-2 cast after a cancel within the first two passes of a cast. Whether a Spell without a record produces such a +0x64 is Unknown.
+
+**Confidence.** Medium. The bodies are High (MAGIC-376, MAGIC-377). The admitted rows rest on the census of MAGIC-378, which read 19 of 86 store sites, and AI-617 is cited for the scroll arm's +0x44 and +0x68 stores only; no original SAVE of a scroll cast was decoded.
+
+**Unknown.** Whether a cancel's callers clear ord+9; whether a scroll cast's Spell gets a record; R0003 with this = 0; a Unit without an executor (+0x3c zero); no read census of +0x64 and no store census of +0x136 were run; no dword scan for R0268 was run, so a table or virtual caller of the admission is not excluded.

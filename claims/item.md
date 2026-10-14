@@ -2153,6 +2153,8 @@ repairs raw `+0x64` through `L04868` and `+0x68` through `L04869`, with the
 same map-hit replacement and miss clear. Cast lifetime, wire widths, the
 destructive-kind branch and the later runtime Unknowns stand.
 
+**Amended.** EXP-0575 narrows the raw-pointer Unknown. After LOAD a weapon-borne cast at action 3 rewrites `+0x64` from weapon `+0x80` at phases 0 and 5 before any read (`MAGIC-377`, `MAGIC-378`); an order-borne cast reads the restored `+0x64`, which is 0 when its Spell has no record, and a null one faults (`MAGIC-376`, `SAV-1264`). Validity of a mapped pointer after later callbacks stays Unknown.
+
 ### ITEM-EFFGRAM-070
 
 - `R0991` takes the right-trimmed text before the first `{` as the item

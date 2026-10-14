@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3936. Observation: 99. Static analysis: 3325. Mixed: 512.
+Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 
 ## Ledger ai
 
@@ -966,6 +966,8 @@ Claims labelled: 3936. Observation: 99. Static analysis: 3325. Mixed: 512.
 | HERO-CROSSHOLD-146 | static analysis | ● active |
 | HERO-163 | static analysis | ● active (amended) |
 | HERO-164 | static analysis | ● active |
+| HERO-170 | static analysis | ● active (branch candidate) |
+| HERO-171 | static analysis | ● active (branch candidate) |
 
 ## Ledger inv
 
@@ -1311,6 +1313,9 @@ Claims labelled: 3936. Observation: 99. Static analysis: 3325. Mixed: 512.
 | MAGIC-TELEPORT-366 | static analysis | ● active (branch candidate, amended) |
 | MAGIC-TELEPORT-370 | static analysis | ● active (branch candidate) |
 | MAGIC-TELEPORT-371 | static analysis | ● active (branch candidate) |
+| MAGIC-376 | static analysis | ● active (branch candidate) |
+| MAGIC-377 | static analysis | ● active (branch candidate) |
+| MAGIC-378 | static analysis | ● active (branch candidate) |
 
 ## Ledger menu
 
@@ -2925,6 +2930,9 @@ Claims labelled: 3936. Observation: 99. Static analysis: 3325. Mixed: 512.
 | SAV-1255 | mixed | ● active (branch candidate) |
 | SAV-1256 | static analysis | ● active (branch candidate) |
 | SAV-1257 | mixed | ● active (branch candidate) |
+| SAV-1262 | static analysis | ● active (branch candidate) |
+| SAV-1263 | static analysis | ● active (branch candidate) |
+| SAV-1264 | static analysis | ● active (branch candidate) |
 
 ## Ledger session
 
