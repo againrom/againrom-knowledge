@@ -172,6 +172,11 @@ original load/resave; recomputing would destroy that state. Sight is not
 restricted to whole cells. Its named constructor gives `0x0500`; LOAD can retain
 zero without that becoming a general constructor/default value. — SAV-794, SAV-795, SAV-796
 
+LOAD restores health `+94` and maximum `+96` as stored and SAVE writes them as held; no LOAD
+step rescales them by the session difficulty. The drawable fill scales the prototype maximum by
+the session difficulty, which holds the head value while LOAD's client loop runs; the unit card's
+figure after LOAD is that fill, not these words (Medium). — UNIT-163, UNIT-164
+
 ## Skills and experience
 
 | Source | Wire position | Meaning |

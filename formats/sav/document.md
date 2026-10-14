@@ -23,7 +23,7 @@ is nonzero. Mission start obtains that number with `atoi(mapName)`.
 | `0x08` | CString | `world+0x28` | Map name |
 | `p+0` | 11 × u32 | See ordered list below | Literal saved values |
 | `p+44` | u32 | `world+0x80` | Mission number |
-| `p+48` | u32 | `world+0x84` | Difficulty; LOAD retains a stored value only in 1..3 |
+| `p+48` | u32 | `world+0x84` | Difficulty; LOAD stores a value in 1..3, then the resume or city path replaces it with campaign `+114` + 1 |
 | `p+52` | u32 | `playerList+0x20` | Meaning Unknown |
 | `p+56` | u32 | Player list count | Followed by that many `objref<Player>` operations |
 
@@ -31,7 +31,7 @@ The eleven-value source order is
 `+11c, +124, +128, +12c, +130, +134, +138, +13c, +148, +144, +140`.
 The final three are not in address order. They are not the difficulty field
 and receive no Boolean normalization or difficulty clamp.
-— SAV-STREAM-010, SAV-HEAD-025, UNIT-GATE-012, SAV-657, SAV-WHEADLOAD-521
+— SAV-STREAM-010, SAV-HEAD-025, UNIT-GATE-012, SAV-657, SAV-WHEADLOAD-521, SAV-1270
 
 ## Ordered grammar
 

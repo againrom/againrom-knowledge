@@ -64,7 +64,7 @@ drawable, so they are filed here rather than there.
 | UNIT-OWNER-009 | actor+0x14 is the owning Player; Player+0x28 is a dword consumed by local control predicates. | High / Medium / Unknown | ● active (partially retracted, superseded) | [EXP-0072](../experiments/EXP-0072-unit-stats/), [EXP-0180](../experiments/EXP-0180-shade-select/), [EXP-0351](../experiments/EXP-0351-authored-player-control/) |
 | UNIT-PANEL-010 | The values a unit's information display shows are a 25-store block copied off the prototype actor in one fixed order — and four of them are adjusted on the way out. | High / Medium / Unknown | ● active (superseded) | [EXP-0073](../experiments/EXP-0073-unit-panel/) |
 | UNIT-PANEL-011 | What was deliberately not established, and why a displacement sweep cannot close it. | High / Unknown | ● active | [EXP-0073](../experiments/EXP-0073-unit-panel/) |
-| UNIT-GATE-012 | The state `UNIT-PANEL-010` left Unknown is `[L00285]+0x84`, a dword on the server singleton, and its value set is exactly `{1, 2, 3}` — stated by the image, not inferred from the three compare arms. | High / Medium | ● active | [EXP-0075](../experiments/EXP-0075-state-gate/) |
+| UNIT-GATE-012 | The state `UNIT-PANEL-010` left Unknown is `[L00285]+0x84`, a dword on the server singleton, and its value set is exactly `{1, 2, 3}` — stated by the image, not inferred from the three compare arms. | High / Medium | ● active (amended) | [EXP-0075](../experiments/EXP-0075-state-gate/) |
 | UNIT-GATE-013 | The panel is not lying: the same arithmetic is applied to the simulation actor, once, at spawn — and only to non-heroes. | High | ● active | [EXP-0075](../experiments/EXP-0075-state-gate/) |
 | UNIT-GATE-014 | Where the value is chosen, and the one thing no instrument here can name. | High / Unknown | ● active (amended) | [EXP-0075](../experiments/EXP-0075-state-gate/), **[EXP-0076](../experiments/EXP-0076-session-lifecycle/)** |
 | UNIT-COMBAT-015 | The shipped per-class combat columns of the `Units` collection, published — the values a consumer needs and could previously find only inside an experiment. | High | ● active | [EXP-0104](../experiments/EXP-0104-combat-columns/) |
@@ -226,6 +226,8 @@ on this code read is not independent corroboration.
 ### UNIT-GATE-012
 
 **The state `UNIT-PANEL-010` left Unknown is `[L00285]+0x84`, a dword on the server singleton, and its value set is exactly `{1, 2, 3}` — stated by the image, not inferred from the three compare arms.** The save's load arm assigns it only inside that range (`L08284` rejects a value below 1 and `L08285` a value above 3, both jumping to `L08873`; store at `L08429`), the constructor's default is `2` (`L12629`, a 32-bit store of 2 to `+0x84`, in `R0967`, the ctor of the 0x174-byte object `R1304` allocates and stores into the global two instructions later), and the only expression that computes it is `campaign+0x65c + 1` where `campaign+0x65c` is a three-valued control index. **Five write sites, four owners**: the ctor; `L08423` in `R0098`; `L12630` and `L08425` in `R0099` — all three the same sequence: load the singleton `[L00285]`, load `campaign+0x65c`, increment it and store it to `+0x84` of the singleton, each guarded on the singleton being non-null; and the save's load arm. `campaign+0x65c` itself has **7** accesses image-wide (`EnumRefs disp:65c`: 7 hits, 6 owners, 0 orphan): default `1` in `InitInstance` (`L09313`), `1` again on the new-campaign arm (`L12631`, the constant 1 loaded at `L12632`), `= precreate+0x1d0` when the pre-create screen reports (`L09354`), and the reverse store back into the screen at `L11291`. **Three readers**: the unit-information panel (`L12633`, `UNIT-PANEL-010`), the world `Serialize`'s store arm (`L12634`, so the setting is saved and restored), and the `.alm` spawner (`L12635`/`L12636`, `UNIT-GATE-013`) | High for the location, the value set, the writers and the readers (each a named instruction; the value set is the loader's own range test; the `Serialize`'s `this` is fixed both by EXP-0055 and by its streamed field set being exactly the ctor's) / **Medium** that the reader enumeration is exhaustive — instrument and blind spots in [EXP-0075](../experiments/EXP-0075-state-gate/)'s `evidence/rom-state-gate-excerpt.md` §G: whole-image `disp:84` is 578 hits / 273 owners / 2 orphan, intersected with `refto:L00285` (172 / 93 / 0) and closed one level by `callto:` over all 265 remaining owners, which cannot see a routine handed the pointer at depth 2 or a `memcpy` of the whole object
+
+**Amended.** `SAV-1269` and `SAV-1270` narrow two clauses. Application `+0x65c` is campaign record `+0x114` (Medium; record at application `+0x548`), so it has two more accesses than the `disp:65c` census counts: the record load reads it through a pointer at `L08413` and the record store writes it at `L08409`. The world `Serialize` restores the head value into `+0x84` only until the resume arm (`L08425`) or the city path (`L08423`) of the same LOAD overwrites it with `+0x65c + 1`.
 
 ### UNIT-GATE-013
 
@@ -615,3 +617,71 @@ Coordinates are shifted arithmetically by 8; R1145 keeps low8 x/y/r. The radius0
 **Confidence.** High for these local tests, branches, key narrowing and lookup miss returns in complete bodies. Medium for absence of a class/group/coordinate bound in the selected walker and lookups, and for completed skipped/fallback mission outcomes. Zero section scans; callees, computed offsets, copied pointers and indirect calls bound the negative.
 
 **Unknown.** Arbitrary invalid class/NPC/definition admission, row0 content, group allocation, R1287's out-of-map rule, message receiver and actual running mission. No global clamp or universal refusal is established.
+
+## Difficulty-derived values across LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| UNIT-163 | Unit LOAD restores health `+0x94` and maximum `+0x96` as stored and SAVE writes them as held; no LOAD step read rescales them. Both Troll.3 of the inputs keep maximum 1152 through the original's LOAD and SAVE. | High | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+| UNIT-164 | The drawable fill scales the prototype maximum by `+0x84`, which holds the head value while LOAD's client loop runs; Medium that the card shows the fill built there. Troll.3 (prototype 768): 1152 under head 3, 768 under head 2. | High / Medium | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+
+### UNIT-163
+
+Inputs: EN window x23 (Unit::Serialize `R0210`) in `out/native/`; the
+inputs decoded in `out/fields/named-records.txt`.
+
+- Store arm: `+0x92`, `+0x94`, `+0x96`, `+0x98` written as 16-bit values from the
+  actor (`L16122`..`L16123`).
+- Load arm: 16-bit reads straight into `+0x84`..`+0x9e`; `+0x94` at
+  `L16124`..`L16125`, `+0x96` at `L16126`..`L16127`. The window reads no
+  prototype and no `[L00285]`.
+- Decoded Troll.3 records (objects 158 and 159 of each file), by token id:
+
+| file | head | Troll.3 health / max |
+|---|---:|---|
+| `againrom-quick-save-2.sav` | 3 | 0xbd 1152 / 1152; 0xc1 1152 / 1152 |
+| `againrom-quick-save-3.sav` | 3 | 0xba 1152 / 1152; 0xbd 1143 / 1152 |
+| `game0031-original-resave.sav` | 2 | 0xba 1152 / 1152; 0xbd 1152 / 1152 |
+
+**Confidence.** High: the load arm is read whole, and the original's resave
+keeps 1152 under a session difficulty of 2, where the spawner rule
+(UNIT-GATE-013) gives 768.
+
+**Unknown.** Why troll 0xbd went from 1143 to 1152 between the second stimulus
+and the resave.
+
+### UNIT-164
+
+Inputs: EN windows x02, x04 and x22 in `out/native/`; UNIT-PANEL-010; Troll.3's
+prototype maximum 768 from UNIT-COMBAT-015's table.
+
+- `R0590` (x04), called at `L03117` in the client dispatcher
+  `R0509` (x22), copies prototype health and maximum
+  (`[L07204 + 4·(face + 4·type)]` `+0x94`/`+0x96`) to drawable `+0xfc`/`+0x100`.
+- When application `+0x6bc` is 2 and `+0x84` is not 2, it multiplies the
+  maximum by 0.66 for `+0x84` = 1 and by 1.5 (to-hit and defence +50) for any
+  other value, then sets health to the maximum (`L12619`/`L12620`).
+- LOAD's `R0099(1)` runs `R0509` in its client loop
+  (`L09145`..`L16121`) before the resume arm stores `+0x84` at `L08425`
+  (SAV-1270), so `+0x84` then holds the head value.
+- The fill reads no Unit word saved in the document.
+- Troll.3: 768 × 1.5 = 1152 under head 3; 768 under head 2.
+
+**Inference.** The owner's 1152 after the stimulus LOAD and 768 after the
+`game0031` LOAD match head 3 and head 2. The stored maxima are 1152 in both
+files, so the figure does not follow them.
+
+**Confidence.** High for the fill arithmetic and the order inside
+`R0099`. Medium for the card figure: that the card shows this cache
+(UNIT-PANEL-010, UNIT-PANEL-011, which records that `R0509` also fills the
+same cache from a network message) and that each loaded unit's drawable is built
+inside the client loop. The creation arm is read only as x22, a fragment that
+starts mid-function at `L16128`; the dispatch arm that reaches `L03117`, its
+guard and whether each loaded unit passes it are not read. The owner's two
+figures separate the readings only together: 768 after `game0031` rules out the
+stored words (1152), and 1152 after the stimulus LOAD rules out a fill after the
+overwrite (768). They do not say which troll the owner looked at.
+
+**Unknown.** Whether a later server message replaces the drawable's figure with
+the actor's own words (UNIT-PANEL-011); the dispatch arm that reaches `L03117`
+and the caller chain that creates each loaded unit's drawable.

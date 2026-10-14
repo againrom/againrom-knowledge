@@ -121,11 +121,20 @@ Unequip deletes a nonnull owned Spell and clears Weapon `+0x80`, while leaving
 the source Effect in place. No Item split is needed for this nested identity
 change. An allocator may reuse the old numerical address. — ITEM-SPELLMOVE-132
 
+Among the routines read, only equip builds `weapon+0x80` from the Effect; copy builds from the
+source Spell's id, or stores 0 when the source has none, and the Weapon constructors and fill
+store 0. The original's resave keeps a worn `castSpell` Weapon's null reference after LOAD
+(High), so such a Weapon keeps it until it is removed and worn again; that no other routine
+writes `weapon+0x80` is Medium. Its holder then attacks without a cast: a mage with reach above 1
+posts a physical ranged attack, and the unit shot would take the class Projectile, 10 for the
+Human Mage row (Medium; Ferion's class is not read from the save).
+— ITEM-187, MAGIC-379
+
 ### Weapon-borne spell state (`ITEM-CASTSTATE-056`, `+0x68`-only remap clause retracted)
 
 A `castSpell` record remains an ordinary ordered Effect of kind 41. General effect dispatch does
 nothing for that kind beyond target recompute. A separate list finder returns the first kind-41
-record; Weapon construction uses its spell-id byte to create a distinct owned Spell at
+record; the equip helper uses its spell-id byte to create a distinct owned Spell at
 `weapon+0x80`, and Weapon copy/split reconstruct it from id. The list record remains the source of
 comparison and persistence while the derived object holds cast runtime state (`ITEM-CASTLINK-076`).
 

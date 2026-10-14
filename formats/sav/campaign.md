@@ -53,7 +53,7 @@ rehydrates the picture pointer is superseded by SAV-609: world-map entry does)
 | Order | Runtime source | Meaning / restoration |
 |---:|---|---|
 | 1 | `+118` | Selected mission |
-| 2 | `+114` | Raw value; both application load paths increment it into server difficulty `+84` |
+| 2 | `+114` | Raw value; both application load paths increment it into server difficulty `+84`, replacing the head's value; it is application `+65c` (Medium: suffix windows and offset arithmetic) (SAV-1269, SAV-1270) |
 | 3 | `+110` | AutoGetMission |
 | 4 | `+11c` | LastMission |
 | 5 | `+120` | First-MapPoint flag, computed on SAVE |

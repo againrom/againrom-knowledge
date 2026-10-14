@@ -2100,7 +2100,7 @@ writer was located.
 | ITEM-EFFMODE-073 | The effect operand dword is four grammars, and malformed numeric text is not uniformly rejected. | High / Unknown | ● active | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
 | ITEM-EFFSPLIT-074 | Item copy and every split deep-copy the ordered Effect list, but omit one serialized item byte, `+0x47`. | High / Unknown | ● active | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
 | ITEM-EFFDISP-075 | All 49 accepted effect keys, their operand widths and their state-0 equip/remove consumers are enumerated. | High | ● active | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
-| ITEM-CASTLINK-076 | `castSpell` is both an ordered general-list Effect and the source of a separate Weapon-owned Spell. | High / Medium | ● active | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
+| ITEM-CASTLINK-076 | `castSpell` is both an ordered general-list Effect and the source of a separate Weapon-owned Spell. | High / Medium | ● active (amended) | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
 | ITEM-EFFSAVE-077 | Effect persistence preserves ordered values but omits transient `+0x44`. | High / Medium | ● active | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
 | ITEM-EFFARM-146 | No instruction in the 46 arm bodies of `R0843` stores into or points at actor `+0x10e..+0x113`; each arm tail then recomputes live `+0xce..+0xd3` through `vt+0x50`. | High / Medium | ● active | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
 | ITEM-EFFKEY-147 | Each of the 49 accepted effect keys adds to one named live or modifier field; the complete key-to-field-and-offset table is published, including the word that kinds 16, 19 and 21..24 add to. | High | ● active | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
@@ -2300,6 +2300,8 @@ on this code read is not independent corroboration.
 three-owner population, Weapon build/copy and the price split rule out
 general-only and weapon-tail-only alternatives. Medium for the 46 Human plus
 two Unit shipped cells per root, which are identical corpus observations.
+
+**Amended.** `ITEM-187` narrows the construction and copy clauses. The Weapon constructors (`R0889`, `R0665`) and fill (`R0887`) store 0 at `weapon+0x80`; the owner that allocates from the Effect id is `R1011`, whose one direct caller is equip (`L05247`). Weapon copy (`L08717`) builds the new Spell from the source Spell's id byte `+8`, not from the Effect, and stores 0 when the source has none.
 
 ### ITEM-EFFSAVE-077
 
@@ -3655,3 +3657,57 @@ A missing name reaches the request service with a sample whose file does not exi
 **Confidence.** High for the counts: one run per root, reproduced byte for byte. The key population is the item name table, not the stock the shops carry.
 
 **Unknown.** Which keys a shop shelf can hold in play; the audible result of a request for a missing file.
+
+## Weapon Spell writers across LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-187 | Among the routines read, only equip builds `weapon+0x80` from the `castSpell` Effect (`R0850`); copy builds from the source Spell's id. The original's resave keeps a worn staff's null reference after LOAD; no other writer is Medium. | High / Medium | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+
+### ITEM-187
+
+Inputs: EN windows x06, x07, x08, x24 to x31 in `out/native/`; scans s01, s03 to
+s09 in `out/scans/`; the inputs decoded in `out/fields/named-records.txt`.
+
+| writer | routine | value |
+|---|---|---|
+| `L16107` | default constructor `R0889` | 0 |
+| `L05249` | name constructor `R0665` | 0 |
+| `L16108` | fill `R0887` | 0 |
+| `L16109` | destructor `L09849` | 0 after deleting the Spell |
+| `L16110` / `L16111` | copy `L08717` | a new Spell from the source Spell's id byte `+8`, or 0 when the source has none |
+| `L04889` | removal `R0853` | 0 after deleting the Spell (`L04888`) |
+| `L04887` | `R1012` (from `R1011`, from equip `R0850` at `L05247`) | a new Spell from Effect `+0x40`'s low byte |
+| `L16112` | by-name builder `R1045` | a Spell by name; no caller (MAGIC-SPELLHOP-023) |
+| `L16113` | Weapon::Serialize `R1639`, load arm | the archived reference through `L08325` |
+
+- `R1011` takes the first Effect of kind 0x29 from `R0858` (x25) and
+  calls `R1012` only when one exists.
+- s01: 118 dword stores at `+0x80` (any base but esp); the ten in
+  `L02478..L16114` are the eight stores above, `L16112` and `L16115`
+  (a mover object, x24). 108 lie elsewhere and were not classified.
+- Direct calls: `R1012` 1 (`L05246`), `R1011` 1 (`L05247`),
+  `R0858` 3 (`L16116` in `R0808`, `L05096` in `R0003`,
+  `L16117`), equip `R0850` 0. No raw dword equals `R1012`, `R1011` or
+  `R0858`.
+- Decoded inputs: Ferion (Human 53) wears Weapon 54. In `againrom-quick-save-2.sav`
+  it is token 0x9e (Effect id 0x14) with Spell 56. In `againrom-quick-save-3.sav`
+  and `game0031-original-resave.sav` it is token 0xb1 (Effect id 0x0e, power 0x14)
+  with a null reference, and the carried token 0x9e (object 60) keeps Spell 62.
+
+**Inference.** A worn `castSpell` Weapon loaded with a null reference keeps it
+until the weapon is removed and worn again; the original's resave confirms the
+null after LOAD and four ticks.
+
+**Confidence.** High for the Weapon routines read, for the LOAD arm and for the
+original's resave keeping a worn staff's null reference after LOAD
+(`game0031-original-resave.sav`). Medium that no other routine writes a Weapon's
+`+0x80`: 108 stores are unclassified, equip's indirect callers are not
+enumerated, and the call scans cover `E8` calls only.
+
+**Unknown.** Whether map or mission start calls equip for a worn weapon; item
+generation beyond the constructors; `R0992` and `R0856`, called by
+the name constructor and the fill. No dword scan for `R0850` was run. `E9`
+jumps were not scanned, so a `jmp` thunk to `R1012` is not excluded. The store
+scan cannot see the write through `L08325` (`L16118`, a store through
+the passed pointer).

@@ -3730,6 +3730,8 @@ on `2026-08-02/game0003.sav` (sub-tick 9343, full tick 584) and true on the othe
 The full-tick count the stepper reaches is `(world+0x04 + 1) >> 4` on all 28 (`SESS-086`). The
 field order, the field meanings and the other four checks stand.
 
+**Amended.** `SAV-1270`: the head difficulty the load arm stores lasts only until the resume arm (`L08425`) or the city path (`L08423`) of the same LOAD sets `world+0x84` to campaign record `+0x114` + 1. SAVE writes the head from that value.
+
 ### SAV-TRAIL-026
 
 - After the world half: `ar << 0xbadface1` (`L08286`; the load arm tests it at
@@ -13916,7 +13918,7 @@ local overwrite. No original-runtime trace was run.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1129 | A physical ranged attack builds its CProjectile in unit virtual slot +0x58 (`R0603`) at the action-7 ShootDelay tick; the 0x72 arm and melee build none, and a cast-diverted attacker's shot builds none through slot +0x58. | High / Medium | ● active | [EXP-0428](../experiments/EXP-0428-fresh-projectile/) |
+| SAV-1129 | A physical ranged attack builds its CProjectile in unit virtual slot +0x58 (`R0603`) at the action-7 ShootDelay tick; the 0x72 arm and melee build none, and a cast-diverted attacker's shot builds none through slot +0x58. | High / Medium | ● active (amended) | [EXP-0428](../experiments/EXP-0428-fresh-projectile/) |
 | SAV-1130 | At the unit shot, the 16 stored projectile leaves take values from shooter, target and class, or stay zero; no leaf records the shooter, the weapon or an item. | High / Medium | ● active | [EXP-0428](../experiments/EXP-0428-fresh-projectile/) |
 | SAV-1131 | The five live projectile creators take their id from one 16-bit counter at client world +0xa0c and insert into a 17-bucket id hash; the loader takes it from the document. Saved IDs follow bucket order, newest first within a bucket. | High / Medium | ● active | [EXP-0428](../experiments/EXP-0428-fresh-projectile/) |
 | SAV-1132 | A projectile of pictures 0..12 never applies damage (pictures 13+ are unread): the simulation actor applies it at its own countdown expiry against the then-current target and range, so a shot and its damage are independent events. | High / Medium | ● active | [EXP-0428](../experiments/EXP-0428-fresh-projectile/) |
@@ -13974,6 +13976,8 @@ stores those opcodes at `L05301`, `L03021`, `L05302`, `L03022`,
 `L03023`, `L05303`, `L03055` and `L05304`, and whether any of those
 senders runs for a ranged attack was not traced. The 0x72 path is answered;
 the arms' senders are open.
+
+**Amended.** `MAGIC-379`: "Mage-staff Human rows (46) are cast-diverted" describes the shipped rows with a Spell. A staff worn with a null `weapon+0x80` is not diverted, so the sentence is not a runtime guarantee.
 
 ### SAV-1130
 
@@ -16416,3 +16420,96 @@ Inputs: SAV-1262, SAV-1263, MAGIC-376, MAGIC-377, MAGIC-378 and AI-617 (the scro
 **Confidence.** Medium. The bodies are High (MAGIC-376, MAGIC-377). The admitted rows rest on the census of MAGIC-378, which read 19 of 86 store sites, and AI-617 is cited for the scroll arm's +0x44 and +0x68 stores only; no original SAVE of a scroll cast was decoded.
 
 **Unknown.** Whether a cancel's callers clear ord+9; whether a scroll cast's Spell gets a record; R0003 with this = 0; a Unit without an executor (+0x3c zero); no read census of +0x64 and no store census of +0x136 were run; no dword scan for R0268 was run, so a table or virtual caller of the admission is not excluded.
+
+## Difficulty across LOAD and SAVE
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1269 | The session difficulty has two holders: server `[L00285]+0x84` (1..3) and application `+0x65c`, which is campaign record `+0x114` (Medium), the campaign tail's second scalar. | High / Medium | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+| SAV-1270 | LOAD stores the head difficulty, then the resume or city path sets `+0x84` to record `+0x114` + 1; SAVE writes the head from `+0x84` and the record from application `+0x65c`, so an original resave has head = `+0x114` + 1. | High / Medium | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+
+### SAV-1269
+
+Inputs: EN windows x01, x02, x03, x13 and x14 in `out/native/`; scan s02 in
+`out/scans/`. EN `rom.exe` and RU `ROM.EXE` have one SHA256,
+942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03 (1977344
+bytes; `out/native/inputs.json`).
+
+- Server `+0x84` writers: the constructor `L12629` (2; taken from UNIT-GATE-012,
+  in no committed window), the city path
+  `L08423` in `R0098`, the new-mission arm `L12630` and the resume arm
+  `L08425` in `R0099`, each storing application `+0x65c` + 1, and the
+  world load arm `L08429` for a head value in 1..3 (UNIT-GATE-012).
+- Application `+0x65c` direct dword stores, image-wide (s02, any base but esp):
+  `L09313`, `L12631`, `L09354`.
+- The campaign record is application `+0x548`: `R0098` and the resume
+  arm of `R0099` pass `this+0x548` to the record load `R0434`. Its
+  `+0x114` is application `+0x65c` (Medium).
+- `R0434` reads `+0x114` through a pointer at `L08413`, second of the
+  seven tail scalars (`+0x118, +0x114, +0x110, +0x11c, +0x120, +0x124, +0x128`);
+  `R1294` writes it at `L08409`. A store scan cannot see the pointer
+  read.
+- Readers of `+0x84` read here: the drawable fill `L12633` and the world store
+  arm `L12634`; the spawner sites `L12635`/`L12636` are UNIT-GATE-012's.
+
+**Confidence.** High for the server holder, the application `+0x65c` holder and
+the server `+0x84` writers read in x01 to x03 (`L08423`, `L12630`,
+`L08425`, `L08429`): each is a read instruction. Medium for the alias
+application `+0x65c` = record `+0x114`: it rests on suffix windows x13 and x14,
+which do not bind `ebx` in `R0434` or `esi` in `R1294` to the
+incoming `this`, and on the offset arithmetic `0x548 + 0x114 = 0x65c`; the
+prologues of both functions were not read. The default 1 stored at `L09313` and
+the decoded tail scalar 1 in every input fit the alias. Medium that the three s02
+stores are the field's only writers, and that `+0x84` has no other writer: that
+rests on UNIT-GATE-012's census.
+
+**Unknown.** Whether a routine handed the server pointer writes `+0x84` through
+another base; the role of `L11291`, which UNIT-GATE-012 calls a reverse store
+into the pre-create screen, was not read. The record's `+0x114` stores by its
+own methods were scanned in an uncommitted run and not classified.
+
+### SAV-1270
+
+Inputs: EN windows x01, x02, x03, x10, x11, x12, x13 and x14 in `out/native/`;
+the three inputs decoded by `tools/savfull -fields` into
+`out/fields/named-records.txt`; the census in `out/census/heads.tsv`.
+
+- LOAD (`R1284`): application `+0x6bc` = 2 (`L06706`); new server object
+  (`+0x84` = 2); document load `R1305` → world load arm, head difficulty
+  stored at `L08429` when 1..3. Then `R0099(1)` (`L06711`) or, when
+  `R1578` returns 0, `R0098` (`L16120`).
+- `R0099(1)` runs the client loop through `R0509`
+  (`L09145`..`L16121`). Its resume arm (`L13472`; `+0x6bc` 2, argument
+  non-zero) loads the campaign record and stores `+0x84` = application `+0x65c` +
+  1 at `L08425`. `R0098` does the same at `L08423`.
+- SAVE (`R0084`, `+0x6bc` 2): document write `R0804` (`L08401`;
+  the head difficulty is `+0x84`, read at `L12634`), the state store, then
+  `R1294` (`L06699`; record `+0x114` = application `+0x65c`, written at
+  `L08409`). The driver itself reads neither holder.
+- Decoded inputs:
+
+| file | head difficulty | record `+0x114` | sub-tick, tick |
+|---|---:|---:|---|
+| `againrom-quick-save-2.sav` (stimulus) | 3 | 1 | 187970, 11748 |
+| `againrom-quick-save-3.sav` (stimulus) | 3 | 1 | 225139, 14071 |
+| `game0031-original-resave.sav` (original) | 2 | 1 | 225206, 14075 |
+
+- Census of the owner save tree (139 `.sav`, authorship unrecorded): 138 parse;
+  136 have head 2 and record `+0x114` 1; `2026-10-07/beforekargallas.sav` and
+  `2026-10-07/saveorcsdontgo.sav` have head 3 and record `+0x114` 1.
+
+**Inference.** After an original LOAD, the session difficulty is the campaign
+record's control index + 1, whatever the head held. A document whose head
+differs from record `+0x114` + 1 runs its LOAD-time drawable fill under the head
+value (UNIT-164) and every later step under the record value, and the original
+writes the record value into its next head. A writer that keeps head and record
+consistent avoids the split.
+
+**Confidence.** High for the sequence: the load driver, the document load, the
+resume arm, the city path, the save driver and the two record routines are
+read; the resave's head 2 against the loaded head 3 is the predicted value.
+Medium for the census: the population holds one control index only, so it does
+not separate the relation from a constant head of 2.
+
+**Unknown.** `R1578`'s test was not read. A LOAD whose server object is
+absent at the overwrite was not traced.

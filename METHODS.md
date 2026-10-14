@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
+Claims labelled: 3950. Observation: 99. Static analysis: 3339. Mixed: 512.
 
 ## Ledger ai
 
@@ -1050,7 +1050,7 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | ITEM-EFFMODE-073 | mixed | ● active |
 | ITEM-EFFSPLIT-074 | static analysis | ● active |
 | ITEM-EFFDISP-075 | static analysis | ● active |
-| ITEM-CASTLINK-076 | static analysis | ● active |
+| ITEM-CASTLINK-076 | static analysis | ● active (amended) |
 | ITEM-EFFSAVE-077 | static analysis | ● active |
 | ITEM-EFFARM-146 | static analysis | ● active |
 | ITEM-EFFKEY-147 | static analysis | ● active |
@@ -1092,6 +1092,7 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | ITEM-LOAD-180 | static analysis | ● active |
 | ITEM-SOUND-183 | static analysis | ● active (branch candidate) |
 | ITEM-SOUND-184 | mixed | ● active (branch candidate) |
+| ITEM-187 | static analysis | ● active (branch candidate) |
 
 ## Ledger magic
 
@@ -1316,6 +1317,7 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | MAGIC-376 | static analysis | ● active (branch candidate) |
 | MAGIC-377 | static analysis | ● active (branch candidate) |
 | MAGIC-378 | static analysis | ● active (branch candidate) |
+| MAGIC-379 | static analysis | ● active (branch candidate) |
 
 ## Ledger menu
 
@@ -2842,7 +2844,7 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | SAV-1126 | static analysis | ✔ promoted |
 | SAV-1127 | mixed | ✔ promoted |
 | SAV-1128 | static analysis | ✔ promoted |
-| SAV-1129 | static analysis | ● active |
+| SAV-1129 | static analysis | ● active (amended) |
 | SAV-1130 | static analysis | ● active |
 | SAV-1131 | static analysis | ● active |
 | SAV-1132 | static analysis | ● active |
@@ -2933,6 +2935,8 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | SAV-1262 | static analysis | ● active (branch candidate) |
 | SAV-1263 | static analysis | ● active (branch candidate) |
 | SAV-1264 | static analysis | ● active (branch candidate) |
+| SAV-1269 | static analysis | ● active (branch candidate) |
+| SAV-1270 | static analysis | ● active (branch candidate) |
 
 ## Ledger session
 
@@ -3984,7 +3988,7 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | UNIT-OWNER-009 | static analysis | ● active (partially retracted, superseded) |
 | UNIT-PANEL-010 | static analysis | ● active (superseded) |
 | UNIT-PANEL-011 | static analysis | ● active |
-| UNIT-GATE-012 | static analysis | ● active |
+| UNIT-GATE-012 | static analysis | ● active (amended) |
 | UNIT-GATE-013 | static analysis | ● active |
 | UNIT-GATE-014 | static analysis | ● active (amended) |
 | UNIT-COMBAT-015 | static analysis | ● active |
@@ -4030,6 +4034,8 @@ Claims labelled: 3944. Observation: 99. Static analysis: 3333. Mixed: 512.
 | UNIT-147 | static analysis | ● active (amended) |
 | UNIT-148 | static analysis | ● active |
 | UNIT-LOAD-159 | static analysis | ● active |
+| UNIT-163 | static analysis | ● active (branch candidate) |
+| UNIT-164 | static analysis | ● active (branch candidate) |
 
 ## Ledger video
 

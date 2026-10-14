@@ -4220,3 +4220,53 @@ The install at L16096 reads [ord+0x30]+0xc before its store; the other five copy
 **Confidence.** Medium: 67 of the 86 hits were not read and may include actor stores; the sweep misses stores through a computed offset, a stack base or a bulk copy.
 
 **Unknown.** The 67 unread hits; whether an executor pass replaces the action word of the R0914 caster. No read census of +0x64 was run (no sweep of loads from +0x64), so a reader beyond the tick's two sites is not excluded. No store census of +0x136 was run.
+
+## Weapon attack with a null Spell
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-379 | A mage wearing a `castSpell` Weapon with `+0x80` null attacks without a cast: reach above 1 posts message 0x72 with no spell field; the unit shot would take class Projectile 10 for the Human Mage row (Medium; Ferion's class is not read). | High / Medium | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+
+### MAGIC-379
+
+Inputs: EN windows x05, x09, x15, x16, x18, x20, x21, x32 and x33 in
+`out/native/`; `out/prj/projectiles.txt`; `out/fields/named-records.txt`;
+SAV-1129, SAV-1134 and EXP-0428's `shot-classes.csv`.
+
+- Tick phase 0 (`L16037`) skips its block unless `+0x54` is 3 (`L16119`). Phase
+  0 and the phase-5 countdown convert the action to a cast only when `+0x54` is
+  3, a weapon is worn, `R0408` holds (weapon `+0x80` non-zero) and
+  `R0442` holds (actor `+0x4c & 4`, mage). Otherwise, at action 3, phase 0
+  calls the attack start `R0245` (`L05237`) and phase 5 the strike
+  `R0001` (`L00006`).
+- `R0245` calls `R0549`, which calls `R1064` when actor
+  `+0x12c` is above 1 and `R0622` with 0x71 otherwise.
+- `R1064` fills message 0x72 with a sound, `+0x134` + `+0x135`, the actor id
+  and the target id (`+0x5c`'s `+4`), stores actor `+0x138`, and sends it through
+  `R1661`. It reads no weapon and no Spell.
+- The strike `R0246` casts from the weapon only when `+0x80` is non-zero
+  and the actor is a fighter (`R0859`: `+0x4c & 4` is 0).
+- Client side: message 0x72 starts action 7, whose driver calls the unit shot
+  `R0603` when the class Projectile is non-zero (SAV-1129). The unit shot
+  sets the picture from the class row `+0xd4` (`L13450`), action 1 and action
+  spell 0. The Human Mage row of `shot-classes.csv` has Projectile 10, which is
+  also the fire_arrow cast picture (SAV-1134). The decoded record names no class
+  for Ferion: the claim uses the mage bit `+0x4c & 4` and `+0x12c` = 5, so the
+  Human Mage row is the likely class and is not read from the save.
+- Ferion (Human 53) has `+0x12c` 5 in `againrom-quick-save-3.sav` and
+  `game0031-original-resave.sav`, with action `+0x54` 3.
+- `game0031-original-resave.sav` holds Prj11274: picture 10, action 1, action
+  spell 0, target 189 (Troll.3 token id 0xbd), segments 5, phase 2. The stimuli
+  hold no projectile.
+
+**Confidence.** High for the server path: the tick sites, the attack start, the
+post routines and the strike are read. Medium for the client half: SAV-1129 is
+Medium that the classes it lists are the ones that reach the unit shot, and
+Medium for how often a 0x72 arrives while the drawable is idle (a 0x72 during a
+running action builds no projectile); Ferion's class is not read from the save.
+Medium that Prj11274 is Ferion's shot: a projectile records no shooter, and a
+fire_arrow cast record also uses picture 10 (SAV-1134).
+
+**Unknown.** `R1661` and the client's 0x72 arm were not read here (they
+are SAV-1129's). Damage of the shot follows the simulation's own countdown
+(SAV-1132), not the projectile.
