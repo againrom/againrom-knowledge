@@ -16513,3 +16513,48 @@ not separate the relation from a constant head of 2.
 
 **Unknown.** `R1578`'s test was not read. A LOAD whose server object is
 absent at the overwrite was not traced.
+
+## Campaign-less LOAD boundary
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1275 | The read LOAD driver ignores the document-loader return; resume attempts campaign load before difficulty assignment. Acceptance, final difficulty and a later SAVE without a campaign record remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0579](../experiments/EXP-0579-weapon-entry-sav-edges/EXP-0579.md) |
+
+### SAV-1275
+
+Inputs: EXP-0579 w01, w02, w06, w07 and w08. These are bounded raw
+instruction listings of one EN/RU program image; w08 ends before the final
+epilogue at L16153.
+
+- R1284 sets application +0x6bc to 2 and calls singleton setup
+  R1304. It calls document loader R1305 at L08427, then does
+  not test that return. It calls client predicate R0912; zero takes
+  a notification arm. Nonzero calls R1578 and chooses resume
+  R0099(1) or city R0098 from its result.
+- R1578 reads framed application state through R1389, then
+  returns typed getter R0452's value with default argument 1. The
+  getter, its key strings and file read/throw behavior remain unread here.
+  This does not establish a campaign-presence predicate.
+- R0099's resume arm follows the client loop, requires application
+  mode 2 and nonzero argument, calls campaign reader R0434 at
+  L08116, then tests the global server pointer. Nonnull receives
+  application +0x65c + 1 at L08425. No local branch between that call and
+  pointer test examines campaign presence or the campaign-reader return.
+- R1305's read window calls world Serialize R0414 at
+  L08404, sets success return storage to 0 at L16154, and has a catch
+  arm that sets return storage to 1. The window reads no campaign record;
+  this document-segment result does not prove whole-file LOAD acceptance.
+- SAV-1269 and SAV-1270 retain the present-campaign holders and SAVE order.
+  The server constructor default does not by itself settle the final value
+  after a campaign-less read.
+
+**Confidence.** High for named local calls, guards and assignments. Unknown
+for completed LOAD acceptance, final difficulty and subsequent SAVE when the
+campaign record is physically absent. The campaign reader, file read/throw
+primitives, client predicate and singleton setup are not expanded here.
+
+**Unknown.** Whether missing campaign bytes throw, leave existing fields,
+return a short read or cause another effect; whether later callbacks run;
+the resulting application +0x65c and server +0x84. Reading those exact
+callees, then a separately authorized synthetic native LOAD/next-SAVE probe,
+would distinguish the live alternatives.

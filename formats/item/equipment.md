@@ -132,6 +132,16 @@ Human Mage row (Medium; Ferion's class is not read from the save).
 
 ### Weapon-borne spell state (`ITEM-CASTSTATE-056`, `+0x68`-only remap clause retracted)
 
+The read mission-entry join constructs Humans through the Human constructor;
+the tavern Human arm passes a name and two zeros to that constructor. Combined
+with the template-equipment dispatch, a new worn Weapon reaches its Spell
+builder (Medium). The read entry bodies establish no complete refresh rule
+for existing carried Weapons; their callees and virtual callbacks remain
+Unknown. Script creation and script transfer instead use factory/add and
+take/add pack paths, with no equip call in the read arms. Their old global
+caller-count clauses are partially retracted; the local arms stand. — ITEM-197,
+ITEM-HUMEQ-030, TRIG-ADDITEM-027, TRIG-XFERITEM-039
+
 A `castSpell` record remains an ordinary ordered Effect of kind 41. General effect dispatch does
 nothing for that kind beyond target recompute. A separate list finder returns the first kind-41
 record; the equip helper uses its spell-id byte to create a distinct owned Spell at

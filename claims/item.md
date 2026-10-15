@@ -3747,3 +3747,43 @@ The explicit supplementary population is game0033.sav (SHA-256 `0a2d2530c3c0ffcd
 Each contains one base Item Scroll at code 0x0e10, row 16, subtype 4, count 1, stored price 4096 and one mode-0 kind-41 Effect whose spell/power words are 5/99. game0033 and game0032 contain Item object 71 in Human object 63. game9999 contains Item object 174 in Sack object 173. The indices identify these streams only. Archive price is Item's Token+1c; count is Item+42; spell and power occupy the Effect operand, not Item+40/+42.
 
 **Confidence.** High for the exact-framed stored fields and enclosing archive-reference joins in these three named streams. Unknown for their producing program and item acquisition history: the source directory alone proves neither. The matching fields corroborate stored state without proving a fresh mission-load chronology or native merchant result.
+
+## Weapon entry construction
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-197 | The read mission join and tavern Human arms call Human construction; template equip builds a worn Weapon's Spell, but a refresh of existing carried Weapons is unproved. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0579](../experiments/EXP-0579-weapon-entry-sav-edges/EXP-0579.md) |
+
+### ITEM-197
+
+Inputs: w03, w04 and w05 of EXP-0579, decoded from the single EN/RU
+program identity recorded there. No new script or health acquisition.
+
+- R0131 calls R0065 at L06675 only when its second argument
+  is nonzero and Player byte +0x3d is zero. The join calls R0497 at
+  L12808 with name, parsed mode and zero, or at L12809 with name and two
+  zeros. A zero type word can discard the result and try Unit construction.
+- R1142 uses Unit construction for zero-based type indices below 2.
+  Its other arm allocates 0x1e8 bytes and calls R0497(name,0,0) at
+  L03123, then assigns id, type and owner and registers/appends the actor.
+- ITEM-HUMEQ-030 supplies the Human template equipment dispatch. Combined
+  with ITEM-SPELLMOVE-132, a Weapon that reaches that equip dispatch rebuilds
+  its owned Spell from its first kind-41 Effect. These new windows read the
+  constructor call sites, not the constructor/equip bodies again.
+- The read mission/hire bodies contain no direct pack traversal that
+  refreshes carried Weapon Spell fields. This local negative does not cover
+  their unread callees or virtual callbacks. ITEM-CARRY-015 and HERO-170
+  retain their own archive-graph and loaded-equipment grades.
+- Script creation opcode 12 and transfer opcode 11 remain the separate
+  factory/add and take/add paths of TRIG-ADDITEM-027 and TRIG-XFERITEM-039.
+  The shipped creation population is class 14, not a measured Weapon grant.
+
+**Confidence.** High for the named call sites and guards. Medium for composing
+an entry-to-worn-Spell result from those calls and prior template/equip
+contracts, and for the local no-refresh negative. Unknown for an existing
+carried Weapon after the complete entry and callbacks. No image-wide writer
+or caller completeness is claimed.
+
+**Unknown.** The mission join's parsed-mode constructor behavior beyond the
+prior template arm; inventory mutation by unread entry, placement,
+registration, script and virtual callees; complete native entry/LOAD/SAVE.
