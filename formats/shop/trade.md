@@ -74,6 +74,18 @@ can remain authoritative at the direct snapshot/merchant consumers even
 when fresh recalculation would differ. Transitive archive callbacks and
 post-load gameplay remain Unknown (`SHOP-105`).
 
+For base Item Scrolls, LOAD restores the stored price before the Effect list
+and scalar tail. Its final row-binding branch assigns only the definition
+pointer and calls no general value method. These direct bodies preserve
+per-item overrides; transitive callbacks and later gameplay remain Unknown.
+— SHOP-142
+
+The three named SAV witnesses for mission81's Protection from Fire Scroll
+store 4,096 with count 1. The reached sale-commit expression therefore gives
+2,048. The complete direct commit tests no placement origin and does not
+recompute Scroll value. Native quote/client ingestion and the coin change
+were not executed and remain Unknown. — SHOP-143
+
 ### Which shelf an item returns to
 
 `R1717`, given the item's class code at `item+0x44`:

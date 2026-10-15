@@ -1726,3 +1726,24 @@ Leaving the shop (`R1758`, button 3 or Esc `R1732`) hides a shown spellbook thro
 **Unknown.** The combined result of the map view's toggle and the room view's swap on the same 0x40f click.
 
 **Answered here.** `SHOP-109`'s unattributed `[reg+0xa4]` receivers: at `L09946` it is the grid released over (the trade table when the target code is 4); at `L09947` it is the strip, the shelf or the table chosen by origin and stamp; at `L09951` it is `[session+0xe8]`, not the trade table. The item word bits that fill `s%.2di%.2d` are `ITEM-SOUND-183`'s; `[L02739]` is the speech volume (`MENU-149`).
+
+## Scroll stored-price consumers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-142 | Base Item LOAD restores stored price before Effects and the scalar tail, then binds only its definition pointer; the complete direct bodies call no general Scroll valuation, preserving a per-item override at that boundary. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0577](../experiments/EXP-0577-scroll-value/) |
+| SHOP-143 | For the three named SAV Scrolls at count 1 and stored value 4096, the reached sale-commit arithmetic yields 2048; the direct commit has no placement-specific price branch, while native quote and coin agreement remain Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0577](../experiments/EXP-0577-scroll-value/) |
+
+### SHOP-142
+
+The retained complete original Item archive body `R0949..R0954` calls Token archive first at `L16143`. Token LOAD reads stored +1c through `L08526 -> R0686 -> L09854`. Ordered Effect-list archive follows at `L08685`, then the fixed Item scalar tail at `L16144..L16145`. The final valid-row branch `L04588..L16146` checks the MagicItems count and assigns only definition pointer +3c. The read row accessor `L09148 -> L15948` returns the table base plus row*64.
+
+The complete direct Item archive body calls neither general value `R1005`, constructor initializer `R0891`, nor value virtual +4c. It therefore does not reprice a Scroll after loading its kind-41 Effect. A stored override remains authoritative at these direct bodies, even if fresh general valuation would differ. This joins SHOP-105's stored-price finding to the base Item Scroll route; it does not widen its transitive scope.
+
+**Confidence.** High for direct load order, scalar restoration, row-pointer assignment and absence of local repricing in the named complete bodies. Existing retained original evidence supplies the archive bodies; the experiment newly reads the short row-accessor chain. Unknown for transitive archive callbacks, post-load gameplay writers and native LOAD-to-merchant chronology. An original LOAD followed by a named price observation would settle that broader result, but no runtime was authorized here.
+
+### SHOP-143
+
+ITEM-193's three named exact-framed SAVs each store count 1 and price 4096 for the Protection from Fire Scroll. The reached complete sale commit `R1572..R1628` reads stored Item+1c, multiplies the unsigned16 count, then truncates `0.5*product+0.5`. For these inputs its result is 2048. It does not recompute Scroll value or test placement origin. The native quote/client-ingestion boundary is still SHOP-104's Unknown. The fresh placed producer and general expression are ITEM-191/192; generated stock's explicit override remains SHOP-CONSUME-073.
+
+**Confidence.** High for the stored operands, retained complete commit arithmetic and the bounded absence of a local placement branch. Unknown for native displayed quote, original coin change or a later caller changing the item between LOAD and sale. This is a direct arithmetic implication of witnessed stored state, not a performed sale.

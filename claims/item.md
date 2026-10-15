@@ -3711,3 +3711,39 @@ the name constructor and the fill. No dword scan for `R0850` was run. `E9`
 jumps were not scanned, so a `jmp` thunk to `R1012` is not excluded. The store
 scan cannot see the write through `L08325` (`L16118`, a store through
 the passed pointer).
+
+## Scroll valuation and mission81
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-191 | ROM1 general Scroll value sums separately truncated kind-41 terms S*2^log_1.2(1+p/30)/50; spell and power are signed16, and a zero sum falls back to MagicItems parameter 0. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0577](../experiments/EXP-0577-scroll-value/) |
+| ITEM-192 | EN/RU mission81 loot record 11 element 1 is Scroll Fire 0x0e10 at (8,8), linked to spell 5 with power 99; the linked spell append is followed by the general value virtual before destination selection. | High / Medium | ✔ promoted (branch candidate) | [EXP-0577](../experiments/EXP-0577-scroll-value/) |
+| ITEM-193 | The three named supplemental SAVs each contain one 0x0e10 Scroll, count 1, stored price 4096 and one kind-41 Effect with spell 5 and power 99; two are carried by Human records and one belongs to a Sack. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0577](../experiments/EXP-0577-scroll-value/) |
+
+### ITEM-191
+
+General Item value `R1005..L13146` copies MagicItems parameter 0 to Item+1c. For subtype 4 it clears +1c, walks the ordered Effects and admits only kind 41. It sign-extends spell id +40 and power +42. Spells parameter 20 supplies signed32 S. The reached ordinary term is `T(S*2^(log(1+p/30)/log(1.2))/50)`, with one truncating conversion per Effect and signed32 accumulation. Zero total selects the row-parameter fallback. The complete direct body has no power clamp or 9,999,999 cap.
+
+Sites `L16129/L16130` scale power; `L16131/L16132` call the same logarithm helper; `L16133` forms their ratio; `L16134` supplies base 2 to the power helper; `L16135/L16136` multiply S and divide by 50; `L16137` truncates. The double constants are independently read as 30, 1 and 50. The retained CRT contracts are SHOP-102 and SHOP-ROUND-017. The generated-stock override is a separate producer, SHOP-CONSUME-073.
+
+**Confidence.** High for the direct instructions, signed widths, helper argument order, constant values, loop/fallback and bounded absence of local clamps. Medium for numerical replays as predictions of native floating output. The 303 binary64/decimal80 controls agree on integer results; this is not a native floating-state proof. EN/RU executable identity is one code witness, not independent corroboration.
+
+**Unknown.** Native entry x87 state and exact transcendental boundary results; invalid spell ids, p<=-30, exceptional helper branches, overflowing conversion and signed32 accumulation. No original runtime was executed. Initial import's fourteen unregistered library metadata lookups are disclosed acquisition debt and supply none of the arithmetic facts.
+
+### ITEM-192
+
+The two lawful mission81 inputs each parse as 12 type-8 records, 28 elements and 38 type-9 records. The only linked Scroll whose Spells row names Protection from Fire is type-8 record 11, element 1: code 0x0e10, MagicItems row 16, owner 0, cell (8,8), link 35. Its type-9 target has zero coordinates, A=0, spell 5, signed power 99 and no additional element recipe. MagicItems parameter 0 is 3000; Spells parameter 20 is 800.
+
+Packed factory `R0519 -> R0520` selects base Item construction `R0972/R0891`. Item vtable L04580 has `R1005` at +4c (reference slot L16138). The map consumer stores the linked spell/power at `L16139/L16140`, appends it at `L05024`, then calls value virtual +4c at `L16141`. Ground/actor destination selection follows at `L16142`. The named local constructor/value bodies take item, recipe and row inputs; no mission-number price branch occurs in those bodies.
+
+**Confidence.** High for the selected installed fields, direct stores, vtable binding and callback order. Medium for the complete fresh native object lifecycle because allocation, string and container framework callees are not proved transitively. ITEM-193 supplies separate saved-state witnesses, not a history of acquisition.
+
+**Unknown.** Native fresh-load completion, later gameplay writers or another producer outside the read path. The negative clause covers the named direct bodies, not the entire image or every mission event.
+
+### ITEM-193
+
+The explicit supplementary population is game0033.sav (SHA-256 `0a2d2530c3c0ffcd0c07c743cfaf96964a2eb86ec44583a3518cd08978b12045`), game0032.sav (`1b0f4d5cc6c031bd0c70b8badc6e7cf47651ca2e2612a31eee977ad76706a7a6`) and game9999.sav (`3b88dd6b905dec13c28ec5610fe73de772364c0bcc8a97d94fb45b997da2a2c3`). Source/copy hashes were recorded before field decoding. The existing exact savfull reader accepts all three streams; no plausible-tag scan is used.
+
+Each contains one base Item Scroll at code 0x0e10, row 16, subtype 4, count 1, stored price 4096 and one mode-0 kind-41 Effect whose spell/power words are 5/99. game0033 and game0032 contain Item object 71 in Human object 63. game9999 contains Item object 174 in Sack object 173. The indices identify these streams only. Archive price is Item's Token+1c; count is Item+42; spell and power occupy the Effect operand, not Item+40/+42.
+
+**Confidence.** High for the exact-framed stored fields and enclosing archive-reference joins in these three named streams. Unknown for their producing program and item acquisition history: the source directory alone proves neither. The matching fields corroborate stored state without proving a fresh mission-load chronology or native merchant result.

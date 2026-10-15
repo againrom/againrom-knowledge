@@ -86,3 +86,30 @@ while Book reads only the first Effect's spell value, or zero when empty (`ITEM-
 The later descriptor path does treat `item+0x1c == -1` specially; the assignment rule is not a
 global denial of sentinel semantics (`ITEM-MAGVAL-090`, whose Book list-traversal clause is
 retracted; `ITEM-WEAR-058`, `ALM-M40-074`).
+
+For an ordinary Scroll, each kind-41 Effect contributes
+`trunc(S*2^(log(1+p/30)/log(1.2))/50)`, where S is Spells parameter 20
+and p is the signed16 word at Effect+42. The spell id is also signed16.
+Each term is truncated before signed32 accumulation; a zero total selects
+the MagicItems parameter-0 fallback. The named complete value body has no
+power clamp or upper-price cap. Invalid ids, exceptional logarithm inputs,
+integer overflow and exact native floating boundaries remain Unknown.
+The generated-stock price override is separate. — ITEM-191
+
+EN and RU mission81 place one matching Protection from Fire Scroll in loot
+record 11 element 1: code 0x0e10, row 16, owner 0, cell (8,8), link 35,
+spell 5, power 99. Its Spells scalar is 800. The linked Effect is appended
+before the general value virtual runs and before ground/actor destination
+selection. The named local price path has no mission-number condition;
+the complete fresh native lifecycle remains Medium. — ITEM-192
+
+Three named exact-framed SAV witnesses carry the same code, count 1 and
+single kind-41 spell/power pair 5/99, with stored price 4,096. Two Items
+are held by Human records and one by a Sack. Their producing program and
+acquisition history remain Unknown. — ITEM-193
+
+Base Item LOAD restores stored price first through Token, then loads the
+Effect list and scalar tail, then binds its definition pointer. The complete
+direct archive bodies call no general value method and preserve a stored
+override at that boundary. Transitive callbacks and later gameplay remain
+Unknown. — SHOP-142
