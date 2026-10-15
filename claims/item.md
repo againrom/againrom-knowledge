@@ -3752,7 +3752,7 @@ Each contains one base Item Scroll at code 0x0e10, row 16, subtype 4, count 1, s
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ITEM-197 | The read mission join and tavern Human arms call Human construction; template equip builds a worn Weapon's Spell, but a refresh of existing carried Weapons is unproved. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0579](../experiments/EXP-0579-weapon-entry-sav-edges/EXP-0579.md) |
+| ITEM-197 | The read mission join and tavern Human arms call Human construction; template equip builds a worn Weapon's Spell, but a refresh of existing carried Weapons is unproved. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0579](../experiments/EXP-0579-weapon-entry-sav-edges/EXP-0579.md) |
 
 ### ITEM-197
 
@@ -3784,6 +3784,104 @@ contracts, and for the local no-refresh negative. Unknown for an existing
 carried Weapon after the complete entry and callbacks. No image-wide writer
 or caller completeness is claimed.
 
-**Unknown.** The mission join's parsed-mode constructor behavior beyond the
-prior template arm; inventory mutation by unread entry, placement,
-registration, script and virtual callees; complete native entry/LOAD/SAVE.
+**Unknown.** Inventory mutation by later entry, placement, registration,
+script and virtual callbacks outside the resolved construction/archive/pack
+operations; complete native entry/LOAD/SAVE.
+
+**Amended.** ITEM-203 resolves the Human constructor's third-argument and
+`Hero` prefix guards, including the mission join's parsed second argument.
+ITEM-204 resolves restoration of worn and pack references without re-equipping
+the restored items. ITEM-205 resolves the named script pack helpers and their
+Item/Weapon stack virtual targets. These path results do not establish a
+general future carried-Weapon refresh rule.
+
+## Equip on named entry paths
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-203 | New Human mission-entry and tavern-hire construction equips nonempty template cells only for a matched Humans row, zero third argument and a name not starting with Hero. | High | ✔ promoted | [EXP-0581](../experiments/EXP-0581-entry-equip/) |
+| ITEM-204 | Human archive restoration assigns worn and pack references, and the resolved lifecycle rebind does not equip those restored items; Weapon LOAD restores its archived Spell reference. | High | ✔ promoted | [EXP-0581](../experiments/EXP-0581-entry-equip/) |
+| ITEM-205 | The shipped script creation population inserts class-14 Items without equip; resolved Item/Weapon transfer uses pointer detach or class-specific split, followed by pack insertion without equip. | High / Medium | ✔ promoted | [EXP-0581](../experiments/EXP-0581-entry-equip/) |
+
+### ITEM-203
+
+Inputs: complete Human constructor and initializer c01/c02, Human table t01,
+wrappers c43, Weapon table t03 and equip c44/c45. Mission-entry and hire
+call sites are the admitted EXP-0579 w03/w04/w05.
+
+- `R0497` installs Human vptr `L00003` before `R0656`.
+  `L12762..L12764` sets the template-equipment flag from third argument
+  equal to zero. `Find("Hero") == 0` forces that flag to zero at
+  `L16155`; a later occurrence of the substring does not select this arm.
+- A matched Humans row binds `+0c/+3c`. Only a true equipment flag at
+  `L03517` reaches the ten-cell loop, which skips empty strings. Cell 0
+  constructs Weapon, 1 Shield, and 2..9 Armor. Human `vt+3c -> R0975`
+  calls Human `vt+38 -> R0933`, then item `vt+38`. Weapon's target is
+  `R0850`. Refused or displaced items go to the pack under ITEM-HUMEQ-030.
+- Mission join is reached only for nonzero entry argument and Player
+  `+3d == 0`. It passes `(name,parsedMode,0)` or `(name,0,0)`. The parsed
+  second argument controls classification; it does not disable the cell loop.
+  Tavern's Human arm, zero-based type index at least 2, passes `(name,0,0)`
+  for each head. Lower type indices use Unit construction.
+- A worn Weapon's equip invokes the existing ITEM-SPELLMOVE-132 first-kind-41
+  builder. No matching Effect leaves `+80` unchanged through that helper;
+  a match replaces it from the Effect id, with null on allocation failure.
+
+**Confidence.** High for these normally returning static paths. Complete
+constructor branches and raw pointer slots distinguish the live alternatives;
+no call-graph absence or all-future-callback guarantee is used.
+
+### ITEM-204
+
+Inputs: complete c06..c14, c26..c32 and c40..c42, with Human/Weapon tables
+t01/t03 and Human archive class record t04. This is the equipment restoration
+cone, not a new whole-LOAD or all-derived-stats claim.
+
+- Archive class creation uses runtime-class `+0c`; Human's target is factory
+  `L16156`, whose default constructor uses `Man_Unarmed`. That allocation
+  shell is distinct from the equipment objects later read from the archive.
+- The generic reader calls object `vt+8`; Human's target `L08212` invokes
+  Humanoid/Unit serialization. Worn `+74/+78` and the twelve Humanoid fields
+  receive `R2291 -> L05928` reference results. Pack LOAD reads each
+  element reference and raw-appends it with `L16157`; it does not call the
+  stack/equip insertion path. Human LOAD rebinds the stored row without
+  calling the template initializer on those restored items.
+- Human lifecycle `vt+24 -> R1569` forwards only to Unit `R1482`.
+  The read Token/map, Spell and item helpers remap saved keys. They do not
+  pass restored equipment to `vt+38`. Weapon serializer `R1639` restores
+  `+80` with `L08325`, an archived Spell reference including null.
+
+**Confidence.** High for the resolved equipment-reference, pack and lifecycle
+rebind operations. Raw virtual slots and complete named bodies support this
+bounded negative. ITEM-187's runtime witness and HERO-170's broader indirect
+callee limits retain their own grades. Later unrelated callbacks are outside
+this clause.
+
+### ITEM-205
+
+Inputs: complete c03..c05, c15..c25 and c33..c39; Item/Weapon pointer tables
+t02/t03. The local opcode arms and map corpus are the retained authorities
+TRIG-ADDITEM-027 and TRIG-XFERITEM-039; their global caller-count clauses are
+partially retracted and are not used.
+
+- In the admitted seven-node creation population, `0xe18+V` with
+  `V={2,5,5,6,11,12,13}` selects class 14. Complete factory and Item
+  constructor/initializer lead to pack add `R0929 -> R0930` when the
+  factory result is nonnull. This is not a witnessed Weapon hand-over.
+- Pack insertion `vt+50` resolves for Item and Weapon to stack predicate
+  `R0927`, based on kind/effect-list emptiness. Equal codes and two true
+  predicates merge counts/flags and delete the incoming object. Otherwise
+  pointer list append/insert runs. These paths do not invoke equip `vt+38`.
+- Transfer finds the source code in the pack. No match returns null. Count
+  at most 1 unlinks the same Item pointer; greater count calls `vt+40`:
+  Item `R2069` or Weapon `R2132`. Split copies one item and reduces
+  source count. Destination uses the same insertion helper without equip.
+- Weapon split/copy `L08717` constructs a new Spell from the source
+  Spell's id when source `+80` is nonnull, and stores null otherwise.
+  This is a copy rule, not an equip from the Effect. Whole-pointer transfer
+  retains the Weapon-owned Spell unless destination merge deletes that Item.
+
+**Confidence.** High for the resolved static Item/Weapon factory/pack paths
+and virtual targets. Medium for the reused authored corpus and its coverage
+grade. No opcode-11 node is authored in that admitted map population. No
+global factory caller census or future callback rule is claimed.

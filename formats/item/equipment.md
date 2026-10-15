@@ -132,15 +132,36 @@ Human Mage row (Medium; Ferion's class is not read from the save).
 
 ### Weapon-borne spell state (`ITEM-CASTSTATE-056`, `+0x68`-only remap clause retracted)
 
-The read mission-entry join constructs Humans through the Human constructor;
-the tavern Human arm passes a name and two zeros to that constructor. Combined
-with the template-equipment dispatch, a new worn Weapon reaches its Spell
-builder (Medium). The read entry bodies establish no complete refresh rule
-for existing carried Weapons; their callees and virtual callbacks remain
-Unknown. Script creation and script transfer instead use factory/add and
-take/add pack paths, with no equip call in the read arms. Their old global
-caller-count clauses are partially retracted; the local arms stand. — ITEM-197,
-ITEM-HUMEQ-030, TRIG-ADDITEM-027, TRIG-XFERITEM-039
+New Human construction equips template cells only when its third argument is
+zero, its name does not start with `Hero`, a Humans row matches, and the cell
+string is nonempty. Mission join passes `(name,parsedMode,0)` or `(name,0,0)`;
+the parsed second argument does not disable equip. The join itself requires
+nonzero entry argument and Player `+3d == 0`. Tavern's Human arm passes
+`(name,0,0)` for zero-based type indices at least 2. Cell 0 reaches Weapon
+equip and its first-kind-41 Spell builder. Refusal or displacement can leave
+an item in the pack. These conditions amend the earlier composed entry
+result; later callbacks do not acquire a general carried-Weapon refresh rule.
+— ITEM-203, ITEM-197, ITEM-HUMEQ-030
+
+Restoring an existing Human directly assigns the archived worn references
+and raw-appends the archived pack elements. Human LOAD rebinds its Humans
+row; its resolved lifecycle rebind does not equip those restored items.
+Weapon LOAD restores the archived Spell reference, including null, rather
+than constructing it from the Effect. The archive allocation shell is
+distinct from the equipment being restored. This states the resolved
+equipment restoration path, not every later callback. — ITEM-204
+
+The admitted shipped script creation population contains seven class-14
+Item grants; it does not witness a Weapon grant. Creation inserts a nonnull
+factory result into the pack without equip. Script transfer detaches the
+same pointer when count is at most 1, or splits one item through `vt+40`
+when greater. A Weapon split builds its Spell from the source Spell id, or
+keeps null, rather than equipping from its Effect. Pack insertion's `vt+50`
+is stackability: equal codes and two stackable objects merge/delete the
+incoming object; otherwise its pointer is inserted. Neither resolved pack
+path invokes equip. The old global caller-count clauses of the script
+authorities remain partially retracted; their local arms stand. — ITEM-205,
+TRIG-ADDITEM-027, TRIG-XFERITEM-039
 
 A `castSpell` record remains an ordinary ordered Effect of kind 41. General effect dispatch does
 nothing for that kind beyond target recompute. A separate list finder returns the first kind-41

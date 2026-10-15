@@ -33,12 +33,13 @@ The final three are not in address order. They are not the difficulty field
 and receive no Boolean normalization or difficulty clamp.
 — SAV-STREAM-010, SAV-HEAD-025, UNIT-GATE-012, SAV-657, SAV-WHEADLOAD-521, SAV-1270
 
-The campaign overwrite describes a returning campaign-reader path. A
-document-segment load is separate from whole-file LOAD acceptance: the read
-driver does not test the document-loader return, and the resume arm attempts
-campaign load before assigning difficulty. When that campaign record is
-absent, completed LOAD, final difficulty and the next SAVE remain Unknown.
-— SAV-1275
+The campaign overwrite describes a returning campaign-reader path. A wholly
+absent tail feeds retained stack-pointer values into campaign counts and
+reaches nested allocations; it has no defined fallback. Exact native
+failure/recovery was not observed. On a returning path the held index may
+include bytes retained by a truncated read. The next ordinary SAVE uses the
+current server value for this head and the held index for the campaign.
+— SAV-1275, SAV-1284, SAV-1285
 
 ## Ordered grammar
 

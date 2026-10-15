@@ -16558,3 +16558,124 @@ return a short read or cause another effect; whether later callbacks run;
 the resulting application +0x65c and server +0x84. Reading those exact
 callees, then a separately authorized synthetic native LOAD/next-SAVE probe,
 would distinguish the live alternatives.
+
+**Amended.** SAV-1283, SAV-1284 and SAV-1285 resolve the actual short-read,
+count-reuse and returning-path difficulty/SAVE behavior. The exact native OS
+outcome remains unobserved; the original bounded ordering stands.
+
+## Campaign missing-data LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1283 | The campaign reader ignores bounded-file short-read returns: EOF leaves destinations unchanged, and a 1..3-byte scalar read replaces only its prefix. | High | ● active | [EXP-0580](../experiments/EXP-0580-campaignless-load/EXP-0580.md) |
+| SAV-1284 | With the entire campaign tail absent, reused argument slots supply the stack file pointer as campaign counts, reaching nested allocations instead of a missing-record fallback. | High / Medium | ● active | [EXP-0580](../experiments/EXP-0580-campaignless-load/EXP-0580.md) |
+| SAV-1285 | On a returning campaign-reader path, difficulty becomes the held record index + 1; SAVE emits that server value in the head and the held record index in the campaign. | High | ● active | [EXP-0580](../experiments/EXP-0580-campaignless-load/EXP-0580.md) |
+
+### SAV-1283
+
+Complete code windows w01, w04..w06, w09, w11..w12, w17..w18,
+w28..w32 and w44 in EXP-0580 bind the campaign's actual file primitive.
+EN and RU executables are one image, SHA256
+942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03.
+
+Constructor `L02299` installs vtable `L02300`; slot+3c is `R0533`.
+The wrapper clamps requested bytes to remaining bytes at `L16158`..`L16159`.
+When the selected size is zero,`L16160`..`L16161` returns 0 without writing
+its destination. The nonzero arm forwards the selected length to the
+underlying file read. Campaign `R0434` and base `R1632` ignore the read
+return values. This is not a short-read exception or a zero-fill operation.
+
+For an unchanged file and a four-byte scalar, k=0..4 returned bytes replace
+only those low k bytes. The other bytes retain their old value. The count
+scratch slots are also reused; no complete-record-length validation precedes
+the campaign programme. The marker reader `R1952` likewise ignores read
+results, including its string length/buffer reads.
+
+**Confidence.** High for the actual vtable bindings, transfer limits and
+unexamined-return behavior, from complete raw instruction bodies. This is a
+path-specific statement, not a global file-API or writer census.
+
+**Unknown.** Native completion of a particular truncated SAV, concurrent file
+mutation effects and later application behavior after malformed counts.
+
+### SAV-1284
+
+EXP-0580 w01/w04/w05/w10/w13/w15/w16/w19/w20/w22/w26/w30/w36/w37
+follow the EOF count into allocation. Resume passes its stack file object
+through application+548 to campaign `R0434` (SAV-1275).
+
+At entry ESP=S, base `R1632` pushes 12 bytes. Its count scratch addressed at
+`L16162` is [ESP+10h]=[S+4], the incoming file-pointer argument. Its Read
+calls return with RET 8, so this identity survives. EOF leaves that pointer p
+in both base count reads. Outer `R0434`'s count scratch [ESP+24h] likewise
+aliases its incoming argument after its SUB10h and four pushes.
+
+The outer array's allocation is 76*p modulo 2^32 and its positive-count loop
+reads p children. Constructor `L16163` constructs these 0x4c-byte children;
+`L07481` calls `R1549` for both embedded short arrays, zeroing their backing
+pointers/counts. Child `L16164` calls the base reader. Each successful child
+therefore retains two separate 2*p-byte arrays from `R1622`. The successful
+loop releases neither array before reading the next child.
+
+For the explicit assumption `00010000`<=p<`80000000`,2*p does not overflow and
+4*p*p retained bytes are at least 17179869184 before overhead. That cannot
+fit in 32-bit address space. The separate 76*p multiplication can overflow
+and make construction itself invalid. The pointer range is not an observed
+original stack bound. This arithmetic does not establish an unconditional
+Windows crash/refusal or its time.
+
+Allocation `R0747` can return null, retry or propagate a configured callback
+exception. Resize `R1622` clears an allocation without a null check. EOF
+itself does not call the file exception throw `R1455`. Resume, LOAD driver
+and frame-procedure FuncInfo have zero try blocks; the runtime window caller
+`L12198` catches CException* at `L16165` and continues after the interrupted
+window dispatch. Its actual application table `L01179` slot+74 binds `L12199`.
+An access violation is a separate unmeasured outcome, not that C++ catch.
+
+**Confidence.** High for the decoded stack/count/allocation route and static
+exception-table bindings. Medium for the resource-failure prediction because
+the stated pointer interval and live allocator/handler state were not measured.
+A read-only host range probe failed AuthorizationManager before producing
+measurements; the refusal was not bypassed. PE characteristics `010b` alone does
+not measure the original stack.
+
+**Unknown.** The actual stack pointer, first failure, handler state, OS result
+and elapsed time. No original runtime was launched. There is no established
+completed-session or subsequent-SAVE contract for that interrupted route.
+
+### SAV-1285
+
+EXP-0580's complete reader w01 binds EBX=ECX at `L16166`. Its caller supplies
+application+548 (SAV-1270/SAV-1275), so destination+114 is exactly
+application+65c. Complete writer w23 binds ESI=ECX at `L16167` and emits
++114 at `L08409`..`L16168`. These full receiver bindings close the alias
+limitation of SAV-1269's suffix-only evidence for the two named methods.
+
+Reader `L08413`..`L16169` neither assigns a default nor clamps+114. With no
+bytes at that field, its value at reader entry survives. A one-to-three-byte
+read preserves the unread high bytes (SAV-1283). Constructor/reset zero is
+SAV-599; server constructor value 2 is UNIT-GATE-012. Neither is a universal
+campaign-less LOAD default. Setup `R1304` constructs the server and its own
+body does not reset application+65c; transitive initialization effects are not
+an exhausted image-wide writer proof.
+
+On a returning mission-resume path with nonnull server,`L08425` writes held
+application+65c+1 to server+84; the city path `L08423` has the same assignment
+(SAV-1270). This addition supplies no new range clamp. With no intervening
+difficulty change, the next ordinary SAVE emits this server value in the
+head and the held index in a full campaign record. It does not preserve the
+physical omission of a campaign tail. A full valid record uses its stored
+index; a returning truncated record can use a retained or byte-merged index.
+
+The selector `R1578` queries CurrentState/InBattle with default 1 through
+`R0452`; it does not test campaign presence. The client predicate and join
+run before that selector and campaign read. Their success is a separate LOAD
+precondition, not a validation of the tail.
+
+**Confidence.** High for the full receiver aliases and conditional relation after return, joining complete new bodies with SAV-1270's admitted driver
+sequence and observed present-record resave. No grade rests on equal EN/RU
+code hashes as independent corroboration.
+
+**Unknown.** Acceptance of an arbitrary truncated tail, a failed read's later
+SAVE, actual original-stack/allocator outcome, and an image-wide last-writer
+list. The claim does not assert that a campaign-less read returns.

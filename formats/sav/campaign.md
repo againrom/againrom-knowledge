@@ -50,18 +50,22 @@ rehydrates the picture pointer is superseded by SAV-609: world-map entry does)
 
 ## Scalar suffix
 
-The present-record difficulty relation does not establish acceptance of a
-file with no campaign record. The read LOAD driver ignores the document
-loader's return and uses client and state-selector checks. On its admitted
-resume arm the campaign reader runs before the difficulty assignment; its
-missing-byte read/throw behavior, final difficulty and a subsequent SAVE
-remain Unknown. A singleton constructor default alone does not settle them.
-— SAV-1275
+The campaign reader ignores short-read returns. At EOF a destination stays
+unchanged; a partial scalar read replaces only its available low bytes. A
+wholly absent record also leaves incoming stack file pointers in reused count
+slots and reaches nested allocations. There is no defined missing-campaign
+fallback. Exact native failure/recovery was not observed. — SAV-1283, SAV-1284
+
+On a returning reader path, server difficulty becomes the held campaign index
+plus one, including an index whose bytes a truncated record retained. The next
+ordinary SAVE writes the current server difficulty in the head and the held
+index in a full campaign record. A failed/interrupted read has no established
+completed-session or later-SAVE contract. — SAV-1285
 
 | Order | Runtime source | Meaning / restoration |
 |---:|---|---|
 | 1 | `+118` | Selected mission |
-| 2 | `+114` | Raw value; both application load paths increment it into server difficulty `+84`, replacing the head's value; it is application `+65c` (Medium: suffix windows and offset arithmetic) (SAV-1269, SAV-1270) |
+| 2 | `+114` | Raw value; returning application load paths increment it into server difficulty `+84`, replacing the head's value; full receiver bindings identify it as application `+65c` (SAV-1269, SAV-1270, SAV-1285) |
 | 3 | `+110` | AutoGetMission |
 | 4 | `+11c` | LastMission |
 | 5 | `+120` | First-MapPoint flag, computed on SAVE |
