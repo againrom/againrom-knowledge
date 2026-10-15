@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3955. Observation: 99. Static analysis: 3343. Mixed: 513.
+Claims labelled: 3963. Observation: 99. Static analysis: 3347. Mixed: 517.
 
 ## Ledger ai
 
@@ -3539,7 +3539,7 @@ Claims labelled: 3955. Observation: 99. Static analysis: 3343. Mixed: 513.
 | TEXT-089 | mixed | ● active |
 | TEXT-090 | static analysis | ● active |
 | TEXT-091 | static analysis | ● active |
-| TEXT-092 | static analysis | ● active |
+| TEXT-092 | static analysis | ● active (partially retracted) |
 | TEXT-094 | static analysis | ● active |
 | TEXT-095 | static analysis | ● active |
 | TEXT-099 | static analysis | ● active |
@@ -3553,6 +3553,14 @@ Claims labelled: 3955. Observation: 99. Static analysis: 3343. Mixed: 513.
 | TEXT-MAPCORP-119 | mixed | ● active |
 | TEXT-TAGFIELDS-120 | static analysis | ● active |
 | TEXT-BROWSER-121 | static analysis | ● active |
+| TEXT-127 | static analysis | ✔ promoted (branch candidate) |
+| TEXT-128 | mixed | ✔ promoted (branch candidate) |
+| TEXT-129 | static analysis | ✔ promoted (branch candidate) |
+| TEXT-130 | mixed | ✔ promoted (branch candidate) |
+| TEXT-131 | mixed | ✔ promoted (branch candidate) |
+| TEXT-132 | static analysis | ✔ promoted (branch candidate) |
+| TEXT-133 | static analysis | ✔ promoted (branch candidate) |
+| TEXT-134 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger town
 

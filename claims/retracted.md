@@ -1483,3 +1483,9 @@ on evidence already committed.
 | `SHOP-098` (cursor-sound clause only; routing stands) | Verbatim: "it plays the cursor sound" | High | [EXP-0573](../experiments/EXP-0573-shop-sounds/), SHOP-SOUND-139 | `L09893` calls `R0320` with `[L01211]`, the cursor manager's set call (`AI-CURSOR-172`); no sound request lies on that arm. | **REFUTED** |
 | `TOWN-348` (the verb "plays" only; branches and operands stand) | Verbatim: "on 1 or 2 it plays `[L01211]` through `R0320`" | High | [EXP-0573](../experiments/EXP-0573-shop-sounds/), SHOP-SOUND-139 | `R0320` sets the cursor through the cursor manager (`AI-CURSOR-172`); it requests no sound. | **REFUTED** |
 | `SHOP-109` (the `[this+0x20b4]` store clause only; the routine, formats, draw and call-site list stand) | Verbatim: "It stores the object at `[this+0x20b0]` and `[this+0x20b4]` and requests it through `R0386` at `L09944` and `L09945`." | High | [EXP-0573](../experiments/EXP-0573-shop-sounds/), SHOP-SOUND-135 | `L09858` stores `[this+0x20b0]` only (`L16043`). `[this+0x20b4]` is read at `L16044`, `L16045` and `L16046`; it is the Put_On sample bound at activation by `R2289`, so the request at `L09945` names a bound sample, not an object this slot stores. | **REFUTED** |
+
+## Scroll packed-class description branch
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TEXT-092` (Book-only/non-Book classification only; instructions and literals stand) | Verbatim: "a non-book item a new `#` line" and "a book (class `0xe00`) takes the ` of <spell>` form" | High / Medium | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/), TEXT-128 | The comparison is packedCode & 0xf00 == 0xe00. Ordinary Scroll keys also satisfy it, taking the inline fragment and suppressing the magic heading. The branch is not a Book-subtype test; literal and painter-scope clauses stand. | **REFUTED** — partially retracted |

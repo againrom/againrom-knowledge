@@ -50,6 +50,17 @@ Consequences a consumer must not miss:
   how an authored string in a `Units.EquipItem` cell, a `Humans` equipment cell or a mission
   `.ini` becomes an item, and it is finished before anything is drawn (`ITEM-NAMEPARSE-040`).
 
+## Scroll name fragments
+
+The five ordinary Scroll templates have packed class 14. The item formatter
+therefore appends the inline main.txt[90] + spell.txt[id-1] + main.txt[91]
+fragment to the itemname.txt name, using ` %s %s%s`. It suppresses the magic
+heading for this packed class. TEXT-092's Book-only/non-Book classification
+is partially retracted: the actual test covers all MagicItems, including
+Scrolls. The other class branch uses a new spell line and a magic heading.
+Localized bytes come directly from the tables, without case conversion.
+— TEXT-128, TEXT-092
+
 ## Appearance field `item+0x40` (`ITEM-APPEAR-023`, `ITEM-APPEAR-024`)
 
 Every item carries one `u16` at `+0x40` that is the whole of its appearance. It is not stored: five

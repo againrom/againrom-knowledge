@@ -2131,7 +2131,7 @@ are recorded in [`retracted.md`](retracted.md); the positive path is MENU-122.
 |---|---|---|---|---|
 | TEXT-090 | For an item whose stream carries kind 42, the formatter appends a spell fragment to the name line, ` of <spell>` EN and ` с заклинанием <spell>` RU, and adds no prefix to the buffer it composes. | High / Medium | ● active | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/) |
 | TEXT-091 | The spell name in that fragment is line `spell id - 1` of `main\text\spell.txt` (28 lines on both roots), inserted unchanged; EN and RU differ only in text-file content, since `rom.exe` is identical and holds the one format literal. | High / Medium | ● active | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/) |
-| TEXT-092 | The same formatter gives a non-book item a new `#` line `casts <spell>` for effect kind 41 and a `#Magic:` header from marker `0x33`; a book (class `0xe00`) takes the ` of <spell>` form for kind 41 and no header. | High / Medium | ● active | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/) |
+| TEXT-092 | The formatter gives classes other than `0xe00` a new spell line and magic header; packed class `0xe00`, including Scrolls, takes the inline fragment and suppresses that header. | High / Medium | ● active (partially retracted) | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/), [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
 
 ### TEXT-090
 
@@ -2197,6 +2197,8 @@ counted and hashed, not read for inflection, and the card shows whatever form
 a row holds.
 
 ### TEXT-092
+
+**Amended.** TEXT-128 partially retracts the Book-only and non-Book classification. The test is packed class 14, which also includes ordinary Scrolls. The retained instruction, literal and painter-scope facts below stand; references to a Book identify an example of that class rather than its entire membership.
 
 - Tag 41 (`castSpell`) is table entry 3, `L11439`. It reads the spell id and
   tests the item class `item+0x06 & 0xf00` against `0xe00`
@@ -2539,3 +2541,92 @@ They cover linear decoded .text and unaligned dwords in .rdata/.data.
 They are not a reader census and do not strengthen the prior holder-set
 negative to an image-wide absence. Copied pointers, computed offsets,
 indirect calls, computed jumps, bulk copies and other tables remain open.
+
+## Ordinary Scroll description contract
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TEXT-127 | The ordinary Scroll description writer transports the low bytes of spell and stored power; tag 50 fills its own Spell directly, without the actor-power fold or a 0..100 clamp. | High | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-128 | Ordinary Scrolls take the packed-class-14 inline spell fragment and suppress the magic heading; localized names and fragments come directly from retained itemname.txt, spell.txt and main.txt rows. | High | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-129 | The complete retained Scroll arm appends damage, range, duration and one special caption in that order, with distinct zero tests and literal formatting; it has no mana or caption-217 call. | High | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-130 | Scroll damage uses the filled byte minimum B and spread S from TEXT-096 and emits main[118] as B-(B+S) only when S is nonzero; exact native floating boundary outputs remain unproved. | High / Medium | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-131 | For class-14 Scrolls, main[123] displays the nonzero filled range byte: the row's low-byte base plus floor(bytePower/30), or floor(bytePower/3) for spell 26, with byte wrapping. | High | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-132 | Scroll duration formats the nonzero filled word times 0.0625 with %5.1f; spell 20 first replaces D by floor(D/7)+10 when global L06743 equals 4, whose ordinary-context reach remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-133 | The Scroll arm calls six TEXT-081 helpers in order 182,185,187,183,186,184; each nonzero result replaces one shared caption, so the last wins, and helper 217 is absent from this arm. | High | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+| TEXT-134 | The 27-by-100 ordinary Scroll matrix yields 5400 localized static predictions; two arithmetic models disagree on 76 spell/power pairs, so neither a native numeric oracle nor a stock distribution is established. | High / Medium | ✔ promoted (branch candidate) | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/) |
+
+### TEXT-127
+
+ITEM-152's complete retained writer emits marker 51, then kind 41 with byte Effect+0x40, followed by tag 50 with byte Effect+0x42. The formatter's kind-41 arm saves the unsigned spell byte; tag 50 reads an unsigned power byte, constructs that Spell and calls its fill directly (L05001..L16147). It does not call either actor-power preparation path. The stored signed16 Effect power therefore supplies p = storedPower & 255 to this descriptor, independently of ordinary-constructor eligibility.
+
+**Confidence.** High for this writer-to-formatter transport and the complete local tag-50 call path. A full-word display-power model contradicts both byte loads. The source population is the retained whole item formatter, effect writer and Spell fill family, not an image-wide producer search.
+
+**Unknown.** Other descriptor producers and runtime reachability of arbitrary descriptors. Wider stored-word values are synthetic transport controls, not ordinary generated stock.
+
+### TEXT-128
+
+The five retained Scroll templates use MagicItems rows 14..18 and packed class 14. Their name-key rows resolve through the retained raw EN/RU text bytes. Both kind 41 and marker 51 test packedCode & 0xf00 against 0xe00. Class 14 selects the inline literal ` %s %s%s`, using main.txt[90], spell.txt[spellByte-1] and main.txt[91]; the marker adds no magic heading. Both locale suffix rows 91 are empty. Other packed classes use main[92]/[93] with `#%s %s%s` and the marker's main[189] heading. TEXT-092's Book-subtype restriction is partially retracted; its literal and branch facts stand.
+
+The text-identity evidence binds all selected raw CP866 strings by locale, table, index, byte count and SHA-256. No case inflection or reconstructed translation is part of this path. The localized name tables, including singular spell.txt rather than spellbook spells.txt, are the authority. The input executable SHA-256 is shared by both locales and supplies one code witness.
+
+**Confidence.** High for the retained key-to-class join, byte-table selection, literal arguments and localized raw-text identities. A Book-only subtype model contradicts the packed-class comparison and the Scroll keys.
+
+**Unknown.** Actual caller/painter framing and visibility. A composed string is not a native screenshot.
+
+### TEXT-129
+
+Tag 50 constructs four CStrings at baseline stack slots 0x34 (damage), 0x1c (range), 0x38 (duration) and 0x10 (special). The append sequence at L16148, L16149, L16150 and L16151 concatenates them in that order. Each value literal begins with `#`, which is a separator in the established hover painter. Damage tests byte +0xf, not B or B+S. Class-14 range tests byte +9. Duration tests word +0x10. Zero omits the corresponding line; a caption helper runs only for its nonzero result.
+
+Damage uses `#%s: %d-%d`; range `#%s: %d`; duration `#%s: %5.1f`. A duration below 100 may therefore have an extra padding space after the literal's existing space. The complete retained arm has no mana-label lookup and no call to the caption-217 helper. These negative clauses cover this arm, not every original description producer.
+
+**Confidence.** High because the complete local control flow, destinations, literal pushes and append order discriminate all-field, spellbook-equivalent and differing-order models. Source labels are main[118], [123] and [124].
+
+### TEXT-130
+
+Let p be unsigned byte power, f = binary64(p/30+1), and T the inherited truncating conversion of TEXT-096. For positive row parameter 16, B=u8(T(p16*f)), else zero. For positive parameter 17, S=u8(T(p17*f-B)), else zero. The subtraction uses the already narrowed B. The formatter reads B and S unsigned, computes B+S without narrowing their sum, and formats main[118] with those two endpoints only if S != 0.
+
+The selected EN/RU Spells populations contain 28 matching numeric rows; damage bases are positive for ids 1,2,3,6,9,11,13,14,21 and absent for the other 19. The matrix uses the stored binary64 factor and preserves an independent decimal80 countermodel. For id 3/power 10 its predicted S differs, 3 versus 2. No model is labelled native output.
+
+**Confidence.** High for the encoded formula, widths, row selection, predicate and endpoints. Medium for numeric binary64/decimal80 predictions because native intermediate precision is not established. The two data queries are one locale comparison, not two independent code proofs.
+
+**Unknown.** Native x87 entry/control state and exact conversion-boundary results. Applied damage and popup equality are separate questions; TEXT-096's universal cast clause remains partially retracted under TEXT-117.
+
+### TEXT-131
+
+The range base is u8(p6). For spell 26 the fill adds floor(p/3); for other ids it adds floor(p/30) only when the base is nonzero. The result is stored as a byte. The formatter's class-14 branch displays that nonzero byte under main[123], without a min-max range or actor-selection fold. For the selected rows the base is zero for ids 4 and 18 and nonzero for the other 26. The ordinary 5/99 witness predicts range 8.
+
+For other packed classes the retained branch constructs an item by the packed code and reads its +0x50 byte instead. It does not read the filled Spell range for that branch. That path and custom-code reachability are not a Scroll eligibility rule.
+
+**Confidence.** High for the branch, integer division, byte stores and finite selected row population. The byte-power and filled-record alternatives are directly discriminated by retained instructions.
+
+### TEXT-132
+
+The filled duration word D follows TEXT-096. With positive p14, id 15 uses u16(T(min(1.05^p*3*16,65000))); other ids use u16(T(1.025^p*p14*16)). Otherwise positive p11 gives u16((p11<<4)+floor((p<<4)/10)); otherwise zero. The retained positive-p14 ids are 5,8,10,15,16,18,20,22,23,24,27,28, and the p11-path ids are 3,7,12,17,19,21.
+
+After fill, the formatter tests global dword L06743 == 4 and spell id == 20. On that branch it replaces D with u16(floor(D/7)+10). Only then does it test the word for zero and format main[124] using `#%s: %5.1f`. The item-specific multiplier was independently queried at VA L16152 in the shared image: .rdata, file offset 1674856, binary64 0.0625. The prior spellbook scalar occupied another address and was not substituted as evidence.
+
+The completed existing-project reference query returns five READ references in four owners and no orphan references for this address. It supplies no writer, initializer, semantic name or ordinary-single-player link. The immediate-text view returned zero with a zero-padding blind spot and is not an absence proof. Partial-overlap, computed-pointer and bulk-copy routes remain outside that bounded search.
+
+**Confidence.** High for encoded formulas, the scalar, the local global/id predicate, integer transform and literal precision/width. Medium for exact floating and one-decimal predicted outputs. Unknown for which ordinary contexts admit global value 4.
+
+**Unknown.** A source-independent native initializer/context witness or fixed-power id-20 card can discriminate the two visible-duration variants. For id 20/power 99 the two word predictions are 1844 and 273. No unconditional context default is inferred.
+
+### TEXT-133
+
+The item arm calls helpers L11153, L11156, L11157, L11154, L11158 and L11155. These select labels 182,185,187,183,186,184, respectively. TEXT-081 supplies their ordinary power 0..100 arithmetic: id 24 returns floor(p/15)+1 and ids 7/28 its negative for 182; ids 5/10/16/22 return floor(p/2) for 183; ids 12/17 return -(floor(p/30)+1) for 184; id 23 returns floor(4p/5)+20 for 185; id 27 the same for 187; id 14 returns min(floor(p/20)+2,7) for 186. Other ids return zero. In particular the item path can show id 17 and 27 captions, unlike the narrower spellbook cell table.
+
+All six Format calls replace baseline slot 0x10. At the first call the displayed stack displacement 0x18 follows two PUSHes, so it is the same destination. The last nonzero result wins. Labels 185/187 use `#%s: +%d%%`, 183 uses `#%s: +%d`, and 182/184/186 use `#%s: %d`. The six finite helper id sets are disjoint on the selected rows, so corpus agreement alone cannot distinguish a shared destination from six independent appended destinations; stack data flow does.
+
+No call to helper L11159 (217, id 18) occurs in this complete local arm. Powers above 100 in the separate descriptor controls do not acquire a new helper-domain guarantee from the ordinary formula authority.
+
+**Confidence.** High for the item call/label/destination/format contract and the reused TEXT-081 formula scope. No new full-helper census is claimed.
+
+### TEXT-134
+
+The constructor authority is SHOP-CONSUME-073/074: ids 1..27, price-window admission, stored powers 1..min(100,10*floor(max/base)) and later stock draws. The 27*100 matrix spans the constructor-candidate envelope, not every individual price window or observed generated stock. Both locale predictions use raw retained CP866 names and labels. The instrument emits numeric fields, text identities and card hashes as derived evidence; complete localized strings remain private.
+
+The matrix has 2700 spell/power pairs and 5400 localized predictions, plus 200 private id-20/global-4 variants. There are 140 separate transport/fill controls across ids 1..28 and powers 0,101,255,256,-1. Slow 28 and those stored-power values are not asserted ordinary stock. ITEM-192/193's named 5/99 placed/saved inputs are not a broader census. For 5/99 both arithmetic models predict range 8, word 5532 and caption 183 value 49; its formatted duration prediction is 345.8.
+
+There are exactly 76 matrix rows where binary64 versus decimal80 intermediate arithmetic changes a minimum, spread or duration word. Both values are retained. A matching pair outside this population is agreement of two models, not proof of native precision or printf tie behavior. Native generation timing, exact x87 outputs, all placed/save identities, custom/malformed reachability and painter framing remain Unknown.
+
+**Confidence.** High for finite output counts, controls, source identity and model disagreement. Medium for numerical predictions as a possible native outcome. Constructor facts retain their prior independent authority and scope.

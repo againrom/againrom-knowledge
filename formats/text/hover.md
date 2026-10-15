@@ -85,8 +85,9 @@ The values come from a fold over the selected actors that are `CUnit` instances 
 damage is summed over actors, range and duration are minima and maxima, mana is the last actor's.
 Each caption is a function of an actor level (skill plus stat minus 30, clamped to 0..100) and of
 the spell id, defined for ten ids; ids 17, 27 and 28 are not in the book's 24-cell id table, so
-the spellbook getter and its fold never fill caption 187; the item formatter also
-formats `main.txt[182..187]` and was not read for it. — TEXT-081
+the spellbook getter and its fold never fill caption 187. The separate item
+formatter uses its descriptor's stored-power byte and the six-caption contract
+below. — TEXT-081, TEXT-127, TEXT-133
 
 An actor whose `+0x7c` is zero is skipped before it is counted. When the session's `+0x3dc` is not
 1 and lacks bit 2, a counted actor sets the flags to 8 and the class tests and the per-cell fold
@@ -100,6 +101,72 @@ The record fields behind the value lines: byte `+9` is the Max Range column plus
 TEXT-096's universal per-cast-at-actor-power clause is partially retracted;
 its popup record-field formulas remain valid. Applied power and separate
 damage/lifetime operands can differ from the popup. — TEXT-117
+
+## Ordinary Scroll descriptions
+
+The ordinary Scroll writer emits marker 51, kind 41 with the low byte of the
+spell id, and tag 50 with the low byte of stored Effect power. Tag 50 constructs
+and fills that Spell directly. It does not run the spellbook actor fold or
+clamp this byte to 0..100. Ordinary construction separately admits ids 1..27
+and powers 1..100 subject to its price window. Wider powers and id 28 in
+descriptor controls are not ordinary stock. — TEXT-127, TEXT-134
+
+Ordinary Scroll keys have packed class 14. That class selects the inline
+fragment ` %s %s%s`, with main.txt[90], singular spell.txt[id-1] and
+main.txt[91], after the keyed itemname.txt name. It also suppresses the marker's
+magic heading. The class test is shared by MagicItems rather than restricted
+to a Book subtype. Text bytes are localized inputs; there is no grammatical
+case conversion in this formatter. — TEXT-128
+
+The ordered suffixes are damage, range, duration and one special caption.
+Every suffix begins with `#`. Damage uses main[118] and `#%s: %d-%d`, only when
+the filled spread byte is nonzero. Range uses main[123] and `#%s: %d`, only
+when the class-14 filled range byte is nonzero. Duration uses main[124] and
+`#%s: %5.1f`, only when the final duration word is nonzero. Its five-character
+minimum width can add a padding space to the literal's existing space.
+This complete arm has no mana or caption-217 call. — TEXT-129
+
+Let p be the unsigned power byte and T a truncating integer conversion.
+The filled damage values are B=u8(T(p16*(p/30+1))) for positive p16, else 0,
+and S=u8(T(p17*(p/30+1)-B)) for positive p17, else 0. The factor is stored as
+binary64. The displayed endpoints are B and B+S, with no byte narrowing of
+the sum. Range starts from u8(p6) and adds floor(p/3) for id 26; other ids
+add floor(p/30) only when the base is nonzero. The range result wraps to a
+byte. These are filled values, not raw table captions. — TEXT-130, TEXT-131
+
+With positive p14, duration D is u16(T(min(1.05^p*3*16,65000))) for id 15,
+or u16(T(1.025^p*p14*16)) otherwise. With no positive p14 but positive p11,
+D=u16((p11<<4)+floor((p<<4)/10)); otherwise D=0. If global dword L06743
+equals 4 and id is 20, the formatter replaces D with floor(D/7)+10. The
+displayed value is then D*0.0625. The meaning and ordinary-context reach of
+that global remain Unknown, so both variants are part of this contract.
+Exact native floating and one-decimal rounding boundaries remain unproved.
+— TEXT-132
+
+The special helpers run in order 182,185,187,183,186,184 and replace one
+shared destination; the last nonzero value wins. Their ordinary p=0..100
+values and label formats are:
+
+| main index | Spell ids | Value | Literal |
+|---|---|---|---|
+| 182 | 24; 7 and 28 | floor(p/15)+1; its negative | `#%s: %d` |
+| 183 | 5,10,16,22 | floor(p/2) | `#%s: +%d` |
+| 184 | 12,17 | -(floor(p/30)+1) | `#%s: %d` |
+| 185 | 23 | floor(4p/5)+20 | `#%s: +%d%%` |
+| 187 | 27 | floor(4p/5)+20 | `#%s: +%d%%` |
+| 186 | 14 | min(floor(p/20)+2,7) | `#%s: %d` |
+
+Other ids return zero, which suppresses the helper's write. The item arm can
+show captions for ids 17 and 27 even though the spellbook cell table omits
+them; it omits the id-18 caption helper 217. — TEXT-133
+
+The complete numeric constructor-candidate envelope has 2,700 spell/power
+pairs and 5,400 localized predictions. Binary64 and decimal80 arithmetic
+models differ on 76 pairs, including id 3/power 10 and id 8/power 1. Encoded
+formulas and field selection have High confidence; exact numeric predictions
+have Medium confidence. Neither model is an original execution transcript.
+Actual rendered cards and all placed/serialized/custom reachability remain
+Unknown. — TEXT-134
 
 ## Attribute rows in character generation
 
