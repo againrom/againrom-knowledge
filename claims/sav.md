@@ -15050,7 +15050,7 @@ occurrence. No first-archive value is supplied.
 | SAV-1188 | The unit shot starts at the shooter's current x/y plus 8 × (ShootOffset pair − Center), the pair chosen by ((dir − 8) & 14) / 2 from eight XY pairs; the cast producer reads the same class data from the cached centre. | High / Medium | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
 | SAV-1189 | Eight instructions store the projectile counter at client world `+0xa0c`: zero in the world constructor, old + 1 at six record insertions and the low u16 of FreeIndex at LOAD; no other writer was found in the decoded population. | High / Medium | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
 | SAV-1190 | No found writer resets the projectile counter at a mission boundary: its one zero store is in the client-world constructor, reached only from virtual method `R0326`, and the collect-all clears do not write it. | Medium | ✔ promoted (amended) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/); [EXP-0508](../experiments/EXP-0508-shot-remainder/) |
-| SAV-1191 | LOAD sets the projectile counter to the low u16 of `Projectiles/FreeIndex`, 0 when absent, before it inserts the saved records under their document IDs; SAVE writes the same counter. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
+| SAV-1191 | The reached mission LOAD counter arm stores the low u16 of `Projectiles/FreeIndex`, 0 when absent, before restoring records by document ID; the reached SAVE producer writes the same counter. | High | ✔ promoted (amended, partially retracted) | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/), [EXP-0583](../experiments/EXP-0583-town-projectile-counter/) |
 | SAV-1192 | A shooter's pending attack damage, ranged included, is never applied once an actor tick sees its HP at or below 0: that tick overwrites the countdown and both damage evaluators refuse an attacker at HP 0 or less. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
 | SAV-1193 | SAVE writes no projectile trail point and LOAD builds each record with an empty trail; the driver's trail arm then refills it for pictures 10 and 12, and other trail writers were not searched. | High | ✔ promoted | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
 | SAV-1194 | The leave-map routine `R0121` takes the actor off the list the walker `R0427` ticks, without writing its countdown or state; other callers of the tick slot were not searched. | High / Medium | ● active | [EXP-0505](../experiments/EXP-0505-unit-shot-leaves/) |
@@ -15166,6 +15166,13 @@ stays Medium.
 `evidence/identity/counter-reset-census.txt`, `evidence/vtables.txt`.
 
 ### SAV-1191
+
+**Amended.** The unqualified LOAD/round-trip scope is partially retracted by
+SAV-1300 and the matching `retracted.md` entry. The instructions below describe
+the reached mission counter arm; CurrentState/InBattle 0 selects the separate
+town route and bypasses that arm. The default-zero instruction, record-ID
+ordering, SAVE field source, and three original mission observations stand.
+Whole-town-LOAD process-counter retention remains Unknown.
 
 - LOAD (`L13475..L13467`): `Projectiles/FreeIndex` is read with default 0
   (`L13476`) and its low 16 bits are stored at world `+0xa0c` (`L13467`)
@@ -16721,3 +16728,94 @@ code hashes as independent corroboration.
 **Unknown.** Acceptance of an arbitrary truncated tail, a failed read's later
 SAVE, actual original-stack/allocator outcome, and an image-wide last-writer
 list. The claim does not assert that a campaign-less read returns.
+
+
+## Town and mission projectile counter routes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1299 | One original town control has explicit InBattle 0 and no FreeIndex or IDs; two original mission controls have explicit InBattle 1 and FreeIndex 28 and 29. | High | ✔ promoted | [EXP-0583](../experiments/EXP-0583-town-projectile-counter/) |
+| SAV-1300 | The original LOAD wrapper routes InBattle 0 to the town consumer and nonzero to the mission loader with flag 1; the town route bypasses the named FreeIndex/default-zero counter arm. | High | ✔ promoted | [EXP-0583](../experiments/EXP-0583-town-projectile-counter/) |
+| SAV-1301 | The located SAVE producer writes Projectiles/FreeIndex and IDs when the low bit of InBattle is nonzero; its zero-bit branch bypasses both writes. | High | ✔ promoted | [EXP-0583](../experiments/EXP-0583-town-projectile-counter/) |
+
+### SAV-1299
+
+The selected original-only corpus has three controls. T1 is the independently
+owner-labelled city candidate preserved from an original play session. Its
+explicit `CurrentState/InBattle` scalar is 0; `Projectiles/FreeIndex` and
+`Projectiles/IDs` are both absent. No Projectiles leaf occurs in its parsed
+registry. M1 and M2 are the retained original mission-150 controls named by
+SAV-1191. Their explicit InBattle scalars are 1, counter scalars are 28 and 29,
+and their kind-6 IDs leaves each contain four bytes.
+
+`evidence/corpus.tsv` records independent presence/type/value columns;
+`evidence/store-inventory.tsv` records the Projectiles leaf population.
+`evidence/corpus-identities.txt` supplies full SHA-256 and size identities.
+The parser is the retained research EXP-0430 `parse_ya1`; hashing and decoding
+use one acquired buffer per file. The selected M10 result is excluded because
+its original-authored producer chain was not established.
+
+**Confidence.** High for these three provenance-verified files. The T1 town
+classification uses its independent owner city label and explicit route flag;
+it does not infer a town from counter absence. A file hash proves identity,
+not field meaning. Presence bits distinguish absence from an explicit zero.
+
+**Unknown.** A second independent original town control and a town control
+carrying another Projectiles leaf were not acquired. This is not a town census.
+
+### SAV-1300
+
+The wrapper `R1284` retains its campaign receiver in ebx, sets campaign
+`+0x6bc` to 2, restores the document, then calls `R1578` at `L16172`.
+That predicate opens the same campaign `+0x234` file, seeks to header dword
+`+4` plus `0x100`, and reads `CurrentState/InBattle` with default 1
+(`L16173..L01102`). The wrapper tests the returned eax at `L16174`.
+Zero reaches the separate town consumer `R0098` at `L16120`; nonzero
+pushes esi=1 and calls `R0099` at `L06711`, retaining the same receiver.
+
+The mission loader retains that receiver in ebx. Its counter-restoration arm
+separately requires campaign `+0x6bc == 2` and its incoming flag nonzero
+(`L13472..L13473`), after preceding setup returns. The counter getter uses
+default 0 (`L13475..L13476`) and stores ax to `[campaign+0xd0]+0xa0c`
+(`L16175..L13467`), before the IDs getter. These are the retained
+SAV-1191 instruction facts with actual caller/guard scope.
+
+T1's explicit InBattle 0 chooses the town route. Its absent counter therefore
+does not execute this consumer's default-zero assignment. The complete local
+town-consumer body was selected through its return; it has no direct operand
+at `+0xa0c` and does not call the named mission loader. The wrapper predicate
+uses InBattle, not the presence of Projectiles or any other leaf beneath it.
+Another such leaf cannot by its presence select this counter consumer. No
+town file carrying that hypothetical leaf was acquired.
+
+**Confidence.** High for the named direct wrapper edge, predicate, receiver,
+operand and guard facts in the identified original image. This establishes
+actual route selection, not only a conditional loader body's semantics.
+It does not assert that setup, transitive calls, callbacks or indirect edges
+leave the counter unchanged, nor that every mission LOAD completes.
+
+**Unknown.** The process counter after the whole town LOAD and its next
+allocation. SAV-1200/1201 retain unresolved writers and a Medium lifetime
+frontier. A native watch on the two counter bytes across town LOAD, the
+identified transitive calls and next allocation would settle preservation
+versus another writer. No native runtime was run here.
+
+### SAV-1301
+
+The located SAVE routine `R0084` retains its campaign receiver in edi and
+reads `[edi+0x3dc] & 1` into ebx (`L16176..L16177`), which it writes as
+`CurrentState/InBattle`. Its later `TEST ebx,ebx; JE L16178`
+(`L13430..L16179`) bypasses the counter and IDs producer when that bit is
+zero. The nonzero arm widens the world's u16 counter at `+0xa0c` and writes
+`Projectiles/FreeIndex` (`L13481..L13482`); its IDs write is
+`L13405..L16180`. The zero branch lands beyond both writes. T1 and M1/M2
+independently provide the matching three-input stored-leaf controls.
+
+**Confidence.** High for this producer's direct branch and the two named
+serializer calls. The selected instructions identify the receiver, source
+bit, tested register, target and both key operands. This is not a census of
+all producers or transitive serializers, and it does not assert that another
+Projectiles leaf implies either counter presence or LOAD consumption.
+
+**Unknown.** Unobserved producers and another-leaf town controls are outside
+this result. The named LOAD predicate is separately established by SAV-1300.

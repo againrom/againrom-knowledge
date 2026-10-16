@@ -109,7 +109,12 @@ at LOAD completion and the first drawn frame remain Unknown. — SAV-1246, SAV-1
 
 ## Projectiles
 
-World SAVE always emits the Projectiles root, even for an empty manager.
+The located SAVE producer emits the counter and IDs when the low bit of
+`CurrentState/InBattle` is nonzero, even for an empty manager. Its zero-bit
+branch bypasses both writes. One provenance-verified original town control
+has explicit InBattle 0 and neither leaf; two original mission controls have
+explicit InBattle 1 and counter values 28 and 29. This is a three-input result,
+not a census of town saves. — SAV-1301, SAV-1299
 
 | Key | Kind | Value source |
 |---|---:|---|
@@ -148,7 +153,7 @@ actionsegments advance with the head sub-tick while x/y stay fixed. The save
 holds no client drawable state of the caster and no Teleport effect record
 (Medium). — SAV-1255, SAV-1257
 
-LOAD is less restrictive than the producer. Missing FreeIndex defaults to 0;
+The reached mission consumer is less restrictive than the producer. Missing FreeIndex defaults to 0;
 missing IDs leaves the constructed vector empty. Kind 6 yields `size/4`
 elements, taking each low u16; kind 2 has a one-element compatibility arm.
 Other kinds reach the typed-getter error. Each listed ID causes allocation,
@@ -156,9 +161,18 @@ sixteen defaulted leaf reads, terrain/world/ID binding, insertion and a
 post-load helper. The tree is producer-complete but not loader-mandatory.
 — SAV-PROJLOAD-429
 
-LOAD stores the low u16 of FreeIndex into the live counter before it builds
+The reached mission consumer stores the low u16 of FreeIndex into the live counter before it builds
 the records, and SAVE writes that counter back, so a round trip keeps it and
-the next shot takes ID FreeIndex. — SAV-1191
+the next shot takes ID FreeIndex. The former unqualified LOAD/round-trip scope
+is partially retracted; the reached-arm instructions stand. — SAV-1191, SAV-1300
+
+The LOAD wrapper selects its route from `CurrentState/InBattle`, with default
+1. Zero calls the town consumer; nonzero calls the mission loader with flag 1.
+The mission loader separately requires campaign state 2 and a nonzero flag
+before the counter arm. The original town control takes the zero route, so its
+absent FreeIndex does not execute the counter arm's default-zero assignment.
+The wrapper predicate does not use another Projectiles leaf. A different leaf
+therefore cannot by its presence select the counter route. — SAV-1300, SAV-1299
 
 The counter's other writers are the client-world constructor (0) and six
 record insertions (old + 1, wrapping at 65536). No found writer resets it at
@@ -172,9 +186,13 @@ with an unresolved destination or length remain unsearched. — SAV-1200
 
 The client world is built once, from the application object's InitInstance
 slot. The mission loader's two non-LOAD callers pass flag 0, which skips the
-FreeIndex arm; only the LOAD path passes 1. Within the found writers the counter is
-therefore 0 once per process and is replaced only by a LOAD. This is Medium;
-a native watch across a mission change would settle it. — SAV-1201
+FreeIndex arm; the named mission LOAD path passes 1. Within the found writers
+the counter is therefore 0 once per process and its replacement is the reached
+mission counter consumer. This is Medium. The town route bypasses that consumer;
+the counter's value after the whole town LOAD remains Unknown because transitive
+calls and the unresolved writer population are not excluded. A native watch
+across town LOAD and the next allocation would settle retention or another
+writer. — SAV-1201, SAV-1300
 
 The sixteen leaves are the whole saved record. The projectile trail, which the
 driver fills for pictures 10 and 12, is not saved and starts empty after LOAD. The start point is not saved

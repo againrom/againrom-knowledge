@@ -1489,3 +1489,10 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `TEXT-092` (Book-only/non-Book classification only; instructions and literals stand) | Verbatim: "a non-book item a new `#` line" and "a book (class `0xe00`) takes the ` of <spell>` form" | High / Medium | [EXP-0578](../experiments/EXP-0578-scroll-descriptions/), TEXT-128 | The comparison is packedCode & 0xf00 == 0xe00. Ordinary Scroll keys also satisfy it, taking the inline fragment and suppressing the magic heading. The branch is not a Book-subtype test; literal and painter-scope clauses stand. | **REFUTED** — partially retracted |
+
+
+## Town projectile counter LOAD scope
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SAV-1191` (unqualified LOAD/round-trip scope only; reached-arm operands, default, ordering, SAVE source and mission controls stand) | LOAD sets the projectile counter from FreeIndex, 0 when absent; a save and a load return the counter unchanged. | High for the located conditional producer/consumer instructions | [EXP-0583](../experiments/EXP-0583-town-projectile-counter/), SAV-1300, SAV-1301 | The actual wrapper selects a separate town consumer when CurrentState/InBattle is 0. The named counter/default-zero arm is reached only through the guarded mission consumer. The reached-arm instruction facts remain valid; whole-town-LOAD process-counter retention is Unknown. | **PARTIALLY RETRACTED** |
