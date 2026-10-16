@@ -2,6 +2,20 @@
 
 [Reference](format.md)
 
+## Client prologue and destruction
+
+The selected client prologue's application slot is a window getter. Its
+nonnull fast paths return the current thread's window fields; its fallback
+can change thread/window maps and links. Every driver call also merges its
+cached rectangle into the view before the zero-count test. Runtime receiver
+variants and complete framework helper effects remain Unknown. — ANIM-175
+
+The selected destructor submits own buffers through R0525 and dispatches
+each nonnull child only when the base pointer-array count is nonzero.
+Ordinary Prj LOAD leaves that array empty in its local reconstruction.
+The child's dynamic slot +4 and later population of the array remain
+Unknown; these bodies do not close target-mark removal. — ANIM-176, SAV-1291
+
 ## Moving targets and the application destination
 
 The client travel step is `trunc((currentAim-currentPosition)/remaining)`

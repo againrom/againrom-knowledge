@@ -88,9 +88,9 @@ default-entry clauses of MAGIC-289 are partially retracted. — MAGIC-293, MAGIC
 
 Opcode 0x74 changes the target's client visibility flag, not a projectile.
 Later hash deletion, corpse/ID-reuse lifetime and retained simulation-pointer
-validity remain Unknown. The pre-zero-test import is USER32!UnionRect;
-ANIM-149 is amended for that import only. Its separate prologue callback and
-destructor remain unresolved. — ANIM-157
+validity remain Unknown. The pre-zero-test import is USER32!UnionRect.
+ANIM-149 and ANIM-157 retain their target-lifetime limits; the local
+prologue and destructor bindings are specified below. — ANIM-149, ANIM-157
 
 The measured executable, unit/projectile registries and numeric parameters of
 all 28 Spells rows are equal between EN and RU. That is one code witness and
@@ -143,8 +143,8 @@ receive non-zero segments, so the mark arm of the eleven pictures 18, 24,
 28, 40, 44, 48, 52, 54, 56, 62 and 64 runs only for a 0x8b record whose
 segment word is non-zero. After its zero test a finished call builds and
 sends nothing, and only picture 13's sets a view redraw request; every call first merges its rectangle with the view through USER32!UnionRect.
-ANIM-149 is amended for this import; the separate prologue callback and
-destructor remain unresolved. — ANIM-157
+The local prologue and destructor bindings are specified below.
+— ANIM-149, ANIM-157
 
 The picture-13 record starts at actionphase -1 with 22 segments. Driver
 calls 1 to 22 return 1; call 9 (actionphase 8) burns the 3 × 3 tiles. Call 23
@@ -175,6 +175,45 @@ it does so on its second call when no rebuild intervened. This is Medium:
 writers of `+0x28/+0x2c` outside the loader, producers and driver were not
 enumerated, and the rebuild's order against the driver pass is
 Unknown. — SAV-1203
+
+## Prologue, destructor and cached geometry
+
+The selected prologue resolves the current thread/application and calls its
+slot +0x7c. On the measured application binding this is a window getter:
+return thread +0x20 when nonzero, otherwise +0x1c when nonzero. With both
+zero, a GetActiveWindow fallback may create a thread handle map or temporary
+window wrapper and alter framework links. The driver discards the returned
+pointer. Runtime receiver variants and the full helper effects remain
+Unknown. — ANIM-175
+
+Every call next merges a rectangle into view +0xf4 through UnionRect, before
+testing the segment count. From screen x, screen y and terrain height, the
+rectangle is left `(x-64)&~31`, right `((x+64)&~31)+32`, top `y-height-64`,
+bottom `y-height+64`. A zero-count finishing call also reaches this merge.
+— ANIM-175
+
+The projectile scalar destructor calls its body and conditionally submits
+the whole object to R0525 when flag bit 0 is set. The body submits the
+own trail buffer through its embedded destructor, then calls the base.
+While the base owned-pointer count +0xd0 is nonzero, the first nonnull
+pointer in data +0xcc receives slot +4 with argument 1; the base shifts the
+remaining dwords and decrements count. It then submits own +0x124, +0x110,
++0xc8 and +0xa8 buffers to R0525. Dynamic child identity and the lower
+heap primitive remain Unknown. No complete target-mark removal rule follows
+from these bodies. — ANIM-176
+
+The geometry routine derives cell and screen fields from cached +0x28/+0x2c,
+using projectile size slots that both return 1, then interpolates terrain
+height into +0x68. Its stores target projectile fields and stack locals.
+It does not itself write the view or register a map node. This is the
+selected body's scope, not a global writer census. — ANIM-177
+
+Ordinary Prj LOAD constructs empty owned arrays, including +0xc8, +0x124
+and +0x138, and does not fill them in its local reconstruction. It derives
+geometry from zero cached x/y while separately restoring the sixteen source
+scalars, the view, ID and map node. The empty child count skips the base's
+child-dispatch loop until a later path changes it. Native rebuild/driver
+ordering and later writers remain Unknown. — SAV-1202, SAV-1291
 
 ## Direction, unit-shot origin and trail
 

@@ -134,6 +134,15 @@ therefore save a point different from its origin; SAVE does not freeze the
 original cast point in a second field. Native in-flight SAVE/LOAD and
 post-load cache restoration remain unobserved. — MAGIC-267
 
+The ordinary Prj constructor/LOAD path initializes empty arrays at projectile
++0xa8, +0xc8, +0x110, +0x124 and +0x138. The sixteen scalar leaves do not
+restore their data or counts. LOAD separately rebinds view, registry, ID and
+map node, then derives cell/screen/terrain-height fields from zero cached
++0x28/+0x2c; the projectile size slots both return 1. The local path leaves
+the owned-child count +0xd0 zero, so its destructor's child-dispatch loop
+does not run before a later writer changes that count. Native frame order
+and subsequent writers remain Unknown. — SAV-1202, SAV-1291, ANIM-177
+
 A Teleport cast stores two picture-60 `Prj` records whose actionphase and
 actionsegments advance with the head sub-tick while x/y stay fixed. The save
 holds no client drawable state of the caster and no Teleport effect record

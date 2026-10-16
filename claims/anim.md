@@ -2889,7 +2889,7 @@ this question.
 |---|---|---|---|---|
 | ANIM-147 | A cast by a caster with a client ID reaches the cast producer (through 0x86, or 0x8a for spell 14), which builds one record of picture 2 × spell + 8 (two for 60); 21 of the 28 get 0 segments and die in that 0x401 pass. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 | ANIM-148 | Odd records come only from Fire Ball's blast (13, 22 segments) and the staged arm of spells 4, 9 and 21 (17, 27, 51; 16, 18, 16 segments); the bursts of 3, 7, 8, 12, 17 and 19 build no record. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
-| ANIM-149 | At picture 13 or above, shipped producers give non-zero segments only to 13, 17, 20, 27, 30, 34, 36, 51 and 60, so the eleven-picture mark arm `L05687` runs only for a 0x8b record with a non-zero segment word. | High / Medium | ✔ promoted (amended) | [EXP-0509](../experiments/EXP-0509-flight-records/); [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| ANIM-149 | At picture 13 or above, shipped producers give non-zero segments only to 13, 17, 20, 27, 30, 34, 36, 51 and 60, so the eleven-picture mark arm `L05687` runs only for a 0x8b record with a non-zero segment word. | High / Medium | ✔ promoted (amended) | [EXP-0509](../experiments/EXP-0509-flight-records/); [EXP-0527](../experiments/EXP-0527-projectile-flight/); [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
 | ANIM-150 | The picture-13 burst record returns 1 on driver calls 1 to 22 and is destroyed in the sweep of call 23, which also sets view `+0x74`; a SAVE between calls 22 and 23 holds it with 0 segments. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 
 ### ANIM-147
@@ -3022,15 +3022,19 @@ Life of each record at picture 13 or above, from the driver `R0558`
 reachability of `L05687`: which sources send 0x8b is Unknown.
 
 **Unknown.** What draws pictures 18, 24, 28, 40, 44, 52, 54 and 62 on their
-target, if anything; how the `+0x124` mark of 20 and 30 is removed, which
-the destructor `L13746` could touch. A listing of `L13746` and closure of the mark lifecycle are still required.
+target, if anything; how the target's `+0x124` mark of 20 and 30 is removed.
+ANIM-176 lists the selected destructor bodies; they do not directly inspect
+that target array. Their nonempty owned-child dispatch remains an open edge.
 
 **Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
 `evidence/q2-listings.txt`, `evidence/q2-life.tsv`,
 `evidence/tables.txt`.
 
 
-**Amended.** ANIM-157 identifies the pre-zero-test import as `USER32!UnionRect`; the separate prologue callback and projectile destructor remain unresolved. The arm/lifetime conclusions and their grades stand.
+**Amended.** ANIM-157 identifies the pre-zero-test import as `USER32!UnionRect`.
+ANIM-175 resolves the bound prologue slot as a window getter, and ANIM-176
+supplies the selected destructor chain. The target-mark lifecycle remains
+Unknown. The arm/lifetime conclusions and their grades stand.
 
 ### ANIM-150
 
@@ -3074,7 +3078,7 @@ which `ANIM-113` leaves open.
 |---|---|---|---|---|
 | ANIM-155 | On the client driver's default travel arm, each positive-count call adds trunc((current aim - current position)/remaining) per axis; a resolved target refreshes aim and direction before the step. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
 | ANIM-156 | Unit-shot records retain a client target word even for picture 12; a normal Fire Ball spell record instead retains a cell-centre point with target word zero. | High | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
-| ANIM-157 | A missing client target preserves aim and direction until countdown completion; opcode 0x74 changes the target's visibility flag, without removing a projectile in that arm. | High / Medium | ✔ promoted | [EXP-0527](../experiments/EXP-0527-projectile-flight/) |
+| ANIM-157 | A missing client target preserves aim and direction until countdown completion; opcode 0x74 changes the target's visibility flag, without removing a projectile in that arm. | High / Medium | ✔ promoted (amended) | [EXP-0527](../experiments/EXP-0527-projectile-flight/); [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
 
 ### ANIM-155
 
@@ -3153,8 +3157,7 @@ the same local operation as its target word becoming unresolvable.
 
 The import at `L13744`, called before the driver's zero test, is
 `USER32!UnionRect`. Its call merges rectangles; it is not an unresolved
-damage callback. The separate `R0347`/slot +0x7c prologue callback remains
-unresolved. ANIM-149's import Unknown is amended by this result.
+damage callback. ANIM-149's import Unknown is amended by this result.
 
 **Confidence.** High for the named local driver, opcode arm, flag consumers
 and PE import identity. Medium for continued target resolvability after
@@ -3164,8 +3167,126 @@ No global target-lifetime or removal-set absence is claimed.
 
 **Unknown.** The client hash's complete corpse/removal/ID-reuse lifetime.
 Static closure of all actor deletion paths, or a native identity watchpoint
-from release through death/leave-map, would settle it. The projectile
-destructor and the prologue callback remain unread.
+from release through death/leave-map, would settle it.
+
+**Amended.** ANIM-175 resolves the bound prologue window getter; ANIM-176
+lists the selected projectile destructor chain. Neither result closes the
+client hash's complete actor lifetime or the nonempty owned-child dispatch.
+
+## Projectile prologue, destructor and geometry
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-175 | On the application binding, the projectile prologue calls a window getter, then UnionRect with view +0xf4 before the zero-count test. | High / Unknown | ● active | [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
+| ANIM-176 | The selected projectile destructor submits its own array buffers to R0525; a nonempty base pointer array first dispatches each nonnull child's slot +4. | High / Unknown | ● active | [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
+| ANIM-177 | With the projectile table, R0614 derives cell, screen and terrain-height fields from cached +0x28/+0x2c; its two size slots return 1. | High | ● active | [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
+
+### ANIM-175
+
+The retained driver prologue calls `R0347`, tests the result, then calls
+it again and dispatches the returned object's slot `+0x7c`. The driver
+does not use that slot's return value. `R0347` reads thread-state `+4`,
+falling back to module-state `+4` when zero. Application base constructor
+`R2293` stores its receiver in both fields. Application constructor
+`L01312` installs table `L01179`; its slot at `L16170` is
+`R2294`.
+
+That bound slot returns receiver dword `+0x20` when nonzero, then `+0x1c`
+when nonzero. With both zero it calls `USER32!GetActiveWindow` and
+`R2295`. The latter obtains thread-state `+0x14`'s handle map, creating
+it on a null pointer, looks up a handle and can insert a temporary wrapper.
+Its reached posthelper can clear a prior wrapper link and pair the returned
+wrapper's `+0x38` with another object's `+0x24`. Thread-data accessors also
+have lazy-initialization calls. These are framework-state paths, not a
+projectile receiver passed to slot `+0x7c`. The reached map owner, lookup
+and posthelpers are `R2296`, `R2297`, `R2298` and
+`R2299`.
+
+The next prologue call is `USER32!UnionRect`, with view `+0xf4` as both
+destination and first source. Its second source is built from projectile
+screen x `+0x50`, screen y `+0x54` and terrain height `+0x68`: left is
+`(x-64)&~31`, right is `((x+64)&~31)+32`, top is `y-height-64`, bottom is
+`y-height+64`. This call precedes the `+0xa0` zero test, including a call
+that returns finished. The union may equal the prior rectangle; no effective
+runtime rectangle growth was measured.
+
+**Confidence.** High for the named constructor stores, table slot, guard
+order, local field operations and retained rectangle call. The selected
+Capstone listings preserve instruction widths and local branch targets;
+the import-table walk identifies GetActiveWindow among 471 imports. This
+is one byte-identical EN/RU image. Unknown for runtime receiver variants,
+fallback reachability and effects of unread framework initialization,
+factory, map-insertion and allocation callees. No whole-image absence is
+claimed.
+
+**Unknown.** Native entry with another thread-object table, null-window
+fallback activation and complete framework helper effects. Capture the
+returned thread/table and getter path, or close those named helper bodies.
+This result supplies no runtime scheduling or pixel witness.
+
+**Evidence.** [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/EXP-0582.md),
+[bound getter](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w17-thread-main-window-getter.txt),
+[application binding](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w16-application-base-constructor.txt),
+[fallback tail](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w23b-window-map-tail.txt).
+
+### ANIM-176
+
+Constructor `R0609` installs projectile table `L02587`. Slot `+4` is
+scalar destructor `L13746`: it calls `R2300`, then calls `R0525`
+with the projectile pointer only when flag byte `[esp+8]&1` is nonzero.
+Body `R2300` calls `R2301` on projectile `+0x138`, then base
+destructor `R2302` on the projectile.
+
+The base first installs `L16171`. While dword count `+0xd0` is nonzero,
+it reads the first pointer from data `+0xcc`. A nonnull pointer receives
+virtual slot `+4` with argument 1. The base shifts the remaining pointers
+by `count-1` dwords, decrements count and repeats, including a null entry.
+It then calls `R2301` on its own `+0x124`, submits nonnull data pointers
+`+0x114`, `+0xcc` and `+0xac` to `R0525`, and rewrites the embedded
+tables and final object table to their base forms. `R2301` submits its
+embedded receiver's data `+4` without a local null test. AI-573 identifies
+`R0525` as the one-call wrapper for `L11036`.
+
+**Confidence.** High for these complete selected bodies, dword widths,
+guards, copy count and call order. Unknown for the dynamic child's type,
+the effects of its slot `+4`, and the unread `L11036` primitive. Buffer
+submission is observed; complete heap-release semantics are not asserted.
+
+**Unknown.** A nonempty pointer array's child constructor/table binding and
+runtime reachability. Identify a pointer inserted into projectile `+0xcc`,
+retain its table and trace slot `+4`. The selected bodies do not directly
+look up actiontarget or erase its `+0x124` marks; the dynamic child edge
+prevents a whole-lifetime absence conclusion.
+
+**Evidence.** [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/EXP-0582.md),
+[scalar wrapper](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w01-projectile-scalar-destructor.txt),
+[projectile body](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w05-projectile-destructor.txt),
+[base body](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w10-base-destructor.txt).
+
+### ANIM-177
+
+`R0614` derives cell `+0x34/+0x38` from arithmetic right shifts of cached
+`+0x28/+0x2c` by 8. It computes viewport bounds `+0x3c..+0x4c`, screen
+`+0x50/+0x54`, centre/cache fields `+0x58..+0x64`, and terrain height
+`+0x68`. The projectile table binds size slots `+0x20/+0x24` to
+`L03099` and `L03100`; both return 1. Screen x is `(cachedX>>3)-(view[+5c]<<5)`;
+screen y uses cachedY and view `+0x60` in the same expression. Terrain
+height reads four signed terrain bytes and interpolates the subcell point.
+
+**Confidence.** High for the complete selected geometry body and both bound
+six-byte getters. Its stores target the projectile or stack locals; its
+four calls are the two constant size getters. The body does not write the
+view, alter cached `+0x28/+0x2c`, or register a map node. This is a local
+body statement, not a writer or registration census.
+
+**Unknown.** Native ordering of this derivation, the driver and drawing,
+and external writers of cached coordinates. A native post-LOAD trace of
+those calls would settle their order; none was run.
+
+**Evidence.** [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/EXP-0582.md),
+[geometry](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w20-cached-geometry.txt),
+[size X](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w25-projectile-width.txt),
+[size Y](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w26-projectile-height.txt).
 
 ## Death and departure lifecycle
 

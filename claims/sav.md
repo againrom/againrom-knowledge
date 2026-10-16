@@ -15479,7 +15479,8 @@ a native watchpoint across a mission change would settle both.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1202 | SAVE writes the 16 Prj leaves of every record with no filter; LOAD reads the 16, rebinds `+0x14`, `+0xe0`, the ID and the map node, and loses the word list `+0xa8`, the point array, the trail and the cached x/y `+0x28/+0x2c`. | High | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
+| SAV-1202 | SAVE writes the 16 Prj leaves of every record with no filter; LOAD reads the 16, rebinds `+0x14`, `+0xe0`, the ID and the map node, and loses the word list `+0xa8`, the point array, the trail and the cached x/y `+0x28/+0x2c`. | High | ✔ promoted (amended) | [EXP-0509](../experiments/EXP-0509-flight-records/); [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
+| SAV-1291 | Ordinary Prj LOAD constructs empty +0xc8/+0x124/+0x138 arrays; its local reconstruction leaves them empty before deriving geometry from zero cached x/y. | High / Unknown | ● active | [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/) |
 | SAV-1203 | A loaded record's derived cell is (0,0) until `R0614` next runs after a driver call, so a loaded picture-13 record at saved actionphase 7 marks the 3 × 3 around map cell (0,0), four of them words before the tile plane. | Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 | SAV-1204 | A cast record with 0 segments takes a counter ID and dies in the 0x401 pass that built it, so no SAV holds it; the 133-file corpus holds 8 distinct records, pictures 1, 2, 5, 10 and 13. | High / Medium | ✔ promoted | [EXP-0509](../experiments/EXP-0509-flight-records/) |
 
@@ -15509,6 +15510,47 @@ listings.
 
 **Evidence.** [EXP-0509](../experiments/EXP-0509-flight-records/),
 `evidence/q5-listings.txt`, `evidence/q2-listings.txt`.
+
+**Amended.** SAV-1291 additionally closes the constructor/LOAD empty
+owned-array population and its local destructor consequence. The sixteen
+saved leaves and the existing loss clauses stand.
+
+### SAV-1291
+
+The base constructor zeroes data, count, capacity and growth fields of
+arrays at projectile `+0xa8`, `+0xc8` and `+0x110`. It calls `L05586`
+on `+0x124`; projectile constructor `R0609` calls the same helper on
+`+0x138`. That helper zeroes four dwords at embedded `+4/+8/+0xc/+0x10`.
+The constructor also zeroes cached x/y `+0x28/+0x2c`.
+
+SAV-1202's retained complete ordinary Prj LOAD reads the sixteen source
+scalars, rebinds view `+0xe0`, registry `+0x14`, ID and map node, then calls
+`R0614`. None of those sixteen field destinations overlaps the arrays
+above. ANIM-177's complete derivation also does not populate them. This
+local path therefore reaches the derived geometry from zero cached x/y
+and leaves the owned-child count `+0xd0` zero. ANIM-176's child loop is
+skipped for that population until a later path changes the array.
+
+A saved zero-segment record is not filtered out. A driver call entered
+with that restored zero count executes ANIM-175's prologue before the zero
+test, then takes its finishing path. The retained sweep unlinks a finished
+record before calling its destructor. The SAVE payload does not preserve
+the omitted buffers, child pointers or their runtime table bindings.
+
+**Confidence.** High for constructor stores and the composed retained
+LOAD/selected derivation path. Unknown for native scheduling, later
+population of the arrays and reached dynamic-child behavior. This does
+not assert that the arrays are empty for every projectile or every frame.
+
+**Unknown.** A writer after this reconstruction and before destruction,
+the first view-rebuild/driver order, and native visible state. Trace the
+count and pointer after ordinary LOAD and record those two call orders.
+No owner save or original runtime was read for this experiment.
+
+**Evidence.** [EXP-0582](../experiments/EXP-0582-projectile-callback-lifetime/EXP-0582.md),
+[base constructor](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w06-base-constructor.txt),
+[array constructor](../experiments/EXP-0582-projectile-callback-lifetime/evidence/w11-array-constructor.txt),
+and SAV-1202's retained Prj LOAD evidence.
 
 ### SAV-1203
 
