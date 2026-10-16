@@ -800,7 +800,7 @@ area is `R0824`'s `+0.5` before its truncate.
 
 **Confidence.** High for death-before-dispatch and the named physical checks (complete routines and raw-byte anchors) / Unknown for mid-action external order replacement and spell-specific target loss, explicitly outside the completed search
 
-**Amended.** The start/reach clause is corrected.
+**Amended.** The start/reach clause is corrected. `AI-638` and `AI-632` answer the Unknown on external order replacement mid-action for the 34 external order writers read there: none stores progress, counter, phase, completion or countdown, and action only 0 (Medium beyond the read bodies); other writers and spell-specific target loss stay open.
 
 ### HERO-JOIN-120
 

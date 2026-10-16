@@ -1891,3 +1891,91 @@ Population: EN `rom.exe`, scan S1 (555089 instructions): 72 exact stores with di
 **Confidence.** High for the four stores and their windows. Medium for the claim that no other path sets the flag: 68 exact stores with `via154` 0 were not read, `rep movs` copies and register-based stores through other bases are open.
 
 **Unknown.** The 68 unread stores; the meaning of `actor+0x168` and `+0x184`; the branch at `L15407..` of the tail.
+
+## Retreat fine position and the two direction helpers
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-174 | The flee picker reads the raw position record, `cell * 256 + sub` per axis; between cells the sub bytes hold the stride-advanced value until the step count snaps them to `0x80`. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
+| MOVE-175 | The centre-bearing helper `R0051` returns one of eight facings for every centre delta: 2:1 boundaries and equal axes go to the diagonal, and a zero delta returns `0xe0`. | High | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
+| MOVE-176 | The step-facing helper `R1356` classifies only the signs of the delta to the node centre; a zero delta returns `(facing & 7) << 5` from the current facing byte. | High | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
+
+### MOVE-174
+
+`R0165` returns `(byte +0 << 8) + byte +4` and `R0166`
+`(byte +1 << 8) + byte +5` of the position record (`MOVE-087`). The flee
+picker `R0104` (`AI-WITHDRAW-028`) reads the same four bytes of
+`[actor+0x10]` directly (`L16216`..`L16217`), without the size centre
+of `R0862`, and reads nothing from the mover.
+
+The step `R0047` increments `mover+0xac`, adds the signed bytes
+`mover+0xb0` and `mover+0xb1` to the 16-bit x and y values, and, when the
+octant word `mover+0xae` is 1 or 5 and both new low bytes are 0, subtracts
+one from x (`L06788`..`L07166`). If the cell bytes are unchanged it
+stores the new sub bytes and cell; otherwise it runs the release loop,
+claims the new cell (`R0058`), stores and occupies
+(`R0050`). When `mover+0xac` reaches `mover+0xaa` it stores `0x80`
+in both sub bytes (`L16218`..`L07100`).
+
+`R1088` sets the step record: the speed clamped to 1..`0x3f` in
+`mover+0xa8`, an octant `(byte + 0x10) >> 5` of a direction argument in
+`mover+0xae`, the stride bytes `mover+0xb0` and `+0xb1` as speed times the
+signed units of two tables at `world+0x58eb0` and `world+0x58eb8` (scaled
+by the double at `L06908` through `R0279` when both units are
+nonzero), and `mover+0xaa = ceil(0x100 / |b|)`, where `b` is the x stride,
+the y stride when x is 0, and 1 when both are 0.
+
+So a mover between cells holds sub bytes equal to the start value plus
+`k` strides (with carry into the cell) after `k` steps, and `0x80` only
+after the snap. The readers take that stored value; they consult no stride
+record.
+
+**Confidence.** High for the getters, the picker's reads and the step and
+set-up bodies. Medium for the between-cells value as a sequence: the writer
+that resets `mover+0xac` and the double at `L06908` were not read.
+
+**Unknown.** The reset of `mover+0xac`, the diagonal scale and what LOAD
+restores in the step record.
+
+### MOVE-175
+
+`R0051(a, b)` takes `dx = cx(b) - cx(a)` and `dy = cy(b) - cy(a)`
+from the 16-bit size centres (`R0862`, `R0863`). With
+`X = |dx|`, `Y = |dy|` it picks a half-sector `s`:
+
+| Signs | `X > Y` | otherwise |
+|---|---|---|
+| `dx > 0`, `dy > 0` | `4 + (X <= 2Y)` | `6 + (Y > 2X)` |
+| `dx > 0`, `dy <= 0` | `2 + (X > 2Y)` | `(Y <= 2X)` |
+| `dx <= 0`, `dy > 0` | `0xa + (X > 2Y)` | `8 + (Y <= 2X)` |
+| `dx <= 0`, `dy <= 0` | `0xc + (X <= 2Y)` | `0xe + (Y > 2X)` |
+
+It returns the byte `(((s + (s != 0)) & 0xfe) << 4)`, so `s = 0xf` folds
+to 0. The facings are 0 for `-y`, `0x40` for `+x`, `0x80` for `+y`, `0xc0`
+for `-x` and the odd multiples of `0x20` for the diagonals. Equal axes and
+an exact 2:1 ratio return the diagonal. `dx = 0, dy > 0` returns `0x80`;
+`dx = 0, dy < 0` returns 0; `dy = 0` returns `0x40` or `0xc0`; `dx = dy = 0`
+returns `0xe0`. The first comparison is 16-bit unsigned and the 2:1 tests
+are 32-bit after masking to 16 bits, so every delta of two 16-bit centres
+is classified by this table.
+
+**Confidence.** High: the whole body is read, every branch is enumerated
+and the fold is the routine's own `INC`/`AND`/`SHL`.
+
+### MOVE-176
+
+`R1356(actor, cellword)` takes `dx = (node.x << 8) - Px + 0x80`
+and `dy = (node.y << 8) - Py + 0x80` from the position record and the
+packed node cell. It classifies signs only:
+
+| `dx` | `dy > 0` | `dy = 0` | `dy < 0` |
+|---|---|---|---|
+| `> 0` | `0x60` | `0x40` | `0x20` |
+| `= 0` | `0x80` | `(mover+0 & 7) << 5` | 0 |
+| `< 0` | `0xa0` | `0xc0` | `0xe0` |
+
+At a zero delta the routine keeps the current facing byte in AL
+(`L14211`) and shifts it left by 5 (`L14213`), so it returns the low
+three bits of the facing times `0x20`, not the facing.
+
+**Confidence.** High: the whole body is read and every branch enumerated.

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 3982. Observation: 99. Static analysis: 3365. Mixed: 518.
+Claims labelled: 3993. Observation: 99. Static analysis: 3376. Mixed: 518.
 
 ## Ledger ai
 
@@ -241,7 +241,7 @@ Claims labelled: 3982. Observation: 99. Static analysis: 3365. Mixed: 518.
 | AI-367 | static analysis | ● active |
 | AI-370 | static analysis | ● active (amended) |
 | AI-371 | static analysis | ● active |
-| AI-372 | static analysis | ● active |
+| AI-372 | static analysis | ● active (amended) |
 | AI-373 | static analysis | ● active |
 | AI-374 | static analysis | ● active |
 | AI-375 | static analysis | ● active (amended) |
@@ -250,11 +250,11 @@ Claims labelled: 3982. Observation: 99. Static analysis: 3365. Mixed: 518.
 | AI-376 | static analysis | ✔ promoted (amended) |
 | AI-377 | static analysis | ✔ promoted |
 | AI-378 | static analysis | ● active (amended) |
-| AI-381 | static analysis | ● active |
-| AI-382 | static analysis | ● active |
-| AI-383 | static analysis | ● active |
+| AI-381 | static analysis | ● active (amended) |
+| AI-382 | static analysis | ● active (amended) |
+| AI-383 | static analysis | ● active (amended) |
 | AI-384 | static analysis | ● active |
-| AI-385 | static analysis | ● active |
+| AI-385 | static analysis | ● active (amended) |
 | AI-387 | static analysis | ● active |
 | AI-390 | static analysis | ● active |
 | AI-391 | static analysis | ● active |
@@ -394,6 +394,14 @@ Claims labelled: 3982. Observation: 99. Static analysis: 3365. Mixed: 518.
 | AI-628 | static analysis | ● active |
 | AI-629 | static analysis | ● active |
 | AI-630 | static analysis | ● active |
+| AI-632 | static analysis | ● active |
+| AI-633 | static analysis | ● active |
+| AI-634 | static analysis | ● active |
+| AI-635 | static analysis | ● active |
+| AI-636 | static analysis | ● active |
+| AI-637 | static analysis | ● active |
+| AI-638 | static analysis | ● active |
+| AI-639 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -1624,6 +1632,9 @@ Claims labelled: 3982. Observation: 99. Static analysis: 3365. Mixed: 518.
 | MOVE-157 | static analysis | ● active |
 | MOVE-158 | static analysis | ● active |
 | MOVE-171 | static analysis | ● active |
+| MOVE-174 | static analysis | ● active |
+| MOVE-175 | static analysis | ● active |
+| MOVE-176 | static analysis | ● active |
 
 ## Ledger pal
 
