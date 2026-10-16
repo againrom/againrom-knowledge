@@ -3364,6 +3364,10 @@ native same-ID retarget occurrence.
 | ANIM-TELEPORT-169 | The read caster body uses the Attack timeline at draw state 8; first post-relocation frames remain Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 | ANIM-TELEPORT-171 | The read client state-sync arm moves an existing drawable's raw point and cache from mask bit 0x20; the arm's own stores change action, clock and remaining only when the stage byte changes. | High / Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
 | ANIM-TELEPORT-172 | Over a Teleport cast the source record keeps its point while the caster body keeps its Attack run; from the relocation step the body's cache holds the destination. | Medium | ● active (branch candidate) | [EXP-0572](../experiments/EXP-0572-teleport-timing/) |
+| ANIM-183 | The selected view-flag frame path installs its recorded clip rectangle. | High / Unknown | ● active | [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md) |
+| ANIM-184 | The selected first frame-callee prefix guards and stores an object-table dispatch result. | High / Unknown | ● active | [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md) |
+| ANIM-185 | The selected second frame-callee prefix conditions a repeated object-table dispatch on recorded results. | High / Unknown | ● active | [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md) |
+| ANIM-186 | The selected completion-flag work does not identify its concrete downstream interface effects. | Unknown | ● active | [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md) |
 
 ### ANIM-TELEPORT-167
 
@@ -3424,3 +3428,80 @@ The caster runs action 8, the Attack run of ANIM-TELEPORT-169's state-8 arm, wit
 **Confidence.** Medium. Paint order relative to the sweep, the body centre +0x60/+0x64 derived from the cache, the cue's audibility and sprite virtuals are not read. No read body draws a trail or hides the caster; this is a local negative without section scans.
 
 **Unknown.** The first native frame at each end, and any camera or view update.
+
+### ANIM-183
+
+The retained three-field gate admits the selected frame path for nonzero
+view+0x74, +0x78 or +0x7c. The measured range builds
+(V5c,V60,V5c+V64,V60+V68), calls R0541 with this tuple and the recorded
+view+0x80/+0xa8 operands, then calls L16181 and L16182 with ECX reloaded
+from [L16183]. It passes view+0xf4 to R0373. TERR-218 establishes this
+setter copying four dwords into clip globals L01503..L01506.
+
+A fresh nonzero view+0x74 test admits the separately measured R0355 call.
+The earlier callees may change state before that test; the first range is
+not exclusively guarded by +0x74.
+
+**Confidence.** High for the selected local operands, call order and immediate
+clip setter bound by TERR-218. ANIM-150 supplies the retained gate context.
+These static instructions do not establish complete repaint extent or pixels.
+
+**Unknown.** Complete callees, runtime admission, changed state between the
+tests and the externally observable result. No dynamic interface is inferred.
+
+**Evidence.** [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md), [frame work](../experiments/EXP-0584-projectile-notifications/evidence/r01-three-field-gate-work.txt),
+[fresh flag arm](../experiments/EXP-0584-projectile-notifications/evidence/r02-74-nonzero-work.txt); ANIM-150 and TERR-218.
+### ANIM-184
+
+For receiver S passed from [L16183], the selected L16181..L16184 prefix
+returns 0 when [S+0x12cc] is zero. Otherwise it builds
+(0,0,[S+0x1298],[S+0x129c]), chooses 1 or 3 according to [S+0x858], and dispatches
+the table+0x30 of [S+0x83c] with the explicit recorded stack operands. It
+stores the return value in [S+4] and returns whether that value was zero.
+
+**Confidence.** High for these selected instructions on the identified image.
+The bounded 128-byte prefix decodes completely. This is not a body census.
+
+**Unknown.** The receiver construction, concrete table target and externally
+observable operation. Zero is a comparison value, not an inferred API result.
+
+**Evidence.** [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md), [selected prefix](../experiments/EXP-0584-projectile-notifications/evidence/r03-dark-entry-prefix.txt).
+### ANIM-185
+
+For receiver S passed from [L16183], the selected L16182..L16185 prefix
+dispatches [S+0x838]'s table+0x4c and returns 0 for a nonzero result. On zero
+it admits a loop when signed [S+0x84c] is positive. Each iteration dispatches
+that object's table+0x20 with explicit pushes 1,[S+0x83c],item,object; the item
+comes from [S+0x848]. A nonzero result returns 0. The count is reread, so this
+does not establish an exact initial-count number of iterations. The admitted
+completion path, including a nonpositive initial count, dispatches the currently
+loaded [S+0x838]'s table+0x50 and returns whether that result was zero.
+
+**Confidence.** High for these selected operands, guards and comparisons on
+the identified image. The fixed 128-byte prefix has no undecoded tail. No
+whole-function or transitive-effect census is claimed.
+
+**Unknown.** The concrete receiver tables, called operations, changed shared
+state and visible output. No API name or success convention is assigned.
+
+**Evidence.** [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md), [selected prefix](../experiments/EXP-0584-projectile-notifications/evidence/r04-dark-fixed-prefix.txt).
+### ANIM-186
+
+The four measured intervals establish the local frame callsites, clip setter
+and selected guarded dispatches. This acquired population does not bind the
+concrete targets of [S+0x83c] table+0x30 or [S+0x838] table+0x4c/+0x20/+0x50.
+TERR-LIGHT-061's amended sentinel/fallback observations and SESS-COMPOSE-058's
+surface routing do not by themselves close the whole R0541/R0355 effects.
+Both reused cards retain their active status and original confidence limits.
+
+**Confidence.** Unknown for those concrete bindings and display outcomes.
+This is a boundary of the selected intervals and reused evidence, not a global
+absence claim. The attached-mark lookup was not expanded to a lifecycle census;
+no claim is made about independent published target-mark authority.
+
+**Unknown.** Receiver construction, permitted table binding and discriminating
+effects would settle these specific edges. Runtime order and final pixels
+require separate evidence. The prior exclusion fence remains in force.
+
+**Evidence.** [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md), [open edges](../experiments/EXP-0584-projectile-notifications/final-unknowns.tsv);
+TERR-LIGHT-061 and SESS-COMPOSE-058.
