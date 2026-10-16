@@ -16101,7 +16101,7 @@ does not establish that those local observations are false.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1246 | ROM1's acquired LOAD binds the light-parser tile plane to Fog restoration: parse clears bit 13, Fog ORs explored bit 15, and the final pre-frame marks remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+| SAV-1246 | ROM1's acquired LOAD binds the light-parser tile plane to Fog restoration: parse clears bit 13, Fog ORs explored bit 15, and the final pre-frame marks remain Unknown. | High / Unknown | ● active (branch candidate, amended) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
 
 ### SAV-1246
 
@@ -16136,6 +16136,68 @@ cells outside sight, and never-explored cells; cold LOAD before any input,
 then warm LOAD. Capture the first frame and writes to the named plane from
 parse through first paint. For SAV-1150's burst clause, also save between
 Fire_Ball calls 4 and 8 and compare after call 8 (tick 3103 or later).
+
+**Amended.** SAV-1308 narrows the bit-15 part for one owner run: at the
+SAVE the owner took at once after a cold LOAD the explored plane held every
+Fog-restored cell plus 34 cells on the party's sight rim. Bits 13 and 14 at LOAD completion
+remain Unknown.
+
+## Fog across SAVE after a cold LOAD
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1307 | ROM1's SAVE root writes Fog from the live tile plane masked with 0x8000 and changes no plane bit before the store; its unread callees are not excluded from stamping. | High / Medium | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| SAV-1308 | For one document another program wrote, the SAVE the owner took at once after a cold LOAD kept its 372 explored cells and added 34 on the party's sight rim. | High / Medium | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+
+### SAV-1307
+
+The root `R0084` runs only when application `+0x6bc` is 2 (`L16219`).
+Its Fog arm is gated on the world-half bit (`L08365`), loads the view from
+application `+0xd0` (`L16220`), the map at view `+0x80` and the plane at
+map `+0x0c` (`L07964`), takes `W*H` from map `+0x08` and `+0x04`, and
+compares each word masked with `0x8000` (`L08355`, `L08357`, `L16221`,
+`L16222`). Every access to the plane in `R0084..L16178` is a load.
+The root's other direct callees are archive, string and file helpers
+(`L07603`, `L07606`, `L05595` and others), `R1704` and `R1196`,
+and two methods called with the view as `this`, `R0317` (`L16223`) and
+`R0380` (`L16224`), whose results are written as values. None is the
+stamp body, the accumulator builder or the clear, whose only direct callers
+are in presentation code (TERR-FOG-269).
+
+Observation: two SAVEs about five seconds apart in one session wrote the same
+43 runs and the same 406 cells (TERR-FOG-265).
+
+**Confidence.** High that the root writes bit 15 of the live plane as it
+stands, with no transform of bit 14 into bit 15 and no recompute inside the
+root window. Medium that no callee stamps or clears before the store: the
+callees' bodies were not read, and a virtual call through slot `+0x48` would
+not appear in the direct-caller census.
+
+### SAV-1308
+
+Over the three files of TERR-FOG-265, every bit-15 cell of the loaded input is
+set in both resaves (372 of 372), and each resave adds the same 34 cells on
+the rim of the party's explored region. The input is a document another
+program wrote (label `9704 fog`); for this input the SAVE the owner took at
+once after a cold LOAD is not a copy of the loaded `Fog` section. It is the
+loaded section plus what the first post-LOAD stamp marked, if SAV-1307's root
+is the whole writer. No tick count or call count of "at once" is known. For a
+document the original wrote in play the added set may be empty. No bit-15
+clear acted between LOAD and either SAVE.
+
+This narrows SAV-1246 for bit 15: at the at-once SAVE the explored plane was
+the Fog OR plus stamps. It says nothing about bits 13 and 14, which a SAV does
+not carry (SAV-1150, SAV-FOG-061).
+
+**Confidence.** High for the observed superset and the equal resaves in this
+run, as file content only. Medium that the gained cells are the first stamp rather than a stamp
+inside the SAVE route (SAV-1307) or another writer (TERR-FOG-267).
+
+**Unknown.** Whether a warm LOAD gives the same result, whether a party that
+is not centred on its cells at LOAD gains the same cells, and whether a cold
+LOAD of a document the original wrote, resaved at once, gains any cell. A
+warm-LOAD resave, a mid-step resave and that cold-LOAD resave on mission 150
+would test each.
 
 ## Restart slots against the install alone
 

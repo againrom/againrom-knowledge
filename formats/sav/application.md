@@ -107,6 +107,14 @@ the Fog OR on the acquired path. A pointer replacement or another writer of view
 Medium because messages and indirect callbacks can write later; exact marks
 at LOAD completion and the first drawn frame remain Unknown. — SAV-1246, SAV-1150
 
+The SAVE root writes Fog from the live plane masked with `0x8000`; inside the
+root no plane bit changes before the store, and its callees were not read.
+For one document another program wrote, the SAVE the owner took at once after
+a cold LOAD is not a copy of the loaded section: in one owner run, 372 of 372 loaded cells were kept and 34 cells on the party's sight
+rim were added, read with Medium confidence as the first stamp; two SAVEs
+about five seconds apart were identical. A cold LOAD of a document the original
+wrote is not tested. — SAV-1307, SAV-1308
+
 ## Projectiles
 
 The located SAVE producer emits the counter and IDs when the low bit of

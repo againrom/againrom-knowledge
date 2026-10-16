@@ -2749,9 +2749,9 @@ later cost writer" stays Medium.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TERR-FOG-234 | ROM1's local fog-clear phase is 32-(counter&31) counted calls when enabled; the acquired LOAD root keeps the view, but the first cold-LOAD phase is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
-| TERR-FOG-235 | ROM1's acquired presentation path can stamp moved units between periodic clears; the first post-LOAD stamp still depends on guards and callback order. | High / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+| TERR-FOG-235 | ROM1's acquired presentation path can stamp moved units between periodic clears; the first post-LOAD stamp still depends on guards and callback order. | High / Unknown | ● active (branch candidate, amended) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
 | TERR-FOG-236 | ROM1's acquired frame path rebuilds two vertex shroud grids from the tile high pair; the end-of-LOAD picture and last writers remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
-| TERR-FOG-237 | The two acquired ROM1 executables are byte-identical; their bounded writer census does not exclude additional visible-bit writers or locale-data timing differences. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
+| TERR-FOG-237 | The two acquired ROM1 executables are byte-identical; their bounded writer census does not exclude additional visible-bit writers or locale-data timing differences. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0539](../experiments/EXP-0539-fog-after-load/) |
 
 ### TERR-FOG-234
 
@@ -2814,6 +2814,11 @@ restamp can be on counted call 1..32, with 0..31 earlier calls without that
 clear. A nonzero global gate, no eligible unit, or unobserved callbacks
 prevent an unconditional finite first-stamp bound. Mission-150 cold/warm
 LOAD with tile-write and presentation-entry traces would distinguish them.
+
+**Amended.** TERR-FOG-268 narrows the first-stamp Unknown for one owner run:
+the SAVE the owner took at once after a cold LOAD held 34 cells on the
+party's sight rim, read with Medium confidence as a party stamp. Which route stamped and on
+which call remain open.
 
 ### TERR-FOG-236
 
@@ -2888,6 +2893,190 @@ casts, teleports, structure changes and EN/RU data-dependent timing.
 **Unknown.** A writer trace during cast, teleport and structure-change
 controls on the same mission would test the remaining event alternatives.
 Code equality alone cannot establish equal first pictures in both roots.
+
+**Amended.** TERR-FOG-269 classifies the word store of `0x8000` at
+`L14414` as a C-runtime lead-byte table fill, not a tile-plane writer, and
+extends the census to the `0x4000`, `0x40` and `0xbf` masks in word and
+scaled-byte forms.
+
+## Fog across a cold LOAD in one owner run
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-FOG-265 | In one owner run of ROM1 EN mission 150, a cold LOAD then the SAVE the owner took at once kept all 372 explored cells and added 34, at Chebyshev 5..7 from the three party heroes; a SAVE about 5 s later was identical. | High | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-266 | ROM1's client stamp marks a 2x2 tile block per positive accumulator cell, walks from drawable +0x34/+0x38 and reads heights from map+0x10; the light parser fills it from ALM type 2. | High / Medium | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-267 | The transcribed client stamp at the heroes' saved cells and sight words explains 28 of the 34 gained cells; no variant within 2 cells and sight 1280..2304 explains all 34; 28 is not unique or maximal. | Medium / Unknown | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-268 | The SAVE the owner took at once held the added cells, read as a party stamp; no tick or call count is known; a standing unit's presentation calls the stamp every call; the clear phase stays Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-269 | ROM1's stamp pair is reached through nine vtables and the accumulator builder has one direct caller; an extended tile-mask store census classifies all 6 hits; cast and teleport stamps stay Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+
+### TERR-FOG-265
+
+Inputs: one document another program wrote for mission 150, label `9704 fog`,
+and two documents the original wrote in one session after a cold LOAD of it,
+one saved at once and one about five seconds later, with no other input. The
+SHA-256 of each file is in the experiment record. The owner's timing is not a
+tick count.
+
+The only fog plane a SAV carries is tile bit 15 in `Fog/Data` (SAV-FOG-061).
+Decoded with that transcription over the 144x144 plane:
+
+| document | `FirstState` | runs | bit-15 cells |
+|---|---|---|---|
+| loaded input | 0 | 39 | 372 |
+| original, at once | 0 | 43 | 406 |
+| original, about 5 s | 0 | 43 | 406 |
+
+- Input to each resave: 34 cells gained, 0 lost, 372 common.
+- At-once to 5 s: 0 cells differ in either direction.
+- The three party heroes are at cells (14,103), (13,106) and (14,104), sub-cell
+  (128,128), in both resaves; their `+0xa4` words are 1699, 1648 and 1546.
+- The 34 gained cells lie at Chebyshev distance 5 (3 cells), 6 (16) and 7 (15)
+  from the nearest hero. They form the outer rim of the party's explored
+  region: rows 96..98, rows 110..113 and column 7 (rows 99..102, 110, 111). None
+  lies at x < 7.
+- The input's actor records were not decoded by the research walker, so the
+  heroes' positions in the input are not compared.
+
+**Confidence.** High for the three planes and their differences: one
+transcribed decoder, identical run sums of 20736 on all three files, and a
+reproduction of the comparison into scratch that matched the committed bytes.
+The result is one run on one mission.
+
+### TERR-FOG-266
+
+The stamp body `L02578` builds the accumulator through `R0284` (call at
+`L10549`), then walks all 41x41 cells. For each cell with a positive
+value it ORs `0xc0` into the high byte of the tile at (x,y), (x+1,y),
+(x,y+1) and (x+1,y+1) (`L02581`, `L02582`, `L02583`, `L02584`). The
+outer loop index is the column and the inner the row, both offset by -20.
+
+The write centre is drawable `+0x34` plus half of slot `+0x20`'s value and
+`+0x38` plus half of slot `+0x24`'s value. Both slots (`R0586`,
+`L10957`) return the class table entry's `+0xd0`. The walk `R0284`
+centres on `+0x34`/`+0x38` directly (`L16225`, `L16226`). The per-cell
+step `R0285` addresses the cell as `b*view+0x84 + a` and reads the signed
+byte at `map+0x10` (`L16227..L10556`).
+
+The light parser's section switch reads its four-entry jump table at
+`L16228`: type 0 to `L16229` (header fields), type 1 to `L02342`
+(2*W*H bytes into `+0x0c`), type 2 to `L16230` (allocates `+0x10`, `+0x14`
+and `+0x18`, reads W*H bytes into `+0x10`), type 3 to `L16231` (W*H bytes
+into `+0x14`).
+
+**Confidence.** High for the local stores, loop order, centres, height
+address and the jump-table mapping, read as raw listings, and for the stamp's
+read at `[view+0x80]+0x10` and the parser's type-2 case. Medium that the
+parser's result is the object at view `+0x80`, so that the client height plane
+is ALM type 2: that link rests on SAV-1246 (`L10922`, EXP-0539) and the call
+to `R0480` is in none of this experiment's windows. Medium that a one-cell
+unit's class `+0xd0` is 1, so that its write centre equals its walk centre: the
+class table contents were not read, and the slots `R0586` and `L10957`
+are not shown to be the party's implementations.
+
+**Unknown.** The record-head reader `R0465` was not read, so the byte
+where the type-2 grid starts within the record is not fixed by this listing.
+
+### TERR-FOG-267
+
+The client walk transcribed by EXP-0120 (TERR-FOG-117) was applied to the three
+heroes' saved cells with their `+0xa4` words as drawable `+0x102`, `k=7`, on
+the type-2 section of the EN `scenario.res` entry `150.alm` as the research
+probe slices it, and on flat ground. The tiles were dilated as TERR-FOG-266
+states and compared with the at-once plane:
+
+| model | stamped tiles | gained explained | unexplained | set by the model but absent |
+|---|---|---|---|---|
+| type-2 heights | 241 | 28 of 34 | 6 | 3 |
+| flat ground | 238 | 27 of 34 | 7 | 3 |
+
+The unexplained cells lie to the north and west, (13,96), (16,96), (9,97),
+(7,99), (7,100), (7,101); the absent ones to the east, (21,109), (20,110),
+(20,111). No whole-party shift of one cell removes both sets. A search over each hero's cell within 2 cells and sight 1280..2304
+in steps of 32 (2475 variants per model) finds no combination of one variant
+per hero that sets every gained cell without setting a cell the at-once plane
+lacks; gained cell (18,113) is set by no such admissible variant.
+
+The model is parameter-sensitive. Nine one-cell whole-party shifts (dx, dy in
+-1..1, not 0,0) explain 17 to 28 of the 34 with type-2 heights and 14 to 30
+with flat ground. `flat@-1,0` explains 30 of 34, with 4 unexplained and 2
+absent; `type2@-1,0` equals the unshifted type 2 (28, 6, 3). So 28 of 34 is
+neither unique nor the maximum, and type 2 against flat (28 against 27) is
+not separated. The 8-cell offset of ALM-GRID-032 was not searched.
+
+**Confidence.** Medium that the 34 gained cells are client stamps of the party:
+they are the rim of discs centred on the heroes, at the reach the stamp's sight
+words give, and no other writer of bit 15 is known (TERR-FOG-145). Unknown
+what produces the residual: the derivation does not reproduce the set.
+
+**Unknown.** Live alternatives: the probe's height slice may start 8 cells
+before the parser's grid (ALM-GRID-032 places the grid 8 bytes after the
+slice start the probe uses); sight or position at the stamp may differ from
+the saved words; another observer may stamp. Reading `R0465` and rerunning
+the derivation with the parser's offset would test the first.
+
+### TERR-FOG-268
+
+Observation: the SAVE the owner took at once holds the 34 gained cells, and
+the 5 s SAVE adds none. "At once" is not a tick count or a presentation-call
+count, and neither is known. Some stamp therefore wrote bit 15 between the Fog
+OR of the cold LOAD and that SAVE's Fog store, if the SAVE route does not stamp
+(SAV-1307); the files bound the first stamp only before that SAVE. The SAV carries no bit 14 (SAV-FOG-061), so the files say nothing
+about the clear counter or the visible plane at either SAVE.
+
+Static route: unit presentation `R0548` loads `+0xa0` (`L02548`); when it
+is zero it calls slot `+0x44` (`L02573`) on every call, and the stepping
+branch calls it at `L02574`. The slot-44 guard admits a stamp when sight
+`+0x102` is nonzero, permission bit 3 is set, both fine coordinates `+0x50`
+and `+0x54` have low five bits 16, and `+0x8/+0xc` differ from the last
+stamped pair `+0xc0/+0xc4`. The stamp then stores `+0x8/+0xc` there
+(`L16232..L10548`). The constructors `R0593` and `R1652` store no
+`+0xc0` or `+0xc4`; `R1652` zeroes `+0x8`, `+0xc` and `+0x102`.
+
+**Confidence.** High that the SAVE the owner took at once holds the 34 cells
+(the file content only, with no tick or call count), and for the listed
+instructions. Medium that a party stamp wrote them before the
+SAVE route began (TERR-FOG-267, SAV-1307). Medium that a freshly created
+centred drawable stamps on its first admitted
+presentation call: allocation contents at `+0xc0/+0xc4`, other writers of
+those fields (including methods of the object embedded at `+0xa8`, whose
+range covers them) and the time `+0x102` becomes nonzero were not read. Unknown for
+the cold-LOAD clear phase (TERR-FOG-234) and whether the first stamp came from
+slot `+0x44` or the clear's restamp.
+
+**Unknown.** An owner run that saves after each of the first presentation
+frames of a cold LOAD cannot separate the routes either, since SAV drops bit
+14. A runtime trace of the slot-44 and clear entries on the same LOAD would.
+
+### TERR-FOG-269
+
+Population: one linear decode of `.text` (1,660,928 bytes, 23 skipped bytes)
+and one dword scan of `.rdata` (132,096 bytes).
+
+- Direct calls: `R0285` only from `R0284` (4 sites); `R0284` only from
+  `L10549`; the clear `R0374` only from `L01627`; `L14409` and
+  `L02578` only by the wrapper jumps `L16233` and `L16234`.
+- Pointers: `L14409`/`L02578` sit as a pair in 7 vtables and the wrappers
+  `R1402`/`R0554` in 2. An immediate scan finds each of the nine bases
+  installed by constructors: 18 stores, among them `L16235` (`L10630`)
+  and `L16236` (`L10631`), which override a `R1842` object in the
+  client dispatcher.
+- Tile-mask stores: an `or`, `and`, `xor` or `mov` to memory of a word-sized
+  `0x4000`, `0x8000`, `0xc000`, `0x3fff`, `0x7fff`, `0xbfff` (or its sign
+  extension), or a byte-sized `0x40`, `0x80`, `0xc0`, `0x3f`, `0x7f`, `0xbf`
+  through an index scaled by 2. 6 hits: the clear's AND at `L01659`, the
+  four ORs in `L02578`, and `L14414`, a C-runtime loop that writes `0x8000`
+  into a lead-byte table, not a tile plane.
+
+**Confidence.** High for the listed direct callers, pointers, installs and
+the 6 classified hits within this population. Medium that no other tile-plane
+mask store exists: register-sourced masks, unscaled pointer walks such as the
+LOAD arm's, bulk copies and computed calls are outside it. Unknown which
+classes the seven base vtables serve and whether a cast, teleport or structure
+drawable ever has nonzero `+0x102`.
+
+**Unknown.** Naming the classes that install `L10100`, `L10637`,
+`L16237`, `L02587`, `L10630` and `L10631`, and tracing `+0x102` on
+each, would decide the cast, teleport and structure stamps.
 
 ## Cell planes at a fresh-map start
 

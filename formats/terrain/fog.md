@@ -180,6 +180,39 @@ decode and selected `.rdata` pointer scan leave computed pointers, bulk
 copies, indirect targets and cast/teleport/structure writers open. No EN/RU
 runtime or data-dependent first-frame equality is established. — TERR-FOG-237
 
+In one owner run of mission 150, the SAVE the owner took at once after a cold LOAD kept all
+372 explored cells of the loaded document and added 34; a SAVE about five
+seconds later was identical. The added cells lie at Chebyshev 5..7 from the
+three party heroes, on the rim of the explored region. — TERR-FOG-265
+
+The stamp ORs `0xc0` into a 2x2 tile block, the cell and its `+x`, `+y` and
+diagonal neighbours, for each positive accumulator cell. Its walk centres on
+drawable `+0x34/+0x38` and reads signed heights at `map+0x10`. The parser's type-2 case allocates that
+grid and reads W*H bytes into it (High); that the object at view `+0x80` is the
+parser's result, so that the client heights are ALM type 2, is Medium
+(SAV-1246). The slot implementations are not shown to be the party's.
+— TERR-FOG-266, SAV-1246
+
+The transcribed stamp at the heroes' saved cells and sight words explains 28
+of the 34 added cells and sets 3 cells the original did not; no variant
+within 2 cells and sight 1280..2304 explains all 34. Nine one-cell shifts
+explain 17 to 28 (type 2) and 14 to 30 (flat; best 30 of 34 at -1,0), so 28
+is neither unique nor maximal and type 2 against flat (28 against 27) is not
+separated. The height-grid offset
+of the type-2 record is the first open alternative. — TERR-FOG-267
+
+A standing unit's presentation calls the movement stamp on every call; the
+guard needs a changed position against `+0xc0/+0xc4`, which the constructors
+do not write. The SAVE the owner took at once held the added cells (no tick
+or call count is known), read with Medium confidence as a party stamp. The SAV holds no bit 14, so the cold-LOAD
+clear phase and the stamping route are not observable from SAV files.
+— TERR-FOG-268
+
+The stamp pair is reached through nine vtables; the accumulator builder has
+one direct caller and the clear one. The extended tile-mask store census has
+6 hits, all classified. Which cast, teleport or structure drawables stamp is
+Unknown. — TERR-FOG-269
+
 ## Player cast hover predicate
 
 The cast hover guard ORs the high pairs of four neighbouring tile words.
