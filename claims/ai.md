@@ -2890,7 +2890,7 @@ sha256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`). No p
 | AI-371 | In one tick the AI slot and queue drain precede every member's executor pass; a spell application in the actor body can run a setter after it. `R0062`, `R0065`, `R0066`, `R0067` are unplaced. | High / Medium / Unknown | ● active | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-372 | In the `+0x158` census the only reads of the order word `ord+0x50` are two compares in `R0154`, the group order 4 arm; if reached, a completed pickup leaves 1 there, which sends that arm to `R0022`, not to a walk. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-373 | In `R0043` and `R0055` the near search raises `mover+0x98` only when aimed at the final destination; an empty waypoint search retries next pass. Occupied ring cells unlabelled: Unknown. | High / Medium / Unknown | ● active | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
-| AI-374 | In state 3 `R0008` tests only the victim's action word; 0x10, set at health -10 or less, stands the member down to state 0xc before dispatch, so arm 3 is not entered; the prologue reads no list. | High / Medium | ● active | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
+| AI-374 | In state 3 `R0008` tests only the victim's action word; 0x10, set at health -10 or less, stands the member down to state 0xc before dispatch, so arm 3 is not entered; the prologue reads no list. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-375 | Move stores `actor+0x50` = 1 and pickup 2; the executor tail reads that value when it consumes `mover+0x98`. A pending walk installed when recovery reaches zero at T0 first calls `R0178` at T0+2; whether it writes a step is Unknown. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-394 | In `R0053`'s own body the static list is empty on return only through three exits: start equals goal, picker A answers 0, or it answers the start cell; the extractor's 1000-step cap is a fourth, unexcluded exit. | High / Medium | ● active (amended) | [EXP-0489](../experiments/EXP-0489-troll-hints/) |
 | AI-395 | The idle-turn arm `R0205` (order 0xb) and the turn routines it calls never store `ord+0x08` or `ord+0x0c` and never call reacquisition or route search, so order 0xb ends by no write of its own. | High / Medium | ● active | [EXP-0489](../experiments/EXP-0489-troll-hints/) |
@@ -3056,6 +3056,13 @@ in `R0008`.
 **Unknown.** Arm 3 itself (`R0009` and its callees) was not read for list or liveness tests. A victim
 that leaves the world list by a route other than action 0x10 is unanswered. What a victim object that is freed before the next AI slot holds at `+0x54`; this read does not
 show when the dead list releases it.
+
+**Amended.** `AI-642` reads `R0009` whole: it has no test of the
+victim's health or action and re-issues pending 5 with the same victim.
+`AI-642` also settles that the dispatch with 0xc after the stand-down runs
+`R0022` in the same AI call. The callees of `R0009` are not
+read. Grades are unchanged; the Unknown on when the dead list releases the
+object is not answered.
 
 ### AI-375
 
@@ -6420,11 +6427,11 @@ followed by complete caller reads, would settle completeness.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-632 | At a stop on a loaded strike, `ord+0x15` holds the progress passes since install (byte) and `actor+0x136` holds 0; no read stop routine or external order writer stores either. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
-| AI-633 | No instruction stores `Player+0x28` through an actor's owner pointer; the read stores are construction 1, participant factory 0, the authored roster dword and the Player load. | High / Medium / Unknown | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
+| AI-633 | No instruction stores `Player+0x28` through an actor's owner pointer; the read stores are construction 1, participant factory 0, the authored roster dword and the Player load. | High / Medium / Unknown | ● active (amended) | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
 | AI-634 | Under a running executor the action-2 arm runs once per pickup; the sack lookup returns 0 for a cell without a record or sack, and the arm then does nothing. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
 | AI-635 | A window-40 census finds no `ord+0x50` reader beyond `AI-372`'s two; group order 4 is installed only after a per-member reset of the word to 0, so its arm does not read a pickup's 1. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
-| AI-636 | Until the next AI slot the strike row and reach-gated pursuit rows keep acting on a victim at action 0x10; no read route clears an attacker's `actor+0x5c` or `ord+0x0c` when the victim dies. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
-| AI-637 | No instruction in the read bodies `R0245`, `R0001` and `R0246` writes the facing byte; a cycle ends with its installed facing unless the executor tail's turn or an unread call writes it. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
+| AI-636 | Until the next AI slot the strike row and reach-gated pursuit rows keep acting on a victim at action 0x10; no read route clears an attacker's `actor+0x5c` or `ord+0x0c` when the victim dies. | High / Medium | ● active (amended) | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
+| AI-637 | No instruction in the read bodies `R0245`, `R0001` and `R0246` writes the facing byte; a cycle ends with its installed facing unless the executor tail's turn or an unread call writes it. | High / Medium | ● active (amended) | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
 | AI-638 | The 34 read external order writers store no progress, counter, phase, completion or countdown; each stores action `actor+0x54` only as 0, directly or through a stop routine, or not at all. | High / Medium | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
 | AI-639 | Every found in-play caller of the AI pass is the counter route; Retreat's queue prologue calls the cast teardown, which keeps a loaded cast, and refuses a unit only at action 0x10. | High / Medium / Unknown | ● active | [EXP-0586](../experiments/EXP-0586-loaded-cycle-remainders/) |
 
@@ -6537,6 +6544,12 @@ which was not read.
 the native order of construction, factory and transfer at mission start. A
 read of the join handler and a native trace of `Player+0x28` across a
 mission start and a join would settle them.
+
+**Amended.** `AI-643` reads the join `R0064`: it stores `actor+0x14`
+= the new Player and no `Player+0x28`, so the value read through the owner
+changes with the Player, as the inference paragraph states. The Unknown's
+join routine is answered; native mission-start order stays Unknown. Grades
+are unchanged.
 
 ### AI-634
 
@@ -6656,6 +6669,15 @@ and the serializer branch at `L04071` are open.
 **Unknown.** Whether the dead actor object is released while an attacker
 still holds it, and what the serializer stores at `L04071`.
 
+**Amended.** `AI-640` reads the reap: the dead actor is unlinked from the
+world list and appended to the dead list with its owner `+0x14` kept; no
+read routine releases the object. `AI-641` lists the victim stores a strike
+on a corpse makes, and `AI-642` places the replacement of `ord+0x0c` in
+the AI call that runs the stand-down. The call at `L04400`, which the
+clause on the victim's `+0x64` names, loads the vtable of the attacker
+(`L16238`), so it is the attacker's `+0x64` (`AI-646`). Grades are
+unchanged.
+
 ### AI-637
 
 `BaseFieldCensus` with base `+0x154`, window 12, finds one BASE store to
@@ -6698,6 +6720,17 @@ pass.
 `L02047` and `L04400` (`AI-408`). Whether a step start and a cycle
 install occur in one executor pass in play. A native trace of `mover+0x00` and `mover+0x98`
 around a pursuit install would settle it.
+
+**Amended.** `AI-646` reads the five virtual calls: `L13251` and
+`L13252` are reached only in the action 0xd/0xe block; `L13253` is
+reached after any strike when `actor+0x74` is set, with the targets
+`R0182` and `R0183` (constants, no store); `L02047` is
+`R0265` and `L04400` is a no-op for a unit and `R0870` for a
+human, and none of the bodies read stores through `+0x154`. The Unknown
+narrows from five virtual calls to `R0810` (called by `R0870`) and
+the callees of `R0265` (`R0254`, `R1050`, `R0861`,
+`R0279`, `R0126`) and of `R0870` (`L16239`, `R0476`,
+`R0279`), none read. Grades are unchanged.
 
 ### AI-638
 
@@ -6789,3 +6822,307 @@ named by evidence. Unknown for the meaning of the modes and of spell kind
 **Unknown.** Which player-visible session (single player, network host,
 client) each window mode is. A read of the writers of window `+0x6bc`,
 `+0x6b8` and `+0x40c` would settle it.
+
+## Dead victim, group join and vanished sack
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-640 | The strike path refuses a victim only for a null pointer, a zero owner `+0x14` or reach; the read teardown, reap and detach keep a dead victim's owner, so a corpse passes every refusal test. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-641 | A strike on a victim at or below 0 health still runs its damage resolver, which records the attacker in the victim's `+0x40` and, when both owners are set, marks the victim's order record through `R0226`. | High / Medium / Unknown | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-642 | In the AI call that stands state 3 down for a victim at action 0x10, `ord+0x0c` changes only when `R0022` finds a candidate; that call runs the acquisition, and a dying victim is re-engaged. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-643 | The join `R0064` detaches the actor, sets its owner to the new Player, puts it alone in a new Group, applies Stand Ground and clears two bits of `actor+0x18`; it stores no progress, phase or victim. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-644 | The script action `R0262` is the only caller of the join that `EnumRefs callto:` finds (direct calls, `.rdata` pointers), for one actor or a list; 14 other member-insert sites in 10 routines call the member insert without it. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-645 | No routine before the action 2 arm tests the sack; with the sack gone and no candidate in reach the pickup ends as one with a sack, without the transfer, at command state 0xc, and the next AI call runs acquisition. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-646 | On a melee strike the victim's virtual `+0x4c` is `R0265` and the attacker's `+0x64` is a no-op for a unit and the experience routine for the other two classes; the facing result of the five virtual calls is Medium. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+
+### AI-640
+
+Victim tests on the strike path (`q1core.txt`):
+
+- Swing start `R0245(attacker, victim)` returns when the victim is
+  null (`L16240`) or its `+0x14` is 0 (`L16241`), and when the attacker
+  is null, its `+0x14` is 0 or its health is not above 0 (`L16242`,
+  `L16243`, `L16244`). Otherwise it computes the distance
+  `R0247` and sends the swing message `R0549` without another
+  victim test.
+- Dispatch `R0001` returns on a null victim (`L16245`), then calls
+  the victim's virtual `+0x2c` (`L16246`) and, when it returns nonzero,
+  `R0246`; otherwise `+0x34` and `R0563`. In the three actor
+  vtables (`L00001`, `L00003`, `L00002`; `tables.txt`,
+  `tables2.txt`) `+0x2c` is a routine that returns 1 (`L16247`,
+  `L14949`) and `+0x34` one that returns 0 (`L16248`), so the class
+  test never refuses an actor.
+- Strike `R0246(attacker, victim)` returns on a null victim, a zero
+  victim `+0x14`, a null or ownerless attacker and attacker health not above
+  0 (`L16249`..`L04392`), and when the reach byte `attacker+0x12c` is
+  below the `R0247` distance (`L00735`..`L00736`). Victim health
+  is read only into the flag "was at or below 0" (`L04395`) and into the
+  branches after the subtraction (`L04164`): the branch for an object in
+  `attacker+0x74` at `L16250`, the damage numeral at `L04399` and the attacker's `+0x64` at
+  `L04401` (`AI-646`).
+- `R0247` reads the two position getters and the virtual `+0x1c`
+  (`R0256`, byte `+0x49`) of both actors; no liveness field.
+- The pursuit rows 5 and 6 test only facing and edge distance through
+  `R0041` (`AI-636`); the progress 1 arm tests nothing (`AI-636`).
+
+Death routines and the owner `+0x14`: the teardown `R0208` stores action
+and command state 0x10 and releases the footprint; the reap `R0427`
+calls `R2059`, which detaches the actor from its Group
+(`R1140`: list removal and `actor+0x70 = 0`), deletes an empty Group
+and removes the actor from the Player's flat index (`R1133`); the reap
+then unlinks the actor from the world list and appends it to the dead list.
+None of `R0208`, `R0427`, `R2059`, `R1140`,
+`R1133`, `R0068` and `R0413` stores `+0x14`. The
+image-wide scan for an immediate-zero dword store at `+0x14` (`z14.txt`,
+152 hits, 142 owners, 0 orphan) has 69 hits with a stack base (ESP 68,
+EBP 1) and 83 with another base (EAX 11, ECX 32, EDX 33, ESI 6, EDI 1).
+One of the 83, `L16251` in `R0059`, was read: it stores to the
+message record at `L00126` (`L16252`, `q1msg.txt`). The other 82
+were not classified, and the 69 stack-based hits were taken as stack
+stores and not read.
+
+Inference: a dead victim keeps its owner, so it passes every refusal test on
+the strike path, and its object stays allocated on the dead list.
+
+**Confidence.** High for the tests, branches and stores of the read bodies
+and for the vtable entries, read from the PE file. Medium that no other
+routine clears a dead actor's `+0x14`: the scan covers only immediate-zero
+dword stores, and 82 of its 83 non-stack hits are in routines not read.
+
+**Unknown.** A store to `+0x14` from a register value or a bulk copy on a
+route that a dead actor takes. A native read of a dead actor's `+0x14`
+across its death would settle it.
+
+### AI-641
+
+`R0265` (victim's virtual `+0x4c`, called at `L02047` with the
+attacker's block `+0xa6` and the attacker; `q1virt.txt`) reads of the
+victim only its `+0x14`, the words `+0xbe`..`+0xcc` and the byte table at
+`+0xce`; it has no test of the victim's health, action or list
+membership. After the damage
+computation, when the attacker is set, `R0416(attacker)` is 0 and
+the attacker's `+0x14` is set (`L16253`..`L16254`), it stores the
+attacker in the victim's `+0x40` (`L04123`) and the victim's byte `+0x48`
+(the attacker block's `+0x15` when `R0442`, bit 4 of
+`attacker+0x4c`, is set; else 0). When the attacker's `+0x14` is 0 it
+stores 0 in the victim's `+0x40` (`L15021`). When both owners are set it
+calls `R0226(attacker, victim)` (`L00875`), which stores the
+victim's `ord+0x54 = 1`, `ord+0x58` = the attacker's cell and
+`ord+0x5a = 0` (`L00652`..`L00654`) and calls `R0126`
+(`q1hit.txt`). Its other stores are the attacker's `+0x144`
+(`L05767`, `L05768`).
+
+`R0246` then subtracts the result from the victim's health
+(`L04164`) whatever that health was (`AI-636`).
+
+Inference: by `AI-640` a corpse keeps its owner, so each strike on it
+repeats these victim stores and the `R0126` call.
+
+**Confidence.** High for the stores and conditions of the read bodies.
+Medium for the corpse case, which composes `AI-640`'s owner retention.
+Unknown for what `R0126` does here (`HERO-AGGRO-028` and
+`AI-DIPLO-084` name it the event flip; not re-read) and for any reader of
+the victim's `ord+0x54` and `ord+0x58` on a dead actor, whose slot returns
+at action 0x10.
+
+**Unknown.** The callees `R0254`, `R1050`, `R0861`,
+`R0279` and `R0126`.
+
+### AI-642
+
+`R0008` (per-member AI routine, group order 0; `q1ai.txt`):
+
+- Command state 3 with `ord+0x0c` set and `[ord+0x0c]+0x54 == 0x10`
+  (`L01149`..`L16255`): three `R0007` calls (action 0,
+  `ord+0x14` = reach), `ord+0x50 = 0`, command state 0xc (`L00597`), post
+  word = own cell, pending 0 (`L01921`), `ord+0x50 = 1`. No store to
+  `ord+0x0c` or `actor+0x5c`.
+- The routine then dispatches on the command state through the table at
+  `L00322` (`L00320`, `tables.txt`). Entry 0xc is `L14697`, which calls
+  the acquisition `R0022`, so the stand-down and the acquisition run
+  in one call. Entry 3 is `L01923`, which calls
+  `R0009(actor, ord+0x0c)` on the current victim.
+- `R0022` takes candidates from `R0114`, which walks the world
+  list `[world+0xa4554]+4` (`L16256`), keeps those on a marked sight cell,
+  applies the diplomacy filter `R0021`, and moves each candidate with
+  health below 1 to a side list (`L00232`..`L00234`); the side list
+  becomes the candidate list only when no other candidate remains
+  (`L14821`..`L16257`). The best candidate within reach gets pending 6,
+  `ord+0x0c` and `ord+0x14` (`L00576`..`L14776`). With none, an AI owner
+  (`Player+0x28` set) gets pending 0xb (`L14777`; `R0113` follows,
+  `AI-530`) and a human owner's member `R0015` (`AI-349`); neither
+  path stores `ord+0x0c`.
+
+The reap removes a dead actor from the world list (`AI-640`), so it is never
+a candidate. `actor+0x5c` changes only at a progress 0 row install or the
+tail install `R0005` (`AI-636`).
+
+Inference: for a victim at action 0x10 the next AI call replaces
+`ord+0x0c` when a candidate exists and leaves the old pointer otherwise;
+`actor+0x5c` follows only when a row installs. A victim that is dying
+(health at or below 0, action not yet 0x10) does not meet the test at
+`L01154`; state 3 re-engages it through `R0009`, and an acquisition
+can select it from the side list when no living candidate is seen.
+
+**Confidence.** High for the read bodies and the table. Medium for the
+dying-victim composition, which depends on the AI call cadence
+(`AI-CLOCK-080`) and on `R0009`, read but whose callees are not.
+
+**Unknown.** The group order arms other than 0 for a member in command state
+3; the cadence of the AI call against the teardown tick.
+
+### AI-643
+
+`R0064(actor, newPlayer)` (`q2join.txt`, read whole):
+
+1. When `actor+0x70` is set, `R1140` removes the actor from its Group
+   and clears `+0x70` (`L07374`).
+2. `R1133` removes the actor from the old Player's flat index
+   (`L07375`).
+3. `actor+0x14 = newPlayer` (`L07376`); `R0032` appends it to
+   `[newPlayer+0x20]`.
+4. A new Group (`0x48` bytes, `R0149`) is appended to
+   `newPlayer+0x24` (`R0198`, `L07380`).
+5. `R0152` inserts the actor: list append, `actor+0x70` = Group,
+   `Group+0x44 = actor+0x14` (`L06065`, `L06066`).
+6. `R0063(Group)` (`L01873`), the Stand Ground setter, for each
+   member: `mover+1 = mover+0`, `ord+0x14` = reach, `ord+0x60`, `mover+0x7c`,
+   action, `ord+0x50` and `ord+0x38` = 0 (`L16258`..`L16259`), Group
+   `+0x20 = 0`, two `R0007` calls, command state 0xc, post word = own
+   cell, pending 0 (`L00152`), and finally Group `+0x20 = 3`
+   (`L00153`).
+7. The old and the new owner's bit (`Player+0x2c`) are cleared from the word
+   `actor+0x18` (`L08645`, `L07383`).
+8. `R0059(actor, 0, -1)` sends a message (`L12975`).
+
+No path stores `ord+0x09`, `ord+0x0c`, `actor+0x58`, `actor+0x5c` or any
+`Player+0x28`.
+
+Inference: a joining actor in a running strike keeps progress, phase and
+victim, as a Stand Ground member does (`AI-352`), and its owner test
+afterwards reads the new Player's `+0x28`.
+
+**Confidence.** High for the stores of the three read bodies. Medium for the
+inference, which composes `AI-352` and `AI-354`; the calls `R0069`,
+`R0071` and `R0045` inside the setter are not read here.
+
+### AI-644
+
+`callto:R0064` (`q2refs.txt`): 2 hits, 1 owner, 0 orphan, both in the
+script action `R0262` (`TRIG-DIPLO-019`): `L01871` for one actor
+and `L01872` in a loop over a list (`q2ranges.txt`).
+
+`callto:R0152`: 15 hits, 11 owners, 0 orphan. Besides the join:
+
+| Owner | Sites | Route read |
+|---|---|---|
+| `R0823` | 2 | not read here |
+| `R0065` | 1 | not read here |
+| `R0061` | 3 | session command dispatcher; `L07347` puts an actor in a new Group of the Player and sends `R0059` |
+| `R0066` | 1 | not read here |
+| `R0151` | 2 | not read here |
+| `R0062` | 1 | new actor, owner = argument, local Group (`L16260`) |
+| `R0003` | 1 | new actor and Group, then `R0044` and `R0063` (`L16261`..`L01874`) |
+| `R0432` | 1 | new actor, owner copied, argument Group, then `R0125` (`L16262`) |
+| `R1142` | 1 | not read here |
+| `R1143` | 1 | Group load loop: count, `L08346` member read, insert (`L08194`) |
+
+`callto:R0063`: 6 hits, 5 owners (`R0064`, `R0065` twice,
+`R0066`, `R0067`, `R0003`).
+
+**Confidence.** High for the two call sites, the site counts and the six
+read windows. Medium that the script action is the only caller:
+`EnumRefs callto:` sees direct calls and code pointers in `.rdata` (6204
+targets) and misses an indirect call through a register, a pointer in
+`.data` and a table built at run time; "0 orphan" counts that instrument's
+own hits. Medium for the routes of the five owners whose bodies are not
+read: they call the member insert, and what they insert is not established
+here.
+
+**Unknown.** The roles of `R0823`, `R0065`, `R0066`,
+`R0151` and `R1142`, and whether any of them changes
+`actor+0x14` of an existing actor.
+
+### AI-645
+
+The pickup setter `R0010` stores action 0, `ord+0x50 = 0`, command
+state 2, `ord+0x0a` = cell, `mover+0x90 = 0` and pending 0
+(`L00021`..`L00024`, `q3fn.txt`). The command state 2 arm `L14699`
+compares `ord+0x0a` with the own cell: different gives pending 1 and the
+cell (`L16263`), equal pending 7 (`L00025`). Executor row 1
+(`L07145`) calls the path search `R0178` and the centre test
+`R0040` and no sack lookup; row 7 (`L00549`) calls only
+`R0007` and `R0019`. Row 7 stores action
+2 when the action word is not 2 (`L00026`); when it is 2 it calls
+`R0007` three times, stores command state 0xc (`L00027`), post word
+= own cell, pending 0 (`L00028`) and `ord+0x50 = 1` (`L00029`). The
+first read of the sack is the lookup `R0446` in the action 2 arm,
+which returns 0 when the cell has no record or sack, and the arm then does
+nothing (`AI-634`).
+
+At arrival, the AI call's state 2 arm turns pending 1 into 7. When row 1
+instead runs with the goal already reached and `R0178` sets
+`mover+0x98` (`MOVE-082`), the executor tail, for command state 2, stores
+pending 0 and calls `R0004` (`L16264`..`L00011`, `AI-375`), the
+reacquisition. When it finds a candidate it stores pending 6 and `ord+0x0c`
+(`AI-350`, `AI-328`), so the actor attacks and the completion below does
+not follow by this route; with no candidate command state 2 stays and the
+next AI call issues pending 7. The completion below therefore holds for the
+arm route and, for the tail route, when no candidate is found. Neither
+route reads the sack.
+
+Next passes with the sack gone: row 7 stores action 2; the arm finds no
+sack; the next executor pass completes the pickup with the stores above;
+the next AI call reaches table entry 0xc, `L14697`, and runs the
+acquisition `R0022` (`AI-642`).
+
+**Confidence.** High that the read bodies of the setter, the state 2 arm,
+rows 1 and 7 and the tail call no sack lookup, and for their stores.
+Medium that `R0178`, not read here, reads no sack. Medium
+for the arrival route, which composes `MOVE-082`'s zero-count branch,
+`R0004`'s candidate branch (`AI-350`, `AI-328`) and the AI call
+cadence, whose order against the executor pass is unread.
+
+**Unknown.** Which of the two arrival routes runs first in play, and the
+AI call cadence against the executor pass.
+
+### AI-646
+
+The three actor vtables read from the PE file (`tables.txt`,
+`tables2.txt`; Unit `L00001`, set by `R0501`; Human `L00003`;
+the vtable at `L00002`, whose slot 6 is at `L03031`,
+`MOVE-GATE-039`):
+
+| Slot | Unit | Human | `L00002` |
+|---|---|---|---|
+| `+0x2c` | `L16247`, returns 1 | `L14949`, returns 1 | `L14949` |
+| `+0x30` | `R0182`, returns 0 | `R0183`, returns 1 | `R0183` |
+| `+0x34` | `L16248`, returns 0 | `L16248` | `L16248` |
+| `+0x4c` | `R0265` | `R0265` | `R0265` |
+| `+0x5c` | | `R0810` | `R0810` |
+| `+0x64` | `R0869`, returns at once (`RET 0xc`) | `R0870` | `R0870` |
+
+`R0870` (Human `+0x64`, called at `L04400` with the victim and the
+damage) computes an experience amount and calls the attacker's virtual
+`+0x5c` (`L16265`) when the victim's owner is set and that Player's
+`+0x28` is set (`L16266`..`L16267`). Its body and
+`R0265` store nothing through `+0x154`. The actor slot `R0037`
+reaches `L13251` and `L13252` (virtual `+4` of `+0x68` and `+0x64`) only
+in the action 0xd/0xe block. After a strike with any other action,
+`L16268` jumps past that block, and `L13253` (virtual `+0x30`) is
+reached whenever `actor+0x74` is set. Its targets are `R0182` (returns 0)
+and `R0183` (returns 1), constants that store nothing (`q1core.txt`,
+`q1virt.txt`).
+
+Inference: in the read bodies no virtual call on the melee cycle path
+stores the facing byte; for the Human and `L00002` classes the call at
+`L16265` (`+0x5c`, `R0810`) is also open.
+
+**Confidence.** High for the vtable entries and the bodies read. Medium for
+the facing result in all three classes: it depends on routines not read,
+the callees of `R0265` and of `R0870`, and for the Human and
+`L00002` classes on `R0810`.
+
+**Unknown.** `R0810`; the callees of `R0265` (`R0254`,
+`R1050`, `R0861`, `R0279`, `R0126`) and of `R0870`
+(`L16239`, `R0476`, `R0279`).
