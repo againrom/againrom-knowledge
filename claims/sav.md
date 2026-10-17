@@ -16199,6 +16199,11 @@ LOAD of a document the original wrote, resaved at once, gains any cell. A
 warm-LOAD resave, a mid-step resave and that cold-LOAD resave on mission 150
 would test each.
 
+**Amended.** TERR-FOG-272 removes the unexplained residual of TERR-FOG-267 (28
+of 34) as a reason for another writer: the stamp transcribed on the parser's
+grid at the saved cells sets exactly the 34 gained cells. The alternative of a
+stamp inside the SAVE route (SAV-1307) is untouched, and the Medium stands.
+
 ## Restart slots against the install alone
 
 | ID | Public functional claim | Confidence | Status | Evidence |

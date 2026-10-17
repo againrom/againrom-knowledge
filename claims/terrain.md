@@ -89,7 +89,7 @@ Level 2 ledger. Index: [registry.md](registry.md) · spec: [`formats/terrain/for
 | TERR-STRUCT-078 | The recompute's polarity, decided by one branch displacement — a SET `Passability` bit BLOCKS, and the shipped column title is the inverse of what the code does with it. | High / Medium | ● active | [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/) |
 | TERR-TILE-079 | Tile bits 15..14 are the FOG OF WAR, and the gate they feed is satisfied exactly where the local view currently has line of sight — so the animated arm and the partial-repaint renderer are live, not dead. | High / Medium | ● active (amended, superseded) | [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/) |
 | TERR-FOG-080 | The stamp's 41×41 mask is not a shape — it is a per-drawable line-of-sight field, rebuilt from scratch on every stamp. | High / Medium | ● active (superseded) | [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/), **[EXP-0120](../experiments/EXP-0120-sight-writers/)** |
-| TERR-FOG-081 | The sight value that drives the fog has TWO widths, and which one you get depends on whether the actor is a hero. | High / Medium | ● active | [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/) |
+| TERR-FOG-081 | The sight value that drives the fog has TWO widths, and which one you get depends on whether the actor is a hero. | High / Medium | ● active (superseded) | [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/) |
 | TERR-FOG-082 | How a consumer BRANCHES on the three states, and why the fourth is unreachable. | High | ● active (partially retracted) | [EXP-0088](../experiments/EXP-0088-fog-of-war/), [EXP-0349](../experiments/EXP-0349-tile-word-consumers/) |
 | TERR-FOG-083 | What the shroud pass consumes is not the tile word but a per-frame projection of it: `CMapView+0xa0`, one dword per lattice vertex, memset and rebuilt every frame. | High | ● active | [EXP-0088](../experiments/EXP-0088-fog-of-war/) |
 | TERR-FOG-084 | The shroud table `[L03341]` is 17 rows and its law is one line: `out_channel = (in_channel × (16 − L)) >> 4`. This CLOSES `TERR-FOG-037`'s Medium — level 16 is exactly black and level 8 exactly half. | High | ● active | [EXP-0088](../experiments/EXP-0088-fog-of-war/) |
@@ -976,6 +976,8 @@ The affected former wording below is partially retracted. See the
 **Original status.** ● active
 
 **Evidence.** [EXP-0085](../experiments/EXP-0085-tile-gate-and-polarity/)
+
+**Amended.** The route label is superseded in [`retracted.md`](retracted.md): `L10563`/`L10564` lie in `R0808`, which fills the frame at view `+0x3f54`; a mission body's `+0x102` comes from the state message (TERR-FOG-275).
 
 ### TERR-FOG-082
 
@@ -2904,10 +2906,10 @@ scaled-byte forms.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | TERR-FOG-265 | In one owner run of ROM1 EN mission 150, a cold LOAD then the SAVE the owner took at once kept all 372 explored cells and added 34, at Chebyshev 5..7 from the three party heroes; a SAVE about 5 s later was identical. | High | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
-| TERR-FOG-266 | ROM1's client stamp marks a 2x2 tile block per positive accumulator cell, walks from drawable +0x34/+0x38 and reads heights from map+0x10; the light parser fills it from ALM type 2. | High / Medium | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
-| TERR-FOG-267 | The transcribed client stamp at the heroes' saved cells and sight words explains 28 of the 34 gained cells; no variant within 2 cells and sight 1280..2304 explains all 34; 28 is not unique or maximal. | Medium / Unknown | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
-| TERR-FOG-268 | The SAVE the owner took at once held the added cells, read as a party stamp; no tick or call count is known; a standing unit's presentation calls the stamp every call; the clear phase stays Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
-| TERR-FOG-269 | ROM1's stamp pair is reached through nine vtables and the accumulator builder has one direct caller; an extended tile-mask store census classifies all 6 hits; cast and teleport stamps stay Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-266 | ROM1's client stamp marks a 2x2 tile block per positive accumulator cell, walks from drawable +0x34/+0x38 and reads heights from map+0x10; the light parser fills it from ALM type 2. | High / Medium | ● active (branch candidate, amended) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-267 | The transcribed client stamp at the heroes' saved cells and sight words explains 28 of the 34 gained cells; no variant within 2 cells and sight 1280..2304 explains all 34; 28 is not unique or maximal. | Medium / Unknown | ● active (branch candidate, amended) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-268 | The SAVE the owner took at once held the added cells, read as a party stamp; no tick or call count is known; a standing unit's presentation calls the stamp every call; the clear phase stays Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| TERR-FOG-269 | ROM1's stamp pair is reached through nine vtables and the accumulator builder has one direct caller; an extended tile-mask store census classifies all 6 hits; cast and teleport stamps stay Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
 
 ### TERR-FOG-265
 
@@ -2976,6 +2978,13 @@ are not shown to be the party's implementations.
 **Unknown.** The record-head reader `R0465` was not read, so the byte
 where the type-2 grid starts within the record is not fixed by this listing.
 
+**Amended.** TERR-FOG-271 reads `R0465` and the store at `L10922`: the
+grid starts after the record head; that the client height plane is ALM type 2
+stays Medium, since nothing was shown not to replace view `+0x80` between the
+store and the stamp (SAV-1246's open callbacks). TERR-FOG-273 reads the class
+table: `+0xd0` is `units.reg` TileSize, 1 for 28 of the 34 classes, and both
+unit vtables bind the two slots.
+
 ### TERR-FOG-267
 
 The client walk transcribed by EXP-0120 (TERR-FOG-117) was applied to the three
@@ -3014,6 +3023,10 @@ slice start the probe uses); sight or position at the stamp may differ from
 the saved words; another observer may stamp. Reading `R0465` and rerunning
 the derivation with the parser's offset would test the first.
 
+**Amended.** TERR-FOG-272 reruns this derivation on the parser's grid, which
+starts 8 bytes after this slice (TERR-FOG-271): it sets all 34 gained cells
+and no cell the at-once plane lacks. The residual here is the slice offset.
+
 ### TERR-FOG-268
 
 Observation: the SAVE the owner took at once holds the 34 gained cells, and
@@ -3047,6 +3060,11 @@ slot `+0x44` or the clear's restamp.
 frames of a cold LOAD cannot separate the routes either, since SAV drops bit
 14. A runtime trace of the slot-44 and clear entries on the same LOAD would.
 
+**Amended.** TERR-FOG-275 narrows when `+0x102` changes: a body of class code
+0x40 or above first takes its prototype's `+0xa4` (value not read), and a
+message with bit `0x2000` sets it, to the owner's client or for an actor named
+in TERR-FOG-275; which message comes first after a cold LOAD stays Unknown.
+
 ### TERR-FOG-269
 
 Population: one linear decode of `.text` (1,660,928 bytes, 23 skipped bytes)
@@ -3077,6 +3095,218 @@ drawable ever has nonzero `+0x102`.
 **Unknown.** Naming the classes that install `L10100`, `L10637`,
 `L16237`, `L02587`, `L10630` and `L10631`, and tracing `+0x102` on
 each, would decide the cast, teleport and structure stamps.
+
+**Amended.** TERR-FOG-273 and TERR-FOG-276 attribute `L02468`, `L02585`,
+`L10630`, `L10631`, `L16237` and `L10637`, and TERR-FOG-276 traces
+`+0x102` on the building-arm classes; `L10100` and `L02587` stay open.
+
+## Client fog stamp inputs
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-FOG-271 | ROM1's light parser reads each ALM record head at its own head-length word, so the type-2 grid at map+0x10 follows the head (20 bytes on 150.alm); the handler stores that object at view+0x80; it is the stamp's plane at Medium. | High / Medium | ● active (branch candidate) | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/) |
+| TERR-FOG-272 | On the parser-framed type-2 grid of EN 150.alm, the client stamp at the three heroes' saved cells and +0xa4 words sets exactly the 34 cells the at-once SAVE added and no cell it lacks. | High / Medium | ● active (branch candidate) | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/) |
+| TERR-FOG-273 | ROM1's unit drawables take the stamp's footprint from units.reg TileSize through the class array indexed by units.reg ID; shipped TileSize is 1 except IDs 26, 27, 66, 68, 72 (2) and 71 (3). | High / Medium / Unknown | ● active (branch candidate) | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/) |
+| TERR-FOG-274 | A .text census of writes overlapping drawable +0x102 finds 34 hits; six reach drawables: two constructors, the creation prototype copy, state-message bit 0x2000, the building arm and the character-screen frame. | High / Medium | ● active (branch candidate) | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/) |
+| TERR-FOG-275 | A body's client sight +0x102 is its server actor's +0xa4 as of the last message with bit 0x2000, sent to the owner's client; a new body of class code 0x40 or above first takes its prototype's +0xa4. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/) |
+| TERR-FOG-276 | ROM1 structure drawables get sight Buildings scanRange x 256 from the building arm and bind slot +0x48 to the stamp body; their presentation slot does not stamp; a clear restamp of them is Medium. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/) |
+
+### TERR-FOG-271
+
+The record-head reader `R0465` reads 8 bytes, seeks -8 relative to the
+current position (`L16272..L16273`) and reads as many bytes as the head's
+second dword states into the caller's head (`L16274..L16275`). The light
+parser `R0480` calls it for the file header (`L16276`) and for each
+record (`L16277`). The type-2 case reads W*H bytes into `map+0x10`
+immediately after (`L16230..L16278`); other types are skipped by the
+head's payload size (`L16279..L16280`); the type-0 case reads seven
+dwords and skips `0x25c`, 632 bytes in all.
+
+The landscape handler opens the stream (`L16281`), allocates `0x30` bytes,
+calls the parser at `L14404` and stores its return (`this`, `L16282`) at
+view `+0x80` (`L10922`). The binder `R0515`, called at `L14405`, sets
+view `+0x84` to map `+4` (W) and `+0x88` to map `+8` (H). The cell step
+`R0285` reads the signed byte at `[view+0x80]+0x10` at offset
+`base + a + b*[view+0x84]` (`L16283`, `L16227..L10556`).
+
+EN `scenario.res` entry `150.alm`: the type-2 record starts at file byte
+42164, head length 20 as read on this map, payload 20736 = 144*144; the grid
+is file bytes [42184, 62920). The 20 bytes agree with the section header
+length of ALM-SEC-002; this card read one map. The slice TERR-FOG-267 used
+starts 8 bytes earlier, the offset ALM-GRID-032 describes.
+
+**Confidence.** High for the listed instructions, read as raw listings in this
+experiment, and for the grid start at head plus head length: the read count
+comes from the head itself, so a fixed 12-byte head read is excluded; the
+head length 20 is read on `150.alm` only. High for the store at `L10922` and
+the binder's dimensions. Medium that the stamp's height plane is the parser's
+object, which is the same statement as that nothing replaces view `+0x80`
+between `L10922` and the stamp (SAV-1246's open callbacks), and
+that the stream slots `+0x30`, `+0x38`, `+0x3c` seek, tell and read
+sequentially: their bodies were not read; the type-0 total of 632 bytes and
+TERR-FOG-272 agree with it.
+
+### TERR-FOG-272
+
+The derivation of TERR-FOG-267, rerun on the TERR-FOG-271 grid: the same
+three heroes at (14,103), (13,106), (14,104) with `+0xa4` words 1699, 1648,
+1546 as drawable `+0x102`, `k=7`, each positive accumulator cell dilated to
+its 2x2 block (TERR-FOG-266), compared with the at-once plane of
+TERR-FOG-265:
+
+| model | stamped tiles | gained explained | unexplained | set by the model but absent |
+|---|---|---|---|---|
+| parser-framed type 2 | 247 | 34 of 34 | 0 | 0 |
+| its eight one-cell shifts | 219..253 | 14..27 of 34 | 7..20 | 2..18 |
+| TERR-FOG-267 slice | 241 | 28 of 34 | 6 | 3 |
+| flat ground | 238 | 27 of 34 | 7 | 3 |
+
+On the parser-framed grid the loaded plane plus the derived tiles equals the
+at-once plane, 406 cells. The per-hero search over sight 1280..2304 in steps of 32 contains none of
+the three saved words and finds no exact combination.
+
+**Confidence.** High for the derived counts on one owner run (EXP-0587's at-once SAVE) and one map: reproduced into scratch,
+byte-identical, with the TERR-FOG-267 rows reproduced as controls. High that
+the added set equals the union of the three heroes' client stamps computed
+from the saved state at the TERR-FOG-266 write centre with half-footprint 0:
+the derivation has no free parameter and every shift and the flat plane
+fail. Medium that these stamps wrote the cells at runtime: the route and
+moment remain TERR-FOG-268's, and another writer whose cells all lie inside
+this set is not excluded.
+
+### TERR-FOG-273
+
+The slots `R0586` and `L10957` each load drawable `+0x20`, index the
+array at `[L02113]` and return the entry's `+0xd0`. The `units.reg` loader
+stores each class record at `[L02113][record+0x04]`, its `ID`
+(`L07406`), growing the array to `ID+1` (`L16284..L16285`). It stores
+`TileSize` (key `L05673`) at `+0xd0` (`L16286`), defaulting to the
+parent's `+0xd0` (`L16287..L16288`) or 1 (`L07441`); REG-UNITS-049.
+
+The shipped EN `units.reg` has 34 classes (EN and RU members are identical,
+MAGIC-263). TileSize is 1 for 28 of them, including the 18 classes with an ID from 1 to 24 (IDs 6, 16, 17, 18, 20 and 22
+are absent from the table); 2 for IDs 26, 27, 66, 68 and 72; 3 for ID 71. The stamp's
+half-footprint, TileSize/2 in integer division, is 0 for TileSize 1 and 1 for
+2 or 3.
+
+The client message arm builds a body for a new id only when the mask holds
+`0x4001` (`L16289..L16290`). The class code is the payload byte under bit
+`0x4000` (`L16291..L04219`). A code in [0x20, 0x40) skips the class check
+and is built by `R0593`; another code needs a non-null entry below the
+count `[L16292]` and is built by `R0594` when the entry's `+0x104` (`Z`)
+is nonzero, else by `R0593` (`L16293..L02807`). `R0594` calls
+`R0593` and installs `L02585` (`L02802`, `L02586`). Both vtables,
+`L02468` and `L02585`, bind `+0x20`/`+0x24` to `R0586`/`L10957`.
+`R0590` sets `+0x20` to 1 for a code in [0x20, 0x40) (`L03169`); other
+codes keep theirs. The sender takes the code from `R0880` (`L04215`).
+
+The other direct calls of `R0593` build the static message object at
+`L16294` (`L02806`), the frame at view `+0x3f54` (`L02809`,
+`L02810`) and one unclassified object (`L02808`).
+
+**Confidence.** High for the slots, the array indexing, the store and its
+defaults, the census, the vtable bindings and the creation arm. Medium that
+every hero and hired unit has a class code below 0x40 other than 0x1a
+and 0x1b, so that its half-footprint is 0: `R0880` was not read. Unknown
+which codes a summoned creature takes.
+
+**Unknown.** Reading `R0880` and the summon and hire paths would name each
+party body's code.
+
+### TERR-FOG-274
+
+Population: one linear decode of `.text` (1,660,928 bytes, 23 undecoded),
+every memory operand the instruction writes, with a base or index register,
+whose bytes overlap `[+0x102, +0x104)`. 34 hits: 9 word stores at `+0x102`
+and 25 dword stores at `+0x100`.
+
+| site | routine | value |
+|---|---|---|
+| `L10565` | CUnit base constructor | 0 |
+| `L16295` | CUnit copy constructor | the source drawable's `+0x102` |
+| `L16271` | `R0590`, new body, code 0x40 or above | prototype `+0xa4` |
+| `L16269` | client state arm, mask bit `0x2000` | the message word |
+| `L16296` | building arm | Buildings parameter 2 shifted left 8 |
+| `L10564` | `R0808`, frame at view `+0x3f54` | `+0xa4` of an actor it builds |
+
+`L16297` is an indexed word store at `+0x102 + 2*i` in a 6-element loop.
+`L16298` and `L16299` are a word read-modify-write of `+0x102` of the
+object at `[ebp+8]`, with a clamp at zero, on an object whose kind was not
+read. The 25 dword stores lie in interface-rectangle and container-row
+routines whose context loads no drawable.
+
+**Confidence.** High for the six listed writers, read in windows of this
+experiment. Medium that no other write reaches a drawable's `+0x102`: the
+25 dword stores are classified from six preceding instructions;
+`L16297`, `L16298` and `L16299` are not classified, since the kind of
+their object was not read; bulk copies,
+computed addresses and bytes outside the linear decode are not covered.
+
+**Unknown.** The kind of the object at `[ebp+8]` in the routine holding
+`L16298` and `L16299`, and of the object indexed at `L16297`.
+
+### TERR-FOG-275
+
+The server sender `R0059` builds the state message at `L00126`. Bit
+`0x2000` appends the actor's `+0xa4` word (`L16300..L16301`); bit
+`0x4000` appends the class code and face (`L16302..L16303`). When the
+recipient is not the actor's owner the mask is ANDed with `0x507b`
+(`L03731`) or `0x50fb` (`L03732`), both without `0x2000`, unless the
+actor's `vt+0x30` is nonzero and its `+0xe` word lies in 0x21..0x3f
+(`L16304..L03734`).
+
+The client arm decodes the payload in mask order into the static drawable
+`L16294`: the bit-`0x2000` word lands at `L16305` (`L16306`), its
+`+0x102`. For a new body it calls
+`R0590` (`L03117`) before the mask stores, so bit `0x2000` (`L16269`)
+overrides the prototype word. `R0590` copies for every code from 0x40 up
+(`L03486`); the compare with 0x49 only selects `+0x14a` (`L12618`). A
+body with a code below 0x40 keeps the constructor's 0 until a message with
+bit `0x2000`.
+
+The sender has 51 direct calls. 16 pass an immediate mask with `0x2000`: 13
+pass `0xffffffff` (`L12974`, `L12975`, `L03848`, `L12984`,
+`L12985`, `L12986`, `L03521`, `L03789`, `L03791`, `L12988`,
+`L12993`, `L09201`, `L12996`) and 3 pass `0xbf7fff7f` (`L12977`,
+`L12978`, `L03276`). 14 pass an immediate mask without it, among them
+`0x1f001304` at `L12991` after a derive call through `vt+0x50`. For 21 the
+mask is a register or is pushed before the six printed instructions.
+
+**Confidence.** High for the sender's arms and owner filter, the client order
+and the direct-call census of one linear `.text` decode. Medium that the
+client word equals the server `+0xa4` at the stamp: messages without bit
+`0x2000` leave it as it was, and the read-modify-write at `L16298` and
+`L16299` (TERR-FOG-274), on an object of unread kind, is an open writer. The
+prototype word taken by a class code from 0x40 was not read. Unknown which call sends bit `0x2000` first
+after a cold LOAD, a hire or a summon.
+
+**Unknown.** Reading the callers that pass `0xffffffff` and the LOAD resync,
+or a runtime trace of `L16269` on a cold LOAD of mission 150, would place
+the first nonzero `+0x102`.
+
+### TERR-FOG-276
+
+The building arm builds one of three classes: `R1842` objects with vtable
+`L10630` or `L10631`, sized by message bytes `+0xf` and `+0x10` into
+`+0x138` and `+0x13c` (`L16307..L16235`, `R1842..L16308`), or a
+`0x138`-byte `L03225` object (`L16309..L16310`). Each gets `+0x102` =
+element 2 of the row at `[L06410] + byte+0x11 * 0x1c`, shifted left 8
+(`L16311..L16296`), the Buildings `scanRange` (DAT-SCHEMA-004,
+TERR-STRUCT-102), and is inserted into view `+0x9b8` (`L16312..L16313`).
+
+Vtables `L10631`, `L10630` and `L16237` bind `+0x20`/`+0x24` to
+`R2206`/`R2207`, which return `+0x138`/`+0x13c`; `L10637` binds
+`R2204`/`R2205` (unread). All four bind `+0x44`/`+0x48` to `L14409`/
+`L02578` directly. Their `+0x3c`, `R1839`, advances an animation phase
+and returns 1 with no call through `+0x44`. The clear's restamp calls `+0x48`
+for visited view `+0x9b8` members (TERR-FOG-235). `L16171` is the CUnit
+base; `L02468` and `L02585` are the unit bodies (TERR-FOG-273);
+`L10100` and `L02587` are not attributed.
+
+**Confidence.** High for the listed stores, slot bindings and the
+presentation body. Medium that a structure with nonzero `scanRange` is
+restamped at a clear: the visit condition and the stamp guards per structure
+were not read. Unknown whether another route calls a structure's `+0x44`.
 
 ## Cell planes at a fresh-map start
 

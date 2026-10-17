@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4007. Observation: 99. Static analysis: 3388. Mixed: 520.
+Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 
 ## Ledger ai
 
@@ -3357,7 +3357,7 @@ Claims labelled: 4007. Observation: 99. Static analysis: 3388. Mixed: 520.
 | TERR-STRUCT-078 | static analysis | ● active |
 | TERR-TILE-079 | static analysis | ● active (amended, superseded) |
 | TERR-FOG-080 | static analysis | ● active (superseded) |
-| TERR-FOG-081 | static analysis | ● active |
+| TERR-FOG-081 | static analysis | ● active (superseded) |
 | TERR-FOG-082 | static analysis | ● active (partially retracted) |
 | TERR-FOG-083 | static analysis | ● active |
 | TERR-FOG-084 | static analysis | ● active |
@@ -3467,10 +3467,16 @@ Claims labelled: 4007. Observation: 99. Static analysis: 3388. Mixed: 520.
 | TERR-FOG-236 | static analysis | ● active (branch candidate) |
 | TERR-FOG-237 | static analysis | ● active (branch candidate, amended) |
 | TERR-FOG-265 | mixed | ● active (branch candidate) |
-| TERR-FOG-266 | static analysis | ● active (branch candidate) |
-| TERR-FOG-267 | static analysis | ● active (branch candidate) |
-| TERR-FOG-268 | static analysis | ● active (branch candidate) |
-| TERR-FOG-269 | static analysis | ● active (branch candidate) |
+| TERR-FOG-266 | static analysis | ● active (branch candidate, amended) |
+| TERR-FOG-267 | static analysis | ● active (branch candidate, amended) |
+| TERR-FOG-268 | static analysis | ● active (branch candidate, amended) |
+| TERR-FOG-269 | static analysis | ● active (branch candidate, amended) |
+| TERR-FOG-271 | static analysis | ● active (branch candidate) |
+| TERR-FOG-272 | mixed | ● active (branch candidate) |
+| TERR-FOG-273 | static analysis | ● active (branch candidate) |
+| TERR-FOG-274 | static analysis | ● active (branch candidate) |
+| TERR-FOG-275 | static analysis | ● active (branch candidate) |
+| TERR-FOG-276 | static analysis | ● active (branch candidate) |
 | TERR-238 | static analysis | ✔ promoted |
 | TERR-239 | static analysis | ✔ promoted |
 | TERR-240 | static analysis | ✔ promoted |
@@ -4043,7 +4049,7 @@ Claims labelled: 4007. Observation: 99. Static analysis: 3388. Mixed: 520.
 | UNIT-SPELL-007 | static analysis | ● active |
 | UNIT-PROTO-008 | static analysis | ● active |
 | UNIT-OWNER-009 | static analysis | ● active (partially retracted, superseded) |
-| UNIT-PANEL-010 | static analysis | ● active (superseded) |
+| UNIT-PANEL-010 | static analysis | ● active (superseded, partially retracted) |
 | UNIT-PANEL-011 | static analysis | ● active |
 | UNIT-GATE-012 | static analysis | ● active (amended) |
 | UNIT-GATE-013 | static analysis | ● active |

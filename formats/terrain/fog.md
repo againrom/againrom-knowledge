@@ -43,6 +43,14 @@ stores require an admitted LOS cell. Bounded guard controls used a fixed
 synthetic LOS field; native LOS extent and event cadence remain Unknown.
 — TERR-DRAWSTAMP-170
 
+Class `+0xd0` is `units.reg` `TileSize`, read through the class array that
+the loader indexes by `units.reg` ID, at drawable `+0x20`. Shipped TileSize
+is 1 for 28 of 34 classes, including the 18 classes with an ID from 1 to 24; 2 for IDs 26,
+27, 66, 68 and 72; 3 for ID 71. The write centre adds TileSize/2, so a
+TileSize-1 body writes around its walk centre. Both unit-body vtables bind
+the two slots; which class code the server sends for each party kind is not
+read. — TERR-FOG-273
+
 - **State.** The two fog bits per tile word encode `11` currently in sight, `10` explored but not in sight, `00` never seen.
 - **Set.** The stamp is `R0554`, the ground and air unit method at vtable offset `+0x48`, which tail-jumps to the body at `L02578`. It sets the two top bits (`0xc0`) of the high byte in four tile-word positions, at byte offsets +1, +3, +W*2+1 and +W*2-1 from `tile + idx*2` (the four stores are at `L02581`, `L02582`, `L02583`, `L02584`). One immediate sets both bits, so a single stamped word satisfies the four-corner OR. A second writer of bit 15 is at `L07966` in the save-load path `R0099`, which restores the saved run-length record (`SAV-FOG-061`, `TERR-FOG-145`); its saved value is held in a register, not an immediate.
 - **Clear.** Only bit 14 is cleared, map-wide, on a period: the mask-out of `0xbfff` at `L01659` in `R0374`. No bit 15 clear is identified in the immediate-form writer set; register-sourced clears are outside that negative. The shroud reader distinguishes explored `0x8000` from visible `0xc000`.
@@ -67,7 +75,7 @@ The method at vtable offset `+0x44`, `R1402`, repeats guards 0 to 2 every tick a
 - Margin: cells outside `[7, W-7) x [7, H-7)` are never evaluated and stay 0.
 - Clip: 19 cells. The maximum shipped scanRange is 12, so the clip never binds on shipped data.
 
-**Sight.** `drawable+0x102` is copied from `actor+0xa4` by the state sync (`L10563`, `L10564`). For a hero, `R0280` writes `ftol(((mind+reaction)/25 + 4) * 256)`, in units of 1/256 cell. For a non-hero, the streamer's slot 11 targets `actor+0xa5`, the high byte, in whole cells (`Data.bin` Units title 11 `scanRange`, Humans title 9 `ScanRange`).
+**Sight.** A mission body's `drawable+0x102` holds its server actor's `actor+0xa4` word as of the last state message with bit `0x2000`; the sender sets that bit for an owner's client, or for any client when the actor's `vt+0x30` is nonzero and its `+0xe` word lies in 0x21..0x3f. A new body of class code 0x40 or above first takes its prototype's `+0xa4` word, whose value was not read; a structure gets its Buildings `scanRange` times 256. The pair `L10563`/`L10564` fills the character-screen frame, not a mission body. For a hero, `R0280` writes `ftol(((mind+reaction)/25 + 4) * 256)`, in units of 1/256 cell. For a non-hero, the streamer's slot 11 targets `actor+0xa5`, the high byte, in whole cells (`Data.bin` Units title 11 `scanRange`, Humans title 9 `ScanRange`). — TERR-FOG-081 (superseded), TERR-FOG-274, TERR-FOG-275, TERR-FOG-276
 
 Consumer consequences: `Index` is in range on 82/82 shipped classes but a decoder should still
 bounds-check it; `DeadObject` is a subscript into the same class array; `FireObject` is **not** a
@@ -188,18 +196,27 @@ three party heroes, on the rim of the explored region. — TERR-FOG-265
 The stamp ORs `0xc0` into a 2x2 tile block, the cell and its `+x`, `+y` and
 diagonal neighbours, for each positive accumulator cell. Its walk centres on
 drawable `+0x34/+0x38` and reads signed heights at `map+0x10`. The parser's type-2 case allocates that
-grid and reads W*H bytes into it (High); that the object at view `+0x80` is the
-parser's result, so that the client heights are ALM type 2, is Medium
-(SAV-1246). The slot implementations are not shown to be the party's.
-— TERR-FOG-266, SAV-1246
+grid and reads W*H bytes into it. — TERR-FOG-266, SAV-1246
+
+The parser reads each record head at the head's own length word, so the
+type-2 grid starts right after the record head; the head length read on EN
+`150.alm` is 20, the section header length of `ALM-SEC-002`. The landscape
+handler stores the parser's object at view `+0x80` and the binder takes W from
+it as the row stride. For `150.alm` the grid is file bytes [42184, 62920).
+That the stamp's height plane is that object, so that nothing replaces view
+`+0x80` before the stamp, is Medium. — TERR-FOG-271, ALM-SEC-002
 
 The transcribed stamp at the heroes' saved cells and sight words explains 28
 of the 34 added cells and sets 3 cells the original did not; no variant
 within 2 cells and sight 1280..2304 explains all 34. Nine one-cell shifts
 explain 17 to 28 (type 2) and 14 to 30 (flat; best 30 of 34 at -1,0), so 28
 is neither unique nor maximal and type 2 against flat (28 against 27) is not
-separated. The height-grid offset
-of the type-2 record is the first open alternative. — TERR-FOG-267
+separated. — TERR-FOG-267
+
+On the parser-framed grid, which starts 8 bytes after that slice, the same
+derivation sets exactly the 34 added cells and no cell the SAVE lacks; its
+eight one-cell shifts explain at most 27. That these stamps wrote the cells
+at runtime is Medium. — TERR-FOG-272
 
 A standing unit's presentation calls the movement stamp on every call; the
 guard needs a changed position against `+0xc0/+0xc4`, which the constructors
@@ -208,10 +225,24 @@ or call count is known), read with Medium confidence as a party stamp. The SAV h
 clear phase and the stamping route are not observable from SAV files.
 — TERR-FOG-268
 
+A body of class code 0x40 or above first takes its prototype's `+0xa4`
+word, whose value was not read; a state message with bit `0x2000` then sets
+it. Two word read-modify-write stores at `L16298` and `L16299` on an
+object of unread kind are an open writer. Of
+51 direct calls to the sender, 16 pass an immediate mask with that bit;
+which message comes first after a cold LOAD is Unknown. A census of writes
+overlapping `+0x102` finds six drawable writers; that no other exists is
+Medium. — TERR-FOG-274, TERR-FOG-275
+
 The stamp pair is reached through nine vtables; the accumulator builder has
 one direct caller and the clear one. The extended tile-mask store census has
 6 hits, all classified. Which cast, teleport or structure drawables stamp is
 Unknown. — TERR-FOG-269
+
+Structure drawables from the building arm carry sight `scanRange` times 256
+and bind slot `+0x48` to the stamp body, with footprint slots returning their
+own size fields; their presentation slot does not stamp. A clear restamp of
+them is Medium; cast and teleport drawables stay Unknown. — TERR-FOG-276
 
 ## Player cast hover predicate
 
