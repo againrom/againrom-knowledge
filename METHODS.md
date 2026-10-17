@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4021. Observation: 99. Static analysis: 3401. Mixed: 521.
+Claims labelled: 4029. Observation: 99. Static analysis: 3409. Mixed: 521.
 
 ## Ledger ai
 
@@ -410,12 +410,17 @@ Claims labelled: 4021. Observation: 99. Static analysis: 3401. Mixed: 521.
 | AI-645 | static analysis | ● active |
 | AI-646 | static analysis | ● active |
 | AI-648 | static analysis | ● active |
-| AI-649 | static analysis | ● active |
+| AI-649 | static analysis | ● active (superseded) |
 | AI-650 | static analysis | ● active |
 | AI-651 | static analysis | ● active |
 | AI-652 | static analysis | ● active |
 | AI-653 | static analysis | ● active |
 | AI-654 | static analysis | ● active |
+| AI-658 | static analysis | ● active |
+| AI-659 | static analysis | ● active |
+| AI-660 | static analysis | ● active |
+| AI-661 | static analysis | ● active |
+| AI-662 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -1650,6 +1655,9 @@ Claims labelled: 4021. Observation: 99. Static analysis: 3401. Mixed: 521.
 | MOVE-175 | static analysis | ● active |
 | MOVE-176 | static analysis | ● active |
 | MOVE-177 | static analysis | ● active |
+| MOVE-181 | static analysis | ● active |
+| MOVE-182 | static analysis | ● active |
+| MOVE-183 | static analysis | ● active |
 
 ## Ledger pal
 

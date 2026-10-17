@@ -310,6 +310,17 @@ are 16, 32 and 5. No give-up counter exists in these read driver bodies;
 empty-search failure and its executor-tail consumption are separate.
 — MOVE-130, MOVE-131, MOVE-PARAM-006, AI-384, AI-ROUTE-045
 
+On every centred ordinary-walk call beyond its range the walk compares the cell
+with resolved word `+76`; equal sets `+90 = 1` and returns before the dynamic
+admission and the step, with no refusal. A static search that returns no route
+collapses `+76` onto the cell first, so it ends the same way with `+98 = 1`. A
+destination held by a unit is labelled on the static plane, so the static search
+routes to it; near the route's end the near search substitutes the cheapest
+labelled cell of the first ring around it and, once the walker stands in that
+ring, its own cell, which leaves the dynamic route empty and sets `+98 = 1`.
+One linear `.text` pass finds nine mover-based writes of `+90`, value 1 only in the walk, and nine of `+76`; 225 rows stay unresolved, so completeness is Medium.
+— MOVE-181, MOVE-182, MOVE-183
+
 
 ## Restored actor registration and the reached turn
 

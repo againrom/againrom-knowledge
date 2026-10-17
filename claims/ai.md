@@ -911,6 +911,8 @@ Against `AI-STATE-011`'s 27-arm table: `5,6,7,9,0x12..0x15` are unwritten *and* 
 
 **Amended.** `AI-649` shows the next group pass re-issues the walk for a group member, so the cancellation of a refused target persists only until that pass (Medium across passes).
 
+**Amended.** `AI-658` narrows the amendment above: after a static-search refusal the next order 4 pass latches the member (path (b)) and does not re-issue the walk, unless the member reset's claim release clears `mover+0x76` on the refused pass (`AI-658`, Medium).
+
 ## Load-time census of group orders
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -2224,6 +2226,8 @@ takes the same zero-count branch as a picker miss. MOVE-080 through MOVE-083
 bound storage and local result use; native order continuation remains Unknown.
 
 **Confidence.** High for the single-tick in-routine branch trace and for the `R0055` gate mechanism (both read whole this round, 0 unresolved) / Medium for the multi-tick "never re-issues, never gives up" claim (the gate exists and its reachability is Unknown, not excluded) and for the impassable-case substitute mechanism (composes this round's own `R0154`/`R0178` reads with `MOVE-ALT-018`/`MOVE-ALT-022`'s already-published, not re-derived, picker-A behavior) / Unknown, explicitly, for whether an ordinary occupied-but-open destination actually drives the give-up gate, and for whether picker A finds a substitute for a given impassable destination in general (terrain-dependent, not decided by this reading)
+
+**Amended.** `MOVE-181` reads the occupied-but-open destination for the walk: the static search does not refuse it, and the near search raises `mover+0x98` when the member stands in picker A's first labelled ring around the cell (High for the branches, Medium for the composition); `AI-659` gives the passes that follow.
 
 ### AI-336
 
@@ -5885,6 +5889,8 @@ one witness). Medium for the composition across passes and ticks (no native tick
 
 **Amended.** `AI-649` reads the re-issue: it is unconditional when `ord+0x50` is 0, and `[grp+0x3c]+0x44` gates only `ord+0x6c`. A member at state 1 is stood down to 0xc on its first refused route, the arm then re-issues the walk at state 0xc, and a later refusal reaches `R0004` (Medium for the order of passes).
 
+**Amended.** `AI-659` answers the open tail path: a Move member refused by the near search is struck at from its second refusal, inside `R0004` when the gate is open; `AI-658` latches a member refused by the static search through path (b), unless the claim release clears `mover+0x76` (Medium). The arm reads no operand at its cell argument (`AI-660`).
+
 ### AI-520
 
 Order 1 (`R0024`): `R0141`, then the candidate builder `R0110`, then a radius clip by `R0167`
@@ -7148,7 +7154,7 @@ the callees of `R0265` and of `R0870`, and for the Human and
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-648 | Move and Swarm members walk at command state 1; Guard walks at 0xb (group order 1), Defend escorts at 8 and script Follow at 0x11 (group order 0); no guard or escort setter or arm read stores 1 or 0xa. | High | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
-| AI-649 | On a refused route the executor tail stands state 1 down to 0xc and sends every other walking state to `R0004`; neither reads the group; the next group pass re-issues the walk whatever `grpAI+0x44` holds. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
+| AI-649 | On a refused route the executor tail stands state 1 down to 0xc and sends every other walking state to `R0004`; neither reads the group; the next group pass re-issues the walk whatever `grpAI+0x44` holds. | High / Medium | ● active (superseded) | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-650 | The struck hook has three direct callers and no `.rdata` or `.data` pointer; strikes pass the striker, spell payloads the caster or source; poison and Drain Life lower health without it in the bodies read (Medium). | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-651 | Of the 39 order-block stores to `ord+0x0a`, none is in acquisition, engage, reacquisition, strike install or the struck hook; setters, group arms, state arms and withdrawal write the walk destination. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-652 | The 14 immediate stores of 1 to `ord+0x50` are at arrival, stand-downs, pickup end and cast end; 112 register stores are Medium; `grpAI+0x44` has three stores; SAVE and LOAD copy order, group and mover raw. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
@@ -7229,6 +7235,8 @@ composition across passes: no native pass was observed.
 **Unknown.** Which pass runs first after a refusal in play, the group pass
 or the next executor pass; a native trace of `ord+8` and `mover+0x98` for one
 refused member would settle it.
+
+**Amended.** `AI-658` and `AI-659` supersede the sentence "A Move member reaches the stand-down on its first refusal and `R0004` on a later one": it holds for a near-search refusal; after a static-search refusal path (b) of the next order 4 pass latches the member and the walk is not re-issued, unless the member reset's claim release clears `mover+0x76` on the refused pass (`AI-658`, Medium); in that case the walk is re-issued and the superseded sentence holds. `AI-660` places the re-issue before the executor pass of the AI slot's tick (Medium), which answers the Unknown above by composition.
 
 ### AI-650
 
@@ -7407,3 +7415,185 @@ before the gate.
 **Unknown.** The other writer `L16384` (in `R0124`) stores a register
 whose value was not traced; the console toggle `L02007` (`AI-378`) is the
 only nonzero writer besides the dead store.
+
+## Refused Move member across passes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-658 | A Move member whose walk's static search returns no route is stood down and latched by path (b) of the next order 4 pass, then acquires through `R0022` and walks no more, unless the claim release clears `mover+0x76` (Medium). | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+| AI-659 | A Move member refused by the near search keeps `mover+0x90` = 0: each order 4 pass re-issues the walk, each walk is refused again, and from the second refusal `R0004` reacquires and installs a strike if the gate is open. | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+| AI-660 | The order 4 re-issue stores `ord+8` = 1, `ord+0xa` from itself and, with `grpAI+0x44` set, `ord+0x6c` = 1, and nothing else; a member left at `ord+8` = 0 runs no row until it; it precedes that tick's executor pass. | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+| AI-661 | For a human participant's refused member the struck hook's stores change no step of the sequence; the walker tail's withdrawal, run after the arm on the same pass, replaces the walk with a flee walk. | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+| AI-662 | Swarm and Roam with an empty candidate set reach the Move sequence through the order 4 arm, which ignores its cell; Guard re-issues the walk without a latch and reaches `R0004` on the first refusal; script Swarm's state is not read. | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+
+### AI-658
+
+Listings `run1/gate-and-walk.txt`, `run1/executor-and-helpers.txt`,
+`run1/group-order-arms.txt`, `run1/member-resets.txt`,
+`run1/claim-release.txt`, `run1/standing-acquisition.txt`.
+
+- Refused pass (executor, progress 0, `ord+8` = 1, state 1). Row 1
+  (`L07145`) stores `mover+0x6c` = 1, `mover+9` = 0xff when `ord+0xa`
+  differs from `mover+0x74`, and calls the walk `R0178(actor, ord+0xa, 0)`.
+  The walk runs the static search when the target differs from `mover+0x74` or
+  `mover+9` exceeds `ctx+0x585bc` (`L02023`..`L02024`). An empty static list
+  stores `mover+0x76` = the cell and `mover+0x98` = 1 (`L06957`, `L01720`);
+  the cell then equals `mover+0x76`, so `mover+0x90` = 1 and the walk returns
+  before the near search and the stepper (`L06953`..`L06956`). The tail
+  stands state 1 down: three resets, `ord+0x50` = 0, state 0xc, post = cell,
+  `ord+8` = 0 (`L14989`..`L00112`).
+- Passes until the group pass: `ord+8` = 0 reaches no row (`L00100`) and the
+  flag is 0, so nothing is stored.
+- Next order 4 pass: the cell is not `ord+0xa`; path (b) finds `mover+0x90`
+  nonzero and the cell equal to `mover+0x76` (`L06958`..`L01714`) and
+  stores three resets, state 0xc, post, `ord+8` = 0, `ord+0x50` = 1 and
+  `mover+0x90` = 0 (`L16391`..`L01715`); `ord+0x50` = 1 then runs
+  `R0022` (`L00455`..`L14830`). Later passes fail path (b)
+  (`mover+0x90` = 0) and run `R0022` again; none stores `ord+8` = 1.
+- `R0022` picks from the sight stamp within reach and stores `ord+8` = 6,
+  `ord+0xc` and `ord+0x14` = reach (`L00576`..`L14776`, `AI-518`); with no
+  pick a human owner's member runs `R0015`, whose no-cast exit stores
+  `ord+8` = 0 (`L00052`..`L00053`). Executor row 6 (`L00581`) then installs the
+  strike when the gate `R0041` passes (`L16392`..`L04073`) or turns
+  through `R0250`. So the first strike is installed on the first executor
+  pass after the latching group pass whose gate passes, on `R0022`'s pick.
+- Exception: the reset `R0007` calls the release `R0045` when
+  `mover+0x80` is nonzero, the unit is centred and the claim differs from the
+  cell (`L14890`..`L14891`); the release stores `mover+0x76` = 0
+  (`L14893`). The stepper claims the next cell before a turn
+  (`L16393`..`L16394`, `L16395`), so a member can be centred with such a
+  claim. Then path (b) fails and the walk is re-issued.
+
+**Confidence.** High for every branch and store cited (one image, EN and RU
+identical, one witness). Medium for the composition across passes, observed in
+no native run, and for whether the release exception occurs on a refused pass.
+
+**Unknown.** Which in-play situations empty the static search (`AI-544` lists
+its exits); a native trace of the fields above for one member would settle the
+sequence.
+
+### AI-659
+
+Listings as `AI-658`, with `run1/stepper-and-near-search.txt`,
+`run1/reacquire-and-turn.txt`, `run1/executor-slot-tables.tsv`.
+
+The near search `R0055` aims at `mover+0x76` (kind 1) when the static count
+is at most `ctx+0x585c8` (`L16396`..`L16397`) and stores `mover+0x98` = 1
+when the dynamic count is 0 after its search (`L01909`..`L00162`). The walk
+calls it at `L01717` when the dynamic list is empty or `mover+0x78` exceeds
+`ctx+0x585c0`, after the wait verdict returned 0. On that pass `mover+0x90` is
+0 (cleared at the last static search, `L06947`) and `mover+0x76` differs from
+the cell (otherwise `L00457` returned first).
+
+| pass | entry | routines | exit |
+|---|---|---|---|
+| refusal 1 (executor) | `ord+8` 1, state 1, `ord+0x50` 0 | row 1, walk, near search sets the flag, stepper turns only (`L16398`), tail state-1 arm | `ord+8` 0, state 0xc, post = cell |
+| executor passes to the group pass | `ord+8` 0 | no row | unchanged |
+| group pass | `mover+0x90` 0 | arm path (c), `L01716`..`L14832` | `ord+8` 1 |
+| refusal 2 and later (first executor pass at progress 0) | `ord+8` 1, state 0xc | row 1, walk, flag, tail: `ord+8` = 0 and `R0004` (`L14993`..`L00011`) | `ord+8` 6 with a strike (progress 1) or a turn, or `ord+8` 0 |
+| executor passes to the next group pass | `ord+8` 6 or progress 1 | row 6 (gate, strike or turn) or the strike counter | — |
+
+`R0004` keeps actors within byte distance of reach, filters by diplomacy and
+prefers living candidates (`AI-542`); the pick is a candidate of least turn
+cost, a later candidate replacing an equal one (`L01787`..`L16399`). It
+stores `ord+0xc` and `ord+8` = 6 (`L00121`..`L00122`); a mage-mask actor
+with reach below 2 and a human owner gets `ord+8` = 0 (`L00811`..`L00123`).
+With the gate open it installs the strike in the same call (`L00741`..`L00740`:
+progress 1, `ord+0x15` = 0, action 3, `actor+0x5c` = `ord+0xc`); closed, it turns
+(`L16400`..`L16401`) and row 6 installs the strike on a later pass. With no
+pick a human owner's member gets `ord+8` = 0 (`L16402`..`L00125`). So a
+hostile in reach is struck from the second refusal on, not on the first.
+
+Each group pass re-issues `ord+8` = 1 while `ord+0x50` = 0; a running strike
+keeps its progress until it ends (`AI-488`), and the next walk is refused again.
+The cycle ends when a near search returns a route, when `mover+9` (incremented
+per near search, `L02021`) exceeds `ctx+0x585bc` and the static search
+returns no route (`AI-658`), when the member stands on `mover+0x76`
+(`MOVE-182`, path (b)) or on `ord+0xa` at a centre (path (a)), or when the
+order changes.
+
+**Confidence.** High for the branches and stores cited. Medium for the
+composition across passes (no native pass observed).
+
+**Unknown.** A native trace of `ord+8` and `mover+0x98` for one member across
+two group passes.
+
+### AI-660
+
+Listings `run1/group-order-arms.txt`, `run1/executor-and-helpers.txt`,
+`run1/executor-slot-tables.tsv`.
+
+With `ord+0x50` = 0 the order 4 arm stores `ord+0x6c` = 1 when
+`[grp+0x3c]+0x44` is nonzero, then `ord+8` = 1 and `ord+0xa` from `ord+0xa`
+(`L01716`..`L14832`). It leaves `actor+0x50` (0xc after a stand-down), the
+post, `ord+0xc`, `ord+0x14`, `ord+0x50`, progress, `actor+0x54` and every mover
+field. The arm reads no operand at its cell argument (`R0154`..`L16403`).
+Pending 0 reaches no executor row (`L00100`), so a refused member left at
+`ord+8` = 0 (the first refusal at state 1, or a later one without a pick)
+stands until the group pass; after a later refusal with a pick it runs row 6
+or a strike first (`AI-659`). The AI slot and queue drain precede every member's
+executor pass in a tick (`AI-371`, High) and the AI slot runs once per 16
+ticks (`AI-385`). After a refusal in tick T the member's next executor pass
+runs first unless tick T+1 is the AI slot's tick; in both cases the re-issued
+walk acts on the executor pass of the AI slot's tick when progress is 0.
+
+**Confidence.** High for the arm's stores and the executor dispatch. Medium for
+the timing: it composes `AI-371`, `AI-385` (Medium for its routes) and the
+executor gate of `AI-455`.
+
+### AI-661
+
+Listings `run1/executor-and-helpers.txt`, `run1/group-walker.txt`,
+`run1/withdrawal-bodies.txt`.
+
+- The struck hook `R0226` stores `ord+0x54` = 1, `ord+0x58` = the attacker's
+  cell, `ord+0x5a` = 0 and calls `R0126` (`L00652`..`L15388`); it stores
+  no pending kind, destination, `ord+0x50`, command state or mover field.
+  `ord+0x54` is read only by the idle turn `R0205` (`AI-RETAL-056`), which a
+  human owner's member reaches through neither `R0004` (`L16402`) nor
+  `R0022` (`R0015`); `ord+0x58` is stamped only for an AI owner
+  (`AI-518`).
+- The walker tail runs for every member after the arm (`L00483`..`L00313`):
+  `R0105` (health at most `ord+0x44` and the hostile list nonempty) leads to
+  `R0100`, which with a living hostile stores `ord+8` = 1 and `ord+0xa` = a
+  cell from `R0104` with distance 3 (`L16404`..`L13766`), else runs
+  `R0022`; otherwise `R0106` (health at most `ord+0x40`, radius 2) leads
+  to `R0107` with the same stores (`L16405`..`L13768`). The flee store
+  replaces the re-issue or the acquisition of that pass, and later order 4
+  passes re-issue the flee cell because the arm reuses `ord+0xa`.
+
+**Confidence.** High for the bodies read. Medium for the thresholds a human
+participant's member carries (`AI-CLASS-030`, `AI-548`) and for the effect of
+`R0126` on the reacquisition's diplomacy filter (unread).
+
+**Unknown.** What `R0126` changes for the candidate filter of `R0004`
+and `R0022`.
+
+### AI-662
+
+Listings `run1/group-walker.txt`, `run1/group-walker-table.tsv`,
+`run1/group-order-arms.txt`, `run2/state-arm-head.txt`,
+`run2/state-arm-table.tsv`.
+
+- Order 5 (Swarm): `R0026` runs the candidate build and, with a nonzero
+  count at `+0xbb4`, engages or idles each member; with a zero count it calls
+  the order 4 arm (`L00462`..`L00463`), so the Move sequence and its latch
+  apply.
+- Order 0x11 (Roam): `R0155` re-posts the group cell and calls `R0026`
+  (`L00481`). The order 4 arm ignores its cell argument (`AI-660`), so a
+  re-posted cell does not reach the members through it.
+- Order 1 (Guard) and order 2 (script Swarm): `R0024` and `R0025` engage a
+  scored victim; at the post or group cell and centred they idle the member;
+  otherwise they store `ord+8` = 1 and `ord+0xa` (`L14846`..`L00828`,
+  `L14847`..`L00448`). Neither reads `mover+0x90` or `mover+0x76`, so a
+  refusal is followed by a re-issue on every pass, without a latch. A Guard
+  member walks at state 0xb (`AI-648`), so its first refusal reaches
+  `R0004`; an order 2 member's tail arm follows the state it holds.
+- Order 0: the state arm head stands a state 1 member down and latches it with
+  the test of path (b) (`L14852`..`L14853`), re-issues the walk for state 1
+  (`L16406`..`L16329`) and acquires for state 0xc (`L14697`); the escort
+  states are `AI-648`'s.
+- Order 3 issues no walk; order 0xff runs `R0022` per member.
+
+**Confidence.** High for the arms and the table entries read. Medium for the
+composed sequences and for the candidate build `R0110`, unread here.

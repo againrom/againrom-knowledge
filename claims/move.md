@@ -2017,3 +2017,96 @@ are not classified.
 
 **Unknown.** The objects behind `L16387`, `L16388` and `L16389`; a read
 of their routines would settle them.
+
+## Walk refusal, occupied destination and the resolved endpoint
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-181 | A walk to an occupied open destination is never refused by the static search; near the route's end the near search substitutes the cheapest labelled ring cell, and on that cell its own, so `mover+0x98` is raised there. | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+| MOVE-182 | On every centred walk call beyond its range, `R0178` sets `mover+0x90` = 1 and returns before the dynamic search and the step when the cell equals `mover+0x76`, with no refusal. | High | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+| MOVE-183 | One `.text` pass finds mover-based writes of `+0x90` at nine sites, value 1 only at `L00457`, and of `+0x76` at nine sites: walk, pursuit, claim release, two relocation blocks and `L07139`. | High / Medium | ● active | [EXP-0591](../experiments/EXP-0591-refused-move-passes/) |
+
+### MOVE-181
+
+Listings `run1/gate-and-walk.txt`, `run1/stepper-and-near-search.txt`,
+`run1/landing-step.txt`, `run1/wait-verdict.txt`, `run2/path-search.txt`,
+`run2/dynamic-extractor.txt`, `run2/picker-a.txt`.
+
+- The static search reads the unit-blind static plane (`MOVE-PLANE-005`), so an
+  open destination held by a unit is labelled and the static route ends on it;
+  `mover+0x76` is that destination (`L01721`).
+- Near the end (static count at most `ctx+0x585c8`) the near search aims at
+  `mover+0x76` (`L16407`..`L16397`) with no target actor (`L16408`). On the
+  dynamic plane the held cell stays unlabelled, so the search calls picker A
+  with bound 8 around it (`L16409`..`L01915`) and extracts to the answer
+  (`L01943`). Picker A returns the least label of the first ring that has one
+  (`MOVE-ALT-019`). The start cell is labelled 0 (`L01965`).
+- While the member is outside that ring, the answer is a ring cell and the
+  member walks there; landing frees the dynamic list (`L00156`..`L16410`).
+  Standing in the ring, the member's own cell is the least label, the
+  extractor adds and removes that one node (`L16411`..`L16412`,
+  `L14987`..`L16413`), the dynamic count stays 0 and `mover+0x98` = 1
+  (`L01909`..`L00162`). For a footprint of 1 and an open ring this is a
+  cell adjacent to the destination, and the refusal comes on the first centred
+  walk pass there with an empty dynamic list.
+- The wait branch (`L16414`..`L16415`) tests the next static waypoint only
+  at Chebyshev distance 1; the verdict `R0402` is 0 for a unit held by a
+  centred occupant with pending other than 1 or 4, and for a centred walker
+  when the cell is the asking member's own `ord+0xa` (`MOVE-132`). So it does not
+  stop the member at the destination; an off-centre occupant can still make it
+  wait (pending 0xa or 0, `L16416`..`L13496`).
+- After the refusal the Move cycle of `AI-659` follows. When the occupant
+  leaves, a later near search finds the destination labelled, the member steps
+  onto it, and order 4 path (a) latches it (`AI-519`). After 17 near searches
+  the static search runs again (`L02023`..`L02024`, `L02021`); the
+  destination is labelled there, so it does not refuse.
+
+**Confidence.** High for every branch and store cited (one image, one witness).
+Medium for the composition, the occupancy labels being `MOVE-PLANE-005`'s and
+`MOVE-CLAIM-007`'s, and for a footprint above 1 (the ring is footprint-blind,
+`MOVE-ALT-019`; the occupancy test over a larger footprint is not read here).
+
+**Unknown.** An owner run of the original with a Move onto a cell held by a
+standing unit would show the member stopping beside it and re-trying each group
+pass.
+
+### MOVE-182
+
+Listing `run1/gate-and-walk.txt`.
+
+`R0178(actor, target, range)` first finishes an off-centre crossing through
+`R0039` and returns (`L06897`..`L06898`). At a centre within `range` it
+returns (range 0) or turns (`L14193`..`L16417`). Otherwise it increments
+`mover+0x78`, runs the static search when needed, and then compares the cell
+with `mover+0x76` (`L16418`..`L16419`): equal stores `mover+0x90` = 1 and
+returns (`L00457`..`L06956`), before the dynamic admission, the near search
+and the stepper. This runs whether or not the static search ran in that call.
+So a member that reaches a static substitute endpoint, or whose static search
+just collapsed `mover+0x76` onto its cell (`AI-658`), has `mover+0x90` = 1; the
+order 4 arm's path (b) reads it (`L06958`..`L01714`).
+
+**Confidence.** High: the routine is read whole and every exit is listed.
+
+### MOVE-183
+
+Instrument: one linear Capstone pass over `.text` (`run2/text-hits.tsv`, 645
+rows; reproduced byte for byte) listing every memory operand written whose bytes
+overlap `+0x76..+0x77`, `+0x90..+0x93` or `+0x50..+0x53`, with the instruction
+that last set its base register within 40 instructions (register moves
+followed, stopping at a `ret`).
+
+- `+0x90`, class `mover`: `L06948`, `L06949`, `L06950`, `L06951`,
+  `L06952` (setters, 0), `L00458`, `L01715` (order 4 arm, 0), `L06947`
+  (walk, 0), `L00457` (walk, 1).
+- `+0x76`, class `mover`: `L06957`, `L01721` (walk), `L16420`, `L16421`,
+  `L13297` (pursuit `R0043`), `L14893` (claim release, 0), `L14902`
+  (landing relocation), `L16422` (relocation, with `+0x80` and `+0xa6`), and
+  `L07139`, which stores 0 with `+0x80` and `+0xa6` in a routine not read.
+- 127 rows of class `ord` write `+0x50..+0x53` (as `AI-652`).
+
+**Confidence.** High for the rows and their classes. Medium for completeness: a
+base set more than 40 instructions earlier, through a call return or by a bulk
+copy is not classified; 225 rows are unresolved, most outside the simulation
+code.
+
+**Unknown.** The routine holding `L07139` and its callers.

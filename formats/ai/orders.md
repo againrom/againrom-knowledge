@@ -525,10 +525,16 @@ arrived and runs no acquisition before arrival or before the route ends on the
 member's own cell; after arrival every pass runs acquisition and none re-issues
 the move (`AI-519`). That re-issue tests nothing but `ord+0x50`; `grpAI+0x44` gates only `ord+0x6c` (`AI-649`). Move and Swarm
 walk at command state 1, Guard at 0xb, Defend escorts at 8 and script Follow at 0x11 (`AI-648`). On a refused
-route the tail stands state 1 down to 0xc and sends the others to the reacquisition, and the next group pass
-writes the walk again (`AI-649`, Medium across passes). There is no group-pass attack-move; the executor tail path
-is open (Medium): a member stood down to state 0xc is reacquired by the tail on a
-later raise of the refusal word (`AI-524`, `AI-541`). Orders 1 and 3 engage a scored victim
+route the tail stands state 1 down to 0xc and sends the others to the reacquisition (`AI-649`; its sentence on the later refusal is superseded). What follows
+depends on the search that refused (Medium across passes). A static-search refusal leaves `mover+0x90` = 1 on
+the member's own cell, so the next order 4 pass latches it through path (b) and it acquires from then on,
+unless the member reset's claim release clears `mover+0x76` on the refused pass and the walk is re-issued (`AI-658`, Medium). A near-search refusal leaves `mover+0x90` = 0, so every group pass re-issues the walk (`ord+8` = 1,
+the same `ord+0xa`, `ord+0x6c` when `grpAI+0x44` is set, nothing else, `AI-660`); each re-issued walk is refused
+again and, from the second refusal, the tail's reacquisition installs a strike when facing and reach hold
+(`AI-659`, `AI-524`, `AI-541`). There is no group-pass attack-move. Being struck changes no step of this for a
+human participant's member; the withdrawal tail after the arm replaces the walk with a flee walk (`AI-661`).
+Swarm and Roam with an empty candidate set reach this through the order 4 arm, which ignores its cell
+argument; Guard and script Swarm re-issue without a latch, Guard reaching `R0004` on its first refusal (`AI-662`). Orders 1 and 3 engage a scored victim
 with pending 5; order 1 walks a member away from its post home, order 3 stores no
 walk (`AI-520`). Order 5 runs the order 3 split when the candidate build found
 something and the order 4 arm when it found nothing (`AI-520`, `AI-519`). Order 0
