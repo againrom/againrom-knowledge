@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4029. Observation: 99. Static analysis: 3409. Mixed: 521.
+Claims labelled: 4033. Observation: 99. Static analysis: 3412. Mixed: 522.
 
 ## Ledger ai
 
@@ -2973,7 +2973,9 @@ Claims labelled: 4029. Observation: 99. Static analysis: 3409. Mixed: 521.
 | SAV-1241 | static analysis | ● active (partially retracted) |
 | SAV-1246 | static analysis | ● active (branch candidate, amended) |
 | SAV-1307 | static analysis | ● active (branch candidate) |
-| SAV-1308 | mixed | ● active (branch candidate) |
+| SAV-1308 | mixed | ● active (branch candidate, amended) |
+| SAV-1311 | mixed | ● active (branch candidate) |
+| SAV-1312 | static analysis | ● active (branch candidate) |
 | SAV-1248 | mixed | ✔ promoted |
 | SAV-1249 | mixed | ✔ promoted |
 | SAV-1250 | mixed | ✔ promoted |
@@ -3493,6 +3495,8 @@ Claims labelled: 4029. Observation: 99. Static analysis: 3409. Mixed: 521.
 | TERR-FOG-274 | static analysis | ● active (branch candidate) |
 | TERR-FOG-275 | static analysis | ● active (branch candidate) |
 | TERR-FOG-276 | static analysis | ● active (branch candidate) |
+| TERR-FOG-279 | static analysis | ● active (branch candidate) |
+| TERR-FOG-280 | static analysis | ● active (branch candidate) |
 | TERR-238 | static analysis | ✔ promoted |
 | TERR-239 | static analysis | ✔ promoted |
 | TERR-240 | static analysis | ✔ promoted |

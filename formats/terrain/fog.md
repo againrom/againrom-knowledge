@@ -244,6 +244,22 @@ and bind slot `+0x48` to the stamp body, with footprint slots returning their
 own size fields; their presentation slot does not stamp. A clear restamp of
 them is Medium; cast and teleport drawables stay Unknown. — TERR-FOG-276
 
+A LOAD nulls the view's map pointer before its message pump; the landscape
+handler then builds a new map whose tile plane the parser allocates and fills
+from the ALM type-1 record. On EN `150.alm` no type-1 word carries bit 14 or
+15, so after the Fog OR bit 15 is the Fog set alone, whatever the plane held
+before the LOAD: the live plane is neither kept nor merged. That the Fog OR
+reaches the parser's block is Medium. — TERR-FOG-279
+
+In one owner session, a SAVE 4 sub-ticks after a LOAD in a running process
+held the same 34 stamped cells as a SAVE 2 sub-ticks after a cold LOAD (both
+windows Medium: counted from the loaded head value, SAV-HEAD-025; later counter
+writers at LOAD unread); a
+SAVE during a step inside one cell and a SAVE after loading it gained no cell.
+The stamp set is exact for all three resaves. The stamping route, the
+presentation-call count and whether drawables keep their last stamped pair
+across a LOAD are Unknown. — TERR-FOG-280, TERR-FOG-268
+
 ## Player cast hover predicate
 
 The cast hover guard ORs the high pairs of four neighbouring tile words.

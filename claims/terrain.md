@@ -3065,6 +3065,11 @@ frames of a cold LOAD cannot separate the routes either, since SAV drops bit
 message with bit `0x2000` sets it, to the owner's client or for an actor named
 in TERR-FOG-275; which message comes first after a cold LOAD stays Unknown.
 
+**Amended.** SAV-1311 supplies a tick count: the head sub-tick of the SAVE the
+owner took at once is 2 above the input's. TERR-FOG-280 adds a SAVE 4
+sub-ticks after a LOAD in a running process (Medium window) that holds the same cells. The
+presentation-call count and the stamping route stay Unknown.
+
 ### TERR-FOG-269
 
 Population: one linear decode of `.text` (1,660,928 bytes, 23 skipped bytes)
@@ -3307,6 +3312,104 @@ base; `L02468` and `L02585` are the unit bodies (TERR-FOG-273);
 presentation body. Medium that a structure with nonzero `scanRange` is
 restamped at a clear: the visit condition and the stamp guards per structure
 were not read. Unknown whether another route calls a structure's `+0x44`.
+
+## Fog plane across a LOAD in a running process
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-FOG-279 | ROM1's LOAD nulls view+0x80 before its message pump; the landscape handler then builds a new map whose tile plane the parser fills from the ALM type-1 record; on EN 150.alm no type-1 word has bit 14 or 15. | High / Medium | ● active (branch candidate) | [EXP-0592](../experiments/EXP-0592-fog-warm-load/) |
+| TERR-FOG-280 | In two owner sessions on EN mission 150, SAVEs 2 sub-ticks after a cold LOAD and 4 after a LOAD in a running process held the 34 stamped cells; TERR-FOG-272's set is exact for 3 new resaves; the route is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0592](../experiments/EXP-0592-fog-warm-load/) |
+
+### TERR-FOG-279
+
+The LOAD root `R0099` stores 0 at view `+0x80` (`L13471..L06689`)
+after its first call and before it pumps any message. Its wait loop
+(`L09145..L12826`) pumps window messages and calls the view's message
+step `R0509` with 100 until view `+0x80` is nonzero; after 60,000 ms by the
+timer import at `[L00849]` it leaves for `L06739`.
+
+The landscape handler `R0514` destroys the object at view `+0x80` through
+its vtable `+4` with argument 1 only when that pointer is nonzero
+(`L16423..L10960`). It then allocates `0x30` bytes (`L16424..L16425`),
+runs the light parser on them (`L14404`) and stores the result at view
+`+0x80` (`L10922`).
+
+The parser `R0480` installs vtable `L10958` (`L16426`). Its type-1
+case allocates 2*W*H bytes through `R0722`, stores the block at `+0x0c` and
+reads 2*W*H bytes into it (`L02342..L16427`). After the record loop it ANDs
+every word of `+0x0c` with `0xdfff` (`L02343..L16428`) and returns the
+object (`L16282`).
+
+The Fog restore loads view `+0x80`, then its `+0x0c` (`L14406`,
+`L14407`), ORs each run's state into consecutive words and flips the state
+by `0x8000` (`L07966..L16429`), then calls `R0082` with the view. The
+first 0x110 bytes of `R0082` zero view `+0x140..+0x148` and the per-slot
+arrays from `+0x14c` and touch no `+0x80`.
+
+EN `scenario.res` `150.alm`: type-1 record at file byte 672, head length 20,
+payload 41472 = 2*144*144. Bit 15 is set in 0 of 20736 words, bit 14 in 0,
+bit 13 in 194.
+
+Inference (High on the read path, Medium that the handler is the publisher
+during a LOAD): when the handler runs with view `+0x80` null, the plane the Fog
+OR reaches is a new block filled from the map file. On `150.alm` every cell's
+bits 14 and 15 are clear before the Fog OR, so bit 15 after it is the Fog set
+alone, whatever the plane held before the LOAD. On that path the live plane is
+neither kept nor merged; the old map object leaves view `+0x80` without the
+handler's destroy call.
+
+**Confidence.** High for the listed instructions, read as raw listings in this
+experiment and reproduced byte-identical, and for the `150.alm` census. The
+Fog window starts inside an instruction; its boundary from `L13432` is
+confirmed by the local branch targets `L16430`, `L07966`, `L16431` and
+`L16432`. Medium that the Fog OR acts on the parser's block: no census of
+writers of view `+0x80` was run, and the dispatch from the message step to
+`R0514` is unread (SAV-1246), so a callback storing another map there
+between the handler and the Fog OR is not excluded. Medium that the stream
+read fills all 2*W*H bytes: the stream slot `+0x3c` was not read
+(TERR-FOG-271).
+
+**Unknown.** Where the old map object is released, and the rest of
+`R0082`.
+
+### TERR-FOG-280
+
+Head sub-tick (SAV-HEAD-025) of the loaded input 960; the cold resaves of
+TERR-FOG-265 962 and 1055; `game0041` 964, `game0042` 990, `game0043` 992
+(sequence: SAV-1311). The three new documents hold 406 bit-15 cells each,
+equal to the cold resaves (SAV-1312). The parser-framed stamp set of
+TERR-FOG-272 (247 tiles) against each: 34 of 34 gained cells explained, 0 set
+but absent, exact. The party's saved cells and `+0xa4` words equal
+TERR-FOG-265's in all three; Kit Hero is mid-step inside cell (14,104) in
+`game0042` (sub-cell (198,58)) and `game0043` (226,30).
+
+Inference: by TERR-FOG-279, bit 15 after the LOAD that preceded `game0041` was
+the 372 Fog cells, so the 34 cells were written within the 4 sub-ticks before
+that SAVE, as within the 2 sub-ticks after the cold LOAD. That depends on two
+links: the Medium Fog-OR link of TERR-FOG-279 and the owner's report of an
+earlier LOAD before `game0041`. The files cannot separate a replaced plane from
+a kept or merged one: the same input was loaded twice, so a kept plane gives
+the same 372 plus 34 in `game0041` as in `game0043`. The windows are counted
+from the loaded head value (SAV-HEAD-025); later counter writers at LOAD
+unread; Medium. A step inside one
+cell adds no cell: the mid-step SAVE and the SAVE after loading it hold the
+same 406 cells, which TERR-FOG-272's set at the saved cells covers.
+
+**Confidence.** High for the counts, the equalities and the sub-tick values,
+as file content; the comparison was reproduced byte-identical. Medium that
+the differences count sub-ticks run since the LOAD: the load arm reads the
+counter from the head (SAV-HEAD-025), and later writers at LOAD were not read.
+Medium that the LOAD before `game0041` ran in a process that had already run a
+document (SAV-1311). Medium that party stamps wrote the cells (TERR-FOG-272).
+
+**Unknown.** Which route wrote them (slot `+0x44`, the clear's restamp
+through `+0x48`, or a callee of the SAVE root), on which presentation call,
+and whether client drawables keep their last stamped pair `+0xc0/+0xc4`
+across a LOAD. Since the loaded `game0042` plane already held the 34 cells,
+`game0043` cannot show whether a LOAD of a mid-step document stamps. A trace of
+`L02578` entries and their callers on a LOAD of `9704 fog` in a running
+original, or a reading of the client body teardown at LOAD, would settle the
+route and the drawable question.
 
 ## Cell planes at a fresh-map start
 

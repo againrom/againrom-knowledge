@@ -16142,12 +16142,18 @@ SAVE the owner took at once after a cold LOAD the explored plane held every
 Fog-restored cell plus 34 cells on the party's sight rim. Bits 13 and 14 at LOAD completion
 remain Unknown.
 
+**Amended.** TERR-FOG-279 reads the parser's type-1 case: the plane is a new
+block filled from the map's type-1 record before the Fog OR, and on EN
+`150.alm` no type-1 word carries bit 14 or 15. Bit 14 is therefore clear in
+every cell right after the Fog OR there; later writers stay open. Medium: no
+census of writers of view `+0x80`, and the dispatch to `R0514` is unread.
+
 ## Fog across SAVE after a cold LOAD
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | SAV-1307 | ROM1's SAVE root writes Fog from the live tile plane masked with 0x8000 and changes no plane bit before the store; its unread callees are not excluded from stamping. | High / Medium | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
-| SAV-1308 | For one document another program wrote, the SAVE the owner took at once after a cold LOAD kept its 372 explored cells and added 34 on the party's sight rim. | High / Medium | ● active (branch candidate) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
+| SAV-1308 | For one document another program wrote, the SAVE the owner took at once after a cold LOAD kept its 372 explored cells and added 34 on the party's sight rim. | High / Medium | ● active (branch candidate, amended) | [EXP-0587](../experiments/EXP-0587-fog-load/) |
 
 ### SAV-1307
 
@@ -16203,6 +16209,104 @@ would test each.
 of 34) as a reason for another writer: the stamp transcribed on the parser's
 grid at the saved cells sets exactly the 34 gained cells. The alternative of a
 stamp inside the SAVE route (SAV-1307) is untouched, and the Medium stands.
+
+**Amended.** SAV-1311 supplies the tick count: the at-once SAVE's head
+sub-tick is 962 against the input's 960. SAV-1312 narrows the warm-LOAD and
+mid-step Unknowns: a SAVE 4 sub-ticks after a LOAD in a running process (Medium, counted from
+the loaded head value) kept the 372 cells and added the same 34, and a mid-step SAVE and a SAVE after
+loading it kept the 406. The original-document clause stays open.
+
+## Fog across SAVE after a LOAD in a running process
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1311 | In one owner session on EN mission 150, head sub-ticks and saved runtime pointers order three SAVEs: game0041 4 sub-ticks after a LOAD of the input, game0042 the same objects 26 later, game0043 new objects 2 after it. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0592](../experiments/EXP-0592-fog-warm-load/) |
+| SAV-1312 | In one owner session, the SAVE 4 sub-ticks (Medium, from the loaded head value) after a LOAD of 9704 fog in a running process kept its 372 explored cells and added the same 34; a mid-step SAVE and a SAVE after loading it kept 406. | High / Medium | ● active (branch candidate) | [EXP-0592](../experiments/EXP-0592-fog-warm-load/) |
+
+### SAV-1311
+
+| document | sub-tick | full tick | party owner ref | hero terrain pointer | Kit Hero sub-cell |
+|---|---|---|---|---|---|
+| input `9704 fog` | 960 | 60 | not walked | `0x51000010` | not walked |
+| `game0041` | 964 | 60 | `02ecd740` | `0x12fdb020` | (128,128) |
+| `game0042` | 990 | 61 | `02ecd740` | `0x12fdb020` | (198,58) |
+| `game0043` | 992 | 62 | `02f2f4c0` | `0x0c476020` | (226,30) |
+| `game9999` (mission 131) | 1 | 0 | `02fe89e0` | `0x0c454020` | not in party |
+| `game0040` (mission 131) | 13 | 0 | `02fe89e0` | `0x0c454020` | not in party |
+
+The owner reference is the saved Player identity, the Player's own pointer
+(SAV-PLAYER-028); the terrain pointer is the raw pointer in the hero's token
+head (SAV-OBJ-014). The two Mage groups' owner references are `02ed0b40` and
+`02ed1c40` in `game0041` and `game0042`, `02f39b70` and `02ecc660` in
+`game0043`.
+
+Each label region holds the new label, its terminator, and from there the
+previous mission-150 label's bytes: `game0042` bytes 12..19 equal
+`game0041`'s, `game0043` bytes 15..19 equal `game0042`'s. The cold at-once
+resave of SAV-1308 holds non-zero label bytes at 9..19, while its loaded
+input's region is zero after byte 8.
+
+Owner's report, given after the run: `game0041` is a resave after two LOADs;
+`game0042` was saved during a step; `game0043` was saved after loading the
+mid-step save. The report does not name the slot loaded before `game0043`.
+
+Inference: `game0041` follows a LOAD of the input by 4 sub-ticks.
+`game0042` continues `game0041`'s objects 26 sub-ticks later with Kit Hero
+walking. Before `game0043` every Player, group and terrain object was
+reallocated; its sub-tick is 2 above `game0042`'s and Kit Hero is 28 further
+along the same diagonal, so the document loaded before it is `game0042` (or a
+document with its state), not the input. The label buffer kept the previous
+label across the three SAVEs, and a LOAD did not copy the loaded document's
+label region into it in the cold run.
+
+**Confidence.** High for the field values, read by one decoder from the
+eight documents. Medium for the sequence: that the sub-tick restarts at the
+loaded value rests on the load arm (SAV-HEAD-025); a LOAD that reallocated
+every object at its old address is not excluded between `game0041` and
+`game0042`. Medium that `game0042` is the document loaded before `game0043`.
+Medium that the three mission-150 SAVEs ran in one process: the label residue
+chain, not a process field. The owner's
+report is testimony, not file evidence; it agrees with every inference above.
+Unknown whether the mission-131 documents came from the same process: no
+field links them.
+
+**Unknown.** How many LOADs preceded `game0041` in its process. None of the
+head, label, hero-head, Player-record or owner-reference fields read in the
+eight documents (`savflag` and `fogpos` output) counts LOADs or names a
+process; no whole-document comparison was run. Two LOADs of the same input
+both restore sub-tick 960; the count of two rests on the owner's report.
+
+### SAV-1312
+
+Over the input and the five resaves of TERR-FOG-280, `game0041`, `game0042`
+and `game0043` each hold 43 runs and 406 bit-15 cells, the same set as the
+cold resaves of SAV-1308: 372 of 372 input cells and the same 34 gained
+cells. `game0041` is the SAVE 4 sub-ticks after a LOAD of `9704 fog` (the
+window is Medium: counted from the loaded head value (SAV-HEAD-025); later
+counter writers at LOAD unread), by the owner's report the second of two LOADs in one process (SAV-1311). `game0042`
+is a SAVE with Kit Hero mid-step inside cell (14,104); `game0043` follows a
+LOAD of `game0042`'s state by 2 sub-ticks. Both keep the 406 cells; neither
+gains or loses a cell.
+
+This narrows SAV-1308's warm-LOAD and mid-step Unknowns for bit 15: after a
+LOAD in a running process the SAVE the owner took at once is the loaded
+section plus the same 34 cells (TERR-FOG-272), and a mid-step SAVE and a SAVE
+after loading it write the loaded section unchanged when the step stays in
+one cell. TERR-FOG-279 gives the mechanism on the read path: the LOAD builds a
+new tile plane from the map file before the Fog OR (Medium: no census of
+writers of view `+0x80`; dispatch to `R0514` unread).
+
+**Confidence.** High for the planes and equalities as file content. Medium
+that the LOAD before `game0041` ran in a process that had already run a
+document: the files do not count LOADs; the owner's report says two LOADs.
+Neither `game0041` nor `game0043` separates a kept or merged plane from a
+replaced one: the input was loaded twice, so a kept plane equals input plus 34
+in `game0041` as well, and `game0043` loaded a plane that already held the 34
+cells; neither shows a stamp at LOAD. The 4 sub-tick window is Medium.
+
+**Unknown.** Whether a cold LOAD of a document the original wrote, resaved at
+once, gains any cell; a mid-step document whose plane lacks the rim; and the
+result on a map whose type-1 words carry bit 15.
 
 ## Restart slots against the install alone
 

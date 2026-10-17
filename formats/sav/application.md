@@ -115,6 +115,23 @@ rim were added, read with Medium confidence as the first stamp; two SAVEs
 about five seconds apart were identical. A cold LOAD of a document the original
 wrote is not tested. — SAV-1307, SAV-1308
 
+The head sub-tick, the saved Player and terrain pointers and the label
+region's residue order SAVEs within one observed session. That session showed,
+at Medium, the counter counting on from the loaded value, the saved objects
+reallocated across one LOAD, and the label buffer keeping the previous label's
+bytes past the new terminator. None of the head, label, hero-head,
+Player-record or owner-reference fields read in eight documents counts LOADs or
+names a process; no whole-document comparison was run. — SAV-1311
+
+After a LOAD in a running process, the SAVE taken 4 sub-ticks later (Medium,
+counted from the loaded head value, SAV-HEAD-025; later counter writers at LOAD
+unread) held the same 406 cells as the cold resave: the loaded 372 plus the same 34. A mid-step
+SAVE and a SAVE after loading it wrote those 406 unchanged. The plane the Fog
+OR reaches is rebuilt from the map file at LOAD (Medium: no census of writers
+of view `+0x80`; dispatch to `R0514` unread); on EN `150.alm` it carries no
+bit 14 or 15 before the Fog OR. The files do not separate a rebuilt plane from
+a kept one. — SAV-1312, SAV-1308, SAV-1246
+
 ## Projectiles
 
 The located SAVE producer emits the counter and IDs when the low bit of
