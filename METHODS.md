@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
+Claims labelled: 4021. Observation: 99. Static analysis: 3401. Mixed: 521.
 
 ## Ledger ai
 
@@ -23,7 +23,7 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-351 | static analysis | ● active (amended) |
 | AI-352 | static analysis | ● active (amended, partially retracted) |
 | AI-353 | static analysis | ● active |
-| AI-ACTIVITY-324 | static analysis | ✔ promoted |
+| AI-ACTIVITY-324 | static analysis | ✔ promoted (amended) |
 | AI-FORMOWNER-314 | static analysis | ✔ promoted |
 | AI-FORMCMD-315 | static analysis | ✔ promoted |
 | AI-FORMTRIGGER-316 | static analysis | ✔ promoted |
@@ -55,7 +55,7 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-INPUT-127 | mixed | ● active |
 | AI-FILTER-001 | static analysis | ● active |
 | AI-ACQUIRE-002 | static analysis | ● active |
-| AI-LIST-003 | static analysis | ● active |
+| AI-LIST-003 | static analysis | ● active (amended) |
 | AI-DIPLO-004 | static analysis | ● active (amended, superseded) |
 | AI-DIPLO-005 | static analysis | ● active |
 | AI-SIGHT-006 | static analysis | ● active (amended, partially retracted, superseded, contested) |
@@ -75,7 +75,7 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-GROUPCMD-020 | static analysis | ● active (amended, superseded) |
 | AI-GUARD-021 | static analysis | ● active (amended) |
 | AI-SWARM-022 | static analysis | ● active (amended) |
-| AI-MOVE-023 | static analysis | ● active (superseded) |
+| AI-MOVE-023 | static analysis | ● active (superseded, amended) |
 | AI-SWARM2-024 | static analysis | ● active (amended, superseded) |
 | AI-ROAM-025 | static analysis | ● active (amended) |
 | AI-WITHDRAW-026 | static analysis | ● active |
@@ -97,7 +97,7 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-POST-042 | static analysis | ● active (amended, partially retracted, superseded) |
 | AI-STATE-043 | static analysis | ● active (amended) |
 | AI-THREAT-044 | static analysis | ● active (amended, superseded) |
-| AI-ROUTE-045 | static analysis | ● active |
+| AI-ROUTE-045 | static analysis | ● active (amended) |
 | AI-CENSUS-046 | mixed | ● active |
 | AI-CENSUS-047 | static analysis | ● active |
 | AI-CENSUS-048 | mixed | ● active |
@@ -108,7 +108,7 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-PANEL-053 | static analysis | ● active (partially retracted, superseded) |
 | AI-CMD-054 | static analysis | ● active |
 | AI-STRIKE-055 | static analysis | ● active |
-| AI-RETAL-056 | static analysis | ● active |
+| AI-RETAL-056 | static analysis | ● active (amended) |
 | AI-ARBITER-057 | static analysis | ● active |
 | AI-RAND-058 | static analysis | ● active (amended, superseded) |
 | AI-KEYMOD-059 | static analysis | ● active |
@@ -253,7 +253,7 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-381 | static analysis | ● active (amended) |
 | AI-382 | static analysis | ● active (amended) |
 | AI-383 | static analysis | ● active (amended) |
-| AI-384 | static analysis | ● active |
+| AI-384 | static analysis | ● active (amended) |
 | AI-385 | static analysis | ● active (amended) |
 | AI-387 | static analysis | ● active |
 | AI-390 | static analysis | ● active |
@@ -409,6 +409,13 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | AI-644 | static analysis | ● active |
 | AI-645 | static analysis | ● active |
 | AI-646 | static analysis | ● active |
+| AI-648 | static analysis | ● active |
+| AI-649 | static analysis | ● active |
+| AI-650 | static analysis | ● active |
+| AI-651 | static analysis | ● active |
+| AI-652 | static analysis | ● active |
+| AI-653 | static analysis | ● active |
+| AI-654 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -1638,10 +1645,11 @@ Claims labelled: 4013. Observation: 99. Static analysis: 3393. Mixed: 521.
 | MOVE-156 | static analysis | ● active |
 | MOVE-157 | static analysis | ● active |
 | MOVE-158 | static analysis | ● active |
-| MOVE-171 | static analysis | ● active |
+| MOVE-171 | static analysis | ● active (amended) |
 | MOVE-174 | static analysis | ● active |
 | MOVE-175 | static analysis | ● active |
 | MOVE-176 | static analysis | ● active |
+| MOVE-177 | static analysis | ● active |
 
 ## Ledger pal
 

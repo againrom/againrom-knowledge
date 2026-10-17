@@ -144,6 +144,14 @@ actor-list enrollment/removal path, the first native post-LOAD event, or
 acceptance of source coordinates beyond the measured safe grid.
 — AI-ACTIVITY-324
 
+The supplied list is the global on-map list. Its add and remove pairs set and clear
+the actor's `+0x4c` bit 8 (`AI-LIST-003`), and the LOAD arm builds the world on it and adds every
+restored actor whose bit 8 is clear; whether a LOAD first empties it before re-adding is Unknown.
+Before its group gate the slot runs that rebuild and then the trigger passes; the
+session Serialize does not carry `+0xb388`. The first native post-LOAD event stays
+unobserved.
+— AI-653, AI-654, AI-LIST-003
+
 ## Missing Player admission and evaluation
 
 An unresolved map owner is refused before an actor or Group exists, so the

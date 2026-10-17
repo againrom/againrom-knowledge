@@ -123,7 +123,10 @@ When progress is zero and both manager `+0xb388` and group-AI byte `+0x45` are z
 the executor sets action `0x1a` and returns. Nonzero progress bypasses that activity
 refusal. Otherwise it preserves actions `2` and `0xf` and clears other actions.
 Effect bit `actor+0x144 & 0x100000` installs progress `4` only from progress zero
-(`AI-456`).
+(`AI-456`). The AI slot runs the activity rebuild over the global on-map list when `+0xb388` is 0, then the
+trigger passes, before that group gate. The LOAD arm builds the world on the same list, adds every restored
+actor whose `+0x4c` bit 8 is clear, and builds a session whose constructor leaves `+0xb388` at 0; the session
+Serialize does not carry the word (`AI-653`, `AI-654`; Medium that every LOAD builds a new session).
 
 | entered `ord+0x09` | operation | exit |
 |---:|---|---|
@@ -311,7 +314,10 @@ every other order that has a "walk there, then do a thing" shape.
 - Among the census rows in `L08481..L14887`, mover `+0x98` is set to 1 at three sites after a
   route search: two after `actor+0x168` is zero, one after `actor+0x184` is zero in mode 1; the
   executor reads and clears it every pass (`AI-532`). The 83 census rows outside that range
-  were each read in a window and store into no mover found (`AI-545`, Medium). The five state functions of `AI-516` have no
+  were each read in a window and store into no mover found (`AI-545`, Medium). In a whole-`.text` pass that traces each base register over 40 instructions, the only read of mover
+  `+0x98` on a base from `+0x154` is the executor tail and the only writes are its clear and the three sets;
+  the Mover Serialize copies the flag raw and the post-load routine rewrites only `+0x7c` (`MOVE-177`, High for
+  those rows, Medium for completeness). The five state functions of `AI-516` have no
   rel32 call or jump, `0F 8x` jump or dword in `.text`, `.rdata`, `.data` (`AI-533`, Medium), no rel8 jump
   to an entry and no VA or RVA dword in five sections; their bodies are executor-row shaped (`AI-562`).
   The dword stores at `+0x134` outside the cast body are in other classes in 13 of 15 segments (`AI-563`).
@@ -334,6 +340,11 @@ every other order that has a "walk there, then do a thing" shape.
 - The order word `ord+0x50` is read only by the group order 4 arm in the `+0x158` census. If reached, a
   completed pickup leaves 1, which sends that arm to the state 0xc acquire routine instead of a walk
   (`AI-372`).
+- Acquisition, engage, reacquisition, strike install and the struck hook store no `ord+0x0a`; the 39 stores
+  found lie in setters, group arms, state arms and withdrawal (`AI-651`). the 14 immediate stores of 1 to
+  `ord+0x50` are at arrival, stand-downs, pickup end and cast end (the 112 register-valued stores are Medium),
+  `grpAI+0x44` has three direct stores, and SAVE and LOAD copy the order
+  block, the group record and the mover raw (`AI-652`, Medium for completeness).
 - In `R0043` and `R0055` the route refusal flag is raised only by a full search that leaves
   the path list empty or by a near search aimed at the final destination; `R0178` also stores it. An empty waypoint search retries on the next pass. Whether
   another unit's cell blocks the contact ring is Unknown (`AI-373`).
@@ -512,7 +523,10 @@ record (`MAGIC-322`; Medium that a human owner's unit casts this way in play); a
 The group pass of order 4 (Move) stores the move again for a member that has not
 arrived and runs no acquisition before arrival or before the route ends on the
 member's own cell; after arrival every pass runs acquisition and none re-issues
-the move (`AI-519`). There is no group-pass attack-move; the executor tail path
+the move (`AI-519`). That re-issue tests nothing but `ord+0x50`; `grpAI+0x44` gates only `ord+0x6c` (`AI-649`). Move and Swarm
+walk at command state 1, Guard at 0xb, Defend escorts at 8 and script Follow at 0x11 (`AI-648`). On a refused
+route the tail stands state 1 down to 0xc and sends the others to the reacquisition, and the next group pass
+writes the walk again (`AI-649`, Medium across passes). There is no group-pass attack-move; the executor tail path
 is open (Medium): a member stood down to state 0xc is reacquired by the tail on a
 later raise of the refusal word (`AI-524`, `AI-541`). Orders 1 and 3 engage a scored victim
 with pending 5; order 1 walks a member away from its post home, order 3 stores no
@@ -541,7 +555,10 @@ recovers, while progress 1 and 2 hold the unit (`AI-522`). The hit routine is a
 damage computation called by the strike executor and the effect applier; it stores
 the attacker pointer and calls the hook, which sets the turn flag, the attacker's
 cell and the diplomacy flip and stores no pending kind or target (`AI-523`,
-`AI-546`). The turn flag forces one random idle turn; no reader of the attacker
+`AI-546`). The hook's three direct callers pass the striker or the effect's source or caster, and no `.rdata` or `.data`
+dword equals its address (Medium for the whole image: `.text` tables and `push` or `mov` immediates are not scanned); in
+the bodies read a poison tick and Drain Life lower health without it (Medium: their callees are unread and other
+damage-over-time routes are not enumerated) (`AI-650`). The turn flag forces one random idle turn; no reader of the attacker
 pointer found starts or changes an order, a strike, a cast or a withdrawal (`AI-547`,
 Medium). The withdrawal tests run for every member of every group order byte
 (`AI-548`); their thresholds start from the authored `Withdraw` and `Wimpy` values (`AI-WITHDRAW-027`) and the Wimpy

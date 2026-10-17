@@ -1764,7 +1764,7 @@ callees through route headers and frees, plus all destruction callers, to settle
 | MOVE-156 | `R0058`, `R1332`, `R0057`, `R0049`, `R0048`, `R1544` read whole store mover `+0xa6`, `+0x86`..`+0x89`, `+1`, `actor+0x17c`, `+0x180`, claim bits and cell-record slots; `R0048` none. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | MOVE-157 | `R0392` and `R0435`, read whole in `MOVE-ALT-019` and `MOVE-ALT-020`, store nothing outside their stack frames; both read the label word array at manager `+0x30000` and return the cell of the least word or 0. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | MOVE-158 | The cell-record hash at manager `+0x540b4` has the helpers `L14473` (find or create, 13 zeroed dwords), `R2259` (remove) and `L14472` (set buckets); `L07102` builds a position record (bytes `+0`..`+5`, `+8`). | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
-| MOVE-171 | `mover+0x98` := 1 is stored in the step starts `R0178`, `R0043`, `R0055`; the executor tail clears it; 68 other exact stores unread (Medium). | High / Medium | ● active | EXP-0559 |
+| MOVE-171 | `mover+0x98` := 1 is stored in the step starts `R0178`, `R0043`, `R0055`; the executor tail clears it; 68 other exact stores unread (Medium). | High / Medium | ● active (amended) | EXP-0559 |
 
 ### MOVE-144
 
@@ -1892,6 +1892,8 @@ Population: EN `rom.exe`, scan S1 (555089 instructions): 72 exact stores with di
 
 **Unknown.** The 68 unread stores; the meaning of `actor+0x168` and `+0x184`; the branch at `L15407..` of the tail.
 
+**Amended.** `MOVE-177` classifies the stores at `+0x98` by the provenance of their base over 40 instructions: in `L13163..L14887` only the four named stores have a base from `+0x154`, and the other rows there are word, indexed or stack operands. Rows outside that range are not classified.
+
 ## Retreat fine position and the two direction helpers
 
 | ID | Public functional claim | Confidence | Status | Evidence |
@@ -1979,3 +1981,39 @@ At a zero delta the routine keeps the current facing byte in AL
 three bits of the facing times `0x20`, not the facing.
 
 **Confidence.** High: the whole body is read and every branch enumerated.
+
+## Readers and writers of the route-failure flag
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-177 | `.text` reads and writes of `+0x98..+0x9b` on a base loaded from `+0x154`: one read, the executor tail; four writes, its clear and the three step-start sets; SAVE and LOAD copy the flag raw with the mover. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
+
+### MOVE-177
+
+Instrument: one linear Capstone pass over `.text` (`run4/text-hits.tsv`,
+reproducing the run-2 rows) that lists every memory operand overlapping
+`+0x98..+0x9b` with the instruction that last set its base register within 40
+instructions, following register moves, stopping at a `ret`.
+
+- Class `mover` (base from `+0x154`): read `L14272` (executor tail); writes
+  `L05750` (clear), `L01720`, `L00161`, `L00162` (value 1).
+- In the simulation range `L13163..L14887` the other rows are word
+  accesses to actor `+0x98`/`+0x9a`, indexed or stack operands, the `lea` of
+  manager and timing structures at `L16385` and `L16386`, and three dword
+  reads on a base loaded from offset 0 (`L16387`, `L16388`, `L16389`).
+  Rows outside that range are not classified.
+- The Mover Serialize `R1348` writes or reads the mover as 0xb4 raw bytes
+  (`CArchive` write or read by the storing bit); its caller is `L06856`. The
+  post-load `L08765` (caller `L16390`) rewrites only `+0x7c`.
+
+Inference: no routine outside the tail tests the flag; a LOAD restores the
+value the save held, and that value is 0 when the save falls between executor
+passes (`AI-510`).
+
+**Confidence.** High for the five mover-class rows and the two serializer
+bodies. Medium for completeness: a base defined more than 40 instructions
+earlier, through a call return or by a bulk copy, and the three offset-0 reads,
+are not classified.
+
+**Unknown.** The objects behind `L16387`, `L16388` and `L16389`; a read
+of their routines would settle them.
