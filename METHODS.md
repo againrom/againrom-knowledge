@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4033. Observation: 99. Static analysis: 3412. Mixed: 522.
+Claims labelled: 4036. Observation: 99. Static analysis: 3415. Mixed: 522.
 
 ## Ledger ai
 
@@ -3970,7 +3970,7 @@ Claims labelled: 4033. Observation: 99. Static analysis: 3412. Mixed: 522.
 | TRIG-ESCORT-031 | static analysis | ● active |
 | TRIG-TARGETID-032 | mixed | ● active |
 | TRIG-CAST-033 | static analysis | ● active |
-| TRIG-EFFECTTIME-034 | mixed | ● active (amended, superseded) |
+| TRIG-EFFECTTIME-034 | static analysis | ● active (amended, superseded) |
 | TRIG-CELLTAIL-035 | static analysis | ● active (amended, partially retracted) |
 | TRIG-PROPERTY-036 | static analysis | ● active |
 | TRIG-CLOSURE-037 | mixed | ✔ promoted (amended, superseded) |
@@ -4024,6 +4024,9 @@ Claims labelled: 4033. Observation: 99. Static analysis: 3412. Mixed: 522.
 | TRIG-ITEMKEY-124 | static analysis | ● active |
 | TRIG-ITEMCORPUS-125 | static analysis | ● active |
 | TRIG-EDITITEM-126 | static analysis | ● active |
+| TRIG-SPELLDOMAIN-141 | static analysis | ✔ promoted |
+| TRIG-EFFECTDOMAIN-142 | static analysis | ✔ promoted |
+| TRIG-SPELLCORPUS-143 | mixed | ✔ promoted |
 | TRIG-ARMCOVER-129 | mixed | ● active |
 | TRIG-CHECKGEOM-130 | static analysis | ● active |
 | TRIG-LISTREAD-131 | static analysis | ● active |

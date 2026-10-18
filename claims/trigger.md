@@ -196,7 +196,7 @@ corpse-stage retraction stand.
 | TRIG-ESCORT-031 | `20.alm` is decided entirely by one escorted unit, and nine shipped maps carry a failure condition no trigger names. | High / Medium / Unknown | ● active | [EXP-0136](../experiments/EXP-0136-script-arms-item-money-nearest/) |
 | TRIG-TARGETID-032 | Check opcode 9 returns the authored map id of the unit currently pursued by its subject, and otherwise returns zero. | High / Medium | ● active | [EXP-0155](../experiments/EXP-0155-trigger-closure/) |
 | TRIG-CAST-033 | Instants 21 and 24 construct a temporary casting actor: 21 casts at a cell, 24 at a unit. | High / Medium | ● active | [EXP-0155](../experiments/EXP-0155-trigger-closure/) |
-| TRIG-EFFECTTIME-034 | Instants 29 and 30 overwrite a 16-bit remaining-time field on every matching effect; neither stops after the first. | High | ● active (amended, superseded) | [EXP-0155](../experiments/EXP-0155-trigger-closure/) |
+| TRIG-EFFECTTIME-034 | Instants 29 and 30 overwrite a 16-bit remaining-time field on every matching effect; neither stops after the first. | High | ● active (amended, superseded) | [EXP-0155](../experiments/EXP-0155-trigger-closure/), [EXP-0593](../experiments/EXP-0593-trigger-spell-domain/) |
 | TRIG-CELLTAIL-035 | Instant 25 writes a six-byte actor-entry trigger, while operation 26 selects a distinct relocation reader. | High / Unknown | ● active (amended, partially retracted) | [EXP-0155](../experiments/EXP-0155-trigger-closure/), [EXP-0236](../experiments/EXP-0236-sav-cell-record-rebind/) |
 | TRIG-PROPERTY-036 | Instant 34 is a word-wide property setter selected by `p0`, followed by a notification even when the selector is unsupported. | High / Medium | ● active | [EXP-0155](../experiments/EXP-0155-trigger-closure/) |
 | TRIG-CLOSURE-037 | The shipped campaign exposes no trigger operation without a consumer-ready active claim. | High / Medium | ✔ promoted (amended, superseded) | [EXP-0155](../experiments/EXP-0155-trigger-closure/) |
@@ -318,11 +318,11 @@ After builder packing, 21 consumes `(fromX, fromY, toX, toY, spell, power)` and 
 
 ### TRIG-EFFECTTIME-034
 
-Instant 29 packs cell `(p1 << 8) OR p0`, scans its fixed six area-effect pointers, and for each non-null effect whose byte `+0x0c == (u8)p2` writes `(u16)p3` to `effect+0x4c`, the area-effect lifetime field whose corrected producer is retained in partially retracted `MAGIC-SHAPE-008`. Instant 30 walks the referenced unit's attached-effect list and, for every effect whose byte `+0x0c == (u8)p0`, writes `(u16)p1` to `effect+0x42`, the duration field used by `MAGIC-EFFMODE-009`. Missing cells, empty slots, absent matches and an empty unit-effect list are no-ops. Both mutations survive a mid-mission save through the effect serializers.
+Instant 29 uses the 16-bit addition key and full-dword comparison specified by `TRIG-CELLEFFECT-045`. It scans six area-effect pointers and writes `(u16)p3` to `effect+0x4c` on every matching non-null object. The corrected lifetime producer is retained in partially retracted `MAGIC-SHAPE-008`. Instant 30 walks the referenced unit's attached-effect list and compares its zero-extended byte `+0x0c` with full-dword `p0`, then writes `(u16)p1` to `effect+0x42` on every match (`TRIG-EFFECTDOMAIN-142`). The destination is the duration field used by `MAGIC-EFFMODE-009`. Missing cells, empty slots, absent matches and an empty unit-effect list are no-ops. Both mutations survive a mid-mission save through the effect serializers.
 
 **Confidence.** High (both helpers read end to end; the all-matches loops and two different destination offsets exclude a shared first-match setter)
 
-**Amended.** The two instant-29 operand-width clauses superseded by TRIG-CELLEFFECT-045.
+**Amended.** The two instant-29 operand-width clauses are superseded by TRIG-CELLEFFECT-045. EXP-0593 supersedes only the instant-30 `(u8)p0` comparison: `L16433` loads full-dword `p0`, `L16434`..`L16435` zero-extends the object's byte and compares them. The all-matches loop, destinations, no-op and persistence clauses stand. The correction is recorded in `retracted.md` and `TRIG-EFFECTDOMAIN-142`.
 
 ### TRIG-CELLTAIL-035
 
@@ -1006,6 +1006,118 @@ Population: the EN `Map Editor.exe` (SHA-256 `697f7b2cddd0c8cd18e8b567e83e70c68a
 **Confidence.** **High** for item 1's observed type assignments and for the Instance manager type tests, call arguments and stores in items 2 to 4. **Medium** for the Check manager, read through an outline and two short ranges; for completion of the second catalogue loop; for decimal-conversion semantics; and for item 5's whole-editor negative. The conversion interpretation is inferred from use, not from the bodies of `L16000` or `L15999`.
 
 **Unknown.** Accepted syntax, signedness, overflow and range behavior require `L16000` and `L15999`; second-loop completion requires the continuation past `L15946` including `L15947`. Also unread: catalogue node constructor `L15201` (initial value of a newly picked type-8 row), literal `L15992`, and the map writer's treatment of that value (`TRIG-EDITTRIG-117` item 3 reads type-7 emission).
+
+## Spell and effect argument domains
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-SPELLDOMAIN-141 | Actions 21/24 construct a Spell from low8(argument); action 25 stores that byte for entry casting, excluding 0 and reserved operation 26. Installed Spells rows are one-based 1..28. | High / Unknown | ✔ promoted | [EXP-0593](../experiments/EXP-0593-trigger-spell-domain/) |
+| TRIG-EFFECTDOMAIN-142 | Actions 29/30 compare a full-dword parameter with zero-extended object byte +0x0c: spell identity on the acquired spell paths, not ordinary Effect kind +0x3c. Values above 255 cannot match. | High / Unknown | ✔ promoted | [EXP-0593](../experiments/EXP-0593-trigger-spell-domain/) |
+| TRIG-SPELLCORPUS-143 | Across 38 EN and 34 RU installed maps, including one RU map without type 7, the five actions have 82 nodes per root with equal value multisets; all 164 values resolve to Spells rows. | High | ✔ promoted | [EXP-0593](../experiments/EXP-0593-trigger-spell-domain/) |
+
+### TRIG-SPELLDOMAIN-141
+
+The definition source is `world.res:data/data.bin`, loaded as
+`World\Data\Data.bin` (DAT-LOC-001). Both tables tile with zero residue under
+DAT-GRAM-003 and contain 28 serialized Spells rows, indices 1..28; row 0 is
+the nonserialized sentinel. `spell-domain.tsv` joins each definition name to
+`main.res:text/spell.txt` line `id-1` (TEXT-091). EN definition/display names
+differ at 19 (`Wall of Earth` / `Stone Wall`) and 25 (`Control Spirit` /
+`Raise Spirit`). RU names are decoded as CP866 for this measurement.
+
+EN/RU rom.exe SHA-256 is
+`942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`.
+`L16436`..`L16437` passes low8(argument) to `R0463`, which writes
+Spell+8 at `L16438`..`L08862`. The resolver rejects byte 0 and passes
+the zero-extended id to the Spells collection `L05046`
+(`L16439`..`L16440`, MAGIC-SPELL-001). Accessor `L16239` reaches
+`L16441`: buffer at collection+4 plus `32*id`, with no subtraction.
+Actions 21/24 reach this constructor through `R1138`/`R1137`.
+
+Action 25 stores low8(p0) in the cell tail. Entry reader
+`L16442`..`L16443` excludes only 0 and 26 in the read value tests before
+indexing the shared Spell object table and calling a caster wrapper.
+Within the installed definition domain, action 25's entry-cast ids are
+1..25 and 27..28. The read value tests do not impose an upper bound of 28.
+Row 26 is Teleport; in this tail, 26 selects the
+separate relocation operation (TRIG-CELLTAIL-035, amended and partially
+retracted). Definition validity does not establish target admission.
+
+**Confidence.** High for the installed domain, local byte transfers and
+action-25 exclusion. PE32 section translation and Capstone 5.0.7 local
+listings preserve the cited instructions. No repaired Ghidra project,
+global census or section scan is used or implied. Data flow to Spells
+excludes a zero-based row, Magic kind, item key or independent trigger enum
+on these calls. Code equality is one witness. Unknown for completed casts
+from arbitrary authored values.
+
+**Unknown.** Byte ids 29..255 have no installed definition; their execution
+outcomes were not observed. In action 25 they pass the two read value tests,
+subject to earlier path conditions; their table lookup and execution remain
+Unknown. Values above 255 are not established safe aliases:
+`L16444`..`L08848` also passes the original argument as the book key.
+A controlled original action-21/24 map carrying 0, 29 and 257 would settle
+those outcomes. Actor entry and arrival on an action-25 map carrying 3, 26
+and 28 would witness the cast/relocation distinction and spell completion.
+
+### TRIG-EFFECTDOMAIN-142
+
+Action 29 at `L16445`..`L16446` compares full-dword p2 with
+zero-extended AreaEffect+0x0c. Action 30 at `L16433`..`L16447` does
+the same with p0 and attached Effect+0x0c. Neither truncates the parameter.
+Only 0..255 can match; this does not assert that every byte has a live producer.
+
+The acquired apply body copies Spell+8 to AreaEffect+0x0c at
+`L16448`..`L16449` and to ordinary Effect+0x0c at, for example,
+`L16450`..`L16451`. These are TRIG-SPELLDOMAIN-141's one-based ids,
+without renumbering. Ordinary Effect+0x3c is the separate Effects-parser
+kind (MAGIC-EFFECT-015); AreaEffect+0x3c has a different layout.
+
+MAGIC-MAPLAYER-040's six registered spell-layer identities are 3, 7, 8, 12,
+17 and 19. This bounds shipped spell-layer use of action 29, not its
+comparison width. A spell definition alone does not establish a lasting
+attached effect for action 30. MAGIC-ATTACH-016 (amended, partially retracted
+and superseded) includes non-spell id-0 Potion attachments, so 0 is not
+universally invalid for action 30.
+
+**Confidence.** High for both complete comparison bodies, the byte range
+and positive spell-identity copies. The bounded Capstone 5.0.7 instrument
+does not enumerate every producer or alias; the complete live-object
+identity population is Unknown. A name selection still requires a matching
+object at the chosen cell/unit.
+
+**Unknown.** All non-spell +0x0c producers were not searched. A bounded
+producer census would settle their static population. A controlled original
+map with a named lasting spell and timed Potion on one unit, followed by
+action 30 using the spell id, 0 and 256+id, would witness the practical
+identity/width distinction. Action 29 can use Wall of Earth at a named cell
+with values 19 and 275, observing its remaining lifetime.
+
+### TRIG-SPELLCORPUS-143
+
+`tools/trigspelldomain/probe.py` reads every file entry of each scenario.res
+and every top-level case-insensitive .alm. Population: 28 archived + 10 loose
+maps EN; 28 archived + 6 loose maps RU. RU Horror.alm frames as ALM without
+type 7 and contributes zero nodes. The other 71 maps tile their type-7
+payloads exactly. Three registry entries per archive are non-ALM and listed
+as excluded; no map is refused by the successful reproduction.
+
+All authored action nodes are counted, including unreferenced nodes. Scalar
+packing follows TRIG-PARAM-030. `nodes.tsv` records every selected node's
+ten value/type slots and actual authored spell slot; labels select nothing.
+
+Per root, action 21: 35 nodes, values 3 x3, 8 x3, 17 x1, 19 x23, 21 x5.
+Action 24: 20 nodes, 5 x4, 10 x4, 16 x4, 20 x3, 22 x4, 23 x1.
+Action 25: 2 nodes, 3 x1, 9 x1. Action 29: 23 nodes, 3 x1, 19 x22.
+Action 30: 2 nodes, 20 x2. The multisets are equal per action across roots;
+all 164 combined values resolve to installed Spells rows, unresolved 0.
+
+**Confidence.** High for this installed population: complete RES traversal,
+strict ALM framing, exact type-7 tiling, signature checks and per-node output.
+Synthetic tests reject short, duplicate and residual records. All ten
+generated files match committed Git blobs in the successful reproduction,
+with explicit LF text. Activation, target admission and spell completion
+remain unwitnessed; row resolution does not establish them.
 
 ## Script arm coverage and bounded bodies
 

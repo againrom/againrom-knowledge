@@ -1504,6 +1504,12 @@ on evidence already committed.
 | `TERR-FOG-081` (route label of the copy only; the source field, the constructor's zero, both widths and the derive stand) | Verbatim: "is copied from **`actor+0xa4`** by the state sync (`L10563` (a load of the 16-bit value at `+0xa4`) / `L10564` (a 16-bit store at `+0x102`))" | High | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/), TERR-FOG-274, TERR-FOG-275 | The two instructions lie in `R0808`, which builds an actor and fills the frame at view `+0x3f54`. A mission body's `+0x102` is stored by the client state arm at `L16269` from the message word under bit `0x2000`, which the server sender fills from `actor+0xa4` at `L16270`; a new body of class code 0x40 or above first takes its prototype's `+0xa4` at `L16271`. | **SUPERSEDED** |
 | `UNIT-PANEL-010` (the code range only; the copy map, the key and the arithmetic stand) | Verbatim: "a code in **`[0x40, 0x49]`** subscripts `[L07204 + 4·(face + 4·code)]`" | High | [EXP-0589](../experiments/EXP-0589-fog-stamp-inputs/), TERR-FOG-275 | The subscript and the copy run for every code from 0x40 up: `L03486` exits only below 0x40. The compare with 0x49 at `L12617` only selects `+0x14a` (`L12618`). | **REFUTED** — partially retracted |
 
+## Action 30 parameter comparison width
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `TRIG-EFFECTTIME-034` (instant-30 parameter truncation only) | The attached effect byte `+0x0c == (u8)p0`. | High for the complete helper and all-matches loop. | [EXP-0593](../experiments/EXP-0593-trigger-spell-domain/), TRIG-EFFECTDOMAIN-142 | `L16433` loads full-dword p0; `L16434`..`L16435` zero-extends the object's byte and compares it with p0. Thus p0=276 cannot match id 20, whereas the former truncation predicts a match. Both shipped nodes use 20, so their result is unchanged. The all-matches loop, destination +0x42, no-op and persistence clauses stand. | **SUPERSEDED** — operand width corrected |
+
 ## EXP-0591: refused Move member
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

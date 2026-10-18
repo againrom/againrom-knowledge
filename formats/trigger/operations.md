@@ -99,6 +99,49 @@ first/second flag and all three store to that one field. So `rec+0x3c` holds a u
 the node declares two `Target_Unit` parameters, which is what the editor's own declaration
 for the opcode does.
 
+## Spell and effect arguments
+
+Actions 21 and 24 use one-based Spells ids 1..28 from
+`World\Data\Data.bin`, shipped as `world.res:data/data.bin`. The Spell
+constructor takes low8(argument); localized name is `main\text\spell.txt`
+line `id-1`. Choose the stored id, not a localized string or zero-based row.
+EN id 19 is definition `Wall of Earth`, displayed `Stone Wall`; id 25 is
+`Control Spirit`, displayed `Raise Spirit`. Values outside the definition
+domain have no established safe execution behavior. — TRIG-SPELLDOMAIN-141
+
+Action 25 stores the same low-byte id. Within the installed definition
+domain, action 25's entry-cast ids are 1..25 and 27..28. The read value tests
+exclude only 0 and 26; they do not impose an upper bound of 28. Execution of
+undefined byte ids 29..255 remains Unknown. Zero disables that entry cast;
+26 selects the separate
+relocation operation although Spells row 26 is Teleport. Completed casts
+and target admission require a runtime witness. — TRIG-SPELLDOMAIN-141
+
+Actions 29 and 30 match the object's spell-identity byte +0x0c against a
+full-dword parameter. Their spell-produced objects use the same one-based
+ids; ordinary Effect kind +0x3c is a different field. Values above 255
+cannot match. A matching live object is required: a definition row alone
+does not establish an attached effect. Non-spell id-0 effects exist; the
+complete producer population remains Unknown. — TRIG-EFFECTDOMAIN-142
+
+The earlier action-30 low-byte parameter comparison in TRIG-EFFECTTIME-034
+is superseded by TRIG-EFFECTDOMAIN-142. Its loop, destination and persistence
+clauses remain. Shipped maps use these values, with counts per root:
+
+| Action | Nodes | Value x count |
+|---|---:|---|
+| 21 | 35 | 3 x3, 8 x3, 17 x1, 19 x23, 21 x5 |
+| 24 | 20 | 5 x4, 10 x4, 16 x4, 20 x3, 22 x4, 23 x1 |
+| 25 | 2 | 3 x1, 9 x1 |
+| 29 | 23 | 3 x1, 19 x22 |
+| 30 | 2 | 20 x2 |
+
+Population: EN 38 maps (28 archived, 10 loose); RU 34 (28 archived, 6 loose),
+including one loose map without a script record. All authored nodes count,
+including unreferenced nodes. Each root has 82 selected nodes; every value
+resolves to Spells. This establishes row resolution, not runtime activation.
+— TRIG-SPELLCORPUS-143
+
 ### The campaign-reachable closure arms (`TRIG-CLOSURE-037`, amended)
 
 The last campaign-reachable helpers are exact enough to implement directly. Parameters below
@@ -119,7 +162,7 @@ instant 29:
 
 instant 30:
     for effect in Target_Unit.attachedEffects:
-        if effect.spellID == u8(p0): effect.duration = u16(p1)
+        if (u32)effect.spellID == p0: effect.duration = u16(p1)
 
 instant 34:
     if p0 == 6:  Target_Unit.health     = u16(p1)
