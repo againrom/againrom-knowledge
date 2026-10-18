@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4045. Observation: 99. Static analysis: 3424. Mixed: 522.
+Claims labelled: 4051. Observation: 99. Static analysis: 3428. Mixed: 524.
 
 ## Ledger ai
 
@@ -421,6 +421,8 @@ Claims labelled: 4045. Observation: 99. Static analysis: 3424. Mixed: 522.
 | AI-660 | static analysis | ● active |
 | AI-661 | static analysis | ● active |
 | AI-662 | static analysis | ● active |
+| AI-484 | static analysis | ✔ promoted |
+| AI-485 | static analysis | ✔ promoted |
 
 ## Ledger alm
 
@@ -1406,7 +1408,7 @@ Claims labelled: 4045. Observation: 99. Static analysis: 3424. Mixed: 522.
 | MENU-096 | static analysis | ● active |
 | MENU-070 | static analysis | ● active |
 | MENU-071 | static analysis | ● active |
-| MENU-072 | static analysis | ● active |
+| MENU-072 | static analysis | ● active (amended) |
 | MENU-073 | static analysis | ● active (amended) |
 | MENU-074 | static analysis | ● active (amended) |
 | MENU-075 | static analysis | ● active |
@@ -2999,7 +3001,7 @@ Claims labelled: 4045. Observation: 99. Static analysis: 3424. Mixed: 522.
 | SAV-1264 | static analysis | ● active (branch candidate) |
 | SAV-1269 | static analysis | ● active (branch candidate) |
 | SAV-1270 | static analysis | ● active (branch candidate) |
-| SAV-1275 | static analysis | ● active (branch candidate) |
+| SAV-1275 | static analysis | ● active (superseded, branch candidate) |
 | SAV-1283 | static analysis | ● active |
 | SAV-1284 | static analysis | ● active |
 | SAV-1285 | static analysis | ● active |
@@ -4117,8 +4119,8 @@ Claims labelled: 4045. Observation: 99. Static analysis: 3424. Mixed: 522.
 | UNIT-PLACEFRONTIER-099 | static analysis | ✔ promoted |
 | UNIT-REGEN-130 | static analysis | ● active |
 | UNIT-BIND-131 | static analysis | ● active |
-| UNIT-STRUCTUSE-137 | static analysis | ● active |
-| UNIT-STRUCTHIT-138 | static analysis | ● active |
+| UNIT-STRUCTUSE-137 | static analysis | ● active (amended) |
+| UNIT-STRUCTHIT-138 | static analysis | ● active (amended) |
 | UNIT-140 | static analysis | ● active |
 | UNIT-141 | static analysis | ● active |
 | UNIT-142 | mixed | ● active |
@@ -4131,6 +4133,10 @@ Claims labelled: 4045. Observation: 99. Static analysis: 3424. Mixed: 522.
 | UNIT-LOAD-159 | static analysis | ● active |
 | UNIT-163 | static analysis | ● active (branch candidate) |
 | UNIT-164 | static analysis | ● active (branch candidate) |
+| UNIT-153 | mixed | ✔ promoted |
+| UNIT-154 | static analysis | ✔ promoted |
+| UNIT-155 | mixed | ✔ promoted |
+| UNIT-156 | static analysis | ✔ promoted |
 
 ## Ledger video
 

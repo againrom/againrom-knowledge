@@ -50,6 +50,11 @@ rehydrates the picture pointer is superseded by SAV-609: world-map entry does)
 
 ## Scalar suffix
 
+The LOAD driver ignores the document-loader return. Its resume arm attempts
+campaign load before assigning server difficulty. SAV-1275's local ordering
+stands; only its missing-byte and returning-path Unknown clause is superseded
+by SAV-1283, SAV-1284 and SAV-1285.
+
 The campaign reader ignores short-read returns. At EOF a destination stays
 unchanged; a partial scalar read replaces only its available low bytes. A
 wholly absent record also leaves incoming stack file pointers in reused count

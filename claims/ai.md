@@ -7597,3 +7597,64 @@ Listings `run1/group-walker.txt`, `run1/group-walker-table.tsv`,
 
 **Confidence.** High for the arms and the table entries read. Medium for the
 composed sequences and for the candidate build `R0110`, unread here.
+
+## Selector-66 local use boundary
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-484 | Selector 66's local use branches on configuration +0xb8 equal to 4 and can change receiver state; the called helpers do not yet establish its player-visible effect or SAVE outcome. | High / Unknown | ✔ promoted | [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+| AI-485 | If both use lookups return Building selector 39/40, the read local action performs no selector-specific mutation or notification; effects elsewhere remain Unknown. | High / Unknown | ✔ promoted | [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+
+### AI-484
+
+UNIT-154 establishes the selector/class join. In the complete local action
+L00196..L01776, a non-Shop resolved object's word +0x0e equal to 66
+calls R2288 on L12800. Its complete getter returns dword +0xb8.
+For value 4, the action calls L08057 with word +4 of receiver
+P=[actor+0x14], calls L12801 if a pointer is returned, then calls
+R2085. It stores the session-leading dword [L00285] pointee+0
+into P+0x50. The read helper population includes the conditional clear of
+L00522+0x18b4 and collection/host calls; their named game effect is unresolved.
+
+For every non-4 value, it calls L12802(P). That complete helper exits
+unless P+0x28 is zero and P+0x34 is nonzero. Otherwise it stores the
+session-leading dword at P+0x1c, calls R1375 with the pointer stored
+at P+0x34 and writes P's word +4 into message word +7. If byte P+0x3e is
+nonzero it forwards the message through R0217. The action then exits.
+
+**Confidence.** High for these named local predicates, calls and stores;
+all their supporting listings are committed in the linked experiment.
+Unknown for the player's resulting page, message, item, roster change,
+script event, saved file or replay behavior. The getter alone does not
+identify configuration value 4's game name. An incomplete request listing
+and unexpanded host/virtual calls do not exclude those alternatives.
+Neither a no-effect claim nor a once-per-mission interpretation follows.
+
+**Unknown.** A separately authorized owner observation must use a verified
+class-66 placement, record configuration dword L06743 and P's gates,
+exercise value 4 and a non-4 value, and compare visible, file and receiver
+state changes. Persistence of P+0x1c/+0x50 and the helper collections has
+not been joined to a SAV parent by this experiment.
+
+### AI-485
+
+The population is the complete local action L00196..L01776 with both
+nearby lookup results constrained to a Building of selector 39 or 40.
+UNIT-154 establishes the selector/class relation for the named placement
+route. The first result matches neither the Shop runtime class nor word
++0x0e values 66, 28 or 29. The second result matches neither byte +0x40
+value 15 nor 16. These paths reach the common return without a direct
+state mutation, notification or actor item-delivery call in this action.
+
+**Confidence.** High for the bounded branch exclusion: the linked experiment
+commits the whole action listing, both lookup bodies and the Building
+constructor/setup. No whole-image absence or function-reference enumeration
+is used. Unknown for mission scripts, lookup-helper side effects, different
+nearby receivers, other use handlers or original-runtime visible behavior.
+The lookup functions re-resolve nearby objects; a retained grave order is
+not proof that both results satisfy this claim's condition.
+
+**Unknown.** A verified class-39/40 placement with no nearby usable competitor,
+one player character and two recorded uses would test the isolated visible
+case. The map number and script population must be verified before that
+owner observation; no grave-bearing mission is identified by this experiment.

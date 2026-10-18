@@ -439,10 +439,21 @@ range stays retired; the next free `unit.md` id is therefore past it, at
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| UNIT-STRUCTUSE-137 | In the local use arm `L00196`, a Shop-class object posts client message `0x83`, which posts `0x42a`; an object with word `+0xe` of `0x42` takes a mode-dependent branch; no branch of the arm tests `+0xe` of 39 or 40. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
-| UNIT-STRUCTHIT-138 | A `Usable` structure is a hover hit through its class field `+0x8c`, whatever `+0x64` holds; the hover id then becomes the target of order `0x24`. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
+| UNIT-STRUCTUSE-137 | In the local use arm `L00196`, a Shop-class object posts client message `0x83`, which posts `0x42a`; an object with word `+0xe` of `0x42` takes a mode-dependent branch; no branch of the arm tests `+0xe` of 39 or 40. | High / Medium / Unknown | ● active (amended) | [EXP-0455](../experiments/EXP-0455-mission-screen/), [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+| UNIT-STRUCTHIT-138 | A `Usable` structure is a hover hit through its class field `+0x8c`, whatever `+0x64` holds; the hover id then becomes the target of order `0x24`. | High / Medium / Unknown | ● active (amended) | [EXP-0455](../experiments/EXP-0455-mission-screen/), [EXP-0537](../experiments/EXP-0537-usable-structures/) |
 
 ### UNIT-STRUCTUSE-137
+
+**Amended.** UNIT-154 proves at High that setup copies class byte +0x40
+to selector word +0x0e, settling the former Medium class/selector join for
+that setup path. AI-484 establishes the selector-66 local configuration
+predicate, receiver gates, stores and named calls at High; the meaning of
+configuration value 4, visible downstream effects and persistence remain
+Unknown. AI-485 excludes grave-specific mutation/notification at High only in the
+read local action and only when both nearby lookups resolve that Building.
+Other receivers, lookup/helper effects and mission scripts remain Unknown.
+The mission Shop-page interpretation remains Medium; click/cursor bounds,
+exact firing time, recharge cadence and native use/SAVE/LOAD remain open.
 
 - Population: the objects the arm resolves, that is the results of lookup `L12566` and, for the fountain branch, `L12567` (the first enumerated Building whose distance helper returns a low byte of at most 2, `UNIT-STRUCTUSE-090`). Other objects are outside the claim.
 - The client builder `R2084` writes order `0x24` with the target id and reads no class field of the target (`evidence/disasm-order-0x24-builder-R2084.txt`).
@@ -456,6 +467,16 @@ range stays retired; the next free `unit.md` id is therefore past it, at
 **Unknown.** What the `0x42` branch does in either mode; what field `+0xb8` of `L12800` is; any use effect of classes 39 and 40 outside this arm or for an object the lookups do not return.
 
 ### UNIT-STRUCTHIT-138
+
+**Amended.** UNIT-153 and UNIT-155 establish the usable registry and
+Buildings parameter-3 values on both installed ROM1 roots at High. Of the
+seven usable Indestructible classes, 15/16 have maximum 3 and
+34/35/39/40/66 have maximum 0; the latter conditionally project 1000/1000
+through the existing notification/readout gates. RU coverage now includes
+those measured registry/table populations, beyond executable identity.
+This settles the former pool/table uncertainty. The Medium all-caller
+hover-ID boundary and inherited click/cursor interpretation remain;
+first-frame publication and native runtime behavior remain Unknown.
 
 - The hit chain is `AI-CURSOR-231` (the class block of `R0218` sets `0x800` and `0x20` when `+0x8c` is non-zero, whatever `+0x64` holds) and `AI-CURSOR-209` (the `town` cursor condition). New here: `R0211` compares the current cursor with the `town` slot (`L01351`) and calls `R2084` with word `view+0x990` (`L12803`..`L12804`, `evidence/disasm-click-dispatch-town-L13157.txt`).
 - Classes 15, 16, 34, 35, 39, 40 and 66 carry `Indestructible` and `Usable` in the `structures.reg` rows of `EXP-0037`; `Indestructible` is a class flag, not a measured health pool (`MENU-072`).
@@ -685,3 +706,105 @@ overwrite (768). They do not say which troll the owner looked at.
 **Unknown.** Whether a later server message replaces the drawable's figure with
 the actor's own words (UNIT-PANEL-011); the dispatch arm that reaches `L03117`
 and the caller chain that creates each loaded unit's drawable.
+
+## Installed usable structure pools and saved use state
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| UNIT-153 | Both installed ROM1 registries mark classes 15, 16, 28, 29, 34, 35, 39, 40 and 66 usable; seven also carry Indestructible, while 28/29 omit that key and use its zero default. | High | ✔ promoted | [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+| UNIT-154 | Building setup copies the low word of Buildings parameter 3 into maximum and current state; non-Shop placement zero can clear current, and LOAD restores both words without rerunning setup. | High | ✔ promoted | [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+| UNIT-155 | In both installed ROM1 Buildings tables, usable classes 15/16 have maximum 3, 28/29 have 1 and 34/35/39/40/66 have 0; the last five project 1000/1000 through the established structure readout route. | High | ✔ promoted | [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+| UNIT-156 | Local well-charge and switch-state mutations share Building word +0x42, serialized at body bytes 60..61; maximum +0x44 occupies 62..63, and the local LOAD arm preserves both restored words. | High / Unknown | ✔ promoted | [EXP-0537](../experiments/EXP-0537-usable-structures/) |
+
+### UNIT-153
+
+The complete installed EN and RU structures.reg payloads are hash-identical.
+The parser visits all 66 declared Structure sections per root with no missing
+section or trailing bytes. Exactly nine have a nonzero integer Usable key:
+15, 16, 28, 29, 34, 35, 39, 40 and 66. Seven of those have Indestructible=1;
+28/29 have no Indestructible key. REG-STR-080 establishes its loader default 0.
+The per-record values and payload-relative offsets are in
+evidence/generated/registry.tsv of the linked experiment.
+
+**Confidence.** High over these two pinned installed registry payloads. The
+pure parser retains absent keys and visits every declared section rather than
+searching names or selected classes. The default comes from the established
+loader claim, not from treating an absent field as a measured zero. This
+does not enumerate all possible runtime classes or every authored mission.
+
+### UNIT-154
+
+DAT-OBJ-002 identifies the collection at L02102 as Buildings.
+R2304 forwards to R2305, which returns pData + ID*0x1c.
+R0476 forwards to L09150, which returns params.pData + index*4.
+R0486 validates class byte +0x40, copies it to word +0x0e and binds
+the corresponding definition at +0x3c. At L16452..L16453 it reads
+parameter index 3, stores its low word into +0x44 and copies that to +0x42.
+R0485 calls this setup; Shop constructor R0490 calls that
+Building constructor before installing its own table.
+
+R0489 selects Shop for placement classes 34/35. Other classes use
+Building. Only a zero placement word +6 replaces current +0x42 with zero;
+nonzero leaves the initialized word. Shop uses the separate signed-word
+times-1000 cap route. This retains ALM-128's bounded placement law.
+R1585 restores current and maximum and then binds +0x3c from the
+restored selector without invoking setup.
+
+**Confidence.** High for the local data flow. The linked experiment commits
+the complete constructor, setup, placement and serializer bodies and the
+four accessor bodies. This excludes a graphics-registry source or a
+placement-proportional current value in these paths. DAT-BLD-005 supplies
+the installed ID join. It does not exclude later script writes or other
+constructors outside this named route.
+
+### UNIT-155
+
+The complete EN and RU Data.bin parsers consume 88,327 bytes each with no
+residue and return 66 Buildings entries plus the skipped slot 0. Every usable
+class in UNIT-153 joins one entry and has six parameters. Parameter 3 is
+3 for 15/16, 1 for 28/29 and 0 for 34/35/39/40/66. Both signed-dword and
+signed-low-word readings agree on these values. The selected rows, offsets
+and source hashes are in evidence/generated/buildings.tsv and assets.tsv.
+The Data.bin payloads differ overall; these selected values agree.
+
+UNIT-154 supplies the simulation stores. UNIT-STRUCTCONT-078 supplies
+current when maximum is nonzero and literal 1000 otherwise in message 0x82.
+MENU-072 supplies the drawable maximum from Buildings parameter 3 and its
+zero-to-1000 substitute. MENU-071 supplies the signed current/maximum text.
+Thus wells display current/3, switches current/1 and the five zero-maximum
+classes 1000/1000 on that route. Indestructible is independent: wells have
+that flag but a nonzero maximum.
+
+**Confidence.** High for the pinned values, local stores and conditional
+readout composition. The complete framing and per-field offsets exclude a
+neighboring parameter or section-index join. The maximum of 1000 is a client
+substitute, not a simulation pool. No rendered frame, first publication
+after LOAD or all-source readout invariant is asserted.
+
+**Unknown.** Literal localized building.txt labels for classes 15, 16, 28
+and 29 were not measured here. Their Data.bin definition names are not a
+substitute for the UI text. Extracting building.txt rows 14, 15, 27 and 28
+through the established text resolver on both roots would settle them.
+
+### UNIT-156
+
+UNIT-STRUCTUSE-090's switch toggle and UNIT-STRUCTUSE-091's positive fountain
+charge decrement both write Building word +0x42; the linked experiment
+re-reads that complete local action. Its complete R1585 serializer
+writes u8 +0x40, u16 +0x42, u16 +0x44, u16 +0x46 after the inherited Token
+and embedded-data programmes. SAV-BLDG-037 establishes their extents as
+37 and 22 bytes. Therefore +0x42 occupies zero-based body offsets 60..61
+and +0x44 occupies 62..63, little-endian, excluding the archive tag/class
+descriptor. These are decoded body offsets, not compressed-file offsets.
+The LOAD arm restores these words and rebinds +0x3c without setup.
+
+**Confidence.** High for this static mutation-to-serializer join and the
+body-offset arithmetic. Unknown for a native use/SAVE/cold-LOAD result,
+which was prohibited. No owner save was read. Root reachability at save
+time, later script changes, first client publication and replay timing
+are not established by a class serializer.
+
+**Unknown.** To settle replay, use a verified class-15/16 or class-28/29
+placement, mutate it, save, cold-load and compare decoded body bytes 60..63
+and the next use. Selector-66 receiver and collection persistence are
+separate from these Building bytes.

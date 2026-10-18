@@ -218,7 +218,7 @@ loader itself, the placement spawner `R0151`, and the map object's destructor,
 which frees the record without reading a field. Between them they read `+0x00`, `+0x04`,
 `+0x08`, `+0x0c`, `+0x10`, `+0x14`, `+0x20`, `+0x24`, `+0x28`…`+0x2b`, `+0x2d`, `+0x2e`,
 `+0x31+i` (`i=1..5`), `+0x37+i` (`i=0..4`), `+0x3c`, `+0x40`, `+0x44` and `+0x48` of the
-runtime record — nothing else (`ALM-TAILHOLD-080`). The stream read slot those reads go through keeps no record pointer, so file `+0x1c`, `+0x22`, `+0x26`, `+0x28`, `+0x2a`, `+0x30`, `+0x33`, `+0x34` and `+0x35` have no reader among the holders; the array append that receives each record pointer and its accessors store, return or count a pointer and dereference no record, except the unread grow routine `L15875` (`ALM-UNITREAD-313`). The map object that owns the array is created, read and destroyed by the routines `ALM-MAPLIFE-226` lists. The no-reader statements are limited to this placed-record holder family.
+runtime record — nothing else (`ALM-TAILHOLD-080`). The stream read slot those reads go through keeps no record pointer (`ALM-UNITREAD-227`), so file `+0x1c`, `+0x22`, `+0x26`, `+0x28`, `+0x2a`, `+0x30`, `+0x33`, `+0x34` and `+0x35` have no reader among the holders; the array append that receives each record pointer and its accessors store, return or count a pointer and dereference no record, except the unread grow routine `L15875` (`ALM-UNITREAD-313`). The map object that owns the array is created, read and destroyed by the routines `ALM-MAPLIFE-226` lists. The no-reader statements are limited to this placed-record holder family.
 
 Installed placements leave the current-mana and actor+0xbe overrides
 absent. Other tail overrides are active, so the full field program is

@@ -39,6 +39,8 @@ reaches nested allocations; it has no defined fallback. Exact native
 failure/recovery was not observed. On a returning path the held index may
 include bytes retained by a truncated read. The next ordinary SAVE uses the
 current server value for this head and the held index for the campaign.
+SAV-1275's local ordering stands; only its missing-byte and returning-path
+Unknown clause is superseded by SAV-1283, SAV-1284 and SAV-1285.
 — SAV-1275, SAV-1284, SAV-1285
 
 ## Ordered grammar

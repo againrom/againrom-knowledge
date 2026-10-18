@@ -16738,7 +16738,7 @@ absent at the overwrite was not traced.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1275 | The read LOAD driver ignores the document-loader return; resume attempts campaign load before difficulty assignment. Acceptance, final difficulty and a later SAVE without a campaign record remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-0579](../experiments/EXP-0579-weapon-entry-sav-edges/EXP-0579.md) |
+| SAV-1275 | The read LOAD driver ignores the document-loader return; resume attempts campaign load before difficulty assignment. Native completion without a campaign record remains Unknown. | High / Unknown | ● active (superseded, branch candidate) | [EXP-0579](../experiments/EXP-0579-weapon-entry-sav-edges/EXP-0579.md) |
 
 ### SAV-1275
 
@@ -16769,19 +16769,19 @@ epilogue at L16153.
   after a campaign-less read.
 
 **Confidence.** High for named local calls, guards and assignments. Unknown
-for completed LOAD acceptance, final difficulty and subsequent SAVE when the
-campaign record is physically absent. The campaign reader, file read/throw
-primitives, client predicate and singleton setup are not expanded here.
+for completed native LOAD acceptance and subsequent SAVE when the campaign
+record is physically absent. The returning-path relation is SAV-1285.
 
-**Unknown.** Whether missing campaign bytes throw, leave existing fields,
-return a short read or cause another effect; whether later callbacks run;
-the resulting application +0x65c and server +0x84. Reading those exact
-callees, then a separately authorized synthetic native LOAD/next-SAVE probe,
-would distinguish the live alternatives.
+**Unknown.** Native completion, first failure, handler state and OS outcome
+when the campaign record is physically absent; later callbacks and a SAVE
+after an interrupted read. A separately authorized synthetic native
+LOAD/next-SAVE probe would settle these boundaries.
 
-**Amended.** SAV-1283, SAV-1284 and SAV-1285 resolve the actual short-read,
-count-reuse and returning-path difficulty/SAVE behavior. The exact native OS
-outcome remains unobserved; the original bounded ordering stands.
+**Amended.** Only the former Unknown clause about missing-byte reads and
+returning-path difficulty/SAVE behavior is superseded by SAV-1283, SAV-1284
+and SAV-1285; see the clause-scoped entry in [retracted.md](retracted.md).
+The original bounded ordering, High / Unknown grades, branch-candidate
+qualification and unobserved native completion/OS outcome stand.
 
 ## Campaign missing-data LOAD
 

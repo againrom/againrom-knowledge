@@ -164,3 +164,16 @@ when their interpretation is incomplete. No magic, section tags or per-entry
 size fields are inserted by this grammar. Array and CString lengths must fit
 the established primitive form; broader MFC encodings are not specified here.
 — DAT-GRAM-003, DAT-SCHEMA-004, DAT-SCHEMA-007, DAT-MATMASK-020
+
+## Installed usable Buildings parameters
+
+The nine installed usable classes are 15, 16, 28, 29, 34, 35, 39, 40 and 66
+in both ROM1 roots. Seven also have Indestructible; 28/29 use its absent-key
+zero default. — UNIT-153
+
+Buildings parameter 3's low word initializes both current +0x42 and maximum
++0x44 through the ID-based setup. Its installed value is 3 for 15/16, 1 for
+28/29 and 0 for 34/35/39/40/66. These selected parameters agree between roots
+even though the complete Data.bin payloads differ. A zero maximum can be
+displayed as 1000/1000; that substitute belongs to the client projection.
+— UNIT-154, UNIT-155

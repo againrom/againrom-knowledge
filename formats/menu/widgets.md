@@ -283,3 +283,18 @@ separately. A sprite header has no origin field; literal-pixel bounds are
 not a widget origin. The metadata establishes this resource population,
 not a complete widget/frame catalogue or native malformed-stream behavior.
 — MENU-129
+
+## Usable structure health ratios
+
+In the installed ROM1 EN/RU population, Buildings parameter 3 is 3 for usable
+classes 15/16, 1 for 28/29 and 0 for 34/35/39/40/66. With the established
+structure notification and widget-8 gates, wells display current/3, switches
+current/1 and the last five classes 1000/1000. Both current notification and
+maximum readout substitute 1000 when the simulation maximum is zero.
+That displayed value is not a simulation pool. Native first-frame visibility
+and first publication after LOAD remain Unknown. — MENU-072, UNIT-155
+
+Literal localized building.txt labels for classes 15, 16, 28 and 29 remain
+Unknown in this measurement. Their definition names do not supply those UI
+strings. Reading rows 14, 15, 27 and 28 through the text resolver on both
+roots would settle the labels. — UNIT-155

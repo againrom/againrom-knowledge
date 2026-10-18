@@ -151,3 +151,41 @@ The persisted cell tail and transient casting actor have different save
 lifetimes. No tower-health dependency is present in this local path, but
 post-destruction cleanup elsewhere and mission-10 runtime/save-load outcomes
 remain Unknown (`UNIT-M10LIFE-057`).
+
+## Installed usable population and pool
+
+Both installed ROM1 registries mark classes 15, 16, 28, 29, 34, 35, 39, 40
+and 66 usable. All except 28/29 also carry Indestructible; those two omit
+the key and use default zero. Buildings parameter 3 initializes both current
+word +0x42 and maximum +0x44. It is 3 for 15/16, 1 for 28/29 and 0 for
+34/35/39/40/66 in both roots. These flags and values are independent.
+— UNIT-153, UNIT-154, UNIT-155
+
+Once the geometry and visibility gates admit a usable CStructure, it
+contributes hit bits 0x800 and 0x20 independently of Indestructible. Cursor
+interpretation and all-caller hover-ID coverage keep their existing bounds.
+— UNIT-STRUCTHIT-138
+
+Non-Shop placement zero can replace current with zero; nonzero placement
+leaves the table value. Shop construction shares setup but has a separate
+placement cap. LOAD restores current and maximum without running setup.
+The five zero-maximum classes project 1000/1000 through the structure
+notification/readout route. This substitute is not their simulation pool.
+Wells project current/3 and switches current/1. — UNIT-154, UNIT-155
+
+Local fountain and switch use changes +0x42. It is serialized at decoded
+Building body bytes 60..61, with maximum at 62..63, excluding archive tags.
+Native use/SAVE/cold-LOAD replay and first client publication remain Unknown.
+— UNIT-156
+
+Setup copies class byte +0x40 to selector word +0x0e. Selector 66 branches
+on configuration +0xb8 equal to 4. That arm calls
+collection helpers and writes receiver +0x50; the other arm gates on receiver
++0x28/+0x34 and can write +0x1c and call a request routine. The player-visible
+effect, once/per-mission conditions and receiver persistence remain Unknown.
+An owner observation at a verified class-66 placement with each configuration
+branch would settle that boundary. Classes 39/40 have no dedicated test in
+the bounded local use action. If both nearby lookups resolve that Building,
+the action performs no selector-specific mutation or notification. Mission
+scripts, other receivers and visible native behavior remain Unknown.
+— UNIT-154, UNIT-STRUCTUSE-137, AI-484, AI-485

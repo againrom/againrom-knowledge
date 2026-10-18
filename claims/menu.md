@@ -509,7 +509,7 @@ The other 117 sites hold no text-table hint: 63 pass null, 51 pass a zero cell (
 |---|---|---|---|---|
 | MENU-070 | Widget 8 shows the hovered object when a hover id resolves and no item is held, else the single selected object, and draws its readout only for a `CStructure` (or a class derived from it); other classes go to `R0877`. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
 | MENU-071 | Widget 8's three structure lines are the `building.txt` text line of class id minus one, string 19 (`Health`) and `%d/%d`, in font `[L02677]` at right edge minus 88; the first two use ramp `L03616`, the ratio `L06394`. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
-| MENU-072 | The ratio is the drawable's current health `+0xfc` over `+0x100`: the first is message word `+0x12`, the second a signed word of a class table, replaced by 1000 when zero; neither store reads the object's class record. | High / Medium / Unknown | ● active | [EXP-0455](../experiments/EXP-0455-mission-screen/) |
+| MENU-072 | The ratio is the drawable's current health `+0xfc` over `+0x100`: the first is message word `+0x12`, the second a signed word of a class table, replaced by 1000 when zero; neither store reads the object's class record. | High / Medium / Unknown | ● active (amended) | [EXP-0455](../experiments/EXP-0455-mission-screen/), [EXP-0537](../experiments/EXP-0537-usable-structures/) |
 
 ### MENU-070
 
@@ -538,6 +538,17 @@ The other 117 sites hold no text-table hint: 63 pass null, 51 pass a zero cell (
 
 
 ### MENU-072
+
+**Amended.** UNIT-154 identifies the parameter-3 read as the Buildings
+maximum and the initialization stores at High. UNIT-153 and UNIT-155 measure
+both installed ROM1 roots: parameter 3 is 3 for classes 15/16, 1 for 28/29,
+and 0 for 34/35/39/40/66. UNIT-155 composes the conditional current/3,
+current/1 and 1000/1000 readouts at High under the existing message/widget
+gates. This settles the table identity, five zero values and cross-root
+comparison left open here. The statement that EXP-0455 did not compare the
+RU registry/table remains that experiment's historical scope. First-frame
+visibility, native layout, timing and later runtime publication remain
+Unknown; the original click and cursor boundaries are unchanged.
 
 - `+0xfc` is written at `L06408` from message word `+0x12` in the client arm `0x82` (`evidence/disasm-client-arm-0x82-hp-store-L13154.txt`); `TERR-STRUCT-102` already reads it as the current health.
 - `+0x100` is written at `L06409` from the signed word at byte `+0xc` of the array behind `[L06410] + messageByte+0x11 × 0x1c + 0xc`, index 3, and replaced by `0x3e8` (1000) when that word is zero (`L06411`..`L06412`). Neither value is read from the object class record `[L01425][obj+0x20]`.

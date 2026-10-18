@@ -1,5 +1,11 @@
 # Overturn history
 
+## SAV-1275: missing-byte and returning-path scope
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SAV-1275` (Unknown clause about missing-byte reads and returning-path difficulty/SAVE only; local LOAD ordering and unobserved native completion stand) | Missing-byte read effects and the resulting application +0x65c/server +0x84 were Unknown pending callee reads and a native LOAD/next-SAVE probe. | High / Unknown | [EXP-0580](../experiments/EXP-0580-campaignless-load/EXP-0580.md), SAV-1283, SAV-1284, SAV-1285 | EOF leaves destinations unchanged; partial reads replace available low bytes. A wholly absent record reuses stack file pointers as counts and reaches nested allocations. On a returning path, server difficulty is the held index + 1; the next ordinary SAVE writes current server difficulty and the held index in a full campaign record. Exact native completion/failure and SAVE after an interrupted read remain Unknown. | **SUPERSEDED** |
+
 ## EXP-2070: executor byte-table cells
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

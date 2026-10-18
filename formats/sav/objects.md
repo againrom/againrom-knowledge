@@ -316,3 +316,15 @@ null-guards its own class-specific field and, when present, dispatches that
 field's own post-load hook once. Across all three classes, LOAD-time field
 binding and LOAD-time container membership are each set exactly once, and
 no post-load hook revisits which owns which. — SAV-1050
+
+## Saved usable-structure state
+
+The local well-charge decrement and switch-state toggle both mutate Building
+word +0x42. Its serializer places that word at decoded body offsets 60..61
+and maximum +0x44 at 62..63, little-endian, excluding archive tags and class
+descriptors. LOAD restores both words and rebinds the definition pointer
+without running setup. These are body offsets, not compressed SAV positions.
+Native use/SAVE/cold-LOAD replay, later script writes, first notification and
+selector-66 receiver/collection persistence remain Unknown. A verified well
+or switch use followed by SAVE and cold LOAD would settle the first boundary.
+— UNIT-156
