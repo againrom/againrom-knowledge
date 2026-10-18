@@ -221,17 +221,56 @@ no original cast was observed (R2-SESSION-162).
 
 ## Player order machine
 
-A player order reaches the unit through a setter that resets the unit state,
-replaces the order code and parameters at once and stores prepared byte +8: 0,
-except in the two order-1 setters, which store 1; no setter writes primary
-byte +9 (R2-ENGINE-541). The executor reads +9 first (1 strike, 2 cast, 3 step,
-4 hold; the 239 byte-table cells for other values are unread) and prepared
-byte +8 only when +9 is zero (R2-ENGINE-542). A cast passes init, the
-cast-routine try, wind-up and recovery (R2-ENGINE-543); the mage's mana is
-subtracted at the cast routine's entry, once per call that reaches the delivery
-(R2-ENGINE-544). A new order during a cast or a step between cells is stored
-and, in the setter windows read, acts after the running action ends; order 1
-acts at the next executor call, the other kinds after a planner pass
-(R2-ENGINE-545, R2-ENGINE-546). Most planners, the command word +0xb0 and the
-strike and hold cells are unread. States, EN/RU equality and Unknowns:
-R2-ENGINE-547, R2-ENGINE-548, R2-ENGINE-549.
+The acquired setters store unit order code +0x50 and command-object parameters
+at once. They reset unit state and prepared byte +8 (0, except the two order-1
+setters store 1), without directly writing primary byte +9. Unit +0x50 and
+command-object +0x50 are distinct. The inherited L2.01576 reset chain stores
+unit order 0xc through L2.02637, then command-object +0x50 = 1; that last write
+does not set unit order 1. — R2-ENGINE-541, R2-ENGINE-555
+
+The 255-cell primary table maps +9 of 1..4 to strike, cast, step and hold;
+5..254 reaches the local clear arm (+9 = 0, state 27), and 255 reaches an arm
+that retains +9 with state 27. All primary arms reach a common tail. EN/RU
+tables agree. The acquired RU writer sites include executor and action
+initializers, plus two 0xff-to-0 clears in the single planner L2.02864.
+The encoded-store census is bounded; called and bulk-copy effects are not
+excluded. — R2-ENGINE-542, R2-ENGINE-553, R2-ENGINE-554
+
+The acquired RU planners store prepared +8 constants and can call setters:
+L2.02872 calls L2.02878; L2.02865 calls L2.02637. The table and individual
+stores are High; per-order closure and inherited reset effects are Medium.
+The helper containing L2.02866 calls the cast initializer, but its order
+reachability is Unknown. — R2-ENGINE-555
+
+The primary strike, cast, step and hold arms do not dispatch prepared +8.
+Strike clears +9 when phase > 2 and +0x136 is nonzero; hold clears it when
+mask bit 0x40000 is absent. A cast passes init, routine try, wind-up and
+recovery; mana subtraction is once per call that reaches delivery, with
+zero-return reachability still open. Movement local flow in L2.02848 and
+L2.01578 is acquired; unread callees still prevent guaranteed movement.
+— R2-ENGINE-543, R2-ENGINE-544, R2-ENGINE-545, R2-ENGINE-546,
+R2-ENGINE-556
+
+A zero +9 alone does not guarantee new-order dispatch. The executor entry
+must admit the unit, the effect-mask test must not reinstall hold, and +8
+must select a valid prepared handler. Order 1 is prepared by its setter;
+other setters clear +8 and depend on a planner pass. A handler may still
+fail its helper test. The common tail can overwrite +9 with 0xff for block
++0x98 nonzero and unit order 0x18, clear +8 or call reset/replanning helpers.
+Complete interruption, flag coexistence and eventual execution remain Medium;
+there is no next-call guarantee for the 5..254 clear arm. — R2-ENGINE-556,
+R2-ENGINE-560
+
+RU command word +0xb0 carries a cell copied from record kind 0x17, not an
+order. With +9 zero and the position test admitting, the executor calls
+L2.00093 with its two bytes and then clears the word. Guaranteed relocation
+and writer completeness remain Medium. — R2-ENGINE-557
+
+Acquired scheduler wrappers and E8 hit counts do not establish planner
+cadence. The actor-step executor call is conditional in standing evidence;
+the other site's containing loop, L2.02880, is inherited. Raw pointer
+occurrences do not identify vtables. Cadence and pointer dispatch remain
+Unknown. States and locale comparisons retain their listed bounds; acquired
+RU planner and movement flow is distinguished from unread branch selection,
+callees, tail composition and EN counterparts. — R2-ENGINE-547,
+R2-ENGINE-548, R2-ENGINE-549, R2-ENGINE-558, R2-ENGINE-559, R2-ENGINE-561
