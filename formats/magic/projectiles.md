@@ -25,6 +25,17 @@ The last positive-count call reaches the current or held aim. Unit shots
 including picture 12 carry a target word; Fire Ball spell picture 12 instead
 carries a fixed cell-centre point. — ANIM-155, ANIM-156, ANIM-157
 
+The aim comes from the target drawable's centre `+0x58/+0x5c`, copied only
+when segments are nonzero, the action byte is 1, the target ID is nonzero and
+the ID is found. The client state arm skips its one `R0614` call while
+client world `+0x80` is 0, as during the mission LOAD pump; whether such a
+drawable's centre stays underived until the next view rebuild is Medium,
+because eight other callers of `R0614` were not read. After loading one
+owner SAV, a record flew to a map corner while no stored field named one.
+Among the routines read, an aim copied from a zero centre is the one path to
+(0,0); the record creators were not read, and which record flew is Unknown.
+— SAV-1323, SAV-1324
+
 The ordinary physical application rereads the simulation target actor+0x5c
 at countdown expiry and tests its current footprint-aware reach. Its live
 damage calculation is separate from the visual endpoint. A dead shooter is

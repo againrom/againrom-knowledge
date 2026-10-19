@@ -58,6 +58,14 @@ common bytes. A child and its transport therefore need not carry the same
 invariants: allocation/alias boundaries and later writes remain Unknown.
 — SAV-1069, MAGIC-ATTRGATE-118, MAGIC-225
 
+A cast-built SpellTransport is allocated through `R1147`, `R0747` and
+`R0722`, with no zeroing in the windows read. Its Token `+08/+0c`, the
+PointEffect's Token `+08` and both Positions' `+06/+07` have no store on the
+cast path read. The original's `game0018.sav` saved a pending cast with these
+fields nonzero (transport `+0c`=0x47, `+08`=0xa; PointEffect `+08`=0xa), so
+a zeroing allocator with no later writer is excluded. Whether allocator
+residue or a tick writer supplies them is Unknown. — MAGIC-413, SAV-1068
+
 Direct delivery-2 admission supplies the caster's Position `+10` to
 SpellTransport's Position-copy constructor chain. Its inspected tick body
 does not move that Position. The nested PointEffect separately copies the

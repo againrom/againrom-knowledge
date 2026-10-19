@@ -186,6 +186,35 @@ sixteen defaulted leaf reads, terrain/world/ID binding, insertion and a
 post-load helper. The tree is producer-complete but not loader-mandatory.
 — SAV-PROJLOAD-429
 
+SAVE writes `action` and `actiondir` as sign-extended bytes and `actiontarget`
+as a zero-extended u16; the other thirteen leaves are dwords. LOAD stores the
+low byte or word back. LOAD builds one record per IDs element. A repeated ID
+finds the existing map node, and LOAD stores the new record over that node's
+value without freeing the earlier record. — SAV-1322
+
+The client state arm's one `R0614` call is skipped while client world
+`+0x80` is 0, which holds through the mission LOAD pump. A drawable it builds
+there may keep an underived centre `+0x58/+0x5c` until the next view rebuild
+(Medium): eight callers of `R0614`, two constructor callees and the
+allocator were not read, and no store census was made. The projectile driver
+copies the target's centre into its aim when segments are nonzero, the action
+byte is 1, the target ID is nonzero and the ID is found; a miss keeps the aim.
+The native order of the pump, the first frame and the first driver call is
+Unknown. — SAV-1323
+
+`game9609.sav`, an owner LOAD input written by another program, carries the
+original `game0018.sav`'s projectile store, head and effect records unchanged
+and resets runtime fields of 49 actor records. Its one record, Prj266
+(picture 10, target 157, 3 segments left, aim at the target's cell centre),
+sits beside a pending SpellTransport with counter 4. The original's SAVE after
+loading it, at head `world+0x04` 3761 against 3452, holds FreeIndex 284, one
+record Prj283 (picture 1, target 131) and no effect record; 17 IDs were taken
+after LOAD (Medium). No stored field names a map corner. Among the routines
+read, the one path that moves a record to (0,0) is an aim copied from a zero
+target centre (Medium); the record creators and client creation arms were
+not read, and which record flew to a corner after that LOAD is Unknown.
+— SAV-1321, SAV-1324
+
 The reached mission consumer stores the low u16 of FreeIndex into the live counter before it builds
 the records, and SAVE writes that counter back, so a round trip keeps it and
 the next shot takes ID FreeIndex. The former unqualified LOAD/round-trip scope

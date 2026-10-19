@@ -7165,8 +7165,8 @@ reciprocal causality, RU and safe producers.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | SAV-PROJSTORE-428 | A world-present ROM1 save producer always emits a canonical `Projectiles` state subtree, even when the live projectile collection is empty. | High | ✔ promoted | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
-| SAV-PROJLOAD-429 | The matching loader is stricter about wire type than about record presence: the whole `Projectiles` subtree is loader-optional. | High / Unknown | ✔ promoted | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
-| SAV-PROJCORP-430 | The lawful 55-path / 31-digest SAV population agrees with the producer shape but scarcely exercises its value relation: one document has a nonempty `IDs`. | High / Medium | ✔ promoted | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
+| SAV-PROJLOAD-429 | The matching loader is stricter about wire type than about record presence: the whole `Projectiles` subtree is loader-optional. | High / Unknown | ✔ promoted (amended) | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
+| SAV-PROJCORP-430 | The lawful 55-path / 31-digest SAV population agrees with the producer shape but scarcely exercises its value relation: one document has a nonempty `IDs`. | High / Medium | ✔ promoted (amended) | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
 | SAV-WORLDSTATE-431 | An independent structural writer can close the canonical empty-Projectiles state tree, but only at level A. | High / Unknown | ✔ promoted | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
 | SAV-WORLDFRONT-432 | Closing `Projectiles` does not yield an implementation-authorable independent world writer: the Human graph remains a synthetic-value boundary and several world values still lack producers. | High / Unknown | ✔ promoted | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
 | SAV-WORLDDIAG-433 | One source-faithful world vector can be independently encoded to complete level A without replaying source records or compressed packets. | High / Unknown | ✔ promoted | [EXP-0263](../experiments/EXP-0263-sav-world-authoring/) |
@@ -7213,6 +7213,10 @@ reached consumer.
 **Unknown.** Malformed error presentation, later projectile tick behaviour and
 running-original mutations.
 
+**Amended.** SAV-1322 narrows the per-ID step: an ID already in the map finds
+the existing node, and the loader stores the new record into that node's value
+and links no new node.
+
 ### SAV-PROJCORP-430
 
 - All 29 distinct world-state documents have `Projectiles/FreeIndex` kind 2 and
@@ -7228,6 +7232,11 @@ running-original mutations.
 the counts and the exact singleton. Medium for `FreeIndex = max(IDs)+1`, because
 one nonempty document cannot discriminate that allocator relation from a
 coincidence or a wider rule.
+
+**Amended.** SAV-1321 adds a second digest of the same projectile store:
+`game9609.sav` (written by another program from this population's
+`game0018.sav`) holds the same Prj266, FreeIndex 267 and IDs `[266]`, the same
+head and the same effect records; 49 actor records differ.
 
 ### SAV-WORLDSTATE-431
 
@@ -12410,7 +12419,7 @@ wider load sequence; it was not traced.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1068 | The selected PointEffect and SpellTransport cast constructors leave Token `+08` and `+0c` without a direct store; their Position sources differ. | High / Unknown | ✔ promoted | [EXP-0388](../experiments/EXP-0388-effect-construction/) |
+| SAV-1068 | The selected PointEffect and SpellTransport cast constructors leave Token `+08` and `+0c` without a direct store; their Position sources differ. | High / Unknown | ✔ promoted (amended) | [EXP-0388](../experiments/EXP-0388-effect-construction/) |
 | SAV-1069 | The two selected cast paths initialize common SpellEffect bytes `+40=0` and `+41=1` with literal stores. | High / Medium / Unknown | ✔ promoted | [EXP-0388](../experiments/EXP-0388-effect-construction/) |
 
 ### SAV-1068
@@ -12448,6 +12457,11 @@ against the lawful image and 12 isolated runs.
 
 **Unknown.** Native allocation values, transitive effects of controlled external
 calls, arbitrary aliases and later first-SAVE values.
+
+**Amended.** MAGIC-413 reads the SpellTransport's allocation chain
+`R1147` → `R0747` → `R0722` (called, not read) with no zeroing in the
+read windows, and records the original's nonzero Token `+08/+0c` values of a
+pending transport in `game0018.sav`. Native allocation values stay Unknown.
 
 ### SAV-1069
 
@@ -16990,3 +17004,173 @@ Projectiles leaf implies either counter presence or LOAD consumption.
 
 **Unknown.** Unobserved producers and another-leaf town controls are outside
 this result. The named LOAD predicate is separately established by SAV-1300.
+
+## Projectiles and spell effects in flight across LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1321 | After loading game9609 (game0018's projectile store, head and effects, 49 actor records reset), the original's SAVE at head 3761 holds FreeIndex 284, one Prj283 and no effect record. | High / Medium | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+| SAV-1322 | Prj SAVE writes action and actiondir as sign-extended bytes and actiontarget as a zero-extended u16; LOAD keeps their low byte or word, and a repeated ID replaces the earlier record in the map without freeing it. | High | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+| SAV-1323 | The client state arm's one R0614 call is skipped while client world +0x80 is 0, as in the LOAD pump; whether the drawable's centre +0x58/+0x5c stays underived until the next view rebuild is open. | Medium / Unknown | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+| SAV-1324 | LOAD builds one projectile record per IDs element; no stored field of game9609 names a map corner, and among the routines read only an aim copied from a zero target centre moves a record to (0,0). | High / Medium / Unknown | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+
+### SAV-1321
+
+Documents, read with `tools/savfull -fields -identity-refs` and the `&YA1`
+state reader:
+
+| Document | Bytes | SHA-256 prefix | Head `world+0x04` | Mission | Effects list |
+|---|---:|---|---:|---:|---:|
+| `game0018.sav` (EN install, original SAVE) | 39,141 | `1e2eb21f47082ab0` | 3452 | 40 | 1 |
+| `game9609.sav` (owner's LOAD input) | 203,720 | `fc053dd27e3e237f` | 3452 | 40 | 1 |
+| `game0015-original-resave.sav` (original SAVE after that LOAD) | 39,071 | `45f17a960c87bb82` | 3761 | 40 | 0 |
+
+Provenance of the input. `game9609.sav` was written by another program from
+the original's `game0018.sav`. Their campaign, lists and head lines are equal.
+Of 144 archive objects in each, 95 decode to equal lines, including the
+SpellTransport, PointEffect and Effect_DirectDamage. The other 49 are actor
+records (39 Unit, 10 Human) whose runtime fields the other program reset:
+`+0x136` 1→0 on 43, `+0x6c` to 0 on 26, `+0x58` to 0 on 3, target `+0x5c`
+(object 152) to 0 on 3, `+0x138` to 0 on 3, `+0x134` 8→7 on 3, `+0xa2` 0x3c→0
+on 2, `+0x40` and `+0x48` on 1. The caster at (73,108), runtime ID 2, has
+`+0x58`=7, `+0x6c`=6 and target object 152 in `game0018.sav` and 0, 0 and none
+in `game9609.sav`. Prj266, FreeIndex 267 and IDs `[266]` of `game9609.sav`
+equal the values SAV-1134 records for `game0018.sav`. `game9609.sav` also
+carries two kind-6 `CurrentState` leaves that no original producer is known
+to write.
+
+| Field | Input Prj266 | Resave Prj283 |
+|---|---:|---:|
+| x, y, z | 19278, 27985, 0 | 19642, 27944, 0 |
+| picture | 10 | 1 |
+| dir, phase, lastaction | 5, 1, 1 | 7, 0, 1 |
+| action, actiondir | 1, 5 | 1, 7 |
+| actiontarget | 157 | 131 |
+| actionx, actiony, actionz | 19840, 28288, 0 | 19840, 28544, 0 |
+| actionphase, actionsegments, actionspell | 2, 3, 0 | 2, 3, 0 |
+
+`Projectiles/FreeIndex` is 267 with IDs `[266]` in the input and 284 with IDs
+`[283]` in the resave. Each stored aim is the centre of its target's cell:
+19840 = 77·256+128; 28288 and 28544 are cells 110 and 111. Target 157 is
+`Unit` object 152 at cell (77,110) in both files; target 131 is at (85,103)
+in the input and (77,111) in the resave.
+
+The input's SpellTransport (Token `+0c`=0x47, `+08`=0xa, `+0e`=0; `+40`=0,
+`+41`=1; counter `+4c`=4; Position cell (73,108)) holds a PointEffect (Token
+`+0c`=1, `+0e`=0xb, `+08`=0xa; `+40`=0, `+41`=1; Position cell (77,110), bytes
+`+06/+07` 0xec/0x6c) with an Effect_DirectDamage and the raw `+44` key of
+object 152. The resave holds no SpellTransport, PointEffect or
+Effect_DirectDamage. Object 152's u16 `+0x94` changes from 0xffc7 to 0xffb9
+and `+0x13c` from 3 to 4; the caster's `+0x58` and `+0x6c` are 5 and 6.
+
+**Confidence.** High for every stored value, hash and object comparison.
+Medium that 17 IDs (267..283) were taken after LOAD: the counter is restored
+from FreeIndex and advanced by each record allocation (SAV-1191, SAV-1204),
+but writers of the counter outside those paths are not enumerated (SAV-1200,
+SAV-1201). `world+0x04` is a sub-tick counter field; 3452 to 3761 is not a
+measured elapsed time.
+
+**Unknown.** What happened between LOAD and the SAVE: how many of the 17 IDs
+belonged to records visible on screen, whether Prj266 completed, and whether
+the transport delivered its child. The meanings of `+0x94`, `+0x13c`,
+`+0x136`, `+0x58` and `+0x6c` are not established here. The `game0018.sav`
+read is the last of this experiment's save reads and was not reproduced.
+
+### SAV-1322
+
+- SAVE loop: `movsx ecx, byte [esi+0x84]` (`L16495`), `movsx eax, byte
+  [esi+0x85]` (`L16496`) and `xor edx,edx; mov dx, word [esi+0x86]`
+  (`L16497..L16498`) feed the integer setter `L07603`. The other
+  thirteen leaves are dwords (SAV-1202).
+- LOAD loop: the getter's results go back as `mov byte [esi+0x84], al`
+  (`L02487`), `mov byte [esi+0x85], al` (`L16499`) and `mov word
+  [esi+0x86], ax` (`L16500`), with the sign-extended constructed values as
+  defaults (`L02489`, `L16501`).
+- ID map: the loader hashes the ID (`>>4`, modulo the bucket count) and walks
+  the bucket (`L16502..L16503`). On a hit it jumps to `L16504` and
+  stores the new record over the node's value (`L16505`), then calls
+  `R0614`. That path calls no destructor or free. On a miss it allocates a
+  zeroed bucket array when none exists (`L16506..L16507`) and inserts a
+  node at the bucket head (`L16508..L16509`).
+
+**Confidence.** High: the SAVE and LOAD loops are complete listings from this
+experiment's native runs.
+
+**Unknown.** No input with a repeated ID was loaded. What else references the
+replaced record is not traced.
+
+### SAV-1323
+
+Read population: the client state arm `L02530..L16510`, the drawable
+constructors `R0593` and `R1652`, the geometry routine `R0614`, the
+view frame and rebuild, the LOAD pump, the allocators `R1147` and
+`R0747`, and the projectile driver `R0558..L03000`.
+
+- The state arm allocates 0x1b0 bytes with `R0747` and builds the drawable
+  with `R0593` (`L03222..L02807`) or `R0594` (`L16511..L02811`,
+  not read). It copies the message position into cached `+0x28/+0x2c`
+  (`L16033`, `L16512`). Its one `R0614` call (`L16513`) requires
+  campaign `+0x3dc` bit 0 and client world `+0x80` nonzero
+  (`L16514..L16515`).
+- The mission LOAD pump `L09145..L16121` dispatches messages and calls the
+  client dispatcher `R0509` while `[campaign+0xd0]+0x80` is 0; the
+  dispatcher's receiver is that client world.
+- `R0614` stores the centre at `+0x58` (`L16475`) and `+0x5c`
+  (`L16476`). The view frame `R0379` calls the view rebuild `R1657`
+  (`L13409`) after its campaign `+0x3dc` test (`L16516`); the rebuild calls
+  `R0614` for every actor drawable (`L16517`) and every projectile record
+  (`L16518`).
+- In the windows read, `R0593` and `R1652` store nothing at
+  `+0x34..+0x68`, and `R0747` calls `R0722` with no zeroing loop.
+- The driver copies a target's centre into aim `+0x88/+0x8c`
+  (`L16519..L02825`) only when segments `+0xa0` are nonzero
+  (`L02817..L05513`), the action byte `+0x84` is 1 (`L13441..L05516`),
+  the target ID `+0x86` is nonzero (`L16520..L16521`), and the ID is found
+  in the client hash `+0x9bc/+0x9c0` (miss at `L13442` keeps the aim).
+
+Open writers. Of the twelve rel32 callers of `R0614` that SAV-1203 lists,
+four were read (`L16517`, `L16518`, `L16513`, `L13758`). Eight were
+not: `L16522`, `L16523`, `L16524`, `L16525`, `L16526` (later arms of
+the dispatcher `R0509`) and `L16527`, `L16528`, `L16529`. The
+constructor callees `R0893` and `R2159`, the arm's virtual calls and
+`R0722` were not read, and no census of stores to `+0x58/+0x5c` was made.
+
+**Confidence.** High for the gate, the listed stores and the copy with its
+conditions. Medium that a drawable built in the LOAD pump keeps an underived
+centre until the next view rebuild: any of the open writers could derive it
+earlier. Medium that the underived centre holds allocator contents.
+
+**Unknown.** Whether any driver call reaches such a drawable before the first
+view rebuild: the native order of the LOAD pump, the session-entry send, the
+first view frame and the first 0x401 pass. A watch on a loaded projectile's
+`+0x88/+0x8c` and its target drawable's `+0x58/+0x5c` from LOAD to the first
+frame settles it.
+
+### SAV-1324
+
+- `game9609.sav` has one IDs element, so the loader builds one record, Prj266.
+  A second record needs a creator after LOAD (SAV-PROJLOAD-429, SAV-1202).
+- No stored projectile or effect field names a map corner. Prj266's stored
+  aim (19840, 28288) is the centre of target 157's cell. The SpellTransport
+  does not move or aim (MAGIC-293).
+- Among the routines read (the Prj loader, the driver `R0558`, the state
+  arm, the view rebuild), the one path that moves a record toward (0,0) is an
+  aim copied from a target centre that holds zero (SAV-1323). A zero centre
+  needs the allocator to have handed out zeroed memory, which is not read.
+- A record is also drawn from cell (0,0) until a driver tail and a geometry
+  pass run (SAV-1203); that is a position, not a flight.
+- Open alternatives: the record creators `R0603` (unit shot) and
+  `R0620` (cast producer) and the client arms `0x86`, `0x8b` and `0x8c`,
+  none read here, may build a record with a zero aim or a zero target; the
+  driver's lookup-miss branch keeps the stored or creator-supplied aim.
+- The original resave holds neither the record nor the transport (SAV-1321).
+
+**Confidence.** High that the loader builds one record and that no stored
+field names a corner. Medium that the corner flight is an aim taken from a
+zero target centre: it rests on the routines read and on allocator contents.
+Unknown which record flew: Prj266 or a record created after LOAD.
+
+**Unknown.** A native run of the original that loads `game9609.sav`, watches
+the record map at client world `+0x9d4` and logs each record's ID, target and
+aim on its first three driver calls settles which record flew and from which
+aim. Reading the creators named above settles whether one supplies a zero aim.

@@ -4672,3 +4672,51 @@ applied to the authored power, ITEM-CASTSTATE-056).
 does not enumerate; which shop weapons a mage can buy in a given town; the
 shop staff-spell product (whether the forced-cast draw gives Drain Life on a
 Staff or Shaman Staff), which is not computed here.
+
+## Cast-built effect fields at the first SAVE
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-413 | A cast-built SpellTransport comes from R1147 through R0747 to R0722 with no zeroing in the windows read; its Token +08/+0c have no store there, yet the original saved them nonzero in game0018. | High / Medium / Unknown | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+
+### MAGIC-413
+
+- Allocation: the caller allocates the 0x50-byte SpellTransport through
+  `R1147` (`L16492..L16493`). `R1147` reaches `R0747`, which
+  calls `R0722` and retries through the new-handler. Neither window holds a
+  zeroing loop; `R0722` was not read. The PointEffect's allocation lies
+  before the read caller window (`L16494`).
+- Stores on the cast path, with the existing sources: PointEffect `+0c` =
+  Spell `+08`, `+41` = (Spell `+0a` == 0), `+3c` = caster or 0, `+0e` =
+  2·Spell `+08` + 9 (MAGIC-225); `+40`=0 from the base; `+44` target, `+48`
+  child; Position copied from the target without `+06/+07` (SAV-1068,
+  SAV-TOKENPOS-074). SpellTransport: `+0e`=0, `+3c`=0, `+40`=0, `+41`=1 from
+  the base `L05979` (`L05296..L09055`), `+44` child, `+48`=0, `+4c` from
+  `R1144` or 10 for Spell `+08` 0xd or 0xe (`L03086`, MAGIC-293); Position
+  copied from the caster without `+06/+07`. Both Token paths store `+14`=0 and
+  call `R1624` (`+18`=0, `+1c`=0).
+- Unstored: PointEffect Token `+08`; SpellTransport Token `+08` and `+0c`;
+  Position `+06/+07` of both (SAV-1068).
+- The delivery tail at `L05107` reads the delivery value: 1 stores the
+  PointEffect's `+0e` again with the same expression (`L06028`) and adds it
+  to the effect container; 2 builds the SpellTransport around it
+  (`L16492..L03052`). The transport arm stores no Token field.
+- The original's own SAVE `game0018.sav` holds one pending cast (transport
+  counter 4, so an unknown number of ticks after the cast). Its PointEffect has
+  `+0c`=1, `+0e`=0xb and `+41`=1; Spell 1's `+0a` is 0, so these agree with the
+  stores. Its unstored fields are nonzero: PointEffect Token `+08`=0xa,
+  transport Token `+0c`=0x47 and `+08`=0xa, PointEffect Position `+06/+07`
+  0xec/0x6c. `game9609.sav` carries the same three effect records unchanged
+  (SAV-1321).
+
+**Confidence.** High for the transport's allocation chain, every listed store
+and the saved values. Medium that the unstored fields come from allocator
+contents: the nonzero saved values exclude a zeroing allocator with no later
+writer, but `R0722`, the PointEffect's allocation and the tick bodies were
+not read, so allocator residue and a writer between construction and SAVE
+both remain.
+
+**Unknown.** Which of allocator residue or a later writer supplies the
+nonzero values, and their values at a first SAVE. An original SAVE written
+within one tick of a cast, read with `savfull -fields`, together with a read
+of the PointEffect and SpellTransport tick bodies, settles it.

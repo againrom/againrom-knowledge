@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4071. Observation: 99. Static analysis: 3447. Mixed: 525.
+Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 
 ## Ledger ai
 
@@ -1380,6 +1380,7 @@ Claims labelled: 4071. Observation: 99. Static analysis: 3447. Mixed: 525.
 | MAGIC-409 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-410 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-411 | mixed | ✔ promoted (branch candidate) |
+| MAGIC-413 | static analysis | ✔ promoted |
 
 ## Ledger menu
 
@@ -2766,8 +2767,8 @@ Claims labelled: 4071. Observation: 99. Static analysis: 3447. Mixed: 525.
 | SAV-LIVEREADER-414 | observation | ✔ promoted |
 | SAV-LIVEPGD-415 | observation | ✔ promoted |
 | SAV-PROJSTORE-428 | mixed | ✔ promoted |
-| SAV-PROJLOAD-429 | static analysis | ✔ promoted |
-| SAV-PROJCORP-430 | mixed | ✔ promoted |
+| SAV-PROJLOAD-429 | static analysis | ✔ promoted (amended) |
+| SAV-PROJCORP-430 | mixed | ✔ promoted (amended) |
 | SAV-WORLDSTATE-431 | mixed | ✔ promoted |
 | SAV-WORLDFRONT-432 | mixed | ✔ promoted |
 | SAV-WORLDDIAG-433 | mixed | ✔ promoted |
@@ -2878,7 +2879,7 @@ Claims labelled: 4071. Observation: 99. Static analysis: 3447. Mixed: 525.
 | SAV-1059 | mixed | ● active |
 | SAV-1060 | static analysis | ● active |
 | SAV-1066 | static analysis | ● active |
-| SAV-1068 | static analysis | ✔ promoted |
+| SAV-1068 | static analysis | ✔ promoted (amended) |
 | SAV-1069 | static analysis | ✔ promoted |
 | SAV-1070 | static analysis | ● active |
 | SAV-1071 | static analysis | ● active |
@@ -3028,6 +3029,10 @@ Claims labelled: 4071. Observation: 99. Static analysis: 3447. Mixed: 525.
 | SAV-1299 | mixed | ✔ promoted |
 | SAV-1300 | static analysis | ✔ promoted |
 | SAV-1301 | static analysis | ✔ promoted |
+| SAV-1321 | mixed | ✔ promoted |
+| SAV-1322 | static analysis | ✔ promoted |
+| SAV-1323 | static analysis | ✔ promoted |
+| SAV-1324 | static analysis | ✔ promoted |
 
 ## Ledger session
 
