@@ -1537,3 +1537,10 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `AI-649` (the sentence on a Move member's later refusal only; the tail arms, `R0004`, the order 4 re-issue and the grades stand) | Verbatim: "A Move member reaches the stand-down on its first refusal and `R0004` on a later one." | High / Medium | [EXP-0591](../experiments/EXP-0591-refused-move-passes/), AI-658, AI-659 | It holds for a near-search refusal. After a static-search refusal the walk leaves `mover+0x90` = 1 and `mover+0x76` = the cell, path (b) of the next order 4 pass latches the member, and no later refusal comes under that order, unless the member reset's claim release clears `mover+0x76` on the refused pass (`AI-658`, Medium); then the walk is re-issued and the sentence holds. | **NARROWED** |
+
+## EXP-0600: Weapon descriptor stream
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ITEM-PANEL-022` (the single-writer clause of its inference only; the `0x0d` arm, the unreachable `0x0e` default arm and the `[base, base+spread]` display stand) | Verbatim: "`R0808` being the only site that emits `0x0d`" | High | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/), ITEM-211 | The Weapon packer `R1033` also writes `(0x0d, +0x60)` and `(0x0e, +0x61)` through `R1030` when `sutableFor` bit 0 is set (`L16542..L16543`). Both writers emit `0x0e` only after `0x0d` or after an elemental pair. | **REFUTED** — partially retracted |
+| `MAGIC-ITEMTRAIN-116` (the Weapon descriptor-bit clause only; the Cast-route conclusion and every training clause stand) | Verbatim: "a Weapon effect supplies bit 4" | High | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/), ITEM-211 | `R0998` sets descriptor bit `0x10` for kind 41, and the Weapon packer `R1033` clears it at `L16557` before returning, so a Weapon descriptor carries neither `0x10` nor `0x01`. | **REFUTED** — partially retracted |

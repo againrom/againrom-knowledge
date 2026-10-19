@@ -727,7 +727,7 @@ is 2 only between `L00541` and `L00115`.
 | ITEM-LADDER-019 | The nine doubles of a shape or material record sit at `record + 0x20 + 8j`, fixed by the record stride `0x68`. | High | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
 | ITEM-DMGFACT-020 | The weapon damage factor is the column the game names `@.damage`, at `record+0x40` = `f64[4]`, and a shape factor is never 1. | High | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
 | ITEM-WEAPCOL-021 | The `Weapons` row's slot-to-title map is `slot i = title i+1`, anchored by four instruction-level uses; `Weapon::Equip` has three arms on slot 5. | High / Unknown | ✔ promoted (amended) | [EXP-0106](../experiments/EXP-0106-weapon-columns/), [EXP-0495](../experiments/EXP-0495-weapon-attack-tail/) |
-| ITEM-PANEL-022 | The item panel draws a weapon's damage line from the weapon's own two bytes as `[base, base+spread]`, composed the way the character sheet does. | High / Unknown | ● active | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
+| ITEM-PANEL-022 | The item panel draws a weapon's damage line from the weapon's own two bytes as `[base, base+spread]`, composed the way the character sheet does. | High / Unknown | ● active (partially retracted) | [EXP-0106](../experiments/EXP-0106-weapon-columns/) |
 
 ### ITEM-SCALE-017
 
@@ -938,6 +938,13 @@ of 25 hits over 15 owners with 0 in orphan code.
 same string the character sheet's damage line uses, so the two surfaces are
 labelled identically, but the string itself is a resource and was not
 resolved.
+
+**Amended.** The clause that `R0808` is the only site that emits `0x0d`
+is partially retracted ([`retracted.md`](retracted.md), ITEM-211). The Weapon
+packer `R1033` also writes `(0x0d, +0x60)` then `(0x0e, +0x61)` through
+`R1030` when `sutableFor` bit 0 is set (`L16542..L16543`). Both writers
+emit `0x0e` only after `0x0d` or after an elemental pair, so the unreachable
+default-arm reading and the `[base, base+spread]` display stand.
 
 ## Appearance word
 
@@ -3662,7 +3669,7 @@ A missing name reaches the request service with a sample whose file does not exi
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ITEM-187 | Among the routines read, only equip builds `weapon+0x80` from the `castSpell` Effect (`R0850`); copy builds from the source Spell's id. The original's resave keeps a worn staff's null reference after LOAD; no other writer is Medium. | High / Medium | ● active (branch candidate) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
+| ITEM-187 | Among the routines read, only equip builds `weapon+0x80` from the `castSpell` Effect (`R0850`); copy builds from the source Spell's id. The original's resave keeps a worn staff's null reference after LOAD; no other writer is Medium. | High / Medium | ● active (branch candidate, amended) | [EXP-0576](../experiments/EXP-0576-difficulty-weapon-spell/) |
 
 ### ITEM-187
 
@@ -3711,6 +3718,12 @@ the name constructor and the fill. No dword scan for `R0850` was run. `E9`
 jumps were not scanned, so a `jmp` thunk to `R1012` is not excluded. The store
 scan cannot see the write through `L08325` (`L16118`, a store through
 the passed pointer).
+
+**Amended.** ITEM-212 closes two Unknown clauses: a dword scan over every
+section finds `R0850` once, the Weapon vtable slot `L16544`, and an
+`E8`/`E9` scan finds no `jmp` to `R1012` or `R1011`. It also states the
+five town, mission and SAV routes. Equip's indirect callers and the
+unclassified stores stay open, so the no-other-writer clause stays Medium.
 
 ## Scroll valuation and mission81
 
@@ -3885,3 +3898,101 @@ partially retracted and are not used.
 and virtual targets. Medium for the reused authored corpus and its coverage
 grade. No opcode-11 node is authored in that admitted map population. No
 global factory caller census or future callback rule is claimed.
+
+## Weapon Spell display and route builders
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-211 | A Weapon's information text reads its columns and its castSpell Effect's bytes; no body read has a Weapon +0x80 operand; base lines need sutableFor bit 0; the spell lines come from a Spell built from Effect +0x40 and +0x42. | High / Medium | ✔ promoted (branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
+| ITEM-212 | Weapon +0x80 on five routes: tavern hire and mission-entry construction build it by template equip; script owner transfer, AddHero, a carried party (Medium) and town SAVE and LOAD keep the Spell or null. Equip has one image reference. | High / Medium | ✔ promoted (branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
+
+### ITEM-211
+
+Inputs: EXP-0600 windows w01, t01, t02, w02, w04, w05 and e01 in `out/native/`.
+
+- Packer `R1033` (Weapon vtable slot `+0x54`, ITEM-155), read whole, writes the price
+  pair (tag 1, `+0x1c`), then reads Weapons parameter 15, `sutableFor` (`L09149..L16545`).
+  With bit 0 set it sets descriptor bit `0x02` and writes `(13, +0x60)`, `(14, +0x61)`, then
+  `(12, +0x52)` when that word is positive, `(15, +0x6a)` when positive, and `(38, +0x50)` when
+  the byte exceeds 1 (`L16546..L16547`). With bit 1 set it sets bit `0x04`. The elemental
+  pair follows when `+0x66` is positive, then the Effect pairs of `R0998` (ITEM-152), and
+  last it clears descriptor bit `0x10` (`L16548..L16549`). The body has no `+0x80` operand
+  and no worn test.
+- Staff and Shaman Staff carry `sutableFor` 2 (ITEM-WEAR-056, ITEM-AUTHCAST-086), so a shipped
+  spell staff gets no damage, tag 12, tag 15 or range base line.
+- The Effect writer emits marker 51, then `(kind, +0x40)` per Effect in list order and
+  `(50, +0x42)` after kind 41 (ITEM-152). Its body has no `+0x80` operand.
+- The formatter (`R0964`) prints the name, then one entry per stream pair in order:
+  tag 13 as `[base, base+spread]` (ITEM-PANEL-022), tags 12, 15 and 38 as single values
+  (ITEM-154), the marker as `#` plus `main[189]` and tag 41 as `#` `main[92]` spell name
+  `main[93]` for a packed class other than `0xe00` (TEXT-092). Tag 50 builds a local Spell from
+  the tag-41 byte and fills it at the tag-50 byte (`L16550`, `L16147`; TEXT-127), then
+  appends damage, range, duration and one caption (TEXT-129, TEXT-130, TEXT-132, TEXT-133).
+- For a Weapon the range line takes the item made from the element's code by `R0519` on
+  `L02110` (`L16551..L16552`), prints its byte `+0x50` under `main[123]` with no zero test
+  and deletes it (`L04872`; TEXT-131), not the local Spell's range, which only the `0xe00` arm
+  reads (`L16553`). That this byte is the Weapons `@.range`, so that a Staff prints 5 and a
+  Shaman Staff 4 (MAGIC-411), is Medium: the factory `R0519` is not read.
+- Sources: spell id is Effect `+0x40` low byte; power is Effect `+0x42` low byte, unclamped;
+  damage B to B+S, duration and caption are Spells row values filled at that power
+  (TEXT-096); range is the Weapons row. `R0997` returns the last matching tag's operand
+  (e01). No body read on this path has a Weapon `+0x80` operand, so a built and a null Spell
+  give one text, and a worn and a carried Weapon give one stream, within the bound the unread
+  callees below set.
+
+**Confidence.** High for the packer, the Effect writer and the formatter arms: complete bodies
+read as instructions, with no `+0x80` operand on any base. The `+0x80` negative covers those
+bodies and the operands they pass. Their callees are not read: the packer's pair writers
+`R1030` and `R1017` and table accessor `R0476`; the Effect writer's `L05966`,
+`R2233`, `L08206` and `L08207`; the formatter's factory `R0519`, `R0463`,
+`R0625` and `R0668`. That none of them reads a Weapon `+0x80` is Medium: most take a
+stream or a Spell rather than a Weapon, and the Weapon constructor stores 0 at `+0x80`
+(ITEM-187), which is inference, not a read. Medium for the text a player sees: the
+receiver that builds the client element from the stream is unread (ITEM-154), so whether it
+adjusts the entry count for the two-pair entries (13 with 14, an elemental pair with 14) is open;
+that the item made from the code holds `@.range` at `+0x50` rests on the factory, not read here;
+the painters other than the hover painter are unread (TEXT-090).
+
+**Unknown.** The context in which global `L06743` is 4, which changes a Stone Curse
+weapon's duration line (TEXT-132). The EN and RU strings of `main[118]`, `main[123]`,
+`main[124]` and `main[182..187]`. Settled by an owner screenshot of the original's hover over a
+shop Staff with Fire Arrow and over the same Staff worn after LOAD with a null `+0x80`.
+
+### ITEM-212
+
+Inputs: EXP-0600 scans s01 and s02 in `out/scans/`, windows e02 and w08 in `out/native/`.
+
+- s01, a dword scan over every section of the EN image: `R0850` (equip) occurs once, at
+  `.rdata L16544`, slot `+0x38` of the Weapon vtable whose slot `+0x54` is the packer
+  (ITEM-155); no dword equals `R1011` or `R1012`. s02, an `E8`/`E9` rel32 scan over
+  `.text`: `R1011` has one call (`L05247`, in equip), `R1012` one (`L05246`), equip
+  none, and no `E9` reaches any of them. The Effect builder is reached only through a virtual
+  call of Weapon `vt+0x38`.
+- Weapon Serialize `R1639` (e02), read whole: the store arm writes `+0x50` and the
+  `+0x80` object through `R1110` (`L16554..L16555`); the load arm reads `+0x50` and the
+  reference into `+0x80` through `L08325` (`L16556..L16113`). A SAVE writes the Spell or a
+  null reference and a LOAD restores it.
+
+| route | routine | `+0x80` |
+|---|---|---|
+| script hands a unit to the player | instants 19 and 22, `R0064` (PARTY-JOIN-025) | kept; the routine makes no item call, and its broadcast `R0059` (w08) has no `+0x80` operand |
+| tavern hire | Human construction `(name,0,0)` with template equip (ITEM-203) | built from the first kind-41 Effect |
+| AddHero in town | command `0x49`, `R0066` (PARTY-ADDHERO-017) | kept; owner and Group assignment only |
+| new mission, carried party | surviving actors are the same objects (PARTY-PERSIST-028); no start routine read equips (PARTY-037, High / Medium / Unknown) | kept (Medium) |
+| new mission, Human constructed on entry | Human construction for a nonzero entry argument with Player `+0x3d == 0`, with template equip (ITEM-203) | built from the first kind-41 Effect |
+| map change by archive | one `WriteObject` graph (PARTY-CARRY-005) through Weapon Serialize | kept, null included |
+| SAV written in town | Weapon Serialize store arm | written as held |
+| town SAV loaded | Weapon Serialize load arm; no re-equip (ITEM-204) | restored, null included |
+
+**Confidence.** High for the scan results, the Serialize arms and the routes whose routines are
+read whole in the cited claims: script transfer, AddHero, tavern hire, mission-entry
+construction, archive carry, SAVE and LOAD. Medium for the carried party at mission start: its
+source PARTY-037 is High / Medium / Unknown, with unread closure owners, an unread SAV-load path
+and census blind spots, and a route composed from it takes its weakest grade. Medium that no
+route calls equip indirectly: the targets of
+indirect `vt+0x38` calls are not enumerated, the start closures of PARTY-037 do not follow
+indirect calls, and HERO-170 leaves an indirect equip below Unit Serialize open.
+
+**Unknown.** A native witness that a null `+0x80` survives a town SAVE, a LOAD and the next
+mission's entry. Settled by an owner run: LOAD a town SAV whose mage wears a `castSpell` Weapon
+with a null `+0x80`, enter a mission, SAVE, and decode that Weapon's `+0x80`.

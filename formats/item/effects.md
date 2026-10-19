@@ -285,6 +285,19 @@ prints `base + spread`. So the item's line is `[base, base+spread]` — the same
 character sheet uses (`HERO-SHEET-038`) — and tag `0x0e`'s own table entry is the default arm,
 which nothing reaches. The shipped `Iron Short Sword` draws `5-8`.
 
+`R0808` is not the only writer of tag `0x0d`; that clause of `ITEM-PANEL-022` is
+partially retracted. The Weapon packer `R1033` writes the item information stream of every
+Weapon. Only when `sutableFor` bit 0 is set does it write the damage pair, tag 12, tag 15 and,
+for a byte above 1, the range tag 38. Shipped spell staffs have `sutableFor` 2 and get none of
+these lines. It then writes the elemental pair and the Effect pairs: marker 51, `(kind, +0x40)`
+per Effect and `(50, +0x42)` after kind 41. For a Weapon the formatter prints `#Magic:`, then for
+the `castSpell` Effect a `casts <spell>` line, then the lines of a Spell it builds from the Effect's
+id byte and power byte: damage, range, duration, one caption. The range line prints byte `+0x50`
+of an item built from the Weapon's code, not the Spell's Max Range. That byte's identity with
+the Weapons `@.range` (Staff 5, Shaman Staff 4) is Medium until the factory is read. No body
+read has an operand on the Weapon's owned Spell at `+0x80`, so a null Spell and a built one give
+one text, worn or carried; across the unread callees this is Medium. — ITEM-211
+
 ### Equal effect kinds on one item (`ITEM-154`, `ITEM-155`, `ITEM-156`)
 
 The item information formatter appends one line per stored attribute pair into its output buffer

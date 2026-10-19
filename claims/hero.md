@@ -1012,6 +1012,55 @@ Inputs: HERO-170, SAV-792 (R0451), ITEM-LOAD-005 (the derive), HERO-EQUIP-017 an
 
 **Unknown.** What makes Human 4's +0x8e zero with a worn weapon; the weapon remove routine's other modifier stores after LOAD.
 
+## Sheet rows of a spell-weapon wearer
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-172 | From knowledge level 3 the sheet gives a mage-bit drawable one damage row, the spell damage of its slot-0 weapon element's tags 0x29 and 0x32, and others damage and attack rows from actor fields; no body read has a Weapon +0x80 operand. | High / Medium | ✔ promoted (branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
+
+### HERO-172
+
+Inputs: EXP-0600 windows w06, w07, w08, w09, w10 and e01 in `out/native/`.
+
+- `R0877` skips the block below level 3 (`L16530`, UNIT-145) and tests drawable
+  `+0x18c & 2`, the mage bit (`L16531`; ITEM-WEAR-055).
+- Mage bit set: with no slot-0 element at `+0x15c`, or a zero entry count, no attack or damage
+  row is drawn. Otherwise the spell id is `R0997(0x29)` and the power `R0997(0x32)`, each
+  the last operand of that tag or 0 (e01); `R0463` builds a local Spell and `R0625` fills
+  it (`L16532..L16533`). When byte `+0xe` plus byte `+0xf` is nonzero the sheet draws label
+  `main[23]` (`+0x5c`) and `"%d-%d"` of B and B+S (`L16534`, `L16535`). A `#%s: %d-%d`
+  string formatted at `L16536` is destroyed undrawn. No attack row is drawn.
+- Mage bit clear: label `main[23]` with `"%d-%d"` of drawable `+0x148` and `+0x148 + +0x149`,
+  and label `main[25]` (`+0x64`) with `"%d"` of `+0x146` (`L16537..L16538`).
+- The sheet draws no range row from a weapon or a Spell; its drawable reads in w07 include no
+  reach or Spell field.
+- For a mission or town unit the slot-0 element comes from the server's message stores
+  (HERO-APPEAR-054), whose source is the worn Weapon's descriptor stream (ITEM-211): tag 0x29
+  is the castSpell Effect's `+0x40` low byte and tag 0x32 its `+0x42` low byte. The
+  character-generation fill `R0808` (w06) builds the element itself from a template
+  Human's worn Weapon: code, tags 12, 15, 38, 13 with 14, then 0x29 and 0x32 from the first
+  kind-41 Effect (`L16116..L16539`), with no marker.
+- `+0x146`, `+0x148` and `+0x149` come from actor `+0xa6`, `+0xb4` and `+0xb5` in the
+  generation fill (`L16540..L16541`) and from the state projection in a mission
+  (SAV-HUMPROJECT-461). The derive `R0280` (w09) and the projection `R0059` (w08)
+  have no `[reg+0x80]` operand except the frame slot `[ebp-0x80]` in w09.
+- Dependence: the mage bit selects the source; the level gate depends on control (UNIT-145); EN
+  and RU share one image and differ only in the `main.txt` labels.
+
+**Confidence.** High for the sheet's branch, sources and formats: complete body read as
+instructions. The `+0x80` negative covers the bodies read (w06 to w09) and the operands they
+pass. Their callees are not read: the Spell builder `R0463` and fill `R0625`, and the
+derive's `R0840`, `R0874`, `R0839` and `R0903`, which feed the non-mage rows. That
+none of them reads a Weapon `+0x80` is Medium: the Spell routines take a Spell, not a Weapon,
+and the Weapon constructor stores 0 at `+0x80` (ITEM-187), which is inference, not a read. Medium that slot 0 holds the worn Weapon's packer stream for every drawable: the
+message stores in `R0509` are named by HERO-APPEAR-054 and were not read here. Medium for a
+mage whose weapon has no castSpell Effect: the id-0 behaviour of `R0463` and `R0625` is
+not read.
+
+**Unknown.** The EN and RU strings of `main[23]` and `main[25]`. A native screenshot of a
+mage's sheet with a Fire Arrow Staff, before and after a LOAD that leaves `+0x80` null, would
+settle the player-visible row.
+
 ## Open items
 
 1. **The magnitude's provenance** — `effect+0x3c` / `+0x3d` / `+0x40` are read by `HERO-EFFECT-019`

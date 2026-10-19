@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
+Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
 
 ## Ledger ai
 
@@ -1011,6 +1011,7 @@ Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 | HERO-164 | static analysis | ● active |
 | HERO-170 | static analysis | ● active (branch candidate) |
 | HERO-171 | static analysis | ● active (branch candidate) |
+| HERO-172 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger inv
 
@@ -1051,7 +1052,7 @@ Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 | ITEM-LADDER-019 | static analysis | ● active |
 | ITEM-DMGFACT-020 | static analysis | ● active |
 | ITEM-WEAPCOL-021 | static analysis | ✔ promoted (amended) |
-| ITEM-PANEL-022 | static analysis | ● active |
+| ITEM-PANEL-022 | static analysis | ● active (partially retracted) |
 | ITEM-APPEAR-023 | static analysis | ● active |
 | ITEM-APPEAR-024 | static analysis | ● active (amended) |
 | ITEM-APPEAR-025 | static analysis | ● active |
@@ -1135,7 +1136,7 @@ Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 | ITEM-LOAD-180 | static analysis | ● active |
 | ITEM-SOUND-183 | static analysis | ● active (branch candidate) |
 | ITEM-SOUND-184 | mixed | ● active (branch candidate) |
-| ITEM-187 | static analysis | ● active (branch candidate) |
+| ITEM-187 | static analysis | ● active (branch candidate, amended) |
 | ITEM-191 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-192 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-193 | mixed | ✔ promoted (branch candidate) |
@@ -1143,6 +1144,8 @@ Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 | ITEM-203 | static analysis | ✔ promoted |
 | ITEM-204 | static analysis | ✔ promoted |
 | ITEM-205 | static analysis | ✔ promoted |
+| ITEM-211 | static analysis | ✔ promoted (branch candidate) |
+| ITEM-212 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger magic
 
@@ -1244,7 +1247,7 @@ Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 | MAGIC-091 | mixed | ✔ promoted |
 | MAGIC-092 | mixed | ● active (amended, partially retracted) |
 | MAGIC-093 | mixed | ✔ promoted |
-| MAGIC-ITEMTRAIN-116 | mixed | ● active |
+| MAGIC-ITEMTRAIN-116 | static analysis | ● active (partially retracted) |
 | MAGIC-ITEMKILL-117 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-ATTRGATE-118 | mixed | ● active |
 | MAGIC-CADENCE-126 | static analysis | ● active |
@@ -4151,7 +4154,7 @@ Claims labelled: 4076. Observation: 99. Static analysis: 3451. Mixed: 526.
 | UNIT-142 | mixed | ● active |
 | UNIT-143 | mixed | ● active |
 | UNIT-144 | static analysis | ● active |
-| UNIT-145 | static analysis | ● active |
+| UNIT-145 | static analysis | ● active (amended) |
 | UNIT-146 | static analysis | ● active |
 | UNIT-147 | static analysis | ● active (amended) |
 | UNIT-148 | static analysis | ● active |

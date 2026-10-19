@@ -27,3 +27,9 @@ General. Equipment numbers follow ITEM-LADDER-019 through ITEM-WEAPCOL-021;
 the ladder/column clauses of ITEM-SCALE-017 and ITEM-DMGCOL-018 are
 retracted. Character-sheet damage is base through base+spread, while the
 server transmits the raw pair. — HERO-SHEET-038
+
+From knowledge level 3 a mage-bit sheet draws one damage row, built from the
+spell id and power tags of its slot-0 weapon element, and no attack row; any
+other sheet draws actor damage and attack. No body the sheet runs has an operand
+on the worn Weapon's owned Spell; across its unread callees this is Medium. No
+sheet row shows a weapon or Spell range. — HERO-172

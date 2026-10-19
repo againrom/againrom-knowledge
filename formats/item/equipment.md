@@ -130,6 +130,14 @@ posts a physical ranged attack, and the unit shot would take the class Projectil
 Human Mage row (Medium; Ferion's class is not read from the save).
 — ITEM-187, MAGIC-379
 
+Equip has one reference in the image, Weapon vtable slot `L16544`. Below it, `R1011` and
+`R1012` each have one direct call and no `jmp` or dword reference. Weapon Serialize writes
+the `+0x80` object or a null reference and LOAD restores it. On the routes between town, mission
+and SAV, tavern hire and the construction of a Human on mission entry build `+0x80` through
+template equip; a script owner transfer, AddHero, an archive map change, a town SAVE and a town
+LOAD keep the stored Spell or null. A new mission's carried party keeps it too (Medium). That no
+route calls equip through an indirect `vt+0x38` is Medium. — ITEM-212
+
 ### Weapon-borne spell state (`ITEM-CASTSTATE-056`, `+0x68`-only remap clause retracted)
 
 New Human construction equips template cells only when its third argument is
@@ -199,8 +207,10 @@ not stored on the item: the common sink first requires recipient type id in `[0x
 which later damage awards enter the actor's school or current weapon slot.
 
 The selected-inventory Cast UI cannot admit a Weapon despite accepting kind 2 into its vmethod. It
-requires descriptor bits `0x10|0x01`; a castSpell Weapon has bit 4 from its effect but its class
-descriptor supplies only suitability bits 1 and 2. Bit 0 is a MagicItems-class bit. The server arm
+requires descriptor bits `0x10|0x01`. The `MAGIC-ITEMTRAIN-116` clause that a castSpell Weapon
+has bit 4 from its effect is partially retracted: the Weapon packer clears bit 4 after the Effect
+writer sets it, and its class descriptor supplies only suitability bits 1 and 2 (ITEM-211). Bit 0
+is a MagicItems-class bit. The server arm
 would accept a crafted weapon item order, but no Weapon row can make the shipped UI emit one.
 
 ### The wear rule (`ITEM-WEAR-055`, Human-constructor clause retracted; `ITEM-WEAR-057`)
