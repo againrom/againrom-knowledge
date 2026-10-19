@@ -626,3 +626,32 @@ Admission sends message 0x86 and stores the send sub-tick in actor +0x138.
 In one owner EN series, +0x138 holds 10656, the countdown 6 at 10658, and the
 relocation is first stored at 10664 = 10656 + 8. One actor tick per sub-tick and
 the per-id branch for Teleport are Medium. — SAV-1256
+
+## Selected cloud attachment endpoints
+
+The duration-mode helper returns integer N unchanged. The outer Effects parser
+stores low16(16*N) into the counter. Signed decimal conversion and its complete
+CString/CRT support retain separate confidence bounds. — MAGIC-397
+
+Both installed ROM1 EN/RU roots carry duration 20 for Freezing Cloud 7 and
+duration 1 for Light 12 and Darkness 17. Their selected builders retain counter
+words 320/16/16 at every admitted power; fresh attachment copies that word
+without rescaling. These conditional successful-parse/attachment values are
+separate from area duration and popup scratch. — MAGIC-398
+
+On the selected world driver, area phase precedes actor phase. An ordinary
+living actor invokes each attachment timer once per simulation step. An
+unrefreshed W in 1..9600 retires on call W, including its first call. Terminal
+actor removal instead forces W to one before calling the timer. Dynamic
+receiver/callback completion and other writers remain bounded. — MAGIC-399
+
+Each admitted same-id duration landing resets the counter; an absent effect
+is copied afresh. For one stationary single-cell target visited once per pulse,
+one area and no other counter mutation/removal/suppression, Freezing refreshes
+every 16 ticks. Light/Darkness expire before the next pulse and are copied
+again. If the final zero-valued area pulse lands and teardown preserves that
+attachment, the same tick consumes its first count: retirement follows area
+teardown by 318 ticks for Freezing and 14 for Light/Darkness. These are Medium
+conditional schedules. Actual teardown side effects remain Unknown because
+complete cell-helper/notification effects were not read; a native last-pulse
+through attachment-retirement trace would settle that boundary. — MAGIC-400

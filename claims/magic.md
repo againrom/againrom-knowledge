@@ -4270,3 +4270,54 @@ fire_arrow cast record also uses picture 10 (SAV-1134).
 **Unknown.** `R1661` and the client's 0x72 arm were not read here (they
 are SAV-1129's). Damage of the shot follows the simulation's own countdown
 (SAV-1132), not the projectile.
+
+## Selected cloud attachment lifetimes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-397 | ROM1 duration helper returns integer N unchanged; the outer Effects parser stores low16(16*N), with complete CString/CRT input conversion still Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-0594](../experiments/EXP-0594-effect-lifetimes/) |
+| MAGIC-398 | Selected ROM1 EN/RU spell 7/12/17 builders retain Effects counters 320/16/16 independently of power; fresh attachment copies the counter without rescaling. | High / Medium | ✔ promoted (branch candidate) | [EXP-0594](../experiments/EXP-0594-effect-lifetimes/) |
+| MAGIC-399 | The selected ROM1 live-actor path ticks each attachment once per simulation step; terminal actor removal instead forces its word to 1 before a timer call. | High / Medium | ✔ promoted (branch candidate) | [EXP-0594](../experiments/EXP-0594-effect-lifetimes/) |
+| MAGIC-400 | ROM1 same-id duration landings reset +42; under a single-target final-pulse model, Freezing retires 318 ticks after area teardown and Light/Darkness 14; actual teardown side effects remain Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0594](../experiments/EXP-0594-effect-lifetimes/) |
+
+### MAGIC-397
+
+R0857's duration route writes integer helper L05839's EAX to its output dword at L16454. Effects parser R1000 shifts that dword left four at L05840 and stores CX into Effect+42 at L16455. Thus the intermediate is N and the stored counter is low16(16*N). Charges/continuous share this outer shift; permanent/singleuse select other mode routes.
+
+The measured literals are +-1234567890 and %d. Reuse MAGIC-306's decimal-dispatch contract: conditional 010/0x10/20s/1.5 inputs yield 10/0/20/1. Empty helper input returns zero. Nonempty failed conversion leaves the ignored-result destination local unwritten.
+
+**Confidence.** High for local calls, unchanged intermediate, shift and word store in complete committed windows. Medium for the full CString/CRT join, retaining MAGIC-306's support boundary. Capstone 5.0.7 raw x86-32 decode is local evidence, not an image-wide writer or input census.
+
+**Unknown.** Full locale/string support, malformed/overflow acceptance and failed-conversion values. A native watchpoint from shipped suffix 20/1 to L16455, followed by separately authorized malformed inputs, would settle them.
+
+### MAGIC-398
+
+Both installed ROM1 tables have 28 parsed Spells rows and zero Data.bin residue. Selected EN/RU text pairs match: spell 7 speed=-3: duration 20, spell 12 scanRange=+2:duration 1, spell 17 scanRange=-2:duration 1. These are Effects operands, separate from p11=15/20/20 and p14=0/0/0.
+
+Template calls are L16456/L16457/L16458. Constructor R1047 copies the operand dword at L16459, including word+42. Selected arms change magnitude+40 and identity, retaining that counter. Fresh target attachment calls R1001 at L16460; L16461 copies the same dword. Under MAGIC-397's successful parse the initial words are 320/16/16 at power 0,20,50,100 and every other admitted power on those arms.
+
+**Confidence.** High for six shipped measurements and complete selected arm/constructor stores. Medium for the complete parsing, delivery, callback and receiver join. These conditional initial values extend MAGIC-307 without promoting its support assumptions. EN/RU identical executable bytes are one witness.
+
+**Unknown.** Runtime callback mutation and successful target admission. A watchpoint from template counter through fresh target copy at recorded power would settle the concrete initial state.
+
+### MAGIC-399
+
+World step R0193 increments counter+4, calls entity/area driver at L01866 and actor driver at L01867. Actor driver R0427 invokes actor vt+18 at L01868 unless action+54 equals 0x10. Actor R0037 invokes each attachment vt+38 at L16462 before the HP/action branch. The measured base Effect vtable maps vt+38 to R0673. No modulo-N gate lies on this selected ordinary call path.
+
+The timer subtracts one at L05762, stores+42 at L14764, and on zero invokes noncontinuous inverse, clears the id bit and marks retirement. The actor tests/removes the entry at L16463..L16464. MAGIC-304/308 retain the 9600 guard, zero-wrap and conditional W-call contract. Terminal action instead enters another loop: L16465 stores 1 into each attachment+42, then L16466 invokes its timer. Ordinary W-call lifetime is not a death/removal lifetime.
+
+**Confidence.** High for ordered local calls, branch gates, stores and conditional recurrence. Medium for dynamic receiver/container/callback completion and composition into game-tick lifetime. No complete scheduler or writer enumeration is claimed; raw linear Capstone ranges and inherited class-slot claims have those blind spots.
+
+**Unknown.** Other scheduler entries, cancellation/writers and native completion. Record world counter, receiver vtables, each admitted timer call and last counter write through retirement on a stationary living target; record terminal removal separately.
+
+### MAGIC-400
+
+On an admitted same-id duration attachment, L05205 calls inverse, L16467 replaces magnitude, L16468 resets counter and L05206 reapplies. If absent, L16460 constructs a fresh copy (MAGIC-ATTACH-016).
+
+The active-area branch pulses after decrement to zero and tears down on the next entry (MAGIC-AREAPULSE-037, MAGIC-304). Ordinary V before word narrowing is 240+trunc(16*power/10) for 7 and 320+trunc(16*power/10) for 12/17. On the selected area-before-actor route, define first-paint call as t=0. Final pulse is t=V and teardown t=V+1. If its landing succeeds, that same tick consumes count one of W. Without subsequent mutation/removal/suppression, retirement is t=V+W-1, hence 318/14/14 ticks after teardown.
+
+For one stationary single-cell target visited once per pulse by one area, the conditional recurrence refreshes an existing Freezing attachment every 16 ticks. Light/Darkness retire on the actor call preceding the next area pulse and are freshly copied on that pulse. This does not assert that every footprint occupant is admitted. Powers 0/20/50/100 are emitted; tests check all ordinary powers 0..100.
+
+**Confidence.** High for local reset stores and area/actor call order. Medium for conditional joined schedules. Unknown for unconditional native persistence through teardown. Selected teardown R0637 calls cell helper R1077 and notification R0635; their complete transitive effects were not read. Its complete local listing cannot exclude callee cancellation.
+
+**Unknown.** Actual surviving tail, dynamic admission, callbacks and other areas/writers. An authorized ROM1 mission-1 Freezing/Light trace must log final pulse, every +42 write, area teardown and attachment retirement on one stationary single-cell living target. Darkness needs an owner-prepared ROM1 map/script applying spell 17 at recorded power. No such run/source selection was made. SAVE/LOAD and elapsed seconds are outside this result.
