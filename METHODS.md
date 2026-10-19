@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4060. Observation: 99. Static analysis: 3437. Mixed: 524.
+Claims labelled: 4067. Observation: 99. Static analysis: 3444. Mixed: 524.
 
 ## Ledger ai
 
@@ -423,6 +423,8 @@ Claims labelled: 4060. Observation: 99. Static analysis: 3437. Mixed: 524.
 | AI-662 | static analysis | ● active |
 | AI-484 | static analysis | ✔ promoted |
 | AI-485 | static analysis | ✔ promoted |
+| AI-666 | static analysis | ✔ promoted (branch candidate) |
+| AI-667 | static analysis | ✔ promoted (branch candidate) |
 | AI-672 | static analysis | ● active |
 | AI-673 | static analysis | ● active |
 | AI-674 | static analysis | ● active |
@@ -1342,7 +1344,7 @@ Claims labelled: 4060. Observation: 99. Static analysis: 3437. Mixed: 524.
 | MAGIC-316 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-317 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-318 | static analysis | ✔ promoted (branch candidate) |
-| MAGIC-323 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-323 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-324 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-328 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-320 | static analysis | ● active |
@@ -1350,7 +1352,7 @@ Claims labelled: 4060. Observation: 99. Static analysis: 3437. Mixed: 524.
 | MAGIC-322 | static analysis | ● active |
 | MAGIC-340 | static analysis | ● active (amended) |
 | MAGIC-341 | static analysis | ● active (amended) |
-| MAGIC-348 | static analysis | ● active |
+| MAGIC-348 | static analysis | ● active (amended) |
 | MAGIC-TELEPORT-356 | static analysis | ● active (branch candidate, amended) |
 | MAGIC-TELEPORT-357 | static analysis | ● active (branch candidate) |
 | MAGIC-TELEPORT-358 | static analysis | ● active (branch candidate) |
@@ -1369,6 +1371,11 @@ Claims labelled: 4060. Observation: 99. Static analysis: 3437. Mixed: 524.
 | MAGIC-398 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-399 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-400 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-403 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-404 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-405 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-406 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-407 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 

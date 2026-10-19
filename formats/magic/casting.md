@@ -408,3 +408,37 @@ and admission are read, while interruption and the actor setter remain open.
 No global absence of walking reachability is established: the heading,
 lower approach, install and phase bodies are outside the acquired set.
 — MAGIC-TELEPORT-366, MAGIC-317
+
+## Admitted cast release and interruption
+
+Phase 5 decrements the byte countdown; exactly zero calls R0002 for
+actor aim or R0003 for cell aim. This local branch repeats no mana,
+reach, facing, visibility or sight gate and has no approach/retry arm.
+The actor wrapper skips Spell ID 14; other IDs forward to application.
+High local calls do not promise a delivered payload. — MAGIC-403
+
+Admission and its retry contract retain their earlier scope. — MAGIC-340
+
+Application uses the actor target's current Position or the supplied cell.
+Heal rejects signed HP at most -10 or target+0x98 zero; PointEffect checks
+class/ownership. The three ordinary actor classes return 1 from virtual
++0x2c without reading HP. Null target with unit distribution reports and
+exits. Removed-target lifetime and callbacks remain Unknown. Literal
+predicates are High; composed target-loss outcomes are Medium. — MAGIC-404
+
+Admission has charged the eligible book caster before wind-up; local release
+has no second payment. Helper R0014 preserves a loaded cast. Cut routine
+R1380 clears Spell, phase, action and command state but directly retains
+countdown, target and progress. No direct refund occurs in these finite
+bodies; whole-image refunds remain Unknown. — MAGIC-405, MAGIC-406
+
+The bearing, distance and approach helpers add no direct spell payment or
+refund branch and are not called by phase-5 release. Path/step callbacks
+and native approach outcomes remain Medium or Unknown. — MAGIC-407
+
+Positive-HP damage, a new pending order and the progress-zero Stone Curse
+gate do not directly reset the acquired progress-2 cast. Nonpositive caster
+HP bypasses release and replaces the countdown for dying. The failure tail
+and external writers prevent a universal continuation rule. Player/creature
+kind-8/9 installs share release; retention and aim can differ. Local branches
+are High; composed outcomes are Medium. — AI-666, AI-667

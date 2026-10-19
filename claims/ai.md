@@ -7670,6 +7670,70 @@ one player character and two recorded uses would test the isolated visible
 case. The map number and script population must be verified before that
 owner observation; no grave-bearing mission is identified by this experiment.
 
+## Admitted cast continuity
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-666 | In decoded ROM1 progress-2 casts, a new pending order, the struck hook and Stone Curse gate do not directly reset wind-up; caster HP at most 0 bypasses release. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+| AI-667 | Player and creature casts installed through ROM1 pending kind 8/9 share progress 2, the actor tick and release calls; retained orders and selected target forms can differ. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+
+### AI-666
+
+Progress 2 restores action 0xd/0xe from order+0x5c, not pending kind.
+Its exit needs order+0x15 greater than 2 and actor+0x136 nonzero; admission
+cleared completion. The status-bit 0x100000 gate installs progress 4 only
+from zero, leaving 2 alone. Hook R0226 writes order+0x54=1,
+order+0x58=attacker cell and order+0x5a=0, then calls R0126. It directly
+writes no phase, countdown, target, Spell or progress. The acquired damage
+resolver also directly writes no cast phase/progress. New-order setter
+facts are reused from MAGIC-311 and AI-639.
+
+After attached effects, signed caster HP+0x94 at most zero takes dying,
+clears command state/action, calls R0014 on first death pass and replaces
+the countdown with dying duration. No phase-5 release runs there.
+Terminal action 0x10 returns before effects. Departure R0121 unlinks
+and sets off-map bit 8 without directly resetting phase/countdown
+(MOVE-136). Positive-HP damage alone is not a local phase reset.
+
+Nonzero mover+0x98 in the common tail remains an exception: command 0x17
+or reacquisition can replace progress/action (AI-354, MAGIC-341).
+Reachability during progress 2 and external writers remain Unknown;
+this is not a universal interruption-event census.
+
+**Confidence.** High for local branches/stores in run1 tick/executor/hook,
+run3 damage/departure and acquired progress tables. Medium for visible
+continuation/cancellation. No runtime or callback/writer closure occurred.
+
+**Unknown.** Other damage/removal callbacks and mover+0x98 during progress 2.
+Trace those paths or record separate mission 1 Heal wind-ups with nonlethal
+hit, new Move order and lethal hit, capturing phase, countdown, progress
+and mana. These owner observations were not made.
+
+### AI-667
+
+Kind 8 installs progress 2, action 0xd, target actor+0x5c and Spell+0x64;
+kind 9's R0013 installs progress 2, action 0xe, cell and Spell. Neither
+install selects release by player kind. Acquired Unit, Humanoid and Human
+tables all put R0037 at +0x18; its table sends 0xd and 0xe to the same
+phase body. Progress 2 chooses actor/cell action by order+0x5c, not player
+kind. The release branch has no player-kind test.
+
+With order+0x60 zero, installs reset command state to 0xc and pending zero;
+with retention nonzero they skip that reset. AI-489/MAGIC-340 supply
+manual/selector scopes. MAGIC-237 supplies creature victim/self/cell aim;
+AI-376 supplies pending replacement during an active cast. These entry
+differences introduce no second local release body. Mage mask and item
+pointer govern payment independently of order origin (MAGIC-406).
+
+**Confidence.** High for acquired tables, installs and branches in run1
+executor/tick, run2 cell install and run3 actor tables. Medium for
+player/creature composition using earlier selector/setter claims.
+Every scripted temporary actor or special start is not covered.
+
+**Unknown.** Remaining starts and intervening writers. Close AI-609/AI-618's
+remaining entry population before extending the kind-8/9 order contract
+to every cast. No original run was made.
+
 ## Attack order context and projectile coordinates
 
 | ID | Claim | Confidence | Status | Evidence |

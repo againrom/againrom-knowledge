@@ -3611,7 +3611,7 @@ owner use was observed.
 | MAGIC-316 | Caster mana word `actor+0x9a` has 17 word stores in 13 segments (census); one subtracting store among the sites read (`L05057`); `R0654` (a quotient of a division by 100, body unread) is not read. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-317 | A scroll cast pays no mana at admission (`actor+0x68` nonzero skips the subtraction); at the end of application the item and the Spell are released and the pointers cleared. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
 | MAGIC-318 | The application routine `R0003` stores caster health 1 and mana 0 at `L05228`/`L05229` after preparing its pair; the spell-id condition rests on `MAGIC-302`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0545](../experiments/EXP-0545-order-machine-cells/) |
-| MAGIC-323 | Arm `L05759..L05760` stores `+0x3d`, then `+0x42` four times (the `MAGIC-303` formula steps), then `+0xc` := spell id and `+0xe` := 2*id+8; its operands come from `MAGIC-303`, the tick from `MAGIC-304`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
+| MAGIC-323 | Arm `L05759..L05760` stores `+0x3d`, then `+0x42` four times (the `MAGIC-303` formula steps), then `+0xc` := spell id and `+0xe` := 2*id+8; its operands come from `MAGIC-303`, the tick from `MAGIC-304`. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | MAGIC-324 | Bit `0x100000` set at `L14772` in the effect apply dispatcher `R0843` lands in `actor+0x150`, not `actor+0x144`; the executor tests `[actor+0x144]` (`L00543..L05747`) (High). | High | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | MAGIC-328 | `R0654`, slot `+0x14` of the three actor vtables, stores mana word `+0x9a` and fraction byte `+0xa3` for a living actor with mana below the maximum; adds the instruction-level stores to `HERO-REGEN-021`. | High | ✔ promoted (branch candidate) | [EXP-0550](../experiments/EXP-0550-order-machine-callees/) |
 
@@ -3861,6 +3861,15 @@ witness; the EN and RU images are byte-equal). Medium for the operand meanings i
 and `[ebp-0x28]` in the application routine, which `MAGIC-303` reads; the virtual `[vt+0x64]` at
 `L14924` and the virtual `+0x2c` at `L14925`.
 
+**Amended.** MAGIC-404 answers the target virtual +0x2c case for the
+three acquired Unit/Humanoid/Human tables: their slots resolve to L16247
+or L14949, both returning constant 1 without an HP test. This narrows
+the Unknown at L14925 only for those three receiver classes. Other
+receivers, the +0x64 callback at L14924, the other listed unread bodies
+and assignments, and runtime outcomes remain Unknown. The original
+acquisition limits and High / Medium grades remain unchanged.
+
+
 ### MAGIC-324
 
 The `or ecx, 0x100000` at `L14772` (`q02`, window `L14926..L14927`) writes `actor+0x150` after adding
@@ -3894,7 +3903,7 @@ This card adds, at instruction level, the three mana stores that `MAGIC-316` lef
 | MAGIC-322 | The engage `R0009` rolls the unit's spell slots on every call and, on a hit, `R0209` stores a cast (pending 8 or 9, spell, reach; an arm for ids 4 and 25 stores no order); a mage-mask unit in melee reach of a human owner skips it. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-340 | For a cast started through pending kind 8 or 9: selectors test mana cost, the executor gate tests facing and reach, the admission refuses only on mana; a refusal retries until the progress-2 exit (High bodies, Medium outcome). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/), [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
 | MAGIC-341 | A cast start is reached at executor progress 0 only; a new order during a step or a cast leaves progress alone and waits; one read path ends a cast, command state 0x17 with `mover+0x98` set, cause unread (Medium). | Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/) |
-| MAGIC-348 | `R2078` returns 1; `L13144`, `R0621` test Spell row parameter 4; `R0904`, `R0269`, `R0617`, `R0618`, `R0254` test no range or sight (Medium). | High / Medium | ● active | EXP-0559 |
+| MAGIC-348 | `R2078` returns 1; `L13144`, `R0621` test Spell row parameter 4; `R0904`, `R0269`, `R0617`, `R0618`, `R0254` test no range or sight (Medium). | High / Medium | ● active (amended) | EXP-0559 |
 
 ### MAGIC-320
 
@@ -3982,6 +3991,11 @@ Population: windows read in EN, listed under `evidence/run1/listings`: the sette
 
 **Amended.** `MAGIC-377` adds that no progress arm stores `+0x64`, that the executor replaces the stored action word on every pass, and that phase 5 clears `+0x64` only when `+0x68` is nonzero; `MAGIC-376` shows that a null `+0x64` at phase 0 faults in the admission. The retry and exit facts stand.
 
+**Amended.** MAGIC-403 through MAGIC-407 read phase-5 release, application,
+motion-helper and cleanup frontiers. These cards retain bounded Unknowns
+for callbacks, removed targets and whole-image refunds. Existing admission,
+retry and confidence clauses stand.
+
 ### MAGIC-341
 
 Population: the windows of `MAGIC-340` plus the progress map (`L00090`, 255 bytes), the progress switch (`L00091`, 6 dwords), the kind switch (`L00099`, 15 dwords) and the group-pass table (`L00322`, 27 dwords).
@@ -4008,6 +4022,13 @@ Population: EN `rom.exe`, windows `R2078..L15362`, `R0269..R0002`, `R0617..R0619
 
 **Unknown.** Those bodies; what the bit set in `actor+0x144` means.
 
+**Amended.** MAGIC-404's acquisition reads the direct application body
+R0003 through its return at L16488 and R0625 through L16489,
+including the former unread portion past L15371. Only these direct bodies
+are now answered. The original acquisition limits and High / Medium grades
+remain unchanged. Unread callees, the other listed bodies and bit-meaning
+question, transitive checks and runtime outcomes remain Unknown.
+
 ## Teleport relocation and presentation
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -4017,6 +4038,7 @@ Population: EN `rom.exe`, windows `R2078..L15362`, `R0269..R0002`, `R0617..R0619
 | MAGIC-TELEPORT-358 | The read normal producer builds two Teleport records; the copy's raw point changes while its source cache stays. | High / Medium | ● active (branch candidate) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 | MAGIC-TELEPORT-359 | The read Teleport cast cue hook uses bank entry 60 and the caster's raw point at the class AttackDelay. | High / Medium | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
 | MAGIC-TELEPORT-360 | Teleport's read relocation checks two footprint masks; exploration, fog and full click admission stay Unknown. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-0569](../experiments/EXP-0569-teleport/) |
+
 
 ### MAGIC-TELEPORT-356
 
@@ -4321,3 +4343,159 @@ For one stationary single-cell target visited once per pulse by one area, the co
 **Confidence.** High for local reset stores and area/actor call order. Medium for conditional joined schedules. Unknown for unconditional native persistence through teardown. Selected teardown R0637 calls cell helper R1077 and notification R0635; their complete transitive effects were not read. Its complete local listing cannot exclude callee cancellation.
 
 **Unknown.** Actual surviving tail, dynamic admission, callbacks and other areas/writers. An authorized ROM1 mission-1 Freezing/Light trace must log final pulse, every +42 write, area teardown and attachment retirement on one stationary single-cell living target. Darkness needs an owner-prepared ROM1 map/script applying spell 17 at recorded power. No such run/source selection was made. SAVE/LOAD and elapsed seconds are outside this result.
+
+## Admitted cast release
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-403 | At phase-5 zero, ROM1 releases through R0002 for actor aim or R0003 for cell aim; the local release branch repeats no mana, reach, facing or sight gate. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+| MAGIC-404 | ROM1 application has spell-specific target checks; PointEffect tests target class and owner, while Unit/Humanoid/Human virtual +0x2c returns 1 without testing health. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+| MAGIC-405 | The loaded-cast helper R0014 preserves action 0xd/0xe with completion 0; the cut routine R1380 clears Spell, phase, action and command state, with no direct mana refund. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+| MAGIC-406 | An admitted ROM1 book cast has paid mana before wind-up; phase-5 release has no second payment branch, but whole-image refunds and mana writes remain unclosed. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+| MAGIC-407 | The unread MAGIC-340 motion helpers compute bearing or distance and perform approach; the acquired bodies contain no additional spell-admission or mana-refund branch. | High / Medium | ✔ promoted (branch candidate) | [EXP-0595](../experiments/EXP-0595-cast-release/) |
+
+### MAGIC-403
+
+The tick decrements byte actor+0x6c at L13484..L14859. A resulting
+zero enters release. Action 0xd passes actor+0x5c and Spell actor+0x64 to
+R0002 at L00007. Action 0xe passes null target, actor+0x60/+0x61 and
+the Spell to R0003 at L00008. This local branch checks no target HP,
+ownership, visibility, distance, line of sight or mana and has no approach
+or retry arm. The separate action-3 weapon conversion repeats weapon/mage
+checks before becoming 0xd.
+
+R0002 reads Spell+4/+8. ID 14 returns without forwarding; every other
+ID calls R0003(caster,target,0,0). It checks neither null Spell nor null
+target. ID 14 is Prismatic Spray (MAGIC-237); its admission collector is
+separate (MAGIC-340, MAGIC-348). On ordinary return the tick cleans up
+items and sets phase 7. Reaching a release call does not prove delivery.
+
+**Confidence.** High for these local instructions in run1/actor-tick.txt,
+run1/release-application.txt and run2/actor-action-table.tsv. Medium for
+composed outcomes. Python 3.12.10 / Capstone 5.0.7 raw x86-32 uses one
+identical EN/RU image. Internal branches agree with decoded boundaries.
+The negative excludes transitive callees, callbacks and external writers.
+
+**Unknown.** Native release after movement, lost sight or target removal.
+Close application/delivery callbacks, or observe mission 1 Fire Arrow while
+the target leaves range and passes behind terrain, recording release
+arguments and eventual payload. No runtime population was observed.
+
+### MAGIC-404
+
+R0003 recomputes power through R0625 and uses the target's current
+Position when nonnull, otherwise cell arguments. Distribution parameter 8
+equal 1 requires a nonnull target at L05217; null reports through
+R1347 and exits at L05879. Other values construct an area object.
+Delivery parameter 5 selects enqueue now (1), transport (2), or epilogue.
+These shape decisions are not a universal target-validity predicate.
+
+The acquired table maps ID 6 to L03244 and ID 11 to L03256. Heal skips
+for an available owner/diplomacy bit-0 refusal, signed target HP+0x94 at
+most -10 or signed target+0x98 zero. Drain Life requires target vt+0x2c
+and a positive bounded amount; failure exits at L16490. Other spell-arm
+contracts are reused from MAGIC-TARGET-017 at their grade.
+
+PointEffect R0266 calls target vt+0x2c before its null/owner checks.
+On the true branch child vt+0x3c requires target and target+0x14 nonnull.
+On the false branch target vt+0x34 must return nonzero. Failed eligibility
+still reaches retirement effect+0x40=1 at L16491. Tables L00001,
+L00002 and L00003 put L16247/L14949 at +0x2c, both constant 1.
+Their +0x34 is L16248, constant 0. These predicates do not exclude an
+owned retained actor merely because its HP is nonpositive.
+
+**Confidence.** High for literal branches/tables/constant virtuals in
+run1/release-application.txt, run2/point-effect.txt and run3 virtual listings.
+Medium for dead-target outcomes and inherited spell identities. Capstone
+does not identify every virtual receiver; child/callback closure is absent.
+
+**Unknown.** Removed-target lifetime, owner changes and per-spell children.
+Trace R1133 and target-reference cleanup callbacks and child vt+0x3c.
+An owner mission 1 Lightning cast while another actor kills its target
+during wind-up would distinguish retained HP 0..-9, terminal death and
+removal. That observation was not made.
+
+### MAGIC-405
+
+R0014 returns for no actor+0x68, item byte +0x44 equal 2, absent type,
+type+0x3c not 0x29, or action 0xd/0xe with actor+0x136 zero. Otherwise
+matching Spell ID and signed type+0x40 delete the active Spell, clear
+actor+0x64, call R0929(actor+0x7c,item) and clear actor+0x68. Mismatch
+reports an error. R0929 forwards the item and collection+0x1c to unread
+R0930. The helper directly changes no mana, phase, countdown, order
+progress, active target or cell.
+
+R1380 calls that helper. With completion 0, nonnull item and
+R1056(item)==0xe it deletes item and Spell and clears both pointers.
+Every path clears actor+0x64, phase+0x58, action+0x54 and command state+0x50,
+and sets completion+0x136=1. Direct stores retain countdown, target, cell
+and order progress and do not refund mana. AI-503 places its two known
+callers in restore sequences; ordinary new-order cancellation is not shown.
+
+At normal release return nonnull actor+0x68 clears +0x68/+0x64; kind 0xe
+also deletes both objects. Without an item the Spell remains. Recovery
+sets phase 7, then phase 0/completion 1 at countdown zero (MAGIC-317, MAGIC-377).
+
+**Confidence.** High for direct predicates/stores in run1/abandon-cleanup.txt,
+run2/actor-restore.txt and run3/item-return.txt; item kind extraction is in
+run2/actor-predicates.txt. Medium for inventory/interruption outcomes:
+virtual destructors, R0930 and restore callers are not closed.
+
+**Unknown.** Refund/removal callbacks and restore eligibility during a cast.
+Read R0930, relevant destructors and complete R1378/R0826 callers
+before asserting a global no-refund rule.
+
+### MAGIC-406
+
+Reacquired R0268 compares signed Spell+0xc with signed caster+0x9a
+for a mage with actor+0x68 zero. Insufficient mana returns 0 at L15295;
+otherwise L05055..L05057 subtract the cost. Its local admitted paths
+return 1. MAGIC-310/317 supply the admission/item skip contract.
+
+The tick sets phase 5 and completion 0 after admission returns nonzero.
+Phase-5 release repeats no cost compare/subtraction. A later target/shape
+refusal returns to cleanup/recovery, not admission again in that pass.
+The acquired cleanup bodies do not directly restore mana. This excludes
+neither intended spell effects nor restore sequences/callbacks writing it;
+MAGIC-316's incomplete writer population is not a closed census.
+
+**Confidence.** High for local subtraction, returns and phase branches in
+run1/admission.txt and run1/actor-tick.txt. Medium for payment after a
+composed interruption. Mage predicate meaning is reused from MAGIC-340.
+No runtime or complete mana-writer census occurred.
+
+**Unknown.** Other writers between admission, interruption and recovery.
+Close typed overlapping-width, alias and bulk-copy mana writers, or record
+mission 1 book Heal admitted then refused on target state, with mana before
+admission, at release and after recovery.
+
+### MAGIC-407
+
+R0051 computes actor-centre bearing (exact sector rule MOVE-175).
+R0089 computes corresponding bearing to packed cell bytes. R0036
+uses both virtual sizes and Position: max of nonnegative axis separations
+after size subtraction, shifted by 8, plus 1. These three bodies directly
+write only stack temporaries.
+
+R0041 requires mover facing equal to R0051 and byte distance from
+R0036 at most reach. R0086 requires facing equal to R0089 and
+whole-cell Chebyshev distance at most reach. Failure returns 0; kind 8/9
+approaches before admission. R0043 finishes an off-centre step, otherwise
+turns within reach or refreshes paths outside reach. It stores tracked
+target mover+0x7c and raises mover+0x98 on an empty static path. R0178
+is the point counterpart, including MAGIC-239's obstacle/pending 0 or 10
+branches. Wrappers R0042/R0087 set action 1 and, off-centre,
+progress 3 and order+0x15 zero. Their direct bodies contain no mana,
+cast-phase or cast-countdown store. Path/step callees update motion.
+
+None is called from the phase-5 spell-release branch. MAGIC-348 already
+answers R0617, R0618 and R0254; its local grades are reused.
+
+**Confidence.** High for named direct instructions in run1 motion/pursuit/
+gate listings and run2/run3 wrappers. Medium for motion and transitive
+spell-check absence: path, step and claim helpers are unread. No global
+line-of-sight or actor-field writer enumeration occurred.
+
+**Unknown.** Callee effects and native path failure during an admitted cast.
+Read path/step callbacks and settle mover+0x98 entry during progress 2
+before treating the failure tail as an observed interruption.

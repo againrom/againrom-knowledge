@@ -598,3 +598,15 @@ The stores that mark a unit's cast as begun are the pending kind 8 or 9 (`R0018`
 
 For a cast started through the pending kinds 8 and 9 the setters test only the member's parked Spell; the selectors test the Spell cost against mana; the executor tests facing and reach and approaches when the gate fails; the admission refuses only a mage-mask caster without a scroll whose mana is below the cost, and a refused cast retries until the progress-2 exit, which depends on the completion byte `actor+0x136` (`MAGIC-340`, Medium for the outcome). The weapon-backed conversion tests the weapon pointer, `R0408` and the mage mask `R0442` and bypasses the executor gate; the checks of the wrapper and gap starts are unread. A start is reached at executor progress 0 only, so a new order during a step or a cast waits for the step centre or the cast exit; command state 0x17 with `mover+0x98` set ends a cast through the executor tail, and the cause of `mover+0x98` is unread (`MAGIC-341`, `MAGIC-311`, Medium).
 The scroll arm of the player's dispatcher (commands 0x25 and 0x26) tests the item and its type byte 0x29, stores the scroll pointer and a parked Spell, and for a cell target undoes both when the Spell row is not a cell Spell, then calls a setter; the helpers it calls are unread (`AI-617`, Medium for the composed outcome). The cell and script casts store the action word in a newly built actor in the wrappers; the stores read in the wrapper and constructor bodies write only that actor, but six callees of the constructor are unread and no read shows the actor removed (`AI-618`, Medium for what the new actor does to others). The callers are the cell-entry pass, the record pass, a script arm and two gap pieces, one of them read from a mid-function jump target with its entry unread; no decoded rel32 branch reaches the second-wrapper arms of the first two callers except the test of the always-one `R2078`, and indirect jumps into them were not searched (`AI-618`). The helpers the admission calls test the Spell row's parameter 4 and a bit of the actor; none tests range or sight (`MAGIC-348`). Seven gap stores are setters or install copies with no outside rel32 caller except `L00012 -> R0005`, whose reach to `L15264` is not shown (`AI-619`, Medium for reach), and no dword reference reaches the listed entries except the action body's three class-table slots (`AI-620`). Four of the 72 exact stores of `mover+0x98` (the step starts) were read; the executor tail clears it, and the other 68 stores are unread (`MOVE-171`, Medium).
+
+## Admitted cast continuation
+
+Progress 2 does not reinstall from a changed pending order. The struck hook
+writes retaliation bookkeeping; Stone Curse parks only progress zero.
+Caster HP at most zero bypasses release and replaces the countdown for dying.
+The mover-failure tail and external callbacks remain open interruption routes.
+Local branches are High; composed continuation is Medium. — AI-666
+
+Player and creature kind-8/9 casts use the same progress-2 phase body and
+release calls. Retention selects parent-command reset; selectors can aim
+at victim, self or cell. Other special starts remain Unknown. — AI-667
