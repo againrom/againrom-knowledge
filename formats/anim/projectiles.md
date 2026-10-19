@@ -52,6 +52,17 @@ the sheet is loaded on FIRST DRAW, not at start-up
 picture 10 and 12 also blit a smoke sheet once per point of the object's trail array
 ```
 
+## Unit-shot origin
+
+The read unit-shot producer starts from shooter raw `+08/+0c` plus
+`8*(ShootOffset[i:i+2]-Center)`, where `i=(facing-8)&14`. It copies that
+origin to projectile raw `+08/+0c` and cached `+28/+2c`. There is no
+empty-array fallback in this body. A successful driver target lookup writes
+aim `+88/+8c/+90` from target cached centre `+58/+5c` and height `+10`.
+The cached centre contains `128*(virtualSize-1)` relative to cached position;
+it is a different input from raw shooter x/y. First-frame cache freshness
+and the visible impact pixel remain Unknown. — AI-674
+
 ## Moving targets and independent application
 
 On the default travel arm, each axis advances by signed

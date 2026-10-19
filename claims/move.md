@@ -2110,3 +2110,43 @@ copy is not classified; 225 rows are unresolved, most outside the simulation
 code.
 
 **Unknown.** The routine holding `L07139` and its callers.
+
+## Fresh structure attack anchor
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-184 | The read fresh-map structure factory gives all 66 valid Buildings IDs an anchor-cell-centred Position and heading token size 1; IDs 34/35 construct Shop, the rest Building. | High / Medium | ● active | [EXP-0596](../experiments/EXP-0596-attack-facing/) |
+
+### MOVE-184
+
+Placement R0489 chooses Shop for IDs 34/35 and Building otherwise.
+Both arms pass placement x/y low bytes to R0288. It stores Position+0=x,
++1=y, word+2=x+(y<<8), and sub-cell bytes +4/+5=128. Base constructor
+R1009 copies that record through R1010 and stores the pointer at
+obj+0x10 (L02083). Building installs table R0492; Shop calls the
+same constructor then installs R0491. Slots +0x1c at
+L16486/L16487 both name R1827, literal byte 1.
+The installed Buildings collection contains 66 named IDs on both roots.
+This route therefore gives 34/35 the Shop token and the other 64 IDs the
+Building token, all size 1, including bridge definitions represented there.
+Drawable CBridge classes are a separate object family (UNIT-RTTI-024).
+
+The footprint attachment loop R0488 adds column/row offsets beginning
+at zero to Position+0/+1. Its rectangle anchor is therefore the upper-left
+cell, even when the attachment mask omits it. The AI-444 heading consumes
+(256*x+128,256*y+128) for these targets, with no rectangle-centre term
+from width+0x60 or height+0x61. AI-445 and UNIT-STRUCTREACH-063 retain their
+existing positive bounds; this result supplies the fresh Position chain and
+Shop size previously left open.
+
+**Confidence.** High for the complete named constructor, copy, factory,
+attachment and size bodies, raw table slots and bounded 66-row population.
+Positive local flow excludes a rectangle-centre Position and width-derived
+token on this factory route. Medium for the composition with attack heading
+in play. Capstone 5.0.7 has no repaired class/writer database; other factories,
+external writes, aliases and LOAD are not enumerated.
+
+**Unknown.** Loaded Position, every other constructor/copy route and art
+alignment. Trace a saved multi-cell Building and Shop through Position
+restoration and their first heading call; an EN mission-90 owner capture
+with anchor and art coordinates settles the visible alignment separately.

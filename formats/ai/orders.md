@@ -272,13 +272,27 @@ the approach, row `6` turns in place, and all three call
 Row `6` clears pending order and leaves before the gate and the turn when actor
 byte `+0x4c` has bit `4`, reach byte `+0x12c` is below `2`, and the owning Player
 dword `+0x28` is zero. The complete executor fixes the entry constants missing
-from `AI-443`'s bounded read (`AI-462`). Which policy writer selected row `5` or
-`6`, and native occurrence of that exit, remain separate bounds.
+from `AI-443`'s bounded read (`AI-462`). At progress zero, action has already
+been cleared except actions 2 and 15. The suppressed arm loads no attack;
+with mover+0x98 zero the tail returns without changing the entry facing.
+Running progress 1/2 dispatches before pending rows. Tail callbacks and a
+later release/facing byte remain bounded separately. — AI-673
+
+The selector is pending BYTE ord+8, not a melee/missile class partition.
+The read engage writer stores 5; standing acquisition and reacquisition store
+6. Engage can delegate to acquisition or casting before its physical store.
+Both EN/RU tables contain 56 named Units and 27 Weapons; none has a fixed
+row assignment in these local writers. The selected Units/Weapons spans
+agree byte-for-byte. The measured attack-input projection of 210 named
+Humans differs at eight typeID rows, with no row-selector implication.
+Computed/restored writers and native occurrence remain Unknown. — AI-672
 
 `R0051` takes the difference
 between the two footprint centres, each the fine point plus `(size-1)*128` in 16 bits, and returns one
 of eight bytes: within each sign quadrant the axis byte when one magnitude exceeds twice the other,
-otherwise the diagonal, so an exact 2:1 is diagonal; the zero vector gives 224 (`AI-444`). A Building target is measured toward its position record `+0x10`, not its rectangle; for the Building vtable the token size is 1 (`AI-445`; the size routine and the record's layout are Medium). Rows `9` and `0xf` turn at the walk's stop arm to `R0089(actor, cell)`, the same
+otherwise the diagonal, so an exact 2:1 is diagonal; the zero vector gives 224 (`AI-444`). A Building target is measured toward its position record `+0x10`, not its rectangle (`AI-445`, amended by MOVE-184). The read fresh-map factory gives all 66 Buildings IDs token size 1: IDs 34/35 construct Shop, the other 64 Building. Position holds the upper-left rectangle anchor x/y with sub-cell bytes 128/128, so the heading point is `(256*x+128,256*y+128)`, including masked footprints. LOAD, other factories and alignment to art remain Unknown. — MOVE-184
+
+Rows `9` and `0xf` turn at the walk's stop arm to `R0089(actor, cell)`, the same
 law on whole-cell differences from the anchor cell (`AI-446`). A shot's flight direction is a
 different 16-way helper; on one difference vector it equals the unit heading or is one sixteenth off
 (`AI-447`).

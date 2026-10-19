@@ -174,6 +174,15 @@ A is `P28/P2c + 128*(TileSize-1)`, not necessarily raw caster `+08/+0c`.
 The complete origin window reads no animation frame or equipment pointer;
 the action clock determines when it runs. — MAGIC-261
 
+For the normal actor-target branch, the producer initializes projectile aim
+`+88/+8c/+90` from the target's cached centre `+58/+5c` and height `+10`.
+The source centre already contains its geometry size term; the producer
+does not add that term again. The unit-shot producer instead starts from
+raw source x/y. A simulation actor target can still become a client point
+projectile through the spell route; the simulation preparation point is
+separate from this cached client aim. First draw and cache-refresh ordering
+remain Unknown. — AI-675
+
 In `R0551`, human state 8 uses the idle weapon/shield name selection.
 The selector's branches and name-to-ID stores are High. Its class-store path
 maps an unshielded mage with empty hands to `mage` (23) and staff categories

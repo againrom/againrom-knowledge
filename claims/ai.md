@@ -3608,7 +3608,7 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 |---|---|---|---|---|
 | AI-443 | Before an attack (executor rows 5, 6) or a cast at an actor (row 8) a unit turns to `R0051(actor, target)`, the byte the act gate compares; rows 5 and 6 call it with the gate's pair, and row 6 can leave before the gate and the turn. | High / Medium | ✔ promoted (amended) | [EXP-0522](../experiments/EXP-0522-target-heading/), [EXP-0526](../experiments/EXP-0526-motion-executor/) |
 | AI-444 | `R0051` heads between the two centres, fine point plus (size-1)*128 in 16 bits: eight bytes from the axis signs and 2:1 tests, an exact 2:1 to the diagonal, the zero vector 224; replayed on 84,842 inputs. | High | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
-| AI-445 | An attack on a Building heads by `R0051` toward the position record `obj+0x10`; no rectangle or size byte enters, and for vtable `R0492` the token size is 1 (`UNIT-STRUCTREACH-063`). | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
+| AI-445 | An attack on a Building heads by `R0051` toward the position record `obj+0x10`; no rectangle or size byte enters, and for vtable `R0492` the token size is 1 (`UNIT-STRUCTREACH-063`). | High / Medium | ✔ promoted (amended) | [EXP-0522](../experiments/EXP-0522-target-heading/) |
 | AI-446 | Before a cast at a cell (row 9) or a structure use (row 0xf) the walk's stop arm turns the unit to `R0089(actor, cell)`: the `AI-444` law on whole-cell differences from the anchor cell, sub-cell and size ignored. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
 | AI-447 | Unit headings come from three routines and a shot's from a fourth, the 16-way `L02828`; on every nonzero fine vector in [-64,64]^2 the shot index equals the unit heading on 8,320 and is one sixteenth off on 8,320. | High / Medium | ✔ promoted | [EXP-0522](../experiments/EXP-0522-target-heading/) |
 
@@ -3629,8 +3629,13 @@ The withdraw tails `R0100` and `R0107` (read whole) store only `ord+0x08 = 1` an
 
 
 **Amended.** `AI-462` supplies the complete entry-path register flow
-and exact row-6 suppression condition. The heading contracts and bounded
-caller confidence stand; attacker-class occurrence remains Unknown.
+  and exact row-6 suppression condition. The heading contracts and bounded
+  caller confidence stand; attacker-class occurrence remains Unknown.
+
+  AI-672 extends the row-choice boundary with the named engage, standing
+  acquisition and reacquisition writers. AI-673 extends the suppression
+  boundary with progress-zero action clearing and the quiet-tail result.
+  Neither supplies native class occurrence or a global writer census.
 
 ### AI-444
 
@@ -3665,7 +3670,13 @@ caller confidence stand; attacker-class occurrence remains Unknown.
 
 **Confidence.** **High** that `R0051` reads `obj+0x10` and `obj->vt+0x1c` and no other field of the target, so the rectangle does not enter: the bodies are complete (`w01`, `w02`). **Medium** that the token size of a Building is 1 (reused from `UNIT-STRUCTREACH-063`; `R1827` and the vtable were not re-read here, and other structure classes were not read) and that `+0x10` is a Building position record laid out like an actor's (that layout was not read).
 
-**Unknown.** Which cell of the Building's rectangle its position record names, and its sub-cell bytes, so the heading relative to the drawn building.
+  **Unknown.** Which cell of the Building's rectangle its position record names, and its sub-cell bytes, so the heading relative to the drawn building.
+
+  **Amended.** MOVE-184 closes the fresh-map placement Position and Shop
+  token-size gaps: both simulation tables return 1 and Position holds the
+  upper-left rectangle anchor with sub-cell bytes 128/128. Other construction
+  routes, LOAD and alignment to rendered art remain Unknown. The earlier
+  positive heading-reader clauses stand.
 
 ### AI-446
 
@@ -7658,3 +7669,137 @@ not proof that both results satisfy this claim's condition.
 one player character and two recorded uses would test the isolated visible
 case. The map number and script population must be verified before that
 owner observation; no grave-bearing mission is identified by this experiment.
+
+## Attack order context and projectile coordinates
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-672 | The read engage writer selects pending 5, standing acquisition and reacquisition select 6; class and weapon tables do not partition those local physical routes. | High / Medium | ● active | [EXP-0596](../experiments/EXP-0596-attack-facing/) |
+| AI-673 | At progress zero, suppressed row 6 loads no attack and preserves facing on the quiet-tail path; running progress 1/2 bypasses pending rows. | High / Medium | ● active | [EXP-0596](../experiments/EXP-0596-attack-facing/) |
+| AI-674 | The read unit-shot producer starts at shooter raw x/y plus class ShootOffset-minus-Center times 8; successful driver lookup aims at the target cached centre. | High | ● active | [EXP-0596](../experiments/EXP-0596-attack-facing/) |
+| AI-675 | The normal actor-target spell producer starts from caster cached centre plus its class offset and initializes aim from the target cached centre and height. | High | ● active | [EXP-0596](../experiments/EXP-0596-attack-facing/) |
+
+### AI-672
+
+The selector is pending BYTE `ord+8` on `actor+0x158`, dispatched only at
+progress BYTE `ord+9 == 0` (`L00548..L00573`). Engage `R0009` writes
+5 at `L00018`, target at `L00019`, and live reach at `L00159`.
+Standing acquisition writes 6 at `L00576`; reacquisition writes 6 at
+`L00122`. Failed gate row 5 approaches; row 6 turns in place (AI-443).
+AI-518/520 supply the established caller contexts and candidate populations.
+
+Engage delegates mask-4, reach-below-2, Player+0x28-zero actors to standing
+acquisition at `L01737`. Order spell slots can select a cast instead at
+`L01739`. A mask-4 actor with nonzero Player+0x28 can call `R0393`
+before the physical store. That helper was not expanded here. No unit-class,
+weapon attackType or missile flag chooses 5 versus 6 in the named writers.
+Class/weapon data can affect admission, reach or art separately.
+
+The installed EN/RU population is 118 serialized Units rows (56 named),
+215 Humans (210 named), 27 Weapons and 66 Buildings. Row zero is reserved
+and not serialized. The selected Units, Weapons and Buildings spans are
+byte-identical; Humans differ. Excluding names, the measured Humans
+class/mana/weapon/attackType/derived-reach projection differs only at rows
+54, 67, 80, 93, 159, 162, 165 and 168: typeID EN 3, RU 4. Other Humans
+columns are outside that projection. No fixed class/weapon row partition
+follows: a physical setup can enter either read context when admitted.
+Per-record measurements and span digests are in `selector-inputs.tsv` and
+`table-inputs.tsv` of the evidence directory.
+
+**Confidence.** High for the named local stores, conditions and table
+measurements. Complete load-bearing Capstone 5.0.7 listings and count/residue
+checks exclude the class-only, missile-only and reach-only selector models
+for these writers. Medium for gameplay occurrence and derived equipped
+reach; the longest weapon suffix match and equip arithmetic reuse
+UNIT-EQUIP-005 and UNIT-COMBAT-006. No repaired function database or
+image-wide writer census is asserted. EN/RU code is one reused witness.
+
+**Unknown.** Computed/restored writers, caster delegation effects and native
+class occurrence. Trace a short-reach actor and an archer through a directed
+engage and standing acquisition, recording pending/progress and any delegated
+cast, to settle the native comparison.
+
+### AI-673
+
+AI-462 supplies the confirmed suppression predicate: actor BYTE+0x4c mask 4,
+BYTE+0x12c below 2, Player DWORD+0x28 zero. On the progress-zero path the
+executor already clears action+0x54 unless it is 2 or 15
+(`L00539..L00540`). Row 6 clears pending+8 at `L00109` and jumps to
+`L00010`; it writes no progress 1, action 3, active victim or facing.
+With mover+0x98 zero, the tail only does bookkeeping and returns, so this
+pass starts no blow or shot and keeps the entry mover+0 facing byte.
+
+Progress 1/2 dispatches before pending rows and restores action 3 or the
+cast action (AI-354, AI-522). Row-6 suppression is therefore not an exit
+inside an active attack. With mover+0x98 nonzero the tail can run cleanup or
+reacquisition. The read reacquisition victim arm repeats the suppression
+predicate at `L16469..L00123` before its gate/load/turn. While those
+inputs stay unchanged, that arm cannot bypass the refusal.
+
+**Confidence.** High for the complete local branch, quiet-tail result and
+progress-before-pending distinction. Medium for composed whole-pass behavior:
+cleanup, candidate/list and delivery callees are not all expanded. The
+Capstone listings cover every instruction on the named local branches, not
+a typed writer census or native sub-tick observation.
+
+**Unknown.** A later action/facing byte and actual suppression occurrence.
+On an original EN mission-10 trace, record pending, progress, action,
+mover+0/+1/+0x98, mask, reach and Player+0x28 through the exit, tail and next
+release. Change only reach or Player+0x28 as the control. External writers
+or changed state can admit a later action; no fixed later sub-tick follows.
+
+### AI-674
+
+In `R0603`, let P be shooter raw x/y at +8/+0xc, C the class from
+`L02113[shooter+0x20]`, and i=`(shooter+0x6c-8)&14`. Origin is
+`P+8*(C.ShootOffset[i:i+2]-C.Center)`. Stores `L16470/L16471` set
+new+8/+0xc; `L16472/L16473` copy them to new+0x28/+0x2c.
+This body has no empty-ShootOffset fallback. It retains the target word
+at `L16474` without an aim store in this producer.
+
+On a successful action-1 driver target lookup, `L02824/L02825` copy
+target cached +0x58/+0x5c to aim+0x88/+0x8c; `L02826` copies height+0x10
+to aim+0x90, and `L13444` stores direction. Geometry `R0614` computes
+cached centre from cached +0x28/+0x2c plus 128*(virtual size-1), at
+`L16475/L16476`. It is a distinct input from shooter raw +8/+0xc.
+ANIM-155/156 supply tracking, target-loss and initial-aim bounds.
+
+**Confidence.** High for these positive stores and arithmetic. Complete
+producer and driver listings and the load-bearing geometry span exclude a
+direct shooter-footprint term or unadjusted target fine-point aim in these
+named paths. No assertion of global writer coverage, pointer alias immunity
+or runtime cache freshness is made.
+
+**Unknown.** Native first visible origin, cache freshness and impact pixel.
+Capture a physical Bat_Sonic shot on EN mission 120, recording class/facing,
+raw and cached points, producer stores, first driver and first draw. That
+trace settles whether current raw and cached coordinates agree at release.
+
+### AI-675
+
+For the normal CUnit/CAirUnit producer `R0620`, actor-target aim stores
+`L16477/L16478/L16479` copy target cached centre+0x58/+0x5c and
+height+0x10 to new+0x88/+0x8c/+0x90. The origin uses caster cached
+centre+0x58/+0x5c. MAGIC-261 gives the class ShootOffset-minus-Center times-8
+formula and the unscaled Selection fallback for an empty array or picture 60.
+Origin stores are `L16480/L05374` or `L16481/L16482`; copies to
+cached new+0x28/+0x2c are `L16483/L16484`. The geometry centre-size
+term is already present in the input cache; this producer adds no second one.
+
+A simulation actor target is not sufficient to imply this client target
+branch. ANIM-156/MAGIC-288 distinguish Fire Arrow target identity from the
+fixed cell-centre point of Fire Ball. The simulation preparation point is
+also separate: `L16485..L06146` copies target Position and, for size
+above 1, sets its fine coordinates to the simulation centre minus 1 on each
+axis. This does not redefine the client driver aim.
+
+**Confidence.** High for the local origin/aim stores and size-term distinction.
+Complete producer, position helpers and geometry listings support the named
+operand flow; MAGIC-261 supplies the previously measured offset branches.
+Alternate producers and cache scheduling are outside this positive claim.
+
+**Unknown.** First visible frame, refreshed-cache timing and actual impact
+pixel. An original actor-target Fire Arrow trace with a multi-cell target,
+plus Fire Ball as a point-target control, must record producer/driver/draw
+points and the target raw/cached geometry. A mission-120 owner fixture
+with that cast opportunity would settle the visible comparison.
