@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4067. Observation: 99. Static analysis: 3444. Mixed: 524.
+Claims labelled: 4071. Observation: 99. Static analysis: 3447. Mixed: 525.
 
 ## Ledger ai
 
@@ -429,6 +429,7 @@ Claims labelled: 4067. Observation: 99. Static analysis: 3444. Mixed: 524.
 | AI-673 | static analysis | ● active |
 | AI-674 | static analysis | ● active |
 | AI-675 | static analysis | ● active |
+| AI-678 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger alm
 
@@ -1179,7 +1180,7 @@ Claims labelled: 4067. Observation: 99. Static analysis: 3444. Mixed: 524.
 | MAGIC-TRAIN-018 | static analysis | ● active (partially retracted) |
 | MAGIC-SING-019 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-AUTOCAST-020 | static analysis | ● active |
-| MAGIC-AUTOCAST-021 | static analysis | ● active |
+| MAGIC-AUTOCAST-021 | static analysis | ● active (amended) |
 | MAGIC-STAFF-022 | static analysis | ● active |
 | MAGIC-SPELLHOP-023 | static analysis | ● active |
 | MAGIC-ICON-024 | static analysis | ● active |
@@ -1376,6 +1377,9 @@ Claims labelled: 4067. Observation: 99. Static analysis: 3444. Mixed: 524.
 | MAGIC-405 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-406 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-407 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-409 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-410 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-411 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 

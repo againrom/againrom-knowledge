@@ -67,7 +67,7 @@ current account.
 | MAGIC-TRAIN-018 | Casting trains the spell's own school by half its mana cost, and only for a hero. | High | ● active (partially retracted) | **[EXP-0067](../experiments/EXP-0067-spell-catalogue/)**, **[EXP-0135](../experiments/EXP-0135-skill-raise/)**, **[EXP-0191](../experiments/EXP-0191-itemcast-training/)** |
 | MAGIC-SING-019 | Eight spells do something no other spell does, and each is a named instruction rather than a shape. | High / Medium | ● active (amended, partially retracted) | [EXP-0067](../experiments/EXP-0067-spell-catalogue/), [EXP-0191](../experiments/EXP-0191-itemcast-training/) |
 | MAGIC-AUTOCAST-020 | A weapon-borne spell has two triggers, not one, and they are exact complements — the caster's attack is *replaced* by the cast while the fighter's carries it as a rider. | High | ● active | [EXP-0137](../experiments/EXP-0137-staff-autocast/) |
-| MAGIC-AUTOCAST-021 | A caster attacking with a spell-carrying weapon cannot miss and cannot be absorbed, and the reason is structural: the routine that rolls is never entered. | High | ● active | [EXP-0137](../experiments/EXP-0137-staff-autocast/) |
+| MAGIC-AUTOCAST-021 | A caster attacking with a spell-carrying weapon cannot miss and cannot be absorbed, and the reason is structural: the routine that rolls is never entered. | High | ● active (amended) | [EXP-0137](../experiments/EXP-0137-staff-autocast/) |
 | MAGIC-STAFF-022 | The character generator hands a caster a staff and only a staff, and that is a fact about distribution — nothing in the image refuses an item on account of class. | High | ● active | [EXP-0137](../experiments/EXP-0137-staff-autocast/) |
 | MAGIC-SPELLHOP-023 | `MAGIC-ITEM-007`'s open hop is dead code, and the question it framed has a false premise: nothing in the image resolves a weapon's spell by NAME. | High | ● active | [EXP-0137](../experiments/EXP-0137-staff-autocast/) |
 | MAGIC-ICON-024 | A spell's icon is a POSITION in one pre-composited strip, not an indexed cell — and four of the twenty-eight spells have none. | High | ● active | [EXP-0139](../experiments/EXP-0139-spell-pictures/) |
@@ -432,6 +432,7 @@ current account.
 **Original status.** ● active
 
 **Evidence.** [EXP-0137](../experiments/EXP-0137-staff-autocast/)
+**Amended.** `MAGIC-409` and `MAGIC-410` scope the reach clause. For a mage attacking with a spell weapon the admission `R0268` does not replace the strike's reach test: it tests mana only and no distance. The reach compare is the act gate and the approach stop, both against `actor+0x12c`, before the conversion to the cast. The clause stands for the strike path it names.
 
 ### MAGIC-STAFF-022
 
@@ -4499,3 +4500,175 @@ line-of-sight or actor-field writer enumeration occurred.
 **Unknown.** Callee effects and native path failure during an admitted cast.
 Read path/step callbacks and settle mover+0x98 entry during progress 2
 before treating the failure tail as an observed interruption.
+
+## Spell-weapon attack distance
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-409 | A mage whose worn weapon carries a Spell, ordered to attack, stops where the edge distance to the target is at most its weapon reach actor+0x12c and starts the cast there; the stop and the act gate take no operand from Spell+9. | High / Medium | ✔ promoted (branch candidate) | [EXP-0597](../experiments/EXP-0597-spell-weapon-reach/) |
+| MAGIC-410 | From attack order to release, the read path compares distance only at the approach stop (ord+0x14) and the row-5 gate (actor+0x12c); conversion, admission and release add no distance or range test. | High / Medium | ✔ promoted (branch candidate) | [EXP-0597](../experiments/EXP-0597-spell-weapon-reach/) |
+| MAGIC-411 | Shipped castSpell weapons of mages resolve to Staff (@.range 5) and Shaman Staff (@.range 4) on EN and RU; each authored spell's Spell+9 (6..11) exceeds that reach in all 46 Humans cells. | High / Medium | ✔ promoted (branch candidate) | [EXP-0597](../experiments/EXP-0597-spell-weapon-reach/) |
+
+### MAGIC-409
+
+The attack path, each link with its claim:
+
+1. Order `0x19` (`R0006`) stores command state `actor+0x50 = 3`,
+   target `ord+0x0c` and `ord+0x14 = actor+0x12c` (AI-CMD-054).
+2. The group pass arm for state 3 calls engage `R0009` at `L01988`
+   (AI-STATE-011, AI-376), once per 16 ticks (AI-385). For a mage with reach
+   2 or more and Player `+0x28` zero, engage stores pending 5, the target and
+   `ord+0x14 =` the live byte `actor+0x12c` (`L00018..L00159`; AI-672,
+   AI-337). AI-678 gives the other branches.
+3. Executor row 5 calls the gate `R0041(actor, ord+0x0c, actor+0x12c)`
+   at `L00743` (AI-443): facing byte equal to the heading (`L00577`) and
+   edge distance `R0036` at most the reach (`L00578`) (AI-PURSUE-040,
+   AI-405).
+4. On failure `R0042` passes `ord+0x14` to `R0043` at
+   `L06113`. Off a cell centre it finishes the step. At a centre, edge
+   distance at most `ord+0x14` (`L00580`) turns and stands; above it routes
+   (AI-414, AI-443).
+5. A passing gate stores progress 1, action 3 and the target (AI-522).
+6. Action-body phase 0 (`L15298..L13664`) turns action 3 into `0x0d`
+   for a worn weapon whose `+0x80` is non-null and a mask-4 actor, with
+   `actor+0x64 = weapon+0x80` and `actor+0x68 = weapon` (MAGIC-377,
+   MAGIC-AUTOCAST-020). No executor gate runs between (MAGIC-340).
+7. Admission `R0268` skips the cost for `actor+0x68` non-zero and has
+   no range test (MAGIC-CAST-003, MAGIC-348). It stores phase 5 and the
+   wind-up countdown `actor+0x6c = actor+0x134` (MAGIC-310).
+
+Metric: the edge distance of MAGIC-REACH-179, `1 + floor(max(gapX, gapY)/256)`
+with both token sizes subtracted. Two touching tokens measure 1. For two
+one-cell tokens at cell centres it equals the Chebyshev cell distance.
+
+Value: `actor+0x12c` is 1 from the constructor (`L00325`) plus
+`weapon+0x50 - 1` at Weapon::Equip (`L04088..L04091`). `weapon+0x50` is
+Weapons slot `0x0b` `@.range`, or 1 when the cell is `-1` (HERO-REACH-025,
+UNIT-COMBAT-006, ITEM-WEAPCOL-021). The four stores of the `disp:12c` sweep
+in HERO-REACH-025 are the constructor, equip, removal `R0853`
+(SAV-EQUIPORDER-552) and `L00278` (typeID `0x18`); the save LOAD restore and
+a wholesale archive copy are outside that sweep.
+On this path `ord+0x14` is written by `R0006` and `L00159`, both from
+`actor+0x12c`. The stores that copy `Spell+9` into `ord+0x14`
+(`L05036`, `L05038`, `L00075`; MAGIC-REACH-178) belong to book, scroll
+and creature cast orders.
+
+Inference: the mage stops at the first cell centre on its route whose edge
+distance is at most its reach, turns to the heading, and starts the wind-up
+on the pass after the gate admits. The shipped Staff gives reach 5 and the
+Shaman Staff 4 (MAGIC-411).
+
+**Confidence.** High for the operand chain: the only `ord+0x14` store on the
+path and the gate argument both load `actor+0x12c`, and every link is a High
+instruction-level claim (AI-PURSUE-040, AI-443, AI-672, AI-CMD-054,
+HERO-REACH-025, MAGIC-377, MAGIC-340, MAGIC-310); this card adds no
+instruction read. That excludes a Max Range replacement and a minimum of the
+two as the stop. It is a statement about operand sources, not about every
+reader of `Spell+9`. The bodies it covers are the executor `R0016` (row 5
+and the progress arms), engage `R0009`, the gate `R0041`,
+`R0042`, `R0043`, the action body from phase 0 to the release
+and the admission `R0268`. Medium for the absence of any other `Spell+9`
+comparison on the path. Medium for the player-visible stopping point: no
+runtime run, centre-only evaluation, turn time, group-pass cadence and a
+moving target all enter it.
+
+**Unknown.** A native observation. Run the original EN with a caster hero
+wearing the generator Wood Staff, order an attack on a stationary one-cell
+monster on open ground, and record the cell distance at the first wind-up
+frame. Not closed: the action-body virtual calls (AI-408: `L13251`,
+`L13252`, `L13253`), the path and step callees (MAGIC-407), a reader
+census of `Spell+9` (MAGIC-REACH-178 lists three stores that copy it, not its
+readers), the save LOAD restore of `actor+0x12c` (SAV-UNITFLD-049 records
+carry the byte) and register-form writers of `ord+0x14`.
+
+### MAGIC-410
+
+Tests on the path from order `0x19` to the release, with operands:
+
+| test | site | operand | effect | claim |
+|---|---|---|---|---|
+| attack-order scorer | `R0006` via `R0225` | domain matrix byte | `0xffffff` (byte 0) turns the member and sets state `0xc` | AI-CMD-054, AI-560 |
+| engage diversion | `L01736..L01737` | mask 4, `actor+0x12c < 2`, Player `+0x28` zero | standing acquisition, then row 6 clears pending | AI-377, AI-462, AI-673 |
+| engage book cast | `L01740..L01741` | mask 4, Player `+0x28` non-zero | `R0393` may install a kind-8 book cast | AI-678 |
+| engage slot draw | `L00610..L01739` | `ord+0x78..0x83` ids and thresholds; reached by any non-mage, a mage with reach 2 or more, and Player `+0x28` non-zero | a match orders a creature-slot cast through `R0209` and `R0018`, which stops at that Spell's range | AI-341, MAGIC-237, AI-678 |
+| approach stop | `L00580` | edge distance against `ord+0x14` | turn and stand, or route | AI-414 |
+| route failure | `L00161`, epilogue `L00114` | `mover+0x98` | pending 0 and reacquisition | MAGIC-239, AI-353 |
+| arrival stand | `L00117` | cell record | pending 0 | AI-353 |
+| act gate | `L00577`, `L00578` | facing; edge distance against `actor+0x12c` | approach or turn until both hold | AI-405 |
+| conversion | `L15298..L13664` | action 3, weapon, `+0x80`, mask 4 | action `0x0d` | MAGIC-377 |
+| admission | `R0268` | mana only when `actor+0x68` is zero | none for a weapon cast | MAGIC-CAST-003 |
+| release | `L13484..L00008` | countdown `actor+0x6c` | none | MAGIC-403 |
+
+The strike's reach test (`L00735..L00736`) is not entered on this path
+(MAGIC-AUTOCAST-021). The progress-1 arm counts `ord+0x15` and tests no
+distance (MAGIC-377). Only the approach stop and the act gate compare a
+distance, and both compare the same edge distance with a value copied from
+or read live as `actor+0x12c`; the slot draw and the book cast divert to an
+order that stops at a Spell's range instead. Whether a shipped Humans slot
+block is non-zero is not established (AI-678). Application after the release
+is outside this question (MAGIC-404).
+
+**Confidence.** High for each listed test and operand: each is a High
+claim's instruction. Medium that the list is complete: the action-body
+virtual calls (AI-408), path and step callees (MAGIC-407) and computed
+writers are not closed.
+
+**Unknown.** Callee and callback effects during approach; whether a native
+path failure or an occupied destination cell delays the cast. A native trace
+of pending, progress, action and `mover+0x98` from the order to the release
+would settle it.
+
+### MAGIC-411
+
+Population: EN and RU `world.res:data/data.bin`, parsed by
+`tools/placedb -mode parse`; every `{castSpell=...}` cell of the Humans and
+Units tables (46 and 2 per root) and the four generator staff literals of
+MAGIC-STAFF-022. Each item name is joined to the Weapons row named by its
+longest whole-word suffix; 0 names stay unmatched.
+
+| Weapons row | @.attackType | @.range | reach | @.charge / @.relax | cells |
+|---|---|---|---|---|---|
+| Staff | 3 | 5 | 5 | 8 / 4 | 31 Humans, 4 generator |
+| Shaman Staff | 3 | 4 | 4 | 8 / 4 | 15 Humans |
+| Boulder Thrower | 5 | 20 | 20 | -1 / -1 | Units Catapult, Ballista |
+
+| spell | id | Max Range | Spell+9 at power 0..100 | authored cells |
+|---|---|---|---|---|
+| Fire Arrow | 1 | 7 | 7..10 | 22 Humans, 4 generator |
+| Lightning | 13 | 8 | 8..11 | 14 Humans |
+| Prismatic Spray | 14 | 7 | 7..10 | 8 Humans |
+| Stone Curse | 20 | 5 | 5..8 | 2 Humans |
+| Fire Ball | 2 | 10 | 10..13 | Catapult, Ballista |
+| Drain Life | 11 | 3 | 3..6 | shop only |
+
+- All 46 Humans rows have ManaMax above 0, so each spawns with mask 4
+  (HERO-HP-071, MAGIC-AUTOCAST-020), and a nonzero knownSpells cell.
+- At the authored power, `Spell+9` lies in 6..11 and exceeds the reach in
+  46 of 46 Humans cells; it equals or falls below it in 0.
+- The Catapult and Ballista rows are Units without mask 4 (AI-341), so
+  their Fire Ball rides the strike instead of replacing it.
+- The shop also attaches Stone Curse or Drain Life to fighter weapons
+  (SHOP-EFFCAST-065). Their reach is the row's `@.range`: Short Bow 4,
+  Long Bow 5, Crossbow 6, and 1 for every melee row (`@.range -1`).
+- SHOP-EFFCAST-065 gives the mage selection as Fire Arrow, Lightning,
+  Prismatic Spray, Stone Curse and Drain Life, and ten mage-only weapon
+  triples that include the Staff and Shaman Staff. Drain Life has Max Range 3,
+  so `Spell+9` is 3..6 against Staff reach 5 and Shaman Staff reach 4.
+
+Inference: on the authored data a weapon-reach model and a
+`min(reach, Spell+9)` model give the same stopping distance, so the shipped
+staffs do not discriminate them; MAGIC-409 does. A mage wearing a shop
+Crossbow with Drain Life is one of the cases where the two would differ:
+reach 6 against `Spell+9` 3..6. A shop Staff or Shaman Staff carrying Drain
+Life would also separate them, if the mage draw yields that pair.
+
+**Confidence.** High for the column values: a complete table parse on both
+roots, whose generated tables agree apart from the root column. Medium for
+the name-to-row join (the suffix grammar of UNIT-EQUIP-005 and
+ITEM-AUTHCAST-086) and for `Spell+9` at the cell power (the TEXT-096 formula
+applied to the authored power, ITEM-CASTSTATE-056).
+
+**Unknown.** Map-placed and save-carried spell weapons, which this table
+does not enumerate; which shop weapons a mage can buy in a given town; the
+shop staff-spell product (whether the forced-cast draw gives Drain Life on a
+Staff or Shaman Staff), which is not computed here.

@@ -7867,3 +7867,64 @@ pixel. An original actor-target Fire Arrow trace with a multi-cell target,
 plus Fire Ball as a point-target control, must record producer/driver/draw
 points and the target raw/cached geometry. A mission-120 owner fixture
 with that cast opportunity would settle the visible comparison.
+
+## Spell-weapon attack control dependence
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-678 | A spell-weapon attack's start distance depends on the mage bit, reach below 2 and Player+0x28, not on sex or, on the weapon path, skills; under non-zero Player+0x28 (computer control, Medium) a book cast may stop at the order's Spell+9. | High / Medium | ✔ promoted (branch candidate) | [EXP-0597](../experiments/EXP-0597-spell-weapon-reach/) |
+
+### AI-678
+
+Code tests on the MAGIC-409 path that read the actor, with their effect:
+
+| test | operand | effect | claim |
+|---|---|---|---|
+| mage bit | `actor+0x4c & 4` at the conversion | set: the attack becomes the cast; clear: the strike runs with the Spell as a rider | MAGIC-AUTOCAST-020 |
+| engage diversion | mask 4, `actor+0x12c < 2`, Player `+0x28` zero (`L01736..L01737`) | standing acquisition; row 6 then clears pending and loads no attack | AI-377, AI-462, AI-673 |
+| engage slot draw | `ord+0x78..0x83` ids and thresholds (`L00610..L01739`) | a match orders a creature-slot cast through `R0209` | AI-341, MAGIC-237 |
+| non-zero Player `+0x28` (read as computer control) | mask 4, Player `+0x28` non-zero (`L01740..L01741`) | `R0393` may order a book cast | MAGIC-AI-012, AI-554 |
+
+- `R0393` with Mind word `+0x88` above 59 and a 30 in 100 draw
+  re-enters engage and returns 0, so the outer default pending 5 at weapon
+  reach is written. Otherwise it walks book ids 1..28 for a Spell whose cost
+  is at most mana and whose Defensive byte is 0. A pick sets `ord+0x60 = 1`
+  and calls `R0018`, which copies `Spell+9` into `ord+0x14`
+  (MAGIC-REACH-178). That kind-8 order approaches to the `Spell+9` held at
+  the order, not to the weapon reach, and casts the book Spell with mana
+  (MAGIC-340). That `Spell+9` is the base at construction and is rewritten by
+  the fill from `skill[Sphere] + Mind - 30` clamped to 0..100 (TEXT-096,
+  `R0904`, `R0625`); whether current power is refreshed before every
+  order decision is Unknown (MAGIC-REACH-178). The book-branch distance can
+  therefore depend on skills and Mind.
+- The mage bit of a Humans row is set when its streamed ManaMax is above 0
+  (`L04441..L04440`, HERO-HP-071). Class enters only through it.
+- No test of typeID, gender or a skill word was found in the bodies the
+  cited claims read whole: the conversion, engage, row 5, the approach and
+  the admission. Sex selects the plain or Uncommon Wood Staff in the
+  character generator (MAGIC-STAFF-022); both resolve to Weapons row Staff,
+  reach 5 (MAGIC-411).
+- The fill may rewrite `Spell+9` with the cast power (TEXT-096,
+  ITEM-CASTSTATE-056), but no operand of the weapon-path stop or gate reads it
+  (MAGIC-409).
+
+Inference: a player-controlled mage holding a shipped staff stops at reach 5
+or 4 whatever its sex, skills and book; its weapon-path operands read no
+`Spell+9` or skill word. Under non-zero Player `+0x28` (read as computer
+control, Medium) the Mind word `actor+0x88` above 59 gates the re-entry
+(`L01768`), and a mage with an affordable non-Defensive book Spell can open
+with a book cast whose stop is the `Spell+9` held at the order, which may
+carry the skill and Mind power term. A player-controlled mage holding a reach-1 spell weapon, such
+as a shop melee weapon with castSpell, is never sent to attack by these
+writers.
+
+**Confidence.** High for the tests, operands and branches: each is a High
+claim's instruction. Medium for the outcomes: Player `+0x28` zero is read as
+a human participant at Medium (MAGIC-AI-012); the book contents a Humans
+`knownSpells` cell gives, and the mana at the order, are not computed here;
+whether a Humans actor's `ord+0x78` slot block is ever non-zero is not
+established (AI-341 names the Units spawn setup and LOAD as writers).
+
+**Unknown.** A native comparison: the same mage and target under player and
+computer control, recording `ord+0x08`, `ord+0x14` and the first wind-up
+distance, would settle the computer branch.

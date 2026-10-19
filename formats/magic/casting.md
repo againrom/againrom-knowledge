@@ -185,6 +185,42 @@ native release. Existing altitude-sensitive sight evidence does not supply
 that missing joined cast route. The local no-altitude result must not erase
 an upstream visibility or order gate.
 
+### Spell-weapon attack distance
+
+A mage (`actor+0x4c & 4`) whose worn weapon carries a Spell, ordered to
+attack, takes the physical pursuit path, not a cast order. Engage stores
+pending 5 with stop distance `ord+0x14 = actor+0x12c`. The approach stands
+at the first cell centre whose edge distance to the target is at most
+`ord+0x14`; the act gate then needs the facing byte equal to the heading and
+the same edge distance at most `actor+0x12c`. The action body turns the
+admitted attack into cast state `0x0d` with the weapon's Spell, and the
+admission and release test no distance. The Spell's Max Range (`Spell+9`) is
+not an operand of the stop or the gate on this path (`MAGIC-409`, `MAGIC-410`).
+
+```
+reach    = 1 + (weapon @.range - 1)      @.range -1 counts as 1
+stop     = first cell centre with edgeDistance(caster, target) <= reach
+wind-up  = countdown actor+0x134, the weapon @.charge
+```
+
+The shipped spell weapons are the Weapons rows Staff (`@.range` 5) and Shaman
+Staff (`@.range` 4). Their authored spells reach `Spell+9` 6..11, above the
+weapon reach in every authored cell, so the shipped staffs give the same
+distance under a weapon-reach rule and a `min(reach, Spell+9)` rule; the code
+decides for weapon reach. Fire Ball on the Catapult and Ballista rides a
+non-mage strike (`MAGIC-411`).
+
+Control changes the opening. A mage with reach below 2 under a Player whose
+`+0x28` is zero is diverted to standing acquisition and loads no attack. A
+mage under a Player whose `+0x28` is non-zero (read as computer control,
+Medium) can first receive a kind-8 book cast whose stop distance is the
+`Spell+9` held at the order. That value may carry the skill and Mind power
+term, and the Mind word gates the re-entry. On the weapon path no sex or skill
+test was found (`AI-678`).
+
+Unknown: a native observation of the first wind-up distance, the save-load
+restore of `actor+0x12c`, and callee effects during the approach.
+
 ## Cast sequence
 
 ```
