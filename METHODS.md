@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4098. Observation: 99. Static analysis: 3471. Mixed: 528.
+Claims labelled: 4103. Observation: 99. Static analysis: 3476. Mixed: 528.
 
 ## Ledger ai
 
@@ -430,6 +430,11 @@ Claims labelled: 4098. Observation: 99. Static analysis: 3471. Mixed: 528.
 | AI-674 | static analysis | ● active |
 | AI-675 | static analysis | ● active |
 | AI-678 | static analysis | ✔ promoted (branch candidate) |
+| AI-682 | static analysis | ● active (branch candidate) |
+| AI-683 | static analysis | ● active (branch candidate) |
+| AI-684 | static analysis | ● active (branch candidate) |
+| AI-685 | static analysis | ● active (branch candidate) |
+| AI-686 | static analysis | ● active (branch candidate) |
 
 ## Ledger alm
 

@@ -7935,3 +7935,164 @@ established (AI-341 names the Units spawn setup and LOAD as writers).
 **Unknown.** A native comparison: the same mage and target under player and
 computer control, recording `ord+0x08`, `ord+0x14` and the first wind-up
 distance, would settle the computer branch.
+
+## Refused walk observed in a run
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-682 | In one run of the original, a Move member refused by the static search was stood down, latched by path (b) of the next order 4 pass, then sent to `R0022` each pass with `ord+8` 0; 2 members, no target pick observed. | High / Medium | ● active (branch candidate) | [EXP-0604](../experiments/EXP-0604-group-pursuit/) |
+| AI-683 | In one run of the original, the group pass ran only at sub-ticks congruent to 6 modulo 16, after that tick's executor passes by counter value; a refused member's executor pass preceded its first group pass by 9 and 14 ticks. | High / Medium | ● active (branch candidate) | [EXP-0604](../experiments/EXP-0604-group-pursuit/) |
+| AI-684 | In one run of the original, Naira was stood down at 4516 and at 7821 and never latched; 281 passes of `R0004` across two Move orders, no pick; the 4516..6935 dynamic refusal is inferred from an absent static hit. | High / Medium | ● active (branch candidate) | [EXP-0604](../experiments/EXP-0604-group-pursuit/) |
+| AI-685 | In one run of the original, with the order byte and member fields written in the child, an order 2 member's walk returned at arrival after a refusal; Roam reached the order 4 arm and latched the refused members. | High / Medium | ● active (branch candidate) | [EXP-0604](../experiments/EXP-0604-group-pursuit/) |
+| AI-686 | In one run of the original, the claim release `R0045` ran 0 times and the release condition (`mover+0x80` non-zero) never occurred; at word stores at displacement 0x76 the walk was the only observed writer of `mover+0x76`. | Medium | ● active (branch candidate) | [EXP-0604](../experiments/EXP-0604-group-pursuit/) |
+
+### AI-682
+
+Run 02 of EXP-0604: `game0013.sav` (29 actors), two human-player members of one Move group, Naira
+`0x05b0acc0` and a witch `0x04a12d58`. Tables `evidence/q1-witch-static-refusal.tsv` (ticks
+7815..7962) and `evidence/q1-naira-static-refusal.tsv` (13150..13300).
+
+| pass | witch tick | Naira tick | site | change |
+|---|---|---|---|---|
+| queue | 7821 | 13160 | Move setter `R0301` | state 1, `ord+8` 1, `ord+0x50` 0, `ord+0xa` `0x202c` |
+| executor | 7821 | 13160 | walk `R0178`, refusal store `L06957`, `L01720` | `mover+0x98` 1, `mover+0x76` = the cell |
+| executor | 7821 | 13160 | arrival store `L00457` | `mover+0x90` 1 |
+| executor | 7821 | 13160 | tail stand-down `L00615` | state 0xc, `ord+8` 0, `mover+0x98` 0 |
+| executor | 7822..7830 | 13161..13174 | entry `R0016` only | none |
+| group | 7830 | 13174 | path (b) latch `L16391`, `L00455`, `L14830` | `ord+0x50` 1, `mover+0x90` 0, `R0022` called |
+| group | 7846..7958 | 13190..13286 | `L14830` to `R0022` | none |
+
+Facing and cell did not change: the witch 96 at 41,29, Naira 160 at 48,32. `ord+0xc` kept its value
+(witch 0, Naira `0x02ad75e0`). `ord+8` stayed 0 on every later pass, so no walk ran again.
+`R0022` stored no pick on 8 or more passes per member (`ord+8` and `ord+0xc` unchanged); no target pick
+was observed, and neither a hostile actor nor the original's reach was established. The sequence is
+the one `AI-658` composes from static reading.
+
+The Move setter `R0301` hit at nine orders in the trace: ticks 4326, 7821, 11129, 11226, 13160,
+18125, 18139, 19325 and 19341. The 13 path (b) latch hits (11 distinct ticks) include arrival latches
+that no refusal preceded, at ticks 11318, 11366 and 18182.
+
+Trace SHA-256 `523439ed129f37dad2f3e7ef30fcf09ad8160b091df06e115765183ee1ec0104` (`523439ed...0104`), 117.6 MB, kept outside the repository.
+
+**Confidence.** High for the sequence in this run: every row is a breakpoint hit with the fields read
+in the child, seen for two members on two orders. Medium for other SAVs, maps, owners and members.
+
+**Unknown.** Whether `R0022` gives a latched member a target: a hostile within reach of a latched
+refused member, recording `ord+8`, `ord+0xc` and the action, would settle it.
+
+### AI-683
+
+Run 02 of EXP-0604, `evidence/q2-q4-sites.tsv` (rows `Q2`, ticks 7820..7832). At tick 7821 the Move
+setter `R0301` ran for both members, then the witch's executor pass (entry `R0016`, refusal
+`L06957`, stand-down `L00615`), then Naira's. The group dispatcher `R0023` first ran at tick
+7830, after both members' executor passes of that tick and before tick 7831's; the order 4 arm
+`R0154` latched the witch there. Over the whole trace the dispatcher ran 16565 times and the
+group arms 1382 times (arm4 970, arm2 122, arm5 145, arm11 145; arm5 and arm11 are one chained call),
+all at sub-ticks congruent to 6 modulo 16; the refusal ticks 7821, 13160, 14887 and 16887 are not.
+
+Comparison with `AI-660`, `AI-371` and `AI-385`. They place the AI slot (group pass) and queue drain
+before every member's executor pass in a tick, with the slot on the pre-increment counter congruent to
+6 modulo 16. The run orders passes by the counter value the instrument reads: the tracked executor
+passes at that value come before the dispatcher (1092 of 1092 dispatch ticks), and the re-issued
+walk acts at the next value (7830 re-issue, 7831 walk). The two agree if the counter increments
+between the dispatcher and the next executor passes, so the run relabels their "tick" and does not
+contradict them; the run does not observe the increment. Nothing in those claims is amended.
+
+Trace SHA-256 `523439ed129f37dad2f3e7ef30fcf09ad8160b091df06e115765183ee1ec0104` (`523439ed...0104`), 117.6 MB, kept outside the repository.
+
+**Confidence.** High for the order observed in this run by counter value. Medium as a rule for the original: one run,
+one image, and the increment position unobserved.
+
+**Unknown.** The order when a refusal falls on a group-pass tick: a Move order whose refused executor
+pass falls on a sub-tick congruent to 6 modulo 16 would settle it.
+
+### AI-684
+
+Run 02 of EXP-0604, Naira `0x05b0acc0` stood down at 4516 and again at 7821 after the second Move order, `evidence/q1-naira-dynamic-refusal.tsv`
+(4510..4600) and `evidence/q2-q4-sites.tsv`. Her Move target was a substitute cell; her
+`mover+0x76` was `0x1d29`, the cell the witch stood on, and she stood at 40,28.
+
+- Tick 4516 (executor, state 1): the walk ran with no hit at the static refusal store
+  `L06957`, `mover+0x98` became 1 with `mover+0x90` 0, and the tail stood her down (state 0xc,
+  `ord+8` 0).
+- Each order 4 pass (4518, 4534, ...): path (b) failed on `mover+0x90` 0 and the arm re-issued
+  `ord+8` = 1 (`L16315`).
+- The next executor pass (4519, 4535, ...): walk, `mover+0x98` 1, tail to `R0004`, which picked
+  nothing and left `ord+8` 0.
+
+`R0004` ran 281 times from 4519 to tick 9000 across two Move orders (ticks 4326 and 7821): 151
+before tick 6935 and 130 from it. At 7821 the Move setter changed her `ord+0xa` from `0x1f2c` to
+`0x1f2b`, the walk hit `L00162` at state 1 (a directly observed dynamic refusal) and the tail stood
+her down. A breakpoint at `L00162`, armed at about tick 6918 (first hit 6935), hit on each later
+executor pass (131 hits to tick 9000). Before that arming the 4516..6935 refusals are inferred as
+dynamic only from the absent hit at `L06957`. Facing 160 and cell did not change. This is the cycle
+`AI-659` composes.
+
+Trace SHA-256 `523439ed129f37dad2f3e7ef30fcf09ad8160b091df06e115765183ee1ec0104` (`523439ed...0104`), 117.6 MB, kept outside the repository.
+
+**Confidence.** High for the cycle in this run from tick 6935 and for the 7821 direct hit. Medium for
+the dynamic classification of 4516..6935 (inferred from the absent static hit; `L00162` was not yet
+watched) and for other members, maps and owners.
+
+**Unknown.** Whether `R0004` picks in this cycle: a hostile within reach of a member in the cycle
+would settle it. Whether the cycle ends when `mover+9` exceeds its limit was not reached.
+
+### AI-685
+
+Run 02 of EXP-0604, group `0x02af93b0` (`grpAI` `0x02af9400`) whose order byte `grpAI+0x20`, group cell
+`grpAI+0x0a` and, for Roam, `ord+0x50` = 0 and `ord+0xa` = `0x202c` of both members were
+written in the child; tables `evidence/q3-order2-witch.tsv`, `evidence/q3-order2-witch-detail.tsv`,
+`evidence/q3-roam-witch.tsv`, `evidence/q3-roam-naira.tsv`.
+
+- Order 2 (written at tick 13862). With `ord+0xa` equal to `mover+0x74`, the walk ran no search
+  and returned at the arrival store `L00457` because the cell equalled `mover+0x76`. After the
+  group cell changed to `0x212c` (14886), the arm `R0025` passed it on and both members were
+  refused by the static search at 14887 at state 0xc; the tail sent them to `R0004` (no pick,
+  `ord+8` 0). From 14902 each order 2 pass stored `ord+8` = 1 and each executor pass returned at
+  `L00457`: no `mover+0x98`, no stand-down, no `R0004`, no further refusal.
+- Roam (0x11, written at 15814). Each pass ran `R0155`, `R0026` and `R0154`. The first
+  pass latched both members by path (b) and called `R0022`. The re-posted group cell did not
+  reach the members. With `ord+0x50` 0 and `ord+0xa` `0x202c` written at 16870, the arm re-issued
+  the walk at 16886, the static search refused it at 16887 (state 0xc, tail to `R0004`, no pick,
+  `mover+0x90` 1), and the arm latched at 16902 and called `R0022` on every later pass.
+
+The order 2 walks returned at arrival with no search because the earlier refusal at 14887 had left
+`mover+0x76` at the member's own cell. The Roam refusal at 16887 and the latch at 16902 follow from the
+two member writes: the refusal was caused by the written unreachable-island target, not by Roam's own
+cell. These agree with `AI-662`: order 2 re-issues without a latch; Roam reaches the order 4 latch.
+
+Trace SHA-256 `523439ed129f37dad2f3e7ef30fcf09ad8160b091df06e115765183ee1ec0104` (`523439ed...0104`), 117.6 MB, kept outside the repository.
+
+**Confidence.** High for the arm dispatch (arm11, arm5 and arm4 on Roam; arm2) and for the Move-sequence
+outcome given the written fields. Medium for the Roam refusal-then-latch as Roam behaviour: the order
+byte and member fields were written in the child, not set by the game, and one group was observed.
+
+**Unknown.** Order 5 (Swarm) set by its own producer with a non-empty candidate set was not observed.
+
+### AI-686
+
+Run 02 of EXP-0604, `evidence/q2-q4-sites.tsv` (rows `Q4` and `COUNT`). The release `R0045` and
+its store `L14893` had 0 hits (both armed from the start of the trace). The sweep that chose the
+sites lists word stores at displacement 0x76 only; a dword store at `+0x74`, a block copy or a store
+through a computed address is outside it. The word stores with displacement 0x76 in `rom.exe` that the
+trace watched were `L07139`, `L06957`, `L01721`, `L16420`, `L16421`, `L13297`,
+`L14902`, `L14893` and `L16422`; only `L06957` (6 hits) and `L01721` (29 hits) ran.
+Arming ticks, read from the nearest trace line to each armed command: `L06957`, `L07001`,
+`L14893` from tick 4161; `L16421` about 6930, `L01721` about 6934, `L16420` about 6940,
+`L13297` about 6945, `L14902` about 6949, `L07139` about 6954, `L16422` about 6958. The two
+stores of `mover+0x76` at 4326 (one per member) came before these seven sites were armed. After
+tick 6958 every change of `mover+0x76` (13 changes, from tick 11129) directly follows a `L01721` hit. At
+each refused pass the member stood centred with `mover+0x80` 0, and `mover+0x76` kept its value
+through the stand-down and the member resets `R0007` (88 hits); every reset with `mover+0x80`
+non-zero found the member off centre.
+
+**Confidence.** Medium for the release alternative: the release condition (`mover+0x80` non-zero) never
+occurred at a refusal, so the run cannot discriminate it. High only for: no hit at `R0045` or
+`L14893`, and no change of `mover+0x76` after tick 6958 without a `L01721` hit, at the watched
+sites. Not covered: stores outside word stores at displacement 0x76 and stores through a computed
+address.
+
+Trace SHA-256 `523439ed129f37dad2f3e7ef30fcf09ad8160b091df06e115765183ee1ec0104` (`523439ed...0104`), 117.6 MB, kept outside the repository.
+
+**Unknown.** The member's next pass after a release: a member refused while centred with
+`mover+0x80` non-zero and different from its cell would settle it.
