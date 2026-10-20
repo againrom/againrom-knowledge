@@ -1260,3 +1260,32 @@ for grants of other classes, which no shipped node authors, as in `ITEM-GRANTLIN
 
 **Unknown.** No original run has shown the absence of a line. An owner run of the shipped node
 labelled "Give bracer" or any other shipped instant-12 node, watching the message line, would settle it.
+
+## Scripted Group ids in shipped maps
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-151 | The 28 scenario maps name 169 (map, Group id) pairs in Target_Group parameters, equal on EN and RU; none is authored for owner 1, all are authored, 4 for two owners; standalone maps name none. | High | ● active | [EXP-0603](../experiments/EXP-0603-groups/) |
+
+### TRIG-151
+
+- Instrument: `groupresolve -ids` over both roots. It prints one row per
+  (root, map, id) for every authored type-6 Group id and every id a
+  `Target_Group` parameter names in an action or condition node, with the
+  authored owners and the AI-366 map-start winner.
+- Scenario maps (`scenario.res`, 28 per root): 169 scripted pairs on each
+  root; the scenario rows are identical between EN and RU. Every scripted id
+  has an authored owner. 4 have two owners (AI-366's four pairs). None has
+  owner 1.
+- Map-start winners of the 169: owner 2 for 43, 3 for 55, 4 for 28, 5 for 14,
+  6 for 16, 7 for 11, 8 for 1, 9 for 1.
+- Owner-1 authored Group ids exist on `scn:150` (id 0), `scn:151` (41),
+  `scn:41` (0) and `scn:71` (1, 2, 12); no `Target_Group` parameter names them.
+- Standalone maps (10 EN; 6 RU, where `Horror.alm`'s type-7 record does not
+  parse, AI-366) name no `Target_Group` id.
+
+**Confidence.** High for the counts over the parsed type-6 and type-7
+records of these maps.
+
+**Unknown.** Whether any non-`Target_Group` script parameter selects a Group
+by id; it was not searched.

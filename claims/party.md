@@ -1243,3 +1243,36 @@ empty-Group deletion arm; that negative has this body population only.
 callback effects, repeated-visit refund identity and failure recovery.
 The UI activation/message dispatch reached from `L16022`, `L16023`
 and `R0217` would settle same-visit undo. No runtime visit was observed.
+
+## Party after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| PARTY-047 | In 27 complete walks plus 1 truncated walk of original-authored saves the human Player is the first Player (slot 1, id 1, +28 zero, hero in its Groups); 0 of 1,004 members (1,050 with the truncated walk) carry another Player's owner key. | High / Medium | ✔ promoted | [EXP-0603](../experiments/EXP-0603-groups/) |
+
+### PARTY-047
+
+- Population: 28 unique original-authored saves (`savdoc -mode
+  group-selectors`): 27 complete walks and 1 truncated walk
+  (`2026-08-15/game0018.sav`: Players 1 to 5 and 16 Groups read, later
+  records unwalked). Per Player the census reads the
+  slot word, the id `+0x08`, `+0x28` and the Group members; per member it
+  compares the saved Token owner key with the enclosing Player's key.
+- In all 28 the first Player has slot 1, id 1 and `+28` zero, and its Groups
+  hold the hero. No other Player has `+28` zero.
+- Members in the 27 complete walks: 76 in +28-zero Players' Groups, 928 in
+  +28-one Players' Groups, 1,004 in all. With the truncated walk: 79, 971 and
+  1,050. All carry the enclosing Player's key; no member is a back-reference
+  or null. Every Group's `+0x44` equals the enclosing Player's key.
+- Player LOAD stamps each member's owner with the enclosing Player and appends
+  it to that Player's flat index (SAV-GRPOWNER-561, PARTY-ORIGIN-010). A party
+  actor saved in another Player's Group is therefore restored as that Player's
+  actor, not the party's; the census holds no such actor.
+
+**Confidence.** High for the census over this population. Medium that the
+party after LOAD is exactly the +28-zero Player's members: the client-to-Player
+binding is PARTY-GROUP-009's Medium.
+
+**Unknown.** A save holding an actor that a script moved to an AI Player and
+back (PARTY-039), loaded in the original with the party roster watched, would
+settle the cross-Player case.

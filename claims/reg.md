@@ -1459,7 +1459,7 @@ build `CUnit`. The `CAirUnit` arm also requires the creation mask to lack the he
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | REG-SCN-062 | `ShopMission`, `InnMission` and `TCMission` are lists of mission numbers that one loader turns into one shared sub-mission array; `ShopMission` is not a shop parameter. | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0059](../experiments/EXP-0059-shop-mission/), [EXP-0060](../experiments/EXP-0060-town-screen/) |
-| REG-SCN-063 | `AutoGetMission` and `LastMission` are the campaign's routing keys, and `[Mission10] AutoGetMission = 20` is what keeps the player out of the town after missions 10 and 20. | High / Unknown | ● active | [EXP-0060](../experiments/EXP-0060-town-screen/) |
+| REG-SCN-063 | `AutoGetMission` and `LastMission` are the campaign's routing keys, and `[Mission10] AutoGetMission = 20` is what keeps the player out of the town after missions 10 and 20. | High / Unknown | ● active (amended) | [EXP-0060](../experiments/EXP-0060-town-screen/), [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
 | REG-SCN-064 | `InnMission`, `ShopMission` and `TCMission` are the offer lists of the tavern, shop and school, each with exactly one reader, and `InnNPC[i]` pairs with `InnMission[i]`. | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0060](../experiments/EXP-0060-town-screen/), [EXP-0394](../experiments/EXP-0394-inn-selection-loop/EXP-0394.md) |
 | REG-SCN-065 | Sub-missions are appended at each main-mission load and dropped after one further load or on completion; an entry is offered, not only listed, once its `+0x18` latch is set. | High | ● active | [EXP-0060](../experiments/EXP-0060-town-screen/) |
 | REG-GMAP-066 | `Scenario\GlobalMap.reg` is keyed `[MissionObjects] Mission<n>`, read as a 0-based object index; the city is `MapObject1` (index 0), which no mission occupies. | High / Medium | ● active (amended, partially retracted) | [EXP-0060](../experiments/EXP-0060-town-screen/) |
@@ -1549,6 +1549,12 @@ read at instruction level; `callto:R1411` returns 1 hit, 0 in orphan code.
 
 **Unknown.** What reads `record+0x11c`: the `LastMission` store is read at
 instruction level, its consumer was not searched.
+
+**Amended.** SAV-1336 names the `LastMission` readers: application `+0x664` at
+`L12196`, `L16599` and `L09345`. SAV-1329 narrows the `!= -1` arm:
+`R0755` loads the requested mission only when it is above the current
+main mission; otherwise nothing is loaded and the party travels to the current
+mission's map object (`retracted.md`, REG-SCN-063).
 
 ### REG-SCN-064
 

@@ -82,11 +82,20 @@ through the external mission-to-map-object registry. This stores a relation
 to campaign map data, not an X/Y coordinate. `View/X` and `View/Y` in YA1 are
 separate application fields. — SAV-CAMPPOS-072, SAV-892
 
-A census of `+120` over 54 organically-numbered original mission saves finds it
-set on 22 and not a pure function of the selected mission: two saves share the
-same selected/main mission with opposite flag values. The writer and reader
-instructions for the field are Unknown; no existing claim traces them.
-— SAV-1099
+A census of `+120` over 54 organically numbered saves finds it set on 22 and
+not a pure function of the selected mission: two saves share the same
+selected/main mission with opposite flag values. SAV-1099's Unknown clause on
+the writer and reader is partially retracted; SAV-1331 below reads them. — SAV-1099
+
+SAVE writes `+120=1` exactly when the live world-map position equals MapPoint
+zero. LOAD places any nonzero value on MapPoint zero and zero on the selected
+mission's map object. World-map entry runs the latched-mission gate and its
+route only from MapPoint zero. Over 76 documents the flag is 1 on all 26
+town-route documents (`InBattle` 0) and 0 on all 50 mission-route documents.
+Of the 76, 36 are attested by manifest (28 class A, 8 class B; 7 town, 29
+mission) and 40 are unattested (30 class C, 10 class D) and may include
+documents the original re-saved or did not write. The code reading carries the
+claim; the census confirms it. — SAV-1331
 
 `+114/+128` are raw passthrough, unlike computed `+120`. Constructors/reset
 zero them; the local campaign reader tail does not consume them again.
@@ -115,12 +124,48 @@ next mission starts. — SAV-1094
 
 `+110` = 0 still takes the same `!= -1` fork as a real mission number and calls
 the routing loader (`R0755`) with request 0; against any nonzero current
-main-progress record this is the documented lower-request no-op (`+110`'s own
-sole reader is monotone, above), so the call itself writes nothing. What the
-routing fork's own reader does next with that zero return — travel to the
-current mission's own map object, or take the same city/object-0 arm the `-1`
-default uses — is Unknown; neither reading is excluded by an observed world map
-with nothing further, since both leave the party there. — SAV-1104
+main-progress record this is the lower-request no-op, so the call writes
+nothing. — SAV-1104
+
+The mission-end fork ignores the routing loader's return. Every `+110` other
+than -1 latches the current main record and travels to a mission's map object;
+completion, the city and the `+558/+55c` send run only for -1. A value above the
+current main mission loads that mission's registry record; any other value
+leaves the current main mission in place. The fork is the same for main and
+side missions; completion differs by selected `% 10`. — SAV-1329
+
+`+110` and `+11c` are reloaded from `Scenario.reg` by the routing loader when
+it accepts a higher main mission; that loader has one direct caller. In the
+record method cluster `L16600..L07482` and the windows read, no other store
+of either field was found, but 21 record-relative write hits outside the
+cluster are unclassified, so the exclusion is Medium. No LOAD route read calls
+the routing loader and the reload-free reading is Medium: the saved `+110`
+decides the next mission end of a mission document, given a saved value (the
+fork itself is High), and which mission follows a mission LOAD is Medium. In
+town a world-map click, inn leave, shop or training-hall entry can route a
+higher main mission first. — SAV-1330
+
+A new campaign's tail before its first SAVE: selected 10, the difficulty,
+`+110` 20, `+11c` 0, `+120` 0 (mission 10's map object), `+124` 0, `+128` as
+received in mission 10, no marker and no hire flag. None of the 76 documents is
+a town document before main mission 30; that is Medium, as the new-campaign
+branch for application `+6bc` not 3 was not read. — SAV-1332
+
+The reader and the writer pass non-registry values through raw. Twelve main-30
+documents hold `+110` 0 and four main-130/150 documents hold `+110` 0 with
+`+11c` 0; the registry loader writes neither. The 16 are unattested, of unknown
+writer, and no original behaviour is claimed from them. Predicted, not
+observed: by the fork above the next mission end of such a document skips the
+city, on the condition that no reload runs between LOAD and mission end
+(Medium). — SAV-1335
+
+`+11c` is read as application `+664` in three places: the mission-end final
+arm, the victory arm's direct `0x41d` post and the close notification
+(`0x429` versus `0x421`). Each tests it for zero. The scan behind "read" is
+bounded to application displacements `0x658..0x670` without an immediate or
+bulk-copy pass, so "only" is Medium. All 76 documents hold 0, so none tests the
+nonzero arm; a registry-loaded main-150 document should hold 1, and the three
+main-150 class D documents hold 0. — SAV-1336
 
 ## Markers
 
@@ -137,6 +182,12 @@ count occupy 32 bytes only when marker count is zero. Both serializer arms
 include the nonzero-marker grammar. The LOAD contract is narrowed to restoring
 these bytes: picture-pointer reconstruction runs separately on world-map entry,
 not synchronously in either SAV loader. — SAV-CAMPMARK-073, SAV-609
+
+Marker order is append order. The appender adds a mission once, at the end,
+and skips a `Picture` of `nothing`; SAVE writes and LOAD rebuilds entries by
+index; the world-map hover takes the first match. 7 of 76
+documents hold markers, each list ascending; all 7 are unattested, so the
+census claims no original behaviour. — SAV-1333
 
 ## Progress and collections
 
@@ -184,6 +235,10 @@ Hire sets its type's hire-flag dword. Mission entry does not clear that flag;
 mission end does. Zero flags mean no outstanding hire, not that no hire ever
 happened: named producers are hire, dismiss, reset and mission-end zeroing.
 — SAV-615, SAV-616, MERC-HIRE-003
+
+The hire flags are the record's only per-type mercenary flags; no tail scalar
+is one, and tail `+128` is a counter. 17 of 76 documents hold a set
+flag, 6 of them town documents; 3 of the 17 are attested. — SAV-1334
 
 Actor class/type/equipment signatures do not encode hire origin. The same
 Human shape can come from hiring, authored map placement or scripted transfer.

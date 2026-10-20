@@ -2791,7 +2791,7 @@ mover+0x98 and the actor's phase before the common tail would discriminate it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-366 | A script `Target_Group` id resolves through an id-only map built over players and their groups head to tail; a repeated id keeps the last group inserted, so the later owner's group wins and the earlier one is unreachable by id. | High / Medium / Unknown | ● active | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/) |
+| AI-366 | A script `Target_Group` id resolves through an id-only map built over players and their groups head to tail; a repeated id keeps the last group inserted, so the later owner's group wins and the earlier one is unreachable by id. | High / Medium / Unknown | ● active (amended) | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/), [EXP-0603](../experiments/EXP-0603-groups/) |
 | AI-367 | Opcode-6 sub-command 5 (`Swarm 2`) writes order and destination to the members of the one group its parameter resolved to and to no other group; in mission 70 that is owner 7's 10 records of group id 40, never owner 5's 5. | High / Medium | ● active | [EXP-0438](../experiments/EXP-0438-resolver-regen-card/) |
 
 ### AI-366
@@ -2863,6 +2863,13 @@ the condition nodes resolve through the same arm: they were counted, not read.
 list in the same order as the map load (the binder also runs from the restore
 arm at `L01841`, whose list contents were not read). A save whose owners
 carry one shared id, restored and then commanded, would discriminate it.
+
+**Amended.** SAV-1337 narrows the restore-order Unknown: the LOAD arm empties
+the player list and appends the saved Players in file order before it calls
+the binder at `L01841`; SAV-1234 restores each Group list in file order.
+SAV-1338 states the resulting rule after LOAD. The player-visible effect of a
+shared id after LOAD stays Unknown. Every mechanism clause and grade above
+stands.
 
 ### AI-367
 

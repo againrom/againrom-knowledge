@@ -189,3 +189,39 @@ No explicit upper-count rejection was found in the named append/archive bodies
 and forwarding wrappers. Pool allocation, actual archive primitives, overflow
 and a program-wide Group/member limit remain Unknown. This negative is Medium
 over the read bodies. — SAV-1252
+
+## Selector binding after LOAD
+
+World LOAD empties the Player list and appends the saved Players in file
+order; each Player's Groups follow in file order. The map reload and the
+selector binder run after that, so the binder sees every saved Group,
+including Groups created during play and emptied Groups. — SAV-1337, SAV-1234
+
+After LOAD a script Group id binds to the last saved Group carrying that `+1c`,
+Players in file order, then Groups in file order; the owner is not part of the
+key. Two Groups of one Player with one id: the later one. Medium: the binder
+and the local append order are High, and that nothing between the Player-list
+LOAD and the binder reorders the lists is Medium. — SAV-1338
+
+The owner-transfer, town AddHero and hire bodies store no `+1c` after Group
+construction. In 25 original mission saves 43 of the 45 human-Player Groups
+carry a `+1c` that no map authors (15 zero, 1 small, 27 at least 256). The
+census does not identify the creator of those 43 Groups; that they hold
+allocation residue is an inference, Medium. — SAV-1339
+
+In those 25 saves every scripted id binds after LOAD to the owner the map
+start binds; 38 of 164 bind to an empty Group. No unauthored Group carries a
+scripted id of its map. Each scripted id has exactly one carrier, so this does
+not separate last-wins from first-wins. — SAV-1340
+
+In 27 complete walks of original-authored saves no Group of a `+28`-zero
+Player is empty (49 Groups);
+`+28`-one Players hold 51 empty Groups of 405, 20 behind a nonempty Group, in
+25 mission saves. A truncated walk is a further witness. The corpus contains
+no town save with an AI Player or an empty Group. — SAV-1341
+
+The human Player is the first Player (slot 1, id 1, `+28` zero) and holds the
+hero; no member in 27 complete walks (1,004) carries another owner key than
+its enclosing Player's. A member
+saved in another Player's Group is restored as that Player's actor. —
+PARTY-047

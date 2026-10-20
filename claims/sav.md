@@ -12934,7 +12934,7 @@ word.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | SAV-1093 | Mission-10 buildings are drawn after LOAD when the document gives each Building publication mask 2 at Token+0x18, its type in the type word at Token+17, and the originals' 1,769 border and footprint block rows. | Medium / Unknown | ● active | [EXP-0397](../experiments/EXP-0397-load-crash-ladder/) |
-| SAV-1094 | A mission-10 document whose campaign `+0x110` (`AutoGetMission`) is 0 leaves the party on the world map after the quest; with 20 the second mission starts. | Medium / Unknown | ● active | [EXP-0397](../experiments/EXP-0397-load-crash-ladder/) |
+| SAV-1094 | A mission-10 document whose campaign `+0x110` (`AutoGetMission`) is 0 leaves the party on the world map after the quest; with 20 the second mission starts. | Medium / Unknown | ● active (amended) | [EXP-0397](../experiments/EXP-0397-load-crash-ladder/), [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
 | SAV-1095 | Hero control on the first LOAD is decided by the document, not by the process: original-written resave game0003 and game9233 give control in a freshly started game, game9232 does not. | Medium / Unknown | ● active | [EXP-0397](../experiments/EXP-0397-load-crash-ladder/) |
 | SAV-1096 | A generated mission-10 document with zero AI start state lets the witch fight at mission start; with the AI actor and group start fields set to the mission-start original's values and diplomacy template {1,1,0,0}, she does not. | Medium / Unknown | ● active | [EXP-0397](../experiments/EXP-0397-load-crash-ladder/) |
 | SAV-1097 | The four block rows `20/20` (static/dynamic) at the sack cells drive two symptoms of a generated mission-10 document: trigger T05 firing at LOAD and the pick-up click being refused. | High / Medium / Unknown | ● active | [EXP-0397](../experiments/EXP-0397-load-crash-ladder/) |
@@ -12979,6 +12979,12 @@ run supports the field without isolating it; the mechanism is `REG-SCN-063`'s
 reading, not traced here.
 
 **Unknown.** What mission 0 resolves to.
+
+**Amended.** SAV-1329 closes the Unknown: request 0 is below the current main
+mission, so `R0755` writes nothing, mission 10 stays current, and the
+party travels to its map object without completion (`retracted.md`,
+SAV-1094). The travel target rests on record vtable slot `+0x0c`, which was not
+read (Medium, SAV-1329).
 
 ### SAV-1095
 
@@ -13108,12 +13114,12 @@ witch in game0003 (`AI-336` tests static 0x20); no round document could show it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| SAV-1099 | Campaign `+0x120`, the first-MapPoint flag, is set on 22 of 54 organically numbered original mission saves in the dated corpus, and the selected mission alone does not predict it. | High / Medium / Unknown | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
+| SAV-1099 | Campaign `+0x120`, the first-MapPoint flag, is set on 22 of 54 organically numbered original mission saves in the dated corpus, and the selected mission alone does not predict it. | High / Medium / Unknown | ● active (partially retracted) | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/), [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
 | SAV-1100 | In an owner run on three substitution documents, Player 0's body byte and its AI group's block are each alone insufficient for hero control on the first LOAD; the hero/session subgroup of about 25 bytes suffices. | Medium | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
 | SAV-1101 | In an owner run on two substitution documents, the witch's own 16-byte personal AI-start record, not her owner-1 AI group's 12-byte block, is what stops her mission-start fight. | High | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
 | SAV-1102 | Bit 5 (`0x20`) is in none of the three constructor-set movement masks (`0x41`, `0x44`, `0x82`), and dynamic bit 6 composes both ground masks; an indirect effect of static bit 5 on collision is not excluded. | High | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
 | SAV-1103 | Ingest blocks water by a hardcoded terrain-class-8 test, not the registry `Pass*` values, but LOAD writes saved block rows raw over both planes, so a saved row on a water cell could override that block. | High / Medium / Unknown | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
-| SAV-1104 | A mission-10 document's `AutoGetMission = 0` takes the `!= -1` fork and calls the routing loader with request 0, the documented no-op; what `R1411` does with that zero return is unread. | Medium | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
+| SAV-1104 | A mission-10 document's `AutoGetMission = 0` takes the `!= -1` fork and calls the routing loader with request 0, the documented no-op; what `R1411` does with that zero return is unread. | Medium | ● active (amended) | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/), [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
 | SAV-1105 | On a normal mission LOAD the Player/client list is filled by a pure archive copy-in with no selection step in the traced LOAD bodies; what picks the restored Player for the first mission command is Unknown. | Medium | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
 | SAV-1106 | On a fresh-process mission LOAD the 100-slot register array is restored wholesale, then the binder writes one slot per opcode-`0x10002` check; an in-session reLOAD skips the restore. | Medium / Unknown | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
 | SAV-1107 | `Group+0x20` is a word list of the shared class `SAV-EMBED-039` names; a direct-call census of its mutation entry points finds no site targeting it, 0 of 567 corpus Group records carry a nonzero count, and element meaning is Unknown. | High / Medium / Unknown | ● active | [EXP-0398](../experiments/EXP-0398-generated-mission-load-state/) |
@@ -13142,6 +13148,18 @@ since the corpus grows.
 **Unknown.** The writer and the reader of `+0x120`: no existing claim traces
 the instructions at that offset, and tracing them needs a Ghidra project built
 from the owned `rom.exe`, which this experiment did not build.
+
+**Amended.** The Unknown clause is withdrawn (`retracted.md`, SAV-1099):
+SAV-CAMPPOS-072 already traced the writer and reader, and SAV-1331 reads them
+again with the world-map consumer. The flag records whether the party stands on
+MapPoint 0; over 76 documents (28 class A and 8 class B attested by manifest,
+30 class C and 10 class D unattested) it is 1 on every town-route document
+(`InBattle` 0) and 0 on every mission-route document, so the route, not the
+selected mission, predicts it. The attested 36 hold 7 town and 29 mission
+documents. Classes C and D may include documents the original re-saved or did
+not write. The headline's "mission saves" is withdrawn: the flag is set on
+town-route documents; the 54 saves are organically numbered saves of the
+dated corpus, and the 22 flagged saves were not re-tabulated by route here.
 
 ### SAV-1100
 
@@ -13292,6 +13310,11 @@ city/object-0 arm is the live alternative this experiment does not exclude.
 from `R0755`: whether it tests the return value (for example routing to
 the city/object-0 arm the `== -1` branch uses) or unconditionally falls through
 to the announce-latch/travel step using the unchanged current record.
+
+**Amended.** SAV-1329 reads `R1411`: it discards the return of
+`R0755` and returns 1, so `AutoGetMission = 0` takes the travel arm with
+mission 10 still current and latched; the city/object-0 arm is excluded and
+completion does not run (`retracted.md`, SAV-1104).
 
 ### SAV-1105
 
@@ -17174,3 +17197,438 @@ Unknown which record flew: Prj266 or a record created after LOAD.
 the record map at client world `+0x9d4` and logs each record's ID, target and
 aim on its first three driver calls settles which record flew and from which
 aim. Reading the creators named above settles whether one supplies a zero aim.
+
+## Campaign tail at a town SAVE and after a mission LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1329 | At mission end `R1411` calls `R0755(+0x110)` for every `+0x110` other than -1, ignores its result and returns 1; the caller then travels to a mission map object and skips completion and the city. | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1330 | `R1297` has one direct caller, `R0755`'s higher-request arm; no other `+0x110`/`+0x11c` store in cluster `L16600..L07482` or the windows read (21 hits outside unclassified); the saved `+0x110` decides after LOAD. Medium. | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1331 | SAVE writes `+0x120` = 1 when the world-map position equals MapPoint 0, else 0; LOAD puts any nonzero value at MapPoint 0, where world-map entry runs the latched-mission arm. 76 documents agree (36 attested: 7 town, 29 mission). | High | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1332 | A new campaign leaves selected mission 10, AutoGetMission 20, LastMission 0, time 0, the counter as received in mission 10, no marker, no hire flag, on mission 10's map object; none of 76 documents is a town save before main 30 (Medium). | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1333 | Markers keep append order: `R1325` adds a mission once at the end, SAVE and LOAD go by index, hover takes the first match; 7 of 76 documents hold markers, all ascending and all unattested (class D). | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1334 | No tail scalar is a mercenary flag: `+0x128` is a counter (0..759 in 76 documents); the per-type hire flags at `+0x88` are set by hire and cleared by dismiss, reset and mission end, and 17 documents hold one set. | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1335 | Prediction: 16 unattested documents (12 main-30 with `+0x110` 0, 4 main-130/150 with `+0x110` and LastMission 0) pass through raw, so by SAV-1329 their next mission end would skip the city. | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+| SAV-1336 | LastMission `+0x11c` is read as application `+0x664` at `L12196`, `L16599` and `L09345` (scan of `0x658..0x670`; "only" Medium), each tested for zero; the 76 documents hold 0. | High / Medium | ✔ promoted | [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
+
+### SAV-1329
+
+EN and RU `rom.exe` are one image (942e9b72); every listing below is from it.
+
+- `R1411` loads `+0x110`. For -1 it returns 0. For any other value it calls
+  `R0755(+0x110)` at `L16601`, discards `eax`, calls `R1410(+0x04)` at
+  `L16602` (the announce latch of the current main record) and returns 1.
+- `R0755(req)`: req -1 or equal to `+0x04` stores `+0x118 = +0x04` and
+  returns 1; req below `+0x04` returns 0 and writes nothing; req above `+0x04`
+  calls the registry loader `R1297` at `L16603`, then stores
+  `+0x04 = +0x118 = req` and returns 1.
+- Caller `L07487`, in the message `0x41d` arm of `R0701`. Return 1
+  (`L16604`): the view's target becomes MapPoint
+  `[R1324(record vt+0x0c())]` and `R1947` moves the party from
+  `view+0xf8/+0xfc` toward it; `R1414` is not called and nothing is sent.
+  Return 0 (`L16605`): `R1414` completes the mission, the target becomes
+  MapPoint 0 (the city) and `R1670` sends application `+0x558/+0x55c`.
+- `R1414`: selected `+0x118 % 10 == 0` (main) calls `R1563`, which
+  requests `vt+0x0c() + 10`; otherwise (side) it removes the child record and
+  requests -1.
+- So saved `+0x110` = 0 in a main-10 document: `R0755(0)` returns 0 without
+  a write, mission 10 stays the current main record and is latched, the party
+  travels to mission 10's map object, and neither completion nor the Mission20
+  load runs. Any value not above the current main mission behaves the same
+  way; a higher main value loads that mission.
+- The fork reads only `+0x110`; it is the same for a main and a side mission.
+  Completion differs by `+0x118 % 10`.
+
+**Confidence.** High for `R1411`, `R0755`, `R1414` and the two arms of
+the caller, read to their stores in this experiment. Medium that the travel
+target is the current main mission's map object: record vtable slot `+0x0c`
+(table `L10123`) was not read; that it returns the main mission rests on
+`R1563` adding 10 to it to request the next main mission.
+
+**Unknown.** The original's on-screen state after the travel arm (not
+observed); what `R1670` sends beyond the two application words.
+
+### SAV-1330
+
+- `R1297` stores `+0x110` from `[Mission<n>] AutoGetMission` (default -1,
+  store `L07484`) and `+0x11c` from `LastMission` (default 0, store
+  `L07486`). Its only direct caller is `L16603`, the higher-request arm of
+  `R0755`.
+- Direct callers of `R0755` in `.text` (8): `L09569` (new campaign),
+  `L09715` (reset), `L16606` (router `R1407`, main request when
+  `m % 10 == 0`), `L16607` (`R1563`, from completion), `L16601`
+  (`R1411`), `L16608` (completion side arm), `L16609` and `L16610`.
+  The `.rdata` pass finds no pointer to any of the 14 routines searched.
+- The router is reached through the marker routine `R0785`, whose callers
+  are the world-map click, the inn leave handler, shop entry, training-hall
+  entry and the arm at `L12194` (TOWN-MARKER-508, as amended).
+- LOAD: `R1284` sets application `+0x6bc = 2`, loads the document, and
+  `R1578` reads `CurrentState/InBattle` (default 1). Nonzero calls
+  `R0099(1)`; zero calls `R0098`, which runs the record reader at
+  `L08112`, then sends application `+0x558/+0x55c` and posts `0x42e`. The
+  resume arm calls the reader at `L08116`. The reader `R0434` reads
+  `+0x118, +0x114, +0x110, +0x11c, +0x120, +0x124, +0x128` raw.
+- No window read on these routes calls `R0755`, `R1407`, `R1563`,
+  `R1411` or `R1297`.
+- Between a mission LOAD and that mission's end no listed caller of the router
+  runs in the windows read, so the saved `+0x110` is what `R1411` tests.
+  A town LOAD keeps the saved value until a world-map click, inn leave, shop or
+  training-hall entry routes a main mission above the current one.
+
+**Confidence.** High for the loader's stores, its single direct caller, the
+eight direct callers of `R0755` and the reader's raw stores. Medium for the
+exclusion clause and for "no reload between LOAD and mission end".
+
+- Exclusion clause: the instrument is Capstone linear disassembly with a
+  `.text` displacement scan (52 write hits) and the direct-target census; the
+  pointer scan covers `.rdata` only. Open alternatives: another record-relative
+  writer among the 21 write hits outside `L16600..L07482`, counted and not
+  classified (`+0x110` at `L16611`, `L11794`, `L16612`, `L16613`,
+  `L16614`, `L16615`, `L16616`; `+0x11c` at `L16617`, `L16618`,
+  `L16619`, `L16620`, `L16621`, `L16622`, `L13722`, `L13721`,
+  `L16623`, `L16624`, `L16625`, `L16626`, `L08242`, `L16627`); a
+  bulk copy of the record (`REP MOVS*` not searched); a store by address
+  arithmetic (no `imm:` pass); a `.data` pointer to a routine (not scanned);
+  23 undecoded `.text` bytes.
+- No reload: `L16609` and `L16610` lie in routines whose callers were not
+  enumerated, `R0099` was not read whole, and calls through registers or
+  tables are outside the direct-target census. The mission-end answer given a
+  saved value is High (SAV-1329); the answer to which mission follows a
+  mission LOAD is Medium, the grade of this weakest link.
+
+**Unknown.** The owners and callers of `L16609` and `L16610`; the 21
+unclassified write hits.
+
+### SAV-1331
+
+- Writer `R1294`, `L16628..L16629`: view = mainframe `+0xf4`; if
+  `view+0xf8 == [view+0xc4]` and `view+0xfc == [view+0xc4]+4` (MapPoint 0) it
+  stores 1, else 0, into `+0x120`, then writes that dword.
+- Reader `R0434`, `L08416`: `test` of the loaded dword. Nonzero copies
+  MapPoint 0 into `view+0xf8/+0xfc`; zero copies MapPoint
+  `[R1324(+0x118)]`. `R1324(m)` returns `[MissionObjects] Mission<m>` of
+  `Scenario\GlobalMap.reg` minus 1 (default 1).
+- World-map entry `R1409`, `L07501..L07502`: when `view+0xf8/+0xfc`
+  equal MapPoint 0 it calls `R1416` (the latched-mission gate of TOWN-483)
+  and builds the route to that mission's map object (`L16630`); otherwise it
+  jumps to `L16631`, past that arm, to the marker rehydration call at
+  `L08042`.
+- The mission-end arm (SAV-1329) travels to MapPoint 0 on the city arm and to
+  a mission's map object on the other arm, and the new-campaign view setup
+  `R1659` stores mission 10's map object.
+- Census (`campaigntail.py`, 76 documents in four classes: 28 class A and 8
+  class B attested by manifest, 30 class C and 10 class D unattested):
+  `+0x120` = 1 on all 26 with `InBattle` 0 and no `Fog` root (town), and 0 on
+  all 50 with `InBattle` 1 and a `Fog` root (mission). The 36 attested
+  documents hold 7 town and 29 mission documents and show the same split.
+  Classes C and D may include documents the original re-saved or did not
+  write; no original behaviour is claimed from them.
+- Values: 0 places the party on the selected mission's map object; 1 and every
+  other nonzero value place it on MapPoint 0. The writer produces only 0 and 1.
+
+**Confidence.** High on the listings: the writer's comparison, both reader
+arms and the world-map test are read to their stores. The census is consistent
+confirmation with no exception in either route; its town count rests on 7
+attested documents, and the route is read from the document itself, not from
+`+0x120`.
+
+### SAV-1332
+
+- New campaign `L08431`: reset `R0757`, view setup `R1659` (position =
+  MapPoint `[R1324(10)]`), application `+0x65c` (record `+0x114`) =
+  difficulty, `R0755(10)`, then message `0x42f` (start battle) when
+  application `+0x6bc` is 3.
+- Reset `R0757`: `+0x110` = -1, `+0x114` = `+0x118` = `+0x44` = 0, hire
+  flags zeroed, working pool copied from the pristine pool, arrays emptied,
+  marker list size 0, then `+0x04`, `+0x08`, `+0x18`, `+0x11c`, `+0x120`,
+  `+0x124`, `+0x128` = 0 and `R0755(10)` at `L09715`, which loads
+  Mission10: AutoGetMission 20 and LastMission 0 (REG-SCN-063).
+- Constructor `R0677`: `+0x04 = +0x08 = +0x110 = +0x118 = -1`,
+  `+0x114 = +0x124 = +0x128 = 0`, `+0x12c = 10`; it does not store `+0x11c` or
+  `+0x120`.
+- So the first SAVE of a campaign, inside mission 10, writes selected 10, the
+  difficulty, `+0x110` 20, `+0x11c` 0, `+0x120` 0, `+0x124` 0, the counter
+  `+0x128` as received in the mission, no marker and no hire flag.
+- Census: the 12 main-10 documents (11 class A attested, 1 class D
+  unattested) hold exactly those values; `+0x128` is 0 on 6 and nonzero on 6.
+  All 26 town documents have main mission 30 or 40; the 7 attested town
+  documents (2 class A, 5 class B) all hold main mission 30.
+
+**Confidence.** High for the reset, constructor and new-campaign stores and
+for the census. Medium for "no town before main mission 30": it rests on
+SHOP-TOWN-023 and REG-SCN-063 and on 76 documents, 36 of them attested; the
+branch taken when
+application `+0x6bc` is not 3 (`L16632`, `R1553`, `R0909`) was not
+read.
+
+**Unknown.** What the original does with a town document at main mission 10:
+no original document exists; the reader would place it by `+0x120` and the
+fork would use the saved `+0x110`.
+
+### SAV-1333
+
+- `R0785(m)` runs `R1413`, the router, the announce latch and the
+  appender `R1325`. The appender returns when an entry with mission `m` is
+  present or the mission's `Picture` is `nothing` (string `L16633`), and
+  otherwise sets the list size to size + 1 and fills the last entry.
+- The record writer writes the count, then each entry by index through
+  `R1951` (`L16634`). The reader sets the size to 0, then to the count
+  (`L12292`, `L12293`), and reads each entry by index through `R1952`
+  (`L16635`).
+- The world-map hover reader `R1863` returns the first entry whose
+  mission's map object rectangle matches.
+- Census: 7 of 76 documents hold markers, all class D (unattested, writer
+  unknown): missions 50, 60, 70 in three and 100, 110 in four, each list
+  ascending. The other 69, including every attested class A and B document,
+  hold none. The census claims no original behaviour; the code reading carries
+  append-at-end.
+
+**Confidence.** High for append-at-end, dedup, index-order serialization and
+first-match lookup, read in this experiment. Medium for the order in play:
+which caller appends first depends on the arrays the inn, shop and
+training-hall callers pass (TOWN-MARKER-508's Unknown).
+
+### SAV-1334
+
+- No ROM1 claim names a "mercenary-working flag". The tail's seven scalars are
+  selected mission, difficulty, AutoGetMission, LastMission, the first-MapPoint
+  flag, time and `+0x128`.
+- `+0x128` is the received hostile corpse-transition counter (FAME-022); the
+  census holds values 0..759 (0..33 in the 36 attested documents).
+- The record's flags per mercenary type are the 15 hire-flag dwords at `+0x88`,
+  written on the wire before the documents and the tail (SAV-CAMPAIGN-083).
+  Writers: hire `R1442`, dismiss `R1443` (MERC-HIRE-003), reset
+  `R0757` (zero 15) and mission end `R0809`, called at `L07290` in the
+  `0x41d` arm before the fork of SAV-1329 (MERC-DEATH-006).
+- Census: 17 of 76 documents hold a set flag: type index 13 in 16 (3 class B,
+  10 class C, 3 class D), type index 5 in one class C document; the 3 class D
+  main-150 documents hold 13 set. 6 of the 17 are town documents and 11 are
+  mission documents. Only the 3 class B documents are attested; the other 14
+  are of unknown writer.
+
+**Confidence.** High that `+0x128` is a counter and for the hire-flag writers
+named. Medium that the brief's "mercenary-working flag" means the hire flags:
+the name matches no ROM1 claim, and these are the only per-type flags in the
+record.
+
+### SAV-1335
+
+- Census: 12 class C documents at main mission 30 (11 town, 1 mission) hold
+  `+0x110` 0, `+0x124` 0 and `+0x128` 0; the 4 class D documents at main
+  mission 130 (1) and 150 (3) hold `+0x110` 0 and `+0x11c` 0. All 16 are
+  unattested: their writer is unknown, and no original behaviour is claimed
+  from them. Every other document at main mission 20 or above holds `+0x110`
+  -1 (the 25 attested ones included), and every main-10 document holds 20.
+- The registry ships `AutoGetMission` only as `[Mission10] = 20` and
+  `LastMission` only as `[Mission150] = 1` (REG-SCN-063); `R1297` stores -1
+  and 0 for every other mission. A `+0x110` of 0 at main mission 30, 130 or
+  150 and a `+0x11c` of 0 at main mission 150 are therefore not values the
+  registry loader produces.
+- The reader stores both raw (SAV-1330) and the writer writes both raw.
+- Prediction from SAV-1329, assuming no reload between LOAD and mission end
+  (SAV-1330, Medium): at the next mission end of such a document
+  `R1411` takes the travel arm, so the city, completion and the next main
+  mission's load do not run. From SAV-1336: a main-150 document with
+  `+0x11c` 0 skips the final arm at `L12196` and the direct `0x41d` post at
+  `L16599`.
+
+**Confidence.** High (census values) / Medium (prediction). High for the census
+values and for the reader's and writer's raw stores. Medium for the predicted outcome: it composes SAV-1329 and
+SAV-1336, depends on SAV-1330's no-reload clause and on documents of unknown
+writer, and was not observed. No document the original wrote is shown to carry
+such a value.
+
+**Unknown.** Which program wrote the 12 class C and the 4 class D documents
+(no manifest names their writer); the on-screen outcome of the prediction.
+
+### SAV-1336
+
+- `.text` scan of application-relative displacements `0x658..0x670`: `+0x664`
+  (record `+0x11c`) is read at `L12196`, `L16599` and `L09345`.
+  - `L12196`, mission end: nonzero and `+0x660 % 10 == 0` calls `R0802`
+    (score from `+0x124/+0x128`) and posts `0x428`; otherwise the fork of
+    SAV-1329.
+  - `L16599`, victory: nonzero and `+0x660 % 10 == 0` posts `0x41d`;
+    otherwise it builds a dialog at `L16636` (not read further).
+  - `L09345`, close notification: nonzero posts `0x429`, zero `0x421`.
+- Inside the record's method cluster `L16600..L07482`, `+0x11c` is stored
+  by the reset and the registry loader and addressed by the writer and reader;
+  nothing else there reads it.
+- The scan finds no application-relative read of `+0x658` or `+0x668` and no
+  write in `0x658..0x674` other than `+0x65c` (`L09313`, `L12631`,
+  `L09354`).
+- Census: `+0x11c` is 0 in all 76 documents (36 attested, 40 unattested), so
+  no document tests the nonzero arm. A registry-loaded main-150 document should
+  hold 1 (REG-SCN-063); the 3 main-150 class D documents hold 0 (SAV-1335).
+
+**Confidence.** High for the three readers and their tests. Medium for "only":
+the scan covers application-relative displacements `0x658..0x670` with no
+`imm:` pass and no bulk-copy search; the 14 record-relative `0x11c` write hits
+outside the cluster (listed in SAV-1330) were counted, not classified; and
+calls through registers are outside the scan.
+
+## Group selectors after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1337 | World LOAD empties the player list, appends each saved Player in file order, reloads the map and only then runs the binder with argument 0 over the restored Players and Groups. | High / Medium | ✔ promoted | [EXP-0603](../experiments/EXP-0603-groups/) |
+| SAV-1338 | After LOAD a script Group id binds to the last saved Group carrying it in Player-then-Group file order, unless an unread callee reorders the lists; the map-start rule over every saved Group. | Medium | ✔ promoted | [EXP-0603](../experiments/EXP-0603-groups/) |
+| SAV-1339 | Owner transfer, town AddHero and the hire loop bodies store no Group+1c; in 25 original mission saves 43 of 45 human-Player Groups carry a +1c no map authors; their creator is not established. | High / Medium | ✔ promoted | [EXP-0603](../experiments/EXP-0603-groups/) |
+| SAV-1340 | In 25 original-authored mission saves of maps 10, 20, 30, 31, 40 and 41, all 164 scripted Group ids bind after LOAD to the authored owner the map start binds; 38 bind to an empty Group. | High / Medium | ✔ promoted | [EXP-0603](../experiments/EXP-0603-groups/) |
+| SAV-1341 | In 27 complete walks of original-authored saves the 49 Groups of +28-zero Players are all nonempty; +28-one Players carry 51 empty Groups of 405, 20 behind a nonempty Group; a truncated walk adds 2 and 14 Groups, 1 empty. | High | ✔ promoted | [EXP-0603](../experiments/EXP-0603-groups/) |
+
+### SAV-1337
+
+- Load arm of `R0414` (whole body, 606 instructions): `L05933` calls
+  `R1339` (a 0x2000-byte clear of `L06793` and a flag store; no list
+  operation), reads the header dwords, then `L08155` calls
+  `R1372` on `[L00380]`.
+- `R1372` LOAD reads its own dword into `this+0x20` and calls
+  `R1558`. That LOAD arm first calls `L16637` -> `L16638`, which walks
+  every node and then zeroes head `+4`, tail `+8`, count `+0c` and free `+10`.
+  It then reads a count and, per element, reads one object (`L08109`) and
+  appends it with `R0417` (`L16639..L16640`). AI-366 reads `R0417`
+  as AddTail. The store arm iterates the list from its head (`R2235`,
+  `R2218`). Restored list order is therefore SAVE-time head-to-tail order.
+- Each Player's Groups are rebuilt in file order (SAV-1234).
+- The same arm then rebuilds `[L00240]` (AI-363), reloads the map with
+  `new(0x32c)` + `R0478` at `L02287`, and calls `R0067(this+0x44,
+  map, 0)` at `L01841`. No Player or type-6 creator is called by this body
+  (direct calls: `R0423` and `R0151` have one caller, `R0128`).
+- Every direct call between `L08155` and `L01841`, by read state. Body
+  read in this experiment: `R1372` (`L08155`), and through it `R1558`,
+  `L16637`, `L16638`, `R0417`. Body read by AI-366 or AI-363, not here:
+  `L01800` (`L16641`), `L01801` (`L16642`), the binder `R0067`
+  (`L01841`). Body unread: `R1581` (`L16643`), `R2222` (`L16644`),
+  `R0027` (`L16645`), `R0028` (`L16646`), `R0032` (`L01793`,
+  once per restored Group, into `[L00240]`), `R0029` (`L16647`),
+  `L14425` (`L16648`), `R1590` (`L16649`), `L05938` (`L16650`),
+  `R1122` (`L05935`), `L16651`, `L09565`, `R0906`, `R1687`
+  (`L16652..L16653`), `L09060` (`L08341`), `R0478` (`L02287`,
+  map load), `R0118` (`L07067`), `R1360` (`L07068`), `R0077`
+  (`L08510`), `R0270` (`L07069`), `L14426` (`L16654`), `R1592`
+  (`L07781`), `R0747` (`L16655`, `L16656`, `L16657`, `L16658`,
+  `L16659`, `L16660`), and the virtual call `L16661`; the virtual call
+  `L08757` follows the binder. The per-Player Group restore reaches
+  `R1558` through the Player read `L08109`, a virtual Player read whose
+  link rests on SAV-1234 and is not in this experiment's windows.
+
+**Confidence.** High for the local order, the clear and the append loop: every
+step is a named instruction in bodies read whole. Medium that nothing between
+the player-list LOAD and the binder reorders or replaces the lists: the
+unread callees listed above, the virtual calls `L16661` and `L08757` and
+the `L08109` link were not read in this experiment.
+
+**Unknown.** Whether the old Player objects are destroyed (`L16662` unread).
+
+### SAV-1338
+
+- The binder's map is id-only and keeps the last insert (AI-366). Over the
+  restored lists (SAV-1337, SAV-1234) the winner for an id is the last Group
+  carrying it, Players in file order and Groups in file order. Two Groups of
+  one Player with one id: the later one. Two Players: the later Player's.
+- The map-start bind (caller `R0128`, which also calls the Player creator
+  `R0423` and the type-6 spawner `R0151`) sees authored Groups, at most
+  one per (owner, id) (AI-GROUP-009). The LOAD bind also sees Groups created
+  during play (PARTY-039, PARTY-040, AI-CMD-033) with their saved +1c
+  (SAV-1339) and authored Groups emptied by death or transfer, which persist
+  for +28-one Players (PARTY-042, SAV-1341).
+- A script node holds the resolved pointer (AI-366, `+0x34`/`+0x3c`); a
+  command reaches the Group bound at the last bind.
+
+**Confidence.** Medium for the rule as a composed outcome. Its links: the
+binder's last-insert map High (AI-366); the local append order High
+(SAV-1337); no intervening reorder or replacement of the lists Medium
+(SAV-1337 names the unread callees). Medium that the map start binds
+before any runtime Group exists: `R0128` was not read here, and the
+two-caller set is a direct-call registry result, not an indirect-call census.
+
+**Unknown.** A runtime Group whose saved +1c equals a scripted id and lies
+after the authored carrier would capture it after LOAD; SAV-1340 finds none.
+An original run that loads a save with such a Group and fires the script
+would settle the player-visible effect.
+
+### SAV-1339
+
+- `R0064` (whole, 93 instructions), `R0066` (whole, 221) and
+  `R1142` (whole, 268) construct Groups with `R0149` at
+  `L07379`, `L14240` and `L14241`. None of the 582 instructions has a
+  register-based `+0x1c` operand; every `+0x1c` operand is the frame local
+  `[ebp-0x1c]`.
+- The constructor keeps incoming +1c and the allocation does not clear it
+  (SAV-GRPNEW-576, SAV-GRPALLOC-577). SAVE writes the current value; LOAD
+  restores it literally (SAV-1234).
+- Census (`savdoc -mode group-selectors`, joined with the shipped map ids):
+  25 unique walk-ok original-authored mission saves hold 45 Groups of the
+  +28-zero Player. 43 are not an authored (owner, id) pair of their map: 15
+  carry 0, 1 carries 2, 27 carry a value of 256 or more. One of 405 Groups
+  of +28-one Players is unauthored.
+- Three separate facts. (1) The three read bodies store no `+1c` after
+  construction. (2) 43 of 45 human-Player Groups in 25 mission saves carry a
+  value no map authors. (3) The census does not say which routine created any
+  of the 43 Groups. The constructor `R0149` has 13 direct callers; this
+  experiment read three of them. The other ten are unread for `+1c`, and so
+  is the join-walk creator `R0065` (through `L14233`, AI-629, AI-449).
+- Reading of the values (3158065, 3158016 and similar, ASCII-like bytes) as
+  allocation residue is an inference, Medium; the values fit it and do not
+  prove it.
+
+**Confidence.** High for the three bodies and for fact (2). Medium that no
+callee of the three bodies writes +1c: `R0152`, `R0198`, `R0063`,
+`R0059`, `R0044` and the hire callees were not read here. Unknown for
+fact (3).
+
+**Unknown.** The creator of the 43 Groups; the allocator contents that
+produce a given value.
+
+### SAV-1340
+
+- Population: files that `saveAuthorship` classifies `original-authored`,
+  unique by SHA-256, walk-ok, world half present: 25 files, maps 10, 20, 30,
+  31, 40 and 41. Script ids: `groupresolve -ids` over the EN scenario maps.
+- For each scripted id the replay applies SAV-1338's rule to the saved lists.
+  All 164 (file, id) rows bind to a Group whose (owner, id) is authored and
+  whose owner is the map-start winner. 38 of those Groups are empty.
+- No unauthored Group in these files carries a scripted id of its map.
+- Every one of the 164 rows has exactly one carrier Group. Last-wins,
+  first-wins and (owner, id) matching therefore give the same result on every
+  row: the replay does not separate last-wins from first-wins. It separates
+  only "the owner changes because of a runtime Group", and finds none.
+- These maps carry no id authored for two owners; the four such ids are on
+  maps 70, 100 and 140 (AI-366).
+
+**Confidence.** High for the census and the replay arithmetic. Medium that the
+original binds as replayed: the binder was not observed, and the data is
+consistent with SAV-1338's rule without testing its order clause.
+
+**Unknown.** Saves of the other 22 scenario maps, and saves after owner
+transfers to AI Players, were not in the population.
+
+### SAV-1341
+
+- Population: 28 unique original-authored files in the `savdoc` provenance
+  table: 27 complete walks and 1 truncated walk (`2026-08-15/game0018.sav`,
+  walk-error at decoded offset 46,969; Players 1 to 5 and 16 Groups read,
+  later records unwalked). The census reads Player `+0x28` and each Group's
+  member count.
+- 27 complete walks: +28-zero Players 27 (Player index 1, slot 1, id 1), 49
+  Groups, none empty. +28-one Players 101, 405 Groups, 51 empty, 20 of them
+  after a nonempty Group in the same list. The 51 empty Groups lie in 25
+  mission saves with the world half present.
+- Truncated walk: its first Player (+28 zero) holds 2 nonempty Groups; its 4
+  +28-one Players hold 14 Groups read, 1 empty. Over all 28 files the counts
+  are 51 Groups and 79 members (+28 zero) and 419 Groups, 52 empty (+28 one).
+- The two world-absent single-Player files (`game0010.sav` in two
+  directories) hold 2 nonempty Groups each, none empty. They are the only
+  town witnesses; no town save with an AI Player or an empty Group is in the
+  population.
+- Empty Groups of +28-zero Players: 0. Those Groups are never empty in a
+  saved mission, so the census cannot separate "the writer prunes" from "it
+  never was empty". It agrees with SAV-1251's prune (High for the predicate,
+  Medium for the population ultimately saved) and SAV-1234's inclusion of
+  empty Groups elsewhere; it is a corpus agreement, not a proof of either.
+
+**Confidence.** High for the measured counts over this population.
+
+**Unknown.** No original-authored save holds an empty Group of a +28-zero
+Player, so LOAD of one is not witnessed.

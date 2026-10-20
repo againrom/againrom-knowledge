@@ -2874,7 +2874,7 @@ The mouse-up handler `R1548` (slot `L12076` of the button child) reads the press
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| TOWN-MARKER-508 | The marker routine `R0785` is entered from five sites: the world-map click (selected mission), world-map view setup, shop entry, training-hall entry and one unreached arm; in play nothing removes a marker. | High / Medium | ● active | [EXP-0478](../experiments/EXP-0478-mission-scripts/) |
+| TOWN-MARKER-508 | The marker routine `R0785` is entered from five sites: the world-map click (selected mission), the inn leave handler, shop entry, training-hall entry and one unreached arm; in play nothing removes a marker. | High / Medium | ● active (partially retracted) | [EXP-0478](../experiments/EXP-0478-mission-scripts/), [EXP-0602](../experiments/EXP-0602-campaign-tail/) |
 
 ### TOWN-MARKER-508
 
@@ -2895,6 +2895,12 @@ The marker array's size routine `R2051` has five call sites in four owners (`cal
 **Confidence.** **High** for the builder, the dedup by mission number, the `Picture` gate, the data and the five callers with their arguments as read. **Medium** for when a mission first gets its marker (three callers pass array contents not traced to their source) and for "no routine removes a marker during play" (the instrument is the callers of the size routine and the displacement sweep of `+0x15c/+0x160`; a removal through another routine type was not searched).
 
 **Unknown.** The array that world-map setup, shop entry and training-hall entry hand to the routine; the picture's draw order against the scroll list.
+
+**Amended.** Item 3's label and the clause "a marker can appear when the world
+map opens" are withdrawn (`retracted.md`, TOWN-MARKER-508): `R0786` is
+the inn leave handler (MERC-HIRE-003, SAV-1138); it passes every entry of its
+array and then calls `R1653`. Item 3 is the inn leave, not world-map
+setup. SAV-1333 reads the appender's order.
 
 ## Tips in the rooms and the character generator
 

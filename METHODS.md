@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
+Claims labelled: 4098. Observation: 99. Static analysis: 3471. Mixed: 528.
 
 ## Ledger ai
 
@@ -237,7 +237,7 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | AI-363 | static analysis | ● active |
 | AI-364 | static analysis | ● active |
 | AI-365 | static analysis | ● active |
-| AI-366 | static analysis | ● active |
+| AI-366 | static analysis | ● active (amended) |
 | AI-367 | static analysis | ● active |
 | AI-370 | static analysis | ● active (amended) |
 | AI-371 | static analysis | ● active |
@@ -1754,6 +1754,7 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | PARTY-041 | static analysis | ● active |
 | PARTY-042 | static analysis | ● active |
 | PARTY-043 | static analysis | ● active |
+| PARTY-047 | mixed | ✔ promoted |
 
 ## Ledger reg
 
@@ -1809,7 +1810,7 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | REG-AI-060 | mixed | ● active |
 | REG-UNITS-061 | static analysis | ✔ promoted (partially retracted) |
 | REG-SCN-062 | static analysis | ● active (amended, partially retracted) |
-| REG-SCN-063 | static analysis | ● active |
+| REG-SCN-063 | static analysis | ● active (amended) |
 | REG-SCN-064 | static analysis | ● active (amended, partially retracted) |
 | REG-SCN-065 | static analysis | ● active |
 | REG-GMAP-066 | static analysis | ● active (amended, partially retracted) |
@@ -2901,17 +2902,17 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | SAV-1091 | static analysis | ● active |
 | SAV-1092 | static analysis | ● active |
 | SAV-1093 | mixed | ● active |
-| SAV-1094 | mixed | ● active |
+| SAV-1094 | static analysis | ● active (amended) |
 | SAV-1095 | mixed | ● active |
 | SAV-1096 | mixed | ● active |
 | SAV-1097 | static analysis | ● active |
 | SAV-1098 | mixed | ● active |
-| SAV-1099 | mixed | ● active |
+| SAV-1099 | mixed | ● active (partially retracted) |
 | SAV-1100 | mixed | ● active |
 | SAV-1101 | mixed | ● active |
 | SAV-1102 | static analysis | ● active |
 | SAV-1103 | static analysis | ● active |
-| SAV-1104 | static analysis | ● active |
+| SAV-1104 | static analysis | ● active (amended) |
 | SAV-1105 | static analysis | ● active |
 | SAV-1106 | static analysis | ● active |
 | SAV-1107 | static analysis | ● active |
@@ -3039,6 +3040,19 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | SAV-1322 | static analysis | ✔ promoted |
 | SAV-1323 | static analysis | ✔ promoted |
 | SAV-1324 | static analysis | ✔ promoted |
+| SAV-1329 | static analysis | ✔ promoted |
+| SAV-1330 | static analysis | ✔ promoted |
+| SAV-1331 | static analysis | ✔ promoted |
+| SAV-1332 | static analysis | ✔ promoted |
+| SAV-1333 | static analysis | ✔ promoted |
+| SAV-1334 | static analysis | ✔ promoted |
+| SAV-1335 | static analysis | ✔ promoted |
+| SAV-1336 | static analysis | ✔ promoted |
+| SAV-1337 | static analysis | ✔ promoted |
+| SAV-1338 | static analysis | ✔ promoted |
+| SAV-1339 | static analysis | ✔ promoted |
+| SAV-1340 | mixed | ✔ promoted |
+| SAV-1341 | mixed | ✔ promoted |
 
 ## Ledger session
 
@@ -3943,7 +3957,7 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | TOWN-500 | static analysis | ● active (branch candidate, partially retracted) |
 | TOWN-501 | static analysis | ● active (branch candidate) |
 | TOWN-502 | static analysis | ● active (branch candidate, superseded, partially retracted) |
-| TOWN-MARKER-508 | static analysis | ● active |
+| TOWN-MARKER-508 | static analysis | ● active (partially retracted) |
 | TOWN-516 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-517 | static analysis | ✔ promoted (branch candidate) |
 | TOWN-518 | static analysis | ✔ promoted (branch candidate) |
@@ -4078,6 +4092,7 @@ Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 | TRIG-ACTIONWRITE-135 | static analysis | ● active |
 | TRIG-GROUPBOUNDS-136 | static analysis | ● active |
 | TRIG-ITEMGRANT-147 | static analysis | ● active (branch candidate) |
+| TRIG-151 | mixed | ● active |
 
 ## Ledger unit
 
