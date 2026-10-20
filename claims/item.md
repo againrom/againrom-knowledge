@@ -1161,7 +1161,7 @@ a class table read from `CRuntimeClass` records in another experiment.
 **Unknown.** The meaning of the three ctor arguments: they are read here and
 not followed into `Data.bin`.
 
-**Amended.** `ITEM-MAGROW-177` reads the class-14 constructor `R0972`: its arguments are the kind 14 and the index byte, which the read instructions of `R0891` check against the MagicItems count. Completed row binding and code persistence remain Medium: `L15948`, `R0992`, `[vtable+0x4c]` and the initializer tail past `L15949` are unread. The constructors of classes 1 to 13 stay unread.
+**Amended.** `ITEM-MAGROW-177` reads the class-14 constructor `R0972`: its arguments are the kind 14 and the index byte, which the read instructions of `R0891` check against the MagicItems count. Completed row binding and code persistence remain Medium: `L15948`, `R0992`, `[vtable+0x4c]` and the initializer tail past `L15949` are unread. The constructors of classes 1 to 13 stay unread. EXP-0601 reads `R0992`, `[vtable+0x4c]` = `R1005` and the initializer `R0891` to its return, and the heads of the class 1..13 constructors `R0971`, `R0970`, `R0969`, each of which calls the Item constructor `R0884` first (`ITEM-GRANTLINE-215`). Their initializers `R0890`, `R0888`, `R0887` stay unread; the grades stand.
 
 ## Humans spawn equipment and armour slots
 
@@ -3996,3 +3996,103 @@ indirect calls, and HERO-170 leaves an indirect equip below Unit Serialize open.
 **Unknown.** A native witness that a null `+0x80` survives a town SAVE, a LOAD and the next
 mission's entry. Settled by an owner run: LOAD a town SAV whose mage wears a `castSpell` Weapon
 with a null `+0x80`, enter a mission, SAVE, and decode that Weapon's `+0x80`.
+
+## Item grant announcement
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-GRANTLINE-215 | Every constructor the two item factories reach stores Token +0x08 = 0, so a created item posts no "Picked up" line; over the direct bodies of the 41 container-call sites only the pickup stamp sets the flag nonzero. | High / Medium | ● active (branch candidate) | [EXP-0601](../experiments/EXP-0601-item-grant-line/) |
+| ITEM-PURSECALLER-216 | Of the flag-0 calls of the purse routine, L04976 charges the school training price and so never posts the gold line, and L04975 lies in a copy of instant 23 that no rel32 call or jump in .text reaches. | High / Medium | ● active (branch candidate) | [EXP-0601](../experiments/EXP-0601-item-grant-line/) |
+
+### ITEM-GRANTLINE-215
+
+Inputs: EXP-0601 `evidence/w01`..`w06`, `s01`..`s07`. EN and RU `rom.exe` share SHA-256 `942e9b72…`.
+
+- Constructors. `R0884` (the plain Item) calls the Token constructor `R0923`, then stores
+  `+0x08 = 0` at `L09175`. The Armor/Shield/Weapon constructors `R0971`, `R0970` and
+  `R0969` call `R0884` first (`L16558`, `L16559`, `L16560`). The class-14
+  constructor `R0972` stores 0 at `L09176`; the by-name constructor `R2076` at
+  `L16561`. The code factory `R0520` (`TRIG-ITEMKEY-124`) and the name factory `R0947`
+  (`MENU-CREATELINE-159`) call only these four code constructors.
+- After that store. The class-14 initializer `R0891` and the routines it hands the item to
+  as `this` (`R0667`, `R0992`, Item vtable `L04580` slot `+0x4c` = `R1005`) have no
+  `+0x08` operand. `R1005` writes `+0x1c` only.
+- `s01`, a `disp 8` pass over `L16562..L16563` (the item classes, the container and the
+  publication): the stores to `[reg+8]` are `L09175`, `L09176`, `L16561`, `L04874` (all
+  0) and the merge `L04883` (old OR incoming).
+- The add. `R0929` passes the insert index `+0x1c` to `R0930`. That routine returns on a
+  null item, merges into the first element with an equal code when both pass the stackability
+  slot `+0x50` (count add, flags OR, incoming deleted; `ITEM-MERGE-129`), and otherwise appends
+  at the tail when the index is at least the count (`L16157`) or steps to the index
+  (`L16564`) and inserts there (`L16565`). It adds weight × count to `+0x20`. It tests no
+  limit (`ITEM-CONT-004`).
+- Publication. `R0883` sets record bit `0x40` only when `+0x08` is nonzero and then clears
+  it (`L04873`..`L04874`, `SAV-1114`). Among the 45 `rel32` call sites of the two post
+  routines (`MISSION-MSGPOST-058`), that bit drives the only item-naming post outside `-trace`
+  (`L04948`, `ITEM-PICKTEXT-145`); code-pointer callers remain that card's Unknown. A newly created object therefore
+  announces nothing. A merged one leaves the retained stack's flag unchanged.
+- Container-call census (`s02`, rel32 over `.text`): 41 calls to `R0929`, `R0930` and
+  `R0450`. Their owners from the function inventory: script instants 11 and 12 (`R0262`)
+  and their unreferenced copies (`L16566`, `L16567`; `TRIG-ITEMREAD-123`), `Give All`
+  `R0407`, `#create` `R0430`, the quest document `R0993` (`ITEM-DOC-069`), the shop
+  buy commit `R1628`, the tray and return helpers `L08230` and `R1573`
+  (`SAV-CITYRETURN-514`), the order dispatcher `R0061` (four calls), the pickup `R0448`,
+  the cast-slot return `R0014`, the equip family `R0976`, `L08216`, `R0975`,
+  `R0981`, `R0983`, `L16568`, `R0849`, `R0850`, the map and mission builders
+  `R0907`, `R0461`, `R0945`, `R0946` (`ITEM-SPAWN-013`), the shop-stock routines
+  `R1779` and `R1711`, the actor teardown `R0208`, the sack and container routines
+  `R0472`, `L16569`, `R0450`, and `L13578`, which adds a generated item to its own
+  actor's pack and has no rel32 caller (`s08`). Roles without a cited card come from other
+  cards' text and were not read here; the scans below do not depend on them.
+- `s03`..`s07`, `disp 8` over `L16570..L16571`, `L16572..L16573`,
+  `L16574..L16575`, `L16576..L16577` and `R0262..L16578`: inside the owners above,
+  the only store that can write nonzero to `[reg+8]` besides the merge is the pickup stamp
+  `L04886` (`= 1`). The other `[reg+8]` stores lie in `R0423`, `R0489`, `R0151`,
+  `R1725`, `R0398`, `R0207` (none a container-call owner) and in the Token copy
+  constructor `R1134` (`L09178`), which copies `+0x08` (`SAV-1114`).
+
+**Confidence.** High for the class-14 path: the constructor store `L09176`, the initializer
+`R0891` and its item callees are read whole. High for the stores `L09175` and `L16561`,
+the add, merge and insert body, and every listed scan hit. Medium for the Armor, Shield and
+Weapon families: their constructors were read to their heads only. Their initializers
+`R0890`, `R0888`, `R0887` and the member constructors `R0977` and `R1044` are
+unread; the scan `s01` sweeps neither other store widths nor block copies (`docs/INSTRUMENT.md`
+items 3 and 4). Medium that no route other than the pickup announces an item. The scans cover the
+owners' own bodies, not their callees or vtable dispatch. `R0061` past `L16571` is outside
+`s03`. Linear decode skipped 1 to 4 bytes per scan. A disp scan cannot see a field reached
+through a computed offset.
+
+**Unknown.** A split copy made by the take (`vt+0x40`, `TRIG-TAKEITEM-038`) copies the source
+stack's flag, so instant 11 or `Give All` moving an item that still carries `+0x08 = 1` would
+post the pickup line. A SAV can carry that flag (`SAV-1115`). No shipped or saved source item
+with the flag was measured. An original run would settle it: a SAV whose map unit holds a flagged
+item before the `Give All` trigger fires.
+
+### ITEM-PURSECALLER-216
+
+Inputs: EXP-0601 `evidence/w05-itemctor-faff7callers.txt`, `s08-call-copy.txt`.
+
+- `L04976` lies in the session command arm at `L09390` (opcode `0x3d`, the school Train
+  request, `TOWN-020`, `TOWN-GENERAL-108`, `HERO-GENERAL-088`). The arm resolves an actor with
+  `R0195` from message `+5` and `+0xa`, accepts a slot `+0xe` in 0..5 and computes a price
+  from the double 200.0, the double 1.1 and the actor's word at `+0x116 + 2·slot`
+  (`L16579`..`L16580`). It returns when the price exceeds the owner's purse `[actor+0x14]+0x38`
+  (`L16581`) or when actor `vt+0x30` returns 0. Otherwise it calls
+  `R0449(owner, −price, 0)` (`L16582`..`L04976`), then `R0838(slot, 0)` and the state
+  send `R0059` with mask `0x1f001304`.
+- The gold line needs the new total above the stored purse (`ITEM-PICKTEXT-145`). A charge
+  lowers the total, so this call never posts it.
+- `L04975` lies in `L16583`..`L16584`, which calls `R0449(this = [rec+0x38], [rec+8], 0)`
+  and returns 4: the call of instant 23 (`TRIG-MONEY-028`). `s08` finds no rel32 call or jump in
+  `.text` to `L16583`. The neighbour `L16585` is a like copy that loops over the group list
+  at `[rec+0x34]+4`, calling `R0064` with `rec+0x38`.
+- The other flag-0 callers have roles in other cards: `L04966` the sack pickup,
+  `L04971` `#create Gold` (`MENU-104`), `L04973` the roster refund in `R1555`
+  (`SAV-1136`), `L04974` instant 23, `L04977` the tavern (`MERC-HIRE-003`), `L04978` the
+  sale (`SAV-CITYSALE-513`) and `L04979` the buy (`SHOP-BUY-009`).
+
+**Confidence.** High for both arms' instructions. Medium for the no-line result of the charge:
+it needs a price that is not negative, and the price passes through `L09843` (taken as the
+power routine) and the converter `R0279`, both unread. Medium that the copy at `L16583`
+never runs: dword occurrences in `.rdata` and `.data` were not scanned (`TRIG-ITEMREAD-123`
+found none for the item copies).

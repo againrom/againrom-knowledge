@@ -275,7 +275,7 @@ The EN root ships `Description Checks.ini` (2 735 B, 22 groups), `Description In
 
 **Confidence.** High for the arm, the creation-vs-transfer distinction and the unconditional notification (both routines read whole; the factory call, the null branch, the container add and the tail are named instructions; the callee is a claim of another experiment reached by a `callto:` sweep on the repaired table with 0 orphan hits) / **Medium** for what the added object *is* beyond its class and index — `ITEM-CODE-029` records the three constructor arguments as Unknown / **Medium** for the notification's reach, whose `(u16)actor+0x0e` in `[0x21,0x40)` gate is cited from `TRIG-GIVEALL-025` and not re-derived
 
-**Amended.** The “tail shared with arm 11” clause remains superseded. The image-wide three-caller clause is partially retracted (`claims/retracted.md`): `L15952` also calls `R0519` in an out-of-line copy (`TRIG-ITEMREAD-123`). No replacement global caller census is claimed. EXP-0565 narrows the Medium object clause: the read initializer assigns `0x0e00|row` for an in-range class-14 row, but completed row binding and code persistence remain Medium because later callees and the factory/initializer tails are unread. The composed invalid-row result (code 0, no row, then the add path) is Medium; the add virtual and later row-less behavior remain unread (`ITEM-MAGROW-177`, `TRIG-ITEMKEY-124`). Dispatcher behavior and other grades stand.
+**Amended.** The “tail shared with arm 11” clause remains superseded. The image-wide three-caller clause is partially retracted (`claims/retracted.md`): `L15952` also calls `R0519` in an out-of-line copy (`TRIG-ITEMREAD-123`). No replacement global caller census is claimed. EXP-0565 narrows the Medium object clause: the read initializer assigns `0x0e00|row` for an in-range class-14 row, but completed row binding and code persistence remain Medium because later callees and the factory/initializer tails are unread. The composed invalid-row result (code 0, no row, then the add path) is Medium; the add virtual and later row-less behavior remain unread (`ITEM-MAGROW-177`, `TRIG-ITEMKEY-124`). Dispatcher behavior and other grades stand. EXP-0601 reads the factory tail (`L04693`..`L16597`), the class-14 constructor and initializer to their returns, `R0992`, `[vtable+0x4c]` = `R1005` and the add `R0929` (`TRIG-ITEMGRANT-147`, `ITEM-GRANTLINE-215`); the container primitives the add calls stay unread. The grades stand.
 
 ### TRIG-MONEY-028
 
@@ -926,7 +926,7 @@ Population: as `TRIG-EDITTRIG-117`; read in compressed form (the lines of `PUSH 
 | TRIG-ITEMBIND-121 | The binder's type-8 arms (instants `L15957`, checks `L15956`) store `value + 0xe18` as a 16-bit word at compiled record `+0x40`, with no range check, lookup or build failure; EN and RU are one image. | High / Unknown | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
 | TRIG-ITEMREAD-122 | Instants 11, 12 and 13 read the compiled item field as a dword and checks 12, 16 and 17 as a word; each hands it to a routine that keeps only its low 16 bits (`R0519`, `R1522`, `R2057`). | High | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
 | TRIG-ITEMREAD-123 | No other reader of the compiled item field was found: the other arms of both dispatchers read other fields, and out-of-line copies of instants 11..13 at `L15958`, `L15959`, `L15960` have no reference in four scans. | Medium | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
-| TRIG-ITEMKEY-124 | Type-8 V gives K = (V + 0xe18) mod 0x10000; V 0..231 decodes to class 14, row 24 + V. Completed creation, pack traversal, first-match order and whole-pack absence are Medium; observed masks and comparisons are High. | High / Medium | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
+| TRIG-ITEMKEY-124 | Type-8 V gives K = (V + 0xe18) mod 0x10000; V 0..231 decodes to class 14, row 24 + V. Completed creation, pack traversal, first-match order and whole-pack absence are Medium; observed masks and comparisons are High. | High / Medium | ● active (amended) | [EXP-0565](../experiments/EXP-0565-trigger-item/); [EXP-0601](../experiments/EXP-0601-item-grant-line/) |
 | TRIG-ITEMCORPUS-125 | Installed maps, both roots: 80 type-8 slots, all `Par1`, on instants 12 (7) and 13 (43) and checks 16 (7) and 17 (23); V spans 2..36 (rows 26..60); V 25 and 36 name rows at or past 49; EN equals RU. | High / Medium | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
 | TRIG-EDITITEM-126 | EN handlers map catalogue Target_Item to type 8, pass text to conversion and store its returned 32-bit value; no type-8 comparison appears in these handlers. Conversion semantics are Medium; syntax and range are Unknown. | High / Medium / Unknown | ● active | [EXP-0565](../experiments/EXP-0565-trigger-item/) |
 
@@ -980,6 +980,8 @@ Population: as `TRIG-ITEMREAD-122`, plus `R0520` (`w08`) and `ITEM-MAGROW-177`. 
 **Confidence.** **High** for the observed masks, comparisons, calls, assignments and null/non-null branches in items 1 to 4, and item 2's arithmetic. **Medium** for pack traversal, first-match order, whole-pack absence and completed creation/binding, including item 5. The factory tail is unread; the constructors of classes other than 14 are unread. The code words of pack items from other producers are reused from `ITEM-APPEAR-023` at its grade. `ITEM-MAGROW-177` supplies only Medium completed-object outcomes.
 
 **Unknown.** Complete `R0520` past `L15951`; traversal population, completeness and order through `R2239`, `R1651`, `R2241`; the virtual `[vtable+0x40]`, `R2068`, allocator `R1147`. Complete those bodies to settle the dependent results; no further acquisition is made here.
+
+**Amended.** EXP-0601 reads the factory tail (`TRIG-ITEMGRANT-147`): `L04693` zeroes `eax` and `L16597` returns with `RET 0x10`, so classes 0 and 15 return null and instant 12 then adds nothing and sends its notification: the classes 0 and 15 null result in item 2 is High. The class 1..13 constructors call the Item constructor `R0884` first (`ITEM-GRANTLINE-215`). The other grades stand.
 
 ### TRIG-ITEMCORPUS-125
 
@@ -1211,3 +1213,50 @@ Command 17 calls R0171, writes group AI +0x20=0x11, selects null when group +0x0
 **Confidence.** High for the whole dispatcher, table, widths and empty-path instruction sequence in the equal EN/RU image. Medium for composed order behavior; this does not establish that command 17 causes movement or that a well-formed authored group is empty at execution.
 
 **Unknown.** Later executors and command-specific callee limits retain their published bounds. No runtime fault was induced. Unresolved indirect calls and unexamined group lifetimes preclude a universal safety claim.
+
+## Script item grant line
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TRIG-ITEMGRANT-147 | Instant 12 posts no message line outside -trace: its item carries no pickup flag; it is merged or inserted at the pack's insert index with no capacity test; in a network session the shipped hero-10001 nodes do not exist. | High / Medium | ● active (branch candidate) | [EXP-0601](../experiments/EXP-0601-item-grant-line/) |
+
+### TRIG-ITEMGRANT-147
+
+Inputs: EXP-0601 `evidence/w01-grant-path.txt`, `w02-grant-callees.txt`; `ITEM-GRANTLINE-215`.
+
+- The arm `L07971`..`L16598` makes three calls: the decoder `R0519` on `L02110`, the
+  add `R0929` on `unit+0x7c` when the result is nonzero, and `R0670(unit, unit+0x14)`.
+  It writes nothing to the item and does not rewrite the pack's insert index `+0x1c`.
+- `R0520` ends at `L16597 RET 0x10`; classes 0 and 15 reach `L04693 XOR eax,eax`, so the
+  arm adds nothing and still sends the notification.
+- Every shipped instant-12 code is class 14, rows 26..37 (`TRIG-ITEMCORPUS-125`), built by
+  `R0972` with `+0x08 = 0` (`ITEM-GRANTLINE-215`). `R0670`, not read here, addresses the
+  unit's owner alone (`TRIG-GIVEALL-025`). The record passes `R0883`, which sets bit `0x40`
+  only for a nonzero `+0x08`, so this item's record carries none and the pickup post `L04948`
+  does not run for it (`SAV-1114`, `ITEM-PICKTEXT-145`). Of the 45 `rel32` call sites of the
+  two post routines (`MISSION-MSGPOST-058`), `L04948` is the only non-trace post on this arm's
+  path; callers through a code pointer remain that card's Unknown.
+- Under `-trace` only, the inventory arm can post the grey `Invalid item in inventory`
+  diagnostic for 10 s (`ITEM-PICT-049`).
+- Place: the item merges into the first equal-code stack when both pass the stackability test,
+  else it goes at the insert index, at the tail when that index is at least the count
+  (`ITEM-GRANTLINE-215`). A fresh pack's index is 10 000 (`ITEM-CONT-004`); the pick-up order
+  and the equip arm rewrite it, so the position follows the last such write. The pack has no
+  capacity, so a full pack does not exist (`ITEM-CONT-004`).
+- The arm calls no load refresh (`R0451`), unlike `#create` (`MENU-CREATELINE-159`).
+- Network: every shipped node names unit 10001, a hero ordinal; the hero resolver returns 0 in
+  multiplayer (`TRIG-REC-011`), and a node with an unresolved reference is not built
+  (`TRIG-BIND-010`). Then neither the item nor a line exists.
+- EN and RU: one image; no string is involved.
+
+**Confidence.** High for the arm's three calls, the factory tail and the item's `+0x08` being 0
+when `R0883` runs for a class-14 grant. Medium for "no line outside `-trace`": `R0670` is
+unread here, and `SAV-1114` grades the absence of other writers Medium. Place and no capacity:
+High for the add routine body; Medium for the container primitives `L16157`, `L16564`,
+`L16565`, `R2238`, `R2240` (unread) and for `ITEM-CONT-004`'s absence of a limit.
+Medium for the network clause, which rests on
+`TRIG-REC-011`'s reading of `[L00285]+0x0c` as multiplayer, not re-derived here. Medium
+for grants of other classes, which no shipped node authors, as in `ITEM-GRANTLINE-215`.
+
+**Unknown.** No original run has shown the absence of a line. An owner run of the shipped node
+labelled "Give bracer" or any other shipped instant-12 node, watching the message line, would settle it.

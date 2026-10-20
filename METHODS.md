@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
+Claims labelled: 4083. Observation: 99. Static analysis: 3459. Mixed: 525.
 
 ## Ledger ai
 
@@ -1146,6 +1146,8 @@ Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
 | ITEM-205 | static analysis | ✔ promoted |
 | ITEM-211 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-212 | static analysis | ✔ promoted (branch candidate) |
+| ITEM-GRANTLINE-215 | static analysis | ● active (branch candidate) |
+| ITEM-PURSECALLER-216 | static analysis | ● active (branch candidate) |
 
 ## Ledger magic
 
@@ -1460,7 +1462,7 @@ Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
 | MENU-101 | static analysis | ✔ promoted (branch candidate) |
 | MENU-102 | static analysis | ✔ promoted (branch candidate) |
 | MENU-103 | static analysis | ✔ promoted (branch candidate) |
-| MENU-104 | static analysis | ✔ promoted (branch candidate) |
+| MENU-104 | static analysis | ✔ promoted (amended, branch candidate) |
 | MENU-105 | static analysis | ✔ promoted (branch candidate) |
 | MENU-106 | static analysis | ✔ promoted (branch candidate) |
 | MENU-107 | static analysis | ✔ promoted (branch candidate) |
@@ -1502,6 +1504,7 @@ Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
 | MENU-151 | static analysis | ● active (branch candidate) |
 | MENU-152 | static analysis | ● active (branch candidate) |
 | MENU-CAST-153 | static analysis | ● active (branch candidate) |
+| MENU-CREATELINE-159 | static analysis | ● active (branch candidate) |
 
 ## Ledger mission
 
@@ -4060,7 +4063,7 @@ Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
 | TRIG-ITEMBIND-121 | static analysis | ● active |
 | TRIG-ITEMREAD-122 | static analysis | ● active |
 | TRIG-ITEMREAD-123 | static analysis | ● active |
-| TRIG-ITEMKEY-124 | static analysis | ● active |
+| TRIG-ITEMKEY-124 | static analysis | ● active (amended) |
 | TRIG-ITEMCORPUS-125 | static analysis | ● active |
 | TRIG-EDITITEM-126 | static analysis | ● active |
 | TRIG-SPELLDOMAIN-141 | static analysis | ✔ promoted |
@@ -4074,6 +4077,7 @@ Claims labelled: 4079. Observation: 99. Static analysis: 3455. Mixed: 525.
 | TRIG-ARMCENSUS-134 | mixed | ● active |
 | TRIG-ACTIONWRITE-135 | static analysis | ● active |
 | TRIG-GROUPBOUNDS-136 | static analysis | ● active |
+| TRIG-ITEMGRANT-147 | static analysis | ● active (branch candidate) |
 
 ## Ledger unit
 

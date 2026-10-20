@@ -1176,7 +1176,7 @@ Population: the `rom.exe` image (one image for the EN and RU installs), the chat
 | MENU-101 | Nine arms of the 12 commands test the privilege byte through `R0444` (10 direct call sites, all in the parser); `#modify`, `#event` and `#Chicken` call no such test, so `#modify +knowledge` is not privilege-gated. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
 | MENU-102 | `#Chicken` is a prefix match that sets the sender's privilege byte to `0xff`, logs one line naming the Player and sends notice 5; it has no gate besides MENU-100. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
 | MENU-103 | The privilege byte `Player+0x68` is 0 from the constructor, 0xff after `#Chicken`, 0 after `#kill cheaters`, and is not written by `Player::Serialize`, so SAVE does not carry it and a LOAD restores 0 by the constructor (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
-| MENU-104 | `#create [N ]<name>` credits N gold for the name `Gold` and otherwise adds a named item of count N to the hero's inventory, under the participant flag, the single-player flag, the privilege byte and a hero test. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
+| MENU-104 | `#create [N ]<name>` credits N gold for the name `Gold` and otherwise adds a named item of count N to the hero's inventory, under the participant flag, the single-player flag, the privilege byte and a hero test. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
 | MENU-105 | `#modify <self\|army>` has four arms with no privilege test: `+god` (self or whole army), `+spell <id>` and `+spells` (self only) and `+knowledge` (either); each ends in notice 7. | High | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
 | MENU-106 | `#summon [hero ]<name>` spawns N creatures or one hero by type name at the caller's hero, under the privilege byte, owned by the caller. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
 | MENU-107 | The four kill commands require the privilege byte and set every actor of the target Players to a health word of `0xffce` (death on the next tick is Medium); `#kill cheaters` also clears the targets' privilege byte and sends no notice. | High / Medium | ✔ promoted (branch candidate) | [EXP-0492](../experiments/EXP-0492-cheat-commands/) |
@@ -1243,6 +1243,8 @@ The arm tests, in order: `server+0x0c == 0` (MENU-100), `[L00285]+0x14c != 0`, t
 For the name `Gold` the arm calls `R0449(Player, count, 0)`, which adds to `Player+0x38` and sends opcode `0x67` with the new balance, then notice 7. For any other name it calls the item factory `R0947(L02110, name)`; a null result, or a failure of the validity test `L09852`, gives notice 6. Success stores the count at `item+0x42`, adds the item to the hero's inventory (`Player+0x34`, container `+0x7c`, `R0929`), runs `R0451`, projects the actor with `R0059` mask `-1` and sends notice 7.
 
 **Confidence.** High for the gates, the count syntax and the gold arm. Unknown for the item-name grammar of `R0947`: its families go through sub-databases at `L04589`, `L04593`, `L04591` and `L04587`, and the name set it accepts was not decoded.
+
+**Amended.** EXP-0601 reads `R0947` whole (`MENU-CREATELINE-159`): it tries `L04589` with `R0971`, `L04593` with `R0969`, the name without a ` Shield` suffix in `L04591` with `R0970`, then the `L04587` rows from the last down to index 1 with `R0972`; row 0 is never compared. This narrows the Unknown to the names those tables hold; the accepted name set stays undecoded, and the other grades stand.
 
 ### MENU-105
 
@@ -2263,3 +2265,52 @@ The complete R0211 reads the current cursor handle. The move-handle arm calls R0
 **Confidence.** High for the literal cursor replacements and branch/call targets. Medium for visible refusal feedback or another order: the cursor adapter, move builder, panel helpers, preceding input dispatcher and runtime timing are unread. A fog refusal is not established as a silent no-op.
 
 **Unknown.** Message, sound, actual cursor pixels and native order delivery. Read R0320, R0215, R0317, R0335, L00204 and the input dispatcher to settle those effects.
+
+## Cheat item line
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-CREATELINE-159 | `#create` of an item posts no "Picked up" line; each client the broadcast reaches (in single player the local one) shows "Player <name> has succesfully used cheats!" white for 5 s; the item, count N, goes into the hero's pack. | High / Medium | ● active (branch candidate) | [EXP-0601](../experiments/EXP-0601-item-grant-line/) |
+
+### MENU-CREATELINE-159
+
+Inputs: EXP-0601 `evidence/w03-vt4c-create-namefactory.txt`; `MENU-104`, `MENU-111`,
+`MISSION-MSGPOST-058`, `ITEM-GRANTLINE-215`.
+
+- The item branch `L16586`..`L16587` calls the name factory `R0947(L02110, name)`.
+  A null result jumps to `L16588`, the notice-6 exit of `MENU-104`. A failed validity test
+  `L09852` deletes the item through vtable slot `+4` with argument 1 and sends notice 6
+  (`L16589`..`L16590`). Success stores the count word at `item+0x42` (`L16591`), adds the
+  item to `[Player+0x34]+0x7c` (`L16592`), calls `R0451(0)` on the hero (`L16593`) and
+  `R0059(hero, Player, -1)` (`L03266`), then sends notice 7 (`MENU-104`).
+- `R0947` tries, in order, `L04589` with constructor `R0971`, `L04593` with
+  `R0969` (`0x84` bytes), the name without its ` Shield` suffix in `L04591` with
+  `R0970`, and the `L04587` rows from the last down to index 1 with `R0972(14, i)`
+  (`L16594`..`L16595`). Row 0 of `L04587` is never compared. A name that matches nothing
+  is logged with the literal at `L16596` and gives null.
+- Each of those constructors stores Token `+0x08 = 0` (`ITEM-GRANTLINE-215`). The windows read
+  here show no write of `+0x08` between the constructor and `R0059`; that the publication
+  reaches `R0883` and sends the record without bit `0x40` is cited (`SAV-1114`), not read.
+- Notice 7 is message `0x92` subtype 7, broadcast (`MENU-111`). Each client formats
+  `"%s %s %s"` from string 225, the player's name and string 226 and posts it white for 5000 ms
+  (`MISSION-MSGPOST-058`). EN: `Player <name> has succesfully used cheats!` (the shipped
+  spelling). RU: `Игрок <name> успешно применил код!`. Notice 6 uses strings 223 and 224: EN
+  `Player <name> has used cheats ineffectively.`, RU `Игрок <name> неумело использовал код.`
+  (EXP-0408 `evidence/slots.tsv`).
+- The item merges into an equal-code stack or goes at the pack's insert index, and the pack has
+  no capacity (`ITEM-GRANTLINE-215`, `ITEM-CONT-004`).
+- The cheat runs only under `MENU-104`'s gates, one of which is a single-player flag. That the
+  broadcast then reaches the local client alone is Medium.
+
+**Confidence.** High for the branch order, the four family lookups and their constructors'
+heads, the row-0 exclusion, the count store and the notice strings. Medium for "no pickup
+line": for the `L04587` (class 14) path it inherits `ITEM-GRANTLINE-215`'s bounded writer
+search; the projector `R0059`, the load refresh `R0451` and `L05967`, which the
+`L04587` arm calls on `item+0x20`, are unread. For the Armor, Shield and Weapon families it
+is Medium as in `ITEM-GRANTLINE-215`: the initializers `R0890`, `R0888`, `R0887` and
+the member constructors `R0977`, `R1044` are unread. Place and no capacity: High for the
+add routine body; Medium for the container primitives `L16157`, `L16564`, `L16565`,
+`R2238`, `R2240` (unread) and for `ITEM-CONT-004`'s absence of a limit.
+
+**Unknown.** The text of `L16596` and which `L04587` row 0 names were not read. An owner run
+of `#create` with a `L04587` row name would show the line set directly.
