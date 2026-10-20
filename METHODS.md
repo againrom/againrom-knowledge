@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4103. Observation: 99. Static analysis: 3476. Mixed: 528.
+Claims labelled: 4107. Observation: 99. Static analysis: 3480. Mixed: 528.
 
 ## Ledger ai
 
@@ -3058,6 +3058,10 @@ Claims labelled: 4103. Observation: 99. Static analysis: 3476. Mixed: 528.
 | SAV-1339 | static analysis | ✔ promoted |
 | SAV-1340 | mixed | ✔ promoted |
 | SAV-1341 | mixed | ✔ promoted |
+| SAV-1345 | static analysis | ✔ promoted |
+| SAV-1346 | static analysis | ✔ promoted |
+| SAV-1347 | static analysis | ✔ promoted |
+| SAV-1348 | static analysis | ✔ promoted |
 
 ## Ledger session
 

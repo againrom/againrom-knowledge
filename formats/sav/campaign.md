@@ -308,6 +308,26 @@ kept valid through entry. Full original click order and the first failing
 consumer remain Unknown. The [Player command prerequisite](player.md#tavern-command-prerequisite)
 is a separate relation. — SAV-932
 
+## AddHero at a town LOAD
+
+Two files, `game9771` and `game9773`, hold the value 22 in the base record's
+AddHero collection. The original faulted on them in three dumps, one fault:
+one run loaded from the main menu and two from the town LOAD menu. The
+faulting routine read the client's primary drawable cache, which was 0. —
+SAV-1345
+
+For a value 21..24 the routine reads that cache once per `MyClass`,
+`!MyClass`, `MySex` or `!MySex` token of the value's `npc.reg` record, with no
+null test. The activation read in `R1284` walks the collection and
+calls it once per value; other callers and the resume path were not read. —
+SAV-1346, SAV-1347
+
+Two files of the same shapes with an empty collection, `game9772` and
+`game9774`, loaded. They also differ in the roster, the documents and the
+selected mission; what left the cache 0 is Unknown. The loading files hold the
+collection empty; an edited file with count 0 has not been loaded. —
+SAV-1347, SAV-1348
+
 ## Terminal campaign
 
 Nonzero LastMission with selected mission divisible by ten reaches an earlier

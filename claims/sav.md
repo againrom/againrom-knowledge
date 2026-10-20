@@ -17632,3 +17632,108 @@ transfers to AI Players, were not in the population.
 
 **Unknown.** No original-authored save holds an empty Group of a +28-zero
 Player, so LOAD of one is not witnessed.
+
+## AddHero at a town LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1345 | Three Windows minidumps of the original's LOAD crash record one fault: `L16663` in `R1155` reads `0x18c` because view `+0x3f54` is 0, for AddHero value 22, under message `0x42e` and the town AddHero walk. | High / Medium | ✔ promoted | [EXP-0605](../experiments/EXP-0605-crash-dumps/) |
+| SAV-1346 | `R1155` reads the primary drawable cache `[view+0x3f54]+0x18c` with no null test at four token-gated sites; a value 22 record reaches only the `!MySex` site; the read is valid only for a cached drawable. | High | ✔ promoted | [EXP-0605](../experiments/EXP-0605-crash-dumps/) |
+| SAV-1347 | The crashing `game9771`/`game9773` hold base AddHero `[22]`; the loading `game9772`/`game9774` hold it empty. That collection alone decides whether the town walk calls `R1155`; the cache was 0 at the fault, why was not read. | High / Unknown | ✔ promoted | [EXP-0605](../experiments/EXP-0605-crash-dumps/) |
+| SAV-1348 | Candidate repair, untested: base AddHero count 1 to 0 and the value 22 removed (crashing files' offsets 5243..5248, 5507 to 5505 bytes) would not make the town walk's call to `R1155` at that LOAD, by the reading of `R1384`. | Medium | ✔ promoted | [EXP-0605](../experiments/EXP-0605-crash-dumps/) |
+
+### SAV-1345
+
+- Inputs: three minidumps (`rom.exe` runs 44816 and 49196 loading `game9771.sav`, `ROM.EXE`
+  run 27604 loading `game9773.sav`); `tools/minidump`. Each holds the ThreadList, ModuleList,
+  MemoryList, Exception and SystemInfo streams; `rom.exe` is mapped at `0x00400000`, size
+  `0x239000`; the heap is not captured; `.data` and the faulting stack from `0x001af940` are.
+- Exception record, identical in all three: code `c0000005`, flags 0, address `L16663`,
+  parameters read (0) and `0x0000018c`.
+- Faulting context, identical except heap pointers: `ecx` 0, `esi` 0, `edx` `0x30000`,
+  `ebp` `001af990`, `esp` `001af944`, `eip` `L16663`. `eax` = `ebx` = the view object
+  (`029d2e28`, `02e92e28`, `02992a18`); `edi` = the campaign record (frame `+0x548`).
+- The instruction at `L16663` is `mov edx, [ecx+0x18c]`. `ecx` comes from `L16664`,
+  `mov ecx, [eax+0x3f54]`; `eax` from `L16665`, the frame local `[ebp-0x2c]`, which holds
+  the view in all three stacks. The faulting read is `0 + 0x18c`: the view's `+0x3f54` is 0.
+- Stack slots: argument `[ebp+8]` = `0x16` (22); `[ebp-0xc]` = 2 (the `Mage` bit); return
+  `[ebp+4]` = `L16666`. Frame layouts join the returns `L16666` (`R1384`),
+  `L11742` (`R1383`), `L16667` (`R1320`, the surface call at `L12150`)
+  and `L16668` (`R0701`'s call at `L16669`). `R0701`'s message slot holds
+  `0x42e`; its dispatch table sends `0x42e` to `L12833`. The slot at `esp+0x78`
+  (`L16670`) is residue of the earlier `R0385` call at `L16671`.
+- `R1384` passes view `[frame+0xd0]` as `this` and the record's AddHero values
+  (`+0x20`, count `+0x24`) one per call; `esi` 0 at the fault is the first element.
+
+**Confidence.** High for the exception record, the registers, the instruction, its operand
+source and the frame chain: each is a read value in all three dumps, joined by frame
+layouts. Medium that the `0x42e` was the LOAD driver's own post at `L14115`: 8 sites
+push `0x42e` in a raw `.text` scan; the attribution rests on the ~10 ms gap after Ok.
+
+**Unknown.** Frames below `R0701` (library dispatch) were not attributed.
+
+### SAV-1346
+
+- `R1155(this = view, npc id)`: for an id in 21..24 (`L07542`, `L07543`) it tests
+  six tokens of the `npc.reg` record through `R1286`: `Mage`, `MyClass`, `!MyClass`,
+  `Female`, `MySex`, `!MySex` (strings `L16672`..`L16673`).
+- Four tokens read `[[this+0x3f54]+0x18c]`: `MyClass` (`L16674`/`L16675`), `!MyClass`
+  (`L16676`/`L16677`), `MySex` (`L16678`/`L16679`), `!MySex`
+  (`L16664`/`L16663`). No site tests the pointer. `Mage` and `Female` set bits without a
+  read.
+- The bits go into a `0x49` message (`L16680`) sent through `R0217` (`L16681`).
+- A value 22 record carries `Mage` and `!MySex` (REG-NPC-090), so only the `!MySex` site
+  reads; the dumps' `[ebp-0xc]` = 2 agrees.
+- The read is valid only when `+0x3f54` holds a drawable. FAME-026 records a census of 9 stores
+  to that word over all decoded `.text`, not repeated here: a drawable stored by the client
+  receiver at `L03713` when the map count is 1, three preview-object stores (`L03727`,
+  `L03728`, `L03729`, FAME-024), and zero stores at `L03722`, `L03723`, `L03724`,
+  `L03725` and `L03726`.
+
+**Confidence.** High: one routine read whole in a capstone listing; the token strings and
+displacements are printed.
+
+### SAV-1347
+
+- Decoded campaign records (`tools/savcampaign -state`), crashing against loading file:
+  base `[30, 9, 1000, 0, 1000, 0]` against `[40, 20, 0, 0, 3000, 0]`; AddHero `[22]` against
+  `[]`; one child (`31`) against two (`31`, `41`); selected mission 30 against 40; documents
+  0 against 3; four `u16` arrays differ. The EN and RU crashing files differ in one label
+  byte; the loading files in 7 document bytes and one label byte.
+- Documents (`tools/savfull -fields`): both shapes have one Player and no world half; the
+  crashing files' roster holds one Human of Player 2, the loading files' two.
+- Of these fields, the walk `R1384` and the faulting routine `R1155` read one:
+  the walk reads AddHero (`L16682`, `L16683`) and calls `R1155` per element
+  (`L16684`). An empty collection makes no call, and the loading files took that path
+  without a fault. The client loop `R0509` (called at `L03782`), the town loader
+  `R0098` (`L16120`) and the document load were not read for file fields.
+- The faulting value `+0x3f54` is 0 in the dumps. The census of stores to that word is in
+  SAV-1346 (FAME-026, FAME-024); which path left it 0 at the fault was not read.
+
+**Confidence.** High for the field differences and for the AddHero collection as the field
+that gates the call in `R1384`. Unknown why the cache was 0: it could be derived from
+state built at LOAD from the roster (one Human against two), the documents (0 against 3),
+the selected mission (30 against 40) or the four `u16` arrays, or be independent of the file.
+
+**Unknown.** Which path left `+0x3f54` 0 at the fault; the file fields read by `R0509`,
+`R0098` and the document load, settled by reading them or by one read of
+`[[frame+0xd0]+0x3f54]` at `L16685` during a LOAD of `game9772.sav`; whether the cache is
+0 on a LOAD that does not crash; whether the original ever writes a town document with a
+nonempty base AddHero. A Human in the roster does not show a drawable in the client map.
+
+### SAV-1348
+
+- In `game9771.sav` and `game9773.sav` the campaign record starts at 5219. The base AddHero
+  count is the u32 at 5243 (1), its value the u16 at 5247 (22), then the EnableMercenary count
+  at 5249 (0).
+- The change: count 0 and the two value bytes removed; the record stays the original's
+  programme (SAV-CAMPPROG-071), and the loaders make no EOF comparison.
+- With count 0 `R1384` would make no `R1155` call, by its reading, so the
+  faulting read would not be reached by that walk. Other callers and the loading path of the
+  edited file were not read.
+- A one-byte alternative, value 22 to 21, would avoid all four reads (`npc21` carries none of
+  the four tokens) but would run the `0x49` grant, with the cache as it is at that LOAD.
+
+**Confidence.** Medium for the count-0 change: the gating call is read, and the loading
+files take the empty path, but the change was not run and the loading files differ in other
+fields. Low for 22 to 21: the grant's later steps were not read.
