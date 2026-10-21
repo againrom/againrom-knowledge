@@ -294,7 +294,11 @@ per Effect and `(50, +0x42)` after kind 41. For a Weapon the formatter prints `#
 the `castSpell` Effect a `casts <spell>` line, then the lines of a Spell it builds from the Effect's
 id byte and power byte: damage, range, duration, one caption. The range line prints byte `+0x50`
 of an item built from the Weapon's code, not the Spell's Max Range. That byte's identity with
-the Weapons `@.range` (Staff 5, Shaman Staff 4) is Medium until the factory is read. No body
+the Weapons `@.range` is established through the packed-code factory, Weapon
+constructor and fill: parameter 11, or 1 when it is -1. Staff supplies 5 and
+Shaman Staff 4. Final receiver/painter behavior remains Medium. — ITEM-221
+
+No body
 read has an operand on the Weapon's owned Spell at `+0x80`, so a null Spell and a built one give
 one text, worn or carried; across the unread callees this is Medium. — ITEM-211
 

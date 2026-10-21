@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4107. Observation: 99. Static analysis: 3480. Mixed: 528.
+Claims labelled: 4116. Observation: 99. Static analysis: 3488. Mixed: 529.
 
 ## Ledger ai
 
@@ -780,7 +780,7 @@ Claims labelled: 4107. Observation: 99. Static analysis: 3480. Mixed: 528.
 | ID | Method | Status |
 |---|---|---|
 | DAT-LOC-001 | static analysis | ● active |
-| DAT-OBJ-002 | static analysis | ● active (amended) |
+| DAT-OBJ-002 | static analysis | ● active (amended, partially retracted) |
 | DAT-GRAM-003 | static analysis | ● active |
 | DAT-SCHEMA-004 | static analysis | ● active |
 | DAT-SCHEMA-007 | static analysis | ● active |
@@ -792,6 +792,8 @@ Claims labelled: 4107. Observation: 99. Static analysis: 3480. Mixed: 528.
 | DAT-ITEMNAME-010 | mixed | ● active |
 | DAT-NAMES-016 | static analysis | ● active |
 | DAT-DOC-021 | mixed | ✔ promoted |
+| DAT-STRARRAY-022 | static analysis | ✔ promoted |
+| DAT-WEAPCELLS-023 | mixed | ✔ promoted |
 
 ## Ledger dialogue
 
@@ -1149,10 +1151,17 @@ Claims labelled: 4107. Observation: 99. Static analysis: 3480. Mixed: 528.
 | ITEM-203 | static analysis | ✔ promoted |
 | ITEM-204 | static analysis | ✔ promoted |
 | ITEM-205 | static analysis | ✔ promoted |
-| ITEM-211 | static analysis | ✔ promoted (branch candidate) |
+| ITEM-211 | static analysis | ✔ promoted (amended, branch candidate) |
 | ITEM-212 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-GRANTLINE-215 | static analysis | ● active (branch candidate) |
 | ITEM-PURSECALLER-216 | static analysis | ● active (branch candidate) |
+| ITEM-219 | static analysis | ✔ promoted |
+| ITEM-220 | static analysis | ✔ promoted |
+| ITEM-221 | static analysis | ✔ promoted |
+| ITEM-222 | static analysis | ✔ promoted |
+| ITEM-223 | static analysis | ✔ promoted |
+| ITEM-224 | static analysis | ✔ promoted |
+| ITEM-225 | static analysis | ✔ promoted |
 
 ## Ledger magic
 

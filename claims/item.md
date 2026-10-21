@@ -3903,7 +3903,7 @@ global factory caller census or future callback rule is claimed.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ITEM-211 | A Weapon's information text reads its columns and its castSpell Effect's bytes; no body read has a Weapon +0x80 operand; base lines need sutableFor bit 0; the spell lines come from a Spell built from Effect +0x40 and +0x42. | High / Medium | ✔ promoted (branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
+| ITEM-211 | A Weapon's information text reads its columns and its castSpell Effect's bytes; no body read has a Weapon +0x80 operand; base lines need sutableFor bit 0; the spell lines come from a Spell built from Effect +0x40 and +0x42. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/), [EXP-0606](../experiments/EXP-0606-weapon-row/) |
 | ITEM-212 | Weapon +0x80 on five routes: tavern hire and mission-entry construction build it by template equip; script owner transfer, AddHero, a carried party (Medium) and town SAVE and LOAD keep the Spell or null. Equip has one image reference. | High / Medium | ✔ promoted (branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
 
 ### ITEM-211
@@ -3931,8 +3931,7 @@ Inputs: EXP-0600 windows w01, t01, t02, w02, w04, w05 and e01 in `out/native/`.
 - For a Weapon the range line takes the item made from the element's code by `R0519` on
   `L02110` (`L16551..L16552`), prints its byte `+0x50` under `main[123]` with no zero test
   and deletes it (`L04872`; TEXT-131), not the local Spell's range, which only the `0xe00` arm
-  reads (`L16553`). That this byte is the Weapons `@.range`, so that a Staff prints 5 and a
-  Shaman Staff 4 (MAGIC-411), is Medium: the factory `R0519` is not read.
+  reads (`L16553`). ITEM-221 establishes that the newly constructed Weapon byte is Weapons parameter 11, with -1 replaced by 1; Staff is 5 and Shaman Staff 4 (MAGIC-411).
 - Sources: spell id is Effect `+0x40` low byte; power is Effect `+0x42` low byte, unclamped;
   damage B to B+S, duration and caption are Spells row values filled at that power
   (TEXT-096); range is the Weapons row. `R0997` returns the last matching tag's operand
@@ -3942,21 +3941,24 @@ Inputs: EXP-0600 windows w01, t01, t02, w02, w04, w05 and e01 in `out/native/`.
 
 **Confidence.** High for the packer, the Effect writer and the formatter arms: complete bodies
 read as instructions, with no `+0x80` operand on any base. The `+0x80` negative covers those
-bodies and the operands they pass. Their callees are not read: the packer's pair writers
-`R1030` and `R1017` and table accessor `R0476`; the Effect writer's `L05966`,
-`R2233`, `L08206` and `L08207`; the formatter's factory `R0519`, `R0463`,
+bodies and the operands they pass. The remaining unread callees are: the packer's pair writers
+`R1030` and `R1017`; the Effect writer's `R2233`, `L08206` and `L08207`; the formatter's `R0463`,
 `R0625` and `R0668`. That none of them reads a Weapon `+0x80` is Medium: most take a
 stream or a Spell rather than a Weapon, and the Weapon constructor stores 0 at `+0x80`
 (ITEM-187), which is inference, not a read. Medium for the text a player sees: the
 receiver that builds the client element from the stream is unread (ITEM-154), so whether it
 adjusts the entry count for the two-pair entries (13 with 14, an elemental pair with 14) is open;
-that the item made from the code holds `@.range` at `+0x50` rests on the factory, not read here;
 the painters other than the hover painter are unread (TEXT-090).
 
 **Unknown.** The context in which global `L06743` is 4, which changes a Stone Curse
 weapon's duration line (TEXT-132). The EN and RU strings of `main[118]`, `main[123]`,
 `main[124]` and `main[182..187]`. Settled by an owner screenshot of the original's hover over a
 shop Staff with Fire Arrow and over the same Staff worn after LOAD with a null `+0x80`.
+
+**Amended.** ITEM-221 closes the constructed Weapon range-source clause at High.
+The packer and formatter behavior stands. The receiver, other painters and
+remaining unread-callee limits retain their grades. The parameter and list-count
+accessors read in EXP-0606 take an embedded array or list, not a Weapon.
 
 ### ITEM-212
 
@@ -4096,3 +4098,203 @@ it needs a price that is not negative, and the price passes through `L09843` (ta
 power routine) and the converter `R0279`, both unread. Medium that the copy at `L16583`
 never runs: dword occurrences in `.rdata` and `.data` were not scanned (`TRIG-ITEMREAD-123`
 found none for the item copies).
+
+## Weapon row consumers and lookup boundaries
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-219 | No operational read of Weapons parameters 0, 1, 4, 10 or 16 is located in the named construction, fill, price, Equip and descriptor bodies; their image-wide uses remain unresolved. | Medium / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-220 | Weapons sutableFor bits 0/1 feed fighter/mage descriptors; bit 0 also filters ordinary shelf candidates, while death tests the whole value against zero. | High / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-221 | A Weapon reconstructed from its packed code gets +0x50 from Weapons parameter 11, or 1 for -1; both examined range-text arms use that item byte, with different emission gates. | High / Medium | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-222 | ROM1 Weapons rows have count-driven, 1-based identities, name lookup and packed-code forms; Weapon LOAD rebinds its archived row byte without a local size or mask check. | High / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-223 | Weapon row identity reaches picture and hero-class keys, shop candidates, SAV and script codes; combat sound and physical projectile picture follow the drawn class on the examined paths. | High / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-224 | Random item selection and the shop candidate walk enforce group-C masks; the examined direct Weapon constructor and LOAD bodies have no local mask test. | High / Medium | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-225 | A missing inventory picture makes the diagnostic return failure; the examined sprite constructor instead calls error handling, with no alternate picture selected on that branch. | High / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+
+### ITEM-219
+
+Population: `R0665` (name constructor, reused from ITEM-NAMEPARSE-040),
+`R0969` (direct constructor), `R0887` (initializer), `R0856` (fill),
+`R0962` (price), `R0850` (Equip), `R1033` (descriptor). The named
+bodies use row parameters 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14 and 15.
+No operational read of 0 Shape, 1 Material, 4 Slot, 10 absorbtion or
+16 Other Parameter was located there. The first array's generic archive
+path `L08399` serializes all its cells through `L08400`; that does not
+establish an operational meaning for one cell.
+
+Instance Shape and Material are the supplied constructor bytes at +0x45
+and +0x46, or the results of name parsers `R0956` and `R0957`.
+The Weapon appearance builder uses literal class 1. Armor's separate
+parameter-4 use does not establish a Weapons parameter-4 consumer.
+DAT-WEAPCELLS-023 supplies every shipped selected value.
+
+**Confidence.** Medium for the bounded non-location. New raw bodies and
+prior name-parser evidence agree, but indirect callees and aliases can
+reach the row. The raw `.text` rel32 scan finds 182 byte-pattern hits for
+`R0476`; it is navigation, not 182 verified readers or a complete field
+census. No repaired Ghidra, all-offset/width sweep or whole-image pointer
+closure was performed. High is not assigned to reader absence.
+
+**Unknown.** Whether any other routine operationally reads each of these
+five slots. Settle with a row-typed data-flow census over both encoded
+displacements and address arithmetic, overlapping widths, embedded arrays,
+bulk copies and pointer dispatch; classify every unnamed hit.
+
+### ITEM-220
+
+`R1033` reads parameter 15 at `L16545`. Bit 0 becomes descriptor
+bit 0x02 and gates base damage, positive to-hit/defence and range above 1;
+bit 1 becomes descriptor bit 0x04. `R0882` tests those descriptor bits
+against member+0x18c bit 1, giving the fighter/mage predicate. Its shop
+background and doll-refusal sites are ITEM-WEAR-055 and ITEM-WEAR-057.
+This is not a server Equip restriction.
+
+`R0963` tests parameter-15 bit 0 at `L16695`. A clear bit deletes
+the candidate unless collector+0x50 is 6 (SHOP-118).
+`R0208` compares the whole parameter dword with zero at `L04765`;
+zero skips the weapon's transfer into the corpse container (ITEM-DEATH-012).
+The latter is not a per-bit class predicate. Higher-only nonzero values
+would pass that comparison but set neither of the two descriptor bits.
+Shipped values are DAT-WEAPCELLS-023 and amended ITEM-WEAR-056.
+
+**Confidence.** High for these named decisions: raw bit tests and branch
+targets, plus the standing client refusal authority. No image-wide
+completeness is asserted.
+
+**Unknown.** Additional consumers, including individual tests of higher
+bits. Settle by completing the row-typed field census of ITEM-219.
+
+### ITEM-221
+
+`R0519` decodes packed class 1 and low-five-bit row, then `R0520`
+constructs `R0969(shape, material, row)`. It stores row at +0x0c and
+calls initializer `R0887`, which binds the Weapons entry and calls
+fill `R0856`. Parameter 11 becomes byte +0x50 at `L04086`; stored
+-1 instead writes 1 at `L04087`. Shape/material factors do not scale it.
+
+There are two examined text arms. `R1033` emits base tag 38 only with
+sutableFor bit 0 and +0x50 above 1; `R0964` formats that byte under
+stats[38] at `L05000`. The castSpell arm for a non-class-14 packed item
+reconstructs the item at `L16696` and formats +0x50 under main[123] at
+`L16552..L16697`, with no zero test there. It does not use the local
+Spell's +9 byte. Staff and Shaman Staff therefore supply 5 and 4 on this
+constructed-item path, despite receiving no base tag 38. This closes the
+factory-source limit of ITEM-211; TEXT-131's class-14 arm remains separate.
+
+**Confidence.** High for the static source chain, sentinel and two gates:
+the factory, constructor and fill are read, and the formatter branch target
+is verified inside its prior full listing. Medium for the player's final
+text because ITEM-211/ITEM-154's stream receiver and other painters remain
+outside the read population. A reconstructed value need not equal an
+archived or modified live Weapon's range byte.
+
+**Unknown.** Full receiver/painter behavior. Settle by tracing those paths,
+or by a separately authorized original hover observation for a spell staff
+and a fighter weapon with both base range and castSpell information.
+
+### ITEM-222
+
+`R0681` reads the Weapons u32 count at `L16698`, resizes through
+`L16699`, and dispatches rows 1 through count-1. `L16700` returns
+collection+8; `R0487` subtracts one. `L08026` computes
+collection.data + row*0x3c without checking the count. Shipped count 28
+and 27 serialized rows are DAT-WEAPCELLS-023, not program constants.
+
+`R0666` searches names backwards down to row 1 and returns 0 on failure.
+The name constructor reports invalid weapon and abandons fill on 0
+(ITEM-NAMEPARSE-040). `R0887` checks material <=15 and row<count;
+it does not exclude row 0 or check Shape against five. Packed codes use
+material bits 12..15, class bits 8..11, Shape bits 5..7 and row bits 0..4.
+Packing `R0667` does not mask every operand to those field widths
+(ITEM-PICT-050), so extending the table does not extend that code format.
+
+Weapon `R1639` LOAD reads archived Token+0x0c and binds through
+`R0926` to Weapons at `L16701`. It does not rebuild that identity from
+the separately archived packed +0x40, and it has no local row-bound or
+material-mask test. Shape/Material bytes are archived separately by
+`R0949` (ITEM-SAVE-014). Only SAV-1088's static helper clauses are used;
+its old empty-rem clause is excluded by amended ITEM-WEAR-056.
+
+**Confidence.** High for the named loader, helpers and local branches,
+bounded to their bodies. The pointer arithmetic is not a missing-row
+fallback; it supplies an unchecked address.
+
+**Unknown.** All behavior following invalid rows or inconsistent archived
+codes, including callbacks and later uses. Settle by tracing the complete
+LOAD-to-first-use closure for a specific invalid key; no runtime fault is
+predicted solely from this local read.
+
+### ITEM-223
+
+The identity joins on the examined paths are:
+
+| Consumer | Routine and key | Missing-key behavior established |
+|---|---|---|
+| Pictures | R0667 and R0886: packed material/class/Shape/row; seven-digit inventory and equipment leaf | Diagnostic/open and selected icon error branch: ITEM-225. Full figure-layer result Unknown |
+| Hero class and animation | R0551: heropicture[row-1], optional shield suffix, then drawn units.reg class | Unmatched name retains class 1. Getter R0668 has no file-local bound; row 27 reads into the next text table (ANIM-107/108) |
+| Combat swing sound | R0573: drawn class -> units.reg Sound[0] -> buffer slot | Zero sound id or null buffer returns without requesting sound (ANIM-105) |
+| Shop speech | L09858: first eligible effect tag, else book value, else packed class and low-five-bit row plus variant 1..3 | Missing-file audible result Unknown (ITEM-SOUND-183/184) |
+| Physical projectile | R0603: drawn class record +0xd4 -> projectile+0x20 | Missing target returns without a shot. Missing class/projectile resource behavior Unknown |
+| Shop candidate list | R1713 -> R1714 -> R0963: collection rows, Shape, material masks and price | Mask-clear candidate is skipped; no external per-weapon stock list is established (SHOP-118) |
+| SAV | R1639: archived row byte; packed code and Shape/Material also stored | Unchecked local row rebinding: ITEM-222 |
+| Scripts | R0433/R0262 -> R0519/R2057/R1522: low word of compiled item field | Search miss returns null; checks 12/17 give false, check 16 gives 255. Creation's unknown-class code returns null; invalid row behavior remains ITEM-222 |
+
+**Confidence.** High for the named key arithmetic and observed branches,
+using native windows and the cited ROM1 claims. Hero animation and sound
+are class-mediated, not proof of a separate table keyed directly by every
+Weapons row. No complete resource-dependency graph is claimed.
+
+**Unknown.** Missing class, animation, projectile or equipment-layer nodes,
+missing speech playback and additional tables keyed by the row. Settle each
+by following its exact loader, lookup, request and consumer error path;
+no single absent key is a global resource fallback test.
+
+### ITEM-224
+
+`L13570` selects a row and tests its five masks for any nonzero word;
+an all-zero row retries. It selects a Shape until that mask is nonzero,
+then retries material until the corresponding bit is set (`L16702`).
+There is no retry cap in this body; an empty eligible population has no
+local exit. `L09853`'s Weapon branch passes Weapons at `L16703`.
+
+`R0963` walks all candidate rows/materials and skips a clear mask bit
+at `L03298`, before price and suitability filtering (DAT-MATMASK-020,
+SHOP-118). In contrast, the examined direct-code constructor `R0969`,
+initializer `R0887`, fill `R0856` and Weapon archive `R1639` do
+not themselves test row masks. Their bounds/lookup behavior is ITEM-222.
+The icon open path keys by the packed code rather than reading a row mask.
+
+**Confidence.** High for the two positive mask checks. Medium for composed
+acceptance on direct creation/LOAD/drawing: these are local negative reads,
+not complete callback or whole-image validation proofs. A clear mask bit
+does not itself select a replacement material on the named direct path.
+
+**Unknown.** Whether another reachable helper validates or changes a
+particular mask-clear item before use. Settle by tracing all reachable
+callbacks for that shape/material/row through creation or LOAD and drawing.
+
+### ITEM-225
+
+`R0886` builds the picture leaf from the packed code (ITEM-PICT-049).
+Diagnostic `R0965` opens graphics/inventory/<leaf>.16a through
+`R0535`; on failure it returns 1 (`L04661`), with no replacement
+leaf. The -trace-only message boundary remains ITEM-PICT-049.
+
+On the selected inventory load branch `L16704..L16705`, constructor
+`R1771` reaches sprite loader `R0753`. Failed open at `L16706`
+takes `L03528..L03529`: it constructs an error message, calls
+`R0517` (application virtual slot +0x94), then `R0754`.
+That helper calls `L12238` and transfers to `L16707`. No alternate
+picture is selected in this observed branch. Generic archive read-open
+miss returns zero at `L16708`; diagnostic failure and sprite failure
+are distinct callers of that result.
+
+**Confidence.** High for the local paths and return polarity: named
+instruction anchors, the open's failure branch and the actual sprite
+constructor call. This is not a runtime observation of termination.
+
+**Unknown.** The full outcome through the application message virtual,
+`L12238`, and `L16707`'s signal/termination callees; other icon loaders
+and worn figure-layer failure paths. Settle by reading those reachable
+dispatch/callee bodies and their installed bindings. A separately authorized
+original observation could settle the visible outcome; none was run here.

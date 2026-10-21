@@ -24,7 +24,7 @@ for every consuming lookup.
 |---|---|---|---|
 | A | Shapes, Materials | 5,16 | Nine binary64 values (72 bytes) |
 | B | Magic | 50 | Parameter array |
-| C | Armors, Shields, Weapons | 30,9,27 | Parameter array, ten raw bytes, second dword array |
+| C | Armors, Shields, Weapons | 30,9,27 | Parameter array, ten raw bytes, CStringArray |
 | D | MagicItems | 49 | Parameter array, one raw byte, CString |
 | E | Units | 118 (56 parameterized) | Parameter array, two CStrings |
 | F | Humans | 215 (210 parameterized) | Parameter array, ten CStrings |
@@ -42,12 +42,16 @@ The ten group-C raw bytes are five u16 material masks, one per Shapes row.
 |---|---|
 | CString | u8 byte length;0xff selects a following u16 length; then the string bytes |
 | Title array | u16 count followed by that many CStrings |
-| Parameter/second dword array | u16 count followed by that many u32 values |
+| Parameter array | u16 count followed by that many u32 values |
+| Group-C second array | u16 count followed by that many CStrings |
 | Collection count | u32 |
 
 These are the established bounded primitive forms. Broader MFC length
 escapes are outside this reference. Integers and binary64 values are
-little-endian. — DAT-GRAM-003
+little-endian. DAT-OBJ-002's second-dword clause is retracted: the
+embedded +0x28 object is a CStringArray whose serializer writes and reads
+each element through the CString operations. All 27 Weapons rows per root
+have zero such elements. — DAT-GRAM-003, DAT-OBJ-002, DAT-STRARRAY-022
 
 ## The schema law
 
@@ -116,8 +120,13 @@ parsing, with the enchantment grammar and effect construction refined by
 
 ## Coverage boundaries
 
-The second group-C dword array's role and group D's extra raw byte's meaning
-remain Unknown. Both have known wire extents and must be retained. The Buildings
+The semantic use of a nonempty group-C CStringArray element and group D's
+extra raw byte remain Unknown. No shipped Weapons element exercises the
+string-array consumer. Trace an element from its embedded-array accessor
+to a decision to settle its use. Both payloads must be retained.
+— DAT-STRARRAY-022
+
+The Buildings
 `Start ID`/`Tiles` titles have no stored numeric parameter (`DAT-SCHEMA-007`),
 so they are not two missing numeric payload fields. Full server-to-client
 creation-message semantics are a separate session contract. Human type-ID
@@ -153,7 +162,8 @@ Weapon, cell 1 a Shield, and cells 2..9 Armor. The installed starting-equipment 
 3. Read each collection's u32 stored count. Read all entries for A/B and
    entries `1..count-1` for C–H; preserve the reserved null slot in memory.
 4. Read the entry name and its group's exact payload. The group-C second
-   dword array has the same u16-count/u32-element framing as a parameter array.
+   array is counted CStrings; four-byte runtime CString slots are not
+   four-byte wire elements.
 5. Resolve parameters through the relevant definition consumer. A stored -1
    preserves the constructor default on the named streaming paths.
 
@@ -163,7 +173,17 @@ material-mask block, its second counted array, and the group-D extra byte even
 when their interpretation is incomplete. No magic, section tags or per-entry
 size fields are inserted by this grammar. Array and CString lengths must fit
 the established primitive form; broader MFC encodings are not specified here.
-— DAT-GRAM-003, DAT-SCHEMA-004, DAT-SCHEMA-007, DAT-MATMASK-020
+— DAT-GRAM-003, DAT-SCHEMA-004, DAT-SCHEMA-007, DAT-MATMASK-020,
+DAT-STRARRAY-022
+
+## Selected Weapons cells
+
+Both installed Weapons collections have stored count 28 and serialized rows
+1..27. Every row has 17 numeric parameters. Selected value distributions,
+identical per locale, are Shape[0] -1 on 2 rows and 0 on 25; Material[1] -1
+on 5 and 0 on 22; Slot[4] -1 on 1 and 1 on 26; absorbtion[10] -1 on 5 and
+0 on 22; Other Parameter[16] -1 on all 27. These are authored cell values,
+not proof of operational use. — DAT-WEAPCELLS-023
 
 ## Installed usable Buildings parameters
 

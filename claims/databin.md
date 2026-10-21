@@ -10,7 +10,7 @@ file: [registry.md](registry.md).
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | DAT-LOC-001 | The placeable-definition database at `L02110` loads from `World\Data\Data.bin`, shipped as the archive node `world.res:data/data.bin` (88 327 B). | High | ● active | [EXP-0049](../experiments/EXP-0049-placeable-db/) |
-| DAT-OBJ-002 | The database holds eleven by-value collections; every entry begins `{vptr, CString name, CDWordArray params}` and its size depends on the element class. | High | ● active (amended) | [EXP-0049](../experiments/EXP-0049-placeable-db/) |
+| DAT-OBJ-002 | The database holds eleven by-value collections; every entry begins `{vptr, CString name, CDWordArray params}` and its size depends on the element class. | High | ● active (amended, partially retracted) | [EXP-0049](../experiments/EXP-0049-placeable-db/), [EXP-0606](../experiments/EXP-0606-weapon-row/) |
 | DAT-GRAM-003 | `Data.bin` is eight serialized groups of column titles and entries, and this grammar tiles the shipped file with 0 residue. | High | ● active | [EXP-0049](../experiments/EXP-0049-placeable-db/) |
 
 ### DAT-LOC-001
@@ -47,7 +47,7 @@ the only owners that reach `R0679`.
   `+0x0c` that EXP-0037 reported.
 - Entry size by class: buildings and magic 0x1c (the bare base); spells 0x20
   (+1 CString); units and humans 0x30 (+ a CStringArray of 2 or 10 strings);
-  armors, shields and weapons 0x3c (+10 raw bytes + a second dword array);
+  armors, shields and weapons 0x3c (+10 raw bytes + a CStringArray at +0x28);
   magic items 0x40; materials and shapes 0x68 (name + 9 doubles, no params).
   The constructor, vtable and `vt+8` Serialize of each class are tabulated in
   the evidence excerpt §4.
@@ -61,6 +61,9 @@ Serialize body was decompiled. The collection-to-offset map appears twice: in
 
 **Amended.** EXP-0037's "each entry 0x30 bytes" described only the two
 collections it saw; the building entries at `L02102` are 0x1c.
+
+The second-array dword interpretation is retracted by DAT-STRARRAY-022.
+The row size, first numeric array, masks and collection identities stand.
 
 ### DAT-GRAM-003
 
@@ -341,3 +344,65 @@ exhaustive scans, not samples.
 
 **Confidence.** High. A complete both-root parse and the instruction-level
 positional dispatcher.
+
+## Weapon row payload
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| DAT-STRARRAY-022 | The group-C row's array at +0x28 is a CStringArray, not a second numeric array; all 27 shipped Weapons rows on each root have zero elements. | High | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| DAT-WEAPCELLS-023 | EN and RU each store Weapons count 28, serialize rows 1..27 with 17 parameters each, and agree on the seven selected columns; Other Parameter is -1 on every row. | High | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+
+### DAT-STRARRAY-022
+
+`R2306` constructs the embedded object at row+0x28 through
+`L12087`, which installs vtable `L16686`. Its Serialize slot +8 is
+`L16687`. The row serializer `L16688` dispatches that slot at `L16689`.
+The array serializer calls CString writer `L16690` once per element on
+SAVE, and CString reader `L16691` once per element on LOAD. The writer
+uses a stored string length and payload, rather than copying four raw bytes.
+The four-byte stride at `L16692`/`L16693` is the runtime CString size.
+Destructor `L16694` reaches `R2040`; its helper `R2041` destroys
+each CString through `R1687` before releasing the array storage.
+
+The complete EN/RU Data.bin walks measure zero elements on all 54 Weapons
+rows. No shipped element value exists in that population. This corrects
+DAT-OBJ-002's second-dword clause; the other clauses stand.
+
+**Confidence.** High for the type and the empty Weapons population. The
+constructor's own vtable store, the row's actual virtual slot, both string
+archive operations and per-element string destruction exclude a raw-u32
+wire array. The empty-file census alone cannot distinguish those types.
+Evidence: native windows w03, w05, w07, w08, w09; the derived receipts,
+observations and weapon cells of EXP-0606. No Ghidra census is claimed.
+
+**Unknown.** Semantic use of a nonempty element, its interpretation by a
+consumer and image-wide reader completeness. Settle by tracing every
+embedded-array accessor to its owning group-C row and following a nonempty
+element to a decision. The shipped empty population cannot settle that use.
+
+### DAT-WEAPCELLS-023
+
+`tools/weaponrow` consumes each root's complete 88,327-byte Data.bin with
+zero residue. Both store Weapons count 28 and serialize 27 rows, each with
+17 numeric parameters. The following distributions are identical per root:
+
+| Slot and title | Values and row counts |
+|---|---|
+| 0 Shape | -1: 2; 0: 25 |
+| 1 Material | -1: 5; 0: 22 |
+| 4 Slot | -1: 1; 1: 26 |
+| 10 absorbtion | -1: 5; 0: 22 |
+| 16 Other Parameter | -1: 27 |
+| 15 sutableFor | -1: 1; 0: 3; 1: 19; 2: 2; 3: 2 |
+| 11 @.range | -1: 19; 4: 3; 5: 2; 6: 1; 8: 1; 20: 1 |
+
+The per-row values and title measurements are `evidence/weapon-cells.tsv`
+and `evidence/titles.tsv` in EXP-0606. Row 1 is BareHands, row 23 is rem,
+and row 27 is Plasma Sword. A stored -1 is retained as a value; it is not
+reported as an absent array or cell.
+
+**Confidence.** High for this finite input population: established grammar
+with DAT-STRARRAY-022's string-array correction, complete payload tiling,
+explicit lengths, a synthetic nonempty-string boundary test and scratch
+reproduction. EN/RU agreement is a locale comparison, not a second code
+witness. These counts do not constrain modified tables.
