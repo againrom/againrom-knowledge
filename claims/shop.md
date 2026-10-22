@@ -94,7 +94,7 @@ what a duplicate is — is [EXP-0061](../experiments/EXP-0061-shop-trade/); its 
 | SHOP-EFFRANGE-064 | Kinds 44..48 use a two-byte range payload and consume three payload draws. | High | ● active | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
 | SHOP-EFFCAST-065 | `castSpell` has two executable-resident spell populations and a separate power law. | High / Medium | ● active | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
 | SHOP-EFFPRICE-066 | Effects change price through an aggregate non-cast addition and a separate addition per cast; SHOP-102 corrects both nonlinear operand orders. | High | ● active (partially retracted) | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/), [EXP-0425](../experiments/EXP-0425-staff-price/) |
-| SHOP-EFFORDER-067 | After the required effect, the second and third opportunity gates are independent inclusive draws. | High | ● active | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
+| SHOP-EFFORDER-067 | After the required effect, the second and third opportunity gates are independent inclusive draws. | High | ● active (amended) | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
 | SHOP-EFFRETRY-068 | Failure handling depends on the stage and has two off-by-one bounds. | High | ● active | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
 | SHOP-EFFCAP-069 | MagCap is both an admission input and a deferred debit. | High | ● active | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
 | SHOP-EFFBASE-070 | The complete shipped Magic Items equipment pool is 367 admitted triples on each preserved root, row-identical: 193 Armor, 36 Shield, 138 Weapon. | Medium | ● active | [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/) |
@@ -249,7 +249,7 @@ what a duplicate is — is [EXP-0061](../experiments/EXP-0061-shop-trade/); its 
 
 **Evidence.** [EXP-0057](../experiments/EXP-0057-shop/), **[EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/)**
 
-**Amended.** The source claim and status above retain their amendment scope. The standing correction is recorded in `retracted.md`.
+**Amended.** The source claim and status above retain their amendment scope. The standing correction is recorded in `retracted.md`. `SHOP-148` further corrects the exact `50/101` and `25/101` gate values to 8111/16384 and 8111/32768 per CRT output.
 
 ### SHOP-RNG-008
 
@@ -828,9 +828,11 @@ results and original merchant observations remain Unknown.
 
 **Confidence.** High (both branches, their common successor, and inclusive wrapper are read; this refutes exact halves and a conditional third gate)
 
-**Recorded status.** ● active
+**Recorded status.** ● active (amended)
 
 **Evidence.** [EXP-0226](../experiments/EXP-0226-magic-shop-effect-generator/)
+
+**Amended.** `SHOP-148` corrects the exact gate probabilities and the 10,201 counts: per CRT output the gates pass with 8111/16384 and 8111/32768, and the opportunity-only counts follow from those. The draw order, independence of the third gate and branch destinations stand ([`retracted.md`](retracted.md)).
 
 ### SHOP-EFFRETRY-068
 
@@ -1747,3 +1749,83 @@ The complete direct Item archive body calls neither general value `R1005`, const
 ITEM-193's three named exact-framed SAVs each store count 1 and price 4096 for the Protection from Fire Scroll. The reached complete sale commit `R1572..R1628` reads stored Item+1c, multiplies the unsigned16 count, then truncates `0.5*product+0.5`. For these inputs its result is 2048. It does not recompute Scroll value or test placement origin. The native quote/client-ingestion boundary is still SHOP-104's Unknown. The fresh placed producer and general expression are ITEM-191/192; generated stock's explicit override remains SHOP-CONSUME-073.
 
 **Confidence.** High for the stored operands, retained complete commit arithmetic and the bounded absence of a local placement branch. Unknown for native displayed quote, original coin change or a later caller changing the item between LOAD and sale. This is a direct arithmetic implication of witnessed stored state, not a performed sale.
+
+## Repeated effect kinds on generated stock
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-144 | On the mode-6 enchantment route, a drawn kind the item already holds costs the same RNG draws as a new kind, starts no redraw or retry, and the routine continues to the next gate. | High | ● active | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) |
+| SHOP-145 | After a repeated-kind draw on the mode-6 route the item keeps one entry of that kind with the later payload; the reprice and the final MagCap debit count that payload once and the earlier one not at all. | High / Unknown | ● active | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) |
+| SHOP-146 | A whole-image rel32 and dword scan finds the mode-6 orchestrator as the only caller of the kind selector and of the merge/append; the other Item Effect builders found append fixed or stored kinds without that rule. | High / Medium | ● active | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) |
+| SHOP-147 | In a model with every payload admitted and no outer re-roll, a mode-6 item draws a held kind with probability 0.2028 (fighter Weapon), 0.1884 (Shield), 0.0329 to 0.1425 (Armor column); the stocked rate is Unknown. | High / Medium / Unknown | ● active | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) |
+| SHOP-148 | `R0861(n)` returns `(rand()*(n+1))>>15`, so the second and third enchantment gates pass with 8111/16384 and 8111/32768 per CRT output, not exactly 50/101 and 25/101. | High | ● active | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) |
+
+### SHOP-144
+
+The kind selector `R1035` takes seven `cdecl` arguments and no item (`ITEM-155`), so a held kind can be drawn. An optional opportunity consumes, in order: the gate draw `R0861(100)` (`L16742`, `L16743`); the kind draw `R1715(endpoint)` (`L16744`); the payload draws of the payload setter `L16745`, one for an ordinary kind (`L16746`) and three for kinds 44..48. Then `R1031` calls `R1034` (`L16747`, `L16748`). That routine has no RNG call and returns through `ret 4` (`L16749`); its two exits for a held kind are the UsableBy discard (`L05013`..`L16750`) and the payload overwrite (`L16751`..`L05020`), both described by `ITEM-155`. The caller reads no result from it: it calls item virtual `+4c` (`L16752`, `L16753`) and goes on to the third gate or to the MagCap debit.
+
+The selector's attempt counter advances only when a draw matches no interval (`L16754`). The outer item counter in `R1711` advances only when `R1031` returns zero (`L16755`..`L16756`); every optional path returns 1. A repeated kind and a discarded kind therefore leave both counters and the remaining gate draws as an accepted new kind would.
+
+**Confidence.** High. Every instruction named above is asserted on the EN and RU executable, which are one image.
+
+**Unknown.** Whether a cloned template can hold an Effect before the first draw was not read; if one can, the first draw is subject to the same merge.
+
+### SHOP-145
+
+`R1034` copies the new payload dword `+40` over the held entry and frees the new Effect (`ITEM-155`); the entry keeps its list position and the list count is unchanged. The dword holds the whole payload: the setter stores an ordinary payload as the dword (`L16757`) and the kind 44..48 base and spread as bytes `+40` and `+41` (`L16758`, `L16759`). The point value `L09850` reads the same field (`L16760`, `L16761`, `L16762`).
+
+After each `R1034` call `R1031` calls item virtual `+4c` (`L16763`, `L16752`, `L16753`). The Armor, Shield and Weapon bodies `R0960`, `R0961` and `R0962` recompute the price from the base, walk the list at `+20` summing `L09850` (`L16764`, `L16765`, `L16766`) and pass the sum to `R1720` (`L16767`, `L16768`, `L16769`). The final ordinary debit subtracts the `L16770` sum over the same list from MagCap `+48` (`L16771`, `L16772`). Both therefore count the later payload once and the earlier one not at all.
+
+The repeated draw's admission used MagCap `+48` minus the points already in the list, the earlier payload included, and a budget computed from the price that included it. The later payload is an independent draw under that bound and can be lower or higher than the earlier one, so a repeat can lower the price. `castSpell` never repeats on this route: a first cast returns before the gates and an optional cast is freed (`SHOP-EFFORDER-067`).
+
+The shop and item-panel text and the wearer modifiers read one entry of the kind, because the list holds one. Their readers were not traced. `ITEM-155` records that an Armor or Shield with a Defence or absorbtion Effect still writes two pairs of that tag, the base pair first.
+
+**Confidence.** High for the list, payload field, reprice and debit. Unknown for the text and modifier readers.
+
+### SHOP-146
+
+The probe scans every section byte for an `E8`/`E9` rel32 whose target, or a dword whose value, is one of 24 routine addresses (`scan.tsv`).
+
+- `R1034`: four calls, all in `R1031`; no `E9`, no dword. `R1035`: three calls in `R1031`. `R1627`: one call in `R1031`.
+- `R1031`: calls at `L16773` in the mode-6 clone `R1711` and at `L16774` in `R1779`, which has no rel32 or dword reference. `R1711` has the four calls in `R1500` (`SHOP-MAGIC-007`).
+- `R1036`, called once at `L16775` in `R1500`, builds the book and wand shelves: each new item gets one Effect of fixed kind 42 or 41 through `L05022` (`L16776`, `L16777`), so no kind repeats. `R1037` and `R1038` have no reference.
+- The map-loader item builder `R0461` (called at `L02208` in `R0128`, which `R0512` calls at `L07873`) appends stored Effects through `L05022` with no kind test and contains no RNG call.
+- `R0003..L05081` constructs and copies Effects; it holds two RNG calls, no reference to the Magic collection `L05012` and no call to the selector or to `R1034`. Its route was not identified.
+
+The containing routine of each of the 26 constructor call sites is the nearest preceding `push ebp; mov ebp, esp`, confirmed for the routines above by their listed returns.
+
+**Confidence.** High for the direct and literal-dword caller sets of `R1034`, `R1035`, `R1627` and `R1031`. Medium that no other route draws a random Effect kind: a computed call through a register loaded from a non-literal address is outside the scan, and the purpose of `R0003` was not read.
+
+**Unknown.** Mission or script rewards and drops that create an item from text use the `Effects=` grammar (`ITEM-155`); whether any of them reaches `R1031` indirectly was not traced.
+
+### SHOP-147
+
+`q4.py` computes exact rationals from the `SHOP-EFFWEIGHT-062` endpoints and UsableBy column and the `SHOP-EFFBASE-070` pool, quantizing every draw as `SHOP-148` states. The model follows `SHOP-EFFORDER-067` and `SHOP-144`: a first cast ends with one Effect; an optional cast ends the routine; a held kind merges; a kind whose UsableBy is 1 or 2 and shares no bit with a held entry's is discarded. Every payload is assumed feasible, and the model does not condition on the outer item re-roll: a required null (`SHOP-EFFPAY-063`) rejects the whole item and the outer loop draws again (`SHOP-EFFRETRY-068`), so delivered items are drawn conditional on a feasible required kind. The values below are rates of this model, not of delivered items.
+
+Repeat and discard rates per selector column, decimals of the exact values in `columns.tsv`:
+
+| Column | Repeat | Discard |
+|---|---|---|
+| fighter 1 (Weapon) | 0.202811 | 0 |
+| fighter 2 (Shield) | 0.188432 | 0 |
+| fighter 4, 5 | 0.032856 | 0.075836 |
+| fighter 6 | 0.135413 | 0 |
+| fighter 7..10 | 0.142488 | 0 |
+| fighter 12 | 0.121762 | 0 |
+| mage 6 | 0.124258 | 0.036304 |
+| mage 7, 8, 10 | 0.127458 | 0.063563 |
+| mage 12 | 0.113565 | 0.023439 |
+
+The ten forced-cast mage Weapons hold one cast and never repeat. Weighting every admitted triple equally gives repeat rates 0.121196 for Armors (193), 0.188432 for Shields (36) and 0.188115 for Weapons (138), and a discard rate of 0.020168 for Armors.
+
+**Confidence.** High for the per-column model values over the committed tables. Medium for the collection averages: the shelf's triple choice is a draw over its template list, and the per-shop price window can exclude triples, so equal weighting is an assumption. Unknown for the rate among delivered items.
+
+**Unknown.** The rate among stocked items. It depends on each triple's price, MagCap and the shop ceiling through payload feasibility, and on the re-roll after a required null, which re-weights the first kind toward feasible kinds; the sign of the difference from the model rate is not known. Per-triple feasible payload sets for the template list, or a count of repeated kinds over generated shop stock, would settle it.
+
+### SHOP-148
+
+`R0861(n)` returns 0 for `n=0`; otherwise it multiplies the CRT output `r` in `0..32767` by `n+1` and shifts right by 15 (`L16778`..`L06614`). `R1715(n)` returns `R0861(n-1)+1`. The CRT routine `R0179` is the LCG `s*214013+2531011` returning `(s>>16)&0x7fff` (`L00669`..`L02800`); over its full period every 15-bit output occurs equally often.
+
+The value `v` therefore has `#{r : v*32768 <= r*(n+1) < (v+1)*32768}` of the 32768 outputs, which is 324 or 325 for `n=100`. The second gate `<50` passes for 16222 outputs, 8111/16384 = 0.495056; the third gate `<25` for 8111 outputs, 8111/32768 = 0.247528. Opportunity-only counts are one 0.379956, two 0.497504, three 0.122540 (`gates.tsv`), against 3876/10201, 5075/10201 and 1250/10201. A kind on the cumulative interval `(prev, end]` of endpoint `E` has probability `#{r : prev*32768 <= r*E < end*32768}/32768`, close to but not exactly `(end-prev)/E`.
+
+**Confidence.** High. The wrapper and LCG instructions are asserted, and the counts are exact integer arithmetic.

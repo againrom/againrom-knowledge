@@ -1,5 +1,12 @@
 # Overturn history
 
+## EXP-0610: 15-bit draw quantization
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SHOP-EFFORDER-067` (the exact gate probabilities and the 10,201 counts only; draw order, third-gate independence and branch destinations stand) | Verbatim: "The exact gate probabilities are `50/101` and `25/101`, yielding opportunity-only counts 3,876/10,201 one, 5,075/10,201 two, 1,250/10,201 three" | High | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) (`SHOP-148`) | `R0861(n)` returns `(rand()*(n+1))>>15` of a 15-bit CRT output, so the values `0..100` are not equiprobable. The second gate passes for 16222 of 32768 outputs (8111/16384) and the third for 8111 (8111/32768); the opportunity-only counts are 0.379956 one, 0.497504 two, 0.122540 three. Each differs from the former value by less than 1e-5 | **CORRECTED** |
+| `SHOP-MAGIC-007` (the exact gate values of the EXP-0226 correction only; mandatory enchantment, mode-6 scope, gate bounds, third-gate independence and the outer bound stand) | Verbatim: "`R0861(100)` draws 101 equiprobable integers, so the gates are exactly `50/101` and `25/101`" | High | [EXP-0610](../experiments/EXP-0610-shop-effect-repeat/) (`SHOP-148`) | The 101 values take 324 or 325 of the 32768 CRT outputs each; the gates pass with 8111/16384 and 8111/32768 per output | **CORRECTED** |
+
 ## SAV-1275: missing-byte and returning-path scope
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

@@ -377,18 +377,34 @@ the admission calculation omits the base round-up term. A particular price
 window can exclude a mask-admitted variant. Exact native x87 results remain
 Unknown (`SHOP-103`).
 
-One effect is required. The second gate is `rand(0..100)<50`, exactly `50/101`; the third is an
-independent `rand(0..100)<25`, exactly `25/101`, and is drawn even when the second gate is false
+One effect is required. The second gate is `rand(0..100)<50`, passing for 8111/16384 of CRT
+outputs; the third is an independent `rand(0..100)<25`, passing for 8111/32768, and is drawn even
+when the second gate is false
 unless an earlier return has ended the routine. A required null rejects the item. An optional null
 retains earlier effects and returns success; an optional cast is randomized then freed and also
 returns success. Those early returns skip the final MagCap debit. Selector attempt 100 cannot
 survive, so only attempts 1..99 succeed. The outer item loop tests `attempt<=10*n`, allowing 201
-rejections for the Magic Items request of 20 (`SHOP-EFFORDER-067`, `SHOP-EFFRETRY-068`).
+rejections for the Magic Items request of 20 (`SHOP-EFFORDER-067`, `SHOP-EFFRETRY-068`). The
+former exact values `50/101` and `25/101` in `SHOP-EFFORDER-067` are amended by `SHOP-148`.
+
+The selector does not see the item, so a later opportunity can draw a kind the item already holds.
+The append then discards a kind whose `UsableBy` is 1 or 2 and shares no bit with a held entry's;
+otherwise it overwrites the held entry's payload with the new one and frees the new Effect, so the
+list keeps one entry per kind (`ITEM-155`). Either outcome consumes the same draws as a new kind,
+starts no redraw or retry, and the routine continues to the next gate (`SHOP-144`). The reprice
+after each append and the final MagCap debit count only the later payload; that payload was
+admitted against capacity that still included the earlier one and can be lower or higher than it
+(`SHOP-145`). No other routine found calls the selector or this append; the book and wand shelves
+and the map loader append fixed or stored kinds without the rule (`SHOP-146`). With every payload
+feasible and no outer item re-roll, an item draws a held kind with probability 0.2028 for a
+fighter Weapon, 0.1884 for a Shield and 0.0329 to 0.1425 by Armor column. These are model rates;
+the rate among stocked items is Unknown (`SHOP-147`).
 
 ### Randomness
 
 `R0179` is the CRT `rand()`: `seed = seed·0x343fd + 0x269ec3`, result `(seed>>16)&0x7fff`.
-`R0861(n)` = uniform on `0..n`; `R1715(n)` = uniform on `1..n`.
+`R0861(n)` = `(rand()*(n+1))>>15` on `0..n`, so each value takes `floor` or `ceil` of
+`32768/(n+1)` outputs; `R1715(n)` = `R0861(n-1)+1` on `1..n` (`SHOP-148`).
 
 **Every seed in the image is a clock.** The only writer of the seed slot is `srand`
 (`R0291`), with three call sites: `R0576` and `R1716` seed with

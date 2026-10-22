@@ -302,16 +302,19 @@ No body
 read has an operand on the Weapon's owned Spell at `+0x80`, so a null Spell and a built one give
 one text, worn or carried; across the unread callees this is Medium. — ITEM-211
 
-### Equal effect kinds on one item (`ITEM-154`, `ITEM-155`, `ITEM-156`)
+### Equal effect kinds on one item (`ITEM-154`, `ITEM-155`, `ITEM-156`, `SHOP-144`, `SHOP-145`, `SHOP-146`)
 
 The item information formatter appends one line per stored attribute pair into its output buffer
 and compares no pair with another (`ITEM-154`). An Armor or Shield packer writes its base defence
 as tag 15 and, when above zero, its base absorption as tag 16 before the Effect pairs, and an
 Effect pair carries its kind as its tag, so a Defence or absorbtion Effect repeats a tag
-(`ITEM-155`). Among the direct-call appends enumerated, only the Magic Items shop generator
-merges an equal kind: it overwrites the operand dword of the existing node and discards the new
-Effect. The map loader, the cell parser, the item copy and the book makers append with no kind
-test (`ITEM-155`).
+(`ITEM-155`). Among the direct and literal-dword callers enumerated (computed calls were not
+searched), only the Magic Items shop generator merges an equal kind (`SHOP-146`): it overwrites
+the operand dword of the existing node and discards the new Effect, after first discarding a
+drawn kind whose UsableBy shares no bit with a held entry's, and it starts no redraw
+(`SHOP-144`). The reprice and the MagCap debit count the later payload once (`SHOP-145`). The map
+loader, the cell parser, the item copy and the book makers append with no kind test
+(`ITEM-155`, `SHOP-146`).
 
 Each Effect node adds its own operand to the modifier word, so two Defence nodes of +1 add 2
 there; the recompute into displayed defence is not established (`ITEM-156`). The campaign

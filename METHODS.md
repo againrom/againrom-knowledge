@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4128. Observation: 99. Static analysis: 3500. Mixed: 529.
+Claims labelled: 4133. Observation: 99. Static analysis: 3504. Mixed: 530.
 
 ## Ledger ai
 
@@ -3215,7 +3215,7 @@ Claims labelled: 4128. Observation: 99. Static analysis: 3500. Mixed: 529.
 | SHOP-EFFRANGE-064 | mixed | ● active |
 | SHOP-EFFCAST-065 | mixed | ● active |
 | SHOP-EFFPRICE-066 | mixed | ● active (partially retracted) |
-| SHOP-EFFORDER-067 | mixed | ● active |
+| SHOP-EFFORDER-067 | mixed | ● active (amended) |
 | SHOP-EFFRETRY-068 | mixed | ● active |
 | SHOP-EFFCAP-069 | mixed | ● active |
 | SHOP-EFFBASE-070 | mixed | ● active |
@@ -3259,6 +3259,11 @@ Claims labelled: 4128. Observation: 99. Static analysis: 3500. Mixed: 529.
 | SHOP-SOUND-139 | static analysis | ● active (branch candidate) |
 | SHOP-142 | static analysis | ✔ promoted (branch candidate) |
 | SHOP-143 | static analysis | ✔ promoted (branch candidate) |
+| SHOP-144 | static analysis | ● active |
+| SHOP-145 | static analysis | ● active |
+| SHOP-146 | static analysis | ● active |
+| SHOP-147 | mixed | ● active |
+| SHOP-148 | static analysis | ● active |
 
 ## Ledger spr16a
 
