@@ -92,11 +92,17 @@ dispatcher runs two tests in this order and takes the first that fires:
 
 | test | radius | threshold |
 |---|---|---|
-| 1 | the actor's own `pth+0x08` | `health <= ord+0x44` — the `Data.bin` Units column **`Wimpy`** |
+| 1 | the actor's own mover byte `+0x08`, in cells (5 at construction) | `health <= ord+0x44` — the `Data.bin` Units column **`Wimpy`** |
 | 2 | the literal **2** cells | `health <= ord+0x40` — the `Data.bin` Units column **`Withdraw`** |
 
 Both collect the occupants of the square of that radius, keep the ones the diplomacy matrix calls
-hostile, and require the set to be non-empty. Both thresholds compare against **current** health as
+hostile, and require the set to be non-empty. The radius is a ring count: the square is Chebyshev,
+`2R+1` cells on a side, centre and border included, with no clipping at the map edge, so radius 5 is
+11×11 and the literal 2 is 5×5. The explicit Retreat state reads the same mover byte (`AI-690`).
+The filter keeps a candidate whose relation byte from the actor's owner slot to its owner slot has
+bit 0 set, so the actor's own entry is kept only if its self byte has bit 0 set. An invisible candidate is
+kept only when some member of the actor's group list sees it within that member's `ord+0x71`
+range; health is not filtered here (`AI-694`). Both thresholds compare against **current** health as
 a signed word, so a value of 0 means *never* and a value equal to `healthMax` means *always*.
 
 The first reaction helper counts entries with `health > 0` in a byte. A zero count calls

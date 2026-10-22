@@ -8096,3 +8096,121 @@ Trace SHA-256 `523439ed129f37dad2f3e7ef30fcf09ad8160b091df06e115765183ee1ec0104`
 
 **Unknown.** The member's next pass after a release: a member refused while centred with
 `mover+0x80` non-zero and different from its cell would settle it.
+
+## Withdrawal radius
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-690 | The Wimpy test `R0105` and the flee helper `R0100` (explicit Retreat, `L00207`) pass mover byte `+0x08` as the ring count of `R0020`, in cells; the Withdraw test `R0106` passes the literal 2 in that slot. | High | ✔ promoted (branch candidate) | [EXP-0608](../experiments/EXP-0608-flee-radius/) |
+| AI-691 | Of 2 275 `.text` stores at displacement 8, the only one found writing mover byte `+0x08` is `L00587` (5) in the mover constructor, reached from four fresh allocations; LOAD's raw copy is the only other producer. | High / Medium | ✔ promoted (branch candidate) | [EXP-0608](../experiments/EXP-0608-flee-radius/) |
+| AI-692 | Every actor's mover byte `+0x08` is 5 at construction, for Humans and for every Units class with a nonzero `Wimpy` or `Withdraw`; all 1 134 records of the 27 EN and RU install saves hold 5. | High | ✔ promoted (branch candidate) | [EXP-0608](../experiments/EXP-0608-flee-radius/) |
+| AI-693 | No play-time writer was found changing mover byte `+0x08` except a rebuilt mover (5); a SAV carries it at byte 8 of the Unit record's raw 180-byte mover block and LOAD restores it raw. | High / Medium | ✔ promoted (branch candidate) | [EXP-0608](../experiments/EXP-0608-flee-radius/) |
+| AI-694 | `R0020` lists the centre cell, then Chebyshev rings 1..R inclusive, each cell once, without map-edge clipping; `R0021(…, 0)` keeps relation bit 0 = 1 and drops invisible candidates no group member sees. | High | ✔ promoted (branch candidate) | [EXP-0608](../experiments/EXP-0608-flee-radius/) |
+| AI-695 | In owner save `game0052.sav`, Dragon.2 (health 26 of 400) holds `ord+0x44` 0 and `ord+0x40` 0, so both withdrawal tests fail at the health compare; dispatcher, group, radius and filter conditions would admit it. | High / Unknown | ● active (branch candidate) | [EXP-0608](../experiments/EXP-0608-flee-radius/) |
+
+### AI-690
+
+`R0105`: `esi` is the actor argument (`L16709`). `L16710 mov edx,[esi+0x154]`,
+`L16711 mov cl,[edx+0x8]`, `L16712 push ecx` is the second argument of `R0020`; the first is
+`R0019([esi+0x10])`, the word at `+2` of the actor's Position object, the cell word (low byte x,
+high byte y). `R0100` repeats it at `L16713`/`L16714`, pushed at `L16715`; state `0x16` of
+`R0008` (table `L00322`) calls `R0100` at `L00207`. `R0106` pushes 2 at `L00485`
+in the same slot. `R0020` uses the argument as a ring count over cell indexes (`AI-694`), so
+both are cells. The operand is not `pth+0x08`: `actor+0x154` is the mover, `actor+0x158` the order
+record. EN and RU are one image (SHA-256 `942e9b72…7d03`), one witness.
+
+**Confidence.** High: the register chain is a straight line inside each function, no merge between
+the load and the push.
+
+### AI-691
+
+Instrument: Capstone 5.0.7 linear sweep of `.text` (554 722 instructions). Every written memory
+operand overlapping displacement 8 at its width: 2 275 rows. Base registers traced back up to 60
+instructions, to `ret`, unconditional `jmp`, a call (for `eax`/`ecx`/`edx`) or the function start.
+262 rows lie in the 132 functions holding a `[reg+0x154]` operand, in detected mover methods or in
+`L16716..L07160`; each was classified by base source and every row not based on an order record
+or a list node was read. One row stores into a mover: `L00587 mov byte ptr [edx+8], 5` after the
+constructor's `rep stosd` of 0x2d dwords. The same sweep lists the 11 `push 0xb4` and
+`mov ecx, 0x2d` sites and the 4 direct calls of `R0206` (`evidence/probe/alloc.tsv`,
+`ctorcalls.tsv`). Constructor call sites, each on a fresh 0xb4 allocation stored at `+0x154`:
+`L00964` (actor constructor `R0185`), `L13291` (`R0825`, caller `L03849`), `L14120`
+(`R1378`), `L14119` (`R0065`); the last three follow a call of `R0525`. Of the other
+seven sites, `L16717` is the constructor's clear and `L16718` the archive transfer; the rest
+show no constructor call and no `+0x154` store within their windows (12 and 30 instructions). Mover calls found: `R2131`, `R2134`, `R0471` (writes `+5`), `R1348` (raw archive
+transfer, `SAV-MOVRATE-866`), `L08765` (writes `+0x7c`, `MOVE-177`), `R0179`; none stores at
+`+6..+8` except `R1348` on LOAD.
+
+**Confidence.** High for the constructor value and the four direct call sites. Medium for "no
+other writer" and for the block-copy negative: the 2 013 rows outside the scope are excluded by
+their function, not read; a mover pointer reached through a merge, a global, an indirect call or
+past an `alloc.tsv` window, and a copy of computed length, are blind spots.
+
+### AI-692
+
+Static: the constructor stores 5 with no operand from the actor or `Data.bin`; the Units stream
+`R0180` writes `ord+0x40/+0x44` (`AI-WITHDRAW-027`), not the mover, and the Humans slot of
+`DAT-HUMANS-008` maps to mover `+0x0a`. Census with `tools/savfull -flee` over every `.sav` in the
+EN root (23: `game0000..0021`, `game9999`) and RU root (4: `game0000..0002`, `game9999`), all decoded
+exactly: 1 134 Unit-family records (EN 331 Human, 659 Unit; RU 68 Human, 76 Unit), mover byte
+`+0x08` 5 in all. 558 carry an authored nonzero threshold pair (`ord+0x40/+0x44`: 0/3 179, 0/5 123,
+0/10 91, 15/4 40, 30/8 52, 60/0 73); no Dragon pair (0/63) occurs in the install saves.
+
+**Confidence.** High for the constructor value (one store, no operand) and the census.
+
+### AI-693
+
+In play the only writer found is the constructor of a rebuilt mover (`AI-691`). The Unit record
+carries the 180-byte mover raw after its scalar runs (`Unit.raw-pointed-154`); byte 8 is the radius.
+Serialize `R1348` copies it unchanged both ways (caller `L06856`); the post-load pass
+`L08765` (caller `L16390`) rewrites only `+0x7c`. Owner save `game0052.sav` (map `131.alm`):
+of 223 Unit-family records, 43 hold 0 (7 live Humans of slot 1, 36 Units with health −10001) and
+180 hold 5; no install save holds 0. The same byte is the guard block radius (`AI-BREAK-041`) and
+the sight radius (`TERR-SIGHT-115`); the effect of 0 was not run.
+
+**Confidence.** High for the record position and the raw restore. Medium for "no play-time
+writer" (blind spots of `AI-691`).
+
+**Unknown.** The producer of the zero bytes in the owner save: the save's ancestry, or a fresh
+original save of the same map compared byte 8 by record, would settle it.
+
+### AI-694
+
+`R0020(cell, R)`: centre first (`L01722..L01723`); `r` from 1 while `r < (R & 0xff) + 1`
+(`L16719..L16720`); `t` from `-r` while `t < r + 1`; cells `c ± 256r + t`, and when `|t| != r`
+(`L01730`) `c + 256t ± r`: every cell of the `(2R+1)²` square once. The index is the 16-bit cell
+word plus offsets with no bound compare, so a column offset carries into the next row. A cell
+counts when bit `0x20` of `[world+0x10000+cell]` is set (`R0034`) and `R0035` returns an
+object; the list is `world+0x5400c`. `R0021(actor, list, 0)` reads
+`[session + 0xa9c4 + 50·me + him]` with `me`, `him` the owners' Player word `+4`, unlinks when
+`bit0 == 0` (`L00216`), and unlinks a candidate with `+0x144 & 0x8000` unless
+`R0036(member, cand) <= member.ord+0x71` for a member of `actor+0x70`'s list. No health test.
+
+**Confidence.** High: both bodies read whole; agrees with `AI-571`, `AI-336` and `AI-FILTER-001`.
+
+### AI-695
+
+Decoded with `tools/savfull -flee` (exact; `evidence/owner/flee.txt`). Dragon.2: object 365, token
+`0x1ef`, cell (122,85), health 26 of 400, owner slot 4, mover `+0x08` 5, `ord+0x08` 5, `ord+0x40` 0,
+`ord+0x44` 0, `ord+0x4c` 0, `ord+0x71` 1, `actor+0x50` 0xa (`st50`), `+0x144` 0 (`f144`). Group 41 of Player object 179: AI
+`+0x20` 0, `+0x45` 1, member 365 only.
+
+| condition | value | result |
+|---|---|---|
+| dispatcher gate `R0076` | `+0x45` 1 | holds |
+| empty-group force | 1 member | not forced |
+| order 0 arm `R0008` | state 0xa | explicit Retreat (0x16) not active |
+| `R0105`: health ≤ `ord+0x44` | 26 ≤ 0 | fails, returns before collecting |
+| `R0106`: health ≤ `ord+0x40` | 26 ≤ 0 | fails |
+| radius 5 square, filter | Fergard (slot 1) at (120,81), Chebyshev 4, relation 4→1 = 1, `+0x144` 0 | would hold |
+
+All 101 records of classes with an authored nonzero threshold (Bee 40, Squirrel 25, Orc_Bow 24,
+Goblin_Pike 6, Goblin_Sling 4, Dragon 2) hold 0/0. Owner observation: in the original this dragon
+does not run away while the player's units attack it. Any positive health fails a 0 threshold, so
+the reading agrees.
+
+**Confidence.** High for the decoded values and the gate evaluation. Unknown for the origin of the
+zeros.
+
+**Unknown.** Whether the zeros come from the Wimpy command (`AI-CLASS-030`, mode 0) or from the
+document's producer: a save made at the start of `131.alm` in the original, decoded for Dragon
+`ord+0x44`, would settle it.

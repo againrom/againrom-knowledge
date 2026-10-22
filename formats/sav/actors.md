@@ -303,6 +303,12 @@ terminates the original with an integer divide by zero at `L09136` on the
 first turn of an ordinary move. Original Humans carry 15..22 and Units 8..22.
 A written mover block needs a nonzero rate. — SAV-1092
 
+Mover byte `+08` is the hostile radius of the guard block, the Wimpy test
+and explicit Retreat, and the sight radius. It is restored raw: no post-load
+pass found rewrites it. All 1 134 Unit and Human records of the 27 original install
+saves hold 5, the constructor value. A document holding another value keeps it
+until the mover is rebuilt. — AI-693, AI-BREAK-041, TERR-SIGHT-115
+
 Original restart-slot saves (`game9999.sav`) hold, for
 every map-placed Unit record, exactly the Mover the placement builds, and, for the
 carried party, the join walk's constructor-state Mover with the derived rate in

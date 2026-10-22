@@ -178,8 +178,9 @@ multiplayer load.
    which needs a human owner.
 3. The occupancy block of **Chebyshev radius 5** around the **post** — not around the actor — is
    filtered for hostiles and any survivor is engaged with a pursuit order. The 5 is `mover+0x08`,
-   a **hard-coded constant** written once by the mover constructor; no shipped byte carries it and
-   no class varies it.
+   a **hard-coded constant** the mover constructor writes on every fresh mover; no `Data.bin` column is
+   found to feed it, and no class varies it (`AI-691`, `AI-692`). A saved document carries the byte raw in
+   the Unit record's mover block, and LOAD restores it unchanged (`AI-693`).
 4. With nothing to fight: away from the post, walk back; at the post, run the standing acquisition.
 
 **Which survivor is engaged starts from distance to the post, not from any authoring or
