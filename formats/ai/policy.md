@@ -105,6 +105,21 @@ kept only when some member of the actor's group list sees it within that member'
 range; health is not filtered here (`AI-694`). Both thresholds compare against **current** health as
 a signed word, so a value of 0 means *never* and a value equal to `healthMax` means *always*.
 
+For a multi-cell actor the square is centred on its Position cell, the top-left cell of its n×n
+footprint, so it reaches R cells past the footprint's left and top edges and R−(n−1) past its
+right and bottom edges (`AI-696`). The footprint side n is the `Data.bin` `tokenSize`: 2 for
+Catapult, Ballista, Ogre, Troll and Daemon, 3 for Dragon, 1 for every other Units entry and every
+Humans actor created from `Data.bin`; a loaded actor takes the side from the save stream, not read (`AI-699`). The collector reads only the ground occupant slot of each cell record: a
+domain-1 or 2 hostile is listed once per footprint cell inside the square, and a domain-3 hostile
+is not entered at the slot the collector reads: for a Dragon or Bat_Sonic created from `Data.bin`
+(`movementType` 3, `TERR-MOVE-055`, and `TERR-MOVE-057`, whose domain gloss was superseded and whose streamed cells stand) it is not listed (`AI-697`, Medium: stores to
+that slot outside the add routine and loaded actors were not searched). Repeats change neither test's outcome nor the
+filter's verdict; the averaging helper weighs a multi-cell hostile once per listed cell and uses
+each entry's anchor point (`AI-698`). Strike reach 1 holds for resting actors exactly when the two
+footprints touch, edge or corner (`AI-700`). Every such striking position of a ground attacker has
+a cell inside the radius-5 square; at radius 2 a side-3 target leaves the cells along its +x and +y
+edges outside (`AI-701`).
+
 The first reaction helper counts entries with `health > 0` in a byte. A zero count calls
 ordinary acquisition. Its averaging loop then sums fine coordinates over the **whole filtered
 list**, not a living-only subset, and divides by the low byte of the list count. The second

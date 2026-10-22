@@ -8214,3 +8214,147 @@ zeros.
 **Unknown.** Whether the zeros come from the Wimpy command (`AI-CLASS-030`, mode 0) or from the
 document's producer: a save made at the start of `131.alm` in the original, decoded for Dragon
 `ord+0x44`, would settle it.
+
+## Multi-cell actors in the withdrawal search
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-696 | In `R0105`, `R0106` and `R0100` the centre of `R0020` is the Position cell word, the top-left cell of an n×n footprint, so the square reaches R cells past the left and top edges and R−(n−1) past the right and bottom. | High / Medium | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+| AI-697 | `R0020` reads only cell-record slot `+0x04`: a domain-1 or 2 actor is listed once per footprint cell inside the square, up to n² times; a domain-3 actor created from `Data.bin`, kept in slot `+0x08` by `R0458`, is not listed by it. | High / Medium | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+| AI-698 | Repeated entries do not change the Wimpy, Withdraw or filter outcome; the flee helper `R0100` averages one anchor point per entry, so a multi-cell hostile weighs as many times as it has cells in the square. | High | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+| AI-699 | The footprint side of an actor created from `Data.bin` is actor byte `+0x49`, from `tokenSize` (default 1): Catapult, Ballista, Ogre, Troll, Daemon 2, Dragon 3, all else 1, EN and RU alike. A loaded actor's side is Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+| AI-700 | For resting actors, strike reach 1 holds exactly when the two footprints touch, edge or corner: 8, 12 and 16 attacker cells around a target of side 1, 2 and 3; `R0247` and `R0036` agree on every placement tried. | High | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+| AI-701 | A resting ground attacker of side 1 to 3 that can strike at reach 1 always has a cell in the radius-5 square; at radius 2 only a side-3 target (Dragon) leaves striking cells outside, along its +x and +y edges. | High / Medium | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+
+### AI-696
+
+The three callers load the actor's Position pointer `+0x10` (`L16721`, `L16722`, `L16723`)
+and call `R0019` (`L16724`, `L16725`, `L16726`), which returns the word at Position `+2`
+(`R0019`). That word is the packed cell, `y << 8 | x`, of the bytes at Position `+0` and `+1`
+(`MOVE-087`); the two setters read here store it beside those bytes (`L16727` in `R0290`,
+`L16728` in `R2307`). The footprint is the n×n block whose top-left cell is that cell
+(`MOVE-087`; occupy loop `L07079`, `L07080`). Nothing in the three callers adds a size term.
+
+With radius R the square `R0020` walks (`AI-694`) covers columns `x−R .. x+R` and rows
+`y−R .. y+R`. The footprint covers `x .. x+n−1`. The square therefore extends R cells beyond the
+footprint's left and top edges and `R−(n−1)` beyond its right and bottom edges: for n = 2, 4 at
+radius 5 and 1 at radius 2; for n = 3, 3 at radius 5 and 0 at radius 2.
+
+**Confidence.** High for the centre word and its relation to the footprint: straight-line loads
+in each caller, the getter body and the occupy loop, asserted in `evidence/probe-en/asserts.tsv`.
+Medium for the writer set: this experiment reads two setters and relies on `MOVE-087`'s list of
+fourteen located writers at that claim's own grade.
+
+### AI-697
+
+`R0020` tests bit `0x20` of `[world+0x10000+cell]` and calls `R0035(cell)`, which returns
+the dword at `+0x04` of the copied cell record (`L16729`, `L05431`); a nonzero result is
+appended (`L16730` and four more sites). `R0050` calls `R0458` for every cell of the n×n
+footprint (`L05508`). `R0458` stores the actor at record `+0x04` when the domain getter
+returns 1 or 2 (`L10903`, `L07121`, `L14144`) and at `+0x08` when it returns 3 (`L10904`,
+`L07122`, `L14145`), matching `TERR-CELLREC-146`. Each square cell yields at most one entry,
+and a ground actor with k of its cells in the square yields k entries. Nothing in the append or in
+`R0020` tests for a pointer already listed. The k entries hold for a completed placement: the
+occupy loop stops at the first cell whose slot is taken (`L07116`..`L16731`) and leaves the earlier
+cells entered.
+
+Of the Units entries `Data.bin` creates (`AI-699`), Dragon (side 3) and Bat_Sonic (side 1) carry
+`movementType` 3; that the domain getter returns that byte is stated by `TERR-MOVE-055` and
+`TERR-MOVE-057` (amended: its domain gloss was superseded, the streamed cells stand; the streamers store it into `+0x4a`). So a Dragon or Bat_Sonic created from
+`Data.bin` is not a candidate of the three withdrawal tests through `R0458`.
+
+**Confidence.** High: that `R0020` reads slot `+0x04` only, and that `R0458` enters domain 1
+and 2 at `+0x04` and domain 3 at `+0x08` (both bodies read whole, every cited instruction asserted
+on EN and RU, one image). Medium: that no domain-3 actor is ever listed and that Dragon and
+Bat_Sonic always carry domain 3. This experiment searched no stores into slots `+0x04` and `+0x08`
+outside `R0458`, and the serializer LOAD branch (`L10358`, `L10359`) can set `+0x49` and
+`+0x4a` of a loaded actor from a stream whose content was not read.
+
+**Unknown.** The full set of writers of slots `+0x04` and `+0x08`. A census of every store to those
+two offsets of the copied record, with the rule that classes a store as a writer, would settle it.
+
+### AI-698
+
+- `R0105` and `R0106` return 1 when the filtered list's count `+0x10` is nonzero (`L16732`,
+  `L16733`); a repeat only raises the count.
+- `R0021` decides each entry from the pair of owners and, for an invisible candidate, from
+  `R0036` per group member (`AI-694`); every copy of one actor gets the same verdict. A removal
+  finds the first node holding the pointer (`L16734`), which is the current node because earlier
+  copies were already removed, and the iterator has already advanced (`L16735`).
+- `R0100` counts living entries in a byte (`L00208`, `L16736`), then sums `R0165` and
+  `R0166` of each entry's Position, the anchor fine point, not the size-adjusted centre
+  (`L16737`, `L16738`), and divides by the low byte of the count (`L16739`, `L16740`)
+  before `R0104` (`L16404`). A side-2 hostile wholly inside the square counts four times in
+  that mean. At radius 5 the list holds at most 121 entries, so the byte does not wrap
+  (`AI-RETREAT-274`).
+
+**Confidence.** High: each consequence follows from instructions read whole and asserted.
+
+### AI-699
+
+Instrument: `tools/placedb -mode footprint` over `world.res:data/data.bin` (`world.res` EN
+`7b44c526…28c9`, RU `8ba0d479…4e51`). The two `world.res` files differ; the printed
+tables (names only for the cited classes, the other entries by index) are equal row for row.
+
+| Units entries | tokenSize | movementType |
+|---|---:|---:|
+| Catapult, Ballista, Daemon | 2 | 1 |
+| Ogre, Troll (4 entries each, base and `.2`..`.4`) | 2 | 1 |
+| Dragon (4 entries) | 3 | 3 |
+| the other 41 named entries | 1 | 1, 2 or 3 |
+
+Units total 41 / 11 / 4 entries of side 1 / 2 / 3. Humans: 20 entries carry 1 and 190 an absent
+cell, so every Humans actor keeps the constructor's 1. The streamers store Units slot `0x1f` and
+Humans slot `0x15` through the address `+0x49` (`L04084`, `L04085`), skipping an absent cell
+(`TERR-MOVE-057`); the LOAD branch of the Unit serializer passes the same address (`L10358`,
+`TERR-MOVE-055`). The domain byte `+0x4a` is streamed beside it (`L10354`, `L10355`).
+
+**Confidence.** High for the `Data.bin` census of the shipped table on both roots, and for the
+side of an actor created from it. The side of an actor restored from a save is Unknown: the LOAD
+branch passes `+0x49` and `+0x4a` to a stream read (`L10358`, `L10359`), and no save stream
+was read.
+
+**Unknown.** The `+0x49` content of a loaded actor; whether a summoned creature or a hero gets
+another side (the summon and join paths were not read). A decode of `+0x49` in a save holding such
+a unit would settle both.
+
+### AI-700
+
+`R0247` takes per axis the size-adjusted centre `P + (s−1)·128` (`L07085`..`L06158`), keeps
+the larger absolute axis difference (`L16741`), subtracts `(sA+sT)·128 − 256` (`L04080`,
+`L04081`) and returns 1 up to `0x180`, else `(E+0x40) >> 8` (`AI-463`). `R0036` subtracts
+`(sA+sT)·128` per axis, clamps at 0 and returns `(max >> 8) + 1` (`AI-PURSUE-040`). Both are
+centre-to-centre Chebyshev tests of the gap between footprints; reach 1 is inclusive.
+
+`evidence/geometry/` evaluates both formulas for every attacker anchor within 8 cells of the
+target anchor, sub-cells `0x80`, sides 1 to 3 each. For an attacker of side 1, d = 1 exactly on the
+ring of cells around the target footprint: offsets −1..1 (side 1), −1..2 (side 2), −1..3 (side 3)
+from the target anchor, footprint excluded. The routines disagree on 0 placements.
+
+**Confidence.** High for resting actors: the formulas are asserted instruction by instruction and
+the enumeration is exhaustive over its window.
+
+**Unknown.** A strike applied while either actor's sub-cell is not `0x80`: the formula then admits
+one more cell on the approaching side. A trace of the sub-cell bytes at strike application would
+settle it.
+
+### AI-701
+
+From `evidence/geometry/geometry.tsv` (resting actors, square centred on the target anchor,
+`AI-696`):
+
+| target side | striking cells, attacker side 1 | outside radius 2 | outside radius 5 |
+|---:|---:|---:|---:|
+| 1 | 8 | 0 | 0 |
+| 2 | 12 | 0 | 0 |
+| 3 | 16 | 9 | 0 |
+
+The nine are the column `x+3` and the row `y+3` of a side-3 target, offsets −1..3. For attackers
+of side 2 and 3 the counts outside radius 2 are 11 and 13, and none outside radius 5. Side 3 is
+Dragon only (`AI-699`), so the blind cells concern the Withdraw test of a Dragon. The side-3
+attacker rows (11 and 13) are model rows: a side-3 attacker is a Dragon, a domain-3 actor that
+`R0458` does not enter at slot `+0x04` (`AI-697`), and no shipped ground attacker has side 3.
+
+**Confidence.** High for the geometry. Medium as a statement about play: it assumes resting
+actors, and whether a ground melee attacker strikes a Dragon depends on target selection
+(`AI-FLIER-073`), not read here.
