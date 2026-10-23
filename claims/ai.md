@@ -669,7 +669,7 @@ In `R0024`: `L00438` loads the group's member count, the latch at `+0x30` is rea
 | AI-WITHDRAW-027 | The two thresholds are the `Data.bin` Units columns the engine names itself — `Withdraw` and `Wimpy` — and only ranged monster classes carry a `Withdraw`. | High | ● active (amended) | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
 | AI-WITHDRAW-028 | The flee cell uses a distance-3 away projection without a passability test in the picker. | High / Unknown | ● active (amended, partially retracted) | [EXP-0087](../experiments/EXP-0087-group-arms/), [EXP-0272](../experiments/EXP-0272-immediate-retreat/) |
 | AI-CLASS-029 | A spawn-time classifier exists that would overwrite both thresholds, and it never writes anything. | High | ● active | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
-| AI-CLASS-030 | A command overwrites both thresholds at runtime, and its per-class table is unreachable. | High / Medium | ● active | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
+| AI-CLASS-030 | A command overwrites both thresholds at runtime, and its per-class table is unreachable. | High / Medium | ● active (amended) | **[EXP-0087](../experiments/EXP-0087-group-arms/)** |
 | AI-ORDER-031 | The complete immediate-form writer set of `grpAI+0x20`, with its instrument and both blind spots. | High / Medium | ● active (amended) | **[EXP-0087](../experiments/EXP-0087-group-arms/)**, [EXP-0322](../experiments/EXP-0322-group-order-producers/) |
 
 ### AI-SWARM-022
@@ -741,6 +741,8 @@ The former living-only centroid and identical positive-HP gate for `R0100`/`R010
 `R0186(a0,a1,a2,player)` and `R0187(…)` walk `world+0xa4554` and set `ord+0x40` / `ord+0x44` to `healthMax × pct / 100` (`0x51eb851f` × / `SAR ,5`), choosing `pct` by `ord+0x4c` — 0 → a0, 1 → a1, 2 → a2, `> 2` → the byte is forced to 0. `player == 0` applies to every actor whose `Player+0x28` is 0; otherwise to that player's actors. Their single caller each is one sub-arm of `R0061` (`L00508`, `L00509`) that reads a mode from `cmd+0x0e` and passes `(v, 2v, 3v)` and `(0, v, v)` with **`v = 0 / 10 / 30`**. Because `AI-CLASS-029` leaves `ord+0x4c` at 0 on every path, the 2v and 3v columns are never selected: the command's effect is uniform — mode 0 disables the withdraw, mode 1 sets it to 10 % of maximum health, mode 2 to 30 %, and all three overwrite the authored `Wimpy`
 
 **Confidence.** High for both routines and the three modes (read end to end, one caller each). **Medium** for the *name* of the command: the outer opcode was not traced past the sub-dispatch at `L00510`
+
+**Amended.** `AI-720` reads the command's arm and sender: with `ord+0x4c` 0 the first column applies, so `Withdraw` becomes 0, 10 or 30 % of `healthMax` and `Wimpy` becomes 0; the Player comes from the command, is never null, and only its actors change. The command is sent by key, options and mission start (`GameOptions\Wimpy`, default 0).
 
 ### AI-ORDER-031
 
@@ -8222,7 +8224,7 @@ document's producer: a save made at the start of `131.alm` in the original, deco
 | AI-696 | In `R0105`, `R0106` and `R0100` the centre of `R0020` is the Position cell word, the top-left cell of an n×n footprint, so the square reaches R cells past the left and top edges and R−(n−1) past the right and bottom. | High / Medium | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
 | AI-697 | `R0020` reads only cell-record slot `+0x04`: a domain-1 or 2 actor is listed once per footprint cell inside the square, up to n² times; a domain-3 actor created from `Data.bin`, kept in slot `+0x08` by `R0458`, is not listed by it. | High / Medium | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
 | AI-698 | Repeated entries do not change the Wimpy, Withdraw or filter outcome; the flee helper `R0100` averages one anchor point per entry, so a multi-cell hostile weighs as many times as it has cells in the square. | High | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
-| AI-699 | The footprint side of an actor created from `Data.bin` is actor byte `+0x49`, from `tokenSize` (default 1): Catapult, Ballista, Ogre, Troll, Daemon 2, Dragon 3, all else 1, EN and RU alike. A loaded actor's side is Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
+| AI-699 | The footprint side of an actor created from `Data.bin` is actor byte `+0x49`, from `tokenSize` (default 1): Catapult, Ballista, Ogre, Troll, Daemon 2, Dragon 3, all else 1, EN and RU alike. A loaded actor's side is Unknown. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
 | AI-700 | For resting actors, strike reach 1 holds exactly when the two footprints touch, edge or corner: 8, 12 and 16 attacker cells around a target of side 1, 2 and 3; `R0247` and `R0036` agree on every placement tried. | High | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
 | AI-701 | A resting ground attacker of side 1 to 3 that can strike at reach 1 always has a cell in the radius-5 square; at radius 2 only a side-3 target (Dragon) leaves striking cells outside, along its +x and +y edges. | High / Medium | ✔ promoted (branch candidate) | [EXP-0609](../experiments/EXP-0609-big-unit-cells/) |
 
@@ -8317,6 +8319,8 @@ was read.
 **Unknown.** The `+0x49` content of a loaded actor; whether a summoned creature or a hero gets
 another side (the summon and join paths were not read). A decode of `+0x49` in a save holding such
 a unit would settle both.
+
+**Amended.** `AI-722` settles the loaded and summoned sides: LOAD restores the saved byte, the 1 134 install-save records hold the class value (Ogre 2, every other class 1), a summoned creature is built through the Units streamer and a hero through the Humans streamer.
 
 ### AI-700
 
@@ -8548,3 +8552,207 @@ arm 5's fallback, whose Move arm ignores it (`AI-ROAM-025`, `AI-SWARM2GATE-107`)
 forms, a byte store of an immediate and a stored zero register, so a store of a register or memory
 value and a whole-record copy are not seen, and an address computed at run time could reach
 `R0158`. So no shipped mission roams through a found writer; Medium that none roams at all.
+
+## Engaging by itself, the cast check and withdraw thresholds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-714 | Reach byte `actor+0x12c` has four `.text` byte writers: constructor 1, weapon equip and removal `±(@.range − 1)`, state-`0x17` arm 5; reach is the worn weapon's `@.range`, 1 for melee or none, and LOAD restores it raw. | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-715 | Standing acquisition `R0022` leaves `ord+8` = 6 with a winner; with none, `0xb` when `Player+0x28 != 0` (8 through `R0113` on mask 4) and 0 or 8 through `R0015` when `Player+0x28 == 0`. | High | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-716 | Of 51 word stores at `+0x0e`, the class word is written by the actor, Units and Humans constructors and LOAD; `0x18` is a Humans class word on 57 mana rows, and no writer of its arm's state `0x17` was found (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-717 | Mask bit 4 is set at construction on an actor with mana, so the suppression guard covers a human participant's mana-carrying unit whose weapon gives reach 1; no install-save record matches. | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-718 | With a target set, engage, cast setter, gate, executor and admission reach no sight-map routine at direct-call depth ≤ 3 except via acquisition and reacquisition, not entered; `R0021` applies a group detection range to invisible victims. | Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-719 | No target path filters at −10 health: a body below 1 stays a fallback target until the dying arm, its `+0x6c` countdown spent, finds health ≤ −10, tears it down and the world step unlinks it that pass. | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-720 | The Wimpy command (Ctrl+W, options, mission start; option `GameOptions\Wimpy`, default 0) sets for the sending Player's actors only `Withdraw` to 0, 10 or 30 % of `healthMax` and `Wimpy` to 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-721 | `Data.bin` `Withdraw`/`Wimpy` health points, streamed raw: Goblin_Sling 30/8, Orc_Bow 60/0, Bat_Sonic 15/4, Goblin_Pike 0/10, Bee 0/3, Squirrel 0/5, Dragon 0/63, Catapult, Ballista, `Human` −1/−1, others 0/0; preserved owner saves agree. | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+| AI-722 | A summoned creature takes footprint side `+0x49` from the Units streamer, a hero from the Humans streamer (1), a loaded actor from the save; 1 134 install-save records hold the class value. | High / Medium | ✔ promoted (branch candidate) | [EXP-0613](../experiments/EXP-0613-engage-withdraw/) |
+
+### AI-714
+
+Instrument: Capstone 5.0.7 sweep of `.text` (554 722 instructions), every written operand
+overlapping `+0x12c` at its width: 24 rows. The byte stores:
+
+- `L00325` in the actor constructor `R0185`: 1.
+- `L04091` in `R0850` (equip): adds `w+0x50 − 1`; `L07757` in `R0853` (removal):
+  subtracts it. Both are reached through a vtable (`.rdata` `L16544`, `L16830`), not a direct
+  call. `w+0x50` is `@.range`, or 1 for −1 (`HERO-REACH-025`).
+- `L00278` in `R0146` (state `0x17`): 5 when the class word is `0x18`; no writer of state
+  `0x17` was found (`AI-STATE-043`, Medium; `AI-716`).
+
+The other 20 rows are dword stores into other classes. The Unit serializer saves the byte at
+`L16831` and LOAD reads it raw at `L16832`; LOAD calls no equip routine (`HERO-170`).
+
+`Data.bin` Weapons `@.range` and the reach it yields, EN = RU: every melee row, `BareHands` and
+`Plasma Sword` −1 (reach 1); `Staff` 5, `Shaman Staff` 4, `Short Bow` 4, `Long Bow` 5,
+`Crossbow` 6, `Sonic Beam` 4, `Flame Thrower` 8, `Boulder Thrower` 20. The 1 134 records of the 27
+install saves hold reach 1, 4, 5 or 6 only.
+
+**Confidence.** High for the four byte stores and the table. Medium for "no other writer": a
+computed-address store or a block copy is not excluded.
+
+### AI-715
+
+`R0022`, read whole:
+
+- A winner: `ord+8 = 6` (`L00576`), `ord+0xc` = target, `ord+0x14` = reach (`AI-ACQUIRE-002`).
+  With no living winner and the session dead list's count `+0xbd4` nonzero, the dead list is
+  scanned with the same reach seed (`L16833..`, `AI-719`).
+- No winner and `Player+0x28 != 0`: `ord+8 = 0xb` (`L14777`); on mask 4 it then calls
+  `R0113`, which has no `ord+8` store of its own and reaches `R0018` (stores 8) directly and
+  through `R0394`.
+- No winner and `Player+0x28 == 0`: `R0015`, which stores 0 or 8 (`AI-349`).
+
+Pending 6 does not approach (`AI-518`).
+
+**Confidence.** High: every exit of the function and of `R0113` was read.
+
+### AI-716
+
+Of the 1 604 written operands overlapping `+0x0e`, 51 are word stores; each was assigned to its
+object. Actor stores: `L03174` (actor constructor, 0), `L03175` (Units constructor, 0),
+`L03159` (Humans constructor, 0), `L03164`/`L03165` (Humans constructor with a nonzero
+mode, `v + 0x21` or `v + 0x23`, the player characters `0x21..0x24`). The streamers form the
+address at `L16834` (Units `typeID`) and `L03162` (Humans `typeID`); LOAD at `L12548`. The
+other 46 go to outgoing command records (16), objects of other vtables (11 and 2 helpers), a
+`[x+0x44]` record (`L05299`) and objects built in `R0003` by other classes' constructors (16).
+
+`Data.bin` Humans, EN and RU: `typeID` `0x18` on 57 rows, all with `ManaMax` above 0 (58 rows carry
+mana); no Units row carries it. The install saves hold 5 Human records of class `0x18`, mask 4,
+reach 4. The only test of `0x18` is in the state-`0x17` arm `R0146`; no writer of state `0x17`
+at `+0x50` was found (`AI-STATE-043`, Medium) and no install save holds it (state values 0, 1, 3,
+`0xa`, `0xb`, `0xc`, `0x10`).
+
+**Confidence.** High for the actor stores and the census. Medium that no writer of state `0x17`
+was found: this is `AI-STATE-043`'s grade, and its sweep is blind to LOAD, scaled-index stores and
+in-place arithmetic. Medium for "no other writer": 1 553
+byte and dword rows overlapping `+0x0e` were not each read; in functions holding a `+0x154` or
+`+0x158` operand they are 66 dword stores at `+0x0c` and one byte store, none on a base traced to
+an actor.
+
+**Unknown.** Whether a LOAD of `+0x50 = 0x17` ever occurs; a save holding that state would show it.
+
+### AI-717
+
+Mask bit 4 at construction: the Humans constructor ORs 6 when mana `+0x9c` is above 0
+(`L04499..L04439`); the Units constructor ORs 4 when `+0x9c` is nonzero (`L05052..L16835`)
+and 6 for class word `0x47` or `0x48` (`L16836..L16837`, `AI-341`). The guard needs mask 4, reach below 2
+and `Player+0x28 == 0` (`AI-462`, `AI-GUARD-007`). `Player+0x28` is 0 on the human participant
+of a campaign map and 1 on the others (`ALM-PLAYER-069`, `AI-633`). Reach below 2 means a weapon
+of `@.range` −1 or none (`AI-714`). So the guard covers the human participant's mages and mana
+units holding a melee weapon or nothing.
+
+Install saves: 14 Human records carry mask 4 (9 in slot 1, of class `0x23`/`0x24`, reach 5; 5 of
+class `0x18`, reach 4); no Unit record carries it; none has reach below 2.
+
+**Confidence.** High for the mask setters and the guard terms. Medium for coverage: other mask
+writers in play were not searched.
+
+**Unknown.** What a covered unit does beside an enemy in play; a run with a mage holding a melee
+weapon would show it.
+
+### AI-718
+
+Direct-call closure, depth 3, from engage `R0009`, the cast setter `R0018`, the gate
+`R0041`, the executor `R0016` and the admission `R0268`, not entering acquisition
+`R0022` or reacquisition `R0004`: none reaches the sight-map clear `R0145`, the sight
+stamp `R0135`/`R0134` or the group builder `R0114` (`AI-GROUPSEE-068`). The closure does
+reach the two excluded routines (`callees.tsv`): engage and the cast setter call acquisition
+directly, and the executor reaches acquisition at depth 3 (`R0250`, `R0137`) and
+reacquisition directly; neither was entered, so a strike path that re-enters them brings their
+sight-based populations in. Engage and the cast setter call the invisibility filter `R0021`,
+which drops non-hostile candidates and unlinks an invisible one (`+0x144 & 0x8000`) unless a
+member of the group is within that member's detection range `ord+0x71` of it (`AI-694`); for an
+invisible victim this is a detection test, and it reads no sight map.
+
+The cast setter, given no target, collects the square of the mover radius (`L16838..L16839`,
+`AI-690`), filters it and takes the first entry; it stores `ord+8 = 8`, `ord+0x28` = target,
+`ord+0x30` = spell and `ord+0x14` = Spell `+9`. Engage with a target stores pending 5 and
+`ord+0x14` = reach (`MAGIC-409`). A carrier stops at its reach or at Spell `+9` with no sight-map
+test on these routines; a visible victim is not tested for sight, an invisible one by the group
+detection range.
+
+**Confidence.** Medium: indirect calls in the executor and the admission are not followed, and
+acquisition and reacquisition, which the closure reaches, are excluded by construction.
+
+**Unknown.** Whether a carrier attacks a visible victim outside its sight map in play; a run with a
+victim behind an obstacle inside the carrier's reach would show it.
+
+### AI-719
+
+The eight −10 compares in `.text` are `L02699`, `L07293`, `L01925`, `L16840`, `L04399`,
+`L04401`, `L16841` and `L05220`; none lies in acquisition, reacquisition, engage or the cast
+setter. Acquisition and reacquisition only set candidates below 1 health apart as fallback
+(`L16833..`, `AI-360`).
+
+The tick's dying arm (`L16842..L04562`): while byte `+0x6c` is above 0 it decrements it; then
+an actor with domain `+0x4a` above 1 gets health −1000; health ≤ −10 sets `+0x54 = 0x10` and calls
+teardown `R0208`, which releases the body's cells (`HERO-DEATH-026`). The world step `R0427`
+skips the tick of an actor with `+0x54 = 0x10` and, in the same pass, calls `R2059` on its Player
+and unlinks it from the world list at `+4` (`L16843..L01926`). A body above −10 when the
+countdown has run out is tested again on every tick (`HERO-DEATH-026`, `HERO-DWELL-065`).
+
+**Confidence.** High for the arm and the unlink. Medium for "no filter", since computed calls are
+not followed, and for the unlinked list being the population the group builder walks.
+
+**Unknown.** How often a ground body stays between −9 and 0; a run that strikes a dying unit would
+show it.
+
+### AI-720
+
+Sender `R1191` fills the static record `L02444`: opcode `0x46` at `+9`, the local Player word
+`[party+0x9b4]+4` at `+5`, selector 1 at `+0xa`, the mode argument at `+0xe`. Callers:
+`L16844` (option `+0xa9c` incremented modulo 3, the key path of `AI-CLASS-030`'s command),
+`L16845` (an options value modulo 3) and `L14417` (mission start, option `+0xa9c`). The option
+is 0 at `L16846` and loaded from registry `GameOptions\Wimpy` at `L16847`.
+
+Arm `L16848`: Player = lookup(`cmd+5`); a null Player leaves the arm; `v` = 0, 10, 30 for mode 0,
+1, 2, else 0. `R0186(v, 2v, 3v, P)` writes `ord+0x40`; `R0187(0, v, v, P)` writes `ord+0x44`.
+With `ord+0x4c` 0 (`AI-CLASS-029`) the first column applies: `Withdraw` = `healthMax·v/100`,
+`Wimpy` = 0. P is never null, so only that Player's actors change.
+
+**Confidence.** High for the arm and the sender. Medium for the key name of `L16844`.
+
+### AI-721
+
+Writers found: the Units streamer (`L00488`, `L00489`); `R0186`/`R0187` (`AI-720`); the
+classifier, which writes nothing (`AI-CLASS-029`); LOAD's raw order block. In functions holding a
+`+0x158` operand no other order-record store at `+0x40`/`+0x44` was found. ALM unit records carry
+no threshold (`ALM-UNIT-040`).
+
+`Data.bin` Units rows with a name, slots 35/36 (`thresholds.tsv`, EN = RU), passed by address to
+`ord+0x40`/`ord+0x44` with no conversion: Goblin_Sling (`0x4f`) 30/8, Orc_Bow (`0x41`) 60/0,
+Bat_Sonic (`0x46`) 15/4, Goblin_Pike (`0x40`) 0/10, Bee (`0x49`) 0/3, Squirrel (`0x4a`) 0/5,
+Dragon (`0x47`) 0/63, Catapult (`0x1a`), Ballista (`0x1b`) and the row `Human` −1/−1; Orc_Sword,
+Ogre, Troll, Ghost, Foot_Animated, Turtle and Daemon 0/0. A class with four tiers carries one pair
+in all four; in the first tier of Goblin_Sling (30) and Orc_Bow (60) `Withdraw` equals `healthMax`.
+
+Comparison population: the 27 `.sav` files of the EN and RU install roots, preserved owner saves
+(1 134 records). Unit class `0x40` 0/10 (91), `0x41` 60/0 (73), `0x46` 15/4 (40), `0x49` 0/3
+(179), `0x4a` 0/5 (123), `0x4f` 30/8 (52), every other Unit class in them 0/0, every Human record
+0/0. Each Unit class in them matches its `Data.bin` row; they hold no Dragon, Catapult or Ballista
+record.
+
+A creature withdraws at health ≤ `Withdraw` and flees at health ≤ `Wimpy` (`AI-WITHDRAW-027`):
+Goblin_Sling 30 and 8, Orc_Bow 60 and never, Bat_Sonic 15 and 4, Goblin_Pike never and 10, Bee
+never and 3, Squirrel never and 5, Dragon never and 63. Humans never, until the Wimpy command sets
+their `Withdraw` (`AI-720`).
+
+**Confidence.** High for the `Data.bin` values and the save comparison. Medium for "no other
+writer": computed pointers outside functions with a `+0x158` operand are not excluded.
+
+### AI-722
+
+Side byte stores: `L00821` (constructor, 1); `L05637` and `L10356` belong to class
+`L05352`. Address formation: `L04084` (Units `tokenSize`), `L04085` (Humans), `L10358`
+(LOAD); SAVE at `L08383`. Summon: `L03125` calls create-by-name `R0501`, which builds the
+actor and runs the Units constructor `R0184` and streamer `R0180`, so the summoned class's
+`tokenSize` applies. A hero is built through the Humans streamer, whose cells are 1 or absent
+(`AI-699`), so 1.
+
+Install saves: side 1 on every record except Unit class `0x42` (Ogre, `tokenSize` 2): 2 on all 5.
+Mover byte `+0x08` is 5 on all 1 134 (`AI-692`); its writers are `AI-691` and `AI-693`.
+
+**Confidence.** High for the stores and the census. Medium for the summon arm's identity and for
+"no change in play".
+
+**Unknown.** The side of a summoned creature in a save; no install save holds one.

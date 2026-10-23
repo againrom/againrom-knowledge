@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4150. Observation: 99. Static analysis: 3521. Mixed: 530.
+Claims labelled: 4159. Observation: 99. Static analysis: 3530. Mixed: 530.
 
 ## Ledger ai
 
@@ -82,7 +82,7 @@ Claims labelled: 4150. Observation: 99. Static analysis: 3521. Mixed: 530.
 | AI-WITHDRAW-027 | static analysis | ● active (amended) |
 | AI-WITHDRAW-028 | static analysis | ● active (amended, partially retracted) |
 | AI-CLASS-029 | static analysis | ● active |
-| AI-CLASS-030 | static analysis | ● active |
+| AI-CLASS-030 | static analysis | ● active (amended) |
 | AI-ORDER-031 | static analysis | ● active (amended) |
 | AI-CMD-032 | static analysis | ● active |
 | AI-CMD-033 | static analysis | ● active (amended) |
@@ -444,7 +444,7 @@ Claims labelled: 4150. Observation: 99. Static analysis: 3521. Mixed: 530.
 | AI-696 | static analysis | ✔ promoted (branch candidate) |
 | AI-697 | static analysis | ✔ promoted (branch candidate) |
 | AI-698 | static analysis | ✔ promoted (branch candidate) |
-| AI-699 | static analysis | ✔ promoted (branch candidate) |
+| AI-699 | static analysis | ✔ promoted (amended, branch candidate) |
 | AI-700 | static analysis | ✔ promoted (branch candidate) |
 | AI-701 | static analysis | ✔ promoted (branch candidate) |
 | AI-702 | static analysis | ✔ promoted (branch candidate) |
@@ -456,6 +456,15 @@ Claims labelled: 4150. Observation: 99. Static analysis: 3521. Mixed: 530.
 | AI-708 | static analysis | ✔ promoted (branch candidate) |
 | AI-709 | static analysis | ✔ promoted (branch candidate) |
 | AI-710 | static analysis | ✔ promoted (branch candidate) |
+| AI-714 | static analysis | ✔ promoted (branch candidate) |
+| AI-715 | static analysis | ✔ promoted (branch candidate) |
+| AI-716 | static analysis | ✔ promoted (branch candidate) |
+| AI-717 | static analysis | ✔ promoted (branch candidate) |
+| AI-718 | static analysis | ✔ promoted (branch candidate) |
+| AI-719 | static analysis | ✔ promoted (branch candidate) |
+| AI-720 | static analysis | ✔ promoted (branch candidate) |
+| AI-721 | static analysis | ✔ promoted (branch candidate) |
+| AI-722 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger alm
 
@@ -948,7 +957,7 @@ Claims labelled: 4150. Observation: 99. Static analysis: 3521. Mixed: 530.
 | HERO-DAMAGE-022 | static analysis | ● active (amended, partially retracted) |
 | HERO-CADENCE-023 | static analysis | ● active (amended, partially retracted) |
 | HERO-TARGET-024 | static analysis | ● active (amended, partially retracted, contested) |
-| HERO-REACH-025 | static analysis | ● active |
+| HERO-REACH-025 | static analysis | ● active (amended) |
 | HERO-DEATH-026 | static analysis | ● active (amended, superseded) |
 | HERO-KILL-027 | static analysis | ● active (amended) |
 | HERO-AGGRO-028 | static analysis | ● active (amended) |

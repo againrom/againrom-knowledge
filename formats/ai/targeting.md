@@ -22,6 +22,9 @@
 5. **Outcome.** A winner sets `order+8 = 6`, `order+0xc = target`, `order+0x14 = reach`. No
    winner: a human participant's unit tries to heal; an AI-owned unit goes to the guard state,
    which walks it back to its post whenever it is farther from the post than `actor+0xa5`.
+   The values left at `order+8` are 6 with a winner; with none, `0xb` for an AI-owned unit (a
+   mage then 8 when its cast arm finds a target) and 0 or 8 from the heal arm for a human
+   participant's unit (`AI-715`).
 
 **Sight decides the population and reach decides the pick.** An engine that acquires on sight
 alone starts fights the game does not; one that scans only within reach acquires through walls,
@@ -111,7 +114,27 @@ seed for whole-cell sight. The shared algorithm has two parameters:
 the guard and engage arms do.
 
 **Two clauses suppress engagement entirely**, both requiring all three of `actor+0x4c & 4`,
-`actor+0x12c < 2` and a human-participant owner (`Player+0x28 == 0`).
+`actor+0x12c < 2` and a human-participant owner (`Player+0x28 == 0`). Mask bit 4 is set at
+construction on an actor with mana, and reach is the worn weapon's `@.range`, 1 for a melee weapon
+or none (`AI-714`), so the clauses cover the human participant's mages and mana units holding a
+melee weapon or nothing; no install-save record is such a unit (`AI-717`). The state-`0x17` arm
+sets reach 5 for class word `0x18`, a Humans class carried by 57 mana rows; no writer of state
+`0x17` was found (`AI-STATE-043`, Medium; `AI-716`).
+
+## After the target is set
+
+Once `order+0xc` holds a target, engage, the cast setter, the strike gate, the executor and the
+cast admission call no sight-map routine directly or through two further levels of direct calls,
+outside acquisition and reacquisition: engage, the cast setter and the executor reach those two,
+and they were not entered. The invisibility filter `R0021`, called by engage and the cast
+setter, applies a group detection range to invisible victims. A weapon carrier stops at its reach
+and a book caster at the spell's stop distance with no sight-map test on these routines. The
+cast setter given no target takes the first hostile of its mover-radius square, filtered for
+relation and invisibility, with no sight map (`AI-718`, Medium).
+
+No target path filters at −10 health. A body below 1 health stays a fallback target until its
+dying arm, the countdown spent, finds health at or below −10, tears it down and the world step
+unlinks it in the same pass (`AI-719`).
 
 ## What a refused route does to a pursuit order
 

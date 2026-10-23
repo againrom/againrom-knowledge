@@ -105,11 +105,20 @@ kept only when some member of the actor's group list sees it within that member'
 range; health is not filtered here (`AI-694`). Both thresholds compare against **current** health as
 a signed word, so a value of 0 means *never* and a value equal to `healthMax` means *always*.
 
+The thresholds are health points. The Units streamer passes the `Data.bin` values unconverted
+(`Withdraw`/`Wimpy`): Goblin_Sling 30/8, Orc_Bow 60/0, Bat_Sonic 15/4, Goblin_Pike 0/10, Bee 0/3,
+Squirrel 0/5, Dragon 0/63, Catapult, Ballista and the `Human` row −1/−1, and Orc_Sword, Ogre,
+Troll, Ghost, Foot_Animated, Turtle and Daemon 0/0 (`AI-721`). In the preserved owner saves every
+Humans actor holds 0/0 (`AI-721`). The Wimpy command, sent by key, options and mission start from option
+`GameOptions\Wimpy` (default 0), sets for the sending Player's actors only `Withdraw` to 0, 10 or
+30 % of `healthMax` and `Wimpy` to 0 (`AI-720`).
+
 For a multi-cell actor the square is centred on its Position cell, the top-left cell of its n×n
 footprint, so it reaches R cells past the footprint's left and top edges and R−(n−1) past its
 right and bottom edges (`AI-696`). The footprint side n is the `Data.bin` `tokenSize`: 2 for
 Catapult, Ballista, Ogre, Troll and Daemon, 3 for Dragon, 1 for every other Units entry and every
-Humans actor created from `Data.bin`; a loaded actor takes the side from the save stream, not read (`AI-699`). The collector reads only the ground occupant slot of each cell record: a
+Humans actor created from `Data.bin`; a summoned creature takes its Units `tokenSize`, a hero 1, and
+a loaded actor the saved byte, which in the install saves is the class value (`AI-699`, `AI-722`). The collector reads only the ground occupant slot of each cell record: a
 domain-1 or 2 hostile is listed once per footprint cell inside the square, and a domain-3 hostile
 is not entered at the slot the collector reads: for a Dragon or Bat_Sonic created from `Data.bin`
 (`movementType` 3, `TERR-MOVE-055`, and `TERR-MOVE-057`, whose domain gloss was superseded and whose streamed cells stand) it is not listed (`AI-697`, Medium: stores to

@@ -582,7 +582,9 @@ damage-over-time routes are not enumerated) (`AI-650`). The turn flag forces one
 pointer found starts or changes an order, a strike, a cast or a withdrawal (`AI-547`,
 Medium). The withdrawal tests run for every member of every group order byte
 (`AI-548`); their thresholds start from the authored `Withdraw` and `Wimpy` values (`AI-WITHDRAW-027`) and the Wimpy
-command overwrites both (`AI-CLASS-030`), other writers being Unknown (`AI-548`, Medium). The earlier unplaced call sites
+command sets the sending Player's actors' `Withdraw` to 0, 10 or 30 % of `healthMax` and `Wimpy` to 0
+(`AI-CLASS-030`, `AI-720`); no other writer was found in functions holding an order-record operand
+(`AI-721`, Medium). The earlier unplaced call sites
 are placed (`AI-549`).
 The refused-route and hit responses per command state are summarised in `AI-550`.
 
