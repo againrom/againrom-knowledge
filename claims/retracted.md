@@ -1567,3 +1567,10 @@ on evidence already committed.
 | Claim | Previous clause | Previous confidence | Evidence | Correction | Outcome |
 |---|---|---|---|---|---|
 | `DAT-OBJ-002` (second-array element type only) | armors, shields and weapons 0x3c (+10 raw bytes + a second dword array) | High | [EXP-0606](../experiments/EXP-0606-weapon-row/); DAT-STRARRAY-022 | Runtime +0x28 is a CStringArray. Its Serialize slot calls the CString writer/reader for each element, and its destructor destroys each CString. All 54 installed Weapons arrays are empty, so the corpus could not distinguish strings from raw dwords. Row size, numeric parameter array, masks and collection identities stand. | REFUTED (second-array type only) |
+
+
+## Guard centroid coordinate scale
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `AI-RADFREEZE-075` (fine-coordinate live-refresh clause only) | Verbatim: "it sums each member's fine coordinates, divides, and stores the fine centroid" | High / Medium | [EXP-0615](../experiments/EXP-0615-group-giveup/), AI-739 | `R0141` calls whole-cell getters `R0299`/`R0300`, averages those bytes and writes integer coordinate words at `grpAI+0x24`; Guard issue `R0140` uses the fine-coordinate getters. The moving-centre/frozen-base conclusion stands. | **REFUTED** |

@@ -2,6 +2,25 @@
 
 [Reference](format.md)
 
+## Pursuit after a stale route end
+
+The invocation completing a crossing clears movement progress at the centre;
+it does not redispatch pending pursuit within that call. The next actor call
+can test live reach and facing, then run pursuit with the execution target and
+stop distance. Planning reads the target's current packed cell, route counts,
+target cache and refresh counters. Requested cell, resolved endpoint and cached
+target cell are separate fields; `mover+0x94` and `+0x96` are search snapshots.
+— AI-743
+
+An endpoint/cache equality branch clears cached target identity and returns
+without stepping; the following admitted call forces replanning. After arrival
+at t, successful replanning with matching facing can start a crossing at t+1,
+or t+2 when that early return occurs at t+1. A moved target need not satisfy the
+cache match. Turning, a stale resolved endpoint, search failure or a replacement
+order changes the delay. Crossing initiation and the first cell-byte change are
+different events. No fixed runtime delay or next cell has been measured.
+— AI-743
+
 ## Player orders
 
 Nineteen opcodes, `0x14..0x26`, dispatched by `R0061`'s order space (19 direct dwords at

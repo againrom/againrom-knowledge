@@ -2,6 +2,22 @@
 
 [Reference](format.md)
 
+## Group members and nonadjacent damage
+
+Engagement can use weapon reach, a class spell or a weapon spell when those
+inputs exist. Point and area payloads and attached poison can damage after the
+source separates; their admission, delivery and damage predicates are separate.
+The identified paths are a bounded inventory: computed writes, other-width
+stores and indirect callbacks remain unclassified. — AI-745
+
+Both shipped mission-20 maps place ten `A_Brigand1` and one
+`F_BrigandLeader1` in owner-3 group 5. Their initial weapons give reach 4
+(Short Bow) and 1 (Two Handed Axe). Both definitions have no mana, known spells
+or weapon `castSpell` property. Bow damage is therefore available without
+adjacency; no initial spell path is supplied by those definitions. Later
+equipment, script, save and external-effect changes are outside this statement.
+— AI-744
+
 ## Target-selection sequence
 
 1. **Population — sight.** Clear `world+0x82ef0` (`0x10000` bytes, one per cell). Stamp the

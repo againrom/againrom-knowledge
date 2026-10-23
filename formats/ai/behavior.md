@@ -161,6 +161,37 @@ order. The circle follows the group; its size is whatever it was when guard was 
 
 ## Guard
 
+### Group give-up and reacquisition
+
+Enabled order-1 groups run Guard at the server check of phase 6 modulo 16.
+Every pass rebuilds shared sight, applies hostility and invisibility filtering,
+clips candidates to the working Chebyshev radius about the current centroid,
+and scores separately for each member. A member with no winner receives a walk
+to its own post; both at that cell and centred, it idles or runs its owner-specific
+cast/heal helper. Member-to-post distance and elapsed pursuit time were not found as
+admission gates in the bodies read (`guard`, `candidate-builder`, `scorer`, `score-value`,
+`filter`, `distance`, `engage`, `group-dispatch`, `group-pass`; callees and indirect calls
+not followed, Medium). Withdrawal runs after the arm and can replace its
+order. — AI-738, AI-740
+
+The live centroid truncates the average of whole-cell member coordinates.
+Guard issue instead averages fine coordinates. The fine-coordinate live-refresh
+clause of AI-RADFREEZE-075 is partially retracted; the moving-centre/frozen-base
+conclusion stands. Live refresh does not replace the stored base radius.
+— AI-739, AI-741
+
+The current pass clips with the radius already stored. A populated group whose
+membership latch is zero then rolls the next radius as base + 4 + jitter; a
+populated latched group increments its counter and keeps that radius. The latch
+does not test target presence, and the counter has no pursuit-time threshold in
+the Guard body read. Reacquisition uses the ordinary fresh population and score.
+The retained execution target is not read for this assignment in the bodies read. Attacker-cell
+memory can still stamp its old cell until consumed; the actor must stand on that
+cell and pass the remaining gates. No prior-target cooldown is found in the bodies read (not checked in their callees; Medium).
+— AI-741, AI-742
+
+### Member guard under group order 0
+
 **Where the post comes from is decided one level up, and it is decided twice.** A group under
 group-order 1 or 3 never runs the per-actor state machine at all, so for it steps 1–4 below are
 not the live path; what anchors its members is the **stance setter** that put the group under that

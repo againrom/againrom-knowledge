@@ -1164,7 +1164,7 @@ Every route into the attack act-state passes through it. An `EnumRefs` pattern s
 | AI-329 | The complete outgoing call inventory of both group-level candidate scorers is four direct targets and six virtual dispatches, and none of the four direct targets is the route search… | Medium | ● active | [EXP-0373](../experiments/EXP-0373-refused-route-attacker/) |
 | AI-FLIER-073 | A melee ground creature never auto-selects a flying target, a ranged one always can, and shipped content places fliers on thirty of the thirty-eight maps. | High / Medium | ● active | [EXP-0112](../experiments/EXP-0112-ai-execution/) |
 | AI-GRPGUARD-074 | Group order 1, the arm 95.6 % of shipped hostile placements run, read end to end — and its walk-home target is the member's own post, not the group's centre. | High | ● active (amended, partially retracted) | [EXP-0112](../experiments/EXP-0112-ai-execution/) |
-| AI-RADFREEZE-075 | A group's notice radius is frozen at the geometry it had when guard was last issued, while the circle it draws follows the group every tick. | High / Medium | ● active (amended) | [EXP-0112](../experiments/EXP-0112-ai-execution/) |
+| AI-RADFREEZE-075 | A group's notice radius is frozen at the geometry it had when guard was last issued, while the circle it draws follows the group every tick. | High / Medium | ● active (amended, partially retracted) | [EXP-0112](../experiments/EXP-0112-ai-execution/), [EXP-0615](../experiments/EXP-0615-group-giveup/) |
 | AI-STAND-076 | Group order 3 is Stand Ground, not attack: its scorer refuses anything past reach and its arm issues no walk order; the executor keeps pathing to the last victim until the next evaluation, a stand or a refused route (Medium, `AI-353`). | High / Medium | ● active (amended) | [EXP-0112](../experiments/EXP-0112-ai-execution/) |
 | AI-REISSUE-077 | What re-issues a pursuit is the group arm itself, unconditionally, every AI tick — and a group with nothing but corpses in sight keeps attacking a corpse. | High / Medium | ● active | [EXP-0112](../experiments/EXP-0112-ai-execution/) |
 | AI-DEADROLL-078 | The guard radius roll exists three times in the image and two of the copies are dead. | High / Medium | ● active | [EXP-0112](../experiments/EXP-0112-ai-execution/) |
@@ -1258,13 +1258,15 @@ This confirms `AI-GUARD-012`'s three cited addresses exactly and corrects its gl
 
 ### AI-RADFREEZE-075
 
-`R0141(AImgr, group)` (`evidence/rom-grouparm-excerpt.md` §8) is `R0140` with the member count taken from `[group+0xc]`: it sums each member's fine coordinates, divides, and stores the fine centroid `grpAI+0x24` (`L00831`) and the cell centroid `grpAI+0x28` (`L00832`), then over the members the maximum Chebyshev spread `grpAI+0x2a`, the maximum member sight `grpAI+0x2b` and the maximum of the two summed `grpAI+0x2c` (`L00833`/`L00834`/`L00835`). It is `R0024`'s first act and its only caller (`callto:R0141` = **1 hit / 1 owner / 0 orphan**), so it runs on every guard tick of every group. **And `grpAI+0x2c` is then never read again.** Whole-image `disp:2c` restricted to byte accesses and stripped of stack slots returns **19 hits**, of which four touch this record: two writers, `L00359` (`R0140`) and `L00835` (`R0141`), and two readers, `L00836` and `L00837`, **both inside the guard setter `R0125`**, which runs at map load, on the player's guard command and on the script's `Par0 = 1` (`callto:R0125` = 6 / 6 / 0).
+`R0141(AImgr, group)` (`evidence/rom-grouparm-excerpt.md` §8) takes the member count from `[group+0xc]` and averages whole-cell coordinates: it stores integer coordinate words at `grpAI+0x24` (`L00831`) and the packed centroid cell at `grpAI+0x28` (`L00832`); this differs from the fine-coordinate average in guard issue `R0140` (`AI-739`), then over the members the maximum Chebyshev spread `grpAI+0x2a`, the maximum member sight `grpAI+0x2b` and the maximum of the two summed `grpAI+0x2c` (`L00833`/`L00834`/`L00835`). It is `R0024`'s first act and its only caller (`callto:R0141` = **1 hit / 1 owner / 0 orphan**), so it runs on every guard tick of every group. **And `grpAI+0x2c` is then never read again.** Whole-image `disp:2c` restricted to byte accesses and stripped of stack slots returns **19 hits**, of which four touch this record: two writers, `L00359` (`R0140`) and `L00835` (`R0141`), and two readers, `L00836` and `L00837`, **both inside the guard setter `R0125`**, which runs at map load, on the player's guard command and on the script's `Par0 = 1` (`callto:R0125` = 6 / 6 / 0).
 
 What the arm actually rolls from is `grpAI+0x38`, whose three writers are all in that same setter (`L00838`, `L00839`, `L00361`) and whose four readers are the two live roll sites and two dead ones (`AI-DEADROLL-078`). So the radius is a load-time constant plus `AI-GUARD-021`'s ±1 jitter, and a group that spreads out, loses members or crosses the map keeps it. This **amends `AI-RADIUS-014`**, whose Medium rested on `R0140` being the only producer: there is a second, and it is the one that runs per tick *[EXP-0125]: the ±1 this row quotes is confirmed to the instruction and its distribution fixed — `{−1, 0, +1}`, each about a third (`AI-JITTER-103`, `AI-RANGE-102`).*
 
 **Confidence.** High (both writer sets and both reader sets are complete enumerations with their instruments named, and the per-tick producer is fixed by a `callto:` with 0 orphan). **Medium** that the enumeration is complete for this record: a byte-displacement sweep cannot tell one object from another, and the attribution rests on each site's own base register
 
 **Amended.** The ±1 the row quotes is confirmed to the instruction and its distribution fixed, `{−1, 0, +1}` each about a third (`AI-JITTER-103`, `AI-RANGE-102`). The row amends `AI-RADIUS-014`, whose Medium rested on `R0140` being the only producer of `grpAI+0x2c`; there is a second, `R0141`, and it is the one that runs per tick.
+
+**Amended.** AI-739 partially retracts the fine-coordinate live-refresh clause. The live getters return cell bytes; only the guard-issue helper averages fine coordinates. The moving-centre and frozen-base conclusions stand.
 
 ### AI-STAND-076
 
@@ -8756,3 +8758,186 @@ Mover byte `+0x08` is 5 on all 1 134 (`AI-692`); its writers are `AI-691` and `A
 "no change in play".
 
 **Unknown.** The side of a summoned creature in a save; no install save holds one.
+
+
+## Group give-up and a stale pursuit route
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-738 | The phase-6 modulo-16 server call reaches the group dispatcher; enabled order-1 groups run Guard once there and rewrite their members' target orders in that pass. | High | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-739 | Guard's live centroid averages whole-cell member coordinates, unlike the Guard setter's fine-coordinate average; the fine-coordinate refresh clause of AI-RADFREEZE-075 is partially retracted. | High | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-740 | Guard assigns from shared sight, hostility/invisibility filtering, a Chebyshev clip about the live centroid and per-member scoring; a targetless member walks to its post or idles there; no pursuit-time or post-distance gate read. | High / Medium | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-741 | Guard clips with its stored radius before testing its membership latch; a populated latch-zero pass rolls base+4+jitter for later passes, and the counter is incremented without a pursuit-time threshold. | High / Medium | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-742 | Guard give-up retains the execution target and attacker-cell memory, but the bodies read do not read it for the next group assignment; the remembered cell can admit a candidate through the ordinary gates; no cooldown in the bodies read. | High / Medium | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-743 | After crossing arrival the next actor call can resume pending pursuit; an endpoint/cache match clears target identity and returns without a step, so next-step delay depends on route refresh, facing and failure rather than one fixed wait. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-744 | Both shipped mission-20 maps place ten A_Brigand1 and one F_BrigandLeader1 in owner-3 group 5; their initial definitions give Short Bow reach 4 and Two Handed Axe reach 1, with no mana, known spells or weapon castSpell property. | High / Medium | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+| AI-745 | Group engagement can use weapon reach, a weapon spell or a class spell; point/area payloads and attached poison can damage after source separation, but the read paths do not establish a complete nonadjacent-damage inventory. | High / Medium | ✔ promoted (branch candidate) | [EXP-0615](../experiments/EXP-0615-group-giveup/) |
+
+### AI-738
+
+`R0147` gates `R0076` on signed `server+4 % 16 == 6`
+(`L12296..L00279`). The group walk tests `grpAI+0x45` and calls
+`R0023` (`L00283..L00282`). Order 1 dispatches to `R0024`
+at `L16849`. Its member walk assigns the scored target or the return/idle
+order without waiting for each actor's individual turn.
+
+**Confidence.** High for the named call path, table dispatch and local member
+walk, verified from the installed PE and local branch boundaries. This does not
+enumerate all session-mode callers. The ungated caller remains AI-702's scope.
+
+### AI-739
+
+Live Guard first calls `R0141`. It uses `R0299` and `R0300`, which
+return Position bytes 0 and 1, not the fine-coordinate getters. The coordinate
+sums are reduced to 16 bits and divided by the low-byte member count; quotient
+fractions are discarded. `grpAI+0x24` receives integer x and y words and
+`+0x28` the packed centroid cell (`L16850..L00832`). The walk contains no
+living-member test. A zero low-byte count returns before refreshing geometry.
+
+Guard issue calls `R0140`, which uses `R0165`/`R0166` to average
+1/256-cell coordinates. Its `+0x24` therefore has a different scale. It supplies
+the initial geometry from which the base radius is installed. AI-RADFREEZE-075's
+moving-centre/frozen-base conclusion stands; its fine-coordinate live-refresh
+clause is partially retracted in the overturn ledger.
+
+**Confidence.** High for both complete geometry bodies and all four getters,
+read directly from the same image. No global writer uniqueness is claimed.
+
+### AI-740
+
+Guard `R0024` calls live geometry, shared candidate builder `R0110`, then
+clips candidates with `R0167`: `max(abs(dx),abs(dy)) <= grpAI+0x2d`, about
+`grpAI+0x28`. It does not use `grpAI+0x0a` or member posts for admission.
+The builder clears the shared sight byte map once, stamps each member's
+`actor+0xa5` sight through the terrain-budget march, and forces remembered
+attacker cells for AI owners. It scans the global actor list and filters with
+the first member's hostility row and group invisibility detection. Health < 1
+parks a candidate as fallback; no living hostile restores those dead candidates.
+
+`R0177` assigns a strict minimum score below `0xffffff`, first on a tie,
+or zero. Its member/candidate-count gates read low bytes. `R0225` uses
+distance, member reach/facing, movement-domain preferences, member skill/class
+tests and candidate effect mask `0x100000`; it reads no previous winner.
+An ordinary winner reaches `R0009` (pending 5, target and reach); spell
+branches can replace it. A targetless member gets pending 1 and its post in
+`ord+0xa`, unless already both at the post cell and centred. There an AI owner
+gets `0xb` plus optional cast, a human participant's member the heal helper.
+The dispatcher applies withdrawal/flee after Guard.
+
+**Confidence.** High for the stores, reads and thresholds in the bodies read (`guard`, `candidate-builder`, `scorer`, `score-value`, `filter`, `distance`, `engage`, `group-dispatch`, `group-pass`). Medium for every absence clause (no pursuit-time check, no post-distance check, no ban timer): "not checked in the bodies read". Callees and indirect calls not followed: from `guard` the cast and heal helpers `R0113` and `R0015`; from `engage` `R0209`, `R0393`, `R0020` and `R0022`; from `candidate-builder` the list primitives `R0028`, `R0251`, `R0068`, `R1133`, `R1334` and `R0032`; from `score-value` `R0051`, `R0115` and the virtual calls at `vt+0x1c` and `vt+0x20`; the further targets of `group-dispatch` and `group-pass`. Medium for the composed outcome in a live session: callbacks, configuration and another order
+writer can intervene. No entire-image absence of a give-up mechanism is claimed.
+
+**Unknown.** Which gate rejected each EXP-0614 target: retain the sight byte,
+radius, centroid, filter and score results at consecutive checks to decide it.
+
+### AI-741
+
+Guard issue `R0125` sets base `B = grpAI+0x38` and working radius `+0x2d`
+from initial max(member-to-centroid distance + sight), floored by a nonzero
+override or, without one, `MinimalGuardRange`. Both measured shipped settings
+hold 8. Live geometry refresh does not replace B.
+
+Guard clips and scores before its latch block (`L00438..L16851`). The
+latch test uses first-member existence, not target existence. Populated/latch
+zero stores `B + 4 + floor(3*rand()/D) - 1`, clears counter `+0x34` and sets
+latch `+0x30` to 1. Populated/latch nonzero increments the counter and keeps
+the radius. Empty/latch nonzero rolls without +4 and clears both fields;
+empty/latch zero increments the counter and keeps the radius. The radius store
+wraps as a byte. The just-stored radius applies after the current clip.
+
+**Confidence.** High for this local order and arithmetic. Medium for jitter
+being exactly -1, 0, 1 in play: D is initialized to `0x8000`, but its global
+immutability was not enumerated. No comparison of `+0x34` with a pursuit-time
+threshold occurs in this body; no global absence of other counter consumers
+is claimed.
+
+### AI-742
+
+The no-winner Guard branch writes pending kind and return cell but does not
+clear `ord+0xc`. The scorer has replaced `ord+0x20` with zero. Neither the
+builder, clip nor scorer consults old `ord+0xc` when making the next group
+assignment. Ordinary engagement overwrites it when a winner returns.
+
+The struck hook `R0226` sets `ord+0x54`, `+0x58` and `+0x5a`; Guard's
+return branch does not reset them. Builder `R0110` stamps the remembered
+cell, then increments its signed stamp counter and clears the cell after
+21 stamps. The old cell can add an actor standing there to the population;
+it does not follow the remembered attacker's identity. Radius, relation,
+invisibility and scoring still apply. Other stamp consumers are AI-703.
+The membership latch and counter are AI-741, not a target cooldown.
+
+**Confidence.** High for the stores, reads and stamp arithmetic in the bodies read (`guard`, `candidate-builder`, `scorer`, `score-value`, `filter`, `distance`, `engage`, `group-dispatch`, `group-pass`). Medium for the field negatives (the old target pointer unread, no cooldown): not checked in the bodies read; the result of the instrument for `ord+0xc` readers is not committed. Callees and indirect calls not followed: from `guard` the cast and heal helpers `R0113` and `R0015`; from `engage` `R0209`, `R0393`, `R0020` and `R0022`; from `candidate-builder` the list primitives `R0028`, `R0251`, `R0068`, `R1133`, `R1334` and `R0032`; from `score-value` `R0051`, `R0115` and the virtual calls at `vt+0x1c` and `vt+0x20`; the further targets of `group-dispatch` and `group-pass`. Medium for policy persistence beyond them: whole-block copies and
+computed/external writers were not enumerated. The existing `actor+0x40`
+attacker record is a separate kill-credit field (AI-706).
+
+### AI-743
+
+`R0037` calls order execution once before actor-action dispatch. Crossing
+progress 3 calls `R0039`, then clears progress and action on arrival;
+the call does not redispatch pending 5. On the next actor invocation pending
+5 tests live reach/facing, then `R0042` calls `R0043` with `ord+0xc`
+and `ord+0x14`. The pursuit reads the target's Position `+2`, the member's
+fractions, target identity cache `mover+0x7c`, static/dynamic counts and
+refresh bytes `+9`/`+0x78`. It stores requested/resolved/cached cells at
+`+0x74`/`+0x76`/`+0x8c`; `+0x94`/`+0x96` are near-search snapshots.
+
+The endpoint match (`L06963..L06965`) needs current cell = resolved
+`+0x76` and target cell = cached `+0x8c`; it increments `+9`, clears `+0x7c`
+and returns without a step. The next admitted invocation then treats target
+identity as changed. An already moved target need not satisfy that match.
+Full search, single-node rebuild and near search can instead retain a stale
+endpoint or fail. Empty-search flag `+0x98` reaches the same-invocation
+executor epilogue and `R0004`.
+
+For an uninterrupted pending pursuit whose last crossing completes at t:
+a successful replan with matching facing can start a crossing at t+1; if the
+endpoint-match return occurs at t+1, successful replanning can start at t+2.
+Turns, search failure and a replacement order change this sequence. A cell-byte
+change is later than crossing initiation and depends on movement strides.
+
+**Confidence.** High for the local control flow. Medium for composition across
+actor calls without an intervening writer. Unknown for the observed delay and
+next cell of an actual stale-route end; no original program ran.
+
+**Unknown.** Record consecutive actor invocations at one identified stale end,
+including target cell, order progress, route counts, caches and facing.
+
+### AI-744
+
+Both measured `scenario.res:20.alm` files contain, in owner-3 group 5,
+10 class-14/template-1018 placements and 1 class-4/template-1020 placement.
+The definition override wins (ALM-CLS-038). The selected Humans rows are
+`A_Brigand1` (serverID 1018, class 14) and `F_BrigandLeader1` (1020, class 9).
+Their default weapon strings are `Wood Short Bow` and
+`Bronze Two Handed Axe`; their Weapons rows give ranges 4 and -1, which
+equip maps to reach 4 and 1 (AI-714). Both Humans rows have ManaMax and
+knownSpells -1, and neither weapon string has `castSpell`.
+
+**Confidence.** High for these measured placement and definition cells.
+Medium for live capability: the definition-id resolution and equip rules
+compose prior ROM1 claims with those cells, and later script, save, equipment
+or external-effect changes were not enumerated. This does not attribute a
+particular EXP-0614 hit to an archer.
+
+### AI-745
+
+Group engage `R0009` can install a reach-based attack, choose a class-spell
+slot, or run the AI mage helper. The actor strike body can substitute a weapon
+spell. The retained paths reach strike resolution `R0246`, spell admission
+`R0268`, point `R0266`, area `R0267` and DirectDamage `R0564`.
+Attached poison token 8 at `R0565` uses no source-position input in its
+damage branch. Drain Life's retained spell branch writes health at `L16319`.
+The effect/payload branches do not impose source/victim cell adjacency there;
+admission and delivery are separate predicates. Their availability depends on
+the member's spell/equipment/effect inputs, not membership alone.
+
+**Confidence.** High for the named local call/store paths. Medium for the
+inventory: the 36 explicit `+0x94` word stores are reproduced, but 109 other-width
+overlap rows and 73 immediate rows are unclassified, as are computed addresses,
+bulk copies and untraced indirect callbacks. Pure movement-field arithmetic and
+combat-distance quantization are recorded in the experiment without taking an
+unassigned movement/combat claim ID.
+
+**Unknown.** The source of the earlier nonadjacent damage: record the health
+store and its caller/attacker at that hit. To close the static inventory, classify
+the remaining overlap/address-formation population and computed write routes.
