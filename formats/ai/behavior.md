@@ -7,7 +7,9 @@
 The AI is **one slot of the full tick**: `server+0x04 % 16 == 6`. It is driven **per group**, never
 per actor — the driver walks the player list, then each player's group list, and runs the group
 order machine once per group, skipping a group whose AI-enable byte is 0. At the shipped speed
-index that is one AI pass per about 992 ms.
+index that is one AI pass per about 992 ms. A second, ungated call of the pass sits in a profiling
+server loop whose launcher has no reference in the image; were it run, it would also decide once
+per 16 ticks, at another phase. Whether a computed address reaches it is Unknown. — AI-702
 
 ## Group and actor behavior
 
@@ -90,8 +92,11 @@ per-actor states right and this wrong reproduces neither who is attacked nor whe
 
 **1. One sight map for the whole group.** The builder clears the `0x10000`-byte visibility array
 once, then stamps *every* member's sight into it, so a candidate seen by any member is a candidate
-for all. For an AI-owned member the cell it was last struck from is forced into the map as well and
-expires after **20** group ticks.
+for all. For an AI-owned member the cell it was last struck from is forced into the map as well.
+The memory counts **stamps, not ticks**: the builder and the standing acquisition each add one, and
+the cell is cleared at the 21st. Under orders 1, 2, 3 and 5 that is one stamp per group pass; each
+run of the standing acquisition adds one more. The attacker becomes a candidate only while it still
+stands on that cell. — AI-703
 
 **2. The sweep is global.** Every actor on the map is tested against that map — head to tail of the
 world actor list, no neighbourhood and no spatial index.
@@ -226,6 +231,50 @@ paragraph names, aimed this time at the target's own contact ring rather than a 
 "never on mere occupancy" does not hold in general: what a pursuit held because every approach to
 the target is occupied (an escorted target, for instance) actually does is Unknown, not identical
 to an ordinary in-progress walk (`MOVE-073`).
+
+**The ways a pursuit ends that the census found.** Of 212 order-record stores to the pursuit fields,
+74 lie in routines nothing references. The referenced writers end a pursuit only through the group
+arms' re-score, the order-0 teardowns and post block, the stand, a refused route and the
+order-progress epilogue, the withdrawal tail's flee, or a command, script or load setter. The census
+follows one straight-line base trace and direct calls; its completeness is Medium. — AI-704
+
+**Struck from outside the circle.** Under Guard an attacker farther than the working radius from
+the centroid is clipped out, so the member is not sent after it; a member walking home keeps
+walking. The struck hook sets only the turn flag, the remembered cell and the diplomacy flip, and the
+turn happens the next time the member runs the idle-turn kind `0xb`, at its post or after the
+order-progress epilogue. Observed behaviour in the original is Unknown. — AI-705
+
+**Who records an attacker.** Among the health-word stores searched, only the strike resolver and
+the point and area spell routes were found to record an attacker and call the hook; poison, Drain
+Life, effect writes and the death-setting stores do not (Medium: the callees of these routines were
+not read for a nested hook call). The spell routes do so only conditionally: spells `0x13` and `0xc`
+(Light) do not call the hook, both routes need the caster's and the victim's `+0x14` non-zero, and
+the point route needs the effect's `+0x41` non-zero. The attacker record is read for kill credit;
+no AI reader was found. — AI-706
+
+**Joining and provocation.** A group joining a fight writes the ordinary engage (kind 5 toward the
+scored target, stop distance = reach). A Darkness hit writes no pursuit; a pursuit of the caster
+follows only when a later group pass finds it inside the circle. Both negatives rest on the pursuit
+writer census above and are Medium. — AI-707
+
+**Alert between groups.** Nothing reached from the hook, the builder or the arms writes another
+group's order, cell or members. An alert crosses groups only through the player-level diplomacy
+flip, after which every group of both players treats the other's units as hostile inside its own
+circle, or through an authored script. — AI-708
+
+**Occupied post.** The limit-8 near-cell picker probes rings 1..7 around an occupied destination and
+stops at the nearest ring that holds a reachable cell; it takes that ring's cheapest-path cell, the
+first probed winning a tie, so a cheaper cell in a farther ring is never chosen. That a guard's walk
+home uses this picker is Medium: the routine that calls it also holds a picker with limit
+`(arg>>2)+4` and a third picker, and the selection between them was not traced. With none reachable
+the route is refused, the member stays where it is, and the next group pass re-issues the walk
+(Medium). What the original shows for a held post is not observed (Unknown). — AI-709
+
+**No shipped wandering found.** The found writers of group order `0x11` are the script Group
+Command 17 and one unreferenced setter; none of the 38 EN or 33 read RU shipped maps carries the
+command (the RU `Horror.alm` has no script record). No shipped mission roams through a found writer;
+that no other writer exists is Medium, because the writer search saw two store forms and does not
+exclude a computed address. — AI-710
 
 This actor guard path does not define the Group Roam program above. An unordered actor stands on its post
 until something hostile comes into the block around that post. Guard is the whole of motion for a

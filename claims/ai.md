@@ -8358,3 +8358,193 @@ attacker rows (11 and 13) are model rows: a side-3 attacker is a Dragon, a domai
 **Confidence.** High for the geometry. Medium as a statement about play: it assumes resting
 actors, and whether a ground melee attacker strikes a Dragon depends on target selection
 (`AI-FLIER-073`), not read here.
+
+## Pursuit end and alert spread
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-702 | The unconditional AI-pass call `L00163` lies in thread loop `R0075`, whose only launcher `R0456` has no rel32, dword or immediate reference in the image; were it run, it would also decide once per 16 ticks. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-703 | The remembered attacker cell `ord+0x58` is forgotten by a count of stamps, not of ticks: the candidate builder `R0110` and the sight stamp `R0114` each add 1 to `ord+0x5a` and clear the cell when it exceeds 20, AI owners only. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-704 | Of 212 order-record stores to the pursuit fields, 74 sit in routines with no reference; referenced writers end a pursuit only by group re-scoring, the stand, a refused route, the withdrawal tail, a teardown, or a command or script setter. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-705 | Under Guard, a member struck by an attacker farther than the working radius from the centroid is not given that attacker: the clip drops it, the member keeps or resumes its walk home, and its turn waits until it next runs order kind 0xb. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-706 | Besides the three hook routes, no health-word store found in the image records an attacker; the attacker record `actor+0x40` is read for kill credit at death, and no AI routine was found reading it. | Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-707 | A group joining a fight writes the ordinary engage (kind 5 toward the scored `ord+0x20`, stop distance = reach); a Darkness hit writes no pursuit, only the hook's turn flag, remembered cell and diplomacy flip. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-708 | No routine reached from the struck hook, the candidate builder or the group arms writes another group's order, cell or members; an alert crosses groups only through the player-level diplomacy flip or an authored script. | Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-709 | Picker A, limit 8, sends a guard walking home to an occupied post to the cheapest-path cell of the nearest ring 1..7 holding a labelled cell, first probed on a tie; whether the walk home reaches that call is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-710 | The found writers of group order `0x11` (Roam) are the script Group Command 17 arm `L07892` and the unreferenced `R0158`; no node of the 38 EN or 33 read RU shipped maps carries Par0 17. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+
+### AI-702
+
+`R0075` calls the AI pass `R0076` once at `L00163`, then runs 16 ticks (counter 1..16,
+`cmp 0x10` / `jg`) on a 0x3e ms sleep schedule, and loops until object `+0x24` is set; its strings
+include `Time used: AI Monsters`. Its only caller is thread procedure `R0261` (`L16817`),
+whose address is pushed only by `R0456` (`L16818`). `R0456` tests object `+0x2c` and
+otherwise prints `can't Run server because Init was not successfull.`. A raw scan of the whole file
+finds no E8/E9/0F8x rel32, no 4-byte occurrence and no push or mov immediate of `R0456`, nor of
+the handle helpers `L16819` and `L16820` (`evidence/probe/refscan.tsv`). The gated call in
+play is `AI-CLOCK-080`'s `server+0x04 % 16 == 6`. Were the loop run, the pass would precede tick
+1 of each block of 16: the same rate, a different phase.
+
+**Confidence.** High for the loop body and the absence of a direct or dword reference. Medium that
+the loop never runs in play: an address computed at run time is not excluded.
+
+**Unknown.** Whether any session mode reaches `R0456` by a computed address: a breakpoint on
+`R0456` during a mission of the original would settle it.
+
+### AI-703
+
+Both consumers test the owner's Player `+0x28` (AI) and `ord+0x58` ≠ 0, add 1 to the per-cell
+sight count at `+0x2a008` for that cell, add 1 to `ord+0x5a`, and clear `ord+0x58` when the
+signed byte exceeds `0x14`: `R0110` at `L16821`..`L00758`, `R0114` at
+`L02348`..`L14710`. The hook `R0226` and the Prismatic Spray preamble `R0109` set the
+cell and store `ord+0x5a` = 0. So the cell is stamped 21 times, the 21st stamp clearing it. A
+member of a group under orders 1, 2, 3 or 5 receives one builder stamp per group pass (each arm
+calls the builder once: `L00823`, `L16822`, `L00841`, `L00459`; Roam `L16823`); each run of the standing
+acquisition `R0022` (`L01742`) adds one more. The turn flag `ord+0x54` is read only by the
+idle turn `R0205`, which clears it (`L00657`); the census of order-record reads of
+`+0x54..+0x5b` finds no other reader (`evidence/probe/refs.tsv`).
+
+**Confidence.** High for the two consumers and the stamp arithmetic. Medium for the conversion to
+group passes: how often a member of an order-0 group runs the standing acquisition per pass was
+not measured.
+
+### AI-704
+
+`evidence/probe/pursuit-writers.tsv` lists every store whose base traces to an order-record load
+`[x+0x158]` at `+0x08`, `+0x09`, `+0x0a`, `+0x0c`, `+0x20`, `+0x54`, `+0x58`, `+0x5a`: 212 rows,
+138 in referenced routines, 74 in routines with no rel32, dword or decoded-branch reference
+(`L13263`..`L14682`, `L16824`, `L14714`, `L15022`, `L15023` and others), each preceded
+by a `ret` or a table. The referenced writers that end a pursuit (kind 5 or 6):
+
+| writer | condition |
+|---|---|
+| group arms 1, 2, 3, 5 (`R0024`, `R0025`, `L00307`, `R0026`; table `L00303`) | each pass re-scores; a member without target walks home (1), walks to the group cell (2) or idles |
+| order 0 state arm `R0008`, block `R0137` | state teardown on a dead target; no survivor in the radius-5 block walks home |
+| stand `R0044` | kind 0, command state 0xc; from step arrival `L00117`, Control Spirit `L14856`, load and commands |
+| executor `R0016` | row 6 suppression (`L00109`); refused route (mover `+0x98`) writes kind 0 and calls `R0004` |
+| epilogue `R0004` | kind 6 toward a target in reach, else 0xb (AI owner, with idle turn) or 0 |
+| withdrawal tail `R0100`, `R0107` | kind 1 (flee) on the health thresholds |
+| command and script setters | player command queue `R0061`, script `R0156`, load placement `R0065` |
+
+The order record is cleared as a block only by its constructor `R0286` (0x94 bytes), called
+for new actors. Rows 5 and 6 measure no time or distance (`AI-PURSUE-040`); the post rule is
+`AI-BREAK-041`, the re-score `AI-REISSUE-077`.
+
+**Confidence.** High for the rows and their classification by reference. Medium for completeness:
+the base trace follows one straight-line run, and an indirect call into an unreferenced routine is
+not excluded.
+
+### AI-705
+
+Guard arm `R0024` builds the candidate list (`L00823`) and drops every candidate whose
+distance `R0167` from the centroid `grp+0x28` exceeds the working radius `grp+0x2d` (`L00373`
+`jbe`, distance equal to the radius kept). Per member: `ord+0x20` set → engage `R0009`
+(`L00336`); else off the post or not centred → kind 1 toward the post (`L00338`, `L00828`);
+at the post an AI owner gets kind 0xb (`L00337`), a human owner `R0015`. The struck hook writes
+no kind and no target (`AI-RETAL-056`), so a walk home continues. The remembered cell makes the
+attacker a candidate only while it stands on that cell, and the clip still applies. The turn flag
+is consumed when the member next runs kind 0xb: at the post, or after the executor epilogue
+`R0004` (`L00124`, `L00813`). The withdrawal tail runs after the arm and may set flee when a
+hostile is within mover `+0x08` cells (`AI-690`).
+
+**Confidence.** High for the arm and hook bodies. Unknown for the observed behaviour: no run of the
+original was made.
+
+**Unknown.** A guard group of the original, its member struck by a ranged attacker outside the
+circle, watched for 30 seconds, would show whether it walks home without turning.
+
+### AI-706
+
+`evidence/probe/health.tsv` lists 36 16-bit stores, adds or subtracts at `[reg+0x94]`, with each
+owner's calls of the hook, `+0x40` stores and slot `+0x4c` calls. Only the strike executor
+`R0246` (`L04164`) and DirectDamage `R0564` (`L05511`) sit in routines that call the
+resolver; the resolver `R0265`, the PointEffect tick `R0266` and the AreaEffect `R0267`
+are the three hook routes (`AI-650`). The two spell routes record and call the hook only under
+conditions: AreaEffect returns before the record for spell `0x13` (`L05411`) and spell `0xc`, the
+Light arm of `MAGIC-LIGHTDARK-044` (`L05421`); both spell routes store the caster in `+0x40` only
+when the caster's `+0x14` is non-zero and call the hook only when the caster's and the victim's
+`+0x14` are non-zero (AreaEffect `L06003`, `L09043`; PointEffect `L06002`, `L09041`);
+PointEffect records nothing when the effect's `+0x41` is zero (`L16825`). A hit by spell `0x13`
+or `0xc`, or one failing these tests, records no attacker. The other rows are initialisation, regeneration, healing,
+load, the poison tick `L16826`, Drain Life `L16319`, effect set and add `L16320`/`L16321`,
+a message `L12487`, the mover field `L01905`, and death-setting constants (-1000 at
+`L04398`, -50 at `L16827`, `L16828`, `L06011`, -10001 at `L16829`, `L06173`): none of
+their routines calls the hook or stores `+0x40`. `+0x40` is read by the death processor for kill
+credit (`MAGIC-ITEMKILL-117`); `AI-547` found no AI reader.
+
+**Confidence.** Medium: the owner ranges come from direct-call starts, and the callees of these
+routines were not read for a nested hook call.
+
+### AI-707
+
+The order 1, 2, 3 and 5 arms assign `ord+0x20` per member from the scorer (`R0177`, `R0153`)
+and call `R0009`, which writes kind 5, `ord+0x0c` = the scored victim and `ord+0x14` = reach
+(`L00019`), or a cast (kind 9) on a slot draw (`AI-337`). Darkness passes the AreaEffect hook at
+`L00877` (`MAGIC-LIGHTDARK-044`): turn flag, remembered cell, diplomacy flip, and `victim+0x40`;
+no store of kind or target. A pursuit of the caster follows only from a later group pass in which
+the caster is a candidate inside the circle.
+
+**Confidence.** High for the engage writer `R0009` and the stores the hook makes (`+0x54`,
+`+0x58`, `+0x5a`, the flip). Medium for "a Darkness hit writes no pursuit" and "only from a later
+group pass": both are negatives over `AI-704`'s writer census, Medium for completeness (one
+straight-line base trace, indirect calls not followed), and rest on the Medium alert clause of
+`MAGIC-LIGHTDARK-044`.
+
+### AI-708
+
+The writers of the group order `grpAI+0x20` named here are `AI-ORDER-010`'s, found over two store
+forms (a byte store of an immediate and a stored zero register); no census of `grpAI+0x20` or
+`grpAI+0x0a` stores is committed with this claim. They are command, script and load setters, the
+group's own dispatcher (0xff when empty) and Roam, which also stores the cell (`L00479`); none is
+reached from the hook, the builder or an arm acting on a
+different group. The hook writes the victim's order record and calls `R0126`, which sets bit 0
+of both players' relation cells when neither low bit is set (`AI-LIST-003`, `AI-RETAL-056`). The
+builder writes only its own members' `+0x58`/`+0x5a` and the shared candidate lists, rebuilt per
+group; `R0109` rebuilds for the caster's group. After a flip every group of both players treats
+the other's units as hostile, inside its own circle.
+
+**Confidence.** Medium: indirect calls and script actions other than group commands were not
+followed to their stores, and the group-record writer list rests on `AI-ORDER-010`'s two store
+forms; a register or memory value stored at `+0x20` and a whole-record copy are not seen.
+
+### AI-709
+
+The walk home is kind 1 toward `ord+0x00`; the walk `R0178` reaches the near search
+`R0055` (`L01717`), which calls `R0053` (`L01908`). That routine holds three pickers:
+Picker A `R0392` with limit 8 (`L06800`..`L01915`), Picker A with limit `(arg>>2)+4`
+(`L01913`), and `R0435` (`L01914`); the choice depends on the destination label
+(`L06796`) and two arguments. No committed listing shows `R0055`, the selection in
+`R0053` or the arguments the walk-home call pushes, so that the walk home takes the limit-8 call
+is Medium; the other limit and `R0435` are open alternatives. With limit 8: rings r = 1..7
+around the destination; for i = −r..r the probes are (x+i, y+r), (x+i, y−r), (x+r, y+i), (x−r, y+i); a cell
+wins only with a strictly smaller label, so ties keep the first probed; the search stops after the
+first ring that holds a labelled cell (`L06810`), so the winner is the cheapest cell of the
+nearest non-empty ring and a cheaper cell in a farther ring is never probed. Labels are the dynamic path cost from the walker, its own
+cell seeded 0 (`MOVE-100`, `MOVE-181`). With no labelled cell the picker returns 0, the route is
+empty and mover `+0x98` = 1; the executor writes kind 0 and `R0004` gives kind 6, 0xb or 0.
+The next guard pass finds the member off its post and writes kind 1 again.
+
+**Confidence.** High for Picker A's ring order, tie rule and nearest-non-empty-ring stop. Medium
+for the route from the walk home to the limit-8 call and with it the failure path, and for the
+cadence: one retry per group pass assumes no other writer intervenes.
+
+**Unknown.** In the original, a guard whose post another unit holds: whether it stands beside the
+post or oscillates. A run with a unit parked on a guard's spawn cell would show it.
+
+### AI-710
+
+`tools/aipatrol` reads the script sub-dispatch table at `L00408`: case 16 (Par0 17) → `L07892`,
+which stores order `0x11` (`L00432`), the first member's cell and counter 0. Over 38 EN maps and
+34 RU maps (33 with a parsable type-7) no action node has Par0 17
+(`evidence/aipatrol-en/group-commands.txt`, `evidence/aipatrol-ru/group-commands.txt`); the RU
+root's `Horror.alm` has no type-7 record, so no script node of it was read
+(`evidence/maps/t7-ru.txt`; all 38 EN maps frame, `evidence/maps/t7-en.txt`). `R0158`, the
+other writer of `0x11` in `AI-ORDER-010`'s census, has no rel32, dword or immediate reference
+(`evidence/probe/refscan.tsv`). Even under `0x11` the generated cell reaches members only through
+arm 5's fallback, whose Move arm ignores it (`AI-ROAM-025`, `AI-SWARM2GATE-107`).
+
+**Confidence.** High for the `L07892` body and for the absence of Par0 17 over the 71 maps read
+(38 EN, 33 RU). Medium that these are the only writers of `0x11`: `AI-ORDER-010` saw two store
+forms, a byte store of an immediate and a stored zero register, so a store of a register or memory
+value and a whole-record copy are not seen, and an address computed at run time could reach
+`R0158`. So no shipped mission roams through a found writer; Medium that none roams at all.
