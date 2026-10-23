@@ -4103,7 +4103,7 @@ found none for the item copies).
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| ITEM-219 | No operational read of Weapons parameters 0, 1, 4, 10 or 16 is located in the named construction, fill, price, Equip and descriptor bodies; their image-wide uses remain unresolved. | Medium / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| ITEM-219 | No operational read of Weapons parameters 0, 1, 4, 10 or 16 is located in the named construction, fill, price, Equip and descriptor bodies; their image-wide uses remain unresolved. | Medium / Unknown | ✔ promoted (amended) | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
 | ITEM-220 | Weapons sutableFor bits 0/1 feed fighter/mage descriptors; bit 0 also filters ordinary shelf candidates, while death tests the whole value against zero. | High / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
 | ITEM-221 | A Weapon reconstructed from its packed code gets +0x50 from Weapons parameter 11, or 1 for -1; both examined range-text arms use that item byte, with different emission gates. | High / Medium | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
 | ITEM-222 | ROM1 Weapons rows have count-driven, 1-based identities, name lookup and packed-code forms; Weapon LOAD rebinds its archived row byte without a local size or mask check. | High / Unknown | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
@@ -4139,6 +4139,11 @@ closure was performed. High is not assigned to reader absence.
 five slots. Settle with a row-typed data-flow census over both encoded
 displacements and address arithmetic, overlapping widths, embedded arrays,
 bulk copies and pointer dispatch; classify every unnamed hit.
+
+**Amended.** ITEM-231 extends the searched population to every element
+accessor call and every inline parameter-array access in `.text`, and finds
+no live reader of the five slots; ITEM-232 classifies the only indexing
+routine as an unreachable export. The bounded non-location here stands.
 
 ### ITEM-220
 
@@ -4298,3 +4303,82 @@ constructor call. This is not a runtime observation of termination.
 and worn figure-layer failure paths. Settle by reading those reachable
 dispatch/callee bodies and their installed bindings. A separately authorized
 original observation could settle the visible outcome; none was run here.
+
+## Weapon row parameters without a live reader
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-231 | Among all 190 element-accessor calls and 72 inline-pattern hits (none a parameter-array access) in `.text`, no live routine reads Weapons parameters 0, 1, 4, 10 or 16; absence beyond that population is Medium. | High / Medium | ✔ promoted | [EXP-0616](../experiments/EXP-0616-weapon-params/) |
+| ITEM-232 | The only routine indexing those Weapons cells, the `Data_updated.lst` export `R2309`, is unreachable: its entry jumps to the epilogue, and its two callers never execute or have no reference. | High | ✔ promoted | [EXP-0616](../experiments/EXP-0616-weapon-params/) |
+
+### ITEM-231
+
+Population, on the single EN/RU `rom.exe` image (SHA-256 `942e9b72...`):
+
+- every rel32 call to the row parameter-array accessors: 182 to operator[]
+  `R0476` (the only caller of `L09150`) and 8 to GetAt `R0752`;
+  190 sites in 64 functions, each owner fixed by its row getter, vtable
+  slot or object field;
+- every direct `[x+0xc]` load followed by a dereference, with a base other
+  than the frame (48 hits), and every inline `+8`/`+4` array-object access
+  (24 hits). Neither scan finds a parameter-array access: all 72 hits (48 + 24)
+  are unrelated code.
+
+Of the 74 accessor sites whose index is 0, 1, 4, 10, 16 or not a constant,
+only the 7 in `R2309` index a Weapons row (ITEM-232). The other 67 belong
+to Magic, Spells, Units, Humans, Buildings, MagicItems, text-section records,
+the CSV parsers (DAT-CSVCELL-028), Armors `R0890` (parameters 4 and 10;
+ITEM-ARMSLOT-031, ITEM-ARMFILL-032) and Shields `R0888` (parameter 10).
+`R0890` and `R0888` are in no vtable. They are reached by direct
+calls from Armor and Shield construction code (`L16866`, `L16867` and
+`L16868`, `L16869`), while the Weapon fill `R0856` is called from
+`L16870`, so those reads are not shared with Weapons. Weapon vtable
+`L16871` also overrides the Armor and Shield price (`+0x48`), equip
+(`+0x34`) and descriptor (`+0x50`) slots. The GetAt callers are stream-cursor
+methods whose cursor is built only for Units (`L16872`) and Humans
+(`L16873`). The 72 inline-pattern hits are vtable loads, rectangle arithmetic,
+`hostent`, text, sprite and CRT/MFC code; none is a parameter-array access.
+
+The preregistered Census C (every reference to the group-C collections
+`L04591`, `L04589`, `L04593`, every row getter call and every stored row
+pointer) was replaced by the inline `+8`/`+4` scan above and not run as
+registered. Preregistered step 4 (further element accessors of the array at
+row+8, added to Census A) was not run; SetAt-like, GetData-like and the const
+`operator[]` methods are not searched.
+
+Data.bin LOAD `L08399`/`L08400` moves every cell without a decision.
+The shipped values are in DAT-WEAPCELLS-023.
+
+**Confidence.** High for the classification of every accessor site and
+inline hit. Medium for absence across the image: computed or indirect calls, a
+pointer kept across a call, string-table driven access, other array-class
+methods, MFC whole-array copies and an inline access shape outside the two
+scans are not covered, and no Ghidra data-flow census was run.
+
+**Unknown.** A reader through a computed or indirect call, a pointer kept
+across a call, string-table driven access, another array-class method or an
+unscanned access shape.
+Settle with a Ghidra data-flow query over every load from a group-C row's
+`pData`. The behaviour of a modded value other than -1 or 0 in these cells
+is not observed; an authorized original run with a modified Data.bin
+settles it.
+
+### ITEM-232
+
+`R2309` writes `Data_updated.lst`. Its dead body loops every parameter
+of the Armors, Shields, Weapons, Units and Humans rows, and an Armors x
+Materials table of parameters 0..3 against the material doubles at
+`+0x28..+0x40`.
+
+- The only control transfer in `R2309..L16874` is `L16875 jmp
+  L16876`, the epilogue.
+- No decoded operand outside the routine's own branches names an address
+  in `L16874..L16876`. The one dword in any section that falls in the
+  range, `.text:L16877`, is the interior of a call's rel32 operand.
+- Caller `L16878` in `R0679` sits behind `xor ecx,ecx; test ecx,ecx;
+  je`, so the call never executes. Caller `L16879` is in `R1470`,
+  which has no rel32 reference and no dword reference in any section.
+
+**Confidence.** High. The jump, the constant-zero branch and the reference
+counts are each one decoded fact; even a call through `R1470` reaches
+only the jump to the epilogue.

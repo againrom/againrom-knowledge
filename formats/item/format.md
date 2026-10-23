@@ -9,8 +9,10 @@ ITEM-CARRY-015, ITEM-EFFGRAM-070, ITEM-EFFSAVE-077
 
 The double-factor ladder and damage column in ITEM-SCALE-017 and
 ITEM-DMGCOL-018 are retracted; use ITEM-LADDER-019 through ITEM-WEAPCOL-021.
-Operational readers of five named Weapons columns remain unresolved
-beyond the examined bodies (ITEM-219). The meaning of item+0x47, producers of item+0x44
+No live reader of Weapons Shape, Material, Slot, absorbtion or Other
+Parameter was located in the scanned population (every call of the two
+element accessors and the two inline scans, on `rom.exe`); absence beyond it
+is Medium and the Unknown of ITEM-231 remains (ITEM-219, ITEM-231). The meaning of item+0x47, producers of item+0x44
 outside the specified constructors, and the transition to actor tick state 2
 remain Unknown. Stock generation and pricing are in [SHOP](../shop/format.md).
 
@@ -34,7 +36,7 @@ Archive field order is linked through each object's persistence contract.
 
 | Reference | Contents |
 |---|---|
-| [Weapon rows and identity lookups](weapon-row.md) | Authored cells, bounded reader Unknowns, resource keys and mask checks; ITEM-219 |
+| [Weapon rows and identity lookups](weapon-row.md) | Authored cells, columns without a live reader, resource keys and mask checks; ITEM-219, ITEM-231 |
 | <a id="at-a-glance"></a><a id="the-item-record"></a><a id="structure"></a><a id="item-fields"></a><a id="magic-item-value"></a> [Item fields and definitions](fields.md) | Class sizes, row binding, instance fields and price |
 | <a id="equipment-cell-effects-item-effgram-070item-effsave-077"></a><a id="a-weapons-numbers--R0856"></a><a id="an-armours-and-a-shields-numbers--R0890-R0888-item-armfill-032"></a><a id="what-equipping-an-armour-or-a-shield-does-item-armfold-033"></a><a id="the-weapons-rows-columns"></a><a id="a-weapons-own-damage-line"></a> [Equipment grammar and item formulas](effects.md) | Effect syntax, scalar targets and item formulas |
 | <a id="the-container"></a><a id="containers"></a><a id="whole-object-transfer-and-serialized-state"></a><a id="equipment"></a><a id="equipment-transfer-boundary"></a><a id="weapon-borne-spell-state-item-caststate-056"></a><a id="the-wear-rule-item-wear-055-item-wear-057"></a><a id="equipment-named-by-a-humans-row"></a> [Containers and equipment state](equipment.md) | Containers, slots, suitability and weapon-spell state |

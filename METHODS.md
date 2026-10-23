@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4167. Observation: 99. Static analysis: 3537. Mixed: 531.
+Claims labelled: 4170. Observation: 99. Static analysis: 3540. Mixed: 531.
 
 ## Ledger ai
 
@@ -832,6 +832,7 @@ Claims labelled: 4167. Observation: 99. Static analysis: 3537. Mixed: 531.
 | DAT-DOC-021 | mixed | ✔ promoted |
 | DAT-STRARRAY-022 | static analysis | ✔ promoted |
 | DAT-WEAPCELLS-023 | mixed | ✔ promoted |
+| DAT-CSVCELL-028 | static analysis | ✔ promoted |
 
 ## Ledger dialogue
 
@@ -1193,13 +1194,15 @@ Claims labelled: 4167. Observation: 99. Static analysis: 3537. Mixed: 531.
 | ITEM-212 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-GRANTLINE-215 | static analysis | ● active (branch candidate) |
 | ITEM-PURSECALLER-216 | static analysis | ● active (branch candidate) |
-| ITEM-219 | static analysis | ✔ promoted |
+| ITEM-219 | static analysis | ✔ promoted (amended) |
 | ITEM-220 | static analysis | ✔ promoted |
 | ITEM-221 | static analysis | ✔ promoted |
 | ITEM-222 | static analysis | ✔ promoted |
 | ITEM-223 | static analysis | ✔ promoted |
 | ITEM-224 | static analysis | ✔ promoted |
 | ITEM-225 | static analysis | ✔ promoted |
+| ITEM-231 | static analysis | ✔ promoted |
+| ITEM-232 | static analysis | ✔ promoted |
 
 ## Ledger magic
 

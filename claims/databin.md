@@ -351,6 +351,7 @@ positional dispatcher.
 |---|---|---|---|---|
 | DAT-STRARRAY-022 | The group-C row's array at +0x28 is a CStringArray, not a second numeric array; all 27 shipped Weapons rows on each root have zero elements. | High | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
 | DAT-WEAPCELLS-023 | EN and RU each store Weapons count 28, serialize rows 1..27 with 17 parameters each, and agree on the seven selected columns; Other Parameter is -1 on every row. | High | ✔ promoted | [EXP-0606](../experiments/EXP-0606-weapon-row/) |
+| DAT-CSVCELL-028 | Building Data.bin from CSV, the vtable-`L16852` row parser stores 0 for any nonempty Shape or Material cell, -1 for any empty cell when the third argument is 0, a keyword code for parameter 5 and atoi of other cells. | High / Medium | ✔ promoted | [EXP-0616](../experiments/EXP-0616-weapon-params/) |
 
 ### DAT-STRARRAY-022
 
@@ -406,3 +407,39 @@ with DAT-STRARRAY-022's string-array correction, complete payload tiling,
 explicit lengths, a synthetic nonempty-string boundary test and scratch
 reproduction. EN/RU agreement is a locale comparison, not a second code
 witness. These counts do not constrain modified tables.
+
+### DAT-CSVCELL-028
+
+The CSV line parser `R0688` is row vtable slot `+0x14`. For column
+`c >= 1` it stores -1 into parameter `c-1` when the cell is empty
+(`L16853..L16854`) when its third argument is 0; with a nonzero third
+argument (`L16855..L16856`) it calls the row virtual for an empty cell
+too. Otherwise it calls row virtual `+0x18`. The row class with constructor
+`R2306` and vtable `L16852` binds `+0x18` to `R2308`:
+
+- column 1 (parameter 0 Shape) or column 2 (parameter 1 Material),
+  nonempty: stores 0 whatever the text;
+- column 6 (parameter 5): keyword map from `blade` = 1 to `astral` = 0xf,
+  an unknown keyword stores 0;
+- every other column: the base parser `L16857`, which stores `atoi` of
+  the text.
+
+The path runs only when no Data.bin is present (DAT-LOC-001). The shipped
+Weapons Shape and Material cells are only -1 and 0 (DAT-WEAPCELLS-023),
+the two values this rule can produce.
+
+The callers read push 0 as the third argument: `L16858`, `L16859`,
+`L16860` and the `0051bb..0051bed` group. The variant `L16861`, called
+by `L16862`, `L16863`, `L16864` and `L16865`, is neither read nor
+excluded.
+
+**Confidence.** High for the parser body, the vtable binding and the stores,
+read on the single EN/RU image. Medium for the application to Weapons rows:
+no cited claim and no evidence file ties the Weapons collection or its row
+constructor to vtable `L16852` (DAT-STRARRAY-022 names the constructor
+`R2306` for the group-C row, not the Weapons collection), and the -1 rule
+holds only for the callers read with third argument 0. The equality of the shipped values is
+consistent with the rule; it is not a second witness.
+
+**Unknown.** The text the original authors had in those cells. The shipped
+Data.bin keeps only the stored values.

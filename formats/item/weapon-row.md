@@ -7,11 +7,20 @@
 Weapons uses 1-based definition rows. Both installed collections store
 count 28 and serialize 27 rows, each with 17 parameters. Shape[0],
 Material[1], Slot[4], absorbtion[10] and Other Parameter[16] have measured
-authored values, but no operational reader was located in the named
-construction, fill, price, Equip and descriptor bodies. This bounded result
-does not establish image-wide absence. Instance Shape/Material come from
+authored values. No live reader was located among every element-accessor
+call and every scanned inline pattern. Absence beyond that population is
+Medium. Unknown: a reader through a computed or indirect call, a pointer
+kept across a call, string-table driven access, another array-class method
+or an unscanned access shape. Instance Shape/Material come from
 supplied bytes or name parsing; the Weapon picture class is literal 1.
-— DAT-WEAPCELLS-023, ITEM-219
+— DAT-WEAPCELLS-023, ITEM-219, ITEM-231
+
+The only routine that indexes these cells is the `Data_updated.lst` table
+export, which is unreachable. When Data.bin is built from CSV, any nonempty
+Shape or Material cell is stored as 0 and any empty cell as -1 (for callers
+that pass third argument 0); the shipped cells are -1 or 0, which this rule
+can produce. That the Weapons rows use this parser is Medium.
+— ITEM-232, DAT-CSVCELL-028
 
 The group-C tail at runtime row+0x28 is a CStringArray. All 54 installed
 Weapons arrays are empty. Its serializer and destructor process strings;

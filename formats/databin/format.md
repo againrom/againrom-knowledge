@@ -70,6 +70,12 @@ as a literal value, including the document-item price below.
 — DAT-SCHEMA-004, DAT-ACT-006 (unconditional Humans typeID clause partially
 retracted; −1 law retained)
 
+A nonempty group-C cell is parsed by column: column 1 (Shape) and column 2
+(Material) store 0 whatever the text, column 6 stores a keyword code from
+`blade` = 1 to `astral` = 0xf (unknown keyword 0), and every other column
+stores `atoi` of the text. The parser's binding to the Weapons rows is
+Medium. — DAT-CSVCELL-028
+
 ## The placement-facing tables
 
 - **Buildings** — index = `structures.reg` `ID` (1..66; `DAT-BLD-005`). Slots:
