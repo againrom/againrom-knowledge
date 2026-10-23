@@ -53,6 +53,15 @@ all unknown entries. Ordinary SAVE builds a fresh empty registry from current
 application/UI/world values and writes it before the campaign; it does not
 pass the loaded registry through. — SAV-914, SAV-915
 
+`Objects/Selection` is an int32 array (kind 6) of view-object ids. Its only
+writer lists the objects whose `+7c` is nonzero, the flag the producer tests;
+it runs only in the state the mission consumer also requires. The town consumer
+calls the object's `vt+0x14` with 1 for each listed id at LOAD. The `vt+0x14`
+target and the meaning of `+7c` were not read, so that the list carries a
+selection is Medium. The mission consumer reads the list only on resume, so
+a mission started from the town ignores it. A town document from the install
+holds `[1]`. — SAV-1360
+
 ## SpellBook state
 
 | Key | Wire kind / bytes | Meaning / runtime source |

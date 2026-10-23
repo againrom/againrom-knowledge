@@ -21,7 +21,7 @@ Offsets in the source column are runtime Player offsets.
 | `s+25` | u8 | `+3c` | Mission-outcome latch |
 | `s+26` | u8 | `+3d` | Retained-actor mission-entry placement latch |
 | `s+27` | u32 | `+48` | XOR `0x5c073f4d`; gameplay meaning Unknown |
-| `s+31` | u32 | `+50` | Constructor zero; other meaning/producer Unknown |
+| `s+31` | u32 | `+50` | Disconnect clock stamp; constructor zero |
 | `s+35` | u16 | `+54` | In-memory dword, `min(v,0x7fff)` on SAVE |
 | `s+37` | u16 | `+4c` | In-memory dword, `min(v,0x7fff)` on SAVE |
 | `s+39` | u32 | `+58` | AI mana-floor percentage; default 95 |
@@ -156,9 +156,24 @@ through actor `+14`. SAVE/LOAD does not apply this command mapping, and
 parameter 1 is the separate withdraw arm. — SAV-726, SAV-666,
 UNIT-DERIVE-003, HERO-MP-006
 
-The `+50` constructor writes zero; other ordinary producers remain Unknown.
-LOAD still restores the saved value.
-— SAV-665
+The `+50` constructor writes zero; LOAD restores the saved value. — SAV-665
+
+`+50` holds the full clock at a disconnect; a reconnect stores 0. Its reader
+removes a Player and its actors when `+50` is positive, `+3d` is nonzero and
+`+50` is below the clock. Every install record holds 0. — SAV-1359
+
+## Town document fields
+
+A document stored in the town holds `+3d` = 0, stored by the mission-end cull
+on each kept human Player, and `+3c` as the mission's reporter left it. At the
+next mission start the join stores `+3c` = 0, then reads `+3d`; the reporter
+reads `+3c` only after the join has set `+3d` = 1. A join for a Player whose
+`+34` is 0 exits before both stores. — SAV-1358
+
+The town carries `+44`, `+50` and the settings block from the mission. The
+next mission's Player build overwrites `+44` with the ALM participant value
+plus 1. No writer of the block's 31 bytes other than `+1f` is known; byte `+1e`
+indexes a relation table. — SAV-1359
 
 ## Diary client projection
 

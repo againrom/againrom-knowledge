@@ -17737,3 +17737,184 @@ nonempty base AddHero. A Human in the roster does not show a drawable in the cli
 **Confidence.** Medium for the count-0 change: the gating call is read, and the loading
 files take the empty path, but the change was not run and the loading files differ in other
 fields. Low for 22 to 21: the grant's later steps were not read.
+
+## Town STORE fields and their first readers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1353 | A town STORE writes a kept actor's `+0x50` = 0 and `+0x136` = 1 from the mission-end cull and carries `+0x6c`, `+0x138`, Mover, Order, word lists and Diary from the mission; a town-built actor holds Unit constructor values. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1354 | After a town LOAD, actor `+0x136` is read before any write and holds 1 from both producers; the join walk overwrites `+0x50` with 0xc; the tick writes `+0x6c` before reading it while the cull's `+0x54` = 0 holds. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1355 | Actor `+0x138` crosses a town STORE and LOAD unchanged; its first reader at the next mission is the regeneration method `R0654`, which applies rate 1, not 3, while clock minus stamp is at most 80 ticks. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1356 | At the next mission start the join walk's placement reads the carried Mover's word `+0x80` against the actor's cell layer before the walk replaces Mover `+0x154` and Order `+0x158` with new objects. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1357 | No routine read on the town paths touches an actor's word lists `+0x15c`/`+0x178` or Diary `+0x1e4`; their first reader at the next mission start is not established. | Medium / Unknown | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1358 | A town document holds Player `+0x3d` = 0 from the cull and `+0x3c` as the mission's reporter left it; at the next mission the join reads `+0x3d` first and stores `+0x3c` = 0 before the reporter reads it. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1359 | A town document carries Player `+0x44`, `+0x50` and the settings block; the next mission's Player build overwrites `+0x44`, `+0x50` is a disconnect stamp read only when positive, and no writer of the block's other 31 bytes was found. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+| SAV-1360 | The only writer of `Objects/Selection`, `R0084`, lists the ids of view-map objects with `+0x7c` nonzero; the town consumer reads it at LOAD and calls each listed object's `vt+0x14` with 1; the city-to-mission start does not read it. | High / Medium | ✔ promoted | [EXP-0611](../experiments/EXP-0611-town-store-fields/) |
+
+### SAV-1353
+
+- Path. The mission-end arm runs the cull `R0826` (PARTY-ENDCULL-026); the party then
+  stays in the town. A STORE calls `R0084`, then the SAVE writer `R0804`, then the
+  document serializer `R0414`, whose store arm `L08871`..`L05933` reaches the Unit,
+  Humanoid, Human and Player serializers through virtual calls that were not followed. The
+  arm as listed stores none of the fields. The serializers' store arms are not committed, and
+  actor and Player `+0x50` and the 32-byte block were not censused.
+- Kept actor (the cull keeps an actor with `0x21 <= word+0x0e < 0x40`): the tail of `R1380`
+  stores `+0x58` = 0 (`L13244`), `+0x136` = 1 (`L13783`), `+0x54` = 0 (`L13763`) and
+  `+0x50` = 0 (`L13764`). The cull stores nothing at `+0x6c`, `+0x138`, `+0x154`, `+0x158`,
+  `+0x15c`, `+0x178` or `+0x1e4`; those hold what the mission left. Pass 1 may re-place the
+  hero through `R1145`, which writes bytes of the existing Mover.
+- Town-built actor (hire, tavern stock, AddHero and the other Human constructor callers): Unit
+  init `R0185` stores `+0x50` = 0 (`L16779`), `+0x136` = 1 (`L16198`), a new Mover
+  (`R0206`) at `+0x154` (`L06970`), a new Order (`R0286`) at `+0x158` (`L16780`) and
+  `+0x138` = 0 (`L16781`); `R0160` then stores `+0x50` = 0xb (`L00324`). The list
+  constructors (`R0861`, `R0403`) were not decoded; the install document `game0010` holds
+  both lists empty (one document). Humanoid init stores `+0x1e4` = 0 (`L08813`);
+  Human init stores a new Diary there (`L13974`).
+- `+0x6c` has no constructor store. The width-1 census over `.text` finds 18 accesses: 15 in
+  the actor tick `R0037`, one in Unit serialize (`R0210`), and two in the view routine `R0509` on a
+  view object. Operator new `R0747` calls the CRT allocator `R0722`; no zeroing was read.
+- Install corpus, the one no-world document (`en/game0010.sav`, SHA-256 `89cfca4c…`): two
+  Humans with `+0x50` 0, `+0x136` 1, `+0x138` 577 and 623, `+0x6c` 0, Mover 29 nonzero bytes,
+  Order 12, both lists empty, Diary 119 dwords and 119 words.
+
+**Confidence.** High for the cited stores and for the store arm `L08871`..`L05933` as
+listed. Medium that the STORE path writes none of the fields: the serializers are reached
+through virtual calls that were not followed, and actor and Player `+0x50` and the block were
+not censused. Medium that no town routine writes these fields between the cull and the STORE:
+the census attributes every access, but town routines reached only through virtual calls were
+not followed.
+
+**Unknown.** A town-built actor's `+0x6c` at the STORE is the allocation's prior content by
+this reading; a STORE made after a hire, decoded, would show it.
+
+### SAV-1354
+
+- `+0x136`. Readers in the census: the list walk `R0426` (from the sub-step `R0193`),
+  which calls each entry's tick (`vt+0x18`, `L07024`) and then removes it from the list when
+  `+0x136` != 0 (`L07025`..`L16782`); the attack AI `R0016` (`L01931`), called by the
+  tick; `R0014` (`L16783`), only when `+0x54` = 0xe; the cull's `R1380`; Unit
+  serialize. A town document holds 1, the value the cull, Unit init and the tick's own end of
+  attack (`L04544`) store.
+- `+0x50`. For each member it places, the join walk `R0065` calls the regroup `R0063`,
+  which stores `+0x50` = 0xc (`L00150`). The regroup's closure (depth 2) and the placement
+  callees before it (depth 2) read no `+0x50`.
+- `+0x6c`. Every actor read is in the tick. With positive health the tick dispatches on
+  `+0x54` minus 1 (`L00538`..`L01797`); state 0 exceeds the table bound (`L02935`) and
+  returns. The reads at `L05336`/`L16784` follow the attack states' own stores at
+  `L04379`/`L04380`. With health 0 or less the tick tests `+0x13c`, which the cull zeroes,
+  and stores `+0x6c` (`L04377`) before the next tick reads it (`L04375`).
+
+**Confidence.** High for the instructions. Medium that no earlier reader exists: membership of
+the `R0426` list after a LOAD and virtual callers were not read.
+
+**Unknown.** Whether a kept actor is on the `R0426` list when the first sub-step runs.
+
+### SAV-1355
+
+- `R0547` returns `clock[+4] - actor+0x138` (`L04047`..`L04048`). Its three callers:
+  the regeneration method `R0654` (Unit, Humanoid and Human table slot `+0x14`), the strike
+  release at `L16785`, which discards the result and stores a new stamp at `L02470`
+  (AI-561), and the reporter at `L16786` on `*(Player+0x34)`.
+- `R0654` sets the rate to 1, and to 3 when the difference exceeds 0x50
+  (`L04036`..`L14983`); the health step multiplies by it (`L16787`). The tick-list walk
+  `R0860` calls it (`L04403`); the stepper `R0147` calls that walk at sub-tick phase 12
+  of 16.
+- No STORE, cull or LOAD routine writes `+0x138`. The clock `+4` is 0 at the first sub-tick of
+  a mission started after a town LOAD (SESS-088). A kept actor with stamp S therefore
+  regenerates at rate 1 until the clock exceeds S + 80 or its next strike release; a
+  town-built actor (stamp 0) until tick 81. Install `game0010`: 577 and 623.
+
+**Confidence.** High for the arithmetic, the callers and the absence of a writer in the
+census. Medium that no other `+0x138` reader on the mission path runs first: the census holds
+103 reads, attributed to actors only in the routines named.
+
+### SAV-1356
+
+- The join walk `R0065` places each member through `R1145` (`L06656`), which calls
+  `R0050` (`L06653`). That routine writes the existing Mover's `+0x72` and
+  `+0x82`..`+0x85`, compares its word `+0x80` with the actor's cell layer
+  (`L16788`..`L16789`) and, when they differ, re-registers the actor on the map
+  (`L16790`).
+- The walk then installs a new Mover at `+0x154` (`L14157`) and a new Order at `+0x158`
+  (`L14160`), and calls the regroup `R0063` (`L14161`).
+- A town-built actor's Mover is its constructor Mover; a kept actor's is the one the mission
+  and the cull's pass 1 left.
+
+**Confidence.** High for the order of the calls. Medium for the scope: actors the walk does
+not place keep both objects, and their first reader was not read.
+
+### SAV-1357
+
+- The census over `.text` finds 109 accesses at `+0x15c`/`+0x178`. Actor ones are in the
+  route and Mover routines `R0053`, `R0437`, `R0438`, `L07101`, `R1544`,
+  `R0043` and in Unit serialize. None is in the cull, the town consumer `R0098`
+  (closure depth 3), the join walk (closure depth 3) or the store arm.
+- `+0x1e4`: Humanoid init, Human init, the destructor `R0982` and Humanoid serialize hold
+  the actor accesses; SAV-982 bounds the Diary's consumers.
+- Kept actors carry both lists (SAV-1214); install `game0010` holds both empty.
+
+**Confidence.** Medium for the town negative. Unknown for the first mission reader.
+
+**Unknown.** Which route routine runs first on a kept actor with a non-empty list, and whether
+it clears (`R0439`) or follows the list: a trace of those six routines over the first
+mission ticks after a town LOAD would settle it.
+
+### SAV-1358
+
+- The cull keeps a Player only when `+0x28` = 0 and its name is not `Self`
+  (`L07386`..`L16791`) and stores `+0x3d` = 0 there (`L07388`). `+0x3c` is written only
+  by the Player constructor, the reporter `R0132` (0, 2, 2, 1) and the join `R0131`.
+- The join exits early when `+0x34` = 0 (`L07353`..`L16792`). Otherwise it stores
+  `+0x3c` = 0 (`L07357`), reads `+0x3d` when the packet word `+0x0a` is 0 (`L16793`,
+  `L07358`), calls the join walk for 0 (`L06675`) and stores `+0x3d` = 1 (`L07359`).
+- The reporter returns unless `+0x3d` != 0 and `+0x28` = 0 (`L16794`..`L16795`), then
+  reads `+0x3c` (`L16796`). The drop routine `R1132` reads `+0x3d` only after
+  `+0x50` > 0.
+- No reader was found in the town consumer's closure (depth 3). Install: `game0010` 0 and 0;
+  every world-half first Player holds `+0x3d` = 1, and `game0006` holds `+0x3c` = 1.
+
+**Confidence.** High for the instructions. Medium that no town routine reads either byte: the
+width-1 census was attributed by owner, and town routines reached only through virtual calls
+were not followed.
+
+### SAV-1359
+
+- `+0x44`: constructor 0 (`L07239`). The Player build `R0423` stores ALM type-5 record
+  `+8` + 1 at `L02129` on both the reuse arm (`L13990`) and the constructor arm, inside
+  fresh construction `R0512`, which `R0099(0)` calls at `L06688`. No reader was found
+  in the town consumer's closure.
+- `+0x50`: constructor 0 (`L08577`). `L09306` stores the full clock `[[L00285]]`
+  (`L16797`); its callers are `L16798` and `L16799`, on the disconnect paths. `R0910`
+  stores 0 (`L16800`). The cull stores nothing. The first reader is `R1132`, from the
+  stepper (`L06009`) and the loop `R0075` (`L06008`): when `+0x50` > 0, `+0x3d` != 0 and
+  `+0x50` < the clock (`L16801`..`L16802`) it removes the Player and its actors. All install
+  Player records hold 0. This extends SAV-665.
+- Block `*(Player+0x30)`: the constructor zeroes 32 bytes and sets `+0x1f` = 2 (`L16803`,
+  `L00561`). A scan of accesses through a just-loaded `+0x30` pointer finds one store, the
+  formation setter (`L00563`). Readers of `+0x1e` (`L16804`, `L16805`) index a
+  100-by-100 relation table. Install: every other byte 0 (SAV-662).
+
+**Confidence.** High for the stores and the reader's test. Medium for the block negative: the
+scan follows a register only for eight instructions.
+
+**Unknown.** Readers of `+0x44` before `L02129` inside `R0099`; the block's first reader
+at the next mission.
+
+### SAV-1360
+
+- References to `Selection` (`L09124`): `L16806` (town consumer), `L16807` (mission
+  consumer), `L16808` (producer). The producer `R0084` runs only when campaign `+0x6bc` =
+  2 (`L16219`). It walks the view map `[view+0xd0]+0x9b8` and appends a node's word key
+  (`L16809`) when the object's `+0x7c` is set (`L16810`..`L16811`), then writes
+  `Objects/Selection` (`L16812`..`L16813`).
+- The town consumer `R0098` reads it (`L09125`), looks each id up in the same map
+  (`L16814`) and calls the object's `vt+0x14` with 1 (`L16815`).
+- The mission consumer reads it only when `+0x6bc` = 2 and its argument is nonzero
+  (`L16816`..`L13473`); the city-to-mission start passes 0 (SAV-POSTLOAD-220).
+- Install: `game0010` holds `[1]`; world-half documents hold `[]`, `[1]`, `[79]`, `[111]`,
+  `[1,111]` and `[1,111,114,113,112]`.
+
+**Confidence.** High for the three references and both gates. Medium that the list carries a
+selection: the `vt+0x14` target at `L16815` and the meaning of `+0x7c` were not read. Medium
+that the listed view objects are actors: the view map's object class was not read.

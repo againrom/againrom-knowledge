@@ -337,6 +337,31 @@ reverting the personal record alone reproduces the fight regardless of the
 group's state, and reverting the group alone does not, regardless of the
 personal record's state. — SAV-1096, SAV-1101
 
+### Town document and the next mission start
+
+A document stored in the town holds two kinds of actor. A kept actor passed
+the mission-end cull: it holds `+0x50` = 0 and `+0x136` = 1 from the cull, and
+`+0x6c`, `+0x138`, Mover, Order, both word lists and Diary as the mission left
+them. A town-built actor holds Unit constructor values: `+0x50` = 0xb,
+`+0x136` = 1, `+0x138` = 0, a constructor Mover and Order, empty lists and a
+new Diary. No constructor stores `+0x6c`. The store arm
+`L08871`..`L05933` writes none of these fields; the serializers it reaches
+through virtual calls were not followed, and `+0x50` and the block were not
+censused there. — SAV-1353
+
+| Field | First use after a town LOAD |
+|---|---|
+| `+0x50` | Join walk regroup stores 0xc before any read |
+| `+0x6c` | Tick stores before it reads while `+0x54` = 0 |
+| `+0x136` | Read by the active-list walk and attack AI; both producers store 1 |
+| `+0x138` | Regeneration reads `clock - stamp`: rate 1 up to 80 ticks, else 3 |
+| `+0x154`, `+0x158` | Placement reads Mover word `+0x80`; the walk then installs new Mover and Order |
+| `+0x15c`, `+0x178`, `+0x1e4` | No town reader; first mission reader Unknown |
+
+The mission clock restarts at 0, so a kept actor's stamp delays the faster
+regeneration rate until the clock passes the stamp plus 80 ticks or the actor
+strikes again. — SAV-1354, SAV-1355, SAV-1356, SAV-1357
+
 ### Client drawable after LOAD
 
 The selected entry state message does not populate every numeric card field.
