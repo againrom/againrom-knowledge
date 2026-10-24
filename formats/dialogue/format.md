@@ -276,12 +276,42 @@ takes its own `Face`. The figure is then `graphics\equipment\<directory>\<face>.
 chosen by `bits & 6` (`mfighter`, `mmage`, `ffighter`, `fmage`), and a result whose `bits & 3` is 1
 also draws the hero back layer. When no live actor passes their terms, `npc21` to `npc24` draw an
 archetype chosen by the tokens and the primary's sex and class (`npc21` always `MaleFighter`).
-Whether a live hero passes the terms for a given party, so that the synthesiser is never reached, is
-Unknown. No party hero, no stock mercenary and no placement of the chapter-140 map (`scn:140.alm`)
+Which live hero passes is stated below. No party hero, no stock mercenary and no placement of the chapter-140 map (`scn:140.alm`)
 passes the terms of `npc62`. If the tavern's client holds no other actor that passes, the dialogue
 draws the synthesised `fmage\4.256` for it. The client's actor map was not enumerated; actors that
 do pass exist in `scn:141.alm` and, on the EN root, in `Beast.ALM`, `Cross.ALM` and `Horror.alm`.
 — `DLG-SYNTH-042`, `DLG-SPEAKER-041`
+
+**Who speaks for `npc21` to `npc24` in the campaign.** Tags naming them occur in 173 EN and 175
+RU event files of the 28 mission directories of the scanned event path: pages per speaker `npc21` 183 / 187, `npc22` 46 / 47, `npc23` 28 / 27, `npc24`
+5 / 5. A hero-band actor passes the `Hero` term: the class setter, called only from `L03117`,
+sets that bit for types `[0x20,0x40)`, and no other writer was classified (Medium). `Me` is set on
+the drawable the first of the client map's two insertion arms adds while the map count is 1; that
+this is the primary is Medium. With every companion joined and alive:
+
+```
+            male fighter          male mage             female fighter        female mage
+npc21       primary (Medium)      primary (Medium)      primary (Medium)      primary (Medium)
+npc22       Reniesta (row 29)     Reniesta (row 29)     Fergard (row 28)      Fergard (row 28)
+npc23       Naira (row 31)        Naira (row 31)        Brian 42 + Danath 30  Brian 42 + Danath 30
+npc24       Fergard (row 36)      Brian 42 + Danath 34  Reniesta (row 37)     Naira (row 35)
+            + Rood Glaen 43 from mission 150
+```
+
+The `npc22` companion is the town grant before mission 30. Brian, the `npc23` actor, the
+`npc24` actor and Rood Glaen answer as map units of other players in missions 40, 70, 100 and
+140 and as party members after. Where two pass, the walk returns the first in the client map's
+order: bucket `(runtime id >> 4) mod 17` ascending, newest insertion first in a bucket; which
+hero that is stays Unknown. No mercenary is known to answer (Medium): the class setter gives
+it no bit 0. A missing companion, or one past corpse stage 1, gives its pages to the other
+passer or to the archetype. With a live companion the `iamfemale`/`iammale` pages
+`m130/event01` 2, `m130/event03` 7 and `m130/event06` 2 match no tag and those dialogues end
+there, per the arm order of `DLG-TAGARM-027` (Medium). The panel is not known to print a
+speaker name (Medium): its children are the portrait, the text control and the button, and no
+part body of a tag naming them opens with a name; the paint of the panel base class and of the
+text control, and any hover text, were not read.
+— `DLG-ROLE-083`, `DLG-ROLE-084`, `DLG-ORDER-085`, `DLG-TAGARM-086`, `DLG-PARTY-087`,
+`DLG-NAME-088`
 
 A person the client creates from a state message with a type id below `0x1a` takes its face from the
 low seven bits of the message's face byte, and bit 7 is its Female bit. For a person the npc arm of

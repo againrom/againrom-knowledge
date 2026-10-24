@@ -2481,3 +2481,185 @@ committed listings and only its voice request is established (DLG-SOUND-028). Th
 
 **Unknown.** Whether a click elsewhere on the panel requests a sound, and
 native audibility. Request tracing on press, Enter and Escape settles it.
+
+## Who answers npc21 to npc24 in the campaign
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| DLG-ROLE-083 | Tags naming `npc21` to `npc24` occur in 173 EN and 175 RU event files of all 28 missions that carry such a tag in the scanned path; pages per speaker, EN / RU: `npc21` 183 / 187, `npc22` 46 / 47, `npc23` 28 / 27, `npc24` 5 / 5. | High | ● active | [EXP-0618](../experiments/EXP-0618-speaker-roles/) |
+| DLG-ROLE-084 | With every companion joined and alive, `npc21` is the primary (Medium), `npc22` the mission-30 companion, `npc23` Naira or else Brian and Danath, `npc24` the mission-100 companion, joined by Brian or Rood Glaen for a male primary. | High / Medium | ● active | [EXP-0618](../experiments/EXP-0618-speaker-roles/) |
+| DLG-ORDER-085 | The live-actor walk returns the first passer in the client map's order: bucket `(runtime id >> 4) mod 17` ascending, newest insertion first within a bucket; which of two passing heroes speaks is Unknown. | High / Medium / Unknown | ● active | [EXP-0618](../experiments/EXP-0618-speaker-roles/) |
+| DLG-TAGARM-086 | When a live companion answers, the `iamfemale`/`iammale` pages `m130/event01` 2, `m130/event03` 7 and `m130/event06` 2 match no tag, so those three dialogues end early on both roots (arm order of `DLG-TAGARM-027`, Medium). | High / Medium | ● active | [EXP-0618](../experiments/EXP-0618-speaker-roles/) |
+| DLG-PARTY-087 | Hero-band actors answer `npc21` to `npc24`; the class setter, called only from `L03117`, gives a mercenary no bit 0 and no other writer was classified (Medium); an absent or dead companion passes its pages on. | High / Medium / Unknown | ● active | [EXP-0618](../experiments/EXP-0618-speaker-roles/) |
+| DLG-NAME-088 | The dialogue panel prints no speaker name (Medium): its children are the portrait, text control and button, and no instance name opens the body of any of the 274 EN and 281 RU `npc21` to `npc24` tags. | High / Medium | ● active | [EXP-0618](../experiments/EXP-0618-speaker-roles/) |
+
+### DLG-ROLE-083
+
+- Population: every `main.res` node `text/battle/m<n>/event<NN>.txt`, 225 EN and 228 RU,
+  scanned as `DLG-MARKUP-007` defines: `<` .. `>`, lower-cased body, the number after `npc=`
+  and after `part=`.
+- The scanned path `text/battle/m<n>/event<NN>.txt` holds 225 EN and 228 RU event nodes in 28
+  mission directories on each root (`census.tsv`); each of the 28 carries such a tag. Dialogue
+  outside that path (tavern, town) is not covered.
+- Files carrying a tag with `npc` 21 to 24: 173 EN with 456 tags in those files, 274 of them
+  naming `npc21` to `npc24`; 175 RU with 463 tags, 281 of them naming `npc21` to `npc24`
+  (`tags.tsv`).
+- A page counts for a speaker when some tag declaring that part names it.
+- `npc22` pages lie in missions 40, 51, 60, 70, 71, 80, 81, 90, 91, 120, 121 and 130.
+  `npc23` pages lie in 70 (`event02` pages 1, 3 to 9 and 12), 91, 101, 111, 121, 130, 140,
+  141, 150 and 151. `npc24` pages: `m100/event08` 1 and 3, `m150/event02` 1, `m150/event09` 1,
+  `m151/event23` 2.
+- Root differences: RU `m90/event05` page 2 and `m90/event06` page 1 are `npc22`; EN
+  `m150/event03` page 2 is `npc23` where RU has `npc21`; RU alone ships `m130/event07` and
+  `m150/event10` (`npc21`); `m81/event06` and `m100/event05` differ in part count.
+
+**Confidence.** High: an exhaustive scan of both roots' event nodes in the scanned path with
+the engine's own substring tests.
+
+### DLG-ROLE-084
+
+- Only an actor with `+0x18c` bit 0 passes the `Hero` term. The class setter `R0590`,
+  called only from `L03117` (direct-call census, `listings.txt`), sets bit 0 in its hero arm,
+  for a type in `[0x20,0x40)`: `(old & 0x80) | 9`, plus Female 4 and Mage 2 from `type - 0x21`
+  (`L16880`..`L03485`). No other writer of `+0x18c` was classified; about 100 memory
+  operands carry that displacement in `.text`, among them whole-word stores and copies, and
+  none was shown unable to set bit 0 or `0x20` of a client drawable. Bit `0x20` (`Me`) is ORed
+  into the drawable that the first insertion arm of `DLG-ORDER-085` adds while the map count
+  is 1, which that arm also stores at `+0x3f54` (`L03495`..`L03216`). The second
+  insertion arm runs neither the setter nor the Me store.
+- The hero-band actors of the campaign are the primary and the five producers of
+  `HERO-JOIN-120`: the town grant before mission 30 (Fergard row 28 for a female primary,
+  Reniesta row 29 for a male one), Brian row 42 (map unit of `40.alm`), the `70.alm` actor
+  (Danath row 30 for a female primary, Naira row 31 for a male one), the `100.alm` actor
+  (male fighter Fergard 36, female fighter Reniesta 37, male mage Danath 34, female mage
+  Naira 35) and Rood Glaen row 43 (map unit of `140.alm`). Each is a map unit of another
+  player in its own mission and a party member from the next main mission.
+- Applying `DLG-SYNTH-042`'s terms, for the canonical party:
+
+| Speaker | Male fighter | Male mage | Female fighter | Female mage |
+|---|---|---|---|---|
+| `npc21` | primary (Medium) | primary (Medium) | primary (Medium) | primary (Medium) |
+| `npc22` | Reniesta 29 | Reniesta 29 | Fergard 28 | Fergard 28 |
+| `npc23` | Naira 31 | Naira 31 | Brian 42 and Danath 30 | Brian 42 and Danath 30 |
+| `npc24` | Fergard 36; from m150 also Rood Glaen 43 | Brian 42 and Danath 34 | Reniesta 37 | Naira 35 |
+
+- In mission 70 the `npc23` actor and in mission 100 the `npc24` actor answer as map units of
+  players 6 and 7, before their transfer.
+- Rood Glaen also passes `npc22` for a female primary, but no `npc22` page lies in missions
+  140 to 151. Sub-missions resolve identically whether played before or after their chapter's
+  main mission.
+- Instance names: EN Fergard, Reniesta, Brian, Danath, Naira, Rood Glaen; RU Фергард,
+  Рениеста, Бриан, Данас, Найра, Руд Глаэн (`HERO-JOIN-128`).
+
+**Confidence.** High for the terms, the bits the hero arm of `R0590` itself writes and
+the producer table: named instructions and the published producer census. Medium that bit 0 is
+set only by that arm: no other writer of `+0x18c` was classified, so a copy of a hero's word
+into a second drawable is not excluded. Medium that `npc21` is the player's own hero: the Me
+bit goes to the first object the first insertion arm adds, and nothing here shows that the
+first element of the client's map is the own hero rather than an object the second arm
+inserted earlier. Medium that no other actor passes: the population is the
+primary, the five producers and the placements of `EXP-0413`; a hero-mode actor built by a
+runtime path outside `HERO-JOIN-120`'s census is not excluded. Medium that a pre-join map unit
+is in the client's map at the dialogue, which rests on the session-entry projection of every
+world actor (`ANIM-126`) and on the unit being alive.
+
+### DLG-ORDER-085
+
+- `this+0x9b8` is an MFC word-keyed map: vtable `L16881`, bucket count `0x11` written by the
+  constructor (`L16882`..`L16883`).
+- Two arms of the client's message handler (`R0509`) insert into `this+0x9b8`, each under
+  the message's id word: bucket `(id & 0xffff) >> 4` modulo `[map+8]` (`L05558`), the new node
+  linked in front of the bucket's head. The dispatch (`L16884`..`L10600`) sends message
+  types `0x6c`, `0x6e`, `0x6f` and `0x70` to the case at `L02530`, whose insertion is
+  `L16885`..`L10178` (key word at message `+0x12`); it then calls `R0590` and
+  applies the Me bit. It sends type `0x82` to the case at `L04899` (key word at message
+  `+0xa`, slot byte at `+0xc`), whose insertion is the second: it loads `this` at `L16312`,
+  takes `+0x9b8` at `L16886`, looks the key up at `L16887`, allocates at `L16888` and
+  links the node at `L16889`..`L16313`, after constructing a drawable of one of two
+  classes (`R1842`, `L03225`). `R0590` has no other caller, and the second arm
+  writes neither `+0x3f54` nor the Me bit. What the message types mean was not decoded.
+- `R0742` walks buckets from index 0, each chain from its head, and returns the first
+  actor passing every term with corpse stage `+0x15a` at most 1 (`L16890`..`L03480`).
+- So among two passers the lower bucket wins, and in one bucket the later insertion. The key
+  is the runtime id, a lowest-free-bit allocation (`MOVE-ID-016`), so the order is run-time
+  state.
+- The two-passer cases of `DLG-ROLE-084`: `npc23` for a female primary from mission 70, 26 EN
+  and 25 RU pages; `npc24` for a male mage from mission 100, 5 pages; `npc24` for a male
+  fighter from mission 150, 3 pages.
+
+**Confidence.** High for the container, the two insertions and the walk: named instructions in
+three routines. The other two callers of the node allocator `L16891` (`L16892`,
+`L16893`) were not read. Medium that the bucket count stays 17: a linear-sweep census of `.text` finds
+only the free (`L16894`) and an allocation that rewrites `+0x9c0` with its own value
+(`L16895`), and it cannot see a store through a register already holding `this+0x9b8`.
+
+**Unknown.** Which hero speaks in each two-passer case. A save made during the mission gives
+both runtime ids; a run of `m70/event02` with a female primary shows Brian (face 1) or Danath
+(face 5).
+
+### DLG-TAGARM-086
+
+- `m130/event01` page 2 and `m130/event03` page 7 are `npc22`, and `m130/event06` page 2 is
+  `npc23`; each page has one `iamfemale` and one `iammale` tag, on both roots.
+- The speaker arms run only when a live actor passes (`DLG-TAGARM-027`; gate `L03572`). The
+  live `npc22` or `npc23` is of the other sex than the primary, so the tag that passes the
+  primary's `iam*` arm fails the speaker's `female` or `male` arm, and the other tag fails its
+  `iam*` arm.
+- The dialogue then ends: `m130/event01` loses pages 2 and 3, `m130/event03` page 7 and
+  `m130/event06` pages 2 to 5.
+- With no live answer the arms are skipped and the `iam*` arms pick by the primary. The four
+  pages with bare `male`/`female` variants (`m60/event01` 3, `m111/event06` 1, `m150/event02`
+  2, `m151/event13` 2) take the variant of a live speaker's sex, and the first in file order
+  for a synthesised one.
+
+**Confidence.** High for the tags, the speaker sexes and the arm outcomes. Medium that the page
+is absent in play, the grade `DLG-TAGARM-027` gives the fall-through and loop tail.
+
+### DLG-PARTY-087
+
+- The class setter `R0590`, called only from `L03117`, gives a mercenary no bit 0:
+  its Humans non-hero arm sets `0x18` plus sex and class, and its Units arm leaves `+0x18c` 0
+  (`DLG-SPEAKER-041`). No other writer of `+0x18c` was classified (`DLG-ROLE-084`), and no
+  Humans row has a type in the hero band. On that reading hiring changes no answer.
+- The answer changes with the companions only:
+  - a companion that never joined, or was removed with its corpse, is not in the client's map;
+    its pages go to the other passer of `DLG-ROLE-084` or to the archetype of `DLG-SYNTH-042`;
+  - a companion at corpse stage 0 or 1 still answers, and one at stage 2 or above is skipped
+    (`L03478`..`L16896`);
+  - Brian or Danath absent leaves the other as the sole `npc23` answer for a female primary;
+    Rood Glaen absent leaves Fergard 36 as `npc24` for a male fighter;
+  - the mission-30 companion absent makes the `m130/event01` and `m130/event03` pages of
+    `DLG-TAGARM-086` reachable, and the mission-70 companion absent for a male primary does the
+    same for `m130/event06`.
+- The placement walk places every member of the player's flat index (`PARTY-ORIGIN-010`);
+  the read campaign path has no step that leaves a member behind.
+
+**Confidence.** High for the bits the two non-hero arms of `R0590` write and for the
+stage gate: named instructions. Medium that only hero-band actors answer and that mercenaries
+never do: that rests on the setter's arms, the population fact about Humans rows and an
+unclassified remainder of `+0x18c` writers. Medium for the removal of a dead companion, which rests on the culls of `PARTY-CULL-004` and
+`PARTY-ENDCULL-026` without a traced death in a mission.
+
+**Unknown.** Whether a member the placement walk could not seat reaches the client's map. A
+save taken after an overfull placement settles it.
+
+### DLG-NAME-088
+
+- `R0695` adds three children: the portrait (id 12), the text control (id 10) and the
+  button (id 11), and no label (`DLG-WIN-001`). The portrait's paint draws the composed
+  surface only (`DLG-PORTRAIT-036`).
+- A part body is the bytes after the tag's line (`DIALOGUE-068`). `bodies.tsv` measures the
+  body of every tag naming `npc21` to `npc24`, 274 EN and 281 RU: no body has a colon in the
+  first 32 bytes of its first line, and no first line opens with one of the six instance names
+  (`HERO-JOIN-128`, EN and RU). Four EN bodies (`m91/event01` tag 3, `m121/event02` tag 1,
+  `m130/event06` tags 2 and 3) carry an instance name inside the sentence.
+- Neither a live actor's instance name nor any `npc.reg` or text-table string was found drawn
+  for the speaker by the routines read; a live and a synthesised speaker differ in the figure.
+
+**Confidence.** High for the child list and the portrait paint: one constructor and one paint
+routine read whole. Medium that the panel prints no speaker name: the claim rests on those two
+readings and on the body table, whose test is a name or a colon opening the first line.
+
+**Not searched.** The paint of the panel's own base class (`R0696`), which could draw a
+caption; the paint and text-set path of the text control (`R0699`), which could add a
+prefix; the button's hint and any hover text. A name drawn by one of these is not excluded.
