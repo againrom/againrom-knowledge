@@ -398,6 +398,18 @@ files: on EN `sound=` occurs 7 times, all in `text/inn`, while `npcalive=`, `npc
 narrowed to event files), `DLG-NPCTAG-019` (its reason for the RU raw-file census partially
 retracted; the counts stand)
 
+Page order is numeric. Every panel (event, inn, mercenary hall, shop, training)
+shows pages 1, 2, 3, ..., each from the first accepted tag in file order whose
+body contains `part=<n>`. A skipped number ends the dialogue after the page
+before it; a missing page 1 leaves `Nothing to say`, then page 2; of two tags
+with one number, the later is shown only when a conditional arm rejects the
+earlier. — DLG-PAGES-091
+
+No shipped node on either root skips a number or lacks part 1. Two nodes repeat
+part 1 without a condition, so their second part-1 page is never shown (EN
+m81 event 6, RU m101 event 6, Medium); five RU nodes author parts out of number
+order and show them in number order. — DLG-PAGES-092
+
 The numeric npc, npcalive/npcdead, tune and tips branches request
 five-byte substrings before their numeric conversion. The conversion
 returns are unchecked. A missing tune search stores -1 to its output;

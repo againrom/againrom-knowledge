@@ -419,7 +419,7 @@ ALM-LIM-067, ALM-ORD-068
 
 ```
 type9: [u32 count] then count records of 26 + 6*n bytes
-       +0x00 u32 tag   (runtime: ALM-T9TAG-312)
+       +0x00 u32 tag   (runtime: ALM-T9TAG-312, partially retracted)
        +0x04 u32 X · +0x08 u32 Y
        +0x0c u16 A · +0x0e u16 B · +0x10 u16 C
        +0x12 u32 spellRaw · +0x16 u32 n
@@ -456,7 +456,7 @@ type8: no count word - the record count is meta+0x2c (the loader's case-8 bound)
 `ALM-EFFLINK-072` and `ALM-EFFPOP-073` read the link operation and type 9 consumer end to end. The loader and consumer each
 subtract one from a positive file link before indexing the type 9 list; zero means none and file
 value one reaches zero-based record zero. Case 8 writes the referring element ordinal and owning
-type 8 pointer to the target type 9 object's runtime `+0x00/+0x04` (`ALM-T9TAG-312`); these are runtime fields, not
+type 8 pointer to the target type 9 object's runtime `+0x00/+0x04` (`ALM-T9TAG-312`, its building-lookup clause partially retracted); these are runtime fields, not
 wire offsets.
 The consumer accepts a linked recipe only when its file X/Y are both zero and the backlink exists.
 It then appends Effects in this order:
@@ -525,6 +525,40 @@ via a generic named-node accessor family (`R0475` find-by-name, `R0476`
 get-param, `R0477`/`IsEmpty` iterate). This historical cross-reference
 does not classify types 8/9 as named-node trees: their distinct record consumers
 are `ALM-SACK-065`, `ALM-EFFREC-071` and `UNIT-M10CELL-054`.
+
+### Element word 2, caster bytes and object binding
+
+Element word 2 is read only on the linked zero-cell arm, where words 1 and 2
+form the Effect operand. The cell arm reads the low bytes of words 0 and 1 of
+elements 0 and 1; the actor and building arms read no element. A cell-entry
+record's word 2 therefore has no read effect (Medium for readers outside the
+builder). — ALM-T9WORD-331
+
+All 438 EN and 154 RU installed cell-entry records have two elements whose
+word 2 is 9078 or 9396, equal in both elements; every element of a zero-cell
+record holds 0 there. — ALM-T9WORD-330
+
+The building arm keeps low 8 bits: the tag `+0x00` goes to caster `+0x3c`, spell
+and power to payload bytes 0 and 1, low8(X) and low8(Y) to bytes 2 and 3. A power
+or tag of 256 reaches the caster as 0. The editor names `+0x00` scan range after
+its control 1219 (Medium). The caster's run-time use of these bytes is Unknown.
+— ALM-T9CAST-333
+
+| Arm | Object lookup | Cell use | Miss |
+|---|---|---|---|
+| actor (not L, A bit 3) | dword B or C<<16 against actor `+0x08` (unit id) | none; no nonzero cell needed | `Can't resolve unit %d for spellbook.`, record skipped |
+| building (N, not L, A bit 2) | same dword against structure `+0x08` (sign-extended type-4 `+0x12`) | payload bytes 2, 3 only | `Can't resolve building %d for building - caster`, record skipped |
+
+The arms of `R0461` look the object up by the dword at `+0x12` and compare no
+cell. That no other routine binds a type-9 entry, by cell or otherwise, is
+Medium: the holders of the type-9 list are a rel32 census of the loader,
+`R0461` and the destructor. — ALM-T9BIND-334
+
+Installed maps: every one of 206 EN and 60 RU building entries names exactly
+one structure id; 48 EN and 11 RU sit on that structure's anchor cell, and 158
+EN and 49 RU lie off it by at most (7,2). The 20 EN actor entries, all in
+`Cross.ALM`, each name one unit, 18 on its cell and 2 one cell off. No entry cell
+is the anchor of two objects (footprints not measured, Medium). — ALM-T9BIND-335
 
 ## Missing Player admission
 

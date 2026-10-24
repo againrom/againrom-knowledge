@@ -1756,7 +1756,7 @@ In 140.alm the Rood Glaen body (unit 443, authored hp 0) and the tower near it a
 | ALM-SAVE-239 | An EN-editor save drops types 4 and 6 when no object exists, round-trips unit wire+0x18 in range, moves orphan loot to unit 1, passes some casters to unread helper L14474 and out of the size sum, binds an unmatched owner to E+0x3c. | High / Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
 | ALM-SAVE-240 | The EN editor's reader stores type-0 +0x08..+0x14, the name, +0x70, +0x74 and the 512-byte text region where its writer reads them, so an unedited save writes those loaded bytes back unchanged. | High / Medium | ✔ promoted (amended) | [EXP-0543](../experiments/EXP-0543-editor-writes/) |
 | ALM-SAVE-252 | The EN editor's reader stores every script node (796 bytes) and trigger (184 bytes) whole, in file order, and its writer emits the same offsets, so an unedited load and save writes both lists back byte for byte (Medium end to end). | High / Medium | ● active | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
-| ALM-SAVE-253 | Reader case 9 stores a type-9 entry's fields where the writer reads them, but drops an entry whose +8 and +0xc are non-zero and whose word +0x10 is 4 when L15129 returns 0; +4 and +0x12 are not on the wire. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
+| ALM-SAVE-253 | Reader case 9 stores a type-9 entry's fields where the writer reads them, but drops an entry whose +8 and +0xc are non-zero and whose word +0x10 is 4 when L15129 returns 0; +4 and +0x12 are not on the wire. | High / Medium | ● active (amended, partially retracted) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
 | ALM-SAVE-254 | At save the type-9 size loop passes an entry with +8 non-zero, +4 zero and 16-bit +0x16 zero to L14474 (thunk L14524), which removes it from the array; the next entry is skipped by the size sum but still written. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
 | ALM-SAVE-255 | Every EN-editor save writes file version 990 and, per type-8 loot, a position taken from its owner object and owner 0 for one class; all 72 installed maps are version 990 and 43 of 43 unit-owned loot per root keep their position. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
 | ALM-SAVE-256 | On load a player's id is its file ordinal (+4 = index + 1), not a stored field, and E+0x3c is the first player, so a unit whose owner matches none is bound to player 1 and saved with owner 1; none of 12,085 installed units is unmatched. | High / Medium | ● active (amended) | [EXP-0554](../experiments/EXP-0554-editor-script-and-newmap/) |
@@ -1992,6 +1992,8 @@ follow in file order (type 8 is read after type 9) index the shorter array by th
 arithmetic of that case is not settled.
 
 **Amended.** `ALM-SAVE-260`: `L15129` is read; of the 206 EN and 60 RU entries, 48 and 11 sit on a type-4 record's cell, 158 and 49 stay undecided, none proved kept or dropped (conditions in `ALM-SAVE-260` item 4).
+
+**Amended.** `ALM-T9WORD-329` item 3 reads the writer: the three words written from `+0x10` are `+0x10` and the dword `+0x12`, so `+0x12` is on the wire as B and C (`ALM-EFFREC-071`). The clause "`+0x04` and `+0x12` are not written" and the headline's "+0x12" are partially retracted (`retracted.md`); `+0x04` is not written, and the reader, the drop branch and the corpus counts stand.
 
 ### ALM-SAVE-254
 
@@ -3012,7 +3014,7 @@ counts. `M` is the map object of loader `R0478`; `O` is a map-browser entry; `T9
 |---|---|---|---|---|
 | ALM-MAPLIST-310 | Type-0 +0x74 is read by R0479 into entry+0x10, posted by R0511 as message 0x461 and formatted by R2271 as the row's last column; among callers of L15876 and L15877 no other reader reads it. The route is Medium. | High / Medium | ● active | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
 | ALM-META-311 | Over the searched population no game routine reads M+0xd8 (type-0 +0x74), M+0x20 (+0x10) or M+0x24 (+0x14); the world+0x540d0 copy of M is only stored and reloaded in R0277; the light parser seeks over +0x74. | Medium | ● active | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
-| ALM-T9TAG-312 | Type-9 +0x00 is kept at T9+0x00 from format 990 on; case 8 overwrites it on each linked record; R0461 reads it on its unlinked building arm into caster+0x3c, read only by the serializer among the 14 slot bodies. | High / Medium | ● active | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
+| ALM-T9TAG-312 | Type-9 +0x00 is kept at T9+0x00 from format 990 on; case 8 overwrites it on each linked record; R0461 reads it on its unlinked building arm into caster+0x3c, read only by the serializer among the 14 slot bodies. | High / Medium | ● active (amended, partially retracted) | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
 | ALM-UNITREAD-313 | The type-6 array helpers L02248, R2270, R2121, R1338, R0521 and L13132 store, return or count a record pointer and dereference no record; except unread grow routine L15875; callers: loader, spawner, destructor. | High / Medium | ● active | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
 | ALM-CPLAYERC-314 | Roster accessors L15878 and R0129 are called from R0128, R0423 and the destructor on M+0x28, and from R0504 and the loader; the two session bodies read no CPlayer+0x0c; installed type-5 +0x08 is 0 or 5000. | High / Medium | ● active | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
 | ALM-CORP-315 | In 72 installed maps, type-6 +0x26 is 0xffff and +0x28, +0x30, +0x33, +0x34 are 0 in every record; type-0 +0x74 is 1..5; type-9 +0x00 is 0..12; type 9 precedes type 8 in all 71 maps that carry both. | High | ● active | [EXP-0564](../experiments/EXP-0564-map-field-consumers/) |
@@ -3104,6 +3106,8 @@ displacement scan of `0x2f0` and no `.rdata` or `.data` dword pass for routine a
 Whether the archived byte reaches a SAV file is not established here (`SAV-CLASSSER-173`).
 
 **Unknown.** A run-time effect of caster `+0x3c`; a reader of `+0x3c` outside the 14 slot bodies.
+
+**Amended.** `ALM-T9BIND-334` reads the building arm whole: the building is found by the dword `T9+0x12` in a map keyed by the building's `+0x08`, not at the cell; the cell only supplies the caster payload bytes 2 and 3 (`ALM-T9CAST-333`). Item 3's "a building is found at the cell" is partially retracted (`retracted.md`); the `+0x00` read, its store at caster `+0x3c` and the holder census stand.
 
 ### ALM-UNITREAD-313
 
@@ -3259,3 +3263,87 @@ No measured owner lies outside 1..its map's roster count. No measured structure/
 The complete reader R0478 establishes three internal type7 count reads and their loops. Mission load R0128 calls AI builder R0077 and binder R0067. Neither body was selected. The 32-window static specification includes the reader and selected structure/unit/loot consumers, not the script binder family; no section scans were made.
 
 **Unknown.** Rejection, substitution, node skipping and player outcome for arbitrary numeric text/script references. Read R0077 and R0067 whole, query their registry dossiers and follow their reference resolvers under a new preregistration. Type7 corpus references were declared unavailable before acquisition; no range or native limit is inferred from their position or nearby program text.
+
+## Map editor type-9 entries: defaults, element third word, caster bounds and binding
+
+Population for this topic: the EN `Map Editor.exe` (SHA-256 `697f7b2c…6526bcb9e`) and the byte-equal EN `rom.exe` / RU `ROM.EXE` (SHA-256 `942e9b72…7b7d367d03`), read statically with a capstone linear decode; the installed maps of both roots (38 EN, 34 RU: loose `.alm` and `scenario.res` members, `ALM-CORP-326`), 792 EN and 334 RU type-9 records. Editor entry offsets are the 0x2e-byte in-memory entry of `ALM-EDITCAST-295`; the runtime record of `rom.exe` uses the same offsets (`+0x00` tag, `+0x04` backlink, `+0x08`/`+0x0c` cell, `+0x10` A, `+0x12` id = B|C<<16, `+0x16` spell, `+0x18` power, `+0x1a` element array). The element words are numbered 0, 1, 2.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ALM-EDITT9-328 | EN editor: the type-9 entry constructor zeroes all 0x2e bytes; Traps Add, Unit Spellbook Add and the Cast from structure open leave tag 0 and backlink 0, and only Traps Add writes elements (two). | High | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-T9WORD-329 | EN editor Traps Manager: Add copies one stack word the handler never writes into word 2 of both elements; selection change and OK write only words 0 and 1; the writer saves all six bytes unchanged. | High | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-T9WORD-330 | Installed maps: all 438 EN and 154 RU cell-entry type-9 records have two elements whose word 2 is 9078 (391 EN, 154 RU) or 9396 (47 EN), equal in both elements; every other element holds 0 there. | High | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-T9WORD-331 | rom.exe reads element word 2 only on the linked zero-cell arm, as the high half of the Effect operand; the cell arm reads low bytes of words 0 and 1 of elements 0 and 1, so a trap's word 2 has no read effect (census Medium). | High / Medium | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-EDITCAST-332 | EN editor Cast from structure: spinners span power 0..100 and control 1219 1..240 (Medium); typed entry takes any unsigned decimal unchecked; OK keeps power's low 16 bits, copies +0x114 to +0x00 (scan range: Medium); 8 EN power 150/200. | High / Medium | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-T9CAST-333 | rom.exe building-caster arm keeps low 8 bits only: the tag +0x00 (named scan range, Medium) to caster +0x3c, power to payload byte 1, cell x, y to bytes 2, 3; power 256 becomes 0; what a caster does with them at run time is Unknown. | High / Unknown | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-T9BIND-334 | The actor and building arms of rom.exe's R0461 look the object up by the id dword +0x12, compare no cell and skip a miss (other binders: Medium); the EN editor matches Cast from structure on cell and id, lists Spellbook by id. | High / Medium | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| ALM-T9BIND-335 | Installed maps: each of 206 EN / 60 RU building entries names one structure id, 48 / 11 at its anchor cell, 158 / 49 up to (7,2) off it; 20 EN unit entries (Cross.ALM) name one unit, 18 at its cell; no entry cell holds two anchors. | High / Medium | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+
+### ALM-EDITT9-328
+
+1. Constructor. Thunk `L15206` jumps to `L16897` (`e01`, `e02`). The body stores the array vtable `L16898` at `+0x1a` and zero at `+0x1e` (data), `+0x22` (count), `+0x26` and `+0x2a`; zero words at `+0x18`, `+0x16`, `+0x14`, `+0x12`, `+0x10`; zero dwords at `+0x0c`, `+0x08`, `+0x00`, `+0x04`. Every byte of `+0x00`..`+0x2d` other than the vtable is written 0. The next routine, `L15534`, copies `+0x00`, `+0x04`, `+0x08`, `+0x0c`, `+0x10`..`+0x19` and each 6-byte element.
+2. Traps Manager Add `L15722` (`e03`): `+0x16` = combo index, `+0x18` = power, `+0x08`/`+0x0c` = the clicked cell, `+0x10` = From + 2 x To, dword `+0x12` = the dialog's `+0x148` (the caller's zero, `ALM-EDITCAST-294`), two elements appended through `L16899` (word 2 per `ALM-T9WORD-329`). `+0x00` and `+0x04` keep the constructor's 0.
+3. Unit Spellbook Add `L15738` (`e11`): `+0x16` spell, `+0x18` power, `+0x08`/`+0x0c` the unit's clicked cell, `+0x10` = 8, `+0x12` the unit id. No element is appended; `+0x00` and `+0x04` stay 0.
+4. Cast from structure open `L15748`, not-found arm `L16900` (`e07`): `+0x10` = 4, `+0x08`/`+0x0c` the clicked cell, `+0x12` the structure id; spell, power, tag and the array keep the constructor's 0. OK `L15751` later stores `+0x16`, `+0x18` and the dialog's `+0x114` (control 1219; the name scan range is Medium) at `+0x00` (`ALM-EDITCAST-297`).
+5. On the wire (writer `L15204`, `e06`, `ALM-T9WORD-329` item 3) a new entry is: Traps `tag 0, x, y, kind, id 0, spell, power, n 2, (x0,y0,w)(x1,y1,w)`; Spellbook `0, x, y, 8, id, spell, power, n 0`; Cast from structure `scan range, x, y, 4, id, spell, power, n 0`.
+
+**Confidence.** **High**: every store of the constructor and the three routes is a named instruction in a whole-body window.
+
+**Answers.** The Unknown of `ALM-EDITCAST-295`, `296` and `297` on whether `L15206` zeroes `+4`: it does, so the save-time removal of `ALM-SAVE-254` meets a new entry whose spell is None.
+
+### ALM-T9WORD-329
+
+1. Add (`e03`). The element is built in the locals `[ebp-0x18]` (word x), `[ebp-0x16]` (word y) and `[ebp-0x14]` (word 2). The From pair is `this+0x114`, `+0x118` and the To pair `this+0x12c`, `+0x128`. Each element is stored as the dword `[ebp-0x18]` at `L15733` / `L16901` and the word `[ebp-0x14]` at `L16902` / `L16903`. No instruction of the body writes `[ebp-0x14]`, so both elements receive the same word, left on the stack by earlier calls.
+2. Selection change `L15726` and OK `L15727` (`e04`, `e05`) store the four coordinate words at element offsets `+0` and `+2` of elements 0 and 1 (`L16904`..`L16905`, `L16906`..`L16907`). Neither stores at element `+4`.
+3. Writer (`e06`): per entry it writes 4 bytes from `+0x00`, 4 from `+0x08`, 4 from `+0x0c`, three words from `+0x10` (so `+0x10` and the dword `+0x12`), two words from `+0x16`, the count `+0x22`, then each element as 6 bytes from the array.
+
+**Confidence.** **High**: whole bodies, named stores. That the value is stack residue is the reading of a never-written local; its content at run time is not established statically.
+
+### ALM-T9WORD-330
+
+Census `corpus.py` (`t9-classes.tsv`, `t9-third-word.tsv`). Cell-entry records are those with X or Y nonzero and A below 4 (`ALM-T9CONTROL-175`): 436 with A 0 and 2 with A 2 on EN, 152 and 2 on RU, every one with exactly two elements. Word 2 is 9078 (0x2376) in 391 EN and 154 RU records and 9396 (0x24b4) in 47 EN records, in both elements; the two words are equal in all 438 EN and 154 RU. The 87 EN and 78 RU elements of zero-cell records (linked or unlinked) hold 0. Records with A 4, 5 or 8 have no element.
+
+**Confidence.** **High** for the counts over the stated population. That the two values are the editor's stack residue (`ALM-T9WORD-329`) is an inference: the equality in every record fits one never-written word, and no game reader uses a cell record's word 2 (`ALM-T9WORD-331`).
+
+### ALM-T9WORD-331
+
+1. Cell arm `L16908`..`L16909` (`g01`): taken when X or Y is nonzero and zero-extended A is below 4. It reads the byte at element `+0` and `+2` of elements 0 and 1 through `L16910` (`L16911`, `L16912`, `L16913`, `L16914`); no read at element `+4`.
+2. Actor arm (`L16915`..`L08851`) and building arm (`L16916`..`L12557`) read no element.
+3. Linked arm `L16917`..`L16918` (`g02`): taken only when X and Y are both 0 and `+0x04` is nonzero. Per element it tests word 0 against 0x29 and copies the dword at element `+2` (words 1 and 2) to the Effect's `+0x40` (`L16919`).
+4. A Traps entry has the clicked cell, so it never takes item 3; word 2 reaches no store of `R0461`.
+
+**Confidence.** **High** for items 1 to 4 within `R0461`, read whole. **Medium** that no other routine reads the element: the holders of the type-9 list are the rel32 census of `ALM-T9TAG-312` item 3 (loader, `R0461`, destructor).
+
+### ALM-EDITCAST-332
+
+1. Data exchange `L16920` (`e07`), read whole: three control bindings (1004 at `+0x5c`, 1214 at `+0x98`, combo 1217 at `+0xd4`) and three text exchanges through `L15577`: id 1213 to `+0x110`, control 1219 to `+0x114`, power 1218 to `+0x118`. No range-check call follows. Control 1219 sits in the dialog's `Scan Range` group; that name for `+0x114` and `+0x00` is Medium (`ALM-EDITCAST-297`): no consumer gives the field its meaning.
+2. `L15577` (`e08`) passes format `%u` to `L16921` (`e09`), which reads up to 32 characters and parses through `L16922` (`e10`): leading blanks skipped; a leading `-` fails; `L16923` converts base 10; a zero result is accepted only from text starting with `0`; trailing blanks only. A failure calls the prompt `L15774` (id 0xf117) and `L16924`. The dialog constructor `L15601` sets `+0x110`, `+0x114`, `+0x118` to 0.
+3. `OnInit` `L15748` sends 0x465 to the power spin with `0x00000064` and to the spin of control 1219 with `0x000100f0`. Read as `UDM_SETRANGE` (low word maximum, high word minimum; Windows constant inferred), the spinners span 0..100 and 1..240.
+4. OK `L15751` ignores the return of `L15573(1)`, then stores word `+0x18` = low 16 bits of `+0x118` and dword `+0x00` = `+0x114`, unless the combo index is 0 (`ALM-EDITCAST-297`).
+5. Installed building entries (`t9-binding.tsv`): power above 100 in 8 EN records, all in `Beast.ALM` (150 three times, 200 five times); `+0x00` = 0 in 3 EN and 2 RU; no `+0x00` above 240; no power above 200.
+
+**Confidence.** **High** for items 1, 2, 4 and 5 as stores and values of `+0x110`, `+0x114`, `+0x118`, `+0x00` and `+0x18`. **Medium** for the name scan range of control 1219, `+0x114` and `+0x00` (`ALM-EDITCAST-297`), so whether a zero at `+0x00` means a range of 0 is not known. **Medium** for item 3's bounds and for what the spinner does at and beyond them: the message meaning and the up-down control's clamping are Windows behaviour, not read. Whether the 8 high powers were typed in this editor is not known.
+
+**Unknown.** The outcome when one text field fails to parse: OK continues with the old member values and then calls the base OK `L15571`, unread.
+
+### ALM-T9CAST-333
+
+Building arm (`g01`, `L16916`..`L12557`): taken when X or Y is nonzero, `+0x04` is 0 and A has bit 2. After the building lookup (`ALM-T9BIND-334`) it constructs the caster (`L02077`, `UNIT-T9CTOR-110`) and stores the byte `[T9+0x00]` at caster `+0x3c` (`L15906`), and at the payload `[caster+0x40]` the bytes `[T9+0x16]` (spell), `[T9+0x18]` (power), `[T9+0x08]` and `[T9+0x0c]` (`L16925`..`L16926`). A power or `+0x00` value of 256 therefore reaches the caster as 0, 300 as 44; a `+0x00` value of 241..255 is kept. The cell arm also keeps low 8 bits of spell and power (`L16927`..`L16928`).
+
+**Confidence.** **High** for the stores of `[T9+0x00]` to caster `+0x3c` and of the payload bytes. **Medium** for the name scan range of `+0x00`: it comes from the editor dialog's control 1219 (`ALM-EDITCAST-297`), not from a consumer. **Unknown** for the run-time use: `ALM-T9TAG-312` finds `+0x3c` read only by the serializer among the caster's own 14 slots, and the consumers of the caster collection (`builder.this+0x24` pointee `+0x10`, `UNIT-T9LIFE-111`) were not read.
+
+### ALM-T9BIND-334
+
+1. `rom.exe` (`g01`). `R0461` first fills two maps keyed by the object's `+0x08`: one from the actor registry `[L00240]` (`L16929`..`L16930`) and one from the builder's building list (`L16931`..`L16932`). The actor arm (not linked, A bit 3) looks up the dword `T9+0x12` (`L16933`); the building arm (cell nonzero, not linked, A bit 2) looks up the same dword (`L16934`). Neither compares the cell. A miss formats `Can't resolve unit %d for spellbook.` or `Can't resolve building %d for building - caster` (`g03`), passes it to `R0422` and continues with the next record. The actor arm needs no nonzero cell.
+2. Keys. A structure's `+0x08` is its sign-extended type-4 `+0x12` (`ALM-STRUCTREAD-228`); an actor's `+0x08` is its type-6 unit id (`TRIG-MAPORD-105`). An id word at or above 0x8000 would not match its own structure; no installed entry has one (`ALM-T9BIND-335`).
+3. EN editor. Cast from structure open (`e07`, `L16935`..`L16936`) takes the last entry with `+0x08` and `+0x0c` equal to the clicked cell, kind 4 and `+0x12` equal to the structure id; a click on another cell of the same structure finds none and appends a new entry there (`ALM-EDITT9-328` item 4). The Unit Spellbook lists kind-8 entries by id and nonzero cell (`ALM-EDITCAST-296`, `e11`). Cited, not re-read here: the structure and unit deletes remove by id (`ALM-EDITDEL-299`, High / Medium there); the editor's reader replaces a kind-4 entry's id with that of the first object whose footprint holds the cell (`ALM-SAVE-260`, High for its items 1 and 2, Medium for what the footprint means).
+
+**Confidence.** **High** for item 1 within `R0461`, read whole: its arms look the object up by the dword at `+0x12` and compare no cell. **Medium** that no other routine of the image binds a type-9 entry to an object: the holders of the type-9 list are the rel32 census of `ALM-T9TAG-312` item 3 (loader, `R0461`, destructor). **High** for item 3 only for the clauses read in `e07` and `e11` (the Cast from structure open and the Spellbook listing and Remove); the delete and rebinding clauses keep the grades of their cited claims. **Medium** for item 2's key identities, taken from the cited claims. The footprint the editor's reader uses is Unknown (`ALM-SAVE-273`), so a kind-4 entry off its structure's anchor may be rebound to another object or dropped on load in the editor.
+
+**Unknown.** Another binder outside `R0461`. The confidence review's raw `.text` scan of the EN `rom.exe` (not committed evidence) for `add ecx, 0x2f0; call` finds 19 sites: 3 in `R0461` and 7 in the loader and destructor window call `L15903`, `L15904`, `L16937`, `L16938` or `L16939`; 9 call other list routines and are unclassified (`L16940`, `L16941`, `L16942`, `L16943` to `L16944`; `L16945`, `L16946`, `L16947`, `L16948`, `L16949` to `L16939`). Reading those 9 sites' owning class settles it.
+
+### ALM-T9BIND-335
+
+Census (`t9-binding.tsv`, `t9-binding-summary.tsv`). Building-arm entries: 206 EN, 60 RU; each id matches exactly one type-4 record of its map (id compared as the sign-extended word, none at or above 0x8000). The entry cell equals that record's anchor cell (fixed-point position shifted right by 8) in 48 EN and 11 RU; it differs in 158 EN and 49 RU, by (0,1), (1,0) or (1,1) in 141 EN and 44 RU and at most (7,2). No entry cell is the anchor of a second structure or of a unit. Structures with two entries: 8 EN and 4 RU; with three: 1 each. Actor-arm entries: 20 EN, all in `Cross.ALM`, none on RU; each id matches one unit; 18 sit on the unit's cell and 2 one cell off (1,1); two units carry 7 and 8 entries, five carry one.
+
+**Confidence.** **High** for the counts and the id matches. **Medium** for "no entry cell holds two objects": only anchor cells were compared; footprints are not measured.

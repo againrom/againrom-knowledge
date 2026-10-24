@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4176. Observation: 99. Static analysis: 3545. Mixed: 532.
+Claims labelled: 4186. Observation: 99. Static analysis: 3552. Mixed: 535.
 
 ## Ledger ai
 
@@ -622,7 +622,7 @@ Claims labelled: 4176. Observation: 99. Static analysis: 3545. Mixed: 532.
 | ALM-SAVE-239 | static analysis | ✔ promoted (amended) |
 | ALM-SAVE-240 | static analysis | ✔ promoted (amended) |
 | ALM-SAVE-252 | static analysis | ● active |
-| ALM-SAVE-253 | static analysis | ● active (amended) |
+| ALM-SAVE-253 | static analysis | ● active (amended, partially retracted) |
 | ALM-SAVE-254 | static analysis | ● active (amended) |
 | ALM-SAVE-255 | static analysis | ● active (amended) |
 | ALM-SAVE-256 | static analysis | ● active (amended) |
@@ -673,7 +673,7 @@ Claims labelled: 4176. Observation: 99. Static analysis: 3545. Mixed: 532.
 | ALM-STRCOPY-293 | static analysis | ● active (amended) |
 | ALM-MAPLIST-310 | static analysis | ● active |
 | ALM-META-311 | static analysis | ● active |
-| ALM-T9TAG-312 | static analysis | ● active |
+| ALM-T9TAG-312 | static analysis | ● active (amended, partially retracted) |
 | ALM-UNITREAD-313 | static analysis | ● active |
 | ALM-CPLAYERC-314 | static analysis | ● active |
 | ALM-CORP-315 | mixed | ● active |
@@ -685,6 +685,14 @@ Claims labelled: 4176. Observation: 99. Static analysis: 3545. Mixed: 532.
 | ALM-GRID-325 | static analysis | ● active |
 | ALM-CORP-326 | mixed | ● active |
 | ALM-SCRIPT-327 | static analysis | ● active |
+| ALM-EDITT9-328 | static analysis | ● active |
+| ALM-T9WORD-329 | static analysis | ● active |
+| ALM-T9WORD-330 | mixed | ● active |
+| ALM-T9WORD-331 | static analysis | ● active |
+| ALM-EDITCAST-332 | static analysis | ● active |
+| ALM-T9CAST-333 | static analysis | ● active |
+| ALM-T9BIND-334 | static analysis | ● active |
+| ALM-T9BIND-335 | mixed | ● active |
 
 ## Ledger anim
 
@@ -907,6 +915,8 @@ Claims labelled: 4176. Observation: 99. Static analysis: 3545. Mixed: 532.
 | DLG-TAGARM-086 | static analysis | ● active |
 | DLG-PARTY-087 | static analysis | ● active |
 | DLG-NAME-088 | static analysis | ● active |
+| DLG-PAGES-091 | static analysis | ● active |
+| DLG-PAGES-092 | mixed | ● active |
 
 ## Ledger fame
 

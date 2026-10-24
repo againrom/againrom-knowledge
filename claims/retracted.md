@@ -1574,3 +1574,10 @@ on evidence already committed.
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
 |---|---|---|---|---|---|
 | `AI-RADFREEZE-075` (fine-coordinate live-refresh clause only) | Verbatim: "it sums each member's fine coordinates, divides, and stores the fine centroid" | High / Medium | [EXP-0615](../experiments/EXP-0615-group-giveup/), AI-739 | `R0141` calls whole-cell getters `R0299`/`R0300`, averages those bytes and writes integer coordinate words at `grpAI+0x24`; Guard issue `R0140` uses the fine-coordinate getters. The moving-centre/frozen-base conclusion stands. | **REFUTED** |
+
+## EXP-0620: editor type-9 writer and building lookup
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ALM-SAVE-253` (the `+0x12` clause only; the reader, the drop branch, the `+0x04` clause and the corpus counts stand) | Verbatim: "`+0x04` and `+0x12` are not written" and, in the headline, "+4 and +0x12 are not on the wire" | High | [EXP-0620](../experiments/EXP-0620-editor-records/), ALM-T9WORD-329 | The writer `L15204` writes three words from `+0x10` (`L16955`..`L16956`: count 3, size 2), which are `+0x10` and the dword `+0x12`; `+0x12` is on the wire as B and C. | **REFUTED** — partially retracted |
+| `ALM-T9TAG-312` (item 3's lookup clause only; the `+0x00` read, the store at caster `+0x3c`, items 1, 2 and 4 and the holder census stand) | Verbatim: "a building is found at the cell" | High | [EXP-0620](../experiments/EXP-0620-editor-records/), ALM-T9BIND-334 | The building arm looks up the dword `T9+0x12` (`L16934`..`L16957`) in a map keyed by the building's `+0x08`; no cell is compared. The cell supplies the caster payload bytes 2 and 3 only. | **REFUTED** — partially retracted |

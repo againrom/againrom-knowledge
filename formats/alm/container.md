@@ -270,7 +270,28 @@ A save can also change records of a loaded map:
   cell, but none is proved kept (the reader may have made no object for the
   record, its key may be 0, its footprint is unread); 158 EN and 49 RU stay
   undecided because the footprint tables are filled at runtime; none is proved
-  dropped. — ALM-SAVE-253, ALM-SAVE-260
+  dropped. — ALM-SAVE-253 (its `+0x12` clause partially retracted), ALM-SAVE-260
+- The writer emits each type-9 entry as `+0x00`, `+0x08`, `+0x0c`, the three words
+  at `+0x10` (A and the dword id `+0x12`, so the id is on the wire as B and C), the
+  spell and power words at `+0x16`, the element count and every 6-byte element
+  unchanged. — ALM-T9WORD-329
+  (ALM-SAVE-253's `+0x12` clause partially retracted)
+- A new entry starts all zero. Traps Manager Add writes the clicked cell, kind
+  From + 2 x To, spell, power, id 0 and two elements `(x, y, w)`, where `w` is one
+  stack word the handler never writes, the same in both elements; selection change
+  and OK rewrite only the coordinates. Unit Spellbook Add writes the clicked cell,
+  kind 8, the unit id, spell and power and no element. Cast from structure, opened
+  on a cell with no matching entry, appends kind 4 with the clicked cell and the
+  structure id; its OK stores spell, power and the dialog's `+0x114` (control
+  1219) at `+0x00`. Tag and backlink stay 0 on every route. — ALM-EDITT9-328,
+  ALM-T9WORD-329
+- Cast from structure accepts any unsigned decimal in its power field and in
+  control 1219: its data exchange has no range check, and only the spinners span
+  0..100 and 1..240 (Medium). OK keeps the low 16 bits of the power and copies the
+  whole `+0x114` to `+0x00`. The name scan range for control 1219 and `+0x00`
+  comes from the dialog's group text and is Medium. Installed building entries
+  include power 150 and 200 (8 EN, `Beast.ALM`) and `+0x00` = 0 (3 EN, 2 RU).
+  — ALM-EDITCAST-332
 - A type-4 record is 20 bytes, or 28 when its dword at `+8` is `0x21`. The
   reader creates no structure for a cell of 7 or less or beyond the map bounds,
   and stores a position of `256 * cell + 0x80`. All 71 installed type-4
@@ -339,7 +360,7 @@ a map file are Unknown. — ALM-SAVE-239, ALM-SAVE-252, ALM-SAVE-272, ALM-SAVE-2
 | Type6 +0x1c/+0x22/+0x26/+0x28/+0x2a/+0x30/+0x33/+0x34/+0x35 | Known stored fields; the record-array helpers copy no record, except the unread grow routine `L15875` (ALM-UNITREAD-313); no named read in the described original field-consumer set; installed values in ALM-CORP-315; authoring roles Unknown |
 | Trigger +0x40 | 64 raw bytes; no meaningful text grammar established |
 | Trigger Target_Item | Item code `(V + 0xe18) mod 0x10000`, class-14 row 24 + V for V 0..231; pack traversal and first-match/whole-pack absence outcomes are Medium (`TRIG-ITEMKEY-124`). The observed in-range code assignment is High; completed binding and code persistence, and the composed invalid-row outcome (no row, code 0, then the add path), are Medium (`ITEM-MAGROW-177`). The read EN editor handlers pass text to conversion and store its returned 32-bit value; no type-8 comparison appears in these handlers. Instance instructions are High; Check manager and decimal-conversion semantics are Medium; syntax and range are Unknown (`TRIG-EDITITEM-126`) |
-| Type9 +0x00 | Kept from format 990 on; overwritten on a record a type-8 element links; an unlinked building record's low byte goes to a caster byte read only by its serializer among the caster class's slot bodies; Medium for any other reader (ALM-T9TAG-312). Run-time meaning Unknown |
+| Type9 +0x00 | Kept from format 990 on; overwritten on a record a type-8 element links; an unlinked building record's low byte goes to a caster byte read only by its serializer among the caster class's slot bodies; Medium for any other reader (ALM-T9TAG-312, its building-lookup clause partially retracted). The editor stores the Cast from structure dialog's control 1219 there (named scan range, Medium); the game keeps its low 8 bits (ALM-T9CAST-333). Run-time meaning Unknown |
 | Type0 text slots | Fixed layout; complete trigger-to-slot relation Unknown |
 | Editor reader | Separate reader; complete acceptance contract Unknown |
 
@@ -347,7 +368,7 @@ a map file are Unknown. — ALM-SAVE-239, ALM-SAVE-252, ALM-SAVE-272, ALM-SAVE-2
 ALM-SCALAR-087, ALM-SCALAR-088, ALM-SCALAR-089, ALM-CPLAYER-090,
 ALM-TAILDIR-081, ALM-TAILU16-082, ALM-TAILVER-084,
 UNIT-PLACESKILL-086, ALM-TRIG-047 (amended: opaque-region gloss withdrawn), ALM-TRIG-049, ALM-TRIG-050,
-ALM-MAPLIST-310, ALM-META-311, ALM-T9TAG-312, ALM-UNITREAD-313, ALM-CPLAYERC-314, ALM-CORP-315
+ALM-MAPLIST-310, ALM-META-311, ALM-T9TAG-312 (partially retracted: building lookup by id), ALM-UNITREAD-313, ALM-CPLAYERC-314, ALM-CORP-315
 
 The placeable-definition source is [Data.bin](../databin/format.md), including
 footprints and actor fields. The earlier unknown source-file clause is

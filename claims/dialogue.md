@@ -2663,3 +2663,38 @@ readings and on the body table, whose test is a name or a colon opening the firs
 **Not searched.** The paint of the panel's own base class (`R0696`), which could draw a
 caption; the paint and text-set path of the text control (`R0699`), which could add a
 prefix; the button's hint and any hover text. A name drawn by one of these is not excluded.
+
+## Page numbers: gaps, repeats and order
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| DLG-PAGES-091 | Every dialogue panel shows pages 1, 2, 3, ... in number order, each from the first accepted tag in file order naming it; it ends at the first missing number after 1; a missing page 1 shows `Nothing to say`, then page 2. | High / Medium | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+| DLG-PAGES-092 | Of 298 EN and 308 RU main.res text nodes with part tags, none skips a number, lacks part 1 or names two parts in one tag; 1 EN and 1 RU repeat a part with no condition; 5 RU author parts out of number order. | High / Medium | ● active | [EXP-0620](../experiments/EXP-0620-editor-records/) |
+
+### DLG-PAGES-091
+
+Population: the byte-equal EN `rom.exe` / RU `ROM.EXE`, static: the panel class `R1228`..`L13136`, the command slot `R0715`, the pager `R0711` and the parser `R0712` (windows `g04`, `g05`).
+
+1. One panel serves all five families. Builder `R0695` is the only caller of the panel constructor `R0696`, and its six callers are the mission event text, the inn, the mercenary hall (two), the shop and the training hall (`DLG-WIN-001`).
+2. Counter. The constructor stores `+0x68` = 0 (`L16950`); the pager adds 1 to it on every call (`L16951`..`L16952`) before the part lookup. No other instruction of the class range or the parser stores to `+0x68` (`g05`: the other two hits read it).
+3. Lookup. For the current number n the parser accepts the first tag in file order whose lower-cased body contains `part=<n>` and passes the conditional arms; a rejected tag resumes the scan (`DIALOGUE-050`, `DLG-TAGARM-027`). The page text runs from the end of that tag's line to the next `<` (`DIALOGUE-068`).
+4. Ending. Show calls the pager once and ignores its result (`DIALOGUE-049`). Command `0x46f` calls the pager; a zero result posts `0x45b` when tips are set and then `0x445`, which closes the panel (`L16953`..`L16954`).
+5. Consequences for an authored message:
+   - pages appear in number order whatever the file order;
+   - a skipped number n ends the dialogue after page n-1, and every higher page is never shown;
+   - a missing page 1 leaves the default text `Nothing to say`, and the next press shows page 2, or closes when page 2 is missing too;
+   - of two tags naming the same number, the later one is shown only when the earlier one is rejected by a conditional arm; an unconditional repeat is never shown;
+   - `part=1` also matches the body `part=10`..`part=19`, so a tag `part=1x` placed before `part=1` supplies page 1.
+
+**Confidence.** **High** for items 2 to 5 as mechanism: named instructions here and in the cited bodies. **Medium** for "no other store" in item 2: the search covers the class range and the parser, not the whole `.text`; a store through another pointer is not excluded. Native presentation is Unknown (`DIALOGUE-049`).
+
+### DLG-PAGES-092
+
+Census `corpus.py` (`text-summary.tsv`, `text-files.tsv`): every file node under `text/` of each root's `main.res` whose bytes contain `part=`. EN: battle 225, inn 22, inn/mercenary 14, shop 4, training 33; RU: 228, 29, 14, 4, 33. A tag's number is the first `part=<digits>` in its lower-cased body.
+
+1. No node on either root has a number missing below its maximum, lacks part 1, or has a tag naming two parts. No node triggers the `part=1x` substring case.
+2. Repeats. 20 EN and 22 RU nodes repeat a number. In 19 EN and 21 RU every repeated number carries a sex or class literal on its tags (the variants of `DLG-TAGARM-027`). Two nodes repeat part 1 with no conditional literal on either tag: EN `text/battle/m81/event06.txt` (`npc=109`, then `npc=21`) and RU `text/battle/m101/event06.txt` (`npc=44`, then `npc=21`).
+3. Order. Counting each number at its first tag, 5 RU nodes are not in ascending order: `text/battle/m10/event02.txt` (3,1,2), `m10/event03.txt` (1,3,2,4), `m30/event15.txt` (2,1,3), `text/inn/npc/npc23m70.txt` (8 first) and `npc24m80.txt` (6 first). No EN node is.
+4. By item 5 of `DLG-PAGES-091`, the five RU nodes show their pages in number order, and the second part-1 tag of the two nodes in item 2 is never shown: the `npc=21` page of EN m81 event 6 and RU m101 event 6.
+
+**Confidence.** **High** for the counts over the stated nodes. **Medium** for item 4's "never shown": it rests on the `npc=` arm rejecting no tag, which `DLG-TAGARM-027` and `TEXT-TAGFIELDS-120` read as tests of the sex and class literals only.
