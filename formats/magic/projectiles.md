@@ -30,11 +30,18 @@ when segments are nonzero, the action byte is 1, the target ID is nonzero and
 the ID is found. The client state arm skips its one `R0614` call while
 client world `+0x80` is 0, as during the mission LOAD pump; whether such a
 drawable's centre stays underived until the next view rebuild is Medium,
-because eight other callers of `R0614` were not read. After loading one
-owner SAV, a record flew to a map corner while no stored field named one.
-Among the routines read, an aim copied from a zero centre is the one path to
-(0,0); the record creators were not read, and which record flew is Unknown.
-— SAV-1323, SAV-1324
+because eight other callers of `R0614` were not read. — SAV-1323, SAV-1324
+
+A cast admitted with a null target sends packet `0x86` with target 0. The
+client arm then stores target 0 and writes no aim, so the caster drawable
+keeps the zero aim its constructor stored. The cast creator `R0620` copies
+that aim when the target is 0. The driver finds no target and steps the missile
+to map point (0, 0). After LOAD of `game9609.sav` the record that moves to (0, 0)
+is Prj267, created after LOAD; that it is the flight seen on screen is an
+inference (Medium), as no screenshot was matched to record positions. With a nonzero target the creator and the driver
+take the target drawable's centre. The unit-shot creator builds no record
+without a found target. The rule is High for the measured spell and Medium for
+other spells. — MAGIC-424, SAV-1365
 
 The ordinary physical application rereads the simulation target actor+0x5c
 at countdown expiry and tests its current footprint-aware reach. Its live

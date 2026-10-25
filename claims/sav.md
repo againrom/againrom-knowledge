@@ -17034,8 +17034,8 @@ this result. The named LOAD predicate is separately established by SAV-1300.
 |---|---|---|---|---|
 | SAV-1321 | After loading game9609 (game0018's projectile store, head and effects, 49 actor records reset), the original's SAVE at head 3761 holds FreeIndex 284, one Prj283 and no effect record. | High / Medium | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
 | SAV-1322 | Prj SAVE writes action and actiondir as sign-extended bytes and actiontarget as a zero-extended u16; LOAD keeps their low byte or word, and a repeated ID replaces the earlier record in the map without freeing it. | High | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
-| SAV-1323 | The client state arm's one R0614 call is skipped while client world +0x80 is 0, as in the LOAD pump; whether the drawable's centre +0x58/+0x5c stays underived until the next view rebuild is open. | Medium / Unknown | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
-| SAV-1324 | LOAD builds one projectile record per IDs element; no stored field of game9609 names a map corner, and among the routines read only an aim copied from a zero target centre moves a record to (0,0). | High / Medium / Unknown | ✔ promoted | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+| SAV-1323 | The client state arm's one R0614 call is skipped while client world +0x80 is 0, as in the LOAD pump; whether the drawable's centre +0x58/+0x5c stays underived until the next view rebuild is open. | Medium / Unknown | ✔ promoted (amended) | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
+| SAV-1324 | LOAD builds one projectile record per IDs element; no stored field of game9609 names a map corner, and among the routines read only an aim copied from a zero target centre moves a record to (0,0). | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0599](../experiments/EXP-0599-flight-at-save/) |
 
 ### SAV-1321
 
@@ -17169,6 +17169,13 @@ first view frame and the first 0x401 pass. A watch on a loaded projectile's
 `+0x88/+0x8c` and its target drawable's `+0x58/+0x5c` from LOAD to the first
 frame settles it.
 
+**Amended.** SAV-1364 measures the case of `game9609.sav` in the original EN:
+at the Prj loader's geometry call the loaded record's target drawable already
+holds its derived centre, and the first driver call keeps the stored aim. The
+centre values at the call come from the notes traces and are not in the
+committed evidence; the committed tables show the centre at the first
+sub-tick. The general clause stays Medium.
+
 ### SAV-1324
 
 - `game9609.sav` has one IDs element, so the loader builds one record, Prj266.
@@ -17197,6 +17204,13 @@ Unknown which record flew: Prj266 or a record created after LOAD.
 the record map at client world `+0x9d4` and logs each record's ID, target and
 aim on its first three driver calls settles which record flew and from which
 aim. Reading the creators named above settles whether one supplies a zero aim.
+
+**Amended.** SAV-1365 measures the record that moves to (0, 0) in map
+coordinates: Prj267, created after LOAD, not Prj266. That it is the flight the
+owner saw on screen is an inference (Medium): no screenshot was matched to
+record positions. MAGIC-424 names its aim: `R0620` copies the caster drawable's
+zero aim when the cast's target is 0. The zero-target-centre path is not the
+measured one.
 
 ## Campaign tail at a town SAVE and after a mission LOAD
 
@@ -17941,3 +17955,90 @@ install's save folder and its archive keys are pointer-like; the writing session
 
 **Unknown.** The RU build: no RU SAV of the install holds a Spell record. A LOAD with frontend
 `+6bc` = 3 and a town LOAD.
+
+## The corner flight after LOAD of game9609
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1364 | In three EN LOADs of game9609, the first sub-tick's client projectile map held Prj266 only and the effect list one SpellTransport; Prj266 reached target 157's centre in three driver steps and ended at sub-tick 3457. | High | ✔ promoted (branch candidate) | [EXP-0623](../experiments/EXP-0623-flight-corner/) |
+| SAV-1365 | The record that moves to map point (0,0) after LOAD of game9609 is Prj267, built at sub-tick 3462 with target 0 and aim (0,0,0); it steps 167 times to (0,0). LOADs of the resave and of game0018 built no such record. | High | ✔ promoted (branch candidate) | [EXP-0623](../experiments/EXP-0623-flight-corner/) |
+| SAV-1366 | Read in LOAD 4 of game9609: the admission at 3453 saw a null caster target `+0x5c`; the send carried target 0 in LOADs 2 and 4, the creator in LOADs 1, 2 and 4. In game0018 the first cast names target 79. | High / Medium | ✔ promoted (branch candidate) | [EXP-0623](../experiments/EXP-0623-flight-corner/) |
+
+### SAV-1364
+
+Runs: the original EN `rom.exe` under `tools/origrun -live`, LOADs through the menus with no
+input inside the measured windows. The reader walks the client world's projectile map
+(`+0x9d4`, the Prj LOAD loop's map, SAV-1322), resolves each record's target through the
+client drawable map `+0x9b8`, and walks the effect list `[[server+0x14]+4]+4` (MAGIC-413's
+insert).
+
+| LOAD | Sub-tick | Records | Effects |
+|---|---:|---|---|
+| 1, 2, 4 (`game9609.sav`) | 3453 | Prj266 | 1 SpellTransport, counter `+0x4c` 3, child PointEffect |
+| 5 (`game0018.sav`) | 3453 | Prj266 | the same |
+| 3 (resave) | 3762 | Prj283 | none |
+
+- Prj266 at the first sub-tick: picture 10, position (19278, 27985, 0), target 157, aim
+  (19840, 28288, 0), 3 segments, action 1, action phase 2. Its own centre `+0x58/+0x5c` is
+  (0, 0) at the first sub-tick (LOADs 1, 2, 4). The `prjload` hit at the loader's geometry
+  call read it as (0, 0) in LOADs 1 and 2 and as non-zero memory in LOAD 4, and read target
+  157's drawable centre as (19840, 28288). Those `prjload` values come from the notes traces
+  and are not in `evidence/`.
+- The driver moves Prj266 to (19465, 28086), (19652, 28187) and (19840, 28288); the two
+  middle positions are read from the notes trace and are not in `evidence/`, which keeps the
+  first and last position. The call with 0
+  segments ends it at sub-tick 3457. The SpellTransport leaves the list at the same sub-tick.
+- Prj283 of the resave (picture 1, target 131, 3 segments) moves the same way to (19840, 28544)
+  and ends at sub-tick 3766.
+
+**Confidence.** High: the same values in three LOADs of `game9609.sav` and one of
+`game0018.sav`; the map and list layouts are the instructions that build them.
+
+**Unknown.** Records the original holds outside the client map, if any; the reader does not
+enumerate other lists.
+
+### SAV-1365
+
+- Prj267 (picture 10) is built at sub-tick 3462 by `R0620`, called
+  at `L02723` from the drawable of runtime ID 2 (vtable `L02468`). At creation it holds
+  position (18904, 27784, 0), target 0, aim (0, 0, 0) and 167 segments.
+- Each driver call adds `trunc((0-position)/segments)` (SAV-1323's step): (-113, -166) for the
+  first steps. Prj267 reaches (0, 0) at sub-tick 3628. The call with 0 segments at 3629 removes
+  it.
+- Three LOADs of `game9609.sav` (one from the main menu, two in-game) gave the same record,
+  sub-ticks and positions. Of 35, 28 and 16 records seen in those LOADs, Prj267 is the only one
+  with target 0 or an aim of (0, 0) after its first step.
+- LOAD of the original resave: 7 records, none with target 0. LOAD of `game0018.sav`: 19
+  records, none with target 0; its Prj267 is picture 20 at target 79.
+- The resave's unit-shot records (picture 1) start with aim (0, 0, 0) from `R0603`, which
+  stores no aim; their first driver call copies the target's centre (SAV-1323), so none flies to
+  (0, 0).
+
+**Confidence.** High: the record and its whole flight were read at every sub-tick in three
+LOADs, and the control LOADs show none.
+
+**Unknown.** What the screen shows of a record at (0, 0); no screenshot was compared with the
+record positions, so that Prj267 is the on-screen flight the owner reported is an inference
+(Medium). The High covers the record's coordinates and its creation.
+
+### SAV-1366
+
+- At sub-tick 3453 the actor phase body calls the cast admission `R0268` from `L01994`
+  with the caster actor (runtime ID 2, action `+0x54` = 13) and the target argument read from
+  actor `+0x5c` at `L16997` (a static read; the run read the argument, and the field's equal
+  value at the second admission). The admission breakpoint was set in LOADs 4 and 5 only. In
+  LOAD 4 of `game9609.sav` the argument and the field are 0;
+  the `0x86` send `R0617` at the same sub-tick carries a null target in LOADs 2 and 4. From
+  sub-tick 3473 the field holds an actor, and later casts name targets 79, 127, 129 and 131.
+- LOAD of `game0018.sav`: the first admission comes at sub-tick 3460 with `+0x5c` nonzero and
+  names target 79.
+- `game9609.sav` holds the caster record without its target reference to object 152, which
+  `game0018.sav` holds (SAV-1321).
+
+**Confidence.** High for the field values read at the admission in LOAD 4 and at the send and creator in the LOADs named above. Medium that the missing SAV
+reference is what leaves `+0x5c` null: the LOAD writer of `+0x5c` was not traced, and the
+other reset fields of the caster (`+0x58`, `+0x6c`) also change the first cast's moment and
+spell.
+
+**Unknown.** The LOAD writer of actor `+0x5c`; a LOAD of `game0018.sav` with only the target
+reference removed separates it from the other resets.

@@ -218,11 +218,19 @@ and resets runtime fields of 49 actor records. Its one record, Prj266
 sits beside a pending SpellTransport with counter 4. The original's SAVE after
 loading it, at head `world+0x04` 3761 against 3452, holds FreeIndex 284, one
 record Prj283 (picture 1, target 131) and no effect record; 17 IDs were taken
-after LOAD (Medium). No stored field names a map corner. Among the routines
-read, the one path that moves a record to (0,0) is an aim copied from a zero
-target centre (Medium); the record creators and client creation arms were
-not read, and which record flew to a corner after that LOAD is Unknown.
-— SAV-1321, SAV-1324
+after LOAD (Medium). No stored field names a map corner. — SAV-1321, SAV-1324
+
+In the original EN, each of three LOADs of `game9609.sav` starts with Prj266 alone in
+the client projectile map and one SpellTransport in the effect list. Prj266
+reaches target 157 in three driver steps and ends at sub-tick 3457. The record
+that moves to map point (0, 0) is Prj267; that it is the flight seen on screen
+is an inference (Medium), as no screenshot was matched to record positions. It
+is built at sub-tick 3462 with target 0 and aim (0, 0, 0) and steps 167 times
+to (0, 0). Its cast was read at sub-tick 3453 in LOAD 4 with the caster's
+target `+0x5c` null; the send carried target 0 in LOADs 2 and 4. The input has no
+target reference for that caster. Whether that missing reference alone causes
+the null is Medium. LOADs of the original resave and of `game0018.sav` build no
+such record. — SAV-1364, SAV-1365, SAV-1366, MAGIC-424
 
 The reached mission consumer stores the low u16 of FreeIndex into the live counter before it builds
 the records, and SAVE writes that counter back, so a round trip keeps it and

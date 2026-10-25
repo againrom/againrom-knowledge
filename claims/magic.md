@@ -4845,3 +4845,50 @@ classified.
 
 **Unknown.** A non-Teleport spell whose power crosses a multiple of 30 between LOAD and the first
 cast was not measured.
+
+## A missile cast with a null target
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-424 | A cast admitted with a null target sends packet 0x86 with target 0; the client keeps its drawable's zero aim, and R0620 copies that aim into the missile, which moves to map point (0,0). | High / Medium | ✔ promoted (branch candidate) | [EXP-0623](../experiments/EXP-0623-flight-corner/) |
+
+### MAGIC-424
+
+The chain, read statically in EN `rom.exe` and seen at run time after LOAD of `game9609.sav`
+(SAV-1365, SAV-1366):
+
+1. Admission `R0268(caster, target, x, y)` sends through `R0617` for this spell
+   (`L03029..L03024`). The sender writes packet kind `0x86`, the caster ID at `+0xa`,
+   `2·Spell+08 + 8` at `+0xc` (10 for the measured spell), and zero bytes at `+0xd/+0xe`
+   (`L16980..L16981`). Only a nonnull target overwrites them with its ID
+   (`L16982..L16983`). The traced send at sub-tick 3453 had a null target.
+2. The client arm `L03013` sets the drawable's action `+0x84` to 8 and phase `+0x94` to 0
+   (`L05325`). When the spell's table entry `+0x2c` is nonzero it stores the packet word
+   `+0xd` as target `+0x86` (`L16984`) and writes no aim. The traced store wrote 0. The other
+   two arms store the drawable's own position (`L16985..L16986`) or a cell centre
+   `byte·256+0x80` (`L16987..L16988`) as the aim. It stores `+0xc` as `+0xa4`
+   (`L16989`).
+3. The unit drawable constructor `R0593` calls `R1652`, which stores 0 at
+   `+0x88/+0x8c/+0x90` (`L16990..L16991`, `ebx` cleared at `L16992`). At all 98 `R0620`
+   calls seen in five LOADs (every one by runtime ID 2), the drawable's aim read (0, 0, 0).
+4. When the action phase reaches the class's release value, `L02723` calls slot `+0x5c`,
+   `R0620`. With target `+0x86` = 0 it copies the drawable's aim into the record
+   (`L16993..L16994`). It sets segments from the distance to that aim (167 for the
+   measured record) and action 1.
+5. The driver finds no target and keeps the aim (SAV-1323). The record steps to (0, 0).
+
+With a nonzero target, `R0620` copies the target drawable's centre instead
+(`L16995..L16479`). The unit-shot creator `R0603` builds no record when the shooter's
+target ID is not in the drawable map (`L16996..L13657`).
+
+**Confidence.** High for the values the run read, on the measured spell (packet `+0xc` = 10)
+and caster: the send's target argument (LOADs 2 and 4), the target store `L16984` (LOADs 2
+and 4), the creator's target and the drawable aim (0, 0, 0) at all 98 calls, and every driver
+step of Prj267. Static reads, not confirmed by a value at that instruction: the packet bytes
+`+0xc` and `+0xd` written by the sender (the run read the argument), the spell table `+0x2c`
+nonzero branch, the absence of an aim store in that client branch, the release-phase test at
+`L02723`, and the constructor `R1652` as the source of the zero (the run read the zero at
+the creator, not at the constructor). Medium that every spell sent through `R0617` behaves alike:
+the spell table `+0x2c` values of the other spells were not read, and one spell was measured.
+
+**Unknown.** Whether another caller of `R0268` passes a null target in ordinary play.
