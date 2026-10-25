@@ -614,6 +614,11 @@ Mana and presentation precede the later arm on the established cast path;
 the point gate and shared payment body do not establish global acceptance.
 — MAGIC-TELEPORT-360, MAGIC-TELEPORT-174, MAGIC-TELEPORT-366
 
+Relocation, the arm and the stand helper make no direct store into another actor. In
+the measured EN relocations no pursuer's order record changed on the relocation
+sub-tick. The callee statement is Medium, and a pursuer's Mover and the unread virtual
+calls and leaves are Unknown. — MAGIC-417
+
 ## Teleport relocation tick
 
 The actor tick runs the point cast in two steps. Its admitting tick calls the

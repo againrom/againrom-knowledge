@@ -190,6 +190,30 @@ memory can still stamp its old cell until consumed; the actor must stand on that
 cell and pass the remaining gates. No prior-target cooldown is found in the bodies read (not checked in their callees; Medium).
 — AI-741, AI-742
 
+### Pursuit after the target teleports
+
+In three measured relocations no pursuer's order record byte changed: pending kind 5,
+the actor as target, the post cell and the assigned target. No field takes a cell
+for the target. The pursuers' Mover is not covered. The group pass keeps re-scoring as before. — AI-750, MAGIC-417
+
+Of four members that still saw the unit, three walked on toward it and one held the
+target without a step. The three Mover goals took the new cell 17 to 51 sub-ticks
+after the relocation, 1 to 2 sub-ticks after a group-pass sample in one case set and 8 in
+the other; the timing does not separate the group pass from the member's own update. A route end still on the cell left can take the member onto that
+cell first. Measured for hops of 2 and 3 cells; 3 was the longest reach measured. — AI-751
+
+On a pass where no member sees the hero, the Guard group drops it: each member walks
+to its post, the assigned target is cleared and the execution target kept. Whether a
+teleport out of every member's sight triggers this on the next pass is Unknown: the
+measured drops preceded the relocation, each with the hero's cast order already active. — AI-752
+
+A member struck before the relocation keeps the pre-teleport cell as its remembered
+attacker cell until the next blow, and its stamp count continues. Sight at a pass is
+not a function of the offset alone. — AI-753
+
+A relocation from out of sight into sight was followed by engagement at the first
+group pass, 6 sub-ticks later (one observation). — AI-754
+
 ### Member guard under group order 0
 
 **Where the post comes from is decided one level up, and it is decided twice.** A group under

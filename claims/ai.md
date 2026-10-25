@@ -8941,3 +8941,102 @@ unassigned movement/combat claim ID.
 **Unknown.** The source of the earlier nonadjacent damage: record the health
 store and its caller/attacker at that hit. To close the static inventory, classify
 the remaining overlap/address-formation population and computed write routes.
+
+## Pursuit after the target teleports
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-750 | After a pursued unit's Teleport, each Guard pursuer's order record keeps its kind (5 in B1 and B2), the actor as target, its post cell and assigned target; no field takes a cell for the target (EN original, three relocations). | High / Medium | ✔ promoted (branch candidate) | [EXP-0621](../experiments/EXP-0621-teleport-pursuit/) |
+| AI-751 | Of four Guard pursuers that still saw the teleported unit, three walked on and one held the target without a step; the three Mover goals took the new cell 17 to 51 sub-ticks later (EN, hops of 2 and 3 cells). | Medium | ✔ promoted (branch candidate) | [EXP-0621](../experiments/EXP-0621-teleport-pursuit/) |
+| AI-752 | A Guard group drops the hero on a pass where no member sees it: kind 1 to each post, assigned target 0, `ord+0x0c` kept; three EN drops all preceded the relocation, so a teleport out of sight is Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0621](../experiments/EXP-0621-teleport-pursuit/) |
+| AI-753 | A pursuer struck before the target teleports keeps the pre-teleport cell in `ord+0x58` until the next blow, its stamp count continuing; sight at a pass is not a function of the offset alone (EN, Guard). | Medium | ✔ promoted (branch candidate) | [EXP-0621](../experiments/EXP-0621-teleport-pursuit/) |
+| AI-754 | After a teleport from out of sight into a Guard group's sight, the group engaged at the first group pass, 6 sub-ticks after the relocation (EN, one observation). | Medium | ✔ promoted (branch candidate) | [EXP-0621](../experiments/EXP-0621-teleport-pursuit/) |
+
+### AI-750
+
+Population: the EN original under `tools/origrun`, input `game0021.sav` (mission 10, a mage hero
+with Teleport), Guard groups (group order 1). Fields per sub-tick: `ord+8`, `ord+0xa`, `ord+0xc`,
+`ord+0x20`, `ord+0x58`, `ord+0x5a`.
+
+- B1: three pursuers, hero (41,35) to (43,37), relocation first sampled at 14421. All held
+  `ord+8` 5, `ord+0xc` = hero, `ord+0x20` = hero and their posts in `ord+0xa` before and after;
+  the passes 14422, 14438, 14454 and 14470 kept the hero assigned.
+- B2: one pursuer, (33,27) to (36,29), relocation 27437; no order field changed at 27437.
+- A relocation into sight from idle (AI-754) changed no field on the relocation sub-tick.
+
+No direct store into another actor in the bodies read (MAGIC-417); the Mover is not covered. The group pass is the writer of `ord+0x20`
+and the engage store of `ord+8`/`ord+0xc` (AI-738, AI-REISSUE-077).
+
+**Confidence.** High that the relocation sub-tick leaves these fields unchanged in the three
+relocations measured. Medium that the next group pass is the only writer that responds: it
+composes AI-738 and AI-REISSUE-077 with these observations; no write breakpoint was set.
+
+**Unknown.** Groups under orders other than 1, the RU build.
+
+### AI-751
+
+- B1: `mover+0x74` stayed on the left cell (41,35) and took (43,37) at 14439, 14440 and 14472, 18,
+  19 and 51 sub-ticks after the relocation; each lies 1 to 2 sub-ticks after a group-pass sample.
+  `6480` held the unit as assigned target at every pass and took no step (it stood at (39,32)
+  from 14424 to the end of the window). The nearest
+  member stood on the hero's neighbouring cell at 14464 and struck at 14470.
+- B2: `mover+0x74` took (36,29) at 27454 (17 sub-ticks, 8 after the pass 27446); `mover+0x76` kept (33,27), the member
+  stepped onto (33,27) at 27463, and `mover+0x76` took (36,29) at 27474 (37 sub-ticks).
+- Hop lengths: 2 and 3 cells (Chebyshev). A cast ordered 4 cells away walked the hero one cell
+  before relocating it 3 cells, so 3 is the longest reach measured (one cast, the caster's Teleport
+  level not recorded, open ground near (43,40); not a general reach, MAGIC-TELEPORT-360). Every pursuer held the hero
+  as assigned target at each pass after the relocation.
+
+The switch fits the route rules of AI-373 (full search or a one-node rebuild toward the old route
+end) and the pass re-issue of AI-REISSUE-077; the timing does not decide between the group pass
+and the member's own update, and the writer was not watched.
+
+**Confidence.** Medium: four pursuers in two relocations (three walked), all near and in sight.
+
+**Unknown.** Which instruction writes `mover+0x74` at the switch.
+
+### AI-752
+
+- A1 (`t03`): drop at 9094, relocation at 9113. `t04`: drop at 17030 while the hero walked toward
+  a far click, relocation at 17040. B3 (`t05`): drop at 5606, relocation at 5609.
+- In each of the three drops the hero's cast order (`ord+8` 9) was already active, so a drop
+  "without a teleport" is one without a relocation. A fourth drop, in Q4 at 12694, came without a cast.
+- At each drop, on one group-pass sample, every member took `ord+8` 1 with `ord+0xa` = its post
+  and `ord+0x20` = 0; `ord+0xc` kept the hero; the group order stayed 1. `mover+0x74` and
+  `mover+0x76` took the post 1 to 9 sub-ticks later.
+- After B3, no member re-engaged through 5706 with the hero at (43,40).
+
+This matches the Guard pass of AI-740: a member with no winner walks to its post.
+
+**Confidence.** Medium for the drop by sight loss (three drops, one mechanism). Unknown for a
+teleport out of sight: each drop came 3 to 20 sub-ticks before the relocation.
+
+**Unknown.** A lone pursuer on open ground that keeps sight until a relocation timed before the
+next group pass settles the out-of-sight case.
+
+### AI-753
+
+- B2: the hero struck the pursuer from (33,27): `ord+0x58` = (33,27), `ord+0x5a` = 1 at 27414.
+  After the relocation at 27437 `ord+0x58` kept (33,27) and `ord+0x5a` rose by 1 per pass until
+  the next blow at 27484 stored (36,29).
+- B1: `ord+0x58` = (41,35) from the blow at 14396 kept that cell after the relocation at 14421
+  until the next blow at 14454 stored (43,37).
+- Offset (-4,-8) from the hero was in sight in `t03` at 12663 and out of sight in `t04` at 17031.
+
+**Confidence.** Medium: two struck members; sight compared at one offset in two places. Only
+Guard groups were measured.
+
+**Unknown.** The sight predicate (terrain, observer, light); Roam and other group modes; whether
+the remembered cell admits a relocated attacker standing elsewhere (AI-703 requires it to stand
+on that cell).
+
+### AI-754
+
+`t03`: the group stood at its posts with `ord+8` 0xb and no assigned target while the hero stood
+at (43,39). The relocation to (43,37) was first sampled at 12656. At the pass sample 12662 all three
+members held `ord+8` 5 with the hero; they stepped at 12671 to 12675. The group dropped the hero
+at 12694 and re-engaged at 12710 as the near member moved between seen and unseen offsets.
+
+**Confidence.** Medium: one relocation into sight.
+
+**Unknown.** A second relocation into sight from a pursuit already dropped by the same group.

@@ -4722,3 +4722,31 @@ both remain.
 nonzero values, and their values at a first SAVE. An original SAVE written
 within one tick of a cast, read with `savfull -fields`, together with a read
 of the PointEffect and SpellTransport tick bodies, settles it.
+
+## Teleport relocation and other actors
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-417 | Teleport's arm, relocation and stand bodies store into no other actor; five callees hold no `[reg+0x158]` load (Medium); three EN relocations left every pursuer's order record unchanged; the Mover is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0621](../experiments/EXP-0621-teleport-pursuit/) |
+
+### MAGIC-417
+
+- Arm `L05853..L13011`: `R1055(caster, x, y)` at `L16009`, then
+  `R0059(caster, 0, 0x20)` at `L05854`.
+- `R1055..L16958`: every store is addressed through the caster `edi`, its Position
+  `[edi+0x10]` or its Mover `[edi+0x154]`: Position bytes 0..5 (`L05856..L05857`), Mover
+  `+0xa6`, `+0x80`, `+0x76` cleared (`L16959..L16422`). Calls `R0048`, `R0057`,
+  `R0046`, `R0050`, stand `R0044(caster)` at `L14857` and
+  `R0059(caster, 0, -1)` at `L12996` (MAGIC-TELEPORT-356).
+- `R0044` stores only into the actor it receives (`ord+0x14`, `ord+0x60`, `ord+0x50`,
+  `actor+0x54`, Mover `+0x7c`). In a separate read outside `evidence/`, `R0057`, `R0050`, `R0046`, `R0048` and
+  `R0059` hold no `[reg+0x158]` load; that search does not cover a Mover (`[reg+0x154]`) store.
+- Live: in B1, B2 and the relocation into sight of EXP-0621 (EN), no pursuer's `ord+8`, `ord+0xa`,
+  `ord+0xc`, `ord+0x20` or `ord+0x58` changed on the relocation sub-tick (AI-750).
+
+**Confidence.** High for the direct stores of the arm, relocation and stand bodies and for the
+three relocations. Medium for the callee statement: the callee windows are not committed.
+
+**Unknown.** Not read: the virtual calls `L15942` and `L15943`; the leaves `R0300`,
+`R0299`, `R0040` and `R0019`; the second level of `R0059`; `R0045`. Whether the
+relocation changes a pursuer's Mover; the RU build.
