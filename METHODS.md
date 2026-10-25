@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4200. Observation: 99. Static analysis: 3559. Mixed: 542.
+Claims labelled: 4216. Observation: 115. Static analysis: 3559. Mixed: 542.
 
 ## Ledger ai
 
@@ -2048,6 +2048,8 @@ Claims labelled: 4200. Observation: 99. Static analysis: 3559. Mixed: 542.
 | R2-ASSET-130 | static analysis | ✔ promoted (branch candidate) |
 | R2-ASSET-131 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-132 | static analysis | ✔ promoted (branch candidate) |
+| R2-ASSET-135 | observation | ● active |
+| R2-ASSET-136 | observation | ● active |
 
 ## Ledger rom2-engine
 
@@ -2258,7 +2260,7 @@ Claims labelled: 4200. Observation: 99. Static analysis: 3559. Mixed: 542.
 | R2-ENGINE-309 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-310 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-311 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-312 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-312 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-313 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-314 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-319 | static analysis | ✔ promoted (branch candidate) |
@@ -2462,6 +2464,12 @@ Claims labelled: 4200. Observation: 99. Static analysis: 3559. Mixed: 542.
 | R2-ENGINE-559 | static analysis | ● active |
 | R2-ENGINE-560 | static analysis | ● active (amended) |
 | R2-ENGINE-561 | static analysis | ● active (amended) |
+| R2-ENGINE-563 | observation | ● active |
+| R2-ENGINE-564 | observation | ● active |
+| R2-ENGINE-565 | observation | ● active |
+| R2-ENGINE-566 | observation | ● active |
+| R2-ENGINE-567 | observation | ● active |
+| R2-ENGINE-568 | observation | ● active |
 
 ## Ledger rom2-session
 
@@ -2560,6 +2568,14 @@ Claims labelled: 4200. Observation: 99. Static analysis: 3559. Mixed: 542.
 | R2-SESSION-196 | static analysis | ● active |
 | R2-SESSION-198 | static analysis | ● active |
 | R2-SESSION-199 | static analysis | ● active |
+| R2-SESSION-201 | observation | ● active |
+| R2-SESSION-202 | observation | ● active |
+| R2-SESSION-203 | observation | ● active |
+| R2-SESSION-204 | observation | ● active |
+| R2-SESSION-205 | observation | ● active |
+| R2-SESSION-206 | observation | ● active |
+| R2-SESSION-207 | observation | ● active |
+| R2-SESSION-208 | observation | ● active |
 
 ## Ledger sav
 

@@ -4859,7 +4859,7 @@ creation calls with their modes would settle the modes; reading the
 | R2-ENGINE-309 | ROM2 message 0x45b shows #tips<wParam> of the current text pool in mission-view child 0x10 (RU 0x11) at (10,20,370,188); the only constant 0x45b in either client is a dialogue's post of its nonzero tips= value, which no shipped text has. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-310 | ROM2 tip popups have no show-once latch: Close (0x45a) and the room leave delete the panel, and an entry that does not build one deletes a leftover; the shop and generator latches reset at each entry. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-311 | ROM2 TipsMode is loaded from HKLM once at startup and stored at exit and after a cutscene through a key opened with KEY_READ; clearing it closes no open tip, stops later builds and the pre-create cycle, not the detail cycle. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
-| R2-ENGINE-312 | ROM2 tip panels have a fixed rectangle per creation site and never size to their text: square (328,0)-(640,200), inn (160,0)-(472,200), shop (164,162)-(476,298), mission view (10,20)-(370,188); no gate tip. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-312 | ROM2 tip panels have a fixed rectangle per creation site and never size to their text: square (328,0)-(640,200), inn (160,0)-(472,200), shop (164,162)-(476,298), mission view (10,20)-(370,188); no gate tip. | High / Medium | ● active (amended, branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-313 | Every ROM2 tip popup is one panel class: an lm.256 frame tiled to the panel, font2 gold text at (20,24), a Close button and a checked Show-tips box; no room or mission tip lights another control. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-314 | ROM2 tip text splits at CR LF, wraps greedily at spaces to the panel width minus 48 in font2, indents each paragraph 6 pixels, justifies non-final lines and clips past (height-60)/12 lines; no shipped tip clips. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 
@@ -5037,7 +5037,7 @@ exit would settle them.
 | inns | (0,0,312,200) | inn center +0x7c, ID 0x450, (160,0,480,480) (R2-ENGINE-246) | (160,0)-(472,200) |
 | shops | (0,162,312,298) | main shop art +0x74, ID 0x3ed, (164,0,480,303) (R2-ENGINE-249) | (164,162)-(476,298) |
 | mission view | (10,20,370,188) | window at application +0xd0, (0,0,width-160,height) | (10,20)-(370,188) |
-| generator detail, pre-create | R2-ENGINE-289 | | (0,280)-(312,480), (232,48)-(640,184) |
+| generator detail, pre-create | R2-ENGINE-289 | | (160,280)-(472,480), (232,48)-(640,184) |
 
 All three inn builders (EN `L2.00744`, `L2.01245`, `L2.01246`) store the
 center at +0x7c, and all three shop builders (EN `L2.00762`, `L2.01247`,
@@ -5051,6 +5051,12 @@ no tip.
 gate in both clients. Medium for page positions: the page origin and the
 chain to the screen are inferred from construction paths
 (R2-ENGINE-238, R2-ENGINE-274).
+
+**Amended.** The generator-detail page rectangle (0,280)-(312,480) is
+corrected: the EN original draws that panel at (160,280)-(472,480)
+(R2-ENGINE-563); (0,280,312,480) is the panel in its parent
+(R2-ENGINE-389). The square, inn, shop and pre-create page rectangles
+agree with the observation. The correction is in `claims/retracted.md`.
 
 ### R2-ENGINE-313
 
@@ -12282,3 +12288,250 @@ Cells of the ROM2 order machine that EXP-2070 leaves Unknown: the return of 0 af
 **Amended.** The clause correction is recorded in `claims/retracted.md`; the remaining local facts stand.
 
 **Evidence.** [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md)
+
+## The EN original's route screens, observed
+
+Runtime observation of the EN original `allods2.exe` in a 640x480 client
+(EXP-2071 runs B6 and B6b). Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2071-rom2-route/evidence/receipt-en.tsv) gives
+each step's screenshot name and PNG SHA-256. Shots are at least 10 s apart
+and the first shot after an input comes 4 s or more after it, so a screen
+shown for less than that interval is not excluded. Colours are read from the
+32-bit capture of the 16-bit mode.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-563 | In the EN original a tip panel shows on both generator pages, at each town-1 square entry seen, in the inn and in the shop, with gold justified text, Close and a checked Show-tips box; the detail-page panel sits at (160,280)-(472,480). | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ENGINE-564 | EN original hover captions are boxes with their bottom-left corner at the pointer: fill (33,44,33), border (165,121,49) and (82,60,24), text (165,121,49) with (8,8,8) shadow; a box past the right edge moves left. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ENGINE-565 | EN main menu: hovering one of eight icons draws its name in capitals in the disc centre; New Game opens the generator, Hall of Fame a ten-name list, Credits and Cut Scenes their views; Load Game opened nothing. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ENGINE-566 | EN generator detail: a - click lowers the attribute by one and raises the pool (Body 40 to 39, pool 10); EN Reset sets four 25s and pool 100 and keeps the weapon skill; the + step numbers (-12, -7, -1, -1) are single caption reads. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ENGINE-567 | EN town-1 START MISSION, clicked after the inn talks, showed the first mission within 4 s with no map, briefing or loading screen in the shots; a global map shown for less than 4 s is not excluded. | High / Unknown | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ENGINE-568 | EN town-1 shop plaques: Undo shows hero gold, Buy the pending cost negated, Sell the pending credit, Exit their sum; a shield priced 3 was bought for 3 and sold for 2, gold 1,000 to 997 to 999. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+
+### R2-ENGINE-563
+
+Steps s2.01, s2.03, s2.23, s2.24, s2.90, s3.02, s3.21, s3.22, s3.55, s3.60,
+s3.61, s3.68, s4.01, s5.01.
+
+| Surface | Shown | Panel on the 640x480 client | Close clicked at |
+|---|---|---|---|
+| generator pre-create | at New Game (s2.01, s2.20, s2.51) | (232,48)-(640,184) | (558,152) |
+| generator detail | at each CONTINUE (s2.23, s2.53) | (160,280)-(472,480) | (391,448) |
+| town-1 square | after Accept (s2.90, four shots over 30 s), after the inn Exit (s3.55), after the shop Exit (s3.68) | (328,0)-(640,200) | (558,168) |
+| inn | at entry (s3.21) | (160,0)-(472,200) | (391,168) |
+| shop | at entry (s3.60) | (164,162)-(476,298) | (395,266) |
+
+Each Close click closed the panel (s2.03, s2.24, s3.02, s3.22, s3.61).
+Each click point lies in the Close rectangle (W-120,H-40)-(W-40,H-22) of
+R2-ENGINE-274 moved to the panel's position. The detail panel's position
+is measured from its frame corners: the top-left corner piece starts at
+(160,280) and the bottom-right one ends at (463,472), the panel less the
+8-pixel shadow margin of R2-ENGINE-313. Text is gold capitals, justified,
+with a checked Show-tips box left of Close. A click outside the open square
+panel acts on the square: SHOP opened with the panel open (s3.60). The
+first mission showed no tip in its first screens (s4.01, s5.01).
+
+Relation to existing claims. It agrees with R2-ENGINE-274, R2-ENGINE-308,
+R2-ENGINE-313 and R2-ENGINE-314 for the square, inn and shop. It agrees
+with R2-ENGINE-389, whose detail bounds (0,280,312,480) are
+parent-relative: the observed panel is those bounds moved by (160,0), the
+origin of the skills child (160,0,480,480) of R2-ENGINE-286 (Medium for
+which parent). It corrects the generator-detail page rectangle that the
+R2-ENGINE-312 table lists; the correction is in `claims/retracted.md`.
+
+**Confidence.** High for the panel positions, the Close actions and the
+panels shown at the listed entries: each panel stayed on screen until
+Close. Medium that the square panel shows at every entry: three entries
+were seen. Medium for the parent that moves the detail panel.
+
+**Unknown.** The Show-tips checkbox click; `#tips4` replacing the shop
+text; the hero and difficulty click tips of R2-ENGINE-289 while the panel
+is open (the panel was closed first). One run clicking the checkbox and a
+shelf with the panels open would settle them.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-ENGINE-564
+
+Steps s2.04, s2.25, s3.03, s3.05, s3.61, s3.64, s3.65, s3.72, s5.05.
+
+The four colours occur in every caption box of these nine shots and are the
+16-bit (5-6-5) packings of R2-ENGINE-385's values: fill (36,44,39) to
+(33,44,33), border (160,120,50) to (165,121,49) and (80,60,24) to
+(82,60,24), font2 top shade (160,120,50) to (165,121,49), shadow (8,8,8).
+The INN caption at pointer (150,370) spans x 150..174 and y 351..368: left
+edge at the pointer, bottom edge within 2 pixels of it, one line. At pointer
+(622,253) the SWITCH TO STATS <TAB> box ends at the right screen edge left
+of the pointer. The boxes appear on the generator, the square, the shop,
+the inn hero panel and the mission panel. The generator command words and
+the inn and shop buttons show no box on hover: the word is drawn lighter
+(R2-ENGINE-566, R2-SESSION-203). Main-menu captions are not boxes
+(R2-ENGINE-565).
+
+Relation to existing claims. It agrees with R2-ENGINE-385's fill, border,
+font colours, the box above and right of the pointer and the right-edge
+shift, and with R2-ENGINE-239's box arithmetic.
+
+**Confidence.** High for the colours (nine shots). Medium for the box
+geometry: one box measured, within 2 pixels.
+
+**Unknown.** The delay before a box appears and its timeout: each hover
+was shot once, 4 s or more after the move.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-ENGINE-565
+
+Steps s1.02, s1.20..s1.27, s1.30..s1.42.
+
+The intro movie ends on Esc and the main menu shows (s1.02, s1.42); without
+input the menu showed at about 90 s in the instrument run T1b. The menu is
+eight bronze icons on a stone disc with no text. Hover captions, drawn in
+the disc centre in gold capitals, one or two lines:
+
+| Icon, pointer point | Caption | Click |
+|---|---|---|
+| shield and swords, (255,92) | NEW GAME | the generator (s1.41, s1.43) |
+| book, (385,95) | LOAD GAME | no other screen within 4 s; Esc changed nothing |
+| globe, (462,188) | SERVER | not clicked |
+| laurel, (458,298) | HALL OF FAME | a parchment of ten ranked names with scores and an Ok seal; Esc does not close it; Ok returns to the menu |
+| crossed bones, (378,382) | EXIT | not clicked |
+| scroll and quill, (250,380) | CREDITS | a rising credits list; Esc returns to the menu |
+| film strip, (170,295) | CUT SCENES | View Cutscenes: eight list rows, one filled (Intro), Ok and Cancel; Esc closes it |
+| handshake, (180,188) | MULTI PLAYER | not clicked |
+
+After a return to the menu no caption shows until the pointer moves
+(s1.38).
+
+Relation to existing claims. It narrows R2-ENGINE-437: the receivers of
+0x425 (New Game, Medium there) and 0x429 (Hall of Fame, Medium there) show
+the screens their captions name. The unnamed button 1 (0x426) is MULTI
+PLAYER by elimination: 0x487 opens the web server list, which SERVER names
+(Medium). LOAD GAME opening nothing agrees with Load being disabled when no
+`game*.sav` is found; the copy held no save before B6 (Medium). That
+caption still drew on the button R2-ENGINE-437 reads as disabled, so the
+image R2-ENGINE-436's mouse body clears on a disabled button is not the
+caption, or Load was not disabled (Unknown which). It narrows
+R2-ENGINE-442's Unknown "what the Hall of Fame shows" and agrees with its
+seen-scene list.
+
+**Confidence.** High for the click results, which are screens waiting for
+input. Medium for each caption, one shot each, and for the two
+by-elimination names.
+
+**Unknown.** The SERVER, MULTI PLAYER and EXIT clicks (never sent);
+View Cutscenes Ok and Cancel; Load Game with a save present; keys on the
+menu.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-ENGINE-566
+
+Steps s2.24..s2.30, s2.41..s2.43, s2.47, s2.48, s2.50, s2.51, s2.53,
+s2.58..s2.67, s2.71.
+
+Opening values (R2-SESSION-202) have pool 0: the + buttons are drawn grey,
+the - buttons lit. A hover on + or - shows a caption with the signed pool
+change of one step:
+
+| Attribute, value | + caption | - caption | - click | then |
+|---|---|---|---|---|
+| Body 40 | -12 | +10 | 39, pool 10; HEALTH 132/135, ATTACK 77 | + at 39: 40, pool 0, caption -12 |
+| Agility 36 | -7 | +6 | 35, pool 6; - caption +5 | + caption -6; + click: 36, pool 0, caption -7 |
+| Mind 25 | -1 | +1 | 24, pool 1 | + caption -1; + click: 25, pool 0 |
+| Spirit 17 | -1 | +0 | 16, pool stays 0; SPIRIT 16 on the sheet | + caption +0; + click: 17, pool 0 |
+
+With pool 6 the Body + button is drawn lit and its caption is -12. The pool
+hover shows FREE POOL. Accept, Reset and Back show no caption box; the
+hovered word is drawn lighter. Reset (s2.50, after the axe was chosen) sets
+Body, Agility, Mind and Spirit to 25 and pool 100; HEALTH 73/75, DMG 10-17,
+ATTACK 64, ABSORB 4, DEFENSE 39, resistances 12, SIGHT 6.0, SPEED 17; AXE 20
+and BLADE 0 stay. Back then shows the pre-create page; CONTINUE shows the
+opening values again with the sword (s2.51, s2.53).
+
+Relation to existing claims. It agrees with R2-ENGINE-286 (EN Reset to four
+25s and pool 100; activation with pool 0) and narrows it: Reset keeps the
+weapon skill. It agrees with R2-ENGINE-283 (Back to pre-create) and with
+R2-ENGINE-387 (hovered command words lighter). The +/- captions are not
+among the tooltips R2-ENGINE-289 lists.
+
+**Confidence.** High for the states: the + buttons grey and the - buttons
+lit at pool 0, the click results, Reset keeping the weapon, and Back and
+CONTINUE restoring the opening page (screens waiting for input). Medium for
+every number read by eye from the 8-9 pixel font with no recorded crop,
+zoom or glyph-template read: the values after clicks (39, 35, 24, 16, the
+pool figures, HEALTH, ATTACK and the Reset sheet). Medium for each hover
+caption (one shot each), so for every signed + step number (-12, -7, -1,
+-1 at the opening values; the + number is never taken as a click at those
+values) and for the rule that step costs differ by attribute and value. The
+- side after clicks (+10, +6, +1, +0 pool change) is also shown in states
+that waited, Medium by the font rule.
+
+**Unknown.** The cost rule behind the step sizes; the + click with a cost
+above the pool; the value-cell hover.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-ENGINE-567
+
+Steps s3.55, s4.01, s4.02.
+
+START MISSION (the far gate, (205,170)) was clicked with the square tip
+open, after the inn talks of R2-SESSION-205 and the shop visit. The shot
+4 s later shows the first mission with its opening dialogue (R2-SESSION-208);
+four shots 14 to 44 s after the click are equal (s4.02). No global map,
+briefing, cutscene or loading screen is in the shots.
+
+Relation to existing claims. It agrees with R2-ENGINE-241 (an allowed gate
+click leaves the square) and with R2-SESSION-128 (flag 0x301 is 1 after the
+stage-10 inn talk). R2-ENGINE-272 and R2-ENGINE-428 open the global map in
+route mode after town 1 and enter the first available location when the
+route ends: if that map showed, it showed for less than the 4-s interval
+(Unknown); no shot contradicts them.
+
+**Confidence.** High that the mission was the first screen shot and that
+the dialogue waited. Unknown whether a map or another screen showed for
+less than 4 s.
+
+**Unknown.** The global map in route mode and its duration; a gate click
+before the inn talk (the `plagatguard` text of R2-ENGINE-241). One run with
+captures every second across the click, or a gate click before the talk,
+would settle them.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-ENGINE-568
+
+Steps s3.60, s3.62, s3.64..s3.67.
+
+| Step | Undo | Buy | Sell | Exit | Hero-row gold |
+|---|---|---|---|---|---|
+| shop entry (s3.60) | 1,000 | 0 | 0 | 1,000 | 1,000 |
+| shield dragged to the table (s3.64) | 1,000 | -3 | 0 | 997 | 1,000 |
+| Buy (s3.65) | 997 | 0 | 0 | 997 | 997 |
+| the bought shield dragged to the table (s3.66) | 997 | 0 | 2 | 999 | 997 |
+| Sell (s3.67) | 999 | 0 | 0 | 999 | 999 |
+
+The item is LEATHER SMALL SHIELD, DEFENSE +3; its shelf cell shows 3 and
+its hero-row cell shows 2.
+
+Relation to existing claims. It agrees with R2-ENGINE-267: pending buy
+total P*q (3), pending sale total ceil(P/2)*q (2), sale credit
+floor(P*q/2+0.5) (2) and the hero-row cell price (P+1)/2 (2) for P=3,
+q=1. It narrows R2-ENGINE-267 by binding its page fields to the plaques:
++0x150 hero gold to Undo, +0x154 to Buy, +0x158 to Sell, +0x15c to Exit
+(Medium: one deal, one price). It agrees with R2-ENGINE-266's buy and sell
+and with R2-ENGINE-249's Undo, Buy, Sell and Exit targets.
+
+**Confidence.** High for the sequence of states (each waited for input):
+the shield on the table, after Buy, on the table again, after Sell, and the
+plaques changing at each. Medium for every plaque and gold value (1,000,
+-3, 997, 2, 999), read by eye from the 8-9 pixel font with no recorded
+crop, zoom or glyph-template read; the sums agree with each other, which is
+not a pixel measurement. Medium for the field-to-plaque binding.
+
+**Unknown.** A deal of several items, a buy above the hero's gold, Undo's
+action, an odd price on sale (where the client total and the server credit
+differ by R2-ENGINE-267).
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)

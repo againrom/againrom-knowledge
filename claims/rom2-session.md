@@ -2441,3 +2441,305 @@ outside the scanned range (R2-SESSION-127).
 **Unknown.** Whether a hire enters at stage 10.
 
 **Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
+
+## The EN original's campaign start, observed
+
+Runtime observation of the EN original `allods2.exe` in a 640x480 client
+(EXP-2071 runs B6 and B6b) from New Game to the first mission screen.
+Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2071-rom2-route/evidence/receipt-en.tsv) gives
+each step's screenshot name and PNG SHA-256. The first shot after an input
+comes 4 s or more after it. Tip panels, hover-caption boxes and the shop
+plaques are R2-ENGINE-563, R2-ENGINE-564 and R2-ENGINE-568.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-201 | EN New Game opens the pre-create page with MALE FIGHTER, name Aldor and MEDIUM lit; each of four hero windows sets the pedestal figure and a name; difficulty clicks light one icon; RETURN TO MAIN MENU leaves. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-202 | The EN detail page opens MALE FIGHTER Aldor at Body 40, Agility 36, Mind 25, Spirit 17, pool 0, BLADE 20, HEALTH 139/142; the inn's hero stats later show HEALTH 142/142 with the other values equal. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-203 | At the first EN town-1 inn visit three patrons sit on equal green seats, crossbowman, peasant and mage; for each the first button stays blank, so no Hire shows; the left card gives name, stats and portrait. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-204 | The EN inn hero panel shows the hero portrait with PREVIOUS HERO and NEXT HERO icons below and an eye icon above; the eye swaps the portrait for the hero stats and its caption to SWITCH TO PICTURE <TAB>. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-205 | EN inn Talk opens a modal box with the speaker's face and one page with Ok; the mage's talk ran 8 pages, mage and hero faces in turn, the peasant's 2 pages; clicks outside the box changed nothing. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-206 | The EN town-1 shop opens on six shields with prices, an empty table and the hero row holding gold 1,000; a bought shield takes the first hero cell ahead of the gold, and its sale returns it to its shelf cell. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-207 | The EN town-1 square captions INN, SHOP, START MISSION, SCHOOL OF MAGIC AND MARTIAL ARTS and the statue's main-menu hint; seven other spots show none; INN and SHOP open their rooms, whose Exit returns to the square. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-SESSION-208 | The EN first mission opens on a fogged forest map with a one-page dialogue spoken by the hero; after Ok the panel shows a minimap, two rows of four command icons and the hero portrait. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+
+### R2-SESSION-201
+
+Steps s1.43, s2.01..s2.20, s2.22.
+
+The page is a chapel with four stained-glass hero windows (pointer points
+(148,166), (212,166), (424,166), (488,166)), three difficulty icons along
+the top ((32,36), (320,36), (604,36)), crossed bones bottom left (48,438)
+and bottom right (588,438), and the name field `Name: Aldor|` at the bottom
+with a blinking-caret bar. Hover captions: MALE FIGHTER, FEMALE FIGHTER,
+FEMALE MAGE, MALE MAGE; EASY, MEDIUM, HARD; RETURN TO MAIN MENU, CONTINUE.
+A hovered window is drawn brighter.
+
+| Click | Pedestal figure | Name |
+|---|---|---|
+| FEMALE FIGHTER | a woman with a bow | Sagita |
+| FEMALE MAGE | a woman in a purple robe with a staff | Galinel |
+| MALE MAGE | a bearded man in a red robe with a staff | Gildarius |
+| MALE FIGHTER | a man with a sword | Aldor |
+
+A difficulty click draws that icon coloured and the others grey stone; the
+hero stays. RETURN TO MAIN MENU shows the menu; New Game again shows MALE
+FIGHTER, Aldor, MEDIUM and the tip panel (s2.20), also in run B6b after B6
+had written two saves (s1.43). CONTINUE opens the detail page
+(R2-SESSION-202).
+
+Relation to existing claims. It agrees with R2-ENGINE-284 (four heroes,
+three difficulties, Cancel, OK and one campaign name field), R2-ENGINE-283
+(OK to detail, Cancel to the main menu) and R2-ENGINE-386 (prompt and caret).
+
+**Confidence.** High for the opening values, click results and names
+(screens waiting for input). Medium for each hover caption (one shot).
+
+**Unknown.** Typing a name; Enter and Esc on the page; the highlight cycle
+of R2-ENGINE-289 (not distinguished in 10-s shots).
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-202
+
+Steps s2.23, s2.31..s2.40, s2.44..s2.46, s2.49, s2.67..s2.70, s2.90, s3.74.
+
+Opening values on the detail page (s2.23, s2.53, s2.67): BODY 40, AGILITY
+36, MIND 25, SPIRIT 17, pool 0; HEALTH 139/142, MANA 0/0, DMG 12-19, ATTACK
+78, ABSORB 4, DEFENSE 43; BLADE 20, AXE 0, BLUDGEON 0, PIKE 0, SHOOTING 10;
+FIRE, WATER, AIR, EARTH, ASTRAL 8 each; WEIGHT 23.6, XP 7320, SIGHT 6.4,
+SPEED 19. The hero wears an iron plate cuirass (portrait hover: IRON PLATE
+CUIRASS, DEFENSE +12, ABSORPTION +2) and holds a sword.
+
+The pillar holds four weapon icons; a hover shows that weapon class's text
+box, and a click moves the skill 20 to it:
+
+| Click | Skills | DMG | ATTACK | DEFENSE | WEIGHT |
+|---|---|---|---|---|---|
+| axe | AXE 20, BLADE 0 | 12-21 | 75 | 43 | 24.6 |
+| mace | BLUDGEON 20, BLADE 0 | 11-18 | 77 | 43 | 23.6 |
+| spear | PIKE 20, BLUDGEON 0 | 12-19 | 76 | 45 | not read |
+| sword | BLADE 20, PIKE 0 | 12-19 | 78 | 43 | 23.6 |
+
+The portrait shows the chosen weapon (axe, spear). The four attribute
+labels show a description box; the stats sheet shows none. Accept opens the
+town square, no other screen within 4 s (s2.90). In the inn the hero stats
+(s3.74) show the same values except HEALTH 142/142.
+
+Relation to existing claims. It agrees with R2-ENGINE-286 (activation with
+the template values and pool 0) and R2-ENGINE-283 (Accept to the town). The
+sheet's colours are the 16-bit packings of R2-ENGINE-388's (label
+(185,159,73) to (189,158,74), value (107,154,120) to (107,154,123), heading
+(150,90,0) to (148,89,0)): agrees. R2-SESSION-131 places the hero's values
+in the actor; this claim adds what is shown.
+
+**Confidence.** High for the sheet's rows and headings, the weapon clicks
+moving the skill 20 and the portrait showing the chosen weapon (screens
+waiting for input). Medium for every number (the attributes, pool, HEALTH
+139/142 and 142/142, the weapon table and the resistances): each is read by
+eye from the 8-9 pixel font, with no recorded crop, zoom or glyph-template
+read.
+
+**Unknown.** Why HEALTH is 139 on the generator and 142 in the inn (the
+actor's health regenerating between the two is one reading, not tested);
+the SHOOTING weapon the tip's five classes imply (four icons shown).
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-203
+
+Steps s3.20..s3.28, s3.31, s3.33, s3.34.
+
+The inn page: the selected patron's stats top left, three buttons top right
+(the first blank, Talk, Exit), the selected patron's portrait bottom left,
+the innkeeper centre, the hero panel bottom right (R2-SESSION-204) and
+three patron sprites at the bottom centre. The seats are the rectangles
+(176,416)-(224,480), (224,416)-(272,480) and (272,416)-(320,480); their
+green backs are pixel-equal at the sampled points. Patron 0 is selected at
+entry.
+
+| Seat | Card heading | Card values |
+|---|---|---|
+| 0 | MERCENARY CROSSBOWMAN | BODY 32, AGILITY 32, MIND 28, SPIRIT 22, HEALTH 156/156, DMG 23-37, ATTACK 156, DEFENSE 138, SHOOTING 48 |
+| 1 | PEASANT | BODY 25, AGILITY 20, MIND 25, SPIRIT 20, HEALTH 55/55, DMG 0-0, ATTACK 3, DEFENSE 6, skills 0 |
+| 2 | MERCENARY MAGE | BODY 35, AGILITY 40, MIND 45, SPIRIT 50, HEALTH 158/158, MANA 604/604, DMG 21-43, DEFENSE 39, WATER 99, AIR 99, SPELLCASTER |
+
+A seat click selects it. The first button stays blank for each selection;
+the hover of Talk and Exit draws the word lighter; seat hovers show no
+caption. No price shows. The left portrait shows the patron in full
+figure; its hover shows that patron's armour text (MITHRILL CUIRASS for the
+crossbowman). The inn tip names a Hire button and greenish-gray backs for
+mercenaries; neither showed.
+
+Relation to existing claims. It agrees with R2-ENGINE-247 (three stage-10
+talk entries seated at (176,416), (224,416), (272,416)), R2-ENGINE-246 (button
+targets; a selected talk entry has a blank first caption) and R2-ENGINE-497
+(no hire seat): the three patrons are talk entries, including the two
+labelled MERCENARY. Which NPC ID each seat holds is Medium, by
+R2-ENGINE-247's order (third seat NPC 517, topic 10). It narrows
+R2-ENGINE-247's Unknown actor-to-art join to these three sprites and
+portraits.
+
+**Confidence.** High for the seats, the card headings and portraits and the
+blank button (screens waiting for input). Medium for the card numbers (read
+by eye from the 8-9 pixel font, no recorded crop, zoom or glyph-template
+read), for the NPC IDs and for each hover.
+
+**Unknown.** A click on the blank button; the crossbowman's talk; a hire
+offer at a later stage.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-204
+
+Steps s3.29, s3.30, s3.32, s3.62, s3.72..s3.75.
+
+The hero panel (480,238)-(640,480) in the inn shows the hero's portrait in
+an oval frame. Icons and hover captions: bottom left (490,457) PREVIOUS
+HERO, bottom right (612,457) NEXT HERO, top right eye (622,253) SWITCH TO
+STATS <TAB>; the top-left corner (490,253) has no icon and no caption in
+the inn, while the shop's panel draws an icon there (s3.62). The portrait
+hover shows IRON PLATE CUIRASS, DEFENSE +12, ABSORPTION +2. A click on the
+eye replaces the portrait with ALDOR's stats sheet (the layout of the
+patron card) and the caption at the pointer becomes SWITCH TO PICTURE
+<TAB>; 10 s later the sheet stays.
+
+Relation to existing claims. R2-ENGINE-246 and R2-ENGINE-249 attach the
+campaign hero panel at (640-panelWidth,0); the drawn portrait and icons are
+in the lower half under the button area, and whether the panel rectangle
+starts at y 0 is Unknown. The sheet agrees with R2-ENGINE-388's layout.
+
+**Confidence.** High for the stats swap (a screen waiting for input).
+Medium for each caption (one shot).
+
+**Unknown.** The second eye click (sent 0.1 s before the run was stopped);
+the Tab key; PREVIOUS HERO and NEXT HERO clicks; the shop and mission icons.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-205
+
+Steps s3.40..s3.55.
+
+Talk with the mage selected opens a purple box over the inn: the speaker's
+face in a frame on the left, one page of white text in a Gothic-style font,
+and Ok. A page waits for Ok (equal shots 10 s apart). Pages and speakers:
+
+| Talk | Pages | Speaker face per page |
+|---|---|---|
+| mage | 8 | mage, mage, hero, mage, hero, mage, hero, hero |
+| peasant | 2 | peasant, peasant |
+
+The hero's face is Aldor's. The mage's face differs from the mage's
+full-figure card portrait and from its seat sprite. The mage's pages tell
+of Lord Skrakan seeking an envoy and the way to his tower; the hero accepts
+the journey. While the box is open, clicks on a seat and on Talk change
+nothing. After the last Ok the box closes; the inn shows again.
+
+Relation to existing claims. It agrees with R2-ENGINE-051 (pages with an
+optional portrait, advanced by the box's button) and R2-ENGINE-220 (TALK
+on a talk actor). With R2-ENGINE-247's order the mage is NPC 517 with topic
+10, the talk that sets flag 0x301 (R2-SESSION-128); the gate then worked
+(R2-ENGINE-567). Medium: the gate was not tried before the talk.
+
+**Confidence.** High for the page counts, faces and the modal box (each
+page waited for input). Medium for the NPC and topic identity.
+
+**Unknown.** The crossbowman's talk; a repeated talk in one visit
+(R2-ENGINE-499).
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-206
+
+Steps s3.60..s3.67.
+
+Opening state: left, a grid of six shield cells, 2 by 3, each with a
+number at its top right (3, 3, 5, 12, 21, 88) and some with one at the
+bottom left (6, 2, 5, 6); centre, the shop room with the shopkeeper; right,
+the plaques (R2-ENGINE-568) and the hero panel; below, a row of five empty
+wooden table cells and the hero row of five cells with a gold pile of
+1,000 in the first. Cell backs: shelf cells dark grey, filled hero cells
+teal, empty hero cells an ornate dark pattern. Hover captions: ARMOR (the
+armour stand), SHOPKEEPER, YOUR HERO'S INVENTORY; an item hover shows its
+text (LEATHER SMALL SHIELD, DEFENSE +3).
+
+The deal: the first shield dragged to the table empties its shelf cell;
+Buy moves it to the first hero cell, with 2 at its corner, and the gold
+pile to the second cell. The shield dragged from the hero row to the table
+and Sell returns it to shelf cell 0 with 3 at its corner; the gold pile is
+back in the first hero cell.
+
+Relation to existing claims. It agrees with R2-SESSION-131 (gold 1,000 at
+town 1; Medium there, shown here), R2-ENGINE-266 (buy to the hero, sale
+back into a category) and R2-ENGINE-267 (the top-right number is the unit
+price, the hero cell's (P+1)/2). R2-ENGINE-249's child (0,303,480,390),
+named shop inventory there, holds the deal table, and the shelf grid is in
+(0,0,164,303); a role narrowing (Medium).
+
+**Confidence.** High for the shown states: the cell layout, the six
+shields, where the bought shield and the gold pile sit (screens waiting for
+input). Medium for every number (the cell numbers, the plaque and gold
+values 1,000 and 997), read by eye from the 8-9 pixel font with no recorded
+crop, zoom or glyph-template read, and for the meaning of the cell numbers
+beyond the one price checked.
+
+**Unknown.** The bottom-left numbers (quantity is one reading); the other
+shelves and room spots; Undo.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-207
+
+Steps s3.02..s3.14, s3.20, s3.55, s3.60, s3.68.
+
+| Spot, pointer point | Hover caption | Click |
+|---|---|---|
+| statue (375,330) | CLICK TO BRING UP THE MAIN MENU | not sent |
+| left building door (150,370) | INN | the inn |
+| far gate (205,170) | START MISSION | the first mission (R2-ENGINE-567) |
+| archway (280,300) | SHOP | the shop |
+| rotunda (505,340) | SCHOOL OF MAGIC AND MARTIAL ARTS | not sent |
+
+No caption at the hanging sign, the horse and cart, the man and the woman
+at the statue, the blue shield sign and the two upper walls. Each room
+showed within 4 s of its click; its Exit returned to the square with the
+square tip (R2-ENGINE-563). After the inn a covered wagon stood bottom left.
+
+Relation to existing claims. It agrees with R2-ENGINE-241: five captions on
+the five selectors with tips (inn, shop, gate, menu, school) and none on
+the figure selectors; inn and shop clicks open their rooms.
+
+**Confidence.** High for the room entries and returns. Medium for each
+caption (one shot).
+
+**Unknown.** The school and statue clicks (R2-ENGINE-241 reads the school
+click as opening no room); spots between the pointer points.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-SESSION-208
+
+Steps s4.01, s4.02, s5.01..s5.08.
+
+The first screen is a forest map under fog with a dialogue box: the hero's
+face (Aldor) on the left, one page in which the hero remarks that the land
+grows deserted near the Great Mage's tower, and Ok; the panel's portrait
+oval shows a signpost while the box is open. After Ok (s5.01) the hero
+stands near a signpost with a green health bar, and the right panel shows a
+minimap with a white view frame, two rows of four command icons and the
+hero portrait with two small icons above and two below. Hovers: GUARD <G> at
+(575,192) and DEFEND <D> at (607,192), points on the border between the icon
+rows; none at (575,160), (607,160), the minimap and the map centre; the
+portrait shows IRON PLATE CUIRASS. No hired unit is in view.
+
+Relation to existing claims. It agrees with R2-ENGINE-051 (a dialogue page
+with a portrait) and shows no mission tip (R2-ENGINE-309).
+
+**Confidence.** High for the dialogue and the panel layout (screens waiting
+for input). Medium for the two captions, whose icons are not identified.
+
+**Unknown.** Which icon each caption belongs to; the other six icons; the
+minimap content; the hero's values in memory.
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)

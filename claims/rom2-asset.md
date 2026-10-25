@@ -1908,3 +1908,81 @@ EN and 37 RU root maps and the generator's pass of the word to block 10;
 reading the block-10 constructor `L2.02738` settles it.
 
 **Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+## Route text as the EN original shows it
+
+Runtime observation of the EN original `allods2.exe` in a 640x480 client
+(EXP-2071 runs B6 and B6b). Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2071-rom2-route/evidence/receipt-en.tsv) gives
+each step's screenshot name and PNG SHA-256. The tip panels and caption
+boxes that carry this text are R2-ENGINE-563 and R2-ENGINE-564.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-135 | EN route tips show 2 lines on pre-create, 8 on the detail page, 8 on the square, 10 in the inn and 4 in the shop, gold capitals, none clipped; the inn tip names a Hire button that its first visit never showed. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ASSET-136 | EN route hover captions are capitals, a key hint in angle brackets (GUARD <G>, SWITCH TO STATS <TAB>); command buttons show mixed-case words (Accept, Talk, Undo); item texts give the name, then one line per stat. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+
+### R2-ASSET-135
+
+Steps s2.01, s2.23, s2.90, s3.21, s3.60.
+
+| Surface | Lines shown | Content |
+|---|---|---|
+| generator pre-create | 2 | choose class and sex by clicking a portrait |
+| generator detail (male fighter) | 8 | Accept skips the screen; choosing one of five weapon classes gives that skill 20 |
+| town-1 square | 8 | the town after a mission; the shop and the inn (hire mercenaries, receive missions); the game menu by Esc or the big statue |
+| inn | 10 | patrons at the bottom; mercenaries on a greenish-gray back with a Hire button; Talk for a story; other patrons on light green give missions |
+| shop | 4 | click a shelf, drag an item onto the table, Buy or Sell |
+
+Every line is gold capitals; lines are justified to the panel width except
+the last of a paragraph; no text runs past its panel. Key and button names
+are in angle brackets (`<ESC>`, `<HIRE>`, `<TALK>`, `<ACCEPT>`, `<BUY>`,
+`<SELL>`).
+
+Relation to existing claims. It agrees with R2-ASSET-080 (the tips are
+`town.txt` sections) and R2-ENGINE-314 (greedy wrap, justified non-final
+lines, no shipped tip clips). Which section each panel shows follows
+R2-ENGINE-289 and R2-ENGINE-308 (`#tips8`, `#tips5`, `#tips1`, `#tips2`,
+`#tips3`), Medium: the text was not compared with the archive bytes. The
+inn tip's Hire button and greenish-gray backs did not show at the first
+visit (R2-SESSION-203).
+
+**Confidence.** High for the line counts and look (each panel stayed until
+Close). Medium for the section identity.
+
+**Unknown.** The female and mage detail tip (`#tips6`), `#tips4`, `#tips7`,
+`#tips9`, `#tips10`; the RU texts (the RU route was not run).
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+### R2-ASSET-136
+
+Steps s1.20, s2.04, s2.12, s2.25, s2.30, s2.35, s3.03, s3.05..s3.08, s3.24,
+s3.29, s3.61, s3.64, s3.65, s3.72, s3.74, s5.05, s5.06.
+
+| Screen | Captions in boxes | Words on buttons |
+|---|---|---|
+| main menu (pictures in the disc, not boxes) | NEW GAME, LOAD GAME, SERVER, HALL OF FAME, EXIT, CREDITS, CUT SCENES, MULTI PLAYER | none |
+| generator | MALE FIGHTER, FEMALE FIGHTER, FEMALE MAGE, MALE MAGE, EASY, MEDIUM, HARD, RETURN TO MAIN MENU, CONTINUE, FREE POOL, signed numbers (-12, +10, +0) | Accept, Reset, Back |
+| square | INN, SHOP, START MISSION, SCHOOL OF MAGIC AND MARTIAL ARTS, CLICK TO BRING UP THE MAIN MENU | none |
+| inn | PREVIOUS HERO, NEXT HERO, SWITCH TO STATS <TAB>, SWITCH TO PICTURE <TAB> | Talk, Exit |
+| shop | ARMOR, SHOPKEEPER, YOUR HERO'S INVENTORY | Undo, Buy, Sell, Exit |
+| mission | GUARD <G>, DEFEND <D> | none |
+
+Item texts: IRON PLATE CUIRASS / DEFENSE +12 / ABSORPTION +2; MITHRILL
+CUIRASS / DEFENSE +26 / ABSORPTION +1 / MAGIC: / DEFENSE +23; LEATHER SMALL
+SHIELD / DEFENSE +3. Weapon and attribute descriptions are capitals in
+several lines with a blank line between a weapon list and its properties.
+
+Relation to existing claims. It agrees with R2-ENGINE-384 (fixed help
+lines for the generator's heroes and controls), R2-ENGINE-267 (item text
+from attribute tags, a stat per line) and R2-ENGINE-437 (menu labels are
+pictures).
+
+**Confidence.** High for the case and bracket form across the 20 shots.
+Medium for each single caption (one shot each).
+
+**Unknown.** The RU wording; captions on controls not hovered (school
+click, other mission icons, the minimap).
+
+**Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)

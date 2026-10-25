@@ -13,6 +13,12 @@
 |---|---|---|---|---|---|
 | `SAV-1275` (Unknown clause about missing-byte reads and returning-path difficulty/SAVE only; local LOAD ordering and unobserved native completion stand) | Missing-byte read effects and the resulting application +0x65c/server +0x84 were Unknown pending callee reads and a native LOAD/next-SAVE probe. | High / Unknown | [EXP-0580](../experiments/EXP-0580-campaignless-load/EXP-0580.md), SAV-1283, SAV-1284, SAV-1285 | EOF leaves destinations unchanged; partial reads replace available low bytes. A wholly absent record reuses stack file pointers as counts and reaches nested allocations. On a returning path, server difficulty is the held index + 1; the next ordinary SAVE writes current server difficulty and the held index in a full campaign record. Exact native completion/failure and SAVE after an interrupted read remain Unknown. | **SUPERSEDED** |
 
+## EXP-2071: generator detail tip position
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-312` (generator-detail page rectangle only; the square, inn, shop, mission-view and pre-create rectangles, the constants and the gate absence stand) | Table row "generator detail, pre-create", column "Page rectangle of the panel": "(0,280)-(312,480)" | Medium | [EXP-2071](../experiments/EXP-2071-rom2-route/), R2-ENGINE-563 | The EN original draws the detail tip panel at (160,280)-(472,480) of the 640x480 client. (0,280,312,480) are the panel's bounds in its parent (R2-ENGINE-389), whose origin is (160,0). | **CORRECTED** |
+
 ## EXP-2070: executor byte-table cells
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
