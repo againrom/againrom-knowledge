@@ -1986,3 +1986,74 @@ Medium for each single caption (one shot each).
 click, other mission icons, the minimap).
 
 **Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+## Game-menu, shop and mission text as the EN original shows it
+
+Runtime observation of the EN original `allods2.exe` in a 640x480 client
+(EXP-2072 runs C1, C2 and C3). Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2072-rom2-route-rest/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256. The boxes that carry
+this text are R2-ENGINE-569 to R2-ENGINE-572 and R2-SESSION-215 to
+R2-SESSION-217.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-141 | EN game-menu boxes show mixed-case titles, labels and buttons and capital hover captions; the save box's Cancel caption is spelled CANCLE, the load box's CANCEL. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ASSET-142 | EN shop and mission captions add SCROLL UP, SCROLL DOWN, WEAPONS, SCROLLS, BOOKS & POTIONS, MAGIC ITEMS, OPEN SPELLBOOK <Q>,<B>, OPEN INVENTORY <~>,<I> and MAIN MENU <ESC>; an open panel's caption begins CLOSE. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+
+### R2-ASSET-141
+
+Steps ra.01, ra.05..ra.08, ra.10..ra.14, ra.16..ra.20.
+
+| Box | Title, labels and buttons | Hover captions |
+|---|---|---|
+| game menu | Save Game, Load Game, Sound Options, Abort Game, Return to Game | none (the word is drawn gold) |
+| save | Save Game, Saved Games, <<< Empty Slot >>>, Ok, Delete, Cancel | CONFIRM SELECTION; DELETE SELECTED / SAVED GAME; CANCLE |
+| load | Load Saved Game, Load Game, Restart last mission, Abort mission and return to town, Ok, Delete, Cancel | CONFIRM SELECTION; DELETE SELECTED / SAVED GAME; CANCEL; RESTART LAST MISSION with a date and time |
+| sound | Sound Options, Tracks, Plagat, Acknowledgments, Music volume, SFX volume, Speech volume, Play, Stop, Ok | RETURN TO GAME (Ok); PLAY; ACKNOWLEDGMENTS; MUSIC VOLUME |
+
+CANCLE was read from a 4x zoomed crop of the caption box.
+
+Relation to existing claims. It agrees with R2-ASSET-136 (capital
+captions, mixed-case button words) and R2-ENGINE-441 (the menu's text
+rows). R2-ENGINE-440 gives the save Cancel tip as dialogs row 33 and
+R2-ENGINE-438 the load Cancel tip as row 27; CANCLE is then row 33's EN
+text (Medium: the archive bytes were not compared). The row labels agree
+with R2-ENGINE-271's `patch.txt` lines.
+
+**Confidence.** High for the case pattern across the 15 shots. Medium for
+each caption and label (one shot each), CANCLE included.
+
+**Unknown.** The RU wording; the Stop, SFX and Speech captions (not
+hovered). A read of EN and RU dialogs rows 26, 27, 32, 33 and 158 would
+settle the row identity.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ASSET-142
+
+Steps r2.02..r2.06, r2.25, r1.41, r1.44, r1.47, r1.48, r1.49.
+
+| Screen | Control | Caption |
+|---|---|---|
+| shop | ornament above the grid | SCROLL UP |
+| shop | gem below the grid | SCROLL DOWN |
+| shop | room objects | ARMOR, WEAPONS, SCROLLS, BOOKS & POTIONS, MAGIC ITEMS |
+| shop | top-left frame icon, open | CLOSE SPELLBOOK <D>,<B> (key hint an eye read) |
+| mission | top-left frame icon | OPEN SPELLBOOK <Q>,<B> |
+| mission | eye | SWITCH TO STATS <TAB> |
+| mission | bottom-left frame icon, closed and open | OPEN INVENTORY <~>,<I>, CLOSE INVENTORY <~>,<I> |
+| mission | bottom-right frame icon | MAIN MENU <ESC> |
+
+Relation to existing claims. It agrees with R2-ASSET-136 (capitals, key
+hints in angle brackets) and narrows its Unknown captions on other mission
+icons.
+
+**Confidence.** High for the capitals and the bracketed key hints across
+the 11 shots. Medium for each caption (one shot each) and for the shop's
+<D>.
+
+**Unknown.** The RU wording; the shop key hint against the mission's <Q>.
+A zoomed read of the shop caption would settle the letter.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)

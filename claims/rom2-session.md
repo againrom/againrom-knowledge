@@ -2743,3 +2743,193 @@ for input). Medium for the two captions, whose icons are not identified.
 minimap content; the hero's values in memory.
 
 **Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+## The EN original's town, inn and mission panel, observed further
+
+Runtime observation of the EN original `allods2.exe` in a 640x480 client
+(EXP-2072 runs C1, C2 and C3), from the town-1 inn to the first mission.
+Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2072-rom2-route-rest/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256. Shots are at least 10 s
+apart. The game menu, the gate and the shop controls are R2-ENGINE-569 to
+R2-ENGINE-576.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-213 | At the first EN town-1 inn visit the crossbowman's Talk is one page with his face and Ok; the blank first button shows no caption, and a click on it changes nothing with any of the three patrons selected. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-SESSION-214 | The EN inn hero panel's eye and the Tab key each swap the portrait and the stats sheet on every press; PREVIOUS HERO and NEXT HERO keep the one hero; a portrait click shows the cuirass text, a right-click nothing. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-SESSION-215 | In the EN town-1 shop clicks on room objects pick one of four shelves, ARMOR, WEAPONS, SCROLLS, BOOKS & POTIONS and MAGIC ITEMS; the first ARMOR page differed between new games. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-SESSION-216 | On the EN town-1 square a school (rotunda) click showed no screen, box or caption at 3 s and 13 s; a statue click opens the game menu of R2-ENGINE-569 over the square. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-SESSION-217 | In the EN first mission the portrait frame's icons are OPEN SPELLBOOK <Q>,<B>, SWITCH TO STATS <TAB>, OPEN INVENTORY <~>,<I> and MAIN MENU <ESC>; spellbook, stats and inventory open and close on clicks. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-SESSION-218 | The EN generator detail page draws no eye on the portrait frame; hovers at its top corners show no caption, and two clicks at 622,253 and Tab presses leave the page unchanged; the stats sheet always shows. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+
+### R2-SESSION-213
+
+Steps r1.01..r1.08, r1.30, r1.31.
+
+Seat clicks at (247,445), (200,445) and (295,445) select the peasant, the
+crossbowman (card MERCENARY CROSSBOWMAN with R2-SESSION-203's values) and
+the mage. The blank first button (553,65), with the crossbowman selected,
+shows no caption on hover; a click changes nothing but the pointer: no
+hire, no price, no box, the seats and the hero panel unchanged. With the
+peasant and with the mage selected the button stays blank and a click
+changes nothing. Talk (553,112) with the crossbowman selected opens the
+modal box of R2-SESSION-205 with his face (helmet, mail) and one page, in
+which he declines to travel to distant lands; Ok (315,308) closes it to
+the inn. Two clicks on the inn floor after it change nothing.
+
+Relation to existing claims. It agrees with R2-SESSION-203 and settles its
+Unknown blank-button click and crossbowman's talk. It agrees with
+R2-ENGINE-246 (a selected talk entry has a blank first caption),
+R2-ENGINE-497 (no hire seated) and R2-SESSION-205 (the page box with Ok).
+The Hire button the inn tip names (R2-ASSET-135) still did not show.
+
+**Confidence.** High for the blank button doing nothing and the one-page
+talk (states waiting for input). Medium for the hover (one shot), the card
+numbers and the talk text read.
+
+**Unknown.** A hire offer at a later stage. An inn visit after the first
+mission would settle it.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-SESSION-214
+
+Steps r1.20..r1.28.
+
+| Input | Result |
+|---|---|
+| eye (622,253), hover | SWITCH TO STATS <TAB> left of the icon |
+| eye, first click | the stats sheet ALDOR replaces the portrait |
+| eye, second click | the portrait again |
+| Tab, first press | the stats sheet |
+| Tab, second press | the portrait again |
+| PREVIOUS HERO (490,457), click | caption PREVIOUS HERO; Aldor's portrait stays |
+| NEXT HERO (612,457), click | caption NEXT HERO; Aldor's portrait stays |
+| portrait (555,330), click | the IRON PLATE CUIRASS text box; no screen opens |
+| portrait, right-click | no box, no screen |
+
+Relation to existing claims. It agrees with R2-SESSION-204 and settles its
+Unknowns: the second eye click, the Tab key and the PREVIOUS HERO and NEXT
+HERO clicks. The caption position agrees with R2-ENGINE-564 (a box past
+the right edge moves left).
+
+**Confidence.** High for the swaps and the kept hero (each press changed a
+state that waited). Medium for each caption (one shot).
+
+**Unknown.** PREVIOUS HERO and NEXT HERO with two heroes. A run after a
+hire would settle it.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-SESSION-215
+
+Steps r2.01, r2.04..r2.12, rb.01, rb.06, rb.11, rb.16.
+
+| Room object clicked | Caption | First grid view |
+|---|---|---|
+| shield on the right wall (435,140), helmet on the stand (410,190), armour (385,255), red shield behind the shopkeeper (370,190) | ARMOR | shields |
+| polearm rack (200,180), swords and axes (240,240), chains and maces (255,200) | WEAPONS | blades |
+| top-shelf bottles (280,90) | SCROLLS, BOOKS & POTIONS | two potions and four scrolls |
+| amulets (350,60) | MAGIC ITEMS | six staffs |
+
+First ARMOR view, top-right numbers (eye reads): C1 3, 5, 11, 12, 21, 113;
+C3 3, 3, 11, 12, 21, 44; R2-SESSION-206's run 3, 3, 5, 12, 21, 88. The
+first WEAPONS view reads 25, 50, 63, 100, 125, 150 in C1 and C3.
+
+Relation to existing claims. It settles R2-SESSION-206's Unknown other
+shelves and room spots. Four shelves agree with the four category lists of
+R2-ENGINE-266. That stock differs between new games is consistent with
+R2-ENGINE-266's refills; the producer of the stock is not observed here.
+
+**Confidence.** High for the shelf each object picks, the item kinds per
+shelf and that the first ARMOR view differs between games (different item
+icons). Medium for each caption (one shot per object) and every number.
+
+**Unknown.** Room spots not clicked; each item's text. A run with one hover
+per cell and a click on each further room spot would settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-SESSION-216
+
+Steps r4.01..r4.03, ra.01.
+
+A hover and click on the school rotunda (505,340) leave the square: no
+screen, box or caption 3 s after the click and the square unchanged at
+13 s. A click on the statue (375,330) opens the game menu box
+(R2-ENGINE-569) in C1 and C3.
+
+Relation to existing claims. It agrees with R2-ENGINE-241 (the school
+selector opens no room; the menu selector posts 0x41f) and settles
+R2-SESSION-207's Unknown school and statue clicks. The statue's caption
+"main menu" names the in-game menu of R2-ENGINE-441, not the main menu of
+R2-ENGINE-565.
+
+**Confidence.** High that the school opens no screen that waits and that
+the statue opens the menu (states waiting for input). Medium that nothing
+shows at all after the school click: a screen under 3 s is not excluded.
+
+**Unknown.** The school at a later stage or town. The post-mission town
+run would settle it.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-SESSION-217
+
+Steps r1.40..r1.50, r2.25, r2.26.
+
+After the opening dialogue's Ok the portrait frame shows four corner
+icons:
+
+| Icon, pointer point | Hover caption | Click | Second click |
+|---|---|---|---|
+| top left (490,255) | OPEN SPELLBOOK <Q>,<B> | a 2x11 grid of empty dark green cells along the map's bottom | the grid closes |
+| top right eye (622,255) | SWITCH TO STATS <TAB> | the stats sheet ALDOR | the portrait |
+| bottom left (490,457) | OPEN INVENTORY <~>,<I> | a row along the bottom: a gold pile of 1,000 and four empty cells; caption CLOSE INVENTORY <~>,<I> | the row closes |
+| bottom right (622,457) | MAIN MENU <ESC> | not clicked | |
+
+In the town-1 shop the top-left icon opens the same 2x11 grid in place of
+the table row, with the caption CLOSE SPELLBOOK and a key hint read <D>,<B>
+(eye read); a second click restores the table row. In the inn the bottom
+corners hold PREVIOUS HERO and NEXT HERO instead (R2-SESSION-214).
+
+Relation to existing claims. It narrows R2-SESSION-208's Unknowns: the
+four small portrait icons carry these captions, and GUARD and DEFEND belong
+to the command rows. It agrees with R2-SESSION-204 (the shop's panel draws
+an icon top left). The grid opens for a hero with MANA 0/0
+(R2-SESSION-202) and shows no spell; R2-ENGINE-322's spellbook field is
+not observed.
+
+**Confidence.** High for the open and close states (each waited for
+input). Medium for each caption and for 1,000.
+
+**Unknown.** The MAIN MENU click and the keys Q, B, I, ~ and Esc in the
+mission; what the four inventory cells hold beyond the gold. A mission run
+sending them would settle it.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-SESSION-218
+
+Steps r5.01..r5.07.
+
+On the detail page, with the tip closed, no icon is drawn at the portrait
+frame's corners. Hovers at (622,253) and (490,253), the inn's eye and
+top-left points, show no caption. Two clicks at (622,253) and two Tab
+presses with the pointer there leave the page digest-equal to r5.01. A
+third Tab with the pointer at (320,40) leaves the stats sheet at the bottom
+left and the portrait at the right; the PNG differs from r5.01 by the
+pointer.
+
+Relation to existing claims. It agrees with R2-SESSION-202 (the stats
+sheet on the page). The eye and Tab swap of the inn panel (R2-SESSION-214)
+has no counterpart on this page.
+
+**Confidence.** High for the four digest-equal inputs. Medium for the
+third Tab (compared by eye) and for each hover (one shot).
+
+**Unknown.** Other keys on the page. A key census run on the page would
+settle it.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)

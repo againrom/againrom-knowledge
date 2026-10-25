@@ -12305,7 +12305,7 @@ shown for less than that interval is not excluded. Colours are read from the
 | R2-ENGINE-564 | EN original hover captions are boxes with their bottom-left corner at the pointer: fill (33,44,33), border (165,121,49) and (82,60,24), text (165,121,49) with (8,8,8) shadow; a box past the right edge moves left. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
 | R2-ENGINE-565 | EN main menu: hovering one of eight icons draws its name in capitals in the disc centre; New Game opens the generator, Hall of Fame a ten-name list, Credits and Cut Scenes their views; Load Game opened nothing. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
 | R2-ENGINE-566 | EN generator detail: a - click lowers the attribute by one and raises the pool (Body 40 to 39, pool 10); EN Reset sets four 25s and pool 100 and keeps the weapon skill; the + step numbers (-12, -7, -1, -1) are single caption reads. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
-| R2-ENGINE-567 | EN town-1 START MISSION, clicked after the inn talks, showed the first mission within 4 s with no map, briefing or loading screen in the shots; a global map shown for less than 4 s is not excluded. | High / Unknown | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
+| R2-ENGINE-567 | EN town-1 START MISSION, clicked after the inn talks, showed the first mission within 4 s with no map, briefing or loading screen in the shots; a global map shown for less than 4 s is not excluded. | High / Unknown | ● active (amended) | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
 | R2-ENGINE-568 | EN town-1 shop plaques: Undo shows hero gold, Buy the pending cost negated, Sell the pending credit, Exit their sum; a shield priced 3 was bought for 3 and sold for 2, gold 1,000 to 997 to 999. | High / Medium | ● active | [EXP-2071](../experiments/EXP-2071-rom2-route/) |
 
 ### R2-ENGINE-563
@@ -12498,6 +12498,12 @@ before the inn talk (the `plagatguard` text of R2-ENGINE-241). One run with
 captures every second across the click, or a gate click before the talk,
 would settle them.
 
+**Amended.** R2-ENGINE-573 narrows the Unknown clause: after the mage's
+talk a route map of the allod shows 1.2 s after the click and is gone by
+2.6 s. R2-ENGINE-574 gives the gate click after the crossbowman's talk alone
+and after the peasant's talk alone. A gate click before any talk stays in
+the Unknown line. The clauses on the 4-s shots stand.
+
 **Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
 
 ### R2-ENGINE-568
@@ -12535,3 +12541,273 @@ action, an odd price on sale (where the client total and the server credit
 differ by R2-ENGINE-267).
 
 **Evidence.** [EXP-2071](../experiments/EXP-2071-rom2-route/)
+
+## The EN original's town menus, gate and shop controls, observed
+
+Runtime observation of the EN original `allods2.exe` in a 640x480 client
+(EXP-2072 runs C1, C2 and C3). Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2072-rom2-route-rest/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256. Shots are at least 10 s
+apart, except the single START MISSION shots at the offsets named, so a
+screen shown for less than the spacing is not excluded. Hover captions are
+the boxes of R2-ENGINE-564.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-569 | The EN town-1 statue opens a game menu box of five buttons, Save Game, Load Game, Sound Options, Abort Game and Return to Game; a hovered button is drawn gold with no caption box; Return to Game closes it. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-570 | The EN in-town Save Game box has a name field, a Saved Games list holding only <<< Empty Slot >>> while game9998/9999 alone exist, a scroll bar, Ok, Delete and Cancel; Cancel closes box and menu with no write. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-571 | The EN in-town Load Saved Game box lists Restart last mission and Abort mission and return to town, whose hover adds a date and time, with Ok, Delete and Cancel; Cancel closes box and menu to the square. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-572 | The EN Sound Options box has a Tracks list (Plagat), an Acknowledgments checkbox, Music, SFX and Speech volume sliders, Play, Stop and Ok (RETURN TO GAME), no Cancel; Esc closes it to the square. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-573 | EN town-1 START MISSION after the mage's talk showed a full-screen parchment map of the allod 1.2 s after the click, the mission without dialogue at 2.6 s and the hero's dialogue by 11-13 s, in two launches. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-574 | EN town-1 START MISSION after only the crossbowman's or only the peasant's talk shows the gate guard's box ("Sorry, but you can't leave the town...") with Ok and no map; it waits, and Ok closes it. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-575 | The EN town-1 shop grid shows three rows of two cells; SCROLL DOWN below it moves the grid one row down and SCROLL UP above it one row back, on each of the four shelves. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-576 | EN town-1 shop Undo returns a pending item to its shelf and the plaques to the hero's gold; after Buy two Undo clicks changed nothing; the return of a hero's item to its cell was not observed between the drag and Undo (Medium). | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+
+### R2-ENGINE-569
+
+Steps r4.03, r4.04, r4.05, ra.01..ra.04.
+
+A click on the statue (375,330) shows a box over the square with five
+buttons in a column: Save Game (pointer point 315,178), Load Game
+(315,208), Sound Options (315,238), Abort Game, Return to Game (315,298).
+The shot 10 s later is digest-equal (r4.04). Return to Game closes the box
+and shows the square (r4.05). A hovered button word is drawn gold and no
+caption box shows (ra.02..ra.04). Save Game, Load Game and Sound Options
+open the boxes of R2-ENGINE-570, R2-ENGINE-571 and R2-ENGINE-572.
+
+Relation to existing claims. It agrees with R2-ENGINE-241 (the menu
+selector posts 0x41f) and R2-ENGINE-441 (the 0x41f popup's five buttons
+with these texts; the tildes of the text rows are not drawn as
+characters). It narrows R2-SESSION-207's Unknown statue click: its caption
+CLICK TO BRING UP THE MAIN MENU names this in-game menu, not the main menu
+of R2-ENGINE-565 (R2-SESSION-216).
+
+**Confidence.** High for the five buttons, the box waiting and Return to
+Game closing it (digest-equal wait, a state an input changed). Medium for
+the hover drawing (one shot per button; Load Game's gold is an eye read).
+
+**Unknown.** Abort Game (not clicked by rule); Esc and the hotkeys S, L,
+N, E, R of R2-ENGINE-441 on the open box. One run that sends them, with
+Abort Game last in a disposable copy, would settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-570
+
+Steps ra.05..ra.09.
+
+The box: title Save Game, an empty name field, a list headed Saved Games
+with one row <<< Empty Slot >>> (highlighted) and blank rows, a scroll bar
+with two arrows, and the buttons Ok (192,357), Delete (341,357) and Cancel
+(440,357). Hover captions: CONFIRM SELECTION, DELETE SELECTED / SAVED GAME
+(two lines), CANCLE (R2-ASSET-141). Cancel closes the box and the game
+menu; the square shows. The disposable copy then held two saves,
+`game9998.sav` and `game9999.sav`, both written at C2's START MISSION;
+their write times (15:25:14Z) did not change, so no save was written.
+
+Relation to existing claims. It agrees with R2-ENGINE-440 (name box,
+Empty Slot row, listed saves except game9998 and game9999) and narrows its
+Medium exclusion clause: with only those two files present, no row besides
+Empty Slot shows. It agrees with R2-SESSION-179 and with R2-ENGINE-441
+(Save opens the save page from the town).
+
+**Confidence.** High for the layout, the single Empty Slot row and
+Cancel's close (states waiting for input; the write-time check). Medium
+for each hover caption (one shot each).
+
+**Unknown.** Ok, Delete, a typed name and the file the Empty Slot writes
+(not clicked by rule). A run in a disposable copy that saves under a typed
+name and deletes the result would settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-571
+
+Steps ra.10..ra.15.
+
+The box: title Load Saved Game, a list headed Load Game with two rows,
+Restart last mission (first, highlighted) and Abort mission and return to
+town, blank rows, a scroll bar, and Ok (197,379), Delete (318,379) and
+Cancel (440,379). Hover captions: CONFIRM SELECTION, DELETE SELECTED /
+SAVED GAME, CANCEL. The first row's hover shows RESTART LAST MISSION
+25.10.2026 16:25:14 (eye read), the local time of C2's START MISSION, and
+draws the heading gold. Cancel closes the box and the game menu; the
+square shows. The copy held only `game9998.sav` and `game9999.sav`.
+
+Relation to existing claims. It agrees with R2-ENGINE-438 (labels as
+rows, the 0x418 page's buttons, game9998 and game9999 listed in mode 1)
+and narrows its Medium role of the `%s  %02d.%02d.%d  %02d:%02d:%02d`
+string: it is the row's hover caption. It agrees with R2-ENGINE-271's two
+`patch.txt` labels and narrows its Medium clause: they are the Load rows of
+the two START MISSION saves; which file carries which label follows
+R2-ENGINE-271's wParam rule (Medium). It narrows R2-ENGINE-439's Unknown
+page close in a session: in town, Cancel returns to the square. It does not
+bear on R2-ENGINE-565, whose main-menu Load Game ran with no save present.
+
+**Confidence.** High for the box, its two rows and Cancel's close (states
+waiting for input). Medium for each caption, the date and time, and for
+the row order as newest first (the two files were written 2 s apart).
+
+**Unknown.** Ok on each row and Delete. A run in a disposable copy that
+loads each row would settle what Restart and Abort enter.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-572
+
+Steps ra.16..ra.21.
+
+The box: title Sound Options; a list headed Tracks with one row Plagat
+(highlighted) and blank rows, a scroll bar; a checkbox Acknowledgments,
+checked; three sliders Music volume, SFX volume and Speech volume; buttons
+Play, Stop and Ok. Hover captions: RETURN TO GAME (Ok, 220,360), PLAY
+(167,327), ACKNOWLEDGMENTS (129,261), MUSIC VOLUME (the music knob,
+447,261; the label is drawn gold). Esc closes the box; the square shows
+with no game menu.
+
+Relation to existing claims. It agrees with R2-ENGINE-340 (a melody list,
+three volume sliders, music on and off) and narrows its Unknown on-screen
+layout. The one listed name, Plagat, is a `tunes.txt` name by R2-ENGINE-340
+(Medium: the file was not compared). Which stored value the
+Acknowledgments box sets (R2-ENGINE-339 lists SoundRandom and
+MusicEnabled) is not shown.
+
+**Confidence.** High for the controls present and Esc's close (a state
+waiting for input; Esc changed it). Medium for each caption.
+
+**Unknown.** Every control's effect (not clicked by rule); why one track
+is listed; Stop's caption. A run that clicks each control and reads the
+sound registry values after each would settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-573
+
+Steps r3.09, r3.10, r3.11, r3.21, r3.22.
+
+| Offset after the click | Run | Shown |
+|---|---|---|
+| 1.18 s | C1 | a full-screen parchment map of the allod: place names in a decorative font (Plagat and Allod Uimoir among them, eye reads), a red route mark near Plagat, a wax seal, a compass rose, a scale bar |
+| 2.60 s | C2 | the first mission: the hero on a forest path by a signpost, fog at the right, the panel with the minimap; no map, no dialogue box |
+| about 11 s and 12.7 s | C1, C2 | the hero's dialogue of R2-SESSION-208; the two shots are digest-equal |
+| about 21 s | C1 | unchanged (digest-equal to the 11-s shot) |
+
+Each launch clicked START MISSION (205,170) after the mage's talk. C2's
+click rewrote the copy's `game9998.sav` and `game9999.sav` at
+15:25:12-14Z.
+
+Relation to existing claims. It narrows R2-ENGINE-567: the map its 4-s
+shots could not exclude shows at 1.2 s and is gone by 2.6 s; its other
+clauses stand. It agrees with R2-ENGINE-272 (0x42d opens the global map in
+route mode after town 1 and enters the first available location) and
+narrows its Unknown map appearance. It agrees with R2-ENGINE-429 (Umoir.bmp
+as the route-mode background; Allod Uimoir is read on the map, Medium) and
+with R2-ENGINE-464: a travel ends on paint 15 or later at 100 ms a paint,
+so the map stays at least 1.5 s (Medium there), inside the bound of these
+shots. It agrees with R2-ENGINE-271 (the gate writes `game9998.sav`).
+
+**Confidence.** High for the dialogue that waits (digest-equal shots in
+two launches). Medium for the map at 1.2 s and for the mission without
+dialogue at 2.6 s: one shot each of a transient state, in different
+launches. Medium for each place name.
+
+**Unknown.** The map's exact duration and what moves on it; any screen
+between 2.6 s and 11 s other than the mission view. A run with captures
+every 0.2 s across the click, under a rule that admits that spacing, would
+settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-574
+
+Steps r1.05, r1.06, r3.01..r3.04, r3.09, rc.02..rc.07.
+
+In C1, after the crossbowman's talk only, a click on START MISSION
+(205,170) shows, 1.18 s later, a modal box over the square: a knight's face
+in a great helm and seven lines beginning "Sorry, but you can't leave
+the town. Only those with urgent assignments may pass." that send the hero
+to the inn, and Ok. Shots at 11 s and 21 s are digest-equal; Ok (315,308)
+closes it to the square. After the mage's talk the next click showed the
+map (R2-ENGINE-573). In C3, after the peasant's two-page talk only, the
+click shows the same box at 1.5 s, digest-equal at 11.5 s, with no map.
+
+Relation to existing claims. It agrees with R2-ENGINE-241 (a false flag
+0x301 gives the `plagatguard` text instead of the leave) and with
+R2-SESSION-128 (the stage-10 talk sets flag 0x301). It narrows
+R2-SESSION-205's Medium NPC and topic clause: the gate refused after each
+of the other two talks and opened after the mage's. It narrows
+R2-ENGINE-567's Unknown gate click before the talk to a click with no talk
+and a click after the mage's talk alone.
+
+**Confidence.** High for the box, its wait and the absence of the map
+(digest-equal shots). Medium that the mage's talk is the one that opens
+the gate: two other single talks were tested, no other order. Medium for
+the text read.
+
+**Unknown.** A gate click with no talk at all, and after the mage's talk
+alone in a fresh game. One run with those two clicks would settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-575
+
+Steps r2.01, r2.02, r2.03, rb.01..rb.20.
+
+The ornament above the grid (80,15) has the caption SCROLL UP, the green
+gem below it (80,283) SCROLL DOWN. At the first row SCROLL UP changes
+nothing (r2.02). Each SCROLL DOWN moves the grid one row: the bottom two
+cells come in, the top two leave. Each SCROLL UP after downs moves it one
+row back. In C3, three downs and one up per shelf (top-right numbers, eye
+reads):
+
+| Shelf | first row view | after three downs |
+|---|---|---|
+| ARMOR | 3, 3 / 11, 12 / 21, 44 | 88, 113 / 225, 450 / two helmets |
+| WEAPONS | 25, 50 / 63, 100 / 125, 150 | 200, 250 / 400, 600 / 800, 175 |
+| SCROLLS, BOOKS & POTIONS | potions 100, 100 / scrolls and flasks | scrolls 1,000 each |
+| MAGIC ITEMS | 733, 801 / 806, 885 / 899, 899 | 971, 971 / 981, 1,051 / 1,065, 1,065 |
+
+Relation to existing claims. It narrows R2-SESSION-206: the six shields of
+its opening state are the first view of a longer ARMOR list. It agrees with
+R2-ENGINE-249 (the shelf grid in the shop page's left child).
+
+**Confidence.** High for the one-row shift on each shelf (each state
+waited for input; the shift is in the cell contents). Medium for every
+number and for item kinds read from icons.
+
+**Unknown.** The rows below the third down, the list's end and a down at
+the end. A run clicking SCROLL DOWN until the grid stops changing, per
+shelf, would settle them.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+### R2-ENGINE-576
+
+Steps r2.20..r2.24, r2.27..r2.29.
+
+| Step | Table | Undo | Buy | Sell | Exit | Hero row |
+|---|---|---|---|---|---|---|
+| shelf shield dragged to the table (r2.20) | shield | 1,000 | -3 | 0 | 997 | gold 1,000 |
+| Buy (r2.21) | empty | 997 | 0 | 0 | 997 | shield, gold 997 |
+| Undo, twice (r2.23, r2.24) | empty | 997 | 0 | 0 | 997 | unchanged |
+| second shelf shield to the table (r2.27) | shield | 997 | -3 | 0 | 994 | unchanged |
+| Undo (r2.28) | empty, the shield back on its shelf cell | 997 | 0 | 0 | 997 | unchanged |
+| hero shield to the table, then Undo (r2.29) | empty | 997 | 0 | 0 | 997 | the shield back in the first hero cell |
+
+Undo shows no hover caption (r2.22).
+
+Relation to existing claims. It agrees with R2-ENGINE-266 (Undo returns
+pending items with an owner to the hero inventory, others to their
+category, and clears the pending list; after Buy the list is empty) and
+narrows R2-ENGINE-568's Unknown Undo action. It agrees with R2-ENGINE-568's
+plaque roles (Undo shows the hero's gold).
+
+**Confidence.** High for the before-Buy return to the shelf and the
+unchanged state after Buy (states waiting for input). Medium for the
+return to the hero cell (no shot of the pending sale) and for every plaque
+number (eye reads).
+
+**Unknown.** Undo with several items or a partial stack. A shop run with
+two items on the table would settle it.
+
+**Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
