@@ -4750,3 +4750,98 @@ three relocations. Medium for the callee statement: the callee windows are not c
 **Unknown.** Not read: the virtual calls `L15942` and `L15943`; the leaves `R0300`,
 `R0299`, `R0040` and `R0019`; the second level of `R0059`; `R0045`. Whether the
 relocation changes a pursuer's Mover; the RU build.
+
+## Spell range after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-420 | In the EN LOADs measured (a hero with a Spell book, the `0x46` subtype-3 sender path), Spell `+9` held the SAV byte until the first sub-tick, where the derive's book walk `R0903` rewrote every slot's `+9` at the current clamped power. | High | ✔ promoted (branch candidate) | [EXP-0622](../experiments/EXP-0622-teleport-reach-load/) |
+| MAGIC-421 | Five EN Teleport casts after LOAD (first, second, after a book toggle, after a Light cast, from a SAV the original wrote) each held `ord+0x14` = 3, Max Range 1 + power/3, during the approach and moved the hero 3 cells. | High | ✔ promoted (branch candidate) | [EXP-0622](../experiments/EXP-0622-teleport-reach-load/) |
+| MAGIC-422 | Between LOAD and a book order, `+9` is written via `R0625` by the derive and skill-raise book walks, and by the application only after the reach test; the walk treats every id alike, so another spell's reach likely follows the same rule. | High / Medium | ✔ promoted (branch candidate) | [EXP-0622](../experiments/EXP-0622-teleport-reach-load/) |
+
+### MAGIC-420
+
+- Load arm of `Spell::Serialize` `R1013`: `+8`, `+9` and `+0xa` are read through pushed
+  addresses and `+0xc` as a word (`L16960..L16961`); no refresh follows.
+- The resume `R0099` sends the `0x46` subtype-3 record through `R1192` at `L14419` when
+  frontend `+6bc` != 3. Executor arm `L07740..L14420` calls `vt+0x50` of each actor in
+  `player+0x20` at `L08636` (MOVE-142). For a Human that slot is the derive `R0280`
+  (`L03967`, `L03968`); its tail calls `R0903(actor)` when `actor+0x140` is nonnull
+  (`L16962..L13187`).
+- `R0903` walks book indices 1..size-1 and calls `R0904(actor)` on each nonnull Spell
+  (`L13188`). `R0904` computes
+  `clamp(word[actor+0xa8+2*Sphere] + word[actor+0x88] - 30, 0, 100)` and passes it to `R0625`
+  (`L16963`), which stores `+9` (TEXT-096).
+- Live, EN, `game0021`, hero Fergard (Mind 26, Astral 10): held at the first sub-tick entry (372),
+  Teleport `+9` = 1 in two LOADs. At sub-tick 373 one hero derive returned to `L16964`, its
+  book walk returned to `L16965`, and 28 refresh calls ran (power 0 for ids 1..22, 6 for ids
+  23..28). Teleport `+9` was then 3. The 17 derives at sub-tick 372 (return `L16966`) made no
+  book walk. A LOAD of a SAV the original wrote (stored 3, Astral 11) showed the same derive at
+  its first sub-tick; its rewrite value equals the stored byte.
+- The 1 → 3 change is attributed to the sub-tick-373 walk by the matching value (1 + 6/3) and the
+  hooked calls: no `R0625` call falls between sub-tick 373 and the later read. The store itself
+  was not traced; the resolver store `L03040` was not hooked.
+
+**Confidence.** High for the measured LOADs: two LOADs of `game0021` read `+9` = 1 at the hold and
+3 after sub-tick 373. The sender at `L14419` (`R1192`, subtype 3) and frontend `+6bc` were not
+read live; the path from the resume to the executor is a static read, inferred live from the
+executor's return `L16964`.
+
+**Unknown.** A LOAD with frontend `+6bc` = 3, where the sender is skipped; a town LOAD; the RU
+build live (the image is the same).
+
+### MAGIC-421
+
+| input | event before the cast | approach sub-ticks | `ord+0x14` in the approach | cast start → landing | application power |
+|---|---|---|---|---|---|
+| `game0021` | none | 1223..1256 | 3 | (16,66) → (13,66) | 6 |
+| `game0021` | the first cast | 2823..2899 | 3 | (17,66) → (20,66) | 7 |
+| `game0021` | spellbook bar toggled off and on | 1623..1656 | 3 | (16,66) → (13,66) | 6 |
+| `game0021` | Light (id 12) cast | 1415..1448 | 3 | (16,66) → (13,66) | 6 |
+| SAV the original wrote after two casts | an automatic Heal | 4012..4070 | 3 | (17,66) → (14,66) | 7 |
+
+- The approach is command state `actor+0x50` = 14, where the reach is tested. From the first
+  state-12 row of the cast phase (sub-ticks 1257, 2900, 1657, 1449, 4071) `ord+0x14` reads 5, the
+  value the idle state-12 rows before the order also hold; the meaning of 5 was not read.
+- Each click lay 7 cells from the hero; the hero walked until the reach covered it, then moved 3
+  cells.
+- The point setter copies `[Spell+9]` into `ord+0x14` (`L05038..L05039`); the Spell is the
+  book's own slot, `actor+0x44 = Book.Get(id)` (`L16967..L16968`, `R0017`).
+- Astral rose 10 → 11 at the first application; the skill-raise book walk (returns `L04466`,
+  `L16965`) left `+9` at 3 (power 7). The toggle made no `R0625` call on a book slot.
+- Light's approach held `ord+0x14` = 6 (Max Range 6, Air power 0; sub-ticks 931..934). Its hover
+  read RANGE 9 in a screenshot kept in the owner's notes, not committed. That 9 is consistent with
+  the fold's byte-wrapped power, 6 + 100/30 (inference); TEXT-097 settles only the fold
+  arithmetic.
+
+**Unknown.** The RU build; a hero whose power crosses a multiple of 3 between LOAD and the
+first cast.
+
+### MAGIC-422
+
+- Callers of `R0903`: the spawn `R0184` (`L16969`), the skill raise `R0810`
+  (`L16970`) and the derive tail (`L13187`). Other callers of `R0904`: the admission
+  `R0268` at `L16971`, only for id 0xe (`L03028`).
+- Other callers of `R0625`: stack locals at `L16533` and `L16147`, the fold `L11201` →
+  `L16972`, the scroll arm `L16973` on a new Spell with item power `+0x42`, and the
+  application `R0003` at `L14398` on the cast Spell with the clamped power.
+- The phase body passes `actor+0x64` to the admission (`L01994`, `L01995`) and the
+  application (`L00008`); the application runs after the reach test, so its write first
+  affects the next order. Live, each application's `ecx` was the book slot.
+- Byte stores at displacement 9 in `L16974..L16975`: the constructors (`L16976`,
+  `L16977`, value 1), the resolver `L03040` and `R0625` (`L03041`, `L16978`,
+  `L16979`); `L05399` and `L05400` store into an effect local.
+- The id enters only `R0625`'s formula (power/3 for id 26, otherwise power/30) and the
+  admission's id-0xe test.
+- Live, for the spells other than Teleport: the sub-tick-373 walk made 28 `R0625` calls, at
+  power 0 (ids 1..22) or 6 (ids 23..28). For a non-Teleport id these give the stored Max Range
+  byte, so no non-Teleport order separates a refreshed byte from a stale one.
+
+**Confidence.** High for the listed callers, the order and the walk treating every id alike.
+Medium that another book spell's reach follows the same rule: no non-Teleport order discriminated
+it. Medium that no other code writes a slot's `+9`: the image-wide sweep's 166 byte, 82 word and
+1555 dword rows at displacement 9 outside the window, and computed-pointer writes, were not
+classified.
+
+**Unknown.** A non-Teleport spell whose power crosses a multiple of 30 between LOAD and the first
+cast was not measured.

@@ -17918,3 +17918,26 @@ at the next mission.
 **Confidence.** High for the three references and both gates. Medium that the list carries a
 selection: the `vt+0x14` target at `L16815` and the meaning of `+0x7c` were not read. Medium
 that the listed view objects are actors: the view map's object class was not read.
+
+## Spell range byte in a SAV
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1361 | EN `game0021` stores each of its 28 Spell records' `+9` equal to the Max Range column (Teleport 1); a SAV the original wrote after two casts stores Teleport 3; in the EN LOADs measured the first sub-tick rewrote the byte (MAGIC-420). | High / Medium | ✔ promoted (branch candidate) | [EXP-0622](../experiments/EXP-0622-teleport-reach-load/) |
+
+### SAV-1361
+
+- `tools/savfull -fields`: `game0021` (SHA-256 `7acf1d56…`, mission 10, the hero's book of 28
+  Spell records) holds `+9` = Max Range for all 28; Teleport (id 26) holds 1.
+- The SAV the original wrote at sub-tick 3355 of the same session, after two Teleport casts at
+  Astral power 6 and 7, stores Teleport `+9` = 3.
+- In the EN LOADs measured, the first sub-tick's book walk rewrote the byte (MAGIC-420): 1 became
+  3 for `game0021`; for the stored 3 the rewrite value is 3, so no change is observable.
+- Inference: a Teleport byte of 1 means the slot was not refreshed at power 3 or more between its
+  creation and the SAVE that wrote it.
+
+**Confidence.** High for the bytes. Medium that the original wrote `game0021`: it sits in the
+install's save folder and its archive keys are pointer-like; the writing session is not recorded.
+
+**Unknown.** The RU build: no RU SAV of the install holds a Spell record. A LOAD with frontend
+`+6bc` = 3 and a town LOAD.

@@ -59,7 +59,9 @@ Spell        0x14 bytes, vtable L05044
   +0x00  vtable
   +0x04  pointer to the Data.bin Spells row   (restored from the id on load)
   +0x08  u8   spell id 1..28
-  +0x09  u8   stored cast range -- initialized from Max Range; updated by R0904 -> R0625
+  +0x09  u8   stored cast range -- initialized from Max Range; updated by R0904 -> R0625;
+              restored by LOAD; in the EN LOADs measured, rewritten at the first sub-tick
+              (MAGIC-420)
   +0x0a  u8   Defensive
   +0x0c  u16  Mana Cost
   +0x0e  u8   per-cast scratch: damage base
@@ -141,6 +143,23 @@ manual setters clear order+0x60 from the register their heads zero. Parent
 states 0x0d/0x0e reissue kind 8/9 and reload reach from the saved Spell+9 on
 each evaluation, preserving the progress byte and the zero flag. This is a stored-value reload, not a power
 recalculation (`MAGIC-253`).
+
+In the EN LOADs measured, the stored byte did not reach an order. These were
+LOADs of a hero with a Spell book on the path where the resume sends the
+`0x46` subtype-3 command. That command runs each listed actor's derive, and
+the derive's book walk rewrote every slot's Spell+9 at the current clamped
+power at the first sub-tick (`MAGIC-420`). The sender and frontend `+6bc`
+were not read live; the path is inferred from the executor's return. A LOAD
+with frontend `+6bc` = 3, which skips the sender, and a town LOAD remain
+Unknown (`MAGIC-420`). Between LOAD and a book order, Spell+9 is written by the
+derive and skill-raise book walks and by the application. The application
+writes after the reach test, so its value first serves the next order. The
+walk treats every spell id alike (`MAGIC-422`). In five EN Teleport
+casts after LOAD, including the first, order+0x14 held 3 during the approach,
+where the reach is tested. The power was 6 or 7 and the SAV byte was 1
+(`MAGIC-421`, `SAV-1361`). Whether another spell's reach follows the same
+rule live is Medium: no non-Teleport order separated a refreshed byte from a
+stale one (`MAGIC-422`).
 
 For child order8, a non-self target must first match the mover's current
 facing. The typed actor predicate then uses Position cell bytes+0/+1,
@@ -378,9 +397,11 @@ Neither stat is read directly by the mana-cost comparison in `Spell::Cast`
 (`R0268`). In that specific body, the explicit refusal is the mana gate;
 there is no separate cooldown, interruption or random-failure check. These
 local observations do not describe the earlier order range/facing and client
-visibility gates. Mind contributes to the stored-range producer, while the
-refresh timing and which power snapshot an order receives remain Unknown
-(`MAGIC-REACH-178`, `MAGIC-REACH-179`, `MAGIC-REACH-180`, `MAGIC-REACH-181`).
+visibility gates. Mind contributes to the stored-range producer. An order
+receives the power of the slot's last refresh: the LOAD derive, a skill
+raise or the previous application (`MAGIC-REACH-178`, `MAGIC-REACH-179`,
+`MAGIC-REACH-180`, `MAGIC-REACH-181`, `MAGIC-420`, `MAGIC-422`). Whether code
+outside the listed writers also writes Spell+9 remains Unknown (`MAGIC-422`).
 
 The separate spellbook result remains: **the book's capacity is not bounded
 by a stat, what may be learned is not chosen by one, and learning is not

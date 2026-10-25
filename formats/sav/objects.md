@@ -165,6 +165,14 @@ Spellbook index zero is omitted in both directions. Each slot has its own
 reference operation; new Spell objects and aliases follow the intended graph.
 — SAV-DIARY-042, SAV-SPELL-044, SAV-SPELLBK-041, SAV-CONTSER-188
 
+A Spell's stored `+09` range byte is restored by LOAD. In the EN LOADs
+measured (a hero with a Spell book, the `0x46` subtype-3 sender path), the
+book refresh at the first sub-tick rewrote it, so the stale byte did not reach
+a cast order. A LOAD with frontend `+6bc` = 3 and a town LOAD are Unknown.
+EN `game0021` stores Teleport `+09` = 1; a SAV the original wrote after two
+casts stores 3.
+— MAGIC-420, SAV-1361
+
 TableLine's grammar is for the descriptor-created base object. Other vtables
 advertise the same descriptor and some use different serializers; those
 unregistered derived programmes are not covered by this row. The three
