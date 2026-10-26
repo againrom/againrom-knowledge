@@ -217,6 +217,8 @@ plane that carries occupancy. Each produces its own route list on the actor.
 
 **Amended.** Building membership remains contested: no Building insert was found over the named insert surface, but untraced wrappers and other tick containers remain open. The record-array to file-order link also remains Medium. The party-first clause is contested by EXP-0514 (`TRIG-MAPORD-105`): the session start `R0512` loads the map, spawns the type-6 records and runs the binder without calling the placement walk `R0065`, whose session-path caller is the join arm of the command executor. Two readings stand: the party is inserted first (this card), or after the map's records, when the join command executes. Neither experiment read when the join command executes relative to the session start, and the walk's caller `L13863` is unclassified. EXP-0515 refutes the party-first clause for the members the join walk places on the new-mission path, High ([`retracted.md`](retracted.md)): the join command is sent after the session start has run the spawner and the binder, and `L13863` is the watchdog arm (`MOVE-114`). A companion that an AddHero command inserted between missions, through the drain caller `R0192` whose callers are not enumerated, would still precede the type-6 records; that case stays contested at Medium. Building membership stays contested.
 
+**Amended (EXP-0624).** The Sack clause is refuted, High (`MOVE-187`, [`retracted.md`](retracted.md)): the insert `R0003` makes at `L16998` adds a Unit named "Ghost" built from `new(0x198)` by `R0501`, not a Sack, so none of the six callers of `R0411` inserts a Sack. That no Sack is a member of the list by another append is Medium (`MOVE-187`). Contradiction C-2 is resolved on the side of `ITEM-SACK-010` and `ITEM-SACK-011` for the `R0003` insert path. The six-caller enumeration stands.
+
 ### MOVE-TICK-015
 
 **How the order changes during play — and death leaves no hole.** (a) The teardown arm (`actor+0x54 == 0x10`) removes the actor's node by **unlink** (`L01926`) — nothing is compacted, swapped from the tail, or replaced; every survivor keeps its relative position — then AddTails the actor to the **dead list** `*(world+0xc)` (`L01927`), where `R0860` runs corpse decay per tick. (b) New spawns/summons append at the **tail**. (c) **Leaving the map** (into a building/transport, `R0121`) unlinks from the tick list and sets `actor+0x4c` bit 3; **returning** (`R0122`/`R0123`, "Unit can't return to map — no free place") re-AddTails — the returning unit moves to the **back** of the walk, losing its old contention position. (d) An **owner change** (`R0064`) moves the actor between the players' own lists and groups but never touches the tick list — its walk position survives a conversion. So mid-game, the walk order = spawn order, minus the dead and the garrisoned, plus returners and newcomers at the tail
@@ -2150,3 +2152,38 @@ external writes, aliases and LOAD are not enumerated.
 alignment. Trace a saved multi-cell Building and Shop through Position
 restoration and their first heading call; an EN mission-90 owner capture
 with anchor and art coordinates settles the visible alignment separately.
+
+## Tick-list insert targets
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-187 | The tick-list insert `R0411` that `R0003` makes at `L16998` adds a Unit named "Ghost", built from `new(0x198)` by `R0501` and copied from a source actor; the insert `R0411` adds no Sack (its six callers read). | High / Medium | ● active | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+
+### MOVE-187
+
+- `R0003` calls `new(0x198)` (`L17001`/`L17002`), pushes the string at `L05127`,
+  "Ghost" (`L17003`), and calls `R0501` on the block (`L03125`). `R0501` stores the
+  vtable `L00001` (`L00496`), whose runtime class is `Unit : Token : CObject`, size `0x198`.
+- The constructed object reaches `[ebp-0x70]`; `R0003` copies fields from the source actor
+  `[ebp-0x68]` into it (`+0x86`/`+0x96` halved, `+0x88`, `+0x8a`, `+0xa6`, `+0xbe`) and sets its
+  `+0x14` from the source (`L06023`), then passes it to `R0411` at `L16998`.
+- `R0411` has six direct callers: `L17004`, `L17005`, `L01792`, `L17006`, `L16998`
+  and `L17007`, the six `MOVE-TICK-014` names. The other five are that claim's actor creators.
+- No Sack `CreateObject` reaches `R0411` within four direct-call levels. `R0941`, which
+  gives a Sack its id, has no list insert; its caller `L16999`, the `CreateObject`
+  constructor, is read, and the other two callers are Sack constructors by `ITEM-SACK-010`
+  (`SAV-1368`).
+
+**Confidence.** High that the insert `R0411` adds no Sack: the allocation size, the string,
+the constructor's vtable store, the runtime class and the call at `L16998` are listed, the
+six-caller census lists every direct call of `R0411`, and the raw scan of every section
+finds the address `R0411` as no dword, so no pointer table names it. Medium that no Sack is
+a member of `[L00240]` or of the actor tick walk: only this insert is read. The linear `.text` decode
+holds 40 instructions with `L00240` as an operand (listed in the census), none classified
+here, and `SAV-LOADREG-878` registers
+actors on LOAD through another append helper.
+
+**Unknown.** When `R0003` runs and what the Ghost does in play; the callers of `R0003`
+were not read. Whether another append to `[L00240]` reaches a Sack: the 40
+instructions that name `L00240`, `SAV-LOADREG-878`'s append helper, untraced wrappers and other tick
+containers (`MOVE-TICK-014`) are not traced.

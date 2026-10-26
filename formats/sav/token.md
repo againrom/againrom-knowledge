@@ -12,7 +12,7 @@ SAV-EMBED-039)
 | Body offset | Type | Source | Meaning |
 |---:|---|---|---|
 | `0` | raw 12 | `*(this+10)` | Position object below |
-| `12` | u32 | `+04` | Runtime creation-order ID |
+| `12` | u32 | `+04` | Runtime id; see [Token `+04` runtime id](#token-04-runtime-id) |
 | `16` | u8 | `+0c` | Registry/definition selector; class-specific use |
 | `17` | u16 | `+0e` | Type word; Human LOAD compares it with `0x21` |
 | `19` | u32 | `+08` | Low word is the map-unit ID on the mapped producer path; on an Item, see [Item Token `+08`](#item-token-08) |
@@ -54,6 +54,47 @@ than an unmodified original); `SpellEffect` has no record in the admitted
 corpus at all. SAV-1058 is partially retracted for claiming both SpellEffect
 bases call the first Token constructor; its two Token `+14` zero stores
 remain valid. — SAV-1058, SAV-1059, SAV-1060, MAGIC-219
+
+## Token `+04` runtime id
+
+One 65,536-bit bitmap at `L06793` gives `+04` to actors, Buildings and
+Sacks, and the Outpost field `+0x80`. Its allocator returns the lowest clear
+bit; bit 0 is never given. Two searches for a counter-shaped store to
+`[reg+4]` found no routine that gives an Item, Effect or SpellEffect an id
+(Medium: a store through a computed pointer is outside both). A zero
+constructor stores 0; the copy constructor does not write `+04`. The non-zero
+values the corpus holds on Items and Effects, which SAVE writes and LOAD reads
+back, are unexplained: heap residue is inferred, and runs of values one apart
+in archive order are not what residue predicts. Projectiles use a separate
+counter. — SAV-1368, SAV-1369
+
+| Class | Given by | Released |
+|---|---|---|
+| Actor | the actor creators and the tick-list insert | corpse decay stage 5 (then `+04` = 0), party removal |
+| Building | the Building manager add | Building destructor, when `+04` is non-zero |
+| Sack | each Sack constructor | Sack destructor, at once |
+| Outpost `+0x80` | each Outpost constructor | never |
+| Item, Effect, SpellEffect | none found (Medium) | never |
+
+— SAV-1368, SAV-1370
+
+World LOAD clears the bitmap to bit 0 before the player list. Each
+Token-derived record then marks its non-zero saved `+04` by its low 16 bits
+in archive order, Items and Effects included; no LOAD path gives an id anew.
+The order of the lists (Players, Buildings, SpellEffects, map, Sacks) is
+taken from earlier reads that SAV-1371 cites, including SAV-1337; that nothing
+between them gives or marks an id is Medium.
+Each Sack's `CreateObject` takes the lowest clear bit before its `Serialize`
+replaces `+04` with the saved value, and that bit stays marked. After the
+archive the binder builds one Outpost per opcode-0x10003 check, each taking
+a bit into `+0x80` and an id into `+04`. The first id given after LOAD is the
+lowest bit this leaves clear, not the lowest id the saved owners leave free.
+— SAV-1371, SAV-1372, SAV-1373
+
+Over 116 distinct corpus SAVs no non-zero id repeats across Actor, Building
+and Sack records; Item and Effect values fall inside and outside that set,
+and 453 of them exceed `0xffff`. No corpus SAV holds an Outpost record. —
+SAV-1374, SAV-1369, SAV-1373
 
 ## Item Token `+08`
 

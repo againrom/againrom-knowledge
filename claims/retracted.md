@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-0624: sack membership of the tick list
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `MOVE-TICK-014` (the Sack clause only; the six-caller enumeration, the type-6 walk order and the clauses already amended stand) | Verbatim: "and sack creation `R0003` — one of whose callers is `R0037`, the actor tick itself, so a mid-tick death-drop appends to the very list being walked. Humans, Units and Sacks are members" | High | [EXP-0624](../experiments/EXP-0624-runtime-ids/) (`MOVE-187`) | The object `R0003` inserts at `L16998` is a Unit named "Ghost", built from `new(0x198)` by `R0501`, which stores the Unit vtable `L00001`. Sacks take their id through `R0941` with no list insert (`SAV-1368`); none of the six callers of the insert `R0411` adds a Sack. That no Sack is in `[L00240]` by another append is Medium. Contradiction C-2 is resolved on the side of `ITEM-SACK-010` and `ITEM-SACK-011` for the `R0003` insert path | **REFUTED** — partially retracted |
+
 ## EXP-0610: 15-bit draw quantization
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

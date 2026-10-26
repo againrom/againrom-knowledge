@@ -340,8 +340,8 @@ three per-class `Equip` bodies the Medium clause left unread, and
 | ITEM-CMD-007 | Moving an item is one command, `0x22`, with a source code and a destination code, and the ground is one of them. | High / Unknown | ● active (amended, partially retracted) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/), [EXP-0275](../experiments/EXP-0275-consumable-use/) |
 | ITEM-DROP-008 | A drop lands where asked only within a Chebyshev distance of 2, otherwise at the dropper's own feet, and is never refused. | High | ● active | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
 | ITEM-PICK-009 | A pick-up is all-or-nothing: the whole sack, every item and all the gold, in one act, and nothing refuses it. | High / Unknown | ● active (amended, superseded) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
-| ITEM-SACK-010 | A sack is a `Token`, not an actor, an item or a building, and there is one per cell. | High | ● active (contested) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
-| ITEM-SACK-011 | A sack does not tick and does not expire; the engine has no such mechanism. | High / Medium | ● active (contested) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
+| ITEM-SACK-010 | A sack is a `Token`, not an actor, an item or a building, and there is one per cell. | High | ● active (amended) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
+| ITEM-SACK-011 | A sack does not tick and does not expire; the engine has no such mechanism. | High / Medium | ● active (amended) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
 | ITEM-DEATH-012 | Death passes the corpse's container to the sack merge/adopt wrapper, unless the template is an NPC, in which case the inventory is destroyed. | High / Unknown | ● active (amended, partially retracted) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/), [EXP-0134](../experiments/EXP-0134-corpse-worn-armour/), [EXP-0285](../experiments/EXP-0285-whole-item-transfer/) |
 | ITEM-SPAWN-013 | Map load calls two further sack makers, a mission `.ini` `"Items"` reader and a random treasure scatter; the claim that no sack comes from the `.alm` is retracted. | High / Medium | ● active (partially retracted) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/) |
 | ITEM-SAVE-014 | `Item::Serialize` writes the 37-byte Token head, the effect list and a fixed scalar tail; one container per actor and one per sack is serialized. | High | ● active (amended) | [EXP-0079](../experiments/EXP-0079-items-and-sacks/), [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
@@ -493,6 +493,16 @@ callers of the tick-list insert `R0411` and counts Sacks as members of
 `[L00240]`. This claim reads sack registration as a direct id-allocator
 call with no list insert (`ITEM-SACK-011`). Both readings stand.
 
+**Amended (EXP-0624).** Contradiction C-2 is resolved for this claim's side on
+the `R0003` insert path, High (`MOVE-187`): the insert `R0003` makes
+at `L16998` adds a Unit built by `R0501` from `new(0x198)`, not a Sack, and
+none of the six callers of the insert `R0411` adds a Sack. `R0941` gives
+a Sack its id with no list insert; its three direct callers are listed, and the
+`CreateObject` constructor `L16999` is read (`SAV-1368`). That no Sack is in
+the list `[L00240]` by another append is Medium (`MOVE-187`).
+`MOVE-TICK-014`'s Sack clause is partially retracted in
+[`retracted.md`](retracted.md).
+
 ### ITEM-SACK-011
 
 - `Sack vt+0x14` and `vt+0x18`, the two slots `SESS-TICK-004` shows the loop
@@ -522,6 +532,12 @@ inserter and counts Sacks as members, while this claim reads `R0941`
 calling the id allocator directly. `MOVE-TICK-014` itself also lists
 `R0941` among the direct allocator callers with no list insert. Both
 readings stand.
+
+**Amended (EXP-0624).** Contradiction C-2 is resolved for this claim's side on
+the `R0003` insert path, High (`MOVE-187`): none of the six callers of the
+tick-list insert `R0411` inserts a Sack. That no Sack enters the actor tick
+walk is Medium: other appends to `[L00240]` are not traced (`MOVE-187`).
+A Sack's id is released by the Sack destructor `L17000` (`SAV-1370`).
 
 ### ITEM-DEATH-012
 

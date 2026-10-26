@@ -18042,3 +18042,225 @@ spell.
 
 **Unknown.** The LOAD writer of actor `+0x5c`; a LOAD of `game0018.sav` with only the target
 reference removed separates it from the other resets.
+
+
+## Runtime ids of Sacks, Items and Effects, their release and their LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1368 | One bitmap at `L06793` gives Token `+0x04` to actors, Buildings and Sacks and an Outpost its `+0x80`; the searches named found no routine that gives an Item, Effect or SpellEffect an id. | High / Medium | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+| SAV-1369 | An Item or Effect built by a Token zero constructor holds `+0x04` = 0; the copy constructor `R1134` does not write it; the non-zero values SAVE stores and LOAD reads back are unexplained (residue inferred). | High / Medium | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+| SAV-1370 | A Building or Sack id is released when its object is destroyed and an actor id at corpse decay stage 5 or at party removal; Item, Effect and Outpost `+0x80` bits are never released. The lowest clear bit is given next. | High / Medium | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+| SAV-1371 | World LOAD clears the bitmap to bit 0, then every Token-derived record marks its non-zero saved `+0x04` in archive order, Items and Effects included; each Sack's `CreateObject` first takes the lowest clear bit. | High / Medium | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+| SAV-1372 | After LOAD the bitmap holds bit 0, the saved owner ids, every non-zero Item/Effect `+0x04` and each Sack constructor's bit; on 27 of the 32 files labelled original the replay leaves bits no owner carries. | High / Medium | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+| SAV-1373 | The binder `R0067`, which world LOAD runs after the map, builds one Outpost per opcode-0x10003 check, taking a never-released bit into `+0x80` and an id into `+0x04`; no corpus file holds an Outpost record. | High / Medium | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+| SAV-1374 | In 116 distinct SAVs no id is carried by two actor, Building or Sack records; Items and Effects carry values outside that set; in one file labelled original low ids sit on Sacks, consistent with reuse of freed ids. | High | ✔ promoted | [EXP-0624](../experiments/EXP-0624-runtime-ids/) |
+
+### SAV-1368
+
+- The bitmap is `0x2000` bytes, 65,536 bits. Reset `R1339` clears it and stores 1 in its
+  first dword (bit 0 marked). Allocator `R0936` returns the lowest clear bit as a 16-bit id
+  and marks it; it has no upper bound. Mark `L08090` and release `R0868` set and clear bit
+  `id & 0xffff`.
+- Only these four routines touch the bitmap: every operand inside `L06793..L08253` of a
+  linear `.text` decode lies in them.
+- The allocator has 10 direct call sites and its address occurs as a dword nowhere else in the
+  image. Each site stores the result's low 16 bits:
+  - into actor `+0x04`: `L13988`, `L17008`, `L17009`, `L17010`, `L17011`, `L14330`
+    and the tick-list insert `L17012` (`MOVE-ID-016`);
+  - into Sack `+0x04`: `L04623` in `R0941`. `R0941` has three direct callers,
+    `L17013`, `L17014` and `L17015`, and its address occurs as no dword. The first lies in
+    the `CreateObject` constructor `L16999`, which is read. The other two lie in `R2063` and
+    `R1008`, not read here; that these are the other two Sack constructors is from
+    `ITEM-SACK-010`;
+  - into `+0x04` of the argument of `R1337`, which appends it to a manager list first; its
+    callers are `L14620` in the structure factory `R0489` (Building or Shop, `MOVE-184`),
+    `L17016` in the binder (Outposts, `SAV-1373`), and `L17017` and `L17018`, whose
+    objects this experiment did not type;
+  - into Outpost `+0x80`: `L17019` in `R1336`, which both Outpost constructors call.
+- No Item, Effect or SpellEffect producer is among them. The Token zero constructors store
+  `+0x04 = 0` (`R1624`); `SAV-1369` reads the copy constructor. Within four direct-call
+  levels no Token-derived `CreateObject` other than Sack's and Outpost's reaches the allocator.
+- Two searches over the linear `.text` decode look for another `+0x04` writer: a dword store
+  to `[reg+4]` whose source was loaded from an absolute address within the 8 preceding
+  instructions, and a store to `[reg+4]` within 12 instructions after an `INC` or `ADD 1`. They
+  list no Item or Effect writer. Their blind spot is a store through a pointer computed from
+  memory or a counter further from its store.
+- Projectile records take their id from the 16-bit counter at client world `+0xa0c`
+  (`SAV-1191`, `SAV-1204`), not from this bitmap.
+
+**Confidence.** High for the store, its four routines and the 10 classified sites: the
+operand census, the raw dword scan and the listings agree. Medium that nothing else gives an
+Item, Effect or SpellEffect `+0x04`: the two searches named above found none, and their blind
+spot is open.
+
+**Unknown.** The classes `L17017` and `L17018` pass to `R1337`.
+
+### SAV-1369
+
+- `R1134`, the Token copy constructor, copies `+0c`, `+0e`, `+14`, `+08`, `+18`, `+1c` and
+  the Position object from its source and does not write `+0x04`. The Item copy constructor
+  `R1003` and the Effect copy constructor `R1001` call it. Operator new `R0747` calls
+  `R0722` and retries through the new-handler; its own body writes no byte of the block
+  (listed; `AI-573` reads it whole). `R0722` is not read, and neither are the five callers
+  of `R1003`, so it is not shown that a copied Item sits in a fresh heap block.
+- The Token zero constructors `R0923`, `R1009` and `R1135` call `R1624`, which
+  stores `+0x04 = 0`; the Item constructors `R0884`, `R0972`, `R2076` and the Effect
+  constructors `R1049`, `R1047` reach them and write no `+0x04` of their own.
+- `Token::Serialize` writes `+0x04` as a u32 and its LOAD arm reads it back (`SAV-TOKEN-034`).
+- Corpus, 116 distinct files: Item 10,878 records, 6,942 with 0 and 3,936 non-zero, 254 of them
+  above `0xffff`, highest low value 4,186; Effect 3,535, 1,696 with 0, 1,839 non-zero, 199 above
+  `0xffff`. On the 32 files labelled original: Item 3,178 / 2,780 / 398 (42 above `0xffff`),
+  Effect 1,078 / 731 / 347 (66).
+- The values are not scattered. In `f2ad5f93` the Effects at archive indexes 81 to 93 hold 84
+  to 89 and those at 97 to 129 hold 106 to 121, each one more than the previous Effect, and
+  indexes 16 and 17 hold 100663829 and 100663830. In each of `f2ad5f93`, `62a3135c` and
+  `0de5da52`, 47 non-zero Item or Effect values are one more than the previous non-zero one in
+  archive order (`runtime-id-objects.tsv`). The residue reading does not predict such runs. The live alternative is a
+  writer of `+0x04` that the two searches of `SAV-1368` cannot see, a store through a computed
+  pointer or a counter further from its store.
+
+**Confidence.** High for the constructor bodies and the counts. Medium that no routine writes
+an Item or Effect `+0x04` other than the zero constructor: the two searches of `SAV-1368` found
+none, and their blind spot is open. The origin of the non-zero values is unexplained: residue
+is an inference from the copy constructor and the unread allocator, and the runs above are
+not what it predicts.
+
+**Unknown.** What wrote the non-zero values. A watch on a copied Item's `+0x04` in a running
+original, from its allocation to its first SAVE, would separate residue from a writer.
+
+### SAV-1370
+
+- Actor: corpse decay stage 5 releases and then zeroes `+0x04` (`L06794`, `L04100`,
+  `MOVE-ID-016`); party removal `R1555` releases the id of each party actor whose `+0x14c` is
+  non-zero (`L17020`).
+- Sack: the destructor `L17000` releases `+0x04` without a test (`L17021`), at once. A Sack
+  is destroyed by a pick-up (`ITEM-PICK-009`) or by a failed cell registration
+  (`ITEM-SACK-010`).
+- Building: the destructor `R1833` releases `+0x04` when it is non-zero (`L17022`). A
+  structure destroyed in play stays a Building record in the 8 files `SAV-1163` reads; that
+  its object, and so its id, survives is inferred from that corpus claim, not read from code.
+- The Token destructor `R1130` has no bitmap call; no release site reads an Item, an Effect
+  or Outpost `+0x80`.
+- The allocator gives the lowest clear bit, so a released id is the next one given whenever no
+  lower bit is clear.
+- Projectile ids are not given back (`SAV-1204`).
+
+**Confidence.** High for the release sites and the lowest-clear-bit rule. The instrument is a
+linear Capstone decode of `.text`, which lists four direct calls of the release routine, and a
+raw scan of every section, which finds its address as no dword. Its blind spot is a call
+through a register computed at run time. Medium that a Building destroyed in play keeps its
+id: inferred from `SAV-1163`.
+
+### SAV-1371
+
+- The LOAD arm of `R0414` calls the reset at `L05933`, its first call, before the
+  player list (`SAV-1337`).
+- The archive then restores, in this order: the Players with their groups' actors and each
+  actor's container and equipment with their Effects; the dead-actor list; the world-half flag;
+  the Building list; the SpellEffect list; the map; the Sack list. This order is not read in
+  this experiment. It comes from `SAV-DOC-053` (High; the store arm of `R0414` read end to
+  end names `R1590` the Building list, `R1122` the SpellEffect list and `R1592` the
+  Sack list, in that order), from `SAV-1337` (High for the reset and the player list at
+  `L08155` first and the binder at `L01841` last; Medium that no unread callee between them
+  reorders or replaces the lists) and from `MAGIC-202` (`L05935` is the LOAD arm's one call of
+  `R1122`). The listed LOAD windows show calls of `R1590` at `L16649`, `R1122` at
+  `L05935` and `R1592` at `L07781`, not those routines' bodies.
+- Every Token-derived body starts with `Token::Serialize` `R0950`, whose LOAD arm reads
+  `+0x04` and, when it is non-zero, marks its low 16 bits (`L17023..L17024`): it tests
+  `dword [this+4]` against 0 and passes `word [this+4]` to the mark, so a saved value such as
+  `0x10000` whose low 16 bits are 0 marks bit 0, which the reset already set. No allocator
+  call lies in the LOAD arm, in a Token-derived `Serialize` or in a `CreateObject` other than
+  Sack's and Outpost's.
+- Sack `CreateObject` `L17025` runs the constructor `L16999`, whose `R0941` takes the
+  lowest clear bit before the Sack's own `Serialize` replaces `+0x04` with the saved id.
+- A record saved with id 0 marks nothing; dead actors at stage 5 load with id 0.
+- After the archive the arm calls the binder (`SAV-1373`). Player restore registers actors
+  through an append, not the allocator (`SAV-LOADREG-878`).
+- The projectile counter is restored from `Projectiles/FreeIndex` (`SAV-1191`).
+
+**Confidence.** High for the reset, the mark and the Sack constructor: they are named
+instructions in the listings. The list order is graded from `SAV-DOC-053` and `SAV-1337`: High
+for the order of the list calls, Medium that no unread callee between the player list and the
+Sack list gives or marks an id out of that order. The replay of `SAV-1372` rests on that
+order.
+
+### SAV-1372
+
+- A replay of `SAV-1371` over each file's archive gives the bitmap world LOAD leaves before
+  the binder runs. Bits it holds that no Actor, Building or Sack record carries come from two
+  sources: a non-zero Item/Effect `+0x04` (its low 16 bits) and a Sack constructor's bit that
+  no later record carries.
+- On the 32 files labelled original (`O`): 27 hold such bits. The label is read from the
+  corpus path by the rule in the experiment's `provenance.py` (`SAV-1374`); it is not an
+  observation of the writer. The Item/Effect marks change the
+  lowest clear bit in 8 files; the Sack constructors change it in 20.
+- Examples: in `3407c9fce2ac9ce0` (20.alm) the three Sack constructors take 20, 21 and 22 and
+  the lowest clear bit is 23, where the saved ids alone leave 20. In `0de5da52950f124c` the
+  Item/Effect marks fill every hole below 462; the saved owner ids alone leave 31.
+- All 116 distinct files: 102 hold such bits; the Item/Effect marks change the lowest clear bit
+  in 57, the Sack constructors in 41.
+- The first object given an id after LOAD takes the lowest clear bit of this bitmap. The
+  binder's Outposts come first on a map with opcode-0x10003 checks (`SAV-1373`); then the first
+  spawn. The first projectile takes `FreeIndex` (`SAV-1191`); an Item or Effect takes no id.
+
+**Confidence.** High for the replay arithmetic on the read code and the saved values; the
+replay takes the list order from `SAV-1371`, Medium past the cited claims. Medium for the
+bitmap the original holds: no run observed it, and the binder's allocations and any
+allocation at session entry precede the first spawn.
+
+**Unknown.** The id the original gives first after LOAD. LOAD `3407c9fce2ac9ce0`, create one
+actor before any death and SAVE: the replay predicts 23 if 20.alm has no opcode-0x10003
+check, against 20 for a LOAD that holds only the saved ids.
+
+### SAV-1373
+
+- `R0067(map, 0)` runs at `L01841` after the archive and the map (`SAV-1337`). For each
+  check whose opcode `+0x40` is `0x10003` it allocates `0xac` bytes and runs the Outpost
+  constructor `L14269`. That constructor's `R1336` takes the lowest clear bit into `+0x80`;
+  the binder then overwrites `+0x80` with the check's `+0x58` and stores `+0x84`
+  (`L17026..L17027`), and `R1337` gives `+0x04` (`L17016`).
+- The listing `L17028..L17029` is one contiguous linear decode. A check below `0x10002`
+  jumps past the arm to `L17029` (`L17030`). Opcode `0x10002` runs `L17031..L17032`, one call of
+  `L17033`, and jumps to the loop head `L12310` without reaching the allocation. Any other
+  opcode except `0x10003` jumps there too (`L12311`). Opcode `0x10003` runs `L17034`
+  straight into `L17035..L14439` (`new(0xac)`, `L14269`); every branch after it, the
+  member loops at `L17036..L17037` and the two `L17038` loops at `L17039` and
+  `L17040`, ends at `L17041`, the `+0x84` and `+0x80` stores, then `R1337` and the loop
+  head.
+- The binder's second argument gates only a per-group registration (`L00381`), so LOAD
+  builds the Outposts as a fresh map start does.
+- Nothing releases `+0x80` (`SAV-1370`); `Outpost::Serialize` `L08390` stores and loads
+  `+0x84`, `+0x88`, `+0x80`, `+0x8c` as raw u32s and marks none.
+- No Outpost record is in any of the 116 distinct files.
+
+**Confidence.** High for the binder's Outpost arm and the constructor's bit: the opcode test,
+the allocation and the stores are one contiguous listing. Medium that
+Outposts are never saved: the count is of this corpus; the list `R1337` appends to was not
+traced to a serializer.
+
+**Unknown.** Which shipped maps carry an opcode-0x10003 check; a census of the maps' check
+opcodes settles how many bits each LOAD takes before the first spawn.
+
+### SAV-1374
+
+- Census of 146 corpus paths, 116 distinct files parsed (1 refused, 29 duplicates):
+  writer classes 32 original, 8 original after loading a generated input, 8 another program,
+  68 not recorded. A class is a label the experiment's `provenance.py` reads from the corpus
+  path (date directory, subdirectory and file name, as the corpus manifests record the
+  writer); it is not an observation of the writer. The all-116 figures include every class,
+  the 68 unrecorded files among them.
+- No file holds one non-zero id on two Actor, Building or Sack records, within a family or
+  across families (0 of 116).
+- Actor 6,442 records, 221 with id 0, ids 1..525; Building 2,437, none 0, 2..373; Sack 368,
+  none 0, 1..534; SpellEffect 20, all 0; Outpost none.
+- Non-zero Item/Effect values against the owner ids of their file: 246 equal an owner id, 1,917
+  fall in a hole below the highest owner id, 3,612 lie above it (all 116 files).
+- In `1e2eb21f47082ab0` (40.alm, labelled original) the only owner ids below 20 are actors 1
+  and 2 and Sacks 8 and 9, and every other actor carries 79 or more; ids 3..7 and 10..19 are
+  clear. This is consistent with Sacks 8 and 9 taking ids freed before them under the
+  lowest-clear-bit rule. It does not demonstrate reuse: Sacks created early in the session,
+  when 8 and 9 were the lowest clear bits, would show the same ids.
+
+**Confidence.** High for the counts over this corpus. The example is consistent with release
+and reuse (`SAV-1370`), not a demonstration of it.
