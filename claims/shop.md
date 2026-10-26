@@ -1829,3 +1829,65 @@ The ten forced-cast mage Weapons hold one cast and never repeat. Weighting every
 The value `v` therefore has `#{r : v*32768 <= r*(n+1) < (v+1)*32768}` of the 32768 outputs, which is 324 or 325 for `n=100`. The second gate `<50` passes for 16222 outputs, 8111/16384 = 0.495056; the third gate `<25` for 8111 outputs, 8111/32768 = 0.247528. Opportunity-only counts are one 0.379956, two 0.497504, three 0.122540 (`gates.tsv`), against 3876/10201, 5075/10201 and 1250/10201. A kind on the cumulative interval `(prev, end]` of endpoint `E` has probability `#{r : prev*32768 <= r*E < end*32768}/32768`, close to but not exactly `(end-prev)/E`.
 
 **Confidence.** High. The wrapper and LCG instructions are asserted, and the counts are exact integer arithmetic.
+
+## Route observation: the shop screen in the running original
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-ROUTE-150 | The EN shop opens on the armour shelf with a tip popup; a click on each of four room areas lists one shelf and names it by tooltip; items show a price, a count and a name tooltip; the buttons show none. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| SHOP-ROUTE-151 | On entering the EN shop in 4 of 14 loaded files a three-page merchant dialogue opened first; while it was open the Undo number still showed the purse of the file loaded before. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| SHOP-ROUTE-152 | Three loads of one EN save, one cold and two warm, showed three different item sets on the shop's armour shelf. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### SHOP-ROUTE-150
+
+Steps `T016`..`T029`, `U011`..`U018`, and the shop of every loaded file. Window points: shelves
+at (449,208), (571,208), (429,308), (585,308); buttons Undo (785,182), Buy (785,232), Sell
+(785,278), Exit (785,322).
+
+- On opening, after any dialogue, the left grid lists shields and the tip popup explains
+  shelves, the table and the Buy and Sell buttons.
+- Shelf tooltips, in the click order above: SCROLLS, BOOKS & POTIONS; MAGIC ITEMS; WEAPONS;
+  ARMOR. Each click replaces the grid's list.
+- A grid cell shows the price at its upper right and the count at its lower left; hover shows
+  the item name and its bonus (BRONZE BUCKLER, DEFENSE +3). A pack item shows the same kind of
+  tooltip (LEATHER GAUNTLETS, DEFENSE +1).
+- The table shows PUT ITEMS HERE TO BUY/SELL on hover (`U012`).
+- The four buttons and the portrait show no tooltip. With an empty table Undo and Exit show
+  the purse and Buy and Sell show 0.
+
+**Confidence.** High; the same layout was captured in 14 files. This claim states no price
+or count value, only that a cell carries them; the values read are in `SHOP-ROUTE-152`, from 3x crops.
+
+**Unknown.** Buying and selling were not done in these files (no buy, by the owner's rule for
+the town saves); the gold before and after a trade stays open.
+
+### SHOP-ROUTE-151
+
+Steps `T013`..`T016`, `U046`..`U049`, `U188`, `U242`..`U245`. Files with the dialogue: the one
+loaded cold first and three loaded warm. The pages, each closed by Ok at (507,452), give the
+news of a plague in the village Billewell, four villagers lost in the Labyrinth, and the
+Burgomaster's reward. The other ten files opened the shop with no dialogue.
+
+- Cold first load: Undo showed 0 during the dialogue (the dialogue covers Exit), then the purse, 600.
+- Warm loads: during the dialogue Undo showed 27,227,165, 5,000 and 0, the purses of the files
+  loaded just before. After Ok the two captured cases showed their own purse (600, 100).
+
+**Confidence.** High for the shown numbers. Medium for the reading that the panel keeps the
+previous file's number until the dialogue closes: four entries.
+
+**Unknown.** What in a file selects the dialogue.
+
+### SHOP-ROUTE-152
+
+One file, armour shelf on opening: run-02 warm load (`U011`), first cells priced 5, 12, 21, 58;
+run-03 cold load (`W015`), 3, 3, 12, 58; run-03 load of the same file again (`W024`), 3, 5,
+11, 12. Inn, purse and hero were the same in all three (`TOWN-ROUTE-556`). Values read from the
+1:1 captures and re-read in 3x crops of each capture (window region x 190..360, y 170..420);
+all six cells, left to right and top to bottom: `U011` 5, 12, 21, 58, 88, 117; `W015` 3, 3,
+12, 58, 88, 175; `W024` 3, 5, 11, 12, 21, 44.
+
+**Confidence.** High that the shown shelf differs between loads of one file, both across
+processes and within one; the digits are High as read from those 3x crops.
+
+**Unknown.** The source of the variation (a draw at load or a state carried from earlier
+loads). Other shelves were compared in one load only.

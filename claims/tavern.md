@@ -826,3 +826,43 @@ inside the builder would move `Talk.wav` to the close.
 
 **Unknown.** Native audibility; hit test `R1810`; `R0361`; requests in virtual callees of
 these routines.
+
+## Route observation: the inn screen in the running original
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TAVERN-ROUTE-031 | The EN inn opens with a tip and the first roster cell selected; a hired mercenary's button reads Fire with his price, an unhired one's Hire, a red-cell person's is blank; Exit shows the purse; no tooltips. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| TAVERN-ROUTE-032 | In the EN inn the Talk dialogue is modal: further roster and button clicks change nothing until its last page's Ok; the red-cell person spoke four pages and the clubman two. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### TAVERN-ROUTE-031
+
+Steps `T031`..`T038`, `U004`..`U008`, and the inn of every loaded file. Window points: roster
+cells from (391,588) at 48-pixel steps, Hire or Fire (745,206), Talk (745,256), Exit (745,302),
+tip CLOSE (583,313).
+
+- The tip popup explains grey cells (mercenaries for hire), red cells (other persons, who give
+  missions), the Talk, Hire and Fire buttons and the purse on Exit.
+- The left panel shows the selected cell's name, the four statistics, health, mana, damage,
+  attack, absorb, defence, skills, resistances, sight and speed; a red-cell person's panel adds
+  weight and experience.
+- A cell shows the price above it and HIRED across a hired one. Files showed 1 to more than
+  12 cells.
+- Button 1 read Hire with the price for an unhired mercenary, Fire with the price for a hired
+  one, and was blank for a red-cell person (`T038`).
+- Roster cells and the three buttons show no tooltip on hover (`T033`..`T037`).
+
+**Confidence.** High; hire and fire were never clicked.
+
+**Unknown.** What Hire and Fire do; a roster longer than the visible rows.
+
+### TAVERN-ROUTE-032
+
+Steps `T039`..`T053`. Talk with the red-cell person: four pages (an adventurer three days in the
+town, her road to Plagat, the Burgomaster's recruiting for plague-struck Billewell, an offer to
+go together). Talk with the clubman: two pages (peasants driven off by monsters, looking to sign
+on). Clicks on a roster cell and on Talk while a page was open left the page unchanged
+(`T041`, `T042`, `T044`, `T045`).
+
+**Confidence.** High for this file.
+
+**Unknown.** Whether talking changed the campaign state: the file was not saved afterwards.

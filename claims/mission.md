@@ -1824,3 +1824,90 @@ Unknown for equal runtime pictures, which also depend on unmeasured inputs.
 **Unknown.** Map tile/fog/brightness/owner populations, display-format
 selection and native frame delivery. A matched-state map/input comparison
 and original runtime observation would settle those differences.
+
+## Route observation: into the first mission
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MISSION-ROUTE-092 | In one EN run, Accept on the detailed page plays a movie that ends without input and then opens the first mission with a modal message from the hero; no town, map or briefing screen was captured (shots 4 s and 28 s after Accept). | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| MISSION-ROUTE-093 | On the EN first mission with the hero selected, the eight command cells show ATTACK <A>, MOVE <M>, GUARD <G>, DEFEND <D>, an empty cell, SWARM <S>, STAND GROUND <T>, RETREAT <R>; the sheet shows XP 1593 and Weight 2.9. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### MISSION-ROUTE-092
+
+One EN run, `-1024`. Catalogue steps `A06`, `B01`..`B16`.
+
+- Accept starts a letterboxed movie; with no input the mission screen follows: the map view at
+  the left and the 160-pixel right column (`MENU-COMBAT-017`) at window x 864..1024.
+- A modal message with the hero's portrait and an Ok button is shown over the map by the first
+  capture of the mission, 28 s after Accept. Eight captures over about 75 s with no input are pixel-identical (`B01`..`B08`): nothing
+  on the screen moves while it is shown.
+- Ok closes it and a tip popup opens at the top left (SHOW TIPS NEXT TIME, CLOSE); the view
+  then animates. CLOSE closes the tip.
+- The hero stands in the teleport circle; clicking his figure selects him: a health bar over
+  him, the command panel, his portrait and his sheet.
+- The original wrote `game9999.sav` in the disposable copy between Accept and the first
+  mission capture; no other copy file changed during the run.
+
+**Confidence.** High for what the captures show: the movie at 4 s, the mission with its message
+at 28 s, eight identical mission captures. Medium for the absence of a town, map or briefing
+screen between them: captures were taken 4 s and 28 s after the Accept click; a screen that
+waits for input would have persisted to the 28 s capture, but one that advanced by itself
+inside the 24 s gap is not excluded.
+
+**Unknown.** The sub-tick at which the message opens and the hero's memory values were not
+read. Whether a town is reached after this mission was not run.
+
+### MISSION-ROUTE-093
+
+Catalogue steps `X01`..`X13`, `Y01`..`Y13`.
+
+- Command cells, row-major (`MENU-COMBAT-018`), hovered: ATTACK <A>, MOVE <M>, GUARD <G>,
+  DEFEND <D>; cell 5 shows nothing; SWARM <S>, STAND GROUND <T>, RETREAT <R>.
+- Right-column icons: the book OPEN SPELLBOOK <Q>,<B>; the bag OPEN INVENTORY <~>,<I>; the
+  right icon MAIN MENU <ESC>. The minimap and the portrait show no tooltip.
+- The sheet: Danath, Body 41, Agility 35, Mind 20, Spirit 15, Health 130/130, Mana 0/0,
+  Dmg 9-14, Attack 50, Absorb 0, Defense 17, Blade 10, every resistance 7, Weight 2.9,
+  XP 1593, Sight 6.1, Speed 19. Weight and XP differ from the detailed page's 0.0 and 0.
+- The bag opens a strip along the bottom of the map view with two items: VALUABLE DOCUMENTS
+  and MONEY with 100 under it. The book opens an empty strip. Each icon closes its strip.
+- The main-menu icon opens a panel: Save Game, Load Game, Game Options, Sound Options, Quest
+  Objectives, End Quest, Return to Game. Quest Objectives shows a text panel closed by Ok.
+  End Quest shows Victory! in the disabled colour, Exit to Main Menu, Exit to Windows and
+  Return to Game; Exit to Main Menu returns to the main menu.
+
+**Confidence.** High for the layout, the tooltip texts and the panels. Medium for the
+small-font digit values of the sheet (XP 1593, Weight 2.9 and the others): read by eye from
+the 1:1 captures, not re-read in a zoomed crop.
+
+**Unknown.** Game Options, Sound Options, Save Game and Load Game were not opened here.
+
+## Route observation: the mission menu and Game Options
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MISSION-ROUTE-094 | Game Options was found in the EN mission menu, not in the main or town menu (three menus opened); Game Options shows speed, eight switches and three modes, and Cancel closes it and the menu. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### MISSION-ROUTE-094
+
+Steps `V015`..`V025`, opened by the menu icon at window (1002,454) in a mission entered from a
+loaded town file. Game Options was found in this menu and not in the other two menus opened:
+the main menu has no options button (`MENU-ROUTE-162`) and the town menu offers Sound Options
+only (`TOWN-ROUTE-558`). The world map, the shop, inn and school screens and the pre-create and
+detailed pages were not searched for an Esc menu (Esc was pressed in the town and the mission
+only): Unknown.
+
+- The mission menu lists Save Game, Load Game, Game Options, Sound Options, Quest
+  Objectives, End Quest and Return to Game.
+- Game Options: a Game Speed slider; check boxes Day/Night changes, Smoothing, Shadows,
+  Dynamic lighting, Object animations, Show Health, Show flying damage and Tips, all shown
+  checked; AutoHealing No, Standard, Often (Standard set); Formation Mode Off, Auto, On (Auto
+  set); Retreat Mode Never, Low Health, Medium Health (Never set); Ok and Cancel.
+- Tooltips: GAME SPEED, DAY/NIGHT CHANGES, TIPS, AUTOHEALING MODE, FORMATION MODE, RETREAT
+  MODE. Ok and Cancel show none.
+- Cancel (`V025`) returned to the mission view with no menu open. No option was changed.
+
+**Confidence.** High for the menu's items and the dialog. Medium for the absence of Game
+Options elsewhere: three menus were opened (mission, main, town). The options shown are this
+install's stored settings, not program defaults.
+
+**Unknown.** The tooltips of the other switches; Quest Objectives and Load Game in this menu.

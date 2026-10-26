@@ -1122,3 +1122,57 @@ section in `claims/registry.md` is authoritative.
 allocation section in `claims/registry.md` is authoritative.
 
 `HERO-165`..`HERO-166` were allocated to EXP-0519 and are returned unused.
+
+## Route observation: hero creation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-ROUTE-181 | In EN, New Game plays a movie that ends without input and opens pre-create with a tip; hovers name the four portraits, the three levels EASY, MEDIUM, HARD, the amulet RETURN TO MAIN MENU and the OK CONTINUE. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| HERO-ROUTE-182 | With the opening pre-create values, the EN detailed page shows a male fighter, Body 41, Agility 35, Mind 20, Spirit 15, pool 0, Blade 10; Reset sets every statistic to 25 and the pool to 100 and keeps the weapon skill. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### HERO-ROUTE-181
+
+One EN run, `-1024`, page origin (192,144). Catalogue steps `N01`..`N06`, `R01`..`R11`,
+`K01`..`K09`, `A01`..`A03`.
+
+- New Game starts a movie; about 24 s after the click, with no input, pre-create shows. The
+  same happens on a second New Game in the same process (`A02`).
+- Pre-create opens with a tip popup at the top right (a SHOW TIPS NEXT TIME check box, checked,
+  and CLOSE) and the four portraits cycling a highlight (`TOWN-519`). The name field reads
+  Danath with a caret.
+- Hover tooltips, at the pointer: portrait 0 MALE FIGHTER, 1 FEMALE FIGHTER, 2 FEMALE MAGE,
+  3 MALE MAGE; level 0 EASY, 1 MEDIUM, 2 HARD; amulet RETURN TO MAIN MENU; OK CONTINUE.
+  Region codes are `TOWN-520`'s.
+- A portrait click draws it chosen and replaces the name: 1 Naira, 2 Reniesta, 3 Fergard,
+  0 Danath. A level click draws that level lit and the previous one at rest; the lit level
+  stays with the pointer off the page.
+- The amulet click returns to the main menu with no question.
+
+**Unknown.** Which level the opening state holds: no level is drawn lit on opening, and none
+was read from memory. Typing into the name field was not tested.
+
+### HERO-ROUTE-182
+
+Catalogue steps `D01`, `E01`..`E12`, `F01`..`F06`, `A04`..`A05`.
+
+- CONTINUE with no portrait or level clicked opens the detailed page for a male fighter
+  named Danath. The sheet reads Health 130/130, Mana 0/0, Dmg 9-14, Attack 50, Absorb 0,
+  Defense 17, Blade 10 and every other weapon skill 0, every resistance 7, Weight 0.0,
+  XP 0, Sight 6.1, Speed 19. A second pass from a fresh New Game gives the same page (`A04`;
+  only a caption area differs).
+- Tooltips: Body + shows -15, Body - shows +12, the pool readout FREE POOL. Accept, Reset and
+  Back brighten their captions and show no tooltip; the five weapon pictures show none.
+- Body - makes Body 40, pool 12, Health 123/123, Attack 49; Body + restores 41 and pool 0 and
+  draws every + disabled. A click on the bow picture moves the 10 points from Blade to
+  Shooting (Dmg 7-11, Attack 55). Reset sets every statistic to 25 and the pool to 100 and
+  keeps Shooting 10 (Health 60/60, Dmg 5-7, Attack 44, Defense 14; resistances 12, 12, 12,
+  12, 10), as `MENU-139` and `HERO-CHARGEN-082` read. Back returns to pre-create with the tip
+  shown again.
+- The page opens with its own tip popup at the bottom centre; its CLOSE closes it.
+
+**Confidence.** High for the layout, the controls and the behaviours (which buttons change
+which statistic, the tooltips, Reset). Medium for the small-font digit values: they were read
+by eye from the 1:1 captures and not re-read in a zoomed crop.
+
+**Unknown.** The axe, mace and spear pictures' hit areas: one click at (512,292) on the axe
+changed nothing.

@@ -3447,3 +3447,126 @@ Coverage: the table covers the sites of those claims. It does not cover the eigh
 **Confidence.** High for each covered site's gate and arguments. The overlap and eviction consequences rest on VIDEO-SFX-086.
 
 **Unknown.** Native mixing, the number of channels in use at the time, and audibility.
+
+## Route observation: the town on the opening route
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-ROUTE-555 | In one EN run from New Game to the first mission, with the opening hero-creation values accepted, no town screen was captured. | Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### TOWN-ROUTE-555
+
+Population: one EN run, every screen captured from the New Game click to the first mission
+(catalogue steps `N01`..`A06`, `B01`): movie, pre-create, detailed page, movie, mission.
+
+**Confidence.** Medium for the absence. The captures after Accept were 4 s (the movie) and
+28 s (the mission) after the click; a screen that waits for input, as the loaded-save town
+does, would have persisted to the 28 s capture. A screen that advanced by itself inside the
+24 s gap is not excluded.
+
+**Unknown.** When the town is first reached on a new campaign. Completing the first mission,
+or loading a save that holds a town state, settles it.
+
+## Route observation: the town screen from a loaded save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-ROUTE-556 | Each of 14 listed EN saves loaded from the Load dialog to the Plagat town screen, one cold and 13 warm in one process, with no refusal, message or crash; a second process loaded one again cold. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| TOWN-ROUTE-557 | With tips on, the EN town screen shows its tip popup on every arrival, after a load and on leaving each building; hovering gate, inn, shop, school and statue shows a one-line tooltip. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| TOWN-ROUTE-558 | In the EN town both the statue click and Esc open one menu: Save Game, Load Game, Sound Options, Abort Game, Return to Game; Abort Game offers Exit to Main Menu, Exit to Windows, Return to Game. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| TOWN-ROUTE-559 | The EN school screen opens with a tip; hovering a pillar row shows that skill's weapons and advantage, and clicking it sets Train to a price and Exit to the purse minus that price before any training. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| TOWN-ROUTE-560 | EN Sound Options from the town menu: track list, Random Order, Acknowledgments, Play, Stop, three volume sliders and Ok; Esc closed the dialog and the town menu together. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| TOWN-ROUTE-561 | From the EN town the gate opens the world map, whose mission tab unrolls the task and payment on hover; a click on the tab opened the mission screen with no screen between. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### TOWN-ROUTE-556
+
+Population: 14 save files, each checked against its listed SHA-256 before it entered the copy
+and unchanged after the runs. Run-02 (one process): one file loaded first from the main menu's
+Load Game (`T001`..`T003`), then 13 from the town menu's Load Game (`U001`..`U236`). Run-03 (a
+new process): one of the 13 loaded cold, then again warm (`W005`, `W021`).
+
+- Every load ended on the same town picture, Plagat by its tip text, 640x480 at (192,144),
+  with no side panel (`T005`). Only the figures at the lower edge (horse, cart) differ between
+  files.
+- No load showed a message, a refusal or a crash; the inn and shop of each loaded file opened.
+- For the file loaded cold in run-03 and warm in run-02, the inn's button labels, the roster,
+  the purse and the hero portrait were the same (`U004`, `W007`); the shop's shelf contents were
+  not (`SHOP-ROUTE-152`).
+
+**Confidence.** High for this population. The rule stated covers only what the original did
+with these files; who wrote them is not evidence.
+
+**Unknown.** Saves that hold a mission rather than a town; the list's `Restart last mission`
+row was not loaded.
+
+### TOWN-ROUTE-557
+
+Steps `T003`..`T012`, `T030`, `T054`, `T063`, every `U` load. Tips were on (the popup's SHOW
+TIPS NEXT TIME box checked; it was never clicked).
+
+- The tip popup (upper right, CLOSE button at window (752,313)) names the town Plagat, the
+  centre building as the shop, the left as the inn, the rightmost as the school, the gate as
+  the mission start and the gilded statue or Esc as load and save.
+- It appeared after each load and again on each return from the shop, the inn and the school.
+- A building opened by a click outside the popup's rectangle while the popup was open.
+- Tooltips (`T006`..`T012`): gate START MISSION, inn door INN, shop door SHOP, school door
+  SCHOOL OF MAGIC AND MARTIAL ARTS, statue ABORT GAME AND EXIT TO MAIN MENU. The inn wall at
+  (250,440) and the sky showed none.
+
+**Confidence.** High: the same popup and tooltips were captured for every file.
+
+**Unknown.** The screen with tips off (the box was not changed). The full extent of each
+region was not probed; one point per region.
+
+### TOWN-ROUTE-558
+
+Steps `T064`, `T065`, `T072`, `W027`..`W031`. Esc (`T064`) and a statue click (`W027`) both
+showed the five-item menu. A hovered item turns gold with no tooltip. Abort Game (`W029`) opens
+a three-item menu; Exit to Main Menu (`W031`) returned to the main menu. Save Game and Exit to
+Windows were not clicked.
+
+**Confidence.** High.
+
+**Unknown.** What Save Game and Exit to Windows open.
+
+### TOWN-ROUTE-559
+
+Steps `T056`..`T063`, `U021`. The school shows a wizard, a fighter, a pillar with weapon-skill
+rows, the buttons Train and Exit, and the hero portrait. Opening values: Train 0, Exit equal to
+the purse (600 in the file of `T056`).
+
+- Pillar row 1 tooltip: the five sword kinds, then THE ADVANTAGE IS FOUND IN A HIGH PRECISION
+  OF ATTACK AND A SHORT INTERVAL BETWEEN ATTACKS (`T058`).
+- Clicking row 1 (`T059`): Train 570, Exit 30. Train was not clicked.
+- Train and Exit show no tooltip on hover; the portrait frame's lower-left arrow shows
+  PREVIOUS HERO (`T062`).
+
+**Confidence.** High for what was shown. Medium for reading Exit 30 as the purse minus the
+price: one row, one file.
+
+**Unknown.** The other rows, mage skills, and what Train does.
+
+### TOWN-ROUTE-560
+
+Steps `T066`..`T071`. The track list showed one row, Town. Both check boxes were shown
+checked. Tooltips: Ok RETURN TO GAME, Play PLAY, Random Order SELECT PLAYING SEQUENCE. One Esc
+(`T071`) left the town screen with no menu open. No control was changed.
+
+**Confidence.** High.
+
+**Unknown.** Slider tooltips (the probe point missed the slider) and Stop.
+
+### TOWN-ROUTE-561
+
+Steps `V001`..`V014`, from one loaded file. The gate click (`V002`) shows a parchment map with
+place names (Plagat, Billewell, Rotten Forest, Kargallas, Glimour and others), a tab at the
+upper left with the mission name The Labyrinth and a tab at the upper right, Plagat. Hover
+unrolls them: the mission tab to the task FIND THE VILLAGERS LOST IN THE LABYRINTH and
+PAYMENT: 700, the Plagat tab to RETURN TO TOWN. Plagat on the map shows the tooltip PLAGAT; the
+seal and the compass show none. A click on the mission tab (`V012`) showed the mission screen
+3 s later; three captures over 25 s showed no message box (`V012`..`V014`).
+
+**Confidence.** High for the screens. Medium for "no screen between": captures were 3 s and
+13 s after the click, and a screen shorter than that could be missed.
+
+**Unknown.** The other files' maps and the RETURN TO TOWN click.

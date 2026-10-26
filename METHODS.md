@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
+Claims labelled: 4272. Observation: 153. Static analysis: 3571. Mixed: 548.
 
 ## Ledger ai
 
@@ -1079,6 +1079,8 @@ Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
 | HERO-170 | static analysis | ● active (branch candidate) |
 | HERO-171 | static analysis | ● active (branch candidate) |
 | HERO-172 | static analysis | ✔ promoted (branch candidate) |
+| HERO-ROUTE-181 | observation | ● active |
+| HERO-ROUTE-182 | observation | ● active |
 
 ## Ledger inv
 
@@ -1586,6 +1588,11 @@ Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
 | MENU-152 | static analysis | ● active (branch candidate) |
 | MENU-CAST-153 | static analysis | ● active (branch candidate) |
 | MENU-CREATELINE-159 | static analysis | ● active (branch candidate) |
+| MENU-ROUTE-162 | observation | ● active |
+| MENU-ROUTE-163 | observation | ● active |
+| MENU-ROUTE-164 | observation | ● active |
+| MENU-ROUTE-165 | observation | ● active |
+| MENU-ROUTE-166 | observation | ● active |
 
 ## Ledger mission
 
@@ -1653,6 +1660,9 @@ Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
 | MISSION-086 | static analysis | ● active |
 | MISSION-087 | static analysis | ● active |
 | MISSION-088 | mixed | ● active |
+| MISSION-ROUTE-092 | observation | ● active |
+| MISSION-ROUTE-093 | observation | ● active |
+| MISSION-ROUTE-094 | observation | ● active |
 
 ## Ledger move
 
@@ -3381,6 +3391,9 @@ Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
 | SHOP-146 | static analysis | ● active |
 | SHOP-147 | mixed | ● active |
 | SHOP-148 | static analysis | ● active |
+| SHOP-ROUTE-150 | observation | ● active |
+| SHOP-ROUTE-151 | observation | ● active |
+| SHOP-ROUTE-152 | observation | ● active |
 
 ## Ledger spr16a
 
@@ -3500,6 +3513,8 @@ Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
 | TAVERN-024 | static analysis | ✔ promoted |
 | TAVERN-027 | static analysis | ● active (branch candidate) |
 | TAVERN-028 | static analysis | ● active (branch candidate) |
+| TAVERN-ROUTE-031 | observation | ● active |
+| TAVERN-ROUTE-032 | observation | ● active |
 
 ## Ledger terrain
 
@@ -4140,6 +4155,13 @@ Claims labelled: 4250. Observation: 131. Static analysis: 3571. Mixed: 548.
 | TOWN-552 | static analysis | ● active (branch candidate) |
 | TOWN-553 | mixed | ● active (branch candidate) |
 | TOWN-554 | static analysis | ● active (branch candidate) |
+| TOWN-ROUTE-555 | observation | ● active |
+| TOWN-ROUTE-556 | observation | ● active |
+| TOWN-ROUTE-557 | observation | ● active |
+| TOWN-ROUTE-558 | observation | ● active |
+| TOWN-ROUTE-559 | observation | ● active |
+| TOWN-ROUTE-560 | observation | ● active |
+| TOWN-ROUTE-561 | observation | ● active |
 
 ## Ledger trigger
 

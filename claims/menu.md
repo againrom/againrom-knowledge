@@ -2314,3 +2314,127 @@ add routine body; Medium for the container primitives `L16157`, `L16564`, `L1656
 
 **Unknown.** The text of `L16596` and which `L04587` row 0 names were not read. An owner run
 of `#create` with a `L04587` row name would show the line set directly.
+
+## Route observation: the main menu and its side screens
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-ROUTE-162 | In the EN original started with `-1024`, the 640x480 main menu page is drawn at (192,144) in a 1024x768 window, black around it; hovering a button draws its glow and shows no tooltip. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| MENU-ROUTE-163 | From the EN main menu, Load Game, Cutscenes and Server open dialogs closed by Cancel, Multiplayer opens a character list closed by Cancel, Hall of Fame closes on Ok, and the credits roll until Esc. | High | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### MENU-ROUTE-162
+
+One run of the EN `rom.exe` (SHA-256 `942e9b72…`), started as the distributor's play task
+starts it (`-1024`), window client 1024x768. Catalogue steps `L00`, `M01`..`M09` in the
+experiment's receipt.
+
+- The page's 640x480 art spans window (192,144)-(832,624); everything outside it is black.
+- Labels, button 1..8 in `MENU-MASK-004` order: NEW GAME, MULTIPLAYER, CUTSCENES, CREDITS,
+  LOAD GAME, SERVER, HALL OF FAME, QUIT. Buttons 1..4 are the left column, 5..8 the right,
+  top to bottom.
+- A hover at the centre of each label draws that button's glow overlay (`MENU-STATE-007`)
+  and no text box (`M01`..`M08`).
+- With the pointer moved off the page to (960,700), the last hovered button keeps its glow
+  (`M09`).
+
+**Unknown.** The screens between launch and the menu: the first capture came about three
+minutes after launch. A run that captures from the first frame settles them. Quit was not
+clicked.
+
+### MENU-ROUTE-163
+
+Catalogue steps `H01`..`H03`, `C01`..`C04`, `V01`..`V06`, `P01`..`P04`, `S01`..`S03`,
+`G01`..`G03`.
+
+- Hall of Fame (button 7): a parchment with ten numbered rows of name and score, read from
+  the install's hall file, and an Ok seal at the lower right; Ok returns to the menu.
+- Credits (button 4): a black screen with a logo and centred lines rising; Esc returns to the
+  menu.
+- Cutscenes (button 3): a dialog titled View Cutscenes with a three-row list, a scroll bar, Ok
+  and Cancel; the first row is selected on opening. Ok plays the selected movie letterboxed on
+  black; Esc ends it and the dialog is drawn again on black, without the menu art around it;
+  Cancel returns to the menu.
+- Multiplayer (button 2): a full page with a character list holding one row, New Character,
+  the buttons Accept, Delete, Rename and Cancel, and an empty portrait oval reading NO UNITS
+  SELECTED. Hovering Accept brightens its caption. Cancel returns to the menu.
+- Server (button 6): a dialog titled Select Connection for Multiplayer Game with one row, the
+  host's DirectPlay TCP/IP provider name, whose non-Latin letters are drawn with substitute
+  glyphs. With the pointer over the list a tooltip reads AVAILABLE PROTOCOLS. Cancel returns.
+- Load Game (button 5): a dialog titled Load Saved Game listing the install's saves by their
+  labels, first row selected, with Ok, Delete and Cancel. Hovering Delete shows the tooltip
+  DELETE SELECTED SAVED GAME. Cancel returns.
+
+**Confidence.** High for what was shown: each screen was captured once on opening and once on
+leaving, in one run.
+
+**Unknown.** The Hall of Fame and Load lists depend on the install's files; their order rule
+was not tested. Ok in the Server and Multiplayer screens was not pressed.
+
+## Route observation: start screens, the save list and Quit
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-ROUTE-164 | In one EN launch with `-1024`, captures 10.5 s apart showed a partial frame, black, the Buka logo, the Nival logo, then the intro movie; Esc during the movie showed the main menu within 2.5 s. | High / Unknown | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| MENU-ROUTE-165 | The EN Load Saved Game list orders saves by file write time, newest first; its arrow buttons moved the highlight and the view in three captures after 4, 10 and 12 clicks; it reopens with row 1 highlighted. | High / Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+| MENU-ROUTE-166 | In the EN original under the live debugger, one click on the main menu's Quit was followed by the process ending 0.92 s later through an access violation; no capture was taken after the click, so a confirmation screen is not excluded. | Medium | ● active | [EXP-0625](../experiments/EXP-0625-rom1-route/) |
+
+### MENU-ROUTE-164
+
+Run-02 of the EN `rom.exe`, catalogue steps `L11`..`L21`, the first command appended 1 s after
+start, one capture every 10.5 s with no input.
+
+- `L11` (about 11 s): a partial picture on black. `L12`: black, one colour.
+- `L13`: the Buka logo (red, Cyrillic) on black. `L14`: the Nival Entertainment logo.
+- `L15`..`L19`: frames of the intro movie, letterboxed on black.
+- `L20`: Esc sent during the movie; 2.5 s later the main menu (`MENU-ROUTE-162`) is shown.
+- The step at 1 s after start is void: the window was foreground but not yet drawn, and the
+  capture held other screen content. It is not part of the record.
+
+**Confidence.** High for the order of the captured frames and for the main menu being drawn
+within 2.5 s of the Esc. Unknown whether it appeared at once. Unknown for anything shorter than
+the 10.5 s interval between captures, for whether Esc also skips the logos, and for whether the
+movie ends by itself.
+
+**Unknown.** The movie's length and its end without input. A run with denser captures and no
+Esc settles them.
+
+### MENU-ROUTE-165
+
+Population: run-02 and run-03, a copy holding 22 install saves, `game9999.sav` and 14 added
+files copied in name order (`game9711`..`game9724`) about an hour after `game9999.sav` was last
+written.
+
+- Run-02 (`T001`): the list began with the file copied last, then the other added files in the
+  reverse of copy order. `game9999.sav` was not first, so a descending file-name order is
+  excluded.
+- Run-03 (`W004`): after the original rewrote `game9999.sav` in run-02 (at the mission start,
+  `V012`), its row, labelled Restart last mission, was first and every other row moved down one.
+- Hovering a row shows the tooltip SELECT QUEST TO LOAD (`T002`).
+- Down arrow clicks (`U145`..`U154`): after 4 clicks the highlight was on row 5 (`U148`);
+  after 10 the first visible row was one lower (`U154`). The clicks between were sent with no
+  capture, so "one row per click" and "the view scrolls only from the last visible row" are
+  read from these counts, not seen.
+- Opened again from the town menu, the dialog showed the list from the top with row 1
+  highlighted (`U170`..`U181`, 12 clicks reached the 13th row).
+
+**Confidence.** High for the order observed in `T001` and `W004`. Medium for the arrow
+behaviour: three captures after 4, 10 and 12 clicks; the steps between were not captured.
+Medium for write time
+as the key: the copy gave each added file one time for creation and write, so creation time is
+not excluded; only `game9999.sav` separates write time from file name.
+
+**Unknown.** The order of files with equal times; the scroll bar and the up arrow.
+
+### MENU-ROUTE-166
+
+Run-03, steps `W032` (hover Quit: the glow, no tooltip) and `W033` (click Quit). The process
+ended 0.9 s after the click; no capture could be taken. The debugger log shows exception
+`c0000005` at `7482432e`, outside the game image, then exit code `0xc0000005`.
+
+**Confidence.** Medium for "no confirmation" and "within 1 s": one click, one run, under the
+debugger; the process ended 0.92 s after the click through an unhandled access violation (a
+fault exit, not a clean close); no capture was possible after the click. Runs 01 and 02 ended
+by the tool's quit command, not by Quit, and add nothing. Medium for the exit fault: the
+debugger may change the exit path.
+
+**Unknown.** The exit code without a debugger; whether a confirmation was drawn before the fault.
