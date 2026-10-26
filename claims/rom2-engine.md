@@ -12811,3 +12811,297 @@ number (eye reads).
 two items on the table would settle it.
 
 **Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+## The town-1 inn patron card and dialogue faces
+
+Static reads of the EN and RU `allods2.exe` and installed data (EXP-2073),
+raw x86 listings committed under the experiment's `out/` and `out-ru/` and
+reproduced against their Git blobs. Addresses are EN unless marked RU.
+Format surface: zero-based CRLF line indexes of `main.res` `text/main.txt`
+and `text/unitname.txt` (R2-ASSET-010, R2-ASSET-145) and the Humans
+parameter order of R2-ENGINE-319, read under the existing grammar; no
+stored layout changes. Card values attributed to "the shots" are
+observations read from the published EXP-2071 catalogue shots s3.21, s3.33
+and s3.34 (crossbowman, peasant, mage; R2-SESSION-203) and from no
+committed output.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-577 | The ROM2 EN inn's left card is the shared sheet L2.01119 drawn for the selected actor: BODY, AGILITY, MIND, SPIRIT are bytes +0x144/+0x147/+0x145/+0x146, HEALTH +0x104/+0x108, MANA +0x148/+0x14a, gated by a grade 0..7. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-578 | The first town-1 inn patrons' NPC words 207, 2108 and 517 each equal the serverID of one installed Humans row, NPC07_2, 2U_PeasantMale and M141_MageTooth (EN = RU); the absence of other rows for them is Medium. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-579 | R2-ENGINE-290's maxima on those rows, with the five school skills' T(s) as experience, give HEALTH 156, 55, 158 and MANA 0, 0, 604: every inn card value at the first visit, with current equal to maximum. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-580 | The ROM2 sheet draws main.txt 190 (spellcaster) when actor flags +0x1b8 bit 1 is clear, dword +0x1c is nonzero and the grade is 7; at the first inn visit only the mage's card meets it. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-581 | The ROM2 sheet heading is actor strings +0xec/+0xf8 when the test L2.02949 on +0xec is nonzero; else main.txt 84 Mercenary or 83 Enemy (flags 0x11), then unitname.txt line +0x24 (15 Crossbowman, 24 Mage). | High / Medium / Unknown | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-582 | A ROM2 dialogue page with a portrait passes an NPC number to face builder L2.02950, which resolves the actor and loads the paperdoll slot +0x88 for flags 0x11, else graphics\infowindow\<name><+0x28>.bmp. | High / Medium / Unknown | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-583 | The town-1 gate refusal (plagatguard, header npc=97) gets the fallback actor's face if no live unit carries 97: flags 0x56 and +0x28 = 17 build the name equipment\fmage\17.256, byte-equal to mfighter\14.256. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-584 | Of the six ROM2 bodies read in both roots, four are equal after address masking; the left painter differs in one application offset and the dialogue page in two child IDs; town text sections and Humans census rows are equal by value. | High | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+
+### R2-ENGINE-577
+
+Left painter `L2.00745` (RU `L2.02951`) draws the card only when the
+application word +0x5d8 (RU +0x63c) is 2 and the selected actor is not
+null. When actor flags +0x1b8 bit 0x40 is clear it calls the shared sheet
+`L2.01119` (RU `L2.02952`) with the actor as `this`; the painter's head
+pushes 0xa0 and 0xee, and the rectangle passed comes from `L2.01491` and
+`L2.02953`. The fallback actor of `R2.0069` sets bit 0x40 (flags 0x56),
+so a fallback actor shows no sheet.
+
+The sheet prints, by the main.txt label key it pushes before each value:
+
+| Label (main.txt) | Value | Format |
+|---|---|---|
+| 15 Body | byte +0x144 | `%d` |
+| 16 Agility | byte +0x147 | `%d` |
+| 17 Mind | byte +0x145 | `%d` |
+| 18 Spirit | byte +0x146 | `%d` |
+| 19 Health | words +0x104, +0x108 | `%d/%d` |
+| 20 Mana | words +0x148, +0x14a | `%d/%d` |
+
+The grade is 7 when the actor's owner word (+0x14)+4 is 0, when helper
+`L2.02954` returns its bit 8 set, or when global `L2.00989` is nonzero;
+otherwise it is the byte at world(+0xe8)+0x3f70+NPC word, halved, for NPC
+words 1..0x9ff, else 0. `L2.02954` and `L2.02955` both call `L2.02956`,
+whose body was not read; "relation" names their use, not a read table.
+The four attributes need grade 5 or more; HEALTH and MANA grade 1 or more,
+with no class test, so the code prints MANA from +0x148/+0x14a for a
+fighter as well; the damage block grade 3 or more; the closing lines grade
+7 (R2-ENGINE-580).
+
+Relation to existing claims. It settles R2-ENGINE-246's Unknown stat
+drawing for the generic inn and R2-ENGINE-388's display record for this
+caller: the record is the client actor itself.
+
+**Confidence.** High for the painter, the fields, the keys and the grade
+compares: complete EN left painter and sheet listings, pushed operands and
+branch conditions. Medium for what the grade inputs mean, which rests on
+the unread `L2.02956`.
+
+**Unknown.** The callee `L2.01492` that places the rectangle, the body of
+`L2.02956` and the grade byte table's writer.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-578
+
+The inn resolves each talk entry's NPC word through `R2.0071`, which
+returns the first unit of the controlled collection whose word +0x1dc
+equals it (R2-ENGINE-247, R2-ENGINE-051). A client unit's +0x1dc comes
+from the server unit's +0x14c (R2-ENGINE-069), which a Humans template
+load sets from serverID (parameter 24) or, above 10000, from
+(serverID/10)%1000 (R2-ENGINE-072, R2-ENGINE-319).
+
+The census read the installed client `world.res` `data/data.bin` of each
+root: every Humans row by parameter 24 with that transform, and every Units
+row by parameter 55, low word. It prints matching rows only:
+
+| NPC word | Humans row (ordinal) | Body, Agility, Mind, Spirit | School skills 1..5 | typeID | face | ManaMax |
+|---|---|---|---|---|---|---|
+| 207 | NPC07_2 (49) | 32, 32, 28, 22 | 12, 23, 4, 9, 48 | 15 | 4 | -1 |
+| 2108 | 2U_PeasantMale (217) | 25, 20, 25, 20 | 0, 0, 0, 0, 0 | 1 | 46 | -1 |
+| 517 | M141_MageTooth (170) | 35, 40, 45, 50 | 0, 99, 99, 0, 0 | 24 | 4 | 447 |
+
+The selection for 97 printed no row in either root. The EN and RU census
+rows are equal. The four attributes and the five skills equal the values
+on the three shots, and typeID gives the heading's type line
+(R2-ENGINE-581).
+
+**Confidence.** High for the three printed rows in the two installed
+client payloads. Medium for the absences (no other row for 207, 2108 or
+517, no row for 97): the committed output prints no row counts and no
+empty selection. Medium that the live patrons are units built from these
+rows: the server routine that creates them in town was not read, and a
+packet's optional key word can also set +0x1dc (R2-ENGINE-069).
+
+**Unknown.** The creator of the town NPC units and its call. Reading the
+callers of the serverID lookup `L2.02663` (`L2.02957`, `L2.02958`) would
+settle it.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-579
+
+Evaluated on R2-ENGINE-578's rows with R2-ENGINE-290's arithmetic:
+HPmax = trunc(trunc(Body*k + log1.1(E/5000+1)*k) * (1.1^Body/100+1)),
+k 2 for a fighter and 1 for a mage; mana with Spirit and k 1/2, only when
+the mana field is nonzero; E the sum of T(s) = trunc((1.1^s-1)*1000)
+over the five school skills (R2-ENGINE-485). A row with ManaMax above 0
+is a mage (R2-ENGINE-319).
+
+| Patron | E | HEALTH | MANA | On the shots |
+|---|---|---|---|---|
+| crossbowman | 107930 | 156 | 0 | 156/156, 0/0 |
+| peasant | 0 | 55 | 0 | 55/55, 0/0 |
+| mage | 25053658 | 158 | 604 | 158/158, 604/604 |
+
+Template load sets HP and mana to their maxima (R2-ENGINE-319), shown as
+current/maximum. Including Skill.General in E would give the mage 163 and
+623, which the shot does not show. The "On the shots" column is an
+observation read from the published shots (rows of the record that crop
+them; no committed output); the MANA 0/0 rows of the crossbowman and the
+peasant are not in R2-SESSION-203's value column.
+
+**Confidence.** Medium: every value matches, but the comparison values
+are observations not reproducible from the committed record, and the
+server recompute for these units, the experience sum's population and the
+packet copy into the client fields +0x104..+0x14a were not read here.
+
+**Unknown.** The client writer of +0x104, +0x108, +0x148 and +0x14a.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-580
+
+At the end of the sheet two lines are tested in order:
+
+| main.txt line | EN / RU text | Position | Predicate |
+|---|---|---|---|
+| 190 | spellcaster / использует магию | (L+0x4a, T+0xae) | flags +0x1b8 bit 1 clear, dword +0x1c nonzero, grade 7 |
+| 191 | Armor piercing / игнорирует броню | (L+0x4a, T+0xba) | flags bits 0x11 clear, byte +0x156 nonzero, grade 7 |
+
+The mage's card shows SPELLCASTER under the skills (s3.34); the
+crossbowman's and the peasant's do not (s3.21, s3.33).
+
+**Confidence.** High for the predicates and keys (EN listing; RU sheet
+equal after masking). Medium for each patron's value: only the mage's
+row has ManaMax above 0 (R2-ENGINE-578), but the writer of client +0x1c
+was not traced.
+
+**Unknown.** The meaning and writer of client +0x1c and +0x156.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-581
+
+The sheet calls `L2.02949` on the actor's string +0xec (`L2.02959..L2.02960`);
+when the result is nonzero it draws +0xec at (R-0x58, T+0x12) and string
++0xf8 at (R-0x58, T+0x1c). The body of `L2.02949` was not read; that a
+nonzero result means "+0xec not empty" is inferred from the shots
+(two-line mercenary headings, one-line peasant heading). Otherwise, when
+flags +0x1b8 & 0x11 is nonzero, the first line is main.txt 84
+(Mercenary / Наемный) if `L2.02955` returns bit 0 clear, or main.txt 83
+(Enemy / Вражеский) if it is set and +0x24 is below 0x40; `L2.02955`
+calls the unread `L2.02956`. The second line, at T+0x1c (`L2.02961`),
+follows both arms of the flags test and is the type name. The type name
+`L2.01929` returns pool line base+type, where `L2.02962` set the base of
+`main\text\unitname.txt` to the pool count at its load and appended one
+entry per CRLF line; the startup sequence loads main.txt first. Type names
+are therefore unitname.txt lines.
+
+Patrons. On the shots, the crossbowman's and the mage's cards draw
+MERCENARY on the first line and CROSSBOWMAN or MAGE on the second:
+unitname.txt lines 15 and 24, their rows' typeIDs. PEASANT is drawn on the
+first line only (glyph rows 19..26 of s3.33; the other cards' second line
+is rows 29..37), read as the +0xec branch. These are observations read
+from the published shots by crops recorded in the consultation record,
+with no committed output.
+
+RU by the same rule, reading the RU text lines: НАЕМНЫЙ АРБАЛЕТЧИК and
+НАЕМНЫЙ МАГ (Наемный, Арбалетчик, Маг), with the letter case the RU
+font draws.
+
+**Confidence.** High for the call order, the label keys and the type line
+source in EN. Medium for the polarity of `L2.02949` and the relation bit
+(unread helpers), for the patron headings (observations from published
+shots), and for the RU headings (the RU sheet is equal after masking; the
+RU text loader was not read). Unknown for the peasant's +0xec string and
+its RU text.
+
+**Unknown.** The bodies of `L2.02949` and `L2.02956`; the writer of +0xec
+and +0xf8 for a non-hero unit.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-582
+
+The dialogue page method `R2.0046` (RU `R2.0045`) parses the part
+header; when the dialogue has a portrait (+0x7c) it calls the face builder
+`L2.02950` (RU `L2.02963`) at `L2.02964`, the only direct call of the
+builder in the EN `.text` call-target scan. The argument is `[ebp-0x24]`,
+an out-parameter of the part parser `R2.0048`, whose body was not read;
+that it is the header's npc= number is R2-ENGINE-051's statement. The
+builder resolves the actor through `R2.0071` (with the fallback of
+`R2.0069` when no unit matches) and draws into an 88x108 surface:
+
+- flags +0x1b8 & 0x11 nonzero: the actor's slot +0x88 (`L2.02965`), the
+  paperdoll. The read part of that window builds `graphics\equipment\`
+  plus `mfighter\`, `mmage\`, `ffighter\` or `fmage\` by flags & 6 (0, 2,
+  4, 6), the item sprite names, and the body name `%s%d.256` with +0x28
+  (`L2.02966..L2.02967`), then calls methods +0x18 and +0x40 of the loaded
+  sprite objects. The committed window (0x1000 bytes) ends at `L2.02968`
+  with no return, and its listing lines 521 to 1082 were not read; what is
+  drawn, in which order and where is not determined.
+- otherwise `graphics\infowindow\%s%d` with the type registry
+  (`L2.02969`) name +0xf8 and +0x28, the digit dropped when +0x28 is 1,
+  plus `.bmp`.
+
+Types 0x40..0x66 take a crop rectangle from table `L2.02970`. A fallback
+actor (flags bit 0x40) is deleted after the build. The inn's left painter
+uses the same infowindow name for a non-paperdoll portrait.
+
+Speakers of the read town-1 sections: `npc207talk9` NPC 207,
+`npc2108talk8` NPC 2108, `npc517talk10` NPC 517 and the hero 21,
+`plagatguard` NPC 97, equal in EN and RU.
+
+**Confidence.** High for the page-to-builder call, the lookup-then-fallback
+code, the flags split and the sprite and bitmap names built (EN; RU builder
+and page equal after masking, R2-ENGINE-584). Medium that the argument is
+the header's npc= number (unread parser). Unknown for the drawn frame and
+crop, and for the RU slot +0x88 body (its window started inside another
+routine).
+
+**Unknown.** The rest of `L2.02965`; the parser `R2.0048`; other town-1
+dialogue keys' headers; the copy geometry of the surface methods
++0x34/+0x38.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-583
+
+The gate click with flag 0x301 false calls the dialogue builder
+`R2.0038` with key `plagatguard` (R2-ENGINE-241). Its one part header is
+`npc=97, part=1` in EN and RU `text/town.txt`. The census printed no
+installed Humans or Units row for 97 (R2-ENGINE-578). When the live lookup
+`R2.0071` finds no unit with +0x1dc = 97, it builds the fallback actor of
+`R2.0069`: flags 0x56, +0x24 = 1, +0x28 = 97-0x50 = 17. Flags & 0x11 =
+0x10 selects the paperdoll; flags & 6 = 6 selects `fmage\`; a new actor
+has no items, so the body name built is `graphics\equipment\fmage\17.256`.
+In graphics.res that key is 11517 bytes, SHA-256
+`bc1130885eb0b1a6616df37ce92c096ad2510e07b473a45c7a73eed5d2d8b04e`,
+byte-equal to `equipment/mfighter/14.256` (EN and RU). The box observed
+in R2-ENGINE-574 shows a knight's face in a great helm.
+
+Open links: whether a live unit carries 97, which decides between the
+fallback actor and a runtime unit's face; the unread part of `L2.02965`
+(R2-ENGINE-582), so the drawn frame and crop are not determined; the
+unread parser `R2.0048` that supplies the number.
+
+**Confidence.** Medium. High for the parts: the header, the fallback
+constants and the sprite name built.
+
+**Unknown.** The sprite's picture was not rendered; the frame and crop
+geometry.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ENGINE-584
+
+Masked comparison (hexadecimal literals of six or more digits replaced),
+from `evidence/derived/enru.tsv`:
+
+| Body (EN / RU) | Instructions | Result |
+|---|---|---|
+| sheet `L2.01119` / `L2.02952` | 1250 | equal |
+| left painter `L2.00745` / `L2.02951` | 1265 | one difference: application +0x5d8 / +0x63c |
+| face builder `L2.02950` / `L2.02963` | 278 | equal |
+| NPC actor helpers `R2.0069` / `R2.0070` | 102 | equal |
+| dialogue page `R2.0046` / `R2.0045` | 555 | two differences: child IDs 0xa/0xb and 0xc/0xd |
+| client unit constructor `R2.0067` / `R2.0068` | 53 | equal |
+
+The town text sections and the Humans census rows are equal by derived
+value; these are not body comparisons. Masked addresses (call targets,
+string and table literals) are not compared. The RU paperdoll slot, the
+RU text loader and the RU type-name helper were not read.
+
+**Confidence.** High for the listed bodies.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)

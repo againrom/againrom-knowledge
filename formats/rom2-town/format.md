@@ -487,7 +487,7 @@ HORSE requests Horse2 at A1 frame 14 and A2 frames 8/14, Horse1 at A3 frame 1 an
 
 Campaign town ID 1 selects the generic inn and shop in both preserved clients. Their selected EN constructors share page or child bases with Kaarg. Shared inn receivers supply buttons, talk and exit. Generic table `L2.00739` uses enter +0x80 `L2.00552`; Kaarg table `L2.00741` replaces it with `L2.00613`. Roster handling belongs to each page's enter body. Per-town center/art methods supply backgrounds, overlays and animation episodes. Detailed geometry below is EN-only. Complete layout equality and differences limited to art remain unproven (`R2-ENGINE-245`, High).
 
-The inn page builds left (0,0,160,480), right-button (480,0,640,238) and center (160,0,480,480) panels. It also attaches the campaign hero panel at (640-panelWidth,0). Its primary graphics are `interface/inn/{LeftStats,LeftPicture,ButtonsArea,CenterArea,manback,ManBackTalk,LUOver,LDOver,RUOver}.bmp` and on/off art for three buttons. The center painter draws background, candle, cauldron, conditional tender, seated actors, edge overlays, a conditional lower-right image and shared children, in that order. The lower-right key and complete actor portrait/stat drawing remain Unknown (`R2-ENGINE-246`, High / Unknown).
+The inn page builds left (0,0,160,480), right-button (480,0,640,238) and center (160,0,480,480) panels. It also attaches the campaign hero panel at (640-panelWidth,0). Its primary graphics are `interface/inn/{LeftStats,LeftPicture,ButtonsArea,CenterArea,manback,ManBackTalk,LUOver,LDOver,RUOver}.bmp` and on/off art for three buttons. The center painter draws background, candle, cauldron, conditional tender, seated actors, edge overlays, a conditional lower-right image and shared children, in that order. The lower-right key remains Unknown (`R2-ENGINE-246`, High / Unknown); the left stat drawing is the shared sheet below (`R2-ENGINE-577`).
 
 The primary inn destinations add to the page origin (`R2-ENGINE-246`, High for selected EN operands):
 
@@ -506,6 +506,24 @@ The primary inn destinations add to the page origin (`R2-ENGINE-246`, High for s
 Inn button rectangles are (484,44,624,90), (484,91,624,137) and (484,138,624,184). A selected talk actor gives a blank first caption, Talk and Exit. A selected hire entry gives Hire or Fire according to option bit 31. Matching press/release selects the local action; Talk formats actor/topic text, and Exit starts room removal (`R2-ENGINE-246`, High).
 
 The generic inn enter `L2.00552` consumes DLL options in order, with kinds 1/2 assigned to hire entries and other kinds to talk entries. The conditional stage-10 speakers are NPC 207/topic 9, NPC 2108/topic 8 and NPC 517/topic 10. Three rows of six 48x64 seats use corners `(176+48*c,480-64*(r+1),224+48*c,480-64*r)`. Only populated seats participate in the hit receiver. Selection updates the actor index and buttons; talk formats `npc%dtalk%d` from the first matching copied option and calls DLL TalkTo. Complete fresh actor artwork and state-gated roster continuation remain Unknown (`R2-ENGINE-247`, High / Medium / Unknown).
+
+### Town 1 inn card and dialogue faces
+
+The left painter `L2.00745` draws the card when application+0x5d8 is 2 and the selected actor has flags+0x1b8 bit 0x40 clear; it calls the shared sheet `L2.01119` with the client actor. The sheet prints Body, Agility, Mind and Spirit (main.txt 15..18) from bytes +0x144, +0x147, +0x145 and +0x146 at grade 5 or more, Health and Mana (19, 20) as +0x104/+0x108 and +0x148/+0x14a at grade 1 or more, and the closing lines at grade 7. The grade's inputs rest on the unread helper `L2.02956` (`R2-ENGINE-577`, High / Medium).
+
+The stage-10 speakers 207, 2108 and 517 equal the serverID of the installed Humans rows NPC07_2, 2U_PeasantMale and M141_MageTooth in both roots; the census printed matching rows only, so the absence of other rows is Medium, as is the join to the live units (`R2-ENGINE-578`, High / Medium).
+
+| Line | Condition | Source |
+|---|---|---|
+| main.txt 190 spellcaster | flags bit 1 clear, dword +0x1c nonzero, grade 7 | `R2-ENGINE-580` |
+| main.txt 191 Armor piercing | flags 0x11 clear, byte +0x156 nonzero, grade 7 | `R2-ENGINE-580` |
+| heading 1 and 2 | `L2.02949`(+0xec) nonzero: strings +0xec, +0xf8 | `R2-ENGINE-581` |
+| heading 1 | else flags 0x11: main.txt 84 Mercenary or 83 Enemy | `R2-ENGINE-581` |
+| heading 2 | else: unitname.txt line +0x24 | `R2-ENGINE-581` |
+
+The writers of +0x1c, +0xec and +0xf8 remain Unknown (`R2-ENGINE-580`, `R2-ENGINE-581`).
+
+A dialogue page with a portrait calls face builder `L2.02950` once, at `L2.02964`, with a number from the unread part parser `R2.0048`. The builder resolves the actor through `R2.0071`, building a fallback actor (flags 0x56, +0x28 = number-0x50) when no unit matches; flags 0x11 select the paperdoll slot +0x88 under `graphics\equipment\<mfighter|mmage|ffighter|fmage>\`, other actors `graphics\infowindow\<name><+0x28>.bmp`. The drawn frame and crop remain Unknown (`R2-ENGINE-582`, High / Medium / Unknown). The gate refusal `plagatguard` (npc=97) has no installed row; if no live unit carries 97, its face is the fallback's `equipment\fmage\17.256` (`R2-ENGINE-583`, Medium).
 
 The generic inn loads 10 candle pictures, 21 cauldron pictures, 24 breath pictures and 40 drink pictures at (160,48), (420,160), (240,152) and (240,152). Candle/cauldron advance once after elapsed time exceeds 100 ms; active tender motion advances once after 83 ms. Its odd/even retained delay selects drink/breath; reset delay is 3000..5047 ms from the bounded 15-bit source, without a probability claim. Drink runs forward then reverse; breath returns to idle after forward completion. Only the selected seated actor advances after 125 ms. The wrap helper uses native field+0x8-1, whose relation to loaded-list counts is Unknown; complete visible cadence and audible playback are unobserved (`R2-ENGINE-248`, High / Medium / Unknown).
 

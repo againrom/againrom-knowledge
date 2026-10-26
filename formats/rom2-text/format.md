@@ -195,6 +195,14 @@ differ; a named encoding or rendered correspondence is not established.
 The CRLF loader calls CharToOemA. Live table mutation, the full startup
 schedule and complete generic input bindings remain Unknown. — R2-ENGINE-093
 
+## Inn card and unit-type rows
+
+The inn statistics card uses zero-based `main.res:text/main.txt` rows 15..20
+(attribute, Health and Mana labels), 83 and 84 (`Enemy`, `Mercenary`), 190
+(`spellcaster`) and 191 (`Armor piercing`) in EN and RU. Unit type names are
+`text/unitname.txt` rows indexed by the type number: rows 1, 15 and 24 are
+Peasant, Crossbowman and Mage. — R2-ASSET-145
+
 ## Menu, save and load page rows
 
 `main.res:text/dialogs.txt` has 176 CRLF rows in EN and RU. The save and

@@ -2057,3 +2057,58 @@ the 11 shots. Medium for each caption (one shot each) and for the shop's
 A zoomed read of the shop caption would settle the letter.
 
 **Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+## Inn card text and dialogue face sprites
+
+Derived reads of the EN and RU `main.res` and `graphics.res` archives
+(EXP-2073): CRLF line tables under R2-ASSET-010 and archive key censuses
+(key, payload size, SHA-256; no payload byte). The routines that use these
+lines and sprites are R2-ENGINE-577 to R2-ENGINE-583.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-145 | ROM2 main.txt 83/84/190/191 are Enemy/Вражеский, Mercenary/Наемный, spellcaster/использует магию, Armor piercing/игнорирует броню; unitname.txt 1/15/24 Peasant, Crossbowman, Mage (RU Крестьянин, Арбалетчик, Маг). | High | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ASSET-146 | The ROM2 graphics.res holds 116 two-level equipment/<class>/<file> keys and 185 infowindow/ keys, equal in name, size and SHA-256 in EN and RU; equipment/fmage/17.256 (11517 bytes) is byte-equal to equipment/mfighter/14.256. | High | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+
+### R2-ASSET-145
+
+Zero-based CRLF line indexes of `main.res` `text/main.txt` and
+`text/unitname.txt`, read in each root (RU decoded as cp1251):
+
+| Table, line | EN | RU |
+|---|---|---|
+| main.txt 15..20 | Body, Agility, Mind, Spirit, Health, Mana | Сила, Ловкость, Разум, Дух, Жизнь, Мана |
+| main.txt 83 | Enemy | Вражеский |
+| main.txt 84 | Mercenary | Наемный |
+| main.txt 190 | spellcaster | использует магию |
+| main.txt 191 | Armor piercing | игнорирует броню |
+| unitname.txt 1 | Peasant | Крестьянин |
+| unitname.txt 15 | Crossbowman | Арбалетчик |
+| unitname.txt 24 | Mage | Маг |
+
+The card draws these in capital letters (R2-SESSION-203); the case
+mapping is the font's, not the text's.
+
+**Confidence.** High: both roots' tables read whole by the line reader.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+### R2-ASSET-146
+
+The census listed the keys of each root's `graphics.res` that fully match
+`equipment/[^/]+/[^/]+` (two path parts below `equipment/`) and
+`infowindow/.*`: 116 and 185 keys, equal in key, size and hash between EN
+and RU. Deeper `equipment/` keys (three path parts, the item sprites under
+`primary/` and `secondary/`) were not listed, and no EN/RU equality is
+claimed for them. Five of the 116 equipment payload hashes occur more than
+once; one pair is `equipment/fmage/17.256` and
+`equipment/mfighter/14.256`, 11517 bytes, SHA-256
+`bc1130885eb0b1a6616df37ce92c096ad2510e07b473a45c7a73eed5d2d8b04e`.
+
+**Confidence.** High for the two listed key sets of the two installed
+archives.
+
+**Unknown.** The deeper equipment keys; the picture the sprite shows (no
+sprite was decoded).
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
