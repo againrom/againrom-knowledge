@@ -2112,3 +2112,66 @@ archives.
 sprite was decoded).
 
 **Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+## Mission text at 1024x768 as the EN original shows it
+
+Runtime observation of the EN original `allods2.exe` launched with
+`-1024` (EXP-2074 run K1). Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2074-rom2-mission-1024/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256. Every text is an eye
+read of the shot (crops at 2x or 3x).
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-148 | At 1024x768 the EN first mission's stats sheet shows the name line and 16 label lines from BODY to SPEED (17 lines in all); the mission game menu lists seven buttons from Save Game to Return to Game. | High / Medium | ● active | [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/) |
+
+### R2-ASSET-148
+
+Steps k2.01, k2.04, k3.11.
+
+The stats sheet below the portrait (R2-ENGINE-588), lines as drawn for
+the new hero Aldor:
+
+| Line | Left | Right |
+|---|---|---|
+| 1 | ALDOR | |
+| 2 | BODY 40 | HEALTH |
+| 3 | AGILITY 36 | 142/142 |
+| 4 | MIND 25 | MANA |
+| 5 | SPIRIT 17 | 0/0 |
+| 6 | DMG 12-19 | ABSORB 4 |
+| 7 | ATTACK 78 | DEFENSE 43 |
+| 8 | SKILLS | RESISTANCE |
+| 9 | BLADE 20 | FIRE 8 |
+| 10 | AXE 0 | WATER 8 |
+| 11 | BLUDGEON 0 | AIR 8 |
+| 12 | PIKE 0 | EARTH 8 |
+| 13 | SHOOTING 10 | ASTRAL 8 |
+| 14 | WEIGHT 23.6 | |
+| 15 | XP 7320 | |
+| 16 | SIGHT 6.4 | |
+| 17 | SPEED 19 | |
+
+SKILLS and RESISTANCE are drawn in orange, the other labels in light
+green.
+
+The mission game menu box (MAIN MENU icon, R2-SESSION-221) lists Save
+Game, Load Game, Game Options, Sound Options, Quest Objectives, End Quest
+and Return to Game, top to bottom; the town-1 statue's box of
+R2-ENGINE-569 lists five (no Game Options, Quest Objectives or End
+Quest; Abort Game in their place).
+
+Relation to existing claims. The body, agility, mind, spirit and blade
+values and the health maximum equal the generator's opening values of
+R2-SESSION-202.
+
+**Confidence.** High for the presence of the sheet, the order of its
+17 lines (the name line and 16 label lines from BODY to SPEED) and the
+seven buttons (states that waited for input). Medium for
+each number and word (eye reads of the small font).
+
+**Unknown.** Which game state makes the mission box differ from the
+town's (the screen size or the mission): a 640x480 mission run that
+clicks MAIN MENU would settle it.
+
+**Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)

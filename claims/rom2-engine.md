@@ -13105,3 +13105,107 @@ RU text loader and the RU type-name helper were not read.
 **Confidence.** High for the listed bodies.
 
 **Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+
+## The EN original at 1024x768, observed
+
+Runtime observation of the EN original `allods2.exe` launched with the
+command-line switch `-1024` (EXP-2074 run K1), from the main menu to the
+first mission. Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2074-rom2-mission-1024/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256, and
+[measures](../experiments/EXP-2074-rom2-mission-1024/evidence/measures.txt)
+the pixel measurements computed from the PNGs. Shots are at least 10 s
+apart. Coordinates are screen pixels, right and bottom exclusive.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-587 | With `-1024` the EN original sets 1024x768 and draws the main menu, both generator pages and the town-1 square as the 640x480 picture unscaled at (192,144)-(832,624), with black around it apart from a 6x6 mark at the town's corner. | High / Medium | ● active | [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/) |
+| R2-ENGINE-588 | With `-1024` the EN first mission draws its own layout: the map view reaches x 848 (top edge and full height Medium; visible x 0..534, y 104..611), a 176-px right column of five blocks, the opening dialogue at its 640 place +(192,144). | High / Medium | ● active | [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/) |
+
+### R2-ENGINE-587
+
+Steps k1.01..k1.07.
+
+- Display: every `display` line of run K1 from the first command to the
+  mission reads 1024x768x32@75 (the run's compatibility layer emulates
+  the game's mode on a 32-bit display); the game's window is
+  (0,0)-(1024,768). The desktop mode before and after the run was
+  2560x1440x32.
+- Main menu (k1.01..k1.03, three equal digests over 24 s): the non-black
+  pixels' bounding box is (192,144)-(832,624), and the crop at (192,144)
+  equals the 640x480 menu shot of EXP-2072 (r0.22) in 307,200 of 307,200
+  pixels. No pixel outside it is non-black.
+- Pre-create page (k1.04) and detail page (k1.05): bounding box
+  (192,144)-(832,624), nothing outside.
+- Town-1 square with and without its tip (k1.06, k1.07): the picture in
+  the same rectangle; the only other non-black pixels are 19 in
+  x 189..194, y 141..146, a small dark green mark at the picture's top
+  left corner.
+- Clicks at the 640 points plus (192,144) worked on every one of these
+  screens and on the inn (k1.08..k1.10).
+
+Relation to existing claims. It confirms live R2-ENGINE-238's switch
+`-1024` and its origin (192,144) for the town view, and shows that the
+menu and the generator are placed at the same origin.
+
+**Confidence.** High for the mode, the rectangle and the unscaled menu
+(pixel equality; the scaled alternative is excluded by equal pixels at
+scale 1, the own-composition alternative by black outside the rectangle).
+Medium that the generator and town pages are unscaled: their rectangles
+and click points match the 640 layout, but no pixel comparison with a
+640 shot of the same state was made.
+
+**Unknown.** What draws the mark at the town's corner; the hero
+creation pages other than the two shot; `-800`.
+
+**Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)
+
+### R2-ENGINE-588
+
+Steps k2.01..k2.04, k3.02, k3.05, k3.11.
+
+- Map view: reaches x 848. Columns x 840..847 hold no
+  non-black pixel in any of the 768 rows of k2.04; the column starts at
+  x 848, so it is 176 pixels wide. The spellbook and inventory panels
+  span x 0..848 at the bottom (R2-SESSION-221). In the shots without a
+  panel (k2.01..k2.04, k3.01, k3.03, k3.04, k3.06..k3.12) the visible
+  map holds non-black pixels only in x 0..534, y 104..611 (748 with the
+  dialogue, 652 with the menu box); the rest is black fog. That the view
+  reaches y 0 and y 768 is inferred: fog fills the unexplored map black, and the
+  minimap's white view frame is wider than tall (about 54x47 pixels,
+  eye read), as 848x768 is.
+- Right column, top to bottom. Block borders are the all-black runs of
+  pixel column x 1021: rows 0..8, 153..170, 229..237, 475..479,
+  519..520, 761..767.
+
+  | Block | Rows (about) | Content |
+  |---|---|---|
+  | minimap | 0..153 | a purple well with the white view frame and the explored patch |
+  | command icons | 153..237 | two rows of four icons |
+  | portrait | 237..477 | the hero's portrait oval with three corner icons (R2-SESSION-221) |
+  | ornament bar | 477..520 | three knot ornaments, a skull in the middle |
+  | stats sheet | 520..768 | the hero's statistics, drawn in every shot of this run (R2-ASSET-148) |
+
+- Opening dialogue (k2.01, k2.02 equal over 10 s): the box with the
+  hero's face, text and Ok stands at about (269,269)-(748,492). A part of
+  the 640 box of EXP-2072 (r3.22) matches it at offset (192,144) in
+  98.5% of pixels; the next best offset gives 67%. The box is centred on
+  the screen, not on the map view. Ok closes it (k2.03).
+- No backpack row is drawn until the inventory icon is clicked (k2.03).
+- The mission game menu box (k3.11) also stands over the map near the
+  screen centre.
+
+Relation to existing claims. R2-SESSION-208 gives the 640 mission panel
+(minimap, two rows of four icons, portrait). R2-ENGINE-238's centred
+640x480 rectangle is not used by this screen.
+
+**Confidence.** High for a layout of its own (the column and map view
+fill the whole screen; no black frame), for the column's left edge
+x 848 only and for the dialogue's offset. Medium for the block rows
+(borders from one pixel column and an eye read of ornament edges, about
+±3 rows) and for the map view's top edge and full height.
+
+**Unknown.** The command icons' captions at 1024x768; whether the
+minimap block's frame reaches the screen top; `-800`.
+
+**Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)

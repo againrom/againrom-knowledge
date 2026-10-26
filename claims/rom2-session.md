@@ -2933,3 +2933,55 @@ third Tab (compared by eye) and for each hover (one shot).
 settle it.
 
 **Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
+
+## The EN original's mission portrait block at 1024x768, observed
+
+Runtime observation of the EN original `allods2.exe` launched with
+`-1024` (EXP-2074 run K1), in the first mission after the opening
+dialogue. Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2074-rom2-mission-1024/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256, and
+[measures](../experiments/EXP-2074-rom2-mission-1024/evidence/measures.txt)
+the pixel measurements. The screen layout is R2-ENGINE-588.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-221 | At 1024x768 the EN mission portrait block has three icons and no stats eye in these shots; two Tab presses left the column unchanged (Medium); the spellbook opens 2x12 cells, the inventory a gold cell and 8 cells. | High / Medium | ● active | [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/) |
+
+### R2-SESSION-221
+
+Steps k3.01..k3.12.
+
+| Icon, pointer point | Hover caption | Click | Second click |
+|---|---|---|---|
+| top left (872,257) | OPEN SPELLBOOK <Q>,<B> | a panel across the map's bottom, rows 683..768, x 0..848: ornament ends and two rows of 12 empty dark green cells at a 38-pixel pitch | the panel closes |
+| bottom left, bag (872,460) | OPEN INVENTORY <~>,<I> | a panel across the map's bottom, rows 678..768: red-gem ends, a gold cell 1,000 and 8 empty cells with a skull ornament at an 80-pixel pitch (9 cells) | the panel closes |
+| bottom right, key (1004,460) | MAIN MENU <ESC> | the mission game menu box (R2-ASSET-148); Return to Game closes it | |
+| top right (1004,257) | none; no icon is drawn there | not clicked | |
+
+- The stats sheet is drawn below the portrait in every shot of this run,
+  k2.03..k3.12 (R2-ENGINE-588); two Tab presses with the pointer on the
+  map left the column unchanged apart from the minimap patch in the two
+  shots (k3.09, k3.10); no key was shown to reach the game.
+- A second click on each panel icon restores the map and the column
+  outside the animated explored area and the minimap (k3.03, k3.06).
+- Cell counts are repeated-template hits in the panel shots: 12 per
+  spellbook row in both rows, 8 skull cells after the gold cell.
+
+Relation to existing claims. At 640x480 R2-SESSION-217 gives four icons
+with SWITCH TO STATS <TAB> top right, a 2x11 spellbook grid and an
+inventory of a gold pile and four cells; at 1024x768 no eye is drawn
+in these shots, the sheet is drawn in every shot, and the panels hold 2x12 and 1+8 cells. It
+settles R2-SESSION-217's Unknown on the MAIN MENU click.
+
+**Confidence.** High for the three icons, no eye drawn in the named shots, the sheet
+drawn in every shot of this run, the open and close states and the cell
+counts (pixel repeats). Medium that Tab changes nothing: the column was
+pixel-equal in the two shots after two presses, but no key was shown to
+reach the game at 1024x768. Medium for each caption (one
+hover shot, small font).
+
+**Unknown.** The keys Q, B, I, ~ and Esc at 1024x768; what the cells
+hold beyond the gold; the hero's portrait click.
+
+**Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)
