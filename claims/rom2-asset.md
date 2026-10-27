@@ -2175,3 +2175,40 @@ town's (the screen size or the mission): a 640x480 mission run that
 clicks MAIN MENU would settle it.
 
 **Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)
+
+## Mission-menu and item texts at 1024x768 as the EN original shows it
+
+Runtime observation of the EN original `allods2.exe` launched with
+`-1024` (EXP-2075 run L1). Texts are eye reads of the shots named by step;
+the [receipt](../experiments/EXP-2075-rom2-screens/evidence/receipt-en.tsv)
+gives each step's screenshot and PNG SHA-256.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-150 | EN texts at 1024x768: the delete question, Game Options and Sound Options labels, the first quest objective, End Quest and Abort Game buttons, item captions and the first signpost's line. | Medium | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+
+### R2-ASSET-150
+
+| Step | Where | Text as drawn |
+|---|---|---|
+| m1.02 | Save Game name field hover | ENTER A NAME FOR THE SAVED GAME |
+| m1.08 | delete question | Are you sure you want to delete game 'exp75' ? · Yes · No |
+| m1.15 | Game Options | Game Options · Game Speed · Day/Night changes · Smoothing · Shadows · Dynamic lighting · Object animations · Show Health · Display damage points · Tips · Alt. message colors · AutoCast for units: · Own · Allies · Neutral · Formation Mode: Off, Auto, On · Retreat Mode: Never, Low Health, Medium Health · AutoCast mode: Minimum, Average, Maximum · Ok · Cancel |
+| m1.17 | Sound Options tracks in the mission | In Restless Waiting · Astral Threat · War of Druids · Tragedy of Battle |
+| m1.19 | Quest Objectives | Quest Objectives and Hints: · Great Mage Skrakan · You must get to Rakhl-Uimoir tower and talk to Great Mage Skrakan. · Ok |
+| m1.21 | End Quest box | Victory! · Exit to Main Menu · Exit to Windows · Return to Game |
+| m1.32 | town Abort Game box | Exit to Main Menu · Exit to Windows · Return to Game |
+| m2.07, m2.11 | buckler hover | BRONZE BUCKLER · DEFENSE +3 |
+| m3.14, m2.26 | scroll hover | SCROLL OF HEAL · DAMAGE: 21-42 · RANGE: 7 |
+| m2.13 | mission gold hover | MONEY |
+| m2.01, m2.14 | empty or shop gold cell hover | YOUR HERO'S INVENTORY |
+| m3.02, m3.04 | backpack end gems | SCROLL LEFT · SCROLL RIGHT |
+| m2.28 | no hero selected | NO UNITS SELECTED (portrait) · NO HERO SELECTED (backpack row) |
+| m2.06 | shop table hover | PUT ITEMS HERE TO BUY/SELL |
+| m4.05 | first signpost box | To Great Mage Skrakan's Tower · Ok |
+
+Menu labels draw one underlined letter each.
+
+**Confidence.** Medium: eye reads of the small font, one shot each.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)

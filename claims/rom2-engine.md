@@ -13209,3 +13209,47 @@ x 848 only and for the dialogue's offset. Medium for the block rows
 minimap block's frame reaches the screen top; `-800`.
 
 **Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)
+
+## The EN original's first-mission minimap at 1024x768, observed
+
+Runtime observation of the EN original `allods2.exe` launched with
+`-1024` (EXP-2075 runs L1 and L2), in the first mission. Steps are
+catalogue step ids; the
+[receipt](../experiments/EXP-2075-rom2-screens/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256, and
+[measures](../experiments/EXP-2075-rom2-screens/evidence/measures.txt)
+the mark blobs per step. The minimap block is R2-ENGINE-588's.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-593 | The EN first-mission minimap at 1024x768 draws a white view frame that a click recentres, a 2x2 hero mark that follows him, a static dark blue 2x2 at the signpost and red marks for nearby hostile creatures and mounds. | High / Medium / Unknown | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+
+### R2-ENGINE-593
+
+Steps m5.01, m4.01-m4.12, m5.10-m5.16, m2.10, m3.01, m2.28, m2.29,
+n5.01-n4.07; measures "minimap marks".
+
+| Mark | Colour (RGB), size | Follows |
+|---|---|---|
+| view frame | white, 54x48 at 872..925 x 60..107 after START MISSION | the map view: a minimap click centres it there and moves the view, clamped at the edge; it is 44 rows high with the backpack open and 38 with spellbook and backpack |
+| hero | 82,121,231 (light blue), 2x2; 132,231,82 (green) in a run entered by Restart last mission | the hero: it moved with each walk and kept its colour through deselection and selection |
+| signpost place | 33,69,189 (dark blue), 2x2 at 884,82 | nothing moved it; it stands at the signpost's place and was absent while the hero was far east |
+| creatures | 231,113,82 (red), 2x2 | hostile creatures (sword pointer over them); shown while the hero is near, gone when he leaves, three gone as he killed creatures |
+| mounds | red, 4x2 | the place of two spiky mounds south-east of the first fight |
+
+- EXP-2074's opening shot k2.04 has a minimap pixel-equal to m5.01's:
+  the frame, the light blue hero mark at 878,84 and the dark blue mark at
+  884,82. The yellow pixels at x 864..868 and 1007..1010 belong to the
+  gold border. A modal box darkens the marks with the screen.
+- After a load the view frame stood at 872..925 x 70..117.
+
+**Confidence.** High for the frame's behaviour, the hero mark following
+the hero and the k2.04 accounting. Medium that the dark blue mark is the
+signpost and for the creature and mound identification (position matched
+by eye, one fight). Unknown why the hero mark was green in one run.
+
+**Unknown.** The hero mark's colour cause: one run entering the mission
+by START MISSION and by Restart last mission would settle it. Marks of
+allies, neutral units and buildings.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)

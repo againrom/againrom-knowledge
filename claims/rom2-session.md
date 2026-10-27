@@ -2985,3 +2985,152 @@ hover shot, small font).
 hold beyond the gold; the hero's portrait click.
 
 **Evidence.** [EXP-2074](../experiments/EXP-2074-rom2-mission-1024/)
+
+## The EN original's mission menu, inventory, spellbook, messages and town at 1024x768, observed
+
+Runtime observation of the EN original `allods2.exe` launched with
+`-1024` (EXP-2075 runs L1 and L2), in the first town and the first
+mission. Steps are catalogue step ids; the
+[receipt](../experiments/EXP-2075-rom2-screens/evidence/receipt-en.tsv)
+gives each step's screenshot name and PNG SHA-256, and
+[measures](../experiments/EXP-2075-rom2-screens/evidence/measures.txt)
+the pixel measurements.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-227 | In the EN first mission at 1024x768 each game-menu button opens its own box; a typed save name and Ok write a new save, Delete asks Yes/No; End Quest and the town's Abort Game reach the main menu with no question. | High / Medium | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+| R2-SESSION-228 | At 1024x768 the EN shop hero row and mission backpack show item captions on hover; eight drag and click inputs, named by step, moved no item between cells; I and ~ toggle the backpack; a portrait right-click deselects the hero. | High / Medium | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+| R2-SESSION-229 | At 1024x768 the EN mission spellbook toggles on its icon, Q and B, stands above an open backpack, draws no page control (one spell, hero without a caster), and shows a bought scroll as one spell icon with no hover caption. | High / Medium | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+| R2-SESSION-230 | In the EN first mission at 1024x768 no message appeared in 2 minutes idle after the dialogue nor on the first walk and fight; a signpost click opens a box that pauses the game until Ok. | High / Medium | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+| R2-SESSION-231 | At 1024x768 the EN inn behaves as at 640x480 at (192,144): the crossbowman's one-page talk, no hire, the eye and Tab swaps, PREVIOUS and NEXT HERO keeping Aldor; the eye caption reaches x 948 and NEXT HERO x 871, past the 640 picture. | High / Medium | ● active | [EXP-2075](../experiments/EXP-2075-rom2-screens/) |
+
+### R2-SESSION-227
+
+Steps m1.01-m1.34; the file effects were read from the copy's save files after each step; those listings are not retained.
+
+| Button (mission menu) | Opens | Leaving it |
+|---|---|---|
+| Save Game | the Save Game box of R2-ENGINE-570 | see below |
+| Load Game | the Load Saved Game box of R2-ENGINE-571 | Cancel closes box and menu |
+| Game Options | a box: Game Speed slider, nine checkboxes, AutoCast for units (Own, Allies, Neutral), radio groups Formation Mode, Retreat Mode, AutoCast mode, Ok, Cancel | Cancel closes box and menu |
+| Sound Options | the box of R2-ENGINE-572 with four tracks listed | Esc closes box and menu |
+| Quest Objectives | one objective text with Ok | Ok closes box and menu |
+| End Quest | a box: Victory! (grey), Exit to Main Menu, Exit to Windows, Return to Game | Return to Game closes it |
+| Return to Game | closes the menu (R2-SESSION-221) | |
+
+- Save page: the name field takes typed letters (shown lower case); Ok
+  with a new name writes `game0000.sav` in the copy and closes box and
+  menu; the list then shows <<< Empty Slot >>> and the name. Ok with that
+  row selected rewrites the file with no question. Delete opens a box
+  asking whether to delete the named game, Yes and No; No returns to the
+  box; Yes removes the row and the file and leaves the box open.
+- End Quest, Exit to Main Menu shows the main menu with no question
+  (digest-equal 10 s later). The town game menu's Abort Game opens a box of
+  Exit to Main Menu, Exit to Windows and Return to Game; its Exit to Main
+  Menu does the same. The way back is the main menu's Load Game: Restart
+  last mission gives the mission start with the opening dialogue, Abort
+  mission and return to town the square.
+- Esc on the mission opens the menu, Esc again closes it.
+
+**Confidence.** High for each box opening and closing, the box states
+the shots show (one click closes the save box with no question; the list
+shows only <<< Empty Slot >>> after Yes) and the screens reached. Medium
+for the file effects (the new file, the rewrite with changed time and the
+same size, the removal after Yes): their listings are not retained.
+Medium for each label and text (eye reads, one shot).
+
+**Unknown.** Victory! and Exit to Windows (not clicked); the Game Options
+and Sound Options controls.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+### R2-SESSION-228
+
+Steps m2.01-m2.29, m3.14, n4.06; measures "region equality".
+
+- Shop hero row (five cells, R2-SESSION-206) and mission backpack (nine
+  cells, R2-SESSION-221) hover captions: an item its name and values
+  (BRONZE BUCKLER / DEFENSE +3; SCROLL OF HEAL / DAMAGE: 21-42 / RANGE: 7),
+  the mission gold MONEY, an empty cell and the shop gold YOUR HERO'S
+  INVENTORY, the backpack's end gems SCROLL LEFT and SCROLL RIGHT.
+- Items stay packed from the left (buckler, scroll, gold). In the
+  mission a drag to an empty cell (m2.12), a click then a click on another
+  cell (m2.17), a drag onto the portrait (m2.18), a drag onto the gold
+  (m2.19), the gold onto the buckler (m2.20) and a right-click (m2.21)
+  each left the row pixel-equal; in the shop a drag of the gold (m2.02)
+  and of the buckler (m2.09) left the hero row pixel-equal; the gems
+  changed nothing. The pick click m2.16 has no equality line. The shop buy
+  drag m2.06 is the control that a drag of this kind works in the town.
+- I and ~ each toggle the backpack as its icon does.
+- A portrait click changes nothing; a right-click deselects the hero:
+  NO UNITS SELECTED in the portrait, an empty stats sheet, NO HERO
+  SELECTED in the backpack row; a click on the hero selects him again.
+
+**Confidence.** High for the unchanged rows of those inputs, the toggles and the
+deselection. Medium for each caption (one hover shot).
+
+**Unknown.** Whether another input (ground drop, modifier key) moves an
+item.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+### R2-SESSION-229
+
+Steps m3.01-m3.20, m2.22, m2.23; measures "bottom panels".
+
+- OPEN SPELLBOOK, Q and B each open and close the spellbook. With the
+  backpack open it stands directly above it, rows 593..677; closing the
+  backpack moves it to the bottom (R2-SESSION-221).
+- Its ornaments show no caption; a click on the right one changes
+  nothing; no page control is drawn in the opened book with one spell,
+  hero without a caster, in four shots (m3.05-m3.08).
+- After buying a scroll of heal in the town, the spellbook shows one icon
+  (a purple heart with a white cross) in the first row's fifth cell; a
+  click draws the cell lighter; hovers of 1.5 s and 3.5 s show no caption.
+
+**Confidence.** High for the toggles, the stacking rows and the icon.
+Medium that no page control is drawn (one spell, hero without a caster,
+four shots) and that a spell icon shows no hover text (two hovers).
+
+**Unknown.** Pages with more spells; a spell's text with a caster hero.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+### R2-SESSION-230
+
+Steps m5.01-m5.16, m4.04-m4.06, m5.10, n4.01-n4.05; measures "idle
+series".
+
+- Nine shots 15 s apart with no input after the opening dialogue's Ok
+  changed only the map animation and the minimap patch; no box or text.
+  About 1 minute of walking and 40 s of fighting creatures showed none.
+- The signpost shows no hover caption. A click walks the hero to it and
+  opens a box to his right with one line and Ok; the screen darkens and
+  the frame is digest-equal 10 s later; Ok closes it.
+
+**Confidence.** High for the absence in the recorded shots, the box, its
+wait and Ok's close. Medium for its text (R2-ASSET-150).
+
+**Unknown.** Messages later in the mission; a box shown for less than the
+shot spacing.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+### R2-SESSION-231
+
+Steps m6.01-m6.13; measures "non-black pixels right of x 832".
+
+- R2-SESSION-213 and R2-SESSION-214 hold at 1024x768 with every control
+  at its 640 point plus (192,144): the crossbowman's Talk is one page with
+  Ok, the blank first button shows no caption and a click leaves the right
+  panel pixel-equal, the eye and Tab swap portrait and stats sheet on each
+  press, PREVIOUS HERO and NEXT HERO keep Aldor.
+- The SWITCH TO STATS <TAB> caption (eye hover) extends past x 832 into
+  the black surround to x 948; the NEXT HERO caption to x 871. A 4-px
+  column at x 949, y 379..395 stands in the hover shots, is no part of a
+  caption and is excluded.
+
+**Confidence.** High for the states and the pixels outside the picture.
+Medium for each caption.
+
+**Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
