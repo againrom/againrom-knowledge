@@ -326,3 +326,13 @@ The body plays Attack phases 0..7 at the source cache and 8..11 at the
 destination, then idles (Medium: the split depends on the relocation sync being
 dequeued before the sweep in its timer step). Paint order, the body centre derivation and the first
 native frame at each end remain Unknown. — ANIM-TELEPORT-172
+
+## Drawable created at LOAD
+
+The constructors give a new actor drawable action `+0x84`, clock `+0x94`, `+0xa0` and stage
+`+0x15a` 0. No mask bit of the state arm stores the action; the sender puts actor `+0x13c`, 0
+until death, in the stage. A living actor whose entry message carries stage 0 is therefore
+drawn in action 0 at the message point until a later message sets its action, whatever its
+loaded action `+0x54`. Other writers before the first frame were not read (Medium). The
+stage source stands in ANIM-DEATH-007; only its 0 → 0 clause is retracted.
+— ANIM-194, ANIM-DEATH-007

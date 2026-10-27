@@ -2187,3 +2187,52 @@ actors on LOAD through another append helper.
 were not read. Whether another append to `[L00240]` reaches a Sack: the 40
 instructions that name `L00240`, `SAV-LOADREG-878`'s append helper, untraced wrappers and other tick
 containers (`MOVE-TICK-014`) are not traced.
+
+## Loaded occupancy in two foreign-written saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-191 | In `magesmoving.sav` units 168 and 183 are mid-step with mover cell `+06` and claim `+0x80` one cell away; the ground slot and dynamic bit 0x40 sit at that next cell, and their Position cells carry neither. | High | ● active (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+| MOVE-192 | Both saves carry dynamic ground bit 0x40 at 64,65 with no cell record and no unit there; every other 0x40 bit of the two block planes matches a living unit's ground slot. | High / Medium | ✔ promoted (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+
+### MOVE-191
+
+`tools/savfull -chase` on `magesmoving.sav` (SHA-256 `241ead79…10c9`), exact decode.
+
+| unit | Position cell | sub-cell | mover `+06` | claim `+0x80` | ground slot | Position row dyn |
+|---|---|---|---|---|---|---|
+| 153 | 21,38 | 0x70,0x70 | 21,38 | 21,38 | 21,38 | 0x60 |
+| 160 | 20,38 | 0x60,0x60 | 20,38 | 20,38 | 20,38 | 0x60 |
+| 168 | 23,38 | 0x60,0xa0 | 22,39 | 22,39 | 22,39 | 0x20 |
+| 183 | 19,37 | 0x80,0xb0 | 19,38 | 19,38 | 19,38 | 0x20 |
+
+All four hold pending 8 and progress 2 (a cast). `mover+0xaa`/`+0xac` are 0x10/0xf, 0x10/0xe,
+0x10/2 and 0xb/2. No other Unit or Human of either save is off-centre. In
+`mage-anim.sav` every unit is centred and every ground slot sits at its Position cell.
+
+`MOVE-088` reads the crossing as one call that releases the old cell, claims, rewrites
+Position and occupies the new cell; under it the Position cell and the ground slot change
+together. Units 168 and 183 depart from that.
+
+**Confidence.** High for the decoded fields.
+
+**Unknown.** What the original does on the crossing tick of such a unit: whether the release
+of a Position cell that holds no slot changes another unit's occupancy.
+
+### MOVE-192
+
+- Block rows (`SAV-1098`): 2,216 in `mage-anim.sav`. 13 rows carry dynamic bit 0x40; 12 of
+  them are the Position cells of the 12 living Humans, each with a cell record whose ground
+  slot names that unit. The 13th is 64,65: dynamic 0x60, static 0x00, no cell record, and no
+  living unit there. In `magesmoving.sav` (2,239 rows) the 13 rows with 0x40 are 10 Position
+  cells, the two next cells of `MOVE-191` and the same row at 64,65.
+- Party units 22, 84 and 132 of `mage-anim.sav` and 22, 69 and 91 of `magesmoving.sav` stand 45
+  or more cells from 64,65; party unit 4 stands at 67,52, 13 cells from it, in both saves.
+- LOAD leaves the bit in place (`SAV-1098`, Medium), and the recompute `R0453` does not
+  visit a cell without a record (`TERR-STRUCT-069`). While the bit stays, a ground mover mask
+  (0x41, 0x44) is blocked there (`TERR-PASS-051`).
+
+**Confidence.** High for the rows. Medium that LOAD leaves the bit, the grade of `SAV-1098`.
+
+**Unknown.** Whether a later tick clears the bit: no other writer of the dynamic plane was
+enumerated. Whether a route of the owner's run reaches 64,65.

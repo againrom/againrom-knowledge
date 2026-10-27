@@ -417,6 +417,12 @@ distinct original-written documents of the owner save tree holds an actor
 whose mover cell is more than one cell from its Position (Medium).
 — SAV-1120, SAV-1121
 
+The drawable built for such an actor starts in action 0 when its entry message carries
+stage 0, whatever the loaded action `+0x54` (Medium). In one foreign-written mission-91
+document four casting mages are mid-step with stage 0; their drawables start in action 0 at
+their mover-cell centres, two of them one cell from their Positions (Medium).
+— ANIM-194, ANIM-195
+
 ## Dead actors and source references
 
 Dead actors leave the owner graph and remain in the exact top-level dead list.

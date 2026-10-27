@@ -9040,3 +9040,142 @@ at 12694 and re-engaged at 12710 as the near member moved between seen and unsee
 **Confidence.** Medium: one relocation into sight.
 
 **Unknown.** A second relocation into sight from a pursuit already dropped by the same group.
+
+## A fleeing party and Guard mages in two saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-758 | In `mage-anim.sav` and `magesmoving.sav` only the Guard mage on post 21,17 holds Stone Curse (id 20); its draw set is ids 13 and 20, and at LOAD the party stands 27 to 46 cells from it. | High / Medium | ● active (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+| AI-759 | In `mage-anim.sav` the five-mage Guard group loads with centroid 21,35, radius byte 10 and its mages at their posts; party units stand 16 to 46 cells from the centroid and over 6 from each mage. | High / Medium | ● active (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+| AI-760 | Guard mages of both saves have sight 6, Mind 35 and book reach 8 or 9, so a mage that sees a party unit is within cast reach; by the Guard arm the group walks home when none sees one and none holds an attacker cell. | Medium | ● active (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+| AI-761 | Of the published holds, a party unit of these saves on a Move can meet the blocked-cell wait, a refused route, the arrival latch, the turn before a step and Stone Curse; whether the list is complete is Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+
+### AI-758
+
+Inputs: `mage-anim.sav` (SHA-256 `b2cc98e9…4b9f`) and `magesmoving.sav` (`241ead79…10c9`),
+decoded with `tools/savfull` (`-fields`, `-chase`), exact; the books and actor bytes are in
+`evidence/books.tsv`, the positions and group bytes in `evidence/chase.txt`.
+
+- Enemy player slot 3 has seven Humans with books. Six hold fire_arrow (id 1), four of them
+  also lightning (13), and heal (6); none of them holds id 20.
+- The seventh, object 194 in `mage-anim.sav` and 191 in `magesmoving.sav`, stands centred
+  on 21,17 in Guard group 20 (order 1, radius byte 8). Its book holds heal (Defensive 1),
+  lightning (cost 10, `Spell+9` 10) and stone_curse (cost 40, `Spell+9` 5). Mana word
+  `+0x9a` is 383 and Mind word `+0x88` is 40.
+- Under `AI-554` the cast choice skips Defensive records and the Mind re-entry needs
+  `+0x88` above 59. Each book choice of this mage therefore draws id 13 or id 20, one in
+  two each (affordable at the loaded mana).
+- Party units (player slot 1) at LOAD: 67,52 (unit 4), 19,51, 19,54 and 18,54 in `mage-anim.sav`;
+  67,52, 19,49, 18,49 and 19,44 in `magesmoving.sav`. Chebyshev distances to 21,17 are 34 to 46
+  and 27 to 46. The mage's sight byte `+0xa5` is 7.
+
+**Confidence.** High for the decoded books, positions and fields. Medium that the
+Stone Curse hold (`AI-512`, `MAGIC-ACTGATE-079`) cannot start at LOAD: that needs the
+Guard engagement rule (`AI-752`, `AI-REISSUE-077`, both Medium) and that `Spell+9` is
+not refreshed before the decision (`MAGIC-REACH-178`).
+
+**Unknown.** Whether a party unit comes into this mage's sight in the owner's run.
+
+### AI-759
+
+- `Group.member.raw80` of group 19 in `mage-anim.sav`: order byte `+0x20` = 1,
+  centroid `+0x28` = 21,35, `+0x2a` = 4, `+0x2b` = 6, `+0x2c` = 10, working radius
+  `+0x2d` = 10, `+0x38` = 10, latch `+0x30` = 0, enable `+0x45` = 5. `magesmoving.sav`
+  holds the same bytes.
+- Its five members (objects 156, 163, 171, 179, 186) stand centred at 18,33, 21,31,
+  24,36, 22,38 and 19,36 with pending `ord+8` = 0xb, progress 0 and command state 0xb:
+  the at-post outcome of the Guard arm (`AI-648`).
+- Party units 22, 84, 132 and 4 stand 16, 19, 19 and 46 cells from 21,35. The nearest mage to
+  a party unit is 13 cells away (22,38 to 19,51); every mage's sight byte is 6.
+- `AI-RADIUS-014` and `AI-GUARD-021` read the clip radius as `+0x2d`, re-rolled to
+  `+0x38` + 4 + {-1, 0, 1} when the latch flips: 10 now, 13 to 15 after a roll.
+
+**Confidence.** High for the bytes. Medium for the consequence that the first Guard
+pass after LOAD gives no mage a target: the candidate list `R0110` and the sight
+stamp are reused from `AI-GRPGUARD-074` and `AI-REISSUE-077`, not read here.
+
+**Unknown.** The tick of the first group pass after LOAD.
+
+### AI-760
+
+- Books of the six group-19 and group-21 mages (both saves, `evidence/books.tsv`):
+  fire_arrow `Spell+9` 8, cost 3, Defensive 0; lightning `Spell+9` 9, cost 10, Defensive 0;
+  heal Defensive 1. Mind word `+0x88` = 35 for each; sight byte `+0xa5` = 6; mana `+0x9a`
+  0xc8 to 0xee.
+- With Mind not above 59 every engage of these computer-owned mages reaches the book
+  draw of `AI-554`, which picks fire_arrow or lightning. The kind-8 order approaches to
+  the `Spell+9` held at the order (`AI-678`).
+- A mage sees a target at Chebyshev distance at most 6, and 6 is below 8. A target seen
+  by the mage is within reach without a step. A target seen only by another member can be
+  farther, and that mage walks until it is within reach.
+- By the Guard arm a member with no winner walks to its post (`AI-740`), and the group
+  dropped the hero on a pass where no member saw it in three EN runs of other documents
+  (`AI-752`).
+- Exception: a computer-owned member's remembered attacker cell `ord+0x58` is forced into
+  the shared stamp until `ord+0x5a` passes 20 group passes (`AI-REISSUE-077`,
+  `AI-GROUPSEE-068`). The hit hook `R0226` sets it (`AI-547`). At LOAD `ord+0x58` and
+  `ord+0x5a` are 0 for all seven mages of both saves.
+- Group 21 (object 205, 202 in `magesmoving.sav`) loads AI-enable `grpAI+0x45` = 0 in
+  `mage-anim.sav` (1 in `magesmoving.sav`), so its mage may not run the group pass there
+  (`AI-ARBITER-057`).
+- In `magesmoving.sav` all five group-19 mages hold pending 8, progress 2 and action
+  `+0x54` = 0xd with `+0x5c` = 0x51000450, the key of party unit 91 (19,44), which holds no
+  book. Party mage 22 carries the same `+0x5c`.
+
+Inference: the mages of both saves advance only to bring a party unit seen by another
+member into reach, and turn back when the party leaves the sight of all of them and no
+member remembers an attacker.
+
+**Confidence.** Medium: a composition of Medium claims (`AI-752`, `AI-678`, `AI-740`) and
+of the loaded `Spell+9`, whose refresh before the decision is Unknown (`MAGIC-REACH-178`).
+The walk home is not shown in code or in a run for these saves.
+
+**Unknown.** A native run of `mage-anim.sav` that records each mage's `ord+8`,
+`ord+0x14` and cell from LOAD while a party unit walks 6 to 9 cells from the nearest
+mage settles it.
+
+### AI-761
+
+Loaded state of the four party units of each save (all centred, `evidence/chase.txt`):
+command state 0xb, `ord+0x50` = 1, `ord+0x54` = 1 (0 for unit 4), `mover+0x98` = 0,
+`mover+0x90` = 0, no bit `0x100000` in `+0x144`; the attached effects carry spell ids 0x12,
+0x17 and 0x18 only. Pending 0 and progress 0, except the casting mage 22 of
+`magesmoving.sav` (pending 8, progress 2). Unit 4 (67,52) is in a group of order 3; the
+others in groups of order 4.
+
+The holds published in the cited claims that can keep such a unit on a cell once it gets a
+Move:
+
+| hold | routine | release |
+|---|---|---|
+| blocked next cell, a moving occupant (centred with pending 1 or 4, or off-centre) | `R0178`, `R0402` (`MOVE-130`, `MOVE-132`) | the occupant leaves, or a later admission searches round it |
+| refused route, `mover+0x98` | executor tail `L00010` (`AI-649`, `AI-659`) | state 1 stands down to 0xc; the next order 4 pass re-issues the walk, except after a static-search refusal latched by path (b) (`AI-519`) |
+| arrival latch on a substitute endpoint | order 4 arm path (b) (`AI-519`, `MOVE-181`) | a new command |
+| turn before step | `MOVE-090` | the facing reaches the step heading |
+| Stone Curse | `R0016` progress 4 (`AI-512`) | effect expiry |
+
+The wait verdict is nonzero only for a unit with virtual footprint side 1 whose Player
+`+0x28` is 0 (`MOVE-132`; that value is read as a human participant at Medium, `AI-678`).
+Neither the party Player's `+0x28` nor a footprint side was read in these saves. The hit
+routine stores no order field; its hook `R0226` stores only `ord+0x54`, `ord+0x58` and
+`ord+0x5a` (`AI-546`, `AI-547`), none of which the walk, the step or the executor rows
+listed here read.
+
+The loaded fields read (`ord+8`, `ord+9`, `ord+0x50`, `ord+0x54`, `mover+0x90`,
+`mover+0x98`, bit `0x100000` of `+0x144`, the attached effects) start no listed hold.
+Whether a Move given to unit 22 of `magesmoving.sav` (loaded progress 2) waits for its cast
+was not read: the executor reads the pending kind only at progress 0 (`AI-519`).
+
+No routine was read to search for a hold outside the table. Unread are the fallback tail of
+`R0020` past `L14301` (`MOVE-132`), the order 4 arm past `L14844` and `R0088`
+(`AI-519`), and the search failures `MOVE-130` leaves open.
+
+**Confidence.** Medium that each listed hold can apply: the table reuses the cited claims at
+their grade, and the loaded fields are read exactly. Unknown whether the list is complete.
+Which hold occurs depends on the route and the other units in play, which the static read
+does not give.
+
+**Unknown.** Which party unit is the owner's hero, and the route of the run. A native run
+of `mage-anim.sav` that records, per tick from the Move command, the hero's `ord+8`,
+`ord+9`, `mover+0x98`, `mover+0x90`, Position and the dynamic plane of its next cell
+names the hold.

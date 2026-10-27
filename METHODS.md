@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4308. Observation: 164. Static analysis: 3589. Mixed: 555.
+Claims labelled: 4316. Observation: 164. Static analysis: 3594. Mixed: 558.
 
 ## Ledger ai
 
@@ -478,6 +478,10 @@ Claims labelled: 4308. Observation: 164. Static analysis: 3589. Mixed: 555.
 | AI-752 | mixed | ✔ promoted (branch candidate) |
 | AI-753 | mixed | ✔ promoted (branch candidate) |
 | AI-754 | mixed | ✔ promoted (branch candidate) |
+| AI-758 | mixed | ● active (branch candidate) |
+| AI-759 | static analysis | ● active (branch candidate) |
+| AI-760 | static analysis | ● active (branch candidate) |
+| AI-761 | static analysis | ● active (branch candidate) |
 
 ## Ledger alm
 
@@ -825,6 +829,8 @@ Claims labelled: 4308. Observation: 164. Static analysis: 3589. Mixed: 555.
 | ANIM-184 | static analysis | ● active |
 | ANIM-185 | static analysis | ● active |
 | ANIM-186 | static analysis | ● active |
+| ANIM-194 | static analysis | ✔ promoted (branch candidate) |
+| ANIM-195 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger databin
 
@@ -1779,6 +1785,8 @@ Claims labelled: 4308. Observation: 164. Static analysis: 3589. Mixed: 555.
 | MOVE-183 | static analysis | ● active |
 | MOVE-184 | static analysis | ● active |
 | MOVE-187 | static analysis | ● active |
+| MOVE-191 | mixed | ● active (branch candidate) |
+| MOVE-192 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger pal
 

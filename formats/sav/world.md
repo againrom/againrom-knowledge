@@ -121,6 +121,13 @@ documents:
 | static bit 0x20 at the four sack cells (originals `20/20`) | the sack lookup fails: trigger `Get sack` sees no sack and fires at LOAD, and a click on a sack is refused. With the rows present, a click walks the hero to the sack and completes the pick-up, and the trigger fires on that pick-up. A pick-up issued while the hero already stands on the sack's cell can still succeed; that path is Unknown — SAV-1097 |
 | a row at every cell record (static `payload+1 \| 0x20`, dynamic `\| 0x40` with a ground occupant) | no unit collision; the rows restore it. Static 0x20 and dynamic 0x40 were not separated by any run. Dynamic 0x40 composes movement mask `0x41` directly; bit 5 (static 0x20) is in none of the three constructor-set masks, but it gates the cell-record lookup that dynamic bit 6/7 is recomputed from, so an indirect bit-5-to-collision path is not excluded — SAV-1098, SAV-1102 |
 
+A dynamic 0x40 bit with no cell record is not visited by the recompute. Two foreign-written
+mission-91 documents carry one at a cell with no unit; LOAD leaves it (Medium), and while it
+stays a ground mover mask is blocked there. Whether a later tick clears it was not read. The
+mask predicate of TERR-PASS-051 stands; its domain naming was amended and its cell counts
+superseded.
+— MOVE-192, SAV-1098, TERR-STRUCT-069, TERR-PASS-051
+
 ## Cell table
 
 ```text

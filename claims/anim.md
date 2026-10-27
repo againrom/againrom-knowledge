@@ -3505,3 +3505,68 @@ require separate evidence. The prior exclusion fence remains in force.
 
 **Evidence.** [EXP-0584](../experiments/EXP-0584-projectile-notifications/EXP-0584.md), [open edges](../experiments/EXP-0584-projectile-notifications/final-unknowns.tsv);
 TERR-LIGHT-061 and SESS-COMPOSE-058.
+
+## The drawable of a unit loaded mid-step
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ANIM-194 | The state arm builds a new drawable with action `+0x84`, clock `+0x94`, `+0xa0` and stage `+0x15a` at 0; no mask bit stores the action, so it starts in action 0 when the entry message carries stage 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+| ANIM-195 | In `magesmoving.sav` four casting mages are mid-step with stage `+0x13c` 0; by `SAV-1119` and `ANIM-194` their drawables start in action 0 at the centres of their mover cells 21,38, 20,38, 22,39 and 19,38. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0629](../experiments/EXP-0629-mage-chase-cell/) |
+
+### ANIM-194
+
+Capstone 5.0.7 listings of the EN `rom.exe` (image SHA-256 `942e9b72…7d03`; the RU image is the
+same file):
+
+- The base constructor `R1652` sets `ebx` to 0 (`L16992`) and stores it at action byte
+  `+0x84` (`L02485`), `+0x85`, clock `+0x94` (`L17125`), `+0xa0` (`L17126`), `+0x88`,
+  `+0x8c`, `+0x98`, `+0x9c`, `+8`, `+0xc`, `+0x6c`; `+0x80` := -1.
+- The constructor `R0593` calls it and stores stage `+0x15a` := 0 (`L10347`).
+- The creation path of the state arm `L02530` (`L09186..L02769`) saves the old stage
+  (`L02542`) and stores, per mask bit of message `+0x14`: 1 `+0xfc`, 2 `+0x13c`, 4 `+0x108`,
+  8 stage `+0x15a`, 0x10 facing `+0x6c`, 0x20 point `+8`/`+0xc`, then cache `+0x28`/`+0x2c`
+  and `+0x10` := 0, and bits 0x200 to 0x80000000 bytes and words in `+0x100..+0x158`, `+0x1c`,
+  `+0x24`, `+0x18`, `+0x18c`. None of these stores is to `+0x84`, `+0x94` or `+0xa0`.
+- The stage switch (`L02769`, table `L02543`, `ANIM-TELEPORT-171`): stage 0 stores
+  action 0 only after a nonzero old stage (`L07732..L17127`); stage 1 stores action 6
+  (`L17128`, `L17129`).
+- The creation callees `R0590` and `R0551` (read to `L17130`) store none of
+  `+0x84`, `+0x94`, `+0xa0`, `+8`, `+0xc`; `R0551` reads `+0x84` (`L17131`).
+
+- The other allocation path (`L09187`) builds with `R0594`, which calls `R0593` and
+  stores only the vtable and `+0x10` := 0x10 (`L02802..L17132`).
+- The actor-state sender `R0059` sends, under mask bit 8, actor byte `+0x13c`
+  (`L17133`), the decay stage that `ANIM-DEATH-007` reads as 0 until death; a stage of 1
+  would start action 6 (`L16036..L17128`).
+
+So a living actor whose entry message carries stage 0 is drawn in action 0 at the message
+point until a later message changes the action. The loaded actor action `+0x54` reaches
+the drawable through no store in this path.
+
+**Confidence.** High for the listed stores and the absence of an action store in the
+read windows. Medium that no other writer changes the action before the first frame: the
+arm's other callees and the dispatcher's other arms were not read.
+
+**Unknown.** The first later message that sets the action of a loaded mid-step or casting
+actor.
+
+### ANIM-195
+
+- `MOVE-191` lists the four mid-step units of `magesmoving.sav` and their mover cells `+06`.
+  `SAV-1119` reads that the entry sender names the mover cell, as `(cell << 8) + 0x80`, for a
+  non-centred actor; the drawable takes that point.
+- Predicted first frames, if no tick moves them before the entry send: unit 153 at the centre
+  of 21,38 (Position sub-cell 0x70,0x70), 160 at 20,38 (0x60,0x60), 168 at 22,39 (Position
+  23,38), 183 at 19,38 (Position 19,37); each in action 0 with the facing the message carries.
+  Actor `+0x13c` is 0 for all four (`evidence/books.tsv`), so the entry message carries
+  stage 0 (`ANIM-194`). The simulation keeps them at their Positions in a cast (pending 8,
+  progress 2, `+0x54` = 0xd).
+- 168 and 183 are drawn one cell from their Position cells; 153 and 160 are off-centre
+  inside their own mover cells and are drawn at those cells' centres.
+- No party unit of either save and no unit of `mage-anim.sav` is mid-step.
+
+**Confidence.** Medium for the points and the action: the inputs are exact; the pre-entry tick
+(`SAV-1118`) and later messages are not excluded. Unknown for what is shown.
+
+**Unknown.** A native LOAD of `magesmoving.sav` that reads each mage drawable's `+8`, `+0xc`
+and `+0x84` at the first frame settles it.
