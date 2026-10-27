@@ -3134,3 +3134,150 @@ Steps m6.01-m6.13; measures "non-black pixels right of x 832".
 Medium for each caption.
 
 **Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+## Nine EN saves and selected LOAD path
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-233 | Nine frozen EN ROM2 saves have exact physical and decoded-document partitions under the selected successful-transfer grammar; decoded lengths are 4408..72936 bytes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-234 | Four frozen EN ROM2 town-like documents contain one Player, an empty dead list, worldPresent 0, two sentinels and a 400-byte trailer; no world half is stored. | High / Medium | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-235 | Five frozen EN ROM2 mission-like documents hold eight Players and a complete world half; game0006 alone has a dead Unit and two world-effect records; all Sack and extra counts are zero. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-236 | Nine frozen EN ROM2 Player-1 records each hold one Group Human with matching controlled/owner saved keys; measured Human state includes attributes, skills, experience, HP, mana, positions, equipment and bag. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-237 | The Player-1 Human books in frozen EN game0005 and game0006 hold all spell IDs 1..29; 0002/0003/0004/9998/9999 hold24, 27; 0000/0001 have no book. Item spells are separate. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-238 | All nine frozen EN ROM2 physical tails tile to EOF as inline REG, one pair, Scenario state and nine empty buffers; incoming current keys distinguish four town-like and five mission-like files. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+
+### R2-SESSION-233
+
+The nine SHA-256 identities are in the experiment's inputs.json. Derived
+document.tsv and fields.tsv tile every decoded byte; physical.tsv tiles every
+physical byte. Decoded lengths in filename order 0000..0006, 9998, 9999 are
+4486, 72178, 4418, 4408, 72188, 72482, 72936, 4408, 72092. All nine compressed streams
+consume their declared source and produce their declared word count.
+
+Three documents have one final word-suffix byte after their 400-byte trailer:
+0000 at 4485, 0004 at 72187 and 9999 at 72091. Each matches the low byte of
+its even decoded length. The selected RU writer R2.0162 rounds an odd archive
+length upward and writes one byte from that length variable before encoding.
+The EN writer was not read; the cause of the suffix in the EN saves is an
+inference from the byte match.
+
+**Confidence.** High for the nine hashed revisions' counts, offsets, hashes
+and exact partitions. Medium for reading this partition as a native LOAD:
+the embedded Group binding and successful-transfer conditions of
+R2-ENGINE-199/200 remain. Byte fit is not original acceptance.
+
+**Unknown.** Full semantic coverage, short-read/exception behavior, arbitrary
+classes and original completion. The conservative unassigned.tsv retains
+unassigned or partially interpreted intervals, including raw blocks.
+
+### R2-SESSION-234
+
+The four files are game0000, game0002, game0003 and game9998. Their decoded
+lengths are 4486, 4418, 4408, 4408. Each has mission 0, incoming current kind 2/ID 1,
+one Player, one inline Group and one Human. Player lists end at 4072, 4005, 3995,
+3995; dead counts occupy the next four bytes and are zero. The world byte is
+zero. Sentinel pairs begin at 4077, 4010, 4000, 4000; 400-byte trailers follow.
+Only game0000 has the one-byte word suffix of R2-SESSION-233.
+
+**Confidence.** High for literal order and values in these revisions.
+Medium for town-like classification from the stored keys. It is not a
+runtime current-pointer or displayed-town observation.
+
+**Unknown.** Most head/Player/raw-trailer meanings and the delivered town
+frame. Cold LOAD with current-pointer and first-frame observation would
+settle delivery.
+
+### R2-SESSION-235
+
+The files are game0001, 0004, 0005, 0006, 9999. Each stores mission10,
+worldPresent1 and incoming current kind 1/ID 10. All eight Players, their inline
+Groups and nested objects terminate under the measured programmes. Each world
+Building list holds 15 Building objects and one Pointer. The world then has
+SpellEffects, terrain, 10374 session bytes, Sacks and the extra Token list.
+
+Only game0006 has a dead-list body: one Unit. Its SpellEffects list contains
+SpellTransport and PointEffect, with a nested Effect_DirectDamage. The other
+four SpellEffects counts are zero. Sack and extra counts are zero in all five.
+document.tsv gives every ordered top-level interval; objects.tsv gives each
+class/reference/payload interval. No class-name search resynchronizes a walk.
+
+**Confidence.** High for counts, named classes and exact extents on these
+hashed buffers. Medium for native interpretation under conditional Group
+binding and complete transfer. Unknown for first-frame and effect continuation.
+
+**Unknown.** Native map registration, session raw meanings, nonempty Sacks or
+extra-list instances and live post-load effects. A cold LOAD of game0006 with
+identified effect/target state at successive ticks would settle continuation.
+
+### R2-SESSION-236
+
+humans.tsv records 14 Humans: nine for Player ID 1 and one for Player ID 8
+in each mission document. Every Player-1 Human self key equals Player+0x38,
+and its owner key equals Player self key. Each Player-1 Group has one member.
+This is a numeric saved-key witness, not list-order identification alone.
+
+semantic.tsv records each Human's name length/hash and field offsets. Name is
+Unit+0x80; attributes +0x84..+0x8a; HP +0x94/+0x96; mana +0x9a/+0x9c;
+skills +0xa8+2i and bases +0x116+2i; main skill and five experience DWORDs
+are Humanoid+0x23c's raw24; experience sum is +0x130. Position bytes 0/1
+and 4/5 in the base raw12 give tile X/Y and fractions (R2-ENGINE-055).
+equipment.tsv resolves hand/offhand, twelve equipment slots and ordered bag
+references separately. Item IDs and quantities are numeric fields, not names.
+
+Player-1 tile positions are 0/0 in the four town-like files, 11/41 in
+0001, 0004, 0005, 9999 and 21/41 in 0006. Fractions are 128/128 throughout.
+0000/0001 hold attributes41/34/24/17, HP149/149, mana0/0 and experience7320.
+The other seven hold19/15/43/25; their individual HP/mana/experience are in
+humans.tsv. Native title binding inherits R2-ENGINE-319's Medium clause.
+
+**Confidence.** High for numeric values, byte extents and saved-key equality.
+Medium for semantic joins inherited at Medium and for delivered party/active
+client identity. Unknown for complete post-load roster and state overrides.
+
+**Unknown.** Which Human is the active party member, displayed names/items,
+all enchantment meanings and first-frame state. Observe owner/member keys,
+coordinates and inventory after a cold LOAD and again at the first frame
+to settle the delivered state.
+
+### R2-SESSION-237
+
+The book is Unit gate+0x140, not the Weapon reference+0x88. The two full
+books have array size 30, 29 nonnull references for slots 1..29 and matching
+stored IDs 1..29. R2-ENGINE-019 supplies the published 29-spell domain.
+Their payloads after the gate are 327 bytes, at decoded3899 in game0005 and
+3851 in game0006; gate offsets are 3898 and 3850.
+
+The five sparse books have size 28, 27 slot references, two nonnull Spell
+objects (24 and 27) and 80 payload bytes. Their gate offsets are 3648, 3801,
+3850, 3801, 3802 in filename order0002, 0003, 0004, 9998, 9999. The two fighter
+books are absent at gate offsets3564/3565. spellbooks.tsv retains every
+slot, including nulls, reference form, object/payload offset and entry fields.
+All 14 Humans are measured separately; Player 8's book is not Player 1's.
+
+**Confidence.** High for the nine buffers' gate, size, slot/ID population and
+equality with the inherited1..29 domain. Medium for ordinary native LOAD
+delivery under the conditional archive model. Unknown for final UI/castability.
+
+**Unknown.** The meaning of book DWORD+0x18, the cause of the full books,
+which file the owner meant and post-load refilling/overrides. Cold LOAD of
+0005/0006 followed by book inspection and controlled casts would settle
+delivery; no original was run.
+
+### R2-SESSION-238
+
+physical-summary.tsv gives exact blob, registry and bank offsets, registry
+counts/pool lengths, incoming current and all nine buffer lengths. The four
+town-like files are 0000, 0002, 0003, 9998, with current kind 2/ID 1; the other five
+have kind 1/ID 10. All current indices are 0. Only 9998 has two availability
+records; all other counts are 1. Every pair count is 1 and every client-buffer
+length is 0. physical.tsv partitions each input through the ninth buffer to EOF.
+
+**Confidence.** High for exact framing and literal measurements on the
+nine hashed revisions. Medium for town-like/mission-like classification.
+Unknown for complete native catalog/client restoration. Existing Scenario
+load contracts R2-SESSION-031..037 retain their grades; raw16 catalog payload
+consumption does not establish verbatim restoration.
+
+**Unknown.** Most registry values, pair meanings, bank/grid/raw16 meanings
+and nonempty buffers. Observe the exact consumer of a distinct saved value
+before and after original LOAD to assign a restoration meaning.

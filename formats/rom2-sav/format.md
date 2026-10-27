@@ -7,11 +7,20 @@ different magic word. The simulation document shares its head, Player-list
 position, world-present byte and trailer with ROM1; the world half, the
 Player body and the physical tail differ. This page lists the differences
 only; where it says "as ROM1", the [ROM1 SAV references](../sav/format.md)
-apply. Four original save points have measured envelope, head and physical-tail
-coverage. The first Group member is walked to its payload end; later Group
-bytes, other actors and current-party identity remain Unknown.
+apply. Nine frozen EN saves now have complete structural document and physical
+partitions under the selected successful-transfer grammar. Four omit the world
+half; five include it. Numeric controlled/owner-key matches find one
+Player-1 Group Human per file; which Human is the active party member stays
+Unknown. Native LOAD completion and first-frame party state remain Unknown.
+The earlier four-point measurements below retain their
+own population and grades.
 — R2-SESSION-017, R2-SESSION-018, R2-SESSION-075, R2-SESSION-078,
 R2-SESSION-099
+
+The [nine-save LOAD contract](#nine-save-load-contract) gives the complete
+partitions, Human fields, book populations and remaining restoration Unknowns.
+— R2-SESSION-233, R2-SESSION-234, R2-SESSION-235, R2-SESSION-236,
+R2-SESSION-237, R2-SESSION-238
 
 ## Envelope
 
@@ -44,8 +53,12 @@ u32 0xBADFACE1, u32 0xBADFACE1
 trailer state         400 bytes
 ```
 
-The three lists before and after terrain and session sit where ROM1 has
-Buildings, SpellEffects and Sacks; their classes were not read. The ROM2
+The earlier positional identification of Buildings, SpellEffects and Sacks
+was Medium. Selected native programmes and five complete mission-buffer walks
+now give Building/Pointer and SpellEffect-derived instances; observed Sack
+and extra-list counts are zero. — R2-SESSION-235, R2-ENGINE-603
+
+The ROM2
 reader reads both trailer words unconditionally and compares neither. ROM1 reads
 the second only when the first equals 0xBADFACE1. The ROM2 world-half load builds the map from the named scenario before
 reading terrain. — R2-SESSION-018
@@ -56,8 +69,11 @@ Terrain stores one `u32` per cell whose byte in plane two is above 0x0f, over
 cell indices `0x807` up to `0xedee` (exclusive). The key is
 `(index << 16) | (plane-two byte << 8) | plane-one byte`. The key list is
 followed by one sub-object written through its own virtual slot and a `u32`
-identity key. The ROM1 cell rows do not appear. List count form and the
-sub-object layout are Unknown.
+identity key. The ROM1 cell rows do not appear. The key count is u16, or
+0xffff then u32, followed by four bytes per key. Under the selected
+constructor, the sub-object has the same escaped count followed by u16 key
+and raw 60 bytes per entry; the raw60 meanings remain Unknown.
+— R2-ENGINE-603
 
 Session is 4,000, 1,000, 48, 400 and 4,908 raw bytes, then `u8`, `u8`, `u32` and
 three `u32`: 10,374 bytes against ROM1's 4,374. Only the first and fifth
@@ -558,3 +574,118 @@ completion +0x40 and +0x41 as two bytes after an unexamined ancestor prefix.
 These are object-relative fields, not absolute SAV offsets. Ordinary SAVE
 reachability, nested damage encoding, RNG persistence and cold LOAD continuation
 remain Unknown; no preserved save was read (R2-SESSION-161).
+
+## Nine-save LOAD contract
+
+The selected EN Ok message 0x419 reaches the load entry after clearing the old
+session. It creates a mode-2 server, decodes the document, then reopens the
+physical tail. Document order is head, Players with all Groups and nested
+actors, dead actors, worldPresent, optional world half, two sentinel DWORDs
+and raw400 trailer. Zero worldPresent skips the world half. Nonzero reads
+Buildings, SpellEffects, constructs the map from the saved scenario name,
+then reads terrain, session, Sacks and the extra Token list. Session reading
+is conditional on its global pointer being null. — R2-ENGINE-601
+
+The client reads inline REG at blobEnd+256 and requests
+CurrentState/InBattle. Nonzero selects mission setup; zero selects the town
+continuation and posts 0x42e, whose measured entry reaches the town-display
+routine L2.00266; view dispatch is Unknown. Both selected tail paths
+read REG, pairs, Scenario and nine buffers in order. The label is skipped as
+state. Incoming catalog raw16 is consumed without being copied into catalog
+objects. Transport failure, later overrides and first-frame delivery remain
+Unknown. The InBattle value in each save's registry was not read, so the
+branch taken per file is Unknown. The listing also contains a 0x421 arm and
+a zero-worldPresent field-reset loop whose effects are unexamined.
+— R2-ENGINE-601, R2-SESSION-033
+
+### Complete measured documents
+
+All nine frozen EN revisions have exact structural document and physical
+partitions under the selected programmes and complete successful transfers.
+This framing result proves no native LOAD acceptance. — R2-SESSION-233
+
+| Save | Decoded bytes | Players | worldPresent | Mission | Incoming current kind/ID |
+|---|---:|---:|---:|---:|---|
+| game0000 | 4486 | 1 | 0 | 0 | 2/1 |
+| game0001 | 72178 | 8 | 1 | 10 | 1/10 |
+| game0002 | 4418 | 1 | 0 | 0 | 2/1 |
+| game0003 | 4408 | 1 | 0 | 0 | 2/1 |
+| game0004 | 72188 | 8 | 1 | 10 | 1/10 |
+| game0005 | 72482 | 8 | 1 | 10 | 1/10 |
+| game0006 | 72936 | 8 | 1 | 10 | 1/10 |
+| game9998 | 4408 | 1 | 0 | 0 | 2/1 |
+| game9999 | 72092 | 8 | 1 | 10 | 1/10 |
+
+The four world-absent documents have one Player and an empty dead list. The
+five world-present documents each have 15 Building objects and one Pointer.
+Only game0006 has one dead Unit and two world-effect records, SpellTransport
+and PointEffect, with a nested Effect_DirectDamage. Sack and extra counts
+are zero throughout the five mission documents. — R2-SESSION-234,
+R2-SESSION-235
+
+Building payload is base38, raw22 and scalar widths 1,2,2,2,1,1,1,4,4:
+78 bytes. Pointer adds a DWORD: 82. Selected Sack is base38, a DWORD and
+the bag programme; these files exercise no Sack body. — R2-ENGINE-603
+
+Game0000, game0004 and game9999 each have one codec word-suffix byte after
+the document. It equals the low byte of the even decoded length. The
+selected RU writer rounds an odd archive length up and appends one byte from
+that rounded-length variable before compression. The EN writer was not read,
+so the cause in the EN saves is an inference from the byte match. The
+document reader reads no record there. — R2-SESSION-233
+
+### Measured Human and book state
+
+All 14 Humans are walked separately. Each Player-1 record has one Group Human
+whose self key equals Player +0x38 and whose owner key equals Player's self
+key. Five other Humans belong to Player 8. These numeric matches do not
+establish final active-client membership. — R2-SESSION-236
+
+Name is Unit +0x80's CString. Attributes are +0x84..+0x8a, current/max HP
++0x94/+0x96 and mana +0x9a/+0x9c. Skills are +0xa8+2i, bases +0x116+2i,
+main skill and five experience DWORDs are the Humanoid raw24 at +0x23c,
+and the sum is +0x130. Parameter-title joins retain their existing Medium
+grade. Worn items and ordered bag entries are separate. — R2-SESSION-236,
+R2-ENGINE-319
+
+The base raw12 block stores tile X/Y in bytes 0/1 and fractions in bytes 4/5.
+Player-1 positions are 0/0 in the four town-like files, 11/41 in
+game0001/0004/0005/9999 and 21/41 in game0006; fractions are 128/128.
+Selected RU base LOAD copies this block and registers saved keys. Its
+measured map helpers compare complete DWORD keys and return the stored
+object, separately from archive indices. Later placement remains Unknown.
+— R2-SESSION-236, R2-ENGINE-604
+
+A present book at Unit gate +0x140 has DWORD +0x18, DWORD size n and references
+for slots 1..n-1; slot 0 is omitted. Each new Spell payload is nine bytes:
+u8 ID, u8 range, u8 defensive, u16 cost and u32 self key. LOAD rebuilds the
+row pointer from ID. Damage/duration are outside this payload. Book DWORD
++0x18 and later cache precedence remain Unknown. — R2-ENGINE-602
+
+| Player-1 saves | Book | Size | Nonnull book IDs |
+|---|---|---:|---|
+| game0000, game0001 | absent | 0 | none |
+| game0002, game0003, game0004, game9998, game9999 | present | 28 | 24,27 |
+| game0005, game0006 | present | 30 | 1..29 |
+
+The full books occupy 327 bytes after the gate; sparse Player-1 books occupy
+80. IDs 1..29 equal the published spell domain. Weapon-attached spells and
+Player-8 books are separate. Native book delivery and castability remain
+Unknown. — R2-SESSION-237, R2-ENGINE-019
+
+### Semantic limits
+
+All nine physical tails end exactly after inline REG, one pair, Scenario and
+nine zero-length buffers. Current indices are zero; only game9998 has two
+availability records. Incoming keys support the four town-like and five
+mission-like classifications. Current-pointer delivery remains Unknown.
+— R2-SESSION-238
+
+Complete framing leaves most head/raw-Player fields, embedded Group state,
+position bytes outside the coordinates, portions of Unit raw blocks, terrain
+raw60, session raw10374, trailer400 and most REG/bank/grid/raw16 meanings
+unassigned. Nonempty Sack/extra restoration and live effect continuation are
+unobserved. Cold LOAD with saved-key, field, effect/target-tick and first-frame
+witnesses would settle delivered state. — R2-SESSION-233, R2-SESSION-235,
+R2-SESSION-236, R2-SESSION-238, R2-ENGINE-601, R2-ENGINE-603,
+R2-ENGINE-604

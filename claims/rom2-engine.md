@@ -13253,3 +13253,124 @@ by START MISSION and by Restart last mission would settle it. Marks of
 allies, neutral units and buildings.
 
 **Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+## Nine EN saves and selected LOAD path
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-601 | The selected EN ROM2 0x419 LOAD route decodes the document before reopening its physical tail; CurrentState/InBattle selects mission setup or the town continuation; first-frame delivery remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-ENGINE-602 | Selected EN/RU ROM2 book serializers store DWORD+0x18, array size n and references for slots 1..n-1; each new Spell payload is ID/range/defensive bytes, a cost word and saved self DWORD: nine bytes. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-ENGINE-603 | Selected ROM2 world programmes frame Building78, Pointer82, terrain escaped-count DWORD keys and escaped-count u16/raw60 entries; five mission documents fit these extents with empty Sack/extra lists. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-ENGINE-604 | Selected RU ROM2 base LOAD copies12 position bytes and registers saved addresses; the read key-map helpers insert and resolve exact DWORD keys, distinct from archive object indices. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+
+### R2-ENGINE-601
+
+The exact message-table entry selectsL2.02035. After old-session clearing
+through L2.02971 the arm calls L2.00826 at L2.02972. The entry sets mode 2,
+creates the server and calls L2.00289. That reader consumes the Bsg& envelope,
+discards blobEnd, decodes through L2.02973 and calls L2.00243.
+
+The document consumes head, Players with all nested Group/actor programmes,
+dead actors and worldPresent. Zero skips the world half. Nonzero reaches
+Buildings, SpellEffects, map construction from the saved scenario name,
+terrain, session, Sacks and the extra Token list. Session reading is itself
+guarded by a null session-global pointer. Both sentinel words and raw400
+trailer are read afterward; the sentinel values are not compared.
+
+L2.01830 reopens the file at blobEnd+256, loads inline REG and requests
+CurrentState/InBattle. Nonzero calls R2.0026(1). Zero takes town preparation,
+L2.02974 and post0x42e; its measured table entry reaches the town-display
+routine L2.00266. Selected mission/town tail readers consume REG,
+pairsL2.00383, scenario-loader pointer
+L2.00393 and nineL2.00388 buffer calls in that order. The label is sought past.
+The existing Ok contract is R2-ENGINE-439. The town display reaches view
+slots+0x80/+0x34; their dispatch and paint scheduling remain open.
+
+**Confidence.** High for selected local instruction/table/call order.
+Medium for composition across unread construction, transport and callback
+contracts. Unknown for ordinary LOAD completion and the first visible frame.
+The instrument follows direct CFG branches, records indirect jumps and
+does not close exception handlers, all callers or arbitrary virtual targets.
+
+**Unknown.** Failure/short-read behavior, global-pointer invariants, indirect
+DLL/view dispatch and later overwrites. The InBattle value in each save's
+registry was not read, so the branch taken per file is Unknown. The listing
+also contains a 0x421 arm and a zero-worldPresent field-reset loop whose
+effects are unexamined. A cold-LOAD trace from Ok through the first frame,
+with document/tail boundaries and field witnesses, would settle it.
+
+### R2-ENGINE-602
+
+Selected class descriptor/factory/constructor/vtable chains bind Spell to
+EN L2.02975/RU L2.02976 and Spellbook toENL2.02977/RU L2.01167. The book is
+behind Unit+0x140's gate; its header is two DWORDs. The array element getter
+RU L2.01172 returns backing_pointer+4*index; size getterL2.02978 reads+8.
+The selected resize body and loop leave index 0 outside serialization.
+
+Spell stores u8+8 ID, u8+9 range, u8+0xa defensive, u16+0xc cost and u32
+self address. LOAD registers that key and rebuilds+4 from the ID's row lookup.
+The nine-byte payload has no damage/duration field; later derivation remains
+separate. Null/earlier-object references carry no new payload. IDs and slot
+indices are distinct fields; the measured nonnull book entries agree.
+
+**Confidence.** High for selected local widths, order, index arithmetic and
+both programme bindings. Medium for composed native SAV delivery, inheriting
+conditional Group framing and successful-transfer assumptions. Unknown for
+final cached values, failed allocations and original acceptance.
+
+**Unknown.** Book+0x18, later refill/derive precedence and malformed counts.
+An original cold LOAD with distinct saved/cached fields and book observations
+would settle final values; no runtime process was started.
+
+### R2-ENGINE-603
+
+Building serializes the 38-byte base, raw22 and scalar widths1, 2, 2, 2, 1, 1, 1, 4, 4:
+78 payload bytes. Pointer calls it then adds DWORD+0x6c:82. Selected EN/RU
+descriptor chains and instruction programmes agree on these widths.
+
+RU R2.0171 transfers terrain keys through R2.0174: the escaped count of
+R2-ENGINE-200, then 4 bytes per key. Its selected constructor binds embedded
++0x54084's vtable+8 to L2.02979: escaped count, per entryu16 key and raw60
+through L2.02980; a saved terrain key follows. Contents of raw60 remain Unknown.
+The selected constructor binding does not prove every runtime vptr invariant.
+
+The five mission buffers have 15 Building and one Pointer each; all complete
+terrain extents lead to the 10374-byte session programme and exact following
+list/trailer boundaries. Only game0006 has nonempty world effects, as
+R2-SESSION-235 records. Selected Sack is base38, DWORD+0x3c and the bag
+programme; the observed Sack and extra lists contain no bodies.
+
+**Confidence.** High for local widths and the five hashed buffers' exact
+extents. Medium for selected embedded binding and native composition.
+Unknown for raw60 semantics, nonempty Sack/extra acceptance and live effects.
+
+**Unknown.** A nonempty identified Sack/extra save and a cold LOAD would settle
+those unexercised kinds. Layer-entry and effect/target observations would
+settle semantic and continuation questions; no image-wide absence is claimed.
+
+### R2-ENGINE-604
+
+RU L2.02981 requests 12 raw bytes in both directions. Under R2-ENGINE-055,
+bytes 0/1 are tile X/Y and 4/5 fractions; other position bytes remain unassigned.
+The baseL2.01164 also reads a saved self key and owner key. The acquired
+L2.01168 calls L2.02982 then stores the object in the returned value cell.
+L2.02982 usesL2.02983's bucket search, inserts a node with the incoming key
+on a miss, and returns node+8.L2.02983 hashes(key>>4), traverses the bucket
+and compares full DWORD keys.L2.01323 returns that node's value on a match.
+These bodies close the local insert/lookup semantics left open in
+R2-ENGINE-323; allocation internals and failure remain unexamined.
+
+The selected Group insertionL2.00361 writes member+0x70=Group and
+Group+0x44=member owner after a list helper. The nine measured Player-1
+saved-key equalities are R2-SESSION-236. Archive shared indices and saved
+address keys are separate namespaces; their numeric equality is not required.
+
+**Confidence.** High for selected RU operations, exact key comparison and
+position-transfer width. Medium for the complete successful native mapping
+path and EN parity beyond inherited contracts. Unknown for post-load roster,
+repositioning and subsequent writes. No whole-image writer/caller census is made.
+
+**Unknown.** Observe identity maps, owner/member lists and positions after
+deserialization and at the first frame to settle delivered state and later
+placement. Allocation failure and short transfer need controlled original
+observations; this experiment ran none.
