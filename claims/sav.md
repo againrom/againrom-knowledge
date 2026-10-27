@@ -18264,3 +18264,148 @@ opcodes settles how many bits each LOAD takes before the first spawn.
 
 **Confidence.** High for the counts over this corpus. The example is consistent with release
 and reuse (`SAV-1370`), not a demonstration of it.
+
+
+## Record fields LOAD resolves or copies and SAVE rewrites, and the grid-ingest fault
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1376 | `Token::Serialize` is the only archive arm for Token `+0x14` of Item, Armor, Weapon, Shield and Effect; run-time stores were not censused. LOAD resolves the key at once, else 0; that the next SAVE writes that 0 is Medium. | High / Medium | ✔ promoted | [EXP-0626](../experiments/EXP-0626-sav-resave-fields/) |
+| SAV-1377 | In 107 corpus SAVs without `Againrom` state records, 1,499 of 10,675 Item-class and Effect records carry a non-zero Token `+0x14`, naming a Player, a Sack or a Human defined earlier; 6 name no earlier object. | High | ✔ promoted | [EXP-0626](../experiments/EXP-0626-sav-resave-fields/) |
+| SAV-1378 | Human `+0x90` is copied by both archive arms; after LOAD the weight-delta helper and the compact sender read the stored value, and the first derive or weight change rewrites it; 216 of 1,382 corpus Humans differ from the derive. | High / Medium | ✔ promoted | [EXP-0626](../experiments/EXP-0626-sav-resave-fields/) |
+| SAV-1379 | A Human loaded with container presence 0 keeps the empty container its constructor built at `+0x7c`, so the next SAVE writes presence 1, count 0 and `(10000, 0)`; no Human or Unit in 107 corpus SAVs has presence 0. | High / Medium | ✔ promoted | [EXP-0626](../experiments/EXP-0626-sav-resave-fields/) |
+| SAV-1380 | The derive `R0280`, the fold `R0840` (also called from `R0184`), the init `R0160` and `L17042` (caller unidentified) write `+0x9c`; `Unit::Serialize` copies it and calls no derive. Other writers: Medium. | High / Medium | ✔ promoted | [EXP-0626](../experiments/EXP-0626-sav-resave-fields/) |
+| SAV-1381 | `L17043` in the grid ingest `R0278` reads the map reader's tile word at `+0x0c`, which stays 0 until the Tiles arm fills it; the document LOAD path reaches it by direct calls; that a mission-map click does is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-0626](../experiments/EXP-0626-sav-resave-fields/) |
+
+### SAV-1376
+
+- `Token::Serialize` `R0950` STORE pushes the dword at `this+0x14` (`L17044..L08993`).
+  LOAD binds the record's identity key to `this` in the map `[L00285]+0x88`
+  (`L08195`), reads the next dword into `+0x14` (`L09000`) and calls `R1371` on it
+  (`L08196`). `R1371` stores the mapped object on a hit and 0 on a miss (`L17045`);
+  key 0 misses.
+- Effect `L08329` calls `R0950` at `L17046`, Item `R0949` at `L16143`; Weapon
+  `R1639`, Shield `L17047` and Armor `L17048` call Item at `L17049`, `L17050`,
+  `L17051`.
+- The resolution runs inside each record's own LOAD, so a key resolves only when its object
+  is the record itself or its Token head was read earlier in the archive. If the map holds
+  only keys read in this LOAD, a key defined later, or absent from the file, leaves 0, and the
+  next SAVE writes that 0. Where the map is cleared and whether other code binds keys into it
+  was not read (Medium).
+- The live value is another object's address, which that object writes as its own identity
+  key.
+
+**Confidence.** High for the arms and the resolver: both are complete bodies, and every listed
+class serializer reaches `R0950` by a direct call. `Token::Serialize` is the only archive
+arm that stores or loads `+0x14` of these classes; other routines read and write it at run
+time (the zero store in the removal routine, the copy constructor), and their census was not
+made. Medium for the consequences that a later or absent key becomes 0 and that the next SAVE
+writes that 0, until the map's population is read. The corpus cannot test it: the 6 outliers
+are save-side values, not LOAD results.
+
+**Unknown.** Which routine gives an Item or Effect a non-zero `+0x14`: the Token owner
+constructor `R1135` has one caller, in the Unit-family constructor `L06021`
+(`L17052`), and the 1,434 dword stores at displacement `0x14` were not classified.
+Consumers of an Item's `+0x14` other than STORE and the copy constructor were not searched.
+The population of the map `[L00285]+0x88` (where it is cleared, whether live objects or an
+earlier LOAD bind keys into it) was not read; reading it settles the Medium consequences.
+
+### SAV-1377
+
+- Population: 146 corpus paths, 116 distinct parsed, 1 refused, 29 duplicates. Nine parsed
+  files hold `AgainromActions`, `AgainromMods` or `AgainromRng` state-store records; the counts
+  are over the other 107.
+- Item 10 of 218 non-zero, Armor 743 of 4,825, Weapon 579 of 2,877, Shield 26 of 292, Effect
+  141 of 2,462, Effect_DirectDamage 0 of 1.
+- Of the 1,499 non-zero values, 1,493 name a key read earlier in the archive: a Player 1,319,
+  a Sack 118, a Human 56 defined earlier; whether it is the Human whose body holds the record was
+  not tested here. Four name a Player defined later and two name no key; all six sit in
+  two files, `4787b1a38f768024` and `a1bc3c65ba5b384d`.
+- In the 32 files whose path labels them as written by the original, 24 Armor and 8 Weapon
+  name an earlier Player; every Item, Shield and Effect value is 0.
+- In the nine files with `Againrom` records, 71 values name no key of their file.
+
+**Confidence.** High for the counts over this corpus with the exact reader. A writer label is
+read from the path, not observed.
+
+### SAV-1378
+
+- STORE pushes the live word `+0x90` (`L17053`); LOAD reads it into `+0x90`
+  (`L08730`). Neither arm calls the derive (`SAV-1380`).
+- The word census at `[reg+0x90]` holds 19 instructions: derive `R0280` 9, helper
+  `R0451` 6, init `R0160` 1 (store 0), `Unit::Serialize` 1, compact sender `R0059` 1
+  (`L17054`, pushed with `0x8000`) and `R0808` 1 (`L03865`, object not identified).
+- The helper reads the stored `+0x90` and `+0x92` first (`L17055`), sets `+0x8e += delta`,
+  recomputes `+0x90` and calls `vt+0x50` only when `load/capacity` changed
+  (`L17056..L08234`). The derive stores `+0x90` from `+0x8e` before reading it.
+- Corpus, 1,382 Humans in 107 files without `Againrom` records: `+0x90` −20..889, 235 zero,
+  17 negative in 6 files; 1,068 equal `+0x8e`, 1,166 equal the derive's load from `+0x8e` and
+  the container `+0x20`, 216 equal neither.
+
+**Confidence.** High for the two arms, the helper and the derive store. Medium that no other
+routine reads the stored value first: the census misses computed-pointer and bulk-copy
+accesses.
+
+**Unknown.** Whether the sender runs before the first derive on a given LOAD.
+
+### SAV-1379
+
+- The actor init `R0185`, called at the five Unit-family constructor sites, stores the
+  container built by `R0403` (`+0x1c` = 10000, `+0x20` = 0) at `+0x7c` (`L04604`) and 0
+  at the Spellbook pointer `+0x140` (`L17057`).
+- STORE writes 1 and the container when `+0x7c` is non-zero, else 0 (`L17058..L17059`).
+  LOAD serializes into the existing container only when the byte is non-zero
+  (`L17060..L17061`). A Spellbook is built at LOAD only on a non-zero byte
+  (`L17062..L17063`).
+- Corpus: 0 of 1,382 Humans and 0 of 3,920 Units in the 107 files without `Againrom` records
+  have presence 0. One Human in a file with `Againrom` records has presence 0.
+
+**Confidence.** High for the constructor, both arms and the corpus count. Medium for the next
+SAVE's bytes: a writer that empties or nulls `+0x7c` between LOAD and SAVE was not
+enumerated.
+
+### SAV-1380
+
+- The word census at `[reg+0x9c]` (44 instructions) holds six stores: the derive `R0280`
+  (3), the init `R0160` (1), `L17042` (1) and the modifier fold `R0840` (1). The fold
+  has a second caller, `R0184`, so `+0x9c` can be rewritten without the derive running.
+  The caller and role of `L17042` were not identified; the call graph has no edge into it.
+  The inputs of that derive step were not re-read here.
+- STORE pushes the live word (`L17064`); LOAD reads it into `+0x9c` (`L17065`).
+  `Unit::Serialize` has no direct call to `R0280`; its indirect calls are `vt+8` of the two
+  route objects and the Spellbook and `vt+0x30` before the definition binding (`L08754`).
+
+**Confidence.** High for the two arms and the listed stores. Medium that no other routine
+writes `+0x9c`: the census misses computed-pointer accesses, and the Humanoid and Human
+serializers' callees are covered only by `HERO-170`.
+
+### SAV-1381
+
+- `L17043` is `mov si, word ptr [ecx + eax*2]` in `R0278`. `ebx` is its argument
+  (`L17066`); `ecx = [ebx+0xc]` (`L17067`); `eax = (row*[ebx] + col) & 0xffff` with
+  `row < [ebx+4]`, `col < [ebx]`. Before it the function reads only `[ebx]` and `[ebx+4]`.
+- The world constructor `R0118` passes its first argument (`L17068`, `L08344`). Its
+  callers pass the map-reader object: the document LOAD arm (`L02287`, `L07067`) and the
+  mission map load `R0128` (`L02288`, `L00242`).
+- The reader `R0478` stores `+0` = `+4` = 16 and `+0x0c` = 0 at entry; its Tiles arm
+  allocates `2*[+0]*[+4]` bytes into `+0x0c`.
+- `R0128` tests `+0x14` only (`L17069`, `ALM-OUTCOME-323`). The document LOAD arm tests
+  only the allocation (`L17070`). The STORE arm ends at `L08706`.
+- Mission-map path, direct edges only: `R0099` calls `R0512` (`L06688`), which calls
+  `R0128` (`L07873`), which calls `R0118` (`L00242`), which calls `R0278`
+  (`L08344`). `R0701` calls `R0099` (`L03842`, `L07366`). Whether the `0x467` arm
+  for a mission map (`TOWN-121`) takes `R0099` is Unknown. LOAD path: `R1284` (`L13684`),
+  `R1305` (`L08427`), `R0414` (`L08404`), `R0118` (`L07067`).
+- With `+0x0c` = 0 the read is at `2*index`, first at address 0.
+
+**Confidence.** High for the instruction, its operands, the reader's entry stores, the Tiles
+arm and the direct edges. A null tile array is a case the code reaches; a short array
+(dimensions set after the Tiles arm) was not excluded, because the stores to the reader's `+0`
+and `+4` were not censused and its Dimensions arm was not read. Unknown which case and which
+path produced the observed fault.
+
+**Unknown.** The faulting data address and the reader status `+0x8c` at the fault settle it:
+0 or a small address with status 5 or 1 is the null tile array. A census of the stores to the
+reader's `+0` and `+4` and a read of its Dimensions arm settle whether a short array is
+reachable. Which `R0701` call site the `0x467` arm uses, and whether it reaches `R0099`,
+was not read.

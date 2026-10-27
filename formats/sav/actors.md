@@ -459,6 +459,22 @@ LOAD keeps `+8e`, `+90` and the modifier object as stored and runs no equip
 routine (Medium); the first derive and a later weapon or shield removal start
 from the stored values. — HERO-170, HERO-171
 
+After LOAD the stored `+90` is read by the weight-delta helper, which derives
+only when `load/capacity` changes, and by the compact sender; the first derive
+or weight change rewrites it. In 107 corpus SAVs without `Againrom` state
+records, 216 of 1,382 Humans hold a `+90` that equals neither form of the
+derive's load. — SAV-1378
+
+The derive writes the mana maximum `+9c`, as do its modifier fold (also called
+from a second site), the init and `L17042`, whose caller and role were not
+identified; both archive arms copy it. Whether any other routine writes it is
+Medium. — SAV-1380
+
+Every actor constructor builds an empty container at `+7c`. LOAD with
+presence 0 skips the container body and keeps that container, so the next SAVE
+writes presence 1, count 0 and `(10000, 0)`. No Human or Unit in those 107
+SAVs has presence 0. — SAV-1379
+
 Actor word `+50`, the AI state, is rewritten at death in two steps. The per-tick routine returns at once for
 `+54` = `0x10`; otherwise it stores 0 into `+50` and `+54` on every tick with signed health at or below 0. Teardown
 stores `0x10` into both and the actor moves to the dead list. A dying record therefore stores 0 and a dead-list

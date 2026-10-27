@@ -9,6 +9,15 @@ enters world build. No native malformed-map run establishes a box, menu
 return or fault. — ALM-OUTCOME-323; ALM-REQ-055 (acceptance scope narrowed),
 ALM-REQ-056 (amended)
 
+The grid ingest reads the reader's tile pointer at `L17043`. The reader
+starts it at 0 with dimensions 16 by 16, and only the Tiles arm fills it, so a
+map without Tiles makes that instruction read from address 0; a short array
+(dimensions set after the Tiles arm) was not excluded. The mission-map caller
+reaches it when Altitudes is non-null, and the document LOAD path reaches it
+with no pointer test; that a mission-map click reaches the mission-map caller
+is Unknown past the direct edges listed. Which case produced the one observed
+access violation is Unknown. — SAV-1381
+
 ## Counts and lengths
 
 | Input | Operation in the selected game bodies | Bound of the conclusion |

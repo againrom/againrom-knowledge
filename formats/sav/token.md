@@ -41,8 +41,8 @@ argument. `Unit`'s own constructors reach the same shared layer and write no
 path, zeros an already-constructed object's own `+0x14` inside a
 removal/detach routine — so the field is not exclusively a construction-time
 default, and whether that runtime zero is the same "owner" meaning cleared
-on removal or a liveness-adjacent meaning is Unknown. Over the full current
-admitted save corpus, nonzero is observed only on `Effect` (18 of 192
+on removal or a liveness-adjacent meaning is Unknown. Over the 70 saves
+admitted for that count, nonzero is observed only on `Effect` (18 of 192
 instances, one save, an independently confirmed original) and resolves,
 every instance, to the `Human` object that structurally contains that
 `Effect` — reached through an equipped `Armor`, `Weapon` or `Shield` record
@@ -54,6 +54,25 @@ than an unmodified original); `SpellEffect` has no record in the admitted
 corpus at all. SAV-1058 is partially retracted for claiming both SpellEffect
 bases call the first Token constructor; its two Token `+14` zero stores
 remain valid. — SAV-1058, SAV-1059, SAV-1060, MAGIC-219
+
+`Token::Serialize` is the only archive arm that stores or loads `+14` of Item,
+Armor, Weapon, Shield and Effect; other routines read and write it at run time
+(the removal routine's zero store, the copy constructor), and their census was
+not made. SAVE writes the live dword, another object's address. LOAD replaces
+it at once with the object its key names among the keys read so far, the
+record's own key included, else 0. That a key defined later in the archive or
+absent from the file ends as 0, and that the next SAVE writes that 0, is Medium
+until the population of the key map is read. Which routine gives an Item or
+Effect a non-zero `+14` is Unknown. — SAV-1376
+
+In 107 corpus SAVs without `Againrom` state records, 1,499 of 10,675 Item-class
+and Effect records carry a non-zero `+14`: 1,319 name an earlier Player, 118 a
+Sack, 56 a Human defined earlier (whether it is the Human whose body holds
+the record was not tested), and 6 name no earlier object. In the 32 files
+labelled original only 24 Armor and 8 Weapon are non-zero, each naming a
+Player. The 70-save population of SAV-1059 and the 107-file population of
+SAV-1377 differ, their counts are not the same measurement, and SAV-1059 is
+unchanged. — SAV-1377
 
 ## Token `+04` runtime id
 
