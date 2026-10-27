@@ -3281,3 +3281,58 @@ consumption does not establish verbatim restoration.
 **Unknown.** Most registry values, pair meanings, bank/grid/raw16 meanings
 and nonempty buffers. Observe the exact consumer of a distinct saved value
 before and after original LOAD to assign a restoration meaning.
+
+## Mission-like save REG state and restored IDs
+
+Inline REG of the five EN mission-like owner saves (game0001, game0004,
+game0005, game0006, game9999), parsed from the offsets of R2-SESSION-238
+with the record grammar of R2-ENGINE-614, and IDs joined with the
+committed field table of R2-SESSION-233. Values are listed in that file
+order.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-244 | Five EN ROM2 mission-like saves store CurrentState/InBattle 1, View 8/29, Selection [1] and no Group keys, and Fog runs over 6400 cells; the book is open in game0005/0006, Speed is 4 or 8, and only game0006 stores a projectile. | High | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-SESSION-245 | In each of the five EN ROM2 mission-like saves Selection ID 1 equals base +4 of the Player-1 Group-0 Human and of no other object in the Players and Buildings field table; game0006's projectile target 24598 is base +4 of a Player-3 unit. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+
+### R2-SESSION-244
+
+| Key | game0001 | game0004 | game0005 | game0006 | game9999 |
+|---|---|---|---|---|---|
+| CurrentState/InBattle | 1 | 1 | 1 | 1 | 1 |
+| GameOptions Speed | 4 | 4 | 8 | 8 | 4 |
+| SpellBook IsOpen | 0 | 0 | 1 | 1 | 0 |
+| SpellBook Pressed | -1 | -1 | -1 | 6 | -1 |
+| Projectiles FreeIndex | 0 | 0 | 1 | 17 | 0 |
+| Projectiles IDs | [] | [] | [] | [16] | [] |
+| Fog runs | 29 | 29 | 29 | 33 | 1 |
+| Fog cells in set runs | 154 | 154 | 154 | 301 | 0 |
+| Character/Name bytes | 6 | 10 | 10 | 10 | 10 |
+
+Equal in all five: View X 8 and Y 29; Selection [1]; no Group0..9 key;
+Inventory IsOpen 0; Wimpy 0, ShowHP 0, FlyingHP 1, Formation 1,
+ShowTimeFlow 1; SpellBook Shortcuts []; Fog FirstState 0; Fog run lengths
+sum to 6400. The game0006 directory Prj16 holds x 6272, y 10624, z 0,
+picture 40, dir 4, phase 1, lastaction 1, action 1, actiondir 4,
+actiontarget 24598, actionx 6272, actiony 10624, actionz 0, actionphase 3,
+actionsegments 0, actionspell 0. Names are kept as length and SHA-256 only.
+The stores hold 28 records, 45 in game0006.
+
+**Confidence.** High: a mechanical parse of the hashed saves with the read
+getter grammar; each store ends at the published tail boundary.
+
+### R2-SESSION-245
+
+The only object in the field table of EXP-2076 (fields named `*.base.04`
+under the `players.*` members and items and under `buildings.*`) with
+base +4 = 1 in each save is `players.0.group.0.members.0.humanoid.unit`
+(document offset 2819 in game0001, 2823 in the other four). In game0006
+base +4 = 24598 (0x6016) belongs to `players.2.group.3.members.1` (offset
+17262). That table has no entries for the dead list, the world-effect
+records or Sacks, so other objects there are not excluded.
+
+**Confidence.** High for the joins over that table. Medium that the client
+object key of R2-ENGINE-614 equals base +4: the client unit creation message
+was not read; the key range agrees with the unit objects of the second
+creation loop of R2-ENGINE-615 (word entry +0x3c + 0x6000) and with
+R2-ENGINE-618.

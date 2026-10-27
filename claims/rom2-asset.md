@@ -2250,3 +2250,27 @@ Pointer runs (the node-to-slot step of R2-ENGINE-520) and that operation 2
 parameter 0 is the event ID (R2-ENGINE-047).
 
 **Unknown.** The RU line as the RU original draws it: no RU run was made.
+
+## Spell row 29 names
+
+`main.res` of the EN and RU installs, read through the repository archive
+reader; RU bytes decoded as code page 1251.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-154 | ROM2 spell.txt line 28 names spell row 29: EN "Slow", RU "Замедление"; none of the 24 spells.txt hover lines in either root names it. | High | ● active | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+
+### R2-ASSET-154
+
+`text/spell.txt` of `main.res` splits on CRLF into 30 lines in each of the
+EN and RU roots (EN SHA-256
+`33ab26bfa0d5ee632dac051cafca9d277650167fe423ca17bf2f429eb7102990`, RU
+`8eb0fc59835ef1fbc575854506d6be98d250d3c3623d18019ba6b2b1bdb3d999`); line
+28 is row 29 under the row r to line r-1 rule of R2-ENGINE-444.
+`text/spells.txt` splits into 25 lines (EN
+`8e2e1a3e9da40f74d44af7f84c6e2241ae966986098fc920c7e32d1b2a4b19c1`, RU
+`9ba346dcd71347089ddb1562d284b42df60b631d724cb09ad033c13c65b31a8a`); for
+each line the text before " (" was compared with every `spell.txt` line,
+and none equals line 28 in either root.
+
+**Confidence.** High: whole-file byte comparisons in both roots.

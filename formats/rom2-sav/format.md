@@ -593,10 +593,13 @@ routine L2.00266; view dispatch is Unknown. Both selected tail paths
 read REG, pairs, Scenario and nine buffers in order. The label is skipped as
 state. Incoming catalog raw16 is consumed without being copied into catalog
 objects. Transport failure, later overrides and first-frame delivery remain
-Unknown. The InBattle value in each save's registry was not read, so the
-branch taken per file is Unknown. The listing also contains a 0x421 arm and
-a zero-worldPresent field-reset loop whose effects are unexamined.
-— R2-ENGINE-601, R2-SESSION-033
+Unknown. The listing also contains a 0x421 arm and a zero-worldPresent
+field-reset loop whose effects are unexamined. — R2-ENGINE-601,
+R2-SESSION-033
+
+The five mission-like files store CurrentState/InBattle 1 and take the
+mission branch; the four town-like values are unread. — R2-SESSION-244,
+R2-ENGINE-601
 
 ### Complete measured documents
 
@@ -672,6 +675,68 @@ The full books occupy 327 bytes after the gate; sparse Player-1 books occupy
 80. IDs 1..29 equal the published spell domain. Weapon-attached spells and
 Player-8 books are separate. Native book delivery and castability remain
 Unknown. — R2-SESSION-237, R2-ENGINE-019
+
+### Mission-like continuation
+
+Mission setup with argument 1 skips the map caller and the autosave, sends
+packet type 4, runs one server tick when app +0x5d4 is set and pumps client
+messages until a type 0x64 message returns after a type 6 message built the
+client map; then it restores REG state, sends 0x408 through slot +0x48 of
+app +0xd4 and stores the tick period and time stamps at app
++0x418/+0x414/+0x424. The messages before the 0x64, whether the clock runs
+and what receives 0x408 are Unknown. — R2-ENGINE-613
+
+The world half names the map asset by session +0x90, prefixed `Scenario\`
+when session +0xd4 is nonzero. The asset gives terrain size and tiles
+through the terrain constructor, is passed to the script compiler and is
+freed; the document reader feeds the Units, Buildings, SpellEffects and
+Sacks readers. What the terrain-layer reader, the second world object and
+the script compiler take from the asset is Unknown. The client constructor
+builds two families of objects from the asset named in message 6: static
+objects from list +0x390, keyed entry +0x10 + 0x6000, and unit objects
+(Medium) from list +0x3a4, a 0x254 or 0x208 byte object and then a 0x1e4
+byte object keyed word entry +0x3c + 0x6000. The constructor beyond these
+loops is unread. — R2-ENGINE-616, R2-ENGINE-615
+
+LOAD rebuilds rather than reads: Building +0x3c from byte +0x40, base
++0x18 cleared, each base self key entered in session +0xdc, the base link
+key and (RU Human) the DWORD keys at +0x40, +0x44, +0x5c, +0x64 and +0x68
+replaced by objects or 0 through the unit-registry walk of slot +0x24.
+Consumers of the loaded Building and Pointer fields after LOAD are not
+searched. — R2-ENGINE-617, R2-ENGINE-618
+
+| Building offset | Width | Note |
+|---|---:|---|
+| base (position +0x10, +4, +0xc, +0xe, +8, +0x18, +0x1c, self key, owner +0x14) | 38 | +0x18 cleared on LOAD |
+| +0x4a | 22 | raw |
+| +0x40 | 1 | selects +0x3c on LOAD |
+| +0x42, +0x44, +0x46 | 2 each | |
+| +0x48, +0x60, +0x61 | 1 each | |
+| +0x64, +0x68 | 4 each | |
+
+— R2-ENGINE-618
+
+REG restore destinations: GameOptions to client +0xab0..+0xabc, app
++0x41c and global ShowTimeFlow; View X/Y to client +0x5c/+0x60; SpellBook
+IsOpen and Pressed; Objects Selection and Group0..9 by object ID;
+Inventory IsOpen; Projectiles FreeIndex and Prj%d objects; Fog runs into
+bit 0x8000 of the client map words, read only when InBattle is nonzero.
+Speed 0..8 selects a divisor 8..32 and app +0x418 = 1000/divisor.
+— R2-ENGINE-614, R2-ENGINE-620
+
+In the five files View is 8/29, Selection is [1], the Player-1 Human's
+base +4 and that of no other object in the Players and Buildings field
+table, and the book is open only in game0005 and game0006; game0006 alone
+restores a projectile. The restore asks for object 1 to be selected if the
+client object list holds it. Pause state and the camera meaning of View
+are Unknown. — R2-SESSION-244, R2-SESSION-245, R2-ENGINE-621
+
+Spell 29 (Slow) has data, an apply arm and cast ID 66, and the EN table
+L2.02137 has no row for it: the table omits rows 9, 14, 15, 28 and 29, and
+the client reads 24 bits of the slot mask. Row 29 is equal in the client
+`world.res` (identical in both roots) and the RU server `world_srv.res`; the
+EN install has no server data file. The game0005 and game0006 books hold
+it. — R2-ENGINE-619, R2-SESSION-237
 
 ### Semantic limits
 

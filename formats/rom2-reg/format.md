@@ -41,6 +41,24 @@ General ROM2 record kinds, value interpretation, key-set differences, native
 lookup, sort and application/writer acceptance are unspecified. Recognition by a
 nested `&YA1` payload is broader than a `.reg` extension filter.
 
+## Save-tail keys on the mission branch
+
+The int getter returns record +4 for value type 1, where type is
+(flags & 0xe) >> 1, and the default for a missing key. The int-array
+getter returns +8/4 DWORDs at pool offset +4 for type 3, one element for
+type 1 and none for type 0. Lookup branches on flag bit 0x10 and compares
+names over 15 characters. Mission setup requests CurrentState/InBattle,
+Character/Name, GameOptions Wimpy, ShowHP, FlyingHP, Formation, Speed and
+ShowTimeFlow, View X and Y, SpellBook IsOpen and Pressed, Objects Selection
+and Group0..9, Inventory IsOpen, Projectiles FreeIndex and IDs with one
+root directory Prj%d per ID, then Fog FirstState and Data when InBattle is
+nonzero. SpellBook/Shortcuts is stored but not requested there.
+— R2-ENGINE-614
+
+In the five mission-like saves the stores hold 28 records (45 in
+game0006). InBattle is 1, View 8/29 and Selection [1] in all five.
+— R2-SESSION-244
+
 ## Selected movie companion consumer
 
 The selected native movie-open path replaces the SMK suffix with `.reg` and

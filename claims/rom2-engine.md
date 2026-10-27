@@ -13265,7 +13265,7 @@ allies, neutral units and buildings.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-601 | The selected EN ROM2 0x419 LOAD route decodes the document before reopening its physical tail; CurrentState/InBattle selects mission setup or the town continuation; first-frame delivery remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-ENGINE-601 | The selected EN ROM2 0x419 LOAD route decodes the document before reopening its physical tail; CurrentState/InBattle selects mission setup or the town continuation; first-frame delivery remains Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-ENGINE-602 | Selected EN/RU ROM2 book serializers store DWORD+0x18, array size n and references for slots 1..n-1; each new Spell payload is ID/range/defensive bytes, a cost word and saved self DWORD: nine bytes. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-ENGINE-603 | Selected ROM2 world programmes frame Building78, Pointer82, terrain escaped-count DWORD keys and escaped-count u16/raw60 entries; five mission documents fit these extents with empty Sack/extra lists. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-ENGINE-604 | Selected RU ROM2 base LOAD copies12 position bytes and registers saved addresses; the read key-map helpers insert and resolve exact DWORD keys, distinct from archive object indices. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
@@ -13305,6 +13305,12 @@ registry was not read, so the branch taken per file is Unknown. The listing
 also contains a 0x421 arm and a zero-worldPresent field-reset loop whose
 effects are unexamined. A cold-LOAD trace from Ok through the first frame,
 with document/tail boundaries and field witnesses, would settle it.
+
+**Amended.** R2-SESSION-244 reads CurrentState/InBattle = 1 in the five
+mission-like saves, so they take the mission branch; R2-ENGINE-613 gives
+that branch's order through the REG restore and the tick-period store.
+The four town-like values remain unread, and the first frame remains
+Unknown.
 
 ### R2-ENGINE-602
 
@@ -13644,3 +13650,334 @@ the reader of app +0x424 was not found.
 **Unknown.** Whether units move and sound plays while the box is open: a
 run in the first mission opening the signpost box with a creature moving
 in view, two shots 5 s apart and one after Ok, noting ambient sound.
+
+## Mission-like LOAD continuation and spell 29
+
+Static reads of the owned EN and RU `allods2.exe`: raw x86 listings decoded
+with Capstone from the plan of one generation reproduced byte for byte, with
+values measured in five EN mission-like owner saves. EN addresses unless RU
+is named. "Equal after masking" means equal once every number at or above
+0x10000 is masked. "client" is the client network view (app +0xd0); "app"
+is the receiver of the mission entry.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-613 | EN ROM2 mission entry R2.0026(1) after a mission-like LOAD skips the map caller and autosave, sends packet 4, ticks the server if app +0x5d4 is set, pumps until a type 0x64 message returns after type 6 built the map, restores REG state. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-614 | On that path EN ROM2 reads REG GameOptions, View X/Y, SpellBook, Objects Selection and Group0..9, Inventory, Projectiles and Fog into client and app fields; Fog is read only when CurrentState/InBattle is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-615 | EN ROM2 client message 6 builds the client map through L2.01385: it opens the named ALM, copies grids, creates static objects (list +0x390, key entry +0x10 + 0x6000) and unit objects (list +0x3a4, key word +0x3c + 0x6000), frees it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-616 | EN ROM2 world half: the name at session +0x90 selects the ALM, which gives terrain size and tiles, goes to the script compiler and is freed; the document reader feeds the Unit, Building, effect and Sack readers; other uses are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-617 | After the EN ROM2 world half the unit registry L2.00325 calls each member's slot +0x24; the RU Human slot resolves saved keys at +0x40, +0x44, +0x5c, +0x64 and +0x68 through session +0xdc and stores 0 on a miss. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-618 | EN ROM2 Building Serialize L2.01659 stores base38, raw22 at +0x4a, +0x40 u8, +0x42/+0x44/+0x46 u16, +0x48/+0x60/+0x61 u8 and +0x64/+0x68 u32; LOAD rebuilds +0x3c from +0x40 and clears base +0x18. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-619 | ROM2 spell row 29, Slow, has data, an apply arm and cast ID 66 but no row in EN table L2.02137, which omits rows 9, 14, 15, 28 and 29; the client selection summary reads 24 slot bits only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-620 | EN ROM2 mission setup maps REG Speed 0..8 to divisors 8, 10, 12, 14, 16, 20, 24, 28, 32 and sets app +0x418 = 1000/divisor; the five mission saves' Speed 4 and 8 give 62 and 31. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-621 | For the five EN ROM2 mission saves the read bodies put View 8/29 in client +0x5c/+0x60, ask to select object 1 (the hero) if client +0x9d0 holds it, open the book in game0005/0006 only and keep the inventory closed; pause is Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+
+### R2-ENGINE-613
+
+With argument 1 (the LOAD tail of R2-ENGINE-601) the entry runs, in order:
+
+1. client +0x80 = 0; `L2.01133` on cursor `[L2.03110]`; music stop
+   `L2.01408` when `[L2.00878]` is set.
+2. The name copy from app +0x5d0; the map caller `L2.00222` is skipped
+   (it needs argument 0 and app +0x5d4).
+3. `L2.03111` rebuilds the room stack: app +0xd4 gets children app +0xd8,
+   +0xdc, +0xe0, +0xe4; app +0xcc gets app +0xd0 and +0xd4; app +0x404 = 1.
+4. Client loaders `L2.03112(0,0)`, `L2.03113(0,0)` and `L2.03114`.
+5. app +0x3f0 = 1; `L2.03115(1)` sends packet type 4 (byte +9) with the
+   word +4 of the client Player `[client+0x9cc]` at +5, 0 at +7 and the
+   argument at +0xa through `L2.00872`; `L2.03116(client+0xab4)` and
+   `L2.03117` send type 0x46 subtypes 1 and 3 (the latter with
+   `[L2.01503]`); `L2.03118(client+0xab0)` is unread.
+6. Only when app +0x5d4 is set (test at `L2.03119`), one call of the
+   session tick `L2.03120`.
+7. A wait loop: one window message (PM_REMOVE; WM_QUIT returns 0), a
+   network wait (`L2.03121`) with timeout error 0x1005, then the client
+   pump `L2.00466(0x64)`. The pump takes messages (`L2.03122`) and
+   dispatches type t through byte table `L2.00467` (index t-3) and jump
+   table `L2.00468`; it returns 1 only after a message of type 0x64 and,
+   with a nonzero argument, keeps polling while none is queued. Type 0x64
+   reaches arm `L2.03123`, which stores message +0xa in app +0x408; type 6
+   reaches arm `L2.03124`, which creates the client map (R2-ENGINE-615).
+   The loop tests client +0x80 at its top and after a pump return, so it
+   ends at the first type-0x64 pump return after +0x80 is nonzero, not when
+   type 6 finishes: a type 0x64 message before the first type 6 makes the
+   loop run again, and every message dispatched before that 0x64 runs
+   first. A zero pump return returns 0.
+8. app +0x3f0 = 0; in campaign mode (app +0x5d8 = 2) the REG restore of
+   R2-ENGINE-614 after reopening the file at blobEnd+256.
+9. app +0xd4 slot +0x48(0x408, 0, 0) (`L2.03125`) and app +0xcc slot +0x34
+   (`L2.03126`). The receiver of the first is the room object `L2.03111`
+   fills with children +0xd8..+0xe4; whether slot +0x48 forwards 0x408 to
+   those children, and that they are panels, is not read.
+10. Outside mode 3: the music body `L2.01375` (R2-ENGINE-336); app +0x43c =
+    -1, +0x3e4 = 0, +0x3e8 = 0.
+11. Mode 2: `L2.03127(app+0x41c)` (R2-ENGINE-620; it stores the tick
+    period and time stamps and does not show that the clock runs), then
+    `main\text\mission%d.txt` and `main\text\quest.txt` through `R2.0056`
+    and the briefing `R2.0027`.
+12. Argument 1 skips the 0x442 autosave; `L2.01133` on `[L2.02989]`;
+    return 1.
+
+RU `R2.0023` has 1002 instructions, as EN. After masking, 24 instructions
+differ, each only in an app field offset; the 13 EN/RU pairs are 0x3bc/0x3d4,
+0x3e4/0x3fc, 0x3e8/0x400, 0x3f0/0x408, 0x41c/0x434, 0x43c/0x454,
+0x460/0x478, 0x47f/0x497, 0x4dc/0x4f4, 0x598/0x5f8, 0x5d0/0x630,
+0x5d4/0x638 and 0x5d8/0x63c. The 59 strings pushed (48 distinct) are equal in order.
+RU callees were not compared.
+
+**Confidence.** High for the EN order, branch conditions, packet bytes and
+stores of the entry, the pump tables and the two arms, and for the RU body
+equality after masking. Medium for callee meanings: the loaders, the tick
+body beyond its phase dispatch, the senders' receivers and `L2.03118` are
+not read to their effects. Unknown which server messages reach the client
+before type 0x64 and in what order, which of them create client objects
+(the hero among them) before the REG restore, whether the clock runs
+(app +0x418 is only stored) and what receives 0x408.
+
+**Unknown.** A cold LOAD of game0001 with a trace of the type byte at each
+`L2.00466` dispatch until type 0x64 would give the message order, the
+arrival of type 6 and the stores made before the REG restore. The first-frame
+run of R2-ENGINE-621 settles whether the clock runs and what reacts to 0x408.
+
+### R2-ENGINE-614
+
+Getters (dir, key, default): int `R2.0113` returns record +4 for value
+type 1 (`(flags & 0xe) >> 1`), the default for a missing key and throws
+for another type; int array `L2.03128` returns +8/4 DWORDs from pool +4 for
+type 3, the low byte of +4 as one element for type 1 and nothing for type 0
+with +8 below 2; word array `L2.03129` has the same shape; string
+`L2.03130`. Lookup `L2.03131` branches on flag bit 0x10 and compares names
+through `L2.03132` with length 0xf. Each call pushes the key, then the
+directory.
+
+| REG key | Destination |
+|---|---|
+| CurrentState/InBattle (default 1) | local; gates Fog |
+| Character/Name (default "No name") | app +0x460, at most 0x20 bytes; app +0x47f = 0 |
+| GameOptions Wimpy, ShowHP, FlyingHP, Formation | client +0xab4, +0xab8, +0xabc, +0xab0 |
+| GameOptions Speed, ShowTimeFlow | app +0x41c, global `L2.03133` |
+| View X, Y | client +0x5c, +0x60 |
+| SpellBook IsOpen | 1 opens the book (`L2.03134`) when `L2.03135` reports it closed; 0 closes it (`L2.03136`) when open |
+| SpellBook Pressed | [app+0xec] +0x60 |
+| Objects Selection (word array) | each ID found in client +0x9d0 (`L2.02998`) gets slot +0x14(1) |
+| Objects Group%d, 0..9 | each ID goes to `L2.03137` for group d |
+| Inventory IsOpen | `L2.03138`, then `L2.03139` or `L2.03140` |
+| Projectiles FreeIndex | word client +0xa24 |
+| Projectiles IDs, root dir Prj%d | a 0x158 object (`L2.03141`): x +8, y +0xc, z +0x10, picture +0x24, dir +0x70, phase +0x74, lastaction +0x78, action byte +0x8c, actiondir byte +0x8d, actiontarget word +0x8e, actionx +0x90, actiony +0x94, actionz +0x98, actionphase +0x9c, actionsegments +0xa8, actionspell +0xac; +0xe8 = client, +0x14 = client +0x9cc, word +4 = ID; inserted in client +0x9ec (`L2.00142`), then `L2.03142` |
+| Fog FirstState (default 0), Data (int array) | run lengths into the word grid [client+0x80] +0xc through `L2.03143`, the state toggling after each run; set state ORs 0x8000 |
+
+Then client `L2.03144` (R2-ENGINE-619). SpellBook/Shortcuts has no reader
+in the entry.
+
+**Confidence.** High for keys, defaults, getters and destination stores.
+Medium for meanings named only by key: that client +0x5c/+0x60 is the
+camera, that slot +0x14(1) selects and that bit 0x8000 marks an explored
+cell rest on unread consumers.
+
+### R2-ENGINE-615
+
+The pump arm `L2.03124` tests client +0x80. When zero it calls
+`L2.03145(message+0xf)`; if +0x80 is still zero it sets `[L2.03146]` =
+0x1004 and returns 0.
+
+`L2.03145` releases an existing map (slot +4 with 1), forms the name from
+its argument, prefixed with `scenario\` (`L2.03147`) when app +0x5d8 is 2,
+creates a 0x30 object through `L2.01385(name)`, stores it in client +0x80,
+sets client +0xdc = 1, calls `L2.03148(map)`, posts 0x403 with the client
+to app +0xd4 (slot +0x48), then `L2.03149(1)`, `L2.03150(map+0x28)` and
+client +0x4970 `L2.03151(0)`.
+
+`L2.01385` (1046 instructions) creates a 0x3b8 object with the ALM reader
+`L2.02484(name)` of R2-ENGINE-616. It stores width and height (`L2.03152`,
+`L2.03153`) at +4/+8, a double of map +0x18 at +0x20, map +0x1c at +0x2c,
+map bytes +0x20/+0x24 at +0x1c/+0x1d and 0x1fff at +0x28. It allocates
++0xc (2wh bytes, the tile words of `L2.03154`), +0x10 (wh bytes copied from
+map +0x14), +0x14 (zeroed, then rows 8..h-5 columns 8..w-9 copied from map
++0x10) and +0x18 (zeroed). For each entry of map list +0x390 it creates by
+entry word +4: 0x21 a 0x14c object (`L2.03155`), 0x25 a 0x14c object
+(`L2.03156`), any other a 0x144 object (`L2.03157`); the object gets word
++4 = entry +0x10 + 0x6000, +0x24 = the kind, +8 = entry word 0 * 256 +
+0x80 and the next coordinate from entry word 2, and goes into client
++0x9d0 under that key. A second loop (`L2.03158`..`L2.03159`) runs over
+map list +0x3a4. For each entry it builds an object of 0x254 bytes
+(`L2.00233`) when entry flag +0x48 has bit 0x10, else of 0x208 bytes
+(`L2.03160`); then a 0x1e4-byte object (`L2.03161` or `R2.0067`) whose
+word +4 is entry word +0x3c + 0x6000 (`L2.03162..L2.03163`) and which goes
+into client +0x9d0 (`L2.00142` at `L2.03164`). Between them the loop calls
+`L2.02708` when app +0x5d8 is 2 (`L2.03165..L2.03166`). The constructor
+beyond these two loops was not read beyond its call list; the asset object
+is freed at `L2.03167` (`L2.03168`).
+
+**Confidence.** High for the arm, the creator and the read part of the
+constructor, both creation loops included. Medium that message +0xf carries
+the saved scenario name: the server sender of type 6 was not read. Medium for
+the meaning of the copied grids, for what the second-loop objects are (the
+roles of the 0x254, 0x208 and 0x1e4 objects and of `L2.02708` are unread;
+that they are units rests on the key range of R2-SESSION-245) and for the
+constructor instructions after the two loops.
+
+### R2-ENGINE-616
+
+When worldPresent is nonzero the document reader `L2.00243` takes the name
+from session +0x90 and prefixes `Scenario\` (`L2.03169`) when session
++0xd4 is nonzero. In order:
+
+1. Units of each Player list +0x24 whose byte +0x4c lacks bit 8 are added
+   to `[L2.00325]` through `L2.00202`; Buildings (`L2.03170`) and
+   SpellEffects (`L2.03171`) are read from the document.
+2. The map: a 0x3b8 object through `L2.02484(name)`, signature "M7R"
+   (`L2.03172`), error codes 1..6 at +0x8c, version at most 0x640 and a
+   13-entry record table `L2.02737`.
+3. Terrain: a 0xa4570 object `L2.03173(map, [L2.00325])` takes width and
+   height into +0x50000/+0x50004 and per-cell tiles (`L2.03174`,
+   `L2.03175`), is stored in `L2.01839` and then reads the document
+   terrain through `L2.03176` (R2-ENGINE-603).
+4. When `L2.01066` is null, a 0xeb20 object `L2.03177(terrain, Players)`
+   is stored there and reads the document through `L2.01736`.
+5. Sacks and the extra list are read from the document; the script is
+   compiled by `L2.00201(session+0x98, map, 0)`.
+6. `L2.03168(map, 1)` frees the map; session +0x94 = 1.
+7. Post-load: `[L2.00325]` slot +4 (R2-ENGINE-617), the dead list slot +4,
+   terrain `L2.03178`, `L2.03179` on `L2.01066`, SpellEffects slot 0.
+
+When worldPresent is zero each unit gets +0x40, +0x44 and +0x5c = 0.
+
+**Confidence.** High for the name source, the order, the sizes and the free,
+for the terrain size and tiles taken through `L2.03173`, and for the calls
+that hand the document reader to the Unit, Building, SpellEffects and Sack
+readers. Medium for the script and the terrain layers: the script compiler
+`L2.00201` receives the asset as an argument, and the bodies of `L2.03176`,
+`L2.01736` and the compiler were not read, so which fields they take from
+the asset and which from the document is Unknown. The server's map lists
++0x390 and +0x3a4 are touched in no read listing; that does not exclude
+their use in the unread bodies.
+
+### R2-ENGINE-617
+
+`[L2.00325]` is the 0x20 object created at `L2.03180` by ctor `L2.03181`
+(list at +4, vtable `L2.03182`) and stored at `L2.03183`; a DWORD scan finds
+43 references, two of them stores. Slot 1 `L2.03184` walks list +4 and
+calls each member's slot +0x24. `L2.00202` has 49 direct call sites; the
+world half's site is `L2.00256`.
+
+EN Building vtable `L2.02577` slot 9 `L2.03185` calls `L2.03186` on
+[this+0x10]: a nonzero link +8 is looked up in session +0xdc
+(`L2.03187`) and replaced by the result when found. RU Human vtable
+`L2.00218` slot 9 `L2.03188` calls `L2.03189`, which calls the RU Building
+slot 9 `L2.03190`, then resolves +0x5c and +0x40 (`L2.03191`), +0x64 and
++0x44 (`L2.03192`) and +0x68 (`L2.03193`): each looks the DWORD up in
+session (`[L2.01317]`) +0xdc through `L2.01323` (R2-ENGINE-604) and
+stores the object, or 0 on a miss. It then calls `L2.03194` on [+0x1c0]
+and `L2.03195` on [+0x1c4], both unread. The world-absent branch of
+R2-ENGINE-616 clears +0x40, +0x44 and +0x5c.
+
+**Confidence.** High for the registry construction, the walk and the read
+slot bodies in their roots. Medium for EN Humans (their slot was read in RU
+only) and for Buildings as registry members (48 call sites unread). Unknown
+for the targets of the resolved fields and the two unread calls.
+
+**Unknown.** The EN Human vtable and its slot 9, and a breakpoint on
+`L2.03184` during LOAD of game0001 counting members by class, would settle
+membership and EN parity. Consumers of the loaded Building and Pointer
+fields after LOAD are not searched; the data watch named in R2-ENGINE-618
+would settle them.
+
+### R2-ENGINE-618
+
+Base `L2.03196` (38 bytes): `L2.02232`, the position object [this+0x10]
+through `L2.03197` (12 bytes, R2-ENGINE-604), +4 DWORD, +0xc and +0xe u16,
++8 DWORD, +0x18 u16, +0x1c DWORD, a self-key DWORD and an owner DWORD
+(+0x14). LOAD calls `L2.00336(word +4)` when +4 is nonzero, clears +0x18
+after reading it, enters this object under the self key in session +0xdc
+(`L2.03198`) and passes +0x14 to `L2.03199`.
+
+Building `L2.01659` (vtable `L2.02577` slot 2): base, raw22 at +0x4a
+(`L2.03200`), then +0x40 u8, +0x42, +0x44, +0x46 u16, +0x48, +0x60, +0x61
+u8, +0x64, +0x68 u32. LOAD sets +0x3c to 0 when +0x40 is 0, else to
+`L2.03201`(+0x40) on `L2.03202`. The Pointer adds +0x6c (R2-ENGINE-517).
+
+In the five mission saves Building base +4 values are 0x6001 upward, in
+the key range of R2-ENGINE-615's static objects; game0001 Building 0 has
++4 = 24577, +0x40 = 55, +0x48 = 5, +0x60 = 4, +0x61 = 3, +0x64 = 1791 and
++0x68 = 4095.
+
+**Confidence.** High for widths, offsets and load stores. Medium for field
+meanings; that a Building and the client static object with the same key
+are one map object is an inference from the key ranges.
+
+**Unknown.** Consumers of the loaded Building fields (and of the Pointer's
++0x6c) after LOAD are not searched beyond slot 9 and the Serialize load. A
+data watch on a loaded Building's +0x3c and +0x64 during the first minute
+after LOAD of game0001 would settle them.
+
+### R2-ENGINE-619
+
+Row 29 of `data/data.bin` (R2-ENGINE-019) is equal in the client
+`world.res` (the same bytes in both roots, SHA-256
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`) and the
+RU server `world_srv.res`; the EN install has no server data file: Slow, Complication 10, Mana 10, Sphere 5, Item 0, Target 1, Delivery 1,
+Max Range 5, Effect Speed -1, Distribution 1, Radius 0, area fields 0, Apply
+Method 2, Duration 10, Frequency 0, damageMin, damageMax and Defensive -1,
+SkillOffset 0, scrollCost 50, bookCost 5000, Effects `speed`. Row 28
+(Curse) differs in bookCost 2000 and Effects `toHit`.
+
+The EN slot table `L2.02137` holds rows 1, 2, 3, 4, 24, 20, 21, 26, 13, 12,
+11, 10, 5, 6, 7, 8, 25, 22, 23, 27, 19, 18, 17, 16. Its DWORD occurs four
+times in the EN image: `L2.03203` and `L2.03204` in `L2.03144`, and
+`L2.03205`, `L2.03206` (unread). `L2.03144` walks client +0x9d0 objects
+that `L2.02988` accepts (R2-ENGINE-606), counts them at +0x140 and ORs
+their +0x18 into +0x148; for kind +0x24 of 0x17 or 0x18 and each set bit
+s of +0x18 below 24 it builds a spell from row [L2.02137 + 4s]
+(`L2.01059`) and fills per-slot arrays from +0x154. A row without a slot has
+no bit in that mask.
+
+Other entries for 29: apply arm `L2.00078`, shared with Haste and negated
+(R2-ENGINE-024); cast ID 66 with no `projectiles.reg` type (R2-ENGINE-445);
+no `spells.txt` hover line (R2-ASSET-154); the RU selected-spell policy
+admits 1..28 (R2-ENGINE-350); the cheat fills 1..29 (R2-ENGINE-300).
+
+**Confidence.** High for the row, the slot table, the scan and the read
+mask loop. Medium that the client book shows no Slow icon for a hero whose
+server book holds 29 (game0005 and game0006, R2-SESSION-237): the writer of
+client +0x18 and the two unread table uses were not read. Unknown whether
+another path casts Slow for a player hero.
+
+**Unknown.** LOAD game0005, open the book and count its icons and hover
+captions; then select the hero and send each cast hotkey, recording whether
+Slow is offered or cast.
+
+### R2-ENGINE-620
+
+`L2.03127` clamps app +0x41c to 0..8, takes the divisor from jump table
+`L2.03207` (arms `L2.03208`..`L2.03209`), stores 1000/divisor (`idiv`) at
+app +0x418, clears +0x40c, +0x428 and +0x42c, stores the time import
+`[L2.02270]` at +0x424 and +0x414, and returns whether +0x41c changed. The
+five mission saves store Speed 4 (game0001, game0004, game9999) and 8
+(game0005, game0006) (R2-SESSION-244): 62 and 31.
+
+**Confidence.** High for the table and the arithmetic. Medium that +0x418
+is a tick period in milliseconds: the import name and the consumer were not
+read.
+
+### R2-ENGINE-621
+
+Composed from R2-ENGINE-613, R2-ENGINE-614 and R2-SESSION-244/245: before
+the first frame the REG restore of each of the five saves sets client
++0x5c/+0x60 to 8/29 and asks for client object 1 (base +4 of the Player-1
+hero, R2-SESSION-245) to be selected: slot +0x14(1) goes only to an object
+already in client +0x9d0 (the `L2.02998` hit test does nothing otherwise),
+and which messages create the hero before the type 0x64 that ends the wait
+is Unknown. Game0005 and game0006 open the book (Pressed 6 in game0006); the
+inventory stays closed. The entry then sends 0x408 through app +0xd4 slot
++0x48; what receives it is unread. game0006 alone restores a projectile.
+
+**Confidence.** Medium: a composition of the read bodies that cannot exceed
+the Medium meanings of R2-ENGINE-614 and the unobserved message order of
+R2-ENGINE-613. Unknown whether the selection takes effect, whether the clock
+runs or the game starts paused,
+and where 8/29 places the camera: the hero is at 11/41 or 21/41
+(R2-SESSION-236).
+
+**Unknown.** LOAD each of the five saves and record the first frame: the
+view origin, the selected portrait, the open panels, and two shots 5 s
+apart without input to see whether the world moves.
