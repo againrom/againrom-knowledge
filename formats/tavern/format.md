@@ -258,6 +258,37 @@ neither, npc2 in the shipped campaign, takes the `infowindow` picture arm, and
 which picture it shows is Unknown.
 — TAVERN-TALKSTATS-017
 
+The shared card's SPELLCASTER flag is `main.txt[190]`. It requires a non-hero
+drawable (`+0x18c & 1 == 0`), a nonzero received spell-mask dword `+0x1c`
+and disclosure selector exactly 7. The flag is a separate row below skills;
+it is not part of the unit name and is not a direct mage-bit or mana test.
+— TEXT-135
+
+In the read stock construction path, the mission selects an `NPCxx_k` Human
+template. Positive maximum mana opens book construction; parameter 25 selects
+spell ids 1..28. The sender derives a mask from occupied book slots and the
+client's masked receive writes drawable `+0x1c`; its base constructor starts
+that dword at zero. The read teaching path conditionally adds a missing spell
+to an existing book and requests an update on every pass, including with no
+book or an already known spell. A loaded campaign can select a template; it
+is not a direct copy of this dword on the fresh-stock path. The complete lifetime writer set and
+intervening updates are Medium, with pointer aliases and bulk copies open.
+— TAVERN-035
+
+Among 16 inspected EN card states, the two mercenary mages show SPELLCASTER
+and 14 other cards do not. Template masks predict the two positive cards;
+Reniesta's hero branch predicts no flag even though her mask is unread.
+These are visible readings plus Medium template/object reconciliation, not
+native memory measurements. The shots do not separate the nonzero-mask rule
+from positive maximum mana or a mage class: neither a positive-mana/zero-mask
+nor a zero-mana/nonzero-mask case is present. The rule's High comes from
+TEXT-135's code. Unselected roster cells remain untested.
+— TAVERN-036
+
+The raw linear `.text` decode (554,699 instructions, 23 bytes skipped) found
+no second direct caption-slot site. Another indirect or image-based caption
+path remains Unknown. — TEXT-136
+
 ## Roster and button clicks
 
 A click on an occupied roster cell selects it and refreshes the first button

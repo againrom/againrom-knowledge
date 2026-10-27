@@ -2630,3 +2630,63 @@ The matrix has 2700 spell/power pairs and 5400 localized predictions, plus 200 p
 There are exactly 76 matrix rows where binary64 versus decimal80 intermediate arithmetic changes a minimum, spread or duration word. Both values are retained. A matching pair outside this population is agreement of two models, not proof of native precision or printf tie behavior. Native generation timing, exact x87 outputs, all placed/save identities, custom/malformed reachability and painter framing remain Unknown.
 
 **Confidence.** High for finite output counts, controls, source identity and model disagreement. Medium for numerical predictions as a possible native outcome. Constructor facts retain their prior independent authority and scope.
+
+## Spellcaster caption condition
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TEXT-135 | The shared unit card draws main.txt slot 190 exactly when the selected drawable has no hero bit, its +0x1c dword is nonzero and the local disclosure selector equals 7. | High | ✔ promoted | [EXP-0627](../experiments/EXP-0627-inn-spellcaster/) |
+| TEXT-136 | A raw linear .text decode (554,699 instructions, 23 bytes skipped) has one non-stack +0x2f8 operand, the shared card's slot-190 read; no second direct caption site was found in that population. | Medium | ✔ promoted | [EXP-0627](../experiments/EXP-0627-inn-spellcaster/) |
+
+### TEXT-135
+
+In `R0877` (R0877), EBP is the drawable passed as ECX at entry. Bit 0
+of `drawable+0x18c` is tested at `L17079`. A clear bit enters `L17080`.
+A set bit passes through the hero rows and reaches `L17081`, whose branch
+skips the caption to `L17082`.
+
+At `L17080..L17083`, dword `drawable+0x1c == 0` and local selector
+`L != 7` each skip to `L17082`. Otherwise `L17084` reads
+`[global text object+0x2f8]`, offset `190*4`, and `L17085` calls text draw
+`R0571`. Every nonzero dword qualifies; no mana, mage-bit or class-name
+comparison occurs in this caption block. L=15 skips just as L=0..6 do.
+
+`evidence/card-flow-census.tsv` enumerates branch edges and writes overlapping
+`[esp+0x14]` over all `R0877..R0916`, including the middle omitted
+from the instruction excerpts: 950 instructions, 3,120 bytes, none skipped.
+The local entry edges into `L17080` are the taken branch at `L17086`
+and fall-through at `L17087`. The four dword selector-slot stores are
+`L17088`, `L17089`, `L17090` and `L17091`; none occurs later in
+this routine. The census retains the selector reload at `L17092`.
+
+The selector's owner, visibility, table-nibble and global-override inputs are
+those of SAV-996. In the inn, `R1804` selects a mercenary or talk-object
+pointer; `R0892` calls this shared card only for a non-null pointer with
+`+0x18c & 0x40` clear (`L17093`, `L17094`, `L10185`). These are
+additional outer gates. The separate flag at slot 191 is not slot 190.
+
+**Confidence.** High for the local branch predicate: raw instruction operands
+and branch destinations were checked with Capstone 5.0.7 and GNU objdump
+2.45.1 against executable SHA-256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`.
+Both installs contain that one image. This is a static drawing condition;
+resource success and actual screen publication are separate boundaries.
+
+### TEXT-136
+
+Capstone 5.0.7 ran a raw linear decode of 1,660,928 `.text` bytes:
+554,699 instructions, with 23 bytes skipped. Six operands have displacement
+`+0x2f8`: the card read `L17084`, stack LEAs `L17095`, `L17096`,
+`L17097` and stack stores `L17098`, `L17099`. The latter five do not
+read the global caption object.
+
+A raw scan of every PE section finds five E8 calls to the shared card,
+including inn call `L10185`, and no absolute dword naming its entry or
+absolute address `L17100`. This complements the direct-displacement
+search but does not establish global absence of another caption path.
+
+**Confidence.** Medium for the bounded search result. No repaired Ghidra
+project was present in this checkout, and this is not a function-completeness
+claim. Linear decoding can miss alternate instruction streams and skipped
+bytes. An aliased text pointer, computed slot address, generic indexed
+accessor or another resource can evade this search. No second direct site
+was found; absence of every indirect or bitmap-rendered copy remains Unknown.

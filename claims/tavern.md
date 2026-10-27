@@ -866,3 +866,81 @@ on). Clicks on a roster cell and on Talk while a page was open left the page unc
 **Confidence.** High for this file.
 
 **Unknown.** Whether talking changed the campaign state: the file was not saved afterwards.
+
+## Selected card spellcaster flag
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TAVERN-035 | The read inn stock path rebuilds Human spellbooks from mission-selected NPC templates and sends their known-spell mask to drawable +0x1c; constructor zero and masked receive are the identified client writers. | High / Medium | ✔ promoted | [EXP-0627](../experiments/EXP-0627-inn-spellcaster/) |
+| TAVERN-036 | Sixteen inspected EN inn card states show SPELLCASTER on the two selected mercenary mages only; template-derived masks predict both, while the hero branch excludes Reniesta independently of her mask. | High / Medium | ✔ promoted | [EXP-0627](../experiments/EXP-0627-inn-spellcaster/) |
+
+### TAVERN-035
+
+The read stock builder `R1555` removes previous nonzero-type stock and
+constructs Unit types 1..2 and Human types 3..15. Human names are
+`NPC%02d_%d`; the second value is the mission-derived tier (MERC-LEVEL-005).
+The Human wrapper `R0497` calls `R0656`.
+
+Unit initialization sets book pointer `actor+0x140` to zero (`L17057`) and
+maximum mana to zero (`L13971`). The Human stream writes maximum mana at
+`L17071`; its word helper skips -1. When signed maximum mana is positive,
+`L13963..L13972` constructs a book, reads parameter 25 (`knownSpells`),
+and populates spell ids 1..28 selected by that mask. A nonzero mana value
+alone does not make a nonempty book. In each EN/RU stock-template population,
+12 mage templates yield nonzero masks and 40 other templates yield zero under
+this constructor model.
+
+The book mask routine `R2254` ORs `1 << id` for occupied slots from id 1.
+Sender `L17072` calls it when a book exists and update bit `0x400000` is
+requested; `L17073` packs the dword. Receiver `L17074` assigns that dword
+to drawable `+0x1c` under the same bit. Base constructor `L17075` writes
+zero. A missing update leaves the previous value. These writes occur at
+drawable construction and message receipt, rather than in the card painter.
+
+The read `teachSpell` arm (`L05050..L17076`) can add a missing spell to an
+existing book. Every pass through the arm sets update bit `0x400000` at
+`L17077..L17078`, including with no book or an already known spell.
+The loaded campaign's mission can select a template; the stock reconstruction
+path does not take the tested
+dword directly from the campaign document. SAV-918 bounds the ordering of
+the command-37 request and view activation.
+
+**Confidence.** High for the named positive instructions and parsed template
+parameters. Medium for a complete lifecycle account: only the identified
+construction, send, receive and teaching paths were expanded. The linear
+drawable-range census covers direct overlapping-width operands and immediate
+offsets, but cannot exclude pointer aliases, bulk copies, indirect callbacks
+or an intervening writer. No repaired decompiler project was available in
+this checkout. No all-image writer absence is claimed.
+
+**Unknown.** Actual update delivery and the selected drawable's intervening
+history; loaded-book paths outside fresh stock reconstruction.
+
+### TAVERN-036
+
+The 16 receipt-verified card witnesses are T032, T038, U004, U029, U042,
+U058, U071, U084, U100, U116, U132, U157, U184, U210, U238 and W007.
+The two positive witnesses show SPELLCASTER below the skill rows:
+U132 matches `NPC03_3`, constructed mask `0x05cc106e`; U157 matches
+`NPC04_2`, constructed mask `0x008534c2`. The names on both cards are
+MERCENARY MAGE. SPELLCASTER is a separate flag row, not part of the name.
+
+The 14 negative witnesses comprise seven Clubman cards, three Archer cards, one
+Horseman card, two Axeman cards and Reniesta. The capture table preserves
+the exact per-step population and inferred template identities. Reniesta's
+mask was not read; the hero branch suffices to predict no caption.
+
+**Confidence.** High for the visible caption readings and receipt equality.
+Medium for the template-to-selected-object reconciliation: identities match
+displayed primary values, skills and catalogue context, but native object
+addresses and mask values were not observed. No disagreement was found among
+the 16 inspected states. These shots do not distinguish the nonzero-mask
+rule from positive maximum mana or a mage class: none pairs positive
+mana with a zero mask, or zero mana with a nonzero mask. The rule's High
+comes from TEXT-135's code, not from these shots.
+Repeated captures of those selections and unselected roster cells are not
+extra independent witnesses.
+
+**Unknown.** Masks of unselected cells, native selected-object identities and
+the actual received masks. A read-only trace at selection and masked receive
+would settle these, but no original program ran in this experiment.

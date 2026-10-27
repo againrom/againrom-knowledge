@@ -318,6 +318,22 @@ The published rules do not establish:
 
 ## Decode and encode sequence
 
+### Conditional spellcaster caption
+
+The shared unit card draws `main.txt[190]` only when the selected drawable's
+hero bit `+0x18c & 1` is clear, its received spell-mask dword `+0x1c` is
+nonzero and disclosure selector L equals 7. L=15 skips this row. This local
+test does not use the mage bit, mana or the displayed unit name. In the inn,
+a null selected object or flag `+0x18c & 0x40` also prevents the shared card
+call. — TEXT-135
+
+One direct caption-slot operand was found in the raw linear `.text` decode
+(554,699 instructions, 23 bytes skipped). No second direct site was found in
+that population. Indirect text-pointer aliases, computed slot access and image content remain outside
+that search, so absence of another caption path is Unknown. — TEXT-136
+
+### Resource and input conversion
+
 1. Parse CRLF-delimited resource tables as bytes, retaining positional order.
 2. Apply the active selector's display transform to each display byte.
 3. Handle controls and markup on the appropriate text path, then index
