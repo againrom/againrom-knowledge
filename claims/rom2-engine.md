@@ -11051,7 +11051,7 @@ an EN call-target scan of the getters would bound the EN readers.
 |---|---|---|---|---|
 | R2-ENGINE-517 | The ROM2 0x70 structure class is Pointer, a Building subclass built for type-4 kinds 0x46..0x4b; it overrides only vtable slots 0 (runtime class), 1 and 2 (Serialize), and Serialize transfers dword +0x6c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 | R2-ENGINE-518 | At health above 0, a ROM2 actor step in state 15 looks up a building within distance 2 of (x-1, y-1) (Medium); a Pointer with +0x6c above 0 calls the executor with +0x6c each step; Shop and Inn call L2.02566 with 0x83, 0x84. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
-| R2-ENGINE-519 | ROM2 unit state 15 is set by one order handler when `L2.02567` returns nonzero (Medium: arrival in range); its next call in state 15 calls `L2.01576`, which sets [r+0x50] to 1. One state-15 store per root found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-519 | ROM2 unit state 15 is set by one order handler when `L2.02567` returns nonzero (Medium: arrival in range); its next call in state 15 calls `L2.01576`, which sets [r+0x50] to 1. One state-15 store per root found. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/), [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-520 | ROM2 compiled action slots follow node order over nodes below 0x10002; Pointer +0x6c counts the same nodes. That a slot advances only on a successful compile is Medium; +0x6c names node e2 only if no earlier node failed. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 | R2-ENGINE-521 | In the RU bodies read, Shop slot 5 calls a method of its 0x98 helper and Inn slot 5 walks a member list and a call counter; neither body reads the 11b or 11a fields; no campaign map has a Shop or Inn. No slot-5 caller was read. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 
@@ -11212,6 +11212,13 @@ the dispatch head (RU `L2.02640`) and a call-target scan of its function
 would settle it. Whether the actor step runs once or more between two
 handler calls: the callers of the step (R2-ENGINE-518 Unknown). What
 `L2.02567` tests: reading `L2.00490`, `L2.02635`, `L2.01521`, `L2.01522`.
+
+**Amended.** R2-ENGINE-607 names the order: unit order 0xf, whose planner
+stores prepared byte 0xf; index 14 of the prepared table reaches the arm
+`L2.02638` (EN `L2.02984`) and this handler. Order 0xf is set from message
+type 0x24, which the client's structure click sends (R2-ENGINE-606); other
+producers of order 0xf were not searched. `L2.01521` returns word +2 of
+its object (R2-ENGINE-607).
 
 ### R2-ENGINE-520
 
@@ -13374,3 +13381,266 @@ repositioning and subsequent writes. No whole-image writer/caller census is made
 deserialization and at the first frame to settle delivered state and later
 placement. Allocation failure and short transfer need controlled original
 observations; this experiment ran none.
+
+## Signpost click, structure order and event box
+
+Static reads of the owned EN and RU `allods2.exe`: raw x86
+listings decoded with Capstone, one generation reproduced byte for byte.
+EN addresses first where both are given; "equal after masking" means equal
+once every number at or above 0x400000 is masked.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-605 | The ROM2 hover routine (EN L2.02985, RU L2.02986) names the object of the last-registered rectangle meeting a 3x3 box at the cursor; a CStructure gets flag 0x800 only if kind-record +0x8c is set, else +0x64 set skips it. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-606 | A ROM2 map click whose box is at most screen width x 10/640 and whose cursor is [L2.02987] sends message type 0x24 with the hovered ID and the IDs of objects that L2.02988 accepts; EN picks that cursor only on hover flag 0x800. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-607 | ROM2 message 0x24 finds the structure by ID and sets order 0xf: target its position word, range 1 for building byte +0x60 of 1 or 2, 2 (cell +0x101) for 3 or 4, else 3 (+0x202); prepared 0xf reaches the state-15 handler. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-608 | The ROM2 event box starts as a 580x240 rect at (30,120); placement rounds it to 8+96k by 104+64k and centres it on the screen (488x232 at 268,268 at 1024x768); Enter and Esc post 0x470 as Ok does. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-609 | A ROM2 modal box sets UI bit 8 (EN +0x404, RU +0x41c), darkens the screen and sets cursor [L2.02989]; in EN bit 8 stops the edge routine and six panel redraws per pass and defers events; no read body stops the simulation. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+
+### R2-ENGINE-605
+
+The routine (585 instructions per root) clears the hovered object +0x994,
+the hovered ID word +0x9a8 and +0x998..+0x9a4, and returns 0 when the
+cursor point (getters `L2.02990`, `L2.02991` on `L2.02992`) lies outside
+the view rectangle. It forms the box (x-1, y-1, x+1, y+1) from the globals
+`L2.02993`, `L2.02994` and walks index i from [view+0x134]-1 down to 0:
+
+1. The 16-byte rectangle i of list view+0x10c (`L2.02995`) is normalised
+   (`L2.02996`) and intersected with the box (`L2.02997`); no overlap
+   continues the walk.
+2. The ID word i of list view+0x120 (`L2.02956`) is looked up in the
+   object collection view+0x9d0 (`L2.02998`); a miss ends the walk.
+3. The name of the object's runtime class record (vtable slot 0) is
+   compared with "CUnit" (flag 1), "CAirUnit" (flag 2) and "CStructure"
+   (EN `L2.02999`, `L2.03000`, `L2.03001`; RU `L2.03002`, `L2.03003`,
+   `L2.03004`). For "CStructure" it takes record [`L2.03005`]([obj+0x24])
+   through `L2.03006`, which calls `L2.03007`: +0x8c nonzero adds flag
+   0x800; otherwise +0x64 nonzero skips the object and the walk continues.
+   Both kept paths add 0x20. `L2.02955`(word +4 of [obj+0x14]) on
+   view+0x9cc adds flag 4.
+4. The object is stored at +0x994. Outside campaign mode (app +0x5d8 = 2
+   in EN, +0x63c in RU) a walk over view+0x4970 fills
+   +0x998..+0x9a4 first. Then the ID word i goes to +0x9a8 and the walk ends,
+   so the highest index that overlaps wins.
+
+After the walk, a cursor inside view child 2 or 3 (RU 3 or 4) clears +0x994
+and +0x9a8. The routine stores the cell under the cursor at +0x9ac, +0x9b0,
+adds flag 0x40 or 0x400 from bits 0xc000 of four map words and, when the
+hovered object changed, posts 0x408 to app members +0xe0 and +0xe4 and sets
++0x114 = 1 on the new and the old object. It returns the flags.
+
+EN `L2.03008` passes its 16-byte rectangle argument with index +0x134 to
+`L2.03009` on list +0x10c and its ID word with the same index to `L2.03010`
+on list +0x120, then adds 1 to +0x134; both store-at-index calls are unread,
+so that they append is Medium. A
+call-target scan of EN `.text` finds four direct callers, `L2.03011`,
+`L2.03012`, `L2.03013` and `L2.03014`, not read.
+
+**Confidence.** High for the control flow and stores of the routine and of
+`L2.03008`: the descending index, the three name compares, the flag
+`or`s, the skip and the stores to +0x994 and +0x9a8; the routine is equal
+in EN and RU after masking except the campaign field offset and the two
+child IDs; `L2.03008` is EN only. Medium that index i addresses the i-th
+registered rectangle and ID, that `L2.02997` tests overlap, that
+`L2.02996` normalises, that `L2.01497` forms the box and that `L2.02998`
+finds by ID: the list, rectangle and collection helpers `L2.02995`,
+`L2.02956`, `L2.02998`, `L2.02997`, `L2.02996`, `L2.01497`, `L2.03009` and
+`L2.03010` are unread. Medium for the other meanings: the cursor getters, `L2.02955`, `L2.03007` and the record layout
+of `L2.03005` are unread, and that the registration order is the draw order
+rests on the unread callers. Unknown which rectangle an object registers
+(sprite frame, foot cell or other).
+
+**Unknown.** The rectangle a Pointer registers: the four callers of
+`L2.03008` would settle it, or a run hovering the top of the signpost
+sprite and its foot cell. Whether the Pointer's client object is a
+CStructure (its runtime class was not read) and whether its kind record
+has +0x8c set, that is, whether a Pointer gets flag 0x800 at all:
+`L2.03007`, the table writer and the Pointer's client class.
+
+### R2-ENGINE-606
+
+The click routine (EN `L2.03015`, RU `L2.03016`; 190 instructions, equal
+after masking) builds a rectangle from a cursor point (`L2.03017` on
+`L2.02992`) and its argument point, normalises it, grows an empty one by
+(1, 1), and goes to `L2.03018` (unread) when its width or height is above
+[`L2.00628`] x 10 / 640. With view +0x140 = 0 it calls `L2.03019`.
+Otherwise it compares the current cursor (`L2.03020`) with the handles in
+`L2.03021`, `L2.03022`, `L2.03023`, `L2.03024`, `L2.03025`, `L2.01940`,
+`L2.03026`, `L2.02987` and `L2.03027` in that order (through `L2.03028`).
+On [`L2.02987`] it calls `L2.03029` (RU `L2.03030`) with word view+0x9a8,
+the hovered ID of R2-ENGINE-605. A call-target scan of `.text` finds that
+call as the only direct caller in each root (EN `L2.03031`, RU `L2.03032`).
+
+`L2.03029` (60 instructions, equal after masking) fills the message
+buffer `L2.03033` (RU `L2.03034`): byte +9 = 0x24, word +5 = word +4 of
+the player object view+0x9cc, word +7 = 0, byte +0x12 = 0. For each object
+of collection view+0x9d0 (head `L2.03035`, next `L2.03036`) that `L2.02988`
+accepts, it stores word +0xe = the hovered ID and appends the object's
+word +4 (`L2.03037`, RU `L2.03038`). It sends the buffer through
+`L2.00871` on `L2.00872` (RU `L2.00459` on `L2.03039`, the packet bus of
+R2-ENGINE-047) and calls slot 0x6c of `L2.03040`'s result. A `.text`
+pattern scan for `c6 ?? 09 24` (`mov byte [reg+9], 0x24`) finds this one
+site per root (EN `L2.03041`, RU `L2.03042`).
+
+EN cursor choice (window `L2.03043`..`L2.03044`, inside a function whose
+head was not read; it calls the hover routine): [`L2.02987`] is chosen at
+`L2.03045` when the hover flags carry 0x800 and lack 4, view +0x140 = 1,
+view +0x144 bit 0 is set and the selected unit view+0x138 has +0x1b8 bit 0;
+at `L2.03046` under the same tests when also flags & 0x23 is nonzero and
+the locals [ebp-0x20], [ebp-0x30] and [ebp-0x68] are zero. Both sites
+test 0x800 (`L2.03047`, `L2.03048`), so in EN the click takes this path
+only on an object for which the hover routine set 0x800: a CStructure whose
+kind record has +0x8c set (R2-ENGINE-605). Whether a Pointer is one is
+Unknown there.
+
+**Confidence.** High for the control flow and stores of the click routine
+and the producer in both roots and for the two scans (the pattern covers
+one encoding: an immediate byte store with an 8-bit displacement). Medium
+for what the helpers do: the normalise, grow-empty and collection head,
+next and append helpers `L2.02996`, `L2.03049`, `L2.03050`, `L2.03035`,
+`L2.03036` and `L2.03037` are unread. Medium that the routine handles a left
+click (its caller was not read), that `L2.02988` accepts the selected units
+(unread), that the globals hold cursor handles, and for the cursor choice
+(EN only; locals set before the window). Unknown what the large-box path
+and `L2.03019` do.
+
+**Unknown.** The cursor shape behind [`L2.02987`] and when it shows: a run
+hovering the signpost with the hero selected and deselected, recording the
+cursor and whether a click walks him.
+
+### R2-ENGINE-607
+
+The message handler's 21-entry jump table (R2-ENGINE-541) holds at index
+18 (type 0x24) EN `L2.03051`, RU `L2.03052`. The arm (46 instructions,
+equal after masking except frame offsets) runs when [`L2.01066`] (RU
+[`L2.02609`]) is nonzero and calls EN `L2.03053`, RU `L2.02792` with word
++0xe on [[ctx+0x7c]]: from EN `L2.03054` through `L2.03055` (RU
+`L2.03056`, `L2.03057`) it returns the
+first object whose dword +4 equals the sign-extended word, else 0. On 0 the
+arm formats string RU `L2.03058` (EN `L2.03059`) with the ID and stops;
+otherwise it calls the setter EN `L2.03060`, RU `L2.02809` with the unit
+[ebp-0x18] and the object (R2-ENGINE-541 reads the unit selection).
+
+The setter (86 instructions, equal after masking) calls reset EN
+`L2.03061` (RU `L2.01584`), stores unit +0x50 = 0xf and, on the command
+object, +0x68 = the object, +0x14 = 1, +8 = 0 and word +0xa = word +2 of
+[object+0x10] (EN `L2.03062`, RU `L2.01521`). It then indexes the 4-entry
+table EN `L2.03063`, RU `L2.03064` by byte +0x60 of the object (EN
+`L2.03065`, RU `L2.03066`) minus 1:
+
+| +0x60 | +0x14 | +0xa |
+|---|---|---|
+| 1, 2 | 1 | unchanged |
+| 3, 4 | 2 | + 0x101 |
+| 0, 5..255 | 3 | + 0x202 |
+
+The order-0xf planner (EN `L2.03067`, RU `L2.02875`; R2-ENGINE-555)
+stores command +8 = 0xf and +0x68 = its second argument. Index 14 of the
+15-entry prepared table (R2-ENGINE-542; EN `L2.02887`, RU `L2.01571`,
+prepared byte minus 1) holds EN `L2.02984`, RU `L2.02638`, which calls the handler of R2-ENGINE-519 (EN
+`L2.02633`, RU `L2.02632`) with the unit and command +0x68. So a structure
+click gives order 0xf. The handler tests +0xa and +0x14 with RU
+`L2.02567` (R2-ENGINE-519): on a zero test it calls RU `L2.02634` (an
+approach step, R2-ENGINE-543; unread here) and sets state 1 (Medium that
+the unit walks toward +0xa); on a nonzero test it sets state 15, where the
+arm of R2-ENGINE-518 runs a Pointer's action.
+
+**Confidence.** High for the arm, the lookup, the setter, the planner, the
+prepared arm and the table cells, read in both roots. Medium that the unit
+walks toward +0xa in state 1: `L2.02634` was not read here (R2-ENGINE-543
+names it an approach step; R2-ENGINE-546 reads state 1 as a cell step).
+Medium that byte +0x60 is the Buildings sizeX (R2-ASSET-124 gives Pointer
+1..6 sizeX 1; no body read stores +0x60), so a Pointer's range of 1 is
+Medium; Medium that
+EN `L2.03054` and `L2.03055` (RU `L2.03056`, `L2.03057`) walk every
+building and that +0xa packs x in the low byte and y in the high byte.
+Unknown what a unit that cannot walk does.
+
+**Unknown.** The writer of building byte +0x60 (the Building constructor
+and its record read). A unit that cannot reach the cell: the state-1 arm
+of the handler, or a run clicking the signpost with the hero blocked.
+
+### R2-ENGINE-608
+
+The event dialogue builder (EN `R2.0038`, RU `R2.0037`; R2-ENGINE-050;
+167 instructions, equal after masking except the IDs) allocates 0x88 bytes
+and calls the dialogue constructor (EN `R2.0040`, RU `R2.0039`) with
+(base ID 9 or RU 0xa, 0x1e, 0x78, 0x262, 0x168, key). Its child IDs are
+those of R2-ENGINE-051. The base constructor (EN `L2.01470`, RU
+`L2.03068`) passes the values to `L2.00634`, stores vtable `L2.03069` and
+calls the placement EN `L2.03070`, RU `L2.03071`. The rectangle constructor
+EN `L2.00635` stores the ID at +4 and passes the four values to
+`L2.00636`.
+
+The placement reads width = dword +0x10 - dword +8 and height = +0x14 -
++0xc (EN `L2.03072`, `L2.03073` on +8), sets w = (w - 8) / 96 x 96 + 8 and
+h = (h - 0x68) / 64 x 64 + 0x68 with truncating division, x = ([`L2.00628`]
+- w) >> 1 and y = ([`L2.00629`] - h) >> 1, and stores (x, y, x + w, y + h)
+at +8. With (0x1e, 0x78, 0x262, 0x168) as left, top, right, bottom, w = 580
+gives 488 and h = 240 gives 232; at 1024x768, x = 268 and y = 268.
+
+The dialogue key handler (EN `L2.03074`, RU `L2.03075`) posts 0x470
+through slot 0x48 for 0xd and 0x1b and returns 1; other keys go to the base
+handler EN `L2.03076`, RU `L2.03077`, whose byte table sends 9 to a focus
+step (`L2.03078`) and 0x25..0x28 to the neighbour fields +0x50, +0x54,
++0x48, +0x4c of [+0x38]. 0x470 is the Ok message of R2-ENGINE-051; its
+close goes through EN `L2.00782`, which for 0x445 and 0x446 calls slot 0x84
+and posts 0x44c with the dialogue to the application. The builder ends
+with the modal push of R2-ENGINE-609. A call-target scan of EN `.text`
+finds 21 direct callers of the builder; `L2.03079` is the UI 0x433 branch
+and the other 20 are not read.
+
+**Confidence.** High for the arithmetic, the constructor arguments and the
+Enter and Esc arm in both roots. Medium for the numbers on screen: they
+rest on `L2.00634` and `L2.00636` storing the four values in order at +8
+(read in navigation only) and on [`L2.00628`] and [`L2.00629`] holding the
+screen size. Medium for the Tab and arrow cells, read from table bytes that
+the listing decodes as code. Unknown which of the 20 other callers open a
+box in play.
+
+**Unknown.** The box frame and its drawn size: a run opening the signpost
+box at 1024x768 and measuring its rectangle, with the hero at two screen
+places to test R2-SESSION-230's "to his right".
+
+### R2-ENGINE-609
+
+The modal push (EN `L2.03080`, RU `L2.03081`; 62 instructions, equal after
+masking except app field offsets) sets bit 0x8000 of the UI word when the
+box is [app+0x3c8] (RU +0x3e0), else bit 8 (UI word EN +0x404, RU +0x41c).
+It adds the box as a child of app+0xcc, calls box slots 0x78 and 0x80,
+calls `L2.03082`(0, 0, [`L2.00628`], [`L2.00629`], 3) between `L2.02282`
+and `L2.02283` (EN: slots 0x64 and 0x80 of [`L2.03083`] with the nesting
+count `L2.03084`), calls `L2.03085` and box slot 0x34, clears app +0x44c
+(RU +0x464), calls `L2.01133` on [`L2.02989`], which passes five fields to
+`L2.03086` on `L2.02992`, and when `L2.03087` on `L2.02992` is nonzero calls
+`L2.03088` and `L2.03089`.
+
+A pattern scan of `.text` for a load of the UI word followed by `and` or
+`or` with 8 (`8b ?? 04 04 00 00 83 ?? 08`, RU `1c 04`) finds 8 EN and 10
+RU sites. EN:
+
+| Site | Body |
+|---|---|
+| `L2.03090` | sets the bit (`or`) |
+| `L2.03091` | the UI 0x433 test of R2-ENGINE-050 |
+| `L2.03092` | `L2.03093` returns 0 while the bit is set |
+| `L2.03094`, `L2.03095` | `L2.03096` returns 0 at once while app +0x3f4 is nonzero or the bit is set, before testing the cursor against six screen-edge rectangles and choosing cursor indices |
+| `L2.03097` | skips six slot-0x34 calls per pass (seven call sites: +0x84 or +0x70, `L2.03098`) on members +0x74, +0x6c, +0x68, +0x84 or +0x70, +0x7c, +0x78 and two helpers |
+| `L2.03099` | the close arm: clears the bit; when the UI word is then 1 and the mode is campaign, stores `timeGetTime()` at app +0x424 and clears +0x40c and +0x428; deletes the box through slot 4 |
+| `L2.01954` | not read |
+
+The RU sites `L2.03100`, `L2.03101`, `L2.03102`, `L2.03103`, `L2.03104`,
+`L2.03105`, `L2.03106`, `L2.03107`, `L2.03108` and `L2.03109` were not
+read; `L2.03101` and `L2.03102` have no EN site at a matching place.
+
+**Confidence.** High for the push in both roots and the EN bodies in the
+table. Medium for the meanings: darkening (`L2.03082` unread; R2-SESSION-230
+saw the screen darken), the cursor store (`L2.03086` unread), edge
+scrolling and panel redraws (named from the rectangles and calls). Medium
+for the population: one encoding of the test; other encodings are outside
+it. Unknown whether the simulation stops: no body read stops a tick, and
+the reader of app +0x424 was not found.
+
+**Unknown.** Whether units move and sound plays while the box is open: a
+run in the first mission opening the signpost box with a creature moving
+in view, two shots 5 s apart and one after Ok, noting ambient sound.

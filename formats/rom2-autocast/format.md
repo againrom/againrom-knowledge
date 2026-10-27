@@ -242,6 +242,14 @@ stores are High; per-order closure and inherited reset effects are Medium.
 The helper containing L2.02866 calls the cast initializer, but its order
 reachability is Unknown. — R2-ENGINE-555
 
+Order 0xf is the structure order. Its setter (RU L2.02809) stores unit +0x50
+= 0xf and, on the command object, +0x68 = the building, +0x14 = range 1, 2
+or 3 by building byte +0x60, and +0xa = the building's cell word, plus 0x101
+or 0x202 for ranges 2 and 3. Planner L2.02875 stores prepared 0xf; prepared
+cell 14 calls the state-15 handler with +0x68. Message type 0x24 reaches the
+setter through a lookup of the building by ID; other producers of order 0xf
+were not searched. — R2-ENGINE-607
+
 The primary strike, cast, step and hold arms do not dispatch prepared +8.
 Strike clears +9 when phase > 2 and +0x136 is nonzero; hold clears it when
 mask bit 0x40000 is absent. A cast passes init, routine try, wind-up and

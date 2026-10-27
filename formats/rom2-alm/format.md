@@ -181,6 +181,27 @@ only on a successful compile is Medium, so +0x6c names the 11c node only if
 no earlier node below 0x10002 failed. — R2-ENGINE-517, R2-ENGINE-518,
 R2-ENGINE-519, R2-ENGINE-520
 
+A map click on cursor `L2.02987`, which EN chooses only on hover flag 0x800
+(a structure whose record has +0x8c set), is an order, not a walk. The
+hover routine walks its screen-rectangle list from the last entry down and
+names the object of the first rectangle that meets a 3x3 box at the cursor
+(that the list and rectangle helpers address and test the registered
+rectangles is Medium); a structure whose kind record has +0x8c 0 and +0x64
+set is skipped, and +0x8c set gives hover flag 0x800. Which rectangle a
+Pointer registers, whether its client object is a structure and whether its
+record has +0x8c set are Unknown, so that a signpost click takes this path
+is Medium. On cursor `L2.02987` a click sends message type 0x24
+with the hovered object's ID and the IDs of the units that `L2.02988`
+accepts (that these are the selected units is Medium). The server finds the
+building whose dword +4 is that ID and sets order 0xf: command +0x68 = the
+building, target +0xa = word +2 of its position object, range +0x14 = 1 for
+building byte +0x60 of 1 or 2, 2 with target + 0x101 for 3 or 4, else 3 with
+target + 0x202 (that +0x60 is the Buildings sizeX is Medium). Prepared 0xf
+calls the state-15 handler with +0x68. Until the range test passes the
+handler calls an approach step and sets state 1 (Medium that the unit walks
+toward the target); when it passes, the unit enters state 15. — R2-ENGINE-605,
+R2-ENGINE-606, R2-ENGINE-607, R2-ENGINE-519
+
 The 46 campaign maps per root hold 13 Pointers and no Shop or Inn. The 35
 gate-1 11c entries name 12 Pointers; for each, the action node at index
 position exists and has operation 2. That the Pointer selects that node at
@@ -264,8 +285,10 @@ R2-ASSET-003, R2-ASSET-024
 
 Type 10 and 11 fields are decoded to the program fields that receive
 them above. The 11c count reader is the state-15 arm (R2-ENGINE-518; that it
-is the only reader is Medium). Which order code puts a unit in state 15 is
-Unknown (R2-ENGINE-519); so are what an Inn offer is and which event
+is the only reader is Medium). Order 0xf, from message type 0x24, reaches the
+handler that sets state 15 (R2-ENGINE-607, R2-ENGINE-519; other producers of
+order 0xf were not searched). The rectangle a Pointer registers for the
+pick is Unknown (R2-ENGINE-605); so are what an Inn offer is and which event
 builds the offer list (R2-ENGINE-536). So is the reader of unit-record
 0x0a and 0x20 outside the two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0

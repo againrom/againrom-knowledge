@@ -109,6 +109,21 @@ event keys match none of those default families, so this page route selects
 no speech name. EN event7 has four parts; RU has three. Other missions and
 other script audio routes are not characterized. — R2-ENGINE-051
 
+The ordinary event dialogue starts as a 580x240 rectangle at (30, 120). Its
+placement rounds the width to 8 + 96k and the height to 104 + 64k (488x232)
+and centres the box on the screen: (268, 268) at 1024x768 (the numbers on
+screen are Medium). Enter and Esc post `0x470` as the button does. The modal
+push sets UI bit eight (EN +0x404, RU +0x41c), so later events defer while
+the box is open; in EN the bit also stops the edge routine and six panel
+redraws per pass (seven call sites, two of them alternatives). Whether the simulation stops is Unknown. — R2-ENGINE-608,
+R2-ENGINE-609
+
+The first-mission signpost, 10.alm Pointer id 42, runs node 25: operation 2,
+parameter 19, event 19 (the node step is Medium). `#event19` occurs once in
+each mission10.txt; each body is one `<` header line and one text line, both
+ended by CR LF. The EN line is the 29 bytes of "To Great Mage Skrakan's
+Tower"; the RU line is 23 bytes. — R2-ASSET-152
+
 ## Mission conversion and font1 index
 
 The native whole-file mission loader appends NUL and calls

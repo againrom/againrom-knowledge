@@ -2212,3 +2212,41 @@ Menu labels draw one underlined letter each.
 **Confidence.** Medium: eye reads of the small font, one shot each.
 
 **Evidence.** [EXP-2075](../experiments/EXP-2075-rom2-screens/)
+
+## First-mission signpost record and its event text
+
+Derived measurements of the `10.alm` member of `scenario.res` and the
+`text/mission10.txt` member of `main.res` in the owned EN and RU roots; no
+member bytes.
+
+| ID | Public functional claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-152 | The first-mission signpost (10.alm Pointer id 42) selects event 19; `#event19` occurs once in each mission10.txt; the EN body's one text line equals R2-ASSET-150's drawn line, and the RU line is 23 bytes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+
+### R2-ASSET-152
+
+`10.alm` is equal in both roots: 74298 bytes, SHA-256
+`23d22542745ab0c101a60b2da5ea80b858eeb4e1840515bd8398ceb2ad9efeca`. Its
+only Pointer (R2-ASSET-123) is the type-4 record id 42, kind 0x4a, x 3712,
+y 10368: cell (14, 40), fraction (128, 128). No other type-4 record lies
+within 3 cells. Its three 11c entries are equal: gate 1, node position 25;
+24 of the 25 nodes before position 25 have signed dword +0x40 (operation)
+below 0x10002 (node 0 has 0x10002), so Pointer +0x6c = 24
+(R2-ENGINE-517). Node 25 (ID 26) has operation 2, type 1 and parameter 0 =
+19: event 19 (R2-ENGINE-047), formatted as `event19` (R2-ENGINE-050).
+
+| Root | mission10.txt | `#event19` at | Body | Body SHA-256 | Text line |
+|---|---:|---:|---|---|---|
+| EN | 9775 B | 9723 | 9733..9774, 41 B | `996f769ffa17beb25628a0a4073d3952da0bd2c23442d9a00f5bbf26df6d254f` | 29 B, `ec1b8c2b84796e4a8c595e730ba2de33716a482268e63db51d5094d9f4d8f9cc` |
+| RU | 9390 B | 9342 | 9352..9387, 35 B | `003498ab2709b44c52a5aa93621934a78ad7703e18f30cbd8f332695b114bfff` | 23 B, `45572f371d4f992c17e4f02aa1a3303c76b41e78d983e5a1bc630e44edb8fdaf` |
+
+Each body is one header line that begins with `<` and one text line, both
+ended by CR LF. The EN text line is the 29 bytes of "To Great Mage
+Skrakan's Tower", the line R2-ASSET-150 saw drawn in the box.
+
+**Confidence.** High for the record, the node, the key counts, offsets,
+lengths and hashes, and the EN equality. Medium that node 25 is the node the
+Pointer runs (the node-to-slot step of R2-ENGINE-520) and that operation 2
+parameter 0 is the event ID (R2-ENGINE-047).
+
+**Unknown.** The RU line as the RU original draws it: no RU run was made.
