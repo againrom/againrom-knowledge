@@ -1891,3 +1891,56 @@ processes and within one; the digits are High as read from those 3x crops.
 
 **Unknown.** The source of the variation (a draw at load or a state carried from earlier
 loads). Other shelves were compared in one load only.
+
+## Shelf sort order
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-154 | The client orders a shelf by C-runtime `qsort` with keys flag bit 0x2, kind, row group, then price, and no tie-break, so equal-price items take an unstable order; this is consistent with the captured potion order 50, 50, 500, 500. | High / Medium | ● active (branch candidate) | [EXP-0628](../experiments/EXP-0628-town-unknowns/) |
+| SHOP-155 | The server sorts drawn stock by a suitability bit for kinds 1, 2 and 7, then row, then price; for a second item outside those kinds it zeroes the first item's key and compares an uninitialised local. | High | ● active (branch candidate) | [EXP-0628](../experiments/EXP-0628-town-unknowns/) |
+
+### SHOP-154
+
+- The shelf populate `L09880` stamps each element (`SHOP-097`), writes its arrival index to
+  `+0x20` (`L17101`) and calls `L17102` (`L17103`), which calls
+  `qsort(list, n, 4, R1024)` (`L17104`).
+- Comparator `R1024`, in order: flag byte `+8` bit `0x2` set first; kind nibble
+  `(code>>8)&0xf` (`L17105`) ascending; for kind 1 a row group from `L17106` ascending;
+  price (`R1023`, token tag 1) ascending; otherwise 0. The arrival index is not read.
+- `L17107` is the C runtime `qsort`: at most eight elements go to the selection sort
+  `L17108`, which moves the first of the maximal elements to the end; a longer range swaps its middle
+  element to the front and partitions. Equal elements change order.
+- The stock builder appends six literal potions after the drawn stock, in the order Health
+  Regeneration (50), Medium Healing (500), Big Healing (3000), Mana Regeneration (50), Medium
+  Mana (500), Big Mana (3000) (`L17109`..`L17110`; `SHOP-DUP-028`, `SHOP-CONSUME-074`).
+- A model of that `qsort` by price over k drawn items arriving in ascending price, followed by
+  the six potions, puts Mana Regeneration before Health Regeneration and Medium Healing before
+  Medium Mana for k = 2, 3, 4 and 8; for k = 2 this needs that arrival order, and k = 3 and 4
+  match in every order. A stable sort or a code tie-break never puts Mana Regeneration before
+  Health Regeneration. Two EN captures show blue 50, red 50, red 500, blue 500, then two
+  scrolls; the captured order is consistent with the read `qsort` and excludes those two.
+
+**Confidence.** High for the keys, the absent tie-break and the `qsort` body, read as
+instructions. Medium for the captured order's derivation: the model assumes the drawn items
+tie with the potions on the first three keys, that the list arrives in the server's order and
+that the drawn items arrive in ascending price (`SHOP-155` can leave the server order of items
+outside kinds 1, 2 and 7 to stack residue); none is read, and blue as mana is read from the
+picture.
+
+**Unknown.** The wire order of a stock list; the flag and kind fields of scrolls and books on
+the potion shelf.
+
+### SHOP-155
+
+- `R2182` calls `qsort` with comparator `R1039`; its callers are `L17111` and
+  `L17112`, the latter in the stock generator `R1711`.
+- `R1039` takes, for each item whose kind byte `+0x44` is 1, 2 or 7, bit 0 of row parameter
+  15 (`ITEM-SUIT-035`) through `R0476`; the larger key sorts first. Then byte `+0xc`
+  ascending, then `+0x1c` ascending, else 0.
+- When the second item's kind is not 1, 2 or 7, the code at `L17113` stores 0 into the first
+  item's key slot `[ebp-0x10]` instead of the second's `[ebp-0xc]`, and the comparison reads
+  the uninitialised `[ebp-0xc]`.
+
+**Confidence.** High for the keys and the store, read as instructions in EN = RU `rom.exe`.
+
+**Unknown.** The stack value the uninitialised slot holds, and so the order it gives.

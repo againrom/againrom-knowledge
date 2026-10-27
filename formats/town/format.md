@@ -357,6 +357,12 @@ five times in a fixed order. (`TOWN-505`) A sheet that
 fails to open reports a fatal error naming its path and aborts the process; the
 loader never skips or stubs it. (`TOWN-506`)
 
+After a town LOAD the square's three families stand, Medium, at positions the
+entry loader draws at random; the entry path takes no save input, and four
+loads of four saves showed the horse position not carried from the screen
+before the load. That a LOAD reaches entry rests on captures; the static path
+from the Load dialog is not traced. (`TOWN-565`)
+
 ### Statue star and crowd
 
 The star loader binds nine 64×44 `Town/stars/S00..S08.bmp` pictures at `+1ac`,
@@ -682,3 +688,25 @@ delegated command consumers have not established whether the skill has
 already changed. Latch arithmetic aliases several class/tier combinations
 and can address one dword beyond the reset's 30 positions; initialization
 and native consequences remain Unknown. (`TOWN-544`, `TOWN-502`)
+
+## School Exit caption and lit rows
+
+The Exit string is purse minus the selected price, a signed decimal with no
+clamp and comma grouping; Train shows the price. A purse below the price puts
+a negative decimal into the Exit string, and the button paint chooses its
+colour object and picture without reading the sign; the drawn caption is
+Unknown. The Train release then returns without a request or sound. A price
+of 0 or less also refuses. A purse at or above a positive price shows Exit 0
+or more, and Train sends the `0x3d` training request, the `teach.wav`
+request, and the trainer speech request while its latch (`TOWN-544`) is set.
+(`TOWN-563`)
+
+Each skill row has a state: none, selected, hover, or selected and hover,
+drawn as no picture, `on`, `shine` and `shine_on`. A pointer message inside
+the view, while the timed block word is 0, clears every hover bit, then
+marks the row under the pointer; two full resets clear every state; a
+press toggles selection on that row and clears it on the others. With the
+cursor elsewhere a row is lit only when selected or when it is the idle
+shine row of `TOWN-541` and `TOWN-542`. Skill level, price and purse do not
+reach the row paint. A hover bit left while the cursor moves onto a child
+control remains Unknown. (`TOWN-564`)

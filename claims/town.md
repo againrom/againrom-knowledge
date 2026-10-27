@@ -3570,3 +3570,87 @@ seal and the compass show none. A click on the mission tab (`V012`) showed the m
 13 s after the click, and a screen shorter than that could be missed.
 
 **Unknown.** The other files' maps and the RETURN TO TOWN click.
+
+## School captions, lit rows and the square after a load
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-563 | The school's Exit string is purse minus price, signed and unclamped; a short purse puts a negative decimal in it and Train refuses silently, and a purse at or above a positive price sends the `0x3d` training request. | High / Unknown | ● active (branch candidate) | [EXP-0628](../experiments/EXP-0628-town-unknowns/) |
+| TOWN-564 | A school row draws lit with the cursor elsewhere only when it is the selected row (`on`) or the idle shine row while the tip child exists (`shine`, `shine_on` if selected); no skill, price or purse input reaches the row paint. | High / Medium | ● active (branch candidate) | [EXP-0628](../experiments/EXP-0628-town-unknowns/) |
+| TOWN-565 | After an EN town LOAD the square's horse, baba and dervish stand at positions the entry loader draws at random; four captured warm loads of four saves each changed the horse position, so it is not carried from the screen before the load. | High / Medium | ● active (branch candidate) | [EXP-0628](../experiments/EXP-0628-town-unknowns/) |
+
+### TOWN-563
+
+- `R1957` stores the purse `[[view+0x6c]+0x9b4]+0xc` at `+0x35c` and purse minus price at
+  `+0x358` (`L17114`, signed `sub`, no clamp); `L12281` formats the price `+0x354` and
+  `+0x358` with `"%d"` into the Train string `+0x360` and the Exit string `+0x364`.
+- The button paint `R1905` refreshes both strings (`L17115`, `L17116`) and groups the
+  digits through `R0807` (`L11513`, `L11514`), a comma every three digits. Its only
+  branches choose the hover or normal caption colour object (`SHOP-130`) and the pressed
+  picture while pressed and hovered; none reads the sign, the purse or the price.
+- The Train release `R1548` calls `R1957` and returns with no request and no sound when
+  `+0x358 < 0` (`L10204`, `jl`) or the price is at most 0 (`L10205`, `jle`). Otherwise it
+  sends the `0x3d` training request, the `teach.wav` request (`L17117`), and the trainer
+  speech request while its latch (`TOWN-544`) is set, then re-reads the selection through
+  `R1954(1)` (`L16079`), which keeps the selected row and re-sends the `0x40` price
+  request for it. A purse equal to the price shows Exit 0 and sends the request. Whether the
+  server completes the training is not read here (`ITEM-PURSECALLER-216`, `TOWN-544`).
+- The server price arm `L17118`..`L17119` has no purse test; the `0x3d` refusal is
+  `ITEM-PURSECALLER-216`.
+- Captures: purse 600 and price 570 showed Train 570 and Exit 30; with no selection Exit showed
+  the grouped purse 4,981,601.
+
+**Confidence.** High for the caption value, the absent sign branch and the two refusal tests,
+read as instructions in EN = RU `rom.exe`: a short purse puts a negative decimal into the
+Exit string, and the button paint chooses its colour object and picture without reading the
+sign. Unknown for the drawn caption, including how the font renders the minus: no capture
+shows a price above the purse.
+
+### TOWN-564
+
+- Row state words: fighter `+0x2a4`..`+0x2b4`, mage `+0x2f4`..`+0x304`; -1 none, bit 0
+  selected, bit 1 hover; constructor and entry write -1 to all ten.
+- `R1477`, called by the pointer handler (`L17120`, flag 0) and the press handler
+  (`L17121`, flag 1), clears bit 1 on all ten rows when the pointer is inside the view
+  rectangle (`L17122`..), a state left at 0 becoming -1, then calls `R1968(row, flag)`
+  for the hit row (ten call sites).
+- `R1968` on a press clears bit 0 on the other rows and toggles it on the hit row, then sets
+  bit 1 on the hit row. A press on the selected row deselects it, and `R1954` then finds no
+  selected row and clears the price.
+- The paint `L17123`..`L12263` draws, for each row with state not -1, the row's picture
+  for that state: 1 `on`, 2 `shine`, 3 `shine_on`. It then calls the idle shine `R1964`
+  (`L12263`), which draws one row while the tip child is non-null (`TOWN-541`, `TOWN-542`).
+- Captures: tip open and no selection, one row lit; tip closed and no selection, none; the
+  cursor on Train or Exit with a row selected, that row `on`; a selected row under the cursor,
+  `shine_on`.
+
+**Confidence.** High for the state words, the paint selection and the absence of skill, price
+and purse reads in the row paint and the two state routines. Medium that the hover bit always
+leaves a row whose cursor has left: the hover bit is cleared by `R1477` on a pointer
+message inside the view rectangle while `+0x328` is 0, and with the selection by the full
+resets `R1959` and `R1958`; delivery while the cursor is over a child control is not
+read.
+
+**Unknown.** Whether a stale hover bit can persist when the cursor moves from a row directly
+onto a child control.
+
+### TOWN-565
+
+- `R1906`, whose only rel32 caller is town entry `R1383` (`L11570`), draws the horse,
+  baba and dervish indices (`TOWN-505`) into `TOWN-490`'s position tables; entry arms the
+  families (`TOWN-491`, `TOWN-444`) and no save input reaches these paths (`TOWN-491`).
+- Entry is the town vtable slot `+0x80` (`L17124`). The town open `R1320` calls it; its
+  one rel32 caller, `L16669`, is the campaign arm for message `0x42e`.
+- EXP-0625 captures, one cold and seven warm loads: each first square frame shows one horse
+  sheet, one baba and one dervish at table positions, the dervish never at the baba's index.
+  In four before/after pairs, warm loads of four different saves, the horse position changed
+  every time.
+
+**Confidence.** High for the entry draw and its random source (prior claims and the loader's
+sole caller). Medium that a LOAD reaches entry: four warm loads of four saves each changed the
+horse position, so the horse position is not carried from the screen before the load; they
+compare the horse only and do not test a save-read position. `TOWN-491` excludes save input
+on the entry path. The path from the Load dialog to `0x42e` is not traced.
+
+**Unknown.** The static LOAD path to message `0x42e`; whether the first frame's dervish is at
+frame 0 or 1 (`TOWN-505`).

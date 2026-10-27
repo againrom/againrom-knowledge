@@ -468,3 +468,21 @@ switch is nonzero and 16 otherwise. Final caption-pixel RGB remains Unknown:
 glyph indices, runtime format and destination blending are unresolved.
 The 16-source-entry clause of SHOP-107 is retracted; its pressed-pass and
 offset clauses stand. (`SHOP-130`, `SHOP-107`)
+
+## Shelf order
+
+The client sorts each shelf with the C runtime `qsort`, unstable, by four
+keys: flag byte `+8` bit `0x2` set first, kind nibble ascending, a row group
+for kind 1, then price ascending. There is no tie-break; items equal on all
+four keys take the order `qsort`'s partition gives over the arrival order.
+The six literal potions arrive after the drawn stock, Health Regeneration,
+Medium Healing, Big Healing, Mana Regeneration, Medium Mana, Big Mana; with
+two drawn scrolls, if they arrive in ascending price, this gives Mana
+Regeneration before Health Regeneration and Medium Healing before Medium
+Mana, consistent with the capture, Medium. A stable sort or a code tie-break
+would keep Health Regeneration first. (`SHOP-154`)
+
+The server sorts drawn stock first by a suitability bit for kinds 1, 2 and
+7, larger first, then by row and price; for a second item of another kind it
+compares an uninitialised key, so that order is not determined by the
+items. (`SHOP-155`)
