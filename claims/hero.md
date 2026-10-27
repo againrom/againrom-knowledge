@@ -1176,3 +1176,175 @@ by eye from the 1:1 captures and not re-read in a zoomed crop.
 
 **Unknown.** The axe, mace and spear pictures' hit areas: one click at (512,292) on the axe
 changed nothing.
+
+## The class a projectile and a cast read
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-187 | The unit shot R0603 and the cast producer R0620 take a hero's class only from the client drawable's 32-bit +0x20; the server keeps its own typeID at actor+0xe, which neither origin window reads. | High | ✔ promoted (branch candidate) | [EXP-0630](../experiments/EXP-0630-hero-class-read/) |
+| HERO-188 | On a CUnit drawable +0x20 is written at creation (L02143), by the hero-range force (L03169), by the 17 arms of R0551, by the virtual init L17134 and by the base copy L17135; the image-wide store census is unreduced. | High / Medium | ✔ promoted (branch candidate) | [EXP-0630](../experiments/EXP-0630-hero-class-read/) |
+| HERO-189 | A weapon put on, taken off or dropped by the item-move command sends an equipment message in that command; the class first changes when the client handles it, and a later producer reads it; whether one runs before that handling is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0630](../experiments/EXP-0630-hero-class-read/) |
+| HERO-190 | Outside action 6, an empty weapon slot derives `unarmed`: class 1, 2 with a shield, 23 for a mage without a shield; R0551 skips every store when the body name is unchanged, and a name no arm matches keeps the class held before. | High | ✔ promoted (branch candidate) | [EXP-0630](../experiments/EXP-0630-hero-class-read/) |
+| HERO-191 | A hero's drawable taking the stage 0→1 or 1→1 arm holds 1 or 24 (mage) while its action stays 6, whatever its items; after LOAD a hero dead at stage 1 does too, one at stage 2 to 4 gets no action 6 and derives from its body's slots. | High / Medium | ✔ promoted (branch candidate) | [EXP-0630](../experiments/EXP-0630-hero-class-read/) |
+
+### HERO-187
+
+- Unit shot `R0603` (shooter in `edi`): `L13450`, `L17136` and `L17137` load
+  `dword [edi+0x20]` and index the class array `[L02113]` with it, for the picture
+  (`class+0xd4`) and the two ShootOffset coordinates (`class+0xec`, minus `class+0x34`/`+0x38`).
+- Cast producer `R0620` (caster in `ebp`): `L17138`, `L17139` and `L17140` load
+  `dword [ebp+0x20]` into the same array for the ShootOffset branch and the Selection fallback
+  (MAGIC-261).
+- Both windows read only the shooter's `+0x08`/`+0x0c` or `+0x58`/`+0x5c`, `+0x6c`, `+0xa4` and
+  `+0x20`: no equipment slot, no flag word and no field of the simulation actor. `CProjectile`
+  and both producers are client objects (SAV-1129); the producers have no direct call site and
+  are reached through CUnit and CAirUnit vtable slots `+0x58`/`+0x5c` (MAGIC-CASTSPAWN-033).
+- The simulation actor's `typeID` at `actor+0xe` (ANIM-106, HERO-CLASS-013) reaches the client
+  only in the creation store of HERO-188. A player hero's `typeID` is `0x21..0x24`, which names
+  no `units.reg` class (HERO-APPEAR-041); the drawn class is the derived `+0x20`.
+
+**Confidence.** High: six named loads in two windows listed whole, with no other class source.
+
+### HERO-188
+
+- Creation (`R0509`, field-masked state arm). A drawable found by id skips to `L16032`, and
+  `L17141` then skips the class block, so `L02143` (wire class `[L03223]`), the force
+  `R0590` (`L03117`) and the derive `R0551` (`L03209`) run only for a drawable the arm
+  has just constructed. `R0590` has this one call site.
+- Force. For an id in `[0x20,0x40)` `R0590` stores `id-0x21` at `L03168` and `1` at
+  `L03169`, and sets `+0x18c` bits 0 and 3 plus the class and sex bits (HERO-APPEAR-041).
+- Derive. `R0551` stores immediates at 17 sites `L17142`..`L17143` (HERO-APPEAR-042). Its
+  10 call sites: `L03209`; `L03210`, `L03211` and `L03212` in the life-state switch on
+  `+0x15a` (HERO-191); `L03213` (arm `0x9c`) and `L03214` (arm `0x76`), each after the
+  twelve slots at `+0x15c` are rebuilt; `L17144`, `L17145`, `L17146` and `L17147` in
+  character-screen routines on their own drawables.
+- Virtual init `L17134` stores an argument; `R0664` is CUnit and CAirUnit slot `+0x54`
+  (dwords at `L17148`, `L17149`) with no direct call. The drawable base copy constructor
+  `R2159` copies `+0x20` at `L17135`; its CUnit-family caller `R0595` has one call site,
+  `L02805`.
+- Census (`probe.py sweep`, Capstone linear sweep of every executable section): 1665 stores whose
+  operand covers any byte `0x1d..0x23`, widths 1, 2 and 4; 401 have a base other than `esp` or
+  `ebp`. In the bands `L17150..L17151`, `L17152..L17153`, `L17154..L17155` and
+  `L17156..L01461`, the 39 hits with a base other than `esp` are the writers above, two
+  stores at `+0x1c` and one byte at `+0x1e` that do not reach `+0x20`, five picture stores into
+  new `CProjectile` records (`L03226`, `L03015`, `L03017`, `L13662`, `L05372`), one
+  into a `0x138`-byte object (`L03224`), a bitmap pointer (`L17157`), the character screen's
+  own `L17158`/`L17159`, and five in one dispatcher arm: `L17160`/`L04893` store
+  `msg+0xd`, capped at 5, into `+0x20` of a drawable found in the id hash at world `+0x9b8`, and
+  `L04898` (the initialiser `R1015`, called once at `L04897`), `L17161` and `L04895`
+  do the same for a drawable that arm sets up.
+
+**Confidence.** High for the named writers, their call sites and the new-drawable gate. Medium
+for completeness: the arm at `L17160` writes `+0x20` of a drawable taken from the same hash
+the creation arm fills, and its object family was not established; the 1543 stores outside
+the bands and the 83 `esp`-based stores inside them were not each classified, 971 `REP MOVS`
+sites were not classified, and callers of the vtable slot `+0x54` were not enumerated.
+
+**Unknown.** Which opcode reaches the arm at `L17160` and whether its drawable can be a CUnit
+hero (settle by tracing the server sender of that opcode); who calls `R0664` through slot
+`+0x54` and with what value (settle by enumerating register-based `+0x54` calls whose object is
+a CUnit); who calls `L17162` (settle by a caller search for `L17162`, including vtable
+dwords). Two further CUnit constructions, a static
+object (`L02806`) and `L02808`, are followed by no force or derive call.
+
+### HERO-189
+
+- Server. The item-move arm of the command handler `R0061` (`L17163`..`L03270`) clears a
+  local mask and `actor+0x150`. Source byte `msg+0xc == 1` takes the item off the actor's own
+  body through `vt+0x40` from slot `msg+0xe + 1` (1 `+0x74`, 2 `+0x78`, 3..12
+  `+0x198 + 4*slot`) and sets bit `0x80` (`L17164`); destination `msg+0xd == 1` puts it on
+  through `vt+0x38` and sets `0x208080` (`L17165`). Destinations 2 (sack), 4 (another
+  container) and 3 (the ground) add `0xa08000` or `0x208000`. One serializer call then sends
+  `local | actor+0x150` to every player (`L03270`); a move that yields no item exits first.
+- The Armor, Shield and Weapon attach and removal routines OR `0x0c00` or `0x0700` into
+  `actor+0x150` (`L17166`, `L17167`, `L17168`, `L17169`, `L17170`, `L17171`) and
+  never `0x80`.
+- Serializer `R0059` sends the field message at `L03237` and only then calls the equipment
+  sender at `L03240` (bit `0x80`), which sends `0x76` for a `typeID` in `[0x21,0x40)` or to the
+  owner, else `0x9c` (HERO-APPEAR-044, HERO-APPEAR-047).
+- Client. Arm `0x9c` looks the drawable up and returns when it is absent (`L17172`); arms
+  `0x9c` and `0x76` rebuild the slots, set `+0x18c` bit 3 and call `R0551` (`L03213`,
+  `L03214`). Among the writers HERO-188 names, that call is the first write of the new class. The shot and the cast producer read `+0x20`
+  at their ShootDelay tick (HERO-187, MAGIC-CASTSPAWN-033), so a shot or cast whose producer
+  runs after that call uses the new class, also when its attack or cast began before.
+
+**Confidence.** High for the arm's branches, the mask bits, the send order and the client call
+sites, read as listings. Medium for "first": it rests on the writer census of HERO-188, whose
+arm at `L17160` is open. Unknown for the interval: the delivery of a queued message to the
+client dispatcher was not read, so whether a producer can run between the command and the
+client arm is open.
+
+**Unknown.** The delivery latency of the server message queue, and other senders of bit `0x80`
+outside the 51 direct serializer call sites (`0x80` alone at `L03277`, `-1`, and the
+register masks at `L03270`, `L03249` and the four in `R0674`). Settle the interval with
+the original: a bow-armed hero (archer class 14) ordered to shoot, a sword put on during the
+wind-up, recording the saved `Prj` start point against MAGIC-263's archer and sword deltas.
+
+### HERO-190
+
+- Empty slot. `L17173` loads slot 0 (`+0x15c`); when it is null the index pushed is the 0 of
+  `L17174`, `heropicture` entry 0, `unarmed`. A non-null slot 1 (`+0x160`) appends `_`. Only an
+  exact `unarmed` with `+0x18c` bit 1 (mage) becomes `mage` (`L04258`..`L17175`). The chain
+  maps `unarmed` to 1, `unarmed_` to 2 and `mage` to 23 (HERO-APPEAR-042), so a mage with an empty
+  weapon slot and a shield gets 2. The value derives from slot 0 being empty, the presence of
+  slot 1 and the mage bit; the SAV and the server `typeID` are not read.
+- Early exit. The name is compared with the cache `+0x19c` (`L17176`..`L17177`). A mage
+  exits on an equal name; a fighter also needs slot 7 (`+0x178`) present exactly when
+  `+0x1ac != -1`. Equal means `L04246` jumps to `L03172`, the epilogue, before any store.
+- No default. The 17 arms are the only `+0x20` stores in `R0551`
+  (`sweep-20.txt`). A name no arm matches leaves `+0x20` as it was: on the first equipment
+  message after creation that is 1 for a fighter and 23 for a mage; later it is the class held
+  before the message.
+- Creation. A new drawable has empty slots (`L17178`), an empty cache (`L17179`) and action 0
+  (`L02485`), so its creation derive builds `unarmed` or `mage` and stores 1 (`L17142`) or 23
+  (`L17143`). An unmatched name first arises on an equipment message. This narrows ANIM-107's
+  unmatched-name clause.
+
+**Confidence.** High: the gate, the null branch, the cache test and the store population of the
+routine are named instructions in its listing.
+
+### HERO-191
+
+- Stage. The client state arm saves the old stage `+0x15a` to `[ebp-0xc8]` (`L02542`,
+  `L02763`) and, under message mask bit 8, stores the new one (`L02541`); the sender writes the
+  server stage `+0x13c` under the same mask bit (`L17133`).
+- Client. The life-state switch on the new `+0x15a` (table `L02543`, six entries) sends 1 to
+  `L16036`. Its branch for old stage 0 (`L17180`) and its branch for old stage 1 (`L17181`)
+  set action `+0x84 = 6` (`L17128`, `L17129`), call slot `+0x68` (`R0575`) with 3 or 2 and
+  call `R0551`. With action 6 the derive copies `unarmed` for a fighter or `mage_st` for a mage
+  (`L04231`..`L17182`) and reads no slot, so the class is 1 or 24 (HERO-APPEAR-042,
+  MAGIC-262). Entry 0, when the old stage is non-zero, sets action 0 and, for a hero (`+0x18c`
+  bit 0), calls the derive (`L07732`, `L17127`, `L03210`). Entries 2, 3 and 4 go to
+  `L02767`, which may bump a counter, stores `+0x80 = -1` and, when `+0x7c` is set, calls
+  `vt+0x14` and `R0082`; it stores no `+0x84` and calls no `R0551`
+  (`L02767`..`L17183`).
+- While the action stays 6 a later derive builds the same name: the cache exit of HERO-190, or
+  the same arm when the armour presence changed. Items leaving the body do not move the class.
+- Server. The item-move arm sets `0x80` only for the acting actor's own body (HERO-189), so taking
+  an item out of another body sends no equipment message for that body from this arm.
+- Teardown. Routine `R0208` (one call site, `L01924`) moves the shield `+0x78` into the sack
+  `+0x7c` unconditionally and the weapon `+0x74` only when its definition parameter 15 is
+  non-zero (`L17184`..`L17185`), and sends `0x80` alone only to the owner whose `+0x34` is
+  this actor (`L17186`..`L03277`). A body past the teardown (stage 2 to 4, HERO-DEATH-026)
+  can therefore still hold its weapon.
+- LOAD. The SAV loader `R0099` constructs `CProjectile` records and no CUnit drawable (the six
+  `R0593` call sites are `L02806`, `L02807`, `L02808`, `L02802`, `L02809`,
+  `L02810`). A loaded hero's drawable is built by the creation arm: the wire `typeID`, the force
+  to 1, the derive over empty slots, then the life-state switch with old stage 0 (`L10347`). The
+  session-entry join sends every dead actor below stage 5 with mask `-1` (SAV-1118), and the
+  field message precedes the equipment message (`L03237`, `L03240`). At stage 1 the 0→1
+  branch sets action 6. At stage 2 to 4 `L02767` sets no action, the action stays the 0 of the
+  base constructor (`L02485`), and arm `0x76` derives from slot 0 and slot 1 (`L03214`). The
+  SAV holds `typeID` at `actor+0xe` (ANIM-106) and no drawn class.
+- In play, the 0→1 branch sets action 6 and the 1→2 transition leaves it alone, so a body that
+  died in the session keeps 1 or 24 at stages 2 to 4 unless a `+0x84` writer not read here runs.
+
+**Confidence.** High for the arms and the table: the switch entries and their old-stage tests,
+the action-6 stores, the forced names, the new drawable's stage, cache and action, and the
+loader's constructor population. Medium for LOAD: the entry send's mask is SAV-1118's, the
+client stage byte `[L02532]` is taken to be the server stage the sender writes under mask
+bit 8, and other `+0x84` writers were not enumerated.
+
+**Unknown.** Settle with the original: LOAD a SAV with a dead party hero at stage 1 and one at
+stage 2 to 4 whose body still holds a weapon with parameter 15 zero; record `+0x15a`, `+0x84` and
+`+0x20` of each client drawable.

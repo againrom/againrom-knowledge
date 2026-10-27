@@ -94,6 +94,26 @@ the death control. Other supported weapons select their mapped body classes.
 The held class supplies cast-origin geometry; the origin window does not
 directly read the equipment. — MAGIC-262
 
+**The class a shot and a cast read.** Both start-point producers take the class from the client
+drawable's 32-bit `+0x20`; the server's `typeID` at `actor+0xe` is a separate copy they do not
+read (`HERO-187`). On a CUnit drawable that field is written by the creation store, by the
+hero-range force and the derive (both only on a new drawable, the derive again on each
+equipment message and on the stage transitions 0→1, 1→1 and non-zero→0), by the virtual init
+and by the base copy; one dispatcher arm that writes a capped value into a drawable of the id
+hash is not yet assigned to a family, so the census is Medium (`HERO-188`). A weapon put on,
+taken off or dropped from the body by the item-move command sends the equipment message in the
+same command; the class first changes when the client handles it, and a producer call after
+that reads the new value. Whether a producer can run between the command and that handling is
+Unknown (`HERO-189`). Outside action 6, an empty weapon slot gives `unarmed`: 1, 2 with a
+shield, 23 for an unshielded mage. The derive writes nothing when the body name is unchanged,
+and a name no arm matches keeps the previous class, which on the first equipment message after
+creation is 1 for a fighter and 23 for a mage (`HERO-190`). A hero's drawable that takes the
+stage 0→1 or 1→1 arm holds 1 or 24 while its action stays 6, whatever its items. After LOAD a
+hero dead at stage 1 is rebuilt the same way; one dead at stage 2 to 4 takes no action 6, and
+its equipment message derives the class from the slots its body still holds. The SAV holds no
+drawn class (`HERO-191`).
+A map-placed hero-kind human reads 1 or 23 until its first equipment message (`MAGIC-426`).
+
 ## Figure equipment slots (`HERO-APPEAR-047`…`HERO-APPEAR-055`, `HERO-FIGURE-062`)
 
 **Who sends them.** `R0669` sends nothing at all unless `actor->vt+0x30()` — the humanoid

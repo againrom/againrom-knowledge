@@ -400,6 +400,14 @@ state arm creates a drawable for an unknown runtime id whose message passes
 the owner, class and `0x4001` tests. The drawable's position is the one the
 message names. — SAV-1118
 
+A dead party hero's drawable created by that send takes its class from the
+stage the message carries; the SAV holds no drawn class. At stage 1 the
+stage arm sets action 6 and the class is 1 for a fighter or 24 for a mage,
+whatever the items. At stages 2 to 4 no arm sets action 6, and the
+equipment message derives the class from the slots the body still holds;
+the teardown has moved the shield and may have kept the weapon. Medium:
+other writers of the action byte were not enumerated. — HERO-191
+
 The sender names the Token Position only when both sub-cell bytes `+4/+5` are
 `0x80`. Otherwise it names the mover word `*(+154)+06` as a cell centre. An
 actor that is still mid-step when the entry send reads it gets its drawable

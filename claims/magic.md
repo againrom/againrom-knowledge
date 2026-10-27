@@ -4892,3 +4892,35 @@ the creator, not at the constructor). Medium that every spell sent through `R061
 the spell table `+0x2c` values of the other spells were not read, and one spell was measured.
 
 **Unknown.** Whether another caller of `R0268` passes a null target in ordinary play.
+
+## Cast and shot class of a map-placed hero-kind human
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-426 | A map-placed human with a hero typeID (0x21..0x24) is drawn class 1, or 23 for a mage, until its first equipment message: creation derives over empty slots, and the server typeID is not set from items. | High / Medium | ✔ promoted (branch candidate) | [EXP-0630](../experiments/EXP-0630-hero-class-read/) |
+
+### MAGIC-426
+
+- Server. The `typeID` at `actor+0xe` of a Human built in non-zero constructor mode is
+  `gender + 0x21` or `+ 0x23` (HERO-CLASS-013); the npc arm passes the npc's `Hero` flag as that
+  mode (ANIM-106). No equipment input enters that store, and the producers do not read the
+  server field (HERO-187).
+- Client. A new drawable gets the wire `typeID`, then `R0590` stores 1 and sets the hero and
+  mage bits, then `R0551` runs over the twelve slots of the freshly constructed drawable
+  (HERO-188). With slot 0 empty the name is `unarmed` (1), or `mage` (23) for a mage
+  (HERO-190). The slots are filled only by arm `0x76` or `0x9c`, which re-derive (HERO-189);
+  `R0669` picks `0x76` for every `typeID` in `[0x21,0x40)`.
+- Order. One serializer call queues the field message (`L03237`) before the equipment message
+  (`L03240`), so with a mask holding bit `0x80` the drawable exists when its equipment message
+  is handled. A shot or cast producer that runs before that message is handled reads 1 or 23
+  (MAGIC-263: class 1 has an empty ShootOffset array, class 23 the mage/xbowman array); one
+  that runs after reads the class the equipment derives (ANIM-107).
+
+**Confidence.** High for the server store, the creation sequence and the empty-slot result.
+Medium that such a human's first serializer call carries bit `0x80`: 27 of the 51 direct
+serializer call sites pass `-1` or a register mask, and others pass `0xbf7fff7f`, which omits
+`0x80`; which one runs first for a map placement was not traced.
+
+**Unknown.** Settle with the original: a mission whose map places an npc with the `Hero` flag
+and a weapon; on the first frames record that human's client drawable `+0x20`, and whether an
+equipment message reaches it before it first attacks or casts.

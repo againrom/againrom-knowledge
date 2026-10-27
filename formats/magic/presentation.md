@@ -195,6 +195,16 @@ arrays; bow class 14 and crossbow class 15 have arrays. State 6's weapon
 bypass is the death control. Body art and registry geometry are separate.
 — MAGIC-262
 
+The cast producer reads the class from the caster drawable's `+0x20` at the ShootDelay tick
+and from no server field (`HERO-187`). An equipment change by the item-move command reaches that
+field when the client handles the equipment message the same command sends, so a cast whose
+producer runs after it uses the new class's ShootOffset; whether a producer can run between
+the command and that handling is Unknown (`HERO-189`). A hero's drawable that takes the stage
+0→1 or 1→1 arm holds class 24 as a mage and 1 as a fighter while its action stays 6. After LOAD
+that holds for a hero dead at stage 1; one dead at stage 2 to 4 holds the class its body's slots
+derive (`HERO-191`). A map-placed hero-kind human casts
+and shoots from class 1 or 23 until its first equipment message (`MAGIC-426`).
+
 All sixteen shipped human classes have Center `(64,78)`, Selection
 `(48,48,80,90)` and TileSize 1. Normal pictures other than 60 produce
 these deltas from A, in fine integer coordinates, with positive y south:
