@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4385. Observation: 164. Static analysis: 3652. Mixed: 569.
+Claims labelled: 4391. Observation: 164. Static analysis: 3657. Mixed: 570.
 
 ## Ledger ai
 
@@ -2095,6 +2095,7 @@ Claims labelled: 4385. Observation: 164. Static analysis: 3652. Mixed: 569.
 | R2-ASSET-154 | mixed | ● active |
 | R2-ASSET-160 | mixed | ● active (branch candidate) |
 | R2-ASSET-162 | mixed | ✔ promoted (branch candidate) |
+| R2-ASSET-164 | mixed | ● active (branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -2427,8 +2428,8 @@ Claims labelled: 4385. Observation: 164. Static analysis: 3652. Mixed: 569.
 | R2-ENGINE-453 | static analysis | ● active |
 | R2-ENGINE-454 | static analysis | ● active |
 | R2-ENGINE-455 | static analysis | ● active (amended) |
-| R2-ENGINE-456 | static analysis | ● active |
-| R2-ENGINE-457 | static analysis | ● active |
+| R2-ENGINE-456 | static analysis | ● active (amended, branch candidate) |
+| R2-ENGINE-457 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-458 | static analysis | ● active |
 | R2-ENGINE-459 | static analysis | ● active |
 | R2-ENGINE-470 | static analysis | ● active |
@@ -2462,7 +2463,7 @@ Claims labelled: 4385. Observation: 164. Static analysis: 3652. Mixed: 569.
 | R2-ENGINE-502 | static analysis | ● active |
 | R2-ENGINE-503 | static analysis | ● active |
 | R2-ENGINE-504 | static analysis | ● active |
-| R2-ENGINE-505 | static analysis | ● active |
+| R2-ENGINE-505 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-506 | static analysis | ● active |
 | R2-ENGINE-507 | static analysis | ● active |
 | R2-ENGINE-508 | static analysis | ● active |
@@ -2573,6 +2574,11 @@ Claims labelled: 4385. Observation: 164. Static analysis: 3652. Mixed: 569.
 | R2-ENGINE-647 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-648 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-649 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-651 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-652 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-653 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-654 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-655 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-659 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-660 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-661 | static analysis | ✔ promoted (branch candidate) |

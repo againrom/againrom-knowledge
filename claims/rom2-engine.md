@@ -9281,8 +9281,8 @@ offsets, not as equal bytes.
 | R2-ENGINE-453 | ROM2 Stone Curse attaches a timed effect with spell id 18 built from its Effects string; the quoted first key matches no effect name, so the effect is blank (tag 0, magnitude 0). | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-454 | In the RU image, a ROM2 Stone Curse effect sets actor mask bit 18, which holds primary command 4 (state 27, no move, attack or cast) until its timer clears the bit; a repeat cast keeps the larger duration; damage taken is unchanged. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-455 | ROM2 Summon creates Squirrel, Turtle or Foot_Animated at level 1..4 for the caster's Player in a new group, placed by a search around the caster's cell; a failed placement aborts the cast; when it leaves is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
-| R2-ENGINE-456 | In RU, a ROM2 creature's template special spell is aimed by a 29-cell per-row table: the victim, its cell, itself, a cell toward the victim (9), a free cell beside it (23) or nothing (22); cells 9 and 23 are Medium. | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
-| R2-ENGINE-457 | The RU computer-mage offensive book choice aims at the victim and support at self or a same-owner unit; a separate Prismatic, Stone Curse, Lightning, Fire Arrow priority routine aims at the victim but has no found caller. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-456 | In RU, a ROM2 creature's template special spell is aimed by a 29-cell per-row table: the victim, its cell, itself, a cell toward the victim (9), a free cell beside it (23) or nothing (22); cells 9 and 23 are Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-457 | The RU computer-mage offensive book choice aims at the victim and support at self or a same-owner unit; a separate Prismatic, Stone Curse, Lightning, Fire Arrow priority routine aims at the victim but has no found caller. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-458 | Each admitted RU selected-spell policy arm aims at the victim, except Summon and Shield at the caster and Heal at the lowest-health candidate; area and point spells cast at a unit apply at its cell. | Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-459 | The ROM2 EN and RU unique spell arms agree after address masking except an RU-only virtual test before reusing a pooled dead unit in Summon and Control Spirit; EN AI, delivery and effect bodies were not read. | High / Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 
@@ -9470,6 +9470,15 @@ from the EN apply table, would settle EN parity. The cell meanings of ids 9 and
 template loader binding of the slots: the loader of the Units rows, not
 searched, would settle it.
 
+**Amended.** R2-ENGINE-653 reads the EN special cast `L2.03459` and table
+`L2.03460`, equal to RU, which settles EN parity of the table; R2-ENGINE-651
+gives the EN planner and both roots' callers. R2-ENGINE-651 and
+R2-ENGINE-652 read the slot roll and the loader stores in this experiment's
+generation listings (High); the binding to the Units titles stays Medium.
+R2-ENGINE-654 narrows the Unknown on ids 9 and 23 by reading `L2.02113`,
+`L2.02114` and `L2.01522`: the "free cell" is a cell where the caster's
+footprint passes a byte-mask test; which cells result stays Medium.
+
 ### R2-ENGINE-457
 
 With nonzero Player kind (+0x2c), the RU offensive choice `L2.00056`
@@ -9493,6 +9502,14 @@ address `L2.02116` over `.text` and the data sections, with the vtables that
 hold it traced, would settle it. The distribution of the random book choice:
 searched the helper `L2.01532` and the generator window only; reading the
 initialiser of the divisor `[this]` and `L2.01699` would settle it.
+
+**Amended.** R2-ENGINE-651 narrows the Unknown on the random book choice:
+`L2.01532(n)` returns `L2.02431()` x n divided by the dword at its `this`,
+and `L2.01699` returns 0..0x7fff. The divisor's initialiser (a separate
+static Unknown) and the seed (`L2.02317`) stay unread, and the grade stays
+Medium. The bounded seed probe (b) and the caller-observation probe (a) of
+R2-ENGINE-651 measure the generator state and the callers in one specified
+mission only; they do not settle the divisor or the distribution.
 
 ### R2-ENGINE-458
 
@@ -10582,7 +10599,7 @@ state executable behaviour and no stored-file layout.
 | R2-ENGINE-502 | ROM2 idle candidates: hostile units on cells a ScanRange ray scan marks (creature ScanRange Medium), plus a computer unit's last attacker cell for 21 builder runs. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-503 | ROM2 group members take the enemy with the least score (cells x 256 + turn), scaled by a 16-byte kind table whose 0 excludes. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-504 | A ROM2 unit holds a target for one activity, then re-picks, from units each nearer than those kept before, the hostile of least turn, or stands or looks around. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
-| R2-ENGINE-505 | A ROM2 attack order's activity-5 body has no distance bound (Medium); a guard's walk-back gives way to an attack on a hostile within the picker radius of its post. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-505 | A ROM2 attack order's activity-5 body has no distance bound (Medium); a guard's walk-back gives way to an attack on a hostile within the picker radius of its post. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-506 | ROM2 Human-table units (slot +0x30 nonzero) back off at health <= +0x40, flee at <= +0x44: HPmax, HPmax/4 with a spellbook; HPmax/2, 0 if ranged. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-507 | A ROM2 active group's programme byte picks one of ten routes; guard handlers leash enemies to a jittered radius and return idle members. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-508 | EN and RU ROM2 agree on 64 of 65 masked targeting, flight and group bodies; EN has a wrapper `L2.02403` (RU Unknown). | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
@@ -10769,6 +10786,11 @@ than through orders 3, 4 and 11 and the group handlers; the writers of
 activity 5 were not censused. The bodies of `L2.01574`, `L2.01578`,
 `L2.02431`, `L2.02442`, `L2.01576` and the three block +0x98 writers
 (`L2.02432`, `L2.02433`, `L2.02434`) were not read.
+
+**Amended.** R2-ENGINE-651 narrows the Medium on what `L2.02431` is and
+the Unknown that lists its body: it returns the value of `L2.01699`, a
+linear congruential step with bits 16..30 returned (0..0x7fff), compared
+with Probability x 0x147 (R2-ENGINE-652). The other grades stay.
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
 
@@ -14781,6 +14803,243 @@ RU tests +0x10a, then the gate. Both return when either fails. RU
 
 **Confidence.** High for the pairs read. The call census and the seed
 writers were read in EN only.
+
+## Creature special spells: pick and aim
+
+Static reads of the owned EN and RU `allods2.exe` (raw x86 listings decoded
+with Capstone from the plan of one generation, reproduced byte for byte) and
+derived values of the one `data/data.bin` both roots' `world.res` hold. RU
+addresses unless EN is named. "Command" is the unit's command object at
+unit +0x1c4. "Equal after masking" means equal once every hex number at or
+above 0x400000 is masked. A "slot" is one of the three template special
+spells of R2-ENGINE-456.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-651 | The ROM2 attack planner (RU L2.01530, EN L2.03461) draws once per carried slot on each call and casts the last slot drawn below its threshold, Teleport only beyond distance 2; each root has 11 direct callers. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+| R2-ENGINE-652 | The ROM2 template loader (RU R2.0087, EN R2.0086) stores each Units Spell 1..3 above 0 at command +0x7c+4i and its Probability x 0x147 at +0x88+4i and books the spell; only a knownSpells mask sets the mage bit. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+| R2-ENGINE-653 | The ROM2 special cast (RU L2.02111, EN L2.03459) aims by id alone through 29 cells: victim, caster or victim cell, a cell search for 9 and 23, nothing for 22; a spell the book getter does not return is not cast. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+| R2-ENGINE-654 | ROM2 special-cast id 9 aims at the caster's position plus a map offset for the 8-way heading toward the victim; id 23 at the first 3 by 3 cell around the victim where the caster's footprint passes a byte-mask test. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+| R2-ENGINE-655 | A ROM2 creature's slot spell is stopped by target +0x4c & 8, a failed draw, Teleport within 2, a zero book getter, id 22 or above 29, or no Teleport cell; after a special-cast call the planner prepares no attack. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+
+### R2-ENGINE-651
+
+The planner `L2.01530(unit, target)`, in both roots:
+
+1. When the target's byte +0x4c & 8 is set (`L2.03462..L2.03463`) it calls
+   `L2.01733(unit, 0)` and returns; no slot is drawn.
+2. For slot i = 0..2 whose command dword +0x7c+4i is nonzero (`L2.03464`) it
+   calls `L2.02431` and keeps that slot's id when the result is below the
+   signed command dword +0x88+4i (`L2.03465`, `jge` at `L2.03466`). The loop
+   has no exit: every carried slot is drawn on every call, and the last
+   succeeding slot is the pick.
+3. A pick other than 23 goes to the special cast `L2.02111(unit, target,
+   pick)` (R2-ENGINE-653), and the planner returns (`L2.03467`). Pick 23 does
+   so only when `L2.01522` of the target's and the unit's position words +2
+   is above 2 (`L2.03468`); otherwise the planner continues.
+4. The rest is the attack route of R2-ENGINE-505.
+
+`L2.02431` calls `L2.01699`, which replaces the dword +0x14 of the block
+`L2.02317` returns with seed x 0x343fd + 0x269ec3 and returns bits 16..30 of
+it (0..0x7fff). `L2.01532(n)` returns `L2.02431()` x n divided by the dword
+at its `this`. One draw succeeds with chance min(T, 32768) / 32768 for the
+threshold T that R2-ENGINE-652 stores.
+
+The call-target scan of `.text` finds 11 direct calls of the planner and 2
+of `L2.02111` (both in the planner) in each root; the dword scan of every
+section finds no stored address of either routine in either root. RU sites:
+
+| Site | Caller and target passed |
+|---|---|
+| `L2.03469` | order 3 handler; command +0xc |
+| `L2.03470` | `L2.02440` (order 4); the first unit of `L2.02117` |
+| `L2.03471` | guard `L2.02438` (order 11) |
+| `L2.03472`, `L2.03473` | `L2.03474`; the nearest unit of kind 3 from `L2.03475`, else the nearest |
+| `L2.03476`, `L2.03477`, `L2.03478`, `L2.03479`, `L2.03480` | group handlers `L2.02464`, `L2.02470`, `L2.02465`, `L2.02468`, `L2.02466`; command +0x20 |
+| `L2.03481` | `L2.00056` (R2-ENGINE-457), when the unit's signed word +0x88 is above 0x3b and `L2.01532(100)` is below 30; it then returns 0 |
+
+A navigation call-target scan finds the callers of these routines:
+`L2.02440` from `L2.03482`; `L2.03474` from `L2.03483`, `L2.03484` and
+`L2.03485`; `L2.02438` from `L2.03486`, `L2.02441`, `L2.03487`, `L2.03488`
+and `L2.03489`; the group handlers from `L2.03490`, `L2.03491`, `L2.03492`,
+`L2.03493`, `L2.03494` and `L2.03495`.
+
+**Confidence.** High for the planner body, the draw, `L2.01699`,
+`L2.01532` and the census of direct calls and stored addresses in both roots
+(planner, draw and rand listings equal after masking). Medium for each
+caller's role: the routine holding a site is inferred from address order,
+the order numbers come from R2-ENGINE-505, the EN sites are matched to RU by
+order, and the parents' scan is navigation only. Unknown how often each
+caller runs.
+
+**Unknown.** The caller frequency and computed calls, which a call-target
+and dword census does not see; the seed (`L2.02317` was not read); the
+meaning of target +0x4c & 8 and the body of `L2.01733`. Three bounded probes
+of the original, none of which raises a grade:
+
+(a) In one specified mission with a Squirrel.4 engaging one fixed target,
+record the original planner entries, caller return addresses, ticks, draws
+and preparation results. A visible-cast count alone gives only a bound, and
+an unobserved computed route remains Unknown outside that run.
+
+(b) At the first `L2.01699` call after each of two starts of that same
+mission, record the dword addressed by `eax+0x14` immediately after
+`L2.02317` returns, and its next value. This measures the initial state for
+those starts without claiming a universal seeding rule.
+
+(c) At planner entry in that mission, record the victim's `+0x4c`, the bit-8
+branch and the actions of `L2.01733`. The meaning of bit 8 and the general
+behaviour of that helper remain Unknown until a static read or a controlled
+original case separates the alternatives.
+
+**Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
+
+### R2-ENGINE-652
+
+The template loader `R2.0087(name)` looks the name up in the row array at
+`L2.00147` and reads the row's values through `L2.02312` (index n of the
+value array at row +0x3c +8):
+
+- When value 0x30 is above 0 it sets unit +0x4c |= 2 and builds a book at
+  unit +0x140 (`L2.03496`).
+- For i = 0..2, when value 0x30+2i is above 0 (`jle` at `L2.03497`), it
+  builds a spell object `L2.03498(id)`, puts it in the book with `L2.00039`,
+  and stores the id at command +0x7c+4i (`L2.03499`) and value 0x31+2i x
+  0x147 at command +0x88+4i (`L2.03500`). A value at or below 0 stores
+  nothing.
+- Value 0x36 is stored in the five words +0xaa..+0xb2.
+- When the row has at least 0x38 values and value 0x38 is neither 0 nor -1,
+  it sets +0x4c |= 6, replaces the book with a new one, adds the spell of
+  each set bit 1..29 (`L2.03501`), and stores values 0x39..0x3d in
+  +0xaa..+0xb2.
+
+Units titles n+1 for these indices are Spell 1..3 and Probability 1..3
+(R2-ASSET-107), Spell Power and knownSpells (R2-ASSET-164). A row whose
+Spell 1 is at or below 0 gets no book from the slot part; R2-ASSET-164 finds no row with Spell 1
+at or below 0 and Spell 2 or 3 above 0. The EN loader `R2.0086` is equal
+after masking except two allocation sizes (RU `push 0x70` and `0x8c` at
+`L2.03502` and `L2.03503`, EN `0x6c` and `0x88`).
+
+**Confidence.** High for the stores, tests and order in both roots. Medium
+for the binding of loader value n to data.bin parameter n: the `L2.00147`
+array is matched to the Units rows by title order, and `L2.02312`'s callees
+`L2.02359` and `L2.03504` were not read. Medium that a slot-only creature has
+no mage bit (+0x4c & 4, R2-ENGINE-018): the other writers of +0x4c were not
+censused. The initial value of command +0x7c..+0x84 for a row with no slot
+was not read.
+
+**Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
+
+### R2-ENGINE-653
+
+`L2.02111(unit, victim, id)` calls the book getter `L2.00040(id)` on unit
++0x140 and exits with no write when it returns 0 (`L2.03505`). Otherwise
+id-1 indexes the 29-cell table `L2.02112` (`ja` at `L2.03506` sends an index
+above 0x1c to the exit arm):
+
+| Aim | Ids | Arm |
+|---|---|---|
+| victim: `L2.01524(unit, victim, spell)` | 1, 5, 10, 11, 16, 18, 26, 28, 29 | `L2.03507` |
+| caster: `L2.01524(unit, unit, spell)` | 4, 8, 12, 13, 19, 20, 21, 24, 25, 27 | `L2.03508` |
+| victim position: `L2.01732(unit, word +2 of [victim+0x10], spell)` | 2, 3, 6, 7, 14, 15, 17 | `L2.03509` |
+| cell search (R2-ENGINE-654) | 9, 23 | `L2.03510`, `L2.03511` |
+| none | 22 | `L2.03512` |
+
+Every path past the book check stores command +0x60 = 1 (`L2.03513`). With
+a target, `L2.01524` stores prepared byte 8, +0x28 = target and +0x30 =
+spell, writes the target's command +0xa4 = the spell's id byte and +0xa8 =
+the tick `[L2.01317]+4`, and stores +0x14 = the spell's range byte +9
+(R2-ENGINE-017). Its finder by defensive flag +0xa (R2-ENGINE-457) runs only
+for a null target, which this routine does not pass: the planner has read
+the victim's byte +0x4c at `L2.03462`. `L2.01732` stores prepared byte 9,
+word +0x3c = the cell, +0x30 = spell and +0x14 = byte +9, with no test. The
+cast then runs as R2-ENGINE-543 states.
+
+The aim is chosen by the id alone. The Spells Target value agrees with the
+victim and victim-position groups and with the caster group except 25
+(Summon) and 27 (Shield), Target 2; ids 9, 22 and 23 have Target 2. The EN
+routine `L2.03459` and table `L2.03460` are equal to RU after masking and by
+arm offset (29 of 29 cells), and so are both preparations.
+
+**Confidence.** High for the 29 cells, the arguments and the stores, in both
+roots. Medium that a zero getter result means the spell is absent: the
+getter's helpers `L2.02978` and `L2.03514` were not read. Medium that word
++2 of `[unit+0x10]` is the unit's cell, inferred from the packed-byte
+distance `L2.01522`. Medium for the effect of +0x60 = 1 on the initializer
+(R2-ENGINE-543, R2-ENGINE-541): no writer between the two was censused.
+
+**Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
+
+### R2-ENGINE-654
+
+Id 9 (`L2.03510`): `L2.02113(caster, victim)` takes dx and dy as the
+differences of `L2.03515` and of `L2.03516` of victim and caster and returns
+one of 16 sector codes; code c > 0 becomes (c+1) >> 1 and code 15 wraps to
+0, giving k = 0..7 returned as k x 32. One of |dx| and |dy| dominates when it
+exceeds twice the other:
+
+| k | Region |
+|---|---|
+| 0 | dy below 0 dominates |
+| 1 | dx above 0, dy at most 0, neither dominates |
+| 2 | dx above 0 dominates |
+| 3 | dx and dy above 0, neither dominates |
+| 4 | dy above 0 dominates |
+| 5 | dx at most 0, dy above 0, neither dominates |
+| 6 | dx below 0 dominates |
+| 7 | dx and dy at most 0, neither dominates, including dx = dy = 0 |
+
+The arm adds the signed bytes at map +0x58e88+k and +0x58e90+k to the
+caster's position bytes +0 and +1 (`L2.00486`, `L2.00487`) and passes
+(y << 8) | x to `L2.01732`.
+
+Id 23 (`L2.03511`): when `L2.01522` of the two position words is above 2
+(`L2.03517`), it scans from the victim's word minus 0x101, rows (high byte)
+outer and columns inner over 3 by 3, and takes the first cell for which
+`L2.02114(caster, cell)` returns 1 (`L2.03518`). That routine returns 0 when
+any cell (x+i, y+j) of the caster's footprint, i and j below the size its
+vtable +0x1c returns, has `byte(L2.03519(cell)) & byte([caster+0x1c0]+5)`
+nonzero (`L2.03520` is an AND of two bytes). With no passing cell, or a
+packed cell of 0, there is no cast (`L2.03521`). The EN bodies (`L2.03522`,
+`L2.03523`, `L2.02720`, `L2.03524`) are equal to RU after masking.
+
+**Confidence.** High for the arithmetic, the scan order and the test, in
+both roots. Medium for the cells produced: the offset bytes at map
++0x58e88/+0x58e90, the getters `L2.03515` and `L2.03516`, the cell byte of
+`L2.03519`, the caster byte `[+0x1c0]+5` and the absolute value `L2.01523`
+in `L2.01522` were not read.
+
+**Unknown.** Which cells the offsets name and what the byte test excludes.
+A run of the original with Turtle.4 (Acid Stream) attacking from each of
+eight headings and Orc_Sword.4 (Teleport) beyond 2 cells of a victim with
+blocked neighbours, recording the cast cell, would settle both.
+
+**Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
+
+### R2-ENGINE-655
+
+The gates on a slot spell, in path order, in both roots:
+
+1. target byte +0x4c & 8 (`L2.03525`): no draw;
+2. a zero slot (`L2.03464`) or a draw at or above the threshold
+   (`L2.03466`);
+3. pick 23 with `L2.01522` at most 2 (`L2.03526`; again `L2.03517`);
+4. the book getter returning 0 (`L2.03505`);
+5. id 22 (its cell is the exit arm) or an index above 0x1c (`L2.03506`);
+6. pick 23 with no passing cell (`L2.03521`).
+
+In gates 4 to 6 the planner has called `L2.02111` and returns without
+preparing an attack on that call. In gates 2 and 3 it continues to the
+attack. No Spells column is read on this path: the aim depends on the id,
+and the spell object is read only for byte +9. After the preparation the
+cast passes the gates of R2-ENGINE-543 (range or approach) and, for a mage
+with no item, the mana test of R2-ENGINE-544.
+
+**Confidence.** High for gates 1 to 6 and the return in both roots. Medium
+for gate 4's meaning (R2-ENGINE-653) and for which spells pay mana
+(R2-ENGINE-652).
+
+**Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
 
 ## Mission effect, projectile and order continuation
 

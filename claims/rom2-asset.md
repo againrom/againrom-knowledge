@@ -2359,3 +2359,55 @@ other entry is 0, 1 or 2. No entry has the value bit 0x8.
 
 **Confidence.** High: whole-entry hashes and counts in both roots. The
 names W, H, typeId and owner byte follow the ALM page's record layout.
+
+## Units special-spell slots
+
+The client `data/data.bin` inside `world.res` (RU read in full; both roots'
+`world.res` have one SHA-256, R2-ASSET-160), read through the grammar of
+R2-ASSET-029. Parameter n carries title n+1 (R2-ASSET-107): p48..p53 are
+Spell 1, Probability 1 .. Spell 3, Probability 3, p54 Spell Power, p56
+knownSpells.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-164 | In the one ROM2 data.bin, 38 Units rows, all .4 or .5, hold a Spell 1..3 above 0: 54 entries of 17 ids, Probability 10 (Spider 20) in slot 1, 1 and 3 in slots 2 and 3; 64 rows hold a knownSpells mask, none both. | High | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+
+### R2-ASSET-164
+
+Of 241 Units rows, 180 have 62 values and 61 have none. A slot value of -1
+counts as no spell (the loader tests above 0, R2-ENGINE-652): 142 rows have
+Spell 1 = -1, 172 have Spell 2 = -1 and 172 have Spell 3 = -1. Each of these
+base names has a slot spell at levels .4 and .5, and at no other level:
+
+| Units base | Slot 1 (Probability) | Slot 2 | Slot 3 |
+|---|---|---|---|
+| Goblin_Pike | 29 Slow (10) | | |
+| Goblin_Sling | 27 Shield (10) | | |
+| Orc_Sword | 23 Teleport (10) | | |
+| Orc_Bow | 20 Bless (10) | | |
+| Ogre | 21 Haste (10) | | |
+| Troll | 18 Stone Curse (10) | | |
+| Bat_Sonic | 14 Darkness (10) | | |
+| Ghost | 26 Drain Life (10) | | |
+| Bee | 12 Invisibility (10) | | |
+| Squirrel | 1 Fire Arrow (10) | | |
+| Foot_Animated | 28 Curse (10) | | |
+| Turtle | 9 Acid Stream (10) | | |
+| F_Zombie | 6 Poison Cloud (10) | 18 (1) | 27 (3) |
+| A_Zombie | 7 Blizzard (10) | 18 (1) | 27 (3) |
+| F_Skeleton | 11 Prismatic Spray (10) | 26 (1) | 12 (3) |
+| A_Skeleton | 14 Darkness (10) | 26 (1) | 12 (3) |
+| Wolf | 16 Diamond Dust (10) | | |
+| Spider | 6 Poison Cloud (20) | | |
+| Dino | 5 Ice Missile (10) | | |
+
+The 17 ids are 1, 5, 6, 7, 9, 11, 12, 14, 16, 18, 20, 21, 23, 26, 27, 28 and
+29; no row holds 22 or an id above 29 in a slot. No row has Spell 1 at or
+below 0 with Spell 2 or 3 above 0. 64 rows hold a knownSpells value other
+than 0 and -1, and none of them holds a slot spell above 0. The Spells table
+has 34 rows; rows 30..34 have no name and no value.
+
+**Confidence.** High: committed derived rows that reproduce byte for byte;
+EN equal by the `world.res` and `data.bin` hashes.
+
+**Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
