@@ -122,3 +122,20 @@ arm divides remaining distance by remaining segments. Picture-specific
 presentation arms do not establish server damage or a SpellTransport link.
 Actual first update state, visible timing and RU parity remain Unknown.
 — R2-ENGINE-661
+
+## Mission View and Selection consumers
+
+The EN mission entry stores View/X and View/Y to the client origin
+inputs. Constructor, resize, panel layout and draw store to the same
+fields and can change them whenever they run; their order against the
+REG stores is unread. The last writer at presentation and any followed
+unit remain Unknown.
+— R2-ENGINE-667
+
+Objects/Selection word lookups call slot +0x14(1) of the object found
+at client +0x9d0, whose class is not read; two acquired EN unit classes
+bind that slot to L2.03528, which calls L2.03529 to store +0x80=1 and
++0x114=1. The entry opens or closes the book and inventory from the REG
+SpellBook and Inventory IsOpen values through controls that are separate
+from the Selection restore. Delivered client identity, membership and first-frame
+state remain Medium/Unknown. — R2-ENGINE-670, R2-ENGINE-614

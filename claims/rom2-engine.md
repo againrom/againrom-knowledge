@@ -13452,7 +13452,7 @@ once every number at or above 0x400000 is masked.
 | R2-ENGINE-606 | A ROM2 map click whose box is at most screen width x 10/640 and whose cursor is [L2.02987] sends message type 0x24 with the hovered ID and the IDs of objects that L2.02988 accepts; EN picks that cursor only on hover flag 0x800. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-607 | ROM2 message 0x24 finds the structure by ID and sets order 0xf: target its position word, range 1 for building byte +0x60 of 1 or 2, 2 (cell +0x101) for 3 or 4, else 3 (+0x202); prepared 0xf reaches the state-15 handler. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-608 | The ROM2 event box starts as a 580x240 rect at (30,120); placement rounds it to 8+96k by 104+64k and centres it on the screen (488x232 at 268,268 at 1024x768); Enter and Esc post 0x470 as Ok does. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
-| R2-ENGINE-609 | A ROM2 modal box sets UI bit 8 (EN +0x404, RU +0x41c), darkens the screen and sets cursor [L2.02989]; in EN bit 8 stops the edge routine and six panel redraws per pass and defers events; no read body stops the simulation. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-609 | A ROM2 modal box sets UI bit 8 (EN +0x404, RU +0x41c); in EN it stops the edge routine and panel redraws and defers events; the mode 2 dispatcher skips local ticks on +0x404 & 0x4008 (R2-ENGINE-671); loaded-mission simulation stop Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 
 ### R2-ENGINE-605
 
@@ -13695,12 +13695,17 @@ table. Medium for the meanings: darkening (`L2.03082` unread; R2-SESSION-230
 saw the screen darken), the cursor store (`L2.03086` unread), edge
 scrolling and panel redraws (named from the rectangles and calls). Medium
 for the population: one encoding of the test; other encodings are outside
-it. Unknown whether the simulation stops: no body read stops a tick, and
-the reader of app +0x424 was not found.
+it. Unknown whether the simulation stops: no body read stops a tick before
+the EN idle dispatcher was read (in app mode 2 that dispatcher skips the
+local tick helpers when +0x404 & 0x4008 is set, R2-ENGINE-671; whether
+the modal box stops the simulation in a loaded mission stays Unknown),
+and the reader of app +0x424 was not found.
 
 **Unknown.** Whether units move and sound plays while the box is open: a
 run in the first mission opening the signpost box with a creature moving
 in view, two shots 5 s apart and one after Ok, noting ambient sound.
+
+**Amended.** R2-ENGINE-671 narrows the simulation Unknown by reading the EN idle caller: in campaign mode mask 0x4008 bypasses the local mission tick helpers. The modal push and the earlier bounded body population remain as stated; actual pre-input clock advance is still unobserved.
 
 ## Mission-like LOAD continuation and spell 29
 
@@ -13713,15 +13718,15 @@ is the receiver of the mission entry.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-613 | EN ROM2 mission entry R2.0026(1) after a mission-like LOAD skips the map caller and autosave, sends packet 4, ticks the server if app +0x5d4 is set, pumps until a type 0x64 message returns after type 6 built the map, restores REG state. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-ENGINE-614 | On that path EN ROM2 reads REG GameOptions, View X/Y, SpellBook, Objects Selection and Group0..9, Inventory, Projectiles and Fog into client and app fields; Fog is read only when CurrentState/InBattle is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-613 | EN ROM2 mission entry R2.0026(1) after a mission-like LOAD skips the map caller and autosave, sends packet 4, ticks the server if app +0x5d4 is set, pumps until a type 0x64 message returns after type 6 built the map, restores REG state. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-614 | On that path EN ROM2 reads REG GameOptions, View X/Y, SpellBook, Objects Selection and Group0..9, Inventory, Projectiles and Fog into client and app fields; Fog is read only when CurrentState/InBattle is nonzero. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-615 | EN ROM2 client message 6 builds the client map through L2.01385: it opens the named ALM, copies grids, creates static objects (list +0x390, key entry +0x10 + 0x6000) and unit objects (list +0x3a4, key word +0x3c + 0x6000), frees it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-616 | EN ROM2 world half: the name at session +0x90 selects the ALM, which gives terrain size and tiles, goes to the script compiler and is freed; the document reader feeds the Unit, Building, effect and Sack readers; other uses are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-617 | After the EN ROM2 world half the unit registry L2.00325 calls each member's slot +0x24; the RU Human slot resolves saved keys at +0x40, +0x44, +0x5c, +0x64 and +0x68 through session +0xdc and stores 0 on a miss. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-618 | EN ROM2 Building Serialize L2.01659 stores base38, raw22 at +0x4a, +0x40 u8, +0x42/+0x44/+0x46 u16, +0x48/+0x60/+0x61 u8 and +0x64/+0x68 u32; LOAD rebuilds +0x3c from +0x40 and clears base +0x18. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-619 | ROM2 spell row 29, Slow, has data, an apply arm and cast ID 66 but no row in EN table L2.02137, which omits rows 9, 14, 15, 28 and 29; the client selection summary reads 24 slot bits only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-ENGINE-620 | EN ROM2 mission setup maps REG Speed 0..8 to divisors 8, 10, 12, 14, 16, 20, 24, 28, 32 and sets app +0x418 = 1000/divisor; the five mission saves' Speed 4 and 8 give 62 and 31. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-ENGINE-621 | For the five EN ROM2 mission saves the read bodies put View 8/29 in client +0x5c/+0x60, ask to select object 1 (the hero) if client +0x9d0 holds it, open the book in game0005/0006 only and keep the inventory closed; pause is Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-620 | EN ROM2 mission setup maps REG Speed 0..8 to divisors 8, 10, 12, 14, 16, 20, 24, 28, 32 and sets app +0x418 = 1000/divisor; the five mission saves' Speed 4 and 8 give 62 and 31. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-621 | For the five EN ROM2 mission saves the read bodies put View 8/29 in client +0x5c/+0x60, ask to select object 1 (the hero) if client +0x9d0 holds it, open the book in game0005/0006 only and keep the inventory closed; pause is Unknown. | Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 
 ### R2-ENGINE-613
 
@@ -13790,6 +13795,8 @@ before type 0x64 and in what order, which of them create client objects
 arrival of type 6 and the stores made before the REG restore. The first-frame
 run of R2-ENGINE-621 settles whether the clock runs and what reacts to 0x408.
 
+**Amended.** R2-ENGINE-668 narrows the 0x408 receiver Unknown. R2-ENGINE-669 and R2-ENGINE-671 narrow the period consumer and clock-gate Unknowns. Pending message order and the first visible frame remain Unknown.
+
 ### R2-ENGINE-614
 
 Getters (dir, key, default): int `R2.0113` returns record +4 for value
@@ -13824,6 +13831,8 @@ in the entry.
 Medium for meanings named only by key: that client +0x5c/+0x60 is the
 camera, that slot +0x14(1) selects and that bit 0x8000 marks an explored
 cell rest on unread consumers.
+
+**Amended.** R2-ENGINE-667 narrows the View-coordinate meaning through selected bounds and draw consumers. R2-ENGINE-670 reads two unit vtable slots, the selected-field setter and panel controls. Actual client membership, followed unit and first-frame delivery remain Unknown.
 
 ### R2-ENGINE-615
 
@@ -14013,6 +14022,8 @@ five mission saves store Speed 4 (game0001, game0004, game9999) and 8
 is a tick period in milliseconds: the import name and the consumer were not
 read.
 
+**Amended.** R2-ENGINE-669 reads two +0x418 consumers and the timeGetTime import, narrowing the period unit to milliseconds on those paths. R2-ENGINE-671 leaves actual pre-input advance conditional on the idle gates and schedule.
+
 ### R2-ENGINE-621
 
 Composed from R2-ENGINE-613, R2-ENGINE-614 and R2-SESSION-244/245: before
@@ -14035,6 +14046,8 @@ and where 8/29 places the camera: the hero is at 11/41 or 21/41
 **Unknown.** LOAD each of the five saves and record the first frame: the
 view origin, the selected portrait, the open panels, and two shots 5 s
 apart without input to see whether the world moves.
+
+**Amended.** R2-ENGINE-667, R2-ENGINE-668, R2-ENGINE-670 and R2-ENGINE-671 narrow the coordinate, message, selection and clock-gate Unknowns. These static results do not replace the Unknown for the actual first frame or camera following.
 
 ## Mission failure reasons and the failure text
 
@@ -15253,3 +15266,161 @@ locally created RU saves, recording the same fields, first ticks and frames
 as the EN original runs in RESULTS.
 
 **Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+## Mission LOAD view, messages and idle gates
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-667 | The read EN ROM2 entry stores View X/Y to client +0x5c/+0x60; selected constructor, resize, layout and draw writers store to the same fields, in unread order against the REG stores. Last writer and followed unit Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2084](../experiments/EXP-2084-rom2-load-frame/) |
+| R2-ENGINE-668 | EN ROM2 LOAD calls panel-root slot +0x48; its 0x408 dispatch maps +0x6c=-100, +0x60=1 and +0x5c=1 in three child objects, each only if the child's base call (L2.00913) returns zero and the forwarder delivers to that child. | High / Medium | ● active (branch candidate) | [EXP-2084](../experiments/EXP-2084-rom2-load-frame/) |
+| R2-ENGINE-669 | EN ROM2 schedulers L2.03527 and L2.02266 read app +0x418 as a millisecond interval in deadlines compared with timeGetTime; this does not prove the loaded mission advances before input. | High / Medium | ● active (branch candidate) | [EXP-2084](../experiments/EXP-2084-rom2-load-frame/) |
+| R2-ENGINE-670 | EN ROM2 unit slot +0x14 (L2.03528, L2.03529) stores selection +0x80 and +0x114; the entry opens or closes book and inventory from REG IsOpen via controls separate from Selection, and calls slot +0x14(1) of an unread class. Hero link Medium | High / Medium | ● active (branch candidate) | [EXP-2084](../experiments/EXP-2084-rom2-load-frame/) |
+| R2-ENGINE-671 | EN ROM2 campaign idle dispatch bypasses local mission tick helpers when app +0x404 has mask 0x4008; otherwise +0x434 chooses an immediate or timed helper. Actual pre-input advance after LOAD remains Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2084](../experiments/EXP-2084-rom2-load-frame/) |
+| R2-ENGINE-672 | Acquired ROM2 EN/RU entry bodies have 1002 instructions each and 24 app-offset differences after address masking; room-bind bodies have 55 each and only +0x404/+0x41c. Other new bodies are EN-only. | High / Unknown | ● active (branch candidate) | [EXP-2084](../experiments/EXP-2084-rom2-load-frame/) |
+
+### R2-ENGINE-667
+
+EN entry R2.0026 stores the REG View/X and View/Y results at
+L2.03530/L2.03531, with existing fields as defaults. R2-SESSION-244
+supplies 8/29 for the five EN mission saves; no save was reread here.
+The bounded writer population is the entry, constructor interval
+L2.03532..L2.03533, resize L2.03534, panel layout L2.03535..L2.03536,
+and draw prefix L2.03537..L2.03538. Resize uses map size minus 8 and
+view extent; layout can clamp Y; draw adds +0x78/+0x7c. These writers
+store to the same fields and can change the origin whenever they run;
+their order against the REG stores is unread. The read getters
+give lower bounds 8/8 and upper bounds width/height minus 8 minus extent.
+
+**Confidence.** Medium for composed grid-origin meaning and the bounded
+writer census. Capstone 5.0.7 linear .text navigation is not a repaired
+function/owner census. Immediate arithmetic, overlapping stores,
+embedded bases, bulk copies, later draw and computed dispatch are open.
+No complete absence or all-writers claim is made.
+
+**Unknown.** Which writer is last at presentation and which unit, if any,
+the camera follows. In the acquired campaign packet window
+L2.03539..L2.03540 +0x3f6c is stored in two branches (mode 2 with unit
++0x1dc = 21; otherwise unit +0x14 equal to client +0x9cc with +0x1b8
+bit 0), and the field scan lists two more stores (L2.03541 and
+L2.03542); none is tied to a camera consumer, so that numeric link does
+not prove camera following. Watch the coordinates through LOAD game0001/game0006 and
+the first presentation; record the pointed object's key and position.
+Evidence windows and the remaining static frontier are in answer 1.
+
+### R2-ENGINE-668
+
+App +0xd4 receives constructor L2.03543's result. Its vtable
+L2.03544 slot +0x48 is L2.03545. For message 0x408 it calls L2.00913,
+then child forwarder L2.00915. Room bind L2.03111 appends +0xd8, +0xdc,
++0xe0 and +0xe4. The forwarder may stop at a nonzero child return.
+
+The acquired constructor/vtable/switch chains map +0xd8 through
+L2.03546 to L2.03547, storing DWORD +0x6c=-100; +0xdc through
+L2.03548 to default L2.03549; +0xe0 through L2.03550 to L2.03551,
+storing DWORD +0x60=1; +0xe4 through L2.03552 to L2.03553,
+storing DWORD +0x5c=1. These offsets belong to distinct child objects.
+In each of the three read handlers the arm runs only after the child's
+own call to L2.00913 returned zero for message 0x408 (L2.03554, L2.03555
+and L2.03556 branch away on a nonzero answer), and only if the
+forwarder delivers the message to that child. The callees of the base
+call are unread.
+
+**Confidence.** High for the read local slots, table arms and stores.
+Medium for composed delivery: collection helpers L2.03557/L2.03558,
+arbitrary descendants and later replacements are not closed. The local
+default branch is not a claim that shared calls write nothing.
+
+**Unknown.** The three fields' later readers and visible effects. During
+LOAD game0001 trace child receivers, returns, stores and the next paint.
+Answer 2 identifies every load-bearing listing.
+
+### R2-ENGINE-669
+
+At L2.03559 and L2.03560 the acquired consumers calculate
+app[+0x414] + (app[+0x40c]+1)*app[+0x418] and compare with import
+L2.02270, WINMM.dll:timeGetTime, whose unit is milliseconds.
+The first due branch increments +0x40c modulo 16, calls L2.03120,
+pumps client L2.00466(0x64) and sends 0x401 through app +0xcc.
+The second consumer is claimed only through its acquired prefix.
+The periods 62/31 for the measured Speed values are reused from
+R2-ENGINE-620 and R2-SESSION-244.
+
+**Confidence.** High for these local consumers and the named import.
+Medium for delivered timing across callers, modes and counter wrap.
+This narrows the old consumer/unit Unknown; it is not a unique-reader
+census. Evidence: en-scheduler, en-time-import, en-speed-setup and
+en-idle-dispatch-cfg listings under the linked experiment's evidence.
+
+**Unknown.** Actual cadence after LOAD. Load game0001/game0005 and log
+the deadline fields, timeGetTime, +0x434 and tick calls for five seconds.
+
+### R2-ENGINE-670
+
+The two acquired unit constructors bind vtables L2.03341 and
+L2.03340. Slot +0x14 in both is L2.03528. Its argument-1 path bypasses
+the deselection arm and calls L2.03529, storing +0x80=1 and +0x114=1.
+Predicate L2.02988 returns +0x80. The argument-1 path opens no panel.
+The LOAD entry calls slot +0x14(1) of the object found at client
++0x9d0, only after a Selection word lookup hits; the class of that
+object is not read, and two acquired unit classes bind the slot to
+L2.03528.
+
+The entry opens or closes the book and inventory from REG SpellBook and
+Inventory IsOpen (reads at L2.03561..L2.03562 and L2.03563..L2.03564)
+through controls that are separate from the Selection restore:
+L2.03134/L2.03136 for book membership and L2.03139/L2.03140 for
+inventory membership; the acquired controls
+add/remove app children and call L2.03535. Alternate UI bit 2 changes
+the book's parent. R2-SESSION-244 gives book-open only in game0005/0006,
+inventory closed in all five and Pressed 6 in game0006.
+
+**Confidence.** High for the read EN slots, selected-field stores and
+entry/control calls. Medium for visible selection/panels: the key-1 to
+hero link remains R2-SESSION-245's Medium, and client creation order,
+all shared child helpers and later overrides are not closed.
+
+**Unknown.** The client's runtime class/membership when REG is restored,
+the selected portrait and panel state at presentation. Load all five
+saves and record the lookup, setter fields and first frame. Answer 4
+names the acquired constructor, slot, setter and panel listings.
+
+### R2-ENGINE-671
+
+Dispatcher L2.01222 enters its local mission route with UI mask 1
+and nonzero app +0x5d4. In mode 2, nonzero UI mask 0x4008 bypasses
+both local tick helpers. Otherwise +0x434 nonzero chooses L2.03565,
+which calls session tick L2.03120 without a deadline test in its body;
+zero chooses the timed L2.03527 of R2-ENGINE-669. Session +0x94 zero
+makes L2.03120 return early. Mode 3 uses another route (L2.02266)
+when [L2.00805] is nonzero; with it zero, control falls to the mask-1
+tests. The route taken when +0x404 bit 0 is clear (L2.03566) is unread.
+Helper L2.03567 for zero +0x5d4 remains unread.
+
+**Confidence.** Medium for permission to tick without input: these local
+routes require no first-input flag, but the outer schedule, tick callees,
++0x434 after LOAD and pending messages are not closed. This narrows
+R2-ENGINE-609's simulation Unknown at the idle caller. Evidence:
+en-idle-dispatch-cfg, en-campaign-scheduler, en-scheduler and
+en-session-tick listings under the linked experiment's evidence.
+
+**Unknown.** Whether the first displayed frame or five seconds before
+input contains an advance. Load game0001 with the cursor away from
+edges; record UI masks, +0x434/+0x5d4, session +0x94, every tick and
+the first frame plus two frames five seconds apart before input.
+
+### R2-ENGINE-672
+
+Entry pair R2.0026/R2.0023 has equal acquired instruction counts.
+The 24 non-address differences are explicit app-field operands. The
+room-bind pair L2.03111/L2.03568 adds the same four direct children and
+uses UI +0x404 in EN, +0x41c in RU. After these listed substitutions,
+the instruction shapes agree. locale-pairs.tsv retains every difference;
+the mask replaces only operand values at least 0x400000.
+
+**Confidence.** High for these two bounded body comparisons, not for
+callee or referenced-data equality. No data-file census or save read
+was added; reused save values are EN-only.
+
+**Unknown.** RU behavior of all other new EN-only bodies, complete
+rendering, timing and data parity. Acquire their RU counterparts or
+repeat the first-frame/watch runs with matching RU mission state.

@@ -801,3 +801,42 @@ The separate REG projectile has its own continuation contract: a stored
 object with zero segments requests removal on its first read update path,
 conditional on unchanged entry state. Actual first-frame behavior remains
 Unknown. — R2-ENGINE-661
+
+## Mission LOAD view and idle gates
+
+The EN REG restore writes View/X and View/Y to client +0x5c/+0x60.
+Selected constructor, resize, panel-layout and draw writers store to
+the same fields and can change the origin whenever they run; their order
+against the REG stores is unread. The bounded writer population does not
+close the last writer at first presentation or identify a followed unit.
+— R2-ENGINE-667
+
+The app +0xd4 root slot +0x48 is L2.03545 in EN. Its forwarding path
+conditionally reaches four direct children, and a store runs only when
+the child's own base call (L2.00913) returns zero for message 0x408 and
+the forwarder delivers the message to that child. Their mapped 0x408
+branches store +0x6c=-100, +0x60=1 and +0x5c=1 in three distinct child
+objects; the fourth takes its local default. Full child delivery and the later
+visible effects remain Medium/Unknown. — R2-ENGINE-668, R2-ENGINE-613
+
+Acquired EN unit slots select through L2.03528/L2.03529, storing +0x80
+and +0x114. The entry opens or closes the book and inventory from REG
+SpellBook and Inventory IsOpen through controls that are separate from
+the Selection restore. Client key-1 identity/membership and actual first-frame panels remain
+Medium/Unknown. — R2-ENGINE-670, R2-ENGINE-614, R2-ENGINE-621
+
+EN schedulers read app +0x418 in a millisecond deadline compared with
+timeGetTime. Campaign idle dispatch bypasses its local mission tick
+helpers on UI mask 0x4008; otherwise +0x434 selects an immediate or
+timed helper. Actual clock advance before the first input remains
+Unknown. The modal-bit simulation Unknown is narrowed at that caller:
+in app mode 2 the dispatcher skips the local tick helpers when
++0x404 & 0x4008 is set; whether the modal box stops the simulation in a
+loaded mission stays Unknown.
+— R2-ENGINE-669, R2-ENGINE-671, R2-ENGINE-620, R2-ENGINE-609
+
+The acquired EN/RU mission entries have 1002 instructions each and
+24 app-field differences after address masking. Room-bind bodies have
+55 each and one UI offset pair, +0x404/+0x41c. After those substitutions
+their instruction shapes agree. No other newly read body or referenced
+data is covered by that equality. — R2-ENGINE-672

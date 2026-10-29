@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4391. Observation: 164. Static analysis: 3657. Mixed: 570.
+Claims labelled: 4397. Observation: 164. Static analysis: 3663. Mixed: 570.
 
 ## Ledger ai
 
@@ -2543,16 +2543,16 @@ Claims labelled: 4391. Observation: 164. Static analysis: 3657. Mixed: 570.
 | R2-ENGINE-606 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-607 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-608 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-609 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-613 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-614 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-609 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-613 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-614 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-615 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-616 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-617 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-618 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-619 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-620 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-621 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-620 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-621 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-623 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-624 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-625 | static analysis | ✔ promoted (branch candidate) |
@@ -2586,6 +2586,12 @@ Claims labelled: 4391. Observation: 164. Static analysis: 3657. Mixed: 570.
 | R2-ENGINE-663 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-664 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-665 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-667 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-668 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-669 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-670 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-671 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-672 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 
