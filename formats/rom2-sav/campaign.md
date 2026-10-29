@@ -413,9 +413,22 @@ establish exact joining time or an unconditional roster. — R2-ENGINE-379
 For hire h=1..20, selection is bank[511+h], availability is bank[531+h],
 and town is bank[551+h]. Read mission-ID writers enable1/3/6/4/7 after
 IDs20/50/60/70/100, with town gates2/3/2/3/2. NPC22/topic30 TALK enables
-hire2/town2; the kind0/ID5 writer enables hire5/town3. These writes do
+hire2/town2; the kind0/ID5 writer enables hire5/town3. These TALK writes do
 not construct controlled identity22 or prove recruitment. Stage768 and
-mission-ID remain separate selectors. — R2-ENGINE-380
+mission-ID remain separate selectors. The inn visit that offers
+NPC22/topic30 builds identity22 through the inn selector below (Medium).
+— R2-ENGINE-380
+
+When app +0x5d8 is 2, the inn selector passes every EnterInn option word
+and stage768 to the same addition producer, before the inn page is shown
+(Medium). At stage30 the NPC22/topic30 word has low word 22, inside the
+controlled range 21..30. The producer builds a Human with the hero flag from
+key 10220, the row Fighter_Hero at Medium, stores WORD+0x14c=22 and appends
+it to the owner's actor list, unless that list already holds identity22.
+Whether the build completes in a town (the map registration calls) is
+Unknown, and so is whether this actor is the companion the talk presents.
+The NPC22 topic40 and topic62 words repeat the request at their stages.
+— R2-ENGINE-633, R2-ENGINE-635
 
 The reached EN entry loop requires nonzero selection and availability,
 selects a subset of 20 hire slots, and passes the nonempty list and stage

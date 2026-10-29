@@ -3336,3 +3336,99 @@ object key of R2-ENGINE-614 equals base +4: the client unit creation message
 was not read; the key range agrees with the unit objects of the second
 creation loop of R2-ENGINE-615 (word entry +0x3c + 0x6000) and with
 R2-ENGINE-618.
+
+## Slot 773 and the party after the stage-30 talk
+
+Static reads of the owned EN and RU `Scenario.dll` and `allods2.exe`
+(listings from the plan of one generation, reproduced byte for byte). Bank
+slot N is the DWORD at `D2.00003` + 4N. The "addition producer" and the
+"owner" are those of R2-ENGINE-633..637.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-254 | In both ROM2 Scenario.dll roots slot 773 occurs twice: the departure entry stores 0, the mission-ID 40 block 23; other writers are LOAD, NewGame, kind-1 word 262 and SetVar (R2-SESSION-127); scripts outside the 46 maps are Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-SESSION-255 | From ROM2 TALK 22/30 to mission 30's first frame the routes read change the party only by the hires the entry loop builds; no route read removes identity 22, added at inn entry. | Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+
+### R2-SESSION-254
+
+A raw DWORD scan of every section of each `Scenario.dll` for `D2.00113`
+finds two hits per root, at the same addresses:
+
+- `D2.00281`: `mov dword ptr [D2.00113], 0`, at the entry of the
+  departure routine `D2.00012`, before its slot 775 test;
+- `D2.00250`: `mov dword ptr [D2.00113], 0x17`, after AddMission(0x32)
+  and AddMission(0x3c) (`D2.00249..D2.00282`), in the mission-ID 40 arm
+  (R2-SESSION-048).
+
+The same scans give hire 2's slots:
+
+- selection 513 (`D2.00283`): no hit;
+- availability 533 (`D2.00284`): a compare at `D2.00159` (EnterInn) and
+  the TalkTo store of 1 at `D2.00139`;
+- town 553 (`D2.00285`): the TalkTo store of 2 at `D2.00140`.
+
+The indexed and bulk writers are those of R2-SESSION-127. Four classes of
+them are named here:
+
+- LOAD's 4096-byte raw restore, with whatever value was saved;
+- NewGame's 4096-byte clear, which writes 0;
+- TalkTo's kind-1 toggle bank[511 + low16], at `D2.00199`, only for low
+  word 262, and it writes 0 or 1;
+- the client SetVar sites (eight per root). Their known indices are 531 + key,
+  776, 781 and the targets of script instants 35 and 36; over the 46 installed
+  maps those targets are 772, 780, 779 and 753..756 (R2-SESSION-127,
+  R2-SESSION-114), so none is 773.
+
+The TalkTo body is 61 instructions per root. The three DLL windows are equal
+in both roots after masking. The client getter (EN `L2.00173`, RU
+`L2.03309`) returns GetVar(0x305).
+
+**Confidence.** High for the two literal stores and the scan results in
+both roots. Medium that no inn kind-1 word has low word 262: the kind-1
+words are the tail hire IDs 1..20 (R2-ENGINE-221). Medium that every
+departure passes `D2.00281`: the LeaveLocation export `D2.00009` is unread.
+
+**Unknown.** Scripts outside the 46 installed maps, arbitrary SetVar inputs
+and a second load of `Scenario.dll` (R2-SESSION-127, R2-SESSION-114).
+
+**Narrowed by the review.** The headline named two further writers only; it
+now names NewGame's clear and the SetVar sites, with the citations that
+exclude 773 for the 46 maps, and states the scope of that exclusion.
+
+### R2-SESSION-255
+
+Composed from R2-ENGINE-633, R2-ENGINE-635, R2-ENGINE-219, R2-ENGINE-381,
+R2-ENGINE-523, R2-ENGINE-525, R2-ENGINE-530, R2-ENGINE-532 and
+R2-SESSION-254. In order:
+
+1. Before the talk, the inn entry adds identity 22 (R2-ENGINE-635).
+2. TALK 22/30: AddMission(30), slot 533 = 1, slot 553 = 2. No actor.
+3. Each later inn entry passes 22 again; the owner match skips the build.
+   The non-controlled inn actors are built into a local list; their key
+   bits are cleared, and whether the actor objects are freed is unread.
+4. Town departure and the 0x41d leave arm: the producer runs only for a
+   nonzero slot 773 (stored 0 or 23 by the literal stores; R2-SESSION-254).
+5. Mission entry: when the location record's DWORD +0 is 1, the hire loop
+   builds hires whose selection and availability are nonzero (R2-ENGINE-523,
+   R2-ENGINE-381). Hire 2 needs selection 513, which TALK 22/30 does not set.
+6. Map build: the owner builder reuses the owner for its first row
+   (R2-ENGINE-525).
+7. Party placement walks owner +0x24 in list order, hero first
+   (R2-ENGINE-530). Whether it runs at mission 30's start is Unknown
+   (R2-ENGINE-532).
+
+**Confidence.** Medium: the composition rests on R2-ENGINE-635 and
+R2-ENGINE-525 at Medium. Unknown for placement and for routes that
+are not read.
+
+**Unknown.** Whether identity 22 is the companion the talk presents, and how
+hire 2 (step 5) relates to him; the talk text was not read.
+
+**Unknown.** In the original: from a stage-30 town-2 save, enter the inn,
+TALK 22/30, leave for mission 30 and record the first frame's party and
+positions, with hire 2 and the name shown for the talk.
+
+**Narrowed by the review.** The headline said identity 22 "stays through
+town, departure and map build"; no route read removes him, which is not a
+retention claim (R2-ENGINE-526 reads one predicate). Step 3 said the inn
+actors are "released"; only the key-bit clear is read.

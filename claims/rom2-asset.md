@@ -2274,3 +2274,49 @@ each line the text before " (" was compared with every `spell.txt` line,
 and none equals line 28 in either root.
 
 **Confidence.** High: whole-file byte comparisons in both roots.
+
+## Identity 21..30 rows and map literals
+
+`world.res` of both roots, read through EXP-2047's `data.bin` walker, and
+`scenario.res` of both roots, read through `tools/r2script`; numbers, row
+names and SHA-256 only.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-160 | Both ROM2 world.res (one SHA-256) give identity 22 only to Humans Fighter_Hero (raw 10220) and hold no 10221..10229 row; the 46-map scripts of each root hold no 10001..10010 or 10220..10229 parameter and one 22 (map 96). | High | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+
+### R2-ASSET-160
+
+Both `world.res` files have SHA-256
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`. The
+measure of a row:
+
+- Humans: parameter 24, mapped to (w/10)%1000 when w is above 10000 (the
+  template load's rule, R2-ENGINE-525);
+- Units: the low word of parameter 55.
+
+| Table | Rows | With the parameter | Identity in 21..30 |
+|---|---:|---:|---:|
+| Humans | 289 | 284 | 9 |
+| Units | 241 | 180 | 0 |
+
+| Humans row | Raw parameter 24 | Identity |
+|---|---:|---:|
+| `ManHorse_LanceShield` | 21 | 21 |
+| `ManMage_Unarmed` | 23 | 23 |
+| `ManMage_Staff` | 24 | 24 |
+| `Start_MF`, `Start_FF`, `Start_MM`, `Start_FM` | 10210..10213 | 21 |
+| `Fighter_Hero` | 10220 | 22 |
+| `Mage_Hero` | 10230 | 23 |
+
+No row holds raw 22 or a raw value in 10221..10229.
+
+The r2script tables of the 46 maps per root were searched for parameters
+holding 10001..10010 (R2-ENGINE-107's controlled literals for identities
+21..30), 10220..10229 or 22. One parameter per root matches: map 96, check
+list, operation 26, parameter slot 0, value 22, type 4. The EN and RU
+results are equal.
+
+**Confidence.** High for the counts, values and names in both roots. The
+search covers parameter values only. A reference built at run time, or
+through a unit record's template, is outside it.

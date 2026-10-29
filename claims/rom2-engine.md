@@ -1188,7 +1188,7 @@ Complete Fading callbacks EN R2.0117 / RU R2.0118 compare the next segment start
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-105 | Selected EN/RU character producers reuse owner +0x38 or construct and register an actor; their Session +0x74==0 branch writes actor WORD+0x14c=21, with the EN opcode-0x48 submission route traced conditionally. | Medium | ● active | [EXP-2014](../experiments/EXP-2014-rom2-party/) |
-| R2-ENGINE-106 | The selected EN location-leave arm forwards nonzero scenario slot 773 to an EN/RU addition producer whose IDs 21..30 branch avoids new creation when owner actors already contain the incoming WORD+0x14c identity. | Medium | ● active | [EXP-2014](../experiments/EXP-2014-rom2-party/) |
+| R2-ENGINE-106 | The selected EN location-leave arm forwards nonzero scenario slot 773 to an EN/RU addition producer whose IDs 21..30 branch avoids new creation when owner actors already contain the incoming WORD+0x14c identity. | Medium | ● active (amended) | [EXP-2014](../experiments/EXP-2014-rom2-party/) |
 | R2-ENGINE-107 | EN/RU literal Unit references 10001..11000 use reference-10001 and compare actor WORD+0x14c-21 in the selected owner's list, gated by Session +0x74==0 and nonnull owner +0x38; complete controlled membership remains unproved. | High / Medium | ● active | [EXP-2014](../experiments/EXP-2014-rom2-party/) |
 | R2-ENGINE-108 | Selected EN/RU map construction conditionally reuses its first owner, matches actor rows through owner DWORD+8 and forms groups by actor-row DWORD+0x40; fresh owners clear +0x38 and complete transition carryover is unproved. | Medium | ● active | [EXP-2014](../experiments/EXP-2014-rom2-party/) |
 
@@ -1254,6 +1254,15 @@ runtime delivery remain open; this does not prove a particular authored join.
 **Unknown.** Slot-773 producer, authored mission/stage schedule, template
 data, actor positioning/acceptance, complete transfer or carryover, and all
 other addition routes. No party size or joining actor is predicted.
+
+**Amended.** R2-ENGINE-634 censuses the producer's callers: this arm and
+the inn selector of R2-ENGINE-633, which passes EnterInn option words.
+R2-SESSION-254 censuses slot 773's literal writers (0 and 23). These narrow
+the "all other addition routes" and "Slot-773 producer" Unknowns above: the
+producer's callers are censused (Medium for register calls), and the stores
+of slot 773 are bounded by R2-SESSION-254. Routes that do not call the
+producer (R2-ENGINE-105, R2-ENGINE-381) remain open (narrowed by the
+review; the first wording said "replace").
 
 ### R2-ENGINE-107
 
@@ -6688,8 +6697,8 @@ EN inventory input L2.01652 supplies either one or the displayed quantity under 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-378 | The two installed ROM2 client Data.bin payloads contain 33 Humans and 22 Units records in the measured campaign-key ranges, covering internal template families for hire IDs 1..7 and controlled identities 21..23. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
-| R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
-| R2-ENGINE-380 | Selected ROM2 departure and TALK arms enable hire IDs1..7 through bank availability/town gates; NPC22/topic30 enables hireID2 rather than constructing controlled identity22. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-380 | Selected ROM2 departure and TALK arms enable hire IDs1..7 through bank availability/town gates; NPC22/topic30 TALK enables hireID2 and builds no actor; the inn entry that offers it builds controlled identity22 (R2-ENGINE-633). | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-381 | The reached EN mission-entry loop selects a subset of 20 hire IDs from nonzero selection and availability; its paired EN/RU creator writes each input identity and has no additional numeric list cap in the read body. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-382 | Selected EN campaign transition cleanup tests actor class WORD+0x0e: classes33..63 take a reset path and other classes take detach/destroy calls; the predicate is not controlled identity WORD+0x14c. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 
@@ -6715,6 +6724,14 @@ The measured client Humans row Mage_Hero carries parameter24=10230, conditionall
 
 **Unknown.** Exact join timing, runtime delivery, mission/script producers of identity22, other callers of the addition producer and an unconditional roster. A preserved save after Leave40 with actor14c and owner membership would settle acceptance.
 
+**Amended.** R2-ENGINE-634 finds the producer's other caller, the inn
+selector (R2-ENGINE-633), which builds identity 22 from the stage-30 option
+word (R2-ENGINE-635). R2-ASSET-160 finds no map-script numeric parameter in
+10001..10010 or 10220..10229 (identity 22); keys 10210..10219 and
+10230..10309 and any name or template route are outside that search
+(narrowed by the review). These narrow the "mission/script producers of
+identity22" and "other callers of the addition producer" Unknowns above.
+
 ### R2-ENGINE-380
 
 Reuse R2-SESSION-047, R2-SESSION-048 and R2-ENGINE-219/221 for the common normalization and offer contract. For hire h=1..20, selection is bank[511+h], availability bank[531+h], and town bank[551+h]. The acquired EN mission-ID table and departure body map ID20 to hire1/town2, ID50 to hire3/town3, ID60 to hire6/town2, ID70 to hire4/town3, and ID100 to hire7/town2. Each stores availability1.
@@ -6732,6 +6749,12 @@ The acquired Talk body toggles selection for kind1. Its kind2 path reaches the j
 narrows the "Complete availability writers" Unknown above: the stores of
 R2-SESSION-048 and this claim can replace that zero with a nonzero value, so
 a dead hire's availability is 0 until one of them runs.
+
+The former headline's "rather than constructing controlled
+identity22" held for the TALK arm only; the headline now says so (narrowed by
+the review). The inn visit that offers
+NPC22/topic30 passes that option word to the addition producer, which
+builds controlled identity 22 (R2-ENGINE-633, R2-ENGINE-635).
 
 ### R2-ENGINE-381
 
@@ -14265,3 +14288,218 @@ Unknown and for the meaning of +0x13c and +0x42.
 
 **Unknown.** The original runs named in R2-ENGINE-624, R2-ENGINE-625,
 R2-ENGINE-627 and R2-ENGINE-629.
+
+## Identity 22 at the stage-30 inn
+
+Static reads of the owned EN and RU `allods2.exe` and `Scenario.dll` (raw
+x86 listings decoded with Capstone from the plan of one generation,
+reproduced byte for byte) and derived values of both roots' `world.res` and
+`scenario.res`. EN addresses unless RU is named. The "addition producer" is
+EN `L2.00174`, RU `L2.00176` (R2-ENGINE-106). The "owner" is the object
+`L2.00310` returns on `L2.00292` (R2-ENGINE-525). "Equal after masking"
+means equal once every hex number of five or more digits is masked.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-633 | The ROM2 inn selector (EN L2.00425, RU L2.00427), when app +0x5d8 (RU +0x63c) is 2, passes every EnterInn option word with stage GetVar(0x300) to the addition producer before the inn page is shown (Medium; narrowed by the review). | High / Medium | ✔ promoted (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-ENGINE-634 | Branch-target and raw DWORD scans of each ROM2 client find two callers of the addition producer, the inn selector and the 0x41d leave arm (EN L2.03302, L2.03303; RU L2.03304, L2.03305), and no pointer to it. | High / Medium | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-ENGINE-635 | For an incoming low word 22 the ROM2 addition producer builds a Human with the hero flag from key 10220 (Fighter_Hero and the hero class Medium), stores WORD +0x14c = 22, appends it to owner +0x24 unless held; town registration Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-ENGINE-636 | The EN ROM2 raw DWORD scan of displacements 0x149..0x14d finds 59 store candidates over +0x14c; of its 15 word moves the producer, the Humans load and literals 21 and 0 are read; 53 sites carry values that are not shown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-ENGINE-637 | In ROM2 campaign play an inn entry at stage 30 adds controlled identity 22 before TALK 22/30 (Medium). Whether he is the talk's companion, how hire 2 relates to him and whether he stays after victory are Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+
+### R2-ENGINE-633
+
+The selector's campaign segment (EN `L2.00437..L2.00432`, RU
+`L2.00438..L2.00433`):
+
+1. tests app +0x5d8 == 2 (RU +0x63c) and skips the segment otherwise;
+2. calls EnterInn through cell `L2.00409` (RU `L2.00551`) with an option
+   array at ebp-0x94 and a count at ebp-0x14;
+3. appends each of the `count` words to a list through `L2.03306`;
+4. calls the producer at `L2.03302` (RU `L2.03304`) with GetVar(0x300) (cell
+   `L2.00451`, RU `L2.00449`) and the list, receiver `[L2.00805]`;
+5. calls `L2.00466(0)`.
+
+The words are EnterInn's packed options: low word NPC or hire ID, bits
+16..27 topic, bits 28..30 kind (R2-ENGINE-219). At stage 30 one is NPC 22,
+topic 30, kind 3, `0x301e0016`, with no bank gate (R2-ENGINE-216). The
+other constants with low word 21..30 are NPC 22 topic 40 (stage 40), NPC 22
+topic 62 (the continuation, stage 60 or more; R2-ENGINE-498) and NPC 23
+topic 49 (stage 50). The tail hire IDs are 1..20 (R2-ENGINE-221). The two
+segments have 40 instructions each. After masking they differ in one line,
+the app offset.
+
+**Confidence.** High for the segment, its gate, the order of calls and the
+arguments, read in both roots. Medium for "before the inn page is shown": the
+inn page is opened after the segment (EXP-2031's selector listing), and no
+inn-page path back to the segment was traced. The meaning of app +0x5d8 == 2
+is not read here.
+
+**Narrowed by the review.** The headline said "before any inn action"; it now
+says "before the inn page is shown (Medium)".
+
+### R2-ENGINE-634
+
+Over every executable byte of each client, the E8, E9, 0F8x, EB and 7x
+branch-target scan finds two sites per root that target the producer:
+
+- EN: `L2.03302` (R2-ENGINE-633) and `L2.03303`;
+- RU: `L2.03304` and `L2.03305`.
+
+A raw DWORD scan of all sections for the producer's address finds none in
+either root. `L2.03303` lies in the 0x41d leave arm. In that arm the order is:
+
+1. the transition `L2.01664`;
+2. `L2.01854`;
+3. GetCurrentLocation (`L2.00270`);
+4. LeaveLocation (`L2.02297`);
+5. `L2.00173`, which returns GetVar(0x305), slot 773;
+6. when that value is nonzero, the producer with GetVar(0x300) and a list
+   holding it, then `L2.00466(0)`.
+
+The RU arm (`L2.03307..L2.03308`) has the same 41 instructions. After
+masking, 11 frame offsets and the exception-state byte differ. Its getter
+`L2.03309` equals EN's.
+
+**Confidence.** High for the scan results and both callers' bodies. Medium
+that no other route reaches the producer: a register call through a
+computed address escapes both scans.
+
+### R2-ENGINE-635
+
+The producer (380 instructions per root, no open edge, equal after masking)
+treats each list word's low word as an ID. ID 21..30 (0x15..0x1e) is the
+controlled test. Keys 10000+10*ID go to the Humans lookup (`L2.02663`), then
+the Units lookup (`L2.02665`). Keys 9998+10*ID+stage/10 replace the base when
+a suffix probe hits (R2-ENGINE-381, R2-ENGINE-524). For ID 22 the base key is
+10220. The only Humans row with that raw value is `Fighter_Hero`, and no row
+holds 10221..10229 (R2-ASSET-160), so no suffix probe hits.
+
+The controlled branch walks owner +0x24 comparing each actor's WORD +0x14c
+with the ID. A match ends the branch. Otherwise it:
+
+1. allocates 0x254 bytes and calls the Human constructor `L2.00214`;
+2. passes the constructor (name from `L2.03310` on `L2.00148`, 1, 0);
+3. stores WORD +0x14c = ID at `L2.03311`;
+4. stores +4 = key from `L2.02670` and +0x14 = owner;
+5. appends the actor to owner +0x24 (`L2.00202`) and a 0x50-byte Group to
+   owner +0x28;
+6. calls `L2.03312` and `L2.02714` on `[L2.01066]`;
+7. calls the sender `L2.01056` with 0xffb.
+
+The constructor passes its arguments 2 and 3 to the Humans template load
+`R2.0088`. With argument 2 nonzero, that load takes the hero class rule,
++0xe = 0x21 or 0x23 plus gender (R2-ENGINE-525). The constructor is 34
+instructions per root and equal after masking.
+
+The non-controlled branch does not touch the owner list. It builds a Unit
+(`L2.01063`) or a Human with (name, 0, 0), stores +0x14c at `L2.03313`, sets
++0x14 and keeps the actor in a local list. Each local actor's key then goes
+to `L2.03314`, which clears its bit in `L2.00339` when the key is below
+0x6000.
+
+**Confidence.** High for the producer's branches and stores, read in both
+roots. Medium that the row built is `Fighter_Hero` and that the class is
+the hero class: the lookup filter `L2.02664`, the name helper `L2.03310` and
+the +0xe writers after the load are unread. Medium for the owner's identity
+(R2-ENGINE-525).
+
+**Unknown.** Whether `[L2.01066]` is null in a town, and what `L2.03312` and
+`L2.02714` do then, so whether the build completes in a town. In the
+original, entering the stage-30 inn and recording whether identity 22
+appears in the party settles both.
+
+**Narrowed by the review.** The headline named the row `Fighter_Hero` and the
+hero class without their grade (Medium) and omitted the town registration
+(Unknown); both are now in the headline.
+
+### R2-ENGINE-636
+
+A raw DWORD scan of every section of the EN client for 0x149..0x14d finds
+193 hits. A hit is a store candidate when some decode 1 to 10 bytes back is
+a write-class mnemonic whose memory operand at displacement 0x149..0x14d
+overlaps +0x14c..+0x14d: 59 candidates. 19 of them have a `mov word`
+decode, 15 at +0x14c:
+
+| Site | Source of the word |
+|---|---|
+| `L2.03311`, `L2.03313` | the producer's ID (R2-ENGINE-635) |
+| `L2.03315`, `L2.02672` | Humans load: parameter 24, (w/10)%1000 above 10000 (R2-ENGINE-525) |
+| `L2.00166` | literal 0x15 |
+| `L2.03316` | literal 0 |
+| `L2.03317` | the hire creator's ID, 1..20 (R2-ENGINE-381) |
+| `L2.02674` | Units parameter 55, low word (R2-ENGINE-525) |
+| `L2.03318` | a Humans row word, parameter 0x18, untransformed |
+| `L2.03319` | a Units parameter 0x37 word |
+| `L2.03320`, `L2.03321` | a copy from another object |
+| `L2.03322` | a stream word |
+| `L2.03323` | the word at `[L2.03324]` |
+| `L2.03325` | not read |
+
+No Humans row holds raw 22 and no Units row holds 22 in parameter 55
+(R2-ASSET-160). A raw row word therefore never gives 22.
+
+**Confidence.** High for the 193 hits, the 59 candidates and the 15 word
+moves. Medium for the sources: some rest on windows ending 0x10 bytes past
+the site. Unknown for the 44 dword-only candidates, `L2.03325`, `L2.03323`
+and the copies, any of which can carry 22.
+
+**Unknown.** A window at each unclassified site settles it.
+
+**Narrowed by the review.** The headline said "53 sites are not classified";
+the table gives a source for eight of the nine unclassified word moves, so it
+now says the 53 sites "carry values that are not shown". The sources are
+known, the values they can carry are not.
+
+### R2-ENGINE-637
+
+Composed from R2-ENGINE-633, R2-ENGINE-635, R2-ENGINE-219, R2-ENGINE-526,
+R2-ENGINE-625 and R2-SESSION-254.
+
+1. At stage 30 an inn entry passes `0x301e0016` to the producer, which adds
+   identity 22 when the owner lacks him.
+2. TALK 22/30 adds mission 30 and sets 533 = 1, 553 = 2 (hire 2). It builds
+   no actor.
+3. The leave arm adds a controlled actor only from slot 773, which the
+   literal stores set to 0 or 23 (R2-SESSION-254).
+4. The last owner loop of the victory transition resets actors of class
+   0x21..0x3f and detaches the rest (R2-ENGINE-526). Identity 22 has the hero
+   class rule at Medium (R2-ENGINE-635), so that loop does not detach him.
+   Whether he stays in the party is Unknown: R2-ENGINE-526 leaves the first
+   owner loop's ten callees, `L2.01670`, slot +4, the world clear and the map
+   deletion unread.
+5. His death sends reason 3 when the guards of R2-ENGINE-625 hold: Session
+   +0x74 zero (Medium), owner +0x2c zero, and a death that reaches the block
+   (the callers are not censused). 44 of 46 mission texts per root carry
+   `#failure3`.
+6. A later inn entry with NPC 22 topic 40 (stage 40) or topic 62 (the
+   continuation) adds him again only if he is absent.
+
+**Confidence.** Medium: the weakest links are the town registration and
+the class (R2-ENGINE-635) and the unclassified +0x14c stores
+(R2-ENGINE-636). Unknown whether a dead actor leaves owner +0x24, and
+whether any unread routine removes him.
+
+**Unknown.** Whether the identity-22 actor is the companion the talk
+presents: the talk text `npc22talk30` was not read. The same talk stores hire
+2's availability 533 = 1 and town 553 = 2, and R2-SESSION-255 step 5 builds
+hire 2 at mission entry when its selection 513 is set. Whether hire 2 is a
+second character, the same character or excluded (the preregistered
+alternative A3) is not shown.
+
+**Unknown.** In the original: from a stage-30 town-2 save, enter the inn
+and record the party before entry, after the page opens and after TALK
+22/30, with hire 2 and the name shown for the talk. Then let identity 22 die
+in mission 30, record the failure screen, and after a LOAD record the party.
+
+No producer read removes him. The victory transition's last owner loop does not
+detach a class 0x21..0x3f actor, and whether he stays is Unknown
+(R2-ENGINE-526). His death sends reason 3 when the guards of R2-ENGINE-625
+hold (Medium). Inn stage 40 or topic 62 adds him again when he is absent.
+
+**Narrowed by the review.** The headline said "the stage-30 inn companion is
+identity 22 ... victory keeps him, his death sends reason 3". The evidence
+shows that the inn selector builds an actor with +0x14c = 22 (Medium for the
+composed join), not that this actor is the character the talk presents. It
+reads one predicate of the victory transition, not retention, and the death
+guards are listed in item 5.
