@@ -1348,3 +1348,46 @@ bit 8, and other `+0x84` writers were not enumerated.
 **Unknown.** Settle with the original: LOAD a SAV with a dead party hero at stage 1 and one at
 stage 2 to 4 whose body still holds a weapon with parameter 15 zero; record `+0x15a`, `+0x84` and
 `+0x20` of each client drawable.
+
+## A generated hero's worn spell weapon
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-192 | With no hero at `Player+0x34`, `R0823` builds its Human by template equip, then `R0837` removes and deletes that Weapon and wears a literal one; only the four mage staffs carry castSpell, so a mage starts with a Fire_Arrow Spell. | High / Medium | ✔ promoted (branch candidate) | [EXP-0631](../experiments/EXP-0631-spell-weapon-builders/) |
+
+### HERO-192
+
+Inputs: EXP-0631 windows w05 to w07, w15, w17 to w19, w47 and w49 to w51 in `out/native/`.
+
+- `R0823`, read whole, builds nothing when `Player+0x34` is nonzero: it returns that
+  hero (`L07351`, `L13992`, `L13993`; PARTY-037). On the arm taken when `Player+0x34` is 0
+  (`L09370` onward) it names the Human `PC_Danath`, `PC_Naira`, `PC_Fergard` or
+  `PC_Reniesta` plus a face suffix (SESS-HERO-014) and calls `R0497(name, 1, 0)`. Template
+  equip of cell 0 runs (ITEM-203): for `PC_Fergard` and `PC_Reniesta` it builds a Fire_Arrow Spell
+  at Weapon `+0x80` (ITEM-241); the `PC_Danath` and `PC_Naira` weapons carry no `castSpell`, so
+  equip leaves the constructor's 0.
+- It then calls `R0837`, read whole. That routine first passes the worn Weapon
+  `actor+0x74` to `actor vt+0x40`; Human `vt+0x40` (`R0934`) calls Weapon removal, which deletes
+  the Spell and stores `+0x80 = 0` (`L04889`). It deletes the returned Weapon through `vt+4`.
+- It builds one Weapon by `R0665` from one of 14 literals (HERO-START-039) and passes it to
+  `actor vt+0x3c`, which reaches Weapon equip. The four staff literals carry
+  `castSpell=Fire_Arrow:10` (value 10) or `:20` (value 20); the other ten literals carry no tail,
+  so those Weapons keep `+0x80 = 0`.
+- When `[server+0x138] != 0`, `R0823` builds a Weapon `PlasmaSword` (`L17225`, no
+  tail) and passes it to `actor vt+0x3c` (`L17226`). Equip removes the staff (its Spell deleted,
+  `+0x80 = 0`), and Human `vt+0x3c` appends it to the pack.
+- `R0823` is reached from the `0x48` arm (SESS-HERO-014) and from the `0xbe` carry arm,
+  there only after the importer returned 0 (`L17227`; ITEM-244). The client routine
+  `R0808` selects one of four construction arms by a jump table on `[ebp+0x74] & 0xc0`
+  (`L17228..L17229`), runs `R0497` once in the arm taken and `R0837` once (`L17230`);
+  that Human is not the server's hero.
+
+**Confidence.** High for the order of the builds and their values: both routines and the
+literals are read whole. Medium for the first frame of the first mission, if the player does not equip or remove the
+weapon in town (out of frame, ITEM-SPELLMOVE-132): no read routine writes the reference in
+between (ITEM-242, ITEM-244), with the grades those cards give.
+
+**Unknown.** `PlasmaSword`'s own `+0x80`; settled by reading its Weapons row for a kind-41 Effect
+and by finding what sets `server+0x138`. A native witness. Settled by an owner run: create a mage in a new campaign, SAVE on
+the first mission's first frame, and decode the worn staff's `+0x80` (a Spell reference with the
+Fire_Arrow id).

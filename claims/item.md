@@ -3740,6 +3740,11 @@ section finds `R0850` once, the Weapon vtable slot `L16544`, and an
 `E8`/`E9` scan finds no `jmp` to `R1012` or `R1011`. It also states the
 five town, mission and SAV routes. Equip's indirect callers and the
 unclassified stores stay open, so the no-other-writer clause stays Medium.
+ITEM-242 classifies every store of the image-wide census, adds no writer, and
+names a third constructor, `R0969`, which reaches the fill (`L16108`,
+0). Its address-arithmetic scan finds the write through `L08325` only
+from Weapon Serialize (`L17231`). The no-other-writer clause stays Medium for
+the census blind spots that card names.
 
 ## Scroll valuation and mission81
 
@@ -3920,7 +3925,11 @@ global factory caller census or future callback rule is claimed.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | ITEM-211 | A Weapon's information text reads its columns and its castSpell Effect's bytes; no body read has a Weapon +0x80 operand; base lines need sutableFor bit 0; the spell lines come from a Spell built from Effect +0x40 and +0x42. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/), [EXP-0606](../experiments/EXP-0606-weapon-row/) |
-| ITEM-212 | Weapon +0x80 on five routes: tavern hire and mission-entry construction build it by template equip; script owner transfer, AddHero, a carried party (Medium) and town SAVE and LOAD keep the Spell or null. Equip has one image reference. | High / Medium | ✔ promoted (branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
+| ITEM-212 | Weapon +0x80 on five routes: tavern hire, AddHero and mission-entry construction build it by template equip; script owner transfer, a carried party (Medium) and town SAVE and LOAD keep the Spell or null. Equip has one image reference. | High / Medium | ✔ promoted (partially retracted, amended, branch candidate) | [EXP-0600](../experiments/EXP-0600-weapon-spell-display/) |
+| ITEM-241 | AddHero (0x49) constructs a Human by `R0497(name,1,0)`; template equip builds worn Weapon +0x80 from the first kind-41 Effect, a Fire_Arrow Spell for Humans rows 28 and 29; kept to the next mission without town equip or removal (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0631](../experiments/EXP-0631-spell-weapon-builders/) |
+| ITEM-242 | Over the 7646 registry bodies, Weapon +0x80 is written only by nine stores in Weapon routines and by ReadObject `L08325` from Weapon Serialize; of 29 `push 0x84` sites, 25 precede a Weapon constructor call (Medium: blind spots). | High / Medium | ✔ promoted (branch candidate) | [EXP-0631](../experiments/EXP-0631-spell-weapon-builders/) |
+| ITEM-243 | When a mission `.ini` has a `Humans` list and a `Humans.Hero<n>` section, placement gives a unit `name#n` its item lines (`R0907`) and a worn Weapon line runs equip; no `.ini` ships (TRIG-INI-012), so shipped data adds no item. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0631](../experiments/EXP-0631-spell-weapon-builders/) |
+| ITEM-244 | In the census (Medium), a carried member's worn Weapon +0x80 changes only through equip, removal or an archive load; the 0xbe carry restores the archived Spell or null (High); the campaign edge's read routines call none (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0631](../experiments/EXP-0631-spell-weapon-builders/) |
 
 ### ITEM-211
 
@@ -3995,7 +4004,7 @@ Inputs: EXP-0600 scans s01 and s02 in `out/scans/`, windows e02 and w08 in `out/
 |---|---|---|
 | script hands a unit to the player | instants 19 and 22, `R0064` (PARTY-JOIN-025) | kept; the routine makes no item call, and its broadcast `R0059` (w08) has no `+0x80` operand |
 | tavern hire | Human construction `(name,0,0)` with template equip (ITEM-203) | built from the first kind-41 Effect |
-| AddHero in town | command `0x49`, `R0066` (PARTY-ADDHERO-017) | kept; owner and Group assignment only |
+| AddHero in town | command `0x49`, `R0066` (PARTY-ADDHERO-017) | retracted, see ITEM-241 |
 | new mission, carried party | surviving actors are the same objects (PARTY-PERSIST-028); no start routine read equips (PARTY-037, High / Medium / Unknown) | kept (Medium) |
 | new mission, Human constructed on entry | Human construction for a nonzero entry argument with Player `+0x3d == 0`, with template equip (ITEM-203) | built from the first kind-41 Effect |
 | map change by archive | one `WriteObject` graph (PARTY-CARRY-005) through Weapon Serialize | kept, null included |
@@ -4003,8 +4012,8 @@ Inputs: EXP-0600 scans s01 and s02 in `out/scans/`, windows e02 and w08 in `out/
 | town SAV loaded | Weapon Serialize load arm; no re-equip (ITEM-204) | restored, null included |
 
 **Confidence.** High for the scan results, the Serialize arms and the routes whose routines are
-read whole in the cited claims: script transfer, AddHero, tavern hire, mission-entry
-construction, archive carry, SAVE and LOAD. Medium for the carried party at mission start: its
+read whole in the cited claims: script transfer, tavern hire, mission-entry
+construction, archive carry, SAVE and LOAD. The AddHero row is retracted (ITEM-241). Medium for the carried party at mission start: its
 source PARTY-037 is High / Medium / Unknown, with unread closure owners, an unread SAV-load path
 and census blind spots, and a route composed from it takes its weakest grade. Medium that no
 route calls equip indirectly: the targets of
@@ -4014,6 +4023,196 @@ indirect calls, and HERO-170 leaves an indirect equip below Unit Serialize open.
 **Unknown.** A native witness that a null `+0x80` survives a town SAVE, a LOAD and the next
 mission's entry. Settled by an owner run: LOAD a town SAV whose mage wears a `castSpell` Weapon
 with a null `+0x80`, enter a mission, SAVE, and decode that Weapon's `+0x80`.
+
+**Amended.** ITEM-241 refutes the AddHero row: `R0066` constructs a new
+Human with `R0497(name, 1, 0)`, whose template equip builds `+0x80`; there is
+no earlier reference to keep ([retracted.md](retracted.md)). ITEM-243 describes a
+separate route, the placement walk's item reader on a mission `.ini` that no install
+ships; it leaves the row for a Human constructed on mission entry as it was.
+ITEM-244 bounds the carried-party row by the writer census of ITEM-242; the row
+stays Medium.
+
+### ITEM-241
+
+Inputs: EXP-0631 windows w01 to w04, w15, w18 and w19 in `out/native/`; Humans
+rows 26 to 29 read on both roots with `tools/humanequip -mode rows -full`.
+
+- The town walk `R1384` sends one command `0x49` per AddHero entry
+  (PARTY-ADDHERO-017). The dispatcher's `0x49` arm (`L14434`) calls
+  `R0066(name, hero, 1)` with the name of the Humans row that the client
+  request `R1155` put in `cmd+0xa`.
+- `R0066`, read whole: `new(0x198)` and the Units constructor
+  `R0501(name)`. When that object's type word `+0xe` is 0 it is deleted, and
+  `new(0x1e8)` with `R0497(name, 1, 0)` builds a Human; when the Human's type
+  word is 0 too, it is deleted and the routine returns 0. Then come the owner,
+  the owner's lists, a new Group and the broadcast `R0059`. The routine makes
+  no other item call.
+- `R0497` with a zero third argument, a matched Humans row and a name not
+  starting with `Hero` equips the row's cells (ITEM-203). Cell 0 reaches Human
+  `vt+0x3c` `R0975`, Human `vt+0x38` `R0933` and Weapon equip `R0850`,
+  whose `R1011` and `R1012` store a new Spell from the first kind-41
+  Effect's `+0x40` low byte at `L04887` (ITEM-187).
+- Shipped rows, EN equal to RU: row 28 `PC_Fergard`, cell 0
+  `Uncommon Wood Staff {castSpell=Fire_Arrow:1}`; row 29 `PC_Reniesta`, cell 0
+  `Wood Staff {castSpell=Fire_Arrow:1}`. Mission 30's AddHero selects one of the
+  two rows by the player character's sex (REG-SCN-098).
+
+**Confidence.** High for the construction and for the build at the join:
+`R0066` and the `0x49` arm are read whole, and an existing actor is
+excluded by the listing. A Units-only build is excluded by the listing together
+with the shipped Units collection, which has no row named `PC_Fergard` or
+`PC_Reniesta` (118 rows, none named `PC_*`; Humans rows 28 and 29 are those two
+names; both roots; the check is the EXP-0631 review report's and is not in the
+committed evidence). Medium that the Spell built at the join is still the
+reference at the next mission's first frame, if the player does not equip or
+remove the weapon in town (out of frame, ITEM-SPELLMOVE-132): no read routine
+writes it (ITEM-242, ITEM-244), but the campaign edge's persistence is Medium
+(PARTY-037) and indirect equip calls are not enumerated. A re-equip in town
+replaces the Spell with a new object and a removal leaves null.
+
+**Unknown.** A native witness. Settled by an owner run: play mission 30 to the
+AddHero join, enter the next mission, SAVE on its first frame, and decode the
+joined Human's worn Weapon `+0x80` (a Spell reference, not null).
+
+### ITEM-242
+
+Inputs: EXP-0631 `out/census/` (s1 to s5), `out/classify/`, `verdicts.tsv`,
+windows w08 to w14, w38 to w44 in `out/native/`.
+
+- Population: the EN image (equal to RU) and its 7646 registry bodies, 455 883
+  instructions in linear decode. s2 lists every memory write overlapping
+  `[0x80,0x84)` at any width, `disp8` or `disp32`: 164. s1 decodes every dword
+  `0x77..0x83` of the executable sections as a `disp32` at every start: 202
+  writes, of which 38 are not in s2 (instruction interiors and absolute
+  `[0x80]`); no s2 write is missing from s1. s3 lists 128 `LEA`/`ADD`/`SUB`
+  forming `reg+0x80`; s5 lists 864 `REP MOVS` and `push 0x84` sites; s4 the
+  references to 18 routines.
+- Object bound: Weapon's runtime class `L04586` has size `0x84` and no class
+  record names Weapon as base, so `+0x80` is a Weapon's last dword. The Weapon
+  vptr `L04583` is installed only in the three constructors, the destructor
+  and the copy: a dword scan of the EN image finds five occurrences,
+  `L17232`, `L17233`, `L17234`, `L17235` and `L17236` (the scan is
+  the EXP-0631 review report's; it is not in the committed evidence).
+
+| store | routine | value | reached from |
+|---|---|---|---|
+| `L16107` | default constructor `R0889` | 0 | CreateObject `R0922` (archive load) |
+| `L05249` | name constructor `R0665` | 0 | 18 calls: `R0823`, `R0907`, `R0184`, `R0656`, 14 in `R0837` |
+| `L16108` | fill `R0887` | 0 | `R0665` and the constructor `R0969` (calls from `R0947`, `R0520`, `L09853`, `R0963`) |
+| `L16109` | destructor `L09849` | 0 after deleting the Spell | deleting destructor `R2067`, Weapon `vt+4` |
+| `L16110`, `L16111` | copy `L08717` | a new Spell from the source's id, or 0 | split `R2132` (`vt+0x40`), clone `R2133` (`vt+0x44`) |
+| `L04889` | removal `R0853` | 0 after deleting the Spell | Weapon `vt+0x3c` |
+| `L04887` | `R1012` | a new Spell from Effect `+0x40` | `R1011` from equip `R0850`, Weapon `vt+0x38` |
+| `L16112` | `R1045` | a Spell by name | no caller (MAGIC-SPELLHOP-023) |
+| `L16118` | `L08325`, `ReadObject` of class Spell | the archived reference | Serialize `R1639` load arm (`L17231`), Weapon `vt+8` |
+
+- The other 155 s2 writes are not on a Weapon: 37 `esp` locals; 96 on a base
+  its owner also uses at `+0x84` or above; 22 by owner (mover objects loaded
+  from `actor+0x154`, methods and constructors of nine other vtables, the
+  end-cull server object, three client view objects and `L13113`).
+- s3: only `L17231` forms a Weapon's `+0x80` address. The others are index
+  arithmetic, strides, sub-objects at `+0x80` of larger objects (the actor name
+  CString among them), an 8-dword copy to `+0x80..+0xa0`, stack slots and the
+  library block.
+- s5: 29 `push 0x84` sites (`s5-copy.tsv`): 25 precede a Weapon constructor
+  call, one for each of the 25 calls; 2 build UI objects (`L03299` to
+  `R0696`, `L17237` to `R1246`) and 2 are not allocations (`L17238`, a
+  text lookup, and `L17239`, a message id). The pairing of the 29 sites is the
+  EXP-0631 review report's scan, not committed output. So no Weapon lives on the
+  stack. No `REP MOVS` has a constant count of `0x21`.
+
+**Confidence.** High for the nine stores, their routes and the s1 to s2 cross
+check. Medium that no other routine writes a Weapon's `+0x80`: the co-base aid
+follows straight-line register origins and ignores branches; five hand verdicts
+are Medium (the client view objects of `R0098` and `R0099`, and
+`L13113`); and a pointer formed without an immediate `+0x80`, a
+variable-count copy and the library block are not covered.
+
+**Unknown.** The indirect `vt+0x38`/`vt+0x3c` callers; a pointer formed without
+an immediate `+0x80`; copies with a variable count; the library block. Settled by
+an owner run that SAVEs a mage with a `castSpell` Weapon at each route and
+decodes `+0x80`, or by enumerating those indirect calls.
+
+### ITEM-243
+
+Inputs: EXP-0631 windows w28, w45 and w48 in `out/native/`.
+
+- The route reads sections of a mission `.ini`. The placement walk calls the
+  line parser `R0475` on `this+0x44` with the key `Humans` (`L17240`; w28)
+  and jumps to the exit on a nonzero result. `R0907` builds the key
+  `Humans.Hero` (`L17241`; w45) plus the number n, looks the section up on the
+  same object and returns at `L17242` when no section exists. `this+0x44` is
+  the mission `.ini` sub-object (TRIG-INI-012), and no install ships that file
+  (PARTY-SESSION-008, ITEM-SPAWN-026). On shipped data the route adds no item.
+  It is a separate route from the mission-join construction of ITEM-203 and the
+  Human-constructed-on-entry row of ITEM-212.
+- The placement walk `R0065` splits a unit name at `#`; the number is
+  the definition index n. It builds a Human by `R0497(name, n, 0)`, or
+  `(name, 0, 0)` without `#`; when its type word is 0 it deletes it and builds a
+  Unit by `R0501(name)`. When n is present it calls
+  `R0907(unit, n)` at `L17243`.
+- `R0907`, read whole, walks the key/value lines of definition n. `Name`
+  sets the actor's name. `Armor`, `Weapon`, `Shield` and `Item` build an object
+  by name (`R0974`, `R0665`, `R0973`, `R2076`). An unknown key is logged
+  and skipped. When the object's word `+0x40` is nonzero, a key prefixed `Bag.`
+  puts it in the pack (`R0929(actor+0x7c, item)`) and any other key passes it to
+  `actor vt+0x3c`; otherwise it is deleted.
+- When the section exists and the unit is a Human, `vt+0x3c` reaches Weapon equip, which builds the new Weapon's
+  `+0x80` from its first kind-41 Effect. The Weapon worn before is removed (its
+  Spell deleted, `+0x80 = 0`) and appended to the pack. A packed Weapon keeps
+  the constructor's 0.
+
+**Confidence.** High for the code once the section exists: the walk arm and
+`R0907` are read whole; no shipped data reaches it. No definitions ship.
+
+**Unknown.** Units: the Units `vt+0x3c` target is not read; settled by reading
+that target. The content of a `Humans.Hero<n>` section, since no `.ini` ships.
+Settled by an owner run: supply a mission `.ini` with a `Humans` list naming a
+unit `name#n` and a `Humans.Hero<n>` section with a `Weapon` line for a
+`castSpell` Weapon, enter that mission, SAVE on its first frame, and decode the
+unit's worn Weapon `+0x80`.
+
+### ITEM-244
+
+Inputs: EXP-0631 windows w22 to w29 in `out/native/`; ITEM-242.
+
+- For a Weapon that already exists, the writers of ITEM-242 reduce to equip
+  (`vt+0x38`), removal (`vt+0x3c`), the destructor, which ends the object, and
+  the Serialize load arm (`vt+8`). The constructors, the fill and the copy
+  write only a new Weapon, and `R1045` has no caller.
+- The `0xbe` carry arm (w25) has no indirect call and no `+0x80` operand. It
+  calls the importer `R1378` twice. It calls character generation `R0823`
+  (HERO-192) only after the importer returned 0 (`L17227`); a successful import
+  stores its hero at `Player+0x34` (`L17244`). `R0823` returns the
+  existing hero and builds nothing when `Player+0x34` is nonzero (`L07351`;
+  PARTY-037). The importer (w26) reads one archive graph (PARTY-CARRY-005); each
+  Weapon is a new object from CreateObject, and the Serialize load arm stores
+  the archived Spell object or null. Its one indirect call is actor `vt+0x50`
+  (`L17245`).
+- On the campaign edge the surviving actors are the same objects
+  (PARTY-PERSIST-028). The end cull `R0826` (w22) has one indirect call,
+  `[edx+0x38]` at `L09066`, on `actor+0x20` timed-effect elements
+  (MAGIC-ATTACH-016); its `+0x80` store is on the server object.
+  Five direct callees of `R0826` are not in the evidence windows: `L17246`
+  (`L17247`), `R1723` (`L17248`), `R0123` (`L13876`), `R1388`
+  (`L17249`) and `R1380` (`L14705`). The EXP-0631 review report read them
+  at depth 1: none calls equip, removal or an indirect
+  `vt+0x38`/`vt+0x3c`/`vt+0x40`, and none reads or stores `+0x80` at depth 1
+  (reviewer read; not in the evidence). Their callees, and the callees of
+  `R0014`, which `R1380` reaches, are not read. The mission
+  join (w27) has no indirect call. The placement walk (w28) builds new units
+  only (ITEM-243). The type-5 player builder (w29) makes no item call.
+
+**Confidence.** High for the `0xbe` import: the arm and the importer are read
+whole. Medium for the campaign edge and for the reduction, so "changes only
+through equip, removal or an archive load" is Medium: the census
+completeness is Medium (ITEM-242), indirect `vt+0x38`/`vt+0x3c` targets are not
+enumerated, and PARTY-037 leaves unread closure owners.
+
+**Unknown.** A native witness. Settled by an owner run: carry a mage wearing a
+`castSpell` Weapon with a nonnull `+0x80` from town into the next mission, SAVE
+on its first frame, and decode that Weapon's `+0x80`; for the `0xbe` path, the
+same across a multiplayer map change.
 
 ## Item grant announcement
 

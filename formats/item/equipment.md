@@ -130,13 +130,40 @@ posts a physical ranged attack, and the unit shot would take the class Projectil
 Human Mage row (Medium; Ferion's class is not read from the save).
 — ITEM-187, MAGIC-379
 
+Over the 7646 registry bodies of the image, the stores to a Weapon's `+0x80` are the nine in
+Weapon routines (two constructors, the fill, the destructor, two in the copy, removal, the Spell
+builder under equip, and a by-name builder with no caller) and the archive read of Weapon
+Serialize's load arm. Every Weapon comes from `new(0x84)` and one of the constructors; none lives
+on the stack. That no other routine writes it is Medium. — ITEM-187, ITEM-242
+
 Equip has one reference in the image, Weapon vtable slot `L16544`. Below it, `R1011` and
 `R1012` each have one direct call and no `jmp` or dword reference. Weapon Serialize writes
 the `+0x80` object or a null reference and LOAD restores it. On the routes between town, mission
-and SAV, tavern hire and the construction of a Human on mission entry build `+0x80` through
-template equip; a script owner transfer, AddHero, an archive map change, a town SAVE and a town
-LOAD keep the stored Spell or null. A new mission's carried party keeps it too (Medium). That no
-route calls equip through an indirect `vt+0x38` is Medium. — ITEM-212
+and SAV, tavern hire, AddHero and the construction of a Human on mission entry build `+0x80`
+through template equip; a script owner transfer, an archive map change, a town SAVE and a town
+LOAD keep the stored Spell or null. ITEM-212's AddHero clause, which said AddHero keeps the
+reference, is partially retracted. That no route calls equip through an indirect `vt+0x38` is
+Medium. — ITEM-212, ITEM-241
+
+AddHero (command `0x49`) constructs a new Human by `R0497(name, 1, 0)`. Its template equip
+wears cell 0 of the Humans row: for rows 28 and 29, `PC_Fergard` and `PC_Reniesta`, an Uncommon
+Wood Staff or a Wood Staff with `castSpell=Fire_Arrow:1`, so the joined Human holds a new Fire_Arrow Spell. If the
+player does not equip or remove the weapon in town, the next mission's entry keeps it (Medium). — ITEM-241
+
+When a mission `.ini` supplies a `Humans` list and a `Humans.Hero<n>` section, mission-entry
+placement gives a unit named `name#n` the item lines of that section (`R0907`); without the
+section the routine returns with no item. No install ships a mission `.ini` (TRIG-INI-012,
+ITEM-SPAWN-026), so no shipped mission reaches this route; it is separate from the construction
+of a Human on mission entry. In the section, `Armor`, `Weapon`, `Shield` and `Item` build an object
+by name; a key prefixed `Bag.` puts it in the pack, any other key wears it. A worn Weapon runs
+equip, so its `+0x80` comes from its first kind-41 Effect, and the Weapon worn before goes to the
+pack with `+0x80 = 0`. A packed Weapon keeps the constructor's 0. For Units the effect is Unknown.
+— ITEM-243, TRIG-INI-012, ITEM-SPAWN-026
+
+In the census (Medium), at mission entry a carried member's worn Weapon `+0x80` changes only
+through equip, removal or an archive load. The `0xbe` carry rebuilds each Weapon from the archive and restores the archived
+Spell or null (High). On the campaign edge the actors are the same objects and the read routines
+call none of these (Medium). — ITEM-244
 
 ### Weapon-borne spell state (`ITEM-CASTSTATE-056`, `+0x68`-only remap clause retracted)
 

@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-0631: AddHero and Weapon +0x80
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `ITEM-212` (the AddHero row only; the other routes, the scans, the Serialize arms and the grades of the other rows stand) | Verbatim table row: "AddHero in town \| command `0x49`, `R0066` (PARTY-ADDHERO-017) \| kept; owner and Group assignment only" | High | [EXP-0631](../experiments/EXP-0631-spell-weapon-builders/) (`ITEM-241`) | `R0066` allocates `0x1e8` bytes and calls `R0497(name, 1, 0)` after a discarded Units build. With ITEM-203's gates its template equip builds `+0x80` from the first kind-41 Effect of cell 0; for Humans rows 28 and 29 that is a Fire_Arrow Spell. There is no earlier reference to keep | **REFUTED** — partially retracted |
+
 ## EXP-0624: sack membership of the tick list
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

@@ -93,6 +93,15 @@ slot  skill      value <= 10 (ordinary)          value > 10
 mage  (staff)    Wood Staff {castSpell=Fire_Arrow:10}   ... :20
 ```
 
+With a hero already at `Player+0x34`, `R0823` returns it and builds nothing. Otherwise the
+Human is first built by template equip from its `PC_*` row, which for the two mage rows
+builds a Fire_Arrow Spell on the template staff. `R0837` removes that Weapon (its Spell
+deleted, Weapon `+0x80 = 0`), deletes it, and wears the literal Weapon through `actor vt+0x3c`,
+which reaches Weapon equip. Only the four staff literals carry `castSpell`, so a generated mage's
+worn staff holds a new Fire_Arrow Spell and every other starting weapon holds none. When
+`server+0x138` is set, a `PlasmaSword` is worn after it and the staff goes to the pack with
+`+0x80 = 0`. — HERO-192
+
 An unarmed hero has an all-zero equipment modifier and `active = 0`;
 the default path does not construct the `BareHands` Weapons definition.
 Both skill terms are skipped and the roll is `[d, 2d]`, where
