@@ -2320,3 +2320,42 @@ results are equal.
 **Confidence.** High for the counts, values and names in both roots. The
 search covers parameter values only. A reference built at run time, or
 through a unit record's template, is outside it.
+
+## First mission map planes and fog fields
+
+`scenario.res:10.alm` of the EN and RU installs, read through the
+repository resource and ALM readers.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-162 | ROM2 scenario.res:10.alm is byte-identical in EN and RU: version 1300, 80 x 80; byte plane 2 spans 0..127, plane 3 0..81; no type 1 word has 0x8000 or 0x4000; no type 5 entry has 0x8. | High | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+
+### R2-ASSET-162
+
+`scenario.res` differs between the roots (EN 5548580 bytes, SHA-256
+`388c955f49c02ecfed765340ff3a5b3e8f37210e2c85c8d877bc04b949d60d7f`; RU
+5549452 bytes,
+`c19950690570d94b40c68acffd210cdab94c2a12b5d6ad5718730392c6b6e08b`); its
+`10.alm` entry is 74298 bytes in both, SHA-256
+`23d22542745ab0c101a60b2da5ea80b858eeb4e1840515bd8398ceb2ad9efeca`.
+
+| Field | Value |
+|---|---|
+| version, W, H | 1300, 80, 80 |
+| record order by typeId | 0, 1, 2, 3, 5, 11, 4, 9, 8, 6, 7, 10, 12 |
+| type 1 words (6400) with 0x8000, 0x4000, 0xc000 | 0, 0, 0 |
+| type 2 bytes, min and max | 0, 127 |
+| type 3 bytes, min and max | 0, 81 |
+| type 2 SHA-256 | `65788c11786050a685e789a7a0652455d460af5af1f2e0fb6214da4f9a3b078a` |
+| type 3 SHA-256 | `e0238972bf618c0c64fcae451113489f8ebeb330081fdc0a9fcb9c39937e6aca` |
+| type 2 cells within 20 of cell 11/41 unequal to that cell | 1206 |
+| type 6 units | 29 |
+| type 6 units within 20 cells of 11/41 | 6, all with owner byte 3, distances 16..20 |
+
+Type 5 holds 8 records. u32 +0 is 1..8; +4/+8 are 0/0 in the first record
+and 1/5000 in the others. Of the 16 u16 entries at +0x2c..+0x4a, entry k of
+record k (k = 0..7) is 0x12 in records 0..6 and 0x10 in record 7; every
+other entry is 0, 1 or 2. No entry has the value bit 0x8.
+
+**Confidence.** High: whole-entry hashes and counts in both roots. The
+names W, H, typeId and owner byte follow the ALM page's record layout.

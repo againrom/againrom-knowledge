@@ -14503,3 +14503,278 @@ shows that the inn selector builds an actor with +0x14c = 22 (Medium for the
 composed join), not that this actor is the character the talk presents. It
 reads one predicate of the victory transition, not retention, and the death
 guards are listed in item 5.
+
+## The client fog stamp
+
+Static reads of the owned EN and RU `allods2.exe` (raw x86 listings decoded
+with Capstone from the plan of one generation reproduced byte for byte) and
+measurements of both roots' `scenario.res:10.alm`. EN addresses unless RU
+is named. "Client" is the object whose +0x80 holds the client map
+(R2-ENGINE-615); "fog words" are the W x H words at client map +0xc
+(R2-ENGINE-614). "Budget" is the accumulator of 41 x 41 DWORDs at client
++0x17e4, row stride 0xa4, indexed [i][j] with i the x offset and j the y
+offset plus 20. "Equal after masking" means equal once every hex number of
+five or more digits is masked.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-643 | EN ROM2 fog stamp L2.03326 is slot +0x48 of statics and, via wrapper L2.03327, units; refresh L2.01068 (tick L2.01389, every 32nd tick, while [L2.00989] is 0) calls it; slot +0x44 L2.03328 is a second route (Medium). | High / Medium | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-644 | EN ROM2 fog walk L2.03329 seeds its centre with (word +0x10a >> 1) + 64 (s 7, K 128); a copied unit's +0x10a is argument word +0xa4, so the hero's seed is 888 for sight 1648 and 872 for sight 1617. | High / Medium | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-645 | EN ROM2 fog walk: rings 1..19 around cell (+0x38, +0x3c); a cell keeps its predecessor's budget minus trunc(128·sqrt(i²+j²)/max(i,j)) and its type-2 height rise over the centre; cells outside 7..W-8 are skipped; an empty ring ends it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-646 | EN ROM2 fog stamp ORs 0xc000 into fog cells X..X+1, Y..Y+1 for each positive budget cell, X = +0x38 + trunc(size/2) - 20 + i; a one-cell body stamps on the walk centre, sizes 2 and 3 one cell to +x and +y. | High / Medium | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-647 | Derived, EN ROM2 first mission, hero 11/41: a stamp uncovers 155 cells for sight 1648 (unmodified Start_MF), 154, the saved count, for 1617; the refresh stamps no earlier than the 32nd tick, L2.03328 earlier is Unknown. | Medium | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-648 | EN ROM2 stamp gate: an object stamps only when word [[Player+0x3c] + 2·owner key] has bit 0x8 and, for units, byte +0x184 is below 3; no 10.alm type 5 entry has bit 0x8, so the writer of that bit is Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-649 | ROM2 EN and RU fog walk, cell test, tables, K and s stores, bounds, plane getter, tick, refresh and owner gate are equal after masking; the RU stamp tests +0x10a before the owner gate, EN after, with the same effect. | High | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+
+### R2-ENGINE-643
+
+Stamp `L2.03326`: one bounded CFG of 140 instructions. It returns unless
+the owner gate (R2-ENGINE-648) passes and word +0x10a is nonzero, sets
+client +0xdc = 1, runs the walk `L2.03329` (R2-ENGINE-645) and writes the
+figure (R2-ENGINE-646).
+
+Census over the EN image:
+
+| Reference | Population | Result |
+|---|---|---|
+| E8/E9 rel32 to `L2.03326` | every byte offset of executable sections | one, `L2.03330` in `L2.03327` |
+| raw DWORD `L2.03326` | every byte offset of every section | seven `.rdata` slots: `L2.03331`, `L2.03332`, `L2.03333`, `L2.03334`, `L2.03335`, `L2.03336`, `L2.03337` |
+| raw DWORD `L2.03327` | every section | `L2.03338`, `L2.03339` |
+
+Tables read at 24 DWORDs: slot +0x48 (index 18) is `L2.03327` in
+`L2.03340` and `L2.03341`, whose +0x20/+0x24 slots read unit collection
+`L2.02969`, and `L2.03326` in `L2.03342` (statics, collection `L2.03005`),
+`L2.03343` and `L2.03344` (size slots `L2.03345`/`L2.03346`, unread). The
+other four stamp slots sit in tables whose starts (`L2.03347`, `L2.03348`,
+`L2.03349`, `L2.03350`) are inferred from the slot position, not read, so
+the class of those four is unknown. Narrowed by the review: the claim
+"units and statics" rests on `L2.03342` read as statics and, through the
+wrapper `L2.03327`, `L2.03340` and `L2.03341` read as units.
+
+Second route, narrowed in by the review. Slot +0x44 of the same tables
+holds `L2.03328` in `L2.03342`, `L2.03343` and `L2.03344`
+(`code/en-vt-*.txt`, words `L2.03351`, `L2.03352`, `L2.03353`), and the
+wrapper `L2.03354` in `L2.03340` and `L2.03341` (`L2.03355`, `L2.03356`).
+The review's raw DWORD scan of `L2.03328` finds seven slots, one word
+below each stamp slot outside the unit tables; its single E8 caller is the
+wrapper `L2.03357`, which tests byte +0x184 below 3. The body of
+`L2.03328` ends at `L2.03358`, just before the stamp. It applies the same
+two gates as the stamp (owner gate `L2.02954`, word +0x10a nonzero) and
+calls virtual slot +0x48 at `L2.03359` when (obj+0x54 & 0x1f) and
+(obj+0x58 & 0x1f) both equal 0x10 and obj +8/+0xc differ from +0xc8/+0xcc,
+the two words the stamp stores (R2-ENGINE-646). The unit update slot +0x3c
+(`L2.03360`) calls slot +0x44 at `L2.03361` on its idle path ([obj+0xa8] is
+0, byte +0x184 below 5), and the tick calls slot +0x3c of every client
+object on every client tick (`L2.03362`, `code/en-tick-L2.01389.txt`). A unit
+whose cell word differs from its last stamped one can therefore be stamped
+on any tick, not only on every 32nd. In the base constructor window the
+review read (`L2.03363..L2.03364`) +8 and +0xc are stored as 0 and no store
+to +0x54, +0x58, +0xc8 or +0xcc appears, so whether a fresh hero differs
+from its last stamped cell on its first update is unread.
+
+Cadence: the client handler `L2.03365` (raw DWORD at `L2.03366`) first
+calls `L2.00913` and takes the message switch only when it returns 0
+(`L2.03367..L2.03368`, read by the review), and maps message 0x401 through
+byte table `L2.03369` (entry 0 is 0) and jump table
+`L2.03370` to `L2.03371`, which calls the tick `L2.01389`, whose only E8
+caller is `L2.03372`. The tick adds 1 to client +0xa88 and then calls
+`L2.01068` when `[L2.00989]` is 0 and +0xa88 & 0x1f is 0. +0xa88 has two
+stores (raw DWORD 0xa88, every section): 0 in the client constructor
+(`L2.03373`) and the tick's add. `L2.01068` has one E8 caller (`L2.03374`)
+and no raw DWORD reference. It sets client +0xdc and +0xe0 to 1, ANDs
+0xbfff into all W x H fog words and calls slot +0x48 of each object of
+client +0x9d0 through `L2.03035`/`L2.03036`. Nine `push 0x401` patterns
+exist; `L2.03375` and `L2.03376` follow the server tick `L2.03120` and the
+pump `L2.00466(0x64)`, `L2.03377` follows the pump; each is sent through
+[app+0xcc] slot +0x48. The other six are not classified.
+
+**Confidence.** High for the bodies and the census rows as stated, and for
+the vtable words and the tick's call of slot +0x3c in the listings. Medium
+for the second route: the bodies of `L2.03328`, `L2.03354` and `L2.03360`
+and the scan of `L2.03328` were read by the review and are not in the
+evidence directory. Medium that no other path stamps: a call through a
+register to slot +0x48 of an object has no fixed target to scan, and four
+of the seven vtable starts (`L2.03347`, `L2.03348`, `L2.03349`, `L2.03350`)
+are inferred from the slot position, not read. Medium that the posted 0x401
+reaches `L2.03365`: the dispatcher between [app+0xcc] and the client
+handler is unread. What the evidence excludes is an earlier stamp by the
+refresh `L2.01068`; it does not exclude `L2.03328`.
+
+**Unknown.** Real time per client tick. The initial values of +0x54, +0x58,
++0xc8 and +0xcc of a client object, and so whether `L2.03328` stamps a
+fresh hero before the 32nd tick; whether a unit's creation or move calls
+the stamp outside the refresh. A save of the original at the first frame of
+a mission and a second save a few ticks later (R2-ENGINE-647) settle both.
+
+### R2-ENGINE-644
+
+Walk `L2.03329` stores (movsx word obj+0x10a >> (8 - s)) + (1 << (s - 1))
+at client +0x2504, the centre [20][20], after zeroing 0x1a44 bytes of the
+budget. s is client +0x3f50 and K = 1 << s is client +0x3f4c; the client
+constructor stores s = 7 at `L2.03378` and K at `L2.03379`, the only
+stores in raw DWORD scans of 0x3f50 and 0x3f4c. With s = 7 the seed is
+(sight >> 1) + 64.
+
+Of the 26 hits of the raw DWORD 0x10a scan (disp32 forms of +0x10a only),
+the word stores are: `L2.03380`
+stores 0 (base constructor); `L2.03381` copies it from the argument
+(`L2.03382`); `L2.03383` stores argument word +0xa4 (`R2.0075`, E8 callers
+`L2.03384`, `L2.03385`, `L2.03386` in the client pump, `L2.03387`,
+`L2.03388` and `L2.03389` in the map builder); `L2.03390` stores the next
+message word when message flags +0x14 have 0x40000; `L2.03391` stores the
+Buildings collection `L2.03202` lookup (key, 2) shifted left by 8, and
+`L2.03392` a lookup shifted left by 8; `L2.03393` and `L2.03394` are in
+unread functions.
+
+R2-ENGINE-290 gives sight word +0xa4 = trunc(((Mind + Reaction)/25 + 4) ·
+256): 1648 for the unmodified Start_MF template row 40/36/25/17
+(R2-ASSET-076; the delivered hero differs by its attribute choice and
+items, R2-SESSION-144) and 1617 for the saved heroes, 41/34/24/17 in 0000/0001 and 19/15/43/25 in the other seven EN
+saves (R2-SESSION-236), both with Mind + Reaction 58. The seeds are 888 and
+872; ScanRange 6 as 6 · 256 would give 832.
+
+**Confidence.** High for the walk's arithmetic, s and K. The list of +0x10a
+writers is the raw DWORD list: a block copy or a store through a computed
+address would not appear, and two writers (`L2.03393`, `L2.03394`) are in
+unread functions (narrowed by the review). Medium that the hero's client object gets +0x10a from argument +0xa4 or a
+message word equal to its sight word: the copy's argument and the message
+sender are unread, and item modifiers may change the word.
+
+### R2-ENGINE-645
+
+Walk `L2.03329` (197 instructions) with cell test `L2.03395` (78), bounds
+`L2.03396` and tables `L2.03397`:
+
+1. Origin ox = obj+0x38 - 20, oy = obj+0x3c - 20; h0 = movsx byte
+   plane[(obj+0x3c) · W + obj+0x38], plane = client map +0x10 (`L2.03398`),
+   W = client +0x84.
+2. For r = 1..19, for k = -r..r, the cells (20+k, 20-r), (20+k, 20+r),
+   (20-r, 20+k), (20+r, 20-k) are tested only when `L2.03396(ox+i, oy+j)`
+   accepts them: 7 <= x < W - 7 and 7 <= y < H - 7. After a ring in which
+   no tested cell stays positive, the walk ends.
+3. Cell (i, j): (dx, dy) = the byte pair at client +0xac0 [i·0x52 + j·2];
+   budget[i][j] = budget[i+dx][j+dy] - (cost[i][j] + movsx
+   plane[oy·W + ox + j·W + i] - h0); cost is the word at client +0x3228
+   [i·0x52 + j·2].
+4. Tables, for a, b = 0..20 and each quadrant: (dx, dy) points one step
+   back along x when b < a >> 1, along y when b > 2a, else diagonally;
+   cost = ftol(sqrt(a² + b²) · K / max(a, b)) through `L2.02707` and
+   `L2.02708`: 128 on the axes, 181 on the diagonal. The tail sets [21][20]
+   to (-1, 0) and [19][20] to (1, 0).
+
+A height above h0 costs its difference; one below gives budget back. The
+plane is signed bytes, one per fog cell, at the same index. The map builder
+`L2.01385` copies W x H bytes from ALM asset +0x14 to client map +0x10;
+the ALM reader `L2.02484` fills asset +0x14 in switch entry 2 of table
+`L2.02737` (13 entries) and +0x10 in entry 3, switching on the record
+header dword at [ebp-0x34] with the payload size at [ebp-0x38].
+
+**Confidence.** High for the arithmetic and the copy. Medium that the
+switch value is the record's typeId and so that the plane is ALM type 2:
+the header reader `L2.02735` is unread; the 20-byte header copy at
+[ebp-0x40] puts typeId at [ebp-0x34]. The three EN saves' 154 cells match
+type 2 heights, not type 3 (R2-ENGINE-647). Medium for truncation in
+`L2.02708` (unread); rounding gives the same figure at 11/41 for seeds
+888 and 872.
+
+### R2-ENGINE-646
+
+After the walk the stamp sets cx = obj+0x38 + slot+0x20()/2 and cy =
+obj+0x3c + slot+0x24()/2 (cdq, sub, sar 1: division toward zero). For i, j
+= 0..40 with budget[i][j] > 0 it ORs 0xc000 into the fog words idx, idx+1,
+idx+1+W and idx+W, idx = (cy - 20 + j) · W + (cx - 20 + i), with no bounds
+test. It then stores obj+8 at +0xc8 and obj+0xc at +0xcc.
+
+The walk runs from (+0x38, +0x3c) without the size term, so the figure
+lies on the walk centre for sizes 0 and 1 and one cell to +x and +y for
+sizes 2 and 3. Unit size slots `L2.03399` and `L2.03400` both return
+record +0xf0 of collection `L2.02969`, a square body; static slots
+`L2.03401`/`L2.03402` return record +0x10/+0x14 of `L2.03005`. The refresh
+clears 0x4000 only; 0x8000 stays set. The draw routines `L2.03403` and
+`L2.03404` AND each of the four words of an object's 2 x 2 block at
+(x >> 8, y >> 8) with 0xc000, OR the four results and draw the object only
+when that union equals 0xc000 (`cmp ecx, 0xc000`; `L2.03405..L2.03406`):
+one word with bit 0x8000 and another with bit 0x4000 pass. The unit
+routine also tests byte +0x184, +0x1b8 and the owner gate. The same union
+sets [obj+0x7c] at `L2.03407..L2.03408`. For a block the stamp wrote, the
+union and "all four words hold 0xc000" agree; they differ at the border of
+an area uncovered earlier (0x8000 only) next to a lit cell (narrowed by the
+review).
+
+**Confidence.** High for the writes, the centre arithmetic and the size
+slots. Medium that +0x38/+0x3c is the cell of the object's position: no
+writer of either was found (a disp8 store escapes the raw DWORD scan); the
+client pump stores +8/+0xc as cell << 8 + 0x80. Medium for the hero's
+size: record +0xf0 for its class was not read.
+
+### R2-ENGINE-647
+
+Derived by `fogdata` from R2-ENGINE-644..646 and `10.alm` (R2-ASSET-162)
+for hero cell 11/41 (the four EN saves, R2-SESSION-236) with a one-cell
+body, type 2 heights and truncating costs. The walk stops after ring 7.
+
+| Seed | Sight | Lit budget cells | Uncovered | Row-major runs | Rows |
+|---:|---:|---:|---:|---:|---:|
+| 888 | 1648 | 130 | 155 | 29 | 14 |
+| 872 | 1617 | 129 | 154 | 29 | 14 |
+| 832 | ScanRange 6 | 120 | 145 | 29 | 14 |
+
+Every seed, rounding and height source gives runs of 4 cells in -x (to
+x = 7, the walk's bound), 7 in +x, 6 in -y and 7 in +y from the hero cell;
+the figure spans x 7..18 and y 35..48. The three EN saves at 11/41 hold
+154 set cells in 29 runs of 6400 (R2-SESSION-244), the cells 0x8000 marks
+(R2-ENGINE-614); compared by count and runs, of 18 variants only seed 872
+with type 2 heights and seed 832 with no heights give that pair. The tick
+adds 1 before its test, so a counter at 0 makes the first refresh
+`L2.01068` the 32nd tick. That holds for the refresh only: the second
+route `L2.03328` (R2-ENGINE-643) can stamp a unit on any tick, and the
+first frame is Unknown. game9999, at 11/41 with 0 set cells, fits a save
+before the first stamp.
+
+**Confidence.** Medium: the hero's anchor and size (R2-ENGINE-646), its
+delivered seed (R2-ENGINE-644) and that its owner passes the gate
+(R2-ENGINE-648); whether the client constructor runs per mission is
+unread. Medium for the figure once stamped, 155 or 154 cells. Unknown for
+the time of the first stamp: the evidence excludes an earlier stamp by the
+refresh only (narrowed by the review).
+
+**Unknown.** The time of the first stamp, and whether `L2.03328` stamps
+before the 32nd tick (R2-ENGINE-643). A run of the original: a new hero
+left at the unmodified Start_MF template, mission 1, saved at once, again a
+few ticks later and again after 32 or more ticks without moving. If only
+the refresh stamps, the Fog data would hold 0 cells, then 155 cells in 29
+runs over x 7..18, y 35..48; a nonzero first save names the other route.
+
+### R2-ENGINE-648
+
+The stamp calls `L2.02954(key)` on client +0x9cc with key = [obj+0x14]+4;
+`L2.02954` passes this+0x38 to `L2.02956`, which calls `L2.03409`,
+returning [this+0x3c] + 2·key; the gate is that word & 8. RU `L2.03410` and
+`R2.0011` are equal after masking. The unit wrapper `L2.03327` adds byte
++0x184 below 3. In `10.alm` the 8 type 5 records hold u16 entries at
++0x2c..+0x4a with no bit 0x8 in either root (R2-ASSET-162).
+
+**Confidence.** High for the gate bodies. Unknown which owners pass: the
+client Player +0x3c words are not the type 5 entries unchanged, and their
+writer is unread. The names "Player" and "owner key" rest on the field
+use, not on a read constructor.
+
+**Unknown.** A run with an allied or neutral unit in view, recording
+whether its surroundings are uncovered.
+
+### R2-ENGINE-649
+
+Pairs equal after masking, instructions per root: walk 197, cell test 78,
+tables 286, K and s stores 12, bounds 25, plane getter 9, tick 258,
+refresh 53, owner gate 16, owner lookup 11 (EN `L2.03329`, `L2.03395`,
+`L2.03397`, `L2.03411`, `L2.03396`, `L2.03398`, `L2.01389`, `L2.01068`,
+`L2.02954`, `L2.02956`; RU `L2.03412`, `L2.03413`, `L2.03414`, `L2.03415`,
+`L2.03416`, `L2.03417`, `L2.01390`, `L2.03418`, `L2.03410`, `R2.0011`).
+The stamps (EN `L2.03326`, RU `L2.03419`) have 140 instructions each and
+differ only in instructions 9..20: EN tests the owner gate, then +0x10a;
+RU tests +0x10a, then the gate. Both return when either fails. RU
+`scenario.res` differs from EN; its `10.alm` is byte-identical
+(R2-ASSET-162).
+
+**Confidence.** High for the pairs read. The call census and the seed
+writers were read in EN only.

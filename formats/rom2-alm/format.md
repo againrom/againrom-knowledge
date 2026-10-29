@@ -53,6 +53,50 @@ The campaign type7 grammar is exactly consumed for all 46 maps per preserved
 root. Full-word operation values, compilation and the supported added arms are
 specified in [Campaign scripts](script.md). — R2-ENGINE-041
 
+<a id="byte-planes-and-the-client-fog"></a>
+
+## Byte planes and the client fog
+
+The client copies the type 2 plane, W×H signed bytes, as its height plane:
+one byte per tile cell, index `y*W+x`, the same index as the u16 fog words.
+That the switch arm which fills it is type 2 rests on an unread header reader
+(Medium). — R2-ENGINE-645
+
+Every 32nd client tick, when `[L2.00989]` is zero, the client clears fog
+bit 0x4000 in all W×H words and calls each client object's stamp slot (EN
+census; the RU bodies are equal and the RU callers of the stamp are
+unread). A unit whose cell word differs from its last stamped one is also
+stamped from its per-tick update, so a stamp can come before the 32nd tick
+(Medium; whether it does for the first frame is Unknown). The stamp slot
+runs the stamp for the static class and, through a wrapper, the unit
+class. The stamp walks rings 1..19 around the object's cell with a budget of
+`(sight >> 1) + 64` at the centre. Each
+cell's budget is its predecessor's (one step back along x, along y or
+diagonally) minus the step cost `trunc(128*sqrt(i²+j²)/max(i,j))` (128 on
+an axis, 181 on the diagonal) and minus the cell's type 2 height less the
+centre's. Cells with x or y below 7 or above W−8 or H−8 are skipped. A ring
+with no positive cell ends the walk. — R2-ENGINE-643, R2-ENGINE-644,
+R2-ENGINE-645
+
+For each cell whose budget stays positive the stamp ORs 0xc000 into the 2×2
+fog words at that cell and its +x, +y and +x+y neighbours. The figure is
+offset by `trunc(size/2)` cells from the walk centre, so it lies on the walk
+centre for one-cell bodies. An object is drawn only when the bitwise OR of
+the top two bits of the four words of its 2×2 block is 0xc000 (the unit
+routine also tests byte +0x184, +0x1b8 and the owner gate). —
+R2-ENGINE-646
+
+The stamp runs only for owners whose word in the client player table has
+the value bit 0x8. No type 5 diplomacy entry of the first mission map has that bit,
+so which owners pass is Unknown. — R2-ENGINE-648, R2-ASSET-162
+
+For the first mission map (`10.alm`, 80×80, identical in EN and RU) and a
+hero at 11/41 with sight 1648 (the unmodified Start_MF template), a stamp
+uncovers 155 cells over x 7..18 and y 35..48; sight 1617 gives 154
+(Medium). The refresh stamps no earlier than the 32nd tick; what the first
+frame holds is Unknown. — R2-ENGINE-647,
+R2-ASSET-162
+
 <a id="unit-record-type-6"></a>
 
 ## Unit record (type 6)
