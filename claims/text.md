@@ -2690,3 +2690,25 @@ claim. Linear decoding can miss alternate instruction streams and skipped
 bytes. An aliased text pointer, computed slot address, generic indexed
 accessor or another resource can evade this search. No second direct site
 was found; absence of every indirect or bitmap-rendered copy remains Unknown.
+
+## Pickup refusal text
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TEXT-137 | The pickup refusals are program text, the same bytes in EN and RU: `Sack not found at ` with the decimal column, a comma and the decimal row, or `Invalid pickup order - no sack there.`; no text table is read. | High / Medium | ✔ promoted (branch candidate) | [EXP-0632](../experiments/EXP-0632-sack-pickup/) |
+
+### TEXT-137
+
+- Order `0x21`'s refusal converts `cmd+0x0c` and `cmd+0x0a` with `R2208`
+  (`_itoa` radix 10, `L17221`) and joins `"Sack not found at "`
+  (`L04634`, 18 bytes), the column `cmd+0x0a`, `","` (`L17222`) and the
+  row `cmd+0x0c` through `L09565`, `L17223` and `R1776`. Session source
+  3 passes `"Invalid pickup order - no sack there."` (`L17224`, 37 bytes)
+  unchanged.
+- Both texts are literals in `rom.exe`; EN and RU share the image (SHA-256
+  `942e9b72...`), so a phase-3 Russian host would show the English text. Where
+  they go is `ITEM-250`.
+
+**Confidence.** High for the literals, the integer conversion and the pushed
+arguments. Medium that the three calls are MFC string concatenations: they
+are identified by their argument shape, not read.

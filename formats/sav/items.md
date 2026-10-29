@@ -23,6 +23,24 @@ numerically coincident price/Effect-list fields. — SAV-670, SAV-671, SAV-672,
 ITEM-CONT-004, ITEM-LOAD-005, ITEM-STACK-003 (its enchantment-separator clause
 is retracted; the running-load sum stands), SAV-CITYSTORE-516
 
+A sack pickup by order `0x21` sets the hero's insertion index to the unit's
+pack scroll base (Medium: 34 of 42 stores to the field are not tied to an
+object class, and "0 while the pack is not scrolled" is inferred from the
+constructor store and the scrolling steps, not read from a scrolled value),
+which is 0 while the pack is not scrolled. The insert routines do not restore
+it, so the saved `+1c` keeps that value until the equip arm (`L04609`) or
+another writer rewrites it. The privileged text command `#pickup all` calls
+the same pickup routine without storing the index, so each sack pours at the
+index the pack already holds. The pickup moves every item of the sack one unit
+at a time from its head: a unit merges into the first equal stackable stack,
+else goes before the element at the index, else to the tail. Non-merging items
+end in reverse sack order by the insert rule when the index is below the count
+at the start (Medium: no original run compared); otherwise the first ones
+append until the count passes the index. No capacity refusal was found on the
+insertion path (Medium: the load-dependent routine `R0451` and the callers'
+prologues were not read); the sack is destroyed.
+— ITEM-246, ITEM-248, ITEM-249, MENU-108
+
 ## Item Effect list
 
 Item's `+20` list is typed as Effect and admits Effect_DirectDamage by

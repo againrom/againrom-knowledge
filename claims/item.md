@@ -4398,3 +4398,241 @@ Materials table of parameters 0..3 against the material doubles at
 **Confidence.** High. The jump, the constant-zero branch and the reference
 counts are each one decoded fact; even a call through `R1470` reaches
 only the jump to the epilogue.
+
+## Sack pickup destination and refusal
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-246 | The client builds pickup order `0x21` only from a map click under the `pickup` cursor, with the hovered cell and, as `cmd+0x0e`, the low word of the selected unit's pack scroll base `+0xdc`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0632](../experiments/EXP-0632-sack-pickup/) |
+| ITEM-247 | Six of the seven calls of the session `0x22` builder push the held item's origin code as source; the seventh sits in a wrapper with no caller in these scans. The code is -1, 1, 2, 4 or shelf + 5 on the paths read, never 3. | High / Medium | ● active (branch candidate) | [EXP-0632](../experiments/EXP-0632-sack-pickup/) |
+| ITEM-248 | A pickup by order `0x21` sets the hero's insertion index to `cmd+0x0e` and leaves it set; each unit merges into the first equal stackable stack, else goes before the element at that index, else to the tail; no body on the path refuses. | High / Medium | ✔ promoted (branch candidate) | [EXP-0632](../experiments/EXP-0632-sack-pickup/) |
+| ITEM-249 | One pickup moves every item of the sack, one unit at a time from its head; a stack arrives whole, non-merging items end in reverse sack order when the index is below the count at the start, and the sack is destroyed. | High / Medium | ✔ promoted (branch candidate) | [EXP-0632](../experiments/EXP-0632-sack-pickup/) |
+| ITEM-250 | A refused order `0x21` starts no walk and sends nothing to the client; its text goes to the frame as message `0x471`, shown only when the frame's phase field is 3, so with phase 2 as the campaign (Medium) no line appears there. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0632](../experiments/EXP-0632-sack-pickup/) |
+
+### ITEM-246
+
+Population: EN `rom.exe` and RU `ROM.EXE`, one image (SHA-256 `942e9b72...`).
+
+- The `[reg+9]` opcode stores of `0x21` and `0x22` over `L08454..L06029`
+  are two of 51 immediate hits: `L17187` in `R2088` (order `0x21`)
+  and `L00720` in `R0238` (session `0x22`). The census sees
+  immediate stores only; it does not see a store of the opcode from a
+  register. A control scan in the confidence review report of EXP-0632 (the
+  report is its source; it is not in this evidence) found over the same range
+  57 `byte [reg+9]` stores, 8 of them from a register (`L17188`, `L17189`,
+  `L17190`, `L17191`, `L17192`, `L17193`, `L17194`, `L17195`). It
+  read five: three copy byte `+5` of a received record into `+9`, `L17191`
+  zeroes fields of another structure and `L17194` is a record copy
+  constructor; none is a builder with an opcode parameter. It did not read
+  `L17192`, `L17193` and `L17195` beyond their addresses.
+- `R2088(col, row)` fills the static record `L00621`: `+0x0a = col`,
+  `+0x0c = row`, `+0x12 = 0`. For each object of the view map `view+0x9b8`
+  (`AI-SELECT-065`) whose `+0x7c` is non-zero it stores the word `[obj+0xdc]`
+  at `+0x0e` (`L17196`..`L17197`) and appends the object's id. It then
+  enqueues (`R0217`) and calls `vt+0x7c` of the object `R2089` returns
+  (`L17198`), the order reply (`VIDEO-070`).
+- Its one `rel32` caller is `L17199` in the map-click handler
+  (`AI-CLICK-050`), on the arm where the cursor is the `pickup` handle
+  `[L01669]+4`; it passes the hovered cell `view+0x994`, `view+0x998`. The
+  builder's address occurs as no dword in `.text` or `.rdata`.
+- `+0xdc` is the pack scroll base: the grid bind `L09915` (slot `+0x94` of
+  six grid vtables) stores `member+0xc8` as the grid's list (`+0x84`) and
+  `member+0xdc` as its base pointer (`+0x90`); `R1272` clamps the base into
+  `0..count-cols*rows`; `SHOP-110` and `SHOP-111` read and step it. The
+  drawable constructor stores 0 at `L17200`.
+- Inference: `cmd+0x0e` is the index of the first pack cell the unit's strip
+  shows, 0 until the player scrolls that pack. The "0 until scrolled" part
+  comes from the constructor store (`L17200`) and the steps of `SHOP-111`;
+  no scrolled value was read. With several selected objects each overwrites
+  `+0x0e`, so the last in the map walk supplies it.
+
+**Confidence.** High for the builder, its single caller, the stored word and
+the bind and clamp routines: each is an instruction or a scan with the
+population named. Medium that a unit drawable's `+0xdc` holds only the scroll
+base: the `.text` displacement census has 42 register-based stores to `+0xdc`,
+8 of them classified (constructor, copy, view, actor modifier, map loader),
+and 34 were not tied to an object class.
+
+**Unknown.** A call through a computed pointer, or a command from a network
+peer, that builds order `0x21` elsewhere. Settle with an original run: a host
+session with a second client; perform each pack gesture and a map click and
+record the opcode, source and destination of every `0x21` and `0x22` command
+that reaches the dispatcher `R0061` (static alternative: enumerate the
+indirect calls whose target can be `R2088` or `R0238`). The walk order
+of `view+0x9b8` when several objects are selected. Settle with an original
+run: select two heroes with different pack scrolls, pick up a sack and read
+which scroll base the item used.
+
+### ITEM-247
+
+- `R0238(src, srcIndex, dst, dstIndex, qty)` writes them to `+0x0c`,
+  `+0x0e`, `+0x0d`, `+0x10`, `+0x12`. It has seven `rel32` callers and no dword
+  reference in `.text` or `.rdata`. Six (`L17201`, `L00211`, `L17202`,
+  `L17203`, `L17204`, `L17205`) push `session+0x3d4` as source. Five of
+  them also push `session+0x3d0` as source index; `L17205` pushes a stack
+  local as source index (`L17206` loads `[esp+0x18]`). `L17201` passes 3 as
+  the destination with the packed cell `(row<<8)|col`, a drop on the map. The
+  seventh, `L17207`, is inside `R0241` and takes its source from the
+  wrapper's parameter; `R0241` has no `rel32` caller and no dword reference
+  in `.text`, `.rdata` or the raw `.data` (the review report of this
+  experiment also found none for the two builders and `R0241` in `.data`).
+  "Live" in this card means "has a caller in these scans": a computed call of
+  the wrapper `R0241` is not excluded.
+- `session+0x3d4` has four stores: the setter `R0331` (its four callers
+  pass `session+0x3d4` itself or a grid's `vt+0xa8`), the clear to -1
+  (`L17208`), the grid pick (`L09864`, grid `vt+0xa8`) and the
+  equipment-slot pick (`L09866`, panel `vt+0x80` = `R1782`, which returns
+  1).
+- The six vtables whose slot `+0x94` is the bind `L09915` (`L17209`,
+  `L06494`, `L09925`, `L09867`, `L09923`, `L09938`) return -1, 2, -1,
+  `[[this+0x20ac]+0x132] + 5`, 2 and 4 from slot `+0xa8`.
+- So the server's source-3 arm (`ITEM-CMD-007`) and its refusal
+  `"Invalid pickup order - no sack there."` are not reached from these client
+  paths, and the client's pickup order is `0x21` (`ITEM-246`). The privileged
+  text command `#pickup all` (`MENU-108`) reaches the same transfer `R0448`
+  from `L17210` and was not read here.
+
+**Confidence.** High for the seven call sites, the source pushed by the six
+callers outside the wrapper and the four stores. Medium that the origin code is
+never 3: the grid classes were found by
+their bind slot, and a grid class with another bind, or a panel other than the
+equipment panel reaching `L09866`, is outside the population.
+
+**Unknown.** A session command built without `R0238`, for example by a
+network peer, and a computed call of the wrapper `R0241`. Settle with an
+original run: a host session with a second client; perform each pack gesture
+and a map click and record the opcode, source and destination of every `0x21`
+and `0x22` command that reaches the dispatcher `R0061` (static alternative:
+enumerate the indirect calls whose target can be `R0238` or `R0241`).
+Whether `#pickup all` is reachable from a campaign chat line. Settle by typing
+it in a campaign and in a host session.
+
+### ITEM-248
+
+- Order `0x21` stores the word `cmd+0x0e`, zero-extended, at
+  `[actor+0x7c]+0x1c` (`L17211`..`L17212`) before the walk
+  (`ITEM-PICK-016`). Session source 3 stores the sign-extended `cmd+0x10`
+  there instead (`L08615`..`L04608`).
+- The drain `R0450` adds each unit through `R0929`, which reads `+0x1c`
+  on every call and passes it to `R0930(index, item)`.
+- `R0930`: when the incoming item and an element with an equal code both
+  pass `vt+0x50`, the first such element in list order takes the count
+  (`ITEM-GRANTLINE-215`); the index is not used. Otherwise, when the index is
+  at least `GetCount` it appends (`L16157`); else it steps `GetNext` index
+  times from the head and calls `L16565`, which links the item before that
+  node (`L17213`..`L17214`). The item then sits at position `index`
+  counted from 0, and the elements from there on move one place back.
+- Neither `R0929` nor `R0930` stores `+0x1c`, and the pickup
+  `R0448` does not restore it, so later adds to that pack use the same
+  index until another writer changes it. The field is saved with the
+  container (`SAV-670`, `SAV-671`).
+- `#pickup all` (`MENU-108`) calls the same routine `R0448` from `L17210`
+  without storing the index, so each sack pours at the index the pack already
+  holds.
+- The pack is a list with no empty cells and no capacity refusal was found on
+  the path (`ITEM-CONT-004`, Medium): there is no first free slot and an
+  occupied slot shifts its element back. After the drain the pickup calls
+  `R0451` (`L17215`), which the confidence review of this experiment
+  reports as updating `actor+0x90` from the pack load; its body is not in this
+  evidence.
+
+**Confidence.** High for the insertion rule and the index stores: every branch
+named is an instruction in `R0930` or a list primitive read whole, and the
+index comes from the two stores above. Medium that nothing refuses and that no
+pack is full, as `ITEM-CONT-004` grades it. Bodies read: the order arm
+(`L04633`..`L17216`), the tick arm head (`L00009`..`L17217`),
+`R0448`, `R0929`, `R0930`, `R0450`, `R0095` and the list
+primitives; none tests a count or a load limit. Bodies not read: `R0451`,
+`R0449`, `L17218`, `R0059`, the split `vt+0x40`, the tick's state
+dispatch before `L00009`, `R0010` beyond the seven stores of
+`ITEM-PICK-016` and the dispatcher prologue (`AI-CMD-033`); a caller that
+tests the load before calling is the blind spot.
+
+**Unknown.** The effect of `R0451` on the pickup. Settle with an original
+run: pick up a sack with a heavy load into a pack already heavy, and record the
+pack after the pickup and the hero's speed and load display.
+
+### ITEM-249
+
+- `R0448` credits `sack+0x3c` when positive, stamps `+0x08 = 1` on every
+  item (`ITEM-PICK-009`), then `R0450(actor+0x7c, sack+0x40)` calls
+  `R0095(source, 0, 1)` until it returns 0: each call takes one unit of the
+  head element, splitting it through `vt+0x40` while its count is above 1 and
+  unlinking it at 1 (`ITEM-STACK-003`).
+- Each unit goes through `ITEM-248`'s rule. The first unit of a stackable
+  stack merges into an equal pack stack if one exists, else lands at the
+  index; the rest of that stack merge into the first equal stack in list
+  order, so the stack arrives whole.
+- Items that do not merge are each inserted at the same index. While the index
+  is below the count, each goes before the previous one, so they end in
+  reverse of their sack order, starting at the index. An index at or above the
+  count appends; the first item into an empty pack appends whatever the index
+  is, and with index 0 the next goes before it. With an index at or above the
+  count at the start, the first items append until the count passes the index
+  and the rest go before the item at the index. After order `0x21` the index
+  is the clamped scroll base (`ITEM-246`, Medium), below the count whenever the
+  pack is non-empty, so the reverse order holds there. After `#pickup all`
+  (`MENU-108`) the index is whatever the pack already holds, and a stale index
+  at or above the count gives the mixed order.
+- Nothing remains: the drain empties and deletes the sack's container, then
+  the pickup nulls `sack+0x40`, deletes the sack and projects with mask
+  `0xa08000` (`SAV-POSTLOAD-223`).
+
+**Confidence.** High for the take order, the split and the deletion. Medium
+for the reverse order as a play outcome: it follows from the insert rule for
+non-merging items with the index below the count, and no original run or SAV
+pair was compared.
+
+**Unknown.** The order of a sack's container as the player could know it,
+since a sack on the map shows no list. Settle with an original run: drop two
+distinct items in order into one sack cell, pick the sack up with the pack
+unscrolled and a non-empty pack, and read the pack order.
+
+### ITEM-250
+
+- Order `0x21` with no sack at the cell (`R0955` returns 0; a click on
+  a cell without static bit `0x20` is refused, `SAV-1097`) builds the
+  `TEXT-137` text, passes it to `R1347` and returns: no `R0010`, so the
+  refusal starts no walk, and no store into the pack. The dispatcher's exit `L08617` only restores the
+  frame and sends nothing.
+- `R1347` -> `R2275` copies the text and posts it as message `0x471` to
+  the main window `[L06446]` (stored once, `L09312`) through the import at
+  `L03535`. Bounded negative: the confidence review's scan of `.text` for
+  an immediate `0x471` found one, at `L17219` (in `w03`), and found no
+  `.rdata` or `.data` dword equal to `0x471`; no other path that draws a
+  refusal was found in that population, and a message sent with a computed id
+  is not excluded.
+- The frame's switch sends `0x471` (byte index `0x35`) to `L17220`, which
+  returns unless `frame+0x6bc == 3`. In phase 3 it posts the text grey
+  `L03668` for 30 000 ms on the message line (`MISSION-MSGPOST-058`). The
+  code tests only `== 3`. Phase 3 is the host console panel (`MENU-112`);
+  phase 2 as the campaign is a name from `SESS-PHASE-002` (Medium for the
+  names). The stores of 3 and of 2 were not read as the campaign and host
+  start flows. With those names, a campaign player sees no line (Medium).
+- The reply `vt+0x7c` (`VIDEO-070`) is played by the client builder after
+  enqueueing, before the server reads the order, so it is attempted for a
+  refused pickup too; `VIDEO-070` puts it behind a 3000 ms stamp shared with
+  every voice, so it can be refused.
+- The prologue that rebuilds the group for every order (`AI-CMD-033`) runs
+  before the arm; its effect on an activity already running when the pickup
+  is refused is Unknown, so a hero already walking or fighting may stop.
+- With the sack gone and no candidate in reach, the pickup ends without a
+  transfer and without text; with a candidate the actor attacks (`AI-645`).
+  The tick arm's no-sack branch (`L16207` `JE L17217`, then `L02936`; `w14`)
+  shows no
+  text. No capacity refusal was found on the path (`ITEM-248`). When
+  `[L00004]` is 0 the arm does nothing.
+
+**Confidence.** High for the refusal arm, the frame arm and its table entry,
+and the reply's place in the builder. Medium for the phase names, taken from
+`SESS-PHASE-002` and `MENU-112`, and for "no line in the campaign". Unknown
+for the running activity and the unreachable cell.
+
+**Unknown.** What the player sees when the sack's cell is unreachable: the
+walk's failure path was not read. What the order prologue's regrouping
+(`AI-CMD-033`) does to an activity already running when the pickup is refused.
+Settle with an original run: in a campaign mission, click with the `pickup`
+cursor on a sack whose cell is walled in, and on a cell that loses its sack
+while the hero walks, and record movement, message line and sound. For the
+regrouping, click `pickup` on an empty cell while the hero walks and while it
+fights, and record whether the activity continues.

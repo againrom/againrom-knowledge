@@ -128,6 +128,15 @@ mask predicate of TERR-PASS-051 stands; its domain naming was amended and its ce
 superseded.
 — MOVE-192, SAV-1098, TERR-STRUCT-069, TERR-PASS-051
 
+A click whose sack lookup fails (a cell with no sack, or one without static bit 0x20) sends
+nothing to the client and starts no walk. The refusal text reaches the message line only when
+the frame's phase field is 3, the host console panel (Medium); with phase 2 read as the
+campaign (Medium), a campaign player sees no line (Medium). Whether the refusal stops an
+activity already running is Unknown, and the unit's reply plays at the click unless the
+3000 ms voice stamp refuses it. The text is `Sack not found at ` with the decimal column, a
+comma and the decimal row, the same in EN and RU.
+— ITEM-250, TEXT-137, SAV-1097, MENU-112, SESS-PHASE-002
+
 ## Cell table
 
 ```text
