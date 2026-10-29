@@ -72,12 +72,51 @@ followed by one sub-object written through its own virtual slot and a `u32`
 identity key. The ROM1 cell rows do not appear. The key count is u16, or
 0xffff then u32, followed by four bytes per key. Under the selected
 constructor, the sub-object has the same escaped count followed by u16 key
-and raw 60 bytes per entry; the raw60 meanings remain Unknown.
-— R2-ENGINE-603
+and raw 60 bytes per entry. — R2-ENGINE-603
+
+A raw60 entry, at stored entry offsets (field names from read uses are
+Medium):
+
+| Bytes | Field |
+|---|---|
+| +0x00, +0x01 | plane bytes copied from the cell at create and written back by refresh |
+| +0x02 | layer count |
+| +0x03 | no access found |
+| +0x04, +0x08 | occupant of kind 1..2, occupant of kind 3 |
+| +0x0c | building |
+| +0x10 | object |
+| +0x14..+0x2b | six effect-layer pointers |
+| +0x2c, +0x30 | footprint occupants, kind other than 3 and kind 3 |
+| +0x34..+0x39 | cell event: +0x34 kind; +0x35..+0x39 arguments passed to `L2.03574` / `L2.03575`; for kind 0x17, +0x38 and +0x39 are read as a destination cell |
+| +0x3a | the entry's own cell key, u16 |
+
+In the five EN mission-10 saves every +0x3a equals the entry key, bytes
++0x34..+0x39 are zero, and every nonzero DWORD at +0x04, +0x08, +0x0c, +0x2c
+and +0x30 is a saved self key of the same save. — R2-SESSION-266
+
+The footprint pass keeps +0x2c and +0x30; a nonzero event kind acts when an
+occupant is placed on the cell (kind 0x17 stores the target pair into the
+unit's command word) or arrives there; refresh reads +0x3a as the cell to
+write back. — R2-ENGINE-673
 
 Session is 4,000, 1,000, 48, 400 and 4,908 raw bytes, then `u8`, `u8`, `u32` and
 three `u32`: 10,374 bytes against ROM1's 4,374. Only the first and fifth
 widths differ from ROM1. — R2-SESSION-019
+
+The first 4,000 bytes are 1,000 DWORD registers, register n at bytes
+4n..4n+3. Session init sets register 901 (bytes 3604..3607) to 1 and
+register 999 (bytes 3996..3999) to 0; one routine adds 1 to 999 before it
+runs the triggers. No other reader of either was found in the scanned code
+and in the 209 + 48 + 197 map operands of check 19 and instants 3 and 8; the
+six register compares of the trigger runner `L2.00517` were not censused.
+The five EN
+mission-10 saves hold 901 = 1 and 999 = 1, 1, 17, 141 and 0.
+— R2-SESSION-265
+
+On LOAD the terrain post-load pass replaces each nonzero pointer DWORD by
+its saved-key lookup and keeps the saved number on a miss; bytes
++0x00..+0x03 and +0x34..+0x3b, the session block, the Player raw blocks and
+the Building base word +0x0c pass without a value test. — R2-ENGINE-676
 
 ## Player body
 
@@ -86,6 +125,20 @@ with different runtime offsets and the same XOR key on the two obfuscated
 fields. After it, ROM2 writes 2,560 raw bytes, then the group list, then 36 raw
 bytes. ROM1 has the group list, 32 raw bytes and a Diary; ROM2 has no Diary.
 — R2-SESSION-020
+
+The 2,560 raw bytes are Player +0x44; the only reader found among the seven
+EN `push 0xa00` sites passes them to a 0xba message builder. They are zero
+in the five EN mission-10 saves except one byte of Player 0 in game0006. A
+census of loaded +0x1c0 pointers in the terrain routines hits 27 offsets
+read (heuristic; the base is not shown to be a Unit); LOAD remaps the
+DWORD +0x7c of that block by saved key.
+— R2-ENGINE-675
+
+Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
+byte +0x0d and no constructor store to its word +0x0c was found in the read
+EN bodies (terrain module listing, serializers and constructor chain);
+seven of 16 structures hold a nonzero high byte in four of the
+saves. — R2-ENGINE-674
 
 The body does not write the cheat flag (Player +0xa78); the constructor
 sets it to 0. That a loaded Player therefore starts with cheats locked is

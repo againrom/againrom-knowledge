@@ -13318,7 +13318,7 @@ allies, neutral units and buildings.
 |---|---|---|---|---|
 | R2-ENGINE-601 | The selected EN ROM2 0x419 LOAD route decodes the document before reopening its physical tail; CurrentState/InBattle selects mission setup or the town continuation; first-frame delivery remains Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-ENGINE-602 | Selected EN/RU ROM2 book serializers store DWORD+0x18, array size n and references for slots 1..n-1; each new Spell payload is ID/range/defensive bytes, a cost word and saved self DWORD: nine bytes. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
-| R2-ENGINE-603 | Selected ROM2 world programmes frame Building78, Pointer82, terrain escaped-count DWORD keys and escaped-count u16/raw60 entries; five mission documents fit these extents with empty Sack/extra lists. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-ENGINE-603 | Selected ROM2 world programmes frame Building78, Pointer82, terrain escaped-count DWORD keys and escaped-count u16/raw60 entries; five mission documents fit these extents with empty Sack/extra lists. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-ENGINE-604 | Selected RU ROM2 base LOAD copies12 position bytes and registers saved addresses; the read key-map helpers insert and resolve exact DWORD keys, distinct from archive object indices. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 
 ### R2-ENGINE-601
@@ -13411,6 +13411,9 @@ Unknown for raw60 semantics, nonempty Sack/extra acceptance and live effects.
 **Unknown.** A nonempty identified Sack/extra save and a cold LOAD would settle
 those unexercised kinds. Layer-entry and effect/target observations would
 settle semantic and continuation questions; no image-wide absence is claimed.
+
+**Amended.** R2-SESSION-266 and R2-ENGINE-673 narrow the raw60 Unknown:
+they name the entry fields and their read uses.
 
 ### R2-ENGINE-604
 
@@ -15424,3 +15427,186 @@ was added; reused save values are EN-only.
 **Unknown.** RU behavior of all other new EN-only bodies, complete
 rendering, timing and data parity. Acquire their RU counterparts or
 repeat the first-frame/watch runs with matching RU mission state.
+
+## Unnamed mission save payloads
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-673 | ROM2 terrain +0x2c/+0x30 hold footprint occupants kept by L2.03569, cell events at +0x34 act in placement L2.03570 and arrival L2.03571, and refresh L2.03572 reads the +0x3a key. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-ENGINE-674 | ROM2 Pointer +0x6c is 24 in five EN saves, and the read EN bodies hold no reader of Building base byte +0x0d and no constructor store to word +0x0c. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-ENGINE-675 | In EN ROM2 the one found reader of Player +0x44 is a 0xba message builder at L2.03573, and a census of loaded +0x1c0 pointers in the terrain routines hits 27 offsets read (heuristic; the base is not shown to be a Unit). | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-ENGINE-676 | ROM2 LOAD keeps a terrain or movement key that misses the saved-object lookup and passes session registers, terrain plane and event bytes, Player raw blocks and Building +0x0c without a value test. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-ENGINE-677 | 31 ROM2 EN/RU save-payload routine and listing pairs are equal after masking operands >=0x400000. | High | ● active (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+
+### R2-ENGINE-673
+
+EN addresses; RU is EN + 0x9ff0 for the 23 terrain routines of R2-ENGINE-677.
+`L2.03574`, `L2.03575`, `L2.03576`, `L2.03577`, `L2.03578` and `L2.03579`
+were not read on RU, and the session routines have a different offset.
+The record layout is R2-SESSION-266.
+
+- +0x2c (occupant kind from `L2.03577` other than 3) and +0x30 (kind 3):
+  `L2.03580` sets the slot when empty and refuses otherwise; `L2.03581`
+  clears it. The footprint pass `L2.03569` (13 callers in `L2.03582..L2.03583`)
+  marks a (size+2)-square grid around an object and calls `L2.03584` for
+  grid values 2 and 3, which sets the slot when empty or already that
+  object, and the routine at `L2.03585` for value 1, which clears the slot
+  when it holds that object (body read from `L2.03586`; its prologue lies
+  inside a jump table). Getters `L2.03587` and `L2.03588` return 0 unless
+  plane-one bit 0x20 is set. Refresh `L2.03572` tests both for nonzero.
+- +0x34..+0x39: writer `L2.03589(key, event)` copies six bytes through
+  `L2.03590`; it refuses when plane-two bit 0 is set and creates a missing
+  record. Placement `L2.03570`, for occupant kinds 1 and 2: +0x34 = 0 is no
+  event; 0x17 stores `(+0x39 << 8) + +0x38` into the unit's `[+0x1c4]` word
+  +0xb0; another kind tests `[[L2.00805] + 0xf8 + 4·kind]` with
+  `L2.03576(unit)` and calls `L2.03574(+0x36, +0x37, unit, +0x34, +0x35)` or
+  `L2.03575(+0x36, +0x37, +0x38, +0x39, +0x34, +0x35)` on `[[L2.00805]+0x7c]`.
+  Arrival `L2.03571` (callers `L2.03591`, `L2.03592`) calls
+  `L2.03593(unit, +0x38, +0x39)` for kind 0x17.
+- +0x3a..+0x3b: create `L2.03594` stores the key (`L2.03595`); refresh
+  `L2.03572` reads it (`L2.03596`) as the cell for its plane writes.
+- Other fields: +0x00/+0x01 copied from the planes by `L2.03594` and back by
+  `L2.03572`; +0x02 written by `L2.03597`, `L2.03598`, read by `L2.03599`;
+  +0x04/+0x08 set by `L2.03570`; +0x0c read by `L2.03572` with building
+  +0x10, +0x60 and +0x64; +0x03 has no access found.
+
+**Confidence.** High for the listed stores, tests and calls (listing
+`en-terrain-lin-L2.03582`). Medium for field names drawn from use, and that
+`L2.03593` moves the unit to (+0x38, +0x39): `L2.03600`, `L2.03601`,
+`L2.03602` and `L2.00314` were not read. Medium that no other routine reads
+these fields: users were found by raw-DWORD scans of `0x54029..0x54068` and
+`0x54081..0x54088` and the 40 lookup and 26 set call sites, all in
+`L2.03603..L2.03604` but one set call at `L2.03605`.
+
+**Unknown.** The callers of `L2.03589` and kinds other than 0x17. Load
+game0001 with a write watch on terrain `+0x54060..+0x54065` and record each
+writer and the six bytes until mission end.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 2.
+
+### R2-ENGINE-674
+
+Pointer +0x6c is 24 in game0001, 0004, 0005, 0006 and 9999. Its readers
+are those of R2-ENGINE-517 and R2-ENGINE-518; no further one was read.
+
+Base word +0x0c is stored by `L2.03606` and loaded by `L2.03607`
+(`L2.03608`) in the EN base serializer `L2.03196`, with no test. The EN
+constructor chain stores no +0x0c: Building `L2.02575` stores +0x40, +0x3c
+and +0x0e = 0; base `L2.03609` stores +0x14 and +0x10; `L2.03610` stores
++0x18, +0x1c and +4; Building init `L2.03611` stores +0x0e = +0x40 and
++0x3c.
+
+The 16 structures (15 Buildings and the Pointer) hold, in game0004, 0005,
+0006 and 9999, base words 0, 0, 0x6568, 0, 1, 0x2049, 0x2073, 0xab20,
+0x7267, 0, 0, 0, 0, 0, 0x7267, 0xab10; seven have a nonzero high byte. In
+game0001 they hold 0xc3, 1, 0, 0, 0, 0xd4, 0xd4, 0, 0xa700, 0xe7f0, 0xc0,
+0xcf, 0, 0, 0, 0xcd; two have a nonzero high byte. Unit and Item base words
++0x0c in game0001 and game0006 are below 0x100.
+
+No reader of byte +0x0d or word +0x0c of a Building was found in the read
+bodies: the terrain module listing, the base and Building serializers, the
+constructor chain and the arm of R2-ENGINE-518. No displacement scan was
+possible for +0x0c.
+
+**Confidence.** High for the values and the transfer. Medium that the
+constructor chain leaves +0x0c unwritten: `L2.03612`, `L2.03613`,
+`L2.03614` and `L2.03615` were not read. That the Building values are
+leftover allocation bytes is an unestablished inference (0x6568 and 0x7267
+are ASCII letter pairs). Unknown whether anything reads the high byte.
+
+**Unknown.** Start mission 10 fresh and load game0001, each with a read and
+write watch on Building 0's word +0x0c, and record every access for one
+minute.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 3.
+
+### R2-ENGINE-675
+
+EN Player serializer `R2.0084` (vtable `L2.03616` slot 2) transfers raw 8
+at +0x10 and raw 2,560 at +0x44 (`L2.03617`, `L2.03618`) without a test,
+then the group list; on LOAD only it sets each group's +0x14 to the Player.
+
+Every EN `push 0xa00` site (7, scan `en-scan-pusha00`): `L2.03619` clears
++0x44 of a newly built object; `L2.03620` copies 2,560 bytes into +0x44 of
+its second argument beside +0x3c and +0xa48..+0xa58 stores; `L2.03573`
+passes argument +0x44 and 0xa00 to `L2.03621` while filling a buffer whose
+byte +9 is 0xba; `L2.03622` passes a local buffer; `L2.03623` clears another
+object's +0x3f70; `L2.03617` and `L2.03618` are the serializer.
+
+The Unit +0x1c0 block: `L2.03451` replaces DWORD +0x7c by its saved-key
+lookup on a hit. A field-use census of the terrain listings through a
+loaded +0x1c0 pointer (heuristic; the base is not shown to be a Unit) finds
+116 reads and 93 writes at 42 offsets in EN;
+the offsets read are +0x00..+0x02, +0x04..+0x06, +0x08..+0x0b, +0x72,
++0x74, +0x76, +0x78, +0x7c, +0x80, +0x8a, +0x8c, +0x9c, +0x9d, +0xa0, +0xa4,
++0xaa, +0xac, +0xae, +0xb0 and +0xb1. Through +0x1c4 it finds byte +0x08
+read and written (two writes, `L2.03624` and `L2.03625`), words +0x16 and
++0xb0 written.
+
+Saved values: Player +0x44 is zero in all 40 Player bodies but Player 0 of
+game0006 (one nonzero byte); Player 0's raw 8 holds two nonzero DWORDs in
+each save, Players 1..7 zero; the preference block (R2-SESSION-150) is
+nonzero only at +0x1f and +0x20.
+
+**Confidence.** High for the serializer, the census hits and their windows,
+and the values. Medium that `L2.03573` is the one reader of Player +0x44
+(an indexed read or a register length escapes the census), that its object
+is a Player, and that it belongs to R2-ENGINE-300's `L2.01061`. Medium for
+the +0x1c0 offsets: the census follows a pointer five instructions, covers
+only the terrain listings and does not identify the base as a Unit.
+
+**Unknown.** Readers of Player +0x10 and of Unit +0xa6, +0xbe and +0x114;
+the first reads after LOAD. Load game0006 and record the first reads of
+Player 0 +0x10..+0x17, +0x44..+0xa43 and the hero's +0x1c0 block for one
+minute without input.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 4.
+
+### R2-ENGINE-676
+
+EN instructions; RU equal for the paired bodies of R2-ENGINE-677 only.
+
+- Session block: direction test `L2.01537` at `L2.03626`; no value test.
+  It is read only when the session global is null (R2-ENGINE-616) and only
+  with the world half (R2-ENGINE-664).
+- Terrain post-load `L2.03178` passes each entry to `L2.03627` and stores
+  it back. For each nonzero +0x04, +0x08, +0x0c, +0x10, +0x2c, +0x30 and
+  +0x14+4i it looks the number up in `[L2.00805]+0xdc` (`L2.03187`) and
+  replaces it only on a hit; the `je` after each lookup (`L2.03628`,
+  `L2.03629`, `L2.03630`, `L2.03631`, `L2.03632`, `L2.03633`, `L2.03634`)
+  keeps the saved number on a miss. Bytes +0x00..+0x03 and +0x34..+0x3b
+  pass unchanged.
+- Footprint getters return 0 when plane-one bit 0x20 is clear (`L2.03635`,
+  `L2.03636`).
+- Movement block: `L2.03451` tests +0x7c (`L2.03637`) and keeps it on a
+  miss (`L2.03638`).
+- Player raw blocks (`L2.03639` direction test) and Building +0x0c pass
+  unchanged; Pointer +0x6c acts only above 0 (R2-ENGINE-518).
+
+**Confidence.** High for the listed tests. Medium for completeness:
+archive-reader refusal, exceptions, allocation failure and `L2.03187`
+were not read.
+
+**Unknown.** The original's behaviour after a missed key. Change one
+terrain +0x0c in a copy of game0001 to a number that is no saved key, load
+it and record whether the entry keeps the number and what reads it.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 5.
+
+### R2-ENGINE-677
+
+Eight listing pairs: session serializer (132 instructions), `L2.03284`
+(27), session init (171), the script arm window `L2.03640` / `L2.03641`
+(1,042), the preference transfer `L2.01536` / `R2.0175` (22), Player
+serializer `R2.0084` / `R2.0085` (309), Building constructor `L2.02575` /
+`L2.02550` (39) and base serializer `L2.03196` / `L2.01164` (123). 23
+terrain routines at RU = EN + 0x9ff0, 9 to 261 instructions each, from
+entry to first `ret`. All have zero differences after operands >= 0x400000
+are masked. The `push 0xa00` sites, `L2.03642`, `L2.03611`, `L2.03609` and
+`L2.03610` were read in EN only. The operand census of R2-SESSION-265 is
+equal in both roots.
+
+**Confidence.** High for textual equality under the mask; it hides large
+constants and does not compare callees.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 6.

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4397. Observation: 164. Static analysis: 3663. Mixed: 570.
+Claims labelled: 4404. Observation: 164. Static analysis: 3670. Mixed: 570.
 
 ## Ledger ai
 
@@ -2537,7 +2537,7 @@ Claims labelled: 4397. Observation: 164. Static analysis: 3663. Mixed: 570.
 | R2-ENGINE-593 | observation | ● active |
 | R2-ENGINE-601 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-602 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-603 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-603 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-604 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-605 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-606 | static analysis | ✔ promoted (branch candidate) |
@@ -2592,6 +2592,11 @@ Claims labelled: 4397. Observation: 164. Static analysis: 3663. Mixed: 570.
 | R2-ENGINE-670 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-671 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-672 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-673 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-674 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-675 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-676 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-677 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 
@@ -2722,6 +2727,8 @@ Claims labelled: 4397. Observation: 164. Static analysis: 3663. Mixed: 570.
 | R2-SESSION-255 | mixed | ● active (branch candidate) |
 | R2-SESSION-259 | mixed | ✔ promoted (branch candidate) |
 | R2-SESSION-260 | mixed | ✔ promoted (branch candidate) |
+| R2-SESSION-265 | static analysis | ✔ promoted (branch candidate) |
+| R2-SESSION-266 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger sav
 

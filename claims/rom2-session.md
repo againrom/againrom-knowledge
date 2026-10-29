@@ -3489,3 +3489,91 @@ not an independent native acceptance witness.
 Cold LOAD game0006 with the effect/list/HP watches in R2-ENGINE-660.
 
 **Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+## Unnamed mission save payloads
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-265 | ROM2 session init sets result register 901 to 1 and 999 to 0, L2.03284 adds 1 to 999, five EN saves hold 901 = 1 and 999 = 0..141; a check 19 and instant 3 and 8 operand census found no other reader, the six L2.00517 compares not censused. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-SESSION-266 | A ROM2 terrain raw60 entry holds two plane bytes, a layer count, occupant, building, object, six effect and two footprint pointers, a six-byte cell event at +0x34 and its own cell key at +0x3a. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+
+### R2-SESSION-265
+
+The 4,000-byte session block at `+0xc784` holds 1,000 signed DWORD
+registers; register n is block bytes 4n..4n+3, so bytes 3604..3607 are
+register 901 (`+0xd598`) and 3996..3999 register 999 (`+0xd720`).
+
+- Session init (EN `L2.03643`, RU `L2.03644`) clears the block and the
+  unsaved 4,000 bytes at `+0xd724`, then stores registers 902 and 900 as 0,
+  901 as 1 (EN `L2.03645`, RU `L2.03646`) and 999 as 0 (EN `L2.03647`).
+- EN `L2.03284` (RU `L2.03648`) adds 1 to register 999 (`L2.03649`,
+  `L2.03650`), then calls `L2.03283`, the trigger runner `L2.00517` and
+  `L2.03651`. Instant 1 adds 1 to register 902.
+- The session serializer transfers the whole block in both directions
+  (R2-SESSION-019).
+- Check 19 reads and instants 3 and 8 write register `[IR+8]`. In each
+  root's 46 maps that operand is a scalar 0 or 70..83 in all 209 check 19,
+  48 instant 3 and 197 instant 8 nodes. The census covers these three
+  node kinds only.
+- The trigger runner `L2.00517` reads registers by a computed index in
+  six compare branches (`L2.03652..L2.03653`). The operand census does
+  not cover these six compares.
+- `L2.03642` stores REG "Variables" values into register `[index]`
+  (`L2.03654`); its only caller lies in a body from `L2.03655` that has no
+  direct branch or raw-DWORD reference in EN.
+- Raw-DWORD scans of displacements `0xd591..0xd723` find nine session
+  accesses in each root: the five init stores and the increments of 999 and
+  902. EN immediate scans of 0x384..0x386 and 0x3e7 find no index use.
+
+Saved values (game0001, 0004, 0005, 0006, 9999, all mission 10): register
+901 is 1 in all five; 999 is 1, 1, 17, 141, 0; 900 and 902 are 0. game0001
+and game0004 hold equal values in registers 0..20, 70..83, 900..902 and 999.
+game0006 differs from game0004 in registers 9, 10, 11, 13, 14, 17 and 999.
+
+**Confidence.** High for the stores, the increment, the operand census and
+the saved values, in both roots for the code. Medium that nothing else reads
+901 or 999: the scans find direct displacements and literal indices, not a
+computed index, a bulk copy or a REG file loaded by `L2.03655`. The
+operand census does not exclude a compiled condition whose operand is 901
+or 999 and that the six compares of `L2.00517` read.
+
+**Unknown.** The callers of `L2.03284` and their cadence; any reader of 901
+or 999 outside the code read, including the six compares of `L2.00517`.
+Load game9999 with a read watch on `+0xd598` and a write watch on `+0xd720`
+and record callers and values for five minutes and through mission end.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 1.
+
+### R2-SESSION-266
+
+The terrain sub-object at terrain `+0x54084` maps a u16 cell key
+`(y << 8) + x` to 60 bytes (R2-ENGINE-603):
+
+| Bytes | Field |
+|---|---|
+| +0x00, +0x01 | plane bytes copied from the cell at create and written back by refresh |
+| +0x02 | layer count |
+| +0x03 | no access found |
+| +0x04, +0x08 | occupant of kind 1..2, occupant of kind 3 |
+| +0x0c | building |
+| +0x10 | object |
+| +0x14..+0x2b | six effect-layer pointers |
+| +0x2c, +0x30 | footprint occupants, kind other than 3 and kind 3 |
+| +0x34..+0x39 | cell event: +0x34 kind; +0x35..+0x39 arguments passed to `L2.03574` / `L2.03575`; for kind 0x17, +0x38 and +0x39 are read as a destination cell |
+| +0x3a | the entry's own cell key, u16 |
+
+Saved values: 125 entries in game0001, 0004, 0005 and 9999, 126 in game0006.
+In every entry +0x3a equals the key and the key is in the saved cell list.
+Bytes +0x02, +0x03, +0x34..+0x39 and DWORDs +0x10..+0x28 are zero in every
+entry. Every nonzero DWORD at +0x04, +0x08, +0x0c, +0x2c and +0x30 equals a
+saved self key of the same save.
+
+**Confidence.** High for the offsets and widths the read routines use and
+for the saved values. Medium for the field names, which come from the uses
+R2-ENGINE-673 lists.
+
+**Unknown.** Event kinds other than 0x17; no save holds an event. Load
+game0001 with a write watch on terrain `+0x54060..+0x54065` and record each
+writer and the six bytes until mission end.
+
+**Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 2.
