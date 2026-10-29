@@ -472,7 +472,7 @@ Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evid
 | R2-ENGINE-057 | ROM2 instant 39 clears a group's forced-activity DWORD; actor-proximity marking and ordinary group/unit ticks determine its later activity. | High / Medium | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-058 | In both verified ROM2 executors, declared instant 37 takes Bad instant default, optionally sends diagnostic packet 0x91 and returns normally; no campaign map contains it. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-059 | Both ROM2 trigger runners compare map result registers with signed comparisons, short-circuit their conjunction, then set a pass latch and run actions in stored order. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-060 | ROM2 result actions increment the session win counter or store a failure reason; the verified RU result tick converts those fields into0xb5/0xb4 packets. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-060 | ROM2 result actions increment the session win counter or store a failure reason; the verified RU result tick converts those fields into0xb5/0xb4 packets. | High | ● active (amended, partially retracted) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 
 ### R2-ENGINE-041
 
@@ -649,12 +649,13 @@ The RU result consumer L2.00127 requires player byte+0x41 nonzero and DWORD+0x2c
 **Unknown.** EN's ordinary mission-result tick was not independently followed. Full victory-window acknowledgement scheduling into LeaveLocation and other failure sources remain frontier;048 supplies the independently established DLL continuation only.
 
 **Amended.** R2-ENGINE-532 names the writers of player byte +0x41: the owner constructor stores 0, the join stores 1, the victory transition stores 0, two constructors of the class with vtable `L2.02693` store 1.
+The mission-10 "failure reason 19" clause is retracted (`claims/retracted.md`): mission 10's two instant-5 nodes store 0 and 5 in both roots (R2-ENGINE-630). R2-ENGINE-624 follows the EN result tick, equal to RU after masking; R2-ENGINE-623 censuses the other users of +0xbe14 and R2-ENGINE-625 the death route that sends 0xb4 without it.
 
 ## Mission text consumers
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-049 | Both ROM2 campaign loaders select mission text by scenario location; substring spans feed briefing, failure and contiguous subobjective caches, and mission 10 has no subobjective section. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
+| R2-ENGINE-049 | Both ROM2 campaign loaders select mission text by scenario location; substring spans feed briefing, failure and contiguous subobjective caches, and mission 10 has no subobjective section. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 | R2-ENGINE-050 | In both ROM2 clients, UI message `0x433` selects `event%d` for ordinary IDs or defers the ID under UI bit eight; IDs 250, 253, 254 and 255 take separate branches. | Medium | ✔ promoted (branch candidate, amended) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 | R2-ENGINE-051 | Both ROM2 dialogue consumers select ordered part/header alternatives, present text and optional portrait/speech, and advance on `0x470`; mission 10 selects no speech name through this page route. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
 | R2-ENGINE-052 | Both ROM2 mission loaders call `CharToOemA`; font1 uses selector-gated byte remapping before glyph/advance indexing, with Windows conversion results and glyph labels still Unknown. | Medium | ✔ promoted (branch candidate) | [EXP-2009](../experiments/EXP-2009-rom2-text/) |
@@ -699,6 +700,10 @@ No whole-image reader absence or malformed-file acceptance is asserted.
 **Unknown.** Initial-game dispatch to `0x434`, failure-reason producers,
 malformed delimiter behavior, and other text consumers. The negative
 subobjective result covers the two installed mission 10 files only.
+
+**Amended.** R2-ENGINE-624, R2-ENGINE-625 and R2-ENGINE-627 name the
+failure-reason producers. R2-ENGINE-629 adds that the `reason - 2` index
+has no bound and R2-ENGINE-630 gives the failure cache of all 46 missions.
 
 ### R2-ENGINE-050
 
@@ -948,7 +953,7 @@ or complete constructor census was performed.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-073 | The selected EN/RU fresh campaign starts with DLL type 2/ID 1; packed inn TALK unlocks type 1/ID 10, whose record ID supplies the first mission path. | Medium | ● active (partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/), [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
-| R2-ENGINE-074 | In selected EN/RU campaign result paths, victory acknowledgement calls DLL LeaveLocation; the first failure report instead offers menu or save-slot selection. | Medium | ● active (amended) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
+| R2-ENGINE-074 | In selected EN/RU campaign result paths, victory acknowledgement calls DLL LeaveLocation; the first failure report instead offers menu or save-slot selection. | Medium | ● active (amended, partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-075 | The enabled EN/RU movie dispatcher indexes cutpaths by DLL output; output 1 selects teleport files 01..99, skips missing files and stops on player return zero. | High | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-076 | Selected EN/RU additional-unit entry filters two bank ranges and uses stage-sensitive native templates; those paths do not establish the complete entering party. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-077 | The selected EN/RU movie-open path reads Common, Fading and Panaraming keys from a same-stem inline REG before opening the SMK through its native import. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
@@ -980,6 +985,7 @@ The first failure report reads cached mission text at reason minus two and const
 **Unknown.** Runtime presentation/timing, later loading from the failure selector, other failure selectors/sources and the complete dispatch population. Initial automatic briefing scheduling remains Unknown.
 
 **Amended.** R2-ENGINE-532 names the writers of player byte +0x41 that the result tick requires: the owner constructor stores 0, the join stores 1, the victory transition stores 0, two constructors of the class with vtable `L2.02693` store 1.
+The clause repeating R2-ENGINE-060's "mission-10 failure reason 19" is retracted (`claims/retracted.md`); mission 10 stores 0 and 5 (R2-ENGINE-630). The failure sources are R2-ENGINE-624, R2-ENGINE-625 and R2-ENGINE-627; the text a reason selects is R2-ENGINE-629.
 
 ### R2-ENGINE-075
 
@@ -13981,3 +13987,281 @@ and where 8/29 places the camera: the hero is at 11/41 or 21/41
 **Unknown.** LOAD each of the five saves and record the first frame: the
 view origin, the selected portrait, the open panels, and two shots 5 s
 apart without input to see whether the world moves.
+
+## Mission failure reasons and the failure text
+
+Static reads of the owned EN and RU `allods2.exe` (raw x86 listings decoded
+with Capstone from the plan of one generation reproduced byte for byte) and
+measurements of both roots' `scenario.res` and `main.res`. EN addresses
+unless RU is named. "Session" is the object at `[L2.01066]` that holds
++0xbe14 (R2-ENGINE-060). "Owner" is the player object whose byte +0x40 the
+result tick and the death routine write. A reason is the value sent with
+packet 0xb4. "Equal after masking" means equal once every hex number of five
+or more digits is masked.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-623 | ROM2 Session +0xbe14 has 11 raw-DWORD users per root: init stores 0, instant 5 stores scalar 0, check 18 and a detector with no EN reference (R2-ENGINE-628) add 1, a serializer passes it on, the result tick reads it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-624 | ROM2 result tick: owner +0x38 null or its actor's byte +0x13c set sends reason 2; else Session +0xbe14 > 0 is sent while owner +0x40 < 2; else +0xbe0c sends B5; owner byte +0x42 adds a reason-0 send. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-625 | ROM2 unit death of a class 0x21..0x3f actor with [L2.00805] +0x74 and owner +0x2c zero stores owner +0x40 = identity +0x14c - 19 and sends it as the reason: identity 21 gives 2, 22..30 give 3..11. | High / Medium | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-626 | Raw push 0xb4 (68 b4 00 00 00) has 13 EN and 15 RU sites; the packet sender follows only the three result-tick sites and the death routine's site; the rest call other routines. | High / Medium | ● active (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-627 | ROM2 check 18 adds 1 to Session +0xbe14 on each pass while its unit's +0x54 is 0x10 and writes no result; both 46-map corpora hold one check 18: map 10 ID 1 on unit 32, named by no trigger. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-628 | EN ROM2 L2.03210, which adds 1 to Session +0xbe14 when no unit of an owner with +0x2c zero remains and +0xbe10 is set, has no call, branch or raw DWORD reference in the EN image. | High / Medium | ● active (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-629 | ROM2 UI 0x431 takes failure cache entry reason - 2 through an accessor with no bound; entries run 2..1+E with slots 0x118+n for empty 2..4; what a reason outside them shows is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-630 | In both ROM2 46-map corpora the 81 instant-5 nodes store 0 or 5..9; only map 96's triggered 5 and map 40's untriggered 7 lie outside their mission's failure cache; mission 10 stores 0 and 5. | High / Medium | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-631 | In ROM2 play a mission fails when the hero is absent or flagged (2), a class 0x21..0x3f actor dies (identity - 19), instant 5 stores a reason or check 18 sees state 0x10; the screen takes cache entry reason - 2, Unknown outside it. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+
+### R2-ENGINE-623
+
+Raw DWORD `0x0000be14` over every section of each image, each hit decoded
+from 1 to 10 bytes back: 11 hits per root, all in `.text`.
+
+| EN site | RU site | Instruction use |
+|---|---|---|
+| `L2.03211` | `L2.03212` | Session init stores 0; EN stores 0 at +0xbe08, +0xbe0c and +0xbe10 beside it |
+| `L2.03213` | `L2.03214` | instant 5 stores IR scalar 0 (+8); action table `L2.00509` index 4 is `L2.03215`, which calls `L2.00521` |
+| `L2.03216`, `L2.03217` | `L2.03218`, `L2.03219` | check 18 adds 1 (R2-ENGINE-627) |
+| `L2.03220`, `L2.03221` | `L2.03222`, `L2.03223` | detector adds 1 (R2-ENGINE-628) |
+| `L2.03224` | `L2.03225` | value passed to `L2.03226` (RU `L2.00354`) |
+| `L2.03227` | `L2.03228` | address passed to `L2.03229` (RU `L2.02583`) |
+| `L2.03230`, `L2.03231`, `L2.03232` | `L2.03233`, `L2.03234`, `L2.03235` | result tick reads (R2-ENGINE-624) |
+
+The instant-5, check-18, detector and result-tick bodies are equal after
+masking in the two roots.
+
+**Confidence.** High for the 11 hits per root and their instructions.
+Medium that no other routine writes the register: an access through a
+smaller displacement from an embedded base, a bulk copy, or a write through
+the address that `L2.03229` receives lies outside a displacement scan.
+Medium that `L2.03226` and `L2.03229` save and load the value: both are
+unread and named from the value-then-address pairing. Medium that the
+check-18 arm, the detector and the init address the `[L2.01066]` object the
+tick reads: R2-ENGINE-060 places instant 5 there and the field layout is
+shared, but each routine's `this` was not traced to that global.
+
+**Unknown.** Whether a LOAD restores a pending reason: reading `L2.03229`,
+or saving a mission between an instant 5 and the failure screen and loading
+it in the original, would settle it.
+
+### R2-ENGINE-624
+
+Result tick EN `L2.00524`, RU `L2.00127`: 269 instructions each, equal after
+masking. With owner byte +0x41 nonzero and DWORD +0x2c zero
+(R2-ENGINE-060), in order:
+
+1. Owner +0x40 of 2 or more skips steps 2 to 4. When the tick object's
+   +0x74 is nonzero, a branch through `L2.03236`, actor word +0x94 at most
+   −40 and owner +0xa64 later stores owner +0x40 = 0 (`L2.03237`).
+2. Owner +0x38 null, or the +0x38 actor's byte +0x13c above 0: owner
+   +0x40 = 2 and 0xb4 with 2 (`L2.03238`); then, if owner byte +0x42 is
+   nonzero and the tick object's +0x74 is zero, 0xb4 with 0 (`L2.03239`).
+3. Otherwise Session +0xbe14 above 0 and owner +0x40 below 2: 0xb4 with
+   +0xbe14 (`L2.03240`) and owner +0x40 = its low byte (`L2.03241`).
+4. Otherwise Session +0xbe0c nonzero and owner +0x40 not 1: 0xb5 and owner
+   +0x40 = 1 (`L2.03242`).
+
+Each send calls `L2.01047` with ecx `L2.00994` (RU `L2.02566`). In the EN
+receiver opcode 0xb4 has selector byte 0x29 (`L2.03243`), whose table entry
+`L2.03244` is `L2.03245`: it posts UI 0x433 with ID 0xff and packet DWORD
++0xa. UI 0x433 (`L2.00133`) stores the ID at +0x43c, and ID 0xff posts 0x431
+with the second argument (R2-ENGINE-050). A reason of 1 stores owner +0x40
+= 1, the value step 4 stores, and leaves +0x40 below 2.
+
+**Confidence.** High for the branch order, stores and sends in both roots.
+Medium for the EN receiver route (narrowed by the review): the selector
+byte, the table entry and the arm are committed; the dispatch at
+`L2.03246..L2.03247` that indexes them is not. Unknown for the meanings of
+actor +0x13c
+(the victory transition clears it, R2-ENGINE-526), owner +0x42 and the tick
+object's +0x74, and for how often the tick runs relative to the script tick.
+
+**Unknown.** In the original, a mission in which the hero dies, with the
+screen recorded, shows which text reason 2 brings; a memory read of hero
++0x13c across a death and a victory would name the byte.
+
+### R2-ENGINE-625
+
+Unit death EN `L2.01806`, RU `L2.01807` (the routine of R2-ENGINE-535):
+394 instructions each, equal after masking. It stores +0x54 = 0x10 and
++0x50 = 0x10 (`L2.03248`, `L2.03249`) and, when unit +0x14 and the owner's
++0x38 are set and the owner's +0x38 is this unit (`L2.03250..L2.03251`),
+owner +0xa54 + 1 and word +0x94 = −50 (`L2.03252`; narrowed by the review).
+Its last block (`L2.03253..L2.03254`): when `[L2.00805]` +0x74 is 0, the
+owner at unit +0x14 has +0x2c = 0 and the zero-extended class word +0xe is
+0x21..0x3f, it stores owner +0x40 = low byte of (word +0x14c − 0x13) and
+sends 0xb4 with that byte (`L2.03255`, RU `L2.03256`). Only the four guards
+jump to `L2.03257` past the block; the linear body has one `ret`.
+
+The character producer writes +0x14c = 21 (R2-ENGINE-105): reason 2. The
+addition producer's IDs 21..30 (R2-ENGINE-106) give 2..11. Hire actors keep
+classes outside 33..63 (R2-ENGINE-525, R2-ENGINE-526) and send nothing.
+
+**Confidence.** High for the block, its guards and the arithmetic in both
+roots. Medium for the reason per actor: R2-ENGINE-105 and R2-ENGINE-106 are
+Medium, and which identities 22..30 join with a class in 0x21..0x3f is
+unread. Medium that hire classes lie outside 33..63 (R2-ENGINE-525). The
+meaning of `[L2.00805]` +0x74 is unread; Session +0x74 is 0 in a campaign
+at Medium (R2-SESSION-198). Medium that every death reaches the block: the callers of the
+routine were not censused.
+
+**Unknown.** Which companions give 3..11. In the original, letting a joined
+companion die in a mission whose text holds `#failure3` and recording the
+failure screen would settle the first of them.
+
+### R2-ENGINE-626
+
+Raw byte pattern `68 b4 00 00 00` over every executable byte, each hit
+decoded from 0 to 3 bytes back: EN 13 hits, RU 15, each a `push 0xb4`. The
+first call after each push:
+
+- `L2.01047` (EN sender): `L2.03238`, `L2.03239`, `L2.03240` (result tick)
+  and `L2.03255` (death). RU sender `L2.02566`: `L2.03258`, `L2.03259`,
+  `L2.03260` and `L2.03256`.
+- EN others: `L2.03261` after `L2.03262`, `L2.03263`, `L2.03264`,
+  `L2.03265`, `L2.03266`; `L2.00341` after `L2.03267`; `L2.01538` and
+  `L2.01539` after `L2.03268` and `L2.03269`; `L2.01492` after `L2.03270`.
+- RU others: `L2.03271` after five sites; `L2.00342`, `L2.00547`,
+  `L2.00548`, `L2.03272`, `L2.03273` and `L2.01551` after one each.
+
+**Confidence.** High for the hit lists and the call after each push. Medium
+that no other route sends 0xb4: an opcode loaded into a register, a computed
+opcode or another sender lies outside the pattern. The other callees are
+not read.
+
+### R2-ENGINE-627
+
+Check switch EN `L2.03274`, RU `L2.03275` (equal after masking): index = IR
+operation (+4) − 1, bound 0x1a, tables `L2.03276` and `L2.03277`. Index 17
+is `L2.03278` (RU `L2.03279`), which calls `L2.03280` (RU `L2.03281`; 16
+instructions, equal after masking). The only E8/E9 caller of `L2.03280` is
+`L2.03282`; no raw DWORD holds its address. The arm reads the unit at IR
++0x5c (the first unit reference, R2-ENGINE-044); when that unit's +0x54 is
+0x10, the death routine's store (R2-ENGINE-625), it adds 1 to Session
++0xbe14. It writes no check-result slot. The check loop `L2.03283` passes
+each compiled check in Session +0xeaac to the switch unless byte
+`[ebp-0x30]` of its local copy is set; the script tick `L2.03284` calls the
+loop and then the trigger runner `L2.00517`; its one caller is `L2.03285`.
+
+Both corpora hold one check-18 node: map 10, index 0, ID 1, parameter 0 =
+32 of type 4, no other parameter, named by no trigger operand. Once unit 32
+is in state 0x10, each loop pass adds 1, so the reason the result tick
+sends is 1 or more.
+
+**Confidence.** High for the arm, its dispatch and the corpus node in both
+roots. Medium that the node runs: whether an untriggered check is compiled
+into +0xeaac, whether reference 32 resolves (R2-ENGINE-044) and what the
+`[ebp-0x30]` byte means were not read. Unknown which value the result tick
+sends: the order of the script tick and the result tick is unread.
+
+**Unknown.** In the original, mission 10 with unit 32 killed, recording
+whether a failure screen appears and its text.
+
+### R2-ENGINE-628
+
+EN `L2.03210` (130 instructions; RU `L2.03286` equal after masking) walks
+the list at `[this+0xa50]` +0xa456c. For each unit, class word +0xe = 0x18
+sets a flag; a unit whose owner (+0x14) has +0x2c = 0 adds 1 to a count
+and, while no class-0x18 unit has been seen, is tested by
+`L2.03287(x, y, 0x3f, 0x1a)`; a result below 4 stores +0xbe08 = 1. After
+the loop: no class-0x18 unit and +0xbe08 set add 1 to +0xbe0c; a count of 0
+with +0xbe10 set adds 1 to +0xbe14; a nonzero count with +0xbe10 clear
+stores +0xbe10 = 1 and calls `L2.03288`. Scans of the EN image: no
+E8/E9/0F8x rel32 or EB/7x rel8 branch targets `L2.03210`, and no raw DWORD
+holds it.
+
+**Confidence.** High for the body and the EN negative over those
+encodings. Medium that it never runs: a computed or table call through a
+non-literal address lies outside the scans, and the RU image was not
+scanned. The meanings of class 0x18 and `L2.03287` are unread.
+
+### R2-ENGINE-629
+
+The 0x431 arm (EN `L2.03289`): app +0x3e8 = 0 and +0x5d8 = 2 (campaign
+mode, R2-ENGINE-049); it stores +0x3e8 = 1, calls `L2.03290(reason − 2)` on
+the cache `L2.03291` and passes the result to the report `R2.0033` (its
+one caller, `L2.03292`), whose title is slot 0x8d of text table `L2.02397`
+(RU `R2.0032`, `L2.03293`). `L2.03290` calls `L2.03294`, which returns
+`[this+4] + 4 * index` with no compare. The cache loop (EN `L2.03295`, RU
+`L2.03296`, equal after masking) empties `L2.03291`, then for n = 2, 3, ...
+calls the filler `R2.0029(n)` (one caller, `L2.03297`; key `#failure%d`,
+the rule of R2-ENGINE-049); an empty result (`L2.01986`: length +4 = 0)
+with n below 5 takes `L2.02396(0x118 + n)` of `L2.02397`; an empty result
+with n of 5 or more stops; each entry is appended by `L2.03298`.
+
+A mission whose cache holds E entries covers reasons 2..1+E. For such a
+reason the entry is the `#failure<reason>` section of the mission text, or
+slot 0x118 + reason for an empty 2..4 (Medium, see Confidence). A reason below 2 or above 1+E
+indexes past the filled entries; reason 0 (R2-ENGINE-624 step 2) is index
+−2.
+
+**Confidence.** High (narrowed by the review) for the control flow of the
+EN arm (gate, +0x3e8 = 1, argument reason - 2, call to `R2.0033`), for the
+unbounded accessor `L2.03294` and for the loop's start at 2, its compare
+with 5 and the `0x118 + n` argument. Medium that entry i holds the i-th
+filler result (`L2.03299`, `L2.03300` and the insert `L2.03301` that
+`L2.03298` calls are unread), that the report displays it with slot 0x8d as
+its title (`L2.02030` is unread) and that UI 0x431 reaches `L2.03289`
+(R2-ENGINE-049). High for the RU loop, filler and report equal after
+masking. Medium for the RU 0x431 arm, which was not read. Medium that slot
+0x118 + n is `main.txt` row 0x118 + n: rows 282..284 are measured, the
+table load and the lookup `L2.02396` are unread. Unknown what a reason
+outside the cache shows: the array's capacity and the bytes after its last
+entry were not read. The arm sets +0x3e8 = 1 and runs only while it is 0;
+where +0x3e8 is cleared is unread, so a report per mission is not
+established.
+
+**Unknown.** In the original, mission 96 with the trigger that runs its
+instant 5 (reason 5, three cache entries), recording the failure screen.
+
+### R2-ENGINE-630
+
+Both roots' 46 maps, type 7 action nodes of operation 5, with the failure
+cache that the R2-ENGINE-629 loop builds from each `mission<N>.txt`:
+
+- 81 instant-5 nodes per root, equal in both roots in index, ID, parameter
+  values, type codes and the number of triggers naming the ID. Parameter 0
+  has type 1 in every node; no other parameter is set.
+- Values named by a trigger: 5 in maps 10, 20, 32, 50, 51, 60, 62, 73, 74,
+  90 and 96; 5 and 6 in 40, 63, 76, 86, 87, 91, 92 and 100..103; 5..7 in 21,
+  42, 61, 70, 71 and 85; 5..8 in 30, 31, 75 and 77; 6..8 in 53; 5..9 in 52;
+  none in 41, 43, 72, 80..84, 93..95 and 110. Named by no trigger: 0 in 10,
+  20 and 30; 7 in 40; 6 in 50; 5 in 53.
+- Cache entries: 3 in 41, 43, 72, 80..84, 93..96 and 110; 4 in 10, 20, 32,
+  51, 60, 62, 73, 74 and 90; 5 in 40, 50, 63, 76, 86, 87, 91, 92 and
+  100..103; 6 in 21, 42, 61, 70, 71 and 85; 7 in 30, 31, 53, 75 and 77; 8 in
+  52; 214 per root, equal in both roots. Slot entries: 3 and 4 in 10 and
+  20; 4 in 30, 32 and 40; every other entry is mission text.
+- Every triggered value has a `#failure<value>` section except map 96's 5.
+  Map 40's untriggered 7 also exceeds its cache. Mission 110 also holds a
+  bare `#failure` tag. No node stores 19.
+- Map 52 has 25 triggers in EN and 24 in RU; the other counts are equal.
+
+**Confidence.** High for the stored values and counts in both roots. Medium
+that a stored value is the reason sent: the literal packs into scalar 0
+(R2-ENGINE-044), and whether each named trigger can pass in play is
+unread.
+
+### R2-ENGINE-631
+
+Composed from R2-ENGINE-624, R2-ENGINE-625, R2-ENGINE-627, R2-ENGINE-629
+and R2-ENGINE-630. The routes that send 0xb4 and the reason each sends:
+
+| Event | Reason | Text shown |
+|---|---|---|
+| owner has no +0x38 actor, or its byte +0x13c is set | 2 | `#failure2` (every mission has one) |
+| a class 0x21..0x3f actor dies (`[L2.00805]` +0x74 zero, owner +0x2c zero) | identity − 19: 2 for 21, 3..11 for 22..30 | `#failure<reason>`, slot 0x118 + reason for an empty 2..4, Unknown above 1+E |
+| a triggered instant 5 | its scalar: 5..9 in the corpora | `#failure<reason>`; map 96 Unknown |
+| check 18 sees its unit in state 0x10 (map 10 only) | 1 or more: +1 per pass on +0xbe14 | Unknown for 1; entry n for n in 2..5 |
+| owner byte +0x42 after step 2 | 0 | Unknown |
+
+Owner +0x40 of 2 or more ends the result tick's sends; the death route
+sends on every qualifying death (narrowed by the review). The first 0xb4 to
+reach the 0x431 arm takes the report.
+
+**Confidence.** Medium: the weakest links are the actor identities
+(R2-ENGINE-625), the node execution (R2-ENGINE-627, R2-ENGINE-630) and
+the unread RU 0x431 arm (R2-ENGINE-629). Unknown for the rows marked
+Unknown and for the meaning of +0x13c and +0x42.
+
+**Unknown.** The original runs named in R2-ENGINE-624, R2-ENGINE-625,
+R2-ENGINE-627 and R2-ENGINE-629.

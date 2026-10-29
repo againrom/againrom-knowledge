@@ -63,6 +63,25 @@ not supply a missing source label. UI failure selection uses `reason - 2`
 as the cache index. Initial dispatch to the briefing request remains Unknown.
 — R2-ENGINE-049
 
+The 0x431 arm passes cache entry `reason - 2`, through an accessor with no
+bound, to the failure report, so a mission whose cache holds E entries
+covers reasons 2..1+E: the `#failure<reason>` section, or text-table slot
+`0x118 + reason` for an empty 2..4. A reason below 2 or above 1+E indexes
+past the filled entries; what the screen shows then is Unknown. That entry
+i holds the i-th filler result and that the report shows it under title
+slot 0x8d are Medium (unread helpers). After one report the arm sets
++0x3e8 = 1 and shows no further report until +0x3e8 is cleared; where it is
+cleared is Unknown. — R2-ENGINE-629
+
+In both roots the 46 mission texts yield 214 cache entries, equal in key and
+source: 3 to 8 per mission, with slot entries only in missions 10, 20 (3
+and 4), 30, 32 and 40 (4). Every reason a triggered instant 5 stores has its
+`#failure<reason>` section except mission 96's 5, past its three entries.
+Mission 110 also holds a bare `#failure` tag. — R2-ENGINE-630
+
+The events that fail a mission and the section each selects are composed in
+R2-ENGINE-631.
+
 ## Event and page selection
 
 At UI message `0x433`, ordinary IDs format `event%d` and construct a dialogue
@@ -185,8 +204,11 @@ its button sends 0x41d. With campaign mode and win flag set, the client
 calls DLL LeaveLocation and consumes its outputs. Failure's first report
 instead uses cached mission text at reason minus two. Its selected close
 choices lead to menu or save-slot selection; those branch bodies contain
-no direct call through the bound LeaveLocation pointer. Other failure selectors, actual later loading and automatic
-initial briefing dispatch remain Unknown. — R2-ENGINE-074
+no direct call through the bound LeaveLocation pointer. Other failure
+selectors, actual later loading and automatic initial briefing dispatch
+remain Unknown. The claim's
+repeated mission-10 reason 19 is retracted; the failure sources are
+composed in R2-ENGINE-631. — R2-ENGINE-074
 
 ## First campaign movie table
 

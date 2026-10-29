@@ -60,6 +60,8 @@ The meanings are scoped to the verified RU/EN executor paths.
 
 | Arm | Literal operands | Actual effect or predicate | Authority |
 |---|---|---|---|
+| Instant 5 | scalar 0=reason | Session +0xbe14 = reason | R2-ENGINE-623 |
+| Check 18 | resolved unit | +0xbe14 + 1 while unit +0x54 = 0x10; no check result | R2-ENGINE-627 |
 | Instant 35 | scalar 0=index, scalar 1=value | SetVar(index,value) | R2-ENGINE-045 |
 | Check 23 | scalar 0=index | GetVar(index) into map result register | R2-ENGINE-045 |
 | Check 24 | scalar 0=n | GetVar(752+n) into map result register | R2-ENGINE-045 |
@@ -164,8 +166,8 @@ Instant 4 increments the session win counter+0xbe0c; instant 5 stores a failure
 reason+0xbe14; instant 8 increments a selected map result register. The verified
 RU result tick prioritizes a positive failure reason and emits 0xb4, otherwise
 a nonzero win counter emits 0xb5. The receiver forwards these to UI 433 selector255
-and UI 430 respectively. The EN result tick and full acknowledgement scheduling
-are Unknown. — R2-ENGINE-060
+and UI 430 respectively. Full acknowledgement scheduling is Unknown. Its former
+mission-10 reason 19 is retracted: mission 10 stores 0 and 5. — R2-ENGINE-060
 
 DLL EnterLocation stores the location-record pointer and clears slots 752..767.
 GetCurrentLocation returns a pointer; the client wrapper reads its numeric ID.
@@ -173,6 +175,41 @@ The ordinary LeaveLocation mission10 arm marks completed-bank slot 896+10,
 adds location20 and returns output 1; that selected case has no 753/754 guard.
 Other continuation arms, persistence and complete native campaign playthrough
 remain Unknown. — R2-ENGINE-048
+
+## Failure reasons
+
+The failure register Session +0xbe14 has eleven raw-displacement users in
+each root: the Session init stores 0, instant 5 stores scalar 0, check 18
+and a detector that has no EN reference (R2-ENGINE-628) add 1, a
+serializer passes the value and its address to two unread helpers, and the
+result tick reads it. Other
+encodings of the access are outside the population. — R2-ENGINE-623
+
+The result tick, equal in EN and RU after masking, works on the owner while
+its byte +0x41 is set and +0x2c is zero, and, while the tick object's +0x74
+is zero, stops sending once owner +0x40 is 2 or more. It sends reason 2 when owner +0x38 is null or that actor's
+byte +0x13c is set (and reason 0 when owner byte +0x42 is also set); else a
+positive +0xbe14 is sent and its low byte stored at +0x40; else a nonzero
+win counter sends 0xb5 and stores 1. Byte +0x13c and +0x42 are Unknown in
+meaning. — R2-ENGINE-624
+
+Outside the script, the death of a class 0x21..0x3f actor, with
+`[L2.00805]` +0x74 zero and owner +0x2c zero, stores owner +0x40 = identity
++0x14c − 19 and sends it: identity 21 gives reason 2, identities 22..30
+give 3..11. Hire classes, at Medium, lie outside the range. — R2-ENGINE-625
+
+Check 18 adds 1 to +0xbe14 on each check-loop pass while the unit at IR
++0x5c has state +0x54 = 0x10, and writes no check result. Each corpus holds
+one check 18: map 10 ID 1 on unit reference 32, named by no trigger;
+whether it runs is Unknown. — R2-ENGINE-627
+
+Each corpus holds 81 instant-5 nodes, equal in both roots, parameter 0 of
+type 1 and no other parameter. They store 0 or 5..9; map 96's triggered 5
+and map 40's untriggered 7 exceed their mission's failure cache, and no
+node stores 19. — R2-ENGINE-630
+
+Which events fail a mission and the text each brings are composed in
+R2-ENGINE-631.
 
 ## Activity owner field producers
 
