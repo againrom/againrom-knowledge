@@ -13695,7 +13695,7 @@ is the receiver of the mission entry.
 | R2-ENGINE-614 | On that path EN ROM2 reads REG GameOptions, View X/Y, SpellBook, Objects Selection and Group0..9, Inventory, Projectiles and Fog into client and app fields; Fog is read only when CurrentState/InBattle is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-615 | EN ROM2 client message 6 builds the client map through L2.01385: it opens the named ALM, copies grids, creates static objects (list +0x390, key entry +0x10 + 0x6000) and unit objects (list +0x3a4, key word +0x3c + 0x6000), frees it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-616 | EN ROM2 world half: the name at session +0x90 selects the ALM, which gives terrain size and tiles, goes to the script compiler and is freed; the document reader feeds the Unit, Building, effect and Sack readers; other uses are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-ENGINE-617 | After the EN ROM2 world half the unit registry L2.00325 calls each member's slot +0x24; the RU Human slot resolves saved keys at +0x40, +0x44, +0x5c, +0x64 and +0x68 through session +0xdc and stores 0 on a miss. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-617 | After the EN ROM2 world half the unit registry L2.00325 calls each member's slot +0x24; the RU Human slot resolves saved keys at +0x40, +0x44, +0x5c, +0x64 and +0x68 through session +0xdc and stores 0 on a miss. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-618 | EN ROM2 Building Serialize L2.01659 stores base38, raw22 at +0x4a, +0x40 u8, +0x42/+0x44/+0x46 u16, +0x48/+0x60/+0x61 u8 and +0x64/+0x68 u32; LOAD rebuilds +0x3c from +0x40 and clears base +0x18. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-619 | ROM2 spell row 29, Slow, has data, an apply arm and cast ID 66 but no row in EN table L2.02137, which omits rows 9, 14, 15, 28 and 29; the client selection summary reads 24 slot bits only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-620 | EN ROM2 mission setup maps REG Speed 0..8 to divisors 8, 10, 12, 14, 16, 20, 24, 28, 32 and sets app +0x418 = 1000/divisor; the five mission saves' Speed 4 and 8 give 62 and 31. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
@@ -13910,6 +13910,9 @@ for the targets of the resolved fields and the two unread calls.
 membership and EN parity. Consumers of the loaded Building and Pointer
 fields after LOAD are not searched; the data watch named in R2-ENGINE-618
 would settle them.
+
+**Amended.** R2-ENGINE-662 reads the EN Human/Unit postload route and the two subobject calls. The command block remaps seven keys only on hits. This narrows the EN and unread-call Unknowns; runtime membership, later overwrites and failure behavior remain Unknown.
+
 
 ### R2-ENGINE-618
 
@@ -14778,3 +14781,216 @@ RU tests +0x10a, then the gate. Both return when either fails. RU
 
 **Confidence.** High for the pairs read. The call census and the seed
 writers were read in EN only.
+
+## Mission effect, projectile and order continuation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-659 | EN ROM2 restores world effects into a list and fixes selected saved links. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-ENGINE-660 | EN ROM2 effect ticks resume a transport countdown and dispatch nested point effects. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-ENGINE-661 | The saved EN ROM2 Prj16 has zero segments; its read update removes that entry state. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-ENGINE-662 | EN ROM2 restores a raw Unit command block and remaps seven keys only on lookup hits. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-ENGINE-663 | EN ROM2 command ticks use two selectors; an empty selector block alone does not prove idle. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-ENGINE-664 | The read EN ROM2 LOAD and tick paths have conditional reset, expiry and refusal gates. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-ENGINE-665 | Fifteen read ROM2 EN/RU programme pairs match after masking operands >=0x400000. | Medium | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+
+### R2-ENGINE-659
+
+EN document reader L2.00243 reaches L2.03171 and L2.03420 on the
+world effect container. The load branch clears the list, reads its count,
+reads typed records and appends them. SpellEffect L2.03421 restores bytes
++0x40/+0x41 after the base. SpellTransport L2.03422 adds nested +0x48/+0x4c
+and word +0x50; PointEffect L2.03423 adds nested +0x4c and saved target
+DWORD +0x48; AreaEffect L2.01713 adds bytes +0x4c..+0x4f, word +0x50
+and nested +0x48. These are object-relative offsets, not file offsets.
+
+Base L2.03196 registers the saved self key in session +0xdc. Its +0x14
+owner-key helper and PointEffect +0x48 helper store zero on a lookup miss.
+After the document, container slot0 L2.00051 calls each member's slot+0x24.
+Transport L2.03424, Point L2.03425 and Area L2.03426 call position fixup
+and the nonnull nested records' slot+0x24. Position L2.03186 replaces
+its nonzero +8 only on a hit and preserves a miss. SpellEffect +0x3c
+starts at zero and is not transferred by the inspected serializers.
+
+The bounded census finds list-reader E8/E9 sites L2.03427 and L2.03428
+inside the document, and base-serializer calls L2.03429, L2.03430 and
+L2.03431 inside the three concrete serializers. Their entry-address scans
+find one vtable slot each: L2.03432, L2.03433 and L2.03434.
+
+**Confidence.** Medium for native composition and reader census. The
+raw-section instrument includes unnamed hits but does not close computed
+calls, all virtual targets, embedded bases or bulk copies. Two concrete
+address scans are frozen navigation observations, not final reproductions.
+Archive/factory, allocation and forward-reference conditions remain.
+
+**Unknown.** Actual caster/target delivery, later writes to +0x3c and
+complete reader population. Cold LOAD game0006 and log saved-key maps,
+postload effect members and the first ticks as RESULTS question 1 specifies.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-ENGINE-660
+
+World phase L2.03435 calls effect-list tick L2.03436. It invokes
+member slot+0x18, then tests completion byte +0x40 and calls removal.
+SpellTransport slot L2.03437 decrements restored word +0x50. At signed
+zero or below it queues +0x48, else +0x4c, clears both links and sets +0x40.
+List wrappers L2.03438/L2.03439 show insertion; iterator mutation semantics
+and allocation helper L2.03440 remain unread.
+
+Point slot L2.03441 calls L2.03442. It tests target +0x48 through virtual
+type slots and +0x14, invokes nested payload +0x4c slot+0x3c when eligible,
+and sets completion +0x40. DirectDamage L2.03443 subtracts the target's
+slot+0x54 return from target word +0x94 on its Unit arm. Exact damage
+calculation and notification callees remain unread. Area tick L2.03444
+reads +0x4c/+0x4d/+0x50, but its application/expiry helpers remain open.
+
+**Confidence.** Medium: stored state reaches read consumers under the
+selected constructor/dispatch contracts. The appended point's same-tick
+versus next-tick execution and successful target binding are not established.
+
+**Unknown.** Delivered HP changes and ordinary nonempty AreaEffect LOAD.
+Cold LOAD game0006 with list/target/HP watches at successive L2.03436 calls;
+separately save and cold-load an identified AreaEffect between pulses.
+This narrows R2-SESSION-235's static continuation Unknown; it does not
+replace R2-SESSION-161's ordinary AreaEffect Unknown.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-ENGINE-661
+
+R2-ENGINE-614 restores the separate REG projectile into client +0x9ec,
+with client +0xe8, Player +0x14 and word ID +4. The read constructor
+L2.03141 binds vtable L2.03350; slot+0x3c is update L2.02165. Client
+window L2.03445..L2.03446 calls that slot for each +0x9ec object, removes
+IDs whose update returned zero and invokes deleting slot+4.
+
+R2-SESSION-244 records game0006 Prj16 actionsegments=0, picture=40.
+Update tests +0xa8 at L2.03447 and returns zero before movement when zero.
+Thus unchanged entry fields request removal on its first update. This
+narrows the continuation of the object R2-ENGINE-621 says is restored.
+
+With nonzero segments and action byte +0x8c=1, a found +0x8e target in
+client +0x9d0 refreshes destination +0x90/+0x94/+0x98 from target
++0x5c/+0x60/+0x10. A miss retains saved coordinates. Default movement
+adds signed (destination-position)/remainingSegments to +8/+0xc/+0x10,
+advances phase and decrements segments. Read picture tables also select
+target-attachment and phase arms; they are not a server damage binding.
+
+**Confidence.** Medium for composition. REG getters and stored values are
+inherited at their published grades; virtual geometry callees and complete
+client scheduling are unread. No live frame or RU projectile was observed.
+
+**Unknown.** Actual first update entry state, removal timing and binding
+to server SpellTransport. Cold LOAD game0006 and record Prj16 after REG,
+at L2.02165 entry, at removal and in the first two frames.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-ENGINE-662
+
+Unit L2.01090 calls L2.03448 on its +0x1c4 object. It transfers
+0xb8 raw bytes, then the word-list programme at block +0xb4. LOAD releases
+the old list, reads the raw block, allocates a new list and replaces +0xb4
+before reading its contents. Unit +0x50/+0x54/+0x58 are separate raw DWORDs;
+the +0x1c0 movement block is separate. R2-ENGINE-209 supplies the inherited
+raw-width/list grammar.
+
+EN Human slot L2.03449 calls Unit L2.03450, which fixes Unit references,
+calls L2.03451 on +0x1c0 and L2.03452 on +0x1c4. The command postload
+looks up each nonzero block DWORD +0xc,+0x10,+0x18,+0x20,+0x28,+0x30,+0x68
+in session +0xdc. A hit replaces the number; a miss preserves it.
+The read body does not clear selector bytes +8/+9. Block +0x5c is not in
+this seven-field set; the read command arm tests it as a boolean.
+
+**Confidence.** Medium for composition and field roles. Local stores and
+branches are explicit, but allocation, the list virtual body and missing-key
+downstream effects are not fully closed. A number matching another key
+does not by itself identify its semantic role.
+
+**Unknown.** Delivered command identities, invalid-key behavior and later
+overwrites. Cold LOAD the five saves, record the command block at raw-read
+completion, after postload and before the first three Unit ticks.
+This narrows R2-ENGINE-617's EN and unread-subobject Unknowns.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-ENGINE-663
+
+Unit slot+0x18 L2.00263 calls command consumer L2.00507 when helper
+L2.03453 is false. The consumer handles block byte +9 first, otherwise
+optional word +0xb0, then byte +8. Selectors +8=0,+9=0 and +0xb0=0 enter
+no selector arm, but the body still tests movement +0x98 and Unit +0x50.
+Manager/group gates, Unit HP and condition flags can act before this path.
+The saved Unit +0x50 DWORD alone therefore does not identify the next order.
+
+Normally Unit +0x54 is reset to zero unless it was 2 or 15; an earlier
+manager/group gate can store 27. The read byte/jump tables map selector9=1
+to L2.03454: Unit +0x54=3, block +0x15 increments, and selector9 clears
+only when +0x15>2 and Unit +0x136 is nonzero. R2-SESSION-259 records
+which hero blocks supply these selectors; it does not establish runtime
+gate inputs after LOAD.
+
+**Confidence.** Medium. The named control flow is read, but complete AI,
+movement and subsequent command dispatch remain open.
+
+**Unknown.** Whether the heroes of game0001/0005/9999 stand, move or receive
+new commands on the first ticks; whether game0006 continues its saved
+selector9=1 arm immediately. Cold LOAD without input and record selectors,
+movement +0x98, Unit +0x50/+0x54, gate inputs and position for three ticks.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-ENGINE-664
+
+The bounded set is RESULTS question 5, with instruction addresses.
+WorldPresent zero bypasses world-effect postload and clears Unit
++0x40/+0x44/+0x5c. Archive object reader L2.03455 checks a reference index
+at L2.03456 and expected class at L2.03457 before error helpers 5/6.
+Their final exception/recovery behavior remains unread.
+
+Lookup helpers either zero a missed key (L2.03458/L2.03199) or preserve it
+(position L2.03186 and command L2.03452). Transport signed countdown expiry
+and completion-byte removal are R2-ENGINE-660. Projectile zero segments
+and missing-target behavior are R2-ENGINE-661. Unit +0x54=16 returns;
+HP<=0 enters death handling; condition helper true skips command dispatch.
+Command manager +0xbbe8, group-owner byte +0x45, selector9 and Unit +0x144
+bit0x40000 gate action resets or replacement. A nonpositive signed list
+count stops the reader loop; it is not demonstrated save rejection.
+
+**Confidence.** Medium for this enumerated local set. It is not a complete
+caller, writer, refusal or failure census. The raw-section/CFG instrument
+does not close indirect dispatch, exceptions, bulk transfer or all writers.
+
+**Unknown.** Actual recovery from invalid class/index, truncated records,
+allocation failure and unresolved keys. Isolate each case in a save copy
+and trace LOAD through the named gate to success, reset, rejection or fault;
+keep owner originals unchanged. No such original run occurred here.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-ENGINE-665
+
+The pairs are four effect serializers, Unit and command serializers,
+Unit and command postload, transport tick, point tick wrapper and application,
+area tick and three concrete effect postload bodies. data/en-ru.tsv gives
+both listing paths and instruction counts: 36,50,45,78,679,78,119,43,43,9,
+117,125,27,18,18 in pair order. All fifteen have zero residual differences.
+
+The comparison removes instruction addresses and masks operands >=0x400000
+as ADDRESS. It preserves operands below that threshold, including small
+object offsets and widths. Large constants and masks are hidden as well.
+It does not compare absolute callees, descriptors or globals semantically,
+and it does not claim byte equality. The two executable SHA-256 values differ.
+
+**Confidence.** Medium for local programme parity under the stated mask.
+Matching streams are one structural comparison, not independent witnesses
+of delivered gameplay. RU projectile, document/list dispatch, damage
+calculation and complete scheduling are outside the paired set.
+
+**Unknown.** Full EN/RU continuation and data parity. The counted save
+inputs are EN only. Acquire the excluded RU bodies and cold-load equivalent
+locally created RU saves, recording the same fields, first ticks and frames
+as the EN original runs in RESULTS.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.

@@ -754,3 +754,50 @@ unobserved. Cold LOAD with saved-key, field, effect/target-tick and first-frame
 witnesses would settle delivered state. — R2-SESSION-233, R2-SESSION-235,
 R2-SESSION-236, R2-SESSION-238, R2-ENGINE-601, R2-ENGINE-603,
 R2-ENGINE-604
+
+## Restored effects and command continuation
+
+Selected EN LOAD readers restore SpellEffect bytes +0x40/+0x41;
+SpellTransport adds nested +0x48/+0x4c and countdown word +0x50;
+PointEffect adds nested Effect +0x4c and saved target DWORD +0x48;
+AreaEffect adds bytes +0x4c..+0x4f, word +0x50 and nested Effect +0x48.
+These are object-relative offsets. The list is rebuilt, then postload
+walks its members and nested records. Some saved-key misses become zero;
+position-link misses preserve their number. The bounded reader census
+does not close computed callers or bulk copies. — R2-ENGINE-659
+
+The selected EN world tick decrements the restored transport countdown,
+queues a nested effect at expiry and marks the transport complete. Point
+application dispatches its payload to an eligible target and completes.
+Same-tick versus next-tick execution, live target delivery and exact HP
+change remain Unknown. game0006 has one top-level transport, countdown 1,
+with a nested point and DirectDamage; it is the two world-effect records
+already counted, not two top-level members.
+— R2-ENGINE-660, R2-SESSION-260, R2-SESSION-235
+
+The Unit +0x1c4 command object stores raw184 then a word list. LOAD replaces
+the saved list pointer with a newly allocated list. Unit +0x50/+0x54/+0x58
+are separate raw DWORDs. EN postload remaps seven nonzero command keys at
++0x0c,+0x10,+0x18,+0x20,+0x28,+0x30,+0x68 only on lookup hits; misses
+retain their number. This narrows the earlier unread-subobject Unknown.
+— R2-ENGINE-662, R2-ENGINE-617
+
+The read command consumer uses bytes +8/+9 and optional word +0xb0.
+Zero selectors and zero +0xb0 enter no selector arm; movement state and
+earlier gates can still act. All five measured EN heroes have Unit +0x50=12;
+game0001/0005/9999 have zero selectors, game0004 has 8/2 and game0006 has
+6/1. The saved DWORD alone does not prove an active order or idle state.
+— R2-ENGINE-663, R2-SESSION-259
+
+The bounded read gate set includes worldPresent, archive class/index checks,
+saved-key lookup outcomes, completion/countdown, projectile remaining
+segments, Unit HP/condition and manager/group flags. It is not a complete
+LOAD failure census. Fifteen selected EN/RU programmes have equal instruction
+shape after masking operands >=0x400000; callees, complete scheduling and
+RU projectile continuation are outside that comparison. Save values are EN-only.
+— R2-ENGINE-664, R2-ENGINE-665
+
+The separate REG projectile has its own continuation contract: a stored
+object with zero segments requests removal on its first read update path,
+conditional on unchanged entry state. Actual first-frame behavior remains
+Unknown. — R2-ENGINE-661

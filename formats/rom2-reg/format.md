@@ -106,3 +106,19 @@ entries; each names a `sfx.res` path without `.wav`. Spell sounds are
 entries are Sfx90 and 30 slots from Sfx508 to Sfx566, and an absent slot
 gives no sound at the play sites read; no census of other sound sites was
 made (Medium), and no read site places Sfx90. — R2-ASSET-102, R2-ENGINE-446
+
+## Restored projectile continuation
+
+The selected EN mission reader restores each Prj%d into client +0x9ec.
+Object fields are x/y/z +8/+0xc/+0x10, picture +0x24, dir +0x70,
+phase +0x74, lastaction +0x78, action byte +0x8c, actiondir byte +0x8d,
+target word +0x8e, destination +0x90/+0x94/+0x98, actionphase +0x9c,
+remaining segments +0xa8 and actionspell +0xac. Its update returns zero
+before movement when +0xa8 is zero. The read client loop removes zero-return
+objects. game0006 Prj16 stores zero segments, so unchanged entry fields
+request removal on its first call. With nonzero segments, action1 can
+refresh the destination from a found client target; the default movement
+arm divides remaining distance by remaining segments. Picture-specific
+presentation arms do not establish server damage or a SpellTransport link.
+Actual first update state, visible timing and RU parity remain Unknown.
+— R2-ENGINE-661

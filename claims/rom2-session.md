@@ -3141,7 +3141,7 @@ Medium for each caption.
 |---|---|---|---|---|
 | R2-SESSION-233 | Nine frozen EN ROM2 saves have exact physical and decoded-document partitions under the selected successful-transfer grammar; decoded lengths are 4408..72936 bytes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-234 | Four frozen EN ROM2 town-like documents contain one Player, an empty dead list, worldPresent 0, two sentinels and a 400-byte trailer; no world half is stored. | High / Medium | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
-| R2-SESSION-235 | Five frozen EN ROM2 mission-like documents hold eight Players and a complete world half; game0006 alone has a dead Unit and two world-effect records; all Sack and extra counts are zero. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-235 | Five frozen EN ROM2 mission-like documents hold eight Players and a complete world half; game0006 alone has a dead Unit and two world-effect records; all Sack and extra counts are zero. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-236 | Nine frozen EN ROM2 Player-1 records each hold one Group Human with matching controlled/owner saved keys; measured Human state includes attributes, skills, experience, HP, mana, positions, equipment and bag. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-237 | The Player-1 Human books in frozen EN game0005 and game0006 hold all spell IDs 1..29; 0002/0003/0004/9998/9999 hold24, 27; 0000/0001 have no book. Item spells are separate. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-238 | All nine frozen EN ROM2 physical tails tile to EOF as inline REG, one pair, Scenario state and nine empty buffers; incoming current keys distinguish four town-like and five mission-like files. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
@@ -3208,6 +3208,9 @@ binding and complete transfer. Unknown for first-frame and effect continuation.
 **Unknown.** Native map registration, session raw meanings, nonempty Sacks or
 extra-list instances and live post-load effects. A cold LOAD of game0006 with
 identified effect/target state at successive ticks would settle continuation.
+
+**Amended.** R2-ENGINE-659/660 and R2-SESSION-260 narrow the static effect-continuation Unknown: the one top-level transport holds the nested point, and its saved countdown feeds the read tick. Live target delivery, same-tick scheduling and applied damage remain Unknown.
+
 
 ### R2-SESSION-236
 
@@ -3432,3 +3435,57 @@ positions, with hire 2 and the name shown for the talk.
 town, departure and map build"; no route read removes him, which is not a
 retention claim (R2-ENGINE-526 reads one predicate). Step 3 said the inn
 actors are "released"; only the key-bit clear is read.
+
+## Stored flight and command state
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-259 | Five EN ROM2 hero blocks have Unit +50=12; their saved command selectors differ. | High | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+| R2-SESSION-260 | EN ROM2 game0006 has one top-level transport with countdown 1 and a nested point effect. | High | ✔ promoted (branch candidate) | [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/) |
+
+### R2-SESSION-259
+
+The five hashed mission-like saves yield 150 stored Unit rows through
+orders.py, using the committed envelope decoder and field offsets. The
+Player-1 Group-0 Human Unit in each save has DWORD +0x50=12. In filename
+order 0001,0004,0005,0006,9999, its +0x54 values are 0,13,0,3,0 and
++0x58 values are 0,7,0,7,0. Command-block bytes +8/+9 are 0/0,8/2,0/0,
+6/1,0/0; command word +0xb0 is zero in all five.
+
+game0006 command +0xc=347558336, +0x28=267371184 and +0x30=48751728.
+They numerically match saved self keys in the inherited field table.
+Command +0x5c=1 in game0004/0005/0006 and zero in 0001/9999; the number
+1 is not a saved-self key in that table. This bounded join says nothing
+about an unrecorded key population or the field being a pointer.
+
+**Confidence.** High for numeric values on these exact buffers under the
+published decoder/offset grammar. Their native interpretation inherits
+R2-ENGINE-209 and R2-ENGINE-662/663 at their stated grades.
+
+**Unknown.** Delivered order and first movement after LOAD. The no-selector
+and selector9=1 original runs specified by R2-ENGINE-663 settle it.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+### R2-SESSION-260
+
+The immutable field table at add42086 records game0006 SpellEffects
+count=1. Its sole top-level SpellTransport contains PointEffect at +0x48;
+that point contains Effect_DirectDamage at +0x4c. Transport +0x4c is null.
+Transport word +0x50=1. Both SpellEffect completion bytes +0x40 are zero
+and +0x41 bytes are one. Point target saved key +0x48=347558336.
+The two SpellEffect-derived records are nested, not two top-level members.
+
+data/effect-values.tsv preserves the scalar values and document offsets
+from the hashed inherited table. R2-SESSION-235 supplies class identities
+and the five-save population; this claim does not regrade its native
+composition. The other four mission-like saves have no world effects.
+
+**Confidence.** High for these stored counts, values and nesting under
+the existing complete-buffer walk. It is a derived reuse of that table,
+not an independent native acceptance witness.
+
+**Unknown.** A live target, applied HP change and same-tick scheduling.
+Cold LOAD game0006 with the effect/list/HP watches in R2-ENGINE-660.
+
+**Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
