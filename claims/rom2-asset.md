@@ -651,7 +651,7 @@ the selected paint or the producing tool's contract would settle it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ASSET-073 | ROM2 sfx.res holds 35 town_kaarg WAV keys per locale; Kaarg loaders find all they name except Kin1 and Kin2, and every found file is mono 16-bit 22050 Hz PCM, equal between locales. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ASSET-073 | ROM2 sfx.res holds 35 town_kaarg WAV keys per locale; Kaarg loaders find all they name except Kin1 and Kin2, and every found file is mono 16-bit 22050 Hz PCM, equal between locales. | High / Unknown | ● active (amended, branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 
 ### R2-ASSET-073
 
@@ -686,6 +686,11 @@ Unknown for the effect of loading an absent key.
 
 **Unknown.** What the slot loader stores when the key is absent; a read of
 the sound object constructor on a missing entry would settle it.
+
+**Amended.** R2-ENGINE-687 narrows the absent-key Unknown: the slot holds a
+sound object with the key and no data, and each start's lazy load ends
+without data when stream open `L2.03656` returns 0. That archive lookup
+`L2.03657` returns null for an absent key was not read.
 
 ## Character generator resources and templates
 

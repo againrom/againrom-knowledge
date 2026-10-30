@@ -3109,7 +3109,7 @@ Frame counts are from the complete selected [art frame envelopes](../experiments
 | R2-ENGINE-245 | Campaign town ID 1 selects the generic inn and shop in preserved ROM2 EN/RU; selected EN generic and Kaarg constructors share native page or child bases. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-246 | The selected ROM2 EN generic inn fixes three panel rectangles, primary art layers and three button targets; complete portrait/stat drawing and the lower-right resource binding remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-247 | The selected ROM2 EN inn consumes packed DLL options, seats actors and dispatches talk by NPC/topic; the stage-10 roster is conditional, and its complete live actor-art join is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
-| R2-ENGINE-248 | Selected ROM2 EN inn branches load candle, cauldron, breath and drink lists and advance them on native clocks; container-count interpretation and the complete visible schedule remain bounded. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-248 | Selected ROM2 EN inn branches load candle, cauldron, breath and drink lists and advance them on native clocks; container-count interpretation and the complete visible schedule remain bounded. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-249 | The selected ROM2 EN generic shop fixes five child rectangles, primary art and Undo/Buy/Sell/Exit targets; complete stock, item-price text and episode state remain Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-250 | Selected ROM2 EN inn/shop departure releases and removes the square; conditional Exit/Escape posts re-enter it and rebuild local art/state, while complete queue admission and visible return are unobserved. | High / Medium | ● active (partially retracted, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 
@@ -3210,6 +3210,11 @@ Selected evidence: [filename loops](../experiments/EXP-2030-rom2-first-town/evid
 **Confidence.** High for filename loops, fixed destinations, native timer comparisons and helper expressions. Medium for a composed visible schedule because container loading and retained live state are unclosed. Unknown for the relation of `L` to loaded list counts. The RNG range is bounded by R2-ENGINE-242; its distribution remains unobserved.
 
 **Unknown.** Loader `L2.00761` was not followed; the raw field-minus-one getter does not settle whether a final loaded picture is skipped. Its allocation/append contract would settle that relation. Selected helper/caller listings do not establish redraw cadence, pre-entry baselines, RNG distribution or audible playback. Native runtime observation would settle their presentation.
+
+**Amended.** R2-ENGINE-685 narrows the `L2.00761` Unknown: it sizes the
+vector through `L2.03658` and constructs one element for each index below
++0x8, so +0x8 - 1 is the last filled element and the one-shot skips none.
+That +0x8 equals the list count rests on `L2.03658` and `L2.03659`, not read.
 
 ### R2-ENGINE-249
 
@@ -4094,11 +4099,11 @@ square consumes 0x45a.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-277 | The ROM2 Kaarg inn taverner picks a1..a5 by ((rand*21)>>15)+1 with no idle wait, runs each series once in >100 ms steps at fixed center positions and keeps its state in a process static. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-277 | The ROM2 Kaarg inn taverner picks a1..a5 by ((rand*21)>>15)+1 with no idle wait, runs each series once in >100 ms steps at fixed center positions and keeps its state in a process static. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 | R2-ENGINE-278 | The ROM2 Kaarg shop fire steps once per 100 ms tick through 18 frames: idle loops lite or cicle, choosing weapons runs it up through burn to cicle, another category runs it back to lite. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 | R2-ENGINE-279 | The ROM2 Kaarg shop keeper plays a1 or a2 files 2..20 under one modulus-20 counter; an idle start picks either, buy and sale start a2, and refusals and category clicks start nothing. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 | R2-ENGINE-280 | ROM2 Kaarg square slots +0x20c..+0x24c hold 17 town_kaarg keys: three voice and four bird clocks, Kman1 after 45 s, two hover keys, the Kvox1 entry loop and six guard steps at nine guard cursors. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
-| R2-ENGINE-281 | Kaarg's omitted pre-load release leaves no different sound state: each slot load releases its slot first and leave releases the same 17 slots; only clock baselines and waits carry across visits. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-281 | Kaarg's omitted pre-load release leaves no different sound state: each slot load releases its slot first and leave releases the same 17 slots; only clock baselines and waits carry across visits. | High / Unknown | ● active (amended, branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 
 ### R2-ENGINE-277
 
@@ -4165,6 +4170,11 @@ timing and for what the screen shows during a restarted series.
 
 **Unknown.** Delivered paint cadence and audible output; an authorized
 timed original session would settle both.
+
+**Amended.** R2-ENGINE-685 narrows the re-entry clause: leave frees the five
+vectors through `L2.03660` and entry rebinds them through `L2.00761`, so a
+resumed series restarts at element 0 without a start sound. The clause
+stays Medium; R2-ENGINE-688 bounds the page lifetime it rests on.
 
 ### R2-ENGINE-278
 
@@ -4347,6 +4357,10 @@ and +0x260 and for what constructor `L2.00984` stores.
 
 **Unknown.** Their first values; an executable-wide writer census or a
 read of the view allocation would settle them.
+
+**Amended.** R2-ENGINE-687 narrows the constructor Unknown: `L2.00984`
+stores the key and zeroes +0xc and +0x10; the data load waits for the
+first start, through lazy loader `L2.03661`.
 
 ## Character generator
 
@@ -15610,3 +15624,203 @@ equal in both roots.
 constants and does not compare callees.
 
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 6.
+
+## The Kaarg inn visit: seats, sounds and re-entry
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-685 | ROM2 Kaarg inn leave frees the five taverner frame vectors, seat sprites, art and 17 sound slots and entry rebuilds them, so each visit restarts frames at element 0; the taverner state and clocks are kept. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
+| R2-ENGINE-686 | In ROM2 Kaarg inn campaign paint the seat sprites step only for the selected seat, (cursor+1) mod frame count after >125 ms on static L2.03662; entry selects seat 0 when any seat exists and restarts every seat cursor at 0. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
+| R2-ENGINE-687 | The ROM2 Kaarg inn page requests Kin1 once and loops Kvox5 at entry, Kman3 or Kman2 at an a1 or a2 start, and Kvox6..8 and Kdish1..4 on 2000+R(2000) ms clocks; leave stops all 17 slots. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
+| R2-ENGINE-688 | ROM2 EN constructs the Kaarg inn page at one E8 call in start-up chain L2.01428, L2.00558 and RU at one call; the inn selector calls entry on that one object (on every visit: Medium). | High / Medium | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
+| R2-ENGINE-689 | 36 ROM2 EN/RU Kaarg inn routine pairs are equal after masking operands >=0x400000, except the application-field displacements +0x5d8/+0x63c, +0x404/+0x41c and +0x44c/+0x464. | High | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
+
+### R2-ENGINE-685
+
+EN addresses; the RU bodies are those of R2-ENGINE-689. Page table
+`L2.00741` slot +0x84 is leave `L2.01233`. In order it calls +0x34; in
+campaign mode the `scenario.dll` ordinal-10 cell `L2.03663`; `L2.03664`;
+writes +0x110 = 0; calls `L2.03665`, `L2.00789` and `L2.00797`; deletes child
++0x80; calls center +0x84 art release `L2.03666`, center +0x7c seat release
+`L2.03667`, `L2.03668`, `L2.03660` on center +0x3cc, +0x3fc, +0x42c, +0x45c
+and +0x48c, sound release +0x8c `L2.03669`, the three lists +0xc0, +0xd4,
++0xe8, and base leave `L2.00785`.
+
+- `L2.03660` deletes every element (and the cached object when the vector
+  is empty), writes 0 to +0x14 and -1 to cursor +0x18.
+- Seat release deletes the hire and talk sprites, clears both sprite arrays
+  and frees both cursor arrays.
+- Sound release stops, deletes and zeroes all 17 slots through `L2.00981`
+  (R2-ENGINE-281).
+
+Entry +0x80 `L2.00613` calls center +0x78 seat init, builds the five
+filename lists and in campaign mode binds them through `L2.00761`, calls
+center +0x80 art load, sound load +0x88 (release +0x8c first), writes
++0x110 = 1 and requests `Kin1` and `Kvox5` (R2-ENGINE-687). `L2.00761`
+sizes the vector through `L2.03658` to the list count, constructs one
+element per filename, writes 0 to +0x18 and caches element 0 at +0x14.
+
+Kept from visit to visit: taverner state `L2.00937` (14 raw-dword operands,
+all in the painter), a5 step center +0x4bc, step clocks `L2.00945` (7
+operands) and `L2.03662` (5), and ambience baselines and waits
++0x4c0..+0x4cc. Among the 36 EN bodies read, +0x4bc and +0x4c0..+0x4cc
+occur only in the center constructor and the painter. A visit that ends
+mid-episode therefore resumes the same series at element 0 on the next
+entry, with no start sound; a5 resumes at its stored step. After time away
+the first paint can advance the taverner and the selected seat at once and
+request a voice and a dish together.
+
+**Confidence.** High for the leave and entry call order and for each
+release and rebuild in both roots. Medium for the kept state: the
+raw-dword and field censuses do not exclude indirect access, the page
+lifetime is R2-ENGINE-688's Medium clause, and `L2.03658`, `L2.03659` and
+element constructor `L2.00573` were not read. Unknown for what the screen
+shows on such a re-entry.
+
+**Unknown.** The delivered re-entry picture; an original session that
+leaves the inn mid-a2 and enters again would settle it. The meaning of the
+`scenario.dll` ordinal-10 cell called at leave; a read of the DLL's export 10
+would settle it.
+
+**Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), questions 2 and 5.
+
+### R2-ENGINE-686
+
+EN center painter `L2.00935` (RU `L2.00936`), campaign mode only, after the
+taverner. It lays out the hire seats (page +0xc0) and then the talk seats
+(page +0xe8) six to a row. Each seat draws its background (`manback.bmp`,
+center +0x274, hire; `ManBackTalk.bmp`, +0x278, talk) and its sprite at its
+own cursor.
+
+| Seats | Sprites | Cursors | Selection index | Order at the selected seat |
+|---|---|---|---|---|
+| Hire | +0x224 | +0x24c | i | draw, then advance |
+| Talk | +0x238 | +0x260 | hire count + i | advance, then draw |
+
+Only the seat whose index equals page +0xb8 advances: when unsigned(now -
+`L2.03662`) > 125 its cursor becomes (cursor + 1) mod frame count
+(`L2.03670`, sprite +4), and `L2.03662` takes now. The static has five
+raw-dword operands (RU `L2.03671`, five), all in the painter. Page +0xb8 = -1
+skips every seat.
+
+Seat init `L2.00756` sizes the arrays to the list counts, loads
+`graphics\interface\inn\Unit%d\sprites.16a` per hire seat and that key,
+`HeroMage` or `HeroFighter` per talk seat, and grows the cursor arrays
+through `L2.00757`, whose new cells are 0 (R2-ENGINE-247). Entry writes page
++0xb8 = 0 when the two lists together are non-empty, otherwise -1. Leave
+frees the arrays (R2-ENGINE-685), so every visit starts every seat at frame
+0 with seat 0 selected. R2-ENGINE-248 states the same 125 ms rule for the
+generic inn.
+
+The taverner steps on its own clock (R2-ENGINE-277).
+
+**Confidence.** High for the step rule, order, layout constants, clock
+census and the entry/leave reset in both roots. That no other object of the
+painter steps on a clock is Medium: the shared left and right children and
+base paint `L2.00578` were not read for animation, only for their sound
+sites. Unknown for delivered cadence.
+
+**Unknown.** The paint rate; a timed original session in the Kaarg inn would
+settle the delivered seat step.
+
+**Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), question 3.
+
+### R2-ENGINE-687
+
+The Kaarg sound loader page +0x88 `L2.03672` (RU `L2.03673`) binds 17
+slots: +0x98 `Add`, +0x9c `NoAdd`, +0xa0 `Town\Shop\nofit`, +0xa4 `Kin1`,
++0xa8 `Town\Inn\Helper`, +0xb0 `Out`, +0xb4 `Talk`, +0x140..+0x14c
+`Kdish1..4`, +0x150 `Kman2`, +0x154 `Kman3`, +0x158 `Kvox5` and
++0x15c..+0x164 `Kvox6..8`.
+
+| Key | Request | Loop |
+|---|---|---|
+| `Kin1` | entry, after base enter `L2.00783` | no |
+| `Kvox5` | entry, next | yes (`L2.00974`, flag 1) |
+| `Kman3`, `Kman2` | the choice of state 1 or 2 (R2-ENGINE-277) | no |
+| `Kvox6..8` | R(3) + 1 when now - +0x4c8 > +0x4cc | no |
+| `Kdish1..4` | R(4) + 1 when now - +0x4c0 > +0x4c4 | no |
+| `Out` | shared right child +0x54 `L2.03674` when its hit test returns 2 (EN) | no |
+| `Talk` | three arms of shared right child +0x58 `L2.00743` (EN) | no |
+| `Helper` | seat selection `L2.00754` (R2-ENGINE-247) | no |
+
+`R(n)` is the R2-ENGINE-235 helper (`L2.00728`), a different function from
+the taverner's `L2.00939`; its RU body was not compared here.
+
+- Each ambience request stores 2000 + R(2000) and now; constructor
+  `L2.00609` initializes the four fields the same way. Both clocks run in
+  campaign mode, independent of the taverner. a3, a4, a5 and every step are
+  silent.
+- Play-once `L2.00941` and play-loop `L2.00974` skip a null slot and a slot
+  whose object is playing (`L2.00976`). Start `L2.02166` returns when
+  `L2.03675` is 0.
+- `Kin1` is absent from both archives (R2-ASSET-073). Sound object
+  `L2.00984` stores the key and zeroes +0xc and +0x10. Start calls lazy
+  loader `L2.03661` when +0xc is 0. The loader returns without data when
+  stream open `L2.03656` returns 0, which happens when archive lookup
+  `L2.03657` returns null. The request then plays nothing.
+- Shared page paint `L2.03676` loops page +0x90 on every paint. Build
+  `L2.01246` writes it 0 and the Kaarg loader binds nothing there.
+- Leave's sound release stops `Kvox5` and every other slot
+  (R2-ENGINE-685). The read set requests `Add`, `NoAdd` and `nofit` nowhere.
+
+**Confidence.** High for keys, slots, conditions, loop flags and waits in
+both roots (the call sites, constants and conditions; not the RU body of
+`R`); `Out`, `Talk` and `Helper` are EN-only reads. Medium that `Kin1`
+is silent (`L2.03657` not read) and that the +0x90 loop finds a null slot
+(other writers of page +0x90 not censused). Unknown for audible output.
+
+**Unknown.** Mixing, volume and the delivered loop; an authorized original
+session with audio capture through entry, an a1 start and leave would settle
+them. Whether `Kin1` is silent; a read of archive lookup `L2.03657` on an
+absent key, or the entry session with audio capture, would settle it.
+
+**Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), question 4.
+
+### R2-ENGINE-688
+
+An E8/E9 call-target census over the executable sections finds one call to
+page constructor `L2.00605`, at `L2.03677` inside `L2.00558`, and one call
+to `L2.00558`, at `L2.03678` inside `L2.01428`. That routine parses the
+command line and registry, opens the archives, sets the video mode, loads
+`main\text\*.txt`, calls `L2.00558`, then loads `scenario.dll` and stores
+its ordinal-10 export in `L2.03663`. RU `L2.00606` has one call, at
+`L2.03679`. Inn selector `L2.00425` (RU `L2.00427`), campaign town 2,
+passes application member +0x10c to `L2.00797`, finds child 0x44c through
+`L2.03680` and calls its +0x80 entry.
+
+**Confidence.** High for the census counts and the selector calls. Medium
+for "one page per process": the census misses indirect calls, and the
+callers of `L2.01428` were not read. `L2.01428` has no direct caller and one
+raw DWORD reference, at `L2.03681`; how often that slot is called was not
+read. That the inn selector calls entry on that one object on every visit is
+Medium for the same reason.
+
+**Unknown.** Whether the page object is constructed more than once; the
+callers of the `L2.03681` slot, or an original session that leaves the inn
+mid-a2 and enters again, would settle it.
+
+**Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), question 5.
+
+### R2-ENGINE-689
+
+Routine pairs from entry to first `ret`, the center painter as a fixed
+0xbdf-byte window: the painter, page build, entry, leave, sound load and
+release, page paint, center constructor, seat init and release, art load
+and release, inn selector, base leave, the frame-vector release, bind,
+clear, count, one-shot and reset, the cursor and sprite array helpers,
+sprite frame count, sound slot load and release, sound object, play-once,
+play-loop, playing test, start, lazy loader and stream open. 30 pairs have
+no masked difference; the painter, entry, leave, art load, art release and
+selector differ only in those displacements. Tables `L2.00937`,
+`L2.00943` (96 cells) are equal. The four jump tables hold code addresses in
+both roots; the committed comparison masks them, and the cell offsets from
+the painter start, recomputed in review, are equal. The
+raw-dword operand counts of `L2.00937`, `L2.00945`, `L2.03662` and
+`L2.03663` (14, 7, 5, 4) are equal in RU. The page message slot and the
+shared right child were read in EN only.
+
+**Confidence.** High for textual equality under the mask; it hides large
+constants and does not compare callees.
+
+**Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), question 6.
