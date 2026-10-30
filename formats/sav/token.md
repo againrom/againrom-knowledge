@@ -124,6 +124,13 @@ carried-container arm posts a "Picked up" line for that bit. Both archive arms
 copy the word literally, so a saved 1 survives LOAD until its first
 publication, the only clearing writer located. — SAV-1114, SAV-1115
 
+A hero's sack pickup clears the flags it stamps before it returns: its
+publication to the owner runs the compact writer over every pack item. The
+Item constructor stores 0, and no shop, equip, removal, drop, cull or map
+construction path read writes the word, so on those paths an original STORE
+holds 0. Writes reached only through virtual calls are outside that search
+(Medium). — SAV-1390
+
 ## PointEffect and SpellTransport cast construction
 
 The selected PointEffect chain reaches Token `R0923`; the selected
@@ -160,6 +167,9 @@ The u16 spanning `+00/+01` and explicit `+02` encode the same cell in the
 normal producer relation. The archive copies all 12 bytes, including bytes
 that constructors/copies omit. LOAD overwrites the fresh current-terrain
 pointer before terrain reconstruction. — SAV-TOKENPOS-074, SAV-TOKENPTR-075
+
+At a town STORE and after a town LOAD, a kept actor's terrain word `+08` is
+the address of the terrain the mission-end cull deleted. — SAV-1393
 
 No named constructor/copy/lifecycle path assigns a meaning to `+06/+07`.
 Zero is a Medium-confidence authoring placeholder for those two bytes only;

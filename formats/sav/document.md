@@ -103,6 +103,17 @@ placement-latch claim supplies no universal relation between `Player+3d` and
 the city/world discriminator.
 — SAV-CITY-030, SAV-ROSTER-024, SAV-SHAPE-023, SAV-POSTLOAD-220
 
+The map name `world+0x28` is `1.alm` from the world constructor until the
+mission-map loader `R0512` stores a mission's name: `%d.alm` of
+`campaign+0x660` when campaign phase `+0x6bc` is 2, else the string at
+`campaign+0x6b4`. The mission-end arm keeps the world, and the two
+mission-start arms read call `R0099` with argument 0 and build no world, so
+a town STORE after a mission carries the last mission map's name and a town
+LOAD restores it (Medium: other arms that start a mission were not read). The
+arm that calls the builder `R1284` rebuilds the world and starts with
+argument 1, where `R0512` is skipped. What a map entered from inside a
+mission leaves there is Unknown. — SAV-1392
+
 Two preserved city-shape streams are measured end to end. File-absolute, the
 3,544-byte stream: header `0..20`, word-coded document `20..2219`, label block
 `2219..2475`, embedded store `2475..3234`, uncompressed campaign record

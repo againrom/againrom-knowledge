@@ -3583,7 +3583,7 @@ writer and the six bytes until mission end.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-273 | Seven unit Effects in EN ROM2 game0004..0006 store base +0xe = 2*(+0xc)+8 (Shield 62, Haste 50), +0x3d 0x1 and duration +0x42; their units store base +0x18 = 2 and Player 0 stores +0x30 = 2. | High / Medium | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
-| R2-SESSION-274 | After a ROM2 LOAD a held mark returns, of the writers read, only through a new 0x88: +0x130 is no REG key, and with the saved +0x18 and +0x30 the notify gate is closed for player 0 unless LOAD clears it. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-SESSION-274 | After a ROM2 LOAD a held mark returns, of the writers read, only through a new 0x88: +0x130 is no REG key, and with the saved +0x18 and +0x30 the notify gate is closed for player 0 unless LOAD clears it. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 
 ### R2-SESSION-273
 
@@ -3636,5 +3636,15 @@ path: the LOAD callers of the notify routine were not read.
 **Unknown.** Whether a held Shield shows after LOAD and at which phase. A
 cold LOAD of game0004 (hero Shield, duration 563) with the first frame and
 the next 100 ticks over the hero recorded would settle it.
+
+**Amended.** R2-ENGINE-701 narrows the 33 unclassified sites: of the 38
+`add e?x, 0x130` decodes of the EN 0x130 DWORD scan, 34 were classified and
+only the 0x88 arm and the effect update arms `L2.03772` (IDs 56 and 60, one update of a
+lifetime-1 cast object, R2-ENGINE-700) and `L2.03740` add or overwrite a
+mark. The opcode 0x6c arm calls `L2.03773` on the list, whose callee
+`L2.03784` is unread; the rest of the 34 build, free, look up or read the
+list. Four sites lie in functions of an unread class, and 104
+`[reg + 0x130]` and 17 indexed `lea` hits of the same scan were not
+classified.
 
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 5.

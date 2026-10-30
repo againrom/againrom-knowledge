@@ -1391,3 +1391,57 @@ between (ITEM-242, ITEM-244), with the grades those cards give.
 and by finding what sets `server+0x138`. A native witness. Settled by an owner run: create a mage in a new campaign, SAVE on
 the first mission's first frame, and decode the worn staff's `+0x80` (a Spell reference with the
 Fire_Arrow id).
+
+## Own weight of a Human the map places
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-194 | A Human the map places starts `+0x8e` = 0 in Unit init; each equip adds the worn item's `+0x4a` through `R0451` after storing the slot and each removal subtracts it, so its first STORE holds the worn items' sum. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0634](../experiments/EXP-0634-sav-town-fields/) |
+
+### HERO-194
+
+- Writers: the non-stack write census at `+0x8b..+0x8f` over the seeded decode of every
+  committed function entry holds 111 rows. Word `+0x8e` is written by Unit init `R0160`
+  (`L08713`, 0) and the helper `R0451` (`L08720`). LOAD forms the address of `+0x8e`
+  at `L08728` (`add ecx, 0x8e`); that row is the only `add` or `lea` with displacement
+  `0x8d` or `0x8e` in `400000..L17271`, and the 68 `0x8c` rows in `q1-addr-takers.tsv`
+  include the three in the Unit serializers (`L17272`, `L17273`, `L17274`), each of
+  which passes the `+0x8c` address to one call and forms the next field's address next.
+  A block copy, or an address built from another register, is outside the scan. The dword
+  `+0x8c` stores belong to other objects: client
+  code below `L17275`, the object `R0431` builds, the mover `R1336`, the map reader
+  `R0478`, three routines with no caller or dword reference (`R0523`, `R0504`,
+  `R0524`) and library code. No byte store hits `+0x8d` or `+0x8f`.
+- The helper's 13 direct call sites: equip pushes the item's `+0x4a` (Armor `L17276`, Shield
+  `L17277`, Weapon `L17278`); removal pushes it negated (`L17279`, `L17280`,
+  `L17281`); seven sites push 0 (`L16593`, `L04617`, `L08210`, `L17282`, pickup
+  `L17215`, `L08233`, `L17283`).
+- Order: Human constructor `R0497` → Humanoid `R0902` → Unit `R0901` → `R0185` →
+  `R0160`, so `+0x8e` = 0. Then `R0497` installs vtable `L00003` and calls `R0656`,
+  whose template-cell loop reaches each item's equip slot `vt+0x38` (`ITEM-HUMEQ-030`).
+- Each equip stores the slot first (Weapon `+0x74` `L04707`, Shield `+0x78` `L04708`, Armor
+  `+0x198+4*slot` `L04720`), after calling the displaced item's removal `vt+0x3c` when the
+  slot is occupied (`L17284`, `L17285`, `L04719`), and then calls the helper.
+- Map items: `R0461` gives a type-8 record attached to a unit with a nonzero equip
+  selector to actor `vt+0x3c` (`L04684`), which equips; otherwise `R0929` adds it to the
+  pack, which leaves `+0x8e` unchanged. The spawner `R0151` passes `flags&0x80` as the
+  third constructor argument; template equip runs only when it is 0 and the name does not
+  start with `Hero` (`ALM-FLAGPATH-109`, `ITEM-203`).
+- The derive `R0280` does not write `+0x8e` (`SAV-792`). EN and RU `rom.exe` are one image.
+
+**Confidence.** High for the writer census, the call arguments and the construction order.
+Medium that every worn item reaches its slot through an equip routine:
+`q1-slot-writes.tsv` holds the 46 non-stack writes at `+0x74`, `+0x78` and `+0x198` over
+`L17286..L00552`. The actor-class rows are Unit init (`R0185`), the destructor-side zeros
+(`R1136`), the three equip and three removal routines, the name init `R0184` (its
+`[+0x158]+0x78+4*n` store goes into the object behind `+0x158`, not a worn slot) and the
+zero stores in `R0876` and `R0982`. The other rows lie in client routines, the shop
+class (`L17287`, `R1499`, `L17288`, `R1498`) and stores of a flag or a word array
+into other objects (`L17289`, `L17290`, `L17291`, `L17292`, `L17293`); those classes
+were placed by reading the store forms and are not a committed table. A block copy is
+outside the census.
+
+**Unknown.** No corpus Human's `+0x8e` was compared with its worn items' `+0x4a`; whether
+the corpus values equal the sum is Unknown. Settle with an original run: start a mission
+whose map places a Human with worn items, SAVE on the first frame and compare `+0x8e` with
+the sum of the worn items' `+0x4a`.

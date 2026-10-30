@@ -23,6 +23,12 @@ Byte `0x4c` of the AI raw80 is the AI word-list pointer. STORE writes its live
 bits; LOAD replaces it with a fresh list before reading the list. Any saved
 value, including 0, loads alike. — SAV-1113
 
+The AI constructor allocates that `0x1c`-byte list and stores its address, or
+0 when the allocation fails. STORE dispatches through the word, so a completed
+STORE saw a heap address. No other direct store nulls it in the ranges scanned
+(Medium). It is the object reference a Player record carries in each Group's
+AI raw80. — SAV-1391
+
 Members are written head-to-tail and loaded with append. Changing Group
 detaches an actor first and appends it anew. List position does not identify
 an actor; a Group can split or combine without changing its actors' keys.

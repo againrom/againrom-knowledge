@@ -2560,3 +2560,71 @@ in the same root. The six rows' identifiers are 16, 24, 34, 46, 48 and 62
 equality.
 
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 1.
+
+## Spells records of data.bin and names of the other held-mark rows
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-178 | ROM2 world.res data/data.bin holds 29 named Spells records then 5 empty entries, equal in EN and RU; 14 carry an Effects string, and record k matches spell.txt row k by name except rows 2, 16 and 22. | High / Medium | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ASSET-179 | ROM2 spell rows 6, 12, 14, 15, 18, 21, 22, 24, 26, 28 and 29 are Poison Cloud, Invisibility, Darkness, Light, Stone Curse, Haste, Animate Dead, Heal, Drain Life, Curse and Slow in EN spell.txt, with the RU names of the card. | High | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+
+### R2-ASSET-178
+
+Record shape: CString name, u16 parameter count 22, 22 u32 values, CString
+Effects (formats/rom2-databin). Both roots' `world.res` have SHA-256
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9` and its
+`data/data.bin` node
+`aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`; the 29
+named records start at offsets `0x23cb3`..`0x2494a`. The last, Slow, ends at
+`0x249bf`; the 20 bytes to the end of the node are zeros, which read as 5
+empty entries of 4 bytes (empty name, parameter count 0, empty Effects), so
+34 entries follow the stored count 35 (formats/rom2-databin).
+
+| Record | Name | Effects |
+|---:|---|---|
+| 4, 8, 13, 19 | Protection from Fire, Water, Air, Earth | `protectionFire=+30: duration 30` and the like |
+| 6 | Poison Cloud | `health=-2:continuous 8` |
+| 12 | Invisibility | `Invisibility = ON` |
+| 14 | Darkness | `scanRange=-2:duration 1` |
+| 15 | Light | `scanRange=+2:duration 1` |
+| 18 | Stone Curse | `"absorbtion=+5:duration 8,defence=-20:duration 8"` (the string is stored inside double quotes) |
+| 20 | Bless | `toHit=+1:duration 30` |
+| 21 | Haste | `speed=+2: duration 30` |
+| 27 | Shield | `absorbtion=+5:duration 30` |
+| 28 | Curse | `toHit=-1:duration 30` |
+| 29 | Slow | `speed=-2: duration 30` |
+
+The other 15 named records have an empty Effects string. Records 2, 16 and 22 are
+named Fire Ball, Diamond Dust and Control Spirit where EN spell.txt rows 2,
+16 and 22 read Fireball, Stone Missile and Animate Dead.
+
+**Confidence.** High for the records and strings in both roots. Medium for
+the join of records 2, 16 and 22 to those rows, which rests on order only.
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 1.
+
+### R2-ASSET-179
+
+| Row | EN | RU |
+|---:|---|---|
+| 6 | Poison Cloud | Ядовитый туман |
+| 12 | Invisibility | Невидимость |
+| 14 | Darkness | Тьма |
+| 15 | Light | Свечение |
+| 18 | Stone Curse | Каменное проклятие |
+| 21 | Haste | Ускорение |
+| 22 | Animate Dead | Перерождение |
+| 24 | Heal | Исцеление |
+| 26 | Drain Life | Вампиризм |
+| 28 | Curse | Проклятие |
+| 29 | Slow | Замедление |
+
+Row r is line r-1, counted from 0, of `text/spell.txt` in each root's
+`main.res` (EN node
+`33ab26bfa0d5ee632dac051cafca9d277650167fe423ca17bf2f429eb7102990`, RU node
+`8eb0fc59835ef1fbc575854506d6be98d250d3c3623d18019ba6b2b1bdb3d999`), as in
+R2-ASSET-177.
+
+**Confidence.** High for the committed lines in both roots.
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 1.

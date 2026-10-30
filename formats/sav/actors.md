@@ -40,6 +40,12 @@ Row 10's bytes `0x90..0x93` are Order `+90`, the pointer to row 11's list.
 STORE writes its live bits; LOAD replaces it with a fresh list before row 11.
 Any saved value, including 0, loads alike. — SAV-1113
 
+The Order constructor allocates that `0x1c`-byte list and stores its address,
+or 0 when the allocation fails. STORE dispatches through the word, so a
+completed STORE saw a heap address. No other direct store nulls it in the
+ranges scanned (Medium). Record `+0x1f7` of a Human with empty Effect and
+route lists is this word. — SAV-1391
+
 Speed sits in row 17's `+8c` and in byte `+0a` of the row 9 Mover block. The
 traced LOAD bodies do not recompute it, and SAVE writes both live values.
 Whether the original re-derives speed after LOAD is Unknown; on one mission-140
@@ -362,6 +368,20 @@ The mission clock restarts at 0, so a kept actor's stamp delays the faster
 regeneration rate until the clock passes the stamp plus 80 ticks or the actor
 strikes again. — SAV-1354, SAV-1355, SAV-1356, SAV-1357
 
+In a world built with mode 2, the campaign builders (`world+0c` = 0), a kept
+actor's Position holds the last mission cell, sub-cell and terrain word at a
+town STORE and after a town LOAD. The cull deletes the terrain and writes no
+Position, so the terrain word is the deleted terrain's address. In a world
+built with mode 0 (`world+0c` nonzero) the cull first re-places each hero,
+which stores its cell, sub-cell `0x80`/`0x80` and the live terrain address;
+the delete then makes that word stale. The next join walk reads only the
+packed cell `+02` against the new terrain, then stores the start cell,
+sub-cell `0x80`/`0x80` and the live terrain. The start cell is Player `+60`
+when world `+0c` and that word are nonzero (mode-0 worlds only), else an
+element of the world `+6c` list, else `0x1e + rand(0x46)` per coordinate.
+Medium that no town routine writes the Position before the STORE in a mode-2
+world. — SAV-1393
+
 ### Client drawable after LOAD
 
 The selected entry state message does not populate every numeric card field.
@@ -472,6 +492,12 @@ with order `+5c` 0 is Unknown). The rule and its case table are in SAV-1264.
 LOAD keeps `+8e`, `+90` and the modifier object as stored and runs no equip
 routine (Medium); the first derive and a later weapon or shield removal start
 from the stored values. — HERO-170, HERO-171
+
+A Human the map places starts with `+8e` = 0 from Unit init. Each equip adds
+the worn item's `+4a` after storing the slot and each removal subtracts it; a
+pickup adds 0. The first STORE of the mission therefore holds the sum of the
+worn items' `+4a` (Medium that every worn item arrives through equip).
+— HERO-194
 
 After LOAD the stored `+90` is read by the weight-delta helper, which derives
 only when `load/capacity` changes, and by the compact sender; the first derive

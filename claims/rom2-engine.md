@@ -16046,10 +16046,10 @@ constants and does not compare callees.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-691 | A ROM2 unit caster of IDs 16, 24, 34, 46, 48 or 62 plays Sfx(500+ID) in state 8 at counter = type +0x120 and releases at +0x11c a cast object of lifetime 0, which its first update ends. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
-| R2-ENGINE-692 | The ROM2 unit consumer L2.03727 rebuilds overlay list +0x11c from the marks +0x130 at every call and decrements each mark's low word; marks 16, 24, 34, 46 call L2.03728, 48 calls L2.03729, 62 calls L2.03730. | High / Medium | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-692 | The ROM2 unit consumer L2.03727 rebuilds overlay list +0x11c from the marks +0x130 at every call and decrements each mark's low word; marks 16, 24, 34, 46 call L2.03728, 48 calls L2.03729, 62 calls L2.03730. | High / Medium | ● active (amended, branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 | R2-ENGINE-693 | A ROM2 protection mark draws one sprite 32s above the unit, shifted 6 px by element; Bless draws 20 sparks at fixed positions on a radius-20 ring, frames advancing round it; Shield draws two turning meridians and two sweeping rings. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 | R2-ENGINE-694 | ROM2 unit draw L2.03682 draws +0x11c entries with z > 0, then z <= 0, at the unit position plus (x, y - z); the Palette preparation builds 16 brightness levels, no blend operation in its table; whether the sprite draw blends is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
-| R2-ENGINE-695 | ROM2 0x88 writes mark (ID<<16) OR 0xffff and 0x89 removes it; expiry sends 0x89 at duration 0 unless the duration is above 9600; notify resends 0x88 only while unit +0x18 AND receiver +0x30 is 0 or flag 0x800000 is set. | High / Medium | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-695 | ROM2 0x88 writes mark (ID<<16) OR 0xffff and 0x89 removes it; expiry sends 0x89 at duration 0 unless the duration is above 9600; notify resends 0x88 only while unit +0x18 AND receiver +0x30 is 0 or flag 0x800000 is set. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 | R2-ENGINE-696 | 26 ROM2 EN/RU held-mark listing pairs, six committed slices and 12 tables and constants are equal after masking operands in 0x400000..L2.03731 (registers and deep frame slots where marked). | High | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 
 ### R2-ENGINE-691
@@ -16127,6 +16127,10 @@ entry is 8 bytes (`L2.03750`): words x, y, z, byte type, byte frame.
 +0x11c in both roots. Medium for the figure order, set by the unread
 `L2.03744`, and for the list helpers `L2.03751` and `L2.03752` named only
 by use. Medium for the hero's s, which was not read.
+
+**Amended.** R2-ENGINE-698 narrows the row of marks 20, 56, 60 and 64: it
+reads their four generators and gives their entries. R2-ENGINE-699 narrows
+the switch: no mark outside the ten builds a figure.
 
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 3.
 
@@ -16225,6 +16229,13 @@ both roots. Medium for the mark lookup `L2.03763` and the entry test
 `L2.03767`, which were not read; the callers and rate of the expiry routine
 were not read.
 
+**Amended.** R2-ENGINE-697 narrows the entry-test Medium: `L2.03767`
+returns 1 when Effect +0x3d AND 1 or AND 2 is nonzero, the `duration` and
+`continuous` keyword values. R2-ENGINE-700 narrows expiry for a continuous
+Effect: slot +0x40 runs at every eighth step and its end omits the slot
++0x44 call that the other Effects make.
+The lookup `L2.03763` and the expiry callers stay unread.
+
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), questions 3 and 5.
 
 ### R2-ENGINE-696
@@ -16246,3 +16257,197 @@ overlay passes, +0x8ae and +0x8d5 arms, +0x8c78 notify and senders,
 constants of 0x400000 and above and callees were compared only where listed.
 
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 6.
+
+## Held marks beyond the six: census and remaining figures
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-697 | ROM2 apply arms store Effect +0xe = 2*row+8 with a timed flag for rows 4, 6, 8, 12..15, 18..21 and 27..29; an Effect that reaches attach sends that mark by 0x88; Heal, Drain Life, Teleport, Summon, Animate Dead, Wall of Earth store none. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ENGINE-698 | ROM2 mark 20 draws one poison_d sprite 32s up and mark 64 a 20-spark Curse ring like Bless; marks 56 and 60 add 3 to 5 random sparks per update on a 16s by 8s ellipse while c >= 8, each shown 8 updates, rising or sinking. | High / Medium | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ENGINE-699 | The ROM2 consumer switch over mark - 16 builds a figure only for marks 16, 20, 24, 34, 46, 48, 56, 60, 62 and 64; every other mark, including 32, 36, 38, 44, 50 and 66, builds none and is only counted down. | High | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ENGINE-700 | ROM2 Heal and Drain Life apply arms build no Effect; the cast object's one update sets marks 56 and 60 to (ID<<16) OR 0x20 and no 0x88 is expected (Medium); a continuous Effect calls slot +0x40 every eighth step and skips end slot +0x44. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ENGINE-701 | Of 34 classified of 38 EN `add e?x, 0x130` sites, only the 0x88 arm and update arms L2.03772 and L2.03740 add or overwrite ROM2 unit marks; opcode 0x6c calls L2.03773 on the list; the rest build, free, look up or read it. | High / Medium | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ENGINE-702 | 16 ROM2 EN/RU listing pairs are equal after masking; of 16 apply slices (head and 15 arms) 14 are equal, and the Animate Dead and Summon arms are 6 instructions longer in RU; 8 tables and 2 scans agree. | High | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+
+### R2-ENGINE-697
+
+The apply routine EN `L2.01692` (RU `L2.00034`) switches on spell byte +8
+through table EN `L2.02121` (30 entries). Each Effect-building arm stores
+Effect +0xc = that byte and +0xe = `lea [x + x + 8]` of it, so the mark is
+2*row+8. The entry test EN `L2.03767` (RU `L2.03774`) returns 1 when +0x3d
+AND `[L2.03775]` (1) or AND `[L2.03776]` (2) is nonzero; attach
+(R2-ENGINE-695) sends 0x88 for a new Effect only then and when +0xc is
+nonzero.
+
+| Rows | Spells | Timed flag source | Mark |
+|---|---|---|---|
+| 4, 8, 13, 19 | protections | arm ORs `[L2.03775]` | 16, 24, 34, 46 |
+| 6 | Poison Cloud | Effects keyword `continuous` (2) | 20 |
+| 12 | Invisibility | arm ORs flag 1 | 32 |
+| 14, 15 | Darkness, Light | keyword `duration` (1) | 36, 38 |
+| 18 | Stone Curse | arm ORs flag 1 | 44 |
+| 20, 28 | Bless, Curse | arm ORs flag 1 | 48, 64 |
+| 21, 29 | Haste, Slow | arm ORs flag 1 | 50, 66 |
+| 27 | Shield | arm ORs flag 1 | 62 |
+
+Keyword values of EN `L2.01762` (RU `L2.03777`): `permanent` 0, `singleuse`
+8, `charges` 4, `duration` 1, `continuous` 2; the parser EN `L2.01757`
+stores the value into +0x3d and, when it AND 7 is nonzero, +0x42 = N << 4.
+The default arm `L2.03778` (rows 1, 2, 3, 5, 7, 9, 10, 11, 16 when they
+reach the switch) builds a blank Effect with +0xe and no flag store; the
+arms of rows 17, 22, 23, 24, 25 and 26 store no Effect +0xe. Among the 20
+`09 88` byte hits of each root, one decodes as `mov byte ptr [reg + 9],
+0x88`, in sender `L2.03765` (RU `L2.03779`), which has three direct
+branch callers: notify, the 0x89 wrapper and attach. Other store forms and
+indirect callers were not searched. Attach `L2.00481` is
+slot +0x3c and expiry `L2.00483` slot +0x38 of the table after the zero at
+`L2.03780`.
+
+**Confidence.** High for the arm stores, flag ORs, keyword values and
+entry test in both roots, and for the two scans as scans (20 hits, one
+decode, three direct branch callers). Unknown whether the single-target
+object `L2.03781` attaches its Effect to the target: it was not read to an
+attach call. Medium for the area rows that go through the occupant
+`L2.01708`, which calls vtable +0x3c: it was read in RU only. The saved
+Shield and Haste Effects of R2-SESSION-273 show that rows 21 and 27 reach
+the unit in EN. Medium that the default arm's blank Effect fails the entry
+test (`L2.03782` unread). Medium that no other sender emits 0x88: other
+displacement and SIB store forms, a dword store that carries the opcode,
+indirect callers and senders whose opcode byte comes from a register were
+not searched or bound.
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 1.
+
+### R2-ENGINE-698
+
+Entries (x, y, z, type, frame), s and c as in R2-ENGINE-692:
+
+| Mark | Generator, arguments | Entries |
+|---|---|---|
+| 20 | `L2.03746`(32s, c mod 6) | (0, -32s, 0, 20, c mod 6) |
+| 64 | `L2.03749`(32s, 20.0, c mod 5) | for a = 0, 18, 36, 54, 72 and t = a + 18(c mod 5) degrees, u = trunc(20 cos t), v = trunc(20 sin t): (u, -32s, v), (v, -32s, -u), (-u, -32s, -v), (-v, -32s, u), frame 4 - a div 18 |
+| 56 | `L2.03747`(+0x11c, 16s, 8s, 32s, c) | carried: each current +0x11c entry of type 56 with frame < 7 gets frame + 1 and y - d; new when (c AND 0xffff) >= 8: rand() mod 3 + 3 entries (trunc(16s cos t), 0, trunc(8s sin t), 56, 0), t = rand() mod 360 degrees |
+| 60 | `L2.03748`(same) | as 56 with type 60, carried y + d, new y = -32s |
+
+d = trunc(32s / 7.0 + 1.0). rand `L2.00729` is state * 214013 + 2531011,
+result (state >> 16) AND 0x7fff. Types (R2-ASSET-101): 20 poison_d (frames
+0..5 of 8 used), 64 Curse, 56 healing (frames 0..7), 60 Drain (frames 0..7
+of 9). The Curse positions are the 20 multiples of 18 degrees, 1 degree from
+Bless's (R2-ENGINE-693). With c = 32 .. 1 (R2-ENGINE-700), new sparks
+appear for 25 calls and each moves 7d over its 8 calls.
+
+**Confidence.** High for the EN arithmetic and constants and for the RU
+bodies as masked text (R2-ENGINE-702). Medium for equal RU figures (RU
+trunc, sin and cos helpers unread) and for the carried-spark chain, which
+rests on the consumer storing each new list into +0x11c (R2-ENGINE-692).
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 2.
+
+### R2-ENGINE-699
+
+The consumer EN `L2.03727` (RU `L2.03741`) branches above (mark - 16) =
+0x30 to `L2.03783`. Byte table `L2.03742` (49 entries) and jump table
+`L2.03743` (11 entries) send the ten marks to figure arms and the 39 other
+values of 16..64 to `L2.03783`, the join every figure arm reaches after
+appending its figure. From it the mark is written back with low word - 1
+and removed at 0, so an unlisted mark of low word 0xffff draws nothing and
+is removed after 65,535 calls unless 0x89 removes it first or the opcode
+0x6c route does (its callee `L2.03784` is unread, R2-ENGINE-701). The RU tables
+`L2.03785` and `L2.03786` give the same map (delta +0x5473).
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 3.
+
+### R2-ENGINE-700
+
+Client: the release gives the cast object of IDs 56 and 60 lifetime 1
+(R2-ENGINE-691). Its one update reaches arm EN `L2.03772` (RU `L2.03787`),
+which, when the target key +0x8e is a client unit, overwrites the unit's
+mark of that ID with (ID<<16) OR 0x20 through `L2.03752` or appends it
+through `L2.03306`. The consumer then calls the generator with c = 32 .. 1
+and removes the mark after 32 calls. A second cast inside that time
+overwrites the mark of that ID and so resets c to 32, if the lookup
+`L2.03763` matches by ID (unread, Medium, R2-ENGINE-695); otherwise the arm
+appends a second mark. Neither apply arm read builds an Effect
+(R2-ENGINE-697).
+
+Server: expiry EN `L2.00483` for a continuous Effect (+0x3d AND 2) calls
+slot +0x40 and notify whenever +0x42 is a multiple of 8 before its
+decrement, and at 0 omits the slot +0x44 call that the other Effects make;
+the bit clear, 0x89 and +0x3d OR 0x80 are common. Attach skips its first slot +0x40
+call for +0xc 6. At the arm the Effects strings give Poison Cloud +0x42 =
+128 and Light and Darkness 16; R2-ENGINE-024 lists other durations for
+these rows.
+
+**Confidence.** High for the 56/60 arm and the expiry branches in both
+roots. Medium that a Heal or Drain cast by any unit caster sets the mark:
+the caster's +0x8e and the cast message were not read. Medium that no 0x88
+or 0x89 carries marks 56 or 60: the apply arms of rows 24 and 26 build no
+Effect, but no Effect constructor outside the apply arms and no
+register-opcode sender was read (R2-ENGINE-697, R2-ENGINE-701). Medium that
+a second cast resets c, as above.
+
+**Unknown.** The duration the attached Poison Cloud, Light and Darkness
+Effects hold: the tail callees `L2.03781`, `L2.01694` and `L2.03788`, which
+could rewrite +0x42, and the expiry rate were not read. An original run that casts Poison Cloud over a
+unit in any mission at Speed 4 and times the poison_d sprite from its first
+frame to its disappearance would settle the Poison Cloud case.
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 4.
+
+### R2-ENGINE-701
+
+Population: the 38 decodes `add e?x, 0x130` of the EN DWORD scan for
+0x130 (180 hits). The same listing holds 104 hit lines with a
+`[reg + 0x130]` memory operand decode (34 of them `mov dword ptr [reg +
+0x130], ...` stores) and 17 indexed `lea` decodes (`L2.03789`..`L2.03790`);
+they were listed and not classified. No plain `lea reg, [reg + 0x130]`
+decode occurs. The RU scan for 0x130 was not made.
+
+| Sites | Routine | Use |
+|---|---|---|
+| `L2.03791`, `L2.03792` | 0x88 arm `L2.03761` | overwrite or append |
+| `L2.03793` | 0x89 arm `L2.03764` | remove |
+| `L2.03794`, `L2.03795` | effect update arm `L2.03772` | overwrite or append, low word 0x20 |
+| `L2.03796` | effect update arm `L2.03740` | append, low word 0xffff |
+| `L2.03797`, `L2.03798`, `L2.03799` | opcode 0x6c arm `L2.00138` | `L2.03773` = `L2.03784`(0, -1) |
+| 14 sites `L2.03800`..`L2.03801` | consumer | read, write back, remove |
+| `L2.03802`, `L2.03803` | lookup `L2.03763` | read |
+| `L2.03804`, `L2.03805`, `L2.03806`, `L2.03807`, `L2.03808`, `L2.03809`, `L2.03810`, `L2.03811` | constructors, copy, destructor, unwind | `L2.03812`, `L2.03813`, `L2.03814` |
+| `L2.03815` | unit update | count |
+| `L2.03816`, `L2.03817`, `L2.03818`, `L2.03819` | field lists at +0x120..+0x130 and +0x9e..+0x134 | `L2.00981`/`L2.00980`, `L2.03229`/`L2.03713`; class of the object not read |
+
+The opcode 0x6c arm calls `L2.03773` when message +0x14 has flag 0x800000
+and on two paths that also clear unit +0x88 and call `L2.03820` on +0x11c.
+
+**Confidence.** High for the population of 38 decodes and the routine of
+34 sites. The four field-list sites are in functions whose class was not
+read; the 4-byte spacing of `+0x120`..`+0x130` in the function at `L2.03821`
+does not fit a unit whose list starts at `+0x11c`, which is an inference.
+Medium that `L2.03784`(0, -1) empties the list and that `L2.03812`,
+`L2.03813` and `L2.03814` only construct, copy and free: their bodies were
+not read. Medium for "no other writer": the 104 `[reg + 0x130]` and 17
+indexed `lea` hits of the same scan were not classified, and the scan covers
+EN only.
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 1.
+
+### R2-ENGINE-702
+
+Listing pairs: consumer (to its jump table), generators of marks 20, 56,
+60 and 64, rand, the two list helpers, effect update and its arms, the 0x88
+sender, entry test, apply dispatcher, Effects builder, parser and keyword
+routine. Apply slices: 16 listing slices of the apply routine (the head at
+`L2.03822` and 15 arm slices, three of which cover several rows), 14 equal.
+The arms of rows 22 and 25 hold 470 and 231 RU instructions against 464 and
+225 EN; neither stores an Effect. Tables: consumer and
+effect-update index tables equal; their jump tables one delta (+0x5473);
+the apply jump table three deltas (+0x9cc7, +0x9cd7, +0x9cec); the
+effect-flag table and 7.0 equal. Scans: 20 `09 88` hits and 3 direct
+branch targets of the sender in each root. Deltas RU - EN: +0x8170 generators, +0x5473 consumer
+and effect update, +0x8c78 sender, +0x9cec entry test and builder, +0x9cd1
+parser and keyword routine, +0x9cc7 dispatcher.
+
+**Confidence.** High for textual equality under the mask of
+R2-ENGINE-696; callees were compared only where listed.
+
+**Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 5.

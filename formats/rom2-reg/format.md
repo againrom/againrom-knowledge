@@ -127,7 +127,9 @@ A unit caster's release gives the cast object of identifiers 16, 24, 34,
 46, 48 and 62 zero remaining segments +0xa8 at creation, so that object
 ends at its first update; the held image of these spells is a unit overlay,
 not a projectile. The client marks +0x130 and the overlay list +0x11c are no
-REG keys. — R2-ENGINE-691, R2-SESSION-274
+REG keys of the EN restore; the 38 EN sites that add the mark list's offset
+were censused, four of them in functions of an unread class. —
+R2-ENGINE-691, R2-SESSION-274, R2-ENGINE-701
 
 ## Mission View and Selection consumers
 

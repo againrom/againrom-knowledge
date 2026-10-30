@@ -18557,3 +18557,180 @@ a Building and so for the period in seconds.
 builds an Outpost, recording the sub-tick number at each `R0432` call, settles it. No
 corpus SAV holds an Outpost record (`SAV-1374`), so no saved `+0x84`, `+0x88` or `+0x8c` was
 observed.
+
+## Town STORE fields: Item Token `+08`, object references, head map name, kept Position
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1390 | A hero's sack pickup stamps Item Token `+0x08` = 1 and clears it before it returns, through `R0059`, `R0670` and `R0883`; no other event read sets it, so on the paths read a STORE holds 0. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0634](../experiments/EXP-0634-sav-town-fields/) |
+| SAV-1391 | The Player record's reference is Group AI `+0x4c` and a Human's record `+0x1f7` is Order `+0x90`: each is the address of a `0x1c`-byte word list its constructor allocates, or 0 if that fails; no other direct store scanned nulls it. | High / Medium | ✔ promoted (branch candidate) | [EXP-0634](../experiments/EXP-0634-sav-town-fields/) |
+| SAV-1392 | Head map name `world+0x28` is `1.alm` until `R0512` stores a mission's map name; the mission-end arm keeps the world, so a town STORE after a mission carries that name; the arm calling `R1284` rebuilds it and skips `R0512`. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0634](../experiments/EXP-0634-sav-town-fields/) |
+| SAV-1393 | In a mode-2 world (`R1382`, `R1284`) a kept actor's town Position is the last mission cell, sub-cell and the deleted terrain's address; in a mode-0 world the cull re-places each hero first; the join walk reads only the packed cell. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0634](../experiments/EXP-0634-sav-town-fields/) |
+
+### SAV-1390
+
+- Pickup `R0448` (direct callers `L17210`, `L17294`) stamps `+0x08 = 1` on every
+  item of the sack's container (`L04886`), drains them into actor `+0x7c` (`R0450`, which
+  runs the merge OR `L04883`), calls the own-weight helper with 0 (`L17215`) and then
+  `R0059(actor, 0, 0xa08000)` (`L12990`).
+- `R0059` with recipient 0 walks the player list `[L00380]` and calls itself for each
+  player `L09285` accepts and for the actor's owner `actor+0x14` (`L17295`..`L17296`).
+- In the owner call bit `0x800000` survives. The mask edits are `&0x50fb` only for a
+  recipient other than the owner with actor type outside `0x21..0x3f` (`L17297`..`L03234`),
+  then `&~2`, `&0xbfffffff` and `&0x7fffffff` (`L09181`, `L17298`, `L17299`). No branch
+  from the body passes `L09139` except that test.
+- `L17300`..`L03241`: bit `0x800000` with recipient = owner calls `R0670`. For actor type
+  `0x21..0x3f` (`L12435`, `L12436`) it calls `R0883` on every item of `actor+0x7c`
+  (`L17301`), which stores `+0x08 = 0` (`SAV-1114`).
+- Construction: the Item constructor stores 0 (`L09175`). The depth-12 direct-callee cone of
+  the name constructors `R0665`, `R0973`, `R0974` (175 routines) holds 24 non-stack
+  writes at displacements `5..0x0b`; `L09175` is the only Item Token write. The others are
+  in the Position constructor `L07102`, list helpers `L08701`, `L09051` and library code.
+- Events: the depth-2 cone of pickup, shop buy `R1628`, the three equip and three removal
+  routines, drop `R0944`, `R0472`, the cull `R0826`, `R1380`, `R0014`, map loot
+  `R0461` and the spawner `R0151` holds 106 such writes. The Item Token writes are
+  `L04886` and `L04883`. The rest write message buffers (15 routines), an object of
+  vtable `L05044` (`R0463`, `R0624`), the spawner's map-unit word (`L06792`), the
+  shop object (`L17302`), the AI constructor, the
+  cull's teardown `L09062`, Position setters, terrain routines and list helpers.
+- The Token copy constructor copies the word (`SAV-1114`); both archive arms copy it
+  (`SAV-1115`). EN and RU `rom.exe` are one image (SHA-256 `942e9b72…`).
+
+**Confidence.** High for the pickup path: stamp, call, owner recursion, mask, type gate and
+clear are each a decoded instruction. Medium that no other event writes the word: the cones
+follow direct edges only, so a write through a vtable or callback is outside them. The 106
+rows of `q2-event-cone.tsv` are listed by containing routine; the grouping of those routines
+by object class above was made by reading them and is not a committed table. Token `+0x08`
+was not read over the original-authored corpus streams. Unknown for a pickup by an actor
+whose type is outside `0x21..0x3f`: `R0670` skips such an actor (`L12435`..`L17303`),
+so that pickup keeps the 1 on this path.
+
+**Unknown.** Settle with an original run in which an actor of a type outside `0x21..0x3f`
+picks up a sack (if any path allows it), SAVE at once and decode the picked items' Token
+`+0x08`. A hero's pickup tests the High path (predicted 0).
+
+### SAV-1391
+
+- Order constructor `R0286` zeroes `0x94` bytes, allocates `0x1c` bytes, constructs the word
+  list (vtable `L08172`) and stores it at `+0x90` (`L14226`); a null allocation stores 0
+  (`L14227`). Its four direct callers are `L14228`, `L14159` (join walk), `L14229`
+  (Unit init) and `L14230`.
+- Group AI constructor `R0150` does the same for `+0x4c` (`L00291`, `L17304`). Its one
+  caller, the Group constructor (`L14232`), stores the AI at Group `+0x3c` (`L00289`).
+- The record offsets and the LOAD replacement are `SAV-1113`'s. STORE dispatches the list's
+  `vt+8` through the word with no null test, so a STORE that completes saw a non-null list.
+- Writers: `q3-ref-writers.tsv` holds the direct non-stack writes at Order `+0x90` over
+  `L15031..L17305` and at AI `+0x4c` over `L16563..L07036`. At `+0x90` they are the
+  constructor (`L14226`, `L14227`), the serializer's LOAD arm (`L09049`) and stores into
+  other objects (`L09700`, the mover behind `+0x154` at `L06948`, `L06949`, `L06950`,
+  `L06951`, `L06952`, `L00458`, `L01715`). At `+0x4c` they are the constructor
+  (`L00291`, `L17304`), the serializer's LOAD arm (`L08203`), the Group and Player
+  records (`L17306`, `L17307`) and byte or word fields of other classes. The class of each
+  other row was placed by reading the store form and is not a committed table.
+- Readers through a pointer loaded at most 8 instructions earlier: 19 reads of Order `+0x90`
+  (pointer from `+0x158`) in `R0159`, `R0172`, `R0173`, `R0161`, `R0016`,
+  `R0175`, `R0146`, `R0164`; 4 reads of AI `+0x4c` (pointer from `+0x3c`), 3 in
+  `R0163` and 1 in `R0164`. Each dereferences the live list.
+
+**Confidence.** High for the constructors, the null case and the STORE dispatch. Medium that
+no other direct store nulls the word: the writer scans cover the ranges named above and
+direct stores only; a block copy or a store through an address formed elsewhere is outside
+them. Medium for the reader list: a pointer held in a frame slot, passed as `this` or kept
+past the window is outside the scan.
+
+### SAV-1392
+
+- Image-wide, every `add reg, 0x28` and `lea reg, [x+0x28]` with its first call within five
+  instructions gives 305 rows. CString or archive calls on world `+0x28` are in the world
+  constructor `R0967` (construct `L17308`; assign the literal `1.alm` at `L17309`),
+  `R0512` (assign its argument, `L17310`), the document LOAD arm (`L17311`), the STORE
+  arm (`L17312`), the destructor `R1540` and two unwind funclets of `L12238`.
+  Readers: `L17313`, `L17314`, `L16652`, `L17315`.
+- `R0099` builds the name (`L03553`..`L17316`): `%d.alm` of `campaign+0x660` when
+  `campaign+0x6bc` = 2, else the string at `campaign+0x6b4`. It calls `R0512` (`L06688`)
+  when its argument is 0 and `campaign+0x6b8` is nonzero. The other call, `L09338`, lies in
+  `R1662`, which has no caller in the E8/E9 and dword scans.
+- `R1304` builds the world; its callers are `L07363`, `L09302`, `L09303`, `L09304`
+  and `L09305` (`callers.txt`). They lie in the builders `R1382`, `R1284`, `R1665`,
+  `R1666` and `R1667`, whose own seven call sites (`callers.txt`) lie at
+  `L17317`..`L17318`. `R0099` has three direct callers: the handler arms `L03842`
+  and `L07366`, each pushing `edi` (zeroed at `L11306`) with no builder call in the arm,
+  and `L06711` inside `R1284`, with argument 1. The arm `L14112`..`L13684` calls the
+  teardown `R1303` and then `R1284`, which builds a new world (mode 2) and starts the
+  mission with argument 1; `L17319` then skips `R0512`, so that world keeps `1.alm`
+  until a later start with argument 0. `R1304` sets `campaign+0x6b8` to 1 only when
+  `R0119` returns 0. The mission-end cull does not write `+0x28`; `PARTY-PERSIST-028`
+  reads the handler's mission-end arm end to end and finds no teardown on it
+  (`PARTY-PERSIST-014`).
+- Values: a world `R1304` built holds `1.alm` until the first `R0512`; after a mission
+  and the return to town it holds that mission's name (`SAV-CITY-030` observed `20.alm` with
+  mission number 0); a town LOAD restores the stored name.
+
+**Confidence.** High for the writers and values above on the arms read. Medium that no
+mission rebuilds the world: the basis is `PARTY-PERSIST-028` for the mission-end arm and the
+two mission-start arms read here; the other arms that start a mission, and which message
+reaches each arm, were not read. Medium for completeness of the writer scan: an address of
+`+0x28` formed another way or passed further than five instructions is outside it. Unknown
+for a sub-map: no routine read enters or leaves one.
+
+**Unknown.** Settle with an original run: enter a map reached from inside a mission, return,
+SAVE in town and decode the head map name.
+
+### SAV-1393
+
+- The cull `R0826`, per human player with a hero, calls `R1707` (`L17320`), which
+  reaches `R0289` through `L12566` on a temporary Position in its own frame and writes no
+  actor Position, and `R0123` (`L13876`) only when world `+0x0c` is nonzero. It then
+  deletes the terrain `[L04624]` and stores 0 there (`L17321`). The body itself calls no
+  routine of the Position family `L14471`..`R1360`.
+- World `+0x0c` is `argument < 2` (`L06608`..`L06610`, `R0119`), the mode that
+  `R1304` passes on. `R1382` (`push 2` at `L07362`) and `R1284` (`push 2` at
+  `L17322`) pass 2, so `+0x0c` = 0 and the cull does not call `R0123`; both set
+  `campaign+0x6bc` = 2. `R1665` and `R1666` pass 0, so `+0x0c` = 1; `R1667` passes
+  `campaign+0x6bc`. In a world with `+0x0c` nonzero, `R0123` reads the actor's cell
+  through `R0300` and `R0299` and calls `R1145`, which stores the cell, sub-cell
+  `0x80`/`0x80` and the live terrain address through `R0289` (`L14136`) before the
+  delete; the terrain word is then stale as in the other case, and a kept Human's sub-cell is
+  reset. Whether any other routine writes `world+0x0c` was not searched.
+- Direct callees of the cull: `q5-cull-reach.tsv` lists the 27 direct callees with the
+  Position-family routines in the direct-edge cone of each (depth 12). Only `R1707`
+  (frame-local Position), `R0123` (the branch above) and `R1723` (a path through
+  `R0923` to the Position constructor `L07102`, which initialises a new Token's
+  Position) reach one.
+- A town LOAD constructs no terrain and keeps the saved Position words (`SAV-POSLOAD-140`).
+- The join walk `R0065` (`this` = world) per actor first calls
+  `R1826([L04624], *(actor+0x10))` (`L17323`). It reads Position `+0x02` only, tests
+  terrain cell flag `0x20`, looks the cell up and returns its occupant. If that is the actor it
+  is skipped. Otherwise `R0289` (`L14151`) sets the cell to the start cell, sub-cell
+  `0x80`/`0x80` and the live terrain, and `R1145` places the actor (`L06656`, `L06655`).
+- Start cell: the Player's `+0x60` word (low byte X, high byte Y) when world `+0x0c` and the
+  word are nonzero; else an element of the list at world `+0x6c` chosen by `R0861`; when
+  `X*Y` = 0, `0x1e + R0861(0x46)` per coordinate (`L14162`..`L12332`). The first
+  source is reachable only in a world with `+0x0c` nonzero (mode 0 builders), so in a
+  campaign world (mode 2) the start cell comes from the `world+0x6c` list or the random
+  fallback.
+- Corpus: 28 distinct streams in six directories whose `MANIFEST.md` files or names record
+  install copies (`tools/savdoc` `saveDirKind`, read from the directory, not from the bytes;
+  class `original` in `q5-provenance.tsv`). `-mode authorship` (`q5-authorship.tsv`) gives
+  `original-authored` for all 28, so no stream is an original resave of a project-written
+  input. `q5-stream-shape.tsv` splits the 28: 25 have `document_ok` and a world half, 2
+  (`game0010.sav` of `2026-08-02` and `2026-08-15`) have `document_ok` and no world half (town
+  documents), and 1 (`1e2eb21f`, `2026-08-15/game0018.sav`, 128 token-derived records) has
+  `document_ok` false, so its document shape and the terrain relation of its Positions are
+  unresolved and it is excluded. Of the 4 Humans in the two town documents, 3 hold a nonzero
+  cell and a nonzero terrain word, of which one holds sub-cell 179/179 and two hold 128/128;
+  one holds cell 0,0, sub-cell 128/128 and terrain word 0. Only the 179/179 Human
+  witnesses a kept sub-cell, because a join-walk placement also stores 128/128. No file of
+  another provenance class was read.
+
+**Confidence.** High for the cull's terrain delete, the branch test on world `+0x0c`, the
+join walk order and the start-cell branches. Medium that nothing else writes a kept actor's
+Position between the cull and the STORE in a mode-2 world: the search covered the cull body,
+`R1707` and the direct-edge cones in `q5-cull-reach.tsv`, which follow direct edges only.
+Medium that the 0,0 Human was built after the cull zeroed the terrain. The corpus agrees with
+the mode-2 reading (the 179/179 Human was not re-placed) but does not identify the builder
+that made its world. Unknown which corpus Human is kept.
+
+**Unknown.** Settle with an original run: end a mission with a hero off a cell centre, SAVE
+in town and decode its Position (predicted: mission cell, sub-cell and a nonzero terrain
+word), then SAVE on the next mission's first frame (predicted: start cell, sub-cell `0x80`).
