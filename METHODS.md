@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4452. Observation: 159. Static analysis: 3711. Mixed: 582.
+Claims labelled: 4460. Observation: 159. Static analysis: 3718. Mixed: 583.
 
 ## Ledger ai
 
@@ -1960,6 +1960,8 @@ Claims labelled: 4452. Observation: 159. Static analysis: 3711. Mixed: 582.
 | REG-INNSTAGE-117 | static analysis | ● active |
 | REG-EDLOAD-121 | static analysis | ● active |
 | REG-INMAP-122 | static analysis | ● active |
+| REG-125 | mixed | ✔ promoted (branch candidate) |
+| REG-126 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger res
 
@@ -3911,6 +3913,12 @@ Claims labelled: 4452. Observation: 159. Static analysis: 3711. Mixed: 582.
 | TERR-254 | static analysis | ● active |
 | TERR-CLICK-262 | static analysis | ● active (branch candidate) |
 | TERR-CLICK-263 | static analysis | ● active (branch candidate) |
+| TERR-LIGHT-285 | static analysis | ✔ promoted (branch candidate) |
+| TERR-LIGHT-286 | static analysis | ✔ promoted (branch candidate) |
+| TERR-LIGHT-287 | static analysis | ✔ promoted (branch candidate) |
+| TERR-LIGHT-288 | static analysis | ✔ promoted (branch candidate) |
+| TERR-LIGHT-289 | static analysis | ✔ promoted (branch candidate) |
+| TERR-LIGHT-290 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger text
 

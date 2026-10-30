@@ -266,6 +266,17 @@ Other keys include `AnimMask`, `Phases`, `Flat`, `Indestructible`, `Usable`,
 suffix (`UNIT-PICT-037`). The RU install lacks the `magic`, `ruins` and
 `sphinx` leaves referenced by structure classes (`REG-PICT-083`).
 
+  `LightRadius` (`class+0x94`) and `LightPulse` (`class+0x98`) default to 0. Both
+roots carry them on five classes: Tower 1 and Tower 2 (12, 13: radius 1, pulse 8),
+Well 2 (15: radius 1, no pulse), Well 3 (16: radius 1, pulse 4) and the Campfire
+(53: radius 1, pulse 6). No other of the ten registries read (`objects`, `projectiles`,
+`material`, `units`, `globalmap`, `npc`, `scenario`, `ai`, `map`) has a light key;
+`sfx.reg` was not read (`REG-125`). Among the 18 routines that reference the class
+array the structure light method is their only reader (`REG-126`; other routes are
+Medium). The stamp is 32 at pulse 0, else a triangle wave of
+the game tick with period `2*LightPulse` ticks between `32-LightPulse/2` and
+`32+LightPulse/2` (`TERR-LIGHT-287`).
+
 - **projectiles.reg:**31 installed definitions. Present SFX values are 1,
   a presence flag; the 12..62 interpretation in `REG-PROJ-041` is withdrawn.
   Installed Width/Height are 12..128, not limits. File is a kind 0 string path

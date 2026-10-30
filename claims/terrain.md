@@ -4133,3 +4133,79 @@ The client point builder stores the resulting low words; the cell setter later k
 **Confidence.** High for the complete conversion body and own stores. Medium for the local absence of actual-extent validation. Unknown for a click beyond actual width/height or on the map border: projected-grid producers, viewport bounds, serialization and server dispatcher can change which input reaches these bodies.
 
 **Unknown.** Read projected-grid/viewport producers and complete R0061, then the coordinate consumers and R0178, to decide border/outside-map admission. No out-of-grid lookup safety or universal wrap/clamp rule is claimed.
+
+## Structure light sources
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-LIGHT-285 | Structure vt+0x40 R2310 stamps a class's light into view+0xa8 on every light-grid rebuild, for every object-map entry, only when Lighting is on, LightRadius is nonzero and the health word is positive. | High / Medium | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+| TERR-LIGHT-286 | The stamp writes one byte to the (TileWidth+1)x(TileHeight+1) corner vertices of the footprint, moved by LightRadius-1, clipped per vertex to the stamp grid; each call increments the write count and unions a dirty rect. | High | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+| TERR-LIGHT-287 | The stamp byte is 32 when LightPulse is 0, else a triangle wave of the view tick counter +0xa70: period 2*LightPulse ticks, 32-P/2 to 32+P/2, one phase for every structure, no random draw. | High / Medium | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+| TERR-LIGHT-288 | The rebuild runs the structure walk, the projectile walk, a third point stamp, then the merge stamps, each a plain byte store; the ground takes min(stamp, terrain byte); the merge model gives a lit-footprint sprite cell level 0 or 1. | High / Medium | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+| TERR-LIGHT-289 | A structure's sprite frame steps its own counter +0x70 once per tick, apart from the light's view counter; the Tower and Campfire periods equal their light periods, Well 3's (12 ticks) does not (8). | High | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+| TERR-LIGHT-290 | Of the nine drawable vtables only the four structure vtables put R2310 at vt+0x40; the four unit vtables return at once and the projectile vtable has its own method, so no unit lights this way. | High | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+
+### TERR-LIGHT-285
+
+Population: EN and RU `rom.exe` (one image, SHA-256 `942e9b72…`), static listings and the original `R2310` bytes executed on a synthetic view.
+
+- `R2310` is `vt+0x40` of the structure vtables (`TERR-LIGHT-290`). It takes the class from the class array `[L01425]` by object `+0x20` and the view from object `+0xe0`.
+- Gates, in order: `[L06417]` (Lighting) nonzero (`L17334`); class `+0x94` nonzero (`L17335`); signed word object `+0xfc` greater than 0 (`L17336`). A failed gate returns with no store and no write-count change. Executed: Lighting 0, radius 0, health 0 and health -5 store nothing; health 1 stamps.
+- Not read: the Animation option `[L05659]`, the ambient byte `[L05650]`, fog or explored state, the object's `+0x4c`. The Animation-off control stamps the same values. `MENU-074`: clearing Animation in the options dialog also clears Lighting.
+- The building arm initialises the health word `+0xfc` from message word `+0x12` (`L06408`); the base constructor also stores `+0xfc` (`L17337`). Later writers of `+0xfc` are not censused, so any later update of a structure's health word is unread. The structure draw tests the same word (`L10097`) and draws the ruin grid when it is not positive and class `+0x64` Indestructible is 0. By the gate above a structure whose health word is not positive stamps no light. By `TERR-STRUCT-210` a Tower (ID 12, 13) reaches that word when destroyed (Medium) and then draws its ruin grid; the Campfire (53) has maximum HP 0 and health word 1000 (`TERR-STRUCT-210`), so it is never unlit by health.
+- Call site: the rebuild `R1657` walks the object map `view+0x9b8` and calls `R0614`, `vt+0x38` and `vt+0x40` for every entry with no condition (`L17338..L17339`). The painter `R0379` calls the rebuild at `L13409` on every pass that passes `L16516`. Structures enter `view+0x9b8` in the building arm (`L16312..L16887`, `TERR-FOG-276`).
+
+**Confidence.** High for the gates, the call chain and the routine's behaviour under the executed controls (`TERR-LIGHT-286` states what the run shows). Medium for the player effect of health: that a destroyed structure's health word becomes not positive rests on `TERR-STRUCT-210`, later writers of the word are unread, and no run was observed.
+
+**Unknown.** Whether the server ever publishes a non-positive health word for the Indestructible Wells 15 and 16. The server code that publishes the word (Building word `+0x42`) is not read, and a Well cannot be destroyed in the original, so a destruction run cannot reach it. A read of the server publication of `+0x42` settles it, or a run in a mission with a Well that reads the Well's `+0xfc` word at load and again while the party attacks it. For the Tower, a run that damages a Tower 1 to destruction with Lighting on and records the stamped ground before and after settles the Medium visible effect.
+
+### TERR-LIGHT-286
+
+`R0614` sets the rect from the anchor `+0x28`/`+0x2c` (cell*256+0x80, `L17340..L17341`): `x1 = ((x-0x80)>>8) - scrollX`, `x2 = x1 + W - 1`, rows alike, with W and H from `vt+0x20`/`vt+0x24` (class `+0x10`/`+0x14` for `CStructure`), clamped to `x1 >= -3`, `x2 <= visCols+2`, `y1 >= -3`, `y2 <= visRows+6`.
+
+- `R2310` loops columns `x1+R-1 .. x2+R` and rows `y1+R-1 .. y2+R`, R = LightRadius, and stores the byte at `grid[(visCols+7)*(row+3) + col+3]` (`L17342`, a plain `mov`) only when col is in `[-3, visCols+3)` and row in `[-3, visRows+3)`: the clip is the stamp grid, a three-vertex margin on every side of the visible area, not the visible window.
+- R = 1 (every shipped light class) stamps the footprint's corner vertices: 4 for the 1x1 Campfire, 9 for the 2x2 Towers and Well 2, 16 for the 3x3 Well 3. Executed R = 2 and R = 3 move the same block right and down by R-1; R does not widen it.
+- After the loop: view `+0x108` += 1 and `UnionRect` of `((x1-2)*32, (y1-2)*32, (x2+3)*32, (y2+3)*32)` into view `+0xf4`. Executed: a footprint wholly beyond the right margin stamps nothing and still does both.
+
+**Confidence.** High for the routine on the inputs tested: the instructions are read, and the original bytes of `R2310` were executed under synthetic inputs with `UnionRect` stubbed. The run fixes the routine's map from its inputs (rect fields `+0x3c..+0x48`, class radius and pulse, health word, the Lighting flag, the view's counter, column and row counts, the grid pointer) to the stored addresses, the stored value, the write count and the third argument given to `UnionRect`; the listing says the same, so the run confirms the reading. The run does not show the rect a real structure supplies (the clamped footprint of `R0614` is read, not executed), the real `visCols`, `visRows` and grid extent, that `UnionRect` unions as stated (its argument order at `L17343..L17344` is read, not run), or that the original calls the routine on every pass (that is the listing of the rebuild and the painter, `TERR-LIGHT-285`).
+
+### TERR-LIGHT-287
+
+- `P` = class `+0x98` LightPulse, `t` = view `+0xa70`, signed `idiv`, `P/2` rounded toward zero: P = 0 gives 0x20 (`L17345`); else the byte is `(t mod P) - P/2 + 32` when `t mod 2P < P`, and `P/2 - (t mod P) + 32` otherwise (`L17346..L17347`).
+- Executed on the shipped classes: Tower 1 and 2 (P 8) 28, 29 … 36 … 29, period 16 ticks; Campfire (P 6) 29 … 35 … 30, period 12; Well 3 (P 4) 30 … 34 … 31, period 8; Well 2 (no key, 0) constant 32. A lower byte is brighter: 28 is the Tower's brightest stamp.
+- The direct stores to `+0xa70` are `L02611` (0 at view construction) and `L02476` (+1 in the tick `R0334`, `ANIM-CLOCK-001`); `counter-refs.tsv` lists every instruction with displacement `0xa70` or `0xa74`, and a bulk write of the view (a fill or block copy) is not a displacement store and is not excluded. The painter's own counter `+0xa78` is not read. Every structure reads the same counter, so all lights of one class are in phase; there is no per-structure offset and no random draw.
+- At the default 16 ticks per second (`ANIM-CLOCK-001`) the periods are 1.0 s (Tower), 0.75 s (Campfire) and 0.5 s (Well 3); the light stops when the tick stops.
+
+**Confidence.** High for the arithmetic, the counter and its direct stores. Medium for the periods in seconds, which take the tick rate from `ANIM-CLOCK-001`.
+
+**Unknown.** Whether a LOAD or mission start constructs a new view, or writes the view in bulk, and so restarts `+0xa70`; only the phase depends on it. A run settles it: LOAD a save beside a Tower, record the stamped value over one period straight after load and compare with the phase before saving.
+
+### TERR-LIGHT-288
+
+- Order inside one rebuild `R1657`: fill `+0xa8` with 0xff and zero `+0x108`; the `view+0x9b8` walk (the structures, in hash order, `vt+0x40` at `L13407`); the projectile walk (`+0x9d4`, `vt+0x40` at `L13408`); a third `R1095` call at `L13411`; then `R0608` with its own stamps (`L05658`, `MAGIC-UNITLIGHT-057`, `MAGIC-270`) and the merge. The structure method stores with a plain `mov byte` (`L17342`) and the point helper with plain `mov byte` stores (`L17348`, `L17349`, `L17350`, `L17351`), none after a compare against the old byte, so the last write to a vertex stands.
+- A projectile stamp replaces a structure stamp at a shared vertex when the projectile object is in the `+0x9d4` walk. `MAGIC-269` records both `L13407` and `L13408` as call sites of the projectile method, so a projectile object entered in `+0x9b8` would stamp in hash order, interleaved with the structures, and a structure stamp could overwrite it. The classes entered into `+0x9b8` are not censused.
+- The third call at `L13411` is the point source that `MAGIC-269` holds as an unattributed Unknown (radius 1, a level chosen by an 11-arm switch of a stored value, no stamp by default). This card does not attribute it.
+- Ground: at a stamped corner `R1816` takes `min(stamp, terrain byte)` (`MAGIC-273`); the gain is `(96-L)/32` (`TERR-LIGHT-020`). The sun model puts flat daytime ground at level 46, gain 1.5625 (`TERR-LIGHT-013`, `TERR-LIGHT-020`; other times of day give other flat levels). Against it a structure stamp of 28..36 gives gain 2.125..1.875. A corner whose terrain byte is below the stamp keeps the terrain byte.
+- Sprites (the model of `MAGIC-273`'s merge arithmetic in `merge-model.tsv`, ambient 14 by day and 32 at night per `MAGIC-UNITLIGHT-057`): a cell with four stamped corners gets level 0, or 1 at stamp 36; with two stamped corners 1 (2 at stamp 34..36) by day and 4 at night; with one, 2 by day and 6 at night; unlit cells are 3 by day and 8 at night. Sprite gain is `2(16-S)/16`. Each footprint cell has four stamped corners; the cells around it have two or one.
+- The structure body is drawn with the `+0xb0` byte of the cell being painted (`L17352..L17353`, registration per `TERR-STRUCT-104`); for a footprint cell with four stamped corners that byte is 0 or 1 under the model above.
+- The stamp does not read the ambient byte: by day and at night the ground under a structure light gets the same stamp.
+
+**Confidence.** High that the rebuild runs the `+0x9b8` walk, then the `+0x9d4` walk, then the third point stamp at `L13411`, then the merge, that every stamp is a plain byte store with no compare against the old byte, and for the ground minimum (instructions read). Medium that every projectile stamp follows every structure stamp: no census of the classes entered into `+0x9b8` is recorded. Medium for the sprite levels and the ground gains. The sprite levels are `merge-model.tsv`, a model of `MAGIC-273`'s arithmetic whose only check is its bolt row (`0 0 0 0 2` at ambient 48); its domain (every window cell with a stamped corner is merged) is `MAGIC-273`'s wording, and `R0608`'s cell loop is not read here. The gains take the flat level 46 from the sun model and the minimum from `MAGIC-273`.
+
+**Unknown.** The `view+0x9b8` walk order between two structures that share a vertex, and whether a projectile object ever sits in that walk: a run with a Campfire beside a Tower, Lighting on, recording the shared `+0xa8` vertices over one Tower period settles the first; a run casting a bolt spell over a Tower, recording the same vertices after the rebuild, settles the second. The attribution of the third point stamp stays `MAGIC-269`'s Unknown. The `L10964 & 2` terrain branch (`MAGIC-273`) and native pixels: captured frames of a lit Tower on flat ground at day and at night, with the terrain-mode selector observed, settle them. The sprite levels: a run recording the `+0xb0` byte of a unit beside a lit Tower at day and at night, or a read of `R0608`'s cell loop, settles the model.
+
+### TERR-LIGHT-289
+
+- `vt+0x3c` `R1839` of the structure vtables: when timeline length `+0x3c` is nonzero and object `+0x78` is 0, `+0x70 = (+0x70 + 1) mod length`. The tick `R0334` calls it for every object-map entry (`L02473`) after incrementing `+0xa70` (`L02476`).
+- `+0x70` is 0 at construction (`L17354`). The draw takes `timeline[+0x70]` (`L17355`); with Animation off the frame offset is 0 (`L17356`). The light ignores the Animation option (`TERR-LIGHT-285`).
+- Timeline lengths: the loader `R1400`, on the branch taken when class `+0x1c` (the `Phases` value, stored at `L17357`) is greater than 1 (`L07511..L17358`), reads `AnimTime` (`L17359`) and `AnimFrame` (`L17360`), appends the frame value to the vector at class `+0x40` once per count of the time value (`L17361..L17362`) and stores the vector's length in class `+0x3c` (`L17363..L17364`). The length is the sum of `AnimTime` (`light-classes.tsv`): Towers `[8 8]` give 16, the Campfire's twelve ones 12, Well 2 and Well 3 six twos 12; light periods 16, 12, none and 8. The five light classes have `Phases` 3, 3, 6, 6 and 12 and so take that branch. Frame and light share the tick but not the counter, so their relative phase depends on when the structure was constructed.
+
+**Confidence.** High: instructions read.
+
+### TERR-LIGHT-290
+
+- `vt+0x40` of the nine drawable vtables: `R2310` in `L10631` and `L10630` (the bridges) and in `L10637` and `L16237`; `R2160` in the projectile vtable `L02587`; `L17365`, a single `ret`, in the unit vtables `L16171`, `L10100`, `L02468` and `L02585`.
+- `R2310` occurs as an aligned dword only in those four slots and is the target of no `rel32` call or jump.
+- The two bridge vtables share the method; bridge classes carry no light key (`REG-125`), so they stamp nothing.
+
+**Confidence.** High for the nine slots and the scans: the dword scan covers every section, so no other table holds `R2310`. A different light routine in a vtable outside these nine is not excluded.

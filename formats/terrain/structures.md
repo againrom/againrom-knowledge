@@ -88,3 +88,59 @@ start is High / Unknown, because mission-start publication is not read. 39 of 95
 (`TERR-STRUCT-211`). In 339 distinct files, one structure other than the two Switches, a Bee House of
 mission 131, reached HP 0 in play; the 994 dwelling and 100 Cave records are all at maximum HP
 (`TERR-STRUCT-212`). The saved record and its footprint persist (`SAV-1163`, `SAV-1164`).
+
+## Structure light (`TERR-LIGHT-285`…`TERR-LIGHT-290`)
+
+Five shipped classes are light sources: Tower 1 and Tower 2 (IDs 12, 13), Well 2 (15), Well 3 (16)
+and the Campfire (53), all with `LightRadius` 1 (`REG-125`). The structure method `vt+0x40`
+stamps their light into the vertex stamp grid `CMapView+0xa8` each time the per-frame light grids
+are rebuilt, for every structure in the view's object map, on screen or not. Unit vtables have an
+empty `vt+0x40`; no unit is a light source this way (`TERR-LIGHT-290`).
+
+```
+gate:   Lighting option on  AND  LightRadius != 0  AND  health word (signed) > 0
+rect:   x1 = anchorCol - scrollX, x2 = x1 + TileWidth - 1      (rows alike)
+        clamped to x1 >= -3, x2 <= visCols+2, y1 >= -3, y2 <= visRows+6
+level:  P = LightPulse, t = view tick counter (+1 per game tick, 0 at view construction)
+        P == 0            -> 32
+        t mod 2P <  P     -> (t mod P) - P/2 + 32
+        otherwise         -> P/2 - (t mod P) + 32
+stamp:  for col in x1+R-1 .. x2+R, row in y1+R-1 .. y2+R  (R = LightRadius)
+            if -3 <= col < visCols+3 and -3 <= row < visRows+3:   # stamp grid, not the visible window
+                a8[(visCols+7)*(row+3) + col+3] = level        # overwrite
+        writeCount += 1; dirty |= ((x1-2)*32, (y1-2)*32, (x2+3)*32, (y2+3)*32)
+```
+
+With R = 1 the stamp covers the footprint's `(TileWidth+1) × (TileHeight+1)` corner vertices: 4
+for the Campfire, 9 for the Towers and Well 2, 16 for Well 3 (`TERR-LIGHT-286`). A larger R moves
+the block by R-1 vertices right and down without widening it. The Animation option, the ambient,
+fog and explored state are not read. A structure whose health word is not positive stamps
+nothing (`TERR-LIGHT-285`). That a destroyed Tower reaches that word, and so also draws its ruin
+grid, is Medium (`TERR-STRUCT-210`); later writers of the word are not censused.
+
+| Class | stamp range | period (ticks) | period at 16 ticks/s |
+|---|---|---:|---:|
+| Tower 1, Tower 2 | 28 … 36 | 16 | 1.0 s |
+| Campfire | 29 … 35 | 12 | 0.75 s |
+| Well 3 | 30 … 34 | 8 | 0.5 s |
+| Well 2 | 32 | — | — |
+
+Lower is brighter. Every structure reads the same counter, so lights of one class pulse in phase;
+there is no random draw (`TERR-LIGHT-287`).
+
+A rebuild runs the structure walk, then the projectile walk, then a third point stamp (its
+source is held Unknown by `MAGIC-269`), then the merge routine; every stamp is a plain byte store,
+so the last write to a vertex stands (High, `TERR-LIGHT-288`). That every projectile stamp follows
+every structure stamp is Medium: the classes entered into the structure walk are not censused.
+The merge routine's own stamps come last (`MAGIC-UNITLIGHT-057`, partially retracted for its
+square-footprint and stamp-gate clauses, which this page does not use; `MAGIC-270`). The ground
+takes `min(stamp, terrain byte)` at a stamped corner (`MAGIC-273`, partially retracted for its
+hardware-mode label only). By the sun model flat daytime
+ground is level 46, gain 1.5625 (`TERR-LIGHT-013`, `TERR-LIGHT-020`), so a stamp of 28…36 gives
+gain 2.125…1.875 there (Medium: other times of day give other flat levels). By the model of the
+merge arithmetic (Medium, `TERR-LIGHT-288`), a sprite cell with four stamped corners gets level 0
+(1 at stamp 36) against 3 by day and 8 at night unlit.
+
+The sprite frame steps a separate per-object counter once per tick. The Tower and Campfire frame
+periods equal their light periods; Well 3's 12-tick timeline runs against an 8-tick light, and
+the relative phase depends on when the structure was constructed (`TERR-LIGHT-289`).

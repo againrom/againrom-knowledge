@@ -2617,3 +2617,37 @@ Population: the EN `Map Editor.exe` as in `REG-EDLOAD-121`: string scans `s01` (
 **Confidence.** **High** for item 1 within its scans and for the three reads of item 2 (instructions read). **Medium** for item 3's loader-to-file binding (`REG-EDLOAD-121`). **Medium** that no other code reads the key or `+0x48`: the scans do not see a key name built at run time, a string in `.rsrc`, a pointer to `L15868` in a key-name table in `.rdata` or `.data` (`s03` scanned only `.text`), a reference by register arithmetic, or a class pointer obtained other than through the scanned array address (the preregistered `disp` scan for the field was not run); the roles of `L15819`'s loop and of the function holding `L15866` are unread. **Medium** for item 4: the published corpus output is the second run, past the preregistered cap of one. Item 5 carries no grade.
 
 **Unknown.** What the loop at `L15819` builds (it is a candidate for the Select objects image list `[L15810]`); whether `rom.exe` reads `InMapEditor` (not searched here).
+
+## Structure light keys
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| REG-125 | Both roots ship five light classes in structures.reg: Tower 1 and 2 (radius 1, pulse 8), Well 2 (1, no pulse), Well 3 (1, 4), Campfire (1, 6); no other of the ten registries read has a light key, and sfx.reg was not read. | High | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+| REG-126 | Of the 18 rom.exe routines that reference the structure class array, only R2310 reads class +0x94 LightRadius and +0x98 LightPulse; the loader stores both with default 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-0635](../experiments/EXP-0635-structure-light/) |
+
+### REG-125
+
+Population: `structures/structures.reg` of the EN and RU roots through `tools/regvalues` (66 `Structure` sections each; the two value tables have one SHA-256), and the key names of the ten registries of each root through `tools/regdump -mode records`: `graphics.res` `objects/objects.reg`, `projectiles/projectiles.reg`, `structures/structures.reg`, `units/material.reg`, `units/units.reg`; `scenario.res` `globalmap.reg`, `npc.reg`, `scenario.reg`; `world.res` `data/ai.reg`, `data/map.reg`.
+
+| ID | DescText | TileWidth x TileHeight | LightRadius | LightPulse | timeline length |
+|---:|---|---|---:|---:|---:|
+| 12 | Tower 1 | 2 x 2 | 1 | 8 | 16 |
+| 13 | Tower 2 | 2 x 2 | 1 | 8 | 16 |
+| 15 | Well 2 | 2 x 2 | 1 | absent (0) | 12 |
+| 16 | Well 3 | 3 x 3 | 1 | 4 | 12 |
+| 53 | Campfire | 1 x 1 | 1 | 6 | 12 |
+
+- `LightRadius` is present on these 5 classes and `LightPulse` on 4; no class carries a pulse without a radius. The other 61 classes have neither key, so both load 0 (`REG-126`).
+- `LightRadius` and `LightPulse` occur in no other of the ten registries read (`objects`, `projectiles`, `material`, `units`, `globalmap`, `npc`, `scenario`, `ai`, `map`), and no other key name of any of them contains `light`. `objects.reg` `FireObject` is the flag the ambient-sound loop compares (`REG-OBJ-047`), not a light key.
+
+**Confidence.** High within the ten registries read, both roots. The installs hold an eleventh registry, `sfx.reg` (in `sfx.res`), whose keys were not read. A light flag in a map placement record is also outside this population; the building arm of the client dispatcher reads no light field (`TERR-LIGHT-285`).
+
+**Unknown.** Whether `sfx.reg` carries a light key: a `tools/regdump -mode records` read of `sfx.res` settles it, with no run of the original. Whether a map placement record can make an object a light source: a run that loads a mission with a placed object of a class without a light key and looks for lit ground around it would show it.
+
+### REG-126
+
+- Population: the 18 owners of every instruction with displacement or immediate `L01425`/`L17324` (class array data and count) in a decode seeded at each committed function entry; inside them every memory operand with displacement 0x91..0x9b, ESP bases dropped: 33 rows, each classified by a named rule, none left unclassified.
+- Four rows read the class record, all in `R2310`: `L17325` (`+0x94`, the gate), `L17326` (`+0x98`), `L17327` and `L17328` (`+0x94` as column and row bound). Two are the loader `R1400`'s stores, `+0x94` at `L17329` (key string `L17330` `LightRadius`) and `+0x98` at `L17331` (`L17332` `LightPulse`); the default register is cleared at `L17333`, so an absent key loads 0. The other 27 are view buffer pointers, client-dispatcher drawable fields and elements of array `L02113`.
+- What `R2310` computes: `TERR-LIGHT-285`, `TERR-LIGHT-286`, `TERR-LIGHT-287`.
+
+**Confidence.** High for the 33 rows and their classification. Medium that no other routine reads the two fields: a class pointer passed to a routine outside the 18 owners, a bulk copy of the record, a field read through a register-computed offset, or code reached only through a table that the decode is not seeded from is not seen by this census.

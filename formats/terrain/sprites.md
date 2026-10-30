@@ -238,6 +238,19 @@ Fire Ball flight and its explosion also deposit point stamps through the
 helper; its footprint follows a clipped squared-distance test rather than
 a radius square. — TERR-LIGHT-061, MAGIC-270, MAGIC-271
 
+Structure light sources write `+0xa8` in the `view+0x9b8` walk, which runs
+before the projectile walk, a third point stamp (its source is held Unknown by
+MAGIC-269) and the merge routine's own stamps: each lit structure overwrites
+its footprint's corner vertices with one byte of 28..36. A later stamp
+overwrites a shared vertex (High for the order of the walks and the plain byte
+store; Medium that every projectile stamp follows every structure stamp, as
+the classes entered into the structure walk are not censused). By the model of
+the merge arithmetic (Medium), a sprite cell inside a lit footprint has four
+stamped corners and gets level 0 (1 at stamp 36); a cell beside it gets 1..2
+by day and 4 or 6 at night. — TERR-LIGHT-286, TERR-LIGHT-288, MAGIC-273
+(hardware-mode label partially retracted), MAGIC-UNITLIGHT-057 (square-footprint and
+stamp-gate clauses partially retracted, not used here), MAGIC-270
+
 Dynamic lighting gates point stamps. It does not gate the direct bolt
 stores or the named unit-grid merge. With `L10964 & 2` clear, Dynamic
 lighting gates the terrain-light pass. With that bit clear and Dynamic
