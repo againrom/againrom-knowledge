@@ -636,7 +636,7 @@ can admit 458 keys from the installed data.bin: 190 armour, 35 shield and
 selects class 5 or 6. EN and RU are equal. Record values from pointer
 writes, a loaded save or a deal source are outside this population, and
 which enchanted keys survive the draw outside town 1 is Unknown
-(`R2-ENGINE-332`, High / Unknown).
+(`R2-ENGINE-332`, High / Unknown; narrowed by `R2-ENGINE-711`).
 
 Armour admission excludes three (class, material, row) keys by program
 constants: Magic Beard, Beard and Gold Crown (`R2-ENGINE-327`, High). The
@@ -653,6 +653,86 @@ material and row are not tested (`R2-ENGINE-333`, High). The server
 object's init makes fills read the Scenario.dll record for mode 2 and
 above and a deal source below it (High); that campaign start passes mode 2
 and network paths pass 0 is Medium (`R2-ENGINE-334`, High / Medium).
+
+## Shop shelves, order and cells in every town
+
+A shop page has four shelves, one per fill category of the town's record.
+The tab tooltip returns `main.txt` key 0x3e+k in town 1, and 0x116+k or
+0x112+k in the other two towns; the keeper rectangle returns key 61
+(`R2-ENGINE-709`, High; Medium that tab k shows list k and which of the
+last two serves town 2; the three tooltips were read in EN only):
+
+| Town | Category 0 | Category 1 | Category 2 | Category 3 |
+|---|---|---|---|---|
+| 1 | Armor: armour and shields | Weapons: mode-2 weapons | Magic Items: enchanted mode-8 weapons | Scrolls, Books & Potions: MagicItems |
+| 2 | Armors: armour and shields | Magic items: enchanted armour, shields and weapons | Scrolls, spellbooks and potions: MagicItems | Weapons: mode-2 weapons |
+| 3 | Armors and weapons: armour, shields and mode-2 weapons | Magic items: enchanted armour, shields and weapons | Scrolls, spellbooks and potions: MagicItems | Elven goods: no key until the druid inn talk |
+
+Rings and amulets are armour rows. A sold item returns to its tagged
+category. An untagged armour piece or shield goes to category 0 when
+stackable, an untagged stackable weapon to category 1, 3 or 0 in towns 1,
+2 and 3, any untagged non-stackable equipment to category 2, 1 or 1, and a
+potion, scroll or book to category 3, 2 or 2 (`R2-ENGINE-709`, High).
+Stackable means that the item's virtual +0x50 returns nonzero, which
+`R2-ENGINE-265` gives for types 3 and 4 and for items with no effects
+(+0x50 itself unread, Medium); a book takes the stackable path whatever it
+returns. The kind bits of the record-2 categories do not change in the
+departure rewrites of `R2-ENGINE-330`.
+
+Each fill sorts every category once with the C library's quicksort, whose
+short sort and swap bodies were not read. Items whose row column 15 has bit 0 set come first among
+armour, shields and weapons, then the row index rises, then the price
+rises. For a pair whose second item is not armour, a shield, a weapon or
+type 7, the comparator reads an uninitialized key, so a MagicItems shelf
+has no defined first key. A sale or Undo merges into an equal entry or
+appends, and nothing re-sorts until the next fill. Whether the client
+shows the server's order is Unknown. The order of equal keys is Medium for
+every list size (`R2-ENGINE-710`, High / Medium / Unknown).
+
+An enchanted category gives each pick one to three effects drawn by the
+data.bin group B weights of its part and column-15 bit. A second pick is
+attempted when a draw is below 50 (50 of 101) and a third when a later draw
+is below 25 (25 of 101); a failed or castSpell second or third pick ends the
+chain, and a pick that is not added does not count. Only the fighter-weapon column
+weights castSpell, so armour and shields are never stocked with a
+castspell. A weapon with column-15 bit 0 clear gets one castspell. Books
+carry teachSpell for their spell; scrolls and potions carry their row's
+effect string. The effect values and the picker's final-price failures
+rest on unread helpers (`R2-ENGINE-711`, High / Medium). This narrows the
+enchanted-draw Unknown of `R2-ENGINE-332`.
+
+The hover caption is Money for a money cell, otherwise the item
+description: the name; a scroll's or book's spell on the name line (EN
+"Scroll of Fire Arrow", RU "Свиток с заклинанием Огненная стрела"); then
+`#` lines produced per tag, such as "Defense +4" and "Damage 9-19". A pair
+of tags 13 or 44..48 gives one line for two pairs, tags 41 on kind 14 and 42
+extend the name, tag 50 gives up to four lines, and a tag whose name is
+empty gives none. Tag 51 prints "Magic:" and tag 41 prints "casts <spell>"
+on kinds other than 14. That the client puts tag 51 before the server's
+added pairs, and the order of those pairs, are Medium and unread here. The
+caption function prints no price (`R2-ENGINE-712`, High / Medium).
+
+A cell draws, in order, an opaque 80x80 back, the `.16a` item picture with
+its skipped pixels transparent, an overlay for item flag 0x20, the
+quantity, the price plate keyed on 16-bit pixel 0, and the price
+(`R2-ENGINE-714`, High / Medium). The plate is `costs<d>` for a d-digit
+price, or `costm<d>` for an item whose +0x18 is 2, which shows half the
+price rounded up; 8 digits keep plate 7. The price is font2 text with a
+comma every three digits, right-aligned, its text box (advance plus 2 pixels of spacing per character)
+ending at column 54 of the 60x10 plate, 6 pixels in from the plate's right
+edge (`R2-ENGINE-713`, High / Medium / Unknown). Plate drawn columns and
+font2 advances are in `R2-ASSET-182` (High): the pen of a 1..7 digit figure
+starts at or right of its plate's first drawn column and the pen of an
+8-digit figure 1 pixel left of `costs7`'s; where glyph ink lies in its cell
+is Unknown. The space advance of `font2.dat` is entry 0, not entry 0x20
+(`R2-ASSET-081`, amended; the drawn width of a space is Medium).
+
+EN and RU have the same shop bodies under an operand mask except item
+offsets 4 larger in RU, one allocation size and one annotation
+(`R2-ENGINE-715`, High). The three tab tooltips (all three towns), the
+scans and the table loaders `L2.03950`, `L2.03951` and `L2.01762` were read
+in EN only; the RU caption keys follow from the RU `main.txt`, not from a
+read of an RU tooltip.
 
 ## Shared town class and overrides
 

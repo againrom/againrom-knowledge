@@ -5368,7 +5368,7 @@ are read.
 | R2-ENGINE-329 | The ROM2 Scenario.dll shop table holds four zero-filled location records; 62 operand sites per DLL reach it, from NewGame, departure, TalkTo, Save, Load and the lookup. No direct store writes record 0. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 | R2-ENGINE-330 | ROM2 NewGame writes shop records 1 and 2; departures rewrite record-2 masks after missions 30, 40, 60, 80 and 90, write record 3 after mission 50 and raise record 2 and 3 price bounds at stages 30..110. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 | R2-ENGINE-331 | ROM2 shop record 3 category 3 has no class bit until TalkTo kind 0, NPC 0x2a3, topic 0x4e ORs in class 4; EnterInn offers that word at location 3 when stage > 60 and bank 770 is 1. | High / Medium | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
-| R2-ENGINE-332 | Under the record values the Scenario.dll direct stores write, ROM2 shops admit 458 data.bin keys (190 armour, 35 shield, 146 weapon, 64 MagicItems, 23 books); none selects class 5 or 6. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
+| R2-ENGINE-332 | Under the record values the Scenario.dll direct stores write, ROM2 shops admit 458 data.bin keys (190 armour, 35 shield, 146 weapon, 64 MagicItems, 23 books); none selects class 5 or 6. | High / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/), [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-333 | ROM2 sold-item placement L2.00804 tests the item tag, type and stackability and the category kind bits and bit 29, never class, material or row; a stackable item prefers a category without bit 29. | High | ✔ promoted (branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 | R2-ENGINE-334 | The ROM2 server object's init sets +0x74 to (mode < 2); campaign start passes mode 2 (Medium), so shop fills read the Scenario.dll record; network paths pass 0; other +0x74 stores are unclassified. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2039](../experiments/EXP-2039-rom2-shop-pool/) |
 
@@ -5536,6 +5536,13 @@ which bit-29 keys survive the enchanted draw outside record 1: enchant
 lookup's pointer in the client or the DLL (R2-ENGINE-329), a loaded SAV's
 bytes, and deal-source records (R2-ENGINE-334). The `L2.01357` enchant and
 its final-price failures.
+
+**Amended.** R2-ENGINE-711 narrows the Unknown on `L2.01357`: it is the
+effect picker that enchant `L2.00816` calls; it fails when the budget
+2*max − P or the level is at most 0, when value helper `L2.00819` returns
+−1 or when its pick falls on the last of 100 tries. Which keys survive
+still depends on `L2.00819`, `L2.03900` and the final price, which stay
+unread.
 
 ### R2-ENGINE-333
 
@@ -16745,6 +16752,293 @@ Unknown. The render `L2.03537`, view routine, message dispatch and the sender
 `L2.03843` were read in EN only.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 6.
+
+## Shop shelves, order, effects and cells
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-709 | A ROM2 shop page has four shelves, one per fill category; tooltips caption them with main.txt 0x3e+k in town 1 and 0x116+k or 0x112+k in towns 2 and 3 (town binding Medium); a sold untagged item goes by type and stackability. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-710 | A ROM2 shop fill sorts each category once with the CRT qsort (equal-key order Medium): row column 15 bit 0 set first for types 1, 2 and 7, then u16 +0xc, then price +0x1c ascending; a sale or Undo merges or appends unsorted. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-711 | A ROM2 enchanted shop category gives an item 1..3 effects by data.bin group B weights for its part and column-15 bit; armour and shields get no castSpell; a flag-0 weapon gets one castspell; stocked MagicItems all carry an effect. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-712 | A ROM2 shop hover shows Money for a money cell, else the item description: the name, a scroll's or book's spell joined to it, then # lines per attribute tag from stats.txt, spell.txt and main.txt; it has no price line. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-713 | A ROM2 shop cell draws its price in font2, comma-grouped, its text box ending 6 px left of the plate's right edge, on plate costs<d> for a d-digit P, or costm<d> showing (P+1)/2 when item +0x18 is 2; 8 digits keep plate 7; P < 1 Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-714 | A ROM2 shop cell draws an opaque 80x80 back, the .16a item picture (pixel-skip runs transparent), an overlay for item flag 0x20, the quantity, then the price plate keyed on 16-bit pixel 0 and the price. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-715 | 48 of 54 ROM2 EN/RU shop listing pairs have equal instructions under an operand mask; 6 differ only in item offsets 4 larger in RU, allocation 0x54/0x58 or an annotation; 7 tables are equal or shifted. | High | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+
+### R2-ENGINE-709
+
+Addresses are EN; RU pairs are in R2-ENGINE-715. The shop tooltip
+`L2.00677` tests the four category rectangles at page +0x60+16k and
+returns `main.txt` text 0x3e+k for the one under the cursor, and text 0x3d
+(Shopkeeper) for the keeper rectangle +0xe0. It returns no text when the
++0x148 field of the object at page +0x5c is 0 (`L2.03901`) or when page
++0x240 & 0x80 is set (`L2.03902`). `L2.00675` and `L2.00676` are the same
+91 instructions as `L2.00677`, differing only in the base operand (0x116 and
+0x112 for 0x3e) and in the branch targets that follow from their addresses.
+
+| Town | Category 0 | Category 1 | Category 2 | Category 3 |
+|---|---|---|---|---|
+| 1 (keys 62..65) | Armor | Weapons | Magic Items | Scrolls, Books & Potions |
+| 2 (278..281) | Armors | Magic items | Scrolls, spellbooks and potions | Weapons |
+| 3 (274..277) | Armors and weapons | Magic items | Scrolls, spellbooks and potions | Elven goods |
+
+Under the record masks of R2-ENGINE-263 and R2-ENGINE-330 the fill
+(R2-ENGINE-265) stocks: town 1 armour and shield rows, mode-2 weapon rows,
+enchanted mode-8 weapon rows, MagicItems; town 2 armour and shield rows,
+enchanted armour, shield and weapon rows, MagicItems, mode-2 weapon rows;
+town 3 armour, shield and mode-2 weapon rows, enchanted armour, shield and
+weapon rows, MagicItems, and a fourth category with no class bit until
+R2-ENGINE-331's talk. Rings and amulets are armour rows (parts 4 and 5).
+
+A sold item with tag +0x4d nonzero returns to category tag−1. The setups
+write type +0x44: armour `L2.01351` and shield `L2.03903` 1, weapon
+`L2.03904` 2, MagicItems `L2.03905` 3 Potion, 4 Scroll or SuperScroll, 5
+Book by row-name prefix. Placement `L2.00804` maps type 1 to kind bit
+0x1000000 (shields included), 2 to 0x400000, 3..5 to 0x4000000. Under
+R2-ENGINE-333's rule an untagged item goes to:
+
+| Item | Town 1 | Town 2 | Town 3 |
+|---|---|---|---|
+| armour or shield, stackable | 0 | 0 | 0 |
+| weapon, stackable | 1 | 3 | 0 |
+| armour, shield or weapon, non-stackable | 2 | 1 | 1 |
+| Potion, Scroll, Book | 3 | 2 | 2 |
+
+Stackable means that the item's virtual `+0x50` returns nonzero
+(`L2.03906`). R2-ENGINE-265 gives that for types 3 and 4 and for items with
+no effects; `+0x50` itself was not read here. A book (type 5) takes the
+stackable path whatever `+0x50` returns (`L2.03907`). The kind bits of the
+record-2 categories do not change in the departure rewrites of
+R2-ENGINE-330: every listed mask of category 0 carries the armour and shield
+bits and no weapon bit; every mask of category 1 carries armour, shield,
+both weapon modes and bit 29; every mask of category 3 carries weapon mode 2
+only (`values/shelves.tsv` tabulates the NewGame masks alone).
+
+**Confidence.** High for the caption keys, the type values and the
+placement arithmetic in the EN bodies. Medium that tab rectangle k shows
+list k (the click handler was not read), that `L2.00675` serves town 2 and
+`L2.00676` town 3 (R2-ENGINE-257, R2-ENGINE-259 and the Elven caption),
+for stackability as defined above (`+0x50` unread) and for the RU captions:
+all three tooltips (`L2.00677`, `L2.00675`, `L2.00676`) were read in EN
+only, so the RU keys follow from the RU `main.txt` and R2-ENGINE-257's note
+on the two RU tooltips, not from a read of an RU tooltip.
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 1.
+
+### R2-ENGINE-710
+
+Sort `L2.00815` calls `qsort` `L2.03908` (count, width 4, comparator
+`L2.03909`). `qsort` returns for n < 2, calls `L2.03910` for 8 or fewer
+elements (cutoff 8) and `L2.03911` for swaps in the partition. Neither
+body was read; the library's short sort is usually a selection sort
+(Medium). The order of equal keys is Medium for every list size. The
+comparator of items A and B:
+
+1. key 1 = bit 0 of row column 15 (`[item+0x3c]+8`, index 15) for type
+   +0x44 in {1, 2, 7}, else 0; the larger key sorts first;
+2. u16 +0xc ascending; every setup passes +0xc to its data.bin table
+   helper as the row index;
+3. s32 +0x1c ascending; the book admission writes the price there and the
+   enchant reads it as the price;
+4. equal keys return 0.
+
+When B's type is not 1, 2 or 7 the code stores 0 into A's key slot and
+compares A's key with B's uninitialized slot [ebp−0xc].
+
+Sale `L2.00832` and Undo `L2.00839` place items through `L2.00804` and
+insert `L2.00833` (R2-ENGINE-266). Insert merges into an equal entry, which
+keeps its place, or appends through `L2.03912`; no sort follows.
+
+**Confidence.** High for the keys, the directions, the comparator defect
+and the call structure in both roots. Medium for the order of equal-key
+items at every list size (`L2.03910` and `L2.03911` unread), for a shelf
+holding types outside {1, 2, 7}, and that append adds at the tail
+(`L2.03912` unread). Unknown whether the client shows the server's order.
+
+**Unknown.** The client transfer of the category lists.
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 3.
+
+### R2-ENGINE-711
+
+Enchant `L2.00816` runs on each pick of a category with bit 29
+(R2-ENGINE-265). It reads flag = row column 15 bit 0, type +0x44, part =
+(ID >> 8) & 0xf (`L2.03913`), level s16 +0x48, price P = +0x1c and budget
+2*max − P (max = category +0x38).
+
+- Flag 0 and type 2: one effect from `L2.00817` with budget
+  min(2*max − P, 100*P), added through `L2.03914`, then repriced.
+- Otherwise picker `L2.01357`: 0 when budget or level is at most 0; column
+  c = part + 12*(1 − flag) − 1 of data.bin group B (`L2.03915`, owner
+  `L2.00811` +0x78, serialized second by `L2.03916`); up to 100 tries, each
+  draws r in 1..total and takes the first row with a nonempty name whose
+  cumulative range holds r. Tag 41 takes spell `L2.03917`[0..1] = {18, 26}
+  (flag 1) or `L2.00818`[0..6] = {1, 10, 11, 18, 26, 5, 16}. The value is
+  `L2.00819`(budget, level); −1, or a pick on the last try, fails.
+- A first pick that returns 0 fails the enchant; a castspell first effect
+  ends it. Otherwise a second pick is attempted when `L2.00939`(100) is
+  below 50 (50 of 101 draws); a second pick that returns 0 or castSpell
+  (deleted) ends the chain. A third pick is attempted when a fresh draw is
+  below 25 (25 of 101) and the chain has not ended; a third pick that
+  returns 0 or castSpell (deleted) ends the chain. The 50/101 and 25/101 are
+  the odds of an attempt, not shares of items with two or three effects, and
+  an attempt can add nothing. Picks after the first use level minus
+  `L2.03900`(item). Only a chain that reaches `L2.03918` (no third attempt,
+  or a third pick added) lowers `+0x48` by `L2.03900`(item); the early
+  returns (castSpell first, the weapon flag 0 path, a failed or castSpell
+  second or third pick) leave `+0x48` as it is.
+
+In every group B column, castSpell (row 41) has weight only in column
+0 (part 1, flag 1: 30 of 275) and column 12 (part 1, flag 0: 100 of
+100). The shield column and every armour column give it 0, so no armour or
+shield is stocked with a castspell; their weights are attribute rows such
+as defence and absorbtion.
+
+MagicItems: admission `L2.00810` gives each book one tag 42 effect (value
+the spell ID). Setup `L2.03905` passes a scroll's or potion's row string,
+such as `castSpell=<spell>:50` or `health=+30`, to `L2.01755` and
+`L2.01756`, which builds each effect through `L2.01757`. No stocked
+MagicItems row other than the five books 1..5 has an empty string (rows 77..83
+are empty and never built). Placement and insert move
+a sold item's object without reading its effects.
+
+**Confidence.** High for the control flow, the column formula, the weights,
+the spell tables, the castspell exclusion and the book effect in both
+roots. Medium for the effect values (`L2.00819`, `L2.03900`, vtable +0x54
+unread), for scroll and potion effects (`L2.01757` unread) and that a merge
+keeps the stocked entry's effects (equality `L2.03919` unread).
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 2.
+
+### R2-ENGINE-712
+
+Hover `L2.03920` returns no text when page +0x148 is 0 or the cell is
+empty, `main.txt` 74 (Money) when `L2.03921` is true, none when `L2.03922`
+is true, else description `L2.00841`. The description writes the name
+(R2-ENGINE-267), then `#` lines produced per tag by the table below (byte
+table `L2.03923`, jump table `L2.03924`): a pair of tags 13 or 44..48 gives
+one line for two pairs, tag 41 on kind 14 and tag 42 extend the name, tag
+50 gives up to four lines, tags 1 and 51 on kind 14 give none, and a tag
+whose `stats.txt` name is empty gives none.
+
+| Tag | Text |
+|---|---|
+| 1 | none |
+| 13, 44..48 | `#<stats[tag]> v` then `-<v+next>` consuming the next pair (none if the name is empty) |
+| 38 | `#<stats[38]> v` |
+| 41 | kind 14: ` <main 90> <spell[v−1]><main 91>`; else `#<main 92> <spell[v−1]><main 93>` |
+| 42 | ` <main 90> <spell[v−1]><main 91>` |
+| 50 | Damage (118), Range (123), Duration (124) and one stat line for the last spell and level v |
+| 51 | kind 14: none; else `#<main 189>` |
+| other | `#<stats[tag]> %+d` when the name is nonempty, `%` added for tags 8 and 11 |
+
+Kind is (ID >> 8) & 0xf (`L2.03925`). `main.txt` 90/92 are "of"/"casts"
+in EN and both "с заклинанием" in RU. Derived: "Bronze Helm#Defense +4",
+"Scroll of Fire Arrow#…", "Book of Fire Arrow", "Small Potion of
+Healing#Health +30"; RU "Свиток с заклинанием Огненная стрела#…".
+
+**Confidence.** High for the hover branches, the case map, the formats and
+the keys in both roots. Medium for a whole caption: the tag-50 helpers
+`L2.01059` and `L2.03926` and the server's pair order were not read, and
+the `#` split is R2-ENGINE-385's. That the client puts tag 51 before the
+server's added pairs, and the order of those pairs, are Medium and unread
+here (client item reader `L2.03700`, read for navigation in an earlier
+experiment and not regenerated). Money for `L2.03921` and the empty result
+for `L2.03922` are names from what the hover does with them, not read
+bodies.
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 4.
+
+### R2-ENGINE-713
+
+Paint `L2.00845`, for a cell that is not money or `L2.03922`: d =
+ftol(log10 P) (`L2.03927`), clamped to array size − 1 = 6 (`L2.00758`);
+plate d from page +0xdc (`costm1..7`) when item +0x18 is 2, else +0xf0
+(`costs1..7`), both filled by `L2.00771`. Plate X = cell right + offset x −
+width, Y = cell top + offset y + 1; vtable +0x1c is a no-op (`L2.03928`)
+and vtable +0x38 draws it keyed. The text is P, or (P+1)/2 when +0x18 is 2,
+`%d` with a comma every three digits (`L2.03929`), drawn by `L2.00720` with
+font2 (`[L2.01249]`, `R2.0066`, spacing 2) at (X + width − 6, Y), flag 1
+right-aligned, colour record at address `L2.01250`, shadow at +1,+1 with
+the colour record at `L2.03930`.
+The plate index uses P. A quantity above 1 is font2 text at (cell x + 10,
+cell bottom − 15).
+
+The text box is the sum over characters of the font2 advance plus spacing
+2 (`L2.01264`), so it includes a trailing 2 px. With R2-ASSET-182's widths
+the box ends at plate column 54 and the last glyph's advance ends at column
+52. The pen starts at the box's left edge: at or right of the plate's first
+drawn column for 1..7 digits, and at column 2 of `costs7`, 1 px left of its
+first drawn column 3, for 8 digits. Where a glyph's ink lies in its 8x10
+cell was not measured, so the ink offset is Unknown.
+
+`L2.01250` and `L2.03930` are passed as addresses: `R2.0062` reads a
+word at +0x1e of the pointer it is given, and `L2.01678` returns
+`L2.03930` as a pointer. They are addresses of colour records in
+uninitialized data, not colour values.
+
+**Confidence.** High for the plate choice, the format, the arithmetic and
+the font in both roots. Medium for P an exact power of ten: `L2.03927`
+loads the x87 control word from `[L2.03931]` unless it already is
+`0x27f`, and that word is `0x027f` in the EN image (53-bit precision, round
+to nearest), so the precision is set; the rounding of `fyl2x` itself was
+not read. Medium for clipping in glyph blit `L2.03932` (unread). Unknown
+for P below 1, for the glyph ink offset and for the contents of the two
+colour records (uninitialized data).
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 5.
+
+### R2-ENGINE-714
+
+Paint `L2.00845` order per cell:
+
+1. back: money item `[L2.03933]` and `[L2.03934]`, no picture;
+   `L2.03922` item `backinvg`, no picture; +0x18 in 5..8 `backinvs` when
+   page +0x150 >= P and `L2.03935`, else `backinvg`; other cells
+   `[L2.03933]` when `L2.03935`, else `backinvg`;
+2. picture: page +0x5c entry (`L2.00657`), vtable +0x18 at (x, y+1);
+3. overlay `L2.03936` when item byte +8 has bit 0x20;
+4. quantity, plate, price (R2-ENGINE-713).
+
+Backs are class `L2.00574` (`L2.00573`); vtable +0x18 `L2.00575` →
+`L2.00576` copies rows with no key. Pictures are `.16a` class `L2.00640`
+(`L2.00639`, loaded by `L2.03937` from `graphics\inventory\`); vtable +0x18
+`L2.00641` → `L2.00642`: 0x4000 skips rows, 0x8000 skips pixels, other runs
+blend through a table chosen by a 4-bit source field. The plate's vtable
++0x38 `L2.00704` → `L2.00705` skips 16-bit pixels equal to 0 after
+`L2.00577`'s 24-to-16-bit shift.
+
+**Confidence.** High for the order, the classes and the blit rules in both
+roots. Medium for `[L2.03933]`, `[L2.03934]`, overlay `L2.03936` and
+`L2.03935`, whose bodies were not read.
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 6.
+
+### R2-ENGINE-715
+
+Pairs (EN/RU): sort `L2.00815`/`L2.03938`, comparator `L2.03909`/
+`L2.03939`, qsort `L2.03908`/`L2.03940`, enchant `L2.00816`/`L2.03941`,
+picker `L2.01357`/`L2.03942`, placement `L2.00804`/`L2.01358`, insert
+`L2.00833`/`L2.03943`, magic setup `L2.03905`/`L2.03944`, admission
+`L2.00810`/`L2.03945`, hover `L2.03920`/`L2.03946`, description
+`L2.00841`/`L2.03947`, paint `L2.00845`/`L2.03948`, support `L2.00771`/
+`L2.03949`, serializer `L2.03916`/`R2.0016`, and 40 helpers. 48 are equal
+under the mask of operands in 0x400000..L2.03731. The armour, shield and
+weapon setups and the description's Range byte read item fields 4 larger
+in RU (+0x54/+0x58); the admission allocates 0x54/0x58; the `.16a`
+constructor differs in a string annotation. The spell tables and the
+description byte table are equal; the jump table and four vtables differ
+by their routines' shifts. data.bin, the plates, backs and font2 files are
+byte-equal in both roots.
+
+**Confidence.** High in instruction shape for the listed pairs; globals
+and unlisted callees are not compared. The three shop tooltips (all three
+towns), the scans and the table loaders `L2.03950`, `L2.03951` and
+`L2.01762` were read in EN only; the RU caption keys follow from the RU
+`main.txt` and R2-ENGINE-257's note on the two RU tooltips, not from a read
+of an RU tooltip.
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 7.
 
 ## Town SAVE LOAD checks and EN/RU parity
 

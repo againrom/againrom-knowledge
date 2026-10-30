@@ -757,7 +757,7 @@ Staff with castSpell Fire_Arrow:1, Uncommon Robe, Uncommon Cloak. Loader
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ASSET-080 | ROM2 ships tip text only as twelve sections #tips1..#tips12 of main.res text/town.txt, once each in EN and RU; no other archive entry, map, library or executable in either root holds a #tips key or a tips= value. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
-| R2-ASSET-081 | ROM2 tip popups draw graphics.res interface/lm.256 frames 9..17 (48x32 and 32x32), interface/radiob.256 frames 4 and 5 (16x16) and the font2 8x10 font of 224 glyphs; the bytes are equal in EN and RU. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ASSET-081 | ROM2 tip popups draw graphics.res interface/lm.256 frames 9..17 (48x32 and 32x32), interface/radiob.256 frames 4 and 5 (16x16) and the font2 8x10 font of 224 glyphs; the bytes are equal in EN and RU. | High | ● active (branch candidate, amended) | [EXP-2037](../experiments/EXP-2037-rom2-tips/), [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 
 ### R2-ASSET-080
 
@@ -796,11 +796,17 @@ left and right edges). `interface/radiob.256` frames 4 and 5 are 16x16.
 (decoder EN `L2.01189`: control 0x40 skips rows, 0x80 skips pixels, any
 other byte N copies N bytes of two pixels, low nibble first, ending at a
 zero high nibble) followed by 32 bytes. `font2.dat` holds 224 dword
-advances; entry 0x20 (space) is 6. Frame sizes, opaque counts and SHA-256
+advances; entry 0x20 is 6 (labelled space here; corrected under Amended). Frame sizes, opaque counts and SHA-256
 hashes are equal in EN and RU.
 
 **Confidence.** High for the frame headers, the decoder rule and the
 equality.
+
+**Amended.** R2-ASSET-182 corrects the space label: the draw indexes
+`font2.dat` by the mapped code minus 0x20, so entry 0x20 is '@'
+(advance 6) and the space is entry 0 (advance 0), High. That the drawn
+space width also adds half an image width through an unread vtable
++0x24 is Medium.
 
 ## Music archive and map music areas
 
@@ -2691,3 +2697,37 @@ Parent, such as type 107 (AttackPhases 0, so it shows no cast).
 **Format surface.** units.reg keys; `formats/rom2-reg/format.md`.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 2.
+
+## Shop cell plates, backs and font2 advances
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-182 | ROM2 graphics.res costs1..7 and costm1..7 are 60x10 24-bit with first drawn columns 45, 39, 33, 24, 18, 12, 3; backinvg/b/s are 80x80; font2.dat advances digits 4 ('1' 2), comma 1, space entry 0 (drawn width Medium); EN and RU are equal. | High | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+
+### R2-ASSET-182
+
+`graphics.res` members, each SHA-256 equal in EN and RU:
+
+| Member | Size | Bits | First and last drawn column |
+|---|---|---|---|
+| `interface/costs1..7.bmp` | 60x10 | 24 | 45, 39, 33, 24, 18, 12, 3; last 59 |
+| `interface/costm1..7.bmp` | 60x10 | 24 | the same columns |
+| `interface/backinvg.bmp`, `backinvb.bmp`, `backinvs.bmp` | 80x80 | 24 | no pixel converts to 0 |
+
+A drawn column holds a pixel that is not 0 after the 24-to-16-bit
+conversion, by the 555 and by the 565 rule alike (R2-ENGINE-714). The
+columns are those of the plate bitmaps; they say nothing about where a glyph's
+ink lies.
+
+`font2/font2.dat` holds 224 dword advances indexed by the mapped code
+minus 0x20; map `R2.0060` returns codes below 0x80 unchanged, so the index is code
+minus 0x20: '0' and '2'..'9' 4, '1' 2, ',' 1, space (entry 0) 0, '@'
+(entry 32) 6. With spacing 2 a digit takes 6 px, '1' 4 px and a comma 3 px.
+Space is the table entry; the width routine adds half of an image width for
+entry 0 through the unread vtable +0x24 (`L2.03899`), so the drawn width of
+a space is Medium (see the amendment of R2-ASSET-081).
+
+**Confidence.** High for the headers, the columns, the advances and the
+equality. Medium for the drawn width of a space.
+
+**Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 5.
