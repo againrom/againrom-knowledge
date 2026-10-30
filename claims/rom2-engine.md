@@ -13410,6 +13410,12 @@ that branch's order through the REG restore and the tick-period store.
 The four town-like values remain unread, and the first frame remains
 Unknown.
 
+**Amended.** R2-SESSION-286 narrows the town Unknown: the four town-like
+files store CurrentState/InBattle 0, so `L2.01830` returns 0 and the load
+entry reaches `L2.02974` when `L2.01829` is nonzero and the unread getter
+`R2.0113` returns the stored value (Medium); `L2.01829` is Unknown.
+R2-ENGINE-723 lists the REG keys that branch requests.
+
 ### R2-ENGINE-602
 
 Selected class descriptor/factory/constructor/vtable chains bind Spell to
@@ -16739,3 +16745,73 @@ Unknown. The render `L2.03537`, view routine, message dispatch and the sender
 `L2.03843` were read in EN only.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 6.
+
+## Town SAVE LOAD checks and EN/RU parity
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-723 | ROM2 LOAD body L2.00289 returns 1 only on open failure, magic or version below 0x0BAD0002 and tests no length or sum itself (callees, caller L2.01828 unread); the town tail seeks past the label and requests 14 REG key forms. | High / Medium | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+| R2-ENGINE-724 | Nine ROM2 EN/RU SAVE and town LOAD bodies have equal instruction counts and are equal after masking every operand of 0x1000 and above, except 23 positions that differ only in an application field offset; callees not compared. | High | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+
+### R2-ENGINE-723
+
+The body EN `L2.00289` / RU `R2.0121` returns 1 only when the open fails,
+when the first DWORD is not `0x26677342` (after `Invalid save file.` to
+`L2.01042`) and when the version is below `0x0BAD0002` by a signed compare
+(after `Outdated save file.`). Otherwise it discards blobEnd, reads blobBytes,
+allocates and reads that many bytes through `L2.03875`, decodes through
+`L2.02973` with no result test and runs the document serializer in load
+direction. The body tests no length, sum or reference itself; failures inside
+`L2.03875`, `L2.02973`, the document serializer and the archive, and
+exceptions, were not followed, and their bodies are unread. The load entry
+`L2.00826` / `L2.00119` copies `Self` to app `+0x460`, does not test the LOAD
+return and calls `L2.01829` before anything else (unread; zero posts 0x421,
+the main menu, and `L2.01830` is not reached). The map caller also calls this
+body at EN `L2.01828` (R2-ENGINE-411); that caller was not read for the
+result.
+
+The town branch `L2.02974` / `L2.03876` reopens the file, reads blobEnd at
+offset 4 and seeks to blobEnd + 0x100, past the label. It reads REG, pairs,
+Scenario and nine cells, then requests `CurrentState/InBattle`,
+`Character/Name` (default `No name`), six `GameOptions` keys, `View/X`,
+`View/Y`, `SpellBook/IsOpen`, `SpellBook/Pressed`, `Objects/Selection` and
+`Objects/Group%d`. It requests no `SpellBook/Shortcuts`, `Inventory/IsOpen`,
+`Projectiles` or `Fog` key.
+
+**Confidence.** High for the three returns of `L2.00289`, the ignored return
+in the load entry and the keys requested in these complete CFGs. Medium for
+what the player sees and for the whole refusal behaviour of a load:
+`L2.01042`, `L2.01829` and the callees above are unread, the archive's
+class-name check (R2-ENGINE-207) and exception handlers were not followed, and
+`L2.01828` was not read. The key absence holds for this body, not for the
+image. Unknown: whether `L2.01830` is reached for a town file, which also
+needs the unread getter `R2.0113` to return the stored InBattle 0
+(R2-SESSION-286).
+
+**Unknown.** The screen after a refused or truncated town file. Loading a
+town file with a changed magic, a changed version and a truncated blob, each
+with the screen recorded, would settle it; the same loads with a trace of the
+`L2.01829` and `R2.0113` results would settle the gate and the getter.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 5.
+
+### R2-ENGINE-724
+
+The pairs are the driver, server save, document serializer, Player map
+writer, trailer writer, session LOAD, load entry, tail-open `L2.01830` /
+`L2.03877` and town preparation. `compare.py` replaces every operand number of
+0x1000 and above by one token and keeps strings. The mask covers code and data
+addresses and also large immediates, so the identity of globals and callees is
+not compared. Six pairs are equal at every position; the driver differs at 9
+positions, the load entry at 4 and the town preparation at 10. Each such
+position differs only in an application offset; the pairs are listed in the
+results. Callees were not compared. The literals `0x26677342`, `0x0BAD0002`,
+`0x1011` and `0xBADFACE1` stand at the same instruction index in the EN and RU
+listings (a text search of the listings, not part of `compare.py`;
+`0xBADFACE1` twice in the document serializer).
+
+**Confidence.** High for the nine bodies read in both roots: equal in
+instruction sequence after the mask above; callees and the identity of
+globals are not compared.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 6.

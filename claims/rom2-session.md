@@ -3139,7 +3139,7 @@ Medium for each caption.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-233 | Nine frozen EN ROM2 saves have exact physical and decoded-document partitions under the selected successful-transfer grammar; decoded lengths are 4408..72936 bytes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
+| R2-SESSION-233 | Nine frozen EN ROM2 saves have exact physical and decoded-document partitions under the selected successful-transfer grammar; decoded lengths are 4408..72936 bytes. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-234 | Four frozen EN ROM2 town-like documents contain one Player, an empty dead list, worldPresent 0, two sentinels and a 400-byte trailer; no world half is stored. | High / Medium | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-235 | Five frozen EN ROM2 mission-like documents hold eight Players and a complete world half; game0006 alone has a dead Unit and two world-effect records; all Sack and extra counts are zero. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
 | R2-SESSION-236 | Nine frozen EN ROM2 Player-1 records each hold one Group Human with matching controlled/owner saved keys; measured Human state includes attributes, skills, experience, HP, mana, positions, equipment and bag. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2076](../experiments/EXP-2076-rom2-save-load/) |
@@ -3169,6 +3169,10 @@ R2-ENGINE-199/200 remain. Byte fit is not original acceptance.
 **Unknown.** Full semantic coverage, short-read/exception behavior, arbitrary
 classes and original completion. The conservative unassigned.tsv retains
 unassigned or partially interpreted intervals, including raw blocks.
+
+**Amended.** R2-SESSION-283 narrows the EN writer clause: EN `L2.00861`
+writes the one byte from the rounded length at `L2.03878..L2.03879`, as the
+RU writer does; the suffix cause is now read in EN.
 
 ### R2-SESSION-234
 
@@ -3648,3 +3652,164 @@ list. Four sites lie in functions of an unread class, and 104
 classified.
 
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 5.
+
+## Town SAVE writer
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-283 | A ROM2 SAVE with application mode word 2 runs driver L2.00860: server save L2.00861 writes and closes header, encoded document and blobEnd; the driver reopens it and appends label, REG, pairs, Scenario and nine cells. | High / Medium | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+| R2-SESSION-284 | The ROM2 document writer takes its head from server +4, +0, +0x90, eleven u32 at +0x174..+0x1a0, +0xd4 and +0xd8; worldPresent and both 0xBADFACE1 are literals; the trailer is 400 bytes of [server+0x170]. | High / Medium | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+| R2-SESSION-285 | A ROM2 town SAVE's REG keys come from app, client and global fields the driver names; InBattle is app +0x404 bit 0, Projectiles and Fog are written only when it is set, Shortcuts is always empty. | High / Medium | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+| R2-SESSION-286 | Every byte of the four EN ROM2 town files, as decoded document and as whole physical file, falls in one of 28 writer-source groups; none is unattributed; all four store CurrentState/InBattle 0. | High / Medium | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+| R2-SESSION-287 | EN ROM2 game0003 and game9998 hold equal documents and equal REG values; their REG record names differ after the NUL in 21 of 22 records, so those bytes are not stable between two saves. | High / Medium | ● active (branch candidate) | [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/) |
+
+### R2-SESSION-283
+
+Message 0x442 and the save page's 0x445 close reach the save driver EN
+`L2.00860` / RU `R2.0166` (R2-ENGINE-271, R2-ENGINE-440). With app `+0x5d8`
+equal to 2 it runs, in order:
+
+1. Server save `L2.00861` / `R2.0162` on `[L2.00805]`. It logs `Saving to:`,
+   walks the map `[L2.00292]` and calls `L2.03880` on list elements whose
+   `L2.02798` returns 0 (callees unread), and opens the file with flags 0x1011.
+   An open failure returns 1 and writes nothing.
+2. It runs the document serializer `L2.00243` / `R2.0120` into a memory
+   archive, rounds an odd length up by writing one byte from the rounded
+   length, and encodes `length/2` words through `L2.03881`.
+3. It writes `0x26677342`, a zero DWORD, `0x0BAD0002`, the encoded length and
+   the encoded bytes, writes the multiplayer label only when server `+0x74` is
+   set, seeks to offset 4, writes the end position there and closes the file.
+4. The driver stores `timeGetTime` to app `+0x424`, reopens the file with
+   flags 2, seeks to its end and writes 256 bytes from app `+0x148`.
+5. It writes the REG store (`L2.03882`), the pairs (`L2.00382`, app `+0x598`),
+   `ScenarioSave` (`[L2.00392]`, `L2.00395`) and the nine cells (`L2.00387`,
+   app `+0x4dc + 12i`), then closes the file.
+
+This closes the EN writer that R2-SESSION-233 left unread: the odd-length byte
+is written by `L2.03878..L2.03879`.
+
+**Confidence.** High for the order, flags and literals in the complete EN
+driver and server-save CFGs; the RU bodies are equal after masking every
+operand of 0x1000 and above, and the literals `0x26677342`, `0x0BAD0002` and
+`0x1011` stand at the same instruction positions in both listings
+(R2-ENGINE-724). Medium for the effects of unread callees: `L2.03880`,
+`L2.02798`, the archive, the encoder and the REG writer, and the file-class
+calls named by call shape (`L2.03883` open, `L2.03884` seek, `L2.03885`
+write, `L2.03886` position, `L2.03887` the memory-file write of the pad
+byte). The stored files agree with those calls: blobEnd equals 16 plus the
+wordBlob length in all four files (`physical-summary.tsv` of EXP-2076,
+`attribution.tsv` P04) and game0000's pad byte matches the rounded length
+(`suffix_matches_rounded_length`).
+
+**Unknown.** What `L2.03880` does to the map lists. A SAVE with a trace of
+`L2.03880` calls, taken in a town with a nonempty list, would settle it.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 1.
+
+### R2-SESSION-284
+
+The store branch of EN `L2.00243` / RU `R2.0120` writes, in order: u32
+server `+4`, u32 server `+0`, CString server `+0x90`, u32 server `+0x174`,
+`+0x17c`, `+0x180`, `+0x184`, `+0x188`, `+0x18c`, `+0x190`, `+0x194`,
+`+0x1a0`, `+0x19c`, `+0x198`, mission `+0xd4` and difficulty `+0xd8`. The
+Player map writer `L2.03888` writes `[L2.00292] +0x20`, calls `L2.03198(0,0)`
+on server `+0xdc` and the list writer `L2.03889` (both unread). The dead list
+is written by virtual slot 0 of the object at `[[server+0x7c]+0xc]`, called
+with the archive at `L2.03890..L2.03891`; the target is unread. worldPresent is the literal u8 1 when
+server `+0x94` is nonzero, followed by the world half, else u8 0. Both
+sentinels are immediate pushes of `0xBADFACE1`. The trailer writer
+`L2.03892` / `R2.0168` writes 400 bytes from offset 0 of `[server+0x170]`.
+Player, Group, Unit and Item fields keep the inherited programmes
+(R2-SESSION-020, R2-ENGINE-209, R2-ENGINE-210, R2-ENGINE-324).
+
+**Confidence.** High for the sources in the read bodies. Medium for the
+Player count and list, written by unread `L2.03889`; Medium for the dead list
+(the 4-byte count in these files), whose writer is the unread virtual target,
+and for any bytes `L2.03198(0,0)` writes. Field meanings of the head members
+and the trailer object are Unknown; names are not assigned.
+
+**Unknown.** Which game state moves the head members and `[server+0x170]`.
+Two town SAVEs of one game, the second taken after one input changed (a
+mission finished, the difficulty changed, another town entered), with the
+decoded heads and the 400 trailer bytes compared field by field, would show
+which members follow that input.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 2.
+
+### R2-SESSION-285
+
+EN `L2.00860` sets these REG keys before writing the store:
+`CurrentState/InBattle` = app `+0x404 & 1`; `Character/Name` = the string at
+app `+0x460`; `GameOptions` Wimpy, ShowHP, FlyingHP and Formation = client
+`+0xab4`, `+0xab8`, `+0xabc`, `+0xab0` (client = app `+0xd0`), Speed = app
+`+0x41c`, ShowTimeFlow = `[L2.03133]`; `View/X`, `View/Y` = client `+0x5c`,
+`+0x60`; `SpellBook/IsOpen` = `L2.03135(client)`, `Pressed` = `[app+0xec]
++0x60`; `Objects/Selection` and `Objects/Group%d` from client `+0x9d0`
+entries through `L2.02988`, `L2.03893(i)` and `L2.03894`; and
+`Inventory/IsOpen` = `L2.03138(client)`. `SpellBook/Shortcuts` is an array
+constructed at `L2.03895` and passed at `L2.03896` with no element added. The
+`Projectiles` and `Fog` keys are written only when app `+0x404 & 1` is
+nonzero (tests `L2.03897`, `L2.03898`). The label is app `+0x148`.
+
+**Confidence.** High for the keys, their order and their sources in the
+complete driver CFG. Medium for the values of the unread getters and for the
+record layout, which the unread `L2.03882` writes.
+
+**Unknown.** Which writers set app `+0x404` bit 0 on entering a town. A run
+that watches app `+0x404` from the end of a mission to a SAVE in the town, and
+a SAVE in a town entered from the main menu, with `CurrentState/InBattle` read
+from each file, would show when the bit is set and cleared.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 2.
+
+### R2-SESSION-286
+
+`coverage.py` assigns every row of the EXP-2076 document and physical
+partitions of game0000, game0002, game0003 and game9998 to the first matching
+one of 28 groups of R2-SESSION-283..285 and the inherited programmes; all 28
+groups carry bytes. The two partitions are two views of one file: the document
+(decoded) lengths are 4486, 4418, 4408, 4408 and the physical (whole file,
+from offset 0) lengths are 6348, 6274, 6256, 6280, whose encoded word blob is
+the document in its stored form. Every byte of both views lies in a group;
+none is unattributed. The REG parse gives 22 records per town file and
+`CurrentState/InBattle` 0 in all four. This narrows R2-ENGINE-601's Unknown:
+the load entry `L2.00826` calls `L2.01829` first, and zero posts 0x421, so the
+town preparation is not reached. When `L2.01829` is nonzero, `L2.01830` reads
+InBattle through the unread getter `R2.0113` with default 1; if the getter
+returns the stored 0, the entry reaches `L2.02974` (Medium). The result of
+`L2.01829` is Unknown.
+
+**Confidence.** High that each byte lies in a group, on these hashed files.
+Medium for the groups whose writer is an inherited programme or an unread
+helper or virtual target (archive tags, saved addresses, counts, raw members,
+the dead-list count, REG, pairs, Scenario, cells). A group is a writer source,
+not a field meaning.
+
+**Unknown.** Meanings of the head members, the raw blocks and the trailer.
+Town SAVEs of one game before and after one changed input (a mission finished,
+the difficulty changed), decoded and compared field by field, would show which
+of those fields follow that input; fields that never change stay Unknown. The
+result of `L2.01829` for a town file: loading one in the original with a
+breakpoint or trace on `L2.01829`, and watching for message 0x421, would
+settle it.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 3.
+
+### R2-SESSION-287
+
+game0003 and game9998 decode to documents equal in every field at every
+offset, saved addresses included, and their REG values are equal key for key.
+Their tails differ in the label, the bank and the availability list. In 21 of
+their 22 REG records the 16-byte name field differs only after the NUL, with
+nonzero bytes there. Label bytes after the NUL are zero in all four town
+files.
+
+**Confidence.** High for the measured differences. Medium that the bytes
+after a REG name NUL are uncleared memory: the name copy is inside unread REG
+helpers.
+
+**Unknown.** Whether saved addresses stay equal across a reload. Two town
+SAVEs in one session with no input between them, and a third after reloading
+one, compared field by field, would settle it.
+
+**Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 4.

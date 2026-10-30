@@ -554,6 +554,66 @@ any mode. Delete asks for confirmation and removes the file. The main menu
 disables Load Game when no `game*.sav` exists in that directory.
 — R2-SESSION-179, R2-ENGINE-440, R2-ENGINE-437
 
+## Town SAVE writer
+
+With the application mode word 2 the save driver first has the server write the whole
+envelope and closes the file: header, encoded document, then blobEnd patched
+at offset 4. It then reopens the file and appends the 256-byte label from the
+application, the REG store, the pairs, the Scenario record and the nine
+cells. An odd document length gets one byte, the low byte of the rounded
+length. Callees of the writer (the pre-save list walk, the archive, the
+encoder, the REG writer) are unread, so their effects are Medium.
+— R2-SESSION-283
+
+| Document field | Written from |
+|---|---|
+| head u32, u32 | server `+4`, `+0` |
+| head CString | server `+0x90` |
+| head 11 x u32 | server `+0x174`, `+0x17c`, `+0x180`, `+0x184`, `+0x188`, `+0x18c`, `+0x190`, `+0x194`, `+0x1a0`, `+0x19c`, `+0x198` |
+| mission, difficulty | server `+0xd4`, `+0xd8` |
+| Players metadata | Player map `+0x20` |
+| worldPresent | literal 1 when server `+0x94` is nonzero, else 0 |
+| sentinels | literal `0xBADFACE1` twice |
+| trailer | 400 bytes of the server's `+0x170` object |
+
+The dead list is written by an unread virtual slot (Medium), and the Player
+list writer is unread (Medium). Field meanings of the head members and the
+trailer remain Unknown. — R2-SESSION-284
+
+The REG store of a town SAVE holds `CurrentState/InBattle` (application
+`+0x404` bit 0; 0 in the four town files, the writers of the bit are
+Unknown), `Character/Name`, six `GameOptions`, `View/X` and `View/Y`,
+`SpellBook` `IsOpen`, `Pressed` and an always empty `Shortcuts`,
+`Objects/Selection`, `Objects/Group0..9` written when the selection groups
+are nonempty (not present in the four files) and `Inventory/IsOpen`.
+`Projectiles` and `Fog` are written only when InBattle is set. The values of
+the unread getters and the record layout are Medium. — R2-SESSION-285
+
+In the four EN town files every byte of the decoded document and of the
+whole physical file has a writer source; the inherited groups (class
+programmes, REG, pairs, Scenario, cells) are Medium, a source and not a
+meaning. All four store InBattle 0 and 22 REG records; the town branch is
+reached from the load entry only through the unread `L2.01829` and the
+InBattle getter (Medium). — R2-SESSION-286
+
+Two town files, game0003 and game9998, have equal documents and REG values;
+the bytes after the NUL of REG record names differ (Medium that they are
+uncleared memory), so they are not stable between saves. Label bytes after
+the NUL are zero. — R2-SESSION-287
+
+The LOAD body returns 1 only on open failure, a magic other than
+`0x26677342` and a version below `0x0BAD0002`, and tests no length or sum
+itself; failures inside its callees and the archive were not followed, and
+the second caller (the map caller) was not read. The load entry does not test
+the result. The town tail seeks past the label by blobEnd. The town branch
+does not request `SpellBook/Shortcuts`, `Inventory/IsOpen`, `Projectiles` or
+`Fog`; that holds for the body read, not for the image. What the player sees
+after a refused file is Medium to Unknown. — R2-ENGINE-723
+
+Nine EN and RU writer and town-LOAD bodies are equal in instruction sequence
+after masking every operand of 0x1000 and above, apart from application field
+offsets; callees are not compared. — R2-ENGINE-724
+
 ## Related
 
 The character file is a separate format: [ROM2 character file](../rom2-a2c/format.md).
