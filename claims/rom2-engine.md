@@ -5594,7 +5594,7 @@ in a committed listing.
 | R2-ENGINE-337 | The ROM2 music player streams one list entry through a looping DirectSound buffer; at a track end it plays the area pick, else the held index, else the next list entry; stop pauses and start resumes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-338 | While no dialogue tune is held, ROM2 music stops for logos, every cutscene, mission entry, mission end and message 0x451 and resumes only on a later screen request; a stream read failure posts 0x486. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-339 | ROM2 stores SoundRandom, SoundMusPos, SoundSfxPos, SoundSpeechPos and MusicEnabled in HKLM; volume defaults to -700, MusicEnabled to 1; -nomusic or a music.res mount failure disables screen and mission music requests. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
-| R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-341 | A ROM2 dialogue tag tune=N cross-fades music to list index N, which repeats only while no area pick exists; no data file or archive entry in either root contains tune=, so shipped dialogue never changes music. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-343 | On a -1 find the ROM2 dialogue loader leaves a one-byte empty body, a clear flag and no error (EN High, RU Medium); that absent means -1, and the TALK body ignoring the result (TalkTo), are Medium. | High / Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
 | R2-ENGINE-344 | The `#<key>` lookup is reached via the dialogue builder (21 direct call sites, 10 functions per image; register calls unseen); only TALK formats `npc%dtalk%d`; no save-load read found. | Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
@@ -5842,6 +5842,15 @@ fill bodies are not decoded. Medium for the slider curve, read from
 
 **Unknown.** The on-screen layout of the panel; the player state values
 the off arm tests beyond 1 and 2.
+
+**Amended.** R2-ENGINE-720 narrows two rows. The 0x474 arm with wParam 8
+calls the play method on the `m_fighter` select slot 2 object,
+`sfx\characters\m_fighter\select\2.wav`, a name no root's `sfx.res` holds
+(R2-ASSET-185); whether that is silent is Unknown (`L2.00984` and `L2.02166`
+unread). wParam 7 plays `sfx.reg` entry 100. The 0x476 close arm also copies
+the checkbox state into the options field `L2.03952` in memory; the field
+is stored as the registry value Acknowledgement by the options store, not by
+the click (R2-ENGINE-720).
 
 ### R2-ENGINE-341
 
@@ -12669,7 +12678,7 @@ the boxes of R2-ENGINE-564.
 | R2-ENGINE-569 | The EN town-1 statue opens a game menu box of five buttons, Save Game, Load Game, Sound Options, Abort Game and Return to Game; a hovered button is drawn gold with no caption box; Return to Game closes it. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
 | R2-ENGINE-570 | The EN in-town Save Game box has a name field, a Saved Games list holding only <<< Empty Slot >>> while game9998/9999 alone exist, a scroll bar, Ok, Delete and Cancel; Cancel closes box and menu with no write. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
 | R2-ENGINE-571 | The EN in-town Load Saved Game box lists Restart last mission and Abort mission and return to town, whose hover adds a date and time, with Ok, Delete and Cancel; Cancel closes box and menu to the square. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
-| R2-ENGINE-572 | The EN Sound Options box has a Tracks list (Plagat), an Acknowledgments checkbox, Music, SFX and Speech volume sliders, Play, Stop and Ok (RETURN TO GAME), no Cancel; Esc closes it to the square. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
+| R2-ENGINE-572 | The EN Sound Options box has a Tracks list (Plagat), an Acknowledgments checkbox, Music, SFX and Speech volume sliders, Play, Stop and Ok (RETURN TO GAME), no Cancel; Esc closes it to the square. | High / Medium | ● active (amended) | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
 | R2-ENGINE-573 | EN town-1 START MISSION after the mage's talk showed a full-screen parchment map of the allod 1.2 s after the click, the mission without dialogue at 2.6 s and the hero's dialogue by 11-13 s, in two launches. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
 | R2-ENGINE-574 | EN town-1 START MISSION after only the crossbowman's or only the peasant's talk shows the gate guard's box ("Sorry, but you can't leave the town...") with Ok and no map; it waits, and Ok closes it. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
 | R2-ENGINE-575 | The EN town-1 shop grid shows three rows of two cells; SCROLL DOWN below it moves the grid one row down and SCROLL UP above it one row back, on each of the four shelves. | High / Medium | ● active | [EXP-2072](../experiments/EXP-2072-rom2-route-rest/) |
@@ -12790,6 +12799,15 @@ waiting for input; Esc changed it). Medium for each caption.
 **Unknown.** Every control's effect (not clicked by rule); why one track
 is listed; Stop's caption. A run that clicks each control and reads the
 sound registry values after each would settle them.
+
+**Amended.** R2-ENGINE-720 narrows the clause on which stored value the
+Acknowledgments box sets and the Unknown on its effect. Medium: it sets the
+options field `+0x20` that is stored as the registry value Acknowledgement
+(default 1) by the options store, which runs at exit and after a cutscene
+(R2-ENGINE-311), if control 0x28 is this box (the only checkbox in the panel
+windows read). The three absolute references to that field are the speaker
+picker test (R2-ENGINE-719), the panel build and the close arm; the settings
+object `L2.01432` of R2-ENGINE-339 is a different object (R2-ENGINE-720).
 
 **Evidence.** [EXP-2072](../experiments/EXP-2072-rom2-route-rest/)
 
@@ -17039,6 +17057,244 @@ towns), the scans and the table loaders `L2.03950`, `L2.03951` and
 of an RU tooltip.
 
 **Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 7.
+
+## Unit acknowledgement voices
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-717 | A ROM2 client voices one selected unit after selecting own units and after 12 order senders (move 0x16, 0x1d, 0x24; attack 0x19; swarm 0x1a; defend 0x17, 0x18, 0x1b, 0x12; retreat 0x14; pick up 0x21, 0x13); the cast sender voices none. | High / Medium | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-718 | A ROM2 unit's voice follows word +0x1dc: 21 by the female and mage bits (aldor, sagita, hildarius, galinel), 22 igles, 23 dina, 1..6 xbow to mage, any other a generic m_/f_ fighter, mage or peasant voice by those bits and +0x188. | High / Medium | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-719 | The ROM2 speaker is a random accepted unit with health above 0 and +0x1b8 mask 0x1, else mask 0x10 or hire 1..20; its recording is floor(r x count / 32768); it is silent within 3000 ms (selection 2000) of its stamp. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-720 | The ROM2 speaker picker, called at 13 sites, returns 0 unless registry value Acknowledgement (default 1; the Sound Options checkbox, Medium) is nonzero and the mode word is 2; gestures play at SoundSpeechPos. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-721 | ROM2 unit slot +0x74(n), whose callers and n are Unknown, plays the voice's easy, hard or dead file (n = 1..3) when +0x1b8 & 0x11 is set or +0x1dc is at most 23, else entry n+1 of the type's +0xdc sound list. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-722 | 23 of 26 ROM2 EN/RU unit-voice listing windows have equal instructions after masking operands; three differ in application offsets and string comments; tables shift by different amounts; RU adds two voiceless senders. | High | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+
+### R2-ENGINE-717
+
+The order senders (EN / RU) fill the message buffer `L2.03033` /
+`L2.03034` with the type and every selected object (`L2.02988` accepts it),
+send it on the packet bus, then call the speaker picker `L2.03040` /
+`L2.03953` (R2-ENGINE-719) and one virtual slot of the unit it returns. A
+call-target scan of every executable byte finds 13 direct picker calls per
+root; all 13 were read:
+
+| Caller EN / RU | Type | Slot | Gesture |
+|---|---|---|---|
+| `L2.03954` / `L2.03955` | selection | +0x80 | select |
+| `L2.03956` / `L2.03957`, `L2.03958` / `L2.03959`, `L2.03960` / `L2.03961` | 0x16, 0x1d, 0x24 | +0x6c | move |
+| `L2.03962` / `L2.02197` | 0x19 | +0x68 | attack |
+| `L2.03963` / `L2.03964` | 0x1a | +0x70 | swarm |
+| `L2.03965` / `L2.03966`, `L2.03967` / `L2.03968`, `L2.03969` / `L2.03970`, `L2.03971` / `L2.03972` | 0x17, 0x18, 0x1b, 0x12 | +0x78 | defend |
+| `L2.03973` / `L2.03974` | 0x14 | +0x7c | retreat |
+| `L2.03975` / `L2.03976`, `L2.03977` / `L2.03978` | 0x21, 0x13 | +0x84 | pickup |
+
+Types 0x16 and 0x1a skip the voice when the speaker's +0x78 is 1. The
+message-to-order map is R2-ENGINE-541's. The gesture names are the directory
+words of the files each slot plays (R2-ENGINE-718). The cast sender
+`L2.03979` / `L2.03980` (it writes types 0x1f and 0x26) has no picker call
+and only slot +4 virtual calls.
+
+The selection call ends routine `L2.03019` / `L2.03981` (reached from the
+click routine of R2-ENGINE-606). It needs modifier `L2.01653` / `L2.03982`
+= 0, a nonzero selected count client +0x140, and flags +0x144 from summary
+`L2.03144` / `L2.03983` with mask 0x1 set (some selected object's class name
+equals `CUnit` by `L2.02024`) and mask 0x4 clear (the first selected object's
+owner +0x14 is the player client +0x9cc). The summary sets the flags to 8
+when application +0x404 (RU +0x41c) is neither equal to 1 nor has mask 0x2
+set.
+
+The gesture routines are slots +0x68..+0x84 of the unit vtables EN
+`L2.03340`, `L2.03341` (RU `L2.03984`, `L2.03985`). A DWORD scan of every
+section for any value in their span finds only those two vtables.
+
+**Confidence.** High for the 13 call sites, their slots and the cast sender
+body in both roots. Medium that no other code calls the gesture slots: a
+call through a vtable is outside the call-target scan. Medium for the
+`CUnit` test, whose comparison routine was not read.
+
+**Unknown.** Other selection paths (hotkeys, portraits) and whether they
+reach `L2.03019`; the meaning of speaker +0x78 and of application +0x404.
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 1.
+
+### R2-ENGINE-718
+
+The loader EN `L2.03986` / RU `L2.03987` builds 18 voice objects of 0x6c
+bytes with init `L2.03988` / `L2.03989`: `m_` and `f_` + `fighter`, `mage`,
+`peasant`, then aldor, sagita, hildarius, galinel, igles, dina, xbow, knight,
+druid, troll, orc, mage. The init formats `sfx\characters\<voice>\select\N.wav`
+and the same for attack, move and swarm (N = 1..4, slots +0x04, +0x14,
++0x24, +0x34) and one name each for retreat, pickup, defend (+0x44, +0x48,
++0x4c) and `easy`, `hard`, `dead` (+0x50..+0x58). Every name's sound object
+is made by `L2.00984` without a test of the name. For select, attack, move
+and swarm the count at +0x5c, +0x60, +0x64 or +0x68 is raised when
+`L2.03656` (body unread) returns nonzero for the name. The installed files
+are R2-ASSET-185.
+
+The getter `L2.03990` / `L2.03991` maps unit word +0x1dc through equal byte
+and arm tables (`L2.03992`, `L2.03993`):
+
+| +0x1dc | Voice |
+|---|---|
+| 1..6 | xbow, knight, druid, troll, orc, mage |
+| 21 | +0x1b8 mask 0x4 adds 1, mask 0x2 adds 2: aldor, sagita, hildarius, galinel |
+| 22, 23 | igles, dina |
+| any other | `f_` when mask 0x4 is set, else `m_`; `mage` with mask 0x2, else `fighter` when +0x188 is nonzero, else `peasant` |
+
+A multi gesture whose count is 0 returns without playing. The installed
+files (R2-ASSET-185) hold no gesture file, in EN for the hire voices and the
+generic voices, in RU for the generic voices, and in RU no pickup file for
+the hire voices; whether the counts of those voices are 0 rests on the
+reading of `L2.03656` below.
+
+**Confidence.** High for the loader, init and getter bodies and tables in
+both roots, including that every name's sound object is made without a test
+and that the four counts depend on the result of `L2.03656`. Medium for the
+meanings: mask 0x4 the female flag and mask 0x2 the mage flag (R2-ENGINE-051
+calls them bit four and bit two), 21 the hero and 1..20 the hires
+(R2-SESSION-195), +0x188 the weapon slot (R2-ENGINE-680). Medium that
+`L2.03656` accepts exactly the keys present in `sfx.res` (its body is
+unread) and that the `sfx\` prefix names `sfx.res` (R2-ASSET-102 reads the
+registry entries as `sfx.res` paths and does not show the resolver); the
+counts equal R2-ASSET-185's file counts only through these two links.
+
+**Unknown.** Which hire rows carry 1..6 and which units carry 22 and 23;
+whether a single gesture whose file is absent plays anything (`L2.00984` and
+`L2.02166` unread).
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), questions 2 and 3.
+
+### R2-ENGINE-719
+
+The picker EN `L2.03040` / RU `L2.03953` returns 0 unless application
++0x5d8 (RU +0x63c) is 2 and Acknowledgement is nonzero (R2-ENGINE-720). It
+walks client list +0x9d0 and keeps objects `L2.02988` accepts (read as
+selected, R2-ENGINE-606) with signed word +0x104 (read as health,
+R2-ENGINE-577) above 0: list A takes +0x1b8 mask 0x1; otherwise, while A is
+empty and +0x1b8 mask 0x10 is set, list B takes it when +0x188 is nonzero
+and list C while B is empty; otherwise +0x1dc 1..20 (read as the hires,
+R2-SESSION-195) goes to B. It returns element rand15 x n / 0x7fff (signed)
+of A, else B, else C, with rand15 from the core `L2.00729` / `L2.01699`
+(R2-ENGINE-391). An accepted unit with health above 0, +0x1b8 masks 0x1 and
+0x10 clear and +0x1dc outside 1..20 never speaks.
+
+Each gesture routine reads `timeGetTime` (import `L2.02270` / `L2.02271`)
+and returns when less than 3000 ms (select 2000 ms) have passed since unit
++0x1bc; otherwise it stores +0x1bc, then gets the voice. A multi gesture
+plays slot `L2.00939` / `R2.0021`(count - 1), which R2-ENGINE-391 states
+as floor(r x count / 32768) with r in 0..32767. That draw is exact for a
+count of 1, 2 or 4 and gives 10923, 10923 and 10922 of the 32768 values of r
+for a count of 3. The stamp is stored before the file test.
+
+**Confidence.** High for the picker and the seven gesture bodies in both
+roots. Medium for the readings they use: accepted as selected (R2-ENGINE-606,
+`L2.02988` unread), health (R2-ENGINE-577), the hires (R2-SESSION-195), and
+the range routine and core (R2-ENGINE-391; their bodies were not read
+here). Unknown for the draw that equals n (rand15 = 32767), since element
+accessor `L2.03994` / `L2.03995` was not read.
+
+**Unknown.** The meaning of +0x1b8 masks 0x1 and 0x10; whether a dead or
+off-screen unit can be among the accepted objects.
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 4.
+
+### R2-ENGINE-720
+
+Field +0x20 of the options object EN `L2.03996` / RU `L2.01508` is set to 1
+by constructor `L2.01505` / `L2.01506` (static initializer `L2.03997` /
+`L2.01507`). The registry load `L2.01541` / `L2.01543`, called from the load
+of R2-ENGINE-311, reads value `Acknowledgement` into it; the store
+`L2.01540` / `L2.01542` writes it as type 4, 4 bytes; the same store writes
+TipsMode at `L2.00893`, the write that R2-ENGINE-311 runs at the application
+exit and after a cutscene. A DWORD scan of every
+section finds three references to the field per root: the picker test
+(R2-ENGINE-719), the panel build and the panel close arm. The build
+`L2.01450` creates checkbox class `L2.03998` / `L2.03999` as control 0x28
+with caption 0xa5, sets it from the field and, when mode word +0x5d8 (RU
++0x63c) is 0 or 1, calls its slot +0x1c(1, 0). Close arm 0x476 copies the
+box into the field. The picker also needs the mode word 2, which the
+campaign start stores (R2-ENGINE-334).
+
+Every gesture passes d + SoundSpeechPos (`L2.04000` / `L2.04001`; default
+-700, R2-ENGINE-339) and (10000 - |d|) / 100, d from `L2.02162`, as for
+spell sounds (R2-ENGINE-446). The body of slot +0x74 (R2-ENGINE-721) does
+not test the value; the callers of that slot were not read.
+The panel's speech test (message 0x474, wParam 8) calls the play method on
+the `m_fighter` select slot 2 object, `sfx\characters\m_fighter\select\2.wav`,
+a file no root's `sfx.res` holds (R2-ASSET-185); whether that is silent is
+Unknown (`L2.00984` and `L2.02166` unread). wParam 7 plays `sfx.reg` entry
+100 at SoundSfxPos.
+
+**Confidence.** High for the field, its default, value name, load, store,
+the three references per root and the two tests of the picker: the picker
+returns 0 under them, and it has 13 direct callers (R2-ENGINE-717). The gate
+is stated for those 13 call sites. Medium that no other code calls a gesture
+slot (R2-ENGINE-717; a call through a vtable escapes the call scan), so a
+slot reached that way is not gated by the picker. Medium that control 0x28
+is the Acknowledgments box of R2-ENGINE-572 (the only checkbox in the
+windows read; caption 0xa5 of pool `L2.04002` is not resolved: it is not a
+`main.txt` line, and EN `dialogs.txt` index 165 reads "Acknowledgments",
+which fits the box but does not show the pool's file) and that mode word 2
+is the campaign (R2-ENGINE-334's Medium caller set). Medium that the store
+runs at exit and after a cutscene, from R2-ENGINE-311.
+
+**Unknown.** Whether a hotkey or portrait selection path reaches a gesture
+slot without the picker (R2-ENGINE-717); the effect of slot +0x1c; whether
+Esc stores the box.
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 5.
+**Format surface.** client sound settings; `formats/rom2-music/format.md`.
+
+### R2-ENGINE-721
+
+Slot +0x74 `L2.04003(n)` / `L2.04004(n)`: for n = 1 or 2 it returns when
+less than 1500 ms have passed since +0x1bc and otherwise stores it, the
+stamp the gestures use. n = 0 plays entry 1 of the sound list at +0xdc of
+the record that [unit +0x24] finds in collection `L2.02969` (the units.reg
+type map of R2-ASSET-180) from the `sfx.reg` table at SoundSfxPos. For
+n = 1, 2, 3 a unit with +0x1b8 & 0x11 nonzero or +0x1dc at most 23 plays
+`easy`, `hard` or `dead` of its voice (R2-ENGINE-718); another unit plays
+list entry n + 1; both at SoundSpeechPos. The body has no reference to the
+Acknowledgement field and no mode test.
+
+**Confidence.** High for the body in both roots. Medium that the list at
++0xdc is filled from units.reg: no loader that writes +0xdc was read, and
+the link is the collection of R2-ASSET-180. Unknown for the meaning of n and
+for the events that call the slot: its callers were not read, so the file
+names easy, hard and dead are the only evidence for "hurt" or "death".
+
+**Unknown.** The callers and the events behind n.
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 1.
+
+### R2-ENGINE-722
+
+Of 26 EN/RU listing windows (rows of `en-ru.tsv`: speaker picker, selection
+routine, selection summary, three sender ranges, cast sender, hurt head and
+tail, voice getter, the attack gesture and the move-to-pickup gestures,
+voice table loader, voice object init, options constructor, store and load,
+registry load, three panel checkbox build windows, panel handler head, panel
+slider arm (the speech test arm), checkbox constructor and methods, options
+static initializer), 23 have equal instructions after masking operands in
+0x400000..L2.03731; the masking does not distinguish one callee or global
+from another. Three differ: the picker and the last panel checkbox build
+window in application +0x5d8 against +0x63c, and the selection summary in
++0x404 against +0x41c and three string comments that only the RU listing
+carries. No window has a branch-shape difference. Of the eight tables, the
+getter and handler index byte tables are equal; the DWORD tables are shifted
+by different amounts: the getter arm table by +0x5473, the handler arm table
+by +0x32b0, the timer import by +0xd060, each unit vtable by nine different
+amounts (+0x0 to +0x5880) and the checkbox vtable by six (+0x60 to +0xaa85).
+The eight unit vtable slots +0x68..+0x84 (the seven gesture routines and the
+slot +0x74 body) all shift by +0x5473 and point to the paired RU bodies. RU adds
+senders of types 0x4d and 0x4e (`L2.01836`, `L2.04005`) without a voice. The
+roots differ in the installed voice files (R2-ASSET-185).
+
+**Confidence.** High for the windows and tables as listed: every one was read
+in both roots. Equal after masking is not equal in the global or callee each
+operand names.
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 6.
 
 ## Town SAVE LOAD checks and EN/RU parity
 

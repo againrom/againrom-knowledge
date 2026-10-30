@@ -54,6 +54,14 @@ Data.bin is 149971 bytes on the client and 152527 on the server. The other
 four matching names have equal lengths; payload equality is Unknown.
 — R2-ASSET-012
 
+`sfx.res` holds the unit voices as `characters/<voice>/<gesture>/<n>.wav`
+(gestures select, attack, move, swarm with n = 1..4; retreat, defend and
+pickup are built with n = 1) and `characters/<voice>/easy.wav`, `hard.wav`,
+`dead.wav`. EN has 88 such keys, gesture files for six named voices only,
+and also `aldor` defend and pickup with n = 2, which no built name reaches;
+RU has 198, gesture files for all twelve named voices and easy, hard and
+dead for the six generic ones too. — R2-ASSET-185
+
 <a id="population-note"></a><a id="not-yet-surveyed"></a>
 
 ## Unknowns

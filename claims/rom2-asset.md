@@ -2731,3 +2731,43 @@ a space is Medium (see the amendment of R2-ASSET-081).
 equality. Medium for the drawn width of a space.
 
 **Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 5.
+
+## Unit voice files
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-185 | ROM2 sfx.res holds unit voices as characters/<voice>/<gesture>/<n>.wav: EN 88 keys (gestures of six named voices, easy/hard/dead of twelve), RU 198 (gestures of twelve, easy/hard/dead of all eighteen voices). | High | ✔ promoted (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+
+### R2-ASSET-185
+
+Census of the `characters/` keys of the installed `sfx.res` (EN 18,219,970
+bytes, RU 25,041,450) against the names the voice init of R2-ENGINE-718
+builds. EN / RU counts:
+
+| Voice | select | attack | move | swarm | retreat, defend | pickup | easy, hard, dead |
+|---|---|---|---|---|---|---|---|
+| `m_`/`f_` + `fighter`, `mage`, `peasant` | 0/0 | 0/0 | 0/0 | 0/0 | 0/0 | 0/0 | 0/1 each |
+| aldor | 3/4 | 2/2 | 2/3 | 2/2 | 1/1 | 1/1 | 1/1 |
+| sagita | 2/3 | 1/1 | 1/3 | 1/3 | 1/1 | 1/1 | 1/1 |
+| hildarius | 2/3 | 1/1 | 1/3 | 1/3 | 1/1 | 1/1 | 1/1 |
+| galinel | 2/4 | 1/1 | 1/2 | 1/3 | 1/1 | 1/1 | 1/1 |
+| igles | 1/3 | 1/1 | 1/3 | 1/3 | 1/1 | 1/1 | 1/1 |
+| dina | 1/4 | 1/1 | 1/3 | 1/2 | 1/1 | 1/1 | 1/1 |
+| xbow | 0/2 | 0/1 | 0/3 | 0/2 | 0/1 | 0/0 | 1/1 |
+| knight | 0/3 | 0/1 | 0/3 | 0/2 | 0/1 | 0/0 | 1/1 |
+| druid | 0/2 | 0/1 | 0/2 | 0/3 | 0/1 | 0/0 | 1/1 |
+| troll | 0/3 | 0/1 | 0/1 | 0/3 | 0/1 | 0/0 | 1/1 |
+| orc | 0/3 | 0/1 | 0/2 | 0/3 | 0/1 | 0/0 | 1/1 |
+| mage | 0/3 | 0/2 | 0/3 | 0/3 | 0/1 | 0/0 | 1/1 |
+
+Every present numbered set starts at 1 without a gap and has at most 4
+files. EN also holds `characters/aldor/defend/2.wav` and
+`characters/aldor/pickup/2.wav`, which no built name reaches; every RU key is
+a built name. EN files are 22050 Hz mono, 35 PCM 16-bit and 53 with format
+tag 2 at 4 bits; RU files are all PCM 16-bit, 22050 Hz mono. No `speech.res`
+key in either root lies under a voice-name directory.
+
+**Confidence.** High: the complete key lists of both archives were read.
+
+**Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 2.
+**Format surface.** `sfx.res` keys; `formats/rom2-res/format.md`.

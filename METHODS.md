@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
+Claims labelled: 4482. Observation: 143. Static analysis: 3739. Mixed: 600.
 
 ## Ledger ai
 
@@ -2090,8 +2090,8 @@ Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
 | R2-ASSET-132 | static analysis | ✔ promoted (branch candidate) |
 | R2-ASSET-135 | observation | ● active |
 | R2-ASSET-136 | observation | ● active |
-| R2-ASSET-141 | observation | ● active |
-| R2-ASSET-142 | observation | ● active |
+| R2-ASSET-141 | mixed | ● active |
+| R2-ASSET-142 | mixed | ● active |
 | R2-ASSET-145 | mixed | ● active |
 | R2-ASSET-146 | mixed | ● active |
 | R2-ASSET-148 | observation | ● active |
@@ -2109,6 +2109,7 @@ Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
 | R2-ASSET-179 | mixed | ● active (branch candidate) |
 | R2-ASSET-180 | static analysis | ● active (branch candidate) |
 | R2-ASSET-182 | static analysis | ✔ promoted (branch candidate) |
+| R2-ASSET-185 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -2341,7 +2342,7 @@ Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
 | R2-ENGINE-337 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-338 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-339 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-340 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-340 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-341 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-343 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-344 | static analysis | ● active (branch candidate) |
@@ -2529,14 +2530,14 @@ Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
 | R2-ENGINE-566 | observation | ● active |
 | R2-ENGINE-567 | observation | ● active (amended) |
 | R2-ENGINE-568 | observation | ● active |
-| R2-ENGINE-569 | observation | ● active |
-| R2-ENGINE-570 | observation | ● active |
-| R2-ENGINE-571 | observation | ● active |
-| R2-ENGINE-572 | observation | ● active |
-| R2-ENGINE-573 | observation | ● active |
-| R2-ENGINE-574 | observation | ● active |
-| R2-ENGINE-575 | observation | ● active |
-| R2-ENGINE-576 | observation | ● active |
+| R2-ENGINE-569 | mixed | ● active |
+| R2-ENGINE-570 | mixed | ● active |
+| R2-ENGINE-571 | mixed | ● active |
+| R2-ENGINE-572 | static analysis | ● active (amended) |
+| R2-ENGINE-573 | mixed | ● active |
+| R2-ENGINE-574 | mixed | ● active |
+| R2-ENGINE-575 | mixed | ● active |
+| R2-ENGINE-576 | mixed | ● active |
 | R2-ENGINE-577 | static analysis | ● active |
 | R2-ENGINE-578 | static analysis | ● active |
 | R2-ENGINE-579 | mixed | ● active |
@@ -2645,6 +2646,12 @@ Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
 | R2-ENGINE-713 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-714 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-715 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-717 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-718 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-719 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-720 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-721 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-722 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-723 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-724 | static analysis | ● active (branch candidate) |
 
@@ -2753,12 +2760,12 @@ Claims labelled: 4475. Observation: 159. Static analysis: 3732. Mixed: 584.
 | R2-SESSION-206 | observation | ● active |
 | R2-SESSION-207 | observation | ● active |
 | R2-SESSION-208 | observation | ● active |
-| R2-SESSION-213 | observation | ● active |
-| R2-SESSION-214 | observation | ● active |
-| R2-SESSION-215 | observation | ● active |
-| R2-SESSION-216 | observation | ● active |
-| R2-SESSION-217 | observation | ● active |
-| R2-SESSION-218 | observation | ● active |
+| R2-SESSION-213 | mixed | ● active |
+| R2-SESSION-214 | mixed | ● active |
+| R2-SESSION-215 | mixed | ● active |
+| R2-SESSION-216 | mixed | ● active |
+| R2-SESSION-217 | mixed | ● active |
+| R2-SESSION-218 | mixed | ● active |
 | R2-SESSION-221 | observation | ● active |
 | R2-SESSION-227 | observation | ● active |
 | R2-SESSION-228 | observation | ● active |

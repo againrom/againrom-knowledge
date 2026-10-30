@@ -105,6 +105,7 @@ uses the tag. — R2-ENGINE-338, R2-ENGINE-341
 | SoundSfxPos | effects volume | -700 |
 | SoundSpeechPos | speech volume | -700 |
 | MusicEnabled | music on | 1 |
+| Acknowledgement | unit acknowledgement voices on | 1 |
 
 The values live under the client's HKLM key, are read once at startup
 and are written at exit and after a movie. After `-nomusic` or a failed
@@ -112,6 +113,17 @@ and are written at exit and after a movie. After `-nomusic` or a failed
 and the mission tick are ignored. The sound panel's music-on command does
 not test this; its effect then is Unknown. MusicEnabled gates start only.
 — R2-ENGINE-339
+
+Acknowledgement belongs to the options object of R2-ENGINE-311's load and
+store, not the settings object, and is the Sound Options checkbox (Medium:
+control 0x28, the only checkbox in the windows read). With it 0, or outside
+application mode word 2, no unit voices a selection or an order at the 13
+call sites of the speaker picker, which returns 0 under those tests. A
+gesture slot called by other code (Medium: none found) or by an unread
+selection path such as a hotkey or portrait click (Unknown) is not gated by
+it. The body of the unit slot that plays the easy, hard and dead files does
+not test it; its callers are unread. Gesture voices play at SoundSpeechPos.
+— R2-ENGINE-720
 
 The sound panel's music-on command resumes or restarts the chosen melody;
 music-off stops or fades the player. The panel also sets the chosen
