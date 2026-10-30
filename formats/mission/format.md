@@ -100,7 +100,10 @@ A win node may be referenced by more than one trigger — four on `81.alm`, two 
 resolve `THEN` slots by node **id**, never by position.
 
 **The two lose arms are armed differently, and a consumer that treats them alike will get one
-of them wrong.** An instant-5 node fires only when a trigger's action list reaches it. A
+of them wrong.** In mode zero an instant-5 node fires when a trigger's action list reaches it,
+or when an Outpost whose saved `+0x8c` holds its index builds actors; `R0431`, the only
+code found that stores a new instant link in an Outpost and runs it at once, runs only
+in nonzero mode (`MISSION-099`). A
 check-18 node is armed by being **authored**: the builder gives every check node a slot and the
 evaluator runs every check once per full tick, so an unreferenced check-18 node still loses the
 mission when its unit dies (`MISSION-VIP-004`; its corpus map count is partially retracted, the
@@ -111,6 +114,20 @@ Eleven of the 28 campaign maps have neither, on both roots — `30`, `41`, `51`,
 `120`, `121`, `131`, `140`, `141` — so their scripts can only ever produce a win
 (`MISSION-LOSE-025`). Independently of scripts, primary-character fall reaches the campaign
 failure branch under the participant gates in `MISSION-DEFEAT-045`.
+
+After a LOAD of `51.alm` in mode zero, of the failure paths read, three can fail
+the mission without input. The reporter's primary arm, for an absent primary or a
+nonzero primary stage `+0x13c`, latches 2 and sets HP -50 on every actor; it posts
+the failure message only when `Player+0x3e` is nonzero. The reporter's
+loss-counter arm fires when `session+0xb3b4` is 1. The death teardown `R0208`
+latches 2 and posts the message itself for an actor of type `0x21..0x3f` whose
+owner Player has `+0x28 == 0`. Other posters of the message were not traced, so
+"three" is bounded by the paths read (Medium). The reporter inputs are SAV fields;
+no trigger names the map's LOSE node, and only a saved Outpost `+0x8c` could run
+it. The reporter runs once per full tick (992 ms at the default speed), so a SAV
+that already meets a reporter arm fails at the first pass. A failure about 10 s
+later needs a change after LOAD, such as the primary's death or an actor's death in
+the teardown, or a panel delay that was not measured (`MISSION-098`).
 
 ## `30.alm`, worked end to end
 

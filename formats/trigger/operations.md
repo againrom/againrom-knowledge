@@ -205,7 +205,7 @@ retracted. — TRIG-CELLTAIL-035, SAV-CELLLOAD-111
 
 Check 4's shipped selector 6 reads signed current health; check 21 reads signed current building
 health. Their field identities are supplied by `HERO-HEALTH-032`, `ALM-CLS-053` and
-`SAV-BLDG-037`.
+`SAV-BLDG-037` (partially retracted only for its raw-block base, which these fields do not use).
 
 ### Reachability and Unknowns
 

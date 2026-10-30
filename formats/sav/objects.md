@@ -27,7 +27,7 @@ SAV-CLASSSER-172, SAV-CONTSER-188
 | `Shield` | Item; raw 22 from `+50` (its own store arm is empty; this transfer is inherited/shared) |
 | `Armor` | Item; raw 22 from `+52`; u8 `+50` |
 | `Weapon` | Item; raw 24 from `+52`; raw 22 from `+6a`; u8 `+50`; `objref` at `+80` |
-| `Building` | Token; raw 22 from `+52`; u8 `+40`; u16 `+42,+44,+46`; u8 `+48,+60,+61`; u32 `+64,+68` |
+| `Building` | Token; raw 22 from the embedded record at `+4a`; u8 `+40`; u16 `+42,+44,+46`; u8 `+48,+60,+61`; u32 `+64,+68` |
 | `Outpost` | Building; u32 `+84,+88,+80,+8c`; `Count(n)`; raw `8*n` from embedded `+6c` |
 | `Tavern` | Building; u32 `+9c` |
 | `Shop` | Building; u32 `+70`, the value cap |
@@ -42,6 +42,34 @@ These sequences are the schema-1 `.data` Token lineage. PointEffect LOAD
 immediately remaps its trailing raw `+44` key: hit installs the pointer;
 miss writes null. No extra bytes are consumed. Outpost's array has only the
 `CObject` runtime descriptor; its element meanings remain Unknown.
+
+Building's raw block is `+0x4a..+0x5f`, a 22-byte record embedded in every
+Building and zeroed by its constructor; it ends before `+0x60`. The former
+`+0x52` base (`SAV-BLDG-037`, partially retracted on this point) put raw
+positions 14, 15 and 18..21 on `+0x60`, `+0x61` and `+0x64..+0x67`; they are
+`+0x58`, `+0x59` and `+0x5c..+0x5f`. Both arms move the raw block, then
+`+40,+42,+44,+46,+48,+60,+61,+64,+68`, each to its own offset, so LOAD
+leaves the separate fields' saved values in `+0x60..+0x6b`. — SAV-1385
+
+No Building-family store to `+0x4a..+0x5f` was found after the constructor,
+so an original Building writes zero there unless a LOAD brought other bytes.
+Over 116 distinct files of the lawful saves directory (2,437 records)
+positions 0..13, 16 and 17 are always zero. The 40 files whose path records the
+original as writer (889 records) hold 22 zero bytes in every record. The 902
+records with a nonzero byte at position 14, 15 or 18..21 lie in 24 files whose
+writer is not recorded as the original (3 labelled engine, 21 unrecorded); each
+such byte equals the `+0x60`, `+0x61` or `+0x64` byte the `+0x52` reading maps
+there. No claim about the original rests on those 24 files. Which program first
+wrote those bytes is Unknown. — SAV-1386
+
+Outpost `+0x88` counts down to the next build of its `+0x6c` actors and then
+reloads from `+0x84` (120 when an entry is set). After each build it runs
+the instant whose index `+0x8c` holds when that is not negative. The
+constructor stores -1; `R0431`, a builder that runs only in nonzero mode, is
+the only code found that stores a new link there, and the serializer restores a
+saved one. In mode zero the link comes only from a SAV that holds an Outpost
+record, and no corpus SAV holds one (`MISSION-099`, `SAV-1374`). The call rate,
+and so the period in seconds, is Unknown. — SAV-1388
 
 `SpellEffect`'s own row, and the three rows built on it, list every field
 that class family's own `Serialize` touches beyond `Token`'s own head. The
@@ -132,7 +160,8 @@ references; its unread-classes Unknown superseded by SAV-EMBED-039),
 SAV-HUMAN-043, SAV-UNITLEN-045, SAV-CLASSSER-173, SAV-CLASSSER-176
 
 Building's Token map-unit ID joins the authored type-4 record. Its 77-byte body
-is fixed. — SAV-BLDG-037
+is fixed; only SAV-BLDG-037's raw-block base is partially retracted (SAV-1385).
+— SAV-BLDG-037, SAV-1385
 
 A structure destroyed in play keeps its Building record. Word `+0x42` is 0, the
 maximum `+0x44` and the other fields are unchanged, and the record count equals

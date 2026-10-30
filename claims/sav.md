@@ -4024,7 +4024,7 @@ The field-specific rule above replaces them.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | SAV-MEMBER-036 | The eleven `Serialize` bodies are read field by field, and a record's length is not a constant: counted lists, a string and presence flags vary it. | High / Unknown | ● active (amended, superseded) | [EXP-0145](../experiments/EXP-0145-save-members/), [EXP-0146](../experiments/EXP-0146-embedded-members/) |
-| SAV-BLDG-037 | A `Building` record is exactly 77 bytes, `Token`'s 37 plus 40 of its own, and chaining consecutive instances confirms the length. | High | ● active | [EXP-0145](../experiments/EXP-0145-save-members/) |
+| SAV-BLDG-037 | A `Building` record is exactly 77 bytes, `Token`'s 37 plus 40 of its own, and chaining consecutive instances confirms the length. | High | ● active (partially retracted) | [EXP-0145](../experiments/EXP-0145-save-members/), [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
 | SAV-OBFCEN-038 | Within the disassembled `Serialize` call set, the XOR obfuscation and the `0x7fff` clamp occur only in `Player::Serialize` `R0415`. | Medium | ● active | [EXP-0145](../experiments/EXP-0145-save-members/) |
 | SAV-EMBED-039 | The eight embedded-object sites a `.sav` record serializes hold four classes: an unnamed `u16` list at five sites, a `Spellbook`, a `CDWordArray` and a `CWordArray`. | High / Unknown | ● active | [EXP-0146](../experiments/EXP-0146-embedded-members/) |
 | SAV-WLIST-040 | Five of the eight embedded sites are one class with no name anywhere in the image: a list of `u16`, vtable `L08172`, written as a count and two bytes per element. | High | ● active | [EXP-0146](../experiments/EXP-0146-embedded-members/) |
@@ -4108,6 +4108,10 @@ map populations, with an exact terminator; 76 and 78 both fail on the second
 instance. None of the three internal checks was used to fix an offset.
 
 **Unknown.** What the two `+0x42`/`+0x44` and `+0x64`/`+0x68` pairs mean.
+
+**Amended.** The raw block's source base is refuted: `R1585` passes `this+0x4a`, so the 22
+bytes are `+0x4a..+0x5f` and end before `+0x60` (`SAV-1385`). The 77-byte length, the field
+order and the chaining stand.
 
 ### SAV-OBFCEN-038
 
@@ -18409,3 +18413,147 @@ path produced the observed fault.
 reader's `+0` and `+4` and a read of its Dimensions arm settle whether a short array is
 reachable. Which `R0701` call site the `0x467` arm uses, and whether it reaches `R0099`,
 was not read.
+
+## Building raw record, Outpost link fields and the Load-click teardown
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1385 | `Building::Serialize` `R1585` moves its 22 raw bytes from the embedded record at `+0x4a..+0x5f`, not `+0x52`; the block ends before `+0x60`, and both arms then move `+40,+42,+44,+46,+48,+60,+61,+64,+68` in that order. | High | ● active | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
+| SAV-1386 | No Building-family store to `+0x4a..+0x5f` was found after the constructor; raw positions 14, 15 and 18..21 are nonzero in 902 of 2,437 records, all in 24 files not recorded as original-written; 889 records of 40 recorded ones are zero. | High / Medium | ● active | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
+| SAV-1387 | `L17260` in `L09224` reads a list element's vtable before deleting it; a Load click with a live session reaches it through the teardown calls read, before the file is read; other deletions in play were not excluded. | High / Medium / Unknown | ● active | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
+| SAV-1388 | Outpost `+0x88` counts down to its next build of the `+0x6c` actors, reloads from `+0x84`, then runs instant `+0x8c` if not negative; `R0431` is the only new-link store found, and the serializer restores a saved link. | High / Unknown | ● active | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
+
+### SAV-1385
+
+- `R1585` calls `Token::Serialize` `R0950`, then `ADD ECX,0x4a` and `R1630`. That
+  routine tests `IsStoring` (`R1123`) and writes or reads `0x16` bytes at its own `this`
+  (`R0271`, `R0272`). The raw block is therefore `Building+0x4a..+0x5f`.
+- Both arms then move, in one order, u8 `+40`, u16 `+42`, `+44`, `+46`, u8 `+48`, `+60`, `+61`,
+  u32 `+64`, `+68`, each to its own offset. No raw byte lands on `+0x60..+0x6b` at LOAD, and
+  the separate fields are not copied into the raw block at SAVE.
+- Raw positions 14, 15 and 18..21 are `+0x58`, `+0x59` and `+0x5c..+0x5f`. The former `+0x52`
+  base read them as `+0x60`, `+0x61` and `+0x64..+0x67`.
+- The record at `+0x4a` is a 22-byte class shared with other objects. Its constructor
+  `R0977` calls `R0839`, which zeroes `0x16` bytes. All four Building constructors,
+  `R1834`, `L14461`, `L14463` and `R0485`, call it with `this+0x4a`. The other four
+  callers of `R1630` pass `+0x6a` (`R1639`), `+0xbe` (`R0210`), `+0x50`
+  (`L17047`) and `+0x52` (`L17048`), the Weapon, Unit, Shield and Armor sources of the
+  object table.
+- Outpost's serializer `L08390` begins by calling `R1585`.
+- The EN and RU `rom.exe` are one image (SHA-256 `942e9b72…7d03`, 1,977,344 bytes).
+
+**Confidence.** High. The base is the immediate operand at the call, the length is the pushed
+`0x16`, and the field order is read in both arms.
+
+### SAV-1386
+
+- Census: `tools/savfull -building-raw` over the lawful saves directory, reduced to distinct
+  files by SHA-256. 116 SAVs parse and 1 is refused; they hold 2,437 Building-family raw
+  blocks. The separate fields are nonzero in 2,437 (`+60`), 2,437 (`+61`) and 2,397 (`+64`)
+  records.
+- Raw positions 0..13, 16 and 17 (`+0x4a..+0x57`, `+0x5a`, `+0x5b`) are zero in all 2,437.
+- Position 14 (`+0x58`) and 15 (`+0x59`) are nonzero in 902 records, 18 (`+0x5c`) in 888,
+  19 in 245, 20 in 47 and 21 in 3. Every nonzero byte at these positions equals the field byte
+  the former `+0x52` base maps there: `+0x60`, `+0x61`, then `+0x64` bytes 0..3.
+- The 902 records lie in 24 SAVs. The other 92 SAVs hold 1,535 records, all with a raw block of
+  22 zero bytes.
+- By the writer the corpus path records (the committed provenance table of `SAV-1374`, a
+  label read from the path, not an observation of the writer; joined to the 116 files by
+  SHA-256, counts only):
+
+  | Class | Files | Records | Files with a nonzero raw byte | Records with one |
+  |---|---|---|---|---|
+  | recorded original | 32 | 805 | 0 | 0 |
+  | original after loading a generated input | 8 | 84 | 0 | 0 |
+  | another program (3 files of an engine lineage directory, 5 generated files) | 8 | 108 | 3 | 108 |
+  | writer not recorded | 68 | 1,440 | 21 | 794 |
+
+  The 40 files recorded as original-written hold 889 records, each with 22 zero bytes. The
+  902 nonzero records lie in 24 files whose writer is not recorded as the original (3
+  labelled engine, 21 unrecorded). No claim about the original rests on those 24 files.
+- Writer search over the EN image: no instruction in `L17261..L17262`, in Outpost's
+  `L08390` or in the Outpost builder `R0431` uses a displacement `0x4a..0x5f`, except one
+  call through a vtable slot (`L17263`). The record's methods `L17264`, `R0845` and
+  `R0847` are called only with other objects' bases (an actor's `+0xbe` and `+0xfe`, item
+  `+0x52`, `+0x50` and `+0x2a`).
+- Inference: the constructor's zeroing and `R1630`'s LOAD are the only writers found, so an
+  original Building keeps zero there unless a LOAD brought other bytes in; LOAD copies them into
+  `+0x4a..+0x5f` and the next SAVE writes them out again. The 24 SAVs carry bytes laid out as
+  the `+0x52` reading predicts. The 40 recorded original-written files and the code support
+  the zero; none of the 24 is recorded as original-written.
+
+**Confidence.** High for the census, an exhaustive count over the distinct lawful SAVs. Medium
+for "no other writer": the search covers the functions named and the record's methods, not a
+pointer to the record passed to other code.
+
+**Unknown.** Which program first wrote the nonzero bytes in the 24 SAVs; none is recorded as
+original-written, three are labelled engine, and the lineage of the 24 is held by the owner.
+A run of the original settles whether it writes nonzero from zero: load a file of recorded
+original writer, save, and census the saved block; a fresh mission start and save does the
+same from a zero constructor.
+
+### SAV-1387
+
+- `L09224(element)`: `R1133` finds and unlinks the element. When it is nonzero,
+  `L17260 MOV EDX,[EAX]` reads its vtable and `L17265 CALL [EDX+4]` with 1 runs the
+  deleting destructor. The read that can fault is the element's first dword: the element
+  pointer is invalid, not the list head.
+- Direct callers: `L16019` (deletes every element), `R0426` (the per-tick reap of world
+  `+0x2c`) and `R1555` (a command arm). Callers of `L16019`: `L09062` and `L17266`,
+  each on world `[+0x0c]+4` (the dead-actor list) and world `+0x2c`, and the Group destructor
+  `R2061` on its member list.
+- Load click (`0x419` arm `L06707` in `R0701`): with `frame+0x3dc == 1` it calls
+  `R1283`, which, in frontend phase 1 or 2 with a live server `[L00285]` and screen bit 0,
+  calls the session teardown `R0826` and so `L09062(world)`. The arm then calls
+  `R1303`, which runs the server destructor `R1540`, then `L17266(world)`, then the
+  Players and their Groups (`R2061`). The save file is opened after these calls.
+- A Load click with a live session reaches the routine through the teardown calls read
+  (`R0826`, `R1540`, the Players and their Groups) before the file is opened. Not
+  excluded: Group deletion in play, since `R2061` runs under the scalar deleting
+  destructor `R2060`, whose two callers found by scan are `L16015` (a sweep over a
+  Player's groups that removes entries after the test `R0197`) and `R1582` (a list
+  remove-and-delete), neither traced; and the per-tick reap `R0426`, which runs on the
+  first sub-ticks after the click if the session survives them.
+- Inference, Medium: that the observed fault was in the teardown rests on the address being
+  inside `L09224` and on the interval of about 10 ms after the click; the static read
+  shows that the teardown reaches the routine, not that the fault occurred there.
+- A freshly started process has no session to tear down (`R1303` and `R1283` test
+  `[L00285]`). That this is why the same file loads is an inference, Medium.
+- The world serializer `R0414` archives the dead-actor manager in both arms and does not
+  archive world `+0x2c`, the temporary casters built at run time (`R0914`). After a LOAD the
+  dead list and the Group memberships come from the SAV; `+0x2c` comes from play.
+- The element is invalid at this read when it was freed or overwritten while still linked:
+  linked in two owning lists, or freed elsewhere without an unlink.
+
+**Confidence.** High for the routine, its read, its direct callers and the teardown calls
+the Load click reaches. Medium for the fault's phase and for the fresh-process explanation
+(inferences above). Unknown which list and which element were involved in the fault observed
+on the owner's desktop.
+
+**Unknown.** The list and the element. Reproducing the fault in the original under a debugger
+(load the mission-130 SAV, play, click Load) and reading `EAX` and the return chain at the
+fault settles it: the return address inside `L09062`, `L17266` or `R2061` names the
+list.
+
+### SAV-1388
+
+- Outpost (vtable `L17267`, runtime class `L17268`, constructor `L14269` on Building's
+  `L14461`) has `vt+0x14` `L12568`. That routine calls Building's `R0538`, decrements
+  `+0x88`, and when the old value is not positive calls `R0432` and stores `+0x84` into
+  `+0x88`.
+- `R0432` builds the actors of each `+0x6c` entry (`new 0x198`, `new 0x1e8`) and then, when
+  `+0x8c >= 0`, calls the instant dispatcher `R0262(+0x8c)` (`MISSION-099`).
+- `R1336`, run by the constructor, stores -1 in `+0x8c`. `L17269`, which sets an entry of
+  the `+0x6c` array, stores 120 in `+0x84` and `+0x88`. The only other store to `+0x8c` found
+  in the whole-image enumeration of that displacement (`listings/disp-8c.txt`) is
+  `R0431`'s link (`L17259`). Outpost's serializer `L08390` moves u32 `+84`, `+88`,
+  `+80`, `+8c`: it reads `+0x8c` on the store arm (`L17270`) and restores the saved value
+  on the load arm. The enumeration does not match an address built by `ADD`.
+
+**Confidence.** High for the stores and calls read. Unknown for the cadence of `vt+0x14` on
+a Building and so for the period in seconds.
+
+**Unknown.** Which call rate drives `L12568`: a run of the original on a network map that
+builds an Outpost, recording the sub-tick number at each `R0432` call, settles it. No
+corpus SAV holds an Outpost record (`SAV-1374`), so no saved `+0x84`, `+0x88` or `+0x8c` was
+observed.

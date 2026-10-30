@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4426. Observation: 164. Static analysis: 3687. Mixed: 575.
+Claims labelled: 4432. Observation: 159. Static analysis: 3694. Mixed: 579.
 
 ## Ledger ai
 
@@ -1649,11 +1649,11 @@ Claims labelled: 4426. Observation: 164. Static analysis: 3687. Mixed: 575.
 | MISSION-DOC-021 | static analysis | ● active |
 | MISSION-MONEY-022 | static analysis | ✔ promoted |
 | MISSION-DOC-023 | static analysis | ✔ promoted |
-| MISSION-M30-024 | observation | ● active (amended) |
-| MISSION-LOSE-025 | observation | ● active |
-| MISSION-CURE-026 | observation | ● active (amended) |
-| MISSION-PAIR-027 | observation | ● active |
-| MISSION-TYP-028 | observation | ● active |
+| MISSION-M30-024 | mixed | ● active (amended) |
+| MISSION-LOSE-025 | static analysis | ● active (amended) |
+| MISSION-CURE-026 | mixed | ● active (amended) |
+| MISSION-PAIR-027 | mixed | ● active |
+| MISSION-TYP-028 | mixed | ● active |
 | MISSION-VICTORY-029 | mixed | ● active |
 | MISSION-VICTORY-030 | static analysis | ● active |
 | MISSION-VICTORY-031 | mixed | ● active |
@@ -1685,6 +1685,8 @@ Claims labelled: 4426. Observation: 164. Static analysis: 3687. Mixed: 575.
 | MISSION-ROUTE-092 | observation | ● active |
 | MISSION-ROUTE-093 | observation | ● active |
 | MISSION-ROUTE-094 | observation | ● active |
+| MISSION-098 | static analysis | ● active |
+| MISSION-099 | static analysis | ● active |
 
 ## Ledger move
 
@@ -2912,7 +2914,7 @@ Claims labelled: 4426. Observation: 164. Static analysis: 3687. Mixed: 575.
 | SAV-TOKEN-034 | static analysis | ● active (amended) |
 | SAV-PTRMAP-035 | static analysis | ● active (partially retracted) |
 | SAV-MEMBER-036 | static analysis | ● active (amended, superseded) |
-| SAV-BLDG-037 | static analysis | ● active |
+| SAV-BLDG-037 | static analysis | ● active (partially retracted) |
 | SAV-OBFCEN-038 | static analysis | ● active |
 | SAV-EMBED-039 | static analysis | ● active |
 | SAV-WLIST-040 | static analysis | ● active |
@@ -3354,6 +3356,10 @@ Claims labelled: 4426. Observation: 164. Static analysis: 3687. Mixed: 575.
 | SAV-1379 | static analysis | ✔ promoted |
 | SAV-1380 | static analysis | ✔ promoted |
 | SAV-1381 | static analysis | ✔ promoted |
+| SAV-1385 | static analysis | ● active |
+| SAV-1386 | static analysis | ● active |
+| SAV-1387 | static analysis | ● active |
+| SAV-1388 | static analysis | ● active |
 
 ## Ledger session
 

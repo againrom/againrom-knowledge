@@ -8,6 +8,18 @@ file-local relations. — SAV-SHAPE-023, SAV-LOAD-057
 
 ## Load order
 
+A Load click in a running session first tears that session down: the
+session teardown `R0826`, then the server destructor `R1540`, then the
+Players and Groups. Between them they delete the dead-actor list, world
+`+0x2c` and each Group's member list element by element through `L09224`,
+whose read of the element's vtable at `L17260` can fault when an element
+was freed while still linked. The target file is opened after these calls.
+Group deletion in play and the per-tick reap of world `+0x2c` also reach
+`L09224` and were not excluded as sources of the observed fault. That the
+observed fault was in the teardown is an inference (Medium), as is the
+explanation of a fresh process loading the same file by having no session to
+tear down. Which list held the faulting element is Unknown. — SAV-1387
+
 1. Deserialize live Player/Group/actor graphs.
 2. Deserialize dead actors.
 3. Rebuild the global actor list.

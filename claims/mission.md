@@ -1063,7 +1063,7 @@ prove sign, recipient or that the callee reaches `Player+0x38`.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | MISSION-M30-024 | `30.alm` decodes end to end, byte-identical on both roots, and its win is one distance test with no precondition. | High | ● active (amended) | [EXP-0161](../experiments/EXP-0161-mission-30/) |
-| MISSION-LOSE-025 | `30.alm` has no script-authored way to lose, and eleven of the 28 campaign maps, the same set on both roots, are in the same position. | High / Medium | ● active | [EXP-0161](../experiments/EXP-0161-mission-30/) |
+| MISSION-LOSE-025 | `30.alm` has no script-authored way to lose, and eleven of the 28 campaign maps, the same set on both roots, are in the same position. | High / Medium | ● active (amended) | [EXP-0161](../experiments/EXP-0161-mission-30/), [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
 | MISSION-CURE-026 | `30.alm` hands the hero a quest item and consumes it at the destination, but nothing in the map ever tests for it. | High / Medium | ● active (amended) | [EXP-0161](../experiments/EXP-0161-mission-30/) |
 | MISSION-PAIR-027 | `31.alm` is a standalone side mission attached to mission 30's town phase, not a stage of mission 30, and the `N`/`N+1` pairing does not cover the campaign. | Medium | ● active | [EXP-0161](../experiments/EXP-0161-mission-30/) |
 | MISSION-TYP-028 | `30.alm` is structurally typical of the campaign and exceptional in being unlosable; `MISSION-TYP-010`'s instant-5 map count is 15, not 14. | High / Medium | ● active | [EXP-0161](../experiments/EXP-0161-mission-30/) |
@@ -1138,6 +1138,12 @@ is scoped to the map's own script. This experiment did not search for an
 engine-level loss condition such as the loss of the whole party, and nothing it
 establishes rules out `MISSION-END-013`'s counter being reached from outside the
 script.
+
+**Amended.** "An instant-5 node fires only when a trigger's action list reaches it" is
+narrowed: an Outpost linked to an instant runs it without a trigger, a link that the
+nonzero-mode builder `R0431` (the only linker found) or a SAV's restored `+0x8c` supplies
+(`MISSION-099`). For `51.alm` in mode zero no such
+route exists (`MISSION-098`).
 
 ### MISSION-CURE-026
 
@@ -1911,3 +1917,102 @@ Options elsewhere: three menus were opened (mission, main, town). The options sh
 install's stored settings, not program defaults.
 
 **Unknown.** The tooltips of the other switches; Quest Objectives and Load Game in this menu.
+
+## Failure without input after a LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MISSION-098 | Of the paths read, three can fail `51.alm` in mode zero without input after a LOAD: the reporter's primary arm (posts only if `Player+0x3e != 0`), its loss-counter arm and the death teardown `R0208`; other `0xb4` posters were not traced. | High / Medium / Unknown | ● active | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
+| MISSION-099 | The instant dispatcher `R0262` also runs from Outposts: `R0431`, in nonzero mode only, links an instant in `+0x8c`; each Outpost build runs `+0x8c` if not negative. It is the only linker found; the serializer restores a saved one. | High / Unknown | ● active | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) |
+
+### MISSION-098
+
+- Script, both roots, identical (`tools/mis30 -mode dump`, labels omitted): 10 instants, 9
+  checks, 7 triggers. The one LOSE node (instant opcode 5, index 4, id 5) is named by no
+  trigger. No check has opcode 18 and none has opcode `0x10003`. The WIN node (id 7) runs from
+  the trigger whose check is group 5's live count equal to 0 (`MISSION-LOSE-025`).
+- Writers of the loss counter `session+0xb3b4`: the reset `R1289` (0); the instant dispatcher
+  `R0262`, type 5 (`INC`, slot 4 of table `L00566`); the check evaluator `R0433`'s type
+  18 arm `R1288` (`INC` when the checked actor's `+0x54 == 0x10`, slot 17 of table
+  `L12295`); and the session serializer `R0270`, called from both arms of the world
+  serializer `R0414`. `R0262`'s callers are the trigger runner `R0428` and the two
+  Outpost routes of `MISSION-099`.
+- For `51.alm` in mode zero none of these runs a loss unless the SAV supplies it: no trigger
+  names the LOSE node, no check-18 exists, the map builds no Outpost from its checks
+  (`SAV-1373`), and the Outpost link needs nonzero mode or a saved `+0x8c`. The counter itself
+  can be 1 in the SAV.
+- The reporter `R0132` runs per Player from `R1663`, which `R1576` calls when
+  `server+0x158 == 0`. The stepper `R0147` calls `R1576` after the sub-tick `R0193`
+  when the sub-tick counter `server+0x04` modulo 16 is 15: once per full tick, 992 ms at the
+  default speed. `R0075` also calls it after a wait of up to 1000 ms.
+- Reporter gates and arms: `MISSION-END-013`, `MISSION-DEFEAT-045`. Below latch 2, a null
+  primary `player+0x34` or a nonzero primary stage `+0x13c` latches 2 and sets HP -50 on every
+  actor in the flat ownership index (`L06591`); it posts the failure message `0xb4` only
+  when joined byte `Player+0x3e` is nonzero and the actual mode is 0 (`L17250..L17251`).
+  With `+0x3e == 0` the arm posts nothing. Otherwise `+0xb3b4 == 1` sets latch 2; that arm
+  needs no `+0x3e`.
+- A third writer of latch `+0x3c`: byte stores of 2 occur at three sites in the image,
+  `L08290` and `L08289` (the reporter) and `L17252`. `L17252` is in the death
+  teardown `R0208`, called at `L01924` from the actor routine `R0037` when signed
+  health `+0x94` is at most -10. When the actual mode is 0, the owner Player's `+0x28` is 0
+  and the dying actor's word `+0x0e` is in `0x21..0x3f`, it stores latch 2 and posts `0xb4`
+  itself (`push 0xb4` at `L17253`, `call R0623`), with no reporter pass and no
+  `+0x13c` test. This site was found at the confidence review of this experiment by an
+  image scan; its instructions are not in the committed listings (Medium). Other posters of
+  `0xb4` (`L17254`, `L17255`, `L17256`, `L00963`, `L17257`; `L16718` carries the
+  immediate) were not traced.
+- SAV sources of these inputs: Player `+0x28`, `+0x3c`, `+0x3d`, `+0x3e` and the saved
+  reference `+0x34`; the primary actor's `+0x13c` (Unit programme); session `+0xb3b4` and
+  `+0xb3ac` (session block); for the death teardown, the dying actor's health `+0x94` and
+  word `+0x0e`. LOAD reads both clocks from the file and loads no map (`SESS-084`).
+- Timing, inferred: a SAV whose state already meets a reporter arm fails at the first
+  reporter pass, within 16 sub-ticks of the first step after LOAD (about 1 s at the default
+  speed). «Mission Failed» about 10 s after LOAD needs a state change after LOAD, such as
+  the primary reaching a nonzero stage, an actor of the listed type dying in the teardown
+  `R0208` (which posts the message at the death, with no reporter pass), or a delay between
+  latch 2 and the panel; none was measured.
+
+**Confidence.** High for the script census and the code paths read. Medium for "of the
+failure paths read, three" and for the headline's bound: the search covers the writers of
+`+0xb3b4`, the callers of `R0262` and the three byte stores of latch `+0x3c`, not the other
+posters of `0xb4`, every writer of Player `+0x34` or actor `+0x13c`, or every route to an
+actor's death. The teardown site is Medium (one reading, not committed). Unknown which arm
+failed the owner's runs.
+
+**Unknown.** The SAV's values and the arm that fired. No SAV in the lawful corpus names
+`51.alm`; 12 of 116 carry no map name. Loading that SAV in the original and recording per full
+tick Player `+0x3c`, `+0x3e`, the primary's `+0x94` and `+0x13c` and `session+0xb3b4`, and at
+the moment of failure the latch and the type of the dying actor (or watching whether the
+primary dies before the message), settles it.
+
+### MISSION-099
+
+- `R0128` (called from `R0512`) calls `R1603` only when `[L00285]+0x0c != 0`.
+  `R1603` walks the Players at `L00380`; for each with `+0x28 != 0` it resolves `+0x24`
+  and passes the object to `R0431`.
+- `R0431` builds an Outpost (`new 0xac`, `L14269`) and stores in `+0x8c` the result of
+  `R2174(object)`: the first index in the instant collection `session+0xc2b0` whose record
+  `+0x34` or `+0x3c` equals the object, else -1. When that is not negative it calls
+  `R0262` at once.
+- Each time the Outpost's countdown expires, `R0432` builds the actors of its `+0x6c`
+  entries and then calls `R0262(+0x8c)` when `+0x8c >= 0` (`SAV-1388`).
+- The other two callers of the Outpost constructor, `R0067` and the `.ini` reader
+  `R0474`, hold no instruction with displacement `0x8c`: the whole-image enumeration of
+  that displacement (390 hits, 206 owners; `listings/disp-8c.txt`) lists no owner `R0067` or
+  `R0474`. The stores to an Outpost's `+0x8c` in it are the constructor's `L17258` (-1)
+  and `L17259` (the link); the enumeration does not match an address built by `ADD` or a
+  pointer held by other code. Outpost's serializer `L08390` restores a saved `+0x8c` from the
+  file. In mode zero the link comes only from a SAV that holds an Outpost record (none in the
+  116 files, `SAV-1374`).
+- `R0262`'s type 5 increments the loss counter and type 4 the win counter. An instant-5
+  node can therefore fail a mission with no trigger naming it: in nonzero mode, or after a LOAD
+  of an Outpost whose saved `+0x8c` is that node's index.
+
+**Confidence.** High for the calls and stores read. Unknown which maps or modes link an
+instant to an Outpost.
+
+**Unknown.** The meaning of instant record `+0x34` and `+0x3c`: a run of the original on a
+network map that builds an Outpost on a Player's object, recording the index `R2174`
+returns and the instant `R0262` runs, settles it. Whether any shipped map's instant names a
+Player's object there is settled by a census of the shipped maps' instant records, a static
+read of the maps.

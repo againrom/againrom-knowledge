@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-0633: Building raw block base
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `SAV-BLDG-037` (the raw block's source base only; the 77-byte length, the field order, the chaining and the internal checks stand) | Verbatim: "`Building::Serialize` `R1585` = `Token` (37) + 22 raw bytes from `+0x52`" | High | [EXP-0633](../experiments/EXP-0633-sav-load-reads/) (`SAV-1385`) | `R1585` executes `ADD ECX,0x4a` before calling the 22-byte transfer `R1630`, which moves bytes at its own `this`. The block is the embedded record at `+0x4a..+0x5f` and ends before `+0x60`; it overlaps none of `+0x60`, `+0x61`, `+0x64..+0x67` | **REFUTED** — partially retracted |
+
 ## EXP-0631: AddHero and Weapon +0x80
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
