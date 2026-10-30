@@ -2416,3 +2416,92 @@ has 34 rows; rows 30..34 have no name and no value.
 EN equal by the `world.res` and `data.bin` hashes.
 
 **Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
+
+## Mission 40 persons and their sprite keys
+
+The type-6 records of `scenario.res` `40.alm` through the field split of
+R2-ASSET-119 (`w08` typeID, `d0c` flags, `d14` definition ID, `d18`
+player); the Humans rows of `world.res` `data/data.bin` through the grammar
+of R2-ASSET-029 (parameter 16 typeID, 17 face, 18 gender, 24 serverID, the
+trailing item strings); the inline REG store `units/units.reg` and the keys
+of `graphics.res`; `main.res` `text/globalmap.txt` and
+`text/heropicture.txt`.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-172 | ROM2 `#title40` (EN The Astrologer, RU Звездочет.) matches 40.alm by number; of 108 type-6 records 35 carry flag 0x10 and Humans serverIDs 2104..2112 or 10230 (Mage_Hero, NPC 23), 73 flag 0 (units.reg types, no Units row read); EN = RU. | High / Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+| R2-ASSET-173 | ROM2 units.reg gives person types 1, 8, 9, 10, 14, 23, 24 no Z key and the sprite files unarmed, axeman_sh, axeman_2hd, clubman, archer, mage, mage_st; heropicture.txt line 0 is unarmed; the selected keys exist; EN = RU. | High | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+
+### R2-ASSET-172
+
+`#title40` is the only key with the EN label The Astrologer; its RU label is
+Звездочет. `#title40` and 40.alm correspond by number: R2-ENGINE-434 formats
+`#title%d` from a global-map record ID, and nothing read here shows that
+record ID 40 loads the member `40.alm`. The shared NPC words support the
+join: the map's placed NPC words 23, 694 and 2112 are the speakers of
+`mission40.txt` (R2-ENGINE-679). The map census and the template census are
+equal in both roots row for row.
+
+| Humans row | serverID | Records | Player | typeID | face | gender | Item strings |
+|---|---:|---|---:|---:|---:|---:|---|
+| 2U_PeasantMale | 2108 | 25..29, 35 | 3 | 1 | 46 | 0 | none |
+| 2U_PeasantFemale | 2109 | 30..34 | 3 | 1 | 13 | 1 | none |
+| 2U_PeasantLeader | 2112 | 9 | 3 | 1 | 44 | 0 | Uncommon Silver Ring |
+| 2F_PeasantGuard | 2110 | 10..17 | 3 | 10 | 45 | 0 | Wood Club |
+| 2A_PeasantGuard | 2111 | 18..24 | 3 | 14 | 16 | 1 | Wood Short Bow |
+| Mage_Hero | 10230 | 36 | 3 | 23 | 20 | 1 | Uncommon None Shoes, None Dress |
+| 2F_Brigand2 | 2104 | 0, 39, 40 | 5 | 8 | 51 | 0 | Iron Axe, Leather Boots |
+| 2A_Brigand2 | 2105 | 3, 4 | 5 | 14 | 17 | 1 | Wood Long Bow, Leather Boots |
+| 2M_Brigand2 | 2106 | 2 | 5 | 24 | 15 | 1 | Uncommon Wood Shaman Staff |
+| 2F_BrigandLeader2 | 2107 | 5 | 6 | 9 | 52 | 0 | Iron Two Handed Axe, Leather Boots |
+
+Each record's `w08` equals its row's typeID. The NPC word of serverID 10230
+is (10230 / 10) % 1000 = 23 (R2-ENGINE-072); the other rows keep their
+serverID. Mage_Hero has ManaMax 70. Row names are internal and equal in both
+roots. The other 73 records have `d0c` 0: types 66, 68, 69, 70, 73, 74, 75, 76,
+99 and 103, players 2, 4 and 7; records 6..8 are type 99 with serverIDs 694
+and 695. No Units row of `data.bin` was read for these 73 records; their
+types are named from `units.reg` `DescText` (type 99 is a Necromancer), and
+the flag-0 arm is the flag test of R2-ENGINE-038, read on RU only.
+
+**Confidence.** High for the record and row values: committed derived rows
+reproduced byte for byte. Medium for the record-to-row join: it is the
+serverID match of R2-ENGINE-038, read on RU only. Medium for the
+title-to-map join: a matching number, corroborated by the shared NPC words.
+
+**Unknown.** The name the game shows for each person; `text/unitname.txt`
+was not read.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 1.
+
+### R2-ASSET-173
+
+| units.reg | ID | Parent | File | `Files/File<n>` | InfoPicture |
+|---|---:|---:|---:|---|---|
+| Unit21 Unarmed Fighter | 1 | 3 | 21 | `humans\unarmed\sprites` | Bee |
+| Unit4 Human AxeMan with shield | 8 | 3 | 4 | `humans\axeman_sh\axeman_sh` | AxeManSh |
+| Unit5 Human AxeMan with 2-handed axe | 9 | 3 | 5 | `humans\axeman_2hd\axeman_2hd` | 2HAxeMan |
+| Unit6 Human ClubMan | 10 | 3 | 6 | `humans\clubman\clubman` | ClubMan |
+| Unit8 Human Archer | 14 | 3 | 8 | `humans\archer\archer` | Archer |
+| Unit20 Unarmed Mage | 23 | 3 | 20 | `humans\mage\sprites` | Mage |
+| Unit16 Human Mage | 24 | 3 | 16 | `humans\mage_st\mage_st` | Mage |
+
+Unit0 (ID 3, Human Swordsman) has no Parent. Key `Z` occurs in three units
+only: 70, 71 and 105, value 96. `Global/FileCount` is 60 and
+`Global/UnitCount` 61.
+
+`text/heropicture.txt` lines 0..25: unarmed, swordsman (1..4), swordsman2h,
+clubman (6..9), axeman, axeman2h, mage_st (12, 13), pikeman (14..16),
+axeman, axeman2h, archer (19, 20), xbowman, empty, Sonic Beam, Flame
+Thrower, swordsman.
+
+`graphics.res` holds `units/humans/<dir>/<name>.256` and `<name>b.256` for
+the six human files above, `units/heroes/mage/` and
+`units/heroes/mage_st/` `sprites.256` and `spritesb.256`, and the paperdoll
+bodies `equipment/mfighter/44, 45, 46, 51, 52`, `equipment/ffighter/13, 16,
+17` and `equipment/fmage/15, 20` (`.256`).
+
+**Confidence.** High: committed derived rows reproduced byte for byte, equal
+in both roots.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), questions 3 and 4.

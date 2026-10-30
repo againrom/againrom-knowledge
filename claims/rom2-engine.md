@@ -15824,3 +15824,203 @@ shared right child were read in EN only.
 constants and does not compare callees.
 
 **Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), question 6.
+
+## Mission 40 villagers: world sprite, portrait and LOAD
+
+EN addresses unless stated; the persons, rows and keys are R2-ASSET-172 and
+R2-ASSET-173. "Client" is the client unit built by the client map
+constructor `L2.01385` (R2-ENGINE-615) or the packet arm; "server" is the
+Human of R2-ENGINE-208.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-679 | The Astrologer of ROM2 mission 40 is most likely Mage_Hero (record 36, NPC word 23, female Unarmed Mage); the npc= header rule names 23, 2112 and 694 and leaves the identity Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+| R2-ENGINE-680 | ROM2 client slot +0x28 `L2.03682` draws a non-hero person from units.reg File of its typeID; hero Mage_Hero (+0xe 0x24) gets `heroes\mage\sprites` from `L2.03683`, `heroes\mage_st` when byte +0x8c is 6. | Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+| R2-ENGINE-681 | ROM2 panel tail `L2.03684` (head unread), mode +0x70 not 0, paints a unit with flags & 0x11 and & 8 via slot +0x88 `L2.02965`: body `equipment\<class>\<face>.256` from flags & 6 and +0x28; the face set gives all 35 persons those flags. | Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+| R2-ENGINE-682 | ROM2 Unit LOAD restores u16 +0xc and +0xe, u8 +0x49..+0x4c (face +0x4b) and +0x14c; Human LOAD relinks +0x3c to Humans row +0xc, or row 5 when +0xe >= 0x21; the client rebuild path is Medium. | High / Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+| R2-ENGINE-683 | Eight ROM2 EN/RU routine pairs of the mission-40 look (draw, paperdoll, client update, units.reg loader, map constructor, panel, template load, serializers) are equal after masking but for sizes, offsets and stack slots. | High | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+
+### R2-ENGINE-679
+
+The `text/mission40.txt` section census counts EN `astrolog` and RU
+`звездоч`, `астролог`. The sections that hold the name and an `npc=` header
+carry 21, 22, 23, 694 and 2112. 23 is Mage_Hero, 2112 is 2U_PeasantLeader,
+694 is type-99 record 6 or 7; 21 and 22 belong to no record of the map.
+
+- NPC 23 speaks only in events 11..14; each holds the name in at least one
+  root. RU parts spoken by 23 hold `звездоч` (event11 part 4, event12
+  part 4); EN parts by 23 hold no `astrolog`.
+- Parts by 2112 (event2, event3) and 694 (event6, event7) also hold the
+  name.
+- Mage_Hero is the only placed Human whose row name carries `_Hero` and
+  whose NPC word lies in 21..23, the range the client map constructor turns
+  into a hero class (R2-ENGINE-680).
+
+**Confidence.** Unknown by the preregistered rule: three placed NPC words
+qualify. Medium for Mage_Hero as a candidate: the name occurs in two RU
+parts of NPC 23 and in none of its EN parts, and in more parts of 2112, 694
+and 22; the rest rests on the hero-class range. A substring count does not
+tell the speaker from the person named.
+
+**Unknown.** A run of the original that inspects NPC 23 in mission 40 and
+reads its dialogue would settle the identity. NPC 22 (name in three own
+parts, no placed record) is not excluded.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 2.
+
+### R2-ENGINE-680
+
+- Class: the client map constructor builds a `L2.03161` object when the
+  units.reg entry +0x124 is nonzero and a `R2.0067` object otherwise
+  (`L2.03685..L2.03686`). +0x124 is read from key `Z` (`L2.03687`); no
+  person type has `Z`, so each person has vtable `L2.03340`, slot +0x28
+  `L2.03682` and slot +0x88 `L2.02965`.
+- `L2.03682` returns for state +0x184 >= 5, takes registry entry
+  `L2.02969`[client +0x24] (`L2.03688`), file index entry +0xc (Dying
+  entry +0x94 in dying states), direction ((+0x70 − 8) & 0xe) >> 1 and flip
+  +0x128. With flag +0x1b8 bit 0 clear it draws sprite object
+  `L2.03689`[file]: `graphics\units\` + `Files/File<n>`, loaded as `.256`
+  and `b.256` (`L2.03690`, `L2.03691`). With bit 0 set it draws +0x1c0 and
+  +0x1c4.
+- Client +0x24 is server +0xe (`R2.0075`). Template load calls the
+  parameter routine `L2.00219`, which moves the row's word into +0xe
+  through `L2.02668` (R2-ENGINE-525, helper unread here); with the hero
+  argument it sets gender + 0x23 when +0x4c & 4 (ManaMax > 0), else
+  gender + 0x21. The map
+  constructor writes the same value, row gender + 2·(ManaMax > 0) + 0x21,
+  and clears +0x4b bits 6..7 for a temporary unit whose +0x14c is 21..23
+  (`L2.03692..L2.03693`). Mage_Hero: +0xe 0x24.
+- Face set `L2.03694`: +0x24 in 0x20..0x3f gives flags 9, +4 for bit 0 and +2
+  for bit 1 of (+0x24 − 0x21), then +0x24 = 1; below 0x1a it gives 0x18, +4
+  for face bit 7, +2 for typeID 0x17..0x18, and +0x28 = face & 0x7f.
+- `L2.03683` (bit 0 only): action byte +0x8c = 6 gives `unarmed`, then
+  `mage_st` for a mage; otherwise `text/heropicture.txt` line (weapon
+  type − 1, 0 without a weapon) through pool `L2.03695`, `_` with a shield,
+  then `mage` for a mage whose line is `unarmed`. Directory `heroes` for a
+  mage, the mount name for +0x1a4, else `heroes_l`; `\sprites.256` and
+  `\spritesb.256`. +0x24 is then set from the line name.
+
+| typeID | Persons | World sprite (`graphics\units\`, `.256` and `b.256`) |
+|---:|---|---|
+| 1 | PeasantMale, PeasantFemale, PeasantLeader | `humans\unarmed\sprites` |
+| 10 | 2F_PeasantGuard | `humans\clubman\clubman` |
+| 14 | 2A_PeasantGuard, 2A_Brigand2 | `humans\archer\archer` |
+| 8 | 2F_Brigand2 | `humans\axeman_sh\axeman_sh` |
+| 9 | 2F_BrigandLeader2 | `humans\axeman_2hd\axeman_2hd` |
+| 24 | 2M_Brigand2 | `humans\mage_st\mage_st` |
+| 23, hero | Mage_Hero | `heroes\mage\sprites` (`heroes\mage_st\` with +0x8c = 6) |
+
+**Confidence.** Medium: the registry getters `L2.03696` and `L2.03697`, the
+registry insert `L2.03698`, the caller of slot +0x28, the weapon type
+`L2.03699`, the writer of +0x8c = 6, the +0xe helper `L2.02668`, the item
+rebuild `L2.03700` (the weapon and shield slots +0x188/+0x18c) and `L2.00997`
+(the `_Hero` test in the actor builder, read in EN only) are not read.
+
+**Unknown.** Which action sets +0x8c to 6, and whether Mage_Hero is ever
+drawn with it in mission 40. A run in mission 40 that watches Mage_Hero in
+the world while it casts and while it walks, and records whether the staff
+sprite appears, would settle it.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 3.
+
+### R2-ENGINE-681
+
+- Panel code from `L2.03684`, the 0x300-byte tail of the routine at
+  `L2.03701` (head `L2.03701..L2.03702` unread): mode +0x70 = 0 calls
+  `L2.01119`. Otherwise flags & 0x11
+  selects the paperdoll route: the temp name `<temp path>allods-2-<word
+  +4>.$$$` (`L2.03703`, `L2.03704`); a name other than cached +0x7c is
+  copied there. With flags & 8, both branches call slot +0x88 (name, +0x74,
+  +0x78); without it a new name is loaded by `L2.03705`. Without 0x11 the
+  panel loads `graphics\infowindow\<InfoPicture><+0x28 when above 1>.bmp`.
+- Flags 0x18 (non-hero) and 0x0f (Mage_Hero) carry 0x11 and 8, so in the
+  route read (mode +0x70 not 0, bit 8 set) all 35 persons take slot +0x88,
+  `L2.02965`. Slot +0x88 clears bit 8 when its cache name is non-null
+  (`L2.03706..L2.03707`) and the face set sets it again on each client
+  update, so the file written for a unit with bit 8 clear is not shown to be
+  the paperdoll's output.
+- `L2.02965`: class directory from flags & 6 (R2-ENGINE-582), body
+  `%s%d.256` with +0x28; for each of 12 item slots `primary\<name>.256`, and
+  `secondary\<name>.256` for slots 3, 8, 9 and, for a mage, 7. +0x24 in
+  0x11..0x15 adds `infowindow\horse.bmp`; no person has it.
+
+| Person | Body |
+|---|---|
+| 2U_PeasantMale | `mfighter\46` |
+| 2U_PeasantFemale | `ffighter\13` |
+| 2U_PeasantLeader | `mfighter\44` |
+| 2F_PeasantGuard | `mfighter\45` |
+| 2A_PeasantGuard | `ffighter\16` |
+| Mage_Hero | `fmage\20` |
+| 2F_Brigand2 | `mfighter\51` |
+| 2A_Brigand2 | `ffighter\17` |
+| 2M_Brigand2 | `fmage\15` |
+| 2F_BrigandLeader2 | `mfighter\52` |
+
+**Confidence.** Medium: the item name helper `L2.03708`, the item rebuild
+`L2.03700`, the mode-0 sheet `L2.01119`, the panel head `L2.03701..L2.03702`,
+the name loader `L2.03705` and the writer of bit 8's clear are not read. The
+label "inspection" rests on the `infowindow` and `allods-2-%d.$$$` strings,
+not on a read of what opens this panel.
+
+**Unknown.** The item sprite keys under `primary\` and `secondary\`; which
+mode the mission inspection opens; which routine opens this panel for a
+person in the mission, and the portrait it shows in mode 0 or from the
+cached name. A run of the original that inspects an elder, a guard and the
+mage in mission 40 and records the portrait would settle both.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 4.
+
+### R2-ENGINE-682
+
+Serializers `L2.01090..L2.03709` (RU `L2.01161..L2.03710`); each branch
+follows the `L2.01537` mode test.
+
+- Base `L2.03196`: u16 +0xc and u16 +0xe through `L2.03711` (store) and
+  `L2.03607` (load).
+- Unit `L2.01090`: u8 +0x49, +0x4a, +0x4b and +0x4c through `L2.03712`
+  (store) and `L2.03713` (load); +0x14c as the low word of a u32 that
+  also carries +0x204 from bit 16 and +0x1a0 from bit 24.
+- Human `L2.03714`, load branch after Humanoid `L2.03715`: +0x3c =
+  `L2.03310`(+0xc) on `L2.00148` when +0xe < 0x21, else `L2.03310`(5).
+- The look fields of R2-ENGINE-680 and R2-ENGINE-681 are +0xe, +0x4b and the
+  items, which are stored by the serializers with the Humanoid item
+  references (R2-ENGINE-208).
+- Client rebuild: the map constructor calls `R2.0075` with a temporary
+  unit built from the map record (`L2.03389`); the packet arm calls
+  `R2.0075` on scratch object `L2.03716` and creates a client unit only
+  when lookup `L2.02998` misses (`L2.03717`).
+
+**Confidence.** High for the transfers and the relink in the bodies read.
+Medium for widths and directions: the four archive helpers and `L2.03310`
+are not read. Medium for the rebuild path: the packet arm after `L2.03718`
+and its senders are not read.
+
+**Unknown.** No owner save holds mission 40 (R2-SESSION-234). A run of the
+original that saves in mission 40, reloads and inspects each person would
+settle the rebuild path.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 5.
+
+### R2-ENGINE-683
+
+Masking replaces operands of six or more hex digits.
+
+| Pair (EN / RU start) | Instructions | Differences |
+|---|---:|---|
+| world draw `L2.03682` / `L2.03719` | 1322 | `[ecx + 0x3f4]` / `[ecx + 0x40c]` |
+| paperdoll `L2.02965` / `L2.03720` | 1119 | none |
+| client update, face set, hero sprites `R2.0075` / `R2.0076` | 927 | 99 `ebp` slots and the frame size |
+| units.reg loader `L2.03721` / `L2.03722` | 1481 | none |
+| client map constructor `L2.01385` / `L2.01386` | 1028 | item sizes 0x88/0x8c, 0x6c/0x70 twice; +0x5d8/+0x63c |
+| panel tail `L2.03684` / `L2.03723` (routine heads unread) | 219 | none |
+| Human constructor, template load, parameters `L2.00214` / `L2.00130` | 826 | item sizes as above |
+| serializers `L2.01090` / `L2.01161` | 1510 | `add ecx, 0x54` / `0x58` in an item serializer at `L2.03724` |
+
+The packet arm, the actor builder, the registry getters, the hero-mage
+test, the line pool and the heropicture load were read on EN only.
+
+**Confidence.** High for textual equality under the mask; it hides large
+constants and does not compare callees.
+
+**Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 6.

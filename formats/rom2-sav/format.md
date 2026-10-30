@@ -704,6 +704,16 @@ and the sum is +0x130. Parameter-title joins retain their existing Medium
 grade. Worn items and ordered bag entries are separate. — R2-SESSION-236,
 R2-ENGINE-319
 
+Human LOAD stores base words +0xc (Humans row index) and +0xe (type), Unit
+bytes +0x49..+0x4c (face +0x4b, gender in bit 7 for a non-hero) and the low
+word of the u32 that also carries +0x204 and +0x1a0 (+0x14c). Human LOAD
+relinks the row pointer +0x3c from +0xc when +0xe is below 0x21 and to row 5
+otherwise. The branch direction is the unread `L2.01537` test and the widths
+come from the unread helpers, so these are Medium. The client takes its type
+from +0xe and its face from +0x4b; that the client look after LOAD is
+rebuilt from them and the stored item references is an inference (Medium).
+— R2-ENGINE-682
+
 The base raw12 block stores tile X/Y in bytes 0/1 and fractions in bytes 4/5.
 Player-1 positions are 0/0 in the four town-like files, 11/41 in
 game0001/0004/0005/9999 and 21/41 in game0006; fractions are 128/128.
