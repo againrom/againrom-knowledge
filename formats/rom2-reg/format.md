@@ -131,6 +131,13 @@ REG keys of the EN restore; the 38 EN sites that add the mark list's offset
 were censused, four of them in functions of an unread class. —
 R2-ENGINE-691, R2-SESSION-274, R2-ENGINE-701
 
+A unit caster's Teleport (identifier 54) release puts two objects into
+client +0x9ec, each with picture 54 and remaining segments +0xa8 = 21: one
+at the caster's position shifted up-left by its unit type's Center minus half
+Selection size, and a copy at destination +0x90/+0x94 shifted the same way.
+Neither moves; phase +0x74 runs 0 to 20 and the object ends at its 22nd
+update. — R2-ENGINE-703
+
 ## Mission View and Selection consumers
 
 The EN mission entry stores View/X and View/Y to the client origin
@@ -147,3 +154,23 @@ bind that slot to L2.03528, which calls L2.03529 to store +0x80=1 and
 SpellBook and Inventory IsOpen values through controls that are separate
 from the Selection restore. Delivered client identity, membership and first-frame
 state remain Medium/Unknown. — R2-ENGINE-670, R2-ENGINE-614
+
+## Unit type attack timing keys
+
+`graphics.res` `units/units.reg` is one file in EN and RU. Each unit type
+section carries `ID` (61 of the 63 sections of the installed file; `Global`
+and `Files` carry none); 16 of the 61 carry `Parent`. The loader reads `Parent`
+with a default of -1 and takes a missing scalar from the parent's loaded type
+only when `Parent` is not -1, else -1, except `ShootDelay` and `AttackDelay`,
+which default to 0. `AttackPhases` (type +0x1c) of 0 means
+the type shows no cast; the attack frame list built from `AttackAnimTime`
+and `AttackAnimFrame` sets the cast animation length +0x68; `AttackDelay`
+(+0x120) is the counter of the cast sound and `ShootDelay` (+0x11c) the
+release counter for every cast identifier except Teleport's 54, which
+releases at counter 0. `CenterX`/`CenterY` (+0x34/+0x38) and
+`SelectionX1`, `SelectionY1`, `SelectionX2`, `SelectionY2` (+0x84..+0x90)
+place a Teleport image. Mage types 23 and 24 carry AttackPhases 6,
+AttackAnimTime 2 x 6, AttackDelay 8, ShootDelay 8, Center 64/78 and
+Selection 48, 48, 80, 90. A type with a `Parent` and no `AttackAnimTime` of its own takes the list
+and `AttackAnimFrame` from the parent's section; the case of a type with
+neither a list nor a `Parent` is Unknown. — R2-ASSET-180, R2-ENGINE-704

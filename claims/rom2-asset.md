@@ -2628,3 +2628,66 @@ R2-ASSET-177.
 **Confidence.** High for the committed lines in both roots.
 
 **Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 1.
+
+## Unit types' attack timing and selection boxes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-180 | ROM2 units.reg is one file in EN and RU; mage types 23 and 24 have AttackPhases 6, AttackAnimTime 2 x 6, AttackDelay 8, ShootDelay 8, Center 64/78 and Selection 48, 48, 80, 90; 61 types are tabulated. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+
+### R2-ASSET-180
+
+`units/units.reg` in EN and RU `graphics.res` has the same SHA256,
+`335809b0672fdb796e8ae3399e176c7920167be8c7271b8abd7bbfaf76a0ac8a`
+(`data/units-reg-inputs.tsv`). The reader takes the REG inline store of
+R2-ASSET-006 and R2-ENGINE-614 (count at 0x10, 32-byte records from 0x18, type (flags & 0xe)
+>> 1, type 3 an int array) and writes every section's ID, Parent, DescText,
+File, Index, AttackPhases, Width, Height, CenterX, CenterY, SelectionX1, Y1,
+X2, Y2, Palette, ShootDelay, AttackDelay, AttackAnimTime, AttackAnimFrame,
+Homing and Projectile (`data/units-reg.tsv`). `data/teleport-unit-values.tsv`
+resolves the scalar keys through Parent for the 61 types with an ID:
+
+| Type | AttackPhases | AttackAnimTime sum | AttackDelay | ShootDelay | Center | Selection |
+|---|---|---|---|---|---|---|
+| 1 Unarmed Fighter | 7 | 14 | 0 | absent | 64, 78 | 48, 48, 80, 90 |
+| 23 Unarmed Mage | 6 | 12 | 8 | 8 | 64, 78 | 48, 48, 80, 90 |
+| 24 Human Mage | 6 | 12 | 8 | 8 | 64, 78 | 48, 48, 80, 90 |
+| 71 Dragon | 7 | 14 | 8 | 8 | 80, 80 | 32, 32, 128, 128 |
+| 107 WarSheep | 0 | none | 0 | absent | 64, 64 | 48, 48, 80, 90 |
+
+The client loader EN `L2.03721` (RU `L2.03722`) reads each scalar through
+`R2.0113` (unread) with a default: the parent's loaded field (type map
+`L2.02969`) when Parent is not -1, else -1 for AttackPhases, Width, Height,
+CenterX, CenterY and the four Selection keys, and 0 for ShootDelay and
+AttackDelay (`L2.03824`, `L2.03825`). The table writes -1 where neither the
+type nor an ancestor carries a key; for ShootDelay ("absent" above) the
+loader's value is 0. It stores AttackPhases at type +0x1c, CenterX/Y at
++0x34/+0x38, Selection X1, Y1, X2, Y2 at +0x84..+0x90 (through `L2.01491`
+and `L2.03826`), ShootDelay at +0x11c and AttackDelay at +0x120; +0x68 is the
+length of the attack frame list built from AttackAnimTime and
+AttackAnimFrame (R2-ENGINE-704). When a type has a Parent and its own
+AttackAnimTime list is empty, the loader reads AttackAnimTime and
+AttackAnimFrame again from the Parent's `Unit%d` section (`L2.03827`..
+`L2.03828`; the section name is built from the Parent's type object at
+`L2.03829`..`L2.03830`). Of the 61 types, 3 have no list of their own: types
+4 and 2, whose Parent is type 3 with a list (sum 11), and type 107, which has
+no Parent. The sum cells of those three are blank in
+`data/teleport-unit-values.tsv`; the blank is the table's, which sums the
+type's own list. AttackDelay is 0 for types 1, 2, 69, 74, 76, 103, 104, 106
+and 107.
+
+**Confidence.** High for the values read from the file and its equality in
+both roots, and for the key-to-field stores in the EN loader. Medium for the
+default rule: `R2.0113` returning its default for a missing key is inferred
+from the call shape. High for the control flow of the Parent fallback, equal in both roots
+(R2-ENGINE-708). Medium that types 2 and 4 therefore play type 3's 11
+updates: the read of a key into a list is inferred from the call shape of
+`L2.03128` (unread), and the Parent's section is its own section, so a
+grandparent's list is not consulted by this read.
+
+**Unknown.** The frame list of a type with neither a list of its own nor a
+Parent, such as type 107 (AttackPhases 0, so it shows no cast).
+
+**Format surface.** units.reg keys; `formats/rom2-reg/format.md`.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 2.

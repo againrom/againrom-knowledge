@@ -1,5 +1,12 @@
 # Overturn history
 
+## EXP-2090: Teleport release and relocation
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-691` (release moment for ID 54 only; the six IDs, the sound moment, the lifetime switch and the grades stand) | Verbatim: "and vtable +0x5c when it equals unit-type +0x11c" | High | [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), R2-ENGINE-703 | For unit +0xac = 0x36 the state 8 arm calls the release at counter 0 (`L2.03823`), and the release builds two effects of lifetime 21. | **NARROWED** |
+| `R2-ENGINE-026` (Teleport move clause only; the range term and the other arms stand) | Verbatim: "Teleport (23, `L2.00080`): moves the caster to the target cell through `L2.00093`" | High | [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), R2-ENGINE-705 | `L2.00093` moves the caster to the target cell centre only when `L2.02921` passes; otherwise it returns 1 with no move. | **NARROWED** |
+
 ## EXP-0633: Building raw block base
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

@@ -229,7 +229,7 @@ ROM1 states the same one-term use of the skill (`MAGIC-POWER-004`), with its cei
 |---|---|---|---|---|
 | R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active (partially retracted) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-025 | Stone Curse draws a random duration up to `4.8*P` units for a spell cast (`2.4*P` for an item cast), cut by Earth resistance; its Effects string begins with a quote that probably stops the kind parsing. | Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active (partially retracted) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active (partially retracted, amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-027 | Prismatic Spray hits min(P/20 + 2, 7) victims, where P for a book cast comes from the power byte and for an item cast from the castSpell effect. | High | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-024
@@ -285,6 +285,8 @@ ROM1's unique-spell arms are listed in `MAGIC-SING-019`; they were not compared 
 **Unknown.** The Control Spirit template contents; the Summon creature names and statistics.
 
 **Amended.** R2-ENGINE-455 partially retracts the Summon placement clause: the creature is placed by a search around the caster's cell, not at the target cell. It also names the creatures (R2-ASSET-107). The other arms, the level rule and the grades stand. See the EXP-2057 entry in retracted.md.
+
+EXP-2090 narrows the Teleport clause: `L2.00093` moves the caster to the target cell centre only when the cell test `L2.02921` passes; otherwise it returns 1 with no move, and the arm, which ignores the return, still calls `L2.00060` with mask 0x10 (R2-ENGINE-705, R2-ENGINE-706). The range term and the grades stand. See the EXP-2090 entry in retracted.md.
 
 ### R2-ENGINE-027
 
@@ -12106,7 +12108,7 @@ R2-ENGINE-471 read.
 |---|---|---|---|---|
 | R2-ENGINE-541 | Each ROM2 player-order setter read resets the unit (state 0), replaces order code +0x50 and its parameters at once and stores prepared byte +8 (0; 1 in the two order-1 setters); none writes primary byte +9. | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-542 | The ROM2 unit executor (RU L2.00506, EN L2.00507) handles a nonzero primary byte +9 first (1 strike, 2 cast, 3 step, 4 hold) and reads prepared byte +8 only when +9 is zero; other +9 values: all 255 cells read (R2-ENGINE-553). | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
-| R2-ENGINE-543 | A ROM2 cast passes init (+9 = 2, state 13 or 14), a try at the cast routine, wind-up (substate 5) and recovery (substate 7); completion byte +0x136 = 1 lets the executor end it. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-543 | A ROM2 cast passes init (+9 = 2, state 13 or 14), a try at the cast routine, wind-up (substate 5) and recovery (substate 7); completion byte +0x136 = 1 lets the executor end it. | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-544 | A ROM2 mage's mana is subtracted at the entry of the cast routine (RU L2.02808), before the wind-up, once per call that reaches the delivery; one path returns 0 after it (reachability unread); no refund read. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-545 | The read RU setters store a new order without writing primary +9; the cast arm ignores prepared +8. Retaining the cast is Medium; later dispatch requires admission and a valid prepared byte. | Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-546 | A ROM2 step between cells is primary +9 = 3 with state 1; it ends when the position object's offset bytes +4 and +5 both read 0x80; an arriving order waits for that end. | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
@@ -12117,7 +12119,7 @@ R2-ENGINE-471 read.
 | R2-ENGINE-554 | In the read RU windows the executor, action initialisers and planner L2.02864 write command +9; that planner owns both 0xff-to-0 clears. Encoded-store coverage is bounded; writer completeness is Medium. | High / Medium | ● active (amended) | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
 | R2-ENGINE-555 | The read RU planners store prepared +8, include two +9 clears in L2.02864 and call order setters. The table and individual constants are High; per-order closure and inherited reset-chain effects are Medium. | High / Medium | ● active (amended) | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
 | R2-ENGINE-556 | The acquired RU strike and hold arms ignore prepared +8; setters store a new order without directly writing +9. Retention is Medium, and dispatch after +9 clears requires admission, no hold reinstall and valid +8. | High / Medium | ● active (amended) | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
-| R2-ENGINE-557 | The ROM2 command word +0xb0 is a destination cell copied from a cell record of kind 0x17; the executor relocates the idle unit there through L2.00093 at +9 = 0 and clears it. It is not an order. | High / Medium | ● active | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
+| R2-ENGINE-557 | The ROM2 command word +0xb0 is a destination cell copied from a cell record of kind 0x17; the executor relocates the idle unit there through L2.00093 at +9 = 0 and clears it. It is not an order. | High / Medium | ● active (amended) | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
 | R2-ENGINE-558 | RU acquired wrappers call selector L2.01725; the E8 scan finds two executor sites. The actor-step call is conditional in standing evidence; the other loop attribution is inherited. Planner cadence and pointer-table dispatch remain Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
 | R2-ENGINE-559 | The ROM2 EN executor, byte table and jump tables equal the RU ones after masking or a constant shift; the +0xb0 and +9 store shapes agree; bodies read in RU only are Unknown in EN. | High / Medium | ● active | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
 | R2-ENGINE-560 | In the read RU paths a new order is stored immediately, but +9 = 0 alone does not dispatch it: entry admission, no hold reinstall and valid prepared +8 are required. Complete interruption and eventual execution remain Medium. | Medium | ● active (amended) | [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md) |
@@ -12162,6 +12164,11 @@ The actor step (RU L2.00028), substate +0x58: substate 0 calls the cast routine 
 **Confidence.** High for the local control flow in RU (actor step, executor and cast routine complete; EN executor and cast routine equal after masking; EN actor step differs in two item-field offsets and two allocation sizes). Medium for the stage meaning: L2.01727, L2.00035 and L2.00034 were not read.
 
 **Unknown.** What L2.01727 does at phase 3 and what the apply routines do.
+
+**Amended.** EXP-2090 narrows the Unknown for the point apply L2.00034: it
+switches on spell byte +8 (bound 0x1d, table L2.00069), and id 23 reaches
+the Teleport arm L2.00080 (R2-ENGINE-705). The other apply arms and
+L2.00035 stay Unknown.
 
 **Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
 
@@ -12312,6 +12319,16 @@ The ROM2 command word +0xb0 is not an order: it holds the destination cell (x in
 **Confidence.** High for the executor consumption, the L2.02924 writer and that the word carries a cell, not an order. Medium that L2.02924 is the only writer: the 34 dword stores per root (e.g. L2.02936, L2.02937) were not classified, and the L2.00093 callers L2.02928, L2.02931 and L2.02932 were not read. Medium for "relocates": L2.02927 and L2.02926 were not read.
 
 **Unknown.** The meaning of record kind 0x17; the bodies of L2.02927, L2.02926 and L2.00315; whether a spell or a cell record at L2.02928 uses the same word.
+
+**Amended.** EXP-2090 narrows the Medium and the Unknown. L2.00093 calls
+L2.02921 once; L2.02921 requires L2.03831(unit, cell, 0) and (unit, cell,
+1). L2.02927 stores x, y, word y << 8 | x and offsets +4/+5 = 0x80 on the
+position object, so "relocates" holds to the cell centre; L2.02926 calls
+L2.02410(unit, 0, 2) and L2.03832; L2.00315 calls L2.02922 and
+L2.02410(unit, ., 1). The caller L2.02928 is the Teleport apply arm
+L2.00080, which passes x and y of the apply's position object
+[ebp-0x20], not the +0xb0 word (R2-ENGINE-705). The meaning of record kind 0x17 and the callers L2.02931
+and L2.02932 stay Unknown.
 
 **Format surface.** Command object word +0xb0; `formats/rom2-autocast/format.md`.
 
@@ -16045,7 +16062,7 @@ constants and does not compare callees.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-691 | A ROM2 unit caster of IDs 16, 24, 34, 46, 48 or 62 plays Sfx(500+ID) in state 8 at counter = type +0x120 and releases at +0x11c a cast object of lifetime 0, which its first update ends. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-691 | A ROM2 unit caster of IDs 16, 24, 34, 46, 48 or 62 plays Sfx(500+ID) in state 8 at counter = type +0x120 and releases at +0x11c a cast object of lifetime 0, which its first update ends. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 | R2-ENGINE-692 | The ROM2 unit consumer L2.03727 rebuilds overlay list +0x11c from the marks +0x130 at every call and decrements each mark's low word; marks 16, 24, 34, 46 call L2.03728, 48 calls L2.03729, 62 calls L2.03730. | High / Medium | ● active (amended, branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 | R2-ENGINE-693 | A ROM2 protection mark draws one sprite 32s above the unit, shifted 6 px by element; Bless draws 20 sparks at fixed positions on a radius-20 ring, frames advancing round it; Shield draws two turning meridians and two sweeping rings. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
 | R2-ENGINE-694 | ROM2 unit draw L2.03682 draws +0x11c entries with z > 0, then z <= 0, at the unit position plus (x, y - z); the Palette preparation builds 16 brightness levels, no blend operation in its table; whether the sprite draw blends is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
@@ -16100,6 +16117,18 @@ word, and so whether this ever occurs for these IDs, were not read.
 **Unknown.** The caster's unit-type +0x11c and +0x120 values and state 8
 frames; which callers pass a zero caster word to the 0x8b sender. A capture
 of each cast from the cast order to 2 s after release would show both.
+
+**Amended.** EXP-2090 narrows the release moment: when unit +0xac is 0x36
+(Teleport, test `L2.03823`) the state 8 arm releases at counter 0, not at
+type +0x11c, and that release builds two effects (R2-ENGINE-703); the six
+IDs still release at +0x11c. The Unknown on the type values narrows:
+units.reg AttackDelay (+0x120) and ShootDelay (+0x11c) per type are in
+R2-ASSET-180 (8 and 8 for types 23 and 24; the loader sets 0 when no type in
+the Parent chain carries the key), and state 8 lasts type +0x68 updates
+(R2-ENGINE-704). The insert helper `L2.00142` stores the object in the map
+under the key, and the paint is message 0x402's render `L2.03537`, outside
+the tick (R2-ENGINE-703, Medium). The grades stand. See the EXP-2090 entry
+in retracted.md.
 
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 2.
 
@@ -16451,3 +16480,262 @@ parser and keyword routine, +0x9cc7 dispatcher.
 R2-ENGINE-696; callees were compared only where listed.
 
 **Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 5.
+
+## Teleport cast presentation and move
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-703 | A ROM2 unit's Teleport (ID 54) release at its first state 8 update makes two type-54 effects of 21 updates, one near the caster and a copy at the target cell centre; neither moves; each draws frames 0..20. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-704 | A ROM2 client Teleport caster plays state 8 for its type's AttackAnimTime sum (12 for types 23, 24) and Sfx 554 at counter AttackDelay (8); the cast is not shown while it animates or its type has AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-705 | ROM2 Teleport pays mana; if three gates pass it sends 0x86 (ID 54, target cell), and +0x134 actor steps later the apply moves the caster to the target cell centre if both footprint tests pass. Read in RU; 8 bodies paired in EN. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-706 | When a ROM2 Teleport cast reaches the client (R2-ENGINE-705), a refused cell keeps the mana paid, both images and Sfx 554 and leaves the caster in place; a target beyond the range byte is approached first. Read in RU. | Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-707 | A ROM2 creature's Teleport takes the hero's server route, packet and client arm; it differs in mana (none for a non-mage, Medium), +0x134, units.reg timing and offsets, its planner cell test, and no image for AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-708 | 23 of 24 ROM2 EN/RU Teleport listing pairs have equal instructions under an operand mask (callees, globals unchecked); 10 tables are equal or shifted; the 0x86 handler differs at 2 of 333 and its dispatcher tables were not compared. | High | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+
+### R2-ENGINE-703
+
+The caster arm of the 0x86 handler (spell IDs: R2-ENGINE-445) stores +0xac = 54 and
+target +0x90/+0x94 = cell * 256 + 0x80 (type 54 has Homing 0). The state 8
+arm EN `L2.03726` (RU `L2.03734`) calls the release (vtable +0x5c) at
+counter +0x9c = 0 when +0xac is 0x36 (`L2.03823`), and at type +0x11c for
+other IDs. The release EN `L2.03725` (RU `L2.03735`), for ID 0x36:
+
+1. Effect 1 (0x158 bytes, `L2.03141`, vtable `L2.03350`): +0x24 = 54,
+   facing +0x70/+0x8d from the caster, +8 = caster +0x5c - CenterX +
+   (SelectionX2 - SelectionX1) / 2, +0xc = caster +0x60 - CenterY +
+   (SelectionY2 - SelectionY1) / 2, of the caster's units.reg type
+   (R2-ASSET-180; +0x84/+0x88/+0x8c/+0x90 are X1, Y1, X2, Y2 through
+   `L2.01491`/`L2.03826`); +0x2c/+0x30 = +8/+0xc; +0x90..+0x98 = the
+   caster's +0x90..+0x98; lifetime +0xa8 = 21 (`L2.03833`); +0x8c = 1,
+   +0x9c = 0; projection `L2.03142`; insert into client +0x9ec under key
+   +0xa24 (`L2.00142`). The ShootOffset branch is skipped for 0x36
+   (`L2.03834`).
+2. Effect 2 only for ID 0x36 (`L2.03835`): copy constructor `L2.03836`
+   (base copy `L2.03382` copies +0xc, +0x10, +0x24, +0x2c, +0x30, +0x54,
+   +0x58, +0x6c, +0x74, +0x8c, +0x90..+0x98, +0x9c, +0xa8 and more), then
+   +8 = effect 1 +0x90 - CenterX + half width, +0xc = effect 1 +0x94 -
+   CenterY + half height, +0x10 = effect 1 +0x98; projection; insert.
+
+For types 23 and 24 the anchor offset is (-48, -57) fine units: Center
+minus half Selection (64 - 16, 78 - 21), 6 px left and 7.1 px up of the point
+(`data/teleport-unit-values.tsv`). Projection `L2.03142` sets screen +0x54 =
+(+0x2c >> 3) - view x * 32, +0x58 likewise from +0x30.
+
+The effect update EN `L2.02165` (RU `L2.02167`) returns 0 when +0xa8 is 0;
+ID 54 (byte table cell 41 = 0x0c) reaches arm `L2.03837`: frame +0x74 =
+counter - 1, then a jump to `L2.03838` past the step at `L2.03839`, so the
+effect keeps +8/+0xc. The tail decrements +0xa8 and sets +0x2c/+0x30 =
++8/+0xc. Updates 1..21 show frames 0..20; the 22nd returns 0 and the tick
+deletes the effect. The draw `L2.02170` (cell 47 = 0x04, arm `L2.03840`)
+draws sprite frame +0x74 of projectile type 54 (96 x 96, R2-ASSET-101) once
+at x = +0x54 - 48, y = +0x58 - 48 - +0x6c - +0x10: the picture's centre sits
+on the anchor, raised by +0x6c and +0x10, whose values are Unknown, so the
+on-screen place relative to the point is Unknown by those two terms. The slot +0x40
+`L2.03841` marks a dirty rectangle from +0x38/+0x3c.
+
+The client tick EN `L2.01389` updates units +0x9d0, then effects +0x9ec, so
+both effects get their first update in the release tick. Message 0x401 runs
+the tick (`L2.03371`), 0x402 the render `L2.03537` (`L2.03842`); `L2.03843`
+sends 0x401 then 0x402 through the import at `[L2.03844]`. The render calls
+`L2.03845`, which projects every unit and effect from +0x2c/+0x30, then draws
+all effects in one pass (`L2.03846..L2.03847`) between unit passes
+(`L2.03848..L2.03849` before; `L2.03850..L2.03851` after, for grid objects
+whose +0x7c is 0, with the unit type map `L2.02969`).
+
+**Confidence.** High for the state 8 test, the two effects, the anchor
+offsets, lifetime, the copy, the update arm and the draw arm in both roots,
+and for the frame sequence. Medium that the arrival effect is first drawn at
+the target, and that either effect is first drawn in frame 0 on the release
+tick: it rests on the import at `[L2.03844]` being a synchronous send and on
+no render between the tick's unit and effect passes; eight other 0x402 push
+sites were not classified. Medium for one render per tick. Unknown for the depth against the
+caster: which unit pass draws a person (its +0x7c) was not read.
+
+**Unknown.** The values of +0x6c and of the caster's +0x98 that lift the
+images; the depth against the caster. A frame capture of a Teleport cast at
+Speed 4 settles both and the first frame.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 1 and 2.
+
+### R2-ENGINE-704
+
+The 0x86 caster arm EN `L2.03852` (RU in `L2.02159`) ignores the packet when
+the caster's +0xa8 is nonzero or its units.reg AttackPhases (+0x1c) is 0;
+otherwise +0xa8 = type +0x68, state +0x8c = 8, counter +0x9c = 0. +0x68 is
+the length of the frame list the loader EN `L2.03721` (RU `L2.03722`)
+builds by repeating each AttackAnimFrame AttackAnimTime times; a type with
+no list of its own takes its Parent's (R2-ASSET-180). The unit
+update EN `L2.03360` dispatches state 8 (table `L2.03733` entry 7) and then
+decrements +0xa8 (`L2.03853`); at +0xa8 = 0 it takes the idle path. The
+state 8 arm calls the sound slot +0x60 EN `L2.02163` (RU `L2.02164`) at
+counter = type +0x120 (AttackDelay): Sfx(500 + 54) = 554 at the caster's
++8/+0xc, volume from distance (R2-ENGINE-446); it stores frame +0x74 =
+counter and copies +8/+0xc to +0x2c/+0x30. Both unit vtables (EN
+`L2.03340`, `L2.03341`) share slots +0x28, +0x3c, +0x5c and +0x60.
+
+Per type (R2-ASSET-180): types 23 (Unarmed Mage) and 24 (Human Mage) run
+state 8 for 12 updates, frames +0x74 0..11, release at the first, sound at
+the ninth (counter 8); type 1 runs 14 updates with the sound at the first.
+At Speed 4 (62 ms ticks, R2-ENGINE-669; Medium, one update per tick) the
+images last 21 ticks (1.30 s), a mage's state 8 12 ticks (0.74 s), the sound
+8 ticks (0.50 s) after the release. The effects create no sound at the sites read: no direct call to the sfx getter
+`L2.02161` or player `L2.02166` is in the release, constructors, base copy,
+update, arm 54 or draw. Not searched: the readers of the `SFX` key of the
+projectile type object (R2-ASSET-101; its value for type 54 was not read),
+the arrival of the 0x86 packet and the sounds the client's state-packet arm
+raises.
+
+**Confidence.** High for the arm, the counters and the units.reg values in
+both roots. Medium for the hero's type: client +0x24 comes from the
+heropicture line (R2-ENGINE-680), so a hero mage may be 23, 24 or 1. Medium
+for the seconds (tick length from R2-ENGINE-669, one update per tick).
+
+**Unknown.** Whether +0xa8 is nonzero when a walking caster's 0x86 arrives,
+which would hide the cast; the sprite frame the unit draw takes from +0x74;
+the readers of the type-54 `SFX` key and the sounds of the state-packet arm,
+so "the sound" of a cast is the unit slot's Sfx 554 and no sound by a direct
+call from the effect code read.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 2 and 3.
+
+### R2-ENGINE-705
+
+The cast routine RU `L2.00027` (EN `L2.03854`) subtracts the mage's mana
+(R2-ENGINE-544); Delivery 1 gives no delay; RU `L2.03855` selects the point
+sender for Target 2. Three tests in the listings decide whether a cast
+reaches the client and the apply:
+
+- After the mana the cast routine calls the helper RU `L2.01570` (EN
+  equivalent not read) on the caster; the helper returns 1 when the caster's
+  +0x3c is 0 (`L2.03856`), and the routine then returns 1 without a packet
+  (`L2.03857`..`L2.03858`).
+- The point sender writes 0x86 only when the caster word +0xe is nonzero;
+  otherwise it writes 0x8b (`L2.03859`..`L2.03860`), whose client arm was not
+  read.
+- The point apply reaches the id switch (`L2.03861`) when spell +0xe plus
+  +0xf is at most 0 (`L2.03862`..`L2.03863`); a larger sum continues in code
+  not read. The setter RU `L2.00045` is called at `L2.03864` and has no
+  committed listing. Teleport's +0xe and +0xf were not read.
+
+The values the caster's +0x3c and word +0xe hold for a hero, and Teleport's
++0xe and +0xf, are Unknown. Below, "the cast" is a cast that passes the three
+tests. The point sender RU `L2.02156` (EN `L2.02154`) writes
+0x86, caster key, +0xc = 54, target cell +0xd/+0xe and delay word +0xf = 0,
+sets caster +0x138 = tick + 4 through vtable +0x2c and passes the packet to
+`L2.03865`. The actor step then holds substate 5 for +0x134 steps
+(R2-ENGINE-543) and calls the point apply RU `L2.00034` (EN `L2.01692`),
+which reaches the id switch (byte spell +8 up to 0x1d, table RU `L2.00069`):
+id 23 is RU `L2.00080` (EN `L2.03866`). That arm calls the relocation RU
+`L2.00093` (EN `L2.03593`) with x and y of the apply's position [ebp-0x20]
+(built by `L2.02599`, unread, from the apply's x and y arguments when no
+target unit is passed, `L2.03867`), ignores its result and calls the state sender RU `L2.00060`(caster, 0, mask 0x10, 0xffb, 0,
+0). In that sender, mask bit 0x10 writes the position object's x and y
+(getters `L2.00486` at `L2.03868`, `L2.00487` at `L2.03869`) through
+`L2.03870` (unread); the record's transport was not read.
+
+The relocation returns 1 without a move when the cell test RU `L2.02921`
+(EN `L2.03600`) fails: it requires `L2.03831`(unit, cell, 0) and
+(unit, cell, 1), each testing every footprint cell's map byte (mode 0
+`L2.03871`, mode 1 `L2.03872`) against caster byte [+0x1c0]+5. Otherwise it
+calls `L2.02926` (calls `L2.02410`(unit, 0, 2) and `L2.03832`), the
+position store `L2.02927` (byte 0 x, byte 1 y, word 2 = y << 8 | x, bytes
++4/+5 = 0x80: the cell centre, no path), `L2.00315` (which runs the cell
+record writer `L2.02922` of R2-ENGINE-557 and `L2.02410`(unit, ., 1)),
+`L2.02636` and the state sender with mask -1 (this `L2.02608`).
+
+**Confidence.** High in RU for the bodies, the order and the conditions
+named, and in EN for the eight paired listings (cast routine, point sender,
+point apply, Teleport arm, relocation, cell test, footprint test, position
+store; R2-ENGINE-708). Read in RU only: the target selector `L2.03855`, the
+helper `L2.01570`, the state sender `L2.00060`, `L2.02926`, `L2.00315`,
+`L2.03873`, `L2.03874` and the setter `L2.00045` (call site only); their EN
+equivalents are Unknown (expected equal from the eight paired neighbours).
+Medium for "pays at the cast step, moves at the apply": +0x134 actor steps
+are server ticks only if one actor step runs per tick (not read). Medium for
+the meaning of the two byte maps and for `L2.02410`, `L2.03832`, `L2.02636`
+and `L2.03865` (unread). Medium that a Teleport cast passes the apply gate:
+its source is the unread spell values and the setter above.
+
+**Unknown.** The client arm of the state packet: whether the client jumps
+or walks the caster and on which client tick it shows the new cell. The
+values of the three gates for a hero's cast, and the client arm for 0x8b.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 2 and 4.
+
+### R2-ENGINE-706
+
+Composed from R2-ENGINE-705, R2-ENGINE-703, R2-ENGINE-704 and
+R2-ENGINE-543, for a cast that passes the three gates of R2-ENGINE-705
+(helper, caster word +0xe, spell +0xe plus +0xf): the mana is subtracted and
+0x86 sent at the cast step,
+before the apply tests the cell; the client releases both images at the
+first state 8 update, the arrival image on the target cell; Sfx 554 plays
+at the AttackDelay counter. At the apply the cell test fails, the caster
+keeps its position and the arm's mask 0x10 state record still carries
+its unchanged x and y. A target
+beyond the range byte (Max Range + P/3, R2-ENGINE-022) is not cast: the
+prepared handler approaches (R2-ENGINE-543) and casts when admitted.
+
+**Confidence.** Medium, read in RU, and in EN as far as R2-ENGINE-705
+reaches: the weakest links are the three gates' values for a hero's cast, the
+meaning of the footprint byte maps (which cells count as blocked), the unread
+client handler of the state packet and the range helper's units.
+
+**Unknown.** Whether the client refuses a blocked cell before it sends the
+order (the order path from a click was not read); what the state packet
+does to the caster on the client.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 4.
+
+### R2-ENGINE-707
+
+A creature's Teleport (R2-ENGINE-651, R2-ENGINE-655) reaches the same cast
+routine, point sender, apply arm and relocation as a hero's, and the same
+client caster arm and release: both unit vtables carry release `L2.03725`
+and sound `L2.02163`. Differences:
+
+| Item | Hero book cast | Creature cast |
+|---|---|---|
+| Target cell | the order's cell | first 3 x 3 cell around the victim passing `L2.02114` (R2-ENGINE-654) |
+| Cell test at the apply | `L2.02921` | the same; the planner test reads another byte map (`L2.03519`), so a planner cell can still be refused |
+| Mana | paid by a mage with no item (R2-ENGINE-544) | none unless the creature passes the mage test |
+| Wind-up +0x134 | Humans row or weapon (R2-ENGINE-319, R2-ENGINE-322) | Units row (R2-ENGINE-483) |
+| State 8 length, sound counter, image offset | its units.reg type | its units.reg type (R2-ASSET-180) |
+| No image | while animating | also for a type with AttackPhases 0 |
+
+**Confidence.** High for the shared bodies and vtable slots. Medium for the
+creature's mana (the mage test of R2-ENGINE-544 was not read for
+creatures) and for the planner and apply tests
+disagreeing (byte maps unread).
+
+**Unknown.** The units.reg type of each creature that carries Teleport, such
+as Orc_Sword.4.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 5.
+
+### R2-ENGINE-708
+
+`pairs.py` masks every operand in 0x400000..L2.03731 and, for the handler,
+frame slots at 0xa00 and deeper (`data/en-ru.tsv`), so a different callee or
+global is invisible. 23 of 24 pairs have the same instructions under the
+mask, equal in shape and not in callee or global identity: unit
+update, state 8 arm, sound slot, release, lifetime arms, both constructors,
+base copy, effect update and arm 54, draw and arm 54, projection, units.reg
+loader, client tick, cast routine, point sender, point apply, Teleport arm,
+relocation, cell test, footprint test, position store. The 0x86 handler
+(333 instructions) differs at two: the dispatcher bound 0xbe / 0xdc and a
+client field +0x404 / +0x41c in the common tail. Tables (`data/en-ru-
+tables.tsv`): byte tables equal; jump tables shifted by +0x5473 (client),
++0x9cc7, +0x9cd7 or +0x9cec per entry (apply); the two unit vtables by the
+deltas of the routines they point to. The 10 table pairs are 3 byte tables
+equal, 5 jump tables equal up to a shift, and those 2 vtables. units.reg is
+the same file in both roots.
+
+**Confidence.** High for the instruction equality under the mask and for the
+table results as stated; callees are compared only where listed and globals
+not at all. The 0x86 dispatcher tables of the two roots (bound 0xbe in EN,
+0xdc in RU) were not compared, though the claim's 0x86 route depends on them:
+Unknown. The render `L2.03537`, view routine, message dispatch and the sender
+`L2.03843` were read in EN only.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 6.
