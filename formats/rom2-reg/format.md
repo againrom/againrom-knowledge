@@ -123,6 +123,12 @@ presentation arms do not establish server damage or a SpellTransport link.
 Actual first update state, visible timing and RU parity remain Unknown.
 — R2-ENGINE-661
 
+A unit caster's release gives the cast object of identifiers 16, 24, 34,
+46, 48 and 62 zero remaining segments +0xa8 at creation, so that object
+ends at its first update; the held image of these spells is a unit overlay,
+not a projectile. The client marks +0x130 and the overlay list +0x11c are no
+REG keys. — R2-ENGINE-691, R2-SESSION-274
+
 ## Mission View and Selection consumers
 
 The EN mission entry stores View/X and View/Y to the client origin

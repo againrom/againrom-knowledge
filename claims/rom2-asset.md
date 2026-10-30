@@ -1155,7 +1155,7 @@ the RU roles: they rest on the same indices in RU bodies equal to EN.
 |---|---|---|---|---|
 | R2-ASSET-101 | ROM2 graphics.res projectiles.reg is byte-equal in EN and RU and defines 31 effect types by ID, File, Phases and draw flags; the 29 projectile .16a sprites are equal between roots and five of them no type names. | High | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ASSET-102 | ROM2 sfx.reg is byte-equal in EN and RU; it names magic sounds at Sfx90 and at 30 slots from Sfx508 to Sfx566, and the 33 magic WAV keys are equal mono 16-bit 22050 Hz PCM in both roots. | High | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
-| R2-ASSET-103 | ROM2 main.res spell.txt holds 29 spell names in spell-row order and spells.txt holds 24 hover entries whose spellbook-slot order is Medium (the names are not committed); both have the same line counts in EN and RU and differ in text bytes. | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ASSET-103 | ROM2 main.res spell.txt holds 29 spell names in spell-row order and spells.txt holds 24 hover entries whose spellbook-slot order is Medium (the names are not committed); both have the same line counts in EN and RU and differ in text bytes. | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 
 ### R2-ASSET-101
 
@@ -1287,6 +1287,10 @@ rows is Medium.
 
 **Unknown.** The 24 `spells.txt` names as a committed list, and the
 consumer EN `L2.02136` of the 'A' key handler.
+
+**Amended.** R2-ASSET-177 commits six `spells.txt` lines (slots 3, 5, 8, 15,
+19 and 20) and joins them to spell rows by equal names in both roots; the
+other 18 lines stay uncommitted.
 
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
@@ -2505,3 +2509,54 @@ bodies `equipment/mfighter/44, 45, 46, 51, 52`, `equipment/ffighter/13, 16,
 in both roots.
 
 **Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), questions 3 and 4.
+
+## Support spell names and «Удача в бою»
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-176 | No node of ROM2 EN or RU main.res, patch.res or world.res and no htm, html or txt file of either install holds «удача в бою»; by meaning it names Bless, row 20, slot 5, RU «Благословение». | High / Medium | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ASSET-177 | ROM2 spell rows 4, 8, 13, 19, 20 and 27 are Protection from Fire, Water, Air, Earth, Bless and Shield in EN and RU spell.txt, at spells.txt slots 3, 15, 8, 20, 5 and 19 by equal names. | High | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+
+### R2-ASSET-176
+
+Needles, case-folded over cp1251 text: «удача в бою», «удача», «удач», «в
+бою», «благослов», «магический щит», «защита от». Population per root: every
+node of `main.res`, `patch.res` and `world.res`, and every `*.htm`, `*.html`
+and `*.txt` file under the install (6 archives and 41 files in all). The
+phrase has 0 hits. The «удача» and «удач» hits are mission and town
+dialogue, the attack-accuracy help line of `text/main.txt`, two RU Manual
+pages and the RU `readme.txt`; none names a spell.
+
+Of the six spells, only Bless's hover line speaks of success in a blow: EN "Bless
+(Homing)#Increases warrior's chances to do maximum damage with a hand-held
+weapon", RU «Благословение (действует на цель)#Повышает воину шанс нанести
+максимальный урон». The RU `readme.txt` describes «благословление» the same
+way.
+
+**Confidence.** High for the search over the named population. Medium for
+the identity, which rests on meaning, not on a text that joins the phrase
+to a row; the other 18 hover lines were not compared in RU. Editions, patches and fan translations outside the two installs
+were not searched.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 1.
+
+### R2-ASSET-177
+
+| Row | EN | RU | Slot | Kind, EN / RU |
+|---:|---|---|---:|---|
+| 4 | Protection from Fire | Защита от магии огня | 3 | Homing / действует на цель |
+| 8 | Protection from Water | Защита от магии воды | 15 | Homing / действует на цель |
+| 13 | Protection from Air | Защита от магии воздуха | 8 | Homing / действует на цель |
+| 19 | Protection from Earth | Защита от магии земли | 20 | Homing / действует на цель |
+| 20 | Bless | Благословение | 5 | Homing / действует на цель |
+| 27 | Shield | Магический щит | 19 | Caster Only / действует на себя |
+
+Row r is line r-1 of `text/spell.txt`; slot n is line n of
+`text/spells.txt`, whose text before the parenthesis equals the row's name
+in the same root. The six rows' identifiers are 16, 24, 34, 46, 48 and 62
+(R2-ENGINE-445).
+
+**Confidence.** High for the committed lines in both roots and the name
+equality.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 1.

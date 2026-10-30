@@ -9011,9 +9011,9 @@ rows (R2-ASSET-098).
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-444 | ROM2 item text and spell lists name row r by spell.txt line r-1; the spellbook hover shows spells.txt line s for slot s with main.txt labels, and the 24-entry table EN L2.02137 gives a row number per slot (Medium join). | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
-| R2-ENGINE-445 | ROM2 spells use identifier 2*row+8 at cast and 30 for Prismatic chains; an area cell uses 2*row+9, read for row 7 only (formula, Medium, elsewhere); the client draws the projectiles.reg type of that ID, or nothing without one. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
-| R2-ENGINE-446 | ROM2 spell sounds are sfx.reg Sfx(500+ID): the caster plays 500+2*row+8, a typed cell effect 500+ID at creation except Blizzard 523 at the ninth update; an absent slot is silent at the sites read (Medium that no other site plays). | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
-| R2-ENGINE-447 | A ROM2 typed spell effect lives for its packet argument in updates; its frame and draw follow per-ID switch tables: (update/2) mod Phases by default, falling Blizzard pieces, swinging lightning and unit-attached marks. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-445 | ROM2 spells use ID 2*row+8 at cast, 30 for Prismatic, 2*row+9 for an area cell (row 7); the client draws that ID's projectiles.reg type or nothing (a unit caster's object of 16, 24, 34, 46, 48, 62 ends at once: R2-ENGINE-691, Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-446 | ROM2 spell sounds are sfx.reg Sfx(500+ID): the caster plays 500+2*row+8, a typed cell effect 500+ID at creation except Blizzard 523 at the ninth update; an absent slot is silent at the sites read (Medium that no other site plays). | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-447 | A ROM2 typed spell effect lives for its packet argument in updates; its frame and draw follow per-ID switch tables: (update/2) mod Phases by default, falling Blizzard pieces, swinging lightning and unit-attached marks. | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-448 | In the effect method EN L2.02138, ROM2 spell effects write the per-cell light byte map for IDs 10, 12, 13, 18, 28, 30 and 40 (radius argument up to 3); other writers are not excluded (Medium) and the footprint is Unknown. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-449 | ROM2 EN and RU spell presentation data are byte-equal and the read routines and switch tables agree; text bytes and one per-slot spellbook flag table, at Summon and Wall of Earth, differ. | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 
@@ -9121,6 +9121,12 @@ unread code.
 **Unknown.** Where the client creates the flying object at the end of a
 caster's state 8, and which type it draws.
 
+**Amended.** R2-ENGINE-691 narrows the Unknown for a unit caster: the state
+8 release EN `L2.03725` creates the cast object with a lifetime chosen by
+ID; for 16, 24, 34, 46, 48 and 62 it is 0 and the first update ends the
+object, so no type of these IDs is drawn from a unit caster (Medium). The
+flight of the other IDs stays as stated.
+
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
 ### R2-ENGINE-446
@@ -9160,6 +9166,10 @@ effect update.
 **Unknown.** The caller and moment of the caster sound; which path, if any,
 plays Sfx90 `firewall`, which no read site places; the census of the
 callers of `L2.02161` and `L2.02166`.
+
+**Amended.** R2-ENGINE-691 narrows the caller Unknown: the state 8 arm EN
+`L2.03726` calls `L2.02163` when counter +0x9c equals unit-type +0x120. The
+census of the callers of `L2.02161` and `L2.02166` stays Unknown.
 
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
@@ -9208,6 +9218,12 @@ period in seconds and the link from unit marks +0x130 to overlays +0x11c.
 
 **Unknown.** The update rate; the trail key string; the overlay list filler;
 what the palette preparation arguments select, including any translucency.
+
+**Amended.** R2-ENGINE-692 narrows the overlay-list filler and the link from
+marks +0x130 to overlays +0x11c: consumer EN `L2.03727` rebuilds +0x11c from
+the marks at each unit update. R2-ENGINE-694 narrows the palette preparation
+of `L2.00644`(16, 4, 0): mode 4 builds 16 brightness levels without a blend;
+the level a draw uses stays Unknown.
 
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
@@ -16024,3 +16040,209 @@ test, the line pool and the heropicture load were read on EN only.
 constants and does not compare callees.
 
 **Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 6.
+
+## Held spell marks and cast release
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-691 | A ROM2 unit caster of IDs 16, 24, 34, 46, 48 or 62 plays Sfx(500+ID) in state 8 at counter = type +0x120 and releases at +0x11c a cast object of lifetime 0, which its first update ends. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-692 | The ROM2 unit consumer L2.03727 rebuilds overlay list +0x11c from the marks +0x130 at every call and decrements each mark's low word; marks 16, 24, 34, 46 call L2.03728, 48 calls L2.03729, 62 calls L2.03730. | High / Medium | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-693 | A ROM2 protection mark draws one sprite 32s above the unit, shifted 6 px by element; Bless draws 20 sparks at fixed positions on a radius-20 ring, frames advancing round it; Shield draws two turning meridians and two sweeping rings. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-694 | ROM2 unit draw L2.03682 draws +0x11c entries with z > 0, then z <= 0, at the unit position plus (x, y - z); the Palette preparation builds 16 brightness levels, no blend operation in its table; whether the sprite draw blends is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-695 | ROM2 0x88 writes mark (ID<<16) OR 0xffff and 0x89 removes it; expiry sends 0x89 at duration 0 unless the duration is above 9600; notify resends 0x88 only while unit +0x18 AND receiver +0x30 is 0 or flag 0x800000 is set. | High / Medium | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-ENGINE-696 | 26 ROM2 EN/RU held-mark listing pairs, six committed slices and 12 tables and constants are equal after masking operands in 0x400000..L2.03731 (registers and deep frame slots where marked). | High | ● active (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+
+### R2-ENGINE-691
+
+The client unit update EN `L2.03360` (RU `L2.03732`, unit vtable +0x3c)
+switches on state +0x8c - 1 through table `L2.03733`. The state 8 arm EN
+`L2.03726` (RU `L2.03734`) calls vtable +0x60 when counter +0x9c equals
+unit-type +0x120, and vtable +0x5c when it equals unit-type +0x11c; it
+stores frame +0x74 = counter and increments the counter. Vtable +0x60 is EN
+`L2.02163` (RU `L2.02164`), Sfx(500 + unit +0xac) of R2-ENGINE-446: 516,
+524, 534, 546, 548 and 562 for the six IDs.
+
+Vtable +0x5c is the release EN `L2.03725` (RU `L2.03735`). It builds a
+0x158-byte effect (`L2.03141`), inserts it into client +0x9ec through
+`L2.00142`, and sets lifetime +0xa8 by a switch on ID - 10 (byte table
+`L2.03736`, jump table `L2.03737`):
+
+| IDs | Lifetime +0xa8 |
+|---|---|
+| 10, 18, 40 | distance / 200 |
+| 12 | distance / 384 |
+| 28, 30 | 13 |
+| 54 | 21 |
+| 56, 60 | 1 |
+| every other ID, including 16, 24, 34, 46, 48, 62 | 0 |
+
+The effect update EN `L2.02165` returns 0 at `L2.03447` when +0xa8 is 0,
+before its ID switch. The client tick EN `L2.01389` updates the +0x9d0
+units, then the +0x9ec effects, removing and deleting each effect whose
+update returns 0.
+
+A non-unit caster (sender `L2.02153`/`L2.02154` with caster word +0xe 0)
+reaches the 0x8b arm EN `L2.03738` (RU `L2.03739`): picture = ID, lifetime =
+packet word +0xf, Sfx(500 + ID).
+
+**Confidence.** High for the state 8 arm, the sound slot and its moment,
+the lifetime switch and the lifetime-0 return in both roots. Medium that a
+unit caster's cast object of the six IDs is never drawn: it rests on the
+read tick order, on the unread insert helper `L2.00142` placing the object
+where that tick's effect pass reaches it, and on the paint running outside
+the tick (no paint path was read). Medium for a non-unit caster's object of the six IDs: the update jump
+table (byte table `L2.02168`, DWORD table `L2.02169`) sends them to arm
+`L2.03740`, which follows the target and appends the mark to its +0x130 on
+each update for the packet lifetime (the unit-attached branch of
+R2-ENGINE-447, not the default rule); the callers that pass a zero caster
+word, and so whether this ever occurs for these IDs, were not read.
+
+**Unknown.** The caster's unit-type +0x11c and +0x120 values and state 8
+frames; which callers pass a zero caster word to the 0x8b sender. A capture
+of each cast from the cast order to 2 s after release would show both.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 2.
+
+### R2-ENGINE-692
+
+The unit update calls vtable +0x50, EN `L2.03727` (RU `L2.03741`), while
+unit byte +0x184 is below 5. For each mark of list +0x130 it switches on
+(mark high word - 16) through byte table `L2.03742` and jump table
+`L2.03743`, builds a figure, lets the arm's generator add entries, and
+appends the figure to a local list. It then writes the mark back with its
+low word minus 1 and removes the mark at 0. After the loop it passes the
+local list to `L2.03744` and stores it into +0x11c through `L2.03745`.
+
+| Mark | Generator, arguments (s = unit vtable +0x20, c = mark low word) |
+|---|---|
+| 16, 24, 34, 46 | `L2.03728`(32s, mark, c mod 6) |
+| 48 | `L2.03729`(32s, 20.0, c mod 5) |
+| 62 | `L2.03730`(11s, 28s, 16s, c mod 90) |
+| 20, 56, 60, 64 | `L2.03746`, `L2.03747`, `L2.03748`, `L2.03749` |
+
+Vtable +0x20 is `L2.03399`, unit-type +0xf0 (R2-ENGINE-646). A generator
+entry is 8 bytes (`L2.03750`): words x, y, z, byte type, byte frame.
+
+**Confidence.** High for the arms, arguments, decrement and the store into
++0x11c in both roots. Medium for the figure order, set by the unread
+`L2.03744`, and for the list helpers `L2.03751` and `L2.03752` named only
+by use. Medium for the hero's s, which was not read.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 3.
+
+### R2-ENGINE-693
+
+Entries per mark (x, y, z, type, frame), s and c as in R2-ENGINE-692:
+
+| Mark | Entries |
+|---|---|
+| 16 | (-6, -32s, 0, 16, c mod 6) |
+| 24 | (6, -32s, 0, 24, c mod 6) |
+| 34 | (0, -32s - 6, 0, 34, c mod 6) |
+| 46 | (0, -32s + 6, 0, 46, c mod 6) |
+| 48 | for a = 89, 71, 53, 35, 17 and t = a + 18(c mod 5) degrees, u = trunc(20 cos t), v = trunc(20 sin t): (u, -32s, v), (v, -32s, -u), (-u, -32s, -v), (-v, -32s, u), frame 4 - a div 18 |
+
+Bless draws 20 sparks at fixed positions 18 degrees apart on a radius-20 ring:
+the five base angles are 18 degrees apart and the four copies 90 degrees
+apart, so the set of positions is the same at every c. The spark frames
+advance 18 degrees round the ring per update, with period 5 updates.
+
+Shield (`L2.03730`, `L2.03753`, midpoint circle `L2.03754`): with C and S
+the cosine and sine of 4(c mod 90) degrees, each fourth point (p, q) of a
+circle of radius 16s yields (trunc(pC), -trunc(1.75q), 11s + trunc(pS),
+62, f) and (-trunc(pS), -trunc(1.75q), 11s + trunc(pC), 62, f), f = |4 -
+trunc(5|q|/28s)|. With h = trunc(28s((c mod 90)/45 - 1)) and w =
+trunc(16s sin(acos(h/28s))), each 2k-th point (p, q) of a circle of radius w
+yields (p, -(11s + h), q, 62, k) and (p, -(11s - h), q, 62, k), k = 4 -
+|(c mod 90) - 45| div 9, which is -1 at c mod 90 = 0.
+
+**Confidence.** High for the arithmetic of the generator bodies in both
+roots as masked instruction text and constants; the RU CRT helpers behind
+`trunc`, `acos` and `L2.03755` were not read, so equal figures in RU are
+Medium. Medium for trunc (`L2.02708`), acos (`L2.03756`) and the unread CRT
+routine `L2.03755` applied to h in EN. Medium for the screen picture of a
+ring or meridian, which composes this table with R2-ENGINE-694.
+
+**Unknown.** What frame byte 0xff draws and what the circle routine emits
+for a step of 0 or below.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 3.
+
+### R2-ENGINE-694
+
+The unit draw EN `L2.03682` (vtable +0x28) walks +0x11c twice: from
+`L2.03757` it draws entries with z > 0, from `L2.03758` those with z <= 0.
+Screen x = unit +0x64 + x - Width/2; screen y = unit +0x68 - unit +0x6c -
+unit +0x10 + y - Height/2 - z. Type map `L2.02134` gives the type; its
+getter `L2.03759` returns sprite +4, whose vtable +0x18 draws (x, y, frame,
+0, 0). The passes hold no Palette test and no second draw.
+
+`L2.03759` lazy-loads the type through `L2.03760` when type +0x38 is 0. With
+Palette and A16 set (the six types, R2-ASSET-101) it calls `L2.00644`(16, 4,
+0), which calls `L2.00645`(16, 4, 0): 16 x 512 bytes, the tint cleared by the
+fourth argument 0, then mode 4 (`L2.00647`) of table `L2.00646`. Mode 4
+writes, for level L = 1..16 and each of 256 entries, each colour byte times
+L/16 (L/18 when `[L2.00648]` is nonzero), clamped and packed into 16 bits.
+
+Timing: one consumer call per unit update, one unit update per client tick
+of 1000/divisor ms (R2-ENGINE-669, R2-ENGINE-620). At Speed 4 (62 ms) a
+protection phase cycle is 6 ticks and a Shield cycle 90 ticks (5.6 s).
+
+**Confidence.** High for the passes, screen arithmetic, preparation
+arguments and mode 4 arithmetic in both roots. Medium for which pass lies in
+front of the unit sprite (the sprite draw between them was not read) and
+for the seconds, which compose this reading with R2-ENGINE-669.
+
+**Unknown.** Which brightness level the draw uses and whether vtable +0x18
+blends.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), questions 3 and 4.
+
+### R2-ENGINE-695
+
+Client: the 0x88 arm EN `L2.03761` (RU `L2.03762`) finds the unit by key +0xa
+in client +0x9d0 and the mark of byte +0xc through `L2.03763`; it overwrites
+a found mark with (ID<<16) OR 0xffff or appends one. The 0x89 arm `L2.03764`
+removes the found mark. Both set unit +0x114 = 1. Sender `L2.03765` puts the
+Effect's +0xe into packet byte +0xc.
+
+Server: attach EN `L2.00481` sends 0x88 for a new Effect; a same-ID renewal
+keeps the larger of each +0x40 (signed) and +0x42 (unsigned) and sends no
+0x88 itself; like a new Effect it ends with the notify call, whose gate
+decides. Bless and Curse cancel each other. Expiry EN `L2.00483` decrements duration +0x42 unless it
+is above 0x2580 (9600), which then never expires; at 0 it clears bit (1 <<
+Effect +0xc) of unit +0x144, sends 0x89 through `L2.03766` when +0xc is
+nonzero and sets +0x3d |= 0x80. It returns at once unless the unread
+`L2.03767` returns nonzero.
+
+Notify EN `L2.01056` (RU `L2.00060`) resends 0x88 for every unit Effect with
++0xc nonzero (`L2.03768`..`L2.03769`) when `L2.03770` finds (unit u16 +0x18
+AND receiver u16 +0x30) equal to 0 or flag 0x800000 is set; at its end
+`L2.03771` ORs receiver +0x30 into unit +0x18.
+
+**Confidence.** High for the arms, the expiry arithmetic and the gate in
+both roots. Medium for the mark lookup `L2.03763` and the entry test
+`L2.03767`, which were not read; the callers and rate of the expiry routine
+were not read.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), questions 3 and 5.
+
+### R2-ENGINE-696
+
+Listing pairs: consumer (to its jump table), release, state 8, unit update,
+cast sound, the eight generator routines, the protection arms, attach,
+expiry, mark arms, notify and its tail, gate, bit set, getter, lazy loader,
+palette preparation, dispatcher and mode 4. Committed EXP-2056 slices: both
+overlay passes, the effect class to its first jump table (704
+instructions), the 0x89/0x88 and 0x86/0x8b senders and the 0x8b arm. 5,287
+EN instructions in all. Tables: the consumer, release and protection jump
+and index tables, the palette mode table, and pi, 1, 5, 1/45 and 180.
+Deltas RU - EN: +0x5473 unit and effect code, +0x8170 generators, +0x539f
+overlay passes, +0x8ae and +0x8d5 arms, +0x8c78 notify and senders,
++0x9cec attach and expiry, +0x9bf1 gate, +0x1480 getter, +0x55ea loader,
++0x2850 palette.
+
+**Confidence.** High for textual equality under the mask; the mask hides
+constants of 0x400000 and above and callees were compared only where listed.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 6.

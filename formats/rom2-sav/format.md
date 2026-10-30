@@ -865,6 +865,24 @@ object with zero segments requests removal on its first read update path,
 conditional on unchanged entry state. Actual first-frame behavior remains
 Unknown. — R2-ENGINE-661
 
+### Unit Effect marks
+
+A unit Effect's base +0xe holds the mark identifier 2*(+0xc)+8 that the
+0x88 message carries; u16 +0x42 is the remaining duration. The server
+expiry decrements +0x42 unless it is above 9600 and sends 0x89 at 0. In the
+EN saves game0004..0006 the hero holds Shield (+0xc 27, +0xe 62, durations
+563, 302 and 50) and, in game0005, Haste (21, 50, duration 196); a player-7
+unit holds Shield. Its u16 +0x40 is 5 for the hero's Shield, 14 for player 7's
+and 2 for Haste; its meaning was not read. Each holder's unit base +0x18 is 2
+and Player 0 +0x30 is 2. The client marks and overlay list are not stored. After
+LOAD a held mark returns, of the writers read, only through a new 0x88 (the
+effect update arm also appends marks, but only for a live effect object,
+and none is restored; 33 other sites that address the mark list were not
+classified); with the saved +0x18 and +0x30
+the notify resend test fails for player 0 unless LOAD clears it, and whether
+the overlay reappears is Unknown. — R2-SESSION-273, R2-SESSION-274,
+R2-ENGINE-695
+
 ## Mission LOAD view and idle gates
 
 The EN REG restore writes View/X and View/Y to client +0x5c/+0x60.

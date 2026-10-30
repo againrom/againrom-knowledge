@@ -3577,3 +3577,64 @@ game0001 with a write watch on terrain `+0x54060..+0x54065` and record each
 writer and the six bytes until mission end.
 
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 2.
+
+## Saved unit Effect marks
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-273 | Seven unit Effects in EN ROM2 game0004..0006 store base +0xe = 2*(+0xc)+8 (Shield 62, Haste 50), +0x3d 0x1 and duration +0x42; their units store base +0x18 = 2 and Player 0 stores +0x30 = 2. | High / Medium | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+| R2-SESSION-274 | After a ROM2 LOAD a held mark returns, of the writers read, only through a new 0x88: +0x130 is no REG key, and with the saved +0x18 and +0x30 the notify gate is closed for player 0 unless LOAD clears it. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2088](../experiments/EXP-2088-rom2-held-marks/) |
+
+### R2-SESSION-273
+
+From the committed EXP-2076 field table of the frozen EN owner saves
+(record of R2-SESSION-165; `u16 +0x40` and `+0x42` are the two halves of
+its u32 +0x40):
+
+| Save | Unit | +0xc | base +0xe | +0x3c | +0x3d | +0x40 | +0x42 | unit base +0x18 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| game0004 | player 0 hero | 27 | 62 | 16 | 0x1 | 5 | 563 | 2 |
+| game0004 | player 7 unit | 27 | 62 | 16 | 0x1 | 14 | 6042 | 2 |
+| game0005 | player 0 hero | 27 | 62 | 16 | 0x1 | 5 | 302 | 2 |
+| game0005 | player 0 hero | 21 | 50 | 17 | 0x1 | 2 | 196 | 2 |
+| game0005 | player 7 unit | 27 | 62 | 16 | 0x1 | 14 | 5781 | 2 |
+| game0006 | player 0 hero | 27 | 62 | 16 | 0x1 | 5 | 50 | 2 |
+| game0006 | player 7 unit | 27 | 62 | 16 | 0x1 | 14 | 3801 | 2 |
+
+Base +0x18 of each Effect is 0. In the three saves Player 0 +0x30 is 2 and
+Players 1..7 +0x30 are 0. game0001 holds Item Effects only; no save holds a
+protection or Bless.
+
+**Confidence.** High for the values, which reproduce from the committed
+table. Medium for the meanings: base +0xe as the mark identifier rests on
+the 0x88 sender copying Effect +0xe (R2-ENGINE-695) and on the values
+equalling 2*row+8 (R2-ENGINE-445); +0x42 as duration on the expiry routine
+of R2-ENGINE-695; unit base +0x18 and Player +0x30 as the notify gate
+operands on equal offsets and widths only. The meaning of u16 +0x40 (5 for
+the hero's Shield, 14 for player 7's, 2 for Haste) was not read.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 5.
+
+### R2-SESSION-274
+
+The client marks +0x130 and overlay +0x11c are not REG keys of the EN
+restore (R2-ENGINE-614); the cast object of the six IDs has lifetime 0
+(R2-ENGINE-691) and so is never a REG projectile for long. Of the writers read, a
+held mark returns only through a new 0x88 (R2-ENGINE-695); the effect update
+arm `L2.03740` also appends marks (R2-ENGINE-691), but only for a live effect
+object, and none is restored. The other 33 `add ecx, 0x130` sites of the census
+(`en-scan-addecx130.txt`) were not classified. The notify resend loop sends 0x88
+for every unit Effect with +0xc nonzero only when (unit +0x18 AND receiver
++0x30) is 0 or flag 0x800000 is set. With the saved 2 and 2 (R2-SESSION-273)
+that test fails for player 0.
+
+**Confidence.** High for the gate arithmetic and the absent REG keys.
+Medium that the saved fields are the gate operands (R2-SESSION-273). Unknown
+whether LOAD clears unit +0x18, passes 0x800000 or sends 0x88 by another
+path: the LOAD callers of the notify routine were not read.
+
+**Unknown.** Whether a held Shield shows after LOAD and at which phase. A
+cold LOAD of game0004 (hero Shield, duration 563) with the first frame and
+the next 100 ticks over the hero recorded would settle it.
+
+**Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 5.
