@@ -9344,14 +9344,14 @@ offsets, not as equal bytes.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-452 | In RU, ROM2 Ice Missile (5) and Diamond Dust (16) take Fire Arrow's single-target projectile damage route with water and earth damage kinds; the read bodies hold no row-specific branch or attached effect; EN delivery bodies are Unknown. | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
-| R2-ENGINE-453 | ROM2 Stone Curse attaches a timed effect with spell id 18 built from its Effects string; the quoted first key matches no effect name, so the effect is blank (tag 0, magnitude 0). | High / Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-452 | In RU, ROM2 Ice Missile (5) and Diamond Dust (16) take Fire Arrow's single-target projectile damage route with water and earth damage kinds; the read bodies hold no row-specific branch or attached effect; EN delivery bodies are Unknown. | High / Medium | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-453 | ROM2 Stone Curse attaches a timed effect with spell id 18 built from its Effects string; the quoted first key matches no effect name, so the effect is blank (tag 0, magnitude 0). | High / Medium | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-454 | In the RU image, a ROM2 Stone Curse effect sets actor mask bit 18, which holds primary command 4 (state 27, no move, attack or cast) until its timer clears the bit; a repeat cast keeps the larger duration; damage taken is unchanged. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-455 | ROM2 Summon creates Squirrel, Turtle or Foot_Animated at level 1..4 for the caster's Player in a new group, placed by a search around the caster's cell; a failed placement aborts the cast; when it leaves is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-456 | In RU, a ROM2 creature's template special spell is aimed by a 29-cell per-row table: the victim, its cell, itself, a cell toward the victim (9), a free cell beside it (23) or nothing (22); cells 9 and 23 are Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-457 | The RU computer-mage offensive book choice aims at the victim and support at self or a same-owner unit; a separate Prismatic, Stone Curse, Lightning, Fire Arrow priority routine aims at the victim but has no found caller. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-458 | Each admitted RU selected-spell policy arm aims at the victim, except Summon and Shield at the caster and Heal at the lowest-health candidate; area and point spells cast at a unit apply at its cell. | Medium | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
-| R2-ENGINE-459 | The ROM2 EN and RU unique spell arms agree after address masking except an RU-only virtual test before reusing a pooled dead unit in Summon and Control Spirit; EN AI, delivery and effect bodies were not read. | High / Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-459 | The ROM2 EN and RU unique spell arms agree after address masking except an RU-only virtual test before reusing a pooled dead unit in Summon and Control Spirit; EN AI, delivery and effect bodies were not read. | High / Medium / Unknown | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 
 ### R2-ENGINE-452
 
@@ -9389,6 +9389,8 @@ the projectile tick `L2.02077` and the Effect Speed fields were read; no
 sprite, sound or animation consumer of the projectile object was searched, and
 reading the projectile's draw method (vtable `L2.02076`) would settle it.
 
+**Amended.** R2-ENGINE-753 narrows the EN Unknown for the paired windows it names: the EN apply head, single-target object, projectile object and tick and the kind 2 and kind 4 setters equal RU after masking, callees not compared; the three vtables have equal slot partitions; the EN damage-object builder, default arm and payload method are unread, and the EN resolver is Medium (an RU-only block of 11 lines). The RU clauses and grades stand.
+
 ### R2-ENGINE-453
 
 Arm `L2.00076` allocates a 0x48-byte effect and builds it with
@@ -9416,6 +9418,8 @@ comparator chain and trims are navigation listings, the final compare
 **Unknown.** Whether tag 0 runs any code after `L2.02084`. Searched: the
 tag-switch cell 0 and its target address only; the body at `L2.02084` was not
 read. A 0x40-byte window at `L2.02084` in the RU image would settle it.
+
+**Amended.** R2-ENGINE-755 narrows the Unknown on tag 0: cell 0 holds `L2.04099`, a `jmp L2.02084`, and the tail calls the target's vtable +0x58 (`L2.04100`) before it returns; the slot-18 prologue runs before the tail, and in EN it first clamps +0xd8. The slot-18 tag arms are unread in either root. The blank-effect clause and the grades stand.
 
 ### R2-ENGINE-454
 
@@ -9578,6 +9582,8 @@ Medium. The bounded seed probe (b) and the caller-observation probe (a) of
 R2-ENGINE-651 measure the generator state and the callers in one specified
 mission only; they do not settle the divisor or the distribution.
 
+**Amended.** R2-ENGINE-756 narrows the reachability Unknown: no E8 call of `L2.02116` (EN `L2.04101`) and no stored dword of it in any section of either root; the EN priority and offensive bodies equal RU after masking and the EN support choice equals RU over its first 0x260 bytes. E9 and conditional branches, computed addresses and offset tables were not searched. The grade stays Medium.
+
 ### R2-ENGINE-458
 
 In the selected-spell policy `L2.01527` (map `L2.01529`, arms `L2.01528`;
@@ -9615,6 +9621,8 @@ the EN AI, delivery-object and effect-core bodies, which were not read.
 followed. Reading the unit class vtable (set by the constructor `L2.01273`) at
 offset 0x30 would settle it. The EN bodies: reading the EN routines around the
 30 EN hits would settle EN parity of the AI, delivery objects and effect core.
+
+**Amended.** R2-ENGINE-754 narrows the vtable+0x30 Unknown for the class of vtable `L2.02314` (EN `L2.04102`): slot +0x30 returns 0; that Summon builds this class rests on a navigation read (Medium there). R2-ENGINE-753, R2-ENGINE-755 and R2-ENGINE-756 narrow the EN Unknown for the paired windows they name, each over the window stated there. The EN selected-spell policy differs from RU in 30 hunks, the 30 EN `0x40000` immediates are unclassified, and the slot-18 tag arms and the callees of the EN delivery bodies are unread. The grades stand.
 
 ## Shop stock events
 
@@ -17909,3 +17917,168 @@ with the same party can be entered are Unknown. The run is a save at mission 50,
 whatever the original offers next, with a save and an actor count wherever it allows one.
 
 **Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 3.
+
+## Spell open rows: EN delivery, Summon init, Stone Curse tail, computer aim parity
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-753 | The ROM2 EN apply head, single-target and projectile objects, projectile tick and kind 2 and 4 setters equal RU after masking, callees not compared; the vtables have equal slot partitions; the EN damage-object builder is unread. | High / Medium | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
+| R2-ENGINE-754 | ROM2 unit init L2.01794 (EN L2.01793) calls the template loader with the built name when the unread helper L2.03298 returns above 0; the loader walks L2.00147 from index 26 (30 to 63); vtable L2.02314 +0x30 returns 0. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
+| R2-ENGINE-755 | ROM2 vtable L2.02314 +0x2c returns 1, so Stone Curse draws its duration on that class; tag 0 reaches the tail call of target vtable +0x58 (EN clamps +0xd8 first); EN attach, timer and dispatcher prefixes equal RU. | High / Medium | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
+| R2-ENGINE-756 | The ROM2 EN priority and offensive routines and the support choice and actor dispatcher prefixes equal RU after masking; no E8 call or stored dword names the priority routine in either root; the EN policy differs. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
+
+### R2-ENGINE-753
+
+Pairs read in both roots (RU, EN), equal line for line after masking operands in
+0x400000..L2.03731 (`out/compare.tsv`). The mask hides every operand in that range, so a callee
+or table named by an operand is not compared. Each equality holds over the window shown; the
+bytes after the window are unread.
+
+| Body | RU | EN | Window bytes | Lines |
+|---|---|---|---:|---:|
+| apply head | `L2.00034` | `L2.01692` | 0x600 | 391 |
+| single-target object | `L2.02072` | `L2.03781` | 0x140 | 100 |
+| projectile object | `L2.02075` | `L2.03788` | 0x120 | 86 |
+| projectile tick (vtable slot 6) | `L2.02077` | `L2.03437` | 0x80 | 39 |
+| kind 2 setter | `L2.00096` | `L2.04103` | 0x30 | 25 |
+| kind 4 setter | `L2.00098` | `L2.04104` | 0x30 | 25 |
+
+The vtables RU `L2.02073`/EN `L2.04105` (single target) and `L2.02076`/`L2.04106` (projectile)
+and the apply table `L2.00069`/`L2.02121` (30 cells) have equal slot partitions: the slots that
+hold one value in RU hold one value in EN. The addresses differ, so the values are not compared.
+Of the projectile vtable only slot 6 (the tick, above) is read in EN; slots 0, 2, 9, 16 and 18
+(RU `L2.04107`, `L2.04108`, `L2.04109`, `L2.04110`, `L2.02976`; EN `L2.04111`, `L2.03422`,
+`L2.03424`, `L2.04112`, `L2.02975`) are unread in EN. The EN apply head calls the five kind
+setters `L2.04113`, `L2.04114`, `L2.04103`, `L2.04104`, `L2.04115` in the order RU calls
+`L2.00095`, `L2.00097`, `L2.00096`, `L2.00098`, `L2.00099`; only the kind 2 and kind 4 setter
+bodies are read. Apply cells 5 and 16 hold the address of cell 1 in both roots, the default arm
+(RU `L2.00085`, EN `L2.03778`, by table only; the EN arm body is unread). Rows 5 and 16 therefore
+reach in EN the bodies read above, which equal RU; the callees those bodies call, among them the
+damage-object builder (RU `L2.02071`), the default arm and the payload method, are masked and
+unread in EN. Delivery 2 projectile, single target, damage kind 2 and 4 are the RU reading of
+R2-ENGINE-452. Cast IDs 18 and 40 and sounds 518 and 540 are R2-ENGINE-445 and R2-ENGINE-446,
+read in both roots there.
+
+The resolver (vtable `vt-unit` slot 21, +0x54: RU `L2.00101`, EN `L2.04116`) window is 0x700
+bytes; the EN window starts at `L2.04117`, 0x2b bytes before the entry, so its first 18 lines are
+the tail of the previous function and the whole EN function lies in the window. It equals RU in
+519 lines. RU has an 11-line block (`L2.04118`..`L2.04119`) that EN lacks: a test of
+`[[ADDR]+0x74]` and two tests of owner +0x2c that guard the call `L2.04120`; EN makes that call
+without the block. The effect of the block is unread.
+
+**Confidence.** High for the six equal pairs over their windows and for the equal slot
+partitions of the tables. Medium that EN Ice Missile and Diamond Dust take the R2-ENGINE-452 route:
+that rests on the EN callees named above, which the mask hides and no listing holds. Medium for
+the EN resolver, because the RU-only block changes the code path and its effect is unread.
+
+**Unknown.** The EN damage-object builder, default arm, payload method and the projectile slots
+0, 2, 9, 16 and 18; the effect of the RU-only +0x74 block on the resistance read. A run of the
+EN original that casts Ice Missile (row 5) and Diamond Dust (row 16) at targets with and without
+water and earth resistance and records the damage and the hit would settle the route; reading
+those bodies in EN would settle each part.
+
+### R2-ENGINE-754
+
+The unit init RU `L2.01794` (EN `L2.01793`, 183 lines, the whole function to its `ret`, equal
+after masking) stores the zero fields of R2-ENGINE-535, clears 0x40 bytes at +0x154, calls
+`L2.00105`, then calls `L2.03298` on its name argument and, when that returns above 0, calls the
+template loader `R2.0087(name)` on the new unit (`L2.04121`..`L2.04122`); what the helper
+tests is unread. The loader (EXP-2082 listing `ru-template-loader`, R2-ENGINE-652) clears word
++0xe and walks the rows of `L2.00147` from index 0x1a, setting the index to 0x3f when it reaches
+0x1e, until `L2.04123(row name + 4, name)` returns nonzero; it then stores the index in word +0xc,
+the row in +0x3c and calls the stat reader `L2.02341` (EN `L2.02669`; first 0x100 bytes, 70
+lines, equal; the rest of the reader is unread). Summon's built name (R2-ENGINE-455) therefore
+selects the first row from index 26, skipping 30..62, whose name the matcher accepts.
+
+The placement tests of R2-ENGINE-455 are R2-ENGINE-531's routines: RU `L2.02106` equals the EN
+cell test `L2.02718` (first 0x100 bytes, 91 lines) and RU `L2.01700` equals the EN clamp
+`L2.02717` (first 0x60 bytes, 28 lines, which end at `sub eax, 9`); the rest of each routine is
+unread. The "byte value below 12" is the clamped y and the flag `[[L2.01317]+0x74]` is the RU
+form of the EN `[L2.00805]` +0x74 test (R2-ENGINE-531).
+
+Vtable RU `L2.02314` (EN `L2.04102`; table `vt-unit` in `out/tables.tsv`) slot +0x30 is RU
+`L2.02318` (EN `L2.04124`): `xor eax, eax; ret` (`out/listings/*-unit-slot12.txt`). The
+constructor of the class that Summon builds stores this vtable (RU `L2.04125`, EN `L2.04126`,
+after the base constructor call `L2.01295`); that store was read in a navigation listing that is
+not committed. The RU-only test of R2-ENGINE-459 therefore passes for a pooled dead creature of
+this class, provided that the class is the one Summon builds.
+
+**Confidence.** High for the init call (the helper's result gates it), the loader walk, the slot
++0x30 body and the equalities over the windows named. Medium that the walk is a name match:
+`L2.03298` and `L2.04123` were not read. Medium for the binding of vtable `L2.02314` to the class
+Summon builds: the constructor store is a navigation read, not a committed listing. Medium for the
+identity of `[L2.01317]` with the EN `[L2.00805]` object, which rests on order. Unknown for the
+statistics the stat reader copies (`L2.01278` and the reader past 0x100 bytes unread) and for
+leaving.
+
+**Unknown.** The creature's statistics, `+0x148` readers and whether the creature leaves. For
+leaving: no timer or group rule is among the sites classified in R2-ENGINE-535; its unclassified
+sites and the group-removal routine are unread. A run of the original that casts Summon and
+waits 10 minutes of game time settles whether it leaves; a run that records the creature's
+health, speed and damage from its info panel settles the statistics; a committed window over
+`L2.01273`..`L2.04127` (RU) and the EN constructor would settle the binding.
+
+### R2-ENGINE-755
+
+Unit vtable `L2.02314` (RU; EN `L2.04102`), slot +0x2c of the creature class (RU `L2.04128`, EN
+`L2.04129`) returns 1. That Summon builds this class is Medium (R2-ENGINE-754). At the Stone
+Curse arm's test (`L2.00090`, R2-ENGINE-025) a target of this class always takes the random draw;
+Human targets use another vtable that was not read.
+
+Tag cells 0 and 1 of the slot-18 switch hold RU `L2.04099` and `L2.04130` (EN `L2.04131`,
+`L2.04132`), each `jmp` to the tail RU `L2.02084` (EN `L2.04133`). The tail calls the target's
+vtable +0x58 and returns. Slot +0x58 of the creature class, RU `L2.04100` (EN `L2.04134`, equal),
+sets word +0xa0 to word +0x9c times owner (+0x14) dword +0xa5c divided by 100 when +0x14 is
+nonzero, else to word +0x9c. For the blank Stone Curse effect (tag 0) the slot runs its
+pre-switch prologue and then this tail call. In RU the first 0x100 bytes of the prologue only
+compute a local magnitude; in EN the prologue first clamps unit word +0xd8, so the EN slot also
+stores to the target. The slot-18 tag arms (cells 2..49) were not read in either root.
+
+Equal after masking, each over the window stated and with the rest of the function unread unless
+noted: attach RU `L2.00480`/EN `L2.00481` (first 0x280 bytes, 197 lines, ending in the new-effect
+branch), timer `L2.00482`/`L2.00483` (first 0x100 bytes, 85, ending at `push 0xffb`), the actor
+dispatcher `L2.00506`/`L2.00507` (first 0x180 bytes, 108; the move, attack and cast switch
+follows; the EN address was located by a 16-byte head pattern in a navigation scan that is not
+committed, and the 108 equal lines carry the identification), the Stone Curse arm
+`L2.00076`/`L2.04135` (97 lines, whole arm to its last jump), the effect vtable
+`L2.01905`/`L2.04136` and the 50-cell tag table `L2.01909`/`L2.04137` by slot partition only.
+Slot 18 (`L2.00054`/`L2.04138`, first 0x100 bytes) differs (`out/compare.tsv`: 70 lines equal, 6
+only in EN, 5 only in RU): EN sets word +0xd8 of the unit to 0 when it is above 24
+(`L2.04139`..`L2.04140`) before the tag switch, so also for tag 0; the RU window has no such
+test.
+
+**Confidence.** High for the slot +0x2c and +0x58 bodies, the tag cells, the tail and the equal
+pairs over the windows named. Medium for non-creature targets, for the class binding
+(R2-ENGINE-754) and for whether RU tests +0xd8 elsewhere: only the first 0x100 bytes of slot 18
+were compared. Unknown for the slot-18 tag arms and for the rest of the attach, timer and
+dispatcher bodies.
+
+**Unknown.** The unclassified `0x40000` immediates: the scans list 31 RU hits
+(`out/scans/ru-imm40000.tsv`, 16 of them named by R2-ENGINE-454) and 30 EN hits
+(`out/scans/en-imm40000.tsv`); none is classified here. The tick length, the held target's
+picture beyond the absent mark-44 figure (R2-ENGINE-699), the meaning of the EN +0xd8 clamp and
+the slot-18 tag arms. A run of the original that casts Stone Curse on a Troll and records the
+target's frames, any message from cast to release and the release time at Speed 4 would settle
+the picture, the message and the tick length.
+
+### R2-ENGINE-756
+
+Equal after masking, each over the window stated: the priority routine RU `L2.02116`/EN
+`L2.04101` (107 lines, the whole function to `ret 8`), the offensive choice
+`L2.00056`/`L2.04141` (182, to its `ret`), the support choice `L2.01533`/`L2.04142` (first 0x260
+bytes, 164 lines, ending inside the function; the rest is unread) and the dispatcher of
+R2-ENGINE-755 (first 0x180 bytes). An E8 call-target scan of `.text` and a dword scan of every
+section find no call and no stored address of the priority routine in either root
+(`out/scans/*-priority-*.tsv`); the dword scan covers an immediate `mov reg, ADDR`. The
+selected-spell policy RU `L2.01527`/EN `L2.04143` (0xad4 bytes) differs in 30 hunks: 581 masked
+lines match and 254 RU and 219 EN lines are unmatched (`ru_lines` and `en_lines` minus
+`equal_lines` of the `policy` row of `out/compare.tsv`; 157 lines only in RU, 136 only in EN, the
+rest in replaced hunks).
+
+**Confidence.** High for the equal pairs over the windows stated and the two scans as scans.
+Medium that the priority routine never runs: E9 and conditional branches, computed addresses and
+offset tables were not searched. Unknown for what the policy difference changes.
+
+**Unknown.** The policy difference and the per-id aim of EN policy arms (R2-ENGINE-458 is RU). A
+run of the original that watches a computer mage with Stone Curse and Prismatic Spray in its book
+and records each cast's target would settle the aim.
