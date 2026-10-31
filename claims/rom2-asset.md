@@ -2940,3 +2940,33 @@ spelling variant of the line of row 22, and not another spell, is a reading of d
 alone, with the equal slot table and the exact RU name for the same slot beside it.
 
 **Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 1.
+
+## Undead Units rows and spell 22 templates
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-202 | ROM2 data.bin Units rows 136..157 (F_Zombie, A_Zombie, F_Skeleton, A_Skeleton, M_Skeleton) are the 22 rows with typeID 82..98; F_Zombie.1, F_Skeleton.1 and Ghost are rows 136, 145 and 99, each name unique. | High | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+
+### R2-ASSET-202
+
+The client `data/data.bin` in `world.res` (one SHA-256 in EN and RU; Units and Humans rows equal)
+holds 241 Units rows of 62 values; parameter n carries title n+1 (R2-ASSET-107), typeID is
+parameter 29 and serverID parameter 55. The rows with typeID 82..98 are 136..157: F_Zombie.1..5
+(82..85), A_Zombie.2..5 (86..88), F_Skeleton.1..5 (89..92), A_Skeleton.1..5 (93..96) and
+M_Skeleton.3..5 (97, 98). The 289 Humans rows carry typeID 1, 3..5, 7..15, 17..21, 23 and 24.
+
+| Parameter | Ghost (99) | F_Zombie.1 (136) | F_Skeleton.1 (145) |
+|---|---:|---:|---:|
+| body, reaction, mind, spirit | 0, 10, 30, 50 | 40, 25, 5, 10 | 30, 35, 5, 10 |
+| healthMax, HP regeneration | 50, 200 | 100, 100 | 80, 100 |
+| speed, scanRange | 10, 6 | 16, 5 | 20, 6 |
+| physical min, max, toHit, defence, absorbtion | 1, 8, 40, 50, 2 | 6, 12, 40, 60, 4 | 8, 16, 50, 45, 2 |
+| protection fire, water, air, earth, astral | 0, 50, 0, 100, 0 | 0, 50, 0, 30, 0 | 30, 0, 50, 0, 0 |
+| resistance blade, axe, bludgeon, pike, shooting | 0, 0, 0, 0, 0 | 30, 75, 0, 50, 50 | 50, 0, 75, 30, 50 |
+| typeID, movementType, See invisible, XPvalue | 69, 2, 2, 120 | 82, 1, 1, 240 | 89, 1, 1, 330 |
+| serverID | 628 | 657 | 664 |
+
+The rows are data facts. That they are the rows the loader delivers rests on the binding of the
+loader index to the data.bin ordinal (R2-ENGINE-754), Medium.
+
+**Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 3.

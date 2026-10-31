@@ -4903,3 +4903,33 @@ loads, and waits 10 minutes of game time settles the behaviour.
 **Format surface.** `formats/rom2-sav/format.md`, First Group member.
 
 **Evidence.** [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md), question 4.
+
+## Spell 22 raised units in a mission save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-327 | A placed unit ROM2 spell 22 builds has the class L2.02314 save programme: owner +0x14 and +0x1a0 = 1 are covered, the +0x14c template serverID only if the loader runs (Medium), +0x148 = 0 is not; save selection is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+
+### R2-SESSION-327
+
+A unit the spell 22 arm constructs has vtable RU `L2.02314` (R2-ENGINE-781), whose slot +8 is the
+Unit programme of R2-SESSION-326 and R2-ENGINE-209. The arm stores, only after the placement
+succeeds (R2-ENGINE-782), owner `+0x14` = the caster's `+0x14`, `+0x1a0` = 1 and `+0x148` = 0. The
+template serverID reaches `+0x14c` only if init calls the loader, which rests on the CString length
+layout (Medium, R2-ENGINE-781): 657 F_Zombie.1, 664 F_Skeleton.1, 628 Ghost (R2-ASSET-202). The programme writes `+0x14` in the
+base and `+0x14c` and `+0x1a0` in the packed u32, and covers no byte of `+0x148`. The unit's Group
+is in the owner's group list (R2-ENGINE-782), which the Player group list writes (R2-SESSION-196). A
+unit the arm reuses from the dead-unit pool keeps its own class, whose programme was not read.
+
+**Confidence.** High for the class and the owner's store of a constructed unit (R2-ENGINE-209's
+grade for the field list), and for `+0x1a0` = 1 and the owner once placement succeeds. Medium for
+the serverID in `+0x14c` (the loader call), the Group (R2-SESSION-196) and the reused unit's class.
+Unknown whether a mission save writes the unit: no save was read and the selection path was not read
+(R2-SESSION-326).
+
+**Unknown.** A run of the original that raises a unit, saves, loads and lists the owner's units
+settles it.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 4.

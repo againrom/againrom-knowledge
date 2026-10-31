@@ -321,6 +321,14 @@ programme in slot +8, read from the class and not from a file. Its owner
 summoned-creature cap counts. Which units a mission save writes, and what
 +0x148 holds after LOAD, are Unknown. — R2-SESSION-326
 
+A unit that spell row 22 builds from a corpse with the constructor has the
+same class and programme. Once the unit is placed, owner +0x14 is the
+caster's, +0x1a0 is 1 and +0x148 is 0. The packed u16 +0x14c holds the
+template serverID (657, 664 or 628) when the template loader runs, which
+is inferred from a string layout. A unit the arm reuses from the dead-unit pool keeps its own class,
+whose programme was not read. Which units a mission save writes is
+Unknown. — R2-SESSION-327
+
 An Item writes the 38-byte base programme that Unit also calls first,
 then u32-counted references and
 u16, u16, u8, u8, u8, u16, u16, u8. Weapon adds raw 24, raw 22, u8 and a

@@ -288,6 +288,8 @@ ROM1's unique-spell arms are listed in `MAGIC-SING-019`; they were not compared 
 
 EXP-2090 narrows the Teleport clause: `L2.00093` moves the caster to the target cell centre only when the cell test `L2.02921` passes; otherwise it returns 1 with no move, and the arm, which ignores the return, still calls `L2.00060` with mask 0x10 (R2-ENGINE-705, R2-ENGINE-706). The range term and the grades stand. See the EXP-2090 entry in retracted.md.
 
+EXP-2105 partially retracts the Control Spirit clause: the arm takes a unit whose word `+0xe` is outside 0x52..0x62 (Units typeID 82..98 are the zombie and skeleton rows, R2-ASSET-202), and Body is copied for kind 2, halved plus 1 for kind 3 and the template's for kind 4. It narrows the rest: the first unit of the corpse ageing list on the target cell of kind 2, else 3, else 4 (R2-ENGINE-780); the templates and copies are R2-ENGINE-781 and the placement R2-ENGINE-782. Health -10001, kind 5, the caster's owner and the absence of P stand. See the EXP-2105 entry in retracted.md.
+
 ### R2-ENGINE-027
 
 Prismatic Spray (id 11) bypasses the normal arm: refill `L2.00032`, then `L2.00033`. The victim count is `min(P/20 + 2, 7)`; P is the power byte of `R2-ENGINE-020` for a book cast and `castSpell effect +0x42 / 20 + 2` for an item cast. The routine passes that cap and the spell's range byte (+9) to the list builder `L2.00094` and applies `L2.00034` to each victim. The cap reaches 7 at P = 100. It equals ROM1's (`MAGIC-CEIL-013`).
@@ -18054,6 +18056,10 @@ committed listings. The binding of the name to the Units row stays Medium, as do
 template loader, which runs only when the unread helper `L2.03298` returns above 0.
 R2-ENGINE-776 narrows leaving and the `+0x148` sites; R2-ENGINE-778 narrows the `[L2.01317]`
 identity to operand positions in equal bodies and to one RU caller site.
+R2-ENGINE-781 narrows the helper clause: `L2.03298` returns the dword at `[name] - 0xc + 4`, the
+CString length slot by layout (Medium), and the loader's matcher `L2.04123` is an exact byte compare
+of the name with `[row + 4]`. The loader window read ends at `L2.04527`, inside its loop, and the
+binding of the loader index to the data.bin ordinal stays Medium.
 
 ### R2-ENGINE-755
 
@@ -18917,8 +18923,8 @@ and 3.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-776 | ROM2 world pass L2.04378 (EN L2.04379) runs every 16th session tick; for a caster with n summoned units (key +0x148) it kills one with chance about (n-1)/100; death stores -10000, corpse ageing sets kind 5 (not for an owner's +0x38 unit). | High / Medium | ● active (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
-| R2-ENGINE-777 | ROM2 stat reader L2.02341 writes Units parameters 0..37 of a row into fixed unit fields, a stored -1 keeping the L2.00105 default; that Summon's creature gets it is Medium (helper L2.03298, matcher L2.04123 unread). | High / Medium | ● active (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
+| R2-ENGINE-776 | ROM2 world pass L2.04378 (EN L2.04379) runs every 16th session tick; for a caster with n summoned units (key +0x148) it kills one with chance about (n-1)/100; death stores -10000, corpse ageing sets kind 5 (not for an owner's +0x38 unit). | High / Medium | ● active (amended, branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
+| R2-ENGINE-777 | ROM2 stat reader L2.02341 writes Units parameters 0..37 of a row into fixed unit fields, a stored -1 keeping the L2.00105 default; that Summon's creature gets it is Medium (helper L2.03298, matcher L2.04123 unread). | High / Medium | ● active (amended, branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
 | R2-ENGINE-778 | ROM2 session tick L2.04380 (EN L2.03120), called on [L2.01317] at the RU site read, calls the world pass when Session +4 mod 16 is 12, then adds 1 to +4, and adds 1 to Session +0 when the new +4 mod 16 is 15. | High / Medium | ● active (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
 
 ### R2-ENGINE-776
@@ -18987,6 +18993,8 @@ call settles both; classifying the 65 unclassified sites and reading the callers
 detach through virtual and stored addresses settles the removal routes, as does a run that casts
 Summon and waits.
 
+**Amended.** R2-ENGINE-780 to R2-ENGINE-783 narrow the Animate Dead clause: the arm from `L2.00079` is spell row 22's, whose data.bin record is named Control Spirit and whose EN `spell.txt` row is Animate Dead (R2-ASSET-179); its end is read, it raises a corpse of kind 2..4, and the unit it builds has `+0x148` = 0.
+
 ### R2-ENGINE-777
 
 The caster chooses the row through its level: the arm computes the word `[caster+0xb2]` / 25 + 1,
@@ -19032,6 +19040,8 @@ the helper `L2.03298` and the matcher `L2.04123` (reading them settles the call 
 and the delivered values (a run of the original that records a summoned creature's health, speed
 and damage from its info panel).
 
+**Amended.** R2-ENGINE-781 narrows the helper Unknown: `L2.03298` returns the dword at `[name] - 0xc + 4` (the CString length slot by layout, Medium) and `L2.04123` is 1 exactly when the byte compare `L2.02085` of the name and `[row + 4]` returns 0; the call of the loader stays Medium through that layout inference, the binding of the loader index to the data.bin ordinal and the writers past `L2.04527`, which are unread. The EN Units rows equal the RU rows (R2-ASSET-202).
+
 ### R2-ENGINE-778
 
 Session tick RU `L2.04380` (EN `L2.03120`, 196 lines, equal after masking) returns at once when
@@ -19060,3 +19070,180 @@ equal bodies and to one RU caller site.
 scheduler (reading the function that holds `L2.04409` settles it).
 
 **Evidence.** [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md), questions 1 to 3.
+
+## Spell row 22 corpse raising
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-780 | ROM2 spell row 22 (RU L2.00079, EN L2.04528) takes the first unit of the corpse ageing list on the target cell with kind 2, else 3, else 4, and word +0xe outside 82..98, and sets its health -10001 and kind 5. | High / Medium | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+| R2-ENGINE-781 | The ROM2 spell 22 arm builds F_Zombie.1, F_Skeleton.1 or Ghost for a kind 2, 3 or 4 corpse through init L2.01794, copies or halves seven statistics (six for the Ghost), sets health to healthMax, and reads no caster field but owner +0x14. | High / Medium | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+| R2-ENGINE-782 | The ROM2 spell 22 arm tries the raised unit on the corpse's cell as clamped, with no search around it (L2.00313, radius 0); placed, it gets +0x1a0 = 1, +0x148 = 0, a new id, the caster's owner and a new Group in that owner's list. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+| R2-ENGINE-783 | A placed ROM2 spell 22 unit is outside the summon cap; its death rolls no gold, item or bag (High) and skips a human attacker's experience (Medium); no timer in the bodies read; EN equals RU in shape except the RU-only +0x30 test. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+
+### R2-ENGINE-780
+
+Spell row 22 is the data.bin record Control Spirit, shown as Animate Dead in EN `spell.txt`
+(R2-ASSET-179). Its Target is 2 and its values 16 and 17 are -1, so the setter `L2.00045` leaves
+spell bytes `+0xe` and `+0xf` at 0 and the apply head `L2.00034` (EN `L2.01692`) reaches the id
+switch. That table entry 22 is the arm is read from R2-ENGINE-026 for RU and inferred for EN from
+R2-ENGINE-459's EN arm range and the body equality; this experiment read no jump table
+(`out/tables.tsv` holds only its header). With no target unit the head builds the target position
+with `L2.02599(x, y, map)`: byte 0 x, byte 1 y, word 2 y << 8 + x.
+
+The arm makes up to three passes over the list `[[L2.01317]+0x7c]+0xc` + 4, the list that corpse
+ageing runs on (R2-ENGINE-776; the kind test below, not list membership, makes a unit a corpse),
+head to tail through `L2.00209`, `L2.00213` and `L2.00211` (each
+node's `+0` link, value at `+8`). Pass k (k = 2, then 3, then 4) accepts the first unit U with:
+
+1. kind byte `+0x13c` = k;
+2. word `+0xe` below 0x52 or above 0x62;
+3. `L2.04529` true on `[U+0x10]` and the target position: word 2 equal, the same cell.
+
+The first accepted unit ends the search. With none the arm jumps to the apply end `L2.04530`. On
+the accepted unit T the arm saves T's kind, stores health word `+0x94` = 0xd8ef (-10001) and kind
+`+0x13c` = 5, and calls `L2.00060(T, 0, 1, 0xffb, 0, 0)` on `L2.02608`. Outside the pool path of
+R2-ENGINE-781 the arm removes T from no list and frees nothing; if the pool returns T (Medium), T is
+removed from the corpse ageing list by `L2.04531` and its virtual `+0x38` runs (`L2.04532` for class
+`L2.02314`, which frees `+0x68`, `+0x64`, `+0x1c0`, `+0x1c4`, `+0x7c`, `+0x78`, `+0x74` and `+0x140`).
+Corpse ageing returns for health below -10000 (R2-ENGINE-776). Word `+0xe` is
+the field the stat reader fills from the Units typeID (R2-ENGINE-777); typeID 82..98 are the zombie
+and skeleton rows (R2-ASSET-202).
+
+EN. The EN arm (`L2.04528`) is compared with the RU arm after masking every hexadecimal operand in
+`0x400000..L2.03731`, so EN globals and callee addresses are not compared (the EN arm reads
+`[L2.00805]+0x7c` where RU reads `[L2.01317]+0x7c`; R2-ENGINE-778 rests that identity on operand
+positions in equal bodies). The EN call targets match the EN windows listed by address: list
+`L2.04533`, position `L2.04534`, `L2.00488` and `L2.00489`, placement `L2.00312`, constructor
+`L2.03160`, init `L2.01793`, Group `L2.04046` and `L2.04535`, lists `L2.00202` and `L2.04536`.
+
+**Confidence.** High for the three tests, their order, the first-match rule, the empty end and the
+stores: committed reproduced listings, equal in instruction shape in both roots after masking. Medium for: the arm being
+reached (the row accessor `L2.02312` is unread, and R2-ENGINE-705's point sender and caster gates
+hold at their grades); "corpse" for kinds 2..4 (other writers of `+0x13c` were not censused); a
+Human corpse's `+0xe` (the Human loader was not read); and T staying out of the new unit (the pool
+of R2-ENGINE-781 can return T, the exception in the body); for EN, the dispatch cell for id 22
+(inferred) and the globals and callees (masked).
+
+**Unknown.** What the unread sender `L2.00060` shows. A run of the original that casts spell 22 on
+fresh, older and oldest corpses settles which corpse is taken and what is shown.
+
+**Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), questions 1 and 2.
+
+### R2-ENGINE-781
+
+Owner is the caster's `+0x14`. The arm walks the global list `[L2.02103]` + 4 for the first unit of
+kind 5 or more (RU also needs its virtual `+0x30` to return 0, R2-ENGINE-783), removes it from the
+corpse ageing list with `L2.04531` and reuses it; without one it allocates 0x208 bytes, runs the
+constructor `L2.01273` (vtable `L2.02314`) and appends the unit to the global list. It then calls
+virtual `+0x38` (class `L2.02314`: `L2.04532`, which frees `+0x68`, `+0x64`, `+0x1c0`, `+0x1c4`,
+`+0x7c`, `+0x78`, `+0x74`, `+0x140`) and init `L2.01794` with `F_Zombie.1` for kind 2,
+`F_Skeleton.1` for kind 3 and `Ghost` for kind 4.
+
+Init clears kind, word `+0xe`, `+0x70`, `+0x148` and `+0x1a0`, stores the name at `+0x80` and calls
+the loader `R2.0087` when `L2.03298(name)` is above 0. `L2.03298` returns the dword at `[name] -
+0xc + 4`. The loader matches a row through `L2.04123`, which is 1 exactly when the byte compare
+`L2.02085` of the name and `[row + 4]` returns 0, then stores the index in `+0xc`, the row in
+`+0x3c`, runs the stat reader `L2.02341` and stores value 0x37 (serverID) in `+0x14c` when the row
+holds at least 0x37 values. The three names are Units rows 136, 145 and 99 (R2-ASSET-202).
+
+After init the arm sets, with T/2 a signed division truncating toward zero:
+
+| Field | kind 2 | kind 3 | kind 4 |
+|---|---|---|---|
+| `+0x84` body | T | T/2 + 1 | template (row value 0) |
+| `+0x86` reaction | T/2 + 1 | T/2 + 1 | T/2 + 1 |
+| `+0x88` mind, `+0x8a` spirit | T | T | T |
+| `+0x96` healthMax | T | T/2 | T/2 |
+| `+0x94` health | its healthMax | its healthMax | its healthMax |
+| `+0xa6` toHit, `+0xbe` defence | T | T | T |
+
+Kinds 2 and 3 copy or halve seven values (body, reaction, mind, spirit, healthMax, toHit, defence).
+Kind 4 (Ghost) copies or halves six: `L2.04537..L2.04538` has no store to `+0x84`, so the body stays
+the row's. Health then equals the new healthMax for every kind.
+
+The arm reads no spell-object field and no local of the head's power computation; the level suffix
+is fixed.
+
+**Confidence.** High for the template choice, the init stores, the loader stores inside the window
+read (`R2.0087..L2.04527`), the copies and the reads of the arm. In the windows read, every other
+value of the new unit is the row's or the builder's. Medium for: the loader being called (that
+`L2.03298` returns the CString length is a layout inference); the binding of the loader index to the
+data.bin ordinal (R2-ENGINE-754), which ties the three Units rows to what the loader delivers; the
+loader's stores past `L2.04527`, where the window ends inside the loop that starts at `L2.04539`
+(unread); the pooled unit (writers of the global list unread), including whether it can be T itself,
+in which case the copies read init's values; the list helpers `L2.00322`, `L2.04540` and `L2.00206`
+(unread); the field names for a Human T.
+
+**Unknown.** How often a unit is reused. Reading the writers of the global list `[L2.02103]` settles
+whether a unit of kind 5 or more is usually present; a run of the original that raises one fresh
+corpse and compares the creature's statistics with the corpse's settles it. What the loader stores
+past `L2.04527` is settled by reading it to its return.
+
+**Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 3.
+
+### R2-ENGINE-782
+
+The arm calls positioning `L2.00313(x, y, 0)` with T's cell. The routine sets the candidate through
+the clamp (RU `L2.01700`; R2-ENGINE-531: x in [8, W-9], y in [8, H-9]) and, for a clamped y below 12
+with `[L2.01317]+0x74` nonzero, skips the test (`L2.02107..L2.02108` in the EXP-2057 listing
+`ru-summon-placement.txt`). With radius 0 it tests the candidate twice and scans no square: the unit
+is tried on the corpse's cell as clamped, with no search around it. Whether a corpse can stand
+outside the clamp range is unread. On failure the arm jumps to the apply end: T stays at kind 5 and
+the built unit gets no owner, Group or id store. Every store below holds only after the placement
+succeeds, in this order:
+
+1. `+0x1a0` = 1;
+2. `L2.04402` on `[L2.00326]`: `L2.04541(unit)`, append to the `+4` list, unit `+4` =
+   `L2.01287()` AND 0xffff;
+3. owner `+0x14` = the caster's `+0x14`, `+0x148` = 0;
+4. append to the owner's unit list `[owner+0x24]` (`L2.00205`);
+5. a 0x50-byte Group from `L2.00349` (R2-ENGINE-732) appended to `[owner+0x28]` by `L2.01781` (unread);
+6. `L2.00361`: the unit leaves a Group held at `+0x70`, joins the new Group's member list, `+0x70` =
+   the Group, Group `+0x44` = the unit's `+0x14`;
+7. `L2.02636`, `L2.04542`, `R2.0098` and `L2.00060(unit, 0, 0xa31fffff, 0xffb, 0, 0)`, then the
+   apply end `L2.04530`.
+
+**Confidence.** High for the call, the order and the stores. Medium for the new id (`L2.01287`
+unread), the Group being the owner's (R2-SESSION-196) and the effect of the unread calls in step 7.
+Unknown whether a corpse's cell passes the cell test, whose grid callees are unread (R2-ENGINE-531),
+and whether a corpse can stand outside the clamp range.
+
+**Unknown.** A run of the original that casts spell 22 on a corpse settles whether the unit appears
+on that cell.
+
+**Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 3.
+
+### R2-ENGINE-783
+
+A placed raised unit has `+0x148` = 0, so the summon cap and the death routine's `+0x148` block skip
+it (R2-ENGINE-776). With `+0x1a0` = 1 the death routine rolls no gold or item and drops no bag
+(R2-ENGINE-535, High); a human attacker's experience award skips it (R2-ENGINE-535, Medium: the
+site lies in a navigation window); a creature attacker's award was not read for `+0x1a0`. The
+stores of `+0x1a0` = 1 (`L2.02746`) and of the caster's owner come after the placement test, so
+all of this holds only after placement succeeds (R2-ENGINE-782). The arm and the bodies it calls
+that were read store no other field of the unit, T or the caster: no timer and no caster link. Its word `+0xe` (82, 89 or 69) is outside classes 33..63, so a mission
+transition takes the detach or destroy route (R2-ENGINE-382, R2-ENGINE-412).
+
+In `out/compare.tsv` 18 of 19 RU/EN pairs are equal after masking (apply head, arm tail, setter,
+position, list, init, loader, name helpers, byte compare, release, group and list bodies). The arm
+pair (426 RU, 423 EN lines) differs in the RU-only virtual `+0x30` call and skip at
+`L2.04543..L2.04544` (EN `L2.04545` reuses any unit of kind 5 or more, R2-ENGINE-459) and in register
+choice in three hunks. The template strings and the Units rows are equal.
+
+The mask replaces every hexadecimal operand in `0x400000..L2.03731`, so EN globals and callee
+addresses are not compared; equality means the same instruction shape. The EN arm was matched to the
+EN windows by call target (R2-ENGINE-780). Table entry 22 for EN is not read: this experiment read
+no jump table, and the entry comes from R2-ENGINE-026 (RU) and R2-ENGINE-459's EN arm range.
+
+**Confidence.** High for the stores, the gold, item and bag skip, and the EN/RU comparison in
+instruction shape over the windows named. Medium for the human attacker's experience skip
+(R2-ENGINE-535), for "no
+timer" and "no caster link" (the calls of R2-ENGINE-782 step 7, `L2.01287` and `L2.04541` are
+unread) and for the transition (those claims' grades). Unknown which classes the RU `+0x30` test
+skips besides `L2.02314`, which returns 0 (R2-ENGINE-754): reading the `+0x30` slot of each unit
+vtable in `.rdata` settles which pooled units RU skips.
+
+**Unknown.** A run of the original that raises a unit, waits 10 minutes of game time, kills the
+caster and finishes the mission settles the lifetime.
+
+**Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), questions 4 and 5.

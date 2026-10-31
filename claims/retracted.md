@@ -1,5 +1,12 @@
 # Overturn history
 
+## EXP-2105: Spell 22 corpse raising
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-026` (Control Spirit filter and Body clauses only; the stores, the owner, the other arms and the grades stand) | Verbatim: "sprite word +0xe in 0x52..0x62" and "a template with halved Body and Reaction per kind" | Medium | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), R2-ENGINE-780, R2-ENGINE-781 | The arm takes a unit whose word +0xe is below 0x52 or above 0x62; Reaction is halved plus 1 for each kind, Body is copied for kind 2, halved plus 1 for kind 3 and the template's for kind 4. | **REFUTED** — partially retracted |
+| `R2-ENGINE-026` (Control Spirit target clause only) | Verbatim: "finds a creature at the target cell with kind byte +0x13c in 2..4" | Medium | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), R2-ENGINE-780 | The arm takes the first unit of the corpse ageing list (R2-ENGINE-776) on the target cell with kind 2, else 3, else 4. | **NARROWED** |
+
 ## EXP-2090: Teleport release and relocation
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
