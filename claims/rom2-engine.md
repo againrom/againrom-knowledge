@@ -18409,3 +18409,86 @@ row and text, which are reused at the grades of R2-ENGINE-498 and R2-ASSET-115.
 visit.
 
 **Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 5.
+
+## Player prefix census and town LOAD windows
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-762 | ROM2 EN/RU: 309 memory operands per root with displacement +0xa44..+0xa5f (add/lea forms are not rows); stores of 0 and +0xa5c 0x5f at one construction site; character-file load sets +0xa48, +0xa4c, +0xa54, +0xa58; sources Medium. | High / Medium | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
+| R2-ENGINE-763 | 16 ROM2 EN/RU town SAVE and LOAD window pairs: 12 bodies equal to their first ret after masking operands in 0x400000..L2.03731; town entry and L2.03127 differ only in application offsets; Armor routine and L2.00466 differ. | High | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
+
+### R2-ENGINE-762
+
+One linear Capstone decode of each `.text` reports every instruction whose memory operand has a
+displacement in `0xa44..0xa5f` (`out/code/scans/`): 309 data rows per root
+(`out/code/compare-scans.tsv`: `en_rows 309`, `ru_rows 309`; the two scan files differ in text,
+addresses and offsets). The counts per displacement and role (read, write, compare) are equal in
+EN and RU in `out/code/scan-roles.tsv`, which `evidence/scanroles.py` computes from the two
+committed scan files; the role comes from the instruction text only (`mov` with the memory
+operand first is a write, with it second a read; `cmp` a compare; the scans hold `mov`, `cmp`
+and `div`). A row's base is not shown to be a Player; session parts use the same displacements
+(R2-SESSION-312).
+
+Population. Rows are memory operands with a displacement only. A site that forms the address by
+`add reg, imm` or `lea`, and a copy of a whole object, is not a row. The Player load arm forms the
+addresses of `+0xa44`, `+0xa48`, `+0xa50` and `+0xa5c` by `add` (EN `L2.04243`, `L2.04244`,
+`L2.04245`, `L2.04246`) and passes them to a reader; none of the four is among the rows. The `imm:`
+form of the census was not run. The other Player prefix fields (`+4`, `+8`, raw 8 at `+0x10`,
+`+0x2c`, `+0x30`, `+0x40`, `+0x41`) and the groups H, B and T were not censused. EN rows:
+
+- `L2.04247..L2.04248` store `+0xa44` = 0, `+0xa48` = 0, `+0xa4c` = 0, `+0xa50` = 0,
+  `+0xa54` = 0, `+0xa58` = 0, `+0xa5c` = 0x5f and `+0xa45` = 0, next to the `+0x44` clear at
+  `L2.03619` (R2-ENGINE-675).
+- `L2.04249..L2.04250` store `+0xa48`, `+0xa54`, `+0xa4c` and `+0xa58` next to the 2,560-byte
+  copy at `L2.03620`, inside the character-file loader `L2.01818` (R2-ENGINE-410).
+- Read-modify-write of `+0xa54` at `L2.04251`/`L2.04252` (inside the unit death span
+  `L2.01806`, whose end was not read) and of `+0xa48` at `L2.04253`/`L2.04254`; `+0xa44` read
+  and written at `L2.04255..L2.04256`; `+0xa4c` and `+0xa48` copied between two objects at
+  `L2.04257..L2.04258`.
+- `+0xa58` is written and read; the Player stream (R2-SESSION-020) does not hold it.
+- `+0xa50`: 203 read, 8 write and 2 compare rows, not classified.
+
+**Confidence.** High for the 309 rows as the displacement-operand population of each `.text` (a
+linear decode can resynchronise late after data; that blind spot is not excluded). Medium that the
+named sites are the only sources of these fields, because the `add`/`lea` forms, whole-object
+copies and the other fields were not censused. Medium for "construction": the stores at
+`L2.04247..L2.04248` sit in a body that was not read, and the body is named a construction only by
+the `+0x44` clear beside it. Medium for each base as a Player and for the events behind the sites:
+the containing bodies were not read.
+
+**Unknown.** Which events move `+0xa48`, `+0xa4c` and `+0xa54`. Two town SAVEs before and after a
+fight in which one enemy dies and one party member dies, with the three fields compared, would
+show it. Open: the `add`/`lea` address forms of the Player prefix, the other P1 fields and the
+groups H, B and T as census targets.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer (Player prefix sources).
+
+**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), question 2.
+
+### R2-ENGINE-763
+
+EN against RU `allods2.exe` (`out/code/bodycmp.tsv`): each window's body up to its first `ret`
+(the zero-worldPresent arm to the window end), compared line for line without the address column
+after masking every hexadecimal operand in 0x400000..L2.03731. The mask hides callee and global
+addresses and also any constant or displacement whose value lies in that range.
+
+- Equal to the first `ret` of the window: the first routine of the base window, Unit, Humanoid
+  and Human, Item, the group list, Player, and the load entry callees `L2.04259`, `L2.00170`,
+  `L2.03121`, `L2.02197`; the zero-worldPresent arm to the window end; the first routine of the
+  Group with bag I/O window. The windows hold later routines that this comparison does not cover.
+- Not equal: the Armor routine (EN `L2.04260`) and one routine after the base (EN `L2.03724`)
+  differ in item-derived field offsets (EN `0x54`, `0x56`; RU `0x58`, `0x5a`; EN `L2.03724`,
+  `L2.04261`, `L2.04262`, `L2.04263`); `out/code/compare.tsv` lists the whole windows as unequal.
+  Those routines were not compared further.
+- The town entry and the town preparation tail `L2.03127` differ only in application offsets
+  (EN `0x44c`/RU `0x464`, `0x41c`/`0x434`, `0x418`/`0x430`).
+- `L2.00466` differs in frame size (RU adds a stack-probe call), application offsets, the
+  dispatcher's case bound (EN `cmp ..., 0xbe` at `L2.04264`, RU `0xdc` at `L2.04265`, a higher bound
+  in RU; the case tables were not read) and bytes the window end cuts. `L2.01829` differs in two application offsets and the cut tail.
+- Per displacement and role, the `0xa44..0xa5f` census rows are equal in
+  `out/code/scan-roles.tsv` (R2-ENGINE-762).
+
+**Confidence.** High for the pairs read, over their windows and up to the first `ret` named
+above; Medium for anything later in a window.
+
+**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), question 5.

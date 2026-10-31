@@ -4427,3 +4427,75 @@ Medium, holds its TalkTo and LeaveLocation call sites).
 **Confidence.** High for the population of 22 files and the native evaluation.
 
 **Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 6.
+
+## Town LOAD use of the unassigned town file fields
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-314 | ROM2 town LOAD: Player and base fields with a visible reader call are read into their own fields; base +0x18 is set to 0 after reading; Unit +0x40, +0x44, +0x5c are zeroed when worldPresent is 0; raw blocks go to unread bodies. | High / Medium | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
+
+### R2-SESSION-314
+
+RU addresses; EN bodies equal after masking (R2-ENGINE-763). Groups as in the format page: P1
+the Player scalar prefix, P2 its raw 2,560 and 36 bytes, H the hero positions without a direct
+store (R2-ENGINE-319), B the 38-byte object base, K the saved addresses.
+
+- Player load arm `R2.0085` (EN `L2.04266..L2.04267`): the Player prefix fields have a visible
+  reader call each and are read into their own runtime offsets: `+0xa48` through the XOR
+  `L2.01271`; `+0xa4c` and `+0xa54` stored sign-extended from two 16-bit reads (EN
+  `L2.04268..L2.04269`); `+0x30` read and also copied to `+0x32` (EN `L2.04270..L2.04271`);
+  `+0x38` receives the raw saved value (EN `L2.04272`) and is replaced in place by the lookup
+  (EN `L2.04273`). The arm holds no constant store. P2 goes to `+0x44` and `[+0x34]`.
+- Base `L2.01164`: raw 12 passed to unread `L2.02981` for `[+0x10]`; `+4` read and, when
+  nonzero, passed to unread `L2.00338`; `+0xc`, `+0xe`, `+8`, `+0x1c` read into their fields;
+  `+0x18` read, then set to 0 (`L2.04274`, EN `L2.04275`). The Unit and Item serializers call
+  it first.
+- K: the own address goes into the saved-address map `L2.01168`; `+0x14` is replaced by its
+  lookup `L2.01169` (R2-ENGINE-323). Saved addresses serve as map keys and lookup inputs; in
+  the Player arm `+0x38` is replaced in place.
+- Unit load arm `L2.01161`: `+0x74` and `+0x78` through the reference reader, u16
+  `+0x84..+0x9e` into the fields. The hero raw blocks `+0xa6` and `+0x114` (`L2.04276`), `+0xbe`
+  (`L2.04277`), `+0xd4` (`L2.04278`), `[+0x1c0]` (`L2.04279`) and `[+0x1c4]` (`L2.04280`), the
+  sub-objects `+0x1c8` and `+0x1e4` (vtable slot +8) and the base raw 12 are passed to callees
+  that were not read; the listing shows the address passed, not what each callee stores. The arm
+  ends by reading `+0x5c`, `+0x64`, `+0x44`, `+0x40`, unpacking `+0x14c`, `+0x204`, `+0x1a0`,
+  calling vtable +0x30 and setting `+0x3c`.
+- Zero-worldPresent arm of the document serializer (EN `L2.04281..L2.04282`): when the byte
+  `[ebp - 0x18]` tested at the arm is 0, for each Player in `[L2.00292]` with `+0x24` nonnull,
+  each element of the list at `[+0x24]+4` gets `+0x40`, `+0x44` and `+0x5c` = 0 (EN `L2.04283`,
+  `L2.04284`, `L2.04285`). The window starts inside the reader, so the source of that byte is
+  not in the listing. The arm restates R2-ENGINE-616 (the elements of each Player list `+0x24`
+  are Units there) and R2-ENGINE-664 with these stores. Four frozen EN town-like documents hold
+  the world byte 0 (R2-SESSION-234; town-like classification Medium); the writer emits 1 only
+  when server `+0x94` is nonzero (R2-SESSION-284). The values of those three Unit fields in a
+  town file whose world byte is 0 are discarded; that every town SAVE has world byte 0 is Medium.
+- The load entry callees `L2.04259`, `L2.00170`, `L2.03121` (to their `ret`), the first 0x100
+  bytes of `L2.00466` and `L2.01829`, the town preparation tail `L2.03127` and the town entry
+  `L2.00266` (EN) store into no Player or Unit field.
+- Record order. Order of first references: the group members in list order; per Human the effects
+  at `+0x20`, the items `+0x74`, `+0x78`, `+0x68`, the bag head to tail, the Humanoid slots 1..12;
+  an Effect record follows its Item. This composes R2-ENGINE-207, 208, 209 and R2-SESSION-165; no
+  file was walked. The LOAD appends bag entries in stored order (Medium).
+
+**Confidence.** High for the stores in the read bodies where a read call is visible (the Player
+arm, the base fields with a direct reader, `+0x74`, `+0x78`, `+0x84..+0x9e`, the zeroing sites and
+the entry callees named). Medium for the fields passed to unread callees (the hero raw blocks,
+`+0x1c8`, `+0x1e4`, the base raw 12): the card shows the address passed. Medium that no later
+step overwrites a field read into place: the five embedded H serializers, `L2.02981`, `L2.00338`,
+the dispatcher `L2.00466` and the town entry's 27 calls are unread. Medium for the Unit identity
+of the `+0x24` list elements, which R2-ENGINE-616 states and this window does not show; Medium
+that the world byte is 0 in every town file. Medium for the record order (see its bullet).
+
+**Unknown.** Later reads and overwrites of the kept fields; the values of the town files (the
+save files were not read: the values pass would settle it, EXP-2076 `measure.py` over the three
+save directories with towns selected by R2-SESSION-238, derived values only). Load an original
+town file and record the hero's `+0x8`, `+0x78`, `+0x8e`, `+0x98`, `+0x9e`, `+0xd4..+0xd7`,
+`[+0x10]`, `[+0x1c0]`, `[+0x1c4]` and the Player's prefix after the document read and at the first
+town frame. Not read, open: the town branch `L2.02974` / `L2.03876` (tail readers and key
+requests, R2-ENGINE-723), the load entry `L2.00826` / `L2.00119`, the bodies of `L2.01829` past
+its first 0x100 bytes, the reachability of `L2.01830` (open in R2-ENGINE-723), the getter
+`R2.0113` and the embedded serializers listed above.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), questions 1 and 3.

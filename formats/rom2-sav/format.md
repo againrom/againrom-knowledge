@@ -678,6 +678,31 @@ Nine EN and RU writer and town-LOAD bodies are equal in instruction sequence
 after masking every operand of 0x1000 and above, apart from application field
 offsets; callees are not compared. — R2-ENGINE-724
 
+In a town LOAD the Player load arm and the base and Unit fields with a
+visible reader call are read into their own runtime offsets (`+0xa48`
+through the XOR, `+0xa4c` and `+0xa54` sign-extended, `+0x30` also copied to
+`+0x32`). The hero's raw blocks, the Unit sub-objects `+0x1c8` and `+0x1e4`
+and the base's raw 12 bytes go to serializers that were not read (Medium).
+Two stored values are discarded: the base `+0x18` word, which the load arm
+sets to 0 after reading it, and Unit `+0x40`, `+0x44` and `+0x5c`, which the
+document's zero-worldPresent arm sets to 0 for each Player's list; the arm
+restates R2-ENGINE-616 and R2-ENGINE-664, and the four town-like documents
+of R2-SESSION-234 hold world byte 0 (Medium that every town SAVE does).
+Saved addresses serve as map keys and lookup inputs, and the Player's `+0x38`
+is replaced in place. Whether a later step overwrites a field read into
+place is Medium: the embedded serializers of the hero's raw blocks, the town
+branch past the tail readers and the town entry's callees are unread. The
+record order is, as a composition of the serializers' programs, the order of
+first references (Medium). — R2-SESSION-314
+
+The Player prefix fields `+0xa44..+0xa5c` are stored as 0, `+0xa5c` as 0x5f,
+at one site of an unread construction body; a character-file load sets
+`+0xa48`, `+0xa4c`, `+0xa54` and the unsaved `+0xa58`; play-time sites
+change `+0xa48` and `+0xa54`. The census covers memory operands with a
+displacement only (309 rows per root); address formation by `add` or `lea`,
+the other Player prefix fields and the groups H, B and T were not censused.
+The construction, the sources and the events are Medium. — R2-ENGINE-762
+
 ## Related
 
 The character file is a separate format: [ROM2 character file](../rom2-a2c/format.md).
