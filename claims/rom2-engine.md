@@ -18428,7 +18428,7 @@ visit.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-762 | ROM2 EN/RU: 309 memory operands per root with displacement +0xa44..+0xa5f (add/lea forms are not rows); stores of 0 and +0xa5c 0x5f at one construction site; character-file load sets +0xa48, +0xa4c, +0xa54, +0xa58; sources Medium. | High / Medium | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
+| R2-ENGINE-762 | ROM2 EN/RU: 309 memory operands per root with displacement +0xa44..+0xa5f (add/lea forms are not rows); stores of 0 and +0xa5c 0x5f at one construction site; character-file load sets +0xa48, +0xa4c, +0xa54, +0xa58; sources Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
 | R2-ENGINE-763 | 16 ROM2 EN/RU town SAVE and LOAD window pairs: 12 bodies equal to their first ret after masking operands in 0x400000..L2.03731; town entry and L2.03127 differ only in application offsets; Armor routine and L2.00466 differ. | High | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
 
 ### R2-ENGINE-762
@@ -18477,7 +18477,17 @@ groups H, B and T as census targets.
 
 **Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer (Player prefix sources).
 
-**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), question 2.
+**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), question 2;
+[EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), question 3.
+
+**Amended.** R2-SESSION-321 and R2-SESSION-322 narrow the Unknown with stored values: in the 11
+original town files of three owner copies `+0xa4c`, `+0xa50` and `+0xa54` are 0 and `+0xa5c` is
+0x5f; `+0xa48` is 0, 6, 6, 23, 46 at town1/10, town2/30, town2/40, town2/50, town3/60; `+0xa44` is
+1 at town1/10 and 2 at every later stage (one transition, town1/10 to later; stage and copy are
+not separable from town2/30 on). No tie to a site this card names is established: the events at
+the named sites are unread, so these data cannot test one. The three zeros match the construction
+stores non-specifically; `+0xa5c` 0x5f is the specific match. Which event moves each field stays
+open; a read of the bodies at the named sites would settle it.
 
 ### R2-ENGINE-763
 

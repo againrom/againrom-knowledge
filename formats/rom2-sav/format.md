@@ -703,6 +703,87 @@ displacement only (309 rows per root); address formation by `add` or `lea`,
 the other Player prefix fields and the groups H, B and T were not censused.
 The construction, the sources and the events are Medium. — R2-ENGINE-762
 
+### Stored values of the original town files
+
+Three owner save copies hold 25 files; 11 are town files: their current
+Scenario record has kind 2, worldPresent is 0 and mission is 0. Each of the 14
+files with a kind 1 current record has worldPresent 1. The 11 stand at five
+stages: town1/10 (five files), town2/30 (two), town2/40 (one), town2/50 (two)
+and town3/60 (one). That every original town SAVE has worldPresent 0 is
+Medium. — R2-SESSION-320
+
+Fields equal in every one of the 11 town files that holds them (High for these
+files; Medium as a rule of town files of copies 1 and 2 (EN) and copy 3, whose
+root is not established; no RU file; fields are named by offset, no meaning is
+assigned). Party Human rows hold for every Human present (the hero in 11 files,
+identity 22 in 5, identity 23 in 3):
+
+| Group | Field | Stored value |
+|---|---|---|
+| Player prefix | `+4`, `+8` | 1, 1 |
+| Player prefix | `+0x2c`, `+0x41` | 0 |
+| Player prefix | `+0x30` | 2 |
+| Player prefix | `+0xa4c`, `+0xa50`, `+0xa54` | 0 |
+| Player prefix | `+0xa5c` | 0x5f |
+| Party Human | `+0x18` | 2 |
+| Party Human | `+0x40`, `+0x44`, `+0x5c` | 0 |
+| Party Human | `+0x78` | null reference |
+| Party Human | `+0x98`, `+0x9e` | 100, 50 |
+| Party Human | `+0xd4..+0xd7` | zero |
+| Base, Armor, Weapon, Shield, Item | `+8`, `+0x18` | 0 |
+| Base, Effect | `+0xc`, `+0xe`, `+0x14`, `+0x18` | 0 |
+| Base, Item | `+0x1c` | 0xFFFFFFFF (one item in 6 files; no other kind holds it; Medium as a rule of Items) |
+| Keys | Player `+0x38` | the hero's saved address |
+| Keys | Human `+0x14`, Group `+0x44`, nonzero Armor or Weapon `+0x14` | the Player's saved address |
+| Keys | Group `+0x40` | 0 |
+| Tail | pair count, row | 1, (1, 1) |
+| Tail | nine client cells | words 0, length 0 |
+
+Base rows hold per record kind, in the files that hold the kind: Shield 1
+record in 1 file, Item 6 records of one item in 6 files, Armor 64 records of 25
+items in 7 files, Effect 57 records of 17 roles in 10 files, Weapon 34 records
+of 10 items in 11 files. Saved addresses are distinct multiples of 8 in each
+file. A copy's town files of one Player name share some saved addresses, across
+stages too (copy1 game0002 and game0003 share 7 of 9); no saved address occurs
+in two copies. — R2-SESSION-321
+
+Every comparison of town2/30 with a later stage, and of copy1 with copy3, also
+differs in copy: town2/30 occurs in copy2 only and town2/40 to town3/60 in copy3
+only. The within-copy stage transitions are copy2 town1/10 to town2/30 and copy3
+town2/40 to town2/50 to town3/60. Fields that differ between stages and are
+equal within the stages tested (town1/10, five files in two copies, and
+town2/30, two files; the two town2/50 files are identical, so that stage adds no
+independent test): Player `+0x40` (0 at town1/10 and town2/40, 1 at the other
+three), `+0xa44` (1 at town1/10, then 2: town1/10 against every later stage),
+`+0xa48` (0, 6, 6, 23, 46 by stage), the raw 2,560 bytes (zero at town1/10,
+nonzero at 1 to 13 byte positions later), byte 32 of the raw 36 bytes (town1/10
+against every later stage), the two DWORDs after the pair rows (0/0, 184/6,
+350/6, 781/24, 1487/60), the current index, `Objects/Selection` and the hero's
+Group `+0x1c`. The availability entries (kind/id) are equal per list index
+within a stage; the lists differ in count. `Objects/Selection` is `[2]` in
+copy3 game0024 only (one file; it equals the hero's base `+4` in ten files that
+do not discriminate and identity 22's in game0024, Medium, a matching number).
+The rows of members 22 and 23 (`+0x8e`, raw blocks), Group(id22) and places 1,
+2, 5, 6 differ between the stages that hold them and were tested within a stage
+on the identical town2/50 pair only; member 22's `+0x8e` (400 at town2/30, 314
+at town2/40 to town3/60) is a copy2 against copy3 difference, not a change
+between copy3 stages. The stored `+0xa4c`, `+0xa50`, `+0xa54` and `+0xa5c` equal
+the construction stores of R2-ENGINE-762 (Medium; the three zeros are not
+specific, `+0xa5c` 0x5f is). No tie of a stage difference to a source
+R2-SESSION-314 or R2-ENGINE-762 names is established: the write-site bodies are
+unread. R2-SESSION-314's LOAD discards the stored Human `+0x40`, `+0x44`,
+`+0x5c` and base `+0x18`. A stage difference may be a copy difference (Medium).
+— R2-SESSION-322
+
+Gold, the hero's `+0x8e` and raw 184 block, the group count, the availability
+count and the keys also differ between town files of one stage (gold is also
+about 99.9 million in copy3 against 44, or 1000 in one file, in copies 1 and 2:
+a visible copy difference); one of the 12 same-stage pairs
+(copy3 town2/50) is equal in the 400 compared fields and the listed raw blocks,
+while the physical files differ in 100 of 8,633 bytes. Whether EN and RU town
+files differ is Unknown: no file of the population is established as RU.
+— R2-SESSION-323
+
 ## Related
 
 The character file is a separate format: [ROM2 character file](../rom2-a2c/format.md).

@@ -4432,7 +4432,7 @@ Medium, holds its TalkTo and LeaveLocation call sites).
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-314 | ROM2 town LOAD: Player and base fields with a visible reader call are read into their own fields; base +0x18 is set to 0 after reading; Unit +0x40, +0x44, +0x5c are zeroed when worldPresent is 0; raw blocks go to unread bodies. | High / Medium | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
+| R2-SESSION-314 | ROM2 town LOAD: Player and base fields with a visible reader call are read into their own fields; base +0x18 is set to 0 after reading; Unit +0x40, +0x44, +0x5c are zeroed when worldPresent is 0; raw blocks go to unread bodies. | High / Medium | ● active (amended, branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
 
 ### R2-SESSION-314
 
@@ -4498,7 +4498,17 @@ its first 0x100 bytes, the reachability of `L2.01830` (open in R2-ENGINE-723), t
 
 **Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
 
-**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), questions 1 and 3.
+**Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), questions 1 and 3;
+[EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), questions 1 to 3.
+
+**Amended.** R2-SESSION-320, R2-SESSION-321 and R2-SESSION-322 narrow the Unknown on the values of
+the town files: all 11 kind-2 files of three owner copies hold world byte 0 (Medium for every town
+SAVE; copies 1 and 2 EN, copy 3 of unestablished root, no RU file); every party Human in those
+files stores `+0x40`, `+0x44`, `+0x5c` = 0, `+0x78` null, `+0x98` 100, `+0x9e` 50 and
+`+0xd4..+0xd7` zero; base `+0x18` is stored 2 in Human records and 0 in item records; the
+hero's `+0x8`, `+0x8e`, raw blocks and the Player prefix values are in R2-SESSION-321 and
+R2-SESSION-322. The values after a LOAD and at the first town frame stay open; a SAVE written
+before and after one LOAD of the same town, read with the EXP-2102 generator, would settle them.
 
 ## Book state in owner saves
 
@@ -4549,3 +4559,203 @@ the getter's store and whether LOAD keeps a value; it does not explain a value s
 survives.
 
 **Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 4.
+
+## Stored values of the original town files
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-320 | ROM2 three owner save copies: 11 of 25 files are town files (current record kind 2, worldPresent 0, mission 0) at town1/10 x5, town2/30 x2, town2/40, town2/50 x2, town3/60; all 14 kind-1 files have worldPresent 1. | High / Medium | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+| R2-SESSION-321 | ROM2 11 town files: Player +4 1, +8 1, +0x2c 0, +0x30 2, +0x41 0, +0xa4c/+0xa50/+0xa54 0, +0xa5c 0x5f; party Humans +0x18 2, +0x40/+0x44/+0x5c 0, +0x78 null, +0x98 100, +0x9e 50; cells empty; each in the files holding the field or kind. | High / Medium | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+| R2-SESSION-322 | ROM2 town files: Player +0x40, +0xa44, +0xa48, raw blocks, tail DWORDs, Selection differ between stages, equal within town1/10 and town2/30 (town2/50 files identical); stage and copy overlap; no tie to a named source established. | High / Medium | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+| R2-SESSION-323 | ROM2 town files of one stage: copy3 game0027 equals game9998 in the 400 compared fields and listed raw blocks (physical files differ in 100 bytes); other pairs differ in gold, counts, keys; EN against RU Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+
+### R2-SESSION-320
+
+Population: the files the three `MANIFEST.sha256` name in the owner copies `rom2-gog-original`
+(9), `rom2-gog-original-2` (7) and `rom2-gog-original-3` (9), each matched to its full SHA-256.
+The document walk reaches the end of all 25. Town rule as R2-SESSION-238 gives it.
+
+- 11 files have current Scenario record kind 2; each has worldPresent 0 and mission 0. Each of
+  the 14 files with current kind 1 has worldPresent 1. No file meets one half of the rule only.
+- Town (current ID, R2-ENGINE-231) and stage (the value of bank slot 768 as stored, R2-SESSION-107;
+  40, 50 and 60 are raw slot values): town1/10 copy1
+  game0000, game0002, game0003, game9998 and copy2 game0008; town2/30 copy2 game0011, game9998;
+  town2/40 copy3 game0024; town2/50 copy3 game0027, game9998; town3/60 copy3 game0030.
+- Party identities (low word of the packed `+0x14c`, R2-SESSION-295): 21 alone at town1/10 and in
+  copy2 game0011; 21 and 22 in copy2 game9998 and copy3 game0024; 21, 22 and 23 at town2/50 and
+  town3/60.
+- Availability (kind/id): 2/1 at town1/10, copy1 game9998 adding 1/10; 2/2 as the first entry
+  from town2/30 on; eight entries in game0030 (2/2, 1/31, 1/43, 1/41, 1/42, 1/60, 2/3, 1/52), current index 6;
+  current index 0 in the other ten.
+- Copy1 game0000's Player name differs from the other ten (length 5 against 9); its hero has
+  class 33 and `+0xc` 26 against 35 and 28, and it shares no saved address with copy1's other
+  town files.
+
+**Confidence.** High for the classification and the stages of these 25 files: both halves of the
+rule agree in every file and every value is decoded by the reused walkers. Medium that every
+original town SAVE has worldPresent 0 and mission 0: 11 files in three copies, copies 1 and 2 EN
+(R2-SESSION-233, R2-SESSION-295) and copy 3 of unestablished root; no RU file.
+
+**Unknown.** Town files of other copies, of RU and of stages this population does not hold. An RU
+town SAVE at town1/10, read with the generator of EXP-2102, would settle RU at that stage; town
+files of further owner copies would settle the other copies and stages.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), question 1.
+
+### R2-SESSION-321
+
+Population: the 11 town files of R2-SESSION-320; XOR removed where R2-SESSION-020 names it.
+Fields are named by offset; no meaning is assigned.
+
+- Player prefix in all 11: `+4` = 1, `+8` = 1, `+0x2c` = 0, `+0x30` = 2, `+0x41` = 0, `+0xa4c` =
+  0, `+0xa50` = 0, `+0xa54` = 0, `+0xa5c` = 0x5f. The raw 36 bytes after the group list are
+  nonzero only at bytes 31-32.
+- Party Humans (the hero in 11 files, identity 22 in 5, identity 23 in 3): `+0x18` = 2; `+0x40`,
+  `+0x44`, `+0x5c` = 0; `+0x78` a null reference; `+0x98` = 100; `+0x9e` = 50; `+0xd4..+0xd7`
+  zero. Identity 22's `+0x8` is 0 and identity 23's is 71 in each file holding them.
+- 38-byte base, per record kind and only in the files that hold the kind (`out/base.tsv`; the
+  record counts are not independent): Human `+0x18` = 2 in all 19 Human records (11 files);
+  `+8` and `+0x18` = 0 in every Armor (64 records of 25 distinct items, 7 files), Weapon (34
+  records of 10 items, 11 files), Shield (1 record, 1 file) and Item (6 records of one item, 3661,
+  6 files) record; Effect (57 records of 17 roles, 10 files) `+0xc`, `+0xe`, `+0x14`, `+0x18`
+  = 0; Item `+0x1c` = 0xFFFFFFFF in all six Item records (one item) and in no record of another
+  kind (Medium as a rule of Items).
+- Keys, per file: saved addresses distinct and multiples of 8; Player `+0x38` equals the hero's
+  saved address; every Human `+0x14`, every Group `+0x44` and every nonzero Armor or Weapon `+0x14`
+  equals the Player's saved address; every Group `+0x40` is 0. All 9 saved addresses of copy2
+  game0008 recur in game0011 and game9998, all 31 of copy3 game0024 in the three later copy3
+  files; copy1 game0002 and game0003 share 7 of 9; game0000 shares none with copy1's other files
+  (so the files of one Player name in a copy share some saved addresses, not all);
+  no saved address occurs in two copies (40 pairs).
+- Tail: pair count 1 and row (1, 1); the raw 16 bytes of a place are equal in every file holding
+  the same kind and ID at the same list index; all nine client cells have both words 0 and length
+  0.
+
+**Confidence.** High for these values in the 11 files, each in the files that hold the field or
+record kind. Medium for each as a rule of town files of copies 1 and 2 (EN) and copy 3 (root not
+established); no RU file; three copies, five stages.
+
+**Unknown.** Whether a value differs in another copy, a RU file or another stage: an RU town SAVE
+at town1/10 and town files of further copies, read with the EXP-2102 generator, would settle it.
+The meaning of each field: for the raw blocks and the hero's `+0x8` and `+0x8e`, a read of the
+callees R2-SESSION-314 lists as unread (`L2.02981`, `L2.04276`, `L2.04279`, `L2.04280`).
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), questions 2 and 3.
+
+### R2-SESSION-322
+
+Population: the 11 town files of R2-SESSION-320, five stages. A field is a stage field when it
+differs between stages and no difference is found within a stage in the stages with two or more
+files that hold it (town1/10, town2/30, town2/50). The two town2/50 files are identical in all 400
+compared fields (R2-SESSION-323), so that stage adds no independent test: the independent
+within-stage tests are town1/10 (five files, two copies) and town2/30 (two files, one copy,
+differing in group count and place count). Per row, the column `stages_with_two_or_more_files` of
+`out/classes.tsv` names the stages that test it: all three for the Player prefix, raw 2,560 and
+36, tail DWORDs, current index, place 0, Selection and the hero's Group; town2/50 alone (the
+identical pair) for the rows of identities 22 and 23, Group(id22) and places 1, 2, 5 and 6.
+
+Copy caveat. Town2/30 occurs only in copy2 and town2/40 to town3/60 only in copy3, so every
+comparison of town2/30 with a later stage, and of copy1 with copy3, also differs in copy. The
+within-copy stage transitions are copy2 town1/10 to town2/30 and copy3 town2/40 to town2/50 to
+town3/60 only. A between-stage statement below holds in that bounded sense.
+
+- Player `+0x40`: 0 at town1/10 and town2/40, 1 at town2/30, town2/50 and town3/60.
+- Player `+0xa44`: 1 at town1/10, 2 at every later stage: one transition, town1/10 against all
+  later stages (within copy2, game0008 against town2/30).
+- Player `+0xa48` (XOR removed): 0, 6, 6, 23, 46 at town1/10, town2/30, town2/40, town2/50,
+  town3/60.
+- Raw 2,560 at Player `+0x44`: zero at town1/10; nonzero at byte 640 at town2/30 and town2/40
+  (one SHA-256); at 637, 640, 694, 703, 2104-2107 at town2/50; at 617, 637, 640, 658, 694-696,
+  703, 716, 2104-2107 at town3/60.
+- Raw 36 after the group list: byte 32 has one value at town1/10 and another at every later
+  stage: one transition, town1/10 against all later stages.
+- Two DWORDs after the pair rows: 0/0, 184/6, 350/6, 781/24, 1487/60 by stage.
+- Availability: each entry (kind/id) at a list index is equal within a stage in the files that
+  hold that index, as R2-SESSION-320 lists them; the lists as wholes are not equal within a stage,
+  because the count differs (W): at town1/10 copy1 game9998 adds 1/10 to 2/1, at town2/30
+  game9998 holds 2/2, 1/30, 1/31 and game0011 holds 2/2. Place 0 is the current town record
+  itself. The current index follows the same bound.
+- `Objects/Selection` is `[1]` in 10 files and `[2]` in copy3 game0024 only, so "differs by stage"
+  rests on one file at town2/40. It equals the hero's base `+4`, which is 1 in every file, so ten
+  files do not discriminate; game0024, where identity 22's base `+4` is 2, is the one
+  discriminating file (Medium, a matching number). Hero position and first member do not fit
+  game0030 (hero third, Selection `[1]`; first member identity 23 with base `+4` 6).
+- Identity 22's `+0x8e`: 400 at town2/30 (copy2, one file), 314 at town2/40, town2/50 and
+  town3/60 (copy3, all three). It does not change between copy3 stages: it is a copy2 against
+  copy3 difference that stage and copy cannot separate. Identity 23's `+0x8e`: 15 at town2/50, 21
+  at town3/60 (copy3). The raw 12, 180 and 184 blocks of identities 22 and 23 differ between the
+  stages that hold them; their within-stage test is the identical town2/50 pair only. The hero's
+  raw 12 and raw 180 differ by stage over the 10 files with the majority Player name.
+- Group `+0x1c`, for the groups held at two stages: the hero's group 0, 49745792, 4294967289 at
+  town1/10, town2/30, town2/50 (tested within all three); identity 22's group 6365300 at town2/30
+  (copy2), 8 at town2/50 (copy3), tested within a stage on the identical town2/50 pair only.
+- Gold, the hero's `+0x8e` and raw 184, the group count, the availability count and the keys
+  differ within a stage (R2-SESSION-323). Gold is about 99.9 million in copy3 and 44 (1000 in
+  game0000) in copies 1 and 2: a visible copy difference that the classes list only as a W field.
+- Sources. R2-SESSION-314 names LOAD readers; the search over the text of R2-SESSION-314 and
+  R2-ENGINE-762 found no stage change that maps to them one to one. The bodies at the write sites
+  were not read, so this is no tie established, not a tie excluded: the data cannot tie or untie
+  a stored value to an event whose body is unread. R2-SESSION-314 discards Human `+0x40`, `+0x44`,
+  `+0x5c` (stored 0) and base `+0x18` (stored 2 in Humans, 0 elsewhere). R2-ENGINE-762's
+  construction stores (0, `+0xa5c` 0x5f) equal the stored `+0xa4c`, `+0xa50`, `+0xa54`, `+0xa5c`;
+  the three zeros match non-specifically (a field no writer touched also holds 0), only `+0xa5c`
+  0x5f is specific. `+0xa44` (1 at town1/10) differs from the construction store 0; the Player
+  load arm has a reader call for each prefix field (R2-SESSION-314), so a write other than the
+  construction store happened in this or an earlier session. `+0xa48` is not the construction
+  value; the sites R2-ENGINE-762 names for them (EN `L2.04255..L2.04256`; `L2.04253`/`L2.04254` and
+  `L2.04257..L2.04258`) have unread events. Player `+0x40` is outside its census.
+
+**Confidence.** High for the values and the stage classes over these 11 files, with the
+within-stage tests as stated above (independent at town1/10 and town2/30). Medium that a field
+equal within the tested stages is equal within every stage, and that a difference between stages
+is not a copy difference: every comparison of town2/30 with a later stage, and of copy1 with
+copy3, also differs in copy. Medium for the construction match: the three zeros are not
+specific, `+0xa5c` 0x5f is, and the character-file load and play-time sites could store the same
+values. No tie to a named source is established; this data cannot test one while the events at the
+named sites are unread (R2-ENGINE-762).
+
+**Unknown.** The events that move `+0x40`, `+0xa44`, `+0xa48`, the raw 2,560 bytes and the tail
+DWORDs. Two town SAVEs at one stage before and after one event (a purchase, a fight with one enemy
+killed), compared with the same generator, would show which field follows it; so would a read of
+the bodies at the R2-ENGINE-762 sites (EN `L2.04255..L2.04256`, `L2.04253`/`L2.04254`,
+`L2.04257..L2.04258`, `L2.04247..L2.04248`). Whether a stage difference at town2/30 to town3/60
+is a copy difference: town files of the same stage in another copy.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), question 3.
+
+### R2-SESSION-323
+
+Population: the 12 pairs of town files of one stage among the 11 of R2-SESSION-320.
+
+- Copy3 game0027 and game9998 (town2/50): equal in all 400 compared fields and in the raw blocks
+  listed in `out/raw.tsv`. The decoded documents are equal (7,718 bytes, a direct comparison by
+  the confidence review); the physical files differ in 100 of 8,633 bytes (29 runs, the first at
+  offset 2947) in bytes the generator does not read, not attributed here.
+- Copy1 game0003 and game9998 (town1/10): only the availability count differs (1 against 2,
+  game9998 adding 1/10). This agrees with R2-SESSION-287 (equal documents and REG values).
+- Copy2 game0011 and game9998 (town2/30): the group count and the availability count differ;
+  identity 22's records exist only in game9998.
+- Copy1 game0002 and game0003: gold and the hero's `+0x8e` differ.
+- Copy1 game0002, game0003 and game9998 against copy2 game0008 (town1/10): 10 to 12 fields differ:
+  the keys and the hero's raw 184 in all three pairs, gold and the hero's `+0x8e` with game0002,
+  the availability count with game9998.
+- Copy1 game0000 against each other town1/10 file: 18 to 20 fields differ, the Player name among
+  them.
+- EN and RU: copies 1 and 2 are EN (R2-SESSION-233, R2-SESSION-295); copy3's root is not
+  established; no file of the population is established as RU, so no stage holds both roots.
+
+**Confidence.** High for the 12 pairs over the compared fields and the listed raw blocks.
+Unknown for EN against RU.
+
+**Unknown.** EN against RU: an original RU town file at a stage this population holds (for
+example town1/10), or the established root of copy3, read with the same generator.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), questions 4 and 5.
