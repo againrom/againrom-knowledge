@@ -18447,7 +18447,7 @@ visit.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-762 | ROM2 EN/RU: 309 memory operands per root with displacement +0xa44..+0xa5f (add/lea forms are not rows); stores of 0 and +0xa5c 0x5f at one construction site; character-file load sets +0xa48, +0xa4c, +0xa54, +0xa58; sources Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+| R2-ENGINE-762 | ROM2 EN/RU: 309 memory operands per root with displacement +0xa44..+0xa5f (add/lea forms are not rows); stores of 0 and +0xa5c 0x5f at one construction site; character-file load sets +0xa48, +0xa4c, +0xa54, +0xa58; sources Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
 | R2-ENGINE-763 | 16 ROM2 EN/RU town SAVE and LOAD window pairs: 12 bodies equal to their first ret after masking operands in 0x400000..L2.03731; town entry and L2.03127 differ only in application offsets; Armor routine and L2.00466 differ. | High | ● active (branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md) |
 
 ### R2-ENGINE-762
@@ -18507,6 +18507,17 @@ not separable from town2/30 on). No tie to a site this card names is established
 the named sites are unread, so these data cannot test one. The three zeros match the construction
 stores non-specifically; `+0xa5c` 0x5f is the specific match. Which event moves each field stays
 open; a read of the bodies at the named sites would settle it.
+
+**Amended.** R2-ENGINE-772 narrows the Unknown on `+0xa48`, `+0xa4c` and `+0xa54`: the unit list
+routine `L2.04418`, called by the tick method `L2.04407`, adds 1 to the killer's owner `+0xa48`
+or `+0xa4c` for a unit in state 0x10 with a live killer of class 0x21..0x3f (the name "kill" is
+Medium); `L2.04419` is a unit method (vtable `L2.04420` slot
+`+0x9c`); the unit death adds 1 to `+0xa54` for the owner's hero; `L2.04257..L2.04258` is a
+read-modify-write of the killer's owner, not a copy between two objects. The 2,560 bytes at
+`+0x44` have two more writers than the unit list: the character-file copy of 0xa00 bytes and LOAD.
+R2-ENGINE-773 reads
+`L2.04255..L2.04256` (the join's number search) and the builder store `L2.04421`. The callers
+of `L2.04419` and the counts behind the stored values stay open.
 
 ### R2-ENGINE-763
 
@@ -18702,6 +18713,205 @@ press a slot, hold each modifier and press F4, close the book, press F4 and reco
 and compare `SpellBook/Pressed`.
 
 **Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 3.
+
+## Town file field writers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-772 | ROM2 EN tick L2.04407 → unit list L2.04418: a unit in state 0x10 with a live killer of class 0x21..0x3f adds 1 to the killer's owner +0xa4c (victim class 0x21..0x3f) or +0xa48; after either, +0x44[victim +0x14c] + 1 below 14. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+| R2-ENGINE-773 | ROM2 EN Player +0xa44: join L2.00197 stores the requested number or, for a new Player, the smallest of 1..15 free among Players with +0x2c 0 (16 when none is); map builder R2.0081 stores entry +0xc + 1 per map player entry. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+| R2-ENGINE-774 | ROM2 EN Player +0x40: of 24 byte stores at displacement 0x40, the Player ones are constructor 0, result tick 0/2/+0xbe14/1, death id−19, handler L2.02723 0 (hero present), transition loop 0 (Session +0x74 set). | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+| R2-ENGINE-775 | ROM2 EN pair object (application +0x598): +4 += Session +4 / 16 at L2.04422, the one add-0x598 site found that calls L2.04423 (Medium); +8 += 1 through L2.04424, its one direct call L2.04425; L2.01855 reads both. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+
+### R2-ENGINE-772
+
+EN addresses; the windows `kill` (EN `L2.04418`, RU `L2.04426`, 0x760 bytes), `unitxp` (EN
+`L2.04419`, RU `L2.02331`), `playerload` and `charfile` are equal after masking operands in
+0x400000..L2.03731 (`out/code/compare.tsv`).
+
+- The tick method `L2.04407` adds 1 to its `+4`, then calls `L2.04418` on `[L2.00325]` at
+  `L2.04427`. `L2.04418` walks the list at `this+4`. A unit whose killer `+0x40` is nonnull while
+  the killer's owner `+0x14` is 0 has its `+0x40` cleared (`L2.04428`); nothing is counted. A unit
+  whose state `+0x54` is not 0x10 gets virtual slot `+0x18`; the state is tested again at
+  `L2.04429`, so a unit that reaches 0x10 inside that call is handled in the same pass. A unit in
+  state 0x10 at that test is unregistered; when its killer `+0x40` is nonnull with class word `+0xe`
+  in 0x21..0x3f, and `L2.04430(killer)` (signed word `+0x94` below 0) is false, the killer's slots
+  `+0x50` and `+0x68` run with the victim, then:
+  - victim class in 0x21..0x3f: killer `+0x14` `+0xa4c` + 1 (`L2.04431`), message 0x94 first
+    when Session `+0x74` is nonzero;
+  - otherwise killer `+0x14` `+0xa48` + 1 (`L2.04258`);
+  - after either arm (`L2.04432` jumps to `L2.04433`; the `+0xa48` arm falls into it), when victim
+    word `+0x14c` is in 1..0x9ff and the byte `owner +0x44 + +0x14c` is below 14, that byte + 1
+    (`L2.04434`); an even result calls `L2.01061(+0x14c, owner)`.
+  When `L2.04430(killer)` holds, the victim's `+0x40` is set to 0 (`L2.04435`) and nothing is
+  counted.
+- The unit method `L2.04419` (vtable `L2.04420` slot `+0x9c`, `out/code/tables.tsv` index 45; the
+  vtable is stored at `L2.04436` and `L2.04437`): `this +0x130` += argument 1; when argument 2 is
+  nonnull and `L2.04430(argument 2)` holds, `this+0x14` `+0xa48` + 1 (`L2.04254`).
+- Other `+0xa48` writers: the Player LOAD arm stores `L2.04438(read value)` (`L2.04439`), the
+  character-file loader stores a file DWORD (`L2.04249`), the constructor stores 0 (`L2.04440`,
+  beside the `+0x44` clear of 0xa00 bytes at `L2.03619`). Other writers of the 2,560 bytes at
+  `+0x44`: the character-file loader copies 0xa00 bytes from a local pointer, when nonnull, to
+  Player `+0x44` (`L2.04441..L2.04442`, `call L2.04443` at `L2.04444`, `en-charfile.txt`), and LOAD
+  reads them from the save (R2-ENGINE-323). The unit death adds 1 to the owner's `+0xa54`
+  when the owner's `+0x38` is the dying unit (`L2.04252`).
+
+Population. The EXP-2100 census of displacements `0xa44..0xa5f` (five dword stores to `+0xa48`,
+the LOAD arm included, plus four byte stores on another base); the `imm` scan of 0xa44..0xa4c
+(four `add` forms: the Player LOAD arm and `L2.04445`/`L2.04446` on an object with `+0xbe0c`, a
+Session part, Medium); the indexed byte-write scan of 0x44..0xa44 (257 rows, two at exactly 0x44:
+`L2.04434` and `L2.04447`; that `L2.04447` is not a Player store, its base being a `L2.04448`
+result of `[L2.01066]`, rests on a navigation window that is not committed, Medium). Direct
+`E8`/`E9` calls in EN `.text`: one caller of `L2.04418` (`L2.04427`), none of `L2.04419`. The dword
+scan (`en-dword.tsv`) covered `L2.00197`, `L2.04418`, `L2.02723`, `L2.00524` and `L2.04420`: no
+dword equals `L2.04418`; no dword scan was run for `L2.04419`. Of 13 `call [reg + 0x9c]` rows,
+`L2.04449` and `L2.04450` were read in navigation windows that are not committed and call with no
+argument on other objects (Medium); the other 11 are unread.
+
+**Confidence.** High for the stores and conditions in the read bodies (`en-kill.txt`), EN and RU
+equal over the windows named. Medium that these are all writers: stores through computed
+pointers, whole-object copies and 11 slot-`+0x9c` call sites are not covered, and a linear decode
+can miss code after data. Medium for each statement that rests on a navigation window that is not
+committed (`L2.04447`, `L2.04449`, `L2.04450`, the bounds of the character-file loader
+`L2.01818`, whose committed window starts at `L2.04451`). Medium that `L2.04407` is a per-tick
+routine (its callers were not read) and for "kill" as the meaning of the counters.
+
+**Unknown.** The callers of `L2.04419`: the 11 unread `call [reg + 0x9c]` sites, a dword scan
+of `L2.04419`, and the other vtables that hold it (only the 64-dword table of `L2.04420` was
+read). The callers of `L2.04407`: a call scan and the dispatch of its callers. How many kills lie
+between two town files: a run of the original that kills a counted number of enemies of one
+identity between two town SAVEs, compared on `+0xa48` and the byte at `+0x44 + identity`, would
+settle it.
+
+**Format surface.** `formats/rom2-sav/format.md`, Player body and Town SAVE writer.
+
+**Evidence.** [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md), questions 2
+and 3.
+
+### R2-ENGINE-773
+
+EN addresses. `out/code/listings/en-joinfn.txt`, `en-builder.txt`.
+
+- Join `L2.00197`, called at `L2.04452` in the server message dispatcher with the message DWORDs
+  `+0xa`, `+0xe`, the string at `+0x16`, the connection of word `+5` and DWORD `+0x12`. The
+  requested number is byte 1 of argument 5 (`L2.04453..L2.04454`); the new-Player flag is "no
+  Player found" (`L2.04455`). With number 0 and the flag set, the number becomes the smallest k
+  from 1 that no Player with `+0x2c` 0 holds as `+0xa44`, at most 16 (`L2.04456..L2.04457`). A
+  nonzero number is stored (`L2.04458`). The body also stores `+0xa50` 0 and `+0x42` 1 and sends
+  0x96 with `+0xa44` − 1.
+- Map Player builder `R2.0081`, called at `L2.00237`: for each nonnull entry of map `+0x28`,
+  entry 1 with Session `+0x74` 0 and `L2.00223` (unread) returning 1 reuses the first Player
+  (`L2.00310`); otherwise a new 0xa80-byte Player (`R2.0079`) gets the name from entry `+0x14`,
+  `+0x2c` 1, `+8` = entry `+4` and is inserted (`R2.0082`). Then `+0xa44` = entry `+0xc` + 1
+  (`L2.04421`), `+0x2c` 1 (0 again for entry 1 when Session `+0x74` is 0) and `+0xa60` = (entry `+0x34` & 2)
+  != 0.
+- LOAD passes `+0xa44` to the reader `L2.03713` (`L2.04243`); the constructor stores 0
+  (`L2.04247`).
+
+Population. C-disp: three byte stores to `+0xa44` in the EXP-2100 census; C-imm: one `add` form
+(the LOAD arm). The builder window is equal in EN and RU after masking. The join is not: EN
+`L2.00197..L2.04459` against RU `L2.00198..L2.04460`, 1022 against 979 lines, 605 equal
+(`out/code/compare.tsv`); RU holds a store at `L2.04461` whose conditions were not compared.
+
+**Confidence.** High for the EN join and the builder (EN and RU) over the bodies read. Medium for
+the events: the dispatcher's case value for `L2.04452` and the role of `L2.00237` in a mission or
+town load were not read. Medium that no other writer exists (no whole-Player copy searched),
+and that the builder reuses the first Player only when `L2.00223` returns 1 (unread).
+
+**Unknown.** The map player entry `+0xc` of the campaign maps, which fixes the builder's value (a
+data read of the type-3 player records settles it); the message type of the join case (the
+dispatcher's jump table); the callee `L2.00223`; and which of the join and the builder ran last for
+a Player (the order of the two at a map load is unread).
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md), questions 2
+and 3.
+
+### R2-ENGINE-774
+
+EN addresses. The scan `out/code/scans/en-w1-player40.tsv` lists every decoded EN `.text`
+instruction that writes one byte at displacement 0x40: 24 rows.
+
+- Constructor `L2.04462`: 0.
+- Result tick `L2.00524` (R2-ENGINE-624), called per Player of `L2.00292` at `L2.04463`:
+  `L2.03237` 0, `L2.04464` 2, `L2.03241` the low byte of `[L2.01066] +0xbe14`, `L2.03242` 1.
+- Unit death `L2.04465` (R2-ENGINE-625): identity `+0x14c` − 19, when Session `+0x74` is 0, the
+  owner's `+0x2c` is 0 and the class is in 0x21..0x3f.
+- Handler `L2.02723`, called at `L2.02724` in the dispatcher with the Player of message
+  word `+5`: clears `+0xa6c`; when `+0x38` is null it sends a message and returns, else it stores
+  `+0x40` 0 (`L2.04466`).
+- Transition loop `L2.01844..L2.04467` (inside `L2.01664`, Medium; called at `L2.04468`,
+  `L2.04469`, `L2.04470`): for a Player with `+0x2c` 0 and a hero, and only when the hero's byte
+  `+0x13c` is above 0 and Session `+0x74` is nonzero, `+0xa64` 0 and `+0x40` 0 (`L2.04471`).
+- The LOAD arm passes `+0x40` and `+0x41` to `L2.03713` (`L2.04472`, `L2.04473`; address forms,
+  not rows).
+- Rows on objects not identified as a Player: `L2.04474`, `L2.04475`, `L2.04476` (0);
+  `L2.04477`, `L2.04478`, `L2.04479`, `L2.04480`, `L2.04481` (1); `L2.04482`, `L2.04483`,
+  `L2.04484`, `L2.04485`, `L2.04486` (a register); `L2.04487`; `esp`-based `L2.04488`,
+  `L2.04489`.
+
+**Confidence.** High for the 24 rows as the byte-store population of a linear decode and for the
+Player stores in the bodies read. Medium for completeness: word and dword stores overlapping
+`+0x40`, address forms other than the LOAD arm and the 13 rows on unidentified objects are not
+excluded as Player writers.
+
+**Unknown.** Which store produced a given stored value (a run of the original settles it); the
+objects of the 13 other rows (a read of the window around each site); word and dword stores
+overlapping `+0x40` (a width census).
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md), questions 2
+and 3.
+
+### R2-ENGINE-775
+
+EN addresses. The pair object at application `+0x598` holds `+0`, `+4`, `+8`, a list at `+0x10`
+and rows at `+0x24` (`out/code/listings/en-pair-class.txt`). SAVE writes count, rows, `+4`, `+8`
+(`L2.00382`, at `L2.04490`, EXP-2093 `en-driver-L2.00860.txt`); LOAD stores the file DWORDs into
+`this+4` and `this+8` through the archive (`L2.00383`, `L2.04491..L2.04492`, at `L2.04493`, EXP-2093
+`en-townprep-L2.02974.txt`, and `L2.04494`).
+
+- `+4` += argument (`L2.04423`). The one `add reg, 0x598` site found that calls it is `L2.04422`;
+  no scan of calls to `L2.04423` was run. The argument is Session `[L2.00805] +4` divided by 16,
+  signed (`L2.04495..L2.04496`), on the branch where application `+0x5d8` is not 0, 1 or 3 and
+  `+0x3e4` is nonzero (`en-pair-add.txt`).
+- `+8` += 1 (`L2.04424`; its one direct call is `L2.04425`, `en-branch.tsv`). The base is
+  `[ebp-0x14]` + 0x598; that it is the application, with fields `+0x5d8` and `+0x404`, comes from
+  navigation windows that are not committed (Medium). The increment runs when the low byte of
+  `[ebp-0x140]` is below 2 and `L2.02955`, called on `[ebp-0xc34] +0x9cc` with the owner `+4` of
+  the object `[ebp-0x14c]`, returns nonzero (`en-pair-count.txt`).
+- Clear (`L2.04497`: `+4`, `+8` = 0) at `L2.04498`, `L2.04499`, `L2.04500`.
+- `L2.01855` (at `L2.04501`) computes `(X +0x110) / (+4 · constant) · (+8)` (a second divisor when
+  `+4` is 0), X being what `L2.04502` returns for application `+0xd0`, and inserts the result into
+  the list at `+0x10`. What the value means is not established.
+
+Population. The `imm` scan of 0x598..0x5a4 holds 25 `add reg, 0x598` rows; each is classified by
+the call after it (RESULTS question 2, F6). Ten rows are classified from committed listings
+(`L2.04500` in `evidence/nav8/`); fifteen come from navigation windows that are not committed
+(listed there). The `disp` scan of 0x598..0x5a4 holds 40 rows in `L2.04503..L2.04504` on another
+class. Two UI objects keep the pair pointer at their `+0x68` (`L2.04505`, `L2.04506`); that their
+read windows use it for the lists only rests on navigation windows that are not committed.
+
+**Confidence.** High for the stores in the bodies read (`L2.04495..L2.04422`, `L2.04423`,
+`L2.04424`, the `L2.01855` expression, the SAVE and LOAD bodies) and for the 25 rows as the `add`
+forms of a linear decode. Medium that `L2.04422` is the one site that adds to `+4` and that the
+`+4` addition runs on one branch (no call scan of `L2.04423`; 15 of the 25 rows rest on windows not
+committed), for the application identity at `L2.04425`, for the event names, and that no store
+reaches `+4` or `+8` through another copied pointer.
+
+**Unknown.** The meaning of Session `+4` and of the `+8` condition. Session `+4`: the callers of
+`L2.04407` (that tick method adds 1 to `this+4` at `L2.04507..L2.04508`; whether `this` is
+`[L2.00805]` is open) and the writers of `[L2.00805]+4`. The `+8` condition: the routine around
+`L2.04509` read from its start (the committed window starts mid-routine) and `L2.02955`. Another
+adder of `+4`: a call scan of `L2.04423` and the windows of the 15 rows not committed. A run that
+ends one mission and compares the two DWORDs before and after would settle the amounts.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md), questions 2
+and 3.
 
 ## Summoned creature lifetime, statistics and session cadence
 

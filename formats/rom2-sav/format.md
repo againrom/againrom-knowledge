@@ -197,6 +197,14 @@ read (heuristic; the base is not shown to be a Unit); LOAD remaps the
 DWORD +0x7c of that block by saved key.
 — R2-ENGINE-675
 
+In EN, the unit-list routine of the tick adds 1 to the byte at Player +0x44
+plus the victim's identity word +0x14c (identities 1..0x9ff) while that byte
+is below 14, after it adds 1 to +0xa4c (victim class 0x21..0x3f) or +0xa48
+(any other victim); a character-file load copies 0xa00 bytes to +0x44, LOAD
+reads the 2,560 bytes from the save, and the constructor clears them. That the
+routine counts kills is Medium: the meaning is taken from its conditions (a
+unit in state 0x10 with a live killer), not from a run. — R2-ENGINE-772
+
 Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
 byte +0x0d and no constructor store to its word +0x0c was found in the read
 EN bodies (terrain module listing, serializers and constructor chain);
@@ -701,6 +709,14 @@ branch past the tail readers and the town entry's callees are unread. The
 record order is, as a composition of the serializers' programs, the order of
 first references (Medium). — R2-SESSION-314
 
+In RU, the bodies behind the base's raw 12 bytes and the hero's raw blocks
+request 0xc, 0x18, 0x16, 0x40, 0xb4 and 0xb8 raw bytes through two unread
+helpers and also call routines that were not read; the 0xb8 body also rebuilds
+its sub-object through two unread routines, and one more body sets one bit of a
+global table. The raw blocks are restored as stored (Medium; RU only), except
+that sub-object, which is Unknown.
+— R2-SESSION-325
+
 The Player prefix fields `+0xa44..+0xa5c` are stored as 0, `+0xa5c` as 0x5f,
 at one site of an unread construction body; a character-file load sets
 `+0xa48`, `+0xa4c`, `+0xa54` and the unsaved `+0xa58`; play-time sites
@@ -775,9 +791,9 @@ on the identical town2/50 pair only; member 22's `+0x8e` (400 at town2/30, 314
 at town2/40 to town3/60) is a copy2 against copy3 difference, not a change
 between copy3 stages. The stored `+0xa4c`, `+0xa50`, `+0xa54` and `+0xa5c` equal
 the construction stores of R2-ENGINE-762 (Medium; the three zeros are not
-specific, `+0xa5c` 0x5f is). No tie of a stage difference to a source
-R2-SESSION-314 or R2-ENGINE-762 names is established: the write-site bodies are
-unread. R2-SESSION-314's LOAD discards the stored Human `+0x40`, `+0x44`,
+specific, `+0xa5c` 0x5f is). No tie of a stage difference to one write event
+is established: the writers below are read, the events between two saved points
+are not. R2-SESSION-314's LOAD discards the stored Human `+0x40`, `+0x44`,
 `+0x5c` and base `+0x18`. A stage difference may be a copy difference (Medium).
 — R2-SESSION-322
 
@@ -789,6 +805,56 @@ a visible copy difference); one of the 12 same-stage pairs
 while the physical files differ in 100 of 8,633 bytes. Whether EN and RU town
 files differ is Unknown: no file of the population is established as RU.
 — R2-SESSION-323
+
+### Play-time writers of the town file fields
+
+EN addresses; the events are named from the conditions of the read bodies
+(Medium), and completeness is Medium: stores through computed pointers and
+whole-object copies were not searched.
+
+The unit-list routine `L2.04418`, called from the tick method `L2.04407`,
+takes each unit in state 0x10 (tested again after a virtual call) whose killer
+is live with class 0x21..0x3f. A victim of class 0x21..0x3f adds 1 to the
+killer's owner `+0xa4c`; any other adds 1 to `+0xa48`; after either, the
+`+0x44` byte of the victim's identity gains 1. A unit method (vtable
+`L2.04420`, slot `+0x9c`; no direct call in EN `.text`, and 11 of 13
+`call [reg + 0x9c]` sites unread) also adds 1 to `+0xa48`. The unit death adds
+1 to `+0xa54` when the dying unit is the owner's hero. A character-file load
+copies 0xa00 bytes to `+0x44` and sets `+0xa48`; LOAD restores both; the
+constructor stores 0. — R2-ENGINE-772
+
+The join routine stores `+0xa44` as the requested number or, for a new Player,
+the smallest of 1..15 that no Player with `+0x2c` 0 holds (16 when none is
+free); the map Player builder stores map player entry `+0xc` + 1.
+— R2-ENGINE-773
+
+Of 24 byte stores at displacement 0x40 in EN `.text`, the Player `+0x40`
+stores are the constructor (0), the result tick per Player (0, 2, the low byte
+of `+0xbe14` of the object at `L2.01066`, or 1), the unit death (identity −
+19, when Session `+0x74` is zero), a dispatcher handler (0 when the Player has
+a hero) and the transition loop (0, when Session `+0x74` is nonzero). 13 rows
+on unidentified objects are not excluded. — R2-ENGINE-774
+
+The two DWORDs after the pair rows are `+4` and `+8` of the pair object at
+application `+0x598`: `+4` grows by Session `+4` / 16 at `L2.04422`, the one
+site found that calls its adder (Medium: no call scan of the adder), `+8` by 1
+at `L2.04425`, the one direct call of its adder; three sites clear both.
+— R2-ENGINE-775
+
+The writers are consistent with the stored values of the 11 town files and do
+not explain them. For a counter (`+0xa48`, the tail DWORDs, the `+0x44` bytes)
+any non-negative value lies in the writer's set. `+0xa48` (0, 6, 6, 23, 46)
+and both tail DWORDs do not decrease within a copy; the nonzero `+0x44`
+positions are below 0xa00, a bound the unit list, the character-file copy and
+LOAD all give; the zero `+0xa4c` and `+0xa54` fit no counted event; `+0x40` 1
+is a result-tick value. `+0xa44` 1 lies in the join's set (the smallest free
+number) and in the builder's (entry `+0xc` = 0); 2 lies in the builder's set
+only if a map entry `+0xc` is 1, which was not read, and the order of the two
+writers is unread. Tail `+8` differs from `+0xa48` at town2/50 and town3/60,
+so they are not equal counts of one event over the same span; resets are not
+excluded. No writer of the hero's Group `+0x1c` was found in the RU Group
+constructor chain. The number of events between two saved points was not read
+(Medium). — R2-SESSION-324
 
 ## Related
 

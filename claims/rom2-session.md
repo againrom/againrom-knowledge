@@ -4432,7 +4432,7 @@ Medium, holds its TalkTo and LeaveLocation call sites).
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-314 | ROM2 town LOAD: Player and base fields with a visible reader call are read into their own fields; base +0x18 is set to 0 after reading; Unit +0x40, +0x44, +0x5c are zeroed when worldPresent is 0; raw blocks go to unread bodies. | High / Medium | ● active (amended, branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+| R2-SESSION-314 | ROM2 town LOAD: Player and base fields with a visible reader call are read into their own fields; base +0x18 is set to 0 after reading; Unit +0x40, +0x44, +0x5c are zeroed when worldPresent is 0; raw blocks go to unread bodies. | High / Medium | ● active (amended, branch candidate) | [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
 
 ### R2-SESSION-314
 
@@ -4510,6 +4510,14 @@ hero's `+0x8`, `+0x8e`, raw blocks and the Player prefix values are in R2-SESSIO
 R2-SESSION-322. The values after a LOAD and at the first town frame stay open; a SAVE written
 before and after one LOAD of the same town, read with the EXP-2102 generator, would settle them.
 
+**Amended.** R2-SESSION-325 narrows the Unknown on the unread bodies: the RU serializers
+`L2.02981`, `L2.04276`, `L2.04277`, `L2.04278`, `L2.04279` and `L2.04280` request 0xc, 0x18, 0x16,
+0x40, 0xb4 and 0xb8 raw bytes through two unread helpers and also call routines that were not
+read; `L2.04280` rebuilds its sub-object at `+0xb4` through `L2.00350` and the sub-object's slot
+`+8`, both unread; `L2.00338` sets one bit of the table at `L2.00340`. The hero's raw blocks are
+restored as stored (Medium while the two helpers and the other callees are unread), except the
+sub-object at `+0xb4`, which stays Unknown.
+
 ## Book state in owner saves
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -4566,7 +4574,7 @@ survives.
 |---|---|---|---|---|
 | R2-SESSION-320 | ROM2 three owner save copies: 11 of 25 files are town files (current record kind 2, worldPresent 0, mission 0) at town1/10 x5, town2/30 x2, town2/40, town2/50 x2, town3/60; all 14 kind-1 files have worldPresent 1. | High / Medium | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
 | R2-SESSION-321 | ROM2 11 town files: Player +4 1, +8 1, +0x2c 0, +0x30 2, +0x41 0, +0xa4c/+0xa50/+0xa54 0, +0xa5c 0x5f; party Humans +0x18 2, +0x40/+0x44/+0x5c 0, +0x78 null, +0x98 100, +0x9e 50; cells empty; each in the files holding the field or kind. | High / Medium | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
-| R2-SESSION-322 | ROM2 town files: Player +0x40, +0xa44, +0xa48, raw blocks, tail DWORDs, Selection differ between stages, equal within town1/10 and town2/30 (town2/50 files identical); stage and copy overlap; no tie to a named source established. | High / Medium | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
+| R2-SESSION-322 | ROM2 town files: Player +0x40, +0xa44, +0xa48, raw blocks, tail DWORDs, Selection differ between stages, equal within town1/10 and town2/30 (town2/50 files identical); stage and copy overlap; no tie to one write event established. | High / Medium | ● active (amended, branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
 | R2-SESSION-323 | ROM2 town files of one stage: copy3 game0027 equals game9998 in the 400 compared fields and listed raw blocks (physical files differ in 100 bytes); other pairs differ in gold, counts, keys; EN against RU Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md) |
 
 ### R2-SESSION-320
@@ -4729,6 +4737,16 @@ is a copy difference: town files of the same stage in another copy.
 
 **Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), question 3.
 
+**Amended.** R2-ENGINE-772..775 and R2-SESSION-324 narrow the Unknown on the events: for a
+unit in state 0x10 with a live killer the unit list routine of the tick adds 1 to `+0xa48` or
+`+0xa4c` and to a `+0x44` byte (the meaning "kill" is named from the conditions, Medium); the join
+and the map Player builder store `+0xa44`; the result tick, the unit death and three clears
+store `+0x40`; the pair object's `+4` is added to at `L2.04422` on a branch of the application
+routine and `+8` at `L2.04425` (a "mission end" meaning is named from the conditions, Medium).
+The `+0x44` bytes also come from a character-file copy and from LOAD. For the counters every
+non-negative value lies in the writer's set; the event counts between two saved points stay
+open, so no field is tied one to one.
+
 ### R2-SESSION-323
 
 Population: the 12 pairs of town files of one stage among the 11 of R2-SESSION-320.
@@ -4759,6 +4777,92 @@ example town1/10), or the established root of copy3, read with the same generato
 **Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
 
 **Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), questions 4 and 5.
+
+## Town file field writers and raw-block bodies
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-324 | ROM2 town file stage values against the read writers: counters (+0xa48, +0x44 bytes, tail DWORDs) accept any value, so the fit is consistency; +0xa44 = 2 is unexplained; event counts are unread; no field fits one to one. | Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+| R2-SESSION-325 | ROM2 RU bodies L2.02981, L2.04276, L2.04277, L2.04278, L2.04279, L2.04280 request 0xc, 0x18, 0x16, 0x40, 0xb4, 0xb8 raw bytes via two unread helpers (L2.04280 also rebuilds a sub-object); L2.00338 sets one bit. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+
+### R2-SESSION-324
+
+Values from R2-SESSION-322 (11 town files, five stages; town2/30 copy2 only, town2/40..town3/60
+copy3 only); writers from R2-ENGINE-772..775 (EN).
+
+| Field | Stored values | Writers' values | Fit |
+|---|---|---|---|
+| Player `+0xa48` | 0, 6, 6, 23, 46 (the XOR of R2-ENGINE-323 removed, EXP-2102) | + 1 per counted kill (the name is Medium); LOAD restores; character-file load; constructor 0 | consistent: any non-negative integer lies in a counter's set; non-decreasing within copy2 and copy3 |
+| raw 2,560 at `+0x44` | positions only | + 1 at `+0x44 + victim +0x14c`, below 14; character-file copy of 0xa00 bytes; LOAD restores | consistent: each nonzero position is below 0xa00, a bound the unit list, the character-file copy and LOAD all give; 2104..2107 match Humans serverIDs of 40.alm (R2-ASSET-172, a matching number) |
+| `+0xa4c`, `+0xa54` | 0 in all 11 | + 1 per kill of a class 0x21..0x3f victim; + 1 per death of the owner's hero | consistent: no counted event |
+| Player `+0x40` | 0 or 1 | 0, 1, 2, low byte of `+0xbe14`, identity − 19 | in part: 1 is the result tick's store (victory counter `+0xbe0c`, or reason 1); 0 a constructor or clear store |
+| Player `+0xa44` | 1, then 2 | requested number or smallest free (join); map entry `+0xc` + 1 (builder) | 1 lies in the join's set (smallest free) and in the builder's (entry `+0xc` = 0); 2 lies in the builder's set only if the entry `+0xc` is 1 (a data read, Unknown); which writer ran last is unread; the kind of the difference is not explained |
+| tail `+4` | 0, 184, 350, 781, 1487 | += Session `+4` / 16 | consistent: any non-negative integer lies in the set; non-decreasing |
+| tail `+8` | 0, 6, 6, 24, 60 | += 1 | consistent: non-decreasing; differs from `+0xa48` at town2/50 and town3/60, so they are not equal counts of one event over the same span; resets (the constructor, the character-file load, the three clear sites of the pair object) are not excluded |
+| hero's Group `+0x1c` | 0, 49745792, 4294967289 | none found in the RU Group constructor chain read | not testable |
+
+Byte 32 of the raw 36, the availability entries, `Objects/Selection`, the hero's raw 12 and 180
+and the rows of identities 22 and 23 were not searched for play-time writers.
+
+**Confidence.** Medium for each row: the value sets come from read bodies (High in
+R2-ENGINE-772..775 where those cards say so), the number of events between two saved points does
+not, a stage difference from town2/50 on is also a copy difference, and for a counter the set
+holds every non-negative value, so the fit is consistency and not explanation. The map builder's
+and the join's order and the map entries `+0xc` are unread. No field fits one to one.
+
+**Unknown.** The event counts. A run of the original from a town file through one mission with a
+counted number of kills of one identity, then a town SAVE, compared on `+0xa48`, the byte at
+`+0x44 + identity`, `+0x40` and the two tail DWORDs, would settle the amounts; a read of the map
+player records (type-3 entries `+0xc`) and of the order of the join and the builder would settle
+`+0xa44`. Play-time writers not searched, and the read that would settle each: byte 32 of the raw 36 (a census of
+stores at displacement 0x20 on the preferences object `L2.04510` and its receive arm,
+R2-ENGINE-361); availability (the `scenario.dll` writers, R2-ENGINE-420, outside this
+population); `Objects/Selection` (writers from client `+0x9d0`, R2-SESSION-285); the hero's raw 12
+and 180 and the rows of identities 22 and 23 (a census of stores into those blocks); the hero's
+Group `+0x1c` (a census of dword stores at displacement 0x1c on Group objects, with the Group
+serializer `R2.0123` and its LOAD arm).
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md), questions 1
+and 5.
+
+### R2-SESSION-325
+
+RU addresses, `out/q4/code/listings/`, each read to its first `ret`; not compared with EN.
+
+- `L2.02981` (base raw 12, `[+0x10]`), `L2.04276` (hero `+0xa6`, `+0x114`), `L2.04277` (`+0xbe`),
+  `L2.04278` (`+0xd4`), `L2.04279` (`[+0x1c0]`): each tests the direction with `R2.0017` and
+  calls `L2.00547` or `L2.00548` with 0xc, 0x18, 0x16, 0x40 and 0xb4 bytes. The listings also call
+  other routines that were not read (`L2.01277`, `L2.01278`, `L2.01279`, `L2.01280`, `L2.04511`,
+  `L2.04512`, `L2.03294`, `L2.04513`, `L2.04514`, `R2.0080`, `L2.04515`, `L2.04516`, `L2.04517`,
+  `L2.01148`, `L2.00354`, `L2.04518`, `L2.04519`, `L2.04520`, `R2.0174`, `L2.04521`, `L2.04522`,
+  `L2.04523`, `L2.04524`, `L2.04525`, `L2.04526`, `L2.01323`).
+- `L2.04280` (`[+0x1c4]`): the same with 0xb8 bytes, which include the pointer at `+0xb4`; on one
+  direction it calls slot `+4` of the sub-object at `+0xb4`, allocates 0x1c bytes, constructs them
+  with `L2.00350(0xa)` and stores the pointer at `+0xb4`; both directions then call the
+  sub-object's slot `+8` with the archive. `L2.00350` and slot `+8` are unread; slot `+8`
+  serializes whatever the sub-object holds.
+- `L2.00338` (base `+4` when nonzero): when the value is below 0x6000 it sets bit `value & 0x1f`
+  of the DWORD at `L2.00340 + (value >> 5) · 4`.
+
+The direction test `R2.0017` is graded by R2-ENGINE-739 (it returns 1 when bit 0 of archive `+0x14`
+is clear). The requested sizes are not guaranteed: the reader of the helper pair can return less
+than requested and the field helper ignores the return (R2-ENGINE-200, EN). In the bodies read no
+step other than the callees above handles the block bytes; what the unread callees do with a stored
+field is not shown.
+
+**Confidence.** High for the call sequences in the bodies to their first `ret` (RU only). Medium
+that the two helpers transfer without transforming (unread), that the other callees compute no
+stored value, and for the field each body serves, taken from R2-SESSION-314. The sub-object of
+`L2.04280`: Medium for the call sequence, Unknown for what it holds after LOAD.
+
+**Unknown.** What `L2.00350` and the sub-object's slot `+8` do, and what the other callees listed
+above and the two transfer helpers do: reading those bodies settles it.
+
+**Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
+
+**Evidence.** [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md), question 4.
 
 ## Summoned creatures in a mission save
 
