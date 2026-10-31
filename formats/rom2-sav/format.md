@@ -937,6 +937,19 @@ The full books occupy 327 bytes after the gate; sparse Player-1 books occupy
 Player-8 books are separate. Native book delivery and castability remain
 Unknown. — R2-SESSION-237, R2-ENGINE-019
 
+Book index i holds the Spell whose ID is i: in the 25 owner files of the three 2026-10-30/31
+copies, all 176 nonnull elements of the 38 present book records (11 positions repeated across
+consecutive saves) have ID equal to index (854 null). The server book getter stores the last
+fetched nonnull index in book DWORD +0x18. In 34 of the 38 books +0x18 is 0 or one of the book's
+own IDs, which fits that store (Medium); in 4 books it holds other values and its meaning there is
+Unknown. The slot masks (client +0x148, +0x150, object +0x18, +0x1c) are not book fields and the
+SAVE body serializes no mask (Medium). On a unit update whose flags hold 0x100000 the server passes
+the book's row mask to a writer that was not read, and the client converts a stored mask to slot
+bits. REG `SpellBook/Pressed` holds panel +0x60: the engine writes a slot index 0..23 or -1 there,
+not a spell ID (High for the writes); LOAD restores the saved value through an unread getter with
+no range test (Medium), and no owner save's `Pressed` value was read. — R2-SESSION-318,
+R2-ENGINE-766, R2-ENGINE-768
+
 ### Mission-like continuation
 
 Mission setup with argument 1 skips the map caller and the autosave, sends

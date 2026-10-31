@@ -4499,3 +4499,53 @@ its first 0x100 bytes, the reachability of `L2.01830` (open in R2-ENGINE-723), t
 **Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
 
 **Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), questions 1 and 3.
+
+## Book state in owner saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-318 | In 25 ROM2 owner saves, 38 book records at 11 positions hold 176 nonnull elements, each with ID equal to its index; book +0x18 is 0 or an own ID in 34 and unexplained in 4; the SAVE body stores no mask. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
+
+### R2-SESSION-318
+
+Population: the 25 files the manifests of the copies `2026-10-30/rom2-gog-original` (9),
+`2026-10-30/rom2-gog-original-2` (7) and `2026-10-31/rom2-gog-original-3` (9) name, each verified
+by SHA-256 and measured with the EXP-2076 chain (`out/save-inputs.tsv`, `out/books.tsv`,
+`out/book-elements.tsv`, `out/book-header.tsv`). Of 272 humans, 38 have a book (12, 7 and 19 per
+copy). Book sizes are 28 (36 books) and 30 (2 books, IDs 1..29). The 176 nonnull elements all have
+ID equal to their index; 854 indices are null (indices 1..size-1; index 0 is not serialized,
+R2-ENGINE-602). Book ID sets: {24, 27} in 21 books, {10, 18, 24, 27} in 5, {1, 4, 20, 21, 24, 27}
+in 8, {2, 10, 24, 27} in 2, 1..29 in 2. The counts are over saved files, not independent heroes: by
+copy and serializer path the 38 books are 11 positions repeated across consecutive saves of the
+same games (`out/book-header.tsv`).
+
+Book DWORD +0x18: 0 in 5 books, 21 in 5, 24 in 8, 27 in 16 (each an ID of the same book), and 4
+books outside 0..29: 1818325620 in one and 24621 in three. The three 24621 values are one position
+(copy 3, `players.0.group.2.members.0`, in game0027, game9998 and game9999). 1818325620 is the bytes
+`0x6c617274`, four printable characters; 24621 is `0x602d`. The server getter EN `L2.04332` stores
+the last fetched nonnull index there, after its size and null tests (`L2.04377`, R2-ENGINE-767), which
+fits the 34.
+
+Masks: when the update flags hold 0x100000 the server passes the book's row mask to `L2.04301`
+(unread) and the client derives object +0x18, client +0x148 and +0x150 from a stored mask and from
+items (R2-ENGINE-766). The SAVE body of R2-ENGINE-602 serializes no mask field. So K1 holds for the
+fields read: the SAVE keeps the book header, size and elements; the masks are not among them.
+REG `SpellBook/Pressed` is described in R2-ENGINE-768.
+
+**Confidence.** High for the measured values and the ID-equals-index count over the 25 files.
+Medium for the meaning of book +0x18 in the 34 books where it is 0 or an own ID: the getter's store
+fits every such value. Medium that no SAVE path stores a mask: the client fields are not unit
+fields, but no census of SAVE writers of client +0x148/+0x150 was run, and three of the four callers
+of the mask builder `L2.04288` (EN `L2.04290`, `L2.04292`, `L2.04293`) were not read. Unknown for the
+meaning of +0x18 in the 4 books outside 0..29: neither value is an index, which fits a field that
+is not always initialized, but that is a reading, not a result.
+
+**Unknown.** The writer of the 4 out-of-range +0x18 values. The static read that would settle it:
+the book constructor EN `L2.02977` and the book LOAD body (R2-ENGINE-602, whose Unknown names book
++0x18).
+A run: LOAD a save, cast one book spell, SAVE, and compare +0x18 with the cast's row (this confirms
+the getter's store and whether LOAD keeps a value; it does not explain a value such as
+`0x6c617274`); then LOAD and SAVE the copy-3 game0027 hero unchanged and compare whether 24621
+survives.
+
+**Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 4.

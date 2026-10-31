@@ -9051,7 +9051,7 @@ rows (R2-ASSET-098).
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-444 | ROM2 item text and spell lists name row r by spell.txt line r-1; the spellbook hover shows spells.txt line s for slot s with main.txt labels, and the 24-entry table EN L2.02137 gives a row number per slot (Medium join). | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-444 | ROM2 item text and spell lists name row r by spell.txt line r-1; the spellbook hover shows spells.txt line s for slot s with main.txt labels, and the 24-entry table EN L2.02137 gives a row number per slot (High join). | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/), [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
 | R2-ENGINE-445 | ROM2 spells use ID 2*row+8 at cast, 30 for Prismatic, 2*row+9 for an area cell (row 7); the client draws that ID's projectiles.reg type or nothing (a unit caster's object of 16, 24, 34, 46, 48, 62 ends at once: R2-ENGINE-691, Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-446 | ROM2 spell sounds are sfx.reg Sfx(500+ID): the caster plays 500+2*row+8, a typed cell effect 500+ID at creation except Blizzard 523 at the ninth update; an absent slot is silent at the sites read (Medium that no other site plays). | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-447 | A ROM2 typed spell effect lives for its packet argument in updates; its frame and draw follow per-ID switch tables: (update/2) mod Phases by default, falling Blizzard pieces, swinging lightning and unit-attached marks. | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
@@ -9082,27 +9082,41 @@ per-slot arrays.
 The 24 dwords at EN `L2.02137` (RU `L2.02148`) are, for slots 0..23: 1, 2,
 3, 4, 24, 20, 21, 26, 13, 12, 11, 10, 5, 6, 7, 8, 25, 22, 23, 27, 19, 18,
 17, 16. The values are read from the binary. That each value is the
-data.bin row whose name matches the slot's `spells.txt` line is Medium: it
-rests on the `spells.txt` name order, which is not committed, and on the
+data.bin row whose name matches the slot's `spells.txt` line was Medium: it
+rested on the `spells.txt` name order, which was not committed, and on the
 fit that the 24 values are distinct and equal rows 1..29 without 9, 14, 15,
-28 and 29. Rows 9 (Acid Stream), 14 (Darkness), 15 (Light), 28
+28 and 29. It is High after the amendment below. Rows 9 (Acid Stream), 14 (Darkness), 15 (Light), 28
 (Curse) and 29 (Slow) have no slot and no hover line. The 'A' key handler
 EN `L2.02149` reads this table when the per-slot flag table EN `L2.02150`
 admits the slot. A slot click calls EN `L2.02151` with slot+1 when the flag
 table EN `L2.02152` admits it.
 
 **Confidence.** High for the item and list text selections, the grid, the
-hover text lines and the table values, in both roots. Medium that the table
-entries are spell rows (the slot-to-row binding), which rests on the
-uncommitted `spells.txt` name order (R2-ASSET-103) and on the unread
-consumer EN `L2.02136` of the 'A' key handler. Medium that the hover's
-per-slot arrays are filled through this table: their filler was not read.
+hover text lines and the table values, in both roots. High that the table
+entries are spell rows (the slot-to-row binding), by the amendment below.
+Medium that the hover's per-slot arrays are filled through this table: their
+filler was not read.
 
 **Unknown.** The writer of the hover's per-slot arrays, the text of
-`main.txt` line 217 in the hover, the order of the `spells.txt` names as a
-committed list and the consumer EN `L2.02136` of the 'A' key handler.
+`main.txt` line 217 in the hover and the consumer EN `L2.02136` of the 'A'
+key handler (its effect is not needed for the binding).
 
-**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
+**Amended.** The slot-to-row binding was Medium and is High. In `main.res` of
+each root the `spells.txt` hover name of slot s (the bytes before the first
+`" ("`) equals `spell.txt` line table[s]-1, the line this card gives row
+table[s], for 24 of 24 slots in RU and 23 of 23 in EN (R2-ASSET-198). The 30
+`spell.txt` line hashes of each root are distinct, so each name selects one
+line. EN slot 17 is the 24th: its hover name is the line of row 22 with one
+letter added, a spelling variant, and that line is the nearest of all 30
+(`out/variant.tsv`). The three reasons for Medium are answered: the name order
+is committed as hashes (`out/texts.tsv`, `out/slots.tsv`), the 24 values are
+distinct and the inverse table agrees with them (R2-ENGINE-766), and the server
+cast converts a slot through the same table (R2-ENGINE-767). The unread
+consumer EN `L2.02136` does not enter the binding. The per-slot arrays of the
+hover stay Medium.
+
+**Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/),
+[EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 1.
 
 ### R2-ENGINE-445
 
@@ -18492,3 +18506,170 @@ addresses and also any constant or displacement whose value lies in that range.
 above; Medium for anything later in a window.
 
 **Evidence.** [EXP-2100](../experiments/EXP-2100-rom2-town-field-sources/RESULTS.md), question 5.
+
+## Spellbook slots, book casts and shortcuts
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-766 | ROM2 book slot s stands for spell row and book index table[s] (EN L2.02137); the server passes the book's row mask to an unread update writer (flag 0x100000); the client maps a stored mask to slots through EN L2.04286. | High / Medium | ✔ promoted (branch candidate) | [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
+| R2-ENGINE-767 | A ROM2 book cast sends message 0x1e (target) or 0x1f (point) with slot+1; the server takes row table[slot] and gives book element GetAt(row) to an unread cast routine per group unit with a nonnull element; mana and range are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
+| R2-ENGINE-768 | ROM2 keys 0x73..0x7b address nine app entries holding a book slot (kind 1) or, by record shape, a unit group (kind 2); message 0x417 assigns or recalls a slot in panel +0x60, which REG Pressed holds (file value Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
+
+### R2-ENGINE-766
+
+The 24 dwords at EN `L2.02137` (RU `L2.02148`, equal) give slot s its row: 1, 2, 3, 4, 24, 20, 21,
+26, 13, 12, 11, 10, 5, 6, 7, 8, 25, 22, 23, 27, 19, 18, 17, 16 (R2-ENGINE-444). The 32 dwords at EN
+`L2.04286` (RU `L2.04287`, equal) hold `1 << s` at row table[s] for every slot and 0 at rows 0, 9,
+14, 15 and 28..31 (`out/slots.tsv`). Row, spell ID and book index are one number: the server cast
+path fetches book element `GetAt(row)` (R2-ENGINE-767), and in the owner saves every nonnull
+element has ID equal to its index (R2-SESSION-318).
+
+Mask chain, EN addresses (`out/listings/`):
+
+1. Book method EN `L2.04288` (RU `L2.02788`) ORs `1 << i` for each nonnull index i of the book: a
+   row mask. Its sibling `L2.04289` ORs `[L2.04286 + 4i]` instead (a slot mask); no E8 call to it
+   was found in either root (`out/scans/*-calls-book.tsv`). `L2.04288` has four E8 callers in EN
+   (`L2.04290`, `L2.04291`, `L2.04292`, `L2.04293`) and four in RU `L2.02788` (`L2.04294`,
+   `L2.04295`, `L2.04296`, `L2.04297`).
+2. Server unit update EN `L2.04298`..`L2.04299`, the caller `L2.04291` (RU `L2.04300` window, call
+   `L2.04295`): when the unit has a book (`+0x140` nonzero) and the update flags hold 0x100000, it
+   calls `L2.04288` and passes the result with 0x100000 to `L2.04301`. Its body was not read:
+   that it appends the mask as field 0x100000 of the update is inferred from the argument shape
+   (flag, value). This is the only caller read; the other three in each root were not.
+3. Client update EN `L2.04302`..`L2.04303` stores the field into object +0x1c; EN
+   `L2.04304`..`L2.04305` clears object +0x18 and, when the object's +0x14 equals client +0x9cc and
+   +0x1c is nonzero, ORs `[L2.04286 + 4b]` into +0x18 for each set bit b < 32.
+4. Client summary EN `L2.03144` zeroes client +0x148, +0x14c and +0x150, ORs object +0x18 into
+   +0x148 for each object `L2.02988` accepts, ORs `[L2.04286 + 4*(object +0x118)]` into +0x14c,
+   and ORs `[L2.04286 + 4r]` into object +0x20 and client +0x150 for each item whose type
+   (`L2.03925`) is 0xe and whose spell `L2.04306` is r.
+5. Panel EN `L2.04307(s)` tests bit s of client +0x148, `L2.04308(s)` bit s of +0x150; the slot
+   under the cursor is `x / 38 + 12 * (y / 38)` for x in 0..0x1c7 (`L2.02147`).
+
+So M1 holds for the client: it converts a stored row mask to slot bits through a row-to-slot
+table. That the stored field is the server's `L2.04288` mask rests on the argument shape of
+`L2.04301` (unread). A row without a slot (0, 9, 14, 15, 28, 29) sets no slot bit. Five 24-entry
+flag tables at EN `L2.04309` + 0x60k (RU `L2.04310` + 0x60k) qualify slots; they differ EN/RU only
+in table 2 at slots 16 and 22 (R2-ENGINE-449; `out/slots.tsv` columns T0..T4, the first 120 of the
+144 dwords read; the other 24 dwords were not compared).
+
+**Confidence.** High for the two tables, their inverse relation and the EN bodies listed. High for
+RU tables and for the RU book methods, summary and server update where the masked compare is equal
+or nearly so (`out/compare.tsv`: summary 840 of 842 lines equal, book-methods 134 of 135, rowmask-b
+equal). The mask replaces every hexadecimal operand in `0x400000..L2.03731` with one token,
+constants and displacements in that range included, so an equal line pair shows equal mnemonics and
+operands outside that range, not equal values inside it. Medium that `L2.04301` carries the mask
+into the update field (unread). Medium for the RU client store and conversion: the RU windows hold
+the same five loads and stores (`L2.04311`, `L2.04312`..`L2.04313`) but differ line for line in
+register use (13 of 36 lines equal). That mask bit s of +0x148 is the bit the panel draws for slot
+s rests on the bodies read; the draw routine itself is R2-ENGINE-444.
+
+**Unknown.** The body of `L2.04301`; the three callers of `L2.04288` not read (EN `L2.04290`,
+`L2.04292`, `L2.04293`; RU `L2.04294`, `L2.04296`, `L2.04297`); the writer of object +0x118 other
+than the 'A' key path (R2-ENGINE-768).
+
+**Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 1.
+
+### R2-ENGINE-767
+
+Client, EN (`out/listings/en-panel-handlers.txt`, `en-click.txt`, `en-map-click.txt`,
+`en-point-and-pre-click.txt`):
+
+1. Press `L2.04314` stores the cursor slot in panel +0x60 when its bit is set; `L2.04315` sets
+   +0x60 = -1.
+2. Release `L2.04316` calls `L2.02151(s+1)` when bit s is set in client `+0x148 | +0x150`
+   (`L2.04317`..`L2.04318`) and flag table 3 (`L2.02152`) admits the slot (`L2.04319`); press
+   `L2.04314` makes the same bit test. With
+   book bit s and panel +0x68 = -1, `L2.02151` sends, for each selected object with bit s in +0x18,
+   message type 0x1e with +0x10 = s+1 (`L2.04320`, `L2.04321`). With scroll bit s it sends type
+   0x25 with +0x10 = an inventory index whose item spell equals `[L2.04322 + 4(s+1)]`
+   (`L2.04323`), then calls `L2.03144`.
+3. A map click (`L2.03015`) calls `L2.04324` (target) or `L2.03979` (point) with the slot
+   argument; these send 0x1e or 0x1f with +0x10 = s+1 (0x25 or 0x26 for a scroll). For a book
+   cast each tests book bit s through `L2.04307` (`L2.04325`, `L2.04326`) and panel +0x68 = -1
+   (`L2.04327`, `L2.04328`) before sending, as `L2.02151` does (`L2.04329`, `L2.04330`).
+
+Server, EN `L2.00171` (`en-server-msg.txt`): for types 0x1e and 0x1f, `+0x10 := byte [L2.04322 +
+4 * (+0x10)]` (`L2.04331`), the low byte of table[slot]; no bound test precedes it in the window
+(the window starts at the routine's prologue).
+For each unit of the built group with a book and a nonzero row it stores `GetAt(row)`
+(`L2.04332`) in unit +0x44. The switch on type - 0x12 (table EN `L2.01872`, RU `L2.02841`, 21
+cells, equal partition) sends 0x1e to `L2.04333` → `[L2.01066].L2.04334(group, target, spell)` and
+0x1f to `L2.04335`, which requires `L2.04336()` nonzero, → `L2.04337(group, x, y, spell)`. Both
+bodies walk the group (`L2.04088`, `L2.04089`); for a unit with +0x44 they call `L2.04338(unit,
+target, spell)` or `L2.04339(unit, x, y, spell)`, else `L2.03312(unit)`, and clear +0x44.
+
+So C1 holds: the click carries slot+1 and the server converts it through the slot table. GetAt
+returns 0 for an index at or past the size or a null element (R2-ENGINE-602 book layout). A unit
+whose element is 0 keeps +0x44 = 0 and takes the `L2.03312(unit)` arm (`L2.04340`..`L2.04341`),
+which is not a cast and whose body is unread. A unit with a nonzero +0x44 reaches `L2.04338` or
+`L2.04339` with that element; what those do with it is unread.
+
+**Confidence.** High for the EN bodies listed and for RU where the masked compare is equal
+(`map-click`, `point-and-pre-click`, `cast-target`, `cast-point`, `book-cursor`). The mask replaces
+every hexadecimal operand in `0x400000..L2.03731` with one token, constants included; the jump table
+is equal as a partition only (`out/compare.tsv`). The RU click
+(242 EN lines all matched, 4 RU lines inserted) and RU server routine (544 of 609 equal) hold the
+same type and table lines (`L2.04342`, read at `L2.04343`; `L2.00040`; the cast bodies `L2.04344`
+and `L2.02810`, whose callees are RU `L2.02813` or `L2.02814` and `L2.02636`, the counterparts of
+EN `L2.04338`, `L2.04339` and `L2.03312` by position in the equal masked listings): Medium for a RU line-for-line identity. What `L2.04336` tests is not stated: its body is committed
+(`spell-point-test`) but was not interpreted.
+
+**Unknown.** Where mana, range and the cast charge are tested: inside `L2.04338`, `L2.04339` or
+later (unread); the body of `L2.03312`, which a unit with a null or out-of-range element takes. A run of the original: LOAD a save with a full book, press a slot, click a target
+out of range and with too little mana, and record cast or refusal.
+
+**Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 2.
+
+### R2-ENGINE-768
+
+Key routine EN `L2.04345` (RU `L2.04346`): digits 0x30..0x39 go to the unit-group routines
+`L2.04347`, `L2.04348`, `L2.04349`, `L2.04350`; other keys index the byte table EN `L2.04351` (RU
+`L2.04352`, equal) at key - 8, then the 8-cell jump table EN `L2.04353`. Keys 0x73..0x7b (VK_F4..
+VK_F12 in Windows numbering) take case 6, EN `L2.04354`; 13, 37..40 and 8 take cases 1..5 and 0
+(`out/tables.tsv`). Case 6 uses entry g = key - 0x73 of nine 12-byte entries at app +0x4dc (RU
++0x4f4): it sends message 0x417 (g, `[L2.01559]`) to `[app+0xec]` when `[L2.01653] == 0` and
+(kind is not 2 or `[L2.01559] != 0`) (`L2.04355`..`L2.04356`), and message 0x417 (g, `[L2.01653]`)
+to `[app+0xe8]` when `[L2.01559] == 0` and (kind is not 1 or `[L2.01653] != 0`)
+(`L2.04357`..`L2.04358`); each global gates both sends. With the book closed a kind-1 entry calls
+`L2.04359(9)` or `L2.04359(10)` after the book or scroll bit test.
+
+Entry setters: `L2.04360(s)` writes word +0 = 1, word +2 = s; `L2.04361(object)` writes word +0 = 2,
+word +2 from object +6, a count (dword +4) from byte object +0xa and a count-byte buffer copied
+from the pointer at object +0xc; `L2.04362(s)` tests kind 1 and +2 == s. Kind 2 is read as a unit
+group from this record shape and the digit-key group routines; the handler of 0x417 at `[app+0xe8]`
+and the caller `L2.04363` of `L2.04361` were not read. Panel message routine `L2.04364`: 0x411 sets
++0x60 = -1; 0x417 with flag nonzero sets entry g to the hovered slot (when +0x60 = -1) or to +0x60,
+and clears every other entry 0..8 holding that slot (`L2.04365`), then `L2.04366`; with flag zero a
+kind-1 entry's slot goes to +0x60. Callers (E8 scan of `.text`): `L2.04360` only from `L2.04367`
+and `L2.04368`; `L2.04361` from `L2.04363`. The 'A' key `L2.04369` ('a' or 'A' with
+`[L2.01559]` nonzero) takes row table[s] of the hovered slot or of +0x60 when flag table 2 admits
+it and calls `L2.02136(row)`, which sends type 0x46 and stores object +0x118 = row. Flag table 2
+admits slots 16 and 22 in EN and not in RU (R2-ENGINE-766), so the 'A' key reaches those two
+slots in EN only.
+
+REG: the mission LOAD (EN `L2.04370`..`L2.04371`) and the second reader (`L2.04372`..`L2.04373`)
+call the getter `R2.0113` with the current `[app+0xec] +0x60`, the `Pressed` name strings and
+the result stored back into `+0x60`; the writer reads the same field (`L2.04374`). What the engine
+writes into `+0x60` is a slot index or -1 (P1: the cursor slot `L2.02147`, the entry slot, -1; the
+'A' key indexes the slot table with it). That the getter returns the file value, and what it
+returns for a missing key, is Medium (the getter is unread); no range test is in the windows, so
+a value outside 0..23 in a file is not excluded, and no owner save's REG value was read. One dword in each image names the `Shortcuts` string (EN `L2.04375`, RU `L2.04376`), the
+writer; the shortcut entries are not saved (R2-SESSION-285).
+
+**Confidence.** High for the EN bodies listed, the key tables in both roots and what the engine
+writes into panel +0x60 (a slot index or -1). The RU REG windows (`reg-read`, `reg-write`) are equal
+after masking; the mask replaces every hexadecimal operand in `0x400000..L2.03731` with one token,
+constants included, and the key jump table (`key-arms`) is equal as a partition only
+(`out/compare.tsv`). Medium for RU panel and key routines (320 of 331 and 255 of 266 masked lines
+equal; the entry offset differs, +0x4f4). Medium that `[L2.01559]` and `[L2.01653]` are
+modifier-key states: their writers were not read. Medium that kind 2 is a unit group (the record
+shape, not its receiver). Medium that `Pressed` read from a file is the value restored: the getter
+`R2.0113` is unread. A negative over call sites is the E8 scan only.
+
+**Unknown.** The kind-2 setter's caller `L2.04363`, the 0x417 handler at `[app+0xe8]`, the getter
+`R2.0113` (value for a missing key) and `L2.04359`'s effect. A run: open the book,
+press a slot, hold each modifier and press F4, close the book, press F4 and record the cursor; SAVE
+and compare `SpellBook/Pressed`.
+
+**Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 3.

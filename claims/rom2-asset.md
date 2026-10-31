@@ -2914,3 +2914,29 @@ play.
 and after its end would settle it.
 
 **Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 3.
+
+## Spellbook hover names against spell rows
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-198 | The ROM2 spellbook hover name of slot s equals spell.txt line table[s]-1 for all 24 slots in RU and 23 in EN; EN slot 17 (row 22) is that line with one letter added, a spelling variant. | High | ✔ promoted (branch candidate) | [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
+
+### R2-ASSET-198
+
+For each root, `main.res` `text/spells.txt` line s up to the first `" ("` was compared byte for
+byte with every `text/spell.txt` line (`out/texts.tsv`, hashes only; `out/slots.tsv` columns
+`hover_matches_line` and `row_minus_1`). In RU each of slots 0..23 matches exactly the line
+table[s]-1, the line R2-ENGINE-444 gives row table[s]. In EN slots 0..16 and 18..23 do; slot 17
+matches no line byte for byte. Its hover name is 13 bytes and the line of row 22 is 12; one ASCII
+letter is deleted from the hover name at index 7 to reach that line (edit distance 1), and no other
+`spell.txt` line is at distance 1 (`out/variant.tsv`; `evidence/variant.py` reads `main.res` once and
+writes lengths, the edit and a byte class, no text). The 30 `spell.txt` line hashes of each root are
+distinct. The slot table is the one the code uses (R2-ENGINE-766), so this establishes at High the
+slot-to-row join that R2-ENGINE-444 held at Medium, for 47 exact slot names and, through the one-letter
+variant, for EN slot 17.
+
+**Confidence.** High for the byte comparisons and for the distance. That the EN slot 17 name is a
+spelling variant of the line of row 22, and not another spell, is a reading of distance 1 to that line
+alone, with the equal slot table and the exact RU name for the same slot beside it.
+
+**Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 1.
