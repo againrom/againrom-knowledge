@@ -3822,7 +3822,7 @@ one, compared field by field, would settle it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-293 | From Kaarg at stage 30 the ROM2 campaign reaches town 3 through Leave30, Leave40 and Leave50; Leave50 alone among departure cases adds town 3, and arrival stage is 60, 70 or 80 by whether 60 and 80 precede 50 (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-SESSION-293 | From Kaarg at stage 30 the ROM2 campaign reaches town 3 through Leave30, Leave40 and Leave50; Leave50 alone among departure cases adds town 3, and arrival stage is 60, 70 or 80 by whether 60 and 80 precede 50 (Medium). | Medium | ✔ promoted (amended, branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/), [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
 | R2-SESSION-294 | On arrival at stage 60 the ROM2 Druids' inn offers talks 70/680 and 71/681 and hire 3 (534 = 1, 554 = 3); missions 70 and 71 follow, and mission entry builds hire 3 from key 10030 with +0x14c = 3 (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-SESSION-295 | The EN owner's Kaarg town file game9998 (abort-and-return save, owner's account) holds the hero (21, class 35) and identity 22 (class 33) in two Player 0 Groups and no hire Human while 512 = 1 and 532 = 1 stay; hire 1 is in mission files. | High | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-SESSION-296 | A ROM2 companion is kept in a town file as a Human in a Player Group (identity in +0x14c, class in +0xe); the one abort-and-return town file read stores no hire Human while 512+i, 532+i, 552+i stay (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
@@ -3864,7 +3864,15 @@ and the stage-50 Kaarg inn's NPC 23 option also reaches the producer
 save of the original after Leave40 and another after the stage-50 inn
 settle both.
 
-**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 1.
+**Amended.** R2-SESSION-301 narrows the Unknown on the origin of identity
+23: leaving mission 40 through the leave arm requests and builds her, which
+reads as the first join (Medium; R2-ENGINE-744); a transfer of the map-40
+`Mage_Hero` by an unselected script opcode is not excluded. An inn entry at
+stage 50 builds her only when the owner list lacks identity 23
+(R2-ENGINE-746). Her class, 0x24 or 0x22, stays Medium (R2-ENGINE-745).
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 1;
+[EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), questions 1 and 2.
 
 ### R2-SESSION-294
 
@@ -3961,3 +3969,160 @@ Human. A save of the original in the town after a mission won with a hire
 settles it.
 
 **Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 5.
+
+## Flag-0x10 map records and stored definition words
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-297 | In the 46 maps of each ROM2 root, 605 type-6 records with d0c bit 0x10 name 77 Humans rows 31..257; the top, 253..257, are Knight rows of 73.alm (256 also 86.alm); one hero record, Mage_Hero in 40.alm; EN = RU. | High / Medium | ● active (branch candidate) | [EXP-2095](../experiments/EXP-2095-rom2-human-row/) |
+| R2-SESSION-298 | In the 22 ROM2 owner saves, all 216 Humans store +0xc in 1..289 and +0x14c equal to that row's serverID word; 187 store the row typeID in +0xe, 29 hero types 33 or 35; the highest +0xc is 274. | High / Medium | ✔ promoted (branch candidate) | [EXP-2095](../experiments/EXP-2095-rom2-human-row/) |
+
+### R2-SESSION-297
+
+Population: every type-6 record of the 46 `.alm` members of `scenario.res` in
+the EN and RU roots. The rule is the person arm of R2-ENGINE-742 and the
+template load of R2-ENGINE-739, applied with the file field `d0c` as record
++0x48 and `d14` as record +0x10 (R2-ASSET-172). The player-resolve and
+session tests that precede the person arm (R2-ENGINE-742) were not applied,
+so the counts are of records that select the person arm if both tests pass,
+not of Humans a map places.
+
+- 605 records carry `d0c` bit 0x10, in 37 maps; each resolves to a Humans
+  row; they name 77 distinct rows from 31 to 257, 76 of them at or above 128 and 2 at or above
+  256. The template index equals the lookup index for all 605.
+- Top rows:
+
+  | Row | Name | serverID | typeID | Records |
+  |---:|---|---:|---:|---|
+  | 253 | 2F_Knight3_73 | 2144 | 4 | 19 in 73.alm |
+  | 254 | 2A_Knight3_73 | 2145 | 15 | 7 in 73.alm |
+  | 255 | 2H_Knight3_73 | 2146 | 21 | 4 in 73.alm |
+  | 256 | 2M_Knight3_73 | 2147 | 24 | 9 in 73.alm, 1 in 86.alm (record 8) |
+  | 257 | 2F_KnightLeader3_73 | 2148 | 5 | 3 in 73.alm (records 25, 41, 66) |
+
+- Each top row has typeID below 0x21, so by R2-ENGINE-739 and R2-ENGINE-740
+  a Human built from it would be stored as +0xc = row and +0xe = typeID and
+  would load row +0xc (a SAVE in mission 73 or 86 settles it); rows 256 and
+  257 need the full u16.
+- The one hero-flag record is `Mage_Hero` (row 31, 40.alm record 36); the
+  rule gives +0xe 0x24, so LOAD takes row 5.
+- Rows 258..289 (`*_Knight2_51` and the hire rows) are named by no flag-0x10
+  record.
+- `w08` equals the row typeID in 510 of 605 records (509 against the census
+  +0xe, which differs for `Mage_Hero`); the 95 others are the 86 records of
+  82.alm (`w08` 4) and 9 in 20.alm, 30.alm and 100.alm. The person arm passes
+  the constructor only the row name, the hero flag and 0.
+- EN = RU field for field. Maps 42, 52, 74 and 110 differ in bytes and
+  version; in 110.alm the flag-0x10 records sit at 132..143 and 258 (EN)
+  and 154..165 and 280 (RU).
+
+**Confidence.** High for the record and row values: the committed tables
+reproduce byte for byte. Medium for the record selection and the
+record-to-row join: `d0c` as record +0x48 and `d14` as +0x10 are the
+R2-ASSET-172 link, and the map loader that fills them is not read. Medium for
+the stored words of the top rows, a prediction from R2-ENGINE-739 and
+R2-ENGINE-740. Medium for the `Mage_Hero` value 0x24 (R2-ENGINE-739); its
+LOAD row 5 holds for every hero value.
+
+**Unknown.** The stored words of the Knight Humans; a SAVE in mission 73 or
+86 settles them. How many of the 605 records the original places; a run that
+loads each map and counts its Humans settles it.
+
+**Evidence.** [EXP-2095](../experiments/EXP-2095-rom2-human-row/RESULTS.md), question 4.
+
+### R2-SESSION-298
+
+Population: the 22 owner saves of the three copy sets (9, 7 and 6 files),
+each verified against its manifest hash; 216 Humans.
+
+- +0xc is at Human payload byte 16 and +0xe at byte 18 in all 216.
+- +0xc lies in 1..289 in all 216; the low word of +0x14c equals the row's
+  serverID word ((ID / 10) % 1000 above 10000) in all 216.
+- 187 Humans store +0xe below 0x21, equal to row +0xc's typeID. 29 store a
+  hero type: `Start_MF` (row 26) 33, `Start_MM` (row 28) 35 and
+  `Fighter_Hero` (row 30) 33; for them LOAD takes row 5.
+- Six hires store rows 264 (`2MercenaryXBowman30`) and 274
+  (`2MercenaryKnight30`) in sets B (`game0012`, `game9999`) and C
+  (`game0017`, `game9999`): stored +0xc above 255 occurs in original saves.
+- 181 Humans store a row that a flag-0x10 record of the map `<mission>.alm`
+  names. The saves are
+  from missions 0, 10, 20, 30 and 31; none is from mission 73 or 86.
+
+**Confidence.** High for the stored values and checks: reproduced byte for
+byte. Medium for the mission-to-map join: `<mission>.alm` is a matching
+number.
+
+**Unknown.** Which map a saved mission number loads; a save taken with the
+loaded map recorded settles it.
+
+**Evidence.** [EXP-2095](../experiments/EXP-2095-rom2-human-row/RESULTS.md), question 5.
+
+## Party identity 23 on the route and in files
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-301 | On the ROM2 route the first join read for identity 23 is at the exit from mission 40 (stage 40 to 50); an inn entry at stage 50 re-adds her when absent; no producer read re-adds her after stage 50 (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+| R2-SESSION-302 | None of the 22 files of three copied ROM2 save directories (768 = 10, 20, 30) holds 773 nonzero or a Player 0 Human with identity 23; by the code read a stage-50 file is expected to keep her as a companion and 773 = 23 at 0xC14 (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+
+### R2-SESSION-301
+
+Composed from R2-SESSION-293, R2-ENGINE-744, R2-ENGINE-745 and R2-ENGINE-746:
+
+1. Stage 40: missions 40..43 are offered. No producer request for identity 23 is read before
+   Leave40. The map-40 `Mage_Hero` (player 3) already carries +0x14c 23 through the Humans load
+   (R2-ASSET-190); a transfer of that unit to the party by an unselected script opcode is not
+   excluded, and it would make the Leave40 build a no-op by the dedup.
+2. Leaving mission 40 through the 0x41d arm: 773 = 23, the stage moves to 50, and the producer
+   builds her unless the owner list holds identity 23.
+3. Stage 50: an inn entry passes `0x00310017` when app +0x5d8 is 2 (Medium, R2-ENGINE-633); the
+   producer builds her only when the owner list lacks identity 23. The stage-50 body has no
+   current-record gate (R2-ENGINE-224); which towns are reachable at stage 50 is the route
+   (R2-SESSION-293, Medium).
+4. 773 stays 23 through the town and the next mission entry unless another writer changes it
+   (R2-SESSION-302); the next ordinary departure zeroes it, and no departure case after 40 stores
+   23.
+5. Once the stage passes 50 (Leave50, or Leave60 played first; R2-SESSION-293) no inn word
+   read has low word 23, so no read producer re-adds her.
+
+The `npc=23` headers of missions 50 to 110 and of the Druids' talks (R2-ASSET-190, R2-ENGINE-733)
+fit a member present from stage 50. Mission 43, offered at stage 40, has two `npc=23` headers in
+EN (event 8) and none in RU; the stage at which mission 43 is played relative to mission 40 is not
+read.
+
+**Confidence.** Medium: a composition; which exits enter the leave arm, whether an inn entry
+reaches the producer, the owner's identity, the script opcodes outside the selected set and the
+removal of a dead actor are Medium or Unknown in the claims composed.
+
+**Unknown.** Whether identity 23 joins the party inside mission 40. A save inside mission 40 after
+events 11 to 14, read for the party's Groups, settles it.
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), questions 1 and 3.
+
+### R2-SESSION-302
+
+- Population: `rom2-gog-original` (9 files), `rom2-gog-original-2` (7), `rom2-owner-kaarg-0051`
+  (6), each matched to its manifest's SHA-256. Bank 768 is 10, 20 or 30 in every file and no file
+  has a nonzero bank 773 (`bank.tsv` lists every nonzero cell). No Human in Player 0's Groups
+  (`party.tsv`, the table committed) has +0x14c 23; they hold identities 21 and 22 and hires 1
+  and 2. Humans of other Players are not tabulated.
+- Rule, expected by the code read: identity 23 is built like identity 22 into her own Group of the
+  owner (R2-ENGINE-745), so a town or mission file is expected to keep her as R2-SESSION-296 keeps
+  a companion: a Human in a Player Group with +0x14c and +0xe. The hire rule (R2-SESSION-294,
+  R2-ENGINE-525) does not apply: the hire creator takes IDs 1..20 (R2-ENGINE-381), and LOAD does
+  not call the producer (R2-ENGINE-743).
+- Bank, expected by the code read: town departure does not touch 773 (R2-ENGINE-744), so a file
+  written in the stage-50 town or a stage-50 mission before its exit is expected to hold 773 = 23
+  at bank offset 0xC14 (R2-SESSION-158). That rests on the other 773 writers R2-SESSION-254 names
+  (LOAD, NewGame, SetVar and TalkTo's kind-1 toggle of bank 511 + low word, which reaches 773 for
+  low word 262) leaving it alone; R2-SESSION-254 holds "no inn kind-1 word has low word 262" at
+  Medium.
+
+**Confidence.** High for the population read. Medium for the rule and the bank value: no file
+holding identity 23 or a nonzero 773 was read.
+
+**Unknown.** Whether LOAD puts a stored identity 23 back in owner +0x24; if not, the next inn
+entry at stage 50 builds a second one. Load a town file written at stage 50, enter the inn, save,
+and count actors with +0x14c 23.
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 4.
+**Format surface.** Bank slot 773 and the companion Group; `formats/rom2-sav/campaign.md`.

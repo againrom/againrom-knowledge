@@ -376,7 +376,7 @@ ROM1 caps P at 100 with the same base 1.025 (`MAGIC-POWER-004`, `MAGIC-CEIL-013`
 | R2-ENGINE-035 | RU build: mission logic runs from the ALM records and `allods2.exe`; `scenario.dll` supplies the campaign location, a numbered variable store and town, inn and shop flows; script arms for scenario variables and subobjectives call it. | Medium | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 | R2-ENGINE-036 | ROM1's type 7 grammar parses all 46 campaign maps; the vocabulary adds instants 35 to 39 and checks 23 to 27, used by 35 maps; every map also carries one undeclared opcode word (65538). | High / Medium | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 | R2-ENGINE-037 | Each campaign map has one `main.res` file `text/mission<N>.txt`, loaded in campaign mode; briefing, subobjective, failure and event are section families across the corpus; ROM1's `text/battle/m<N>/` family is absent. | High / Medium | ● active (amended) | [EXP-2007](../experiments/EXP-2007-rom2-mission/), [EXP-2009](../experiments/EXP-2009-rom2-text/) |
-| R2-ENGINE-038 | RU build: unit placement resolves the record's definition id against the Units column `serverID` (slot 55) or, for the person arm, the Humans column `serverID` (slot 24); ROM1 keyed Units on other columns. | Medium | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
+| R2-ENGINE-038 | RU build: unit placement resolves the record's definition id against the Units column `serverID` (slot 55) or, for the person arm, the Humans column `serverID` (slot 24); ROM1 keyed Units on other columns. | Medium | ● active (amended) | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 | R2-ENGINE-039 | ROM1's byte-run (`.256`) and the word-run (`.16a`) frame grammars parse every frame of every ROM2 sprite file: 40,570 and 2,865 frames, no failure; pixel meaning is not tested. | High / Medium | ● active | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 | R2-ENGINE-040 | Among the 46 campaign maps the axes disagree: map 83 has the fewest triggers and declared operations and no ROM2-only operation; map 32 has the fewest units and objects; the ten-map Pareto set is the same with or without opcode 65538. | High | ● active (amended) | [EXP-2007](../experiments/EXP-2007-rom2-mission/) |
 
@@ -435,6 +435,14 @@ In the RU build `L2.00115`, a bit `0x10` of the placement record's in-memory fla
 **Confidence.** Medium, RU build only: the scan and the slot numbers were read; the identity of the Units and Humans collections with the data.bin groups of `R2-ASSET-009` rests on slot numbering, not on a load-time link.
 
 **Unknown.** Whether every `serverID` used in the maps is present in the table (no join was run); the consumers of the type 10 to 12 record arrays; whether `L2.00132` (hero required) is reachable in single-player.
+
+**Amended.** R2-ENGINE-742 reads the person arm in EN (`L2.00192`), equal to RU
+after masking, so that arm holds for EN; the ordinary Units arm stays RU only.
+R2-SESSION-297 narrows the Unknown on missing `serverID`s: all 605 flag-0x10
+records of the 46 maps of each root resolve to a Humans row; flag-0 records
+were not joined. R2-ENGINE-741 narrows the collection identity: the database
+serializer loads +0xa0 in the walker-group order, and its `this` link is
+still numeric (Medium).
 
 ### R2-ENGINE-039
 
@@ -2079,7 +2087,7 @@ and invalid-input behavior, transport/refill semantics and original LOAD.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-207 | The selected RU archive object reference is a u16 tag with u32 escape: null, earlier object, earlier class or new class with schema and name; class and object share one index counter before the payload call. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
-| R2-ENGINE-208 | The RU Human class record chains to Humanoid and Unit; Human adds no stream bytes, and Humanoid writes the Unit programme, 24 raw bytes and twelve Item references. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-ENGINE-208 | The RU Human class record chains to Humanoid and Unit; Human adds no stream bytes, and Humanoid writes the Unit programme, 24 raw bytes and twelve Item references. | High | ✔ promoted (amended) | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 | R2-ENGINE-209 | The RU Unit serializer writes a 38-byte base, counted references, three counted word lists, six raw blocks of 498 bytes, scalars, three references, a name and two gated nested payloads in one fixed order. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 | R2-ENGINE-210 | The RU Item serializer writes the shared 38-byte base, counted references and eight scalars; Weapon adds 24 and 22 raw bytes, a byte and a reference, and Armor adds 22 raw bytes and a byte. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 
@@ -2150,6 +2158,10 @@ class-name alignment (R2-SESSION-100).
 **Unknown.** The meaning of the 24 raw bytes and of the twelve slots; the
 result of L2.01160; the effects of L2.01157 and the rest of the Human
 constructor.
+
+**Amended.** R2-ENGINE-740 reads L2.01160 and its callee L2.04050: the result
+is [this+4] + 0x30 * index, with no bound check. This narrows the Unknown on
+the result of L2.01160.
 
 ### R2-ENGINE-209
 
@@ -6729,7 +6741,7 @@ EN inventory input L2.01652 supplies either one or the displayed quantity under 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-378 | The two installed ROM2 client Data.bin payloads contain 33 Humans and 22 Units records in the measured campaign-key ranges, covering internal template families for hire IDs 1..7 and controlled identities 21..23. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
-| R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/), [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
 | R2-ENGINE-380 | Selected ROM2 departure and TALK arms enable hire IDs1..7 through bank availability/town gates; NPC22/topic30 TALK enables hireID2 and builds no actor; the inn entry that offers it builds controlled identity22 (R2-ENGINE-633). | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-381 | The reached EN mission-entry loop selects a subset of 20 hire IDs from nonzero selection and availability; its paired EN/RU creator writes each input identity and has no additional numeric list cap in the read body. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-382 | Selected EN campaign transition cleanup tests actor class WORD+0x0e: classes33..63 take a reset path and other classes take detach/destroy calls; the predicate is not controlled identity WORD+0x14c. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
@@ -6763,6 +6775,13 @@ word (R2-ENGINE-635). R2-ASSET-160 finds no map-script numeric parameter in
 10230..10309 and any name or template route are outside that search
 (narrowed by the review). These narrow the "mission/script producers of
 identity22" and "other callers of the addition producer" Unknowns above.
+
+**Amended.** R2-ENGINE-744 and R2-ENGINE-745 narrow the "exact join timing"
+Unknown for identity 23: LeaveLocation of mission 40 stores 773 = 23 after
+the common 773 = 0, and the same leave arm passes it to the producer, which
+builds a Human from key 10230 (`Mage_Hero`, Medium) with WORD +0x14c 23
+unless the owner list holds identity 23. R2-SESSION-302 finds no owner save
+after Leave40, so acceptance stays unobserved.
 
 ### R2-ENGINE-380
 
@@ -11501,6 +11520,13 @@ availability 8..20, the unread part of R2-ENGINE-380); the native join
 immediate DLL store makes hires 8..20 available, and after NewGame they stay
 unavailable at Medium.
 
+**Amended.** R2-ENGINE-742 reads `L2.02664` (it returns the parameter count
++8) and `L2.02667` → `L2.04051` (base + 4*index), and R2-ENGINE-741 reads the
+Humans collection fill (elements 1..count-1 in stored order). This narrows
+the Humans half of the join (hires 1, 2 and 6). The Units lookup `L2.02665`
+and the Units fill stay unread, and the numeric `this` link of the database
+serializer remains.
+
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
 
 ### R2-ENGINE-525
@@ -14431,7 +14457,7 @@ means equal once every hex number of five or more digits is masked.
 |---|---|---|---|---|
 | R2-ENGINE-633 | The ROM2 inn selector (EN L2.00425, RU L2.00427), when app +0x5d8 (RU +0x63c) is 2, passes every EnterInn option word with stage GetVar(0x300) to the addition producer before the inn page is shown (Medium; narrowed by the review). | High / Medium | ✔ promoted (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
 | R2-ENGINE-634 | Branch-target and raw DWORD scans of each ROM2 client find two callers of the addition producer, the inn selector and the 0x41d leave arm (EN L2.03302, L2.03303; RU L2.03304, L2.03305), and no pointer to it. | High / Medium | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
-| R2-ENGINE-635 | For an incoming low word 22 the ROM2 addition producer builds a Human with the hero flag from key 10220 (Fighter_Hero and the hero class Medium), stores WORD +0x14c = 22, appends it to owner +0x24 unless held; town registration Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ENGINE-635 | For an incoming low word 22 the ROM2 addition producer builds a Human with the hero flag from key 10220 (Fighter_Hero and the hero class Medium), stores WORD +0x14c = 22, appends it to owner +0x24 unless held; town registration Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/), [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
 | R2-ENGINE-636 | The EN ROM2 raw DWORD scan of displacements 0x149..0x14d finds 59 store candidates over +0x14c; of its 15 word moves the producer, the Humans load and literals 21 and 0 are read; 53 sites carry values that are not shown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
 | R2-ENGINE-637 | In ROM2 campaign play an inn entry at stage 30 adds controlled identity 22 before TALK 22/30 (Medium). Whether he is the talk's companion, how hire 2 relates to him and whether he stays after victory are Unknown. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 
@@ -14546,6 +14572,11 @@ persists into a town file: the owner's EN Kaarg town file `game9998`,
 written after the stage-30 inn, stores a Human with
 +0x14c = 22 and class +0xe = 33 (0x21) in its own Group of Player 0, owned
 by the Player. Whether that actor came from this producer is not shown.
+
+**Amended.** R2-ENGINE-745 adds a read, EN only: `L2.03312`, `L2.02714` and
+their callees `L2.03061`, `L2.02686`, `L2.04086`, `L2.04087` never
+dereference `this` in their own bodies; `L2.02685`, `L2.04088` and
+`L2.04089` are unread. The town-registration Unknown stays.
 
 ### R2-ENGINE-636
 
@@ -15922,7 +15953,7 @@ Human of R2-ENGINE-208.
 | R2-ENGINE-679 | The Astrologer of ROM2 mission 40 is most likely Mage_Hero (record 36, NPC word 23, female Unarmed Mage); the npc= header rule names 23, 2112 and 694 and leaves the identity Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
 | R2-ENGINE-680 | ROM2 client slot +0x28 `L2.03682` draws a non-hero person from units.reg File of its typeID; hero Mage_Hero (+0xe 0x24) gets `heroes\mage\sprites` from `L2.03683`, `heroes\mage_st` when byte +0x8c is 6. | Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
 | R2-ENGINE-681 | ROM2 panel tail `L2.03684` (head unread), mode +0x70 not 0, paints a unit with flags & 0x11 and & 8 via slot +0x88 `L2.02965`: body `equipment\<class>\<face>.256` from flags & 6 and +0x28; the face set gives all 35 persons those flags. | Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
-| R2-ENGINE-682 | ROM2 Unit LOAD restores u16 +0xc and +0xe, u8 +0x49..+0x4c (face +0x4b) and +0x14c; Human LOAD relinks +0x3c to Humans row +0xc, or row 5 when +0xe >= 0x21; the client rebuild path is Medium. | High / Medium | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
+| R2-ENGINE-682 | ROM2 Unit LOAD restores u16 +0xc and +0xe, u8 +0x49..+0x4c (face +0x4b) and +0x14c; Human LOAD relinks +0x3c to Humans row +0xc, or row 5 when +0xe >= 0x21; the client rebuild path is Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
 | R2-ENGINE-683 | Eight ROM2 EN/RU routine pairs of the mission-40 look (draw, paperdoll, client update, units.reg loader, map constructor, panel, template load, serializers) are equal after masking but for sizes, offsets and stack slots. | High | ● active (branch candidate) | [EXP-2086](../experiments/EXP-2086-rom2-villagers/) |
 
 ### R2-ENGINE-679
@@ -16084,6 +16115,12 @@ and its senders are not read.
 **Unknown.** No owner save holds mission 40 (R2-SESSION-234). A run of the
 original that saves in mission 40, reloads and inspects each person would
 settle the rebuild path.
+
+**Amended.** R2-ENGINE-739 and R2-ENGINE-740 read the mode test `L2.01537`,
+the word writer `L2.03711`, the word reader `L2.03607` and `L2.03310` →
+`L2.04052` in both roots. This narrows the Medium on the widths and
+directions of +0xc and +0xe to High; the u8 transfers and the +0x14c packing
+keep their grade.
 
 **Evidence.** [EXP-2086](../experiments/EXP-2086-rom2-villagers/RESULTS.md), question 5.
 
@@ -17395,7 +17432,7 @@ globals are not compared.
 | R2-ENGINE-730 | The ROM2 client unit's slot +0x88 (L2.02965, RU L2.03720) builds equipment\<class dir by flags & 6>\, walks 12 item slots at +0x188 and formats the body %s%d.256 from +0x28; a fallback actor has no items. | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-ENGINE-731 | The ROM2 talk lookup matches class CUnit (size 0x1e4) by u16 +0x1dc; copy R2.0075 (RU R2.0076) sets +0x1dc from a source unit's +0x14c and +0x24 from its +0xe; the EN scan finds 5 word and 11 dword stores at +0x1dc. | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-ENGINE-732 | The EN ROM2 group list L2.04008 equals RU R2.0122 after masking: store writes a count and each Group body; load builds each 0x50-byte Group, reads it and appends it; that it is the Player's list is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
-| R2-ENGINE-733 | Druids' inn talks 70/71, Kaarg talks 61..63 and mission 60 event1 name speakers 21, 22, 23; with no client unit carrying that +0x1dc the fallback picture is absent and the client takes the fatal path (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ENGINE-733 | Druids' inn talks 70/71, Kaarg talks 61..63 and mission 60 event1 name speakers 21, 22, 23; with no client unit carrying that +0x1dc the fallback picture is absent and the client takes the fatal path (Medium). | Medium | ✔ promoted (amended, branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/), [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
 
 ### R2-ENGINE-729
 
@@ -17560,4 +17597,315 @@ it.
 original after Leave40 and another after the stage-50 Kaarg inn settle
 both.
 
-**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.
+**Amended.** R2-SESSION-301 and R2-ENGINE-745 narrow the Unknown on where
+identity 23 comes from: the leave arm builds a Human with WORD +0x14c 23 on
+leaving mission 40, and the stage-50 inn rebuilds her when absent; the
+class stays Medium (0x24 or 0x22), and a town file holding her was not read
+(R2-SESSION-302).
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3;
+[EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 2.
+
+## Human definition reference in the mission SAV
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-739 | ROM2 SAVE writes a Human's definition as Unit base u16 +0xc and u16 +0xe at Human payload bytes 16 and 18; the template load sets +0xc to the first name-equal Humans row and +0xe from the row, 0x21+ for a hero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2095](../experiments/EXP-2095-rom2-human-row/) |
+| R2-ENGINE-740 | ROM2 Human LOAD reads u16 +0xc, then +0xe, and points +0x3c at Humans element +0xc when +0xe < 0x21, else at element 5; the bodies read make no bound check and no serverID or name lookup. | High / Medium | ✔ promoted (branch candidate) | [EXP-2095](../experiments/EXP-2095-rom2-human-row/) |
+| R2-ENGINE-741 | The ROM2 database serializer loads its Humans collection +0xa0 ninth: a count, SetSize, then elements 1..count-1; both roots store 290, so rows 1..289, and element 0 is never loaded. | High / Medium | ✔ promoted (branch candidate) | [EXP-2095](../experiments/EXP-2095-rom2-human-row/) |
+| R2-ENGINE-742 | The ROM2 placement person arm, EN L2.00192 and RU L2.00115, tests flag 0x10, finds the top Humans row whose parameter 24 equals record +0x10, sets the hero flag from `_Hero` in its name and builds a Human from that name. | High / Medium | ● active (branch candidate) | [EXP-2095](../experiments/EXP-2095-rom2-human-row/) |
+
+### R2-ENGINE-739
+
+The Human serializer `L2.03714` (RU `L2.01158`) calls Humanoid `L2.03715`
+(RU `L2.01159`), which calls the Unit serializer `L2.01090` (RU `L2.01161`),
+which calls the base serializer `L2.03196` (RU `L2.01164`). The mode test
+`L2.01537` (RU `R2.0017`) returns 1 when bit 0 of archive +0x14 is clear;
+that arm passes field values to the writers, so it stores.
+
+- Store order in the base: the position block, u32 +4 through `L2.03226`,
+  u16 +0xc (`L2.03606`, `L2.04053`), u16 +0xe (`L2.04054`, `L2.04055`), u32
+  +8, u16 +0x18, u32 +0x1c, the object itself, u32 +0x14.
+- The word writer `L2.03711` (RU `L2.01715`) copies two bytes to the archive
+  cursor +0x24 and advances it by 2. The store arm reads the fields as they
+  are; nothing is recomputed at SAVE.
+- Source of +0xc: the template load `R2.0088` (RU `R2.0089`) cuts the name
+  at its first '.', loops i = 1..count-1 over `L2.00148` and, at the first
+  row whose name `L2.04056` finds equal, stores i (`L2.04057`) and points
+  +0x3c at that row. `L2.04056` is true when `L2.04058` returns 0;
+  `L2.04058` is read in EN only and the compare `L2.02024` under it in
+  neither root. An exact and a case-folded compare give the same first
+  index for every installed row.
+- Source of +0xe: 0 at `L2.04059`; then the parameter routine `L2.00219`,
+  called at `L2.04060` and not read here, sets it from the row (R2-ENGINE-525
+  reads it by position as the typeID); in the 187 saved non-hero Humans +0xe
+  equals parameter 16 of row +0xc (R2-SESSION-298). For the hero argument
+  0x21 + gender, or 0x23 + gender when `L2.01136` returns nonzero (`L2.04061`
+  to `L2.01141`). +0xe = 0 afterwards logs `Invalid human`.
+- The template load also stores the row's parameter 24 low word at +0x14c and
+  replaces it with (word / 10) % 1000 when it exceeds 10000 (`L2.04062` to
+  `L2.02672`); the Unit serializer stores it in a packed u32 (R2-ENGINE-682).
+- In all 216 Humans of the owner saves, +0xc is at Human payload byte 16 and
+  +0xe at byte 18 (R2-SESSION-298).
+- EN and RU bodies are equal instruction for instruction after operands of
+  0x1000 and above are masked (callee and global identity is not compared);
+  the template load differs in three small immediates, allocation sizes
+  passed before `L2.04063`. `L2.04058` is read in EN only.
+
+**Confidence.** High for the store instructions, widths and order in both
+roots, and for the +0xc loop and its store `L2.04057`; LOAD consumers
+zero-extend both words, so they are unsigned. Medium for the equality
+predicate (`L2.02024` unread, `L2.04058` EN only). Medium for the +0xe source
+routine (`L2.00219` not read here); High for the saved equality of +0xe with
+parameter 16. Medium for the exact hero value: `L2.01136` is unread; the
+saved hero values 33 and 35 agree with the census rule and do not settle it.
+Medium that the SAVE value equals the build-time value: other writers of +0xc
+and +0xe were not searched, though no save contradicts it.
+
+**Unknown.** The hero value branch and whether anything rewrites +0xc or +0xe
+before SAVE; a hero and a placed Human built in a mission and saved, with the
+words at creation compared to the file, settle both. The name predicate; a
+map in a copied install that names a Humans row with different case, loaded
+in the original, settles it.
+
+**Evidence.** [EXP-2095](../experiments/EXP-2095-rom2-human-row/RESULTS.md), question 1.
+
+### R2-ENGINE-740
+
+- The base load arm reads +4 through `L2.03229`, then +0xc (`L2.04064` to
+  `L2.03608`) and +0xe (`L2.04065` to `L2.04066`) through the word reader
+  `L2.03607` (RU `L2.04067`), which copies two bytes from the archive cursor.
+- After Humanoid returns, the Human load arm (`L2.04068` to `L2.04069`)
+  zero-extends +0xe and compares it with 0x21. Below: +0x3c =
+  `L2.03310`(+0xc) on `L2.00148`; +0xc wins and +0xe is not compared with the
+  row's typeID. At or above: +0x3c = `L2.03310`(5); +0xe wins and +0xc does
+  not select the row (SAVE writes it back; no other consumer was searched).
+- `L2.03310` calls `L2.04052` (RU `L2.01160`, `L2.04050`), which returns
+  [this+4] + 0x30 * i with no bound check.
+- No serverID lookup, name search or map read occurs in these bodies; +0x14c
+  is restored as a word and not used for the row. Row 5 of both roots'
+  `data.bin` is `Man_Sword2Handed`, typeID 5.
+- EN and RU bodies are equal instruction for instruction after operands of
+  0x1000 and above are masked; callee and global identity is not compared.
+
+**Confidence.** High for the read order, the branch and the missing bound
+check in the bodies read in both roots. Medium that element 5 holds the
+`data.bin` row 5: it rests on the load order of R2-ENGINE-741. Medium that
+nothing later re-derives +0x3c: no consumer was searched.
+
+**Unknown.** What a stored +0xc of 0 or above 289 yields; a LOAD of such a
+save in the original settles it. Whether element 5 is the `data.bin` row 5
+and whether a later consumer re-derives +0x3c; a mission save holding a hero,
+reloaded in the original with the hero's row-5 traits observed, settles both.
+
+**Evidence.** [EXP-2095](../experiments/EXP-2095-rom2-human-row/RESULTS.md), question 2.
+
+### R2-ENGINE-741
+
+- The database serializer `L2.03916` (RU `R2.0016`) loads its collections
+  in the order +0x14, the object itself (no offset added, `L2.04070`), +0x78,
+  +0x3c, +0x28, +0x50, +0x64, +0x8c, +0xa0, +0xc8, +0xdc. The `data.bin`
+  walker groups fit that order, which puts Humans at +0xa0, ninth.
+- The data loader `L2.04071` calls the serializer with its own `this`
+  (`L2.04072`).
+- The Humans arm (`L2.04073` to `L2.04074`) reads a count through `L2.03229`,
+  calls SetSize `L2.04075` (RU `L2.00023`), which sets +8 to its argument on
+  every branch, then calls slot +8 of elements 1..count-1. The count getter
+  `L2.04076` returns +8. Element 0 is never loaded. The row vtable
+  `L2.04077` has slot +8 = `L2.04078` (EN only).
+- Both roots store count 290 with an identical `data.bin` payload; rows 1..289
+  are loaded, and rows 2, 6, 16, 22 and 25 have empty names.
+- The data loader `L2.04071` (RU `R2.0004`) names a loose `Data.bin` before
+  `World.res` member `World\Data\Data.bin`.
+- A u16 +0xc can name 0..65535; 0 and 290..65535 address element 0 or memory
+  past the array (R2-ENGINE-740).
+- EN and RU bodies are equal instruction for instruction after operands of
+  0x1000 and above are masked; the vtable and `L2.04078` are read in EN only.
+
+**Confidence.** High for the arm, the loop bounds and the stored count; the
+walker and the native loop agree. Medium for the collection identity: the
+caller of the data loader, which would give `this` = `L2.00811`, is unread,
+so the link is the numeric match `L2.00148` = `L2.00811` + 0xa0. Medium that
+a loose `Data.bin` is tried first: the loader was read as a linear window
+with an open edge.
+
+**Unknown.** Whether a loose `Data.bin` replaces the rows; a run of the
+original with one beside `World.res` settles it. The collection identity; a
+run of the original with the loader's `this` recorded at `L2.04072` settles
+it.
+
+**Evidence.** [EXP-2095](../experiments/EXP-2095-rom2-human-row/RESULTS.md), question 3.
+
+### R2-ENGINE-742
+
+Before the arm, the routine resolves each list entry's player word +0x14
+through `L2.00308` on `[L2.00292]`; a miss logs `Can't resolve player %d for
+unit %d.` and skips the entry (`L2.04079` to `L2.04080`). It skips the entry
+when `[L2.00805]`+0x174 and the player's +0x2c are both nonzero (`L2.04081`
+to `L2.04082`). EN and RU bodies are equal instruction for instruction after
+operands of 0x1000 and above are masked; callee and global identity is not
+compared. The arm `L2.04083` to `L2.04084`:
+
+1. record +0x48 & 0x10, else the Units arm;
+2. `L2.02663` (RU `L2.02560`) on `L2.00811` with record +0x10: from count-1
+   down to 1, the first row whose parameter count +8 (`L2.02664`) is nonzero
+   and whose parameter 24 (`L2.02667` → `L2.04051`, base + 4i) equals the key;
+   0 when none;
+3. hero flag = Find(`_Hero`) > 0 in that row's name (`L2.00997`, a wrapper
+   of the unread `L2.01457` that returns the offset or -1);
+4. a 0x254-byte object and the Human constructor `L2.00214` (RU `L2.00130`)
+   with (row name, hero flag, 0); the constructor calls the unread Unit
+   constructor `L2.04085` and passes the three arguments to the template load
+   of R2-ENGINE-739.
+
+The template load searches the name again from row 1, so its +0xc differs from
+the lookup index only when an earlier row has the same name.
+
+**Confidence.** High for the arm, the two skip tests and the helpers listed,
+in both roots. Medium for the hero flag: `L2.01457` is unread. Medium for
+which records reach the arm: `L2.00308`, the callers of `L2.00192` and the
+map loader that fills the record were not read.
+
+**Unknown.** Whether any flag-0x10 record is skipped by the player or session
+test; a run of the original that loads each map and counts the Humans placed
+settles it.
+
+**Evidence.** [EXP-2095](../experiments/EXP-2095-rom2-human-row/RESULTS.md), question 4.
+
+## Party identity 23: request, build and repeats
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-743 | ROM2 WORD +0x14c gets 23 at producer L2.03311 (low word 23; callers leave arm and inn selector only) and Humans load L2.03315/L2.02672 (rows ManMage_Unarmed 23, Mage_Hero 10230); other routes are Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+| R2-ENGINE-744 | ROM2 LeaveLocation of mission 40 stores 773 = 0, then 23 (scenario.dll D2.00281, D2.00250); the 0x41d leave arm then passes 773 and the stage to the producer (EN L2.03303, RU L2.03305), requesting identity 23 (arm entry Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+| R2-ENGINE-745 | For low word 23 the ROM2 producer builds a Human from Humans key 10230 (Mage_Hero, Medium) with hero argument 1, WORD +0x14c 23, owner +0x14 and its own Group; class +0xe 0x24 or 0x22 by +0x4c bit 2 (EN read, Medium); level Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+| R2-ENGINE-746 | The ROM2 producer skips identity 23 when owner +0x24 holds WORD +0x14c 23, with no alive test; the stage-50 inn body offers 0x00310017, passed on when app +0x5d8 is 2 (Medium); TalkTo has no NPC 23 arm; death removal Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+
+### R2-ENGINE-743
+
+Sites that store WORD +0x14c, the identity word, with a value that can be 23:
+
+| Site (EN, RU) | Value | Reached by |
+|---|---|---|
+| `L2.03311`, `L2.04090` | list word low word, controlled branch (0x15..0x1e) | the producer `L2.00174` (`L2.00176`) |
+| `L2.03313`, `L2.04091` | list word low word, other IDs | the producer; not reached by 23 |
+| `L2.03315`, `L2.04092` | Humans parameter 0x18 | the Humans load `R2.0088` (`R2.0089`) |
+| `L2.02672`, `L2.04093` | (w/10)%1000 when the parameter is above 10000 | the same |
+
+- Callers, by scan in both roots: the producer has two (`L2.03303`, `L2.03302`; RU `L2.03305`,
+  `L2.03304`; R2-ENGINE-634); the Humans load has two (the constructor `L2.00214` and the second
+  constructor `L2.00233`); the constructor has 22: 16 with `Start_*` literals (12 in `L2.01814`,
+  `L2.04094`, `L2.01818`; 4 in the R2-ENGINE-105 producer, which writes 21), 2 in the addition
+  producer, 1 in the hire creator, 2 in `L2.01062` (name from its caller), 1 in the map actor
+  builder `L2.00192`. The second constructor builds `Man_Unarmed`, whose row this experiment did
+  not read; its 3 EN callers are not classified.
+- `world.res` (one file for both roots) gives parameter 0x18 = 23 to `ManMage_Unarmed` and 10230
+  to `Mage_Hero` and holds no Humans row in 10231..10239.
+- Requests for 23: `scenario.dll` stores slot 773 directly twice per root, 0 at `D2.00281` and
+  0x17 at `D2.00250` (R2-SESSION-254); EnterInn holds one constant option word with low word 23,
+  `0x00310017` at `D2.00156`, and a byte scan for it finds that one site per root.
+- EN/RU: the producer and the Humans load are equal after masking operands of 0x1000 and above, so
+  callees, globals and large immediates are not compared by the mask; the key base 0x2710, the
+  offset 0x270e and the load's `cmp ecx, 0x2710` stand at the same lines in both listings, and the
+  inn word is checked by the byte scan in each root.
+- Maps and scripts: R2-ASSET-190.
+
+**Confidence.** High for the scans, the four sites and the bodies read in both roots. Medium that
+no other route writes 23: a register call escapes the scans, the callers of `L2.01062` and of the
+second constructor are not classified, the open sources of R2-ENGINE-636 remain, and unselected
+script parameters are not written.
+
+**Unknown.** Windows at the callers of `L2.01062` and `L2.00233` settle the remaining routes.
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 1.
+
+### R2-ENGINE-744
+
+- `D2.00009` (both roots, same addresses): a type-2 current (a town) goes to `D2.00013`, which does
+  not touch 773; any other current goes to `D2.00012`, whose fifth instruction stores 773 = 0
+  before any branch. Its case 40 (R2-SESSION-048, R2-ENGINE-379) at `D2.00249` calls
+  AddMission(0x32) and AddMission(0x3c) and stores 773 = 0x17.
+- The 0x41d leave arm `L2.01922` (RU `L2.01924`), 0x255 bytes: app +0x3e4 (RU +0x3fc) nonzero;
+  the transition `L2.01664` when `[L2.00805]` is set; `L2.01854`; GetCurrentLocation; LeaveLocation
+  `[L2.02297]`; at `L2.04095` the getter `L2.00173`, GetVar(0x305); when nonzero the value in a list
+  and GetVar(0x300) to the producer at `L2.03303`, receiver `[L2.00805]`; then `L2.00466(0)`.
+- So the request that LeaveLocation of mission 40 writes reaches the producer in the same arm,
+  after the transition. Every other ordinary departure leaves 773 = 0, so the arm requests
+  identity 23 only on leaving mission 40.
+
+**Confidence.** High for the bodies, read in both roots and equal after masking operands of 0x1000
+and above (callees and globals are not compared by the mask). Medium for which exits enter the
+arm: this experiment does not read app +0x3e4; R2-ENGINE-412 and R2-ENGINE-422 read it as the
+win flag the 0x430 victory arm sets and hold the defeat negative at Medium, and R2-ENGINE-526
+names `L2.01664` the victory transition. LeaveLocation is also called from the 0x42d arm
+(R2-ENGINE-421), which does not call the producer (R2-ENGINE-634).
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 1.
+
+### R2-ENGINE-745
+
+The producer's controlled branch for low word 23:
+
+1. Humans lookup of 10230 (`L2.02663`); `Mage_Hero` holds it. Suffix keys 10231..10239 have no
+   row, so the stage does not change the row.
+2. 0x254 bytes and the constructor `L2.00214` with (name of the Humans index from `L2.03310`,
+   1, 0).
+3. WORD +0x14c = 23 at `L2.03311`; +4 = low word of `L2.02670`, the first free bit of the bitmap
+   `L2.00339` as word*32+bit (EN; the RU callee is not read); +0x14 = owner from `L2.00310` on
+   `[L2.00292]`.
+4. Append to owner +0x24, a new 0x50-byte Group appended to owner +0x28, the actor added to it.
+5. `L2.03312` and `L2.02714` on `[L2.01066]`. In EN these and their callees `L2.03061`,
+   `L2.02686`, `L2.04086`, `L2.04087` never dereference `this` in their own bodies; they pass it
+   to `L2.02685` (unread) and write the actor's +0x50 and +0x1c4 fields or walk its Group through
+   `L2.04088`/`L2.04089` (unread). The RU callees are not read.
+6. The sender `L2.01056` with 0xffb.
+
+The Humans load (both roots) sets +0x14c = 10230, then 23 at `L2.02672`; gender = parameter 0x12;
++0x4c |= 6 when word +0x9c is above 0; with the hero argument, +0xe = gender + 0x23 when
+`L2.01136` returns nonzero, else gender + 0x21. `L2.01136` returns byte +0x4c & 4 (EN; the RU
+callee is not read). `Mage_Hero` (EN = RU): gender 1, typeID 23, face 20, Body 14, Reaction 33,
+Mind 35, Spirit 44, HealthMax 30, ManaMax 70, Fire 25, Astral 10, other schools 0, serverID
+10230, items "Uncommon None Shoes" and "None Dress", no level parameter. The leave arm and the
+inn word give the same unit. The map-40 `Mage_Hero` (R2-ASSET-190) is built by the map actor
+builder with player 3 and is not in the owner list.
+
+**Confidence.** High for the producer, constructor and load bodies, read in both roots and equal
+after masking operands of 0x1000 and above (callees and globals are not compared by the mask).
+Medium for the row join (the filter `L2.02664` and `L2.04051` are unread), for the owner as the
+party's Player (R2-ENGINE-525) and for the class: which of 0x24 and 0x22 holds needs the fields
+`L2.00219` writes (R2-ENGINE-680 reads 0x24), and the bit test is read in EN only. Medium for
+skills and items: their placement goes through `L2.00219` and an unread item loop. Unknown:
+level.
+
+**Unknown.** A save of the original after the mission-40 victory, read for her Unit body, settles
+class, level, skills and items.
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 2.
+
+### R2-ENGINE-746
+
+- The controlled branch walks owner +0x24 (`L2.04096..L2.04097`) comparing WORD +0x14c with the
+  ID; a match skips the build at `L2.04098`. The walk reads no other field.
+- The stage-50 EnterInn body offers `0x00310017` (kind 0, topic 49, NPC 23) ungated
+  (R2-ENGINE-224); EnterInn's other 45 constant option stores have no low word 23. A campaign inn
+  entry passes the options to the producer when app +0x5d8 is 2, whose meaning is unread
+  (R2-ENGINE-633). Which towns are reachable at stage 50 is the route (R2-SESSION-293).
+- TalkTo `D2.00137` (61 instructions, both roots) has kind-0 arms only for NPC 5 and NPC 675 topic
+  78 (R2-ENGINE-230).
+- Her class, 0x22 or 0x24, lies in 0x21..0x3f, which the victory transition's last owner loop
+  resets rather than detaches (R2-ENGINE-526).
+- Her death sends reason 4 under R2-ENGINE-625's guards; 41 of 46 mission failure-tag sets per
+  root hold 4 (not missions 10, 20, 30, 32, 40), so in mission 50 and later her death is a
+  defeat.
+
+**Confidence.** High for the walk, the word in the stage-50 body and TalkTo, read in both roots
+(the inn word by the byte scan in each root, since the mask hides it). Medium that a campaign inn
+entry passes it (R2-ENGINE-633), and for the victory loop and death links (R2-ENGINE-526,
+R2-ENGINE-625). Unknown whether a dead actor leaves owner +0x24; while it stays, the walk blocks a
+rebuild.
+
+**Unknown.** After a defeat caused by her death, the original's next screen and whether a town
+with the same party can be entered are Unknown. The run is a save at mission 50, her death, and
+whatever the original offers next, with a save and an actor count wherever it allows one.
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 3.

@@ -430,6 +430,27 @@ Unknown, and so is whether this actor is the companion the talk presents.
 The NPC22 topic40 and topic62 words repeat the request at their stages.
 — R2-ENGINE-633, R2-ENGINE-635
 
+Identity 23 has two requests and two stores. LeaveLocation of mission ID 40
+stores 773 = 0 and then 23, and the leave arm then passes 773 with stage768
+to the addition producer, so leaving mission 40 through that arm requests
+her (High for the bodies, Medium for which exits enter the arm). The
+stage-50 EnterInn body offers the word NPC23/topic49 (`0x00310017`), the
+only one of its 46 constant option stores with low word 23; a campaign inn
+entry passes it to the producer when app +0x5d8 is 2 (Medium). The stores
+are the producer's controlled store and the Humans load, which gives 23 to
+units built from the rows ManMage_Unarmed and Mage_Hero. Other routes are
+Medium. — R2-ENGINE-743, R2-ENGINE-744
+
+For low word 23 the producer builds a Human from key 10230, the row
+Mage_Hero at Medium, with the hero argument, stores WORD+0x14c=23 and gives
+it a Group of its own in the owner, unless the owner's actor list already
+holds identity23; the walk has no alive test. Her class is 0x24 or 0x22 by
+bit 2 of +0x4c (EN read, Medium), and her level is Unknown. In EN the
+registration wrappers on `[L2.01066]` do not dereference it in their own
+bodies (the RU callees are not read). TalkTo has no arm for NPC 23; whether
+death removes her from the owner list is Unknown.
+— R2-ENGINE-745, R2-ENGINE-746, R2-ENGINE-635
+
 The reached EN entry loop requires nonzero selection and availability,
 selects a subset of 20 hire slots, and passes the nonempty list and stage
 to the actor creator. The paired creator bodies assign each input ID
@@ -531,9 +552,29 @@ Among the departure cases only Leave50 adds town 3. The stage on arrival is
 precede 50 (Medium, a composition). An optional Leave80 stores 778 = 1;
 777 = 1 and 770 = 1 belong to Leave70. — R2-SESSION-293
 
+The first join read for identity 23 is on leaving mission 40 (stage 40 to
+50); a transfer of the map-40 Mage_Hero to the party by a script opcode
+outside the selected set is not excluded. An inn entry at stage 50 re-adds
+her only when she is absent, and no producer read re-adds her after stage
+50 (Medium). — R2-SESSION-301
+
+By the code read, a town or mission file is expected to keep identity 23 as
+a companion, a Human in a Player Group with +0x14c and +0xe, not by the
+hire rule. Town departure does not touch 773, so a file written at stage 50
+before the next mission exit is expected to hold bank 773 = 23 at bank
+offset 0xC14 (Medium). No file read holds identity 23 or a nonzero 773: the
+22 files of three copied save directories are at stages 10, 20 and 30.
+— R2-SESSION-302
+
 In the 14 route maps the only bank store by opcode 35 is map 50's 780 = 1;
 opcode 36 nodes take values 1..4; other opcodes are counted, not
 interpreted. — R2-ASSET-189
+
+Over the 46 maps of each root one type-6 record holds a definition word in
+23 or 10230..10239: map 40 record 36, the player-3 Mage_Hero (10230). No
+selected script parameter holds 23, 10003 or 10230..10239. Headers naming
+speaker 23 occur in missions 40, 43 (EN only) and 50..110 except 61, and in
+10 town keys. — R2-ASSET-190
 
 At stage 60 the Druids' inn offers talks 70/680 and 71/681 and hire 3
 (Druid). From stage 70 it adds 79/5 when 774 = 1 (79/5 stores 536 = 1,
@@ -571,8 +612,9 @@ A town file that reaches those talks or mission 60 therefore needs world
 units with +0x14c 21, 22 and 23 that reach the client (Medium: the speaker
 number, the world-unit source, the open's return for an absent key and the
 fatal reading are each Medium or rest on unread callees). How the inn NPCs
-680 and 681 resolve, the client collection in a town and the origin of
-identity 23 are Unknown. — R2-ENGINE-733
+680 and 681 resolve and the client collection in a town are Unknown.
+Identity 23 is read as built on leaving mission 40 and expected to be kept
+as a companion (Medium, above). — R2-ENGINE-733, R2-SESSION-301
 
 ## Catalog and campaign graph
 

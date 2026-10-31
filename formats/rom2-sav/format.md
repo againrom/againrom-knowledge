@@ -492,8 +492,9 @@ slot 768 to an addition producer. Its EN/RU branch for IDs 21..30 skips new
 creation when the selected owner's actor list already contains the same
 WORD(+0x14c). A missing match constructs and registers a human with that word.
 The mission-ID40 departure arm supplies slot773=23; the selected consumer
-can construct identity23 or reuse its existing match. The join schedule
-and runtime acceptance remain Unknown. — R2-ENGINE-379, R2-ENGINE-106
+can construct identity23 or reuse its existing match. Leaving mission 40
+through the leave arm is the request; runtime acceptance remains Unknown.
+— R2-ENGINE-379, R2-ENGINE-106, R2-ENGINE-744
 
 Selected EN/RU map owner construction can reuse the existing owner for its
 first row under a Session +0x74 and count-wrapper condition. A fresh owner
@@ -671,6 +672,11 @@ scenario SAVE/LOAD pair transfers these bytes; the actors and controlled
 pointer use the Player/Group/Unit programs. Cold LOAD preserving the same
 roster and literal binding remains Unknown. — R2-SESSION-158
 
+By the code read, a file written at stage 50 before the next mission exit is
+expected to hold 773 = 23 at 0xC14 and to keep identity 23 as a companion in
+a Player Group (Medium); no file read holds identity 23 or a nonzero 773.
+— R2-SESSION-302
+
 The selected EN transition tests actor class WORD+0x0e, retaining the
 reset branch for 33..63 and calling the detach/destroy route otherwise.
 It does not test identity WORD+0x14c here. Earlier cleanup callees and
@@ -787,13 +793,36 @@ R2-ENGINE-319
 
 Human LOAD stores base words +0xc (Humans row index) and +0xe (type), Unit
 bytes +0x49..+0x4c (face +0x4b, gender in bit 7 for a non-hero) and the low
-word of the u32 that also carries +0x204 and +0x1a0 (+0x14c). Human LOAD
-relinks the row pointer +0x3c from +0xc when +0xe is below 0x21 and to row 5
-otherwise. The branch direction is the unread `L2.01537` test and the widths
-come from the unread helpers, so these are Medium. The client takes its type
-from +0xe and its face from +0x4b; that the client look after LOAD is
-rebuilt from them and the stored item references is an inference (Medium).
-— R2-ENGINE-682
+word of the u32 that also carries +0x204 and +0x1a0 (+0x14c). The u8
+transfers of +0x49..+0x4c and the packed +0x14c rest on unread archive
+helpers (`L2.03712` and `L2.03713` for the bytes), so their widths are
+Medium. The client takes its type from +0xe and its face from +0x4b; that the
+client look after LOAD is rebuilt from them and the stored item references is
+an inference (Medium). — R2-ENGINE-682
+
+A Human's definition is the unsigned u16 pair +0xc, +0xe at Human payload
+bytes 16 and 18 (base bytes 16 and 18). SAVE writes the stored words as they
+are; the template load sets them at creation (Medium that nothing else changes
+them). It sets +0xc to the first Humans row whose name it finds equal to the
+template name (the compare is Medium) and +0xe from that row, or to 0x21 or
+more for a hero (the exact hero value is Medium). — R2-ENGINE-739
+
+| +0xe | LOAD sets row pointer +0x3c to | Note |
+|---|---|---|
+| below 0x21 | Humans element +0xc | +0xe is not checked against the row |
+| 0x21 or more | Humans element 5 (`Man_Sword2Handed` if the collection is the `data.bin` Humans table, Medium) | +0xc is not used to select the row |
+
+The Human LOAD bodies read make no bound check, serverID lookup or name
+search; +0x14c is not used for the row. — R2-ENGINE-740
+
+The Humans table stores 290 elements in both roots; elements 1..289 are
+loaded rows and element 0 is never loaded. In the Human LOAD bodies read a
++0xc of 0 or above 289 is not rejected; what it yields is Unknown.
+— R2-ENGINE-741
+
+In the 22 owner saves all 216 Humans store +0xc in 1..289 (highest 274) and a
++0x14c word equal to that row's serverID word; 29 store a hero type (33 or
+35) and so load element 5. — R2-SESSION-298
 
 The base raw12 block stores tile X/Y in bytes 0/1 and fractions in bytes 4/5.
 Player-1 positions are 0/0 in the four town-like files, 11/41 in

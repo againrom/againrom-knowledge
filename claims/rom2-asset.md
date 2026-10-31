@@ -2854,3 +2854,32 @@ original through missions 30 to 50 with the party and items recorded after
 each settles it.
 
 **Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 2.
+
+## Party identity 23 in maps, scripts and texts
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-190 | Of the type-6 records of 46 maps per ROM2 root only 40.alm record 36 (10230, player 3) holds 23 or 10230..10239; no selected script parameter does; npc=23 headers occur in missions 40, 43 (EN), 50..110 and 10 town keys. | High | ✔ promoted (branch candidate) | [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
+
+### R2-ASSET-190
+
+- Maps: every `.alm` member of `scenario.res` (EN
+  `388c955f49c02ecfed765340ff3a5b3e8f37210e2c85c8d877bc04b949d60d7f`, RU
+  `c19950690570d94b40c68acffd210cdab94c2a12b5d6ad5718730392c6b6e08b`) through the EXP-2068 walker:
+  46 maps per root, every size check passing, 4212 type-6 records EN and 4234 RU. One record per
+  root has its definition word in {23, 10230..10239}: `40.alm` record 36, definition 10230
+  (`Mage_Hero`), flag 0x10, player 3, type 23; EN = RU (R2-ASSET-172).
+- Scripts: `tools/r2script` writes 4180 parameters per root (selected nodes only, R2-ASSET-189);
+  none equals 23, 10003 or 10230..10239.
+- Texts (`main.res` EN `27b841ab71e6132eff7acc4fb75a6a2294260c0696b93ceec7f96773fae2d857`, RU
+  `d51b031c9fbc09d2b15bca837c615619d7987fa09f6daa3c2ef248b86cb4c3e2`): headers holding `npc=23`
+  occur in mission 40 events 11..14, mission 43 event 8 (EN only), every mission from 50 to 110
+  except 61, and none in missions 10..32, 41, 42. Town keys: `npc23talk49`, `kaargwoman60`,
+  `npc22talk62`, `npc2109talk63`, `npc680talk70`, `npc677talk83`, `npc681talk91`,
+  `npc2006talk100`, `npc6accept70`, `npc2019talk53` (13 headers, both roots). The `npc=23` counts
+  differ EN/RU in missions 40, 43, 50, 60, 62, 71, 84, 92 and 103.
+
+**Confidence.** High for the population read. Parameters of unselected script nodes are not
+written, so a script that adds identity 23 through another opcode is not excluded.
+
+**Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 1.
