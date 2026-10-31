@@ -1714,7 +1714,7 @@ The acquired paired DLL SAVE/LOAD body ranges have equal hashes. R2-ENGINE-209 s
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-161 | Both inspected ROM2 AreaEffect serializers preserve a six-byte local scalar suffix including Blizzard pulse count and countdown; ordinary SAV reachability and LOAD resume remain Unknown. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-SESSION-161 | Both inspected ROM2 AreaEffect serializers preserve a six-byte local scalar suffix including Blizzard pulse count and countdown; ordinary SAV reachability and LOAD resume remain Unknown. | Medium / Unknown | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-SESSION-162 | The selected EN/RU Blizzard loops agree locally; all 46 campaign maps per root parse, but Blizzard caster counts and complete locale parity remain Unknown. | High / Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 
 ### R2-SESSION-161
@@ -1749,6 +1749,11 @@ for ordinary SAVE/LOAD behavior and full object encoding.
 prefix, nested damage payload, factory recreation, RNG-state preservation and
 cold LOAD continuation remain Unknown. An original mid-Blizzard SAVE followed
 by fresh-process LOAD with parsed state would settle them.
+
+**Amended.** R2-SESSION-330 narrows the ancestor-prefix Unknown: the ancestor writes the position
+object, dword `+4`, words `+0xc` and `+0xe`, the mode dword `+8`, word `+0x18`, dword `+0x1c`,
+the save key and the owner key `+0x14` before `+0x40`/`+0x41`, for every mode. The nested payload,
+SAVE reachability and LOAD continuation stay Unknown.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -5015,3 +5020,60 @@ holding Stone Curse was read.
 
 **Unknown.** The stored bytes of a real save. A save made during Stone Curse and read at the unit's
 Effect record, then loaded once, would settle them.
+
+## AreaEffect save programme
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-330 | A ROM2 AreaEffect record of every mode holds the effect ancestor (row +0xc, ID +0xe, mode +8, keys), bytes +0x40/+0x41 and the area suffix; the three bodies read write no caster +0x3c, words +0x42/+0x44/+0x46 or map cell registration. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+
+### R2-SESSION-330
+
+AreaEffect slot +8 RU `L2.01711` (EN `L2.01713`) calls the SpellEffect serializer `L2.01716` (EN
+`L2.03421`), which calls the ancestor `L2.01164` (EN `L2.03196`). The save branch writes, in order:
+
+1. Ancestor:
+   - `L2.00543` (not read);
+   - the position object `+0x10` through `L2.02981` (not read);
+   - dword `+4`;
+   - word `+0xc`, the row;
+   - word `+0xe`, 2*row+9;
+   - dword `+8`, the mode;
+   - word `+0x18`;
+   - dword `+0x1c`;
+   - the object's own pointer, its save key;
+   - dword `+0x14`, the owner key.
+2. SpellEffect: byte `+0x40` (completion), byte `+0x41`.
+3. AreaEffect (R2-SESSION-161):
+   - bytes `+0x4c` (first update done), `+0x4d` (radius), `+0x4e` (direction), `+0x4f` (pulse
+     index);
+   - word `+0x50` (countdown);
+   - the owned object `+0x48`.
+
+The load branch reads the same fields. It sets `+0x18` to 0, registers the key in session
+`[L2.01317]+0xdc` (`L2.01168`) and resolves `+0x14` through `L2.01169`. The programme does not
+depend on the mode. The three bodies read do not write the area's caster `+0x3c`, words `+0x42`
+and `+0x46` (R2-ENGINE-796) or word `+0x44`, which the base constructor zeroes (`L2.04785`) and no
+listed body writes. The owned effect's `+0x44` holds a copy of the caster (R2-ENGINE-792); it is
+written or not by the serializer of the nested payload `+0x48` (`L2.00356`), which was not read
+(Unknown). The cell registrations of a mode-1 area (R2-ENGINE-793) live in the map's cell records,
+not in the object. A loaded area with `+0x4c` = 1 does not rerun its first update.
+
+These are object-relative fields, not file offsets.
+
+**Confidence.** High for the field order of the three bodies in both roots (equal after masking).
+Medium for:
+
+- the dword width of `L2.00354`, taken from its use and not read (`L2.01714` writes one byte and
+  `L2.01715` two, R2-SESSION-161);
+- the unread `L2.00543` and `L2.02981`.
+
+Unknown whether the map records are saved elsewhere, whether the nested payload writes the caster
+copy, and what a loaded mode-1 area does.
+
+**Unknown.** A save made during a Wall of Fire, read at the AreaEffect record and loaded once,
+would settle all three; reading the owned classes' serializers would settle the caster copy.
+
+**Format surface.** `formats/rom2-sav/format.md`, AreaEffect local scalar suffix.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 4.

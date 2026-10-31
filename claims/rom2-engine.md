@@ -6916,7 +6916,7 @@ Selected activation EN L2.01117 / RU L2.01212 passes panel ID 0x467 and bounds (
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-390 | Positive filled Blizzard damage bypasses the blank-effect default and creates a mode-2 AreaEffect owning a damage object in both inspected ROM2 roots. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-390 | Positive filled Blizzard damage bypasses the blank-effect default and creates a mode-2 AreaEffect owning a damage object in both inspected ROM2 roots. | Medium | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-391 | The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3. | Medium | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-392 | The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-393 | The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
@@ -6947,6 +6947,11 @@ independent raw listings. No original process was run.
 
 **Unknown.** Allocation failure, global scheduler integration and complete
 player-visible lifetime were not observed.
+
+**Amended.** R2-ENGINE-792 and R2-ENGINE-796 correct the clause "registers it in map collection
++0x92ecc": `L2.04675` sets area word `+0x42` from the sector table at that map offset and
+inserts nothing; with Delivery 1 the tail adds the area to the effect list through `L2.04731`.
+The other clauses stand.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -9060,7 +9065,7 @@ rows (R2-ASSET-098).
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-444 | ROM2 item text and spell lists name row r by spell.txt line r-1; the spellbook hover shows spells.txt line s for slot s with main.txt labels, and the 24-entry table EN L2.02137 gives a row number per slot (High join). | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/), [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/) |
-| R2-ENGINE-445 | ROM2 spells use ID 2*row+8 at cast, 30 for Prismatic, 2*row+9 for an area cell (row 7); the client draws that ID's projectiles.reg type or nothing (a unit caster's object of 16, 24, 34, 46, 48, 62 ends at once: R2-ENGINE-691, Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-445 | ROM2 spells use ID 2*row+8 at cast, 30 for Prismatic, 2*row+9 for an area cell (row 7); the client draws that ID's projectiles.reg type or nothing (a unit caster's object of 16, 24, 34, 46, 48, 62 ends at once: R2-ENGINE-691, Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) , [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-446 | ROM2 spell sounds are sfx.reg Sfx(500+ID): the caster plays 500+2*row+8, a typed cell effect 500+ID at creation except Blizzard 523 at the ninth update; an absent slot is silent at the sites read (Medium that no other site plays). | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-447 | A ROM2 typed spell effect lives for its packet argument in updates; its frame and draw follow per-ID switch tables: (update/2) mod Phases by default, falling Blizzard pieces, swinging lightning and unit-attached marks. | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-448 | In the effect method EN L2.02138, ROM2 spell effects write the per-cell light byte map for IDs 10, 12, 13, 18, 28, 30 and 40 (radius argument up to 3); other writers are not excluded (Medium) and the footprint is Unknown. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
@@ -9189,6 +9194,12 @@ caster's state 8, and which type it draws.
 ID; for 16, 24, 34, 46, 48 and 62 it is 0 and the first update ends the
 object, so no type of these IDs is drawn from a unit caster (Medium). The
 flight of the other IDs stays as stated.
+
+**Amended.** R2-ENGINE-792 reads the cell-identifier store of every area row: the tail writes
+area `+0xe` = 2*row+9 (High). R2-ENGINE-796 narrows which area stages send cell effects: row 2
+sends 13 and row 9 sends 27 by 0x86, while the bodies read of rows 3, 6, 14, 15 and 17 send no
+typed effect, so the typed-effect arm is not reached from those bodies (callees unread); how the
+client draws types 15, 21, 37, 39 and 43 stays Unknown.
 
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
@@ -19645,3 +19656,282 @@ actor-step call and the death loop (RU and EN). Medium:
   loaded once, would settle it.
 - The EN timer tail (bit clear, 0x89, flag set). Reading the EN timer to its return would settle
   it.
+
+## Area spells and their cell programmes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-792 | ROM2 builds an AreaEffect at one direct call in the apply tail, for the 8 rows with Distribution not 1: mode 2 for rows 7 and 9 (Distribution 5), mode 1 for rows 3, 6, 14, 15, 17 (AreaDuration > 0), mode 0 for row 2. | High / Medium | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-793 | A ROM2 mode-1 area registers a wall (rows 3, 17) or a diamond (rows 6, 14, 15) in per-cell kind slots and, for 16*AreaDuration+16P/10 updates, applies its effect every 16 updates to the first occupant of each cell. | High / Medium | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-794 | On a shared cell ROM2 Fire Ball and Wall of Fire unregister Poison Cloud, Poison Cloud leaves a Wall of Fire cell, Light and Darkness unregister each other; Wall of Earth skips cells whose record entry +4 is set and applies nothing. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-795 | ROM2 Fire Ball's area applies each of the 3 occupant entries of each 3 by 3 cell once, damage divided by size squared; Acid Stream's hits a stored cone in 6 pulses 3 updates apart (25 straight or 21 diagonal cells), no draw for cells. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-796 | ROM2 area bodies read send 0x87 cell bitmaps at start and end for rows 3, 6, 14, 15, 17, gated by area word +0x42, setting bit row in client map +0xa08; Fire Ball sends 0x86 ID 13 (22) once, Acid Stream ID 27 (18) per cell. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-797 | Compared ROM2 EN/RU area bodies (card list) match after masking except: EN's straight Acid Stream cone repeats (-1,2) and omits (-2,2) at pulse 2; RU guards the 0x87 client arm and post-hit occupant step; client counter +0x49b8/+0x4a38. | High / Medium | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+
+### R2-ENGINE-792
+
+The apply common tail RU `L2.01690` (EN `L2.01693`) reads Distribution (param 8). For 1 it builds a
+point effect; for any other value it calls the AreaEffect constructor `L2.01691` (EN `L2.01694`)
+with the target position and the Radius byte (param 9). The call is at RU `L2.04732` (EN `L2.04733`).
+The tail then stores:
+
+- `+0x3c` = caster when `L2.01570`(caster) is 0, else 0; `+0xc` = row; owned effect `+0x44` =
+  `+0x3c`;
+- `+0xe` = 2*row+9;
+- `+0x50` = AreaDuration (param 11) << 4. When that word is nonzero it adds (P << 4) / 10 and sets
+  mode `+8` = 1. Distribution 5 sets mode `+8` = 2 and `+0x50` = 0;
+- `+0x4e` = (`L2.02635`(caster, target position) & 0xff) >> 5;
+- then it calls `L2.04675`.
+
+Delivery 1 adds the area to the effect list (`L2.04731`). Delivery 2 (row 2 only among these rows)
+wraps it in a SpellTransport (R2-ENGINE-660).
+
+The data.bin Spells rows with Distribution not 1 are 2, 3, 6, 7, 9, 14, 15 and 17, with equal values
+in both roots (R2-ENGINE-395). Rows 2, 3, 7 and 9 reach the tail through the damage-object head;
+rows 6, 14, 15 and 17 reach it through their switch arms.
+
+| Row | Distribution | AreaDuration | Radius | Delivery | Mode |
+|---|---|---|---|---|---|
+| 2 Fire Ball | 3 | 0 | 1 | 2 | 0 |
+| 3 Wall of Fire | 4 | 10 | 2 | 1 | 1 |
+| 6 Poison Cloud | 3 | 10 | 2 | 1 | 1 |
+| 7 Blizzard | 5 | 8 | 4 | 1 | 2 |
+| 9 Acid Stream | 5 | 0 | 3 | 1 | 2 |
+| 14 Darkness | 3 | 15 | 4 | 1 | 1 |
+| 15 Light | 3 | 15 | 4 | 1 | 1 |
+| 17 Wall of Earth | 4 | 10 | 2 | 1 | 1 |
+
+Censuses, per root:
+
+- direct E8 calls to the constructor in `.text`: one;
+- the vtable (RU `L2.01710`, EN `L2.01712`) as a dword in every section: three hits, all in the
+  class's default constructor, constructor and destructor;
+- the class table: size 0x54, schema 1, factory RU `L2.04734` (EN `L2.04735`).
+
+The area tick slot 6 RU `L2.04736` (EN `L2.03444`) runs the stage `L2.01695` for mode & 2, the
+mode-1 path for mode & 1, and `L2.04737` for mode 0.
+
+**Confidence.** High for the tail stores, the mode rule, the data.bin rows and the censuses as
+censuses, in both roots. Medium that no other site builds an AreaEffect: the censuses do not close
+a copy of an object or a constructor reached through a computed call, and other classes that act
+over cells were not searched. Medium for the direction meaning: `L2.02635` was not read.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 1.
+
+### R2-ENGINE-793
+
+Timing. Let D = 16*AreaDuration + floor(16P/10), with P the power of R2-ENGINE-020.
+
+- At update 1 the first-update body RU `L2.04738` (EN `L2.04739`) builds the shape and sets `+0x4c`
+  = 1.
+- At updates 2 .. D+1 the countdown `+0x50` takes the values D-1 .. 0, and a pulse fires at each
+  multiple of 16. That gives AreaDuration + ceil(floor(16P/10)/16) pulses, 16 updates apart.
+- At update D+2 the end RU `L2.04740` (EN `L2.04741`) runs and completion `+0x40` = 1.
+
+The cell choice and timing of the mode-1 bodies read use no random draw; the damage each Wall of
+Fire hit applies is drawn as in R2-ENGINE-028.
+
+Shape. Distribution 4 (rows 3 and 17, RU `L2.04742`, EN `L2.04743`) uses the builder `L2.04744`
+with the direction `+0x4e` and one of two tables (RU `L2.04745` / `L2.04746`, EN `L2.04747` /
+`L2.04748`):
+
+- table A: x -2..2 at y 0 and 1, 10 cells, for directions 0, 2, 4 and 6 (x and y swapped for 2 and
+  6);
+- table B: 9 cells on two adjacent diagonals, for the odd directions.
+
+The signs are y- for 0 and 1, x- for 4, 5 and 6, both for 7. Other Distributions (rows 6, 14 and 15,
+RU `L2.04749`, EN `L2.04750`) take every (dx, dy) in [-R..R]² with |dx|+|dy| <= R+1: 21 cells for
+radius 2, 57 for radius 4.
+
+Marking. Each shape cell goes through mark-cell RU `L2.04751` (EN `L2.04752`):
+
+- it is skipped when its third occupant is nonzero and its map byte has mask 0x04 set;
+- otherwise it is registered through `L2.04753`, which overwrites slot +0x14 + 4*kind of the cell
+  record and recounts the six slots;
+- the kind (`L2.00477`) is 0 for row 3, 2 for row 6, 3 for row 17, 4 for row 15 and 5 for row 14;
+- with a damage object of positive spread, mark-cell also ORs 0x10 into map planes +0x10000 and
+  +0x20000 (`L2.04754`).
+
+Pulse. Over the (2R+1)² square, wherever `L2.04755` finds a nonzero slot of the area's kind, the
+first occupant (`L2.02476`, cell-record entry +4) goes to the occupant routine `L2.01708`, which
+applies the owned object through `vtable+0x3c` (R2-ENGINE-393). The applications are:
+
+- Wall of Fire: fire damage;
+- Poison Cloud: the `health` Effect;
+- Light and Darkness: the `scanRange` Effect, with renewal by R2-ENGINE-695.
+
+No visited set is kept: a target that stays on a cell is reached at every pulse.
+
+End. The end unregisters the full square through `L2.04756`, which clears a slot only when it holds
+this area. The destructor body `L2.04757` makes no registry call; its calls to the owned object's
+virtual destructor and the base destructor `L2.04758` were not read. A newer same-kind area
+overwrites a shared cell, and both areas' pulses act on it while their squares cover it.
+
+**Confidence.** High for the bodies, tables, kinds and timing arithmetic in both roots. Medium for
+the classes behind the cell-record entries (R2-ENGINE-393), the item-cast P (a signed, unclamped
+word) and the facing (`L2.02635` not read).
+
+**Unknown.** The update period in seconds. Timing an original Wall of Fire cast at a known power
+would settle it.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 2.
+
+### R2-ENGINE-794
+
+The cell function RU `L2.04759` (EN `L2.04760`) runs after each registration (mark-cell) and, with
+a damage object of positive spread, at each Fire Ball cell. `r` is cell-record +0x14
+(`L2.00474`).
+
+| Rows | Action |
+|---|---|
+| 2, 3 | A Poison Cloud in slot 2 is unregistered and its 0x87 stop is sent; the same for slot 1 |
+| 6 | When slot 0 (Wall of Fire) is set, this Poison Cloud is unregistered and its stop is sent |
+| 14 | When slot 4 (Light) is set, slots 5 and 4 are unregistered and Light's stop is sent |
+| 15 | When slot 5 (Darkness) is set, slots 4 and 5 are unregistered and Darkness's stop is sent |
+
+Kind 1 is produced by no row in `L2.00477`.
+
+Row 17 registers only where `L2.02476`(cell) is 0, a cell with no first occupant (record entry
++4; the other two entries are not tested). The occupant routine returns at once for row 17, so its
+pulses apply nothing. Its owned object is the blank Effect `L2.00089`.
+
+**Confidence.** High for the arms and tables in both roots. Medium that slot 1 is never filled
+(the kind function is the only producer read). Unknown what the kind-3 registration of Wall of
+Earth blocks: the register calls `L2.04761`, whose callee `L2.04762` was read only to `L2.04763`
+(in navigation, not committed) and there handles record entry +0xc.
+
+**Unknown.** Movement and sight through a Wall of Earth or Darkness cell. Reading the readers of
+the cell-record slots, or an original run that orders a unit through a Wall of Earth, would
+settle it.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 2.
+
+### R2-ENGINE-795
+
+Fire Ball, mode 0, RU `L2.04737` (EN `L2.04764`). At the area's first update after the transport
+releases it, the body:
+
+1. sends the 0x86 of R2-ENGINE-796;
+2. visits the 3 by 3 square around the area position (R = `+0x4d` = 1);
+3. passes all three occupants of each cell (`L2.01704`, `L2.01705`, `L2.01706`) to `L2.01708`, which
+   copies the damage object and divides base and spread by the square of the target's
+   `vtable+0x1c` byte;
+4. with a damage object of positive spread, runs the cell function and the map-bit OR at each cell;
+5. sets completion `+0x40` = 1.
+
+Each of the 9 cells is visited once and each of its three occupant entries is applied once. Whether
+a target larger than one cell is listed in one or several cell records was not read, so whether it
+is hit once or once per covered cell is Unknown; the cell-record writers settle it.
+
+Acid Stream, mode 2 (stage RU `L2.01695`). The countdown restarts at 2, so the pulses fall at
+updates 1, 4, 7, 10, 13 and 16. Pulse p (`+0x4f`) builds its cells from table A at RU `L2.04765` +
+0xa4*p and table B at `L2.04766` + 0xa4*p (EN `L2.04767`, `L2.04768`), turned by the direction as
+for walls (R2-ENGINE-793). After pulse index 6, the dword at RU `L2.04769` (EN `L2.04770`), the area
+completes.
+
+- A, straight, RU: pulse p is the row y = p, x -p..p, for p 0..4. Pulse 5 is empty. 25 cells.
+- B, diagonal: pulse p holds the p+1 cells (p-i, i). 21 cells.
+
+The cell choice and timing of the row-9 branch use no random draw; the damage each hit applies is
+drawn as in R2-ENGINE-028. For each cell that passes `L2.01700`, the body sends the 0x86 of
+R2-ENGINE-796 and passes the three occupants to `L2.01708`. They take water damage (kind 2,
+resistance word `+0xc6`). The cone tables are read as stored in the image: an operand census of
+their start addresses and the count dword finds no `.text` reference outside this stage, and writes
+to interior addresses of these `.data` tables were not searched.
+
+**Confidence.** High for the bodies and the table contents as stored. Medium that the cone tables
+do not change at run time, and for the occupant classes (R2-ENGINE-393). Unknown whether Fire Ball
+hits a multi-cell target once or once per covered cell.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 2.
+
+### R2-ENGINE-796
+
+Opcode 0x87. Sender RU `L2.04771` (EN `L2.04772`) builds the packet at `L2.04773`:
+
+| Byte | Field |
+|---|---|
+| +0xa | area `+0xe` (2*row+9) |
+| +0xb, +0xc | x-R, y-R |
+| +0xd, +0xe | 2R+1, 2R+1 |
+| +0xf | flag |
+| +0x10..+0x1b | a 96-bit bitmap, bit j*(2R+1)+i |
+
+Flag 1 (first update) sets the bits where an area of this kind is registered. Flag 0 (end or
+cancel) sets the bits where none remains.
+
+The send `L2.04774` (EN `L2.04775`) gives the packet to a receiver when area `+0x42` AND the
+receiver `+0x30` is nonzero, or when `[L2.01317]+0x74` is 0. For the other receivers with word `+4`
+in 16..31, a start ORs the receiver bit into `+0x46` instead, and a stop is sent only when that bit
+is clear. `L2.04675` (EN `L2.04776`) sets `+0x42` to the OR of the four diagonal-neighbour sector
+words in the map table at +0x92ecc+0x400. The single-cell send `L2.03865` tests the same table.
+
+Client. The client dispatch RU `L2.04777`/`L2.04778` (EN `L2.04779`/`L2.03247`) maps 0x87 to arm RU
+`L2.04780` (EN `L2.04781`). The arm calls RU `L2.04782` (EN `L2.04783`) with x0, y0, w, h,
+(`+0xa` >> 1) - 4 = row, the bitmap and the flag. For each set bit:
+
+- start ORs (1 << row) into the cell map `+0xa08`; stop clears that bit;
+- row 3 start: when tile bit 0x2000 is clear it can add the cell to list `+0xa94`; it then sets tile
+  bit 0x2000;
+- rows 14 and 15 start: write 0x50 or 0 into 2 by 2 bytes of a client byte map; at the stop they
+  call `L2.04784`.
+
+The bodies read for rows 3, 6, 14, 15 and 17 (tick, first update, pulse, end, mark-cell, cell
+function) call no sender but the 0x87 one. Callees not read (`L2.02074`, the damage apply chain,
+client `L2.04784`) are not excluded. Units the area hits are updated by their own messages, such as
+the Effect's 0x88 (R2-ENGINE-697).
+
+Opcode 0x86:
+
+- Fire Ball: `L2.04771` sends 0x86 once with ID 13, argument 22, at the area cell, through
+  `L2.03865`.
+- Acid Stream: per accepted cell through `L2.01709`, ID 27, argument 18.
+- The client effects, lifetimes, frames and sounds are R2-ENGINE-445..448.
+
+**Confidence.** High for the packet, the gate and the client cell routine in both roots. Medium for:
+
+- the dispatch indexing (the instruction forming the index was not read; the 0x88 arm of
+  R2-ENGINE-695 agrees);
+- the meaning of `+0x42`/`+0x46` as receiver-visibility masks;
+- the meaning of the client byte map and of list `+0xa94`.
+
+Unknown which client routine draws the firewall, poison and wall pictures from `+0xa08`.
+
+**Unknown.** Reading the readers of client `+0xa08`, or an original run that casts Wall of Fire,
+Poison Cloud and Wall of Earth and records the pictures and their duration, would settle it.
+Whether a receiver deferred in `+0x46` gets the start later is open; reading the other `+0x46`
+readers would settle it.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 3.
+
+### R2-ENGINE-797
+
+After masking operands in `0x400000..L2.03731`, these listing pairs are equal:
+
+- the first update, both shapes, mark-cell, the end, slot 14, the cell registry, test, lookup and
+  register, unregister, the map op and tile byte;
+- the base constructor, class and destructor bodies, the transport constructor, the sector mask;
+- the three senders, the ancestor and SpellEffect serializers;
+- mode 0 and the builder outside their embedded tables;
+- the mode-2 stage, the area tick, constructor and serializer (EXP-2049 listings, compared by
+  `evidence/diff.py` with the same mask, outside `out/compare.tsv`).
+
+The wall tables, the diagonal cone table, the cone count and the jump and byte tables are equal.
+Not compared: `L2.02074`, `L2.01700`, `L2.01709`, the damage apply chain, `L2.04761` and the
+callees of the cell record.
+
+Differences:
+
+- Straight cone table A, pulse 2: EN x = -1, -1, 0, 1, 2; RU -2, -1, 0, 1, 2. EN processes (-1, 2)
+  twice (two 0x86 packets, two applications) and never (-2, 2).
+- Client 0x87 arm: RU returns unless client `+0x80` is nonzero; EN has no such test.
+- Client cell routine: counter `+0x49b8` in EN, `+0x4a38` in RU, at four sites each.
+- Occupant RU `L2.01708` before `L2.02074` (EXP-2049 `area-occupant`, compared as above): RU also
+  skips the call when `[L2.01317]+0x74` is set, the caster owner's `+0x2c` is nonzero and the
+  target owner's `+0x2c` is 0.
+- Client opcode tables: 54 arms in EN, 67 in RU, selector 0x16 versus 0x1a for 0x87.
+
+**Confidence.** High for the compared windows and the listed differences. Medium for what the RU
+occupant condition changes: `L2.02074` was not read.
+
+**Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 5.

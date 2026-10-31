@@ -975,10 +975,20 @@ Both inspected AreaEffect serializers write four bytes for object fields
 +0x4c..+0x4f, then a little-endian countdown word +0x50, after the base prefix
 and before the owned effect +0x48. Pulse counter +0x4f and countdown +0x50
 are local state needed by a running Blizzard. The RU base locally writes
-completion +0x40 and +0x41 as two bytes after an unexamined ancestor prefix.
+completion +0x40 and +0x41 as two bytes after the ancestor prefix.
 These are object-relative fields, not absolute SAV offsets. Ordinary SAVE
 reachability, nested damage encoding, RNG persistence and cold LOAD continuation
-remain Unknown; no preserved save was read (R2-SESSION-161).
+remain Unknown; no preserved save was read (R2-SESSION-161, amended).
+
+The ancestor prefix, in both roots, writes the position object +0x10, dword
++4, word +0xc (spell row), word +0xe (2*row+9), dword +8 (area mode 0, 1 or
+2), word +0x18 (zeroed at LOAD), dword +0x1c, the object's own save key and
+the owner key +0x14. The programme is the same for every mode. The three
+bodies read do not write the area's caster +0x3c, the words +0x42, +0x44
+(zeroed at construction) and +0x46, or the map cell registrations of a mode-1
+area. The owned effect's +0x44 holds a copy of the caster; whether the nested
+payload writes it, and whether the map saves the registrations elsewhere, is
+Unknown (Medium for the dword width of the writer). — R2-SESSION-330
 
 ## Nine-save LOAD contract
 
