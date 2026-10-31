@@ -2883,3 +2883,34 @@ each settles it.
 written, so a script that adds identity 23 through another opcode is not excluded.
 
 **Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 1.
+
+## Map 50 trigger for bank 780
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-192 | In both ROM2 roots map 50's trigger 24 is the one trigger running action 34 (instant 35, bank 780 = 1), beside actions 35 and 43, under check 34 (opcode word 4) against check 17 (word 65538). | High / Unknown | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+
+### R2-ASSET-192
+
+`tools/r2script` over the 46 installed maps of each root's `scenario.res` (EN 5548580 bytes, RU
+5549452 bytes). In `50.alm`:
+
+| Row | Values (EN = RU) |
+|---|---|
+| trigger index 24 | left0 check 34, right0 check 17, compare0 2; actions 35, 34, 43; word 0xb4 1 |
+| action 34 (index 33) | opcode 35; parameters 780, 1 |
+| actions 35, 43 (indexes 34, 42) | opcode word 2 |
+| check 34 (index 33) | word 4, word48 1; the census writes no parameters for this unselected node |
+| check 17 (index 16) | word 65538 (low 2, high 1); parameters 0 |
+
+No other map-50 trigger lists action 34. Over both roots' maps, action 34 of map 50 is the one
+instant-35 node with target 780 (R2-SESSION-114 counts four instant-35 nodes per root).
+
+**Confidence.** High for the rows, read by the census tool in both roots. Unknown for what
+check 34 with opcode word 4 and its parameters test and what compare 2 means, so for whether the trigger fires in
+play.
+
+**Unknown.** An original run that plays mission 50 and compares bank offset 0xC30 in saves before
+and after its end would settle it.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 3.

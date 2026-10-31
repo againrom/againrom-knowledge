@@ -1734,7 +1734,7 @@ No dedicated case body exists for stage 20. The byte table maps stage 20 to the 
 
 **Unknown.** Which stage value the client passes for catalog ID 2, which continuation entries a stage-20 call reaches at run time, whether the bank-slot compares are gates, the effects of the continuation beyond its stores and compares, and the meaning of the stage labels beyond the earlier numbering.
 
-**Amended.** R2-ENGINE-215/216/217/218 resolve the selector, output-buffer contract, current-ID predicates and named helpers. R2-ENGINE-221 separates the dynamic tail; R2-SESSION-109 bounds the early writer inference. The earlier method grade is unchanged.
+**Amended.** R2-ENGINE-215/216/217/218 resolve the selector, output-buffer contract, current-ID predicates and named helpers. R2-ENGINE-221 separates the dynamic tail; R2-SESSION-109 bounds the early writer inference. The earlier method grade is unchanged. R2-ENGINE-748 narrows the Unknown: the continuation compares are gates, evaluated per option, and the stage-10 body has none.
 
 ## Startup caller and concrete collection receiver
 
@@ -2417,7 +2417,7 @@ claim of a complete runtime roster or an empty stage30 continuation.
 | R2-ENGINE-226 | Stage90 emits kind3 topic90 for currentID2, or topics91/92 for currentID3 only when slots987/988 respectively equal zero. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
 | R2-ENGINE-227 | Stage100 emits kind3 topics100/102/103 for currentID2, with 102 gated by 998=0 and 103 by 987!=0 and 999=0; currentID3 gets101 only at 997=0. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
 | R2-ENGINE-228 | Stage110 emits its single kind3 topic110/NPC2006 store only for currentID2 before entering the shared continuation. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
-| R2-ENGINE-229 | All 23 remaining kind3 options pass topic to TalkTo's AddMission call as type1/ID-topic; with initial recordID10 they add no special bank store, and TalkTo has no direct stage store. | High | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
+| R2-ENGINE-229 | All 23 remaining kind3 options pass topic to TalkTo's AddMission call as type1/ID-topic; with initial recordID10 they add no special bank store, and TalkTo has no direct stage store. | High | ✔ promoted (amended) | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
 | R2-ENGINE-230 | Remaining kind0 options NPC2108/topic48 and NPC23/topic49 have no catalog or bank effect in TalkTo; the published client route selects npc2108talk48 and npc23talk49 text keys. | High / Medium | ✔ promoted | [EXP-2028](../experiments/EXP-2028-rom2-inn-stages/) |
 
 ### R2-ENGINE-223
@@ -2560,6 +2560,10 @@ catalog mutation, allocator callbacks or every possible bank writer.
 
 **Unknown.** Catalog matching/allocation success and mutations outside
 that initial identity; no native click or live availability was observed.
+
+**Amended.** R2-ENGINE-751 narrows the catalog-matching Unknown: AddMission's walk and type and
+ID test are read, and each of the 39 kind-3 inn topics matches one rebuilt record. The find
+compare, the node allocator and catalog mutation through GetAllLocations stay open there.
 
 ### R2-ENGINE-230
 
@@ -18082,3 +18086,173 @@ offset tables were not searched. Unknown for what the policy difference changes.
 **Unknown.** The policy difference and the per-id aim of EN policy arms (R2-ENGINE-458 is RU). A
 run of the original that watches a computer mage with Stone Curse and Prismatic Spray in its book
 and records each cast's target would settle the aim.
+
+## Inn offer gates, writers and TalkTo effects
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-748 | ROM2 EnterInn has 48 option stores and no other; stage 10's three words need only 768 = 10, and every other option's predicate, tabulated in the card, matches the native body in EN and RU. | High | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-ENGINE-749 | In both ROM2 scenario.dll images the 99 cells EnterInn tests have DLL writers only in NewGame, Load, SetVar, the mission departure and TalkTo; 776 and 781 have only SetVar, NewGame and Load. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-ENGINE-750 | ROM2 EnterInn tests the ID of the record at current D2.00007, stored only by EnterLocation, Load and the two departures (zero); TalkTo tests the fixed mission-10 record D2.00143. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-ENGINE-751 | ROM2 AddMission appends each catalog type-1 record whose ID equals the topic and that the list find reports absent; each of the 39 kind-3 inn topics matches one of the 49 rebuilt records. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-ENGINE-752 | ROM2 inn TALK stores bank cells only for topics 10, 30, 79 and 78 and hire words; every constant option but 79 and 78 is emitted again by the next EnterInn with the same bank and current. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+
+### R2-ENGINE-748
+
+The EnterInn export `D2.00089` (698 instructions, both roots) makes 48 option stores: 46 constant
+words (7 kind 0, 39 kind 3) and the two tail stores `D2.00273` / `D2.00274`. This is the set of
+R2-ENGINE-494; the window holds no further store into the option buffer. A word packs kind in
+bits 28..30, topic in bits 16..27 and NPC in bits 0..15. `896+N` is the completion flag the
+mission-N departure sets (R2-ENGINE-749).
+
+| Body (768) | Topic / NPC (kind) and the predicate beyond the stage |
+|---|---|
+| 10 | 9 / 207 (0), 8 / 2108 (0), 10 / 517 (3): none |
+| 30 | 30 / 22 (3), 39 / 2110 (0): none; 31 / 2108 (3): 927 = 0 |
+| 40 | 40 / 22 (3), 48 / 2108 (0): none; 41 / 2015, 42 / 2111, 43 / 2004 (3): 937, 938, 939 = 0 |
+| 50 | 49 / 23 (0): none; 51 / 2 (3): 533 != 0, 947 = 0; 53 / 2019 (3): 949 = 0 |
+| 60, 70, 80 | 70 / 680, 71 / 681 (3): current ID 3, 771 != 0, 966 = 0 (71 also 967 = 0) |
+| 60 | 61 / 2006, 63 / 2109 (3): current ID 2, 957 / 959 = 0 |
+| 70 | 72 / 2108, 73 / 2004 (3): current ID 2, 968 / 969 = 0 |
+| 80 | 83 / 677 (3): current ID 3, 979 = 0, 536 != 0; 81 / 2010: current ID 2, 776 != 0, 977 = 0; 82 / 2009: current ID 2, 776 = 0, 978 = 0 |
+| 90 | 90 / 2004: current ID 2; 91 / 681, 92 / 2003: current ID 3, 987 / 988 = 0 |
+| 100 | 100 / 2006: current ID 2; 102 / 2109: current ID 2, 998 = 0; 103 / 2005: current ID 2, 987 != 0, 999 = 0; 101 / 681: current ID 3, 997 = 0 |
+| 110 | 110 / 2006 (3): current ID 2 |
+| continuation | 79 / 5 (0): signed 768 > 60, current ID 3, 774 = 1; 78 / 675 (0): signed 768 > 60, current ID 3, 770 = 1 |
+| continuation | 62 / 22 (3): signed 768 >= 60, current ID 2, 958 = 0, 949 != 0 |
+| continuation | NPC 2022 (3), current ID 2: 74..77 need 959 != 0 and all 970..973 = 0; 84..87 any 970..973 != 0 and all 980..983 = 0; 93..96 any 980..983 != 0 and all 989..992 = 0; 776/781 zero/zero, zero/set, set/set, set/zero pick the first..fourth topic |
+| tail | hire i+1 (i = 0..19): 552+i = current ID and 532+i = 1 or 2 (the kind); bit 31 iff signed 512+i > 0 |
+
+The 60/70/80 body is shared; its options carry their own stage compare. The continuation runs
+after every body and for unlisted stages.
+
+- Controls: for each option a witness state and a breaker per conjunct; over both roots 256 option
+  witness states, 3,448 single-conjunct breaker states and 240 tail states (120 emit, 120 do not),
+  0 disagreements between this table and the native body.
+- Sweep: 3000 seeded states per root over 98 cells, 127 stages and current IDs 0..4, and 163 stage
+  values with a permissive bank; 0 mismatches; all 46 constant options emitted.
+- EN and RU listings are byte-equal.
+
+**Confidence.** High. The native body is interpreted from its committed listing in both roots,
+and the controls and sweep exclude a further conjunct on any option. EnterInn's only callee is the
+ID getter `D2.00011` (R2-ENGINE-218).
+
+**Unknown.** Which bank the client holds at a given inn visit; R2-ENGINE-749 and R2-SESSION-304
+bound the writers and one route.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 1.
+
+### R2-ENGINE-749
+
+Population: raw DWORD scans at every byte offset of every section of each `scenario.dll` image
+for every bank slot address (`D2.00003 + 4N`, N = 0..1023); of 127 hits per root, 126 are
+instruction operands classified by their instruction, and one, at `D2.00286`, is a dword spanning
+the end of `push dword ptr [esp+0x10]` and the start of `push 0x1003` (not a reference; listed
+as unclassified in `bank-references.tsv`). Indexed stores are bound to the ranges their listings
+show. The 99 distinct cells are the 41 EnterInn names by absolute address (including 768) and
+512..571 read through the tail index (the two sets share 533 and 536); `enterinn-bank-reads.tsv`
+lists 61 because it also lists 552..571, which the tail reads by index.
+
+| Cells | Literal stores | Indexed stores |
+|---|---|---|
+| 768 | NewGame `D2.00202` (10); departure `D2.00201` (+10 when ID % 10 = 0) | none |
+| 532..538 | Leave20 532, Leave50 534, Leave70 535, Leave60 537, Leave100 538 (1); TalkTo 533 (`D2.00139`), 536 (`D2.00287`) (1) | departure prefix `D2.00228` / `D2.00229` (2 or 1 when nonzero); NewGame `D2.00231` (0) |
+| 552..558 | Leave20 552 (2), Leave50 554 (3), Leave70 555 (3), Leave60 557 (2), Leave100 558 (2); TalkTo 553 (2), 556 (3) | none |
+| 512..531 | none | TalkTo kind 1 `D2.00199` (toggle of 511+low16); departure prefix `D2.00230` (0) |
+| 770 / 771 / 774 | Leave70 / Leave50 / Leave60 (1); TalkTo topic 78 / topic 79 store 770 / 774 = 2 | none |
+| 776, 781 | none | none |
+| 927..999 | none | departure `D2.00120` (896+ID = 1) |
+
+Every cell also has the SetVar export store `D2.00226` (client index), NewGame's 4096-byte clear
+and Load's 4096-byte restore. The client's SetVar indices are 531+key for key 1..20, 776, 781 and
+the script-instant targets (R2-SESSION-127); the hero flags 776/781 are set at hero creation
+(R2-ENGINE-283). Over the 46 installed maps of each root, instant 35 targets 772, 779 and 780 and
+instant 36 targets 753..756 (R2-SESSION-114, reproduced); none is an inn-tested cell.
+
+**Confidence.** High for the DLL literal-store census and the indexed-store sites. Medium for the
+ranges reached through client arguments (the SetVar index, the TalkTo word's low 16 bits), which
+rest on R2-SESSION-127 and R2-ENGINE-221 rather than a client read here.
+
+**Unknown.** `allods2.exe` code outside the SetVar call sites, a second load of the DLL by name,
+scripts outside the 46 maps, and the values the client passes to SetVar.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 2.
+
+### R2-ENGINE-750
+
+The EnterInn bodies read the current pointer `D2.00007` and call the getter `D2.00011`, which
+returns `[this+4]`, the record ID. The raw scan finds 29 references per root; the stores are:
+
+| Site | Routine | Value |
+|---|---|---|
+| `D2.00288` | EnterLocation `D2.00006` | its argument; it then clears 752..767 |
+| `D2.00289`, `D2.00290` | town departure `D2.00013` | 0 (ID 1 first removes the record from availability) |
+| `D2.00291` | mission departure `D2.00012` | 0 |
+| `D2.00265` | Load `D2.00103` | the availability node at the saved index |
+
+EnterLocation's one direct caller is NewGame (`D2.00292`, town 1); the client calls the export.
+Town 2 is admitted by Leave20 (AddTown 2) and town 3 by Leave50 (AddTown 3), so the compared ID is
+2 or 3 after the client enters that town's record. TalkTo compares its topic with the ID of
+`D2.00143` (`D2.00293`..`D2.00145`). That record is constructed by `D2.00142` as type 1, ID 10
+and is the fourth record the rebuild appends (`D2.00294`); its raw references are the
+constructor, the rebuild and TalkTo, and its field setter has one caller (R2-SESSION-127).
+
+**Confidence.** High for the DLL stores of the current pointer and TalkTo's object. Medium for
+the record the client passes to EnterLocation: the client caller was not read.
+
+**Unknown.** A direct store to the record's ID field `D2.00295` outside the windows read (no raw
+scan of that address), and client writes through record pointers it obtains from the DLL.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 4.
+
+### R2-ENGINE-751
+
+AddMission `D2.00014` takes the topic. It walks the catalog list `D2.00032` from its head (the
+head read `D2.00296` returns `[this+4]`; the step `D2.00111` returns node+8 and advances through
+`[node]`). For each record of type 1 whose ID equals the topic it calls the list find `D2.00021`
+on availability `D2.00105` with start 0 and, when the find returns no node, appends the record
+through `D2.00033`. Every one of the 39 kind-3 inn topics is the ID of exactly one type-1 record of
+the 49 the rebuild appends (R2-ENGINE-418); the three type-1 records built outside the rebuild
+are not on the list.
+
+The catalog list is written by the rebuild `D2.00005` (callers NewGame `D2.00297` and Load
+`D2.00298`), the list constructor call at `D2.00299` and the exit-time destructor call at `D2.00300`
+(raw scan, 57 references per root). The export GetAllLocations returns its address.
+
+**Confidence.** High for the walk, the type and ID test and the topic-to-record match. Medium for
+the absent test and the append: the find's compare `D2.00109` and the node allocator
+`D2.00301` were not read.
+
+**Unknown.** Client mutation of the catalog through GetAllLocations, and whether the
+`.rdata`-reached append method `D2.00254` (R2-ENGINE-420) runs on this list.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 5.
+
+### R2-ENGINE-752
+
+TalkTo `D2.00137` (61 instructions, both roots), run natively on each of the 46 constant words
+and five hire-shaped words:
+
+| Word | Effect |
+|---|---|
+| kind 3, every topic | AddMission(topic) (R2-ENGINE-751) |
+| kind 3 topic 10 | also 769 = 1 (topic equals the ID of `D2.00143`) |
+| kind 3 NPC 22 topic 30 | also 533 = 1, 553 = 2: hire 2 available in town 2 |
+| kind 0 NPC 5 topic 79 | 536 = 1, 556 = 3, 774 = 2: hire 5 available in town 3 |
+| kind 0 NPC 675 topic 78 | 770 = 2; ORs 0x80000 into the DWORD at `D2.00240` |
+| other kind 0 | nothing |
+| kind 1 | toggles 511+low16 (0 to 1, nonzero to 0) |
+| kind 2 | nothing |
+
+With the bank after TALK and the same current, EnterInn emits every constant option again except
+79 and 78, whose TALK moves 774 / 770 from 1 to 2. The client finds the first copied word with the
+seat's low 16 bits, shows the text of key `npc<NPC>talk<topic>` and passes the full word to TalkTo
+(R2-ENGINE-220, R2-ENGINE-498); the census of those keys is R2-ASSET-115.
+
+**Confidence.** High for the stores and the repeat over the native bodies. Medium for the client
+row and text, which are reused at the grades of R2-ENGINE-498 and R2-ASSET-115.
+
+**Unknown.** The meaning of `D2.00240`, and whether the client calls EnterInn again within one inn
+visit.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 5.

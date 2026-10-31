@@ -323,6 +323,69 @@ In `text/town.txt` each of the 46 talk keys first hits its own line-leading
 tag in EN; in RU 45 do, and `#npc2006talk110` is not at a line start. It holds `about` for hires 1..7
 and accept and reject sections by hire and stage. — R2-ASSET-115
 
+## Inn offer gates
+
+EnterInn makes 48 option stores and no other. Bank 768 selects one body;
+stage 10's three options need nothing else. Most side-mission options need
+their completion flag `896+N` to be 0, so a mission's option disappears
+when its departure sets the flag. The continuation options 79 and 78 need
+signed 768 above 60, current ID 3 and 774 / 770 equal to 1; the NPC 2022
+families need current ID 2 and completion-flag groups, with 776/781
+choosing one topic of four. Each predicate is tabulated in the claim card.
+— R2-ENGINE-748
+
+The bank offsets these gates read, in the 4096-byte bank of the scenario
+record (slot N at 4N):
+
+| Slots | Bank offsets | Writers |
+|---|---|---|
+| 512..531 (hire selection) | 0x800..0x84F | TalkTo kind 1 toggle; departure clear |
+| 532..551 (hire availability) | 0x850..0x89F | departures 20, 50, 60, 70, 100; TALK 30 and 79; departure 1/2 rewrite; NewGame clear |
+| 552..571 (hire town) | 0x8A0..0x8EF | the same departures and TALKs |
+| 768 (stage) | 0xC00 | NewGame 10; departures with ID divisible by ten add 10 |
+| 770, 771, 774 | 0xC08, 0xC0C, 0xC18 | Leave70, Leave50, Leave60 store 1; TALK 78 and 79 store 2 into 770 / 774 |
+| 776, 781 (hero flags) | 0xC20, 0xC34 | no DLL store besides the SetVar export, NewGame's clear and Load's restore |
+| 896+N (completion) | 0xE00+4N | the mission-N departure stores 1 |
+
+Every slot also takes SetVar, NewGame's clear and Load's restore. No map
+script instant in the 46 maps of each root targets these slots; client code
+outside the SetVar sites is not read (Medium). — R2-ENGINE-749
+
+EnterInn compares the ID of the record at current, which EnterLocation,
+Load and the two departures store; TalkTo compares the fixed mission-10
+record. Current is 2 after the client enters town 2's record and 3 after
+town 3's (Medium for the client side). — R2-ENGINE-750
+
+Kind-3 TALK walks the catalog and appends each type-1 record with ID equal
+to the topic that availability lacks; each of the 39 kind-3 topics matches
+one rebuilt record. The find compare and node allocator are unread
+(Medium). — R2-ENGINE-751
+
+TALK stores bank slots only for topic 10 (769), topic 30 (hire 2), topic
+79 (hire 5, 774 = 2), topic 78 (770 = 2) and hire words (512..531 toggle).
+At the next inn entry with the same bank every constant option is offered
+again except 79 and 78. — R2-ENGINE-752
+
+On a modeled new-game route every option and hires 1..7 are offered:
+stage 10 in town 1; stages 30..60 in town 2; from stage 70 on in towns 2
+and 3. The route order is a model (Medium). — R2-SESSION-304
+
+Mission 52 enters availability through Leave50 with bank 780 (offset
+0xC30) nonzero, the bank-775 (0xC1C) restoration list or Load, in the
+windows read; no inn option carries topic 52. That no other reference to
+the record adds it is Medium (no raw scan of the record; AddMission by ID
+from a TalkTo word is excluded only through R2-ENGINE-421). Map 50's
+trigger 24 runs the one instant-35 node that targets 780 in the 46 maps of
+each root; that no other writer sets 780 is Medium, and whether the trigger
+fires in play is Unknown. — R2-SESSION-305, R2-ASSET-192
+
+The 22 owner saves of 2026-10-30 hold stage 10, 20 or 30. EnterInn
+evaluated on each file's stored bank and current record yields the
+stage-10 options, none, or the stage-30 options with hire 1 (3 of 10
+files), hires 1 and 2 (3) or no hire (4, whose current record is a
+mission). Eleven of the 22 files store a mission as the current record, so
+their result is not an inn display. — R2-SESSION-306
+
 ## Selected client tail
 
 After the store, the selected EN/RU writer and reader arms transfer the pair

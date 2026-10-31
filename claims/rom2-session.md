@@ -4126,3 +4126,117 @@ and count actors with +0x14c 23.
 
 **Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 4.
 **Format surface.** Bank slot 773 and the companion Group; `formats/rom2-sav/campaign.md`.
+
+## Inn offers on the new-game route, mission 52 and owner saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-304 | On a modeled ROM2 new-game route run through the native EnterLocation, EnterInn, TalkTo and departure bodies, all 46 inn options and hires 1..7 are emitted; the card gives each first stage and town. | Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-SESSION-305 | ROM2 mission 52 (record D2.00015) enters availability in the windows read through Leave50 (bank 780 nonzero), the 775 list or Load; no inn option or departure request carries 52; map 50 action 34 is the one instant-35 node targeting 780. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-SESSION-306 | EnterInn evaluated on the stored bank and current of the 22 ROM2 owner saves of 2026-10-30 yields the stage-10 options, none (stage 20) or the stage-30 options with hire 1, hires 1 and 2, or no hire; EN and RU agree. | High | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+
+### R2-SESSION-304
+
+The route starts from NewGame's state (768 = 10, availability town 1, EnterLocation town 1), sets
+776/781 to one of four pairs and runs a fixed order of inn visits, TALKs, town departures and
+missions. Every step calls the native bodies of R2-ENGINE-748, R2-ENGINE-750 and R2-ENGINE-752 and
+the departures `D2.00013` / `D2.00012`; AddMission and the list helpers are modeled from their
+listings (R2-ENGINE-751). Map 50's instant sets 780 = 1 in one variant and not in the other; no
+other script write is modeled. 8 variants per root (4 hero pairs, 780 set or not; 16 in all), EN
+and RU equal. The statement of the order of inn visits, TALKs, town departures and missions is
+`route-visits.tsv` in the experiment's `generated/derived/`, one row per step; this card does not
+repeat it.
+
+| Stage | Town 1 | Town 2 | Town 3 |
+|---:|---|---|---|
+| 10 | 8, 9, 10 | | |
+| 30 | | 30, 31, 39, hire 1 | |
+| 40 | | 40..43, 48, hire 2 | |
+| 50 | | 49, 51, 53 | |
+| 60 | | 61, 62, 63, hire 6; one topic each of 74..77, 84..87, 93..96 | |
+| 70 | | 72, 73 | 70, 71, 79, hire 3 |
+| 80 | | 81 (776 set) or 82 | 78, 83, hires 4 and 5 |
+| 90 | | 90 | 91, 92 |
+| 100 | | 100, 102, 103 | 101 |
+| 110 | | 110, hire 7 | |
+
+The writers that put each option in place on the route: Leave10..Leave110 raise 768; Leave20
+admits town 2 and hire 1; Leave50 admits town 3, sets 771 and hire 3; Leave60 sets 774 and hire 6;
+Leave70 sets 770 and hire 4; Leave100 sets hire 7; TALK 30 sets hire 2 and TALK 79 hire 5; each
+mission departure sets its completion flag; 776/781 come from hero creation. The 780 variant
+changes only whether mission 52 becomes available.
+
+**Confidence.** Medium. The stage of an option that tests 768 is forced by its predicate; the
+stage of the others is this route's. The mission order and the client's event order are a model,
+not a read of the client.
+
+**Unknown.** The client's order of EnterInn, TalkTo and LeaveLocation calls; an original run that
+saves at each inn visit would settle it.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 2;
+the order: [route-visits.tsv](../experiments/EXP-2097-rom2-inn-offer-gates/generated/derived/route-visits.tsv).
+
+### R2-SESSION-305
+
+Mission 52 is the rebuilt record `D2.00015` (R2-ENGINE-418), the 16th the rebuild appends. Its
+producers in the windows read:
+
+- Leave50 appends it directly (`D2.00302`) when 780 (`D2.00303`) is nonzero.
+- The mission departure's 775 restoration list (775 nonzero) appends it at `D2.00304`, whatever
+  780 holds. Slot 775 has no DLL store except the departure's clear and no SetVar index or script
+  target (R2-SESSION-114), so this list runs only after a Load restores a bank with 775 nonzero.
+- Load restores the saved availability list.
+
+These are the producers found in the windows read; the list is not shown exhaustive (see
+Confidence).
+
+No inn option has topic 52 (R2-ENGINE-748), and the departure AddMission / AddTown arguments are
+20, 21, 32, 50, 60, 80 and towns 2, 3. Bank 780 sits at bank offset 0xC30 of the scenario
+record's 4096-byte bank. Its writers: no DLL store besides NewGame's clear, Load's restore and
+the SetVar export; client SetVar of a script-instant target (R2-SESSION-127); in each root's 46 maps one instant-35
+node, map 50 action 34, value 1 (R2-ASSET-192). Slot 775 (bank offset 0xC1C) has one DLL store,
+the departure's clear, and is neither a SetVar index nor a script target.
+
+**Confidence.** High for the three producers in the windows read; for the DLL stores of 780 (none
+besides NewGame's clear, Load's restore and the SetVar export); and for the one instant-35 node
+targeting 780 in the 46 maps of each root. Medium for the exclusion of any other writer of 780,
+which rests on R2-SESSION-127 and R2-SESSION-114. Medium for the negative over other references to
+`D2.00015`: no raw scan of that value was made (the scan budget was not spent), and AddMission by
+ID from a TalkTo word with topic 52 is excluded only through R2-ENGINE-421 (Medium), which holds
+the client's TalkTo call sites. Unknown whether map 50's trigger runs in play (R2-ASSET-192).
+
+**Unknown.** What map 50 check 34 tests. An original run that plays mission 50 and saves before
+and after its end, comparing bank offset 0xC30 and the saved list, would settle it. Client code
+outside the SetVar sites, a second load of the DLL and scripts outside the 46 maps as writers of
+780: a module-name census of `allods2.exe` and an archive census beyond `scenario.res`. Other
+references to `D2.00015`: a raw DWORD scan of that value in each root, with every hit classified.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 3.
+
+### R2-SESSION-306
+
+Each save file was matched to its manifest's SHA-256 and parsed with the EXP-2023 envelope
+parser. The bank is the first item of the scenario record, 4096 bytes, slot N at bank offset 4N;
+all 1024 cells and the stored availability list and current record were decoded. EnterInn ran in
+both DLLs on that bank and current.
+
+| Files | Stage, current | Options |
+|---|---|---|
+| rom2-gog-original: 9; rom2-gog-original-2: game0008 | 10, town 1 or mission 10 | 9, 8, 10 |
+| rom2-gog-original-2: game0009, game0010 | 20, mission 20 | none |
+| rom2-gog-original-2: game0011; Kaarg: game0015, game0051 | 30, town 2 | 30, 31, 39, hire 1 |
+| rom2-gog-original-2: game9998; Kaarg: game0016, game9998 | 30, town 2 | 30, 31, 39, hire 1 (bit 31), hire 2 (bit 31 in the Kaarg files) |
+| rom2-gog-original-2: game0012, game9999; Kaarg: game0017, game9999 | 30, mission 30 or 31 | 30, 31, 39 |
+
+Gate cells read at bank offset 4N: 512..571, 768..781 (0xC00..0xC34) and 896..999. Nonzero among
+them: 512, 513, 532, 533, 552, 553, 769, 776, 906 and 916. No file holds 770, 771, 774, 780 or a
+completion flag of an offered mission. EnterInn does not test the record type. Of the 10 stage-30
+files, 3 yield hire 1 only, 3 yield hires 1 and 2 and 4 yield no hire (a mission is the current
+record). In all, 11 of the 22 files store a mission as the current record (5 at stage 10, 2 at
+stage 20, 4 at stage 30); their result is an evaluation of EnterInn on the stored state, not an
+inn display, and what the client calls on such a record is outside this read (R2-ENGINE-421,
+Medium, holds its TalkTo and LeaveLocation call sites).
+
+**Confidence.** High for the population of 22 files and the native evaluation.
+
+**Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 6.
