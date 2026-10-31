@@ -12962,7 +12962,7 @@ committed output.
 | R2-ENGINE-579 | R2-ENGINE-290's maxima on those rows, with the five school skills' T(s) as experience, give HEALTH 156, 55, 158 and MANA 0, 0, 604: every inn card value at the first visit, with current equal to maximum. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-580 | The ROM2 sheet draws main.txt 190 (spellcaster) when actor flags +0x1b8 bit 1 is clear, dword +0x1c is nonzero and the grade is 7; at the first inn visit only the mage's card meets it. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-581 | The ROM2 sheet heading is actor strings +0xec/+0xf8 when the test L2.02949 on +0xec is nonzero; else main.txt 84 Mercenary or 83 Enemy (flags 0x11), then unitname.txt line +0x24 (15 Crossbowman, 24 Mage). | High / Medium / Unknown | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
-| R2-ENGINE-582 | A ROM2 dialogue page with a portrait passes an NPC number to face builder L2.02950, which resolves the actor and loads the paperdoll slot +0x88 for flags 0x11, else graphics\infowindow\<name><+0x28>.bmp. | High / Medium / Unknown | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-582 | A ROM2 dialogue page with a portrait passes an NPC number to face builder L2.02950, which resolves the actor and loads the paperdoll slot +0x88 for flags 0x11, else graphics\infowindow\<name><+0x28>.bmp. | High / Medium / Unknown | ● active (amended) | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-ENGINE-583 | The town-1 gate refusal (plagatguard, header npc=97) gets the fallback actor's face if no live unit carries 97: flags 0x56 and +0x28 = 17 build the name equipment\fmage\17.256, byte-equal to mfighter\14.256. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-584 | Of the six ROM2 bodies read in both roots, four are equal after address masking; the left painter differs in one application offset and the dialogue page in two child IDs; town text sections and Humans census rows are equal by value. | High | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 
@@ -13183,7 +13183,16 @@ routine).
 dialogue keys' headers; the copy geometry of the surface methods
 +0x34/+0x38.
 
-**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
+**Amended.** R2-ENGINE-730 narrows the Unknowns on the rest of `L2.02965`
+and the RU slot +0x88 body: in both bodies the reachable direct-branch
+graph (1096 instructions, ending in `ret 0xc`, equal after masking) and the
+23-instruction window of the seven cases of its one indirect jump are read
+for the names they build; callees and exception blocks are not followed,
+and what is drawn stays open.
+R2-ENGINE-729 adds what happens when the built name cannot be opened, and
+R2-ENGINE-731 what the lookup matches.
+
+**Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/)
 
 ### R2-ENGINE-583
 
@@ -14422,9 +14431,9 @@ means equal once every hex number of five or more digits is masked.
 |---|---|---|---|---|
 | R2-ENGINE-633 | The ROM2 inn selector (EN L2.00425, RU L2.00427), when app +0x5d8 (RU +0x63c) is 2, passes every EnterInn option word with stage GetVar(0x300) to the addition producer before the inn page is shown (Medium; narrowed by the review). | High / Medium | ✔ promoted (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
 | R2-ENGINE-634 | Branch-target and raw DWORD scans of each ROM2 client find two callers of the addition producer, the inn selector and the 0x41d leave arm (EN L2.03302, L2.03303; RU L2.03304, L2.03305), and no pointer to it. | High / Medium | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
-| R2-ENGINE-635 | For an incoming low word 22 the ROM2 addition producer builds a Human with the hero flag from key 10220 (Fighter_Hero and the hero class Medium), stores WORD +0x14c = 22, appends it to owner +0x24 unless held; town registration Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-ENGINE-635 | For an incoming low word 22 the ROM2 addition producer builds a Human with the hero flag from key 10220 (Fighter_Hero and the hero class Medium), stores WORD +0x14c = 22, appends it to owner +0x24 unless held; town registration Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-ENGINE-636 | The EN ROM2 raw DWORD scan of displacements 0x149..0x14d finds 59 store candidates over +0x14c; of its 15 word moves the producer, the Humans load and literals 21 and 0 are read; 53 sites carry values that are not shown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
-| R2-ENGINE-637 | In ROM2 campaign play an inn entry at stage 30 adds controlled identity 22 before TALK 22/30 (Medium). Whether he is the talk's companion, how hire 2 relates to him and whether he stays after victory are Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/) |
+| R2-ENGINE-637 | In ROM2 campaign play an inn entry at stage 30 adds controlled identity 22 before TALK 22/30 (Medium). Whether he is the talk's companion, how hire 2 relates to him and whether he stays after victory are Unknown. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2080](../experiments/EXP-2080-rom2-iglez-join/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 
 ### R2-ENGINE-633
 
@@ -14532,6 +14541,12 @@ appears in the party settles both.
 hero class without their grade (Medium) and omitted the town registration
 (Unknown); both are now in the headline.
 
+**Amended.** R2-SESSION-295 narrows the Unknown on whether identity 22
+persists into a town file: the owner's EN Kaarg town file `game9998`,
+written after the stage-30 inn, stores a Human with
++0x14c = 22 and class +0xe = 33 (0x21) in its own Group of Player 0, owned
+by the Player. Whether that actor came from this producer is not shown.
+
 ### R2-ENGINE-636
 
 A raw DWORD scan of every section of the EN client for 0x149..0x14d finds
@@ -14622,6 +14637,12 @@ shows that the inn selector builds an actor with +0x14c = 22 (Medium for the
 composed join), not that this actor is the character the talk presents. It
 reads one predicate of the victory transition, not retention, and the death
 guards are listed in item 5.
+
+**Amended.** R2-SESSION-295 narrows the hire-2 Unknown: the owner's EN
+mission-30 files hold identity 22 (class 33) and, separately, a hire actor
+with +0x14c = 1 and class 15 while selection 512 = 1 and 513 = 0; the
+companion is not hire 1, and hire 2 was not selected in those files
+(513 = 0 in all seven files of the copy).
 
 ## The client fog stamp
 
@@ -17365,3 +17386,178 @@ instruction sequence after the mask above; callees and the identity of
 globals are not compared.
 
 **Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 6.
+
+## Druids' town talk portraits and the party a town file must carry
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-729 | When a ROM2 sprite open returns 0, constructor L2.00643 builds "FATAL ERROR: can't load " plus the name, calls L2.04006 and then L2.04007, whose tail has the shape of an abort with exit code 3 (callees unread, Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ENGINE-730 | The ROM2 client unit's slot +0x88 (L2.02965, RU L2.03720) builds equipment\<class dir by flags & 6>\, walks 12 item slots at +0x188 and formats the body %s%d.256 from +0x28; a fallback actor has no items. | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ENGINE-731 | The ROM2 talk lookup matches class CUnit (size 0x1e4) by u16 +0x1dc; copy R2.0075 (RU R2.0076) sets +0x1dc from a source unit's +0x14c and +0x24 from its +0xe; the EN scan finds 5 word and 11 dword stores at +0x1dc. | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ENGINE-732 | The EN ROM2 group list L2.04008 equals RU R2.0122 after masking: store writes a count and each Group body; load builds each 0x50-byte Group, reads it and appends it; that it is the Player's list is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ENGINE-733 | Druids' inn talks 70/71, Kaarg talks 61..63 and mission 60 event1 name speakers 21, 22, 23; with no client unit carrying that +0x1dc the fallback picture is absent and the client takes the fatal path (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+
+### R2-ENGINE-729
+
+The sprite constructor EN `L2.00643` / RU `L2.04009` (154 instructions per
+root, equal after masking) calls the open `L2.03656` / `L2.04010` (101
+instructions, equal) with the name. When the open returns 0 it copies
+`FATAL ERROR: can't load ` and appends the name, calls `L2.04006` /
+`L2.04011` with (text, 0, 0) and then `L2.04007` / `L2.04012`. The open
+returns 0 on two paths: after `L2.04013` and after the registry lookup
+`L2.03657` (both unread).
+
+- `L2.04006` (9 instructions) calls `L2.04014` and a virtual slot +0x94 of
+  its result, with the three arguments.
+- `L2.04007` calls `L2.04015` and jumps to `L2.04016` / `L2.04017`, which
+  pushes 0xa and calls `L2.04018`, pushes 0x16 and calls `L2.04019`, pushes
+  3 and calls `L2.04020`.
+
+**Confidence.** High for the branch, the text built and the call order, in
+both roots. Medium that the sequence shows a message box and ends the
+process with code 3: `L2.04014`, slot +0x94, `L2.04015`, `L2.04018`,
+`L2.04019` and `L2.04020` are unread, and the reading rests on the shape of
+the C runtime's abort (signal 0x16, exit 3). Medium that an absent key makes
+the open return 0: `L2.03657` is unread. "Equal after masking" replaces
+every operand of 0x1000 and above with one token, so the callees and
+globals of the two roots are not compared.
+
+**Unknown.** What the player sees. A run of the original that opens a
+dialogue whose speaker has no unit and no picture settles it.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.
+
+### R2-ENGINE-730
+
+Vtable `L2.03340` slot +0x88 (`L2.04021`) holds `L2.02965`; RU `L2.04022`
+holds `L2.03720`. The two bodies have 1096 instructions each and are equal
+after masking. The body:
+
+1. builds `graphics\equipment\` plus a class directory from flags +0x1b8 & 6
+   through table `L2.04023` / `L2.04024`: 0 `mfighter\`, 2 `mmage\`,
+   4 `ffighter\`, 6 `fmage\` (cases `L2.04025..` / `L2.04026..`);
+2. walks 12 DWORD item slots at +0x188 and builds a sprite name for each
+   nonzero slot;
+3. formats the body name `%s%d.256` with +0x28 and loads it through the
+   sprite constructor `L2.00643`.
+
+The client unit constructor `R2.0067` / `R2.0068` (53 instructions)
+clears 0x30 bytes at +0x188, so the fallback actor of `R2.0069`
+(R2-ENGINE-582) reaches step 3 with no items: flags 0x56 give `fmage\` and
++0x28 is the speaker number minus 0x50.
+
+**Confidence.** High for the names built and the loop bounds, both roots.
+Medium for what is drawn and where: the surface methods called after the
+loads are unread. The mask replaces every operand of 0x1000 and above, so
+callees and globals are not compared between roots.
+
+**Unknown.** The drawn frame and crop. A run of the original that opens
+talk 70 with the speaker's unit present, with the portrait pixels
+captured, settles it.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.
+
+### R2-ENGINE-731
+
+The lookup `R2.0050` / `R2.0049` walks client collection +0x9d0, keeps
+objects for which `L2.04027` with `L2.04028` returns nonzero and compares
+u16 +0x1dc with the number. The runtime class at `L2.04028` names `CUnit`
+(string at `L2.04029`) with object size 0x1e4, the size the fallback
+allocates.
+
+The copy `R2.0075` / `R2.0076` (376 instructions each) stores the source's
+u16 +0xe into +0x24, passes its byte +0x4b to `L2.03694`, and stores its u16
++0x14c into +0x1dc at `L2.00136` / `L2.00137`. After masking (every operand
+of 0x1000 and above replaced, so callees and globals are not compared) the
+two bodies differ in 99 positions: the frame size (0x150, 0x15c) and 98
+frame-slot offsets.
+
+EN census of the bytes `dc 01 00 00` over every section: 86 hits, 54 of
+them `mov` operands with displacement 0x1dc. Five are word stores to
++0x1dc: `L2.00140` (from the scratch unit's +0x1dc at `L2.03324`),
+`L2.04030` (the fallback, the number), `L2.04031` (the constructor, 0),
+`L2.04032` (from another client unit) and `L2.00136` (the copy). Eleven
+are dword-width stores to `[reg + 0x1dc]` whose objects are unread:
+`L2.04033`, `L2.04034`, `L2.04035`, `L2.04036`, `L2.04037`, `L2.04038`,
+`L2.04039`, `L2.04040`, `L2.04041`, `L2.04042`, `L2.04043`. The E8/E9 scan
+finds six callers of the copy, none read: `L2.03384`, `L2.03385`,
+`L2.03386`, `L2.03387`, `L2.03388`, `L2.03389`.
+
+**Confidence.** High for the bodies, the class record and the EN census of
+that byte pattern. Medium that the source is the world unit: the offsets
++0xe, +0x4b and +0x14c match the Unit serializer (R2-ENGINE-209,
+R2-ENGINE-682), and none of the six callers was read. Whether the eleven
+dword stores touch client units is not read. A store through another
+displacement form or a block copy is outside the census.
+
+**Unknown.** Which units the client collection holds in a town. A run of
+the original that lists the client units at the Druids' inn settles it.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.
+
+### R2-ENGINE-732
+
+EN `L2.04008` and RU `R2.0122` have 81 instructions each and 0 differing
+positions after masking (every operand of 0x1000 and above replaced, so
+callees and globals are not compared). With `this` the list object, and
+the unread `L2.01537` selecting the branch:
+
+- store: count from `L2.04044` (with `L2.03226`) written as u32, then an
+  iterator over the list calling the Group body `L2.04045` on each element;
+- load: u32 count, then for 1..count allocate 0x50 bytes, construct with
+  `L2.04046`, read with `L2.04045` and append with `L2.04047`.
+
+**Confidence.** High for the instruction sequence of both bodies and their
+EN = RU equality after masking. Medium that the list is the Player's group
+list (R2-SESSION-196, whose caller is untraced) and that `L2.01537`
+selects store or load; the callees' roles are read by call shape.
+
+**Unknown.** The Group body `L2.04045` and whether its member load appends
+each actor to the owner's +0x24 list. A run of the original that loads
+`game9998` and lists the Player's actors settles it.
+
+**Amended.** Narrows the EN Unknown of R2-SESSION-196.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 5.
+
+### R2-ENGINE-733
+
+Composed from R2-ENGINE-582, R2-ENGINE-729, R2-ENGINE-730, R2-ENGINE-731
+and R2-ASSET-187, R2-ASSET-188:
+
+1. A dialogue part with a portrait passes its speaker number to the face
+   builder, which looks for a client unit with that +0x1dc.
+2. A client unit's +0x1dc is the +0x14c of the world unit it was copied from.
+3. On a miss the fallback names `equipment\fmage\<N-80>.256`; the
+   `graphics.res` census finds `equipment/fmage/<N>.256` only for N = 1..20,
+   so for 21, 22 and 23 no such key exists, and when the open returns 0 the
+   sprite constructor takes the fatal path.
+4. Speakers 22 and 23 appear in `npc680talk70`, 21 in `npc681talk71`; Kaarg
+   `npc2006talk61` names 22, `npc22talk62` and `npc2109talk63` name 21, 22
+   and 23; mission 60 `event1` names 21, 22 and 23.
+
+So a town file that reaches the Druids' inn or mission 60 needs world
+units with +0x14c 21, 22 and 23 that reach the client.
+
+**Confidence.** Medium: each of steps 1 to 3 rests on a Medium or an unread
+callee. Step 1 passes the header's `npc=` value, Medium because the part
+parser `R2.0048` is unread (R2-ENGINE-582). Step 2's source identity is
+Medium and none of the copy's callers is read (R2-ENGINE-731). Step 3 needs
+the open to return 0 for an absent key (the registry lookup `L2.03657` is
+unread) and its fatal reading is Medium (R2-ENGINE-729, R2-ASSET-187); the
+formatter and string callees `L2.04048`, `L2.04049`, `L2.02015` are named
+by call shape. The client collection's content in a town and the origin of
+identity 23 (R2-SESSION-293) are Unknown.
+
+**Unknown.** How the inn NPCs 680, 681, 677, 675, 5, 2006, 2109 resolve. The
+inn selector passes every option word to the addition producer, whose
+non-controlled branch builds a unit with +0x14c set (R2-ENGINE-633,
+R2-ENGINE-635); that route was not followed. A run of the original that
+opens talk 70 at the Druids' inn with the client unit list recorded settles
+it.
+
+**Unknown.** Where identity 23 comes from and its class. A save of the
+original after Leave40 and another after the stage-50 Kaarg inn settle
+both.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.

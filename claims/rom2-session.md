@@ -2276,7 +2276,7 @@ page only.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-195 | A ROM2 client unit update with +0x1dc 1..20 and signed health word below -10 sets bank 531+that value to 0; ordinary departure then makes a nonzero availability 2 if selected, 1 if not, and clears selections. | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
-| R2-SESSION-196 | In RU a ROM2 hire's Group is written and rebuilt by the Player group list with the creator's append method, its Unit body carrying class, owner and hire ID; LOAD does not run the hire creator. | Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-SESSION-196 | In RU a ROM2 hire's Group is written and rebuilt by the Player group list with the creator's append method, its Unit body carrying class, owner and hire ID; LOAD does not run the hire creator. | Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-SESSION-198 | A ROM2 store census finds one Session-global store to +0x74 per root, the map build's; the rest stay unattributed, so +0x74 is 0 in a campaign (Medium) and the dead-hire update keeps bit 0x80. | Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 | R2-SESSION-199 | Scenario.dll stores availability and town literals only for ROM2 hires 1..7, equal in EN and RU; with the indexed and client writers, hires 8..20 never become available after NewGame (Medium). | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 
@@ -2360,7 +2360,11 @@ rebuilt on LOAD. The EN counterpart of `R2.0122`, the caller of the list
 body and the collection identity at owner +0x28 settle the first; a saved
 mission state with a hire, read back after LOAD, settles the second.
 
-**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
+**Amended.** R2-ENGINE-732 narrows the EN Unknown: the EN group list
+`L2.04008` equals `R2.0122` after masking. Its caller and the collection
+identity stay unread.
+
+**Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/)
 
 ### R2-SESSION-198
 
@@ -3813,3 +3817,147 @@ SAVEs in one session with no input between them, and a third after reloading
 one, compared field by field, would settle it.
 
 **Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 4.
+
+## Route to the Druids' town and the party in a town file
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-293 | From Kaarg at stage 30 the ROM2 campaign reaches town 3 through Leave30, Leave40 and Leave50; Leave50 alone among departure cases adds town 3, and arrival stage is 60, 70 or 80 by whether 60 and 80 precede 50 (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-SESSION-294 | On arrival at stage 60 the ROM2 Druids' inn offers talks 70/680 and 71/681 and hire 3 (534 = 1, 554 = 3); missions 70 and 71 follow, and mission entry builds hire 3 from key 10030 with +0x14c = 3 (Medium). | Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-SESSION-295 | The EN owner's Kaarg town file game9998 (abort-and-return save, owner's account) holds the hero (21, class 35) and identity 22 (class 33) in two Player 0 Groups and no hire Human while 512 = 1 and 532 = 1 stay; hire 1 is in mission files. | High | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-SESSION-296 | A ROM2 companion is kept in a town file as a Human in a Player Group (identity in +0x14c, class in +0xe); the one abort-and-return town file read stores no hire Human while 512+i, 532+i, 552+i stay (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+
+### R2-SESSION-293
+
+Composed from R2-SESSION-047, R2-SESSION-048, R2-ENGINE-146, R2-ENGINE-148,
+R2-ENGINE-424 and R2-ENGINE-633:
+
+| Step | Stage | Stores | List |
+|---|---|---|---|
+| Kaarg inn, stage 30 | 30 | TALK 22/30: 533 = 1, 553 = 2; identity 22 built | 30, 31 |
+| Leave30 | 30 to 40 | 926 = 1 | |
+| Kaarg inn, stage 40 | 40 | | 40..43 |
+| Leave40 | 40 to 50 | 773 = 23, 936 = 1 | 50, 60 |
+| Kaarg inn, stage 50 | 50 | | 51 (533 nonzero), 53 |
+| Leave60 (optional, before 50) | +10 | 537 = 1, 557 = 2, 774 = 1, 956 = 1 | 80 |
+| Leave80 (optional, before 50) | +10 | 778 = 1, 976 = 1 | |
+| Leave50 | +10 | 771 = 1, 534 = 1, 554 = 3, 946 = 1 | town 3; 52 when 780 is nonzero |
+
+777 = 1 and 770 = 1 belong to Leave70 with 535 and 555 (R2-SESSION-048),
+so Leave80 does not set 770, the gate of talk 78/675.
+
+Each ordinary departure first zeroes 773 and 512+i, normalises 532+i,
+removes current and stores 896+ID = 1; IDs not divisible by 10 (31, 32,
+41..43, 51, 53) keep the stage. Among departure cases only Leave50 adds town
+3; the slot-775 restoration also appends it, and 775 has no writer in the
+read population except clears and LOAD (R2-ENGINE-419, R2-ENGINE-425).
+
+**Confidence.** Medium: a composition; which order the global map lets the
+player choose is not read.
+
+**Unknown.** The reachable arrival stages. A run of the original that plays
+60 before 50 settles whether 70 occurs.
+
+**Unknown.** The origin of identity 23: Leave40 requests it with 773 = 23,
+and the stage-50 Kaarg inn's NPC 23 option also reaches the producer
+(R2-ENGINE-633); which of them builds it, and its class, are not read. A
+save of the original after Leave40 and another after the stage-50 inn
+settle both.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 1.
+
+### R2-SESSION-294
+
+Composed from R2-ENGINE-217, R2-ENGINE-221, R2-ENGINE-225, R2-ENGINE-229,
+R2-ENGINE-493, R2-ENGINE-523, R2-ENGINE-524, R2-ENGINE-525 and
+R2-SESSION-293:
+
+- Talks with current ID 3: 70/680 and 71/681 (771 nonzero; 966, 967 zero);
+  79/5 when stage is above 60 and 774 = 1; 78/675 when stage is above 60 and
+  770 = 1; 83/677 at stage 80 with 536 nonzero and 979 zero.
+- Hires: hire i+1 when 552+i = 3 and 532+i is 1 or 2. After Leave50 that is
+  hire 3 (Druid, Units). TALK 79/5 stores 536 = 1, 556 = 3 (hire 5); Leave70
+  stores 535 = 1, 555 = 3 (hire 4).
+- Missions: TALK 70 and 71 add 70 and 71; 83 at stage 80; 52 when 780 was
+  set; 60 and 80 while unplayed.
+- Mission entry (current type 1): hire i+1 enters when 512+i and 532+i are
+  nonzero; for hire 3 the creator looks up 10030 and the stage row 10034 at
+  stage 60 (10035 at 70) (R2-ENGINE-524) and writes +0x14c = 3
+  (R2-ENGINE-525).
+
+**Confidence.** Medium: a composition of claims graded High and Medium; the
+template join is Medium (R2-ENGINE-524).
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 4.
+
+### R2-SESSION-295
+
+Population: the seven EN files of the owner's second copy of 2026-10-30,
+each matched to its `MANIFEST.sha256` value before parse; decoded with the
+EXP-2023 envelope parser and the EXP-2076 measurement. Player 0's Humans
+(+0x14c low word, class +0xe, +0xc):
+
+| File | Current | Members |
+|---|---|---|
+| `game0008`, `game0011` | town 1, town 2 | 21, 35, 28 |
+| `game0009`, `game0010` | mission 20 | 21, 35, 28 |
+| `game0012` | mission 30 | 22, 33, 30; 21, 35, 28; 1, 15, 264 |
+| `game9998` | town 2 | 21, 35, 28; 22, 33, 30 |
+| `game9999` | mission 30 | 21, 35, 28; 22, 33, 30; 1, 15, 264 |
+
+Each Human is the only member of its Group; every owner key equals the
+Player's saved key; only identity 21 equals Player +0x38; the packed high
+bits are 0. Bank: `game0011` 532 = 1, 552 = 2, 768 = 30, 769 = 1, 776 = 1,
+906 = 916 = 1; `game0012`, `game9998`, `game9999` add 512 = 1, 533 = 1,
+553 = 2 and records 30 and 31. Slot 754 is nonzero in the mission files
+`game0009`, `game0010`, `game0012` and zero in the mission-30 file
+`game9999` and in every town file. Slot numbers index the DWORDs of the
+4096-byte bank (R2-SESSION-158).
+
+`game9998` is the only town file with 512 = 1. By the owner's account it was
+written by the automatic save of the abort-and-return from mission 30; no
+town file written after a victory is in the population. The save folder's
+README calls the second Human of `game9998` the hired mercenary; the stored
+values (identity 22, class 33, +0xc 30) differ from the mission files' hire
+actor (+0x14c 1, class 15, +0xc 264).
+
+**Confidence.** High for these values in these files. That `game9998` was
+written by the abort-and-return save is the owner's account; the file's
+own label was not read here.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 5.
+
+### R2-SESSION-296
+
+Composed from R2-SESSION-295, R2-ENGINE-682, R2-ENGINE-731, R2-ENGINE-732,
+R2-ENGINE-523, R2-ENGINE-524, R2-ENGINE-525 and R2-ENGINE-526:
+
+- Store: the group list (the Player's, Medium in R2-ENGINE-732) writes each
+  Group and its Human; the Unit
+  body carries +0x14c in the low word of a packed u32 and the class in base
+  +0xe. The Kaarg town file holds identity 22 that way.
+- LOAD: the group list rebuilds each Group; Unit LOAD restores +0x14c and
+  +0xe; the client copy puts +0x14c into +0x1dc, the field the talk lookup
+  reads.
+- Hire: in the one town file read, written by the abort-and-return save
+  (R2-SESSION-295), no hire Human is stored while selection 512+i,
+  availability 532+i and town 552+i stay in the bank; the creator builds the
+  hire at the next mission entry with +0x14c = hire ID (R2-ENGINE-525), and
+  LOAD does not run the creator. The absence may come from the departure
+  transition, which detaches actors outside class 33..63 (R2-ENGINE-526),
+  rather than from the record format.
+
+**Confidence.** High for the stored values (R2-SESSION-295). Medium for the
+rule: one town file holds a companion; the hire's absence is observed in
+one abort-and-return file, not after a victory; the Group body `L2.04045`
+and the owner +0x24 rebuild are unread.
+
+**Unknown.** Whether LOAD appends a stored companion to owner +0x24. A read
+of `L2.04045` and its member load, or a run of the original that loads
+`game9998` and checks the literal identity 10002, settles it.
+
+**Unknown.** Whether a town file written after a victory keeps a hire
+Human. A save of the original in the town after a mission won with a hire
+settles it.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 5.

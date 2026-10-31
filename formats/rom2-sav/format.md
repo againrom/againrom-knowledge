@@ -677,6 +677,27 @@ It does not test identity WORD+0x14c here. Earlier cleanup callees and
 combat-death removal remain unclosed; this branch alone cannot identify
 all surviving campaign members. — R2-ENGINE-382
 
+In the owner's EN Kaarg town file written, by the owner's account, by the
+automatic save of the abort-and-return from mission 30, Player 0's group
+list holds two Groups of one Human each: the hero (+0x14c low word 21,
+class +0xe 35, +0xc 28) and identity 22 (33, 30). No hire Human is stored
+although selection 512 = 1 and availability 532 = 1 stay in the bank; the
+mission-30 files of the same run (`game0012`, `game9999`) hold the hire as
+a third Group (+0x14c 1, class 15, +0xc 264). Every member's owner key is
+the Player's. No town file written after a victory was read.
+— R2-SESSION-295
+
+The EN group list equals the RU one after masking; LOAD rebuilds each Group
+and appends it to the list (High for the sequence; Medium that it is the
+Player's list). — R2-ENGINE-732
+
+A companion is kept in a town file as a Human in a Player Group, with its
+identity word in the low word of the packed +0x14c field and its class in
++0xe. In the one town file read, an abort-and-return save, no hire Human is
+stored while bank cells 512+i, 532+i and 552+i stay, and the hire is built
+at the next mission entry; whether a victory save keeps a hire Human is
+Unknown (Medium for the rule). — R2-SESSION-296
+
 ## AreaEffect local scalar suffix
 
 Both inspected AreaEffect serializers write four bytes for object fields

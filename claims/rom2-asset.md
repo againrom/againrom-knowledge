@@ -2771,3 +2771,86 @@ key in either root lies under a voice-name directory.
 
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 2.
 **Format surface.** `sfx.res` keys; `formats/rom2-res/format.md`.
+
+## Druids' town speakers, fallback bodies and route-map scripts
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-187 | ROM2 graphics.res (EN = RU) holds 116 equipment keys, fmage 1..20, mmage 1..20, ffighter 1..22, mfighter 1..54 (High); that a fallback speaker has a body only for N = 81..100 also needs the open's name-to-key step (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ASSET-188 | In ROM2 text/town.txt Druids' talks 70, 71 and Kaarg talks 61..63 name speakers 21, 22 or 23 (EN = RU), seven other town keys differ EN/RU; mission 60 event1 names 21, 22, 23; four mission keys differ and three are RU-only. | High | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+| R2-ASSET-189 | In the 14 ROM2 route maps (21, 30..32, 40..43, 50..53, 60, 80) the only opcode-35 node is map 50's 780 = 1 and opcode-36 nodes take values 1..4; action header words and selected parameters are EN = RU; triggers differ in maps 42, 52, 74. | High | ✔ promoted (branch candidate) | [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
+
+### R2-ASSET-187
+
+Key census of `graphics.res` with pattern `equipment/<dir>/<name>` (one
+level), EN `5d22e7e4835347082052366d59b91c582fefb295141f1b8c0d1b6d7fe2c2817c` and RU
+`3b4fa796838cd756a4b20bdaacb9d9362b0795e538b3c97176ef936e634cf3e1`:
+116 keys per root (22 + 20 + 54 + 20), equal names, sizes and SHA-256.
+Every name is `N.256`: `ffighter` 1..22, `fmage` 1..20, `mfighter` 1..54,
+`mmage` 1..20, with no gap. The fallback actor of R2-ENGINE-582 uses
+`fmage` and N-80 (R2-ENGINE-730), so the census holds a key for its body
+only for N = 81..100; for 21, 22 and 23 the names `fmage\-59.256`,
+`fmage\-58.256`, `fmage\-57.256` have no key of that form.
+
+**Confidence.** High that `equipment/fmage/<N>.256` exists only for N =
+1..20 in this one-level census of `graphics.res`, both roots. Medium that a
+fallback speaker outside 81..100 has no body: the open's mapping from the
+built name to an archive key sits in the unread registry lookup `L2.03657`
+(R2-ENGINE-729). Keys deeper than one level below a class directory, other
+archives and loose files were not searched.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.
+
+### R2-ASSET-188
+
+Header census of `main.res` `text/town.txt` (all `npc<N>talk<T>` keys) and
+of every key of `text/mission60.txt`, `text/mission70.txt` and
+`text/mission71.txt`, EN and RU; npc= value x count:
+
+| Key | EN | RU |
+|---|---|---|
+| `npc680talk70` | 22x1 23x1 680x7 | equal |
+| `npc681talk71` | 21x5 681x6 | equal |
+| `npc5talk79` | 5x2 21x1 22x1 | equal |
+| `npc677talk83` | 23x1 677x2 | equal |
+| `npc2006talk61` | 22x2 2006x3 | equal |
+| `npc22talk62` | 21x2 22x4 23x1 | equal |
+| `npc2109talk63` | 21x5 22x2 23x2 2109x7 | equal |
+| mission 60 `event1` | 21x4 22x2 23x1 | equal |
+| mission 60 `event2` | 22x1 23x1 | 23x2 |
+
+Other differences. `text/town.txt` has 136 `npc*talk*` keys in EN and 134
+in RU; seven keys differ: `npc2003talk92` (EN 12 headers, RU 13),
+`npc2005talk103` (10, 16), `npc2022talk84` (6, 7), `npc2111talk42` (14,
+15), `npc22talk40` (25, 28), and EN-only `npc2006talk110` and `npc520talk7`.
+Missions: mission 70 `event3` and `event6`, mission 71 `event2` (EN names
+22 once, RU not) and RU-only mission 71 `event10..12`.
+
+**Confidence.** High for the census; that the npc= value is the number the
+page passes is R2-ENGINE-582's Medium.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3.
+
+### R2-ASSET-189
+
+`tools/r2script` over the 46 maps of each root (`scenario.res` EN
+`388c955f49c02ecfed765340ff3a5b3e8f37210e2c85c8d877bc04b949d60d7f`, RU
+`c19950690570d94b40c68acffd210cdab94c2a12b5d6ad5718730392c6b6e08b`). Route maps: 21, 30, 31, 32, 40..43, 50..53,
+60, 80. Opcode 35: map 50 action index 33 (ID 34), slot 780, value 1. Opcode 36: 52 nodes
+per root with first values 1..4 and second 1 or 2; map 32, 43 and 51 have
+none. Per-map opcode counts are in the evidence. Ignoring name hashes, the
+node header words of all action and check nodes and the parameters of the
+nodes `r2script` selects (actions 35 to 39, checks 23 to 27 and word 65538)
+are
+equal EN/RU; the parameters of the other nodes are not written and were
+not compared. 7 trigger rows differ (map 42: 2, map 52: 3, map 74: 2).
+
+**Confidence.** High for the population. The meaning of opcodes other than
+35/36 is not assigned; party joins, item grants and hero changes by script
+are Unknown.
+
+**Unknown.** The lasting effects of the other opcodes. A run of the
+original through missions 30 to 50 with the party and items recorded after
+each settles it.
+
+**Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 2.

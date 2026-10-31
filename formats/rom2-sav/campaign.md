@@ -515,8 +515,64 @@ R2-SESSION-198
 
 In RU the hire's Group is, at Medium, in the Player group list a mission
 save writes and LOAD rebuilds (the list's caller and collection identity
-are unread); the Unit body carries class, owner and hire ID. EN is
-Unknown. — R2-SESSION-196
+are unread); the Unit body carries class, owner and hire ID. The EN group
+list equals the RU one after masking: store writes a count and each Group,
+load builds each 0x50-byte Group, reads it and appends it to the list
+(High for the sequence; Medium that it is the Player's list).
+— R2-SESSION-196, R2-ENGINE-732
+
+## Route to the Druids' town
+
+From Kaarg at stage 30 the campaign reaches town 3 through Leave30, Leave40
+and Leave50. Leave40 stores 773 = 23 and adds 50 and 60; Leave50 stores
+771 = 1, 534 = 1, 554 = 3 and adds town 3 (and 52 when 780 is nonzero).
+Among the departure cases only Leave50 adds town 3. The stage on arrival is
+60 when 50 precedes 60, 70 when 60 precedes 50 and 80 when 60 and 80
+precede 50 (Medium, a composition). An optional Leave80 stores 778 = 1;
+777 = 1 and 770 = 1 belong to Leave70. — R2-SESSION-293
+
+In the 14 route maps the only bank store by opcode 35 is map 50's 780 = 1;
+opcode 36 nodes take values 1..4; other opcodes are counted, not
+interpreted. — R2-ASSET-189
+
+At stage 60 the Druids' inn offers talks 70/680 and 71/681 and hire 3
+(Druid). From stage 70 it adds 79/5 when 774 = 1 (79/5 stores 536 = 1,
+556 = 3, hire 5) and 78/675 when 770 = 1; at stage 80, with 536 nonzero,
+it adds 83/677. TALK 70 and 71 add missions
+70 and 71. Mission entry builds a selected hire 3 from key 10030 and the
+stage row and writes +0x14c = 3 (Medium). — R2-SESSION-294
+
+### Talk portraits
+
+The face builder looks for a client unit of class `CUnit` (0x1e4 bytes)
+whose u16 +0x1dc equals the header's speaker number. A client unit takes
++0x1dc from the world unit's +0x14c and +0x24 from its +0xe (Medium for the
+source's identity). — R2-ENGINE-731
+
+On a miss the fallback actor (flags 0x56, +0x28 = number - 0x50, no items)
+loads the sprite named `graphics\equipment\fmage\<+0x28>.256`; what is drawn
+is Unknown. — R2-ENGINE-730
+
+`graphics.res` holds 116 one-level equipment keys, and
+`equipment/fmage/<N>.256` exists only for N = 1..20. That a fallback speaker
+outside 81..100 has no body also needs the open's name-to-key step
+(Medium). — R2-ASSET-187
+
+When the sprite open returns 0 the constructor builds `FATAL ERROR: can't
+load <name>`, passes it to a routine with the shape of a message display
+and calls a tail with the shape of the C runtime's abort (exit 3, Medium).
+— R2-ENGINE-729
+
+Druids' inn talk 70 names speakers 22 and 23, talk 71 names 21; Kaarg talk
+61 names 22, Kaarg talks 62 and 63 and mission 60 `event1` name 21, 22 and
+23 (EN = RU). — R2-ASSET-188
+
+A town file that reaches those talks or mission 60 therefore needs world
+units with +0x14c 21, 22 and 23 that reach the client (Medium: the speaker
+number, the world-unit source, the open's return for an absent key and the
+fatal reading are each Medium or rest on unread callees). How the inn NPCs
+680 and 681 resolve, the client collection in a town and the origin of
+identity 23 are Unknown. — R2-ENGINE-733
 
 ## Catalog and campaign graph
 
