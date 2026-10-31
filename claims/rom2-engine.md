@@ -9523,6 +9523,16 @@ statistics: reading `L2.01794` past its 0xff-byte window would settle
 them.
 
 **Amended.** R2-ENGINE-535 states what +0x1a0 does: no bag or gold drop at death, no experience to a human attacker (Medium), and the unit copy omits it (Medium). When the creature leaves stays Unknown. The grades above stay.
+R2-ENGINE-776 narrows the leaving Unknown: a world pass every 16th session tick kills one of a
+caster's n summoned units with chance about (n-1)/100, and corpse ageing in the death call sets a
+unit to kind 5 (Medium for the reach: the death body's callees are unread); the one removal rule
+found for a living summoned creature is that pass, and the `+0x148` sites are that claim's census
+(16 of 81 sites, Medium). R2-ENGINE-777 narrows the template statistics: the stat reader and the
+Units row are read; that the loader runs for a Summon name stays Medium (helper `L2.03298`
+unread), as does the name binding. The cell tests are R2-ENGINE-531's routines (R2-ENGINE-705,
+R2-ENGINE-654); the RU placement cell test calling the footprint test is inferred from the EN call
+and the root offset (Medium). The flag is Session `+0x74` (R2-ENGINE-778, R2-SESSION-198), and
+what the map bytes stand for stays Unknown.
 
 ### R2-ENGINE-456
 
@@ -17941,7 +17951,7 @@ whatever the original offers next, with a save and an actor count wherever it al
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-753 | The ROM2 EN apply head, single-target and projectile objects, projectile tick and kind 2 and 4 setters equal RU after masking, callees not compared; the vtables have equal slot partitions; the EN damage-object builder is unread. | High / Medium | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
-| R2-ENGINE-754 | ROM2 unit init L2.01794 (EN L2.01793) calls the template loader with the built name when the unread helper L2.03298 returns above 0; the loader walks L2.00147 from index 26 (30 to 63); vtable L2.02314 +0x30 returns 0. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
+| R2-ENGINE-754 | ROM2 unit init L2.01794 (EN L2.01793) calls the template loader with the built name when the unread helper L2.03298 returns above 0; the loader walks L2.00147 from index 26 (30 to 63); vtable L2.02314 +0x30 returns 0. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
 | R2-ENGINE-755 | ROM2 vtable L2.02314 +0x2c returns 1, so Stone Curse draws its duration on that class; tag 0 reaches the tail call of target vtable +0x58 (EN clamps +0xd8 first); EN attach, timer and dispatcher prefixes equal RU. | High / Medium | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
 | R2-ENGINE-756 | The ROM2 EN priority and offensive routines and the support choice and actor dispatcher prefixes equal RU after masking; no E8 call or stored dword names the priority routine in either root; the EN policy differs. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
 
@@ -18035,6 +18045,15 @@ sites and the group-removal routine are unread. A run of the original that casts
 waits 10 minutes of game time settles whether it leaves; a run that records the creature's
 health, speed and damage from its info panel settles the statistics; a committed window over
 `L2.01273`..`L2.04127` (RU) and the EN constructor would settle the binding.
+
+**Amended.** R2-ENGINE-777 narrows the statistics Unknown (the reader past 0x100 bytes and the
+cursor readers are read). It settles the binding of vtable `L2.02314` to the class Summon builds
+(Medium for the unread tail from `L2.04127`): the RU constructor `L2.01273` stores the vtable at
+`L2.04125`, the last store of the 0xc0-byte window read, equal to the EN constructor `L2.03160`, in
+committed listings. The binding of the name to the Units row stays Medium, as does the call of the
+template loader, which runs only when the unread helper `L2.03298` returns above 0.
+R2-ENGINE-776 narrows leaving and the `+0x148` sites; R2-ENGINE-778 narrows the `[L2.01317]`
+identity to operand positions in equal bodies and to one RU caller site.
 
 ### R2-ENGINE-755
 
@@ -18683,3 +18702,151 @@ press a slot, hold each modifier and press F4, close the book, press F4 and reco
 and compare `SpellBook/Pressed`.
 
 **Evidence.** [EXP-2101](../experiments/EXP-2101-rom2-spellbook-slots/RESULTS.md), question 3.
+
+## Summoned creature lifetime, statistics and session cadence
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-776 | ROM2 world pass L2.04378 (EN L2.04379) runs every 16th session tick; for a caster with n summoned units (key +0x148) it kills one with chance about (n-1)/100; death stores -10000, corpse ageing sets kind 5 (not for an owner's +0x38 unit). | High / Medium | ● active (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
+| R2-ENGINE-777 | ROM2 stat reader L2.02341 writes Units parameters 0..37 of a row into fixed unit fields, a stored -1 keeping the L2.00105 default; that Summon's creature gets it is Medium (helper L2.03298, matcher L2.04123 unread). | High / Medium | ● active (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
+| R2-ENGINE-778 | ROM2 session tick L2.04380 (EN L2.03120), called on [L2.01317] at the RU site read, calls the world pass when Session +4 mod 16 is 12, then adds 1 to +4, and adds 1 to Session +0 when the new +4 mod 16 is 15. | High / Medium | ● active (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
+
+### R2-ENGINE-776
+
+The world pass RU `L2.04378` (EN `L2.04379`, 211 lines, equal after masking) runs from the
+session tick when Session `+4` mod 16 is 12 (R2-ENGINE-778). In order it calls virtual `+0x14` on
+each object of `[L2.00326]+4`, calls corpse ageing `L2.02525` on each unit of
+`[[L2.01317]+0x7c]+0xc`, and then applies a cap to summoned units:
+
+1. In a map (`L2.04381(10)`), for each unit of the global list `[L2.02103]+4` whose `+0x148` is
+   nonzero, `map[+0x148] += 1`. The Summon arm stores the caster's `+4` in `+0x148`
+   (R2-ENGINE-455).
+2. For each key with count n, `r = L2.00092(100)`; when r < n (unsigned) the key is marked -1.
+3. A second walk of the list gives the death call `L2.01807` (RU `L2.04382`, EN `L2.04383`) to the
+   first unit of each marked key and marks the key -2: at most one unit per key per pass.
+
+`L2.00092(n)` is `R2.0021(n-1) + 1`, and `R2.0021(m)` is `(rand() * (m+1)) >> 15` (0 for m = 0);
+`rand` (RU `L2.01699`, EN `L2.00729`) returns bits 16..30 of a 214013x + 2531011 state. So r is
+1..100 and the chance per pass is ceil((n-1) * 327.68) / 32768: 0 for n = 1, 1.0 % for n = 2,
+3.0 % for n = 4. No test of the caster's existence is in the pass.
+
+Death `L2.01807` (EN `L2.01806`, 394 lines, equal) begins: when `+0x148` is nonzero, health word
+`+0x94` = -10000 and `+0x148` = 0. Its last call is corpse ageing (`L2.04384`), which returns for
+health below -10000, lowers health by 1 when Session `+0` is even, sets kind `+0x13c` to 2, 3, 4
+below -10, -20, -40 and, below -600, kind 5 and health -10001, then releases `+4` through
+`L2.04385` and clears it when `+4` is nonzero and `+0x4a` is at most 1. In one corpse-ageing call
+the kind is set in order 2, 3, 4, 5 with no view of an intermediate kind between the calls read;
+one view-change message through `L2.00060` (unread) is sent when the final kind differs from the
+kind at entry. The death body has a second direct store to `+0x94`: -50 (RU `L2.04386`), run
+before the corpse call for a unit whose owner `+0x14` has `+0x38` equal to that unit
+(`L2.04387..L2.04388`); that unit enters corpse ageing at -50, which sets kind 4, not 5. No other
+direct store to `+0x94` is in the death body; its callees (`L2.02926`, `L2.04389`, the virtual
+calls at `+0x48`) are unread. A unit that is not its owner's `+0x38` unit therefore reaches kind 5
+in its death call, whichever caller (the actor tick or this pass); whether a summoned creature is
+such a unit was not read. RU corpse ageing alone clamps health at -61 for class words 0x21..0x24;
+summoned rows are classes 74..76 (R2-ENGINE-777). The Animate Dead arm stores `+0x148` = 0 at RU
+`L2.04390` (EN equal), a site that lies after the start `L2.00079` of the arm R2-ENGINE-026 names
+Control Spirit; EXP-2089 and EXP-2098 name spell row 22 Animate Dead, the two names are not
+reconciled and the arm end was not read. Units of that store are outside the cap.
+
+Census: a linear decode of each `.text` lists 81 instructions with displacement 0x148 per root;
+the 16 RU sites in `L2.04391..L2.04392` are accesses (reads, stores and a copy) in init, unit
+copy, death, the Summon and Animate Dead arms, the builder `L2.04393`, this pass, `L2.04394` and
+the Inn offer `L2.04395`, whose class rests on the EXP-2068 listing `ru-offer-a.txt`, not on a
+listing in this experiment's `out/`; the other 65 are unclassified. Death has two E8 callers per
+root, the actor tick and this pass (`ru-removal-calls.tsv`, `en-death-calls.tsv`); the scans of
+detach and constructor callers are RU only. Dword scans of the sections (`*-world-ptr.tsv`)
+cover the world pass, `L2.04394`, corpse ageing and the session tick, not the death routine; death
+reached through a stored address is covered only by the 64 slots of the unit vtable.
+
+**Confidence.** High for the instructions of the pass, the session-tick condition, the random
+draw, the direct stores of the death body and the thresholds of corpse ageing: committed
+reproduced listings, equal in both roots except corpse ageing (both read). Medium for: the map and
+iterator semantics of the pass (get-or-insert, lookup and next-association argument order), which
+rest on call sites and on the unread `L2.04396`, `L2.04397`, the tail of `L2.04398`, `L2.00209`
+and `L2.00213`; the reach of the kind-5 clause (callees of the death body and `L2.00060` unread);
+the time per pass (R2-ENGINE-778); kind 5 meaning removal from play (the arm reuses units of kind
+5 or more, R2-ENGINE-455; the drawing code was not read); which unit of a caster goes first (list
+order, iterators unread); and the absence of a timer, caster-death or group rule, which covers 16
+of the 81 sites and the E8 calls read only. The victory-transition destruction of units outside
+classes 33..63 (R2-ENGINE-382, R2-ENGINE-412) reaches summoned units at that claim's grade.
+
+**Unknown.** The real time of a pass after LOAD and the visible effect of kind 5. A run of the
+original that casts Summon twice with one caster and logs Session `+4`, the time and each death
+call settles both; classifying the 65 unclassified sites and reading the callers of death and
+detach through virtual and stored addresses settles the removal routes, as does a run that casts
+Summon and waits.
+
+### R2-ENGINE-777
+
+The caster chooses the row through its level: the arm computes the word `[caster+0xb2]` / 25 + 1,
+clamped to 1..4, and appends it to the name (EXP-2098 listing `ru-summon-arm.txt`,
+`L2.04399..L2.04400`). The arm builds the unit with `L2.01273`, whose vtable `L2.02314` store (RU
+`L2.04125`; EN `L2.03160`, 45 lines, equal) is the last store in the 0xc0-byte window read; that
+window has no `ret` and the tail from `L2.04127` is unread. The arm then calls init `L2.01794` with
+the built name; init calls the defaults `L2.00105` (EN `L2.04401`, equal) and, only when the
+unread helper `L2.03298` returns above 0 (R2-ENGINE-754), the template loader, which calls the
+stat reader `L2.02341` (EN `L2.02669`, 333 lines, equal). The arm's callees after the build
+(`L2.04402`, `L2.01781`, `L2.02636`, `L2.04403`, `R2.0098`) are unread.
+
+The reader takes parameters 0..37 in order through four cursor readers (`L2.01278` word,
+`L2.01279` byte, `L2.01280` dword, `L2.01281` word). Each fetches element i of the row array
+(`L2.01294`), stores it only when it is not -1, and advances i. Destinations: body, reaction,
+mind, spirit `+0x84..+0x8a`; healthMax `+0x96` and `+0x94`; HP and MP regeneration `+0x98`,
+`+0x9e`; manaMax `+0x9c`, `+0x9a`, `+0xa0`; speed `+0x8c`; rotationSpeed `[+0x1c0]+0xa`; scanRange
+`+0xa5`; physicalMin, physicalMax and attackKind to `+0xb4..+0xba` by kind (kind 0 or below:
+`+0xb4` min, `+0xb5` max - min, scaled by 1/15 with bit 0x80 for large values; kind 3 also sets
+`+0x4c` bit 0x10); toHit `+0xa6` and `+0xa8`; defence `+0xbe`; absorbtion `+0xc0`; charge and relax
+`+0x134`, `+0x135`; five protections `+0xc4..+0xcc`; five resistances `+0xcf..+0xd3`; typeID `+0xe`;
+face `+0x4b`; tokenSize `+0x49`; movementType `+0x4a`; dyingTime read and dropped; Withdraw, Wimpy,
+See invisible `[+0x1c4]+0x40`, `+0x44`, `+0x71`; XPvalue `+0x1c`.
+
+Defaults (`L2.00105`): body 30, reaction 30, mind 20, spirit 20, speed 10, rotation 8, scan range
+5, health 30, HP regeneration 100, mana 0, `+0x9e` 50, charge 8, relax 4, `+0x50` 0xb, `+0x92` 300
+(ten times the default body), `+0x12c` 1. RU Units rows 109..123 supply parameters 0..37 except
+attackKind, -1 in all 15, so the reader's local 0 stands and the melee branch runs; manaMax is 0,
+typeID is 74 (Squirrel), 75 (Foot_Animated) and 76 (Turtle), healthMax runs 20..82, 30..123 and
+60..246 for the levels Summon builds. The level reaches the unit only through the row name, and
+the caster supplies directly the owner `+0x14` and the key `+0x148` in the arm body read. Slot +0x58
+(`L2.04100`) scales `+0xa0` by owner `+0xa5c`, which gives 0 for manaMax 0.
+
+**Confidence.** High for what the reader does once it runs, the cursor readers, the defaults body
+and the RU row values read. Medium for the call of the loader (helper `L2.03298` unread), for the
+binding of the built name to the row (matcher `L2.04123` unread, R2-ENGINE-754), and for the
+absence of other writers of these fields after the build: the arm's callees after the build are
+unread and no census of the writers was made. So "a summoned creature takes the row's
+parameters" is Medium until the helper is read. EN Units rows were not read.
+
+**Unknown.** The EN rows (a data read of the EN `world.res` with the same reader settles them),
+the helper `L2.03298` and the matcher `L2.04123` (reading them settles the call and the binding),
+and the delivered values (a run of the original that records a summoned creature's health, speed
+and damage from its info panel).
+
+### R2-ENGINE-778
+
+Session tick RU `L2.04380` (EN `L2.03120`, 196 lines, equal after masking) returns at once when
+`+0x94` of its object is 0. With t the object's `+4` at entry: when t mod 16 is 6 it calls
+`L2.00502` on `[L2.02609]`; when t mod 16 is 12 it calls the world pass of R2-ENGINE-776
+(`L2.04404`, EN `L2.04405`) and further members; then it always calls `L2.04406` (EN `L2.04407`,
+24 of 25 lines equal), which stores `+4` = t + 1; when (t + 1) mod 16 is 15 it calls `L2.04408` and
+adds 1 to the object's `+0`. At the one RU caller site read (call at `L2.04409`, in the window
+from `L2.04410`; `ru-tick-site.txt`) `[L2.01317]` is the object; the other three RU sites and all
+four EN sites were not read for their object. The EN world pass reads `[L2.00805]+0x7c` where the
+RU pass reads `[L2.01317]+0x7c` in the equal bodies. E8 scans find four callers of the session
+tick per root and no stored address of it. Two further parts of the tick bound its cadence: a
+first block calls `L2.04411` when the value from the call through `[L2.02355]` has advanced by
+more than 0x493e0 (300000) since the last store at `L2.04412` (a millisecond clock by inference,
+Medium), and the tick returns at once when `+0x94` of its object is 0.
+
+**Confidence.** High for the bodies, the conditions and the RU object operand at the site read.
+Medium for the time: the EN schedulers (`L2.03527`, `L2.02266`, R2-ENGINE-669) call a tick once
+per period (62 or 31 ms at the measured Speed values, linked to R2-ENGINE-620), which gives one
+world pass per 16 periods, about one second at 62 ms; the RU scheduler that holds the caller
+`L2.04409` is unread, and the period after LOAD is R2-ENGINE-669's Unknown. This narrows
+R2-ENGINE-754's identity of `[L2.01317]` with the EN `[L2.00805]` object to operand positions in
+equal bodies and to one RU caller site.
+
+**Unknown.** The scheduler period after LOAD (R2-ENGINE-669's run settles it) and the RU
+scheduler (reading the function that holds `L2.04409` settles it).
+
+**Evidence.** [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md), questions 1 to 3.

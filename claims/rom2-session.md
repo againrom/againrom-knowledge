@@ -4759,3 +4759,43 @@ example town1/10), or the established root of copy3, read with the same generato
 **Format surface.** `formats/rom2-sav/format.md`, Town SAVE writer.
 
 **Evidence.** [EXP-2102](../experiments/EXP-2102-rom2-town-field-values/RESULTS.md), questions 4 and 5.
+
+## Summoned creatures in a mission save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-326 | The class a ROM2 summoned creature belongs to has the Unit programme in vtable L2.02314 slot +8 (L2.01161): owner +0x14 and +0x1a0 are stored, +0x148 is not; no save was read; +0x148 after LOAD is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md) |
+
+### R2-SESSION-326
+
+The class the Summon arm builds stores vtable RU `L2.02314` (R2-ENGINE-777). Its slot +8 holds
+`L2.01161` (EN table `L2.04102` slot +8 `L2.01090`; the two 64-slot tables are equal as
+partitions), the Unit serializer of R2-ENGINE-209. That programme stores the owner `+0x14` in the
+base, `+0x1a0` in bits 24..31 of the packed u32 and the u32 `+0x144`; no step of its list covers
+the bytes `0x148..0x14b`, so `+0x148`, the caster key the cap of R2-ENGINE-776 counts, is not
+stored. A linear decode of RU `.text` finds no displacement 0x148 in `L2.04413..L2.04414` or
+`L2.04415..L2.04416`, which hold the serializer and its helpers; those ranges are chosen around
+the serializer and exclude the known sites `L2.04393` and `L2.04395`, so the step list is the
+stronger evidence. The creature's Group is written by the Player group list (R2-ENGINE-732,
+R2-SESSION-196). After LOAD the creature keeps `+0x1a0` (R2-ENGINE-535).
+
+This claim reads the class slot, not a file: no save was read, the four saves fit the programme
+with Human units (R2-SESSION-099), and the path that selects which units a mission save writes (for
+example a kind-5 or flag filter) was not read. Whether and where the original writes a summoned
+creature into a mission file is not shown.
+
+**Confidence.** High for the slot value and for the stored field list (R2-ENGINE-209's grade,
+which covers the load branch of the programme). Medium for the Group (R2-SESSION-196) and for
+`+0x1a0` after LOAD (R2-ENGINE-535, whose save and load sites are Medium). Unknown for the
+selection of units written and for `+0x148` after LOAD: the class factory path (the E8 caller
+`L2.04417` of the constructor `L2.01273`, the base constructor `L2.01295`, the allocator
+`L2.03294`) was not read, and the constructor window has no `+0x148` store.
+
+**Unknown.** Whether a mission save writes a summoned creature at all, and whether a loaded one is
+counted by the cap. Reading the unit-selection path of the save settles the first; reading the
+factory path settles the value; a run of the original that saves with two summoned creatures of one caster,
+loads, and waits 10 minutes of game time settles the behaviour.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2104](../experiments/EXP-2104-rom2-summon-lifetime/RESULTS.md), question 4.

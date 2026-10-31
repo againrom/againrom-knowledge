@@ -307,6 +307,12 @@ bytes, then twelve Item references for slots 1..12. — R2-ENGINE-208
 The gate +0x140 list with n > 0 is Medium; the rest is High.
 — R2-ENGINE-209
 
+The class a summoned creature belongs to (vtable `L2.02314` in RU) has this
+programme in slot +8, read from the class and not from a file. Its owner
++0x14 and +0x1a0 are stored; no step covers +0x148, the caster key that the
+summoned-creature cap counts. Which units a mission save writes, and what
++0x148 holds after LOAD, are Unknown. — R2-SESSION-326
+
 An Item writes the 38-byte base programme that Unit also calls first,
 then u32-counted references and
 u16, u16, u8, u8, u8, u16, u16, u8. Weapon adds raw 24, raw 22, u8 and a
