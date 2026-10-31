@@ -329,6 +329,22 @@ is inferred from a string layout. A unit the arm reuses from the dead-unit pool 
 whose programme was not read. Which units a mission save writes is
 Unknown. — R2-SESSION-327
 
+A unit that Summon builds gets +0x1a0 = 1 before its placement. Placed,
+it gets a new id at +4, owner +0x14 and key +0x148 from the caster
+(+0x14 and +4), a new Group at +0x70 in the owner's group list with order
+code +0x50 = 0xb, and the coverage word +0x1a4 from the recount. The
+state sender ORs a field mask into the dword +0x114 + 4 * id for a player
+id 16..31 that does not cover the unit while Session +0x74 is nonzero, and
+clears that dword when it sends. The cell test reads footprint mask byte
+`[+0x1c0]+5` (0x41 from the block constructor) and tokenSize +0x49. A
+placement that fails leaves +0x1a0 = 1, no id, owner or Group store, and
+the unit off the grid. The cast's recovery byte +0x6c on the caster
+includes a draw of 0..3, taken in the actor step that runs the apply.
+Session +0x74 has two known stores: server init's and the map build's.
+Which of these a mission save writes is
+Unknown. — R2-ENGINE-788, R2-ENGINE-789, R2-ENGINE-790, R2-ENGINE-791,
+R2-SESSION-329
+
 An Item writes the 38-byte base programme that Unit also calls first,
 then u32-counted references and
 u16, u16, u8, u8, u8, u16, u16, u8. Weapon adds raw 24, raw 22, u8 and a

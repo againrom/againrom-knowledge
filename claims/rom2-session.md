@@ -2281,7 +2281,7 @@ page only.
 |---|---|---|---|---|
 | R2-SESSION-195 | A ROM2 client unit update with +0x1dc 1..20 and signed health word below -10 sets bank 531+that value to 0; ordinary departure then makes a nonzero availability 2 if selected, 1 if not, and clears selections. | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-SESSION-196 | In RU a ROM2 hire's Group is written and rebuilt by the Player group list with the creator's append method, its Unit body carrying class, owner and hire ID; LOAD does not run the hire creator. | Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
-| R2-SESSION-198 | A ROM2 store census finds one Session-global store to +0x74 per root, the map build's; the rest stay unattributed, so +0x74 is 0 in a campaign (Medium) and the dead-hire update keeps bit 0x80. | Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-SESSION-198 | A ROM2 store census finds one Session-global store to +0x74 per root, the map build's; the rest stay unattributed, so +0x74 is 0 in a campaign (Medium) and the dead-hire update keeps bit 0x80. | Medium | ● active (amended) | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 | R2-SESSION-199 | Scenario.dll stores availability and town literals only for ROM2 hires 1..7, equal in EN and RU; with the indexed and client writers, hires 8..20 never become available after NewGame (Medium). | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 
 ### R2-SESSION-195
@@ -2409,6 +2409,15 @@ computed outside eight instructions is classed by the nearest writer only.
 hit's function entry and its `this` source settles them. The identity of the
 join's receiver with the Session object: the `ecx` source in the routine
 that dispatches the join arm settles it.
+
+**Amended.** R2-SESSION-329 narrows the Session-global part: a chain scan through the global
+finds the same map-build store per root and 58 RU and 57 EN reads, and the map-load method seeds
+the CRT before it calls the map build. Server init stores `this` into the Session global (RU
+`L2.00332`), so its `+0x74` = (mode below 2) store (RU `L2.01030`) is a second known write to the
+Session object. The campaign value of `+0x74` is not shown by that experiment: it needs the mode
+that server init receives to be 2 or more (R2-ENGINE-334, not re-read there) and the map build to
+store 0 (R2-ENGINE-509), and the order of the two writes is unread. R2-SESSION-198 keeps its
+grade. The other unattributed hits stay unattributed.
 
 **Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
 
@@ -4933,6 +4942,47 @@ settles it.
 **Format surface.** `formats/rom2-sav/format.md`, First Group member.
 
 **Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 4.
+
+## Session +0x74 through the Session global
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-329 | Through the ROM2 Session global the chain scan finds one +0x74 store per root (the map build's, map +0xd8 above 1) and 58 RU and 57 EN reads; server init also stores this+0x74 = (mode below 2) into the object it makes that global. | Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+
+### R2-SESSION-329
+
+A chain scan of each `allods2.exe` `.text` for a load of the Session global (RU `[L2.01317]`, EN
+`[L2.00805]`) followed by an access at `+0x74` finds one write per root, RU `L2.02695` (EN
+`L2.02694`), the map build's store of map `+0xd8` above 1 (R2-SESSION-198), and 58 RU and 57 EN
+reads. The map-load method RU `L2.00112` (EN `L2.00222`) calls the CRT seed `L2.04658` at
+`L2.04712` (EN `L2.04713`; R2-ENGINE-790) and later the map build `L2.00113` at `L2.04714` (EN
+`L2.00186` at `L2.04715`) with `ecx` = its object + 0x98. Server init RU `R2.0010` stores
+`this+0x74` = (mode below 2) at `L2.01030` (EN `L2.01015`) and `+0x70` = (mode above 0); it then
+stores `this` into the Session global `[L2.01317]` at `L2.04716`, `L2.00332` (EN `L2.00331` into
+`[L2.00805]`), so server init's store is a second write of `+0x74` to the Session object, made
+before the global holds `this`.
+
+Summon's readers are positioning RU `L2.04717`, `L2.04718` (EN `L2.04719`, `L2.04720`), which skip
+a candidate y below 12 when `+0x74` is nonzero, and the state sender RU `L2.04721`, `L2.04722`,
+`L2.04723`, `L2.04724`, `L2.04725` (EN `L2.04726`, `L2.04727`, `L2.04728`, `L2.04729`,
+`L2.04730`), whose first read defers a message to a player id 16..31 that does not cover the unit
+(R2-ENGINE-788).
+
+**Confidence.** Medium. The scan follows the global's load to the access; a store through `this` or
+another computed base is outside it, and server init's store was read in the body, not found by the
+scan. Two stores are known: server init's (mode below 2) and the map build's (map `+0xd8` above 1).
+No other store was traced; R2-SESSION-198's unattributed hits are not tied to the Session global.
+The object identity of server init's `this` with the global is read at `L2.00332`.
+
+**Unknown.** The value of `+0x74` in a campaign: server init's store gives 0 only when its mode
+argument is 2 or more, and the order of the two writes and the mode a campaign passes are not shown
+here (R2-SESSION-198 grades the campaign value Medium from R2-ENGINE-334). A store census by
+function entry with each `this` source traced settles the other writers; a run of the original that
+hosts a multiplayer map and casts Summon at a map edge with y below 12 settles the skip.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md), question 3.
 
 ## Stone Curse in a mission save
 

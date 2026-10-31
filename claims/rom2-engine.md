@@ -6917,7 +6917,7 @@ Selected activation EN L2.01117 / RU L2.01212 passes panel ID 0x467 and bounds (
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-390 | Positive filled Blizzard damage bypasses the blank-effect default and creates a mode-2 AreaEffect owning a damage object in both inspected ROM2 roots. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
-| R2-ENGINE-391 | The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-391 | The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3. | Medium | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-392 | The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-393 | The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-394 | Each accepted RU Blizzard cell sends opcode 0x86 with effect identifier 23 and argument 16; the client draws it as the 9-frame `Meteor\sprites` type for 16 updates with Sfx 523 at the ninth update; the update period is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
@@ -6983,6 +6983,12 @@ and occupant queries but still consumes placement draws and advances the pulse.
 **Unknown.** RNG seed policy, interleaving with other objects, EN map-edge
 acceptance and the final admitted-cell sequence. An original cast with recorded
 RNG/coordinates would settle the final sequence.
+
+**Amended.** R2-ENGINE-790 narrows the seed policy: `L2.04658` (EN `L2.04659`) passes
+`timeGetTime()` to srand RU `L2.04660` (EN `L2.04661`), which stores into the state `L2.02317`
+returns (body unread; the core addresses it alike, Medium), and the
+map-load method calls it before the map build (R2-SESSION-329). Other srand callers were not
+scanned, so a later reseed stays open (Medium).
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -9543,6 +9549,12 @@ unread), as does the name binding. The cell tests are R2-ENGINE-531's routines (
 R2-ENGINE-654); the RU placement cell test calling the footprint test is inferred from the EN call
 and the root offset (Medium). The flag is Session `+0x74` (R2-ENGINE-778, R2-SESSION-198), and
 what the map bytes stand for stays Unknown.
+R2-ENGINE-789 narrows the cell tests: they are read in both roots, and a cell fails when a plane
+byte under the creature's footprint shares a bit with its mask 0x41 or, for layer kinds 1 to 3
+(kind 0 unread), when a footprint cell's record already holds a unit. R2-ENGINE-788 narrows what follows the placement (id, owner, key,
+Group, orders 0xc then 0xb, recount, state message). R2-ENGINE-791 narrows "failure aborts the
+cast": the mana is paid and the cast message sent before positioning, and the unit is left off the
+grid. R2-ENGINE-790 gives the draws. Session `+0x74` is R2-SESSION-329.
 
 ### R2-ENGINE-456
 
@@ -11473,7 +11485,7 @@ generator of R2-ASSET-123 over them would settle which kinds they build.
 | R2-ENGINE-527 | The hire creator's last call is the EN unit-state sender: argument 3 is a field mask, 0xffb and two zeros feed two field helpers; the creator writes no coordinate, and the hire's cell is Unknown. | High / Unknown | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-529 | ROM2 party placement starts at a random word of the receiver's +0xc0 drop list (x low, y high), or rand(70)+30 per axis when x*y is 0; radius trunc(max(5, sqrt(n)+4)), Medium, EN constants. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 | R2-ENGINE-530 | ROM2 party placement walks owner +0x24 in list order, tries the hero at radius 0 first and every other actor at the party radius, and logs a failure; its skip rule is Medium, and no read ties a campaign hire to it. | High / Medium / Unknown | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
-| R2-ENGINE-531 | ROM2 positioning(x, y, r) tests trunc(r*r/2)+2 random cells (rand ranges EN only), then the r-wide square x-major; a fit places the actor on the ground grid, a failure returns 0. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
+| R2-ENGINE-531 | ROM2 positioning(x, y, r) tests trunc(r*r/2)+2 random cells (rand ranges EN only), then the r-wide square x-major; a fit places the actor on the ground grid, a failure returns 0. | High / Medium | ● active (amended) | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 | R2-ENGINE-532 | A ROM2 join routine runs party placement only when its flag is set and owner byte +0x41 is 0, then sets +0x41 to 1; victory sets +0x41 to 0 for kept owners; whether a campaign hire reaches it is Unknown. | High / Medium / Unknown | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 | R2-ENGINE-533 | The two ROM2 senders of 0x468 (map travel end, victory arm) are High; that two push sites per root post it, and that the creator's direct call is its one route, are Medium. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
 
@@ -11838,6 +11850,13 @@ for the meaning of a failed cell: `L2.02720` and the two layer accessors
 **Unknown.** Whether a failed check means another actor, impassable terrain
 or both. The RU draw ranges: a window on RU `R2.0021` settles them. Whether
 party placement's receiver is the object at `[L2.00805]` (R2-ENGINE-532).
+
+**Amended.** R2-ENGINE-789 narrows the failed-cell Unknown: `L2.02720` (RU `L2.03520`) is an AND
+of the plane byte and the actor's mask byte `[+0x1c0]+5` (0x41 from the block constructor), and
+the accessors `L2.02722` and `L2.02721` (RU `L2.03871`, `L2.03872`) read planes P2 and P1, read in
+both roots. Occupants, buildings and effects set those bits (R2-ENGINE-758); terrain bits from the
+map load stay unread. The ground place `L2.00314` can still return 0 on a cell record that holds a
+unit (layer kinds 1 to 3; kind 0 unread). The RU draw range is 0..r (R2-ENGINE-391, R2-ENGINE-790).
 
 **Evidence.** [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/)
 
@@ -15011,7 +15030,7 @@ spells of R2-ENGINE-456.
 | R2-ENGINE-651 | The ROM2 attack planner (RU L2.01530, EN L2.03461) draws once per carried slot on each call and casts the last slot drawn below its threshold, Teleport only beyond distance 2; each root has 11 direct callers. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 | R2-ENGINE-652 | The ROM2 template loader (RU R2.0087, EN R2.0086) stores each Units Spell 1..3 above 0 at command +0x7c+4i and its Probability x 0x147 at +0x88+4i and books the spell; only a knownSpells mask sets the mage bit. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 | R2-ENGINE-653 | The ROM2 special cast (RU L2.02111, EN L2.03459) aims by id alone through 29 cells: victim, caster or victim cell, a cell search for 9 and 23, nothing for 22; a spell the book getter does not return is not cast. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
-| R2-ENGINE-654 | ROM2 special-cast id 9 aims at the caster's position plus a map offset for the 8-way heading toward the victim; id 23 at the first 3 by 3 cell around the victim where the caster's footprint passes a byte-mask test. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+| R2-ENGINE-654 | ROM2 special-cast id 9 aims at the caster's position plus a map offset for the 8-way heading toward the victim; id 23 at the first 3 by 3 cell around the victim where the caster's footprint passes a byte-mask test. | High / Medium | ● active (amended, branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 | R2-ENGINE-655 | A ROM2 creature's slot spell is stopped by target +0x4c & 8, a failed draw, Teleport within 2, a zero book getter, id 22 or above 29, or no Teleport cell; after a special-cast call the planner prepares no attack. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 
 ### R2-ENGINE-651
@@ -15205,6 +15224,9 @@ in `L2.01522` were not read.
 A run of the original with Turtle.4 (Acid Stream) attacking from each of
 eight headings and Orc_Sword.4 (Teleport) beyond 2 cells of a victim with
 blocked neighbours, recording the cast cell, would settle both.
+
+**Amended.** R2-ENGINE-789 narrows the byte test: the caster byte `[+0x1c0]+5` is 0x41 from the
+block constructor `L2.01783` (Medium for later writers). The cell byte of `L2.03519` stays unread.
 
 **Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
 
@@ -16622,7 +16644,7 @@ R2-ENGINE-696; callees were compared only where listed.
 |---|---|---|---|---|
 | R2-ENGINE-703 | A ROM2 unit's Teleport (ID 54) release at its first state 8 update makes two type-54 effects of 21 updates, one near the caster and a copy at the target cell centre; neither moves; each draws frames 0..20. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-704 | A ROM2 client Teleport caster plays state 8 for its type's AttackAnimTime sum (12 for types 23, 24) and Sfx 554 at counter AttackDelay (8); the cast is not shown while it animates or its type has AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
-| R2-ENGINE-705 | ROM2 Teleport pays mana; if three gates pass it sends 0x86 (ID 54, target cell), and +0x134 actor steps later the apply moves the caster to the target cell centre if both footprint tests pass. Read in RU; 8 bodies paired in EN. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-705 | ROM2 Teleport pays mana; if three gates pass it sends 0x86 (ID 54, target cell), and +0x134 actor steps later the apply moves the caster to the target cell centre if both footprint tests pass. Read in RU; 8 bodies paired in EN. | High / Medium | ● active (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-706 | When a ROM2 Teleport cast reaches the client (R2-ENGINE-705), a refused cell keeps the mana paid, both images and Sfx 554 and leaves the caster in place; a target beyond the range byte is approached first. Read in RU. | Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-707 | A ROM2 creature's Teleport takes the hero's server route, packet and client arm; it differs in mana (none for a non-mage, Medium), +0x134, units.reg timing and offsets, its planner cell test, and no image for AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-708 | 23 of 24 ROM2 EN/RU Teleport listing pairs have equal instructions under an operand mask (callees, globals unchecked); 10 tables are equal or shifted; the 0x86 handler differs at 2 of 333 and its dispatcher tables were not compared. | High | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
@@ -16794,6 +16816,12 @@ its source is the unread spell values and the setter above.
 **Unknown.** The client arm of the state packet: whether the client jumps
 or walks the caster and on which client tick it shows the new cell. The
 values of the three gates for a hero's cast, and the client arm for 0x8b.
+
+**Amended.** R2-ENGINE-788 and R2-ENGINE-789 narrow the RU-only reads: `L2.00315`, `L2.02410`,
+`L2.02636` and the state sender `L2.00060` are read in both roots and equal after masking (EN
+`L2.00314`, `L2.03569`, `L2.03312`, `L2.01056`). The two byte maps are planes P2 (`L2.03871`) and
+P1 (`L2.03872`) tested against mask 0x41, and `L2.00315` returns 0 when a footprint cell's record
+already holds a unit (layer kinds 1 to 3; kind 0 unread).
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 2 and 4.
 
@@ -19053,6 +19081,11 @@ and the delivered values (a run of the original that records a summoned creature
 and damage from its info panel).
 
 **Amended.** R2-ENGINE-781 narrows the helper Unknown: `L2.03298` returns the dword at `[name] - 0xc + 4` (the CString length slot by layout, Medium) and `L2.04123` is 1 exactly when the byte compare `L2.02085` of the name and `[row + 4]` returns 0; the call of the loader stays Medium through that layout inference, the binding of the loader index to the data.bin ordinal and the writers past `L2.04527`, which are unread. The EN Units rows equal the RU rows (R2-ASSET-202).
+R2-ENGINE-788 narrows the after-build Unknown: the callees `L2.04402`, `L2.01781`, `L2.02636`,
+`L2.04403`, `R2.0098` and `L2.00060` are read and, in those bodies, store none of the reader's
+destinations; they write `+4`, `+0x14`, `+0x148`, `+0x70`, `+0x50`, the Group programme, `+0x1a4`
+(for each actor of the recount's list with a nonzero table word) and `+0x114` + 4 * id. Their unread callees, named in
+R2-ENGINE-788, keep "no other writer" at Medium.
 
 ### R2-ENGINE-778
 
@@ -19089,7 +19122,7 @@ scheduler (reading the function that holds `L2.04409` settles it).
 |---|---|---|---|---|
 | R2-ENGINE-780 | ROM2 spell row 22 (RU L2.00079, EN L2.04528) takes the first unit of the corpse ageing list on the target cell with kind 2, else 3, else 4, and word +0xe outside 82..98, and sets its health -10001 and kind 5. | High / Medium | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
 | R2-ENGINE-781 | The ROM2 spell 22 arm builds F_Zombie.1, F_Skeleton.1 or Ghost for a kind 2, 3 or 4 corpse through init L2.01794, copies or halves seven statistics (six for the Ghost), sets health to healthMax, and reads no caster field but owner +0x14. | High / Medium | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
-| R2-ENGINE-782 | The ROM2 spell 22 arm tries the raised unit on the corpse's cell as clamped, with no search around it (L2.00313, radius 0); placed, it gets +0x1a0 = 1, +0x148 = 0, a new id, the caster's owner and a new Group in that owner's list. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
+| R2-ENGINE-782 | The ROM2 spell 22 arm tries the raised unit on the corpse's cell as clamped, with no search around it (L2.00313, radius 0); placed, it gets +0x1a0 = 1, +0x148 = 0, a new id, the caster's owner and a new Group in that owner's list. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
 | R2-ENGINE-783 | A placed ROM2 spell 22 unit is outside the summon cap; its death rolls no gold, item or bag (High) and skips a human attacker's experience (Medium); no timer in the bodies read; EN equals RU in shape except the RU-only +0x30 test. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md) |
 
 ### R2-ENGINE-780
@@ -19223,6 +19256,11 @@ and whether a corpse can stand outside the clamp range.
 **Unknown.** A run of the original that casts spell 22 on a corpse settles whether the unit appears
 on that cell.
 
+**Amended.** R2-ENGINE-788 narrows the unread calls it shares with Summon: `L2.01287` takes the
+first clear bit of the table `L2.00340`; `L2.01781` links a pool node holding the Group at the tail
+of `[owner+0x28]`; `L2.02636` sets `+0x50` = 0xc; `R2.0098` and `L2.00060` are read in both roots.
+R2-ENGINE-789 gives the cell test's callees. `L2.04542` stays unread.
+
 **Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 3.
 
 ### R2-ENGINE-783
@@ -19259,6 +19297,187 @@ vtable in `.rdata` settles which pooled units RU skips.
 caster and finishes the mission settles the lifetime.
 
 **Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), questions 4 and 5.
+
+## Summon placement and the cast after the build
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-788 | After placement the ROM2 Summon arm gives the creature an id, the caster's owner and key and a new Group (orders 0xc then 0xb), recounts coverage and sends its state; the only caster store in the bodies read is +0x1a4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+| R2-ENGINE-789 | ROM2 Summon places its creature on the first of 20 random cells within 3 of the caster, then of the 7 by 7 square x-major, where no footprint cell has a bit of 0x41 in plane P1 or P2 and (layer kinds 1 to 3) every cell record is free. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+| R2-ENGINE-790 | One ROM2 Summon cast draws the kind 1..3, the facing 0..128, two 0..6 draws per random placement try (up to 40) and 0..3 for the caster's recovery, from the CRT state that map load seeds from timeGetTime (the state body is unread). | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+| R2-ENGINE-791 | A ROM2 Summon cast shows only the caster's cast state 8 and sound 558 (packet 58) in the bodies read; a failed placement keeps the mana paid and leaves the unit in the global list, off the grid, with no owner store. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+
+### R2-ENGINE-788
+
+The arm (RU `L2.00082`, EXP-2057 listing `ru-unique-arms.txt`) stores unit `+0x1a0` = 1 at
+`L2.02744`, before positioning `L2.04662`. On a nonzero result it runs, in order:
+
+1. `L2.04402` on `[L2.00326]`: search `L2.04541`, append `L2.00206`, unit `+4` = `L2.01287()` AND
+   0xffff. `L2.01287` (EN `L2.02670`) takes the first clear bit of the table `L2.00340`, marks it
+   through `L2.00338` and returns word index * 32 + bit.
+2. Unit `+0x14` = the caster's `+0x14`; `+0x148` = the caster's `+4`.
+3. `L2.00205`: append to `[owner+0x24]`.
+4. A 0x50-byte Group (`L2.00349`); `L2.01781` (EN `L2.04047`) links a 0xc-byte pool node (`L2.04663`)
+   holding the Group at `+8` at the tail of `[owner+0x28]` (head `+4`, tail `+8`).
+5. `L2.00361`: unit `+0x70` = the Group, Group `+0x44` = the owner (R2-ENGINE-782).
+6. `L2.02636` (EN `L2.03312`): reset and unit `+0x50` = 0xc (R2-ENGINE-541).
+7. `L2.04403(group, 0)` on `[L2.02609]` (EN `L2.04664`): `L2.02842` resets each member and clears
+   command `+0x38`; `L2.02815` sets each member's `+0x50` = 0xb (R2-ENGINE-541); programme
+   `[group+0x3c]+0x20` = 1; `L2.04665` runs `L2.04666`, which stores programme `+0x28` (packed
+   cell), `+0x24` (packed fine position), `+0x2a` (largest member distance, `L2.01522`), `+0x2b`
+   (largest scanRange `+0xa5`) and `+0x2c` (largest sum), and copies `+0x2c` to `+0x2d` and `+0x38`;
+   then `+0x2d` and `+0x38` are raised to `[[L2.02609]+0xa8b8]` when lower, and `+0x39` = 0.
+8. `R2.0098` on `[L2.02538]+0x92ecc` (EN `R2.0097`): the recount of R2-ENGINE-087. It stores the
+   word `+0x1a4` (`L2.04667`, from the table word loaded at `L2.04668`; skipped when that word is 0,
+   `L2.04669`) of each actor of the list at `[Session+0x7c]+0xc`, so the caster's `+0x1a4` is written
+   when the caster is in that list and its table word is nonzero.
+9. `L2.00060(unit, 0, 0xa31fffff, 0xffb, 0, 0)` on `L2.02608` (EN `L2.01056`), then the apply end
+   `L2.04530` (epilogue).
+
+`+0xa8b8` has one writer per root in an operand scan of `.text` (5 hits per root): RU `L2.04670`
+(EN `L2.04671`) stores `R2.0114(this, "Scanning", "MinimalGuardRange", 10)`. `R2.0114` (EN
+`R2.0113`) looks up the first key through `L2.04672`, then the second in its result, type-checks the
+entry and returns entry `+4`, or 10 when the second lookup returns 0.
+
+The sender with recipient 0 walks the players `[L2.00293]` and recurses for a player p whose byte
+`+0x43` (`L2.04673`, R2-ENGINE-532) is nonzero or who owns the unit. For recipient p, when unit
+`+0x1a4` AND p `+0x30` is 0, Session `+0x74` is nonzero and p's id is 16..31, it ORs the mask into
+the dword unit `+0x114` + 4 * id and returns; otherwise it builds the message at `L2.04674` (`+7` =
+p's id, `+0x12` = the unit's id) under R2-ENGINE-525's mask rules and, for id 16..31, stores 0 in
+that dword.
+
+**Confidence.** High for the order and the stores: committed reproduced listings, equal after
+masking in both roots for `L2.01781`, `L2.04403`, `L2.02842`, `L2.04665`, `L2.04666`, `L2.01287`,
+`R2.0098`, `L2.00060`, `L2.04673` and `R2.0114`; RU only for the arm's own stores, `L2.04402`,
+`L2.00205` and `L2.00361`. Medium for the key roles and the value (`L2.04672` and the configuration
+source unread). The bodies read store no field of the caster and nothing in the player's selection
+except the recount's `+0x1a4`. Medium for "no other caster or selection store", because unread
+callees remain: `L2.00322`, `L2.00206`, the transport `L2.03865`; of the recount `R2.0095`,
+`L2.00155`, `L2.04675`, `L2.04676`, `L2.04677`, `L2.04678`, `L2.04679`, `L2.04680`, `L2.04681`,
+`L2.00486`, `L2.00487`; of the state sender `L2.03870` (31 sites), `L2.04682`, `L2.04683`,
+`L2.04684`, `L2.04685`, `L2.01309`, `L2.04686`, `L2.00311`, `L2.01750`, `L2.04687`, `L2.04688`,
+`L2.00459`; of the group centre `L2.02502`, `L2.02411`, `L2.02412`; of the group call `L2.04689`,
+`L2.04690`, `L2.02816`, `L2.02637`. The call lists of the bodies (RU direct targets: recount 16,
+sender 33 and 5 indirect sites, centre 6, centre tail 3, group call 8) were not each matched to a
+committed listing, so further unread callees may remain.
+
+**Unknown.** The configuration value: reading `L2.04672` and the file it parses settles it.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md), question 1.
+
+### R2-ENGINE-789
+
+Positioning `L2.00313(x, y, 6)` (R2-ENGINE-531) is called with the caster's cell for the built unit.
+It sets the position through `L2.02599` (`+0`, `+1`, word `+2` = y << 8 | x, `+4` = `+5` = 0x80),
+then for k = 0..19 draws y' = y - 3 + `R2.0021(6)`, then x', clamps (`L2.01700`), skips a clamped
+y' below 12 while Session `+0x74` is nonzero, and stops at the first cell for which `L2.02106(unit)`
+is nonzero; then it scans x' = x-3..x+3 (outer) and y' = y-3..y+3 (inner) with the same skip on the
+raw y'. A found cell returns the ground place `L2.00315(unit)`; none returns 0.
+
+The cell test calls `L2.03831(unit, cell, 0)` and `(unit, cell, 1)` (EN `L2.02719`). Flag 0 reads
+plane P2 through `L2.03871` (this + 0x20000 + y * 256 + x), flag 1 plane P1 through `L2.03872` (this
++ 0x10000 + ...). For each footprint cell (size from virtual `+0x1c`, slot `L2.04691`: byte
+`+0x49`) `L2.03520` returns the plane byte AND `[unit+0x1c0]+5`; a nonzero result fails. The block
+constructor `L2.01783` stores `+5` = 0x41; a chain scan for `[reg+0x1c0]` then `+5` finds 6 reads
+and no write per root.
+
+The ground place (EN `L2.00314`) sets block `+0x72` (`L2.04692`), `+0x82`/`+0x83` = x/y and
+`+0x84`/`+0x85`, runs the cell test again and calls the cell record writer `L2.02922` (EN
+`L2.03570`, R2-ENGINE-673) for each footprint cell. For layer kinds 1..2 (virtual `+0x20`, slot
+`L2.04693`: byte `+0x4a`) the writer finds or creates (`L2.04694`) the record, runs its cell event,
+and returns 0 when record `+4` holds a unit, else stores the unit there; kind 3 uses `+8`.
+Kind 0 takes `L2.04695 jbe L2.04696`, a jump to the first byte past the listed window; that body
+is unread, so the record test for kind 0 is unread. A 0 ends the place with 0, leaving earlier
+records of a larger footprint written.
+Otherwise `L2.02410(unit, cell, 1)` marks the footprint in the grid at this `+0xa452c`, block
+`+0x80` = the cell, and the place returns 1.
+
+So a cell fails when a P1 or P2 byte under the creature's footprint shares a bit with 0x41, or,
+for layer kinds 1 to 3, when a footprint cell's record holds a unit. The footprint size and mask are
+the creature's. Bits of 0x41 come from the ground occupant's 0x40 (this experiment's plane-layer and
+occupant-kind listings) and from the `|= 5` writer for buildings and effects (R2-ENGINE-758, EN,
+not re-read here), which shares bit 0 with 0x41. The same writer clears bits 0 and 2 with `&= 0xfa`
+for buildings selected by the bit test on building `+0x64`; which structures take which branch is
+Unknown. A structure or effect on the cell fails it when its writer took the `|= 5` branch.
+
+**Confidence.** High for the bodies, the order and the tests read: reproduced listings, equal after
+masking in both roots, for layer kinds 1 to 3. Medium that the mask is 0x41 when the test runs
+(stores through `this` are outside the chain scan) and for what sets the plane bits:
+R2-ENGINE-758's writers; the map load's terrain bits are unread. The creature's layer kind comes
+from virtual `+0x20` (slot `L2.04693`, byte `+0x4a`) and depends on the creature, so for a creature
+of kind 0 the record test is unread.
+
+**Unknown.** Which terrain fails: reading the map loader's plane writers, or a run of the original
+that casts Summon beside water and walls and records the creature's cell, settles it. Which kind
+the summoned creatures have, and what `L2.04696` does: reading `L2.04696` and the creature types'
+byte `+0x4a` settles it.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md), question 2.
+
+### R2-ENGINE-790
+
+`R2.0021(n)` returns 0..n and `L2.00092(n)` 1..n over the core `L2.01699` (R2-ENGINE-391). A
+call-target scan of `.text` finds RU 95 calls of `R2.0021`, 19 of `L2.00092`, 39 of `L2.01699`
+and 5 of `L2.02431`; EN 93 of `L2.00939`, 19 of `L2.04697` and 39 of `L2.00729`. A Summon cast
+makes, in order:
+
+1. the kind roll `L2.00092(3)` at `L2.04698` (EN `L2.04699`): 1..3;
+2. the facing in init, `R2.0021(0x80)` at `L2.04700` (EN `L2.04701`): 0..128;
+3. per random positioning try, y at `L2.04702` then x at `L2.04703` (EN `L2.04704`, `L2.04705`),
+   each 0..6: 2 * (k + 1) draws when try k passes, 40 when none does; the square scan draws none;
+4. in the actor step that runs the apply, after the apply call (RU `L2.04706`, `call L2.00034`,
+   then `+0x58` = 7; EXP-2104 `ru-actor-tick.txt`), `R2.0021(3)` at `L2.04707` (EN `L2.04708`):
+   recovery byte `+0x6c` = byte `+0x135` + base + the draw, base 12 or (word `[+0x74]+0x4a` + (30 -
+   word `+0x86`) * 5) / 12.
+
+The cast routine and the apply head make no direct draw. `L2.04658` (EN `L2.04659`) passes
+`timeGetTime()` to srand `L2.04660` (EN `L2.04661`), which stores it at `[L2.02317()]+0x14`; the
+core reads `[L2.02317()]+0x14` too. The body of `L2.02317` is unread, so that srand and the core
+address the same state rests on the same call and offset. Map load calls the seed routine
+(R2-SESSION-329).
+
+**Confidence.** High for the sites, ranges and order: reproduced listings, equal after masking in
+both roots (step 4 and the seed windows read in both). Medium that the draws share one stream:
+`L2.02317` is unread. Medium that no other draw occurs: virtual targets (the RU pool walk's
+`+0x30`, slots of the build) and the cell event's script hooks are unread. Medium that map load's
+seed is the only one: srand's callers were not scanned.
+
+**Unknown.** A call-target scan for `L2.04660` settles the seeds.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md), question 4.
+
+### R2-ENGINE-791
+
+The cast routine sends the cast message (`L2.02155` at `L2.04709` or `L2.02156` at `L2.04710`;
+cast identifier 2 * 25 + 8 = 58) after the payment and before the wind-up (EXP-2090 listing
+`ru-cfg-L2.00027.txt`). The caster takes cast state 8 and sound 558 at the counter of R2-ENGINE-446
+and R2-ENGINE-691; 58 has no lifetime entry and no `projectiles.reg` type (R2-ENGINE-445). No
+picture or sound call at the creature's cell is in the arm, the callees of R2-ENGINE-788 or the
+apply head. The creature reaches the clients through the state sender.
+
+When positioning returns 0 the arm jumps to `L2.04530` (`L2.04711`): the mana is paid and the cast
+message sent. The unit stays in the global unit list `[L2.02103]` with init's `+0x13c` = 0, `+0x70` =
+0 and `+0x50` = 0xb (defaults) and the arm's `+0x1a0` = 1, at the last candidate position, off the
+grid, with no id, owner or Group store; a pooled unit keeps its earlier `+4` and `+0x14`.
+
+**Confidence.** High for the failure jump, the payment and message before it and the stores before
+positioning (listings read). Medium for the presentation: the client arm of the state message is
+unread and the grades are those of the claims cited. Medium for the new unit's place in the global
+list, which rests on the constructor and the pool walk.
+
+**Unknown.** A run of the original that casts Summon beside the caster and records frames and
+sounds at the creature's cell settles the presentation; one with all 49 cells blocked that records
+the unit count settles what the unplaced unit does.
+
+**Format surface.** `formats/rom2-sav/format.md`, First Group member.
+
+**Evidence.** [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md), question 5.
 
 ## Stone Curse effect, look and end
 
