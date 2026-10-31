@@ -4924,3 +4924,49 @@ serializer call sites pass `-1` or a register mask, and others pass `0xbf7fff7f`
 **Unknown.** Settle with the original: a mission whose map places an npc with the `Hero` flag
 and a weapon; on the first frames record that human's client drawable `+0x20`, and whether an
 equipment message reaches it before it first attacks or casts.
+
+## Retained creature casts and the Dragon draw
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs) and of `data/data.bin` in both `world.res` files (the rows read, `data-en.tsv` and `data-ru.tsv`, are equal and only the hash line differs; the two files have different hashes, so other rows may differ); no process was run. `EXP-0636` was allocated `MAGIC-428`..`MAGIC-432` and spent `MAGIC-428`..`MAGIC-430`; `MAGIC-431` and `MAGIC-432` are unused. A repeat is a further install of a kind-8 or kind-9 order kept armed by `ord+0x60` (`MAGIC-240`).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-428 | Each repeat of a retained kind-8 cast calls the range gate at progress 0 and releases at the target's position then, except id 14 (aim Unknown); no HP or sight test gates the arm, install or release call (card). | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| MAGIC-429 | A retained cast does not cut a step except at command state 0x17 with `mover+0x98` set (`MAGIC-341`); a repeat is installed and cast from the cell the step reached. | Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| MAGIC-430 | A computer-owned Dragon or Daemon has empty class slots, so each engage draw reaches `R0393`: Mind 75..99 gives about 30-in-100 kind 5 (CRT `rand()` / `0x8000`), else an equal-weight kind-8 pick of an affordable book spell. | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+
+### MAGIC-428
+
+- Kind-8 arm `L00108`: a self target bypasses the gate; otherwise `R0041(actor, ord+0x28, ord+0x14)` is called with the target pointer. It compares the facing byte of `R0051` with the direction byte and then the distance from `R0036` with reach (`L14169..L00578`); both callees are unread here, the reading of the target's position inside `R0036` is inherited from `AI-522`, and a failure may be a facing failure. On failure the arm approaches through `R0042`. On success the install copies `ord+0x28` to `actor+0x5c` and `ord+0x30` to `actor+0x64`, stores `ord+0x5c` := 1 and tests `ord+0x60`.
+- Release `R0002` calls `R0003(caster, target, 0, 0)` except for spell id 14 (Prismatic Spray, `L06167..L17368`), which bypasses it; the aim of id 14 is Unknown. Prismatic Spray is in the books of Dragon.3, Dragon.4 and the Daemon (`UNIT-167`). The application reads `target+0x10` at release (`L16485..L06146`, with the multi-cell adjustment through `vt+0x1c`, `R0863`, `R0862`); a null target uses the cell arguments.
+- So a retained Fire Ball, Wall of Fire or Poison Cloud (ids other than 14) ordered at an actor lands at that actor's position at each release, after its wind-up, and follows it between repeats.
+- Kind 9 (`L05042`) gates with `R0086` and the cell `ord+0x3c` stored at the draw (`MAGIC-237`) and installs through `R0013`.
+- Dead target: no HP test gates the range call, the install or the release call. The application listing tests the target's health in two arms: `L17369` (health above −10, in the arm at `L03244..L17370`) and `L17371..L03258` (the arm at `L03256..L16490` clamps the amount to health + 10 and applies nothing when the clamp is not positive). Which spell ids reach those arms is not shown; Drain Life (id 11) is in four dragon books. The strike path refuses only a null victim, a zero owner or reach (`AI-640`), and a body below 1 stays a target until the dying arm tears it down at health ≤ −10 (`AI-719`); no sweep clears other actors' order targets (`AI-470`). Out of sight: no sight-map routine is reached at direct-call depth 3 or less with a target set (`AI-718`). Out of range: the arm approaches.
+
+**Confidence.** High for the call of the gate, the install copies and the release read of `target+0x10` (ids other than 14). Medium for the dead-target and sight clauses, which compose `AI-640`, `AI-718`, `AI-719` and `AI-470` at their grades, with the Drain Life exception above. Unknown: the release aim of id 14, the effect of a dead target on the application's health arms, what the gate's two callees test, and what a repeat does with a target pointer after teardown.
+
+**Unknown.** Settle with the original: a computer-owned Dragon face 1 against a moving unit; record each Fire Ball release position against the target's `+0x10`, then kill the target and record `ord+0x28`, `ord+0x08` and the next release until the target is torn down.
+
+### MAGIC-429
+
+- The kind-8 and kind-9 arms run only from the pending switch at progress 0 (`MAGIC-341`, `AI-488`). Out of range the arm approaches; the step runs at progress 3 and clears progress only when the mover is at a cell centre (`AI-509`).
+- The step bodies read no order-record operand (`AI-509`), and an auto-started strike or cast begins only at progress 0 with no mover access in the action body (`AI-522`).
+- Therefore the repeat's range test, install and release take the caster's position at the cell centre where the step left progress.
+- Exception: command state 0x17 with `mover+0x98` set is the one read path that ends a step or a cast, and its cause is unread (`MAGIC-341`). `AI-509` grades "no order kind changes the step" Medium and says a relocation arrival replaces the order.
+
+**Confidence.** Medium: a composition of `AI-509` (Medium for the unread setters and the tail flag), `MAGIC-341` and `AI-522`; no repeat during a step was observed.
+
+**Unknown.** Settle with the original: a computer-owned Dragon whose victim walks out of range; record per tick the Dragon's mover sub-cell bytes, `ord+0x09` and the caster position the cast object starts from.
+
+### MAGIC-430
+
+- The order-block constructor `R0286` zeroes 0x94 bytes, and the class setup fills `ord+0x78..+0x8c` only from positive Spell columns; the Dragon and Daemon rows carry Spell 1..3 = −1 (Data.bin Units rows 112..116). The engage slot loop skips zero ids (`L01761..L00611`, `AI-377`), so it never matches.
+- `R0009` then calls `R0393` for mask 4 and `Player+0x28 != 0` (`L01740..L05133`). The class setup sets mask 4 for typeID 0x47 and 0x48 (`L01773`, `UNIT-167`).
+- `R0393` (`MAGIC-AI-012`, `AI-554`): Mind word above 59 and a draw below 30 in 100 (`rand() * 100 / 0x8000 < 30` with `R0179` the CRT `rand()`, `AI-RAND-058`, and the divisor `[this+0]` = `0x8000`: 9831 of 32768 values, 30.003 percent; `L01768..L17372`) re-enter the engage selector and return 0, so the outer call writes kind 5 with `ord+0x14` := reach; a re-entered pick's `ord+0x28`, `ord+0x30` and `ord+0x60` survive under kind 5. Otherwise a pick among book ids whose Mana Cost is at most current mana and whose Defensive byte is 0, index `rand() * n / 0x8000` over the affordable ids in id order (equal weight up to the modulus; `L17373..L05149`), `ord+0x60` := 1, and `R0018` writes kind 8 at the victim with `ord+0x14` := `Spell+9`. An empty list with no id 28 returns 0 and the outer call writes kind 5.
+- Data.bin Mind is 75, 83, 91, 99 for Dragon faces 1..4 and 99 for the Daemon, all above 59. Every book spell of `UNIT-167` has Defensive −1, so none is filtered by that byte. The book walk bypasses `R0209`, so Fire Ball, Wall of Fire and Poison Cloud are ordered at the victim actor, not at its cell (`MAGIC-221`).
+- Mana at creation equals manaMax (500, 750, 1125, 1688; Daemon 2000), written by the streamed load step of the creation sequence that `formats/unit/creation.md` describes (manaMax to `+0x9c`, `+0x9a` and `+0xa0`); the listing of `R0184` holds no store to `+0x9a` or `+0x9c`. Per engage call the frequencies over time depend on mana, which the static read does not give. The cheapest book spell costs 5 (Darkness) or 10 (Lightning, Curse).
+- Reach: a Dragon's EquipItem Flame Thrower has Weapons range 8, so reach 1 + 8 − 1 = 8; the Daemon has no EquipItem and keeps reach 1. For `Player+0x28 == 0` a Dragon reaches neither the diversion (reach 8 ≥ 2) nor `R0393`, so its draw writes kind 5; a Daemon with reach 1 is diverted into standing acquisition (`AI-341`, `AI-678`).
+
+**Confidence.** High for the slot contents, the Data.bin rows read and the routine bodies cited. Medium for the random source's divisor (read from `AI-RAND-058` and its manager-constructor amendment, not re-read here), for the mana source (the writer was not read in this experiment) and for reading nonzero `Player+0x28` as computer control (`MAGIC-AI-012`) and for the reach values, which apply the reach rule of the unit format to the rows without reading the equip call.
+
+**Unknown.** Settle with the original: a mission with a computer-owned Dragon face 1 fighting a unit for 100 group passes; record per pass `ord+0x08` and `ord+0x30` (prediction, not a finding: about 70 kind-8 orders spread over Fire Ball, Wall of Fire and Lightning while mana lasts; the static read gives per-call odds, not frequencies over time).

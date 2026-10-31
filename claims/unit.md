@@ -810,3 +810,44 @@ are not established by a class serializer.
 placement, mutate it, save, cold-load and compare decoded body bytes 60..63
 and the next use. Selector-66 receiver and collection persistence are
 separate from these Building bytes.
+
+## Dragon and Daemon spellbooks
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs) and of `data/data.bin` in both `world.res` files (the rows read, `data-en.tsv` and `data-ru.tsv`, are equal and only the hash line differs; the two files have different hashes, so other rows may differ); no process was run. `EXP-0636` was allocated `UNIT-167` and `UNIT-168` and spent both. Skill word `i` is `actor+0xa8 + 2i`: 1 Fire, 2 Water, 3 Air, 4 Earth, 5 Astral.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| UNIT-167 | Class setup `R0184` builds Dragon and Daemon books from `rom.exe` immediates, not Data.bin (Spell −1): Dragon faces 1-4 ids 2,3,13 / 2,3,13,11,27 / 2,8,11,14,27 / 2,8,11,14,17,20; Daemon 2,8,11,14,17,20; with fixed skill words. | High | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| UNIT-168 | The class arms run only inside `R0185` for a non-empty class name; after them `R0903` sets each book spell's power to skill + Mind − 30 (0..100) before the fold and placement overrides, and release recomputes it. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+
+### UNIT-167
+
+- `L17374..L17375`: typeID word `actor+0x0e` 0x47 or 0x48 enters the arm; any other class jumps to `L17376`. The arm ORs `actor+0x4c |= 6` (`L01773`) and allocates a book (`R0462`) when `actor+0x140` is null (`L17377..L17378`).
+- 0x47 switches on face byte `actor+0x4b` − 1 through the table at `L17379` (faces 1..4 to `L17380`, `L17381`, `L17382`, `L17383`; others to `L17384`, no spell). 0x48 runs `L17385`. Each spell is built by `R0463(id)` and added by `R0464` with the same id.
+
+| class row | face | spell ids (names) | skill words stored |
+|---|---|---|---|
+| Dragon | 1 | 2 Fire Ball, 3 Wall of Fire, 13 Lightning | Fire 30, Air 30 |
+| Dragon.2 | 2 | 2, 3, 13, 11 Drain Life, 27 Curse | Fire 50, Air 50, Water 60, Astral 20 |
+| Dragon.3 | 3 | 2, 8 Poison Cloud, 11, 14 Prismatic Spray, 27 | Fire 50, Water 50, Air 50, Astral 50 |
+| Dragon.4 | 4 | 2, 8, 11, 14, 17 Darkness, 20 Stone Curse | Fire 90, Water 90, Air 90, Earth 0; Astral 30 from the face-4 loop |
+| Daemon | 1 | 2, 8, 11, 14, 17, 20 | Fire 99, Water 99, Air 99, Earth 20 |
+
+- The face-4 loop (`L17386..L17387`) stores 30 into skill words 1..5 before the class arm, so Dragon.4's Astral word is 30.
+- Data.bin Units rows 112..116 carry Spell 1..3 and Probability 1..3 = −1, so no class slot `ord+0x78..+0x8c` is filled (`UNIT-SPELL-007`). The Spells rows of all nine ids have Defensive −1. Mana costs: 2 and 3 cost 30, 13 costs 10, 11 costs 20, 27 costs 10, 8 costs 30, 14 costs 80, 17 costs 5, 20 costs 40.
+- Mind 75, 83, 91, 99 (Dragon faces 1..4) and 99 (Daemon); manaMax 500, 750, 1125, 1688 and 2000.
+
+**Confidence.** High: the immediates and stores are listed instructions of the one image, the face mapping is the jump table's own dwords, and the Data.bin rows read (Units rows with a positive spell slot or typeID 0x47 or 0x48, the Flame Thrower row, all 28 Spells rows) are equal in both roots. The claim is confined to the class setup: the registry key `units.reg` and the map records were not read and are not excluded as other sources of a book. This claim is the book and skill words at class setup; later writers are `UNIT-168`'s.
+
+### UNIT-168
+
+- `R0184` has one caller, `L00493` in `R0185`, taken when the length `L04697` of the class-name argument is positive (`L14143..L17388`). `R0185` has five callers, one in each family constructor (`L00495`, `L00497`, `L00499`, `L00501`, `L00503`).
+- `R0501` passes its own argument and has eight call sites: `L09220`, `L09221`, `L02317` (the `.alm` spawner `R0151`), `L09222`, `L03125` (the application `R0003`), `L09223`, `L09218`, `L09219`. `R0901` passes `L06853` (`L13982 push L06853`), a `.data` address beyond the section's raw size, which is zero-filled at load, so it holds an empty string until something writes it; writes to the address were not searched (Unknown), and the class setup is skipped for `R0901` callers if it is never written. Its callers are `L17389`, `L06031`, `L17390`, `L00504`.
+- All five Dragon and Daemon arms reach `L17391`, which calls `R0903(actor)` on the book (`L16969`). It runs `R0904(caster)` for each book index from 1, which stores power = skill[Sphere] + Mind − 30 clamped to 0..100 (`MAGIC-348`, `MAGIC-REACH-178`). Other classes skip the call. The fold `R0840` and the `.alm` placement overrides (Mind, current mana, skill words 1..5) run after it.
+- Power at the fill from the Data.bin Mind and the stored skill words: Dragon face 1 all 75; face 2 100, Curse 73; face 3 all 100; face 4 100, Stone Curse 69; Daemon 100, Stone Curse 89.
+- At release the application recomputes power from the caster's current skill word and Mind (`L05065..L14398`, then `R0625`) unless the cast comes from an item, which uses the item's `+0x42`.
+- LOAD restores the book through `Spellbook::Serialize` (`SAV-SPELLBK-041`) and the order block raw (`SAV-1066`).
+
+**Confidence.** High for the call chain, the fill call and the release recompute, as listed instructions. Medium for the fill values, which apply `MAGIC-348`'s formula to the Data.bin Mind before the fold. Unknown which construction routes pass a non-empty class name, and whether LOAD reruns the arm.
+
+**Unknown.** Which of the eight `R0501` sites and the four `R0901` sites carry a Dragon class name, whether any instruction stores a class name at `L06853` (a static scan of stores to that address, or of each site's pushed argument, would also settle the routes), and whether shipped placements override a Dragon's Mind or skill words. Settle with the original: place a Dragon by map, by script and by LOAD of a save holding one; record `actor+0x140`'s spell ids, skill words `+0xaa..+0xb2` and each spell's power after creation.

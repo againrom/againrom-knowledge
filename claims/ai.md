@@ -9179,3 +9179,64 @@ does not give.
 of `mage-anim.sav` that records, per tick from the Move command, the hero's `ord+8`,
 `ord+9`, `mover+0x98`, `mover+0x90`, Position and the dynamic plane of its next cell
 names the hold.
+
+## Creature draws during a strike
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs); no process was run. `EXP-0636` was allocated `AI-762`..`AI-767` and spent `AI-762`..`AI-765`; `AI-766` and `AI-767` are unused. A draw is a call of the engage selector `R0009` and the order writes it reaches (`AI-376`, `AI-554`, `MAGIC-221`); the strike is the action body's phases 0, 5 and 7 under executor progress 1 or 2 (`AI-354`, `AI-488`).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-762 | A draw during a creature's strike writes only order-record fields in the bodies listed; the executor reads the drawn kind at the first progress-0 entry, at the earliest the second actor tick after recovery, under three conditions (card). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| AI-763 | Before that read the drawn order can be replaced by a later group pass's draw, the withdrawal tail's kind 1, a player setter, LOAD or the tail's pending 0; the list is composed from earlier claims, not a census of `ord+0x08` writes. | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| AI-764 | In 25 bodies censused by literal displacement, no operand at `0x9`, `0x15`, `0x54`, `0x58`, `0x6c` or `0x136` tests the member's own strike state; callee gates are not covered; 8 of the 25 bodies are committed as listings. | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| AI-765 | A hit stores only `ord+0x54`, the attacker cell and `ord+0x5a`; the only reader of the flag found is `R0205` (25 bodies by displacement; `Order::Serialize` copies it) and `R0126` is unread (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+
+### AI-762
+
+- Draw. The order writes a draw reaches store `ord+0x08`, `ord+0x0c`, `ord+0x14` (kind 5), or `ord+0x08`, `ord+0x14`, `ord+0x28`, `ord+0x30`, `ord+0x60` (kind 8, `R0018`), or `ord+0x08`, `ord+0x14`, `ord+0x30`, `ord+0x3c`, `ord+0x60` (kind 9, `L15273..L17366` and `L06096..L06098`); none stores progress `ord+0x09`, the action word `actor+0x54`, phase `actor+0x58`, countdown `actor+0x6c` or completion `actor+0x136` (`AI-376`, `AI-554`, `MAGIC-221`).
+- Executor. Progress 1 stores action 3 (`L00092`); progress 2 stores 0xd, or 0xe when `ord+0x5c` is 0 (`L00093`). Both increment `ord+0x15` and clear progress and action only when `ord+0x15 > 2` and `actor+0x136` is nonzero (`L00094..L14673`); both then jump to the tail `L00010`. The pending switch runs only at progress 0 (`L00548`, table `L00099`).
+- Actor tick. `R0037` calls the executor at `L00086` before it dispatches the action body. Recovery phase 7 counts down `+0x135` plus the weapon term plus a draw of `R0861(3)` (plus the Spell's Complication Level for a cast, `L05340..L04383`); at zero it stores phase 0 and completion 1 (`L08584`, `L04544`).
+- Time line. Tick T: the action body ends recovery. Tick T+1: the executor sees progress 1 or 2 with completion set and clears progress; the action body runs with action 0. Tick T+2: if the three conditions below hold, the executor enters at progress 0 and the pending switch reads the drawn kind. For a retained physical order this is the `+ 2` boundary of `HERO-CADENCE-112`.
+- A Dragon's strike counts down charge 10 plus the flight delay, then relax 4 plus the weapon term and the draw (Data.bin Units rows 112..115, `formats/unit` slot map).
+- Conditions on the read at T+2. (1) The actor tick skips the executor call when `R0416` returns nonzero, which is when `actor+0x3c` is 0 (`L13241..L01796`, `AI-455`). (2) At progress 0 the executor stores action 0x1a and returns when `session+0xb388` and `grpAI+0x45` are both zero (`L00088..L00089`); the group pass is admitted by the same condition, so a draw from the group pass implies the condition held at the draw, not at T+2. (3) The executor tail stores pending 0 at `L00112`, `L00113` and `L00114` (and progress 0xff at `L00545`) when `mover+0x98` is set (`AI-511`); a pending kind so replaced is not the drawn one. Also, `actor+0x144 & 0x100000` makes the executor store progress 4 at `L00546` when progress is 0.
+
+**Confidence.** High for the listed instructions of the executor arms and the actor tick. Medium for the T+2 read: it holds only under the three conditions above, and no other routine was shown not to store progress or completion between T and T+2 (the executor tail can rewrite active fields for a nonzero `mover+0x98`, `AI-354`, `AI-511`, and its reachability during progress 1 or 2 was not read). "Writes only order-record fields" holds in the bodies listed and the cited claims; callees not listed (`R0021`, `R0020`, `R0022`, `R0179`) were not read. Unknown: an observed tick.
+
+**Unknown.** Settle with the original: a mission with a computer-owned Dragon engaging a unit; per actor tick from the strike start, record the Dragon's `ord+0x08`, `ord+0x09`, `ord+0x15`, `actor+0x54`, `actor+0x58`, `actor+0x6c` and `actor+0x136`, and the tick at which `actor+0x54` first becomes 0xd or 0xe.
+
+### AI-763
+
+- The group pass `R0076` runs once per 16 ticks (`AI-385`). A member that still has a scored victim draws again and the new draw overwrites the order of `AI-762`. For a member with no victim the arms differ: order 1 at its post stores pending 0xb (and calls `R0113` for mask 4), order 1 off its post stores kind 1, order 3 stores nothing, order 5 runs the order 4 arm (`AI-520`).
+- The withdrawal tail `R0105` → `R0100` stores `ord+0x08` := 1 when health is at most `ord+0x44` (Wimpy; Dragon 63, `AI-721`) and hostiles are within its radius.
+- A null book lookup stores nothing; ids 4 and 25 store only `ord+0x60` (`MAGIC-221`).
+- Player setters store pending 0 or 1 (`AI-487`); LOAD restores the order block raw (`SAV-1066`).
+- The struck hook stores none of the draw's fields (`AI-765`).
+- The executor tail stores pending 0 at `L00112`, `L00113` and `L00114` when `mover+0x98` is set (`AI-511`, `AI-762`).
+- The executor executes whatever `ord+0x08` holds at the T+2 read, under the conditions of `AI-762`. A strike longer than 16 actor ticks contains a further group pass when the draw came in its first ticks.
+
+**Confidence.** High for the stores listed in each named routine. Medium for the list as a whole: it is composed from earlier claims (`AI-487`, `AI-520`, `AI-721`, `SAV-1066`) and the bodies listed here, not from a census of writes to `ord+0x08`; this experiment's census covers displacements `0x9`, `0x15`, `0x54`, `0x58`, `0x6c` and `0x136`. The group pass's helpers were read only by literal displacement, and `mover+0x98` reachability in the executor tail during progress 1 or 2 is unread.
+
+**Unknown.** Settle with the original: in the run of `AI-762`, record the tick of each group pass and `ord+0x08`, `ord+0x30` after it, for a Dragon whose strike spans a pass.
+
+### AI-764
+
+- The 14 rel32 call sites of `R0009` lie in `R0008` (`L01988`, `L01989`), `R0441` (`L06090`, `L06089`), `R0137` (`L00333`, `L00586`), `R0306` (`L02072`, `L02073`), `R0023` (`L00842`), `R0024` (`L00336`), `R0025` (`L01990`), `R0026` (`L01708`), `R2211` (`L01991`) and `R0393` (`L01992`). No aligned dword equals the entry.
+- The census of displacements `0x9`, `0x15`, `0x54`, `0x58`, `0x6c` and `0x136` over those 10 bodies and `R0155`, `R0076`, `R0154`, `R0146`, `R0177`, `R0153`, `R0110`, `R0141`, `R0225`, `R0252`, `R0022`, `R0105`, `R0100`, `R0106`, `R0107` finds 19 operands, 25 bodies in all. Only 8 of the 25 bodies are committed as listings in `listings.txt` (`R0393`, `R2211`, `R0076`, `R0154`, `R0146`, `R0110`, `R0105`, `R0100`); the other 17 appear as census rows or "0 rows" lines and regenerate with `probe.py body`. Apart from the 0xff test of `R0146` below, no operand reads the member's own `ord+0x09`, `ord+0x15`, `actor+0x58`, `actor+0x6c` or `actor+0x136`.
+- The rows are: victim or partner `+0x54` compared with 0x10 (`L01154`, `L01984`); `Spell+9` (`L13504`); a group record's `+0x15` (`R0155`); `ord+0x09` compared with 0xff and cleared (`R0146`, command state 0x17); `ord+0x58` (`R0110`); `+0x6c` of a `R0022` result (`L14831`); and stores of the member's action word `actor+0x54` (`L01985` := 0, `L01986` := 0x1a, `L00321` := 0, `L01987`).
+- The executor stores the action word from progress on every pass before the action body runs (`AI-488`), so those stores do not reach a strike at progress 1 or 2. Progress 0xff, the value `R0146` clears, is not a strike.
+
+**Confidence.** High for the call-site population and the census rows. Medium for "no operand tests the member's own state": the census is a literal-displacement scan inside each of the 25 bodies; calls, computed bases, callees, virtual calls and a gate expressed through another field are not followed. The row meanings for the 17 uncommitted bodies can be checked only by rerunning `probe.py body`. Reachability of the selector during a strike is not observed.
+
+**Unknown.** Callee gates below depth 1, and whether the selector is reached during a strike or a cast. Settle with the original: in the run of `AI-762`, record whether a group pass that falls inside the Dragon's strike calls `R0009` for it (a write to `ord+0x08` in that pass).
+
+### AI-765
+
+- `R0226` (callers `L00875`, `L00876`, `L00877`) stores `ord+0x54` := 1, `ord+0x58` := the attacker cell from `R0019`, `ord+0x5a` := 0, then calls `R0126`, which sets hostility bits in both directions of the matrix at `session+0xa9bc` and posts `R0127` for `Player+0x28 == 0` (`AI-666`). It stores no pending kind, operand, progress or phase.
+- `ord+0x54` is read by `R0205`, whose callers are `L17367`, the pending kind 0xb arm of table `L00099`, and `L00813` in the reacquisition routine `R0004` (`AI-390`). That is the only reader found: readers by displacement were censused in the 25 bodies of `AI-764` only, and `Order::Serialize` copies order bytes `0x00..0x93` raw, which reads the byte too (`SAV-1066`). Kinds 8 and 9 run `L00108` and `L05042`, which do not call it.
+- The hook's stores leave pending, operands and progress untouched; `R0126` is unread beyond the hostility-matrix and message effects named above, so a rewrite of the pending order through it is not excluded.
+- For `Player+0x28 != 0` the threat builder `R0110` increments a grid byte at the attacker cell and `ord+0x5a`, and clears `ord+0x58` after more than 20 passes.
+- Health at most 0 enters the dying path instead (`AI-666`).
+
+**Confidence.** High for the hook's stores and the two callers of `R0205` (rel32 and aligned-dword scan). Medium for "the only reader" and for the unchanged pending order: other readers of `ord+0x54` were searched by displacement in 25 bodies only, `Order::Serialize` copies the byte, and no routine the hook reaches through the unread `R0126` was shown not to rewrite the pending order.
+
+**Unknown.** Settle with the original: strike a computer-owned Dragon between its draw and the read of `AI-762`; record `ord+0x08`, `ord+0x28`, `ord+0x30` and the read tick against an unstruck run.

@@ -534,6 +534,24 @@ can leave other kinds, including 5 to 9 (Medium, `AI-514`, `AI-515`; these amend
 writes pending 1 or 7 for command state 2 and 0xf for state 0xf (`AI-502`). A scroll cast pays no mana
 (`MAGIC-317`).
 
+A creature's draw during its own strike writes only order-record fields in the bodies listed.
+The strike at progress 1 or 2 runs to the end of its recovery; on the next tick the executor
+clears progress, and on the tick after that it can enter at progress 0 and read the drawn kind,
+provided the actor tick does not skip the executor call (`actor+0x3c` is 0), `session+0xb388`
+or `grpAI+0x45` is nonzero, and the executor tail has not stored pending 0 (`mover+0x98` set,
+`AI-511`); the tick is not observed (Medium, `AI-762`). Until that read a later group pass can
+draw again, the withdrawal tail can store kind 1, and a player setter or LOAD can replace the
+order; the last write is executed. The writer list is composed from earlier claims, not a
+census of `ord+0x08` writes (Medium, `AI-763`). In the 25 bodies censused by literal
+displacement, no operand tests the member's own progress, phase, countdown or completion; callee
+gates and computed bases are not covered, only 8 of the 25 bodies are committed as listings,
+and the action-word stores in the state arm and the order-4 arm are rebuilt from progress on
+every pass (Medium, `AI-764`). A hit stores only the turn flag `ord+0x54`, the attacker cell
+`ord+0x58` and `ord+0x5a`; the only reader of the flag found is the routine called under
+pending kind 0xb and in reacquisition (readers by displacement were censused in 25 bodies, and
+the order serializer copies the byte), and the routine the hit reaches next is unread, so a
+pending cast order is taken to keep its kind, operands and read tick (Medium, `AI-765`).
+
 ## A unit acting without a new order
 
 The routine that can start an attack or a cast for a unit without a new order

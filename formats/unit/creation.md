@@ -45,7 +45,24 @@ Drawable and simulation fields have different consumers:
    `actor+0x140`, and per pair `[actor+0x158]+0x78+4i` = spell id,
    `[actor+0x158]+0x84+4i` = probability × `0x147`.
 7. **Special arms:** `face == 4` sets the five live skill words to 30; `typeID ∈ {0x47,
-   0x48}` (Dragon, Daemon) ORs `actor+0x4c |= 6` and forces a spellbook.
+   0x48}` (Dragon, Daemon) ORs `actor+0x4c |= 6` and forces a spellbook. The Dragon and
+   Daemon books are fixed in `rom.exe`, not taken from Data.bin, whose Spell columns for these
+   rows are −1, so their class slots stay zero (`UNIT-167`). Skill word `i` is
+   `actor+0xa8 + 2i` (1 Fire, 2 Water, 3 Air, 4 Earth, 5 Astral):
+
+   | class row | spell ids | skill words stored |
+   |---|---|---|
+   | Dragon (face 1) | 2, 3, 13 | Fire 30, Air 30 |
+   | Dragon.2 | 2, 3, 13, 11, 27 | Fire 50, Air 50, Water 60, Astral 20 |
+   | Dragon.3 | 2, 8, 11, 14, 27 | Fire 50, Water 50, Air 50, Astral 50 |
+   | Dragon.4 | 2, 8, 11, 14, 17, 20 | Fire 90, Water 90, Air 90, Earth 0 (Astral 30 from the face-4 loop) |
+   | Daemon | 2, 8, 11, 14, 17, 20 | Fire 99, Water 99, Air 99, Earth 20 |
+
+   After the arm, `R0903` sets each book spell's power to skill + Mind − 30, clamped
+   0..100, from the values before the fold and the placement overrides; release recomputes it
+   from the current values. The arms run only through `R0185` for a non-empty class
+   name; which construction routes pass a Dragon name, and whether LOAD reruns the arm, are
+   Unknown (`UNIT-168`).
 8. **Fold the modifier block once** — `R0840(actor+0xd4, actor)` — onto the streamed
    values, with **no zeroing first**. This is the one structural difference from the hero,
    whose fold runs inside a derive that has just `memset` the `+0xbe` block.

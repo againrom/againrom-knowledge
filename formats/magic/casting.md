@@ -372,10 +372,28 @@ completion and feedback remain Unknown (`MAGIC-239`, amended). `ord+0x60` is rea
 stop-and-reset at install, a nonzero value keeps the order armed, and every creature cast selector
 found writes 1 (`MAGIC-240`). A selector pass that finds no slot match writes a kind-5 engage order and
 leaves `ord+0x60` alone; the cast already in flight runs from actor fields and is not cancelled by
-it (`AI-376`). The selector body does not read the creature's own cast state; its callers' gates were read only in part (`AI-376`). A zero slot id is
+it (`AI-376`). The selector body does not read the creature's own cast state; its callers' gates were read only in part (`AI-376`): in the 25 bodies censused by literal displacement, including the 10 routines holding its 14 call sites, no operand tests the creature's own progress, phase, countdown or completion, while callee gates and computed bases are not covered (Medium, `AI-764`). A zero slot id is
 skipped before `rand()`, a zero threshold never matches, and a non-mage creature is neither refused
 nor charged by `R0268` (`AI-377`). The slot path also issues its order with no
-mana test at selection, unlike the Mind-gated walk and `R0305`. Unknown: whether repeated path failure ends the walk, a dead target at the kind-8 arm, a null target at the cell arms from the unguarded call site `L01988`, the reach of Dragon and Daemon (`actor+0x12c < 2`), and whether the selector is reached during a cast. Whether the cast applies identically to a player's after the cast state begins was not traced.
+mana test at selection, unlike the Mind-gated walk and `R0305`. Unknown: whether repeated path failure ends the walk, a null target at the cell arms from the unguarded call site `L01988`, whether the selector is reached during a strike or a cast, and what a repeat does with a target pointer after teardown. Whether the cast applies identically to a player's after the cast state begins was not traced.
+
+A Dragon or Daemon has empty class slots and a fixed book (`UNIT-167`), so for a nonzero
+`Player+0x28` each draw reaches the Mind-gated walk: its Mind of 75 to 99 hands back on 30 in
+100 draws (CRT `rand()` scaled by `0x8000`: 9831 of 32768 values), which ends in kind 5 at
+weapon reach, and otherwise it orders a pick among its affordable book spells with equal weight
+up to the modulus, as kind 8 at the victim, Fire Ball, Wall of Fire and Poison Cloud included.
+Frequencies over time depend on mana, which the static read does not give. A Dragon's reach is
+8 from its Flame Thrower; the Daemon's is 1 (Medium, `MAGIC-430`).
+
+Each repeat of a retained kind-8 cast calls the range gate with the target at that pass (the
+facing byte must match and the distance be within reach) and releases at the target's position
+at release, so the cast follows a moving target; spell id 14 (Prismatic Spray) bypasses that
+release call and its aim is Unknown, and a kind-9 repeat keeps the cell stored at the draw. No
+HP or sight test gates the arm, the install or the release call, so a repeat keeps a dying
+target until its teardown; the application's effect arms test the target's health in places and
+which spells reach them is unread (High / Medium, `MAGIC-428`). A repeat that needs an approach
+waits for the step to reach a cell centre and is cast from there, except where command state
+0x17 with `mover+0x98` set ends it (Medium, `MAGIC-429`).
 
 ## Mind and Spirit
 
