@@ -74,6 +74,27 @@ identity key. The ROM1 cell rows do not appear. The key count is u16, or
 constructor, the sub-object has the same escaped count followed by u16 key
 and raw 60 bytes per entry. — R2-ENGINE-603
 
+The sub-object writes every entry it holds, with no cell test: the count,
+then buckets 0..99 by `(key >> 4) mod 100`, chain order within a bucket (the
+buckets of the nine files do not decrease; the order inside a bucket is not
+tested, and the slot value that binds the map to this body is Medium). An
+entry is created at the first field set on its cell, which gives plane one
+bit 0x20, and deleted when a clear leaves it empty, at 8 create and 6 delete
+sites among the direct calls in EN code (Medium that no other path creates or
+deletes one). Refresh sets the cell's plane-two byte to its plane-one byte
+with bit 0x20, so a refreshed entry cell is in the key list (Medium that every
+entry cell is refreshed). The key list also holds cells without an entry. In
+the nine mission saves of the two owner directories
+every entry key is in the key list with plane-two bit 0x20:
+
+| Mission | Files | Keys | Entries |
+|---|---|---|---|
+| 10 | 5 | 1,782..1,830 | 125..126 |
+| 20 | 2 | 2,131..2,282 | 474..475 |
+| 30 | 2 | 3,623..3,638 | 427..430 |
+
+— R2-SESSION-310, R2-ENGINE-758
+
 A raw60 entry, at stored entry offsets (field names from read uses are
 Medium):
 
@@ -81,7 +102,7 @@ Medium):
 |---|---|
 | +0x00, +0x01 | plane bytes copied from the cell at create and written back by refresh |
 | +0x02 | layer count |
-| +0x03 | no access found |
+| +0x03 | zero at create; no access in the routines read (Medium) |
 | +0x04, +0x08 | occupant of kind 1..2, occupant of kind 3 |
 | +0x0c | building |
 | +0x10 | object |
@@ -94,6 +115,17 @@ In the five EN mission-10 saves every +0x3a equals the entry key, bytes
 +0x34..+0x39 are zero, and every nonzero DWORD at +0x04, +0x08, +0x0c, +0x2c
 and +0x30 is a saved self key of the same save. — R2-SESSION-266
 
+Each byte group comes from its own setter at SAVE: the plane bytes from the
+cell at create, +0x02 from the effect-layer routine, +0x04/+0x08 from
+placement, +0x0c from the building setter, +0x10 from the object setter,
++0x14..+0x2b from the effect setter, +0x2c/+0x30 from the footprint
+routines, +0x34..+0x39 from the event writer and +0x3a from create. In the
+nine mission saves (2,432 entries) bytes +0x02, +0x03, +0x10..+0x2b and
++0x34..+0x39 are zero in every entry, +0x00 is nonzero in every entry (6..16
+in the mission 10 files, 6..8 or 6..9 in the others), +0x01 is 0 or 1 in the
+mission 10 files and 0, 1 or 5 in the others, and +0x3a equals the key.
+— R2-SESSION-311
+
 The footprint pass keeps +0x2c and +0x30; a nonzero event kind acts when an
 occupant is placed on the cell (kind 0x17 stores the target pair into the
 unit's command word) or arrives there; refresh reads +0x3a as the cell to
@@ -103,20 +135,51 @@ Session is 4,000, 1,000, 48, 400 and 4,908 raw bytes, then `u8`, `u8`, `u32` and
 three `u32`: 10,374 bytes against ROM1's 4,374. Only the first and fifth
 widths differ from ROM1. — R2-SESSION-019
 
+| Session bytes | Part | Written by | At LOAD |
+|---|---|---|---|
+| 0..3999 | 1,000 DWORD registers | session init, the script compile, the script tick, script nodes | kept; the script compile stores each 65538 check's parameter 0 again |
+| 4000..4999 | trigger latches | the trigger runner | kept |
+| 5000..5047 | performance timer: counter start 0..7, stop 8..15, frequency 16..23, ticks 24..27, milliseconds 28..31, frequency / 1000 at 32..35 | the session constructor and the turn routine | kept; the next turn rewrites start and stop |
+| 5048..5447 | 400 bytes cleared by init; no other user found | session init | kept |
+| 5448..10355 | diplomacy: bytes 1, 1, 0, 0, owner DWORD, 70 x 70 matrix | the diplomacy constructor and methods | kept; the owner DWORD is replaced at post-load |
+| 10356, 10357 | two bytes with zero stores only | session init | kept |
+| 10358..10361 | a counter, a divisor of the debug statistics; equal to register 999 in the nine files (Medium that it is a turn count) | the turn routine and, twice per call, a routine with no direct caller | kept |
+| 10362..10373 | the result-tick DWORDs of R2-ENGINE-623 and R2-ENGINE-624 | script nodes | kept |
+
+In the nine mission saves the frequency is 10,000,000, bytes 5048..5447 and
+10356..10357 are zero, bytes 10358..10361 equal register 999, the diplomacy
+bytes 0..3 are 1 1 0 0 and the matrix diagonal holds 0x12 at 8, 7 and 6
+cells in missions 10, 20 and 30. The meaning and readers of bytes
+5048..5447 and 10356..10357 beyond the transfer are Unknown. — R2-ENGINE-760,
+R2-SESSION-312
+
 The first 4,000 bytes are 1,000 DWORD registers, register n at bytes
 4n..4n+3. Session init sets register 901 (bytes 3604..3607) to 1 and
 register 999 (bytes 3996..3999) to 0; one routine adds 1 to 999 before it
 runs the triggers. No other reader of either was found in the scanned code
-and in the 209 + 48 + 197 map operands of check 19 and instants 3 and 8; the
-six register compares of the trigger runner `L2.00517` were not censused.
+and in the 209 + 48 + 197 map operands of check 19 and instants 3 and 8.
 The five EN
 mission-10 saves hold 901 = 1 and 999 = 1, 1, 17, 141 and 0.
 — R2-SESSION-265
+
+The six register compares of the trigger runner `L2.00517` read registers
+named by check slots for check ids present in the map, below 54 in both
+46-map corpora; a trigger naming an absent id is unread. Registers 100..999
+have direct writers only in session init, the script tick (999) and
+instant 1 (902). In the nine mission saves they are nonzero only at 901 (1)
+and 999 (1, 1, 17, 141, 0; 1, 91, 5, 0). — R2-SESSION-313
 
 On LOAD the terrain post-load pass replaces each nonzero pointer DWORD by
 its saved-key lookup and keeps the saved number on a miss; bytes
 +0x00..+0x03 and +0x34..+0x3b, the session block, the Player raw blocks and
 the Building base word +0x0c pass without a value test. — R2-ENGINE-676
+
+LOAD inserts each stored entry without a key, plane or count test; a
+repeated key replaces the earlier entry. Plane one and plane two of a listed
+cell come from its key, not from the entry; a cell outside the key list
+keeps the planes the map construction gives; plane zero is not stored. No
+LOAD step read re-runs create or refresh (Medium for later steps).
+— R2-ENGINE-759
 
 ## Player body
 
@@ -927,6 +990,13 @@ unobserved. Cold LOAD with saved-key, field, effect/target-tick and first-frame
 witnesses would settle delivered state. — R2-SESSION-233, R2-SESSION-235,
 R2-SESSION-236, R2-SESSION-238, R2-ENGINE-601, R2-ENGINE-603,
 R2-ENGINE-604
+
+The sources and LOAD handling of terrain raw60 and session raw10374 are
+assigned under Terrain and session. Still open there: plane zero of an
+entry cell after LOAD, +0x03 users through a record pointer, effect and
+event bytes (zero in all nine mission saves), readers of session bytes
+5048..5447 and 10356..10357, and computed-index register writes.
+— R2-ENGINE-759, R2-SESSION-311, R2-ENGINE-760, R2-SESSION-313
 
 ## Restored effects and command continuation
 

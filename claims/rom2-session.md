@@ -116,7 +116,7 @@ The shared ALM record-header primitive is a three-way byte-identical match acros
 |---|---|---|---|---|
 | R2-SESSION-017 | A ROM2 single-player `game*.sav` uses the ROM1 envelope with magic `Bsg&` (0x26677342): same 16-byte header, version 0x0BAD0002, word-codec blob and 256-byte label at the blob end. | High | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-018 | The ROM2 document serializer reproduces the ROM1 head, Player-list position, world-present byte, world-half order and 400-byte trailer; ROM2 adds one object list after the last world list. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
-| R2-SESSION-019 | ROM2 session raw data is 10,374 bytes against ROM1's 4,374, and ROM2 terrain is a sparse key list over cell indices 0x807 up to 0xedee (exclusive) plus a sub-object, not the ROM1 cell table. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
+| R2-SESSION-019 | ROM2 session raw data is 10,374 bytes against ROM1's 4,374, and ROM2 terrain is a sparse key list over cell indices 0x807 up to 0xedee (exclusive) plus a sub-object, not the ROM1 cell table. | High / Medium | ✔ promoted (amended) | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-020 | The ROM2 Player body keeps ROM1's 51-byte scalar prefix widths and adds a 2,560-byte raw block, a 36-byte raw suffix and no Diary; Player grows 112 to 2,688 runtime bytes. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-021 | After the label ROM2 keeps the ROM1 `&YA1` store and its key names, then writes a count-prefixed pair list, the `scenario.dll` `ScenarioSave` record and nine length-prefixed blocks in place of ROM1's campaign record. | High / Unknown | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-022 | A ROM2 `.a2c` character file is a `0x04507989` magic plus six 16-byte-headed sections, scrambled with a per-section 15-bit key and a doubling checksum; both lawful files decode to end of file. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
@@ -150,6 +150,10 @@ Terrain `R2.0171` writes: for cell index `i` from 0x807 while `i < 0xedee`, if t
 **Confidence.** High for the session raw widths and offsets and for the terrain key formula and index bounds (decompiled body, both directions); Medium for the 70-by-70 and 1,000-slot readings (arithmetic only). The ROM1 comparison reads `formats/sav/world.md`, not ROM1 save bytes.
 
 **Unknown.** The list writer's count form (`R2.0174`); the sub-object's layout; every session field meaning in ROM2.
+
+**Amended.** R2-SESSION-310 and R2-ENGINE-759 narrow the sub-object Unknown: the entry container,
+its write order and its LOAD. R2-ENGINE-760 narrows the session field Unknown to the writers and readers found for each part;
+the meaning of +0xa48, +0xa49 and the 400 bytes at +0xa728 stays Unknown.
 
 ### R2-SESSION-020
 
@@ -3502,8 +3506,8 @@ Cold LOAD game0006 with the effect/list/HP watches in R2-ENGINE-660.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-265 | ROM2 session init sets result register 901 to 1 and 999 to 0, L2.03284 adds 1 to 999, five EN saves hold 901 = 1 and 999 = 0..141; a check 19 and instant 3 and 8 operand census found no other reader, the six L2.00517 compares not censused. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
-| R2-SESSION-266 | A ROM2 terrain raw60 entry holds two plane bytes, a layer count, occupant, building, object, six effect and two footprint pointers, a six-byte cell event at +0x34 and its own cell key at +0x3a. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-SESSION-265 | ROM2 session init sets result register 901 to 1 and 999 to 0, L2.03284 adds 1 to 999, five EN saves hold 901 = 1 and 999 = 0..141; a check 19 and instant 3 and 8 operand census found no other reader, the six L2.00517 compares not censused. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-SESSION-266 | A ROM2 terrain raw60 entry holds two plane bytes, a layer count, occupant, building, object, six effect and two footprint pointers, a six-byte cell event at +0x34 and its own cell key at +0x3a. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 
 ### R2-SESSION-265
 
@@ -3552,6 +3556,12 @@ and record callers and values for five minutes and through mission end.
 
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 1.
 
+**Amended.** R2-SESSION-313 narrows the Unknown: the only direct E8 call site of `L2.03284` in
+EN `.text` is `L2.03285` in the turn routine `L2.00503` (E9, indirect and data references are
+not scanned; Medium), and, for check ids present in the map, the six compares of `L2.00517`
+read registers named by check slots, below 54 in both 46-map corpora; a trigger naming an
+absent id is unread (R2-SESSION-313).
+
 ### R2-SESSION-266
 
 The terrain sub-object at terrain `+0x54084` maps a u16 cell key
@@ -3585,6 +3595,10 @@ game0001 with a write watch on terrain `+0x54060..+0x54065` and record each
 writer and the six bytes until mission end.
 
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 2.
+
+**Amended.** R2-SESSION-311 narrows the +0x03 row: in the bodies read, create zeroes +0x03 and
+only the raw copies move it; it is zero in all 2,432 entries of nine mission files. It narrows
+the event Unknown to the nine files: no entry holds an event.
 
 ## Saved unit Effect marks
 
@@ -4126,6 +4140,179 @@ and count actors with +0x14c 23.
 
 **Evidence.** [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 4.
 **Format surface.** Bank slot 773 and the companion Group; `formats/rom2-sav/campaign.md`.
+
+## Mission terrain entries and session parts in files
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-310 | ROM2 SAVE writes every terrain map entry, count first, in bucket order (key >> 4) mod 100, with no cell test; nine mission saves hold 125..475 entries, each keyed in the cell list with plane-two bit 0x20. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-SESSION-311 | ROM2 terrain entry bytes come from their setters (plane copies, layer count, occupant, building, object, effect, footprint, event, key); +0x03 has no access in the bodies read; nine mission saves give per-group counts. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-SESSION-312 | Nine ROM2 mission saves hold timer frequency 10,000,000, zero +0xa728, +0xa48 and +0xa49, +0xa4c equal to register 999, diplomacy bytes 1 1 0 0 and a 70x70 matrix with 0x12 on 6..8 diagonal cells. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-SESSION-313 | ROM2 registers 100..999 have direct writers only in init, the script tick (999) and instant 1 (902); runner compares read check-slot registers for ids in the map, below 54; nine saves hold only 901 and 999 there. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+
+### R2-SESSION-310
+
+EN addresses; RU is EN + 0x9ff0 for these terrain routines and equal after masking
+(R2-ENGINE-761). Planes P0, P1, P2 are terrain +0x0, +0x10000, +0x20000.
+
+- The terrain serializer `L2.03176` (SAVE caller `L2.04219`) writes the key list of
+  R2-SESSION-019, then calls the map at terrain +0x54084 through vtable +8, then the terrain
+  self key. The map constructor `L2.04173` stores vtable `L2.04174` (`L2.04175`) and
+  `L2.04176` calls `[eax + 8]`; that slot +8 is `L2.04172` comes from R2-ENGINE-603 and is in
+  no committed listing or table (Medium).
+- `L2.04172` store: WriteCount `L2.04220` (u16; 0xffff, then u32, above it), then buckets 0..99,
+  each chain node as its u16 key (`L2.04221`) and its 60 raw bytes (`L2.04222`, `L2.01538`). The
+  count is the map's entry count. It tests no cell, plane or key.
+- The bucket is `L2.04223(key)` = (key & 0xffff) >> 4, modulo the hash size. The constructor
+  `L2.04173` sets 17; the tile pass calls `L2.04224` at `L2.04225` with 100 (one of its two call
+  sites; the other is `L2.04226`).
+
+Owner saves (`rom2-gog-original` game0001, 0004, 0005, 0006, 9999, mission 10;
+`rom2-gog-original-2` game0009, 0010, mission 20, game0012, 9999, mission 30):
+
+| Files | Keys | Entries | Keys without entry |
+|---|---|---|---|
+| game0001, 0004, 0005, dir 1 game9999 | 1,782 | 125 | 1,657 |
+| game0006 | 1,830 | 126 | 1,704 |
+| game0009 | 2,131 | 474 | 1,657 |
+| game0010 | 2,282 | 475 | 1,807 |
+| game0012 | 3,638 | 427 | 3,211 |
+| dir 2 game9999 | 3,623 | 430 | 3,193 |
+
+In all nine files the entry keys are distinct, have non-decreasing buckets (the order inside one
+bucket is not tested; the insert `L2.04227` puts a new node at the head of its chain), lie in the
+key list with plane-two bit 0x20, and no entry is empty by the `L2.04154` test.
+
+**Confidence.** High for the body of `L2.04172`, the bucket walk, the count and the nine files.
+Medium that the map is serialized by `L2.04172` (the vtable slot value is not committed;
+R2-ENGINE-603). Medium that every entry cell is listed in other saves: create sets bit 0x20 in
+plane one only, plane two gets it when refresh runs (R2-ENGINE-758, Medium that every create is
+refreshed), and the writer tests no cell.
+
+**Unknown.** The order of nodes inside a bucket, and the vtable slot value in a committed
+product. A save holding an entry whose cell has plane-two below 0x10. Load game0006, clear a
+building with a debugger write to plane two at its cell, save, and compare the entry and key
+lists.
+
+**Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 1.
+
+### R2-SESSION-311
+
+EN addresses (RU EN + 0x9ff0). Sources at SAVE; LOAD keeps each byte as read, pointer DWORDs
+remapped on a key hit (R2-ENGINE-676). The layout is R2-SESSION-266.
+
+| Bytes | Writer |
+|---|---|
+| +0x00, +0x01 | create `L2.03594` copies P0 and P1 |
+| +0x02 | effect-layer routine stores 0 or a copied count (`L2.04228`, `L2.04229`, `L2.04230`, `L2.04231`, `L2.04232`, `L2.04233`) |
+| +0x03 | create zeroes the scratch record; the raw copies (`L2.04180`, `L2.04222`) move it; no other access in the bodies read |
+| +0x04, +0x08 | placement `L2.03570` (create `L2.04145`, `L2.04146`) |
+| +0x0c | building setter (create `L2.04149`) |
+| +0x10 | object setter `L2.04148` (create `L2.04147`) |
+| +0x14..+0x2b | effect setter (create `L2.04150`) |
+| +0x2c, +0x30 | footprint `L2.03580` (create `L2.04152`) and `L2.03584` (create `L2.04153`) |
+| +0x34..+0x39 | event writer `L2.03589` (create `L2.04151`) |
+| +0x3a | create stores the key |
+
+Nonzero entries per file, in the order mission 10 files, game0009, game0010, game0012, dir 2
+game9999:
+
+| Bytes | Nonzero |
+|---|---|
+| +0x00 | every entry; values 6 7 8 9 10 11 12 14 15 16 in the mission 10 files, 6 7 8 in game0009, game0010 and game0012, 6 7 8 9 in dir 2 game9999 |
+| +0x01 | 33 in each mission 10 file, 67, 67, 21, 21; value 1 in the mission 10 files, 1 or 5 in missions 20 and 30 |
+| +0x04 | 34 (33 in game0006), 45, 43, 109, 116 |
+| +0x08, +0x30 | 13, 0, 0, 22, 22 |
+| +0x0c | 78, 427, 427, 298, 298 |
+| +0x2c | 34 (35 in game0006), 48, 48, 113, 116 |
+| +0x02, +0x03, +0x10, +0x14..+0x2b, +0x34..+0x39 | none |
+
++0x3a equals the key in every entry, and every nonzero pointer DWORD equals a saved self key of
+its file. 2,432 entries in all.
+
+**Confidence.** High for the stores in the bodies read and for the counts. Medium for the field
+names (from use) and for +0x03: a displacement scan of terrain +0x5402c..+0x54067 finds direct
+scratch-record accesses only at +0x00, +0x01 and +0x3a, so users through a record pointer are
+bounded only by the bodies read. Medium for the event writer's arguments: its head
+`L2.03589..L2.04234` is outside the committed window.
+
+**Unknown.** Effect and event bytes in a save; +0x03 users elsewhere. Cast a ground effect in
+mission 10 from game0001, save while it lasts, and compare +0x02 and +0x14..+0x2b of the new
+entries; load game0001 with a write watch on byte +3 of each entry until mission end.
+
+**Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 2.
+
+### R2-SESSION-312
+
+Session part values in the nine mission files of R2-SESSION-310, from the committed EXP-2076
+field tables (`out/saves/<dir>/session.tsv`, `diplomacy.tsv`):
+
+- Timer (48 bytes at +0x08): frequency DWORD +0x10 is 10,000,000 and +0x20 is 10,000, equal to
+  frequency / 1000, in all nine. Nonzero DWORDs 0, 1, 2, 3, 4, 6, 8, 9, 10; both game9999 files
+  add 7 and 11.
+- +0xa728 (400 bytes): zero in all nine. +0xa48 and +0xa49: 0. +0xbe0c: 1 in game0010, else 0.
+  +0xbe10 and +0xbe14: 0.
+- +0xa4c: 1, 1, 17, 141, 0 (mission 10), 1, 91 (20), 5, 0 (30); equal to register 999 in each.
+- Latches (1,000 bytes at +0xe6c4): nonzero 1, 1, 1, 1, 0; 2, 6, 3, 0; every nonzero value is 1,
+  at indices below 12.
+- Diplomacy (4,908 bytes at +0xa8bc): bytes 0..3 are 1 1 0 0 and DWORD 4 is nonzero in all
+  nine. The 4,900-byte matrix holds 0x12 on 8 diagonal cells (mission 10), 7 (20) and 6 (30);
+  row 0 and column 0 are zero. Value counts: 0:4865 1:25 2:2 18:8 in all five mission 10 files;
+  0:4874 1:19 18:7; 0:4873 1:20 18:7; 0:4877 1:13 2:4 18:6 twice.
+
+**Confidence.** High for the values. Medium for the readings "frequency" (the constructor stores
+the QueryPerformanceFrequency result there, R2-ENGINE-760) and "player diagonal" (the diagonal
+count follows the mission, not a read of the player list).
+
+**Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 3.
+
+### R2-SESSION-313
+
+Register n is session +0xc784 + 4n (R2-SESSION-265). EN addresses; RU equal after masking for
+the windows of R2-ENGINE-761.
+
+- Direct displacements +0xc914..+0xd723 (registers 100..999) in EN `.text`: 9 sites, the init
+  stores of 900, 901, 902, 999 (`L2.04235..L2.03647`), 999 + 1 (`L2.03649`, `L2.03650`) and
+  902 + 1 (`L2.04236`, `L2.04237`).
+- Indexed accesses of +0xc784: 59 sites, the compile seed `L2.04187`, the init clear, the
+  transfer, the 12 of the runner compares, the REG loader `L2.03654` and 42 node-handler sites in
+  `L2.04238..L2.04239`.
+- The compiler `L2.00201` gives every check the current slot in its id → slot map; a 65538 check
+  stores parameter 0 (node +0x48) into register `slot` and takes the next slot; a check below
+  65538 takes the next slot when it compiles; a word above 65538 takes none. The trigger loop
+  (`L2.04240..L2.04241`) maps each condition's two check ids through the map (`L2.04242`) and
+  stores (slot a, slot b, op). The runner compares register a with register b for op 0..5
+  (`L2.03652..L2.03653`). The slots are below 54 for ids present in the map; the miss path of
+  `L2.04242` is unread.
+- Map census, both roots: 46 maps, 986 checks, largest check array 54 (103.alm), 164 checks of
+  word 65538, none above, largest trigger array 32. Mission maps: 10.alm 21 checks and 16
+  triggers, 20.alm 16 and 12, 30.alm 40 and 29.
+- The only direct E8 call site of the script tick `L2.03284` in EN `.text` is `L2.03285` in the
+  turn routine `L2.00503`; E9, indirect and data references are not scanned (R2-ENGINE-758).
+- Saves: registers 100..999 are nonzero only at 901 (1 in all nine) and 999 (1, 1, 17, 141, 0;
+  1, 91, 5, 0). Each 65538 check's parameter 0 equals its saved register in all nine files (6,
+  3 and 7 per file of missions 10, 20 and 30) for the EN and the RU maps.
+
+**Confidence.** High for the read bodies, the scans, the census and the values. Medium that
+nothing else reaches 100..999: 34 of the 42 node-handler sites lie outside a read window and
+their operand values are censused only for check 19 and instants 3 and 8; the REG loader's
+caller has no direct reference; `L2.04242` on a missing id is unread. Medium that `L2.03285` is
+the only caller of `L2.03284`: the census is an E8 byte scan of EN `.text`.
+
+**Unknown.** The miss path of `L2.04242` for a check id absent from the map: a listing of its
+body settles it, and no map of the 46-map corpora needs it. E9, indirect and data references to
+`L2.03284`: an E9, indirect-call and dword-data scan settles it. A computed-index write to 100..999. Load game0012 (mission 30) with a write watch on
+session +0xc914..+0xd723 until mission end, then save and compare the registers.
+
+**Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 3.
 
 ## Inn offers on the new-game route, mission 52 and owner saves
 

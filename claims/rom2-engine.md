@@ -18087,6 +18087,159 @@ offset tables were not searched. Unknown for what the policy difference changes.
 run of the original that watches a computer mage with Stone Curse and Prismatic Spray in its book
 and records each cast's target would settle the aim.
 
+## Mission terrain entry lifetime, LOAD and session parts
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-758 | ROM2 terrain entries: 8 create and 6 delete sites among the direct E8 calls in EN .text (completeness Medium); create sets plane-one bit 0x20, refresh sets plane two, so a refreshed entry cell is key-listed (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-ENGINE-759 | ROM2 LOAD inserts each saved terrain entry by SetAt with no key, plane or count test, sets P1/P2 only from the key list, never saves P0, and neither the serializer nor post-load runs create or refresh. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-ENGINE-760 | ROM2 session parts at LOAD: registers, latches and timer kept (seeds re-stored by the compile), +0xa8c0 rewritten; +0xa4c is a counter equal to register 999 (Medium that it is a turn count); +0xa48/+0xa49/+0xa728 have no reader found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-ENGINE-761 | 34 of 35 ROM2 EN/RU terrain and session listing pairs, both import tables and four scans are equal after masking operands in 0x400000..L2.03731; the turn routine differs only in a call cut by its window end. | High | ● active (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+
+### R2-ENGINE-758
+
+EN addresses; RU is EN + 0x9ff0 and equal after masking (R2-ENGINE-761). Planes P0, P1, P2 are
+terrain +0x0, +0x10000, +0x20000; the scratch record is terrain +0x5402c.
+
+- Create `L2.03594(key)`: on a lookup miss it zeroes the scratch record, sets +0 = P0, +1 = P1,
+  +0x3a = key, calls SetAt `L2.03579` and then P1 |= 0x20 (`L2.04144`; plane one, not plane two). Direct E8
+  call sites in EN `.text` (8):
+  `L2.04145`, `L2.04146` (placement `L2.03570`), `L2.04147` (`L2.04148`), `L2.04149`
+  (building), `L2.04150` (effect layer), `L2.04151` (event writer `L2.03589`), `L2.04152`
+  (`L2.03580`), `L2.04153` (`L2.03584`).
+- Empty test `L2.04154`: +0x04, +0x08, +0x0c, +0x10, byte +0x02, byte +0x34, +0x2c and +0x30
+  all zero. Delete `L2.04155`: P0 = +0, P1 = +1, remove (`L2.04156`, one call site), and when P1
+  had bit 0x10 it ORs 0x10 into P1 and P2. Direct E8 call sites in EN `.text` (6), each after the
+  empty test:
+  `L2.04157` (`L2.04158`), `L2.04159` (`L2.04160`), `L2.04161` (`L2.04162`), `L2.04163`
+  (effect clear), `L2.04164` (`L2.03581`), `L2.04165` (`L2.03585`).
+- Refresh `L2.04166` (17 call sites) calls `L2.03572` (3 call sites): P1 = +1, P0 = +0,
+  P1 |= 0x20, P2 = P1; +0x2c nonzero: P2 |= 0x40 (`L2.04167`); +0x30 nonzero: P2 |= 0x80
+  (`L2.04168`); a building at +0x0c: P1/P2 |= 5 or, by the bit test on building +0x64,
+  &= 0xfa with P0 = terrain byte +0x5414b; each nonzero effect layer accepted by `L2.04169`
+  (returns 1): P0 <<= 2; +0x20 nonzero: P1/P2 |= 5; P1 bit 0x10 restored into both planes.
+- Create gives plane one bit 0x20; plane two gets it when refresh runs. A refreshed entry cell
+  has P2 >= 0x20, so the key list of R2-SESSION-019 holds it (Medium that every created entry
+  cell is refreshed). The key list also holds cells with no entry (R2-SESSION-310).
+
+**Confidence.** High for the bodies. The call census is a byte scan for E8 over EN `.text` that
+compares each rel32 target (`callto`, `evidence/probe.py`): 8 create and 6 delete sites among the
+direct E8 calls. It does not scan E9 jumps, indirect calls, the two function addresses as data,
+or any other section, and RU is compared only by the row count per target (136 rows each), not
+by site address. Medium for completeness: that no other path creates or deletes an entry.
+Medium that every create is followed by a refresh: the 17 refresh sites were not paired with the
+8 create sites.
+
+**Unknown.** The callers of the event writer `L2.03589` (R2-ENGINE-673), whether an entry can
+outlive its last field, and E9, indirect and data references to `L2.03594` and `L2.04155`. A
+scan of EN `.text` for E9 jumps to the two targets, for indirect calls through a memory operand
+holding them, and of every section for their addresses as dwords would settle the references.
+Load game0001, place and remove a unit on an empty cell, save, and compare the entry count with
+game0001.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 1.
+
+### R2-ENGINE-759
+
+EN addresses; RU is EN + 0x9ff0 and equal after masking (R2-ENGINE-761).
+
+- `L2.03176` LOAD (caller `L2.04170`), after the direction test `L2.04171` (archive +0x14 bit
+  0): reads the key list, the map (vtable +8; binding below), the self key (`L2.03198` on
+  `[L2.00805]+0xdc`), then writes P2 = (key >> 8) & 0xff and P1 = key & 0xff at cell
+  key >> 16 for each listed key.
+- Binding of the map to `L2.04172`: the map constructor `L2.04173` stores vtable `L2.04174`
+  (`L2.04175`) and the serializer calls `[eax + 8]` (`L2.04176`). Slot +8 = `L2.04172` comes
+  from R2-ENGINE-603, whose card does not prove every runtime vptr invariant; the slot value is
+  in no committed listing or table. The binding is kept Medium.
+- `L2.04172` load: ReadCount `L2.04177`; per entry a temporary record zeroed by `L2.04178`
+  (`L2.04179`), the u16 key, the 60 raw bytes, SetAt `L2.03579` (copy `L2.04180`), destructor
+  `L2.04181`. SetAt on a present key overwrites it. No key, plane or count test.
+- Post-load `L2.03178` (caller `L2.04182`) walks the entries (`L2.04183`, `L2.04184`), remaps
+  pointer fields through `L2.03627` (R2-ENGINE-676) and stores them back by SetAt. Its calls
+  include neither create nor refresh.
+- Terrain construction runs before `L2.03176` (R2-ENGINE-616); its tile pass `L2.03174` sets
+  the hash size to 100 and clears P1, P2 and terrain +0x944f4. A cell outside the key list keeps
+  the planes the construction gives. P0 is not in the file.
+
+**Confidence.** High for the read bodies. Medium that the map at terrain +0x54084 runs
+`L2.04172` through vtable +8 (R2-ENGINE-603 binding above), that no later LOAD step (unit
+post-load, R2-ENGINE-617) calls a setter or refresh, and for P0 of an entry cell after LOAD.
+
+**Unknown.** The vtable `L2.04174` slot +8 value in a committed product: a derived table of
+the slot from the image would commit it. P0 of an entry cell after LOAD. Load game0006, read P0 at the 126 entry cells before
+the first turn and compare with each entry's +0x00 and with the same cells after one turn; a
+call watch on `L2.03594` and `L2.04166` over the same span settles the later-step question.
+
+**Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 1.
+
+### R2-ENGINE-760
+
+EN addresses (RU starts in the experiment's plan; equal after masking, R2-ENGINE-761). Session
+global `[L2.01066]`; serializer `L2.01736`, SAVE caller `L2.04185`, LOAD `L2.04186`.
+
+- Registers +0xc784 and latches +0xe6c4: kept as read. The compile after the session read
+  (R2-ENGINE-616) stores each 65538 check's parameter 0 into its slot (`L2.04187`). The runner
+  `L2.00517` reads a latch (`L2.04188`), clears it (`L2.04189`) and sets 1 (`L2.04190`).
+- Timer +0x08 (48 bytes; also +0x38, +0x68, +0x98, unsaved): `L2.04191` stores
+  QueryPerformanceFrequency at +0x10, +0x20 = frequency / 1000 (`L2.04192`) and starts
+  (`L2.04193`: QueryPerformanceCounter at +0); stop `L2.04194`: counter at +8, +0x18 ticks,
+  +0x1c = +0x18 / +0x20, +0x28 through `L2.04195`. The turn routine `L2.00503` (caller
+  `L2.04196`) starts +8 and stops it into +0x8b0. LOAD reads the 48 bytes over the
+  constructor's; the next turn rewrites the start and stop fields, and +0x10/+0x20 keep the
+  saved values.
+- +0xa728 (400 bytes): cleared by init (`L2.04197`); no other access in the scans.
+- Diplomacy +0xa8bc (4,908): constructor `L2.04198` stores bytes 1, 1, 0, 0, clears the 70 x 70
+  matrix at +0xa8c4; DWORD +0xa8c0 is the session; post-load `L2.03179` (caller `L2.04199`)
+  rewrites it. Matrix users: join `L2.04200`, remove `L2.04201`, attack `L2.04202`, hostile
+  test `L2.04203` (6 call sites).
+- +0xa48, +0xa49: zero stores (`L2.04204`, `L2.04205`, `L2.04206`, `L2.04207`, `L2.04208`,
+  `L2.04209`, `L2.04210`) and the transfer only.
+- +0xa4c: `L2.00503` adds 1 per call (`L2.04211..L2.04212`); `L2.04213` (no direct caller in
+  either root) adds 1 twice per call (`L2.04214`, `L2.04215`). In the nine files it equals
+  register 999, the script tick counter (R2-SESSION-312). Read by the statistics of `L2.00503` ("Stats: last turn - %d, average: %d.", under
+  `[[L2.00805]+0x170]`) and `L2.04216` as a divisor.
+- +0xbe0c..+0xbe14: R2-ENGINE-623 and 624; instant 4 `L2.00519` adds 1 to +0xbe0c.
+
+**Confidence.** High for the stores and reads in the bodies read and the scan rows. Medium that
++0xa48, +0xa49, +0xa4c and +0xa728 have no other reader: displacement scans find no access
+through a computed pointer, and 25 +0xa48..+0xa4f rows outside `L2.04217..L2.04218` were
+assigned to other classes in navigation listings that are not committed. Medium that the saved
+timer frequency stays: no call of `L2.04191` on session +0x08 after LOAD was found among its 20
+call sites, which were not all traced. +0xa4c is a counter with those two incrementing routines;
+that it counts turns as the player sees them is Medium: the equality with register 999 supports
+one increment per script tick, and `L2.04213` has no known caller.
+
+**Unknown.** The meaning of +0xa48, +0xa49 and +0xa728, and their readers. Whether +0xa4c is a
+turn count: a write watch on +0xa4c with the caller addresses over twenty turns of game0010
+would show which routines run and how often. Load game0010 with read watches on session
++0xa48..+0xa49 and +0xa728..+0xa8b7 for five minutes of play and through a save.
+
+**Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 3.
+
+### R2-ENGINE-761
+
+EN against RU `allods2.exe`, lines compared one for one after dropping the address column and
+masking operands in 0x400000..L2.03731; the mask hides every callee and global named by an
+operand. Each equality holds over its window (`out/code/ranges.tsv`).
+
+- 35 listing pairs: the terrain serializer, map class, record helpers, create/delete/refresh,
+  the setter windows, the tile pass, post-load, the session constructor, init, serializer,
+  post-load, methods, turn routine, statistics, timer, diplomacy methods, script tick, runner and
+  compiler (0x1800 bytes). 34 equal; `turn-L2.00503` (0x1f3 bytes) equals in 132 of 133 lines,
+  the last being a call whose rel32 the window end cuts.
+- Both import-table pairs have equal partitions; both roots import QueryPerformanceFrequency and
+  QueryPerformanceCounter.
+- Scans: the call census pair has equal hit counts per target (136 rows each); the three operand
+  scans have equal masked texts (229, 129 and 45 rows).
+
+**Confidence.** High for the pairs read, over their windows.
+
+**Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 4.
+
 ## Inn offer gates, writers and TalkTo effects
 
 | ID | Claim | Confidence | Status | Evidence |
