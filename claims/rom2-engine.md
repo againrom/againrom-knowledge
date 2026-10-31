@@ -268,7 +268,7 @@ ROM1 gives Stone Curse a `pow(1.025, P)` duration (`MAGIC-CEIL-013`).
 
 **Unknown.** The runtime consumer of the effect; whether kind 0 is a silent no-op or a default.
 
-**Amended.** R2-ENGINE-453 reads the comparator chain and confirms the blank effect at Medium; R2-ENGINE-454 names its consumer, the actor-mask bit 18 that holds primary command 4 until the timer clears it. The duration clauses stand.
+**Amended.** R2-ENGINE-453 reads the comparator chain and confirms the blank effect at Medium; R2-ENGINE-454 names its consumer, the actor-mask bit 18 that holds primary command 4 until the timer clears it. The duration clauses stand. R2-ENGINE-786 narrows the target-test clause: the creature and Human classes both return 1, so no class read keeps the fixed duration.
 
 ### R2-ENGINE-026
 
@@ -9366,7 +9366,7 @@ offsets, not as equal bytes.
 |---|---|---|---|---|
 | R2-ENGINE-452 | In RU, ROM2 Ice Missile (5) and Diamond Dust (16) take Fire Arrow's single-target projectile damage route with water and earth damage kinds; the read bodies hold no row-specific branch or attached effect; EN delivery bodies are Unknown. | High / Medium | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-453 | ROM2 Stone Curse attaches a timed effect with spell id 18 built from its Effects string; the quoted first key matches no effect name, so the effect is blank (tag 0, magnitude 0). | High / Medium | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
-| R2-ENGINE-454 | In the RU image, a ROM2 Stone Curse effect sets actor mask bit 18, which holds primary command 4 (state 27, no move, attack or cast) until its timer clears the bit; a repeat cast keeps the larger duration; damage taken is unchanged. | Medium / Unknown | ● active | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
+| R2-ENGINE-454 | In the RU image, a ROM2 Stone Curse effect sets actor mask bit 18, which holds primary command 4 (state 27, no move, attack or cast) until its timer clears the bit; a repeat cast keeps the larger duration; damage taken is unchanged. | Medium / Unknown | ● active (partially retracted) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-455 | ROM2 Summon creates Squirrel, Turtle or Foot_Animated at level 1..4 for the caster's Player in a new group, placed by a search around the caster's cell; a failed placement aborts the cast; when it leaves is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-456 | In RU, a ROM2 creature's template special spell is aimed by a 29-cell per-row table: the victim, its cell, itself, a cell toward the victim (9), a free cell beside it (23) or nothing (22); cells 9 and 23 are Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
 | R2-ENGINE-457 | The RU computer-mage offensive book choice aims at the victim and support at self or a same-owner unit; a separate Prismatic, Stone Curse, Lightning, Fire Arrow priority routine aims at the victim but has no found caller. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2057](../experiments/EXP-2057-rom2-spell-rules/RESULTS.md) |
@@ -9488,6 +9488,14 @@ draw routine, and reading that routine would settle it. The seconds per timer
 tick: the timer decrements per call; the caller of slot 14 and the game clock
 rate were not read, and reading that caller, or an owner run of the original
 timing a Stone Curse, would settle it.
+
+**Amended.** R2-ENGINE-785 classifies the sixteen unclassified immediates: the ten described as
+`mov [reg+disp], 0x40000` stores are bytes inside `mov dword ptr [reg + disp32], 4`
+instructions (that description is withdrawn in `claims/retracted.md`), and the six others test
+no unit `+0x144`; "damage taken is unchanged" now covers all 31 hits and stays Medium. This
+narrows the appearance Unknown: for mark 44 the client replaces the frame variable and, in the
+unit draw, the palette (R2-ENGINE-784, Medium for entry 16). It narrows the tick Unknown: one
+decrement per actor step in RU (R2-ENGINE-786); the seconds stay Unknown. The headline, the other clauses and the grades stand.
 
 ### R2-ENGINE-455
 
@@ -17954,7 +17962,7 @@ whatever the original offers next, with a save and an actor count wherever it al
 |---|---|---|---|---|
 | R2-ENGINE-753 | The ROM2 EN apply head, single-target and projectile objects, projectile tick and kind 2 and 4 setters equal RU after masking, callees not compared; the vtables have equal slot partitions; the EN damage-object builder is unread. | High / Medium | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
 | R2-ENGINE-754 | ROM2 unit init L2.01794 (EN L2.01793) calls the template loader with the built name when the unread helper L2.03298 returns above 0; the loader walks L2.00147 from index 26 (30 to 63); vtable L2.02314 +0x30 returns 0. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
-| R2-ENGINE-755 | ROM2 vtable L2.02314 +0x2c returns 1, so Stone Curse draws its duration on that class; tag 0 reaches the tail call of target vtable +0x58 (EN clamps +0xd8 first); EN attach, timer and dispatcher prefixes equal RU. | High / Medium | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
+| R2-ENGINE-755 | ROM2 vtable L2.02314 +0x2c returns 1, so Stone Curse draws its duration on that class; tag 0 reaches the tail call of target vtable +0x58 (EN clamps +0xd8 first); EN attach, timer and dispatcher prefixes equal RU. | High / Medium | ● active (amended, branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
 | R2-ENGINE-756 | The ROM2 EN priority and offensive routines and the support choice and actor dispatcher prefixes equal RU after masking; no E8 call or stored dword names the priority routine in either root; the EN policy differs. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2098](../experiments/EXP-2098-rom2-spell-open-rows/RESULTS.md) |
 
 ### R2-ENGINE-753
@@ -18103,6 +18111,10 @@ picture beyond the absent mark-44 figure (R2-ENGINE-699), the meaning of the EN 
 the slot-18 tag arms. A run of the original that casts Stone Curse on a Troll and records the
 target's frames, any message from cast to release and the release time at Speed 4 would settle
 the picture, the message and the tick length.
+
+**Amended.** R2-ENGINE-786 narrows the non-creature clause: slot +0x2c of the Human vtable returns
+1 in both roots, so Human targets also take the draw. R2-ENGINE-785 classifies the 0x40000
+immediates this card left unclassified. The other clauses and the grades stand.
 
 ### R2-ENGINE-756
 
@@ -19247,3 +19259,170 @@ vtable in `.rdata` settles which pooled units RU skips.
 caster and finishes the mission settles the lifetime.
 
 **Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), questions 4 and 5.
+
+## Stone Curse effect, look and end
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-784 | While a ROM2 unit holds mark 44 (Stone Curse) and byte +0x184 <= 2, both client routines that push the literal 44 replace the frame variable with (+0x70 - 8) & 15, and the unit draw replaces the palette (entry 16 or mode 5); EN equals RU. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
+| R2-ENGINE-785 | All 31 RU and 30 EN dword immediates 0x40000 in ROM2 allods2.exe are classified; no fixed-immediate reader of unit bit 18 beyond R2-ENGINE-454's four; five tests of 1 << n, n unread, read bit 18 if n is 18. | High / Medium | ● active (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
+| R2-ENGINE-786 | ROM2 Stone Curse draws its random duration on the Human class too (vtable +0x2c returns 1); in RU it counts down once per actor step and ends at 0 or at the target's death through the timer end that clears bit 18. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
+
+### R2-ENGINE-784
+
+The client mark lookup (EN `L2.03763`, RU `L2.04547`) has 15 call sites in each root. The literal
+0x2c (mark 44) is pushed only in two routines:
+
+- the unit draw, EN `L2.03682..L2.04548` and RU `L2.03719..L2.04549`, calls at EN `L2.04550`,
+  `L2.04551` and RU `L2.04552`, `L2.04553`;
+- a second unit routine, EN `L2.04554..L2.04555` and RU `L2.04556..L2.04557`, call at EN
+  `L2.04558` and RU `L2.04559`.
+
+Nine other sites push 0x20; the committed listings show eight, and the ninth (RU `L2.04560`, past
+the end `L2.04557` of the committed second-routine window) rests on an uncommitted navigation
+pass. Two pass packet byte `+0xc` (the 0x88 and 0x89 arms, R2-ENGINE-695).
+One (EN `L2.04561`, RU `L2.04562`) passes dword `+0x24` of a local object, whose value was not read.
+
+Frame. When the lookup finds mark 44 and unit byte `+0x184` is at most 2, both routines replace the
+frame variable. The normal frame comes from the animation step and dword `+0x74`; the replacement
+is `(unit dword +0x70 - 8) & 0xf`. When dword `+0x128` of the type record is nonzero and the value
+is above 8, it becomes `16 - value` and the mirror flag is set (draw EN `L2.04563..L2.04564`, RU
+`L2.04565..L2.04566`; second routine EN `L2.04567..L2.04568`).
+
+Gates. The unit draw returns before drawing when byte `+0x184` is 5 or more (RU
+`L2.04569..L2.04570`). In the branch for bit 0 of dword `+0x1b8`, both routines compare the frame
+variable with the value that `L2.04571` (not read) returns for the object at `+0x1c0`, and skip
+the draw unless the frame is below it (RU `L2.04572..L2.04573`; second routine
+`L2.04574..L2.04575`).
+
+Palette, unit draw only. The draw's selector chooses the palette:
+
+- 0: palette collection (EN `L2.04576`, RU `L2.04577`) entry `L2.04578`(owner `+0x14`) (RU);
+- 1: the type palette 0;
+- otherwise: the type palette `+0x28 - 1`.
+
+Under the same mark-44 test, selector 0 takes collection entry 16 instead. Any other selector takes a
+local palette that the preparation routine (EN `L2.00645`, RU `L2.04579`) builds from the type
+palette 0 with 16, mode 5, 0 (EN `L2.04580..L2.04581`, RU `L2.04582..L2.04583`). The palette
+builder block (EN `L2.04584..L2.04585`, RU `L2.04586..L2.04587`) appends to the collection 16
+palettes, prepared from base palettes 0..15 with 16, mode 2, 1. It then appends one prepared from
+base palette 0 with 16, mode 5, 0. Mode 5 (EN `L2.04588`, RU `L2.04589`) writes, for levels 16 down
+to 1 and each entry, `g = ((B + G + R) * L * 2 / 3) / N` clamped to 255, where N is the level
+count, dword `[palette + 4]` (RU `L2.04590`; 16 in the calls read). It packs the same g into all
+three channels, so red, green and blue are equal at every level.
+
+The second routine reads no palette collection. Equal after masking in EN and RU: the unit draw
+except `cmp [ecx + 0x3f4], 0` (EN `L2.04591`) against `[ecx + 0x40c]` (RU `L2.04592`) after the
+mark blocks; the second routine from EN `L2.04593` / RU `L2.04594` to its return (hunks before
+the mark test); the lookup, the builder block and mode 5. Stone Curse builds no mark figure
+(R2-ENGINE-699) and no projectile (R2-ENGINE-445); its cast sound is Sfx 544 (R2-ENGINE-446).
+
+**Confidence.** High for the call census, the mark-44 tests, the two gates, the frame arithmetic,
+the palette selection, the builder's calls and the mode-5 arithmetic in both roots. Medium:
+- that collection entry 16 is the appended mode-5 palette (the add, EN `L2.04595` and RU
+  `L2.04596`, and the get bodies were not read, nor whether the collection is empty before the
+  loop);
+- that `+0x70` is the facing (16 values with the mirror of 9..15);
+- that the player sees a still grey figure: an inference from the replacements, with entry 16 and
+  `+0x70` Medium, the brightness level and `+0x184` Unknown and `L2.04571` not read.
+
+**Unknown.**
+- Which of the 16 levels the sprite draw uses.
+- The meaning of `+0x184` (a unit above 2 keeps its normal look).
+- What the second routine draws.
+- What EN `L2.04561` passes.
+- What `L2.04571` returns for the object at `+0x1c0`, and what bit 0 of `+0x1b8` selects.
+
+An original run would settle the first two: cast Stone Curse on a Troll and on a Human at Speed 4
+and record the frames from cast to release.
+
+### R2-ENGINE-785
+
+R2-ENGINE-459 and R2-ENGINE-454 count 31 RU and 30 EN dword hits of 0x00040000 in `.text`. A
+linear operand decode lists 176 operands per root with displacement 0x144..0x147 or immediate
+0x40000; 21 are the immediate in each root. The 10 RU and 9 EN hits it does not show are bytes
+inside `mov dword ptr [reg + disp32], 4`: the displacement's zero high word and the immediate's
+low bytes form the dword (RU `L2.04597`, `L2.04598`, `L2.04599`, `L2.04600`, `L2.04601`,
+`L2.04602`, `L2.04546`, `L2.04603`, `L2.04604`, `L2.04605`; EN `L2.04606`, `L2.04607`,
+`L2.04608`, `L2.04609`, `L2.04610`, `L2.04611`, `L2.04612`, `L2.04613`, `L2.04614`).
+
+The six RU decoded hits that R2-ENGINE-454 left unclassified (`L2.04615`, `L2.04616`, `L2.04617`,
+`L2.04618`, `L2.04619`, `L2.04620`) work on a register loaded from a callee's return, an import's
+return, a local or field `+0x20` of an argument. None loads `+0x144` in its window. Of the other
+15 RU decoded hits, which R2-ENGINE-454 classified, four test unit `+0x144` (dispatcher
+`L2.04621`, `L2.04622`; choice `L2.02089`; target score `L2.02090`). The other 11 touch other
+words: five OR into word `+0x150` in the effect core (`L2.04623..L2.04624`, `L2.04625`), and six
+act on other words in R2-ENGINE-454's mask-read windows (`L2.04626`, `L2.04627`, `L2.04628`,
+`L2.04629`, `L2.04630`, `L2.04631`).
+
+No `shr`, `sar`, `shl`, `bt`, `bts`, `btr`, `btc`, `rol` or `ror` has the immediate 0x12 in either
+root. No instruction compares or masks byte `+0x146` with an immediate. Eight byte moves per root
+address `+0x146` (RU `L2.04632`, `L2.04633`, `L2.04634`, `L2.04635`, `L2.04636`, `L2.04637`,
+`L2.04638`, `L2.04639`) and were not followed (struct copies are likely, not read). The mask
+helpers (RU `L2.00042`, `L2.00043`; EN `L2.04640`, `L2.04641`) have six call sites per root. The
+RU sites pass ids 12, 20 and 28 (R2-ENGINE-454); the EN sites are paired with them by address
+only.
+
+Five computer routines test `1 << n` against a unit's `+0x144`. They read bit 18 if n is 18; n was
+not read in any of them. The mask each tests and its n:
+- RU `L2.04642`: a list member (`[ebp-0x24]` from `L2.00209`/`L2.00213`); n = byte `+0x78` of
+  the caster's command object;
+- `L2.04643`: the acting unit (`[ebp+8]`, whose `+0x1c4` command object receives `+0x60` = 1);
+  n = byte `+8` of the object `L2.00040` returns for the caster's `+0x140`;
+- `L2.04644`: a local; n as in `L2.04643`;
+- `L2.04645`: n = dword `+8` of its argument;
+- `L2.04646`: the target, with the branch inverted (a set bit goes to the action path
+  `L2.04647`); n from before the window read.
+
+The first three set command `+0x60` = 1 and call onward only when the tested bit is clear. EN
+windows at RU minus 0x9ff0 or 0xa039 are equal after masking.
+
+**Confidence.** High for the classification of every hit, the empty shift scan and the variable
+tests in both roots. Medium for "no fixed-immediate reader of bit 18 beyond the four": this is a byte and operand
+census.
+Calls through pointers and a walk of `+0x20` comparing effect `+0xc` with 18 are not censused. EN
+decoded hits outside the windows compared are paired by constant offsets. The reading that n is a
+spell's effect id, so that the computer does not cast the same spell again, is Medium at most.
+
+**Unknown.** What n and the tested units mean in the five routines. Reading the writers of command
+`+0x78` and of the object `L2.00040` returns, and the callers' arguments, would settle it.
+
+### R2-ENGINE-786
+
+The Human vtable (RU `L2.00218`, R2-ENGINE-405; EN `L2.00217`, the same slot partition) has slot 11
+(`+0x2c`) RU `L2.04648` and EN `L2.04649`, both `mov eax, 1; ret`. Its slot 6 is the actor step
+`L2.00028` and slot 21 the hit resolver `L2.00101`. With R2-ENGINE-755, the creature and Human
+classes both take the random draw of R2-ENGINE-025. A repeat keeps the larger `+0x40` and `+0x42`
+and sends no 0x88 (R2-ENGINE-695).
+
+The RU actor step exits for state 16. Otherwise it calls slot 14 (`+0x38`) of every effect in
+`+0x20` once and removes the effects that `L2.04650` reports ended. Slot 14 decrements `+0x42` per
+call. At 0 it runs slot 17 when the bit at `[L2.01908]` is clear in `+0x3d` (RU
+`L2.04651..L2.04652`), as the Stone Curse arm leaves it (the arm ORs only `[L2.01906]`,
+`L2.04653`), then the notify, the clear of bit (1 << `+0xc`) of `+0x144`, 0x89, and
+`+0x3d |= 0x80` (R2-ENGINE-695). This RU timer end is read in full. In EN, R2-ENGINE-755
+compares only the first 0x100 bytes of the timer; the bit clear, the 0x89 send and the flag set
+past them are not read here.
+
+The death routine (RU `L2.01807`, loop `L2.04654..L2.04655`; EN `L2.01806`, loop
+`L2.04656..L2.04657`) sets state 16. For each effect of `+0x20` passing `L2.03774`, it sets
+`+0x42` = 1, calls slot 14 and removes the effect, so Stone Curse ends at the death by the same
+path (the RU timer end above). The attach cancels only ids 20 and 28 against each other. After the clear, the hold arm
+sets +9 = 0 at its next call (R2-ENGINE-553), and the client loses mark 44 on 0x89 (R2-ENGINE-784).
+
+**Confidence.** High for the Human slot 11 bodies (both roots), the RU timer to its end, the RU
+actor-step call and the death loop (RU and EN). Medium:
+- that `L2.00218`/`L2.00217` is the class of every Human target;
+- that the bit at `[L2.01908]` is clear at the end (the arm leaves it clear; slot 16 and the
+  same-id branch were not checked for it);
+- that no other routine removes id 18 (bounded by R2-ENGINE-785);
+- that the caster's death leaves it (the death loop walks only the dying unit's list);
+- the EN actor step (not read).
+
+**Unknown.**
+- Seconds per actor step, and so the duration in seconds. A run of the original that casts Stone
+  Curse at a known power at Speed 4 and times the grey look would settle it.
+- The effect at mission end. A save made under Stone Curse, read at the unit's Effect record and
+  loaded once, would settle it.
+- The EN timer tail (bit clear, 0x89, flag set). Reading the EN timer to its return would settle
+  it.

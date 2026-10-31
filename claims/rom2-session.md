@@ -4933,3 +4933,35 @@ settles it.
 **Format surface.** `formats/rom2-sav/format.md`, First Group member.
 
 **Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 4.
+
+## Stone Curse in a mission save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-328 | A ROM2 save made under Stone Curse stores the Effect's +0xc, +0xe, tag, flags and u32 +0x40, unit +0x144 and the raw 184 command block; the values (18, 44, tag 0, duration in high word +0x42) are predicted, Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
+
+### R2-SESSION-328
+
+The Unit programme (R2-ENGINE-209) writes the `+0x20` references, u32 `+0x144` and the raw 184
+bytes at the `+0x1c4` command object. The Stone Curse effect is in `+0x20`. Its Effect record
+(R2-SESSION-165) is the base, with u16 `+0xc` and u16 `+0xe`, then:
+- u8 tag `+0x3c`;
+- u8 flags `+0x3d`;
+- u32 `+0x40`, which holds the u16 values `+0x40` and `+0x42`;
+- u16 `+0xc`, the trailing field as R2-SESSION-165 lists it.
+
+Predicted from code, not read in a save: `+0xc` 18 (the spell id the arm writes); `+0xe` 44 (the
+mark rule `2 * (+0xc) + 8` of R2-SESSION-273, with R2-ENGINE-695); tag 0 (the blank effect of
+R2-ENGINE-453, Medium); the timed bit in `+0x3d`; the magnitude `+0x40` 0; and the remaining
+duration `+0x42` in the high word of the u32 at `+0x40`, which follows from the in-place
+little-endian dword and is not shown by a listing of this experiment. While the effect holds,
+`+0x144` has bit 18 (0x40000), and command byte +9 is 4 once the hold is installed
+(R2-ENGINE-399, R2-ENGINE-553). These fields are stored, so LOAD restores what they hold.
+
+**Confidence.** High for the field list (R2-ENGINE-209, R2-SESSION-165). Medium for the predicted
+values and the word order of the u32: no save holding Stone Curse was read. Medium that after LOAD the timer resumes from the stored `+0x42` and that the notify resends mark 44
+to the client: live effect continuation after LOAD is unobserved (R2-SESSION-235), and no save
+holding Stone Curse was read.
+
+**Unknown.** The stored bytes of a real save. A save made during Stone Curse and read at the unit's
+Effect record, then loaded once, would settle them.

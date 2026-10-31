@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-2106: Stone Curse effect, look and end
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-454` (the description of ten unclassified hits only; the headline, the other clauses and the grades stand) | Verbatim: "and ten `mov [reg+disp], 0x40000` stores" | Medium | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md), R2-ENGINE-785 | The ten RU hits are bytes inside `mov dword ptr [reg + disp32], 4` instructions (for example `L2.04546`, `[ecx + 0x100]`), where the displacement's zero high word and the immediate form the dword; no instruction there has the operand 0x40000. | **REFUTED** — partially retracted |
+
 ## EXP-2105: Spell 22 corpse raising
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

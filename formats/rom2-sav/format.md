@@ -1231,6 +1231,17 @@ game0001/0005/9999 have zero selectors, game0004 has 8/2 and game0006 has
 6/1. The saved DWORD alone does not prove an active order or idle state.
 — R2-ENGINE-663, R2-SESSION-259
 
+A unit under Stone Curse holds an Effect in its +0x20 references: base u16
++0xc and u16 +0xe, u8 tag +0x3c, u8 flags +0x3d, u32 +0x40 holding the u16
+values +0x40 and +0x42, and a trailing u16 +0xc. Its u32 +0x144 and the raw
+184 command block, whose +9 is 4 once the hold is installed, are stored with
+it. The field list is High. The values are predicted from code, not read in
+a save (Medium): +0xc 18, +0xe 44, tag 0, the timed flag, bit 18 (0x40000)
+of +0x144, and the remaining duration in the high word +0x42 of the u32.
+LOAD restores these bytes. That the countdown resumes from the stored
+duration and that the client mark returns is Medium; no save holding the
+effect was read. — R2-SESSION-328
+
 The bounded read gate set includes worldPresent, archive class/index checks,
 saved-key lookup outcomes, completion/countdown, projectile remaining
 segments, Unit HP/condition and manager/group flags. It is not a complete
