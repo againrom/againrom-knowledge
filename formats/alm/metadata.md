@@ -47,7 +47,7 @@ The offsets below are relative to the payload. The fixed reads total 632 bytes. 
 | +0x0c | 32-bit word; signed integer in editor arithmetic | **Starting Time (editor minutes)** | Loaded into `M+0x1c`, terrain `P+0x2c` and the editor `E+0x1c`. The editor requests slider positions0..96, loads signed `value/15` and accepts `position*15`. Its `(value/60)%24` lighting path reaches palette colors and render-buffer stores. Default360 is 06:00. The identified normal game M/P paths do not read this scalar; a universal or native game effect remains unestablished. Native editor transactions are unobserved; slider bounds are not an ALM validation range. | ALM-EDITTIME-205, ALM-SCALAR-198, ALM-EDITORSCALAR-203 |
 | +0x10 | u32 | scalar (stored) | Loaded into map `M+0x20` and terrain ambient byte `P+0x1c`. Forced relight overwrites the terrain value before its known read. Installed values span `0..33`; this is not a validation bound. | ALM-META-026 (partially retracted), ALM-META-091, ALM-META-092, ALM-CORP-093, ALM-META-311 |
 | +0x14 | u32 | scalar (stored) | Loaded into map `M+0x24` and terrain range byte `P+0x1d`; the four-byte terrain store also writes `P+0x1e/0x1f/0x20`. Relight replaces the range before its known read. Installed values span `27..64`; this is not a validation bound. | ALM-META-026 (partially retracted), ALM-META-091, ALM-META-092, ALM-CORP-093, ALM-META-311 |
-| +0x18 | u32 | bitmask | **Terrain tile-group mask.** The map loader discards its local copy; terrain stores it at `P+0x28`. Bit i selects group `(i>>2)+1`, variants `(i&3)*4 .. +3`. Installed values use bits `0..12`: groups 1–3 and group 4 variants 0–3. | ALM-META-026 (partially retracted), TERR-LOAD-152 |
+| +0x18 | u32 | bitmask | **Terrain tile-group mask.** The map loader discards its local copy; terrain stores it at `P+0x28`. Bit i selects group `(i>>2)+1`, variants `(i&3)*4 .. +3`. Installed values use bits `0..12`: groups 1–3 and group 4 variants 0–3. Bits 13..31 name `tile4-04..15` and `tile5..8-00..15`, which no install ships; a set one reaches the fatal load error unless a loose file supplies the path (Medium). The editor saves `+0x18` at most `0x1fff`. | ALM-META-026 (partially retracted), TERR-LOAD-152, ALM-TILE-338, ALM-TILE-337 |
 | +0x1c | u32 | **#players** | player-record count = `type5_size / 76` ; installed values `3..9` (editor caps at 16) | ALM-META-025 |
 | +0x20 | u32 | **#objects** | object-record count (base records; extensions are additional bytes, not records) | ALM-META-025 |
 | +0x24 | u32 | **#units** | unit-record count = `type6_size / 70` in the version-990 form | ALM-META-025 |
@@ -156,6 +156,11 @@ arithmetic retained, `TERR-SEM-004`): `g = (w & 0x1fff) >> 6` selects a
 `terrain.3d/tileG-VV.bmp` strip (`G=(g>>2)+1`, `V=(g&3)*4+((w>>4)&3)`) and `w & 0xf`
 selects the 32×32 sub-cell. `tile1/2` = land strips, `tile3` = animated water, `tile4` =
 road; bit-13 tiles composite over `dirt.bmp`.
+
+Every type-1 cell of the 72 maps of the install roots and `scenario.res` (38 EN, 34 RU) names one of 398 values in groups
+0..12, each with a shipped file and frame, and sets no bit among 10..12 and 14..15; each
+map's `+0x18` admits every group its cells use (`ALM-TILE-336`). The EN editor's paint
+tables write groups 0..12 and its save keeps bits 0..9 and 13, so a saved word names a group at most 15 (`ALM-TILE-337`).
 
 ### Main and light-parser tile storage
 

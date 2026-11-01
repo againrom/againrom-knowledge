@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4581. Observation: 143. Static analysis: 3819. Mixed: 619.
+Claims labelled: 4590. Observation: 143. Static analysis: 3826. Mixed: 621.
 
 ## Ledger ai
 
@@ -706,6 +706,9 @@ Claims labelled: 4581. Observation: 143. Static analysis: 3819. Mixed: 619.
 | ALM-T9CAST-333 | static analysis | ● active |
 | ALM-T9BIND-334 | static analysis | ● active |
 | ALM-T9BIND-335 | mixed | ● active |
+| ALM-TILE-336 | mixed | ✔ promoted (branch candidate) |
+| ALM-TILE-337 | static analysis | ✔ promoted (branch candidate) |
+| ALM-TILE-338 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger anim
 
@@ -4038,6 +4041,12 @@ Claims labelled: 4581. Observation: 143. Static analysis: 3819. Mixed: 619.
 | TERR-LIGHT-288 | static analysis | ✔ promoted (branch candidate) |
 | TERR-LIGHT-289 | static analysis | ✔ promoted (branch candidate) |
 | TERR-LIGHT-290 | static analysis | ✔ promoted (branch candidate) |
+| TERR-TILE-291 | static analysis | ✔ promoted (branch candidate) |
+| TERR-TILE-292 | static analysis | ✔ promoted (branch candidate) |
+| TERR-TILE-293 | static analysis | ✔ promoted (branch candidate) |
+| TERR-TILE-294 | static analysis | ✔ promoted (branch candidate) |
+| TERR-TILE-295 | static analysis | ✔ promoted (branch candidate) |
+| TERR-TILE-296 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger text
 

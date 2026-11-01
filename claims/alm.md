@@ -3347,3 +3347,42 @@ Building arm (`g01`, `L16916`..`L12557`): taken when X or Y is nonzero, `+0x04` 
 Census (`t9-binding.tsv`, `t9-binding-summary.tsv`). Building-arm entries: 206 EN, 60 RU; each id matches exactly one type-4 record of its map (id compared as the sign-extended word, none at or above 0x8000). The entry cell equals that record's anchor cell (fixed-point position shifted right by 8) in 48 EN and 11 RU; it differs in 158 EN and 49 RU, by (0,1), (1,0) or (1,1) in 141 EN and 44 RU and at most (7,2). No entry cell is the anchor of a second structure or of a unit. Structures with two entries: 8 EN and 4 RU; with three: 1 each. Actor-arm entries: 20 EN, all in `Cross.ALM`, none on RU; each id matches one unit; 18 sit on the unit's cell and 2 one cell off (1,1); two units carry 7 and 8 entries, five carry one.
 
 **Confidence.** **High** for the counts and the id matches. **Medium** for "no entry cell holds two objects": only anchor cells were compared; footprints are not measured.
+
+## Terrain picture values in installed and editor-saved maps
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ALM-TILE-336 | Every type-1 cell of the 38 EN and 34 RU installed maps selects one of 398 picture values in groups 0..12, each with a shipped file and frame; no cell sets bits 10..12 or 14..15; each map's +0x18 admits every group its cells use. | High | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| ALM-TILE-337 | The EN map editor's paint tables write words of groups 0..12; its save keeps bits 0..9 and 13 and caps +0x18 at 0x1fff, so a saved word names a group at most 15, and a loaded word of group 13..15 is kept. | High / Medium | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| ALM-TILE-338 | Type-0 +0x18 bits 13..31 admit groups 13..31, whose loader paths tile4-04..15 and tile5..8-00..15 (76 names) are absent from every .res of both installs; 632 of the loader's 2048 values have a shipped frame. | High / Medium | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+
+### ALM-TILE-336
+
+Population: the 38 EN and 34 RU maps (loose `.alm` and `M7R` members of `scenario.res`), read through each map's record table, not by byte scan.
+
+- Field split: `g = (w & 0x1fff) >> 6`, `b = (w >> 4) & 3`, `sub = w & 15` (`TERR-TILE-291`).
+- EN: 880,704 cells, 398 distinct `(g, b, sub)`. RU: 677,696 cells, 395 distinct, all also in EN; RU lacks `g2 b0 sub6`, `g2 b0 sub7` and `g2 b1 sub6`.
+- Groups 0..12 only. Land and road groups (0..7, 12) reach frame 13 at most; water groups 8..11 frame 7 at most. 0 cells name a slot without a `terrain/` file or a frame past its strip's last (land 14 frames, water 8). Frame 13 occurs at 11 cells per root (group 0 columns 0..3, group 3 column 1).
+- 0 cells set bits 10..12 or 14..15; bit 13 is the only other bit set.
+- Type-0 `+0x18` values, EN: `0x1fff` 24 maps, `0xfff` 5, `0xff` 2, `0xfbf` 2, `0x1fdf` 2, `0xf7f`, `0x1f1f` and `0x1fbf` one each. In all 72 maps every group a cell uses has its bit set.
+- Minimap lookup columns used: at most 51; rows at most 13.
+
+**Confidence.** High: framed census of the whole installed population of both roots.
+
+### ALM-TILE-337
+
+- The editor's variant rows at `L14568` hold 361 distinct words in groups 0..12, frames 0..8, 11 and 12, no bit above 12. Its pair entries at `L14569` hold 128 distinct words in groups 0..12 with frames up to 12; some carry the `0x1000` flag, which reads as groups 64..76 and which the paint path removes before the store (`TERR-243`).
+- The save writes each word ANDed with `0x23ff` and stores `+0x18` as `0x1fff` when it is above `0x1fff` (`ALM-SAVE-238`). Bits 10..12 never reach a saved word, so a saved word names a group at most 15. The paint tables write groups 0..12 only; a word of group 13..15 loaded from a file survives a save (the loader mask `0x1fff` and the `+0x18` cap do not alter words).
+
+**Confidence.** High for the tables and the save mask. Medium that no other editor path writes a tile word of group above 12: the population is the two tables plus the paint path of `TERR-243`; a word written by another editor routine was not searched for.
+
+### ALM-TILE-338
+
+- `rom.exe`'s loader turns `+0x18` bit `i` (0..31) into four paths `tile((i>>2)+1)-((i&3)*4+j)` (`TERR-TILE-292`). Bits 13..31 name `tile4-04`..`tile4-15` and `tile5-00`..`tile8-15`.
+- Both roots' `graphics.res` hold `terrain/tile1-00..15`, `tile2-00..15`, `tile3-00..15`, `tile4-00..03` and `dirt` (53 entries), the same names under `terrain.3d/`, and `interface/MiniMapData.bmp`; no other `.res` of either root holds an entry under those directories. None of the 76 names is present.
+- With 14 frames per land or road strip and 8 per water strip, the 52 files give `9*4*14 + 4*4*8 = 632` values with a frame, of the 2048 the 128 loader slots address.
+- A map that sets one of these bits fails at load unless a loose file supplies the path (`TERR-TILE-292`; Medium).
+
+**Confidence.** High for the paths and the archive contents of both roots. Medium for the load failure, which inherits `TERR-TILE-292`.
+
+**Unknown.** Whether a loose file in a searched directory satisfies the path (`TERR-TILE-292`).

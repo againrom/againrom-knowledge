@@ -4209,3 +4209,81 @@ Population: EN and RU `rom.exe` (one image, SHA-256 `942e9b72…`), static listi
 - The two bridge vtables share the method; bridge classes carry no light key (`REG-125`), so they stamp nothing.
 
 **Confidence.** High for the nine slots and the scans: the dword scan covers every section, so no other table holds `R2310`. A different light routine in a vtable outside these nine is not excluded.
+
+## Terrain picture capacity and unshipped selection values
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TERR-TILE-291 | rom.exe's renderers and minimaps and the EN editor's draw pick a picture from tile-word bits 0..12: slot 4*((w&0x1fff)>>6)+((w>>4)&3), frame w&15 (water groups 8..11: group by animation phase); 8192 values, 2048 in a 128-slot loader. | High / Medium | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| TERR-TILE-292 | A set mask bit builds four slots from tile paths; a path no open archive or listed directory supplies reaches the constructor's fatal arm (FATAL ERROR: can't load, then a call sequence shaped like the CRT abort); no substitute exists. | High / Medium | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| TERR-TILE-293 | Five further rom.exe routines read g=(w&0x1fff)>>6 and, within their listed windows, test only 8<=g<12; the classifier and raw water test see w&0x3ff and w&0x300, so a group g>=16 takes the class, cost and block of group g mod 16. | High / Medium | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| TERR-TILE-294 | No draw bounds the frame: in a 14-frame strip frame 14 reads the strip's own 1024-byte palette and frame 15 starts past its W*H+0x408 allocation; in an 8-frame water strip frame 8 reads the palette, 9..15 lie past. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| TERR-TILE-295 | A group whose mask bit is clear keeps a null slot; renderer R0539 and the EN editor's draw read the pixel field through it with no test; the editor loads with 0x1fff at start-up and with 0 at L17392. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+| TERR-TILE-296 | The 52x14 minimap lookup has no bound: slot c>=52 at frame s shows the colour of slot c mod 52 at frame s-(c div 52), or a pixel past the buffer when that is negative; frames 14 and 15 read before it. | High / Medium | ✔ promoted (branch candidate) | [EXP-0637](../experiments/EXP-0637-tile-numbers/) |
+
+### TERR-TILE-291
+
+Population: EN and RU `rom.exe` (one image, SHA-256 `942e9b72…`), EN `Map Editor.exe` (`697f7b2c…`), static listings.
+
+- Renderer `R0539`: `w & 0x1fff` (`L17393`); `g = >> 6` (`L17394`); `b = (w >> 4) & 3` (`L17395`..`L17396`); for `8 <= g < 12` the group becomes `8 + phase` (`L17397`..`L17398`); slot `[L10218 + 16g + 4b]` (`L17399`); pixel source `[slot+0x10] + 8 + (w & 15) * 0x400` (`L17400`..`L17401`). The other renderers (`L17402`, `L17403` and `L17404` hits) extract the same fields (`TERR-GFXBOUND-165`, EXP-0349 instruction table).
+- The minimap builder samples its lookup at `(H-1-(t & 15)) * W + (t >> 4)`, `t = w & 0x1fff` (`MISSION-083`).
+- EN editor: the terrain draw repeats the split (`L17405`..`L17406`), maps a water group to `(g & 3) + 8` (no animation term), loads `[L17407 + 16g + 4b]` (`L17408`) and sources `[slot+0x10] + 8 + (w & 15) * 0x400` (`L17409`..`L17410`); its minimap uses the `rom.exe` index (`L17411`..`L17412`).
+- Capacity in the word's own units: 13 bits, 8192 values, 128 groups of 4 columns of 16 frames. Each loader holds 128 slots, groups 0..31, 2048 values (`TERR-SLOTADMIT-166`; editor loop `L17413`, 32 bits of four slots). Groups 32..127 address past the array (`TERR-GFXBOUND-165`).
+- Grouping: slot `4g + b` is file `tile((g>>2)+1)-((g&3)*4+b)`; one mask bit admits one group (`TERR-LOAD-152`).
+
+**Confidence.** High for the arithmetic of renderer `R0539`, both minimaps and the editor draw: listings read. Medium that no other picture consumer exists: the population is the consumers named here plus the immediate sweeps of `rom.exe` (`TERR-TILE-293`) and of the EN editor (`sweep-editor.txt`); a reader that shifts without one of those immediates is not in it. The precomposed-texture path `L17414` splits the word differently (page `t >> 7`); its table size is not read and its activation is open (`TERR-FAMILY-187`).
+
+### TERR-TILE-292
+
+- `rom.exe` ordinary block `L10965`..`L17415`: for set bit `i` it destroys each old slot, formats `graphics\terrain\tile%d-%d.bmp` or `tile%d-0%d.bmp` with `(i>>2)+1` and `(i&3)*4+j`, allocates `0x24` bytes and stores the constructor's return in slot `4i+j` (`L17416`..`L17417`). A slot is null after a set bit only if that allocation fails.
+- Constructor `R1152` opens the path through `R0535` (search order: `R0536`, below). On a zero return it copies `FATAL ERROR: can't load ` (`L11995`) and appends the path, calls `R0517(text, 0, 0)`, which calls slot `+0x94` of the object `R1877` returns, then `R0754`: `call L12238`, `jmp L16707`, where `L16707` is `push 0xa; call L17418; push 0x16; call L17419; push 3; call L17420` (arguments 10, 22, 3, the shape of the CRT abort; the callees were not read).
+- Search order in `R0536` on `L07608`: each of `[this+8]` open archives through `R0537` (`L17421`..`L17422`), then, for each of `[this+0x1c]` entries of the list `[this+0x18]`, the entry joined with the path, opened through a file object's slot `+0x28` (`L17423`..`L17424`). Error codes 2 and 3 continue with the next entry; any other error goes to `R1455`; success records the file (`L17425`..`L17426`). With every entry tried and none open, it returns 0.
+- EN editor: constructor `L17427` has the same fatal arm (`L17428`..`L17429`: text `L17430` plus path, `L17431(text, 0, 0)`, `L17432`).
+
+**Confidence.** High for the loop, the stored return, the zero test and the order of calls on the fatal arm. Medium that the arm ends the process and that a message box is shown: `L12238`, `R1877`'s object slot `+0x94`, `R0537` and the editor's `L17432` were not read. Medium that a loose file satisfies a load: the directory list's contents are not read.
+
+**Unknown.** Which directories `[L07608+0x18]` lists, and which archive answers first when two hold one path. A read of the writers of `L07608+0x18` and `+0x1c`, or a run with a loose `graphics\terrain\tile4-04.bmp` under the install root and a map whose `+0x18` has bit 13, settles both. A run of the original on a map whose `+0x18` has bit 13 set, with no loose `tile4-04.bmp`, that records whether the process ends and the text of any dialog settles the Medium on the fatal arm.
+
+### TERR-TILE-293
+
+Population: the `rom.exe` `.text` linear sweep (Capstone skip-data) for immediates `0x1fff`, `0x3ff`, `0x300`, `0x3c0` and `0xfff0`.
+
+- `0x1fff`, 12 hits: five in the four renderers and the minimap builder; five compute `g = (w & 0x1fff) >> 6` and, within the listed windows (`listings-rom.txt`), each tests only `8 <= g < 12`; use of the group value outside the windows was not read: `L17433` (returns 1 at the first such cell of its scan), `L17434`, `L17435`, `L17436`, and `L17414` (precomposed-texture path); two are not tile words (`L17437`, signed division by 8192; `L17438`, a packed position field).
+- A group above 12 is not in `8..11`, so within its window each of those five takes its non-water arm. What `L17434`, `L17435` and `L17436` produce was not identified.
+- Class, cost and block take `w & 0x3ff` (`L17439`) and the raw water test `(w & 0x300) == 0x200` (`L17440`), `TERR-PASS-049`, `TERR-PASS-050`. Bits 10..12 do not reach them, so group `g >= 16` gets what group `g mod 16` gets: groups 16..23 and 28 the pair of 0..7 and 12, groups 24..27 the water returns, groups 29..31 the unwritten pair entries of 13..15 (heap bytes, `TERR-PASS-050`).
+
+**Confidence.** High for every hit read and for the mask arithmetic. Medium that no other reader of the selection bits exists: a reader that shifts without one of these immediates, or masks through a register, is outside the sweep; 17 `0x300`, three `0xfff0` and seven `0x3ff` hits were not classified.
+
+**Unknown.** The products of `L17434`, `L17435` and `L17436`: a run of the original that records what each returns or stores for a cell of group 13 and a cell of group 0 on a named map settles it. The class, cost and block of groups 13..15 and 29..31 (their pair entries are heap bytes): a run recording the class byte, cost and block the classifier returns for one cell word of group 13 on a named map settles it.
+
+### TERR-TILE-294
+
+- Strip buffer (`R1152`, editor `L17427`): one allocation of `W*H + 0x408` bytes at `[obj+0x10]`; `W` and `H` at `+0` and `+4`; pixels at `+8`, `W*H` bytes in file row order; then the palette, zero-filled and read as `biClrUsed*4` or `0x400` bytes (`L12111`..`L12113`).
+- The pixel source is `[slot+0x10] + 8 + (w & 15) * 0x400` with no compare of the frame in `R0539` (`L17400`..`L17401`, `L17441`..`L17442`, and the bit-13 copy at `L17443`..`L17444`) or in the editor draw (`L17409`..`L17410`).
+- Land and road strips are 32×448, `W*H = 0x3800` (14 frames): frame 14 is the 1024 palette bytes; frame 15 begins at the first byte after the allocation. Water strips are 32×256, `0x2000` (8 frames): frame 8 is the palette; frames 9..15 begin past the allocation.
+- Installed maps never use such a frame (`ALM-TILE-336`). The classifier returns class `0xff` for these frames (`TERR-PASS-050`).
+
+**Confidence.** High for the buffer layout and the arithmetic in `R0539` and the editor draw. Medium for the other three renderers, whose frame extraction is `TERR-GFXBOUND-165` and whose source arithmetic was not reread here.
+
+**Unknown.** The drawn pixels and whether a read past the allocation faults: a run drawing a cell with word `0x000e` and one with `0x000f`, each captured, settles both.
+
+### TERR-TILE-295
+
+- A clear mask bit destroys and zeroes its four slots (`L17445`..`L17446`, `TERR-SLOTADMIT-166`).
+- `R0539` loads the slot (`L17399`) and reads `[slot+0x10]` at `L17447`, `L10945` or `L17448`; the tests between them are the bit-13 test and cell-geometry compares, none on the slot. The editor draw loads `[L17407 + ...]` (`L17408`) and reads `[slot+0x10]` at `L17449` with no slot test.
+- The EN editor calls its loader with the constant `0x1fff` (`L17450`) and with 0 (`L17392`); the rel32 and aligned-dword scans find no other caller. No caller passes a mask with a bit above 12, so groups 13..31 are never loaded in the editor.
+
+**Confidence.** High for the zeroing, the absent test and the editor's two masks. Unknown for the native effect of reading through a null slot (address `0x10`): fault handling was not read and nothing was run.
+
+**Unknown.** What the game and the editor do on that read. A run of each with a map holding one word of group 13 and `+0x18` bit 13 clear, recording whether the process stops, settles it.
+
+### TERR-TILE-296
+
+- `rom.exe` `R1176` allocates `2*W*H + 8` bytes for `MiniMapData.bmp` (52×14 in both roots): `W`, `H` at `+0`, `+4`, 728 16-bit pixels from `+8` (`L17451`..`L17452`). The builder reads pixel `(13 - s) * 52 + c` for `c = t >> 4`, `s = t & 15` with no compare (`MISSION-083`). The editor's minimap uses the same index (`L17411`..`L17412`).
+- For `c >= 52` the pixel is that of slot `c mod 52` at frame `s - (c div 52)` when that is 0 or more, else a pixel past the 728. A group 13 slot (c 52..55) at frame `s >= 1` shows group 0's colour at frame `s - 1`; at frame 0 it reads past the buffer.
+- For `c < 52` and frame 14 or 15 the pixel lies before pixel 0: `c` 48..51 at frame 14 read the stored `W` and `H` words; the others read before the allocation.
+- Water frames 8..13 have lookup colours though their strips have no such frame.
+
+**Confidence.** High for the buffer, the index and the arithmetic consequence. The 52x14 size and the `buffer+8` pixel base rest on `MISSION-083` and EXP-0536, not on a listing of this experiment (the builder's lookup width and height come from virtual calls and its pixel base is a stack local). Medium for the editor's buffer layout, which was not read (its constructor for the lookup image is unread).
+
+**Unknown.** The colour shown for a read past the buffer. A run of a map with group 13 frame 0, capturing the minimap, settles it.

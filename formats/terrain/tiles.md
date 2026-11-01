@@ -45,7 +45,7 @@ zero-padded `%d-0%d` for `V<10`) and loads each into a **128-slot pointer array 
 at the global `L10218`:
 
 ```
-tiles[(G-1)*16 + V]  <-  tileG-VV.bmp      G = 1..8, V = 0..15   (absent file -> null)
+tiles[(G-1)*16 + V]  <-  tileG-VV.bmp      G = 1..8, V = 0..15   (clear mask bit -> null; set bit, file not found -> fatal; corrects the earlier comment "absent file -> null", TERR-TILE-292)
 [L10220]         <-  dirt.bmp
 [L10222]         =   first non-null block leader + 0x14     (object address)
 ```
@@ -124,7 +124,10 @@ slot still needs a usable bitmap from the resource constructor. A null
 selected pointer reaches a pixel-buffer-field read at pointer `+0x10` in
 the inspected full-render arm; bounded execution faults there. Native
 resource failure behavior and pixels for unpopulated groups remain Unknown.
-— TERR-SLOTADMIT-166, TERR-GFXBOUND-165
+For a set bit whose file is not found the constructor's fatal arm was read
+(TERR-TILE-292); the clear-bit null read in the renderer and the editor draw is
+TERR-TILE-295.
+— TERR-SLOTADMIT-166, TERR-GFXBOUND-165, TERR-TILE-292, TERR-TILE-295
 
 With animation disabled, the water arm normalizes groups 8–11 to group 8.
 The `R1814` pass instead skips every non-water group before lookup;
@@ -167,6 +170,35 @@ subcells and water strips contain 8. A decoder must use the selected strip's
 own subcell count and reject or handle missing resources explicitly; these
 installed populations are not a new upper bound on the tile-word field.
 — TERR-VER-005
+
+## Selection capacity and unshipped values
+
+Bits 0..12 select the picture in the renderers, the minimap builder and the EN map
+editor's draw and minimap: slot `4*((w & 0x1fff) >> 6) + ((w >> 4) & 3)`, frame
+`w & 15`. The word carries 8192 selection values (128 groups of 4 columns of 16 frames);
+the 128 loader slots hold groups 0..31, 2048 values; groups 32..127 address past the slot
+array. — TERR-TILE-291, TERR-GFXBOUND-165
+
+The installs ship 52 strip files, slots 0..51 (groups 0..12), which give 632 values with a
+frame. Mask bits 13..31 name `tile4-04..15` and `tile5..8-00..15`; no `.res` of either
+install holds them. Every cell of the 72 maps of the install roots and `scenario.res` names a shipped file and frame, and
+each map's `+0x18` admits every group its cells use. The EN editor's paint tables write words of groups 0..12;
+its save keeps bits 0..9 and 13, so a saved word names a group at most 15 and a loaded word of group 13..15 is kept (Medium for the population of writers). — ALM-TILE-336, ALM-TILE-337, ALM-TILE-338
+
+Values no shipped file covers:
+
+| case | outcome | claim |
+|---|---|---|
+| mask bit set, path in no open archive and no listed directory | the strip constructor builds `FATAL ERROR: can't load ` plus the path and calls a sequence with the argument shape of the CRT abort; no substitute picture exists; that the process ends is Medium | TERR-TILE-292 |
+| mask bit clear, a cell names the group | the slot is null and the draw reads its pixel field with no test; the native effect is Unknown | TERR-TILE-295 |
+| frame past the strip's last | land frame 14 and water frame 8 read the strip's palette; land frame 15 and water frames 9..15 start past the allocation; the pixels are Unknown | TERR-TILE-294 |
+| minimap colour | the 52×14 lookup is unchecked: slot `c >= 52` at frame `s` takes slot `c mod 52` at frame `s - (c div 52)`, or a pixel past the buffer; frames 14 and 15 read before it | TERR-TILE-296 |
+| class, cost, block | from `w & 0x3ff`: group `g >= 16` acts as `g mod 16`; groups 13..15 and 29..31 use unwritten pair entries, so their class, cost and block are Unknown; land frames 14, 15 and water frames 8..15 give class `0xff` | TERR-TILE-293, TERR-PASS-050 (partially retracted: its water-return sentence; the clauses used here stand), TERR-WATERBOUND-164 |
+| water-only readers | within their listed windows five routines test only `8 <= g < 12`; use of the group outside the windows was not read, and what three of them produce is Unknown | TERR-TILE-293 |
+
+The open asks every open archive first, then each entry of a directory list, so a loose
+file in a listed directory can supply a path; the list's entries are Unknown. The editor
+loads with mask `0x1fff` at start-up and with 0 at `L17392`, so its groups 13..31 are null after the start-up load. — TERR-TILE-292, TERR-TILE-295
 
 ## Tile draw sequence
 
