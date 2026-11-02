@@ -16918,8 +16918,8 @@ Unknown. The render `L2.03537`, view routine, message dispatch and the sender
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-709 | A ROM2 shop page has four shelves, one per fill category; tooltips caption them with main.txt 0x3e+k in town 1 and 0x116+k or 0x112+k in towns 2 and 3 (town binding Medium); a sold untagged item goes by type and stackability. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
-| R2-ENGINE-710 | A ROM2 shop fill sorts each category once with the CRT qsort (equal-key order Medium): row column 15 bit 0 set first for types 1, 2 and 7, then u16 +0xc, then price +0x1c ascending; a sale or Undo merges or appends unsorted. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-709 | A ROM2 shop page has four shelves, one per fill category; tooltips caption them with main.txt 0x3e+k in town 1 and 0x116+k or 0x112+k in towns 2 and 3 (town binding Medium); a sold untagged item goes by type and stackability. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-710 | A ROM2 shop fill sorts each category once with the CRT qsort (equal-key order Medium): row column 15 bit 0 set first for types 1, 2 and 7, then u16 +0xc, then price +0x1c ascending; a sale or Undo merges or appends unsorted. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-711 | A ROM2 enchanted shop category gives an item 1..3 effects by data.bin group B weights for its part and column-15 bit; armour and shields get no castSpell; a flag-0 weapon gets one castspell; stocked MagicItems all carry an effect. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-712 | A ROM2 shop hover shows Money for a money cell, else the item description: the name, a scroll's or book's spell joined to it, then # lines per attribute tag from stats.txt, spell.txt and main.txt; it has no price line. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-713 | A ROM2 shop cell draws its price in font2, comma-grouped, its text box ending 6 px left of the plate's right edge, on plate costs<d> for a d-digit P, or costm<d> showing (P+1)/2 when item +0x18 is 2; 8 digits keep plate 7; P < 1 Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
@@ -16984,6 +16984,12 @@ all three tooltips (`L2.00677`, `L2.00675`, `L2.00676`) were read in EN
 only, so the RU keys follow from the RU `main.txt` and R2-ENGINE-257's note
 on the two RU tooltips, not from a read of an RU tooltip.
 
+**Amended.** R2-ENGINE-798 reads the EN tab click: tab rectangle k shows
+list k (High). R2-ENGINE-800 reads `+0x50` (`L2.04789`): nonzero for types 3
+and 4 and for items with an empty effect list (High). The clause "tab rectangle k
+shows list k", Medium above, is High for the EN client (R2-ENGINE-798);
+other grades stay.
+
 **Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 1.
 
 ### R2-ENGINE-710
@@ -17017,6 +17023,15 @@ holding types outside {1, 2, 7}, and that append adds at the tail
 (`L2.03912` unread). Unknown whether the client shows the server's order.
 
 **Unknown.** The client transfer of the category lists.
+
+**Amended.** R2-ENGINE-799 reads `L2.03910`, `L2.03911` and `L2.03912`:
+a selection of the maximum, a byte exchange and an append at the tail, with
+the equal-item order for every list size (High), and the two stale slots a
+MagicItems list reads (values Unknown). R2-ENGINE-798 reads the client
+transfer: the client re-sorts every received list by its own keys, so this
+order shows only among items equal under them. The equal-key order, Medium
+above, is High (R2-ENGINE-799); the client Unknown is closed for EN; the
+grades of the other clauses stay.
 
 **Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 3.
 
@@ -19935,3 +19950,213 @@ Differences:
 occupant condition changes: `L2.02074` was not read.
 
 **Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 5.
+
+## Shop shelf order on the client and the Kaarg shelves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-798 | The ROM2 EN client re-sorts each shop list it receives: itemname.pkt flag 0x2 set first, then item kind, weapon row group, shown price ascending; tab k shows list k, cell i entry i plus the scroll. | High / Medium | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+| R2-ENGINE-799 | EN: ROM2 qsort `L2.03908` short-sorts by selecting the maximum; items equal under the client shop keys get a permutation of the server order, which for a MagicItems list rests on two stale stack slots. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+| R2-ENGINE-800 | EN: no pick of fill `L2.00813` and no untagged sale puts an item without effects on a magic-items tab; `L2.04790` could (no direct caller, Medium); potions are 50 plus a draw by `L2.04697(50)` each. | High / Medium | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+| R2-ENGINE-801 | Kaarg's NewGame shop record admits, in both data files: Armors 47 armour and 9 shield keys; Magic items 41 armour, 7 shield, 27 weapon keys admitted to enchanting (survivors Unknown); Scrolls 7 books, 32 MagicItems rows; Weapons 33. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+
+### R2-ENGINE-798
+
+Addresses are EN. Transfer: shop entry `L2.00823` fills when category 0 is
+empty (`L2.04791`), then deal open `L2.04792` copies the four shop lists in
+order into the deal, skipping entries for which `L2.04793` is true, and
+`L2.04794`(-1) sends them through `L2.04795` and `L2.04796`: message 0x76,
+list id k+5, a u16 count and the items in list order (`L2.04797`).
+
+The client decoder (window `L2.04798..L2.04799`) reads each item with
+`L2.03700`, drops one that `L2.04800` rejects ("Invalid item in shop") and,
+when its `+0x404` bit 2 is set, posts 0x413 (wparam id, lparam list) to
+window 0x3e8. Page handler `L2.01218` sends ids 5..8 to `L2.04801` with
+k = id-5, which stamps each item (+0x18 = k+5, +0x14 = k, +0x20 = index),
+sorts the list with `L2.04802` (qsort `L2.03908`, width 4, comparator
+`L2.04803`) and installs it at grid +0x2100+k*0x14 in place of the old one.
+
+Comparator `L2.04803` writes every local before it reads it:
+
+1. bit 0x2 of item byte +8 set first. `L2.03700` takes that bit only from
+   the itemname.pkt record of the item ID (byte +4, R2-ASSET-207). The
+   decoder masks the stream's flag byte to 0x40 in the arm where stream bit
+   0x80 is set (`L2.04804`) and to 0x60 in the arm where 0x20 is set
+   (`L2.04805`); in the third arm (`L2.04806`) it keeps the byte as sent and
+   ORs the record byte at `L2.04807`. There the sender writes the byte as 0
+   or 0x40 (`L2.04808`, `L2.04809`), so bit 0x2 comes only from the record.
+2. kind (ID>>8)&0xf (`L2.03925`) ascending. Server IDs are
+   material<<12 | part<<8 | class<<5 | row (`L2.04810`): part 1 for weapons,
+   2 for shields, armour column 4 (4 ring, 5 amulet, 6 head, 7 and 8 body,
+   9 bracers, 10 gloves, 12 boots), 0xe for MagicItems.
+3. for kind 1, the group of ID&0x1f (`L2.03699`): rows 1..6 give 1, 18..19
+   give 2, 15..17 give 3, 7..12 give 5, 20..22 give 6, others 7; every other
+   kind gives 1; ascending.
+4. price `L2.00846` ascending: the last tag-1 value of the client attribute
+   sequence (`L2.04788`). For an item sent without effects that is the
+   record's own value; for one sent with effects `L2.03700` writes the
+   server's +0x1c over it.
+5. otherwise 0.
+
+Display: the tab click (`L2.04811` tests page +0x60+16k, `L2.04812`(k) sets
+page +0x132 = k and the scroll to 0, `L2.00965`(k) sets grid +0x84 to list
+k) shows list k, so tab k shows category k. Paint `L2.00845` fills cell i
+(rectangle page +0x20c4+16i) with entry i + [grid+0x90] and prints P from
+`L2.00846` (R2-ENGINE-267); `L2.04813` clamps the scroll to count minus
+cells.
+
+Against the published views: the town-1 admitted keys (R2-ENGINE-264)
+joined with their records give category 0 the order shields 3, 3, 5, 11,
+12, 21, 44, 88, 113, 169, 225, 338, 450, then head armour from 1, and
+category 1 swords and daggers 25..800, then axes from 175. Every number
+sequence of R2-SESSION-206, R2-SESSION-215 and R2-ENGINE-575 is an ordered
+subsequence of these. Shield 11 (row 6) before 12 (row 1) excludes
+R2-ENGINE-710's row-first order as the shown order. The axe at 175 after
+the sword at 800 excludes price alone and is consistent with both the group
+order and the server's row order (row 18 follows row 6 in both); only the
+absence of clubs, maces and polearms between 800 and 175 in the views would
+separate them, and that is a stock outcome, not read. The helmets from 1
+after the shield at 450 exclude price alone if the two helmets are priced
+below 450 (two icons; their prices were not read). Both pairs rest on
+numbers read by eye (R2-SESSION-215, R2-ENGINE-575).
+
+**Confidence.** High for the transfer, the comparator, the sort call, the
+tab binding and the cell index, in EN. Medium that cells fill row by row:
+the rectangle table at page +0x20c4 was not read; R2-ENGINE-575's views
+show rows of two.
+
+**Unknown.** What sets decoder `+0x404` bit 2; the RU client bodies.
+
+**Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), questions 3 and 4.
+
+### R2-ENGINE-799
+
+Short sort `L2.03910` (cutoff 8, R2-ENGINE-710) runs, while hi > lo: take
+lo as the maximum, replace it by each later p with comparator(p, max) > 0,
+swap the maximum with hi (`L2.03911`, a byte exchange), step hi down. Ties
+keep the earliest maximum. The partition swaps the middle element to lo,
+scans loguy up while comparator(loguy, lo) <= 0 and higuy down while
+comparator(higuy, lo) >= 0, swaps the two while they have not crossed,
+swaps lo with higuy and stacks the larger part. For n equal items the
+result is a rotation left by one for n = 2..8 and the exchange of
+positions 0 and n/2 for n >= 9 (derived/qsort-equal.txt). Append
+`L2.03912` inserts at index count (`L2.04814`), the tail.
+
+Server comparator `L2.03909` leaves its slot `[ebp-0xc]` unwritten when B is
+not of type 1, 2 or 7 (R2-ENGINE-710). Relative to qsort's frame Q, calls
+from qsort read Q-0x1c and calls from the short sort read Q-0x40. Each short
+sort call pushes lo, a heap pointer, into Q-0x1c; each key computed in a
+qsort-level call pushes a heap pointer into Q-0x40 (`L2.04051`). Before the
+first such write both slots hold what the last deep call of the fill's
+final draw left (add `L2.00814`, merge `L2.03919`, append and the CRT
+heap); static reading does not fix those values.
+
+Only the town-1 category 3 and the record-2 and record-3 category 2
+(mask 0x04000000) hold such items. The client re-sort (R2-ENGINE-798)
+decides the shown order; among items equal under the client keys, such as
+the 100-priced potions and scrolls, the final order is a fixed function of
+the server order and the list size (the client qsort permutes equal items
+again as above). Over 500 simulated town-1 category-3 fills
+(derived/sim-scrolls-town1.txt) the view starts with both 100-priced
+potions in 24 to 137 fills, depending on the slot signs: reachability under
+the simulator's model (its own pool draw, deduplicated 20 draws, heap
+pointers taken as positive), not a frequency. R2-ENGINE-575's SCROLLS view,
+potions 100, 100 first, is one of the reachable orders. The sibling draw
+routine `L2.04790` (R2-ENGINE-800) sorts with the same comparator, so the
+stale-slot reading applies to its lists too. Addresses are EN; the RU short
+sort, swap and `+0x50` were not read.
+
+**Confidence.** High for the short sort, the swap, the partition, the
+equal-item rule and the slot addresses. Medium for the simulator as a
+replay of the server and client sorts. Unknown for the stale slot values.
+
+**Unknown.** The slot values at each fill; a debugger read of Q-0x1c and
+Q-0x40 at the first comparator call of a MagicItems sort would settle it.
+
+**Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), questions 1 and 2.
+
+### R2-ENGINE-800
+
+Addresses are EN; the RU bodies were not read. Item virtual +0x50 is
+`L2.04789` for armour, shields, weapons and MagicItems
+(vtables `L2.04815`, `L2.04816`, `L2.04817`, `L2.04818`): nonzero for types
+3 and 4, else nonzero exactly when the effect list at +0x20 is empty
+(`L2.04819`, `L2.04820`, count +0xc). Equipment without effects is
+therefore stackable, so an untagged sale places it in category 0 or the
+weapon category, never on a magic-items tab (R2-ENGINE-709's table).
+
+A second draw routine `L2.04790` (listing en-upto-L2.04821; the scan
+en-scancall-525844 has one hit in it, `L2.04821`, and one in `L2.00813`)
+clamps a price argument, clones books with quantity 2 under the same
+`0x04000000` test and has no potion block. Its bit-29 rule differs: at
+`L2.04822..L2.04823` a bit-29 mask draws rand(100); above 50 it calls enchant
+`L2.00816`, at 50 or less it accepts the pick unenchanted, and no price-range
+test follows. A census of EN `allods2.exe` finds no direct E8/E9 call and no
+absolute dword reference to `L2.04790` (en-scancall-L2.04790,
+en-scandw-L2.04790: 0 hits each, all sections). A call through a computed
+register address is not excluded, so unreached is Medium. The statements
+below about the fill cover `L2.00813` only, reached from `L2.00803`.
+
+Fill `L2.00813` keeps a pick of a bit-29 category only when enchant
+`L2.00816` returns nonzero, or when bit 28 is also set and a rand(100)
+draw is at most 50, and its price lies in [min, max]; otherwise it deletes
+the pick and draws again. No directly stored mask sets bits 28 and 29
+together (R2-ENGINE-263, R2-ENGINE-330): town 1 category 2 is `28018100`,
+the record-2 category 1 masks are `2bc3c304`..`2bc772c0`, the record-3
+masks `2bc7d318` and `2bc042f0`.
+
+A mask with bit 0x04000000 first clones every pool book with quantity 2,
+then adds Potion Health Regeneration, Medium Healing, Big Healing, Mana
+Regeneration, Medium Mana and Big Mana (rows 69..74, prices 100, 1000,
+10000, 100, 1000, 10000), each with quantity 50 plus a draw by `L2.04697(50)` (`push 0x32; call
+L2.04697; add eax, 0x32`); R2-ENGINE-265 and R2-ENGINE-790 give 51..100 for
+this block and for that helper, whose body was not read here. Then it
+draws scrolls (R2-ENGINE-264).
+
+Shown orders by R2-ENGINE-798 in town 1: Armor shields, then armour by part
+(head, body, bracers, gloves, boots), then the flag-clear cloth keys (caps,
+low hats, robes, cloaks, capes, gloves, shoes) by part; Weapons by group, then
+price; Magic Items staffs by price; Scrolls, Books & Potions potions and
+scrolls by price, books last.
+
+**Confidence.** High for `L2.04789`, the vtable slots, the bit-29 keep
+test of `L2.00813`, the mask list and the potion block's rows. Medium that
+`L2.04790` is unreached. Unknown: the callers of `L2.04790` beyond direct
+calls and absolute references; the quantity range (helper body unread). Medium that a nonzero enchant
+always left an effect (R2-ENGINE-711) and that a tagged return keeps an
+item in its own category (the tag writer was not read).
+
+**Unknown.** Masks from a loaded SAV or the deal source (R2-ENGINE-332).
+
+**Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), question 4.
+
+### R2-ENGINE-801
+
+Masks decode by R2-ENGINE-264's rule. NewGame record 2 (R2-ENGINE-330),
+prices 0..5000:
+
+| Tab | Mask | Kinds | Materials | Classes | Admitted keys |
+|---|---|---|---|---|---|
+| 0 Armors | `1383c305` | armour, shield | 0, 2, 8, 9, 15 | 0..2 | 47 armour, 9 shield |
+| 1 Magic items | `2bc3c304` | armour, shield, weapon modes 2 and 8, bit 29 | 2, 8, 9, 15 | 0..2 | 41 armour, 7 shield, 27 weapon |
+| 2 Scrolls, spellbooks and potions | `04000000` | MagicItems | | | 7 books, 32 MagicItems rows |
+| 3 Weapons | `10438305` | weapon mode 2 | 0, 2, 8, 9 | 0..2 | 33 weapon |
+
+The counts are EXP-2039's per-kind split of R2-ENGINE-330's totals, equal
+for the EN and RU data.bin. After leaving mission 20 they are 49/11,
+41/9/30, 8/43 and 36; after 30, 60/7, 57/12/38, 12/44 and 31; after 40,
+87/11, 64/16/47, 13/50 and 35.
+
+Shown orders by R2-ENGINE-798: Armors shields, then armour parts with
+rings and amulets first, then the cloth keys (material 15); Magic items
+fighter weapons by group, shields, then armour parts, then staffs and
+cloth; Scrolls potions and scrolls by price, books last; Weapons by group,
+then price.
+
+**Confidence.** High for the mask decode and the counts. Medium for the
+later states as a campaign order (R2-ENGINE-330). Unknown which
+Magic-items keys survive the enchanted draw: a pointer to R2-ENGINE-332's
+Unknown, not a read made here. The Magic items counts are keys admitted to
+the enchanted category.
+
+**Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), question 5.

@@ -659,8 +659,9 @@ and network paths pass 0 is Medium (`R2-ENGINE-334`, High / Medium).
 A shop page has four shelves, one per fill category of the town's record.
 The tab tooltip returns `main.txt` key 0x3e+k in town 1, and 0x116+k or
 0x112+k in the other two towns; the keeper rectangle returns key 61
-(`R2-ENGINE-709`, High; Medium that tab k shows list k and which of the
-last two serves town 2; the three tooltips were read in EN only):
+(`R2-ENGINE-709`, High; Medium which of the last two serves town 2; the
+three tooltips were read in EN only). Tab k shows list k
+(`R2-ENGINE-798`, High):
 
 | Town | Category 0 | Category 1 | Category 2 | Category 3 |
 |---|---|---|---|---|
@@ -673,21 +674,44 @@ category. An untagged armour piece or shield goes to category 0 when
 stackable, an untagged stackable weapon to category 1, 3 or 0 in towns 1,
 2 and 3, any untagged non-stackable equipment to category 2, 1 or 1, and a
 potion, scroll or book to category 3, 2 or 2 (`R2-ENGINE-709`, High).
-Stackable means that the item's virtual +0x50 returns nonzero, which
-`R2-ENGINE-265` gives for types 3 and 4 and for items with no effects
-(+0x50 itself unread, Medium); a book takes the stackable path whatever it
-returns. The kind bits of the record-2 categories do not change in the
-departure rewrites of `R2-ENGINE-330`.
+Stackable means that the item's virtual +0x50 returns nonzero: for types 3
+and 4 and for items with an empty effect list; a book takes the stackable
+path whatever it returns. Under the directly stored masks no fill or
+untagged sale puts an item without effects on a magic-items shelf (EN: the fill `L2.00813`; a second draw routine `L2.04790` accepts an unenchanted pick at a draw of 50 or less and has no direct call or absolute reference in the EN image, Medium that it is unreached), and
+every MagicItems fill adds the six potions of rows 69..74, 50 plus a draw by `L2.04697(50)` each (51..100 by `R2-ENGINE-265` and `R2-ENGINE-790`; helper body unread)
+(`R2-ENGINE-800`, High / Medium). The kind bits of the record-2 categories
+do not change in the departure rewrites of `R2-ENGINE-330`. Kaarg's NewGame
+record admits 47 armour and 9 shield keys on Armors, 41 armour, 7 shield
+and 27 weapon keys on Magic items, 7 books and 32 MagicItems rows on
+Scrolls, and 33 weapon keys on Weapons, from both data files
+(`R2-ENGINE-801`, High / Medium / Unknown).
 
-Each fill sorts every category once with the C library's quicksort, whose
-short sort and swap bodies were not read. Items whose row column 15 has bit 0 set come first among
-armour, shields and weapons, then the row index rises, then the price
+Each fill sorts every category once with the C library's quicksort: a
+partition with a selection-of-the-maximum short sort for eight or fewer
+items, so n equal items rotate left by one for n = 2..8 and positions 0 and
+n/2 exchange for n >= 9. Items whose row column 15 has bit 0 set come first
+among armour, shields and weapons, then the row index rises, then the price
 rises. For a pair whose second item is not armour, a shield, a weapon or
-type 7, the comparator reads an uninitialized key, so a MagicItems shelf
-has no defined first key. A sale or Undo merges into an equal entry or
-appends, and nothing re-sorts until the next fill. Whether the client
-shows the server's order is Unknown. The order of equal keys is Medium for
-every list size (`R2-ENGINE-710`, High / Medium / Unknown).
+type 7, the comparator reads a stale stack slot whose value static reading
+does not fix, so a MagicItems shelf has no defined server order. A sale or
+Undo merges into an equal entry or appends at the tail, and nothing
+re-sorts until the next fill (`R2-ENGINE-710`, High / Medium / Unknown;
+`R2-ENGINE-799`, High / Medium / Unknown).
+
+The EN client re-sorts each list it receives (RU Unknown), and the shelf shows that order:
+items whose itemname.pkt flag has bit 0x2 set first, then the item kind
+(weapon, shield, ring, amulet, head, body, bracers, gloves, boots,
+MagicItems), then for weapons the row group (swords and daggers, axes,
+polearms, clubs and hammers, bows, others), then the shown price
+ascending. The shown price is the record's own for an item sent without
+effects and the server's for one with effects. The decoder masks the stream
+flag byte to 0x40 or 0x60 in two of its three arms; in the third the sender
+writes 0 or 0x40, so flag bit 0x2 comes only from the record. Cell i shows entry i plus
+the scroll; that cells fill row by row is Medium (`R2-ENGINE-798`, High /
+Medium). Among items equal under these keys the final order is a fixed
+function of the server order and the list size, because the client sort
+permutes equal items again (`R2-ENGINE-799`). itemname.pkt holds 491 records; flag bit 0x2 is clear on cloth
+armour, staffs, books and quest items (`R2-ASSET-207`, High / Medium).
 
 An enchanted category gives each pick one to three effects drawn by the
 data.bin group B weights of its part and column-15 bit. A second pick is

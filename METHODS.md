@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4590. Observation: 143. Static analysis: 3826. Mixed: 621.
+Claims labelled: 4595. Observation: 143. Static analysis: 3830. Mixed: 622.
 
 ## Ledger ai
 
@@ -2127,6 +2127,7 @@ Claims labelled: 4590. Observation: 143. Static analysis: 3826. Mixed: 621.
 | R2-ASSET-192 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-198 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-202 | mixed | ● active (branch candidate) |
+| R2-ASSET-207 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -2656,8 +2657,8 @@ Claims labelled: 4590. Observation: 143. Static analysis: 3826. Mixed: 621.
 | R2-ENGINE-706 | mixed | ● active (branch candidate) |
 | R2-ENGINE-707 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-708 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-709 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-710 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-709 | static analysis | ✔ promoted (branch candidate, amended) |
+| R2-ENGINE-710 | static analysis | ✔ promoted (branch candidate, amended) |
 | R2-ENGINE-711 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-712 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-713 | static analysis | ✔ promoted (branch candidate) |
@@ -2726,6 +2727,10 @@ Claims labelled: 4590. Observation: 143. Static analysis: 3826. Mixed: 621.
 | R2-ENGINE-795 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-796 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-797 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-798 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-799 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-800 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-801 | mixed | ● active (branch candidate) |
 
 ## Ledger rom2-session
 

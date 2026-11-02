@@ -2970,3 +2970,48 @@ The rows are data facts. That they are the rows the loader delivers rests on the
 loader index to the data.bin ordinal (R2-ENGINE-754), Medium.
 
 **Evidence.** [EXP-2105](../experiments/EXP-2105-rom2-spell22-raise/RESULTS.md), question 3.
+
+## Client item records in itemname.pkt
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-207 | ROM2 world.res data/itemname.pkt holds 491 item records, equal in EN and RU: u16 ID, flag byte +4, length +6, attribute data; flag bit 0x2 is clear on 84 IDs (cloth armour, staffs, books, quest items). | High / Medium | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+
+### R2-ASSET-207
+
+Layout as client loader `L2.04786` (EN) walks it after `itemname.bin`: a
+9-byte header, then per record a u16 item ID at +0, a flag byte at +4, a
+byte at +5, a length byte L at +6 and L bytes of attribute data from +7;
+the next record starts at +7+L. The 491 records end at byte 7763, the
+payload's size, in both locales; every field but the names agrees. The
+loader keys the records by ID in table `L2.04787` and, for kind 0xe
+(MagicItems), replaces the value at +8 with MagicItems column 0 of row
+ID&0xff.
+
+Flag values by kind ((ID>>8)&0xf):
+
+| Kind | 0x02 | 0x04 | 0x06 | other |
+|---|---|---|---|---|
+| 1 weapon | 141 | 13 (Staff, Shaman Staff) | | |
+| 2 shield | 37 | | | |
+| 4 ring, 5 amulet | | | 25 | |
+| 6..12 armour | 132 | 47 (material 15: hats, caps, robes, dresses, cloaks, capes, gloves, shoes) | | |
+| 14 MagicItems | | | | 0x07 13 potions and Quest Treasure, 0x17 58 scrolls, 0x05 5 books, 0x01 19 quest items |
+
+The attribute data is the sequence client `L2.04788` reads: a tag byte,
+then a u32 for tag 1 (price) or one byte for any other tag. For an item the
+server sends without effects the record's tag-1 value is the price the
+shop cell shows (R2-ENGINE-798). Of the 114 category 0 and 1 town-1
+admitted equipment keys (R2-ENGINE-264), 25 show 1 more than their server
+admission price (for example 2 and 3, 43 and 44, 112 and 113) and none
+less. The four category 2 keys are enchanted staffs, always sent with
+effects, and show the server's price (2 of the four have a record price 1
+higher; derived/town1-shown-en.tsv). The flag byte of an item in the
+decoder's third arm is as sent (0 or 0x40), so bit 0x2 comes only from the
+record (R2-ENGINE-798).
+
+**Confidence.** High for the layout, the counts and the EN/RU agreement
+(the walk ends exactly at the payload end). Medium for any meaning of the
+flag bits beyond the client shop comparator's use of bit 0x2.
+
+**Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), question 3.
