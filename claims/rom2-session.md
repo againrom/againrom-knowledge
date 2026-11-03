@@ -5077,3 +5077,75 @@ would settle all three; reading the owned classes' serializers would settle the 
 **Format surface.** `formats/rom2-sav/format.md`, AreaEffect local scalar suffix.
 
 **Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 4.
+
+## Original-client stop on the supplied mission save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-335 | The supplied ROM2 mission-10 save stores packed Unit state 0 in all 30 actors; five original-made mission-10 files have nonzero low-word keys in all 150 actors; every saved HPmax is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2112](../experiments/EXP-2112-rom2-load-crash/RESULTS.md) |
+| R2-SESSION-336 | Among the 30 Human/Unit records of the supplied save, one has HP 1229 (Unit archive index 26, ID 32, row 92); the fault object's identity is an inference from the number 1229, Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2112](../experiments/EXP-2112-rom2-load-crash/RESULTS.md) |
+
+### R2-SESSION-335
+
+The supplied file's SHA256 is
+c7e8d536cb26bd3ed2555d0ebf264c6cb252dcedd094a0594fb4fe8432fa5a5f.
+Its decoded document has 70878 bytes and walks to its exact end. Thirty
+Human/Unit object payloads have packed state 0, thus low-word +0x14c 0
+and both packed Boolean bands 0. Their HPmax words are 20..1229, none 0.
+
+The first named original population has nine files; five have mission 10:
+game0001, game0004, game0005, game0006 and game9999. The second has
+seven files and no mission-10 head. The five complete mission documents
+have 30 actors each, 150 total, all with nonzero packed low-word keys and
+nonzero HPmax. inputs.tsv records each full SHA256; actors.tsv records
+every relevant record and offset. No filename/byte resynchronization is used.
+
+The supplied file has 28 Unit-class records with key 0: twelve have
+signed HP above zero and sixteen are in the dead list with HP below zero.
+Two other zero-key records are Humans: not examined; the flag-0x20 arm is unread.
+zero-key-units.tsv enumerates all 28 records. This is not a claim that all
+28 are visible or reach the same division: the owner test, life state,
+view and packet flags still gate it.
+
+**Confidence.** High for exact byte values, hashes, partitions and counts
+recomputed from committed TSV rows. Medium for native composition under
+the inherited Group binding and complete archive-transfer assumptions.
+No first-frame survival claim is made for any original-made file.
+
+**Unknown.** Which of the 28 zero-key Units next reaches the division.
+Reload an isolated copy with valid keys, then visit each live candidate's
+cell while recording client HPmax and the draw branch; inspect dead-unit
+state separately. The original was not run here.
+
+### R2-SESSION-336
+
+The fault's rectangle width is 446 - 386 - 8 = 52 from the saved frame
+locals. The listed numerator is signed client HP times that width.
+EDX:EAX = 0:63908 gives HP = 63908/52 = 1229, with no signed-16-bit
+multiplication overflow possible at width 52.
+
+Among the 30 Human/Unit records of the supplied save, only
+players.4.group.0.members.0 has that HP. Its archive object index is 26,
+record starts at decoded offset 17540,
+payload at 17542, ID is 32, template row is 92 and class word is 68.
+Current HP at 18135 and maximum at 18137 are both 1229 (word 0x04cd).
+Packed state at 18166..18169 is 0. Codec value bytes at physical offsets
+2029 and 2030, both 0, repeat into those four decoded bytes; the packet
+control is at 2028. HP source bytes are at 2011/2012, maximum at 2013/2014.
+
+Every one of the five original-made mission-10 files has a row-92 Unit
+with low-word key 623; the first has packed state 0x0100026f. Installed
+EN row 92 is named Troll.4 and also has parameter-55 key 623.
+
+**Confidence.** High for measured bytes, source offsets, arithmetic and
+the unique saved HP match. Medium for identifying the faulting heap
+receiver with this record: the dump omits the receiver, so the join is an
+inference from the number 1229, not a captured object ID. It assumes saved
++0x94 was copied through R2.0075 into client +0x104 and still held that
+value at the first draw; regeneration or a later writer is not excluded.
+
+**Unknown.** A dump holding this client's ID or a traced LOAD of this
+save recording ID 32, HP 1229 and HPmax at the failing draw would settle
+the join. Replacing only the packed key in a scratch copy and observing
+the first frame would test the causal explanation, not prove every other
+field valid.

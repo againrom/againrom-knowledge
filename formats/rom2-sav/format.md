@@ -1346,3 +1346,47 @@ The acquired EN/RU mission entries have 1002 instructions each and
 55 each and one UI offset pair, +0x404/+0x41c. After those substitutions
 their instruction shapes agree. No other newly read body or referenced
 data is covered by that equality. — R2-ENGINE-672
+
+## Template keys and the original client health divisor
+
+A saved HPmax word alone does not establish the original client maximum
+after LOAD. The EN Unit serializer writes current word +0x14c OR
+(DWORD +0x204 shifted 16) OR (DWORD +0x1a0 shifted 24) as one u32.
+LOAD restores the low word and Boolean byte bands; this local path does
+not derive the template key from saved +0xc. The Unit template initializer
+takes +0x14c from Units parameter 55. Complete archive transfer remains a
+condition of the composed restoration. — R2-ENGINE-816
+
+The client may reconstruct its maximum through an incoming template key.
+The EN sender can omit an explicit maximum when it equals template
+parameter 4, while sending +0x14c separately. For the supplied row-92
+record, the Medium omitted-maximum explanation requires owner to differ
+from recipient, no scaling at the loaded difficulty, and class neither 26
+nor 27. When flag 0x20 is clear and 0x80 is set, client reconstruction looks
+up that key and copies temporary Unit +0x96 to client +0x108; a separately
+received maximum can overwrite it. Key 0 occurs in none of the 180
+nonempty installed EN Units rows (61 other serialized rows are empty).
+The table at L2.00811 being that Data.bin Units array is inherited, not
+read here. The live default-row and packet delivery composition is Medium.
+— R2-ENGINE-815, R2-ENGINE-817
+
+One supplied mission-10 document has thirty zero packed actor states.
+Five original-made mission-10 documents have 150 actor records, each
+with a nonzero low-word key; every saved HPmax in both populations is
+nonzero. Twenty-eight supplied records are Units: twelve have positive
+HP and sixteen are in the dead list. This is a bounded key census, not
+a claim that all twenty-eight reach the same draw. — R2-SESSION-335
+
+The corresponding EN dump shows a signed division by zero at IDIV
+L2.04928 with client divisor +0x108 equal to zero (High). The stack words
+and installed code place it inside LOAD entry L2.00826 after server reader
+L2.00289 returned (Medium: the module list holds no MD5). The inferred
+current HP 1229 matches one of the thirty Human/Unit records of the
+supplied save: Player 4/Group 0/member 0, Unit archive object 26, ID 32,
+row 92. Its packed state at decoded 18166 is 0; the matching original
+records have low key 623. The fault object's identity is an inference from
+the number 1229, Medium. It assumes saved +0x94 was copied through
+R2.0075 into client +0x104 and still held that value at the first draw;
+regeneration or a later writer is not excluded. The causal reconstruction
+remains Medium because its heap bytes and actual packet flags are absent.
+— R2-ENGINE-814, R2-SESSION-336

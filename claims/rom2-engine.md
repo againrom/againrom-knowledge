@@ -20653,6 +20653,125 @@ would settle bounded root differences; masked text equality would not.
 
 **Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 6.
 
+## Original-client stop on the supplied mission save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-814 | The supplied ROM2 EN dump stops at IDIV L2.04928 with client word +0x108 equal to zero; its return chain still includes LOAD entry L2.00826 after the server reader returned. | High / Medium | ✔ promoted (branch candidate) | [EXP-2112](../experiments/EXP-2112-rom2-load-crash/RESULTS.md) |
+| R2-ENGINE-815 | ROM2 EN client unit reconstruction selects a template by an incoming key and copies its HPmax into client +0x108; key 0 is absent from all 180 nonempty installed Units rows. | High / Medium | ✔ promoted (branch candidate) | [EXP-2112](../experiments/EXP-2112-rom2-load-crash/RESULTS.md) |
+| R2-ENGINE-816 | ROM2 EN Unit SAVE packs +0x14c, +0x204 shifted 16 and +0x1a0 shifted 24 into one u32; LOAD restores the low word and Boolean byte bands without deriving a template key. | High / Medium | ✔ promoted (branch candidate) | [EXP-2112](../experiments/EXP-2112-rom2-load-crash/RESULTS.md) |
+| R2-ENGINE-817 | ROM2 EN unit update can omit HPmax when it equals template parameter 4, while sending +0x14c separately; a saved nonzero HPmax alone does not establish the client divisor after LOAD. | High / Medium | ✔ promoted (branch candidate) | [EXP-2112](../experiments/EXP-2112-rom2-load-crash/RESULTS.md) |
+
+### R2-ENGINE-814
+
+The exception is 0xc0000094 at EIP L2.04928, instruction IDIV ECX,
+with EDX:EAX = 0:63908 and ECX = 0. The preceding MOVSX at L2.04929
+loads the divisor from [this+0x108]. The receiver saved at EBP-0x54 is
+0x0f687f98. That heap address is absent from the dump's memory ranges.
+
+The nine game-module return addresses in the EBP chain are L2.04930,
+L2.04931, L2.04932, L2.04933, L2.04934, L2.04935, L2.04936,
+L2.04937 and L2.04938. A call ends at each address in the committed
+listings. L2.04935 follows the call to R2.0026. In that same LOAD entry,
+the server reader L2.00289 was called earlier at L2.01093. The stop is
+synchronous client drawing in the still-active LOAD entry, not evidence of
+a later session tick. No original runtime was run.
+
+**Confidence.** High for the dump exception, registers, zero divisor and
+the matching sixteen fault-code bytes in the installed EN image. Medium
+for the composed call chain: module timestamp, image size and fault bytes
+match, but MINIDUMP_MODULE holds no MD5. Whole-file MD5 equality to the
+dumped module is unverified. EXP-2112's RESULTS.md records the installed
+client's MD5. No system DLL body was read.
+
+**Unknown.** The faulting object's ID and other heap fields. A dump holding
+the receiver's header and health fields would settle them.
+
+### R2-ENGINE-815
+
+The packet arm at L2.04939 reads an optional word, flag 0x80, into
+L2.03324. The lookup at L2.04940..L2.03323 is reached when flag 0x20
+is clear and 0x80 is set. It looks up that key through L2.02665,
+sets a temporary Unit's +0xc to the returned index, obtains its row through
+L2.04941, calls parameters L2.02669 and sets its +0x14c from the key.
+R2.0075 copies the temporary Unit's +0x96 to client +0x108 at L2.04942.
+The later flag-8 arm can overwrite +0x108 with the separately received
+maximum at L2.04943.
+
+L2.02665 searches descending positive row indices, skips rows whose
+parameter-array count is zero, compares parameter 55 with the key and
+returns 0 on a miss. EN world.res Data.bin has 241 serialized Units rows:
+180 nonempty arrays, each long enough to read parameter 55, and 61 empty
+arrays. None of the 180 has key 0. Parameter 4 of row 92, Troll.4, is 1229;
+parameter 55 is 623.
+
+The identity of the lookup table at L2.00811 as the Data.bin Units array
+is inherited, not read here.
+
+**Confidence.** High for the read local data flow and the complete bounded
+180-row key census under the inherited ROM2 grammar. Medium for composing
+key 0 into a live client maximum of zero: the table identity is inherited,
+and the runtime default contents of row 0 and its complete constructor
+are unread. The zero maximum in this
+dump is observed independently by R2-ENGINE-814. No completeness claim
+about all client-field writers is made.
+
+**Unknown.** A captured row-0 object and the incoming packet flags at this
+LOAD would settle the remaining default-row and delivery alternatives.
+
+### R2-ENGINE-816
+
+Unit serializer L2.01090 stores zero-extended word +0x14c OR
+(DWORD +0x204 << 16) OR (DWORD +0x1a0 << 24) through L2.03226 at
+L2.04944. Its load arm reads the u32 at L2.04945, restores its low word
+to +0x14c at L2.03322, and restores +0x204/+0x1a0 from the nonzero
+0x00ff0000/0xff000000 bands. The +0x204 test uses signed SETG on the
+masked middle byte; that mask is nonnegative.
+
+The mode test L2.01537, DWORD wrappers L2.03226/L2.03229 and the
+in-buffer DWORD transfer are listed. The word helpers also show the
+independent saved HPmax +0x96 transfer. The Unit template initializer's
+store at L2.02674 takes the low word of Units parameter 55 when its
+array-count test passes. SAVE writes current fields; this
+store arm does not recompute the key from +0xc or the saved HPmax.
+
+**Confidence.** High for these EN local operands, packing and in-buffer
+transfers. Medium for whole native LOAD composition: archive refill
+L2.04946 and preceding Group/raw-block bindings remain outside the read
+population. No claim is made that later code never changes +0x14c.
+
+**Unknown.** The final post-LOAD field under arbitrary archive failures;
+a traced complete LOAD with the restored word recorded would settle it.
+
+### R2-ENGINE-817
+
+In the non-Human arm of L2.04947's listed region, when owner differs
+from the recipient, parameter 4 of [unit+0x3c]+8 is compared with +0x96,
+after scaling when session +0x74 is 0 and difficulty +0xd8 is 1 or 3.
+When equal and class is neither 26 nor 27,
+L2.04948 clears flag 8. Flag 8 otherwise writes +0x96 through L2.02684
+at L2.04949. Flag 0x80 writes word +0x14c through that helper at
+L2.04950. The client flag-8 arm writes the separately received maximum;
+the template reconstruction supplies it otherwise (R2-ENGINE-815).
+
+The supplied save's row-92 unit stores HP/HPmax 1229/1229, the installed
+row has parameter 4 = 1229, and its packed template key is 0. An omitted
+explicit maximum together with a missed template key is a Medium
+explanation of the observed zero divisor only if owner differs from
+recipient, there is no scaling at the loaded difficulty, and class is
+neither 26 nor 27. If flag 8 is sent, client +0x108 takes the sent 1229
+instead.
+
+**Confidence.** High for the conditional mask and operands in EN. Medium
+for this LOAD's packet flags and the composed crash explanation: sender
+caller arguments, L2.02684 transport, default row 0 and the exact heap-object
+join were not observed. The client frame itself is the dump witness.
+
+**Unknown.** Trace the original's first update packet for unit ID 32,
+the loaded difficulty, the recipient of that first update, its flags
+8/0x80, reconstructed template and client +0x108 to distinguish
+the omitted-maximum/default-row path from another later field writer.
+
 ## Mission dialogue speaker pictures and crop operands
 
 | ID | Claim | Confidence | Status | Evidence |
