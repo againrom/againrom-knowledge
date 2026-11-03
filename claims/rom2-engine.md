@@ -268,7 +268,7 @@ ROM1 gives Stone Curse a `pow(1.025, P)` duration (`MAGIC-CEIL-013`).
 
 **Unknown.** The runtime consumer of the effect; whether kind 0 is a silent no-op or a default.
 
-**Amended.** R2-ENGINE-453 reads the comparator chain and confirms the blank effect at Medium; R2-ENGINE-454 names its consumer, the actor-mask bit 18 that holds primary command 4 until the timer clears it. The duration clauses stand. R2-ENGINE-786 narrows the target-test clause: the creature and Human classes both return 1, so no class read keeps the fixed duration.
+**Amended.** R2-ENGINE-811 narrows class duration and runtime tag-0 Unknowns; inspected false predicates keep the initial fixed duration if reached, and tag 0 calls target +0x58 at start/end; ordinary request reachability and the blank parse stay Medium (the R2-ENGINE-786 sentence concerns the creature and Human classes only). R2-ENGINE-453 reads the comparator chain and confirms the blank effect at Medium; R2-ENGINE-454 names its consumer, the actor-mask bit 18 that holds primary command 4 until the timer clears it. The duration clauses stand. R2-ENGINE-786 narrows the target-test clause: the creature and Human classes both return 1, so no class read keeps the fixed duration.
 
 ### R2-ENGINE-026
 
@@ -6918,8 +6918,8 @@ Selected activation EN L2.01117 / RU L2.01212 passes panel ID 0x467 and bounds (
 |---|---|---|---|---|
 | R2-ENGINE-390 | Positive filled Blizzard damage bypasses the blank-effect default and creates a mode-2 AreaEffect owning a damage object in both inspected ROM2 roots. | Medium | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-391 | The inspected Blizzard area loop samples one candidate cell per pulse with two inclusive RNG(5) draws; each axis ranges from target-2 to target+3. | Medium | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
-| R2-ENGINE-392 | The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown. | Medium | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
-| R2-ENGINE-393 | The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver. | Medium / Unknown | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-392 | The inspected Blizzard mode-2 loop attempts 32 pulses on area-update calls 1,4,...,94, then marks completion; initial duration 0 starts the countdown. | Medium | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
+| R2-ENGINE-393 | The inspected RU Blizzard damage route uses water resistance for actors, permits repeated local applications and has a separate fixed-minus-5 structure resolver. | Medium / Unknown | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 | R2-ENGINE-394 | Each accepted RU Blizzard cell sends opcode 0x86 with effect identifier 23 and argument 16; the client draws it as the 9-frame `Meteor\sprites` type for 16 updates with Sfx 523 at the ninth update; the update period is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md), [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-395 | Independent ROM2 EN/RU client data.bin parses give identical Blizzard row-7 stored parameters, including Distribution 5, Radius 4 and damage bounds 10..30. | High | ● active | [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md) |
 
@@ -7020,6 +7020,8 @@ of an instantaneous or zero-pulse Blizzard. The authored area-duration value
 update, collection removal delay and presentation lifetime after completion.
 An original time-stamped cast would settle these. No runtime was observed.
 
+**Amended.** R2-ENGINE-812 narrows first-update timing to the read active session chain and an ordinary actor successful late-pass insertion; unconditional request delay and first accepted hit remain Unknown.
+
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
 ### R2-ENGINE-393
@@ -7069,6 +7071,8 @@ multi-cell multiplicity and EN damage-resolver parity.
 classes of the three query results, maximum hits for multi-cell occupants,
 EN structure/resistance parity and player-visible health deltas. An original
 cast covering caster, ally, enemy and structure would settle these.
+
+**Amended.** R2-ENGINE-812, R2-ENGINE-813 narrow query admission and row-7 multiplicity to the read slots, placement writers and one-cell pulse; EN query/occupant bodies are read, while complete class reachability and damage-resolver parity remain Unknown.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -9456,7 +9460,7 @@ comparator chain and trims are navigation listings, the final compare
 tag-switch cell 0 and its target address only; the body at `L2.02084` was not
 read. A 0x40-byte window at `L2.02084` in the RU image would settle it.
 
-**Amended.** R2-ENGINE-755 narrows the Unknown on tag 0: cell 0 holds `L2.04099`, a `jmp L2.02084`, and the tail calls the target's vtable +0x58 (`L2.04100`) before it returns; the slot-18 prologue runs before the tail, and in EN it first clamps +0xd8. The slot-18 tag arms are unread in either root. The blank-effect clause and the grades stand.
+**Amended.** R2-ENGINE-811 narrows tag-0 lifecycle with full start/end/timer paths and the EN clamp; it does not upgrade the inherited Medium blank-tag parse. R2-ENGINE-755 narrows the Unknown on tag 0: cell 0 holds `L2.04099`, a `jmp L2.02084`, and the tail calls the target's vtable +0x58 (`L2.04100`) before it returns; the slot-18 prologue runs before the tail, and in EN it first clamps +0xd8. The slot-18 tag arms are unread in either root. The blank-effect clause and the grades stand.
 
 ### R2-ENGINE-454
 
@@ -9506,7 +9510,7 @@ tick: the timer decrements per call; the caller of slot 14 and the game clock
 rate were not read, and reading that caller, or an owner run of the original
 timing a Stone Curse, would settle it.
 
-**Amended.** R2-ENGINE-785 classifies the sixteen unclassified immediates: the ten described as
+**Amended.** R2-ENGINE-811 narrows the EN effect-core/timer-call Unknowns with full attach/timer/start/end windows and both actor steps; dispatcher coverage, damage scope and seconds are not upgraded. R2-ENGINE-785 classifies the sixteen unclassified immediates: the ten described as
 `mov [reg+disp], 0x40000` stores are bytes inside `mov dword ptr [reg + disp32], 4`
 instructions (that description is withdrawn in `claims/retracted.md`), and the six others test
 no unit `+0x144`; "damage taken is unchanged" now covers all 31 hits and stays Medium. This
@@ -15038,7 +15042,7 @@ spells of R2-ENGINE-456.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-651 | The ROM2 attack planner (RU L2.01530, EN L2.03461) draws once per carried slot on each call and casts the last slot drawn below its threshold, Teleport only beyond distance 2; each root has 11 direct callers. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
+| R2-ENGINE-651 | The ROM2 attack planner (RU L2.01530, EN L2.03461) draws once per carried slot on each call and casts the last slot drawn below its threshold, Teleport only beyond distance 2; each root has 11 direct callers. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 | R2-ENGINE-652 | The ROM2 template loader (RU R2.0087, EN R2.0086) stores each Units Spell 1..3 above 0 at command +0x7c+4i and its Probability x 0x147 at +0x88+4i and books the spell; only a knownSpells mask sets the mage bit. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 | R2-ENGINE-653 | The ROM2 special cast (RU L2.02111, EN L2.03459) aims by id alone through 29 cells: victim, caster or victim cell, a cell search for 9 and 23, nothing for 22; a spell the book getter does not return is not cast. | High / Medium | ● active (branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
 | R2-ENGINE-654 | ROM2 special-cast id 9 aims at the caster's position plus a map offset for the 8-way heading toward the victim; id 23 at the first 3 by 3 cell around the victim where the caster's footprint passes a byte-mask test. | High / Medium | ● active (amended, branch candidate) | [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/) |
@@ -15113,6 +15117,8 @@ those starts without claiming a universal seeding rule.
 branch and the actions of `L2.01733`. The meaning of bit 8 and the general
 behaviour of that helper remain Unknown until a static read or a controlled
 original case separates the alternatives.
+
+**Amended.** R2-ENGINE-808 narrows the bit-8/reset Unknown: set/clear methods and the RU retarget/default stores are read; full events and unread candidate/mage helpers remain Medium or Unknown.
 
 **Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
 
@@ -15236,7 +15242,7 @@ A run of the original with Turtle.4 (Acid Stream) attacking from each of
 eight headings and Orc_Sword.4 (Teleport) beyond 2 cells of a victim with
 blocked neighbours, recording the cast cell, would settle both.
 
-**Amended.** R2-ENGINE-789 narrows the byte test: the caster byte `[+0x1c0]+5` is 0x41 from the
+**Amended.** R2-ENGINE-809, R2-ENGINE-810 narrow the offset/getter and cell-byte/mask Unknowns with initialization, centre getters, P2 pointer/writers and the kind-dependent block writer; persistence, full terrain producers and the absolute-value helper remain open. R2-ENGINE-789 narrows the byte test: the caster byte `[+0x1c0]+5` is 0x41 from the
 block constructor `L2.01783` (Medium for later writers). The cell byte of `L2.03519` stays unread.
 
 **Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
@@ -18198,7 +18204,7 @@ the slot-18 tag arms. A run of the original that casts Stone Curse on a Troll an
 target's frames, any message from cast to release and the release time at Speed 4 would settle
 the picture, the message and the tick length.
 
-**Amended.** R2-ENGINE-786 narrows the non-creature clause: slot +0x2c of the Human vtable returns
+**Amended.** R2-ENGINE-811 narrows the attach/timer and class-predicate Unknowns with longer committed windows; other tag arms and complete class reachability remain open. R2-ENGINE-786 narrows the non-creature clause: slot +0x2c of the Human vtable returns
 1 in both roots, so Human targets also take the draw. R2-ENGINE-785 classifies the 0x40000
 immediates this card left unclassified. The other clauses and the grades stand.
 
@@ -19361,7 +19367,7 @@ caster and finishes the mission settles the lifetime.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-788 | After placement the ROM2 Summon arm gives the creature an id, the caster's owner and key and a new Group (orders 0xc then 0xb), recounts coverage and sends its state; the only caster store in the bodies read is +0x1a4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
-| R2-ENGINE-789 | ROM2 Summon places its creature on the first of 20 random cells within 3 of the caster, then of the 7 by 7 square x-major, where no footprint cell has a bit of 0x41 in plane P1 or P2 and (layer kinds 1 to 3) every cell record is free. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+| R2-ENGINE-789 | ROM2 Summon places its creature on the first of 20 random cells within 3 of the caster, then of the 7 by 7 square x-major, where no footprint cell has a bit of 0x41 in plane P1 or P2 and (layer kinds 1 to 3) every cell record is free. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
 | R2-ENGINE-790 | One ROM2 Summon cast draws the kind 1..3, the facing 0..128, two 0..6 draws per random placement try (up to 40) and 0..3 for the caster's recovery, from the CRT state that map load seeds from timeGetTime (the state body is unread). | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
 | R2-ENGINE-791 | A ROM2 Summon cast shows only the caster's cast state 8 and sound 558 (packet 58) in the bodies read; a failed placement keeps the mana paid and leaves the unit in the global list, off the grid, with no owner store. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
 
@@ -19474,6 +19480,8 @@ byte `+0x4a` settles it.
 
 **Format surface.** `formats/rom2-sav/format.md`, First Group member.
 
+**Amended.** R2-ENGINE-809 narrows the live-mask inference: the constructor still writes 0x41, but an inner-this method later writes 0x41/0x44/0x82 for kinds 1/2/3; the chain scan remains a bounded six-read result, not complete writer coverage.
+
 **Evidence.** [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md), question 2.
 
 ### R2-ENGINE-790
@@ -19543,7 +19551,7 @@ the unit count settles what the unplaced unit does.
 |---|---|---|---|---|
 | R2-ENGINE-784 | While a ROM2 unit holds mark 44 (Stone Curse) and byte +0x184 <= 2, both client routines that push the literal 44 replace the frame variable with (+0x70 - 8) & 15, and the unit draw replaces the palette (entry 16 or mode 5); EN equals RU. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
 | R2-ENGINE-785 | All 31 RU and 30 EN dword immediates 0x40000 in ROM2 allods2.exe are classified; no fixed-immediate reader of unit bit 18 beyond R2-ENGINE-454's four; five tests of 1 << n, n unread, read bit 18 if n is 18. | High / Medium | ● active (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
-| R2-ENGINE-786 | ROM2 Stone Curse draws its random duration on the Human class too (vtable +0x2c returns 1); in RU it counts down once per actor step and ends at 0 or at the target's death through the timer end that clears bit 18. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
+| R2-ENGINE-786 | ROM2 Stone Curse draws its random duration on the Human class too (vtable +0x2c returns 1); in RU it counts down once per actor step and ends at 0 or at the target's death through the timer end that clears bit 18. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2106](../experiments/EXP-2106-rom2-stone-curse/RESULTS.md) |
 
 ### R2-ENGINE-784
 
@@ -19703,6 +19711,8 @@ actor-step call and the death loop (RU and EN). Medium:
   loaded once, would settle it.
 - The EN timer tail (bit clear, 0x89, flag set). Reading the EN timer to its return would settle
   it.
+
+**Amended.** R2-ENGINE-811 narrows the EN timer-tail and actor-step Unknowns: both are read through the relevant return/call paths; the copy/notification callees and seconds per actor step remain open (the R2-ENGINE-786 sentence concerns the creature and Human classes only).
 
 ## Area spells and their cell programmes
 
@@ -20414,3 +20424,228 @@ window of the state 1 hard voice and is shown by the listing tails
 `L2.04904` and no such test), not by a pair row.
 
 **Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 6.
+
+## ROM2 spell target and cell tests
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-808 | ROM2 bit-8 branch enters a retarget/default path (RU body read). | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-809 | ROM2 Teleport reads P2 and a kind-initialized block mask. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-810 | ROM2 Acid Stream uses eight offsets and centre getters. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-811 | ROM2 Stone Curse has class duration tests and tag-0 start/end. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-812 | ROM2 Blizzard's one-cell pulse and schedule are inherited Medium. | High / Medium / Unknown | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-813 | ROM2 spell-test comparison has four bounded text differences. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+
+### R2-ENGINE-808
+
+EN planner L2.03461 and RU L2.01530 skip slot draws when target byte +0x4c
+has bit 8, calling L2.01733(unit,0). RU L2.04905 / EN L2.04906 set it
+after a map-helper call; the next two methods clear it after successful
+placement. Initialization writes zero and the copy constructor copies it.
+The RU .text raw E8 scan lists eleven calls of these three methods, in the
+committed caller windows. Script wrappers and paired container operations
+are read; complete event names and indirect/jump routes are not established.
+
+RU L2.01733 (L2.01733) dispatches flag 0 to L2.01731. It refreshes candidate
+collections, ranks them and calls L2.01525 with a selected target or L2.01531
+without one. The ordinary selected branch writes command block +8=6,
++0xc=target and +0x14 from L2.01728. The default branch can prepare 11 or 0
+and invoke mage helpers. This is not a proved universal attack cancellation.
+
+**Confidence.** High for the read set/clear, planner and RU dispatch/store
+bodies. Medium for complete events, transient-unplacement interpretation
+and composed target choice: candidate, position, collection and mage callees
+remain partly unread. EN's reset windows have equal masked text; the RU-only
+selected-target helper is not an EN body read. Direct E8 and displacement/
+immediate scans do not establish complete writers, aliases or bulk copies.
+
+**Unknown.** Read the candidate/mage helpers and event dispatches to close
+the remaining behavior. An original case starting before a target enters a
+container or is removed by script, recording bit 8 and the next target/order,
+would distinguish the event interpretations. No runtime or save was read.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 1.
+
+### R2-ENGINE-809
+
+L2.03519, RU L2.03519 / EN L2.04907, returns the pointer
+map+0x20000+uint16(cell). The footprint tester RU L2.02114 / EN L2.03523
+returns 0 if any size-by-size footprint P2 byte AND block byte
+[unit+0x1c0]+5 is nonzero; otherwise 1. The planner's 3 by 3 order and
+later apply test remain R2-ENGINE-654 and R2-ENGINE-707.
+
+Unit init allocates a 0xb4-byte movement/footprint block and stores it at
++0x1c0. Its constructor sets +5=0x41. RU L2.04908 / EN L2.04909 writes
++5=0x41,0x44,0x82 for virtual +0x20 returns 1,2,3 respectively; other
+returns leave it. A call of L2.04908 at RU L2.04910 passes
+this=[unit+0x1c0] and the unit argument. By address, the containing routine
+lies in R2-ENGINE-652's template-loader body; that attribution is Medium:
+the window starts off an instruction boundary and does not include the
+loader entry. The writer's inner +5 form is outside R2-ENGINE-789's chain scan.
+R2-ASSET-210 measures movementType 1 for the two slot-23 Units rows.
+R2-ENGINE-777 supplies the loader link to Unit +0x4a; the read Unit
+virtual +0x20 returns that byte. Their loaded 0x41 mask is composed Medium.
+
+The read cell rebuild starts P2 from record byte 1 plus P1 bit 0x20,
+adds occupancy bits 0x40/0x80, applies a structure's mask as OR 5 or
+AND 0xfa, applies OR 5 for area slot 3, and preserves P1 bit 0x10.
+Other read writers restore layer bytes and change selected area/obstacle
+bits. Initial terrain production is not closed.
+
+**Confidence.** High for the named local getters, test and initialization
+stores in the committed listings. Medium for live masks, terrain meaning
+and complete writer coverage. Scans name .text disp/imm forms and
+overlap widths; the twelve-instruction pointer-chain reduction finds six
+reads per root but misses inner-this methods, saved aliases and bulk copies.
+The EN loader suffix is not read here. No universal terrain exclusion is made.
+
+**Unknown.** Read the initial plane producers and remaining alias writers.
+An original SAV with Orc_Sword.4 beyond distance 2, blocked neighbours,
+water/walls and ground/air occupants could record P2, the live mask, prepared
+cell and actual landed cell separately. No original run was made here.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 2.
+
+### R2-ENGINE-810
+
+RU L2.04911 / EN L2.03174 initialize dx/dy pairs for k=0..7 as
+(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1).
+Only these eight indices are used by the id-9 arm. k=8..15 at the dx
+base aliases the dy array; at the dy base it reads signed bytes
+0,-1,-1,-1,1,-1,-1,-1 of the following initialized dwords -256,-255.
+The sixteen requested reads are in out/directions.tsv, not a sixteen-way
+arm table. The initializer constructs the next array as dy*256+dx.
+
+RU getters L2.03515/L2.03516, EN L2.04912/L2.04913, return low16 of
+256*positionCell+positionSubcell+128*(size-1), separately for x and y.
+The read lower getters use position bytes 0/1 and 4/5. R2-ENGINE-654's
+sector collapse therefore uses footprint centres and subcell positions;
+the arm adds the selected signed offset to the caster's cell bytes.
+
+**Confidence.** High for initialized values, getters and local arm arithmetic.
+Medium that the values remain unchanged whenever cast: .text disp
+0x58e85..0x58e9f and imm 0x58e88/0x58e90 scans do not close aliases or
+bulk-copy writers. This is initialization evidence, not immutability proof.
+
+**Unknown.** Close later writers or observe a bounded original case with
+Turtle.4 attacking on all eight headings, varied sizes and subcell positions,
+recording centres, index and prepared cell. No runtime was observed.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 3.
+
+### R2-ENGINE-811
+
+Read RU/EN Unit, Humanoid and Human vtable +0x2c slots return 1. Token,
+Building and Pointer return 0 in both roots; inspected Shop/Inn tables
+return 0 in RU only. True targets take R2-ENGINE-025's Earth-scaled draw;
+false targets keep P*240*m/100 without that resistance read or draw
+(m=2 without an item, 1 with one). Point apply also has the +0x34 object
+branch; this is not a complete census of classes reachable by an ordinary
+spell request or proof of safe effect attachment to each false class.
+
+Attach runs start for a new copy, inserts it, sets mask bit id and sends
+the mark. Same-id renewal runs end, takes the greater magnitude/duration
+and runs start again. Id 18 start/end call tag dispatch with +1/-1.
+Tag 0 reaches target virtual +0x58 and returns. EN first clears signed
+target word +0xd8 when greater than 24; the RU tag-0 head has no such store.
+Unit's +0x58 recomputes +0xa0 from +0x9c and owner +0xa5c. Human/Humanoid
+recomputation has unread callees; tag 0 is not established as a no-op.
+
+Once admitted by the timer helper, non-continuous timed effects decrement
++0x42 once per actor step unless above 9600. Intermediate Stone Curse
+updates do not run tag dispatch; zero runs end, clears bit 18, sends removal
+and sets the ended flag. Continuous effects have a distinct every-eight
+start path. The read Stone Curse/start/renewal branches do not add that flag.
+
+**Confidence.** High for the read slots, branches, tag-0 tail and timer in
+both roots. Medium for class bindings/reachability and the composed spell:
+R2-ENGINE-453's blank-tag parse remains Medium, the copy method L2.04914
+is unread, and Human recomputation/notifications have unread callees.
+The actor hold and death conclusions are reused from R2-ENGINE-454/786.
+
+**Unknown.** Complete request admission, effect-copy and recomputation
+callees and seconds per actor step. An original SAV before casts on a
+creature, Human and selectable object, recording request success, duration,
+statistics and removal at a stated speed, would settle bounded cases.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 4.
+
+### R2-ENGINE-812
+
+The three RU/EN cell queries require P1 bit 0x20 and successful cell-record
+lookup, then return record +4,+8,+0xc without a class test. Placement
+registers each footprint cell at +4 for kinds 1/2, +8 for kind 3.
+RU L2.04915 / EN L2.04916 writes +0xc when empty; its Building binding
+is inherited from R2-ENGINE-758, not a census of all callers. Unit virtual
++0x20 returns +0x4a. Query lookup L2.01707 is reused, not re-read here.
+
+R2-ENGINE-391 supplies the Medium one-cell-per-pulse count: the list helper
+L2.04917 over table L2.01697 is not read here. Conditional on that count,
+the stage queries the three slots once for that cell. A normally registered
+Unit pointer in one slot receives one local application if the cell is
+accepted and covers it (composed Medium). Covering several candidate cells
+does not multiply that pulse's calls under this inherited count. Later pulses can select it again.
+Arbitrary records aliasing a pointer into several slots are not deduplicated
+by these getters. Row-2 multi-cell multiplicity is outside this conclusion.
+
+The read active session step increments its tick counter, processes input,
+runs extra actors, area effects and Unit notifications, then ordinary actors.
+The effect list calls each member's +0x18 once. Under that chain, an ordinary
+actor's successful late-pass insertion first updates next tick; an earlier
+extra actor can insert before the same tick's effect pass. The local counter
+step and limit 32 are read. The schedule at area updates 1,4,...,94 and
+32 attempts are inherited Medium from R2-ENGINE-392; the initial +0x50=0
+and constructor state are not read here. Rejection consumes an attempt.
+First attempt is not necessarily a hit. The later wind-up byte decrements before testing:
+W>0 takes W actor steps and W=0 takes 256. Conditional on an uninterrupted
+ordinary accepted cast at T, first area update is T+W+1 (zero gives T+257).
+
+**Confidence.** High for the three query bodies, local counter increment,
+limit 32 and world-phase order. Medium for one cell per pulse, one local
+application per normally placed Unit per pulse, and calls 1,4,...,94:
+helper L2.04917 and initial +0x50 are unread here, inherited from
+R2-ENGINE-391/392. Complete occupant classes and ordinary-caster timing
+are also Medium: lookup/class bindings are inherited; insertion's
+allocation helper is partly unread. Unknown for player-request-to-first-update
+or first-hit time: input queue, approach and earlier dispatch are unread.
+No wall-clock rate or complete EN damage-resolver parity is claimed.
+
+**Unknown.** Read queue/approach and allocation callees, or create an original
+SAV with an ordinary caster inside/outside range and a large occupant.
+Record session ticks at request receipt, acceptance, insertion, first update
+and first accepted hit, distinguishing one pulse from following pulses.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 5.
+
+### R2-ENGINE-813
+
+out/compare.tsv records 59 EN/RU listing pairs with exact ranges and counts.
+Pairs overlap (for example reset and state-writer windows); the number of
+distinct routines compared is smaller than 59. Of these overlapping pairs,
+55 are equal after masking hexadecimal operands 0x400000..L2.03731 as ADDR.
+This hides call/jump targets, globals, table pointers and any other immediate
+in that range. Prefix/full-window overlaps are not independent witnesses.
+No equality of unread callees, table identities or RU-only windows follows.
+
+Four pairs differ. EN tag-0 head clears signed target +0xd8>24; RU's head
+does not. The actor-step windows have two item offsets EN +0x84/RU +0x88
+and two allocation sizes EN 0x54/RU 0x58. RU's area-occupant suffix adds
+session +0x74/caster-owner +0x2c/target-owner +0x2c checks after damage.
+Nonzero session/caster-owner and zero target-owner skip the later call
+L2.02074 in RU. R2-ENGINE-797 already records this guard; the earlier
+hostility-bookkeeping label is inherited (R2-ENGINE-393/797), not a body
+read of L2.02074 here. No allegiance or immunity name is assigned to the
+tested fields. RU session step pushes one extra
+zero to a different sender; the preceding world/ordinary-actor order matches.
+
+**Confidence.** High for the exact bounded text comparison and the read
+EN clamp/RU suffix branches. Medium for semantic parity beyond those local
+operations: the broad mask cannot prove callee/global correspondence and
+the senders and full EN damage resolvers are not read. R2-ENGINE-393's
+resolver conclusions remain RU-only. Field names are not immunity evidence.
+
+**Unknown.** Read the senders and damage resolvers. Corresponding newly made
+original SAV states with the same cast/targets, tick/health/message traces
+would settle bounded root differences; masked text equality would not.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 6.

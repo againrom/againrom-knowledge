@@ -3073,3 +3073,32 @@ substring find of R2-ENGINE-050. No header that requests a name carries
 part 2.
 
 **Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 1.
+
+## ROM2 Teleport unit values
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-210 | Two EN/RU Units rows (>=54 parameters, spell id 23) store tokenSize/movementType 1; shorter rows unsearched. | High | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+
+### R2-ASSET-210
+
+The existing world.res/data.bin grammar parses 241 Units rows in each root.
+The selection requires at least 54 numeric parameters and value 23 in
+parameter 48,50 or 52. Exactly two selected rows are emitted: ordinal 77
+Orc_Sword.4 and 78 Orc_Sword.5. Both roots store p31=1, p32=1, p29=80,
+and p48,p50,p52=23,-1,-1. Measured titles call p31 tokenSize, p32
+movementType and p29 typeID. This is an authored-value measurement, not
+runtime proof that all later instances retain those fields.
+
+**Confidence.** High for this two-file population, exact rows, titles and
+counts, regenerated twice and reproduced twice as raw Git blobs. Full input
+SHA256 values and member sizes are in out/inputs.tsv. The grammar is reused
+from the ROM2 data instrument; no new stored layout is inferred.
+
+**Unknown.** Shorter rows were not searched for partial spell slots by this
+instrument; R2-ASSET-164 supplies the earlier shipped slot-carrier census.
+Runtime mapping and later mutation do not follow from the
+titles alone; R2-ENGINE-777 and R2-ENGINE-809 state the loader/mask link and
+its Medium scope. No save or runtime instance was read here.
+
+**Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 2.
