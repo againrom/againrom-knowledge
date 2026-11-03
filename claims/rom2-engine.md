@@ -20832,6 +20832,51 @@ client type +0x24 in 0x40..0x66 they copy a pair (X,Y) from EN
 The committed table windows start at the type-64 entries, EN `L2.04925`
 and RU `L2.04926`: 39 equal pairs, eight with Y = -1.
 
+The 39 pairs, read as signed 32-bit words from the committed table windows
+`en-class-crop.txt` and `ru-class-crop.txt` (equal in both roots):
+
+| Type | X | Y |
+|---|---|---|
+| 64 | 30 | 72 |
+| 65 | 26 | 23 |
+| 66 | 10 | 44 |
+| 67 | -1 | -1 |
+| 68 | 15 | 21 |
+| 69 | 32 | 21 |
+| 70 | -1 | -1 |
+| 71 | 7 | 49 |
+| 72 | -1 | -1 |
+| 73 | -1 | -1 |
+| 74 | 8 | 72 |
+| 75 | -1 | -1 |
+| 76 | -1 | -1 |
+| 77 | -1 | -1 |
+| 78 | -1 | -1 |
+| 79 | 30 | 72 |
+| 80 | 23 | 31 |
+| 81 | 43 | 7 |
+| 82 | 37 | 28 |
+| 83 | 37 | 28 |
+| 84 | 37 | 28 |
+| 85 | 37 | 28 |
+| 86 | 37 | 28 |
+| 87 | 37 | 28 |
+| 88 | 37 | 28 |
+| 89 | 37 | 24 |
+| 90 | 37 | 24 |
+| 91 | 37 | 24 |
+| 92 | 37 | 24 |
+| 93 | 37 | 15 |
+| 94 | 37 | 15 |
+| 95 | 37 | 15 |
+| 96 | 37 | 15 |
+| 97 | 35 | 15 |
+| 98 | 35 | 15 |
+| 99 | 35 | 14 |
+| 100 | 35 | 21 |
+| 101 | 32 | 18 |
+| 102 | 15 | 21 |
+
 If Y remains -1 the six pushed arguments, in call order, are
 `8,7,36,140,108,232`. Otherwise they are
 `8,7,X,144-Y,X+72,240-Y`. All numbers except X and Y are instruction
