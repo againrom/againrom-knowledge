@@ -21059,3 +21059,118 @@ LOAD of game0029 with mode, activity, post, target and prepared goal recorded
 on successive ticks would distinguish zero-goal movement from target pursuit.
 
 **Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).
+
+## EN relation words, map reveal, sight draw and mode-18 timing
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-826 | Listed EN server L2.01852 sets relation word bit 8 from M[Q][P] bit 0x10 and copies any bit 8 in M[P][Q]; the client 0xb9 arm replaces the local array; diagonal 2 gives own word 0x22, no bit 8. | High / Medium | ● active (branch candidate) | [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md) |
+| R2-ENGINE-827 | Listed EN client message 0xaa value 1 sets [L2.00989] and ORs 0xc000 into every fog cell; the senders found are chat commands #show map, #hide map and #victory behind cheat byte +0xa78 > 50. | High / Medium | ● active (branch candidate) | [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md) |
+| R2-ENGINE-828 | Listed EN Group mode-18 arm (L2.04968 unread) moves a member to command word +0x9c while command word +0x16 is within 10 of server word +0 (30 when HP differs from max); otherwise it holds or returns to the command post. | High / Medium | ● active (branch candidate) | [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md) |
+| R2-ENGINE-829 | Listed EN L2.03404 draws an object only when its 2x2 fog cells OR to 0xc000 and, for list tag 0x20, owner relation bit 8; detail arms L2.04969/L2.04970 need bit 8, owner 0 or reveal. | High / Medium | ● active (branch candidate) | [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md) |
+
+### R2-ENGINE-826
+
+The listed EN server routine L2.01852 builds the client message 0xb9 for
+receiving Player P from the session matrix at +0xa8c4 (row 0x46 bytes).
+Word Q starts as the signed byte M[P][Q], ORed with 8 when M[Q][P] & 0x10, with
+0x20 when M[Q][P] & 2 and with 0x40 when M[Q][P] & 1. A bit 0x08 stored in
+M[P][Q] therefore reaches bit 8 directly; for the own word the stored
+diagonal 2 has none. The listed client
+pump L2.00466 indexes byte table L2.00467 with type - 3 and jump table
+L2.00468. Type 0xb9 reaches L2.04971, which sets the local Player's
+relation array size (+0x38) to the message count and copies every word.
+Type 0x96 reaches L2.04972, which makes the first Player local and sets its
+own word to 0x3a. Helper L2.02954 tests bit 8 of word i. A diagonal 0x12
+gives the own word 0x3a (bit 8 from M[Q][P] bit 0x10); a diagonal 2 gives 0x22, without bit 8. The map
+build store L2.04973 and the join branch at L2.04974 write diagonal 0x12.
+The post-load routine L2.03179 leaves the matrix as read.
+
+**Confidence.** High for the listed bodies and the word arithmetic. Medium
+for the state after LOAD: which of nine E8 callers of L2.01852 runs after
+LOAD, and its order against message 0x96, are unread. A later 0x96 would
+restore bit 8 only until the next 0xb9.
+
+**Unknown.** The local Player's own word after an original LOAD of a file
+with diagonal 2. Read the L2.01852 callers, or record that word in a run.
+
+**Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
+
+### R2-ENGINE-827
+
+The listed EN client arm L2.01067 of message 0xaa switches on DWORD +0xa.
+Value 0 stores 0 to [L2.00989]. Value 1 stores 1 and ORs 0xc000 into every
+cell of the fog grid (width +4, height +8, data +0xc, index x + y·width),
+borders included. Value 2 posts 0x430. The raw DWORD census of L2.00989
+finds seven references; the stores are the two in this arm and 0 at
+L2.01095. Six push-0xaa sites were found; three of them pass 1, 0 and 2 to the
+sender L2.01047 in the server chat handler after compares with "#show map",
+"#hide map" and "#victory". Each is gated by L2.01037, which returns Player
+byte +0xa78 > 50, the cheat flag of R2-ENGINE-297.
+
+**Confidence.** High for the listed arm, gate and strings. Medium for the
+sender set: the push census and five store-form scans of the type byte are
+byte scans over EN allods2.exe and do not cover register or computed
+stores. Three of the six push-0xaa sites (L2.04975, L2.04976, L2.04977)
+were not read, so where they send 0xaa is unread. The census also shows
+two mov forms of 0xaa, `mov cl, 0xaa` at L2.04978 and `mov dl, 0xaa` at
+L2.04979; both are unread.
+
+**Unknown.** Whether another route sends 0xaa value 1. Read the three
+unread push sites, the two mov sites, the callers of L2.01047 other than
+the three chat sites (never censused) and the computed type stores.
+
+**Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
+
+### R2-ENGINE-828
+
+The listed EN Group mode-18 arm L2.04960 runs for each member, after unread
+helpers L2.04962, L2.04963, L2.04964 and L2.04980, against the server
+structure [L2.00805]. In order: HP +0x94 different from max +0x96 (the test is cmp; je skip, L2.04981)
+and |command word +0x16 - server word +0| < 30 moves to command word +0x9c; else
+|command +0x16 - server +0| < 10 moves to +0x9c; else a nonzero command
++0x20 attacks (L2.03461); else HP different from max and |command DWORD +0x98 -
+server DWORD +4| < 10 moves to +0x9c; else a nonzero byte +0x9e moves to
++0xa0; else the member moves to command post +0 unless it stands there and
+has arrived (L2.00491), where it idles (L2.04965). A random-offset branch
+before the last step is unreachable (xor eax, eax; je). The moves call
+prepared move L2.04961. Each absolute difference is `sub eax, edx` of two zero-extended words, then
+`call L2.04968`, then `cmp eax, 0x1e` or `0xa` (L2.04982..L2.04983);
+L2.04968 is unread and is assumed to be an absolute value. The listed
+mode-3 arm L2.04959 attacks on a nonzero
++0x20 and otherwise calls unread L2.04984; it reads neither +0x16 nor +0x9c.
+
+**Confidence.** High for the arm order and operands. Medium for the
+trajectory: the four helpers, L2.04968 (absolute value assumed), attack, idle, pathing and the LOAD restore of
+server +0 are unread. The meaning of +0x16 and +0x98 is not established. The arm predicts a
+move to goal 0 for every mode-18 member while step 2 fires, yet 13 of 30
+units moved (R2-SESSION-340); the non-movers are unexplained (unread
+helpers L2.04962 and following, pathing, blocked goals). The server clock
+went 1 to 19 across the resave, so step 2 can fire for only about the first
+nine increments, and the observed walks are 1 to 4 cells.
+
+**Unknown.** The writer of command +0x16 and of server word +0. Read the
+command constructor and the server clock, or record both after LOAD.
+
+**Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
+
+### R2-ENGINE-829
+
+The listed EN routine L2.03404 returns without drawing when byte +0x184 > 1
+or +0x1b8 bit 0x80 is set. When L2.03763 finds an entry with high word 0x20
+in the object's list +0x130, it also requires relation bit 8 for the owner
+(L2.02954). It always requires the OR of the four fog cells under the object,
+masked by 0xc000, to equal 0xc000. It then fills a rectangle in the owner
+colour +0x148 through L2.04985. The listed arms L2.04969 and L2.04970 set
+detail level 7 when the owner key +4 is 0, when the owner has relation bit 8
+or when [L2.00989] is nonzero.
+
+**Confidence.** High for the listed tests. Medium for the role: the routine
+looks like a map-dot drawer, a reading from its shape only. The world sprite
+renderer is not identified among the other callers of L2.02954, so
+"nothing drawn" from this routine is Medium.
+
+**Unknown.** The world sprite renderer's visibility test. Identify it and
+read it.
+
+**Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).

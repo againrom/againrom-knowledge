@@ -153,6 +153,12 @@ cells in missions 10, 20 and 30. The meaning and readers of bytes
 5048..5447 and 10356..10357 beyond the transfer are Unknown. — R2-ENGINE-760,
 R2-SESSION-312
 
+Eight Againrom-written mission-10 files and their original resaves store the
+diagonal as 2 with no cell holding bit 0x10. The EN server sets a Player's
+own relation bit 8, which the fog stamp needs, only from the diagonal's bit
+0x10; see "EN mission-10 sight, map reveal and command timing". —
+R2-SESSION-339, R2-ENGINE-826
+
 The first 4,000 bytes are 1,000 DWORD registers, register n at bytes
 4n..4n+3. Session init sets register 901 (bytes 3604..3607) to 1 and
 register 999 (bytes 3996..3999) to 0; one routine adds 1 to 999 before it
@@ -1429,3 +1435,43 @@ byte-equal to game0029. The census covers every parsed field and archive
 record kind, including opaque blocks by hash. Parser-path equality is
 High for bytes, Medium for semantic state equivalence after reference,
 group or list changes. — R2-SESSION-338
+
+## EN mission-10 sight, map reveal and command timing
+
+The listed EN server builds each client's relation words from the session
+matrix and sets bit 8 of word Q from M[Q][P] bit 0x10 and copies any bit 8 already in M[P][Q]; for the own word the stored diagonal 2 has none. The
+client replaces its whole relation array with these words. A saved
+diagonal of 0x12 gives a Player's own word 0x3a; a saved diagonal of 2
+gives 0x22, without the bit 8 that the fog stamp needs. Which server call
+delivers the words after LOAD is unread, so the composed post-LOAD state
+is Medium. — R2-ENGINE-826
+
+Client message 0xaa value 1 marks every fog cell explored and visible,
+borders included, and stops the fog refresh; value 0 clears the flag. The
+senders found are the "#show map", "#hide map" and "#victory" chat
+commands behind the unsaved cheat flag. The sender set rests on byte
+scans and is Medium. — R2-ENGINE-827
+
+The listed routine L2.03404, which looks like a map-dot drawer (Medium), needs the OR of the four fog cells under the object to hold both fog bits and, for
+one list tag, owner relation bit 8. The world sprite renderer is not
+identified. — R2-ENGINE-829
+
+The listed EN Group mode-18 arm sends a member to its command word +0x9c
+while command word +0x16 lies within 10 of the server word +0 restored
+from the SAV head second DWORD (30 when its HP differs from max; the absolute value is assumed because L2.04968 is unread). Otherwise it
+attacks, patrols or returns to its command post. The trajectory and the
+LOAD restore are Medium. — R2-ENGINE-828, R2-SESSION-284
+
+In 13 mission-10 files the five original-made store the diagonal 0x12,
+eight cells with bit 0x10 and command +0x16 65500 in every Unit and Human
+record. The eight Againrom-written files and their original resaves store
+the diagonal 2, no bit 0x10 and command +0x16 0. Head second is 1 in
+game1040 and 444 in game1041. — R2-SESSION-339
+
+The original resaves keep the matrix and command +0x16 as read. The fog REG
+of the original resaves game0040 and game0039 holds all 6400 cells
+explored. Over
+game1040 to game0040, 13 of 30 live units move, 11 nearer to cell (0,0);
+over game1041 to game0041 none of 14 moves. Both resaves empty the
+selection. No stored byte is shown to refuse command of game1040's hero.
+— R2-SESSION-340

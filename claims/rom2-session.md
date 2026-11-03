@@ -5222,3 +5222,67 @@ blocks and which differences cause behaviour. Decode their programmes,
 then isolate changed fields in controlled LOAD/action comparisons.
 
 **Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).
+
+## Mission-10 relation diagonal, fog and command timing bytes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-339 | In 13 ROM2 mission-10 files the five original-made store relation diagonal 0x12 and command +0x16 65500; the eight Againrom-written files and resaves store diagonal 2, no 0x10 cell and +0x16 0. | High | ● active (branch candidate) | [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md) |
+| R2-SESSION-340 | Original resaves keep diagonal 2 and command +0x16 0; game1040 to game0040 moves 13 of 30 live units, game1041 to game0041 0 of 14; game0040 stores all 6400 fog cells explored. | High / Medium | ● active (branch candidate) | [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md) |
+
+### R2-SESSION-339
+
+The 13 manifest-verified mission-10 documents are try game1040, game1041,
+game0040, game0041; owner game0029, game0038, game0039; testhis game0028;
+original1 game0001, game0004, game0005, game0006, game9999. In the session
+matrix at +0xa8c4 the five original1 files store M[i][i] = 0x12 for
+i = 1..8 and eight cells with bit 0x10. The other eight store M[i][i] = 2
+and no cell with bit 0x10; game1041, game0029, game0028 and their resaves
+also store M[5][1] = 1. Command word +0x16 is 65500 in all 150 Unit and
+Human records of the original1 files and 0 in all 240 records of the
+others. Head second (server +0) is 1 in game1040 and 444 in game1041,
+game0029 and game0028. The command post +0 is nonzero in every live record
+except those of game0029, game0028, game0038 and game0039, where all 14 are
+0. The seven nonhero groups of those four files store mode 1; the matching
+groups of game1040 and game1041 store mode 18. The fog REG of game1040 holds
+131 explored cells, of game0001 154 and of game1041 1502.
+
+**Confidence.** High for byte values at the parser paths and counts
+recomputed from the committed TSVs. The fog decoding takes cells row-major
+with width 80 from 6400 cells.
+
+**Unknown.** Which Againrom writer stores diagonal 2 and +0x16 0 is outside
+this research. The original's writer of 65500 is unread.
+
+**Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
+
+### R2-SESSION-340
+
+Four resave pairs: game1040 to game0040, game1041 to game0041, game0029 to
+game0038, game0038 to game0039. Each resave keeps the input's relation matrix
+SHA256 and command +0x16 0. Live units moved: 13 of 30 (11 nearer to cell
+(0,0)), 0 of 14, 8 of 14 (all 8 nearer) and 8 of 14 (all 8 nearer). The
+hero's cell is unchanged in all four. game0040 and game0039 store fog
+FirstState 32768 with one run of 6400 cells: all explored, border cells
+included. game0041 and game0038 keep their input's 99 runs. Both try
+resaves drop REG CurrentState/AgainromForm and store Objects/Selection []
+where the input stores [1]. Outside objects and terrain they differ only in
+head first, head second and the session section; in its 1000-register part
+register 999 changes 0 to 19 and 0 to 5. game1040's Aldor stores base +0xc
+3, +0x1c 0, +0x4b 1, DWORD +0x54 1 (0 after resave), +0xa4 1443 and no
+tagged equipment slot; game0001's Aldor stores 26, 57, 32, 0, 1617 and five.
+
+**Confidence.** High for byte comparisons and recomputed counts. Medium for
+the composed movement cause through R2-ENGINE-828 and R2-ENGINE-824: the
+arm predicts movement for all mode-18 members, 13 of 30 units moved
+(walks of 1 to 4 cells) and the non-movers are unexplained. game0001 to
+game0005 moves 0 of 30 units (recomputed from out/units.tsv, outside the
+committed movement tables). No
+stored byte is shown to refuse command of game1040's hero; the listed
+admission (R2-ENGINE-822) passes state54 1.
+
+**Unknown.** The hero command refusal and whether game0040's full fog
+comes from the reveal of R2-ENGINE-827. An original LOAD of game1040 with a
+selection, a move order and no chat input would settle both.
+
+**Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
