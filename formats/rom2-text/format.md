@@ -309,3 +309,32 @@ on an uncommitted name order, is Medium. Rows 9, 14, 15, 28 and 29 have no
 slot. Hover lines add `main.txt` labels 117, 118,
 123, 124, 182..187 and 217. Both files have the same line counts in EN and
 RU and differ in text bytes. — R2-ASSET-103, R2-ENGINE-444, R2-ENGINE-449
+
+## Mission speaker picture and crop operands
+
+The read EN/RU dialogue route resolves a client unit by its NPC word. For
+the non-paperdoll branch it forms `graphics\infowindow\<InfoPicture><N>.bmp`
+from the unit type and its +0x28 value, omitting N when it is 1. The composed
+route is Medium: string/registry helpers and the creature variant tail remain
+open. Missing NPC-registry records do not by themselves select an empty
+portrait. Failed bitmap-open handling reaches error/termination calls;
+an unresolved actor's allocated surface has no established pixel contents.
+— R2-ENGINE-582, R2-ENGINE-818
+
+The read face builders pass native destination `(8,7)`. Source operands are
+`(36,140,108,232)`, or `(X,144-Y,X+72,240-Y)` for type 0x40..0x66 when
+its program-table pair has Y other than -1. These operand tuples are High;
+their mapping to decoded BMP and final child pixels is Medium. The requested
+boxes are 72 by 92 or 72 by 96 in an 88 by 108 result surface. Runtime clip
+and final child-painter behavior remain Unknown. — R2-ENGINE-819
+
+Mission 10 names keys 21,616,623,651,2000 in both languages. Conditional on
+the measured placements reaching matching client units and variants, keys
+616,623,651 select Ogre.bmp, Troll4.bmp, Dragon4.bmp; predicted top-origin
+BMP boxes are `(10,44,82,140)`, `(15,21,87,117)`, `(7,49,79,145)`.
+The join, variant conversion and pixel prediction are Medium. Exact hero
+and paperdoll layers for 21 and 2000 remain Unknown. — R2-ENGINE-821
+
+The read npc.reg and units.reg key-name census supplies no key containing
+rect, crop or portrait. This is a bounded Medium negative; other names,
+registries and reader routes remain open. — R2-ENGINE-820

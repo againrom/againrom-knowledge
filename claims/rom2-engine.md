@@ -13297,6 +13297,9 @@ for the names they build; callees and exception blocks are not followed,
 and what is drawn stays open.
 R2-ENGINE-729 adds what happens when the built name cannot be opened, and
 R2-ENGINE-731 what the lookup matches.
+  R2-ENGINE-818 reads the type-picture loader and header route at Medium.
+  R2-ENGINE-819 narrows the crop Unknown to operand tuples (High);
+  decoded BMP coordinates and final child pixels remain Medium/Unknown.
 
 **Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/)
 
@@ -20649,3 +20652,170 @@ original SAV states with the same cast/targets, tick/health/message traces
 would settle bounded root differences; masked text equality would not.
 
 **Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 6.
+
+## Mission dialogue speaker pictures and crop operands
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-818 | ROM2's read face builders use a client unit, InfoPicture and +0x28 for the bitmap name. | Medium | ✔ promoted (branch candidate) | [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/) |
+| R2-ENGINE-819 | EN/RU face-builder calls pass (8,7) and fixed or type-table source operands. | High / Medium | ✔ promoted (branch candidate) | [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/) |
+| R2-ENGINE-820 | The read EN/RU npc.reg and units.reg key names contain no rect, crop or portrait substring. | Medium | ✔ promoted (branch candidate) | [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/) |
+| R2-ENGINE-821 | Mission 10 conditionally selects Ogre, Troll4 and Dragon4 pictures in both roots. | Medium | ✔ promoted (branch candidate) | [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/) |
+
+### R2-ENGINE-818
+
+The EN face builder `L2.02950` and RU `L2.02963` call the resolver
+`R2.0071` / `R2.0072`. Its lookup compares the requested number with
+client-unit u16 +0x1dc; a miss calls the synthetic-unit constructor.
+The read client copy stores source u16 +0x14c in +0x1dc and u16 +0xe
+in +0x24. R2-ENGINE-731's Medium source-unit identity still applies.
+
+When flags +0x1b8 & 0x11 are zero, the builder indexes the type table by
++0x24, takes its string at +0xf8, and formats
+`graphics\infowindow\%s%d` with +0x28. When +0x28 is 1 it removes the
+last character; it appends `.bmp`. The units.reg loader supplies
+`InfoPicture` to +0xf8, trying the parent section when the first string
+is empty and a parent exists. Other flags use the actor's slot +0x88
+(R2-ENGINE-582). The page passes the result to its portrait child.
+
+The EN/RU header parser reads `npc=` into its second output argument;
+the page passes that output to the face builder. The string-search,
+substring and numeric-conversion helpers are identified by call shape,
+not fully read: EN search/substring/number helpers L2.00997,L2.04918,L2.04919;
+RU L2.01289,L2.04920,L2.04921. The client copy's +0x28 conversion is only a partial
+window: creature paths jump beyond it at `L2.04922` / `L2.04923`.
+
+An unresolved actor takes a branch that allocates an 88 by 108 surface
+and returns it without a paint in that branch. Its pixel contents are
+Unknown. Failure of the bitmap open calls the error and termination
+paths (EN `L2.04006`, `L2.04007`); those callees are unread here.
+No safe empty-picture or placeholder behavior is established.
+
+**Confidence.** Medium for the composed message-to-picture route. The
+named builders and loader windows are read in each root, but string
+helpers, registry lookup `L2.03131` (EN), the indirect cases of the
+string getter, and the creature variant-conversion tail remain open.
+This is a conditional path, not a complete call-site or actor census.
+
+**Unknown.** The exact +0x28 value for every live unit, the contents of
+an unpainted allocation and final error behavior. Read the named tails
+and helpers; a mission-10 dialogue with the client unit recorded settles
+the delivered picture.
+
+**Evidence.** [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/RESULTS.md), question 1; `evidence/derived/native/code/` face, actor-key, client-copy, face-variant, units-loader, units-keys, portrait-page, header-parser and bitmap-load windows of both roots.
+
+### R2-ENGINE-819
+
+Both read face builders allocate a result surface 88 by 108 and a work
+surface 160 by 240. They initialize four rectangle fields to -1. For
+client type +0x24 in 0x40..0x66 they copy a pair (X,Y) from EN
+`L2.02970 + 8*type`, RU `L2.04924 + 8*type`, into the first two fields.
+The committed table windows start at the type-64 entries, EN `L2.04925`
+and RU `L2.04926`: 39 equal pairs, eight with Y = -1.
+
+If Y remains -1 the six pushed arguments, in call order, are
+`8,7,36,140,108,232`. Otherwise they are
+`8,7,X,144-Y,X+72,240-Y`. All numbers except X and Y are instruction
+constants. The loaded bitmap's slot +0x38 receives them after the
+background's slot +0x34 receives the same tuple. The concrete bitmap
+vtable binds +0x38 to EN `L2.00704`, RU `L2.02287`; these forward to
+EN `L2.00705`, RU `L2.02288` with the source pointer, width and height.
+The copy body calculates width = arg5 - arg3, height = arg6 - arg4,
+clips against current global bounds and skips zero-valued pixels.
+Thus the requested widths/heights are 72 by 92 or 72 by 96, with no
+scaling loop in these read copy bodies.
+
+The bitmap loader's slot +0x2c reverses the work surface's rows. The
+copy then starts at `(height-1-sourceY)*width+sourceX` and advances
+upward through its source rows. For the read positive-height BMPs,
+the top-origin source-box interpretation is `(X,Y,X+72,Y+96)` for a
+table pair, `(36,8,108,100)` for the default. This interpretation is
+Medium: conversion helper EN `L2.00577` / RU `L2.04927` and the final
+portrait-child painter are unread. Destination `(8,7)` is the native
+call tuple; no screen-coordinate or child-top-origin equivalence is claimed.
+
+**Confidence.** High for the literal argument tuples, their arithmetic,
+the 39 table pairs and the read copy-body operations in EN and RU.
+Medium for the source rectangle in decoded BMP coordinates and the final
+visible pixels. The RU rectangle-initializer window ends after its field
+stores and before the complete return instruction. The bitmap is read
+through its concrete vtable; the background's dynamic class is unbound.
+Neither a renderer-dispatch census nor final global clipping state is known.
+
+**Unknown.** The final child painter, conversion helper and active clip
+at presentation. Read those bodies and run mission 10 event2 with speaker
+623, comparing the picture boundaries against the predicted box.
+
+**Evidence.** [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/RESULTS.md), question 2; `evidence/derived/native/code/` face, class-crop, surface-vtable, surface-ctor, rect-ctor, point-ctor, surface-target, bitmap-load, surface-copy-wrappers and copy-transparent windows of both roots; EN surface-copy-wrappers and RU bitmap-flip contain the row reversal.
+
+### R2-ENGINE-820
+
+In each read root `scenario.res:npc.reg` has one directory, Multiplayer,
+and four leaves: FacesMF, FacesMM, FacesFF, FacesFM. It has no individual
+speaker section. `graphics.res:units/units.reg` has 63 directories:
+61 Unit sections, Global and Files; 60 leaves are named InfoPicture.
+The complete key-name census in these two payloads has no name containing
+`rect`, `crop` or `portrait`, case-insensitively. Names such as CenterX,
+SelectionX1 and ShootOffset are present; their names alone establish no
+portrait meaning. The 185 infowindow BMP headers per root all measure
+160 by 240, 24 bpp. No pixel payload is published.
+
+The read portrait route gets its X,Y operands from program data, not
+from a field of the speaker or a BMP-header rectangle (R2-ENGINE-819).
+InfoPicture selects the picture stem; the same literal key appears in
+the loader and in the shipped type sections (R2-ENGINE-818).
+
+**Confidence.** Medium for the bounded absence and the conclusion about
+data-controlled portrait coordinates. The key-name and header populations
+are complete for the two named payloads and 185 listed BMPs, but names do
+not prove field semantics. No census of all readers, indirect dispatch,
+other registries or bulk transfers was made. A numeric field under another
+name or another route remains a live alternative.
+
+**Unknown.** Whether any other data route can move the final portrait.
+Enumerate readers and indirect routes for these fields and the work surface;
+a visual run changing one candidate field would discriminate its effect.
+
+**Evidence.** [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/RESULTS.md), question 3; `evidence/derived/data/` directories.tsv, registry.tsv, domains.tsv, keys.tsv and headers.tsv.
+
+### R2-ENGINE-821
+
+The mission10 header census reads 64 EN and 59 RU `npc=` headers, with
+the same key set {21,616,623,651,2000}. These are headers, not a count
+of pages that every hero variant reaches. None has an individual record
+in the read npc.reg (R2-ENGINE-820). EN/RU map 10.alm are byte-equal.
+Its type-6 records 0,14,20 have (d14,w08,w0a)
+`(616,66,1)`, `(623,68,4)`, `(651,71,4)`; record 16 has `(2000,24,1)`.
+Units templates Ogre, Troll.4 and Dragon.4 have parameter 55 equal to
+616,623,651. Type records 66,68,71 name InfoPicture Ogre,Troll,Dragon.
+
+Conditioned on those placements reaching the matching live client units
+and their w0a values reaching +0x28, the read route predicts:
+
+| Key | Picture below graphics/infowindow/ | Native source tuple | BMP top-origin box | Native destination |
+|---|---|---|---|---|
+| 616 | Ogre.bmp | (10,100,82,196) | (10,44,82,140) | (8,7) |
+| 623 | Troll4.bmp | (15,123,87,219) | (15,21,87,117) | (8,7) |
+| 651 | Dragon4.bmp | (7,95,79,191) | (7,49,79,145) | (8,7) |
+
+All three request 72 by 96 from a 160 by 240 BMP into the 88 by 108
+portrait surface. The predicted names match the listed keys after the
+instrument's case fold, with equal EN/RU hashes; native case handling is
+unread. For 21 and 2000 the expected paperdoll branch and default
+tuple `(36,140,108,232)` remain conditional; exact layers and the chosen
+hero face are Unknown. Several Humans rows map numerically to key 21,
+so an ID match does not choose a character.
+
+**Confidence.** Medium. Header and data measurements do not prove a
+native load-time identity join. The placement-to-source-unit link is
+numeric, the copy's callers are unread (R2-ENGINE-731), and the creature
+variant-conversion tail jumps beyond the committed window. BMP coordinates
+also inherit R2-ENGINE-819's conversion/painter limit. No runtime frame
+was acquired and no behavior of a selected save is asserted.
+
+**Unknown.** Actual live +0x28, final clip, hero/paperdoll layers and the
+delivered pixels. Read the missing identity/variant/painter routes or run
+mission 10 event2 parts 1,2,4 with npc=623 and record the client unit and
+portrait; use the corresponding 616,651,2000,21 headers for the other cases.
+
+**Evidence.** [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/RESULTS.md), question 4; `evidence/derived/data/` placed.tsv, templates.tsv, registry.tsv, keys.tsv and headers.tsv; `evidence/derived/native/code/` class-crop, client-copy and face-variant windows.

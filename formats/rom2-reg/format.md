@@ -174,3 +174,21 @@ AttackAnimTime 2 x 6, AttackDelay 8, ShootDelay 8, Center 64/78 and
 Selection 48, 48, 80, 90. A type with a `Parent` and no `AttackAnimTime` of its own takes the list
 and `AttackAnimFrame` from the parent's section; the case of a type with
 neither a list nor a `Parent` is Unknown. — R2-ASSET-180, R2-ENGINE-704
+
+## Dialogue picture keys and bounded crop search
+
+The read EN/RU `scenario.res:npc.reg` contains one Multiplayer directory
+and the four arrays FacesMF, FacesMM, FacesFF and FacesFM; there is no
+individual speaker section in that payload. The read `units/units.reg`
+contains 63 directories (61 Unit sections, Global and Files) and 60
+InfoPicture leaves. No key name in those two payloads contains rect, crop
+or portrait, case-insensitively. This does not exclude another field name
+or reader route supplying portrait coordinates: that conclusion is Medium.
+All 185 read infowindow BMP headers per root measure 160 by 240, 24 bpp.
+— R2-ENGINE-820
+
+The selected dialogue builder uses the type's InfoPicture string and the
+client unit's variant to form its bitmap path. The source-box operands in
+the selected route come from constants and a program table indexed by type;
+full registry lookup, variant conversion and final rendering remain open.
+— R2-ENGINE-818, R2-ENGINE-819
