@@ -5149,3 +5149,76 @@ save recording ID 32, HP 1229 and HPmax at the failing draw would settle
 the join. Replacing only the packed key in a scratch copy and observing
 the first frame would test the causal explanation, not prove every other
 field valid.
+
+## Mission-10 command inputs and resave census
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-337 | Eight manifest-verified ROM2 mission-10 documents measure 240 actors and 64 Players; supplied Gildarius has state54 0 and 13 live nonhero actors have zero posts, equal at the same parser path in game0029, game0038 and game0039. | High / Medium | ✔ promoted (branch candidate) | [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md) |
+| R2-SESSION-338 | Eight ROM2 mission-10 walks partition all decoded bytes into 11 sections each; both supplied resaves change six sections while zero posts and nonhero group modes are equal at the same parser path in game0029, game0038, game0039. | High / Medium | ✔ promoted (branch candidate) | [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md) |
+
+### R2-SESSION-337
+
+The three supplied files are game0029, game0038 and game0039. Five
+original-made comparisons are game0001, game0004, game0005, game0006 and
+game9999 in the first original population. Eleven other allowed saves
+have non-mission-10 heads and are excluded from body claims. Full hashes
+are in inputs.tsv; exact values, decoded offsets and physical codec sources
+are in actors.tsv, players.tsv, groups.tsv and operands.tsv.
+
+The supplied file has 14 live-group actors and 16 dead Units. All live
+state54 values are 0; dead state54 values are 16 and remain 16 in both
+resaves. Hero ID 1 belongs by saved-key join to Player 1. Its state50/54/58
+is 0/0/0 in all three, whereas original-made heroes have state50 12.
+The listed local state54 predicate therefore does not exclude this hero
+conditional on successful roster restoration and delivered input.
+The Player-1 raw8+0x10 pair is 0/0 in the three supplied files; its causal
+meaning is not established. The original heroes/levels are not matched states.
+
+All seven live nonhero groups have programme mode 1 and group post 0;
+all 13 nonhero live actors have command post 0, equal at the same parser
+path in game0029, game0038 and game0039. The
+corresponding original-made nonhero groups use mode 18 and nonzero posts.
+Data row names link Human Mage row 178 to CH_Scrakan, Unit Dragon.4 row
+127, Troll row 89 and Bat_Sonic.4 row 97. Mapping the owner's informal
+names to these records is an inference. The two troll rows stay distinct.
+
+**Confidence.** High for measured bytes, hashes, counts and within-file
+numeric joins. Medium for restored pointers, admission composition and the
+owner-name identity links. Zero-goal composition is R2-ENGINE-824, Medium.
+
+**Unknown.** The specific saved bytes causing hero control loss, delivered
+commands and first-tick goals. RESULTS questions 1-4 name discriminating runs.
+
+**Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).
+
+### R2-SESSION-338
+
+The eight documents yield 88 sections, 846 object payload records and
+31794 parsed fields under the inherited successful-transfer grammar.
+Sections.tsv gives offsets, lengths and full SHA256 hashes. References.tsv
+also lists prior-object and null forms; record-census.tsv counts every
+form/class and embedded Group. Physical.tsv covers outer physical parts.
+
+Versus game0029, both game0038 and game0039 differ in head, players,
+dead, buildings, terrain and session. SpellEffects, sacks, extra,
+worldPresent and sentinels-and-trailer are byte-equal. Field changes
+include Player, Group, Human, Unit, Armor, Weapon, Item, Spell and Effect
+inside players, Building, and dead Unit. The full seven-comparison section,
+record-kind and field tables also cover the five original-made files.
+
+Operand-comparisons.tsv records hero state50/state54/state58, zero command
+posts, nonhero group modes and the Player raw8 identity pair as equal at
+the same parser path in game0029, game0038 and game0039;
+changed address keys and other state do not repair these measured values.
+
+**Confidence.** High for parser-path byte/hash comparisons and counts
+recomputed from committed TSVs. Medium for semantic state equivalence:
+group splitting, archive-reference changes and dead/live movement can
+change path identity. Opaque blocks have hashes without full semantics.
+
+**Unknown.** Semantic differences inside opaque session/terrain/preferences
+blocks and which differences cause behaviour. Decode their programmes,
+then isolate changed fields in controlled LOAD/action comparisons.
+
+**Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).

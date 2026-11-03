@@ -20983,3 +20983,79 @@ mission 10 event2 parts 1,2,4 with npc=623 and record the client unit and
 portrait; use the corresponding 616,651,2000,21 headers for the other cases.
 
 **Evidence.** [EXP-2113](../experiments/EXP-2113-rom2-speaker-window/RESULTS.md), question 4; `evidence/derived/data/` placed.tsv, templates.tsv, registry.tsv, keys.tsv and headers.tsv; `evidence/derived/native/code/` class-crop, client-copy and face-variant windows.
+
+## EN command admission and zero-post movement
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-822 | The listed EN command-admission path looks up a requested unit in its Player roster and rejects state54 16; complete client selection, delivery and attack admission remain Medium. | Medium | ✔ promoted (branch candidate) | [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md) |
+| R2-ENGINE-823 | Listed EN SAV transfers preserve Unit state50/state54/state58, the 184-byte command and 80-byte Group programme; complete key fixups and client restoration remain unclosed. | Medium | ✔ promoted (branch candidate) | [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md) |
+| R2-ENGINE-824 | The listed EN Group mode-1 no-target arm passes the Unit command post directly to prepared movement; a zero post is a conditional zero-goal explanation, not a proven trajectory. | Medium | ✔ promoted (branch candidate) | [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md) |
+
+### R2-ENGINE-822
+
+The EN client senders L2.04951/L2.04952 collect selected IDs and send
+0x16/0x19 with the local Player ID. The listed server L2.01661/L2.04953
+calls Player lookup and Unit lookup in Player+0x24. Its found-unit test
+returns null for DWORD Unit+0x54 equal to 0x10. The ID lookup compares
+Unit DWORD+4 with the sign-extended requested word. Missing lookup also
+returns null. This is a local predicate, not every command gate.
+
+**Confidence.** Medium for composition. The complete selection summary,
+client roster restoration, collection helpers, packet append/transport,
+Player-lookup success tail and attack predicate L2.04954 remain unclosed.
+All newly read bodies are EN only. RESULTS question 1 links each listing.
+
+**Unknown.** The saved-byte cause of lost hero control. LOAD game0029,
+select Gildarius, issue move/attack and record selected owner, local-player
+pointer, outgoing IDs/count, roster lookup and next group/tick state.
+
+**Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).
+
+### R2-ENGINE-823
+
+The listed Player transfer R2.0084 reads ID+4, raw8+0x10 and other
+prefix fields; LOAD copies +0x30 to +0x32 and attaches group members to
+Player+0x24 with owner+0x14. Unit transfer L2.01090 calls the base transfer
+and command transfer, and copies +0x50/+0x54/+0x58 as four bytes each.
+Position transfer L2.03197 copies 12 bytes. Command transfer L2.03448
+copies 184 bytes plus its word list; Group transfer L2.04955 copies
+80 bytes plus its word list. LOAD replaces embedded list pointers.
+These local bodies do not establish the complete restoration graph.
+
+**Confidence.** Medium for composed LOAD. Raw archive helpers L2.01539/
+L2.01538, key registration L2.03198, owner fixup L2.03199, object helper
+L2.04956 and later fixups are unread. Group binding uses R2-ENGINE-199/200
+at their Medium grade. RESULTS question 2 links the committed EN listings.
+
+**Unknown.** Client +0x9cc/+0x9d0 and selected +0x80 restoration. Trace
+LOAD of game0029 through key fixups and incoming client updates before input.
+
+**Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).
+
+### R2-ENGINE-824
+
+EN group dispatch L2.04957 reads [Group+0x3c]+0x20. The committed
+tables route 1 to L2.04958, 3 to L2.04959 and 18 to L2.04960. In mode 1,
+after target preparation, a nonzero Unit-command+0x20 takes the attack arm.
+Otherwise the body compares position word+2 to command word+0 and arrival;
+on inequality or incomplete arrival it calls L2.04961 with that post.
+The latter sets prepared byte+8 to 1 and goal word+0xa to the argument.
+This local arm passes a zero post as zero. Unlike the listed guard branch,
+it contains no initialization of a zero post from current position.
+
+**Confidence.** Medium for the composed explanation. Target/center helpers
+L2.04954, L2.04962, L2.04963, L2.04964, collection helpers, attack L2.03461,
+idle L2.04965 and actual pathing are unread. The call L2.04966 at L2.04967,
+which runs before the mode read, and the scheduler gate of
+out/code/group-schedule.txt (active byte and session override) are also
+unread. The zero goal follows only if that step leaves the mode at 1.
+Mode 18 is only a prefix read.
+This is not a global AI/script census or a final coordinate prediction.
+RESULTS question 4 links the complete local mode-1 and prepared-move listings.
+
+**Unknown.** Which arm each named actor reaches on the next tick. Original
+LOAD of game0029 with mode, activity, post, target and prepared goal recorded
+on successive ticks would distinguish zero-goal movement from target pursuit.
+
+**Evidence.** [EXP-2114](../experiments/EXP-2114-rom2-no-control/RESULTS.md).

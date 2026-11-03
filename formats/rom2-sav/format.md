@@ -1390,3 +1390,42 @@ R2.0075 into client +0x104 and still held that value at the first draw;
 regeneration or a later writer is not excluded. The causal reconstruction
 remains Medium because its heap bytes and actual packet flags are absent.
 — R2-ENGINE-814, R2-SESSION-336
+
+## EN mission-10 command inputs and resave preservation
+
+The listed EN command path sends selected client-unit IDs with a local
+Player ID. Server lookup uses the Player roster and rejects a found Unit
+whose DWORD +0x54 is 16. This is a local admission predicate, Medium for
+the composed selection, delivery and attack path; client controlled-set
+restoration and additional target gates remain unclosed. — R2-ENGINE-822
+
+The listed SAV programmes transfer Player prefix fields, Unit ID/owner
+keys and DWORD +0x50/+0x54/+0x58, raw position 12, command 184 and Group
+programme 80 bytes. Player LOAD attaches group members to its roster and
+sets their owner; later key fixups and client projection remain Medium or
+Unknown. These widths do not establish whole LOAD success. — R2-ENGINE-823
+
+The listed EN mode-1 no-target arm passes the Unit command word +0 as
+its prepared move goal when position differs or arrival is incomplete.
+A zero post is therefore a conditional zero-goal explanation, Medium;
+actual target choice, pathing and the complete mode-18 route remain
+unclosed. — R2-ENGINE-824
+
+In the supplied mission-10 game0029 and original resaves game0038/game0039,
+Gildarius Unit state50/state54/state58 is 0/0/0 and a saved owner-key
+match with Player 1 holds, equal at the same parser path in all three files.
+The shown state54 check does not explain lost hero
+control. Its specific saved-byte cause remains Unknown. Seven other live
+groups have mode 1 and all 13 members have command post 0, equal at the
+same parser path in game0029, game0038 and game0039. Five
+original-made mission-10 comparisons use mode 18 for the corresponding
+nonhero groups. Exact measured values are High; restored-state and
+behavioural joins are Medium. — R2-SESSION-337
+
+Eight complete mission-10 walks partition 11 decoded sections each.
+Both resaves change head, players, dead, buildings, terrain and session;
+spellEffects, sacks, extra, worldPresent and sentinels-and-trailer remain
+byte-equal to game0029. The census covers every parsed field and archive
+record kind, including opaque blocks by hash. Parser-path equality is
+High for bytes, Medium for semantic state equivalence after reference,
+group or list changes. — R2-SESSION-338
