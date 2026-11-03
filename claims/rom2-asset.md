@@ -3015,3 +3015,61 @@ record (R2-ENGINE-798).
 flag bits beyond the client shop comparator's use of bit 0x2.
 
 **Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), question 3.
+
+## Speech archive keys and dialogue speech headers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-208 | ROM2 speech.res holds 1133 EN / 1135 RU keys: 742 / 734 requested by town dialogue pages, 379 / 381 of shop formats, 12 / 20 no route requests; none requested is missing after the census's `\` to `/` and case fold (lookup unread, Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+| R2-ASSET-209 | In the ROM2 dialogue files only town.txt sections carry a speech family (EN 176 of 188, RU 174 of 186); other files request none through this page route (census Medium); one RU header, no EN header, has sound=. | High | ● active (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+
+### R2-ASSET-208
+
+Keys of the `speech.res` archive of each root, grouped by digit pattern in
+30 patterns: `about`, `accept`, `reject`, `talk` and `town` with letters `t`,
+`a`, `f`, `m`, `s`, and `shop`, `shop_druid`, `shop_kaarg` with `books`,
+`effects` and `s#i#p#`. A key is requested when the replay of the dialogue
+page (R2-ENGINE-802) names it; it matches the shop formats of R2-ENGINE-803
+or neither.
+
+The unreachable keys and their causes:
+
+| Keys | Root | Cause |
+|---|---|---|
+| `talk/0021{a,f,m,s}063p11`, `talk/0022{a,f,m,s}063p12` | both | `npc2109talk63` has no `part=10` |
+| `talk/0023t063p09` | both | a second `part=9` header |
+| `accept/0022t081p06` | EN | no section requests it |
+| `accept/0022t100p99` | EN | no EN `sound=` header names it |
+| `shop/s01i9p2` | EN | `%.2d` cannot give one digit |
+| `talk/0021{a,f,m,s}110p05`, `talk/0022t110p0{2,4}`, `talk/2006t110p0{1,3,6}` | RU | no section `npc2006talk110` |
+| `talk/0520t007p01` | RU | no section `npc520talk7` |
+| `town/0097t010p01` | RU | `plagatguard` gives number 000 |
+
+Request rows against keys: EN 743 rows name 742 keys, because
+`accept/0022t100p02.wav` is requested by two sections; RU 734 rows name 734.
+
+**Confidence.** High for the key population and the replay's results (counts).
+Medium that every requested name is present in the archive for the lookup the
+client makes: the census compares the name after mapping `\` to `/` and
+folding case, while the file test body `L2.03656` and normaliser `L2.04013`
+only copy the name (through `L2.04824` when `L2.04825` is set) and `L2.03657`
+reaches the archive through unread callees (`L2.04826`, `L2.04827`,
+`L2.04828`); this covers all 742 EN and 734 RU names. Medium that the
+shop-pattern keys are reachable (item numbers from unread helpers).
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 2.
+**Format surface.** dialogue text; `formats/rom2-text/format.md`.
+
+### R2-ASSET-209
+
+Sections are line-leading `#` keys of `text/globalmap.txt`,
+`text/town.txt`, `text/quest.txt` and the 46 `text/mission*.txt` files of
+each root's `main.res`. Family sections of `town.txt`: EN talk 47, about 7,
+accept 41, reject 41, keeper 12, man 18, guard 10; RU the same but talk 45
+(RU lacks `npc2006talk110` and `npc520talk7`). Twelve sections per root
+carry no family. No family section's key meets another section first in the
+substring find of R2-ENGINE-050. No header that requests a name carries
+`npcalive=` or `npcdead=`. The one `sound=` header is RU `npc5accept100`
+part 2.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 1.

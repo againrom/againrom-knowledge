@@ -119,11 +119,23 @@ store, not the settings object, and is the Sound Options checkbox (Medium:
 control 0x28, the only checkbox in the windows read). With it 0, or outside
 application mode word 2, no unit voices a selection or an order at the 13
 call sites of the speaker picker, which returns 0 under those tests. A
-gesture slot called by other code (Medium: none found) or by an unread
-selection path such as a hotkey or portrait click (Unknown) is not gated by
-it. The body of the unit slot that plays the easy, hard and dead files does
-not test it; its callers are unread. Gesture voices play at SoundSpeechPos.
-— R2-ENGINE-720
+gesture slot called by other code (Medium: none found) is not gated by it.
+The `P` key sends pick-up through a sender that calls the picker; digit keys
+make no direct voice call (Medium) and a portrait click is Unknown. Gesture
+voices play at SoundSpeechPos. — R2-ENGINE-720, R2-ENGINE-806
+
+The unit slot that plays the easy, hard and dead files has five callers in
+the client message pump (Medium: some call encodings were not scanned), not
+through the picker, and no test of Acknowledgement or the mode word guards
+the calls. The slot plays the voice subject to its 1500 ms gate. The arm for
+message types 0x6c, 0x6e, 0x6f and 0x70 calls it with `dead` when a unit's
+health falls from above 0 to -10..0 and with `hard` while it stays there
+(Medium that all four types reach the calls; no other call in the windows
+read, with the tail of the state 2..4 arm and the state 5 arm unread). A
+health update calls it with the unit type's sound when the health is
+unchanged, makes no slot +0x74 call at -10 or below, and calls `hard` below
+half health and `easy` otherwise. The same arm holds another sound call
+outside the slot, not characterized. — R2-ENGINE-804, R2-ENGINE-721
 
 The sound panel's music-on command resumes or restarts the chosen melody;
 music-off stops or fades the player. The panel also sets the chosen

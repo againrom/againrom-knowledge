@@ -17220,11 +17220,11 @@ of an RU tooltip.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-717 | A ROM2 client voices one selected unit after selecting own units and after 12 order senders (move 0x16, 0x1d, 0x24; attack 0x19; swarm 0x1a; defend 0x17, 0x18, 0x1b, 0x12; retreat 0x14; pick up 0x21, 0x13); the cast sender voices none. | High / Medium | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
-| R2-ENGINE-718 | A ROM2 unit's voice follows word +0x1dc: 21 by the female and mage bits (aldor, sagita, hildarius, galinel), 22 igles, 23 dina, 1..6 xbow to mage, any other a generic m_/f_ fighter, mage or peasant voice by those bits and +0x188. | High / Medium | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
-| R2-ENGINE-719 | The ROM2 speaker is a random accepted unit with health above 0 and +0x1b8 mask 0x1, else mask 0x10 or hire 1..20; its recording is floor(r x count / 32768); it is silent within 3000 ms (selection 2000) of its stamp. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
-| R2-ENGINE-720 | The ROM2 speaker picker, called at 13 sites, returns 0 unless registry value Acknowledgement (default 1; the Sound Options checkbox, Medium) is nonzero and the mode word is 2; gestures play at SoundSpeechPos. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
-| R2-ENGINE-721 | ROM2 unit slot +0x74(n), whose callers and n are Unknown, plays the voice's easy, hard or dead file (n = 1..3) when +0x1b8 & 0x11 is set or +0x1dc is at most 23, else entry n+1 of the type's +0xdc sound list. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-717 | A ROM2 client voices one selected unit after selecting own units and after 12 order senders (move 0x16, 0x1d, 0x24; attack 0x19; swarm 0x1a; defend 0x17, 0x18, 0x1b, 0x12; retreat 0x14; pick up 0x21, 0x13); the cast sender voices none. | High / Medium | ● active (amended, branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-718 | A ROM2 unit's voice follows word +0x1dc: 21 by the female and mage bits (aldor, sagita, hildarius, galinel), 22 igles, 23 dina, 1..6 xbow to mage, any other a generic m_/f_ fighter, mage or peasant voice by those bits and +0x188. | High / Medium | ● active (amended, branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-719 | The ROM2 speaker is a random accepted unit with health above 0 and +0x1b8 mask 0x1, else mask 0x10 or hire 1..20; its recording is floor(r x count / 32768); it is silent within 3000 ms (selection 2000) of its stamp. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-720 | The ROM2 speaker picker, called at 13 sites, returns 0 unless registry value Acknowledgement (default 1; the Sound Options checkbox, Medium) is nonzero and the mode word is 2; gestures play at SoundSpeechPos. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
+| R2-ENGINE-721 | ROM2 unit slot +0x74(n), with five client-pump callers (events behind n: names Medium, senders Unknown), plays the voice's easy, hard or dead file (n = 1..3) when +0x1b8 & 0x11 is set or +0x1dc is at most 23, else entry n+1 of +0xdc. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
 | R2-ENGINE-722 | 23 of 26 ROM2 EN/RU unit-voice listing windows have equal instructions after masking operands; three differ in application offsets and string comments; tables shift by different amounts; RU adds two voiceless senders. | High | ● active (branch candidate) | [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/) |
 
 ### R2-ENGINE-717
@@ -17273,6 +17273,14 @@ call through a vtable is outside the call-target scan. Medium for the
 **Unknown.** Other selection paths (hotkeys, portraits) and whether they
 reach `L2.03019`; the meaning of speaker +0x78 and of application +0x404.
 
+**Amended.** R2-ENGINE-806 narrows the Unknown on other selection paths: key
+`P` calls the type 0x13 sender `L2.04829`, whose picker call is the one above,
+and the digit keys call group routines with no direct call of `L2.03019`, the
+click routine or the picker (bodies unread). R2-ENGINE-805 narrows the meaning
+of speaker +0x78: in the four writers identified as unit-class writes (of 80
+hits), a copy of action byte +0x8c, 1 read as Move; the other writers are
+unclassified.
+
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 1.
 
 ### R2-ENGINE-718
@@ -17320,6 +17328,11 @@ counts equal R2-ASSET-185's file counts only through these two links.
 whether a single gesture whose file is absent plays anything (`L2.00984` and
 `L2.02166` unread).
 
+**Amended.** R2-ENGINE-806 narrows the Medium on `L2.03656`: it asks
+`L2.03657` for the normalised name in archive directory `L2.04830` and returns
+1 only when an entry is found; the disk branch of `L2.03657` and the case map
+`L2.04824` stay unread.
+
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), questions 2 and 3.
 
 ### R2-ENGINE-719
@@ -17353,6 +17366,13 @@ accessor `L2.03994` / `L2.03995` was not read.
 
 **Unknown.** The meaning of +0x1b8 masks 0x1 and 0x10; whether a dead or
 off-screen unit can be among the accepted objects.
+
+**Amended.** R2-ENGINE-805 records that `L2.03694` sets +0x1b8 masks 0x1 and
+0x10 from the unit type (0x1 for unit types 0x20..0x3f, 0x10 for types below
+0x1a); the other stores of the field were not read, so other sources of the
+masks stay Unknown. It narrows the Unknown draw rand15 = 32767 to a possible
+read of the DWORD after the last element: accessor `L2.03994` has no bound
+check, and the value stays Unknown on the unread `L2.04831`.
 
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 4.
 
@@ -17400,6 +17420,11 @@ runs at exit and after a cutscene, from R2-ENGINE-311.
 slot without the picker (R2-ENGINE-717); the effect of slot +0x1c; whether
 Esc stores the box.
 
+**Amended.** R2-ENGINE-804 reads the callers of slot +0x74: five sites in the
+client message pump, none behind the picker or the Acknowledgement field; the
+mode word tests on those paths skip other blocks, not the calls. R2-ENGINE-806 narrows the hotkey Unknown: key `P` calls the picker
+through its sender; digit keys stay Medium and portrait clicks Unknown.
+
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 5.
 **Format surface.** client sound settings; `formats/rom2-music/format.md`.
 
@@ -17422,6 +17447,13 @@ for the events that call the slot: its callers were not read, so the file
 names easy, hard and dead are the only evidence for "hurt" or "death".
 
 **Unknown.** The callers and the events behind n.
+
+**Amended.** R2-ENGINE-804 narrows the callers to five sites; the events
+behind n stay Medium (names) and Unknown (senders): the arm for messages
+0x6c, 0x6e, 0x6f and 0x70 calls n = 3 when health falls from above 0 to -10..0 and n
+= 2 while it stays there; message 0x73 calls n = 0, 1 or 2 by health against
+its update and half of +0x108. Other callers stay Medium (disp32 and jump
+encodings not scanned).
 
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), question 1.
 
@@ -20160,3 +20192,225 @@ Unknown, not a read made here. The Magic items counts are keys admitted to
 the enchanted category.
 
 **Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), question 5.
+
+## Speech lines and unit hurt voices
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-802 | A ROM2 dialogue page plays `speech\<name>.wav` at SoundSpeechPos when its name is nonempty: sound=, else a family default (talk, about, accept, reject, keeper, man, guard); only town.txt (EN 176, RU 174 sections) requests one (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+| R2-ENGINE-803 | The ROM2 shop routine EN L2.04832 plays one `speech\shop*\` effects, books or item file when the mode word is 2, the page is 5..8 and L2.00728(100) < 0x1e; the item numbers come from unread helpers and the path to the routine is Medium. | High / Medium | ● active (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+| R2-ENGINE-804 | ROM2 slot +0x74, five pump callers: the arm for types 0x6c, 0x6e, 0x6f, 0x70 calls n=3 (dead) as health falls to -10..0, n=2 (hard) while it stays (Medium); 0x73 calls n=0 if unchanged, none at -10 or below, else n=2 below half health, n=1. | High / Medium | ✔ promoted (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+| R2-ENGINE-805 | ROM2 L2.03694 sets +0x1b8 mask 0x1 (types 0x20..0x3f) and 0x10 (below 0x1a); other stores unread; 4 of 80 +0x78 hits are unit-class writes (copy +0x8c or 0), rest unclassified; the picker accessor can read past the list at draw 32767. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+| R2-ENGINE-806 | ROM2 key P sends pick-up 0x13 through the sender that calls the speaker picker; digit keys make no direct voice call; file test L2.03656 returns 1 when the archive directory holds the name; the mode word is stored 0..3. | High / Medium | ✔ promoted (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+| R2-ENGINE-807 | 13 ROM2 EN/RU speech and hurt-voice listing pairs have equal instruction counts; masked differences are offsets and two child IDs; RU shows a +0x3f4 test at L2.04833 past the compared window (listing tails). | High | ● active (branch candidate) | [EXP-2110](../experiments/EXP-2110-rom2-speech/) |
+
+### R2-ENGINE-802
+
+Page method EN `R2.0046` / RU `R2.0045` (R2-ENGINE-051) has two direct
+callers: `L2.04834` in vtable slot +0x80 routine `R2.0044` (the first page)
+and `L2.04835` in the 0x470 handler `R2.0054` (Next). It raises part counter
++0x68, handles the previous sound object +0x70 (`L2.00976`, `L2.00982`) and
+parses the part (`R2.0048`). An empty name takes the first family of the
+section key in the order talk, about, accept, reject, then keeper, man or
+guard:
+
+| Family | Format |
+|---|---|
+| talk, accept, reject | `<family>\%04d%c%sp%02d` |
+| about | `about\%04dt000p%02d` |
+| keeper, man, guard | `town\%04d%c%sp%02d` |
+
+`%04d` is the header's NPC, `%s` the key's trailing digits padded with `0` to
+three, `%02d` the part. `%c` is `t` unless the header has a hero token or the
+NPC is 21; then the unit `R2.0071(21)` returns gives `s` (+0x1b8 masks 0x4
+and 0x2), `a` (0x4), `m` (0x2) or `f`. A nonempty name makes a 0x14-byte
+sound object `L2.00984("speech\" + name + ".wav")`, stored at +0x70, loaded
+by `L2.03661` and played by `L2.02166` with SoundSpeechPos (`L2.04000`).
+Load and play return silent when global `L2.03675` is 0; the load also when
+file test `L2.03656` fails (R2-ENGINE-806).
+
+A replay of this loop over `globalmap.txt`, `town.txt`, `quest.txt` and the
+46 `mission*.txt` files of each root (the files of R2-ENGINE-344) finds
+request rows with a name only in `town.txt`: EN 743 in 176 sections, RU 734
+in 174 (R2-ASSET-209); the 743 EN rows name 742 keys because
+`accept/0022t100p02.wav` is requested by two sections. Every requested name
+equals a `speech.res` key in both roots after the census's mapping of `\` to
+`/` and its case fold (R2-ASSET-208; the archive lookup callees are unread,
+Medium). The `speech\` prefix string has one reference, in this page. Other
+script audio routes are not characterized.
+
+**Confidence.** High, EN, for the callers, formats and load-and-play body;
+the RU page, parser, load and file test equal EN under the operand mask
+(R2-ENGINE-807). Medium that the census replay is the page (it models the
+read loop; `R2.0071` is unread), that every requested name opens its key (the
+separator mapping and case fold are the census's; the callees `L2.04826`,
+`L2.04827`, `L2.04828` of `L2.03657` are unread), that no loose file stands in
+for a key
+(`L2.03657` disk branch unread; no `speech` directory at either install top
+level) and for the caller of slot +0x80.
+
+**Unknown.** Audible playback; the writer of `L2.03675`; which code opens
+the first page.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 1.
+**Format surface.** dialogue text; `formats/rom2-text/format.md`.
+
+### R2-ENGINE-803
+
+Shop routine EN `L2.04832` / RU `L2.04836` is slot +0xa4 of vtable
+`L2.04837` (sole DWORD reference `L2.04838`, no direct call); `L2.04839` calls
+slot +0xa4 at three sites (`L2.04840`, `L2.04841`, `L2.04842`), all on
+`[ebp-0x10]`; that the receiver has vtable `L2.04837` was not read. It returns unless
+`L2.00728(100)` is below 0x1e, mode word +0x5d8 (RU +0x63c) is 2 and page
++0x18 of application +0x3f4 (RU +0x40c) is 5..8. It picks `shop_kaarg`,
+`shop_druid` or `shop` by application +0x100 and +0xfc against +0x20ac, then
+formats `speech\%s\effects\%.2d.wav`, `speech\%s\books\%.2d.wav` or
+`speech\%s\s%.2di%.2dp%d.wav` with numbers from `L2.04843`, `L2.04844`,
+`L2.03699` and `L2.03925`, releases object +0x20b0 and plays through
+`L2.00984` and `L2.02166`.
+
+**Confidence.** High for the body and its tests in EN, with the RU body equal
+under the mask but for the two application offsets. Medium for the meanings:
+`L2.00728(100)` as a draw of 0..99 and the shop kinds, whose helpers and the
+caller's page values were not read, and for the receiver class of the three
+calls in `L2.04839`; the path to the routine is Medium as a whole.
+
+**Unknown.** Which item maps to which file; whether the receiver of the three
+calls in `L2.04839` has vtable `L2.04837`; whether the 30 other `ff 9x a4`
+hits (EN 33, the three in `L2.04839` read) call this slot.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 1.
+
+### R2-ENGINE-804
+
+The call sites of slot +0x74 (`L2.04003`, R2-ENGINE-721) are EN `L2.04845`,
+`L2.04846`, `L2.04847`, `L2.04848`, `L2.04849` / RU `L2.04850`, `L2.04851`,
+`L2.04852`, `L2.04853`, `L2.04854`, in the client message pump `L2.00466`.
+The pump switches on byte +9 minus 3 (tables EN `L2.00467`, `L2.00468`).
+
+Arm `L2.00138` (RU `L2.00139`) holds types 0x6c, 0x6e, 0x6f and 0x70. It
+saves state byte +0x184 and sets it from signed health +0x104: above 0 to 0,
+-10..0 to 1, -20..-11 to 2, -40..-21 to 3, -600..-41 to 4, below to 5. For
+new state 1 (table `L2.04855`): old state 0 sets action +0x8c to 6 and calls
++0x74(3); old state 1 calls +0x74(2). No call in the windows read; the tail of the
+state 2..4 arm (after `L2.04856`) and the state 5 arm `L2.04857` were not read,
+and the scan finds no other `ff 5x 74` site.
+
+Arm `L2.04858` (RU `L2.04859`) holds type 0x73: unit by ID +0xa, new health
++0xc. Before the update: health equal to the new value calls +0x74(0);
+health -10 or below makes no slot +0x74 call; health below +0x108 / 2 calls +0x74(2), else
++0x74(1).
+
+With R2-ENGINE-721, n = 3, 2, 1 play the voice's `dead`, `hard` and `easy`
+files and n = 0 the type sound; n = 1 and 2 are subject to the 1500 ms gate of
+R2-ENGINE-721. No path tests the Acknowledgement field; its mode word tests
+skip other blocks. The window `en-sync-L2.04860.txt` also shows another sound
+call, `call [L2.00450]` at `L2.00917` (type +0x213 for +0x1dc 1..20, state
+above 1), outside slot +0x74; it is not characterized here.
+
+The scans: no E8/E9 call of `L2.04003`; `ff 50 74` 8 and `ff 52 74` 9 hits
+per root, EN `ff 51/53/57 74` none and `ff 56 74` one in library code. The
+other hits are a UI dispatcher (`L2.04861`), a return-value use
+(`L2.04862`), an undecoded site (`L2.04863`) and library code.
+
+**Confidence.** High, EN and RU, for the five sites, arguments and
+conditions. Medium that no other code calls the slot (the disp32, jump and
+load-then-call forms and RU registers other than eax and edx were not
+scanned), that all four types 0x6c, 0x6e, 0x6f and 0x70 reach the calls (the
+arm calls the slot; no type test in the windows read, which do not cover the
+whole arm) and for the event names (health from
+R2-ENGINE-577; the senders are server code, not read).
+
+**Unknown.** The events that send 0x6c..0x70 and 0x73.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 3.
+**Format surface.** client sound settings; `formats/rom2-music/format.md`.
+
+### R2-ENGINE-805
+
+A linear sweep for writes of +0x1b8 (40 EN hits) finds masks 0x1 and 0x10
+set in `L2.03694(arg)` (RU `L2.04864`) by unit type +0x24: 0x20..0x3f keeps
+0x80 and sets 0x1 | 0x8, adds 0x4 for bit 0 and 0x2 for bit 1 of type - 0x21
+and stores type 1; below 0x1a keeps 0x80 and sets 0x10 | 0x8, 0x4 from arg
+bit 0x80, +0x28 = arg & 0x7f and 0x2 for types 0x17, 0x18; another type
+stores only +0x28 = arg. Its callers are `L2.04865` (new unit in message
+0x6c..0x70) and `L2.04866` (record init). `L2.04867` stores 0x56 (at `L2.04868`). Of the 40
+stores only `L2.03694`, `L2.04867` and the copy `L2.04869` were read; about 30
+others take a register or zero (`L2.04870`, `L2.04871`, `L2.04872`,
+`L2.04873`, `L2.04874`, `L2.04875`, `L2.04876`, `L2.04877` and more) and can
+carry bits 0x1 or 0x10 from a message or record, so other sources of the masks
+stay Unknown.
+
+Writes of +0x78 (80 hits): four are identified as unit-class writes,
+`L2.04878` and `L2.04879` copying signed action byte +0x8c and constructors
+`L2.04880` and `L2.04881` storing 0. The other hits, four of them in the
+unit-code region (`L2.04882`, `L2.04883`, `L2.04884`, `L2.04885`), were not
+classified. Writes of +0x8c (19): action 1 by the handlers of messages 0x6b,
+0x86, 0x8b and 0x8c, and by stores at `L2.04886` and `L2.04887` outside the
+pump; the 0x6b arm's table
+`L2.04888` maps 1, 3, 7, 8 to debug strings `Move`, `Attack`, `Shoot`,
+`Cast`.
+
+Accessor `L2.03994` (RU `L2.03995`) returns `L2.04889`'s `&data[i]` from
+list +4 with no bound check; the list (constructor `L2.04890`) holds data
++4, size +8, capacity +0xc and growth +0x10, and grows in `L2.04831`.
+
+**Confidence.** High for the bodies and callers read. Medium that the
+sweeps list every write (linear decode; `ebp`, `esp` and absolute bases
+excluded), for type 0x20..0x3f as the hero types and for 1 = Move (debug
+strings; the unclassified +0x78 writers also bear on "+0x78 == 1 is Move").
+Unknown for other sources of masks 0x1 and 0x10 (stores not read), and for the
+DWORD that can be read at index n when the draw is 32767, which `L2.04831`'s
+capacity policy decides.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 4.
+
+### R2-ENGINE-806
+
+Key handler EN `L2.04345` / RU `L2.04346` (application +0x404 = 1 and +0x80
+set) maps letters through tables `L2.04891` and `L2.04892`: `P` calls
+`L2.04829` (RU `L2.04893`), which sends type 0x13 and calls the speaker
+picker at `L2.03977` (R2-ENGINE-717) when `L2.01559` is 0, the selected
+count +0x140 is nonzero and +0x144 & 0x24 is 0; `A M G D C S T R` call
+`L2.04359(n)`, `L` `L2.04894`. Digits call `L2.04347`, `L2.04348`,
+`L2.04349`, `L2.04350`, which hold no direct call of the picker, the click
+routine `L2.03015` or the selection routine `L2.03019`. `L2.03015` is called
+at `L2.04895`, `L2.04896` (in `L2.03365`) and `L2.04897` (in `L2.01879`) and
+reaches pick-up sender `L2.04898` (type 0x21).
+
+File test `L2.03656(name, flags, error)` (RU `L2.04010`) normalises the
+name (`L2.04013`, case map `L2.04824` when `L2.04825` is set), returns 0 for
+flags & 1, and asks `L2.03657` on directory `L2.04830`: a found entry is
+copied to +0x10, error 0, return 1; else error 2, return 0.
+
+Mode word +0x5d8 writes (8): 0 at `L2.04899`, `L2.04900`, `L2.04901`; 2 at
+`L2.04902`, `L2.04903` (campaign, R2-ENGINE-334); 3 at `L2.01010`,
+`L2.01011` after `-ip`; 1 at `L2.01009` after `-timeout`.
+
+**Confidence.** High, EN, for the bodies, tables and writes. Medium that
+digit keys never voice (bodies unread), that `L2.03656` accepts exactly the
+archive keys (`L2.03657` disk branch and `L2.04824` unread) and for modes 3
+and 1 as network sessions.
+
+**Unknown.** Whether a portrait click enters `L2.03015`.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 5.
+**Format surface.** client sound settings; `formats/rom2-music/format.md`.
+
+### R2-ENGINE-807
+
+Thirteen EN/RU listing pairs (dialogue page, header parser, shop speech,
+sound load, file test, unit flags, element accessor and address, and five
+voice windows of the message pump) have equal instruction counts and no
+branch-shape difference after masking operands in 0x400000..L2.03731. Six
+have no difference; the dialogue page differs in the child IDs of
+`L2.03680` (EN 0xa, 0xc; RU 0xb, 0xd), the shop in mode word +0x5d8/+0x63c
+and application +0x3f4/+0x40c, and the voice windows in frame offsets, the
+mode word, +0x450/+0x468 and +0x404/+0x41c. The letter key byte tables are
+equal; the arm table shifts by +0xe9. The pump arms hold the same message
+types. The RU test of application +0x3f4 at `L2.04833` lies past the compared
+window of the state 1 hard voice and is shown by the listing tails
+(`ru-sync-L2.04851.txt` against `en-sync-L2.04846.txt`, which has `push 0x2710` at
+`L2.04904` and no such test), not by a pair row.
+
+**Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 6.

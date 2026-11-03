@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4595. Observation: 143. Static analysis: 3830. Mixed: 622.
+Claims labelled: 4603. Observation: 143. Static analysis: 3837. Mixed: 623.
 
 ## Ledger ai
 
@@ -2128,6 +2128,8 @@ Claims labelled: 4595. Observation: 143. Static analysis: 3830. Mixed: 622.
 | R2-ASSET-198 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-202 | mixed | ● active (branch candidate) |
 | R2-ASSET-207 | static analysis | ● active (branch candidate) |
+| R2-ASSET-208 | static analysis | ✔ promoted (branch candidate) |
+| R2-ASSET-209 | mixed | ● active (branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -2664,11 +2666,11 @@ Claims labelled: 4595. Observation: 143. Static analysis: 3830. Mixed: 622.
 | R2-ENGINE-713 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-714 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-715 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-717 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-718 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-719 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-720 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-721 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-717 | static analysis | ● active (amended, branch candidate) |
+| R2-ENGINE-718 | static analysis | ● active (amended, branch candidate) |
+| R2-ENGINE-719 | static analysis | ● active (amended, branch candidate) |
+| R2-ENGINE-720 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-721 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-722 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-723 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-724 | static analysis | ● active (branch candidate) |
@@ -2731,6 +2733,12 @@ Claims labelled: 4595. Observation: 143. Static analysis: 3830. Mixed: 622.
 | R2-ENGINE-799 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-800 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-801 | mixed | ● active (branch candidate) |
+| R2-ENGINE-802 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-803 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-804 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-805 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-806 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-807 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 

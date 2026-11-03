@@ -125,8 +125,23 @@ tips and closes through `0x445`. Nonempty speech names form
 `speech\<name>.wav`; default names exist for particular town-dialogue key
 families. The two mission 10 files have no explicit sound headers and their
 event keys match none of those default families, so this page route selects
-no speech name. EN event7 has four parts; RU has three. Other missions and
-other script audio routes are not characterized. — R2-ENGINE-051
+no speech name. EN event7 has four parts; RU has three. — R2-ENGINE-051
+
+The page plays its name at SoundSpeechPos on the first page and on each
+Next. An empty name takes the first family word of the section key in the
+order talk, about, accept, reject, then keeper, man or guard, and becomes
+`<family>\%04d%c%sp%02d` (`about\%04dt000p%02d`; keeper, man and guard use
+`town\`): the header's NPC, a letter, the key's trailing digits padded with
+`0` to three, and the part. The letter is `t` unless the header has a hero
+token or the NPC is 21; then the hero's female and mage bits give `f`, `a`,
+`m` or `s`. Only `town.txt` sections carry a family word (EN 176, RU 174; Medium: the
+census model, while the unit lookup it needs is unread); the global-map, quest and
+mission files request no speech through this page route; other script audio
+routes are not characterized. Every requested name equals a `speech.res` key
+in both roots after the census's mapping of `\` to `/` and its case fold (the
+archive lookup is unread, Medium); EN holds 12 and RU 20 keys that no
+page or shop name format can request. The shop name formats and the shop
+route are outside this page. — R2-ENGINE-802, R2-ASSET-208
 
 The ordinary event dialogue starts as a 580x240 rectangle at (30, 120). Its
 placement rounds the width to 8 + 96k and the height to 104 + 64k (488x232)
