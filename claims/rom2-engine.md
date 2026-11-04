@@ -21174,3 +21174,169 @@ renderer is not identified among the other callers of L2.02954, so
 read it.
 
 **Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
+
+## EN corpse list, owner detach, creature spell slots and bat draw inputs after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-830 | The EN ROM2 kill walker moves a unit from the walked list (the registry, via R2-ENGINE-772) to the corpse list [[L2.00805]+0x7c]+0xc; the document writes and reads it by slot 0; in the bodies read LOAD uses no other list. | High / Medium | ✔ promoted (branch candidate) | [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+| R2-ENGINE-831 | EN ROM2 L2.01670(unit) removes the unit from the object at unit +0x70 (L2.04986), drops that object from owner +0x28 when L2.02798 on it returns 0 and [+0x44]+0x2c is 0, and removes the unit from owner list +0x24. | High / Medium | ✔ promoted (branch candidate) | [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+| R2-ENGINE-832 | ROM2 bats with command spell slot +0x7c = 0 keep it through original resaves (game0038..0041); the listed Unit LOAD body (EN L2.01090) calls no template loader directly, so no Darkness slot (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+| R2-ENGINE-833 | ROM2 bat relation cells 1,5 and 5,1 hold no bit 0x10 in 18 files; SpellEffects is empty in 17. Two inputs of the L2.03404 test; +0x184, +0x1b8, fog not compared; refusing value Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+
+### R2-ENGINE-830
+
+The EN kill walker (listing of EXP-2103, `L2.04987..L2.04988`) calls the
+owner detach `L2.01670` (R2-ENGINE-831) on unit +0x14, removes the unit
+from list +4 of the walked object through `L2.04533`, and adds it through
+`L2.00202` to `[[L2.00805]+0x7c]+0xc`, the list corpse ageing runs on
+(R2-ENGINE-776). `L2.00202` appends to list +4 (`L2.00203`). The listing shows the walked object as
+`this`, saved at `L2.04989`; that it is the unit registry `[L2.00325]` comes
+from R2-ENGINE-772 (one caller, `L2.04427`).
+
+The EN document routine `L2.00243` calls slot 0 of that list with the
+archive in the store branch (`L2.03891`) and in the load branch
+(`L2.04990`), and slot 1 after the world half (`L2.04991`). When the byte read after the corpse list is nonzero (read at `L2.04992`;
+`je L2.04993` at `L2.04994`), the load branch adds to `[L2.00325]` only the
+members of each Player's list `[+0x24]+4` whose byte +0x4c lacks bit 8
+(`L2.04995..L2.04996`).
+
+Slot 0 of class `L2.03181` (vtable `L2.03182`) is `L2.04997`, which calls
+`L2.04998` on list +4. Storing, `L2.04998` writes the count (`L2.02800`)
+and each element through `L2.04999`. Loading, it clears the list
+(`L2.05000`), reads the count (`L2.03229`) and appends each object read by
+`L2.04956` (`L2.03455` with `L2.05001`) through `L2.00204`; it calls no
+other list. Slot 1 `L2.03184` calls each member's slot +0x24
+(R2-ENGINE-617). The EN Unit slot +0x24 path (`L2.03450`, listing of
+EXP-2112) ends with `L2.03451` on [+0x1c0] and `L2.03452` on [+0x1c4];
+each looks a nonzero DWORD ([+0x1c0]+0x7c; [+0x1c4]+0xc, +0x10, +0x18,
++0x20, +0x28 and on) up in `[L2.00805]+0xdc` through `L2.03187` and stores
+the result when found.
+
+`L2.03181` has 21 E8 call sites. `L2.05002` builds two lists at +0x6c and
++0x8c of an object with vtable `L2.05003`; `L2.05004` and `L2.05005` build
+`[L2.00325]` and `[L2.05006]`. The constructor of the corpse list was not
+found.
+
+**Confidence.** High for the listed instructions. Medium for: the corpse
+list's class, so its slot 0 and slot 1 being `L2.04997` and `L2.03184`
+(the non-virtual `L2.00202` add fits the class or one derived from it);
+`L2.03455`, unread; and the clause "no other list", because the Player and
+Group LOAD readers that fill a Player's +0x24 list were not read.
+
+**Unknown.** Whether any LOAD path puts a dead-list unit into a Player's
++0x24 list or into `[L2.00325]`. Read the Player and Group LOAD readers and
+the constructor that stores server +0x7c; or load game0045 in the original
+and watch the dead squirrels' cells.
+
+**Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).
+
+### R2-ENGINE-831
+
+The EN routine `L2.01670` takes a unit and runs on the owner (the kill
+walker passes unit +0x14). It takes O = unit +0x70 and calls
+`L2.04986(unit)` on O. When `L2.02798` on O returns 0 and [O+0x44]+0x2c is
+0, it calls `L2.03880(O)` on owner +0x28. It then removes the unit from
+list [owner+0x24]+4 through `L2.04533`. The routine at `L2.01669` calls
+`L2.01670` and then the unit's slot +4 with 1. The E8 scan finds two
+callers of `L2.01670`: `L2.05007` and the kill walker's `L2.05008`.
+
+In game0045 the Player at list position 2 (id 3, Enemy) keeps groups 1, 2 and
+5 with no member after its six squirrels and four group-5 Foot_Animated are
+in the dead list (R2-SESSION-341); game0044 holds 3, 3 and 4 members in those
+groups (out/group-members.tsv).
+
+**Confidence.** High for the listed instructions and the two E8 callers.
+Medium for O being the unit's Group, for `L2.02798` testing emptiness and
+`L2.03880` removing O from a Group list (bodies unread), and for the
+game0045 groups showing the +0x44 +0x2c test (one file).
+
+**Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).
+
+### R2-ENGINE-832
+
+The attack planner casts only a command slot +0x7c+4i that is nonzero
+(R2-ENGINE-651); the template loader fills the slots from Units Spell 1..3
+(R2-ENGINE-652). Units row 97 Bat_Sonic.4 has Spell 1 14 with Probability 10
+(R2-SESSION-341); spell row 14 is Darkness by R2-ASSET-179 (the name is
+Medium, reached through the row number).
+
+Of the 72 bat records in 18 mission-10 files, the 20 in the five
+original-made files store slot +0x7c 14 and threshold +0x88 3270
+(10 x 0x147). The 52 in the 13 Againrom-written files and their original
+resaves (game0040, game0041, game0038, game0039, game0044, game0045,
+game0046) store 0 and 0. Four of those resaves (game0038, game0039, game0040,
+game0041) are the original's resaves by the owners' statements in the
+population READMEs and store 0 and 0; game0044 to game0046 are tied to the
+Againrom line by the hero name only (Medium). The command bytes +0x14, +0x40, +0x44 and +0x71
+are 4, 15, 4, 4 in the original-made bat records and 0 in the other 52.
+Every bat record has a book (+0x140 present, size 15) whose one Spell
+object has id 14 (72 of 72 records, the 52 with slot 0 included). The book is
+an input of the cast step the planner calls: `L2.02111` calls the book getter
+on +0x140 and exits with no write when it returns 0 (R2-ENGINE-653). The
+books do not separate the files, so the missing Darkness does not come from
+the book.
+
+The listed EN Unit serializer body (`L2.01090..L2.03196`, EXP-2112) calls 35
+distinct targets directly in 121 E8 calls, none of them the template loader
+`R2.0086`, and makes 5 indirect calls (`[edx+8]` and `[eax+8]` four times,
+`[eax+0x30]` once at `L2.05009`). The callees of the 35 targets, the unit's
+own virtual slot +0x30, the object factory `L2.03455` and the callers of
+`R2.0086` were not read. Its LOAD tail tests
+slot +0x30 and on 0 stores +0x3c from `L2.04941(+0xc)` on `L2.00146`.
+
+**Confidence.** High for the stored values and the call census of the
+listing. Medium for the composition: that no other LOAD or play path
+refills the slots (the original's resaves keep 0, which shows the field at
+save time, not every path), and that the book gives no Darkness (the planner
+body R2-ENGINE-651 reads +0x7c and +0x88; the book is read by the cast step
+only, R2-ENGINE-653; other casting routes were not read). The Darkness name
+is Medium through R2-ASSET-179.
+
+**Unknown.** Whether the original's bats cast from another source. Load
+game0044 and game0001 in the original, keep the hero in sight of cells
+(45..48, 10..12) for two minutes and count Darkness casts.
+
+**Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).
+
+### R2-ENGINE-833
+
+The listed test (R2-ENGINE-829) reads client object bytes +0x184 and
++0x1b8, a list +0x130 tag 0x20, the owner's relation bit 8 and four fog
+cells. Mark 0x20 is the Invisibility Effect mark 32 (R2-ENGINE-697), an
+identity by a matching number. The SpellEffects section is the 4-byte
+empty count in 17 of the 18 mission-10 files; game0006 alone has a body.
+The size of the section per file is in out/spelleffects-sections.tsv. Relation
+bit 8 comes from M[Q][P] bit 0x10 (R2-ENGINE-826). The matrix is indexed by
+Player id; the bats are in the Player at list position 4 (id 5, Troll4), so
+their cells are 1,5 and 5,1 (out/players.tsv, out/creatures.tsv). Cell 1,5 is
+zero in all 18 files; cell 5,1 is 1 in eight files (game1041, game0041,
+game0029, game0038, game0039, game0028, game0043, game0046) and absent in
+ten, which include the five original-made files, game0042, game0044 and
+game0045 (out/session.tsv). Every off-diagonal value in every file is 1 or
+2, so bit 0x10, and with it relation bit 8, is never set for the bats' word
+in any file. The cell does not separate the owner's observations: game0029
+and game1041 have the same matrix hash. R2-SESSION-339 records M[5][1] = 1.
+Only two inputs of the test (SpellEffects, relation cells) were compared.
+No stored source of +0x184 or +0x1b8 was identified, and fog was not
+compared. R2-ENGINE-829 grades L2.03404's role as a map-dot drawer Medium,
+so a stored input of it is not shown to be an input of the bats' sprite.
+
+The bat records of game0001 and game0044 differ in 20 fields
+(R2-SESSION-342). Owner reports in the populations: in the original after
+the game0029 LOAD the bats walked toward a corner; after the game1041 LOAD
+and after the game0042 and game0043 LOADs they were not seen. Across
+game0029 and game0043 the bat records differ only in the 184-byte command
+block: all zero in game0029, post = own cell and +0x16 65500 in game0043.
+
+**Confidence.** High for the stored values. Medium for the mapping of
+stored bytes to the test inputs (the client-side producers of +0x130,
++0x184 and +0x1b8 and the post-LOAD relation delivery are unread).
+Unknown for which value hides the bats: the world sprite renderer is not
+identified (R2-ENGINE-829).
+
+**Unknown.** Identify and read the world sprite renderer; or load game0044
+and game0001 in the original, bring the hero next to cells (45..48,
+10..12) and note whether the bats are drawn.
+
+**Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).

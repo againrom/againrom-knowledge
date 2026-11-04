@@ -5286,3 +5286,114 @@ comes from the reveal of R2-ENGINE-827. An original LOAD of game1040 with a
 selection, a move order and no chat input would settle both.
 
 **Evidence.** [EXP-2115](../experiments/EXP-2115-rom2-sight-control/RESULTS.md).
+
+## Mission-10 creature records, life states and resave census
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-341 | 18 ROM2 mission-10 files hold 4 Bat_Sonic.4, 6 Squirrel and 10 Foot_Animated records each; game0044 stores all 20 alive, game0045 6 squirrels and 4 feet in the dead list, game0046 all 16 there. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+| R2-SESSION-342 | Original resaves keep the Againrom creature values (+0x136 0, names, bag +0x1c 0, dead +0x58 0, +0x48 10; bat spell slots 0); game0043 to game0046 changes keys, position, health by -1, command blocks, bat +0x138, +0x1c0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+
+### R2-SESSION-341
+
+Units rows of the EN data.bin: 97 Bat_Sonic.4 (typeID 70, movementType 3,
+Spell 1 14 with Probability 10, serverID 627), 109 Squirrel (74, 1, no
+spell, 636) and 114 Foot_Animated (75, 1, no spell, 640). Of the 29 type-6
+records of the EN 10.alm, 4 carry (typeID, serverID) (70, 627), 6 carry
+(74, 636) and 10 carry (75, 640). In every save record of these kinds
++0xc is the row and word +0xe the typeID; the packed key low word is the
+serverID in 17 files and 0 in game0028. The bats are in group 1 of the Player at list position 4 (id 5, name
+Troll4); the squirrels are in groups 1 and 2, and the Foot_Animated in groups
+3, 4 and 5, of the Player at list position 2 (id 3, name Enemy)
+(out/players.tsv, out/creatures.tsv).
+The owner's «мышки», «белки» and «сороконожки» are taken to be
+Bat_Sonic.4, Squirrel and Foot_Animated.
+
+Life states (group / dead list; squirrels, then Foot_Animated):
+
+| File | Writer | Squirrel | Foot_Animated |
+|---|---|---|---|
+| game0028, game0043 | Againrom | 0 / 6 | 0 / 10 |
+| game0042 | Againrom | 6 / 0 | 10 / 0 |
+| game0044 | original | 6 / 0 | 10 / 0 |
+| game0045 | original | 0 / 6 | 6 / 4 |
+| game0046 | original | 0 / 6 | 0 / 10 |
+| game0001, game0004, game0005, game9999 | original | 6 / 0 | 10 / 0 |
+| game0006 | original | 6 / 0 | 9 / 1 |
+
+The four bats are in group 1 in every file. In game0045 the dead are
+squirrel IDs 23..28 (health -50..-70, +0x13c 4) and Foot_Animated 39..42
+of group 5 (health -23..-37, +0x13c 3); all have +0x50 = +0x54 = 16, +0x58
+5 or 7, +0x48 0, and +0x40 = +0x5c = the hero's record. In game0046 the 16
+dead have +0x13c 4, health -47..-194, +0x58 0, +0x48 10, +0x5c 0 and +0x40
+the hero. game0006 holds one Foot_Animated in the dead list (health -11,
++0x13c 2) and one in a group with health -7, +0x13c 1, +0x50 = +0x54 = 0.
+
+The owner, asked which file was loaded, answered «Сейв оригинала» (README of
+the sight run), so the loaded file is one of the three original-written
+files game0044 to game0046. Only game0044 (GOG time 10:01:09, before
+game0045 at 10:02:28) stores the squirrels and the group-5
+Foot_Animated alive. A LOAD of game0044 therefore shows them alive from
+stored state alone; a LOAD of game0045 or game0046 finds them only in the
+dead list, which LOAD keeps as the corpse list in the bodies read
+(R2-ENGINE-830).
+
+**Confidence.** High for the rows, placements, counts, joins and values,
+recomputed from life-states.tsv, creatures.tsv, data-rows.tsv and
+alm10-units.tsv. Medium for the owner-name ties: «белки» to Squirrel by name; «мышки» to
+Bat_Sonic.4 by name (a bat is a "мышь" in Russian) and by the Darkness spell
+(R2-ASSET-179); «сороконожки» to Foot_Animated by name only. Medium for
+game0044 as the revival LOAD (it rests on R2-ENGINE-830's Medium and on the
+owner's narrowing to three files). The owner's single centipede that comes
+alive and vanishes does not discriminate between a LOAD of game0044, where
+all ten Foot_Animated are already alive, and a dead-list revival from
+game0045 or game0046. Unknown why one centipede
+appears and then vanishes: no stored field singles out one Foot_Animated in
+game0044 or game0045.
+
+**Unknown.** Load copies of game0045 and game0044 in the original, watch
+cells (20, 29..31), (25..27, 22) and (37..39, 14..16) for two minutes and
+note which creatures are drawn, move or vanish.
+
+**Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).
+
+### R2-SESSION-342
+
+The census pairs records of one kind by record ID, and by sorted record ID
+when the ID sets do not intersect: the records of game0001 are paired with
+game0044's by sorted record ID for all three kinds. It lists every walk field whose bytes differ
+(census.tsv, census-summary.tsv):
+
+| From, to | Bat_Sonic.4 | Squirrel | Foot_Animated |
+|---|---|---|---|
+| game0042, game0044 | 9 | 7 | 7 |
+| game0044, game0045 | 3 | 14 | 14 |
+| game0043, game0046 | 9 | 6 | 6 |
+| game0001, game0044 | 20 | 15 | 15 |
+| game0029, game0043 | 1 | 1 | 1 |
+
+Between game0043 and game0046 the squirrel and Foot_Animated records
+differ only in the archive keys (savedSelf, owner +0x14, +0x40), position
+raw12, health (-1 in each of the 16) and the command block. The four bats
+change the same keys, the position block and the command block, and also
++0x138 (1 record) and +0x1c0 (1 record); no bat health changes. Between
+game0044 and game0045 the bats change +0x138, a book tag and pointer
++0x1c0 only; among their 14 changed fields the killed records change +0x13c, +0x40, +0x50, +0x54,
++0x58, +0x5c and health. Against game0001, every game0044 creature record
+differs in +0x136 (1 in game0001, 0), the name +0x80 (empty, the template
+name), bag +0x1c (32767, 0) and the command block; Squirrel and
+Foot_Animated also in the book (absent in game0001, present with size 1);
+the bats also in the +0x74 item (word +0xe 0 and owner 0 in game0001, 33
+and the key of the Player at list position 4, id 5, in game0044). Between game0029 and game0043 only the command
+block differs, in all 20 records.
+
+The census supports these lines: game0046 from game0043 (equal fields
+apart from keys, one corpse-ageing step and command blocks); game0044 and
+game0045 from the game0042 line, game0045 after game0044 in play (the
+Againrom-only values above are kept and the live Foot_Animated keep their cells).
+
+**Confidence.** High for the field census over the walked fields. Medium
+for the lines of descent: the owner did not name the loaded files, and the
+census compares only the files named.
+
+**Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).

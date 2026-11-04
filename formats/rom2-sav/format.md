@@ -1475,3 +1475,37 @@ game1040 to game0040, 13 of 30 live units move, 11 nearer to cell (0,0);
 over game1041 to game0041 none of 14 moves. Both resaves empty the
 selection. No stored byte is shown to refuse command of game1040's hero.
 — R2-SESSION-340
+
+## EN mission-10 creatures, dead list and resaves
+
+The mission-10 bats, squirrels and Foot_Animated are Units rows 97, 109
+and 114 (typeIDs 70, 74 and 75), with 4, 6 and 10 records in each file;
+the owner's creature names are tied to them by name (the bats also by the
+Darkness spell, R2-ASSET-179): Medium. Of the three original-written files of
+the sight run game0044 stores all of them alive, game0045 six
+squirrels and four Foot_Animated in the dead list, game0046 all sixteen
+there. Why one centipede appears and vanishes after a LOAD is Unknown.
+— R2-SESSION-341
+
+A killed unit leaves its Group, its owner's +0x24 list and the walked list
+(the unit registry, through R2-ENGINE-772) and enters the corpse list, which the document writes and reads
+through that list's slot 0 as a count and objects. In the bodies read,
+LOAD keeps those units in the corpse list only; the list's class and the
+Player and Group LOAD readers are Medium. — R2-ENGINE-830, R2-ENGINE-831
+
+A bat record stored with command spell slot +0x7c = 0 keeps it through
+original resaves (game0038..game0041 are the original's resaves by the
+owners' statements), and the listed Unit LOAD body calls no template loader
+directly (35 direct targets, 5 indirect calls; callees and the object factory
+unread), so the attack planner finds no Darkness slot (Medium). — R2-ENGINE-832
+
+Two of the inputs of the L2.03404 test (SpellEffects records, relation
+cells 1,5 and 5,1) hold no tag 0x20 and no bit 0x10 for the bats in 18 files
+(cell 5,1 is 1 in eight files, 0 in ten); +0x184, +0x1b8 and fog were not
+compared, and the role of L2.03404 as a map-dot drawer is Medium
+(R2-ENGINE-829). Which value keeps the bats undrawn is Unknown.
+— R2-ENGINE-833
+
+Original resaves keep the Againrom-written creature values: +0x136 0, the
+name, bag +0x1c 0 and, for dead records, +0x58 0 and +0x48 10; for the
+bats, spell slots 0. — R2-SESSION-342
