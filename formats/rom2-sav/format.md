@@ -1183,6 +1183,21 @@ searched. — R2-ENGINE-617, R2-ENGINE-618
 
 — R2-ENGINE-618
 
+In ROM2 EN (RU bodies unread), base +4 is the structure key. The map build
+stores +8 = type-4 ID and +4 = +8 + 0x6000; the client's static object holds
+the same sum from the map. LOAD reads +4 from the save with no value test;
+no recompute was found (Medium: the object builder is unread). Of the fields
+named above, LOAD rebuilds Building +0x3c, base +0x18 and the link keys and
+enters the self key in the session; it keeps +4 as stored. Message 0x24
+finds the clicked structure by +4. — R2-ENGINE-857, R2-ENGINE-617,
+R2-ENGINE-618
+
+The five original mission-10 files store +4 = +8 + 0x6000 in all 16
+structures (Pointer 24618). game1000 and game1236 store 2..17, and the
+original's resaves game0049 and game0048 write 2..17 back. With such a file
+loaded, a sign click's lookup returns 0 and no order, action or text box
+follows; that composed path is Medium. — R2-SESSION-344, R2-ENGINE-858
+
 REG restore destinations: GameOptions to client +0xab0..+0xabc, app
 +0x41c and global ShowTimeFlow; View X/Y to client +0x5c/+0x60; SpellBook
 IsOpen and Pressed; Objects Selection and Group0..9 by object ID;

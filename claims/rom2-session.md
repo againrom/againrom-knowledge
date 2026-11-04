@@ -5451,3 +5451,43 @@ after a lost pursuit, and the seconds per head-second step are not
 measured.
 
 **Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+## Mission-10 structure keys in original, other-program and resaved files
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-344 | Five original ROM2 mission-10 saves store each Building and Pointer base +4 = type-4 ID + 0x6000 (Pointer 24618); game1000, game1236 and their original resaves game0049, game0048 store 2..17 (Pointer 17). | High | ✔ promoted (branch candidate) | [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md) |
+
+### R2-SESSION-344
+
+Population: game0001, game0004, game0005, game0006 and game9999 of the
+first original-made folder; game0004 (the same SHA256), game0048,
+game0049, game1000 and game1236 of the sign-resave folder. Each file was
+verified against its folder's manifest and decoded to its end by the
+structural walk (SHA256 values in the experiment's inputs.tsv). Each holds
+16 structures: 15 Building records and the Pointer as record 15.
+
+| Field | Five original files | game1000, game1236 | game0048, game0049 |
+|---|---|---|---|
+| base +4 | +8 + 0x6000 for all 16 (24577..24618) | 2..17 in record order | 2..17 in record order |
+| base +8 | 1,2,3,4,6,10,11,12,25..31,42 | same | same |
+| Pointer base +0x0c | 205 (game0001), 43792 | 0 | 0 |
+| Pointer base +0x14 | nonzero | 0 | 0 |
+| Pointer base +0x18 | 0 | 2 | 0 |
+| Pointer +0x0e, +0x40, +0x60, +0x6c | 74, 74, 1, 24 | same | same |
+
+- The base +8 list equals the type-4 IDs of the EN `10.alm` records in order.
+- Field-by-field against game0004 (same field path; paths shift where record
+  counts differ): game1000 differs in 827 of 3221 fields and holds a value
+  found in none of the five original files in 643; game1236 710 of 3327 and
+  632; game0048 728 of 3340 and 659; game0049 838 of 3234 and 666. The counts
+  are field-path matches; the share caused by path shift is not measured, and
+  they say nothing about which fields the game reads.
+- Unit records keyed +8 = 32 and 36 occur once in every file of the
+  population.
+- The current availability record of every file is (1, 10).
+
+**Confidence.** High for the measured values, hashes and counts. The field
+meanings of +4 and +8 are R2-ENGINE-857's reading.
+
+**Evidence.** [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md)

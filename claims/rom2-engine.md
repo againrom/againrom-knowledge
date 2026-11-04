@@ -21988,3 +21988,103 @@ Both complete listed hover bodies perform the object walk before their four-word
 **Confidence.** Medium for this bounded local ordering and absence of a later local clear; no complete caller, indirect or visibility-writer census. Unknown for which units, structures, Pointers, sacks and corpses stay nameable after sight loss. The byte +0x184<2 gate alone is not a proved corpse taxonomy.
 
 **Unknown.** Read the +0x7c writers and per-class preparation/registration paths. A future first-mission run must move own sight away from an explored object, keep the pointer at its old top and foot rectangles, and watch sprite, cursor and panel; repeat for each listed kind and locale.
+
+## Structure key after LOAD and the road-sign click
+
+Static reads of the owned EN `allods2.exe` (Capstone listings, one generation
+reproduced byte for byte). EN addresses only; the RU bodies were not read.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-857 | ROM2 EN keys a structure by base DWORD +4 = type-4 ID + 0x6000; LOAD reads +4 with no value test and the list serializer does not call `L2.05098`; a recompute in unread `L2.05099` is not excluded; message 0x24 matches the ID on +4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md) |
+| R2-ENGINE-858 | After ROM2 EN LOAD of a mission-10 save with no structure at base +4 = 0x602a (measured: game1000, game1236, game0048, game0049, all 16 structures 2..17), a sign click's 0x24 lookup returns 0 and no order, action or text box follows. | High / Medium | ✔ promoted (branch candidate) | [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md) |
+
+### R2-ENGINE-857
+
+- Map build: the type-4 Pointer arm of the type-4 pass (`L2.05100`, kinds
+  0x46..0x4b) and its common tail store structure +8 = element +0x10
+  (`L2.05101`..`L2.05102`) and call structure add `L2.05098` (`L2.05103`).
+  Structure add calls `L2.05104` (which appends through `L2.05105`) and then
+  stores +4 = +8 + 0x6000 (`L2.05106`..`L2.05107`).
+- The ALM type-4 reader `L2.05108` passes the sign-extended record ID to the
+  element constructor `L2.02500`, which stores it at element +0x10.
+- Client: the map constructor `L2.01385` stores static object word +4 =
+  entry +0x10 + 0x6000 (`L2.05109`..`L2.05110`); R2-ENGINE-615 reads the list
+  and R2-ENGINE-606 the hovered ID that message 0x24 carries.
+- LOAD: the document reader `L2.00243` calls the Buildings reader
+  `L2.03170` on [[this+0x7c]] (`L2.05111`..`L2.05112`), which calls the list
+  serializer `L2.05113`. Its read branch reads a count and, per object,
+  calls `L2.05099` and appends the result with `L2.05105` (`L2.05114`..
+  `L2.05115`); it does not call `L2.05098`. The base serializer `L2.03196`
+  reads +4 into the object (`L2.05116`..`L2.05117`), passes word +4 to
+  `L2.00336` when +4 is nonzero, and has no compare on the value. `L2.00336`
+  sets bit (ID & 31) of DWORD [`L2.00339` + (ID >> 5) x 4] for an ID below
+  0x6000 and skips the others. The save branch writes the object's +4
+  (`L2.05118`..`L2.05119`). A second call of
+  `L2.03170` at `L2.05120` (branch gated by `[obj+0x94]`, compare at
+  `L2.05121`) reaches the same serializer; which branch LOAD takes was not
+  read.
+- Lookup: `L2.03053` walks its list with `L2.03054` and `L2.03055` and
+  returns the first object whose DWORD +4 equals the sign-extended word
+  argument, else 0 (`L2.05122`..`L2.05123`). The 0x24 arm calls it at
+  `L2.05124` on [[ctx+0x7c]] (R2-ENGINE-607). Direct E8 calls of
+  `L2.03053`: `L2.05125`, `L2.05124`, `L2.05126`.
+- The script compile `L2.00201` maps structures from [[this+0x24]] and units
+  by their +8, not by +4 (`L2.05127`..`L2.05128`).
+
+**Confidence.** High for the listed stores, compares and calls. Medium that
+the list LOAD fills is the one the 0x24 arm searches: the arm's ctx is the
+`this` of `L2.00235` and the reader's is a local of its caller at
+`L2.05129`; the two objects are not tied by a read body. Medium that each
+loaded object reaches the base serializer: `L2.05099` is unread. Medium that
+`L2.05130` and `L2.05103` are the only callers of `L2.05098`: E8 byte scan
+only, no indirect-call census.
+
+Observation, not a read body: the original wrote game0048 and game0049 after
+LOAD of game1236 and game1000, and they hold +4 = 2..17. The save branch
+writes the object's +4, so no recompute changed these objects between LOAD
+and SAVE. Limit: this is the value at save time, not at click time, and the
+owner did not click after loading the resaves.
+
+**Unknown.** Whether the server later sends the client a structure key
+that replaces the map key.
+
+**Evidence.** [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md)
+
+### R2-ENGINE-858
+
+Composed from R2-ENGINE-857, R2-SESSION-344 and the path of R2-ENGINE-606,
+R2-ENGINE-607, R2-ENGINE-519, R2-ENGINE-518 and R2-ENGINE-047:
+
+- If the client keeps the map key (Medium), the client sign object key is
+  0x602a (type-4 ID 42 of `10.alm`, record 15) whatever the save holds, so
+  the click sends 0x602a.
+- In game1000, game1236, game0048 and game0049 every loaded structure holds
+  +4 in 2..17, so `L2.03053` returns 0. The arm then pushes the string
+  `L2.03059` ("No building #") and the ID to the formatter and calls
+  `L2.01042`, and does not call the
+  setter `L2.03060` (R2-ENGINE-607).
+- `L2.01042` passes the text to `L2.05131` only when app +0x5d8 equals 3,
+  and otherwise frees it.
+- With no order 0xf the hero does not enter state 15, the state-15 arm does
+  not run the Pointer's +0x6c = 24, and op 2 with event 19 (node 25) is not
+  reached. `mission10.txt` holds `#event19` once in EN; its body is 41 bytes.
+- In game0004 and the four other original files the Pointer holds 24618 =
+  0x602a, so the lookup returns the Pointer and the path of R2-ENGINE-607
+  continues.
+
+**Confidence.** The index grade reads High for the miss branch of the arm and
+for `L2.01042`, Medium for the composed headline (the headline is Medium): it rests on the Medium links of
+R2-ENGINE-857 and on the client key staying 0x602a after LOAD. Medium that
+campaign play leaves the miss silent: `L2.05131` is unread and app +0x5d8 =
+2 for campaign is R2-ENGINE-605's reading. The object `L2.01042` tests comes from the unread getter `L2.05132`.
+Units keyed 32 and 36 (nodes 13 and 22, the unit references before node 25
+below 10001) are present once in each of the nine distinct mission-10 files;
+that slot 24 therefore names node 25 after every LOAD is Medium: the router
+`L2.00178` miss path and the reference 10001 path were not read.
+
+**Unknown.** The run that settles it: LOAD game0048 or game0049 in the
+original EN, select the hero and click the sign. The prediction is no text
+box and no walk.
+
+**Evidence.** [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md)
