@@ -9315,3 +9315,130 @@ In the complete listed R0218 body the object rectangle walk and paired hit store
 **Confidence.** Medium for the bounded ordering/no-local-clear observation, with no complete caller/visibility census. Unknown which unit, structure, sack or corpse remains nameable after sight loss. A matching field offset or an explored-cell screenshot from another game is not evidence.
 
 **Unknown.** Read the visibility-state writers and every population's preparation route. A future mission run must move own sight away from an explored enemy unit, structure, sack and corpse, keep the pointer over each old rectangle and compare hover, panel and draw state.
+
+## Guard machine per pass, walk home and a blow on the way
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-776 | Guard's member tail has three outcomes per pass (engage, kind 0xb or heal at the post, else kind 1 to the post); row 1 calls no acquisition, so kind 1 stays at the post unless the route is refused (`mover+0x98`: `R0004`). | High | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-777 | Under Guard a pursuit ends at the first pass that gives the member no winner from the clipped shared population; no pursuer-to-post, pursuit-time or pursued-distance test is in the bodies read. | Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-778 | Order-0 state 0xb tests the 5-cell block about the post through `R0020` and `R0021` and reads no sight stamp, so a remembered attacker cell reaches it only after arrival, through `R0022`. | High | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-779 | A Guard member struck on the walk home keeps walking until a later pass admits the attacker for the whole group; the turn flag waits for the idle turn and turns to a random facing, not to the attacker. | High / Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-780 | The executor reads `[actor+0x70]+0x3c` then `+0x45` with no null test while `session+0xb388` is 0, and the per-actor machine has no live caller but group order 0; no path for a groupless actor was found. | High / Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-781 | The guard machine has engage, walk-home and at-post outcomes rewritten each pass; no walk-back flag, timer or distance ends the walk, and target taking resumes at the next pass. | Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-782 | The guard machine's state is saved raw in the order block, the group AI record and the mover; the candidate lists and the sight map are not in those blocks. | Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+
+### AI-776
+
+Order 1's arm `R0024` (`evidence/code-en/listings/guard.txt`) ends with a member walk
+`L00825`..`L00826`. `ord+0x20` non-zero (`L00774`) calls `R0009(member, ord+0x20)`
+(`L00336`). Otherwise the member's cell is compared with the post word `ord+0x00` (`L00827`) and
+`R0040` tests the sub-cell centre; both true with `[owner]+0x28` non-zero store kind 0xb
+(`L00337`) and call `R0113` when `actor+0x4c & 4`; both true with `[owner]+0x28` zero call
+`R0015`; any other case stores kind 1 (`L00338`) and `ord+0x0a` = `ord+0x00` (`L00828`). The
+walk stores no `actor+0x50`, `ord+0x0c` or `ord+0x54`..`+0x5a`. The dispatcher then runs for each
+member `R0105` and `R0100`, or `R0106` and `R0107` (`L00312`..`L00313`,
+`group-dispatch.txt`). Executor row 1 (`L07145`..`L14833`, `executor.txt`) stores `mover+0x6c` =
+1, `mover+9` = 0xff when `mover+0x74` differs from `ord+0x0a`, and calls `R0178(actor, ord+0x0a,
+0)`; then progress 3 and action 1, or action 1 when centred (`L17458`). It stores no kind and calls no acquisition, so a
+member that reached its post keeps kind 1 until the next pass stores 0xb, unless the route is refused
+(`mover+0x98`): then the epilogue `L00613`..`L00114` (`executor.txt`) stores `ord+0x08` = 0 and runs
+reacquisition `R0004` (`AI-ROUTE-045`, `AI-375`). Kind 0xb's row
+(`L14702`) only calls `R0205`. Row mapping from the table at `L00099` is `AI-502`'s.
+
+**Confidence.** High: the three bodies read whole in one image (EN and RU listings identical, SHA-256
+`942e9b72…`, one witness), every store a cited instruction and every branch target local. Callees
+`R0009`, `R0113`, `R0015`, `R0178` and the list primitives `R1334`, `R0029`,
+`R1133` are not re-read here.
+
+### AI-777
+
+Composed from `AI-776`, `AI-740`, `AI-741`, `AI-739` and the clip read in `guard.txt`: the candidate
+cell's Chebyshev distance `R0167` from the centroid word `grpAI+0x28` (`L00372`) is compared with
+`grpAI+0x2d` and kept when not above it (`L00373`). The member's own position and its post enter
+only the walk-home test. A pursuit therefore ends at the first pass (once per 16 ticks, `AI-385`)
+where the member gets no winner: the target is out of every member's sight and off any remembered
+cell, outside the circle, filtered, or outscored. Other enders are a refused route, the withdrawal
+tail, a stand and command, script or LOAD setters (`AI-704`).
+
+**Confidence.** Medium: a composition; the completeness of the enders rests on `AI-704` and
+`AI-REISSUE-077` (Medium), and the scorer and builder bodies are `AI-740`'s.
+
+**Unknown.** A native trace of `ord+0x08`, `ord+0x20` and the target's distance from the centroid at
+each pass of one Guard pursuit that ends.
+
+### AI-778
+
+`R0137` (`member-guard.txt`, read whole): post set from the current cell when zero (`L00328`);
+distance `R0162` from the cell to the post compared with `actor+0xa5` (`L00267`),
+kind 1 and `ord+0x0a` = post when not below (`L00330`, `L00331`); block `R0020(ord+0x00,
+mover+0x08)` (`L00332`), filter `R0021(…, 0)` (`L17459`), list head to `R0009`
+(`L00333`/`L00586`); empty and off the post cell: kind 1 and `ord+0x0a` = post (`L00334`,
+`L14873`); on the post cell: `R0022` (`L00335`). Its calls are `R0019`, `R0299`, `R0300` (position getters) and these five. `R0022`
+calls the sight stamp `R0114` (`L01742`, `acquire.txt`), which carries the remembered cell
+(`AI-703`), and stores kind 6 within reach or kind 0xb (`L00576`, `L14777`).
+
+**Confidence.** High: one body read whole, its ten call sites (eight distinct targets) listed in `calls.tsv`. `R0020` is
+`AI-694`'s and `R0021` `AI-694`'s and `AI-FILTER-001`'s.
+
+### AI-779
+
+The hook `R0226` (`struck-hook.txt`, read whole) stores `ord+0x54` = 1 (`L00652`), `ord+0x58` =
+the attacker's cell (`L00653`), `ord+0x5a` = 0 (`L00654`) and calls `R0126` (`L15388`).
+Executor row 1 reads none of these (`AI-776`). The idle turn `R0205` (`idle-turn.txt`, read whole),
+run by kind 0xb's row (`L17367`) and by the reacquisition routine (`L00813`, `AI-390`), reads the flag (`L00655`), sets the wanted facing to `mover+0x00 + 0x21 +
+190·rand()/[AImgr]` (`L00994`..`L00997`), clears the flag (`L00657`) and calls `R0056`; it reads
+no `ord+0x58` and no attacker. Composition with `AI-GROUPSEE-068`, `AI-SCORE-069` and `AI-703`: at the
+next pass an AI-owned member's remembered cell is stamped into the shared map, so an attacker standing
+there or seen is a candidate for every member, each member is scored for it, and the clip of `AI-777`
+applies again. A struck member keeps walking for at most one pass interval when the attacker is
+admitted; an attacker outside the circle is never assigned, the walk and the later idle turn
+continue (`AI-705`).
+
+**Confidence.** High for the hook, row 1 and the idle turn bodies. Medium for the composition across
+passes: no run of the original, and the scorer may prefer another candidate.
+
+**Unknown.** A Guard member struck on the walk home by a ranged attacker inside the circle and out of
+sight: record `ord+0x08`, `ord+0x20`, `ord+0x58` per sub-tick until the second pass after the blow.
+
+### AI-780
+
+The executor `R0016` (`executor.txt`): when `session+0xb388` is 0 (`L00088`) it loads
+`[actor+0x70]` (`L17460`), then `[that+0x3c]` (`L17461`) and the byte `+0x45` (`L17462`) with no
+test of either pointer. `actor+0x70` as the actor's group follows `AI-694`'s reading of `actor+0x70`'s
+list and the group record `grp+0x3c` of `AI-GROUP-009`; the identity link is that reading. The
+per-actor machine `R0008` is reached live only from group order 0 (`L00284`, `AI-TICK-008`): the
+sweep `R0148` is unreachable (`AI-DEAD-035`) and the wrappers `L14669`, `L14670`, `L14671`
+have no found caller (`AI-549`). Temporary casters with `actor+0x3c` = 0 skip the executor (`AI-478`).
+
+**Confidence.** High for the executor stores and loads read. Medium for "no path for a groupless
+actor": it rests on `AI-549` and `AI-DEAD-035`'s caller searches and on the field identity above.
+
+**Unknown.** Whether any reachable actor has `actor+0x70` = 0 while ticking: a run recording
+`actor+0x70` of every actor at each pass of one mission, including summoned and created actors.
+
+### AI-781
+
+Composition of `AI-776`..`AI-780`, `AI-742` and `AI-752`. Order 1: engage (kind 5, `ord+0x0c`,
+`ord+0x14`, `ord+0x20`), walk home (kind 1, `ord+0x0a` = `ord+0x00`, `ord+0x20` = 0, `ord+0x0c` kept),
+at post (kind 0xb for an AI owner). Every pass recomputes the outcome from the population; the
+walk-home outcome carries no flag, timer or distance, and the next pass that admits a candidate
+replaces it. Order 0 state 0xb: engage the block head, walk home, or `R0022` at the post. EN and
+RU listings are identical.
+
+**Confidence.** Medium: no stronger than `AI-777` and `AI-779`'s compositions.
+
+### AI-782
+
+From `SAV-1066` (order block `0x00`..`0x93` raw), `AI-652` (group record `0x50` bytes and mover
+`0xb4` bytes raw), `SAV-GRPORDER-806` (order byte literal) and `AI-654` (`session+0xb388` not
+serialized). The machine's fields of `AI-781` lie in those blocks: `ord+0x00`, `+0x08`, `+0x09`,
+`+0x0a`, `+0x0c`, `+0x14`, `+0x20`, `+0x54`, `+0x58`, `+0x5a`; `grpAI+0x20`, `+0x24`, `+0x28`,
+`+0x2d`, `+0x30`, `+0x34`, `+0x38`, `+0x45`. The candidate lists and the sight byte map are rebuilt
+each pass and are not in the blocks named.
+
+**Confidence.** Medium: a mapping of fields onto the cited serializers; no save was read here, and
+whether LOAD translates the actor pointers `ord+0x0c` and `ord+0x20` is not established.
+
+**Unknown.** Save during a Guard pursuit, load, and record `ord+0x0c` and `ord+0x20` before the first
+pass.

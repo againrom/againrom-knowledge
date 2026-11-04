@@ -190,6 +190,31 @@ memory can still stamp its old cell until consumed; the actor must stand on that
 cell and pass the remaining gates. No prior-target cooldown is found in the bodies read (not checked in their callees; Medium).
 — AI-741, AI-742
 
+### The guard machine per pass
+
+Each Guard pass gives each member one of three outcomes: engage its scored candidate; at its post
+cell and centred, the idle turn (AI owner) or the heal helper (human participant's owner); otherwise
+a walk to its post. The walk row itself only walks: it stores no kind, runs no acquisition and reads no struck field, so a
+member that reached its post keeps the walk kind until the next pass unless the route is refused;
+then the executor epilogue stores `ord+0x08` = 0 and runs reacquisition. — AI-776
+
+A pursuit ends at the first pass that gives the member no winner from the population clipped about
+the live centroid. Under group order 1, the member's distance from its post, the pursuit's duration
+and the distance chased are not tested in the bodies read. There is no walk-back flag, timer or
+distance: the next pass that admits a candidate replaces the walk (Medium). — AI-777, AI-781
+
+A member struck on the walk home keeps walking. At the next pass an AI-owned member's remembered
+attacker cell joins the shared population, so the attacker, standing there or seen, is scored for
+every member inside the circle. The struck turn waits for the idle turn, run by the at-post kind and by the reacquisition routine,
+and picks a random facing; it does not face the attacker. Under order 0 the member's own guard state
+tests the member's distance from its post against its sight and the 5-cell block about its post; the remembered cell reaches it through the standing acquisition after
+arrival. — AI-778, AI-779
+
+The executor reads the actor's group record without a null test, and the per-actor machine has no
+live caller except group order 0; no evaluation path for an actor in no group was found (Medium).
+The machine's fields are saved raw in the order block, the group AI record and the mover; the
+candidate lists and the sight map are not in those blocks, and the session enable word is not saved. — AI-780, AI-782
+
 ### Pursuit after the target teleports
 
 In three measured relocations no pursuer's order record byte changed: pending kind 5,
