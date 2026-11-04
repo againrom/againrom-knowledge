@@ -10762,7 +10762,7 @@ state executable behaviour and no stored-file layout.
 | R2-ENGINE-504 | A ROM2 unit holds a target for one activity, then re-picks, from units each nearer than those kept before, the hostile of least turn, or stands or looks around. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-505 | A ROM2 attack order's activity-5 body has no distance bound (Medium); a guard's walk-back gives way to an attack on a hostile within the picker radius of its post. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-506 | ROM2 Human-table units (slot +0x30 nonzero) back off at health <= +0x40, flee at <= +0x44: HPmax, HPmax/4 with a spellbook; HPmax/2, 0 if ranged. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
-| R2-ENGINE-507 | A ROM2 active group's programme byte picks one of ten routes; guard handlers leash enemies to a jittered radius and return idle members. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-507 | A ROM2 active group's programme byte picks one of ten routes; guard handlers leash enemies to a jittered radius and return idle members. | High / Medium | ● active (amended, partially retracted) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-508 | EN and RU ROM2 agree on 64 of 65 masked targeting, flight and group bodies; EN has a wrapper `L2.02403` (RU Unknown). | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 
 ### R2-ENGINE-501
@@ -11004,8 +11004,10 @@ move); 17, wander `L2.02469`; 18, guard B `L2.02470`; 19, support
 `L2.02471`; 0xff, each member through the idle planner (`L2.02472`); 6 to
 16 and 20 to 254 run no route, only the post-step. Group sight `L2.02473` joins the members' sight and remembered
 cells under the hostile filter. `L2.02474` keeps enemies within radius
-+0x38 + U{-1, 0, 1}, plus 4 while enemies remain, of point +0x28. Members
-without a target return to cmd word +0 and stand.
++0x2d of point +0x28, the members' mean cell that `L2.02475` rewrites at the
+start of each guard tick (R2-ENGINE-841, R2-ENGINE-842). +0x2d is +0x38 +
+U{-1, 0, 1} + 4 from the tick that finds a first member while +0x30 is 0
+(R2-ENGINE-843). Members without a target return to cmd word +0 and stand.
 
 **Confidence.** High in RU for the dispatch, the value mapping and the
 handler bodies; High in EN for the handler bodies read; Medium in EN for
@@ -11014,8 +11016,16 @@ the jitter draw `L2.02421` (U{-1, 0, 1}) and for the leash radius and the return
 navigation reads of the same bytes, and for what the programme values mean
 to a mission script.
 
-**Unknown.** The bodies of `L2.02421`, `L2.02475` and the area helper
-`L2.02476` were not read.
+**Unknown.** The bodies of `L2.02421` and the area helper `L2.02476` were
+not read.
+
+**Amended.** The radius clause "plus 4 while enemies remain" is withdrawn:
+the +4 depends on the first member and +0x30 (R2-ENGINE-843). Point +0x28
+is identified as the members' mean cell and `L2.02475` is read
+(R2-ENGINE-841). The former wording is in [`retracted.md`](retracted.md)
+under "EXP-2118: group leash radius and point". The dispatch, the routes,
+the other clauses and the grades stand. The return clause is narrowed by
+R2-ENGINE-844 (cases 1, 2, 4 and 5 precede the walk to the post).
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
 
@@ -21620,3 +21630,280 @@ delivery cadence and audio on list changes while paused/fading/playing.
 Trace flags, buffer cursor and selected index through those cases.
 Evidence: EXP-2117 `evidence/measured/listings/en-player-*.tsv`,
 `ru-player-*.tsv`, `en-sound-panel-off.tsv` and its fade listings.
+
+## Group leash, walk back and hit memory
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-841 | ROM2 guards A (mode 1) and B (mode 18) first run L2.02475, which rewrites group record +0x24/+0x28 with the members' mean cell; group sight, the leash from +0x28 and assignment follow on the same tick. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-842 | The ROM2 leash L2.02474 drops each listed enemy farther than record +0x2d from the centroid +0x28; with none left, assignment writes cmd +0x20 = 0, which ends the pursuit (composed, Medium). | High / Medium | ● active (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-843 | ROM2 record +0x2d becomes +0x38 + 4 + U{-1,0,1} (L2.05033) on the guard tick that finds a first member while +0x30 is 0, then +0x30 = 1; the +4 does not depend on enemies. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-844 | RU ROM2 guard B walks a member without a target to cmd +0x9c (two windows), to +0xa0 or to its post cmd +0 (cmd +8 = 1, +0xa = goal), rewritten each tick; at the centred post cmd +8 = 0xb. | High / Medium | ● active (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-845 | ROM2 L2.02074(attacker, victim) stores victim cmd +0x54 = 1, +0x58 attacker cell, +0x94 attacker, +0x98 server dword +4 and +0x9c a cell away from the attacker; it writes no target +0x20. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-846 | RU ROM2 L2.05035 stamps cmd +0x16 with server word +0 for a mode-18 member with cmd +8 = 5 when L2.05036 exceeds L2.01728 (both unread); the constructor stores 65500. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-847 | The read bodies give a grouped creature no walk-back state: each group tick it takes the least-score enemy group sight lists within +0x2d of the centroid, except in the stamp window (sight inputs unread). | Medium | ● active (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-848 | EN ROM2 10.alm holds 29 type-6 records in 12 groups, none without a group: Ogre group 3, Troll 11, Troll.4 10, Dragon.4 13, four Bat_Sonic.4 14 (names by Units serverID, Medium). | High / Medium | ● active (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+
+### R2-ENGINE-841
+
+Guard A `L2.02464` (group mode 1) and guard B `L2.02470` (mode 18) begin
+with the same calls (RU `L2.05037`..`L2.05038` and `L2.05039`..`L2.05040`):
+`L2.02475`(group), group sight `L2.02473`(group), the leash
+`L2.02474`(word +0x28, byte +0x2d) (R2-ENGINE-842) and assignment
+`L2.02424` (R2-ENGINE-503); then the radius step (R2-ENGINE-843) and a loop
+over the members from `L2.04689` (list head through `L2.05041`; next
+member `L2.04690`). The offsets are in the record at group +0x3c.
+
+`L2.02475` takes the count from `L2.02502` and writes nothing when it is 0.
+Otherwise it sums the members' cell x (`L2.00486`) and y (`L2.00487`)
+bytes, divides each sum by the count (integer division) and writes dword
++0x24 = y << 16 | x and word +0x28 = y << 8 | x. A second pass writes +0x2a =
+the largest member distance `L2.01522` from that cell, +0x2b = the largest
+member byte +0xa5 and +0x2c = the largest sum of the two. EN `L2.04962` and
+the EN guards in `L2.04980..L2.05042` equal the RU listings after masking
+addresses of six or more hex digits.
+
+**Confidence.** High for the RU and EN bodies and the call order. Medium for
+the count `L2.02502` (not read here), the list helpers `L2.05043` and
+`L2.05044`, and what byte +0xa5 names.
+
+**Unknown.** The readers of +0x2a, +0x2b and +0x2c were not censused.
+In the five mission-10 saves +0x28 equals the truncated mean in all 33
+records with +0x30 = 1 and in 19 of 32 with +0x30 = 0. The 13 others all
+have +0x30 = 0: the hero group stores 0 (4 files), group 5 stores the mean
+plus one cell in x and in y (5 files), and four groups of game9999 store the
+mean plus one cell (group 4 in x and y, groups 6, 12 and 14 in x). The
+writer of +0x28 at load is not read.
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-842
+
+`L2.02474`(cell, radius) walks the enemy list +0xa68 of its object (the
+list group sight fills) and removes (`L2.04531`) each enemy whose distance
+`L2.01522` from the cell to the enemy's cell (`L2.01521`) exceeds the
+radius byte (`cmp`, `jle` at `L2.05045`). Both guards pass the record's
+word +0x28, the centroid `L2.02475` wrote on the same tick (R2-ENGINE-841),
+and byte +0x2d (R2-ENGINE-843). Assignment `L2.02424` then gives each
+member cmd +0x20 = the least-score enemy left, or 0 (R2-ENGINE-503). The
+distance is taken from the members' current mean cell, not from a home
+point, a post or the member; for a one-member group the mean cell is the
+member's own cell. EN `L2.04964` equals the RU body after masking.
+
+So a pursuit ends on the first group tick on which no enemy that group
+sight `L2.02473` lists lies within +0x2d of the centroid: the member's cmd
++0x20 becomes 0 and guard B's no-target clauses run (R2-ENGINE-844). The
+test runs once per group tick.
+
+**Confidence.** High for the RU and EN leash body and its operands. Medium
+for the composed end of a pursuit: `L2.01522` (Chebyshev by R2-ENGINE-503)
+and the list helpers were not read here, the inputs of group sight are
+R2-ENGINE-507's, and writers of cmd +0x20 outside `L2.02424` were not
+censused.
+
+**Unknown.** Other writers of cmd +0x20; a census of the `disp:0x20` stores
+on the command block would settle it.
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-843
+
+After the assignment both guards call `L2.04689`(group) for the first
+member. With a member and +0x30 = 0 they call `L2.05033`: +0x2d = +0x38 +
+`L2.02421`(-1, 1) + 4 (`lea eax, [esi + eax + 4]` at `L2.05046`) and +0x34 =
+0; with a member and +0x30 nonzero, +0x34 += 1; both then set +0x30 = 1.
+With no member and +0x30 nonzero they call `L2.05034`: +0x2d = +0x38 +
+`L2.02421`(-1, 1) and +0x34 = 0; with no member and +0x30 = 0, +0x34 += 1;
+both then set +0x30 = 0. The radius written on a tick bounds the next
+tick's leash. The +4 depends on the first member and +0x30, not on enemies.
+The jitter is drawn once, on the tick that finds a first member while +0x30
+is 0; later ticks leave +0x2d unchanged until `L2.05034` or the setter
+rewrites it.
+
+The mode-18 setter `L2.02519`(group, r) runs `L2.02815` on each member,
+writes mode 18 to +0x20 and calls `L2.04665`. For r nonzero above +0x2d it
+writes r to +0x2d and +0x38; for r = 0 with +0x2d below session dword
++0xa8b8 it writes 20 to both; it then writes +0x39 = 0. EN `L2.05047`
+equals it after masking.
+
+In five original-made mission-10 saves, the 60 mode-18 group records store
++0x30 = 1 with +0x2d - +0x38 = 3 (12 records), 4 (8) or 5 (13), and +0x30 = 0
+with +0x2d = +0x38 (27), among them every group of game9999 (R2-SESSION-343).
+The 27 records with +0x30 = 0 and +0x2d = +0x38 are records that have not run
+`L2.05033` (or hold the setter's equal write), so they do not test the jitter
+of `L2.05034`; the saves agree with the +4 clause (33 of 33 in 3..5) and are
+not evidence for the distribution.
+
+**Confidence.** High for the RU and EN bodies. Medium for U{-1, 0, 1}:
+`L2.02421` divides by a session dword that was not read; the saves show
+offsets 3..5 only. Medium for what +0x30 and +0x34 mean beyond these writes.
+
+**Unknown.** The callers of `L2.02519` and their r; the bodies of
+`L2.02842`, `L2.02815` and `L2.04665`. Whether the no-member arm is
+reachable: the group tick gives an empty group mode 0xff (R2-ENGINE-507).
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-844
+
+Guard B's member loop (RU, `L2.02470..L2.02465`) takes for each member the
+first case that holds:
+
+1. HP +0x94 differs from max +0x96 and |cmd word +0x16 - server word +0| <
+   30: walk to cmd word +0x9c;
+2. that difference < 10: walk to +0x9c;
+3. cmd +0x20 nonzero: the attack planner `L2.01530` (R2-ENGINE-505);
+4. HP differs from max and |cmd dword +0x98 - server dword +4| < 10: walk to
+   +0x9c;
+5. byte +0x9e nonzero: a counter branch that walks to +0xa0;
+6. off the post cmd +0 or not centred: walk to the post; else
+   `L2.01733`(unit, 1).
+
+Walk `L2.02401`(unit, cell) writes cmd +8 = 1 and word +0xa = cell. Arrival
+`L2.00490` returns 1 when position bytes +4 and +5 are both 0x80.
+`L2.01733`(unit, 1) calls `L2.01531`: when the owner's (+0x14) dword +0x2c is
+nonzero it writes cmd +8 = 0xb and calls `L2.01513` if `L2.00044` returns
+nonzero; otherwise it calls `L2.02911`. Guard A has only cases 3 and 6.
+Guard B's member loop reads no stored walk-back flag other than +0x9e and
++0xa0, whose writers were not censused; while cmd +0x20 stays 0 the loop
+writes the walk again on each group tick, after group sight, leash and
+assignment. Only cases 1 and 2 keep a member with a target from attacking
+inside guard B's loop; the planner `L2.01530` is R2-ENGINE-505's.
+The EN arm has the same order (R2-ENGINE-828).
+
+**Confidence.** High for the RU bodies of guard B, the walk, the arrival
+test and `L2.01733`. Medium for each absolute value (`L2.01523`, unread),
+the case 5 branch (its random cell was not interpreted), that cmd +8 = 0xb
+starts order 11 (R2-ENGINE-505), and what `L2.00044`, `L2.01513` and
+`L2.02911` do.
+
+**Unknown.** The bodies of `L2.01523`, `L2.00044`, `L2.01513` and `L2.02911`.
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-845
+
+`L2.02074`(attacker, victim, third) writes the victim's command block: +0x54
+= 1, word +0x58 = the attacker's cell (`L2.01521`), byte +0x5a = 0. It calls
+`L2.02419` on session +0xa8bc with the three arguments, fills the record at
+session +0xbd98 (1, attacker at +0xbdc4, victim at +0xbdc8) and passes a
+0x54-byte copy to `L2.01727` on session +0xbbec. Then +0x94 = attacker,
++0x98 = server dword +4 (`[L2.01317]+4`) and word +0x9c = a cell beyond the
+victim on the line from the attacker, scaled by the double at `L2.02420`
+(10 by a navigation read). It writes no cmd +0x20. EN `L2.04120` equals the
+RU body after masking.
+
+The RU `.text` E8 census (direct E8 only; EN not censused) lists five
+calls: `L2.05048`, `L2.05049`, `L2.05050`, `L2.05051` and `L2.05052`, each
+in a committed caller window. No read body makes the attacker a target: this
+body stores no +0x20, and group sight reads the remembered cell
++0x58/+0x5a (`L2.05053..L2.05054`). The consumers of the posted record and
+other writers of +0x20 are unread. With no target a hurt member walks to
++0x9c (R2-ENGINE-844 case 4).
+
+**Confidence.** High for the RU and EN bodies. Medium for the caller roles
+(damage routines by reading, functions not read whole), the caller census
+(direct E8 only; no indirect or jump routes), the geometry of +0x9c
+(`L2.02411`, `L2.02412`, `L2.01309`, `L2.01523` unread), and what `L2.02419`
+and `L2.01727` do.
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-846
+
+The RU window `L2.05055..L2.05056`, the tail of a routine whose head and
+callers were not read, writes cmd word +0x16 = the word at `[L2.01317]`
+(server word +0) at `L2.05035` when the unit's group record ([+0x70]+0x3c)
+has mode 18, cmd byte +8 is 5, and `L2.05036`(two cell words of the routine,
+the unit's vtable +0x1c value) returns more than `L2.01728`(unit), the
+value the planner stores as cmd +0x14 (R2-ENGINE-808). The command
+constructor `L2.01785` writes 0xffdc (65500). The census is a byte-pattern
+scan of the RU image over the sections flagged executable, for four
+patterns: `66 89 modrm` with displacement 0x16, `66 c7 modrm` with
+displacement 0x16 (immediate), and the displacement 0x9c and 0x98 forms for
+R2-ENGINE-845. It lists four hits at displacement 0x16: the stamp
+`L2.05035`, the constructor `L2.05057`, an absolute-address store `L2.05058`
+and `L2.05059`. A wider rescan adds a dword store at `L2.05060`. Neither
+`L2.05059` nor `L2.05060` is classified. Not searched: displacement 32-bit
+and SIB forms, dword and byte stores, register-indirect stores, `rep movs`
+and the 0x54-byte copy at `L2.01727`. So `L2.05035` is the one word-register
+store found among the encoded patterns.
+
+From the stamp, guard B's case 2 walks the member to cmd +0x9c for 10 steps
+of server word +0, and case 1 for 30 when HP differs from max, before the
+target case (R2-ENGINE-844); the member does not attack its target in that
+window. In
+five original-made mission-10 saves every command block stores 65500
+(R2-SESSION-343).
+
+**Confidence.** High for the RU stamp and constructor bodies. Medium for
+what `L2.05036` and `L2.01728` compute (a target beyond reach is an
+interpretation), for the writer census (the patterns above) and for the
+window length in group ticks (R2-SESSION-343). The EN stamp was not read.
+
+**Unknown.** The stamp routine's head and callers, `L2.05036` and
+`L2.01728`. An original run recording cmd +0x16 and +8 per tick while a
+mode-18 creature chases an enemy it cannot reach would settle when the
+stamp fires.
+
+**Evidence.** The byte-pattern scan receipts are outside the reproduction.
+[EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-847
+
+States of a grouped creature, from the RU bodies (the EN core bodies are
+masked-equal, except `L2.05035`, which is RU only):
+
+| State | Stored fields | Entered by | Left by |
+|---|---|---|---|
+| Pursuit | cmd +0x20 nonzero, +8 = 5 | `L2.02424` | +0x20 = 0 (R2-ENGINE-842), stamp |
+| Stamp window | +0x16 within 10 or 30 of server word +0 | `L2.05035` (RU; R2-ENGINE-846) | expiry |
+| Walk to post | +0x20 = 0, +8 = 1, +0xa = post | guard B case 6 | target, arrival |
+| Hurt step away | +0x98 within 10 of server dword +4 | `L2.02074`, the only +0x9c store in a read body (R2-ENGINE-845) | expiry, target |
+| At post | +8 = 0xb | `L2.01531` | target |
+
+No stored flag marks the walk back; arrival only changes the case to
+`L2.01733`, which does not stop the next tick from taking a target. Each
+group tick runs group sight, the leash from the centroid and assignment
+before the member cases. An attacker of a walking creature is recorded by
+`L2.02074`; no read body makes it the target, and a target assigned later
+passes group sight and the leash from the centroid again (the consumers of
+the posted record and other writers of +0x20 are unread). In the read
+bodies the group answers through the same sight, leash and assignment. A
+unit in no group has the order-11 walk back of R2-ENGINE-505; every type-6
+record of mission 10's `10.alm` has a group (R2-ENGINE-848).
+
+The read bodies give a creature that ignores an enemy in range on the way
+back only in the +0x16 window, or when the enemy lies beyond +0x2d of the
+centroid.
+
+**Confidence.** Medium, composed from High bodies with unread helpers
+(`L2.05036`, `L2.01728`, `L2.01522`, `L2.01523`), the inputs of group sight,
+the callees of `L2.02074` and the group-tick cadence (R2-SESSION-343).
+
+**Unknown.** The seconds per group tick and which case a creature is in when
+it ignores an attacker. Load game0005 in the original, provoke Troll.4
+(group 10), walk away, and record per tick server word +0, cmd +0x16, +0x20,
++8, +0xa and the group's +0x2d.
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+### R2-ENGINE-848
+
+EN `scenario.res:10.alm` (version 1300; SHA256 in the experiment's
+asset-inputs.tsv) holds 29 type-6 records. Every record has a group number
+(record 0x2c, R2-ASSET-119): Turtle (Units row 119) x4 group 1, Ogre (84)
+group 3, Squirrel (109) x3 in each of groups 4 and 5, Foot_Animated (114) x3
+in each of groups 6 and 8 and x4 in group 12, the Human record (dword 0x14 =
+2000) group 7, Troll.4 (92) group 10, Troll (89) group 11, Dragon.4 (127)
+group 13 and Bat_Sonic.4 (97) x4 group 14. No record has no group. The
+original-made mission-10 saves game0001, game0004, game0005 and game9999
+hold the same twelve groups with these member counts besides the hero
+group; game0006 holds two members in group 6 (R2-SESSION-343).
+
+**Confidence.** High for the record bytes and counts. Medium for the names:
+record dword 0x14 is matched to the EN world.res Units serverID column, an
+identity by a matching number. RU 10.alm is byte-identical
+(R2-ASSET-162).
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)

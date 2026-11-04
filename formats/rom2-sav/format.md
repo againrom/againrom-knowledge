@@ -1509,3 +1509,51 @@ compared, and the role of L2.03404 as a map-dot drawer is Medium
 Original resaves keep the Againrom-written creature values: +0x136 0, the
 name, bag +0x1c 0 and, for dead records, +0x58 0 and +0x48 10; for the
 bats, spell slots 0. — R2-SESSION-342
+
+## Mission-10 group leash and command fields
+
+The Group programme record holds the leash state of a guard group. Each
+guard tick first writes +0x24 and +0x28 with the members' truncated mean
+cell; +0x2a, +0x2b and +0x2c take the largest member distance from it, the
+largest member byte +0xa5 and the largest sum of the two. The leash bound is
+byte +0x2d, measured from +0x28. — R2-ENGINE-841
+
+| Offset | Width | Field |
+|---|---|---|
+| +0x20 | u8 | programme mode; 18 for every nonhero group of the five original mission-10 saves |
+| +0x24 | u32 | mean cell, y << 16 \| x |
+| +0x28 | u16 | mean cell, y << 8 \| x |
+| +0x2d | u8 | leash bound: +0x38 + U{-1, 0, 1} + 4 once +0x30 is 1 |
+| +0x30 | u32 | 1 after the first guard tick with a member; 0 before it, and again after a tick with no member |
+| +0x34 | u32 | guard ticks since +0x30 last changed |
+| +0x38 | u8 | base radius: 10, 11, 12, 15 or 20 in mission 10 |
+| +0x45 | u8 | active byte |
+
+The mode-18 setter raises +0x2d and +0x38 together to its argument, or to
+20 when the argument is 0 and +0x2d is below a session value; the jitter
+draw's divisor is unread, so U{-1, 0, 1} is Medium. In the five original
+mission-10 saves, 33 records store +0x30 1 with +0x2d - +0x38 of 3, 4 or 5
+and 27 store +0x30 0 with +0x2d = +0x38, every group of the restart save
+among them. +0x28 equals the stored members' truncated mean in 52 of 65
+records (all 33 with +0x30 = 1). — R2-ENGINE-843, R2-SESSION-343
+
+The Unit command block fields of the walk back and the hit memory:
+
+| Offset | Width | Field |
+|---|---|---|
+| +0x0 | u16 | post cell |
+| +0x8 | u8 | activity: 1 walk, 5 attack, 0xb at the post |
+| +0xa | u16 | walk goal cell |
+| +0x16 | u16 | stamp: server word +0 at the stamp (RU); 65500 from the constructor |
+| +0x20 | u32 | target; 0 when the leash leaves no enemy |
+| +0x54 | u32 | 1 after a hit |
+| +0x58 | u16 | the attacker's cell at the hit |
+| +0x5a | u8 | 0 at the hit |
+| +0x94 | u32 | the attacker |
+| +0x98 | u32 | server dword +4 at the hit |
+| +0x9c | u16 | the step-away cell beyond the victim |
+
+A hit writes no target. All 150 unit records of the five original mission-10
+saves store +0x16 = 65500, so none holds a stamp; game0006 stores
+a group of two that reads as in pursuit, with the hit memory toward the hero's cell.
+— R2-ENGINE-845, R2-ENGINE-846, R2-SESSION-343

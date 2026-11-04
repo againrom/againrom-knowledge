@@ -1,5 +1,12 @@
 # Overturn history
 
+## EXP-2118: group leash radius and point
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-507` (the "+4" radius clause only; the dispatch, the routes, the other clauses and the grades stand) | Verbatim: "`L2.02474` keeps enemies within radius +0x38 + U{-1, 0, 1}, plus 4 while enemies remain, of point +0x28" | Medium | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md), R2-ENGINE-843 | The leash bound is byte +0x2d. Both guards set it to +0x38 + U{-1, 0, 1} + 4 (`L2.05033`) on the tick that finds a first member while +0x30 is 0, then set +0x30 = 1; `L2.05034` (+0x38 + U{-1, 0, 1}) runs only with no first member. No enemy test is involved. | **REFUTED** — partially retracted |
+| `R2-ENGINE-507` (point +0x28 and the `L2.02475` Unknown) | Verbatim: "of point +0x28" and "The bodies of `L2.02421`, `L2.02475` and the area helper `L2.02476` were not read." | Medium | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md), R2-ENGINE-841, R2-ENGINE-842 | `L2.02475` runs first in both guards and writes +0x28 with the members' truncated mean cell, so the leash measures from the current centroid, not from a fixed home point. | **NARROWED** |
+
 ## EXP-2106: Stone Curse effect, look and end
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

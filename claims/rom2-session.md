@@ -5397,3 +5397,57 @@ for the lines of descent: the owner did not name the loaded files, and the
 census compares only the files named.
 
 **Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).
+
+## Mission-10 group leash and command fields in original saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-343 | Five original ROM2 mission-10 saves store mode 18 in all 60 nonhero group records, +0x2d = +0x38 + 3..5 when +0x30 = 1 (33), and cmd +0x16 = 65500 in all 150 unit records; game0006 group 6 reads as in pursuit. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+
+### R2-SESSION-343
+
+The population is game0001, game0004, game0005, game0006 and game9999 of
+the first original-made folder, each verified against its manifest
+(SHA256 in the experiment's save-inputs.tsv); the eleven other saves of
+both folders are not mission 10. Each holds 13 groups and 30 member
+records. The fields are in the Group programme record (80 bytes,
+R2-ENGINE-823) and the Unit command block (184 bytes).
+
+Group record:
+
+- +0x20: 18 in the 12 nonhero groups of every file; the hero group stores 3,
+  and 4 in game0006.
+- +0x28 equals the truncated mean of the members' cells in all 33 records
+  with +0x30 = 1 and in 19 of 32 with +0x30 = 0. The 13 others all have
+  +0x30 = 0: the hero group stores 0 (4 files), group 5 stores the mean plus
+  one cell in x and in y (5 files), and four groups of game9999 store the
+  mean plus one cell (group 4 in x and y, groups 6, 12 and 14 in x). The
+  writer of +0x28 at load is not read.
+- +0x38 is 10, 11, 12, 15 or 20. +0x30 = 1 with +0x2d - +0x38 = 3 (12
+  records), 4 (8) or 5 (13); +0x30 = 0 with +0x2d = +0x38 (27), among them
+  every group of game9999 (R2-ENGINE-843).
+- +0x45 = 0 for groups 3 (Ogre), 5, 8 and 11 (Troll) in four files and for
+  groups 3, 5 and 11 in game0006 (R2-ENGINE-848 for the names).
+- +0x34 equals the head second DWORD minus 1 for the groups active since
+  the first tick: 0 at 1 (game0004), 16 at 17 (game0005), 140 at 141
+  (game0006); game0001 stores 0 at 0, and group 8 of game0006 stores 57.
+
+Command block: +0x16 is 65500 in all 150 records (R2-ENGINE-846). In
+game0006 group 6 holds two members with cmd +0x20 equal to one saved
+pointer, cmd +8 = 5 and 1; one member and one dead-list record store
++0x54 = 1, +0x58 = 10517, the cell (21, 41) of the hero, and +0x94 equal to
+that pointer (R2-ENGINE-845). Their +0x98 are 2178 and 2236 at head second
+141; the head first DWORD is 2257. The hero's block also stores +0x54 = 1,
++0x58 = 10518, +0x94 = 347557800, +0x98 = 2233 and +0x9c = 10507.
+
+**Confidence.** High for the measured bytes, hashes and counts. Medium for
+the clock relation: that the head second DWORD is the server word +0 is
+R2-SESSION-284, and that the head first DWORD is server dword +4 is a
+reading of the two +0x98 values. Medium for the pursuit reading of game0006
+(the saved pointer is not resolved to the hero).
+
+**Unknown.** No save holds a stamped +0x16 or a creature walking back
+after a lost pursuit, and the seconds per head-second step are not
+measured.
+
+**Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
