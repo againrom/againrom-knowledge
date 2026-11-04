@@ -9240,3 +9240,78 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs); no p
 **Confidence.** High for the hook's stores and the two callers of `R0205` (rel32 and aligned-dword scan). Medium for "the only reader" and for the unchanged pending order: other readers of `ord+0x54` were searched by displacement in 25 bodies only, `Order::Serialize` copies the byte, and no routine the hook reaches through the unread `R0126` was shown not to rewrite the pending order.
 
 **Unknown.** Settle with the original: strike a computer-owned Dragon between its draw and the read of `AI-762`; record `ord+0x08`, `ord+0x28`, `ord+0x30` and the read tick against an unstruck run.
+
+## Mission hover rectangles and cursor placement
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-768 | ROM1 registers kind-record rectangles for admitted structures and units during painting; these bounds are independent of the current sprite frame. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| AI-769 | ROM1 hover tests normalized registered rectangles against (x-1,y-1,x+1,y+1), descending by index; a failed ID lookup ends the walk. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| AI-770 | The read ROM1 unit draw changes its shading argument to zero when view+0x98c is that unit and session+0x3cc is zero; same-frame display is unproved. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| AI-771 | ROM1 cursor hot spots are constructor immediates; the read drawing paths place the image at controller position minus that hot spot. | High / Medium | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| AI-772 | ROM1 panel and unit hover share a hit through paired object/ID stores; the panel resolves the ID and prefers it to a single selection under MENU-070 gates. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| AI-773 | ROM1 hover computes fog capabilities after the rectangle walk; actual object nameability outside current sight remains Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+
+### AI-768
+
+ROM1 EN rom.exe, equal by full SHA256 to RU. The writer R1821 copies a RECT to the 16-byte slot [view+0x110]+16i, stores the object ID in [view+0x124]+2i through R2081, and increments view+0x134. The storage resize paths are listed; their allocator bodies are not read.
+
+The four observed direct registration instructions in R0379's painter are L17453, L17454, L17455 and L17456. The first two take the structure-kind RECT at +0x20. Their offset is (32*[obj+0x3c], 32*([obj+0x40]+[kind+0x14]-[kind+0x18])-cellHeight). The first requires kind+0x90 nonzero, the second zero. Both can draw with obj+0x78 below 2 but append only when +0x78 is 0. A successful virtual draw result is not tested before append at these sites.
+
+The ordinary-unit and air-unit sites take their own unit-kind RECT at +0x84, offset by ([obj+0x60]-[kind+0x34], [obj+0x64]-[kind+0x38]-[obj+0x68]-[obj+0x10]). The ordinary site needs +0x78=0, tests list entry 0x26 through unread R0615 and, on its nonnegative result, owner relation bit 8. The air site needs +0x78=0. ANIM-REGISTER-083 and the amended TERR-SPR-137/139 identify the planes and phases at their own grades. Within the read sweeps, rows ascend and columns descend; the two structure phases precede the ordinary-unit append, which precedes the later air-unit append. This is registration order, not an opaque-pixel ordering guarantee.
+
+**Evidence.** evidence/measured/rom1-en-register.txt, rom1-en-id-store.txt, rom1-en-paint.txt and rom1-en-unit-draw.txt under EXP-2119. A read ordinary-unit frame branch places a frame of width fW and height fH at A+(trunc(W/2)-trunc(fW/2), trunc(H/2)-trunc(fH/2)), where A is the unit offset above, W=[kind+0x2c], H=[kind+0x30]. Registration instead adds the RECT's own coordinates to A; it does not substitute this frame's dimensions.
+
+**Confidence.** High for the listed arithmetic and stores. Medium for complete caller/kind coverage and the body-to-class interpretation inherited from earlier claims; no indirect/jump census was made. The four sites are those present in the read painter window R0379..L01621; a ROM1 byte scan was run in navigation but its table is not committed, so no whole-image count is claimed. A field's game meaning is not established by its offset alone.
+
+**Unknown.** Literal bounds for every installed kind, alternate-unit dispatch, a sack or corpse's own registered ID rectangle, visibility-state writers and whether an unread virtual paint draws pixels. Read the authored kind records and all preparation/dispatch routes; observe each kind at sprite top, sides and foot in a future authorized mission run.
+
+### AI-769
+
+In R0218, the cursor must pass PtInRect on the view rectangle. The local cursor RECT is (x-1,y-1,x+1,y+1), coordinate span 2 per axis. The loop starts at view+0x134-1 and decrements. It copies RECT i, normalizes through the fully read R2311 and calls imported IntersectRect. A non-overlap continues. The inline word-ID map lookup compares the bucket-chain key; a miss exits the walk instead of falling through to a lower rectangle.
+
+A CStructure with kind+0x8c zero and kind+0x64 nonzero explicitly continues the walk. The kept hit sets view+0x98c to its object and word +0x990 to the matching list ID and ends the walk. The class flags and correction in AI-CURSOR-231 stand. Children 2 and 3 clear the pointer and ID if the point lies in their rectangles; child lookup R0375 remains unread here. These child clears do not rewind the already constructed capability mask.
+
+**Evidence.** evidence/measured/rom1-en-hover.txt, rom1-en-normalize.txt and imports.tsv. The painter calls the cursor/hover cascade at L01619 after its object sweeps. Two read input paths call it at L01622/L01623 and L01624. Their outer dispatcher and every indirect route are not read.
+
+**Confidence.** High for the local RECT, index order, lookup failure and stores. Medium for complete entry/child semantics. Unknown for a universal frame/tick/motion cadence. The rectangles are tested through the Windows API, not through a sprite alpha test at these instructions; no whole-program absence is claimed.
+
+**Unknown.** Native time between these calls and the complete caller population. Trace the outer input and paint dispatcher, then keep the pointer still over a moving unit and compare hover changes with frame and tick counters in a future run.
+
+### AI-770
+
+The listed ordinary-unit renderer R0552 compares the view's +0x98c with this at L17457. On equality and session+0x3cc=0 it writes zero to its drawing argument's stack slot at L10404. Later sprite calls take that slot. The new and old hovered objects are marked dirty through +0x10c by the hit routine; the routine also sends 0x408 to two application members when the pointer changes.
+
+**Evidence.** evidence/measured/rom1-en-unit-draw.txt, rom1-en-hover.txt, rom1-en-hover-cascade.txt and rom1-en-panel.txt. Cursor selection reads the returned capability mask and, in its pickup composite, +0x98c. The panel uses the companion ID word +0x990 rather than directly reading the object pointer. Both are written together on the accepted hit. The painter's hover-cascade call follows the unit draw calls, so these reads alone do not establish simultaneous use of a newly computed hit by all consumers.
+
+**Confidence.** High for the compare, zero store and paired hover fields. Medium that the changed argument visibly brightens the unit: the final sprite blitter and palette bodies are not read. No same-frame, outline, structure or sack-wide effect is established.
+
+**Unknown.** Final pixels and scheduling. Read the selected sprite virtual draw methods and the present/dirty dispatcher, or record stationary and moving-pointer hover transitions in a future mission run.
+
+### AI-771
+
+The 28 calls in R0220 pass path, hotX, hotY and period to R0330. The constructor stores the two hot-spot arguments at cursor+8/+0xc. Adapter R0320 passes these to R0321, which stores them at controller+0x18/+0x1c. Both R0324 and the cursor block of R0345 draw at (controller+0x10 - controller+0x18, controller+0x14 - controller+0x1c). A change of hot spot therefore changes image top-left at a fixed controller point.
+
+**Evidence.** evidence/measured/cursors.tsv gives all 28 paths, immediates, call sites and slot addresses. The ROM1 rows are independent reads of ROM1: default (5,5), move (15,15), swarm (21,21), attack (3,3), defend (15,13), select (3,4), patrol (8,25), cast (15,15), pickup (12,13), town/backpack/dice/wait (16,16), cantput (38,36); arrow0/4/6/2/7/5/1/3 are (15,5)/(16,25)/(6,16)/(25,15)/(8,9)/(8,23)/(22,8)/(23,22). Small default is (2,2), the five other small slots (0,0).
+
+The hover cascade compares a nonzero chosen cursor's handle with the current handle and calls its adapter at L01218 only when changed. AI-CURSOR-190/226/242 and MENU-CAST-153 supply the already established choice conditions at their own grades. This experiment does not promote an unexamined caller or armed jump route.
+
+**Confidence.** High for the constructor constants, transfer and subtraction. Medium for the complete displayed-cursor contract: the image loaders, blitter bodies and input-coordinate producer are unread. The hot spots are not read from sprite headers at these construction sites.
+
+### AI-772
+
+The hit's object pointer +0x98c and word ID +0x990 are written from one accepted index. The read R0349 panel resolves +0x990 in the object's map, uses it when session+0x3cc=0, and otherwise falls back to the single selection +0x138. Its structure class arm is MENU-070's; the non-structure call is R0877.
+
+**Evidence.** evidence/measured/rom1-en-hover.txt, rom1-en-panel.txt and rom1-en-other-panel-prefix.txt. The read prefix of R0877 sets its detail local to 7 for owner key 0 or owner relation bit 8. The rest of that large renderer, its full class population and its final output remain unread. This prefix does not close MENU-070's full non-structure-output Unknown.
+
+**Confidence.** High for the paired source and listed precedence. Medium for class/lookup helper meanings inherited from MENU-070. Unknown for display freshness and the complete non-structure readout. No new literal structure-name, health or portrait value is claimed for ROM1.
+
+### AI-773
+
+In the complete listed R0218 body the object rectangle walk and paired hit stores precede the four tile-word calculation. The later OR of the words' 0xc000 parts sets capability 0x400 when the OR differs from 0xc000; it does not locally clear a previously accepted object. Capability 0x40 additionally needs the +0x98 plane cell nonzero and OR equal to 0xc000. A cell whose four parts are all 0x8000 cannot take this 0x40 arm.
+
+**Evidence.** evidence/measured/rom1-en-hover.txt and rom1-en-paint.txt. Read registration sites require obj+0x78=0, with separate drawing tests described by AI-768. The writer that maps actual sight loss to +0x78 and the prepared populations is not read. TERR-FOG-082's former global exclusion of raw01 is retracted; OR=0xc000 must not be restated as proof that a corner is currently visible for every admitted raw input.
+
+**Confidence.** Medium for the bounded ordering/no-local-clear observation, with no complete caller/visibility census. Unknown which unit, structure, sack or corpse remains nameable after sight loss. A matching field offset or an explored-cell screenshot from another game is not evidence.
+
+**Unknown.** Read the visibility-state writers and every population's preparation route. A future mission run must move own sight away from an explored enemy unit, structure, sack and corpse, keep the pointer over each old rectangle and compare hover, panel and draw state.

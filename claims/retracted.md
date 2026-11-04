@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-2119: cursor rectangle coordinate span
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-605` (3x3 size label only; other clauses and grades stand) | Verbatim: "meeting a 3x3 box at the cursor" | High / Medium / Unknown | [EXP-2119](../experiments/EXP-2119-hover/RESULTS.md), R2-ENGINE-850 | EN/RU constructors store (x-1,y-1,x+1,y+1), span 2 on each axis, and the read wrapper calls IntersectRect. The earlier coordinate tuple stands; the 3x3 size label is withdrawn. | **REFUTED** — partially retracted |
+
 ## EXP-2118: group leash radius and point
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

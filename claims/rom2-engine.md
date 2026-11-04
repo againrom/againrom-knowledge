@@ -13678,7 +13678,7 @@ once every number at or above 0x400000 is masked.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-605 | The ROM2 hover routine (EN L2.02985, RU L2.02986) names the object of the last-registered rectangle meeting a 3x3 box at the cursor; a CStructure gets flag 0x800 only if kind-record +0x8c is set, else +0x64 set skips it. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-605 | ROM2 hover takes the last accepted registered rectangle meeting (x-1,y-1,x+1,y+1); CStructure kind+0x8c adds 0x800, while +0x8c zero and +0x64 set skip it. | High / Medium / Unknown | ✔ promoted (amended, partially retracted, branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md); [EXP-2119](../experiments/EXP-2119-hover/) |
 | R2-ENGINE-606 | A ROM2 map click whose box is at most screen width x 10/640 and whose cursor is [L2.02987] sends message type 0x24 with the hovered ID and the IDs of objects that L2.02988 accepts; EN picks that cursor only on hover flag 0x800. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-607 | ROM2 message 0x24 finds the structure by ID and sets order 0xf: target its position word, range 1 for building byte +0x60 of 1 or 2, 2 (cell +0x101) for 3 or 4, else 3 (+0x202); prepared 0xf reaches the state-15 handler. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-608 | The ROM2 event box starts as a 580x240 rect at (30,120); placement rounds it to 8+96k by 104+64k and centres it on the screen (488x232 at 268,268 at 1024x768); Enter and Esc post 0x470 as Ok does. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
@@ -13743,6 +13743,8 @@ sprite and its foot cell. Whether the Pointer's client object is a
 CStructure (its runtime class was not read) and whether its kind record
 has +0x8c set, that is, whether a Pointer gets flag 0x800 at all:
 `L2.03007`, the table writer and the Pointer's client class.
+
+**Amended.** EXP-2119, R2-ENGINE-850 refutes only the former 3x3 size label: the listed constructor stores (x-1,y-1,x+1,y+1), coordinate span 2 per axis, and the overlap wrapper calls IntersectRect. R2-ENGINE-849 reads the list store/index helpers and registration sites; their unread allocator and complete indirect-route population still limit the composed contract. Other clauses and grades stand.
 
 ### R2-ENGINE-606
 
@@ -21907,3 +21909,82 @@ identity by a matching number. RU 10.alm is byte-identical
 (R2-ASSET-162).
 
 **Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
+
+## Mission hover rectangles and cursor placement
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-849 | ROM2 EN/RU registration appends kind-record rectangles in the read painter phases, with separate structure and unit placement formulas. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| R2-ENGINE-850 | ROM2 EN/RU hover forms (x-1,y-1,x+1,y+1), coordinate span 2 per axis, and calls IntersectRect; the earlier 3x3 size label is withdrawn. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| R2-ENGINE-851 | ROM2 EN/RU unit drawing zeroes its shading argument when the unit equals view+0x994 and the held-item field is zero; panel freshness remains unproved. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| R2-ENGINE-852 | ROM2 EN/RU cursor hot spots are code immediates; default, move, swarm, select, pickup and several arrows differ from ROM1. | High / Medium | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| R2-ENGINE-853 | ROM2 EN/RU structure panel reads building.txt through kind-1, formats signed words +0x104/+0x108 as %d/%d, and builds a portrait path from kind+0x54. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+| R2-ENGINE-854 | ROM2 EN/RU hover tests four fog words after accepting a registered object; actual nameability in explored out-of-sight cells is unresolved. | Medium / Unknown | ● active (branch candidate) | [EXP-2119](../experiments/EXP-2119-hover/) |
+
+### R2-ENGINE-849
+
+EN writer L2.03008 and RU L2.05061 store RECT i in view+0x10c and ID word i in view+0x120, then increment +0x134. The store/index helpers are listed: EN L2.03009, L2.02995, L2.05062, L2.03010, L2.02956/L2.03409; RU L2.05063, L2.05064, L2.05065, L2.05066, R2.0011/L2.05067. Resize allocation bodies remain unread.
+
+The executable-section byte scans find four E8 candidates per root, all read at actual call boundaries in the painter: EN L2.03011/L2.03012/L2.03013/L2.03014; RU L2.05068/L2.05069/L2.05070/L2.05071. Completeness of indirect and jump routes remains Medium.
+
+The first two use structure-kind RECT +0x20, offset by (32*[obj+0x40], 32*([obj+0x44]+[kind+0x14]-[kind+0x18])-cellHeight). Kind+0x90 chooses the earlier nonzero or later zero phase. The status getter result below 2 admits drawing there, but only zero appends. EN L2.05072 returns object+0x7c; RU L2.05073 is unread, so that field interpretation is EN only. The third and fourth sites use unit-kind RECT +0x84, offset by ([obj+0x64]-[kind+0x34], [obj+0x68]-[kind+0x38]-[obj+0x6c]-[obj+0x10]). They need status result zero and client byte +0x184 below 2; the third additionally tests unread list lookup L2.03763 (RU L2.04547) and owner relation helper L2.02954 (RU L2.03410). Each structure pass precedes the ordinary-unit site; the air-plane site is later. These sweeps walk rows ascending and columns descending.
+
+**Evidence.** evidence/measured/rom2-{en,ru}-{register,paint,rect-store-index,rect-index-body,id-store}.txt, both calls.tsv and scans.tsv. Each root is read independently.
+
+The EN unit-kind loader passes SelectionX1/Y1/X2/Y2 keys to unread R2.0113 and stores its results in RECT +0x84; it separately fills Width/Height/CenterX/CenterY at +0x2c/+0x30/+0x34/+0x38. This is Medium as a configuration grammar and is EN only. In the read ordinary-unit frame branch, its top-left is the placement offset above plus (trunc(W/2)-trunc(fW/2), trunc(H/2)-trunc(fH/2)). Registered bounds instead add the selection RECT coordinates. The current frame dimensions are not substituted into that RECT.
+
+**Confidence.** High for listed arithmetic, stores and direct sites; Medium for full populations and game labels where the class/preparation route or a helper is unread. Unknown for all installed literal rectangles, the Pointer kind's concrete rectangle, actual fog admission, and corpse/sack-specific ID routes. No cross-game address resemblance is used.
+
+### R2-ENGINE-850
+
+EN L2.02985 and RU L2.02986 form the same four coordinates. EN L2.01497 and RU L2.05074 store left, top, right and bottom in that order. EN L2.02996 and RU L2.05075 swap reversed x/y endpoints. EN L2.02997 and RU L2.03006 call imported IntersectRect. Thus right-left and bottom-top are 2, not 3. R2-ENGINE-605's 3x3 size wording is refuted; its coordinate tuple and the remaining control flow stand.
+
+The walk starts at +0x134-1. No overlap continues. A failed object-ID lookup ends the walk. For exact class-name CStructure, kind+0x8c nonzero adds 0x800, both retained arms add 0x20, and kind+0x8c zero with +0x64 nonzero continues. Accepted object +0x994 and ID word +0x9a8 come from one index; the first accepted descending entry wins. EN child 2 or 3, RU child 3 or 4, can subsequently clear the pair. Unread child and collection helpers keep their composed meanings Medium.
+
+**Evidence.** evidence/measured/rom2-{en,ru}-{hover,normalize,overlap}.txt (EN overlap is in rect-helpers.txt), imports.tsv and the list helpers of R2-ENGINE-849. The cursor cascade is called after the painter's object passes (EN L2.05076, RU L2.05077). The native outer scheduling population is not complete.
+
+**Confidence.** High for the coordinate span, imported overlap wrapper and local ordering/stores. Medium for a complete hit-test contract; Unknown for a universal frame/tick/motion frequency and same-frame panel/draw synchronization.
+
+**Unknown.** Read the outer input/present dispatcher and every indirect route. In a future run, keep a pointer still over a moving object, then move it across overlapping rectangles while recording hover, panel and frames.
+
+### R2-ENGINE-851
+
+EN L2.03682 and RU L2.03719 compare the view field +0x994 with their own this (EN L2.05078, RU L2.05079). Equality with application +0x3f4 zero (RU +0x40c zero) writes zero to argument [ebp+0x10]. Subsequent hero and non-hero sprite calls consume that argument. Final sprite blitter and palette bodies remain unread, so visible brightening is Medium.
+
+**Evidence.** evidence/measured/rom2-{en,ru}-{unit-draw,hover,hover-cascade,panel,paint}.txt. Hover writes both +0x994 and +0x9a8, marks new and old objects dirty through +0x114 and posts 0x408 to two application members. Cursor choice consumes its returned flags and the pickup composite reads +0x994. The panel resolves ID +0x9a8. They share the accepted hit logically, but the painter's cascade call follows sprite drawing; a newly changed pointer need not already have affected the sprites drawn earlier in that pass.
+
+**Confidence.** High for the listed compare, zero store and paired fields. Medium for the pixel effect and dirty-message meanings. Unknown for same-frame display and other object classes' final hover pixels. No result from ROM1 supplies a missing ROM2 body.
+
+### R2-ENGINE-852
+
+EN L2.05080 and RU L2.05081 each construct 28 cursors. Constructors EN L2.05082 and RU L2.05083 store hotX/hotY at cursor+8/+0xc; adapters L2.01133/L2.05084 transfer them to controller+0x18/+0x1c through L2.03086/L2.05085. The read direct draw calls subtract those from controller position +0x10/+0x14. At a fixed position, changing the hot spot moves the image top-left. Resource loader and final blitter bodies remain unread.
+
+**Evidence.** evidence/measured/cursors.tsv contains separate 28-row EN and RU populations. Both give default (4,4), move/swarm (2,3), attack/select (3,3), defend/cast/town/backpack/dice/wait (16,16), patrol (8,25), pickup (16,12), cantput (38,36), small default (1,1), five small order cursors (0,0). Arrow0/4/6/2/7/5/1/3 are (16,6)/(16,28)/(5,16)/(26,16)/(8,9)/(8,24)/(23,9)/(23,24).
+
+The two listed cascades perform hover calls before their normal cursor choices. Their tail changes a nonzero chosen cursor only when its handle differs from the current one (EN adapter call L2.05086, RU L2.05087). Constructor, adapter, set/draw and cascade listings are committed independently for each root. Constants in this ROM2 card come only from ROM2; the comparison with ROM1 uses AI-771's independent rows.
+
+**Confidence.** High for the immediate values and coordinate subtraction. Medium for an exhaustive displayed-image/cadence contract: the armed tables' full dispatch population, input coordinate producer, loaders and final blitters are not all read. The failed-generation and assembly boundaries are recorded in INSTRUMENT.md.
+
+### R2-ENGINE-853
+
+Panel prefixes EN L2.03701 and RU L2.05088 resolve hover ID +0x9a8 only when nonzero, no item is held and the application UI field equals 1. They otherwise try a single selection. A runtime-class test against EN record L2.05089 (RU record L2.05090, body not read here) distinguishes structure and unit arms; the IsKindOf body remains unread.
+
+In the read structure text arm, kind +0x24 minus 1 goes to EN L2.01929 / RU L2.01551. These getters add the text source's base +0xc and access the global string pool. Binding EN L2.05091 and RU L2.05092 supplies main\\text\\building.txt to the respective text loader. The name's concrete file row and localized value depend on the kind and parser; Pointer 1's proposed zero-based row 69 is Medium from matching kind 0x46 in R2-ENGINE-517/ASSET-124. This experiment did not read the installed text entry and does not assert that it contains ROAD SIGN or a Russian equivalent at that row.
+
+The following line uses global text slot 0x13 as a label, then formats signed 16-bit structure words +0x104 and +0x108 with %d/%d (EN L2.05093..L2.05094; RU L2.05095..L2.05096). The map constructor copies its queried maximum into both words, substitutes 1000 for both when that value is zero, and then writes current +0x104=0 when record word +6 is zero. Actual first-mission Pointer values are not measured; a zero Data.bin healthMax does not by itself prove the displayed pair.
+
+The alternate structure portrait arm uses kind+0x54 in graphics\\infowindow\\%s.bmp and caches the name; bitmap bytes were not read. The map constructor's ordinary structure branch (kinds other than 0x21/0x25 in its read structure-record loop) calls EN L2.03157 or RU L2.05097; each stores its own structure vtable. EN slot 0 and class record identify CStructure. The Pointer link is Medium: it depends on identifying these records by their matching kind numbers, not on a read end-to-end Pointer-to-client update.
+
+**Evidence.** evidence/measured/rom2-{en,ru}-{panel,name-getter,name-loader,text-file-binding,client-map-ctor,structure-ctor}.txt, EN structure-runtime-get.txt (EN only; the RU body was not listed), strings.tsv and tables.tsv.
+
+**Confidence.** High for the listed arguments, formats and stores; Medium for the resource-row, class and health meanings whose getter/parser/class-link helpers are unread. Unknown for the exact EN/RU name row content, displayed first-mission health, actual portrait entry and Pointer kind+0x8c. Read the named text entry, kind record, parser and Pointer-to-client route to settle them; no asset or map byte is needed in the repository.
+
+### R2-ENGINE-854
+
+Both complete listed hover bodies perform the object walk before their four-word 0xc000 calculation. The later 0x400/0x40 capability tests do not locally clear a previously accepted object. The 0x40 arm additionally needs a nonzero view+0x98 plane cell and the four-word OR equal to 0xc000; four words carrying only 0x8000 do not pass it.
+
+**Evidence.** evidence/measured/rom2-{en,ru}-{hover,paint}.txt. Registration reads object+0x7c through EN L2.05072 (body listed) and RU L2.05073 (body unread), then requires zero to append. The writers linking actual fog state to this field and each plane's prepared population remain unread. A field name or a ROM1 mapping does not establish ROM2 fog behavior.
+
+**Confidence.** Medium for this bounded local ordering and absence of a later local clear; no complete caller, indirect or visibility-writer census. Unknown for which units, structures, Pointers, sacks and corpses stay nameable after sight loss. The byte +0x184<2 gate alone is not a proved corpse taxonomy.
+
+**Unknown.** Read the +0x7c writers and per-class preparation/registration paths. A future first-mission run must move own sight away from an explored object, keep the pointer at its old top and foot rectangles, and watch sprite, cursor and panel; repeat for each listed kind and locale.

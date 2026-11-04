@@ -228,12 +228,15 @@ R2-ENGINE-519, R2-ENGINE-520
 A map click on cursor `L2.02987`, which EN chooses only on hover flag 0x800
 (a structure whose record has +0x8c set), is an order, not a walk. The
 hover routine walks its screen-rectangle list from the last entry down and
-names the object of the first rectangle that meets a 3x3 box at the cursor
-(that the list and rectangle helpers address and test the registered
-rectangles is Medium); a structure whose kind record has +0x8c 0 and +0x64
-set is skipped, and +0x8c set gives hover flag 0x800. Which rectangle a
-Pointer registers, whether its client object is a structure and whether its
-record has +0x8c set are Unknown, so that a signpost click takes this path
+names the object of the first accepted rectangle meeting the cursor box
+(x-1,y-1,x+1,y+1), coordinate span 2 per axis. The former 3x3 size label in
+R2-ENGINE-605 is retracted; the read wrapper calls IntersectRect. List
+store/index arithmetic is read, while allocation and complete indirect-route
+coverage remain Medium (R2-ENGINE-849, R2-ENGINE-850); a structure whose kind record has +0x8c 0 and +0x64
+set is skipped, and +0x8c set gives hover flag 0x800. The literal rectangle of a
+Pointer kind and its +0x8c remain Unknown. The read map constructor uses
+CStructure for ordinary structure kinds; linking Pointer through kind numbers
+remains Medium (R2-ENGINE-853), so that a signpost click takes this path
 is Medium. On cursor `L2.02987` a click sends message type 0x24
 with the hovered object's ID and the IDs of the units that `L2.02988`
 accepts (that these are the selected units is Medium). The server finds the
@@ -331,9 +334,10 @@ Type 10 and 11 fields are decoded to the program fields that receive
 them above. The 11c count reader is the state-15 arm (R2-ENGINE-518; that it
 is the only reader is Medium). Order 0xf, from message type 0x24, reaches the
 handler that sets state 15 (R2-ENGINE-607, R2-ENGINE-519; other producers of
-order 0xf were not searched). The rectangle a Pointer registers for the
-pick is Unknown (R2-ENGINE-605); so are what an Inn offer is and which event
-builds the offer list (R2-ENGINE-536). So is the reader of unit-record
+order 0xf were not searched). A Pointer kind's literal registered bounds remain
+Unknown (R2-ENGINE-605, amended by R2-ENGINE-849/850; the former 3x3 size label
+is retracted). What an Inn offer is and which event builds the offer list also
+remain Unknown (R2-ENGINE-536). So does the reader of unit-record
 0x0a and 0x20 outside the two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0
 there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The writer's reason
