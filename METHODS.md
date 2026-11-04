@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4637. Observation: 143. Static analysis: 3861. Mixed: 633.
+Claims labelled: 4644. Observation: 143. Static analysis: 3866. Mixed: 635.
 
 ## Ledger ai
 
@@ -2358,10 +2358,10 @@ Claims labelled: 4637. Observation: 143. Static analysis: 3861. Mixed: 633.
 | R2-ENGINE-332 | static analysis | ✔ promoted (branch candidate, amended) |
 | R2-ENGINE-333 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-334 | static analysis | ✔ promoted (amended, branch candidate) |
-| R2-ENGINE-335 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-336 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-337 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-338 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-335 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-336 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-337 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-338 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-339 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-340 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-341 | static analysis | ✔ promoted (branch candidate) |
@@ -2765,6 +2765,13 @@ Claims labelled: 4637. Observation: 143. Static analysis: 3861. Mixed: 633.
 | R2-ENGINE-831 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-832 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-833 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-834 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-835 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-836 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-837 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-838 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-839 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-840 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-session
 

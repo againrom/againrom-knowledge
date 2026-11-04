@@ -5607,10 +5607,10 @@ in a committed listing.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-335 | ROM2 screens request fixed music keys: menu 0x421 menu, New Game 0x425 chrgen, town 0x42e/0x468 b14/b16/b15, map 0x42d/0x41d map, credits 0x428 credit; menu, chrgen and town skip a list already holding the key. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
-| R2-ENGINE-336 | A ROM2 mission sets the list B00..B16; every 16 ticks the type-12 music area holding the hero, or the map's default record, picks one of its four themes at random, and the next track end plays that list index. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
-| R2-ENGINE-337 | The ROM2 music player streams one list entry through a looping DirectSound buffer; at a track end it plays the area pick, else the held index, else the next list entry; stop pauses and start resumes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
-| R2-ENGINE-338 | While no dialogue tune is held, ROM2 music stops for logos, every cutscene, mission entry, mission end and message 0x451 and resumes only on a later screen request; a stream read failure posts 0x486. | High / Medium | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-335 | ROM2 screens request fixed music keys: menu 0x421 menu, New Game 0x425 chrgen, town 0x42e/0x468 b14/b16/b15, map 0x42d/0x41d map, credits 0x428 credit; menu, chrgen and town skip a list already holding the key. | High | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-336 | A ROM2 mission sets the list B00..B16; every 16 ticks the type-12 music area holding the hero, or the map's default record, picks one of its four themes at random, and the next track end plays that list index. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-337 | The ROM2 music player streams one list entry through a looping DirectSound buffer; at a track end it plays the area pick, else the held index, else the next list entry; stop pauses and start resumes. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
+| R2-ENGINE-338 | While no dialogue tune is held, ROM2 music stops for logos, every cutscene, mission entry, mission end and conditionally for message 0x451 and resumes only on a later screen request; a stream read failure posts 0x486. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-339 | ROM2 stores SoundRandom, SoundMusPos, SoundSfxPos, SoundSpeechPos and MusicEnabled in HKLM; volume defaults to -700, MusicEnabled to 1; -nomusic or a music.res mount failure disables screen and mission music requests. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-341 | A ROM2 dialogue tag tune=N cross-fades music to list index N, which repeats only while no area pick exists; no data file or archive entry in either root contains tune=, so shipped dialogue never changes music. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
@@ -5654,6 +5654,11 @@ RU instructions), whose key and same-key test were read in RU.
 **Unknown.** A screen reached only through an indirect call; the RU
 fourth pre-create caller at RU `L2.01374`; the resolver's case rule for
 archive keys (inferred case-insensitive, since `B00` must reach `b00.wav`).
+
+**Amended.** R2-ENGINE-835 reads the EN same-key comparison as
+case-sensitive and gives the unknown-town-ID fallthrough. This comparison
+does not settle archive lookup. R2-ENGINE-838 bounds the fresh two-client
+byte scan without closing indirect routes.
 
 ### R2-ENGINE-336
 
@@ -5710,21 +5715,25 @@ from its random start until the hero first enters an area; after that the
 last pick stays in force, since nothing else in a mission resets it.
 
 **Confidence.** High for the list, the record walk and the theme draw in
-both locales (equal normalized mnemonics). Medium for the array
-population and the consequences above that depend on it: the head append
-`L2.01391`, the area append `L2.01392` and the count and index helpers
-`L2.01393` and `L2.01394` are not decoded, and eight references to
-`L2.01387` (`L2.01395`..`L2.01396`, `L2.01397`..`L2.01398`, `L2.01399`,
-`L2.01400`) lie in unread bodies. Whether the head stays in the array and
-whether the array is cleared between missions is therefore Medium. Medium
-that the object at view+0x3f6c is the player's hero and that its
-+8/+0xc are map units of 1/256 tile; the scale is inferred from the shift
-by 8.
+both locales (equal normalized mnemonics), and for EN head preservation
+through the pointer-array helpers read by R2-ENGINE-834. Medium for RU
+helper semantics and clearing between missions: the EN cleanup loops are
+listed, but their complete event contexts are unread. Medium that the
+object at view+0x3f6c is the player's hero and that its +8/+0xc are map
+units of 1/256 tile; the actor route and coordinate producer are unread.
+Mode 3's network identity remains Medium under R2-ENGINE-837.
 
-**Unknown.** The identities of the closed views and of mode 3; the
-semantics of the four helpers and the eight unread `L2.01387` references;
-the pick after a mission ends while a later screen leaves it at a stale
-value.
+**Unknown.** Full cleanup contexts and RU helper counterparts; the
+incoming actor-registration route and coordinate units; all meanings of
+mode 3; the pick after a mission ends while a later screen leaves it at a
+stale value. R2-ENGINE-838 identifies the EN closed views; their RU
+counterparts remain unread here.
+
+**Amended.** R2-ENGINE-834 reads the EN pointer-array helpers, cleanup
+loops and zero-initialized counter. R2-ENGINE-837 separates the LOAD
+mode-2 store from selected mode-3 connection writers. R2-ENGINE-838
+identifies the EN closed views as three shops and three inns. Full
+transition freshness, actor identity and RU counterparts keep their bounds.
 
 ### R2-ENGINE-337
 
@@ -5756,8 +5765,13 @@ audible resume: it rests on documented DirectSound Stop/Play semantics,
 not on an observation.
 
 **Unknown.** The reader of +0x20 (none in the player class range
-EN `L2.01418`..`L2.01419`); the effect of stop called by list set while
-the hold flag is set.
+EN `L2.01418`..`L2.01419`).
+
+**Amended.** R2-ENGINE-839 gives the fade recurrence, argument units,
+threshold comparison and scheduling limits. R2-ENGINE-840 reads the
+computed state codes and list-set sequence while holding: held stop
+reselects the old held entry, then the replacement list's random select
+wins while hold persists. Its audio and invalid-index bounds remain.
 
 ### R2-ENGINE-338
 
@@ -5770,7 +5784,7 @@ the player's own timer, list set and destructor, and the five below.
 | Cutscene `L2.00875` | `L2.01422` | every movie: intro, 0x41d, 0x436, 0x42d, view-close |
 | Mission entry `R2.0026` | `L2.01423` | before the mission list (R2-ENGINE-336) |
 | Mission end `L2.01424` | `L2.01425` | 0x41d, 0x45c, 0x45d, exit |
-| Message 0x451 arm `L2.01426` | `L2.01427` | posted from view-close |
+| Message 0x451 arm `L2.01426` | `L2.01427` | posted from view-close (two of seven EN senders) |
 
 The cutscene and logos bodies contain no start call. Music resumes only
 when the next screen requests it; a same-key screen resumes the paused
@@ -5790,6 +5804,10 @@ absence of a start call in the cutscene and logos bodies. Medium for the
 
 **Unknown.** Stops reached through indirect calls; the sender and meaning
 of 0x451.
+
+**Amended.** R2-ENGINE-836 lists seven positive EN 0x451 senders and
+the conditional stop arms without claiming complete event identities.
+R2-ENGINE-838 bounds a new EN/RU raw-call scan; indirect stops stay open.
 
 ### R2-ENGINE-339
 
@@ -5858,8 +5876,8 @@ normalized mnemonics). Medium for the RU tune-name path: the RU build and
 fill bodies are not decoded. Medium for the slider curve, read from
 `L2.01449` only in EN.
 
-**Unknown.** The on-screen layout of the panel; the player state values
-the off arm tests beyond 1 and 2.
+**Unknown.** The on-screen layout of the panel; the audible effect of
+the off arm, including fade duration and callback cadence.
 
 **Amended.** R2-ENGINE-720 narrows two rows. The 0x474 arm with wParam 8
 calls the play method on the `m_fighter` select slot 2 object,
@@ -5868,7 +5886,10 @@ calls the play method on the `m_fighter` select slot 2 object,
 unread). wParam 7 plays `sfx.reg` entry 100. The 0x476 close arm also copies
 the checkbox state into the options field `L2.03952` in memory; the field
 is stored as the registry value Acknowledgement by the options store, not by
-the click (R2-ENGINE-720).
+the click (R2-ENGINE-720). R2-ENGINE-839 and R2-ENGINE-840 supply the
+fade's units and recurrence, computed state-1/state-2 predicates and
+their listed writers; this closes the state-code Unknown locally without
+claiming every alias writer or audible timing.
 
 ### R2-ENGINE-341
 
@@ -21340,3 +21361,262 @@ and game0001 in the original, bring the hero next to cells (45..48,
 10..12) and note whether the bats are drawn.
 
 **Evidence.** [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md).
+
+## ROM2 music transition follow-up
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-834 | EN music-area helpers preserve the admitted default before appending area pointers; the tick counter is initialized to zero and incremented before its 16-tick test; position-object identity remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-835 | EN town music selects b14/b16/b15 only for IDs 1/2/3; other IDs append no key. Its same-key test compares bytes with case; continuing the square's track inside the inn or shop remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-836 | The EN .text decoded-operand sweep finds seven push 0x451 sites; the 0x451 arm conditionally stops music; 0x41d/0x45c/0x45d reach mission end under different mode and app+0x404 bit-0 tests. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-837 | EN LOAD writes application mode 2 and enters a mission or town; mode 3 bypasses the mission music request and has connection-entry writers. Normal area or town selection after LOAD is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-838 | EN shop and inn close branches rebuild mission music outside mode 2; byte scans of both clients yield six list-set, eight start and ten stop rel32 call candidates per client. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-839 | ROM2 fade(2000,8000) caps effective time and sets a negative volume threshold; listed EN/RU step arithmetic depends on volume; a step on every due callback is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-840 | ROM2 player states 1 and 2 mean unpaused open music with fade clear or set; held stop clears fade and reselects the held entry, while list set retains hold and ultimately selects a new-list random entry. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+
+### R2-ENGINE-834
+
+EN count `L2.01393` returns array+8. Index `L2.01394` delegates to
+`L2.05010`, which returns the address of pointer slot `[array+4]+4*i`.
+Append `L2.01391` saves the old count and writes at that index through
+`L2.05011`. Append-array `L2.01392` grows to old count plus source count
+and copies the source pointers after the old slots. Resize `L2.05012`
+preserves old slots, including an admitted head, on reallocation. Loader
+`L2.03159..L2.05013` admits the 28-byte head when theme 0 is nonnegative,
+then appends the area array and calls `L2.05014` on the source container;
+its body is unread.
+
+The two listed cleanup loops repeatedly free pointer slot 0 and erase
+one slot until count zero. Their full event contexts are unread. EN
+`L2.03373` writes counter +0xa88 = 0. Tick `L2.01389` increments before
+testing its low four bits; absent another writer, checks start on tick 16.
+Position-object selection at `L2.05015..L2.05016` tests actor word
++0x1dc == 0x15 in mode 2. In any other mode it compares actor +0x14
+with view+0x9cc and requires flag 1 at +0x1b8. Those identity fields'
+meanings and coordinate producers remain unread. The counter store's
+containing body is unread, so its per-view or per-mission cadence is Unknown.
+
+R2-ENGINE-336 supplies the four-theme draw and map selection; newly listed
+EN selector and mission-music bodies confirm the local use. Theme t
+addresses slot t of B00..B16. A position pick replaces the random initial
+entry before start; subsequent picks take effect at a track end under
+R2-ENGINE-337. R2-ASSET-084 remains the authority for per-map records.
+
+**Confidence.** High for the listed EN helper arithmetic and explicit
+initialization/tick instructions. Medium for the position object's hero
+identity, coordinate unit, all-transition clearing and a complete writer
+set. RU helpers were not read here; this does not upgrade their grade.
+
+**Unknown.** The source-container callee `L2.05014`, wider cleanup
+callers, counter-store context and actor-registration route. Follow them
+in each client to settle freshness, initialization cadence and identity. Evidence:
+EXP-2117 `evidence/measured/listings/en-collection-*.tsv`,
+`en-loader-area-insertion.tsv`, `en-counter-zero.tsv`,
+`en-mission-tick-head.tsv`, `en-position-owner.tsv`,
+`en-area-select-complete.tsv` and `en-mission-music-complete.tsv`.
+
+### R2-ENGINE-835
+
+EN `L2.00266..L2.01369` compares town IDs 1/2/3 and appends
+music\b14.wav, b16.wav or b15.wav. Every other ID falls through without
+an append. Temporary-list constructor `L2.05017` sets count to zero.
+The common tail still performs list operations; this is neither a
+silence contract nor a safe default for an unknown town ID.
+
+The same-key path compares list element zero through `L2.01370`,
+`L2.04058` and `L2.02024`. The last helper compares bytes to the NUL
+terminator without case conversion. This is separate from archive lookup.
+The selected shop `L2.00602..L2.05018` and inn
+`L2.00425..L2.00426` entries make no direct music list-set/start call;
+they invoke unread virtual entry methods.
+
+**Confidence.** High for the EN local ID branch and byte-comparison
+contract. Medium that a room continues the square's key: the selected
+entries are not a census of their indirect descendants. R2-ENGINE-231
+remains the EN/RU authority for the three square keys.
+
+**Unknown.** Other room routes, unknown-ID failure behaviour and the
+archive resolver's case rule. Read the virtual room methods and empty-list
+access paths. Evidence: EXP-2117 `evidence/measured/listings/en-town-*.tsv`,
+`en-key-*.tsv`.
+
+### R2-ENGINE-836
+
+EN application dispatch tables map 0x451 to `L2.01426`. Stop at
+`L2.01427` is reached when `L2.01986(app+0x3d4)` returns nonzero and
+app+0x404 is zero. Other local branches bypass it. The EN decoded-operand
+sweep of `.text` finds seven `push 0x451` sites: `L2.05019`, `L2.05020`,
+`L2.05021`, `L2.05022`, `L2.05023`, `L2.05024` and `L2.05025`.
+RU was not swept; ids held in data or built in registers were not searched.
+The linear sweep can lose instruction alignment after data. The first
+site posts to window `[L2.05026]`; forwarding to the application arm is
+unread. The others call application post `L2.00470`. Two are view-close
+branches; the first four complete event contexts were not read. This is
+not a complete sender census or an exclusive pause-command identification.
+
+The 0x41d arm reaches mission end conditionally, then follows the campaign
+victory/failure routes bounded by R2-ENGINE-422. The 0x45c arm reaches
+mission end for modes 0/1 when bit 0 of app+0x404 is set; mode 3 may
+post 0x451, while mode 2 bypasses these local stops. The 0x45d arm reaches
+mission end only for mode 0 with bit 0 of app+0x404 set, then posts 0x459.
+In the mode-2 failure branch, 0x41d calls fail cleanup and posts 0x421;
+modes 1/3 post 0x459 and mode 0 posts 0x452. Mission end `L2.01424`
+calls stop only when the music-available word is nonzero. Hold clear
+pauses the buffer; held stop reselects a track under R2-ENGINE-840.
+
+**Confidence.** High for the listed EN branches, posts and dispatch-table
+mapping. Medium for event names and any wider sender/caller census. A
+0x45c/0x45d post alone does not identify victory, defeat or a universal
+campaign exit.
+
+**Unknown.** Read the readiness helper, first sender's window forwarding
+and complete outer events of the senders to name their triggers; observe
+cursor/time to settle audible pause/resume. Evidence: EXP-2117
+`evidence/derived/message-targets.tsv`,
+`evidence/measured/listings/en-message-*.tsv`, `en-music-451-arm.tsv`,
+`en-sender-*.tsv`, `en-451-from-view-close-*.tsv` and
+`en-mission-end-stop.tsv`.
+
+### R2-ENGINE-837
+
+EN LOAD `L2.00826` writes app+0x5d8 = 2 at `L2.04903`, passes the mode
+to initializer `L2.01003`, loads the session and calls mission entry
+`R2.0026(1)` or posts town 0x42e. R2-ENGINE-439 supplies the load-page
+route. Mission entry stops the player and its music tail skips
+`L2.01375` only when the mode read there equals 3.
+
+The selected mode-3 stores `L2.01010` and `L2.01011` occur in bodies
+that initialize the connection object; the former parses an IP argument.
+They do not establish every writer or all meanings of the mode word.
+If intervening work preserves mode 2 and succeeds, mission LOAD rebuilds
+B00..B16 and makes an area pick from the restored position; town LOAD
+requests b14/b16/b15 with the usual same-key test. This does not identify
+a saved playback-position field.
+
+**Confidence.** High for the listed EN stores, branches and calls.
+Medium for network-mode identity and the composed post-LOAD tracks:
+initializer `L2.01003`, mission-entry middle `L2.05027..L2.05028`,
+restored actor selection and town-entry transit are not fully listed.
+
+**Unknown.** Full RU LOAD and mode writers, and audible cold-LOAD music.
+Trace the named missing bodies; cold LOAD one existing mission save and
+one town save and watch requested key/cursor. No save or save directory
+was read. Evidence: EXP-2117 `evidence/measured/listings/en-load-entry.tsv`,
+`en-mission-entry-*.tsv`, `en-mode3-writer-*.tsv`.
+
+### R2-ENGINE-838
+
+EN selectors bind shops for town 1/3/2 to app+0xf8/+0xfc/+0x100 and
+inns to +0x104/+0x108/+0x10c. Constructor bindings and the known
+R2-ENGINE-237 Kaarg entry agree. The two close groups call mission music
+when mode != 2 and bypass it in campaign mode 2. The shop/inn entry
+selectors have a branch for modes other than 2; no open was observed.
+
+Each allods2.exe raw scan searches every backed PE section for absolute
+dwords equal to set-list/start/stop entries, plus E8/E9 rel32 targets in
+executable sections. It finds 6/8/10 E8 candidates and zero absolute-dword
+or E9 candidates to those entries in each image. Counts are recomputed
+from committed `refs.tsv`, not transcribed from a prior census.
+
+**Confidence.** High for the listed EN positive bindings and close
+conditions. Medium for census completeness: raw hits may be instruction
+interiors; computed pointers, other jump encodings, vtable arithmetic,
+DLL dispatch and a repaired function graph were not read. There is no
+High enumeration/absence rationale from this instrument.
+
+**Unknown.** Every indirect caller and a complete screen/music inventory.
+Repair and trace pointer tables and computed routes across both clients
+and eligible DLLs. Evidence: EXP-2117 `evidence/measured/refs.tsv`,
+`evidence/derived/reference-counts.tsv`, and listings
+`en-room-construction.tsv`, `en-town-shop-entry.tsv`,
+`en-town-inn-entry.tsv`, `en-close-shops.tsv`, `en-close-inns.tsv`.
+
+### R2-ENGINE-839
+
+The dialogue cross-fade and state-1 music-off pass D=2000 and F=8000.
+EN/RU setup captures initial volume V0, stores F and sets fade flag
++0x14. D is a maximum time in milliseconds; F is the positive magnitude
+of stop threshold -F in the buffer's volume units (hundredths of a dB
+under the existing DirectSound identification). Effective time T is
+the unsigned minimum of D, source-time expression R and buffered-time Q.
+The exact R/Q register expressions and helper limits are in EXP-2117
+RESULTS, section 6. Source virtual getters `L2.05029` and `L2.05030`
+remain unread, so the remaining-source-time interpretation is Medium.
+
+The interval is `delta=min(100,(floor(bufferBytes/rate)*1000)>>4)` ms,
+where rate is wave-format bytes/second. The player timer callback reads
+timeGetTime. In EN, the head accepts a callback when now >= due and
+advances due by delta once, and the tail applies the step and stop test.
+The code between them (`L2.05031..L2.05032`) and the RU head are unread,
+so a step on every due callback is Medium. The step uses the stored delta.
+For positive T,F and ordinary inputs without 32-bit product overflow:
+
+```text
+q = floor(F*delta/T)
+s = q*(F+V0)/F
+next(v) = v - trunc_toward_zero(s*(0.3*(v+F/4)^4/(F/2)^4+0.9))
+```
+
+The pow paths and truncation helpers were read in both roots, along with
+constants 4.0, 0.3, 2.0 and 0.9. A negative base with exponent 4.0 follows
+the listed even-integer branch of the pow entry; its half-constant is
+unread. The fourth-power interpretation depends on that constant. The
+timer tail tests current v < -F before the step and then calls stop.
+Equality still attempts a step; after a crossing, stop occurs when the
+tail is next reached, with next-due-callback composition Medium. There
+is no final write forcing exactly -F. End action depends on hold
+(R2-ENGINE-840).
+
+**Confidence.** High for the local EN/RU setup, step and tail arithmetic
+and the four measured constants. Medium for a step on every due callback,
+time composition through unread source getters, the pow entry's unread
+half-constant and the physical volume unit's inherited interface
+identification. Actual callback cadence is Unknown. EN's step window ends
+inside its return, after all arithmetic; the complete return is in
+R2-ENGINE-337's earlier listing.
+Mnemonic alignment is navigation only, not proof of operand equality.
+
+**Unknown.** Zero-T/invalid input handling and the native V0 = -8000
+case: the model gives a zero step forever, so v < -F never holds and stop
+never fires. Also unread are all callback dispatch routes, the timer
+middle and RU head, the pow half-constant, x87 edge rounding and audible
+fade duration. List those bodies and the source getters; measure the
+half-constant and record time/volume/cursor for music off and a dialogue
+tune, including V0 = -8000. EXP-2117 `evidence/derived/fade-model.tsv`
+is a synthetic arithmetic illustration, not a native trace. Evidence:
+its `evidence/measured/values.tsv`,
+`imports.tsv` and `listings/{en,ru}-fade-*.tsv`.
+
+### R2-ENGINE-840
+
+EN/RU status returns 1 when buffer and source exist, paused +0xc is zero
+and fade +0x14 is zero; fade set yields 2. Paused wins with 3. Missing
+source yields 4 and missing buffer 5. These are computed results, not
+stored enum values. The listed EN constructor sets paused=1/fade=0;
+start clears paused; fade setup sets fade; ordinary stop sets paused
+and removes the callback without clearing fade. Held stop clears fade,
+selects held index +0x1c, restores configured volume and retains hold.
+Those are positive writers, not an all-alias census.
+
+EN music-off in state 1 arms fade then clears MusicEnabled. Its timer fade
+tail has no MusicEnabled test. State 2 stops immediately. A later start
+does not clear the retained fade flag. A held stop reselects from the
+beginning rather than pausing at the old cursor.
+
+With valid buffer/source and hold set, list set calls held stop on the
+old list, copies the replacement, selects rand() mod new count and writes
+area pick -1. Hold and old held index remain. The new-list selection
+replaces the interim held selection. EN select resets the buffer cursor
+to zero and preloads; it does not call Play. Immediate audio therefore
+depends on prior buffer playing state and successful virtual operations.
+
+**Confidence.** High for the listed state predicates and call/store
+sequence in EN/RU; EN for the constructor, sound-panel arm and complete
+select. Medium for actual audio, global writer completeness, inherited
+list-copy semantics and effects through unread virtual I/O helpers.
+
+**Unknown.** Out-of-range held index, empty replacement list, native
+delivery cadence and audio on list changes while paused/fading/playing.
+Trace flags, buffer cursor and selected index through those cases.
+Evidence: EXP-2117 `evidence/measured/listings/en-player-*.tsv`,
+`ru-player-*.tsv`, `en-sound-panel-off.tsv` and its fade listings.
