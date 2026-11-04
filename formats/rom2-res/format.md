@@ -82,3 +82,20 @@ only 01.smk exists. The 6753596-byte EN/RU payload hashes differ; equal
 size does not imply media identity. Same-stem 476-byte REG companions
 have equal hashes. Loose override/alias precedence, physical EOF and
 truncation behavior remain Unknown. — R2-ENGINE-096
+
+## Selected speech lookup and record projection
+
+The read EN archive component parser accepts slash and backslash. Child
+comparison is byte-sensitive after a prior normalizer; selected EN/RU
+zero-locale case branches lowercase ASCII A..Z. The EN directory helper
+tries disk search bases after archive miss, with its concrete file method
+calling CreateFileA using read/OPEN_EXISTING for flags 0. Full mount
+precedence, locale behavior and RU's concrete disk opener remain Medium
+or Unknown. — R2-ENGINE-870
+
+Each root's 491 itemname-record projection through the shop speech
+formula forms 852 distinct normalized relative names, 283 present and
+569 absent in that root's speech key set. The projection spans all three
+shop stems and ordinary item parts 1..3. It is not the admitted/mutated
+stock population and proves neither universal native coverage nor 569
+actual failed requests. — R2-ASSET-212

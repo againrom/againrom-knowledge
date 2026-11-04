@@ -338,3 +338,22 @@ and paperdoll layers for 21 and 2000 remain Unknown. — R2-ENGINE-821
 The read npc.reg and units.reg key-name census supplies no key containing
 rect, crop or portrait. This is a bounded Medium negative; other names,
 registries and reader routes remain open. — R2-ENGINE-820
+
+## Dialogue page speech opening
+
+The selected EN/RU dialogue open constructs part counter zero and calls
+modal open, which invokes the real dialogue +0x80 method after a no-op
++0x78. The page increments to part 1; 0x470 advances it later. Explicit
+nonempty sound= wins over the talk/about/accept/reject/keeper/man/guard
+family default; the request is speech\<name>.wav at SoundSpeechPos.
+The helper for NPC word 21 searches for a class-tested object with that word
+and has a fallback call. EN's read fallback writes flags 0x56, selecting
+speaker letter s. Its RU body is unread. Full living-hero identity and
+composition through collection/modal helpers remain Medium.
+— R2-ENGINE-802, R2-ENGINE-865
+
+The sound loader/play code depends on an object pointer cleared on
+selected EN/RU startup failures and release. Complete lifetime and audible
+output remain open. Name resolution has a disk fallback after archive
+miss in the read EN path; normalized archive-key equality is not the
+whole contract. — R2-ENGINE-866, R2-ENGINE-870

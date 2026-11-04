@@ -227,9 +227,14 @@ control 0x28, the only checkbox in the windows read). With it 0, or outside
 application mode word 2, no unit voices a selection or an order at the 13
 call sites of the speaker picker, which returns 0 under those tests. A
 gesture slot called by other code (Medium: none found) is not gated by it.
-The `P` key sends pick-up through a sender that calls the picker; digit keys
-make no direct voice call (Medium) and a portrait click is Unknown. Gesture
-voices play at SoundSpeechPos. — R2-ENGINE-720, R2-ENGINE-806
+The `P` key sends pick-up through a sender that calls the picker. Complete
+EN/RU digit-group bodies contain no direct picker/click call; silence
+through every indirect descendant remains Medium. In EN, rectangle-tested
+portrait-panel branches send 0x40e/0x40f to a view whose handlers can call
+the ordinary click routine while a command collection is nonempty. This
+composed route is Medium, not every portrait click; full RU parity is open.
+Gesture voices play at SoundSpeechPos. — R2-ENGINE-720, R2-ENGINE-806,
+R2-ENGINE-869
 
 The unit slot that plays the easy, hard and dead files has five callers in
 the client message pump (Medium: some call encodings were not scanned), not
@@ -237,12 +242,66 @@ through the picker, and no test of Acknowledgement or the mode word guards
 the calls. The slot plays the voice subject to its 1500 ms gate. The arm for
 message types 0x6c, 0x6e, 0x6f and 0x70 calls it with `dead` when a unit's
 health falls from above 0 to -10..0 and with `hard` while it stays there
-(Medium that all four types reach the calls; no other call in the windows
-read, with the tail of the state 2..4 arm and the state 5 arm unread). A
+(Medium that all four types reach the calls). The read state-2..4 and
+state-5 arms contain no direct slot call; absence through their descendants
+remains Medium. A
 health update calls it with the unit type's sound when the health is
 unchanged, makes no slot +0x74 call at -10 or below, and calls `hard` below
-half health and `easy` otherwise. The same arm holds another sound call
-outside the slot, not characterized. — R2-ENGINE-804, R2-ENGINE-721
+half health and `easy` otherwise. These tests use health before the update.
+R2-ENGINE-804 is partially retracted only for its unsupported label of
+`[L2.00450]` as another sound call: its target remains Unknown. The RU
+application +0x3f4/+0x3bc/+0x3c8 condition is after the state-1 voices.
+In RU, with mode != 2, the current-unit match, new state 4 and old state < 4, text 0x44 is inserted when any of application +0x3f4/+0x3bc/+0x3c8 is zero; all three nonzero skip it. Text 0x45 follows under the same preceding conditions, independently of those three field tests.
+The field meanings remain Unknown; this is not a proven hurt-voice gate.
+— R2-ENGINE-804, R2-ENGINE-721, R2-ENGINE-863
+
+Both wrappers supply 0x73. In EN, the read builder writes unit +0x94 to payload +0xc and the ID to +0xa; EN serialization selects 0x6e/0x6f/0x70/0x6c for one/two/three/four mask bytes. The corresponding RU helper/table and builder relationships remain Medium, with those bodies unread.
+Selected EN 0x73 senders follow subtraction from unit +0x94;
+complete game-event identities remain Medium/Unknown. Selected EN voice
+word writers include zero, copies, packet/server transfer, supplied
+fallback NPC and server template reductions. They do not establish the
+word of every creature or hire; RU server-template event parity is open.
+— R2-ENGINE-863, R2-ENGINE-864
+
+## Shop speech
+
+The known EN/RU speech grid has page getter 4, so only the middle shared
+left-release +0xa4 call dispatches its speech method. Read EN stock and
+page-2 grids use other methods. Full admission and receiver coverage are
+Medium. The request requires mode 2, source page 5..8 and draw(100)<30;
+it is not conditioned on an established successful purchase.
+— R2-ENGINE-861
+
+Pointer comparisons select `shop`, `shop_druid` or `shop_kaarg`. The
+first recognized tag in 2..11,21..25,27..31,33..37 selects
+`speech\<shop>\effects\<tag:02>.wav`; otherwise a nonzero last tag-42
+value selects `books\<value:02>.wav`. Otherwise it forms
+`speech\<shop>\s<kind:02>i<subtype:02>p<p>.wav`, with
+kind `(u16(item+6)>>8)&15`, subtype `u16(item+6)&31`, p=draw(3)+1.
+The draw uses `floor(r*N/32767)%N` for these small positive N, so the
+core endpoint r=32767 wraps to zero. Core seeding and complete live-item
+decoding remain open. The filename literals and three shop stems are read in EN; the same RU strings are Medium inference from the corresponding code shape, not independently read literals. High covers numeric operands and
+attribute precedence in both roots. — R2-ENGINE-862
+
+Each root's 491 itemname-record projection forms 852 distinct normalized
+names, 283 present and 569 absent from its speech key set. This is not
+the shop-admitted/mutated population and proves neither universal key
+coverage nor 569 actual failed requests. — R2-ASSET-212
+
+## Speaker list endpoint and sound availability
+
+The EN/RU picker can choose index count when rand15=32767. The read grow bodies request no extra logical element for a sentinel. The initial EN zero-fill covers the supplied logical range. No initialized sentinel is established (Medium: the EN initialization tail and RU L2.05133 are unread). data[count] remains Unknown.
+The accessor has no bounds check. The following DWORD, speaker pointer
+and native outcome remain Unknown. Selected EN speaker-field masks
+preserve 0x1/0x10, and extra +0x78 stores include an object pointer;
+neither field sweep establishes every unit owner or alias writer.
+— R2-ENGINE-867, R2-ENGINE-868
+
+Sound load/play use an object pointer cleared on listed EN/RU startup
+failures and release. The EN factory thunk reaches DSOUND.dll ordinal 1;
+the external body and complete pointer lifetime remain open. Zero there
+means no usable pointer on these paths, not an options-checkbox value.
+— R2-ENGINE-866
 
 The sound panel's music-on command resumes or restarts the chosen melody;
 the EN music-off arm stops or fades the player. The panel also sets the

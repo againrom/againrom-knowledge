@@ -3102,3 +3102,34 @@ titles alone; R2-ENGINE-777 and R2-ENGINE-809 state the loader/mask link and
 its Medium scope. No save or runtime instance was read here.
 
 **Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 2.
+
+## Item-record speech projection
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-212 | Each ROM2 root's 491 itemname records project 852 distinct shop speech names: 283 keys present and 569 absent; this is not a census of shop-admitted or mutated items. | High / Medium | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
+
+### R2-ASSET-212
+
+For each root, the native directory instrument reads speech.res keys and
+the 491 world.res:data/itemname.pkt records. The item payload is 7763
+bytes, SHA256 932a2491ecb40b7e65f219e6528d72f4d866cf9f1bf0cac54ec5cc0bf0d33ad5
+in both roots. The text analyzer applies R2-ENGINE-862's formulas to
+each record under shop, shop_druid and shop_kaarg, and p=1,2,3 when no
+effect/book is found. It forms 852 distinct lowercase slash-relative
+names, 283 present and 569 absent in each root's key set. Effect tags
+are 2,3,4,5,6,8,9,11; no nonzero book value occurs in this projection.
+
+**Confidence.** High for these derived counts over the committed record
+and key tables. Medium as coverage of real shop requests: admission,
+decoded books and mutated attributes are not modeled. This neither
+proves universal native key coverage nor 569 actual failed requests.
+
+**Unknown.** Every name the actual shop can form on admitted live items.
+
+**Evidence.** RESULTS question 1; derived inputs.tsv,
+en/ru-item-speech-fields.tsv, en/ru-speech-keys.tsv,
+record-speech-names.tsv, record-speech-summary.json, shop-keys.tsv;
+evidence/analyze.py.
+
+[EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md).
