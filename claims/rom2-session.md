@@ -5491,3 +5491,32 @@ structural walk (SHA256 values in the experiment's inputs.tsv). Each holds
 meanings of +4 and +8 are R2-ENGINE-857's reading.
 
 **Evidence.** [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md)
+
+## Route-failure fields in original saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-346 | Five original ROM2 mission-10 saves store cmd +0x16 = 65500, +0x9e = 0 and +0xa0 = 0 in all 150 command blocks and +0x9c nonzero only in the 3 with +0x54 = 1; no block holds a stamp or a case-5 walk. | High / Medium | ● active (branch candidate) | [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md) |
+
+### R2-SESSION-346
+
+The population and manifest check are R2-SESSION-343's (SHA256 in the
+experiment's `save-inputs.tsv`), read again by the EXP-2118 save reader (original1's `README.md` is absent,
+`save-population.tsv`; the manifest was read and every save hash is in
+`save-inputs.tsv`): 150 unit records, all mission 10. +0x16 = 65500 (150), +0x9e = 0 (150), +0xa0
+= 0 (150), +0x54 = 1 and +0x9c nonzero together (3). Cmd +8: 11 (82), 0 (61), 8
+(3), 1 (2), 6 (1), 5 (1). The one cmd +8 = 5 block (`game0006`,
+`players.2.group.3.members.1`, group 6, mode 18, target set) has +0x16 =
+65500: a mode-18 attacker without a stamp, the single saved case the stamp's
+condition could apply to; whether its substitute was in range or the goal
+reachable is not known.
+
+**Confidence.** High for the values as generated; the table was not
+reproduced (the reproduction stopped at the scan limit before the saves), and
++0x16 = 65500 agrees with R2-SESSION-343. Medium for the state reading
+(R2-ENGINE-873, R2-ENGINE-876).
+
+**Unknown.** The movement block (+0x1c0: +0x98, +9, +0x76, +0x7c) is not in
+the save reader.
+
+**Evidence.** [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md)

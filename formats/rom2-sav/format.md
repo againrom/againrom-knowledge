@@ -1559,7 +1559,7 @@ The Unit command block fields of the walk back and the hit memory:
 | +0x0 | u16 | post cell |
 | +0x8 | u8 | activity: 1 walk, 5 attack, 0xb at the post |
 | +0xa | u16 | walk goal cell |
-| +0x16 | u16 | stamp: server word +0 at the stamp (RU); 65500 from the constructor |
+| +0x16 | u16 | stamp: server word +0 when a mode-18 attacker's route search finds no route and its substitute cell is farther from the goal than `L2.01728` (RU and EN); 65500 from the constructor |
 | +0x20 | u32 | target; 0 when the leash leaves no enemy |
 | +0x54 | u32 | 1 after a hit |
 | +0x58 | u16 | the attacker's cell at the hit |
@@ -1567,8 +1567,13 @@ The Unit command block fields of the walk back and the hit memory:
 | +0x94 | u32 | the attacker |
 | +0x98 | u32 | server dword +4 at the hit |
 | +0x9c | u16 | the step-away cell beyond the victim |
+| +0x9e | u8 | guard B case-5 counter; among the census-traced sites only in case 5, and no read body starts it from 0 |
+| +0xa0 | u16 | guard B case-5 walk cell; among the census-traced sites only in case 5 |
 
 A hit writes no target. All 150 unit records of the five original mission-10
 saves store +0x16 = 65500, so none holds a stamp; game0006 stores
 a group of two that reads as in pursuit, with the hit memory toward the hero's cell.
 — R2-ENGINE-845, R2-ENGINE-846, R2-SESSION-343
+
+The same 150 records store +0x9e = 0 and +0xa0 = 0, in the five saves of R2-SESSION-346.
+— R2-ENGINE-873, R2-ENGINE-876, R2-SESSION-346
