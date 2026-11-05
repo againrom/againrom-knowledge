@@ -1,0 +1,89 @@
+# Group and member decisions
+
+## Group tick
+
+| Input/state | Rule | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| Ordinary session, session +0xbbe8 zero | Recount activity. Group tick L2.00504 calls L2.02456 only if session +0xbbe8 or programme +0x45 is nonzero. Inactive Group and command +9 = 0 makes the unit executor set state 27 and return. | R2-ENGINE-057 High for branches; R2-ENGINE-507 High RU gate | Owner classification and other session gate modes |
+| Activity marking | Owner +0x2c = 0 actors mark owner masks over a 5 by 5 coarse-cell neighbourhood. Actors of the alternative owner branch (owner +0x2c nonzero) below max health can activate their Group. A nonzero cell mask or forced +0x48 marks active. | R2-ENGINE-057 High local stores, Medium producer population | All marking exceptions; GUI fog equivalence is not established |
+| Empty Group | Tick sets programme byte +0x20 to 0xff before dispatch. | R2-ENGINE-507 High RU; R2-ENGINE-882 High both dispatch bodies | Whether a guard's no-member radius arm can be reached |
+| Programme dispatch | Byte table RU L2.02461 / EN L2.05245 maps 0..19 into jump table RU L2.02462 / EN L2.05246; 0xff has its own branch. Post-step follows the selected route or no route. | R2-ENGINE-882 High | Seconds per tick and relation to member executor calls |
+
+## Programme routes
+
+Order is preserved within the clauses each card reads. A named unread helper is
+an explicit boundary; its internal decisions are not supplied here.
+
+| Programme/state | Per-member rule in the read order | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| 0 | Group route L2.02463 runs each member through L2.01726, the unit-order selector wrapper. | R2-ENGINE-507 High RU route; R2-ENGINE-882 High body; R2-ENGINE-558 High wrapper, Unknown rate | Planner scheduling |
+| 1, Guard A, L2.02464 | Guard preparation below; with target command +0x20 run the attack planner; otherwise, in the EN arm read by R2-ENGINE-824, walk to the post unless centred there. R2-ENGINE-844 states the case subset; the RU Guard A body was not read. | R2-ENGINE-841 High preparation; Guard A member decision: one sentence of R2-ENGINE-844 (cases 3 and 6 only; the card's High is for Guard B), Medium for Guard A; R2-ENGINE-824 Medium, EN mode-1 arm | RU Guard A body not read (R2-ENGINE-882); helper effects; final coordinate from a zero post |
+| 2, L2.02465 | Sight, assignment L2.02424; target: planner; no target: walk to Group point +0xa, or L2.01733(member, 1). | R2-ENGINE-882 High body order, Medium callees; R2-ENGINE-507 High RU route | Exact arrival/helper conditions; no direct leash call does not exclude one in callees |
+| 3, L2.02466 | Sight, assignment L2.05173 using scorer L2.05238; target: planner; no target: L2.01531. | R2-ENGINE-882 High body; R2-ENGINE-881 High assignment writes, Medium census | Scorer's complete decision; sight/support callees |
+| 4, L2.02467 | Read body calls L2.04666, walk, L2.01576, L2.01733, L2.02114 and L2.01731. It does not access target +0x20. The reset chain can store unit order 0xc. | R2-ENGINE-882 High call/access body, Medium callees; R2-ENGINE-884 Medium order composition | Branch conditions connecting those calls; complete per-member execution |
+| 5, L2.02468 | Sight; with enemies, assignment then planner on a target or L2.01733(member, 1); without enemies, programme 4. | R2-ENGINE-882 High body order, Medium callees | Sight, planner and move helper effects |
+| 17, L2.02469 | Distance tests and L2.02421, then programme 5. | R2-ENGINE-882 High local sequence, Medium meanings; R2-ENGINE-507 High RU route | Wander destination and distance-branch semantics not specified by these cards |
+| 18, Guard B, L2.02470 | Guard preparation, then the first matching numbered case below. | R2-ENGINE-841 High order; R2-ENGINE-844 High operands/order, Medium absolute value | Full path/clock composition |
+| 19, L2.02471 | Each member takes L2.01531. | R2-ENGINE-882 High body, Medium callee meaning | Complete support choice |
+| 0xff, L2.02472 | Each member takes L2.01733(member, 0). | R2-ENGINE-882 High body, Medium callees | Candidate/mage helper effects |
+| 6..16, 20..254 | No programme route; post-step still runs. | R2-ENGINE-507 High RU; R2-ENGINE-882 High both tables | External setters and script meanings |
+
+## Guard preparation and assignment
+
+| Input/state | Rule | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| Nonempty Guard A/B Group | L2.02475 writes programme +0x24 = meanY << 16 or meanX; +0x28 = meanY << 8 or meanX, with truncated integer means. Then +0x2a = maximum member distance, +0x2b = maximum member +0xa5, +0x2c = maximum sum. | R2-ENGINE-841 High bodies, Medium count/list helpers | Readers of +0x2a..+0x2c; load-time centre writer |
+| Fresh mean available | Group sight L2.02473, leash L2.02474(mean +0x28, radius +0x2d), assignment L2.02424, radius step, member loop. | R2-ENGINE-841 High call order; R2-ENGINE-507 High/Medium sight description | Complete group-sight inputs |
+| Listed enemy farther than radius | Remove it when Chebyshev distance from the current mean exceeds +0x2d. The member's post is not the leash centre. | R2-ENGINE-842 High operands/body; R2-ENGINE-878 High distance body | List helpers; unseen enemies |
+| Enemies survive | Score each for each member; strictly least score wins, first on a tie. Write command +0x20; with no enemy or all scores excluded write 0. | R2-ENGINE-503 High arithmetic; R2-ENGINE-881 High stores, Medium writer completeness | Untraced stores, LOAD/constructor effects |
+| Group scorer L2.00057 | Score = d * 256 + turn. Ranged members use d-range+1 beyond range, else 1. A 16-byte table supplies preference; 0 excludes. For size below 2 and Mind at least 15, preference 1 adds half, preference 4 subtracts a quarter. Effect 0x40000 adds 0x7f, floor 1. | R2-ENGINE-503 High arithmetic/table, Medium kind names | Semantic kind labels; target eligibility outside this scorer |
+| Preference-table input | Candidate kind 1 with its range above 1 becomes kind 0. Ranged member indexes T[k], melee T[k+4*ownKind]. T rows are 2,1,2,4 / 4,2,1,0 / 2,1,4,0 / 2,1,2,4. | R2-ENGINE-503 High values, Medium kind names | Full meaning of kind values |
+| No assigned target after leash | Guard A/B take their no-target clauses. A pursuit ending at this point is a composition, not a universal write census. | R2-ENGINE-842 Medium composed end; R2-ENGINE-881 Medium coverage | 141 RU untraced +0x20 writes; helpers and later execution |
+
+## Radius latch
+
+| Input/state after assignment | Rule | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| First member exists, +0x30 = 0 | +0x2d = +0x38 + draw(-1,1) + 4; +0x34 = 0; +0x30 = 1. | R2-ENGINE-843 High stores, Medium uniform {-1,0,1} interpretation | Draw denominator; seconds per tick |
+| First member exists, +0x30 nonzero | Increment +0x34, set +0x30 = 1; radius unchanged. | R2-ENGINE-843 High | Meanings beyond these writes |
+| No first member, +0x30 nonzero | +0x2d = +0x38 + draw(-1,1); +0x34 = 0; +0x30 = 0. | R2-ENGINE-843 High stores, Medium draw | Reachability after empty Group becomes 0xff |
+| No first member, +0x30 = 0 | Increment +0x34, set +0x30 = 0. | R2-ENGINE-843 High | Same reachability boundary |
+| Mode-18 setter(group, r) | Set members' order 0xb, programme 18, run radius setup. Nonzero r above +0x2d raises +0x2d/+0x38 to r; r=0 and +0x2d below session +0xa8b8 writes 20 to both. Clear +0x39. | R2-ENGINE-843 High; R2-ENGINE-541 High setter body | Setter callers and r values |
+| Guard-A setup in the Summon path | L2.04403 sets programme 1 and unit order 0xb; L2.04666 and setup copy +0x2c to +0x2d/+0x38 and raise both to session MinimalGuardRange when lower. | R2-ENGINE-788 High stores, Medium config role/value | Configuration source/value; not all creation paths |
+
+## Guard B cases
+
+Take the first matching row, in this order. Difference denotes the subtraction
+followed by the presumed absolute-value helper; that interpretation remains
+Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
+
+| Case/input | Rule | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| 1: HP differs from max; word difference(command +0x16, server +0) below 30 | Prepare walk to command +0x9c, even with an assigned target. | R2-ENGINE-828 High order/operands, Medium trajectory; R2-ENGINE-844 High stores, Medium absolute value | Clock restore, helper and route outcome |
+| 2: same word difference below 10 | Prepare the same walk, with no HP or hit-memory test. | R2-ENGINE-844 High operands/stores, Medium absolute value | Same clock/path boundaries |
+| 3: command +0x20 nonzero | Run attack planner L2.01530 on the assigned target. | R2-ENGINE-844 High branch; R2-ENGINE-505 High RU body, Medium range/step interpretation | Planner helpers; whether target remains eligible |
+| 4: no target; HP differs from max; dword difference(command +0x98, server +4) below 10 | Prepare walk to command +0x9c. | R2-ENGINE-844 High branch/stores, Medium absolute value; R2-ENGINE-845 High hit stores, Medium away-cell geometry | Live clock and destination result |
+| 5: command byte +0x9e nonzero | Increment counter, walk to +0xa0, clear counter past 10. The read path that would start it from zero always jumps over initialization. | R2-ENGINE-876 High body/path, Medium census; R2-ENGINE-844 High walk | Untraced writers, LOAD and outside/indirect entries |
+| 6: off post +0 or not centred | Prepare +8 = 1, goal +0xa = post. Otherwise run L2.01733(member,1): owner +0x2c nonzero writes +8 = 0xb; otherwise L2.02911. | R2-ENGINE-844 High body/arrival test, Medium helper meanings | Full support/mage path; +8 = 0xb is an activity, not unit order 11 |
+| Guard A subset | R2-ENGINE-844 states only cases 3 and 6. The EN mode-1 no-target arm passes a zero post unchanged to prepared movement. | R2-ENGINE-844 one sentence, Medium for Guard A; R2-ENGINE-824 Medium, EN only; R2-ENGINE-883 Medium search composition | RU Guard A body not read (R2-ENGINE-882); actual zero-goal movement; prior setters |
+| Walking home on later Group tick | Sight, leash and assignment run again before these cases; no read body establishes an unconditional return-home lockout. | R2-ENGINE-847 Medium composition | All writer/helper effects and original observed case |
+
+## Struck member and look-around flag
+
+| Input/state | Rule | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| Hit hook L2.02074(attacker,victim,third) | Victim command +0x54=1, +0x58=attacker cell, +0x5a=0; call L2.02419, post copied event-1 record through L2.01727; +0x94=attacker, +0x98=server dword +4, +0x9c=away cell. No direct target +0x20 store. | R2-ENGINE-845 High stores/calls, Medium geometry/caller roles | Relation helper and posted-record consumers; full caller coverage |
+| Remembered cell | For a computer-owned actor, candidate builder marks it for runs 1..21, increments +0x5a and clears +0x58 after marking on run 21. Group sight also reads remembered cells. | R2-ENGINE-502 High local builder; R2-ENGINE-875 Medium group-sight census | Full group-sight predicates; builder-run cadence against the Group tick is Unknown |
+| Candidate admission | Builder ray scan marks cells; hostility bit and visibility remove candidates; health below 1 separates dead candidates. | R2-ENGINE-502 High local arithmetic/filter, Medium creature scan range/table inputs | Complete group-sight population; shared builder does not prove identical pipelines |
+| Look-around flag | +0x54 requests a new heading and is cleared by look-around. The hit hook does not directly order every Group to attack the attacker. | R2-ENGINE-504 High RU look-around, Medium EN/helper meaning; R2-ENGINE-845 High no direct target write, Medium broader inference | Event consumers and untraced target writers |
+| Stored attacker pointer | +0x94 has no reader in the census with traced command bases; +0x58 has builder/group-sight readers, +0x98/+0x9c have Guard B readers. | R2-ENGINE-875 Medium census; High for the Guard B readers of +0x98/+0x9c; Medium for the builder and group-sight readers of +0x58 | 268 RU +0x94 sites with untraced bases; aliases and bulk copies |
+
+## Health and hostile post-step
+
+| Input/state | Rule | Claims and clause grades | Unknowns |
+|---|---|---|---|
+| Each member after programme route | Health <= command +0x44 and hostile within movement byte +8 + 5: flee. Otherwise health <= +0x40 and hostile within 2: back-off helper L2.02451. | R2-ENGINE-506 High predicates, Medium helper destination; R2-ENGINE-877 Medium bounded route independence | All threshold writers; units outside this Group post-step |
+| Human-table threshold setup | Spellbook: class 2, +0x40=HPmax, +0x44=HPmax/4. Else range>1 and kind!=3: class 1, HPmax/2 and 0. Else class 0, both zero. | R2-ENGINE-506 High local stores | Further writer effects |
+| Creature thresholds | Stat reader can supply Withdraw/Wimpy to command +0x40/+0x44, keeping defaults for -1. Human-only setup does not imply creature thresholds stay constructor values. | R2-ENGINE-777 High reader, Medium delivered row; R2-ENGINE-884 Medium creature composition | Creature row values and complete writer population |
+| Flee chosen | Try spell 23 through admission L2.01518; otherwise move 3 cells away from living hostiles' centre. No living hostile: default route. | R2-ENGINE-506 High flee body, Medium centre/away interpretation | Spell admission and concrete destination |
+| RU creation arm with session word +0xd8=1 | Halve command +0x44. | R2-ENGINE-884 High stores, Medium selection meaning | Meaning of +0xd8 and complete EN counterpart |

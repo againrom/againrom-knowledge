@@ -2,6 +2,8 @@
 
 # Actor AI, targeting and orders
 
+<!-- machine-page -->
+
 Target acquisition reads actor state, diplomacy, candidate populations and
 sight. Group and per-actor state machines select orders; movement executes
 those orders. Player input creates command records through separate handlers.
