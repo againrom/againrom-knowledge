@@ -851,3 +851,22 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and o
 **Confidence.** High for the call chain, the fill call and the release recompute, as listed instructions. Medium for the fill values, which apply `MAGIC-348`'s formula to the Data.bin Mind before the fold. Unknown which construction routes pass a non-empty class name, and whether LOAD reruns the arm.
 
 **Unknown.** Which of the eight `R0501` sites and the four `R0901` sites carry a Dragon class name, whether any instruction stores a class name at `L06853` (a static scan of stores to that address, or of each site's pushed argument, would also settle the routes), and whether shipped placements override a Dragon's Mind or skill words. Settle with the original: place a Dragon by map, by script and by LOAD of a save holding one; record `actor+0x140`'s spell ids, skill words `+0xaa..+0xb2` and each spell's power after creation.
+
+## Cell trap caster lifetime
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs; EN and RU byte-equal); no process was run. `EXP-0639` was allocated `UNIT-169`..`UNIT-175` and spent `UNIT-169`; `UNIT-170`..`UNIT-175` are unused.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| UNIT-169 | A cell trap's temporary caster is built inside the step's ordinary-pass tick and appended only to receiver list `+0x2c`, which the next sub-tick walks first, so its first tick is c+1; it starts with HP 30 and charge and recovery 1. | High / Medium | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+
+### UNIT-169
+
+- Builder `R0914` (`w11`): `new(0x198)`, constructor `R0901`, `+4` = 0, append to `this+0x2c` through `R0292` (`L06032`), Position from the source bytes (`R0289`), Spell object, power in the sphere skill word, then `+0x134` = `+0x135` = 1 (`L17478`, `L17479`). Wrapper `R1137` stores action `+0x54` = 0xd and target `+0x5c` = the entering actor.
+- Initialiser `R0185` (`w13`) stores `+0x3c` = 0, `+0x0e` = 0, `+0x4c` = 0, `+0x58` = 0, `+0x136` = 1, then calls `R0160` unconditionally (`L06971`), which stores HP `+0x94` = 30, `+0x96` = 30, `+0x134` = 8 and `+0x135` = 4 (`w14`, `L06152`), later overwritten to 1 and 1 by the builder. Class setup `R0184` runs only for a non-empty class name (`UNIT-168`), and its listing (`w15`) holds no store to `+0x94`.
+- The sub-tick walks the receiver list before the ordinary actor pass (`MAGIC-435`), and the step runs in that pass (`MOVE-CLOCK-032`), so a caster appended on c is first ticked on c+1. Its tick skips the executor because `+0x3c` is 0 (`R0416`, `AI-478`) and reaches the sub-phase machine through action 0xd (`w16`, `w17`, `w18`).
+- None of the builder's or constructor's direct calls is the ordinary-list insert `R0411` or one of its six callers (`MOVE-187`).
+
+**Confidence.** High for the builder, constructor and initialiser stores and the sub-tick call order. Medium that the caster is on no other tick list (transitive callees of the constructor were not read) and that HP is still 30 at its first tick (the class-name string and the callees of `R0184` were not read).
+
+**Unknown.** An original run that dumps the receiver list and the caster's `+0x94`, `+0x58` and `+0x6c` per sub-tick after a trap admission would settle both.

@@ -222,6 +222,59 @@ recompute, the source and destination have these distinct slot/plane states.
 | After cell-byte change | Destination footprint holds actor | Source claim and destination occupancy |
 | Centred completion | Destination footprint holds actor | Source-only cells cleared; current footprint retained |
 
+### Cell trap timing
+
+A cell trap is a cell record whose payload byte `+2c` is a spell id other than
+0 and `0x1a`. In the step body `R0047` the trap is reached only on its
+crossing call c (other routes to the occupy follow; the census of callers is
+a rel32 byte scan, Medium), the call whose cell byte changes: Position is
+rewritten into the new cell, then the occupy enters each footprint cell and
+the domain 1/2 entry builds the temporary caster before its slot test. The
+start call and the centring of a finished step enter no trap; the live step's
+one other occupy is the `0x1a` relocation block (`MOVE-197`). — MOVE-194
+
+The 0x6b arm does not write the drawn position from Position; the driver
+advances it (other client paths that write it were not read). The 0x6b of
+call 1 carries facing and duration only; its arm sets the remaining offset to
+one cell per moving axis and the count to N without touching the drawn
+position, and each 0x401 pass adds remaining/count. When call c's simulation runs, c-1 driver
+calls have run: at stride 16 the unit is drawn 112/256 of a cell from the
+source centre on a positive axis (c=8, 9 calls left) and 128/256 on a
+negative axis (c=9, 8 calls left) for a unit at rest at its centre (Medium,
+`MOVE-195`), while Position is already in the destination cell. — MOVE-195
+
+Every crossing enters the whole new `n x n` footprint, so a footprint cell
+kept from the old position fires its trap again; the first refused cell still
+fires. Standing makes no entry call and leaving calls the release.
+Placement, relocation (Teleport), the `0x1a` arrival and the fine-position
+setter `L07101` also call the occupy, which enters every footprint cell; a
+cell whose `+2c` is nonzero and not `0x1a` builds a caster, subject to the
+two unread gate helpers of `MOVE-194`. Relocation writes the destination
+centre before it and sends the actor-state projection after it. Where the
+client draws a placed unit then is Unknown. — MOVE-196, MOVE-197
+
+Each sub-tick ticks the receiver list `+2c`, then walks the effect list, then
+runs the ordinary actor pass, so an effect an ordinary actor appends on tick
+R is first visited on R+1 and one a receiver-list caster appends on R is
+visited on R. The trap's caster is appended to the receiver list during the
+step, holds HP 30 and charge and recovery 1, and first ticks on c+1.
+— MAGIC-435, UNIT-169
+
+| Sub-tick | Lightning trap (spell 13) |
+|---|---|
+| c | crossing call; caster built |
+| c+1 | caster phase 0 sends 0x8b, 5 segments; projectile driven on c+1..c+5 |
+| c+2 | phase 5 releases a SpellTransport of count 10 |
+| c+11 | transport fires, appending its PointEffect |
+| c+12 when the transport is the last effect; c+11 only if the unread iterator fixes the successor before the visit | PointEffect applies DirectDamage; 0x73 sent and applied in that timer step |
+
+The schedule is a Medium composition. A trap spell whose row is not
+delivery 2 sends no cast message and its effect is first visited on c+2; a
+delivery-2 row other than 13 and 14 counts distance/Speed. Which ids those
+are was not read. Over the installed maps' 438 EN and 154 RU cell-entry
+records, 25 EN and 21 RU payload values occur, never 14; 26 is the
+relocation. Ids 6 and 11 take an unread branch. — MAGIC-433, MAGIC-434
+
 ## Centred arrival
 
 `R0039` takes one step and, after a cell-byte change, updates word

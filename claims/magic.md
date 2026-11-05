@@ -4970,3 +4970,56 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and o
 **Confidence.** High for the slot contents, the Data.bin rows read and the routine bodies cited. Medium for the random source's divisor (read from `AI-RAND-058` and its manager-constructor amendment, not re-read here), for the mana source (the writer was not read in this experiment) and for reading nonzero `Player+0x28` as computer control (`MAGIC-AI-012`) and for the reach values, which apply the reach rule of the unit format to the rows without reading the equip call.
 
 **Unknown.** Settle with the original: a mission with a computer-owned Dragon face 1 fighting a unit for 100 group passes; record per pass `ord+0x08` and `ord+0x30` (prediction, not a finding: about 70 kind-8 orders spread over Fire Ball, Wall of Fire and Lightning while mana lasts; the static read gives per-call odds, not frequencies over time).
+
+## Cell trap cast schedule
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs; EN and RU byte-equal) and a census of the installed maps; no process was run. `EXP-0639` was allocated `MAGIC-433`..`MAGIC-436` and spent `MAGIC-433`..`MAGIC-435`; `MAGIC-436` is unused. Sub-tick c is the step call that admits the trap (`MOVE-194`).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-433 | A Lightning trap admitted on c sends 0x8b on c+1, releases on c+2 into a SpellTransport of count 10 and damages the walker on c+12 when the transport is the last effect, c+11 only if the unread iterator fixes the successor first. | Medium | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+| MAGIC-434 | The installed maps' cell traps (438 EN, 154 RU records) use 25 EN and 21 RU payload values (26 relocates), never 14; a trap spell whose row is not delivery 2 (ids not read) sends no cast message and its effect is first visited on c+2. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+| MAGIC-435 | Each sub-tick runs the receiver list and the effect walk before the ordinary actor pass, so an effect an ordinary actor appends on tick R is first visited on R+1, and one a temporary caster appends on R is visited on R. | High / Medium | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+
+### MAGIC-433
+
+| Sub-tick | Event | Instructions |
+|---|---|---|
+| c | Step occupy builds the caster and appends it to receiver list `+0x2c` | `MOVE-194`, `UNIT-169` |
+| c+1 | First caster tick, phase 0: apply `R0268` (`L01994`); delivery 2 sets 5 segments for id 13 (`L05061`); target sender `R0617` (`L03024`) writes 0x8b because caster word `+0xe` is 0, picture 34; return 1 sets `+0x136=0`, phase 5, `+0x6c` = `+0x134` = 1 (`L15296..L04379`) | `w16`, `w20`, `w21` |
+| c+1 | Client builds the 0x8b record in the dispatcher; the 0x401 pass makes its first driver call; phases 0,4,3,2,1 on c+1..c+5, return 0 and removal on c+6 | `MAGIC-281`, `ANIM-113`, `ANIM-121` |
+| c+2 | Phase 5: `+0x6c` 1 to 0 (`L13484..L05338`); release `R0002` calls `R0003(caster, target, 0, 0)`; delivery 2 wraps the prepared child in SpellTransport `R0633`, count set to 10 for ids 13/14 (`L03086`), appended at `L03053`; phase 7 (`L05340`) | `w16`, `w22`, `w23`, `w24` |
+| c+2..c+11 | The effect walk of the same sub-tick (`L03066`) visits the transport; each visit subtracts 1 and the tenth (c+11) appends the child at the list tail and retires the transport | `w02`, `w25`, `w26` |
+| c+11 or c+12 | The child's first visit: c+12 when the transport was the last node at its fire visit, c+11 when another node followed it (`ANIM-114` states the last-visit case; the other case rests on the walk iterator `R0648`/`R0649`, which was not read here) | `ANIM-114` |
+| same | PointEffect tick calls the child's vt+0x3c on the retained actor; DirectDamage `R0564` subtracts HP and sends 0x73 for positive damage, applied by the client in that timer step | `MAGIC-293`, `MAGIC-297`, `ANIM-125`, `ANIM-124` |
+
+- The caster ends phase 7 after `+0x135` (1) plus `R0861(3)` ticks (`L17463..L04382`; the Spell object is already deleted, so no Spell parameter is added) and is removed by the receiver walk (`L17464..L16782`).
+- At stride 16 (`MOVE-195`, `evidence/order.tsv`) the damage falls on call 19 or 20 of a positive-axis step and 20 or 21 of a negative-axis step, after the arrival on call 16: the walker is at the destination centre, or on the next step.
+- The PointEffect retains the actor pointer (`MAGIC-293`), so the damage follows the walker wherever it has moved.
+
+**Confidence.** Medium: each row is a listed instruction or a cited claim, but the chain is composed. The weakest links are the list identity of `[[L00285]+0x14]` with the sub-tick's session (`ANIM-114`, `AI-478`), the selection of a PointEffect with DirectDamage as Lightning's prepared child (`MAGIC-293`, `MAGIC-225`; Lightning's Distribution row was not read here), the iterator rule that splits c+11 from c+12 (`ANIM-114`, Medium for the tail link; the iterator `R0648`/`R0649` was not read), and the observed paint of a 0x8b record (`MAGIC-281`). `SAV-1154` shows a saved Fire_Ball chain one tick off a composed prediction; `MAGIC-435` names the order that accounts for that tick.
+
+**Unknown.** An original run on mission 10 that steps a unit onto 21,63 or 22,64 with a per-sub-tick dump of the receiver list, the effect list and the walker's HP would settle c+11 against c+12; a frame capture would date the first visible bolt frame.
+
+### MAGIC-434
+
+- Census `census.py` (`evidence/census`): 72 map files (38 EN, 34 RU; loose `.alm` and `scenario.res` members). Cell-entry type-9 records (X or Y nonzero, A below 4): 438 EN in 17 files, 154 RU in 12 files, the populations of `ALM-T9WORD-330`. Spell low byte, records EN/RU: 1 4/2, 2 90/51, 3 19/5, 4 30/7, 5 11/5, 6 14/12, 7 8/2, 8 32/13, 9 14/0, 10 6/1, 11 22/0, 12 4/0, 13 7/4, 15 12/6, 16 10/1, 17 11/3, 19 2/1, 20 31/9, 21 29/4, 22 10/3, 23 28/11, 24 12/3, 26 3/0, 27 16/5, 28 13/6. Powers range 0..170 (`trap-spells.tsv`).
+- Spell 26 is 0x1a: the attach skips it and the arrival relocation reads it (`MOVE-129`, `UNIT-M10LIFE-057`). Spell 14 is in no record.
+- A spell row whose Delivery System is not 2 (the column was not read here, so which ids these are is Unknown; `MAGIC-DELIVERY-170` covers only the transport countdown): apply returns 1 at `L06150` without calling a sender when getter `R0416` is true, which it is for the caster (`+0x3c` = 0). The release on c+2 appends the effect at `L05395` during the receiver walk, before that sub-tick's effect walk, so the effect is first visited on c+2.
+- Any delivery-2 row takes distance/Speed segments (`L17465..L13753`); ids 13 and 14 override them to 5 (`L05061`). The 0x8b picture is 2*id+8, and outside ids 13 and 14 the transport count is distance/Speed with no override (`MAGIC-293`).
+- Ids 6 and 11 bypass the 0x60 effect construction (`L05083`, `L05084`) to an unread branch.
+
+**Confidence.** High for the counts over the stated population. Medium for the schedules of a row that is not delivery 2 and of a delivery-2 row (same composition as `MAGIC-433`, with the delivery branch read). Unknown which ids have which Delivery System (the Spell table column was not read), for ids 6 and 11, for effects other than PointEffect and AreaEffect damage, and for any picture an effect of a row that is not delivery 2 sends on its visit.
+
+**Unknown.** A read of the Spell table's Delivery System column would name the ids of each branch; an original run with one trap of each id would show what is drawn and when the effect lands.
+
+### MAGIC-435
+
+- Sub-tick `R0193` (`w01`): message drain `R0191`, then `R0426` on `[this+0x14]` (`L01866`), then the ordinary actor pass `R0427` on `[L00240]` (`L01867`), then the flush (`L09336`).
+- `R0426` (`w02`) ticks every receiver-list `+0x2c` element through vt+0x18 and removes one whose `+0x136` is nonzero (`L07024..L16782`), then calls the effect walk `R0641` (`L03066`). `R0427` (`w03`) ticks its list through vt+0x18 (`L01868`); a stepping unit reaches the step there (`MOVE-CLOCK-032`).
+- An effect appended by an ordinary actor's tick on R misses R's effect walk and is first visited on R+1. An effect appended by a receiver-list caster on R is visited by R's effect walk.
+- `SAV-1154`'s catapult rider ticks in the ordinary pass on R: its transport is first visited on R+1, fires on its third visit R+3, and an inner effect appended behind a last-node transport first ticks on R+4, the observed record tick 3102.
+
+**Confidence.** High for the call order inside `w01` and `w02`. Medium for the composed statement, which joins them as `AI-474` does and depends on the list identity of `MAGIC-433`; Medium for the `SAV-1154` consequence, which also takes that card's transport count and rider dating.
+
+**Unknown.** A per-sub-tick dump of the effect list across a catapult shot would confirm the R+1 first visit.

@@ -2236,3 +2236,60 @@ of a Position cell that holds no slot changes another unit's occupancy.
 
 **Unknown.** Whether a later tick clears the bit: no other writer of the dynamic plane was
 enumerated. Whether a route of the owner's run reaches 64,65.
+
+## Cell trap admission within a step
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs; EN and RU byte-equal) and a census of the installed maps; no process was run. `EXP-0639` was allocated `MOVE-194`..`MOVE-198` and spent `MOVE-194`..`MOVE-197`; `MOVE-198` is unused. A cell trap is a cell record whose payload byte `+0x2c` is a spell id other than 0 and 0x1a; call 1 of a step is its start call (`MOVE-094`).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-194 | Within step body `R0047` the occupy is reached only on the call whose cell byte changes, after Position is rewritten; the start call and a finished step's centring admit none; the other occupy is the 0x1a relocation block (`MOVE-197`). | High / Medium | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+| MOVE-195 | At trap call c the client has made c-1 of its N driver calls started by call 1's 0x6b, whose arm does not copy Position: at stride 16, from rest, it is drawn 112/256 (positive, c=8) or 128/256 (negative, c=9) from the source centre. | High / Medium | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+| MOVE-196 | Each crossing enters every cell of the new n x n footprint, so a unit wider than one cell fires again the traps under cells it already covered; standing makes no entry call and leaving calls the release, not the attach. | High / Medium | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+| MOVE-197 | Placement `R1145`, relocation `R1055`, the 0x1a arrival and setter `L07101` reach the occupy, which enters every footprint cell; a cell with `+0x2c` nonzero and not 0x1a builds a caster, subject to `MOVE-194`'s gate helpers. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0639](../experiments/EXP-0639-rom1-trap-order/) |
+
+### MOVE-194
+
+- Step `R0047` (`w07`): it increments `mover+0xac`, adds the signed strides `mover+0xb0`/`+0xb1` to fine X/Y, applies the direction 1/5 zero-fraction correction (`L06788..L07166`), then compares the old and new cell X byte (`L07018`) and Y byte (`L17466`). Equal: it writes Position and jumps to `L02043`. Different: release loop `R0057` (`L07020`), claim `R0058` (`L02037`), Position rewrite with the new cell and fraction bytes (`L02038..L02039`), then occupy `R0050` (`L02042`).
+- Occupy (`w08`) calls `R0458` once per footprint cell (`L05508`) with no earlier exit. The attach (`w09`) takes domain 1/2, calls the unread fetch `R1342` for the cell record, tests byte `+0x2c` nonzero and not 0x1a (`L17467..L07118`), and, because predicate `R2078` returns the literal 1 (`w10`), calls the caster wrapper `R1137` with the source bytes `+0x2e`/`+0x2f`, the entering actor, spell `+0x2c` and power `+0x2d` (`L06049`), before its slot test (`MOVE-088`).
+- `R1851` (domain, `L10901`) and `R1342` (cell fetch, `L17468`) were not read; the caster is built only when the domain is 1 or 2 and the fetch returns nonzero; a domain-3 unit or a zero fetch takes a path with no caster call.
+- Start call: `R0054` (`w05`) runs the step once (`L06896`); with the stride clamp 1..63 the cell byte first changes on call 3 or later (`MOVE-094`). Arrival: live step `R0039` (`w06`) calls the occupy only at `L07169`, inside the 0x1a relocation block (`MOVE-129`, `MOVE-149`). Walk `R0178` (`w04`) calls the live step while a fraction is not 0x80 and the start otherwise.
+- Diagonals: with equal per-axis magnitude (`MOVE-094`) both cell bytes change on one call; where `s` divides 128 the direction 1/5 correction moves the X crossing onto the Y crossing call. A step therefore has one crossing call.
+- Census (`evidence/scans`): `R0050` has six rel32 call sites (`L06653`, `L17469`, `L07127`, `L02042`, `L07169`, `L17470`) and `R0458` one (`L05508`); neither address occurs as a literal dword in any section.
+
+**Confidence.** High for the crossing test, the rewrite-before-occupy order and the arrival's 0x1a-only occupy: listed instructions of whole bodies. Medium that no other route reaches the attach: the census is a rel32 byte scan of the occupy's and attach's callers, not of the step's, and indirect and jump-table routes were not read. Medium for the two unread gate helpers `R1851` and `R1342`.
+
+**Unknown.** An original run that steps a ground unit onto a mission-10 trap cell while recording `server+4`, Position and the receiver list `+0x2c` per sub-tick would show the caster's creation tick against the crossing call.
+
+### MOVE-195
+
+- Sender `R0550` (`w29`), called from the actor tick's action-1 arm: when the words sampled before the executor had both fractions 0x80 and Position moved, it sends 0x6b through `R0622` with facing `2*mover+0xae` and duration byte `mover+0xaa`; the per-direction table values it computes are not pushed, so the message carries no position.
+- Client arm 0x6b (`w32`, `L09200..L17471`, dispatcher tables `w30`/`w31`): it looks the actor up in `+0x9b8`, logs only when `+0xa0` is still nonzero, then stores `+0xa0` = duration, action `+0x84` = 1, facing `+0x85`, and remaining `+0x88`/`+0x8c` = table X/Y (`L02525`, `L02526`, `w35`) << 8. It does not write the drawn position `+8`/`+0xc` from Position; the driver advances it. Other client paths that write `+8`/`+0xc` were not read.
+- Driver `R0548` (`w33`, action 1 at `L02706`): share = remaining / `+0xa0` per axis (`idiv`), remaining -= share, drawn `+8`/`+0xc` += share; the tail decrements `+0xa0`.
+- One timer step runs the sub-tick, the client dispatcher, then the 0x401 pass (`ANIM-113`), and a packet flushed in the sub-tick is dispatched in that timer step (`ANIM-121`). The 0x6b of call 1 is driven first in timer step 1, so when call k's simulation runs, k-1 driver calls have run.
+- `evidence/order.tsv` (from `order.py`) lists, for every stride 1..63 and both axis signs, c, N = ceil(256/s), the drawn offset when the trap fires and the driver calls left. Stride 16: positive c=8, drawn 112, 9 calls left; negative c=9, drawn 128, 8 calls left. Position is then already in the destination cell.
+
+**Confidence.** High for the message fields, the arm's stores, the driver arithmetic and the table. Medium for the composed drawn offset: it assumes a unit at rest at its centre with drawn position equal to Position before call 1, the timer entries `R0260`/`R0454` and the local delivery path (`ANIM-113`, `ANIM-121`); diagonal strides and their duration (`R1088`) are not tabulated; the paint of `+8`/`+0xc` within the frame was not read.
+
+**Unknown.** A timed original run with a per-frame capture of a stepping unit against a per-tick dump of Position would settle the drawn offset on the screen.
+
+### MOVE-196
+
+- The crossing's release loop (`L07905..L07906`) visits the old n x n footprint; the occupy loop (`w08`, `L17472..L17473`) visits every cell of the new n x n footprint, row by row, with n = vt+0x1c. The attach runs the cast before the slot test, so the first refused cell still fires its trap and the cells after it are not entered (`MOVE-088`).
+- A footprint cell covered both before and after the step is released and entered again on the crossing call, so its trap fires once per step that keeps it covered.
+- Standing makes no attach call (`UNIT-M10LIFE-057`); the release `R0057` is a different routine; the attach has one direct call site, inside the occupy.
+
+**Confidence.** High for the two loops and the cast-before-slot order. Medium that the release reaches no attach and that no other route enters the attach: the census is rel32 only and the release body was not read here.
+
+**Unknown.** Which shipped actors have a footprint above 1 and step onto trap cells; an original run with such a unit on a trap row would show the repeat.
+
+### MOVE-197
+
+- Placement `R1145` (`w36`) writes the requested cell through `R0289`, searches outward with `R0290` and the fit test `R1287`, and on success calls the occupy at `L06653`. Its body sends no message. 13 direct callers (`evidence/scans`) were not read.
+- Relocation `R1055` (`w37`) tests the destination footprint and `R0048`, releases the old footprint, clears the claim, writes the destination cell with fractions 0x80/0x80 (`L17474..L05857`), calls the occupy (`L17470`), then order reset `R0044` (`AI-535`) and the actor-state projection `R0059` (`FAME-023`) in the same sub-tick. Callers: `L16009` (the Teleport arm, `MAGIC-TELEPORT-356`), `L17475`, `L17476`.
+- Each of these enters every footprint cell; a cell whose `+0x2c` is nonzero and not 0x1a builds a caster, subject to the two unread gate helpers of `MOVE-194`.
+- The 0x1a arrival (`L07169`, `MOVE-129`) has the same order. Setter `L07101` (`w38`) writes the given fine position and, when the cell word changes, releases the old footprint and calls the occupy (`L17469`); its one rel32 caller `L17477` lies outside the published inventory. `L07127` is in the unreferenced run of `MOVE-093`.
+
+**Confidence.** High for each body's order of Position write, occupy and message. Medium for which play events reach placement and relocation, because their callers were not read. Unknown where the client draws a placed unit when its trap fires.
+
+**Unknown.** An original run that teleports a unit onto a trap cell and one that loads a map with a unit record on a trap cell would show whether these entries fire and what the client draws then.

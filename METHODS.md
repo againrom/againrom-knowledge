@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4686. Observation: 143. Static analysis: 3903. Mixed: 640.
+Claims labelled: 4694. Observation: 143. Static analysis: 3911. Mixed: 640.
 
 ## Ledger ai
 
@@ -1515,6 +1515,9 @@ Claims labelled: 4686. Observation: 143. Static analysis: 3903. Mixed: 640.
 | MAGIC-428 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-429 | mixed | ✔ promoted (branch candidate) |
 | MAGIC-430 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-433 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-434 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-435 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 
@@ -1829,6 +1832,10 @@ Claims labelled: 4686. Observation: 143. Static analysis: 3903. Mixed: 640.
 | MOVE-187 | static analysis | ● active |
 | MOVE-191 | mixed | ● active (branch candidate) |
 | MOVE-192 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-194 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-195 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-196 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-197 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger pal
 
@@ -4772,6 +4779,7 @@ Claims labelled: 4686. Observation: 143. Static analysis: 3903. Mixed: 640.
 | UNIT-156 | static analysis | ✔ promoted |
 | UNIT-167 | static analysis | ✔ promoted (branch candidate) |
 | UNIT-168 | static analysis | ✔ promoted (branch candidate) |
+| UNIT-169 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger video
 
