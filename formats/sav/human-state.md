@@ -225,3 +225,15 @@ and group collections, further helper calls and state publication. Those handoff
 do not establish an empty interval before SAVE. Old-item and attached-Effect
 receivers, allocation contents and later writes still prevent a general
 first-mission-SAVE value contract for the six residual spans. — SAV-936
+
+
+## Stored fields beside attached effects
+
+The read Unit archive transfer copies its saved live blocks and the 64-byte modifier
+block at +0xd4. It therefore has stored values to restore without rerunning an
+effect application at that local boundary. This does not establish a later
+derive, an observed dropped effect, or a lasting stat change with no timer.
+Whether post-load or the first tick reapplies or resets these values is Unknown.
+The seven-file census reproduces all six live protection words at +0xc2+2*i
+and modifier words at +0x102+2*i, i=0..5. The bounded corpus and local join
+remain Medium; original-runtime continuation is Unknown. — SAV-1398

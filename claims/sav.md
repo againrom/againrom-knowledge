@@ -18734,3 +18734,47 @@ that made its world. Unknown which corpus Human is kept.
 **Unknown.** Settle with an original run: end a mission with a hero off a cell centre, SAVE
 in town and decode its Position (predicted: mission cell, sub-cell and a nonzero terrain
 word), then SAVE on the next mission's first frame (predicted: start cell, sub-cell `0x80`).
+
+
+## Unit effects in the bounded map-141 population
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1395 | Seven owner SAVs contain 420 Effects: 113 Unit attachments and 307 other records. | Medium | ✔ promoted (branch candidate) | [EXP-0640](../experiments/EXP-0640-rom1-effects-sav/) |
+| SAV-1396 | Read archive/tick bodies admit the 113 observed attachments locally; complete LOAD retention remains Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0640](../experiments/EXP-0640-rom1-effects-sav/) |
+| SAV-1397 | One-party mixed-lineage snapshots contain 100 type-zero attachments; original-only ancestry is unproved. | Medium | ✔ promoted (branch candidate) | [EXP-0640](../experiments/EXP-0640-rom1-effects-sav/) |
+| SAV-1398 | Unit LOAD transfers saved live/modifier blocks; later derive and permanent untimed changes remain Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0640](../experiments/EXP-0640-rom1-effects-sav/) |
+
+### SAV-1395
+
+The exact reader accepts game6351, game0069, game9999 and game0070..0073. Effect counts are 79/74/1/67/65/67/67 and attachment counts 28/23/0/16/14/16/16. Every attachment belongs to a first-player Human in these documents. All seven class censuses have zero SpellEffect-lineage objects; this is not a class-reachability law. `evidence/census/units.tsv` includes zero-effect units and resolves party membership through Player identity. `effects.tsv` preserves every Effect, including non-unit parents, with class, interval, slot/order, kind/mode, packed operand, magnitude/counter, identity and Token fields. `protections.tsv` exports six live/modifier slot pairs per Unit; native labels and unit names remain private, with label length/hash in `labels.tsv`.
+
+**Amendment.** The population now includes the four formerly unparsed additions. Two fresh exact parses reproduce all nine numeric census files byte for byte; their receipt is `evidence/census-reproduction.json`. Full input hashes remain in `inputs.tsv`. The bounded corpus/identity interpretation stays Medium. Actual original LOAD retention is Unknown.
+
+### SAV-1396
+
+R0210 sends Unit +0x20 to R0951. STORE writes each reference; local LOAD reads each typed Effect through factory L08128 and inserts it through L08701. L08329 transfers Token, kind +0x3c, mode +0x3d, u32 +0x40 and identity +0x0c. The read bodies have no spell-kind or type-zero rejection. The factory/default paths zero source +0x44, which serialization omits; the list supplies the target association.
+
+All 113 measured attachments have mode 1 and counters above 1. R0673 counts down duration/continuous modes, skips values above 9600 and marks expiry with mode bit 128. Unit tick R0037 removes members through R2312, whose local test reads that mode bit, not Token +0x0e. One isolated invocation does not expire these records; actual ticks during LOAD are not counted.
+
+The read Unit post-load body R1482 does not touch Unit+0x20. The Effect post-load Token hook R1560 calls unread R1595; indirect callbacks and other lifecycle paths remain open. **Confidence.** Medium for this local archive/tick join in EN/RU listings (one image), Unknown for complete LOAD-to-first-action retention. Static listings were not natively reproduced. The expanded census is reproduced. No original runtime was run.
+
+### SAV-1397
+
+`effects.tsv` records each unit attachment's zero/nonzero flag and spell row; non-unit spell identity is not inferred from +0x0c. Zero/nonzero counts for game6351/0069/0070/0071/0072/0073 are 28/0, 21/2, 15/1, 13/1, 12/4 and 11/5 (game6351, 28/0, is Againrom-written). These six map-141 files are snapshots of one party in one session, not independent samples. game0069 is the owner-attested original resave of game6351; parents for the other four are Unknown. None of the 85 attachments in original-written files has established original-only ancestry. The 13 nonzero attachments are Bless 23/type54, haste 24/type56 and invisibility 15/type38. On game0073, invisibility is type0 on unit IDs 1 and 3 and type38 on ID2; no unit/list-position loss rule follows.
+
+In the same 113 attachments, Token +0x04 is zero in all 100 type-zero records and nonzero in all 13 nonzero ones; kind +0x3c is 0 in 9 of those 13 and 17 in the 4 haste records. Token +0x18 and +0x14 are zero in all 113. Type +0x0e is one of at least three differing fields in the records interpreted as inherited versus freshly cast. Token copy calls constructor L08171 and does not copy +0x04; that constructor is unread.
+
+For the owner-attested game6351-to-game0069 pair, joining party owner id04, unit id04 and unit type (Medium identity link), all 23 child unit/spell pairs occur in the parent: 21 have type0 and two type54. Parent presence alone does not determine +0x0e. Eleven timers fall by exactly the clock delta 628; twelve do not. Ten of those twelve have parent timers above 628 and type0 retained in 10 of 10 pairs; their departure from simple decay fits a recast of a live type-zero record. The other two are the type54 Bless records with parent timers 195 and 39, fitting expiry and a fresh cast. This is a timer fit in one file pair, four units in one party; intervening casts and same live-record identity were not observed.
+
+`parent-comparison.tsv` leaves other parents Unknown. Under an unproved continuation hypothesis, game0072-to-game0073 row15 timers on IDs1/3 rise 3535-to-6211 and 5482-to-6301 with type0 kept; ID2 changes 88-to-6256 and type0-to-38, clock delta284. These fit live refresh versus expiry/fresh creation but do not establish ancestry or actions.
+
+Jump table L03242 selects R0003 branches that write 2*spell_id+8 for rows 5, 10, 15, 16, 18, 22, 23 and 24; other branches write 2*id+9. The body passes its object to R1046 or R0652. No listing here shows that object reaching R0612: the cast-to-attachment join rests on the 13 nonzero records equalling 2*row+8. The listed attachment call to R0627 at L03096 sends the incoming effect before the same-id search; it does not send the retained record at cast time. No read path here establishes a loaded record's +0x0e reaching that sender. The sender puts the low type byte in message +0x0c. A client window starting inside a function at L17481 reads a byte at message +0x0c as a key; that this is the opcode-0x88 message built by R0627 is not read. A notification discrepancy after LOAD remains a hypothesis.
+
+**Confidence.** Medium for the reproduced mixed-lineage snapshot differences, timer fits and local EN/RU listings (one image). **Unknown.** Cast-to-attachment composition, complete LOAD publication and client draw, actual object loss, first LOAD notification and whether saved or external state decides the owner's observation. Pre-tick LOAD/list/stat/notification inspection and unchanged-file cold-process repeats would settle those boundaries.
+
+### SAV-1398
+
+R0210 transfers saved live blocks and calls R1570 on Unit +0xd4 for 64 bytes. Reading those stored bytes does not require rerunning an effect application at that local boundary; whether post-load or the first tick reapplies or resets them is Unknown. The seven-file `unit-fields.tsv` exports every numeric Unit run, six raw blocks as u16 and Humanoid raw24. `protections.tsv` separately pairs six live words at +0xc2+2*i and modifier words at +0x102+2*i (i=0..5), including zero-effect units. Raw-block offsets in unit-fields are relative, not absolute Unit offsets.
+
+**Confidence.** Medium for the read local transfer and reproduced saved values. The snapshots include protection changes but do not establish a LOAD reset, dropped object or lasting untimed stat change. Later derive/unapply and the actual first actor tick remain Unknown. Measure the saved words before/after LOAD, one tick and resave without recasting.

@@ -263,3 +263,44 @@ proof that publication never happened. Terminal stage does not determine the
 mask; revoke and republish can change it during the actor lifetime.
 Universal fog-of-war meaning and the complete class lifetime remain Unknown.
 — SAV-678, SAV-653, SAV-664
+
+
+## Attached-effect notification type
+
+For an attached status, +0x0c identifies the spell and +0x0e is separately
+serialized. In six map-141 files of one party and one session, 100 of 113
+attachments carry type zero and 13 carry 38, 54 or 56; the first file was
+written by Againrom, the second is its owner-attested resave by the original,
+and the parents of the other four are Unknown. The counts are snapshots, not
+independent samples; original-only ancestry is unproved. — SAV-1397
+
+All 23 child unit/spell pairs occur in the known loaded parent. Eleven timers
+fall by the clock delta 628; twelve do not. Ten of those twelve have parent
+timers above 628 and retain type 0, fitting recast of live type-zero records.
+The other two have parent timers 195 and 39 and type 54, fitting expiry and a
+fresh cast. This is a timer fit in one file pair; casts were not observed.
+Parent presence alone does not determine the type. — SAV-1397
+
+In the same 113 attachments, Token +0x04 is zero in all 100 type-zero records
+and nonzero in all 13 nonzero ones. Kind +0x3c is 0 in 9 of those 13 and 17
+in the 4 haste records. Type +0x0e is one of at least three fields differing
+between records interpreted as inherited versus freshly cast. Token copy
+calls constructor L08171 and does not copy +0x04; that constructor is unread.
+— SAV-1397
+
+Jump table L03242 selects cast-body branches writing 2*spell_id+8 for rows
+5, 10, 15, 16, 18, 22, 23 and 24; other branches write 2*id+9. That body hands
+the object to R1046 or R0652. No listing shows it reaching attachment
+R0612; the cast-to-attachment join rests on the 13 nonzero records equalling
+2*row+8. Fresh attachment locally copies its incoming type; same-id refresh
+has no explicit replacement store to the retained type or kind. — SAV-1397
+
+The attachment routine sends the incoming effect's type at cast time
+(L03096), before its same-id search; this is not the retained record's type.
+No read path here establishes a loaded record's +0x0e reaching that sender.
+The sender copies the low type byte to message +0x0c. A client window starting
+inside a function at L17481 reads a byte at message +0x0c as a key; that this
+is the opcode-0x88 message the sender builds is not read. A notification
+discrepancy after LOAD is a hypothesis. These local EN/RU listings are one
+image. Confidence remains Medium; actual object removal and complete client
+draw remain Unknown. — SAV-1397

@@ -43,3 +43,21 @@ MAGIC-EFFMODE-009
 
 Runtime member offsets identify original in-memory fields. Wire offsets and
 byte order are stated separately in the relevant layouts.
+
+
+## Saved status notification fields
+
+The exact installed RU name queries match element protections at rows 5, 10,
+16 and 22, invisibility at row 15 and battle luck at row 23, paired with EN
+Bless. Both bounded spell-name members match their earlier digests. The
+row/catalogue composition remains Medium. — MAGIC-437
+
+The read same-id noncontinuous refresh explicitly replaces magnitude and
+counter between unapply/reapply callbacks. It does not explicitly replace the
+retained type +0x0e or kind +0x3c. A fresh attachment locally copies its incoming
+type. The listed cast body writes 2*spell_id+8 for rows 5, 10, 15, 16, 18, 22,
+23 and 24 through jump table L03242; other branches write 2*id+9. It hands
+its object to unread R1046 or R0652, with no listed path to attachment
+R0612. That join rests on the 13 nonzero saved types equalling 2*row+8.
+Callback changes and actual native LOAD remain open. EN/RU code listings are
+one image; the distinction is Medium, not an object-removal rule. — MAGIC-438

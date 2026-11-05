@@ -609,3 +609,9 @@ conditional composition). Successful live-death transfer, Hero lifecycle and
 EN/RU equivalence are Unknown here. The new table/selector, no-suffix,
 predicate-absence, transfer-wrapper and image-equality clauses are partially
 retracted. — SAV-1241
+
+
+The read +20 list archive transfers every element without a spell-kind filter.
+For the 113 observed mode-1 attachments, the listed isolated countdown invocation
+does not reach expiry. This local result is Medium; all intervening LOAD hooks,
+actual tick count and next action remain Unknown. — SAV-1396

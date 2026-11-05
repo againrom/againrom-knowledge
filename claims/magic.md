@@ -5023,3 +5023,24 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs; EN an
 **Confidence.** High for the call order inside `w01` and `w02`. Medium for the composed statement, which joins them as `AI-474` does and depends on the list identity of `MAGIC-433`; Medium for the `SAV-1154` consequence, which also takes that card's transport count and rider dating.
 
 **Unknown.** A per-sub-tick dump of the effect list across a catapult shot would confirm the R+1 first visit.
+
+## Bounded saved status notification fields
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-437 | Installed names map protections to rows 5/10/16/22, invisibility to 15 and battle luck to 23. | Medium | ✔ promoted (branch candidate) | [EXP-0640](../experiments/EXP-0640-rom1-effects-sav/) |
+| MAGIC-438 | Same-id refresh replaces magnitude/timer, with no explicit store to retained type +0x0e or kind +0x3c. | Medium | ✔ promoted (branch candidate) | [EXP-0640](../experiments/EXP-0640-rom1-effects-sav/) |
+
+### MAGIC-437
+
+The bounded query rereads only the previously located EN/RU main.res spell-name members, verifies both full digests, and splits their 28 lines. All six exact RU name queries match: protection-fire/water/air/earth rows 5/10/16/22, invisibility 15 and battle luck 23. The paired EN row23 is Bless. `evidence/tables/owner-name-matches.tsv` records row, zero-based line and full line hash; `name-query-inputs.tsv` records both exact intervals and full digests. TEXT-091 supplies the spell_id-1 line rule. The 28-row numeric Spells catalogue remains in `spell-rows.tsv`; no native text is published.
+
+**Amendment.** Corrected protection queries and the direct invisibility match supersede the earlier omitted-word/absent-query limitation. The source member digests match the earlier navigation receipt. Confidence remains Medium for the row/catalogue composition; the new two-window name query was performed once, not independently reproduced.
+
+### MAGIC-438
+
+Jump table L03242 selects R0003 branches that write 2*spell_id+8 for rows 5, 10, 15, 16, 18, 22, 23 and 24; other branches write 2*id+9. The body passes its object to R1046 or R0652. No listing here shows that object reaching R0612, so the cast-to-attachment join rests on the 13 nonzero records equalling 2*row+8 and remains Medium.
+
+Separately, fresh attachment in R0612 calls Effect copy R1001 at L16460, then Token copy R1134, which reads/writes +0x0e at L17480/L03176; insertion follows at L05845. The attachment search compares +0x0c. The retained noncontinuous arm calls unapply at L05205, replaces magnitude +0x40 at L16467 and counter +0x42 at L16468, then calls apply at L05206. Those explicit stores write neither retained +0x0e, +0x3c nor +0x0c. The continuous arm refreshes only the counter. Callback mutations and other cast routes are not excluded.
+
+**Confidence.** Medium for complete local EN/RU attachment/copy listings (one image), not a global store census or complete cast-to-attachment path. SAV-1397 supplies the mixed-lineage snapshot/timer fit: ten pairs with parent timers above the 628 delta depart from simple decay and retain type0, while two parent Bless timers below 628 fit expiry/fresh creation. It is one file pair, not an observed cast sequence. Actual refresh, creation and LOAD-to-draw behaviour remain Unknown without an original-runtime witness.

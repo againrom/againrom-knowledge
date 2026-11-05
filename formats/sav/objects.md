@@ -373,3 +373,19 @@ Native use/SAVE/cold-LOAD replay, later script writes, first notification and
 selector-66 receiver/collection persistence remain Unknown. A verified well
 or switch use followed by SAVE and cold LOAD would settle the first boundary.
 — UNIT-156
+
+
+## Bounded attached-effect population
+
+Seven owner SAVs contain 420 Effects: 113 Unit.effects members and 307 other
+records. Their exact class census has no SpellEffect-lineage object. The nine
+numeric census tables reproduce byte for byte. This bounded population remains
+Medium and does not establish a class-reachability limit. — SAV-1395
+
+The read Unit/Effect list and archive bodies transfer each attachment without a
+spell-kind filter. Mode-1 records with remaining counters above 1 pass the listed
+isolated first-tick expiry tests. Whole LOAD-to-first-action retention remains
+Unknown; source +0x44 is omitted and the containing list supplies the target
+association. The read Unit post-load body does not touch Unit+0x20; the
+Effect post-load hook calls the unread R1595. A missing display mark does
+not prove object removal. — SAV-1396
