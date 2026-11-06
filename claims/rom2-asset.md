@@ -3229,3 +3229,48 @@ record-speech-names.tsv, record-speech-summary.json, shop-keys.tsv;
 evidence/analyze.py.
 
 [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md).
+
+## Unit shoot points
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-222 | ROM2 units.reg ShootOffset is a list of 16 integers, 8 (x, y) sprite points by draw direction, in 25 of 61 unit types; types 23 and 24 carry their own, within 28 px across and 45 px up of Center (64, 78, through Parent). | High / Medium | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+
+### R2-ASSET-222
+
+`graphics.res` `units/units.reg` (SHA256
+`335809b0672fdb796e8ae3399e176c7920167be8c7271b8abd7bbfaf76a0ac8a` in both
+roots, R2-ASSET-180) has a ShootOffset integer array in 25 of its 61 typed
+sections (14, 15, 23, 24, 26, 27, 65, 70, 71, 72, 79, 81, 86, 87, 88, 93..101
+and 105), each of 16 integers. The loader EN `L2.03721` (RU `L2.03722`)
+reads it into type list +0x108 (`L2.05521`) and, for a type with a Parent and
+an empty list, reads the Parent's section once more (`L2.05522`); no type
+gains a list that way. The release (R2-ENGINE-930) reads pair k = (x, y) at
+index 2k for draw direction k.
+
+Pixel offsets from Center (64, 78, from Parent type 3) by direction k:
+
+| k | Type 23 (dx, dy) | Type 24 (dx, dy) |
+|---:|---|---|
+| 0 | −7, −3 | −12, 1 |
+| 1 | −19, −12 | −28, −14 |
+| 2 | −20, −25 | −27, −32 |
+| 3 | −12, −35 | −10, −45 |
+| 4 | 4, −36 | 11, −44 |
+| 5 | 16, −28 | 27, −32 |
+| 6 | 17, −16 | 27, −13 |
+| 7 | 9, −5 | 11, 1 |
+
+`data/state8-frames.tsv` resolves per type MovePhases, MoveBeginPhases,
+AttackPhases, Flip, the per-update attack frame list, AttackDelay and
+ShootDelay through Parent: types 23 and 24 have Flip 0, sheet base 96, 12
+updates and the release at counter 8 on attack frame 4; types 26 and 27
+carry ShootOffset with ShootDelay 0.
+
+**Confidence.** High for the values and their equality in both roots, and
+for the list store and Parent fallback in both loaders. Medium for the
+scalars resolved through Parent (the default rule of `R2.0113` is
+inferred, R2-ASSET-180) and for the screen direction of k, which rests on
+the unread client direction writer.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 3; `data/unit-shoot-values.tsv`, `data/shoot-points.tsv`, `data/reg-inputs.tsv`.

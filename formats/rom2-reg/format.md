@@ -138,6 +138,46 @@ Selection size, and a copy at destination +0x90/+0x94 shifted the same way.
 Neither moves; phase +0x74 runs 0 to 20 and the object ends at its 22nd
 update. — R2-ENGINE-703
 
+A cast picture is not part of the caster's sprite. A caster in state 8
+shows the attack frames of its current direction through the draw arm of a
+strike (state 3) and state 7: sprite (MovePhases + MoveBeginPhases) × 8 +
+16 + direction × AttackPhases + the per-update attack frame, or × 5 + 9 for
+a Flip type. Neither the cast packet's caster arm nor the state 8 update
+stores the direction in its own body. The state 5 update eases the
+direction, the client writer of +0x8d and whether the shown direction is
+the server facing are Unknown, and so is whether an item cast or a creature
+cast reaches the client through this arm. — R2-ENGINE-929, R2-ENGINE-704
+
+The release of an identifier other than 54 creates one effect object at the
+caster's +0x5c/+0x60 plus 8 × (ShootOffset point of the draw direction
+minus Center): the sprite point, in pixels from the sprite's Center. The
+meaning of the caster's +0x5c/+0x60 is Medium and the screen direction of
+the draw direction is Unknown. A type
+without ShootOffset uses the Center/Selection anchor of Teleport. The
+release sets no height; the draw lifts by +0x6c and +0x10, whose values are
+Unknown. — R2-ENGINE-930, R2-ENGINE-703
+
+For a type 23 or 24 caster a Fire Arrow (identifier 10) is created at state
+8 counter 8, on attack frame 4 (Medium, through Parent), with remaining
+segments distance / 200; a distance below about 25 px gives no picture. Each update moves it by the remaining distance over the
+remaining segments toward its homing target and shows frame (counter / 2)
+mod 4, from frame 0 one step from the start. A first draw in the release
+tick and the seconds are Medium. — R2-ENGINE-931
+
+An area cell picture (odd identifier, such as 23) is created by the packet
+handler itself at the cell centre, height 0, with no caster animation; its
+first update shows frame 0, in the next client tick (Medium). —
+R2-ENGINE-932
+
+The render draws per cell, rows top-down and columns right to left, the
+structure and then the unit of grid +0x8c; then a sweep of grid +0x90 by a
+call whose drawing is Unknown; then every effect in one pass; then the units
+of grid +0x90. The order is High for these listed loops and Medium for the
+absence of another pass in the unlisted render code. An effect covers every
+grid +0x8c unit in the units' +0x28 draws;
+whether a missile covers its caster depends on the caster's grid, which is
+Unknown. The order among effects is Medium. — R2-ENGINE-933, R2-ENGINE-703
+
 ## Mission View and Selection consumers
 
 The EN mission entry stores View/X and View/Y to the client origin
@@ -174,6 +214,13 @@ AttackAnimTime 2 x 6, AttackDelay 8, ShootDelay 8, Center 64/78 and
 Selection 48, 48, 80, 90. A type with a `Parent` and no `AttackAnimTime` of its own takes the list
 and `AttackAnimFrame` from the parent's section; the case of a type with
 neither a list nor a `Parent` is Unknown. — R2-ASSET-180, R2-ENGINE-704
+
+`ShootOffset` (type +0x108) is 8 (x, y) sprite points, one per draw
+direction, in 25 of the 61 types; types 23 and 24 carry their own, within
+28 px across and 45 px up of Center (64, 78; Center through Parent).
+`MovePhases` (+0x14),
+`MoveBeginPhases` (+0x18) and `Flip` (+0x128) place the attack frames in the
+unit sheet. — R2-ASSET-222, R2-ENGINE-929
 
 ## Dialogue picture keys and bounded crop search
 

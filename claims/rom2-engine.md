@@ -10768,7 +10768,7 @@ state executable behaviour and no stored-file layout.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-501 | A ROM2 idle unit attacks the nearest hostile it marks within attack range, least turn on a tie, turning to it without stepping. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-501 | A ROM2 idle unit attacks the nearest hostile it marks within attack range, least turn on a tie, turning to it without stepping. | High / Medium | ● active (amended) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-502 | ROM2 idle candidates: hostile units on cells a ScanRange ray scan marks (creature ScanRange Medium), plus a computer unit's last attacker cell for 21 builder runs. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-503 | ROM2 group members take the enemy with the least score (cells x 256 + turn), scaled by a 16-byte kind table whose 0 excludes. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-504 | A ROM2 unit holds a target for one activity, then re-picks, from units each nearer than those kept before, the hostile of least turn, or stands or looks around. | High / Medium / Unknown | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
@@ -10814,6 +10814,13 @@ Medium: `L2.01525` was read in navigation only; the position units behind
 `L2.02411` and `L2.02412`, and the bodies of `L2.01574` and `L2.02409`,
 were not read, so "without stepping" rests on activity 6 calling no step
 routine; EN activity 6 is generation only (R2-ENGINE-508).
+
+**Amended.** R2-ENGINE-926 and R2-ENGINE-927 read the bodies of `L2.01574`
+and `L2.02409` in both roots and EN activity 6 (`L2.05523`): `L2.01574`
+admits only when the facing equals the heading `L2.02113` and the target is
+within range, so a strike waits for the turn; `L2.02409` writes only
+movement-block bytes (facing, heading, counters; callee `L2.01523` unread), so "without stepping"
+holds for the turn. The choice-rule grades stay.
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
 
@@ -12275,7 +12282,7 @@ R2-ENGINE-471 read.
 |---|---|---|---|---|
 | R2-ENGINE-541 | Each ROM2 player-order setter read resets the unit (state 0), replaces order code +0x50 and its parameters at once and stores prepared byte +8 (0; 1 in the two order-1 setters); none writes primary byte +9. | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-542 | The ROM2 unit executor (RU L2.00506, EN L2.00507) handles a nonzero primary byte +9 first (1 strike, 2 cast, 3 step, 4 hold) and reads prepared byte +8 only when +9 is zero; other +9 values: all 255 cells read (R2-ENGINE-553). | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
-| R2-ENGINE-543 | A ROM2 cast passes init (+9 = 2, state 13 or 14), a try at the cast routine, wind-up (substate 5) and recovery (substate 7); completion byte +0x136 = 1 lets the executor end it. | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
+| R2-ENGINE-543 | A ROM2 cast passes init (+9 = 2, state 13 or 14), a try at the cast routine, wind-up (substate 5) and recovery (substate 7); completion byte +0x136 = 1 lets the executor end it. | High / Medium | ● active (amended, branch candidate) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-544 | A ROM2 mage's mana is subtracted at the entry of the cast routine (RU L2.02808), before the wind-up, once per call that reaches the delivery; one path returns 0 after it (reachability unread); no refund read. | High / Medium | ● active | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-545 | The read RU setters store a new order without writing primary +9; the cast arm ignores prepared +8. Retaining the cast is Medium; later dispatch requires admission and a valid prepared byte. | Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
 | R2-ENGINE-546 | A ROM2 step between cells is primary +9 = 3 with state 1; it ends when the position object's offset bytes +4 and +5 both read 0x80; an arriving order waits for that end. | High / Medium | ● active (amended) | [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md) |
@@ -12335,7 +12342,10 @@ The actor step (RU L2.00028), substate +0x58: substate 0 calls the cast routine 
 **Amended.** EXP-2090 narrows the Unknown for the point apply L2.00034: it
 switches on spell byte +8 (bound 0x1d, table L2.00069), and id 23 reaches
 the Teleport arm L2.00080 (R2-ENGINE-705). The other apply arms and
-L2.00035 stay Unknown.
+L2.00035 stay Unknown. R2-ENGINE-926 and R2-ENGINE-928 narrow "the range
+helper admits": L2.01574 and L2.02567 also require the facing to equal the
+heading to the target or cell, and the approach turns a centred unit in
+range (for a point cast only when the range byte is not 0); a self-targeted cast at prepared 8 skips the test.
 
 **Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
 
@@ -16716,8 +16726,8 @@ R2-ENGINE-696; callees were compared only where listed.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-703 | A ROM2 unit's Teleport (ID 54) release at its first state 8 update makes two type-54 effects of 21 updates, one near the caster and a copy at the target cell centre; neither moves; each draws frames 0..20. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
-| R2-ENGINE-704 | A ROM2 client Teleport caster plays state 8 for its type's AttackAnimTime sum (12 for types 23, 24) and Sfx 554 at counter AttackDelay (8); the cast is not shown while it animates or its type has AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-703 | A ROM2 unit's Teleport (ID 54) release at its first state 8 update makes two type-54 effects of 21 updates, one near the caster and a copy at the target cell centre; neither moves; each draws frames 0..20. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-704 | A ROM2 client Teleport caster plays state 8 for its type's AttackAnimTime sum (12 for types 23, 24) and Sfx 554 at counter AttackDelay (8); the cast is not shown while it animates or its type has AttackPhases 0. | High / Medium | ● active (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-705 | ROM2 Teleport pays mana; if three gates pass it sends 0x86 (ID 54, target cell), and +0x134 actor steps later the apply moves the caster to the target cell centre if both footprint tests pass. Read in RU; 8 bodies paired in EN. | High / Medium | ● active (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-706 | When a ROM2 Teleport cast reaches the client (R2-ENGINE-705), a refused cell keeps the mana paid, both images and Sfx 554 and leaves the caster in place; a target beyond the range byte is approached first. Read in RU. | Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-707 | A ROM2 creature's Teleport takes the hero's server route, packet and client arm; it differs in mana (none for a non-mage, Medium), +0x134, units.reg timing and offsets, its planner cell test, and no image for AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
@@ -16786,6 +16796,14 @@ caster: which unit pass draws a person (its +0x7c) was not read.
 images; the depth against the caster. A frame capture of a Teleport cast at
 Speed 4 settles both and the first frame.
 
+**Amended.** R2-ENGINE-933 reads the render in both roots (RU `L2.05524`)
+and narrows the depth Unknown: the effect pass follows the cell sweep that
+draws grid +0x8c units and precedes the +0x28 sweep of grid +0x90 units, so
+the depth against the caster depends only on which grid holds it (for the
++0x28 draws read; a +0x2c sweep of grid +0x90 before the effect pass is
+unread). R2-ENGINE-930
+reads the ShootOffset branch that ID 0x36 skips.
+
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 1 and 2.
 
 ### R2-ENGINE-704
@@ -16826,6 +16844,12 @@ which would hide the cast; the sprite frame the unit draw takes from +0x74;
 the readers of the type-54 `SFX` key and the sounds of the state-packet arm,
 so "the sound" of a cast is the unit slot's Sfx 554 and no sound by a direct
 call from the effect code read.
+
+**Amended.** R2-ENGINE-929 settles the Unknown on the sprite frame: the
+unit draw takes list +0x54[+0x74] in the attack frames of the unit's
+direction, by the arm it uses for state 3, so frames +0x74 0..11 of types 23
+and 24 show attack frames 0,0,1,1,..,5,5 (Medium through Parent). The other
+Unknowns stay.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 2 and 3.
 
@@ -23435,6 +23459,279 @@ four of the RU ten.
 **Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
 question 6; listings `en-startup-initializer`, `ru-startup-archives`,
 `en-archive-mount`; `measured/refs.tsv`.
+
+## Cast facing, release point and draw order
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-926 | A ROM2 cast at another unit (prepared 8, RU L2.01552, EN L2.05525) and an activity-6 strike start only when L2.01574 finds facing [+0x1c0]+0 equal to heading L2.02113 within range; else the unit turns or steps; a self cast skips it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-927 | ROM2 turn L2.02409 (EN L2.05526) stores the heading at [+0x1c0]+1; from rest a turn within 32 of 256 sets the facing at once (Medium: L2.01523 unread), otherwise L2.05527 moves it by RotationSpeed [+0x1c0]+0xa per call. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-928 | A ROM2 point cast (prepared 9, RU L2.02859, EN L2.05528) needs facing equal to heading L2.02635 of the cell; for the caster's own cell that heading is 224 (16-sector code 14), turned to only when the range byte is not 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-929 | The ROM2 client 0x86 caster arm and state 8 update store neither direction +0x70 nor +0x8d in their own bodies; unit draw L2.03682 (RU L2.03719) draws states 3, 7, 8 by one arm: attack frames of direction +0x70 at list +0x54[counter]. | High / Medium | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-930 | A ROM2 release of cast IDs other than 54 (EN L2.03725, RU L2.03735) starts the effect at caster +0x5c/+0x60 plus 8 x (ShootOffset pair of the draw direction minus Center) when the type has ShootOffset, else at the Center/Selection anchor. | High / Medium | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-931 | A ROM2 Fire Arrow (ID 10) of a type 23 or 24 caster appears at state 8 counter 8 (frame 4, Medium through Parent), lives distance/200 updates, homes on its target, shows frames 0,1,1,2,2,3,3,0..; first drawn one step on (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-932 | A ROM2 area cell effect (odd ID with a registered type, such as 23) is built by the 0x86 handler at the cell centre, z 0, counter -1, the packet's lifetime, no caster animation; first update shows frame 0, next client tick (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+| R2-ENGINE-933 | ROM2 render EN L2.03537 (RU L2.05524) draws per cell structures, grid +0x8c units; then a vtable +0x2c sweep of grid +0x90 (draw unread); then all effects; then grid +0x90 units: an effect covers every grid +0x8c unit. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md) |
+
+### R2-ENGINE-926
+
+The prepared-8 handler RU `L2.01552` (EN `L2.05525`) calls the cast
+initializer `L2.01575` (EN `L2.05529`) at once when the target is the
+caster itself. For another target it calls the admission test `L2.01574`
+(EN `L2.05530`) with command byte +0x14 as range. The test calls
+`L2.00490` (body not read here) and ignores its result; it returns 1 only when movement-block
+byte [+0x1c0]+0, the facing, equals `L2.02113(unit, target)`, the 8-way
+heading of R2-ENGINE-654, and the edge distance `L2.01588` is not above the
+range. On 0 the handler calls the approach `L2.01577` (EN `L2.05531`) and
+sets unit state +0x54 = 1. The approach calls `L2.01578` (EN `L2.05532`):
+a unit not centred in its cell steps through `L2.02848`; a centred unit
+within range calls `L2.05533` (EN `L2.05534`), which is
+`L2.02409(unit, L2.02113(unit, target))`, the turn of R2-ENGINE-927; a unit
+out of range plans a route. The approach then sets primary +9 = 3 when the
+unit is not centred.
+
+Activity 6 `L2.02406` (EN `L2.05523`) uses the same test: on 1 it calls
+the strike start `L2.02407` (EN `L2.05535`: +9 = 1, phase +0x15 = 0,
+state 3, unit +0x5c = target); on 0 it calls `L2.02408` (EN `L2.05536`),
+which turns through `L2.02409` toward `L2.02113` and sets state 1. Neither
+the strike start nor the cast initializer stores the facing. No store or
+compare of [+0x1c0]+0 is in the executor cast arm RU `L2.02853..L2.05537`
+(EN window from `L2.05538`), the actor-step state arms RU
+`L2.02868..L2.05539` (EN `L2.05540..`), the actor step's dispatch (byte
+table RU `L2.02590`, arms `L2.02591`; EN `L2.02592`, `L2.02593`), or the
+cast routine and 0x86 sender read through RU `L2.00027` and `L2.02155`.
+This negative is over direct operands in those windows; their callees were
+not read.
+The actor step RU `L2.00028` (EN `L2.00263`) copies the facing and heading
+into locals used only by its state-1 arm `L2.00157`, which was not read.
+
+The 21 EN/RU pairs of these server listings are equal after masking
+addresses (call deltas mainly 0x9ff0 and 0xa039), except four item-field
+offsets and sizes in the actor-step arms, none of them the facing.
+
+**Confidence.** High for the handler, test, approach and strike bodies in
+both roots. Medium that a cast waits for the turn: the handler runs again
+only when the executor re-dispatches prepared 8 with primary +9 = 0
+(R2-ENGINE-556), whose cadence was not read; the bodies of `L2.00490` and
+`L2.01588` were not read here.
+
+**Unknown.** What the actor step's state-1 arm does with the saved facing;
+how the server facing reaches the client direction.
+
+**Amends.** R2-ENGINE-501's Medium on the bodies of `L2.01574` and
+`L2.02409`; R2-ENGINE-543's clause that the range helper admits a cast: it
+also requires the facing.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 1; `evidence/derived/code/` server listings of both roots and `data/en-ru.tsv`.
+
+### R2-ENGINE-927
+
+The turn RU `L2.02409` (EN `L2.05526`) takes a unit and a heading byte. It
+stores the heading at [+0x1c0]+1 and d = `L2.01523`(facing − heading)
+(`L2.01523` was not read; its use reads as an absolute value). When the
+turning flag [+0x1c0]+0xa0 is 0 it clears the counter +0x9d; then, still at
+flag 0, when d < 0x21 or 256 − d < 0x21 it stores the heading as the facing
+and +0xa4 = 1. Otherwise it calls the step `L2.05527` (EN `L2.05541`) once,
+folds d to at most 128 and stores +0xa4 = ceil(d / RotationSpeed), with
+RotationSpeed the byte [+0x1c0]+0xa (R2-ENGINE-319). In every case it sets
+the flag to 1 and increments +0x9d; when the facing equals the heading the
+flag returns to 0. The step moves the facing by RotationSpeed toward the
+heading the short way and stores the heading when the folded difference is
+below RotationSpeed.
+
+A heading of `L2.02113` or `L2.02635` is a multiple of 32, so from rest a
+turn to the next of the 8 headings lands at once and a larger turn takes
+one step of RotationSpeed per call.
+
+**Confidence.** High for the two bodies in both roots. Medium for the snap
+threshold (0x21) and the ceil(d / RotationSpeed) count: both use `L2.01523`,
+unread. Medium for one call per actor step: the turn runs when the approach of R2-ENGINE-926 runs.
+
+**Unknown.** RotationSpeed values per unit; the screen meaning of a
+heading; whether the client shows the intermediate facings.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 1.
+
+### R2-ENGINE-928
+
+The prepared-9 handler RU `L2.02859` (EN `L2.05528`) calls the point
+initializer when `L2.02567` (EN `L2.05542`) returns 1: facing [+0x1c0]+0
+equal to `L2.02635(unit, cell)` and distance `L2.01522` not above the range;
+else the approach `L2.02634` (EN `L2.05543`) calls `L2.02867` (EN
+`L2.05544`). There a unit not centred steps; a centred unit within range
+calls `L2.05545` (EN `L2.05546`), `L2.02409(unit, L2.02635(unit, cell))`,
+only when the range byte is not 0.
+
+`L2.02635` (EN `L2.05547`) takes dx and dy in cells from the unit's
+position bytes to the cell and sets one of 16 sector codes from the signs
+and from |dx| against 2|dy| and |dy| against 2|dx|; the heading is
+((code + 1) >> 1) << 5 for a nonzero code, so 8 headings of 32. For dx =
+dy = 0 the path takes code 14 (`L2.05548`), heading 224, the code the
+routine also gives a cell with dx < 0, dy < 0 and |dx| ≤ |dy| ≤ 2|dx|.
+
+**Confidence.** High for the bodies in both roots. Medium for a cast at
+the caster's own cell in a run: whether such a cast reaches prepared 9,
+and the spell's range byte, were not read; with range 0 the read bodies
+make no turn.
+
+**Amends.** R2-ENGINE-543's clause that the range helper admits a point
+cast.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 1.
+
+### R2-ENGINE-929
+
+The caster arm of the 0x86 handler EN `L2.03852..L2.05549` (RU in
+`L2.02159`) stores +0xa8, state +0x8c = 8, counter +0x9c = 0, the target
++0x90/+0x94 and the ID +0xac (R2-ENGINE-704) and stores neither direction
++0x70 nor +0x8d. It runs for an even identifier with a registered unit (odd
+identifiers take the area branch, R2-ENGINE-932) whose +0xa8 is 0 and whose
+type +0x1c is not 0 (`L2.05550`, `L2.05551`). The unit update EN `L2.03360`
+stores +0x70 = +0x8d in its state 1, 3 and 7 arms (`L2.05552`, `L2.05553`,
+`L2.05554`) and eases +0x70 toward +0x8d over +0xa8 updates in its state 5
+arm (`L2.05555`); its state 8 arm (`L2.03726`) stores frame +0x74 = counter
+and no direction (window EN `L2.05556`+0xa66, RU `L2.05557`, equal).
+
+The unit draw EN `L2.03682` (RU `L2.03719`, unit vtable +0x28) switches on
++0x78 (the last state, set by the update) through table EN `L2.05558` (RU
+`L2.05559`); entries 3, 7 and 8 go to one arm EN `L2.05560` (RU
+`L2.05561`). With direction k = ((+0x70 − 8) & 0xe) >> 1, mirrored to 8 − k
+for k > 4 when type +0x128 (Flip) is set, the arm takes sprite index
+
+  (MovePhases + MoveBeginPhases) × 8 + 16 + k × AttackPhases + list[+0x74]
+
+or × 5 + 9 with Flip, where the loader EN `L2.03721` (RU `L2.03722`)
+stores MovePhases at type +0x14, MoveBeginPhases +0x18, AttackPhases +0x1c,
+Flip +0x128 and list +0x54, the per-update AttackAnimFrame list whose
+length is +0x68 (R2-ENGINE-704). So a hero Fire Arrow cast through this arm
+shows the same attack frames as a strike (state 3), in the direction +0x70
+the unit had. For types 23 and 24 (Parent
+3, no Flip) the frames are 96 + 6k + 0,0,1,1,..,5,5.
+
+**Confidence.** High for the arms, the table and the loader stores in both
+roots. Medium for the type values through Parent: the default rule of
+`R2.0113` is inferred (R2-ASSET-180). What the leading 16 or 9 sprites
+are was not read. The negative on +0x70 and +0x8d covers the direct stores
+in EN `L2.03852..L2.05549` and `L2.05556..L2.05562` (RU twins); the callees
+(the caster arm's `L2.02998`, `L2.04048`, `L2.01560`, `L2.03688`, `L2.05563`,
+`L2.05564`; the state 8 arm's vtable +0x5c and +0x60) and every other writer
+of +0x70 and +0x8d are unread.
+
+**Unknown.** The client writer of +0x8d before a cast, and so whether the
+shown direction is the server facing; the state 5 turn animation of +0x70;
+whether an item cast or a creature cast reaches the client through 0x86
+with this caster arm.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 2; `data/state8-frames.tsv`.
+
+### R2-ENGINE-930
+
+The release EN `L2.03725` (RU `L2.03735`) builds the 0x158-byte effect
+(`L2.03141`), +0x24 = ID, +0x70/+0x8d = caster +0x70, and d = (caster +0x70
+− 8) & 0xe, twice the draw direction k of R2-ENGINE-929 before any mirror.
+When the caster type's list +0x108 (ShootOffset, loader `L2.05521`) is
+empty or the ID is 0x36, the start is the Center/Selection anchor of
+R2-ENGINE-703. Otherwise (`L2.05565`..`L2.05566`):
+
+  +8 = caster +0x5c − (CenterX − list[d]) × 8
+  +0xc = caster +0x60 − (CenterY − list[d + 1]) × 8
+
+and +0x2c/+0x30 = +8/+0xc. Positions are 8 per pixel, so the start is the
+ShootOffset point of the attack sprite in pixels from the sprite's Center,
+added to the caster's +0x5c/+0x60. The release sets no height +0x10; the
+draw lifts by +0x6c + +0x10 (R2-ENGINE-703). With a target key +0x8e the
+target becomes the target unit's +0x5c/+0x60/+0x10 and +0x8d =
+`L2.05567` toward it (unread); a key missing from client +0x9d0 creates no
+effect. Without a key the effect takes the caster's +0x90..+0x98.
+
+**Confidence.** High for the arithmetic in both roots. Medium for the
+meaning of caster +0x5c/+0x60: they are the fields the effect code reads as
+a homing target's position; their writer was not read.
+
+**Unknown.** Height: the constructor's +0x10 and the value of +0x6c.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 3; `data/shoot-points.tsv`.
+
+### R2-ENGINE-931
+
+For a caster of type 23 or 24 (R2-ASSET-180, R2-ASSET-222) the state 8
+arm releases at counter = ShootDelay 8 (R2-ENGINE-691), the 9th of 12
+updates, on attack frame 4 (frame list through Parent, Medium;
+`data/state8-frames.tsv`); the caster then
+shows frames 4, 5, 5. Fire Arrow (ID 10: Phases 4, RotationPhases 16, Flip,
+Homing; R2-ASSET-101) gets lifetime distance / 200 (R2-ENGINE-691), with
+distance = ftol(sqrt(dx² + dy² + c)) from the effect target to the caster
++8/+0xc and c the double at EN `L2.05568` (unread); a distance below about 200
+(about 25 px) gives lifetime 0 and no picture. Each effect update EN `L2.02165` (RU
+`L2.02167`), with state +0x8c = 1 set by the release, re-reads a keyed
+target's +0x5c/+0x60/+0x10 and direction, increments counter +0x9c, steps
+each axis by (target − position) / lifetime, sets +0x70 = +0x8d and frame
+(counter / 2) mod Phases, then decrements the lifetime: the first update
+shows frame 0 one step from the start, and the last reaches the target. The
+draw takes sprite 4 × direction + frame, direction (+0x70 − 8) & 15
+mirrored above 8 (R2-ENGINE-447).
+
+**Confidence.** High for the arms and the frame and step rule in both roots.
+For the values of types 23 and 24, High for ShootDelay and AttackDelay (own
+keys) and Medium for the frame list, phases, Flip and Center (through
+Parent). Medium for the threshold, whose constant c is unread. Medium that the first update and draw come in the release
+tick (R2-ENGINE-703) and for seconds (R2-ENGINE-669).
+
+**Unknown.** `L2.05567`, so the exact direction index; the constant c.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 4.
+
+### R2-ENGINE-932
+
+For an odd ID (2*row+9, R2-ENGINE-445) with a registered type the 0x86 handler EN `L2.02158` (RU
+`L2.02159`) builds the effect itself, not through a caster's state 8: at
+the cell centre (cell × 256 + 0x80), z 0, target = its own position,
+counter +0x9c = −1, lifetime +0xa8 = packet word +0xf, state +0x8c = 1. The
+effect update increments the counter before it computes the frame, so the
+first update shows frame 0. For ID 23 (Meteor, 64 × 64, 9 Phases;
+R2-ASSET-101) the arm sets frame = counter and the draw shows sprite 8
+lifted 28 − 4 × frame pixels while the frame is below 8, then frame − 8
+(R2-ENGINE-447).
+
+**Confidence.** High for the handler arm and the counter in both roots.
+Medium for the first update in the next client tick: the handler runs
+from the message loop, and its order against the tick was not read.
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 4.
+
+### R2-ENGINE-933
+
+The message-0x402 render EN `L2.03537` (RU `L2.05524`, called at EN
+`L2.05569`, RU `L2.05570`) sweeps the cells by rows from −4 to height + 8
+and, in each row, by columns from width + 3 down to −4. In the sweep from EN
+`L2.05571` each cell draws first the structure of grid +0x94 (type map
+`L2.03005`, kind +0x90 = 0), then the unit of grid +0x8c (vtable +0x2c when
+global `L2.05572` is set, then +0x28). Then a loop EN `L2.05573`..`L2.05574`
+(RU call at `L2.05575`; `L2.05573` is the target of the jump at `L2.05574`)
+reads grid +0x90 and the +0xc0 grid and calls vtable +0x2c on the +0x90
+object (EN call at `L2.05576`); what it draws was not read. After it all
+effects of client
++0x9ec draw in one pass (EN `L2.03846..L2.03847`, iterator `L2.03035`,
+`L2.03036`); then a cell pass draws client +0xa08 objects at fully fogged
+corners (mask 0xc000); then a sweep (EN `L2.03850..L2.05577`) draws the
+units of grid +0x90 by vtable +0x28. A unit's own overlays +0x11c draw inside its unit
+draw (R2-ENGINE-694). EN and RU render windows are equal after masking.
+
+**Confidence.** High for the order of the listed loops by address, in both
+roots (the render is straight-line between them as read). Medium that no
+further pass lies in the unlisted code: EN `L2.03537..L2.03848`,
+`L2.05578..L2.05579` and after `L2.05577`. Medium for the order among
+effects: the iterator bodies were not read. An effect covers every grid
++0x8c unit as the +0x28 bodies read.
+
+**Unknown.** What the +0x2c sweep of grid +0x90 draws. Which grid holds a
+person, and so whether a missile draws over or under its caster; the
+candidate writer is vtable +0x44 EN `L2.03354` (`L2.03328`), not read.
+
+**Amends.** R2-ENGINE-703's Unknown on the depth against the caster
+(narrowed to the grid of the caster, for the +0x28 draws).
+
+**Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 5.
 
 ## Route failure and the unreachable target
 
