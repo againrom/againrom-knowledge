@@ -93,6 +93,15 @@ calling CreateFileA using read/OPEN_EXISTING for flags 0. Full mount
 precedence, locale behavior and RU's concrete disk opener remain Medium
 or Unknown. — R2-ENGINE-870
 
+Both clients mount ten names at startup through one routine, in order: a
+built `cs.res` path, `main.res`, `patch.res`, `world.res`, `music.res`,
+`video.res`, `sfx.res`, `movies.res`, `scenario.res`, `speech.res`; then
+they read `update.lst`. An exception-handler block after the `music.res`
+mount clears the music-available word; that a failed mount reaches it is
+Medium (mount body not interpreted).
+`graphics.res` is not among them. Which archive wins when two hold one
+name is Unknown. — R2-ENGINE-921
+
 Each root's 491 itemname-record projection through the shop speech
 formula forms 852 distinct normalized relative names, 283 present and
 569 absent in that root's speech key set. The projection spans all three

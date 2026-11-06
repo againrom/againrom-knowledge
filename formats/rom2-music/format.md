@@ -326,10 +326,62 @@ the EN music-off arm stops or fades the player. The panel also sets the
 chosen melody, the random flag and the three volumes, clamped to -10000..0.
 — R2-ENGINE-340
 
+## Request census and dispatch
+
+A byte scan of each client (absolute dwords, rel32 calls, jumps and
+conditional jumps, short branches) finds 32 references to the seven player
+entries, all direct calls: from the sound panel, the player itself, the
+0x451 arm, the screen bodies above and the dialogue page. No table in the
+scanned `allods2.exe` holds a player entry. The screen bodies are called
+from the application dispatcher, the view-close body (RU has a third
+pre-create call there), the EN startup initializer (logos, cutscene), the
+load entry (mission entry) and mission-end callers outside the dispatcher
+(in the EN `L2.02060` and the fail-cleanup routine of each client).
+Completeness is Medium: computed addresses are outside the scan. The EN
+install has one DLL and the RU install three; none imports DSOUND or WINMM
+(High), but an import table does not exclude `LoadLibrary`, so that no DLL
+plays sound itself is Medium.
+— R2-ENGINE-917, R2-ENGINE-838, R2-ENGINE-335
+
+| Message | Music body called |
+|---|---|
+| 0x421, 0x425, 0x428 | menu, pre-create, credits |
+| 0x42e | town |
+| 0x42f, 0x457 | mission entry |
+| 0x468 | mission entry for location kind 1, else town |
+| 0x41d | mission end, cutscene, map |
+| 0x42d | cutscene, map |
+| 0x436 | cutscene |
+| 0x45c, 0x45d | mission end |
+
+The table is the dispatcher's own calls; other callers exist. RU makes the
+same calls for the targets scanned (cutscene and logos were not scanned in
+RU) and also calls mission end for 0x48e. Arm boundaries and the meaning of location kind 1 are Medium.
+— R2-ENGINE-918
+
+A town ID other than 1, 2 or 3 leaves the town body's temporary list empty
+with data pointer 0. When the player list is nonempty, the same-key test
+reads address 0 (when the music-available word is set); when it is empty,
+list set divides by the count 0 if the player's +0x9c is set. Both clients take these paths; what follows the
+fault is Unknown. The RU same-key compare is byte-exact, like EN.
+— R2-ENGINE-916, R2-ENGINE-835
+
+The 0x451 stop needs the EN readiness helper to see a zero dword 8 bytes
+before the pointer at application+0x3d4. Each client has seven decoded
+`push 0x451` sites and one undecoded hit; the RU helper is unread and the
+events are Medium. — R2-ENGINE-919,
+R2-ENGINE-836
+
+In the EN `values` scan the only direct-displacement store of 0 to the tick
+counter is in the view constructor, which one call site runs; the tick stores it. A per-mission reset is Medium. — R2-ENGINE-920,
+R2-ENGINE-834
+
 ## Unknowns
 
 Audible output, the complete 0x451 sender events, complete indirect
-screen inventory, panel layout and RU tune-name build remain Unknown.
+screen inventory, panel layout and RU tune-name build remain Unknown. So do
+the fault result for an unknown town ID, which archive wins a shared name,
+the RU readiness helper and the order of mission-end music and a movie.
 Both client byte scans find six/eight/ten rel32 set-list/start/stop
 candidates. This is a byte census with Medium completeness; computed
 pointers and other jump routes were not closed.

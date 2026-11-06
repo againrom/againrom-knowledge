@@ -5666,6 +5666,8 @@ case-sensitive and gives the unknown-town-ID fallthrough. This comparison
 does not settle archive lookup. R2-ENGINE-838 bounds the fresh two-client
 byte scan without closing indirect routes.
 
+**Amended.** R2-ENGINE-917 finds the RU third view-close pre-create call at `L2.01374`; R2-ENGINE-918 adds mission entry under 0x42f, 0x457 and 0x468 (the dispatcher's calls; R2-ENGINE-917 lists the other callers).
+
 ### R2-ENGINE-336
 
 Mission body EN `L2.01375` / RU `L2.01376` builds the 17-entry list
@@ -21468,6 +21470,8 @@ EXP-2117 `evidence/measured/listings/en-collection-*.tsv`,
 `en-mission-tick-head.tsv`, `en-position-owner.tsv`,
 `en-area-select-complete.tsv` and `en-mission-music-complete.tsv`.
 
+**Amended.** R2-ENGINE-920 places the +0xa88 zero in view constructor `L2.01227`, called once from `L2.00558`; a per-mission reset stays Medium.
+
 ### R2-ENGINE-835
 
 EN `L2.00266..L2.01369` compares town IDs 1/2/3 and appends
@@ -21492,6 +21496,8 @@ remains the EN/RU authority for the three square keys.
 archive resolver's case rule. Read the virtual room methods and empty-list
 access paths. Evidence: EXP-2117 `evidence/measured/listings/en-town-*.tsv`,
 `en-key-*.tsv`.
+
+**Amended.** R2-ENGINE-916 reads the unknown-ID tail in EN and RU: an address-0 read or a division by a zero count, with the result Unknown; the RU same-key compare is byte-exact too.
 
 ### R2-ENGINE-836
 
@@ -21529,6 +21535,8 @@ cursor/time to settle audible pause/resume. Evidence: EXP-2117
 `evidence/measured/listings/en-message-*.tsv`, `en-music-451-arm.tsv`,
 `en-sender-*.tsv`, `en-451-from-view-close-*.tsv` and
 `en-mission-end-stop.tsv`.
+
+**Amended.** R2-ENGINE-919 reads the EN readiness helper body (RU helper unread) and lists the seven decoded RU `push 0x451` sites; event identities stay Medium.
 
 ### R2-ENGINE-837
 
@@ -21583,6 +21591,8 @@ and eligible DLLs. Evidence: EXP-2117 `evidence/measured/refs.tsv`,
 `evidence/derived/reference-counts.tsv`, and listings
 `en-room-construction.tsv`, `en-town-shop-entry.tsv`,
 `en-town-inn-entry.tsv`, `en-close-shops.tsv`, `en-close-inns.tsv`.
+
+**Amended.** R2-ENGINE-917 adds jcc, short-branch and E9 forms to both client scans: 32 player-method hits per client, all E8; completeness stays Medium. R2-ENGINE-918 maps the dispatcher arms.
 
 ### R2-ENGINE-839
 
@@ -22460,6 +22470,8 @@ en-disk-file-open.txt, en-imports.txt.
 
 [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md).
 
+**Amended.** R2-ENGINE-921 lists the ten startup archive mounts and their order in EN and RU; precedence between archives stays Unknown.
+
 ## Quest objective machine
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -22993,6 +23005,12 @@ settles it. Also unread: the cast body `L2.05342` (R2-ENGINE-901) and what a ret
 | R2-ENGINE-913 | ROM2 sound objects (EN L2.00984/L2.03661/L2.02166, RU L2.05309/L2.05403/L2.05287) return on no device, failed open, incomplete load or all buffers busy; a failed load retries each play (High); no logging is Medium (callees unread). | High / Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
 | R2-ENGINE-914 | Composed: EN hires 1..6 play only easy/hard/dead, the catapult nothing; RU hires 1..6 also select, attack, move, swarm, retreat, defend, never pickup, the catapult only generic cries (sfx/speech.res keys only; hires 8..20 Unknown). | Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
 | R2-ENGINE-915 | Composed: a ROM2 hire with ID 1..7 and an empty server name shows npcnames line ID-1 on its sheet: Mercenary in EN, Наемник in RU except Катапульта for ID 7 (IDs 8..20 unread; no RU save, RU sender unlocated). | Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-916 | ROM2 EN/RU town music with an ID other than 1/2/3, music-available word set, reads address 0 (empty-list element 0) with a nonempty player list, else divides by a zero count; RU key compare byte-exact; result Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
+| R2-ENGINE-917 | Both ROM2 client byte scans find 32 player-method references, all E8 calls in the panel, player, dialogue page, 0x451 arm and screen bodies; no table, jump or short-branch form; completeness Medium. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
+| R2-ENGINE-918 | ROM2 dispatcher arms: 0x42f, 0x457 and 0x468 (location kind 1) call mission entry, 0x468 otherwise the town body; 0x41d and 0x42d call the map body and a cutscene; RU 0x48e calls mission end. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
+| R2-ENGINE-919 | EN 0x451 readiness helper (RU unread) returns 1 when the dword 8 bytes before the pointer at app+0x3d4 is 0; the values scan finds seven decoded push 0x451 sites per client plus one undecoded hit; events Medium. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
+| R2-ENGINE-920 | EN tick counter +0xa88: the only direct-displacement store of 0 in the values scan is in view constructor L2.01227, called once from L2.00558; the tick stores it; a per-mission reset is Medium. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
+| R2-ENGINE-921 | ROM2 EN/RU startup mounts cs.res, main, patch, world, music, video, sfx, movies, scenario and speech .res through one routine in that order; a failed music mount clearing the music word is Medium; precedence Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
 
 ### R2-ENGINE-908
 
@@ -23246,6 +23264,177 @@ no RU save exists and the RU sender is unlocated.
 
 **Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 3;
 `derived/texts/*-npcnames.tsv`, `derived/saves/gog-original-2.tsv`.
+
+### R2-ENGINE-916
+
+EN town body `L2.00266` and RU `L2.00267` build a temporary list whose
+constructor (EN `L2.05017`, RU `L2.05471`) writes data pointer +4 and count
++8 as 0. Only arms 1, 2 and 3 append a key. With another ID and the
+music-available word set, the tail reads the player list +0x40 count
+(EN `L2.03659`, RU `L2.03299`, both return +8):
+
+1. Count nonzero: the same-key test takes element 0 of both lists
+   (EN `L2.03294`, RU `L2.05472`: data + 4·i) and dereferences the
+   temporary one (EN `L2.05473`, RU `L2.05474`). The address read is 0.
+2. Count zero: list set (EN `L2.01377`, RU `L2.01403`) runs only when
+   player +0x9c is nonzero; it copies the empty list and divides rand() by
+   the count 0 (EN `L2.05475`, RU `L2.05476`). With +0x9c zero it writes
+   the area pick -1; start follows.
+
+The RU same-key wrapper `L2.00091` calls `L2.02085`, which compares bytes to
+the NUL terminator in aligned and unaligned loops without case conversion,
+as EN does (R2-ENGINE-835).
+
+**Confidence.** High for the listed EN and RU paths. Unknown for the result
+of the address-0 read or the division (no handler was read; no run).
+
+**Amends.** R2-ENGINE-835's Unknown on unknown-ID failure behaviour and the
+RU same-key comparison.
+
+**Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
+question 1; listings `{en,ru}-town-body`, `-list-helpers`,
+`-player-list-set`, `-key-compare*`, `ru-byte-compare`.
+
+### R2-ENGINE-917
+
+The `refs` scan of each `allods2.exe` covers absolute dwords in every backed
+section and E8, E9, 0F 80..8F rel32 and EB, 70..7F, E3 rel8 targets in
+executable sections. For the seven player entries it finds 32 hits per
+client, all E8 calls: set list 6, start 8, stop 10, select 4, fade 2,
+cross-fade 1, set random 1. Their routines are the sound panel, the
+player's own methods, the dispatcher's 0x451 arm, the seven screen bodies
+(menu, pre-create, town, map, credits, mission music, mission entry and
+mission end, R2-ENGINE-335..338; eight bodies) and the dialogue page
+(cross-fade, R2-ENGINE-341). No absolute, jump or short-branch hit occurs
+in the byte scan of the two `allods2.exe`, so no table there holds a player
+entry. The screen bodies are called from the application dispatcher (EN
+`L2.00262`, RU `R2.0036`), the view-close body (EN `L2.00787`, RU
+`L2.05477`, which holds a third RU pre-create call `L2.01374`), the EN
+startup initializer (logos, intro cutscene), the load entry (mission
+entry: EN `L2.05478` in `L2.00826`, RU `L2.05479` in `L2.00119`) and
+further mission-end callers outside the dispatcher: EN `L2.05480` (in
+`L2.02060`) and `L2.05481` (in fail-cleanup `L2.01858`), RU `L2.05482` (in
+`L2.05483`) and `L2.05484` (in `L2.01859`, RU fail-cleanup); `refs.tsv`
+lists each. The EN install has one DLL, `Scenario.dll`; the RU install has
+`scenario.dll`, `engine32.dll` and `helper32.dll`; none imports DSOUND or
+WINMM, while both `allods2.exe` import both. An import table does not
+exclude `LoadLibrary` or `GetProcAddress`.
+
+**Confidence.** High for every listed hit and its form and for the import
+tables. Medium for completeness: an address built by arithmetic, a
+relative-offset table or a call made from an external DLL through a passed
+pointer is outside the scan. Medium that no DLL plays sound itself.
+
+**Amends.** R2-ENGINE-838's Unknown on other jump encodings and DLL dispatch,
+and R2-ENGINE-335's RU fourth pre-create caller.
+
+**Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
+question 2; `measured/refs.tsv`, `derived/reference-counts.tsv`,
+`measured/imports.tsv`.
+
+### R2-ENGINE-918
+
+The EN dispatcher subtracts 0x416 and dispatches values 0..0x73 through
+byte table `L2.00794` and dword table `L2.00795`; RU dispatches 0..0x78
+through `L2.01225` and `L2.01226`. Calls to music bodies by nearest arm:
+
+| Message | EN arm | Calls |
+|---|---|---|
+| 0x419 | `L2.02035` | LOAD entry |
+| 0x421 / 0x425 / 0x428 | `L2.01994` / `L2.01098` / `L2.05485` | menu / pre-create / credits |
+| 0x42e | `L2.00796` | town body |
+| 0x42f, 0x457 | `L2.05486`, `L2.05487` | mission entry |
+| 0x468 | `L2.00827` | location kind 1: mission entry(0); else town body |
+| 0x41d | `L2.01831` | mission end (three sites), cutscene, map body |
+| 0x42d | `L2.00873` | cutscene, map body |
+| 0x436 | `L2.05488` | cutscene |
+| 0x451 / 0x45c / 0x45d | `L2.01426` / `L2.05489` / `L2.05490` | stop / mission end / mission end |
+
+RU arms make the same calls for the RU targets scanned (cutscene and logos
+were not scanned in RU); RU message 0x48e calls mission end.
+
+The table lists the dispatcher's own calls; other callers of the same
+bodies exist (R2-ENGINE-917).
+
+**Confidence.** High for the EN and RU table decode and the arm-to-call map. Medium
+for an arm boundary where the nearest-arm rule could assign shared code
+to the wrong arm, and for the meaning of location kind 1.
+
+**Amends.** R2-ENGINE-335's message list: mission entry is also requested by
+0x42f, 0x457 and 0x468.
+
+**Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
+question 2; `derived/dispatcher-arms.tsv`, `derived/dispatcher-sites.tsv`,
+listings `en-dispatcher-head`, `ru-dispatcher-head`, `en-arm-468`.
+
+### R2-ENGINE-919
+
+EN readiness helper `L2.01986` calls `L2.03300`, which returns the pointer
+at its object minus 0xc, and returns 1 when the dword at that address +4 is
+0. The 0x451 arm passes app+0x3d4, so its stop needs the dword 8 bytes
+before the pointer at app+0x3d4 to be 0 and app+0x404 to be 0. The
+`values` scan of `allods2.exe` (`0x451` as an immediate dword in decoded
+instructions) finds seven decoded `push 0x451` sites per client. EN:
+`L2.05491`, `L2.05492`, `L2.05493`, `L2.05494`, `L2.05495`, `L2.05496`,
+`L2.05497`. RU: `L2.05498`, `L2.05499`, `L2.05500`, `L2.05501`, `L2.05502`
+(dispatcher), `L2.05503` and `L2.05504` (view close). Each root also has one
+undecoded hit, EN `L2.05505` and RU `L2.05506`, not classified. A 0x451
+built by arithmetic or loaded from a table is outside the scan. The RU
+helper is unread.
+
+**Confidence.** High for the EN helper body and for the decoded `push`
+sites listed; Medium that the seven sites are complete. Medium for the
+field's meaning and every sender's event; RU helper unread.
+
+**Amends.** R2-ENGINE-836's Unknown on the readiness helper and its RU sweep.
+
+**Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
+question 3; listings `en-readiness-helper`, `en-string-header`,
+`en-arm-451`; `measured/values.tsv`.
+
+### R2-ENGINE-920
+
+EN `L2.03373` zeroes the tick counter +0xa88 inside the constructor
+`L2.01227`, which installs vtable `L2.05507`. The `refs` scan finds one
+direct call of that constructor, at `L2.05508` in the view-construction
+body `L2.00558`. The EN `values` scan finds two stores to +0xa88: that zero,
+the only direct-displacement store of 0 in the scan (EN only), and the
+tick's store `L2.05509`; RU's tick `L2.01390` uses the same +0xa88
+and +0x3f6c.
+
+**Confidence.** High for the constructor store and the call site. Medium
+that no mission start resets the counter: 25 `add reg, 0xa88` hits in
+other routines and indirect stores were not classified.
+
+**Amends.** R2-ENGINE-834's Unknown on the counter store's context.
+
+**Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
+question 5; listing `en-view-constructor`; `measured/refs.tsv`,
+`measured/values.tsv`.
+
+### R2-ENGINE-921
+
+EN startup `L2.01428` (calls `L2.05510`..`L2.05511`) and RU calls `L2.05512`..`L2.05513` mount archives through one routine
+(EN `L2.05514`, RU `L2.05515`) in this order: a built `cs.res` path,
+`main.res`, `patch.res`, `world.res`, `music.res`, `video.res`, then after
+the `-nomusic` and `-trace` tests `sfx.res`, `movies.res`, `scenario.res`
+and `speech.res`, then read `update.lst`. An exception-handler block after
+the `music.res` mount (EN `L2.01442`, RU `L2.05516`) clears the
+music-available word; `-nomusic` clears it directly (EN `L2.01443`). The mount routine has one other caller (EN
+`L2.05517`, RU `L2.05518`); `graphics.res` is not among the startup names.
+
+**Confidence.** High for the order and call sites. Medium that a failed
+mount raises the exception that reaches the handler (mount body not
+interpreted). Unknown which archive
+wins when two hold one name: the mount body's insert callees
+(EN `L2.05519`, `L2.05520`) are listed but not interpreted.
+
+**Amends.** R2-ENGINE-870's Unknown on mounted roots. R2-ENGINE-034 named
+four of the RU ten.
+
+**Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
+question 6; listings `en-startup-initializer`, `ru-startup-archives`,
+`en-archive-mount`; `measured/refs.tsv`.
 
 ## Route failure and the unreachable target
 
