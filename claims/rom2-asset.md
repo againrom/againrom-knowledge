@@ -3230,6 +3230,40 @@ evidence/analyze.py.
 
 [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md).
 
+## Units treasure parameters
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-224 | ROM2 Units parameters 38..44 are treasure.1 Gold, treasureMin.1, treasureMax.1, treasure.2 Item, treasureMin.2, treasureMax.2, treasureMask.2; Ogre rows hold parameter 41 (treasure.2 Item) 40 and mask 0x21c7ffff, Dragon 100 and 0x2c0fffff. | High | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
+
+### R2-ASSET-224
+
+`world.res` (SHA256
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`, both
+roots) `data/data.bin` (SHA256
+`aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`, 149971
+bytes) has 241 Units rows; 180 carry 62 values. Parameter n carries title
+n + 1 (R2-ASSET-031). Parameters 38..44 (0x26..0x2c), by row:
+
+| Row | 38 | 39 | 40 | 41 | 42 | 43 | 44 |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Ogre | 90 | 150 | 750 | 40 | 300 | 1500 | `0x21c7ffff` |
+| Ogre.2 | 90 | 1050 | 5025 | 40 | 2100 | 10050 | `0x21c7ffff` |
+| Ogre.3 | 90 | 7350 | 33668 | 40 | 14700 | 67335 | `0x21c7ffff` |
+| Ogre.4 | 90 | 51450 | 225572 | 40 | 102900 | 451145 | `0x21c7ffff` |
+| Ogre.5 | 90 | 154350 | 676717 | 40 | 308700 | 1353434 | `0x21c7ffff` |
+| Dragon | 100 | 3000 | 6000 | 100 | 1500 | 4500 | `0x2c0fffff` |
+| Dragon.2 | 100 | 21000 | 40200 | 100 | 10500 | 30150 | `0x2c0fffff` |
+| Dragon.3 | 100 | 147000 | 269340 | 100 | 73500 | 202005 | `0x2c0fffff` |
+| Dragon.4 | 100 | 1029000 | 1804578 | 100 | 514500 | 1353434 | `0x2c0fffff` |
+| Dragon.5 | 100 | 3087000 | 5413734 | 100 | 1543500 | 4060301 | `0x2c0fffff` |
+
+Ogre rows have typeID (parameter 29) 66 and Dragon rows 71. Parameter 41 is
+above 0 in 66 rows, 0 in 21 and −1 in 93; parameter 44 takes 14 values,
+−1 in 77 rows (`creature-drops.tsv`). The EN and RU tables are equal.
+
+**Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 2; `data/units-titles.tsv`, `data/units-roll-parameters.tsv`, `data/creature-drops.tsv`, `data/inputs-data.tsv`.
+
 ## Unit shoot points
 
 | ID | Claim | Confidence | Status | Evidence |

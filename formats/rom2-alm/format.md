@@ -138,7 +138,10 @@ attacker (R2-ENGINE-480; Medium here; a creature attacker's award was not
 read for the flag). The unit copy omits the flag (Medium: its head is
 unread); the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
 Inn offer blocks 2, 4 and 6 (Medium: the receiver of the offer generator is
-the Inn by address inference); RU and EN agree in those blocks. — R2-ENGINE-535, R2-ENGINE-537
+the Inn by address inference); RU and EN agree in those blocks. A template
+name holding "NPC" (Medium: the substring helper is unread) also empties
+the bag at death; with +0x1a0 clear such a
+unit still rolls gold and an item. — R2-ENGINE-535, R2-ENGINE-537, R2-ENGINE-943
 
 Each root's 46 campaign maps hold 34 type-6 records of the Humans row
 `2U_PeasantLeader` on maps 20, 21, 30, 31, 40, 42, 43, 52, 61, 71, 73, 75, 85,

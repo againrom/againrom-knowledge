@@ -457,6 +457,14 @@ replace the bag with a new empty list; respawn and the victory transition
 create a bag only when the pointer is null.
 — R2-ENGINE-410, R2-SESSION-169
 
+At death the bag first takes unit +0x78, +0x74 when its row parameter 15
+is not 0, and the slots; a template name holding "NPC" (Medium) or +0x1a0
+empties it. The item roll then adds at most one generated item with
+quantity 1, and a nonempty bag or nonzero gold drops in the sack of the
+unit's cell. Whether the death's walk of unit list +0x20 and its virtual
+calls +0x38, +0x48 and +0x4c drop anything else, and how a sack already on
+the cell bounds the merged bag, are Unknown. — R2-ENGINE-943, R2-ENGINE-940
+
 EN and RU write the same bytes at Medium: the EN serializer bodies were
 read, their list and reference callees were not. RU items carry one more runtime dword
 (+0x54, not stored), so RU Weapon and Armor fields sit 4 bytes above EN's.

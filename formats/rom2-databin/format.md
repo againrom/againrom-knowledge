@@ -78,6 +78,34 @@ The additional titles include serverID, knownSpells and the five school skills.
 Other title arrays retain their ROM1 forms; the Spells radius title differs
 only by literal quote characters. — R2-ASSET-031
 
+## Units treasure parameters
+
+Units parameters 38..44 are titled treasure.1 Gold, treasureMin.1,
+treasureMax.1, treasure.2 Item, treasureMin.2, treasureMax.2 and
+treasureMask.2 in both roots. Ogre rows hold parameter 41 (treasure.2
+Item) 40, parameters 42..43 300..1500 up to 308700..1353434 and mask
+0x21c7ffff; Dragon rows hold parameter 41 100, parameters 42..43
+1500..4500 up to 1543500..4060301 and mask 0x2c0fffff.
+— R2-ASSET-224
+
+The unit death reads them (Medium: +0xe as typeID and the template as the
+data.bin row) for typeID 64 or more with +0x1a0 clear: gold is parameter
+39 + rand(parameter 40) when rand(100) lies below parameter 38; then, when
+rand(100) lies below parameter 41, one entry of the shop category draw for
+{parameter 42, parameter 43, 100 draws, quantity bound 1, mask parameter
+44}, when that draw returns any; it drops with the gold in the sack of the
+unit's cell. — R2-ENGINE-940, R2-ENGINE-941
+
+Of the 180 Units rows with values, 66 reach the roll (Medium: the same
+template binding): orcs, undead and necromancers at chance 30, ogres at
+40, dragons and Urd at 100. A magic
+mask (dragons, M_Skeleton, necromancers) always yields an item when the
+roll passes (Medium). Whether an ogre or an orc shaman, whose kept draws
+are all enchanted, ever yields one is Unknown. Urd and Orc_ShamanLeader
+yield none. Which enchanted draws survive the price test, so the item mix
+of every bit-29 category, and whether weapons and armour stack are
+Unknown. — R2-ENGINE-942
+
 <a id="the-2556-byte-clientserver-delta-located"></a>
 
 ## Client/server values

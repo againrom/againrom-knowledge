@@ -7697,9 +7697,9 @@ bound in a caller of the bag methods: no census of direct calls to bag
 insert and merge was run and no caller was searched; none occurs in these
 bodies. That census and a read of each caller would settle it.
 
-**Unknown.** The string at `L2.00405` and the meaning of Unit +0x1a0.
+**Unknown.** The meaning of Unit +0x1a0.
 
-**Amended.** R2-ENGINE-535 states what Unit +0x1a0 does: set, the bag is replaced and no gold or item is rolled (High); the human attacker's experience skips the victim (Medium); the writers are type-6 0x10 bit 8, two unique-spell arms and the map build, and the unit copy omits it (Medium). The grades above stay.
+**Amended.** R2-ENGINE-535 states what Unit +0x1a0 does: set, the bag is replaced and no gold or item is rolled (High); the human attacker's experience skips the victim (Medium); the writers are type-6 0x10 bit 8, two unique-spell arms and the map build, and the unit copy omits it (Medium). The grades above stay. R2-ENGINE-943 reads the string at `L2.00405` (RU `L2.00408`): "NPC", searched in the template name (substring search Medium: `L2.02244` unread); a match with +0x1a0 = 0 still rolls gold and an item after the bag is replaced.
 
 **Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
 
@@ -12009,7 +12009,7 @@ it settles its class.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-535 | A ROM2 actor with +0x1a0 set drops no bag or gold at death and pays no human attacker experience (Medium); type-6 0x10 bit 8, two spell arms and the map build (diplomacy byte toward "Self" bits 0..2 clear) set it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ENGINE-535 | A ROM2 actor with +0x1a0 set drops no bag or gold at death and pays no human attacker experience (Medium); type-6 0x10 bit 8, two spell arms and the map build (diplomacy byte toward "Self" bits 0..2 clear) set it. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ENGINE-536 | A ROM2 Inn builds a player's offer list from ten blocks gated by its 11a fields +0xc4, +0xc8, +0xcc, +0xd0 and word +0xd4 (receiver Medium), each candidate within a level window of the hero's top skill; an offer stays Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ENGINE-537 | ROM2 Inn offer blocks draw from flagged actors and groups: +0x194, +0x19c and +0x198 (type-6 0x10 bits 1, 2, 4) and group +0x48, +0x4c (type-10 e2 bits 4, 8); RU block 3 skips the Inn owner's groups, EN does not. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ENGINE-538 | ROM2 L2.02502 returns its receiver's dword +0xc: a group with 0 there gets no type-10 object, and slot 5 (Medium, R2-ENGINE-510) re-creates only at 0 or below; RU re-creates over the member spread, EN at radius 0 (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
@@ -12084,9 +12084,7 @@ writer runs only with Session+0x74 set: 0 in a campaign at Medium
 (R2-SESSION-198); set in the root maps if they are built by the routine of
 R2-ENGINE-509 (Medium; R2-ASSET-130).
 
-**Unknown.** What the name test at `L2.01289` matches: searched the death
-window and the string at RU `L2.00408`; reading `L2.01289` in both roots
-settles it. What diplomacy bits 0..2 and owner +0x2c mean, and whether the
+**Unknown.** What diplomacy bits 0..2 and owner +0x2c mean, and whether the
 owner named "Self" flags its own units (the loop does not exclude O = S and
 the byte for S toward S is unread): searched the 70-instruction map-build
 window in both roots; reading the writers of the table at
@@ -12096,6 +12094,8 @@ first instruction in both roots settles whether it copies +0x1a0. Whether a
 creature attacker's award tests +0x1a0: no site of the 59-site RU scan lies
 in the code-region range and the body at RU `L2.02331` was not read; reading
 it settles it.
+
+**Amended.** R2-ENGINE-943 reads the name test in both roots: it searches the template name for "NPC" (RU `L2.00408`, EN `L2.00405`; substring search Medium: `L2.02244` unread), and a match with +0x1a0 = 0 replaces the bag but still rolls gold and an item. The grades above stay.
 
 **Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
 
@@ -23840,6 +23840,201 @@ is not read.
 question 3; listings `en-order3-setter-L2.05582`, `en-group-attack-570946`,
 `en-target-helper-head-L2.04954`, `en-command-postload-L2.03452`; `out/scans`;
 `evidence/navigation/callto-L2.05607.txt`.
+
+## Death item roll
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-940 | A ROM2 unit death with typeID +0xe of 64 or more and +0x1a0 = 0 draws rand(100) for gold, then for an item; below Units parameter 41, entry rand(n − 1) of the generated list, when the list is not empty, goes to the bag and the ground sack. | High / Medium | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
+| R2-ENGINE-941 | The ROM2 death item comes from the shop draw for {parameters 42, 43, 100 draws, bound 1, mask 44}: magic adds every admitted book and six potions; bit 29 enchants each draw (with bit 28, only when rand(100) > 50) and keeps it in [min, max]. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
+| R2-ENGINE-942 | In the EN and RU data.bin, 66 of 180 Units rows reach the ROM2 death item roll: orcs, undead and necromancers at chance 30, ogres at 40, dragons and Urd at 100; Urd and Orc_ShamanLeader admit no item. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
+| R2-ENGINE-943 | A ROM2 unit death first bags items +0x78, +0x74 (what +0x48 returns: Medium, R2-ENGINE-410) and the slots; a template name holding NPC or +0x1a0 discards them, and with +0x1a0 = 0 the roll still runs and its item and gold still drop. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
+
+### R2-ENGINE-940
+
+The death body RU `L2.01807` (EN `L2.01806`; 394 instructions in each root,
+no open edge) tests unit word +0xe against 64 and +0x1a0 against 0. When both pass it reads Units parameters through
+`L2.02312` (EN `L2.02667`), whose body `L2.02359` returns element n of the
+row array, and runs in this order:
+
+1. rand(100) (`R2.0021`, EN `L2.00939`, R2-ENGINE-391) against parameter
+   38 (value 0x26); when the parameter is greater, gold = parameter 39 +
+   rand(parameter 40).
+2. rand(100) against parameter 41 (0x29). When the parameter is greater:
+   generator `L2.05614`, setup `L2.05615` with the record {parameter 42,
+   parameter 43, 100, 1, parameter 44}, draw `L2.05616`(100, 1, parameter
+   42, parameter 43, local list) (R2-ENGINE-941).
+3. When the list holds n > 0 entries: entry rand(n − 1) gets quantity
+   +0x42 = 1 and goes into bag +0x7c (`L2.01313`, EN `L2.01055`). Then the
+   generator destructor `L2.05617` and the list destructor `L2.05618`,
+   whose element destructor `L2.05619` is an empty loop.
+4. A bag count above 0 (`L2.01746`) or gold other than 0 calls `L2.01811`
+   (EN `L2.01810`) with the bag, the gold and a flag (1 when [+0x14]+0x38
+   is the unit). It calls `L2.05620` with cell +0x10; sack placement
+   `L2.05621` finds a sack at the cell (`L2.05622`) or builds one, merges
+   the bag into an existing sack (`L2.01743`) and adds the gold to sack
+   +0x3c. The unit gets a new empty bag (`L2.01738`).
+
+rand(n) is trunc(r × (n + 1) / 32768) over a 15-bit core r, so the item
+chance c passes for ceil(c × 32768 / 101) of 32768 values: 9734 at 30,
+12978 at 40 and 32444 at 100; c of 0 or below never passes.
+
+The death has two direct callers per root and no stored pointer: RU
+`L2.05623` (EN `L2.05624`) in the actor tick `L2.00028`, after the +0x6c
+countdown, when health +0x94 is −10 or below (movementType +0x4a above 1
+first sets −1000); RU `L2.04382` (EN `L2.04383`) in `L2.04378` for a unit
+whose +0x148 entry holds −1 (R2-ENGINE-776).
+
+**Confidence.** High for the body and the order of the draws in both
+roots (CFG listings with no open edge, equal after masking). High for the
+two E8/E9 callers and for the absence of a stored absolute pointer in any
+section; a conditional or short jump to the entry and a computed target
+are not covered by these scans. Medium that +0xe holds the Units typeID
+(parameter 29) and that element n is data.bin parameter n: the writer of
++0xe was not read here, and the template loader `R2.0087` keeps the
+template whose name matches while skipping indexes 0..25 and 30..62
+(index 30 is replaced by 63 before use), the empty Units ordinals.
+
+**Unknown.** The bodies of `L2.01743`, `L2.05622`, `L2.05625`, `L2.05626`,
+`L2.05627`, `L2.05628`, `L2.05629`, `L2.05630` and `L2.02657`, so whether a
+sack merge bounds the bag, and whether a new sack is always registered
+(`L2.05627` failure returns 0).
+
+**Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 1; listings `p1-*-death-*`, `p1-*-param-*`, `p1-*-sack-*`, `p2-*-sackadd-*`, `p3-*-sackplace-*`, `p3-*-loader-*`, `p6-*-deathcaller-*`, `s1-*`.
+
+### R2-ENGINE-941
+
+Setup `L2.05615` (EN `L2.05631`) stores min +0x34, max +0x38 and mask
++0x54 and calls the kind builder `L2.05632` once per set bit of
+0x0dc00000: bit 22 weapon mode 2, bit 23 shield mode 7, bit 24 armour mode
+1 (enchant flag = bit 29), bit 27 weapon mode 8 (only with bit 29, flag 1);
+bit 26 calls the magic admission `L2.03945`. Admission is R2-ENGINE-264,
+R2-ENGINE-327 and R2-ENGINE-332. The magic admission keeps a book of spell
+1..29 other than 9, 14, 15, 24, 28 and 29 when Spells parameter 21 lies in
+[min, max], and for each i in 1..29 one of MagicItems rows i+5 and i+34
+(`L2.00092(2)`) when its price lies in range. Bit 25 is tested by none of
+the read bodies (setup, kind builder, table admission and its arm window,
+magic admission, draw, merge, enchant); the unread helpers were not
+searched.
+
+The draw `L2.05616` (EN `L2.00813`, 555 instructions):
+
+1. No candidate: return 0, the list stays empty.
+2. Bit 26: every candidate book (type +0x44 = 5) is copied into the local
+   list with quantity 2, and six potions built by name are added with
+   quantity 50 + `L2.00092(50)`.
+3. Until 100 draws are kept or more than 1000 have failed: candidate
+   rand(count − 1), drawn again while it is a book (up to 1000 tries, then
+   stop), set to quantity 2 and cloned (vtable +0x40).
+4. Bit 29: the clone is enchanted (`L2.03941`, R2-ENGINE-711); with bit 28
+   too, only when rand(100) is above 50, else it stays plain. It fails and
+   is deleted when the enchant returns 0 or its price +0x1c lies outside
+   [min, max]. Without bit 29 it is kept.
+5. A kept clone that stacks (vtable +0x50) gets quantity rand(1) + 1 and
+   adds to an equal entry (`L2.05633`); any other is appended (`L2.05634`).
+6. Sort `L2.03938` (R2-ENGINE-710), then append to the caller's list.
+
+The death picks entry rand(n − 1) of that list, so a candidate's weight is
+its share of list entries.
+
+Helpers not read: `L2.05635` (EN `L2.05636`), `L2.05637` (EN `L2.05638`),
+`L2.00089`, `L2.05633`, `L2.05639`, `L2.05640`, `L2.02358`, `L2.05641`,
+the enchant value helpers `L2.05642`, `L2.03942`, `L2.05643`, `L2.05644`
+(EN `L2.00817`, `L2.01357`, `L2.03900`, `L2.03914`), item virtuals
++0x40, +0x4c and +0x50, and the list, admission and item-constructor
+helpers of R2-ENGINE-264's bodies.
+
+**Confidence.** High for the setup, the magic admission and the draw in
+both roots (equal after masking except item allocation sizes (draw 6,
+magic admission 7, admission arms 4)). Medium for the scroll price, set by the unread virtual
++0x4c; MagicItems parameter 0 reproduces R2-ENGINE-801's counts. Unknown
+which enchanted clones are kept, and which items stack.
+
+**Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 3; listings `p1-*-setup-*`, `p1-*-draw-*`, `p2-*-kind-*`, `p2-*-magicadm-*`, `p2-*-merge-*`, `p2-*-cntbound-*`, `p2-*-enchant-*`, `p3-*-admit-*`, `p4-*`.
+
+### R2-ENGINE-942
+
+`creature-drops.tsv` holds the 180 Units rows with values per root: 66
+have item chance above 0 and typeID 64 or more, 21 chance 0 and 93 chance
+−1; none with a positive chance has a typeID below 64. Values are
+R2-ASSET-224's.
+
+| Rows | Chance | Mask | Admitted kinds |
+|---|---:|---|---|
+| Orc_Sword, Orc_Bow .1..5 | 30 | `0x3147ffff` | weapon 2, armour; bits 28, 29 |
+| Ogre .1..5 | 40 | `0x21c7ffff` | weapon 2, shield, armour; bit 29 |
+| Dragon .1..5 | 100 | `0x2c0fffff` | magic, weapon 8; bit 29 |
+| Urd | 100 | `0x00000000` | none |
+| Orc_Shaman .1..5 | 30 | `0x23c7ffff` | weapon 2, shield, armour; bit 29 |
+| F_Zombie, A_Zombie, F_Skeleton, A_Skeleton | 30 | `0x31ffffff` | weapon 2, shield, armour; bits 28, 29 |
+| M_Skeleton .3..5 | 30 | `0x2e2e73f8` | magic, weapon 8; bit 29 |
+| Orc_ShamanLeader | 30 | `0x00000064` | none |
+| Necro_*, GoodNecroLeader, GoodNecro | 30 | `0x2e7fffff` | magic, weapon 2, weapon 8; bit 29 |
+
+Ogre levels 1..5 (prices 300..1500, 2100..10050, 14700..67335,
+102900..451145, 308700..1353434; classes 0..3, all 15 materials) admit 22,
+15, 15, 11, 9 weapon keys, 4, 4, 5, 3, 3 shield keys and 107, 107, 107,
+89, 62 armour keys. Dragon levels 1..5 (1500..4500, 10500..30150,
+73500..202005, 514500..1353434, 1543500..4060301; classes 0..4) admit 10,
+6, 6, 6, 6 Staff and Shaman Staff keys, 2, 4, 0, 1, 3 books and 0, 2, 7, 3,
+0 scroll rows (both alternatives counted), and the draw adds the six
+potions.
+`ogre-dragon-keys.tsv` names each key; the replay reproduces all 16
+R2-ENGINE-801 control counts.
+
+After a passed roll:
+
+- magic masks always hold the six potions, so an item drops;
+- bits 28 and 29: about half the draws stay plain and every admitted weapon
+  and shield key lies in range, so an item drops except with negligible
+  probability (an estimate over up to 1100 draws; Medium: the clone's price
+  +0x1c is taken as the admission price, +0x40 unread);
+- bit 29 alone, no magic (Ogre, Orc_Shaman): only enchanted draws in range;
+- Urd and Orc_ShamanLeader: no candidate, no item.
+
+**Confidence.** High for the data.bin values and admitted keys per row in
+both roots and for the no-item rows; Medium that a creature's death reads
+that row (R2-ENGINE-940's binding). Medium for the scroll counts (price by
+the unread +0x4c; R2-ENGINE-801's control reproduces the choice at prices
+0..5000). Medium for the magic and bit-28 drops:
+the potion builder `L2.05635` is unread, and the bit-28 result is a
+probability bound over up to 1100 draws. Unknown whether an ogre or orc
+shaman ever drops an item, and the item mix of every bit-29 category.
+
+**Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 4; `data/creature-drops.tsv`, `data/roll-categories.tsv`, `data/ogre-dragon-keys.tsv`, `data/admission-control.tsv`.
+
+### R2-ENGINE-943
+
+Before the roll the death body (R2-ENGINE-940) passes unit +0x78 to vtable
++0x48 (unread) and inserts its return value into the bag; then +0x74
+likewise when the +0x74 row's parameter 15 is not 0, then calls vtable +0x4c (the slots of
+R2-ENGINE-410). Name test `L2.01289` (EN `L2.00997`) searches the template
+name `[+0x3c]+4` for "NPC" (RU `L2.00408`, EN `L2.00405`, three
+characters) through `L2.02244` and returns −1 when absent. When it is
+found or +0x1a0 is set, the bag is deleted (`L2.05645`) and replaced by an
+empty one. Control then reaches the roll test: with +0x1a0 = 0 a matching
+unit still rolls, and rolled gold or an item still drops a sack. No Units
+row name in either data.bin holds "NPC" (other tables not searched).
+
+The generator's other direct callers are the shop fill (R2-ENGINE-264) and
+RU `L2.00058` (EN `L2.05646`, 1369 and 1306 instructions with two open
+jump-table edges each), which calls setup twice, with {X, 2X, 100, 1,
+`0x1b7fffff`} and then {3X/4, 3X/2, 100, 1, `0x2bffffff`}, for X clamped to
+250..16383000, and fills a new bag; its one
+direct caller is RU `L2.05647` in `L2.02763`. It is not a direct callee of
+the death. After the sack the death walks unit list +0x20 (predicate
+`L2.03774`, vtable +0x38, `L2.04650`, removal `L2.05648`).
+
+**Confidence.** High for the order, the string and the replacement in both
+roots. Medium that the substring search is `strstr` (`L2.02244` unread), for
+the absence of NPC-named rows (the template binding of R2-ENGINE-940) and
+for the death reaching no other drop through vtable +0x38, +0x48 and +0x4c.
+Unknown what `L2.00058` and list +0x20 are.
+
+**Amends.** R2-ENGINE-410's Unknown on the string at `L2.00405` and
+R2-ENGINE-535's Unknown on what the name test at `L2.01289` matches.
+
+**Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 5; listings `p1-*-death-*`, `p5-*-nametext-*`, `p5-*-nametest-*`, `p6-*-gencaller-*`, `p7-*-gencaller-*`, `p8-*`, `s1-*-call-*`, `s2-*`.
 
 ## Route failure and the unreachable target
 
