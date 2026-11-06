@@ -23733,6 +23733,114 @@ candidate writer is vtable +0x44 EN `L2.03354` (`L2.03328`), not read.
 
 **Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 5.
 
+## Null attack target after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-936 | EN ROM2 attack planner L2.03461 reads target byte +0x4c at L2.05580 before any null test; the order-3 arm L2.05581 passes command +0xc unchecked, so a dispatched unit with order 3 and target 0 faults there. | High / Medium | ● active (branch candidate) | [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md) |
+| R2-ENGINE-937 | The EN ROM2 order-3 writers read never store order 3 with target 0: setter L2.05582 itself stores it only for a target other than the unit (L2.03312 and L2.03061 unread); postload L2.03452 keeps a zero +0xc. | High / Medium | ● active (branch candidate) | [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md) |
+
+### R2-ENGINE-936
+
+A minidump of EN `allods2.exe` (module timestamp 925380143, image size
+2969600, checksum 0, equal to the installed header; the 16 captured bytes
+at L2.05583 equal the installed bytes) holds exception 0xc0000005, a read
+of address 0x4c, at L2.05580 `mov dl, byte ptr [ecx+0x4c]` in L2.03461.
+ECX is the second argument [EBP+0xc], the target, and the stack holds 0
+there; the first argument, the unit, is 0x12d5c518. The planner copies the
+target to a local and reads +0x4c before any test; its first test is of
+bit 8 of that byte (`L2.05584`..`L2.05585`).
+
+The unit dispatch L2.02477 jumps through the 28-entry table L2.05586 on
+unit +0x50; entry 3 is the only one equal to L2.05581, which pushes
+[unit+0x1c4]+0xc and the unit and calls L2.03461 at L2.05587 with no test
+of the target. The confirmed calls above it, each ending at a stack word:
+L2.05588 in L2.02403 (the [unit+0x14]+0x2c test chooses this call site; either arm reaches L2.02477), L2.05589 in
+L2.05590, L2.05591 in the group dispatch L2.04957 (group [+0x3c]+0x20
+through index table L2.05245 and table L2.05246; mode 0 is case L2.05592,
+a member loop through L2.04088 and L2.04089), L2.05593 in the group loop
+L2.00505 (with session +0xbbe8 = 0 a group is dispatched only when
+[+0x3c]+0x45 is nonzero), L2.05594 in the turn L2.00503, L2.04196 in
+L2.03120 (it calls the turn when the signed remainder of [this+4] by 16 is
+6), L2.05595, L2.05596, L2.05597 (vtable +0x68), L2.05598, L2.05599
+(vtable +0x5c), L2.05600 and L2.05601. These 14 are all the allods2.exe
+`.text` words over 0x1afd3c..0x1b0000 with a call ending at them (13 words
+into system DLLs were not decoded). The first ten are the EBP chain; the
+last four are stack words off the chain. None lies in the LOAD entry
+L2.00826 (R2-ENGINE-814) or the postload routines of R2-ENGINE-662; the
+routines holding L2.05596 and L2.05598 were not read from their starts. A
+null target in the order-3 arm therefore stops the session turn after
+LOAD, not LOAD, at Medium.
+
+**Confidence.** High for the exception, the operand (inside the 16
+captured bytes), and the installed-image bodies of the order-3 arm, the
+table entry and the planner. Medium for the composed call chain and its
+placement after LOAD (whole-module identity: the module list holds no MD5,
+as in R2-ENGINE-814), for the four words off the EBP chain and the two
+virtual links, and for the names of the upper frames.
+
+**Unknown.** The RU planner L2.01530 was not reread for a null target.
+The other ten direct E8 callers of L2.03461 and indirect routes were not
+read. A trace of the first call of L2.00503 after LOAD would settle the
+turn.
+
+**Amends.** R2-ENGINE-505's clause "with no target, or itself as target"
+for EN: a null target faults at L2.05580 before that branch, and only a
+self target reaches the nearest-unit branch (L2.05602..L2.05603).
+R2-ENGINE-651 names L2.03461 as the EN attack planner.
+
+**Evidence.** [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md),
+questions 1 and 2; `out/exception.json`, `out/stack-words.tsv`, listings
+under `out/code`.
+
+### R2-ENGINE-937
+
+The EN order-3 setter L2.05582 (unit, target) compares the two; equal, it
+calls L2.03312 (unread) and stores nothing in its own body. Otherwise it
+calls L2.03061 (unread), stores
+unit +0x50 = 3 (`L2.05604`), command +0xc = target (`L2.05605`), command
++0x14 = L2.05343(unit) and command +8 = 0. Its one direct E8 caller is
+L2.05606 in L2.05607, a loop over the group's members through L2.04088
+and L2.04089; for each member it calls L2.04954(member, target), which
+reads [target+0x10] at `L2.05608`..`L2.05609` before any other use, and
+calls the setter only when L2.04954 returns other than 0xffffff, else
+L2.03312. A null target thus faults before the setter is reached. A raw
+scan of the executable sections for `C7 /0` mod-01 stores of 3 into
+[reg+0x50] finds only L2.05604. The planner L2.03461 stores command +0xc
+only from a nonzero local (R2-ENGINE-936 holds the planner body).
+
+LOAD keeps the saved value: unit +0x50 is a raw dword and the command
+object a raw 0xb8-byte block (R2-ENGINE-662), and the EN command postload
+L2.03452 tests each of dwords +0xc, +0x10, +0x18, +0x20, +0x28, +0x30 and
++0x68 for zero and looks up only a nonzero one in session +0xdc through
+L2.03187 (`L2.05610`, `L2.05611`). A saved order 3 with command +0xc = 0
+reaches the order-3 arm with target 0.
+
+**Confidence.** High for the setter, caller and postload bodies read and
+the scan result. Medium that no other writer stores order 3 with target
+0: disp32 forms, register stores, byte and arithmetic stores, block
+copies, indirect calls and stored addresses of the setter were not
+searched; the callers of L2.05607 (L2.05612, L2.05613, raw E8 scan) were
+not read; L2.03187 was not read. Nor were writers of command +0xc = 0
+that leave +0x50 = 3 searched in any form (including a L2.03187 hit with
+out-value 0). Medium for the self-target arm and the reset call: L2.03312
+and L2.03061 were not read; the disp8 scan finds no order-3 store in them.
+Medium for the EN LOAD transfer (R2-ENGINE-662).
+
+**Unknown.** A census of register and disp32 stores to unit +0x50 and
+command +0xc, and of stored pointers to L2.05582.
+
+**Amends.** R2-ENGINE-541's Unknown on the EN order-3 setter: L2.05582 is
+the counterpart of RU L2.02812 by order code and body shape (Medium; RU
+L2.02812 was not compared) and stores order 3, target, range and prepared
+byte 0 as read above; its first call L2.03061 is unread, so the EN reset
+is not read.
+
+**Evidence.** [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md),
+question 3; listings `en-order3-setter-L2.05582`, `en-group-attack-570946`,
+`en-target-helper-head-L2.04954`, `en-command-postload-L2.03452`; `out/scans`;
+`evidence/navigation/callto-L2.05607.txt`.
+
 ## Route failure and the unreachable target
 
 | ID | Claim | Confidence | Status | Evidence |

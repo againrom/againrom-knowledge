@@ -1423,6 +1423,39 @@ regeneration or a later writer is not excluded. The causal reconstruction
 remains Medium because its heap bytes and actual packet flags are absent.
 — R2-ENGINE-814, R2-SESSION-336
 
+## Saved attack order without a target
+
+A saved unit order +0x50 = 3 with command +0xc = 0 stops the EN original.
+LOAD keeps both values (EN transfer R2-ENGINE-662, Medium): +0x50
+is a raw dword, the command block is raw, and the command postload looks up
+only nonzero dwords +0xc, +0x10, +0x18, +0x20, +0x28, +0x30 and +0x68. The
+read order-3 writers never store order 3 with target 0: the setter itself
+stores nothing for a self target (L2.03312 unread), and its one direct
+caller reads the target before it. Writer completeness is Medium: disp32,
+register, byte and copy stores, indirect calls, stored setter addresses and
+writers of +0xc alone were not searched. — R2-ENGINE-937
+
+When the unit's group is dispatched (session +0xbbe8 = 0 needs group
+[+0x3c]+0x45 nonzero; mode 0 runs the member loop; either arm of L2.02403
+reaches the dispatch), the order-3 arm passes command +0xc to attack
+planner L2.03461, which reads target byte +0x4c at L2.05580 before any null
+test. A target of 0 reads address 0x4c and the client stops with exception
+0xc0000005. The stop is in the session turn after LOAD, not in LOAD
+(Medium: the module row holds no MD5; the routines holding L2.05596 and
+L2.05598 were not read from their starts). — R2-ENGINE-936
+
+The dragonout `game0057.sav` (mission 30) holds exactly one such record
+among 107 Unit and Human records: the Human "Igles" of player 0, group 176
+(mode 0, +0x45 = 1). Order 3 is at decoded offset 22342; the command block
+at decoded 22152 holds +8, +9, +0xc and +0x14 all 0. None of the 496 Unit
+and Human records of the 16 original-made saves holds order 3; the
+original mission-30 records of the same row and type hold order 12. The
+join of the dump's unit to this record is by elimination over the order-3
+route only, Medium. — R2-SESSION-356
+
+Unknown: whether the stop was on the first turn after LOAD; RU (planner
+L2.01530 not reread); the other ten callers of L2.03461.
+
 ## EN mission-10 command inputs and resave preservation
 
 The listed EN command path sends selected client-unit IDs with a local

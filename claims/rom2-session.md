@@ -5613,6 +5613,47 @@ string by R2-SESSION-101, the premise of R2-ENGINE-910 and R2-ENGINE-912.
 **Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), questions 1 to 3;
 `evidence/summary.txt`, `derived/saves/*.tsv`.
 
+## Saved attack order without a target
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-356 | game0057.sav (dragonout, mission 30) holds 1 of 107 Unit and Human records with order +0x50 3 and command +0xc 0: Human "Igles" in players.0.group.176 (mode 0, +0x45 1); none of 496 in 16 original-made saves holds order 3. | High / Medium | ● active (branch candidate) | [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md) |
+
+### R2-SESSION-356
+
+`game0057.sav` (SHA256
+a22236d1fb401339d9bad05bb2d666393eade8656e8749719e0757b69f567369, matched
+to its manifest) decodes to 165738 bytes and the EXP-2026 stream
+programmes parse all of it into 1258 objects. Its 107 Unit and Human
+records hold order +0x50 16 (65, in no group), 11 (37), 10 (4) and 3 (1);
+all 107 store command +0xc = 0. The order-3 record is
+`players.0.group.176.members.0`, a Human named "Igles", row +0xc 30, type
++0xe 33, owner +0x14 equal to player 0's saved address; player 0 +0x2c is
+0. Order 3 is at decoded offset 22342 (physical 8562..8565). The command
+block starts at decoded 22152: +8 = 0, +9 = 0, +0xc = 0, +0x14 = 0 (the
+codec produces them from a repeat of physical bytes 8525 and 8526), and
+dwords +0x10, +0x18, +0x20, +0x28, +0x30 and +0x68 are 0; state +0x54 is
+3. Group 176 has mode [+0x3c]+0x20 = 0 and +0x45 = 1; it is one of 5
+mode-0 groups with members, the other four holding one order-10 Peasant
+each. The save also holds 182 groups of mode 255 with +0x45 = 1, none with
+members.
+
+The 16 saves of `rom2-gog-original` (9) and `rom2-gog-original-2` (7)
+hold 496 Unit and Human records and no order 3. The records of row 30 and
+type 33 in `-2` `game0012`, `game9999` (mission 30) and `game9998`
+(mission 0) hold order 12, state 0, command +0xc 0, in a group of mode 3,
+with an empty stored name.
+
+**Confidence.** High for the stored values and counts in these 17 files.
+Medium that the record is the unit of the dump (joined by elimination: the
+dump holds no heap; elimination over the order-3 route only, the other ten
+callers of L2.03461 are unread) and that the original row-30 type-33 records are the
+same hero (row and type only).
+
+**Evidence.** [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md),
+questions 4 and 5; `out/units.tsv`, `out/groups.tsv`, `out/census.tsv`,
+`out/failing-record.tsv`, `out/comparison.tsv`.
+
 ## Route-failure fields in original saves
 
 | ID | Claim | Confidence | Status | Evidence |
