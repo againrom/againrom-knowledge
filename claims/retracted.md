@@ -1,5 +1,12 @@
 # Overturn history
 
+## EXP-2125: objective mark frames and notification branches
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-046` (the frame clause only; the mode stores, events and bit tests stand) | Verbatim: "chooses sprite frames 11,12,10 respectively" | High | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md), R2-ENGINE-889 | 11, 12 and 10 are the mark control values; the mark draws frame value - 10 above 10 and frame 0 otherwise, so frames 1, 2 and 0 of a three-frame sprite. | **REFUTED** — partially retracted |
+| `R2-ENGINE-046` (the banner label only) | Verbatim: "Notification253/254 takes separate UI 433 banner branches. The examined banner setup" | High | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md), R2-ENGINE-891 | The 253 and 254 branches play sound-list entries 0xe and 0x10 when idle and draw no banner. | **REFUTED** — partially retracted |
+
 ## EXP-2119: cursor rectangle coordinate span
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

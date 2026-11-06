@@ -59,7 +59,9 @@ runtime equivalence with ROM1. The structural compiled-binary relationships
 in `claims/rom2-engine.md` have no standalone stored format page.
 The [group machine](rom2-ai/format.md) gives its programme, member, executor,
 route and SAV-field contracts; it is a runtime reference, with clause grades
-and Unknowns from the accepted claims.
+and Unknowns from the accepted claims. The [quest objective machine](rom2-quest/format.md)
+gives the objective states, their writers, notifications, window rows and marks,
+SAV and LOAD, and the objectives of maps 21 and 31.
 
 | Format | Seen as | Reference | Contents and limits |
 |---|---|---|---|
@@ -78,6 +80,7 @@ and Unknowns from the accepted claims.
 | **Character** | `*.a2c` | [Reference](rom2-a2c/format.md) | Six scrambled sections, checksum, plus a byte-run codec; section meanings Unknown (`R2-SESSION-022`) |
 | **Automatic casting** | `Player preferences and spell orders` | [Reference](rom2-autocast/format.md) | Three cumulative support levels, selected offensive spell and separate computer paths; execution, lifecycle defaults and full EN/RU equivalence remain Unknown (`R2-ENGINE-345`, `R2-SESSION-150`) |
 | **Group machine** | `Group programme and Unit command state` | [Reference](rom2-ai/format.md) | Programme dispatch, Guard A/B, assignment, hit memory, executor, failed routes and stored fields; cadence, helper closure and observed stamp cycle remain Unknown (`R2-ENGINE-882`, `R2-ENGINE-874`) |
+| **Quest objective machine** | `Bank slots 752..767, #subobjective texts, subobj.256` | [Reference](rom2-quest/format.md) | Objective states and writers, notification arms, briefing-window rows and marks, SAV/LOAD and maps 21 and 31; check-arm meanings and sounds remain Medium (`R2-ENGINE-894`) |
 
 <a id="explicitly-out-of-scope-not-rom1-native"></a>
 

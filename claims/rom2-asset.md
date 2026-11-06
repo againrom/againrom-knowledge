@@ -3103,6 +3103,31 @@ its Medium scope. No save or runtime instance was read here.
 
 **Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 2.
 
+## Treasure and adamantine map names
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-215 | ROM2 globalmap #title21 and #title31 name maps 21 and 31 Разбойничий клад / The Brigands Camp and Адамантиновые рудники / Adamantium Mines; no RU title contains сокровищ or шахт. | High | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+
+### R2-ASSET-215
+
+Population: every `text/*.txt` member of `main.res` in each root, read through the
+R2-ENGINE-049 substring rule, with a case-folded substring census (cp1251) of the needles
+сокровищ, адамант, шахт, клад (RU) and treasure, adamant, mine (EN). Section hits are
+published per member and section in the evidence.
+
+- Titles: RU #title21 holds клад, #title31 адамант; EN #title31 holds adamant and mine. No
+  #title section holds сокровищ, шахт or treasure.
+- сокровищ (RU, 17 hits) and treasure (EN, 34) occur in missions 21, 63, 84 and 86, in
+  quest.txt `#treasureally`, `#treasureenchant`, `#treasureitem`, `#treasuremoney`,
+  `#treasurexp`, and in itemname.txt and itemserv.txt; EN also in mission 20 `#event6` and
+  globalmap `#briefing21`. Mission 21's `#subobjective1` holds the word in both roots.
+
+**Confidence.** High for the census over this population; a substring census also counts
+words that merely contain a needle (клад: 40 RU hits).
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
 ## Item-record speech projection
 
 | ID | Claim | Confidence | Status | Evidence |

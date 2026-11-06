@@ -474,7 +474,7 @@ Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evid
 | R2-ENGINE-043 | In the verified RU/EN compilers, check word 65538 initializes its map result-register slot from parameter 0 instead of creating an executable check. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-044 | ROM2 literal checks pack ordinary scalar operands densely and resolve unit/group/player references separately; unresolved literal references can omit the compiled node. | High / Medium | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-045 | Instants 35 and checks 23/24 access the scenario.dll DWORD bank; its exports have no explicit index guard, and NewGame initially clears a1024-DWORD span. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-046 | In both clients, instant 36 mutates752+n with exact mode-dependent stores and 253/254 notifications; objective rows read the resulting bits. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-046 | In both clients, instant 36 mutates752+n with exact mode-dependent stores and 253/254 notifications; objective rows read the resulting bits. | High | ✔ promoted (amended, partially retracted) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-047 | ROM2 instant 2 emits packet 0xb6; actual RU/EN receiver tables forward its event ID to UI 433, which separates ordinary events from 250/253/254/255. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-048 | The corresponding scenario.dll code clears slots 752..767 on EnterLocation; the verified LeaveLocation mission10 arm marks completion and adds location20. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-053 | ROM2 check 25 tests a terrain cell's indexed effect-layer pointer after a low-u16 X+256Y lookup; the arm has no explicit layer bound. | High / Medium | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
@@ -483,7 +483,7 @@ Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evid
 | R2-ENGINE-056 | ROM2 instant 38 makes one matching inventory extraction call per unit in the terrain-provided list, destroys a returned item and refreshes that unit. | High / Medium | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-057 | ROM2 instant 39 clears a group's forced-activity DWORD; actor-proximity marking and ordinary group/unit ticks determine its later activity. | High / Medium | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-058 | In both verified ROM2 executors, declared instant 37 takes Bad instant default, optionally sends diagnostic packet 0x91 and returns normally; no campaign map contains it. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-059 | Both ROM2 trigger runners compare map result registers with signed comparisons, short-circuit their conjunction, then set a pass latch and run actions in stored order. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-059 | Both ROM2 trigger runners compare map result registers with signed comparisons, short-circuit their conjunction, then set a pass latch and run actions in stored order. | High | ✔ promoted (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-060 | ROM2 result actions increment the session win counter or store a failure reason; the verified RU result tick converts those fields into0xb5/0xb4 packets. | High | ● active (amended, partially retracted) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 
 ### R2-ENGINE-041
@@ -542,13 +542,15 @@ The DLL exports at D2.00001/D2.00002 address DWORD baseD2.00003+4*index. GetVar 
 
 RU L2.00124 and EN L2.00452 read scalar 0=n and scalar 1=mode and use DLL slot 752+n. Mode 1 stores 1 only if old value is 0. Mode 2 does nothing if old value is exactly4; otherwise it emits event253 only when(old&2)==0 and stores 3. Mode 4 emits event254 and stores 5 without the old 4 guard. Every other mode directly stores mode. The producer arguments are null player, event ID, extra0. Mission10 action IDs 24/25/27/28 use(n,mode)=(1,1)/(1,2)/(2,1)/(2,2), targeting753/754.
 
-Objective consumers RU L2.00453 and EN L2.00454 read GetVar(752+row) for cached row indices. Zero omits the row. The native rendering tests bits 2,4,1 in that priority and chooses sprite frames 11,12,10 respectively. Notification253/254 takes separate UI 433 banner branches. The examined banner setup and objective-render routes do not establish a SetVar acknowledgement transition. The decoded SetVar-reference population has 9 sites/5 owners per client: binding,35,36, options writes 776/781 and a unit packet path at 531+unit.u16(+0x1dc). This navigational population is not an alias/indirect-writer absence proof.
+Objective consumers RU L2.00453 and EN L2.00454 read GetVar(752+row) for cached row indices. Zero omits the row. The native rendering tests bits 2,4,1 in that priority and passes mark values 11,12,10 respectively (R2-ENGINE-888, R2-ENGINE-889 for the frames drawn). Notification253/254 takes separate UI 433 branches (R2-ENGINE-891). The examined notification arms and objective-render routes do not establish a SetVar acknowledgement transition. The decoded SetVar-reference population has 9 sites/5 owners per client: binding,35,36, options writes 776/781 and a unit packet path at 531+unit.u16(+0x1dc). This navigational population is not an alias/indirect-writer absence proof.
 
 Known exact slot writers are generic35,36 and the DLL reset of 752..767 on EnterLocation. None of the four installed35 nodes targets752+n: their slots are 779/779/772/780. State 4 is not proved to mean acknowledged/completed merely because mode 2 guards it.
 
 **Confidence.** High for exact mode branches, stores, event arguments and objective bit consumers in both clients, using selected instructions rather than numeric-state names.
 
 **Unknown.** Any indirect acknowledgement writer, semantic names for states4/5, cache/text population beyond the independently traced objective reader and notification presentation timing remain unverified. The actual3 store suppresses a repeated253 while bit 2 remains set; mode 4 itself has no repeat suppression.
+
+**Amended.** The frame clause "chooses sprite frames 11,12,10" and the "banner branches" label are withdrawn ([correction](retracted.md#exp-2125-objective-mark-frames-and-notification-branches)): R2-ENGINE-889 gives the frames, R2-ENGINE-891 the 253/254 arms. R2-ENGINE-888 gives the row geometry, R2-ENGINE-890 the text cache and R2-ENGINE-896 the DLL reference census.
 
 ### R2-ENGINE-047
 
@@ -648,7 +650,7 @@ Mission10 `triggers.tsv` retains all 16 trigger rows; every stored DWORD+0xb4 is
 
 **Unknown.** General trigger validity, every malformed comparison/action ID and scheduler timing outside the selected ordinary runner remain frontier.
 
-**Amended.** The mission10 trigger7 left operand is original check ID 12 in both reproduced rows. The [correction record](retracted.md#rom2-script-base-and-trigger-corrections) preserves the former check10 statement. The signed comparison, latch and action-order contracts stand.
+**Amended.** The mission10 trigger7 left operand is original check ID 12 in both reproduced rows. The [correction record](retracted.md#rom2-script-base-and-trigger-corrections) preserves the former check10 statement. The signed comparison, latch and action-order contracts stand. R2-ENGINE-893 adds that the compiler skips a condition row with a zero check ID.
 
 ### R2-ENGINE-060
 
@@ -716,6 +718,8 @@ subobjective result covers the two installed mission 10 files only.
 **Amended.** R2-ENGINE-624, R2-ENGINE-625 and R2-ENGINE-627 name the
 failure-reason producers. R2-ENGINE-629 adds that the `reason - 2` index
 has no bound and R2-ENGINE-630 gives the failure cache of all 46 missions.
+R2-ENGINE-890 pairs subobjective row i with bank slot 752 + i and measures
+`#subobjective0` in every sectioned member.
 
 ### R2-ENGINE-050
 
@@ -22432,6 +22436,314 @@ en-string-comparison-tail.txt, en-disk-file-vtable-correct.txt,
 en-disk-file-open.txt, en-imports.txt.
 
 [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md).
+
+## Quest objective machine
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-888 | In both ROM2 clients the objective builder shows row i only when bank slot 752+i is nonzero, in cache order, as a 24x24 mark at x 48..72 beside wrapped text from x 80; the window grows with its rows and has no scroll. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-889 | ROM2 objective marks draw subobj.256 frame value - 10 for values above 10, so states with bit 2, with bit 4 but not 2, and bit 1 alone draw frames 1, 2 and 0 of the sprite's three 24x24 frames. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-890 | ROM2 mission entry, LOAD included, rebuilds the objective text cache from #subobjective0 to the first empty text, so row i pairs with slot 752+i; #subobjective0 is a line-break-only span in all 34 sectioned text members per root. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-891 | In both ROM2 clients UI 0x433 events 254, 253 and 250 play sound-list entries 0x10, 0xe and 0xe when that entry is idle; 250 also posts text 0x61 to the message line with 30000; no arm writes state or draws a banner. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-892 | ROM2 objective rows belong to the briefing window class: constructor RU R2.0034 / EN R2.0035 passes title text 0x44 and the cached briefing, vtable slot 30 builds the rows, and one raw E8 call site per root creates it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-893 | ROM2 trigger compilers skip a condition row whose left or right check ID is 0, so a trigger tests only its rows with two nonzero IDs, a skipped row's comparison code has no effect, and a trigger with none passes. | High | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-894 | ROM2 map 21 opens objective 1 on the first runner pass and completes it when Get sack (60,18) reads 0; objective 2 opens near unit 46 and completes there under two more tests; no node stores state 5 and no condition reads an objective slot. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-895 | ROM2 map 31 opens objective 1 near unit 101 and completes it there once player 4 has no units, which also ends the mission complete; objective 2 opens near unit 102 and completes through registers 76 and 75. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+| R2-ENGINE-896 | In each ROM2 scenario.dll a raw dword census finds slot 752's address only in the EnterLocation clear and none of 753..767; the bank base has 5 sites: the indexed GetVar read, the SetVar store and 3 pushes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+
+### R2-ENGINE-888
+
+RU `L2.00453` / EN `L2.00454` (398 lines each, equal after masking hex of six or more
+digits) is slot 30 of the window vtable (R2-ENGINE-892).
+
+- It calls the base builder RU `L2.05253` / EN `L2.05254`; the first row's y is 16 below
+  the value RU `L2.05255` returns.
+- Loop i = 0 .. count(cache RU `L2.05256` / EN `L2.05257`) - 1. Text i is wrapped by RU
+  `L2.01258` (font `[L2.05258]`, width w - 0x80, height 0x1e0) into a line list.
+- v = GetVar(0x2f0 + i) through the client cell RU `[L2.00449]` / EN `[L2.00451]`. v = 0
+  continues the loop without advancing y.
+- v & 2: style global RU `L2.05259` / EN `L2.05260` and mark value 0xb; else v & 4: RU
+  `L2.05261` / EN `L2.05262` and 0xc; else v & 1: RU `L2.05263` / EN `L2.05264` and 0xa;
+  else no mark, and the style local keeps the previous row's value.
+- Each mark is a new 0x24-byte sprite object loading `graphics\interface\subobj.256` (RU
+  `L2.04009`), set by RU `L2.05265(1, 1, 0)` and wrapped by the mark control RU `L2.05266`
+  / EN `L2.05267` with id y + 1, rectangle (48, y - 3, 72, y + 21) and the mark value.
+- The text control RU `L2.05268` (0x98 bytes) has id y, rectangle (0x50, y, w - 0x30,
+  y + lines x line height), the text, the font and the style; it is added before the mark.
+- y and the window bottom advance by lines x line height + 10. After the loop the bottom
+  grows by 0x28, RU `L2.03071` places the window (R2-ENGINE-608) and one button 0x445,
+  96x24, is centred near the bottom, labelled from text table `L2.01500`.
+- No scroll control is created. With no shown row the window holds the base builder's
+  controls and the button.
+
+**Confidence.** High for the loop, the tests and their order, the constants and the
+controls created, in both roots. Medium for the line height and the wrap (RU `L2.01258`
+and `L2.05269` bodies unread) and for what the base builder draws (R2-ENGINE-892).
+
+**Unknown.** The colours of the three style globals (their initialisers are unread). A run
+settles it: load game0010 (slot 754 = 3) and open the objectives window.
+
+**Amends.** R2-ENGINE-046's objective-consumer clause: the bits select mark values and text
+styles, and the geometry is above.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-889
+
+The mark constructor RU `L2.05266` / EN `L2.05267` stores vtable RU `L2.05270` / EN
+`L2.05271`, the sprite at +0x5c and the value at +0x60. Vtable slot 11, RU `L2.05272` / EN
+`L2.05273` (158 lines each, equal after masking), returns at once without a sprite, reads
+the control's origin and then:
+
+- value 1 and value 2 take other paths (sprite methods +0x30, +0x24, +0x20 and +0x38;
+  value 2 first calls `L2.05274` over (x + 8, y + 7, x + 0x50, y + 0x65)). The objective
+  builder never passes 1 or 2 (R2-ENGINE-888).
+- a value above 10 calls sprite method +0x18 with (x, y, value - 10, 0, 0); any other value
+  with (x, y, 0, 0, 0).
+
+So 0xb draws frame 1, 0xc frame 2 and 0xa frame 0. `graphics.res` member
+`interface/subobj.256` is 2379 bytes in both roots, trailer 0x80000003: three frames of
+24x24 (438, 439 and 438 data bytes), with equal frame hashes in EN and RU.
+
+**Confidence.** High for the selection arithmetic in both roots and the frame count. Medium
+that sprite method +0x18 draws the frame its third argument names (its body is unread), and
+for the depiction: by palette-index pattern frame 0 is an empty box, frame 1 a check stroke
+and frame 2 a cross over the box.
+
+**Unknown.** The +0x18 body and the colours. A run settles both: load game0010 (slot 754 =
+3) and game0009 (754 = 1), open the objectives window and record the row 2 mark.
+
+**Amends.** R2-ENGINE-046: its "sprite frames 11,12,10" clause is withdrawn
+([correction](retracted.md#exp-2125-objective-mark-frames-and-notification-branches)).
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-890
+
+RU `L2.05275..L2.05276` inside `R2.0023` (EN site `L2.05277` inside `R2.0026`) empties
+the cache RU `L2.05256` / EN `L2.05257`, then for i = 0, 1, ... calls the reader RU
+`R2.0030` / EN `R2.0031` (R2-ENGINE-049, key `#subobjective%d`); an empty result tested
+by `L2.05278` ends the loop, otherwise the text is added. The loop runs before the argument
+test that gates the autosave, so LOAD's call with argument 1 rebuilds the cache too. A raw
+E8 census finds one call of the reader per root. The cache address has 7 raw-dword
+references per root: 2 in the fill, 3 in the builder and 2 in static construction and
+exit (`L2.05279`, `L2.05280`).
+
+Texts (`main.res`, every `text/*.txt` member): 34 members per root carry
+`#subobjective<n>` tags, and every `#subobjective0` span, from the tag to the next tag, is
+18 bytes: the 14-byte key and line breaks. The reader starts at key + 2, so the cached row
+0 text is line breaks only. Maps 21 and 31 hold `#subobjective0..2` in both roots. EN
+`mission31.txt` repeats three tags at offsets 844, 862 and 922 whose probe key ends after
+`#subobje` (a byte outside the tag alphabet follows); that the native key
+`#subobjective<n>` does not match them is inferred. A row's text is fixed; its style follows the
+state (R2-ENGINE-888).
+
+**Confidence.** High for the loop, its position before the autosave test, the reference
+census (a raw byte scan) and the spans in both roots. Medium that row 0 is cached: the
+emptiness test `L2.05278` is unread. Medium that no other code fills the cache: indirect
+references are not scanned. Medium for the EN `mission31.txt` second block (key byte not
+recorded in the evidence).
+
+**Unknown.** `L2.05278`. A run settles it: in mission 21, write 1 to slot 752 and open the
+window; a blank row with a frame-0 mark above row 1 shows that row 0 is cached.
+
+**Amends.** R2-ENGINE-049's subobjective cache clause: row index equals slot offset, and
+the row 0 measurement covers all sectioned members.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-891
+
+RU `L2.05281..L2.05282`, EN `L2.00133..L2.05283`. The selector is stored at RU +0x454 / EN
++0x43c (R2-ENGINE-047).
+
+- 255 calls RU `L2.00465` / EN `L2.00470` with (0x431, argument, 0).
+- 254 takes entry 0x10 of the sound list RU `L2.05284` / EN `L2.02160` (indexer RU
+  `L2.05285` / EN `L2.02161`) and calls the status helper RU `L2.05286` / EN `L2.00976`; only
+  when it returns 0 does it call RU `L2.05287` / EN `L2.02166` with (volume RU `[L2.05288]`
+  / EN `[L2.02251]`, 0, 0, 0xdc, 0).
+- 253 does the same with entry 0xe.
+- 250 does the same with entry 0xe, then posts text-table RU `L2.01550` / EN `L2.00859` id
+  0x61 with 30000 to the message-line object at `[this + 0xd0] + 0xa28`.
+- Each arm then leaves the handler. None calls SetVar, creates a window or stores a field
+  other than the selector.
+
+Instant 36 raises 253 only when bit 2 was clear and raises 254 on every mode 4
+(R2-ENGINE-046), so a repeated completion is silent and a repeated mode 4 plays again when
+the entry is idle.
+
+**Confidence.** High for the arms in both roots. Medium that the status helper reports a
+playing entry (it calls the buffer's vtable +0x24; that body is unread), for which sounds
+entries 0xe and 0x10 are (the list loader is unread) and for 30000 being milliseconds.
+
+**Unknown.** The sounds. A run settles it: load game0009 (mission 20, slot 754 = 1),
+complete that objective and record the sound; game0010 holds the completed state.
+
+**Amends.** R2-ENGINE-046's "banner branches" label is withdrawn
+([correction](retracted.md#exp-2125-objective-mark-frames-and-notification-branches));
+R2-ENGINE-047's UI 433 clause gains the 250, 253 and 254 bodies.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-892
+
+The constructor calls the dialog base RU `L2.05289` with text-table `L2.01500` id 0x44, the
+string RU `L2.05290` (the cached briefing, R2-ENGINE-049) and its five arguments, then
+stores vtable RU `L2.05291` / EN `L2.05292`. Slot 30 (RU cell `L2.05293`, EN `L2.05294`)
+is the row builder (R2-ENGINE-888). Each vtable address has 2 raw-dword references per
+root.
+
+The one RU call site `L2.05295` sits in a UI arm that requires `[this + 0x41c] == 1`. When
++0x3f4 and +0x3bc are nonzero and +0x3c8 is 3 it creates a 0x7c-byte object through
+`L2.05296` instead; otherwise it creates the 0x78-byte window with (1, 0x14, 0, 0x26c,
+0x1f4) and passes it to `L2.03081`. The EN call site is `L2.05297` (census only).
+R2-ENGINE-049 names this class the briefing control and its UI entry 0x434. The window's
+button 0x445 closes it (R2-ENGINE-608).
+
+The base builder RU `L2.05253` (also called from `L2.05298`) was listed whole (1000-byte
+cap) and read by filter: it creates a text control at (0x28, 0x20), frames and up to six
+buttons 0x445..0x44b chosen by style fields of 0x1000, 0x2000 and 5.
+
+**Confidence.** High for the constructor, the vtable slot and the RU arm's conditions.
+Medium for one creator per root (a raw E8 scan; E9, indirect and data references are not
+scanned) and for what the base builder shows above the rows.
+
+**Unknown.** Which player action raises the arm, and what text sits above the rows. A run
+settles both: in game0010 open the objectives window from the in-mission menu and record
+it.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-893
+
+EN `L2.04240..L2.05299` (RU `L2.05300..`, equal after masking) loops i = 0..2 over trigger
++0x80 + 8i (left ID) and +0x84 + 8i (right ID). A zero on either side jumps to the loop step
+`L2.05299` (`jmp L2.05301`). Otherwise each ID maps through `L2.04242` (find or insert,
+R2-SESSION-313) to its result slot, and the pair is stored with comparison +0xa8 + 4i and the
+trigger flag +0xb4. The runner RU `L2.00516` / EN `L2.00517` starts each trigger with pass =
+1 and clears it on a failing compiled condition (R2-ENGINE-059), so a trigger without a
+compiled condition passes whenever its latch does not skip it.
+
+Maps 21 and 31 (both roots equal): 45 and 51 condition rows, of which 26 and 34 have two
+nonzero IDs; every nonzero ID a trigger names exists in its map's check list.
+
+**Amends.** R2-ENGINE-059: the conjunction covers compiled rows only.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-894
+
+`scenario.res:21.alm`, EN = RU in node headers, parameters and triggers. Objective n is
+slot 752 + n and text `#subobjective<n>` (R2-ENGINE-890). Notation: cN is check ID N, AN
+action ID N; check and instant names are catalog labels (R2-ENGINE-036); 10001 is a unit
+reference whose resolution is unread. Comparisons: R2-ENGINE-059; zero rows: R2-ENGINE-893.
+
+Checks: c1, c2, c14 op 6 (10001 to unit 46, 58, 53); c3 op 9 (unit 44); c4 op 14 (60, 18);
+c5 op 15 (player 1, 10, 11); c9 op 15 (player 4, 20, 20); c10 op 7 (10001, 20, 20); c12
+op 7 (unit 39, 61, 18); c13, c18, c20, c21 op 10 (players 2:1, 5:1, 5:1, 4:1); c15 op 5
+(unit 58); c16 op 16 (10001, item 59, 10, 11); c17 op 17 (10001, item 59); c8, c19, c22 op
+19 (registers 70, 71, 72); constants c6 = 4, c7 = 0, c11 = 10, c23 = 2.
+
+Objective actions: A18 (1, 1), A19 (1, 2), A20 (2, 1), A21 (2, 2) (instant 36 (n, mode),
+R2-ENGINE-046). Other actions: A6..A10, A14, A22..A24 instant 2 events 1..9; A15 instant
+4; A17, A25, A27 instant 5 reasons 5, 6, 7; A11, A26, A28 instant 8 on 70, 71, 72; A3 to
+A5, A13 instant 10; A1, A12, A16 instant 6; A2 word 65538.
+
+Triggers (flag 1 = once unless noted):
+- T0: c7 == c7: A6, A16, A18 (objective 1 state 1).
+- T1: c1 <= c6: A7, A20 (objective 2 state 1). T2: c2 <= c6: A8.
+- T3: c12 > c7: A11. T4: c1 <= c6, c4 != c7, c8 != c7: A10, A12, A11, A21 (objective 2
+  state 3, event 253).
+- T5: c1 <= c6, c4 == c7, c8 == c7: A9, A13, A3, A26. T6: c10 <= c6, c4 == c7, c9 >= c11:
+  A14, A3, A26.
+- T7: c16 <= c6, c4 == c7: A15. T11: c17 == c7, c4 == c7, c5 <= c6: A15.
+- T8: c13 != c7: A17. T9: c4 == c7: A19 (objective 1 state 3, event 253). T10: c15 == c7:
+  A25.
+- T12 (flag 0): c18 != c7, c19 == c7: A28. T14 (flag 0): c21 != c7, c19 == c7: A28. T13:
+  c22 >= c23: A27.
+
+No node is instant 36 mode 4 and no check is op 24, so no objective takes state 5 and no
+condition reads an objective slot. The mission ends complete through A15 (T7, T11) and
+failed through A17, A25, A27 (T8, T10, T13).
+
+**Confidence.** High for the stored tables and the trigger, condition and action wiring in
+both roots. Medium for each condition's meaning: the check arms (RU `L2.05302..L2.05303`,
+op 6 `L2.05304`, 14 `L2.05305`, 19 `L2.05303`) and the action arms other than 36 are
+unread, and the names are catalog labels.
+
+**Unknown.** What c4 and c12 measure, and whether T4 can pass after T9 (c4 != 0 against c4
+== 0). A run settles it: play mission 21 from its start with a watch on slots 753 and 754
+and registers 70..72, and record the pass of T4 and T9.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-895
+
+`scenario.res:31.alm`, EN = RU in node headers, parameters and triggers. Notation and
+sources as R2-ENGINE-894. Most triggers have flag 0 and are guarded by registers that
+their own actions increment (instant 8 read as an increment by catalog label,
+R2-ENGINE-036).
+
+Checks: c1, c3, c5, c7 op 6 (10001 to unit 100, 101, 105, 102); c18, c26 op 8 (player 4,
+5); c20, c29 op 5 (unit 101), c30 op 5 (unit 165); c22, c24 op 10 (players 6:1, 5:1); c11,
+c12, c13, c14, c17, c19, c21, c27 op 19 (registers 70..77 in that order); constants c9 = 0,
+c10 = 4, c23 = 2, c28 = 1.
+
+Objective actions: A40 (1, 1), A41 (1, 2), A43 (2, 1), A42 (2, 2). Others: A2, A4, A5, A7,
+A9, A11, A19, A26 instant 2 events 2, 1, 4, 6, 8, 10, 12, 14; A46 instant 2 event 250
+(R2-ENGINE-891); A21 instant 4; A22, A28, A29, A35 instant 5 reasons 5, 8, 6, 7; A13..A18,
+A24, A38 instant 8 on 70..77; A23 instant 23 (player 1, 10000); A25 instant 22; A36
+instant 18 (101, 165); A37 instant 16 (165); A32, A33, A44, A47 instant 6; A45 word 65538.
+
+Triggers (flag 0 unless noted):
+- T0 (flag 1): c9 == c9: A37, A4.
+- T1: c1 <= c10, c11 == c9, c12 == c9: A2, A13.
+- T2: c3 <= c10, c12 == c9, c18 != c9: A5, A14, A40 (objective 1 state 1).
+- T3: c7 <= c10, c14 == c9, c18 != c9: A9, A16, A43 (objective 2 state 1).
+- T4: c5 <= c10, c13 == c9, c18 != c9: A7, A15.
+- T5: c3 <= c10, c17 == c9, c18 == c9: A19, A17, A46, A41 (objective 1 state 3, events 250
+  and 253).
+- T6: c1 <= c10, c19 == c9, c21 != c9: A11, A18, A23, A32.
+- T7: c20 == c9: no action. T8: c7 <= c10, c21 == c9, c18 == c9: A26, A24, A33, A44.
+- T9: c22 != c9: A28. T10: c26 <= c23: A29. T11: c24 != c9: A35.
+- T12: c18 == c9, c27 == c9: A36, A38, A47.
+- T13 (flag 1): c19 == c28: A42 (objective 2 state 3, event 253), A18.
+- T14: c29 == c9, c27 == c9: A22. T15: c30 == c9, c27 > c9: A22.
+- T16: c17 > c9: A21.
+
+T16 tests register 74, which A17 sets in T5, so the mission ends complete on objective 1's
+completion; objective 2 may still be open or absent then. No instant 36 mode 4 and no op 24
+check occur.
+
+**Confidence.** High for the tables and the wiring in both roots. Medium for the condition
+meanings (unread check arms, catalog labels, instant 8 read as an increment) and for T16 passing in the same runner pass as
+T5 (the runner's trigger order is the compiled list order).
+
+**Unknown.** The check arm bodies and the runner order. A run settles it: play mission 31
+with a watch on slots 753, 754 and registers 70..77 and record the tick of T5, T16 and
+the mission end.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+### R2-ENGINE-896
+
+Values D2.00003 (bank base), D2.00008..D2.00305 (slots 752..767), all sections of
+each DLL image: base at `D2.00306` (read `[eax*4 + base]`), `D2.00226` (store) and pushes
+at `D2.00223`, `D2.00225`, `D2.00224`; slot 752 at `D2.00227` (`mov [edx*4 +
+D2.00008], 0`, the EnterLocation clear of R2-ENGINE-046); no hit for 753..767. EN and RU
+equal.
+
+In the client, the GetVar cell RU `L2.00449` / EN `L2.00451` has 26 raw-dword hits and the
+EnterLocation cell RU `L2.05306` / EN `L2.01972` 4 (one store, three calls).
+
+**Confidence.** High for the census (a raw byte scan of every section). Medium for writer
+completeness: the 3 pushes pass the base to bodies not read here (R2-ENGINE-045 reads the
+NewGame clear), and computed indices reach any slot.
+
+**Amends.** R2-ENGINE-046's Unknown on an indirect acknowledgement writer: none in the
+direct references of `scenario.dll`.
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
 
 ## Route failure and the unreachable target
 

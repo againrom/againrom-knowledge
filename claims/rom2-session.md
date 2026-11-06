@@ -5492,6 +5492,32 @@ meanings of +4 and +8 are R2-ENGINE-857's reading.
 
 **Evidence.** [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md)
 
+## Objective slots in original saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-348 | In the 16 original-made ROM2 saves of 2026-10-30 bank slots 752..767 are 0 except 754: 1 in four mission-10 and one mission-20 and mission-30 save each, 3 in game0010 (mission 20); towns and game9999 hold 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md) |
+
+### R2-SESSION-348
+
+Folders `rom2-gog-original` (9 files) and `rom2-gog-original-2` (7), each file matched to
+its MANIFEST SHA256 and parsed by the EXP-2023 envelope reader. Slot 754 = 1 in game0001,
+0004, 0005, 0006 (current record 1/10), game0009 (1/20) and game0012 (1/30); 754 = 3 in
+game0010 (1/20). Every other file, the town saves (2/1, 2/2) and both game9999 (1/10,
+1/30), holds 0 in 752..767. Slot 768 holds 10, 20 or 30 as the table shows.
+
+LOAD restores the bank raw (R2-SESSION-031) and rebuilds the text cache (R2-ENGINE-890).
+The client EnterLocation cell has one store and three call sites (R2-ENGINE-896); none lies
+in the mission entry or the LOAD route read here, so LOAD keeps 752..767.
+
+**Confidence.** High for the values. Medium that LOAD never clears the slots: the three
+call sites' containing routines are unread.
+
+**Unknown.** Their callers. A run settles it: load game0010 and confirm slot 754 = 3 after
+the load and in the window (frame 1 on row 2).
+
+**Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
 ## Route-failure fields in original saves
 
 | ID | Claim | Confidence | Status | Evidence |

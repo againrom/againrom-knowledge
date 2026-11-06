@@ -65,7 +65,7 @@ The meanings are scoped to the verified RU/EN executor paths.
 | Instant 35 | scalar 0=index, scalar 1=value | SetVar(index,value) | R2-ENGINE-045 |
 | Check 23 | scalar 0=index | GetVar(index) into map result register | R2-ENGINE-045 |
 | Check 24 | scalar 0=n | GetVar(752+n) into map result register | R2-ENGINE-045 |
-| Instant 36 | scalar 0=n, scalar 1=mode | Mode-dependent stores to 752+n and notifications 253/254 | R2-ENGINE-046 |
+| Instant 36 | scalar 0=n, scalar 1=mode | Mode-dependent stores to 752+n and notifications 253/254 | R2-ENGINE-046 (amended), R2-ENGINE-891 |
 | Instant 37 | scalars 0..7 from X,Y,int×6 | Bad instant default, optional diagnostic packet 0x91, ordinary cleanup/return | R2-ENGINE-058 |
 | Check 25 | scalars 0=X,1=Y,2=layer | Nonzero terrain cell effect-layer pointer | R2-ENGINE-053 |
 | Check 26 | resolved unit, scalar 0=effectID | Nonzero active effect bit 1<<(effectID&31) | R2-ENGINE-054 |
@@ -76,8 +76,10 @@ The meanings are scoped to the verified RU/EN executor paths.
 Instant 36 mode 1 stores 1 only from old 0. Mode 2 leaves old 4 unchanged;
 otherwise it emits 253 only if old bit 2 is clear, then stores 3. Mode 4 always
 emits 254 and stores 5. Other modes store their value directly. Objective rows
-read752+row, omit zero values, and render bits 2/4/1 in that priority using
-frames 11/12/10. Generic35/36 and EnterLocation reset are known writers;
+read752+row, omit zero values, and test bits 2/4/1 in that priority for
+mark values 11/12/10, which draw subobj.256 frames 1/2/0 (R2-ENGINE-889; the
+former frame clause of R2-ENGINE-046 is partially retracted). Generic35/36 and
+EnterLocation reset are known writers;
 an acknowledgement transition to 4 and semantic names for states4/5 remain
 Unknown. — R2-ENGINE-046
 
