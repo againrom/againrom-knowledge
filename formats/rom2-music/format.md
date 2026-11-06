@@ -263,6 +263,24 @@ fallback NPC and server template reductions. They do not establish the
 word of every creature or hire; RU server-template event parity is open.
 — R2-ENGINE-863, R2-ENGINE-864
 
+A sound object returns without playing when no sound
+device is open, its file open fails, its load is incomplete, it has no
+buffers or every buffer is playing; a failed load leaves the object unloaded,
+so each play retries it. A gesture whose file is absent is therefore silent
+in both roots (High for the exits; that nothing is logged is Medium, since the
+callees are unread; Medium for failures inside the WAV parse). — R2-ENGINE-913
+
+Composed (Medium): hires carry their ID 1..7 as the voice word. EN hires 1..6 play
+only easy, hard and dead, and the EN catapult plays no voice. RU hires 1..6
+also play select, attack, move, swarm, retreat and defend, never pickup; the
+RU catapult plays only its generic voice's easy, hard and dead. The weakest
+links are the hire creator and the catapult's generic voice, which bears on the
+voice name only, not on the counts. The file counts come from the complete
+`characters/` key lists of `sfx.res` and the `speech.res` statement; other
+archives and the mounted lookup were not searched, and no `.wav` lies loose in
+the install trees (not the save folders). The EN "none" is Medium for that
+reason. Hires 8..20 are Unknown. — R2-ENGINE-914
+
 ## Shop speech
 
 The known EN/RU speech grid has page getter 4, so only the middle shared

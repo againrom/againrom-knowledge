@@ -2095,7 +2095,7 @@ and invalid-input behavior, transport/refill semantics and original LOAD.
 | R2-ENGINE-207 | The selected RU archive object reference is a u16 tag with u32 escape: null, earlier object, earlier class or new class with schema and name; class and object share one index counter before the payload call. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 | R2-ENGINE-208 | The RU Human class record chains to Humanoid and Unit; Human adds no stream bytes, and Humanoid writes the Unit programme, 24 raw bytes and twelve Item references. | High | ✔ promoted (amended) | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 | R2-ENGINE-209 | The RU Unit serializer writes a 38-byte base, counted references, three counted word lists, six raw blocks of 498 bytes, scalars, three references, a name and two gated nested payloads in one fixed order. | High / Medium | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
-| R2-ENGINE-210 | The RU Item serializer writes the shared 38-byte base, counted references and eight scalars; Weapon adds 24 and 22 raw bytes, a byte and a reference, and Armor adds 22 raw bytes and a byte. | High | ✔ promoted | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
+| R2-ENGINE-210 | The RU Item serializer writes the shared 38-byte base, counted references and eight scalars; Weapon adds 24 and 22 raw bytes, a byte and a reference, and Armor adds 22 raw bytes and a byte. | High | ✔ promoted (amended, branch candidate) | [EXP-2026](../experiments/EXP-2026-rom2-member-programme/) |
 
 ### R2-ENGINE-207
 
@@ -2241,8 +2241,10 @@ constructors, vtable cells and
 serializer CFGs were read completely. The saves fit 103-byte Weapon and
 77-byte Armor payloads.
 
-**Unknown.** Item field meanings; other Item subclasses; the L2.01180
-class.
+**Unknown.** Item field meanings; other Item subclasses.
+
+**Amended.** R2-ENGINE-904 names L2.01180: it is the Spell class record, size
+0x14, schema 1, factory L2.05307.
 
 
 ## Inn option contract and town 2 TALK
@@ -6771,7 +6773,7 @@ EN inventory input L2.01652 supplies either one or the displayed quantity under 
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-378 | The two installed ROM2 client Data.bin payloads contain 33 Humans and 22 Units records in the measured campaign-key ranges, covering internal template families for hire IDs 1..7 and controlled identities 21..23. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-ENGINE-378 | The two installed ROM2 client Data.bin payloads contain 33 Humans and 22 Units records in the measured campaign-key ranges, covering internal template families for hire IDs 1..7 and controlled identities 21..23. | Medium | ● active (branch candidate, amended) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-379 | The selected ROM2 mission-ID40 departure and EN location-leave consumer form a conditional request for controlled identity23; an existing owner-list identity23 bypasses new construction. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/), [EXP-2096](../experiments/EXP-2096-rom2-member-23/) |
 | R2-ENGINE-380 | Selected ROM2 departure and TALK arms enable hire IDs1..7 through bank availability/town gates; NPC22/topic30 TALK enables hireID2 and builds no actor; the inn entry that offers it builds controlled identity22 (R2-ENGINE-633). | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 | R2-ENGINE-381 | The reached EN mission-entry loop selects a subset of 20 hire IDs from nonzero selection and availability; its paired EN/RU creator writes each input identity and has no additional numeric list cap in the read body. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
@@ -6788,6 +6790,10 @@ The Humans transfer/transformation is separately bounded by R2-ENGINE-072 and R2
 **Confidence.** Medium for the catalog-to-producer association. The two equal payloads are one data basis, not independent runtime witnesses. The instrument preserves parameter coordinates rather than assigning all current actor statistics from titles.
 
 **Unknown.** Displayed character names, server/loose-table overrides, constructor acceptance, complete live statistics and templates outside these two selected client collections. A closed native table-load/lookup join and an entry save would settle the association.
+
+**Amended.** R2-ENGINE-915 gives the displayed name of a hire with an empty
+server name: `npcnames.txt` line ID - 1, `Mercenary` in EN, `Наемник` in RU
+except `Катапульта` for ID 7 (Medium; IDs 1..7).
 
 ### R2-ENGINE-379
 
@@ -13104,7 +13110,7 @@ committed output.
 | R2-ENGINE-578 | The first town-1 inn patrons' NPC words 207, 2108 and 517 each equal the serverID of one installed Humans row, NPC07_2, 2U_PeasantMale and M141_MageTooth (EN = RU); the absence of other rows for them is Medium. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-579 | R2-ENGINE-290's maxima on those rows, with the five school skills' T(s) as experience, give HEALTH 156, 55, 158 and MANA 0, 0, 604: every inn card value at the first visit, with current equal to maximum. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-580 | The ROM2 sheet draws main.txt 190 (spellcaster) when actor flags +0x1b8 bit 1 is clear, dword +0x1c is nonzero and the grade is 7; at the first inn visit only the mage's card meets it. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
-| R2-ENGINE-581 | The ROM2 sheet heading is actor strings +0xec/+0xf8 when the test L2.02949 on +0xec is nonzero; else main.txt 84 Mercenary or 83 Enemy (flags 0x11), then unitname.txt line +0x24 (15 Crossbowman, 24 Mage). | High / Medium / Unknown | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-581 | The ROM2 sheet heading is actor strings +0xec/+0xf8 when the test L2.02949 on +0xec is nonzero; else main.txt 84 Mercenary or 83 Enemy (flags 0x11), then unitname.txt line +0x24 (15 Crossbowman, 24 Mage). | High / Medium / Unknown | ● active (amended) | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-582 | A ROM2 dialogue page with a portrait passes an NPC number to face builder L2.02950, which resolves the actor and loads the paperdoll slot +0x88 for flags 0x11, else graphics\infowindow\<name><+0x28>.bmp. | High / Medium / Unknown | ● active (amended) | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/), [EXP-2094](../experiments/EXP-2094-rom2-druids-state/) |
 | R2-ENGINE-583 | The town-1 gate refusal (plagatguard, header npc=97) gets the fallback actor's face if no live unit carries 97: flags 0x56 and +0x28 = 17 build the name equipment\fmage\17.256, byte-equal to mfighter\14.256. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-584 | Of the six ROM2 bodies read in both roots, four are equal after address masking; the left painter differs in one application offset and the dialogue page in two child IDs; town text sections and Humans census rows are equal by value. | High | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
@@ -13281,6 +13287,13 @@ its RU text.
 
 **Unknown.** The bodies of `L2.02949` and `L2.02956`; the writer of +0xec
 and +0xf8 for a non-hero unit.
+
+**Amended.** R2-ENGINE-911 reads `L2.02949` (RU `L2.05308`) as strlen, so the
+first arm draws a non-empty +0xec. R2-ENGINE-908 and R2-ENGINE-909 write +0xec
+and +0xf8 from the unit message (the packet name, else `npcnames.txt` line
++0x1dc - 1) and R2-ENGINE-910 reads the EN server side. R2-ENGINE-912 gives the
+peasant patron's +0xec as line 2107, EN `Peasant`, RU `Крестьянин` (Medium).
+`L2.02956` and the RU loader body stay unread.
 
 **Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
 
@@ -17380,6 +17393,12 @@ whether a single gesture whose file is absent plays anything (`L2.00984` and
 `L2.03657` for the normalised name in archive directory `L2.04830` and returns
 1 only when an entry is found; the disk branch of `L2.03657` and the case map
 `L2.04824` stay unread.
+
+**Amended.** R2-ENGINE-913 reads `L2.00984` and `L2.02166` (RU `L2.05309`,
+`L2.05287`): a sound object whose file open fails plays nothing and logs
+nothing, so a single gesture with no file is silent. R2-ENGINE-914 composes
+the hires: IDs 1..6 carry the hire voices and ID 7 a generic voice (Medium).
+Three saved Humans carry word 22 (R2-SESSION-352).
 
 **Evidence.** [EXP-2092](../experiments/EXP-2092-rom2-unit-voices/RESULTS.md), questions 2 and 3.
 
@@ -22125,7 +22144,7 @@ box and no walk.
 | R2-ENGINE-861 | EN/RU shop speech dispatch uses the page-4 receiver at the middle shared release call; read EN stock and page-2 grids use other +0xa4 methods; full event admission remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
 | R2-ENGINE-862 | EN/RU shop speech chooses the first recognized effect tag, else nonzero last tag-42 value, else item kind/subtype and part 1..3; its small-positive draw uses floor(r*N/32767) modulo N. | High / Medium | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
 | R2-ENGINE-863 | EN/RU state-tail reads place the RU +0x3f4 test on text-0x44 insertion; EN state packet types encode mask width, while selected EN 0x73 senders follow +0x94 subtraction; complete game events remain open. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
-| R2-ENGINE-864 | Selected EN unit voice-word writes include zero, copy, packet/server transfer, fallback NPC and server template reductions; RU selected copies agree locally, while every unit-kind value remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
+| R2-ENGINE-864 | Selected EN unit voice-word writes include zero, copy, packet/server transfer, fallback NPC and server template reductions; RU selected copies agree locally, while every unit-kind value remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
 | R2-ENGINE-865 | EN/RU dialogue opening calls the real +0x80 page method from counter 0; NPC-21 lookup has a fallback, whose read EN flags 0x56 select speaker letter s; living-hero identity remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
 | R2-ENGINE-866 | EN/RU sound load/play use an object pointer cleared on the listed startup failures and release; the EN factory thunk reaches DSOUND.dll ordinal 1; complete sound-device lifetime remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
 | R2-ENGINE-867 | EN/RU picker index can equal count at rand15=32767; read grow bodies request no extra logical sentinel element, but no initialized sentinel is established (Medium); data[count] remains Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2121](../experiments/EXP-2121-rom2-voices/RESULTS.md) |
@@ -22255,6 +22274,10 @@ references are not instruction addresses. They add no writer evidence.
 Medium for complete writer/type/event attribution. Unknown for the
 voice word of every creature/hire. R2-ENGINE-718 maps a word already
 present; it does not prove which writer supplied it.
+
+**Amended.** R2-ENGINE-914 narrows the hire voice words: a hire carries its ID
+1..7 (R2-ENGINE-381, Medium; ID 1 is the only one witnessed, 2..7 rest on
+R2-ENGINE-381), and two original saves store a word-1 hire (R2-SESSION-352). Creature words stay Unknown.
 
 **Evidence.** RESULTS question 2; both voice-id-writers and
 server-npc-writers files, en-voice-id-default.txt,
@@ -22744,6 +22767,485 @@ NewGame clear), and computed indices reach any slot.
 direct references of `scenario.dll`.
 
 **Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
+
+## Weapon Spell, book and the mage bit across LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-900 | ROM2 unit predicates: EN L2.01136 / RU L2.00044 return byte +0x4c & 4 (the mage bit), EN L2.05310 / RU L2.01517 return 1 when it is clear, EN L2.05311 / RU L2.02338 return weapon Spell (EN +0x84, RU +0x88) nonzero. | High | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-901 | In ROM2 EN and RU actor state 3 a unit with bit 4 and a weapon Spell sets +0x64, +0x68 and state 0xd; without bit 4 only the strike casts the weapon Spell, after a blow with damage above 0 to a living target or for Spell id 2. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-902 | ROM2 EN attack-order routine L2.05312..L2.05313 calls book choice L2.04141 (computer owner) or L2.04143 (player) only for a mage, else sets cmd +8 = 5; idle support L2.04984 calls L2.05314 or L2.05315 only for a mage. | High / Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-903 | ROM2 EN cast L2.03854 charges mana only to a mage with +0x68 = 0, returns 1 for a non-mage whose weapon is +0x68 before its Spell +4 test, else 0 if +4 = 0; book order L2.04338 and mask update L2.04298: no bit 4 test (L2.03061 unread). | High / Unknown | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-904 | ROM2 class record EN L2.05316 / RU L2.01180, which the Weapon Spell reference loads (EN L2.05317), is Spell: size 0x14, schema 1, factory EN L2.05318 / RU L2.05307, base EN L2.05319 / RU L2.05320. | High | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-905 | An EN linear-sweep census of ROM2 byte writes to +0x4c finds 7 bit-4 setters in 6 routines: R2.0086 (knownSpells), L2.05321, L2.00201 (no book only), R2.0088, L2.01818, L2.01385 (+0x9c > 0); none in Unit LOAD (a helper store, unseen). | High / Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-906 | In an EN census of 88 ROM2 +0x84 store candidates, the classified Weapon writers are constructors, destructor, L2.05322, copy constructor, L2.05323 and L2.05324; none is in Weapon or Unit LOAD, which stores via L2.05317 (unseen). | High / Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-907 | Static EN composition (RU not censused): after LOAD of game1200.sav the 3 ROM2 necromancers keep Drain Life and books, but +0x4c = 2 (no bit 4) bars state 0xd and book choices; only the strike reaches the weapon Spell, its cast unread. | Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+
+### R2-ENGINE-900
+
+Bodies read in both roots (`out/code-en/listings/en-L2.01136-mage-predicate.txt`,
+`en-L2.05310-not-mage.txt`, `en-L2.05311-cast-object.txt`; `out/code-ru/listings/ru-L2.00044-mage-predicate.txt`,
+`ru-L2.01517-not-mage.txt`, `ru-L2.02338-cast-object.txt`):
+
+- EN `L2.01136` and RU `L2.00044` load byte +0x4c of `ecx`, AND it with 4 and return it. The RU
+  predicate is the mage bit of R2-ENGINE-018.
+- EN `L2.05310` and RU `L2.01517` load the same byte, AND it with 4, then `neg`, `sbb`, `inc`: 1
+  when the bit is clear, 0 when set.
+- EN `L2.05311` and RU `L2.02338` return 1 when the weapon's dword +0x84 (EN) or +0x88 (RU) is
+  nonzero. That dword is the Weapon's Spell reference, the reference LOAD reads (R2-ENGINE-904;
+  RU +0x88 by R2-ENGINE-210).
+
+In the EN E8 census (`out/code-en/calls.tsv`) `L2.01136` has 37 raw E8 call candidates, `L2.05310` 8 and `L2.05311` 3 (kind "raw E8 candidate; boundary unverified"). The callers read are those of R2-ENGINE-901, R2-ENGINE-902 and R2-ENGINE-903.
+
+**Confidence.** High: each body is a few instructions, read whole, and both roots agree.
+
+**Unknown.** The other callers of each predicate, among them the item-modifier routine EN
+`L2.04138` (14 calls at `L2.05325`..`L2.05326`) and the vtable routines `L2.05327`, `L2.05328`,
+`L2.05329`.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-901
+
+Actor step, state 3 (EXP-2069 `evidence/measured/listings/en-actor-step.txt` and
+`ru-actor-step.txt`): when +0x54 is 3 and weapon +0x74 is nonzero, `L2.05311` (RU `L2.02338`)
+holds and the mage predicate `L2.01136` (RU `L2.00044`) holds, it stores +0x64 = the weapon Spell,
++0x68 = the weapon and +0x54 = 0xd (EN `L2.05330`..`L2.05331`, again at `L2.05332`/`L2.05333`; RU
+`L2.05334`..`L2.05335`, again at `L2.05336`/`L2.05337`). Otherwise it calls the strike path.
+
+Strike (EXP-2060 `out/listings/en-strike-and-resolver.txt` `L2.05338`..`L2.05339`, `ru-strike.txt`
+`L2.05340`..`L2.05341`): when the attacker has a weapon, the weapon has a Spell, the not-mage
+predicate `L2.05310` (RU `L2.01517`) holds, and either the damage is above 0 and the target's
++0x94 is above 0 after the blow or the Spell's id byte +8 is 2, it stores +0x64 = the Spell and
++0x68 = the weapon, calls the cast (EN `L2.05342`, RU `L2.00035`) with attacker and target, then
+clears +0x64 and +0x68.
+
+So a weapon Spell reaches a mage only through state 0xd and a non-mage only through the strike.
+
+**Confidence.** High for the tests, stores and order in both roots. Unknown what state 0xd does:
+its handler was not read, so that a mage casts the weapon Spell at range is not shown.
+
+**Unknown.** The state-0xd handler; the body of the cast EN `L2.05342`.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-902
+
+Owner is unit +0x14; computer means owner +0x2c nonzero (the Player 3 records of R2-SESSION-350
+store 1, Player 0 stores 0).
+
+- Attack-order routine (EXP-2082 `out/listings/en-attack-planner.txt`, `L2.05312`..`L2.05313`):
+  computer owner and `L2.01136` holds: call `L2.04141`; a nonzero return ends the routine. Player
+  owner and `L2.01136` holds: call `L2.04143`, same use of the return. In every other case it sets
+  cmd +8 = 5 and cmd +0xc = the target, stores `L2.05343`'s return in cmd +0x14, and for a player
+  mage with cmd +0x14 below 2 calls `L2.05315`.
+- Idle support `L2.04984` (`out/code-en/listings/en-L2.04965-idle-support.txt`): computer owner:
+  cmd +8 = 0xb, then `L2.05314` only when `L2.01136` holds. Player owner: `L2.05344` calls
+  `L2.05315` when `L2.01136` holds, else sets cmd +8 = 0.
+
+**Confidence.** High for the gates, read whole. Medium that the gated callees choose book spells:
+`L2.04141`, `L2.04143`, `L2.05314` and `L2.05315` were not read here.
+
+**Unknown.** The bodies of the four callees; the RU counterparts of the attack-order routine.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-903
+
+Cast `L2.03854(spell, caster, ...)` (`out/code-en/listings/en-L2.03854-cast.txt`):
+
+- `L2.05345`: when `L2.01136` holds and caster +0x68 is 0, a cost word +0xc above mana +0x9a
+  returns 0; otherwise mana falls by the cost. This is R2-ENGINE-018's RU gate, read in EN.
+- `L2.05346`: when `L2.01136` does not hold, the caster has a weapon and +0x74 equals +0x68, it
+  returns 1 (`L2.05347`).
+- `L2.05348`: spell +4 = 0 returns 0. LOAD sets +4 from the id (R2-ENGINE-602).
+
+Book order `L2.04338` (`en-L2.04338-book-cast-target.txt`) stores +0x50 = 0xd, cmd +0x28 = target,
++0x30 = spell, +0x14 = spell byte +9 and +8 = 0, with no unit predicate or bit 4 test in the body read (the call `L2.03061` at `L2.05349` is unread). The server update
+`L2.04298` (`en-L2.04298-server-update-book.txt`) passes the book mask of `L2.04288` to `L2.04301`
+when +0x140 is nonzero and the flags hold 0x100000, with no unit predicate.
+
+**Confidence.** High for the read bodies. Unknown for the panel: R2-ENGINE-766's three unread
+callers of `L2.04288` (EN `L2.04290`, `L2.04292`, `L2.04293`) each follow an E8 call to
+`L2.01136` (`L2.05350`, `L2.05351`, `L2.05352`; `out/code-en/calls.tsv`), so a bit-4 test before
+a mask is possible there and was not read.
+
+**Unknown.** Those three bodies; `L2.03061`; what a returned 1 at `L2.05347` leads to; whether a Weapon is an
+item of client type 0xe (R2-ENGINE-766).
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-904
+
+Records (`out/code-en/table-en-L2.05316-class-record.tsv`, `out/code-ru/table-ru-L2.01180-class-record.tsv`):
+dword 0 points to the name string (EN `L2.05353`, RU `L2.05354`, both `Spell` in
+`out/code-*/strings.tsv`), then size 0x14, schema 1, factory, base and 0.
+
+EN `L2.05317` (`out/code-en/listings/en-L2.05317-spell-reference-and-ctor.txt`) passes `L2.05316` to
+the object reader `L2.03455` and stores the result; the EN Weapon LOAD `L2.05355` calls it for
++0x84 (EXP-2076 `evidence/derived/classes-en/Weapon-serializer.txt`). The EN factory `L2.05318`
+(`en-L2.05318-spell-creator.txt`) allocates 0x14 bytes and calls `L2.05356`, which stores vtable
+`L2.05357`, +4 = 0 and +0xa = 0.
+
+The RU Weapon LOAD expects record `L2.01180` for +0x88 (R2-ENGINE-210). The record's size, schema
+and name equal the Spell programme R2-ENGINE-602 binds.
+
+**Confidence.** High: one record per root read whole, its name string read, and the EN reader and
+factory read.
+
+**Unknown.** The object reader `L2.03455`; the RU factory `L2.05307` body.
+
+**Amends.** R2-ENGINE-210's Unknown on the L2.01180 class.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-905
+
+Census `out/code-en/census-unit-4c.tsv`: every Capstone memory write with a base register other than
+esp and ebp that covers displacement +0x4c, in the executable sections: 95 candidates (37 byte, 6
+word, 52 dword).
+
+- 19 byte immediates write 0, 1 or 2: none sets bit 4.
+- 18 register byte writes. Bit 4 is set at 7 sites:
+  - `L2.05358` in the template `R2.0086`, on a knownSpells mask (`|= 6`). Its one E8 caller is
+    `L2.05359` in unit init `L2.01793`, which runs it only when the name length (`L2.05360`) is
+    above 0 (`en-L2.01793-unit-init.txt`). Unit init first stores +0x4c = 0 (`L2.05361`).
+  - `L2.05362` in `L2.05321` and `L2.05363` in `L2.00201`: each runs only when +0x140 is 0,
+    builds a book, sets `|= 2`, and `|= 4` when +0x9c is nonzero (`en-L2.05321-ensure-book.txt`,
+    `en-L2.05364-learn-bits.txt`). `L2.05321` has no E8 caller and no raw dword pointer
+    (`entry-pointers.tsv` is empty); `L2.00201` has callers `L2.05365` and `L2.00241`.
+  - `L2.05366` and `L2.05367` in `R2.0088` (`|= 6` when +0x9c > 0; callers `L2.05368`,
+    `L2.05369`).
+  - `L2.05370` in `L2.01818` (`|= 6` when +0x9c > 0, then replaces the book; callers `L2.05371`,
+    `L2.05372`, `L2.05373`).
+  - `L2.05374` in `L2.01385` (`|= 4` when +0x9c > 0; caller `L2.05375`).
+- The other 11: `|= 2` at `L2.05376`, `L2.05377`, `L2.05378`; `|= 8` at `L2.05379`; `&= 0xf7` at
+  `L2.05380`, `L2.05381`, `L2.05382`; `|= 0x10` at `L2.05383`; copies at `L2.05384` (Unit copy
+  `L2.05385`) and `L2.05386` (receiver class not identified); `L2.05387` (`add`) unclassified.
+
+Routine starts are prologue-boundary candidates (`entries.tsv`). No site lies in the EN Unit
+serializer `L2.01090..L2.03196`, which reads +0x4c as stored (EXP-2114 `out/code/unit-transfer.txt`).
+
+**Confidence.** High for the classified sites and their conditions. Medium for completeness: a
+linear sweep; the 58 word and dword candidates, writes through the LOAD helper `L2.03713`,
+`memcpy` and indirect routes are not classified, and the callers of `L2.00201`, `R2.0088`,
+`L2.01818` and `L2.01385` were not read.
+
+**Unknown.** When `L2.01818` and `L2.01385` run; RU.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-906
+
+Census `out/code-en/census-weapon-84.tsv`: 88 candidates (1 byte, 14 word, 73 dword). The Weapon
+classified writers (the other candidates are unread), with listings in `out/code-en/listings/en-528*-weapon-*.txt` and `en-529*-weapon-84.txt`:
+
+- constructors store 0: `L2.05388`, `L2.05389` (from-name `L2.05390`) and `L2.05391` (`L2.03904`);
+- destructor `L2.05392` and `L2.05322` delete the Spell and store 0; `L2.05322` has no E8 caller;
+- copy constructor `L2.05393` copies +0x54 and the 0x2e bytes at +0x56 and, when the source +0x84
+  is set, stores `L2.01059(source id +8)`: a new Spell from the id. Its E8 callers are `L2.05394`
+  (Unit copy `L2.05385`), `L2.05395`, `L2.05396` and `L2.05397`;
+- `L2.05323` stores the result of `L2.05398`; `L2.05324` stores `L2.01059(id)` (caller
+  `L2.05399`).
+
+The EN Weapon LOAD `L2.05355` and the Unit serializer `L2.01090..L2.03196` contain none of them. The Weapon LOAD stores the reference through `L2.05317` into an address it is handed (R2-ENGINE-904), which no +0x84 displacement store shows: the census cannot see that writer.
+
+**Confidence.** High for the read sites. Medium for completeness (linear sweep; indirect routes,
+the other candidates and the callers' contexts unread).
+
+**Unknown.** `L2.05398` and `L2.01059`; who calls `L2.05393`'s callers; RU.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-ENGINE-907
+
+Composition of R2-SESSION-350 (stored values), R2-ENGINE-602 and R2-ENGINE-904 (LOAD keeps the
+Spell and the book), R2-ENGINE-905 and R2-ENGINE-906 (no read writer restores bit 4 or replaces the
+Spell after LOAD), R2-ENGINE-901 to R2-ENGINE-903 (the routes).
+
+| Record | Owner | +0x4c | Staff Spell | Book IDs | After LOAD |
+|---|---|---:|---|---|---|
+| players.3.group.0.members.0 | computer | 2 | 26 | 1, 26, 27 | no state 0xd, no book choice; Drain Life on blows |
+| players.3.group.0.members.1 | computer | 2 | 26 | 1, 26, 27 | same |
+| players.3.group.5.members.0 | computer | 2 | 26 | 1, 10, 26, 27 | same |
+
+The deciding stored field is +0x4c bit 4. The original's own necromancers store it set (14 or 6).
+Mana 0 and 2 of the two males are below every book cost (3..20) a mage would pay. Cast on a blow,
+the non-mage pays no mana (R2-ENGINE-903).
+
+**Confidence.** Medium, the grade of its weakest links: the +0x4c census (three mana-gated bit-4 routines with unread callers, `R2.0088`, `L2.01818` and `L2.01385`, and `L2.00201`, which a unit with a book bypasses; these records store +0x9c 150, 150 and 200, so the gate holds and they are live alternatives, not excluded ones) and the unread state-0xd handler and four book-choice callee bodies (`L2.04141`, `L2.04143`, `L2.05314`, `L2.05315`; R2-ENGINE-902 grades the callers' gates High and the callees Medium). EN only: RU is not censused.
+
+**Unknown.** A cold LOAD of game1200.sav in the original with the hero in sight of Player 3,
+watching for ranged casts against melee hits with Drain Life, then a resave to compare +0x4c,
+settles it. Also unread: the cast body `L2.05342` (R2-ENGINE-901) and what a returned 1 at `L2.05347` leads to (R2-ENGINE-903).
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+## Placed-unit names and hire replies
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-908 | EN ROM2 unit messages 0x6c..0x70 store the optional word as +0x1dc (flag 0x80) and a 24-byte name split at byte 0x7c into +0xec/+0xf8 (flag 0x80000000); an empty +0xec then gets npcnames.txt line +0x1dc-1. | High / Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-909 | RU ROM2 unit messages run the EN name step at L2.05400..L2.05401: an empty +0xec gets line +0x1dc-1 of pool L2.05402, loaded from npcnames.txt; helper shapes equal EN, the RU pool loader is unread. | High / Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-910 | The EN ROM2 server unit-state builder sends name flag 0x80000000 only when server unit string +0x80 is non-empty, copying it into a 24-byte field; else it clears the flag. The RU sender is not located. | High / Unknown | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-911 | ROM2 sheet test L2.02949 (RU L2.05308) is strlen; the objective formatter names a unit by npcnames line +0x1dc-1 when +0x1b8 & 0x11, else by type name; no EN hover reader among 161 swept sites (Medium); hover source Unknown. | High / Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-912 | Composed: the 34 2U_PeasantLeader placements (EN = RU) show npcnames line 2111, Elder / Староста, not the type label Peasant / Крестьянин (Medium: server name witnessed empty for 3 EN placements, maps 20 and 30; RU sender unlocated). | Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-913 | ROM2 sound objects (EN L2.00984/L2.03661/L2.02166, RU L2.05309/L2.05403/L2.05287) return on no device, failed open, incomplete load or all buffers busy; a failed load retries each play (High); no logging is Medium (callees unread). | High / Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-914 | Composed: EN hires 1..6 play only easy/hard/dead, the catapult nothing; RU hires 1..6 also select, attack, move, swarm, retreat, defend, never pickup, the catapult only generic cries (sfx/speech.res keys only; hires 8..20 Unknown). | Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ENGINE-915 | Composed: a ROM2 hire with ID 1..7 and an empty server name shows npcnames line ID-1 on its sheet: Mercenary in EN, Наемник in RU except Катапульта for ID 7 (IDs 8..20 unread; no RU save, RU sender unlocated). | Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+
+### R2-ENGINE-908
+
+The client unit arm for messages 0x6c, 0x6e, 0x6f and 0x70 (R2-ENGINE-069,
+R2-SESSION-195), EN:
+
+- `L2.05404..L2.05405`: with flag 0x80 in packet flags +0x14 it reads a WORD
+  at the payload cursor into `L2.03324`; `L2.05406..L2.00140` stores it as
+  unit +0x1dc.
+- `L2.05407..L2.05408`: with flag 0x80000000 it clears 12 bytes at +0xec
+  (`L2.00341`, memset) and looks for `|` in the payload name (`L2.05409`,
+  strchr). Found: the bytes before it go to +0xec and 12 bytes after it to
+  +0xf8 (`L2.04443`, memmove). Not found: 11 bytes go to +0xec and +0xf8[0]
+  is set to 0. The cursor advances 0x18.
+- `L2.05015..L2.04872`: in application mode 2 (+0x5d8) a unit with +0x1dc
+  0x15 becomes context +0x3f6c and gets +0x1b8 | 0x20; in other modes the unit
+  whose +0x14 equals context +0x9cc and has +0x1b8 mask 0x1 does.
+- `L2.05016..L2.05410`, after both arms of the flag test: when +0xec[0] is 0
+  and +0x1dc is nonzero, +0xec = strcpy (`L2.04049`) of getter `L2.01929`
+  (+0x1dc - 1) on pool `L2.05411`, which `L2.05412` loads from
+  `main\text\npcnames.txt`. The getter returns pool `L2.02397` entry
+  [pool +0xc] + index through `L2.02396`, which calls `L2.02400`.
+
+A name from the packet therefore wins; the NPC word's line fills only an
+empty +0xec, and +0xf8 stays as the packet left it. The hero default name
+(`L2.05413`) pushes 0x14 to the same getter, and two original saves store hero
+word 21 with a name equal to line 20 (R2-SESSION-352).
+
+**Confidence.** High for the bodies listed. Medium that the result is
+zero-based line +0x1dc - 1: the accessor `L2.02400` is unread, and the reading
+rests on R2-ENGINE-581's loader and the save witness. Medium that all four
+message types reach `L2.05407`: the arm's earlier exits were not read.
+
+**Unknown.** The arm's earlier exits; the other +0xec writers of the EN
+displacement census (`L2.05414`, `L2.05415..L2.05416`, `L2.05417`, clear
+`L2.05418`, copy `L2.05419..L2.05420`), which are not claimed here.
+
+**Amends.** R2-ENGINE-581's Unknown writer of +0xec and +0xf8 for a non-hero
+unit.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 1;
+`derived/listings/en-unitmsg-*.txt`, `en-L2.01929.txt`, `en-L2.02396.txt`,
+`en-text-load-npcnames.txt`, `en-hero-default.txt`.
+
+### R2-ENGINE-909
+
+RU range `L2.05400..L2.05401` holds the EN steps of R2-ENGINE-908 with RU
+fields: flag 0x80000000 at `L2.05421`, memset `L2.00342`, strchr `L2.05422`
+with `|` (0x7c), memmove `L2.04512`, cursor + 0x18, mode word +0x63c = 2 with
++0x1dc 0x15, and at `L2.05423..L2.05424`, when +0xec[0] is 0 and +0x1dc is
+nonzero, strcpy `L2.05425` of getter `L2.01551`(+0x1dc - 1) on pool
+`L2.05402`. The RU text load passes `main\text\npcnames.txt` with pool
+`L2.05402` at `L2.05426` and `main\text\unitname.txt` with pool `L2.05427` at
+`L2.05428`, both to `L2.01548`. The four helpers and the getter have the EN
+mnemonics after address masking.
+
+**Confidence.** High for the RU fallback body and the load call sites. Medium
+for the line index: loader `L2.01548` and the accessor below `L2.01551` were
+not read. Medium for the word store: the RU flag 0x80 path was not listed here
+and rests on R2-SESSION-195.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 1;
+`derived/listings/ru-unitmsg-name.txt`, `ru-text-load.txt`, `ru-58*.txt`,
+`ru-L2.01551.txt`.
+
+### R2-ENGINE-910
+
+EN `L2.05429..L2.05430`: when the requested fields include 0x80000000, the
+builder tests server unit +0x80 with `L2.05360`, which returns DWORD +4 of the
+block 0xc bytes before the string data (`L2.03300`). Nonzero: it takes the
+string buffer (`L2.02044`), copies it with strncpy (`L2.05431`) to packet
++0x18 + length, advances the length by 0x17, stores a NUL, advances by 1 and
+sets packet flag 0x80000000. Zero: it clears 0x80000000 from the requested
+fields, so no name is sent and the client keeps or fills +0xec as
+R2-ENGINE-908 states.
+
+**Confidence.** High for the EN body. Medium that DWORD +4 is the length
+(string-object layout read from the two helpers only). Unknown for RU: the six
+RU `or 0x80000000` sites of the linear-sweep census include `L2.05432`, which
+is a bit-tree emitter, not this builder; the others were not read. `L2.05433`
+lies beside the `and` at `L2.05434`, where an RU counterpart of `L2.05429`
+would be expected; it is the nearest candidate and is unread.
+
+**Unknown.** The RU sender; the writer of server unit +0x80 for placed units.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 1;
+`derived/listings/en-server-name.txt`, `en-L2.05360.txt`, `en-L2.03300.txt`,
+`en-L2.02044.txt`, `en-L2.05431.txt`, `ru-server-name.txt`,
+`derived/scans/ru-flag-disp.tsv`.
+
+### R2-ENGINE-911
+
+- Sheet test: EN `L2.02949` and RU `L2.05308` are the same dword-stepping
+  strlen, so the sheet of R2-ENGINE-581 draws +0xec and +0xf8 when +0xec is
+  non-empty and the type label otherwise, in both roots (the sheets
+  `L2.01119` / `L2.02952` have equal mnemonics). The raw E8 census finds five
+  callers per root (EN `L2.05435`, `L2.05436`, `L2.05437`, `L2.05438`,
+  `L2.05439`; RU `L2.05440`, `L2.05441`, `L2.05442`, `L2.05443`, `L2.05444`).
+- Objective formatter EN `L2.05445..L2.05446` (RU `L2.05447..L2.05448`), the
+  target of kinds 1, 4 and 11 by the case and index tables (byte index table
+  `L2.05449`; the dispatch instructions at `L2.05450` lie outside the listed
+  window, Medium): for a unit found in list +0x9d0, +0x1b8 & 0x11 nonzero formats
+  npcnames line +0x1dc - 1 (pool `L2.05411` / `L2.05402`); otherwise the type
+  name (pool `L2.05451` / `L2.05427`) alone for types 0x52..0x66, else
+  `%s[%d]` with +0x28.
+- EN `L2.05452..L2.05453` (RU `L2.05454..L2.05455`) also takes npcnames line
+  +0x1dc - 1 into a string object.
+- Other EN +0xec readers: the message line `L2.05456..L2.05457` (+0xec, a
+  separator and a `L2.02397` line) and the mode-other-than-2 overlay
+  `L2.05458..L2.05459` (option `L2.00892`, +0x1b8 mask 0x1).
+- No EN hover or dialogue-heading reader was found among the 161 sites of the
+  EN linear-sweep census of displacement 0xec, of which the sheet, the
+  objective formatter, the message line, the overlay and five writer sites were
+  opened. The sweep misses an accessor that holds `&unit+0xec`, a copy to
+  another buffer and any site in unlisted code. RU is not censused. The
+  dialogue page shows a portrait (R2-ENGINE-582). The raw DWORD census of pool
+  `L2.05411` finds 16 EN sites: the four consumers above (`L2.05460`,
+  `L2.05461`, `L2.05462`, `L2.05463`), the load `L2.05464`, and 11 users not
+  read in a committed listing and not claimed.
+
+**Confidence.** High for the strlen bodies, the formatter and the readers
+listed. Medium for the masks a given unit carries (R2-ENGINE-805: type below
+0x1a sets 0x10; other stores unread) and for the hover and dialogue negative
+(byte and linear-sweep censuses, EN only, 161 sites of which a handful were
+opened) and for kinds 1, 4 and 11 reaching the formatter.
+
+**Unknown.** The hover line source.
+
+**Amends.** R2-ENGINE-581's Medium on the polarity of `L2.02949` and its
+Unknown body.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 1;
+`derived/listings/en-L2.02949.txt`, `ru-L2.05308.txt`, `en-sheet.txt`, `ru-sheet.txt`,
+`en-objective-*.txt`, `ru-objective-*.txt`, `en-msgline.txt`, `en-mp-overlay.txt`;
+`derived/tables/en-objective-a-*.tsv`; `derived/scans/en-name-disp.tsv`,
+`en-npcpool.tsv`, `ru-npcpool.tsv`, `*-sheet-callers.tsv`.
+
+### R2-ENGINE-912
+
+The 34 placements of R2-ASSET-219 carry d14 = 2112, the Humans row's
+serverID, so server +0x14c and client +0x1dc = 2112 (R2-ENGINE-072,
+R2-ENGINE-069). The row's parameter 16 is 1. Composed with R2-ENGINE-908,
+R2-ENGINE-909 and R2-ENGINE-911: with no server name, +0xec = line 2111, EN
+`Elder`, RU `Староста` (R2-ASSET-218), and the sheet shows it on one line. The
+type label, `unitname.txt` line 1 (EN `Peasant`, RU `Крестьянин`,
+R2-ASSET-145), shows on the sheet only when +0xec is empty and +0x1dc is 0,
+and in the objective formatter only when +0x1b8 & 0x11 is clear (type 1 sets
+0x10, R2-ENGINE-805). The shown name differs from the type label on all 20
+headman maps.
+
+**Confidence.** Medium. The server name is witnessed empty only for the
+3 placements of maps 20 (record 12) and 30 (records 5 and 13), by their saved
+records in the EN original saves (R2-SESSION-352); no RU save exists, so the RU
+composition rests on those EN saves, the RU line index and an unlocated RU
+sender; its
+writer for placed units is unread (R2-ENGINE-910), and the RU sender is
+Unknown. The RU line index is Medium (R2-ENGINE-909).
+
+**Unknown.** A map-specific server name on the other 18 maps; the hover line.
+
+**Amends.** R2-ENGINE-581's Unknown peasant +0xec: the same rule gives the
+inn patron with word 2108 line 2107, EN `Peasant`, RU `Крестьянин` (Medium).
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 2;
+`evidence/summary.txt`, `derived/maps/*-units.tsv`.
+
+### R2-ENGINE-913
+
+EN build `L2.00984`: +0x10 = 0, +0xc = 0, name string at +8. EN load
+`L2.03661`: returns at once when device `L2.03675` is 0; opens the name with
+file test `L2.03656`; on failure it closes the file object (`L2.05465`) and
+returns; only after a successful open does it allocate +0x10 (`L2.05466`
+buffers) and, at the end, set +0xc = 1. EN play `L2.02166`: returns when the
+device is 0; loads when +0xc is 0; returns when +0xc is still 0 or +0x10 is 0;
+takes the first buffer whose status (vtable +0x24) has bit 0 clear and returns
+when none; returns when `L2.05467` gives 0; else sets volume, pan and optional
+frequency and plays through `L2.00975`. None of these exits stores a value after its return test; the callees on
+the failure path (`L2.05468`, `L2.05469`, `L2.05465`, `L2.05467`) are unread
+for logging. RU build `L2.05309`, load `L2.05403` and play `L2.05287` have the EN
+mnemonics after address masking (device `L2.05151`, file test `L2.04010`).
+
+**Confidence.** High for the listed exits, both roots: each returns with no
+further store. Medium that nothing is logged or shown: the callees `L2.05468`,
+`L2.05469`, `L2.05465` and `L2.05467` are unread for that and no log routine
+is identified. Medium that the WAV-parse failure paths inside the load are
+silent (`R2.0111`, `L2.05470` unread) and for the path after `L2.05467`
+(unread).
+
+**Amends.** R2-ENGINE-718's Unknown on a single gesture whose file is absent:
+its sound object plays nothing; that it logs nothing is Medium.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 5;
+`derived/listings/en-sound-*.txt`, `ru-sound-*.txt`.
+
+### R2-ENGINE-914
+
+Hire IDs 1..7 build templates 10010, 10020, ..., 10070 (R2-ENGINE-381,
+R2-ENGINE-378) and carry +0x1dc = ID; the voice getter gives xbow, knight,
+druid, troll, orc, mage for 1..6 and a generic voice for 7 (R2-ENGINE-718).
+The picker serves gestures only with Acknowledgement on, a hero first
+(R2-ENGINE-719, R2-ENGINE-720); a multi gesture with count 0 plays nothing; a
+single gesture with no file plays nothing (R2-ENGINE-913); the +0x74 cries
+need +0x1dc at most 23 and no setting (R2-ENGINE-721). With R2-ASSET-185:
+
+| Hire | EN | RU |
+|---|---|---|
+| 1..6 | easy, hard, dead only | select, attack, move, swarm (1 to 3 files each), retreat, defend, easy, hard, dead; no pickup |
+| 7 catapult | nothing | easy, hard, dead of its generic voice |
+
+The table rests on R2-ASSET-185: the complete `characters/` key lists of
+`sfx.res` (EN 88 keys, RU 198) and the statement that no `speech.res` key lies
+under a voice-name directory; other archives and the mounted lookup
+(`L2.03657`, R2-ENGINE-870, Medium) were not searched. No `.wav` lies loose in
+the install trees `rom2-en` and `rom2-ru` (`evidence/loose-wav.txt`, a file
+list of those trees, not regenerated by `regen.sh`; the save folders and a
+runtime working directory were not searched), so the EN disk branch
+(R2-ENGINE-870) finds none either; the EN "none" is Medium for that reason.
+
+**Confidence.** Medium: a composition whose weakest links are R2-ENGINE-381
+(Medium) and the catapult's generic voice, chosen by +0x1b8 masks and +0x188.
+The generic voice bears on the voice name only, not on the counts: every
+generic voice has 0 EN and 1 RU files per cry, so the EN result (nothing) and
+the RU result (one file per cry) do not change with the choice.
+
+**Unknown.** Hires 8..20, which have no template in R2-ENGINE-378's ranges;
+the archives and the mounted lookup named above.
+
+**Amends.** R2-ENGINE-864's Unknown voice word of every hire: hires carry
+their ID 1..7 (ID 1 is the only one witnessed in a save; 2..7 rest on
+R2-ENGINE-381, Medium).
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 6;
+`evidence/loose-wav.txt`.
+
+### R2-ENGINE-915
+
+R2-ENGINE-381 writes server +0x14c = hire ID; the client word +0x1dc follows
+it. With an empty server name (the two saved hires, R2-SESSION-352) the client
+fills +0xec with line ID - 1 (R2-ENGINE-908, R2-ENGINE-909): lines 0..19 are
+`Mercenary` in EN; in RU `Наемник`, except line 6 `Катапульта`
+(R2-ASSET-218). The sheet then draws that line and an empty +0xf8, not the
+`Mercenary` + type label of the inn patrons whose lines are empty
+(R2-ENGINE-581).
+
+**Confidence.** Medium (R2-ENGINE-381 is Medium; the saves witness ID 1 only;
+RU line index Medium). IDs 8..20 follow the same line arithmetic and lines
+8..19 are equal to line 0, but their identity is not read (R2-ENGINE-914). RU:
+no RU save exists and the RU sender is unlocated.
+
+**Amends.** R2-ENGINE-378's Unknown displayed character names, for the hires.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 3;
+`derived/texts/*-npcnames.tsv`, `derived/saves/gog-original-2.tsv`.
 
 ## Route failure and the unreachable target
 

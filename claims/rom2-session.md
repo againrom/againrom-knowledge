@@ -5518,6 +5518,101 @@ the load and in the window (frame 1 on row 2).
 
 **Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
 
+## Necromancer weapon Spells and books in saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-350 | game1200.sav holds 3 living ROM2 necromancer Units (rows 178, 178, 180) with +0x4c 2, staff Spell Drain Life and 28-slot books; the 4 original-made ones (two each in original2 game0012, game9999) store the same with +0x4c 14 or 6. | High / Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-SESSION-351 | In four original ROM2 resaves (game0038..game0041) all 64 squirrel and Foot_Animated Units keep the Againrom-written size-1 book and +0x4c 0, and all 16 bats a size-15 book and +0x4c 18; every one stores mana max 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md), [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md) |
+
+### R2-SESSION-350
+
+Population: the 17 files of `out/saves/save-inputs.tsv` (full SHA256 each): `game1200` of
+2026-11-05 `rom2-necro-quicksave` (Againrom-written), 9 files of 2026-10-30 `rom2-gog-original`
+and 7 of `rom2-gog-original-2` (original-written). 8 records (the 3 living `game1200` necromancers, `dead.33` and the 4 original-made ones) store type +0xe = 99, the typeID of
+every Units row whose name contains Necro; all are class Unit with +0xc 178, 179 or 180 (Necro_Male1,
+Necro_Female1, Necro_Leader1; `out/data-en/rows-en-units.tsv`).
+
+`game1200` (`out/saves/units.tsv`, `unit-spells.tsv`, owner `players.3`, named Necromancers,
++0x2c = 1 in `players.tsv`):
+
+| Record | Row | +0x4c | Mana | Weapon Spell at | Book at, size | Book IDs |
+|---|---|---:|---|---:|---|---|
+| group.0.members.0 | 178 | 2 | 0/150 | 34073 | 34168, 28 | 1, 26, 27 |
+| group.0.members.1 | 178 | 2 | 2/150 | 34993 | 35088, 28 | 1, 26, 27 |
+| group.5.members.0 | 180 | 2 | 200/200 | 36413 | 36510, 28 | 1, 10, 26, 27 |
+
+Each weapon is Weapons row 13 (Staff) with +0xe 33, +0x14 the Player key and one Effect; its Spell
+stores id 26, range 7, defensive 0, cost 20 (Spells row 26 Drain Life, cost 20). Book +0x18 is 0.
+`dead.33` (row 179) stores +0x4c 2, no weapon and a size-1 book.
+
+Original-made: rows 178 at `players.3.group.0.members.6` and `players.3.group.1.members.3` of
+`original2/game0012` and `game9999` (Player 3 Necromancers, +0x2c = 1) store +0x4c 14, 6, 6, 6,
+mana 150/150, the same Spell and Effect, weapon +0xe 0 and +0x14 0, book +0x18 263 or 3, book IDs
+1, 26, 27 with ranges 7, 7, 0 (`game1200`: 8, 8, 0), +0x134/+0x135 6/8 (`game1200`: 8/4) and an
+empty name.
+
+Over the populations every original record with a weapon Spell has bit 4 (12 Human in original1,
+7 Human and 4 Unit in original2); in `game1200` the 3 necromancers are the only class-Unit records with one
+(39 class-Unit records and 20 Human records in `game1200`; original1 holds 140 Unit and 14 Human, original2 190 Unit and 152 Human records) and none has bit 4.
+
+**Confidence.** High for the stored values and counts. Medium for the necromancer identity, which
+rests on +0xc and +0xe as Units row and typeID (serverID +0x14c equals the row's v55: 691, 691,
+693). The difference list covers the `units.tsv` columns only.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
+
+### R2-SESSION-351
+
+Recount of EXP-2116 `out/creatures.tsv` (the population of R2-SESSION-342): per resave, 6 records
+of Units row 109 and 10 of row 114 store +0x4c 0, a book with size 1 and no reference, and 4 of row
+97 store +0x4c 18 and a size-15 book. The original-made files of that population (original1) store
+no book in their 80 row-109 and row-114 records and the same size-15 bat books with +0x4c 18. All
+records store +0x9c = 0.
+
+**Confidence.** High for the counts. Medium that the original's LOAD and play keep a stored book in
+general: one map, one creature set. Because +0x9c is 0, the +0x9c-gated bit-4 setters of
+R2-ENGINE-905 are not tested by this population.
+
+**Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md), [EXP-2116](../experiments/EXP-2116-rom2-mice-revival/RESULTS.md)
+
+## Saved unit names in original saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-352 | In the 16 original-made ROM2 saves of 2026-10-30 all 150 non-hero Humans store an empty +0x80 name, among them 6 headman records (3 placements) and 2 word-1 hire records (no other hire ID); the 16 heroes (word 21) store 5 or 9 bytes. | High | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+
+### R2-SESSION-352
+
+The two folders `rom2-gog-original` (9 files) and `rom2-gog-original-2` (7
+files) were read after each file matched its folder's MANIFEST SHA256, through
+the committed EXP-2076 save reader: the counted string at +0x80 and the low 16
+bits of the packed u32 holding +0x14c, the fields R2-SESSION-101 reads. 166
+Humans (`-2` marks
+the second folder):
+
+| +0x14c | Humans | +0x80 bytes | Files |
+|---|---|---|---|
+| 21 | 16 | 5 in 2 (equal to EN `npcnames.txt` line 20), 9 in 14 | one in each file |
+| 1 | 2 | 0 | `-2` game0012, game9999 |
+| 22 | 3 | 0 | `-2` game0012, game9998, game9999 |
+| 2112 | 6 | 0 | `-2` game0009, game0010 (mission 20), game0012, game9999 (mission 30) |
+| 2000, 2001, 2100, 2101, 2103, 2108..2111, 2113, 2114, 2117 | 139 | 0 | as listed in `evidence/summary.txt` |
+
+The 6 headman records are 3 map placements (map:record 20:12, 30:5, 30:13)
+in 4 files (`game0009`, `game0010`, `game0012`, `game9999`); `game0010` holds
+the mission-20 headman again at a moved position. The 2 word-1 records, one in
+each of `game0012` and `game9999`, stand at different positions (14,14 and
+13,13), so they are probably one hire at two moments, not two units. Word 1 is
+the only hire ID saved. "Non-hero" means word other than 21; the 3 word-22
+records are a companion with an empty name. The saved +0x80 is the server unit
+string by R2-SESSION-101, the premise of R2-ENGINE-910 and R2-ENGINE-912.
+
+**Confidence.** High for these 16 files.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), questions 1 to 3;
+`evidence/summary.txt`, `derived/saves/*.tsv`.
+
 ## Route-failure fields in original saves
 
 | ID | Claim | Confidence | Status | Evidence |

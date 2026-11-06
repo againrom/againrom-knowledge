@@ -3128,6 +3128,77 @@ words that merely contain a needle (клад: 40 RU hits).
 
 **Evidence.** [EXP-2125](../experiments/EXP-2125-rom2-quest-machine/RESULTS.md)
 
+## NPC name lines and headman placements
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-218 | ROM2 main.res npcnames.txt has 2371 lines (EN 2030 empty, RU 2021): 0..19 Mercenary / Наемник (RU 6 Катапульта), 20..26 hero/companion names, 2107..2110 Peasant (RU Крестьянин, Крестьянка, Крестьянин, Крестьянка), 2111 Elder / Староста. | High | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+| R2-ASSET-219 | Each ROM2 root's 46 scenario.res maps hold 34 type-6 placements of Humans row 2U_PeasantLeader (ordinal 221) on 20 maps, all with d14 = 2112; the row's parameter 16 is 1 (unitname line 1). | High / Medium | ● active (branch candidate) | [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md) |
+
+### R2-ASSET-218
+
+Zero-based CRLF line indexes of `main.res` `text/npcnames.txt` (EN member
+SHA256 `f3d3f5b08099da4fd9aa032860e1842ee222b6cf0e85ae1d230474d73e8df3a1`, RU
+`785495aa6e6183a9e3cdc93aef1f6f6e73a61af7f4521bbcb116714d0a1eff7c`), RU decoded
+as cp1251. Labels for the indexes this experiment names:
+
+| Line | EN | RU |
+|---|---|---|
+| 0..5, 7 | Mercenary | Наемник |
+| 6 | Mercenary | Катапульта |
+| 20, 23 | Aldor | Альдор |
+| 21, 22 | Igles, Dina | Иглез, Дайна |
+| 24, 25, 26 | Sagita, Gildarius, Galinel | Сагита, Гильдариус, Галенель |
+| 28, 1999 | Skrakan | Скракан |
+| 96, 206, 516 | (empty) | П.Стражник, Арбалетчица, Волшебница |
+| 2000 | Requirt | Рекрут |
+| 2107, 2109 | Peasant | Крестьянин |
+| 2108, 2110 | Peasant | Крестьянка |
+| 2111 | Elder | Староста |
+| 2112 | Knight | Рыцарь |
+| 2116 | Leader | Командир |
+
+Lines 8..19 were not labelled; their EN and RU lengths and SHA256 equal line 0's
+(`derived/texts/*-npcnames.tsv`). The headline's `Peasant` is the EN text for
+lines 2107..2110; the RU texts are in the table.
+
+**Confidence.** High: both roots' tables read whole by the R2-ASSET-145 line
+rule.
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 2;
+`derived/texts/en-npcnames.tsv`, `ru-npcnames.tsv`.
+
+### R2-ASSET-219
+
+Every type-6 record of every `.alm` member of `scenario.res` was walked with
+the committed EXP-2068 walker and joined by the person-arm rule
+(R2-ENGINE-742) to the highest-ordinal Humans row whose parameter 24 equals
+d14, or to the Units row whose parameter 55 does. EN: 4212 records on 46 maps
+(605 person, 3607 units); RU: 4234 (605, 3629); every record joined. 42 of the
+46 maps are byte-equal across the roots; headman maps 42 and 52 differ (map version
+EN 1600, RU 1300), and their headman records carry equal fields.
+
+The 34 `2U_PeasantLeader` placements, map:record, equal in both roots: 20:12,
+21:19, 30:5, 30:13, 31:0, 40:9, 42:3, 42:4, 43:54, 52:0, 61:4, 71:60, 73:2,
+73:13, 75:4, 75:15, 85:0, 92:9, 92:18, 93:20, 93:21, 93:22, 94:3, 94:19, 94:20,
+95:3, 95:18, 95:20, 96:3, 96:19, 96:20, 102:5, 103:96, 103:97. Each has d14 =
+2112 and d10 = 0; d18 is 2 (8), 3 (13), 4 (4), 5 (5), 6 (1) or 7 (3); d1c is 0
+(30), 1 (3) or 2 (1). Row 221's parameter 16, which R2-ENGINE-578 reads as
+typeID, is 1; `unitname.txt` line 1 is 7 bytes EN, 10 bytes RU (R2-ASSET-145:
+Peasant, Крестьянин).
+
+On the 20 maps the other 316 person placements carry their rows' words; 8 of
+them point to empty `npcnames.txt` lines (A_Knight3 1052 x2, F_Knight3 1051
+x3, H_Knight3 1053 x1, U_FemalePeasant4 1086 x2). For every units-arm
+placement of either root, line (d14 low 16) - 1 is empty.
+
+**Confidence.** High for the census of the installed maps and the field
+values. Medium for the join (R2-ENGINE-742) and for parameter 16 as typeID
+(R2-ENGINE-578 shows it for three rows).
+
+**Evidence.** [EXP-2127](../experiments/EXP-2127-rom2-names-voices/RESULTS.md), question 2;
+`evidence/summary.txt`, `derived/maps/*-units.tsv`, `*-units-members.tsv`.
+
 ## Item-record speech projection
 
 | ID | Claim | Confidence | Status | Evidence |

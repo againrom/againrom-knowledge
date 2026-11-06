@@ -354,7 +354,12 @@ R2-SESSION-329
 An Item writes the 38-byte base programme that Unit also calls first,
 then u32-counted references and
 u16, u16, u8, u8, u8, u16, u16, u8. Weapon adds raw 24, raw 22, u8 and a
-reference; Armor adds raw 22 and u8. — R2-ENGINE-210
+reference; Armor adds raw 22 and u8. — R2-ENGINE-210 (amended)
+
+The Weapon reference is the weapon's Spell: LOAD reads it with class record
+RU L2.01180 / EN L2.05316, named Spell (size 0x14, schema 1). The EN LOAD bodies read (Weapon
+`L2.05355`, Spell `L2.02975`) test nothing on it; the object reader `L2.03455`
+and the RU Spell bodies are unread. — R2-ENGINE-904, R2-ENGINE-210
 
 In all four saves the first member is a new Human (class index 3, object
 index 4). Its payload runs 2806..4024 in A/C and 2807..4025 in B/D,
@@ -1072,6 +1077,12 @@ and the sum is +0x130. Parameter-title joins retain their existing Medium
 grade. Worn items and ordered bag entries are separate. — R2-SESSION-236,
 R2-ENGINE-319
 
+In the 16 original-made saves of 2026-10-30, all 150 non-hero Humans store an
+empty +0x80 name, including 6 saved headman records (+0x14c 2112; 3 map placements, maps 20
+and 30) and 2 saved records of a word-1 hire (+0x14c 1, probably one hire);
+no other hire ID is saved. Each of the 16 heroes (+0x14c 21) stores 5 or 9
+bytes. — R2-SESSION-352
+
 Human LOAD stores base words +0xc (Humans row index) and +0xe (type), Unit
 bytes +0x49..+0x4c (face +0x4b, gender in bit 7 for a non-hero) and the low
 word of the u32 that also carries +0x204 and +0x1a0 (+0x14c). The u8
@@ -1577,3 +1588,65 @@ a group of two that reads as in pursuit, with the hit memory toward the hero's c
 
 The same 150 records store +0x9e = 0 and +0xa0 = 0, in the five saves of R2-SESSION-346.
 — R2-ENGINE-873, R2-ENGINE-876, R2-SESSION-346
+
+## Weapon Spell, book and the mage bit across LOAD
+
+Unit byte +0x4c bit 4 is the mage bit: EN L2.01136 / RU L2.00044 return it,
+EN L2.05310 / RU L2.01517 its negation (High in both clients). A unit with the
+bit and a weapon Spell enters actor state 0xd from state 3; a unit without it
+casts the weapon Spell only from the strike, after a blow with damage above 0
+to a living target (or the Spell id is 2). The tests are High in both clients;
+what state 0xd does is Unknown (the handler was not read). — R2-ENGINE-900,
+R2-ENGINE-901
+
+In EN only, the attack-order routine and idle support call the book choices and
+support only for a mage (High for the gates; Medium for what the choices do,
+since the bodies of L2.04141, L2.04143, L2.05314 and L2.05315 are unread). The
+EN cast charges mana only to a mage casting without an item. The EN book order
+and the server book-mask update contain no bit 4 test (the call L2.03061 in the
+book order is unread). Unknown: whether three other mask callers and the
+panel's item spells depend on bit 4; what the cast body L2.05342 does and what
+a returned 1 at L2.05347 leads to; RU, where these routines are unread.
+— R2-ENGINE-902, R2-ENGINE-903, R2-ENGINE-901
+
+In an EN linear-sweep census of +0x4c byte writes, 7 sites in 6 routines set
+bit 4: the creature template (reached from unit init only with a name), two
+ensure-book routines that act only on a unit with no book, and three that act
+when mana max +0x9c is above 0; none is in the Unit LOAD body (LOAD stores the
+byte through a helper, so a displacement census would not show it either way).
+In an EN linear-sweep census of 88 +0x84 store candidates, the classified
+Weapon writers are the Weapon constructors, destructor, copy constructor (a new
+Spell from the stored id) and two setters; none is in a LOAD body, and the
+Weapon LOAD stores the Spell reference through the reference reader L2.05317,
+which that census cannot see. Both censuses are Medium for completeness.
+Unknown: the callers of L2.00201, R2.0088, L2.01818 and L2.01385; the 58 word
+and dword +0x4c candidates and writes through L2.03713 and memcpy; the RU
+censuses. — R2-ENGINE-905, R2-ENGINE-906
+
+| game1200 record | Units row | +0x4c | Weapon Spell | Book size | Book IDs |
+|---|---|---:|---|---:|---|
+| players.3.group.0.members.0 | 178 Necro_Male1 | 2 | 26, range 7, cost 20 | 28 | 1, 26, 27 |
+| players.3.group.0.members.1 | 178 Necro_Male1 | 2 | 26, range 7, cost 20 | 28 | 1, 26, 27 |
+| players.3.group.5.members.0 | 180 Necro_Leader1 | 2 | 26, range 7, cost 20 | 28 | 1, 10, 26, 27 |
+
+The table is the Againrom-written game1200: three living necromancers of
+computer-owned Player 3, typeID +0xe 99 (Medium: a necromancer is identified
+by +0xe 99 and the +0xc row; the 8 records with +0xe 99 include dead.33). The
+four original-made row-178 records, two in each of game0012 and game9999, store the same Spell and book IDs with +0x4c
+14 or 6 (bit 4 set), mana 150/150 and book +0x18 263 or 3. — R2-SESSION-350
+
+In four original resaves of mission 10, all 64 squirrel and Foot_Animated
+records keep the Againrom-written size-1 book and +0x4c 0; all store mana max
+0 (Medium that LOAD and play keep a stored book in general: one map, one
+creature set; none of these units stores +0x9c above 0, so the bit-4 setters
+gated on it were not tested). — R2-SESSION-351
+
+So, in the EN census and routes (RU not censused), after LOAD of game1200 the
+original keeps each necromancer's Drain Life staff Spell and book, but with bit
+4 clear the necromancer takes no state-0xd route and no book choice. The only
+read route that reaches its weapon Spell is the strike; what the cast does
+after its return is unread. The stored +0x4c decides it (Medium: three
+mana-gated bit-4 routines have unread callers, L2.00201 is bypassed by a unit
+with a book, and state 0xd and the four book-choice callees are unread). A cold
+LOAD of game1200 in the original, watching for ranged casts and resaving to
+compare +0x4c, would settle it and has not been run. — R2-ENGINE-907

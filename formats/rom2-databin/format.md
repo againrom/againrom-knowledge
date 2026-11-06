@@ -173,6 +173,10 @@ Fighter_Hero and Mage_Hero, with derived identities21,22,23. Row presence
 does not prove admission; displayed names, native lookup-table joins,
 overrides and complete live statistics remain Unknown. — R2-ENGINE-378
 
+Composed (Medium; IDs 1..7): a hire with an empty server name displays `npcnames.txt` line
+ID - 1, `Mercenary` in EN and `Наемник` in RU (`Катапульта` for ID 7).
+— R2-ENGINE-915
+
 ## Blizzard stored row
 
 Independent EN and RU client data.bin walks give the same 22 parameters for

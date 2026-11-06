@@ -521,7 +521,7 @@ The stage-10 speakers 207, 2108 and 517 equal the serverID of the installed Huma
 | heading 1 | else flags 0x11: main.txt 84 Mercenary or 83 Enemy | `R2-ENGINE-581` |
 | heading 2 | else: unitname.txt line +0x24 | `R2-ENGINE-581` |
 
-The writers of +0x1c, +0xec and +0xf8 remain Unknown (`R2-ENGINE-580`, `R2-ENGINE-581`).
+The writer of +0x1c remains Unknown (`R2-ENGINE-580`). The heading test `L2.02949` (RU `L2.05308`) is strlen (`R2-ENGINE-911`, High). +0xec and +0xf8 come from the EN unit message: the packet name, else `npcnames.txt` line +0x1dc - 1 (`R2-ENGINE-908`, High / Medium); RU runs the same step (`R2-ENGINE-909`, High / Medium). The EN server sends a name only when its unit string +0x80 is non-empty (`R2-ENGINE-910`, High / Unknown). By that rule the stage-10 peasant, word 2108, shows line 2107, `Peasant` / `Крестьянин` (`R2-ENGINE-912`, Medium), and a hire with an empty server name shows line ID - 1, `Mercenary` / `Наемник` (`R2-ENGINE-915`, Medium).
 
 A dialogue page with a portrait calls face builder `L2.02950` once, at `L2.02964`, with a number from the unread part parser `R2.0048`. The builder resolves the actor through `R2.0071`, building a fallback actor (flags 0x56, +0x28 = number-0x50) when no unit matches; flags 0x11 select the paperdoll slot +0x88 under `graphics\equipment\<mfighter|mmage|ffighter|fmage>\`, other actors `graphics\infowindow\<name><+0x28>.bmp`. The drawn frame and crop remain Unknown (`R2-ENGINE-582`, High / Medium / Unknown). The gate refusal `plagatguard` (npc=97) has no installed row; if no live unit carries 97, its face is the fallback's `equipment\fmage\17.256` (`R2-ENGINE-583`, Medium).
 

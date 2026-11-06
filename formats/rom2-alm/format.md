@@ -140,6 +140,16 @@ unread); the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
 Inn offer blocks 2, 4 and 6 (Medium: the receiver of the offer generator is
 the Inn by address inference); RU and EN agree in those blocks. — R2-ENGINE-535, R2-ENGINE-537
 
+Each root's 46 campaign maps hold 34 type-6 records of the Humans row
+`2U_PeasantLeader` on maps 20, 21, 30, 31, 40, 42, 43, 52, 61, 71, 73, 75, 85,
+92, 93, 94, 95, 96, 102 and 103. All carry definition id 2112 and a zero 0x10
+field; the row's parameter 16 (typeID) is 1. The census is High for the 46
+`scenario.res` maps of each root; the row join is Medium. — R2-ASSET-219
+
+Composed (Medium): these placements show `npcnames.txt` line 2111, `Elder` /
+`Староста`; the type label `Peasant` / `Крестьянин` shows only with an empty
+unit name and NPC word 0. — R2-ENGINE-912
+
 <a id="group-and-object-records-types-10-and-11"></a>
 
 ## Group and object records (types 10 and 11)

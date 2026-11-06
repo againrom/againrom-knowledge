@@ -255,6 +255,47 @@ The inn statistics card uses zero-based `main.res:text/main.txt` rows 15..20
 `text/unitname.txt` rows indexed by the type number: rows 1, 15 and 24 are
 Peasant, Crossbowman and Mage. — R2-ASSET-145
 
+## Unit names from npcnames.txt
+
+`main.res:text/npcnames.txt` has 2371 CRLF lines in each root (EN 2030 empty,
+RU 2021). Lines 0..19 are `Mercenary` / `Наемник`, except RU line 6
+`Катапульта`; lines 20..26 hold the hero and companion names; lines 2107..2110
+are `Peasant` (RU `Крестьянин`, `Крестьянка`, `Крестьянин`, `Крестьянка`) and line 2111 is `Elder` /
+`Староста`. — R2-ASSET-218
+
+EN client unit messages 0x6c, 0x6e, 0x6f and 0x70 store the optional word as
+unit +0x1dc and split a 24-byte packet name at `|` into +0xec and +0xf8. When
++0xec is then empty and +0x1dc is nonzero, +0xec takes `npcnames.txt` line
++0x1dc - 1 (zero-based line index Medium: accessor `L2.02400` unread; that all four
+message types reach the step is Medium). A packet name wins over the word's line. — R2-ENGINE-908
+
+RU runs the same step; its line index is Medium because the RU pool loader is
+unread. — R2-ENGINE-909
+
+The EN server sends the packet name only when the server unit's string +0x80
+is non-empty; the RU sender is Unknown. — R2-ENGINE-910
+
+The sheet's first-line test is strlen of +0xec in both roots, so the sheet
+draws +0xec and +0xf8 when +0xec is non-empty and the type label otherwise.
+The objective formatter names a unit by line +0x1dc - 1 when +0x1b8 & 0x11 is
+set, else by its type name (kinds 1, 4 and 11 by the case tables; Medium). No EN
+hover or dialogue-heading reader of +0xec was found among the 161 linear-sweep
+sites, of which the sheet, formatter, message line and overlay were opened
+(Medium; RU not censused); the hover line source is Unknown. — R2-ENGINE-911
+
+Composed (Medium): the 34 placed headmen show line 2111, `Elder` / `Староста`;
+their type label, `unitname.txt` line 1 (`Peasant` / `Крестьянин`), shows only
+with an empty +0xec and word 0. The server name is witnessed empty only for 3
+EN placements on maps 20 and 30; the RU sender is Unknown. — R2-ENGINE-912
+
+Composed (Medium; IDs 1..7, IDs 8..20 unread): a hire with an empty server name
+shows line ID - 1, `Mercenary` in EN and `Наемник` in RU (`Катапульта` for ID 7),
+not the type label. No RU save exists. — R2-ENGINE-915
+
+Unknown: the RU server-name sender; the writer of server `+0x80` for placed
+units; the hover line source; the unit-message arm's earlier exits; hires
+8..20. — R2-ENGINE-910, R2-ENGINE-911, R2-ENGINE-908, R2-ENGINE-914
+
 ## Menu, save and load page rows
 
 `main.res:text/dialogs.txt` has 176 CRLF rows in EN and RU. The save and
