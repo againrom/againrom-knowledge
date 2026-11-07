@@ -48,8 +48,49 @@ consumer behavior is not independently specified here.
 | Raw owner tables | 16 consecutive 1024-byte tables, total 16384 bytes |
 
 The preserved resources use 156 BMP-shaped and three raw palettes. The
-shape determines where to read/write the table bytes; color-value meanings
-and ROM2 table-building modes remain Unknown. — R2-ASSET-008
+shape determines where to read/write the table bytes. The ordinary-unit
+consumer below adds a bounded native interpretation; other palette
+consumers and preparation modes 0, 1, 3 and 4 remain unspecified.
+— R2-ASSET-008, R2-ASSET-226
+
+## Ordinary mission unit palettes
+
+The client draw reads the unit type's DWORD +0x98. Zero selects the shared
+palette collection by the owner getter's DWORD +0x0c; one selects type
+palette 0; other values select type palette `unit DWORD +0x28 - 1`
+(High for the read branches; Medium that the record is the unit's type
+and that unit +0x14 is the owner object).
+The owner getter returns that field directly. The type-loader local
+stores the `Palette` integer getter's return in +0x98. Unknown includes
+the default pushed for Palette. Mission-map to client production of the
+owner colour and unit fields, START MISSION,
+Restart and mission 42's actual values remain Unknown. — R2-ENGINE-955,
+R2-ENGINE-956
+
+`graphics/units/humans/human.pal` has 16 tables of 256 B,G,R,X entries,
+1024 bytes per table, and is byte-equal in EN and RU. The EN shared builder
+passes that path and a 16384-byte read to unread resource helpers (Medium
+that they read this entry) and prepares source tables 0..15 with
+16 rows, mode 2 and channel additions enabled. Both builders append, in
+the last iteration, a mode-5 palette from table 0 with (16,5,0).
+Source-table i mapping to shared collection index i remains Medium
+because initial emptiness and
+the nested insert helper are unclosed. EN type palettes are loaded from
+BMP colour-table offset 0x36 into 1024-byte source slots; their full path
+composition remains Medium. — R2-ASSET-226, R2-ENGINE-956, R2-ENGINE-957
+
+Mode 2 writes rows for L=16 down to 1. Each channel is
+`clamp(trunc((source + current channel byte)*2*L/16),0,255)`, then packed
+using the device's current channel widths and shifts. The normal byte
+sprite wrapper addresses row `palette base + 512*shade`. Its literal
+commands overwrite destination WORDs with that row's indexed colour;
+skips preserve destination pixels. The read normal EN/RU blitters use
+no destination-colour blend. With mark 32 the call goes to slot +0x34
+when unread L2.02954 on view +0x9cc accepts the owner's +4, and the draw
+leaves without a sprite call otherwise; the slot +0x34 blitters were not
+read. The upstream light calculation, channel-byte writers, special
+blitters, complete RU producer parity and final screen
+colour remain Unknown. — R2-ENGINE-957, R2-ENGINE-958
 
 ## Town-1 ShopFrame reader
 

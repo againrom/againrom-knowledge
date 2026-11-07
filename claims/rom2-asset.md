@@ -3308,3 +3308,33 @@ inferred, R2-ASSET-180) and for the screen direction of k, which rests on
 the unread client direction writer.
 
 **Evidence.** [EXP-2129](../experiments/EXP-2129-rom2-cast-timing/RESULTS.md), question 3; `data/unit-shoot-values.tsv`, `data/shoot-points.tsv`, `data/reg-inputs.tsv`.
+
+## Ordinary mission unit sprite colour
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-226 | ROM2 human.pal has sixteen 1024-byte colour tables and is byte-equal in EN and RU. | High | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+
+### R2-ASSET-226
+
+Both graphics.res entries units/humans/human.pal have 16384 bytes and
+SHA256 ed8f0e6d64d6a955f65a208236f03d3f1a99072064dd92ea8ca16753c501cdf0.
+The selected entry divides into sixteen consecutive 1024-byte tables,
+each containing 256 four-byte B,G,R,X entries. The native source stride
+and channel accesses are R2-ENGINE-957; this is a measured specialization
+of R2-ASSET-008, not a new general palette-file census.
+
+The output retains all sixteen table hashes and per-table distinct-entry
+counts, not the palette bytes.
+The selected units/units.reg entries are also SHA256-equal across roots.
+
+**Confidence.** High for exact byte/hash equality, counted shape and the
+listed measurements. No claim identifies a mission 42 unit with one of
+these source tables or claims equality of the whole archives.
+
+**Unknown.** The actual mission mage's owner colour and final pixel.
+Close the native map-to-client producer and draw inputs before assigning
+a source table to that unit.
+
+**Evidence.** out/{en,ru}-data-inputs.tsv, human-pal.tsv and unit-reg.tsv;
+out/paired-data.tsv. Full source archive and entry hashes are retained.

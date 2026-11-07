@@ -24733,3 +24733,135 @@ EN apply L2.04138 has six extra instructions at L2.04139..L2.04140: load the Hum
 **Unknown.** When a reached +0xd8 exceeds 24 and whether intervening writers restore it. A controlled case and a caller/writer trace would settle that effect.
 
 **Evidence.** EXP-2132 stage02 EN apply plus stage03 epilogue/corrected table, stage01 RU apply, derived pairs/differences.
+
+## Ordinary mission unit sprite colour
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-955 | ROM2 unit draw selects shared or type palettes by type DWORD +0x98. | High / Medium | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ENGINE-956 | The ROM2 type-loader local stores the Palette getter result at +0x98; mission field production stays open. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ENGINE-957 | ROM2 mode 2 builds descending brightness rows with channel additions and device packing. | High / Medium | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ENGINE-958 | The read normal ROM2 byte blitters copy indexed colours from a 512-byte shade row. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+
+### R2-ENGINE-955
+
+The paired client draw inputs read the type record for unit DWORD +0x24,
+then take type DWORD +0x98. Zero selects the shared collection using the
+getter on unit +0x14: EN L2.05729 / RU L2.04578 returns owner DWORD +0x0c
+directly. One selects type palette 0. Other selector values use unit
+DWORD +0x28 minus one as the type palette index. The EN type getter lazily
+prepares its +0x9c slot from its +0xbc source with (16,2,1).
+
+**Confidence.** High for the local branches and fields in both roots.
+Medium for the whole lookup/object composition: that unit +0x14 holds the
+owner object, EN L2.03688, RU L2.02556, the RU type/collection getters and
+object persistence are unclosed in the committed population.
+R2-ENGINE-784 is reused at its grade.
+
+**Unknown.** Actual mission 42 values and the client fields' producers.
+Read the map-to-client transfer and the mage's map/type records.
+
+**Evidence.** out/{en,ru}-unit-draw-inputs.txt, unit-palette-choice.txt and
+owner-colour.txt; out/en-palette-getters.txt and palette-collection-get.txt.
+
+### R2-ENGINE-956
+
+EN L2.05730 / RU L2.05731 calls the integer getter (RU R2.0114, unread;
+equal to EN by masked form) with the retained Palette string and stores
+the return at type DWORD +0x98. The EN window L2.05732..L2.05733, which
+uses the same frame slots [ebp-0x78], [ebp-0x3b0] and [ebp-0x3b8], names
+graphics\units\units.reg and Unit%d (Medium that one loader holds both;
+L2.05733..L2.05730 is unread). Its getter R2.0113 returns a found
+record's +4 when its type field ((+0xc & 0xe) >> 1) is 1; a record of
+another type reaches unread L2.05734; no record returns the supplied
+default, whose value for Palette is pushed before the window and unread.
+Name lookup L2.03131 and registry open L2.05735 are unread.
+
+The EN local creates type source palette slots by seeking 0x36 and reading
+1024 bytes. Its \palette%d.pal construction removes the first number;
+the sprite-directory and string helper bodies remain unread.
+
+EN map owner R2.0081 and unit L2.00192 have the server-side owner/key
+stores of R2-ENGINE-108/155/156. These different classes do not identify
+the client owner's +0x0c or client unit +0x24/+0x28 producers.
+
+**Confidence.** High for the paired local +0x98 stores and EN positive
+stores/read arguments. Medium for registry resolution, type-file paths
+and the composition with the prior map claims. Unknown for map-to-client
+production, START MISSION, Restart and mission 42's actual palette.
+
+**Unknown.** Read the native transfer/update/constructor paths, including
+indirect and bulk-copy routes, then mission 42's relevant map records.
+Read L2.03131 and path helpers to close the type resource composition.
+Unknown also includes the default pushed for Palette.
+
+**Evidence.** out/{en,ru}-type-selector-load-local.txt,
+out/en-unit-registry-open.txt, registry-integer-getter.txt,
+map-owner-builder.txt, map-unit-builder.txt, owner-constructor.txt and
+owner-registration.txt; palette-metadata.tsv supplies the string values.
+
+### R2-ENGINE-957
+
+The EN shared builder L2.04584 passes the retained
+graphics\units\humans\human.pal path to L2.03656 and 0x4000 bytes at
+L2.05736 to R2.0111 (helpers unread) and feeds source base + 1024*i,
+i=0..15, to preparation (16,2,1), appending each result. RU L2.04586
+has the same masked instruction forms; its source path string is unread.
+Both builders append, in the last iteration, a mode-5 palette from table 0
+with (16,5,0). EN append L2.04595
+forwards the current count to unread insert helper L2.05737. Initial
+emptiness and insert semantics remain unclosed; collection index i being
+the prepared source table i is Medium, as in R2-ENGINE-784.
+
+Dispatch tables select mode 2 at EN L2.05738 / RU L2.05739. With N=16,
+rows are written for L=16 down to 1. Each R/G/B channel reads source
+entry bytes +2/+1/+0, adds its current global byte, and computes
+clamp(trunc((C+T)*L*2/N),0,255). The fourth argument 1 retains the
+channel additions. The result is packed with current device channel
+widths and shifts; entry byte +3 is unread by this mode.
+
+**Confidence.** High for the read source stride, builder arguments,
+dispatch and arithmetic in both roots. Medium for the link from the retained
+path to the graphics.res entry (the resource helpers are unread), the
+collection-index composition and whole mission output. The comparison masks
+addresses and does not prove unexpanded callee or data-target equality.
+
+**Unknown.** Initial collection/insert behaviour, channel-byte and device
+mask writers. Read those producers; do not assume row 0 is source RGB.
+
+**Evidence.** out/{en,ru}-palette-build.txt, palette-conversion.txt and
+palette-metadata.tsv; out/en-palette-append.txt; R2-ASSET-226 measures the
+graphics.res entry that path names (Medium: the resource helpers are unread).
+
+### R2-ENGINE-958
+
+The byte-sprite class table slot +0x14 selects wrapper EN L2.05740 /
+RU L2.05741. With mirror zero it obtains the palette row through EN
+L2.02292 / RU L2.05742: [palette+8] + 512*shade. It passes the row to
+EN L2.00798 / RU L2.05743. Both complete normal bodies overwrite
+destination WORDs from row[index] for byte literals and preserve skipped
+pixels; they contain no destination-colour blend. Complete EN mirror
+L2.05744 also copies indexed WORDs in reversed horizontal order.
+
+The unit's normal calls pass the supplied shading argument; the paired
+hover predicate sets it to zero (R2-ENGINE-851). Stone Curse may replace
+the selected palette (R2-ENGINE-784). With mark 32 the call goes to slot
++0x34 when unread L2.02954 on view +0x9cc accepts the owner's +4, and the
+draw leaves without a sprite call otherwise; the slot +0x34 blitters
+were not read.
+
+**Confidence.** High for the two class cells, wrappers, row getters and
+complete normal blitters, plus the bounded EN mirror body. Medium for
+their complete ordinary-unit composition and address-masked EN/RU forms.
+Unknown for upstream light/shade production, special blitters, the second
+sprite/overlays and final device output. No absence claim covers them.
+
+**Unknown.** On mission 42 record one identified mage, its frame, source
+pixel index, owner/override, selected table/entry, shade, packed output
+and screen RGB before/after Restart in both originals. Static closure
+also needs the missing light, special and RU mirror bodies.
+
+**Evidence.** out/{en,ru}-palette-metadata.tsv,
+byte-sprite-palette-wrapper.txt, shade-row-getter.txt and
+byte-sprite-normal-blit.txt; out/en-byte-sprite-mirror-blit.txt,
+unit-sprite-calls.txt, shared-sprite-calls.txt and unit-sprite-lazy-load.txt.
