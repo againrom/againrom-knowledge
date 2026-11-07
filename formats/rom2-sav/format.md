@@ -1180,9 +1180,10 @@ Sacks readers. What the terrain-layer reader, the second world object and
 the script compiler take from the asset is Unknown. The client constructor
 builds two families of objects from the asset named in message 6: static
 objects from list +0x390, keyed entry +0x10 + 0x6000, and unit objects
-(Medium) from list +0x3a4, a 0x254 or 0x208 byte object and then a 0x1e4
-byte object keyed word entry +0x3c + 0x6000. The constructor beyond these
-loops is unread. — R2-ENGINE-616, R2-ENGINE-615
+from list +0x3a4: a 0x254 or 0x208 byte object (what it is, Medium) and then
+a 0x1e4 byte object keyed word entry +0x3c + 0x6000. The 0x1e4 object is the client object of
+the map-built unit with that +4. The constructor beyond these loops is
+unread. — R2-ENGINE-616, R2-ENGINE-615, R2-ENGINE-951
 
 LOAD rebuilds rather than reads: Building +0x3c from byte +0x40, base
 +0x18 cleared, each base self key entered in session +0xdc, the base link
@@ -1211,6 +1212,36 @@ enters the self key in the session; it keeps +4 as stored. Message 0x24
 finds the clicked structure by +4. — R2-ENGINE-857, R2-ENGINE-617,
 R2-ENGINE-618
 
+Base +4 is also the unit key, in both roots. The map build stores +8 = ALM
+unit word +0x3c and +4 = +8 + 0x6000. A unit created later takes the lowest
+clear ID of a 0x6000-bit map whose ID 0 is reserved, so 1..0x5fff. LOAD keeps
+the saved +4 (Medium). LOAD marks a nonzero loaded +4 below 0x6000 in that
+map through the base serializer (R2-ENGINE-857; Medium that every loaded unit
+reaches it). — R2-ENGINE-950, R2-ENGINE-953, R2-ENGINE-857
+
+After LOAD the join (Medium that it serves LOAD) sends message 6 and then
+every registry unit. Message 6
+gives each ALM unit entry a client object under key +0x3c + 0x6000 with
+object bit +0x1b8 0x80 set, also for an entry the server skipped. A unit
+message carries +4 at word +0x12 and the client looks it up. For keys of
+0x6000 or more the send-all mask holds no create bit, so the unit binds to its
+map object: field 1 sets object +0x104 from unit +0x94 (the shown health,
+Medium) and field 0x10 clears bit 0x80. Such a key with no map object gets no
+client object from send-all (whether it is drawn is Unknown). A key below
+0x6000 creates its object. — R2-ENGINE-951, R2-ENGINE-953
+
+Sight messages carry +4 at word +0xa: 0x74 sets and 0x69 clears object bit
+0x80 (read as hidden, Medium). With Session +0x74 nonzero a player whose
+WORD +0x30 bit is clear in unit +0x1a4 (read as cannot see, Medium) receives
+0x74 and the unit's other fields wait in unit +0x114. Message 0x6a removes the object by +4. A campaign keeps Session +0x74
+zero (Medium), so sight does not gate these messages there. The body that
+detects a sight change is Unknown. — R2-ENGINE-952, R2-ENGINE-953
+
+In the 16 original-made saves every unit outside players.0 and in the dead
+list stores +4 = +8 + 0x6000; the 21 units of players.0, the hero's player,
+store 1, 2 or 3, the hero 1. No unit of the hero's player carries a map key.
+— R2-SESSION-360
+
 The five original mission-10 files store +4 = +8 + 0x6000 in all 16
 structures (Pointer 24618). game1000 and game1236 store 2..17, and the
 original's resaves game0049 and game0048 write 2..17 back. With such a file
@@ -1229,8 +1260,10 @@ In the five files View is 8/29, Selection is [1], the Player-1 Human's
 base +4 and that of no other object in the Players and Buildings field
 table, and the book is open only in game0005 and game0006; game0006 alone
 restores a projectile. The restore asks for object 1 to be selected if the
-client object list holds it. Pause state and the camera meaning of View
-are Unknown. — R2-SESSION-244, R2-SESSION-245, R2-ENGINE-621
+client object list holds it; that list is keyed by unit +4, which LOAD keeps
+from the save (Medium). Pause state and the camera meaning of View
+are Unknown. — R2-SESSION-244, R2-SESSION-245, R2-ENGINE-621,
+R2-ENGINE-951
 
 Spell 29 (Slow) has data, an apply arm and cast ID 66, and the EN table
 L2.02137 has no row for it: the table omits rows 9, 14, 15, 28 and 29, and

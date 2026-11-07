@@ -11553,7 +11553,7 @@ generator of R2-ASSET-123 over them would settle which kinds they build.
 |---|---|---|---|---|
 | R2-ENGINE-523 | The ROM2 hire loop runs in the 0x468 case only when the current location record's DWORD +0 is 1; a call and .rdata-word pass finds one creator caller per root, so LOAD creates no hire (Medium). | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-524 | The ROM2 hire creator looks up 10000+10*ID in Humans (parameter 24), then Units (parameter 55), highest index first; a stage row 9998+10*ID+stage/10 replaces it when the family has suffix rows. | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
-| R2-ENGINE-525 | A ROM2 hire actor is built by row name, gets WORD +0x14c = ID, joins owner +0x24 in its own new Group, and keeps its row's typeID as class +0xe: 15, 5, 23, 100, 102, 101 or 26. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
+| R2-ENGINE-525 | A ROM2 hire actor is built by row name, gets WORD +0x14c = ID, joins owner +0x24 in its own new Group, and keeps its row's typeID as class +0xe: 15, 5, 23, 100, 102, 101 or 26. | High / Medium | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-526 | ROM2 victory's last owner loop resets actors of class 33..63 and detaches every other actor through L2.01670 and its virtual slot +4 with 1; every installed hire row's class is outside 33..63. | High / Medium | ● active | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-527 | The hire creator's last call is the EN unit-state sender: argument 3 is a field mask, 0xffb and two zeros feed two field helpers; the creator writes no coordinate, and the hire's cell is Unknown. | High / Unknown | ● active (amended) | [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/) |
 | R2-ENGINE-529 | ROM2 party placement starts at a random word of the receiver's +0xc0 drop list (x low, y high), or rand(70)+30 per axis when x*y is 0; radius trunc(max(5, sqrt(n)+4)), Medium, EN constants. | High / Medium | ● active | [EXP-2067](../experiments/EXP-2067-rom2-hire-placement/) |
@@ -11721,6 +11721,11 @@ were not read.
 scan of word stores to +0xe and of calls to `L2.02668` would settle it);
 the RU sender (its counterpart of `L2.01056`, found by a caller pass over
 the RU creator); the owner (a read of `L2.02681`, `L2.02682`, `L2.00223`).
+
+**Amended.** R2-ENGINE-950 reads `L2.02670`: it returns the lowest clear ID of a
+0x6000-bit map whose ID 0 is reserved. R2-ENGINE-953 finds the RU sender
+`L2.00060` equal to `L2.01056`, so the mask tests hold in RU; the virtual
+body behind `[obj+0x30]` stays unread. The other clauses and grades stand.
 
 **Evidence.** [EXP-2066](../experiments/EXP-2066-rom2-hire-entry/)
 
@@ -13989,7 +13994,7 @@ is the receiver of the mission entry.
 |---|---|---|---|---|
 | R2-ENGINE-613 | EN ROM2 mission entry R2.0026(1) after a mission-like LOAD skips the map caller and autosave, sends packet 4, ticks the server if app +0x5d4 is set, pumps until a type 0x64 message returns after type 6 built the map, restores REG state. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-614 | On that path EN ROM2 reads REG GameOptions, View X/Y, SpellBook, Objects Selection and Group0..9, Inventory, Projectiles and Fog into client and app fields; Fog is read only when CurrentState/InBattle is nonzero. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-ENGINE-615 | EN ROM2 client message 6 builds the client map through L2.01385: it opens the named ALM, copies grids, creates static objects (list +0x390, key entry +0x10 + 0x6000) and unit objects (list +0x3a4, key word +0x3c + 0x6000), frees it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-615 | EN ROM2 client message 6 builds the client map through L2.01385: it opens the named ALM, copies grids, creates static objects (list +0x390, key entry +0x10 + 0x6000) and unit objects (list +0x3a4, key word +0x3c + 0x6000), frees it. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-616 | EN ROM2 world half: the name at session +0x90 selects the ALM, which gives terrain size and tiles, goes to the script compiler and is freed; the document reader feeds the Unit, Building, effect and Sack readers; other uses are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-617 | After the EN ROM2 world half the unit registry L2.00325 calls each member's slot +0x24; the RU Human slot resolves saved keys at +0x40, +0x44, +0x5c, +0x64 and +0x68 through session +0xdc and stores 0 on a miss. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-618 | EN ROM2 Building Serialize L2.01659 stores base38, raw22 at +0x4a, +0x40 u8, +0x42/+0x44/+0x46 u16, +0x48/+0x60/+0x61 u8 and +0x64/+0x68 u32; LOAD rebuilds +0x3c from +0x40 and clears base +0x18. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
@@ -14144,6 +14149,13 @@ the meaning of the copied grids, for what the second-loop objects are (the
 roles of the 0x254, 0x208 and 0x1e4 objects and of `L2.02708` are unread;
 that they are units rests on the key range of R2-SESSION-245) and for the
 constructor instructions after the two loops.
+
+**Amended.** R2-ENGINE-951 reads the client unit arm, which finds the second loop's
+0x1e4-byte objects by the server unit's +4, and R2-ENGINE-950 the server map
+build, which gives a map-built unit +4 = ALM word +0x3c + 0x6000: the 0x1e4
+objects are the client objects of map-built units (High for the key path;
+what the 0x254 and 0x208 objects are stays Medium). R2-ENGINE-953 finds the
+RU loops equal to EN except four rows. The other clauses and grades stand.
 
 ### R2-ENGINE-616
 
@@ -24041,6 +24053,213 @@ Unknown what `L2.00058` and list +0x20 are.
 R2-ENGINE-535's Unknown on what the name test at `L2.01289` matches.
 
 **Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 5; listings `p1-*-death-*`, `p5-*-nametext-*`, `p5-*-nametest-*`, `p6-*-gencaller-*`, `p7-*-gencaller-*`, `p8-*`, `s1-*-call-*`, `s2-*`.
+
+## Unit keys, client binding and sight messages
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-950 | ROM2 map build stores unit +8 = ALM word +0x3c and +4 = +8 + 0x6000; a unit created later gets +4 = the lowest clear ID of a 0x6000-bit map with ID 0 reserved (EN L2.02670); LOAD keeps the saved +4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md) |
+| R2-ENGINE-951 | After ROM2 LOAD the client unit arm finds its object by packet word +0x12 = server +4 in client +0x9d0; message 6 made the 0x6000+ keys from ALM +0x3c; a miss without flag 0x20 or 0x80 (send-all's 0x6000+ mask) creates no client object. | High / Medium | ✔ promoted (branch candidate) | [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md) |
+| R2-ENGINE-952 | ROM2 sight messages 0x74 and 0x69 carry +0xa = unit +4 and set or clear client bit +0x1b8 0x80; with Session +0x74 nonzero a player that cannot see the unit gets only 0x74, the rest deferred; 0x6a deletes by +4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md) |
+| R2-ENGINE-953 | 16 of 20 ROM2 EN/RU body pairs for unit keys, client binding and sight are equal after masking addresses and frame offsets; the unit arm, message-6 loops, copy and join differ in app offsets, sizes and 9 RU arm rows. | High | ✔ promoted (branch candidate) | [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md) |
+
+### R2-ENGINE-950
+
+EN addresses. The RU map build, creator, ID map and registry adds are equal
+(R2-ENGINE-953); the call scans are EN only.
+
+- Map build `L2.00192` walks ALM list +0x3a4. It finds the owner by entry
+  word +0x14 (`L2.00308` on `L2.00292`); with no owner it logs the entry
+  (+0x14, +0x3c) and skips it. It skips the entry when Session DWORD +0x174
+  and owner DWORD +0x2c are both nonzero (`L2.04081..L2.04082`; what the two
+  fields hold is unread). It builds a 0x254-byte object when entry +0x48 has
+  bit 0x10, else a 0x208-byte object; +0x96 = entry word +0x22 unless -1;
+  +0x94 = entry word +0x20 unless -1, else +0x96; it places the unit through
+  `L2.00312` at (entry DWORD 0 >> 8, entry DWORD +4 >> 8) and on failure logs
+  and deletes it. On success it stores +8 = the sign-extended entry word +0x3c
+  (`L2.05669..L2.05670`) and calls `L2.00319` on the registry `L2.00325`,
+  which adds the unit and stores +4 = +8 + 0x6000 (`L2.05671..L2.05672`).
+  Then +0x14 = owner and the owner +0x24 list takes the unit (`L2.00202`).
+- The creator `L2.01062`, whose stores match the R2-ENGINE-525 creator's,
+  takes one of two arms by DWORD +0x94 of the object at `[ebp-0x58]` (its
+  source is unread). Nonzero: it places the unit
+  (`L2.00312`), deletes it on failure, else calls `L2.04536`, which adds it
+  to the registry and stores +4 = `L2.02670()` & 0xffff (`L2.05673..L2.05674`).
+  Zero: +4 = `L2.02670()` & 0xffff (`L2.05675..L2.05676`) with no registry
+  add. Both arms then store the owner at +0x14 and call the sender
+  `L2.01056` with field mask -1, recipient 0 (placed) or the owner.
+- ID map `L2.00339`, 0xc00 bytes: `L2.00335` zeroes it and sets DWORD 0 to
+  1, so ID 0 is never returned while that bit stays set. `L2.00336` sets and
+  `L2.03314` clears the bit of an ID below 0x6000 and do nothing for 0x6000
+  or more. `L2.02670` skips DWORDs equal to -1, returns 32 x DWORD index +
+  the lowest clear bit as a word, and sets that bit through `L2.00336`; its
+  scan has no end test.
+- A raw E8 scan of the EN image finds 2 calls of `L2.00319` (`L2.05677`,
+  `L2.05678`) and 5 of `L2.04536` (`L2.05679`, `L2.05680`, `L2.05681`,
+  `L2.05682`, `L2.05683`).
+- LOAD: the base serializer reads +4 from the save with no value test
+  (R2-ENGINE-857); the world half adds each loaded unit to the registry
+  through `L2.00202`, which stores no +4 (R2-ENGINE-617).
+
+Ranges: a map build key is 0x6000 + the ALM word, and a created ID is 1..0x5fff
+while the map has a clear bit below 0x6000.
+
+**Confidence.** High for the map build, `L2.00319`, `L2.04536`, the
+creator's two arms and the ID map bodies. Medium for the call census (a raw
+E8 scan; indirect calls and jump routes are not counted) and for the `L2.05677` caller,
+whose +8 source is unread. Medium that LOAD keeps +4: it rests on
+R2-ENGINE-857 and on no rewrite in the read LOAD bodies.
+
+**Unknown.** Who calls `L2.00335` and `L2.03314`, and which LOAD body calls
+`L2.00335` before the loaded units: R2-ENGINE-857 reads the base serializer
+`L2.03196` passing each nonzero loaded +4 to `L2.00336`, which marks IDs
+below 0x6000 (Medium that every loaded unit reaches that serializer).
+An E8 scan of the three addresses and a read of each caller settles it.
+What the 0x254 and 0x208 objects are and what `L2.05681`, `L2.05682`,
+`L2.05679`, `L2.05683` create are unread.
+
+**Amends.** R2-ENGINE-525's Unknown on the key `L2.02670`.
+
+**Evidence.** [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md)
+
+### R2-ENGINE-951
+
+EN addresses. The RU bodies are equal or differ only as R2-ENGINE-953 lists,
+except the dispatcher case `L2.05684` and the packet constructor `L2.05685`,
+which were read in EN only.
+
+- Server. The sender `L2.01056(unit, recipient, mask, ...)` fills a packet
+  built by `L2.05685` (type byte +9 0x6c, 0x6e, 0x6f or 0x70) with +7 =
+  recipient player +4, +0x12 = unit +4 and the field mask at +0x14.
+  When the unit's owner is not the recipient the mask is ANDed with
+  0xc08000fb (`L2.05686`); field 1 sends +0x94 (`L2.05687..L2.05688`).
+  When Session +0x74 is nonzero and unit +0x1a4 AND player WORD +0x30 is zero,
+  the sender ORs the mask into unit +0x114[player ID] when that ID is
+  0x10..0x1f, and sends nothing (`L2.05689..L2.05690`). After a send `L2.03771` marks the player sent and
+  clears that slot.
+- The join `L2.02723` (dispatcher case `L2.05684`: player from message
+  word +5, flag message DWORD +0xa = 0) sends type 6 with +0xa = server
+  +0xd4 and +7 = player +4, clears the player's bit (WORD +0x30) from WORD
+  +0x18 of every registry and list member (`L2.05691`, `L2.05692`), sends
+  the hero with mask -1 when player +0x38 is set, then calls send-all
+  `L2.05693(player)` and `L2.05694(hero, 0, 0)` (R2-ENGINE-952).
+- Send-all walks the registry `L2.00325` and the Session +0x7c +0xc list. The
+  mask is 0x100013 (registry) or 0x13 (list) for +4 of 0x6000 or more and
+  0xa35fffff for less, with 0x40 added when +0x204 is nonzero; list members
+  with byte +0x13c of 5 or more are skipped. Only the masks for keys below
+  0x6000 hold 0x20 and 0x80.
+- Client message 6 (`L2.03124`, R2-ENGINE-615): the ctor `L2.01385` creates
+  one 0x1e4-byte object per list +0x3a4 entry with no skip test, word +4 =
+  entry +0x3c + 0x6000, puts it in client +0x9d0 (`L2.00142` at `L2.03164`)
+  and sets +0x1b8 bit 0x80 (`L2.05695..L2.04877`); the 0x1e4 ctor `R2.0067`
+  stores +0x1b8 = 0. The copy `R2.0075` sets object +0x104 from the
+  template's +0x94 (`L2.05696..L2.05697`), and the loop fills that +0x94
+  from entry +0x20 or +0x96 as the server map build does.
+- Client unit arm `L2.00138` (types 0x6c, 0x6e, 0x6f, 0x70; pump index of
+  R2-ENGINE-069): key = packet word +0x12; lookup `L2.02998` in client +0x9d0
+  (`L2.05698`). A miss with mask AND 0xa0 zero leaves the arm
+  (`L2.05699..L2.05700`); a miss with either bit creates a 0x1e4-byte object,
+  enters it under the key (`L2.05701`) and stores word +4 (`L2.05702`). Field
+  1 stores +0x104 (`L2.05703..L2.05704`). Field 0x10 with a key of 0x6000 or
+  more clears +0x1b8 bit 0x80 (`L2.05705..L2.04870`). State 5 (table
+  `L2.04855` to `L2.04857`) removes the key and deletes the object only for a
+  key below 0x6000 (`L2.05706..L2.05707`).
+
+So after LOAD a unit keyed 0x6000 or more binds to the object message 6
+made from the ALM entry whose +0x3c + 0x6000 equals its saved +4, and gets
++0x104 and bit 0x80 cleared from send-all's mask; a unit below 0x6000 gets a
+new object. A unit keyed 0x6000 or more with no such entry gets no client
+object from send-all; a later message with bit 0x20 or 0x80 would create one,
+and whether such a unit is drawn rests on the unread draw list. An entry the server skipped keeps a client object with bit 0x80 set
+that no unit message reaches.
+
+**Confidence.** High for the read arms, the sender's packet fields and
+gate, send-all's masks and the join's calls. Medium that the dispatcher case
+is the client's type-4 message of R2-ENGINE-613 (shape only) and that
++0x104 is the shown health (its drawing reader is unread). Medium for the
+last paragraph: it composes the read bodies with R2-ENGINE-950's LOAD clause.
+
+**Unknown.** The reader of client +0x104 and of +0x1b8 bit 0x80 in drawing;
+whether the object message 6 leaves for a skipped entry is drawn; the
+virtual body `[obj+0x30]` the sender branches on (R2-ENGINE-525). A read of
+the client draw list settles the first two.
+
+**Amends.** R2-ENGINE-615's Medium on what the second-loop objects are, and
+R2-SESSION-245's Medium that the client key equals base +4.
+
+**Evidence.** [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md)
+
+### R2-ENGINE-952
+
+EN addresses; the RU bodies are equal (R2-ENGINE-953).
+
+- `L2.05694(unit, flag, player)` builds packet `L2.05708` with type 0x74
+  when flag is nonzero and 0x69 when it is zero, +0xa = unit +4 and +7 =
+  player +4. For a named player, when Session +0x74 is nonzero and unit
+  +0x1a4 AND player WORD +0x30 is zero, it ORs 0x40000000 into unit
+  +0x114[player ID] when that ID is 0x10..0x1f and sends only when flag is
+  nonzero; otherwise it sends.
+  With player 0 it applies the same to each player that `L2.03236` admits.
+- The sender `L2.01056` turns mask bit 0x40000000 into a call of
+  `L2.05694(unit, (+0x4c & 8) != 0, player)`, also made on the first send to
+  a player when +0x4c has bit 8 (`L2.05709..L2.05710`).
+- `L2.05711`, for a type 0x6b packet to a player that cannot see the unit
+  (the same +0x1a4 and +0x74 test), ORs 0x40000010 into +0x114[player ID]
+  and calls `L2.05694(unit, 1, player)` (`L2.05712..L2.05713`,
+  `L2.05714..L2.05715`).
+- Delete `L2.05716` sends type 0x6a with +0xa = unit +4 to each player for
+  which `L2.05717` (unit WORD +0x18 AND player WORD +0x30) is nonzero.
+- Client: the 0x69/0x74 arm `L2.05718` looks up +0xa in client +0x9d0; 0x74
+  sets +0x1b8 bit 0x80, 0x69 clears it, with no key range test; a miss does
+  nothing. The 0x6a arm `L2.05719` looks up +0xa, removes the key
+  (`L2.00144`) and deletes the object for any key.
+
+A unit that a player cannot see is therefore sent as 0x74 at once and its
+other fields wait in +0x114; message 6 starts every map object with bit 0x80
+set. With Session +0x74 zero, which a campaign keeps (R2-SESSION-198), the
+gates pass and units are sent regardless of +0x1a4.
+
+**Confidence.** High for the read bodies and the client arms. Medium that
+bit 0x80 hides the object and that +0x1a4 is the player's sight mask: both
+rest on the read setters and gates, not on a draw reader or the +0x1a4
+writer. Medium that a campaign keeps Session +0x74 zero (R2-SESSION-198).
+
+**Unknown.** Which body detects a unit leaving or entering sight (the +0x1a4
+writer), what replays +0x114, and who calls the delete `L2.05716`; a
+displacement scan of +0x1a4 and +0x114 and an E8 scan of `L2.05716` settle
+them. The meaning of +0x4c bit 8.
+
+**Evidence.** [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md)
+
+### R2-ENGINE-953
+
+The comparison masks every number of 0x400000 or more and every `[ebp -
+n]` offset (level 1) and also the general register names (level 2), then
+aligns the EN and RU instruction rows. Images: EN SHA256
+0eaa9673d74d26dcf245d7233da5757a88769ecfe3cc1a706f34fb4e93c1b0c7, RU
+0bda594428a021a8def38c2a1844184d28071d0f5f6402946bd5f43242e9f109.
+
+- Equal at both levels, same instruction count: the 0x73, 0x6a and
+  0x69/0x74 client arms, the key map `L2.02998` (RU `L2.05720`), the 0x1e4
+  ctor, the creator and ID map (RU `L2.05721..L2.05722`, `L2.02670` at RU
+  `L2.01287`), the sender `L2.01056` (RU `L2.00060`), `L2.05711`
+  (RU `L2.05723`), send-all (RU `L2.05724`), delete (RU `L2.05725`),
+  `L2.05694` (RU `L2.05726`), `L2.05717` (RU `L2.05727`), the list and
+  registry bit clears, the registry adds and the map build `L2.00192` (RU
+  `L2.00115`).
+- Unit arm `L2.00138` / RU `L2.00139` (1579 / 1588 instructions): 22 rows
+  differ at level 2. App +0x5d8 is RU +0x63c (4 rows); offsets +0x48c..+0x498
+  are RU +0x4a4..+0x4b0, +0x404 is +0x41c, +0x450 is +0x468, +0x598 is
+  +0x5f8; RU inserts 9 rows at `L2.04833..L2.05728` that test +0x3f4, +0x3bc
+  and +0x3c8 of the object at `[ebp-0x14]` in the arm's state 2..4 branch.
+- Message-6 loops (`L2.01385..L2.03159`): 4 rows, pushes 0x88 / 0x8c and
+  0x6c / 0x70 (twice) and app +0x5d8 / +0x63c. Copy `R2.0075`: frame size
+  0x150 / 0x15c. Join `L2.02723`: one push, 0x40f / 0x410.
+
+**Confidence.** High for the equality as measured over these windows. What
+the differing pushes and the RU-inserted tests mean is unread.
+
+**Evidence.** [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md)
 
 ## Route failure and the unreachable target
 

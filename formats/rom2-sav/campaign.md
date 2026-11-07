@@ -555,10 +555,11 @@ Players collection's head getter returns (the hero's where the map build
 reuses it, Medium). Every hire class is outside 33..63, so the victory
 transition detaches hires (Medium). The unit-state sender clears the field
 bit that sends +0x14c when Session +0x74 is nonzero (Humans hires always,
-Units hires when the key is 0x6000 or more; EN only). The creator writes no
-cell. A store census finds no campaign writer that sets Session +0x74, so in
+Units hires when the key is 0x6000 or more; the RU sender is equal). The
+creator takes the key from the lowest clear ID of a 0x6000-bit map. The
+creator writes no cell. A store census finds no campaign writer that sets Session +0x74, so in
 a campaign the bit stays set (Medium). — R2-ENGINE-525, R2-ENGINE-526,
-R2-ENGINE-527, R2-SESSION-198
+R2-ENGINE-527, R2-SESSION-198, R2-ENGINE-950, R2-ENGINE-953
 
 Party placement and positioning bodies are read, and that a campaign hire
 reaches them is Unknown. Party placement fixes one start point for the

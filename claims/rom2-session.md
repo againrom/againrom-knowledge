@@ -3322,7 +3322,7 @@ order.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-244 | Five EN ROM2 mission-like saves store CurrentState/InBattle 1, View 8/29, Selection [1] and no Group keys, and Fog runs over 6400 cells; the book is open in game0005/0006, Speed is 4 or 8, and only game0006 stores a projectile. | High | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-SESSION-245 | In each of the five EN ROM2 mission-like saves Selection ID 1 equals base +4 of the Player-1 Group-0 Human and of no other object in the Players and Buildings field table; game0006's projectile target 24598 is base +4 of a Player-3 unit. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-SESSION-245 | In each of the five EN ROM2 mission-like saves Selection ID 1 equals base +4 of the Player-1 Group-0 Human and of no other object in the Players and Buildings field table; game0006's projectile target 24598 is base +4 of a Player-3 unit. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 
 ### R2-SESSION-244
 
@@ -3365,6 +3365,11 @@ object key of R2-ENGINE-614 equals base +4: the client unit creation message
 was not read; the key range agrees with the unit objects of the second
 creation loop of R2-ENGINE-615 (word entry +0x3c + 0x6000) and with
 R2-ENGINE-618.
+
+**Amended.** R2-ENGINE-951 reads the sender storing unit +4 at packet word +0x12 and the
+client unit arm keying its object list on that word: the client object key
+equals the server unit's +4 (High for those bodies); that it equals the saved
+base +4 after LOAD is Medium (R2-ENGINE-950's LOAD clause). The other clauses and grades stand.
 
 ## Slot 773 and the party after the stage-30 talk
 
@@ -5653,6 +5658,49 @@ same hero (row and type only).
 **Evidence.** [EXP-2130](../experiments/EXP-2130-rom2-dragonout-crash/RESULTS.md),
 questions 4 and 5; `out/units.tsv`, `out/groups.tsv`, `out/census.tsv`,
 `out/failing-record.tsv`, `out/comparison.tsv`.
+
+## Unit keys in original saves
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-360 | In the 16 original-made ROM2 saves of 2026-10-30, 475 of 496 Unit and Human records store +4 = +8 + 0x6000 (all of players.1..7 and the dead list); the 21 of players.0, the hero's player, store 1, 2 or 3. | High | ✔ promoted (branch candidate) | [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md) |
+
+### R2-SESSION-360
+
+Population: the nine saves of the first original folder and the seven of
+the second, each matched to its folder's `MANIFEST.sha256` by full SHA256
+(hashes in the experiment's `save-inputs.tsv`), read by the EXP-2126 SAV walk
+with the EXP-2026 stream programmes. Missions: 0 (game0000, game0002,
+game0003, game9998 of the first; game0008, game0011, game9998 of the
+second), 10, 20 and 30.
+
+- 496 Unit and Human records: 493 under `players.N` and 3 in the dead list
+  (game0006 dead.0 +4 24597 with +8 21; game0010 dead.0 24616 / 40 and dead.1
+  24618 / 42).
+- 475 records store +4 = +8 + 0x6000, +4 of 0x6000 or more: every record of
+  players.1..7 (472) and the 3 dead-list records.
+- 21 records belong to players.0, whose +0x38 equals the hero's saved self
+  key in all 16 saves, and store +4 below 0x6000: the hero +4 = 1 in all 16
+  saves; +4 = 2 (class +0xe 33, +8 0) in game0012, game9998 and game9999 of
+  the second folder; +4 = 3 (class +0xe 15, +8 58) in game0012 and game9999
+  of the second folder. None of players.0 stores a key of 0x6000 or more.
+- WORD +0x18 is 2 in all 496 records; players.0 stores WORD +0x30 = 2 and
+  players.1..7 store 0.
+
+So the population holds no unit of the hero's player with a map key; that it
+holds no map-built unit of that player is Medium: by R2-ENGINE-950 such a unit
+would store +4 = +8 + 0x6000, and that LOAD keeps +4 is Medium there.
+
+**Confidence.** High for the values as generated and reproduced. That no
+such unit exists in these missions' maps is not claimed: the ALM unit
+entries owned by the hero's player were not read.
+
+**Unknown.** Whether the ALM files of missions 10, 20 and 30 place a unit
+for the hero's player, and whether the map build's skip test (Session +0x174
+and owner +0x2c, R2-ENGINE-950) drops it; a read of the `scenario.res` ALM
+unit lists and of the two fields' writers settles it.
+
+**Evidence.** [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md)
 
 ## Route-failure fields in original saves
 
