@@ -24738,8 +24738,8 @@ EN apply L2.04138 has six extra instructions at L2.04139..L2.04140: load the Hum
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-955 | ROM2 unit draw selects shared or type palettes by type DWORD +0x98. | High / Medium | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
-| R2-ENGINE-956 | The ROM2 type-loader local stores the Palette getter result at +0x98; mission field production stays open. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ENGINE-955 | ROM2 unit draw selects shared or type palettes by type DWORD +0x98. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ENGINE-956 | The ROM2 type-loader local stores the Palette getter result at +0x98; mission field production stays open. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 | R2-ENGINE-957 | ROM2 mode 2 builds descending brightness rows with channel additions and device packing. | High / Medium | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 | R2-ENGINE-958 | The read normal ROM2 byte blitters copy indexed colours from a 512-byte shade row. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 
@@ -24763,6 +24763,10 @@ Read the map-to-client transfer and the mage's map/type records.
 
 **Evidence.** out/{en,ru}-unit-draw-inputs.txt, unit-palette-choice.txt and
 owner-colour.txt; out/en-palette-getters.txt and palette-collection-get.txt.
+
+**Amended.** R2-ENGINE-963, R2-ENGINE-964, R2-ENGINE-965 and
+R2-ENGINE-966 add bounded producer paths and identify four mission-42
+records. Complete event ordering and their actual selected table remain Unknown.
 
 ### R2-ENGINE-956
 
@@ -24799,6 +24803,10 @@ Unknown also includes the default pushed for Palette.
 out/en-unit-registry-open.txt, registry-integer-getter.txt,
 map-owner-builder.txt, map-unit-builder.txt, owner-constructor.txt and
 owner-registration.txt; palette-metadata.tsv supplies the string values.
+
+**Amended.** R2-ENGINE-963, R2-ENGINE-964, R2-ENGINE-965 and
+R2-ENGINE-966 add bounded producer paths and identify four mission-42
+records. Complete event ordering and their actual selected table remain Unknown.
 
 ### R2-ENGINE-957
 
@@ -24982,3 +24990,139 @@ item arm.
 bodies outside the pairs is not claimed.
 
 **Evidence.** EXP-2135 `out/compare/en-ru.tsv` over stage01, stage04 and stage05 listings.
+
+## Mission palette field producers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-963 | ROM2's read map-player path preserves file colour through server +0xa44 minus one into a newly constructed EN client owner's +0x0c; event order remains open. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
+| R2-ENGINE-964 | The read ROM2 client copier stores server type +0x0e at +0x24 and passes variant +0x4b to the +0x28 setter; the EN map loop builds these inputs from template parameters. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
+| R2-ENGINE-965 | The EN unit sender appends type then variant under mask 0x20; client creation uses the setter, while one conditional existing-unit arm writes +0x28 directly. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
+| R2-ENGINE-966 | Mission 42's retained EN/RU map census identifies four type-24 person records owned by 4; their client variant and actual selected palette remain Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
+
+### R2-ENGINE-963
+
+The ALM dispatcher selects type 5 at EN L2.05794 / RU L2.05795. Its first
+DWORD read goes to the map player row's +0x0c; the next DWORD goes to +0x34,
+the third to +0x10. It sets row +4 to the one-based ordinal. The EN server
+builder R2.0081 stores the low byte of row +0x0c + 1 at Player +0xa44.
+Sender L2.05796 writes message 0x96 bytes +0xa = Player +4, +0xb = Player +8,
+and +0xc = Player +0xa44 - 1. Client arm L2.04972 extracts these bytes;
+for a missing owner it passes the third byte as argument 2 to L2.05797,
+which stores it at owner +0x0c. The existing-owner branch does not establish
+the same store. The EN local at L2.04458 can replace server +0xa44 from
+a local value before sending 0x96; its complete selection path is unread.
+
+For mission 42, map owner ordinals 1..6 have file colour values 1,1,2,3,4,5
+in both retained maps. Conditional on the read map-store and new-owner
+message path, these become server bytes 2,2,3,4,5,6 and client +0x0c
+values 1,1,2,3,4,5. These are not observed tick-0 client values.
+
+**Confidence.** High for the listed local EN instructions and paired type-5
+reads. Medium for the composition: collection helpers and the complete
+writer/order population are not closed. The displacement/immediate scan
+of EN .text is a Capstone linear sweep, not a complete writer census;
+indirect, embedded-base and bulk-copy routes remain open. Unknown for
+complete START MISSION/Restart reachability and final owner values.
+
+**Amends.** R2-ENGINE-955 and R2-ENGINE-956's open producer question, without
+changing their draw-selector branches.
+
+**Evidence.** Stage01 en-server-map-owner; stage03 en-player-message-arms;
+stage04 en-client-owner-constructor and en-player-colour-touches;
+stage05 owners.tsv and en-server-player-sender; stage06 paired alm-loader;
+stage07 tables.tsv and en-join-colour-local; out/derived/mission42-owners-conditional.tsv.
+
+### R2-ENGINE-964
+
+EN R2.0075 / RU R2.0076 zero-extends server WORD +0x0e to client DWORD
++0x24 and calls EN L2.03694 / RU L2.04864 with server BYTE +0x4b. The setter
+stores the argument at +0x28. Types 0x20..0x3f become client type 1 with
+flags derived from the incoming type. Types below 0x1a clear bit 0x80
+from +0x28 and put it in flags; other types retain the argument.
+
+The EN map loop L2.05798 builds a temporary Unit or Human. Its Human arm
+looks up the row using map row +0x10 and reads its parameters through
+L2.00219. That routine passes the address of WORD +0x0e to L2.02668 and
+BYTE +0x4b to L2.05799, in successive parameter-reader calls. The iterator
+starts at index 0; binding these calls to parameter slots 16 and 17 by the
+read call sequence is Medium. The read prefixes skip the target store when
+getter EN L2.05800 / RU L2.01294 returns -1. EN L2.05801, L2.05799 and
+L2.05802 have visible index writebacks. The retained prefix of EN L2.02668 /
+RU L2.01281 computes index + 1 but ends before its writeback and return.
+Binding the following call to slot 17 is Medium, conditional on that unread
+tail and getter. The loop can OR parameter 18 into bit 0x80 of
+the temporary variant. EN L2.03389 calls the client copier. Named-human
+template R2.0088 also reads these parameters, but has further name/session
+dependent type/variant branches; it is not identical to the map preview loop.
+
+**Confidence.** High for the paired copier/setter stores and the observed
+reader-prefix instructions. Medium for numeric parameter binding, including
+the unread WORD-reader tail and getter, and for complete map composition.
+L2.05800, constructor effects, virtual calls, later writes and bulk copies
+remain unclosed. Unknown for the full START MISSION, Restart and LOAD writer/order
+population and mission-42 template slot 17 values.
+
+**Amends.** R2-ENGINE-955 and R2-ENGINE-956's open unit-producer question.
+R2-ENGINE-961 remains the authority for its temporary-object observations.
+
+**Evidence.** Stage03 paired-with-stage05 client-unit-copy and mission-unit-loop;
+stage04 en-client-variant-setter; stage05 en-human-parameters;
+stage06 ru-client-variant-setter and paired human-template;
+stage07 en-parameter-iterator, paired parameter-readers and en-actor-builder.
+
+### R2-ENGINE-965
+
+EN sender L2.01056, under mask 0x20, appends the low byte returned by
+L2.05803, then server BYTE +0x4b. The getter returns WORD +0x0e. Byte
+append L2.05804 writes at packet +0x18 + current length and increments
+the length. The client reads type and variant into DWORD globals
+L2.05805 and L2.05806 in that order. A new object receives +0x24 from
+the first and calls L2.03694 with the second, or uses a server-object
+copy when that branch supplies one. Mask 0x40 sets owner pointer +0x14
+through the client owner collection.
+
+At EN L2.05807..L2.04304, an existing-object test, session +0x404 bit
+0x200 and mask 0x20 guard a direct store of global L2.05806 to unit
++0x28 at L2.05808. This store does not call the creation-time setter.
+No claim equates its reachability with all normal state messages.
+
+**Confidence.** High for the positive EN local stores, byte order and named
+getter/append bodies. Medium for the complete object/message composition:
+owner collection helpers and event ordering remain open. Unknown for all
+indirect/bulk-copy writers, LOAD's complete path and final mission state.
+
+**Amends.** R2-ENGINE-955 and R2-ENGINE-956's open transfer question.
+
+**Evidence.** Stage03 en-server-unit-sender and en-unit-message-prefix;
+stage04 en-unit-type-getter and en-packet-field-append;
+stage07 en-client-unit-arm-tail-aligned. The direct update store is in
+stage03, not the stage07 continuation.
+
+### R2-ENGINE-966
+
+The retained mission-42 census has 89 unit records per root. Selecting
+person records with map WORD +8 and joined template parameter 16 in
+{23,24} yields records 1,2,86,87, all type 24 and owner 4. Their definition
+keys and raw x/y positions are respectively 2121 at 14720/17792,
+2023 at 27776/32128, 2126 at 30336/32128 and 2121 at 27520/33920.
+The template join uses the retained numeric map records, not a substring
+of a template name. It reuses the earlier census at its existing grade.
+
+The measured EN Unit24 registry directory contains Palette = 5. Composing
+that measurement with R2-ENGINE-955/956 conditionally selects a type
+palette indexed by client +0x28 - 1, not the shared owner-colour branch.
+The actual +0x28 of these four records is unmeasured. Conditional owner
+colour 3 for owner ordinal 4 does not establish their palette or screen colour.
+
+**Confidence.** Medium for identity and the composed type-resource/selector
+binding. Unknown for the actual selected table after START MISSION,
+Restart or LOAD, and for a hood pixel's screen colour. No runtime or save
+read was performed. The two permitted save collections contain no mission 42.
+
+**Amends.** R2-ENGINE-955 and R2-ENGINE-956's mission-42 scope remains open
+for actual selection; this claim narrows the required unit population.
+
+**Evidence.** out/derived/mission42-mages.tsv and reused-inputs.tsv;
+stage05 population.tsv, units-reg.tsv and data-inputs.tsv;
+the reused mission-42 rows of the EN/RU unit censuses from EXP-2127.

@@ -62,10 +62,41 @@ palette 0; other values select type palette `unit DWORD +0x28 - 1`
 and that unit +0x14 is the owner object).
 The owner getter returns that field directly. The type-loader local
 stores the `Palette` integer getter's return in +0x98. Unknown includes
-the default pushed for Palette. Mission-map to client production of the
-owner colour and unit fields, START MISSION,
-Restart and mission 42's actual values remain Unknown. — R2-ENGINE-955,
+the default pushed for Palette. The bounded producer paths below do not
+close event ordering on START MISSION, Restart or LOAD, or mission 42's
+actual selected table. — R2-ENGINE-955,
 R2-ENGINE-956
+
+The read map-player path takes the first file DWORD as row +0x0c. Its
+server builder stores row +0x0c + 1 at Player byte +0xa44; message 0x96
+sends that byte minus one. A missing EN client owner receives the message
+colour at +0x0c. For map owner ordinals 1..6 of mission 42 the conditional
+client values are 1,1,2,3,4,5 in both maps. A separate read server local can
+replace +0xa44. Complete writer/order coverage remains open (High for
+positive local stores, Medium for the composition). — R2-ENGINE-963
+
+The client copier stores server WORD +0x0e as DWORD +0x24 and passes server
+BYTE +0x4b to the +0x28 setter. For types below 0x1a that setter removes
+bit 0x80; types 0x20..0x3f become client type 1 with separate flags. The
+EN map loop's binding of these inputs to successive template parameter slots
+16 and 17 is Medium, with a conditional bit-0x80 addition from slot 18.
+The retained WORD-reader prefix EN L2.02668 / RU L2.01281 computes index + 1
+but ends before its writeback and return; its tail is unread. The parameter
+getter and complete constructor/write population remain open. The EN
+sender transmits type then variant under mask 0x20. One conditional
+existing-unit client arm writes +0x28 directly, bypassing the creation
+setter (High for the paired copier/setter stores, observed reader-prefix
+instructions and EN transfer stores; Medium for numeric parameter binding,
+including the unread WORD-reader tail and getter, and full composition).
+— R2-ENGINE-964, R2-ENGINE-965
+
+Mission 42's retained numeric map/template join identifies four type-24
+person records owned by 4: records 1,2,86,87 at raw positions
+14720/17792, 27776/32128, 30336/32128 and 27520/33920. The measured EN
+Unit24 Palette value is 5, conditionally selecting type palette
+`client +0x28 - 1`. Their actual +0x28 and table remain Unknown; the
+conditional owner colour 3 does not settle their hood colour (Medium
+for identity and composition). — R2-ENGINE-966, R2-ENGINE-955, R2-ENGINE-956
 
 `graphics/units/humans/human.pal` has 16 tables of 256 B,G,R,X entries,
 1024 bytes per table, and is byte-equal in EN and RU. The EN shared builder
