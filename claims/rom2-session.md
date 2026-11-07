@@ -5682,3 +5682,22 @@ reproduced (the reproduction stopped at the scan limit before the saves), and
 the save reader.
 
 **Evidence.** [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md)
+## Human saved modifier attack bytes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-358 | ROM2 Human raw64 +0xd4 holds modifier to-hit at block +0x12/+0x13 and damage base/spread at +0x20/+0x21; the read Unit SAVE/LOAD transfers it before held-item references; complete post-LOAD order is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md) |
+
+### R2-SESSION-358
+
+The brief's UD4 denotes the raw 64-byte block at Human +0xd4. Block +0x12/+0x13 is word Human +0xe6, block +0x20 is byte +0xf4, block +0x21 is byte +0xf5. These are modifier fields, distinct from the saved live attack block at +0xa6. R2-ENGINE-947 and R2-ENGINE-946 establish the listed equip and Effect-49 writes; the tag-49 arm itself changes base only. These coordinates are arithmetic on the raw 64-byte transfer at +0xd4 (R2-ENGINE-209 step 4); the SAVE/LOAD body does not address fields inside the block, and the fold reads block +0x12 as the attack block.
+
+RU Unit SAVE/LOAD L2.01161 calls block transfer L2.04278 on +0xd4 at L2.05668, before held +0x74/+0x78. The helper is listed in stage01 and selects 64-byte raw write/read by archive direction. This reuses R2-ENGINE-209's RU archive-transfer authority. EN L2.01090 calls its matching helper L2.01094; its block transfer is listed in stage02. The Weapon's own raw attack blocks are transferred by RU L2.01178 / EN L2.05355, not rebuilt by a direct fill/equip call in those local bodies.
+
+Conditional on the ordinary equip route completing and no later writer, saved modifier base is its pre-existing contribution plus Weapon base plus every delivered generic operand of the Weapon's tag-13, tag-43 and tag-49 children, modulo 256. Delivered tag 49 alone adds nothing to modifier to-hit or spread. SAVE reads the current block at that call site; it does not derive it from Weapon data there.
+
+**Confidence.** High for coordinates, RU raw transfer and local ordering, using complete prior archive authority plus the newly committed local listings. Medium for the complete equipment-to-SAV result and EN archive semantics through masked helpers. Unknown for whole-session last-writer and LOAD continuation: object-reference reconstruction, Item/Effect LOAD, Human postload and later updates are unread. No original save with the questioned child was measured.
+
+**Unknown.** Whether a complete cold LOAD later changes or reapplies these values. Read the reconstruction/postload chain and compare a controlled original-made save before/after cold LOAD, one update, unequip and resave; the exact case is specified in the evidence experiment.
+
+**Evidence.** [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md), stage01 RU block transfer, stage02 EN block transfer and Unit bodies, stage04 Weapon bodies; R2-ENGINE-208/209/210 retain their existing grades.

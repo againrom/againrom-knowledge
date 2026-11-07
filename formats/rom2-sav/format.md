@@ -1691,3 +1691,45 @@ mana-gated bit-4 routines have unread callers, L2.00201 is bypassed by a unit
 with a book, and state 0xd and the four book-choice callees are unread). A cold
 LOAD of game1200 in the original, watching for ranged casts and resaving to
 compare +0x4c, would settle it and has not been run. — R2-ENGINE-907
+
+### Human modifier to-hit and damage with held effects
+
+The Human raw64 block at object +0xd4 (UD4) contains modifier to-hit word
+at block +0x12/+0x13 (object +0xe6), damage base byte +0x20 (+0xf4) and
+spread byte +0x21 (+0xf5). These differ from live attack +0xa6/+0xb4/+0xb5.
+The read Unit transfer writes or reads the block before held-item references.
+RU transfer and local order are High; the composed equipment-to-SAV result
+and EN helper semantics are Medium. Whole-session last-writer and post-LOAD
+order are Unknown. The coordinates are arithmetic on the raw 64-byte transfer.
+— R2-SESSION-358
+
+For descriptor parameter 5 below 10, the read equip bodies add Weapon
+to-hit/base/spread to those modifier fields, modulo 65536/256/256. Sources
+are RU +0x5a/+0x68/+0x69 and EN +0x56/+0x64/+0x65. Equip calls recompute,
+then child start; removal calls child end before subtracting the Weapon
+fields and recomputing. Call order is High in RU; in EN the slot +0x58
+recompute and Weapon slots are bound by RU correspondence (Medium).
+Complete child traversal, the parameter binding and all-event coverage are
+Medium; map construction and initial modifier values are Unknown.
+— R2-ENGINE-947
+
+In both read Effect apply bodies, tag 49 shares the arm of tags 13 and 43
+and adds the scaled operand to modifier base modulo 256. That arm writes
+neither modifier to-hit nor spread. Flags 1/2/4 select signed16 +0x40, otherwise dword +0x40;
+the generic start/end route supplies multiplier +1/-1 and excludes Effect
++0xc values 6, 14 and 15. The local branches are High. Other consumers of
+tag 49 are Unknown. — R2-ENGINE-946
+
+Recompute builds live attack from attributes and skills, then folds the
+modifier block into it; it does not store the derived live base at the
+modifier-base store listed above. Local fold stores are High; formulas
+containing unread power/conversion helpers remain Medium. The earlier
+weapon formula is amended for child and pre-existing modifier terms.
+R2-ENGINE-479's formula stays Medium / Unknown.
+— R2-ENGINE-948, R2-ENGINE-479 (amended)
+
+The complete apply bodies are not identical: EN has six extra instructions
+that clear signed Human word +0xd8 when greater than 24. The other 870
+instructions match RU after absolute-address masking. This local difference
+is High; callee equivalence is Medium and its full scheduling/player effect
+is Unknown. — R2-ENGINE-949

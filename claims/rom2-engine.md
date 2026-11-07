@@ -9920,7 +9920,7 @@ only; reading them in RU would settle it.
 |---|---|---|---|---|
 | R2-ENGINE-477 | A ROM2 weapon blow on a unit hits when attack value + U[0,200] - 100 exceeds the target's defence word, when that roll term is at least 90, or when the attacker has unit flag 0x10; a blow on a structure takes no roll. | High / Medium | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-478 | A ROM2 weapon hit deals base + U[0,spread], minus absorption, then cut by the target's percentage byte for the attack type as trunc(v(100-a)/100 + 0.75); the unit strike subtracts the sum of the block's parts from health +0x94. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
-| R2-ENGINE-479 | In RU, a ROM2 human's attack value is trunc((1.1^Body + 1.1^Reaction)/5) + 3 skill[t] + weapon toHit; damage base trunc(1.1^Body/20) + skill[t]/5 + weapon base; spread trunc(1.1^Body/20) + weapon spread. (Medium.) | Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-479 | In RU, a ROM2 human's attack value is trunc((1.1^Body + 1.1^Reaction)/5) + 3 skill[t] + weapon toHit; damage base trunc(1.1^Body/20) + skill[t]/5 + weapon base; spread trunc(1.1^Body/20) + weapon spread. (Medium.) | Medium / Unknown | ● active (amended) | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-480 | A ROM2 weapon hit pays a fighter trunc(V x 0.5 x D / HPmax + 1), V victim value +0x1c, scaled by Mind/30 + 0.25, cut for repeated victim kinds (Medium) and off-main skills, into the weapon's skill; a mage's weapon hit pays none (Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-481 | The ROM2 strike body `L2.02313` resolves a melee or ranged weapon blow within range byte +0x12c, calls no object constructor and subtracts the damage in the same call (no projectile object and a cast object on a surviving target: Medium). | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-482 | ROM2 EN and RU strike, resolver, structure resolver, damage object, experience and recompute attack bodies agree after address masking, except an RU-only refusal against a target whose byte +0x4a is 3 and an RU-only bookkeeping gate. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
@@ -10050,6 +10050,12 @@ that passes through the fold tail of `L2.02321` past `L2.02326` (unread),
 where the magic kind byte would be carried. Medium in EN for the recompute
 section, equal after masking with its constants unread. Unknown in EN for the
 weapon fill, equip and fold, which were not located.
+
+**Amended.** R2-ENGINE-947/948 read the RU fold tail and the EN fill,
+equip, remove and fold bodies, narrowing those local-body Unknowns.
+R2-ENGINE-946 establishes the tag-49 addition to the modifier base;
+the formulas above omit child-effect and other pre-existing modifier terms.
+The power helper, table-record values and whole-event coverage remain open.
 
 **Unknown.** The body of `L2.02322`; the fold tail of `L2.02321`; the
 class-record doubles per item byte value; the binding of BareHands (Weapons
@@ -24456,3 +24462,55 @@ clause that creature-table units keep constructor values; R2-ENGINE-872's
 Unknown on the order a creature holds.
 
 **Evidence.** [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md)
+## Human held-weapon modifier damage base
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-946 | The read ROM2 EN/RU Effect tag-49 arm adds its scaled operand to Human +0xf4 modulo 256, then calls slot +0x58; the arm, shared with tags 13 and 43, stores to neither +0xe6 nor +0xf5. | High | ✔ promoted (branch candidate) | [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md) |
+| R2-ENGINE-947 | In the read ROM2 equip/remove bodies, Weapon fields add to or subtract from Human +0xe6/+0xf4/+0xf5 for parameter 5 below 10; child start runs after equip's recompute, child end before removal's subtraction. | High / Medium | ✔ promoted (branch candidate) | [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md) |
+| R2-ENGINE-948 | ROM2 Human recompute builds live attack +0xa6/+0xb4/+0xb5, then folds modifier +0xe6/+0xf4/+0xf5 into it by word/byte addition; the listed fold and recompute bodies agree after masking in EN and RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md) |
+| R2-ENGINE-949 | The read ROM2 EN Effect apply has six extra prologue instructions: clear signed Human word +0xd8 if above 24; its other 870 instructions match RU after address masking, including tag 49's base addition. | High / Medium | ✔ promoted (branch candidate) | [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md) |
+
+### R2-ENGINE-946
+
+RU Effect apply L2.00054 uses its table L2.01909: tags 13, 43 and 49 all target L2.05649; EN L2.04138 uses table L2.04137: all target L2.05650. The switch byte is Effect +0x3c, the tag of R2-ENGINE-403; R2-ENGINE-414 names tags 13, 43 and 49 damagemin, damage and damagebonus. The shared arm adds the low byte of its scaled operand to Human +0xf4, sets +0x150 mask 0x20000 and reaches the common Human slot +0x58 call. The arm (RU L2.05649..L2.05651, EN L2.05650..L2.05652) has no store to to-hit +0xe6 or spread +0xf5; this negative covers the arm, not the slot +0x58 recompute or its unread callees. Tag 12 adds to word +0xe6 and tag 14 to byte +0xf5 in separate arms.
+
+The scaled operand is argument times signed16(Effect +0x40) when flags +0x3d contain any of masks 1/2/4, otherwise argument times dword +0x40. Flags and tables were read in both roots. Effect slot 16's generic route passes +1 to slot 18, slot 17's generic route -1. These routes exclude Effect +0xc values 6, 14 and 15. Low-byte addition wraps modulo 256 and adds nothing to the spread or to-hit fields in this arm.
+
+**Confidence.** High for these finite local branches and both roots: raw instruction listings, actual dispatch cells and complete local start/end/apply paths are committed. EN apply is assembled from its stage02 body and stage03 epilogue/table window. Stage02's guessed table is not a table and is excluded. Complete child traversal is Medium in R2-ENGINE-947; this claim does not enumerate every tag-49 consumer.
+
+**Unknown.** All other consumers, non-generic +0xc cases, and a native save under the questioned equipped child. A controlled equip/SAVE/LOAD/unequip case would settle the composed behavior.
+
+**Evidence.** EXP-2132 stage01 RU apply/table, stage02 EN apply, stage03 start/end and corrected EN table, stage04 constructors and stage05 EN vtable.
+
+### R2-ENGINE-947
+
+Equip RU L2.01314 / EN L2.05653, for descriptor parameter 5 below 10, adds Weapon to-hit u16 +0x5a / +0x56 to Human +0xe6, base u8 +0x68 / +0x64 to +0xf4 and spread u8 +0x69 / +0x65 to +0xf5. It calls Human slot +0x58, then item-child start RU L2.05654 / EN L2.05655. That loop takes Item +0x20 and invokes each returned object's slot +0x40. Read Effect vtables resolve that slot to R2-ENGINE-946's start wrapper, which reaches apply with +1 on the generic route.
+
+Remove RU L2.05656 / EN L2.05322 calls child end RU L2.05657 / EN L2.05658 first. Its returned children receive slot +0x44, resolving to the wrapper that passes -1 on the generic route. It then subtracts the Weapon fields, sets Human attack type +0xb6 to zero, calls slot +0x58 and clears held +0x74 later. Parameter 5 >= 10 is a separate branch: 11/12 use the secondary damage fields; the ordinary-weapon formula is not generalized to it.
+
+**Confidence.** High for direct fields, widths, modulo additions/subtractions and call order in both roots; RU only for slot +0x58 as recompute and for the Weapon vtable slots; Medium in EN, where the Human and Weapon vtables were not read. Medium that the compared value is descriptor parameter 5 and for its complete domain: accessor RU L2.02312 / EN L2.02667 and the iterators are unread. Medium for all children being traversed and their order: iterators RU L2.05659/L2.05660/L2.05661, EN L2.05662/L2.05663/L2.05664 are unread. Medium for complete map/equip event coverage; the two raw E8 scans produce three candidates per image, miss indirect/jump routes and do not census writers. The two constructor-tail navigation windows are misaligned and establish no constructor behavior.
+
+**Unknown.** Full map construction, initial modifier values, equipment constructors and all caller events. The read Human template load calls equipment constructors and slot +0x44, but its binding and parameter helper remain unread.
+
+**Evidence.** EXP-2132 stage01 weapon listings, stage02 item-child listings and RU vtables, stage03 Effect wrappers, stage05 EN vtable; stage04 template listings provide the bounded construction result.
+
+### R2-ENGINE-948
+
+RU recompute L2.00052 / EN L2.00318 derives live to-hit word +0xa6 and damage base/spread bytes +0xb4/+0xb5. Body/Reaction use unread power helpers; selected skill adds 3*skill to live to-hit and skill/5 to live base. It passes Human +0xd4 to fold RU L2.00102 / EN L2.01058, which adds modifier +0x12 to live +0xa6 using attack-add RU L2.02321 / EN L2.05665. That helper adds word +0 and bytes +0xe/+0xf/+0x11..+0x14, then copies source byte +0x15. Thus modifier +0xe6/+0xf4/+0xf5 enters live +0xa6/+0xb4/+0xb5; UD4 and the live block are distinct.
+
+**Confidence.** High for the complete local stores and the fold tail, closing that part of R2-ENGINE-479's Unknown. High that 781 recompute, 55 fold and 53 add instructions per root match after masking absolute operands. Medium for helper-dependent live formulas (power RU L2.00109/L2.00108, EN L2.05666/L2.05667; conversion RU L2.01309, EN L2.02708), masked callee semantics and any universal claim that recompute cannot indirectly alter modifier bytes. No global field/call census was performed.
+
+**Unknown.** Exact power/conversion helper semantics and all stat-recompute events. Body/skill-derived live damage must not be substituted for the saved UD4 modifier base.
+
+**Evidence.** EXP-2132 stage01 recompute/RU fold/add, stage02 EN fold/add, derived pairs and differences.
+
+### R2-ENGINE-949
+
+EN apply L2.04138 has six extra instructions at L2.04139..L2.04140: load the Human argument, read signed word +0xd8, compare with 24, and store zero when greater. RU L2.00054 has no matching local prefix. The 876 EN and 870 RU instructions contain 870 address-masked matches; the tag-49 arithmetic is in the matching portion.
+
+**Confidence.** High for the local difference and finite comparison. The instrument masks only absolute operands of at least six hex digits; it retains field offsets, small immediates and registers. Medium for semantic equality through masked calls. This is not equality of whole executables, every callee or all SAVE/LOAD events. R2-ENGINE-321 links +0xd8 to a modifier used for speed; the complete scheduling and player-visible effect of this reset are not established.
+
+**Unknown.** When a reached +0xd8 exceeds 24 and whether intervening writers restore it. A controlled case and a caller/writer trace would settle that effect.
+
+**Evidence.** EXP-2132 stage02 EN apply plus stage03 epilogue/corrected table, stage01 RU apply, derived pairs/differences.
