@@ -321,6 +321,12 @@ bytes, then twelve Item references for slots 1..12. — R2-ENGINE-208
 The gate +0x140 list with n > 0 is Medium; the rest is High.
 — R2-ENGINE-209
 
+The raw 180 block is the movement block at Unit +0x1c0. Byte 0 is the
+facing and byte 1 the heading; LOAD reads the block back over the one the
+constructor filled. In five original saves 355 of 356 Unit and Human
+records hold the two bytes equal. High for the RU transfer and the
+values; Medium for EN and for a loaded unit keeping them. — R2-SESSION-362
+
 The class a summoned creature belongs to (vtable `L2.02314` in RU) has this
 programme in slot +8, read from the class and not from a file. Its owner
 +0x14 and +0x1a0 are stored; no step covers +0x148, the caster key that the

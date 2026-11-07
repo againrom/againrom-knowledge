@@ -5749,3 +5749,67 @@ Conditional on the ordinary equip route completing and no later writer, saved mo
 **Unknown.** Whether a complete cold LOAD later changes or reapplies these values. Read the reconstruction/postload chain and compare a controlled original-made save before/after cold LOAD, one update, unequip and resave; the exact case is specified in the evidence experiment.
 
 **Evidence.** [EXP-2132](../experiments/EXP-2132-rom2-weapon-effect-base/RESULTS.md), stage01 RU block transfer, stage02 EN block transfer and Unit bodies, stage04 Weapon bodies; R2-ENGINE-208/209/210 retain their existing grades.
+
+## Saved facing and the Restart save
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-362 | In a ROM2 SAV the Unit programme's raw 180 block is the movement block at +0x1c0: byte 0 the facing, byte 1 the heading, read back by LOAD; 355 of 356 Unit/Human records in five original saves hold them equal. | High / Medium | ✔ promoted (branch candidate) | [EXP-2135](../experiments/EXP-2135-rom2-start-facing/RESULTS.md) |
+| R2-SESSION-363 | ROM2 START MISSION draws new facings and Restart keeps the stored ones: a Restart save holds 124 non-party facings in 64..192, equal to heading; its 3 party Humans hold 0; two mission-10 saves share 2 of 30. | Medium | ● active (branch candidate) | [EXP-2135](../experiments/EXP-2135-rom2-start-facing/RESULTS.md) |
+
+### R2-SESSION-362
+
+The RU Unit serializer `L2.01161` calls the block serializer `L2.04279` at `L2.05791` with
+`ecx = [unit+0x1c0]`. That body moves 0xb4 bytes from block +0 through `L2.00547` or `L2.00548`,
+chosen by `R2.0017`. The block is the fifth raw block of the Unit programme (R2-ENGINE-209).
+Byte 0 is the byte initialization sets to 0x40 + draw and byte 1 its copy (R2-ENGINE-959). The EN
+block serializer `L2.05787` equals RU after masking (R2-ENGINE-962). The post-LOAD fixup
+`L2.03194` remaps block +0x7c only.
+
+Census of the original saves of 2026-10-30 with a complete structural walk (records, facing in
+64..192, facing equal to heading):
+
+| Save | Mission | Records | 64..192 | Equal |
+|---|---:|---:|---:|---:|
+| set 2 game9999 | 30 | 127 | 124 | 127 |
+| set 2 game0009 | 20 | 42 | 40 | 41 |
+| set 2 game0012 | 30 | 127 | 118 | 127 |
+| set 1 game9999 | 10 | 30 | 29 | 30 |
+| set 1 game0001 | 10 | 30 | 29 | 30 |
+
+Aggregate counts derived from the existing committed census: all 356 records hold block byte
++8 = 5, the constructor's value; +5 is 0x41 in 291, 0x44 in 27 and 0x82 in 38. These values
+are retained only as aggregate counts; the per-record columns were removed without rereading saves.
+
+**Confidence.** High for the RU block transfer and the census values. Medium for EN, whose Unit
+serializer call site is unread, and for a loaded unit keeping the stored bytes: post-LOAD writers
+other than the fixup are unread.
+
+**Unknown.** Post-LOAD writers of +0 and +1.
+
+**Evidence.** EXP-2135 stage05 RU Unit serializer, stage01 block serializer, `out/saves`.
+
+### R2-SESSION-363
+
+RU mission entry R2.0023 calls map caller L2.00112 at L2.05792 only when argument 0 and app +0x638 != 0; a nonzero argument or zero app +0x638 skips it.
+The map caller seeds and builds (R2-ENGINE-960); the nonzero-argument branch is at `L2.05793`. The LOAD
+tail calls mission entry with argument 1 (R2-ENGINE-411, R2-ENGINE-613), and after the map loads
+mission entry posts the 0x442 autosave to `game9999.sav` (R2-ENGINE-411, R2-ENGINE-271), the
+"Restart last mission" entry (R2-ENGINE-571).
+
+Set 2 `game9999.sav` (mission 30, labelled the Restart save by its README): the 76 Units and 48
+Humans outside player 0 hold facings 64..192 with 88 distinct values, each equal to its heading;
+player 0's three Humans (ids 1..3) hold 0 and 0. Set 1 `game9999.sav` (mission 10): 29 records
+outside player 0 in 70..191, player 0's Human 0. By id, set 2 `game0012.sav` (the same mission,
+later) keeps 109 of 127 facings of set 2 `game9999.sav`; set 1 `game0001.sav` (mission 10) shares
+2 of 30 with set 1 `game9999.sav`. R2-ENGINE-411 makes hero reuse a conditional Medium inference. Whether each player-0 Human bypasses this builder, and what writes its observed 0, remain Unknown.
+
+**Confidence.** Medium: no runtime was observed; the provenance of the saves is the README's; the
+ticks between the build and the autosave are unread; a mission-10 save pair that differs in 28 of
+30 facings agrees with a new seeded draw per start but does not show which starts made them.
+
+**Unknown.** The writer of player 0's facing 0; whether a tick before the autosave turns a unit.
+An original run settles both: START MISSION of mission 30, then Restart; at tick 0 of each,
+record every Unit and Human id, owner and bytes `[+0x1c0]+0` and `+1`.
+
+**Evidence.** EXP-2135 stage05 RU mission entry, `out/saves`.

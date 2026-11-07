@@ -24865,3 +24865,120 @@ also needs the missing light, special and RU mirror bodies.
 byte-sprite-palette-wrapper.txt, shade-row-getter.txt and
 byte-sprite-normal-blit.txt; out/en-byte-sprite-mirror-blit.txt,
 unit-sprite-calls.txt, shared-sprite-calls.txt and unit-sprite-lazy-load.txt.
+
+## Start facing of a map-placed unit
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-959 | ROM2 Unit initialization (RU L2.01794, EN L2.01793), reached by every read Unit and Human constructor, stores byte [+0x1c0]+0 = 0x40 + a 0..128 range draw, so 64..192, and the same byte at [+0x1c0]+1. | High / Medium | ● active (branch candidate) | [EXP-2135](../experiments/EXP-2135-rom2-start-facing/RESULTS.md) |
+| R2-ENGINE-960 | No read ROM2 placement body stores facing/heading after init; the .text chain census finds 16 such stores per root: 7 to byte 0 and 9 to byte 1; five RU heading-store sites remain unclassified. | High / Medium | ● active (branch candidate) | [EXP-2135](../experiments/EXP-2135-rom2-start-facing/RESULTS.md) |
+| R2-ENGINE-961 | The read RU mission-load row loop L2.02554 builds a temporary Unit or Human per row, whose initialization draws once, copies stats to a 0x1e4 client object and stores no [+0x1c0] byte. | High / Medium | ● active (branch candidate) | [EXP-2135](../experiments/EXP-2135-rom2-start-facing/RESULTS.md) |
+| R2-ENGINE-962 | 16 of 17 read ROM2 EN/RU body pairs of the start-facing path match instruction for instruction once numbers of 0x400000 and above are masked; the Human template differs only in three allocation sizes. | High | ● active (branch candidate) | [EXP-2135](../experiments/EXP-2135-rom2-start-facing/RESULTS.md) |
+
+### R2-ENGINE-959
+
+Unit initialization allocates 0xb4 bytes and calls the block constructor (RU `L2.01783`, EN
+`L2.05745`), which clears 0xb4 bytes and sets +5 = 0x41, +8 = 5, +9 = 0xff and +0xa = 0x10. It
+stores the block at +0x1c0. It then pushes 0x80 and calls the range draw (RU `R2.0021`, EN
+`L2.00939`) at RU `L2.04700` / EN `L2.04701`, adds 0x40 and stores the low byte at `[+0x1c0]+0`
+(RU `L2.05746`, EN `L2.05747`) and at `[+0x1c0]+1` (RU `L2.05748`, EN `L2.05749`).
+
+The range draw returns 0 for n = 0 without a core call; otherwise `(core() * (n + 1)) >> 15`,
+0..n. The core (RU `L2.01699`, EN `L2.00729`) sets s = 214013 s + 2531011 on dword +0x14 of the
+block returned by the core's getter (RU L2.02317, read; EN L2.05750, unread) and yields `(s >> 16) & 0x7fff`. With n = 0x80
+the draw has 129 values; each comes from 254 or 255 of the 32768 core values. Initialization makes
+one range-draw call.
+
+Constructors read in RU: the named Unit constructor `L2.00129` calls initialization at `L2.05751`
+and the default one `L2.01273` at `L2.01797`; `L2.05752`, `L2.05753` and `L2.05754` call it at
+`L2.05755`, `L2.05756` and `L2.05757`. The Human constructors `L2.00130` and `L2.00234` call the
+Humanoid base `L2.01157`, which calls `L2.01273`. The actor builder's Units arm calls `L2.00129`
+and its Humans arm `L2.00130` (R2-ENGINE-742). After the store, initialization calls the defaults
+(RU `L2.00105`), which store `[+0x1c0]+0xa` = 8 and neither +0 nor +1.
+
+**Confidence.** High for the initialization body in both roots and for the RU constructor chains
+read. Medium that no constructor path skips initialization: the raw E8 scan finds 9 call sites,
+of which `L2.05758`, `L2.05759`, `L2.05760` and `L2.05761` are unread, and indirect calls are not
+searched.
+
+Medium for thread locality: the RU getter's indirect lookup/set calls are not identified in the retained evidence, and the EN getter is unread.
+
+**Unknown.** What the four unread call sites construct.
+
+**Evidence.** EXP-2135 stage01 and stage04 RU listings, stage05 EN listings, stage01 caller scan.
+
+### R2-ENGINE-960
+
+The actor builder (RU `L2.00115..L2.00180`, EN `L2.00192..L2.00178`) has no `[+0x1c0]` operand.
+It calls positioning RU `L2.00313` at `L2.05762` with two coordinate dwords shifted right by 8
+and r = 0. Positioning (EN `L2.00312`) passes r & 0xff to both of its range draws, which then make
+no core call; its position set `L2.02599` runs on `[unit+0x10]`. The ground place (RU `L2.00315`,
+EN `L2.00314`) stores block +0x72 and +0x82..+0x85. The defaults store +0xa. The Human template
+(RU `R2.0089..L2.05763`, EN `R2.0088`) has one `[+0x1c0]` operand, the address of +0xa passed to
+the reader `L2.01279`. The first 0x200 bytes of the template loader RU `R2.0087` have none.
+
+The map-load method (RU `L2.00112`, EN `L2.00222`) calls the seed RU `L2.04658`, srand of
+timeGetTime (R2-ENGINE-790), at `L2.04712`, and the map build `L2.00113` at `L2.04714`; the build
+reaches the actor builder in the same call path, so on the same thread. The facing of the k-th
+built actor is 0x40 plus a draw from that seeded sequence.
+
+The chain census sweeps `.text` with Capstone, follows a register loaded by `mov r32, [X+0x1c0]`
+and reports a later store through it covering +0 or +1. RU stores to +0: `L2.05746`
+(initialization), `L2.05764` (`L2.05765`), `L2.05766`, `L2.05767`, `L2.05768` (`L2.05527`),
+`L2.05769` (the body from `L2.02848`), `L2.05770` (`L2.02409`). RU stores to +1: `L2.05748`,
+`L2.05771` (0xff), `L2.05772`, `L2.05773`, `L2.05774`, `L2.05775`, `L2.05776`, `L2.05777`,
+`L2.05778`. The census finds 16 such stores per root: 7 to byte 0 and 9 to byte 1; five RU heading-store sites remain unclassified. The raw E8 callers of `L2.05765`, `L2.05527`, `L2.02848` and
+`L2.02409` lie in `L2.05779..L2.05780`, none in a read build-path body.
+
+**Confidence.** High for the read bodies: builder, positioning, ground place, defaults and Human
+template in both roots, the template-loader prefix in RU. Medium that nothing stores the facing
+between initialization and the first step: the census misses stores through `this` in a block
+method, bulk copies and a load in another basic block. Unread callees on the path include
+`L2.00309`, `L2.02560`, `L2.02666`, `L2.00320`, `L2.00205`, `L2.00361`, `L2.00349`, `L2.01781`,
+virtual +0x58, `L2.02753`, `L2.00116`, `L2.00117`, `L2.00118` and the ground place's callees
+`L2.04692`, `L2.05781`, `L2.05782`, `L2.02922`, `L2.02410`. Medium for the draw's place in the
+sequence: the calls between `L2.04712` and `L2.04714` are unread for draws.
+
+**Unknown.** The routines of the heading stores `L2.05771`, `L2.05772`, `L2.05776`, `L2.05777`
+and `L2.05778`; whether the unread callees draw. A tick-0 record of each unit's id and block
+bytes +0/+1 after START MISSION would test the composed result.
+
+**Evidence.** EXP-2135 stage01, stage03 chain scans, stage04 caller scan, stage05 EN listings.
+
+### R2-ENGINE-961
+
+In each row the loop either allocates 0x254 bytes and calls the default Human constructor
+`L2.00234`, the Humans lookup `L2.02560`, the parameter routine `L2.00220` and `L2.01285`, or
+allocates 0x208 bytes and calls the default Unit constructor `L2.01273` and the Units lookup
+`L2.02666`. Either constructor runs Unit initialization (R2-ENGINE-959), one draw. It allocates a
+0x1e4 client object (`R2.0068`, or `L2.02557` when the record +0x124 test selects it) and
+copies stats through R2.0076; its committed prefix [R2.0076,L2.05783) has no [+0x1c0] operand. Its remaining arm and branch target L2.05784 are unread.
+The loop calls the temporary unit's virtual slot +4. The client object gets +4 = row +0x3c + 0x6000 and +0x1e0 = row +0x40. The client base
+constructor `L2.05785` stores +0x70 = 0 and +0x8d = 0.
+
+**Confidence.** High for the local loop instructions and read constructor chains; Medium for an absence of later effects through the copier remainder and unread callees.
+The EN loop (`L2.02555`) is unread.
+
+**Unknown.** Which thread runs the loop, so whether its draws share the map-load sequence of
+R2-ENGINE-960; what the client object's +0x70 and +0x8d hold after the first state message.
+
+**Evidence.** EXP-2135 stage01 loop listing, stage04 loop tail, copier and client constructors.
+
+### R2-ENGINE-962
+
+Pairs (RU start / EN start, instructions): initialization `L2.01794` / `L2.01793` (180), Unit base
+constructor `L2.01295` / `L2.05786` (50), default Unit constructor `L2.01273` / `L2.03160` (68),
+named Unit constructor `L2.00129` / `L2.01063` (61), defaults `L2.00105` / `L2.04401` (57), block
+constructor `L2.01783` / `L2.05745` (22), seed `L2.04658` / `L2.04659` (8), range draw `R2.0021` /
+`L2.00939` (16), CRT srand `L2.04660` / `L2.04661` (4), CRT core `L2.01699` / `L2.00729` (14),
+actor builder `L2.00115` / `L2.00192` (460), positioning `L2.00313` / `L2.00312` (164), ground
+place `L2.00315` / `L2.00314` (129), map-load method prefix `L2.00112` / `L2.00222` (254), block
+serializer `L2.04279` / `L2.05787` (113), Human constructor `L2.00130` / `L2.00214` (34), Human
+template `R2.0089` / `R2.0088` (509). The template's differences are `push 0x8c` / `0x88` at
+RU `L2.05788` and `push 0x70` / `0x6c` at RU `L2.05789` and `L2.05790`, allocation sizes in its
+item arm.
+
+**Confidence.** High for these pairs; masked numbers are not compared, so equality of called
+bodies outside the pairs is not claimed.
+
+**Evidence.** EXP-2135 `out/compare/en-ru.tsv` over stage01, stage04 and stage05 listings.
