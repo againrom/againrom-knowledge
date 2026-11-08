@@ -157,6 +157,13 @@ without ShootOffset uses the Center/Selection anchor of Teleport. The
 release sets no height; the draw lifts by +0x6c and +0x10, whose values are
 Unknown. — R2-ENGINE-930, R2-ENGINE-703
 
+The lift +0x6c is the bilinear sample, at the object's point, of a signed-byte
+grid that the client's dword +0x80 supplies, the ground height (Medium); its
+bytes at a given cell are Unknown. The teleport objects' slot +0x40 is the
+effect light method, whose default arm stores no light for them; other
+light writers are not excluded (Medium). —
+R2-ENGINE-993, R2-ENGINE-703
+
 For a type 23 or 24 caster a Fire Arrow (identifier 10) is created at state
 8 counter 8, on attack frame 4 (Medium, through Parent), with remaining
 segments distance / 200; a distance below about 25 px gives no picture. Each update moves it by the remaining distance over the

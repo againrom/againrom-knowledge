@@ -22,6 +22,102 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## Effect draw, place and light of the open identifiers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-991 | ROM2 client opcode 0x86 reaches the cell arm through the dispatcher's tables (RU after a client +0x80 test); effect 23 stays at the cell centre for packet-argument updates, falls 8, shatters 8, Sfx 523 at update 9 if the slot exists. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+| R2-ENGINE-992 | A ROM2 effect 56 or 60 takes its target unit's position and frame = counter only when the target is a client unit; the effect draw method draws nothing for 56 and draws Drain for 60 by the default rule. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+| R2-ENGINE-993 | ROM2 effects 23 and 54 never move in the update arms read; the draw centres the sprite on +0x2c/+0x30, raised by +0x10 and by +0x6c, a bilinear sample of the client +0x80 signed-byte grid at that point. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+| R2-ENGINE-994 | A ROM2 effect 28 or 30 shows frames 4, 3, 2, 1, 0, 1, 2, 1, 0, 1, 2, 3, 4 at counter 1..13 and keeps its last frame at any other counter; a unit release's object ends at update 14 (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+| R2-ENGINE-995 | The ROM2 light writer overwrites one value into the cell corners with i²+j² < R(R+1) around a cell: 4, 12, 32 and 52 corners for R 0..3; the effect light method is slot +0x40 EN L2.03841. | High / Medium | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+| R2-ENGINE-996 | ROM2 render preparation resets the light map to 0xff; the terrain reader skips all-0xff cells and takes min(light, terrain) per corner, and a lower value picks a brighter shade row (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+
+### R2-ENGINE-991
+
+The client dispatcher indexes a byte table by opcode - 3. For 0x86 the EN byte at `L2.05854` is 0x15 and jump word 21 is the cell arm `L2.02158`. The RU byte at RU `L2.05855` is 0x19 and jump word 25 is RU `L2.05856`, which jumps to RU `L2.05857` past the arm when client dword +0x80 is 0 and else enters RU `L2.02159`. The EN arm has no such test.
+
+For an odd ID with a type in map `L2.02134` the arm builds a 0x158-byte effect (`L2.03141`): +0x24 = ID, +8/+0xc = cell * 256 + 0x80, +0x10 = 0, +0x2c/+0x30 = +8/+0xc, target +0x90..+0x98 = that position, +0x8e = 0, counter +0x9c = -1, lifetime +0xa8 = packet word +0xf, state +0x8c = 1. It projects (`L2.03142`), inserts into client +0x9ec under key +0xa24 and plays Sfx(500 + ID) except for ID 23.
+
+For ID 23 the update arm `L2.05858` adds the head's step, zero because the target is its own position, sets frame +0x74 = counter and plays Sfx 523 at counter 8. The draw arm `L2.05859` draws sprite 8 lifted 28 - 4 * frame pixels while frame < 8, else sprite frame - 8. The effect light method sends 23 to its default arm, which stores no light; the cell routine, the list +0xa94 writer and the 28/30 inline block are other writers, and no census of the light writers exists (Medium). With argument 16 updates 1..8 show the falling sprite 8 at lifts 28 .. 0 px, updates 9..16 show sprites 0..7 of `Meteor\sprites`, type 23 of projectiles.reg (R2-ASSET-101, R2-ENGINE-445), update 9 plays Sfx 523 if the slot exists, and update 17 deletes the effect. In the 166-instruction cell-arm window read, no other read store uses packet word +0xf; the window ends at `L2.03852` with a jump to `L2.05549`, which was not read.
+
+**Confidence.** High for the dispatch binding in both roots, the arm stores, the update and draw arms and the Sfx counter (masked-text equal bodies). Medium for the producer link of R2-ENGINE-394 and for the first draw's moment (R2-ENGINE-932). Unknown for the update period in seconds.
+
+**Unknown.** The update period in seconds; why RU tests client +0x80. RU skips the arm when the field is 0; the same client field is the grid object read in R2-ENGINE-993, so the test may be a guard for a missing grid. Unknown.
+
+**Evidence.** [Answer 1](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#1-identifier-23): dispatch, cell-arm, update and draw listings and tables.
+
+### R2-ENGINE-992
+
+Update arm `L2.03772` (update byte cells 43 and 47) acts only when the update head found target key +0x8e among the client units. It then sets +8/+0xc = target +0x90/+0x94, copied by the head from the unit's +0x5c/+0x60, sets frame = counter, and overwrites the unit's mark of that ID with (ID << 16) | 0x20 (`L2.03763`, `L2.03752`) or appends it (`L2.03306`). It jumps past the step and the default frame rule. Without a found target it writes nothing.
+
+The effect draw method sends 56 (draw byte cell 49) to `L2.05860`, a jump to the end, so that method draws nothing for 56. The same update arm appends the unit mark (56 << 16) | 0x20, and R2-ENGINE-692 lists mark 56 and 60 generators (`L2.03747`, `L2.03748`) in the unit consumer `L2.03727`; what they draw was not read here. ID 60 is past the draw switch bound 49 (60 - 7 = 53) and takes the default arm `L2.05861`, which draws by the `[type+0x28] != 0` path or by the vtable +0x14 path at `L2.05862`: type 60 `Drain`, sprite Phases * direction + frame, or frame when RotationPhases is 1 (R2-ENGINE-447).
+
+A unit's release object of 56 or 60 has lifetime 1 (R2-ENGINE-691) and counter 0 from the release join `L2.05863`. Its one update has counter 1, so frame 1 at the target unit when it is found as a client unit (Medium); the next update deletes it.
+
+**Confidence.** High for the arm and draw writes in both roots. Medium for frame 1 of the release object, because the counter store is read for the join that ID 54 reaches (R2-ENGINE-703) and applied to the other IDs, and for how many renders show it. Unknown for the frame without a client-unit target.
+
+**Unknown.** The constructor `L2.03141`'s frame; the counter start of the 0x8b arm.
+
+**Evidence.** [Answer 2](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#2-identifiers-56-and-60): update and draw listings and tables.
+
+### R2-ENGINE-993
+
+The world position is +8/+0xc/+0x10 in 1/256 cell. The update tail copies +8/+0xc to +0x2c/+0x30. Projection `L2.03142` writes +0x38/+0x3c = +0x2c/+0x30 >> 8; +0x54/+0x58 = (+0x2c/+0x30 >> 3) - view cell * 32; +0x5c/+0x60 = +0x2c/+0x30 + 128 * slot - 0x80 with slots +0x20 and +0x24, both `return 1`, so +0x5c/+0x60 = +0x2c/+0x30; +0x64/+0x68 = (+0x5c/+0x60 >> 3) - view cell * 32; and +0x6c = the bilinear interpolation of the four signed bytes around cell (+0x5c >> 8, +0x60 >> 8) of the grid `L2.03398` returns from client +0x80 (row width client +0x84), weights ((v >> 3) & 0x1f) / 32. The draw puts the sprite at x = +0x54 - Width / 2, y = +0x58 - Height / 2 - +0x6c - +0x10.
+
+ID 23 starts at the cell centre with +0x10 = 0 and a zero step, so it never moves in its update arm; the other cell identifiers (13, 21, 27, 43) were not traced for movement; its picture is centred on the cell centre, raised by +0x6c there and by the fall lift of R2-ENGINE-991. ID 54's arm `L2.03837` sets frame = counter - 1 and skips the step, so it keeps the release position of R2-ENGINE-703; its picture is centred on that anchor, raised by +0x6c there and by +0x10.
+
+**Confidence.** High for the field writes and reads in EN and the masked-text equal RU bodies; Medium for RU `projection-2`, read as a navigation listing at RU `L2.05864`, and that the `L2.03398` grid is the ground height (helper unread). Unknown for the grid bytes at a cell and effect 1's +0x10 for ID 54.
+
+**Unknown.** The helper `L2.03398`; the release's store to +0x10 of effect 1.
+
+**Evidence.** [Answer 3](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#3-identifiers-23-and-54-position): projection, vtable slot, update and draw listings.
+
+### R2-ENGINE-994
+
+Arm `L2.05865` sets k = counter - 1. For k <= 12 unsigned, table `L2.05866` (13 words, RU `L2.05867` with targets + 0x5473) selects frame 4, 3, 2, 1, 0, 1, 2, 1, 0, 1, 2, 3, 4 for counter 1..13. For counter 0 and counter >= 14 the arm writes no frame, so the effect keeps its last frame; no clamp and no default rule run, and the arm does not move the effect. Each update tail calls slot +0x50 `L2.05868`, which for 28 and 30, when the target is a client unit, builds a path from the effect's screen point (+0x54, +0x58 - +0x6c - +0x10) to the unit's (+0x64, +0x68 - +0x6c - +0x10) with type 0x12 (`L2.05869`, unread) and stores it into point list +0x11c (`L2.03745`, unread).
+
+A unit's release object has lifetime 13 (R2-ENGINE-691) and counter 0 from the release join: updates 1..13 show the 13 frames and update 14 deletes it, so no update past 13 runs (Medium). A creator that starts the counter at -1 gives a first update that writes no frame.
+
+**Confidence.** High for the arm and both roots' tables, read from the committed table words of `nav9-tables.tsv`. Medium for the release object's counter start (as in R2-ENGINE-992) and for the path builder's result. Unknown for the non-unit chain arm and the 0x8b arm.
+
+**Unknown.** The counter start and lifetime of the non-unit chain arm and the 0x8b arm, which decide whether their first update shows 4 and whether updates past 13 occur.
+
+**Evidence.** [Answer 4](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#4-identifiers-28-and-30): update, slot +0x50 and draw listings; navigation table.
+
+### R2-ENGINE-995
+
+Writer EN `L2.02182` (RU `L2.02183`)(x, y, R, value), x and y a cell, returns when [`L2.02187`] is 0. It subtracts the view origin client +0x5c/+0x60, sets T = R * (R + 1), or 1 for R 0, and for i, j = 0..R with word table[(i + 20) * 41 + j] < T stores value with `mov byte` into map client +0xa8 (row width client +0x64 + 7) at entries (x+4+i, y+4+j), (x+4+i, y+3-j), (x+3-i, y+4+j) and (x+3-i, y+3-j), each only when its column is 3..width - 3 and its row 3..(+0x68 + 11) - 3, and counts each store at +0x108. Table EN `L2.02184` (RU `L2.05870`) has no file bytes; the EN loop `L2.05871..L2.05872` (RU `L2.05873..L2.05874`) fills it with i² + j² for i, j = 0..20. Entries (c+3, r+3) .. (c+4, r+4) are the four corners of view cell (c, r) in the reader of R2-ENGINE-996. The light method's 28/30 arm stores frame * 10 into a 2 x 2 block at each point of +0x11c with `mov byte`, without the `L2.02187` test (`L2.05875..L2.05876`).
+
+| R | Pairs admitted | Corners written | Shape around the cell |
+|---|---|---|---|
+| 0 | 1 | 4 | its four corners |
+| 1 | 3 | 12 | 4 x 4 minus 4 corners |
+| 2 | 8 | 32 | 6 x 6 minus 4 corners |
+| 3 | 13 | 52 | 8 x 8 minus 3 at each corner |
+
+The effect light method is vtable slot +0x40, EN `L2.03841` (RU `L2.05877`); `L2.02138` lies inside it. Its arms and values are those of R2-ENGINE-448; IDs 23, 54, 56 and 60 reach the default arm. Render preparation also calls the writer for list client +0xa94 (`L2.05878`, R 1, values 0x24, 0x18, 0xc, 0, 0x14, 0x1c) and the cell routine `L2.05879` for flagged cells (`L2.05880`, R 1, value 0xc or 0).
+
+**Confidence.** High for the writer, the EN filler, the footprint and the overwrite, in EN and in the masked-text equal RU writer. Medium for the RU filler (navigation listing), for reading entries as cell corners, and for the absence of other stores: there is no census of the writer's callers or of other stores to +0xa8 beyond the sites read (writer, list +0xa94, cell routine, this inline block).
+
+**Unknown.** Who sets `L2.02187` and `L2.02191`.
+
+**Evidence.** [Answer 5](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#5-the-light-byte-map): writer, filler, light method and render preparation listings; vtable and light tables.
+
+### R2-ENGINE-996
+
+Render preparation `L2.03845` copies the map to client +0xac through `L2.04443` when [`L2.05881`] is 2, fills the first client +0x70 / 4 bytes of +0xa8 with 0xff through memset `L2.00341`, sets +0x108 = 0, then calls slot +0x40 for every unit, runs the cell routines, projects and calls slot +0x40 for every effect, then runs the list +0xa94 writer. Among the stores read (units' slot +0x40 arms, the cell routine, effects, the +0xa94 list), a later store to a corner replaces an earlier one; the full census of +0xa8 writers is Unknown.
+
+Terrain routine `L2.05882` takes the four corner bytes of each view cell and skips the cell when all four are 0xff. Each corner is the terrain corner byte (grid `L2.05883` of client +0x80) when the light byte is 0xff, else min(light, terrain). Flat blitter `L2.05884` (`L2.05885` when the corner heights differ, unread) interpolates the four values bilinearly and draws each pixel as WORD row[source byte] of a 96-row table from `L2.05886`. Loop `L2.05887` prepares those tables with `L2.00644`(0x60, 3, 1), mode 3 of `L2.00645` (R2-ENGINE-694): row r scales each channel by (96 - r) / 32, clamped at 255. Row 0 is 3x, row 64 the unchanged colour, row 95 the darkest. Light values of R2-ENGINE-448 (0..46) therefore brighten the ground (Medium).
+
+A second routine `L2.05879` writes per-cell bytes at client +0xb0 from the corners: min(((sum of the four corners minus 0x20 each, clamped at 0) >> 4), G >> 2), G = [`L2.05888`]. Routine `L2.05889` compares +0xa8 with +0xac to decide a redraw.
+
+**Confidence.** High for the reset call, the skip and the min in EN and the masked-text equal RU bodies. The memset body, the flat blitter and the shade-row preparation were read in EN only; RU is Medium for them. The fill covers client +0x70 / 4 bytes; that this length is the whole map (+0x64 + 7) * (+0x68 + 11) was not read (Medium). Medium that a lower value is brighter (table getter `L2.05890` and the sloped blitter unread) and for the store order (unit and effect iteration through unread containers). Unknown for the flags and the +0xb0 consumer.
+
+**Unknown.** Who sets `L2.02187`, `L2.02191` and `L2.05881`; the unit light method; the consumer of +0xb0.
+
+**Evidence.** [Answer 5](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#5-the-light-byte-map): render preparation, fill helper, terrain, blitter and palette listings.
+
 ## Same-side area spell reach and hit memory
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -7318,6 +7414,8 @@ lifetime and frame arithmetic of identifier 23 in the client
 update period. A cast of row 7 shows these only as far as the Medium
 producer link holds.
 
+**Amended.** R2-ENGINE-991 binds opcode 0x86 to the cell arm through the client dispatcher's byte and jump tables in both roots (High) and adds the RU-only skip when client dword +0x80 is 0. R2-ENGINE-993 places the piece at the cell centre, raised by the sample +0x6c (that the grid is the ground height is Medium). This binding grade supersedes the Medium binding grade of the Amended confidence line above for opcode 0x86. The producer link stays Medium.
+
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
 ### R2-ENGINE-395
@@ -9277,7 +9375,7 @@ rows (R2-ASSET-098).
 | R2-ENGINE-445 | ROM2 spells use ID 2*row+8 at cast, 30 for Prismatic, 2*row+9 for an area cell (row 7); the client draws that ID's projectiles.reg type or nothing (a unit caster's object of 16, 24, 34, 46, 48, 62 ends at once: R2-ENGINE-691, Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) , [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-446 | ROM2 spell sounds are sfx.reg Sfx(500+ID): the caster plays 500+2*row+8, a typed cell effect 500+ID at creation except Blizzard 523 at the ninth update; an absent slot is silent at the sites read (Medium that no other site plays). | High / Medium | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-447 | A ROM2 typed spell effect lives for its packet argument in updates; its frame and draw follow per-ID switch tables: (update/2) mod Phases by default, falling Blizzard pieces, swinging lightning and unit-attached marks. | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
-| R2-ENGINE-448 | In the effect method EN L2.02138, ROM2 spell effects write the per-cell light byte map for IDs 10, 12, 13, 18, 28, 30 and 40 (radius argument up to 3); other writers are not excluded (Medium) and the footprint is Unknown. | High / Medium / Unknown | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
+| R2-ENGINE-448 | In the effect method EN L2.03841 (L2.02138 lies inside it), ROM2 spell effects write the per-cell light byte map for IDs 10, 12, 13, 18, 28, 30 and 40 (radius up to 3); other writers are not excluded (Medium) and the footprint is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 | R2-ENGINE-449 | ROM2 EN and RU spell presentation data are byte-equal and the read routines and switch tables agree; text bytes and one per-slot spellbook flag table, at Summon and Wall of Earth, differ. | High / Medium | ● active | [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/) |
 
 ### R2-ENGINE-444
@@ -9410,6 +9508,8 @@ sends 13 and row 9 sends 27 by 0x86, while the bodies read of rows 3, 6, 14, 15 
 typed effect, so the typed-effect arm is not reached from those bodies (callees unread); how the
 client draws types 15, 21, 37, 39 and 43 stays Unknown.
 
+**Amended.** R2-ENGINE-991 reads the dispatcher tables: opcode 0x86 reaches EN `L2.02158` and RU `L2.05856`, which skips the arm when client dword +0x80 is 0 and else enters RU `L2.02159`. That binding is High; the other opcodes' bindings keep their grade.
+
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
 ### R2-ENGINE-446
@@ -9508,6 +9608,8 @@ the marks at each unit update. R2-ENGINE-694 narrows the palette preparation
 of `L2.00644`(16, 4, 0): mode 4 builds 16 brightness levels without a blend;
 the level a draw uses stays Unknown.
 
+**Amended.** R2-ENGINE-992 adds 56 and 60: the arm writes the frame and position only when the target is a client unit, the effect draw method draws nothing for 56 (the unit mark it adds feeds the unit overlay generators of R2-ENGINE-692, whose result was not read), and 60 is past the draw switch bound and draws Drain by the default rule. R2-ENGINE-994 reads table `L2.05866`: counter 0 and counters above 13 write no frame, so 28 and 30 keep their last frame.
+
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
 ### R2-ENGINE-448
@@ -9559,6 +9661,8 @@ contents of the table `L2.02184` and the tail of `L2.02182` after
 +0xa8 map; a caller and displacement census would settle both. The
 binding of identifier 13 to Fire Ball is the cell formula of
 R2-ENGINE-445.
+
+**Amended.** The method's entry is vtable slot +0x40 EN `L2.03841` (RU `L2.05877`); `L2.02138` lies inside it. R2-ENGINE-995 reads the footprint (4, 12, 32 and 52 cell corners for R 0..3, stored by overwrite) and two more writer callers. R2-ENGINE-996 reads the reset to 0xff, the terrain reader's min and the shade rows, in which a lower value is brighter (Medium). The reader Unknown narrows to the flags, the unit light method and getter `L2.05890`.
 
 **Evidence.** [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)
 
@@ -16995,6 +17099,8 @@ the depth against the caster depends only on which grid holds it (for the
 +0x28 draws read; a +0x2c sweep of grid +0x90 before the effect pass is
 unread). R2-ENGINE-930
 reads the ShootOffset branch that ID 0x36 skips.
+
+**Amended.** The slot +0x40 `L2.03841` is the effect light method (R2-ENGINE-995); ID 54 reaches its default arm, which only marks the dirty rectangle. R2-ENGINE-993 reads +0x6c: the bilinear sample of the signed-byte grid of client +0x80 at the effect's point; its values stay Unknown.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 1 and 2.
 

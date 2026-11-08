@@ -207,6 +207,25 @@ a type draws nothing. Frame choice is per identifier: (update/2) mod Phases
 by default, the lightning and chain swing 4..0..4, and the teleport
 counter. — R2-ENGINE-445, R2-ENGINE-447
 
+The lightning and chain objects (28, 30) show frames 4, 3, 2, 1, 0, 1, 2,
+1, 0, 1, 2, 3, 4 at update counters 1..13 and keep their last frame at any
+other counter; a unit caster's object lives 13 updates, so no later update
+runs (Medium). Heal (56) and Drain Life (60) objects take the target unit's
+position and frame = counter only when the target is a client unit; the
+effect draw method draws nothing for 56, and draws `Drain` for 60 by the
+default rule. Both update arms also append a unit mark that feeds the unit
+overlay generators of R2-ENGINE-692, whose result was not read. A unit
+caster's one-update object, found as a client unit, shows frame 1
+(Medium). — R2-ENGINE-992, R2-ENGINE-994, R2-ENGINE-692
+
+Effect pictures drawn through the common draw head are centred on the
+object's point, raised by its height and by a bilinear sample of a
+signed-byte grid of the client at that point, which is the ground height
+(Medium); the Blizzard object (23) adds its fall lift. The Blizzard cell
+object (23) and the teleport object (54) never move in the update arms
+read; the other area cell identifiers (13, 21, 27, 43) were not traced for
+movement. — R2-ENGINE-993
+
 ## Blizzard presentation
 
 The Blizzard cell effect, identifier 23 with argument 16, is the type
@@ -214,3 +233,33 @@ The Blizzard cell effect, identifier 23 with argument 16, is the type
 frame 8 falls for 8 updates, then frames 0..7 play and Sfx 523 sounds once.
 R2-ENGINE-394 is amended by these facts. The update period in seconds
 remains Unknown. — R2-ENGINE-394, R2-ENGINE-446, R2-ENGINE-447
+
+Opcode 0x86 reaches the client's cell arm through the dispatcher's tables in
+both roots; RU skips the arm when the client's dword +0x80 is 0. The piece
+stays at the cell centre and falls from 28 px to 0 px above it, 4 px per
+update, then shatters in place. The effect light method's default arm,
+which this identifier reaches, stores no light; the cell routine, the list
+writer and the lightning block are other writers and no census of the light
+writers exists (Medium). In the cell arm window read, the packet argument
+is stored only as the lifetime. — R2-ENGINE-991
+
+## Effect light
+
+The client keeps one light byte per corner of each view cell. Each render
+fills the first +0x70 / 4 bytes of the map with 0xff, unlit; that this
+length is the whole map was not read (Medium). Then units, cells and
+effects store values; a store replaces the byte, so among the stores read
+(units, the cell routine, effects, the list) the last store wins (the order
+among objects is Medium, and the census of map writers is Unknown). An effect stores one value at the corners within
+radius R of its cell, the corners with i² + j² < R(R + 1): 4, 12, 32 or 52
+corners for R 0, 1, 2 or 3. The values per identifier and the lightning and
+chain blocks of frame × 10 at each path point are R2-ENGINE-448. A writer
+flag can switch the radius stores off; who sets it is Unknown. —
+R2-ENGINE-448, R2-ENGINE-995
+
+The terrain draw skips a cell whose four corners are unlit. Otherwise each
+corner takes the lower of its light byte and the terrain's own corner shade,
+and the tile is shaded bilinearly between its corners. A lower value selects
+a brighter shade row: row 0 triples each channel, row 64 keeps the colour and
+row 95 is the darkest (Medium). Effect light values 0..46 therefore brighten
+the ground (Medium). — R2-ENGINE-996
