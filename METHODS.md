@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4837. Observation: 143. Static analysis: 4022. Mixed: 672.
+Claims labelled: 4842. Observation: 143. Static analysis: 4025. Mixed: 674.
 
 ## Ledger ai
 
@@ -2160,11 +2160,16 @@ Claims labelled: 4837. Observation: 143. Static analysis: 4022. Mixed: 672.
 | R2-ASSET-224 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-222 | static analysis | ✔ promoted (branch candidate) |
 | R2-ASSET-226 | mixed | ✔ promoted (amended, branch candidate) |
+| R2-ASSET-228 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-engine
 
 | ID | Method | Status |
 |---|---|---|
+| R2-ENGINE-997 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-998 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-999 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1000 | mixed | ✔ promoted (branch candidate) |
 | R2-ENGINE-991 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-992 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-993 | static analysis | ✔ promoted (branch candidate) |
@@ -2470,7 +2475,7 @@ Claims labelled: 4837. Observation: 143. Static analysis: 4022. Mixed: 672.
 | R2-ENGINE-411 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-412 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-413 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-414 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-414 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-418 | static analysis | ● active |
 | R2-ENGINE-419 | static analysis | ● active |
 | R2-ENGINE-420 | static analysis | ● active |
@@ -2710,7 +2715,7 @@ Claims labelled: 4837. Observation: 143. Static analysis: 4022. Mixed: 672.
 | R2-ENGINE-709 | static analysis | ✔ promoted (branch candidate, amended) |
 | R2-ENGINE-710 | static analysis | ✔ promoted (branch candidate, amended) |
 | R2-ENGINE-711 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-712 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-712 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-713 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-714 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-715 | static analysis | ✔ promoted (branch candidate) |

@@ -736,6 +736,28 @@ on kinds other than 14. That the client puts tag 51 before the server's
 added pairs, and the order of those pairs, are Medium and unread here. The
 caption function prints no price (`R2-ENGINE-712`, High / Medium).
 
+The shop hover and the hero inventory strip build the card with the same
+routine (`R2-ENGINE-997`, `R2-ENGINE-712` amended, High / Medium). A tag-50
+pair fills the last tag-41 spell at its value byte L and adds, in order,
+"Damage: a-b" when the spell has a damage spread, "Range: r", "Duration: d"
+and one stat line. Spell 18 is the only spell the description routine's own code compares. The stat line is
+chosen by six getters that compare spells 4, 8, 11, 13, 14, 15, 19, 20, 21 and 28, and the
+shared fill branches on 12, 18 and 23. Spell 18 shows "Duration: 0.0 - d" with half
+the fill's duration (`R2-ENGINE-998`, High / Medium). A weapon with spell 18
+at level L therefore reads "casts Stone Curse", "Range: r" with the weapon's
+own range column, or 1, and "Duration: 0.0 - d" with d = floor(2.4·L)/16
+printed as `%5.1f`, and no tag-50 Damage or stat line (the weapon's own template tags print through other arms and
+were not read for a staff). At exact ties of the first decimal (the halved word modulo 16 equal to 4 or 12) the digit
+depends on the CRT rounding of the unread format helper; the examples L = 10, 50, 100 are
+not ties. When the record reaches the card through the client reader's flag-0x20 path, the reader
+stores tag 51 before the packet pairs, so a `#Magic:` line (main.txt 189) precedes
+`#casts Stone Curse` (Medium: the flag meaning and the server pair order were not read). EN and RU
+print the same lines in their own text (`R2-ENGINE-999`, `R2-ASSET-228`,
+High / Medium). If L is the item cast's power, d is the server's Stone Curse
+duration for a target that takes the draw, before Earth resistance, in units
+of 16 timer counts, and the RU timer decrements once per actor step
+(`R2-ENGINE-1000`, Medium); seconds per step are Unknown.
+
 A cell draws, in order, an opaque 80x80 back, the `.16a` item picture with
 its skipped pixels transparent, an overlay for item flag 0x20, the
 quantity, the price plate keyed on 16-bit pixel 0, and the price

@@ -22,6 +22,134 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## Item card for a spell-carrying item
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-997 | The ROM2 item card is built by description EN L2.00841 (RU L2.03947); raw scans find five direct calls per root, among them the shop hover and the hero inventory strip hover, and no jump or stored address. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+| R2-ENGINE-998 | A ROM2 tag-50 pair adds Damage, Range, Duration and a stat line of the last tag-41 spell. Spell 18 is the only spell the description routine's own code compares (word halved, 0.0 - x); six getters choose the stat line. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+| R2-ENGINE-999 | A ROM2 weapon card with spell 18 at L adds casts Stone Curse, Range: column 11 (or 1), Duration: 0.0 -%5.1f of floor(2.4L)/16, no tag-50 Damage or stat line; EN equals RU under the address mask, apart from the RU item fields 4 bytes higher. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+| R2-ENGINE-1000 | If L is the item cast's power, the ROM2 card's Stone Curse maximum floor(2.4L)/16 is the server's item-cast duration before Earth resistance, in units of 16 timer counts; the server's pair writer is unread. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+
+### R2-ENGINE-997
+
+Description EN `L2.00841` (RU `L2.03947`) takes an item record in `ecx` and returns the card
+text. The record holds the name ID at `+6`, the tag count at `+9` and the tag stream pointer at
+`+0xc`. One raw scan per image finds five E8 rel32 calls to the routine and no E9 jump. A DWORD
+of the address occurs in no raw section. Each hit decodes as `call` inside a read window:
+
+| Caller (EN / RU call site) | What the caller returns besides the description |
+|---|---|
+| shop hover EN `L2.03920` (`L2.05891` / `L2.05892`) | `main.txt` 74 Money for a money item (R2-ENGINE-712) |
+| EN `L2.05893`, RU `L2.05894` (`L2.05895` / `L2.05896`) | a row of 0x50-pixel cells: 54 and 55 at the ends, 58 for an empty list or an index past its end, 74 for money |
+| EN `L2.05897` (`L2.05898` / `L2.05899`) | 74, 46 and 358 for item IDs 0xffff, 0xfffe, 0xfffd |
+| EN `L2.05900` (`L2.05901` / `L2.05902`) and the call at EN `L2.05903` / RU `L2.05904`, inside a routine whose start was not identified | the item in slot `+0x184 + 4·b` of a unit object, b being the byte of a 160-byte-wide map under the cursor |
+
+The second row's keys are Scroll left, Scroll right, Your hero's inventory and Money
+(R2-ASSET-228). R2-SESSION-228 observed the keys 58 and 74 on the shop hero row and on the mission backpack,
+and 54 and 55 (the scroll gems) on the mission backpack; which screens use the caller at
+`L2.05893` is Medium. That the strip and the shop hover share the builder follows from the two call bodies read.
+
+**Confidence.** High for the five call bodies read and the routine they call, in both roots.
+Medium that no other route reaches the routine: the census is a byte scan, so a call through a
+register or a computed address is outside it. Medium for the role names, which rest on the
+caption keys and R2-SESSION-228. The classes behind the callers were not traced.
+
+**Unknown.** The screens behind the third and fourth rows. Tracing the vtables or registrations
+that hold these routines would settle them.
+
+### R2-ENGINE-998
+
+The routine dispatches on tag−1 through byte table EN `L2.03923` (51 entries, equal in RU) and
+jump table EN `L2.03924` (RU entries +0x2c70); tags above 51 take the default arm.
+
+- Tag 41 sets the current spell to its value byte v (0 before any tag 41). On item kind
+  (ID >> 8) & 0xf other than 14 it appends `#%s %s%s` with `main.txt` 92, `spell.txt` line
+  v−1 and `main.txt` 93.
+- Tag 50 builds a spell object for the current spell (EN `L2.01059`: `+8` spell, `+0xc` column
+  1, `+9` column 6 of its row) and calls fill EN `L2.03926` / RU `L2.00045` with value byte L.
+  That fill is R2-ENGINE-022's, and the EN body equals it under the mask.
+- Spell 18 (EN `L2.05905`): the duration word `+0x10` is halved (`shr cx, 1`).
+- Damage: `#%s: %d-%d` with `main.txt` 118, `+0xe` and `+0xe`+`+0xf`, when `+0xf` is nonzero.
+- Range: `#%s: %d` with `main.txt` 123. On kind 14 it is spell byte `+9` when that is nonzero;
+  otherwise it is byte EN `+0x54` (RU `+0x58`) of a fresh item built from the record's ID (EN
+  `L2.05906`), printed without a zero test. For an armour or shield record the byte `+0x54` is the slot byte (R2-ENGINE-414), so its
+  Range line prints the slot byte; the weapon reading is for ID kind 1 (R2-ENGINE-999).
+- Duration: `main.txt` 124 with word/16.0, only when the word is nonzero. Spell 18 (second test,
+  EN `L2.05907`) uses `#%s: 0.0 -%5.1f`; any other spell uses `#%s: %5.1f`.
+- Stat: six getters write one slot, and the last nonzero one wins: 182 (spell 21), 185 (20),
+  187 (28), 183 (4, 8, 13, 19), 186 (11), 184 (14, 15).
+- The slots are appended in the order damage, range, duration, stat.
+
+Tag 51 appends `#` and `main.txt` 189 on kinds other than 14. Spell 18 is the only spell the description routine's own code compares. The stat line is
+chosen by six getters that compare spells 4, 8, 11, 13, 14, 15, 19, 20, 21 and 28, and the
+shared fill branches on 12, 18 and 23. The fill's branches on 12 and 18 are for the duration word and its branch on 23 is for the range byte. No other spell takes the spell-18 card branch.
+
+**Confidence.** High for the arms, tables, tests, format strings read, constant and keys, in
+both roots. The Damage format `#%s: %d-%d` and the kind-14 Range format were not read from the image
+(Medium); the formats of the Range, Duration, casts and Magic: lines were read. Medium that unformatted slots add nothing (their constructor's source `L2.05908` was not
+read) and for rendered characters, since the format helpers `L2.04048`, `L2.05909` and
+`L2.02015` were not read.
+
+### R2-ENGINE-999
+
+The claim is for a record whose stream gives tag 41 with value 18 and then tag 50 with value L,
+on ID kind 1 (the lookup's weapon branch, EN `L2.05910`).
+
+- `#casts Stone Curse` (RU `#с заклинанием Каменное проклятие`): `main.txt` 92 and 93 (93 is
+  empty) and `spell.txt` line 17 (R2-ASSET-228).
+- `#Range: r` (RU `Дистанция`): the weapon fill EN `L2.05911` stores column 11 of the weapon row,
+  or 1 when that column is −1. data.bin group C titles that column `@.range`.
+- `#Duration: 0.0 -%5.1f` (RU `Длительность`): the fill stores `(L·15·16·2)/100` because row 18's
+  Duration is 10. The card halves it and divides by 16.0: floor(2.4·L)/16, printed as `%5.1f`. L = 10, 50 and
+  100 give 1.5, 7.5 and 15.0. At exact ties of the first decimal (the halved word modulo 16 equal to 4 or 12) the digit
+  depends on the CRT rounding of the unread format helper; the examples L = 10, 50, 100 are
+  not ties. The line appears for every L ≥ 1.
+- No tag-50 Damage line: row 18 damageMin and damageMax are −1, so the spread byte is 0. No stat
+  line: no getter answers spell 18. So the card has no tag-50 Damage or stat line (the weapon's own template tags print through other arms and
+  were not read for a staff).
+
+When the record reaches the card through the client reader's flag-0x20 path, the reader
+stores tag 51 before the packet pairs, so a `#Magic:` line (main.txt 189) precedes
+`#casts Stone Curse` (Medium: the flag meaning and the server pair order were not read).
+
+Row 18 is equal in both roots, since `data.bin` is byte-equal.
+
+**Confidence.** High for the bodies, strings, constant, row values and text entries, in both
+roots. Medium for:
+
+- the line order, which needs tag 41 before tag 50 in the record (the client reader copies the
+  server's pairs after a tag-51 pair; the server's pair writer was not read);
+- a staff's ID kind 1;
+- the table bindings of `L2.05912` and `L2.00807`;
+- the reading of `@.range` as the weapon's range;
+- the virtual call `[vtable + 0x4c]` after the weapon fill (`L2.05913`) and `L2.04810` are
+  unread; whether either changes `+0x54` is Unknown;
+- the spacing (R2-ENGINE-998).
+
+**Unknown.** A shop or backpack hover over a staff with Stone Curse in the original, recorded with
+the staff's level, would settle the order, the spacing and r.
+
+### R2-ENGINE-1000
+
+For a target that takes the draw, the server's item-cast duration is a uniform draw from 0 to
+floor(240·P/100)·(100 − EarthResist)/100 (R2-ENGINE-025 with m = 1, R2-ENGINE-811). The card's
+`0.0 -` matches the draw's lower end. Its floor(2.4·L)/16 equals floor(240·P/100)/16 when L = P
+and EarthResist is 0. The card reaches the value by halving the shared fill's spell-cast word
+480·L/100, which the server's arm overwrites. If L is the item cast's power, one card unit is 16 timer counts, and the RU timer decrements
+once per actor step (R2-ENGINE-786; the EN actor step was read through return paths in
+R2-ENGINE-811). The card states neither the Earth-resistance
+cut nor the fixed duration of a target class without the draw (R2-ENGINE-811).
+
+**Confidence.** Medium for the composed equality. L is the tag-50 pair byte that the server sends.
+That the byte is the castspell effect's `+0x42` (R2-ENGINE-027, R2-ENGINE-403) and how a value
+above 255 is sent rest on the server pair writer, which was not read. R2-ENGINE-025's draw clause
+is Medium.
+
+**Unknown.** The server pair writer, and seconds per actor step. Reading the server item serializer
+that fills the client packet's pairs would settle the first. A timed cast from such a staff at a
+stated speed would settle the second.
+
 ## Effect draw, place and light of the open identifiers
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -7911,7 +8039,7 @@ whether EN sends the undo update from another body.
 | R2-ENGINE-411 | On the read ROM2 departure path mission entry clears Session +0x1ac before the map caller, whose only LOAD runs when +0x1ac is set; that the hero and its items cross into the mission as the same objects is Medium. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-412 | ROM2 victory runs a transition that keeps class 0x21..0x3f units and clears ground lists; the bodies read do not write their bag or worn items (Medium, ten callees unread); defeat runs it only when app +0x404 bit 0 is set. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 | R2-ENGINE-413 | ROM2 opcode 0x22 reaches the item-move arm in the dispatcher branch for packet byte +4 below 1 (no map test); that it is the only 0x22 arm is Medium, the sibling branch table being unread; one client builder, seven callers per root. | High / Medium | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
-| R2-ENGINE-414 | ROM2 effect tags index a 50-name table equal in EN and RU (41 castspell, 42 teachspell); effect apply scales s16 or u32 +0x40 by its argument; item +0x47, +0x50, RU +0x54 and +0x0e have no reader in the read bodies. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
+| R2-ENGINE-414 | ROM2 effect tags index a 50-name table equal in EN and RU (41 castspell, 42 teachspell); effect apply scales s16 or u32 +0x40 by its argument; item +0x47, +0x50, RU +0x54 and +0x0e have no reader in the read bodies. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/) |
 
 ### R2-ENGINE-410
 
@@ -8164,6 +8292,9 @@ bodies, not the executable.
 0x54 and 0x0e on Item registers would narrow the four fields. Item +0x42
 of an effect with tag 42: slot 18 reads +0x40 only, and no body read
 shows whether +0x42 matters for tag 42.
+
+**Amended.** The description body also reads `+0x54` as the weapon range column for ID kind 1
+(R2-ENGINE-999).
 
 **Evidence.** [EXP-2052](../experiments/EXP-2052-rom2-inventory-mission/)
 
@@ -17306,7 +17437,7 @@ Unknown. The render `L2.03537`, view routine, message dispatch and the sender
 | R2-ENGINE-709 | A ROM2 shop page has four shelves, one per fill category; tooltips caption them with main.txt 0x3e+k in town 1 and 0x116+k or 0x112+k in towns 2 and 3 (town binding Medium); a sold untagged item goes by type and stackability. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-710 | A ROM2 shop fill sorts each category once with the CRT qsort (equal-key order Medium): row column 15 bit 0 set first for types 1, 2 and 7, then u16 +0xc, then price +0x1c ascending; a sale or Undo merges or appends unsorted. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-711 | A ROM2 enchanted shop category gives an item 1..3 effects by data.bin group B weights for its part and column-15 bit; armour and shields get no castSpell; a flag-0 weapon gets one castspell; stocked MagicItems all carry an effect. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
-| R2-ENGINE-712 | A ROM2 shop hover shows Money for a money cell, else the item description: the name, a scroll's or book's spell joined to it, then # lines per attribute tag from stats.txt, spell.txt and main.txt; it has no price line. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
+| R2-ENGINE-712 | A ROM2 shop hover shows Money for a money cell, else the item description: the name, a scroll's or book's spell joined to it, then # lines per attribute tag from stats.txt, spell.txt and main.txt; it has no price line. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-713 | A ROM2 shop cell draws its price in font2, comma-grouped, its text box ending 6 px left of the plate's right edge, on plate costs<d> for a d-digit P, or costm<d> showing (P+1)/2 when item +0x18 is 2; 8 digits keep plate 7; P < 1 Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-714 | A ROM2 shop cell draws an opaque 80x80 back, the .16a item picture (pixel-skip runs transparent), an overlay for item flag 0x20, the quantity, then the price plate keyed on 16-bit pixel 0 and the price. | High / Medium | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
 | R2-ENGINE-715 | 48 of 54 ROM2 EN/RU shop listing pairs have equal instructions under an operand mask; 6 differ only in item offsets 4 larger in RU, allocation 0x54/0x58 or an annotation; 7 tables are equal or shifted. | High | ✔ promoted (branch candidate) | [EXP-2091](../experiments/EXP-2091-rom2-shop/) |
@@ -17507,6 +17638,12 @@ here (client item reader `L2.03700`, read for navigation in an earlier
 experiment and not regenerated). Money for `L2.03921` and the empty result
 for `L2.03922` are names from what the hover does with them, not read
 bodies.
+
+**Amended.** The tag-50 helpers `L2.01059` and `L2.03926` and the client item
+reader `L2.03700` are now read (R2-ENGINE-998, R2-ENGINE-999): tag 50 gives a Damage, Range,
+Duration and one stat line of the last tag-41 spell, and the reader puts tag 51 before the
+server's added pairs. The order of those pairs is still unread (R2-ENGINE-1000). The shop
+hover and the hero inventory strip call the same description routine (R2-ENGINE-997).
 
 **Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 4.
 

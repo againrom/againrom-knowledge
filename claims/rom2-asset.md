@@ -3342,3 +3342,51 @@ out/paired-data.tsv. Full source archive and entry hashes are retained.
 **Amended.** R2-ENGINE-975 and R2-ENGINE-976 identify mission 42's mages
 with owner colour 3 and shared entry 3, equal to table 3 in the running EN
 original (the draw's own resolution untrapped, Medium); R2-ENGINE-977 is the frame cross-check.
+
+## Item card text entries
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-228 | ROM2 spell.txt line 17 is EN Stone Curse, RU Каменное проклятие; main.txt 92 is EN casts, RU с заклинанием, 93 is empty, and 123 and 124 are EN Range and Duration, RU Дистанция and Длительность. | High | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+
+### R2-ASSET-228
+
+The `main.res` members, split at CRLF and counted from line 0, give these entries:
+
+| Member | EN SHA256 | RU SHA256 |
+|---|---|---|
+| `text/main.txt` (370 lines) | d6c525a9551f3a4e901c6f332762dda5396f78162e7d71b01dcebe2ce1d9e54d | c0d1081992aa0ec31f4749b100d6dded34d80c265f235f1ce1c0cdb6f4d7817a |
+| `text/spell.txt` (30 lines) | 33ab26bfa0d5ee632dac051cafca9d277650167fe423ca17bf2f429eb7102990 | 8eb0fc59835ef1fbc575854506d6be98d250d3c3623d18019ba6b2b1bdb3d999 |
+
+| Line | EN | RU |
+|---|---|---|
+| spell.txt 17 | Stone Curse | Каменное проклятие |
+| main.txt 46 | XP | Опыт |
+| main.txt 54 | Scroll left | Прокрутка влево |
+| main.txt 55 | Scroll right | Прокрутка вправо |
+| main.txt 58 | Your hero's inventory | Рюкзак вашего героя |
+| main.txt 74 | Money | Деньги |
+| main.txt 90, 92 | of, casts | с заклинанием, с заклинанием |
+| main.txt 91, 93 | (empty string) | (empty string) |
+| main.txt 118 | Damage | Урон |
+| main.txt 123 | Range | Дистанция |
+| main.txt 124 | Duration | Длительность |
+| main.txt 182 | Speed | Скорость |
+| main.txt 183 | Resistance | Сопротивление |
+| main.txt 184 | Sight | Обзор |
+| main.txt 185 | Maximum Damage Probability | Вероятность максимального урона |
+| main.txt 186 | rays | Лучей |
+| main.txt 187 | Minimum Damage Probability | Вероятность минимального урона |
+| main.txt 189 | Magic: | магия: |
+| main.txt 358 | Ally | Союзник |
+
+spell.txt line 17 has 11 bytes in EN (SHA256
+4e15ab4d620abc1d2797d0c13af39ccb1a4d086298c9ccbd2b9efb8ac33febc5) and 18 bytes in RU (SHA256
+23552e351fb13316a7f0905e8c6c0b76b93f60c7aa97bbab04b1f7c2ed3f56dd). The card routine that prints
+these entries is R2-ENGINE-998, and line 17 is spell 18 by the card's line v−1.
+
+**Confidence.** High for the member hashes, the line split and each entry's bytes, read from
+both roots' `main.res`. The per-line byte counts and hashes are in the evidence.
+
+**Evidence.** [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md),
+`evidence/generated/texts.tsv`.
