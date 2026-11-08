@@ -111,6 +111,10 @@ reachable site at `L09711` untouched.
 the side mission that unlocks them, so the intersection is observable in play"
 is retracted ([`retracted.md`](retracted.md), EXP-0062). The first missions at
 which the four can appear are 50 / 80 / 120 / 130, not 40 / 70 / 10 / 120.
+TAVERN-UNLOCK-043 settles the former within-chapter Unknown for the read
+ordinary side-completion branch: the existing chapter can show the newly
+unlocked type. The forward-main-ladder figures are not earliest possible
+chapters; native timing and alternate branches remain open.
 
 ### MERC-HIRE-003
 
@@ -944,3 +948,100 @@ extra independent witnesses.
 **Unknown.** Masks of unselected cells, native selected-object identities and
 the actual received masks. A read-only trace at selection and masked receive
 would settle these, but no original program ran in this experiment.
+
+## Roster and campaign presence
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TAVERN-ORDER-038 | Stock IDs come from the lowest free bit; cells follow bucket order, including ID-to-bucket wrap. | Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-STAY-039 | Read hire and talk handlers retain cell order; activation rebuilds lists and clears heard missions. | Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-LIMIT-040 | Named hire bodies test price and unlock state; a global party-size ceiling remains unproved. | Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-ACCEPT-041 | Exit removes the heard offer pair; before exit the same pair can be selected again. | Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-BIO-042 | A rejected first bio page uses the constructed-panel rule; absent-resource display remains Unknown. | Medium / Unknown | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-UNLOCK-043 | The read side-completion route can expose a new mercenary in the same main chapter. | Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-PEOPLE-044 | All 24 campaign sections give 22 tavern pairs per root: 12 npc IDs, 19 offers and 3 zero offers. | High / Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+| TAVERN-ROOTS-045 | EN and RU have one executable and equal scenario.reg; localized archives differ. | High | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+
+### TAVERN-ORDER-038
+
+R1555 explicitly allocates types 1..2 and 3..15 in ascending type order after each constructor, then publishes in type order. R0936 scans for the first clear bitmap bit and marks it. The stock refresh frees IDs of removed nonzero-type party actors first. Constructor and publication internals remain boundaries.
+
+L05558 computes ((key & 0xffff) >> 4) modulo the map's stored bucket count. The client insertion at L10177..L10178 links at the head. R0746 walks increasing buckets and each chain from its head, retaining matching CUnits with nonzero pool. Its array append and return are committed through L17482. The inn copies that order at L08031..L10174.
+
+With an explicit synthetic 17-bucket premise, IDs 266..280 place types 7..15 in bucket 0, ahead of types 1..6 in bucket 16. This is a projection, not a runtime observation. No universal concrete first roster follows without the current bitmap and intervening allocations.
+
+**Confidence.** Medium for the composed allocation/publication rule. Named arithmetic and stores are read; constructor, publication, pump and container-lifetime alternatives are not closed. There is no census excluding other allocators or map writers.
+
+**Unknown.** Exact stock IDs and native chronology after new campaign, mission return or town LOAD. Evidence: order listings, presence roster tail, closure activation and order-model.tsv in the linked experiment.
+
+### TAVERN-STAY-039
+
+R1441 and R1440 route hire/dismiss to per-type flag setters and sound requests. R0702 opens dialogue and appends a nonzero heard identity without removing its offer. These bodies do not explicitly rebuild the cell arrays.
+
+R1412 rebuilds the mercenary and talk halves and calls the pending dword array size helper with 0 at L17483..L17484. R0786 visits pending entries, calls registration, submits the hire vector and then clears the view lists. R1318 invokes stock refresh before activation.
+
+**Confidence.** Medium for one-stay and repeated-entry composition: complete named local handlers and the activation call order were read, but constructors, publication and UI callbacks remain open. Array helper semantics reuse TAVERN-023.
+
+**Unknown.** Native re-entry ordering and SAVE requested before exit; an unread SAVE caller may first commit. Evidence: presence hire/exit/flag, order activation and closure activation listings.
+
+### TAVERN-LIMIT-040
+
+R1556 subtracts already-hired squad prices from available money. R1441 compares money with the selected price and requests refusal slot +a0 on the less-than arm; success requests +98. R1442 checks unlock membership and writes the per-type flag. The dismiss path clears the flag and requests +9c.
+
+The complete spawn body R1142 through return L17485 creates one Group per nonzero requested type and loops over every requested head. No explicit party-headcount comparison occurs in these named bodies. No call-site census or transitive constructor/list-insertion proof was made.
+
+**Confidence.** Medium for the bounded negative over these named bodies and the read spawn loop. Whether a global party limit exists remains Unknown: constructors, list insertion, publication and indirect routes are unread boundaries. Unlimited party size does not follow from this finite local read.
+
+**Unknown.** Limits in those callees and any size-specific disabled page state. Evidence: closure money-preview and presence hire-dismiss-talk, hire-flags and hire-spawn listings.
+
+### TAVERN-ACCEPT-041
+
+R0702 reads the selected paired words, opens dialogue, and appends only a nonzero mission. R0786 commits that pending list. R1413 finds the first matching InnMission and removes the same index from InnMission and InnNPC. The next activation builds talk cells from the remaining InnNPC array. The zero arm queues no acceptance.
+
+On the normal path an accepted pair therefore disappears on the next activation rather than receiving a retained disabled-cell state. Completing its side mission later does not explicitly append that pair in R1414. A later authored zero-offer conversation with the same npc id is a separate pair.
+
+**Confidence.** Medium for the composed visible result: local stores and array consumers are read, while external writers, chapter reload, native input and pixels remain open. Removal/append helper semantics reuse TAVERN-023 and TAVERN-024.
+
+**Unknown.** Altered-state completion/LOAD and direct external mutation. Evidence: presence talk, exit, registration and completion, and order view-enter listings.
+
+### TAVERN-BIO-042
+
+The biography route uses the shared dialogue builder. A constructed panel's show slot ignores first pager failure. Existing readable text with no accepted part 1 can therefore retain the default and continue to part 2 under DIALOGUE-049 and amended DLG-EMPTY-004.
+
+The constructor calls R0720. That payload loader calls R0535 without testing its return before asking for length. The open helper can return zero on lookup miss. The resource lookup, length/read methods and exception path are outside this read, so a failed open is not treated as a successful empty payload.
+
+**Confidence.** Medium for applying the constructed-panel rule to the biography route. Unknown for absent-resource pixels, closure or error behavior. No original runtime was invoked.
+
+**Unknown.** Missing-bio presentation and actual sound. Evidence: presence dialogue builder/payload/show and closure payload-open listings. The complete inventory has fourteen bio-family nodes per root, including npc35, and no npc11/npc15 node.
+
+### TAVERN-UNLOCK-043
+
+The mission-end caller invokes R1669 at L10124 before normal town-return completion. The selected side callback R1799 appends EnableMercenary values and clears its reward array. R1414 removes the completed side record and requests -1 from the main selector. The established equality arm keeps the current main record. Tavern activation then filters that chapter's named types against the grown unlock set and positive pool.
+
+The committed two-root campaign table gives these conditional cases: type10 after mission41 in chapter40; type8 after71 in 70; type1 after111 in 110; type5 after121 in 120. Each is already named in that chapter. The claim does not assert a first frame of native visibility.
+
+**Amends.** MERC-SHELF-002's within-chapter Unknown is settled for this read ordinary branch. Its 50/80/120/130 figures remain a qualified forward-main-ladder calculation.
+
+**Confidence.** Medium: the caller, side callback, completion and activation are read. The main-selector equality semantics reuse SAV-1329; dispatch/publication and native journey remain transitive boundaries.
+
+**Unknown.** Other routing/AutoGetMission branches and native entry timing. Evidence: presence mission-end, side/main-unlock, completion and flag listings, order activation and campaign-mercenaries.tsv.
+
+### TAVERN-PEOPLE-044
+
+The complete two-root scenario.reg walk publishes chapter, index, InnNPC id, InnMission and addressed conversation for every pair in campaign-persons.tsv. All 24 Mission sections were enumerated, yielding 22 pairs, 12 distinct npc ids, 19 nonzero offers and 3 zero offers per root. Chapters10/20 and the side sections contribute no pair. All addressed conversations ship. An npc id is an authored identity key, not an inferred physical actor name.
+
+Fresh main-record load supplies the chapter's pairs; normal exit acceptance can remove a nonzero pair, while hearing a zero offer does not remove it. A loaded shortened array need not equal the fresh authored table. This table is not a census of every realized visible cell or altered quest state.
+
+**Confidence.** High for the finite registry population and node resolution, recomputed from committed output. Medium for normal lifetime composition. Live/synthetic actor resolution, selection-gated drawing, external mutation and complete town LOAD remain boundaries.
+
+**Unknown.** Complete native lifetime table and visibility in every state. Evidence: campaign-persons.tsv, campaign-mercenaries.tsv, dialogue-inventory.tsv and the committed loader/activation/registration listings.
+
+### TAVERN-ROOTS-045
+
+Both 1,977,344-byte executables have SHA256 942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03. All 29 selected ranges per root have equal hashes and equal instruction text after the root-label header. The 4,592-byte scenario.reg payload on each root has SHA256 0af3b58f6e542c53fd0c32613aedd470ca19172f20399ab4bb7c81eec9de1436.
+
+The scenario/main archives differ by full SHA256. The authored 22-pair table is equal, but RU has seven unaddressed NPC dialogue nodes while EN has zero. No voice samples or original output were read.
+
+**Confidence.** High for equality of these exact inputs and ranges, from full digests and regenerated output comparisons. One equal program is one witness. This grade does not establish any behavior left open by another claim.
+
+**Unknown.** Equal native pixels, localized text/voice and actual sound delivery. Evidence: the three code input/range manifests, data-inputs.tsv and dialogue-inventory.tsv.

@@ -77,7 +77,7 @@ show it at all** — the filter runs before the list is built. The shipped campa
 that for four types, whose unlocks are the reward for side missions 41, 71, 111 and 121:
 
 ```
-type   named by Mercenaries from   unlocked by   first main-mission shelf that shows it
+type   named by Mercenaries from   unlocked by   next forward-main-ladder checkpoint
  10    mission 40                  mission 41    mission 50
   8    mission 70                  mission 71    mission 80
   1    missions 10, 20, 110        mission 111   mission 120
@@ -86,9 +86,13 @@ type   named by Mercenaries from   unlocked by   first main-mission shelf that s
 
 A consumer must therefore keep the two apart: *named by this mission* and *hireable in this
 mission's town* are different sets, and only the second is what the player sees. The right-hand
-column above is computed by walking the main-mission ladder in ascending order; whether a side
-mission's unlock can take effect inside its own chapter, before the next main mission, depends
-on when the player does it and is **not** established here.
+column is a forward-main-ladder checkpoint, not an earliest possible chapter.
+On the read ordinary side-completion route the current main record is kept,
+so the next tavern activation can show type 10 after mission 41 in chapter 40,
+type 8 after 71 in 70, type 1 after 111 in 110 and type 5 after 121 in 120,
+provided its pool is positive. This composition is Medium; native timing and
+alternate routing remain open. — TAVERN-UNLOCK-043. MERC-SHELF-002 is amended
+for this former within-chapter Unknown.
 
 Mission 20 is a useful boundary case. Its record names type 1, but type 1 is not enabled until
 side mission 111, so the mission-20 shelf is empty. The next main mission, 30, names type 14;
@@ -389,3 +393,42 @@ through flat destruction and event callbacks is Medium. — PARTY-041, PARTY-043
 Entry sends rebuild before activation; exit sends hire before closing. A
 same-visit undo control and its runtime delivery remain Unknown. The command
 refund alone does not establish that UI operation. — PARTY-043
+
+## Allocation and one-stay boundaries
+
+Stock refresh constructs types 1..15 in ascending type order and explicitly
+takes the lowest clear bitmap bit after each constructor. Roster cells follow
+ascending actor-map buckets and head-first chains, not authored type order.
+The bucket is ((id & 0xffff) >> 4) modulo the map's stored bucket count; IDs
+can wrap from the last bucket to the first. Exact first IDs after LOAD depend
+on the restored bitmap, removed typed actors and intervening construction.
+The composed rule is Medium; a universal concrete order is not established.
+— TAVERN-ORDER-038
+
+Read hire/dismiss changes a type flag. Talk retains the pair until exit commits
+its heard mission; the next activation reads the shortened pairs. Activation
+rebuilds the roster and clears the view's pending heard array. Native re-entry
+and SAVE requested before the exit/commit remain Unknown.
+— TAVERN-STAY-039, TAVERN-ACCEPT-041
+
+The named local hire bodies compare money with squad price and check unlock
+membership. No explicit party-headcount comparison occurs in those bodies or
+the read spawn loop; unread constructors, insertion, publication and indirect
+routes leave a global party-size ceiling Unknown. No size-specific disabled
+button state is established. — TAVERN-LIMIT-040
+
+The complete fresh campaign table contains 22 paired cells per root over all
+24 mission sections: 12 npc ids, 19 nonzero offers and 3 zero offers. Each
+addressed conversation ships. A loaded shortened array is not the fresh table,
+and selection/actor/sprite construction still gates visible drawing. Main
+record load replaces the pairs before aging side records; arbitrary same-chapter
+record deletion and the full native lifetime table remain open.
+— TAVERN-PEOPLE-044, TOWN-569
+
+The shared constructed-panel rule applies when a readable bio has no accepted
+first page. Missing-resource presentation is a separate Unknown: the payload
+loader ignores the open return before asking for length. — TAVERN-BIO-042
+
+Both roots have the same executable and campaign registry payload. Localized
+archives differ, with seven unaddressed RU NPC dialogue nodes. Equal code
+does not settle the remaining native behavior or voice. — TAVERN-ROOTS-045

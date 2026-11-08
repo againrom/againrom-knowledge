@@ -3654,3 +3654,19 @@ on the entry path. The path from the Load dialog to `0x42e` is not traced.
 
 **Unknown.** The static LOAD path to message `0x42e`; whether the first frame's dervish is at
 frame 0 or 1 (`TOWN-505`).
+
+## Tavern campaign transitions
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| TOWN-569 | Main-record load replaces tavern pairs before aging side records; outside deletion remains open. | Medium | ● active | [EXP-0641](../experiments/EXP-0641-tavern-unknowns/) |
+
+### TOWN-569
+
+R1297 clears InnMission at L17486..L17487 and InnNPC at L17488..L17489, then fills the requested chapter's pairs at L17490..L17491. Only afterward does its L17492..L17493 age pass increment child +0x48 and erase a child whose age is at least 2. The correct instruction bridge at L17494..L17495 is committed separately because the first finite split started inside an instruction.
+
+R1414's side-completion branch destroys and shifts out one child, decrements the child count and requests main identity -1. This local body does not explicitly append an inn offer. Accepted pair removal is a separate transition.
+
+**Confidence.** Medium for the composed expiry/presence result. Registry helpers, destructor L17496, list helpers and outside aliases are not closed. No global deletion-call census or runtime observation was made.
+
+**Unknown.** Removing a current record while holding the chapter's inn arrays unchanged; complete town LOAD continuation. Evidence: presence mission-loader, completion and registration listings, plus closure loader-boundary.

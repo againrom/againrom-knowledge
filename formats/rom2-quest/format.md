@@ -37,6 +37,10 @@ the text cache (R2-ENGINE-890) and the read route does not pass EnterLocation,
 so slots 752..767 survive a load (R2-SESSION-348, High for the save values,
 Medium for the route; Unknown: the callers of the three EnterLocation call sites). The 16 original-made saves hold slot 754 only.
 
+The selected EN/RU SAVE and LOAD bodies request a 4096-byte bank transfer, including the
+objective cells (R2-SESSION-368, High for the requests). This static read did not execute stream
+restoration or later callbacks; the first cold-LOAD town frame remains Unknown.
+
 ## Maps 21 and 31
 
 Both maps write objectives 1 and 2 with instant 36 modes 1 and 2 only (no mode

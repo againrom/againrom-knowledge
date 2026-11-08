@@ -289,8 +289,9 @@ the generic inn page `L2.00744`, the center pointer routine `L2.00755` after
 its hit slot returns nonzero, and button 0 on release, run Fire when the
 copied word has bit 31, else Hire. EN and RU agree after masking addresses
 and register names, except that RU skips the about text when the selection
-is negative. The Kaarg and druid inn pages, the event class and the callers
-of `L2.00755` are Unknown. — R2-ENGINE-495, R2-ENGINE-496
+is negative. The Kaarg/druid inherited control slots are now bounded by R2-ENGINE-970;
+the event class and whole caller coverage remain Unknown.
+— R2-ENGINE-495, R2-ENGINE-496 (amended)
 
 On the generic inn page, hire seats come before talk seats. For a hire seat
 whose copied word has bit 31 the painter passes main-text key 257's string
@@ -813,3 +814,30 @@ it is mission 20's point, a PathMap node. That every opening does so is
 Medium: other openers of the map were not enumerated. Two LOAD bodies
 store no party point; the rest of the load is unread (Medium). —
 R2-SESSION-177, R2-SESSION-185
+
+## Inn action and restoration boundaries
+
+The amended local option/refresh contracts distinguish first-seat reset at entry from TALK
+retaining the index; the application close-message consumer remains unread. Repeated admitted
+keys retain vector elements, while TALK resolves the first copied topic. Missing-section
+construction retains the campaign action; empty parsing does not locally close on entry.
+Kaarg/druid control-slot reuse is exact within each root, and joined membership is not a
+predicate in the read builder/resolver. Complete delivered behavior and EN/RU equality
+remain bounded (R2-ENGINE-220, R2-ENGINE-343, R2-ENGINE-496, R2-ENGINE-752, amended;
+R2-ENGINE-967, R2-ENGINE-968, R2-ENGINE-969, R2-ENGINE-970, R2-ENGINE-973, R2-ENGINE-974).
+
+The two read hire loops establish a 20-candidate bound, not a complete party limit. Actor and
+Group allocation operands are byte sizes. Missing base matches can feed EN second-table
+ordinal0; its contents and final constructor result remain unread. Admission/refusal and
+complete placement remain Unknown (R2-ENGINE-381, amended; R2-ENGINE-971, R2-ENGINE-972).
+
+Fire locally clears copied bit31 and kind1 TalkTo toggles selection; it does not itself
+remove an actor or write SAV. For a received unit update with identity +0x1dc in 1..20 and
+state +0x184>1, the read client arm requests bank[531+ID]=0 (High local instructions).
+Interpreting this as hire death and composing delivery, departure and the next inn visit remain
+Medium; intervening writers remain open. A later successful SAVE transfers the then-current
+bank; transferring that zero requires no intervening writer (R2-SESSION-195, amended;
+R2-SESSION-367, High transfer request / Medium persistence). Raw bank restoration and prior stored-value
+examples establish no first-frame town roster or party. The prior delivery/LOAD Unknowns
+remain (R2-SESSION-158, R2-SESSION-195, amended; R2-SESSION-366, R2-SESSION-367,
+R2-SESSION-368).

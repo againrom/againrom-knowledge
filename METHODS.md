@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
+Claims labelled: 4815. Observation: 143. Static analysis: 4006. Mixed: 666.
 
 ## Ledger ai
 
@@ -2287,7 +2287,7 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-ENGINE-217 | static analysis | ✔ promoted |
 | R2-ENGINE-218 | static analysis | ✔ promoted |
 | R2-ENGINE-219 | static analysis | ✔ promoted |
-| R2-ENGINE-220 | static analysis | ✔ promoted |
+| R2-ENGINE-220 | static analysis | ✔ promoted (amended) |
 | R2-ENGINE-221 | static analysis | ✔ promoted |
 | R2-ENGINE-223 | static analysis | ✔ promoted |
 | R2-ENGINE-224 | static analysis | ✔ promoted |
@@ -2394,7 +2394,7 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-ENGINE-339 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-340 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-341 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-343 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-343 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-344 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-353 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-354 | static analysis | ● active (branch candidate) |
@@ -2512,7 +2512,7 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-ENGINE-493 | static analysis | ● active |
 | R2-ENGINE-494 | static analysis | ● active |
 | R2-ENGINE-495 | static analysis | ● active |
-| R2-ENGINE-496 | static analysis | ● active |
+| R2-ENGINE-496 | static analysis | ● active (amended) |
 | R2-ENGINE-497 | static analysis | ● active |
 | R2-ENGINE-498 | mixed | ● active |
 | R2-ENGINE-499 | mixed | ● active |
@@ -2729,7 +2729,7 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-ENGINE-749 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-750 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-751 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-752 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-752 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-762 | static analysis | ● active (amended, branch candidate) |
 | R2-ENGINE-763 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-766 | static analysis | ✔ promoted (branch candidate) |
@@ -2906,6 +2906,14 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-ENGINE-964 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-965 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-966 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-967 | static analysis | ✔ promoted |
+| R2-ENGINE-968 | mixed | ✔ promoted |
+| R2-ENGINE-969 | mixed | ✔ promoted |
+| R2-ENGINE-970 | mixed | ✔ promoted |
+| R2-ENGINE-971 | mixed | ✔ promoted |
+| R2-ENGINE-972 | static analysis | ✔ promoted |
+| R2-ENGINE-973 | mixed | ✔ promoted |
+| R2-ENGINE-974 | mixed | ✔ promoted |
 
 ## Ledger rom2-session
 
@@ -2985,7 +2993,7 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-SESSION-155 | static analysis | ● active (branch candidate) |
 | R2-SESSION-156 | static analysis | ● active (branch candidate) |
 | R2-SESSION-157 | static analysis | ● active (branch candidate) |
-| R2-SESSION-158 | mixed | ● active (branch candidate) |
+| R2-SESSION-158 | mixed | ● active (amended, branch candidate) |
 | R2-SESSION-161 | static analysis | ● active (amended) |
 | R2-SESSION-162 | static analysis | ● active |
 | R2-SESSION-163 | mixed | ✔ promoted (branch candidate) |
@@ -3093,6 +3101,9 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | R2-SESSION-358 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-362 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-363 | static analysis | ● active (branch candidate) |
+| R2-SESSION-366 | mixed | ✔ promoted |
+| R2-SESSION-367 | static analysis | ✔ promoted |
+| R2-SESSION-368 | static analysis | ✔ promoted |
 
 ## Ledger sav
 
@@ -4017,6 +4028,14 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | TAVERN-ROUTE-032 | observation | ● active |
 | TAVERN-035 | static analysis | ✔ promoted |
 | TAVERN-036 | mixed | ✔ promoted |
+| TAVERN-ORDER-038 | static analysis | ● active |
+| TAVERN-STAY-039 | static analysis | ● active |
+| TAVERN-LIMIT-040 | static analysis | ● active |
+| TAVERN-ACCEPT-041 | static analysis | ● active |
+| TAVERN-BIO-042 | static analysis | ● active |
+| TAVERN-UNLOCK-043 | static analysis | ● active |
+| TAVERN-PEOPLE-044 | mixed | ● active |
+| TAVERN-ROOTS-045 | mixed | ● active |
 
 ## Ledger terrain
 
@@ -4682,6 +4701,7 @@ Claims labelled: 4795. Observation: 143. Static analysis: 3995. Mixed: 657.
 | TOWN-563 | static analysis | ● active (branch candidate) |
 | TOWN-564 | static analysis | ● active (branch candidate) |
 | TOWN-565 | static analysis | ● active (branch candidate) |
+| TOWN-569 | static analysis | ● active |
 
 ## Ledger trigger
 

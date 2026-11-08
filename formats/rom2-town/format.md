@@ -1121,3 +1121,56 @@ each ship ShopButton1..4: 1/4 are 120x52 and 2/3 are 140x46. These are
 High header and equality measurements over that filtered registry
 population. Names outside the filter, other town/menu consumers and
 shop caption font/ink remain Unknown (R2-ASSET-090).
+
+## Inn option refresh and repeated seats
+
+The three inn entry builders preserve copied-option order within hire and talk vectors and
+select seat 0 when either vector is populated, otherwise -1. TALK itself requests dialogue,
+calls TalkTo and leaves the selection index unchanged. Its local body does not rebuild the
+list. The application's close-message consumer remains unread, so the moment of a rebuild
+after conversation is Unknown (R2-ENGINE-967, High / Medium / Unknown).
+
+Each admitted option appends a vector element without key deduplication on the local path.
+With successful allocation, repeated keys retain repeated elements. TALK finds the first
+matching low16 word in the full copied list; duplicate talk seats request that first topic.
+Actual duplicated seats remain Medium. Party membership is not a predicate in the read
+builders/resolver; an option still needs its campaign-bank admission. Joining and consuming a
+one-shot topic are separate changes (R2-ENGINE-968, R2-ENGINE-973, High / Medium).
+
+Kaarg and druid page control slots +48/+4c/+54 and center slots +4c/+54 exactly reuse the
+generic targets within each root. Shared button release runs Hire/Fire by copied bit31 on
+hire seats, about text on their Talk button, and first-topic TALK on talk seats. A talk seat
+has no first-button action. Composed dispatch is Medium; a visible Hire caption does not
+guarantee kind1 admission, and first-key collisions retain their rejection rule
+(R2-ENGINE-970, High / Medium).
+
+### Empty dialogue and unavailable templates
+
+On find=-1 the loader supplies one NUL byte and the builder takes the no-speaker branch.
+TALK still reaches TalkTo. Empty parsing returns zero; entry ignores that return, whereas
+the dismiss message requests close after another zero. An empty page with a dismiss action
+is Medium; missing town-file buffer initialization and delivered pixels remain Unknown
+(R2-ENGINE-969, High / Medium / Unknown).
+
+The mission-entry candidate loop examines 20 hire pairs. Allocation sizes are not party
+limits, and complete capacity/refusal behavior remains Unknown (R2-ENGINE-971). EN missing
+template matches can reach second-table ordinal0, whose accessor computes a table address;
+that is not proof of a NULL actor or an accepted fallback. Row0 contents, constructors and
+the RU accessor cores remain Unknown (R2-ENGINE-972).
+
+### Choice, death and town LOAD
+
+Fire clears copied bit31 and calls TalkTo. Kind1 toggles selection, so a consistent selected
+choice becomes clear; kind2 stores no bank value. The local Fire body does not delete a live
+actor or write a disk save. Restored binding and final mission placement remain Unknown
+(R2-SESSION-366, High / Medium / Unknown).
+
+A received unit update with ID1..20 and state>1 clears availability. A subsequent successful
+SAVE transfers the current bank; death alone proves no disk write. Delivery, intervening
+writers and the next-visit composition remain Medium (R2-SESSION-367). Raw restoration of
+4096 bank bytes leaves the first cold-LOAD town-frame roster, party, selected seat and
+buttons Unknown; stored-value examples do not establish that frame (R2-SESSION-368).
+
+Among 44 paired inn-area windows, two have equal bytes: TalkTo and the selected Scenario
+SAVE/LOAD range. Twenty have equal address-masked instruction text, which hides callee and
+global identity. Complete EN/RU behavior equality is Unknown (R2-ENGINE-974).

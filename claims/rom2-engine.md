@@ -2256,7 +2256,7 @@ serializer CFGs were read completely. The saves fit 103-byte Weapon and
 | R2-ENGINE-217 | The 15 fixed EnterInn continuation stores depend on current-record ID and exact bank predicates; three NPC2022 families have no stage bound and use slots776/781 to select one topic each. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
 | R2-ENGINE-218 | D2.00011 reads record ID; D2.00035/00036 allocate/release list-node blocks through selected heap paths and do not decode packed options; EnterInn calls only the ID getter. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
 | R2-ENGINE-219 | Selected town2 stage30 kind3 TALK admits type1/ID-topic to availability; NPC22/topic30 also sets slots533=1,553=2, while NPC2108/topic31 has no special bank store and NPC2110/topic39 kind0 makes no state change. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
-| R2-ENGINE-220 | The selected EN/RU inn builder lists option kinds0/3 as talk actors; its TALK action finds the first matching low16 actor key, formats npc%dtalk%d, dispatches text, then passes the same packed word to TalkTo. | High / Medium | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
+| R2-ENGINE-220 | The selected EN/RU inn builder lists option kinds0/3 as talk actors; its TALK action finds the first matching low16 actor key, formats npc%dtalk%d, dispatches text, then passes the same packed word to TalkTo. | High / Medium | ✔ promoted (amended) | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
 | R2-ENGINE-221 | The EnterInn dynamic tail emits kind1/2, low ID i+1 when slot552+i=currentID and slot532+i is 1/2, with bit31 iff signed slot512+i>0; an admitted currentID2 EnterInn call after Leave20 without an intervening writer emits kind1/ID1. | High | ✔ promoted | [EXP-2027](../experiments/EXP-2027-rom2-inn-entries/) |
 
 ### R2-ENGINE-215
@@ -2398,6 +2398,8 @@ callees are not closed and no original run occurred.
 
 **Unknown.** Rendered rows, actor lookup/allocation success, dialogue
 alternatives, multiple topics for one actor key and input scheduling.
+
+**Amended.** R2-ENGINE-968 narrows repeated-option storage and first-topic resolution; displayed duplicates remain Medium.
 
 ### R2-ENGINE-221
 
@@ -5620,7 +5622,7 @@ in a committed listing.
 | R2-ENGINE-339 | ROM2 stores SoundRandom, SoundMusPos, SoundSfxPos, SoundSpeechPos and MusicEnabled in HKLM; volume defaults to -700, MusicEnabled to 1; -nomusic or a music.res mount failure disables screen and mission music requests. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-341 | A ROM2 dialogue tag tune=N cross-fades music to list index N, which repeats only while no area pick exists; no data file or archive entry in either root contains tune=, so shipped dialogue never changes music. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
-| R2-ENGINE-343 | On a -1 find the ROM2 dialogue loader leaves a one-byte empty body, a clear flag and no error (EN High, RU Medium); that absent means -1, and the TALK body ignoring the result (TalkTo), are Medium. | High / Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
+| R2-ENGINE-343 | On a -1 find the ROM2 dialogue loader leaves a one-byte empty body, a clear flag and no error (EN High, RU Medium); that absent means -1, and the TALK body ignoring the result (TalkTo), are Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
 | R2-ENGINE-344 | The `#<key>` lookup is reached via the dialogue builder (21 direct call sites, 10 functions per image; register calls unseen); only TALK formats `npc%dtalk%d`; no save-load read found. | Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
 
 ### R2-ENGINE-335
@@ -5977,6 +5979,8 @@ the same arm (read `L2.01457` and `L2.01289` on an empty string); sections
 whose header exists but whose body is empty (read the cut and parser on a
 zero-length body); the RU find result for absent (read `L2.01289`).
 
+**Amended.** R2-ENGINE-969 commits constructor/builder/NUL-exit evidence and distinguishes entry from dismiss; missing-file initialization and live display remain open.
+
 ### R2-ENGINE-344
 
 Every `#<key>` lookup the census saw runs in the one loader of
@@ -6026,7 +6030,6 @@ destination (decode that RU site); the 14 dword references to the EN
 buffer between `L2.01478` and `L2.01479` and the two in the text loader
 (`L2.01480`, `L2.01481`), which are not classified; the `Docs\%d.txt`
 destination; which file the buffer holds when TALK runs.
-
 
 ## Kaarg selected room construction
 
@@ -6858,7 +6861,7 @@ The EN placement call L2.01663 supplies actor, owner, -1, 0xffb and two zeros. T
 
 **Unknown.** Preceding mode predicate, all entering retained members, other callers, final placement and admission failure. The placement/retained-registration cones and a named entry save would settle these.
 
-**Amended.** R2-ENGINE-523 reads the preceding predicate: the loop runs only when the current location record's DWORD +0 is 1, and the creator has one direct caller per root. R2-ENGINE-527 shows the call named placement above is the unit-state sender; its arguments are a field mask and two field values, and final placement stays Unknown.
+**Amended.** R2-ENGINE-971 bounds the two local loops and allocation-null flow; complete party/admission limits remain Unknown.  R2-ENGINE-523 reads the preceding predicate: the loop runs only when the current location record's DWORD +0 is 1, and the creator has one direct caller per root. R2-ENGINE-527 shows the call named placement above is the unit-state sender; its arguments are a field mask and two field values, and final placement stays Unknown.
 
 ### R2-ENGINE-382
 
@@ -10259,7 +10262,7 @@ settle these.
 | R2-ENGINE-493 | ROM2 TalkTo has two kind 0 arms: NPC 5 at any topic sets banks 536=1, 556=3, 774=2; NPC 0x2a3 with topic 0x4e sets 770=2 and ORs 0x80000 into D2.00240. Kinds 2 and 4..7 store nothing; bit 31 is not read. | High | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
 | R2-ENGINE-494 | ROM2 EnterInn makes 48 option stores: 46 constant words (7 kind 0, 39 kind 3) and two tail words. Of the kind 0 words only NPC 5/topic 79 and NPC 675/topic 78 reach a TalkTo effect arm. | High | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
 | R2-ENGINE-495 | ROM2 Hire on a kind 1 entry formats `npc<ID>accept<stage>`, sets bit 31 of the copied word and calls TalkTo; any other kind formats `npc<ID>reject<stage>` only. Fire clears bit 31 and calls TalkTo, with no format. | High / Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
-| R2-ENGINE-496 | On the generic inn page `L2.00744`, the center pointer routine `L2.00755` after its hit slot returns nonzero, and button 0 on release, run Fire if the hire's copied word has bit 31, else Hire. Button 1 formats `npc<key>about`. | High / Medium / Unknown | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
+| R2-ENGINE-496 | On the generic inn page `L2.00744`, the center pointer routine `L2.00755` after its hit slot returns nonzero, and button 0 on release, run Fire if the hire's copied word has bit 31, else Hire. Button 1 formats `npc<key>about`. | High / Medium / Unknown | ● active (amended) | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
 | R2-ENGINE-497 | The generic inn page's center painter `L2.00746` seats hire entries before talk entries and, on a hire seat whose copied word has bit 31, passes key 257's string to `L2.00720`; no hire is seated while the selection is -1. | High / Unknown | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
 | R2-ENGINE-498 | Every ROM2 inn action takes the first copied option with the seat's low 16 bits, and constants precede hire entries (High). Medium: a speaker speaks its first option, and hire 2 meets topic 51's word at stage 50. | High / Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
 | R2-ENGINE-499 | Within one visit of the page, a repeated ROM2 inn TALK with the same hero selects the same alternatives. No inn section header in either root carries `npcalive=`, `npcdead=` or `tips=`; other header tokens were not enumerated. | Medium | ● active | [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/) |
@@ -10381,6 +10384,8 @@ the EN hits `L2.02389`, `L2.02390`, `L2.02391`, `L2.02392`, `L2.02393` and
 routines or not at all is Unknown.
 
 **Evidence.** [EXP-2062](../experiments/EXP-2062-rom2-inn-talk/)
+
+**Amended.** R2-ENGINE-970 establishes the later-town inherited page/center control slots; event scheduling and complete caller coverage remain open.
 
 ### R2-ENGINE-497
 
@@ -18498,7 +18503,7 @@ operand. Each equality holds over its window (`out/code/ranges.tsv`).
 | R2-ENGINE-749 | In both ROM2 scenario.dll images the 99 cells EnterInn tests have DLL writers only in NewGame, Load, SetVar, the mission departure and TalkTo; 776 and 781 have only SetVar, NewGame and Load. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
 | R2-ENGINE-750 | ROM2 EnterInn tests the ID of the record at current D2.00007, stored only by EnterLocation, Load and the two departures (zero); TalkTo tests the fixed mission-10 record D2.00143. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
 | R2-ENGINE-751 | ROM2 AddMission appends each catalog type-1 record whose ID equals the topic and that the list find reports absent; each of the 39 kind-3 inn topics matches one of the 49 rebuilt records. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
-| R2-ENGINE-752 | ROM2 inn TALK stores bank cells only for topics 10, 30, 79 and 78 and hire words; every constant option but 79 and 78 is emitted again by the next EnterInn with the same bank and current. | High / Medium | ✔ promoted (branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
+| R2-ENGINE-752 | ROM2 inn TALK stores bank cells only for topics 10, 30, 79 and 78 and hire words; every constant option but 79 and 78 is emitted again by the next EnterInn with the same bank and current. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/) |
 
 ### R2-ENGINE-748
 
@@ -18659,6 +18664,8 @@ row and text, which are reused at the grades of R2-ENGINE-498 and R2-ASSET-115.
 visit.
 
 **Evidence.** [EXP-2097](../experiments/EXP-2097-rom2-inn-offer-gates/RESULTS.md), question 5.
+
+**Amended.** R2-ENGINE-967 establishes local selection reset versus TALK retention; the application modal-return refresh consumer remains unread.
 
 ## Player prefix census and town LOAD windows
 
@@ -25126,3 +25133,106 @@ for actual selection; this claim narrows the required unit population.
 **Evidence.** out/derived/mission42-mages.tsv and reused-inputs.tsv;
 stage05 population.tsv, units-reg.tsv and data-inputs.tsv;
 the reused mission-42 rows of the EN/RU unit censuses from EXP-2127.
+
+## Inn refresh and persistence: bounded static paths
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-967 | ROM2 inn entry resets selection; TALK has no local rebuild; modal-return refresh is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-968 | ROM2 inn appends repeated actor keys separately; TALK still resolves the first matching word. | High / Medium | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-969 | A ROM2 not-found dialogue keeps the campaign action; its empty parser does not locally close on entry. | High / Medium / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-970 | Kaarg and druid inn page/center control slots reuse the generic targets in both ROM2 roots. | High / Medium | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-971 | ROM2 examines 20 hire pairs; complete party limits and allocation-refusal presentation remain Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-972 | EN ROM2 can index second-table row 0 after missing template matches; the resulting actor is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-973 | ROM2 inn builders do not locally filter an admitted talk option by joined party membership. | High / Medium | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-ENGINE-974 | Of 44 paired ROM2 inn-area windows, two are byte-equal; complete EN/RU behavior equality is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+
+### R2-ENGINE-967
+
+The three measured EN/RU entry copy/build blocks retain ordered options in +0xfc, partition actor pointers into hire +0xc0 and talk +0xe8, and set selection +0xb8 to 0 for a nonempty combined roster or -1 for an empty one. TALK EN L2.00554..L2.05809 and RU L2.00555..L2.05810 call the dialogue builder, TalkTo and the sound helper; they contain no selection store or EnterInn call. A later entry resets to the first seat; TALK locally retains the selected index.
+
+The dialogue close path requests application message 0x44c after its leave callback. The application's consumer was not read. No immediate refresh, deferred refresh or permanently stale visit is established.
+
+**Confidence.** High for the local calls and reset stores in both roots. Medium for their player-facing composition; base handlers, sound callees and modal-return scheduling remain unread. Unknown when the application rebuilds an inn after a conversation.
+
+**Amends.** R2-ENGINE-752's client-refresh Unknown gains the local reset/action distinction; its campaign-bank clauses stand. R2-ENGINE-247 supplies the existing roster contract.
+
+**Evidence.** EXP-2137 RESULTS.md question 1 and out-first/*-talk.txt, *-enter.txt; out-second/*-kaarg-entry.txt and *-druid-entry.txt; out-third/*-dialog-constructor.txt; out-fourth/*-base-modal-messages.txt.
+
+### R2-ENGINE-968
+
+Each measured inn-entry build appends once for every admitted option, in original order within its kind partition. The append takes the old count, grows to index+1 and stores a pointer there. No key equality test occurs on this local path. With successful ordinary allocation/initialization/copy calls, repeated keys yield repeated vector elements, even when resolution returns the same actor pointer. Those callees below resize are not interpreted here.
+
+The first-match helper scans the complete copied-word vector by actor WORD+0x1dc against low16 and returns the first index. TALK extracts that word's topic. Thus duplicate talk seats request the first topic; the selected duplicate occurrence does not supply a later topic. R2-ENGINE-498's NPC-2022 bank example remains conditional.
+
+**Confidence.** High for local loop/index/store/lookup instructions in EN/RU; Medium for actual displayed duplicate seats, reusing the vector-driven painter and grid of R2-ENGINE-246/247/497 and assuming successful allocation. No original duplicated display was observed.
+
+**Amends.** R2-ENGINE-220's multiple-options Unknown is narrowed to successful local vector storage and first-topic resolution; full displayed rows retain their prior grade.
+
+**Evidence.** EXP-2137 RESULTS.md question 2; out-first/*-enter.txt, *-first-match.txt, *-talk.txt; out-second/*-container.txt; out-third/*-insert.txt; out-fourth/*-resize.txt.
+
+### R2-ENGINE-969
+
+On find=-1 the paired loaders create one NUL byte and clear +0x7c. The builder takes its no-speaker arm, adds text and a dismiss button (0x470), and requests a dialogue page. TALK ignores the builder result before calling TalkTo. The empty parser returns zero. Entry ignores advance's zero return and calls base entry; a subsequent 0x470 with another zero requests close through 0x445. Enter/Escape send 0x470.
+
+Both find wrappers map NULL to -1. The substring and fast-path windows establish their empty-buffer branches for a multi-character key. Slow character-step callees and missing-file buffer initialization remain unread.
+
+**Confidence.** High for conditional loader/parser/entry/action instructions in both roots. Medium for the composed empty display and arbitrary absent-section lookup; base drawing, application scheduling and slow character-step helpers remain unclosed. Unknown what a missing town file supplies to the shared text buffer.
+
+**Amends.** R2-ENGINE-343's uncommitted constructor/builder and unread NUL-exit boundaries are now committed; its missing-file and delivered-display Unknowns remain.
+
+**Evidence.** EXP-2137 RESULTS.md question 3; out-second/*-dialog-loader.txt, *-dialog-builder.txt, *-find-wrapper.txt, *-dialog-empty-tail.txt; out-third/*-dialog-constructor.txt, *-dialog-parser-head.txt, *-substring.txt; out-fourth/*-dialog-next.txt, *-substring-fast.txt.
+
+### R2-ENGINE-970
+
+In each root the three page tables have the same targets at +0x48/+0x4c/+0x54, and the three center tables at +0x4c/+0x54. The ten comparisons are derived from twelve table windows. This is exact within-root pointer reuse, not a census of every dispatch.
+
+The three entry copy/build blocks share the kind partition and first-seat reset. With the shared right child of R2-ENGINE-257/353, the measured button-release body runs Hire/Fire on a hire seat by copied bit31; button1 requests npc<ID>about there and TALK on a talk seat. Button0 on a talk seat has no action. The center action after its successful hit uses the same Hire/Fire/TALK routines (R2-ENGINE-496). First-match collisions and non-kind1 rejection retain R2-ENGINE-495/498. RU's negative-selection about guard remains a real difference.
+
+**Confidence.** High for the read table values and local action instructions. Medium for composed later-town operation: child construction is reused at its grade, and event delivery/hit callees are not fully closed.
+
+**Amends.** R2-ENGINE-496's later-town dispatch Unknown gains the exact inherited-slot evidence; the event-class and whole-call-site Unknowns remain.
+
+**Evidence.** EXP-2137 RESULTS.md question 4; evidence/derived/bindings.tsv, out-second/*-page-table.tsv, out-fourth/*-center-table.tsv and out-first/*-button-release.txt, *-center-pointer.txt.
+
+### R2-ENGINE-971
+
+The paired reached entry loops examine i=0..19, selecting i+1 when bank[512+i] and bank[532+i] are nonzero. The creator iterates its supplied count. Neither body compares that count with a party-size constant; this is a local negative, not an unbounded-party claim.
+
+Actor allocation requests are 0x208 or 0x254 bytes, and the Group request is 0x50. These are sizes, not admission limits. If the read allocation-null branches are taken, zero reaches later unconditional actor/Group uses without a local refusal message. The underlying allocator, constructors and Group/owner append bodies are not closed. The read owner wrapper calls another append routine.
+
+**Confidence.** High for the loop bound, allocation operands and conditional zero flow. Medium for the composed absence of a local cap. Unknown for complete party capacity, allocation outcome and player-visible refusal.
+
+**Amends.** R2-ENGINE-381's caller/constructor/destination-limit Unknown stays open; the two local loop and allocation distinctions are explicit.
+
+**Evidence.** EXP-2137 RESULTS.md question 5; out-third/*-entry-hires.txt, *-creator.txt; out-fourth/*-allocator-wrapper.txt, *-owner-append.txt.
+
+### R2-ENGINE-972
+
+Both read lookup loops search positive table ordinals and return 0 on no match. The creator tries the second table after a zero first lookup. A missing stage lookup preserves the base ordinal. If both base matches and the replacement remain zero, the second-table constructor path still uses row ordinal 0.
+
+EN L2.04941 calls L2.05811, which returns backing+0x30*ordinal; the creator adds 4 before the Unit constructor. Humans uses L2.03310 -> L2.04052 with the same stride. This is not proof of a NULL actor: row0 contents and constructor/template readers remain unread.
+
+**Confidence.** High for EN ordinal data flow. Medium for the paired caller/lookup shape, whose masked comparison hides targets. Unknown for row0 contents, the final actor/error, and the RU accessor cores. The third-plan RU accessor guesses are not used as counterparts.
+
+**Evidence.** EXP-2137 RESULTS.md question 6; out-third/*-creator.txt, *-template-lookups.txt; out-third/en-template-human-index.txt, en-template-unit-index.txt; out-fourth/en-human-index-core.txt, en-unit-index-core.txt.
+
+### R2-ENGINE-973
+
+The three paired inn copy/build blocks append the actor resolved for every admitted option, with no party-membership predicate between resolution and append. The resolver searches the client's +0x9d0 actor collection by WORD+0x1dc and otherwise creates a presentation actor. Its read local body does not test server party membership.
+
+An admitted option is therefore not locally removed merely because the identity joined the party. Its continued admission still depends on R2-ENGINE-748/752's bank predicates. Identity22/23 joins retain the Medium composition of R2-ENGINE-633/637 and R2-SESSION-301; one-shot topic consumption and joining are separate obligations.
+
+**Confidence.** High for the bounded local append and resolver tests. Medium for continued live conversation: collection iteration, type-cast, construction and delivered actor state are not fully closed. No whole-image absence of a membership filter is claimed.
+
+**Evidence.** EXP-2137 RESULTS.md question 7; out-first/*-enter.txt; out-second/*-kaarg-entry.txt, *-druid-entry.txt, *-actor-lookup.txt; out-third/*-actor-find-create.txt.
+
+### R2-ENGINE-974
+
+The committed range tables contain 90 windows: 78 instruction windows and 12 tables. There are 44 locale pairs and two EN-only accessor cores. The complete TalkTo range and selected ScenarioSave/Load range are byte-equal across EN/RU; all other paired range hashes differ.
+
+Twenty pairs have equal instruction text after masking every six-or-more-digit hexadecimal address. The mask hides external call targets and global identities; equal shape is not semantic equality. The ten within-root inherited control-slot comparisons are all equal. RU's negative-selection about guard remains a positive difference (R2-ENGINE-496).
+
+**Confidence.** High for range hashes and counts recomputed by derive.py from the committed output. Medium for shared selected local behavior; Unknown for complete client/callee/runtime equality. Adjacent-routine and navigation-only windows are included in the population, not silently discarded.
+
+**Evidence.** EXP-2137 RESULTS.md question 11; evidence/derived/counts.json, comparisons.tsv, bindings.tsv; out-*/ranges.tsv, inputs.tsv and locale-ranges.tsv.

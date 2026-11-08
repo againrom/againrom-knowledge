@@ -662,3 +662,11 @@ terms, mission 110 event 02 resolves `npc67` to the single placed brigand leader
 the last part (`DLG-SPEAKER-075`). Whether a voice carries speech beyond its text is not established:
 Skrakan's portal-passage inn part has one more sentence in the EN text than in the RU text, and the RU
 voice's extra length is within delivery variation (`DLG-VOICE-076`).
+
+## Tavern biography boundary
+
+A readable biography with no accepted first page follows the constructed-panel
+default/continuation rule. An absent resource is a separate Unknown: the payload
+loader does not test the open result before requesting length, and the remaining
+lookup/read/exception chain is not closed. Equal EN/RU code does not prove the
+missing-resource presentation or native voice result. — TAVERN-BIO-042

@@ -1698,7 +1698,7 @@ Scenario transfers in R2-SESSION-156 preserve parameters and do not identify cur
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-158 | The selected ROM2 scenario SAVE/LOAD bank carries hire selection, availability, town gates and deferred identity requests separately from serialized Player/Group/Unit members; cold LOAD preserving the same binding is unobserved. | Medium | ● active (branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
+| R2-SESSION-158 | The selected ROM2 scenario SAVE/LOAD bank carries hire selection, availability, town gates and deferred identity requests separately from serialized Player/Group/Unit members; cold LOAD preserving the same binding is unobserved. | Medium | ● active (amended, branch candidate) | [EXP-2047](../experiments/EXP-2047-rom2-party/) |
 
 ### R2-SESSION-158
 
@@ -1709,6 +1709,8 @@ The acquired paired DLL SAVE/LOAD body ranges have equal hashes. R2-ENGINE-209 s
 **Confidence.** Medium for the party-state synthesis and native restoration relation. Raw bank transfer does not prove the same actor membership or literal resolution after executed LOAD. The acquired RU Player fragment covers903 of its planned905 bytes and is not a complete serializer witness; the load relation relies on the separately scoped existing card.
 
 **Unknown.** Cold LOAD with the same members and first-match identity binding, later-stage save rosters, saved-address map semantics and EN Player restoration. A named-stage save followed by an owner cold LOAD and identity/owner-list observation would settle these.
+
+**Amended.** R2-SESSION-368 preserves the first-frame Unknown and separates raw transfer requests from executed LOAD and actor restoration.
 
 ## Blizzard: EXP-2049
 
@@ -2344,7 +2346,7 @@ order settles the first Medium. Whether a later writer restores a dead
 hire's availability is a search of the writers of R2-SESSION-048 and
 R2-ENGINE-380 against that hire.
 
-**Amended.** R2-SESSION-198 finds the map build's store as the only
+**Amended.** R2-SESSION-367 adds the guarded-update to successful-later-SAVE boundary; packet delivery and intervening writers retain their grades.  R2-SESSION-198 finds the map build's store as the only
 Session-global store to +0x74 in a store census and reads +0x74 as 0 in a
 campaign (Medium), so the bit-0x80 gate does not block the update there.
 
@@ -5813,3 +5815,45 @@ An original run settles both: START MISSION of mission 30, then Restart; at tick
 record every Unit and Human id, owner and bytes `[+0x1c0]+0` and `+1`.
 
 **Evidence.** EXP-2135 stage05 RU mission entry, `out/saves`.
+
+## Inn refresh and persistence: bounded static paths
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-366 | ROM2 Fire clears the copied bit and toggles kind1 selection; live actor deletion is not in that body. | High / Medium / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-SESSION-367 | A ROM2 client update can clear hire availability; a later SAVE transfers the current bank. | High / Medium | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+| R2-SESSION-368 | ROM2 raw bank restoration does not establish inn people or party on the first cold-LOAD frame. | High / Unknown | ✔ promoted | [EXP-2137](../experiments/EXP-2137-rom2-inn-unknowns/) |
+
+### R2-SESSION-366
+
+Fire clears bit31 of the first matching copied option and calls TalkTo. Kind1 TalkTo toggles bank[511+ID], independently of bit31: a consistent selected value 1 becomes 0, but a preexisting 0 becomes 1. Kind2 has no bank-store arm. The local Fire and kind1 bodies do not delete an actor, change availability/town slots or write a disk save.
+
+The mission-entry loop separately reads selection/availability, and ScenarioSave separately transfers the current bank. A selected hire's creator does not establish its final cell; the measured owner-placement body and R2-ENGINE-529/530/531/532 leave helper success, call order and final placement bounded.
+
+**Confidence.** High for local Fire/toggle data flow in EN/RU. Medium for applying it after LOAD, conditioned on the restored page resolving that option; first-match collisions retain R2-ENGINE-498. Unknown for first-frame membership and the hire's final mission cell.
+
+**Evidence.** EXP-2137 RESULTS.md question 9; out-first/*-hire-fire.txt; out-third/*-scenario-talkto.txt, *-entry-hires.txt, *-party-placement.txt; out-fourth/*-scenario-save-load.txt.
+
+### R2-SESSION-367
+
+The read client update EN L2.02689..L2.05812 / RU L2.02691..L2.05813 checks identity +0x1dc in 1..20 and state byte +0x184>1, then calls the bank setter with 531+ID and zero. The preceding signed +0x104 classification places values below -10 in state>1. R2-SESSION-195/198 retain their health/identity packet-delivery and campaign-mode qualifications.
+
+The selected ScenarioSave transfers the current 4096-byte bank, which includes that slot. Death itself establishes no disk write. On a successful later SAVE after the setter and without an intervening writer, zero is the value transferred. Existing ordinary-departure algebra keeps zero availability zero; with it EnterInn emits no matching hire tail word (R2-ENGINE-748).
+
+**Confidence.** High for guarded store and transfer instructions in both roots. Medium for death delivery, successful stream persistence, departure and next-visit composition. Intervening writers and received-update order remain open.
+
+**Evidence.** EXP-2137 RESULTS.md question 10; out-fourth/*-death-update.txt and *-scenario-save-load.txt.
+
+**Amends.** R2-SESSION-195's update/departure relation gains the explicit successful-later-SAVE boundary; its delivery Unknowns remain.
+
+### R2-SESSION-368
+
+ScenarioSave requests 4096 bytes from bank D2.00003; ScenarioLoad requests 4096 bytes into that same bank. Selection512..531, availability532..551 and town552..571 lie inside it, separately from serialized actors (R2-SESSION-031/158/196). These instructions were read in both roots and the selected range is byte-equal.
+
+No save was newly opened. R2-SESSION-306's already-published rom2-gog-original-2 game0011/game9998 stored-value examples are reused for those files only. They are not a first-frame observation or proof of a particular completed-talk sequence.
+
+**Confidence.** High for the selected raw transfer requests. Unknown for first-town-frame roster, selected seat, buttons, joined members and mutations after successful restoration. Cold LOAD and before-first-click observation would settle that boundary.
+
+**Amends.** R2-SESSION-158's cold-LOAD Unknown remains; the distinction between a requested bank transfer, saved-value evaluation and delivered first frame is explicit.
+
+**Evidence.** EXP-2137 RESULTS.md question 8; out-fourth/*-scenario-save-load.txt; existing R2-SESSION-306 evidence at its own grade.

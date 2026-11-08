@@ -710,3 +710,17 @@ cursor elsewhere a row is lit only when selected or when it is the idle
 shine row of `TOWN-541` and `TOWN-542`. Skill level, price and purse do not
 reach the row paint. A hover bit left while the cursor moves onto a child
 control remains Unknown. (`TOWN-564`)
+
+## Tavern campaign candidates
+
+Main-record load supplies new InnNPC/InnMission pairs before aging and erasing
+old side records. Normal inn exit removes an accepted pair separately; side
+completion supplies no explicit reinsertion in the read body. Arbitrary record
+deletion and complete town LOAD continuation remain Unknown. The fresh table
+has 22 pairs, not a proof that all cells draw in every state.
+— TOWN-569, TAVERN-ACCEPT-041, TAVERN-PEOPLE-044
+
+The read side-completion route applies its unlock while retaining the current
+main chapter. The next tavern activation can expose a type already named there,
+with positive pool. Native journey and alternate routing remain open.
+— TAVERN-UNLOCK-043
