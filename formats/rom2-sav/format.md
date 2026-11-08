@@ -187,6 +187,19 @@ keeps the planes the map construction gives; plane zero is not stored. No
 LOAD step read re-runs create or refresh (Medium for later steps).
 — R2-ENGINE-759
 
+## Building casters
+
+The list `[Session+0x7c]+0x10` holds the building casters built from type-9 records. The document serializer carries it
+in both directions through `R2.0173`: count, then each object; LOAD clears the list and reads each object back and
+appends it (the clear, count and object reader bodies are unread; Medium that LOAD rebuilds the list from the file).
+Whether the map build that LOAD runs also runs the caster stage is Unknown. The caster stores, after its base, byte
+`+0x3c` and the 6-byte block that `+0x40` points to. The list sites are read in RU; the EN site is Medium. This list
+is the "extra" list of the paragraphs above; its observed counts in five saves are zero (R2-SESSION-235, R2-ENGINE-601).
+The layout row "ROM2-only object list" and the Unknown "Nonempty Sack/extra restoration" name the same list. — R2-ENGINE-1011
+
+Bytes 0 to 3 of the block are the spell, power and cell bytes of the map record; bytes 4 and 5 are not written by the
+arm. At run time the caster's target is chosen and the cast entry `L2.05951` called on the chosen unit. — R2-ENGINE-1008
+
 ## Player body
 
 The scalar prefix has the same 51 bytes and type order as the ROM1 Player,

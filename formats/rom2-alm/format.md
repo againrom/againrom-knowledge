@@ -37,7 +37,7 @@ the loader's switch has cases 0..12 and a non-rejecting default.
 | 6 | 48×nUnits | Type0 unit count |
 | 7 | ROM1 three-counted-array grammar | Counts in this payload |
 | 8 | ROM1 variable loot-record grammar | Count in type 0; modern head 20 bytes |
-| 9 | ROM1 counted caster-record grammar | Count in this payload |
+| 9 | Counted elements, grammar in [Type-9 records with mode mask 4](#type-9-records-with-mode-mask-4) | Count in this payload |
 | 10 | 16×meta[+0x30] | Flat array at map+0x310 |
 | 11 | 12×meta[+0x34]+84×meta[+0x38]+12×meta[+0x3c] | Arrays at map+0x338/+0x324/+0x34c respectively |
 | 12 | 28+28×meta[+0x40] | Fixed head at map+0x374; array at map+0x360 |
@@ -338,6 +338,39 @@ gate refer to the same field remains Unknown. — R2-ASSET-024
 The ROM1 version ceiling of 1001 rejects the preserved ROM2 versions. Shared
 field shapes do not imply ROM1 load acceptance. — R2-ASSET-002,
 R2-ASSET-003, R2-ASSET-024
+
+## Type-9 records with mode mask 4
+
+An element is, in file order: u32 `+0x00` (only at version 0x3de and above), u32 `+8`, u32 `+0xc`, u16 mode at
+`+0x10`, u32 key at `+0x12`, u32 at `+0x16` (bytes `+0x16` and `+0x18` used), u32 count, count × (u32, u16) entries.
+Read from RU `L2.05946`; EN grammar is Medium. Mode values in the census are 0, 1, 2, 4 and 5. "Mode mask 4" is
+mode & 4. — R2-ASSET-230
+
+The population of 142 maps (EN 59, RU 83) has 99 EN and 322 RU mask-4 records, on 9 EN and 29 RU map files. Maps 72
+and 81 of `scenario.res` hold 27 and 3 in both roots. The 9 mode-5 records are at cell 0,0 and have a key above 32767,
+and the 412 mode-4 records have a nonzero cell. — R2-ASSET-230, R2-ENGINE-1009
+
+The mission-load stage builds one object for an element with mode & 4, a nonzero cell and `+4` zero, when the key
+names a building by its `+8`; otherwise an error is reported and nothing is built. The object copies the building's
+location and owner pointer, the element's `+0x00`, the spell byte `+0x16`, the power byte `+0x18` and the cell low
+bytes. `+4` is set by the type-8 arm. — R2-ENGINE-1006
+
+The turn routine, once per 16 session ticks (Medium), runs a consumer that walks the objects in the session list. For
+each object the spell table at Session `+0xf8` gives T; a unit chosen by the relation bit against T `+0xa` is passed to
+the call of `L2.05951`. The candidate fill and the cast body are unread, so whether a cast takes effect is Unknown.
+Read in RU; the EN call site of the consumer and the EN type-9 arm are Medium. — R2-ENGINE-1007, R2-ENGINE-1008
+
+Field ranges: spell 1..29; power 2..255; `+0x00` 1..9 on mode 4 and 0 or 2 on mode 5; cell low bytes up to 243 and
+242. The consumer tests no range of the spell or power. What a value does beyond the cast entry is Unknown.
+— R2-ENGINE-1009
+
+Type-4 `+0x0e` is resolved at load into the building's `+0x14`. The built object copies that pointer, and the consumer
+uses its word `+4` as the row of the relation matrix. A call of `L2.01703` whose computed value is not below its target's word `+0x42` removes the objects whose
+location word `+2` equals the target's (the cell word only). That the target is the building class is Medium. Other
+removal routes were not searched. — R2-ENGINE-1010
+
+The objects are in the document's caster list and are saved and loaded with it; LOAD calls the list reader, whose bodies are unread (Medium that it rebuilds the list from the file).
+— R2-ENGINE-1011
 
 <a id="not-yet-surveyed"></a>
 

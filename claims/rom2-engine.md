@@ -35,6 +35,12 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 | R2-ENGINE-1003 | ROM2 post-step L2.02446 has one direct caller, the group tick at L2.05914, reached by every programme including 0 once the tick runs; member routine L2.02447 has one, in it; no slot +0x30 test; ungrouped units Medium. | High / Medium | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 | R2-ENGINE-1004 | ROM2 order-3 arm passes command +0xc with no test; the planner head reads target +0x4c first in both roots (masked equal), so a zero target faults; dead or removed targets are not tested in the head read. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 | R2-ENGINE-1005 | No census store of command +0x40/+0x44 traced to +0x1c4 lies in a LOAD body read; seven ROM2 bodies (creation, post-step, member routine, predicates, order-3 arm, planner head) are equal under the mask. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
+| R2-ENGINE-1006 | ROM2 stage RU L2.00117/EN L2.02687 builds a 0x44 caster for a type-9 element with mask 4, a nonzero cell and no sack whose key names a building, calling unread L2.05948 with its location and copying its owner; a missing key builds none. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1007 | ROM2 turn routine RU L2.00502 calls consumer L2.05949 after the group-tick loop; it walks the caster list once per turn, so by R2-ENGINE-778 once per 16 session ticks (Medium); no caller census of L2.05949. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1008 | A ROM2 caster picks a unit through L2.05950 by relation bit 0 against spell byte +0xa and unit +0x144 bit 0x1000, draws one survivor and calls L2.05951 on it; fill L2.05952 and L2.05953 are unread, so a cast taking effect is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1009 | ROM2 caster fields: type-9 +0x16 is the spell index (EN 1..27, RU 1..29), +0x18 the power (EN 5..255, RU 2..255), +8/+0xc low bytes the cell, +0x00 a fill byte (1..9); power goes unchanged to the call of L2.05951. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1010 | ROM2 type-4 +0x0e is resolved only at load into building +0x14; a caster copies it; a call of L2.01703 with a value not below its target's +0x42 removes casters of the same location word +2 (target class Medium). | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1011 | ROM2 casters are saved: document serializer R2.0120 carries the [Session+0x7c]+0x10 list through R2.0173, a caster storing byte +0x3c and the block at +0x40; LOAD rebuilding the list from the file is Medium (RU). | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 
 ### R2-ENGINE-997
 
@@ -320,6 +326,148 @@ blind spots and on R2-ENGINE-662's Medium; helpers on the LOAD path were not rea
 **Unknown.** Whether a helper on the LOAD path recomputes the fields.
 
 **Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
+
+### R2-ENGINE-1006
+
+RU stage `L2.00117` (EN `L2.02687`) loops over the type-9 elements at map `+0x2fc`. For an element E with
+(E`+8` or E`+0xc` nonzero), E`+4` zero and `mode & 4`, it looks the dword E`+0x12` up in a map keyed by each
+building's `+8`. Found P: `new` 0x44 object Q with constructor `L2.05954` and vtable `L2.05955` (EN `L2.05956`,
+`L2.04420`), the arm calls `L2.05948` (body unread; Medium that it copies) with P's location pointer and Q's location block
+(0xc bytes, allocated in the base constructor `L2.01295`, `push 0xc`). Q byte `+0x3c` = E byte `+0x00`; bytes 0 to 3
+of the 6-byte block that Q `+0x40` points to (allocated in the constructor through `L2.05957`, unread) = E `+0x16`,
+E `+0x18`, E `+8` low byte, E `+0xc` low byte; bytes 4 and 5 are not written by the arm. Q `+0x14` = P `+0x14`. Q is
+appended through `L2.02631`/`L2.05958` to `[stage object + 0x24] + 0x10`; that this is `[Session+0x7c]+0x10`, the
+list read by the consumer, is Medium (no listing shows the stage object's `+0x24`). Not found: "Can't resolve building %d for building -
+caster" through `L2.05959`, and the loop continues with no object. The arm is RU `L2.05960..L2.05961`.
+
+**Amends.** R2-ASSET-024's case 9 field list, by the element destinations in the stage body.
+
+**Confidence.** High for the gates, the branches and the stores, in both roots (equal under the address mask).
+Medium for the copy by `L2.05948`, for the block allocation and for the list identity. Medium for E`+4`: it is set
+only by the type-8 arm and no census of those links was made, so the count of the 412 mode-4 records that
+reach the arm is Unknown. Medium for the error path, whose body `L2.05959` was not read.
+
+**Unknown.** Whether the error sink stops the load.
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ENGINE-1007
+
+The turn routine RU `L2.00502` calls consumer `L2.05949` at `L2.05962`, after the group-tick loop, with no
+`ret` and no branch past the loop between the loop exit and the call (`ru-turn-L2.00503.txt`, EXP-2099, lines for
+`L2.00502..L2.05962`; the three-instruction window `ru-turn-caller.txt` shows the call only). The consumer takes no arguments and walks `[Session+0x7c]+0x10` once
+through iterator `L2.05963`/`L2.05964`/`L2.05965`. R2-ENGINE-778 gives the turn routine at `t mod 16 == 6` of
+the session tick (one RU tick call site read), so the consumer runs once per 16 session ticks (Medium). The turn
+routine has one direct caller by the byte scan `ru-callto-terrain-session.tsv` of EXP-2099 (hit `L2.05966`); a
+register or table call is not excluded. Q has no own per-turn slot: its vtable
+overrides only slots 0 to 2 of base `L2.05967`.
+
+**Confidence.** High for the body and this caller in RU; EN consumer `L2.05968` is equal under the mask. Medium
+for the EN caller site `L2.00503`, not read for this call. Medium for caller completeness: no E8 or dword census
+of `L2.05949` was run. Medium for the clock, by R2-ENGINE-778.
+
+**Unknown.** Other callers of the consumer.
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ENGINE-1008
+
+For each caster Q the consumer takes S = first byte at Q`+0x40`, T = `[Session + S*4 + 0xf8]` and flag = (T`+0xa`
+nonzero). `L2.05950` (EN `L2.05969`) calls unread `L2.05952(cell, Q byte +0x3c, Q+0x14, this+0xa64)`, then marks
+each unit U in list `this+0xa68` whose byte `[this + 0xa8c4 + owner*0x46 + U.owner]` has bit 0 equal to flag, or
+whose `U+0x144` has bit 0x1000, and removes it by `L2.04531`. Owner is word `+4` of Q`+0x14`. `L2.02421(1,
+count)` chooses a survivor; none yields 0 and no cast. `T.L2.05970(R)` is a direct call and returns 1, so
+`M.L2.05951(byte2, byte3, R, S, byte1)` is the only route; it calls `L2.05953` and stores 0xd at result `+0x54`
+and R at `+0x5c`. `L2.05953` is unread, so whether a cast takes effect is Unknown.
+Route `L2.05971` is unreachable from this body.
+
+**Amends.** R2-ENGINE-673's clause that `L2.03574`, `L2.03575` and `L2.03576` were not read on RU: their RU twins
+`L2.05951`, `L2.05971`, `L2.05970` are read and equal under the mask (`cast-a`, `cast-b`, `t-test` in `equality.tsv`).
+No clause of 673 is contradicted.
+
+**Confidence.** High for the branches, in both roots. Medium for `L2.05952`'s population and the byte's role.
+Medium for the draw's uniformity, depending on `L2.02431`. Unknown for the semantics of T`+0xa`, relation bit 0
+and cast `L2.05953`.
+
+**Unknown.** What `L2.05953` does. Whether `L2.05952` clears `this+0xa64` before filling: `this+0xa68` is the list
+that group sight fills, so if it does not clear, the candidates include what the last group-sight
+call left. Read one window of `L2.05953` and of `L2.05952`. The consumer and `L2.05950` read no timer, cooldown or
+cost; the fill, `L2.05953` and any use of the spell object by the cast were not read for one.
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ENGINE-1009
+
+Destinations for a caster, from E to Q, with the census: E`+0x16` is the spell index S (1..29 in 412 mode-4
+records, EN 1..27, RU 1..29; value 0 only on the 9 mode-5 records at cell 0,0 which fail the cell test); E`+0x18` is the power (EN
+5..255, RU 2..255 on mode 4; 0 only on those 9); E`+8` and E`+0xc` low bytes are cell x and y (up to 243 and 242);
+E`+0x00` is the byte passed to the fill routine (1..9 on mode 4; mode 5 holds 0 or 2). Key E`+0x12` is 2..863 on
+mode-4 records and above 32767 on the 9 mode-5 records. The consumer tests no range of S and no null of T. Power
+is passed unchanged to the call of `L2.05951`; `L2.05953` is unread. A mode-4 element bound to a sack (E`+4` nonzero) is not built.
+
+**Amends.** R2-ENGINE-1006's field list, by the census ranges.
+
+**Confidence.** High for byte routing and census ranges (recomputed from committed tables, `summary.tsv`). Medium
+for the effect of a value: S and power continue into unread `L2.05953`, and whether the table `+0xf8` holds an entry
+for 28 and 29 was not read.
+
+**Unknown.** The meaning of `+0x00`. A window of `L2.05952` settles it.
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ENGINE-1010
+
+The word type-4 `+0x0e` goes to element `+8`; the tail of the type-4 pass RU `L2.05972` stores
+`[L2.00293].L2.00309(word)` at the building's `+0x14`, a null result taking error string `L2.05973`. `L2.00309`
+walks a list for the node whose `+8` equals the signed word. Casters copy it at construction as Q`+0x14`; the
+consumer passes it to `L2.05950`, whose relation row is its word `+4`. No read routine reads the file field during
+a mission. A call of the resolver `L2.01703` (R2-ENGINE-393) whose computed value is not below its target's word
+`+0x42` walks `[Session+0x7c]+0x10` inside the resolver, before any subtraction, and for each Q with `L2.04529` true
+calls `L2.05974`, which unlinks (`L2.05975`, unread) and deletes Q through slot 1. `L2.04529` compares word `+2` of
+the two location structs (the cell, R2-ENGINE-780). The match is the cell word only, so a caster of another building
+on the same cell word is removed too. The condition is a call with that value, not a death. That the target class is
+the building class P is Medium: R2-ENGINE-393 holds the structure identity at Medium, and the type-4 tail stores
+`+0x42` into the object it builds, which agrees but does not identify the class. Callers of `L2.01703` other than
+`L2.01702` were not enumerated.
+
+**Amends.** R2-ENGINE-393's structure hit, by the casters it removes; the identity of the class stays Medium as in
+393.
+
+**Confidence.** High for the reads, the tail and the removal, in both roots (equal under the mask). Medium for "the
+only read route": only the bodies listed were read. Medium for removal being the only way a caster dies: no census
+of `L2.05974` callers or of the list `+0x10` was run.
+
+**Unknown.** Other removal routes. Census the callers of `L2.05974` and of the list.
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ENGINE-1011
+
+The document serializer `R2.0120` (R2-SESSION-018) reaches the caster list `[Session+0x7c]+0x10` through `R2.0173`
+at `L2.05976` (store) and `L2.05977` (load). `R2.0173` writes the count and each object (High in RU for the store branch). On LOAD it calls `L2.05978`, reads a
+count, then a loop that calls `L2.05979` and `L2.05958` (bodies unread; Medium that this clears and rebuilds the list
+from the file; the link of `L2.05979` to Q is by the neighbouring constructor `L2.05954`). Whether the map build that
+LOAD runs (R2-SESSION-018: the map is built from the scenario name before terrain is read) also runs the caster stage
+`L2.00117` is Unknown; the list read at `L2.05980` follows the map build in the document order, so if the stage runs
+it precedes the read (Medium). Slot 2 `L2.05981` of Q writes or reads, after the base serializer `L2.01164`, byte
+`+0x3c` and the 6 bytes of the block that Q`+0x40` points to (`push 6`, `[Q+0x40]`, `L2.00547`). The base serializes the location through `L2.02981`, `+4`, `+0xc`, `+0xe`, `+8`, `+0x18`, `+0x1c`, a key
+(read through Session `+0xdc`) and `+0x14` (fix-up `L2.01169` on read). Slot 9 `L2.03190` calls `L2.05982` on `[this+0x10]`;
+its body is unread.
+
+**Amends.** R2-SESSION-018's document serializer, by the caster list it carries: this answers the element-class
+Unknown of `R2.0173` at Medium (the class by the constructor next to the reader, not by the reader's body); the
+empty-list Unknown stands (R2-SESSION-235 counts zero in five walked saves).
+
+**Amends.** R2-ENGINE-601 and R2-SESSION-235: the list written last by the document serializer, called there the
+extra Token list, holds the caster class (Medium, as above).
+
+**Confidence.** High in RU for the call sites at `L2.05976` and `L2.05977`, the store branch and the Q and base
+serializers (EN Q and base serializers equal under the mask). Medium for the LOAD statements above. Medium for the
+EN document site `L2.00243`, not read for this call.
+
+**Unknown.** Whether the fix-up `L2.01169` and `L2.05982` change the caster's fields beyond the keys.
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
 
 ### R2-ENGINE-991
 

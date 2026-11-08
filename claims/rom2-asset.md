@@ -3349,6 +3349,7 @@ original (the draw's own resolution untrapped, Medium); R2-ENGINE-977 is the fra
 |---|---|---|---|---|
 | R2-ASSET-228 | ROM2 spell.txt line 17 is EN Stone Curse, RU Каменное проклятие; main.txt 92 is EN casts, RU с заклинанием, 93 is empty, and 123 and 124 are EN Range and Duration, RU Дистанция and Длительность. | High | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ASSET-229 | ROM2 Units rows: 241 per root, 61 have zero columns for Withdraw and Wimpy; Withdraw is above 0 on 20 rows and Wimpy on 46; EN and RU equal in all 482 row-title pairs; -1 is stored on 4 rows. | High | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
+| R2-ASSET-230 | ROM2 type-9 map records with mode mask 4: 99 of 219 EN and 322 of 635 RU over 142 maps; maps 72 and 81 hold 27 and 3 in both roots; 9 mode-5 records lie at cell 0,0; element grammar read in RU, EN Medium. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 
 ### R2-ASSET-228
 
@@ -3402,3 +3403,25 @@ equals RU in all 482 row-title pairs.
 **Confidence.** High for the values. A stored -1 keeps the constructor default (R2-ENGINE-777).
 
 **Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
+### R2-ASSET-230
+
+The population is 142 maps (EN 59: 13 loose and 46 in `scenario.res`; RU 83: 37 and 46), every chain ending at end
+of file. Type-9 elements number 219 EN and 635 RU; mask-4 records 99 on 9 EN maps and 322 on 29 RU maps (mode 4: 98
+EN, 314 RU; mode 5: 1 EN, 8 RU); modes present are 0, 1, 2, 4, 5. Maps 72 and 81 of `scenario.res` hold 27 and 3
+in both roots. The 9 mode-5 records are the only mask-4 records at cell 0,0 and the only ones with a key above 32767;
+all 412 mode-4 records have a nonzero cell and a key in 2..863 that resolves to a type-4 id of the same file. An
+element is, in file order: u32 `+0x00` (version at least 0x3de), u32 `+8`, u32 `+0xc`, u16 mode at `+0x10`, u32 key
+at `+0x12`, u32 at `+0x16`, u32 count and count × (u32, u16) entries at `+0x1a`.
+
+**Amends.** R2-ASSET-024's case 9: the field gated at `0x3dd/989` is the element's first u32 `+0x00` (read at
+version 0x3de and above, `cmp ..., 0x3de / jb` at `L2.05945`), and the remaining fields are listed here; and the ALM
+page's "ROM1 grammar" row for type 9.
+
+**Confidence.** High for the counts (recomputed from `maps.tsv`, `type9-bit2.tsv`). High for the RU grammar (`L2.05946`
+read); Medium in EN, whose arm was not read here (R2-ASSET-119 gives EN dispatcher coverage). The mask reading is an
+interpretation of the question's "bit 4": mode 4 is tested by `and edx, 4` at `L2.05947`; a mask of 0x10 selects no
+record.
+
+**Unknown.** How many elements a type-8 record binds to a sack (+4 nonzero).
+
+**Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
