@@ -63,8 +63,8 @@ and that unit +0x14 is the owner object).
 The owner getter returns that field directly. The type-loader local
 stores the `Palette` integer getter's return in +0x98. Unknown includes
 the default pushed for Palette. The bounded producer paths below do not
-close event ordering on START MISSION, Restart or LOAD, or mission 42's
-actual selected table. — R2-ENGINE-955,
+close event ordering on START MISSION, Restart or LOAD; mission 42's
+runtime values follow below. — R2-ENGINE-955,
 R2-ENGINE-956
 
 The read map-player path takes the first file DWORD as row +0x0c. Its
@@ -92,11 +92,28 @@ including the unread WORD-reader tail and getter, and full composition).
 
 Mission 42's retained numeric map/template join identifies four type-24
 person records owned by 4: records 1,2,86,87 at raw positions
-14720/17792, 27776/32128, 30336/32128 and 27520/33920. The measured EN
-Unit24 Palette value is 5, conditionally selecting type palette
-`client +0x28 - 1`. Their actual +0x28 and table remain Unknown; the
-conditional owner colour 3 does not settle their hood colour (Medium
-for identity and composition). — R2-ENGINE-966, R2-ENGINE-955, R2-ENGINE-956
+14720/17792, 27776/32128, 30336/32128 and 27520/33920 (Medium for
+identity). R2-ENGINE-966's composed clause that the Unit24 registry
+Palette value 5 selects a type palette for them is partially retracted.
+— R2-ENGINE-966, R2-ENGINE-955, R2-ENGINE-956
+
+In the running EN original, after START MISSION, after Restart and after
+LOAD of a save written in mission 42, these four client units hold type
+24, variant 16 and an owner whose +0x0c is 3. Type record 24 holds
++0x98 = 0 and no type palette, so the selector takes shared collection
+entry 3. The party takes entry 1 and Peasants entry 2. Dragon and
+Monster types take type palettes: +0x98 = 5 selects index `+0x28 - 1`,
++0x98 = 1 selects palette 0. Wherever read, all 92 units keep these
+values across the four reads; the scan after the dialogue read the fields
+of all 92 units but two owners and one type record. High for the read values; Medium that the draw call
+itself resolved them, since no breakpoint trapped it. In a frame drawn
+through the cnc-ddraw wrapper, a head pixel of mage record 1 has word
+0xec28, entry 3 row 3 index 109, which only table 3 produces (Medium for
+the index and the hood). Not read: why the registry Palette = 5 does not
+reach type record 24 (the directory bound to type 24); shared entries 0, 2
+and 4..16; the hood's own sprite index; units created later in the
+mission; the draw's own palette argument. The RU original was not run.
+— R2-ENGINE-975, R2-ENGINE-977, R2-ENGINE-978
 
 `graphics/units/humans/human.pal` has 16 tables of 256 B,G,R,X entries,
 1024 bytes per table, and is byte-equal in EN and RU. The EN shared builder
@@ -106,9 +123,12 @@ that they read this entry) and prepares source tables 0..15 with
 the last iteration, a mode-5 palette from table 0 with (16,5,0).
 Source-table i mapping to shared collection index i remains Medium
 because initial emptiness and
-the nested insert helper are unclosed. EN type palettes are loaded from
-BMP colour-table offset 0x36 into 1024-byte source slots; their full path
-composition remains Medium. — R2-ASSET-226, R2-ENGINE-956, R2-ENGINE-957
+the nested insert helper are unclosed. In the running EN original,
+entries 1 and 3 equal prepared tables 1 and 3 in all 4096 row WORDs with
+zero channel additions (High for those two entries). EN type palettes are
+loaded from BMP colour-table offset 0x36 into 1024-byte source slots;
+their full path composition remains Medium. — R2-ASSET-226, R2-ENGINE-956,
+R2-ENGINE-957, R2-ENGINE-976
 
 Mode 2 writes rows for L=16 down to 1. Each channel is
 `clamp(trunc((source + current channel byte)*2*L/16),0,255)`, then packed

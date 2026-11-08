@@ -1,5 +1,11 @@
 # Overturn history
 
+## EXP-2138: mission 42 mage palette selection
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `R2-ENGINE-966` (the composed Palette = 5 selection clause only; the record identity stands) | Verbatim: "Composing that measurement with R2-ENGINE-955/956 conditionally selects a type palette indexed by client +0x28 - 1, not the shared owner-colour branch." | Medium | [EXP-2138](../experiments/EXP-2138-rom2-hood-table/RESULTS.md), R2-ENGINE-975 | At START MISSION, after Restart and after LOAD, type record 24 holds +0x98 = 0 and no type palette; the four mages take shared collection entry 3 (owner +0x0c 3, variant 16). | **REFUTED** — partially retracted |
+
 ## EXP-2125: objective mark frames and notification branches
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

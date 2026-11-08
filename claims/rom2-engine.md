@@ -24747,7 +24747,7 @@ EN apply L2.04138 has six extra instructions at L2.04139..L2.04140: load the Hum
 |---|---|---|---|---|
 | R2-ENGINE-955 | ROM2 unit draw selects shared or type palettes by type DWORD +0x98. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 | R2-ENGINE-956 | The ROM2 type-loader local stores the Palette getter result at +0x98; mission field production stays open. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
-| R2-ENGINE-957 | ROM2 mode 2 builds descending brightness rows with channel additions and device packing. | High / Medium | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ENGINE-957 | ROM2 mode 2 builds descending brightness rows with channel additions and device packing. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 | R2-ENGINE-958 | The read normal ROM2 byte blitters copy indexed colours from a 512-byte shade row. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 
 ### R2-ENGINE-955
@@ -24774,6 +24774,10 @@ owner-colour.txt; out/en-palette-getters.txt and palette-collection-get.txt.
 **Amended.** R2-ENGINE-963, R2-ENGINE-964, R2-ENGINE-965 and
 R2-ENGINE-966 add bounded producer paths and identify four mission-42
 records. Complete event ordering and their actual selected table remain Unknown.
+R2-ENGINE-975 and R2-ENGINE-978 read mission 42's actual inputs in the
+running EN original: the mages take shared entry 3 through type +0x98 = 0;
+Dragon and Monster types take type palettes. The draw's own resolution was
+not trapped.
 
 ### R2-ENGINE-956
 
@@ -24814,6 +24818,10 @@ owner-registration.txt; palette-metadata.tsv supplies the string values.
 **Amended.** R2-ENGINE-963, R2-ENGINE-964, R2-ENGINE-965 and
 R2-ENGINE-966 add bounded producer paths and identify four mission-42
 records. Complete event ordering and their actual selected table remain Unknown.
+R2-ENGINE-975 and R2-ENGINE-978 read mission 42's actual inputs in the
+running EN original: the mages take shared entry 3 through type +0x98 = 0;
+Dragon and Monster types take type palettes. The draw's own resolution was
+not trapped.
 
 ### R2-ENGINE-957
 
@@ -24847,6 +24855,10 @@ mask writers. Read those producers; do not assume row 0 is source RGB.
 **Evidence.** out/{en,ru}-palette-build.txt, palette-conversion.txt and
 palette-metadata.tsv; out/en-palette-append.txt; R2-ASSET-226 measures the
 graphics.res entry that path names (Medium: the resource helpers are unread).
+
+**Amended.** R2-ENGINE-976 observes shared entries 1 and 3 equal to prepared
+tables 1 and 3, with zero channel additions, in the running EN original.
+Other entries keep this grade.
 
 ### R2-ENGINE-958
 
@@ -25005,7 +25017,7 @@ bodies outside the pairs is not claimed.
 | R2-ENGINE-963 | ROM2's read map-player path preserves file colour through server +0xa44 minus one into a newly constructed EN client owner's +0x0c; event order remains open. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
 | R2-ENGINE-964 | The read ROM2 client copier stores server type +0x0e at +0x24 and passes variant +0x4b to the +0x28 setter; the EN map loop builds these inputs from template parameters. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
 | R2-ENGINE-965 | The EN unit sender appends type then variant under mask 0x20; client creation uses the setter, while one conditional existing-unit arm writes +0x28 directly. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
-| R2-ENGINE-966 | Mission 42's retained EN/RU map census identifies four type-24 person records owned by 4; their client variant and actual selected palette remain Unknown. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
+| R2-ENGINE-966 | Mission 42's retained EN/RU map census identifies four type-24 person records owned by 4; their client variant and actual selected palette remain Unknown. | Medium / Unknown | ✔ promoted (branch candidate, partially retracted) | [EXP-2136](../experiments/EXP-2136-rom2-mission-palette-fields/) |
 
 ### R2-ENGINE-963
 
@@ -25123,7 +25135,7 @@ The actual +0x28 of these four records is unmeasured. Conditional owner
 colour 3 for owner ordinal 4 does not establish their palette or screen colour.
 
 **Confidence.** Medium for identity and the composed type-resource/selector
-binding. Unknown for the actual selected table after START MISSION,
+binding (composed binding withdrawn, see Amended). Unknown for the actual selected table after START MISSION,
 Restart or LOAD, and for a hood pixel's screen colour. No runtime or save
 read was performed. The two permitted save collections contain no mission 42.
 
@@ -25133,6 +25145,154 @@ for actual selection; this claim narrows the required unit population.
 **Evidence.** out/derived/mission42-mages.tsv and reused-inputs.tsv;
 stage05 population.tsv, units-reg.tsv and data-inputs.tsv;
 the reused mission-42 rows of the EN/RU unit censuses from EXP-2127.
+
+**Amended.** R2-ENGINE-975 partially retracts the composed Palette = 5
+clause: at runtime type record 24 holds +0x98 = 0 and no type palette,
+and the four mages take shared collection entry 3 with variant 16. The
+record identity, definition keys and positions stand. See the EXP-2138
+entry in retracted.md.
+
+## Mission 42 runtime colour tables
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-975 | At EN mission 42 start the four mage units read type 24, variant 16 and owner +0x0c 3; type 24 holds +0x98 0, so the selector takes shared collection entry 3 under R2-ENGINE-955's branches (the draw call itself untrapped, Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2138](../experiments/EXP-2138-rom2-hood-table/) |
+| R2-ENGINE-976 | The running EN original's shared palette entries 1 and 3 equal human.pal tables 1 and 3 in all 4096 shade-row WORDs. | High / Medium | ✔ promoted (branch candidate) | [EXP-2138](../experiments/EXP-2138-rom2-hood-table/) |
+| R2-ENGINE-977 | A head pixel of mission 42's mage record 1 shows 0xec28, entry 3 row 3 index 109 (index inferred from the unique word match), a word only human.pal table 3 produces. | High / Medium | ✔ promoted (branch candidate) | [EXP-2138](../experiments/EXP-2138-rom2-hood-table/) |
+| R2-ENGINE-978 | Mission 42's human units take owner entries 1, 2 and 3; Dragon and Monster types take type palettes; Restart and LOAD keep every read value wherever read (the draw call untrapped, Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2138](../experiments/EXP-2138-rom2-hood-table/) |
+
+### R2-ENGINE-975
+
+Launch L1 of the EN original read every client unit after START MISSION
+of mission 42, with the mission's first dialogue still open. Map records
+1, 2, 86 and 87 are client keys 0x601f, 0x6020, 0x607f and 0x6080 at
+their map raw positions. Each holds DWORD +0x24 = 24 and +0x28 = 16. Its
++0x14 points to an object of vtable L2.05814 whose +4 is owner ordinal 4
+and whose +0x0c is 3. The type record [[L2.05815]+4*24] has vtable
+L2.05816, +4 = 24, +0x98 = 0 and zero DWORDs at +0x9c..+0xb8.
+
+EN L2.03688 calls L2.03696, which returns the address
+[collection+4]+4*index. L2.05729 returns owner +0x0c. L2.05817 calls
+L2.05818, which indexes the shared collection the same way. Under
+R2-ENGINE-955's local branches these values select shared collection
+L2.04576 entry 3, object 0x02d32ce0 at mission start. The record has no
+type palette to select. Both scanned unit classes, vtables L2.03340 and
+L2.03341, hold the unit draw L2.03682 at slot +0x28, read from memory.
+
+**Confidence.** High for the read field values, the helper instructions
+and the branch these values take under R2-ENGINE-955. Medium that the
+draw call itself reached entry 3: live mode sets no breakpoint, so the
+draw's own resolution was not trapped. R2-ENGINE-977's frame cross-check
+agrees with entry 3. The key-to-map-record link is Medium: key number
+plus raw x/y equality, not an object link.
+
+**Amends.** R2-ENGINE-966, partially retracting its composed clause that
+the Unit24 registry Palette value 5 selects a type palette for these
+mages. The runtime type record 24 holds +0x98 = 0 and no type palette.
+Which link of that composition fails is Unknown: the registry
+directory's binding to type 24, the Palette getter, or a later store.
+The record identity of R2-ENGINE-966 stands. R2-ENGINE-955 and
+R2-ENGINE-956: mission 42's actual inputs and selected entry.
+R2-ASSET-226: the mages' owner colour is 3.
+
+**Unknown.** The draw's own resolved palette argument; a breakpoint on
+the selector in a non-live run would settle it. The RU original was not
+run. The type loader's directory for type 24; a static read of EN
+L2.05733..L2.05730 and L2.03131 would settle it.
+
+**Evidence.** EXP-2138 out/units-start.tsv, types.tsv, owners.tsv,
+collection.tsv, vtable-slots.tsv and static-helpers.txt.
+
+### R2-ENGINE-976
+
+The shade rows of shared collection entries 1 and 3, 16 rows of 256
+WORDs at [[[L2.05819]+4*i]+8], were read at mission start, after LOAD of
+the save the original wrote in mission 42, and in launch L2. Each read
+of entry i equals human.pal table i in 4096 of 4096 WORDs under
+R2-ENGINE-957's mode 2 with zero channel additions, row r at level
+L = 16 - r, packed RGB565. The next-best table, 5, matches 3267 WORDs
+for entry 1 and 3294 for entry 3. The row hashes are equal in all three
+reads. The collection array 0x02cda790 holds 17 entries in the three L1
+reads of it. After Restart and after LOAD, entries 0..15 are new objects and
+entry 16 stays at 0x02cda810.
+
+**Confidence.** High for the equality of the two read entries with
+tables 1 and 3: a whole-block content match, not one number. Entries 0,
+2 and 4..16 were not compared and keep R2-ENGINE-957's grade. Zero
+channel additions are observed for these reads only, hence Medium for
+other rows and states.
+
+**Amends.** R2-ENGINE-957: in the running EN original, collection index
+i holds prepared source table i for i = 1 and 3.
+
+**Unknown.** The other entries' tables; reading their rows in one more
+run would settle them.
+
+**Evidence.** EXP-2138 out/shade-rows.tsv and collection.tsv.
+
+### R2-ENGINE-977
+
+In launch L2 frame l2-15, mage record 1 (key 0x601f, type 24, variant
+16, owner ordinal 4) stands at raw 14720/17792. Its head pixel at client
+point (145,216) has RGB565 word 0xec28. In entry 3's rows read nine
+seconds earlier that word occurs once, at row 3 index 109. The same row
+and index hold 0xec28 at mission start and after LOAD. Of the 16
+human.pal tables, only table 3 produces 0xec28 under R2-ENGINE-976's
+model; entry 1 holds 0x5f68 there. Index 109 is one of the 55 indices
+at which the 16 tables differ.
+
+In the mage's 16x32 box, the pixels that exactly one table produces are
+110 for table 3 and 1 for table 1 in frame l2-14, and 67 and 0 in frame
+l2-15; in l2-15, 179 of the 512 pixels belong to no table, which probably
+includes the health bar or overlays. In the hero's body box (owner 1, entry 1) of frame l2-15, 63
+pixels come only from table 1 and none only from table 3.
+
+**Confidence.** High for the frame word as decoded and for entry 3's
+memory words. The frame boxes are placed by hand on the figure taken as
+record 1, and that binding is Medium. Medium for sprite index 109
+and for the pixel lying on the hood: the index is inferred from a unique
+word match in entry 3's rows, and the hood is named from the pixel's
+place in the top rows of the head under the health bar. The frame is the
+cnc-ddraw wrapper's GDI output and serves as a cross-check only.
+
+**Unknown.** The sprite's own index at that pixel; decoding the type-24
+frame and its draw position would settle it.
+
+**Evidence.** EXP-2138 out/hood-pixel.tsv, frame-tables.tsv and
+l2-in-view.tsv.
+
+### R2-ENGINE-978
+
+At mission start the scan read 92 client units: the 89 mission-42 map
+units at their map raw positions and three party members. Grouped by
+the selector inputs: party types 5, 23 and 24 (owner 1, colour 1) take
+entry 1; Peasants types 1, 10 and 14 (owner 3, colour 2) take entry 2;
+Mages types 24 and 1 (owner 4, colour 3) take entry 3. These six human
+types hold +0x98 = 0. Dragon type 71 (owner 2) and Monster types 66, 68,
+70, 73, 74, 76 and 105 (owner 6, colour 5) hold +0x98 = 5 with five
+prepared type palettes and take type palette +0x28 - 1, here 0, 1 or 3.
+Monster types 82, 83, 86 and 90 hold +0x98 = 1 and take type palette 0.
+Owner ordinals 1, 2, 3, 4 and 6 hold +0x0c = 1, 1, 2, 3 and 5, as
+R2-ENGINE-963's conditional values give; no owner object of ordinal 5
+was read.
+
+Later scans after the dialogue, after Restart (LOAD of the original's
+"Restart last mission" entry) and after LOAD of the save the original
+wrote in mission 42 found the same 92 keys. Each key keeps type,
+variant, owner colour, selector and table index wherever read. Restart
+and LOAD rebuild the owner objects and collection entries at new
+addresses.
+
+**Confidence.** High for the read values in the four scans. The scan
+after the dialogue read the unit fields of all 92 keys but only two
+owner and one type record. The draw's own resolution is Medium as in
+R2-ENGINE-975.
+
+**Unknown.** Units created later in the mission; reading them when they
+appear would settle it.
+
+**Evidence.** EXP-2138 out/selection-groups-start.tsv, units-*.tsv,
+phases.tsv, types.tsv, owners.tsv and counts.json.
 
 ## Inn refresh and persistence: bounded static paths
 

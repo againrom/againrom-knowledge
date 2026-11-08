@@ -3313,7 +3313,7 @@ the unread client direction writer.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ASSET-226 | ROM2 human.pal has sixteen 1024-byte colour tables and is byte-equal in EN and RU. | High | ✔ promoted (branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
+| R2-ASSET-226 | ROM2 human.pal has sixteen 1024-byte colour tables and is byte-equal in EN and RU. | High | ✔ promoted (amended, branch candidate) | [EXP-2134](../experiments/EXP-2134-rom2-unit-colour/) |
 
 ### R2-ASSET-226
 
@@ -3338,3 +3338,7 @@ a source table to that unit.
 
 **Evidence.** out/{en,ru}-data-inputs.tsv, human-pal.tsv and unit-reg.tsv;
 out/paired-data.tsv. Full source archive and entry hashes are retained.
+
+**Amended.** R2-ENGINE-975 and R2-ENGINE-976 identify mission 42's mages
+with owner colour 3 and shared entry 3, equal to table 3 in the running EN
+original (the draw's own resolution untrapped, Medium); R2-ENGINE-977 is the frame cross-check.

@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4815. Observation: 143. Static analysis: 4006. Mixed: 666.
+Claims labelled: 4819. Observation: 143. Static analysis: 4008. Mixed: 668.
 
 ## Ledger ai
 
@@ -2159,7 +2159,7 @@ Claims labelled: 4815. Observation: 143. Static analysis: 4006. Mixed: 666.
 | R2-ASSET-212 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-224 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-222 | static analysis | ✔ promoted (branch candidate) |
-| R2-ASSET-226 | mixed | ✔ promoted (branch candidate) |
+| R2-ASSET-226 | mixed | ✔ promoted (amended, branch candidate) |
 
 ## Ledger rom2-engine
 
@@ -2896,7 +2896,7 @@ Claims labelled: 4815. Observation: 143. Static analysis: 4006. Mixed: 666.
 | R2-ENGINE-949 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-955 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-956 | static analysis | ✔ promoted (amended, branch candidate) |
-| R2-ENGINE-957 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-957 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-958 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-959 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-960 | static analysis | ● active (branch candidate) |
@@ -2905,7 +2905,11 @@ Claims labelled: 4815. Observation: 143. Static analysis: 4006. Mixed: 666.
 | R2-ENGINE-963 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-964 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-965 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-966 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-966 | mixed | ✔ promoted (branch candidate, partially retracted) |
+| R2-ENGINE-975 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-976 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-977 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-978 | mixed | ✔ promoted (branch candidate) |
 | R2-ENGINE-967 | static analysis | ✔ promoted |
 | R2-ENGINE-968 | mixed | ✔ promoted |
 | R2-ENGINE-969 | mixed | ✔ promoted |
