@@ -162,3 +162,7 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 | Creature thresholds | Stat reader can supply Withdraw/Wimpy to command +0x40/+0x44, keeping defaults for -1. Human-only setup does not imply creature thresholds stay constructor values. | R2-ENGINE-777 High reader, Medium delivered row; R2-ENGINE-884 Medium creature composition | Creature row values and complete writer population |
 | Flee chosen | Try spell 23 through admission L2.01518; otherwise move 3 cells away from living hostiles' centre. No living hostile: default route. | R2-ENGINE-506 High flee body, Medium centre/away interpretation | Spell admission and concrete destination |
 | RU creation arm with session word +0xd8=1 | Halve command +0x44. | R2-ENGINE-884 High stores, Medium selection meaning | Meaning of +0xd8 and complete EN counterpart |
+
+## Health thresholds, difficulty and attack order
+
+Withdraw and Wimpy are Units columns (R2-ASSET-229). The stat reader stores them in command +0x40 and +0x44 for a unit whose template loads (Medium: loader condition, script-created creatures; R2-ENGINE-1001). The map arm scales a non-Human record by the difficulty word when Session +0x74 is 0 and the value is not 2 (R2-ENGINE-1002). In the bodies read, the only direct caller of the threshold post-step is the group tick (byte scan; indirect and jump routes unread, Medium; R2-ENGINE-1003). The order-3 arm passes command +0xc to the planner with no null test (R2-ENGINE-1004). In the bodies read, LOAD leaves the thresholds as saved (R2-ENGINE-1005).

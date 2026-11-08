@@ -33,3 +33,16 @@ raise a composed trajectory above Medium. The former radius clause of
 R2-ENGINE-507 is partially retracted; the current radius follows R2-ENGINE-843.
 No runtime observation establishes the composed stamp cycle. R2-ENGINE-874,
 R2-SESSION-343, R2-SESSION-346.
+
+## Health thresholds, difficulty and attack order
+
+Withdraw and Wimpy are Units columns (R2-ASSET-229). The stat reader stores them in the command's
++0x40 and +0x44 for a unit whose template loads (R2-ENGINE-1001; Medium: loader condition,
+script-created creatures). The map arm, for a record without the person flag, halves HPmax, HP and
++0x44 when the difficulty word is 1 and Session +0x74 is 0; at any value other than 1 or 2 with
++0x74 = 0 it adds 50 to toHit and defence and multiplies HPmax by 1.5; at 2 it writes nothing
+(R2-ENGINE-1002, RU; the table is read in RU, EN equal under the address mask, the EN doubles
+unread). In the bodies read, the only direct caller of the threshold post-step is the group tick
+(byte scan; indirect and jump routes unread, Medium; R2-ENGINE-1003). The order-3 arm passes command
++0xc to the planner with no null test (R2-ENGINE-1004). In the bodies read, LOAD leaves the
+thresholds as saved (R2-ENGINE-1005, Medium).

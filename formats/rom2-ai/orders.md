@@ -42,3 +42,7 @@ end-to-end composition; planner cadence remains Unknown under R2-ENGINE-558.
 | 5..254 | Clear +9, state 27, then common tail. | R2-ENGINE-553 High all 255 table cells | Tail may change primary again |
 | 255 | Keep +9, state 27, then common tail. Planner L2.02864 owns both read 255-to-0 clears. | R2-ENGINE-553 High table/body; R2-ENGINE-554 High local clears, Medium global coverage | Conditions selecting clears and other writers |
 | Any arm except inactive early return | Run common empty-route tail; it can reset, re-pick or write primary 255. Local precedence does not prove that every newly stored order survives. | R2-ENGINE-872 High tail branches; R2-ENGINE-556 High local flow; R2-ENGINE-560 Medium retention | Planner timing, helper effects and flags during an arriving order |
+
+## Health thresholds, difficulty and attack order
+
+The stat reader stores them in command +0x40 and +0x44 for a unit whose template loads (Medium: loader condition, script-created creatures; R2-ENGINE-1001). The map arm scales a non-Human record by the difficulty word when Session +0x74 is 0 and the value is not 2 (R2-ENGINE-1002). In the bodies read, the only direct caller of the threshold post-step is the group tick (byte scan; indirect and jump routes unread, Medium; R2-ENGINE-1003). The order-3 arm passes command +0xc to the planner with no null test (R2-ENGINE-1004). In the bodies read, LOAD leaves the thresholds as saved (R2-ENGINE-1005).

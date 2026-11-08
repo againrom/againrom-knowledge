@@ -1491,6 +1491,8 @@ test. A target of 0 reads address 0x4c and the client stops with exception
 (Medium: the module row holds no MD5; the routines holding L2.05596 and
 L2.05598 were not read from their starts). — R2-ENGINE-936
 
+The order-3 arm passes the saved target to the planner with no null test in EN and RU (R2-ENGINE-1004).
+
 The dragonout `game0057.sav` (mission 30) holds exactly one such record
 among 107 Unit and Human records: the Human "Igles" of player 0, group 176
 (mode 0, +0x45 = 1). Order 3 is at decoded offset 22342; the command block

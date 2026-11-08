@@ -3348,6 +3348,7 @@ original (the draw's own resolution untrapped, Medium); R2-ENGINE-977 is the fra
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ASSET-228 | ROM2 spell.txt line 17 is EN Stone Curse, RU Каменное проклятие; main.txt 92 is EN casts, RU с заклинанием, 93 is empty, and 123 and 124 are EN Range and Duration, RU Дистанция and Длительность. | High | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+| R2-ASSET-229 | ROM2 Units rows: 241 per root, 61 have zero columns for Withdraw and Wimpy; Withdraw is above 0 on 20 rows and Wimpy on 46; EN and RU equal in all 482 row-title pairs; -1 is stored on 4 rows. | High | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 
 ### R2-ASSET-228
 
@@ -3390,3 +3391,14 @@ both roots' `main.res`. The per-line byte counts and hashes are in the evidence.
 
 **Evidence.** [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md),
 `evidence/generated/texts.tsv`.
+
+### R2-ASSET-229
+
+The group E rows of `world.res` `data/data.bin` (241 rows per root) read by column title through the
+EXP-2091 reader grammar give, in RU: Withdraw 100 on 8 rows, 90 on 4, 60 on 4, 15 on 4, 0 on 156, -1
+on 4, absent on 61; Wimpy above 0 on 46 rows (values 1..137), 0 on 130, -1 on 4, absent on 61. EN
+equals RU in all 482 row-title pairs.
+
+**Confidence.** High for the values. A stored -1 keeps the constructor default (R2-ENGINE-777).
+
+**Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)

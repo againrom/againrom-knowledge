@@ -30,6 +30,11 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 | R2-ENGINE-998 | A ROM2 tag-50 pair adds Damage, Range, Duration and a stat line of the last tag-41 spell. Spell 18 is the only spell the description routine's own code compares (word halved, 0.0 - x); six getters choose the stat line. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ENGINE-999 | A ROM2 weapon card with spell 18 at L adds casts Stone Curse, Range: column 11 (or 1), Duration: 0.0 -%5.1f of floor(2.4L)/16, no tag-50 Damage or stat line; EN equals RU under the address mask, apart from the RU item fields 4 bytes higher. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ENGINE-1000 | If L is the item cast's power, the ROM2 card's Stone Curse maximum floor(2.4L)/16 is the server's item-cast duration before Earth resistance, in units of 16 timer counts; the server's pair writer is unread. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+| R2-ENGINE-1001 | ROM2 creature command +0x40/+0x44 come from the stat reader's Units Withdraw/Wimpy and the map arm L2.05178 (+0x44 >>= 1); a census finds 19 stores traced to +0x1c4, the others unclassified. | High / Medium | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
+| R2-ENGINE-1002 | RU ROM2 map arm L2.00115, non-Human records: [L2.01317]+0xd8 = 1 halves HPmax, HP and cmd +0x44; 2 or +0x74 set: none; other values +50 toHit and defence, HPmax x1.5. Three other routines read +0xd8 too. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
+| R2-ENGINE-1003 | ROM2 post-step L2.02446 has one direct caller, the group tick at L2.05914, reached by every programme including 0 once the tick runs; member routine L2.02447 has one, in it; no slot +0x30 test; ungrouped units Medium. | High / Medium | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
+| R2-ENGINE-1004 | ROM2 order-3 arm passes command +0xc with no test; the planner head reads target +0x4c first in both roots (masked equal), so a zero target faults; dead or removed targets are not tested in the head read. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
+| R2-ENGINE-1005 | No census store of command +0x40/+0x44 traced to +0x1c4 lies in a LOAD body read; seven ROM2 bodies (creation, post-step, member routine, predicates, order-3 arm, planner head) are equal under the mask. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 
 ### R2-ENGINE-997
 
@@ -160,6 +165,161 @@ stated speed would settle the second.
 | R2-ENGINE-994 | A ROM2 effect 28 or 30 shows frames 4, 3, 2, 1, 0, 1, 2, 1, 0, 1, 2, 3, 4 at counter 1..13 and keeps its last frame at any other counter; a unit release's object ends at update 14 (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
 | R2-ENGINE-995 | The ROM2 light writer overwrites one value into the cell corners with i²+j² < R(R+1) around a cell: 4, 12, 32 and 52 corners for R 0..3; the effect light method is slot +0x40 EN L2.03841. | High / Medium | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
 | R2-ENGINE-996 | ROM2 render preparation resets the light map to 0xff; the terrain reader skips all-0xff cells and takes min(light, terrain) per corner, and a lower value picks a brighter shade row (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2141](../experiments/EXP-2141-rom2-effect-draw/) |
+
+### R2-ENGINE-1001
+
+The stat reader stores Units Withdraw and Wimpy through two cursor calls: `L2.05915..L2.05916`
+pushes `[unit+0x1c4]+0x40` and calls `L2.01280`, and the next pair pushes `+0x44` (R2-ENGINE-777
+gives the reader's call chain). A linear sweep of RU executable sections for memory-operand writes
+at +0x40 and +0x44 (look-back 16 instructions for the base) finds 19 candidates whose base comes
+from `+0x1c4`: 9 at +0x40 and 10 at +0x44, namely `L2.05176..L2.05177` in the range of `L2.02444`
+and `L2.02445`, and `L2.05178`, the map arm of R2-ENGINE-1002. `L2.02445` has one direct caller,
+`L2.05917`. The command constructor `L2.01785` stores `+0x71 = 1` and no +0x40 or +0x44 in its first
+70 instructions; it calls `L2.00342` first (unread).
+
+**Confidence.** High for the listed stores. Medium that no other writer exists: 183 dword write
+candidates, 81 byte or word writes and 11 `lea` forms at +0x40/+0x44 on other bases are unclassified
+(R2-ENGINE-884 counted 146 and 100 on a different basis; the two counts are not reconciled), and the
+sweep cannot see helpers, block copies or a base loaded farther back. Medium that a script-created
+creature takes these fields: the eight `L2.01273` call sites were not read as a population. Medium
+that the stat reader stores the values for a unit whose template loads: the loader call depends on an
+unread helper (R2-ENGINE-1002).
+
+**Amends.** R2-ENGINE-884's and R2-ENGINE-877's Unknown on the +0x44 writer: the map arm is read as
+a whole. R2-ENGINE-506's Unknown on other +0x40/+0x44 store sites: the census names them, and leaves
+the population above unclassified.
+
+**Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
+
+### R2-ENGINE-1002
+
+Routine `L2.00115` walks the map records at `[arg+0x3a4]`. A record with `+0x48` bit 0x10 builds a
+0x254-byte object through `L2.00130` and jumps to the shared tail `L2.05918` at `L2.05919`. A record
+without it builds a 0x208-byte object through `L2.00129` and then reads `[L2.01317]+0xd8`:
+
+| `+0xd8` | `+0x74` | Writes |
+|---|---|---|
+| 2 | any | none |
+| any other | nonzero | none |
+| 1 | 0 | `+0x96` x 0.5, `+0x94 = +0x96`, command `+0x44` >>= 1 (arithmetic) |
+| not 1 or 2 | 0 | `+0xa6` += 50, `+0xbe` += 50, `+0x96` x 1.5, `+0x94 = +0x96` |
+
+The factors are the doubles at `L2.05252` (0.5) and `L2.05920` (1.5), through the helper `L2.01309`
+(unread; the rounding of the product is not read). The arm runs after the constructor `L2.00129`
+returns. Whether the stat reader has stored the row's values by then depends on the loader call in
+init `L2.01794` (call at `L2.04122` to `R2.0087`), which runs only when the unread helper `L2.03298`
+returns above 0 (R2-ENGINE-777, Medium). So "the arm scales the values the stat reader left" is
+Medium. It does not touch `+0xa8` or +0x40.
+
+The EN Accept arm calls `L2.05921` on global `L2.00805` with `index+1`, which stores `+0xd8`; the EN
+creation arm reads `+0xd8` of the same global, so in EN `+0xd8` is the difficulty index + 1 as set
+at Accept (R2-ENGINE-283). Other callers of `L2.05921` and other writers of the field were not
+censused in either root, so a difficulty change after Accept is not excluded. The RU global is by
+masked equality. `+0x74` is Session `+0x74` = (map `+0xd8` > 1) (R2-ENGINE-509), which already
+records the `+0x96` scaling when `+0x74` is 0; the ordinary arm of the EN creation routine builds
+from the Units collection (R2-ENGINE-038, with its own grade). A census of `[L2.01317]+0xd8` reads
+finds 8 in four routines: these two, the pairs at `L2.05922`/`L2.05923` and
+`L2.05924`/`L2.05925` after `L2.01273` and `L2.02341` calls, and
+`L2.05926`/`L2.05927`, which compare a Units value with `+0x96` after x0.5 at 1 and x1.5 at 3
+(the `L2.00060` comparison of R2-ENGINE-817). Three other routines read `+0xd8`: two builders with
+unread doubles (`L2.05922`, `L2.05924`) and that comparison. The
+windows at `L2.05928` and `L2.05929` write `+0x96`, `+0x94`, `+0xa6` and `+0xbe` under the same
+compares, with unread doubles `L2.05930`, `L2.05931`, `L2.05932` and `L2.05933`, and show no +0x44
+store in their 80 and 90 instructions.
+
+**Confidence.** High for the map arm's stores and their order after the constructor call, and for
+the EN match of the one committed +0xd8 writer (the Accept arm) and the reader. Medium that the
+0x208-byte arm is the creature table (its vtable store is unread; the Units-collection build of
+R2-ENGINE-038 is cited with its own grade), that the arm scales the values the stat reader left (the
+loader condition above), that `+0xd8` is the difficulty index + 1 for every later time (other
+writers uncensused), and that RU `[L2.01317]+0xd8` is the difficulty (by masked equality of the
+creation body). Unknown: what the two extra builders make and their doubles.
+
+**Unknown.** Read `L2.05930`, `L2.05931`, `L2.05932`, `L2.05933`, the routines holding
+`L2.05928` and `L2.05929`, and the vtable store of `L2.00129`.
+
+**Amends.** R2-ENGINE-884's arm description: it runs for +0xd8 = 1 with +0x74 = 0, on non-Human
+records; the other value is the +50 and x1.5 arm. R2-ENGINE-884's clause "no EN counterpart at
+-0x9ff0 or -0xa039": EN `L2.00192` is the counterpart, equal under the address mask (the `+0xd8`
+compares at `L2.05934` and `L2.05935`). R2-ENGINE-038's note "the ordinary Units arm stays RU only":
+the ordinary arm (`push 0x208` at `L2.05936`) is present in EN and equal under the mask.
+
+**Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
+
+### R2-ENGINE-1003
+
+A raw E8/E9 and DWORD scan of RU finds one direct call to the post-step `L2.02446`, at `L2.05914`
+in the group tick `L2.02456`, which every programme arm reaches through `L2.05937`. Bytes `L2.02461`
+map programme 0 to arm 0 and programmes 6..16 to the default arm 9. The tick `L2.02456` is called
+from `L2.00504` under a gate (session `+0xbbe8` nonzero, or the record's byte `+0x45` nonzero); the
+callers of `L2.02456` and `L2.00504` were not scanned, and `L2.05244`, called at the start of the
+tick, is unread. The member routine `L2.02447` has one direct call, `L2.05938`, in `L2.02446`, and
+no DWORD reference. In the bodies read, the only direct caller of the threshold post-step is the
+group tick (byte scan; indirect and jump routes unread, Medium).
+
+`L2.02447` calls `L2.02448` (signed health `+0x94` <= command `+0x44`, then a hostile within
+`[+0x1c0]+8` + 5 through unread `L2.05939`, `L2.02119` and `L2.02502`) and on success `L2.02449`;
+else `L2.02450` (health <= `+0x40`, radius 2) and on success `L2.02451`. No virtual slot +0x30 test
+appears in these bodies. A creature-table unit runs them with the values of R2-ENGINE-1001 and
+R2-ENGINE-1002; a stored 0 satisfies the test only at health 0 or below.
+
+**Confidence.** High for the read bodies and the gate in `L2.00504`. Medium for the caller census:
+it is a byte scan and indirect and jump routes were not read, so "outside any group" is Medium.
+Unknown: the callers of `L2.02456` and `L2.00504` (a scan of both would settle it) and the body of
+`L2.05244`.
+
+**Amends.** R2-ENGINE-506's Unknown on units outside a group.
+
+**Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
+
+### R2-ENGINE-1004
+
+The order-3 arms RU `L2.05940` and EN `L2.05581` are equal raw bytes; each pushes command `+0xc`
+and the unit and calls the planner, with no test of the target. The planner heads (70 instructions,
+RU `L2.01530`, EN `L2.03461`) are equal under the address mask and read target byte `+0x4c` before
+any other use, so a zero target faults at that read in both roots (R2-ENGINE-936, EN). For a nonzero
+target, bit 8 set calls `L2.04965(unit, 0)`, which with 0 calls `L2.05941` (unread). Otherwise (EN
+tail `L2.05942..L2.05943`, 130 instructions; the RU tail is unread): with no spell chosen, or after
+the spell-23 test, a target equal to the unit becomes local 0 (`L2.05602`) and the nearest-unit
+search `L2.05944` runs; a chosen slot calls `L2.02111` (RU) with the target. No test of the target's
+health or list membership appears in the EN head and tail; the callees that take the target
+(`L2.04141`, `L2.04143`, `L2.03459`, `L2.05941`) are unread.
+
+**Confidence.** High for the arm and head reads in both roots, and in RU for the first read of
+`+0x4c` (`L2.03462`, read directly); Medium for the fault itself in RU, as no RU run exists (the
+RU head equals the EN head under the mask). Unknown for the state after a dead or removed target:
+the meaning of bit 8 was not read here, and `L2.05941`, `L2.03459` and the attack path were not read.
+The RU tail is unread.
+
+**Unknown.** Read `L2.05941` and `L2.03459`, or run the original with a Bat_Sonic.4 ordered to attack
+a unit that dies, recording the unit's order and state.
+
+**Amends.** R2-ENGINE-936's Unknown on the RU planner: the RU head reads `+0x4c` first, as in EN.
+
+**Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
+
+### R2-ENGINE-1005
+
+The RU census of R2-ENGINE-1001 finds no `+0x1c4`-based +0x40 or +0x44 store in a routine named as a
+LOAD body. R2-ENGINE-662 reads the EN LOAD and command postload bodies; the postload reads seven key
+fields and does not name +0x40 or +0x44. In the bodies read, LOAD leaves the saved values. The RU
+census was not mapped onto the EN LOAD bodies of R2-ENGINE-662; no RU LOAD routine is identified, and
+the EN census is not committed. R2-ENGINE-832 (the EN Unit LOAD body calls no template loader
+directly; resaves of Againrom-written bats keep +0x40/+0x44 = 0) is consistent with saved values
+standing; the original-made bats hold 15/4, equal to Units row 97 (R2-ASSET-229), the unhalved row
+values.
+
+Seven pairs of bodies are equal under the address mask: creation, post-step, member routine, both
+predicates, order-3 arm and planner head (raw bytes equal in two; relative branch distances equal in
+all seven). The mask erases operands inside the image and leaves displacements, immediates and
+constants.
+
+**Confidence.** High for the seven equalities; Medium for the LOAD clause: it rests on the sweep's
+blind spots and on R2-ENGINE-662's Medium; helpers on the LOAD path were not read.
+
+**Unknown.** Whether a helper on the LOAD path recomputes the fields.
+
+**Evidence.** [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md)
 
 ### R2-ENGINE-991
 
