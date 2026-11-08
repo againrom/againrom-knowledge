@@ -22,6 +22,85 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## Directed script diplomacy and combat relation updates
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-979 | ROM2 action 10 changes one directed relation byte by mask-and-add. | High | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+| R2-ENGINE-980 | ROM2 action 10 calls the relation producer for returned endpoint matches. | High / Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+| R2-ENGINE-981 | ROM2 combat relation updates gate each direction by its low two bits. | High / Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+| R2-ENGINE-982 | Read ROM2 hover and acquisition predicates use outgoing hostility. | High / Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+| R2-ENGINE-983 | Composed ROM2 mission-10 action (7,1,1) leaves owner 1's outgoing relation to owner 7 clear (owner 1 taken as the hero's: not read). | Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+| R2-ENGINE-984 | ROM2 mission 10 is byte-equal; 12 of 13 listed code pairs equal under address masking. | High | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+
+### R2-ENGINE-979
+
+RU dispatch L2.05820 and EN L2.05821 subtract 1 from the action operation and use their jump tables. Entry 9 calls RU L2.05822 / EN L2.05823. For compiled scalars p0/p1/p2 at IR +8/+0xc/+0x10, M[a][b] is Session +0xa8c4+70*a+b. The complete action body stores M[p0][p1] = old & 0xfc, then low8((old & 0xfc)+low8(p2)). It does not test a lock bit before these stores and directly writes no reciprocal cell. Values 0..3 preserve old bits 2..7; unrestricted p2 can change them through byte addition.
+
+**Confidence.** High for the local two-root dispatch, arithmetic and absence of a local lock test: exact instruction windows and the selected table entries distinguish one direction from two, addition from OR, and masked from whole-byte replacement. No whole-image writer absence is asserted.
+
+**Unknown.** Complete raw-action compilation, invalid scalar admission and other writers. R2-ENGINE-044 establishes the check compiler, so its use to interpret this action's literal operands remains Medium.
+
+**Evidence.** [Answer 1](../experiments/EXP-2139-rom2-script-diplomacy/RESULTS.md#1-script-action), generated tables and both script-write/action-dispatch listings.
+
+### R2-ENGINE-980
+
+After its stores, action 10 iterates Session +0xc77c through RU L2.05824/L2.04686 or EN L2.05825/L2.05826. A returned entry whose signed word +4 equals p0 or p1 is passed to RU L2.05827 / EN L2.01852. This producer builds 0xb9: word Q for receiver P starts as signed-byte M[P][Q], OR 8 from reverse mask 0x10, OR 0x20 from reverse mask 0x02, OR 0x40 from reverse mask 0x01. It updates paired notification-cache words and calls queue RU L2.00459 / EN L2.00871. It returns early for a null session global. The body also builds and emits a message line (strings L2.05828, L2.05829, L2.05830, L2.05831, L2.05832 chosen by the same reverse bits) through unread callees L2.05833, L2.05834, L2.00291 and L2.05835 when the cache word differs from the new word and the receiver entry +0x2c is zero; the effect of that path is Unknown. In the action and producer bodies read, neither directly stores a reciprocal matrix cell or orders/rescans units.
+
+**Confidence.** High for local calls, gates, packet arithmetic and direct-store scope in both roots. Medium for covering both endpoint owners and for the composed client update: iteration and queue helpers are unread, and the client replacement is reused from R2-ENGINE-826 at its grade. No negative claim extends into unread callees.
+
+**Unknown.** Queue delivery/order, RU receiver, iteration completeness and dispatcher IR cleanup effects. No observed immediate client refresh is claimed.
+
+**Evidence.** [Answer 2](../experiments/EXP-2139-rom2-script-diplomacy/RESULTS.md#2-immediate-continuation), both script-write/notify listings and RU dispatch-cleanup.
+
+### R2-ENGINE-981
+
+Hit hook RU L2.02074 forwards attacker A, victim B and argument F to RU L2.02419; the helper body is read in RU and as EN L2.04202, and the forwarding edge is read in RU only. Both owners must exist. Indices are low bytes of owner +4. If M[A][B]&3 is zero, OR 1 into M[A][B], notifying both owners only when A.owner +0x2c is zero. If M[B][A]&3 is nonzero, return. Otherwise OR 1 into M[B][A] when F=0, B.command +0xac signed >10, signed health +0x94 < trunc(signed maxHealth +0x96 / 2), or B.state +0x54=0x10. This store notifies both owners only when B.owner +0x2c is zero. In the reverse-low-bits-zero branch, F nonzero then increments B.command +0xac even if that store was deferred. No separate lock-bit test occurs. Other bits survive every OR 1.
+
+RU call sites L2.05048 and L2.05049 pass F=0 (reverse write admitted at once); L2.05050 passes F=1 (counter, health, state gate). Their windows preserve owner/session gates, not complete containing functions; no containing function is identified, and the file-name labels of the windows are inferences. Existing hit memory and posted-record facts of R2-ENGINE-845 stand.
+
+**Confidence.** High for complete helper bodies in EN and RU, and for the forwarding edge and the listed argument pushes in RU. The EN hook, its forwarding push and its callers are unread (Unknown). Medium for which game actions reach each call site, complete damage/cast admission and effects of notification callees. A selected direct-E8 navigation scan supplies no complete caller population.
+
+**Unknown.** Other entries, counter initialization/writers, all indirect/jump paths and observed retaliation. The F nonzero gate is a numeric mechanism; it is not identified as a named game rule from a symbol.
+
+**Amends.** R2-ENGINE-845's unread relation-helper boundary is closed for the two helper bodies; event consumers, away-cell geometry and complete caller roles remain at their earlier grades.
+
+**Evidence.** [Answer 3](../experiments/EXP-2139-rom2-script-diplomacy/RESULTS.md#3-blow-and-cast), complete combat-relation listings, RU hurt-link and three selected caller listings.
+
+### R2-ENGINE-982
+
+The listed hover blocks pass the hovered owner's +4 index to Player helper RU L2.05836 / EN L2.02955, which returns indexed relation word &1. The listed index wrappers/bodies place it at Player +0x3c+2*index. Hover sets flag 4 from this result. Reverse hostility is packed as bit 0x40 by the sender, not tested by this helper. The selected normal cursor fragment (starting at L2.05837) uses flag 4 for the attack slot, subject to selection, input and object gates; upstream gates are unread. Attack-slot clicks call RU L2.05838 / EN L2.04952, sending 0x19 with target and accepted selected-unit IDs; this sender has no local relation read. The complete EN target scorer has no direct matrix access, but its callees remain unread.
+
+Server predicate RU L2.01589 / EN L2.04203 reads M[first-unit.owner][second-unit.owner]&1. Filter RU L2.02119 / EN L2.05839 supplies the querying unit first and candidate second. Its hostility-filter role in idle acquisition is inherited from R2-ENGINE-502. No selected predicate tests the reverse cell; this is not a census of every consumer.
+
+**Confidence.** High for the listed two-root hover/index/predicate/filter reads and client sender bodies. Medium for the identity of the hover Player object as the local player, which is inherited from R2-ENGINE-826 / EXP-2115. Medium for end-to-end cursor choice, acquisition and accepted attacks: selection/modifier producers, list/visibility/geometry helpers, delivery and later order execution remain outside the read. The cursor blocks differ in stack layout.
+
+**Unknown.** Actual modifier identity, complete attack refusal predicates, input eligibility, whether any input mode selects the attack cursor on a non-hostile hover, and the next autonomous action. R2-ENGINE-605's rectangle/frontier clauses and R2-ENGINE-502's wider acquisition grades remain unchanged.
+
+**Evidence.** [Answer 4](../experiments/EXP-2139-rom2-script-diplomacy/RESULTS.md#4-player-consumers), named hover, index, cursor, click, relation-reader and acquire-filter listings; EN session-attack/attack-score.
+
+### R2-ENGINE-983
+
+Both mission-10 members have 16 trigger rows. Trigger 3 Ogre annoyed lists actions 6,10,19,0. Action 19 is opcode 10 with (7,1,1), type 1 for all three operands. Type-5 rows whose raw first fields are 1 and 7 have zero words toward the other's column. EN map construction stores columns at index+1, but its nested map accessors and complete row/owner binding remain unread.
+
+Conditional on those native slots, compiled operands and no earlier relevant write: (M[7][1],M[1][7]) is (0,0) before the action, (1,0) after it, and (1,1) after an admitted F=0 hit hook in either direction. Packed W1[7] is respectively 0,0x40,0x41 after a matching client update. Owner 1's outgoing hover/acquisition hostility test remains false in the middle state. An F nonzero call with victim owner 1 can retain (1,0) while the reverse counter/health/state gates defer it; one with attacker owner 1 sets owner 1's outgoing bit first.
+
+**Confidence.** Medium for this composition, limited by literal action compilation, native identity binding, actual preceding writes, hook admission and client update timing. Stored map fields and the arithmetic in R2-ENGINE-979..982 are locally High. No autonomous attack, actual cursor image or successful click is claimed as observed.
+
+**Unknown.** The owner identity of the hero and ogre units (owner 1 and 7 are taken from the action name and row order, not read); the firing condition of trigger 3 (left0 3, right0 4, left1 5, right1 7), so when the action fires relative to any blow; other writers of the two cells. Record both directed cells, client word, hovered cursor, ordinary/explicit click outcome, hook F, victim counter/health/state and next hero action in separate mission-10 continuations before action, after action before a blow and after the first blow by each side. Repeat the cast route separately.
+
+**Evidence.** [Answer 5](../experiments/EXP-2139-rom2-script-diplomacy/RESULTS.md#5-mission-case), generated players/actions10/triggers tables and EN map-relation-loop, composed with R2-ENGINE-979..982.
+
+### R2-ENGINE-984
+
+The two 74298-byte mission-10 archive members have SHA256 23d22542745ab0c101a60b2da5ea80b858eeb4e1840515bd8398ceb2ad9efeca. The trigger and selected action fields match. Of 13 paired instruction windows in equality.tsv, 3 are raw-equal and 12 equal after replacing PE-image-address operands with one token. The cursor pair differs under that mask because of stack offsets. Masked equality does not establish the identity or semantics of unread callees. Only allods2.exe and the mission member were needed; neither DLL nor the original runtime was read.
+
+**Confidence.** High for byte identity by full SHA256 and the precisely defined comparison of committed windows. This is not whole-program behavioral equality or independent behavioral witnesses from the two roots.
+
+**Unknown.** RU client receiver, EN damage/cast caller counterparts and all unlisted bodies/routes.
+
+**Evidence.** [Answer 6](../experiments/EXP-2139-rom2-script-diplomacy/RESULTS.md#6-en-and-ru), generated inputs.tsv, equality.tsv, windows.tsv and both-root listings.
+
 ## Engine sharing between ROM1 and the ROM2 binaries
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -21741,7 +21820,7 @@ Evidence: EXP-2117 `evidence/measured/listings/en-player-*.tsv`,
 | R2-ENGINE-842 | The ROM2 leash L2.02474 drops each listed enemy farther than record +0x2d from the centroid +0x28; with none left, assignment writes cmd +0x20 = 0, which ends the pursuit (composed, Medium). | High / Medium | ● active (amended, branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
 | R2-ENGINE-843 | ROM2 record +0x2d becomes +0x38 + 4 + U{-1,0,1} (L2.05033) on the guard tick that finds a first member while +0x30 is 0, then +0x30 = 1; the +4 does not depend on enemies. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
 | R2-ENGINE-844 | RU ROM2 guard B walks a member without a target to cmd +0x9c (two windows), to +0xa0 or to its post cmd +0 (cmd +8 = 1, +0xa = goal), rewritten each tick; at the centred post cmd +8 = 0xb. | High / Medium | ● active (amended, branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
-| R2-ENGINE-845 | ROM2 L2.02074(attacker, victim) stores victim cmd +0x54 = 1, +0x58 attacker cell, +0x94 attacker, +0x98 server dword +4 and +0x9c a cell away from the attacker; it writes no target +0x20. | High / Medium | ✔ promoted (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
+| R2-ENGINE-845 | ROM2 L2.02074(attacker, victim) stores victim cmd +0x54 = 1, +0x58 attacker cell, +0x94 attacker, +0x98 server dword +4 and +0x9c a cell away from the attacker; it writes no target +0x20. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
 | R2-ENGINE-846 | RU ROM2 L2.05035 stamps cmd +0x16 with server word +0 for a mode-18 member with cmd +8 = 5 when L2.05036 exceeds L2.01728 (both unread); the constructor stores 65500. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
 | R2-ENGINE-847 | The read bodies give a grouped creature no walk-back state: each group tick it takes the least-score enemy group sight lists within +0x2d of the centroid, except in the stamp window (sight inputs unread). | Medium | ● active (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
 | R2-ENGINE-848 | EN ROM2 10.alm holds 29 type-6 records in 12 groups, none without a group: Ogre group 3, Troll 11, Troll.4 10, Dragon.4 13, four Bat_Sonic.4 14 (names by Units serverID, Medium). | High / Medium | ● active (branch candidate) | [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md) |
@@ -21888,6 +21967,8 @@ starts order 11 (R2-ENGINE-505), and what `L2.00044`, `L2.01513` and
 **Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
 
 ### R2-ENGINE-845
+
+**Amended.** R2-ENGINE-981 reads the complete relation-helper bodies in both roots (the RU forwarding edge only; the EN hook is unread). That local helper boundary is closed; notification delivery, complete caller admission, posted-record consumers and away-cell geometry remain at their earlier grades. The hit-memory and no-direct-target-store clauses stand.
 
 `L2.02074`(attacker, victim, third) writes the victim's command block: +0x54
 = 1, word +0x58 = the attacker's cell (`L2.01521`), byte +0x5a = 0. It calls

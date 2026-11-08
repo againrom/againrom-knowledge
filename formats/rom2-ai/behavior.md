@@ -1,5 +1,40 @@
 # Group and member decisions
 
+## Directed relation updates and admission
+
+Script action 10 changes M[p0][p1] by mask-and-add and invokes the relation
+producer for matching endpoint records. In the action and producer bodies
+read, it directly changes neither the reciprocal cell nor a unit order. Packet word Q for receiving P carries
+M[P][Q] in its low bits and reverse hostility as bit 0x40. Local stores and
+packet arithmetic are High; iteration and delivery remain Medium or Unknown.
+— R2-ENGINE-979, R2-ENGINE-980
+
+The hit relation helper first ORs bit 0 into M[attacker][victim] only when
+that cell's low two bits are zero. It treats the reverse cell separately,
+also requiring low two bits zero. A zero third argument admits the reverse
+write immediately (RU call sites read: two of three pass 0; which game
+actions reach each is Medium). A nonzero argument additionally requires
+victim command +0xac signed >10, health below half max, or state 0x10;
+otherwise it only increments that counter. The complete bodies are High in
+both roots; the hook-to-helper edge is read in RU only; complete combat
+entry and notification delivery remain Medium. —
+R2-ENGINE-981
+
+The listed hover block tests a Player's indexed relation word &1 and derives
+flag 4 (that Player as the local player is Medium, inherited). The selected
+cursor fragment uses that flag for an attack cursor; upstream gates are
+unread. An attack
+cursor click sends 0x19 without another local relation test. The server
+acquisition predicate tests M[querying owner][candidate owner]&1, not the
+reverse cell. Local predicates are High, composed cursor/attack/acquisition
+remain Medium. Mission 10 can therefore have M[7][1]=1 and M[1][7]=0 after
+the ogre action, until an admitted hit (F=0, or the F nonzero gates)
+or another writer changes it. The owner identity of the hero and ogre units
+and the trigger's firing condition are Unknown. That case is Medium, with
+observed cursor, delivery and next action Unknown. Two-root code
+comparisons cover only the listed windows. — R2-ENGINE-982,
+R2-ENGINE-983, R2-ENGINE-984
+
 ## Group tick
 
 | Input/state | Rule | Claims and clause grades | Unknowns |
@@ -72,7 +107,7 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 
 | Input/state | Rule | Claims and clause grades | Unknowns |
 |---|---|---|---|
-| Hit hook L2.02074(attacker,victim,third) | Victim command +0x54=1, +0x58=attacker cell, +0x5a=0; call L2.02419, post copied event-1 record through L2.01727; +0x94=attacker, +0x98=server dword +4, +0x9c=away cell. No direct target +0x20 store. | R2-ENGINE-845 High stores/calls, Medium geometry/caller roles | Relation helper and posted-record consumers; full caller coverage |
+| Hit hook L2.02074(attacker,victim,third) | Victim command +0x54=1, +0x58=attacker cell, +0x5a=0; call L2.02419, post copied event-1 record through L2.01727; +0x94=attacker, +0x98=server dword +4, +0x9c=away cell. No direct target +0x20 store. | R2-ENGINE-845 High stores/calls, Medium geometry/caller roles; R2-ENGINE-981 High relation-helper body | Posted-record consumers; full caller coverage and notification delivery |
 | Remembered cell | For a computer-owned actor, candidate builder marks it for runs 1..21, increments +0x5a and clears +0x58 after marking on run 21. Group sight also reads remembered cells. | R2-ENGINE-502 High local builder; R2-ENGINE-875 Medium group-sight census | Full group-sight predicates; builder-run cadence against the Group tick is Unknown |
 | Candidate admission | Builder ray scan marks cells; hostility bit and visibility remove candidates; health below 1 separates dead candidates. | R2-ENGINE-502 High local arithmetic/filter, Medium creature scan range/table inputs | Complete group-sight population; shared builder does not prove identical pipelines |
 | Look-around flag | +0x54 requests a new heading and is cleared by look-around. The hit hook does not directly order every Group to attack the attacker. | R2-ENGINE-504 High RU look-around, Medium EN/helper meaning; R2-ENGINE-845 High no direct target write, Medium broader inference | Event consumers and untraced target writers |

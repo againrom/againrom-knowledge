@@ -1,5 +1,21 @@
 # Fields and SAV coordinates
 
+## Relation coordinates
+
+The hit hook's relation-helper boundary is closed separately from its
+memory stores: the matrix is Session +0xa8c4+70*source+target, one byte per
+directed cell. The complete relation helper gates each direction by that
+cell's low two bits; its nonzero-third-argument reverse gate reads and can
+increment victim command DWORD +0xac. These are native state coordinates,
+not a new SAV layout proof. Hit-memory and clock/geometry grades stand.
+— R2-ENGINE-845, R2-ENGINE-981
+
+The listed hover Player's relation words use array +0x38 and data +0x3c, indexed
+by the hovered owner's key. The read hostility helper returns word &1.
+The server's querying-unit/candidate predicate reads the corresponding
+outgoing matrix cell. Complete acquisition, delivery and attack admission
+remain Medium. — R2-ENGINE-982
+
 Offsets below are relative to the named object, not physical file offsets.
 Command is the object at unit +0x1c4; movement is at unit +0x1c0; programme is
 at Group +0x3c. Command +8, command +9, movement +9 and unit +0x50 are distinct.

@@ -55,6 +55,26 @@ and all final defaults are Unknown. — R2-ENGINE-045
 
 ## Added declared arms
 
+Action 10 dispatches to the one-direction relation writer in the body read
+(RU L2.05822 / EN L2.05823). With compiled
+scalars p0/p1/p2, it stores M[p0][p1] = old & 0xfc, then adds low8(p2)
+modulo 256. For p2 in 0..3 the old bits 2..7 survive. There is no local
+lock-bit test and no direct reciprocal-cell store in that body. The action then invokes
+the relation packet producer for returned owner entries matching either
+endpoint. Complete iteration, queue delivery and effects of unread callees
+remain Medium or Unknown. — R2-ENGINE-979, R2-ENGINE-980
+
+In mission 10, trigger index 3 Ogre annoyed names action 19, opcode 10 with
+(7,1,1), type 1 for each operand. The two whole map members are byte-equal.
+Stored relation defaults between raw owner rows 1 and 7 are zero. Composing
+their native identity and literal action compilation is Medium: the script
+can produce M[7][1]=1 while M[1][7]=0. Owner 1's outgoing hostility test
+then stays clear until an admitted hit (F=0, or the F nonzero gates) or
+another writer changes it. The owner identity of the hero and ogre units and
+the trigger's firing condition are Unknown. Runtime cursor, click, delivery
+and the hero's next action are Unknown. — R2-ENGINE-983,
+R2-ENGINE-984
+
 Scalar indices below are compiled indices, not original catalog slot indices.
 The meanings are scoped to the verified RU/EN executor paths.
 
