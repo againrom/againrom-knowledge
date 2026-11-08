@@ -16,9 +16,9 @@ write immediately (RU call sites read: two of three pass 0; which game
 actions reach each is Medium). A nonzero argument additionally requires
 victim command +0xac signed >10, health below half max, or state 0x10;
 otherwise it only increments that counter. The complete bodies are High in
-both roots; the hook-to-helper edge is read in RU only; complete combat
-entry and notification delivery remain Medium. —
-R2-ENGINE-981
+both roots; the hook-to-helper edge and its pushes are read in both roots
+and equal after masking; complete combat entry and notification delivery
+remain Medium. — R2-ENGINE-981, R2-ENGINE-987
 
 The listed hover block tests a Player's indexed relation word &1 and derives
 flag 4 (that Player as the local player is Medium, inherited). The selected
@@ -34,6 +34,46 @@ and the trigger's firing condition are Unknown. That case is Medium, with
 observed cursor, delivery and next action Unknown. Two-root code
 comparisons cover only the listed windows. — R2-ENGINE-982,
 R2-ENGINE-983, R2-ENGINE-984
+
+## Same-owner area blow
+
+An area pulse stores the caster as area +0x3c when the caster's own +0x3c
+is nonzero. Each occupant is then handled with no owner or relation test:
+row 17 nothing; row 2 the damage copy, other rows the area object's attach;
+row 15 nothing more; every other row a caster pointer in occupant +0x40 when
+the caster has an owner (not for row 14) and the hit hook (caster,
+occupant, 1). The RU body alone skips the hook when a session flag
+and the caster owner's +0x2c are nonzero and the occupant owner's +0x2c is
+zero; it cannot be met when caster and occupant share one owner object (an
+equal owner index is Medium evidence for that). The occupant body is High in both roots; the caster
+field at the apply is Medium. — R2-ENGINE-985
+
+The Effect attach renews a same-ID Effect (larger +0x40 and +0x42), cancels
+Bless against Curse, or adds a copy and its bit in unit +0x144. It reads no
+owner. What Darkness's sight Effect changes is Unknown. — R2-ENGINE-986
+
+The hook writes hit memory, session +0xbd98/+0xbdc4/+0xbdc8 and one record
+appended to session list +0xbbec, which the RU script tick clears (Medium:
+navigation listing; EN tick unread). The hook body writes no command +0x20,
++8 or +0x0c; its callees and the EN append are unread. For one owner index i the
+relation helper reads M[i][i] in both directions: low bits set, nothing is
+written and +0xac is not incremented; low bits clear, bit 0 is ORed into the
+diagonal. Group sight marks the remembered attacker cell for a member
+whose owner +0x2c is nonzero and lists units on it; the hostility filter
+then decides. —
+R2-ENGINE-987, R2-ENGINE-988
+
+Composed, in the read bodies: with the diagonal's bit 0 clear and low bits
+set, and the owner's +0x2c nonzero so that group sight marks the caster's
+cell, the filter drops the same-owner caster, assignment keeps the
+least-score hostile, and a
+member with a target stays in Guard B's target case; a member without one
+and below max health walks to command +0x9c while the hit clock is fresh.
+This path is Medium, not observed; what the Darkness Effect does to sight
+range (it can drop the old target) and the +0xbbec readers are Unknown.
+Mission 10's Troll.4 and the four
+Bat_Sonic.4 share owner word 5, whose Player row stores diagonal 0x12 (High
+fields, Medium names). — R2-ENGINE-989, R2-ENGINE-990
 
 ## Group tick
 
@@ -107,8 +147,8 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 
 | Input/state | Rule | Claims and clause grades | Unknowns |
 |---|---|---|---|
-| Hit hook L2.02074(attacker,victim,third) | Victim command +0x54=1, +0x58=attacker cell, +0x5a=0; call L2.02419, post copied event-1 record through L2.01727; +0x94=attacker, +0x98=server dword +4, +0x9c=away cell. No direct target +0x20 store. | R2-ENGINE-845 High stores/calls, Medium geometry/caller roles; R2-ENGINE-981 High relation-helper body | Posted-record consumers; full caller coverage and notification delivery |
-| Remembered cell | For a computer-owned actor, candidate builder marks it for runs 1..21, increments +0x5a and clears +0x58 after marking on run 21. Group sight also reads remembered cells. | R2-ENGINE-502 High local builder; R2-ENGINE-875 Medium group-sight census | Full group-sight predicates; builder-run cadence against the Group tick is Unknown |
+| Hit hook L2.02074(attacker,victim,third) | Victim command +0x54=1, +0x58=attacker cell, +0x5a=0; call L2.02419, post copied event-1 record through L2.01727; +0x94=attacker, +0x98=server dword +4, +0x9c=away cell. No target +0x20, prepared +8 or +0x0c store in the hook body (callees and EN append unread). The record goes to the tail of session list +0xbbec, which the RU script tick clears. The area occupant routine is one caller, with third argument 1. | R2-ENGINE-845 High stores/calls, Medium geometry/caller roles; R2-ENGINE-981 High relation-helper body; R2-ENGINE-987 High EN/RU hook and RU append/tick, Medium list clear; R2-ENGINE-985 High occupant call | Posted-record readers before the clear; full caller coverage and notification delivery |
+| Remembered cell | For a computer-owned actor, candidate builder marks it for runs 1..21, increments +0x5a and clears +0x58 after marking on run 21. Group sight also reads remembered cells: for a member whose owner +0x2c is nonzero it marks +0x58, increments +0x5a, clears +0x58 past 20 and lists units on marked cells before filter L2.02119. | R2-ENGINE-502 High local builder; R2-ENGINE-875 Medium group-sight census; R2-ENGINE-988 High group-sight body, Medium filter output list | Full group-sight predicates; builder-run cadence against the Group tick is Unknown |
 | Candidate admission | Builder ray scan marks cells; hostility bit and visibility remove candidates; health below 1 separates dead candidates. | R2-ENGINE-502 High local arithmetic/filter, Medium creature scan range/table inputs | Complete group-sight population; shared builder does not prove identical pipelines |
 | Look-around flag | +0x54 requests a new heading and is cleared by look-around. The hit hook does not directly order every Group to attack the attacker. | R2-ENGINE-504 High RU look-around, Medium EN/helper meaning; R2-ENGINE-845 High no direct target write, Medium broader inference | Event consumers and untraced target writers |
 | Stored attacker pointer | +0x94 has no reader in the census with traced command bases; +0x58 has builder/group-sight readers, +0x98/+0x9c have Guard B readers. | R2-ENGINE-875 Medium census; High for the Guard B readers of +0x98/+0x9c; Medium for the builder and group-sight readers of +0x58 | 268 RU +0x94 sites with untraced bases; aliases and bulk copies |

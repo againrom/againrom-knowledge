@@ -10,6 +10,16 @@ increment victim command DWORD +0xac. These are native state coordinates,
 not a new SAV layout proof. Hit-memory and clock/geometry grades stand.
 — R2-ENGINE-845, R2-ENGINE-981
 
+One owner index i makes both helper tests read the diagonal M[i][i]. The
+hook also stores session +0xbd98=1, +0xbdc4=attacker and +0xbdc8=victim and
+appends a 0x54-byte copy of +0xbd98 to session list +0xbbec. An area object
+keeps its caster at +0x3c, copied to its attached object +0x44; an occupant
+gets caster pointer +0x40 and byte +0x48 from the attached object +0xc.
+Mission 10 stores owner word 5 for Troll.4 and the four Bat_Sonic.4 and
+diagonal 0x12 in Player row 4, so their composed same-owner hit leaves
+M[5][5] unchanged (Medium). — R2-ENGINE-985, R2-ENGINE-987, R2-ENGINE-988,
+R2-ENGINE-989, R2-ENGINE-990
+
 The listed hover Player's relation words use array +0x38 and data +0x3c, indexed
 by the hovered owner's key. The read hostility helper returns word &1.
 The server's querying-unit/candidate predicate reads the corresponding

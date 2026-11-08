@@ -22,13 +22,101 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## Same-side area spell reach and hit memory
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-985 | ROM2 area occupant applies the area object, then calls the hit hook (caster, occupant, 1) with no owner or relation test. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-986 | The ROM2 Effect attach renews, cancels or adds an Effect on its unit without reading an owner or a relation. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-987 | The ROM2 hit hook writes victim hit memory and posts an event record; its body writes no command +0x20, +8 or +0x0c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-988 | A same-owner ROM2 hook call changes no relation cell when the diagonal's low bits are set; group sight marks the caster cell for a member whose owner +0x2c is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-989 | In the read ROM2 bodies a struck grouped creature keeps its target after a same-owner area blow when the diagonal has bit 0 clear and low bits set; the filter drops the caster. | Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-990 | ROM2 mission 10 gives Troll.4 and the four Bat_Sonic.4 owner word 5, whose Player row stores diagonal 0x12 (names Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+
+### R2-ENGINE-985
+
+The apply tail RU L2.05840 / EN L2.05841 stores area +0x3c = the apply routine's first argument (the caster, R2-ENGINE-792) when RU L2.01570 / EN L2.03453 returns 0, else 0; that predicate returns 1 exactly when its object's dword +0x3c is 0. The tail copies area +0x3c into [area+0x48]+0x44 when +0x48 is nonzero.
+
+The occupant routine RU L2.01708..L2.04737 / EN L2.05842..L2.04764, with target T, caster C = area +0x3c and row = area +0xc:
+
+1. T null or row 17: return.
+2. Row 2: copy the damage object, divide base and spread by T's vtable+0x1c byte squared, apply the copy. Other rows: call [area+0x48] vtable+0x3c(T).
+3. Row 15: return.
+4. T vtable+0x20 low byte zero, or C zero: return.
+5. L2.01570(C) nonzero: T+0x40 = 0. Else C.owner +0x14 nonzero and row not 14: T+0x40 = C, T byte +0x48 = [area+0x48] byte +0xc; row 14 stores neither. C.owner zero: T+0x40 = 0.
+6. C.owner or T.owner zero: return.
+7. RU only (12 instructions L2.05843..L2.05844): return when [L2.01317]+0x74 and C.owner +0x2c are nonzero and T.owner +0x2c is zero.
+8. Hit hook (C, T, 1) on RU [L2.02609] / EN [L2.01066]; call sites RU L2.05050 / EN L2.05845.
+
+The body reads no owner index +4, no relation cell and no relation predicate. Step 7 compares two owners' +0x2c; when C and T share one owner object it cannot be met (an equal owner index is Medium evidence for one owner object). So Darkness (14) reaches a same-owner occupant with the attach and the hook; Light (15) with the attach only; Wall of Earth (17) with nothing. Removing step 7, the EN and RU bodies are equal under a mask of five-or-more-digit hex operands (137 instructions).
+
+**Confidence.** High for the complete occupant, predicate and apply-tail windows in both roots. Medium that [area+0x48] for row 14 is the arm-14 Effect and its vtable+0x3c the attach (R2-ENGINE-697, R2-ENGINE-793), and that a creature's +0x3c, nonzero when the executor prepared its cast (R2-ENGINE-399, R2-ENGINE-542), is still nonzero at the apply. Medium for what T vtable+0x20 tests (not read).
+
+**Unknown.** The meaning of [L2.01317]+0x74 and owner +0x2c in step 7; which of a cell's occupant entries a pulse passes is R2-ENGINE-793's.
+
+**Evidence.** [Answer 1](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#1-reach): apply-tail-store, caster-predicate and area-occupant listings; occupant-compare.tsv.
+
+### R2-ENGINE-986
+
+The Effect attach RU L2.00480..L2.02361 / EN L2.00481..L2.05846 (complete in two windows per root, equal after masking) takes unit U. It stores U+0x150 = 0. For a Bless (20) or Curse (28) Effect passing entry test L2.03774 it removes an opposite Effect found in U's list +0x20 (clears its bit in U+0x144, calls its slot +0x44, L2.05847, unlinks it, calls L2.00060) and returns. Otherwise, with the entry test passing, a same-ID Effect in the list gets slot +0x44(U), the larger signed +0x40 and the larger unsigned +0x42, then slot +0x40(U) unless the ID is 6; without one the attach copies the Effect (0x48 bytes, L2.04914), calls slot +0x40(U) unless ID 6, links it, ORs bit ID into U+0x144 and calls the 0x88 sender L2.03779 for a nonzero ID. A failed entry test calls slot +0x40(U) only. The non-cancel paths end in L2.00060(U, 0, U+0x150, 0xffb, 0, 0). The body reads no owner field and no relation.
+
+**Confidence.** High for the body in both roots. Medium for its role as the Effect slot +0x3c (R2-ENGINE-697). The callees L2.03774, the list helpers, slots +0x40/+0x44, L2.05847 and L2.00060 were not read, so a side test inside them is not excluded.
+
+**Unknown.** What slot +0x40 changes for Darkness's scanRange Effect (R2-ENGINE-024 magnitude -1-P/30), so whether a darkened unit's sight shrinks.
+
+**Evidence.** [Answer 1](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#1-reach): effect-attach-1 and effect-attach-2 listings.
+
+### R2-ENGINE-987
+
+The hit hook RU L2.02074..L2.02407 / EN L2.04120..L2.05535 (complete, masked-equal) takes attacker A, victim B and F, with B.cmd = [B+0x1c4], and tests nothing before its stores: cmd +0x54 = 1; word +0x58 = L2.01521([A+0x10]); byte +0x5a = 0; relation helper on its object +0xa8bc with (A, B, F) (R2-ENGINE-981); object +0xbd98 = 1, +0xbdc4 = A, +0xbdc8 = B; a 0x54-byte copy of +0xbd98 to RU L2.01727 / EN L2.05848 on +0xbbec; cmd +0x94 = A; +0x98 = [L2.01317]+4; word +0x9c = the away cell of R2-ENGINE-845. The hook body writes no cmd +0x20, +8 or +0x0c; its callees L2.05849, L2.01521, L2.02411, L2.02412, L2.00486, L2.00487, L2.01309 and L2.01523, and in EN the append L2.05848, are unread.
+
+RU L2.01727..L2.05850 allocates a node (L2.05849), copies 21 dwords into node +8 and links it at the list tail. The RU script tick L2.03648..L2.05851 increments +0xd720, calls L2.05851 and L2.00516, then L2.05852 on +0xbbec, which a navigation listing shows freeing every node.
+
+**Confidence.** High for the hook in both roots and the RU append and tick bodies. Medium that L2.05852 empties the list (navigation listing). A navigation raw dword scan of RU executable sections finds 9 0xbbec candidates (hook, assignment, two executor posts, script tick, four unclassified) and none for 0xbbf0 or 0xbbf4; it is not a reader census.
+
+**Unknown.** Which routine reads the posted records before the clear; reading L2.05851, L2.00516 and the condition arms of L2.03275 would settle it.
+
+**Amends.** R2-ENGINE-981's Unknown on the EN hook and its forwarding push, and its RU-only forwarding edge: both are read in EN, equal to RU after masking.
+
+**Evidence.** [Answer 3](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#3-the-command-afterwards): hit-hook, event-post and script-tick listings; navigation refs.tsv and ru-post-record.txt.
+
+### R2-ENGINE-988
+
+In the relation helper (R2-ENGINE-981) attacker and victim of one owner index i make both tests read M[i][i]. With M[i][i] & 3 nonzero the forward store is skipped and the reverse test returns at once: no OR, no producer call and no +0xac increment, whatever F is. With M[i][i] & 3 zero the forward test ORs 1 into M[i][i] (a self-hostile diagonal) and the reverse test then returns.
+
+Group sight RU L2.02473..L2.01514 / EN L2.04963..L2.05853 (complete, masked-equal) clears list +0xa68, marks each member's sight and, for a member whose owner +0x2c is nonzero and whose cmd word +0x58 is nonzero, raises the grid byte at +0x2a008 + cell, increments +0x5a and clears +0x58 once signed +0x5a exceeds 20. It adds every world unit on a marked cell to list +0xa64, then calls filter L2.02119(first member, +0xa64, 0) and L2.02416; with +0xa68 empty and +0xa88 not, it moves +0xa88 into +0xa64. It tests no reach or route. So, when B's owner +0x2c is nonzero, a hit by A puts A's cell into the next group sight of B's group, and the filter's rule (R2-ENGINE-502, R2-ENGINE-982) decides whether A becomes a candidate.
+
+**Confidence.** High for the helper branch and the group-sight body in both roots. Medium for the filter's output list (+0xa68, R2-ENGINE-502 and R2-ENGINE-842; the filter body is not re-read) and for the count helper L2.02502.
+
+**Evidence.** [Answers 2 and 3](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#2-the-hooks-arguments): relation-helper and group-sight listings.
+
+### R2-ENGINE-989
+
+After a same-owner area blow on a grouped creature whose owner's diagonal has bit 0 clear and low bits nonzero: the hook leaves the matrix unchanged and writes hit memory only (R2-ENGINE-987, R2-ENGINE-988); group sight marks the caster's cell when the owner's +0x2c is nonzero; the filter removes the caster because M[i][i] & 1 is 0; assignment writes cmd +0x20 = the least-score hostile of the filtered list on each group tick (R2-ENGINE-503, R2-ENGINE-881). The old target stays while it is still listed and still scores least. Guard B tests +0x20 (case 3) before the hit case 4, so a member with a target keeps attacking; a member without one and below max health walks to +0x9c while server dword +4 is within 10 of +0x98, which each pulse rewrites (R2-ENGINE-844). Darkness's own Effect is attached on every pulse (R2-ENGINE-986).
+
+**Confidence.** Medium: composed from High bodies with unread posted-record readers, the filter's output list, the Effect's slot +0x40 effect on sight (a smaller sight can drop the old target, and then assignment writes 0) and the untraced +0x20 writers of R2-ENGINE-881.
+
+**Unknown.** What the Darkness Effect does to sight range (slot +0x40; a smaller sight can drop the old target). Which routines read the +0xbbec records before the clear. Owner 5's +0x2c, which group sight needs to mark the caster's cell in mission 10. Observed behaviour: in original mission 10 let a Bat_Sonic.4 cast Darkness over Troll.4 while it attacks the hero and record per tick M[5][5], Troll.4 cmd +0x20, +8, +0x0c, +0x54, +0x58, +0x5a, +0x94, +0x98, +0x9c, +0xac, unit +0x40, +0x48, +0xa5, group 10's lists +0xa64/+0xa68 and the session +0xbbec records.
+
+**Evidence.** [Answer 4](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#4-the-old-target), composed with R2-ENGINE-985..988.
+
+### R2-ENGINE-990
+
+In EN and RU scenario.res:10.alm (byte-equal) the type-6 record 14 (group 10, dword 0x14 = 623) and records 25..28 (group 14, dword 0x14 = 627) store low word 5 in dword 0x18, which R2-ASSET-119 moves to row +0x14. Type-5 Player row 4 (field0 5) stores word 18 (0x12) at its own column 4 and 1 at columns 1, 3 and 6. R2-ENGINE-848 names groups 10 and 14 Troll.4 and Bat_Sonic.4. The EN map loop writes diagonal 0x12 (R2-ENGINE-983) and original-made saves hold it (R2-SESSION-339). So a hook call from a bat on Troll.4 reads M[5][5] & 3 = 2, the no-store branch of R2-ENGINE-988.
+
+**Confidence.** High for the stored fields in both roots. Medium for the names (R2-ENGINE-848), for reading word 5 as the owner (it equals the bats' saved Player id 5 of R2-ENGINE-833). Whether the bats cast Darkness is R2-ENGINE-832's Medium.
+
+**Unknown.** The hero's owner and its relation to owner 5 when the bat casts. Owner 5's +0x2c, which group sight tests before it marks the bat's cell.
+
+**Evidence.** [Answer 5](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#5-mission-10): units, players and inputs tables.
+
 ## Directed script diplomacy and combat relation updates
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-979 | ROM2 action 10 changes one directed relation byte by mask-and-add. | High | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
 | R2-ENGINE-980 | ROM2 action 10 calls the relation producer for returned endpoint matches. | High / Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
-| R2-ENGINE-981 | ROM2 combat relation updates gate each direction by its low two bits. | High / Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
+| R2-ENGINE-981 | ROM2 combat relation updates gate each direction by its low two bits. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
 | R2-ENGINE-982 | Read ROM2 hover and acquisition predicates use outgoing hostility. | High / Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
 | R2-ENGINE-983 | Composed ROM2 mission-10 action (7,1,1) leaves owner 1's outgoing relation to owner 7 clear (owner 1 taken as the hero's: not read). | Medium | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
 | R2-ENGINE-984 | ROM2 mission 10 is byte-equal; 12 of 13 listed code pairs equal under address masking. | High | ✔ promoted (branch candidate) | [EXP-2139](../experiments/EXP-2139-rom2-script-diplomacy/) |
@@ -62,6 +150,8 @@ RU call sites L2.05048 and L2.05049 pass F=0 (reverse write admitted at once); L
 **Confidence.** High for complete helper bodies in EN and RU, and for the forwarding edge and the listed argument pushes in RU. The EN hook, its forwarding push and its callers are unread (Unknown). Medium for which game actions reach each call site, complete damage/cast admission and effects of notification callees. A selected direct-E8 navigation scan supplies no complete caller population.
 
 **Unknown.** Other entries, counter initialization/writers, all indirect/jump paths and observed retaliation. The F nonzero gate is a numeric mechanism; it is not identified as a named game rule from a symbol.
+
+**Amended.** R2-ENGINE-987 reads the EN hook L2.04120 and its forwarding push to L2.04202; they equal RU after masking, so the forwarding edge and the F argument are read in both roots. R2-ENGINE-985 reads the function containing RU L2.05050 / EN L2.05845 as the area occupant routine, which passes F=1 in both roots. R2-ENGINE-988 states the same-owner outcome.
 
 **Amends.** R2-ENGINE-845's unread relation-helper boundary is closed for the two helper bodies; event consumers, away-cell geometry and complete caller roles remain at their earlier grades.
 
