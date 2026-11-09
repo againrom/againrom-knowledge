@@ -46,3 +46,8 @@ unread). In the bodies read, the only direct caller of the threshold post-step i
 (byte scan; indirect and jump routes unread, Medium; R2-ENGINE-1003). The order-3 arm passes command
 +0xc to the planner with no null test (R2-ENGINE-1004). In the bodies read, LOAD leaves the
 thresholds as saved (R2-ENGINE-1005, Medium).
+
+## Route of a unit's next action
+
+The RU read route from the Group pass to a unit's next action, with its standing-order and re-pick planners, is the composed route section of the [planner page](orders.md). Both owner +0x2c branches reach the selector through L2.01726 (R2-ENGINE-1017, Medium). The idle planner writes no unit order and no assigned target in its own body (R2-ENGINE-1018). The executor tail with movement +0x98 set stores order 0xc for a unit in order 1 (R2-ENGINE-1020).
+The Group pass in this route runs only when session counter +4 mod 16 is 6 (R2-ENGINE-1016). The write census is by base class and does not count unit-order writers (R2-ENGINE-1022).

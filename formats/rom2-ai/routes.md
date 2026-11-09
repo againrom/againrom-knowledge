@@ -40,3 +40,7 @@
 ## Health thresholds, difficulty and attack order
 
 The stat reader stores them in command +0x40 and +0x44 for a unit whose template loads (Medium: loader condition, script-created creatures; R2-ENGINE-1001). The map arm scales a non-Human record by the difficulty word when Session +0x74 is 0 and the value is not 2 (R2-ENGINE-1002). In the bodies read, the only direct caller of the threshold post-step is the group tick (byte scan; indirect and jump routes unread, Medium; R2-ENGINE-1003). In the bodies read, LOAD leaves the thresholds as saved (R2-ENGINE-1005).
+
+## Tail branch of a finished route
+
+The flag branch is read at L2.02883: order 1 stores order 0xc through L2.02858 and L2.02636; orders 0xa and 0x18 keep their branches; every other value clears +8 and calls re-pick L2.02425 (R2-ENGINE-1020). The route from the Group pass to this tail is bounded by R2-ENGINE-1017.

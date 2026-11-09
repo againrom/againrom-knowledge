@@ -41,6 +41,13 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 | R2-ENGINE-1009 | ROM2 caster fields: type-9 +0x16 is the spell index (EN 1..27, RU 1..29), +0x18 the power (EN 5..255, RU 2..255), +8/+0xc low bytes the cell, +0x00 a fill byte (1..9); power goes unchanged to the call of L2.05951. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 | R2-ENGINE-1010 | ROM2 type-4 +0x0e is resolved only at load into building +0x14; a caster copies it; a call of L2.01703 with a value not below its target's +0x42 removes casters of the same location word +2 (target class Medium). | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 | R2-ENGINE-1011 | ROM2 casters are saved: document serializer R2.0120 carries the [Session+0x7c]+0x10 list through R2.0173, a caster storing byte +0x3c and the block at +0x40; LOAD rebuilding the list from the file is Medium (RU). | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1016 | RU L2.04380 calls Group pass L2.00502 only when counter +4 mod 16 is 6 (R2-ENGINE-778), its other steps when it is 12. Actor step dispatch unread. | High / Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1017 | RU selector L2.01725 is reached through L2.01726; no E8/E9/dword reference to loop L2.01724; both owner +0x2c branches reach it. | Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1018 | RU idle planner L2.01731 ranks list candidates by distance then turn; its own body stores none of +0x50, +0x20, +8, +0xc. | High / Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1019 | RU re-pick L2.02425 writes +0xc and +8=6 on a found unit, else +8=0xb or 0 by owner +0x2c; no +0x50 or +0x20 write. | High / Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1020 | RU executor tail with movement +0x98 set: order 1 calls L2.02858, which reaches L2.02637 (order 0xc, R2-ENGINE-541) through L2.02636; L2.02636 has 16 E8 sites. | High / Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1021 | RU +0xbbec list: calls of L2.06024, L2.06025 and L2.05852, four appends of record kinds 1 to 4; no read operand found; aliased readers open. | Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1022 | Linear-sweep write census of +0x50, +8, +9, +0xc, +0x20 by traced base class in both roots; RU +0x20: 7 command-base of 203 sites. | Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
 
 ### R2-ENGINE-997
 
@@ -468,6 +475,86 @@ EN document site `L2.00243`, not read for this call.
 **Unknown.** Whether the fix-up `L2.01169` and `L2.05982` change the caster's fields beyond the keys.
 
 **Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ENGINE-1016
+
+RU `L2.04380` (`win/ru-sched-parent-L2.05966.lst`, 196 instructions) returns at once when its object's `+0x94` is 0 (`L2.06026`) and calls `L2.00502` at `L2.05966` only when the signed low four bits of its object's field `+4` equal 6 (`cmp eax,6` at `L2.06027`, `jne L2.06028`), the condition R2-ENGINE-778 reads (field +4 and its increment through `L2.04406`). After it, the signed low four bits of field +4 of the object at `[ebp-0x14]` compared with 12 decide whether `L2.04378`, `L2.06029`, `L2.06030`, `L2.06031` and `L2.06032` run (`jne L2.06033` skips them otherwise).
+
+`L2.00502` (`win/ru-groupsched-before-L2.06034.lst`, first 120 of its instructions, and `win/ru-groupsched-2-L2.06035.lst`, its tail to `ret 4`) runs in this order: `L2.06036`/`L2.06037` pairs around each part; with session +0xbbe8 zero, `R2.0098` on `[session+0xa50]+0x92ecc`; the script tick `L2.03648`; for each entry of the argument list, Group pass `L2.00504`; `L2.05949`; counters +0xa4c and +0x8b0..+0x8c0. `L2.00504` (`win/ru-grouptick-L2.00504.lst`) walks the entry's `+0x28` sublist and calls `L2.02456` for an entry when session +0xbbe8 is nonzero or byte +0x45 of the programme record (R2-ENGINE-507) is nonzero. The sole E8/E9 call site of `L2.00504` in the scan is `L2.06034`.
+
+**Confidence.** High for the read call order and branch tests in RU. One call of `L2.00502` per 16 values of `+4` (R2-ENGINE-778 reads the increment in `L2.04406`). Medium for how many server steps that is. EN unread here.
+
+**Unknown.** Seconds per tick; the RU scheduler above `L2.04380` past R2-ENGINE-778's one read caller site `L2.04409`; where the actor step `L2.00028` (three raw `.rdata` dwords `L2.02945`, `L2.02946`, `L2.02947`, which do not identify vtables or a dispatch, R2-ENGINE-558; dispatch site unread) is scheduled relative to the Group pass. Finding what calls `L2.00028` settles it.
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 1.
+
+### R2-ENGINE-1017
+
+The RU scan (`scan/ru-callers.tsv`, E8/E9 rel32 over code-flag sections) lists the E8 sites `L2.02939` and `L2.02940` for selector `L2.01725`, and `L2.02941` and `L2.02942` for wrapper `L2.01726`. `L2.01726` (`win/ru-wrap-L2.01726.lst`) tests owner +0x2c of `[unit+0x14]`: zero calls the selector, nonzero calls `L2.02938`, whose body (`win/ru-wrap-L2.02938.lst`) only calls the selector. Both branches therefore call `L2.01725` with the same unit. `L2.02941` lies in loop `L2.01724`; `L2.02942` lies in `L2.02463`, a one-unit method (`win/ru-prog0-L2.02463.lst`), which R2-ENGINE-507 and R2-ENGINE-882 give as the programme-0 route.
+
+The scan finds no E8 or E9 site for `L2.01724` over code-flag sections, and `scan/ru-dwords.tsv` finds no dword equal to it in any section.
+
+**Confidence.** Medium: a byte and dword scan does not see a computed address or a jump table outside these forms. High for the wrapper bodies read.
+
+**Unknown.** Whether `L2.01724` runs at all; its indirect or computed callers, if any. Reading the dispatch of every call-through-pointer site with a session `this` is the settling census.
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 2.
+
+### R2-ENGINE-1018
+
+RU `L2.01731` (`win/ru-idle-planner-L2.01731.lst`, 220 instructions, and `win/ru-idle-planner-tail-L2.06038.lst` to `ret 4` at `L2.06039`) takes the planner's range byte from `L2.01728(unit)`, calls `L2.02404(unit)` and walks session list `+0xa64`+4: it skips a unit whose score from `L2.00057` is `0xffffff`; takes distance from `L2.01588`, adding 1 when the candidate's byte from `L2.02402` is 3 and the unit's is not; keeps the smaller distance, or on an equal distance within range the turn from `L2.02405` that is not larger. If no candidate qualified it repeats over list `+0xa88` without the `L2.00057` skip and without the kind adjustment. A best distance beyond the range clears the result. A found unit passes to `L2.01525` (R2-ENGINE-555 lists its +8 store; R2-ENGINE-501 says a player-owned mage first tries `L2.01527`, Medium: navigation read of `L2.01525`; body unread here); none calls `L2.01531`, which for owner +0x2c nonzero stores +8=0xb, otherwise `L2.02911` (`win/ru-idle-L2.01531.lst`, `win/ru-idle-575015.lst`); `L2.01531` also calls `L2.01513` when `L2.00044` holds on the nonzero arm, and `L2.02911` calls `L2.01512` when `L2.00044` holds. The tail calls `L2.02410` when `L2.00490(cell)` is true and the movement word +0x80 is nonzero and differs from the cell.
+
+The read body contains no store to unit +0x50, command +8, +9, +0xc or +0x20.
+
+**Confidence.** High for the read RU body and its comparisons. Medium for helper meanings (`L2.02404`, `L2.01588`, `L2.02405`, `L2.02402`, `L2.00057`, `L2.02410`), all named and unread here. No statement for EN.
+
+**Unknown.** The population of `L2.02404` beyond R2-ENGINE-502; `L2.01525` body.
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 3.
+
+### R2-ENGINE-1019
+
+RU `L2.02425` (`win/ru-repick-L2.02425.lst`, whole body to `ret 4`) copies units of `[session+0xa50]+0xa456c+4` whose distance `L2.02426` is within `L2.01728(unit)` and not above the running smallest distance, other than the unit itself, to the list at session +0xa64; runs the filter `L2.02119` and `L2.02416` (hostility role: R2-ENGINE-502; unread here); if list +0xa68 is empty and list +0xa88 is not, copies +0xa88 into it; and takes the last list entry whose `L2.02113`/`L2.02405` turn value is not larger than the running value, starting at 300. A found entry stores command +0xc and +8=6, then calls `L2.02406`. Otherwise it stores +8=0xb and calls `L2.02430` for owner +0x2c nonzero and +8=0 for owner +0x2c zero. `L2.02406` (`win/ru-after-repick-L2.02406.lst`, first 60 instructions): for `L2.00044` true with range below 2 and owner +0x2c zero, it stores +8=0; otherwise `L2.01574` admits and calls `L2.02407` and stores unit state +0x54=3, or calls `L2.02408`.
+
+The read bodies store no unit +0x50 and no command +0x20.
+
+**Confidence.** High for the read RU bodies. Medium for the `L2.00044` meaning and for the `L2.02406` tail past the read 60 instructions. No statement for EN.
+
+**Unknown.** `L2.02430`, `L2.02408`, `L2.02407`, `L2.01574`; whether `L2.00044` marks a mage (it reads actor byte +0x4c & 4, R2-ENGINE-362).
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 3.
+
+### R2-ENGINE-1020
+
+RU tail `L2.02883` (`win/ru-exec-tail-L2.06040.lst`) runs after the primary arms, except the early exit at `L2.02460` (R2-ENGINE-872); only when movement dword +0x98 is nonzero does it clear it and branch by unit +0x50: order 1 calls `L2.02858`; 0xa stores command +4=1 and +8=0 and advances the point list; 0x18 stores +9=0xff; every other value stores +8=0 and calls `L2.02425`. `L2.02858` (`win/ru-bfn-L2.02858.lst`) calls `L2.01585` then `L2.02636`; `L2.02636` (`win/ru-bfn-L2.02636.lst`) calls `L2.01584` then setter `L2.02637`, which stores order 0xc (R2-ENGINE-541). `L2.01585` (`win/ru-reset-L2.01585.lst`) copies movement byte 0 to byte 1 when they differ, may call `L2.02822`, recomputes command +0x14 from `L2.01728`, clears command +0x60 and movement +0x7c and writes unit state +0x54 = 0. The RU scan lists 16 E8 call sites of `L2.02636` (`scan/ru-callers.tsv`), including `L2.06041`, `L2.06042`, `L2.03822`, `L2.06043` and `L2.06044`.
+
+**Confidence.** High for the read tail and for `L2.02858`, `L2.02636` and `L2.01585`; the store of order 0xc in `L2.02637` is R2-ENGINE-541 and R2-ENGINE-880, not read here. Medium for what each of the 16 callers passes and for which session paths reach them (caller bodies other than the setter sites unread). Whether a walk's arrival sets the flag is not read; R2-ENGINE-872 reads the flag set when the route list is empty after the search.
+
+**Unknown.** The kinds of call behind each L2.02636 site; `L2.01584`, read nowhere here, beyond R2-ENGINE-541.
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 3.
+
+### R2-ENGINE-1021
+
+A linear sweep of RU `.text` for any operand with displacement or immediate 0xbbec (`scan/ru-bbec-uses.tsv`, 30 rows, 9 of them with 0xbbec) lists `L2.06045` (the call of `L2.06024`, unread here, `win/ru-bbec-a-572180.lst`), `L2.06046` (the call of `L2.06025`, unread here, `win/ru-bbec-b-L2.06047.lst`), `L2.06048` (`L2.05852`, the routine after the script tick that R2-ENGINE-987 reads in navigation as freeing the nodes (Medium), `win/ru-script-L2.03648.lst`), the appends `L2.06049` (hit hook, record kind 1 at +0xbd98=1, R2-ENGINE-987), `L2.06050` (kind 2) and `L2.06051` (kind 3), both in the executor (`win/ru-bbec-exec-L2.06052.lst`), `L2.06053` (kind 4 in the assignment routine, `win/ru-bbec-assign-L2.06054.lst`), and two rows at `L2.06055` and `L2.06056`, which the sweep gives as `add ecx,0xbbec` and which are unread. The script tick's named readers `L2.05851`, `L2.03275` and `L2.00516` hold no such operand: `L2.05851` iterates list `+0xeaac` and calls `L2.03275`, which dispatches one record by its field `+4`; `L2.00516` reads list `+0xeab4` (first 100 instructions read).
+
+**Confidence.** Medium: the sweep is linear and can lose instructions around jump tables in `.text`; it names operand forms; a reader using an aliased session pointer, a list iterator built elsewhere or a bulk copy is not excluded, and the arms of `L2.03275` are unread.
+
+**Unknown.** Any reader of a +0xbbec record before the clear; the two unread sites; whether `L2.05852` reads the records before it frees.
+
+**Amends.** R2-ENGINE-987's Unknown on readers: the three named routines hold no 0xbbec operand; the arms of `L2.03275` and `L2.00516` hold none in the sweep; readers through an aliased pointer stay open.
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 4.
+
+### R2-ENGINE-1022
+
+A linear-sweep Capstone census of writes (`mov` and arithmetic) with displacement 0x50, 8, 9, 0xc or 0x20 and a same-function base trace (`scan/ru-census-writes.tsv`, `scan/en-census-writes.tsv`, counts in `census-summary.tsv`) gives per root and displacement the sites whose base traces to a `+0x1c4` command pointer: RU 2/109 at +0x50, 54/1609 at +8, 14/192 at +9, 7/1301 at +0xc, 7/203 at +0x20; EN 2/107, 54/1583, 14/165, 7/1284, 7/203. The remaining sites stay as classes in the summary (for RU +0x20: 86 at a function boundary, 35 arithmetic results, 25 stack-held, 25 other-field, 13 untraced, 8 frame-local, 3 immediate, 1 pop). This census does not classify the prior 141 RU untraced +0x20 writes individually; the other classes are unresolved; a class count states no object for any one site. The unit order is on the unit, so class `command-base` at +0x50 holds only the command-object field of R2-ENGINE-541 (RU `L2.02882`, `L2.06057`); the setter stores on unit +0x50 (`L2.06058`..`L2.06059`) are in class `stack-held`, and this table does not count unit-order writers. The RU `+0x20` command-base sites are the 7 of R2-ENGINE-881. Excluded: indexed operands and any write form outside the census's mnemonic list.
+
+**Confidence.** Medium: linear sweep and bounded back trace. The trace does not resolve `this`-based writes crossing a function entry; those stay in the boundary class.
+
+**Unknown.** The caller class of each site; indirect or bulk writes. Reading each boundary-class function entry settles its base.
+
+**Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 5.
 
 ### R2-ENGINE-991
 

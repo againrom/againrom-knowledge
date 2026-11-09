@@ -166,3 +166,8 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 ## Health thresholds, difficulty and attack order
 
 Withdraw and Wimpy are Units columns (R2-ASSET-229). The stat reader stores them in command +0x40 and +0x44 for a unit whose template loads (Medium: loader condition, script-created creatures; R2-ENGINE-1001). The map arm scales a non-Human record by the difficulty word when Session +0x74 is 0 and the value is not 2 (R2-ENGINE-1002). In the bodies read, the only direct caller of the threshold post-step is the group tick (byte scan; indirect and jump routes unread, Medium; R2-ENGINE-1003). The order-3 arm passes command +0xc to the planner with no null test (R2-ENGINE-1004). In the bodies read, LOAD leaves the thresholds as saved (R2-ENGINE-1005).
+
+## Reach of the per-unit selector and the event list
+
+Selector L2.01725 is reached through L2.01726 from the programme-0 route; the per-unit loop L2.01724 has no reference found (R2-ENGINE-1017, Medium). The executor tail is bounded by R2-ENGINE-1020. Records appended to session list +0xbbec have no read operand found in a RU sweep; aliased readers stay open (R2-ENGINE-1021, Medium).
+The Group pass runs only when session counter +4 mod 16 is 6 (R2-ENGINE-1016). The idle planner ranks list candidates by distance then turn (R2-ENGINE-1018) and the re-pick writes +0xc and +8 (R2-ENGINE-1019). The write census counts no unit-order writer at +0x50 (R2-ENGINE-1022).
