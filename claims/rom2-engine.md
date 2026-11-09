@@ -54,6 +54,13 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 | R2-ENGINE-1043 | RU L2.01525 (whole body): a unit with owner +0x2c zero passing L2.00044 tries L2.01527; otherwise +8=6, +0xc=target and +0x14 from L2.01728; bodies EN masked equal. | High / Medium | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
 | R2-ENGINE-1044 | RU attack planner L2.01530 (188 decoded instructions) holds no +0x94 or +0x96 operand; no test in it is identified as a death, sight or hostility test; endings Unknown. | High / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
 | R2-ENGINE-1045 | RU L2.03275 has 27 arms, one call each (jump table L2.03277 unread); RU L2.05852 walks a chain from [this+4] calling L2.06061 per node and clears +4, +8, +0xc, +0x10 and, after L2.06062, +0x14; helpers unread. | High / Medium / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1072 | EN loop L2.04213 and wrapper L2.02403 (20-instruction twins of RU L2.01724, L2.01726) had 0 hits in one counted mission-10 launch while the hero stood, read order 1 and stood again. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1073 | EN actor step L2.00263 ran once per scheduler counter value for each of 30 units, from one return address; the counter advanced 16.1 per second in launch 1 and 32.1 in launch 2; server tick unmeasured. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1074 | In one EN launch each player ground click moved the hero into a new Group object and wrote order 1; the left Group record read programme 0xff; order read 0xc afterwards. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1075 | EN L2.04984's return L2.06121 lies in idle planner L2.05941's no-candidate arm, L2.06122 in programme-3 route L2.04959; six E8 callers; which reached it for the hero in launch 1 is Unknown (launch 2: R2-ENGINE-1078). | High / Medium / Unknown | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1076 | RU programme 4 L2.02467 and Guard A L2.02464 read whole: programme 4: route end, walk or idle planner; Guard A: attack planner, L2.02401 or L2.01733(member, 1); empty-Group 0xff store at L2.05243; scorer L2.05238 Unknown. | High / Medium / Unknown | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1077 | Masked RU-to-EN comparison of the table's bodies: 16 pairs equal through 256 instructions, 7 differ at a later index; EN twins of L2.02466 and L2.02473 are fixed; L2.05852 stays ambiguous. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1078 | Second EN launch, save game0006: with no attack order the hero read order 0xc, state 3 and another owner's unit at +0x5c; loop L2.04213 stayed at 0; idle planner entries came from L2.06123 (479) and L2.06124 (2). | High / Medium / Unknown | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 
 ### R2-ENGINE-997
 
@@ -619,6 +626,110 @@ RU `L2.03275` (151 decoded instructions, `hit-L2.03275.lst`) is a switch on fiel
 **Amends.** R2-ENGINE-1021's Unknown on whether `L2.05852` reads the records (narrowed: it passes `node+8` to `L2.06061`, unread).
 
 **Evidence.** EXP-2147 RESULTS.md question 9; `evidence/generated/win/ru-hit-L2.03275.lst`, `ru-list-L2.05852.lst`.
+
+### R2-ENGINE-1072
+
+EN `L2.04213`, `L2.02403`, `L2.05590` are the unique EN positions whose first 20 masked instructions equal RU `L2.01724`, `L2.01726`, `L2.02463` (`twin20.tsv`); RU site `L2.02942` corresponds to EN `L2.05589` in the read body of `L2.05590`. Run: one launch of the EN original, save `game0001.sav` (mission 10), counting breakpoints at both routine entries. Hits at `L2.04213` and `L2.02403`: 0 in every dump from scheduler counter 1533 to 3995, the span covering the hero standing, two player ground clicks (order 1 read 1.4 s after each) and the hero standing afterwards (`run1-counts.tsv`, `run1-counts-b.tsv`). From counter 2244 to 3995, where the argument-keyed counter ran, the routine EN `L2.04984` (20-instruction twin of RU `L2.01531`) was entered with the hero as its first stack argument 106 times at 106 counter values: 105 from return address `L2.06121` (counters 2310 to 3990) and 1 from `L2.06122` (counter 2246) (`run-returns.tsv`, launch L1, dump c4e, derived by `evidence/runreturns.py`). Dump 1's `ecx`-keyed count gives no hero count.
+
+**Confidence.** High for the counts in this launch. Medium for the RU-EN correspondence: 20 masked instructions, not the whole body; this says nothing about RU.
+
+**Unknown.** Which routines hold the return addresses `L2.06121` and `L2.06122` (bodies unread here; placed by R2-ENGINE-1075), so the route that serves the hero is not established. Other missions, other spans, a hostile in reach (no position read), and whether anything reaches `L2.04213` elsewhere.
+
+**Amends.** R2-ENGINE-1041 and R2-ENGINE-1017 keep their static census; this adds that the routine did not run in the counted span, bounded as above. It narrows the run that R2-ENGINE-1041 names as settling "what reaches `L2.01724`" and R2-ENGINE-558's Unknown on that loop's cadence against the actor step, for the EN twin only (Medium correspondence), one mission, one save, one hero: in that span the loop had no entry; whether it runs elsewhere stays Unknown.
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
+
+### R2-ENGINE-1073
+
+EN `L2.00263` (20-instruction twin of RU `L2.00028`) in the first counted dump: 30 distinct `ecx` values, each 240 hits at 240 distinct values of the counter at `[L2.03120 this]+4`, all from return address `L2.04429` (`run1-counts.tsv`; per return address `run-returns.tsv`, launch L1, dump c1). Counter rate, launch 1: 323 counter values in 20.021 s of wall clock with only the counter's own breakpoint active (dump c0a read 754, c0b read 1077), 16.13 per second. Launch 2, another save: 3483 counter values in 108.56 s (counter 3029 at 16:36:46.036, 6512 at 16:38:34.595; `run2-counts.tsv`), 32.08 per second. The two rates differ by a factor of two and the difference is unexplained. EN `L2.00505` (twin of RU `L2.00504`) was entered 120 times, all from return address `L2.06125`, at 15 distinct counter values in the same first dump (`run-returns.tsv`, L1 c1); the counter gate of R2-ENGINE-1016 was read in EN `L2.03120` (`cmp eax,6` on the low four bits of `+4`).
+
+**Confidence.** High for the counts and each launch's rate, under a debugger that stops the child at each hit. Unknown for the rate outside a debugger and for what sets it.
+
+**Unknown.** The server tick in seconds; what `L2.04429` is (caller body unread); any other route to the actor step.
+
+**Amends.** R2-ENGINE-1016 and R2-ENGINE-558 left cadence Unknown; this measures counter values per second for two launches in EN and gets two different rates, so R2-ENGINE-1016's Unknown on seconds per tick stays open. The 120 entries of `L2.00505` at 15 counter values agree with R2-ENGINE-1016's one Group pass per 16 counter values for EN (Medium: one dump).
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
+
+### R2-ENGINE-1074
+
+One EN launch, save `game0001.sav`. Hero unit `0x04497c10` (read as the hero by its response to a click: its order and Group object changed; three owners hold one actor each and the other actors were not read after a click; owner `+0x14 = 0x03f30590`). Before the first ground click: unit `+0x50 = 0xc`, `+0x70 = 0x02c4b770`, whose record `[+0x3c] = 0x02c4b7c0` read programme byte `+0x20 = 3`, `+0x45 = 1`. After the click, 1.4 s later: `+0x50 = 1`, `+0x54 = 0` then `1`, `+0x70 = 0x02c6f7c0`, a different Group object; record `0x02c4b7c0` read `+0x20 = 0xff`. After the order 1 reads: `+0x50 = 0xc`, `+0x54 = 0`. Later, record of Group `0x02c6f7c0` read programme 4 with the hero standing. A second click on a tree repeated the pattern with Group `0x02c75e80`; the record of the Group it left then read `0xff`, with order 1 at 1.4 s and order 0xc at 3.5 s after the click (`run1-counts-b.tsv`).
+
+**Confidence.** High for the values read in this launch. Medium that the Group object after the click is a new object rather than a reused one (no allocation read), and that the hero's Group before the click is `players.0.group.0` of the save (matches its programme 3 and one member; no number field compared). Medium that this unit is the hero. Medium for `+0x50` as the order (R2-ENGINE-541), `+0x20` as the programme byte (R2-ENGINE-1040) and `+0x14` as the owner (R2-ENGINE-071) in EN: RU meanings, carried without an EN writer or setter read.
+
+**Unknown.** Whether the second click's goal was blocked: the goal cell's class was not read and the hero's position is not derived, so what ends an unfinished route stays Unknown. What writes the order 1, what writes programme 0xff or 4 (no write watch was run). RU not run.
+
+**Amends.** R2-ENGINE-1040's saved values of the hero's Group (programme 3, and 4 in game0006): an EN runtime record also read programme 0xff after the hero left it; no EN writer of 0xff was read (RU `L2.05243` is the candidate, R2-ENGINE-1076, Medium).
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
+
+### R2-ENGINE-1075
+
+EN `L2.05941` (masked twin of RU `L2.01731` by R2-ENGINE-1072's method) holds `call L2.04984` at `L2.06126`, return address `L2.06121`, in its tail (`win/en-idle-planner-tail-L2.06127.lst`): when local `[ebp-0x2c]` is nonzero it calls `L2.06075`, otherwise `L2.04984`. EN `L2.04959` (`win/en-p3route-L2.04959.lst`, 43 instructions, whole) walks members through `L2.04088`/`L2.04089` after `L2.04963` and `L2.06128`, and per member calls attack planner `L2.03461` when `[member+0x1c4]+0x20` is nonzero, otherwise `L2.04984` at `L2.06129`, return address `L2.06122`.
+
+EN jump table `L2.05246` (EXP-2123 `tables/en-group-jump.tsv`) entry 3 is `L2.06130`; `en-fn-L2.02456.txt` shows `L2.06131 call L2.04959`, so `L2.04959` is the programme-3 route. It resolves the two 20-instruction candidates of RU `L2.02466`: entry 2's arm calls the other candidate `L2.05042` at `L2.06132`, the programme-2 handler. Entry 4's arm calls `L2.06133` at `L2.06134`.
+
+E8/E9 scan of EN code-flag sections (`scan/en-callers-item1.tsv`): `L2.05941` is called at `L2.06135`, `L2.06136`, `L2.06137`, `L2.06138`, `L2.06139`, `L2.06140` (six); `L2.04984` at `L2.06126`, `L2.06141`, `L2.06129`, `L2.06142`. Same scan of RU (`scan/ru-callers-item7.tsv`): `L2.01731` at `L2.06143`, `L2.06144`, `L2.06145`, `L2.06146`, `L2.06147`, `L2.06148`.
+
+For the hero in the launch of R2-ENGINE-1072, from counter 2244 to 3995, 105 of 106 entries of `L2.04984` came from the idle planner's no-candidate arm and one from the programme-3 route. RU `L2.01531` (EXP-2146 `win/ru-idle-L2.01531.lst`) branches on owner `+0x2c`: nonzero stores command `+8 = 0xb` and calls `L2.01513` for a unit passing `L2.00044`; zero calls `L2.02911`, which stores command `+8 = 0` for a unit not passing `L2.00044` and calls `L2.01512` for one that does.
+
+**Confidence.** High for the two EN bodies read and the table arms. Medium for the caller census: E8/E9 only, no indirect route covered, EN `L2.04984` matched to RU `L2.01531` by its first 20 masked instructions (R2-ENGINE-1072) at this point. The RU behaviour of `L2.01531` is carried to EN at Medium until its whole-body comparison.
+
+**Unknown.** Which of the six callers reached the idle planner for the hero in launch 1; launch 2 settles it by return addresses (R2-ENGINE-1078).
+
+**Amends.** R2-ENGINE-1072's Unknown on the routines holding the two return addresses.
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
+
+### R2-ENGINE-1076
+
+RU programme 4 handler `L2.02467` (EXP-2123 `ru-fn-L2.02467.txt`, whole body; the handler's identity as entry 4 of the jump table is R2-ENGINE-882's table, arm `L2.06149`). Per member, in order. When the member's cell equals command `+0xa`, `L2.00490` is nonzero and command `+0x50` is zero: `L2.01576(member)` and movement `+0x90 = 0`. Otherwise, when movement `+0x90` is nonzero and movement `+0x76` equals the member's cell: the same two steps. Then, when command `+0x50` is nonzero: `L2.01733(member, 0)`, which calls idle planner `L2.01731` (EXP-2146 `ru-idle-L2.01733.lst`). Otherwise: command `+0x6c = 1` when Group record `+0x44` is nonzero, `L2.02401(member, command +0xa)`, and `L2.02114(member, argument cell)`; when that returns zero, command `+0xa` equals the argument cell and `L2.01522` between the member's cell and the argument cell is below 2, `L2.01731(member)`.
+
+RU Guard A `L2.02464` (`win/ru-guarda-L2.02464.lst`, 130 instructions, whole) calls `L2.02475`, sight `L2.02473`, `L2.02474`, assignment `L2.02424` (R2-ENGINE-881), then takes the first member from `L2.04689`. With a member and Group record `+0x30` zero it calls `L2.05033` and clears record `+0x34`; with a member and `+0x30` nonzero it increments `+0x34`; either way it sets `+0x30 = 1`. With no member and `+0x30` nonzero it calls `L2.05034` and clears `+0x34`; with no member and `+0x30` zero it increments `+0x34`; either way it sets `+0x30 = 0`. Per member, command `+0x20` nonzero calls attack planner `L2.01530`; otherwise the listing tests the member's cell through `L2.01521` and `L2.00490` and calls `L2.02401` or `L2.01733`, then takes the next member from `L2.04690`. When the member's cell equals the word at command `+0` and `L2.00490` returns nonzero it calls `L2.01733(member, 1)`, which by `ru-idle-L2.01733.lst` calls `L2.01531` and not idle planner `L2.01731`.
+
+RU `L2.05244` (`win/ru-emptygroup-L2.05243.lst`, 14 instructions) stores Group record `+0x20 = 0xff` when `L2.02502` returns zero; R2-ENGINE-1040 names this site as unread. It runs at the start of dispatch `L2.02456` (R2-ENGINE-882's listing, `call L2.05244` at `L2.06150`).
+
+RU scorer `L2.05238` (`win/ru-scorer-L2.05238.lst`, 130 instructions, whole) calls `L2.01521` twice, `L2.01522`, `L2.01728`, `L2.02402`, `L2.02113` and `L2.02405`, and tests a local against 0, 1 and 4 before `ret 8`. Which value each helper contributes is not derived here. RU sight `L2.02473` (160 instructions) calls `L2.02413`, `L2.01586`, `L2.00205`, `L2.02119` and `L2.02416` among 21 calls; `L2.02119` and `L2.02416` were decoded (84 and 52 instructions) and not interpreted here. RU `L2.02474` (54 instructions) calls `L2.06151`, `L2.00209`, `L2.01521`, `L2.01522`, `L2.00213`, `L2.04531`.
+
+E8/E9 callers, RU (`scan/ru-callers-item7.tsv`): `L2.02464` only at `L2.03490`; `L2.02467` at `L2.06149` and `L2.06152`; `L2.05238` only at `L2.06153`; `L2.00057` at `L2.06154`, `L2.06155`, `L2.06156`, `L2.06157`; `L2.02473` at `L2.06158`, `L2.06159`, `L2.06160`, `L2.06161`, `L2.06162`, `L2.06163`; `L2.02474` at `L2.06164`, `L2.06165`.
+
+**Confidence.** High for the two whole handler bodies and the 0xff store in RU. Medium for what each helper means (`L2.00490`, `L2.02114`, `L2.01522`, `L2.02475`, `L2.05033`, `L2.05034`, `L2.01576`, `L2.02401`, `L2.01521`, `L2.04689`, `L2.04690`, `L2.02502` unread here), so "route end", "walk" and "empty-Group" in this card and its index row name tests of the read bodies, not read meanings ("empty-Group" is R2-ENGINE-507's clause; `L2.02502` is unread here), and for the caller census (E8/E9 only). No statement for EN beyond R2-ENGINE-882's tables.
+
+**Unknown.** The decision of scorer `L2.05238` per value, which units the assignment and group sight admit (body of `L2.02119`, `L2.02416`, `L2.00205`), and what ends a pursuit (the attack planner's endings, R2-ENGINE-1044, stay open). Reading those bodies against their callers settles it.
+
+**Amends.** R2-ENGINE-1040's unread writer at `L2.05243` and R2-ENGINE-882's unread programme 1 (Guard A).
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
+
+### R2-ENGINE-1077
+
+Comparison (`mask/*.txt`, one file per pair, capstone masked instruction streams of both images, rel32 targets and image-range immediates and displacements masked): for 24 RU bodies against the EN positions of R2-ENGINE-1072's `twin20.tsv`, each compared over 256 decoded instructions (64 for `L2.05852`). Equal over all 256: `L2.04380`/`L2.03120`, `L2.01724`/`L2.04213`, `L2.01731`/`L2.05941`, `L2.01530`/`L2.03461`, `L2.01733`/`L2.04965`, `L2.01531`/`L2.04984`, `L2.02636`/`L2.03312`, `L2.02858`/`L2.06166`, `L2.02407`/`L2.05535`, `L2.02425`/`L2.06167`, `L2.02406`/`L2.05523`, `L2.02463`/`L2.05590`, `L2.00502`/`L2.00503`, `L2.02473`/`L2.04963`, `L2.05173`/`L2.06128`, `L2.02466`/`L2.04959` (16 pairs); first differing index: `L2.00028` 215, `L2.01726` 237, `L2.02938` 217, `L2.01725` 206, `L2.00504` 141, `L2.02456` 103, `L2.03275` 151. For a body shorter than the compared length the comparison runs past its end into the following code, so a first difference at or past the body's end says nothing about the body. Bodies with a listing whose end is known and shorter than their first difference: `L2.01726`, `L2.02938` (R2-ENGINE-1017 reads them as wrappers), `L2.03275` (151 decoded, R2-ENGINE-1045). For `L2.00028`, `L2.01725`, `L2.00504` and `L2.02456` the body length is not established here, so the first difference is not placed relative to the body's end; `L2.02456`'s index 103 lies near the listing end of its RU body (R2-ENGINE-882).
+
+Candidates resolved: EN `L2.04959` is the twin of RU `L2.02466` (equal over 256 and the programme-3 route by R2-ENGINE-1075's table arm), not `L2.05042`. EN `L2.04963` is the twin of RU `L2.02473` (equal over 256; `L2.05853` differs at 112). RU `L2.05852` compared equal over its 35-instruction body (R2-ENGINE-1045) to the three EN candidates `L2.06168`, `L2.06169`, `L2.06170` (index 50 of 64 in each, past the body end); nine EN positions matched its first 20 instructions (`scan/en-twin20.tsv` names eight of the nine positions), six were not compared, so its EN twin is not established.
+
+**Confidence.** High for the masked comparison of the streams above and for the two candidate resolutions. Medium for the whole-body statement of every body whose length is not placed against its first difference, and for `L2.01731`, whose body extends past the compared 256 instructions.
+
+**Unknown.** The EN twin of `L2.05852` (the caller of the routine at the EN site corresponding to RU `L2.06082` settles it) and the body ends of the four bodies named above.
+
+**Amends.** R2-ENGINE-1072's Medium correspondence for the pairs equal over 256 instructions (which include `L2.04213` and `L2.05590`), and its 20-instruction statement for `L2.02403`.
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
+
+### R2-ENGINE-1078
+
+One launch of the EN original, save `game0006.sav` (mission 10), no attack order given in the launch. Input after the LOAD: a click at (450,330) (a new Group object; order read 0xc at 1.5 s and 9.6 s, no order 1 read), a minimap click, and a click at (400,190) (order 1 read at 2.5 s). No click after 16:38:55. The class of what lay under the clicks was not read. Hero unit `0x03fce9f8` (read as the hero by its response to a click: order and Group object changed; three owners hold one actor each and the other actors were not read after a click; owner `+0x14 = 0x03fc9508`; Medium that this unit is the hero). Fields and counts: `run2-samples.tsv`, `run2-counts.tsv`, `run-returns.tsv` (launch L2) and `run2-keys.tsv`. Counters installed at 16:35:10, before the LOAD, to counter 10099; the first dump, at 3029, holds 48 planner and 42 `L2.04984` entries of the hero.
+
+The first hero read, 40 s after the LOAD confirmation, is order `+0x50 = 0xc`; its Group record first read `+0x20 = 4`, 64 s after that confirmation. After the click at (400,190) the hero read order 1 and, 3.55 s later, order `0xc`, `+0x54 = 3`, `+0x58 = 5` and `+0x5c = 0x03fcc838`, an actor of owner `0x03fcaa38`. The other 9 hero samples after that read `+0x5c` equal to the hero and `+0x54` of 0 or, once, `0xd`, with order `0xc`. Group record `+0x20` read 4 at each of the 14 samples that read it, of 15 hero samples. The actor step of `0x03fcc838` was last counted at counter 7437 of the 10099 reached (`run2-keys.tsv`: 5180 hits, counters 2258 to 7437); from 16:40:08 that unit read `+0x70 = 0`, `+0x50 = 0x10`, `+0x54 = 0x10`, `+0x5c` the hero.
+
+Counts from the installation to counter 10099, keyed on the first stack argument: loop `L2.04213` and wrapper `L2.02403` 0 hits in every dump; attack planner `L2.03461` 47 hits, none for the hero; `L2.05941` entered with the hero 481 times, 479 from return address `L2.06123` and 2 from `L2.06124`; `L2.04984` entered with the hero 461 times, all from `L2.06121`. Between counters 7273 and 7387, the span holding the strike sample, the hero entered `L2.05941` 3 times and `L2.04984` not at all.
+
+**Confidence.** High for the counts and values read in this launch, under a debugger. Medium for the meanings: `+0x54 = 3` as the strike state and `+0x5c` as its target are carried from R2-ENGINE-556 (RU initializer), and this run reads EN. Medium for the callers: `L2.06136` and `L2.06140` are the E8 sites of R2-ENGINE-1075 whose return addresses these are; they are matched to RU `L2.06144` and `L2.06148` by their order in the two sorted six-site lists, not by a body comparison. Medium that the owner `0x03fcaa38` is hostile to the hero's owner: inferred from the strike and from that unit's `+0x5c` naming the hero. Medium for `+0x50` as the order (R2-ENGINE-541), `+0x20` as the programme byte (R2-ENGINE-1040) and `+0x14` as the owner (R2-ENGINE-071) in EN: RU meanings, carried without an EN writer read.
+
+**Unknown.** Whether a hostile stood within reach in a stated distance: no position field was read, and the hero's reach was not measured. What wrote `+0x5c` and order `0xc` (no write watch). Why `0x03fcc838` stopped being stepped: a death was not read. Whether a hero with a hostile near but no strike keeps order `0xc`. Other saves and RU.
+
+**Amends.** R2-ENGINE-1075's Unknown on which caller reached the idle planner for the hero, for this launch only (launch 1 stays Unknown). R2-ENGINE-872's Unknown on which order `+0x50` a creature in attack holds: an EN hero in state 3 with a target at `+0x5c` read order `0xc` in this launch (Medium: RU field meanings, no EN writer read; one unit, one save).
+
+**Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
 
 ### R2-ENGINE-991
 
