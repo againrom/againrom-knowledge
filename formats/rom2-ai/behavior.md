@@ -177,3 +177,23 @@ Group methods write programme byte +0x20 (R2-ENGINE-1040, High bodies, Medium co
 Counted run (EN, one mission-10 launch, one hero): R2-ENGINE-1072 (loop L2.04213 and wrapper L2.02403 had 0 hits in the span; route serving the hero Unknown in launch 1), R2-ENGINE-1073 (actor step once per scheduler counter value per unit; the counter advanced 16.1 and 32.1 per second in the two launches), R2-ENGINE-1074 (a ground click wrote order 1 and moved the hero to another Group object).
 
 Continuation reads: R2-ENGINE-1075 (EN return addresses L2.06121 and L2.06122 of L2.04984 lie in the idle planner's no-candidate arm and in the programme-3 route; which of the planner's six E8 callers served the hero is Unknown in launch 1), R2-ENGINE-1076 (RU programme 4 and Guard A bodies, including Guard A's arm L2.01733(member, 1), which does not call the idle planner; the empty-Group store of programme 0xff), R2-ENGINE-1078 (a second EN launch: with no attack order the hero read order 0xc and a strike state on another owner's unit, and the idle planner's entries by return address), R2-ENGINE-1077 (256-instruction masked comparison of RU and EN bodies; 16 pairs equal, seven differ at a later index, the EN twin of L2.05852 stays ambiguous).
+
+## Target choice and continuation boundaries
+
+Assignment L2.05173 rejects adjusted distance above 1 and selects the first
+strictly least score; preference/kind meanings remain bounded
+(R2-ENGINE-1111). Group sight gathers marked-cell world units before relation,
+effect and health filtering; leash loss followed by assignment is only a
+bounded pursuit-ending path (R2-ENGINE-1112). Programme setters are separate
+from member-order setters (R2-ENGINE-1113, R2-ENGINE-1107). The direct writer
+census and named target writers do not close all live stores
+(R2-ENGINE-1104, R2-ENGINE-1105).
+
+Strike admission and HP application use distinct tests (R2-ENGINE-1106), and
+empty-route/arrival branches have separate signals (R2-ENGINE-1108). A hit
+hook's local stores do not prove later order retention (R2-ENGINE-1109).
+Darkness adjusts overlapping sight-coordinate words for the read predicate,
+with complete target effects still open (R2-ENGINE-1110). Delivered cadence
+and per-body EN coverage keep their limits (R2-ENGINE-1114,
+R2-ENGINE-1115). Remaining readers, predicates and runs are named on the
+[planner page](orders.md).

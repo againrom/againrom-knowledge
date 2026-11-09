@@ -26767,3 +26767,223 @@ in a mission list.
 **Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
 questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 `evidence/run-2-gap.tsv`, `evidence/run-3-gap.tsv`, counter tables.
+
+## Static continuation of the ROM2 order machine
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1104 | ROM2 EXE sweeps find one direct immediate order-0xc store per root; unit-writer closure is open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1105 | Read ROM2 bodies set unit +0x5c for strikes/casts and clear it during construction/copy. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1106 | ROM2 strike admission and HP application use different distance calculations and thresholds. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1107 | Twenty ROM2 setters match across roots; RU input types 0x1e/0x25 reach order 0xd. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1108 | Read ROM2 route branches distinguish an empty-route flag from own-cell arrival. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1109 | ROM2 hit-hook bodies write hit memory and an event; later order effects remain open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1110 | EN Effect 14 slots +0x40/+0x44 and their masked-equal RU bodies adjust unit words +0xa4 and +0xe4. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1111 | Scorer L2.05238 rejects adjusted distance above 1 and ranks by turn and preference. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1112 | Read ROM2 Group sight gathers marked-cell units, filters them and supplies assignment. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1113 | Read ROM2 Group setters write programme constants; programme and member order stay distinct. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1114 | EN ROM2 speed setup writes a selectable period; read RU schedulers use different app offsets. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1115 | ROM2 body comparisons close the 20 setter twins, while mismatches and ambiguous twins remain. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+
+### R2-ENGINE-1104
+
+Population: the installed RU and EN allods2.exe .text sections. The Capstone linear sweep in EXP-2152 evidence/probe.py preserves memory operands with write access whose encoded displacement overlaps +0x5c (four bytes), +0x50 (four bytes), or +0x20 (one byte), at the operand's decoded width, including indexed operands. It separately preserves immediate operands equal to those three offsets. It does not resolve every operand's object.
+
+generated/census-summary.tsv gives RU/EN overlap-write counts: +0x5c 115/133, +0x50 123/120, +0x20 230/230; immediate-operand counts respectively 184/185, 207/204, 963/940. These are operand/site measurements, not counts of unit or Group writers. Indexed writes are retained, not silently discarded. Reduction to mov dword [eax|ebx|ecx|edx|esi|edi+0x50],0xc gives RU L2.02881 and EN L2.06190. Both lie in the read setter bodies L2.02637/L2.02686: reset, unit order 0xc, command word +0=own cell and prepared +8=0. R2-ENGINE-1107 covers the body comparisons.
+
+The RU reference files preserve raw E8 calls, E9 jumps over executable/code-flag sections and absolute dwords at every byte offset of every section for their named target lists. Interior/data hits are not established call sites. Jcc, short jumps, computed addresses, fall-through and table dispatch semantics are outside that reference instrument. No repaired Ghidra project was used.
+
+**Confidence.** High for the named local setter stores and the reproduced measurements as measurements. Medium for enumeration/completeness: linear decoding can cross inline tables, ownership is unresolved for the other hits, address arithmetic using other immediates and embedded bases is open, and implicit/bulk writes and scenario.dll/engine32.dll writers are not censused. A unique reduced immediate store is not a universal unique writer.
+
+**Unknown.** Every unit +0x5c writer and every way to store order 0xc, including register-sourced stores and copies. Classify the full hit population and aliases, then census the other admitted images and dispatch forms.
+
+**Amends.** R2-ENGINE-1022's writer-census gap: this adds the exact +0x5c/width population and the reduced immediate-0xc result; it does not turn command-base classes into unit-order writers.
+
+**Evidence.** EXP-2152 generated/scan/{ru,en}-field-census.tsv, census-summary.tsv, scan/ru-{q1-callers,q1-extra-callers,setters-callers,scheduler-callers}.tsv and win/{ru,en}-order-c.lst.
+
+### R2-ENGINE-1105
+
+The paired strike initializer RU L2.02407/EN L2.05535 stores primary +9=1, phase +0x15=0, unit state +0x54=3 and unit +0x5c=command +0xc, without a local admission test. Its direct caller sites in the RU reference population are L2.06191, L2.06192 and L2.06193; the last two are the admitted branches of the read activity-5 and activity-6 bodies (R2-ENGINE-1106).
+
+Target-cast initializer L2.01575/L2.05529 stores primary 2, phase 0, state 13, unit +0x5c=command +0x28, unit +0x64=command +0x30 and command +0x5c=1. Point-cast initializer L2.02860/L2.06194 stores command +0x5c=0; that store is not a clear of unit +0x5c. The cast initializers can call L2.01576 when command +0x60 is zero; that chain writes unit order 0xc and command +0x50=1, as the read setter span shows.
+
+RU L2.06195/EN L2.06196 unconditionally writes `+0x5c` of its first argument from its second and stores 3 at `+0x54`. The body reads no other field of the argument; that it is a unit is Medium, from the offset pair, with caller L2.06197 unread. RU L2.06198/EN L2.06199 scans eight neighbouring cells, calls the unread candidate predicate L2.06200 and retains the smaller angular difference. With a found candidate and difference below 2, it can align through L2.05765, then stores the candidate at unit +0x5c and state 3. A larger difference stores movement heading and state 1; no candidate returns 0. Its RU E8 sites are L2.06201 and L2.06202; their bodies remain unread.
+
+RU L2.01794/EN L2.01793 constructs movement/command pointers and clears unit +0x50, +0x54, +0x58 and +0x5c; the full 180-instruction bodies are masked-equal. The read copy prefix RU L2.00106/EN L2.05385 copies +0x50/+0x54/+0x58 from the argument and clears +0x5c at RU L2.06203. The pair first differs at instruction index 151, after these stores; equality is claimed only for the preceding prefix. The field-store condition is the straight-line initialization/copy path, not target loss during play.
+
+**Confidence.** High for the stores, local branch tests and exact compared spans in both roots. Medium for the eight-neighbour operation's candidate meaning, construction/copy role beyond the read prefix, and caller completeness. Its helpers L2.06200, L2.05765, L2.06204 and L2.02476 and the named caller bodies were not read; that the eight iterations are neighbouring cells rests on L2.06204 and is Medium. No runtime writer was watched.
+
+**Unknown.** Clears during ordinary attack completion, every other writer, and caller reachability. The window from RU L2.00116 did not reach census site L2.06205. The +0x5c stores in L2.06206/L2.06207 have unresolved object ownership and ambiguous EN twins. Read those containing paths and the remaining census bases; a write-watch run would distinguish live writers.
+
+**Amends.** R2-ENGINE-1078's Unknown on who can write +0x5c is narrowed to these static writers; it does not identify the writer of that launch's sample. R2-ENGINE-1042's reset/arrival clauses do not acquire a unit-target clear from a command-target clear.
+
+**Evidence.** EXP-2152 generated/win/*strike-init.lst, *cast-unit-init.lst, *cast-cell-init.lst, *target-clear-{a,b}.lst, *target-write-{d,e}.lst; mask files of the same labels; scan/ru-setters-callers.tsv and scan/ru-scheduler-callers.tsv.
+
+### R2-ENGINE-1106
+
+RU target admission L2.01574/EN L2.05530 calls L2.00490, compares movement byte +0 to the low-byte heading from L2.02113, then admits only when the low byte from L2.01588 is no greater than the low byte of the range argument. The return of L2.00490 is not tested in this helper. Activity 5 (L2.02437/L2.06208) computes range with L2.01728, passes command +0xc and, if admitted, initializes strike/state 3; otherwise it calls L2.01577 and stores state 1. Activity 6 (L2.02406/L2.05523) has a preceding owner/+0x4c predicate and range-below-2 exception; outside it, the same admission starts strike, while rejection computes a heading, calls L2.02408 and stores state 1. The helper meanings of the exception and the approach/turn callees retain their earlier grades.
+
+Range producer L2.01728/L2.05343 returns unit byte +0x12c unless command byte +0x78 is nonzero, lookup L2.00040 on unit +0x140 returns an object, and signed unit word +0x9a is at least that object's signed word +0xc. In the latter case it returns the object's byte +9. The lookup body is unread; a spell-name interpretation is not established here.
+
+Coordinate readers L2.02411/L2.02412 return 256 times the cell byte plus its fraction byte at +4/+5. Let sA/sB be the two bytes returned by virtual slot +0x1c. Distance L2.01588/L2.06209 shifts each coordinate by (s-1)*128, takes absolute differences, subtracts (sA+sB)*128 from each and clamps each result at zero. It returns floor(max(dx,dy)/256)+1, through a byte result. The absolute helper L2.01523 is read. This is a cell-scaled edge calculation; the virtual size implementations remain unread.
+
+HP application uses another calculation. Actor state-3 phase-5 code at RU L2.06210 calls L2.02315(actor,unit +0x5c) when the preceding item/mage branch did not turn it into a cast. That routine selects L2.02313 when target virtual slot +0x2c is nonzero, or L2.02316 when target slot +0x34 is nonzero. The latter body is unread. In RU L2.02313/EN L2.05142, null/owner-null arguments or nonpositive attacker HP exit. Both compare attacker byte +0x12c with signed result of L2.02339/L2.06211; a smaller range exits before HP application. RU then has an additional kind/item branch (L2.06212..L2.06213) that EN lacks. On an admitted path target slot +0x54 supplies a value subtracted from target signed HP word +0x94 at RU L2.06214/EN L2.06215. The bodies differ at instruction index 47 and are not claimed equal. This proves local HP stores, not a guaranteed positive blow.
+
+L2.02339/L2.06211 computes max absolute differences of coordinates returned by L2.03515/L2.03516, subtracts (sA+sB)*128-256, returns 1 when the result is <=0x180, otherwise (result+0x40)>>8 as a signed word. The RU coordinate bodies are listed; their EN correspondence is ambiguous, so the EN arithmetic body is High while its coordinate meaning is Medium.
+
+**Confidence.** High for the named local comparisons, formulae, stores and equal spans. Medium for the complete path to a blow: virtual predicates/damage helpers are unread, the RU actor phase window differs from EN, and the size/kind meanings are incomplete. Idle order 0xc reaching activity 6 and explicit attack/Group programme reaching activity 5 reuse R2-ENGINE-1018/1043 and R2-ENGINE-882/1076 at their clause grades; no order-dependent comparison appears in the read admission helper, but universal reachability is not proved.
+
+**Unknown.** Every unit kind's virtual-size/target predicate, the L2.02316 path, positive damage and execution timing. Read those bodies and the remaining actor branches; an authorized run must measure live positions/range at initiation and application separately.
+
+**Amends.** R2-ENGINE-505/556's unread range helper and R2-ENGINE-1019's 60-instruction activity-6 boundary are narrowed by whole local bodies. The read activity-5 body recomputes range through L2.01728 rather than reading command +0x14 for this call. R2-ENGINE-1078's unmeasured distance stays Unknown for that launch.
+
+**Evidence.** EXP-2152 generated/win/*target-admission.lst, *activity{5,6}.lst, *range-source.lst, *edge-distance.lst, *position-{x,y}.lst, *absolute.lst, *actor-{x,y}.lst, *strike-phase5.lst, *blow-apply.lst, *unit-blow.lst, *application-distance.lst and their mask receipts.
+
+### R2-ENGINE-1107
+
+generated/setter-bodies.tsv compares the 20 setter bodies individually, using their listed boundaries through ret, not equal instruction counts across inline data. RU/EN starts are paired by the verified -0xa039 displacement in these bodies: L2.02806 (order 1), L2.02807 (1), L2.02812 (3), L2.02809 (0xf), L2.02878 (4), L2.02813 (0xd), L2.02814 (0xe), L2.02815 (0xb), L2.02637 (0xc), L2.02816 (0x17), L2.02817 (8), L2.02818 (0x11), L2.02819/L2.02820/L2.02821 (0xa), L2.01579 (0x16), L2.01580 (2), L2.01581 (0x1a), L2.01582 (0x18), L2.01583 (0x19). All 20 compare equal under the listed address mask. This is 17 different values. Reset behavior reuses R2-ENGINE-541; reset and order-0xc bodies are also read here. Self-target exceptions of order 3/8/0x11 are visible in the setters.
+
+RU input switch reads message byte +9 minus 0x12, bounds it to 0..20 and uses table L2.02841. Its cells and read calls give the following paths, conditional on the handler's earlier admission and nonzero session pointer:
+
+- 0x12 -> L2.06066 -> L2.02816 (0x17); 0x13 -> L2.01581 (0x1a); 0x14 -> L2.06063 -> L2.01579 (0x16).
+- 0x16 and 0x1c -> L2.02843 -> L2.02806 (1); 0x17 -> L2.04403 -> L2.02815 (0xb); 0x18 -> L2.06060 -> L2.02637 (0xc).
+- 0x19 -> L2.02844: score L2.00057 unequal to 0xffffff calls L2.02812 (3), otherwise L2.02636 (stop). 0x1a -> L2.06216 -> L2.02845 -> L2.02806 (1).
+- 0x1b -> L2.06217 -> L2.02817 (8); 0x1d -> L2.06218 -> L2.02819 (0xa).
+- 0x1e and the admitted 0x25 item branch -> L2.04344: nonzero member +0x44 calls L2.02813 (0xd), otherwise stop. 0x1f and the admitted 0x26 item branch -> L2.02810: nonzero member +0x44 calls L2.02814 (0xe), otherwise stop. Both clear member +0x44 afterwards.
+- The admitted 0x21 branch -> L2.01580 (2); admitted 0x24 branch -> L2.02809 (0xf). Types 0x15,0x20,0x22,0x23 take the table's default.
+
+The read bodies identify no path from these 21 cells to setters L2.02878 (4), L2.02818 (0x11), L2.01582 (0x18) or L2.01583 (0x19). This is not an absence claim over other input tables or indirect paths. The EN input prefix differs and its full table was not read; EN setter equality does not make the RU input chain an EN chain.
+
+**Confidence.** High for the 20 paired setter bodies, RU cells, local pushes/calls and conditional setters in the read Group methods. Medium for complete player-input behavior: handler admission, object delivery, list helpers, score semantics and other call forms are not closed. The 0x25/0x26 item construction/admission helpers are unread.
+
+**Unknown.** Full EN input mapping and other input routes for the four named values. Read EN table/cells and the other setter callers, including indirect dispatch. A player-visible command/result association needs a separately authorized run.
+
+**Amends.** R2-ENGINE-541's unread EN order-1/order-3 setters are now compared whole. Its statement that no read window calls L2.02813 is narrowed: the read L2.04344 body does, reached by the RU 0x1e and admitted 0x25 arms. R2-ENGINE-1040's Medium type-0x18 link is narrowed by the RU cell/arm and Group setter read.
+
+**Evidence.** EXP-2152 generated/setter-bodies.tsv, tables/ru-player-input.tsv, win/*setters*.lst, *order4.lst, *order-c.lst, *group-choice.lst, *group-order1.lst, *group-attack.lst, ru-input-*.lst and scan/ru-setters-callers.tsv.
+
+### R2-ENGINE-1108
+
+Read paired walk L2.02867/L2.05544: with L2.00490 returning zero, call L2.02848; otherwise compare cell distance to the range argument. In the search branch, a true L2.06219 on unit list +0x1c8 stores own cell into movement +0x76 and movement +0x98=1. A nonempty list supplies +0x76 from its first listed word. Later, own cell equal to +0x76 stores movement +0x90=1 and returns. This local arrival store is distinct from +0x98. The interpretation of the list predicate as empty retains R2-ENGINE-872's High local clause; its helper body was not read here.
+
+Approach L2.01578/L2.05532 is equal over the read first 256 instructions, not a whole-body claim. Its search-empty branch stores own cell into +0x76 and +0x98=1 at RU L2.02433; its later branch can clear movement target +0x7c and increment a route counter when the current destination and stored target cell match. Repath L2.05184/L2.06220 is read whole: it calls search for a goal selected by local cases; only list +0x1e4 count zero and case 1 store +0x98=1.
+
+The executor tail RU L2.02883..L2.06221 and its EN prefix are equal through the ret (the first difference at index 113 is after that ret). It clears +0x98. Order 1 calls L2.02858, whose read setter span/reset chain writes state 0, unit order 0xc and prepared +8=0. Order 0xa stores command +4=1 and +8=0 and advances its point list within a distance test; order 0x18 writes primary 255; all others clear prepared +8 and call re-pick L2.02425. The body makes no direct store to assigned command target +0x20. This is a local body observation, not a transitive absence proof.
+
+**Confidence.** High for listed branches/stores and the exact compared spans. Medium for route outcomes: search L2.05182, passability L2.03831, route/reservation helpers and the approach tail are unread. Empty after search does not identify why search failed or guarantee a particular occupied-goal result.
+
+**Unknown.** Route blocked on every side, occupied goal, how ordinary arrival reaches order replacement, and elapsed waiting. Read the search and occupancy helpers, the approach/step continuations and their result consumers; run explicit occupied-neighbour/goal controls with the cells and order/state sampled.
+
+**Amends.** R2-ENGINE-1042's unread movement-flag set sites are narrowed by their local bodies. R2-ENGINE-872's empty-route result stands; the new +0x90 arrival store does not equate arrival with +0x98 or close its runtime frequency.
+
+**Evidence.** EXP-2152 generated/win/*walk-route.lst, *approach-route.lst, *repath-route.lst, *empty-route-tail.lst, *wait-blocked.lst, *reset-state.lst, *stop-chain.lst, *setters-next-next-next.lst and mask receipts.
+
+### R2-ENGINE-1109
+
+Hit hook RU L2.02074/EN L2.04120 is read whole (148 instructions) and masked-equal. For attacker A and victim B, it writes victim command +0x54=1, +0x58=A's cell, +0x5a=0, calls relation helper L2.02419 with A/B/F, writes session event fields +0xbd98/+0xbdc4/+0xbdc8, appends the 0x54-byte record, then writes victim command +0x94=A, +0x98=session +4 and +0x9c from the away-coordinate arithmetic. It has no direct store to unit order +0x50, unit target +0x5c, prepared +8, command target +0xc or assigned target +0x20 in that body. The negative is bounded to this body and its identified bases.
+
+Different-owner area delivery reuses R2-ENGINE-985's occupant bodies (High, with its Medium virtual-object meanings) and R2-ENGINE-986's Effect attach (High local body, Medium slot binding). No new occupant/attach acquisition was made. Their conditions must still hold; the RU session/owner-kind skip is not silently removed. R2-ENGINE-987 supplies the existing hook/event-post authority. The hook's event consumers and relation-helper body were not reacquired here. No direct local store is not evidence that no later callback changes an order.
+
+**Confidence.** High for the paired hook's local positive stores. Medium for the bounded negative and composed different-owner hit path: no complete callee/scheduled-reader census excludes later writes. The retained authority of each inherited clause is stated above.
+
+**Unknown.** Which scheduled routines inspect +0xbbec before its clear and what they store on a victim holding an attack order. Read script case bodies and aliased event-list readers, then run a different-owner pulse with unit and command fields watched across subsequent ticks.
+
+**Amends.** R2-ENGINE-989's posted-reader gap stays open; this explicitly separates the local hook's stores from a claim that the old target survives a pulse. R2-ENGINE-1045's unread case bodies were not closed.
+
+**Evidence.** EXP-2152 generated/win/{ru,en}-hit-hook.lst and mask/hit-hook.tsv; inherited area/attach clauses are R2-ENGINE-985/986/987 at their grades.
+
+### R2-ENGINE-1110
+
+RU Darkness creation window L2.00073 stores Effect +0xc from the spell row and signed magnitude word +0x40=-1-P/30, reusing R2-ENGINE-024's row-14/power authority (High expression). Its tail and EN row identity are not newly established by a whole apply-body comparison.
+
+EN Effect vtable at L2.04136 has slot +0x40=L2.05846 and +0x44=L2.06222; the table is read. Their RU bodies L2.02361 and L2.06223 are paired whole (132 and 77 instructions). For Effect ID +0xc=14 and a nonzero result from unit virtual slot +0x30, apply adds signed magnitude<<8 to unit words +0xe4 and +0xa4 and ORs unit +0x150 with 0x40000. Remove subtracts the same shifted magnitude under the same test and ORs that flag. A zero virtual predicate skips these ID-14 changes. The ID-14 arms make no direct unit-order/target store; their called predicates remain a boundary.
+
++0xa5 is the high byte of word +0xa4 in little-endian storage. The local word operation changes it through 16-bit arithmetic, without a clamp in these arms. R2-ENGINE-502's sight-budget reader of byte +0xa5, including its creature-source Medium, is inherited rather than reacquired: the newly read L2.01586 is only a wrapper calling L2.01587. The latter body is not read here. The vtable+0x30 predicate's kind meaning and +0xe4 readers remain unread, so this is not a universal sight reduction for every kind.
+
+**Confidence.** High for the paired slot bodies, EN slots, arithmetic and overlapping-byte coordinate. Medium for the Darkness-to-instance-to-sight composition: the row/attach authority and predicate implementation are not all newly traced; inherited clause grades are retained. No runtime attack-target retention follows from these stores alone.
+
+**Unknown.** Kind-specific predicate, all readers and eventual candidate/target effects, including wrap/clamping elsewhere. Read unit slot +0x30, L2.01587, +0xe4 readers and Effect lifecycle callers; run a pulse while comparing sight and assignment before/after.
+
+**Amends.** R2-ENGINE-986 and R2-ENGINE-989's Unknown on Darkness slot +0x40 is narrowed to these stores and their branch; the complete sight/candidate consequence remains Medium or Unknown.
+
+**Evidence.** EXP-2152 generated/tables/en-effect-vtable.tsv, win/*effect-apply.lst, *effect-remove.lst, *darkness-create.lst, *sight-reader.lst and corresponding mask receipts.
+
+### R2-ENGINE-1111
+
+Scorer RU L2.05238/EN L2.06224 is read whole and masked-equal (130 instructions). Let d be the Chebyshev distance between the units' packed cells (read L2.01522), r the member range from L2.01728, and k the candidate virtual kind obtained through L2.02402. Candidate kind 1 with its own range>1 is replaced by k=0. For r>1, preference is byte [session+0xa54+k] and adjusted d is 1 within range, otherwise d-r+1. For r<=1, preference is [session+0xa54+k+4*memberKind] and d is unchanged. Adjusted d>1 returns 0xffffff.
+
+Otherwise base score=(d<<8)+turn, with turn the minimum cyclic byte difference between the movement facing and heading result (L2.02405 read whole). Preference 0 returns 0xffffff, 1 doubles the score, 4 arithmetic-shifts it right one, and other values leave it unchanged. The sixteen preference-table contents/writers were not read here; no semantic kind names are inferred from the numbers. The heading body's EN position is resolved by the explicit pair; virtual kind implementations are unread.
+
+Assignment L2.05173/L2.06128 (97 instructions, whole and equal) calls this scorer per member/candidate, takes strictly smaller score and preserves the first on a tie. It writes command +0x20 to that candidate when a score below 0xffffff exists, otherwise 0; its early empty-input branch also clears targets. The list-count helper L2.02502 is unread, so the empty-input meaning retains R2-ENGINE-881's grade boundary.
+
+**Confidence.** High for arithmetic, local branches and assignment stores in both roots. Medium for full target choice: table contents, virtual kinds and complete candidate/list-helper semantics are not closed. No preference or exclusion beyond the read branch is assumed.
+
+**Unknown.** Meaning and source of each preference/kind, and global pursuit termination. Read the table/writers, virtual kind methods and the remaining assignment/planner paths; a live pursuit ending requires a run.
+
+**Amends.** R2-ENGINE-1076's Unknown on scorer L2.05238 is narrowed by the full branch derivation and consumer. R2-ENGINE-881's writer completeness remains Medium.
+
+**Evidence.** EXP-2152 generated/win/*scorer.lst, *assignment3.lst, *cell-distance.lst, *turn-distance.lst, *unit-kind.lst, *heading-resolved.lst, *range-source.lst and mask receipts.
+
+### R2-ENGINE-1112
+
+RU Group sight L2.02473..L2.06225 and its EN body at L2.04963 are contained in paired equal listing spans. With a first member, the body clears the sight grid through L2.02413 and calls L2.01586 per member. For a member with owner +0x2c nonzero and command cell +0x58 nonzero it marks that cell, increments signed byte +0x5a and clears the cell when the new count exceeds 20. It walks the world list at [session+0xa50]+0xa456c, adds units whose cell is marked, then filters using the first member as querying unit and argument 0, followed by the health filter. If no live list remains and fallback +0xa88 is nonempty it moves that fallback population back to candidates. The shape is read; grid/list helpers remain explicit boundaries.
+
+Filter L2.02119/L2.05839 (whole, equal) removes a candidate when relation helper L2.01589 equals the supplied third argument. Otherwise an effect-0x1000 candidate is removed unless some querying-Group member has edge distance <= its command byte +0x71. The relation bit meaning is inherited from R2-ENGINE-502 at its grade, not inferred from this helper's name. Health filter L2.02416/L2.06226 removes signed HP<1 from the live list and passes it to the fallback list. RU wrapper L2.00205 merely calls L2.00206 on this+4; it is not itself an eligibility predicate. Its EN twin remains ambiguous and L2.00206 is unread.
+
+Leash L2.02474 reads each candidate's packed cell and removes it when cell distance from its argument point exceeds its radius argument. It does not directly clear a member's assigned target. A later assignment can clear it if no admitted candidate remains (R2-ENGINE-1111); this is a bounded pursuit-ending composition, not every ending.
+
+**Confidence.** High for paired local filter bodies and Group-sight branches/stores. Medium for full eligibility/population and composed pursuit loss: grid/world/list producers, relation helper, wrappers, virtual kinds and other target writers remain unread or inherited. The EN Group-sight call provides a contextual append site, but no whole-body EN append-helper claim is made.
+
+**Unknown.** Every way the world list/grid admits or omits a unit, all target-loss causes and player/computer kind bindings. Read the producers/helpers and attack planner endings; use an authorized pursuit run to measure actual loss and next action.
+
+**Amends.** R2-ENGINE-1076's open filter/append bodies are narrowed. R2-ENGINE-1018/1019's helper boundaries are not turned into complete target-population closure.
+
+**Evidence.** EXP-2152 generated/win/*group-sight*.lst, *hostility-resolved.lst, *health-filter.lst, *sight-population.lst, *leash.lst and corresponding mask receipts.
+
+### R2-ENGINE-1113
+
+The equal Group-setter spans in both roots preserve distinct programme byte [Group+0x3c]+0x20 and unit order +0x50. Read methods write programme constants: RU L2.02843 -> 4 and member order 1; L2.02845 -> 5 and member order 1; L2.06064 -> 2; L2.06065 -> 0x11; L2.04403 -> 1 and member order 0xb; L2.02519 -> 0x12 and member order 0xb; L2.06060 -> 3 and member order 0xc; L2.06066 -> 0x13 and member order 0x17; L2.06063 -> 0 and member order 0x16; L2.06067 and L2.02842 -> 0. The cast methods L2.04344/L2.02810 also store programme 0 after their member loop. The read loops call reset/list helpers as listed, not an assumed second unit-order field.
+
+L2.02843 and L2.02845 test an owner preference byte and member distances to decide formation-coordinate adjustments before calling the order-1 setter. They both preserve the requested cell in the Group record. No attack-order-3 write lies in L2.02845; its name is not evidence that it sets order 3. Explicit attack choice L2.02844 instead calls the order-3 setter when its scorer is not 0xffffff, else stop (R2-ENGINE-1107).
+
+**Confidence.** High for the read method stores and compared spans. Medium for writer completeness and role names: Group-record constructor programme 0 and empty-Group 0xff are inherited from R2-ENGINE-1040/1076 at their stated grades; neither was reacquired here. Register/bulk/load writers and the full programme-byte census remain open.
+
+**Unknown.** Every programme writer and programmes at mission start or across all player Groups. Classify the complete byte/overlap census and creation/load callers; a mission-start run is required for initial live Group state.
+
+**Amends.** R2-ENGINE-1040's RU-only setter clauses acquire paired spans for the named methods. R2-ENGINE-541's previously unread inner Group methods are narrowed without claiming all input routes or writer completeness.
+
+**Evidence.** EXP-2152 generated/win/*group-order1.lst, *group-attack.lst, *group-choice.lst, *group-cast-setters.lst, *group-setters*.lst and corresponding mask receipts.
+
+### R2-ENGINE-1114
+
+EN speed setter L2.03127 clamps its argument to 0..8, stores app +0x41c, obtains a divisor from its switch and stores integer 1000/divisor in app +0x418. The local body, including the constants and stores, is read to ret. Exact Speed-to-cell mapping and the nine divisors 8,10,12,14,16,20,24,28,32 are inherited from R2-ENGINE-620 (High); table L2.03207 was not reacquired. The body clears +0x40c/+0x428/+0x42c and stores clock readings into +0x424/+0x414.
+
+EN scheduler L2.03527, whole body read, computes app +0x414+(app +0x40c+1)*app +0x418 and compares the deadline unsigned with import L2.02270. When due, it increments +0x40c modulo 16 and calls session tick L2.03120 on [L2.00805], then pumps/sends the listed client calls and loops while due. The import's timeGetTime name and milliseconds are inherited from R2-ENGINE-669 (High), not a new import-table read.
+
+RU bodies L2.06227 and L2.06228 instead use app +0x424/+0x42c/+0x430 and import L2.02271 for the corresponding local deadline arithmetic, then call L2.04380 on [L2.01317]. They are not masked-equal to the EN body above. RU L2.06229 calls that tick without such a local deadline and increments app +0x424. This permits multiple caller modes; their selector and the RU period writer/import identity are unread. Four RU E8 references to session tick are preserved, including unread site L2.06230.
+
+Session tick's +4 increment through L2.04406 and Group scheduling at entry +4 mod16=6 are inherited from R2-ENGINE-778/1016 (High local bodies, Medium delivered cadence). Thus a scheduler counter step, a Group pass and wall-clock seconds are distinct units. The EN saved Speed values 4/8 and periods 62/31 are R2-ENGINE-620's inherited result; they are compatible with R2-ENGINE-1073's two observed rates, but do not identify which setter/mode ran in those launches.
+
+**Confidence.** High for the read EN/RU local arithmetic and calls. Medium for a composed single-player clock: caller selection, gates, import/root identity and the historical launch's chosen speed are incomplete. No fresh runtime rate is measured.
+
+**Unknown.** RU selectable-rate writer and import name, full caller/mode selection, actual cadence after LOAD and which speed caused each prior launch's rate. Read those writers/selectors/imports; run an authorized clock/period/tick trace after LOAD to settle delivered timing.
+
+**Amends.** R2-ENGINE-1073's unexplained factor-of-two rate is narrowed to an available static rate selector, not declared causally resolved. R2-ENGINE-778's unread RU scheduler gap is narrowed by these three RU bodies; its complete mode and period mapping remain open.
+
+**Evidence.** EXP-2152 generated/win/en-speed-setup.lst, win/*scheduler-{a,b,c}.lst, mask/scheduler-*.tsv and scan/ru-scheduler-callers.tsv; inherited authorities and grades are named above.
+
+### R2-ENGINE-1115
+
+generated/windows.tsv identifies 138 retained instruction listings; two table windows bring the native window count to 140. Every mask file names exact roots, starts, decoded counts, stop reasons and first differing instruction, or preserves all ambiguous prefix candidates. A window ending at cap is not automatically a whole body.
+
+All 20 setters compare equal individually through ret in setter-bodies.tsv (R2-ENGINE-1107). Other equal full local pairs include strike/cast initialization, target admission, range/edge/application distance, reset, walk, repath, score/assignment, hit hook, Effect apply/remove and the resolved hostility filter. The Group-sight and Group-setter bodies are covered by equal spans with their return boundaries visible. R2-ENGINE-1077 retains its own grades for older comparisons, not promoted by this card.
+
+Mismatches are preserved: copy prefix first differs at 151, actor-step at its recorded index, strike-phase5 at 27; scheduler pairs differ structurally/at app offsets. RU L2.06227 has no EN candidate in the mask run; input-switch first differs at 55 and input-arms-tail at 17. `setters` first differs at 225. `setters-next`, `setters-next-next` and `setters-next-next-next` were compared from unpaired starts (RU minus EN 0xa035, 0xa036, 0xa033, against 0xa039 for the setters), so their first difference at index 0 is window alignment and says nothing about the bodies. Empty-route tail first differs at 113 after its ret. Ambiguous candidates remain for L2.06206/L2.06207, L2.03515/L2.03516 and L2.00205. No complete EN twin is claimed for them. Explicit pairs resolve L2.02113 and L2.02119 against their read callers and whole local spans; a match alone does not establish semantic identity outside that span.
+
+**Confidence.** High for exact emitted comparisons and the paired local spans; Medium for the complete machine's EN coverage. The address mask replaces direct branch targets and image-range operands, so equality is structural and is not an independent behavioral witness or a callee-target proof. The table's full transitive RU-only body population has not been enumerated/read.
+
+**Unknown.** Every old orders-page dependency in EN, ambiguous twin identities and the effect of retained differences. Read the named callers/tables and remaining whole bodies under a new authorized budget. The current 140-window ceiling is spent.
+
+**Amends.** R2-ENGINE-1077's partial whole-body coverage is extended only for the newly named spans; its L2.05852 ambiguity and other unread lengths remain. R2-ENGINE-541's missing EN setters are closed locally by R2-ENGINE-1107, not by a universal table correspondence.
+
+**Evidence.** EXP-2152 generated/windows.tsv, setter-bodies.tsv, generated/mask/ and each listing those receipts name. Generation was reproduced once into separate output and all 223 generated files compared byte-for-byte equal.

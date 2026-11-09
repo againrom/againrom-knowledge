@@ -56,3 +56,19 @@ Programme byte writers, method L2.06060 and the saved values of players.0.group.
 Counted run (EN, one mission-10 launch, one hero): R2-ENGINE-1072 (loop L2.04213 and wrapper L2.02403 had 0 hits in the span; route serving the hero Unknown in launch 1), R2-ENGINE-1073 (actor step once per scheduler counter value per unit; the counter advanced 16.1 and 32.1 per second in the two launches), R2-ENGINE-1074 (a ground click wrote order 1 and moved the hero to another Group object).
 
 Continuation reads: R2-ENGINE-1075 (EN return addresses L2.06121 and L2.06122 of L2.04984 lie in the idle planner's no-candidate arm and in the programme-3 route; which of the planner's six E8 callers served the hero is Unknown in launch 1), R2-ENGINE-1076 (RU programme 4 and Guard A bodies, including Guard A's arm L2.01733(member, 1), which does not call the idle planner; the empty-Group store of programme 0xff), R2-ENGINE-1078 (a second EN launch: with no attack order the hero read order 0xc and a strike state on another owner's unit, and the idle planner's entries by return address), R2-ENGINE-1077 (256-instruction masked comparison of RU and EN bodies; 16 pairs equal, seven differ at a later index, the EN twin of L2.05852 stays ambiguous).
+
+## Static clause boundaries
+
+The [planner page](orders.md) distinguishes local unit stores and incomplete
+writer census (R2-ENGINE-1104, R2-ENGINE-1105), initiation versus HP-application
+distance (R2-ENGINE-1106), and the paired setters with RU input chains
+(R2-ENGINE-1107). Empty-route and arrival signals remain separate
+(R2-ENGINE-1108). Hit-hook stores do not close scheduled effects
+(R2-ENGINE-1109); Darkness slot arithmetic does not guarantee target retention
+(R2-ENGINE-1110).
+
+Scorer L2.05238, candidate filtering and programme setters have separate
+authorities: R2-ENGINE-1111, R2-ENGINE-1112 and R2-ENGINE-1113. The clock's local
+rate selector is not a measured delivered cadence (R2-ENGINE-1114). Per-body
+EN coverage, retained differences and ambiguous twins remain explicit
+(R2-ENGINE-1115). The planner table names the read or run for each open cell.

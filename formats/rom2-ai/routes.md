@@ -52,3 +52,22 @@ The programme-3 route L2.02466 makes no direct call to the selector; no referenc
 Counted run (EN, one mission-10 launch, one hero): R2-ENGINE-1072 (loop L2.04213 and wrapper L2.02403 had 0 hits in the span; route serving the hero Unknown in launch 1), R2-ENGINE-1073 (actor step once per scheduler counter value per unit; the counter advanced 16.1 and 32.1 per second in the two launches), R2-ENGINE-1074 (a ground click wrote order 1 and moved the hero to another Group object).
 
 Continuation reads: R2-ENGINE-1075 (EN return addresses L2.06121 and L2.06122 of L2.04984 lie in the idle planner's no-candidate arm and in the programme-3 route; which of the planner's six E8 callers served the hero is Unknown in launch 1), R2-ENGINE-1076 (RU programme 4 and Guard A bodies, including Guard A's arm L2.01733(member, 1), which does not call the idle planner; the empty-Group store of programme 0xff), R2-ENGINE-1078 (a second EN launch: with no attack order the hero read order 0xc and a strike state on another owner's unit, and the idle planner's entries by return address), R2-ENGINE-1077 (256-instruction masked comparison of RU and EN bodies; 16 pairs equal, seven differ at a later index, the EN twin of L2.05852 stays ambiguous).
+
+## Admission, arrival and retained targets
+
+The read walk's own-cell arrival stores movement +0x90; search-empty branches
+store +0x98 and the common tail replans by order (R2-ENGINE-1108). A direct
+order-0xc store in a reduced EXE sweep is not complete writer closure
+(R2-ENGINE-1104). Target initialization and command-target clears must use
+their actual bases (R2-ENGINE-1105). Strike initiation and application have
+different distance calculations, with an additional RU application rejection
+(R2-ENGINE-1106). Player input/setter and Group programme paths remain
+separate (R2-ENGINE-1107, R2-ENGINE-1113).
+
+Hit/event and Darkness field stores do not guarantee that an existing route
+or assigned target survives the next scheduled action (R2-ENGINE-1109,
+R2-ENGINE-1110). Scorer L2.05238 and filtered/leashed candidates supply
+specific target-retention/loss paths (R2-ENGINE-1111, R2-ENGINE-1112), not all
+pursuit endings. Clock delivery and EN body coverage retain their boundaries
+(R2-ENGINE-1114, R2-ENGINE-1115). The [planner table](orders.md) names the
+search/occupancy reads and runtime controls still needed.
