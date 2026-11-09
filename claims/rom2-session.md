@@ -20,6 +20,33 @@ routines of `allods2.exe` statically; see `experiments/EXP-2005-rom2-save-format
 `experiments/EXP-2005-rom2-save-format/evidence/operands.tsv`; the decompiled bodies are not
 committed and are reproducible only by running `tools/ghidra/DecompAddrs.java` at the cited addresses.
 
+## Hall of Fame counters in the SAV pair record
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-384 | The ROM2 SAV pair record is written by the Hall object (EN L2.00382 read, RU masked equal); its two final u32 are Hall+4 then Hall+8. Reader tail per R2-SESSION-035. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+
+### R2-SESSION-384
+
+EN `L2.00382` writes the pair list and then Hall +4 and Hall +8 (dwords, that order); `L2.00383` reads them in
+that order (R2-SESSION-035 at its grade; the committed window ends at `L2.06115`, before that tail). Both are
+methods of the Hall object at application +0x598 (EN). The pair helpers `L2.06116` and `L2.06117` transfer a
+row's +0 and +4 (R2-SESSION-035). Call sites: `L2.04490` (the save writer) and `L2.04493`, `L2.04494` (the
+two LOAD arms). RU body at `R2.0182` is masked equal over 90 instructions.
+
+Measured in the tail (grammar search to EOF, one match per file; values only): `game0054` (0, 15), `game0055`
+(0, 19), rom2-gog-original `game0000`, `game0003`, `game9999` (0, 0).
+
+**Confidence.** High for the writer body and field order in EN and the RU masked writer body; the reader's tail
+is R2-SESSION-035's, not re-read here.
+Medium for the fields' role beyond this and for the two RU LOAD sites (not read in RU). What the reader
+does on a short file is Unknown (the file object's read path was not traced for end of file).
+
+**Amends.** R2-SESSION-035: the two final u32 are named; R2-SESSION-076's "two zero suffix DWORDs" are these fields.
+
+**Evidence.** EXP-2148 evidence/generated/win/en-ser-L2.00382.lst, ru-ser-guess-R2.0182.lst, en-site-L2.06118.lst,
+en-site-L2.06119.lst, en-site-L2.06120.lst; evidence/run-values.txt.
+
 ## Transports and sockets
 
 | ID | Claim | Confidence | Status | Evidence |

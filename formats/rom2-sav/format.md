@@ -505,7 +505,8 @@ The [native campaign and selected client tail](campaign.md) gives the paired
 record contracts, catalog membership restoration, current-index limits and
 buffer transfer rules. Field meanings and complete live-state coverage remain
 Unknown. — R2-SESSION-031, R2-SESSION-032, R2-SESSION-033, R2-SESSION-034,
-R2-SESSION-035, R2-SESSION-036, R2-SESSION-037
+R2-SESSION-035, R2-SESSION-036, R2-SESSION-037. The two final u32 of the pair
+record are the Hall +4 and Hall +8 fields the Hall of Fame score reads. — R2-SESSION-384
 
 After the label ROM2 writes the [`&YA1` store](../rom2-reg/format.md) with the
 ROM1 root names (`Character`, `GameOptions`, `SpellBook`, `Objects`,

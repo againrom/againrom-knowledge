@@ -401,6 +401,10 @@ are 60 bytes, but the selected pair helpers transfer only runtime +0 and +4.
 The reader resizes the array and reads those fields. The other 52 bytes, the row
 constructors and all field meanings remain Unknown. — R2-SESSION-035
 
+The pair record is written and read by the object that holds the Hall of Fame
+rows at application +0x598 (EN). Its two final u32 are that object's +4 and
++8, the two fields the Hall of Fame score reads. — R2-SESSION-384
+
 Each of the nine buffer records is u16, u16, u32 byte length and that many raw
 bytes. The runtime cell is 12 bytes: the first two WORDs, length at +4 and a
 buffer pointer at +8. The buffer pointer itself is not emitted by this helper.
@@ -739,6 +743,9 @@ enters the first available record when no town is available, and
 otherwise opens the global map. Outputs 1..5 select the cutpaths rows
 teleport, stars, crown, knights and druids. In the read client
 call sites a defeat does not call LeaveLocation (Medium). — R2-ENGINE-422, R2-ENGINE-423
+
+In the victory arm, when GetVar(768) is at least 120, the client adds the Hall
+of Fame row before posting the credits. — R2-ENGINE-1065
 
 ## Global map
 

@@ -26314,3 +26314,125 @@ Twenty pairs have equal instruction text after masking every six-or-more-digit h
 **Confidence.** High for range hashes and counts recomputed by derive.py from the committed output. Medium for shared selected local behavior; Unknown for complete client/callee/runtime equality. Adjacent-routine and navigation-only windows are included in the population, not silently discarded.
 
 **Evidence.** EXP-2137 RESULTS.md question 11; evidence/derived/counts.json, comparisons.tsv, bindings.tsv; out-*/ranges.tsv, inputs.tsv and locale-ranges.tsv.
+
+## Hall of Fame row and score
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1064 | ROM2 famehall.dat: u32 count; per row u32 n, n name bytes with NUL, u32 score, two u32 (zero in the files read); the add path keeps 10 rows, descending; EN writer L2.02062, reader L2.06083; RU masked equal. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+| R2-ENGINE-1065 | ROM2 adds the Hall row at EN L2.04501 in the victory arm when GetVar(768) is at least 120, before credits; insertion is first index with score <= new, list cut to 10. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+| R2-ENGINE-1066 | ROM2 Hall score is trunc(B/(C*10.0)*A) with C = Hall+4, A = Hall+8, B = hero+0x110, or trunc(B/500000.0*A) when C is 0; x87, truncated by helper L2.02708. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+| R2-ENGINE-1067 | ROM2 Hall+4 adds [L2.00805]+4 / 16 at the win arm; L2.04497 is called at startup, New Game and L2.06084; a SAV stores Hall+4 and Hall+8; hero+0x110 writers are Unknown. | Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+
+### R2-ENGINE-1064
+
+ROM2 `famehall.dat`: `u32 count`, then per row `u32 n`, `n` bytes of the name including its NUL, `u32 score`,
+`u32 +8`, `u32 +0xc`. EN writer `L2.02062` and reader `L2.06083` take it through a file object's vtable
+slots `+0x40` and `+0x3c`; the reader reads the count, resizes the array, then each row. The Hall object is at
+application +0x598 (EN; +0x5f8 RU, read in the RU victory arm). Rows live at Hall +0x10 and are 16 bytes
+(name CString, score, +8, +0xc). The Hall constructor `L2.06085` writes Hall +0xc = 10 (the add path's row limit).
+The reader (`L2.06086`..`L2.06087`) resizes the array to the file's count with no comparison against that
+limit, so the limit holds for rows that went through the add path. The row constructor `L2.06088` zeroes the
+score, +8 and +0xc; neither the defaults nor the score routine writes +8 or +0xc. The 30 rows read (the run's
+file and the two install files, 10 each) hold zero in +8 and +0xc, as do the rows the read code builds; a read
+file's values are carried through.
+
+Loader site `L2.06089` opens `famehall.dat` (string `L2.02063`): reader when `L2.06090` returns nonzero,
+defaults `L2.06091` when it returns zero or the open fails. The defaults: nine rows, score
+`70000 - 7000 * i + rand(5000)` (`L2.00728`), name text row `0x107 + i`; a tenth row score 0, text row
+0x110. Writer routine `L2.02060` opens string `L2.02061` with flags 0x1001 and calls `L2.02062`.
+
+The name is copied from hero `+0xec` as a C string (`L2.00346`) into the row's CString, read from
+`[[app+0xd0]+0x3f6c]+0xec` (High for the read path). That this object is the player's hero is Medium
+(R2-ENGINE-336).
+
+**Confidence.** High for the layout, the routines and the writer and reader bodies in EN; RU writer and
+reader masked equal over 256 instructions (`compare.py`). Medium for the row limit in RU (constructor not read
+in RU), for encoding (bytes copied without translation in the bodies read; `L2.06092` unread), and for the
+claim that no other routine reads or writes the file: the text scan finds three occurrences of `famehall` per
+root (EN `L2.06093`, `L2.02063`, `L2.02061`). The reference scan `refs1` (E8/E9 rel32 sites and absolute
+dwords) covers the last two, in EN only; `L2.06093` and the RU occurrences are not referenced or read here. It
+is not a `CFile` census.
+
+**Unknown.** The trigger of `L2.02060`. One `.rdata` dword at `L2.06094` holds the address of `L2.02060`
+(`refs1`). Whether that is a vtable slot and what dispatches it are unread.
+
+**Amends.** R2-ENGINE-442's Unknowns on the file layout and the routine `L2.02060` direction: the routine
+writes through `L2.02062`. Its trigger stays Unknown.
+
+**Evidence.** EXP-2148 evidence/generated/win/en-w-L2.02062.lst, ru-w-L2.06095.lst, en-exit-482526.lst,
+en-load-L2.06089.lst, en-w-L2.06096.lst, en-ctor-L2.06085.lst, en-f-L2.06088.lst; evidence/nav/refs1.tsv.
+
+### R2-ENGINE-1065
+
+EN `L2.01855` adds a Hall row. Its only E8/E9 or absolute reference is `L2.04501`, in the victory arm of R2-ENGINE-422: win
+flag set, after LeaveLocation and the movie dispatch, when `L2.01921` returns nonzero (GetVar(768) at least
+120, R2-ENGINE-422 at its grade), before `[app+0xd0].R2.0077(1)` and the post of 0x428. If the hero pointer
+is null no row is added. Insertion `L2.06097`: the first index where new score >= row score (a tie goes
+before the old row), else after every row; the list is then cut to Hall +0xc rows.
+
+The scan `refs5` covers E8/E9 rel32 sites and absolute dwords in EN; computed calls are not covered.
+
+The comparison and the calls are read; the bodies of the insert `L2.06098` (index, row, 1), the append `L2.06099`
+and the cut `L2.06100` (Hall +0xc, -1) are not.
+
+**Confidence.** High for the arm position and for the order test and the calls in EN; Medium for their effect.
+The run's file fits one such insertion: 64425 at index 2, the old tenth row gone. Insertion and score body
+masked equal in RU over a 256-instruction window. Medium for the RU arm (178 of 256 lines masked-equal; of the
+other 78, 66 differ in frame slots, 9 in application offsets and 3 in the exception-state byte), for no other add
+path (no other direct or absolute reference), and for a later file write (R2-ENGINE-1064).
+
+**Amends.** R2-ENGINE-422: at the head of the win arm, on every win, the arm adds to Hall +4 (R2-ENGINE-1067);
+when GetVar(768) is at least 120 it also calls `L2.01855` before the post of 0x428.
+
+**Evidence.** EXP-2148 evidence/generated/win/en-arm-L2.01922.lst, en-add-L2.06097.lst, ru-addscore-L2.06101.lst,
+ru-arm-L2.01924.lst; evidence/nav/refs5.tsv.
+
+### R2-ENGINE-1066
+
+The score of a new Hall row, `L2.01855`: `C` = Hall +4, `A` = Hall +8, `B` = hero +0x110, all read as signed
+dwords by `fild`. If `C != 0`: `trunc((B / (C * 10.0)) * A)`. If `C == 0`: `trunc((B / 500000.0) * A)`.
+Constants: `L2.06102` = 10.0, `L2.06103` = 500000.0 (table, EN). `L2.02708` sets the x87 rounding mode to
+truncate, stores with `fistp` to 64 bits and returns the low dword. No other branch.
+
+**Confidence.** High for the arithmetic in EN. RU body masked equal over the same window; RU constant values
+were not read (Medium for RU constants). The composition of the row value with its inputs is at the grades
+of R2-ENGINE-1067.
+
+**Evidence.** EXP-2148 evidence/generated/win/en-add-L2.06097.lst, en-f-L2.02708.lst, tab/en-const-L2.06102.tsv;
+ru-addscore-L2.06101.lst.
+
+### R2-ENGINE-1067
+
+Hall +4 grows through `L2.04423` (reads the argument, adds it), called at `L2.06104` in the victory arm
+with `[L2.00805]+4` divided by 16 with sign correction; the constructor sets it to 0 (read). `L2.04497` is
+called at `L2.06105` (startup), `L2.06106` (the 0x425 arm) and `L2.06084`; its body is not in a committed
+listing (the window ends at `L2.06107`), so that it clears Hall +4 and +8 is Medium. The callers were read at the
+EN sites of `add reg,0x598` that the census found; a caller reaching the Hall through another address form is not
+covered. The census has 25 `add reg,0x598` rows; two, `L2.06108` and `L2.06109`, are unread; the callee of
+`L2.06110` (`L2.04424`) is unread; views store a Hall pointer at +0x68 (`L2.04505`, `L2.04506`); the 16 rows at
+`0x59c`..`0x5a4` are not classed. Hall +8 is read by the score; `L2.06111` and `L2.06112` are unread, and
+which field either touches is Unknown (neither is shown to touch Hall +8). `L2.06111` is called with 1 at startup
+and in the New Game arm; the three `rom2-gog-original` SAVs hold Hall +8 = 0, which an unconditional store of 1
+by that routine at New Game would not leave. SAV storage of Hall +4 and +8 is R2-SESSION-384. Hero +0x110 is
+read at `L2.06113`; `census6` (EN, displacement and immediate 0x110 over `.text`) lists candidates and none is
+classed to the hero. Its writers and SAV place are Unknown. New Game (`L2.01098`, the 0x425 arm): `L2.04497`
+then `L2.06111(1)`.
+
+All five SAVs read hold Hall +4 = 0, `game0054` and `game0055` with Hall +8 = 15 and 19, although the arm adds to
+Hall +4 on every win (R2-ENGINE-422). No file read shows a nonzero Hall +4. Whether a win's addition ran before
+those saves with a nonzero quotient is Unknown (`[L2.00805]+4` is not named and its value at a win is unread).
+
+The object behind `[L2.00805]+4` is not named by these reads; that it is a tick count is not shown.
+
+**Confidence.** High for the adder and for the three call sites in EN; Medium for RU (arm not masked equal),
+for the reset body and for the grade of Hall +8's role; Unknown for Hall +8's writers and for hero +0x110
+writers. The `L2.06111` and `L2.06112` windows were not read: the pass ceiling was reached.
+
+**Unknown.** Hero +0x110 writers and SAV place; the origin of `[L2.00805]+4`; `L2.06111`, `L2.06112` bodies. Why
+Hall +4 is 0 in every SAV read, including `game0054` and `game0055`.
+A run settles them: on `game0055` at the last win, read `[L2.00805]+4` and hero +0x110; the row's score must
+equal the formula of R2-ENGINE-1066.
+
+**Evidence.** EXP-2148 evidence/generated/win/en-f-L2.04423.lst, en-site-481318.lst, en-menu-486289.lst,
+en-site-L2.06114.lst, en-site-L2.04500.lst; evidence/nav/census6.tsv; RESULTS.md question 4.
