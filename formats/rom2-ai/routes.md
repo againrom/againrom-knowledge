@@ -44,3 +44,7 @@ The stat reader stores them in command +0x40 and +0x44 for a unit whose template
 ## Tail branch of a finished route
 
 The flag branch is read at L2.02883: order 1 stores order 0xc through L2.02858 and L2.02636; orders 0xa and 0x18 keep their branches; every other value clears +8 and calls re-pick L2.02425 (R2-ENGINE-1020). The route from the Group pass to this tail is bounded by R2-ENGINE-1017.
+
+The walk prepare L2.02401 stores command +8 and +0xa and reads no candidate list (R2-ENGINE-1042). Its movement +0x98 sites are census rows; arrival stays unread. The found-target branch L2.01525 is R2-ENGINE-1043.
+
+The programme-3 route L2.02466 makes no direct call to the selector; no reference to loop L2.01724 was found in the Medium census, and an indirect or computed route is not excluded (R2-ENGINE-1041).

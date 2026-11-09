@@ -48,6 +48,12 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 | R2-ENGINE-1020 | RU executor tail with movement +0x98 set: order 1 calls L2.02858, which reaches L2.02637 (order 0xc, R2-ENGINE-541) through L2.02636; L2.02636 has 16 E8 sites. | High / Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
 | R2-ENGINE-1021 | RU +0xbbec list: calls of L2.06024, L2.06025 and L2.05852, four appends of record kinds 1 to 4; no read operand found; aliased readers open. | Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
 | R2-ENGINE-1022 | Linear-sweep write census of +0x50, +8, +9, +0xc, +0x20 by traced base class in both roots; RU +0x20: 7 command-base of 203 sites. | Medium | ● active | [EXP-2146](../experiments/EXP-2146-rom2-order-machine/) |
+| R2-ENGINE-1040 | RU Group-record constructor L2.00500 stores programme 0; method L2.06060 stores order 0xc in each member and programme 3; players.0.group.0 of the five mission-10 originals stores 3 (4 in one). | High / Medium | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1041 | RU programme-3 route L2.02466 makes no direct call to the selector; in the E8/E9 and dword census (Medium) a hero in programme 3 reaches it only if loop L2.01724 runs, Unknown. | High / Medium / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1042 | RU walk prepare L2.02401 stores +8=1 and +0xa, no candidate read; RU L2.02637 stores order 0xc and +8=0; movement +0x98 has three sets and one clear in the census, arrival unread. | High / Medium / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1043 | RU L2.01525 (whole body): a unit with owner +0x2c zero passing L2.00044 tries L2.01527; otherwise +8=6, +0xc=target and +0x14 from L2.01728; bodies EN masked equal. | High / Medium | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1044 | RU attack planner L2.01530 (188 decoded instructions) holds no +0x94 or +0x96 operand; no test in it is identified as a death, sight or hostility test; endings Unknown. | High / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1045 | RU L2.03275 has 27 arms, one call each (jump table L2.03277 unread); RU L2.05852 walks a chain from [this+4] calling L2.06061 per node and clears +4, +8, +0xc, +0x10 and, after L2.06062, +0x14; helpers unread. | High / Medium / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
 
 ### R2-ENGINE-997
 
@@ -555,6 +561,64 @@ A linear-sweep Capstone census of writes (`mov` and arithmetic) with displacemen
 **Unknown.** The caller class of each site; indirect or bulk writes. Reading each boundary-class function entry settles its base.
 
 **Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 5.
+
+### R2-ENGINE-1040
+
+Group programme byte +0x20. RU `L2.00500` constructs the Group's `+0x3c` record (R2-ENGINE-199, Medium binding through R2-ENGINE-823): it calls `L2.00342(this, 0, 0x50)` (helper unread here), stores +8=0, +9=0, +0x20=0, +0x45=1 and +0x4c from a new 0x1c object. The Group constructor is `L2.00349` (R2-ENGINE-199), not read here. Group methods read in `prog-*` listings, RU: reset `L2.02842` (each member `L2.01584`, programme 0); `L2.04344`, `L2.02810`, `L2.06063` (member calls then programme 0); `L2.02843` programme 4, `L2.02845` 5, `L2.06064` 2, `L2.06065` 0x11, `L2.04403` 1 (members `L2.02815`), `L2.02519` 0x12 (members `L2.02815`), `L2.06066` 0x13 (members `L2.02816`), `L2.06067` 0 (members `L2.01585`), method `L2.06060` 3 (the Group-wide order-0xc setter, called Stop as a label only: reset, then each member `L2.02637`, which stores order 0xc). Callers of `L2.06060` (RU E8 scan `callers.tsv`): `L2.06068` inside dispatcher `R2.0119`, `L2.06069` (method `L2.04542`), `L2.06070`; `L2.04542` has eight E8 callers, among them `L2.06071` and `L2.06072`. R2-ENGINE-541 reads the message handler: type 0x18 reaches `L2.02637`; `L2.06068` in its listing calls `L2.06060` on the message's list, on `[ebp-0x1c]` with `this` = `[L2.02609]`. Group blocks read by `saves_groups.py` in `generated/save-groups.tsv` (the walker of EXP-2115): `players.0.group.0` (one member), read as the hero's Group (Medium), stores programme 3 in game0001, 0004, 0005, 9999 of the first folder and 4 in game0006, as R2-SESSION-343. The walker reads mission-10 bodies only: the eleven other saves (mission field 0 in 7, 20 in 2, 30 in 2) were not walked, so no Group of another mission is read.
+
+**Confidence.** High for the named bodies and for the saved values (generated). Medium that `players.0.group.0` is the hero's Group (R2-SESSION-343's label; the tool's member column is empty; the `number` field of that row in game0006 is 48752816, where the others read 0). Medium for completeness of the writers: the RU census of EXP-2146 has 25 byte rows at `+0x20`, of which 14 are read here (`L2.05242` and the 13 method stores), eight are stack frames and three are others: `L2.05243` stores 0xff through a base traced to `+0x3c` (R2-ENGINE-507's empty-Group clause, unread here), `L2.01594` is the Player preference constructor `L2.01591` (R2-SESSION-152, not a Group field), `L2.06073` stores a register value through a base from `+0x34` (not read; R2-SESSION-152 gives `+0x34` as the Player's preference pointer). Immediate 3 occurs only at `L2.06074` in these rows; a register-sourced store, the LOAD copy (R2-ENGINE-823, Medium) and untraced forms are not excluded. Unknown: whether another caller (`L2.06069`, `L2.06070`) runs for a player's Group; the link of the `L2.06068` arm to type 0x18 is R2-ENGINE-541's Medium; the programme at mission start before a save.
+
+**Amends.** R2-ENGINE-507's programme mapping keeps its grades; this adds the named writers, which R2-ENGINE-507 listed as unread external setters. R2-ENGINE-881's "16 byte stores ... write group programme bytes" includes `L2.01594`, the Player preference constructor, which is not a Group field.
+
+**Evidence.** EXP-2147 RESULTS.md question 1; `evidence/generated/win/ru-prog-*.lst`, `ru-prog-ctor-L2.00500.lst`, `scan/ru-callers.tsv`, `save-groups.tsv`.
+
+### R2-ENGINE-1041
+
+RU programme-3 route `L2.02466` (body read, 43 instructions). Direct calls: `L2.02473`, `L2.05173`, `L2.04689`, `L2.01530`, `L2.01531`, `L2.04690`; per member `L2.01530` when command +0x20 is nonzero, else `L2.01531`. None of the six is the selector `L2.01725`, `L2.01726` or `L2.02401` or a wrapper of it. R2-ENGINE-558 (E8 scan and `.rdata` dword scan) gives the selector's callers as `L2.02939`/`L2.02940` from wrappers reached at `L2.02941` (loop `L2.01724`) and `L2.02942` (programme 0). R2-ENGINE-1017 (E8/E9 scan over code sections and any-section dword scan, Medium) finds no reference to `L2.01724`. This experiment's dword scan covers every section and every byte offset of the RU image for an absolute dword: no hit for `L2.01724` (`ru-dwords.tsv`); its rel32 scan did not take `L2.01724` as a target. Jcc rel32, short jumps, fall-through, computed addresses and other images are not covered. The programme-0 route is the group tick, the E8 caller of the handlers (R2-ENGINE-882). Composed from R2-ENGINE-1017 (Medium census) and R2-ENGINE-882: the census of selector callers gives no other route for a unit whose Group holds programme 3 than loop `L2.01724`; it does not exclude an indirect or computed one.
+
+**Confidence.** High for the body and its direct call list. Medium for the census (E8/E9 and dword). Unknown for the composition: the population of call sites is the census above; an indirect route is unread, and which of the two statements (the programme route alone; both running) holds is not established.
+
+**Unknown.** What reaches `L2.01724`. The run: mission 10, hero walking, a breakpoint counter on `L2.01724` and on `L2.02942`; firing every server tick means the selector runs for a programme-3 hero, never firing means only the programme route runs.
+
+**Evidence.** EXP-2147 RESULTS.md question 1; `evidence/generated/win/ru-prog3-L2.02466.lst`, `scan/ru-dwords.tsv`.
+
+### R2-ENGINE-1042
+
+RU `L2.02401` (14 instructions, whole): command +8=1, +0xa=word argument; the body reads no candidate list. RU `L2.02637` (22 instructions, whole): calls `L2.01584`, stores unit +0x50=0xc, command word +0 = own cell from `L2.01521` on unit +0x10 (the unit's cell, R2-ENGINE-880), command +8=0. RU `L2.02815` stores order 0xb in the same pattern. Census of movement +0x98 writes (RU, dword at disp 0x98, `census-98.tsv`, 46 rows): writes through a base traced to +0x1c0 are three sets of 1 (`L2.02432`, `L2.02433`, `L2.02434`) and one clear (`L2.05192`); the other 42 rows have other base classes (not traced to +0x1c0; not read individually). R2-ENGINE-872 counts 46 writes on untraced bases from its own census; this census has 46 rows in all, 4 traced; the two are not reconciled. Bodies around the set sites are not read here, so whether a walk's arrival sets the flag stays as R2-ENGINE-872.
+
+**Confidence.** High for the two whole bodies; EN masked equal: `L2.04961`, `L2.02686` whole, `L2.00441` first 22 instructions (`scan/en-twin*.tsv`). Medium for the census completeness: linear sweep, byte scan, indirect and jump routes unread, classes not read individually. Unknown whether arrival sets +0x98 (R2-ENGINE-872 reads an empty-route case).
+
+**Amends.** The `orders.md` gap on the body of `L2.02401`, now read.
+
+**Evidence.** EXP-2147 RESULTS.md question 3; `evidence/generated/win/ru-walk-L2.02401.lst`, `ru-order-c-577564.lst`, `ru-order-b-L2.02815.lst`, `scan/ru-census-98.tsv`.
+
+### R2-ENGINE-1043
+
+RU `L2.01525` (whole body): if `L2.00044` is true for the unit and owner `[unit+0x14]+0x2c` is zero, it calls `L2.01527` and returns when that returns nonzero; otherwise command +8=6, +0xc=target and +0x14=low byte of `L2.01728(unit)`. RU `L2.00044` (12 instructions, whole): returns byte +0x4c & 4 of `this`. EN masked equal: `L2.06075` whole (38), `L2.01136` whole (12). `L2.01527`: 200 instructions read; the body continues past the window and is not claimed here; `L2.02119`, `L2.02416`, `L2.02407`, `L2.02408` and `L2.02410` are unread.
+
+**Confidence.** High for the two whole bodies and the EN masked equalities. Medium for "L2.00044 marks a mage" (R2-ENGINE-362) and for "owner +0x2c zero marks a player" (R2-ENGINE-362 and R2-ENGINE-501). Unknown for a unit's behaviour per kind beyond this branch.
+
+**Amends.** R2-ENGINE-501's Medium on the navigation read of `L2.01525` and R2-ENGINE-1018's Unknown on its body.
+
+**Evidence.** EXP-2147 RESULTS.md question 4; `evidence/generated/win/ru-idlefound-L2.01525.lst`, `ru-mage-flag-L2.00044.lst`, `ru-mage-575049.lst`.
+
+### R2-ENGINE-1044
+
+RU `L2.01530` (188 decoded instructions, whole body): no +0x94 or +0x96 operand occurs (grep of `win/ru-attack-L2.01530.lst`). The body's direct tests are target byte `+0x4c` (R2-ENGINE-651, event meaning open), the spell slots, a null or self target, owner `+0x2c` (`L2.06076`), `L2.00044` at three sites and the distance (slot 0x17) and range-below-2 tests. Both the `+0x4c` branch (`L2.03462`..`L2.06077`) and the null-target branch (`L2.06078`..`L2.06079`, `call L2.01733` at `L2.06080`) call `L2.01733`; whether either is a death, sight or hostility ending is not established. Further calls `L2.02111`, `L2.02117`, `L2.00056`, `L2.01527`, `L2.01728`, `L2.01512` are unread. `L2.02430` (72 decoded instructions) stores `+0x54` and calls `L2.02409`, `L2.02431`, `L2.01532` (unread); no store to `+0x20`, `+8` or `+0xc` in this body.
+
+**Confidence.** High for the operands in the listing; a grep negative does not cover callees or an aliased record. Unknown for the endings (dead, out of sight, no longer hostile, out of reach and blocked, in reach): none is identified in this body, and the callees are unread.
+
+**Evidence.** EXP-2147 RESULTS.md question 6; `evidence/generated/win/ru-attack-L2.01530.lst`, `ru-tail-L2.02430.lst`.
+
+### R2-ENGINE-1045
+
+RU `L2.03275` (151 decoded instructions, `hit-L2.03275.lst`) is a switch on field `+4` minus 1 against `0x1a` (`cmp [ebp-8],0x1a`): the listing shows 27 arms, each one call, in code order `L2.06081`..`L2.00484`. Jump table `L2.03277` is outside the listing, so which value takes which arm is unread; the case routines are unread. R2-ENGINE-1021 gives this switch list `+0xeaac`. RU `L2.05852` (35 instructions, whole) walks the chain from `[this+4]`, calls `L2.06061(node+8, 1)` per node, clears `+0xc`, `+0x10`, `+8` and `+4`, calls `L2.06062` on `[this+0x14]` and clears `+0x14`; both helpers are unread. `L2.06082` calls it with `ecx` = session `+0xbbec` (`add ecx,0xbbec` at `L2.06048`; R2-ENGINE-987, R2-ENGINE-1021, `EXP-2146 win/ru-script-L2.03648.lst`). Each record pointer `node+8` is passed to `L2.06061`; whether that routine reads the record is Unknown.
+
+**Confidence.** High for the arms and the body read. Medium for "frees" (`L2.06061`, `L2.06062` unread). Unknown whether any arm reads a record of list `+0xbbec`.
+
+**Amends.** R2-ENGINE-1021's Unknown on whether `L2.05852` reads the records (narrowed: it passes `node+8` to `L2.06061`, unread).
+
+**Evidence.** EXP-2147 RESULTS.md question 9; `evidence/generated/win/ru-hit-L2.03275.lst`, `ru-list-L2.05852.lst`.
 
 ### R2-ENGINE-991
 

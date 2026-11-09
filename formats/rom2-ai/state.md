@@ -41,7 +41,7 @@ R2-ENGINE-541, R2-ENGINE-554, R2-ENGINE-823.
 
 | Input/state field | Read/write and SAV coordinate | Claims and clause grades | Unknowns |
 |---|---|---|---|
-| byte +0x20 | Programme selector; same byte in SAV programme block. | R2-ENGINE-882 High dispatch; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | All external setters |
+| byte +0x20 | Programme selector; same byte in SAV programme block. | R2-ENGINE-882 High dispatch; R2-ENGINE-1040 High named setters, Medium writer completeness; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | Callers of the named setters and whether a player order reaches them |
 | point +0xa | Programme-2 goal; within SAV programme block. Width not strengthened here. | R2-ENGINE-507 High RU dispatch; R2-ENGINE-882 High body, Medium meaning; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | Complete point producers |
 | dword +0x24; word +0x28 | Mean x/y packed as y<<16 or x and y<<8 or x; same SAV block coordinates. | R2-ENGINE-841 High stores, Medium helpers; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | Load-time centre initialization |
 | bytes +0x2a/+0x2b/+0x2c | Largest member distance, largest +0xa5, largest sum; same SAV coordinates. | R2-ENGINE-841 High writes, Medium semantic inputs; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | Reader census |
@@ -97,3 +97,7 @@ Withdraw and Wimpy are Units columns (R2-ASSET-229). The stat reader stores them
 
 The wrapper tests owner +0x2c at unit +0x14 and reaches the same selector on both branches (R2-ENGINE-1017, Medium). The idle planner's own body writes none of unit +0x50, command +8, +9, +0xc, +0x20 (R2-ENGINE-1018). The stop chain resets unit state +0x54 and stores order 0xc (R2-ENGINE-1020). Session list +0xbbec has appenders of record kinds 1 to 4, a routine that clears it in a navigation read and no read operand found in a RU sweep (R2-ENGINE-1021, Medium).
 The Group pass runs only when session counter +4 mod 16 is 6 (R2-ENGINE-1016). The re-pick writes command +0xc and +8 and no unit +0x50 or command +0x20 (R2-ENGINE-1019). The write census is by base class and does not count unit-order writers (R2-ENGINE-1022).
+
+Movement +0x98: census sets L2.02432, L2.02433, L2.02434 and clear L2.05192 (R2-ENGINE-1042, Medium census, arrival unread). L2.01525 stores command +8, +0xc and +0x14 (R2-ENGINE-1043). L2.05852, called with ecx = session +0xbbec, walks a chain from [this+4] and clears +4, +8, +0xc, +0x10 and +0x14 (R2-ENGINE-1045, helpers unread).
+
+The programme-3 route L2.02466 makes no direct call to the selector; no reference to loop L2.01724 was found in the Medium census, and an indirect or computed route is not excluded (R2-ENGINE-1041).
