@@ -100,7 +100,8 @@ they read `update.lst`. An exception-handler block after the `music.res`
 mount clears the music-available word; that a failed mount reaches it is
 Medium (mount body not interpreted).
 `graphics.res` is not among them. Which archive wins when two hold one
-name is Unknown. — R2-ENGINE-921
+name is Unknown. — R2-ENGINE-921 In the EN root no `music.res` name occurs in
+another startup archive present or in `graphics.res`. — R2-ENGINE-1094
 
 Each root's 491 itemname-record projection through the shop speech
 formula forms 852 distinct normalized relative names, 283 present and

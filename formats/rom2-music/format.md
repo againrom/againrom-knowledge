@@ -18,6 +18,12 @@ The client requests keys with the prefix `music\`; the mission list uses
 upper-case `B00`..`B16`. Key lookup is therefore inferred to ignore case.
 — R2-ENGINE-335
 
+In the EN root no `music.res` name also occurs in another startup archive
+present or in `graphics.res`; `cs.res` is absent there. — R2-ENGINE-1094
+In one EN run the source object at player +0x80 held offset and size equal
+to the `music.res` entry of `menu.wav` and of `b08.wav`; the field meaning is
+Medium. — R2-ENGINE-1095
+
 ## Names and Music.ini
 
 `main.res` `text/tunes.txt` maps each key to a display name, one
@@ -200,8 +206,25 @@ work preserves mode 2 and succeeds, a mission LOAD rebuilds B00..B16
 and picks from the restored position, while a town LOAD requests its
 town key with the same-key resume rule. Both composed playback results
 are Medium: intervening initialization, actor restoration and town
-transit were not fully traced. Cold LOAD audio/cursor remains Unknown.
-— R2-ENGINE-837
+transit were not fully traced. Cold LOAD audio and cursor remain Unknown,
+including in the two observed LOADs below, which read the player's timer
+accumulation only. — R2-ENGINE-837
+
+In one EN run of the mission save `game0009`, cold LOAD ran mission entry's
+stop, then set list with an interim select of index 2, then select of index 8
+from the mission body, then start; the first read showed 17 entries, index 8,
+`music\b08.wav`, area pick 8 and the player's timer accumulation restarted
+at 700. The result holds for that run and that save. — R2-ENGINE-1096
+
+In one EN run of the town save `game0008`, cold LOAD set a one-entry list
+from the town body and selected index 0, with first read `music\b14.wav`,
+area pick -1 and accumulation 800. Closing the inn in that run called start
+from the town body with no set list, stop or select: the key and index stayed,
+and the accumulation continued across the close. — R2-ENGINE-1097, R2-ENGINE-1098
+A lower timer accumulation of a one-entry track was read with no select-entry
+hit, in two runs (High); a single restart near the entry's computed end is
+derived (Medium). The absence of a select hit is not evidence for or against a
+track end. — R2-ENGINE-1099
 
 ## Settings
 

@@ -22455,7 +22455,7 @@ and game0001 in the original, bring the hero next to cells (45..48,
 | R2-ENGINE-834 | EN music-area helpers preserve the admitted default before appending area pointers; the tick counter is initialized to zero and incremented before its 16-tick test; position-object identity remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
 | R2-ENGINE-835 | EN town music selects b14/b16/b15 only for IDs 1/2/3; other IDs append no key. Its same-key test compares bytes with case; continuing the square's track inside the inn or shop remains Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
 | R2-ENGINE-836 | The EN .text decoded-operand sweep finds seven push 0x451 sites; the 0x451 arm conditionally stops music; 0x41d/0x45c/0x45d reach mission end under different mode and app+0x404 bit-0 tests. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
-| R2-ENGINE-837 | EN LOAD writes application mode 2 and enters a mission or town; mode 3 bypasses the mission music request and has connection-entry writers. Normal area or town selection after LOAD is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
+| R2-ENGINE-837 | EN LOAD writes application mode 2 and enters a mission or town; mode 3 bypasses the mission music request and has connection-entry writers. Normal area or town selection after LOAD is Medium. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
 | R2-ENGINE-838 | EN shop and inn close branches rebuild mission music outside mode 2; byte scans of both clients yield six list-set, eight start and ten stop rel32 call candidates per client. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
 | R2-ENGINE-839 | ROM2 fade(2000,8000) caps effective time and sets a negative volume threshold; listed EN/RU step arithmetic depends on volume; a step on every due callback is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
 | R2-ENGINE-840 | ROM2 player states 1 and 2 mean unpaused open music with fade clear or set; held stop clears fade and reselects the held entry, while list set retains hold and ultimately selects a new-list random entry. | High / Medium | ✔ promoted (branch candidate) | [EXP-2117](../experiments/EXP-2117-rom2-music/) |
@@ -22595,6 +22595,8 @@ Trace the named missing bodies; cold LOAD one existing mission save and
 one town save and watch requested key/cursor. No save or save directory
 was read. Evidence: EXP-2117 `evidence/measured/listings/en-load-entry.tsv`,
 `en-mission-entry-*.tsv`, `en-mode3-writer-*.tsv`.
+
+**Amended.** R2-ENGINE-1096 observes the EN player after one cold LOAD of one mission save and R2-ENGINE-1097 after one cold LOAD of one town save; audible output stays Unknown.
 
 ### R2-ENGINE-838
 
@@ -24043,7 +24045,7 @@ settles it. Also unread: the cast body `L2.05342` (R2-ENGINE-901) and what a ret
 | R2-ENGINE-918 | ROM2 dispatcher arms: 0x42f, 0x457 and 0x468 (location kind 1) call mission entry, 0x468 otherwise the town body; 0x41d and 0x42d call the map body and a cutscene; RU 0x48e calls mission end. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
 | R2-ENGINE-919 | EN 0x451 readiness helper (RU unread) returns 1 when the dword 8 bytes before the pointer at app+0x3d4 is 0; the values scan finds seven decoded push 0x451 sites per client plus one undecoded hit; events Medium. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
 | R2-ENGINE-920 | EN tick counter +0xa88: the only direct-displacement store of 0 in the values scan is in view constructor L2.01227, called once from L2.00558; the tick stores it; a per-mission reset is Medium. | High / Medium | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
-| R2-ENGINE-921 | ROM2 EN/RU startup mounts cs.res, main, patch, world, music, video, sfx, movies, scenario and speech .res through one routine in that order; a failed music mount clearing the music word is Medium; precedence Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
+| R2-ENGINE-921 | ROM2 EN/RU startup mounts cs.res, main, patch, world, music, video, sfx, movies, scenario and speech .res through one routine in that order; a failed music mount clearing the music word is Medium; precedence Unknown. | High / Unknown | ● active (amended, branch candidate) | [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md) |
 
 ### R2-ENGINE-908
 
@@ -24468,6 +24470,8 @@ four of the RU ten.
 **Evidence.** [EXP-2128](../experiments/EXP-2128-rom2-sound/RESULTS.md),
 question 6; listings `en-startup-initializer`, `ru-startup-archives`,
 `en-archive-mount`; `measured/refs.tsv`.
+
+**Amended.** R2-ENGINE-1094 finds no music name shared between EN startup archives; which archive wins a shared name stays Unknown for other names and for RU.
 
 ## Cast facing, release point and draw order
 
@@ -26594,3 +26598,172 @@ The adder `L2.04423` was hit once, argument 1944, return `L2.06173`, which is 31
 **Amends.** R2-ENGINE-1066: the formula's first branch matches one observed row.
 
 **Evidence.** EXP-2150 evidence/run-values.tsv; RESULTS.md.
+
+## Music player state observed in EN runs
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1094 | ROM2 EN: none of the 21 music.res names occurs as a path or basename in the other startup archives present or in graphics.res; cs.res is absent from the root; the census reads only EN and names no resolver order. | High | ✔ promoted (branch candidate) | [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md) |
+| R2-ENGINE-1095 | ROM2 EN, one run: the music source at player +0x80 held the names menu.wav and b08.wav with +0x14 and +0x18 equal to those entries' music.res offset and size; field meaning is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md) |
+| R2-ENGINE-1096 | ROM2 EN, one run of mission save game0009: cold LOAD set the 17-entry list, selected index 2 then 8 and started; first read index 8, music\b08.wav, area pick 8, timer step +0x70 = 700. | High | ✔ promoted (branch candidate) | [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md) |
+| R2-ENGINE-1097 | ROM2 EN, one run of town save game0008: cold LOAD set a one-entry list from the town body, whose set list selected index 0; first read music\b14.wav, index 0, area pick -1, timer step +0x70 = 800. | High | ✔ promoted (branch candidate) | [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md) |
+| R2-ENGINE-1098 | ROM2 EN, one run: closing the inn after a town LOAD called start from the town body with no set list, stop or select; key and index stayed music\b14.wav, 0, and +0x70 continued across the close. | High | ✔ promoted (branch candidate) | [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md) |
+| R2-ENGINE-1099 | ROM2 EN, two runs: a lower timer step +0x70 of a one-entry track was read on a later read with no select-entry hit (High); a single restart near the entry's computed end is derived (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md) |
+
+### R2-ENGINE-1094
+
+The population is the EN root's `main.res`, `patch.res`, `world.res`, `music.res`,
+`video.res`, `sfx.res`, `movies.res`, `scenario.res`, `speech.res` and `graphics.res`,
+read as registries (`&YA1`, registry from the header +0x10 offset to the end of the
+file, 32-byte nodes), paths case-folded. `cs.res` is absent from that root; the
+startup list of R2-ENGINE-921 names it. No path occurs in two of these archives;
+none of the 21 `music.res` names occurs elsewhere as a basename.
+
+**Confidence.** High for this population. Which archive the resolver prefers
+is not addressed: no shared name exists to test it. A file on disk outside
+the archives and RU are outside the census.
+
+**Amends.** R2-ENGINE-921's Unknown, for the music names of the EN root only.
+
+**Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
+question 1; `evidence/archive-census.tsv`, generator `archive_census.py`.
+
+### R2-ENGINE-1095
+
+Launch A of the EN original read the player pointer at `L2.06174` (constructor
+store `L2.06175`, R2-ENGINE-337's player) and the object at player +0x80, whose
+vtable `L2.06176` is the one constructor `L2.06177` installs in the player's
+open path. Two reads:
+
+| Read (UTC, 2026-11-09) | Name at +0xc | +0x14 | +0x18 | `music.res` entry offset, size |
+|---|---|---|---|---|
+| 18:12:50.491, menu | `music\menu.wav` | 136538676 | 3528496 | 136538676, 3528496 |
+| 18:14:31.425, mission | `music\b08.wav` | 61642260 | 5924884 | 61642260, 5924884 |
+
+**Confidence.** High for the values read in that launch. Medium that +0x14 and
++0x18 are the source's archive offset and size: the link is the equality of the
+two numbers with the entry table, on two entries, and the source's own
+accessors were not read. The open file handle was not read, so the archive is
+named by its entry offset and size, not by a path.
+
+**Unknown.** The meaning of +0x1c, read as 1761324 and 5283884; other names;
+RU.
+
+**Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
+question 1; `evidence/run-2-source.tsv` (vtable column), `evidence/archive-census.tsv`.
+
+### R2-ENGINE-1096
+
+Launch A loaded the original-written save `game0009` (mission 20) cold from
+the menu of a fresh process. Counting breakpoints, installed before the menu,
+recorded per entry and harness millisecond since the live start:
+
+| ms | Routine | Key | Return address |
+|---|---|---|---|
+| 150747 | stop | player | `L2.06178`, mission entry |
+| 150771 | set list | player | `L2.06179`, mission music body |
+| 150771 | stop, in set list | player | `L2.06180` |
+| 150771 | select | index 2 | `L2.06181`, in set list |
+| 150771 | select | index 8 | `L2.06182`, mission music body |
+| 150771 | start | player | `L2.06183` |
+
+Reads of the player object (fields from listings of R2-ENGINE-337 and
+R2-ENGINE-840) at 18:13:39.456 UTC: paused 0, open 1, fade 0, hold 0, list count
+17, index 8, source name `music\b08.wav`, area pick 8 (`L2.01378`), timer step
+accumulation +0x70 = 700. Over the following 13.8 s of the harness clock +0x70
+rose to 14600 in steps of 100 per timer callback. Settings object at the launch:
+SoundMusPos -700, MusicEnabled 1, music available 1, SoundRandom 0.
+
++0x70 accumulates per-callback deltas (`L2.06184`..`L2.06185`); select zeroes it
+at `L2.06186`; another, unread writer also restarts it (R2-ENGINE-1099). It is
+not a DirectSound cursor.
+
+**Confidence.** High for this run and this save: the sequence and values were
+read. Index 2 as the interim random entry is the listed call site; that the
+same random value occurs on another run is not claimed.
+
+**Unknown.** The save's writing state, which no trace records; audible output;
+a town LOAD; another save or another run's selection.
+
+**Amends.** R2-ENGINE-837's Unknown on cold-LOAD music, for this mission save
+only; R2-ENGINE-336's mission-entry statement is observed here on one run.
+
+**Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
+question 2; `evidence/run-2-player.tsv`, `evidence/run-2-counters.tsv`.
+
+### R2-ENGINE-1097
+
+Launch B loaded the original-written town save `game0008` (Plagat) cold from
+the menu of a fresh process. Counters installed before the menu recorded, at
+128073 ms since the live start: set list (return `L2.06187`, town music body),
+stop in set list, select index 0 (return `L2.06181`), start (return `L2.06188`).
+Reads at 18:27:51.831 UTC: paused 0, open 1, fade 0, list count 1, index 0, source
+name `music\b14.wav`, area pick -1, +0x70 = 800. The source object held +0x14 =
+102777912 and +0x18 = 4467500, equal to that entry's `music.res` offset and size
+(R2-ENGINE-1095 for the field-meaning grade).
+
+**Confidence.** High for this run and this save.
+
+**Unknown.** The save's writing state; audible output; other towns and saves;
+another run's values.
+
+**Amends.** R2-ENGINE-837's Unknown on cold-LOAD music, for this town save only.
+
+**Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
+question 2; `evidence/run-3-player.tsv`, `evidence/run-3-counters.tsv`,
+`evidence/run-3-source.tsv`.
+
+### R2-ENGINE-1098
+
+Launch B opened the inn from the town by a click at 18:28:25 UTC and closed it by
+its Exit button at 18:28:49.706. The counters show one start at 186942 ms since the
+live start (18:28:49.897), return `L2.06188` in the town body, and no set list,
+stop or select hit between the town LOAD and that start. List count 1, index 0
+and source name `music\b14.wav` were unchanged across the close. +0x70 read 7900
+at 18:28:49.700, before the Exit click, and 9400 at 18:28:51.137, so the
+accumulation continued; no restart from zero occurred at the close.
+
+**Confidence.** High for this close of the inn in this run. The shop close, other
+rooms and the wider same-key rule are not read here.
+
+**Unknown.** Audible output and play position across the close; +0x70 is not a
+cursor. The town-exit transition: the town gate click returned the guard's
+refusal dialog, so no exit to a mission was reached; a mission is obtained in the
+inn, which was not run.
+
+**Amends.** R2-ENGINE-835's Medium, that a room continues the square's track,
+for this inn close only.
+
+**Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
+question 3; `evidence/run-3-player.tsv`, `evidence/run-3-counters.tsv`.
+
+### R2-ENGINE-1099
+
+Two one-entry tracks showed a lower +0x70 on a later read, with no select-entry
+counter hit in either span and the due time advancing. `menu.wav` in launch A
+(3528496 bytes) read 16000 at 18:12:51.552 and 22200 at 18:13:37.857; `b14.wav`
+in launch B (4467500 bytes) read 41200 at 18:28:32.313 and 7900 at 18:28:49.700.
+The moment of the restart was not read. Derived from `evidence/run-2-gap.tsv` and
+`evidence/run-3-gap.tsv` (first read + due-time gain - later read, against the
+entry size over 88200 bytes per second, R2-ASSET-083 format):
+
+| Track | Subtraction | Implied ms | Computed end ms |
+|---|---|---|---|
+| `menu.wav` | 16000 + 46300 - 22200 | 40100 | 40006 |
+| `b14.wav` | 41200 + 17400 - 7900 | 50700 | 50652 |
+
+A one-entry list repeats its key (R2-ENGINE-337).
+
+**Confidence.** High for the read values: a lower +0x70 with no select hit.
+Medium for a single restart near the computed end: it assumes one restart in the
+gap and a constant rate, the equality on two tracks is a numeric match, and the
+writer on the restart path was not read. The absence of a select hit is not
+evidence for or against a track end: the next-entry path of R2-ENGINE-337 goes
+through `L2.06189`, not select, so no hit is expected either way.
+
+**Unknown.** The writer of +0x70 on that path; the behaviour at a track end
+in a mission list.
+
+**Evidence.** [EXP-2151](../experiments/EXP-2151-rom2-music-run/RESULTS.md),
+questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
+`evidence/run-2-gap.tsv`, `evidence/run-3-gap.tsv`, counter tables.
