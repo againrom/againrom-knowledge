@@ -5816,6 +5816,45 @@ record every Unit and Human id, owner and bytes `[+0x1c0]+0` and `+1`.
 
 **Evidence.** EXP-2135 stage05 RU mission entry, `out/saves`.
 
+## Saved Unit template row 0
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-374 | One supplied mission-110 save stores Unit +0xc 0 in 22 of 260 Unit records, all in players.1.group.3; 16 original-made saves store it in 0 of 330 Units and 0 of 166 Humans. Which record faulted is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2145](../experiments/EXP-2145-rom2-iglezwaits-crash/RESULTS.md) |
+| R2-SESSION-375 | EN and RU ROM2 world.res are byte-identical with equal Units and Humans rows; the windows read of the EN dump hold the table counts 242 and 290, not the rows, so which data the process held is Medium. | High / Medium | ● active (branch candidate) | [EXP-2145](../experiments/EXP-2145-rom2-iglezwaits-crash/RESULTS.md) |
+
+### R2-SESSION-374
+
+Scope: `iglezwaits.sav`, decoded 383,804 bytes, walked to the end with no frontier, mission 110, plus 16 original-made saves named by SHA256 in the experiment; of the 16, 7 hold no Unit record and the 330 Units lie in 9 files of missions 10, 20 and 30.
+
+22 Unit records store word +0xc 0, packed word +0x14c 0 and an empty +0x80 name. They are `players.1.group.3` members 0..20 and 23. Their +0xe is 92 for 13 records, 96 for 7, 98 for 1 and 26 for 1. Their IDs +4 run 24728..24774.
+
+Members 21, 22 and 24 of that group store rows 156, 156 and 26.
+
+In the 16 original-made saves all 330 Unit and 166 Human records store a row with values; the rows run 26..264.
+
+No record of the 17 files stores a row without values (61 Units rows and 5 Humans rows) or a row outside the table.
+
+**Confidence.** High for the stored values in the 17 files. Medium as a statement about original writers, since the population is 16 saves. Unknown which of the 22 records faulted. The empty +0x80 does not separate the 22 from original Units: all 330 original Units also store it empty.
+
+**Unknown.** Which unit faulted: the owner test at `L2.06000` and the order of the unit registry at `[L2.00325]` depend on runtime memory that the dump does not hold.
+
+**Evidence.** EXP-2145 RESULTS.md questions 4 and 5; evidence/generated/units.tsv, census.json.
+
+### R2-SESSION-375
+
+Scope: `world.res` of the EN and RU roots; one EN crash dump.
+
+Both `world.res` have SHA256 `863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`, 160,108 bytes. Their `data/data.bin` has SHA256 `aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`, 149,971 bytes. Units and Humans rows and values are equal.
+
+The windows read of the dump's memory hold module .data with collection `L2.00146` count 242 and `L2.00148` count 290, not the table contents.
+
+**Confidence.** High for the equal archives and rows. Medium that the process used those tables, since a loose `Data.bin`, `patch.res` and the 110 map files of both roots were not examined and the dump names no opened file.
+
+**Unknown.** What a full-memory dump of the same load would show for the unit header and row. What those files would change.
+
+**Evidence.** EXP-2145 RESULTS.md question 6; evidence/generated/census.json, memory.json.
+
 ## Inn refresh and persistence: bounded static paths
 
 | ID | Claim | Confidence | Status | Evidence |

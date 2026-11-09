@@ -1143,6 +1143,18 @@ In the 22 owner saves all 216 Humans store +0xc in 1..289 (highest 274) and a
 +0x14c word equal to that row's serverID word; 29 store a hero type (33 or
 35) and so load element 5. — R2-SESSION-298
 
+A record for which slot +0x30 is false loads template row pointer +0x3c as
+Units element +0xc, with no bound check (that slot +0x30 separates Humans is
+Medium; its body is unread). Units element 0 is built with an array base of 0
+and is not loaded by the Units load loop, so a saved +0xc of 0 gives a row
+whose array base stays 0 unless another route writes it (Medium).
+— R2-ENGINE-1013
+
+One save written by another program stores Unit +0xc 0 in 22 of its 260 Unit
+records. In the 16 original-made saves of 2026-10-30 (7 of them hold no Unit
+record; the 330 Units lie in 9 files of missions 10, 20 and 30), 0 of 330 Units and 0 of
+166 Humans store it, and each stored row has values. — R2-SESSION-374
+
 The base raw12 block stores tile X/Y in bytes 0/1 and fractions in bytes 4/5.
 Player-1 positions are 0/0 in the four town-like files, 11/41 in
 game0001/0004/0005/9999 and 21/41 in game0006; fractions are 128/128.

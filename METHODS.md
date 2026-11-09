@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 4855. Observation: 143. Static analysis: 4036. Mixed: 676.
+Claims labelled: 4859. Observation: 143. Static analysis: 4040. Mixed: 676.
 
 ## Ledger ai
 
@@ -2946,6 +2946,8 @@ Claims labelled: 4855. Observation: 143. Static analysis: 4036. Mixed: 676.
 | R2-ENGINE-976 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-977 | mixed | ✔ promoted (branch candidate) |
 | R2-ENGINE-978 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-1012 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1013 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-967 | static analysis | ✔ promoted |
 | R2-ENGINE-968 | mixed | ✔ promoted |
 | R2-ENGINE-969 | mixed | ✔ promoted |
@@ -3141,6 +3143,8 @@ Claims labelled: 4855. Observation: 143. Static analysis: 4036. Mixed: 676.
 | R2-SESSION-358 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-362 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-363 | static analysis | ● active (branch candidate) |
+| R2-SESSION-374 | static analysis | ✔ promoted (branch candidate) |
+| R2-SESSION-375 | static analysis | ● active (branch candidate) |
 | R2-SESSION-366 | mixed | ✔ promoted |
 | R2-SESSION-367 | static analysis | ✔ promoted |
 | R2-SESSION-368 | static analysis | ✔ promoted |

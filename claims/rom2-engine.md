@@ -26016,6 +26016,51 @@ appear would settle it.
 **Evidence.** EXP-2138 out/selection-groups-start.tsv, units-*.tsv,
 phases.tsv, types.tsv, owners.tsv and counts.json.
 
+## Unit template row 0 and the send path
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1012 | EN ROM2 crash dump of one save: read of 0x10 at L2.05983 in L2.01056, because the array base at [unit+0x3c]+0xc is 0; reached from LOAD entry L2.00826 after its document reader, by the session update through L2.05693. | High / Medium | ✔ promoted (branch candidate) | [EXP-2145](../experiments/EXP-2145-rom2-iglezwaits-crash/RESULTS.md) |
+| R2-ENGINE-1013 | EN Unit LOAD: +0x3c is Units element +0xc unbounded; the loop skips element 0, so a saved +0xc of 0 gives element 0, whose array base stays 0 unless another route writes it (Medium), and a read of its element 4 at `L2.05983` then faults. | High / Medium | ✔ promoted (branch candidate) | [EXP-2145](../experiments/EXP-2145-rom2-iglezwaits-crash/RESULTS.md) |
+
+### R2-ENGINE-1012
+
+Scope: one Windows crash dump of EN `allods2.exe` (dump SHA256 `894132e730488270855cf96e317cb97ede63e8e115d06bd3d831b8ddf30cad0b`).
+
+Exception `0xC0000005`, read of `0x10`, at `L2.05983`: `mov edx, dword ptr [eax]`. Registers EAX `0x10`, ECX 0, EDX 4.
+
+`L2.05984..L2.05985` load `[unit+0x3c]`, add 8 and call `L2.02667(4)`, which calls `L2.04051`, which computes `[this+4] + 4*4`. ECX 0 is that base and EDX 4 the index, so `[[unit+0x3c]+0xc]` was 0. A null +0x3c would fault at `L2.05986`.
+
+Return addresses from the EBP chain, each with the call before it read: `L2.05987` (`L2.05988` to `L2.01056`), `L2.05989` (`L2.05990` to `L2.05693`), `L2.05991` (`L2.02724` to `L2.02723`), `L2.05992` (`L2.05993` to `L2.00171`), `L2.05994` (`L2.05995` to `L2.00235`), `L2.05996` (`L2.05997` to `L2.04407`), `L2.05998` (`L2.05999` to `L2.03120`), `L2.04935` (`L2.05478` to `R2.0026`), `L2.04936` (`L2.02972` to `L2.00826`).
+
+The LOAD entry `L2.00826` (R2-ENGINE-814; it names `L2.00289` the server reader, which this card calls the document reader) calls the document reader `L2.00289` at `L2.01093` before the call at `L2.05478` on the same path.
+
+In the listed window the route to `L2.05983` requires virtual slot +0x30 false at `L2.02675` and unit +0x14 different from the recipient at `L2.06000`.
+
+**Confidence.** High for the exception, the registers, the instruction and the routine bytes `L2.06001..L2.06002`, and for the return addresses as stack words. Medium that ECX 0 is the array base read through `L2.02667` and `L2.04051`, whose bodies lie outside the compared interval (the registers fit them exactly: `0 + 4*4 = 0x10`). Medium for the composed chain and its placement under the LOAD entry, as in R2-ENGINE-814 and R2-ENGINE-936. Medium for the bodies outside `L2.06001..L2.06002`: the install is tied to the running module by timestamp 925380143, image size 2,969,600 and equal bytes of that interval only.
+
+**Unknown.** The message that selects arm `L2.05684`; the unit's identity, since its heap memory is absent.
+
+**Evidence.** EXP-2145 RESULTS.md questions 1 and 2; evidence/generated/memory.json, code/fn-L2.01056.txt, fn-L2.04051.txt, fn-L2.05693.txt, fn-L2.02723.txt, arm-L2.05684.txt, fn-R2.0026.txt, load-entry-L2.00826.txt.
+
+### R2-ENGINE-1013
+
+Scope: EN `allods2.exe` routines listed; the Units table of `data.bin`.
+
+Base serializer `L2.03196` loads word +0xc at `L2.04064..L2.03608`. In the Unit serializer `L2.01090` the load arm ends with `L2.06003..L2.06004`: `+0x3c = L2.04941(+0xc)` on the collection `L2.00146`. When virtual +0x30 is true it sets +0x3c to 0. `L2.04941` calls `L2.05811`, which returns `[this+4] + i*0x30`; no bound check.
+
+The Units arm `L2.06005..L2.04073` calls SetSize `L2.06006` with the saved count, then calls element slot +8 for elements 1 to count-1. Element 0 is not loaded there. SetSize, when the array is empty (base 0, the branch at `L2.06007`; the branch at `L2.06008` is unread), allocates and constructs every element through `L2.06009`; the placement helper `L2.06010` and the fill `L2.00341` are unread and read by call shape. `L2.06009` calls the fill and `L2.06011`. `L2.06011` calls `L2.06012`, which calls `L2.06013` on the +8 member; `L2.06013` zeroes that array's +4 base, the word at element +0xc.
+
+The dump's .data holds the collection at `L2.00146` with count 242 and Humans at `L2.00148` with count 290.
+
+**Confidence.** High for the LOAD rule and the construction and skip of element 0, from the listed bodies. Medium that the Units arm's collection `[ebp-0x10]+0x8c` is `L2.00146`: the link is the numeric match `L2.00811 + 0x8c`, as in R2-ENGINE-741 for Humans, supported by the matching count 242 in the dump's `.data`. Medium that no other route writes +0xc or the Units array. The dword scan finds code holding the immediate `L2.00146`, 15 places, six of them read in committed listings; `L2.06014`, `L2.06015`, `L2.06016`, `L2.06017`, `L2.06018`, `L2.06019`, `L2.06020`, `L2.06021` and `L2.06022` have no listing. It does not reach code using `L2.00811+0x8c` (the load arm and `L2.02665` themselves use that form), and it is not a census of writes to field +0xc.
+
+**Unknown.** What loader helper `L2.06023` stores in the +8 array of a loaded row.
+
+**Amends.** Narrows, without contradicting, R2-ENGINE-524 (the Units lookup `L2.02665` and the Units fill were unread) and R2-ENGINE-815 (the constructor of row 0 was unread). Hires 8..20 build a Unit from Units index 0 per R2-ENGINE-524; its reach into `L2.01056` is unread.
+
+**Evidence.** EXP-2145 RESULTS.md question 3; evidence/generated/code/ser-base-L2.03196.txt, ser-unit-L2.01090.txt, dbser-units-arm.txt, fn-L2.06006.txt, fn-L2.06009.txt, fn-L2.06011.txt, fn-L2.06012.txt, fn-L2.06013.txt, scan/dword-L2.00146.txt.
+
 ## Inn refresh and persistence: bounded static paths
 
 | ID | Claim | Confidence | Status | Evidence |
