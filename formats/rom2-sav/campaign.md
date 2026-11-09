@@ -747,6 +747,10 @@ call sites a defeat does not call LeaveLocation (Medium). — R2-ENGINE-422, R2-
 In the victory arm, when GetVar(768) is at least 120, the client adds the Hall
 of Fame row before posting the credits. — R2-ENGINE-1065
 
+One EN run of a completed campaign save added the row with score 61235 at 0-based index 2 of ten. Hall+4 was 0 at the
+load and 1944 after the arm; Hall+8 was 19; the field at `[[app+0xd0]+0x3f6c]+0x110` read 62653614 (hero naming Medium); the row equals the published formula
+for those inputs. — R2-ENGINE-1088, R2-ENGINE-1089, R2-ENGINE-1090
+
 ## Global map
 
 The 0x41d and 0x42d arms open the global map. It runs in route mode after

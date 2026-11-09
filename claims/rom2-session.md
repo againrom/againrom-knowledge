@@ -25,6 +25,7 @@ committed and are reproducible only by running `tools/ghidra/DecompAddrs.java` a
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-384 | The ROM2 SAV pair record is written by the Hall object (EN L2.00382 read, RU masked equal); its two final u32 are Hall+4 then Hall+8. Reader tail per R2-SESSION-035. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+| R2-SESSION-390 | The measured hero+0x110 value 62653614 occurs once as a dword in game0055 (file offset 0x2010) and once in game0054 (0x200f); no block or field coordinate is established; a number match only. | Medium | ● active (branch candidate) | [EXP-2150](../experiments/EXP-2150-rom2-fame-run/) |
 
 ### R2-SESSION-384
 
@@ -46,6 +47,14 @@ does on a short file is Unknown (the file object's read path was not traced for 
 
 **Evidence.** EXP-2148 evidence/generated/win/en-ser-L2.00382.lst, ru-ser-guess-R2.0182.lst, en-site-L2.06118.lst,
 en-site-L2.06119.lst, en-site-L2.06120.lst; evidence/run-values.txt.
+
+### R2-SESSION-390
+
+The dword 62653614, the value of hero+0x110 read from the process in the EN run of R2-ENGINE-1089, occurs exactly once in `game0055` (188046 bytes, file offset `0x2010`) and exactly once in `game0054` (181378 bytes, offset `0x200f`), by byte search of the whole files at every byte alignment. The block and field that contain the two matches are not identified; a matching number is the only link.
+
+**Confidence.** Medium: number equality, one place per file. Unknown whether it is the field the run read, and the block coordinate.
+
+**Evidence.** EXP-2150 evidence/run-values.tsv; RESULTS.md.
 
 ## Transports and sockets
 

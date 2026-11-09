@@ -26434,6 +26434,9 @@ Twenty pairs have equal instruction text after masking every six-or-more-digit h
 | R2-ENGINE-1065 | ROM2 adds the Hall row at EN L2.04501 in the victory arm when GetVar(768) is at least 120, before credits; insertion is first index with score <= new, list cut to 10. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
 | R2-ENGINE-1066 | ROM2 Hall score is trunc(B/(C*10.0)*A) with C = Hall+4, A = Hall+8, B = hero+0x110, or trunc(B/500000.0*A) when C is 0; x87, truncated by helper L2.02708. | High / Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
 | R2-ENGINE-1067 | ROM2 Hall+4 adds [L2.00805]+4 / 16 at the win arm; L2.04497 is called at startup, New Game and L2.06084; a SAV stores Hall+4 and Hall+8; hero+0x110 writers are Unknown. | Medium | ● active (branch candidate) | [EXP-2148](../experiments/EXP-2148-rom2-fame-score/) |
+| R2-ENGINE-1088 | One EN run of game0055 adds Hall row 61235 at 0-based index 2 of ten; the score-0 tenth row leaves. Seen in process memory and the Hall view; root famehall.dat unchanged, file write Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2150](../experiments/EXP-2150-rom2-fame-run/) |
+| R2-ENGINE-1089 | At that win Hall+4 was 0, then 1944 (adder arg 1944 equals 31104/16, as R2-ENGINE-1067 predicts); Hall+8 was 19; hero+0x110 read 62653614, last 12.6 s before the add; Hall reads bracket the add. | High / Medium | ● active (branch candidate) | [EXP-2150](../experiments/EXP-2150-rom2-fame-run/) |
+| R2-ENGINE-1090 | In that run the formula of R2-ENGINE-1066 gives 61235 from B 62653614, C 1944, A 19: equal to the added row; C is nonzero, so the first branch. | High | ● active (branch candidate) | [EXP-2150](../experiments/EXP-2150-rom2-fame-run/) |
 
 ### R2-ENGINE-1064
 
@@ -26547,3 +26550,47 @@ equal the formula of R2-ENGINE-1066.
 
 **Evidence.** EXP-2148 evidence/generated/win/en-f-L2.04423.lst, en-site-481318.lst, en-menu-486289.lst,
 en-site-L2.06114.lst, en-site-L2.04500.lst; evidence/nav/census6.tsv; RESULTS.md question 4.
+
+### R2-ENGINE-1088
+
+One EN run (`allods2.exe`, sha256 `0eaa9673d74d26dcf245d7233da5757a88769ecfe3cc1a706f34fb4e93c1b0c7`), resumed from
+the owner's save `game0055`, took the campaign to Victory. The harness ended the ending movie with Esc and the credits with Esc; a fully played ending was not run, so whether it takes the same path is Unknown. `L2.01855` was hit once (`ecx` = Hall, return `L2.06171`), 6 ms after the Esc that ended the movie. The Hall array read before and after
+held ten rows with these scores: 70006, 65817, 56966, 53043, 44925, 37399, 29751, 25479, 18114, 0 before; 70006, 65817, 61235, 56966, 53043, 44925, 37399, 29751, 25479, 18114 after.
+The new row's score is 61235 at 0-based index 2; its name bytes equal the hero's at +0xec. The Hall view drew the same list, position 3 showing 61,235: read by eye on one capture (sha256 `3f56579aea6df12fdcc00df3b5a56d644fbd7e97e1a76999d3e10b9bd191820b`), which is not derived by script.
+
+The root's `famehall.dat`, carrying the read-only attribute, is byte-equal before and after the run. Counting breakpoints on `L2.02060` and `L2.02062`, set after the row was added and the Hall view opened, showed 0 hits by the time that view closed. The process did not reach a program exit.
+
+**Confidence.** High for the row in the process and on the screen, in this one run. Whether and when the original writes the file is Unknown here.
+
+**Amends.** R2-ENGINE-1065: one observation of the arm adding a row, with `L2.01855` hit once.
+
+**Evidence.** EXP-2150 evidence/run-values.tsv; RESULTS.md.
+
+### R2-ENGINE-1089
+
+Same run. Hall is the `ecx` of the one hit of `L2.00383` at load (return `L2.06172`): Hall+0xc = 10, the array behind Hall+0x10 holds the file's ten scores and Hall+8 equals the save's second tail value 19 (R2-SESSION-384).
+
+| Field | Before the arm | After the adder |
+|---|---|---|
+| Hall+4 | 0 | 1944 |
+| Hall+8 | 19 | 19 |
+| hero+0x110 | 62653614 | 62653614 |
+| `[L2.00805]+4` | 31104 | 0 |
+
+The adder `L2.04423` was hit once, argument 1944, return `L2.06173`, which is 31104 / 16. Hero is the read path `[[app+0xd0]+0x3f6c]` with app = Hall-0x598. Reads at 18:08:01 and 18:08:17 UTC bracket the `L2.01855` hit at about 18:08:14.6 UTC and agree on Hall+4 and Hall+8. Hero+0x110 read 62653614 at each of four reads from 18:07:21 to 18:08:01; at 18:08:17 the path `[session+0x3f6c]` was null, so no read follows the insertion. The Hall bracket shows no change across the insertion; it is not a read at the instruction. `[L2.00805]+4` read 31104 at 18:07:41 and 0 at 18:07:55.
+
+**Confidence.** High for the values read in this run and for Hall's identity. Medium for naming the object the player's hero (R2-ENGINE-336); the new row's name equals its name. One run; values are of this save and run, not constants.
+
+**Amends.** R2-ENGINE-1067: one run reads the win arm's inputs: the adder argument equals 31104 / 16, as R2-ENGINE-1067 predicts, and Hall+4 was 0 at the load of this save; the link to `[L2.00805]+4` stays graded by R2-ENGINE-1067.
+
+**Evidence.** EXP-2150 evidence/run-values.tsv; RESULTS.md.
+
+### R2-ENGINE-1090
+
+`trunc(62653614 / (1944 * 10.0) * 19)` = 61235, computed by `derive.py` in double precision with C != 0, the first branch of R2-ENGINE-1066. It equals the row added in R2-ENGINE-1088.
+
+**Confidence.** High for this row. The input values rest on R2-ENGINE-1089 at its grades. One row of one run on EN; RU was not run.
+
+**Amends.** R2-ENGINE-1066: the formula's first branch matches one observed row.
+
+**Evidence.** EXP-2150 evidence/run-values.tsv; RESULTS.md.

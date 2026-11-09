@@ -445,6 +445,9 @@ candidate writers of the base fields, +0xbb..+0xbd, +0x114..+0x12b and
 +0xd4..+0xd7. The main skill +0x23c is set from the row only when the
 template name contains `_Hero` or `Start_`. — R2-ENGINE-319
 
+A run measured the hero field the Hall score reads as 62653614; that dword occurs once each in two saves at file
+offsets 0x2010 and 0x200f. Its block is not established (Medium). — R2-SESSION-390
+
 #### Hero inventory
 
 The bag at gate +0x7c is an item list: u32 count, Item references head to
