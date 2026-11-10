@@ -71,3 +71,20 @@ specific target-retention/loss paths (R2-ENGINE-1111, R2-ENGINE-1112), not all
 pursuit endings. Clock delivery and EN body coverage retain their boundaries
 (R2-ENGINE-1114, R2-ENGINE-1115). The [planner table](orders.md) names the
 search/occupancy reads and runtime controls still needed.
+
+The orders page's static continuation adds bounded clauses. The selector calls
+the stop chain for order 3 when the target's +0x54 is 0x10 (R2-ENGINE-1121; the
+order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium)
+and stops order 1 on the +0x90 arrival flag at the destination
+(R2-ENGINE-1121). The attack planner stores no order; with target +0x4c bit 8
+set it runs the idle planner, and with a null or self target it first takes the
+first unit of L2.02117 and runs the idle planner only when none is found
+(R2-ENGINE-1120). Byte +0x4c bit 8 has a bounded census of byte stores
+(R2-ENGINE-1122). A script action switch reaches Group methods; the case
+routines read store only into a result array
+(R2-ENGINE-1123, R2-ENGINE-1124). The slot +0x34 blow and approach wrapper
+(R2-ENGINE-1125), the constant preference bytes (R2-ENGINE-1126), the standing
+helpers (R2-ENGINE-1127), the EN input cells and order-4/0x11 setters
+(R2-ENGINE-1128) and the clock imports and RU mode selector (R2-ENGINE-1129)
+keep the grades stated on the orders page. Root correspondence
+remains bounded by R2-ENGINE-1115.
