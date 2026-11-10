@@ -743,7 +743,10 @@ pair fills the last tag-41 spell at its value byte L and adds, in order,
 and one stat line. Spell 18 is the only spell the description routine's own code compares. The stat line is
 chosen by six getters that compare spells 4, 8, 11, 13, 14, 15, 19, 20, 21 and 28, and the
 shared fill branches on 12, 18 and 23. Spell 18 shows "Duration: 0.0 - d" with half
-the fill's duration (`R2-ENGINE-998`, High / Medium). A weapon with spell 18
+the fill's duration (`R2-ENGINE-998`, High / Medium). In EN the item factory
+builds a weapon only for ID kind (ID >> 8) & 0xf equal to 1, so a staff, a
+Weapons row, takes the weapon branch (`R2-ENGINE-1141`, High dispatch, Medium
+for the staff's stored ID; RU not read). A weapon with spell 18
 at level L therefore reads "casts Stone Curse", "Range: r" with the weapon's
 own range column, or 1, and "Duration: 0.0 - d" with d = floor(2.4·L)/16
 printed as `%5.1f`, and no tag-50 Damage or stat line (the weapon's own template tags print through other arms and

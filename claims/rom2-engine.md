@@ -26794,6 +26794,15 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1127 | ROM2 helpers L2.02430 and L2.02408 only turn and set state; read part of L2.01527 prepares casts or clears +8. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1128 | EN input cells call the RU method addresses minus 0xa039; order 4 comes from the order-0x19 arm, 0x11 from a script action. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1129 | ROM2 clock imports are timeGetTime in both roots; in the +0x41c bit-0-set branches RU L2.01223 calls one of four routines (schedulers per R2-ENGINE-1114). | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
+| R2-ENGINE-1136 | Read ROM2 attack bodies from input to cast routine contain no sight operand or call of the sight builders; 92 direct callees without a listing here and the tails of L2.01527, L2.01512 and L2.00034 are unread. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1137 | ROM2 Group sight and the idle builder add a unit when the grid byte at its anchor cell is set, no other body cell read; an empty live list is refilled from fallback +0xa88 with no cell test. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1138 | ROM2 cast routine, apply call and target sender compare no distance in the bodies read; a staff-armed mage pays no mana; apply tail and four helpers unread. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1139 | ROM2 approach routes to the target's anchor cell; by the code read, admission needs a unit facing the target with edge distance to the nearest body cell within range; no run was made. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1140 | ROM2 size slot +0x1c returns byte +0x49; Units tokenSize is 2 for typeIDs 66 and 68 and 3 for 71 in EN and RU. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1141 | EN ROM2 item factory takes kind (ID>>8)&0xf; only kind 1 builds a weapon, so a Weapons-row staff is kind 1. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1142 | Read ROM2 attack and cast order bodies write no command byte +0x78; the range producer and selected-spell policy read it; its writer and any value met by an attack order are Unknown. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1143 | ROM2 order 0xd at a unit admits by edge distance against spell +9, except a self target; the eight scan hits of packed-cell metric L2.01520 lie in L2.06342..L2.06343, RU only. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1144 | By the code read, a ROM2 staff mage with no affordable selected spell and no winning special-spell draw enters the staff's spell cast once its cell is within +0x12c of the target's nearest cell; no run was made. | Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 
 ### R2-ENGINE-1104
 
@@ -27126,3 +27135,118 @@ Import slots RU L2.02271 and EN L2.02270 both name WINMM.dll timeGetTime (pefile
 **Amends.** R2-ENGINE-1114's unread RU import and mode selector.
 
 **Evidence.** EXP-2153 generated/tables/ru-clock-import.tsv, en-clock-import.tsv, win/ru-scheduler-modes.lst, scan/ru-census-pass1.tsv.
+### R2-ENGINE-1136
+
+Population: RU and EN allods2.exe, Capstone listings of input L2.02844/L2.05607 (41), scorer L2.00057/L2.04954 (160), order-3 setter L2.02812/L2.05582 (35), reset L2.01585/L2.02685 (67), selector L2.01725/L2.02477 (200 from the head, covering the order-3 arm L2.05940 and the order-0xd arm L2.06344), attack planner L2.01530/L2.03461 (188), range L2.01728/L2.05343 (35), activity 5 L2.02437/L2.06208 (40), admission L2.01574/L2.05530 (40), strike start L2.02407/L2.05535 (20), approach wrapper L2.01577/L2.05531 (31), approach L2.01578/L2.05532 (256, with the tail from L2.06345 to its end), actor arm from L2.02871/L2.06346 (256), cast routine L2.00027/L2.03854 (206, whole), apply call L2.00035/L2.05342 (23), target sender L2.02155/L2.02153 (71) and the first 256 instructions of L2.00034/L2.01692. All pairs are masked-equal except the actor arm, whose only non-address differences are two loads of the weapon's Spell, +0x88 in RU and +0x84 in EN. Forms searched in these listings: operands +0x1a4 (activity mask, R2-ENGINE-087), +0x1b8, map +0x58ec0 and grid +0x2a008 (sight grid, R2-ENGINE-502), the effect constant 0x1000, and calls of L2.02473, L2.02404, L2.01586, L2.01587, L2.02119 and L2.01589. None occurs. A census of word operand +0x1a4 over both .text sections (46 sites each) has no site in these bodies; the grid is reached through an immediate add that the census form does not see, so its negative rests on the listings.
+
+The selector head stops order 3 only when the target's +0x54 is 0x10 (R2-ENGINE-1121). The planner (R2-ENGINE-1120) first runs the idle planner when the target's +0x4c bit 8 is set, then calls cast preparer L2.02111 for a carried slot that wins its draw (R2-ENGINE-651); otherwise it splits on owner +0x2c: nonzero sends a mage to offensive choice L2.00056, which can call L2.01524 and return 1, zero sends it to selected-spell policy L2.01527; a unit still without a cast stores prepared 5 (the zero-means-player reading is R2-ENGINE-362/501, Medium). A computer unit's target can enter through the lists of R2-ENGINE-1137; the callers of those builders were not counted, and R2-ENGINE-651 lists other target sources (the first unit of L2.02117, the nearest unit of kind 3 from L2.03475, a Group command +0x20 and guard L2.02438). A player's target comes from input L2.02844, whose cursor pick is unread.
+
+**Confidence.** High for the absence of the named operands and calls in the listed bodies, both roots. Medium for the route: the 32 RU route listings call 111 distinct direct targets and 19 of them have a listing; the other 92 are unread here, among them L2.01527 past L2.06314 (R2-ENGINE-1127), L2.01512, L2.05182, L2.02848, L2.06347, L2.05533, L2.02113, L2.06348, the cast routine's helpers L2.00031, L2.03855, L2.00032, L2.00033, L2.00042, L2.02312 and L2.01570, L2.00034 past L2.06349, and, from the listings' call lines, L2.02842, L2.04689, L2.04690, L2.02405, L2.02402, L2.01522, L2.02431, L2.00490, L2.05184, L2.05782, L2.06350, L2.06219, L2.06351, L2.05193, L2.00549, L2.02822, L2.06352 and the callees of selector arms other than 3 and 0xd. L2.02111, L2.02117 and L2.00056 are read in R2-ENGINE-1120, L2.00044 and L2.02338 in R2-ENGINE-900 (High), none of them for sight; L2.01527's selected-spell policy is read to L2.01528 in R2-ENGINE-350 (Medium).
+
+**Unknown.** Whether the player's cursor pick admits an unseen unit, the callers of the sight builders and the unread callees. Read them; run an attack order on a unit outside the side's sight.
+
+**Amends.** R2-ENGINE-1106's admission and R2-ENGINE-926's cast admission: the read route around them tests no sight.
+
+**Evidence.** EXP-2154 generated/win/*input-attack.lst, *score.lst, *setter-attack.lst, *reset.lst, *selector.lst, *attack-planner.lst, *range-source.lst, *activity5.lst, *admission.lst, *strike-start.lst, *approach-wrapper.lst, *approach.lst, *approach-tail.lst, *actor-action-arm.lst, *cast-routine.lst, *cast-target-apply.lst, *sender-target.lst, *apply-head.lst, their mask files, field-differences.tsv, scan/*-census-sight.tsv.
+
+### R2-ENGINE-1137
+
+Group sight L2.02473/L2.04963 (160) and idle builder L2.02404/L2.06311 (151, whole) are masked-equal. Each clears the grid at map +0x58ec0 through L2.02413, marks it from the member's or actor's packed cell through L2.01586, walks the world list [map]+0xa456c and appends a unit when byte grid+0x2a008+packed cell is nonzero (builder RU L2.06353..L2.06354). The packed cell is word +2 of the unit's position object +0x10 (L2.01521, 9 instructions, both roots). RU writer L2.02120 (35, read) stores cell bytes +0 and +1 from its two arguments and word +2 = (byte +1 << 8) + byte +0, so for that writer the word is the anchor cell that distance reads as bytes +0 and +1 (L2.02411, L2.02412, R2-ENGINE-1106); other writers of the position object were not read. On this path no other cell of the unit is read. Edge distance centres a unit of size s at the anchor plus (s-1)/2 cells on each axis (R2-ENGINE-1139), and the fog stamp of sizes 2 and 3 extends to +x and +y (R2-ENGINE-646): the anchor is the low-x, low-y cell of an s by s body. On the marked-cell path a 2x2 or 3x3 unit is added when that one cell is marked.
+
+Two other paths add or mark with no anchor test. The builder (L2.06355..L2.02418, RU) moves the fallback list +0xa88 into the candidates with no grid byte test when the live list is empty; Group sight has the same shape (R2-ENGINE-1112). The marking step also marks the command cell, word +0x58 of [unit+0x1c4], when it is nonzero (builder L2.06356..L2.06357, Group sight L2.05053..L2.06358; R2-ENGINE-1112 limits it to an owner +0x2c nonzero), so a unit can be marked at a cell that is not its own anchor.
+
+**Confidence.** High for the one-byte tests in both bodies and roots. Medium for the anchor being the low corner (arithmetic of L2.01588 and R2-ENGINE-646's EN stamp, not a footprint writer), for word +2 equal to cell bytes +0 and +1 for every writer (R2-ENGINE-654 uses the position words +2 as cells, inferred), and for the marking itself (R2-ENGINE-502's grades).
+
+**Unknown.** Other grid readers, other writers of the position object and whether client display of a unit tests other cells. Read the remaining +0x2a008 readers; run a large unit with only a non-anchor cell in sight.
+
+**Amends.** R2-ENGINE-1112 and R2-ENGINE-502: "units on marked cells" tests only the anchor cell on the marked-cell path.
+
+**Evidence.** EXP-2154 generated/win/*group-sight.lst, *candidate-builder.lst, *packed-cell.lst, ru-aim-cell.lst and their mask files.
+
+### R2-ENGINE-1138
+
+Cast routine L2.00027/L2.03854 (206, whole, masked-equal): a mage with no item at +0x68 tests and subtracts mana; the actor arm stores the weapon at +0x68 before a staff cast, so that cast pays none. The aim is the target's position; for a target of size above 1 it is (L2.03515 - 1, L2.03516 - 1), and those RU helpers (23 each) return the coordinate plus (s-1)*128, so the aim is the body centre minus 1/256 cell. A delay is computed from the result of L2.00031 (unread, called with the unit's position object +0x10 and a local) and a speed; the routine sends through L2.03855 to L2.02155 (unit) or L2.02156 (point). In the instructions read it compares no distance and no range; its failure exits through L2.00042, L2.01570 and the comparison after L2.02120 lie behind helpers that are unread. L2.00035 (23) calls L2.00034 unless the spell is 11. The first 256 instructions of L2.00034 (to L2.06349) compute power, repeat the aim, exit on target slot +0x2c or +0x4c bit 8 and build damage objects, with no distance comparison. Sender L2.02155 (71) builds packet 0x86 with no comparison.
+
+**Confidence.** High for the comparisons and calls of the listed bodies in both roots. Medium for "no re-test at release": L2.00034 past L2.06349, L2.00031, L2.00042, L2.01570, L2.02312 and the other helpers named in R2-ENGINE-1136 are unread.
+
+**Unknown.** The apply tail to its end. Read it; a run reads the distance at state 0xd entry and at application.
+
+**Amends.** R2-ENGINE-543's cast try: it re-tests no distance and a staff cast pays no mana. R2-ENGINE-1106's application distance L2.02339 belongs to strike path L2.02315, which the staff cast does not take.
+
+**Evidence.** EXP-2154 generated/win/*cast-routine.lst, *cast-target-apply.lst, *apply-head.lst, *sender-target.lst, ru-aim-x.lst, ru-aim-y.lst, ru-aim-cell.lst and their mask files.
+
+### R2-ENGINE-1139
+
+Approach L2.01578/L2.05532 (whole with its tail): the goal is the target's packed cell L2.01521(target+0x10), word +2, which by writer L2.02120 is the anchor cell (R2-ENGINE-1137, Medium for other writers); d = L2.01588(unit, target). Off a cell centre it continues step L2.02848; centred with d no greater than the range it turns (L2.05533); otherwise it counts movement +0x78, resets the route when movement +0x7c is not the target and searches through L2.05182(unit, x, y, 1, target). Activity 5 recomputes the range with L2.01728 and admits through L2.01574 (facing equal to heading and d within range, R2-ENGINE-1106), else calls the approach and state 1. The approach wrapper passes command byte +0x14 as the approach's range (L2.01577: mov dl,b[ecx+0x14]); admission uses the fresh L2.01728 value, so the two agree only while +0x14 equals it. Admission compares the byte-masked values with a signed jg, so it admits at d at most the range; the approach's test at L2.06359 has the same sense. "Stops" is a reading of code; no run was made.
+
+L2.01588 (117, both roots): each coordinate is 256*cell + fraction plus (s-1)*128; per axis |difference| - (sA+sB)*128, clamped at 0; result floor(max/256) + 1. With centred positions and a one-cell attacker this is the Chebyshev distance from the attacker's cell to the nearest cell of the target's body anchor..anchor+s-1, and 1 when the attacker is beside or inside it. A one-cell target is admitted at Chebyshev distance range; a target of size s at range from its nearest cell, which measured to the anchor is range from the low-x/low-y side and range + s - 1 from the high side. Sight is not a term (R2-ENGINE-1136).
+
+**Confidence.** High for the arithmetic, the signedness and the local branches; no run was made, so the stop position is a reading of code. Medium that admission happens only at cell centres (R2-ENGINE-546 and the approach's off-centre branch; admission itself ignores L2.00490) and for the route shape (L2.05182 unread).
+
+**Unknown.** Route choice around obstacles and admission off a centre. Read L2.05182 and L2.02848; a run reads both cells at state 0xd entry.
+
+**Amends.** R2-ENGINE-1106's edge distance is the nearest-body-cell Chebyshev distance; R2-ENGINE-1125's approach callee is read.
+
+**Evidence.** EXP-2154 generated/win/*approach.lst, *approach-tail.lst, *approach-wrapper.lst, *activity5.lst, *admission.lst, *edge-distance.lst, *packed-cell.lst and their mask files.
+
+### R2-ENGINE-1140
+
+Slot 7 (+0x1c) of the Unit vtable RU L2.02314/EN L2.04102 and the Human vtable RU L2.00218/EN L2.00217 is L2.04691/L2.06360 (9, masked-equal), which returns byte +0x49. The Units stat reader writes tokenSize there (R2-ENGINE-777, High / Medium). In the committed EN and RU Units tables of EXP-2105, titles 30 and 32 read typeID and tokenSize (parameters 29 and 31, R2-ASSET-107). typeID 66 (Ogre, Ogre.2 to Ogre.5) and 68 (Troll, Troll.2 to Troll.5) have tokenSize 2; typeID 71 (Dragon, Dragon.2 to Dragon.5) has 3. EN equals RU for these 15 rows.
+
+**Confidence.** High for the slot body and the table values. Medium that a placed creature's +0x49 holds its row's value (R2-ENGINE-777's creation clause).
+
+**Unknown.** Slot +0x1c of other classes and the live +0x49 of a placed Ogre, Troll or Dragon. Read the remaining vtables; read the byte in a run.
+
+**Amends.** R2-ENGINE-1106's incomplete size meaning: the Unit and Human size slot is read.
+
+**Evidence.** EXP-2154 generated/tables/*-vt-unit.tsv, *-vt-human.tsv, win/*size-slot.lst, mask/size-slot.tsv, data/unit-sizes.tsv, data/unit-sizes-inputs.tsv.
+
+### R2-ENGINE-1141
+
+EN L2.05906 (51, whole) splits an item ID into kind (ID >> 8) & 0xf, (ID >> 5) & 7, (ID >> 12) & 0xf and row ID & 0x1f, and calls L2.06361; kind 14 passes the low byte instead. EN L2.06361 (129, whole): kind 1 allocates 0x88 bytes and calls L2.05910; kind 2 calls L2.06362; kinds 3 to 13 call L2.01754; kind 14 calls L2.05638 with 14 and the low byte; any other kind returns null. L2.05910 stores the three values at +0x45, +0x46 and +0xc, sets vtable L2.04817 and calls L2.03904, which requires +0x46 at most 15 and +0xc below the count of table L2.00807. Staff and Shaman Staff are Weapons rows (R2-ASSET-111), so a staff built from an ID by this factory has kind 1.
+
+**Confidence.** High for the EN factory and dispatch. Medium for table L2.00807 being the Weapons table (by use, R2-ENGINE-999) and for a staff's stored ID following the same encoding (its writer is unread). RU is not read.
+
+**Unknown.** The RU twin and the writer of a staff's ID. Read them.
+
+**Amends.** R2-ENGINE-999's weapon branch: kind 1 is the only arm that builds a weapon.
+
+**Evidence.** EXP-2154 generated/win/en-item-factory.lst, en-item-kind-dispatch.lst, en-item-lookup.lst.
+
+### R2-ENGINE-1142
+
+In the read bodies command byte +0x78 is read by range L2.01728; L2.01527 reads it (R2-ENGINE-350). Input L2.02844 and L2.04344, scorer L2.00057, setters L2.02812 and L2.02813, reset L2.01585, planner L2.01530, selector L2.01725 (200), activity 5, admission, approach, strike start, order-0xd planner L2.01524 and prepared-8 handler L2.01552 neither read nor write it, in both roots. The approach's +0x78 is movement block [unit+0x1c0]+0x78. The unread callees L2.01584, L2.02636, L2.01576 and L2.01527 past L2.06314 may write it. Who writes +0x78, and whether an attack order meets a nonzero value in play, is Unknown; no statement here says when the selected-spell exception of L2.01728 applies.
+
+**Confidence.** High within the read bodies. Medium for the whole: no census of +0x78 stores was made and the callees named above are unread.
+
+**Unknown.** The +0x78 writer and the value an attack order meets. A census of byte stores at displacement 0x78 through command pointers, or a write watch in a run, settles it.
+
+**Amends.** R2-ENGINE-350's unread selected-ID writer is none of the setters, planners or handlers read here.
+
+**Evidence.** EXP-2154 generated/win/*range-source.lst, *setter-attack.lst, *reset.lst, *attack-planner.lst, *selector.lst, *setter-cast.lst, *order-d-planner.lst, *prepared8.lst, *input-attack.lst, *input-cast.lst, *score.lst and their mask files.
+
+### R2-ENGINE-1143
+
+Input L2.04344 calls setter L2.02813 (order 0xd: +0x28 target, +0x30 spell, +0x14 = spell +9, +8 = 0). The selector's order-0xd arm L2.06344 calls L2.01524(unit, +0x28, +0x30). L2.01524/L2.06363 (86, whole, masked-equal): with a null target it takes the first unit of L2.02118 or L2.02117 by spell byte +0xa; with a target it stores +8 = 8, +0x28, +0x30 and the target's command +0xa4 = spell byte +8 and +0xa8 = the clock; without one it calls L2.01733. It always ends with +0x14 = spell byte +9. Prepared-8 handler L2.01552 admits through L2.01574(unit, +0x28, +0x14). A player's book cast at a unit therefore compares edge distance L2.01588, attacker cell to nearest target body cell, with spell +9, unless the target is the unit itself: the handler skips the admission call when the target equals the unit (L2.06364). R2-ENGINE-1106's admission holds for it; its range source L2.01728 is activity 5's only. R2-ENGINE-348's packed-cell metric L2.01520 has eight E8 scan hits in RU, all in L2.06342..L2.06343, after support entry L2.01512; the scan table lists E8, E9, 0F8x, EB, 7x and absolute forms, interior hits are not call sites until read, and computed calls, register calls and jump tables are outside it. That metric compares anchor cells with no size term. The scan is RU only.
+
+**Confidence.** High for the bodies and the scan hits. Medium for the functions holding the eight hits (bounded by address, not read; the hits are not read as call sites) and for L2.02118.
+
+**Unknown.** Which functions hold the eight hits, whether they are call sites, and their callers. Read L2.01512 to its end.
+
+**Amends.** R2-ENGINE-348's metric is, by address, nearer the support family's checks than order 0xd (Medium); R2-ENGINE-926 and R2-ENGINE-1127's unread L2.01524 are read.
+
+**Evidence.** EXP-2154 generated/win/*input-cast.lst, *setter-cast.lst, *selector.lst, *order-d-planner.lst, *prepared8.lst, their mask files, scan/ru-refs-policy-callers.tsv.
+
+### R2-ENGINE-1144
+
+Composition, by the code read, for a unit passing mage predicate L2.00044 whose weapon +0x74 has a Spell (L2.02338 returns weapon Spell nonzero, R2-ENGINE-900 High), ordered to attack a unit. Planner preconditions (RU L2.01530, R2-ENGINE-1120, R2-ENGINE-651): the target's +0x4c bit 8 is clear (set, the planner calls L2.01733(unit, 0) and returns); no carried slot +0x7c+4i wins its draw against +0x88+4i (a winning slot calls L2.02111, pick 0x17 only beyond 2 cells); the target is not null or self. Then, with owner +0x2c nonzero, L2.00056 runs first: above unit word +0x88 0x3b with a draw below 30 it calls the planner again and returns 0, otherwise a picked spell stores command +0x60 = 1, calls L2.01524 and returns 1, which leaves the route through prepared 8 (admission against that spell's +9, R2-ENGINE-1143) before prepared 5; with owner +0x2c zero, L2.01527 handles a selected spell first (R2-ENGINE-1043, R2-ENGINE-1127, R2-ENGINE-350; Medium). Otherwise the planner stores prepared 5 with range L2.01728, which by that body is +0x12c when +0x78 is zero or unaffordable (R2-ENGINE-1142), and for owner zero, a true mage predicate and a range below 2 calls L2.01512 (L2.06365). Both owner values are covered by the composition; whether a given side's units have owner zero or nonzero is R2-ENGINE-362/501 (Medium). The unit approaches the target's anchor cell and is admitted at a cell centre where the Chebyshev distance from its cell to the nearest body cell is within that range (R2-ENGINE-1139). The strike start sets state 3; the actor arm (RU L2.02871, EN L2.06346, field-aware equal) then stores +0x64 = the weapon's Spell, +0x68 = the weapon, state 0xd, and calls the cast routine in the same step. No read body on the route tests sight or re-tests a distance (R2-ENGINE-1136, R2-ENGINE-1138); application follows the wind-up through L2.00035. A unit failing any of the arm's three tests (weapon null, L2.02338 zero, L2.00044 zero) takes the branch at L2.06366, which calls L2.06348, instead.
+
+The RU equip body adds the weapon's range byte minus 1 to +0x12c (R2-ENGINE-322); the EN equip body was not read. Staff has range 6 and Shaman Staff 5 (R2-ASSET-111). If the hero's base +0x12c is 1, the distance is 6 (Staff) cells to a one-cell target, and 6 to the nearest cell of an Ogre or Troll (size 2) or Dragon (size 3) (R2-ENGINE-1140); measured to their anchor it is 7 or 8 from the high side. R2-ENGINE-777's default of 1 is for creatures; the hero's base is unread.
+
+**Confidence.** Medium: the composition is no stronger than owner +0x2c's meaning, L2.01527's unread tail, the cell-centre scheduling and the base +0x12c of a hero, none measured; no run was made.
+
+**Unknown.** A live release distance, the hero's base +0x12c, the player's cursor choice of an unseen target, the planner branches above in a run and the EN equip body. A run with a player mage holding a Staff, attacking an Ogre and a one-cell unit from more than 6 cells, reads both cells, +0x12c and +0x49 at the tick state 0xd is entered.
+
+**Amends.** R2-ENGINE-1106: for this unit the strike path L2.02315 and its application distance are not reached; R2-ENGINE-543 already enters state 13 from state 3 for a mage with a staff, so the cast entry is restated, not amended.
+
+**Evidence.** EXP-2154 generated/win/*actor-action-arm.lst, field-differences.tsv, and the evidence of R2-ENGINE-1136 to R2-ENGINE-1143.

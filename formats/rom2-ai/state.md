@@ -143,3 +143,15 @@ helpers (R2-ENGINE-1127), the EN input cells and order-4/0x11 setters
 (R2-ENGINE-1128) and the clock imports and RU mode selector (R2-ENGINE-1129)
 keep the grades stated on the orders page. Root correspondence
 remains bounded by R2-ENGINE-1115.
+
+The orders page's staff section composes, by the code read, the attack with a
+weapon that has a Spell (R2-ENGINE-1144, Medium; no run was made), unless an
+earlier planner branch takes the unit elsewhere: admission by the Chebyshev
+distance to the target's nearest body cell at a cell centre (R2-ENGINE-1139),
+body sizes from byte +0x49 (R2-ENGINE-1140), no sight operand in the bodies
+read and 92 direct callees unread (R2-ENGINE-1136), anchor-cell tests on the
+marked-cell path of the sight lists, whose callers were not counted
+(R2-ENGINE-1137), no distance re-test after admission in the bodies read
+(R2-ENGINE-1138), command +0x78 read with its writer Unknown
+(R2-ENGINE-1142), the book cast's spell +9 admission (R2-ENGINE-1143) and the
+EN item kind of a staff (R2-ENGINE-1141).

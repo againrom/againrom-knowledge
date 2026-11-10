@@ -170,6 +170,16 @@ pairs. Physical coordinate units and complete sight semantics remain Unknown.
 Self Heal, self Shield and fallback self Invisibility bypass this wrapper.
 — R2-ENGINE-348, R2-ENGINE-364
 
+The metric compares the packed bytes of its two arguments, so it has no
+body-size term. Whether the packed word is the unit's anchor cell is read for
+one RU writer only (R2-ENGINE-1137, Medium for other writers). Its eight RU
+scan hits lie in L2.06342..L2.06343, after support entry L2.01512; they are
+not read as call sites, and computed calls are outside the scan. In the bodies
+read, a book cast at a unit (order 0xd) does not call it: the prepared-8
+handler admits by edge distance to the target's nearest body cell against spell
+byte+9, except for a self target.
+— R2-ENGINE-1143
+
 ## Prepared support and player orders
 
 Support marks command+0x60 = 1 and prepares byte+8 = 8, target+0x28,
