@@ -27503,6 +27503,88 @@ Each part except the first pair under Bless or Curse is base + U[0,spread]; a sp
 **Evidence.** EXP-2155 generated/win/*resolver-p*.lst, *vt30-unit.lst, *vt30-human.lst, *ftol.lst, generated/tables/*kind-switch.tsv, *vt-*.tsv.
 
 
+## Repeated-victim storage and lifecycle
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1172 | RU Unit +0x1a8 has a 20-byte array header; its getter returns buffer+4*i, and insert calls resize before an out-of-size store. EN helpers remain unread. | High / Medium | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+| R2-ENGINE-1173 | Five read Unit constructors call the +0x1a8 array initializer; RU header fields start at zero. The +0x1a8 site RU L2.06420 / EN L2.06447 is destruction, not copying. | High / Medium | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+| R2-ENGINE-1174 | The read RU/EN Unit assignment bodies have no explicit repeated-victim array copy or clear; destination-history retention is conditional on unread callees. | Medium | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+| R2-ENGINE-1175 | ROM2 Unit-list sweeps retain 361 RU and 336 EN field/immediate rows and 177 RU / 34 EN selected-helper reference candidates; ownership and bulk-copy coverage remain incomplete. | Medium | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+| R2-ENGINE-1176 | EN mission reset L2.01668 has no explicit +0x1a8 operation but calls unread L2.01842; the repeated-victim list at the next mission start remains Unknown in both roots. | High / Medium / Unknown | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+
+### R2-ENGINE-1172
+
+In RU, array initialization `L2.06448` stores a vtable and zeros dwords +4, +8, +0xc and +0x10. Unit constructors pass Unit+0x1a8, so the header occupies +0x1a8..+0x1bb. The adjacent +0x1bc has a separate zero store in Unit init. Element wrapper `L2.02334` calls `L2.06449(i)`, whose complete 11-instruction body returns `[this+4]+4*i`.
+
+Insert `L2.06418(i,v)` compares i with +8; if i is at least +8, it calls `L2.06450(i+1,-1)`, then stores v at `[this+4]+4*i`. The resize body compares requested size with +0xc, stores size at +8 and capacity at +0xc, and uses +0x10 as the growth parameter. Its zero-size arm passes the old buffer to `L2.06284` and zeros buffer, size and capacity. Growth passes byte sizes `4*n` to `L2.03271`, copies `4*oldSize` through `L2.04512` (unread; copy by argument convention), and zero-fills through `L2.00342` (unread; fill by argument convention). Those four callees are unread here. In RU `L2.06451..L2.06452` a nonzero +0x10 is added to the capacity; a zero +0x10 gives growth = size/8 clamped to 4..0x400; the new capacity is max(capacity + growth, request). With initial capacity zero, requests 1 and 2 lead to capacities 1 and 5 on the successful-allocation paths; capacity 5 after the second element needs +0x10 = 0 and a successful allocation. The container is not a fixed five-dword inline buffer.
+
+The five-entry award policy and kind/count encoding are inherited from R2-ENGINE-1157 at its High RU / Medium EN grades. The policy is distinct from allocated capacity. The EN constructor calls initializer `L2.03812`; its body was not read. Prefix matching returned six candidates. The guessed EN getter address `L2.06449` is a different routine, and is not evidence for getter parity.
+
+**Confidence.** High for RU header stores, getter arithmetic and the explicit resize/insert data flow. Medium for allocation/copy/zero-fill effects that depend on the unread runtime helpers, and for EN layout beyond the read Unit call sites. No runtime allocation was observed.
+
+**Unknown.** EN getter, insertion and resize bodies; allocation failure effects. Read the EN initializer and resolve the getter from an award caller to settle the static parity.
+
+**Amends.** R2-ENGINE-1157's unread element-accessor and append-callee clauses, in RU only. Its five-entry policy remains at its original grade.
+
+**Evidence.** EXP-2158 `evidence/generated/win/ru-element-inner.lst`, `ru-element.lst`, `ru-insert.lst`, `ru-array-lifecycle.lst`, `en-ctor-head.lst`; `mask/array-lifecycle.tsv`, `mask/element-inner.tsv`.
+
+### R2-ENGINE-1173
+
+RU constructors `L2.01273`, `L2.00129`, `L2.05752`, `L2.05753`, `L2.05754` call `L2.06448` on Unit+0x1a8. EN counterparts `L2.03160`, `L2.01063`, `L2.06453`, `L2.06454`, `L2.06455` call `L2.03812` on the same offset. The paired constructor-head and constructor-tail/init windows are instruction-equal after address masking. The RU initializer zeros pointer, count, capacity and growth (R2-ENGINE-1172). Later template/reset callees can still change global or Unit state; full map-loader and runtime-creation call chains were not closed.
+
+RU `L2.06456` / EN `L2.06457` call `L2.04532` (unread), `L2.06458` on +0x1e4 and +0x1c8 (unread; the pair of constructor callee `L2.00350` by position), and `L2.06459`/`L2.03814` on +0x1a8; RU `L2.06459` passes the buffer to `L2.06284` (unread; a release by position, `L2.03271` being its allocation partner by position only). The outer destructors have 38 instructions each and agree after masking. The EN array destructor and the release callee remain unread. This is object destruction, not a live Unit reset. This destructor read says nothing about a clear of the list on a living Unit through death, resurrection, owner change or a timer; Unknown.
+
+**Confidence.** High for constructor call sites in both roots, RU zero stores, the two complete outer destructor bodies (38 instructions each) and the calls named above. Medium for what the unread callees do, for the final list after a complete construction, EN initializer/release semantics, and creation-path coverage. No claim that every summon or loaded map Unit takes these exact paths.
+
+**Unknown.** The complete map/summon/LOAD creator census and later writes through their callees. Resolve the retained constructor reference candidates and class registration paths; then read their bodies.
+
+**Amends.** R2-ENGINE-1157's attribution of RU `L2.06420` to a copy region: it is a destructor site. The constructor sites previously unread are now listed. R2-ENGINE-535's copy-tail observation is not changed by this correction.
+
+**Evidence.** EXP-2158 `evidence/generated/win/{ru,en}-ctor-head.lst`, `{ru,en}-ctor-tail-init-head.lst`, `{ru,en}-ctor-source-overload.lst`, `{ru,en}-unit-dtor.lst`, `ru-array-lifecycle.lst`; paired mask receipts. The `source-overload` listing label is a navigation label, not evidence that the argument is another Unit.
+
+### R2-ENGINE-1174
+
+RU assignment `L2.00106` reaches `ret 4` at `L2.06460`; EN `L2.05385` reaches `ret 4` at `L2.06461`. Head and middle listings cover each body without gaps. Both assign named scalars and subobjects, call `L2.00342(Unit+0x154, 0, 0x40)` (RU `L2.06462`, EN `L2.06463`; unread; a memory fill by argument convention), replace objects +0x1c0/+0x1c4, call `L2.05193` on +0x1c8 and +0x1e4 (EN `L2.06464`; unread; a clear by position only), and finish with +0x194, +0x198, +0x19c and +0x204. Neither body explicitly addresses +0x1a8, its header fields or its element buffer, or passes that embedded array to a copy/clear helper.
+
+There are real EN/RU differences: held-item allocation widths differ; RU passes the Unit to `L2.04908` on the new +0x1c0 object, whereas EN has no corresponding call. The whole bodies are not declared masked-equal. Unread calls include the `L2.05193` calls, item/subobject builders, assignment helpers and RU `L2.04908`. The body makes no explicit whole-Unit block copy. That does not exclude a helper or global alias changing history.
+
+Conditionally, if those callees do not touch the array, assignment keeps the destination's previous history rather than the source's. A fresh destination whose constructor left the list empty therefore remains empty; assignment into an existing destination need not produce an empty list. The prior copy-tail clause is R2-ENGINE-535, reused at Medium. R2-ENGINE-535's remark that the head of the unit copy is unread is now read for RU `L2.00106` / EN `L2.05385`; its tail observation is unchanged.
+
+**Confidence.** Medium for omission and destination retention: complete selected bodies are read in both roots, but their callees and every class override are not. The RU Unit vtable binds slot +0x3c to this assignment. Reference scans retain one direct call and three absolute table candidates per root; virtual and computed callers remain unclosed.
+
+**Unknown.** All other unit-copy builders, derived overrides, and the effect of assignment callees. Resolve all three table candidates and the direct callers RU `L2.06465` / EN `L2.06466`, then trace slot +0x3c dispatch.
+
+**Amends.** R2-ENGINE-1157's open unit-copy clause for these two assignment bodies only.
+
+**Evidence.** EXP-2158 `evidence/generated/win/{ru,en}-copy-real-head.lst`, `{ru,en}-copy-middle.lst`; `scan/{ru,en}-refs-lifecycle.tsv`, `tables/ru-unit-vtable.tsv`. The copy-tail windows start after these assignment returns and support no assignment-body fact.
+
+### R2-ENGINE-1175
+
+Python 3.12.10, Capstone 5.0.7 and pefile 2024.8.26 linearly sweep each installed `allods2.exe` `.text`. Memory operands of any decoded width are kept when their displacement span overlaps [0x1a8,0x1c0); immediates equal to 0x1a8 or 0x1b0 are also kept. This is a deliberate superset of the 20-byte header, including adjacent +0x1bc. RU retains 315 memory rows and 46 immediate rows (361 total); EN 290 and 46 (336). Base/index operands and addresses remain in the receipts. The scan does not establish that those bases are Units.
+
+Unit sites identified so far are the five constructor initializers, the destructor, and the award reader and updater supplied by R2-ENGINE-1157 at its existing grade; the other rows are unclassified. R2-ENGINE-1157's 15 memory and 40 immediate rows per root are the exact +0x1a8 subset of these rows (15 rows with displacement exactly +0x1a8 and 40 immediates equal to 0x1a8 in each root); the new counts are the wider span [0x1a8,0x1c0), in which 183 RU rows (175 EN) are +0x1b8 alone. Other field candidates, including the code-region and code-region families, remain unclassified; they are not discarded as unrelated. The wider sweep is not a census of embedded +4/+8/+0xc/+0x10 accesses through arbitrary aliases.
+
+Raw selected-helper reference scans keep E8 calls, E9 jumps, long/short conditional jumps and short jumps at every byte offset of code-flag sections, plus absolute target dwords at every byte offset of all sections. The RU target set produces 177 candidates, EN 34; the target sets differ and these counts measure no root disparity. Of the 177 RU candidates, 129 target the generic element wrapper `L2.02334` and 12 the resize `L2.06450`; the EN set has no getter target. They retain the three Unit assignment table candidates and the one direct caller in each root. Instruction-interior and data hits are not all classified. All targets are frozen in the plan.
+
+**Confidence.** Medium. No repaired Ghidra project or complete base ownership analysis. Bulk copies/reads/writes covering the header, computed pointers/calls, different embedded coordinates and cross-module calls are not exhausted. `scenario.dll` and `engine32.dll` bodies were not read. This supports no global absence or complete list of writers/readers.
+
+**Unknown.** Complete reader/writer, reset, death, resurrection, owner-change and timer coverage. Classify every retained candidate, add embedded-base and containing-copy analysis, and trace dispatch in all named images. The acquisition ceiling was reached at 8 passes; no further native read was made.
+
+**Evidence.** EXP-2158 `evidence/generated/scan/{ru,en}-census-container.tsv`, `{ru,en}-refs-lifecycle.tsv`; `evidence/frozen-plan.json`, `evidence/acquisition-budget.jsonl`.
+
+### R2-ENGINE-1176
+
+EN `L2.01668` has 67 decoded instructions through its return. It first calls `L2.01842`, then stores +0x64, +0x58, +0x54 and +0x50 as 0, +0x136 as 1, and, when +0x136 is 0 and the +0x68 object's class byte is 0xe, calls virtual slot +4 (argument 1) on the +0x68 and +0x64 objects and zeroes both. No explicit +0x1a8 operation occurs in this body. `L2.01842` and the indirect equipment destructors were not read.
+
+R2-ENGINE-526 supplies, at High for the selected owner loop / Medium for party removal, the connection from victory to this reset for classes 33..63 and detachment of other classes. That older claim leaves the earlier owner loop, world clear and map deletion open. No new transition-loop read was made here. The RU reset body was not read. Even a reset that leaves the list alone would not prove that the same actor instance reaches the next mission.
+
+**Confidence.** High for the EN reset's local stores and calls. Medium for the reused victory-to-reset composition. Unknown for the hero's and companions' list at next mission start in either root; the whole statement is not High.
+
+**Unknown.** Read EN `L2.01842`, its RU counterpart and the complete surviving-actor transition through map entry, including the open earlier callees. Runtime check: give a hero and a Human companion known distinct kind/count entries, finish a mission without a LOAD, and compare their lists and next same-kind experience payment at the next mission's first controllable state; repeat EN/RU. Separately check a hire that is detached and rebuilt.
+
+**Evidence.** EXP-2158 `evidence/generated/win/en-mission-reset.lst`; R2-ENGINE-526 for the older transition observation and its grades.
+
 ## Effect record identity and renewal
 
 | ID | Claim | Confidence | Status | Evidence |

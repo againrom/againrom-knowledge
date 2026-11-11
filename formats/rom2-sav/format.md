@@ -334,6 +334,28 @@ bytes, then twelve Item references for slots 1..12. — R2-ENGINE-208
 The gate +0x140 list with n > 0 is Medium; the rest is High.
 — R2-ENGINE-209
 
+### Repeated-victim history
+
+The read RU and EN Unit SAVE/LOAD bodies have no explicit transfer or reset
+of the repeated-victim array at Unit +0x1a8. The Unit save loads the
+dwords at +0x1c0 and +0x1c4 as receivers of helper calls; the widths 180
+and 184 and the raw-block reading are R2-ENGINE-209's, and the helpers were
+not re-read. On that basis the two blocks are separate pointees (Medium)
+and do not cover that embedded header. No file
+offset or width for history is established. Omission is Medium: helper,
+global-alias and archive-construction effects remain unclosed. Under a
+fresh constructor (R2-ENGINE-1173) and unchanged helper behavior, the code
+read in both roots, with no run of the original, has LOAD start with an
+empty list; a reused destination can keep its prior history. Native LOAD
+and the next award remain Unknown. — R2-SESSION-410, R2-ENGINE-1173, R2-ENGINE-209
+
+Recursive `.sav` pathname enumeration found no file in the two named ROM2
+EN/RU install trees (pathname match only; archives and other extensions
+not searched). That bounded directory result is High; the original saves
+read by earlier claims were not re-examined for list bytes, so a byte
+witness from these two roots and runtime persistence remain Unknown.
+— R2-SESSION-411
+
 The raw 180 block is the movement block at Unit +0x1c0. Byte 0 is the
 facing and byte 1 the heading; LOAD reads the block back over the one the
 constructor filled. In five original saves 355 of 356 Unit and Human

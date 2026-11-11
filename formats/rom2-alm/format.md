@@ -138,13 +138,35 @@ attacker (R2-ENGINE-480; Medium here; a creature attacker's award was not
 read for the flag). By the code read, the flag is the second refusal of the
 Human award, after the attacker class test (R2-ENGINE-1156); by the code read,
 for a Human killer, a kill pays through the killer's repeated-victim list
-(R2-ENGINE-1157, R2-ENGINE-1158). The unit copy omits the flag (Medium: its head is
-unread); the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
+(R2-ENGINE-1157, R2-ENGINE-1158). The unit copy omits the flag (Medium; the complete
+selected bodies are now read, but callee effects remain unclosed, R2-ENGINE-1174);
+the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
 Inn offer blocks 2, 4 and 6 (Medium: the receiver of the offer generator is
 the Inn by address inference); RU and EN agree in those blocks. A template
 name holding "NPC" (Medium: the substring helper is unread) also empties
 the bag at death; with +0x1a0 clear such a
 unit still rolls gold and an item. — R2-ENGINE-535, R2-ENGINE-537, R2-ENGINE-943
+
+The repeated-victim array at Unit +0x1a8 has a 20-byte header in RU:
+buffer +4, size +8, capacity +0xc and growth +0x10. Its getter returns
+buffer+4*i. Capacity is dynamic; five entries is the award's policy, not
+inline storage. These local RU reads are High; the effects of the unread
+allocation, copy and fill helpers L2.03271, L2.06284, L2.04512, L2.00342
+and EN L2.03812, and the unread EN array bodies, remain Medium.
+— R2-ENGINE-1172
+
+Five selected constructors call the array initializer in both roots; RU
+header fields start at zero. Complete creation paths remain Medium.
+The site RU L2.06420 / EN L2.06447 is array cleanup in Unit destruction,
+not unit copying. — R2-ENGINE-1173
+
+The selected Unit assignment bodies have no explicit array copy or clear.
+By the code read, with no run of the original, and subject to unread
+callees, assignment keeps the destination's history;
+an empty fresh destination and a reused destination differ (Medium).
+Field and helper-reference sweeps leave unclassified bases, virtual calls
+and bulk copies, so no complete lifecycle census is claimed.
+— R2-ENGINE-1174, R2-ENGINE-1175
 
 Each root's 46 campaign maps hold 34 type-6 records of the Humans row
 `2U_PeasantLeader` on maps 20, 21, 30, 31, 40, 42, 43, 52, 61, 71, 73, 75, 85,

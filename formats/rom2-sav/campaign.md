@@ -611,6 +611,13 @@ load builds each 0x50-byte Group, reads it and appends it to the list
 (High for the sequence; Medium that it is the Player's list).
 — R2-SESSION-196, R2-ENGINE-732
 
+The repeated-victim history at the next mission start remains Unknown in
+both roots. The EN victory reset body has no explicit +0x1a8 operation,
+but its callee L2.01842 is unread. Earlier transition and map-entry paths
+are also open; a local reset omission does not prove actor or list survival.
+The EN body's stores and calls are High, its older victory-loop connection
+is Medium, and the composed persistence result is Unknown. — R2-ENGINE-1176
+
 ## Route to the Druids' town
 
 From Kaarg at stage 30 the campaign reaches town 3 through Leave30, Leave40

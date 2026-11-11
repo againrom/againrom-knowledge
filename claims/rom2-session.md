@@ -5891,6 +5891,41 @@ The windows read of the dump's memory hold module .data with collection `L2.0014
 
 **Evidence.** EXP-2145 RESULTS.md question 6; evidence/generated/census.json, memory.json.
 
+## Repeated-victim history across SAV
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-410 | The read RU/EN Unit SAV bodies have no explicit +0x1a8 history transfer or reset; fresh-constructor LOAD is predicted empty, with callee and runtime effects unclosed. | Medium | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+| R2-SESSION-411 | Recursive .sav pathname enumeration finds no file in the two named ROM2 install roots; no shipped-save byte witness for repeated-victim history is available there. | High / Unknown | ● active | [EXP-2158](../experiments/EXP-2158-rom2-victim-list-life/) |
+
+### R2-SESSION-410
+
+RU Unit transfer `L2.01161` reaches `ret 4` at `L2.06467`; EN `L2.01090` has the matching three-window instruction sequence after address masking. The store and load branches and their join are covered without gaps. The base transfer is RU `L2.01164` / EN `L2.03196`; the portions belonging to that base are also read. Extra instructions after its return are not claimed equal.
+
+The outer order agrees with R2-ENGINE-209: base; references +0x20; counted word lists +0x1c8/+0x1e4; raw-block helper calls at +0xa6, +0xbe, +0x114, +0xd4; pointee blocks +0x1c0/+0x1c4; scalars, Item references, name, more scalars, packed kind/flags, inventory/book gates, four dwords and one byte. The six widths 24,22,24,64,180,184 are inherited from R2-ENGINE-209 (High RU for its read programme; not re-read in the block helpers here). The listings show the dwords at +0x1c0 and +0x1c4 loaded as receivers of helper calls (RU `L2.06468`, `L2.06469`, `L2.06470`, `L2.06471`); the widths 180 and 184 and the raw-block reading are R2-ENGINE-209's (High for its load branch), and the helpers were not re-read here. On that basis the two blocks are separate pointees (Medium) and do not cover Unit+0x1a8. No listed direct operation passes the header at Unit+0x1a8 or its buffer for transfer, and there is no explicit count restore or clear.
+
+No byte position or width for repeated-victim history can therefore be assigned in this programme. This is a bounded omission result, not a proof that no helper can transfer it. Unread callees include the raw-block/list/reference/archive helpers, the base's `L2.00338`, `L2.01168`, `L2.01169`, and the Unit virtual +0x30 call. Receiving no explicit array argument does not exclude global/alias access. EN/RU masking does not verify the objects behind masked addresses.
+
+If a fresh Unit uses the constructors of R2-ENGINE-1173 and none of these callees changes history, SAVE leaves its live history alone and LOAD starts with an empty list; it does not restore the pre-save counts. RU initialization is read; EN initializer semantics remain Medium. Reusing an existing Unit instead of constructing a fresh one would leave its prior list under the same condition. Native LOAD completion and the next award remain Unknown.
+
+**Confidence.** Medium for SAVE omission, LOAD omission, unchanged live history at SAVE and empty fresh LOAD in both roots. The outer bodies are read, but callee/global effects and the complete archive construction chain are unclosed. No SAV byte comparison or runtime LOAD was performed.
+
+**Unknown.** Close the called transfer programmes and class constructors. Runtime check: obtain at least three qualifying same-kind awards with a hero, make a lawful original mission SAV, compare the live list before/after SAVE, cold-LOAD it, compare pointer/count/entries and the next same-kind award. Repeat EN/RU with a different-kind control and a companion. There is no predicted file offset to inspect until another transfer covering this storage is found.
+
+**Amends.** R2-ENGINE-1157's load Unknown is narrowed to this Medium fresh-constructor prediction. R2-ENGINE-209's local transfer order is reused unchanged, without its stronger no-archive-argument absence inference.
+
+**Evidence.** EXP-2158 `evidence/generated/win/{ru,en}-unit-transfer-{head,middle,tail}.lst`, `{ru,en}-base-transfer.lst`; paired transfer mask receipts; R2-ENGINE-1173 for construction.
+
+### R2-SESSION-411
+
+The probe calls `Path.rglob('*.sav')` under only `gameversions/rom2-en` and `gameversions/rom2-ru`, on Windows, and emits zero file rows. It opens no save file and uses no owner save. Both roots exist (the executable was read from each); `*.sav` matched by pathname only, case-insensitive on Windows; archives and other extensions not searched. This is an inventory of those two directory trees, not of every possible lawful distribution or archive member. The original saves read by earlier claims (R2-SESSION-099 and the saves cited on `formats/rom2-sav/format.md`) are a separate population that this experiment did not re-examine for list bytes, so "a byte witness is Unknown" means no witness from the two roots, not no saved file anywhere.
+
+**Confidence.** High for the zero pathname result over that population. Unknown for a shipped SAV byte witness and for native save/load behavior; R2-SESSION-410 gives no history byte interval to test.
+
+**Unknown.** A lawful original-generated mission SAV from the controlled state specified by R2-SESSION-410, plus a closed transfer path that identifies candidate bytes, would permit a byte witness. The present inventory supplies neither. No original run is authorized in this experiment.
+
+**Evidence.** EXP-2158 `evidence/generated/save-inventory.tsv`, `evidence/probe.py`, `evidence/frozen-plan.json`; `evidence/reproduction.tsv` records identical regeneration.
+
 ## Inn refresh and persistence: bounded static paths
 
 | ID | Claim | Confidence | Status | Evidence |
