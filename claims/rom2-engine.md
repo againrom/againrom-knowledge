@@ -26803,6 +26803,11 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1142 | Read ROM2 attack and cast order bodies write no command byte +0x78; the range producer and selected-spell policy read it; its writer and any value met by an attack order are Unknown. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1143 | ROM2 order 0xd at a unit admits by edge distance against spell +9, except a self target; the eight scan hits of packed-cell metric L2.01520 lie in L2.06342..L2.06343, RU only. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1144 | By the code read, a ROM2 staff mage with no affordable selected spell and no winning special-spell draw enters the staff's spell cast once its cell is within +0x12c of the target's nearest cell; no run was made. | Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1148 | ROM2 blow resolver: the roll r is tested at r >= 90 and r < -90; the physical part hits on A + r > d, flag 0x10 or r >= 90; the r < -90 branch writes 0 over 0. | High | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
+| R2-ENGINE-1149 | ROM2 blow draws in order: Bless and Curse U[0,100], spread U[0,S], roll U[0,200], second pair, magic part; the first three precede the roll and are made on a miss. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
+| R2-ENGINE-1150 | Over the 32768 generator outputs, a ROM2 blow's physical part hits for the fraction of outputs x with r > d - A at d - A of -100..88, 1793/32768 for 89 and above, and always below -100. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
+| R2-ENGINE-1151 | ROM2 blow resolver has no branch reference and three +0x54 table cells per root; two of 42 +0x54 call sites (unit strike, damage apply) subtract its result; no caller passes a roll. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
+| R2-ENGINE-1152 | ROM2 blow operands: bytes +0xe/+0xf (x15 for bit 7 when virtual +0x30 returns 0), +0x11/+0x12, +0x13/+0x14 with kind +0x15; a spread of 0 makes no draw. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
 
 ### R2-ENGINE-1104
 
@@ -27250,3 +27255,90 @@ The RU equip body adds the weapon's range byte minus 1 to +0x12c (R2-ENGINE-322)
 **Amends.** R2-ENGINE-1106: for this unit the strike path L2.02315 and its application distance are not reached; R2-ENGINE-543 already enters state 13 from state 3 for a mage with a staff, so the cast entry is restated, not amended.
 
 **Evidence.** EXP-2154 generated/win/*actor-action-arm.lst, field-differences.tsv, and the evidence of R2-ENGINE-1136 to R2-ENGINE-1143.
+### R2-ENGINE-1148
+
+Resolver RU L2.00101 / EN L2.04116, read whole in two windows per root (part 1, 256 instructions, masked-equal; part 2 equal except the RU-only bookkeeping gate L2.04118..L2.06367, which reads and writes no slot of the blow). The roll is r = U[0,200] - 100 (L2.06368 push 0xc8; call R2.0021; sub eax,0x64), the 201 integers -100..100. Its slot [ebp-0x14] is read three times: the add into A + r (A = block word +0, d = target word +0xbe, both signed) and two comparisons. Four comparisons decide the blow:
+
+- L2.06369 (EN L2.06370) A + r > d (jg): the physical slot P = v at L2.06371;
+- otherwise, for an attacker that is not null, byte +0x4c & 0x10 set (L2.06372): P = v at L2.06371;
+- otherwise L2.06373 (EN L2.06374) r >= 90: P = v at L2.06375;
+- otherwise L2.06376 (EN L2.06377) r < -90: P = 0 at L2.06378; r of -90..89 writes nothing.
+- L2.06379 (EN L2.06380) A + r > d again admits the magic part; when it fails the part is admitted only if the unconverted bytes +0xe and +0xf are both 0.
+
+P is written 0 at L2.06381 and no other write to P lies on a path to L2.06378, so that write cannot change P: the physical part has two ranges, r of 90 or more and r below 90. A hit takes v, the first-pair value computed before the roll. When P > 0, absorption word +0xc0 is subtracted unless the attacker is null or has flag 0x10, floored at 0; then the +0xce percentage cut. The second pair is applied on every call that passes the two early returns and whose bytes +0x11 + +0x12 sum above 0, with no test of the roll. The return is the sum when above 0, else 0. Before the roll and before any draw (the draws lie at L2.06382 and above) the body returns 0 for a null block and for target byte +0x4c & 0x08. [ebp-8] is written 0x64 at L2.06383 and read nowhere in the body. No call receives r or A + r.
+
+**Confidence.** High in both roots for the comparisons, the writes and the ranges: committed listings reproduced byte for byte, RU/EN masked-equal over part 1 and part 2 outside the named RU-only block, and no backward jump in either body.
+
+**Unknown.** The default arm of the magic kind switch (L2.04516, L2.05835) for kinds outside 1..5.
+
+**Amends.** R2-ENGINE-477: a third comparison, r < -90, exists; it writes 0 over 0 and changes no outcome. A null attacker takes no flag test. R2-ENGINE-478 step 3: absorption is also skipped for a null attacker. R2-ENGINE-028: the magic part is admitted by A + r > d or by a block with bytes +0xe and +0xf of 0, not by a hit by r >= 90 or flag 0x10.
+
+**Evidence.** EXP-2155 generated/win/*resolver-p1.lst, *resolver-p2.lst, mask/resolver-p*.tsv, alignment.tsv, resolver-compares.tsv, resolver-slots.tsv, resolver-calls.tsv.
+
+### R2-ENGINE-1149
+
+The resolver RU L2.00101 / EN L2.04116 calls the range helper R2.0021 (EN L2.00939) at six sites, in address order, which is execution order (no backward jump):
+
+1. L2.06382 U[0,100] for Bless (id 20): attacker not null, attacker dword +0x14 nonzero, bit 20 of +0x144 set and a list entry found;
+2. L2.06384 U[0,100] for Curse (id 28), on the same terms, whatever the Bless draw gave;
+3. L2.06385 U[0,S], the first-pair spread, when neither effect took effect;
+4. L2.06386 U[0,200], the roll, on every call past the two early returns;
+5. L2.06387 U[0,+0x12], the second pair, when bytes +0x11 + +0x12 are above 0, on every path;
+6. L2.06388 U[0,+0x14], the magic part, when it is present and admitted.
+
+The range helper returns 0 for 0 without calling the generator L2.01699 (EN L2.00729), so a spread of 0 makes no draw. Draws 1 to 3 precede the roll and are made on a miss, whose physical part is then 0. A block with bytes +0xe and +0xf of 0 still draws the roll, which then changes nothing. Effects: only the attacker's are read. L2.00042(id) returns (1 << id) & attacker +0x144. L2.00043(id) walks the list at attacker +0x20 for an entry whose word +0xc is id. Bless is read before draw 1 and Curse between draws 1 and 2. A set bit with no entry is cleared and makes no draw. An effect takes effect when the entry's word +0x40 is greater than its draw. Bless sets v = B + S; Curse only suppresses draw 3, so when both take effect v = B + S. The target's words are read after the roll.
+
+**Confidence.** High in both roots for the six calls, their arguments, conditions and order, and for the effect reads (bodies masked-equal). Medium that no callee draws: unread are `L2.06389`, `L2.06390`, the eight callees of `L2.02074` (`L2.01521`, `L2.02419`, `L2.01727`, `L2.02411`, `L2.02412`, `L2.01523`, `L2.00487`, `L2.00486`), the default arm (`L2.04516`, `L2.05835`) and the attacker's virtual +0x30 for classes outside the three tables read (L2.02074 itself calls neither R2.0021 nor L2.01699).
+
+**Unknown.** Whether all draws share one generator state: L2.02317, which returns the state block, was not read.
+
+**Amends.** R2-ENGINE-478 step 2: Curse gives v = B only when Bless did not take effect, and its draw is made after Bless's. R2-ENGINE-028: Curse uses its base only when Bless did not take effect.
+
+**Evidence.** EXP-2155 generated/win/*resolver-p1.lst, *resolver-p2.lst, *random-range.lst, *rng-core.lst, *effect-test.lst, *effect-find.lst, *ftol.lst, *attacker-test.lst, *bookkeeping.lst, navigation/win/*list-*.lst, resolver-calls.tsv.
+
+### R2-ENGINE-1150
+
+The range helper (RU R2.0021, EN L2.00939, read whole) returns (x(n + 1)) >> 15 for the 15-bit generator output x. Counted over x = 0..32767 (evidence/derive.py, hit-chance.tsv), r = U[0,200] - 100 takes 196 values 163 times and 5 values 164 times. With D = d - A, the physical part hits for these counts of x: all 32768 for D of -101 or less; those with r > D for D from -100 to 88 (16302, 0.4975, at D = 0; 8151 at D = 50; 1956 at D = 88); 1793 (0.0547) for D of 89 or more. Flag 0x10 makes every x hit. The magic part of a block with physical bytes is admitted for the x with r > D, none from D = 100. The generator body is state x 214013 + 2531011 modulo 2^32 (multiply, then add). By the usual conditions for a linear congruential generator (increment odd, multiplier minus 1 divisible by 4), arithmetic outside the listing, it has full period, so over one period each x occurs 2^17 times; a session sees part of that sequence.
+
+**Confidence.** High for the counts as a function of x. Medium for the full-period property, which rests on those usual conditions and not on the listing. The counts are frequencies over x, not a measured rate in play.
+
+**Unknown.** The rate in a session: a run that records the outcomes of many blows at known D would measure it.
+
+**Amends.** R2-ENGINE-477: the EN generator arithmetic, Medium there, is equal to RU's by `mask/rng-core.tsv` and `mask/random-range.tsv` (High).
+
+**Evidence.** EXP-2155 generated/hit-chance.tsv, generated/win/*random-range.lst, *rng-core.lst, evidence/derive.py.
+
+### R2-ENGINE-1151
+
+The reference scans of both roots (E8, E9, 0F 8x and EB/7x at every code byte, absolute dwords in every section) find no branch or call to the resolver (RU L2.00101, EN L2.04116) and three absolute dwords: the +0x54 cells of tables RU L2.02314, L2.06391, L2.00218 (EN L2.04102, L2.06392, L2.00217). A linear .text census lists 42 call or jmp sites through displacement 0x54 in each root. Two of them subtract the result from word +0x94 of the receiver; that the receiver's slot is the resolver follows from the dispatch of R2-ENGINE-481 for the unit strike and is not shown for the damage apply:
+
+- the unit strike RU L2.06393 (EN L2.06394), with the attacker's block at attacker +0xa6 and the attacker;
+- the damage apply RU L2.06395 (EN L2.06396), with the damage object's block at +0x48 and its dword +0x44.
+
+The strike serves melee and ranged weapon blows (R2-ENGINE-481); the damage object carries spell damage (R2-ENGINE-028, R2-ENGINE-452). The resolver takes two stack arguments (ret 8), reads block word +0 and bytes +0xe..+0x15 only, and draws the roll on every path past its early returns, so no caller passes a roll or an outcome; a caller sets the attack value in word +0.
+
+**Confidence.** High for the two callers' arguments and "no caller passes a roll" in both roots (bodies masked-equal, except the RU-only refusal and item offset of the strike, R2-ENGINE-482). Medium for the census: the other 40 sites are unclassified, the census misses calls through a register loaded from a table, and no repaired project was used.
+
+**Unknown.** The receivers of the other 40 sites (read each caller); the callers of the damage apply at RU L2.06397 and table dword L2.06398 (not read here).
+
+**Evidence.** EXP-2155 generated/scan/*-refs-blow.tsv, *-vcall-54.tsv, generated/tables/*vt-*.tsv, generated/win/*unit-strike.lst, *damage-apply.lst, *resolver-p*.lst.
+
+### R2-ENGINE-1152
+
+The resolver RU L2.00101 / EN L2.04116 reads these block bytes, each zero-extended:
+
+| Part | Base | Spread | Conversion | Cut |
+|---|---|---|---|---|
+| first pair | +0xe | +0xf | +0xe bit 7 and attacker virtual +0x30 returning 0: B = (B & 0x7f) x 15, S = S x 15 | absorption +0xc0, then target byte [+0xce + block byte +0x10] |
+| second pair | +0x11 | +0x12 | none | target word +0xc6 when nonzero, floored at 0 |
+| magic | +0x13 | +0x14 | none | kind +0x15: 1 +0xc4, 2 +0xc6, 3 +0xc8, 4 +0xca, 5 +0xcc; floored at 0 |
+
+Each part except the first pair under Bless or Curse is base + U[0,spread]; a spread of 0 gives the base with no draw. A cut is trunc(v(100 - a)/100 + 0.75) through L2.01309, which sets chop rounding (control word | 0x0c00) for one fistp. The first-pair cut has no floor after it; the other two cuts do. Virtual +0x30 is L2.02318, returning 0, in table L2.02314 (EN L2.04124 in L2.04102), and L2.02319, returning 1, in tables L2.06391 and L2.00218 (EN L2.06399 in L2.06392 and L2.00217). The conversion calls the attacker's virtual with no null test. The kind switch cells (RU L2.01701, EN L2.06400) map kinds 1..5 to the five arms; other kinds reach the default arm and add the value uncut if it returns.
+
+**Confidence.** High in both roots for the bytes, the conversion test, the three tables' +0x30 bodies, the switch cells and the truncation; RU constants from R2-ENGINE-478 (High, RU), not read in this experiment. Medium for the EN values of 100.0 and 0.75, which R2-ENGINE-478 read in RU only, and for other classes whose tables were not read.
+
+**Unknown.** The default arm L2.04516/L2.05835; which unit classes use table L2.02314.
+
+**Amends.** R2-ENGINE-478 step 1: a third table, L2.06391 (EN L2.06392), also holds the resolver at +0x54 and L2.02319 at +0x30, so it skips the conversion.
+
+**Evidence.** EXP-2155 generated/win/*resolver-p*.lst, *vt30-unit.lst, *vt30-human.lst, *ftol.lst, generated/tables/*kind-switch.tsv, *vt-*.tsv.
