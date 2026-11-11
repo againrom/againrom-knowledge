@@ -135,7 +135,10 @@ Session+0x74 is set, from the map build for the units of owners whose
 diplomacy toward the owner named "Self" has bits 0..2 clear. An actor with
 +0x1a0 set drops no bag or gold at death and pays no experience to a human
 attacker (R2-ENGINE-480; Medium here; a creature attacker's award was not
-read for the flag). The unit copy omits the flag (Medium: its head is
+read for the flag). By the code read, the flag is the second refusal of the
+Human award, after the attacker class test (R2-ENGINE-1156); by the code read,
+for a Human killer, a kill pays through the killer's repeated-victim list
+(R2-ENGINE-1157, R2-ENGINE-1158). The unit copy omits the flag (Medium: its head is
 unread); the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
 Inn offer blocks 2, 4 and 6 (Medium: the receiver of the offer generator is
 the Inn by address inference); RU and EN agree in those blocks. A template

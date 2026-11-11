@@ -412,7 +412,10 @@ school skill from its experience E through the threshold table
 T(L) = trunc((1.1^L - 1) x 1000), and the loaders and the reuse path
 rebuild the sum from E; at template load E = T(skill). The level from E is
 the largest L with T(L) <= E for E below the dword past the table, which was
-not read. — R2-ENGINE-485 (High for the law, Medium for the exact values and
+not read. That dword is the first of an object a separate routine constructs
+(Medium: the constructor body and the object's other readers are unread), and
+the skill-from-experience loop reaches it only for E at or above T(149)
+(R2-ENGINE-1159). — R2-ENGINE-485 (High for the law, Medium for the exact values and
 for the set of readers), R2-ENGINE-489 (High for the arithmetic of the
 bodies read, Medium for the roles)
 

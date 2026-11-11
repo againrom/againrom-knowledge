@@ -26772,6 +26772,10 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
+| R2-ENGINE-1156 | The ROM2 award (RU L2.00055) stores skill XP after a class gate, +0x1a0, Mind scaling, the kind cut, owner gates, ceil(X/8) unless the skill is main or 5, and the cap; field writers Medium; main skill unchanged: Medium. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
+| R2-ENGINE-1157 | The ROM2 award's +0x1a8 list: kind + 0x10000 x count dwords, five entries; slot +0x68 updates it after the award call, paid or not; by the code read, for an empty start, the cut 10/(n+10) starts at the third call for a kind. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
+| R2-ENGINE-1158 | One ROM2 kill route (one of 4+ slot +0x68 sites in the unit range): killer class 0x21..0x3f, health not below 0, offers trunc(V x 0.5) via slot +0x68; owner gates skipped if victim health below 0 (unread); 9 of 109 slot calls classified. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
+| R2-ENGINE-1159 | ROM2 dword L2.02343 past the threshold table is the first of an object built by L2.06401 (Medium: constructor, other readers unread); the loop reads it only for E at or above T(149); two Heal windows hold no slot call, call unread callees. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
 | R2-ENGINE-1104 | ROM2 EXE sweeps find one direct immediate order-0xc store per root; unit-writer closure is open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1105 | Read ROM2 bodies set unit +0x5c for strikes/casts and clear it during construction/copy. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1106 | ROM2 strike admission and HP application use different distance calculations and thresholds. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
@@ -26808,6 +26812,161 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1150 | Over the 32768 generator outputs, a ROM2 blow's physical part hits for the fraction of outputs x with r > d - A at d - A of -100..88, 1793/32768 for 89 and above, and always below -100. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
 | R2-ENGINE-1151 | ROM2 blow resolver has no branch reference and three +0x54 table cells per root; two of 42 +0x54 call sites (unit strike, damage apply) subtract its result; no caller passes a roll. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
 | R2-ENGINE-1152 | ROM2 blow operands: bytes +0xe/+0xf (x15 for bit 7 when virtual +0x30 returns 0), +0x11/+0x12, +0x13/+0x14 with kind +0x15; a spread of 0 makes no draw. | High / Medium | ● active | [EXP-2155](../experiments/EXP-2155-rom2-hit-roll/) |
+
+### R2-ENGINE-1156
+
+The award `L2.00055` (Human slot +0x64; arguments X, victim, skill) runs these steps in order (RU addresses):
+
+1. Attacker word +0xe outside 0x21..0x3f: return (`L2.06402`).
+2. Victim given and victim +0x1a0 nonzero: return (`L2.02739`).
+3. X = ftol(X x (Mind / 30.0 + 0.25)), Mind the attacker's signed word +0x88 (`L2.06403`..`L2.06404`).
+4. Victim given: the repeated-victim cut of R2-ENGINE-1157, X = 10X / (n + 10), unsigned integer division.
+5. Victim given and `L2.02362(victim)` false (victim signed word +0x94 not below 0; R2-ENGINE-1158): return when the
+   victim's owner +0x14 equals the attacker's, when the attacker's +0x14 is 0, or when `[L2.02609]` is nonzero and
+   the byte at `[L2.02609]` + 0xa8c4 + 0x46 x victim owner word +4 + attacker owner word +4 has bit value 2.
+6. Skill words +0xa8+2i take their base words +0x116+2i, i = 1..5.
+7. Mage (`L2.00044`, byte +0x4c & 4): s is the passed skill and must be above 0. Other attacker: the passed skill
+   must be 0 and s is byte +0xb6, above 0. Either way skill word s must be below 100, else nothing is stored.
+8. s is neither dword +0x23c nor 5: X = (X + 7) >> 3 (sar after the signed adjustment), which is ceil(X / 8) for
+   X >= 0 (`L2.06405`..`L2.06406`, `L2.06407`..`L2.06408`).
+9. X = min(X, T(L+1) - T(L)), L the base level of s; with Session `[L2.01317]` +0x74 nonzero the difference is
+   divided by 5 first (signed `idiv`) (`L2.02329`). The two writers of +0x74 and the Medium for a campaign value of 0
+   are R2-ENGINE-334 and R2-SESSION-198; no new read was made here, and R2-SESSION-329 leaves the campaign value open.
+10. E(s) and +0x130 grow by X; the raise of R2-ENGINE-486 follows.
+
+The only steps that depend on s are 7 (the skill word below 100), 8 and 9. Step 8 reads dword +0x23c, the main skill.
+A census of dword writes overlapping +0x23c in each root finds 19 rows: 10 indexed stores of E(s) (in the award,
+reuse, experience-from-skill, raise-one, the item routine and two unread sites `L2.06409`, `L2.06410`), the server
+character-file store `L2.06411` (R2-ENGINE-489), stores at `L2.01288` and `L2.06412` (the second inside chosen
+skill, R2-ENGINE-320; the first unread), and six stores of 0 at `L2.06413`..`L2.06414` (base unresolved). By the
+census, no direct store to +0x23c lies in the award or in slot +0x68, +0x6c, +0x70; the award's callees were not read
+and `L2.01288` is unread. Medium that the award leaves the main skill unchanged. Step 7's byte +0xb6 has
+three byte stores (`L2.06415` = 0, `L2.06416`, `L2.06417` = 0) and 36 dword stores at +0xb4 that overlap it; none
+was read here.
+
+Worked values (Mind 10 and 40; no earlier kill of the kind; L 10, step 260; Session +0x74 zero):
+
+| Offer | Offered | Mind 10 | Mind 40 | main or 5, Mind 10 / 40 | other skill, Mind 10 / 40 |
+|---|---|---|---|---|---|
+| fighter blow, V 100, D 20, HPmax 50 | trunc(21.0) = 21 | trunc(12.25) = 12 | trunc(33.25) = 33 | 12 / 33 | 2 / 5 |
+| mage spell damage, same victim | 21 | 12 | 33 | 12 / 33 | 2 / 5 |
+| mage cast payment, cost 10 | trunc(5.5) = 5 | trunc(2.92) = 2 | trunc(7.92) = 7 | 2 / 7 | 1 / 1 |
+
+**Confidence.** High for the order, the arithmetic and the gates: the RU award and cap listings of EXP-2060
+(`ru-xp-award.txt`, `ru-xp-scale-and-vt26-28.txt`), equal to EN after masking (R2-ENGINE-491). High for the step 5
+predicate (`L2.02362` read in RU here, equal to EN `L2.04430`). Medium for the field writers: linear census, base
+objects unresolved, no repaired project; `L2.01288`, `L2.06409`, `L2.06410` and the +0xb6 stores are unread. Medium
+that +0x4c & 4 is the mage class (R2-ENGINE-362). The worked values rest on the formulas above and on ftol truncating
+(R2-ENGINE-478).
+
+**Unknown.** The meaning of skill 5 and of the owner byte table at `[L2.02609]`+0xa8c4; the writers of +0xb6.
+Reading `L2.06415`..`L2.06417` and `L2.01288` settles the field writers.
+
+**Extends.** R2-ENGINE-480 step 3 ("unless the victim's health is below 0"): the predicate `L2.02362(victim)` is the
+victim's health word +0x94 below 0 (body read here), so by the code read a blow that leaves the victim below 0 and
+every kill skip the owner gates.
+
+**Evidence.** EXP-2156 `evidence/generated/win/ru-pred-L2.02362.lst`, `en-pred-L2.02362.lst`, `mask/pred-L2.02362.tsv`,
+`scan/ru-census-fields.tsv`, `scan/en-census-fields.tsv`; EXP-2060 `out/listings/ru-xp-award.txt`,
+`ru-xp-scale-and-vt26-28.txt`.
+
+### R2-ENGINE-1157
+
+The list at attacker +0x1a8 is a dword array: count `L2.02333` returns dword +8 of the list; append `L2.01545(v)`
+calls `L2.06418(count, v)` and returns the old count; remove `L2.02335(i, k)` moves the tail down by k dwords through
+`L2.04512` and subtracts k from +8. Element `L2.02334(i)` returns a pointer the callers dereference (body unread).
+An entry holds the victim's kind word +0x14c in its low word and a count in its high word.
+
+Slot +0x68 (`L2.02328`) calls the award first and only then updates the list, after the award call returns, whether or
+not the award paid (the list advances when the award refuses): a found kind adds 0x10000 to its entry;
+otherwise, when the count is 5 or more, entry 0 is removed, and the kind is appended with count 0. The award reads
+the first entry whose low word equals the victim's kind and pays X = 10X / (n + 10). So the first kill of a kind
+appends it with n = 0; the second call of slot +0x68 for the kind pays in full (10/10) and raises n to 1; the k-th call
+(k >= 2) pays 10/(k + 8), and a blow after the j-th call pays 10/(j + 9); n counts slot +0x68 calls for the kind, not paid
+kills. By the code read, blows (+0x6c) and cast payments (+0x70) never add entries. At most five kinds are
+remembered; a sixth kind drops the oldest. By the code read, for a list empty at the start, the cut starts at the third kill of a kind.
+
+A census of +0x1a8 in each root (15 memory rows and 40 `imm` rows per root) shows, in the ranges `L2.06419`..`L2.06420`
+and `L2.06421`..`L2.06422` (15 of the 40 `imm` rows), the
+award and slot +0x68, five `add ecx,0x1a8` at `L2.06419`..`L2.06423` (near the unit constructor) and one at
+`L2.06420` (the unit copy region of R2-ENGINE-535); none in the unit save or load routines. The other 25 `imm` rows
+and all 15 memory rows lie outside these ranges and are unclassified.
+
+**Confidence.** High for count, append (to its callee) and remove, read in RU; EN twins were ambiguous (69, 36 and 3
+prefix matches), so EN rests on the masked equality of the callers (R2-ENGINE-491): Medium in EN. Medium for the
+element accessor and `L2.06418` (unread) and for "nothing else writes the list" (the six sites near the constructor
+and copy are unread; a block copy is outside the census; 25 immediate and 15 memory rows outside the named ranges are
+unclassified).
+
+**Unknown.** Whether the list survives a mission change or a load (the unit-range sites above are unread); reading
+`L2.06419`..`L2.06423` and `L2.06420` settles it.
+
+**Amends.** R2-ENGINE-480's list clause: the roles of `L2.02333`, `L2.01545` and `L2.02335` are read.
+
+**Evidence.** EXP-2156 `evidence/generated/win/ru-list-count.lst`, `ru-list-append-and-get.lst`,
+`ru-list-remove.lst`, `scan/*-census-fields.tsv`; EXP-2060 `out/listings/ru-xp-scale-and-vt26-28.txt`.
+
+### R2-ENGINE-1158
+
+The kill route RU `L2.04426` (R2-ENGINE-772) takes the killer from victim +0x40; for a killer of class 0x21..0x3f
+whose health word is not below 0 it calls the killer's slot +0x50 (gold) and then slot +0x68 with the victim and the
+sign-extended byte victim +0x48 as the spell. Slot +0x68 returns for a non-mage with a nonzero spell, takes the
+spell's Sphere for a mage, and offers trunc(V x 0.5) (V the victim's +0x1c). A mage killer with spell 0 is refused
+by the award (step 7 of R2-ENGINE-1156). The kill route calls the award for a Human killer's slot +0x68, whose
+payment needs victim byte +0x48 nonzero for a non-mage and refuses a mage killer when it is 0. By the code read, a kill
+of an own or allied unit is paid when the victim's health word is below 0 at the kill route, because `L2.02362(victim)`
+then holds and the owner and diplomacy gates of the award are skipped; the health word at state 0x10 is unread; no run
+was made. Medium. The creature +0x64 (`L2.02331`) adds X to +0x130 and counts the kill in owner +0xa48 per
+R2-ENGINE-772 (count only when argument 2 is nonnull and `L2.02362(argument 2)` holds) and R2-ENGINE-480 (read in EN);
+the class of the receiver in this route is not tied to `L2.02331` here, since a Human killer's slot +0x68 calls the
+award, not `L2.02331`. This is one route of at least four slot +0x68 sites in the unit range (`L2.06424`, `L2.06425`
+and `L2.06426` are unclassified).
+
+The slot-call sweep finds 109 calls through +0x64, +0x68, +0x6c or +0x70 in each root (RU: 27, 21, 35, 26). Nine
+lie in bodies read: +0x64 from slots +0x68, +0x6c and +0x70; +0x6c from the strike `L2.06427`, the Drain Life arm
+`L2.06428`, the effect tick `L2.06429` and the damage object `L2.06430`; +0x70 from the apply head `L2.06431`; +0x68
+from the kill route `L2.06432`. Four more in the unit range (`L2.06433`, `L2.06424`, `L2.06425`, `L2.06426`) call
+the slot on the object at +0x5c4 of their frame object; their class is not identified. The other 96 lie in
+L2.06434..L2.06435 and L2.06436..L2.06437 and are not classified.
+
+**Confidence.** High for the two kill-route calls and their arguments (EXP-2103 `ru-kill.txt`, EN equal) and for
+the predicate's body. Medium for the payment of an own or allied unit's kill (health word at state 0x10 unread).
+Medium for the census: a linear sweep that does not see computed or indexed slots, and 100 sites are
+not classified, so other award callers are not excluded. Medium that +0x48 holds the killing spell (its writers
+were not read).
+
+**Unknown.** The writers of victim +0x40 and +0x48; the receivers of the 100 unclassified sites.
+
+**Amends.** R2-ENGINE-480's Unknown on the callers of +0x68: the kill route is one, read.
+
+**Evidence.** EXP-2156 `evidence/generated/scan/ru-slotcalls-award-slots.tsv`, `en-slotcalls-award-slots.tsv`,
+`win/ru-pred-L2.02362.lst`; EXP-2103 `out/code/listings/ru-kill.txt`; EXP-2060 `out/listings/ru-creature-award.txt`.
+
+### R2-ENGINE-1159
+
+The routine `L2.06401` pushes `L2.00230`, loads `ecx` = `L2.02343` and calls `L2.04517` (unread): `L2.02343`, the
+dword one past the 150-dword threshold table (R2-ENGINE-485), is the first of an object that routine builds (Medium:
+the constructor body and the object's other readers are unread). The
+skill-from-experience loop reads it only at i = 149, that is for E >= T(149) = 1,470,651,577. The award stops at
+base level 100 and caps each payment at one step, so award play from E below T(100) keeps E(s) below T(101); the dword
+does not decide a level reached by the award.
+
+The two Heal callee windows read here contain no slot-call instruction and call unread `L2.01780`, `R2.0021`:
+`L2.02360` (47 instructions) calls `L2.01780`; `L2.00092` (10 instructions) calls `R2.0021`. No sweep site lies in
+either window, none between `L2.06426` and `L2.06438` and none between `L2.06430` and `L2.06432`; a transitive call is
+open, and the sweep misses indexed and computed slots.
+
+**Confidence.** High for the three instructions at `L2.06401` and the two windows, RU only. Medium for the object
+reading (constructor body unread) and for the Heal clause beyond these windows.
+
+**Unknown.** The value of the dword at runtime; the bodies of `L2.01780`, `R2.0021` and `L2.00060`.
+
+**Amends.** R2-ENGINE-485: the dword at `L2.02343` is not a table entry; R2-ENGINE-489's "level from E" bound
+matters only above T(149). R2-ENGINE-487 and R2-ENGINE-488: the Heal clauses; two Heal callees are now partly read
+(windows only, above).
+
+**Evidence.** EXP-2156 `evidence/generated/win/ru-site-L2.02352.lst`, `ru-heal-callee-L2.02360.lst`,
+`ru-heal-callee-L2.00092.lst`, `scan/ru-slotcalls-award-slots.tsv`.
 
 ### R2-ENGINE-1104
 
