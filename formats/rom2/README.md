@@ -19,6 +19,7 @@ semantics and writer boundaries remain explicit on each page.
 | Town presentation | [Town](../rom2-town/format.md) | ID/resource selection, Kaarg square layers, mask, clocks and room art; full room layout and shell text destinations Unknown |
 | Character generator | [Generator](../rom2-chargen/format.md) | Pre-create and detail screens, budget, skills, tips and the hero at town 1; item effects and the hero's SAV bytes Unknown |
 | Automatic casting | [Autocast](../rom2-autocast/format.md) | Three cumulative support masks, selected RU spell policy and Player preferences; execution and lifecycle Unknown |
+| Unit Effects | [Effects](../rom2-effects/format.md) | ID renewal, slots, timer and direct characteristic stores; complete source routes, recomputation and writer census Unknown |
 | Session records | [Header](../rom2-net/format.md) | Eight-byte header and transport length rules; payload grammar Unknown |
 | Single-player save | [Save](../rom2-sav/format.md) | `Bsg&` envelope, document, Player and tail differences from ROM1; field meanings Unknown |
 | Character file | [Character](../rom2-a2c/format.md) | `.a2c` sections, scramble, checksum and codecs; section meanings Unknown |

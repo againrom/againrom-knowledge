@@ -27501,3 +27501,127 @@ Each part except the first pair under Bless or Curse is base + U[0,spread]; a sp
 **Amends.** R2-ENGINE-478 step 1: a third table, L2.06391 (EN L2.06392), also holds the resolver at +0x54 and L2.02319 at +0x30, so it skips the conversion.
 
 **Evidence.** EXP-2155 generated/win/*resolver-p*.lst, *vt30-unit.lst, *vt30-human.lst, *ftol.lst, generated/tables/*kind-switch.tsv, *vt-*.tsv.
+
+
+## Effect record identity and renewal
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1164 | ROM2 same-ID renewal keeps the old Effect and independently maximizes signed magnitude and u16 duration. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1165 | ROM2 Effect entry tests flags&3; timer duration0 wraps to 65535; continuous expiry omits end. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1166 | ROM2 Effect slots use ID specials or 50 tag arms; clamps and packed overwrites limit reversibility. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1167 | ROM2 renewal keeps the less negative magnitude; speed-arm examples are conditional on recomputation. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1168 | ROM2 different Effect IDs can coexist; IDs20/28 cancel, while the read ID14/15 slots use opposite predicates. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1169 | ROM2 parsed timed item Effects retaining ID0 merge by that ID even when their tags differ (Medium). | High / Medium / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1170 | ROM2 item-child start/end call slots40/44 directly; complete item/spell contribution independence is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1171 | ROM2 read bodies write Effect words40/42 during construction, renewal and ticking; other-writer census is Unknown. | High / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+
+### R2-ENGINE-1164
+
+Complete attach RU L2.00480..L2.02361 / EN L2.00481..L2.05846 is read in two windows per root. It first clears unit dword150. With entry passing, incoming ID20 or 28 searches unit list20 for the opposite ID. When an opposite record is found, it clears that record's mask144 bit, calls old slot44, L2.05847 / L2.03766, L2.05648 / L2.06439 and notify, then returns without copying, linking or starting incoming. That the old record leaves the list rests on unread L2.05648 / L2.06439 (Medium). A second standing opposite record, if one exists, is not examined. Otherwise a second entry test gates same-ID search. The key is u16 Effect0C alone.
+
+A found old object gets slot44(unit), then signed max(word40_old,word40_new), then max(u16 word42_old,u16 word42_new), then slot40(unit) except ID6. Both comparisons use JLE; the first operands are MOVSX words, the second are zero-extended words. Old tag3C, flags3D, source44 and identity remain. The incoming object is not linked by renewal. Without a match, allocate0x48, copy, start except ID6, link, OR the ID bit and send for nonzero ID. Failed entry calls incoming slot40 directly. Every arm not returning after cancellation joins the common notify tail.
+
+The read copy RU L2.04914 / EN L2.06440 sets the Effect vtable, copies tag3C, flags3D, dword40 (both words), ID0C and source44 after an unread base copy. Both read tables bind attach to slot3C. The complete attach directly compares no tag or source in its match; a side gate inside unread callees remains possible.
+
+**Confidence.** High for these direct bodies, fields, comparisons, slot bindings and stores in EN/RU. Medium for complete traversal and allocation/list/notification effects: iterators, mutators, allocator, base copy and senders are unread. No census proves the absence of additional matching paths elsewhere.
+
+**Unknown.** Duplicate-record order and uniqueness, list cleanup, allocation failure recovery, full source admission and final characteristic. Read the named callees and lifecycle callers; a separately authorized run can compare record pointers across renewal.
+
+**Amends.** R2-ENGINE-986's unread-copy boundary is narrowed to the copied fields and vtable; base-copy and list/callee boundaries remain. It does not upgrade that claim's complete gameplay composition.
+
+**Evidence.** EXP-2157 RESULTS section1; generated listings *-attach-1, *-attach-2, *-copy, *-entry and tables/equality receipts.
+
+### R2-ENGINE-1165
+
+Entry RU L2.03774 / EN L2.03767 returns 1 exactly when flags3D contains mask1 or mask2. Both constants are read. It tests neither magnitude, duration, tag nor target. Failed entry goes to direct slot40 without retaining a new record. Keyword labels duration=1, continuous=2, charges=4 and singleuse=8 are inherited from R2-ENGINE-697, High for those values.
+
+Timer RU L2.00482..L2.00480 / EN L2.00483..L2.00481 first requires entry. With flag2 and pre-decrement duration divisible by 8, it calls start and notify. It then returns without decrement when zero-extended duration>9600. Otherwise it decrements the u16 duration; a result0 invokes end only without flag2, clears the unit mask bit, calls removal for nonzero ID and ORs the byte at L2.06441, whose value was not committed here (0x80 per R2-ENGINE-695, High for that claim's EN read). This body does not itself unlink. Initial duration0 becomes65535; the next ordinary timer call returns above 9600. A continuous duration0 also starts before that decrement.
+
+**Confidence.** High for entry, constants1/2, timer arithmetic and direct call/store order in both roots. Medium for final effects of start/end, send/notify and caller cleanup, which include unread helpers. Removal semantics are inherited from R2-ENGINE-695 at its clause grades; no new delivery proof is supplied.
+
+**Unknown.** Timer scheduling, seconds, ended-record cleanup and all external duration writers. Read callers and list cleanup; measure only in a separately authorized run.
+
+**Amends.** R2-ENGINE-695's expiry boundary is narrowed: an initial zero wraps rather than expiring on its first decrement; the continuous start precedes the >9600 check. Existing notification and delivery grades stand. R2-ENGINE-454: 'larger magnitude' is the signed maximum; 'removes the effect' at timer zero is not shown by the timer body (unlink unread); an initial duration 0 wraps to 65535. R2-ENGINE-697's Medium for the blank Effect narrows to: the blank constructor read stores flags 0, which fails the entry test; that the default arm uses this constructor remains from R2-ENGINE-697.
+
+**Evidence.** EXP-2157 RESULTS section4; generated *-entry, *-timer, flags in tables.tsv and equality.tsv.
+
+### R2-ENGINE-1166
+
+The paired Effect tables bind start/end/tag to slots40/44/48. Start/end special-case ID6,15,14. ID6 start uses negated signed magnitude, optional target wordC6 scaling, word94 subtraction and source/notification calls; attach skips it for a new or renewed ID6, and its end has no direct characteristic operation. ID15 with unit virtual30=0 subtracts/adds magnitude<<8 from/to wordA4. ID14 with virtual30!=0 adds/subtracts that shift at wordsE4 andA4. Other IDs dispatch tag with polarity+1/-1.
+
+Tag RU L2.00054..L2.01909 / EN L2.04138..L2.04137 is complete:870/876 instructions in four windows per root. All50 key pointers and jump entries are read in both roots. With flags&7 nonzero delta is signed word40 times polarity; otherwise dword40 times polarity. The derived100-row kind table records each arm, field, guard and width. Additions are modular at their stored width. Attribute arms cap above 100; health/mana cap at their maxima; selected defence/absorption and protection arms clamp below 0. Keys13/43/49 share byteF4 addition. Keys44..48 overwrite bytesFB/F9/FA from kind and original Effect40/41, independent of polarity. Keys38..40 call RU L2.04516 / L2.05835 or EN L2.06442 / L2.01042 on a string (callees unread); key41 branches directly to the tail. Key42 guards [unit+0x140] != 0, calls RU L2.00040 / EN L2.04332 with delta, allocates 0x14 bytes on a zero return, then calls RU L2.03498 / EN L2.01059 with low8(delta) and RU L2.00039 / EN L2.01060 with (delta, object); all these callees are unread. Every direct arm reaches target virtual58.
+
+EN alone first clears signed target wordD8 when>24. Removing those six EN instructions yields equal whole-dispatch syntax under the image-address mask. Special ID14/15 start/end do not call tag and therefore do not execute that preamble.
+
+**Confidence.** High for slot bindings, direct stores and branch guards in the 50 arms, field coordinates, comparisons and the stated EN/RU difference. For keys38..42, High applies only to direct stores and guards, including [unit+0x140] != 0; the named callees are unread and their effects are not established. Medium for complete characteristics and predicate meanings: target virtual30/58, direct predicates, the listed key38..42 callees and ID6 scaling constants outside the read tables remain unread. Table key names alone do not establish player-stat semantics.
+
+**Unknown.** Final recomputed values, reachable target classes and whether external writers preserve the modifier fields. Pure additive arms invert only under stable predicates/recompute; clamps and packed overwrites do not establish a universal inverse. Read the predicates, recompute and callers.
+
+**Amends.** R2-ENGINE-986's unread start/end boundary is narrowed to these bodies and their remaining callees; no complete sight or target consequence is inferred.
+
+**Evidence.** EXP-2157 RESULTS section2; generated *-start, *-end, *-tag-1..4, table/string/range receipts; derived/kind-slots.tsv.
+
+### R2-ENGINE-1167
+
+Attach MOVSX/CMP/JLE keeps max(-5,-2)=-2 in either order, independently of duration. It first ends the old magnitude, then stores the maximum and reapplies using the old tag/flags/source. Paired speed-create RU L2.00078..L2.00076 / EN L2.06443..L2.04135 writes magnitude=trunc(P/15)+1, negated for row29, ID=row and mark=2*row+8. The Effects string of rows 21 and 29 was not read and no committed claim names its key; the examples assume key speed (17) with unit virtual +0x30 nonzero and a recompute that preserves word D8. Haste and Slow as the names of rows 21 and 29 are from R2-ENGINE-024 and R2-ASSET-179. Darkness's negative formula is inherited from R2-ENGINE-024.
+
+For additive wordD8 with virtual30!=0 and a recompute preserving that modifier, P0/P15 give Haste1/2 and Slow-1/-2. Duration10 is inherited from R2-ENGINE-024; the read arm has immediate pow base1.025 and read multiplier16. Using its inherited duration law and truncation gives160/231. The second cast follows one decrement. Haste low/high renews to(m2,t231), high/low to(m2,t230). Slow low/high renews to(m-1,t231), high/low to(m-1,t230). Every sequence ends at modifier0 if the same additive/recompute assumptions continue. The old record survives renewal; the new object has no separate unit-record expiration.
+
+**Confidence.** High for signed maximum, direct magnitude/ID/mark stores and conditional modular algebra in EN/RU. Medium for complete numerical cast examples: the Effects-string key is assumed, both pow/accessor bodies and EN ftol are unread; RU ftol is read and sets truncation. Target predicates and virtual58 remain unread. The 32-row table is a conditional calculation, not an observed final speed or sight value.
+
+**Unknown.** The Effects-string key: read the Effects strings of data.bin rows 21 and 29. Actual speed, sight and target retention after recompute; full upstream power and duration-row access: read those helpers or record fields in a separately authorized run.
+
+**Amends.** R2-ENGINE-986's greater-magnitude wording is narrowed explicitly to signed maximum for negative values; it does not mean greater absolute magnitude.
+
+**Evidence.** EXP-2157 RESULTS sections3/10; generated *-attach-1, *-speed-create, tag/start/end/timer listings, RU ftol and constants; derived/worked-examples.tsv.
+
+### R2-ENGINE-1168
+
+By the code read in both roots, the complete attach retains different IDs unless it finds the explicit opposite pair20/28. When a Bless (20) is standing and a Curse (28) arrives, or the reverse, the first opposite record found in the list is ended (slot 44 called, its mask bit cleared) and the incoming Effect is not copied, linked or started. That the old record then leaves the list rests on unread L2.05648 / L2.06439 (Medium). A second standing opposite record, if one exists, is not examined. The body supplies no cancellation pair for 21/29 or 14/15. With unchanged predicates, additive modifier and preserving recompute, different-ID contributions h and s give B+h+s; ending h first leaves B+s, ending s first leaves B+h, and ending both leaves B. This is conditional algebra, not a complete characteristic result.
+
+The Effects string of rows 21 and 29 was not read and no committed claim names its key; the examples assume key speed (17) with unit virtual +0x30 nonzero and a recompute that preserves word D8. Haste and Slow as the names of rows 21 and 29 are from R2-ENGINE-024 and R2-ASSET-179.
+
+For IDs14/15, the complete slots have opposite virtual30 tests: nonzero admits Darkness's wordA4/E4 changes only; zero admits Light's wordA4 change only. Both records may coexist if both attaches are reached. The same target's stable predicate prevents those two special arms from applying opposite contributions together. Area-cell registration/reachability is a separate boundary.
+
+**Confidence.** High for the attach branches and both per-ID slot predicates in EN/RU. Medium for the named spell-pair composition and additive outcomes: row21/29 names are from R2-ENGINE-024 and R2-ASSET-179, but their Effects-string key is assumed, not inherited. Row14/15 scanRange binding and area reach reuse R2-ENGINE-793 at its existing grades; predicates, recompute, delivery and all other ID pairs were not censused. Unlink is Medium because its helper is unread. Generic clamps/overwrites and EN D8 reset prevent generalizing an inverse.
+
+**Unknown.** The Effects-string key: read the Effects strings of data.bin rows 21 and 29. Exhaustive ID pairs on every characteristic, changing predicates, complete final values and delivery of both areas: read source/ID producers and recompute; observe both expiry orders only in a new authorized run.
+
+**Evidence.** EXP-2157 RESULTS section5; generated attach/start/end/tag listings and inherited named authorities.
+
+### R2-ENGINE-1169
+
+Blank construction RU L2.00089 / EN L2.03782 explicitly stores ID0, tag0, flags0, dword40=0 and source44=0 after an unread base initializer. Two512-instruction parser prefixes construct that blank, write tag3C, values and flags, and when flags&7 is nonzero write duration=value<<4. Their read direct stores assign no ID; remaining epilogues and value/string helpers are unread. Whole item-use RU L2.01763 / EN L2.06444 returns the item for HP<=0; otherwise it iterates item20, sets flags|8 only when flags were 0, invokes each returned child's slot3C, runs target slot 5C, then four compares of item+4 with fixed strings (callee L2.01289 unread) and a time-gated call to L2.00059 (unread), then calls item vtable slot +4 with argument 1 (a deleting destructor by convention; the slot is unread, Medium). In the compares, item denotes the descriptor loaded from Item+0x3c; the named direct callee addresses are RU.
+
+Conditional on a parsed timed child reaching attach with ID0, two such children merge by ID even with different tags. The old tag/flags/source survive. For hypothetical Body+5/t100 then Mind+8/t200, the retained Body record gets+8/t200; the Mind operation is not used by the renewal branch. Reversing the order keeps the Mind tag. Same-kind children use the same maximum rule. ID0 and a nonzero spell ID remain distinct. No shipped potion data or complete producer-to-use path was read.
+
+**Confidence.** High for the constructor stores, the child loop, the flag-OR-8 condition and the slot3C call in EN/RU. Medium for the deleting-destructor interpretation of unread item slot+4, retaining ID0 through the parser/producer and the conditional potion interpretation: the parser is truncated before return, helpers/iterators and upstream bindings are unread. The effects of the four compares and the time-gated call are not established. Unknown for shipped timed-potion population and complete characteristic after recompute. A bounded negative over these prefixes is not a complete ID-writer census.
+
+**Unknown.** Which installed potion rows are timed, exact IDs at delivery and whether every producer retains constructor ID0. Read the data, full constructor/parser chain and producer-to-use call path before claiming a shipped-potion rule.
+
+**Amends.** R2-ENGINE-403's limited Effect flag/tag boundary is narrowed to these read stores and the conditional collision. Its class/factory/value-helper Unknowns are not upgraded.
+
+**Evidence.** EXP-2157 RESULTS section7; generated *-blank, *-parser-1/2, *-item-use and attach listings.
+
+### R2-ENGINE-1170
+
+Paired item child-start/end RU L2.05654..L2.06445 / EN L2.05655..L2.06446 iterate item20 and call returned child slot40/44 directly. These are the start/end slots, not unit attach slot3C. Item20 and unit20 have different owner bases. Equip/remove call order and Weapon direct-field operations are inherited from R2-ENGINE-947: High direct fields/order, Medium complete traversal/class/event composition.
+
+If an item and spell contribute I andS to a modular additive field, predicates stay fixed, no clamp or EN D8 reset fires and recompute preserves that field, then B+I+S becomes B+I at spell end or B+S at item removal. This conditional algebra does not prove full independence. The shared tag dispatcher can clamp or overwrite and always calls unread target virtual58. There is no callee/writer census excluding changes to item or standing-Effect state elsewhere.
+
+**Confidence.** High for the paired child-call bodies and their slots. Medium for combined item/spell modifier algebra and inherited equip composition. RU only for slot +0x58 and Medium in EN, as in R2-ENGINE-947. Unknown for universal independence, actual displayed characteristic and complete save/load/event paths.
+
+**Unknown.** Target/Human recompute, full equip/remove coverage and record-field side effects of all callees. Read those paths; a separately authorized fixed-item/fixed-spell run through both removal orders would settle bounded final-state cases.
+
+**Evidence.** EXP-2157 RESULTS section8; generated *-item-children, *-start, *-end and tag listings; inherited R2-ENGINE-947.
+
+### R2-ENGINE-1171
+
+Read standing-record writers are same-ID renewal's word40/word42 stores and timer's word42 decrement. Read construction writers are blank dword40=0, copy dword40 from source, parser dword40/word40/word42 stores, and speed-arm word40/word42 stores. The dword writes overlap both words; construction is distinguished from a retained record's later mutation.
+
+**Confidence.** High for these identified stores in EN/RU, with the parser bounded to its 512-instruction prefix. Unknown for the full writer population. No disp/imm sweep, overlapping-width reduction, embedded-coordinate analysis, indirect-call scan or bulk-copy census was performed; no absence or completeness claim follows.
+
+**Unknown.** Dispel, save/load, server-message and all other standing-field writers across allods2.exe, scenario.dll and engine32.dll. A classified census retaining unnamed candidates and aliases would settle it. The 40-window budget ended before this census.
+
+**Evidence.** EXP-2157 RESULTS section9; generated blank/copy/parser/speed/attach/timer listings and window/budget receipts.

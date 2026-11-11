@@ -1806,3 +1806,29 @@ that clear signed Human word +0xd8 when greater than 24. The other 870
 instructions match RU after absolute-address masking. This local difference
 is High; callee equivalence is Medium and its full scheduling/player effect
 is Unknown. — R2-ENGINE-949
+
+### Effect renewal and construction boundary
+
+By the code read in both roots, attach keeps the old same-ID object, tag,
+flags and pointer44,
+then independently maximizes signed magnitude and zero-extended remaining
+duration between old end/start. A new copy transfers the two words with one
+dword store. Direct bodies are High; base-copy, traversal and notification
+composition remain Medium. — R2-ENGINE-1164
+
+By the code read in both roots, entry is flags&3. Timer duration0 wraps to
+65535 before a later >9600 return;
+continuous start runs before that limit check and continuous expiry omits
+end. The timer marks an ended record; cleanup/unlink is unread. These direct
+operations are High in both roots. — R2-ENGINE-1165
+
+A parsed timed item child retaining constructor ID0 meets another ID0 even
+with a different tag; renewal uses the old tag. This source composition is
+Medium: blank and item-use bodies are complete, parser prefixes and helpers
+are incomplete, and shipped timed-potion rows were not read. — R2-ENGINE-1169
+
+Item child-start/end call slots40/44 directly. Additive item/spell modifier
+algebra is conditional; complete recomputation and independence are Unknown.
+The read construction/renewal/timer stores do not form a complete writer
+census, and no new save/load or message-writer proof is supplied.
+— R2-ENGINE-1170, R2-ENGINE-1171

@@ -81,6 +81,7 @@ SAV and LOAD, and the objectives of maps 21 and 31.
 | **Automatic casting** | `Player preferences and spell orders` | [Reference](rom2-autocast/format.md) | Three cumulative support levels, selected offensive spell and separate computer paths; execution, lifecycle defaults and full EN/RU equivalence remain Unknown (`R2-ENGINE-345`, `R2-SESSION-150`) |
 | **Group machine** | `Group programme and Unit command state` | [Reference](rom2-ai/format.md) | Programme dispatch, Guard A/B, assignment, hit memory, executor, failed routes and stored fields; cadence, helper closure and observed stamp cycle remain Unknown (`R2-ENGINE-882`, `R2-ENGINE-874`) |
 | **Quest objective machine** | `Bank slots 752..767, #subobjective texts, subobj.256` | [Reference](rom2-quest/format.md) | Objective states and writers, notification arms, briefing-window rows and marks, SAV/LOAD and maps 21 and 31; check-arm meanings and sounds remain Medium (`R2-ENGINE-894`) |
+| **Unit Effect records** | `Effect attach, renewal, timer and end on a unit` | [Reference](rom2-effects/format.md) | Same-ID renewal, the entry test, per-kind slot operations and the Bless and Curse cancel in EN and RU; source admission, list cleanup and the recomputed characteristic remain Unknown (`R2-ENGINE-1164`, `R2-ENGINE-1171`) |
 
 <a id="explicitly-out-of-scope-not-rom1-native"></a>
 

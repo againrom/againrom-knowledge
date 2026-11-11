@@ -48,9 +48,15 @@ zero; it cannot be met when caster and occupant share one owner object (an
 equal owner index is Medium evidence for that). The occupant body is High in both roots; the caster
 field at the apply is Medium. — R2-ENGINE-985
 
-The Effect attach renews a same-ID Effect (larger +0x40 and +0x42), cancels
-Bless against Curse, or adds a copy and its bit in unit +0x144. It reads no
-owner. What Darkness's sight Effect changes is Unknown. — R2-ENGINE-986
+By the code read in both roots, the Effect attach keeps the old same-ID
+object and kind, maximizes signed
+magnitude and zero-extended duration independently, cancels Bless against
+Curse, or adds a copy and its bit in unit +0x144. The direct body reads no
+owner. Negative renewal keeps the less negative magnitude. Darkness's slots
+add/subtract magnitude<<8 at A4/E4 only when virtual30 is nonzero; final sight
+and target effects remain Unknown. Direct stores are High, complete
+list/callee composition Medium. — R2-ENGINE-986, R2-ENGINE-1164,
+R2-ENGINE-1166, R2-ENGINE-1167, R2-ENGINE-1168
 
 The hook writes hit memory, session +0xbd98/+0xbdc4/+0xbdc8 and one record
 appended to session list +0xbbec, which the RU script tick clears (Medium:
