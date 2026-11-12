@@ -259,6 +259,12 @@ composed route is Medium, not every portrait click; full RU parity is open.
 Gesture voices play at SoundSpeechPos. — R2-ENGINE-720, R2-ENGINE-806,
 R2-ENGINE-869
 
+The letter keys reach their senders only when Ctrl is not held, the
+selection count is nonzero and view +0x144 & 0x24 is 0; C also needs
+`L2.03135()` to return 0; with a nonzero result the key is consumed with no
+effect.
+— R2-ENGINE-1179
+
 The unit slot that plays the easy, hard and dead files has five callers in
 the client message pump (Medium: some call encodings were not scanned), not
 through the picker, and no test of Acknowledgement or the mode word guards

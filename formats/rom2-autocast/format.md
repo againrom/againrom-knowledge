@@ -252,6 +252,12 @@ stores are High; per-order closure and inherited reset effects are Medium.
 The helper containing L2.02866 calls the cast initializer, but its order
 reachability is Unknown. — R2-ENGINE-555
 
+Before L2.02865 branches, its ring search fills the collection; an empty
+one leads to L2.02637 (R2-ENGINE-1183). Order 8's planner stores prepared 4
+when it approaches and returns for prepared 5, 6, 8 and 9 (R2-ENGINE-1184).
+Its helper plans spell 0x18 through cast planner L2.01524 when the spell's
+word +0xc is at most the defender's word +0x9a (R2-ENGINE-1185).
+
 Order 0xf is the structure order. Its setter (RU L2.02809) stores unit +0x50
 = 0xf and, on the command object, +0x68 = the building, +0x14 = range 1, 2
 or 3 by building byte +0x60, and +0xa = the building's cell word, plus 0x101

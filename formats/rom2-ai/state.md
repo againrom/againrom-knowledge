@@ -155,3 +155,31 @@ marked-cell path of the sight lists, whose callers were not counted
 (R2-ENGINE-1138), command +0x78 read with its writer Unknown
 (R2-ENGINE-1142), the book cast's spell +9 admission (R2-ENGINE-1143) and the
 EN item kind of a staff (R2-ENGINE-1141).
+
+## Keyboard orders and the defend order
+
+The mission letter keys G, T, R, P and L send input types 0x17, 0x18, 0x14,
+0x13 and 0x12 to the selection; on the RU input chain these become orders
+0xb, 0xc, 0x16, 0x1a and 0x17 (Medium for the order numbers: RU chain only,
+conditional on the handler's admission, R2-ENGINE-1107), while A, M, D and S
+only set a cursor mode (R2-ENGINE-1179). Order 0x1a searches square rings
+around the unit for an accepted cell, stores it at command +0xa with
+prepared +8 = 0xc, and with none calls the order-0xc setter
+(R2-ENGINE-1183). Order 8 approaches the defended unit beyond range r,
+command byte +0x70. Within r a defender with a book plans spell 0x18 on the
+defended unit when (defender word +0xa0 is 0 and defended +0x94 < +0x96) or
+(+0xa0 nonzero, below defender +0x9c + 3, and +0x94 < +0x96 / 2), the spell
+is in its book and its word +0xc is at most defender +0x9a
+(R2-ENGINE-1185); in every other case it runs the attack helper over an
+unread list of the defended unit. At distance below 2, when the prepared
+byte left by the helpers is 7 or outside 5..9, it steps r cells away along
+the line between the two cells, clamped to 8..size - 9; no read body reads a
+facing field (R2-ENGINE-1184).
+
+The application key routine handles Pause, Esc, F1, F2, F3, Num+ and Num-
+(R2-ENGINE-1181); Num+ and Num- step the game speed index 0..8 through the
+setter that R2-ENGINE-620 describes (R2-ENGINE-1182). The view key
+routine and its three key tables are read in R2-ENGINE-1178 and
+R2-ENGINE-1180 (the third table's arms); 39 of the 46 key
+entries of the RU install text have an arm in the read routines
+(R2-ENGINE-1186).

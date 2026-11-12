@@ -27585,6 +27585,173 @@ R2-ENGINE-526 supplies, at High for the selected owner loop / Medium for party r
 
 **Evidence.** EXP-2158 `evidence/generated/win/en-mission-reset.lst`; R2-ENGINE-526 for the older transition observation and its grades.
 
+## Mission keyboard and the defend order
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1178 | ROM2 app key routine EN L2.06472 / RU L2.06473 forwards codes as message 0x100 to app +0xcc; view routine EN L2.04345 / RU L2.04346 has three byte-plus-jump tables for codes 8..0x7b, 0x41..0x54, 0x20..0xc0; the hop between them is Medium. | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1179 | ROM2 keys A M G D C S T R set view mode 1..8 through L2.04359; G, T and R then send types 0x17, 0x18, 0x14, P and L send 0x13 and 0x12; the RU input chain maps these to orders 0xb, 0xc, 0x16, 0x1a and 0x17. | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1180 | ROM2 view table T3 arms: Space, I and 0xc0 post 0x40e/0x40f, B and Q 0x40f, W 0x466, U and E call routines; Ctrl+W F H U L C call routines, Ctrl+N O K T flip globals L2.03133, L2.06474, L2.00892, L2.06475. | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1181 | ROM2 app key routine EN L2.06472 / RU L2.06473 sets the Ctrl and Shift flags and handles Pause, Esc, F1, F2, F3, Num+ and Num-; keypad digits go on as 0x30..0x39; RU F2 and F3 add network-state conditions. | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1182 | ROM2 Num+ and Num- step speed index app +0x41c (RU +0x434) by 1 within 0..8; EN jump table L2.03207 leads to nine arms that store 8, 10, 12, 14, 16, 20, 24, 28, 32 for 0..8, and app +0x418 = 1000 / that value. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1183 | ROM2 order 0x1a planner RU L2.02865 / EN L2.06476 searches square rings around the unit out to its byte +0xa5 for a cell L2.06477 accepts; a hit sets cell +0xa and prepared +8 = 0xc, none calls the order-0xc setter. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1184 | ROM2 order 8 planner RU L2.02907 / EN L2.06478 approaches beyond range r = command byte +0x70, else runs two helpers; at distance < 2 with prepared +8 7 or outside 5..9 it steps r cells away; no read body reads a facing field. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1185 | Within r, ROM2 order 8 plans spell 0x18 on the defended unit when +0x94 is below +0x96 (or half) and the cost fits +0x9a; else it attacks the nearest member of list L2.03475, kind 3 first; with an empty list it calls L2.01733(defender, 0). | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1186 | RU readme.txt lists 46 key entries; 39 have an arm in the read ROM2 key routines with the stated key and condition; Tab, Ctrl+A, Shift+1..9, Alt+F4 and the held Alt, Ctrl and Shift have none there. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+
+### R2-ENGINE-1178
+
+EN `L2.06472` / RU `L2.06473` (R2-ENGINE-1181) forward most codes as message 0x100 to the object at application +0xcc and call `L2.06479`; EN `L2.04345` / RU `L2.04346` is a key routine of the view object at application +0xd0. That the 0x100 message reaches the view routine was not read (Medium); each routine's own body is High. The view routine was read whole in three 256-instruction windows per root: 728 of 768 lines are equal under the address mask. The 18 differing code lines are field displacements only (application +0x404 to +0x41c, +0x5d8 to +0x63c, +0x4dc/+0x4de to +0x4f4/+0x4f6); the other 22 are table bytes decoded as code.
+
+- Gate: application +0x404 equal to 1 and view +0x80 nonzero. Otherwise, when application +0x404 & 2 is set and the key is B (0x42) or Q (0x51), it posts 0x40f to application +0xd4, to the view and to the object from `L2.03680(app+0xcc, 0x3e8)`; it returns 0.
+- Application +0xc0 nonzero: the key goes to application +0x138 virtual +0x6c; return 0.
+- Digits 0x30..0x39: Ctrl set: Shift set `L2.04349`, else `L2.04348`; Ctrl clear: Alt set `L2.04350`, else `L2.04347`; return 1. The flags are EN `L2.01559` (Ctrl), `L2.01653` (Shift), `L2.06480` (Alt).
+- Table T1 (jumps `L2.04353`, bytes `L2.04351`, key − 8 at most 0x73): Backspace `L2.06481(view+0xa28)`; Enter `L2.00991(app)`; Left `L2.06482(-1)`, Right `L2.06482(1)`, Up `L2.06483(-1)`, Down `L2.06483(1)`, each when application +0x404 is 1; F4..F12 (0x73..0x7b) arm `L2.04354`, the hotkey slots of R2-ENGINE-768. Every other code of the range goes to `L2.06484`.
+- `L2.06484`: when application +0x404 is 1, Ctrl is 0, view +0x140 is nonzero and view +0x144 & 0x24 is 0, table T2 (jumps `L2.04892`, bytes `L2.04891`, key − 0x41 at most 0x13; the letter commands). Otherwise, and for the T2 cells of B E F H I J K N O Q, table T3 (jumps `L2.06485`, bytes `L2.01555`, key − 0x20 at most 0xa0; R2-ENGINE-1180). Codes outside every range and the 145 T3 cells without an arm end at `L2.06486` with 0.
+- The routine returns 1 only from the digit and T2 arms.
+
+The RU tables lie 0xe9 higher. Decoded cell by cell, every key of the three tables reaches the arm at the same place of the routine in both roots. A reference scan (E8/E9/0F 8x rel32 and rel8 at every byte offset of code sections, absolute dwords at every byte offset of every section) finds no call or jump to `L2.04345` or `L2.06472` and one .rdata dword each (EN `L2.06487`, `L2.06488`; RU `L2.06489`, `L2.06490`). Modifier clear `L2.06491` (R2-ENGINE-1181) has one .rdata dword (EN `L2.06492`, RU `L2.06493`), 0x78 bytes after the application key slot.
+
+**Confidence.** High for the gates, the three tables, the cells and the arm calls in both roots. Medium for what the callees do: `L2.06481`, `L2.00991`, `L2.06482`, `L2.06483`, `L2.03680` and the digit routines were not read here. Medium that the 0x100 message of the application routine reaches the view routine (the receiver of the +0xcc message and `L2.06479` were not read; the raw scan finds no call to `L2.04345`). Medium that both routines are virtual methods: the scan is raw bytes without a repaired project, and the slot tables were not traced. Unknown for key release.
+
+**Unknown.** Which window message calls the slot of `L2.06491` and whether a separate key-up routine exists. Reading the application window procedure settles it.
+
+**Evidence.** EXP-2159 `evidence/generated/win/{en,ru}-key-{1,2,3}.lst`, `generated/mask/key-routine.tsv`, `generated/tables/*-key-tables-{a,b}.tsv`, `navigation/nav5/scan`.
+
+### R2-ENGINE-1179
+
+T2 cells, both roots: A `L2.04359(1)`, C `L2.04359(5)` only when `L2.03135()` returns 0; when it returns nonzero the arm returns 1 without calling it and without reaching T3, D (4), G (3), L `L2.04894` (RU `L2.06494`), M (2), P `L2.04829` (RU `L2.04893`), R (8), S (6), T (7). Each arm returns 1.
+
+Mode routine `L2.04359(n)` (RU `L2.06495`, 117 instructions, masked-equal): k = n, except k = 5 for n = 9 or 10. When view +0x9b4 is 5, k is not 5 and `L2.03135()` is nonzero, it calls `L2.03136()` and `L2.06496(app+0xec)`. Mask m = `L2.06497()`; when m has bit k − 1 set or n is 10, view +0x9b4 = k and it posts 0x40d(k − 1, 0) to application +0xdc; otherwise it returns with no change. Then n − 3 in 0..5 indexes table EN `L2.06498` / RU `L2.06499`: G (3) `L2.06500`, T (7) `L2.06501`, R (8) `L2.06502`, each followed by view +0x9b4 = 0 and post 0x40b; C (5) calls `L2.03134` when `L2.03135()` returns 0; D (4) and S (6) end after the mode store. A (1) and M (2) are outside the switch and end after the mode store.
+
+Mask `L2.06497` (RU `L2.06503`, 25 instructions, masked-equal): 0 when view +0x144 & 4; else 0xef, with 0x10 added when view +0x148 or +0x150 is nonzero. From T2 (+0x144 & 0x24 is 0) modes 1..4 and 6..8 always pass; mode 5 needs +0x148 or +0x150 nonzero.
+
+Senders G `L2.06500`, T `L2.06501`, R `L2.06502`, P `L2.04829`, L `L2.04894` (RU `L2.06504`, `L2.06505`, `L2.06506`, `L2.04893`, `L2.06494`; each masked-equal) fill buffer `L2.03033`: +9 type 0x17, 0x18, 0x14, 0x13, 0x12; word +5 from [view +0x9cc]+4; the ids (`L2.03037` of word +4) of the members of view +0x9d0 that `L2.02988` accepts, P only those with member +0x1b8 & 1. They send through `L2.00871(L2.00872, buffer)`, then call virtual +0x78 (G, T, L), +0x7c (R) or +0x84 (P) of the object `L2.03040()` returns (`L2.03040` is the speaker picker of R2-ENGINE-717). Modes 1, 2, 4, 5 and 6 send nothing at the key.
+
+The RU input chain of R2-ENGINE-1107 maps type 0x17 to order 0xb, 0x18 to 0xc, 0x14 to 0x16, 0x13 to 0x1a and 0x12 to 0x17, conditional on the handler's admission (R2-ENGINE-1107, High for the RU cells, Medium for player input).
+
+**Confidence.** High for the T2 cells, the mode routine, the mask, the arm table and the five senders in both roots. Medium for the order numbers: they rest on the RU input table of R2-ENGINE-1107 at its grade; the EN input table was not read. Medium for the meaning of `L2.03135`, `L2.02988`, `L2.03040` and the virtual calls, whose bodies were not read.
+
+**Unknown.** The click senders of modes 1, 2, 4, 5 and 6, so which order D's mode 4 sends; whether the mission panel has a button for any of these orders. Reading the view click routine and the receiver of 0x40d on application +0xdc settles both.
+
+**Amends.** R2-ENGINE-806: A M G D C S T R reach `L2.04359` only through the T2 gate (application +0x404 is 1, Ctrl 0, view +0x140 nonzero, +0x144 & 0x24 zero), and C calls it only when `L2.03135()` returns 0; with a nonzero result the arm returns 1 and the key is consumed.
+
+**Evidence.** EXP-2159 `evidence/generated/win/*-letter-command.lst`, `*-key-p-sender.lst`, `*-key-l.lst`; `generated-2/win/*-letter-arm-{a,b,c}.lst`, `*-letter-mode-mask.lst`, `generated-2/tables/*-letter-arm-table.tsv`, the matching `mask/*.tsv`.
+
+### R2-ENGINE-1180
+
+T3 arms read in the view routine, both roots (key, cell, body):
+
+- Space `L2.06507`: needs application +0x404 = 1 and +0xc0 = 0. When view +0x3f6c is nonzero and its word +0x104 is at most −0x28, it calls `L2.06508`. Else, when `L2.03138()` and `L2.03135()` both return 0, it posts 0x40e then 0x40f; else it posts 0x40e when `L2.03138()` is nonzero and 0x40f when `L2.03135()` is nonzero. Posts go to application +0xd4 and to the view.
+- I and 0xc0 `L2.06509`: application +0x404 = 1, post 0x40e(0, 0). B and Q `L2.06510`: the same with 0x40f.
+- W `L2.06511`: Ctrl calls `L2.06512` and shows string `L2.02397`[`L2.06513()` + 0x5e]; no Ctrl and application +0x5d8 not 2 calls `L2.00470(app, 0x466, 0, 0)`.
+- F `L2.06514`: Ctrl calls `L2.06515`, string [`L2.06516()` + 0x61]. H `L2.06517`: Ctrl calls `L2.06518`, string [view +0xab8 + 0x64]. L `L2.06519`: Ctrl calls `L2.06520`, string [view +0xabc + 0x66].
+- U `L2.01557`: Ctrl calls `L2.01501` and shows string `L2.00859`.`L2.01929`(v + 0x73), v = 0, 1 when [`L2.01503`] & 0x10, 2 when & 0x20; no Ctrl and application +0x404 = 1 calls `L2.06521()`.
+- N `L2.06522`: Ctrl flips [`L2.03133`], string + 0x68, `L2.03149(1)`. O `L2.06523`: Ctrl flips [`L2.06474`], string + 0x6a. K `L2.06524`: Ctrl and application +0x5d8 not 2 flips [`L2.00892`], string + 0x16f. T `L2.06525`: Ctrl flips [`L2.06475`], no string.
+- C `L2.06526`: Ctrl calls `L2.06527(![L2.06528])` and shows `L2.00859`.`L2.01929`([`L2.06528`] + 0x55).
+- E `L2.06529`: `L2.06530()` with no modifier test. EN `L2.06530` (56 instructions) walks view +0x9d0 (`L2.03035`/`L2.03036`) and calls member virtual +0x14 with 1 when `L2.04027(L2.04028)` accepts the member, member +0x14 equals view +0x9cc, byte +0x184 is at most 1 and +0x1b8 & 0x80 is 0, else with 0; then `L2.03144()`.
+
+Strings are passed to `L2.01560(view+0xa28)` with 0x7d0 and [`L2.06531`] as arguments. The calls that take a string are dispatches to routines whose bodies were not read; "shows" names the argument, not an observed display.
+
+**Confidence.** High for the cells and the arm bodies inside the view routine in both roots, and for the EN body of `L2.06530`. Medium for every callee named above, whose bodies were not read, and for the RU E arm: the masked match of `L2.06530` found four candidates and none was read. Names of these actions come from the shipped text (R2-ENGINE-1186).
+
+**Unknown.** Whether a save or a mission change carries the flipped globals: no writer outside these arms was read. A store census of the five globals settles it.
+
+**Evidence.** EXP-2159 `evidence/generated/win/{en,ru}-key-{2,3}.lst`, `generated/tables/*-key-tables-b.tsv`, `generated-2/win/en-key-e.lst`, `generated-2/mask/key-e.tsv`.
+
+### R2-ENGINE-1181
+
+EN `L2.06472` (two windows, 452 instructions) and RU `L2.06473` (453) act when application +0x448 is 0 (RU +0x460). Their tables (EN jumps `L2.06532`, bytes `L2.06533`; RU `L2.06534`, `L2.06535`) give every read key the same cell in both roots; the cells of 0xbc..0xc0 were not read. EN arms:
+
+- Forwarded as (0x100, key) to application +0xcc: 8, 9, 0xd, 0x20..0x28, 0x2d, 0x2e, 0x30..0x39, F4..F9 (0x73..0x78), F11, F12. Keypad 0x60..0x69 is forwarded as key − 0x30. The default cell forwards 0x41..0x5a and drops every other code whose cell was read (F10 (0x79), Alt (0x12), the keypad codes other than 0x60..0x69, 0x6b and 0x6d); the cells of 0xbc..0xc0 are unread.
+- Shift (0x10) stores [`L2.01653`] = 1 (RU `L2.03982`); Ctrl (0x11) [`L2.01559`] = 1 (RU `L2.01558`).
+- Pause (0x13): with application mode +0x5d8 = 2 and +0x404 = 1 it allocates 0x78 bytes, calls `L2.02030` with string `L2.02397`[0x77] and passes the result to `L2.03080` (bodies unread: Medium that this opens a dialog).
+- Esc (0x1b): +0x404 = 1 posts 0x416, and when the mode is not 2 calls `L2.06536(app+0x450)`. +0x404 = 0: when `L2.01986(app+0x3d4)` is nonzero and the mode is 2 it posts 0x41f, the menu popup of R2-ENGINE-441; zero forwards the key. The menu popup of R2-ENGINE-441 is High there for its five buttons and messages.
+- F1 (0x70) posts 0x434. F2 (0x71) posts 0x41a, and F3 (0x72) posts 0x418, when the mode is 2 and application +0x404 is 0 or 1; F3 in other modes with +0x404 = 1 posts 0x43c. R2-ENGINE-441 names 0x41a Save and 0x418 Load.
+- Num+ (0x6b) and Num- (0x6d): R2-ENGINE-1182.
+- Every key then reaches `L2.06479(key, ...)`.
+
+The RU routine is not masked-equal (182 of 452 lines equal in `generated-2/mask/app-key-routine.tsv`); it differs in field displacements (+0x404 to +0x41c, +0x41c to +0x434, +0x5d8 to +0x63c), global addresses (flags EN `L2.01559/dc/e0` and string table `L2.02397`; RU `L2.01558/a4/a8` and `L2.03293`), register choice and two arms, read in its own listing: F2 also posts 0x420 when +0x41c is 1, +0x3f4 and +0x3bc are nonzero and +0x3c8 is 3; F3 outside mode 2 tests +0x3f4, +0x3bc and +0x3c8.
+
+EN `L2.01073` (114 instructions; gate application +0x448 = 0) forwards F10 (0x100, 0x79, 0) to application +0xcc; for 0x12 it stores [`L2.06480`] = 1; with flag argument bit 0x2000 it stores the Alt flag and forwards 0x31..0x39 as they are and 0x60..0x69 as key − 0x30, calls `L2.06537` for S, and for 0x42..0x59 with application +0x404 & 1 calls `L2.01075(key − 0x41)` on application +0xd0. Modifier clear `L2.06491` (RU `L2.06538`, 16 instructions, masked-equal) calls `L2.06539(arg)`, zeros application +0xbc and the Alt, Ctrl and Shift flags.
+
+**Confidence.** High for the EN arms and table, for the RU cells and the RU arm bodies read in two windows, and for the EN Alt routine and both clears. Medium for what the posted messages 0x416, 0x434, 0x43c, 0x420 and the forwarded keys do: their receivers were not read here. Medium that bit 0x2000 is the held Alt, and that the Alt routine `L2.01073` is the held-Alt handler. The calls that take a string (`L2.02030`, `L2.03080`, `L2.02396`, `L2.01560`, `L2.00513`, `L2.06540`) are dispatches to unread bodies; "shows" names the argument, not an observed display.
+
+**Unknown.** The RU twin of `L2.01073`; the cells 0xbc..0xc0, so whether 0xc0 reaches the view routine's backpack arm; the message that calls `L2.06491`.
+
+**Evidence.** EXP-2159 `evidence/generated-2/win/*-app-key-{1,2}.lst`, `*-modifier-clear.lst`, `generated-2/mask/app-key-routine.tsv`, `generated/win/en-modifier-writer-c.lst`, `navigation/nav3` and `nav4` app key tables.
+
+### R2-ENGINE-1182
+
+Num+ (0x6b): with Ctrl, application +0x434 = 1; else, when mode +0x5d8 is not 0 and +0x404 is 1, setter `L2.03127(app+0x41c + 1)`. Num- (0x6d): with Ctrl, +0x434 = 0, +0x424 = [`L2.02270`](), +0x40c = 0, +0x428 = 0; else `L2.03127(app+0x41c − 1)` under the same test.
+
+Setter EN `L2.03127` / RU `L2.06541` (65 instructions; equal except field displacements) clamps s to 0..8, stores it at +0x41c, jumps through the nine-entry jump table `L2.03207` to arms `L2.03208`..`L2.03209` that store v = 8, 10, 12, 14, 16, 20, 24, 28, 32 for s = 0..8 (as R2-ENGINE-620), stores +0x418 = 1000 / v by signed integer division (125, 100, 83, 71, 62, 50, 41, 35, 31), resets +0x40c, +0x428, +0x42c and timers +0x424, +0x414, and returns whether s changed. The RU setter carries the same nine immediates in the same order (`ru-speed-setter.lst`); its jump table `L2.06542` was not read, so the RU index-to-value map is Medium. The EN and RU setters also differ in the clock import (`L2.02270` vs `L2.02355`), not only in field displacements. The Num+ and Num- arms (EN `L2.06543`, `L2.06544`), not the setter, pass `L2.02397`[s + 0x6c] to `L2.00513` on `L2.00994` after a change, and with no change the same string with 0x1388 to `L2.06540(view+0xa28)`; those calls are dispatches to unread bodies, and "shows" names the argument, not an observed display. The E8 scan finds 8 EN and 9 RU callers of the setter.
+
+**Confidence.** High for the arms, the clamp, the step of 1, the EN arm immediates and the division in EN; High for the RU setter body. Medium for the RU index-to-value map (RU jump table not read) and for reading +0x418 as a tick period in milliseconds.
+
+**Amends.** R2-ENGINE-620 and R2-ENGINE-1114 are confirmed for the table kind; the key arms are the callers they did not read.
+
+**Unknown.** The other callers' arguments; the meaning of +0x434.
+
+**Evidence.** EXP-2159 `evidence/generated-2/win/*-app-key-2.lst`, `navigation/nav4/win/*speed-setter*`, `navigation/nav4/mask/speed-setter.tsv`, `navigation/nav5/tables`, `navigation/nav5/scan`.
+
+### R2-ENGINE-1183
+
+Planner RU `L2.02865` / EN `L2.06476` (35 instructions, masked-equal) calls `L2.06545(unit, 1)` (EN `L2.06546`, 162 instructions, masked-equal) on world +0xa50. If `L2.06350` reports the list at world +0xa4510 nonempty, it stores the word `L2.06547` returns at command +0xa and prepared +8 = 0xc; else it calls `L2.02637(unit)`, the order-0xc setter of R2-ENGINE-541.
+
+`L2.06545(unit, first)`: c = `L2.03062`(unit +0x10), R = unit byte +0xa5. It clears the list (`L2.06464`) and adds c when `L2.06548(c)` is nonzero; with first set it returns there. Then for k = 1..R and j = −k..k it tests cells c + (k << 8) + j and c − (k << 8) + j, and, when |j| (`L2.04968`) is not k, c + (j << 8) + k and c + (j << 8) − k; each cell `L2.06477(unit, cell)` accepts is added (`L2.06549`). After each j, with first set and `L2.06550` nonzero, it returns. With first set the search ends after the j step that added at least one cell; that step can add up to four cells, and which cell the planner stores (the getter's element) is unread (Medium).
+
+The planner holds no state of its own beyond the stores above; how often the selector calls it is Unknown (R2-ENGINE-561). When no cell is accepted in a call, that call invokes the order-0xc setter, which stores unit order 0xc (R2-ENGINE-541, R2-ENGINE-1042).
+
+**Confidence.** High for both bodies in both roots. Medium for what `L2.06477` and `L2.06548` accept (unread; the shipped text's pick-up action for P, R2-ENGINE-1186), for the list helpers read by call shape only, and that prepared 0xc moves the unit to cell +0xa: its executor was not read.
+
+**Amends.** R2-ENGINE-555: the collection on which `L2.02865` branches is filled by the ring search `L2.06545` read here.
+
+**Evidence.** EXP-2159 `evidence/generated/win/*-order-1a-planner.lst`, `generated-2/win/*-order-1a-collect.lst`, `generated/mask/order-1a-planner.tsv`, `generated-2/mask/order-1a-collect.tsv`.
+
+### R2-ENGINE-1184
+
+RU addresses; EN `L2.06478` is masked-equal (111 instructions), as are the approach `L2.02909` / EN `L2.06551` (28) and the cell helper `L2.02454` / EN `L2.06552` (142).
+
+- r = command (unit +0x1c4) byte +0x70, read at `L2.06553`. d = `L2.02442`(map, cells of defender and defended from `L2.00486`/`L2.00487`), at `L2.06554`.
+- d > r: approach `L2.02909(defender, defended, r)` at `L2.06555`: prepared +8 = 4 (`L2.06556`), +0x18 = defended, +0x14 = r, or defender byte +0xa5 (`L2.06557`) when r is 0.
+- Else, test at `L2.06558`: defender +0x140 nonzero calls helper `L2.02912`, zero calls `L2.03474` (R2-ENGINE-1185).
+- Then prepared +8 − 5 (`L2.06559`), at most 4 (`L2.06560`), indexes table `L2.06561` (`L2.06562`): 5, 6, 8 and 9 return; 7 and every value outside 5..9 go to the distance test.
+- Distance test `L2.06563`: d < 2 calls `L2.02454(map, defender, defended cell, r)` at `L2.06564` and `L2.02401(defender, cell)` at `L2.06565`.
+- `L2.02454`: defender fine coordinates (`L2.02411`, `L2.02412`); dx, dy from the defended cell, 0 replaced by 1; along the larger axis a step of r·256 away from the defended unit, the other axis on the line through both; shift right 8 (`L2.06566`, `L2.06567`); clamp to 8 (`L2.06568`, `L2.06569`) and to `L2.02777()` − 9 and `L2.06570()` − 9 (`L2.06571`, `L2.06572`); returns (y << 8) + x.
+
+No read body (planner, approach, cell helper, both helpers) reads a facing field; the place depends on the two cells and r. The planner keeps no place of its own; whether it is called every tick is Unknown (R2-ENGINE-561). `L2.02401` stores prepared 1 (R2-ENGINE-555); the cell consumer and the executor of prepared 1 are unread. The selector ends order 8 when the defended unit's +0x54 is 0x10 (R2-ENGINE-1121 at its grade).
+
+**Confidence.** High for the bodies, constants and addresses in both roots. Medium for the composed rule: `L2.02401`, `L2.02442`, `L2.01309` and the prepared-byte executor were not read, so a facing input or a different use of the cell there is not excluded.
+
+**Amends.** R2-ENGINE-555: prepared values of the order 8 path, the approach store 4 and the step-away cell are read here. R2-ENGINE-561: the branch conditions of `L2.02907` are read here.
+
+**Evidence.** EXP-2159 `evidence/generated/win/*-order-8-planner.lst`, `*-approach-unit.lst`, `*-cell-near.lst`; `generated-2/tables/*-defend-prepared-table.tsv`; the matching `mask/*.tsv`.
+
+### R2-ENGINE-1185
+
+Helper A RU `L2.02912` / EN `L2.06573` (79 instructions, masked-equal): s = 0x18 (`L2.06574`) when defender word +0xa0 is 0 and defended word +0x94 is below +0x96, and (`L2.06575`) when +0xa0 is below defender +0x9c + 3 (`L2.06576`) and +0x94 is below +0x96 / 2 (`L2.06577`). Spell = `L2.00040(defender +0x140, s)`; when it exists and its word +0xc is at most defender word +0x9a (`L2.06578`), command +0x60 = 1 (`L2.06579`) and cast planner `L2.01524(defender, defended, spell)` (prepared 8, R2-ENGINE-555); otherwise helper B (`L2.03484`). The spell is planned in these two cases only, and only when it is in the book and its cost fits; in every other case helper B runs.
+
+Helper B RU `L2.03474` / EN `L2.06580` (143, masked-equal): list = `L2.03475(defended)` (`L2.06581`). When it is nonempty, the nearest member (`L2.01588` distance) whose virtual +0x20 (`L2.02402`) returns 3 (`L2.06582`); if there is none, the nearest member closer than 0xff (`L2.06583`). Either goes to attack planner `L2.01530(defender, member)` (prepared 5, R2-ENGINE-555). An empty list calls `L2.01733(defender, 0)` (`L2.06584`). `L2.01733(unit, flag)` calls `L2.01531(unit)` for a nonzero flag and `L2.01731(unit)` for a zero flag (`ru-idle-planner.lst`, 18 instructions, whole). `L2.01733` with a zero second argument calls `L2.01731(defender)`, the planner of table code 0xc in R2-ENGINE-555 (which lists `L2.01531` as the store of prepared 0xb); its body and the effect on the defender are unread (Unknown).
+
+**Confidence.** High for both bodies and constants in both roots. Medium that +0x94/+0x96 are the defended unit's current and maximum life and that spell 0x18 heals: the comparisons show the order, not the names. Unknown what list `L2.03475` holds and what kind 3 is: `L2.06585`, `L2.02119`, `L2.06586` and the +0x20 methods were not read.
+
+**Unknown.** Read `L2.03475` and its callees, and the +0x20 virtuals, to settle whom the defender attacks. Read `L2.01731` and the prepared-byte executor to settle what an empty list does to the defender.
+
+**Evidence.** EXP-2159 `evidence/generated-2/win/*-defend-helper-{a,b}.lst`, `generated-2/mask/defend-helper-{a,b}.tsv`, `navigation/nav4/win/ru-defend-*.lst`, `navigation/nav4/win/ru-idle-planner.lst`.
+
+### R2-ENGINE-1186
+
+The RU install's `readme.txt` (code page 1251) has a key section of 46 entries, lines 31..76. Each entry was matched to the read arms of R2-ENGINE-1178 through R2-ENGINE-1181 by key code, modifier and stated condition. 39 entries have an arm in the read routines; for the entry `` ` `` the arm is in the view routine (T3 cell 0xc0) and the application routine's cell for 0xc0 was not read (R2-ENGINE-1181), and the same holds for every entry whose route passes the application default cell. The arm's conditions agree where the text names one: W, Ctrl+K and F3's second action are limited to non-mode-2 sessions, F2 and F3's load to mode 2, P to members with +0x1b8 & 1 (the text restricts it to hero members), C to `L2.03135()` returning 0.
+
+Seven entries have no arm in the read routines: Tab (the application routine forwards 9 to an unread receiver), Ctrl+A (T2 requires Ctrl 0 and T3 has no A cell), Shift+1..9 (no Shift-only digit arm; it reaches `L2.04347`, not read here), Alt+F4, and the held Alt, Ctrl and Shift as click modifiers (the key arms only set the flags; their use at a click is outside the read bodies).
+
+The text's actions (M move, A attack, G guard, D defend, S move in combat readiness, T hold position, R retreat, L stand still, E select all own characters and the rest) are the install's text. They are not behaviour facts.
+
+**Confidence.** High for the 46 entries and the arm match of each. Medium for the EN `README.TXT` hotkey section: it was read, but its entries were not tabulated. Behaviour carries the grade of the claim that holds the arm.
+
+**Evidence.** EXP-2159 `evidence/derived/ru-readme-keys.tsv`.
+
 ## Effect record identity and renewal
 
 | ID | Claim | Confidence | Status | Evidence |

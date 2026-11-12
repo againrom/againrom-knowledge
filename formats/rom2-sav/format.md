@@ -1222,6 +1222,11 @@ not a spell ID (High for the writes); LOAD restores the saved value through an u
 no range test (Medium), and no owner save's `Pressed` value was read. — R2-SESSION-318,
 R2-ENGINE-766, R2-ENGINE-768
 
+In a mission F4..F12 (0x73..0x7b) with none of Ctrl or Shift, with Ctrl, and with Shift reach the
+view key routine's arm `L2.04354` through its first key table (F10 through the Alt routine
+`L2.01073`); the Alt forms of F4..F9, F11 and F12 are not forwarded by the bodies read.
+— R2-ENGINE-1178, R2-ENGINE-1181
+
 ### Mission-like continuation
 
 Mission setup with argument 1 skips the map caller and the autosave, sends

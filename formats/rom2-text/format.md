@@ -310,6 +310,10 @@ web server list popup. The row texts are not quoted. The RU row roles are
 Medium.
 — R2-ASSET-098, R2-ENGINE-441
 
+The application key routine posts 0x41f for Esc only when application
++0x404 is 0 and the mode is 2; in a mission Esc posts 0x416. F2 posts 0x41a,
+and F3 posts 0x418, when the mode is 2 and application +0x404 is 0 or 1. — R2-ENGINE-1181
+
 ## Automatic-casting labels
 
 The installed `main.res:text/dialogs.txt` source uses zero-based rows 167..169
