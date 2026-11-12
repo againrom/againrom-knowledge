@@ -27752,6 +27752,342 @@ The text's actions (M move, A attack, G guard, D defend, S move in combat readin
 
 **Evidence.** EXP-2159 `evidence/derived/ru-readme-keys.tsv`.
 
+## Order senders, cursor modes and the Defend list
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1188 | ROM2 Defend list L2.03475 is rebuilt on every call from units within r of the defended unit's cell (r = byte +8 of its +0x1c0 object), then filtered; this path reads the map's shared scratch list, not a list stored for the unit. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1189 | With an empty Defend list ROM2 order 8 reads as calling L2.01733(defender, 0), whose idle planner stores no order itself; selected branch prepares 6, default 0xb, 0 or a mage helper (Medium); RU L2.02907 has one direct caller, L2.06587. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1190 | ROM2 view mode +0x9b4 sets the cursor (1 cc4, 2 cbc, 4 cc8, 5 cd4, 6 cc0, 8 cd0; 3 and 7 none); a click sends by cursor, and a nonzero mode then stores 0 (0x40b post Medium); no setter path holds mode 8 (cd0 source Unknown). | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1191 | ROM2 EN order panel (app +0xdc) has 8 buttons (hit-test geometry); a press (0x201, read as left) on button i sends 0x40c(i), the view calls L2.04359(i+1), which stores the mode under its mask; k = 3, 7 and 8 reach a sender, then mode 0. | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1192 | RU prepared 4 reads as calling L2.01578 toward command +0x18; 0xc as walking to cell +0xa, waiting a call, clearing prepared (handler map Medium); the 0x1a planner stores the last appended cell, if L2.06588 counts nodes in +0xc. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1193 | ROM2 EN L2.06589 clears the Shift, Ctrl and Alt flags and sends nothing to app +0xcc in its own body (calls unread routines); view slot +0x6c is L2.04345; cells 0xbc..0xc0 are 0x12 x4, 0x11 (both roots); EN forwards 0xc0, drops 0xbc..0xbf. | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1194 | ROM2 RU E routine L2.06590 has the structure of EN L2.06530 (class handle and callee are twins by offset, Medium); RU Alt routine L2.06591 differs from EN L2.01073 only in operands; RU speed cells give 8..32 as EN. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1195 | ROM2 Ctrl+N/O/K/T/C toggles are process globals (section not read; EN L2.03133, L2.06474, L2.00892, L2.06475, L2.06528); a census finds direct writers only in their arms, the options setup, L2.06592 and unread bodies at L2.06593, L2.06594. | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+
+### R2-ENGINE-1188
+
+RU `L2.03475(defended)` (EN twin in the window from `L2.06595`; 48 lines, masked-equal) calls `L2.06585(defended)`, then `L2.02119(defended, L, 0)` and `L2.06586(defended, L)`, and returns the list L that `L2.06585` returned. `L2.06585` (RU) returns `[world +0xa50].L2.05939(L2.01521(defended +0x10), byte +8 of the object at defended +0x1c0)` (`L2.01521` is taken as the unit's cell); EN `L2.06595` makes the same calls to `L2.03062` and `L2.06596`.
+
+RU `L2.05939(cell c, r)` (191 instructions through `ret 8`):
+
+- It calls `L2.00550` on map +0x54010 (read as a list clear; unread) and tests c.
+- For k = 1..r and j = −k..k it tests c + (k << 8) + j and c − (k << 8) + j, and, when |j| (`L2.01523`, taken as the absolute value; unread) is not k, c + (j << 8) + k and c + (j << 8) − k.
+- A cell is taken when `L2.03520(map byte +0x10000 + cell, 0x20)` is nonzero and `L2.02476(cell)` returns a nonzero unit; that unit is appended (`L2.00205` on map +0x5400c).
+- It returns map +0x5400c.
+
+The list is the map's shared scratch list: this path reads no list stored for the defended unit. A unit enters it when a call finds it on a tested cell; the next call to `L2.05939` rewrites it (R2-ENGINE-1120 shows `L2.02117` also fills it with `L2.05939`). The clear targets `+0x54010` while the appends and the return use `+0x5400c`; that `+0x54010` is the node field of the `+0x5400c` object is inferred from `L2.05229` (list +4). The search is centred on the defended unit, not on the defender. The two filters run on that list with the defended unit as the first argument: `L2.02119` with third argument 0 removes members whose relation bit is clear and effect-0x1000 members no Group member sees within its command byte +0x71 (R2-ENGINE-1112; the bit's hostility meaning at the grade of R2-ENGINE-502); `L2.06586` removes kind-3 members (virtual +0x20) when `L2.01728(defended)` is below 2 (Medium: its body rests on EXP-2063 `out/listings/ru-pickers-filter.txt`, CONSULTED lines 27 and 28; the removal call `L2.04531` is unread).
+
+**Confidence.** High for `L2.03475` and `L2.06585` in both roots and for the RU body of `L2.05939`. Medium for EN `L2.06596`, which was not read; for the unread callees `L2.00550` ("clears"), `L2.01521` ("cell"), `L2.01523` ("|j|"), `L2.03520`, `L2.02476` and `L2.00205` (one unit per accepted cell is the call shape; the helper meanings are names); for the filter semantics, which carry R2-ENGINE-1112 and R2-ENGINE-502; and for `L2.06586`, read only in an older listing used for navigation (EXP-2063 `out/listings/ru-pickers-filter.txt`, CONSULTED lines 27 and 28). The EN filter calls are Medium by twin position: the masked-equal EN window shows calls only as `*`, and the EN twins `L2.05839` and `L2.06597` of the filters are not shown. Masked equality shows the same instruction structure, not the same callee, global or class.
+
+**Unknown.** The writer of byte +8 of the object at unit +0x1c0; the meaning of cell flag 0x20.
+
+**Amends.** R2-ENGINE-1185: the list `L2.03475` returns, which it left Unknown, is the per-call area list described here.
+
+**Evidence.** EXP-2160 `evidence/generated/win/*-defend-source.lst`, `generated/mask/defend-source.tsv`, `navigation/nav1/win/ru-area-query.lst`; EXP-2063 `out/listings/ru-pickers-filter.txt`.
+
+### R2-ENGINE-1189
+
+The path is composed from standing claims at their grades; this experiment adds the caller scan.
+
+- Within range r, helper B calls `L2.01733(defender, 0)` when list `L2.03475` (R2-ENGINE-1188) is empty (R2-ENGINE-1185).
+- `L2.01733(defender, 0)` reaches the RU idle planner `L2.01731` (R2-ENGINE-1120). It ranks the defender's candidates by distance, then turn (R2-ENGINE-1018). The ordinary selected branch stores prepared +8 = 6 and the target at command +0xc (R2-ENGINE-808). The default branch prepares 0xb or 0 or runs a mage helper (R2-ENGINE-808); a player-owned mage may try `L2.01527` first (R2-ENGINE-501).
+- The idle planner's own body stores no +0x50 (R2-ENGINE-1018, R2-ENGINE-1120). "Keeps order 8" rests on those two claims; `L2.01525`, `L2.01531`, `L2.02911`, `L2.01513` and `L2.01512` are unread, so the composed outcome is Medium.
+- Back in `L2.02907`, a defender at distance below 2 with prepared 0xb or 0 (outside 5..9) steps r cells away (R2-ENGINE-1184).
+- Beyond r the planner approaches the defended unit instead (R2-ENGINE-1184).
+
+The RU reference scan covers code sections at every byte offset: E8 and E9 rel32, 0F 8x rel32, EB and 7x rel8. It also covers absolute dwords at every byte offset of every section. It excludes only those direct references; it does not exclude calls through computed addresses. Callers:
+
+| Target | Sites |
+|---|---|
+| `L2.02907` (order 8 planner) | `L2.06587` |
+| `L2.01725` | `L2.02939`, `L2.02940` |
+| `L2.01726` | `L2.02941`, `L2.02942` |
+| `L2.00504` | `L2.06034` |
+| `L2.02456` | `L2.06297`, `L2.06298` |
+| `L2.01733` | 16 call sites |
+
+No absolute dword equals any of the six targets, so none of them is reached through a table in the scanned bytes; a call through a computed address is not excluded.
+
+**Confidence.** High for the RU scan rows, bounded to direct references. The path is a reading of code: Medium for the composed empty-list behaviour, which is no stronger than its Medium links: the helper meanings in R2-ENGINE-1018 and R2-ENGINE-1120, the branch outcomes of R2-ENGINE-501 and R2-ENGINE-808, and the unread executor parts of R2-ENGINE-1184. Medium that `L2.06587` lies in selector `L2.01725`: function bounds were not read.
+
+**Unknown.** How often the chain runs. The functions that contain `L2.02941` and `L2.02942` and their callers were not read.
+
+**Evidence.** EXP-2160 `evidence/generated/scan/ru-refs-cadence.tsv`.
+
+### R2-ENGINE-1190
+
+**Cursor choice.** The block is at EN `L2.06598` and RU `L2.06599`. The RU window starts one instruction late, at `L2.06600`. Its 63 following lines match the EN lines one for one; the RU arms lie +0xe3 higher and the RU cursor globals +0xa1d4 higher. A mode m from 1 to 8 indexes the table (EN `L2.06601`, RU `L2.06602`; 8 cells read in each root):
+
+| Mode | Cursor global EN / RU |
+|---|---|
+| 1 | `L2.03021` / `L2.06603` |
+| 2 | `L2.03023` / `L2.06604` |
+| 3, 7, above 8 | no store; the cursor chosen before the block stays |
+| 4 | `L2.03025` / `L2.06605` |
+| 5 | `L2.03027` / `L2.06606` |
+| 6 | `L2.03022` / `L2.06607` |
+| 8 | `L2.03024` / `L2.06608` |
+
+No mode setter path holds mode 8 (R2-ENGINE-1191), so the `cd0` arm is reachable only if another source sets cursor `cd0` (Unknown).
+
+After the table, two tests can replace the cursor. When bit 0x400 of `L2.02985()` is set and the cursor is `L2.03027`, it becomes `L2.03023`. When `L2.03087` on `L2.02992` is nonzero and `L2.03049` of the box is zero, it becomes `L2.02989`.
+
+**Click.** Routine EN `L2.03015` / RU `L2.03016`; 256 lines in each root, masked-equal; its head is R2-ENGINE-606. With view +0x140 nonzero it compares the current cursor with these handles in order:
+
+| Cursor | Sender (EN) | Type and payload |
+|---|---|---|
+| `cc4` | `L2.04952(id)` when the hovered ID (word +0x9a8) is nonzero and its object (+0x994) is class `L2.04028`; otherwise `L2.04951(+0x9ac, +0x9b0)` | 0x19 with +0xe = ID; otherwise 0x16 |
+| `cc0` | `L2.06609(+0x9ac, +0x9b0)` | 0x1a, +0xa = x, +0xc = y |
+| `cbc` | `L2.04951(+0x9ac, +0x9b0)` | 0x16, +0xa = x, +0xc = `L2.06610([L2.02993], [L2.02994])` + view +0x60; the second argument is not read |
+| `cd0` | `L2.06611(+0x9ac, +0x9b0)` | 0x1d, +0xa = x, +0xc = y (reachable only if another source sets cursor `cd0`, Unknown) |
+| `cc8` | `L2.06612(id)` when the hovered ID is nonzero | 0x1b, +0xe = ID, sent only when `L2.02998` finds the ID in view +0x9d0 and the object is class `L2.04028` |
+| `ccc` | `L2.03019` (selection) | none |
+| `cd8` | `L2.04898(+0x9ac, +0x9b0)` | 0x21, +0xa/+0xc = point, +0xe = word +0xe4 of the last object added |
+| `d18` | `L2.03029(id)` (R2-ENGINE-606) | 0x24 |
+| `cd4` | when `L2.06613` on application +0xec gives s ≥ 0: `L2.04324(id, s + 1)` for a nonzero hovered ID whose object is class `L2.04028` with `L2.06614()` nonzero. With a hovered ID of 0, `L2.03979(+0x9ac, +0x9b0, s + 1)` is called only when `L2.06614()` is zero, and nothing is sent when it is nonzero (`L2.06615` to `L2.06616`). With a nonzero ID that fails the `L2.04027` class test, `L2.03979` is called. A nonzero ID that passes the class test with `L2.06614()` zero is not separated here. | cast (R2-ENGINE-717) |
+
+Every sender above fills buffer `L2.03033` with byte +9 = type, word +5 = word +4 of the view +0x9cc object, word +7 = 0 and count +0x12 = 0. It appends word +4 of each object of view +0x9d0 that `L2.02988` accepts, sends through `L2.00871` on `L2.00872`, and voices through `L2.03040` (R2-ENGINE-717). The senders were read in EN; the RU windows are masked-equal (`L2.06617` 256 lines, `L2.06618` 160, `L2.06619` 67). Masked equality was supplemented by an operand check: the nine RU cursor-global operands in the click routine are all +0xa1d4 above EN, and the sender pairs differ by the window offsets.
+
+**After the click.** Every dispatch arm, and a cursor that matches no handle, reaches the tail:
+
+- On the `cd4` path only, mode 5 with `L2.03135()` nonzero calls `L2.03136()`.
+- Test `L2.06620` jumps to the end (`L2.06621`) when view +0x9b4 is 0, so a click with mode 0 stores nothing and does not reach the calls below. A click with a nonzero mode stores mode 0 (`L2.06622`) and, by the pushes in the window (0, 0, 0x40b, the object at application +0xdc), posts 0x40b to the panel. The call `L2.06496` and the call through slot +0x48 lie after the store. The committed window ends at `L2.06623` (`mov eax,[edx]`), before `call [eax+0x48]`, so the post rests on the pushes and on slot +0x48 being the panel message routine (Medium), and its effect on panel +0x60 rests on R2-ENGINE-1191's arm (Medium).
+- With view +0x140 = 0 the routine selects (`L2.03019`) and skips the tail, so the mode stays.
+
+R2-ENGINE-1107's RU input switch maps the types to orders:
+
+| Type | Order |
+|---|---|
+| 0x16 | 1 |
+| 0x19 | 3, or stop |
+| 0x1a | 1, through `L2.02845` |
+| 0x1b | 8 |
+| 0x1d | 0xa |
+| 0x21 | 2 |
+| 0x24 | 0xf |
+
+**Writers of +0x9b4.** The census sweeps code for any memory write at displacement +0x9b4. EN has 11 rows: `L2.06624`, `L2.06625`, `L2.06626`, `L2.06627`, `L2.06622`, `L2.06628`, `L2.06629` (the mode setter, R2-ENGINE-1191), and `L2.06630`, `L2.06631`, `L2.06632`, `L2.06633`. RU has 11 rows in the same order (`L2.06634` … `L2.06635`). In EN every row except `L2.06629` stores 0.
+
+**Confidence.** High for the cursor table and its arms in both roots, and for the click dispatch, the tail up to `L2.06623` (the mode test and the mode store) and the sender bodies in EN with masked-equal RU windows. Medium for the following:
+
+- the 0x40b post to the panel and its effect on panel +0x60, which lie past the window end;
+- the class test `L2.04027` (an unread helper used at four places), so "is class `L2.04028`" in the sender rows;
+- the meanings of helpers `L2.02988`, `L2.02998`, `L2.06610`, `L2.03135`, `L2.03136`, `L2.06496` and `L2.06613`;
+- that view +0x9ac/+0x9b0 is the clicked point;
+- the type-to-order map, which is RU only in R2-ENGINE-1107;
+- the census rows outside the read routines, whose base object is not shown.
+
+**Unknown.** The cursor that modes 3 and 7 keep, which is set before the block. Branch `L2.03018`, taken for a box larger than the click limit. Whether any source other than the mode setter sets cursor `cd0` (mode 8).
+
+**Amends.** R2-ENGINE-606: the click routine continues past its 190 read instructions into the tail above, which stores mode 0 for a nonzero mode.
+
+**Evidence.** EXP-2160 `evidence/generated/win/*-cursor-mode.lst`, `*-click-routine.lst`, `*-senders-a.lst`, `*-senders-b.lst`, `*-pickup-sender.lst`, `generated/tables/*-mode-cursor-table.tsv`, `generated/mask/*.tsv`, `generated/scan/*-census-mode-and-toggles.tsv`.
+
+### R2-ENGINE-1191
+
+**Mouse routing.** In the base message routine EN `L2.00913` / RU `L2.00914` (244 lines, masked-equal), mouse messages go to the child at +0x34 when it is nonzero. When +0x34 is 0, the routine calls forwarder `L2.00915`, and the object's own slots run only when the result is 0 (`jne L2.06636`): 0x200 to +0x4c, 0x400 to +0x50, and 0x201..0x206 through table `L2.01937` (6 cells, EN) to +0x54, +0x58, +0x5c, +0x60, +0x64 and +0x68.
+
+**Panel slots.** The panel has EN constructor `L2.06637`, vtable `L2.06638` and message routine `L2.03548`. Its slots:
+
+- +0x54 (0x201), `L2.06639`:
+  - It returns 1 at once when application +0x3f4 is nonzero or panel +0x68 is 0.
+  - Hit-test geometry (the paint geometry was not read): for i = 0..7 with bit i of panel +0x64 set, the box is 0x22 × 0x22 at x = left + (i & 3)·0x22 + 8, y = top + (i >> 2)·0x22 + 7.
+  - On a hit nothing happens when i equals +0x60, or when i is 4 and the view's `L2.03135()` is nonzero. Otherwise +0x60 = i, the panel redraws (+0x34), and it calls view +0x48 with (0x40c, i, 0).
+  - When no box is hit, +0x60 = −1, the panel redraws, and it calls view +0x48 with (0x40c, −1, 0).
+- +0x5c (0x203), `L2.06640`: calls +0x54 with flag bit 1 set.
+- +0x4c (0x200), `L2.06641`: calls +0x54 while flag bit 1 is set.
+- +0x58 (0x202), `L2.06642`: with application +0x3f4 nonzero calls `L2.01133` on [`L2.02989`] and `L2.06643(app)`.
+- +0x64 (0x205), `L2.06644`: calls view +0x48 with (0x405, 0, 0).
+- +0x60 and +0x68: return 1.
+
+**Panel messages.** `L2.03548` (the numbering of the arms rests on jump table `L2.06645`, whose cells are not committed, so it is Medium; the arm bodies are High):
+
+- 0x403 stores the view at +0x5c.
+- 0x409 sets +0x68 = 1, +0x6c = 1 and the button mask +0x64 = wParam.
+- 0x40a sets +0x68 = 0.
+- 0x40b sets +0x60 = −1.
+- 0x40d sets +0x60 = wParam when +0x68 is set, wParam differs from +0x60, and bit wParam of +0x64 is set.
+
+**Mode setter.** EN `L2.04359(k)`, first 64 instructions:
+
+1. m = k, except that k = 9 and k = 0xa give m = 5.
+2. When the mode is 5, m is not 5 and `L2.03135()` is nonzero, it calls `L2.03136()` and `L2.06496` on application +0xec.
+3. When bit m − 1 of `L2.06497()` is set, or k = 0xa, it stores view +0x9b4 = m (`L2.06629`) and sends (0x40d, m − 1, 0) to the panel. Otherwise it stops.
+4. For k = 3..8 a switch follows, read with its table in R2-ENGINE-1179 (EXP-2159 `generated-2/tables/en-letter-arm-table.tsv`, High). k = 3, 7 and 8 reach `L2.06500`, `L2.06501` and `L2.06502` and then store mode 0 (R2-ENGINE-1179, High); no setter path holds mode 8, so the `cd0` arm and type 0x1d are reachable only if another source sets cursor `cd0` (Unknown). The reference scan places the three sender calls: `L2.06646` calls `L2.06500` (type 0x17, read here), `L2.06647` calls `L2.06501` and `L2.06648` calls `L2.06502` (types 0x18 and 0x14 in R2-ENGINE-717). After each call the census shows a store of mode 0 (`L2.06630`, `L2.06631`, `L2.06632`).
+
+**Callers of the setter.** The view's message 0x40c arm calls `L2.04359(wParam + 1)` at `L2.06649`. The EN reference scan finds 12 direct calls of `L2.04359`: `L2.06649`; `L2.06650` and `L2.06651`; the eight calls `L2.06652`..`L2.06653` in the view key routine; and `L2.06654`. A function at `L2.06655`..`L2.06656` calls five senders directly (`L2.04951`, `L2.04952`, `L2.06609`, `L2.06612`, `L2.06611`) and stores mode 0 at `L2.06633`.
+
+**Buttons and modes.** By R2-ENGINE-1190's cursor table, button i asks for mode i + 1, and the cursor follows where the setter holds the mode:
+
+| Button | Mode | Click |
+|---|---|---|
+| 0 | 1 | attack-or-move |
+| 1 | 2 | move |
+| 3 | 4 | defend |
+| 4 | 5 | cast |
+| 5 | 6 | type 0x1a |
+
+Modes 3 and 7 set no cursor. Buttons 2, 6 and 7 (k = 3, 7 and 8) reach a sender and then store mode 0 (R2-ENGINE-1179).
+
+**Confidence.** High for the panel slot bodies, the panel message arms, the base table and the mode setter's first 64 instructions (EN). High for the reference-scan sites. Medium for the 0x40c arm's argument wParam + 1, read only in an older listing used for navigation. Medium that `L2.06497` is the allowed-mode set. High for the k values that reach the three immediate senders (k = 3, 7 and 8, R2-ENGINE-1179's table). Medium for the message numbering of the panel arms (0x403, 0x409, 0x40a, 0x40b, 0x40d), whose jump table `L2.06645` is not committed; for the Windows readings of 0x201, 0x203 and 0x205 as left press, double click and right release; and for the RU base routine, where masked equality shows the same instruction structure, not the same callee. RU is Unknown: the RU panel routine was not matched (two candidates, `L2.06657` and `L2.06658`), and RU `L2.04359` was not read.
+
+**Unknown.** Which buttons the 0x409 mask enables and who sends it. Whether any source other than the mode setter sets cursor `cd0`. Whether the miss (0x40c with −1, reaching `L2.04359(0)`) clears the mode: the store then needs bit 31 of `L2.06497()`. What message 0x405 does in the view. The body of the function containing `L2.06655`.
+
+**Amends.** R2-ENGINE-1179: its sender table is tied to panel buttons 2, 6 and 7.
+
+**Evidence.** EXP-2160 `evidence/navigation/nav1/win/en-panel-slots.lst`, `nav1/tables/en-base-mouse-table.tsv`, `navigation/nav2/win/en-mode-setter.lst`, `generated/win/en-panel-message.lst`, `generated/tables/en-panel-vtable.tsv`, `generated/win/*-base-message.lst`, `generated/scan/en-refs-mode-and-senders.tsv`; EXP-2159 `generated-2/tables/en-letter-arm-table.tsv`.
+
+### R2-ENGINE-1192
+
+The handlers window starts at RU `L2.01577` / EN `L2.05531`: 160 lines, masked-equal. All four handlers below are RU addresses.
+
+- `L2.01577(unit, target)`, prepared 4 with target = command +0x18. It calls `[world +0xa50].L2.01578(unit, target, command byte +0x14)`. When `L2.00490(unit +0x10)` returns 0, it sets primary +9 = 3 and command +0x15 = 0. It then sets unit +0x54 = 1.
+- `L2.02437(unit)`, prepared 5. When `L2.01574(unit, command +0xc, L2.01728(unit))` is nonzero, it calls `L2.02407(unit)` and sets +0x54 = 3. Otherwise it calls `L2.01577(unit, command +0xc)` and sets +0x54 = 1.
+- `L2.01552(unit)`, prepared 8. When the unit is command +0x28, or `L2.01574(unit, +0x28, byte +0x14)` is nonzero, it calls `L2.01575(unit)`. Otherwise it calls `L2.01577(unit, +0x28)` and sets +0x54 = 1.
+- `L2.06659(unit)`, prepared 0xc (reads as a walk to the cell and a one-call wait, from `+0x54` and the unread `L2.02634`). It checks whether the unit's cell (`L2.01521(unit +0x10)` & 0xffff) equals word command +0xa and `L2.00490(unit +0x10)` is nonzero.
+  - If so and +0x54 is not 2, it sets +0x54 = 2.
+  - If so and +0x54 is 2, it sets +0x54 = 0 and prepared +8 = 0.
+  - Otherwise it calls `L2.02634(unit, word +0xa, 0)` and sets +0x54 = 1.
+
+**Collect cell (RU).** The ring search `L2.06545` of R2-ENGINE-1183 tests the centre cell with `L2.06660` and the ring cells with `L2.06661`. These are the RU twins of EN `L2.06548` and `L2.06477`, as the EN and RU call sites in that claim's listings show.
+
+- `L2.06661(unit, cell)` (24 instructions) accepts when `L2.06660(cell)` and `L2.02114(unit, cell)` are both nonzero.
+- `L2.06660(cell)` (33 instructions) returns 0 when bit 0x20 of map byte +0x10000 + cell is clear. Otherwise it looks the cell up in map +0x54084 (`L2.01707`, record at map +0x5402c) and returns the record's dword +0x10 on a hit, else 0.
+- Append `L2.05229(w)` (32 instructions) makes a node with `L2.06588(0, [list +4])` and stores w at node +8. It links the old [list +4] node's +4 to the new node, or sets list +8 when [list +4] was 0. Then it sets list +4 = new node.
+- Getter `L2.06547` returns [list +4] + 8. `L2.06350` returns list +0xc.
+
+So the planner stores the cell of the last append. The search ends after the first j step that added a cell, if `L2.06588` counts the node into +0xc (`L2.06350` reads list +0xc and `L2.05229` never writes it). With the planner's first flag set, that cell is:
+
+- the centre cell, when it is accepted;
+- otherwise, in the first ring k with an accepted cell, the step j (counting up from −k) with the first acceptance. Within that step the last accepted cell wins, in the order c + (k << 8) + j, c − (k << 8) + j, c + (j << 8) + k, c + (j << 8) − k.
+
+This is neither the first accepted cell of the search nor a distance minimum.
+
+**Confidence.** High in RU for the four handlers (EN windows masked-equal), the cell tests, the append and the getters. Medium for the following:
+
+- the prepared-value-to-handler map, which comes from an older experiment's jump-table read used for navigation;
+- the unread helpers `L2.01578`, `L2.00490`, `L2.01574`, `L2.02407`, `L2.01575`, `L2.02634`, `L2.02114`, `L2.01707` and `L2.06588`, including whether `L2.06588` counts the node into +0xc;
+- the EN cell tests and append, by twin position only; masked equality shows the same instruction structure, not the same callee, global or class.
+
+**Unknown.** What cell flag 0x20 and the +0x54084 records stand for, and what `L2.02114` checks about the unit.
+
+**Amends.** R2-ENGINE-1183: the stored cell is the last one appended, as above. Prepared 0xc's executor, which that claim left unread, reads as walking to cell +0xa and clearing prepared after a one-call wait there (`+0x54` and the unread `L2.02634`).
+
+**Evidence.** EXP-2160 `evidence/generated/win/*-prepared-handlers.lst`, `generated/mask/prepared-handlers.tsv`, `generated/win/*-list-get.lst`, `navigation/nav1/win/ru-cell-test.lst`, `ru-cell-first.lst`, `ru-list-append.lst`.
+
+### R2-ENGINE-1193
+
+**Application table.** The 64 dwords at EN `L2.06662` form six-dword rows of (message, 0, 0, 0, signature, routine):
+
+| Message | Routine |
+|---|---|
+| 0xf | `L2.06663` |
+| 0x20 | `L2.06664` |
+| 7 | `L2.06665` |
+| 0x100 | `L2.06472` |
+| 0x104 | `L2.01073` |
+| 0x101 | `L2.06589` |
+| 0x105 | `L2.06666` |
+| 0x102 | `L2.06667` |
+| 8 | `L2.06491` |
+| 0x10 | `L2.06668` |
+
+The row ending just inside the table has signature 9 and routine `L2.06669`. The dwords `L2.06488` (`L2.06472`) and `L2.06492` (`L2.06491`) of R2-ENGINE-1178 are cells of these rows. Reading the first field as the Windows message number (0x100 key down, 0x101 key up, 0x102 character, 0x104 and 0x105 system key down and up, 8 focus loss) comes from the layout; the code that walks the table was not read.
+
+**Key release (EN).** The release reading rests on the Windows message numbers in the first field (Medium).
+
+- EN `L2.06589`: when application +0x448 is 0, key 0x10 clears [`L2.01653`] (Shift), 0x11 clears [`L2.01559`] (Ctrl) and 0x12 clears [`L2.06480`] (Alt). Every key then reaches `L2.06670(key, …)` and `L2.06671` on `L2.02992`.
+- EN `L2.06666`: under the same gate, 0x12 clears [`L2.06480`]. It then calls `L2.06672(…)` and `L2.06671`.
+- Neither routine sends anything to application +0xcc.
+
+The next routine, `L2.00262`, is a message routine. It forwards message 0x101 and message 0x200 to application +0xcc slot +0x48, and ends message 0x100 without a call. It also has a 0x201..0x206 table and a 0x416.. table.
+
+**Base routine and view slots.** In base routine EN `L2.00913` / RU `L2.00914` (masked-equal), messages 0x100..0x102 go in order to the child at +0x38 (slot +0x48), then to forwarder `L2.00915`, then to the object's own slot: +0x6c for 0x100, +0x70 for 0x101, +0x74 for 0x102, each with wParam. The view vtable EN `L2.05507` (32 cells) has:
+
+- +0x48 = `L2.03365`, the view message routine;
+- +0x6c = `L2.04345`, the key routine of R2-ENGINE-1178 (its .rdata dword `L2.06487` is this cell);
+- +0x70 = `L2.01959`;
+- +0x74 = `L2.03093`.
+
+**Key cells 0xbc..0xc0.** These are the cells of R2-ENGINE-1181's byte table (key − 8): EN `L2.06673`..`L2.06674`, RU `L2.06675`..`L2.06676`. In both roots the cells hold 0x12, 0x12, 0x12, 0x12 and 0x11.
+
+- In the EN jump table (EXP-2159's table read, at R2-ENGINE-1181's grade), cell 0x12 is `L2.06677`. This is the default arm, which forwards only 0x41..0x5a, so 0xbc..0xbf are dropped.
+- Cell 0x11 is `L2.06678`, the arm shared by cells 0, 1, 6, 7, 8, 0xf and 0x10. That arm forwards (0x100, key) to application +0xcc, so 0xc0 is forwarded.
+
+**Tab and Ctrl+letter.** By R2-ENGINE-1181 the application routine forwards Tab (9). In the view routine, 9 lies in table T1's range and has no T1 arm, so it goes to `L2.06484`. It is outside T2 and T3 there, and the routine ends with 0 (R2-ENGINE-1178). With Ctrl held, T2 is skipped and letters go to T3 (R2-ENGINE-1178, R2-ENGINE-1180).
+
+**Confidence.**
+
+- High: the table rows, both key-release bodies and the `L2.00262` head (EN); the base routine (both roots; masked equality shows the same instruction structure, not the same callee); the view cells (EN); the key cell bytes (both roots); the forward and drop arms in EN only.
+- Medium: the Windows-message reading of the rows; the unread `L2.06670`, `L2.06672` and `L2.06671`; that application +0xcc passes key messages on to the view; the Tab and Ctrl paths, which carry R2-ENGINE-1178's Medium hop; the RU forward and drop arms, by R2-ENGINE-1181's same-cell statement; that `L2.06589` and `L2.06666` are key-up routines, which rests on the Windows message numbers of the first field.
+
+**Unknown.**
+
+- The body of view slot +0x70 `L2.01959` (the read window's last instruction is at `L2.06679`).
+- The RU key-release routines.
+- Which object application +0xcc is.
+
+**Amends.**
+
+- R2-ENGINE-1181: cells 0xbc..0xc0 are read, and modifier clear `L2.06491` is the routine of the table row for message 8.
+- R2-ENGINE-1178: the view key routine sits in view slot +0x6c, which the base routine calls for 0x100. The read key-release bodies send no 0x101 to application +0xcc.
+
+**Evidence.** EXP-2160 `evidence/generated/tables/en-app-vtable.tsv`, `en-view-vtable.tsv`, `*-app-key-cells-bc-c0.tsv`, `generated/win/*-base-message.lst`, `navigation/nav1/win/en-app-key-up.lst`, `en-view-stub-slots.lst`, `nav1/tables/en-base-mouse-table.tsv`; EXP-2159 `evidence/navigation/nav3/tables/en-app-key-tables.tsv` for the jump cells.
+
+### R2-ENGINE-1194
+
+**E routine.** The RU view routine's E arm calls `L2.06590` at `L2.06680`; that call is in EXP-2159's listing, at R2-ENGINE-1180's grade. RU `L2.06590` and EN `L2.06530` are each 56 instructions through `ret`, equal under the address mask. Masked equality shows the same instruction structure, not the same callee, global or class. RU pushes `L2.06681` where EN pushes `L2.04028` (class test; callee `L2.02629` against `L2.04027`). The offsets are consistent (+0xa1b0, +0xaa85), but the RU class is not read: the class handle and the callee are the RU twins by offset (Medium).
+
+**Alt routine.** RU `L2.06591` and EN `L2.01073` are each 114 instructions through `ret`. Of the 114 lines, 32 differ, and only in operands:
+
+- application +0x460 against +0x448 and +0x41c against +0x404, the field shifts R2-ENGINE-1181 records for the key routine;
+- Alt flag [`L2.06682`] against [`L2.06480`];
+- `L2.06683` against `L2.02992`;
+- branch targets inside the routine, which differ by 0x5691;
+- the call targets `L2.06684`, `L2.06685`, `L2.06686` and `L2.06687`, against EN `L2.06688`, `L2.06671`, `L2.06537` and `L2.01075`.
+
+The opcodes and their order are the same on all 114 lines.
+
+**RU speed table.** The nine cells of RU `L2.06542` are `L2.06689`, `L2.06690`, `L2.06691`, `L2.06692`, `L2.06693`, `L2.06694`, `L2.06695`, `L2.06696` and `L2.06697`. In the RU setter listing of R2-ENGINE-1182, these arms store 8, 10, 12, 14, 16, 20, 24, 28 and 32. Index s = 0..8 maps to the same values as EN.
+
+**Confidence.** High for the counts, the opcode order and the speed values. Medium for the identity of the RU E class handle and callee.
+
+**Amends.**
+
+- R2-ENGINE-1180: its RU E arm has the EN structure; the RU class handle and callee stay Medium.
+- R2-ENGINE-1181: the RU twin of `L2.01073` is `L2.06591`.
+- R2-ENGINE-1182: the RU index-to-value map is read.
+
+**Evidence.** EXP-2160 `evidence/generated/win/*-key-e.lst`, `*-alt-writer.lst`, `generated/mask/key-e.tsv`, `alt-writer.tsv`, `generated/tables/ru-speed-divisor-table.tsv`.
+
+### R2-ENGINE-1195
+
+The census is a linear sweep of code sections in each root. The scan files give the section of each site, not of the five addresses. It records every memory operand at the five addresses and every immediate equal to one of them. Separately it records every raw dword equal to one of them, at every byte offset of every section. Each root has 56 raw hits, all in `.text` and all inside a census row; no table in `.data` or `.rdata` holds an address. The EN and RU rows pair one for one in order, with the same global and access on each row. The arm letters are R2-ENGINE-1180's.
+
+| Global EN / RU (arm) | Direct writes EN / RU | Address used as an immediate EN / RU | Reads EN |
+|---|---|---|---|
+| `L2.03133` / `L2.06698` (N) | `L2.06699`/`L2.06700` (arm); `L2.06701`/`L2.06702` = 1; `L2.06593`/`L2.06703`; `L2.06594`/`L2.06704` | `L2.06705`, `L2.06706`, `L2.06707`, `L2.06708` / `L2.06709`, `L2.06710`, `L2.06711`, `L2.06712` | 9, including `L2.06713` and `L2.06714` just before the two writes, and `L2.06715` |
+| `L2.06474` / `L2.06716` (O) | `L2.06717`/`L2.06718` (arm); `L2.06719`/`L2.06720` = 1 | `L2.06721`, `L2.06722`, `L2.06723`, `L2.06724` / `L2.06725`, `L2.06726`, `L2.06727`, `L2.06728` | 13 |
+| `L2.00892` / `L2.06729` (K) | `L2.06730`/`L2.06731` (arm) | `L2.06732`, `L2.06733` / `L2.06734`, `L2.06735` | 4 |
+| `L2.06475` / `L2.06736` (T) | `L2.06737`/`L2.06738` (arm) | none | 3 (`L2.06739`, `L2.06740`, `L2.06741`) |
+| `L2.06528` / `L2.06742` (C) | `L2.06592`/`L2.06743` (inside `L2.06527`, the C arm's callee) | `L2.06744` (stored as a pointer), `L2.06745`, `L2.06746` / `L2.06747`, `L2.06748`, `L2.06749` | 5 |
+
+**Carriage.**
+
+- The toggles are process globals (section not read), addressed directly in the census rows.
+- T (`L2.06475`) has one direct writer, its arm, and its address is never used as an immediate. The census finds no direct reference to T outside its arm; a write through a computed address or a bulk copy is not excluded. Persistence over a mission change or restart is Medium. Its starting value was not read.
+- For N, O, K and C, the address is passed or stored in the options region (`L2.06721`..`L2.06746`), which R2-ENGINE-273 cites by address range (Medium) for registry load `L2.00886`, store `L2.00893` and dialog `L2.00888`; R2-ENGINE-273 describes the TipsMode global `L2.00713`, not N, O, K or C. The options setup stores N = 1 and O = 1 (`L2.06719`, `L2.06701`).
+- N is also written at `L2.06593` and `L2.06594` (bodies unread, so "app routines" is a name) and read by the save writer at `L2.06715`, the town-save ShowTimeFlow of R2-SESSION-285.
+
+**Confidence.** High for the census rows, the raw-hit coverage and the RU pairing. Medium for carriage across a save, a mission load and a process restart, and for R2-ENGINE-273's address-range map of the options region: the routines that receive the pushed addresses, the bodies around `L2.06593` and `L2.06594`, and pointer writes through the stored address were not read. R2-ENGINE-273 and R2-SESSION-285 carry their own grades.
+
+**Unknown.** Whether registry load restores N, O, K and C at start-up. What the writes at `L2.06593` and `L2.06594` store. The section and initial values of the five globals.
+
+**Amends.** R2-ENGINE-1180: writers outside the arms exist for N, O and C.
+
+**Evidence.** EXP-2160 `evidence/generated/scan/*-census-mode-and-toggles.tsv`, `*-abs-mode-and-toggles.tsv`.
+
 ## Effect record identity and renewal
 
 | ID | Claim | Confidence | Status | Evidence |

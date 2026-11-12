@@ -116,7 +116,7 @@ defended unit when (defender word +0xa0 is 0 and defended +0x94 < +0x96) or
 (+0xa0 nonzero, below defender +0x9c + 3, and +0x94 < +0x96 / 2), the spell
 is in its book and its word +0xc is at most defender +0x9a
 (R2-ENGINE-1185); in every other case it runs the attack helper over an
-unread list of the defended unit. At distance below 2, when the prepared
+area list around the defended unit (R2-ENGINE-1188). At distance below 2, when the prepared
 byte left by the helpers is 7 or outside 5..9, it steps r cells away along
 the line between the two cells, clamped to 8..size - 9; no read body reads a
 facing field (R2-ENGINE-1184).
@@ -128,3 +128,66 @@ routine and its three key tables are read in R2-ENGINE-1178 and
 R2-ENGINE-1180 (the third table's arms); 39 of the 46 key
 entries of the RU install text have an arm in the read routines
 (R2-ENGINE-1186).
+
+## Cursor modes, the order panel and the Defend list
+
+This path reads no list stored for the defended unit; it reads the map's
+shared scratch list, rewritten by each call. Each call rebuilds it from the
+units on the cells within r of the defended unit's cell, where r is byte +8 of the object
+at defended +0x1c0. The search takes the centre cell first, then square
+rings. The list is then filtered with the defended unit as the reference
+(R2-ENGINE-1188; the EN search body and the filter meanings are Medium).
+With the list empty, order 8 reads as calling the idle planner for the
+defender, which stores no order in its own body; the ordinary selected branch
+prepares 6, and the default branch prepares 0xb or 0 or runs a mage helper.
+The order 8 planner has one direct caller; the scan excludes only direct
+references, not calls through computed addresses (R2-ENGINE-1189; the composed
+path is Medium).
+
+View mode +0x9b4 sets the cursor:
+
+- modes 1, 2, 4, 5 and 6 set the attack-or-move, move, defend, cast and
+  0x1a cursors through the mode setter;
+- mode 8 maps to the 0x1d cursor in the table, but no setter path holds
+  mode 8, so that cursor needs another source (Unknown);
+- modes 3 and 7 set none.
+
+A map click sends by cursor:
+
+- type 0x19 on a hovered unit, or 0x16 at the point;
+- 0x16;
+- 0x1b on a hovered unit;
+- the cast;
+- 0x1a at the point;
+- 0x1d at the point, only if another source sets the 0x1d cursor (Unknown).
+
+A click with a nonzero mode stores mode 0 and, by the pushes in the window
+(the call itself lies past the window end, Medium), posts 0x40b to the panel;
+a click with mode 0 does neither (R2-ENGINE-1190).
+
+The EN order panel has 8 buttons in two rows of four in its hit-test
+geometry. Pressing an enabled button i (message 0x201, read as a left press)
+asks the view for mode i + 1 through the mode setter (the wParam + 1 argument
+is read in an older listing, Medium). The setter stores the mode when the
+allowed-mode mask has its bit (Medium: L2.06497 as the allowed-mode set). For
+arguments 3, 7 and 8 it reaches three immediate senders (types 0x17, 0x18 and
+0x14), each followed by mode 0 (R2-ENGINE-1191, R2-ENGINE-1179). Which buttons are enabled, and the RU
+panel, are Unknown.
+
+Prepared 4 reads as approaching command +0x18. Prepared 0xc reads as walking
+to cell +0xa, waiting one call there and clearing prepared. The order 0x1a
+planner stores the cell its ring search added last, if the list append counts
+the node (R2-ENGINE-1192, RU; Medium).
+
+In EN, key release L2.06589 clears the Shift, Ctrl and Alt flags and sends
+nothing to the application's +0xcc object in its own body; it calls unread
+routines. The view key routine sits in view slot +0x6c. The key cell bytes are
+the same in both roots; in EN the application routine forwards 0xc0 and drops
+0xbc..0xbf (R2-ENGINE-1193). The RU E and Alt routines have the EN
+instruction structure (the E routine's class handle and callee are Medium),
+and the RU speed cells match EN (R2-ENGINE-1194).
+
+The Ctrl+N, O, K, T and C toggles are process globals (section not read).
+The census finds no direct writer of T except its key arm; a write through a
+computed address is not excluded (R2-ENGINE-1195; persistence over a mission
+change or restart is Medium).
