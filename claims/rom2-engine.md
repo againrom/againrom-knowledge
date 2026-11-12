@@ -28088,6 +28088,151 @@ The census is a linear sweep of code sections in each root. The scan files give 
 
 **Evidence.** EXP-2160 `evidence/generated/scan/*-census-mode-and-toggles.tsv`, `*-abs-mode-and-toggles.tsv`.
 
+## The L key order (0x17)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1198 | ROM2 L (type 0x12): when message byte +4 is 1 or more (the sender does not write it; Unknown), the dispatcher puts each listed id it finds, unless unit +0x54 is 0x10, into one new Group; L2.06066 sets order 0x17 and programme 0x13. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1199 | ROM2 order-0x17 setter L2.02816 tests nothing: after reset L2.01584 (stop L2.01585, cmd +0x50 = 0) it stores unit +0x50 = 0x17, cmd word +0 = the unit's own cell, cmd +8 = 0; no target, +9 or +0xc write in the bodies read. | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1200 | Under ROM2 order 0x17 programme 0x13 calls L2.01531 per member: a player non-mage gets prepared 0, a player mage may heal or buff allies, a computer member gets 0xb, or 8 when L2.01513 casts (R2-ENGINE-1143); no walk or attack call read. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1201 | ROM2 order 0x17 is read only by the selector's switch in the census: one 0x17 store at +0x50, no compare with 0x17; it ends when another write to unit +0x50 replaces it (new order, script, programme handler). | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1202 | ROM2 order 0x17 has one direct route in six reference forms (input arm, L2.06066, L2.02816); L's sender has one direct caller (the key routine); other type-0x12 builders and computed calls not searched; no panel button by direct reference. | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1203 | A ROM2 save holds order-0x17 state in unit +0x50, Group record +0x20 and command +8; command word +0 lies in the saved block unnamed; movement block not decoded by the save reader (R2-SESSION-346; save content Unknown); load Unknown. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+
+### R2-ENGINE-1198
+
+The L sender (R2-ENGINE-1179; RU `L2.06494`, EN `L2.04894`) fills message buffer (EN `L2.03033`, RU `L2.03034`): type byte +9 = 0x12, word +5 from the view's +0x9cc object (+4), word +7 = 0, count +0x12 = 0, then the ids of the view's +0x9d0 members that `L2.02988` accepts (RU `L2.06750`), appended through `L2.03037` (RU `L2.03038`) as words from +0x13. The addresses in this paragraph are EN unless a RU twin is given. It does not write byte +4. It sends with `L2.00871` (RU `L2.00459`).
+
+Dispatcher head, RU `R2.0119` and EN `L2.00171`, 116 instructions each. The two differ only in addresses, the frame size (0xdb4, 0xdd4) and the this-slot offset (−0xd00, −0xd1c). Masked equality shows the same structure: EN callees are the RU callees at the region displacements, checked per call (0xa039 and 0x9ff0 near code-region, 0x9f30 near code-region, 0x9d22 near code-region, 0x9c03 near code-region, 0x8d48 near code-region):
+
+- byte +4 below 1 jumps to `L2.06751` (not read; `L2.06752`..`L2.06753` in both nav2 listings), so the Group build below holds only for byte +4 of 1 or more; session `[L2.02609]` = 0 or count +0x12 = 0 ends the message (`L2.06754`).
+- The first id goes to `L2.01662(word +5, id)`; 0 ends the message with no Group built.
+- G = `L2.06755` on +0x28 of the first found unit's owner (unit +0x14). Then `L2.00361(G, unit)` and `L2.01843(unit)`.
+- Ids 1 to count − 1 take the same lookup; each found unit gets `L2.00361(G, unit)` and `L2.01843(unit)`; a failed id is skipped.
+- `L2.01781(G)` on owner +0x28 links G.
+- With byte +4 = 3, word +0xe must resolve through `L2.06756` on `[L2.00326]` or `L2.02792` on `[[this +0x7c]]`; otherwise the message ends.
+
+Lookup `L2.01662` (22 instructions; EN `L2.01661` masked-equal) calls `L2.01565(word +5)` (unread); 0 returns 0, otherwise it returns `L2.06757(that object, id)`. `L2.06757` (108; EN `L2.04953` masked-equal) calls `L2.06756(id)` on the object's +0x24 (unread). Not found, it builds a text from `L2.06758`, the object's word +4 and `L2.06759`, calls `L2.05835` and returns 0. Found with unit +0x54 = 0x10, it returns 0; otherwise the unit.
+
+`L2.06755` (67; EN `L2.06760` masked-equal) walks the owner's list, removes (`L2.06761`) the first entry for which `L2.02502` returns 0 and calls `L2.06762(1)` on it, then allocates 0x50 bytes and runs `L2.00349` (unread). `L2.00361` moves the unit from its old Group into G and stores unit +0x70 = G (R2-ENGINE-782). `L2.01843` (88; EN `L2.01842` masked-equal) conditionally releases unit +0x64 and +0x68.
+
+The RU type 0x12 cell calls `L2.06066(G)` when the session is nonzero (R2-ENGINE-1107); EN cell 0 calls `L2.06317` (R2-ENGINE-1128). `L2.06066` (29; EN `L2.06317` masked-equal) calls `L2.02842(G)`, which resets each member and clears command +0x38 and the programme (R2-ENGINE-788). It then calls `L2.02816(member)` for each member (`L2.04689`/`L2.04690` iteration) and stores `[G +0x3c]` +0x20 = 0x13.
+
+**Confidence.** High for the dispatcher head, `L2.01662`, `L2.06757`, `L2.06755`, `L2.01843` and `L2.06066` as read in both roots. Medium for "the sender's list": `L2.01565` and `L2.06756` are unread, and the reading of word +5 as the sender is R2-ENGINE-1179's. The Group build holds only for message byte +4 of 1 or more. Medium for the composed key-to-order path: the stretch from the head to the type switch is R2-ENGINE-1107's and R2-ENGINE-1128's at their grades, and the handler's admission is Medium there. R2-ENGINE-782 and R2-ENGINE-788 carry their grades.
+
+**Unknown.** Byte +4 of the L message (the sender does not write it) and the `L2.06751` path for byte +4 below 1. That L takes this path is a live alternative the evidence does not exclude. The meaning of unit +0x54 = 0x10 and of the `L2.01843` release. Constructor `L2.00349`.
+
+**Amends.** R2-ENGINE-1179: the 0x12 to 0x17 link is now read in both roots; the receivers are the admitted ids, moved into one new Group.
+
+**Evidence.** EXP-2161 `evidence/navigation/nav2/win/*-dispatcher-head.lst`, `nav2/win/*-unit-admit.lst`, `generated/win/*-unit-lookup.lst`, `*-group-new.lst`, `*-unit-regroup.lst`, `*-group-method.lst`, `generated/mask/*.tsv`; EXP-2159 `evidence/generated/win/*-key-l.lst`, `generated/mask/key-l.tsv`.
+
+### R2-ENGINE-1199
+
+`L2.02816(unit)` (22 instructions; EN `L2.06763` masked-equal) calls `L2.01584(unit)`, stores unit +0x50 = 0x17, stores command word +0 = `L2.01521(unit +0x10)` and command +8 = 0 (command = the object at unit +0x1c4). It tests nothing and takes no argument but the unit.
+
+`L2.01584(unit)` (14; EN `L2.03061` masked-equal) calls `L2.01585(unit)` and stores command dword +0x50 = 0. `L2.01585` (R2-ENGINE-880) copies movement byte 0 into byte 1, calls `L2.02822` when unit +0x80 is nonzero, the unit is centred and +0x80 is not its cell, stores command +0x14 = `L2.01728(unit)`, command +0x60 = 0, movement +0x7c = 0 and unit +0x54 = 0. `L2.02822` (13, RU) is `L2.02410(unit, 0, 1)`; `L2.02410` is unread.
+
+In the bodies of the setter, the reset and `L2.01585` (R2-ENGINE-880) no store hits command +9, +0xc, +0x20, +0x28, +0x30 or +0xb0, nor movement +0x98; the unread callees `L2.02410`, `L2.01728`, `L2.01521` and `L2.00490` are not excluded (Medium). No unit kind is refused inside the setter; the dispatcher's lookup refuses unit +0x54 = 0x10 (R2-ENGINE-1198).
+
+**Confidence.** High for the setter and reset bodies in both roots and `L2.02822` in RU. `L2.01585` at R2-ENGINE-880's grade (High for the body; Medium for its callees `L2.02822` and `L2.00490`). Medium for the negative above, which leaves the unread callees open, and for `L2.01521` as the unit's cell (unread). Medium for what `L2.02410(unit, 0, 1)` does (R2-ENGINE-501 reads it as sending the unit back to cell +0x80).
+
+**Amends.** R2-ENGINE-541: `L2.02816` stores the unit's own cell, not a target pointer. R2-ENGINE-880: `L2.02822` is a three-argument call of `L2.02410`.
+
+**Evidence.** EXP-2161 `evidence/generated/win/*-setter.lst`, `*-reset.lst`, `navigation/nav3/win/ru-reset-move.lst`, `generated/mask/setter.tsv`, `reset.tsv`.
+
+### R2-ENGINE-1200
+
+Programme 0x13 runs `L2.02471` from the group tick (R2-ENGINE-507, R2-ENGINE-882). Its one E8 site is RU `L2.06764`, EN `L2.06765`. It calls `L2.01531` on each member.
+
+`L2.01531(unit)` and `L2.02911(unit)` (46 instructions; EN `L2.04984` masked-equal):
+
+- owner +0x2c nonzero: command +8 = 0xb, then `L2.01513(unit)` if `L2.00044(unit)` returns nonzero;
+- owner +0x2c zero: `L2.01512(unit)` if `L2.00044(unit)` returns nonzero, otherwise command +8 = 0.
+
+`L2.00044` returns byte +0x4c & 4 (R2-ENGINE-900, High), the mage bit of R2-ENGINE-018. "Player" (owner +0x2c zero) and "computer" (nonzero) are readings of owner +0x2c at R2-ENGINE-362's Medium.
+
+Executor `L2.06766` (12; EN `L2.06767` masked-equal) takes prepared +8 − 1; a value above 0xe jumps to `L2.02883`, so prepared 0 runs no prepared handler.
+
+Computer branch `L2.01513` (121; EN `L2.05314` masked-equal) needs book +0x140, mana +0x9a above 10 and spell 0x18 from `L2.00040`. With own +0x94 unequal to +0x96 it stores command +0x60 = 1 and calls `L2.01524(unit, unit, spell)`. Otherwise it takes the area list `L2.05939(cell, spell byte +9)` filtered by `L2.06768` and the first member in list order with the least integer quotient +0x94 / +0x96 (0 for any member below full health). Below the double at `L2.01516` it casts 0x18 on that member; otherwise it calls `L2.01533(unit, list)` (unread).
+
+Player branch `L2.01512` (RU, through `ret 4` at `L2.06769`; its first 256 instructions masked-equal with EN `L2.05315`):
+
+1. Mana +0x9a below 5, or bit value 8 of byte +0x20 of `[owner +0x34]` (owner = unit +0x14) clear: command +8 = 0.
+2. +0x94 unequal to +0x96 and `L2.01518(unit, 0x18, 0)` admitting: cast 0x18 on the unit.
+3. Unit +0x144 bit 0x8000000 clear and spell 0x1b admitted: cast 0x1b on the unit.
+4. From `L2.01514`, `L2.01515` and list +0xaa8: with more than one entry and the first member in list order with the least integer quotient +0x94 / +0x96 (0 for any member below full health) below `L2.01516`, cast 0x18 on that ally.
+5. Preference bit 0x10 clear, or mana below 10: command +8 = 0.
+6. On allies that `L2.01519` accepts, filtered by `L2.01520` and, when the ally's command +0xa4 is 0x14, by `L2.01523` of its +0xa8 against the clock: 0x14 (non-mage ally, bit 0x100000 clear) or 0x15 (0x200000). Preference bit 0x20 clear, or mana below 40, stores command +8 = 0. Otherwise: 0xd (0x2000), 0x13 (0x80000), 4 (0x10), 8 (0x100) or 0xc (0x1000) on an ally; failing that, 0xc on the unit itself when its own bit 0x1000 is clear.
+7. Otherwise command +8 = 0.
+
+Each cast stores command +0x60 = 1 and calls `L2.01524`. With a target it stores prepared +8 = 8, +0x28 = the target and +0x30 = the spell, and in the target's command +0xa4 and +0xa8 (R2-ENGINE-1143, High). A cast in either branch therefore leaves prepared 8 (handler `L2.01552`), not 0 or 0xb. The callees are `L2.02502`, `L2.06151`, `L2.00209`, `L2.00213`, `L2.01517`, `L2.01515`, `L2.01518` (11 sites), `L2.01519`, `L2.01520`, `L2.01524` (11), `L2.01514` and `L2.01523`. The body stores no +0x50 or +0x54.
+
+Under this route a player member with `L2.00044` zero reads as standing: no prepared handler, no walk, turn or attack call. Paths outside the route still act: a nonzero primary +9 (R2-ENGINE-542, R2-ENGINE-553); the post-step flight at low health (R2-ENGINE-506); and the executor tail with movement +0x98 set, which re-picks through `L2.02425` (R2-ENGINE-872, R2-ENGINE-504). Selector cell 0x17 is the default `L2.06232` (R2-ENGINE-1121). No direct route from the group tick reaches the selector under programme 0x13. `L2.01724` loops over a unit collection and calls `L2.01726` per unit, which reaches selector `L2.01725` on both branches (R2-ENGINE-558); its caller is Unknown (no reference in six forms, R2-ENGINE-558, R2-ENGINE-1124). Whether `L2.01724` runs the selector, and through cell 0x17 the idle planner (`L2.01733(unit, 0)`, which attacks a hostile within range; R2-ENGINE-501, R2-ENGINE-1120, R2-ENGINE-1121), for such a unit is Unknown.
+
+**Confidence.** High for `L2.01531`, `L2.02911`, `L2.01513` and the executor head in both roots, and for `L2.01512` in RU (EN for its first 256 instructions); `L2.00044` and `L2.01524` are read in R2-ENGINE-900 and R2-ENGINE-1143 (High). Medium for the callees named above, the readings "player" and "computer" of owner +0x2c (R2-ENGINE-362) and the group tick's cadence (R2-ENGINE-507, R2-ENGINE-882, R2-ENGINE-057). The composed "reads as standing" is Medium: the outside paths carry their claims' grades and computed calls are not excluded.
+
+**Unknown.** The handler of prepared 0xb under programme 0x13 for computer members, and whether such a Group stays active. Spell effects. `L2.01533`. The rest of EN `L2.05315`. Whether `L2.01724` (caller Unknown, R2-ENGINE-558) runs the selector, and through cell 0x17 the idle planner, for a unit under programme 0x13; the caller of `L2.01724` would settle it.
+
+**Amends.** R2-ENGINE-1136 and R2-ENGINE-1143: RU `L2.01512` is now read to its end. R2-ENGINE-1075: EN `L2.04984` is masked-equal to RU `L2.01531` over 46 instructions.
+
+**Evidence.** EXP-2161 `evidence/generated/win/*-support.lst`, `*-player-mage.lst`, `*-computer-mage.lst`, `*-prepared-dispatch.lst`, `navigation/nav2/win/ru-player-mage-2.lst`, `ru-player-mage-3.lst`, `generated/scan/*-refs-order-17.tsv`, `generated/mask/*.tsv`.
+
+### R2-ENGINE-1201
+
+The `valctx` census over `.text` of each root keeps an operand overlapping unit +0x50 (4 bytes) or Group +0x20 (1 byte) that is written with the immediate 0x17 or 0x13, read and compared or subtracted with it in the next four instructions, or read before a scaled-table jump in the next eight. Hits:
+
+- store +0x50 = 0x17: RU `L2.06770`, EN `L2.06771` (the setter, R2-ENGINE-1199);
+- store +0x20 = 0x13: RU `L2.06772`, EN `L2.06773` (`L2.06066`, R2-ENGINE-1198);
+- read before a table jump: RU `L2.06774`, EN `L2.06775` (the selector switch; above 0x1b it goes to `L2.06232`);
+- no compare with 0x17 or 0x13.
+
+The census finds no compare with 0x17, and the read selector and executor tail do not end it. The order ends when another write to unit +0x50 replaces it:
+
+- another input order that passes the same head with byte +4 of 1 or more, which also regroups it (R2-ENGINE-1198);
+- a script action on its Group (R2-ENGINE-1123);
+- a programme handler that calls `L2.01576`, which stores order 0xc (programmes 4, 5 and 17; R2-ENGINE-884). Programme 0x13 is not among them.
+
+The selector's stop chain does not apply to 0x17 (R2-ENGINE-1121). The executor tail keeps the order (R2-ENGINE-872). `L2.02842` clears command +0x50, not unit +0x50 (R2-ENGINE-788). The Group methods `L2.06064` and `L2.06065` store no member order (R2-ENGINE-1113).
+
+**Confidence.** High for the census hits as generated in both roots. Medium for every negative: the census misses a value carried longer in registers or memory, other displacements and byte tables; it also misses the group tick's programme read in `L2.02456`. The list of ending writes carries the cited claims' grades.
+
+**Evidence.** EXP-2161 `evidence/generated/scan/*-valctx-order-17-programme-13.tsv`, `evidence/probe.py`.
+
+### R2-ENGINE-1202
+
+The reference scan over each root covers E8, E9, 0F 8x, EB and 7x at every byte offset of code sections and absolute dwords in every section. Hits:
+
+| target | RU site | EN site |
+|---|---|---|
+| `L2.06066` / `L2.06317` | `L2.06776` (input arm) | `L2.06777` (input cell 0) |
+| `L2.02816` / `L2.06763` | `L2.06778` (`L2.06066`) | `L2.06779` (`L2.06317`) |
+| `L2.02471` / `L2.06780` | `L2.06764` (group tick) | `L2.06765` |
+| L sender `L2.06494` / `L2.04894` | `L2.06781` (key routine) | `L2.06782` |
+
+No absolute dword names any target. The L sender routine has one direct call site per root, in the view key routine; other builders of a type-0x12 message were not searched. No panel button reaches the route by a direct reference (panel bodies read in EN only, R2-ENGINE-1191). R2-ENGINE-1123's eleven script methods do not reference `L2.06066`. The unit defaults store order 0xb (R2-ENGINE-884, R2-ENGINE-777). No direct reference to `L2.06066` or `L2.02816` lies outside the input arm and `L2.06066`; computer-player code was not otherwise read.
+
+**Confidence.** High for the direct references in both roots. Medium for the absence of other senders: other builders of a type-0x12 message, calls through computed addresses and copies of the setter's stores in other bodies are not excluded.
+
+**Evidence.** EXP-2161 `evidence/generated/scan/*-refs-order-17.tsv`.
+
+### R2-ENGINE-1203
+
+One ledger lookup per field:
+
+- unit +0x50 (order): saved in the Unit records (R2-SESSION-259; R2-ENGINE-884 reads 0xb from five saves);
+- Group record +0x20 (programme): saved in the 80-byte Group record (R2-SESSION-343);
+- command +8 (prepared): saved in the 184-byte command block (R2-SESSION-346, R2-SESSION-259);
+- command word +0 (the cell): inside that block, but no save claim names it;
+- movement block +0x1c0: not in the save reader (R2-SESSION-346).
+
+The values those claims list contain no order 0x17 and no programme 0x13.
+
+**Confidence.** High for the three named fields at the cited claims' grades. Medium for command word +0.
+
+**Unknown.** Whether a unit loaded with order 0x17 and programme 0x13 resumes the route of R2-ENGINE-1200; it needs a save holding them.
+
+**Evidence.** EXP-2161 `RESULTS.md` (ledger lookups).
+
 ## Effect record identity and renewal
 
 | ID | Claim | Confidence | Status | Evidence |

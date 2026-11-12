@@ -192,3 +192,50 @@ The Ctrl+N, O, K, T and C toggles are process globals (section not read).
 The census finds no direct writer of T except its key arm; a write through a
 computed address is not excluded (R2-ENGINE-1195; persistence over a mission
 change or restart is Medium).
+
+## The L key order (0x17)
+
+The L message (type 0x12) carries the sender in word +5 and the selected
+ids. With message byte +4 of 1 or more (Unknown for L, which does not write
+it) the dispatcher looks each id up in the sender's unit list and drops an
+id it does not find or whose unit has +0x54 = 0x10. The found units leave
+their Groups and join one new Group; the Group method then calls the order
+0x17 setter on each member and sets programme 0x13. Both roots are read;
+the sender's list and the stretch to the type switch are Medium. The path
+for byte +4 below 1 is not read, and that L takes it is not excluded
+(R2-ENGINE-1198).
+
+The setter tests nothing. It runs the reset (the stop routine and command
++0x50 = 0), then stores order 0x17, command word +0 = the unit's own cell
+and prepared +8 = 0. In the bodies read it writes no target, primary +9 or
++0xc; its unread callees are not excluded (R2-ENGINE-1199).
+
+On the Group tick, programme 0x13 calls the support routine on each member:
+
+- a player unit that is not a mage gets prepared 0, which the executor maps
+  to no handler: on this route it reads as standing, with no walk, turn or
+  attack call (Medium); whether the per-unit loop `L2.01724`, whose caller
+  is Unknown, reaches the selector and the idle planner is Unknown;
+- a player mage with mana 5 or more and bit value 8 heals itself or the
+  first wounded ally in list order with spell 0x18 and casts 0x1b on itself;
+  buffs 0x14 and 0x15 need bit 0x10 and mana 10; buffs 0xd, 0x13, 4, 8 and
+  0xc need bit 0x20 and mana 40; RU read to its end, EN for the first 256
+  instructions;
+- a computer member gets prepared 0xb, or 8 when its mage branch casts, and
+  a computer mage heals with 0x18.
+
+A primary action in progress, the low-health flight and the executor tail
+on an empty route still act. No direct route from the group tick reaches the
+selector under programme 0x13 (R2-ENGINE-1200; the readings "player" and
+"computer" and the composed "reads as standing" are Medium; prepared 0xb
+under this programme is Unknown).
+
+The census finds no compare with 0x17. The order ends when another write to
+unit +0x50 replaces it: another input order, a script action on the Group,
+or a programme handler that stores order 0xc (R2-ENGINE-1201; the negatives
+are Medium). The direct references give one route, the L key through the
+input arm; no panel button reaches it by a direct reference, and other
+builders of a type-0x12 message were not searched (R2-ENGINE-1202; computed
+calls are not excluded). A save holds unit +0x50, Group record +0x20 and
+command +8; command word +0 lies in the saved block but no save claim names
+it, and whether a loaded unit resumes the route is Unknown (R2-ENGINE-1203).
