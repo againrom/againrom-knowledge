@@ -1356,12 +1356,22 @@ Medium) and field 0x10 clears bit 0x80. Such a key with no map object gets no
 client object from send-all (whether it is drawn is Unknown). A key below
 0x6000 creates its object. — R2-ENGINE-951, R2-ENGINE-953
 
+The inn's addition producer gives an actor for a low word outside 21..30 a
+new key, sends it with mask -1 (field 0x80, so the client object gets
++0x1dc = WORD+0x14c, Medium), then releases the key and deletes the actor
+before it returns. No read body sends the delete message 0x6a for it; the
+client object's removal is Unknown; while it is present, a later unit with
+the released key updates it instead of creating one. Party members carry their speaker number in the same
+WORD+0x14c (Medium). — R2-ENGINE-1229, R2-ENGINE-1230, R2-ENGINE-1232
+
 Sight messages carry +4 at word +0xa: 0x74 sets and 0x69 clears object bit
 0x80 (read as hidden, Medium). With Session +0x74 nonzero a player whose
 WORD +0x30 bit is clear in unit +0x1a4 (read as cannot see, Medium) receives
 0x74 and the unit's other fields wait in unit +0x114. Message 0x6a removes the object by +4. A campaign keeps Session +0x74
 zero (Medium), so sight does not gate these messages there. The body that
-detects a sight change is Unknown. — R2-ENGINE-952, R2-ENGINE-953
+detects a sight change is Unknown. The delete sender has two direct callers
+per root; register and table calls are not covered. — R2-ENGINE-952,
+R2-ENGINE-953
 
 In the 16 original-made saves every unit outside players.0 and in the dead
 list stores +4 = +8 + 0x6000; the 21 units of players.0, the hero's player,

@@ -1149,6 +1149,11 @@ shop caption font/ink remain Unknown (R2-ASSET-090).
 
 ## Inn option refresh and repeated seats
 
+The option words come from EnterInn's code: 46 constant words chosen by stage 768, the town ID
+and bank cells, plus up to 20 hire words. On a campaign inn entry the selector passes them, in
+that order, to the addition producer, which walks them once by low word before the inn page
+(Medium for the order against the page) (R2-ENGINE-1228, High / Medium).
+
 The three inn entry builders preserve copied-option order within hire and talk vectors and
 select seat 0 when either vector is populated, otherwise -1. TALK itself requests dialogue,
 calls TalkTo and leaves the selection index unchanged. Its local body does not rebuild the

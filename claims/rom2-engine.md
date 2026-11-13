@@ -15728,6 +15728,11 @@ their callees `L2.03061`, `L2.02686`, `L2.04086`, `L2.04087` never
 dereference `this` in their own bodies; `L2.02685`, `L2.04088` and
 `L2.04089` are unread. The town-registration Unknown stays.
 
+**Amended.** R2-ENGINE-1229 reads the non-controlled branch to its end in
+both roots: the actor is also sent to the owner's player with mask -1, its
+key is released, and the clear `L2.01866` deletes it through its virtual
+slot +4 before the producer returns.
+
 ### R2-ENGINE-636
 
 A raw DWORD scan of every section of the EN client for 0x149..0x14d finds
@@ -18842,6 +18847,13 @@ identity 23 comes from: the leave arm builds a Human with WORD +0x14c 23 on
 leaving mission 40, and the stage-50 inn rebuilds her when absent; the
 class stays Medium (0x24 or 0x22), and a town file holding her was not read
 (R2-SESSION-302).
+
+**Amended.** R2-ENGINE-1230 and R2-ENGINE-1231 narrow the Unknown on the inn
+NPCs: each admitted option word's NPC is sent with field 0x80, so a client
+object with +0x1dc = its number exists before the inn page (Medium); when
+that object is removed stays Unknown. Speaker 21, and 22 or 23 where no
+word for them is admitted, still need party members (R2-ENGINE-1232,
+Medium).
 
 **Evidence.** [EXP-2094](../experiments/EXP-2094-rom2-druids-state/RESULTS.md), question 3;
 [EXP-2096](../experiments/EXP-2096-rom2-member-23/RESULTS.md), question 2.
@@ -25236,6 +25248,11 @@ writer), what replays +0x114, and who calls the delete `L2.05716`; a
 displacement scan of +0x1a4 and +0x114 and an E8 scan of `L2.05716` settle
 them. The meaning of +0x4c bit 8.
 
+**Amended.** R2-ENGINE-1230 narrows the Unknown on who calls the delete
+`L2.05716`: an E8/E9 scan finds two direct callers per root, EN `L2.07002`
+in `L2.01064` and `L2.07003` in `L2.07004` (RU `L2.07005`, `L2.07006`);
+register and table calls are not covered.
+
 **Evidence.** [EXP-2133](../experiments/EXP-2133-rom2-client-unit-key/RESULTS.md)
 
 ### R2-ENGINE-953
@@ -28720,3 +28737,230 @@ Read standing-record writers are same-ID renewal's word40/word42 stores and time
 **Unknown.** Dispel, save/load, server-message and all other standing-field writers across allods2.exe, scenario.dll and engine32.dll. A classified census retaining unnamed candidates and aliases would settle it. The 40-window budget ended before this census.
 
 **Evidence.** EXP-2157 RESULTS section9; generated blank/copy/parser/speed/attach/timer listings and window/budget receipts.
+## Inn option words and the addition producer's units
+
+Terms shared by these cards: the producer is the addition producer EN `L2.00174` / RU `L2.00176`
+(R2-ENGINE-635); an inn word is one packed EnterInn option (kind bits 28..30, topic bits 16..27,
+NPC or hire ID bits 0..15; R2-ENGINE-748); the low word is bits 0..15; the client object is a
+`CUnit` in client collection +0x9d0, which the talk lookup searches by WORD +0x1dc (R2-ENGINE-731).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1228 | ROM2 inn words are EnterInn's packed options (46 scenario.dll constants and up to 20 hire words); in campaign mode the inn selector lists them in order and the producer walks the list once by low word, before the pump. | High / Medium | ● active | [EXP-2165](../experiments/EXP-2165-rom2-inn-options/) |
+| R2-ENGINE-1229 | For an inn word with low word outside 21..30 the ROM2 producer builds a Unit or Human with WORD +0x14c = low word, owner +0x14 and a new key +4, sends it with mask -1, then releases the key and deletes it before returning. | High / Medium | ● active | [EXP-2165](../experiments/EXP-2165-rom2-inn-options/) |
+| R2-ENGINE-1230 | A ROM2 producer actor outside 21..30 is sent with field 0x80, so the client builds a CUnit with +0x1dc = low word before the selector's pump returns (Medium); no read body sends its delete; its removal is Unknown. | High / Medium / Unknown | ● active | [EXP-2165](../experiments/EXP-2165-rom2-inn-options/) |
+| R2-ENGINE-1231 | Every speaker of the ROM2 inn talks is the talk's own NPC (46 EN, 45 RU rows), another NPC offered at that stage and town (2 EN, 3 RU) or identity 21, 22 or 23 (60 EN, 58 RU); only 21..23 need the party (Medium; object lifetime Unknown). | High / Medium | ● active | [EXP-2165](../experiments/EXP-2165-rom2-inn-options/) |
+| R2-ENGINE-1232 | ROM2 party members meet the talk lookup by the same field: the client stores the sent WORD +0x14c as +0x1dc; hero 21, identities 22/23 and hires 1..20 carry theirs in +0x14c; their send in a town is not read (Medium). | Medium | ● active | [EXP-2165](../experiments/EXP-2165-rom2-inn-options/) |
+
+### R2-ENGINE-1228
+
+Source. The inn words come from code, not from a town data file: EnterInn (`scenario.dll`
+`D2.00089`, both roots) stores 46 constant words chosen by stage 768, the current town ID and bank
+cells, plus the tail of up to 20 hire words built from bank 512..571 (R2-ENGINE-748).
+
+Walk, from the committed listings `en-innseg-L2.00437` / `ru-innseg-L2.00438` and `en-producer-L2.00174` /
+`ru-producer-L2.00176` of EXP-2096:
+
+1. The inn selector's campaign segment runs only when app +0x5d8 (RU +0x63c) is 2. It calls
+   EnterInn, appends the returned words in EnterInn's order to a list, and calls the producer with
+   GetVar(0x300) (the stage) and the list, receiver `[L2.00805]`; then the client pump
+   `L2.00466(0)` (R2-ENGINE-633).
+2. The producer walks the list once, index 0 to count - 1 (`L2.07007..L2.07008`: count through
+   `L2.03751`, element through `L2.03752`). For each word it keeps only the low word
+   (`and edx, 0xffff` at `L2.07009`); kind and topic are not read. A low word in 0x15..0x1e takes
+   the controlled branch of R2-ENGINE-635; every other low word, hire IDs 1..20 and NPC numbers
+   such as 680 included, takes the branch of R2-ENGINE-1229.
+3. After the loop the producer releases, deletes and flushes (R2-ENGINE-1229), and the selector's
+   pump runs (R2-ENGINE-1230).
+
+The inn page's entry builder then calls EnterInn again and resolves an actor for each admitted
+word through the client lookup, which creates a presentation actor on a miss (R2-ENGINE-973).
+
+**Confidence.** High for the source and the walk: bodies read in both roots (the producer and
+segment equal after masking, EXP-2096; EnterInn byte-equal, R2-ENGINE-748). Medium that the walk
+runs before the inn page is shown and for the meaning of app +0x5d8 == 2 (R2-ENGINE-633).
+
+**Evidence.** EXP-2165 `RESULTS.md` question 1.
+
+### R2-ENGINE-1229
+
+The producer's branch for a low word outside 0x15..0x1e (the cut at `L2.07010..L2.07011`):
+
+1. Template. The Humans lookup `L2.02663` with key 10000 + 10 x ID, then the Units lookup
+   `L2.02665` with the same key (a Units hit sets the Unit flag `[ebp-0x40]`); when both miss, the
+   Humans lookup and then the Units lookup with the raw ID, and that path sets the Unit flag
+   whatever the Units result. The suffix probe 10000 + 10 x ID + k (k = 1..9) and the stage key
+   9998 + 10 x ID + stage / 10 replace the row when a probe hits.
+2. Build. With the Unit flag: 0x208 bytes and the Unit constructor `L2.01063` with the Units row
+   name (`L2.04941` on `L2.00146`). Without: 0x254 bytes and the Human constructor `L2.00214` with
+   (name from `L2.03310` on `L2.00148`, 0, 0).
+3. Fields. WORD +0x14c = the low word (`L2.03313`); +0x14 = the owner, `L2.00310` on `[L2.00292]`.
+4. List. The actor is added to a local list at `[ebp-0x30]` through `L2.04536`, which stores
+   +4 = the lowest clear ID of the ID map (`L2.02670`; R2-ENGINE-950). The owner's +0x24 list, its
+   Groups and the registry `L2.00325` are not touched.
+5. Send. `L2.01056(actor, owner, -1, 0xffb, 0, 0)` on `L2.00994`, the same call as the controlled
+   branch.
+6. After the loop, for every member of the local list: `L2.03314` with WORD +4, which clears that
+   ID in the map (R2-ENGINE-950). Then `L2.01866` on the list (`L2.07012`): until the list is
+   empty it takes the head (`L2.07013`) and passes it to `L2.07014`, which unlinks it (`L2.04533`)
+   and calls the element's virtual slot +4 with 1.
+7. Slot +4 is the deleting destructor. Unit vtable `L2.04102` slot +4 is `L2.07015`: destructor
+   `L2.06457`, then `L2.07016` (read as the memory release by call shape; unread) when bit 0 of
+   the argument is set. Human vtable `L2.00217` slot +4 is `L2.07017`: `L2.07018`, which ends in
+   `L2.06457`, then `L2.07016`.
+8. Then `L2.07019(0)` on `L2.00994` (a type-0x64 message), `L2.07020` on `L2.00994` (a walk of
+   +0x18b8 calling `L2.07021`), and the list destructor `L2.07022` (EN reads, EXP-2066; the RU
+   `L2.07023` and `L2.07024` are not read).
+
+RU: `L2.04402`, `L2.00060`, `L2.04385`, `L2.07025`, `L2.07023`, `L2.07024`, `L2.07026`; Unit vtable
+`L2.02314` slot +4 `L2.07027`, Human vtable `L2.00218` slot +4 `L2.07028`. The list destructor and
+both slot +4 bodies are equal to EN after masking (the destructor differs only in a string
+annotation of its vtable operand); the RU clear, head and remove (61 instructions in one linear
+window) equal the EN ones, the window ending before the remove's `ret 4`.
+
+**Confidence.** High for the branch, the stores, the order and the delete call, read in both roots.
+High that the elements are the actors: the producer's own walk reads WORD +4 of the same list's
+elements. Medium for the template row (the row-0 path of R2-ENGINE-972) and for what `L2.04533`,
+`L2.07013`'s callees, the destructor's callees, `L2.07016` and the list destructor's `L2.05000`
+and `L2.07029` do; the destructor bodies are read in EN only.
+
+**Amends.** R2-ENGINE-635: its non-controlled branch "keeps the actor in a local list" and passes
+each key to `L2.03314`; the actor is also sent to the owner's player and is deleted before the
+producer returns.
+
+**Evidence.** EXP-2165 `RESULTS.md` question 2; `generated/listings/en-listclear-L2.01866.txt`,
+`en-listhead-L2.07013.txt`, `en-noderemove-L2.07014.txt`, `en-unitvt-L2.04102.txt`, `en-humanvt-L2.00217.txt`,
+`en-unitslot4-L2.07015.txt`, `en-humanslot4-L2.07017.txt`, `en-unitdtor-L2.06457.txt`,
+`en-humandtor-L2.07030.txt`, `en-humandtorbody-L2.07018.txt`, `en-listdtor-L2.07022.txt` and the RU
+counterparts; `generated/derived/compare.tsv`, `listclear-compare.tsv`; EXP-2066
+`evidence/navigation/nav1/listings/en-after-L2.07019.txt`, `en-after-L2.07020.txt`.
+
+### R2-ENGINE-1230
+
+Send. In the sender `L2.01056` (EXP-2133 listing) the recipient is the owner, so the cut to
+0xc08000fb for a foreign owner does not apply. When the actor's virtual `+0x30` returns 0, its key is
+below 0x6000 and its +0x14c is above 0x14, the mask becomes 0x800000db (`L2.07031..L2.07032`);
+when `+0x30` returns nonzero and the owner is the recipient, the mask is kept. Field 0x80 is
+cleared only when Session +0x74 is nonzero (`L2.07033`, and the test at `L2.02678`). With field
+0x80 the sender writes WORD +0x14c into the packet (`L2.04950`; R2-ENGINE-817). On the client,
+a unit message whose key misses client +0x9d0 and whose mask has 0x20 or 0x80 creates a 0x1e4-byte
+object under the key, and field 0x80 stores the packet word as +0x1dc (R2-ENGINE-069; creation on
+a miss, R2-ENGINE-951).
+
+Order. The producer sends inside its loop, sends type 0x64 through `L2.07019(0)` after the loop and
+flushes; the selector then calls the pump `L2.00466(0)`, which returns after a type-0x64 message
+and, with argument 0, also when no message is queued (R2-ENGINE-613). So the client object with
++0x1dc = the low word exists when the pump returns if the unit messages are queued by then
+(Medium).
+
+Removal. The delete sender `L2.05716` (type 0x6a; R2-ENGINE-952) has two E8/E9 callers in each
+root: EN `L2.07002` in `L2.01064` and `L2.07003` in `L2.07004` (RU `L2.07005`, `L2.07006`; the RU
+windows equal the EN ones after masking). `L2.07004` reaches the delete only when Session +0x74 is
+nonzero. `L2.01064` (sends the delete, then pushes 1 and loads its argument's vtable; the call
+lies past the committed windows) has two E8 callers,
+`L2.07034` and `L2.07035`; both pass an element of the list at Session +0x7c +8. None of these sites
+lies in the bodies the deletion of R2-ENGINE-1229 runs: `L2.07015`, `L2.07017`, `L2.06457`,
+`L2.07018`, `L2.07036` (the Unit vtable's slot +0x38 that `L2.06457` calls, which deletes eight owned
+objects). So no read body (EN; the RU destructor bodies are not read) sends a 0x6a delete for these
+actors, and their key is released for reuse. Whether the client object stays is not shown.
+
+**Confidence.** High in EN for the mask arithmetic and the client arm (EN listings); Medium in RU,
+where the sender was not compared here and the arm differs in app offsets, sizes and nine rows
+(R2-ENGINE-953). High for the delete sender's two direct callers in each root and for the EN
+destructor bodies. Medium that the client object exists when the pump returns: the transport
+`L2.00871`/`L2.07021` is unread, the pump's argument 0 does not wait for the 0x64, Session +0x74
+is zero in a campaign at Medium (R2-SESSION-198), and the virtual `+0x30` is unread (both of its
+outcomes keep 0x80). Unknown whether anything removes the object. The destructor callees
+`L2.07037`, `L2.03814`, `L2.07038`, `L2.06911` and `L2.07039` are unread. So are the callees
+`L2.03913`, `L2.07040`, `L2.07041` and `L2.07042` and the four virtual calls of `L2.07036`, as are
+`L2.07016` and the list destructor's `L2.05000` and `L2.07029`. A register or table call escapes
+the E8/E9 scan. A unit message of state 5 for a key below 0x6000 (R2-ENGINE-951) is a removal form
+this search does not cover. The functions holding
+`L2.07034` and `L2.07035` were identified by navigation windows that exceeded the 256-instruction
+ceiling and are not committed; their two call contexts are committed (`en-wdctx-*`).
+
+**Unknown.** When the client object goes: on leaving the inn, on leaving the town, or when a later
+unit takes the same key (a key hit updates the object, R2-ENGINE-951). A run of the original that
+lists client +0x9d0 after the Druids' inn page opens and again after the page closes settles it.
+
+**Amends.** R2-ENGINE-733's first Unknown on how the inn NPCs resolve: each admitted word's NPC
+gets a client object with +0x1dc = its number before the page (Medium).
+
+**Amends.** R2-ENGINE-952's Unknown on who calls the delete `L2.05716`: two E8/E9 callers per
+root, EN `L2.07002` in `L2.01064` and `L2.07003` in `L2.07004` (RU `L2.07005`, `L2.07006`);
+register and table calls are not covered.
+
+**Evidence.** EXP-2165 `RESULTS.md` question 3; `generated/listings/en-scan-delete-L2.05716.txt`,
+`ru-scan-delete-L2.05725.txt`, `en-delcaller-L2.07002.txt`, `en-delcaller-L2.07003.txt`,
+`ru-delctx-L2.02870.txt`, `ru-delctx-L2.07043.txt`, `en-scan-worlddel-L2.01064.txt`, `en-wdctx-L2.07044.txt`,
+`en-wdctx-L2.07045.txt`, `en-unitclean-L2.07036.txt`; EXP-2133 `out/code/en-builder-L2.01056.txt`; EXP-2066
+`evidence/navigation/nav1/listings/en-after-L2.07019.txt`, `en-after-L2.07020.txt`.
+
+### R2-ENGINE-1231
+
+Census (`generated/derived/census-en.tsv`, `census-ru.tsv`): each of the 46 constant inn words of
+R2-ENGINE-748 joined with the `npc=` values of every header of its talk key `npc<N>talk<T>` in
+`main.res` `text/town.txt` (the EXP-2094 header census, R2-ASSET-188). A context is a stage 10..110
+and a town 1..3; bank cells other than stage 768 and the current town are not evaluated.
+
+| Class | EN rows | RU rows | Speakers |
+|---|---|---|---|
+| own NPC of the talk | 46 | 45 | 2, 5, 22, 23, 207, 517, 675, 677, 680, 681, 2003..2006, 2009, 2010, 2015, 2019, 2022, 2108..2111 |
+| another NPC with a word admissible at that stage and town | 2 | 3 | 2110 in `npc22talk30`, 2108 in `npc22talk40`; RU also 2006 in `npc2005talk103` |
+| identity 21..30 with a word admissible at that stage and town | 23 | 22 | 22, 23 |
+| identity 21..30 with no such word | 37 | 36 | 21, 22, 23 |
+| key absent | 0 | 1 | RU `npc2006talk110` |
+
+No talk names a speaker outside these classes: no number of 1..20 other than the own NPC 2, and no
+NPC without an inn word. By R2-ENGINE-1228 to R2-ENGINE-1230, when the selector's pump returns, the
+talk's own NPC has a client object built by the producer at that entry (Medium). For 22 and 23 the
+controlled branch builds one when the owner list lacks it; a held member has one only through the
+party route of R2-ENGINE-1232. Another NPC has one when its word was admitted at the same entry
+(Medium). Whether these objects are still present when the talk opens is R2-ENGINE-1230's removal
+Unknown. Identity 21 (the hero) has no inn word, so hero 21, and 22 or 23 where no word for them is
+admitted (the Druids' talks 70, 71, 91, the Kaarg talks 61..63 among them), have a client object
+only through the party (R2-ENGINE-1232).
+
+**Confidence.** High for the census. Medium for which speakers have an object when the pump
+returns; Unknown whether it is still present when the talk opens. The Medium composes R2-ENGINE-1230 (Medium) and does not evaluate the bank cells that admit a co-offered
+word. The speaker number is the header's `npc=` value at R2-ENGINE-582's Medium.
+
+**Unknown.** NPC word 2 (Kaarg topic 51) gives an object with +0x1dc 2, the number of hire 2; which
+of two objects with one +0x1dc the lookup returns depends on the collection's order, which is not
+read.
+
+**Amends.** R2-ENGINE-733's first Unknown narrows: the inn NPCs 680, 681, 677, 675, 5, 2006 and
+2109 have a producer-built client object when the selector's pump returns (Medium); whether it
+lasts until their talk opens stays Unknown (R2-ENGINE-1230); 21, and 22 or 23 where no word for
+them is admitted, need party members (Medium). R2-ENGINE-733 keeps its grade.
+
+**Evidence.** EXP-2165 `RESULTS.md` question 4; `evidence/census.py`, `evidence/options.tsv`.
+
+### R2-ENGINE-1232
+
+Composed from R2-ENGINE-069, R2-ENGINE-951, R2-ENGINE-950, R2-ENGINE-635, R2-ENGINE-745,
+R2-ENGINE-525, R2-ENGINE-105, R2-ENGINE-682 and R2-ENGINE-1230:
+
+1. The talk lookup compares client WORD +0x1dc. The client unit arm stores the packet word of
+   field 0x80 as +0x1dc (R2-ENGINE-069), and the sender fills that word from the world unit's
+   WORD +0x14c (R2-ENGINE-1230). The field that carries a member's speaker number is therefore
+   world WORD +0x14c.
+2. Hero 21: the character producers' Session +0x74 == 0 branch stores +0x14c = 21
+   (R2-ENGINE-105, Medium). Identities 22 and 23: the producer's controlled branch stores the low
+   word (R2-ENGINE-635 and R2-ENGINE-745, High for the store) and sends the new member with mask
+   -1. Hires: the hire creator stores IDs 1..20 (R2-ENGINE-525, High for +0x14c = ID). Unit LOAD
+   restores +0x14c (R2-ENGINE-682, High for the transfer, Medium for its width).
+3. The send-all of a join sends registry units with keys below 0x6000 under mask 0xa35fffff, which
+   holds 0x80 (R2-ENGINE-951, High for send-all's masks); LOAD adds loaded units to the registry (R2-ENGINE-950, Medium).
+
+So the same lookup finds a party member when a client object for it exists, under the member's
++0x14c. Whether every member in a town has been sent to the client (a member built at an earlier
+visit or restored by a town LOAD) is not read here.
+
+**Confidence.** Medium: a composition whose weakest links are the delivery of R2-ENGINE-1230 and the
+LOAD and join routes of R2-ENGINE-950 and R2-ENGINE-951.
+
+**Unknown.** The client collection in a town. A run of the original that lists client +0x9d0 in
+the Druids' inn with the party's +0x14c values settles it.
+
+**Evidence.** EXP-2165 `RESULTS.md` question 5.

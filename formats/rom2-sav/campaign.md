@@ -498,6 +498,24 @@ Unknown, and so is whether this actor is the companion the talk presents.
 The NPC22 topic40 and topic62 words repeat the request at their stages.
 — R2-ENGINE-633, R2-ENGINE-635
 
+The option words are EnterInn's packed words, not a data file. The producer
+walks them once in EnterInn's order and reads only the low word.
+— R2-ENGINE-1228
+
+For a low word outside 21..30 (a hire ID 1..20 or an NPC number such as 680)
+the producer builds a Unit when a Units template matches, else a Human. It
+stores WORD+0x14c = the low word and the owner at +0x14, and gives the actor a
+new key +4. It sends the actor to the owner's player with mask -1. After the
+walk it releases every such key and deletes every such actor. The
+producer's body does not append them to the owner's actor list, its Groups
+or the registry. — R2-ENGINE-1229, R2-ENGINE-635
+
+The send carries field 0x80, so the client builds an object with
++0x1dc = the low word before the selector's pump returns (Medium). No read
+body sends the delete message 0x6a for these actors; whether the client
+object outlives the server actor, and when it goes, is Unknown.
+— R2-ENGINE-1230
+
 Identity 23 has two requests and two stores. LeaveLocation of mission ID 40
 stores 773 = 0 and then 23, and the leave arm then passes 773 with stage768
 to the addition producer, so leaving mission 40 through that arm requests
@@ -691,6 +709,21 @@ fatal reading are each Medium or rest on unread callees). How the inn NPCs
 680 and 681 resolve and the client collection in a town are Unknown.
 Identity 23 is read as built on leaving mission 40 and expected to be kept
 as a companion (Medium, above). — R2-ENGINE-733, R2-SESSION-301
+
+Every speaker of the inn talks is the talk's own NPC (46 EN rows, 45 RU),
+another NPC offered at that stage and town (2 EN, 3 RU) or identity 21, 22
+or 23 (60 EN, 58 RU); RU lacks `npc2006talk110`. The inn NPCs 680, 681, 677,
+675, 5, 2006 and 2109 therefore get a producer-built client object before
+the inn page (Medium); whether it lasts until their talk opens is Unknown.
+Hero 21 has no inn word; 21, and 22 or 23 where no word for them is
+admitted, need party members (Medium).
+NPC word 2 shares +0x1dc 2 with hire 2; which object the lookup returns is
+Unknown. — R2-ENGINE-1231, R2-ENGINE-733
+
+A party member meets the same lookup through world WORD+0x14c, which field
+0x80 carries into client +0x1dc: 21 for the hero, 22 and 23 for the
+identities, 1..20 for hires. Whether every member in a town was sent to the
+client is not read (Medium). — R2-ENGINE-1232
 
 ## Catalog and campaign graph
 
