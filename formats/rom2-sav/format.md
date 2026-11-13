@@ -126,10 +126,46 @@ in the mission 10 files, 6..8 or 6..9 in the others), +0x01 is 0 or 1 in the
 mission 10 files and 0, 1 or 5 in the others, and +0x3a equals the key.
 — R2-SESSION-311
 
-The footprint pass keeps +0x2c and +0x30; a nonzero event kind acts when an
-occupant is placed on the cell (kind 0x17 stores the target pair into the
-unit's command word) or arrives there; refresh reads +0x3a as the cell to
-write back. — R2-ENGINE-673
+The footprint pass clears a unit's +0x2c (kind 3: +0x30) from the ring around
+its position and sets it on the position square and, at a step start, on the
+target square — R2-ENGINE-673, R2-ENGINE-1213
+
+A nonzero event kind acts when an occupant is placed on the cell (kind 0x17
+stores the target pair into the unit's command word) or arrives there;
+refresh reads +0x3a as the cell to write back. — R2-ENGINE-673
+
+A building is stored in +0x0c of each cell of its width (+0x60) by height
+(+0x61) rectangle whose bit, row x width + column, is set in the building's
++0x68 mask; the cells whose bit is set in the +0x64 mask get mask 5 in both
+plane bytes at refresh, the others have masks 1 and 4 cleared. The Building
+destructor zeroes +0x0c over the same cells without comparing it with the
+building. — R2-ENGINE-1212
+
+For a walking unit of one cell, in the bodies read, +0x04 (kind 3: +0x08) is
+on the cell named by the unit's position bytes (Medium as an invariant) and
+moves to the next cell when the fine coordinate crosses into it; +0x2c (kind
+3: +0x30) is on both cells of a step from its start until the unit reaches
+the centre of the target cell, and on the one cell of a standing unit (the
+stage table is Medium). — R2-ENGINE-1213
+
+Plane two is rebuilt from the entry at each refresh: 0x20 for an entry, 0x40
+for +0x2c, 0x80 for +0x30, 5 for a blocking building cell or a nonzero +0x20;
+bit 0x10 of both planes survives refresh and delete and has its own setter
+and clearer. +0x04 and +0x08 set no plane bit. Four other plane writers are
+unread. — R2-ENGINE-1214
+
+Removal zeroes +0x04 or +0x08 without comparing it with the unit; the
+footprint clear compares. Death (EN body; the RU call site is a scan hit)
+clears the unit from its position square and from the ring around it, which
+holds both cells of a step in progress. What a load does with an entry whose
++0x04 names a unit positioned on another cell is Unknown. — R2-ENGINE-1215
+
+By a reference scan of `allods2.exe` in both roots (direct call, jump and
+address forms; Medium), the placement, the removal and the refresh have no
+caller outside the terrain code; whether LOAD reaches a caller of the ground
+place, the footprint pass or the building init is Unknown. — R2-ENGINE-1216
+
+These are readings of both executables; no run of the original observed a step, a death or a load.
 
 Session is 4,000, 1,000, 48, 400 and 4,908 raw bytes, then `u8`, `u8`, `u32` and
 three `u32`: 10,374 bytes against ROM1's 4,374. Only the first and fifth

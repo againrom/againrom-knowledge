@@ -11804,7 +11804,7 @@ Medium: `L2.01525` was read in navigation only; the position units behind
 were not read, so "without stepping" rests on activity 6 calling no step
 routine; EN activity 6 is generation only (R2-ENGINE-508).
 
-**Amended.** R2-ENGINE-926 and R2-ENGINE-927 read the bodies of `L2.01574`
+**Amended.** R2-ENGINE-1213 corrects "back to that cell through `L2.02410`": the pass moves no unit; it rewrites the footprint references and block `+0x80`. R2-ENGINE-926 and R2-ENGINE-927 read the bodies of `L2.01574`
 and `L2.02409` in both roots and EN activity 6 (`L2.05523`): `L2.01574`
 admits only when the facing equals the heading `L2.02113` and the target is
 within range, so a strike waits for the turn; `L2.02409` writes only
@@ -16715,7 +16715,7 @@ repeat the first-frame/watch runs with matching RU mission state.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-673 | ROM2 terrain +0x2c/+0x30 hold footprint occupants kept by L2.03569, cell events at +0x34 act in placement L2.03570 and arrival L2.03571, and refresh L2.03572 reads the +0x3a key. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-ENGINE-673 | ROM2 terrain +0x2c/+0x30 hold footprint occupants kept by L2.03569, cell events at +0x34 act in placement L2.03570 and arrival L2.03571, and refresh L2.03572 reads the +0x3a key. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 | R2-ENGINE-674 | ROM2 Pointer +0x6c is 24 in five EN saves, and the read EN bodies hold no reader of Building base byte +0x0d and no constructor store to word +0x0c. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 | R2-ENGINE-675 | In EN ROM2 the one found reader of Player +0x44 is a 0xba message builder at L2.03573, and a census of loaded +0x1c0 pointers in the terrain routines hits 27 offsets read (heuristic; the base is not shown to be a Unit). | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 | R2-ENGINE-676 | ROM2 LOAD keeps a terrain or movement key that misses the saved-object lookup and passes session registers, terrain plane and event bytes, Player raw blocks and Building +0x0c without a value test. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
@@ -16764,6 +16764,8 @@ these fields: users were found by raw-DWORD scans of `0x54029..0x54068` and
 **Unknown.** The callers of `L2.03589` and kinds other than 0x17. Load
 game0001 with a write watch on terrain `+0x54060..+0x54065` and record each
 writer and the six bytes until mission end.
+
+**Amended.** R2-ENGINE-1213 narrows "the footprint pass keeps +0x2c and +0x30": the pass clears the unit from the ring around its position and sets the position square and, in mode 0, the target square.
 
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 2.
 
@@ -19332,7 +19334,7 @@ and records each cast's target would settle the aim.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-758 | ROM2 terrain entries: 8 create and 6 delete sites among the direct E8 calls in EN .text (completeness Medium); create sets plane-one bit 0x20, refresh sets plane two, so a refreshed entry cell is key-listed (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-ENGINE-758 | ROM2 terrain entries: 8 create and 6 delete sites among the direct E8 calls in EN .text (completeness Medium); create sets plane-one bit 0x20, refresh sets plane two, so a refreshed entry cell is key-listed (Medium). | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
 | R2-ENGINE-759 | ROM2 LOAD inserts each saved terrain entry by SetAt with no key, plane or count test, sets P1/P2 only from the key list, never saves P0, and neither the serializer nor post-load runs create or refresh. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
 | R2-ENGINE-760 | ROM2 session parts at LOAD: registers, latches and timer kept (seeds re-stored by the compile), +0xa8c0 rewritten; +0xa4c is a counter equal to register 999 (Medium that it is a turn count); +0xa48/+0xa49/+0xa728 have no reader found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
 | R2-ENGINE-761 | 34 of 35 ROM2 EN/RU terrain and session listing pairs, both import tables and four scans are equal after masking operands in 0x400000..L2.03731; the turn routine differs only in a call cut by its window end. | High | ● active (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
@@ -19377,6 +19379,8 @@ scan of EN `.text` for E9 jumps to the two targets, for indirect calls through a
 holding them, and of every section for their addresses as dwords would settle the references.
 Load game0001, place and remove a unit on an empty cell, save, and compare the entry count with
 game0001.
+
+**Amended.** R2-ENGINE-1214 extends the refresh: the blocking bits of a building cell follow the building's `+0x64` mask, and occupants `+4` and `+8` set no plane bit.
 
 **Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 1.
 
@@ -28097,7 +28101,7 @@ The census is a linear sweep of code sections in each root. The scan files give 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1198 | ROM2 L (type 0x12): when message byte +4 is 1 or more (the sender does not write it; Unknown), the dispatcher puts each listed id it finds, unless unit +0x54 is 0x10, into one new Group; L2.06066 sets order 0x17 and programme 0x13. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
-| R2-ENGINE-1199 | ROM2 order-0x17 setter L2.02816 tests nothing: after reset L2.01584 (stop L2.01585, cmd +0x50 = 0) it stores unit +0x50 = 0x17, cmd word +0 = the unit's own cell, cmd +8 = 0; no target, +9 or +0xc write in the bodies read. | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1199 | ROM2 order-0x17 setter L2.02816 tests nothing: after reset L2.01584 (stop L2.01585, cmd +0x50 = 0) it stores unit +0x50 = 0x17, cmd word +0 = the unit's own cell, cmd +8 = 0; no target, +9 or +0xc write in the bodies read. | High / Medium | ● active (amended) | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1200 | Under ROM2 order 0x17 programme 0x13 calls L2.01531 per member: a player non-mage gets prepared 0, a player mage may heal or buff allies, a computer member gets 0xb, or 8 when L2.01513 casts (R2-ENGINE-1143); no walk or attack call read. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1201 | ROM2 order 0x17 is read only by the selector's switch in the census: one 0x17 store at +0x50, no compare with 0x17; it ends when another write to unit +0x50 replaces it (new order, script, programme handler). | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1202 | ROM2 order 0x17 has one direct route in six reference forms (input arm, L2.06066, L2.02816); L's sender has one direct caller (the key routine); other type-0x12 builders and computed calls not searched; no panel button by direct reference. | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
@@ -28141,6 +28145,8 @@ In the bodies of the setter, the reset and `L2.01585` (R2-ENGINE-880) no store h
 **Confidence.** High for the setter and reset bodies in both roots and `L2.02822` in RU. `L2.01585` at R2-ENGINE-880's grade (High for the body; Medium for its callees `L2.02822` and `L2.00490`). Medium for the negative above, which leaves the unread callees open, and for `L2.01521` as the unit's cell (unread). Medium for what `L2.02410(unit, 0, 1)` does (R2-ENGINE-501 reads it as sending the unit back to cell +0x80).
 
 **Amends.** R2-ENGINE-541: `L2.02816` stores the unit's own cell, not a target pointer. R2-ENGINE-880: `L2.02822` is a three-argument call of `L2.02410`.
+
+**Amended.** R2-ENGINE-1213 reads `L2.02410(unit, 0, 1)`, held here at Medium: it clears the ring, sets the position square and stores `+0x80` = the position cell.
 
 **Evidence.** EXP-2161 `evidence/generated/win/*-setter.lst`, `*-reset.lst`, `navigation/nav3/win/ru-reset-move.lst`, `generated/mask/setter.tsv`, `reset.tsv`.
 
@@ -28370,6 +28376,142 @@ Session `+0` and `+4`: no claim found in one lookup.
 **Unknown.** Whether a save holds Session `+0` and `+4`, and so whether the health phase and K continue after LOAD: reading the Session serializer settles it.
 
 **Evidence.** EXP-2162 `RESULTS.md` question 6 (ledger lookups).
+
+## Map cell records for a building and a walking unit
+
+Terms shared by these cards: the entry is the 60-byte per-cell record of R2-SESSION-266; plane one and plane two are the cell status bytes at terrain `+0x10000` and `+0x20000` (R2-ENGINE-758); the position object is `[object+0x10]` with cell bytes `+0` (x) and `+1` (y) and offset bytes `+4`, `+5` (R2-ENGINE-546); the movement block is `[unit+0x1c0]`; the size is the unit's virtual `+0x1c`; the kind is `L2.03577(unit)` (EN address). Addresses are EN; RU is EN + 0x9ff0 for every terrain routine named.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1212 | ROM2 building setter EN L2.06901 / RU L2.06902 stores the building in entry +0x0c of each width x height cell whose bit is set in +0x68; refresh blocks the cells whose bit is set in +0x64; the clearer zeroes +0x0c without comparing. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1213 | A walking one-cell ROM2 unit: entry +4 (kind 3: +8) is on its position cell and moves when the fine coordinate crosses into the next cell; +0x2c (+0x30) is on both cells of a step from its start until the centre of the target cell. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1214 | ROM2 plane bytes: refresh rebuilds plane two from the entry (0x20 always, 0x40 for +0x2c, 0x80 for +0x30, 5 for a blocking building cell or +0x20) and keeps 0x10; 34 direct stores in 9 terrain routines per root; 4 routines unread. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1215 | ROM2 removal zeroes entry +4 or +8 without comparing; the footprint clear compares; death (EN L2.01806) clears the position square and the ring around it; a refused placement leaves a unit with no +4 entry on its position cell. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1216 | In ROM2 the terrain serializer and the post-load pass call no entry writer (R2-ENGINE-759); the writers' direct callers by a reference scan of allods2.exe; whether LOAD reaches one of them: Unknown. | Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+
+### R2-ENGINE-1212
+
+Setter `L2.06901(building)`: rows r from 0 to byte `+0x61` - 1, columns c from 0 to byte `+0x60` - 1, bit index n = r x width + c. Where bit n of building DWORD `+0x68` is set it calls `L2.04916(building, key)` with key = (position y + r) << 8 | (position x + c). `L2.04916`:
+
+- no entry at the key: create (`L2.03594`), entry `+0x0c` = building, write back, refresh (`L2.04166`), return 1;
+- an entry with `+0x0c` = 0: `+0x0c` = building, write back, return 1; this branch calls no refresh;
+- an entry with `+0x0c` nonzero: return 0 with no write. The setter then returns 0 at once; cells written earlier in the loop stay written.
+
+Refresh `L2.03572`, for an entry with `+0x0c` nonzero: bit index (cell y - building y) x byte `+0x60` + (cell x - building x). Bit set in building DWORD `+0x64`: plane one |= 5 and plane two |= 5. Bit clear: plane one &= 0xfa, plane two &= 0xfa, and the terrain byte of the cell = terrain byte `+0x5414b`. The refresh reads no other building field.
+
+Clearer `L2.06903(building)`: the same loop and the `+0x68` mask; `L2.04162(building, key)` on a present entry stores 0 into `+0x0c` with no comparison against the building, writes back, refreshes, and deletes the entry (`L2.04155`) when the empty test `L2.04154` passes (`+4`, `+8`, `+0x0c`, `+0x10`, `+0x2c`, `+0x30`, byte `+2` and byte `+0x34` all zero). An absent entry returns 0 and ends the loop.
+
+Building init EN `L2.03611(building, a, b)` is the one caller of the setter in a committed listing: it takes the kind row for byte `+0x40` from table `L2.03202` into `+0x3c`; with a + b = 0 it stores `+0x60`, `+0x61` (bytes) and `+0x64`, `+0x68` (DWORDs) from row elements 0, 1, 4 and 5 through `L2.02667`; with a + b above 0 it stores `+0x60` = a, `+0x61` = b, `+0x68` = 0xffffffff and `+0x64` = 0. It then calls the setter on the terrain object `[L2.01839]`, with no test of `[L2.01839]`. When byte `+0x40` is 0 or above the count of table `L2.03202` (`L2.06904`) the init returns with no store and no setter call.
+
+**Confidence.** High for the setter, the one-cell setter, the clearer, the one-cell clearer, the empty test and the refresh in EN and RU: the bodies are equal in both committed listings after address masking. High, EN only, for the stores of the building init. Medium for the row elements as the kind's own data: `L2.02667` and `L2.03201` are unread helpers. Medium for the create, write-back and lookup helpers, taken from R2-ENGINE-758. High, EN only, for the destructor body. Medium for the caller counts: the reference scan covers E8, E9, Jcc and absolute-dword forms in `allods2.exe` only.
+
+Callers, by the reference scan of each root: the setter has one call site, in the building init (EN `L2.06905`, RU `L2.06906`); the RU init `L2.00131` equals the EN one after masking. The init has two call sites per root: the constructor EN `L2.02575`, which passes its third and fourth arguments as a and b, and EN `L2.06907`, unread. The clearer has one call site, EN `L2.06908` (RU `L2.06909`), in the Building destructor EN `L2.06910`: it stores the table `L2.02577`, calls `L2.03314` with word `+4` when DWORD `+4` is nonzero, calls the clearer when `[L2.01839]` is nonzero, then the base destructor `L2.06911`.
+
+**Unknown.** Whether LOAD constructs a Building through a caller of the init: reading EN `L2.06907` and the callers of `L2.02575` settles it. The RU destructor body. What elements 4 and 5 of a kind row hold for each kind: a data read of the table behind `L2.03202`.
+
+**Amends.** R2-SESSION-311's "+0x0c from the building setter": the setter writes only the cells of the `+0x68` mask, and the plane bits of a building cell come from the `+0x64` mask at refresh.
+
+**Evidence.** EXP-2163 `evidence/derived/listing-compare.tsv` (rows `fn-L2.06901`, `fn-559890`, `fn-L2.06903`, `fn-L2.04162`, `fn-L2.03572`, `fn-L2.04154`); EXP-2085 `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.05179.txt`, `ru-terrain-lin-L2.06912.txt`, `en-building-init-L2.03611.txt`.
+
+### R2-ENGINE-1213
+
+Bodies, for a unit of kind 1 or 2 (kind 3 uses `+8` for `+4` and `+0x30` for `+0x2c`):
+
+- Placement `L2.03570(unit, x, y)`: an entry whose `+4` is nonzero returns 0 with no write to the entry, after the entry-event branch of R2-ENGINE-673; otherwise `+4` = unit, write back, refresh; a missing entry is created first. Kind 0 or above 3 returns 0.
+- Removal `L2.04158(unit, x, y)`: a present entry with `+4` nonzero gets `+4` = 0 with no comparison against the unit, then write back, refresh, delete when empty; block bytes `+0x86..+0x89` = position x, y and the low bytes of the fine x, y. `L2.06913(unit)` runs it over the size x size square at the position cell and stops at the first 0.
+- Ground place `L2.00314(unit)`: block word `+0x72` = the result of `L2.06914`, `+0x82..+0x85` = position x, y and fine low bytes; the cell test `L2.02718` (R2-ENGINE-789) and, by its result, two routines that are empty in the listing (`L2.06915`, `L2.06916`); placement on each cell of the size x size square at the position cell, returning 0 at the first refusal; then the footprint pass (unit, position cell, 1).
+- Footprint pass `L2.03569(unit, cell, mode)`: over the (size + 2) square whose corner is position - 1, every cell is cleared of this unit (`L2.03585`: `+0x2c` = 0 only when it holds this unit) except: in modes 0 and 1 the size square at the position is set (`L2.03584`: `+0x2c` = unit unless it holds another object), and in mode 0 the size square at `cell` is set as well. Block word `+0x80` = `cell` (mode 0), the position cell (mode 1) or 0 (mode 2).
+- Step start `L2.06917(unit)`: with an empty path it calls `L2.05541` and returns; otherwise block `+6` = the next cell of the path, `+0x70` = the position cell; pass (unit, 0, 2); pass (unit, next cell, 0); block `+1` = heading to the next cell; when heading `+0` equals it, `L2.06918`, block `+0xac` = 0 and one advance; otherwise the turn `L2.05526`.
+- Advance `L2.06919(unit)`: block `+0xac` += 1; fine x += signed byte `+0xb0`, fine y += signed byte `+0xb1`; when block word `+0xae` is 1 or 5 and both low bytes of the new fine coordinates are 0, 1 is subtracted from the fine x. Cell = fine >> 8, taken after that. Same cell: the position is stored. Other cell: pass (unit, 0, 2); removal `L2.06913`; the position is stored (`L2.06920`); ground place; pass (unit, old cell, 0). When `+0xac` reaches `+0xaa` both offset bytes are set to 0x80.
+- Arrival `L2.03571(unit)`: one advance; when both offset bytes are 0x80: block `+0xaa`, `+0xac`, `+0xa8` = 0; pass (unit, 0, 2); pass (unit, 0, 1); the path head is removed; an entry event of kind 0x17 on the cell calls `L2.03593`.
+- The drivers `L2.05544` and `L2.05532` call the arrival and return while the offset bytes are not both 0x80 (`L2.00491`).
+
+A step from cell A to cell B, composed from these bodies:
+
+| Stage | `+4` | `+0x2c` | block `+0x80` |
+|---|---|---|---|
+| standing on A after a ground place or an arrival | A | A | A |
+| from the step start, also while the unit turns first | A | A and B | B |
+| after the fine coordinate enters B's cell | B | A and B | A |
+| at the centre of B | B | B | B |
+
+The `+0x2c` column holds only where no other object holds the entry's `+0x2c`: the footprint set returns without a store there.
+
+In the bodies read, the cell holding `+4` is the cell of the position object's bytes `+0`, `+1` whenever the placement was not refused (Medium as an invariant: `L2.06921`, `L2.03593`, `L2.06922` and the callers of the position setters were not read, and LOAD takes `+4` from the file). Refresh sets plane two bit 0x40 for `+0x2c` nonzero (0x80 for `+0x30`) and reads neither `+4` nor `+8`.
+
+**Confidence.** High for each body in EN and RU: equal in both committed listings after address masking. Medium for the stage table: it is a composition, the step vector set by `L2.06918` was not read, so "enters B's cell" assumes the step vector leads from A to B; for the row "while the unit turns", the turn `L2.05526` and its facing step `L2.05541` are read by R2-ENGINE-927 (High, both roots): they store the heading, the facing and the turn counters of the movement block; R2-ENGINE-927 names no entry writer among their calls. Medium for the helpers taken from R2-ENGINE-758 and R2-ENGINE-546. A stop, a new order and a death in the middle of a step: R2-ENGINE-1215.
+
+**Unknown.** The step vector written by `L2.06918` (block `+0xaa`, `+0xae`, `+0xb0`, `+0xb1`): reading its body in the committed listing settles it.
+
+**Amends.** R2-ENGINE-673's "the footprint pass keeps +0x2c and +0x30": the pass clears the unit from the ring around its position and sets the position square and, in mode 0, the target square; its jump table `L2.06923` holds four targets (no action, clear, set, set). R2-ENGINE-501's "sends the unit back to that cell through `L2.02410`": the pass moves no unit; it rewrites the footprint references and block `+0x80`. R2-ENGINE-1199's Medium for `L2.02410(unit, 0, 1)`: it clears the ring, sets the position square and stores `+0x80` = the position cell. The Unknowns of R2-ENGINE-546, R2-ENGINE-549 (item 4), R2-ENGINE-555, R2-ENGINE-560, R2-ENGINE-561 and R2-ENGINE-1043 that list RU `L2.02410` or the advance RU `L2.02876` (EN `L2.06919`) as unread are narrowed, not contradicted.
+
+**Evidence.** EXP-2163 `evidence/derived/listing-compare.tsv` (rows `fn-L2.03570`, `fn-L2.04158`, `fn-550697`, `fn-L2.00314`, `pass-L2.03569-code`, `clear-L2.03586`, `fn-L2.03584`, `fn-L2.06917`, `fn-L2.06919`, `fn-L2.03571`, `fn-555411`, `fn-L2.05532`, `fn-551383`), `evidence/derived/en-writer-callsites.tsv`; EXP-2085 `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.06912.txt`, `ru-terrain-lin-L2.05179.txt`.
+
+### R2-ENGINE-1214
+
+Entry fields that refer to an object or mark the cell, with the routine that stores each: `+4` and `+8` (placement `L2.03570`, removal `L2.04158`), `+0x0c` (R2-ENGINE-1212), `+0x2c` and `+0x30` (footprint set `L2.03584` and clear `L2.03585`; also `L2.03580` and `L2.03581`, which have no reference in either root by the scan). The save writes the entry as stored (R2-SESSION-311).
+
+Refresh `L2.03572(entry)`, for the cell of entry word `+0x3a`, in this order: it keeps the old plane-one bit 0x10; plane one = entry `+1`; terrain byte = entry `+0`; plane one |= 0x20; plane two = plane one; `+0x2c` nonzero: plane two |= 0x40; `+0x30` nonzero: plane two |= 0x80; `+0x0c` nonzero: the building branch of R2-ENGINE-1212 (masks 1 and 4 of both planes set or cleared); each of the six pointers `+0x14..+0x28` accepted by `L2.04169` shifts the terrain byte left by 2; `+0x20` nonzero: both planes |= 5; the old bit 0x10 is restored in both planes. It reads neither `+4` nor `+8`.
+
+Other plane writers. A `wctx` census of byte stores at displacements 0x10000 and 0x20000 finds 34 instructions per root, all inside the terrain range, at equal offsets in both roots, in 9 routines:
+
+- refresh `L2.03572` (8 stores);
+- delete `L2.04155`: terrain byte = entry `+0`, plane one = entry `+1`, and bit 0x10 restored in both planes when plane one had it; no other store to plane two;
+- `L2.06924(cell)`: both planes |= 0x10; `L2.06925(cell)`: both planes &= 0xef;
+- `L2.06926` (10 stores of 0x1f into plane one) and `L2.03175` (stores of 1 and 5 into plane one), bodies unread;
+- `L2.03176`: the LOAD plane writes of R2-ENGINE-759;
+- `L2.06927` and `L2.03288` (one store to each plane each), bodies unread.
+
+Stores through the plane pointer getters `L2.06928` and `L2.04907` inside the terrain listing: create `L2.03594` (plane one |= 0x20), refresh, delete, and the helpers `L2.04167`, `L2.04168` (plane two |= 0x40, 0x80) and `L2.06929`, `L2.06930` (clear them). Outside refresh the helpers are called only by `L2.06931`, `L2.06932`, `L2.06933` and `L2.06934`, which have no reference in either root by the scan.
+
+**Confidence.** High for the refresh, the delete and the two bit-0x10 routines in EN and RU (masked-equal committed listings). Medium for the census and the no-reference results: a linear sweep and a reference scan of `allods2.exe` only, which miss computed addresses, register-held plane pointers outside the terrain listing, bulk copies and the two DLLs. Unknown for bits written by the four unread routines.
+
+**Unknown.** Who calls `L2.06924` and `L2.06925`, and what bit 0x10 means. The bits stored by `L2.06927`, `L2.03288`, `L2.06926` and `L2.03175`: their bodies are in the committed listing. Callers of the plane getters outside the terrain listing: a reference scan of `L2.06928` and `L2.04907`.
+
+**Amends.** R2-ENGINE-758's refresh: the blocking bits of a building cell follow the building's `+0x64` mask, and occupants `+4` and `+8` set no plane bit.
+
+**Evidence.** EXP-2163 `evidence/generated/scan/en-wctx-planes.tsv`, `ru-wctx-planes.tsv`, `en-refs-cell-writers.tsv`, `ru-refs-cell-writers.tsv`, `evidence/derived/listing-compare.tsv`; EXP-2085 terrain listings.
+
+### R2-ENGINE-1215
+
+Clears that compare and clears that do not (EN and RU bodies of R2-ENGINE-1212 and R2-ENGINE-1213):
+
+- removal `L2.04158` zeroes `+4` (or `+8`) of the entry at the given cell whatever object it holds;
+- the building clear `L2.04162` zeroes `+0x0c` whatever it holds;
+- the footprint clear `L2.03585` zeroes `+0x2c` (or `+0x30`) only when it holds the unit passed.
+
+A refused placement: the ground place `L2.00314` returns 0 at the first cell whose `+4` holds an object and skips its footprint pass; the advance `L2.06919` ignores the result and runs the pass (unit, old cell, 0). The unit's position bytes then name a cell whose entry `+4` is another object or, for a larger unit, only part of its square holds it; a later removal at that cell zeroes the other object's `+4`.
+
+Removal from the map. `L2.03601(unit)` runs the footprint pass (unit, 0, 2), which clears the unit's `+0x2c` over the (size + 2) square around its position, then removal `L2.06913` over the position square. A step in progress keeps `+0x2c` on two adjacent cells, both inside that square. Its call sites outside the terrain range, per root: the death routine EN `L2.01806` (at `L2.06935`, followed by `L2.06936`, which sets both offset bytes to 0x80); EN `L2.04906`, which runs it once and sets bit 8 of byte `+0x4c`; EN `L2.06937`, which runs it for each unit of a list before removing the unit from the registry `L2.00325`. Removal `L2.06913` has no call site outside the terrain range.
+
+A stop or a new order: the two drivers read finish the step before they replan; whether a stop or a new order always passes through them is taken from R2-ENGINE-546 (Medium). The turn `L2.05526` and the facing step `L2.05541` (R2-ENGINE-927) call no entry writer; the step start calls `L2.05541` when the path is empty.
+
+A larger unit: placement, removal and both footprint squares loop over size x size cells; the placement loop and the removal loop stop at the first refusal and leave the cells already written.
+
+**Confidence.** High for the compare and no-compare clauses and for the refused-placement path (bodies masked-equal in EN and RU). High, EN only, for the three outside call sites read in committed listings and one navigation window; their RU twins are scan hits only. Medium for the call-site counts (reference scan forms of R2-ENGINE-1212). Medium for a stop or a new order, from R2-ENGINE-546. Unknown whether a placement is ever refused in play.
+
+**Unknown.** What a load does with an entry whose `+4` names a unit whose position bytes name another cell: no body read compares them; a load of a save edited that way, observed in the original, settles it. The second advance `L2.06922` and the direct footprint setters `L2.03580`, `L2.03581`: no reference found in `allods2.exe`; a scan of the two DLLs settles whether they are reachable.
+
+**Evidence.** EXP-2163 `evidence/generated/scan/en-refs-cell-writers.tsv`, `ru-refs-cell-writers.tsv`, `evidence/navigation/nav2/win/en-caller-L2.06938.lst`, `evidence/derived/en-writer-callsites.tsv`; EXP-2079 `en-death-L2.01806.txt`; EXP-2067 `en-positioning.txt`.
+
+### R2-ENGINE-1216
+
+From older claims, at their grades: LOAD inserts the entries as stored and sets plane one and plane two from the key list (R2-ENGINE-759, R2-ENGINE-676); the post-load pass replaces the pointer DWORDs by objects on a key hit and runs neither create nor refresh (R2-ENGINE-616, R2-ENGINE-617); the Building serializer reads `+0x60`, `+0x61`, `+0x64` and `+0x68` from the file (R2-ENGINE-618).
+
+Added by the reference scan of each root (36 terrain entries; E8, E9, Jcc and absolute-dword forms):
+
+- the post-load pass EN `L2.03178` has one call site, EN `L2.04182` (RU `L2.06939`);
+- placement `L2.03570`, removal `L2.06913`, create `L2.03594`, delete `L2.04155`, refresh `L2.03572` and `L2.04166` have no call site outside the terrain range;
+- the ground place `L2.00314` has one outside call site, EN `L2.06940` (the positioning routine EN `L2.00312`); the footprint pass has one, EN `L2.06941` (the idle planner tail of R2-ENGINE-1018);
+- the building setter has one direct call site, in the building init, and the clearer has one direct call site, in the Building destructor (R2-ENGINE-1212).
+
+So a per-cell field is rebuilt at LOAD only if LOAD reaches the positioning routine, the building init or a terrain routine that calls the writers; the terrain serializer and the post-load pass do not (R2-ENGINE-759, Medium for later LOAD steps).
+
+**Confidence.** Medium: the negative rests on a reference scan of `allods2.exe` without a census of the callers of the terrain routines that wrap the writers, and on the older claims' reads of LOAD. The scan covers E8, E9, Jcc and absolute-dword forms in `allods2.exe` of each root; a computed or register call, and `scenario.dll` and `engine32.dll`, are outside it. Unknown whether LOAD runs the building init or the positioning routine.
+
+**Unknown.** Whether a Building or a unit made at LOAD passes through EN `L2.02575`, `L2.06907` or `L2.00312`: reading the callers of these three settles it. If the init ran at LOAD, the setter would return 0 at the first cell whose loaded entry already holds `+0x0c`.
+
+**Evidence.** EXP-2163 `evidence/generated/scan/en-refs-cell-writers.tsv`, `ru-refs-cell-writers.tsv`, `evidence/navigation/nav2/scan/en-refs-building-init.tsv`, `ru-refs-building-init.tsv`.
 
 ## Effect record identity and renewal
 

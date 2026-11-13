@@ -4203,7 +4203,7 @@ and count actors with +0x14c 23.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-310 | ROM2 SAVE writes every terrain map entry, count first, in bucket order (key >> 4) mod 100, with no cell test; nine mission saves hold 125..475 entries, each keyed in the cell list with plane-two bit 0x20. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
-| R2-SESSION-311 | ROM2 terrain entry bytes come from their setters (plane copies, layer count, occupant, building, object, effect, footprint, event, key); +0x03 has no access in the bodies read; nine mission saves give per-group counts. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
+| R2-SESSION-311 | ROM2 terrain entry bytes come from their setters (plane copies, layer count, occupant, building, object, effect, footprint, event, key); +0x03 has no access in the bodies read; nine mission saves give per-group counts. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
 | R2-SESSION-312 | Nine ROM2 mission saves hold timer frequency 10,000,000, zero +0xa728, +0xa48 and +0xa49, +0xa4c equal to register 999, diplomacy bytes 1 1 0 0 and a 70x70 matrix with 0x12 on 6..8 diagonal cells. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
 | R2-SESSION-313 | ROM2 registers 100..999 have direct writers only in init, the script tick (999) and instant 1 (902); runner compares read check-slot registers for ids in the map, below 54; nine saves hold only 901 and 999 there. | High / Medium | ✔ promoted (branch candidate) | [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/) |
 
@@ -4300,6 +4300,8 @@ mission 10 from game0001, save while it lasts, and compare +0x02 and +0x14..+0x2
 entries; load game0001 with a write watch on byte +3 of each entry until mission end.
 
 **Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
+
+**Amended.** R2-ENGINE-1212 narrows "+0x0c from the building setter": the setter writes only the cells of the building's `+0x68` mask, and the plane bits of a building cell come from the `+0x64` mask at refresh.
 
 **Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 2.
 

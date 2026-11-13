@@ -234,6 +234,14 @@ The setter tests nothing. It runs the reset (the stop routine and command
 and prepared +8 = 0. In the bodies read it writes no target, primary +9 or
 +0xc; its unread callees are not excluded (R2-ENGINE-1199).
 
+The reset's call RU L2.02822 is the footprint pass L2.02410(unit, 0, 1). It
+moves no unit: it clears the unit's footprint reference from the ring of map
+cells around its position, sets it on the position square and stores movement
++0x80 = the position cell (R2-ENGINE-1213). A unit that dies in the middle of
+a step is cleared from both cells of the step (R2-ENGINE-1215). By a reference
+scan of allods2.exe in both roots (Medium) the pass has one direct call site
+outside the terrain code, in the idle planner tail (R2-ENGINE-1216).
+
 On the Group tick, programme 0x13 calls the support routine on each member:
 
 - a player unit that is not a mage gets prepared 0, which the executor maps
@@ -308,3 +316,31 @@ mana, and no pass over time was found calling the remaining full sets
 (R2-ENGINE-1208, Medium). The RU Unit serializer holds the pools, maxima,
 divisors, remainders, stamp and the raw block that covers the modifiers;
 Session +0 and +4 in a save are Unknown (R2-ENGINE-1209).
+
+## The step between cells and the map cell entries
+
+The step primitive moves two references in the map cell entries. In the
+bodies read, the occupant reference (entry +0x04, kind 3: +0x08) stays on the
+cell named by the unit's position bytes (Medium as an invariant) and moves
+when the fine coordinate crosses into the next cell. The footprint reference
+(entry +0x2c, kind 3: +0x30) is set on the next cell when the step starts,
+also while the unit first turns, and is cleared from the cell left when the
+unit reaches the centre of the target cell. The stage table is Medium.
+— R2-ENGINE-1213
+
+By a reference scan of `allods2.exe` in both roots (direct call, jump and
+address forms; Medium), the placement, the removal and the refresh have no
+caller outside the terrain code; whether LOAD reaches a caller of the ground
+place, the footprint pass or the building init is Unknown. — R2-ENGINE-1216
+
+A unit that dies in the middle of a step (EN body; the RU call site is a scan
+hit) is cleared from its position square and from the ring around it, which
+holds both cells of the step, and its offset bytes are set to the cell centre.
+The two drivers read finish the step before they replan; whether a stop or a
+new order always passes through them is taken from R2-ENGINE-546 (Medium).
+The turn and its facing step (R2-ENGINE-927) call no routine that writes a map
+cell entry. A placement refused because the cell already holds an occupant
+leaves the unit without an occupant reference on its position cell.
+— R2-ENGINE-1215
+
+These are readings of both executables; no run of the original observed a step, a death or a load.

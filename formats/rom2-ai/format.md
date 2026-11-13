@@ -210,6 +210,14 @@ The setter tests nothing. It runs the reset (the stop routine and command
 and prepared +8 = 0. In the bodies read it writes no target, primary +9 or
 +0xc; its unread callees are not excluded (R2-ENGINE-1199).
 
+The reset's call RU L2.02822 is the footprint pass L2.02410(unit, 0, 1). It
+moves no unit: it clears the unit's footprint reference from the ring of map
+cells around its position, sets it on the position square and stores movement
++0x80 = the position cell (R2-ENGINE-1213). A unit that dies in the middle of
+a step is cleared from both cells of the step (R2-ENGINE-1215). By a reference
+scan of allods2.exe in both roots (Medium) the pass has one direct call site
+outside the terrain code, in the idle planner tail (R2-ENGINE-1216).
+
 On the Group tick, programme 0x13 calls the support routine on each member:
 
 - a player unit that is not a mage gets prepared 0, which the executor maps
