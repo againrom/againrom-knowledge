@@ -14978,7 +14978,7 @@ is the receiver of the mission entry.
 | R2-ENGINE-613 | EN ROM2 mission entry R2.0026(1) after a mission-like LOAD skips the map caller and autosave, sends packet 4, ticks the server if app +0x5d4 is set, pumps until a type 0x64 message returns after type 6 built the map, restores REG state. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-614 | On that path EN ROM2 reads REG GameOptions, View X/Y, SpellBook, Objects Selection and Group0..9, Inventory, Projectiles and Fog into client and app fields; Fog is read only when CurrentState/InBattle is nonzero. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-615 | EN ROM2 client message 6 builds the client map through L2.01385: it opens the named ALM, copies grids, creates static objects (list +0x390, key entry +0x10 + 0x6000) and unit objects (list +0x3a4, key word +0x3c + 0x6000), frees it. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
-| R2-ENGINE-616 | EN ROM2 world half: the name at session +0x90 selects the ALM, which gives terrain size and tiles, goes to the script compiler and is freed; the document reader feeds the Unit, Building, effect and Sack readers; other uses are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
+| R2-ENGINE-616 | EN ROM2 world half: the name at session +0x90 selects the ALM, which gives terrain size and tiles, goes to the script compiler and is freed; the document reader feeds the Unit, Building, effect and Sack readers; other uses are unread. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-617 | After the EN ROM2 world half the unit registry L2.00325 calls each member's slot +0x24; the RU Human slot resolves saved keys at +0x40, +0x44, +0x5c, +0x64 and +0x68 through session +0xdc and stores 0 on a miss. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-618 | EN ROM2 Building Serialize L2.01659 stores base38, raw22 at +0x4a, +0x40 u8, +0x42/+0x44/+0x46 u16, +0x48/+0x60/+0x61 u8 and +0x64/+0x68 u32; LOAD rebuilds +0x3c from +0x40 and clears base +0x18. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
 | R2-ENGINE-619 | ROM2 spell row 29, Slow, has data, an apply arm and cast ID 66 but no row in EN table L2.02137, which omits rows 9, 14, 15, 28 and 29; the client selection summary reads 24 slot bits only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2078](../experiments/EXP-2078-rom2-mission-load/) |
@@ -15175,6 +15175,8 @@ readers. Medium for the script and the terrain layers: the script compiler
 the asset and which from the document is Unknown. The server's map lists
 +0x390 and +0x3a4 are touched in no read listing; that does not exclude
 their use in the unread bodies.
+
+**Amended.** R2-ENGINE-1220 adds the call sites of the load branch `L2.06942..L2.06943`; the order of the steps is unchanged.
 
 ### R2-ENGINE-617
 
@@ -23097,7 +23099,7 @@ reproduced byte for byte). EN addresses only; the RU bodies were not read.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-857 | ROM2 EN keys a structure by base DWORD +4 = type-4 ID + 0x6000; LOAD reads +4 with no value test and the list serializer does not call `L2.05098`; a recompute in unread `L2.05099` is not excluded; message 0x24 matches the ID on +4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md) |
+| R2-ENGINE-857 | ROM2 EN keys a structure by base DWORD +4 = type-4 ID + 0x6000; LOAD reads +4 with no value test and the list serializer does not call `L2.05098`; a recompute in unread `L2.05099` is not excluded; message 0x24 matches the ID on +4. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md) |
 | R2-ENGINE-858 | After ROM2 EN LOAD of a mission-10 save with no structure at base +4 = 0x602a (measured: game1000, game1236, game0048, game0049, all 16 structures 2..17), a sign click's 0x24 lookup returns 0 and no order, action or text box follows. | High / Medium | ✔ promoted (branch candidate) | [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md) |
 
 ### R2-ENGINE-857
@@ -23149,6 +23151,8 @@ owner did not click after loading the resaves.
 
 **Unknown.** Whether the server later sends the client a structure key
 that replaces the map key.
+
+**Amended.** R2-ENGINE-1220 narrows "which branch LOAD takes was not read": the call of `L2.03170` at `L2.05120` lies in the store branch; the load call is `L2.05112`.
 
 **Evidence.** [EXP-2120](../experiments/EXP-2120-rom2-sign-text/RESULTS.md)
 
@@ -28383,11 +28387,14 @@ Terms shared by these cards: the entry is the 60-byte per-cell record of R2-SESS
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1212 | ROM2 building setter EN L2.06901 / RU L2.06902 stores the building in entry +0x0c of each width x height cell whose bit is set in +0x68; refresh blocks the cells whose bit is set in +0x64; the clearer zeroes +0x0c without comparing. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1212 | ROM2 building setter EN L2.06901 / RU L2.06902 stores the building in entry +0x0c of each width x height cell whose bit is set in +0x68; refresh blocks the cells whose bit is set in +0x64; the clearer zeroes +0x0c without comparing. | High / Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
 | R2-ENGINE-1213 | A walking one-cell ROM2 unit: entry +4 (kind 3: +8) is on its position cell and moves when the fine coordinate crosses into the next cell; +0x2c (+0x30) is on both cells of a step from its start until the centre of the target cell. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
 | R2-ENGINE-1214 | ROM2 plane bytes: refresh rebuilds plane two from the entry (0x20 always, 0x40 for +0x2c, 0x80 for +0x30, 5 for a blocking building cell or +0x20) and keeps 0x10; 34 direct stores in 9 terrain routines per root; 4 routines unread. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
-| R2-ENGINE-1215 | ROM2 removal zeroes entry +4 or +8 without comparing; the footprint clear compares; death (EN L2.01806) clears the position square and the ring around it; a refused placement leaves a unit with no +4 entry on its position cell. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
-| R2-ENGINE-1216 | In ROM2 the terrain serializer and the post-load pass call no entry writer (R2-ENGINE-759); the writers' direct callers by a reference scan of allods2.exe; whether LOAD reaches one of them: Unknown. | Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1215 | ROM2 removal zeroes entry +4 or +8 without comparing; the footprint clear compares; death (EN L2.01806) clears the position square and the ring around it; a refused placement leaves a unit with no +4 entry on its position cell. | High / Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1216 | In ROM2 the terrain serializer and the post-load pass call no entry writer (R2-ENGINE-759); the writers' direct callers by a reference scan of allods2.exe; whether LOAD reaches one of them: Unknown. | Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1220 | EN ROM2 LOAD calls the Players reader, then the Buildings reader, then reads the cell records into a new terrain object; its constructor's two passes make no direct call to a scanned entry writer (Medium: callees unread). | High / Medium / Unknown | ● active | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
+| R2-ENGINE-1221 | EN ROM2 Building Serialize calls neither the init nor the setter; maker L2.05099 is unread; in the bodies read, entry +0x0c after LOAD is the file's, replaced by the object on a key hit (Medium). | High / Medium / Unknown | ● active | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
+| R2-ENGINE-1222 | By two EN scans no call site of a cell writer or of positioning lies in the read ROM2 LOAD bodies; entry +4, +8, +0x0c, +0x2c, +0x30 after LOAD are the file's, remapped, with no compare against the objects in the read bodies. | Medium / Unknown | ● active | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
 
 ### R2-ENGINE-1212
 
@@ -28410,6 +28417,8 @@ Callers, by the reference scan of each root: the setter has one call site, in th
 **Unknown.** Whether LOAD constructs a Building through a caller of the init: reading EN `L2.06907` and the callers of `L2.02575` settles it. The RU destructor body. What elements 4 and 5 of a kind row hold for each kind: a data read of the table behind `L2.03202`.
 
 **Amends.** R2-SESSION-311's "+0x0c from the building setter": the setter writes only the cells of the `+0x68` mask, and the plane bits of a building cell come from the `+0x64` mask at refresh.
+
+**Amended.** R2-ENGINE-1221 narrows the Unknown "Whether LOAD constructs a Building through a caller of the init" to the unread `L2.05099` and `L2.06907`: Building Serialize calls no init.
 
 **Evidence.** EXP-2163 `evidence/derived/listing-compare.tsv` (rows `fn-L2.06901`, `fn-559890`, `fn-L2.06903`, `fn-L2.04162`, `fn-L2.03572`, `fn-L2.04154`); EXP-2085 `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.05179.txt`, `ru-terrain-lin-L2.06912.txt`, `en-building-init-L2.03611.txt`.
 
@@ -28492,6 +28501,8 @@ A larger unit: placement, removal and both footprint squares loop over size x si
 
 **Unknown.** What a load does with an entry whose `+4` names a unit whose position bytes name another cell: no body read compares them; a load of a save edited that way, observed in the original, settles it. The second advance `L2.06922` and the direct footprint setters `L2.03580`, `L2.03581`: no reference found in `allods2.exe`; a scan of the two DLLs settles whether they are reachable.
 
+**Amended.** R2-ENGINE-1222 narrows the Unknown on an entry whose `+4` names a unit positioned on another cell: in the bodies read a load keeps it as read; the original's behaviour after the load stays Unknown.
+
 **Evidence.** EXP-2163 `evidence/generated/scan/en-refs-cell-writers.tsv`, `ru-refs-cell-writers.tsv`, `evidence/navigation/nav2/win/en-caller-L2.06938.lst`, `evidence/derived/en-writer-callsites.tsv`; EXP-2079 `en-death-L2.01806.txt`; EXP-2067 `en-positioning.txt`.
 
 ### R2-ENGINE-1216
@@ -28511,6 +28522,8 @@ So a per-cell field is rebuilt at LOAD only if LOAD reaches the positioning rout
 
 **Unknown.** Whether a Building or a unit made at LOAD passes through EN `L2.02575`, `L2.06907` or `L2.00312`: reading the callers of these three settles it. If the init ran at LOAD, the setter would return 0 at the first cell whose loaded entry already holds `+0x0c`.
 
+**Amended.** R2-ENGINE-1221 and R2-ENGINE-1222 narrow the Unknown for EN to the unread object makers, constructors and virtual calls: no call site of a writer or of positioning lies in the load bodies they list.
+
 **Evidence.** EXP-2163 `evidence/generated/scan/en-refs-cell-writers.tsv`, `ru-refs-cell-writers.tsv`, `evidence/navigation/nav2/scan/en-refs-building-init.tsv`, `ru-refs-building-init.tsv`.
 
 ## Effect record identity and renewal
@@ -28525,6 +28538,78 @@ So a per-cell field is rebuilt at LOAD only if LOAD reaches the positioning rout
 | R2-ENGINE-1169 | ROM2 parsed timed item Effects retaining ID0 merge by that ID even when their tags differ (Medium). | High / Medium / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1170 | ROM2 item-child start/end call slots40/44 directly; complete item/spell contribution independence is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1171 | ROM2 read bodies write Effect words40/42 during construction, renewal and ticking; other-writer census is Unknown. | High / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+
+### R2-ENGINE-1220
+
+EN `L2.00243`: the direction test is `L2.01537` at `L2.06944`; the load branch `L2.06942..L2.06943`, in the order of the committed listing (`s` is the reader's `this`):
+
+1. `L2.00335` (`L2.06942`, the first call of the branch, unread), then scalar reads.
+2. `L2.03888` on `[L2.00292]` (`L2.06945`), the Player map of R2-SESSION-284; that the unit records are read under this call is taken from R2-SESSION-284 and R2-ENGINE-616 (Medium). Then slot 0 of the object at `[[s+0x7c]+0xc]` (`L2.04990`); then one byte through `L2.03713` (`L2.04992`). A zero byte skips to `L2.04993`, past steps 3 to 7; the branch then stores 0 into `+0x40`, `+0x44` and `+0x5c` of each unit (`L2.04283..L2.04285`).
+3. For each member of `[L2.00292]`, each unit of its `+0x24` list whose byte `+0x4c` lacks bit value 8 goes to `L2.00202` on `[L2.00325]` (`L2.00256`).
+4. The Buildings reader `L2.03170` on `[[s+0x7c]]` (`L2.05112`), then `L2.03171` on `[[s+0x7c]+4]` (`L2.03428`).
+5. The map object (`L2.02484`, 0x3b8 bytes), then a 0xa4570-byte object built by `L2.03173(map, [L2.00325])` (`L2.06946`) and stored in `[L2.01839]` at `L2.06947`.
+6. The terrain serializer `L2.03176` on `[L2.01839]` (`L2.04170`): the per-cell records of R2-ENGINE-759.
+7. When `[L2.01066]` is null: the constructor `L2.03177([L2.01839], [L2.00292])` (`L2.06948`), then `L2.01736` on the new `[L2.01066]`. Then `L2.06949` on `[[s+0x7c]+8]`; `L2.06950`; the compiler `L2.00201(s+0x98, map, 0)` (`L2.05365`); `L2.03168(map, 1)`.
+8. When the byte of step 2 is nonzero: slot `+4` of `[L2.00325]` (`L2.06951`), slot `+4` of `[[s+0x7c]+0xc]` (`L2.04991`), the terrain post-load `L2.03178` (`L2.04182`), `L2.03179` on `[L2.01066]`, slot 0 of `[[s+0x7c]+4]` (`L2.06952`).
+9. Two reads, then `L2.03892` on `[s+0x170]` (`L2.06953`), the trailer of R2-SESSION-284.
+
+So the Players reader (the unit records, Medium) and the Buildings reader are called before the terrain object of the loaded mission is allocated, and the per-cell records are read into that new object after both. The constructor `L2.03173` (whole body, 84 instructions) calls member constructors, then `L2.03174` with the registry argument and `L2.03175` with the map. The direct calls of `L2.03174` (`L2.02798`, `L2.00341`, `L2.04224`, `L2.05468`, `L2.03656`, `L2.03261`, `L2.06954`, `L2.06955`, `R2.0113`, `L2.06956`, `L2.05465`) and of `L2.03175` (`L2.06957`, `L2.03152`, `L2.03153`, `L2.03154`, `L2.06958`, `L2.06926`, `L2.04443`) hold none of the 36 cell-writer entries scanned for R2-ENGINE-1216; `L2.03175` stores 1, 1, 1 and 5 into plane one at four sites and ends with a 0x10000-byte call of `L2.04443` on the addresses of plane one and plane two.
+
+**Confidence.** High, EN only, for the order of the calls; Medium that the call at `L2.06945` is the read of the unit records. High, EN only, for the constructor's own body, read whole in a committed listing. Medium that the terrain constructor's two passes make no direct call to a scanned entry writer: only their call lines and plane stores were read; their callees `L2.06926`, `L2.06958`, `L2.06957` and `L2.06956` and the member constructors `L2.06959` and `L2.06960` are unread. Medium for the names of the readers, taken from R2-ENGINE-616 and R2-SESSION-284.
+
+**Unknown.** The RU order: reading the load branch of the committed RU document listing of EXP-2076 settles it. What `[L2.01839]` holds while steps 2 to 4 run: reading the routine that frees the terrain of the previous mission settles it.
+
+**Amends.** R2-ENGINE-616: the call sites of its steps are added and its order is unchanged; the Buildings reader runs after the registry adds and before the map and terrain objects are made. R2-ENGINE-857's "which branch LOAD takes was not read": the call of `L2.03170` at `L2.05120` lies in the store branch; the load call is `L2.05112`.
+
+**Evidence.** EXP-2078 `evidence/derived/code/en-document.txt`, `en-terrain-ctor.txt`, `en-terrain-bind-L2.03174.txt`, `en-terrain-from-map-L2.03175.txt`.
+
+### R2-ENGINE-1221
+
+EN bodies a load runs for a building, as far as committed listings hold them:
+
+- The Buildings reader `L2.03170` calls the list serializer `L2.05113`, whose read branch calls `L2.05099` per object and appends the result with `L2.05105` (call lines read; R2-ENGINE-857).
+- Building Serialize `L2.01659`, load branch `L2.06961..L2.06962`, read whole: after the base serializer `L2.03196` and `L2.03200` on `+0x4a` it reads byte `+0x40`, words `+0x42`, `+0x44`, `+0x46`, bytes `+0x48`, `+0x60`, `+0x61` and DWORDs `+0x64`, `+0x68`, then stores `+0x3c` = 0 or `L2.03201`(byte `+0x40`) on `L2.03202`. It calls neither the building init `L2.03611` nor the setter `L2.06901`. The footprint size and both masks of a loaded building are the file's.
+- The init `L2.03611` returns at once, with no store and no setter call, when byte `+0x40` is 0 (`L2.06963..L2.06964`, R2-ENGINE-1212). The constructor `L2.02575` stores its first argument into byte `+0x40` before it calls the init.
+- By R2-ENGINE-1220 the Buildings reader runs before the new terrain object is stored in `[L2.01839]`, and the init calls the setter on `[L2.01839]`. A setter call made while a Building is read would therefore act on the object `[L2.01839]` held before the load, not on the terrain the per-cell records are then read into.
+- After the per-cell records are read, the document reader's calls are those of steps 7 to 9 of R2-ENGINE-1220: among them slot `+4` of the registry `[L2.00325]` and of `[[s+0x7c]+0xc]`, the terrain post-load, `L2.03179` and slot 0 of `[[s+0x7c]+4]`. It makes no post-load call on the Buildings list `[[s+0x7c]]`. The terrain post-load replaces an entry's `+0x0c` by the object on a key hit and keeps the number on a miss (R2-ENGINE-676).
+
+So in the bodies read (Medium), an entry's `+0x0c` after a load is the file's, and the plane bytes of a building cell are the key list's where the cell is listed and the constructor's elsewhere (R2-ENGINE-759): no read body writes them again from a loaded Building.
+
+**Confidence.** High, EN only, for the Serialize load branch, the init gate and the constructor store. Medium that no load step writes a building cell: `L2.05099`, the code at `L2.06907` that calls the init, `L2.03200`, the callees of the base serializer and the unread load callees listed in R2-ENGINE-1222 are unread, and virtual calls are outside the reference scan. Medium for the list serializer, read as call lines only.
+
+**Unknown.** Whether `L2.05099` reaches the init call at `L2.06907`, and with which byte `+0x40`: reading EN `L2.05099` and `L2.06965..L2.03611` and their RU twins settles it. The RU bodies of the Serialize load branch.
+
+**Amends.** R2-ENGINE-1216's Unknown for the building: narrowed to the unread object maker `L2.05099`; the Serialize itself calls no init, and a call before `L2.06947` cannot reach the new terrain object. R2-ENGINE-1212's Unknown "Whether LOAD constructs a Building through a caller of the init": narrowed to `L2.05099` and `L2.06907`.
+
+**Evidence.** EXP-2078 `evidence/derived/code/en-building-serialize-L2.01659.txt`, `en-document.txt`; EXP-2085 `evidence/derived/code/en-building-ctor-L2.02575.txt`, `en-building-init-L2.03611.txt`; EXP-2120 `out/listings/en-list-serialize.txt`, `en-buildings-reader.txt`.
+
+### R2-ENGINE-1222
+
+Two committed scans of EN `allods2.exe` bound the call sites that can write a cell entry from outside the terrain code:
+
+- 23 sites outside `L2.03582..L2.06966` reference one of the 36 cell-writer entries of R2-ENGINE-1216: `L2.04182` (the terrain post-load), `L2.06967`, `L2.06968`, `L2.06940`, `L2.06969`, `L2.06935`, `L2.06938`, `L2.06970`, `L2.06905`, `L2.06908`, `L2.06971`, `L2.06972`, `L2.06973`, `L2.06941`, `L2.06974`, `L2.06975`, `L2.06976`, `L2.06977`, `L2.06978`, `L2.06979`, `L2.06980`, `L2.06981`, `L2.06982`.
+- 12 sites call the positioning routine `L2.00312`: `L2.06983`, `L2.06984`, `L2.06985`, `L2.06986`, `L2.06987`, `L2.06988`, `L2.06989`, `L2.02715`, `L2.06990`, `L2.06991`, `L2.02716`, `L2.06992`. The RU scan has 12 sites as well.
+
+None of the 35 lies in the document reader `L2.00243..L2.06943` except the post-load call itself, in Building Serialize `L2.01659..L2.06993`, in the compiler body `L2.00201..L2.06994`, or anywhere in `L2.06995..L2.06996` (the ends are the neighbouring sites `L2.06972` and `L2.02716`). That last range holds the Buildings reader `L2.03170`, the registry add `L2.00202`, the registry post-load `L2.03184`, the Unit serializer `L2.01090`, the Unit and Human post-load slots `L2.03450` and `L2.03449`, the base serializer `L2.03196`, the Building post-load slot `L2.03185` and the Player serializer `R2.0084` (R2-ENGINE-617, R2-ENGINE-662, R2-ENGINE-677). For the compiler, no call target of its body lies between the placement person arm `L2.00192` (R2-ENGINE-742) and the compiler's entry, or between the compiler's last instruction `L2.06994` and the site `L2.06973`; the compiler's callees are unread.
+
+For each per-cell field that refers to an object, composed with R2-ENGINE-759 and R2-ENGINE-676:
+
+| Field | In memory after a load, in the bodies read |
+|---|---|
+| `+0x04`, `+0x08` (occupant) | the file's number, replaced by the object on a key hit; no body read compares it with the unit's position bytes |
+| `+0x0c` (building) | the same; no body read compares it with the building's position, size or masks (R2-ENGINE-1221) |
+| `+0x2c`, `+0x30` (footprint) | the same; the movement block post-load `L2.03451` resolves block `+0x7c` only (R2-ENGINE-676) |
+| plane one, plane two | the key list's bytes on listed cells; the constructor's bytes elsewhere (R2-ENGINE-759, R2-ENGINE-1220); no read body calls the refresh |
+
+No body read writes an entry field a second time from a loaded unit or building, so no "later of two writes" was found. In the bodies read, an entry that names a unit whose position bytes name another cell is kept as read (Medium).
+
+**Confidence.** Medium. The negative covers E8, E9, Jcc and absolute-dword references in EN `allods2.exe` to 36 terrain entries and to the positioning routine; it has no census of the terrain routines that wrap a writer beyond those 36, and computed calls, virtual calls, `scenario.dll` and `engine32.dll` are outside it. The routines that make a Unit or a Human from the file, and their constructors, are unread; the extents of the bodies named in the range are taken from their entry addresses, not from read ends. Unread load callees, beside the object makers: `L2.00335`, the map constructor `L2.02484`, the SpellEffects reader `L2.03171` and its slot 0, the Sack reader `L2.06949`, `L2.06950`, `L2.03168`, `L2.03892`, the virtual slots of the dead list, and the callees of the compiler (`L2.06997` and the `L2.06998..L2.06999` and `L2.07000..L2.07001` groups). The RU cell-writer scan of EXP-2163 was not classified here: the statement is for EN, with the RU positioning count as a scan result only.
+
+**Unknown.** Whether a constructor run for a loaded Unit calls a cell writer through a virtual call: reading the object maker behind `L2.04956` (`L2.03455`) and the Unit and Human constructors it runs settles it. The count of entries in the native mission saves that differ from the building and unit records of the same file: a committed reader over the nine files of R2-SESSION-310 settles it; no save was read in this experiment. What the original does on its first tick with an entry that names a unit positioned elsewhere: a load of a save edited that way, observed in the original.
+
+**Amends.** R2-ENGINE-1216's "whether LOAD reaches one of them: Unknown": narrowed for EN to the unread object makers, constructors and virtual calls; no call site of a writer or of positioning lies in the listed load bodies. R2-ENGINE-1215's Unknown "What a load does with an entry whose `+4` names a unit whose position bytes name another cell": narrowed: kept as read in the bodies read; the original's behaviour after the load stays Unknown.
+
+**Evidence.** EXP-2163 `evidence/generated/scan/en-refs-cell-writers.tsv`; EXP-2067 `evidence/navigation/nav1/scans/en-callto-positioning.tsv`, `ru-callto-positioning.tsv`; EXP-2085 `evidence/derived/code/en-compiler-L2.00201.txt`; EXP-2078 `evidence/derived/code/en-document.txt`.
 
 ### R2-ENGINE-1164
 

@@ -218,6 +218,16 @@ a step is cleared from both cells of the step (R2-ENGINE-1215). By a reference
 scan of allods2.exe in both roots (Medium) the pass has one direct call site
 outside the terrain code, in the idle planner tail (R2-ENGINE-1216).
 
+The EN load calls the Players reader (the unit records, Medium), then the
+Buildings reader, then makes a new terrain object and reads the per-cell
+records into it (R2-ENGINE-1220). The EN Building Serialize calls neither
+the building init nor the setter (R2-ENGINE-1221). By reference scans of the
+EN executable (Medium), no call site of the ground place, the footprint pass
+or the positioning routine lies in the read load bodies, and, in the bodies
+read, the footprint fields of an entry after a load are the file's numbers,
+replaced by objects on a key hit; the routines that make a unit or a
+building from the file are unread (R2-ENGINE-1222).
+
 On the Group tick, programme 0x13 calls the support routine on each member:
 
 - a player unit that is not a mage gets prepared 0, which the executor maps

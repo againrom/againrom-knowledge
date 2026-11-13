@@ -157,13 +157,38 @@ unread. — R2-ENGINE-1214
 Removal zeroes +0x04 or +0x08 without comparing it with the unit; the
 footprint clear compares. Death (EN body; the RU call site is a scan hit)
 clears the unit from its position square and from the ring around it, which
-holds both cells of a step in progress. What a load does with an entry whose
-+0x04 names a unit positioned on another cell is Unknown. — R2-ENGINE-1215
+holds both cells of a step in progress. For an entry whose +0x04 names a
+unit positioned on another cell: in the bodies read a load keeps such an
+entry as read (R2-ENGINE-1222, Medium); what the original then does with it
+is Unknown. — R2-ENGINE-1215
 
 By a reference scan of `allods2.exe` in both roots (direct call, jump and
 address forms; Medium), the placement, the removal and the refresh have no
 caller outside the terrain code; whether LOAD reaches a caller of the ground
-place, the footprint pass or the building init is Unknown. — R2-ENGINE-1216
+place, the footprint pass or the building init is Unknown beyond the load
+bodies of R2-ENGINE-1221 and R2-ENGINE-1222. — R2-ENGINE-1216
+
+The EN load calls the Players reader (the unit records, Medium), then the
+Buildings reader, then makes a new terrain object and reads the per-cell
+records into it; the post-load calls follow. The terrain constructor's two
+passes make no direct call to one of the 36 scanned entry writers (call lines
+read; their callees `L2.06926`, `L2.06958`, `L2.06957` and `L2.06956` are
+unread; Medium). The RU order is unread. — R2-ENGINE-1220
+
+The EN Building Serialize reads the footprint size and both masks from the
+file and calls neither the building init nor the setter; the routine that
+makes each Building object from the file is unread. In the bodies read
+(Medium), an entry's +0x0c after a load is the file's number, replaced by the
+object on a key hit. — R2-ENGINE-1221
+
+By two reference scans of the EN executable (Medium), no call site of a cell
+writer or of the positioning routine lies in the read load bodies. In the
+bodies read (Medium), entry +0x04, +0x08, +0x0c, +0x2c and +0x30 after a load
+are the file's numbers, replaced by objects on a key hit; no read body
+compares one with the position of the object it names or writes it again from
+a loaded unit or building. The routines that make a Unit from the file and
+their constructors are unread, and no save was counted against the building
+and unit records. — R2-ENGINE-1222
 
 These are readings of both executables; no run of the original observed a step, a death or a load.
 
