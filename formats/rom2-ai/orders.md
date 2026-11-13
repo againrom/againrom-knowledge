@@ -263,3 +263,48 @@ builders of a type-0x12 message were not searched (R2-ENGINE-1202; computed
 calls are not excluded). A save holds unit +0x50, Group record +0x20 and
 command +8; command word +0 lies in the saved block but no save claim names
 it, and whether a loaded unit resumes the route is Unknown (R2-ENGINE-1203).
+
+## Health and mana restoration
+
+These are readings of both executables; no run of the original measured a
+restoration.
+
+The refill's address stands at three dword sites per root, slot 5 of three
+tables per root; two RU tables have a read store of their base and the other
+bases are inferred from the entry offset (Medium). The world pass calls the
+refill on each object of its list once per 16 session ticks, when Session
++4 is 12 mod 16. Session +4 is the counter the session tick advances by 1
+per call in which its +0x94 is nonzero; Session +0 advances once between
+two passes. At the scheduler periods of the Speed table one pass takes 496
+to 2000 ms, 992 ms at Speed 4 (R2-ENGINE-1204; bodies and arithmetic High
+in both roots, milliseconds Medium).
+
+Mana is restored on every pass while below its maximum. Health is restored
+on one pass in four, when the signed remainder of Session +0 by 4 equals
+that of the unit id +4, and only when divisor +0x98 is not 0: 16 and 64
+counter advances between two restorations (R2-ENGINE-1205; that neither
+value is negative is Medium).
+
+Each restoration adds hundredths: 2 * max * (+0xde + 100) * K / +0x98 to
+health and max * (+0xe2 + 100) * K / +0x9e to mana, with C truncating
+division. The remainders stay in bytes +0xa2 and +0xa3; the pool is capped
+at its maximum after the remainder is stored. With the defaults 100 and 50
+and modifiers 0 each restoration adds 2 % of the maximum. K is 3 when
+Session +4 minus the unit's stamp +0x138 exceeds 80, else 1; the move step,
+the strike senders and three further senders, called from the address range
+of the cast routine, set the stamp. Effect tag 8 adds to +0xde without a
+clamp; tag 11 adds to +0xe2 under an unread test (Medium) (R2-ENGINE-1206;
+formulas High, sender meanings and writer completeness Medium).
+
+A unit with +0x54 = 0x10 or with health 0 or below restores nothing; below 0
+the refill takes 1 health on one pass in four, and corpse ageing lowers
+health separately, so the total loss per pass is not this figure alone. The
+body tests no owner, side, player, order, combat or cast. Which classes the
+list holds is Medium (R2-ENGINE-1207). A census of word stores to health and
+mana finds no other restorer of a living unit over time among the stores it
+classified; nine RU word stores are unclassified and are not excluded. A
+per-player pass revives a hero at health -40 or below to full health and
+mana, and no pass over time was found calling the remaining full sets
+(R2-ENGINE-1208, Medium). The RU Unit serializer holds the pools, maxima,
+divisors, remainders, stamp and the raw block that covers the modifiers;
+Session +0 and +4 in a save are Unknown (R2-ENGINE-1209).

@@ -1298,8 +1298,8 @@ For Spirit up to 52 the effective ceiling is 96.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-030 | Mana regenerates in the actor tick every tick while below maximum: `max*(modifier+100)*K/50` hundredths per tick, K 3 when more than 80 ticks have passed since actor+0x138 (writer unread) and 1 otherwise; the block has no cast condition. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-031 | Maximum mana is `2*Spirit` plus an experience term, then scaled by `pow(1.1, Spirit)/100 + 1`; health regenerates every fourth tick per actor phase. | Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-030 | Mana regenerates while below maximum, once per world pass (R2-ENGINE-1204): `max*(modifier+100)*K/50` hundredths, K 3 when more than 80 counter advances have passed since actor+0x138 and 1 otherwise; the block has no cast condition. | High / Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-031 | Maximum mana is `2*Spirit` plus an experience term, then scaled by `pow(1.1, Spirit)/100 + 1`; health regenerates every fourth world pass per actor phase (R2-ENGINE-1205). | Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-032 | Duration words are 16 bits and the arithmetic wraps from P 228 (Protection), 216 (Shield) and 244 (Bless, Curse, Haste, Slow); Poison Cloud never does, and no damage byte wraps. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-030
@@ -1314,6 +1314,8 @@ Spirit scales the pool only through the maximum (`R2-ENGINE-031`); the block rea
 
 **Unknown.** What writes actor+0x138, and so whether casting resets the K timestamp ("quiet" is ROM1's meaning in `HERO-REGEN-021`, not ROM2 evidence); the tick-to-second scale (`SESS-TICK-006` defines the sub-tick).
 
+**Amended.** R2-ENGINE-1204 corrects "every tick" and "the block `R2.0022` in the actor tick `L2.00028`": the refill is virtual slot 5, called by the world pass once per 16 session ticks, not part of the actor step. R2-ENGINE-1205 corrects the health phase to the signed remainder of Session `+0`, the world-pass count, and "50 ticks (17 ticks at K 3)" to 50 and 17 restorations. R2-ENGINE-1206 corrects "the effect byte +0xe2" to a signed word, as `+0xde` is, corrects the K term to Session `+4` minus unit `+0x138`, and narrows the "writer unread" Unknown. R2-ENGINE-1207 corrects "Dying actors lose 1 health per 4 ticks" to 1 per four world passes.
+
 ### R2-ENGINE-031
 
 Maximum mana is `m = 2*Spirit`; then `m = ftol(m + log1.1(XP/5000 + 1) * (non-mage ? 1 : 2))` (constant 5000.0 at `L2.00107`, `L2.00108` is log base 1.1); then `m = ftol(m * (pow(1.1, Spirit)/100 + 1))` (`L2.00109` is pow(1.1, x)). The multiplier on the experience term is 2 for a mage and 1 otherwise, the same arrangement as ROM1's inverted fighter multiplier note in `HERO-MP-006`. The order of truncations was read as listed; the second truncation was not confirmed against the stored word.
@@ -1321,6 +1323,8 @@ Maximum mana is `m = 2*Spirit`; then `m = ftol(m + log1.1(XP/5000 + 1) * (non-ma
 The health regeneration phase is stated in `R2-ENGINE-030`.
 
 **Confidence.** Medium: the formula reproduces `HERO-MP-006` in shape and constants but the final store was not traced.
+
+**Amended.** R2-ENGINE-1204 and R2-ENGINE-1205 correct "health regenerates every fourth tick": health is restored on every fourth world pass, 64 session ticks apart.
 
 ### R2-ENGINE-032
 
@@ -28232,6 +28236,140 @@ The values those claims list contain no order 0x17 and no programme 0x13.
 **Unknown.** Whether a unit loaded with order 0x17 and programme 0x13 resumes the route of R2-ENGINE-1200; it needs a save holding them.
 
 **Evidence.** EXP-2161 `RESULTS.md` (ledger lookups).
+
+## Health and mana restoration
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1204 | ROM2 refill RU R2.0022 / EN R2.0096 stands at three dword sites per root (slot 5; three bases inferred); the world pass calls it every 16th session tick, when Session +4 mod 16 is 12; Session +0 advances once per pass; seconds Medium. | High / Medium | ● active | [EXP-2162](../experiments/EXP-2162-rom2-regeneration/) |
+| R2-ENGINE-1205 | ROM2 refill restores mana on every world pass while below maximum, health on one pass in four (signed Session +0 % 4 = signed unit +4 % 4, +0x98 nonzero): 16 and 64 Session +4 advances apart. | High / Medium | ● active | [EXP-2162](../experiments/EXP-2162-rom2-regeneration/) |
+| R2-ENGINE-1206 | ROM2 restoration adds 2*max*(+0xde+100)*K/+0x98 hundredths of health, max*(+0xe2+100)*K/+0x9e of mana, remainder bytes +0xa2/+0xa3, capped at max; K is 3 when Session +4 - unit +0x138 > 80, else 1. | High / Medium | ● active | [EXP-2162](../experiments/EXP-2162-rom2-regeneration/) |
+| R2-ENGINE-1207 | ROM2 refill restores nothing when unit +0x54 is 0x10 or health is 0 or below (below 0 it takes 1 per four passes, apart from corpse ageing); no health when +0x98 is 0; no owner, side or player test; list and table membership Medium. | High / Medium | ● active | [EXP-2162](../experiments/EXP-2162-rom2-regeneration/) |
+| R2-ENGINE-1208 | ROM2 word-store census of health and mana finds no other periodic restorer of a living unit among its classified stores; nine RU stores are unclassified and not excluded; a periodic player pass revives a hero at health <= -40 (Medium). | Medium / Unknown | ● active | [EXP-2162](../experiments/EXP-2162-rom2-regeneration/) |
+| R2-ENGINE-1209 | The RU Unit serializer holds the restoration state of a unit by R2-ENGINE-209 (health, mana, maxima, divisors, remainders, stamp +0x138, modifier block +0xd4); Session +0 and +4 in a save: Unknown. | High / Medium / Unknown | ● active | [EXP-2162](../experiments/EXP-2162-rom2-regeneration/) |
+
+### R2-ENGINE-1204
+
+The refill RU `R2.0022` / EN `R2.0096` (206 instructions, equal after masking addresses) has its address at exactly three dword sites per root: RU `L2.06783`, `L2.06784`, `L2.06785`; EN `L2.06786`, `L2.06787`, `L2.06788`. A dword scan of every section of each `allods2.exe` finds the address at these sites only; an E8/E9/Jcc scan finds no direct call or jump to it. Two RU sites are the virtual slot 5 (`+0x14`) of tables whose base stores were read: `L2.02314` (R2-ENGINE-777, with its EN twin `L2.04102`) and `L2.00218` (R2-ENGINE-1207). The bases RU `L2.06391`, EN `L2.06392` and EN `L2.00217` are the site address minus 0x14, with no store read.
+
+The world pass RU `L2.04378` / EN `L2.04379` calls slot 5 on each object of its list `[this+4]` (R2-ENGINE-776; the 33-instruction head is equal after masking). The session tick RU `L2.04380` / EN `L2.03120` (196 instructions, equal after masking) calls the world pass when its object's `+4` at entry, t, is 12 mod 16; it then stores `+4` = t + 1 through RU `L2.04406` / EN `L2.04407`, and when (t + 1) mod 16 is 15 it calls RU `L2.04408` / EN `L2.06789` and adds 1 to `+0` (R2-ENGINE-778). So:
+
+- the counter is Session `+4`; the session tick advances it by 1 per call in which its `+0x94` is nonzero (it returns at once at `L2.06026` when `+0x94` is 0, R2-ENGINE-778);
+- one world pass, and so one refill call per listed unit, runs per 16 advances of `+4`;
+- Session `+0` advances by exactly 1 between two world passes, on the tick that makes `+4` 15 mod 16.
+
+The refill reads the Session object as `[L2.01317]` (RU) and `[L2.00805]` (EN); the RU object is the session tick's object at the one RU caller site read, the EN one by operand position in equal bodies (R2-ENGINE-778).
+
+Pacing, by lookup: the scheduler calls the session tick once per period (R2-ENGINE-778, Medium), and the period is 1000/divisor ms with divisors 8, 10, 12, 14, 16, 20, 24, 28, 32 for Speed 0..8 (R2-ENGINE-620). With integer division that is 125, 100, 83, 71, 62, 50, 41, 35, 31 ms per advance, and 2000, 1600, 1328, 1136, 992, 800, 656, 560, 496 ms per world pass. R2-ENGINE-1073 measured this counter at 16.1 and 32.1 advances per second in two EN launches under a debugger; 1000/62 and 1000/31 are 16.1 and 32.3.
+
+**Confidence.** High for the three dword sites per root, the bodies and the counter arithmetic in both roots, and for slot 5 of the two RU tables whose stores were read. Medium for the third RU base and the EN bases other than `L2.04102` (inferred from the entry offset), for the EN Session object (operand position, R2-ENGINE-778) and for milliseconds: the period per Speed is R2-ENGINE-620's table, the one call per period is R2-ENGINE-778's Medium, and the RU scheduler is unread.
+
+**Unknown.** The period after LOAD and outside a debugger (R2-ENGINE-669, R2-ENGINE-1073): a timed run of the original at a known Speed settles it.
+
+**Amends.** R2-ENGINE-030 says the refill runs "every tick": it runs once per world pass, every 16th session tick. R2-ENGINE-030's "the block `R2.0022` in the actor tick `L2.00028`": the refill is slot 5 called by the world pass, not part of the actor step, which R2-ENGINE-1073 counts once per counter value. R2-ENGINE-031's "every fourth tick" for health is every fourth world pass, 64 session ticks (R2-ENGINE-1205).
+
+**Evidence.** EXP-2162 `RESULTS.md` question 1; `evidence/derived/listing-compare.tsv`; `evidence/generated/scan/*-refs-refill.tsv`.
+
+### R2-ENGINE-1205
+
+Every test that gates a restoration, in order, in both roots (equal bodies). The K test (`cmp eax,0x50` at RU `L2.06790`, R2-ENGINE-1206) stands between tests 2 and 3 and gates nothing; the two cap compares and the tests of the health-below-0 path (R2-ENGINE-1207) are not listed.
+
+1. `+0x54` = 0x10: return, nothing restored.
+2. Signed word health `+0x94` at most 0: the health-0-or-below path (R2-ENGINE-1207); nothing restored.
+3. Health: restored only when signed `+0x94` < signed maximum `+0x96`, signed word `+0x98` is not 0, and `[Session]+0 % 4` = `unit+4 % 4`. Both remainders are C signed remainders (`cdq`, `xor`, `sub`, `and 3`, `xor`, `sub`).
+4. Mana: restored when signed `+0x9a` < signed maximum `+0x9c`. There is no counter test and no test of `+0x9e`. The mana block runs whether or not the health block ran.
+
+For a unit appended through RU `L2.04402`, unit `+4` is the id from `L2.01287` masked with 0xffff (R2-ENGINE-788); such an id is not negative and its remainder is id mod 4. Other writers exist: the load branch of the serializer stores u32 `+4` (R2-ENGINE-209), corpse ageing clears it (R2-ENGINE-776), and no census of `+4` writers was made. Between two restorations of mana Session `+4` advances 16 times (one world pass). Between two restorations of health it advances 64 times (four world passes), on the pass whose Session `+0` mod 4 equals the id mod 4; units with ids equal mod 4 restore health on the same pass. A full pool stays untouched: a unit at maximum gets neither the addition nor the cap.
+
+**Confidence.** High for the tests and their order in both roots. Medium that Session `+0` is never negative: no writer of it other than the increment was read; a negative `+0` gives a nonpositive remainder, which equals the id's remainder only at 0. Medium that unit `+4` is never negative, and so that the phase is id mod 4: the masked id is read for one RU appender only and the writers of `+4` were not censused.
+
+**Unknown.** The starting value of Session `+0` and `+4` at mission start and after LOAD: reading their writers settles it.
+
+**Amends.** R2-ENGINE-030's health phase `(tick & 3) == ((actor+4) & 3)` is the signed remainder of Session `+0`, the world-pass count, not of the tick; for values not below 0 the two forms agree. R2-ENGINE-030's "an empty pool fills in 50 ticks (17 ticks at K 3)" is 50 and 17 restorations: 800 and 272 advances of Session `+4` for mana.
+
+**Evidence.** EXP-2162 `RESULTS.md` question 2; refill listings named in `evidence/listing-pairs.json`.
+
+### R2-ENGINE-1206
+
+Read in the equal refill bodies (C truncating `idiv` throughout):
+
+- K = 1; K = 3 when helper RU `L2.06791` / EN `L2.06792` (11 instructions, equal) returns more than 0x50 (signed). The helper returns `[Session]+4 - unit+0x138`.
+- Health: acc = `+0x94`*100 + byte `+0xa2` + (2 * `+0x96` * (signed word `+0xde` + 100) * K) / signed word `+0x98`. Then byte `+0xa2` = acc % 100, word `+0x94` = acc / 100, then `+0x94` = min(`+0x94`, `+0x96`).
+- Mana: acc = `+0x9a`*100 + byte `+0xa3` + (`+0x9c` * (signed word `+0xe2` + 100) * K) / signed word `+0x9e`. Then byte `+0xa3` = acc % 100, `+0x9a` = acc / 100, then the cap at `+0x9c`.
+- The remainder byte is stored before the cap and is not cleared by the cap. After each restoration the refill calls the state sender RU `L2.00060` on `L2.02608` / EN `L2.01056` on `L2.00994` of R2-ENGINE-788 with (unit, 0, mask, 0xffb, 0, 0), mask 1 after health and 2 after mana.
+
+Inputs and their writers:
+
+- Divisors `+0x98` and `+0x9e`: the census of word stores finds the defaults 100 and 50 (RU `L2.06793`, `L2.06794`) and a copy (RU `L2.06795`, `L2.06796`); the stat reader stores the Units parameters "HP regeneration" and "MP regeneration" there through cursor readers (R2-ENGINE-777, High / Medium). The scan also lists byte-width stores at displacement 0x98 (4 per root) and 0x9e (3 per root); they are untraced.
+- Modifiers `+0xde` and `+0xe2`: the only direct word stores by displacement are in the Effect tag dispatch RU `L2.00054` / EN `L2.04138`, slot 18 of the Effect tables (RU `L2.06797`, `L2.06798`; EN `L2.06799`, `L2.06800`). Tag 8 (healthregeneration, R2-ENGINE-414) adds the value to `+0xde` with no clamp (RU `L2.06801`, store `L2.06802`; EN `L2.06803`; listing, both roots). Tag 11 (manaregeneration; arm RU `L2.06804`, EN `L2.06805` by the jump table) adds the value to `+0xe2` (stores RU `L2.06806`, EN `L2.06807`) only when a test at RU `L2.06808` / EN `L2.06809` finds `eax` nonzero; the instructions that set it (RU `L2.06804..L2.06810`) are unread, and the arm is known from the six-instruction census row only. The value is R2-ENGINE-414's scaled argument.
+- Stamp `+0x138`, 14 direct stores by displacement per root. Unit senders (RU region `L2.06811..L2.06812`, 256 instructions equal to EN `L2.06813..`): `L2.06811` (message 0x6b or its type argument) stores Session `+4` + (third argument & 0xff) on its first argument; `L2.06814` (message 0x72) stores Session `+4` + byte `+0x134` + byte `+0x135`; `L2.02155` and `L2.02156` (messages 0x86/0x8b and 0x8a/0x8c) store Session `+4` when the unit's virtual `+0x2c` returns nonzero (listing, both roots); `L2.02157` stores it at RU `L2.06815` / EN `L2.06816`, outside the window, by its census row in both roots: the same shape, the object of the virtual call not shown. Their only direct call sites, RU `L2.04709`, `L2.04710`, `L2.06817`, lie in the address range of the cast routine `L2.00027` of R2-ENGINE-543; that range was not read here. Callers (RU): the move step `L2.00157` (state-1 step, R2-ENGINE-547) calls `L2.06811` at `L2.06818` (type 0x6d) and `L2.06819` (type 0); `L2.06820` calls `L2.06814` when byte `+0x12c` > 1, else `L2.06811` with type 0x71 and charge plus relax; the one direct caller of `L2.06820` is `L2.06348`, which requires both units' `+0x14` nonzero and the first unit's health above 0, calls `L2.02339(first, second)` and then `L2.06820(first, second)`. Constructor RU `L2.06821` / EN `L2.06822` stores 0; RU `L2.06823` / EN `L2.06824` copies. Seven stores elsewhere (RU `L2.06825`, `L2.06826`, `L2.06827` storing 0x77359400, `L2.06828`, `L2.06829`, `L2.06830`, `L2.06831`) have bases not traced to a unit.
+
+Worked numbers, divisors at their defaults, modifiers 0: each restoration adds 2 * max hundredths (2 % of the maximum) at K = 1 and 6 * max at K = 3, for health and for mana alike. A unit with maximum 100 regains 2 or 6 points per restoration. Because the stamp is set to a future value (Session `+4` plus up to 255, or plus charge and relax: 8 + 4 by the defaults of R2-ENGINE-777), K = 3 returns 81 advances after that value.
+
+**Confidence.** High for the formulas, the rounding, the remainder stores, the caps, the helper, the stamp stores of `L2.06811`, `L2.06814`, `L2.02155` and `L2.02156` and the tag 8 arm in both roots. Medium for the tag 11 arm (census row only, under an unread test), for the store of `L2.02157` (census row only), for what the senders mean (the attack meaning rests on R2-ENGINE-547 and the unread `L2.02339`; "spell delivery" rests on the unread call sites), for the completeness of the `+0x138` writers (seven untraced bases; virtual `+0x2c` unread) and of the modifier writers (dword stores covering `+0xde` and `+0xe2`, RU 21 and 22, were not traced to a unit base). Writes through a pointer (the load branch of R2-ENGINE-209, cursor readers) are outside the census.
+
+**Unknown.** The seven untraced `+0x138` stores and virtual `+0x2c`: reading their bases settles them. The test that gates the tag 11 arm: reading RU `L2.06804..L2.06810` settles it. Units rows' HP and MP regeneration values: a data read of the Units table settles them. A negative modifier below -100 makes the addition negative by the arithmetic; whether any Effect produces one is unread.
+
+**Amends.** R2-ENGINE-030's K term "(session tick + 4) - actor+0x138" reads Session `+4` - unit `+0x138`; its "writer unread" Unknown is narrowed to the seven untraced stores and virtual `+0x2c`. R2-ENGINE-030's "the effect byte +0xe2" is a signed word, read at RU `L2.06832`; `+0xde` likewise.
+
+**Evidence.** EXP-2162 `RESULTS.md` question 3; `evidence/generated/scan/*-wctx-unit-fields.tsv`; `evidence/navigation/nav2..nav6`.
+
+### R2-ENGINE-1207
+
+Who restores nothing through the refill (both roots unless named):
+
+- A unit with `+0x54` = 0x10: the refill returns at once, with no restoration and no loss.
+- A unit with health 0: nothing. A unit with health below 0: no restoration; on the pass where signed `[Session]+0 % 4` is 0 the refill takes 1 health and calls the state sender `L2.00060` of R2-ENGINE-788 with (unit, owner `+0x14`, 1, 0xffb, 0, 0). So below 0 the refill takes 1 health on one pass in four; corpse ageing lowers health separately (R2-ENGINE-776), so the total loss per pass is not this figure alone. Any unit at health 0 or below is not restored by the refill; the death body stores -10000 for a unit with `+0x148` nonzero (R2-ENGINE-776).
+- Health with `+0x98` = 0: no health. Mana with `+0x9e` = 0 and mana below maximum: the division has no guard (behaviour Unknown). Mana maximum 0, as in the Summon rows of R2-ENGINE-777: no mana while mana is not below 0.
+- An object not in the world pass's list, or whose class table holds another slot 5. The list is filled through `L2.04402` (R2-ENGINE-788); its RU direct callers are `L2.06833`, `L2.06834`, `L2.06835`, `L2.06836`, `L2.06837`. The tables holding the refill include RU `L2.02314` (stored by the unit build `L2.01273`, R2-ENGINE-777) and `L2.00218` (stored by constructor `L2.00234`); the third RU site's base `L2.06391` is inferred and unnamed (R2-ENGINE-1204).
+
+The 206 instructions contain no test of the owner, the side, a player, the order, combat or a cast. Besides the pools, maxima, divisors, modifiers and remainders they read only `+0x54`, the id `+4`, the owner `+0x14` (as a notify argument), the stamp through the helper and the two Session counters.
+
+**Confidence.** High for the tests in the body and the health-below-0 path in both roots. Medium for list and table membership: the classes of the objects in the list and the other tables' slot 5 were not censused, and the five RU callers of `L2.04402` were not read for their objects.
+
+**Unknown.** Which classes the list holds and what `+0x54` = 0x10 means: reading the list's appenders and the writers of `+0x54` settles them.
+
+**Amends.** R2-ENGINE-030's "Dying actors lose 1 health per 4 ticks" is 1 health per four world passes, 64 session ticks, taken by the refill.
+
+**Evidence.** EXP-2162 `RESULTS.md` question 4.
+
+### R2-ENGINE-1208
+
+Population: word stores (width 2) at displacement `+0x94` and `+0x9a` in a linear sweep of `.text` of each `allods2.exe` (RU 52 and 16, EN 51 and 16), each with its six preceding instructions; RU classified, EN counted only. Groups in RU:
+
+- the refill and its health-below-0 decrement (`L2.06838`, `L2.06839`, `L2.06840`, `L2.06841`, `L2.06842`);
+- additions: the heal method `L2.02360` (stores `L2.06843`, `L2.06844`; adds, caps at `+0x96`, ORs 1 into `+0x150`, calls `L2.01780` when health crosses from 0 or below to above 0), whose only direct callers are the spell arms `L2.06845` and `L2.06846` (EN `L2.06847`, callers `L2.06848`, `L2.06849`); the health and mana arms of the Effect tag dispatch (`L2.06850`, `L2.06851`, `L2.06852`, `L2.06853`; tags 6 and 9 cap at the maximum);
+- full sets (health = `+0x96`, mana = `+0x9c`): `L2.06854`, `L2.06855`, `L2.06856`, `L2.06857`, `L2.06858`/`L2.06859` (after the start `L2.01819` with no `ret` in the 256 instructions read, Medium), `L2.06860`/`L2.06861` (after the start `L2.01833`, likewise Medium), `L2.06862`/`L2.06863` (in `L2.00162`), `L2.06864`/`L2.06865`, `L2.06866`/`L2.06867`, `L2.06868`/`L2.06869` (after the start `R2.0089`, the initializer of constructor `L2.00234`, likewise Medium), `L2.06870`/`L2.06871`, the spell arms `L2.06872`, `L2.06873`, `L2.06874`, and the map arm stores `L2.06875`, `L2.06876`, `L2.06877` (R2-ENGINE-1002);
+- constants (defaults, -50, -61, -600, -1000, -10000, -10001, 50, mana 0), copies (`L2.06878`, `L2.06879`) and subtractions (`L2.06880`, `L2.06881`, `L2.06214`, `L2.02861`, `L2.06882`, `L2.06883`, `L2.06884`);
+- stores from another field or a local, not classified further: `L2.06885`, `L2.06886`, `L2.06887` (from `+0x20`), `L2.06888`, `L2.06889`, `L2.06890`, `L2.06891`, `L2.06892`, `L2.06893`.
+
+One full set is periodic. The session tick calls RU `L2.04408` every 16 advances (R2-ENGINE-1204); `L2.04408` calls `L2.06894`, which calls `L2.00127` for each player of the list `[L2.00293]`. `L2.00127` returns unless player byte `+0x41` is nonzero and `+0x2c` is 0. When byte `+0x40` >= 2, Session `+0x74` is nonzero, `L2.04673(player)` (player byte `+0x43`, R2-ENGINE-788) is nonzero, the hero `[player+0x38]` has health <= -40 and `+0xa64` is nonzero, it clears `+0xa64`, calls `L2.00162` and `L2.02696`, and sets `+0x40` = 0. `L2.00162` acts when the hero's byte `+0x13c` > 0: it calls `L2.01779`, sets health and mana to their maxima and appends to the owner's `+0x24` list. Session `+0x74` is (map `+0xd8` > 1) by R2-ENGINE-1002 citing R2-ENGINE-509. This revives a dead hero; it does not restore a living unit.
+
+The other full sets follow the starts `L2.01819` (callers `L2.06895`, `L2.06896`, `L2.06897`) and `L2.01833` (callers `L2.06898`, `L2.06899`, `L2.06900`) or belong to construction and map setup; no pass over time was found calling them. Nine RU word stores are unclassified and are not excluded as restorers; whether any of them runs over time was not read. No store in the census was traced to a building, a town or the time between missions.
+
+**Confidence.** Medium. The word-store census covers its form over the RU sweep; dword stores covering the fields (RU 75 and 45), byte-wise and bulk copies, computed bases and calls through tables were not traced, and EN was counted, not classified. The negative holds for the 46 named and classified RU stores and the 13 constants only: the nine stores "not classified further" are not excluded. The containing function of the stores after `L2.01819`, `L2.01833` and `R2.0089` is not shown by a listing (the windows ended before the stores). The callers of `L2.01819`, `L2.01833` and the R2.0119 dispatcher were not resolved to a game event, and `L2.02696`, `L2.01779` are unread. Meaning of player fields and "hero" for `+0x38` is Medium.
+
+**Unknown.** Whether a town, a building or the briefing between missions restores a unit through `L2.01819`, `L2.01833` or an untraced store: reading their callers to a named event, or a run of the original comparing a wounded hero's health across a mission boundary, settles it.
+
+**Evidence.** EXP-2162 `RESULTS.md` question 5; `evidence/generated/scan/ru-wctx-unit-fields.tsv`; `evidence/navigation/nav3..nav6`.
+
+### R2-ENGINE-1209
+
+One ledger lookup per field. The RU Unit serializer of R2-ENGINE-209 (High / Medium) writes:
+
+- u32 `+4`, the id, in its base part, and 4 raw bytes at `+0x54`;
+- u16 `+0x84..+0x9e`, which covers health `+0x94`, maximum `+0x96`, divisor `+0x98`, mana `+0x9a`, maximum `+0x9c` and divisor `+0x9e`;
+- u8 `+0xa2` and `+0xa3`, the two remainders;
+- u32 `+0x138`, the stamp; R2-SESSION-342 saw it change between two saves;
+- 64 raw bytes from `+0xd4`, which cover the modifier words `+0xde` and `+0xe2` without naming them.
+
+Session `+0` and `+4`: no claim found in one lookup.
+
+**Confidence.** High / Medium as R2-ENGINE-209 grades the serializer; RU only. Medium for the modifier words inside the raw block. Unknown for the two Session counters.
+
+**Unknown.** Whether a save holds Session `+0` and `+4`, and so whether the health phase and K continue after LOAD: reading the Session serializer settles it.
+
+**Evidence.** EXP-2162 `RESULTS.md` question 6 (ledger lookups).
 
 ## Effect record identity and renewal
 

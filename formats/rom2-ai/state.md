@@ -293,3 +293,29 @@ builders of a type-0x12 message were not searched (R2-ENGINE-1202; computed
 calls are not excluded). A save holds unit +0x50, Group record +0x20 and
 command +8; command word +0 lies in the saved block but no save claim names
 it, and whether a loaded unit resumes the route is Unknown (R2-ENGINE-1203).
+
+## Health and mana restoration
+
+| Field | Width | Role in the refill | Claims |
+|---|---|---|---|
+| Session +4 | u32 | Counter; world pass at 12 mod 16; K reads it minus the stamp | R2-ENGINE-1204, R2-ENGINE-1206 |
+| Session +0 | u32 | One advance per pass; health phase is its signed remainder by 4 | R2-ENGINE-1204, R2-ENGINE-1205 |
+| Unit +4 | u32 | Id; health phase, signed remainder by 4 | R2-ENGINE-1205 |
+| Unit +0x54 | dword | 0x10: refill returns | R2-ENGINE-1207 |
+| Unit +0x94, +0x96 | s16 | Health and its cap | R2-ENGINE-1205, R2-ENGINE-1206 |
+| Unit +0x9a, +0x9c | s16 | Mana and its cap | R2-ENGINE-1205, R2-ENGINE-1206 |
+| Unit +0x98, +0x9e | s16 | Divisors, defaults 100 and 50; +0x98 = 0 stops health | R2-ENGINE-1206, R2-ENGINE-1207 |
+| Unit +0xde, +0xe2 | s16 | Modifiers added to 100; Effect tag 8 adds to +0xde; tag 11 adds to +0xe2 under an unread test (Medium) | R2-ENGINE-1206 |
+| Unit +0xa2, +0xa3 | u8 | Remainders in hundredths | R2-ENGINE-1206 |
+| Unit +0x138 | u32 | Stamp; K = 3 when Session +4 minus it exceeds 80 | R2-ENGINE-1206 |
+
+These are readings of both executables; no run of the original measured a
+restoration. The refill runs once per world pass, every 16 session ticks;
+mana is restored on every pass and health on one pass in four
+(R2-ENGINE-1204, R2-ENGINE-1205). Health 0 or below restores nothing
+(R2-ENGINE-1207). A census of word stores to health and mana finds no other
+restorer of a living unit over time among the stores it classified; nine RU
+word stores are unclassified and are not excluded. A per-player pass
+revives a hero at health -40 or below to full health and mana
+(R2-ENGINE-1208, Medium). The RU Unit serializer holds every unit field of
+the table; Session +0 and +4 in a save are Unknown (R2-ENGINE-1209).

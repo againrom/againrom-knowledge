@@ -1859,3 +1859,13 @@ algebra is conditional; complete recomputation and independence are Unknown.
 The read construction/renewal/timer stores do not form a complete writer
 census, and no new save/load or message-writer proof is supplied.
 — R2-ENGINE-1170, R2-ENGINE-1171
+
+## Health and mana restoration state
+
+The RU Unit serializer's fourteen u16 at +0x84..+0x9e cover health +0x94,
+its maximum +0x96, the health divisor +0x98, mana +0x9a, its maximum +0x9c
+and the mana divisor +0x9e. Its u8 +0xa2 and +0xa3 are the two remainders
+in hundredths, its u32 +0x138 is the stamp that sets the factor K, and its
+64 raw bytes from +0xd4 cover the modifier words +0xde and +0xe2 without
+naming them. Whether a save holds Session +0 and +4, which set the health
+phase and K, is Unknown. — R2-ENGINE-1209
