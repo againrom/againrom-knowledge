@@ -94,6 +94,23 @@ so one stable predicate admits only one of their direct operations even when
 both records stand. The pair list is bounded, not an exhaustive census of
 every source on every characteristic. R2-ENGINE-1168.
 
+Light (ID15) and Darkness (ID14) carry signed magnitude P/30+1 and -1-P/30, duration 16 and
+mark 2*row+8, renewed at every area pulse (Medium) (R2-ENGINE-1236). Virtual30 is 1 for Human and
+Humanoid and 0 for Unit, Token, Building and Pointer, and in RU for Shop and Inn
+(R2-ENGINE-1237). Darkness therefore lowers a Human's or Humanoid's sight byte +0xa5 and
+word +0xe4 by 1+P/30, and Light lowers a Unit's sight byte by P/30+1, each when +0xa5 is at least that
+amount; below it the Effect arms wrap the byte modulo 256 and no arm clamps, and whether a reader
+clamps is not read except the ring walk's limit of 19 rings (R2-ENGINE-502). Light on a Human and
+Darkness on a Unit change no sight. Neither arm tests the owner (R2-ENGINE-1238).
+The 17 read sites of +0xa5 are the ray scans (one with no found caller; whether it runs is
+Unknown) and the planner, movement and group radii; five routines overwrite the word, and +0xe4
+has no unit reader outside the Effect arms in the direct-displacement census (R2-ENGINE-1239).
+Bit 0x40000 sends the word to the unit's own player; for Human and Humanoid units with word +0xe in
+0x21..0x3f another player may receive it (Unknown), with a further cut for Units below key 0x6000
+(R2-ENGINE-1240). Expiry runs the end slot and resends; a
+save keeps the lowered word (R2-ENGINE-1241). The per-class result is Medium
+(R2-ENGINE-1242) (High for the arms, Medium for the reach, the delivery and the fog link).
+
 By the code read in both roots, a parsed timed item Effect that retains
 constructor ID0 meets another ID0 even with another tag; the renewal branch
 keeps the old tag and stores the merged words in that record.

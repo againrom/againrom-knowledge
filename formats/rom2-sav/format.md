@@ -1500,9 +1500,9 @@ Effects carry a mark to attach; the Heal and Drain Life arms build no
 Effect, and their marks 56 and 60 are set on the client by the cast object.
 The server expiry decrements +0x42 unless it is above 9600 and sends
 0x89 at 0; for a continuous Effect it also calls slot +0x40 at every eighth
-step. Which duration an attached Poison Cloud, Light or Darkness Effect
+step. Which duration an attached Poison Cloud Effect
 holds, and whether the single-target delivery object attaches its Effect,
-are Unknown. In the
+are Unknown. A Light or Darkness Effect holds duration 16 at cast (R2-ENGINE-1236; Unknown after renewal). In the
 EN saves game0004..0006 the hero holds Shield (+0xc 27, +0xe 62, durations
 563, 302 and 50) and, in game0005, Haste (21, 50, duration 196); a player-7
 unit holds Shield. Its u16 +0x40 is 5 for the hero's Shield, 14 for player 7's
@@ -1516,6 +1516,10 @@ read the list, and the opcode 0x6c arm passes it to an unread routine);
 with the saved +0x18 and +0x30 the notify resend test fails for player 0
 unless LOAD clears it, and whether the overlay reappears is Unknown. — R2-SESSION-273, R2-SESSION-274, R2-ENGINE-695,
 R2-ENGINE-697, R2-ENGINE-700, R2-ENGINE-701
+
+A Light or Darkness Effect lowers unit word +0xa4 (R2-ENGINE-1236, R2-ENGINE-1238). The Unit
+serializer writes that word, so a save taken under the spell stores the lowered sight; whether
+LOAD restores the Effect so that its end restores the word is Unknown (R2-ENGINE-1241).
 
 ## Mission LOAD view and idle gates
 

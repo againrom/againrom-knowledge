@@ -53,8 +53,11 @@ object and kind, maximizes signed
 magnitude and zero-extended duration independently, cancels Bless against
 Curse, or adds a copy and its bit in unit +0x144. The direct body reads no
 owner. Negative renewal keeps the less negative magnitude. Darkness's slots
-add/subtract magnitude<<8 at A4/E4 only when virtual30 is nonzero; final sight
-and target effects remain Unknown. Direct stores are High, complete
+add/subtract magnitude<<8 at A4/E4 only when virtual30 is nonzero; Darkness
+changes sight only for objects whose virtual +0x30 returns nonzero, and for a
+Unit-class object it attaches and changes no sight (Medium for the class of any
+named creature; R2-ENGINE-1237, R2-ENGINE-1238); the target-drop consequence
+stays Unknown. Direct stores are High, complete
 list/callee composition Medium. — R2-ENGINE-986, R2-ENGINE-1164,
 R2-ENGINE-1166, R2-ENGINE-1167, R2-ENGINE-1168
 
@@ -75,8 +78,9 @@ cell, the filter drops the same-owner caster, assignment keeps the
 least-score hostile, and a
 member with a target stays in Guard B's target case; a member without one
 and below max health walks to command +0x9c while the hit clock is fresh.
-This path is Medium, not observed; what the Darkness Effect does to sight
-range (it can drop the old target) and the +0xbbec readers are Unknown.
+This path is Medium, not observed; the Darkness Effect changes sight only for objects whose virtual +0x30 returns
+nonzero (R2-ENGINE-1237, R2-ENGINE-1238), whether the lowered sight drops the old
+target is Unknown, and so are the +0xbbec readers.
 Mission 10's Troll.4 and the four
 Bat_Sonic.4 share owner word 5, whose Player row stores diagonal 0x12 (High
 fields, Medium names). — R2-ENGINE-989, R2-ENGINE-990
@@ -203,6 +207,16 @@ with complete target effects still open (R2-ENGINE-1110). Delivered cadence
 and per-body EN coverage keep their limits (R2-ENGINE-1114,
 R2-ENGINE-1115). Remaining readers, predicates and runs are named on the
 [planner page](orders.md).
+
+Light and Darkness lower the sight byte +0xa5 that the ray scans and the planner, movement
+and group routines read: Darkness for a Human or Humanoid occupant, Light for a Unit occupant,
+by 1+P/30 cells while the byte is at least that amount (below it the Effect arms wrap the byte
+modulo 256 and no arm clamps; whether a reader clamps is not read except the ring walk's limit of
+19 rings, R2-ENGINE-502), with no owner test (R2-ENGINE-1236, R2-ENGINE-1237, R2-ENGINE-1238,
+R2-ENGINE-1239). The unit's own player receives the changed word (Medium; for Human and Humanoid
+units with word +0xe in 0x21..0x3f another player may receive it, Unknown) (R2-ENGINE-1240), expiry
+adds the shift back (R2-ENGINE-1241), and the per-class result is Medium (R2-ENGINE-1242)
+(High for the arms, Medium for the reach, the delivery and the fog link).
 
 The orders page's static continuation adds bounded clauses. The selector calls
 the stop chain for order 3 when the target's +0x54 is 0x10 (R2-ENGINE-1121; the
@@ -433,3 +447,24 @@ mana, and no pass over time was found calling the remaining full sets
 (R2-ENGINE-1208, Medium). The RU Unit serializer holds the pools, maxima,
 divisors, remainders, stamp and the raw block that covers the modifiers;
 Session +0 and +4 in a save are Unknown (R2-ENGINE-1209).
+
+## Computer caster spell and target choice
+
+A computer mage (mage bit, owner +0x2c nonzero; "computer" at Medium) chooses
+book spells in three routines: the offensive choice, called by the attack
+planner after its slot draws, and the heal routine with its support choice,
+called by the idle wrapper. Each has one direct caller in each root; the
+priority routine has no direct reference in any form searched
+(R2-ENGINE-1244, R2-ENGINE-1250). The heal routine heals the caster when
+hurt, else the first wounded unit of the Heal-radius area list around the
+caster that the relation filter keeps (bit 2), else calls the support
+choice: Shield on the caster when its effect bit 27 is clear, then one drawn
+list member of the caster's owner, healed when hurt or given a drawn
+Defensive book spell at full mana (R2-ENGINE-1245, R2-ENGINE-1246). The
+offensive choice casts a drawn book spell of ids 1..28 whose Defensive value
+is not 1 at the victim, unless Mind above 59 and a draw below 30 of 100 send
+it back to the planner; the three routines never choose Slow (29) from the
+book (the loops stop at 28); that no other routine chooses a book spell is
+Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
+after masking (R2-ENGINE-1249). How often these routines run per simulation
+tick is Unknown.

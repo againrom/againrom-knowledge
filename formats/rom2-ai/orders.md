@@ -93,7 +93,8 @@ older owner-field binding. R2-ENGINE-1115 states the remaining correspondence ga
 | Any / walking member / search returns empty route / EN/RU | Store own cell as movement destination and +0x98=1; the executor tail branches by order. Order 1 resets to 0xc/state 0; 0xa advances points; 0x18 sets primary 255; other orders re-pick. | R2-ENGINE-1108 High local branches, Medium composition | Why search is empty: read search/occupancy; run occupied goal and fully blocked neighbours |
 | Any / walking member / own cell equals movement destination / EN/RU | The read walk branch stores movement +0x90=1. For order 1 the selector then calls stop chain L2.01576 when +0x76 equals the own cell. | R2-ENGINE-1108 High local store; R2-ENGINE-1121 High EN/RU selector test; R2-ENGINE-1020 High, R2-ENGINE-1042 High (RU), EN L2.02686 whole for the order-0xc store | Other +0x90 consumers and cadence: read the remaining +0x90 census sites and run unobstructed arrival |
 | Different owners / struck unit / area pulse reaches hook / EN/RU hook, inherited area | Write hit memory and event record. Local hook absence of order/target stores does not exclude scheduled changes. | R2-ENGINE-985/986 High local bodies, Medium binding; R2-ENGINE-1109 High stores, Medium negative/composition | Posted-record/aliased readers: read the script cases, then run the next tick with order fields watched |
-| Any / virtual slot +0x30 nonzero / Darkness Effect 14 applies or expires / EN slots, RU bodies masked-equal | Add or subtract magnitude<<8 at words +0xa4/+0xe4; +0xa5 is the high byte. Same-ID renewal keeps the less negative signed magnitude and independently maximizes remaining duration. Inherited sight reads +0xa5. No retained-target guarantee follows. | R2-ENGINE-1110 and R2-ENGINE-1166 High slot arithmetic; R2-ENGINE-1167 High comparison, Medium composed characteristic; R2-ENGINE-502 inherited reader grades | Kind predicate, +0xe4 readers and candidate consequence: read them and run a pulse on an attack holder |
+| Any / virtual slot +0x30 nonzero / Darkness Effect 14 applies or expires / EN slots, RU bodies masked-equal | Add or subtract magnitude<<8 at words +0xa4/+0xe4; +0xa5 is the high byte. Same-ID renewal keeps the less negative signed magnitude and independently maximizes remaining duration. Inherited sight reads +0xa5. No retained-target guarantee follows. | R2-ENGINE-1110 and R2-ENGINE-1166 High slot arithmetic; R2-ENGINE-1167 High comparison, Medium composed characteristic; R2-ENGINE-502 inherited reader grades | Candidate consequence of the lowered sight: run a pulse on an attack holder (kind predicate per class, R2-ENGINE-1237, R2-ENGINE-1238; +0xe4 census, R2-ENGINE-1239) |
+| Any / virtual +0x30 per class / Light Effect 15 or Darkness Effect 14 applies or expires | Virtual +0x30 is 1 for Human and Humanoid and 0 for Unit and the other vtables read. Darkness lowers +0xa5 and +0xe4 of the former by 1+P/30; Light lowers +0xa5 of a Unit by P/30+1; no owner test; the Effect arms clamp nothing and a byte below the amount wraps modulo 256. Readers: two ray scans, a ring walk, the planner, movement and group radii; five routines overwrite the word. Expiry adds the shift back and resends. | R2-ENGINE-1236, R2-ENGINE-1237, R2-ENGINE-1238 High arms, Medium reach; R2-ENGINE-1239 High census, Unknown dword operands; R2-ENGINE-1240, R2-ENGINE-1241 High / Medium; R2-ENGINE-1242 Medium | Dword operands at +0xa4, overwrite timing, group record +0x2b/+0x2c readers: read them and run a pulse |
 | Group member / virtual kinds unresolved / scorer L2.05238 and assignment L2.05173 / EN/RU | Adjust distance for range, reject adjusted distance>1; score distance/turn/preference; choose strictly least score, first on tie, else clear assigned target. | R2-ENGINE-1111 High arithmetic/stores, Medium complete choice; R2-ENGINE-1126 High constructor bytes 2,1,2,4,4,2,1,0,2,1,4,0,2,1,2,4, Medium object link and writer completeness | Kinds behind virtual slot +0x20 and the unresolved dword stores: read the vtables and sites |
 | Group member / marked-cell population / sight and leash before assignment / EN/RU named bodies | Gather world units on marked cells, apply relation/invisibility/health filters and fallback; leash removes candidates beyond radius, after which assignment may clear a target. | R2-ENGINE-1112 High local branches, Medium eligibility/end composition | Grid/world producers and other target writers: read them; run pursuit ending and next action |
 | Player input / selected read units / message cells 0x12..0x26 / RU input, EN/RU setters | Named input chains reach 13 distinct order values. Types 0x1e/0x25 can reach order 0xd; 20 setters cover 17 values in total. | R2-ENGINE-1107 High local chains/setters, Medium complete input population | EN cells 0, 1, 2, 4, 5, 6, 8, 10, 11, 15, 18 call the RU method addresses minus 0xa039 and cells 3, 14, 16, 17 take the default as in RU (R2-ENGINE-1128 High; method bodies not compared); order 4 comes from the selector's order-0x19 arm, 0x11 from a script action; 0x18/0x19 setters have no six-form reference (Medium). EN cells 7, 9, 12, 13, 19, 20 unread |
@@ -354,3 +355,23 @@ leaves the unit without an occupant reference on its position cell.
 — R2-ENGINE-1215
 
 These are readings of both executables; no run of the original observed a step, a death or a load.
+
+## Computer caster spell and target choice
+
+For a computer mage the attack planner calls the offensive choice after its
+slot draws and stores command +8 = 5 when it returns 0; the idle wrapper
+stores +8 = 0xb and calls the heal routine, which may call the support
+choice. Each has one direct caller in each root; the priority routine has no
+direct reference in any form searched (R2-ENGINE-1244, R2-ENGINE-1250).
+Each cast of the heal routine stores command +0x60 = 1 (R2-ENGINE-1200). Heal goes to the
+caster when hurt, else to the first wounded unit of the Heal-radius area
+list that the relation filter keeps; Shield to the caster when its effect
+bit 27 is clear; a drawn Defensive book spell at full mana to one drawn list
+member of the caster's owner (R2-ENGINE-1245, R2-ENGINE-1246). The
+offensive choice casts a drawn book spell of ids 1..28 whose Defensive value
+is not 1 at the victim, unless Mind above 59 and a draw below 30 of 100 send
+it back to the planner; the three routines never choose Slow (29) from the
+book (the loops stop at 28); that no other routine chooses a book spell is
+Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
+after masking (R2-ENGINE-1249). How often these routines run per simulation
+tick is Unknown.

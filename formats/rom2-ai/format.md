@@ -66,6 +66,15 @@ distance (R2-ENGINE-1106), and the paired setters with RU input chains
 (R2-ENGINE-1108). Hit-hook stores do not close scheduled effects
 (R2-ENGINE-1109); Darkness slot arithmetic does not guarantee target retention
 (R2-ENGINE-1110).
+Light and Darkness lower the sight byte +0xa5 that the ray scans and the planner, movement
+and group routines read: Darkness for a Human or Humanoid occupant, Light for a Unit occupant,
+by 1+P/30 cells while the byte is at least that amount (below it the Effect arms wrap the byte
+modulo 256 and no arm clamps; whether a reader clamps is not read except the ring walk's limit of
+19 rings, R2-ENGINE-502), with no owner test (R2-ENGINE-1236, R2-ENGINE-1237, R2-ENGINE-1238,
+R2-ENGINE-1239). The unit's own player receives the changed word (Medium; for Human and Humanoid
+units with word +0xe in 0x21..0x3f another player may receive it, Unknown) (R2-ENGINE-1240), expiry
+adds the shift back (R2-ENGINE-1241), and the per-class result is Medium (R2-ENGINE-1242)
+(High for the arms, Medium for the reach, the delivery and the fog link).
 
 Scorer L2.05238, candidate filtering and programme setters have separate
 authorities: R2-ENGINE-1111, R2-ENGINE-1112 and R2-ENGINE-1113. The clock's local
@@ -302,3 +311,24 @@ mana, and no pass over time was found calling the remaining full sets
 (R2-ENGINE-1208, Medium). The RU Unit serializer holds the pools, maxima,
 divisors, remainders, stamp and the raw block that covers the modifiers;
 Session +0 and +4 in a save are Unknown (R2-ENGINE-1209).
+
+## Computer caster spell and target choice
+
+A computer mage (mage bit, owner +0x2c nonzero; "computer" at Medium) chooses
+book spells in three routines: the offensive choice, called by the attack
+planner after its slot draws, and the heal routine with its support choice,
+called by the idle wrapper. Each has one direct caller in each root; the
+priority routine has no direct reference in any form searched
+(R2-ENGINE-1244, R2-ENGINE-1250). The heal routine heals the caster when
+hurt, else the first wounded unit of the Heal-radius area list around the
+caster that the relation filter keeps (bit 2), else calls the support
+choice: Shield on the caster when its effect bit 27 is clear, then one drawn
+list member of the caster's owner, healed when hurt or given a drawn
+Defensive book spell at full mana (R2-ENGINE-1245, R2-ENGINE-1246). The
+offensive choice casts a drawn book spell of ids 1..28 whose Defensive value
+is not 1 at the victim, unless Mind above 59 and a draw below 30 of 100 send
+it back to the planner; the three routines never choose Slow (29) from the
+book (the loops stop at 28); that no other routine chooses a book spell is
+Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
+after masking (R2-ENGINE-1249). How often these routines run per simulation
+tick is Unknown.

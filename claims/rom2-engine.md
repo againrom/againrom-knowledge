@@ -824,7 +824,7 @@ A second routine `L2.05879` writes per-cell bytes at client +0xb0 from the corne
 | R2-ENGINE-986 | The ROM2 Effect attach renews, cancels or adds an Effect on its unit without reading an owner or a relation. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-987 | The ROM2 hit hook writes victim hit memory and posts an event record; its body writes no command +0x20, +8 or +0x0c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-988 | A same-owner ROM2 hook call changes no relation cell when the diagonal's low bits are set; group sight marks the caster cell for a member whose owner +0x2c is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
-| R2-ENGINE-989 | In the read ROM2 bodies a struck grouped creature keeps its target after a same-owner area blow when the diagonal has bit 0 clear and low bits set; the filter drops the caster. | Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-989 | In the read ROM2 bodies a struck grouped creature keeps its target after a same-owner area blow when the diagonal has bit 0 clear and low bits set; the filter drops the caster. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-990 | ROM2 mission 10 gives Troll.4 and the four Bat_Sonic.4 owner word 5, whose Player row stores diagonal 0x12 (names Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 
 ### R2-ENGINE-985
@@ -891,6 +891,8 @@ After a same-owner area blow on a grouped creature whose owner's diagonal has bi
 **Confidence.** Medium: composed from High bodies with unread posted-record readers, the filter's output list, the Effect's slot +0x40 effect on sight (a smaller sight can drop the old target, and then assignment writes 0) and the untraced +0x20 writers of R2-ENGINE-881.
 
 **Unknown.** What the Darkness Effect does to sight range (slot +0x40; a smaller sight can drop the old target). Which routines read the +0xbbec records before the clear. Owner 5's +0x2c, which group sight needs to mark the caster's cell in mission 10. Observed behaviour: in original mission 10 let a Bat_Sonic.4 cast Darkness over Troll.4 while it attacks the hero and record per tick M[5][5], Troll.4 cmd +0x20, +8, +0x0c, +0x54, +0x58, +0x5a, +0x94, +0x98, +0x9c, +0xac, unit +0x40, +0x48, +0xa5, group 10's lists +0xa64/+0xa68 and the session +0xbbec records.
+
+**Amended.** R2-ENGINE-1237 and R2-ENGINE-1238 narrow the Unknown on Darkness and sight range per class: Darkness changes sight only for objects whose virtual +0x30 returns nonzero; for a Unit-class object it attaches and changes no sight (Medium for the class of any named creature). The target-drop consequence stays Unknown.
 
 **Evidence.** [Answer 4](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#4-the-old-target), composed with R2-ENGINE-985..988.
 
@@ -7130,7 +7132,7 @@ exhausted; no further native read belongs to this candidate.
 | R2-ENGINE-348 | RU admission requires a book spell and enough mana; affinity uses preference bits 1/2/4 and accepts self; range compares a packed-byte Chebyshev metric with spell +9. Getter meanings remain Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
 | R2-ENGINE-349 | RU support prepares command 8 with a target and spell pointer; candidate buff checks suppress recent pending spell ID 20, not a proved cooldown for every spell. Movement and interruption remain Unknown. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
 | R2-ENGINE-350 | RU selected-spell policy reads command byte +0x78, admits one affordable spell and dispatches IDs 1..28; it does not choose another spell from the book in that body. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
-| R2-ENGINE-351 | RU nonzero-Player-kind branches use a distinct offensive book-choice routine and separate support routines; equality with the player three-level policy is not established. | Medium | ✔ promoted (branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
+| R2-ENGINE-351 | RU nonzero-Player-kind branches use a distinct offensive book-choice routine and separate support routines; equality with the player three-level policy is not established. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2042](../experiments/EXP-2042-rom2-autocast/) |
 
 ### R2-ENGINE-345
 
@@ -7376,6 +7378,10 @@ these routines would exceed the evidence.
 **Unknown.** Index distribution, all computer-unit dispatch, summon/default
 policy and EN equivalents. Read the helper and callers or perform a
 controlled owner observation of a computer mage.
+
+**Amended.** R2-ENGINE-1246 reads the index helper's divisor: the index is uniform if the divisor
+stays 0x8000 (Medium). R2-ENGINE-1249 reads the EN equivalents of `L2.00056` and `L2.01533`, equal to
+RU after masking. R2-ENGINE-1244 gives the direct callers. The grades of this claim are unchanged.
 
 ## Automatic-casting control, admission and prepared orders
 
@@ -26811,7 +26817,7 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1107 | Twenty ROM2 setters match across roots; RU input types 0x1e/0x25 reach order 0xd. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1108 | Read ROM2 route branches distinguish an empty-route flag from own-cell arrival. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1109 | ROM2 hit-hook bodies write hit memory and an event; later order effects remain open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
-| R2-ENGINE-1110 | EN Effect 14 slots +0x40/+0x44 and their masked-equal RU bodies adjust unit words +0xa4 and +0xe4. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1110 | EN Effect 14 slots +0x40/+0x44 and their masked-equal RU bodies adjust unit words +0xa4 and +0xe4. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1111 | Scorer L2.05238 rejects adjusted distance above 1 and ranks by turn and preference. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1112 | Read ROM2 Group sight gathers marked-cell units, filters them and supplies assignment. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1113 | Read ROM2 Group setters write programme constants; programme and member order stay distinct. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
@@ -27117,6 +27123,8 @@ EN Effect vtable at L2.04136 has slot +0x40=L2.05846 and +0x44=L2.06222; the tab
 **Unknown.** Kind-specific predicate, all readers and eventual candidate/target effects, including wrap/clamping elsewhere. Read unit slot +0x30, L2.01587, +0xe4 readers and Effect lifecycle callers; run a pulse while comparing sight and assignment before/after.
 
 **Amends.** R2-ENGINE-986 and R2-ENGINE-989's Unknown on Darkness slot +0x40 is narrowed to these stores and their branch; the complete sight/candidate consequence remains Medium or Unknown.
+
+**Amended.** R2-ENGINE-1237 narrows the Unknown on unit slot +0x30 to a per-class table; R2-ENGINE-1238 narrows "not a universal sight reduction for every kind" to those classes; R2-ENGINE-1239 narrows the Unknown on L2.01587 and the +0xe4 readers to its census.
 
 **Evidence.** EXP-2152 generated/tables/en-effect-vtable.tsv, win/*effect-apply.lst, *effect-remove.lst, *darkness-create.lst, *sight-reader.lst and corresponding mask receipts.
 
@@ -28123,7 +28131,7 @@ The census is a linear sweep of code sections in each root. The scan files give 
 |---|---|---|---|---|
 | R2-ENGINE-1198 | ROM2 L (type 0x12): when message byte +4 is 1 or more (the sender does not write it; Unknown), the dispatcher puts each listed id it finds, unless unit +0x54 is 0x10, into one new Group; L2.06066 sets order 0x17 and programme 0x13. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1199 | ROM2 order-0x17 setter L2.02816 tests nothing: after reset L2.01584 (stop L2.01585, cmd +0x50 = 0) it stores unit +0x50 = 0x17, cmd word +0 = the unit's own cell, cmd +8 = 0; no target, +9 or +0xc write in the bodies read. | High / Medium | ● active (amended) | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
-| R2-ENGINE-1200 | Under ROM2 order 0x17 programme 0x13 calls L2.01531 per member: a player non-mage gets prepared 0, a player mage may heal or buff allies, a computer member gets 0xb, or 8 when L2.01513 casts (R2-ENGINE-1143); no walk or attack call read. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
+| R2-ENGINE-1200 | Under ROM2 order 0x17 programme 0x13 calls L2.01531 per member: a player non-mage gets prepared 0, a player mage may heal or buff allies, a computer member gets 0xb, or 8 when L2.01513 casts (R2-ENGINE-1143); no walk or attack call read. | High / Medium / Unknown | ● active (amended) | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1201 | ROM2 order 0x17 is read only by the selector's switch in the census: one 0x17 store at +0x50, no compare with 0x17; it ends when another write to unit +0x50 replaces it (new order, script, programme handler). | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1202 | ROM2 order 0x17 has one direct route in six reference forms (input arm, L2.06066, L2.02816); L's sender has one direct caller (the key routine); other type-0x12 builders and computed calls not searched; no panel button by direct reference. | High / Medium | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
 | R2-ENGINE-1203 | A ROM2 save holds order-0x17 state in unit +0x50, Group record +0x20 and command +8; command word +0 lies in the saved block unnamed; movement block not decoded by the save reader (R2-SESSION-346; save content Unknown); load Unknown. | High / Medium / Unknown | ● active | [EXP-2161](../experiments/EXP-2161-rom2-order-l/) |
@@ -28205,6 +28213,8 @@ Under this route a player member with `L2.00044` zero reads as standing: no prep
 **Unknown.** The handler of prepared 0xb under programme 0x13 for computer members, and whether such a Group stays active. Spell effects. `L2.01533`. The rest of EN `L2.05315`. Whether `L2.01724` (caller Unknown, R2-ENGINE-558) runs the selector, and through cell 0x17 the idle planner, for a unit under programme 0x13; the caller of `L2.01724` would settle it.
 
 **Amends.** R2-ENGINE-1136 and R2-ENGINE-1143: RU `L2.01512` is now read to its end. R2-ENGINE-1075: EN `L2.04984` is masked-equal to RU `L2.01531` over 46 instructions.
+
+**Amended.** R2-ENGINE-1249 reads `L2.01533` in RU and EN, which this claim lists as Unknown; R2-ENGINE-1245 and R2-ENGINE-1246 give its candidate list and its draws. The grades of this claim are unchanged.
 
 **Evidence.** EXP-2161 `evidence/generated/win/*-support.lst`, `*-player-mage.lst`, `*-computer-mage.lst`, `*-prepared-dispatch.lst`, `navigation/nav2/win/ru-player-mage-2.lst`, `ru-player-mage-3.lst`, `generated/scan/*-refs-order-17.tsv`, `generated/mask/*.tsv`.
 
@@ -28551,7 +28561,7 @@ So a per-cell field is rebuilt at LOAD only if LOAD reaches the positioning rout
 | R2-ENGINE-1165 | ROM2 Effect entry tests flags&3; timer duration0 wraps to 65535; continuous expiry omits end. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1166 | ROM2 Effect slots use ID specials or 50 tag arms; clamps and packed overwrites limit reversibility. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1167 | ROM2 renewal keeps the less negative magnitude; speed-arm examples are conditional on recomputation. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
-| R2-ENGINE-1168 | ROM2 different Effect IDs can coexist; IDs20/28 cancel, while the read ID14/15 slots use opposite predicates. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1168 | ROM2 different Effect IDs can coexist; IDs20/28 cancel, while the read ID14/15 slots use opposite predicates. | High / Medium | ✔ promoted (amended) | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1169 | ROM2 parsed timed item Effects retaining ID0 merge by that ID even when their tags differ (Medium). | High / Medium / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1170 | ROM2 item-child start/end call slots40/44 directly; complete item/spell contribution independence is Unknown. | High / Medium / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1171 | ROM2 read bodies write Effect words40/42 during construction, renewal and ticking; other-writer census is Unknown. | High / Unknown | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
@@ -28699,6 +28709,8 @@ For IDs14/15, the complete slots have opposite virtual30 tests: nonzero admits D
 **Confidence.** High for the attach branches and both per-ID slot predicates in EN/RU. Medium for the named spell-pair composition and additive outcomes: row21/29 names are from R2-ENGINE-024 and R2-ASSET-179, but their Effects-string key is assumed, not inherited. Row14/15 scanRange binding and area reach reuse R2-ENGINE-793 at its existing grades; predicates, recompute, delivery and all other ID pairs were not censused. Unlink is Medium because its helper is unread. Generic clamps/overwrites and EN D8 reset prevent generalizing an inverse.
 
 **Unknown.** The Effects-string key: read the Effects strings of data.bin rows 21 and 29. Exhaustive ID pairs on every characteristic, changing predicates, complete final values and delivery of both areas: read source/ID producers and recompute; observe both expiry orders only in a new authorized run.
+
+**Amended.** R2-ENGINE-1237 narrows the ID14/15 virtual30 predicates to a per-class table: nonzero for Human and Humanoid, zero for Unit and the other vtables read.
 
 **Evidence.** EXP-2157 RESULTS section5; generated attach/start/end/tag listings and inherited named authorities.
 
@@ -28964,3 +28976,481 @@ LOAD and join routes of R2-ENGINE-950 and R2-ENGINE-951.
 the Druids' inn with the party's +0x14c values settles it.
 
 **Evidence.** EXP-2165 `RESULTS.md` question 5.
+
+## Light and Darkness on the sight word
+
+Terms shared by these cards: the sight word is unit WORD +0xa4, whose high byte +0xa5 is the ray
+scan's ScanRange byte (R2-ENGINE-502); virtual +0x30 is slot +0x30 of the object's vtable; P is the
+power of R2-ENGINE-024 and R2-ENGINE-1110; m is the Effect's signed magnitude word +0x40. Light is
+spell row 15 and Effect ID15, Darkness row 14 and Effect ID14. EN addresses first, RU in brackets.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1236 | ROM2 Light and Darkness build Effects ID15 and ID14 with m = P/30+1 and m = -1-P/30, duration 16 and mark 2*row+8; R2-ENGINE-793's diamond pulses them onto cell occupants. | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1237 | ROM2 virtual +0x30 returns 1 in the Human and Humanoid vtables and 0 in the Unit, Token, Building and Pointer vtables (RU also Shop and Inn); the 1-returning body at that address stands only in those two slots (dword scan). | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1238 | A ROM2 Darkness cell lowers a Human or Humanoid occupant's sight byte +0xa5 and word +0xe4 by 1+P/30; a Light cell lowers a Unit occupant's +0xa5 by P/30+1 while the byte is not below that (it wraps mod 256); no owner test. | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1239 | ROM2 byte +0xa5 has 17 read sites per root (two ray scans, a ring walk, a planner test, three movement reads, ten group maxima); five routines overwrite it; +0xe4 has no unit reader outside Effects (direct-displacement census). | High / Medium / Unknown | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1240 | ROM2 Light and Darkness set unit +0x150 bit 0x40000; the sender clears it for other recipients when virtual +0x30 is 0, and for word +0xe outside 0x21..0x3f when it is nonzero; the 0x21..0x3f path is Unknown. | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1241 | ROM2 Light and Darkness timer expiry runs the end slot, which adds the shift back, then sends the unit with its +0x150 bits; the Unit serializer saves the changed word +0xa4. | High / Medium / Unknown | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1242 | ROM2 sight by class: Darkness lowers Human and Humanoid sight by 1+P/30 cells, Light lowers Unit sight by P/30+1 while the byte is not below that (it wraps); Light on a Human and Darkness on a Unit change no sight; other classes Unknown. | Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+
+### R2-ENGINE-1236
+
+Light EN `L2.07046` [`L2.00074`] and Darkness EN `L2.07047` [`L2.00073`] build the Effect from the
+row's Effects string (record +4 to Effect +0x1c) through EN `L2.07048` [`L2.00086`], store Effect
++0xc from the spell's byte +8, signed word +0x40 = P/30 + 1 (Light) or -1 - P/30 (Darkness), with P
+the dispatcher local `[ebp-0x40]`, and word +0xe = 2 * row + 8 (38 Light, 36 Darkness). Duration +0x42 = 16 is composed from the Effects string of record 14/15 (R2-ASSET-178, `duration 1`) and the parser clause of R2-ENGINE-697 (High each); no arm stores it. Whether the Effect outlasts the 16-update pulse period depends on how often the timer runs, which is Unknown (R2-ENGINE-1165). Both roots read.
+
+The area is R2-ENGINE-793's mode-1 diamond |dx| + |dy| <= R + 1, cell kinds 4 (Light) and 5
+(Darkness), pulsed every 16 updates for 16 * AreaDuration + 16P/10 updates onto the first occupant
+of each cell; R2-ENGINE-024 gives AreaDuration 15. Each pulse renews the Effect (R2-ENGINE-1164) and sets its duration back to 16; whether it expires between two pulses is Unknown. A unit that leaves keeps the Effect for at most 16 timer units.
+
+**Confidence.** High for the arm stores in both roots. Medium: P's identity with R2-ENGINE-024's
+power is inherited, the constructor `L2.07048` [`L2.00086`] is read only for the stores named, and
+the area clauses keep the grades of R2-ENGINE-793 and R2-ENGINE-024.
+
+**Unknown.** The readers of mark 36 and 38 at Effect +0xe. How often the timer runs against the 16-update pulse period (R2-ENGINE-1165).
+
+**Evidence.** EXP-2166 `RESULTS.md` question 1; R2-ASSET-178; EXP-2057 `out/listings/ru-unique-arms.txt` and
+`en-unique-arms.txt`.
+
+### R2-ENGINE-1237
+
+| vtable EN [RU] | Class | Slot +0x30 EN [RU] | Returns |
+|---|---|---|---|
+| `L2.00217` [`L2.00218`] | Human | `L2.06399` [`L2.02319`] | 1 |
+| `L2.06392` [`L2.06391`] | Humanoid | `L2.06399` [`L2.02319`] | 1 |
+| `L2.04102` [`L2.02314`] | Unit | `L2.04124` [`L2.02318`] | 0 |
+| `L2.07049` [`L2.05967`], `L2.02577` [`L2.02576`], `L2.02578` [`L2.02549`] | Token, Building, Pointer | `L2.07050` [`L2.07051`] | 0 |
+| RU `L2.02546`, `L2.02544` | Shop, Inn | [`L2.07051`] | 0 |
+
+The 1-returning body is 8 instructions in each root, masked-equal. An absolute-dword scan of every section of each image finds `L2.06399` only at `L2.07052` and `L2.07053` [`L2.02319` only at `L2.07054`
+and `L2.07055`], the +0x30 slots of the Human and Humanoid vtables, and `L2.04124` only at
+`L2.07056` [`L2.02318` only at `L2.07057`], the Unit slot (population: the dword value of the one address). It does not see a second body returning 1, an address built by computation, an indirect call form, or classes outside the `allods2.exe` tables. The bodies of the Token, Building, Pointer (`L2.07050` [`L2.07051`]) and RU Unit (`L2.02318`) slots are read in EXP-2111 listings (`tables.tsv` and its slot listings), not in this experiment's windows.
+
+**Confidence.** High for the slot bodies of the vtables read. The tables read are six in EN (Human, Humanoid, Unit, Token, Building, Pointer) and eight in RU (adding Shop and Inn); a class outside them is Medium: a vtable whose slot +0x30 is a third body was not searched.
+
+**Amends.** R2-ENGINE-1110's Unknown on unit slot +0x30 and R2-ENGINE-1168's per-ID predicates are
+narrowed to this per-class table.
+
+**Evidence.** EXP-2166 `RESULTS.md` question 2; `evidence/navigation/listings/nav1-*-slot30-*.txt`,
+`nav2-ru-scan-dword-L2.02319.txt`, `nav2-ru-scan-dword-L2.02318.txt`,
+`generated/listings/gen-en-scan-dword-L2.06399.txt`, `gen-en-scan-dword-L2.04124.txt`,
+`generated/derived/compare.tsv`; EXP-2111 `tables.tsv` and its slot listings.
+
+### R2-ENGINE-1238
+
+Start EN `L2.05846` [`L2.02361`] and end EN `L2.06222` [`L2.06223`] (R2-ENGINE-1110,
+R2-ENGINE-1166):
+
+1. ID15 with virtual +0x30 = 0: start subtracts m << 8 from word +0xa4, end adds it.
+2. ID14 with virtual +0x30 nonzero: start adds m << 8 to words +0xe4 and +0xa4, end subtracts it;
+   m is negative, so both words fall.
+3. Both arms OR 0x40000 into unit +0x150. The Effect arms clamp nothing: a word below m << 8 wraps modulo 65536,
+   so +0xa5 becomes (+0xa5 - |m|) mod 256. Whether a reader clamps is not read except the ring walk's limit of 19 rings (R2-ENGINE-502).
+
+With R2-ENGINE-1237: Darkness lowers byte +0xa5 of a Human or Humanoid by 1 + P/30 cells and
+Light lowers it for a Unit by P/30 + 1, each when +0xa5 is at least that amount (below it the byte wraps, item 3); the low byte +0xa4 is unchanged. Light on a Human and
+Darkness on a Unit attach the Effect and change neither word (R2-ENGINE-1168). The occupant routine
+tests no owner or relation (R2-ENGINE-985), so the caster's own units are reached. Renewal ends the
+old record, keeps the larger signed m (for Darkness the less negative, R2-ENGINE-1167) and the
+larger duration, then starts again (R2-ENGINE-1164). Light and Darkness unregister each other on a
+shared cell (R2-ENGINE-794).
+
+**Confidence.** High for the arms and their predicates in both roots. Medium for the composition
+with the area's reach (R2-ENGINE-793 and R2-ENGINE-985 at their grades) and for P (R2-ENGINE-1236).
+
+**Amends.** R2-ENGINE-1110's "not a universal sight reduction for every kind" is narrowed to
+R2-ENGINE-1237's classes.
+
+**Evidence.** EXP-2166 `RESULTS.md` question 2; EXP-2157 start and end listings.
+
+### R2-ENGINE-1239
+
+A displacement census (`--scan-dword 0xa4 --span 2 --classify` and `--scan-dword 0xe4`, whole
+image, both roots) finds per root 10 word reads and 9 word writes at +0xa4, 17 byte reads and 2
+byte writes at +0xa5, 3 byte reads and 4 byte writes at +0xa4, and 4 word reads and 3 word writes
+at +0xe4. Each of these 52 sites is attributed from a committed listing; EN and RU agree site by
+site in class, width and register-masked decode. RU sites:
+
+1. Ray scan `L2.01587`: budget (+0xa5 << s) + (1 << (s - 1)) into map +0x25450 (R2-ENGINE-502).
+   Callers: `L2.07058` in wrapper `L2.01586` and `L2.07059`; the wrapper's callers are the idle
+   builder `L2.07060` (R2-ENGINE-502), `L2.07061`, `L2.07062`, `L2.07063` and `L2.07064`.
+   A second scan `L2.07065` (budget +0xa5 << s) has no E8/E9 caller and no absolute dword reference in the RU image (two scans); jcc and short-jump forms, computed targets and EN were not searched. Whether it runs is Unknown.
+2. Ring walk `L2.06545`: +0xa5 rings around the unit's cell over map +0xa4510.
+3. Planner `L2.07066`: when the distance `L2.02442` to cell [+0x1c4] is not below +0xa5, it calls
+   `L2.02401`.
+4. Movement `L2.06557` (+0xa5 into [+0x1c4] +0x14), `L2.07067` (+0xa5 + 1), `L2.07068` (+0xa5 - 1).
+5. Two group routines (code-region tail, `L2.02475`) store the largest member +0xa5 at record
+   [+0x3c] +0x2b and the largest distance plus +0xa5 at +0x2c; `L2.07069`/`L2.07070` take the
+   largest member +0xa5 when owner +0x2c is nonzero.
+6. Word +0xa4 is overwritten by the record copy `L2.07071` (= record word +0x10), the Human
+   recompute `L2.00052` (from words +0x88 and +0x86 through three unread doubles), the unit copy
+   `L2.07072`/`L2.07073` and the init helper (+0xa5 = 5, +0xa4 = 0); `L2.07074` writes +0xa5 = 5
+   for word +0xe = 0x18. The modifier fold `L2.00102` adds record word +0x10.
+7. The Unit serializer `L2.07075` writes the word; the sender `L2.07076` and the client copy
+   `L2.07077` read it (R2-ENGINE-1240).
+8. Word +0xe4 is read and written only by the ID14 arms and tag key 19 with virtual +0x30
+   nonzero in the direct-displacement census; the fifth read `L2.07078` is a client-range routine that reads word +0xe4 of an object it looks up through `L2.06750`; not shown to be a unit.
+9. The byte +0xa4 sites `L2.07079`..`L2.07080` and `L2.07081` are of other objects.
+
+The 781-instruction Human recompute has no +0xe4 operand. An overwrite of word +0xa4 while the
+Effect stands discards its decrement, and the end slot then raises the word above the rewritten
+value (inference from the bodies; the callers and timing are not read).
+
+**Confidence.** High for the census over direct word and byte displacements and for the bodies
+named. Medium for the EN roles taken by position parity in `evidence/sites.tsv` and for the
+callers listed from RU scans only. Unknown beyond the census.
+
+**Unknown.** Per root, at +0xa4: 128 dword-width operands (89 reads, 38 writes, 1 read-modify-write), 95 immediates, 1 lea, 80 (EN) or 83 (RU) undecoded hits; at +0xa5: 8 immediates; at +0xe4: 155 dword-width operands, 25 immediates, 176 (EN) or 177 (RU) undecoded hits; none is attributed. The scans cover displacements 0xa4/0xa5 and 0xe4 only; a dword access at +0xa2, +0xa3 or +0xe1..+0xe3 was not searched. The readers
+of group record +0x2b/+0x2c, the callers of the overwriting routines, and what `L2.02401` does.
+
+**Amends.** R2-ENGINE-1110's Unknown on `L2.01587` and the +0xe4 readers is narrowed to this
+census.
+
+**Evidence.** EXP-2166 `RESULTS.md` question 3; `generated/derived/scan-*.tsv`,
+`evidence/sites.tsv`, `evidence/navigation/listings/nav2-*.txt`, `nav3-ru-scan-dword-L2.07065.txt`.
+
+### R2-ENGINE-1240
+
+The attach tail and the timer send the unit through EN `L2.01056` [`L2.00060`] with mask unit
++0x150. Field 0x40000 writes word +0xa4 (EN `L2.07082`..`L2.07083` [`L2.04630`..`L2.07084`],
+helper EN `L2.02684` [`L2.04682`] unread). Before it the sender cuts the mask:
+
+1. Virtual +0x30 = 0, dword +4 below 0x6000 and word +0x14c above 0x14: AND 0x800000fb, then
+   AND ~0x20 (EN `L2.07031`..`L2.07032` [`L2.07085`..`L2.07086`]).
+2. Recipient not equal to unit +0x14, virtual +0x30 = 0: AND 0xc08000fb (EN `L2.05686`
+   [`L2.07087`]).
+3. Recipient not equal to unit +0x14, virtual +0x30 nonzero, word +0xe outside 0x21..0x3f: AND
+   0xc0c000fb (EN `L2.07088` [RU constant at `L2.07089` and `L2.07090`]).
+
+The sender clears bit 0x40000 for every recipient other than the unit's +0x14 when virtual +0x30 is 0; when it is nonzero it clears it only if word +0xe is outside 0x21..0x3f (EN `L2.07088`, RU `L2.07089`), and for 0x21..0x3f a test of map table +0xa8c4 bit 0x10 (EN `L2.07091`, RU `L2.07090`) decides, with no clear when the map pointer `[L2.01066]` (RU `[L2.02609]`) is zero. That path is not read to its meaning (Unknown).
+
+None of the three masks holds 0x40000. The client unit arm stores the field's word at client +0x10a
+(EN `L2.07092`..`L2.03390` [`L2.04626`..`L2.07093`]), and the client copy EN `L2.07094`
+[`L2.07077`] copies world +0xa4 to +0x10a. The client fog stamp seeds its walk with
+(+0x10a >> 1) + 64 for owner-gated objects (R2-ENGINE-644, R2-ENGINE-646, R2-ENGINE-648).
+
+**Confidence.** High for the EN masks and conditions. High for the RU constants at the same
+listing positions; Medium for RU's virtual-nonzero branch, read only as its constant. Medium for
+the field writer (helper unread) and for the fog consequence (inherited grades).
+
+**Unknown.** Cut 3 inside 0x21..0x3f, and whether another player's client receives the word for a Human or Humanoid with word +0xe in that range.
+
+**Evidence.** EXP-2166 `RESULTS.md` question 3; EXP-2066 `out/listings/en-unit-sender.txt` and the
+client arm listings; EXP-2136 `out/stage05/listings/ru-server-unit-sender.txt`.
+
+### R2-ENGINE-1241
+
+Timer expiry EN `L2.07095`..`L2.07096` [`L2.04652`..`L2.07097`] clears unit +0x150, calls the end
+slot, then the sender (unit, 0, unit +0x150, 0xffb, 0, 0); the attach tail does the same around
+start. End adds the shift back (R2-ENGINE-1238). Duration 16 is timed, so the continuous path of
+R2-ENGINE-1165 does not apply. Other state the spell changes: the Effect in unit list +0x20, bits
+14 and 15 of the active-ID mask +0x144, bit 0x40000 of +0x150, mark 36 or 38 at Effect +0xe, cell
+kinds 4 and 5 (R2-ENGINE-794), and the saved word: the Unit serializer EN `L2.07098`
+[`L2.07075`] writes word +0xa4, so a save taken under the spell stores the lowered value.
+
+**Confidence.** High for the expiry order and the serializer read in both roots. Medium for the
+mask bits, whose readers are not searched.
+
+**Unknown.** Whether LOAD restores the Effect so that a later end restores the saved word, and the
+readers of +0x144 bits 14 and 15.
+
+**Evidence.** EXP-2166 `RESULTS.md` question 4; EXP-2157 timer listings; EXP-2051
+`out/code/listings/*-unit-ser.txt`.
+
+### R2-ENGINE-1242
+
+Composed from R2-ENGINE-1236, R2-ENGINE-1237, R2-ENGINE-1238, R2-ENGINE-1239 and R2-ENGINE-1240:
+
+| Class | Darkness | Light |
+|---|---|---|
+| Human | +0xa5 and +0xe4 fall by 1 + P/30 (when at least that) | attached, no change |
+| Humanoid | +0xa5 and +0xe4 fall by 1 + P/30 (when at least that) | attached, no change |
+| Unit | attached, no change | +0xa5 falls by P/30 + 1 (when at least that) |
+| Token, Building, Pointer, Shop, Inn | no change | the +0xa4 arm runs; what the word means is Unknown |
+
+Each fall lowers the byte by the amount when +0xa5 is at least that amount; below it the Effect arms wrap the byte modulo 256 and no arm clamps. Whether a reader clamps is not read except the ring walk's limit of 19 rings (R2-ENGINE-502).
+
+On the server the fallen byte shrinks the ray-scan budget and the group and planner radii of
+R2-ENGINE-1239. On the client it reaches the owner's copy +0x10a except under cut 1 of
+R2-ENGINE-1240. If a Human recompute, record copy or init helper runs while the Effect holds, it
+overwrites the word and the end then adds the shift on top (inference; whether they run is Unknown, see R2-ENGINE-1239).
+
+**Confidence.** Medium: the weakest links are the area reach (R2-ENGINE-793, R2-ENGINE-985), the
+unread callers of the overwriting routines and the unattributed dword operands.
+
+**Unknown.** Whether a non-unit class is ever a cell occupant; a run of the original that compares
+the ScanRange byte of a Human and a creature inside both areas settles the composition.
+
+**Evidence.** EXP-2166 `RESULTS.md` question 5.
+
+## Computer caster spell and target choice
+
+Terms shared by these cards: a computer mage is a unit whose mage predicate `L2.00044` (byte `+0x4c`
+& 4) holds and whose owner (`+0x14`) has `+0x2c` nonzero, the reading of "computer" R2-ENGINE-362
+and R2-ENGINE-902 give at Medium; the book is the array at unit `+0x140` read by id through the book
+getter `L2.00040`; the offensive choice is RU `L2.00056` / EN `L2.04141`, the heal routine RU
+`L2.01513` / EN `L2.05314`, the support choice RU `L2.01533` / EN `L2.04142`, the priority routine RU
+`L2.02116` / EN `L2.04101`; the draw `L2.01532(n)` is the random index of R2-ENGINE-651; a cast is
+command `+0x60` = 1 and `L2.01524(caster, target, spell)`; the spell object's byte `+0xa` is its
+defensive byte.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1244 | A ROM2 computer mage chooses book spells in offensive choice L2.00056 (attack planner) and heal routine L2.01513 with support choice L2.01533 (idle wrapper); each has one direct caller per root; cadence is Unknown. | High / Medium / Unknown | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1245 | ROM2 computer support candidates are the units of the Heal-radius area list around the caster, kept on relation bit 2, caster first (Medium); other support goes to one drawn same-owner unit. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1246 | ROM2 computer casters pick spells and support targets by draws uniform if the divisor stays at the constructor's 0x8000 (Medium); Heal needs mana above 10, other support full mana; offense yields at Mind above 59 in 30 of 100. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1247 | ROM2 computer book choices read ids 1..28 of book +0x140: offense takes spells whose Defensive value is not 1, support Heal, Shield and the other Defensive spells; the three never choose Slow (29); no other chooser is Medium. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1248 | Census of the ROM2 computer book choices over the 29 spells: 17 can go at the victim, Heal and Shield have own arms, 9 Defensive spells go at a drawn same-owner unit at full mana, Slow is chosen by none of the three routines. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1249 | EN ROM2 support choice L2.04142 equals RU L2.01533 after masking over its whole body, as do EN area query L2.06596, filter L2.07099, offensive choice L2.04141, spell fill L2.07100 and five helpers. | High | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1250 | No direct reference names the ROM2 priority routine (RU L2.02116, EN L2.04101) in either root: no rel32 call or jump, no rel32 or rel8 branch and no absolute dword in any section. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+
+### R2-ENGINE-1244
+
+Routes of a computer mage to a book spell:
+
+1. Attack route. The attack planner RU `L2.01530` / EN `L2.03461` runs its slot draws first
+   (R2-ENGINE-651, R2-ENGINE-653), then calls the offensive choice (RU call `L2.07101`, EN
+   `L2.07102`). With Mind `+0x88` above 0x3b and `L2.01532(100)` below 30, the offensive choice calls
+   the attack planner again and returns 0. Otherwise it casts one drawn book spell at the victim and
+   returns 1, or returns 0 when no spell qualifies (R2-ENGINE-1246, R2-ENGINE-1247). After a return
+   of 0 the planner stores command `+8` = 5 (RU listing EXP-2042
+   `evidence/measured/listings/ru-player-kind-policy.txt`, `L2.07101..L2.07103`; EN R2-ENGINE-902).
+2. Idle route. The idle wrapper RU `L2.01531` / EN `L2.04984` stores command `+8` = 0xb and calls
+   the heal routine (RU call `L2.07104`, EN `L2.07105`) (R2-ENGINE-1200). The heal routine casts
+   nothing without a book, with mana `+0x9a` not above 10, or without Heal (24) in the book. It casts Heal at the
+   caster when `+0x94` differs from `+0x96`, else at the first wounded unit of its candidate list
+   (R2-ENGINE-1200, R2-ENGINE-1245), else calls the support choice (RU call `L2.07106`, EN
+   `L2.07107`).
+3. Support choice, in order: Heal at the caster when hurt; Shield (27) at the caster when Shield is
+   in the book and the caster's effect mask `+0x144` lacks bit 27; then one drawn candidate
+   (R2-ENGINE-1245), which must have the caster's owner; Heal at it when hurt; then, at full mana
+   only, one drawn Defensive book spell at it unless its effect mask already has that spell's bit
+   (R2-ENGINE-1246, R2-ENGINE-1247). Each arm that casts returns 1; the others return 0.
+
+Direct references (population of R2-ENGINE-1250: rel32 calls and jumps, rel32 and rel8 branches in
+the executable sections, absolute dwords in every section of each root's `allods2.exe`):
+
+| Target (RU / EN) | References per root | Sites RU / EN |
+|---|---|---|
+| offensive choice | 1 | `L2.07101` / `L2.07102` |
+| heal routine | 1 | `L2.07104` / `L2.07105` |
+| support choice | 1 | `L2.07106` / `L2.07107` |
+| idle wrapper | 4 | `L2.07108`, `L2.07109`, `L2.07110`, `L2.07111` / `L2.06126`, `L2.06141`, `L2.06129`, `L2.06142` |
+| `L2.01733` / `L2.04965` | 16 | 4 pushing 1: `L2.07112`, `L2.07113`, `L2.07114`, `L2.07115` / `L2.07116`, `L2.07117`, `L2.07118`, `L2.07119`; 12 pushing 0 |
+| priority routine | 0 | none |
+
+RU `L2.01733(unit, flag)` (EXP-2153 `evidence/generated/win/ru-attack-retarget.lst`, whole) calls the
+idle wrapper when flag is nonzero and `L2.01731(unit)` otherwise. The call at RU `L2.07108` is the idle
+planner's arm read at `L2.07120..L2.07121`; `L2.07111` lies in programme 0x13 (R2-ENGINE-1200).
+
+**Confidence.** High for the reference counts as a census of the direct forms named, and for the
+bodies of the three choosing routines in RU (EXP-2042 listings) and EN (R2-ENGINE-1249). Medium that
+no other routine chooses a book spell for a computer mage: readers of book `+0x140` were not
+censused, and computed or table calls not stored as an absolute dword are outside the population.
+Medium for "computer" (R2-ENGINE-362, R2-ENGINE-902); for the pushed flag values at the 16 calls of
+`L2.01733` / `L2.04965` in both roots, which are a byte pattern nine bytes before each call (scan
+field `minus9`), not a decoded window; and for the EN flag test, whose EN body is not read. Unknown
+for cadence.
+
+**Unknown.** How often the attack planner and the idle wrapper run for one unit per simulation
+tick, and which of the 4 flag-1 callers of `L2.01733` and the 2 programme callers run for a given
+order; R2-ENGINE-1073 counts the actor step, not these routines. Reading the callers of the 11 planner call sites of R2-ENGINE-651 and of the 4 flag-1 sites,
+or a run of the original counting entries of the heal routine per tick, would settle it.
+
+**Amends.** R2-ENGINE-351's and R2-ENGINE-457's Unknown on the callers of the computer routines: one
+direct caller each in both roots.
+
+**Evidence.** EXP-2167 `RESULTS.md` question 1; `navigation/listings/ru-refs-decision.txt`,
+`en-refs-decision.txt`, `ru-idlearm-L2.07122.txt`, `en-idlearm-L2.07123.txt`.
+
+### R2-ENGINE-1245
+
+Candidate list of the heal routine and the support choice. The heal routine builds it with the area
+query RU `L2.05939` / EN `L2.06596` (whole bodies, masked equal, R2-ENGINE-1249) centred on the
+caster's cell with radius = byte `+9` of Heal, the Max Range of Heal, 6 in both roots
+(R2-ENGINE-1248). The query tests the centre cell first and then rings 1..r (R2-ENGINE-1188), so the
+unit that `L2.02476` returns for the caster's cell is the first member; that this is the caster, and
+that the cell passes flag 0x20 of `L2.03520`, are Medium. Filter RU `L2.06768` / EN `L2.07099` (EXP-2063
+`out/listings/ru-pickers-filter.txt` lines 136..223; EN masked equal) keeps a member when bit value
+2 of relation byte `[session +0xa8c4 + 0x46 x owner(caster).word4 + owner(member).word4]` is set; a
+member with effect bit 0x1000 is kept only if some member of the caster's `+0x70` list has
+`L2.01588` at most that member's command byte `+0x71`; the others are removed through `L2.04531`.
+
+Heal at a candidate: the heal routine takes the first member in list order with the least integer
+quotient `+0x94 / +0x96` and casts Heal when it is below 1.0 (R2-ENGINE-1200), so Heal goes to the
+first wounded member, of any owner the filter keeps.
+
+Other support spells: the support choice draws index `L2.01532(count)` over the same list (count
+`+0xc` of the list object, RU `L2.02502` -> `L2.02799`) and walks to that member (`L2.00209`,
+`L2.00213`, RU `L2.00211` / EN `L2.00210` masked equal). When the member's owner `+0x14` differs
+from the caster's it returns 0 and casts nothing. The caster can be drawn if it is a member
+(Medium, see Confidence). The offensive
+choice takes no candidate list: it casts at the victim it is given.
+
+**Confidence.** High for the RU bodies of the area query, the filter, the support choice and the list
+step, and for EN through R2-ENGINE-1249 (masked equality hides numbers of 0x1000 or more: the EN
+values `0xa8c4`, `0xa50` and 0x1000 are read directly in the EN listings, not by equality). Medium
+for the caster being the first member and a drawable member (flag 0x20 of `L2.03520` and `L2.02476`
+unread). Medium for the meaning of bit 2 as "allied": the save
+diagonal holds 2 (R2-ENGINE-826, R2-SESSION-312); Medium for the unread helpers `L2.04531`,
+`L2.01588`, `L2.00550` and `L2.02476` (names by call shape), and for the EN list count, whose inner
+helper `L2.02800` is not read.
+
+**Amends.** R2-ENGINE-457's "support at self or a same-owner unit": Heal from the heal routine goes
+to the first wounded member of any owner whose relation bit 2 is set; only the drawn member of the
+support choice must have the caster's owner.
+
+**Evidence.** EXP-2167 `RESULTS.md` question 2; `generated/listings/ru-areaquery-L2.05939.txt`,
+`navigation/listings/en-areaquery-L2.06596.txt`, `ru-listnext-L2.00211.txt`, `ru-listcount-L2.02799.txt`.
+
+### R2-ENGINE-1246
+
+Values compared:
+
+| Routine | Test | Source |
+|---|---|---|
+| heal routine | mana `+0x9a` above 10; Heal in the book | R2-ENGINE-1200 |
+| heal routine, support choice | hurt: `+0x94` differs from `+0x96` | |
+| heal routine | least quotient below the double 1.0 at `L2.01516` | R2-ENGINE-1200 |
+| support choice | Shield: caster `+0x144` bit 27 clear | |
+| support choice | Defensive spells: mana `+0x9a` equals `+0x9c` | |
+| offensive and support choice | spell cost `+0xc` at most mana `+0x9a` | |
+| support choice | target `+0x144` lacks bit id | |
+| offensive choice | Mind `+0x88` above 0x3b and `L2.01532(100)` below 30: no cast | |
+
+Heal and Shield arms test no cost; the heal routine's mana gate (above 10) covers Heal (5) and
+Shield (10) (R2-ENGINE-1248).
+
+Choice. The offensive choice and the last step of the support choice collect the qualifying ids in
+ascending order in a local list (RU `L2.07124` constructor, `L2.07125` size, `L2.07126` append,
+`L2.07127` head, `L2.07128` next, `L2.07129` destructor; node `L2.07130` raises the count; EN
+`L2.07131` and `L2.07132` masked equal), draw `L2.01532(size)` and take that element. The support
+choice draws its member the same way (R2-ENGINE-1245). Heal takes the first wounded member, not a
+draw. `L2.01532(n)` returns `L2.02431()` x n divided by the dword at its `this` (R2-ENGINE-651). The
+Random constructor RU `L2.07133` / EN `L2.07134` (whole, masked equal) stores 0x8000 at `[this]`,
+calls `time(0)` and seeds; the session constructor RU `L2.07135` calls it on its own `this` before
+its members at `+8` .. `+0xbd98`. If the divisor at the draw is the constructor's 0x8000 (Medium),
+and with a generator value 0..0x7fff, the index is 0..n-1, each index taking floor or ceil of
+0x8000 / n generator values.
+
+**Confidence.** High for the tests and the draw shape in RU (EXP-2042 listings) and EN
+(R2-ENGINE-1249; numbers of 0x1000 or more are masked there, so the EN divisor 0x8000 is read
+directly in `en-randctor-L2.07134.txt`, not by equality). Medium for the divisor at each draw: the routines draw with their own `this`,
+which is read as the session object; writers of session `+0` after the constructor were not
+censused; the EN session constructor is not read.
+
+**Amends.** R2-ENGINE-651's Unknown on the divisor's writer and R2-ENGINE-457's Unknown on the
+distribution of the random book choice: the constructor writes 0x8000. R2-ENGINE-351's Unknown on
+the index distribution: uniform if the divisor stays 0x8000 (Medium).
+
+**Evidence.** EXP-2167 `RESULTS.md` question 3; `navigation/listings/ru-randctor-L2.07133.txt`,
+`en-randctor-L2.07134.txt`, `ru-sessctor-L2.07136.txt`, `ru-vector-L2.07124.txt`, `ru-listnode-L2.07130.txt`.
+
+### R2-ENGINE-1247
+
+Spells each routine can choose, for a book spell the book getter returns:
+
+- Offensive choice: ids 1..28 whose defensive byte is 0 and cost is at most mana.
+- Heal routine and support choice: Heal (24) and Shield (27) by id; then ids 1..28 whose defensive
+  byte is nonzero, other than 24 and 27, with cost at most mana.
+
+The defensive byte is 1 exactly when the spell row's Defensive value (value 0x12) equals 1: the spell
+fill RU `L2.00037` stores `[value 0x12] == 1` at `+0xa`, value 1 (Mana Cost) at `+0xc` and value 6
+(Max Range) at `+9` (EXP-2057 `out/listings/ru-spell-object.txt` `L2.07137..L2.07138`); EN
+`L2.07100` is masked equal over the whole fill (R2-ENGINE-1249). Defensive is 1 for ids 4, 8, 12,
+13, 15, 19, 20, 21, 23, 24, 27 and -1 for the other 18 (R2-ENGINE-1248). Both loops stop at 28, so
+these three routines never choose Slow (29); that no other routine chooses a book spell is Medium
+(R2-ENGINE-1244). The slot draws of R2-ENGINE-653 can cast it.
+
+Book source for template units: the template loader books each Units Spell 1..3 above 0
+(R2-ENGINE-652) and, for knownSpells bit i set, books spell i for i = 1..29 (RU `L2.07139..L2.07140`,
+EXP-2082 `out/listings/ru-template-loader.txt`).
+
+**Confidence.** High for the two id loops and the defensive byte in both roots. Medium that no
+other routine chooses a book spell (R2-ENGINE-1244). Medium for the
+knownSpells booking in EN (the EN loop is not compared here) and for books of units not built from
+a template (heroes, summons, loaded saves), which are not read.
+
+**Evidence.** EXP-2167 `RESULTS.md` question 4; `generated/listings/en-spellfill-L2.07100.txt`,
+`generated/derived/compare.tsv` row `spellfill`.
+
+### R2-ENGINE-1248
+
+`generated/derived/census.tsv` (census program `evidence/census.py` over EXP-2082
+`out/data/ru-spell-rows.tsv`, `ru-unit-spell-slots.tsv` and `ru-unit-spell-ids.tsv`; both roots'
+`world.res` hash to
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`, the input of those tables):
+
+- At the victim, by the offensive choice: 1, 2, 3, 5, 6, 7, 9, 10, 11, 14, 16, 17, 18, 22, 25, 26,
+  28 (17 spells).
+- Heal (24, cost 5, Max Range 6): at the caster when hurt, else at the first wounded candidate
+  (`census.tsv` row 24; the support choice's own Heal at a drawn same-owner candidate is in
+  R2-ENGINE-1244 and is not a census row).
+- Shield (27, cost 10): at the caster when its effect bit 27 is clear.
+- At a drawn same-owner candidate at full mana, unless it has the spell's effect bit: 4, 8, 12, 13,
+  15, 19, 20, 21, 23 (9 spells).
+- By none of these three routines: Slow (29); that no other routine chooses it is Medium.
+
+Rules applied are R2-ENGINE-1244 to R2-ENGINE-1247; the table also lists cost, Max Range, the
+special-cast aim of R2-ENGINE-653, the Spell 1..3 slot rows and the number of the 64 knownSpells
+masks that include each spell (Heal 40, Shield 58).
+
+**Confidence.** High for the data values and for the arm per spell under the rules read in RU.
+Medium wherever a link is Medium: that no other routine chooses a book spell (R2-ENGINE-1244), bit 2
+and the unread list helpers `L2.04531`, `L2.01588`, `L2.00550`, `L2.02476` and the EN list-count
+helper `L2.02800` (R2-ENGINE-1245), the divisor at each draw (R2-ENGINE-1246) and the books
+(R2-ENGINE-1247).
+
+**Unknown.** What a cast at a same-owner unit does for spells whose apply ignores the target, such
+as Summon or Teleport; the per-spell apply was not read.
+
+**Evidence.** EXP-2167 `RESULTS.md` question 5.
+
+### R2-ENGINE-1249
+
+Masked comparison (`evidence/maskcmp.py`: operand numbers of 0x1000 or more become `A`, int3
+dropped), `generated/derived/compare.tsv`, every pair equal in count and every position:
+
+| Pair (EN / RU) | Instructions |
+|---|---|
+| support choice `L2.04142..L2.07141` / `L2.01533..L2.07142` | 163 |
+| support choice `L2.07141..L2.07143` / `L2.07142..L2.07144` | 112 |
+| offensive choice `L2.04141..L2.07145` / `L2.00056..L2.07146` | 127 |
+| filter `L2.07099..L2.07147` / `L2.06768..L2.01515` | 88 |
+| area query `L2.06596..L2.06921` / `L2.05939..L2.07148` (whole) | 191 |
+| spell fill `L2.07100..L2.07149` / `L2.00037..L2.07150` (whole) | 106 |
+| list step `L2.00210` / `L2.00211` | 16 |
+| list node `L2.07132` / `L2.07130` | 75 |
+| local list `L2.07131..L2.07151` / `L2.07124..L2.07152` | 103 |
+| idle planner arm `L2.07153..L2.07154` / `L2.07120..L2.07121` | 29 |
+| Random constructor `L2.07134` / `L2.07133` | 16 |
+
+**Confidence.** High for equality of instruction structure over the windows stated. Masked equality
+does not show the same callee, global or class. Numbers of 0x1000 or more and jump targets are
+masked: the EN values 0x8000 (`en-randctor-L2.07134.txt`), `0xa8c4`, `0xa50` and 0x1000 (EXP-2063
+`en-pickers-filter.txt`) are read directly in the EN listings, not by equality.
+
+**Amends.** R2-ENGINE-756's unread rest of EN `L2.04142` and R2-ENGINE-1188's Medium on EN
+`L2.06596`: both are read whole and masked equal. R2-ENGINE-351's Unknown on EN equivalents of
+`L2.00056` and `L2.01533`, and R2-ENGINE-1200's Unknown on `L2.01533`: both are read in RU and EN.
+
+**Evidence.** EXP-2167 `RESULTS.md` questions 1 to 4; `evidence/pairs.tsv`.
+
+### R2-ENGINE-1250
+
+Census `static.py --scan-refs` over each root's `allods2.exe`: rel32 E8 and E9, 0F 8x rel32, EB and
+7x rel8 at every byte offset of the executable sections, and absolute dwords at every byte offset of
+every section. Target RU `L2.02116`: 0 hits; EN `L2.04101`: 0 hits. The same scan finds the
+references of R2-ENGINE-1244 for the other targets.
+
+**Confidence.** High for the census as a census. Medium that the routine never runs: an address
+computed at run time without a stored dword, or a jump through a register loaded from such an
+address, is outside the population.
+
+**Amends.** R2-ENGINE-756's Medium and R2-ENGINE-457's Unknown on the reachability of the priority
+routine: E9 and conditional branches are now searched and find none.
+
+**Evidence.** EXP-2167 `RESULTS.md` question 1; `navigation/listings/ru-refs-decision.txt`,
+`en-refs-decision.txt`.

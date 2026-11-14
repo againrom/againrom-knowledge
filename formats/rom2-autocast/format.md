@@ -208,8 +208,27 @@ R2-ENGINE-541, R2-ENGINE-545
 RU selected-spell policy reads command byte+0x78 and dispatches IDs 1..28;
 it does not iterate the book to choose a replacement spell in that body.
 The selected owner-kind branches use different computer offensive and
-support routines. Random distribution and admission of every computer unit
-remain Unknown. — R2-ENGINE-350, R2-ENGINE-351
+support routines. Admission of every computer unit remains Unknown.
+— R2-ENGINE-350, R2-ENGINE-351
+
+A computer mage chooses book spells only through the offensive choice
+(attack planner) and the heal routine with its support choice (idle
+wrapper); each has one direct caller per root, and the priority routine has
+no direct reference in any form searched (R2-ENGINE-1244, R2-ENGINE-1250;
+"only" and "computer" at Medium; cadence Unknown). Heal goes to the caster
+when hurt, else to the first wounded unit of the Heal-radius area list that
+the relation filter keeps (bit 2, any owner; bit 2 as allied is Medium); Shield to the caster when its
+effect bit 27 is clear; at full mana one drawn Defensive book spell to one
+drawn list member of the caster's owner, the caster included (Medium)
+(R2-ENGINE-1245). Heal needs mana above 10; the spell and member draws are
+uniform over the candidates if the divisor stays 0x8000 (R2-ENGINE-1246,
+Medium for the divisor at each draw). The offensive choice draws one book spell of ids
+1..28 whose Defensive value is not 1, cost at most mana, and casts it at the
+victim; at Mind above 59 a draw below 30 of 100 casts no book spell and
+sends it back to the planner (R2-ENGINE-1246, R2-ENGINE-1247). The three routines never choose Slow (29) from the book (the loops stop at 28);
+that no other routine chooses a book spell is Medium (R2-ENGINE-1244).
+The per-spell census of the 29 spells is R2-ENGINE-1248; the EN bodies equal
+RU after masking (R2-ENGINE-1249).
 
 EN/RU acquired third maps, cycles, receiving byte widths, options masks and
 36-byte preference widths agree. Their key-mode field offsets differ:

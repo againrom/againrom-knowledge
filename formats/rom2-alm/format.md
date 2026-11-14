@@ -78,6 +78,11 @@ centre's. Cells with x or y below 7 or above W−8 or H−8 are skipped. A ring
 with no positive cell ends the walk. — R2-ENGINE-643, R2-ENGINE-644,
 R2-ENGINE-645
 
+Light and Darkness lower the sight word that seeds this walk through a Medium chain
+(R2-ENGINE-1240, R2-ENGINE-644); the unit sender carries the changed word to the unit's own
+player; for Human and Humanoid units with word +0xe in 0x21..0x3f another player may receive it
+(Unknown) (High for the arms, Medium for the reach, the delivery and the fog link).
+
 For each cell whose budget stays positive the stamp ORs 0xc000 into the 2×2
 fog words at that cell and its +x, +y and +x+y neighbours. The figure is
 offset by `trunc(size/2)` cells from the walk centre, so it lies on the walk

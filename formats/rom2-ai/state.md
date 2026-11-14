@@ -127,6 +127,16 @@ separate record field (R2-ENGINE-1113). EN/RU clock offsets differ
 (R2-ENGINE-1115); open writer/reader populations are on the
 [planner page](orders.md).
 
+Light and Darkness lower the sight byte +0xa5 that the ray scans and the planner, movement
+and group routines read: Darkness for a Human or Humanoid occupant, Light for a Unit occupant,
+by 1+P/30 cells while the byte is at least that amount (below it the Effect arms wrap the byte
+modulo 256 and no arm clamps; whether a reader clamps is not read except the ring walk's limit of
+19 rings, R2-ENGINE-502), with no owner test (R2-ENGINE-1236, R2-ENGINE-1237, R2-ENGINE-1238,
+R2-ENGINE-1239). The unit's own player receives the changed word (Medium; for Human and Humanoid
+units with word +0xe in 0x21..0x3f another player may receive it, Unknown) (R2-ENGINE-1240), expiry
+adds the shift back (R2-ENGINE-1241), and the per-class result is Medium (R2-ENGINE-1242)
+(High for the arms, Medium for the reach, the delivery and the fog link).
+
 The orders page's static continuation adds bounded clauses. The selector calls
 the stop chain for order 3 when the target's +0x54 is 0x10 (R2-ENGINE-1121; the
 order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium)
@@ -337,3 +347,18 @@ word stores are unclassified and are not excluded. A per-player pass
 revives a hero at health -40 or below to full health and mana
 (R2-ENGINE-1208, Medium). The RU Unit serializer holds every unit field of
 the table; Session +0 and +4 in a save are Unknown (R2-ENGINE-1209).
+
+## Computer caster spell and target choice
+
+The computer caster routines read health +0x94 and +0x96, mana +0x9a and
++0x9c, Mind +0x88, effect mask +0x144, book +0x140 and the relation byte at
+session +0xa8c4 + 0x46 x owner A + owner B, whose bit 2 keeps a candidate
+(R2-ENGINE-1244, R2-ENGINE-1245). In RU the Random constructor, called first by
+the session constructor on its own object, stores 0x8000 at session +0, the
+divisor of every draw these routines make (R2-ENGINE-1246, Medium for later
+writers); the EN session constructor is not read. Spell byte +0xa is 1 exactly when the spell's Defensive value is 1;
+ids 1..28 bound both book loops, so the three routines never choose Slow (29)
+from the book; that no other routine chooses a book spell is Medium
+(R2-ENGINE-1244, R2-ENGINE-1247, R2-ENGINE-1248). The EN bodies equal RU after masking
+(R2-ENGINE-1249); the priority routine has no direct reference
+(R2-ENGINE-1250).
