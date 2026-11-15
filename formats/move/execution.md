@@ -309,6 +309,18 @@ The step and its stepper touch these mover words: reads `+70`, `+80`, `+a6`, `+a
 `+b0`, `+b1`; writes `+72`, `+76`, `+80`, `+a6`, `+a8`, `+aa`, `+ac`; neither body has an operand at the
 order record. — MOVE-148
 
+Word `+ac` has three writers in the walk's step. Transit start stores 0 once facing equals wanted
+facing and then makes the first step call; each step call adds 1; the live step stores 0 when the
+step ends centred. A unit whose order runs through the walk arm `R0178` finishes the
+uncentred step before a new transit start resets the count; other order consumers were not read.
+A byte-scan census of the displacement finds no writer in an order or stop routine; its
+completeness is Medium. — MOVE-199
+
+A diagonal step adds `trunc(0.707 v)` to each axis, truncated toward zero, for
+`ceil(256 / trunc(0.707 v))` calls; a straight one adds `v` for `ceil(256 / v)`. At v = 16 that
+is 24 calls of 11 against 16 calls of 16. In the diagonal octants both cell bytes change on the
+same call for v 2..63; at v = 1 the diagonal stride is 0. — MOVE-200
+
 ## Blocked routes and retries
 
 An off-centre ordinary walk or pursuit continues `R0039` and returns
@@ -404,6 +416,16 @@ The selected frontend resume can bootstrap a server call, but earlier world,
 frontend, phase-dependent full-tick, command and world-object callbacks remain
 between LOAD and the selected actor consumer. Absolute first producer/read order,
 the byte at that read and native resume timing remain Unknown. — SAV-FIRSTMOVE-880
+
+In the read bodies LOAD restores a mid-step mover as saved. The 180 mover bytes and the 12
+Position bytes are transferred raw; the post-load hooks rewrite only mover `+7c` and Position
+`+08`; the walk continues the uncentred step through the live step, with no snap and no count
+reset. Unread archive and hook helpers keep this Medium. — SAV-1406
+
+After LOAD the flee picker reads the unit's restored raw Position, `cell * 256 + sub` per axis
+(High); when the same walk calls precede its read in both runs, it reads the same Position bytes
+as the run without the save (Medium). The number of calls between LOAD and that read is Unknown.
+— MOVE-201
 
 ## Mover state at mission start
 

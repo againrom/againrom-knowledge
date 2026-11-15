@@ -34,6 +34,13 @@ ticks       = ceil(256 / (stepX != 0 ? |stepX| : |stepY|))  -> mover+0xaa
 Per tick, the position advances by `(stepX, stepY)` in 1/256ths of a cell per axis and `mover+0xac`
 counts up; on reaching `mover+0xaa` the fractions snap to the centre and the surplus is discarded.
 
+`trunc` is toward zero: `R0279` stores with rounding control `0x0c00`. When both strides
+are 0 the divisor is 1. A diagonal step lasts longer than a straight one at the same v: at v = 16
+it adds 11 per axis for 24 calls against 16 for 16 calls; at v = 1 its stride is 0 on both axes.
+Where the diagonal stride divides 128, the octant 1/5 x-1 correction keeps both cell bytes
+changing on the same call (`MOVE-200`). The count is set to 0 at a transit start once facing is
+reached and again when the step ends centred (`MOVE-199`).
+
 ### When the group term is set, and when it is not (`MOVE-GATE-035`…`037`)
 
 `grpAI+0x44` is written by exactly two routines — the group Move setter `R0108` (group order
@@ -89,7 +96,9 @@ arm requires nonzero RotationSpeed. The selected move/order caller chain can rep
 this step; complete order scheduling and route/callback effects remain
 Unknown. These are local call boundaries, not a whole-action tick count —
 MOVE-TURN-044. Serialized local treatment and the post-LOAD frontier are
-SAV-TURNLOAD-822.
+SAV-TURNLOAD-822. The step record beside the turn bytes (`+aa`, `+ac`, `+ae`, `+b0`, `+b1`) is
+restored as saved in the read bodies, and an uncentred step continues on the next walk call, if
+one is made (Medium) — SAV-1406.
 
 **The turning byte has several producers.** Unit initialization stores the
 180-byte mover allocation at actor+154. Its constructor writes byte+a=16,

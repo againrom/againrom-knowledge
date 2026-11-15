@@ -140,6 +140,12 @@ Both call the same distance-3 away picker and install pending move 1. The picker
 Route search, not the picker, handles inaccessible cells. These geometry clauses survive
 the partial correction to `AI-WITHDRAW-028`, whose living-only centroid clause is retracted.
 
+After LOAD the flee picker reads the unit's restored raw Position, `cell * 256 + sub` per axis
+(High, `MOVE-174`); when the same walk calls precede its read in both runs (the calls one step takes:
+`MOVE-200`), it reads the same
+Position bytes as the run without the save (Medium). The number of calls between LOAD and that
+read is Unknown (`MOVE-201`).
+
 **Shipped threshold source, not explicit-command eligibility.** The **Humans** table has
 neither column; that is not an immunity to explicit Retreat. Of the 56 parameterised Units rows in
 both shipped roots, twelve carry a nonzero `Withdraw` and they are exactly the three ranged

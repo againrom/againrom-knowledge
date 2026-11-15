@@ -18778,3 +18778,25 @@ Jump table L03242 selects R0003 branches that write 2*spell_id+8 for rows 5, 10,
 R0210 transfers saved live blocks and calls R1570 on Unit +0xd4 for 64 bytes. Reading those stored bytes does not require rerunning an effect application at that local boundary; whether post-load or the first tick reapplies or resets them is Unknown. The seven-file `unit-fields.tsv` exports every numeric Unit run, six raw blocks as u16 and Humanoid raw24. `protections.tsv` separately pairs six live words at +0xc2+2*i and modifier words at +0x102+2*i (i=0..5), including zero-effect units. Raw-block offsets in unit-fields are relative, not absolute Unit offsets.
 
 **Confidence.** Medium for the read local transfer and reproduced saved values. The snapshots include protection changes but do not establish a LOAD reset, dropped object or lasting untimed stat change. Later derive/unapply and the actual first actor tick remain Unknown. Measure the saved words before/after LOAD, one tick and resave without recasting.
+
+## Mover step record across LOAD
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs; EN and RU byte-equal) and listings committed by earlier experiments; no process was run and no save was read. `EXP-0646` was allocated `SAV-1406`..`SAV-1408` and `MOVE-199`..`MOVE-204`; it spent `SAV-1406` here and `MOVE-199`..`MOVE-201` in `claims/move.md`; `SAV-1407` and `SAV-1408` are unused. Mover offsets are relative to the mover at actor `+0x154`; Position is the 12-byte record at actor `+0x10`.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SAV-1406 | In the read bodies LOAD restores a mid-step mover as saved: its 180 bytes and 12 Position bytes are read raw, the post-load hooks rewrite only mover `+0x7c` and Position `+0x08`, and the walk continues the step through `R0039`. | High / Medium | ✔ promoted (branch candidate) | [EXP-0646](../experiments/EXP-0646-rom1-flee-step/) |
+
+### SAV-1406
+
+- Mover serializer `R1348` (`w09`) pushes 0xb4 and the mover and tests archive `+0x14` bit 0: set calls `R0272`, clear calls `R0271`. Position serializer `R1494` (`w10`) has the same shape for 0xc bytes; Token serialize `R0950` calls it on `[this+0x10]` (`L08995`, `w06`). Neither body writes a field. The step count `+0xac`, duration `+0xaa`, octant `+0xae`, strides `+0xb0`/`+0xb1`, next cell `+0x06` and the sub bytes `+4`/`+5` are therefore the saved values.
+- Post-load slot `+0x24` (`evidence/en/bytes.tsv`): Unit `R1482`, Humanoid and Human `R1569`, which calls `R1482` and returns (`w06`). `R1482` (`w05`) calls `R1560(this)`, `R1108(+0x5c)`, `L04868(+0x64)`, `L04868(+0x44)`, `L04869(+0x68)`, `R1108(+0x40)`, and only when byte `+0x13c` is 0 the mover repair `L08765` (`L16390`) and `R0170(+0x158)` (`L04566`). Its own body stores nothing into the mover or Position.
+- `L08765` (`w07`) replaces a nonzero `+0x7c` with its lookup through `R1488` in `[L00285]+0x88`. `R1560` writes Position `+0x08` (`SAV-TOKENLOAD-092`).
+- The load arm's tail `L17647..L17648` (`w04`) copies actor `+0x148` to `+0x14c` and calls slot `+0x30` (`L08754`): Unit `R0182` returns 0 (`w02`), Humanoid and Human `R0183` return 1 (`w03`). On 0 it stores actor `+0x3c` from `R0500(+0x0c)` and clears `+0x14c`; on 1 it clears `+0x3c`. The tail also calls `R0686` (`L17649`), stores the result at actor `+0x40` (`L17650`) and calls `L17651` on actor `+0x48` (`L17652`); both bodies are unread and neither is passed the mover or Position. No other operand visible in `w04` is the mover or Position.
+- Walk `R0178` calls `R0039` while a sub byte differs from 0x80 (`MOVE-199`), whose step adds the restored strides and compares the restored count with the restored duration. The read bodies contain no snap, no count reset and no restart of a restored step.
+
+**Confidence.** High for each read body's stores and calls on both roots. Medium for the restored-as-saved headline: `R0272`/`R0271` are taken as the archive's read and write by their call shape; `R1108`, `L04868`, `L04869` and `R0170` were read by `SAV-1262` as acting on actor fields and the order block, and were not re-read here for a mover or Position operand; `R0500`, `R0686`, `L17651`, `R0272` and `R0271` were not read; no census of Position writers between LOAD and the first walk call was made.
+
+**Unknown.** Save a unit between cells, LOAD, and record Position, `+0xac` and `+0xaa` on the following calls; the record would show whether the step resumes on its next call.
+
+**Amends.** `SAV-TURNLOAD-822` (High / Unknown): the load arm's slot `+0x30` call resolves to constant returns (agreeing with `SAV-1137`, High / Medium) and writes no mover byte; its Unknown first post-LOAD driver stands.

@@ -2293,3 +2293,64 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs; EN an
 **Confidence.** High for each body's order of Position write, occupy and message. Medium for which play events reach placement and relocation, because their callers were not read. Unknown where the client draws a placed unit when its trap fires.
 
 **Unknown.** An original run that teleports a unit onto a trap cell and one that loads a map with a unit record on a trap cell would show whether these entries fire and what the client draws then.
+
+## Step count, diagonal stride and the flee read after LOAD
+
+Evidence is a static read of `rom.exe` (one image on both lawful installs; EN and RU byte-equal, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`) and listings committed by earlier experiments; no process was run and no save was read. `EXP-0646` was allocated `MOVE-199`..`MOVE-204` and `SAV-1406`..`SAV-1408` and spent `MOVE-199`..`MOVE-201` and `SAV-1406`; `MOVE-202`..`MOVE-204`, `SAV-1407` and `SAV-1408` are unused. Mover offsets are relative to the mover at actor `+0x154`; Position is the 12-byte record at actor `+0x10`, sub bytes `+4`/`+5`, 0x80 the cell centre.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-199 | In the walk's step, mover word `+0xac` is set to 0 at a transit start once facing is reached (`L17632`), +1 per step call (`L17633`) and 0 when the step ends centred (`L17634`); the census found no order or stop writer (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0646](../experiments/EXP-0646-rom1-flee-step/) |
+| MOVE-200 | A diagonal step adds `trunc(0.707 v)` per axis (double `L06908`, truncating `R0279`) for `ceil(256 / trunc(0.707 v))` calls, a straight one `v` for `ceil(256 / v)`: at v = 16, 24 calls against 16. | High / Medium | ✔ promoted (branch candidate) | [EXP-0646](../experiments/EXP-0646-rom1-flee-step/) |
+| MOVE-201 | After LOAD the flee picker reads Position as restored, the saved `cell * 256 + sub` plus the steps walked since; when both runs run the same ticks first, it reads what the unsaved run reads. The tick count after LOAD is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0646](../experiments/EXP-0646-rom1-flee-step/) |
+
+### MOVE-199
+
+- Transit start `R0054` calls set-up `R1088` (`L06858`) and, only when facing `+00` equals wanted facing `+01` (`L07009`), stores word `+0xac` = 0 (`L17632`) and calls the step (`L06896`), which makes the count 1. Unequal facing jumps to the turn `R0056` (`L07010`) without a store (`EXP-0494` listing `disasm-step-R0039-R0054.txt`).
+- Step `R0047` increments word `+0xac` on every call (`L17633`). At `L06900..L07100` it compares `+0xac` with duration word `+0xaa`; when the count is not below the duration, both sub bytes become 0x80 (`EXP-0586` listing `q8.txt`).
+- Live step `R0039` stores `+0xac` = 0 (`L17634`) when both sub bytes are 0x80 after its step call, beside its stores to `+0xaa` (`L17635`), `+0xa8` (`L17636`), `+0x80` (`L17637`) and `+0xa6` (`L14900`) and its call to `R0046` (`L07167`); the stored register is 0 on every path into the block.
+- The other step routine `L07128..L07129` increments it at `L17638` (`MOVE-093`, `EXP-0553` listing `fL17639.txt`).
+- Bulk writers: the mover constructor `R0206` zeroes 0x2d dwords (`L16717..L14127`); its four callers are `MOVE-119`'s. Serializer `R1348` transfers 0xb4 bytes (`w09`, `SAV-1406`).
+- Walk `R0178` calls `R0039` and returns while either sub byte differs from 0x80 (`L17640..L06898`, `EXP-0386` listing `walk-arm-R0178-body.txt`), so a unit whose order runs through the walk arm `R0178` finishes the uncentred step before a new transit start resets the count; other order consumers were not read.
+- Census (`evidence/table/census-ac.tsv`): a raw byte scan of the executable sections for the 32-bit displacements `0xa5..0xad`, each hit decoded at every candidate start (107 write decodes overlapping `+0xac..+0xad`, 50 LEA decodes of those displacements). Word writes: the three above, `L17638`, and four in `004f6xxx` whose base `[ebp-0x124]` is an actor. Byte writes: 31 ESP-based and one absolute (`L17641`). Dword writes: 16 alternative decodes sharing a hit with a word decode; 43 register-based, three EBP-as-register and one ESP-based in `0040..004e`; two ESP-based in `0053e`; absolute `L17642`; `L17643`. LEAs: the Humans streamer `L17644` (actor fields, `w08`), EBP-based `L17645`, six in `0058` and 42 in `0040..004e`. Bulk forms (`evidence/en/bulk.tsv`): the constructor, the serializer, four `new(0xb4)` sites, three 0xb4-byte messages (`MISSION-098`), and six other forms (`L17646`, `L17254`, `L09677` and three misaligned decodes in `004eexxx`/`004efxxx`).
+
+**Confidence.** High for the stores and the compare in the read bodies on both roots. Medium for "no writer in an order or stop routine was found": the census is a byte scan whose completeness is bounded by its method; a write through a pointer computed elsewhere, a copy without a size literal, writes wider than 8 bytes at a displacement below `0xa5`, and the owners of the `0040..004e`, `0053e`, `L17642`, `L17643`, `L17641`, `L17645` rows and the LEAs in `0058` were not read; the order consumers other than the walk arm `R0178` and the turn `R0056` were not read.
+
+**Unknown.** A debugger watch on mover `+0xac` while a unit is ordered away and stopped between cells would show every runtime writer.
+
+### MOVE-200
+
+- The double at `L06908` is 0.70699999999999996 on both roots (`evidence/en/bytes.tsv`, `evidence/ru/bytes.tsv`).
+- `R0279` (`w01`, 16 instructions) saves the FPU control word, ORs rounding control `0x0c00` (toward zero), stores the top of stack with `FISTP` qword, restores the control word and returns `EDX:EAX`.
+- Set-up `R1088` (`EXP-0586` listing `q8.txt`) computes the strides `+0xb0`/`+0xb1` from rate v and the octant's unit components: an 8-bit product `v * component` in the four straight octants, `R0279(v * component * K)` per axis in the four diagonal ones. Duration `+0xaa` is `ceil(256 / b)`, b the absolute x stride, the y stride when x is 0, and 1 when both are 0.
+- Derived table (`evidence/table/step-table.tsv`): v 1..63 by 8 octants under the per-call rule of `MOVE-199` and the octant 1/5 x-1 correction at `L06788..L06790`. Per-axis travel `N * s` lies in 256..256+s-1 before the snap. For v 2..63 the x and y cell bytes change on the same call in all 248 diagonal rows. Where the diagonal stride divides 128 (v 2, 3, 4, 6, 7, 12, 23, 24, 46) the correction fires and octants 1 and 7 change cell one call after octants 3 and 5 (v 24: call 9 against 8). Straight from the centre a positive axis changes cell on call `ceil(128 / v)` and a negative one on `ceil(129 / v)` (v 16: 8 against 9).
+- At v = 1 the diagonal stride is 0 on both axes: the sub bytes stay 0x80, and the duration is 256.
+- Shipped rows (`evidence/table/rows-table.tsv`, Speed from the committed `EXP-0093` `class-rates.csv`, 333 rows, 67 of them absent-parameter rows taken at the constructor default 16), on flat cost-8 ground with no group speed term, where v = Speed (`MOVE-RATE-029`, `MOVE-GROUP-030`), straight stride/calls and diagonal stride/calls:
+
+| Row | Speed | Straight | Diagonal |
+|---|---|---|---|
+| Units `Catapult` | 8 | 8 / 32 | 5 / 52 |
+| Units `Ogre` | 15 | 15 / 18 | 10 / 26 |
+| Units `Orc_Sword` | 16 | 16 / 16 | 11 / 24 |
+| Units `Orc_Sword.4` | 19 | 19 / 14 | 13 / 20 |
+| Units `Goblin_Pike` | 24 | 24 / 11 | 16 / 16 |
+
+**Confidence.** High for the constant, the rounding mode, the stride and duration terms and the table as their arithmetic. Medium for the in-play values of a named row off flat cost-8 ground or with a group speed term, where v follows `MOVE-RATE-029`'s terrain and slope terms, and for what follows a zero-stride diagonal call, whose next walk call was not traced.
+
+**Unknown.** A run of the original with a Speed-16 unit moving one diagonal cell on flat ground, Position recorded per call, would show 24 calls of stride 11.
+
+**Amends.** `MOVE-RATE-029`, `MOVE-DIR-034`, `MOVE-126`, `MOVE-174` (their laws stand; the card adds the rounding-mode read, the per-v call counts and the all-v same-call result).
+
+### MOVE-201
+
+- The flee picker `R0104` reads the raw Position record, `cell * 256 + sub` per axis (`MOVE-174`).
+- LOAD transfers the Position bytes and the mover's step record raw; the post-load hooks rewrite only mover `+0x7c` and Position `+0x08` (`SAV-1406`). Neither is an operand of the picker's coordinate read.
+- Each walk call after LOAD advances the restored sub bytes by the restored strides, counts on from the restored `+0xac` and centres at the restored `+0xaa` (`MOVE-199`, `MOVE-200`), as in the run that was not saved.
+- So the picker's first read after LOAD equals the unsaved run's read at the same tick when the same number of walk calls precede it in both runs.
+- The calls between LOAD and that read are not established: a pre-entry tick when campaign `+0x6b8` is nonzero (`SAV-1119`) and the tick count before the first actor tick (`SAV-1118`) are open there.
+
+**Confidence.** High for the picker's operand (`MOVE-174`'s High clause). Medium for the equality, which composes `SAV-1406`'s Medium restored-as-saved clause. Unknown for the number of walk calls and ticks between LOAD and the first read.
+
+**Unknown.** Save a withdrawing unit between cells, record Position and the picked cell over the following calls, LOAD the save, record the same, and compare.
+
+**Amends.** `MOVE-174` (High / Medium): its raw-Position read holds for a read after LOAD, on the restored bytes plus the walk calls since; which tick that read falls on is Unknown. Its facts stand.

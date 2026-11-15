@@ -34,6 +34,9 @@ helpers. Diagonal and straight costs, stopping conditions and failure paths
 are explicit in the linked procedures. — MOVE-SEARCH-001, MOVE-REFRESH-012,
 MOVE-TICK-013, MOVE-RATE-029
 
+A diagonal step lasts `ceil(256 / trunc(0.707 v))` calls and a straight one
+`ceil(256 / v)`: at v = 16, 24 against 16. — MOVE-200
+
 ## Reference map
 
 | Reference | Contents |

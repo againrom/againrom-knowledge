@@ -304,6 +304,12 @@ Frontend, world, phase and command callbacks precede the selected actor suffix,
 so the first actual restored mover event, its value and native timing remain
 Unknown. — MOVE-EVENT-060, MOVE-EVENT-061, SAV-FIRSTMOVE-880
 
+A mover saved between cells is restored as saved in the read bodies: step count `+ac`, duration
+`+aa`, octant `+ae`, strides `+b0`/`+b1`, next cell `+06` and the Position sub bytes `+4`/`+5`
+come from the document. In the read bodies the post-load hooks rewrite only mover `+7c` and Position `+08`; the load
+arm's slot `+30` call returns a constant and writes no mover byte. The walk continues the step on
+its next walk call, if one is made (Medium). — SAV-1406
+
 Because the mover is transferred raw, a document with rotation speed `+a` = 0
 terminates the original with an integer divide by zero at `L09136` on the
 first turn of an ordinary move. Original Humans carry 15..22 and Units 8..22.
