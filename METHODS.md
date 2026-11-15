@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5017. Observation: 143. Static analysis: 4188. Mixed: 686.
+Claims labelled: 5022. Observation: 143. Static analysis: 4193. Mixed: 686.
 
 ## Ledger ai
 
@@ -646,7 +646,7 @@ Claims labelled: 5017. Observation: 143. Static analysis: 4188. Mixed: 686.
 | ALM-EDITTIME-205 | static analysis | ✔ promoted |
 | ALM-HDRLIFE-206 | mixed | ✔ promoted |
 | ALM-CATAPULT-213 | mixed | ● active |
-| ALM-LOOT-214 | mixed | ● active |
+| ALM-LOOT-214 | static analysis | ● active (amended) |
 | ALM-VIEW-215 | mixed | ● active |
 | ALM-NEWMAP-236 | static analysis | ✔ promoted (amended) |
 | ALM-NEWMAP-237 | static analysis | ✔ promoted |
@@ -728,6 +728,11 @@ Claims labelled: 5017. Observation: 143. Static analysis: 4188. Mixed: 686.
 | ALM-TILE-336 | mixed | ✔ promoted (branch candidate) |
 | ALM-TILE-337 | static analysis | ✔ promoted (branch candidate) |
 | ALM-TILE-338 | mixed | ✔ promoted (branch candidate) |
+| ALM-OWNGOLD-339 | static analysis | ✔ promoted (branch candidate) |
+| ALM-OWNGOLD-340 | static analysis | ✔ promoted (branch candidate) |
+| ALM-OWNGOLD-341 | static analysis | ✔ promoted (branch candidate) |
+| ALM-OWNGOLD-342 | static analysis | ✔ promoted (branch candidate) |
+| ALM-OWNGOLD-343 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger anim
 

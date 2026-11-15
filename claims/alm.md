@@ -1713,7 +1713,7 @@ Complete originalR0278 and calleesR0469/R0470 execute in 304 additional controls
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | ALM-CATAPULT-213 | In 90.alm the catapult at (102,14) belongs to player 8 "Catapult", which is non-hostile to Self and holds 0 or 2 toward every player; no trigger names it. | High / Medium | ● active | [EXP-0478](../experiments/EXP-0478-mission-scripts/) |
-| ALM-LOOT-214 | In 111.alm the only unit with authored loot is the brigand leader, unit 91 at (80,116); the one Troll-class unit, unit 119 at (10,73), has no type-8 link, and the six type-8 records are the leader's stock and five ownerless ground ... | High / Medium | ● active | [EXP-0478](../experiments/EXP-0478-mission-scripts/) |
+| ALM-LOOT-214 | In 111.alm the only unit with authored loot is the brigand leader, unit 91 at (80,116); the one Troll-class unit, unit 119 at (10,73), has no type-8 link, and the six type-8 records are the leader's stock and five ownerless ground ... | High / Medium | ● active (amended) | [EXP-0478](../experiments/EXP-0478-mission-scripts/) |
 | ALM-VIEW-215 | In 140.alm the Rood Glaen body (unit 443, authored hp 0) and the tower near it are 227 cells from the Drop Location; the script and map data author no reveal, so neither is visible at start under local-only stamping. | High / Medium | ● active | [EXP-0478](../experiments/EXP-0478-mission-scripts/) |
 
 ### ALM-CATAPULT-213
@@ -1735,6 +1735,8 @@ In 111.alm the only unit with authored loot is the brigand leader, unit 91 at (8
 **Original status.** ● active
 
 **Evidence.** [EXP-0478](../experiments/EXP-0478-mission-scripts/)
+
+**Amended.** ALM-OWNGOLD-339 and ALM-OWNGOLD-343: the gold 10000 is the record's file gold word; at run time `R0461` gives unit 91 the record's two items and not the gold.
 
 ### ALM-VIEW-215
 
@@ -3386,3 +3388,75 @@ Population: the 38 EN and 34 RU maps (loose `.alm` and `M7R` members of `scenari
 **Confidence.** High for the paths and the archive contents of both roots. Medium for the load failure, which inherits `TERR-TILE-292`.
 
 **Unknown.** Whether a loose file in a searched directory satisfies the path (`TERR-TILE-292`).
+
+## Owned loot-record gold
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ALM-OWNGOLD-339 | For a type-8 record whose owner word +0x3c is non-zero, R0461 gives the gold word +0x48 to no object: its one read of it, L02219, sits behind L02212 (owner zero) and L17573 (container non-null). | High | ✔ promoted (branch candidate) | [EXP-0644](../experiments/EXP-0644-rom1-owned-loot-gold/) |
+| ALM-OWNGOLD-340 | An owned type-8 record keeps its gold at +0x48 until R0128 deletes the map object at L02271; the bodies of its deleter L17574 and destructor L17575 read no field of +0x3c..+0x48; their callees are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-0644](../experiments/EXP-0644-rom1-owned-loot-gold/) |
+| ALM-OWNGOLD-341 | R0208's death gold is its local [ebp-0x10], written only at L17576 (zero) and L04122 (template draw); the suppression flag [ebp-0x18] gates only the container swap L04752..L17577, and both arms reach the draw. | High | ✔ promoted (branch candidate) | [EXP-0644](../experiments/EXP-0644-rom1-owned-loot-gold/) |
+| ALM-OWNGOLD-342 | At load, death and pickup the player does not receive an owned type-8 record's gold (High: ALM-OWNGOLD-339, -341); that it never does is Medium (ALM-OWNGOLD-340). | High / Medium | ✔ promoted (branch candidate) | [EXP-0644](../experiments/EXP-0644-rom1-owned-loot-gold/) |
+| ALM-OWNGOLD-343 | Over the 38 EN and 34 RU maps (root .alm files and M7R members of scenario.res) one type-8 record has a non-zero owner and gold: 111.alm record 2, owner unit 91 (type-6 record 42, player 2), gold 10000, two elements, on both roots. | High | ✔ promoted (branch candidate) | [EXP-0644](../experiments/EXP-0644-rom1-owned-loot-gold/) |
+
+### ALM-OWNGOLD-339
+
+Population: the whole body of `R0461` (the committed EXP-0568 listing), the helpers it calls with a pointer into a type-8 record, and the type-9 backlink uses. `rom.exe` is byte-identical on both roots (SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`), so the bodies hold for EN and RU.
+
+- Every operand of the routine with displacement `0x48` is classified: the record read `L02219 mov eax,[edx+0x48]`; frame locals `[ebp-0x48]`; the allocation sizes `push 0x48` at `L17578`, `L17579` and `L17580`.
+- Owner arm (`L04680`, `+0x3c != 0`): the actor is `*R0968(map, &record+0x3c)` and the container local `[ebp-0x24]` is 0. An element item goes to actor `vt+0x3c` (`L04684`) when the element's `u16` is non-zero, else into the carrier `actor+0x7c` (`L04683`).
+- After the element loop `L02212 cmp [record+0x3c],0 / jne L17581` skips the sack build, and `L17573` skips it for a null container. Only past both does `L02219` push the gold into `R0472` (`ALM-SACK-065`).
+- Helpers called with a record-derived pointer, all read: `L17582` and `L17583` return the dword at `this+8` (an element count); `L17584` calls `L17585`, which returns `[this+4] + 4*index`; `R0130` calls `L08138`, which returns `[this+4] + 2*index`; `R0968(local table, &record+0x3c)` reads the key dword `[key]` (`L17586`) and passes the key pointer to `L17587`, whose `L17588` (`[key] >> 4`) and `L02075` (`[a] == [b]`) read only that dword; the bodies of `L17588` and `L02075` are EXP-0354 `functions.txt`, and the miss path of `R0968` calls `L17589` and `L17590`, unread, with the table and no record pointer.
+- Four indirect calls (`L17591`, `L16141`, `L17592`, `L04684`) receive the new item or the actor and the item, never a record pointer; their callees are unread, so a read of the record through a global alias rests on `ALM-MAPLIFE-226` (Unknown for a computed alias).
+- The type-9 backlink to the record (`ALM-LINK-322`) is only compared with 0 (`L17593`, `L17594`, `L17595`), never dereferenced.
+- The record constructor `R0518` zeroes `+0x3c`, `+0x40`, `+0x44` and `+0x48` (`L17596`), so below format version `0x3dd` the word is 0.
+
+The gold is discarded for every record whose owner word is non-zero at the consumer, and for an owner-zero record only when its container allocation returned null. Loader case 6 sets the owner word from the linked unit's id (`ALM-ORD-068`).
+
+**Confidence.** High for the consumer's own data flow: the whole routine and every helper reached with a record pointer are read; the alternatives that the owner arm hands the gold to the actor, its carrier or a player are excluded instruction by instruction.
+
+**Amends.** ALM-LOOT-214: its "unit 91 … carries gold 10000" names the file's gold word; at run time the consumer gives unit 91 the record's two items and not the gold.
+
+### ALM-OWNGOLD-340
+
+- `R0128` calls the consumer at `L02208`, then `R1603` with `ecx` = its own `this` (only when `[L00285]+0xc` is non-zero, `L17597..L17598`), then deletes the map object at `L02271` through `L14427(1)` to `R0522` (EXP-0568 listing).
+- `R0522`'s type-8 loop (`L17599..L17600`) calls `L17574(1)` for every non-null record. `L17574` calls `L17575`, then `R0525(this)` when bit 0 is set.
+- `L17575` calls `L17601(this)`, `L09064(this+0x28)`, `L17601(this+0x14)`, `L10166(this+0x28)`, `L17602(this+0x14)` and `L17602(this)`, and reads no other field itself; those four callees are unread.
+- The map object's three creators, the routines each passes it to and its deletion before each returns are `ALM-MAPLIFE-226`, at its grade.
+- The record list `map+0x2dc`: the committed linear decode of EXP-0542 has 35 `disp`/`imm` rows. Beyond the consumer (13), the loader (3), the destructor (4), three uncalled map constructors and three stack-frame immediates, there are five `add ecx,0x2dc` funclets (`L17603`, `L17604`, `L17605`, `L17606`, `L17607`) that each call the list destructor `L17608` and sit in runs that end `mov eax,imm32; jmp L15181`, the same shape as the record constructor's handler `L17609`; and four hits on other bases: `[L04369]+0x2dc` at `L17610`, `L17611` and `L17612`, a dword passed to `R0567`, and the store of a new `0x24` object at `L17613`.
+
+**Confidence.** High that the record is deleted before mission load returns. Medium that nothing reads `+0x48` between `L02219` and the delete: `L17601`, `L09064`, `L10166`, `L17602`, `R0525`, `L17608`'s callees and `R1603` (called when `[L00285]+0xc` is non-zero) are unread; the funclet runs are classified by shape; the `0x2dc` population is a linear decode, not a pointer-table census; the four `0x2dc` hits on other bases are classified by base, and that classification inherits the Unknown of `ALM-MAPLIFE-226` (computed alias, indirect entry into the uncalled constructors).
+
+**Unknown.** Whether an unread helper above reads the record's `+0x48`.
+
+### ALM-OWNGOLD-341
+
+Population: the whole body `R0208..R0867` in the committed EXP-0285 listing.
+
+- `[ebp-0x10]` is written at `L17576` (0) and at `L04122` (parameter 0x27 plus a draw below parameter 0x28 of `[actor+0x3c]+8`, entered when `word actor+0xe > 0x40` and parameter 0x26 exceeds a draw below 100, `MISSION-DROP-074`). It is read at `L17614` and `L17615`, the second pushing it with `actor+0x7c` into `R0871`.
+- `[ebp-0x18]` is the "NPC" find result at `L17616`, forced to 1 at `L17617` by `Player+0x5c` and `[L00285]+0xc` (`ITEM-DEATH-012`). When it is non-zero, `L04630` deletes `actor+0x7c` (`R0943(1)`) and `L17577` stores a new empty container (`R0403`); both arms continue at `L17576`.
+- A suppressed unit therefore still reaches the gold draw, and a non-zero draw still makes a sack through `R0871`.
+
+**Confidence.** High: one routine read whole, with both writes and both reads of the local named.
+
+### ALM-OWNGOLD-342
+
+- At load: `ALM-OWNGOLD-339`. Until death: `ALM-OWNGOLD-340`. At death: `ALM-OWNGOLD-341`.
+- A sack's gold reaches the owner's `Player` money at pick-up (`R0448` credits sack `+0x3c`; `ITEM-PICK-009`, `active (amended, superseded)`: its `sack+0x3c` credit clause stands, only its discriminator clause is superseded by `ITEM-PICK-016`); an owned record's gold never enters a sack, at load or at death.
+- Trigger and script operations were not read. Any that runs after mission load returns finds no record (`ALM-OWNGOLD-340`).
+
+**Confidence.** High that the load arm, the death routine and a sack pick-up do not deliver it; for the death routine High covers `R0208` only, which does not see a copy of the word an unread helper of `ALM-OWNGOLD-340` made earlier. Medium for "never", which inherits the Medium clause of `ALM-OWNGOLD-340`.
+
+**Unknown.** Whether an unread helper named in `ALM-OWNGOLD-340` reads the word before the delete. A run of the original would settle it: load `111.alm`, kill unit 91 and compare the player's money before and after picking up its sack with the template gold of its Data.bin row.
+
+### ALM-OWNGOLD-343
+
+Population: every root `.alm` and every `scenario.res` member that starts `M7R\0` of both roots (38 EN, 34 RU), walked through each map's record table by the committed census program; inputs named by SHA256 in its `inputs.tsv`. The runtime owner applies loader case 6: the sign-extended unit id of the last type-6 record whose link minus one indexes the record.
+
+- EN: 180 type-8 records, 43 with a non-zero owner, 12 with a non-zero gold word, 11 of them ownerless. RU: 176, 43, 9, 8.
+- The runtime owner equals the file owner on every record of both roots.
+- RU `Horror.alm` walks 4 records and has no type-8 record (`ALM-CORP-060`).
+- The record: `111.alm` (a `scenario.res` member) type-8 record 2, owner 91, linked from type-6 record 42 (unit id 91, player 2, cell (80,116), `+0x08` = 9), gold 10000, two elements; one type-6 record has that unit id. The same on both roots.
+- At load the unit receives the two items (`ITEM-OWNED-028`) and not the gold (`ALM-OWNGOLD-339`); the player does not receive the 10000 at load, death or pick-up (High, `ALM-OWNGOLD-339`, `-341`, `ITEM-PICK-009`); that it never does is Medium (`ALM-OWNGOLD-342`); unit 91's own death gold is its template draw (`MISSION-DROP-074`).
+
+**Confidence.** High for the census of the population walked; other archives and maps in saves were not read. The consequences carry the grades of the claims they cite.

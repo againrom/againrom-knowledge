@@ -144,6 +144,12 @@ container-identity sentence is retracted), `ITEM-GROUNDMOVE-130` and
 leaves nothing at all. Because the strip precedes the
 emptiness test, a body that wore anything leaves a sack even if it carried nothing.
 
+The gold of steps 7 and 8 is the routine's own local: it is written only as 0 and as the template
+draw, and the suppression of step 6 replaces only the container, so a suppressed unit still
+reaches the draw (`ALM-OWNGOLD-341`). A unit that a map's type-8 loot record names as its owner
+drops only this template gold; the record's own gold word does not reach the player at load, at
+the owner's death or at a pick-up (High); that it never does is Medium (`ALM-OWNGOLD-342`).
+
 **Death is not overridden per class.** `vt+0x18`, the tick that reaches `R0208`, is
 `R0037` on all three actor vtables. Only `vt+0x44` differs, and its empty base body is
 structural rather than stylistic: `Unit` is `0x198` bytes, so the loop's first read on a base

@@ -438,7 +438,8 @@ type8: no count word - the record count is meta+0x2c (the loader's case-8 bound)
        +0x08 u32 X      -> obj+0x40. L02140 shifts the fixed-point value down by 8 bits -> position byte 0
        +0x0c u32 Y      -> obj+0x44. L02141 shifts the fixed-point value down by 8 bits -> position byte 1
        +0x10 u32 gold   -> obj+0x48. R0472 arg 3; L02142 adds it to sack+0x3c
-                          (version-gated: 0 below 0x3dd)
+                          (version-gated: 0 below 0x3dd). Read on the owner==0 arm
+                          only; an owned record's gold reaches no object
        then n elements of 10 B:
        +0x00 u32 item   low u16 is a PACKED code -- R0519 cuts bits 8..11 (class),
                         12..15, 5..7, 0..4 and R0520 allocates 0x84 Weapon (1),
@@ -468,6 +469,14 @@ It then appends Effects in this order:
 
 This construction finishes before the owner-zero branch. A ground sack and actor stock therefore
 receive the same enchanted item operation; the link is not a ground-only or owner-only field.
+
+The gold word of an owned record reaches no object. `R0461` reads `obj+0x48` once, at
+`L02219`, on the owner-zero arm and only when the container exists; for a non-zero owner the
+word stays in the record, and no helper the owner arm calls reads it (`ALM-OWNGOLD-339`, High for the consumer's own data flow; the callees of its four indirect calls are unread). The
+map object's destructor deletes every record before mission load returns, so the owning unit
+carries no record gold to its death (`ALM-OWNGOLD-340`: the bodies of the deleter and destructor read no field of the word; their callees are unread, so Medium that nothing reads the word
+before the delete). One shipped record is in this state, the same on both roots: `111.alm`
+record 2, owner unit 91, gold 10000, two items (`ALM-OWNGOLD-343`).
 
 ### `rom.exe` cross-reference (`ALM-CODE-023`)
 
