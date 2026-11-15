@@ -20,6 +20,7 @@ field-specific restoration with a single generic Group reset.
 | Diplomacy and visibility population | Select eligible targets |
 | Group order | Dispatch the group behavior; order 0 delegates to member states |
 | Actor order at actor+0x158 | Holds the member action and its subject/target |
+| Caster with no group-assigned target | Heal itself or the first kept damaged unit, else may buff one unit of its own Player — AI-784, AI-785, AI-786, AI-787, AI-788, AI-789 |
 
 The full-tick group pass dispatches its current order, then applies withdrawal
 tests. Player commands can allocate a new order 0 group; map scripts can

@@ -291,10 +291,14 @@ stale latch, then repeats. With a zero latch, refusal continues to be attempted 
 
 **A creature can reach a cast through two of at least four independent mechanisms, not only the
 Mind-gated mage check below.** The two this page traces are the engage selector's own three-slot
-loop and the Mind-gated walk. Two more are already published elsewhere: the defender's own Heal
-path (`R0305`, `AI-FOLLOWHEAL-118`) and `R0113` → `R0394` (`AI-340`);
-`R0015`, which calls `R0018` twice, has not been read at all (`EnumRefs
-callto:R0018`: 13 hits / 8 owners).
+loop and the Mind-gated walk. Two more are published elsewhere: the defender's own Heal path
+(`R0305`, `AI-FOLLOWHEAL-118`), and the support arms of a member with no group-assigned
+target (`AI-784`). A computer Player's mage holding Heal heals itself or the first kept damaged unit
+within Heal's range, else may cast a Defensive spell other than Heal at one drawn unit of its own
+Player (`R0113` → `R0394`; `AI-785`, `AI-786`, random reachability `AI-340`). `R0015` (a human participant's unit with no group-assigned target) and `R0305` (the defender) cast only Heal (`AI-789`); the engage class-slot draw is a separate route (`MAGIC-322`). `R0018` searches
+for its own target only when passed none (`AI-787`). Per spell row, the 17 non-Defensive rows go at
+enemies, Heal at the caster and at units the diplomacy filter keeps, and the other 10 Defensive rows at units of the caster's
+own Player (`AI-788`).
 
 For an actor without the mage bit, the engage selector's own three-slot loop over
 `ord+0x78`/`+0x7c`/`+0x80` (each paired with a probability dword at `ord+0x84`/`+0x88`/`+0x8c`) is
@@ -323,7 +327,7 @@ if (Mind > 59 and rand()*100/0x8000 < 30):
         the re-entered call can find a slot match, or reach this same branch again and recurse
 otherwise, over ids 1..28 through Spellbook::Get:
         keep a spell iff  ManaCost <= current mana  AND  Defensive == 0
-        if the kept list is non-empty: pick one uniformly, order it
+        if the kept list is non-empty: pick one by rand()*n/[session+0], order it
         if it is empty: cast id 28 (Slow) anyway if the spellbook holds it — unfiltered by mana
                 or Defensive, because it is only the walk's own last-tested id, not a deliberate
                 fallback spell — otherwise cast nothing

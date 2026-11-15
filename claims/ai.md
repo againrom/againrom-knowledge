@@ -97,7 +97,7 @@ A new scroll pointer can therefore coexist statically with a retained old active
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-349 | `R0015`, the order 3 arm's call for a human participant's member with no group-assigned target, stores `ord+0x08` once, as 0 or 8, and never stores `ord+0x09`, `ord+0x0a` or `ord+0x0c`. | High / Unknown | ● active | [EXP-0411](../experiments/EXP-0411-stand-ground/) |
+| AI-349 | `R0015`, the order 3 arm's call for a human participant's member with no group-assigned target, stores `ord+0x08` once, as 0 or 8, and never stores `ord+0x09`, `ord+0x0a` or `ord+0x0c`. | High / Unknown | ● active (amended) | [EXP-0411](../experiments/EXP-0411-stand-ground/) |
 | AI-350 | The per-tick executor `R0016` runs no arm for `ord+0x08` of 0, 3, 0xd or 0xe, re-reads `ord+0x0c` on every row 5 pass, and stores `ord+0x08` only as 0 in its own body. | High / Unknown | ● active (amended) | [EXP-0411](../experiments/EXP-0411-stand-ground/) |
 | AI-351 | Both order 3 setters store `ord+0x08 = 0` for every member and never store `ord+0x09`, `ord+0x0a` or `ord+0x0c`; their other member stores are `ord+0x14`, `ord+0x38`, `ord+0x50`, `ord+0x60`, `actor+0x50`, `actor+0x54` and the post word. | High / Unknown | ● active (amended) | [EXP-0411](../experiments/EXP-0411-stand-ground/) |
 | AI-352 | A member holding `ord+0x08` of 5 or 1 when a Stand Ground setter runs holds 0 afterwards, with `ord+0x0a` and `ord+0x0c` unchanged, and a step already in progress ends at the next cell centre. | High / Medium / Unknown | ● active (amended, partially retracted) | [EXP-0411](../experiments/EXP-0411-stand-ground/), [EXP-0414](../experiments/EXP-0414-cycle-orders/) |
@@ -114,6 +114,8 @@ The ally scan takes the cell from `R0019(actor+0x10)`, the candidates from `R002
 **Confidence.** **High** for the write set: both routines are read whole and the store table is complete over their bodies. `R0019`, `R0017`, `R0020` and `R0021` are read whole and store nothing to an order block: `R0017` stores spell book `+0x18` once (`L00081`) and `R0021` loads the order block once, to read `ord+0x71` (`L00082`, `L00083`), while its store hits are inlined `CObList` removal on the candidate list (`L00084`..`L00085`).
 
 **Unknown.** The list iterators `R0027`, `R0028` and `R0029` and the spell book accessors `R0030` and `R0031` are not read. What word `actor+0xa0` is and what spell id 6 is stay unresolved (`AI-FOLLOWHEAL-118` selects the same id). `R0020` calls `R0032`, `R0033`, `R0034` and `R0035`, and `R0021` calls `R0036`, which are not read; neither `R0020` nor these receive the order block through a `+0x158` load. Whether the order 1, 2, 4 and 5 arms reach this routine under the same conditions is not read here.
+
+**Amended.** `AI-789`: spell id 6 is Heal (`MAGIC-SPELL-001`), which answers the Unknown on its identity. The other Unknowns stand.
 
 ### AI-350
 
@@ -430,7 +432,7 @@ Right down captures and stores the origin. With `MK_RBUTTON`, each non-zero sign
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-FILTER-001 | `R0021` is not an acquisition routine — it is a diplomacy predicate over a candidate list, and the relation it keeps is a *parameter*. | High / Medium | ● active | [EXP-0074](../experiments/EXP-0074-target-acquisition/) |
+| AI-FILTER-001 | `R0021` is not an acquisition routine — it is a diplomacy predicate over a candidate list, and the relation it keeps is a *parameter*. | High / Medium | ● active (amended) | [EXP-0074](../experiments/EXP-0074-target-acquisition/) |
 | AI-ACQUIRE-002 | The standing acquisition rule is `R0022`: everything the unit can see, filtered to enemies, nearest first and cheapest turn to break a tie — then discarded unless it is within reach. | High / Medium | ● active | [EXP-0074](../experiments/EXP-0074-target-acquisition/) |
 | AI-LIST-003 | `world+0xa4554` is the global on-map actor list, walked linearly — there is no spatial index anywhere on the acquisition path. | High / Medium | ● active (amended) | [EXP-0074](../experiments/EXP-0074-target-acquisition/) |
 | AI-DIPLO-004 | The relation a unit consults is a 50×50 byte matrix at `session+0xa9c4`, and it is empty until something fills it. | High / Medium | ● active (amended, superseded) | [EXP-0074](../experiments/EXP-0074-target-acquisition/) |
@@ -445,6 +447,8 @@ the callee clears twelve bytes of stack arguments, so the signature is `__thisca
 Two pass `wantBit = 1` — `R0015` (`L00066`) and `R0113` (`L00221`) — and both then minimise `cand+0x94 / cand+0x96`, the health fraction, and cast: they are the heal routines, which is what fixes the polarity. **Three producers fill the list**, not one: `R0020(cell, r)` builds the occupants of the `(2r+1)²` block into `world+0x5400c` (12 of the 15 sites; `callto:R0020` = 14 hits / 13 owners / 0 orphan), `R0004` fills `session+0xba4` from the world actor list by **reach**, and `R0114`/`R0110` fill it from the same list by **sight**
 
 **Confidence.** High (the signature is the twelve-byte stack clearance with the three pushes read at every site; the index arithmetic and the unlink test are single instructions; the polarity is discriminated by the two `wantBit = 1` callers doing the opposite thing, not by assumption). **Medium** that the caller list is complete — `callto:` sees direct calls and `.rdata` code pointers, so an indirect call through a computed pointer would be missed
+
+**Amended.** `AI-785` and `AI-789`: the value `R0113` and `R0015` minimise is the integer quotient `+0x94 / +0x96` (`idiv`), 0 for every unit from 1 health to maximum minus 1 and compared strictly against a 2.0 seed. The pick is the first such unit in list order, not the lowest health fraction. The side set and the other clauses stand.
 
 ### AI-ACQUIRE-002
 
@@ -5782,7 +5786,7 @@ Population: EN `rom.exe` (RU the same SHA256), scans S3 to S6 of `evidence/run1/
 | AI-523 | The hit hook `R0226` stores the turn flag, the attacker's cell and the diplomacy flip and no pending kind or target; the hit routine body, its callers and the readers of `actor+0x40` are read in `AI-546` and `AI-547` (Medium). | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-524 | The executor tail reacquires through `R0004` for every command state except 1, 0xa and 0x17 when the mover raises `+0x98`; a pick in position installs the strike (progress 1, action 3) in that same call. | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | AI-525 | The guard evaluator `R0137` engages a hostile found near the post without an order, walks an actor off its post back to it, and runs standing acquisition on the post; state `0xb` is the construction value. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
-| AI-526 | Group order `0x11` re-posts the group at random when its members are near the post, then runs the order-5 arm; `R2211` and `R2212` run the order-3 split and standing acquisition per member. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| AI-526 | Group order `0x11` re-posts the group at random when its members are near the post, then runs the order-5 arm; `R2211` and `R2212` run the order-3 split and standing acquisition per member. | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 
 ### AI-517
 
@@ -6103,6 +6107,8 @@ and `R2212` runs standing acquisition `R0022` for every member (`L14878`); their
 and `R2212` beyond their stores and calls. No player command stores group order `0x11` (`AI-487`).
 
 **Unknown.** The callers of `R2211` and `R2212`; the data that selects order `0x11` (`AI-ORDER-010`).
+
+**Amended.** `AI-784`: `R2211` and `R2212` have no rel32 and no dword reference in the image; an indirect call or jump, a rel8 short jump (not scanned) or a computed target is not excluded (Medium).
 
 ## What a unit does when its route is refused and when it is hit
 
@@ -9442,3 +9448,202 @@ whether LOAD translates the actor pointers `ord+0x0c` and `ord+0x20` is not esta
 
 **Unknown.** Save during a Guard pursuit, load, and record `ord+0x0c` and `ord+0x20` before the first
 pass.
+## Computer caster support casts: Heal and own-Player buffs
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-784 | Caster cast decisions, rel32 and dword census of 14 entries in the EN image (RU same SHA256): `R0113` and `R0015` have 8 sites each, `R0394` one; `R2211`, `R2212`, `R1048`, `L14879` and `L14880` none. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-785 | `R0113` (computer mage, Heal in book, mana above 10) heals itself when damaged, else the first kept unit below maximum health within Heal's 6 cells, else calls the buff tail `R0394`. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-786 | `R0394` draws one kept unit; a unit of the caster's own Player, caster mana full, gets an affordable non-Heal Defensive spell drawn with equal weight up to the modulus, if its Effects bit is clear; an empty draw can cast Slow. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-787 | `R0018` searches for a target only when passed none; of its 13 sites only the state-0xd re-issue `L14884` can pass a null target with a Defensive spell, so its ally search is not shown reachable. | Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-788 | Of 28 spell rows the 17 non-Defensive go at enemies (Slow also at an own unit); Heal at the caster and units the diplomacy filter keeps (which Players: Medium); the other 10 Defensive rows at own-Player units, 4 also at the caster by slot. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-789 | `R0015` and `R0305` cast only spell id 6, Heal: `R0015` at itself or the first listed unit below maximum health with word `+0x98` nonzero, not the most damaged; `R0305` at the protected unit. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+
+### AI-784
+
+Population: the census read the EN `rom.exe`; the RU `ROM.EXE` enters only through its equal SHA256
+`942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` (`evidence/images.tsv`). The
+census reads every byte offset of every executable section for `E8`/`E9` rel32 and `0F 8x` jcc rel32
+whose target is one of the 14 entries of `scan-targets.tsv`, and every byte offset of every section
+for a dword equal to an entry (`evidence/calls.tsv`, `evidence/dwords.tsv`, `evidence/counters.tsv`;
+reproduced byte for byte, `evidence/repro.tsv`). The linear sweep has 554722 instruction starts, 7053
+indirect calls and 724 indirect jumps; those are not resolved. No dword equals any entry.
+
+Sites, all at instruction starts:
+
+- `R0113` (computer mage support, `AI-785`): `L01753` (no-winner path `R0022`, `AI-715`),
+  `L17497` and `L17498` (wrappers `L14879`, `L14880`), `L02018` (walker `R0023`),
+  `L17499` (order 1 arm `R0024`), `L17500` (order 2 arm `R0025`), `L02019` (order 5 arm
+  `R0026`), `L17501` (in `R2211`).
+- `R0015` (participant heal, `AI-789`): the eight sites 10 bytes later, `L00077`, `L14881`,
+  `L14882`, `L00051`, `L00078`, `L00079`, `L00080`, `L14883`.
+- `R0394`: `L01757` in `R0113`. `R0305`: `L01146` in `R0138`. `R0393`:
+  `L05133`; `R0209`: `L01739`; both in `R0009`, which has 14 sites. `R0293`: `L17502`
+  in the script cell loop `R1139` (`AI-618`). `R0018`: 13 sites (`AI-787`).
+- None: `L14879`, `L14880`, `R2211`, `R2212`, `R1048` (`AI-620`).
+
+At each of the sites in `L17503`..`L17504` and `L17505`..`L17506` read in the committed
+listings (`EXP-0547` `b10`, `b11`; `EXP-0385` `group-order5-R0026-body.txt`; `EXP-0444`
+`listing.txt`), a member whose `ord+0x20` is null takes `R0113` when `[actor+0x14]+0x28` is
+nonzero (a computer Player, `AI-633`) and `actor+0x4c` bit 4 (the mage bit) is set, after storing
+`ord+8` = 0xb; it takes `R0015` when that dword is 0. Orders 1 and 2 also need the member's cell to
+equal the order cell and `R0040` true; order 5 and the walker test no cell. How often each arm
+runs per tick is outside this census.
+
+**Amends.** `MAGIC-320`: its eighth site `L14883` lies in `R2211`, which no rel32 and no dword
+in the image names. `AI-526`: its order-3 split `R2211` and `R2212` have no rel32 and no dword reference in the image; an
+indirect call or jump, a rel8 short jump (not scanned) or a computed target is not excluded (Medium).
+
+**Confidence.** High for the site lists in this population. Medium that these are all callers: the
+indirect calls and jumps are not resolved, and a computed target with no stored dword is not
+excluded.
+
+**Unknown.** In the original, a computer-owned mage group under each group order, with a breakpoint
+on `R2211` and `R2212`, settles whether either is ever entered.
+
+### AI-785
+
+`R0113` (listing `experiments/EXP-0386-engagement-under-occupancy/evidence/nowinner-mage-R0113-body.txt`,
+read whole). Tests in order:
+
+1. Book `actor+0x140` null (`L17507`), mana word `+0x9a` not above 10 (`L15294`), or no book
+   record for id 6 from `R0017` (`MAGIC-221`; `L17508`, `L17509`): return, no cast. Id 6 is
+   Heal (`MAGIC-SPELL-001`). A caster without Heal in its book reaches neither Heal nor the buff tail.
+2. Health `+0x94` differs from its maximum `+0x96` (`MAGIC-320`): store `ord+0x60` = 1 and call
+   `R0018(actor, actor, Heal)` (`L17510`..`L17511`).
+3. Otherwise the cell from `R0019`, the block of radius byte `Heal+9` (Max Range, 6 for Heal,
+   `MAGIC-SPELL-001`) from `R0020`, and the filter `R0021(actor, list, 1)` (`L00221`,
+   `AI-FILTER-001`); the list is built centre cell first, then rings by Chebyshev radius (`AI-336`).
+4. A walk from the list head: the integer quotient `+0x94 / +0x96` (`idiv`, `L17512`) against a best
+   seeded 2.0 (`L17513`), replaced only when strictly less (`L17514`..`L17515`). The quotient
+   is 0 for every health from `1 - max` to `max - 1`, so the pick is the first such unit in list
+   order, not the most damaged. No word `+0x98` and no other health test is in the body.
+5. Best below 1.0 (`[L00059]` = 1.0, `AI-349`; `L17516`): `ord+0x60` = 1 and Heal at the pick (`L17517`).
+   Otherwise `R0394(actor, list)` (`L01757`, `AI-786`).
+
+No health floor is tested before the quotient, so a kept unit below 1 health gives quotient 0 and
+can be the pick; whether the block lists such a unit is not read here. The caller sets are those of `AI-784`; `AI-340` publishes the random-draw reachability of the
+tail.
+
+**Amends.** `AI-FILTER-001`: the minimised value is the integer quotient, 0 for every unit below
+maximum health, so the pick is the first such unit in list order, not the lowest health fraction.
+
+**Confidence.** High for the body. Medium for which Players' units the filter keeps: the diplomacy
+byte values for the own, an allied and a neutral Player, and whether the caster is in its own list,
+are not read here.
+
+**Unknown.** In the original, a computer mage holding Heal at full mana, with one damaged unit of
+its own Player, one of an allied computer Player and one neutral within 6 cells: record
+`ord+0x28` after each pass.
+
+### AI-786
+
+`R0394(actor, list)` (listing
+`experiments/EXP-0549-route-refusal-and-hit/evidence/listings/r06-fn-R0394.txt`, read whole), whose
+one rel32 caller is `R0113` (Medium that it is the only caller, `AI-784`):
+
+1. Caster damaged and Heal in book: Heal at itself (`L17518`..`L17519`). Unreachable from
+   `R0113`, which already healed a damaged caster.
+2. `k = rand() * count / [mgr]` (`L01758`..`L17520`), a walk to element `k`; a null element
+   returns 0 (`L17521`). One unit is drawn per call.
+3. Element `+0x14` differs from the caster's `+0x14` (the Player pointer whose `+0x28` the group arms
+   read, `AI-633`): return (`L17522`, `L17523`). Only a unit of the caster's own Player continues.
+4. Element damaged and Heal in book: Heal at it (`L17524`..`L17525`); reached only for health
+   above maximum, since `R0113` enters here only with every quotient at least 1.
+5. Caster mana `+0x9a` differs from `+0x9c` (full mana; `+0x9c` receives manaMax at creation, `MAGIC-430`,
+   `HERO-HP-071`): return (`L17526`..`L17527`).
+6. Ids 1..28 through `R0017`: keep a record when non-null, cost `+0xc` not above mana
+   (`L17528`), byte `+0xa` nonzero (Defensive 1, `MAGIC-SPELL-001`; `L17529`) and id byte `+8`
+   not 6 (`L17530`). One kept record is drawn with equal weight up to the modulus of `rand()*n/[session+0]` (divisor 0x8000,
+   `MAGIC-430` Medium; `L01759`..`L17531`). The kept ids are
+   among 5, 10, 12, 15, 16, 18, 22, 23, 24 and 26 (`evidence/spell-census.tsv`).
+7. Nothing kept: the walk is skipped (`L17532`, `L17533`) and `esi` still holds the id-28 lookup.
+   A book without Slow returns; a book with Slow goes on with Slow, a Defensive -1 row, at the unit.
+8. Bit `1 << id` of the element's Effects mask `+0x144` (`MAGIC-AIBIT-082`) set: return
+   (`L05775`..`L05785`). Else `ord+0x60` = 1, `R0018(actor, element, spell)` (`L17534`),
+   return 1.
+
+**Amends.** `MAGIC-237`: the caster is the whole target set of a Defensive spell only within
+`R0209`; this routine aims a Defensive spell at one drawn unit of the caster's own Player, possibly the caster.
+
+**Confidence.** High for the body. Medium for the candidate set it draws from (that of `AI-785`) and
+for whether the caster itself can be the drawn unit.
+
+**Unknown.** In the original, a computer mage holding Heal and Bless at full mana, no damaged unit
+near it, beside two units of its own Player: record which unit and spell `ord+0x28` and `ord+0x30`
+name over 20 passes.
+
+### AI-787
+
+`R0018` (listing `experiments/EXP-0547-sighting-response/evidence/listings/b09-cast-install.txt`):
+a non-null target jumps to the install (`L06087`). A null target with spell byte `+0xa` nonzero
+builds the block of radius byte `[[actor+0x154]+8]` (unidentified) and filters with wanted bit 1;
+with byte 0, wanted bit 0; the list head becomes the target. The install stores `ord+8` = 8
+(`L00071`), `ord+0x28` = target and `ord+0x30` = spell (`MAGIC-320`).
+
+The 13 sites (`AI-784`) and their target argument, from the listings cited in `AI-784` to `AI-789`:
+`L17511`, `L17517`, `L17519`, `L17525`, `L17534`, `L00062`, `L00064` pass the caster or
+a tested non-null unit; `L01144` the protected unit (`AI-FOLLOWHEAL-118`); `L06077` and
+`L06080` the target or the caster from `R0209` (`MAGIC-237`), whose victim arm holds only byte-0
+ids; `L05147` the target of `R0393`, which keeps only byte-0 spells (`MAGIC-AI-012`);
+`L17535` lies in `R1048`, which has no caller (`AI-620`); `L14884` re-issues the stored
+`ord+0x28` and `ord+0x30` (`experiments/EXP-0440-order-pursuit/evidence/rom-fns-orders.txt`).
+
+Of the 13 rel32 sites, a null target with a Defensive spell can come only from `L14884`, and only if `ord+0x28` was
+null when a Defensive spell was stored.
+
+**Confidence.** Medium: the writers of `ord+0x28` were not censused, and the radius byte is not
+identified.
+
+**Unknown.** In the original, a computer mage that has cast a buff, with its target torn down before
+the re-issue: record whether `R0018` is entered with a null target.
+
+### AI-788
+
+The field that supplies the routines' spells is the book `actor+0x140` (`MAGIC-BOOK-002`, lookup
+`R0017`, `MAGIC-221`) for `R0113`, `R0394`, `R0015`, `R0305`, `R0393` and the
+lookup in `R0209`; the engage draw of `R0009` reads the class slots `ord+0x78`, `+0x7c`,
+`+0x80` (`MAGIC-237`). The table `evidence/spell-census.tsv` is derived from the `EXP-0636` rows of
+both roots and the `EXP-0444` arm table; the Defensive column is identical in EN and RU.
+
+- Non-Defensive (byte `+0xa` 0): 1, 2, 3, 4, 7, 8, 9, 11, 13, 14, 17, 19, 20, 21, 25, 27, 28. At
+  enemies through `R0393` (`MAGIC-AI-012`) and, for a slot holder, the victim or victim-cell arm
+  of `R0209`; Acid Stream (9, Turtle) through the slot arm at the cell next to the caster. Slow
+  (28) also at a unit of the caster's own Player through the empty draw of `AI-786`.
+- Heal (6): at the caster and at the first kept damaged unit through `R0113` (computer mage,
+  `AI-785`) and `R0015` (participant's unit, `AI-789`); at the protected unit through `R0305`.
+- Defensive other than Heal: 5, 10, 12, 15, 16, 18, 22, 23, 24, 26. At a unit of the caster's own
+  Player through `R0394` (`AI-786`). At the caster through the caster arm of `R0209` for the
+  slot holders of 15 (Bee), 18 (Goblin_Sling), 23 (Orc_Bow), 24 (Ogre); Teleport (26, Orc_Sword) at
+  the cell next to the caster.
+
+No row has no route in these routines. Every slot holder's row has manaMax 0, and the dragons and the
+Daemon hold no Defensive 1 row (`MAGIC-430`, `UNIT-167`).
+
+**Confidence.** High for the row values and each routine's filter. Medium for each route in play:
+the caller sets of `AI-784` and the filter side set of `AI-785` are Medium, and whether a manaMax 0
+slot holder completes a cast is not read here. The slot holders (Bee, Goblin_Sling, Orc_Bow, Ogre) come
+from the EN rows of `data-en.tsv`; the RU rows were compared only for the Defensive column.
+
+**Unknown.** In the original, a Bee and an Ogre in combat: record whether either starts its slot
+cast.
+
+### AI-789
+
+`R0015` (listing `experiments/EXP-0547-sighting-response/evidence/listings/b08-heal-ai.txt`),
+called where `Player+0x28` is 0 (`AI-784`): it looks up id 6 only. It heals itself when damaged, else
+walks the kept list (iterator `R0029`, unread) keeping a unit whose integer quotient
+`+0x94 / +0x96` is strictly below the best and whose word `+0x98` is nonzero (`L17536`..`L00070`),
+and casts when the best is below 1.0 (`L17537`). The quotient is 0 for every damaged unit, so the
+first such unit in list order wins. `R0305` (`AI-FOLLOWHEAL-118`) looks up id 6 only and casts
+at the protected unit. Id 6 is Heal (`MAGIC-SPELL-001`).
+
+**Amends.** `AI-FILTER-001`: for `R0015` the minimised value is the integer quotient, 0 for every unit
+below maximum health, so the pick is the first such unit in list order, not the lowest health fraction.
+`AI-349`: its Unknown on spell id 6 is answered, id 6 is Heal (`MAGIC-SPELL-001`). `MAGIC-320`: "the most damaged ally" is the first listed unit below maximum health with
+word `+0x98` nonzero, and spell id 6 is Heal. `AI-FOLLOWHEAL-118`: its spell id 6 is Heal.
+
+**Confidence.** High for the bodies. Medium for the list order, which rests on the unread iterator.
+
+**Unknown.** In the original, a participant's mage holding Heal beside two damaged units of its
+Player at different health: record which one `ord+0x28` names.

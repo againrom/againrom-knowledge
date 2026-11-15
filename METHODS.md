@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
+Claims labelled: 5011. Observation: 143. Static analysis: 4182. Mixed: 686.
 
 ## Ledger ai
 
@@ -18,7 +18,7 @@ Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
 | AI-355 | static analysis | ● active |
 | AI-356 | static analysis | ● active |
 | AI-357 | static analysis | ● active |
-| AI-349 | static analysis | ● active |
+| AI-349 | static analysis | ● active (amended) |
 | AI-350 | static analysis | ● active (amended) |
 | AI-351 | static analysis | ● active (amended) |
 | AI-352 | static analysis | ● active (amended, partially retracted) |
@@ -53,7 +53,7 @@ Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
 | AI-KEY-125 | static analysis | ● active (amended) |
 | AI-CURSOR-126 | static analysis | ● active |
 | AI-INPUT-127 | mixed | ● active |
-| AI-FILTER-001 | static analysis | ● active |
+| AI-FILTER-001 | static analysis | ● active (amended) |
 | AI-ACQUIRE-002 | static analysis | ● active |
 | AI-LIST-003 | static analysis | ● active (amended) |
 | AI-DIPLO-004 | static analysis | ● active (amended, superseded) |
@@ -379,7 +379,7 @@ Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
 | AI-523 | static analysis | ● active (amended) |
 | AI-524 | static analysis | ● active (amended) |
 | AI-525 | static analysis | ● active |
-| AI-526 | static analysis | ● active |
+| AI-526 | static analysis | ● active (amended) |
 | AI-541 | static analysis | ● active |
 | AI-542 | static analysis | ● active |
 | AI-543 | static analysis | ● active |
@@ -499,6 +499,12 @@ Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
 | AI-780 | static analysis | ● active (branch candidate) |
 | AI-781 | static analysis | ● active (branch candidate) |
 | AI-782 | mixed | ● active (branch candidate) |
+| AI-784 | static analysis | ● active (branch candidate) |
+| AI-785 | static analysis | ● active (branch candidate) |
+| AI-786 | static analysis | ● active (branch candidate) |
+| AI-787 | static analysis | ● active (branch candidate) |
+| AI-788 | static analysis | ● active (branch candidate) |
+| AI-789 | static analysis | ● active (branch candidate) |
 
 ## Ledger alm
 
@@ -1406,7 +1412,7 @@ Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
 | MAGIC-236 | static analysis | ● active |
 | MAGIC-225 | static analysis | ✔ promoted |
 | MAGIC-235 | static analysis | ● active (amended) |
-| MAGIC-237 | static analysis | ✔ promoted |
+| MAGIC-237 | static analysis | ✔ promoted (amended) |
 | MAGIC-238 | static analysis | ✔ promoted |
 | MAGIC-239 | static analysis | ✔ promoted (amended) |
 | MAGIC-240 | static analysis | ✔ promoted (amended) |
@@ -1473,7 +1479,7 @@ Claims labelled: 5005. Observation: 143. Static analysis: 4176. Mixed: 686.
 | MAGIC-323 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-324 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-328 | static analysis | ✔ promoted (branch candidate) |
-| MAGIC-320 | static analysis | ● active |
+| MAGIC-320 | static analysis | ● active (amended) |
 | MAGIC-321 | static analysis | ● active |
 | MAGIC-322 | static analysis | ● active |
 | MAGIC-340 | static analysis | ● active (amended) |

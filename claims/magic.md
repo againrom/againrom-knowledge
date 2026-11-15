@@ -1769,7 +1769,7 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs, sha25
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-237 | A slot-drawn spell is aimed by its `R0209` arm: 7 ids at the engage victim, 9 at the caster, 8 at the victim's cell, Acid Stream and Teleport at the cell next to the caster, 2 at nothing. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
+| MAGIC-237 | A slot-drawn spell is aimed by its `R0209` arm: 7 ids at the engage victim, 9 at the caster, 8 at the victim's cell, Acid Stream and Teleport at the cell next to the caster, 2 at nothing. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 | MAGIC-238 | A drawn Acid Stream or Teleport orders a kind-9 cast at the cell one step from the caster toward the victim; Teleport's nine-cell search is overwritten by that store. | High / Medium | ✔ promoted | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
 | MAGIC-239 | Kind-8/9 reach or facing failure selects approach rather than release; approach with a non-empty route retries, while route-search failure or the point obstacle branch can replace the pending kind. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md), [EXP-0497](../experiments/EXP-0497-out-of-range-cast/EXP-0497.md) |
 | MAGIC-240 | `ord+0x60` is a retention flag read by the two cast install arms: zero runs the stop-and-reset at install, nonzero keeps the order armed; the eight stores of 1 found in the AI module are in creature cast selectors. | High / Medium | ✔ promoted (amended) | [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md) |
@@ -1789,6 +1789,8 @@ So Shield, Bless, Haste and Invisibility are aimed at the caster; Darkness at th
 **Confidence.** High for the arm table (read off both roots, identical), each arm's aim and the single-push structure of the caster arm; the seven, nine, eight and two-id counts are the table's own. Medium for the caster being the whole target set of a Defensive spell: the arms were read whole, but `R0018`'s ally search was read only to the branch that selects it. The Defensive column values come from committed catalogue evidence, not from a fresh read of Data.bin.
 
 **Unknown.** The cell arms (`L05160`, the tail at `L05161`) read `target+0x10` and call `R0051` with no null test, so a null target with a drawn cell spell would read low memory. Of the fourteen direct call sites of `R0009`, nine follow a zero test of the passed value (`L01989`, `L06089`, `L00586`, `L02072`, `L02073`, `L00842`, `L01990`, `L01708`, `L01991`), two supply a null in a branch the preceding zero test and jump on equal makes unreachable (`L06090`, `L00333`), `L00336` compares with a frame-held value, `L01992` passes the working target that `R0009` has just tested nonzero, and `L01988` (command state 3) passes `ord+0xc` with no test in its routine. Whether `ord+0xc` can be zero there was not traced.
+
+**Amended.** `AI-786`: the caster is the whole target set of a Defensive spell only within `R0209`; `R0394` aims a Defensive spell at one drawn unit of the caster's own Player, possibly the caster (Medium).
 
 **Evidence.** [EXP-0444](../experiments/EXP-0444-creature-books/EXP-0444.md), `evidence/asserts-en.txt`, `evidence/listing.txt`, `evidence/spell-arms.tsv`
 
@@ -3901,7 +3903,7 @@ This card adds, at instruction level, the three mana stores that `MAGIC-316` lef
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-320 | The heal arm `R0015` casts spell id 6 from a human owner's unit's book on itself, else on the most damaged ally in range, without an order; stored as pending 8 with `ord+0x60` = 1. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
+| MAGIC-320 | The heal arm `R0015` casts spell id 6 from a human owner's unit's book on itself, else on the most damaged ally in range, without an order; stored as pending 8 with `ord+0x60` = 1. | High / Medium | ● active (amended) | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-321 | The armed cast mode stores nothing on the unit; a unit that cast returns to state 0xc, and the cast states 0xd and 0xe only re-issue the stored cast, so the mode adds no automatic cast. | Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-322 | The engage `R0009` rolls the unit's spell slots on every call and, on a hit, `R0209` stores a cast (pending 8 or 9, spell, reach; an arm for ids 4 and 25 stores no order); a mage-mask unit in melee reach of a human owner skips it. | High / Medium | ● active | [EXP-0547](../experiments/EXP-0547-sighting-response/) |
 | MAGIC-340 | For a cast started through pending kind 8 or 9: selectors test mana cost, the executor gate tests facing and reach, the admission refuses only on mana; a refusal retries until the progress-2 exit (High bodies, Medium outcome). | High / Medium | ● active (amended) | [EXP-0556](../experiments/EXP-0556-cast-starts/), [EXP-0571](../experiments/EXP-0571-teleport-admission/) |
@@ -3933,6 +3935,8 @@ without an order: the engage `R0009` draws a spell slot from `ord+0x78..0x83` an
 unresolved (`AI-349`, `AI-FOLLOWHEAL-118`), and `+0xa0` is unidentified.
 
 **Unknown.** The callee iterators `R0027`, `R0028`, `R0029`.
+
+**Amended.** `AI-784`: the eighth site `L14883` lies in `R2211`, which no rel32 and no dword in the image names (Medium that no indirect or computed entry exists). `AI-789`: "the most damaged ally" is the first listed unit below maximum health with word `+0x98` nonzero, and spell id 6 is Heal.
 
 ### MAGIC-321
 

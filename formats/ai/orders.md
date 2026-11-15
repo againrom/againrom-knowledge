@@ -187,7 +187,12 @@ replace that order before this happens (`AI-459`).
 A pending order of `0` is not a row. The index `ord+0x08 - 1` wraps above 14 and the tick ends in
 the shared tail with no arm (`AI-350`). The Stand Ground setters store `0` for every member and
 leave `ord+0x0a` and `ord+0x0c` as they were (`AI-351`). The heal AI stores `0`, or `8` when it
-casts, for a human participant's member that has no group-assigned target (`AI-349`). A step under
+casts, for a human participant's member that has no group-assigned target (`AI-349`); its spell is
+Heal and its target the caster or the first listed damaged unit (`AI-789`). A computer Player's mage
+member with no group-assigned target stores `0xb` and runs the support arm, which stores `8` when it
+heals itself or the first kept damaged unit or buffs a unit of its own Player (`AI-784`, `AI-785`,
+`AI-786`). Of the 13 rel32 sites, only the state-0xd re-issue can hand the cast install a null target with a Defensive spell (`AI-787`, Medium); the
+routes per spell row are `AI-788`. A step under
 way ends at the next cell centre (`AI-352`). Its unconditional strike consequence is
 partially retracted: a counted strike or cast finishes its progress first only when
 the common tail and other writers retain its active fields (`AI-354`).

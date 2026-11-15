@@ -40,7 +40,10 @@ equipment, script, save and external-effect changes are outside this statement.
    which walks it back to its post whenever it is farther from the post than `actor+0xa5`.
    The values left at `order+8` are 6 with a winner; with none, `0xb` for an AI-owned unit (a
    mage then 8 when its cast arm finds a target) and 0 or 8 from the heal arm for a human
-   participant's unit (`AI-715`).
+   participant's unit (`AI-715`). The mage's cast arm targets itself when damaged, else the first
+   kept unit below maximum health within Heal's range, else one drawn unit of its own Player for a
+   buff (`AI-785`, `AI-786`); the heal arm targets the first listed damaged unit (`AI-789`). Callers,
+   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`.
 
 **Sight decides the population and reach decides the pick.** An engine that acquires on sight
 alone starts fights the game does not; one that scans only within reach acquires through walls,

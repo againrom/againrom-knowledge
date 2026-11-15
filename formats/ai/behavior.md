@@ -30,6 +30,15 @@ defines what each arm does.
 
 Values 6..0x10 and 0x12..0xfe do nothing. **After every arm the withdraw tail runs**, below.
 
+**The cast and heal arms of a member with no group-assigned target.** The order 1, 2 and 5 arms and
+the order-3 walker run the same split (`AI-784`). A computer Player's mage runs the support arm: with
+Heal in its book and mana above 10 it heals itself when damaged, else the first unit below maximum
+health that the diplomacy filter keeps (`AI-785`; which Players it keeps is Medium) within Heal's range, in list order; else it draws one
+kept unit and, only for a unit of its own Player at full caster mana, casts a drawn affordable
+Defensive spell other than Heal whose effect the unit lacks (`AI-786`). A human participant's unit
+runs the heal AI, which casts only Heal (`AI-789`). The cast install searches for its own target only
+when passed none (`AI-787`); the routes per spell row are `AI-788`.
+
 Roam's local result is the Group-AI cell/counter program and the Swarm2 call,
 not a proved copy into member destinations. Swarm2 forwards the cell only on
 its zero-candidate Move fallback; Move ignores that argument and uses each
