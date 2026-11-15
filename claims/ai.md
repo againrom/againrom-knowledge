@@ -496,6 +496,8 @@ The row and column index is `Player+0x04`, a signed word (`L00249`, `L00250`), s
 
 **Amended.** Two readings of the writer set stand: the row's `disp:a5` sweep with 10 hits and two writers (`L00260`, `L00261`), and `AI-SIGHT-092`'s six writers, which withdraws the two-writer clause. The writer-set clause withdrawn by EXP-0120. The writer-set clause only: There are **six** writers (refuted, EXP-0120). Two mechanism sentences: **Both are off by one structure.** (a) `R0134` zeroes `0x1000` **dwords** at `fog+0x24000` — `0x4000` bytes, the line-of-sight accumulator — not the `0x10000`-byte byte map (superseded, EXP-0088). The "still located, not read" residue on `R0142` only; the sight stamp, the leash, both named consumers, the writer-set withdrawal by EXP-0120 and the EXP-0082/EXP-0088 corrections all stand: `R0142` is a sight-radius-bounded ring search over candidate cells, not merely located: `actor+0xa5` is read at entry and used as its own loop bound (the ring-size comparison at `L00272`-`L00273`), each candidate cell is validated against the static plane (`R0143`) and `R0144`… (narrowed, EXP-0322). `retracted.md` holds the full entries.
 
+**Amended.** The six-writer count it quotes from `AI-SIGHT-092` is partially retracted (EXP-0642, `MAGIC-443`); `actor+0xa4` has at least twelve writers in committed listings. The ten-hit `disp:a5` sweep and its two byte writers stand.
+
 ### AI-GUARD-007
 
 `R0009` is the engage routine: given a target, or else the first survivor of the occupancy block around its own cell, it sets `order+8 = 5`, `order+0xc = target`, `order+0x14 = actor+0x12c` — a target with a **stop distance**, which is the only construct in this area that survives being farther away than reach. Its 13 call sites over 9 owners are the AI's engage arms, `R0137`'s post scan among them. Both `R0009` and `R0004` refuse outright when `(actor+0x4c & 4) && actor+0x12c < 2 && Player+0x28 == 0` — a human participant's short-reach unit with that flag does **not** auto-engage; `R0004` writes the target into `order+0xc` first and then sets `order+8 = 0` (`L00121`, `L00122`, `L00123`), so the pointer is left behind but the order is idle.
@@ -1424,7 +1426,7 @@ Only `disp:440`/`disp:500` see them. Every power-of-two folding of both bases wa
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-SIGHT-092 | `actor+0xa4` is a `u16` sight radius in 1/256 cell whose high byte is `actor+0xa5`, and it has SIX writers — a `disp:a5` sweep sees two of them. | High / Medium | ● active | [EXP-0120](../experiments/EXP-0120-sight-writers/) |
+| AI-SIGHT-092 | `actor+0xa4` is a `u16` sight radius in 1/256 cell whose high byte is `actor+0xa5`, and it has SIX writers — a `disp:a5` sweep sees two of them. | High / Medium | ● active (partially retracted) | [EXP-0120](../experiments/EXP-0120-sight-writers/) |
 | AI-SIGHT-093 | The drawn fog and the AI's vision are ONE algorithm written twice, and at a whole-cell sight they agree exactly — so `TERR-FOG-088`'s Medium is discharged. | High | ● active | [EXP-0120](../experiments/EXP-0120-sight-writers/) |
 | AI-SIGHT-094 | Where the two DO diverge: the server truncates a hero's sight to whole cells and the drawn fog does not, so the fog can show a hero cells his own simulation does not grant him. | High / Medium | ● active | [EXP-0120](../experiments/EXP-0120-sight-writers/) |
 
@@ -1435,6 +1437,8 @@ The pairing is the constructor's own two stores: the byte stores of 5 into `+0xa
 **Confidence.** High that each of the six is a writer (every one is a cited instruction re-read from raw bytes on both roots, and each helper's own store was read) / **Medium** that six is the whole set: the enumeration is complete over displacement form and immediate-computed-address form and over **nothing else** — an address reached in two steps, an address carried in a field, and a wholesale `memcpy` of the actor are invisible to every sweep run here. Refuting `two` needs one counterexample and has four; asserting `six` needs an instrument this round does not supply
 The EN and RU `rom.exe` are one image (SHA-256 `942e9b72…`), so their agreement
 on this code read is not independent corroboration.
+
+**Amended.** The writer count and the completeness of its displacement-form enumeration are partially retracted: `actor+0xa4` has at least twelve writers: the six `AI-SIGHT-092` names, the four Light and Darkness apply and remove stores (`MAGIC-443`), `L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`. The six named writers, the `u16` width and the `+0xa5` pairing stand. See claims/retracted.md.
 
 ### AI-SIGHT-093
 

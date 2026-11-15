@@ -660,3 +660,51 @@ teardown by 318 ticks for Freezing and 14 for Light/Darkness. These are Medium
 conditional schedules. Actual teardown side effects remain Unknown because
 complete cell-helper/notification effects were not read; a native last-pulse
 through attachment-retirement trace would settle that boundary. — MAGIC-400
+
+## Light and Darkness sight
+
+A Light (12) or Darkness (17) cast builds one cloud AreaEffect of radius 4
+whose counter starts at 320 + trunc(16p/10), and an inner Effect of the same
+id with the word `+0x40` = p/30 + 1 for Light and -1 - p/30 for Darkness,
+duration mode and counter `+0x42` = 16. The cloud keeps its caster in `+0x3c`
+unless an unread caster test clears it. — MAGIC-441
+
+Each cloud pulse lands the Effect on every actor in the ground occupant slot
+`+4` of a covered cell. No side, owner or caster test comes first; air actors
+and structures are not visited. The only unit test before the sight store is
+the humanoid predicate `vt+0x30` in the apply. — MAGIC-442
+
+The apply lowers sight in whole cells, on disjoint classes. Light writes only
+an actor whose `vt+0x30` returns 0, the plain Unit: `actor+0xa4` falls by
+(p/30 + 1) * 256. Darkness writes only an actor whose `vt+0x30` returns 1,
+Humanoid or Human: `+0xe4` and `+0xa4` both fall by (1 + p/30) * 256. Both set
+state bit `0x2000`, which carries `+0xa4` to the owner's client fog; the
+remove adds the same amount back. Neither applies the `scanRange` kind its
+Effects string names. — MAGIC-443
+
+The lowered sight is read by the state sender and by seven `+0xa5` byte
+reads, the server sight-stamp seed among them; the drawn light comes from the
+cell mask, not from `+0x40`. Readers through a computed address and word reads
+of `+0xa4` were not searched. — MAGIC-444
+
+Both spells set the actor's `+0x144` bit for their id and refresh a present
+copy instead of stacking it. Only Darkness then records the caster for kill
+credit and calls the struck hook, on a reached ground actor of any class,
+under `MAGIC-445`'s caster and `+0x14` conditions. Expiry
+runs the remove and restores sight; a Humanoid derive keeps Darkness's
+reduction through `+0xe4`, and the plain Unit derive does not touch `+0xa4`.
+— MAGIC-445
+
+| class (`vt+0x30`) | Light | Darkness |
+|---|---|---|
+| plain Unit (0) | sight minus m cells | sight unchanged; kill credit and hook under MAGIC-445's conditions |
+| Humanoid, Human (1) | unchanged | sight minus m cells; kill credit and hook under MAGIC-445's conditions |
+| air actor, structure | not reached | not reached |
+
+m is 1 to 4 at book power. A reached unit whose sight is its shipped streamed
+value or the derive's base, with no other reduction in force, keeps sight 0 or
+more at book power (Medium: the 4-cell minimum is the corpus row of TERR-FOG-081, superseded,
+and the base of HERO-SIGHT-007, amended and superseded); whether other writers bring sight below m is
+Unknown. At 0 its body stamps no fog. A unit whose lowered
+sight is below its reach acquires only inside that sight. Above the clamped
+power range the word can wrap; that case is Unknown. — MAGIC-446, TERR-FOG-081, HERO-SIGHT-007

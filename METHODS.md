@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5011. Observation: 143. Static analysis: 4182. Mixed: 686.
+Claims labelled: 5017. Observation: 143. Static analysis: 4188. Mixed: 686.
 
 ## Ledger ai
 
@@ -147,7 +147,7 @@ Claims labelled: 5011. Observation: 143. Static analysis: 4182. Mixed: 686.
 | AI-LOS-089 | static analysis | ● active |
 | AI-LOS-090 | static analysis | ● active |
 | AI-LOS-091 | static analysis | ● active |
-| AI-SIGHT-092 | static analysis | ● active |
+| AI-SIGHT-092 | static analysis | ● active (partially retracted) |
 | AI-SIGHT-093 | static analysis | ● active |
 | AI-SIGHT-094 | static analysis | ● active |
 | AI-POST-095 | static analysis | ● active |
@@ -1334,7 +1334,7 @@ Claims labelled: 5011. Observation: 143. Static analysis: 4182. Mixed: 686.
 | MAGIC-AREAEND-041 | static analysis | ● active (amended, partially retracted) |
 | MAGIC-WALLEARTH-042 | static analysis | ● active (amended) |
 | MAGIC-AREATARGET-043 | static analysis | ● active (amended) |
-| MAGIC-LIGHTDARK-044 | static analysis | ● active |
+| MAGIC-LIGHTDARK-044 | static analysis | ● active (amended) |
 | MAGIC-WALLBLOCK-045 | static analysis | ● active |
 | MAGIC-AREACOST-046 | static analysis | ● active |
 | MAGIC-FIREDIV-047 | static analysis | ● active (amended, partially retracted) |
@@ -1526,6 +1526,12 @@ Claims labelled: 5011. Observation: 143. Static analysis: 4182. Mixed: 686.
 | MAGIC-435 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-437 | mixed | ✔ promoted (branch candidate) |
 | MAGIC-438 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-441 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-442 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-443 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-444 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-445 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-446 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger menu
 

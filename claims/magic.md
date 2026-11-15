@@ -562,7 +562,7 @@ current account.
 | MAGIC-AREAEND-041 | (rom.exe) All three modes end at the same byte; cloud teardown removes its owned cell layers, whose helper can restore saved terrain/flags. | High | ● active (amended, partially retracted) | [EXP-0172](../experiments/EXP-0172-area-tick/) · [EXP-0332](../experiments/EXP-0332-area-damage-overlap/) |
 | MAGIC-WALLEARTH-042 | (rom.exe) `wall_of_earth` applies nothing to any unit and refuses occupied cells, and no passability write was found for it. | High / Medium | ● active (amended) | [EXP-0172](../experiments/EXP-0172-area-tick/), [EXP-0174](../experiments/EXP-0174-area-movement/) |
 | MAGIC-AREATARGET-043 | (rom.exe) No per-tick routine of an area effect consults diplomacy, so an area effect pulses on the caster's own party. | High | ● active (amended) | [EXP-0172](../experiments/EXP-0172-area-tick/), [EXP-0191](../experiments/EXP-0191-itemcast-training/) |
-| MAGIC-LIGHTDARK-044 | (rom.exe) `light` and `darkness` are the same effect with opposite sign, and only `darkness` provokes its victims. | High / Medium / Unknown | ● active | [EXP-0172](../experiments/EXP-0172-area-tick/) |
+| MAGIC-LIGHTDARK-044 | (rom.exe) `light` and `darkness` are the same effect with opposite sign, and only `darkness` provokes its victims. | High / Medium / Unknown | ● active (amended) | [EXP-0172](../experiments/EXP-0172-area-tick/) |
 | MAGIC-WALLBLOCK-045 | (rom.exe) `wall_of_earth` blocks movement through the ordinary terrain-block bits, and a routine outside the area module derives them from the cell record. | High | ● active | [EXP-0174](../experiments/EXP-0174-area-movement/) |
 | MAGIC-AREACOST-046 | (rom.exe) Every occupied area layer multiplies its cell's movement cost byte by four, and the step-duration path divides it back by four once and stores the result. | High / Unknown | ● active | [EXP-0174](../experiments/EXP-0174-area-movement/) |
 | MAGIC-FIREDIV-047 | (rom.exe) `fire_ball`'s footprint-squared divide is a per-cell normalisation, not a size penalty — because a unit is stored in every cell record it covers. | High | ● active (amended, partially retracted) | [EXP-0174](../experiments/EXP-0174-area-movement/), [EXP-0271](../experiments/EXP-0271-multicell-area/) |
@@ -806,6 +806,8 @@ draw remains Unknown. Construction, timing and lifetime clauses stand.
 **Original status.** ● active
 
 **Evidence.** [EXP-0172](../experiments/EXP-0172-area-tick/)
+
+**Amended.** On the units they reach the two spells are not one effect of opposite sign: the inner Effect's apply lowers a plain Unit's `actor+0xa4` for `light` and a Humanoid's or Human's `+0xe4` and `+0xa4` for `darkness` (`MAGIC-443`, EXP-0642). The arm expressions, the shared constructor and the `light` early return stand; the statement that nothing in either cast arm writes a visibility value is limited to the two cast arms. The client-rendering Unknown is answered by `MAGIC-LIGHTDRAW-055`.
 
 ### MAGIC-WALLBLOCK-045
 
@@ -5048,3 +5050,100 @@ Jump table L03242 selects R0003 branches that write 2*spell_id+8 for rows 5, 10,
 Separately, fresh attachment in R0612 calls Effect copy R1001 at L16460, then Token copy R1134, which reads/writes +0x0e at L17480/L03176; insertion follows at L05845. The attachment search compares +0x0c. The retained noncontinuous arm calls unapply at L05205, replaces magnitude +0x40 at L16467 and counter +0x42 at L16468, then calls apply at L05206. Those explicit stores write neither retained +0x0e, +0x3c nor +0x0c. The continuous arm refreshes only the counter. Callback mutations and other cast routes are not excluded.
 
 **Confidence.** Medium for complete local EN/RU attachment/copy listings (one image), not a global store census or complete cast-to-attachment path. SAV-1397 supplies the mixed-lineage snapshot/timer fit: ten pairs with parent timers above the 628 delta depart from simple decay and retain type0, while two parent Bless timers below 628 fit expiry/fresh creation. It is one file pair, not an observed cast sequence. Actual refresh, creation and LOAD-to-draw behaviour remain Unknown without an original-runtime witness.
+
+## Light and Darkness sight
+
+Evidence is a static read of committed listings of `rom.exe` (one image on both lawful installs, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on EN and RU) and of ROM1 claims; no process was run. `EXP-0642` was allocated `MAGIC-441`..`MAGIC-448`. `p` is the cast power; one cell is 256 units of `actor+0xa4`.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-441 | A Light or Darkness cast builds one cloud AreaEffect of radius 4 and counter 320+trunc(16p/10) holding an Effect of id 12 or 17 with word +0x40 = p/30+1 or -1-p/30 and counter +0x42 = 16. | High / Medium | ✔ promoted (branch candidate) | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/) |
+| MAGIC-442 | Each cloud pulse lands the Effect on every actor in ground slot +4 of a covered cell; no side, owner or caster test is on the path, so the caster and its allies standing there are landed on; air actors and structures are not reached. | High / Medium | ✔ promoted (branch candidate) | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/) |
+| MAGIC-443 | Light's apply lowers a plain Unit's sight word +0xa4 by p/30+1 cells; Darkness's lowers a Humanoid's or Human's +0xe4 and +0xa4 by 1+p/30 cells; both set state bit 0x2000 and neither applies the scanRange kind. | High / Medium | ✔ promoted (branch candidate) | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/) |
+| MAGIC-444 | Sight is read by the state sender L16270 and seven +0xa5 byte reads, the AI stamp seed among them; Effect +0x40 by apply, remove, attach refresh and two copy constructors; no wider census was run. | High / Medium | ✔ promoted (branch candidate) | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/) |
+| MAGIC-445 | Both set actor+0x144 bit 12 or 17 and refresh instead of stacking; only Darkness records the caster for kill credit and calls the struck hook; expiry runs the remove, which restores sight. | High / Medium | ✔ promoted (branch candidate) | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/) |
+| MAGIC-446 | At book power Light takes 1..4 cells off a plain Unit's sight, owner fog and AI stamp; Darkness as many off a Humanoid's or Human's, credits and hooks a reached ground actor under MAGIC-445's conditions; air actors, structures keep theirs. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/) |
+
+### MAGIC-441
+
+- Light's arm `L05462` and Darkness's `L05463` in the cast body `R0003` each allocate `0x48` bytes and call the template constructor `R1047(row+0x1c)`, base Effect vtable `L02981`. They store the spell id in `+0x0c` (`L17540`, `L17541`), the word `+0x40` (Light `p/30 + 1` at `L05464`..`L05465`, Darkness `-1 - p/30` at `L05466`..`L05467`) and `+0x0e = 2*id + 8` (`L17542`, `L17543`). The two expressions are `MAGIC-LIGHTDARK-044`'s (High). The meaning of `+0x0e` is not read here.
+- The template parses the rows' Effects strings `scanRange=+2:duration 1` and `scanRange=-2:duration 1`: duration mode and counter `+0x42 = 16` at every admitted power (`MAGIC-398`, High / Medium). Whether the `scanRange` kind is applied is decided by the apply arms (this topic's sight claim).
+- The AreaEffect part of the same body allocates `0x50` bytes and calls the cloud constructor `R0652(inner, &point, radius)` at `L03047` with the row's radius byte, 4 for both spells on both roots (`MAGIC-LIGHTDARK-044`). It stores `+0x3c` = the caster, or 0 when `R0416(caster)` returns nonzero (`L17544`..`L08776`); `+0x0c` = id (`L16449`); `inner+0x44 = area+0x3c` (`L05415`); `+0x0e = 2*id + 9` (`L03051`); `+0x4c` = Area Effect Duration `20 << 4` = 320 (`L05101`), then `+= (p << 4)/10` with `+0x08 = 1` (`L05105`..`L05399`); `+0x4a = (R0089(...) & 0xff) >> 5` (`L05428`).
+- `p` is the cast power: the clamped `skill + Mind - 30` (0..100) when caster `+0x68` is zero, otherwise an unclamped signed `i16` (`MAGIC-303`, High / Medium). On the clamped path `p/30 + 1` is 1 for p 0..29, 2 for 30..59, 3 for 60..89 and 4 for 90..100.
+- The cloud pulses when its decremented counter is a multiple of 16, zero included (`MAGIC-304`, High / Medium): `ceil(V/16)` pulse entries for `V = 320 + trunc(16p/10)` (`MAGIC-AREAPULSE-037` as partially retracted, High).
+
+**Confidence.** High for the arm and builder stores: each is a named instruction in the EXP-0172 listings `listing-spell-arms-12-17-19.txt` and `listing-area-builder.txt`. Those listings record no image hash; they are reused at `MAGIC-LIGHTDARK-044`'s High, and EN and RU `rom.exe` are one image (SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, `evidence/generated/rom-hashes.tsv`). Medium for the caster-zero condition and `+0x4a`, which rest on the unread helpers `R0416` and `R0089`, and for the counter values at `MAGIC-398`'s and `MAGIC-303`'s Medium clauses.
+
+**Unknown.** Cast sources other than the player book and the Dragon and Daemon books (items, traps, scripts) and the power each passes.
+
+### MAGIC-442
+
+- The cloud tick `R0629` walks dx, then dy, over `-r..r`; for each cell whose spell-layer query is nonzero it reads the cell's occupant slot `+4` and calls `R0267(area, unit)`, with no set of visited targets (`MAGIC-CLOUDVISIT-156`, High). Slot `+4` holds the ground actors (movement domains 1 and 2); air actors sit in `+8` and structures in `+0xc` (`TERR-CELLREC-146`, High / Medium), so neither is reached.
+- `R0267` (EXP-0383 `areaeffect-tick-attribution-R0267-body.txt`) exits for a null unit (`L05410`) and for area id `0x13` (`L05411`), takes its own branch for id 2, and otherwise calls `[area+0x44]->vt+0x3c(unit)` (`L05412`..`L05413`), the attach `R0612` (`MAGIC-AREAAPPLY-038`, partially retracted, its dispatch clause High / Medium).
+- The attach (EXP-0594 `attachment.txt`) clears `actor+0x150` (`L17545`), admits the duration mode through `R0674`, passes the Bless/Curse loop that ids 12 and 17 do not match (`L05201`..`L05202`) and lands the Effect; its stores are this topic's other-changes claim.
+- No routine on the tick path reads the diplomacy table (`MAGIC-AREATARGET-043`, High), and neither `R0629` nor `R0267` compares the occupant with the caster `area+0x3c`, so the caster and its allies standing in a covered cell are landed on.
+- The only test on the unit before the sight store is in the Effect's apply `R0565` (EXP-0538 `evidence/n1/effect-apply-inverse.txt`): `target->vt+0x30()` at `L16324` for Light and `L16325` for Darkness. That slot is the humanoid predicate: `R0182` (`XOR EAX,EAX`, returns 0) in the plain Unit table `L00001`, `R0183` (returns 1) in the Humanoid table `L00002` and the Human table `L00003` (`SAV-ACTORBIND-544`, High; EXP-0287 `evidence/instructions.tsv`).
+
+**Confidence.** High for every test in the bodies read whole (`R0267`, `R0612`, `R0565`) and for the class predicates. Medium that air actors and structures are never reached: the slot rule is reused at `TERR-CELLREC-146`'s High / Medium, and no other route that could land an area Effect was searched.
+
+**Unknown.** Whether an actor whose token covers more than one cell is landed on once per covered cell in one pulse; the same-id refresh makes extra landings leave sight unchanged.
+
+### MAGIC-443
+
+- The apply `R0565` (Effect `vt+0x40`; EXP-0538 `evidence/n1/effect-apply-inverse.txt`, range `R0565`..`R0843`) reads the id byte `+0x0c` and compares it with 8 (`L02966`), 12 (`L02967`) and 17 (`L02968`); any other id calls `vt+0x48(target, 1)` at `L16326`, the kind dispatcher.
+- Id 12: when `target->vt+0x30()` returns 0, `target+0xa4 = u16(target+0xa4 - (movsx(+0x40) << 8))` (`L17546`..`L17547`) and `target+0x150 |= 0x2000` (`L17548`). When it returns nonzero nothing is written.
+- Id 17: when it returns nonzero, `target+0xe4 += movsx(+0x40) << 8` (`L17549`..`L17550`), `target+0xa4 += movsx(+0x40) << 8` (`L17551`..`L17552`) and `target+0x150 |= 0x2000` (`L17553`). With `+0x40 = -1 - p/30` both words fall. When it returns 0 nothing is written.
+- The remove `R1004` (`vt+0x44`) re-tests `vt+0x30` and mirrors both arms: id 12 adds the amount back to `+0xa4` (`L17554`..`L17555`, bit at `L17556`); id 17 subtracts it from `+0xe4` and `+0xa4` (`L17557`..`L17558`, bit at `L17559`).
+- Neither id reaches `vt+0x48`, so the `scanRange=+2` and `scanRange=-2` kind of the Effects strings is not applied to Light or Darkness.
+- Bit `0x2000` is the state bit whose message carries `actor+0xa4` (the sender's read at `L16270`) to the owner's client, and to every client when `vt+0x30` is nonzero and `+0x0e` lies in 0x21..0x3f; the client stores it at `drawable+0x102` (`L16269`) (`TERR-FOG-275`, High / Medium / Unknown). The attach sends `actor+0x150` at `L03264` after the apply.
+- The client fog seeds from the signed word `+0x102` and the server sight stamp from the byte `+0xa5` (`AI-SIGHT-094`, High / Medium); a body whose `+0x102` is 0 stamps no fog (`L10542`, `TERR-TILE-079`, amended and superseded, its guard clause High). A change of whole cells lowers both seeds by the same number of cells.
+- The drawn light is the cell mask, bits `0x1000` and `0x20000`, which set the terrain brightness and the unit draw level (`MAGIC-LIGHTDRAW-055`, High; `MAGIC-UNITLIGHT-057`, partially retracted, its mask clause High); no read of the Effect's `+0x40` is on that path.
+
+**Amends.** `MAGIC-LIGHTDARK-044`: on the units they reach the two spells are not one effect of opposite sign; the inner Effect writes sight, downward for both, on disjoint actor classes. `AI-SIGHT-092`: four more `actor+0xa4` writers, `L17547`, `L17552`, `L17555` and `L17558`; its count of six and the completeness of its displacement-form enumeration are partially retracted. `actor+0xa4` has at least twelve writers: the six `AI-SIGHT-092` names, the four Light and Darkness apply and remove stores (`MAGIC-443`), `L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`.
+
+**Confidence.** High for the arms, the remove and the class predicates: named instructions in listings whose inputs carry the image's SHA256 (EXP-0538 `evidence/provenance.json`, EXP-0287 `evidence/inputs.tsv`). The fog route carries `TERR-FOG-275`'s High / Medium / Unknown and the seeds `AI-SIGHT-094`'s High / Medium. Medium that a reached unit's fog shrinks on its owner's screen on the tick of the apply: the send at `L03264` was not followed into the message builder.
+
+**Unknown.** What a wrapped word does when the magnitude exceeds the unit's sight, possible off the clamped power path or when other reductions are in force: the server byte would read 252 cells or more and the client seed would be negative.
+
+### MAGIC-444
+
+- Effect `+0x40`: read by the apply `R0565` (`L17560`, `L17561`, `L17562`) and the remove `R1004` (`L17563`, `L17564`, `L17565`) (EXP-0538 `evidence/n1/effect-apply-inverse.txt`); copied by the attach's same-id refresh (`L17566`) and as a dword with `+0x42` by the two copy constructors (`L17567`..`L17568`, `L17569`..`L16461`) (EXP-0594 `generated/attachment.txt`, `generated/construct-copy.txt`). The population is those Effect-class bodies; `+0x40` is a common displacement and no image-wide search was run.
+- `actor+0xa5`, the whole-cell sight byte: a Ghidra `EnumRefs` displacement census (EXP-0187 `evidence/width-refs.txt`) lists 10 references, the writers `L00260` and `L00261`, a stack-frame address at `L00262`, and seven byte reads: `L00268` (`R0138`), `L00270` (`R0139`), `L00267` (`R0137`, a compare), `L04077` (`R0140`), `L04078` (`R0141`), `L00263` (`R0134`, the sight-stamp seed, `AI-SIGHT-094`) and `L04079` (`R0142`). The stamp read zero-extends (`XOR ECX,ECX` at `L17570`). The roles of the other six readers are not read here.
+- `actor+0xa4` as a word: the state sender's read at `L16270` (`TERR-FOG-275`) and the apply and remove arms. No census of word reads was run.
+- `actor+0xe4`: `R0280` rewrites `+0xa4` from Mind and Reaction (`HERO-SIGHT-007`, `L00919`, High) and then adds `+0xe4` into it through `R0840` (`HERO-MOD-016`, `L17538`, High).
+- The acquisition rule `R0022` draws its candidates from the stamp `R0114` and discards a pick past reach (`AI-ACQUIRE-002`, High / Medium), so the stamp read is the acquisition input.
+
+**Confidence.** High for each named read, an instruction in a committed listing. Medium for completeness: the `+0xa5` census covers the displacement form only, not an address carried in a register or a field or a wholesale copy of the actor (the blind spot `AI-SIGHT-092` names), and no census of `+0xa4` word reads, `+0xe4` reads or Effect `+0x40` reads was run.
+
+**Unknown.** Readers reached through a computed address, and what the five `+0xa5` readers other than the stamp and `L00267` compute.
+
+### MAGIC-445
+
+- The attach `R0612` (EXP-0594 `generated/attachment.txt`) sets `actor+0x144 |= 1 << id` (`L05199`..`L05675`) and calls `R0627` (body not read). It searches the actor's list for the same id (`L17571`..`L17572`). A present non-continuous copy is removed (`L05205`), given the new `+0x40` (`L16467`) and `+0x42` (`L16468`) and applied again (`L05206`), so a second cloud or pulse replaces the magnitude and the counter instead of adding to them. With none present a copy is constructed (`L16460`), applied (`L05844`) and appended to `actor+0x20` (`L05845`). It then sends `actor+0x150` (`R0059` at `L03264`). The no-stack rule agrees with `MAGIC-400` (High / Medium / Unknown).
+- After the attach `R0267` returns for Light at `L05468`. For Darkness, as for every area id other than `0xc` and `0x13`, when the unit's `vt+0x20` (movement domain) is above 0 and the caster `area+0x3c` is nonzero: `unit+0x40 = 0` if `R0416(caster)` (not read) returns nonzero; otherwise, with caster `+0x14` nonzero, `unit+0x40 = caster` (`L05469`) and `unit+0x48 = inner+0x0c` (`L05470`), the kill-credit pair (`MAGIC-LIGHTDARK-044`, High), else `unit+0x40 = 0`. When caster and unit `+0x14` are both nonzero it calls `[L00004]->R0226(caster, unit)` at `L00877`, the struck hook, which sets a turn flag, a remembered cell and a diplomacy flip and writes no pursuit (`AI-706`, Medium; `AI-707`, High / Medium). The tail does not test the class, so Darkness credits and hooks a plain Unit whose sight it leaves alone.
+- Expiry: the timer `R0673` decrements `+0x42` once per actor call; at zero it calls the remove for a non-continuous Effect, clears the id bit and marks the copy retired (`MAGIC-304`, High / Medium). The remove restores the sight words (this topic's sight claim). Under `MAGIC-400`'s single-target model a copy expires before the next pulse and is copied again, and the last copy retires 14 ticks after the cloud's teardown (Medium).
+- Derive: the plain Unit derive (`vt+0x50` = `R0836`, EXP-0347 `evidence/game-instructions.tsv`) writes `+0xa0` and not `+0xa4`, so nothing in it undoes Light's change. `R0280` rewrites `+0xa4` from Mind and Reaction (`HERO-SIGHT-007`, `L00919`, High) and then adds `+0xe4` into it through `R0840` (`HERO-MOD-016`, `L17538`, High), so Darkness's share in `+0xe4` keeps the reduction across a derive.
+- The remove writes neither `unit+0x40` nor `unit+0x48`; the kill-credit pair outlives the Effect.
+
+**Confidence.** High for the stores in the attach, the `R0267` tail and the remove, each read whole in a committed listing. Medium for the per-pulse schedule (`MAGIC-400`'s Medium model), for the hook's effects (`AI-707`'s grade) and for the routes through the unread helpers `R0416` and `R0627`.
+
+**Unknown.** Whether the bit `0x2000` the remove sets at expiry is sent before the next pulse lands, so whether the owner's fog widens for the tick between two pulses.
+
+### MAGIC-446
+
+`m` is `p/30 + 1` cells: 1 to 4 at book power 0..100 (`MAGIC-441`). Sight changes are `MAGIC-443`'s, reach `MAGIC-442`'s, other changes `MAGIC-445`'s.
+
+| class (`vt+0x30`) | actors | Light | Darkness |
+|---|---|---|---|
+| plain Unit (0) | Units-table ground actors | `+0xa4` minus `m` cells: own sight, the owner's fog seed and the AI stamp; no kill credit, no hook | sight unchanged; kill credit and hook under `MAGIC-445`'s conditions |
+| Humanoid, Human (1) | Humans-table actors and heroes | unchanged; no kill credit, no hook | `+0xe4` and `+0xa4` minus `m` cells; the owner's fog, and every client's copy when `+0x0e` is 0x21..0x3f; kill credit and hook under `MAGIC-445`'s conditions |
+| air actor (slot `+8`) | flying units | not reached | not reached |
+| structure (slot `+0xc`) | buildings | not reached | not reached |
+
+- Shipped streamed sight is 4..12 cells on the Units rows and 4..7 on the Humans rows (`TERR-FOG-081`, superseded, its corpus clause Medium), and a hero's derived sight is at least 4 cells while Mind + Reaction is not negative: `R0280` rewrites `+0xa4` from Mind and Reaction (`HERO-SIGHT-007`, High) and then adds `+0xe4` into it through `R0840` (`HERO-MOD-016`, High). A reached unit whose sight is its shipped streamed value or the derive's base, with no other reduction in force, keeps sight 0 or more at book power (Medium: the 4-cell minimum is `TERR-FOG-081`'s corpus row and `HERO-SIGHT-007`'s base); whether other writers bring sight below `m` is Unknown. A body at sight 0 stamps no fog (`TERR-TILE-079`, amended and superseded, its guard clause High) and its AI stamp has radius 0.
+- Acquisition draws on the stamp and is capped by reach (`AI-ACQUIRE-002`, High / Medium): a reached unit whose lowered sight is below its reach acquires only inside the lowered sight; the reach cap itself is unchanged.
+- Darkness is in no player book (`MAGIC-303`); the Dragon face 4 and Daemon books hold it (`UNIT-167`, High). Light is a book spell.
+
+**Confidence.** High for the sight-word writes, the kill-credit stores and the hook call in the plain-Unit and Humanoid/Human rows (`MAGIC-443`, `MAGIC-445`). The owner-fog and AI-stamp entries carry `TERR-FOG-275`'s High / Medium / Unknown and `AI-SIGHT-094`'s High / Medium. The air-actor and structure row carries `MAGIC-442`'s Medium. Medium for the actor column: that every Units-table actor carries the plain Unit table and every Humans-table actor a Humanoid or Human table is taken from the creation sequence and was not re-read; and Medium for the shipped minimum and the acquisition consequence, at their sources' grades. Unknown off the clamped power path or when other reductions are in force, where `m` can exceed the unit's sight and the word wraps.
+
+**Unknown.** Settle with the original: in a mission, an own Units-table creature and an own hero stand in one Light cast at power 90 or more; per tick for 40 ticks record each one's revealed radius. Prediction from this claim, not a finding: the creature's radius falls by 4 cells and the hero's does not change.

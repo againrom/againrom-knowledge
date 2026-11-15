@@ -46,6 +46,12 @@
 | `R2-ENGINE-691` (release moment for ID 54 only; the six IDs, the sound moment, the lifetime switch and the grades stand) | Verbatim: "and vtable +0x5c when it equals unit-type +0x11c" | High | [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), R2-ENGINE-703 | For unit +0xac = 0x36 the state 8 arm calls the release at counter 0 (`L2.03823`), and the release builds two effects of lifetime 21. | **NARROWED** |
 | `R2-ENGINE-026` (Teleport move clause only; the range term and the other arms stand) | Verbatim: "Teleport (23, `L2.00080`): moves the caster to the target cell through `L2.00093`" | High | [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), R2-ENGINE-705 | `L2.00093` moves the caster to the target cell centre only when `L2.02921` passes; otherwise it returns 1 with no move. | **NARROWED** |
 
+## EXP-0642: Light and Darkness sight writers
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `AI-SIGHT-092` (the writer count and the completeness of its displacement-form enumeration; the `u16` width, the `+0xa5` pairing and each of the six named writers stand) | Verbatim: "and it has SIX writers" | Medium | [EXP-0642](../experiments/EXP-0642-rom1-light-sight/), MAGIC-443 | The Effect apply `R0565` stores `actor+0xa4` as a 16-bit word at `L17547` (Light, id 12) and `L17552` (Darkness, id 17), and the remove `R1004` at `L17555` and `L17558`; each is a displacement-form store to the actor argument. The set has at least twelve writers: the six `AI-SIGHT-092` names, the four Light and Darkness apply and remove stores (`MAGIC-443`), `L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`; its completeness is not established. | **REFUTED** — partially retracted |
+
 ## EXP-0633: Building raw block base
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

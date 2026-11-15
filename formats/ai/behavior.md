@@ -346,6 +346,10 @@ scored target, stop distance = reach). A Darkness hit writes no pursuit; a pursu
 follows only when a later group pass finds it inside the circle. Both negatives rest on the pursuit
 writer census above and are Medium. — AI-707
 
+**Light and Darkness.** Darkness credits its caster and calls the struck hook on a reached ground actor of any class,
+under `MAGIC-445`'s caster and `+0x14` conditions, and lowers sight only on Humanoids and Humans; Light does neither of the first
+two and lowers sight only on plain Units. — MAGIC-445, MAGIC-446
+
 **Alert between groups.** Nothing reached from the hook, the builder or the arms writes another
 group's order, cell or members. An alert crosses groups only through the player-level diplomacy
 flip, after which every group of both players treats the other's units as hostile inside its own

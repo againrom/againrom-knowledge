@@ -71,7 +71,7 @@ appends the primary and returns before reading the cap. Its stack pointer region
 and its winner/threshold regions ten; neither population overflow nor a custom cap above ten is
 checked. Candidate scores are session scratch at `+0xd74`, whose capacity is Unknown.
 
-### The sight stamp, complete (`AI-GROUPSEE-068`, `AI-LOS-087`…`AI-LOS-091`, `AI-SIGHT-092`…`AI-SIGHT-094`)
+### The sight stamp, complete (`AI-GROUPSEE-068`, `AI-LOS-087`…`AI-LOS-091`, `AI-SIGHT-092`…`AI-SIGHT-094`; the writer count of `AI-SIGHT-092` is partially retracted)
 
 The sight object is embedded at `world+0x58ee8`. Its init runs in each of the four world
 constructors, **before the map is loaded**, and builds three tables that depend on
@@ -125,8 +125,17 @@ seed for whole-cell sight. The shared algorithm has two parameters:
 - **the playable rectangle.** `8 .. W−9` here against the view's `7 .. W−8`, and the byte-wide compares
   here against 32-bit ones there (`TERR-FOG-118`).
 
-`actor+0xa4`'s six writers, and the two forms of sweep that see them, are `AI-SIGHT-092`; a
-`disp:a5` sweep sees two of the six.
+`actor+0xa4` has at least twelve writers: the six `AI-SIGHT-092` names, whose count of six is
+partially retracted, the four Light and Darkness apply and remove stores (`MAGIC-443`),
+`L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`. A
+`disp:a5` sweep sees two of the six; the seven `+0xa5` byte reads it lists include the stamp
+seed (`MAGIC-444`). A Humanoid derive keeps Darkness's reduction through `+0xe4`
+(`MAGIC-445`).
+
+**Light and Darkness shrink the stamp.** Light lowers a reached plain Unit's sight, and Darkness a
+reached Humanoid's or Human's, by p/30 + 1 whole cells, so the stamp's seed and the candidate set
+acquisition draws from shrink with it. The reach cap is unchanged: a reached unit whose lowered
+sight is below its reach acquires only inside that sight (`MAGIC-446`).
 
 **A unit only closes distance when it is given a pursuit order** — `order+8 = 5`,
 `order+0xc = target`, `order+0x14 = reach` as the stop distance. Acquisition never produces one;

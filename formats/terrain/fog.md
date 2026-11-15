@@ -77,6 +77,8 @@ The method at vtable offset `+0x44`, `R1402`, repeats guards 0 to 2 every tick a
 
 **Sight.** A mission body's `drawable+0x102` holds its server actor's `actor+0xa4` word as of the last state message with bit `0x2000`; the sender sets that bit for an owner's client, or for any client when the actor's `vt+0x30` is nonzero and its `+0xe` word lies in 0x21..0x3f. A new body of class code 0x40 or above first takes its prototype's `+0xa4` word, whose value was not read; a structure gets its Buildings `scanRange` times 256. The pair `L10563`/`L10564` fills the character-screen frame, not a mission body. For a hero, `R0280` writes `ftol(((mind+reaction)/25 + 4) * 256)`, in units of 1/256 cell. For a non-hero, the streamer's slot 11 targets `actor+0xa5`, the high byte, in whole cells (`Data.bin` Units title 11 `scanRange`, Humans title 9 `ScanRange`). — TERR-FOG-081 (superseded), TERR-FOG-274, TERR-FOG-275, TERR-FOG-276
 
+**Light and Darkness.** Light's apply lowers a reached plain Unit's `actor+0xa4` by whole cells and Darkness's a reached Humanoid's or Human's, each with bit `0x2000`, so the next state message lowers that body's `+0x102` and its stamped area; the remove restores it. — MAGIC-443
+
 Consumer consequences: `Index` is in range on 82/82 shipped classes but a decoder should still
 bounds-check it; `DeadObject` is a subscript into the same class array; `FireObject` is **not** a
 class reference (`REG-OBJ-047`). **And the animated arm is not dead**: it fires on exactly the
@@ -134,7 +136,8 @@ the AI's sight and leaves the player's fog untouched**. Its byte map is cleared 
 `R0145`, whose two callers stamp **one actor** (`R0114`) or **a whole group**
 (`R0110`). Different storage, clock, consumer and lifetime — do not merge them.
 `AI-SIGHT-006`'s two location clauses (the array `R0134` zeroes and the field
-`fog+0x25450`) are superseded by `TERR-FOG-084`.
+`fog+0x25450`) are superseded by `TERR-FOG-084`. Its six-writer count for `actor+0xa4` is
+partially retracted (`AI-SIGHT-006`, amended; `MAGIC-443`).
 
 Both of the server's tables are built by **`R0273`**, called once from the object's init
 `R0274` in each of the four world constructors, before the map load; there is no other
