@@ -822,7 +822,7 @@ A second routine `L2.05879` writes per-cell bytes at client +0xb0 from the corne
 |---|---|---|---|---|
 | R2-ENGINE-985 | ROM2 area occupant applies the area object, then calls the hit hook (caster, occupant, 1) with no owner or relation test. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-986 | The ROM2 Effect attach renews, cancels or adds an Effect on its unit without reading an owner or a relation. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
-| R2-ENGINE-987 | The ROM2 hit hook writes victim hit memory and posts an event record; its body writes no command +0x20, +8 or +0x0c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-987 | The ROM2 hit hook writes victim hit memory and posts an event record; its body writes no command +0x20, +8 or +0x0c. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-988 | A same-owner ROM2 hook call changes no relation cell when the diagonal's low bits are set; group sight marks the caster cell for a member whose owner +0x2c is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-989 | In the read ROM2 bodies a struck grouped creature keeps its target after a same-owner area blow when the diagonal has bit 0 clear and low bits set; the filter drops the caster. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-990 | ROM2 mission 10 gives Troll.4 and the four Bat_Sonic.4 owner word 5, whose Player row stores diagonal 0x12 (names Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
@@ -869,6 +869,8 @@ RU L2.01727..L2.05850 allocates a node (L2.05849), copies 21 dwords into node +8
 **Confidence.** High for the hook in both roots and the RU append and tick bodies. Medium that L2.05852 empties the list (navigation listing). A navigation raw dword scan of RU executable sections finds 9 0xbbec candidates (hook, assignment, two executor posts, script tick, four unclassified) and none for 0xbbf0 or 0xbbf4; it is not a reader census.
 
 **Unknown.** Which routine reads the posted records before the clear; reading L2.05851, L2.00516 and the condition arms of L2.03275 would settle it.
+
+**Amended.** R2-ENGINE-1262 narrows the Unknown on the reader of +0xbbec: the script-step bodies L2.05851 and L2.00516 do not address it; no reader was found in the instructions read, Medium (L2.07190 and the per-node call L2.06061 of L2.05852 are unread).
 
 **Amends.** R2-ENGINE-981's Unknown on the EN hook and its forwarding push, and its RU-only forwarding edge: both are read in EN, equal to RU after masking.
 
@@ -6313,7 +6315,7 @@ two-handed weapon and +0x78 as the off hand: no weapon row was read.
 **Unknown.** The writer of +0x78.
 
 **Amended.** R2-ENGINE-402 gives the bag object's fields and
-R2-ENGINE-405 the item-move routes into and out of the slots.
+R2-ENGINE-405 the item-move routes into and out of the slots. R2-ENGINE-1260: the unequip body L2.05656 restores 8 and 4.
 
 ### R2-ENGINE-323
 
@@ -13345,7 +13347,7 @@ the Teleport arm L2.00080 (R2-ENGINE-705). The other apply arms and
 L2.00035 stay Unknown. R2-ENGINE-926 and R2-ENGINE-928 narrow "the range
 helper admits": L2.01574 and L2.02567 also require the facing to equal the
 heading to the target or cell, and the approach turns a centred unit in
-range (for a point cast only when the range byte is not 0); a self-targeted cast at prepared 8 skips the test.
+range (for a point cast only when the range byte is not 0); a self-targeted cast at prepared 8 skips the test. R2-ENGINE-1261 corrects the substate 5 sentence: +0x64 and +0x68 are cleared only when +0x68 is nonzero; the count is low byte(+0x135 + weapon/Reaction term + 0..3 draw + Complication on a book cast), with no speed term. R2-ENGINE-1262 narrows the Unknown on L2.00035/L2.00034 and L2.01727 (suffix and append read; the arms and the list's reader open).
 
 **Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
 
@@ -17746,7 +17748,7 @@ R2-ENGINE-696; callees were compared only where listed.
 | R2-ENGINE-704 | A ROM2 client Teleport caster plays state 8 for its type's AttackAnimTime sum (12 for types 23, 24) and Sfx 554 at counter AttackDelay (8); the cast is not shown while it animates or its type has AttackPhases 0. | High / Medium | ● active (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-705 | ROM2 Teleport pays mana; if three gates pass it sends 0x86 (ID 54, target cell), and +0x134 actor steps later the apply moves the caster to the target cell centre if both footprint tests pass. Read in RU; 8 bodies paired in EN. | High / Medium | ● active (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-706 | When a ROM2 Teleport cast reaches the client (R2-ENGINE-705), a refused cell keeps the mana paid, both images and Sfx 554 and leaves the caster in place; a target beyond the range byte is approached first. Read in RU. | Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
-| R2-ENGINE-707 | A ROM2 creature's Teleport takes the hero's server route, packet and client arm; it differs in mana (none for a non-mage, Medium), +0x134, units.reg timing and offsets, its planner cell test, and no image for AttackPhases 0. | High / Medium | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
+| R2-ENGINE-707 | A ROM2 creature's Teleport takes the hero's server route, packet and client arm; it differs in mana (none for a non-mage, Medium), +0x134, units.reg timing and offsets, its planner cell test, and no image for AttackPhases 0. | High / Medium | ● active (amended, branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 | R2-ENGINE-708 | 23 of 24 ROM2 EN/RU Teleport listing pairs have equal instructions under an operand mask (callees, globals unchecked); 10 tables are equal or shifted; the 0x86 handler differs at 2 of 333 and its dispatcher tables were not compared. | High | ● active (branch candidate) | [EXP-2090](../experiments/EXP-2090-rom2-teleport/) |
 
 ### R2-ENGINE-703
@@ -17989,6 +17991,8 @@ disagreeing (byte maps unread).
 
 **Unknown.** The units.reg type of each creature that carries Teleport, such
 as Orc_Sword.4.
+
+**Amended.** R2-ENGINE-1260: after an unequip the wind-up +0x134 is 8, from neither the Humans row nor the weapon.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), question 5.
 
@@ -20273,7 +20277,7 @@ R2-ENGINE-788 narrows the after-build Unknown: the callees `L2.04402`, `L2.01781
 `L2.04403`, `R2.0098` and `L2.00060` are read and, in those bodies, store none of the reader's
 destinations; they write `+4`, `+0x14`, `+0x148`, `+0x70`, `+0x50`, the Group programme, `+0x1a4`
 (for each actor of the recount's list with a nonzero table word) and `+0x114` + 4 * id. Their unread callees, named in
-R2-ENGINE-788, keep "no other writer" at Medium.
+R2-ENGINE-788, keep "no other writer" at Medium. R2-ENGINE-1260 is the direct-operand census of the writers of +0x134/+0x135, Medium for completeness.
 
 ### R2-ENGINE-778
 
@@ -20492,7 +20496,7 @@ caster and finishes the mission settles the lifetime.
 |---|---|---|---|---|
 | R2-ENGINE-788 | After placement the ROM2 Summon arm gives the creature an id, the caster's owner and key and a new Group (orders 0xc then 0xb), recounts coverage and sends its state; the only caster store in the bodies read is +0x1a4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
 | R2-ENGINE-789 | ROM2 Summon places its creature on the first of 20 random cells within 3 of the caster, then of the 7 by 7 square x-major, where no footprint cell has a bit of 0x41 in plane P1 or P2 and (layer kinds 1 to 3) every cell record is free. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
-| R2-ENGINE-790 | One ROM2 Summon cast draws the kind 1..3, the facing 0..128, two 0..6 draws per random placement try (up to 40) and 0..3 for the caster's recovery, from the CRT state that map load seeds from timeGetTime (the state body is unread). | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
+| R2-ENGINE-790 | One ROM2 Summon cast draws the kind 1..3, the facing 0..128, two 0..6 draws per random placement try (up to 40) and 0..3 for the caster's recovery, from the CRT state that map load seeds from timeGetTime (the state body is unread). | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
 | R2-ENGINE-791 | A ROM2 Summon cast shows only the caster's cast state 8 and sound 558 (packet 58) in the bodies read; a failed placement keeps the mana paid and leaves the unit in the global list, off the grid, with no owner store. | High / Medium | ✔ promoted (branch candidate) | [EXP-2107](../experiments/EXP-2107-rom2-summon-place/RESULTS.md) |
 
 ### R2-ENGINE-788
@@ -20637,6 +20641,8 @@ both roots (step 4 and the seed windows read in both). Medium that the draws sha
 seed is the only one: srand's callers were not scanned.
 
 **Unknown.** A call-target scan for `L2.04660` settles the seeds.
+
+**Amended.** R2-ENGINE-1261 corrects step 4: the weapon term has no base 12 (0 without a weapon or when slot +0x30 returns 0, clamp 0..12 otherwise), and the Complication byte is added on a book cast.
 
 **Format surface.** `formats/rom2-sav/format.md`, First Group member.
 
@@ -26835,7 +26841,7 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1129 | ROM2 clock imports are timeGetTime in both roots; in the +0x41c bit-0-set branches RU L2.01223 calls one of four routines (schedulers per R2-ENGINE-1114). | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1136 | Read ROM2 attack bodies from input to cast routine contain no sight operand or call of the sight builders; 92 direct callees without a listing here and the tails of L2.01527, L2.01512 and L2.00034 are unread. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1137 | ROM2 Group sight and the idle builder add a unit when the grid byte at its anchor cell is set, no other body cell read; an empty live list is refilled from fallback +0xa88 with no cell test. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
-| R2-ENGINE-1138 | ROM2 cast routine, apply call and target sender compare no distance in the bodies read; a staff-armed mage pays no mana; apply tail and four helpers unread. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1138 | ROM2 cast routine, apply call and target sender compare no distance in the bodies read; a staff-armed mage pays no mana; apply tail and four helpers unread. | High / Medium | ● active (amended) | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1139 | ROM2 approach routes to the target's anchor cell; by the code read, admission needs a unit facing the target with edge distance to the nearest body cell within range; no run was made. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1140 | ROM2 size slot +0x1c returns byte +0x49; Units tokenSize is 2 for typeIDs 66 and 68 and 3 for 71 in EN and RU. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1141 | EN ROM2 item factory takes kind (ID>>8)&0xf; only kind 1 builds a weapon, so a Weapons-row staff is kind 1. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
@@ -27371,6 +27377,8 @@ Cast routine L2.00027/L2.03854 (206, whole, masked-equal): a mage with no item a
 **Confidence.** High for the comparisons and calls of the listed bodies in both roots. Medium for "no re-test at release": L2.00034 past L2.06349, L2.00031, L2.00042, L2.01570, L2.02312 and the other helpers named in R2-ENGINE-1136 are unread.
 
 **Unknown.** The apply tail to its end. Read it; a run reads the distance at state 0xd entry and at application.
+
+**Amended.** R2-ENGINE-1262 narrows the Unknown on the apply tail: the common suffix RU L2.01690..L2.07191 is read to its `ret`; the per-spell arms and L2.04731 stay unread.
 
 **Amends.** R2-ENGINE-543's cast try: it re-tests no distance and a staff cast pays no mana. R2-ENGINE-1106's application distance L2.02339 belongs to strike path L2.02315, which the staff cast does not take.
 
@@ -29757,3 +29765,260 @@ a complete path census; a bounded run cannot prove global absence.
 absence/census clause, narrowed only. R2-SESSION-326's post-LOAD Unknown stands.
 
 **Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 5.
+## Cast wind-up and recovery counts
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1260 | ROM2 stores +0x134/+0x135 in defaults 8/4, weapon equip (12/13), unequip 8/4, a copy, a 1/1 builder and three bodies that pass the two addresses to a callee (two to the byte reader L2.01279, one to the unread L2.07192); direct operands. | High / Medium | ● active (branch candidate) | [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md) |
+| R2-ENGINE-1261 | ROM2 recovery = low byte(+0x135 + t + R2.0021(3) + spell Complication on a book cast); t = 0 unless a weapon and slot +0x30, else clamp((weapon word +0x4a + (30 - Reaction)*5)/12, 0, 12). | High / Medium | ● active (branch candidate) | [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md) |
+| R2-ENGINE-1262 | A ROM2 cast tried successfully at actor step s applies at s + c (c = byte +0x134) and ends substate 7 at s + c + r; the apply suffix builds and lists the effect object; its effect step is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md) |
+| R2-ENGINE-1263 | ROM2 cast wind-up reads only caster byte +0x134; recovery reads +0x135, a Human's weapon word and Reaction, a 0..3 draw and a book cast's Complication; in the arms and suffix read, neither count reads the target. | High / Medium | ● active (branch candidate) | [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md) |
+
+### R2-ENGINE-1260
+
+A linear Capstone decode (skipdata) of every executable section of `allods2.exe`
+in both roots lists each instruction whose memory displacement 0x131..0x135
+covers byte +0x134 or +0x135, and each immediate 0x134 or 0x135: 127 rows per
+root, RU 23 stores, 57 reads and 47 immediates, EN 22, 57 and 48
+(`evidence/generated/census-ru.tsv`, `census-en.tsv`, context files beside
+them). A raw scan of RU `.text` for the displacement dwords 0x131..0x135 finds
+215 hits (EN 216); every RU hit lies inside a decoded instruction (127 census
+rows, 88 other instructions, none outside one). The scan does not identify the
+base object of a hit.
+
+The byte stores and the bodies that pass the two addresses to a callee:
+
+| RU body (EN) | +0x134, +0x135 | Body and caller |
+|---|---|---|
+| L2.00105 (L2.04401) | 8, 4 | Unit defaults (R2-ENGINE-777) |
+| L2.01274 (L2.07193) | 8, 4 | called by the constructors L2.01157 and L2.07194; it also stores 13 dwords from +0x208 |
+| L2.01314 (L2.05653) | weapon parameters 0xc, 0xd | weapon equip (R2-ENGINE-322), through L2.02312; vtable dword L2.07195 |
+| L2.05656 (L2.05322) | 8, 4 | vtable dword L2.07196; every path joins L2.07197, which calls slot +0x58, subtracts from +0x12c, stores 8 and 4, then calls L2.07198 with minus weapon word +0x4a |
+| L2.00106 (L2.05385) | the argument's two bytes | copies them from the object at `[ebp+8]` into the object at `[ebp-0x68]`; slot +0x3c of vtables L2.02314, L2.06391, L2.00218; direct call at L2.06465 |
+| L2.05953 (L2.07199) | 1, 1 | builds a 0x208-byte unit (L2.01273), places it, gives it book +0x140 holding spell L2.03498(id), Mind +0x88 = 30, one skill word from its argument and +0x64 = the spell; callers L2.05951, L2.05971 |
+| L2.02341 (L2.02669) | address to byte reader L2.01279 | the Units stat reader (R2-ENGINE-777: stores unless -1) |
+| L2.00220 (L2.00219) | address to byte reader L2.01279 | the same cursor reader on its cursor `[ebp-0x14]` |
+| L2.01161 (L2.01090) | address to L2.07192 on `[ebp+8]` | L2.07192 is unread; whether it reads or writes the bytes is not settled |
+
+The weapon pair is High: L2.05656 is the vtable neighbour of the equip body,
+and on each of its paths the 8 and 4 stores follow the slot +0x58 call, so a
+Human whose table row gave other values holds 8 and 4 after this body. The other
+census stores are 11 RU (10 EN) dword stores in bodies L2.01227..L2.07200, whose
+callers and vtables lie outside the unit code, and immediates in
+`add ecx, 0x134` (bodies L2.07201..L2.07202, L2.07203), `cmp edi, 0x134` and
+`0x135` (L2.07204) and a stack frame size; RU L2.07205 passes `[obj+8]`+0x134
+to UI slot +0x18 (body L2.07206, vtable L2.07207; window `ru-address-L2.07208`).
+Unit-code readers by direct operand: L2.06814, L2.06820, L2.00106, the actor step
+L2.00028 and L2.01161.
+
+**Confidence.** High for each listed store, its value and its body in both
+roots (census rows; windows `ru-writer-L2.05656`, `ru-writer-L2.05953`,
+`ru-writer-L2.01274`). Medium for the role words: the Human defaults rest on the
+constructor callers, the copy body on its vtable slot, the builder's callers are
+unread, and L2.07192 is unread. Medium for completeness: stores through a pointer
+passed to a callee, bulk copies, computed addresses, the unidentified bases of the
+dword stores, `scenario.dll` and `engine32.dll` are outside the census.
+
+**Unknown.** Who calls L2.05953 and for which units; whether a spell, effect or
+level change writes the bytes through a pointer. Reading L2.05951's body and
+L2.07192, and a pointer-flow read of the unit vtable slots, would settle them.
+
+**Amends.** R2-ENGINE-777's "no census of the writers was made", for +0x134 and
++0x135 only: the direct-operand census above is that census, Medium for
+completeness. R2-ENGINE-322's weapon pair: the unequip body restores 8 and 4.
+
+**Evidence.** [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md), question 1.
+
+### R2-ENGINE-1261
+
+The substate 5 arm of the actor step (RU L2.00028, EN L2.00263; EXP-2069
+`ru-actor-step.txt` L2.07209..L2.07210 and `en-actor-step.txt`, the same
+instructions) sets the recovery count +0x6c in the step that calls the apply:
+
+1. When +0x68 is nonzero: if `L2.06352(+0x68)` returns kind 0xe, the item and
+   the spell object +0x64 are destroyed through slot +4 with 1; in both cases
+   +0x68 and +0x64 become 0. When +0x68 is zero, +0x64 is kept.
+2. Substate +0x58 = 7, t = 0.
+3. When +0x74 is nonzero and virtual slot +0x30 returns nonzero:
+   q = (signed word `[+0x74]+0x4a` + (30 - signed word +0x86) * 5) / 12, C
+   truncating division; t = 12 when q >= 12, 0 when q < 0, else q.
+4. d = `R2.0021(3)`; +0x6c = low byte(byte +0x135 + t + d).
+5. When state +0x54 is 13 or 14 and +0x64 is nonzero: +0x6c += low byte of
+   dword 0 of the spell's parameter array (`L2.02312` on `[+0x64]+4`+8, index 0).
+
+`R2.0021(n)` (RU; EN L2.00939; EXP-2040 listings, equal after masking,
+`evidence/derived/parity.tsv`) returns 0 without a draw for n = 0, else
+(r * (n + 1)) >> 15 with signed rounding toward zero, which is floor(r * (n + 1)
+/ 32768) for r = 0..32767, the 15-bit output of the core (R2-ENGINE-391). For
+n = 3 it returns 0..3, each value from 8192 of the 32768 values of r.
+
+So the recovery is r = (b + t + d + k) mod 256 actor steps, with b = byte +0x135,
+d in 0..3 and k the Complication byte or 0; r = 0 counts 256 steps (the arm
+decrements before its zero test). Slot +0x30 returns 0 for the Unit vtable
+L2.02314 (R2-ENGINE-754) and nonzero for the Human table (R2-ENGINE-506, at its
+grade), so t applies to a Human with a weapon at +0x74 and not to a creature. Signed word +0x86 is Reaction (R2-ENGINE-777). Step 1 makes k
+apply only to a cast without an item at +0x68: a book cast. A staff cast stores
+the weapon at +0x68 (R2-ENGINE-1138), so it has no k. The weapon word +0x4a is
+the word that the unequip body subtracts through L2.07198 (R2-ENGINE-1260); its
+column name is not read.
+
+**Confidence.** High for the expression, its order and its bounds in both roots
+(committed listings) and for the range helper. Medium for the names: element 0
+as Complication rests on the column order of R2-ENGINE-019 (the spell loader is
+unread), `L2.06352`'s kind 0xe is unread, the weapon word's column is not
+bound, and the Human side of slot +0x30 is taken from R2-ENGINE-506.
+
+**Unknown.** The weapon word's data column; a read of the item loader settles
+it. The draw's distribution over many casts depends on the core's state, not read
+here.
+
+**Amends.** R2-ENGINE-790, step 4: the weapon term has no base 12; it is 0
+without a weapon or with slot +0x30 returning 0, and 12 is its upper clamp; the
+count also adds the Complication byte on a book cast. R2-ENGINE-543's substate 5
+sentence: +0x64 and +0x68 are cleared only when +0x68 is nonzero, and the count
+reads byte +0x135, the weapon word and Reaction, the draw and the Complication
+byte, with no speed term.
+
+**Evidence.** [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md), question 2.
+
+### R2-ENGINE-1262
+
+Each substate arm of the actor step (RU L2.00028, EN L2.00263; EXP-2069
+listings) makes at most one transition and leaves through L2.07211 to the
+common exit L2.05539, so a count of n means n further actor steps:
+
+| Step | Substate arm | Effect on the caster |
+|---|---|---|
+| s | 0 | the cast routine L2.00027 returns nonzero; +0x136 = 0, +0x58 = 5, +0x6c = byte +0x134 (state 3 adds a strike term). A zero return keeps substate 0 and the try repeats at the next step |
+| s + 1 .. s + c | 5 | +0x6c decrements; at zero, in step s + c: state 13 calls L2.00035 (target), state 14 calls L2.00034 (point); then +0x58 = 7 and the recovery count of R2-ENGINE-1261 |
+| s + c | 5 | A state 3 attack that completes its substate 5 with a spell weapon converts to state 13 at L2.07212 and applies in that step (wind-up +0x134 plus the strike term); whether it occurs is not read |
+| s + c + 1 .. s + c + r | 7 | +0x6c decrements; at zero, in step s + c + r: +0x58 = 0, +0x136 = 1 |
+
+c is byte +0x134 and r the recovery count; a count of 0 lasts 256 steps. The
+executor ends the cast on +0x136 = 1 (R2-ENGINE-543), so the next order can begin
+no earlier than step s + c + r; the order of the executor and the actor step
+within one tick is not read here. The cast routine pays mana and sends the cast
+at step s (R2-ENGINE-1138, at its grade).
+
+L2.00035 calls L2.00034 unless the spell is 11 (EXP-2154 apply-head listing).
+L2.00034 switches on spell byte +8 through table L2.00069 (R2-ENGINE-543). The
+per-spell arms are not read here. The common suffix RU L2.01690..L2.07191
+(`ru-apply-suffix-L2.01690`, `ru-apply-suffix-end-L2.07213`; EN L2.01693, equal
+after masking over its first 256 instructions, `evidence/derived/parity.tsv`)
+reads the spell row's elements through L2.02312:
+
+1. Distribution (element 8) 1 with a target argument: a 0x50-byte object
+   L2.02072(L, target), where L is local `[ebp-0x44]` (taken from `[ebp-0x30]`
+   when zero); its +0x3c is the caster when L2.01570(caster) returns 0, else 0;
+   +0xc = spell id, +0xe = 2 * id + 9, +0x41 = (row byte +0xa == 0); L +0x44 =
+   the same caster-or-0. Without a target the body calls L2.04516 with string
+   L2.07214 and L2.05835, and returns with no object.
+2. Otherwise: a 0x54-byte area object L2.01691(L, local point, byte element
+   9); +0x3c, +0xc and +0xe as above; +0x50 = element 11 * 16, plus
+   (`[ebp-0x40]` * 16) / 10 and +8 = 1 when positive; Distribution 5 sets +8 = 2
+   and +0x50 = 0; +0x4e = (L2.02635 on `[L2.02538]` with the caster and L2.01521
+   of the point, & 0xff) >> 5; L2.04675 registers it on `[L2.02538]+0x92ecc`.
+3. Delivery (element 5) 1: L2.04731 adds the object to `[[L2.01317]+0x7c]+4`+4
+   and the apply returns.
+4. Delivery 2: projectile L2.02075(object, caster +0x10, word element 7, Effect
+   Speed); ids 10 and 11 set its +0x50 = 10; L2.04731 adds it to the same list.
+
+Every row of the spell table has Delivery 1 or 2 (`evidence/derived/terms.tsv`).
+No store in the suffix goes through the caster argument `[ebp+8]`. Where the effect lands is outside the bodies
+read: L2.04731, the processing of its list, L2.04675 and the projectile's flight
+are unread, and an arm before the suffix may act on the target in step s + c.
+
+The executor's phase-3 record (R2-ENGINE-543) goes to L2.01727, which appends a
+21-dword copy to list script +0xbbec (R2-ENGINE-987, read in RU; EN L2.05848
+equal after masking over 51 instructions). A census of displacement and immediate
+0xbbec over RU `.text` finds 9 instructions, each `add ecx, 0xbbec` before a call:
+L2.01727 from the executor L2.00506 (2), the hit hook L2.02074 and L2.02424;
+L2.05852 from the script tick L2.03648; L2.06024 from L2.07135; L2.06025 from
+L2.07215 and two unwind funclets (`evidence/navigation/nav2/census-ru-bbec.tsv`).
+The two script-step bodies L2.05851 (44 instructions) and L2.00516 (189) walk
++0xeaac and +0xeab4 and do not address +0xbbec. No reader of the list was found.
+
+**Confidence.** High for the step table, the suffix arms and the 0xbbec census
+rows in RU, and for the suffix in EN over the instructions compared. Medium for
+"no reader": L2.07190 (vtable L2.07216, calls L2.01727) and the per-node call
+L2.06061 of the tick's walker L2.05852 (R2-ENGINE-1045) are unread; a pointer or
+vtable route is not excluded. Medium for element names other than
+Delivery and Distribution, taken from R2-ENGINE-019's column order. Unknown for
+the step at which a spell takes effect.
+
+**Unknown.** The effect step; whether L2.06061 reads the posted records. Static: read L2.04731, the routine that walks
+`[[L2.01317]+0x7c]+4`+4, L2.04675, and L2.02075 with the projectile's step.
+Run: on a map with a Human mage, cast Heal (Delivery 1) and Fire Arrow (Delivery
+2) from the book at a target 1 and 5 cells away, record the scheduler counter at
+the cast order, at the target's health change and at the caster's next order.
+
+**Amends.** R2-ENGINE-543's Unknown on what L2.01727 does at phase 3 and what
+the apply routines do, narrowed: the append and the suffix are read; the arms and
+the list's reader stay open. R2-ENGINE-1138's Unknown on the apply tail,
+narrowed: the suffix is read to its `ret`. R2-ENGINE-987's Unknown on the reader
+of +0xbbec, narrowed: L2.05851 and L2.00516 do not address it.
+
+**Evidence.** [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md), question 3.
+
+### R2-ENGINE-1263
+
+In the actor step's cast arms (R2-ENGINE-1262) the wind-up count c is byte
++0x134 for states 13 and 14, and the recovery count r is R2-ENGINE-1261's
+expression. The terms and what each reads:
+
+| Term | Depends on | Reads |
+|---|---|---|
+| c | caster kind, row, weapon | byte +0x134 (R2-ENGINE-1260 writers) |
+| b in r | caster kind, row, weapon | byte +0x135 (same writers) |
+| t in r | Human caster with a weapon | weapon word +0x4a, Reaction +0x86 |
+| d in r | none | `R2.0021(3)`, 0..3 |
+| k in r | spell, on a book cast | low byte of spell row element 0 (Complication) |
+
+In the arms and suffix read, neither count reads the target or its distance; the per-spell arms are unread. The
+spell enters the counts only through k; the step at which the spell takes effect
+depends on its Delivery, Distribution and Effect Speed (R2-ENGINE-1262) and is
+Unknown.
+
+Data values (`evidence/derived/terms.tsv`, counts per table, each named by the
+full SHA256 of the generated table it counts):
+
+- Spells, client `world.res` (the same file in both roots) and RU
+  `world_srv.res`, one table
+  `8868e9a268fe534c33c5fd5dcf8963fe745603a5abce8c5766cfbd302bf30c3e`:
+  Complication 3 for 8 spells, 10 for 10, 20 for 10, 25 for 1 (Invisibility);
+  Delivery 2 for Fire Arrow, Fire Ball, Ice Missile, Lightning (10), Prismatic
+  Spray (11) and Diamond Dust, 1 for the other 23.
+- Weapons `00fec6c35bad1f9b057861d2d42d0aea2772f5fd19f4996e5609b1e0fd6be3ec`
+  (all three files), @.charge/@.relax (values 12/13, the equip's parameters 0xc
+  and 0xd): 7/4 for 9 rows, 8/4, 6/4 and 10/4 for 3 each, 20/5 for 2 (bows),
+  8/16 for 1 (Crossbow), -1/-1 for 6; Staff and Shaman Staff 8/4.
+- Humans, client `36d3a702d26620320a7e95fd35deb5b008a6034562b1f0a726ebfcf490bf0f28`:
+  charge/relax (values 19/20) -1/-1 for 131 rows, 10/4 for 58, 7/4 for 40, 8/16
+  for 28, 20/5 for 20, 8/4 for 5, 6/4 for 2, short rows 5. RU server
+  `b120ed69abb8e3c3bcd2f25f075aa441f5d2de0481b1902d6f56c5f3a41bac6e`: 135, 63,
+  40, 28, 20, 5, 2 and 5.
+- Units, client `51cbb36a3a3a45650bfb3f627357a789fc5b0dcc94eb857e7d27104ac6c49015`:
+  charge/relax (values 17/18) 6/8 for 49 rows, 21/7 for 18, 8/4 for 16, 61 short
+  rows, 40 distinct pairs; RU server
+  `8deb436f6a2511acd4e0cabf6bd0423e20fc5778e4c96dffca1a1a801af584b4` differs.
+
+Worked bounds from the expression: a caster with the 8/4 defaults and no weapon
+waits c = 8 steps, then r = 4 + d + k: 7..10 for a Complication 3 book cast, 14..17
+for 10, 24..27 for 20, 29..32 for Invisibility. A staff cast entered through the substate 0 conversion (8/4, no k) waits 8,
+then 4 + t + d.
+
+**Confidence.** High for the term structure (R2-ENGINE-1261, R2-ENGINE-1262) and
+for the counts of the generated tables. Medium for the column bindings: values
+k = title k+1 holds for the four tables read, but the loaders binding Spells
+element 0, Weapons values 12/13, Humans 19/20 and Units 17/18 to the bytes are
+read only for Units (R2-ENGINE-777); the Humans reader's parameter index, the
+weapon word's column and the equip's handling of -1 are not read. Medium that no
+other writer changes +0x134/+0x135 between equip and cast (R2-ENGINE-1260).
+
+**Unknown.** Whether the equip skips a -1 value (read RU L2.01314 from L2.07217
+to L2.07218); the Humans reader's indices for +0x134/+0x135 (read L2.00220).
+Run: on a map with a Human mage, cast Fire Arrow from the book with no weapon,
+then with a staff, then Invisibility from the book, and count actor steps from the
+cast order to the next order; the counts should fall in the bounds above.
+
+**Evidence.** [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md), question 4.ROM2 allods2.exe stores +0x134/+0x135 in defaults 8/4, weapon equip (12/13), unequip 8/4, a copy, a 1/1 builder and three bodies that pass the two addresses to a callee (two to the byte reader L2.01279, one to the unread L2.07192); direct operands only.

@@ -448,7 +448,8 @@ clears that dword when it sends. The cell test reads footprint mask byte
 `[+0x1c0]+5` (0x41 from the block constructor) and tokenSize +0x49. A
 placement that fails leaves +0x1a0 = 1, no id, owner or Group store, and
 the unit off the grid. The cast's recovery byte +0x6c on the caster
-includes a draw of 0..3, taken in the actor step that runs the apply.
+includes a draw of 0..3, taken in the actor step that runs the apply;
+the weapon term is 0 without a weapon and at most 12 (R2-ENGINE-1261).
 Session +0x74 has two known stores: server init's and the map build's.
 Which of these a mission save writes is
 Unknown. — R2-ENGINE-788, R2-ENGINE-789, R2-ENGINE-790, R2-ENGINE-791,

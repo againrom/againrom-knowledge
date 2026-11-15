@@ -289,10 +289,12 @@ The primary strike, cast, step and hold arms do not dispatch prepared +8.
 Strike clears +9 when phase > 2 and +0x136 is nonzero; hold clears it when
 mask bit 0x40000 is absent. A cast passes init, routine try, wind-up and
 recovery; mana subtraction is once per call that reaches delivery, with
-zero-return reachability still open. Movement local flow in L2.02848 and
+zero-return reachability still open. Wind-up lasts byte +0x134 actor steps
+with the apply in its last step, and recovery the count of R2-ENGINE-1261;
+the step at which the effect lands is Unknown (R2-ENGINE-1262). Movement local flow in L2.02848 and
 L2.01578 is acquired; unread callees still prevent guaranteed movement.
 — R2-ENGINE-543, R2-ENGINE-544, R2-ENGINE-545, R2-ENGINE-546,
-R2-ENGINE-556
+R2-ENGINE-556, R2-ENGINE-1261, R2-ENGINE-1262
 
 A zero +9 alone does not guarantee new-order dispatch. The executor entry
 must admit the unit, the effect-mask test must not reinstall hold, and +8

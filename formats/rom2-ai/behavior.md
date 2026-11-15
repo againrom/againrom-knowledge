@@ -516,3 +516,19 @@ callees and visible departure keep the composition Medium. R2-ENGINE-1255
 The bounded summoned-unit departure census retains the count pass and the
 selected transition cleanup; caster loss, timers, general defeat fate and
 LOAD outcome remain Unknown. R2-ENGINE-1256 (Medium bounded composition).
+
+## Cast wind-up and recovery
+
+A cast whose routine try succeeds at actor step s runs the apply in step s + c
+and returns to substate 0, with completion byte +0x136 = 1, in step s + c + r; a
+count of 0 lasts 256 steps. c is caster byte +0x134. r = low byte(+0x135 + t + d
++ k): t = 0 unless a Human caster holds a weapon, else clamp((weapon word +0x4a +
+(30 - Reaction) * 5) / 12, 0, 12); d is a 0..3 draw; k is the spell's
+Complication byte on a book cast and 0 on an item or staff cast. In the arms and suffix read, neither count reads the target; the per-spell arms are unread. The defaults are 8 and 4; the Units and Humans readers and
+weapon equip write the table values (its handling of -1 is unread), unequip restores 8 and 4, and one unit builder
+writes 1 and 1; the writer census covers direct operands only. The apply's
+common suffix builds the effect object and adds it, or its projectile, to a
+world list; the step at which the effect lands is Unknown. R2-ENGINE-1260 (High
+stores, Medium completeness), R2-ENGINE-1261 (High expression, Medium names),
+R2-ENGINE-1262 (High step table, effect step Unknown), R2-ENGINE-1263 (High
+terms, Medium column bindings).

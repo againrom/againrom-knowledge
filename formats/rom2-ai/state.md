@@ -53,6 +53,7 @@ R2-ENGINE-541, R2-ENGINE-554, R2-ENGINE-823.
 
 | Input/state field | Read/write and SAV coordinate | Claims and clause grades | Unknowns |
 |---|---|---|---|
+| unit bytes +0x134/+0x135, +0x6c, +0x136 | Wind-up and recovery bases, the substate count, completion; defaults 8/4, table, weapon equip, unequip 8/4. | R2-ENGINE-1260 High stores, Medium completeness; R2-ENGINE-1261 High count; R2-ENGINE-1262 High step table; R2-ENGINE-1263 Medium column bindings | Pointer and bulk writers; the effect step |
 | unit dwords +0x50/+0x54/+0x58 | Order, actor state, action substate; separately transferred scalars. | R2-ENGINE-541 High order; R2-ENGINE-543 High substate flow; R2-ENGINE-823 Medium EN LOAD; RU coordinates by equal layout | Later overwrites and complete restoration |
 | unit words +0x94/+0x96 | Health/max; read by Guard B and post-step. This page establishes no physical SAV offset for them. | R2-ENGINE-844 High comparisons; R2-ENGINE-506 High predicates | Complete save coordinate here |
 | command word +0; word +2; +4 | Post; point word +2 and flag +4 as read by the order-0xa tail (order name not established). Same positions within raw SAV command block. | R2-ENGINE-844 High post; R2-ENGINE-872 High order-0xa tail; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | All post/point/flag producers |
