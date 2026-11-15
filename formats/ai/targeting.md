@@ -125,6 +125,9 @@ seed for whole-cell sight. The shared algorithm has two parameters:
 - **the playable rectangle.** `8 .. W−9` here against the view's `7 .. W−8`, and the byte-wide compares
   here against 32-bit ones there (`TERR-FOG-118`).
 
+A guard group's base radius is the largest member distance to the centroid plus that
+member's `actor+0xa5`, then the guard setter's floor or script argument (`AI-793`).
+
 `actor+0xa4` has at least twelve writers: the six `AI-SIGHT-092` names, whose count of six is
 partially retracted, the four Light and Darkness apply and remove stores (`MAGIC-443`),
 `L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`. A

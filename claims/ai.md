@@ -9651,3 +9651,84 @@ word `+0x98` nonzero, and spell id 6 is Heal. `AI-FOLLOWHEAL-118`: its spell id 
 
 **Unknown.** In the original, a participant's mage holding Heal beside two damaged units of its
 Player at different health: record which one `ord+0x28` names.
+## Guard radius sources and the turn back to the post
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-792 | Of the six direct callers of the guard setter `R0125(grp, n)`, five push `n` = 0 (`L00384`, `L00378`, `L00949`, `L00950`, `L00388`); the script Guard arm `L00596` passes the low byte of the node's Par1. | High / Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| AI-793 | A guard radius is geometry `+0x2c` raised to `MinimalGuardRange` (8) when `n` = 0, or to a nonzero script `n`: at least 8 stored, 11 rolled on a populated pass, 7 on the empty edge (`AI-JITTER-103`); a nonzero `n` has no floor, 0 takes it. | High / Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| AI-794 | No pursue-distance test is in the Guard bodies read (`AI-777`, Medium); the 5-cell post test (`AI-BREAK-041`) is not read for a guard member. Passes run every 16 ticks (`AI-385`, High / Medium / Unknown); no winner turns it back. | Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+
+### AI-792
+
+- `L00384`: `push 0` before the call (EXP-0125 `rom-post-excerpt.md`, line 155).
+- `L00378`, player command 0x17: `push 0` at `L17618` (EXP-0249 `route-listings.txt`,
+  lines 5585-5591).
+- `L00949`: `push 0` at `L17619` (EXP-0248 `producer-disassembly.txt`, line 3432).
+- `L00950`: `push 0` at `L17620` (EXP-0588 `q2sites.txt`).
+- `L00388`, the mission-description builder: `push 0` at `L17621`, group `[ebp-0x24]`
+  (this experiment's window `L17622`..`L17623`, `evidence/code-en/listings/mission-guard-call.txt`;
+  RU byte-equal).
+- `L00596`, script Group Command with Par0 = 1 (Guard), case 0 at `L17624`: `n` is
+  `mov cl, [eax+0xc]`, the low byte of Par1, and the group is `[eax+0x34]` (EXP-0440
+  `rom-fns-orders.txt` lines 15-20, EXP-0566 `group-dispatch.txt`; Par offsets `+0x8` Par0,
+  `+0xc` Par1 per EXP-0083).
+- Shipped scripts: one Guard node, `scn:80.alm` node 9, group 4 with 15 members, in both
+  roots, with an empty trigger column (EXP-0102 `command-nodes.csv`). Its Par1 value is not in
+  a committed table.
+
+**Confidence.** High for each push: every call site is read with the instructions before
+it. Medium that the six are all callers: the set is `AI-POST-097`'s direct-call census
+(High / Medium), not an indirect-call census.
+
+**Unknown.** The Par1 of the `scn:80.alm` Guard node, and whether that node fires. Settle with
+a data read of node 9's Par1 in both roots' `scn:80.alm`, and with an original run of mission
+80 that SAVEs after the node's trigger and records group 4's `+0x2d` and `+0x38`.
+
+### AI-793
+
+- Setter `R0125(grp, n)` (`AI-450`, High): `+0x2d` = `+0x38` = geometry `+0x2c`
+  (`L00360`, `L00838`). `n` = 0: when `+0x2d` is below `session+0xa9b8` both take it
+  (`L17625`..`L00361`). `n` nonzero: when `+0x2d` is below `n` both take `n`
+  (`L17626`..`L00839`), and the `session+0xa9b8` test is not on that path. Stores are
+  bytes (EXP-0615 `guard-setter.txt`).
+- Geometry `+0x2c`: the largest member Chebyshev distance to the fine centroid plus the
+  member's sight high byte `actor+0xa5`, whole cells (`AI-SIGHT-092`, High / Medium).
+- `session+0xa9b8` is `ai.reg` `[Scanning] MinimalGuardRange`: 8 in the shipped file, 10 the
+  code default (`AI-741`, High / Medium).
+- Random term: a populated latch-zero pass rolls `base + 4 + jitter`, jitter in
+  {-1, 0, +1} (`AI-741`, High / Medium; `AI-JITTER-103`, High / Medium).
+- Smallest values. `n` = 0 (five of six callers, `AI-792`): stored radius at least 8 cells;
+  the radius rolled on a populated latch-zero pass is at least 8 + 4 - 1 = 11; the
+  empty-members edge rolls `+0x38 - 1 .. +0x38 + 1` and can store 7 (`AI-JITTER-103`). Script
+  `n` from 1 to 255: radius `max(+0x2c, n)` with no floor, so a group whose geometry is below 8
+  can keep less than 8; a low byte of 0 takes the floor of `MinimalGuardRange` (`L17626`,
+  `L17627`, `L17628`: `je L17625`).
+- Winner: the largest of geometry and the floor or `n`; one value per setter call.
+
+**Confidence.** High for the setter paths (`AI-450`, read whole). Medium for the composed
+smallest values, the weakest links being `AI-741` and `AI-JITTER-103`.
+
+**Unknown.** Whether any shipped script passes an `n` below 8: settled by the data read named
+in `AI-792`.
+
+### AI-794
+
+- Engage: the member tail clips the shared sight population with the stored radius about the
+  live whole-cell centroid (`AI-740`, High / Medium; `AI-739`, High).
+- Chase: a member keeps its target while the pass gives it a winner. No pursue-distance test is
+  in the Guard bodies read (`AI-777`, Medium); no pursuer-to-post, pursuit-time or
+  pursued-distance test either.
+- Cadence: the AI pass with the group tail runs once per 16 ticks (`AI-385`,
+  High / Medium / Unknown).
+- Turn back: without a winner, kind 0xb or heal at the post, else kind 1 to the post
+  (`AI-776`, High). Each setter call re-anchors the post (`AI-POST-097`, High / Medium).
+- The default state breaks a pursuit when the target is more than 5 cells Chebyshev from the
+  post (`AI-BREAK-041`, High / Medium). That test is not in the guard tail's read bodies;
+  whether a guard member's chase passes through it is not read here.
+
+**Confidence.** Medium: composed from claims whose weakest link, `AI-777`, is Medium.
+
+**Unknown.** The distance a guard member chases in play. Settle with an original run: place
+an enemy just inside a guard group's radius, let it flee in a straight line, SAVE every
+16 ticks and record the member's distance from its post when its order turns to kind 1.

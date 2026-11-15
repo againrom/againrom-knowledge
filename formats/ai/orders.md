@@ -238,6 +238,12 @@ pending order. Nonzero strike/cast progress restores the action before this
 dispatch; clearing pending order alone does not cancel it (`AI-354`). Successful
 damage and per-spell effects still require their own validity rules.
 
+The three states differ by branch: a blow adds a distance term to its charge (Medium for the meaning of the distance, `HERO-197`;
+an item cast diverted at the phase-5 zero keeps it) and strikes;
+a cast admission can refuse with no store, then releases; an item cast is a diverted blow
+whose item and Spell pointers are cleared before recovery. Phase 7 is stored on every path
+out of phase 5 (`HERO-196`, `HERO-198`).
+
 | command | direct setter effect | ordinary executor effect |
 |---|---|---|
 | admitted attack at another actor, 0x19 | command state 3, queued victim replaced, action 0, pending 0; no direct progress or active-victim store | pending 5 copies the queued victim only at progress zero and in position (`AI-355`) |
@@ -414,6 +420,8 @@ every other order that has a "walk there, then do a thing" shape.
   select a re-search against the `[Path Finding]` values, and the flag `mover+0x98` is set at three empty-list
   sites (`AI-384`).
 - The AI pass that contains the group tail runs once per 16 ticks on both of its callers (`AI-385`).
+- A guard member's chase is judged on that pass: it ends at the first pass without a winner,
+  and the member walks back to its post (`AI-794`, Medium).
 
 ### Transit into a held cell
 

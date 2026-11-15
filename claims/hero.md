@@ -1445,3 +1445,147 @@ outside the census.
 the corpus values equal the sum is Unknown. Settle with an original run: start a mission
 whose map places a Human with worn items, SAVE on the first frame and compare `+0x8e` with
 the sum of the worn items' `+0x4a`.
+## Phases of a blow, a hand cast and an item cast
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-196 | Blow (state 3) and cast (0xd unit, 0xe cell) run in one routine, `R0037` arm `L00005`, on one phase byte 0, 5, 7, 0 and one countdown `+0x6c`; branches differ in admission, wind-up term, release and recovery term. | High / Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| HERO-197 | A blow's wind-up adds `(d*256+128) IDIV 200` actor ticks when `d` from `R0247` exceeds 1, else 0: d = 2..10 add 3, 4, 5, 7, 8, 9, 10, 12, 13. A hand cast adds none; an item cast diverted at the phase-5 zero keeps it. | High / Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| HERO-198 | Damage and spell release happen at the phase-5 zero, the end of the wind-up; phase 7 and the recovery countdown are stored at `L05340` on every path out of it, so a blow that fails the strike's reach recheck pays the full recovery. | High | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| HERO-199 | Nominal repeat intervals (EN = RU in charge, relax, penalty): Orc_Sword and Man_Sword 13-16 actor ticks, Goblin_Pike 12-15, Goblin_Sling 27-30 plus distance term, Ogre 20-23, Catapult 42-45; staff casts 14-20; hand casts 18-21 to 45-48. | Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+
+### HERO-196
+
+- Body: EXP-0234 `listings.txt`, `R0037`. The arm `L00005` serves states 3, 0xd and
+  0xe and switches on the phase byte (`L00005`..`L04574`): phase 0 to `L16037`, phase 5
+  to `L13484`, phase 7 to `L04543`.
+- Phase 0, state 3. When the worn weapon `+0x74` is set, its Spell is nonzero (`R0408`,
+  item `+0x80`) and the actor is a mage (`R0442`, `actor+0x4c & 4`), the arm stores
+  `+0x64` = that Spell, `+0x68` = the weapon and state 0xd (`L17629`..`L13664`): the item
+  cast. Otherwise it calls the swing start `R0245(actor, target, &extra)` (`L05237`)
+  and stores completion `+0x136` = 0, phase 5 and `+0x6c` = byte `+0x134` (charge) + extra
+  (`L09264`..`L04380`, `HERO-197`).
+- Phase 0, states 0xd and 0xe. Admission `R0268(spell, actor, target, 0, 0)`
+  (`L01994`), or with the cell bytes `+0x60`, `+0x61` (`L01995`). A zero return jumps to
+  `L14659` with no store, so the phase stays 0. A nonzero return stores `+0x136` = 0, phase
+  5 and `+0x6c` = byte `+0x134` with no distance term (`L15296`..`L04379`). Mana is
+  subtracted inside admission when the caster's mage bit is set and `+0x68` is zero
+  (`MAGIC-310`, High; `MAGIC-317`, High / Medium).
+- Phase 5 decrements `+0x6c` once per actor tick. At zero, state 3 tests the item-cast
+  conversion again (`L15299`..`L15270`), else calls the strike `R0001` (`L00006`,
+  `HERO-198`). States 0xd and 0xe release through `R0002` (unit target, `L00007`) or
+  `R0003` (cell, `L00008`). After a release with `+0x68` set, an item whose `R1056` class
+  (`(word +0x40 >> 8) & 0xf`) is 14 is deleted with its Spell (High); that class 14 is the
+  scroll is Medium (`MAGIC-317`). Every item cast clears `+0x68` and `+0x64`
+  (`L04547`..`L00044`).
+- Phase 7 recovery, stored at `L05340`: the Humanoid weapon penalty when `+0x74` is set and
+  `vt+0x30` is true (`L04545`..`L04546`), plus `R0861(3)`, plus byte `+0x135` (relax),
+  into `+0x6c` (`L17630`..`L04382`); for state 0xd or 0xe with `+0x64` still set, plus the
+  low byte of `R0476(spell, 0)`, the Spell's Complication Level (`L17631`..`L04383`). At
+  zero, phase 0 and `+0x136` = 1 (`L08584`, `L04544`).
+- Differences, per branch. Blow: admission is the swing start, wind-up charge + distance term,
+  strike, no Complication. Hand cast: admission can refuse with no store, wind-up charge,
+  release, Complication. Item cast (a mage's spell weapon, or a scroll, Medium): state 3
+  diverted to 0xd, release, pointers cleared, so no Complication (`MAGIC-CADENCE-126`,
+  High / Medium). A diversion at phase 0 winds up charge alone. A diversion at the phase-5
+  zero comes after a swing start, so that wind-up was charge plus the distance term for `d` > 1,
+  and the release follows in the same tick with no admission and no mana. Which route a shipped
+  mage takes needs the conditions to change between the two tests and is not read here. A fighter's spell weapon stays a blow; its Spell is a rider of the strike
+  (`MAGIC-AUTOCAST-020`, High).
+- Ends and interrupts are older claims: a new pending order does not cancel phase-5 progress,
+  but the executor tail can replace active fields (`AI-354`, High / Medium / Unknown); being
+  struck only turns the victim (`AI-RETAL-056`, High / Medium); in casts the struck hook does
+  not reset the wind-up and caster HP at most 0 bypasses release (`AI-666`, High / Medium);
+  command state 0x17 with `mover+0x98` set ends a cast, cause unread (`MAGIC-341`, Medium).
+- Unit of time: one actor tick per sub-tick (`SESS-TICK-006`, High / Unknown); a sub-tick is
+  1000/R ms, 62 ms at the default speed (`SESS-CLOCK-005`, High).
+
+**Confidence.** High for the phase byte, the stores and the branch sites: the arm is read
+whole in a committed listing of the one image (EN and RU `rom.exe` share a SHA-256). Medium
+for the helper meanings: `R0408`, `R0442`, `R1056` (EXP-0512) and `R0476`
+(EXP-0106) are read in other experiments' committed listings, and `R0861`'s random source
+`R0179` is not read here, so `U[0,3]` rests on `HERO-CADENCE-112` (High). The interrupt bullet carries its claims'
+grades.
+
+**Unknown.** None for the routine. Whether an interrupt that replaces active fields mid-phase
+leaves recovery unpaid is settled by an original run: order a melee attack, issue a move order
+during the wind-up, SAVE on each tick and record the phase byte and `+0x6c`.
+
+### HERO-197
+
+- `R0245` (EXP-0234 `listings.txt`): `d` = `R0247(attacker, target)`; when `d` > 1,
+  extra = `(d*256 + 128)` signed `IDIV` 200 (`L09262`..`L14865`); else extra stays 0. The
+  arm adds extra to charge in `+0x6c` (`L09264`..`L04380`).
+- `R0247` (EXP-0527 listing) returns 1 when `max(|dx|, |dy|) - ((s_a + s_b) * 0x80 - 0x100)`
+  is at most `0x180`, else that value plus `0x40` shifted right by 8, where `dx`, `dy` come from
+  `R0862` and `R0863` (unread; read as fine coordinates), `s_a`, `s_b` are the bytes
+  returned by each actor's `vt+0x1c` (unread) and `R0376` is unread; that `d` is an edge
+  distance in whole cells is Medium.
+- Values: d = 1 adds 0; d = 2..10 add 3, 4, 5, 7, 8, 9, 10, 12, 13
+  (`evidence/table/ranged-extra.tsv`).
+- The cast admission path (`L15296`..`L04379`) loads `+0x134` alone, and the item-cast
+  diversion at phase 0 leaves state 3 before the swing start, so it adds no term; the diversion
+  at the phase-5 zero follows a swing start whose wind-up already held the term
+  (`L09264`..`L04380`, `L15299`..`L15270`).
+
+**Confidence.** High for the arithmetic and the values: both bodies are read. Medium for
+the meaning of `d`: `R0247` calls the coordinate helpers `R0165`, `R0166` and the
+footprint `vt+0x1c`, whose bodies are not read here, so "edge distance in cells" is inferred
+from the constants.
+
+**Unknown.** The distance at which a shipped ranged row swings. Settle with an original run:
+order a Goblin_Sling at a target 6 cells away and record the ticks from the order to the
+hit; the term predicts 8 more than at contact.
+
+### HERO-198
+
+- At the phase-5 zero the arm calls `R0001(actor, target)` (`L00006`) and does not
+  test its return. `R0001`: a null target does nothing; target `vt+0x2c` true calls
+  `R0246`; `vt+0x34` true calls `R0563` (a structure); otherwise an error log.
+- `R0246` (EXP-0234 `listings.txt`) needs both actors non-null with `+0x14` set and the
+  attacker's health `+0x94` above 0, then rechecks reach: byte `attacker+0x12c` at least
+  `R0247` (`L05243`..`L00736`), else no hit. Damage is target
+  `vt+0x4c(attacker+0xa6, attacker)`, subtracted from the target's `+0x94`.
+- The cast branches release at the same phase-5 zero (`L00007`, `L00008`); a projectile
+  spell's effect may arrive later through its delivery (`MAGIC-DELIVERY-170`, High).
+- Phase 7 and its countdown are stored at `L05340` and `L04382` after the strike, the
+  release and the item-pointer clear, on every path; no branch from phase 5 skips them.
+
+**Confidence.** High: the arm and the three strike routines are read whole, and the only
+paths out of the phase-5 zero join before `L05340`.
+
+**Unknown.** None for the static path.
+
+### HERO-199
+
+- Input: the committed derived tables EXP-0234 `actor-cadence.csv` (SHA-256
+  `d97cbebc9246ebb31c3eb127c7ca6dc786ee4ab791d6d584c3cfb161090e31a2`, charge, relax and Humanoid
+  penalty per row and root) and EXP-0067 `catalogue.txt` (SHA-256
+  `07332effd3b9970ce47063a78cbd2c9db4bad243f7df7da039da822279f82200`, Complication Level per
+  Spell), joined by `table.py` into `evidence/table/table.tsv`.
+- Formula: the retained repeat interval `charge + relax + humanoidPenalty + U[0,3] + 2`, plus
+  the distance term for a blow (`HERO-CADENCE-112`, High) and plus Complication Level for a
+  hand cast (`MAGIC-CADENCE-126`, High / Medium); penalty source `HERO-CADENCE-113`
+  (High / Medium).
+- Blows at contact: Orc_Sword 13-16, Goblin_Pike 12-15, Goblin_Sling 27-30, Ogre 20-23,
+  Catapult 42-45, Man_Sword 13-16, Man_Axe2Handed 18-21, Man_Club 16-19 actor ticks.
+- Item casts (staff): ManMage_Staff 15-18, PC_Elf 14-17, NPC_Scrakan 17-20.
+- ManMage_Staff hand casts: Fire Arrow (Complication 3) 18-21, Fire Ball (10) 25-28,
+  Invisibility (25) 40-43, Fire Sacrifice (30) 45-48.
+- Times are nominal at 62 ms per actor tick (`SESS-CLOCK-005`, default speed): Orc_Sword is
+  806-992 ms and Fire Sacrifice 2790-2976 ms.
+- The 15 EN rows equal the 15 RU rows in charge, relax and penalty; the Complication column is
+  one EN reading used for both (the RU histogram agrees, `MAGIC-CADENCE-126`).
+- The Catapult takes the blow path because it has no mage bit (`MAGIC-247`); the staff rows
+  assume the mage bit (`HERO-CLASS-013`). The ManMage_Staff hand-cast rows are computed for the
+  named spells and do not show that the row owns them.
+
+**Confidence.** Medium, the weakest link: the penalty source is High / Medium, and the
+Complication Levels were read from the EN `world.res` only (SHA-256
+`7b44c5261db4e01a0e47b47b66cfd191944a39b2165b0f82bbbae8c109fa28c9`); the RU file
+(`8ba0d479f5ebcad587b9edd7921327382e99a23c28ffc3726cf1865ef26e4051`) agrees with it only in
+EXP-0234's Complication histogram. The arithmetic over the committed tables is exact.
+
+**Unknown.** The approach and turn before the first wind-up are not included. Settle with an
+original run: order an Orc_Sword at an adjacent enemy, SAVE each tick and count the ticks
+between two consecutive health drops of the target.

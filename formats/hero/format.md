@@ -8,7 +8,9 @@ map placement populate different initial inputs; the derive routine and
 later consumers have explicit ordering. — HERO-STAT-001, HERO-COST-002,
 HERO-BUDGET-004, HERO-EQUIP-017 (amended), HERO-MOD-016
 
-Combat cadence is specified by HERO-CADENCE-112 through HERO-CADENCE-115 (amended).
+Combat cadence is specified by HERO-CADENCE-112 through HERO-CADENCE-115 (amended). One actor routine runs a blow, a hand cast and an item cast on one phase byte and one
+countdown; the branch differences are HERO-196, the distance term
+HERO-197 (a blow adds it; Medium for the meaning of the distance; an item cast diverted at the phase-5 zero keeps it), the damage moment HERO-198 and shipped repeat intervals HERO-199.
 Spell behavior is in [MAGIC](../magic/format.md); saved raw state is in
 [SAV](../sav/format.md).
 

@@ -94,6 +94,11 @@ with argument 0, which writes `+0x20` 1, the centroid `+0x24`/`+0x28`, word
 and `+0x39` 0. Both setters store every member's post `ord+0x00`, `ord+0x14`
 and `ord+0x08` 0. — AI-450, AI-451
 
+The script Guard command calls the same setter with the low byte of its node's Par1. A
+nonzero argument replaces MinimalGuardRange as the floor, so that radius is
+max(`+0x2c`, Par1) with no minimum of 8; the other five direct callers pass 0.
+— AI-792, AI-793
+
 The trigger binder writes AI `+0x48` = 1 for a Group it resolves directly or
 through a unit; it writes no other AI field and no order field. — AI-452
 

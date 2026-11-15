@@ -212,6 +212,18 @@ the live centroid. Under group order 1, the member's distance from its post, the
 and the distance chased are not tested in the bodies read. There is no walk-back flag, timer or
 distance: the next pass that admits a candidate replaces the walk (Medium). — AI-777, AI-781
 
+Five of the six direct guard-setter callers pass argument 0; the script Guard command passes
+the low byte of its node's Par1. With 0 the stored radius is the group geometry raised to
+MinimalGuardRange (8 shipped), so at least 8 cells stored; the radius rolled on a populated
+latch-zero pass is at least 11, and the empty-members edge can store 7 (High / Medium, `AI-741`,
+`AI-JITTER-103`). A script argument whose low byte is nonzero replaces that floor and has none;
+a low byte of 0 takes the floor. No pursue-distance test is in the Guard bodies read (`AI-777`,
+Medium); whether the default state's 5-cell post test (`AI-BREAK-041`) also applies to a guard
+member is not read. A member chases while its clipped population yields a winner; the pass runs
+once per 16 ticks (`AI-385`, High / Medium / Unknown), and the member walks back to its post at
+the first pass without a winner (Medium).
+— AI-792, AI-793, AI-794
+
 A member struck on the walk home keeps walking. At the next pass an AI-owned member's remembered
 attacker cell joins the shared population, so the attacker, standing there or seen, is scored for
 every member inside the circle. The struck turn waits for the idle turn, run by the at-post kind and by the reacquisition routine,
@@ -421,6 +433,8 @@ thing and it belongs to the group**:
 centroid   = mean of the members' fine positions
 grpAI+0x2c = max over members of ( Chebyshev(centroid, member) + member.sight )
 grpAI+0x2d = grpAI+0x38 = max( grpAI+0x2c, [Scanning] MinimalGuardRange )
+           for argument 0 (five of the six direct callers); a nonzero script
+           argument n replaces the floor (AI-793)
 on the tick grpAI+0x30 flips from 0:
            grpAI+0x2d = grpAI+0x38 + 4 + rand3
            rand3      = (3 * rand()) / 0x8000 - 1,  i.e. exactly {-1, 0, +1},
