@@ -133,7 +133,7 @@ an explicit boundary; its internal decisions are not supplied here.
 | First member exists, +0x30 nonzero | Increment +0x34, set +0x30 = 1; radius unchanged. | R2-ENGINE-843 High | Meanings beyond these writes |
 | No first member, +0x30 nonzero | +0x2d = +0x38 + draw(-1,1); +0x34 = 0; +0x30 = 0. | R2-ENGINE-843 High stores, Medium draw | Reachability after empty Group becomes 0xff |
 | No first member, +0x30 = 0 | Increment +0x34, set +0x30 = 0. | R2-ENGINE-843 High | Same reachability boundary |
-| Mode-18 setter(group, r) | Set members' order 0xb, programme 18, run radius setup. Nonzero r above +0x2d raises +0x2d/+0x38 to r; r=0 and +0x2d below session +0xa8b8 writes 20 to both. Clear +0x39. | R2-ENGINE-843 High; R2-ENGINE-541 High setter body | Setter callers and r values |
+| Mode-18 setter(group, r) | Set members' order 0xb, programme 18, run radius setup. Nonzero r above +0x2d raises +0x2d/+0x38 to r; r=0 and +0x2d below session +0xa8b8 writes 20 to both. Clear +0x39. | R2-ENGINE-843 High; R2-ENGINE-541 High setter body | Setter callers and r values; the arguments of the three Guard A setter callers per root (RU L2.07168, L2.07169, L2.07170; EN L2.07171, L2.07172, L2.07173) are unread |
 | Guard-A setup in the Summon path | L2.04403 sets programme 1 and unit order 0xb; L2.04666 and setup copy +0x2c to +0x2d/+0x38 and raise both to session MinimalGuardRange when lower. | R2-ENGINE-788 High stores, Medium config role/value | Configuration source/value; not all creation paths |
 
 ## Guard B cases
@@ -468,3 +468,51 @@ book (the loops stop at 28); that no other routine chooses a book spell is
 Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick is Unknown.
+
+## Guard radius source
+
+The installed Scanning/MinimalGuardRange value is 8 in both roots; the getter
+fallback is 10. Guard A's zero-argument floor copies that value; Guard B's
+zero-argument branch writes 20 when setup's radius is below it. These writes
+are on the group controller. One raw Guard B caller in RU (L2.07155) and two in EN (L2.07156,
+L2.07157) are not interpreted, the complete
+source-loader chain and the other writer forms remain open. R2-ENGINE-1252
+(High data and lookup bodies; Medium delivery, caller and writer completeness).
+
+## Conditional guard distances
+
+With the installed floor delivered as 8 and r=0, Guard A starts at max(b,8),
+where b is setup's +0x2c byte. Guard B keeps b when b>=8 and otherwise writes
+20. Under the Medium draw range -1..1, baselines 8 and 20 become 11..13 and
+23..25 after the first-member latch, affecting the next leash. The no-+4 helper
+can write 7..9 and 19..21 through R2-ENGINE-843's no-member arm (reachability
+Unknown); the working radius on that path is not bounded below by the setup floor. A nonzero r,
+LOAD, another writer or byte overflow prevents a universal minimum claim.
+The same radius filters the listed enemy before engage and pursuit; it does
+not establish sight detection distance. R2-ENGINE-1253 (High local stores and
+conditional arithmetic; Medium delivered bounds; global minimum Unknown).
+
+## Pursuit reference and return
+
+The leash follows the current truncated member mean, so it does not give a
+fixed maximum journey from the post. A listed enemy at distance exactly equal
+to the radius survives that filter; other sight/score exclusions can still
+clear assignment. Target-free Guard A prepares the post return; Guard B's
+HP/time and case-5 goals can precede its post return. Visible turn timing and
+arrival stay Medium through the planners and active action. R2-ENGINE-1254
+(Medium composition in both roots; no new target-writer census).
+
+## Summoned-unit count pass
+
+The world pass counts nonzero caster keys and compares a 1..100 draw with
+n, then kills the first linked-list unit of each marked key, at most one per
+key per pass. For n=1 that test cannot fire; for n=2 its conditional chance
+is 328/32768. It runs at Session +4 mod 16 = 12, with delivered time still
+Medium. The read Summon arm supplies no admission-count test; a universal
+absence of a cap is unproved. Count-map helpers, list population, death
+callees and visible departure keep the composition Medium. R2-ENGINE-1255
+(High new helper bodies and arithmetic, Medium composition, global cap Unknown).
+
+The bounded summoned-unit departure census retains the count pass and the
+selected transition cleanup; caster loss, timers, general defeat fate and
+LOAD outcome remain Unknown. R2-ENGINE-1256 (Medium bounded composition).

@@ -426,7 +426,8 @@ values; Medium for EN and for a loaded unit keeping them. — R2-SESSION-362
 The class a summoned creature belongs to (vtable `L2.02314` in RU) has this
 programme in slot +8, read from the class and not from a file. Its owner
 +0x14 and +0x1a0 are stored; no step covers +0x148, the caster key that the
-summoned-creature cap counts. Which units a mission save writes, and what
+world pass counts (R2-ENGINE-776, R2-ENGINE-1255; a probabilistic cull, not an
+established admission cap). Which units a mission save writes, and what
 +0x148 holds after LOAD, are Unknown. — R2-SESSION-326
 
 A unit that spell row 22 builds from a corpse with the constructor has the
@@ -1944,3 +1945,36 @@ in hundredths, its u32 +0x138 is the stamp that sets the factor K, and its
 64 raw bytes from +0xd4 cover the modifier words +0xde and +0xe2 without
 naming them. Whether a save holds Session +0 and +4, which set the health
 phase and K, is Unknown. — R2-ENGINE-1209
+
+## Guard radius source
+
+The installed Scanning/MinimalGuardRange value is 8 in both roots; the getter
+fallback is 10. Guard A's zero-argument floor copies that value; Guard B's
+zero-argument branch writes 20 when setup's radius is below it. These writes
+are on the group controller. One raw Guard B caller in RU (L2.07155) and two in EN (L2.07156,
+L2.07157) are not interpreted, the complete
+source-loader chain and the other writer forms remain open. R2-ENGINE-1252
+(High data and lookup bodies; Medium delivery, caller and writer completeness).
+
+## Conditional guard distances
+
+With the installed floor delivered as 8 and r=0, Guard A starts at max(b,8),
+where b is setup's +0x2c byte. Guard B keeps b when b>=8 and otherwise writes
+20. Under the Medium draw range -1..1, baselines 8 and 20 become 11..13 and
+23..25 after the first-member latch, affecting the next leash. The no-+4 helper
+can write 7..9 and 19..21 through R2-ENGINE-843's no-member arm (reachability
+Unknown); the working radius on that path is not bounded below by the setup floor. A nonzero r,
+LOAD, another writer or byte overflow prevents a universal minimum claim.
+The same radius filters the listed enemy before engage and pursuit; it does
+not establish sight detection distance. R2-ENGINE-1253 (High local stores and
+conditional arithmetic; Medium delivered bounds; global minimum Unknown).
+
+## Departure and LOAD boundary for summoned units
+
+The bounded departure census retains the count-pass death and the selected
+mission-transition detach/destroy path. An independent timer, caster-dependent
+cleanup and general defeat fate remain Unknown. The Unit serializer omits
++0x148 at its cited grade; this alone proves neither disappearance nor immunity
+after LOAD. Field candidates, indirect routes and saved-unit selection remain
+unclosed. R2-ENGINE-1256 (Medium bounded composition, completeness and runtime
+outcome Unknown).

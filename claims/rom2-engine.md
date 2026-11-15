@@ -29454,3 +29454,306 @@ routine: E9 and conditional branches are now searched and find none.
 
 **Evidence.** EXP-2167 `RESULTS.md` question 1; `navigation/listings/ru-refs-decision.txt`,
 `en-refs-decision.txt`.
+## Guard radius source and bounded caller census
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1252 | ROM2 ai.reg holds Scanning/MinimalGuardRange=8 in both roots; getter fallback 10. Read Guard B callers pass 0 or byte +0xc; one RU (L2.07155) and two EN (L2.07156, L2.07157) raw Guard B callers and writer completeness remain open. | High / Medium | ● active (branch candidate) | [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md) |
+
+### R2-ENGINE-1252
+
+The read getter RU R2.0114 / EN R2.0113 and the writer at RU L2.04670 / EN
+L2.04671 are the committed EXP-2107 listings `out/listings/*-config-reader.txt`
+and `*-radius-writer.txt` (R2-ENGINE-788). The RU writer passes fallback 10.
+The paired string read here identifies World\\Data\\ai.reg, Scanning and
+MinimalGuardRange (`evidence/q1/ru-allods2-strings.tsv`). The installed world.res
+and nested data/ai.reg hashes and four derived records per root are in
+`evidence/data/`. Scanning points at record 3, whose stored 15-character name
+is MinimalGuardRan and whose value +4 is 8, type (flags & 0xe) >> 1 = 1.
+
+Lookup RU L2.04672 and EN L2.03131 (`evidence/q1b/win/*-config-lookup.lst`,
+79 instructions each) address 32-byte records using parent +4 and count +8.
+The unsorted branch calls a 15-character comparator, the sorted branch calls
+an unread search helper. Source loading L2.07158, string construction L2.07159,
+comparators L2.07160 and L2.07161, and sorted search L2.07162 remain unread.
+The value 8 is High as data; delivery to every controller instance is Medium.
+The controller used by these setters is RU [L2.02609], EN [L2.01066]; its
+identity with the Session object RU [L2.01317] is not established.
+
+The raw E8/E9 and stored-dword scans of every PE section of each allods2.exe
+find four E8 Guard B sites per root, no E9 or stored dword to the setter.
+RU L2.07163 passes 0 (`evidence/q1/win/ru-bcaller-L2.07163.lst`). RU L2.07164
+and EN L2.07165 locally pass 0 (`evidence/q1b/win/`); their listing prefixes
+are misaligned, so their argument interpretation is Medium. RU L2.07166
+passes record byte +0xc (existing EXP-2153 `evidence/generated/win/ru-caller-L2.06070.lst`);
+EN L2.07167 has the same local pushes (`evidence/q1b/win/en-script-L2.07167.lst`).
+RU L2.07155 / EN L2.07157 remain unclassified: their attempted windows decoded
+zero instructions. The corresponding EN L2.07156 was scanned, not body-read.
+
+Existing EXP-2107 `out/listings/*-group-call.txt`, `*-group-post.txt` and
+`*-group-centre*.txt` read Guard A/B setters, setup and the baseline source.
+Setup copies +0x2c to +0x2d/+0x38. A nonzero r raises them when larger.
+With r=0 below controller +0xa8b8, Guard A copies its low byte; Guard B writes
+20. Both clear +0x39. R2-ENGINE-843's tick writers keep their grades.
+The new operand census covers +0xa8b8 across the executable sections and common
+small offsets only inside the declared group-code ranges. It includes nearby
+start offsets and immediate forms; embedded bases, bulk copies and indirect
+routes are not excluded. Scenario.dll and engine32.dll were not opened.
+
+**Confidence.** High for derived registry values and the two complete lookup
+bodies. Medium for source delivery, locally recovered caller arguments and
+completeness. A raw byte scan is not a call-site or writer proof.
+
+**Unknown.** The unclassified Guard B callers (RU L2.07155; EN L2.07156, L2.07157; the
+correspondence of RU L2.07163 to EN L2.07156 is positional, not read), the arguments of
+the three Guard A setter callers per root (RU L2.07168, L2.07169, L2.07170; EN L2.07171,
+L2.07172, L2.07173), all other creation/load/copy writers,
+configuration override priority, and the full loader/comparator chain. The
+question's ten-window allowance includes a failed prologue search and two
+zero-instruction decodes and is exhausted.
+
+**Amends.** R2-ENGINE-843's Unknown on the setter's callers and compared value,
+and R2-ENGINE-788's Unknown on configuration source/value, narrowed only.
+
+**Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 1.
+
+## Guard distance bounds under the read setup
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1253 | In the read ROM2 setup with floor 8, Guard A starts at max(b,8); zero-argument Guard B keeps b>=8, else writes 20. The first member latch adds 4 plus a draw for the next leash; a universal minimum remains Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md) |
+
+### R2-ENGINE-1253
+
+Let b be the byte copied from Group record +0x2c by setup. R2-ENGINE-788's
+committed paired EXP-2107 `out/listings/*-group-call.txt` and `*-group-post.txt`
+read both setters and setup. The following are conditional calculations, with
+controller +0xa8b8 delivered as the installed value 8 (R2-ENGINE-1252, Medium
+for delivery), no later writer and no byte overflow:
+
+| Input | Initial working radius and baseline | Working radius after first-member latch |
+|---|---|---|
+| Guard A, r=0 | max(b,8) | baseline+4+draw(-1,1), then narrowed to a byte |
+| Guard B, r=0, b<8 | 20 | 24+draw(-1,1), then narrowed to a byte |
+| Guard B, r=0, b>=8 | b | baseline+4+draw(-1,1), then narrowed to a byte |
+| Either setter, nonzero r | max(b,lowByte(r)) | baseline+4+draw(-1,1), then narrowed to a byte |
+
+A second row: RU L2.05034 / EN L2.07174, reachable only through R2-ENGINE-843's
+no-member arm (reachability Unknown), writes baseline+draw(-1,1), 7..9 for baseline 8
+and 19..21 for baseline 20 under the Medium draw; the working radius on this path is
+therefore not bounded below by the setup floor.
+
+Thus the zero-argument setup writes at least 8 under those assumptions; the
+Guard B below-floor branch specifically has 20. If the draw is -1..1 as
+R2-ENGINE-843 grades Medium, a baseline 8 gives 11..13 on the following leash,
+and baseline 20 gives 23..25. These are bounds of those local paths, not a
+survey of delivered initial states or the distance at which an unseen enemy
+is detected. A nonzero argument bypasses the zero-argument floor; SAV, another
+writer and byte overflow keep a global minimum Unknown.
+
+The new 44-instruction paired windows `evidence/generated/win/*-radius-latch.lst`
+read RU L2.05033/L2.05034 and EN L2.07175/L2.07174. They store only the low byte
+of baseline+4+draw or baseline+draw. The latter helpers pass (-1,1) to RU
+L2.02421 / EN L2.07176. No saturation test precedes either store. The RU draw
+body is already listed in EXP-2057 `evidence/navigation/listings/nav1-ru-random-index.txt`:
+trunc(rand()*3/[this])-1. Its denominator and the EN draw body were not read
+here, so a uniform three-outcome draw stays Medium, not High.
+
+R2-ENGINE-841 and R2-ENGINE-843 supply the preparation order and latch:
+assignment/leash precede this update; it is the first-member transition,
+not an observed combat-start/combat-end transition. The same +0x2d bounds
+the enemy list before assignment for both engage and pursuit. Sight eligibility
+and the current mean still matter (R2-ENGINE-842).
+
+**Confidence.** High for the new local byte stores in both roots and the
+arithmetic conditional on the stated inputs. Medium for delivered minima and
+the draw range through R2-ENGINE-1252 and R2-ENGINE-843. Unknown for a universal
+minimum per mode across nonzero arguments, loaded states and other writers.
+
+**Amends.** R2-ENGINE-843 by making byte narrowing and the conditional source
+value explicit; it does not close its draw-denominator Unknown.
+
+**Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 2.
+
+## Moving-centroid pursuit and return composition
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1254 | In the read ROM2 Guard A/B chain, an enemy must stay in sight's list and within +0x2d of the current member mean; losing assignment invokes return cases. This supplies no fixed pursuit distance from the post. | Medium | ● active (branch candidate) | [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md) |
+
+### R2-ENGINE-1254
+
+This is a composition of existing authorities, not a new runtime observation
+or a writer census. R2-ENGINE-841 (High order, Medium helpers) supplies a mean
+cell recomputed before sight and leash on each Guard A/B Group tick, in both
+roots. R2-ENGINE-842 (High leash body, Medium pursuit composition) removes an
+enemy only when its distance from that current mean exceeds radius +0x2d.
+R2-ENGINE-878 reads the Chebyshev distance body in both roots: max(abs(dx),abs(dy)).
+R2-ENGINE-881 reads assignment's clear on an empty enemy list or all candidates
+excluded, with Medium completeness of writers. Detection, scoring and other
+candidate exclusions may end an assignment even inside the radius.
+
+For one member the mean is that member's own cell. As the group moves, this
+reference moves. The leash body therefore does not supply a fixed maximum
+number of cells travelled from the post or starting cell. An enemy at exactly
+the radius survives this filter (the branch accepts <=), but can fail another
+eligibility test. Movement, current primary action, obstacles and subsequent
+planners prevent a local assignment clear from proving immediate visible turn.
+
+RU Guard A's complete body and its post comparison are R2-ENGINE-1076's
+EXP-2149 `evidence/generated/win/ru-guarda-L2.02464.lst`. R2-ENGINE-844's paired
+handler/return authorities give the target-free branches: Guard A walks to
+command word +0 unless already there and centred, then calls the standing
+helper. Guard B first applies its HP/time cases to +0x9c, then a target attack,
+then the later HP/time case to +0x9c, case 5 to +0xa0, otherwise the post +0.
+Its return goal is written again each Group tick. R2-ENGINE-844 grades these
+bodies High and the composed walk/meaning Medium; its amendment
+R2-ENGINE-876 keeps case-5 initiation unestablished. EN return order is inherited
+through R2-ENGINE-844's R2-ENGINE-828 clause, not raised here.
+
+**Confidence.** Medium in both roots for the composed pursuit and return.
+Local distance/filter operands retain their cited High grades. There is no
+High assertion about complete target writers, helper closure, path arrival or
+actual trajectory. No Q3 native windows were needed to reuse those grades.
+
+**Unknown.** Complete causes and delivered timing of a turn back, the current
+sight population, and distance travelled from the post on a concrete map.
+On map 10, lure a one-member guard along an open corridor; on each Group tick
+record its cell, post, enemy cell, mean, radius and assigned target, then break
+sight or step beyond the radius. Observe target clear and the first movement
+back. Repeat with a spread group and a hurt Guard B member to distinguish the
+mean and its special return goal.
+
+**Amends.** R2-ENGINE-842's composed pursuit end and R2-ENGINE-1076's pursuit
+Unknown, narrowed only; no new body or complete cause census is claimed.
+
+**Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 3.
+
+## Summon count pass and victim selection
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1255 | ROM2's read world pass counts nonzero caster keys and tests a 1..100 draw<n, then kills the first list member of each marked key, at most one per pass; no admission cap is established by the read Summon arm. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md) |
+
+### R2-ENGINE-1255
+
+R2-ENGINE-776's paired committed EXP-2104 `out/listings/*-world.txt` read
+RU L2.04378 / EN L2.04379. They count every global-list unit with +0x148
+nonzero, with no local HP/kind or live-caster test. They draw once for each
+key, mark it -1 if unsigned draw < count, then walk the same list again.
+The first matching unit causes key=-2 before the death call, preventing
+another death for that key in this pass. This is a later count-dependent
+cull, not a hard maximum or a rejection of the next cast in these bodies.
+
+New paired complete bodies are in `evidence/generated/win/`:
+RU L2.04396 / EN L2.07177 (lookup, 44 instructions),
+RU L2.04397 / EN L2.07178 (insert, 47),
+RU L2.00211 / EN L2.00210 (list next, 16), and
+RU L2.07179 / EN L2.07180 (28-instruction map-iterator tail).
+Lookup walks a bucket chain and tests its key through an unread comparator;
+insert links a missing node and returns its +0xc value address. The map iterator
+tail writes output key from node +8, value from +0xc and advances its position.
+The earlier RU tail prefix is EXP-2104 `ru-map-iter.txt`; EN prefix is inherited
+at Medium. Map hash/comparator RU L2.07181/L2.07182, EN
+L2.07183/L2.07184, and allocation/initialization RU L2.07185/L2.07186,
+EN L2.07187/L2.07188 are unread. Logical key/count aggregation remains Medium.
+
+Existing EXP-2044 `evidence/measured/listings/ru-target-iterator.txt` reads
+list setup and next wrapper. New next bodies read node +0 as next, node +8
+as payload. They establish linked-list traversal order locally; the victim
+is first in that order, not a random choice among the caster's creatures.
+Which creature holds that position after insertion, reuse or LOAD is not
+established. The complete EN setup wrapper is not newly read.
+
+R2-ENGINE-776 reads draw = floor(rand()*100/32768)+1 with rand in 0..32767.
+Assuming that marginal population, n=1 cannot trigger this pass, n=2 has
+328/32768 probability, n=4 has 984/32768, and n>=101 always passes the draw.
+For 1<=n<=101 the numerator is ceil((n-1)*32768/100). These are arithmetic
+conditional on the counted list, not a measured lifetime or independent draws.
+
+The Summon arm of R2-ENGINE-455 and R2-ENGINE-459, including the committed
+EXP-2057 `out/listings/*-unique-arms.txt`, does not compare an existing
+caster-key count with a number. It reuses/builds a unit, initializes it,
+positions it and then stores the caster key and Group (R2-ENGINE-788).
+At any already-held count, that local arm follows the same path; failed
+placement is R2-ENGINE-791. Earlier admission and unread callees remain open,
+so a universal absence of an admission cap is not claimed.
+
+The pass runs when Session +4 mod 16 = 12 (R2-ENGINE-778, High condition,
+Medium delivered cadence). Death and corpse ageing are R2-ENGINE-776's
+committed `*-death.txt` and `*-corpse.txt`: key nonzero first causes health
+-10000 and key=0; state +0x54 becomes 0x10. The final corpse call can set kind
+5 and health -10001 in that call. The owner's +0x38 unit has a later health
+-50 overwrite. Unread death callees and visible kind-5 effects keep reach and
+visible departure Medium; no fixed duration in seconds follows.
+
+**Confidence.** High for the new local bodies in both roots and the conditional
+integer probability calculation. Medium for count/map semantics, first-victim
+composition, delivered cadence and removal effects through unread helpers.
+Unknown for a global cap, a runtime lifetime and complete visible removal.
+
+**Amends.** R2-ENGINE-776's map/list helper and victim-selection Medium,
+narrowed only. R2-ENGINE-776's and R2-SESSION-326's word "cap" names this
+count-dependent cull, not an admission limit or a hard maximum. R2-ENGINE-455's leaving Unknown is narrowed by this pass; the
+other departure routes remain open.
+
+**Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 4.
+
+## Bounded census of summoned-creature departures
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1256 | The bounded ROM2 departure census retains count-pass death and mission-transition cleanup; caster loss, an independent timer and post-LOAD counting remain Unknown. The Unit serializer omits the caster key at its cited grade. | Medium / Unknown | ● active (branch candidate) | [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md) |
+
+### R2-ENGINE-1256
+
+This is a bounded census, not every departure path. Both executables' complete
+executable sections were linearly decoded with Capstone skipdata; operand
+candidates and E8/E9/stored-dword references are in `evidence/generated/scan/`.
+`evidence/derived/candidate-counts.tsv` counts 81 displacement and 42 immediate
+0x148 candidates per root; 0x1a0 has 44 displacement and 15 immediate candidates.
+The scan also admits overlapping dword-store start displacements and common
+Group fields under its declared range restriction. It does not identify an
+object from a displacement. R2-ENGINE-776 interpreted 16 of the 81 displacement
+sites; this experiment does not classify the remaining 65 or the 42 immediate
+sites as Unit accesses. Scenario.dll and engine32.dll, indirect/computed targets,
+embedded bases, wider or bulk copies and runtime scripts remain outside closure.
+
+| Candidate departure | Read result and trigger | Timing and confidence |
+|---|---|---|
+| Count pass, noncombat | R2-ENGINE-1255: nonzero key, count n, draw<n; first matching list unit gets death | One call at Session +4 mod 16 = 12; Medium composition in both roots |
+| Death's immediate cleanup | R2-ENGINE-776: key nonzero causes health -10000, key=0; final corpse call can reach kind 5; owner +0x38 exception and unread callees remain | In that death call; High direct stores, Medium final reach and visible disappearance |
+| Mission victory/transition | R2-ENGINE-412: read transition keeps classes 0x21..0x3f; other units call detach/destroy. R2-ENGINE-777 gives Summon classes 74..76 | During selected transition, both roots; Medium composition through class binding, lists and virtual destruction |
+| Mission defeat | R2-ENGINE-412's transition is gated by mode, Session and app +0x404 bit 0; other failure cleanup exists | General summoned-unit fate Unknown; no universal defeat rule |
+| Independent lifetime timer | No additional route identified within the bodies interpreted by R2-ENGINE-776 and the new map/list helpers | Unknown outside this population; unclassified field sites remain |
+| Caster death or departure | The count pass tests no live caster; no complete dependent-unit or removal cone was read | Immediate versus later dependent cleanup Unknown |
+| Save/LOAD | R2-SESSION-326: Unit serializer writes owner and +0x1a0 but has no step covering +0x148; factory, saved-unit selection and fixups remain open | Post-LOAD presence and counting Unknown; omission alone proves no disappearance or immunity |
+
+The death/direct-reference census finds two E8 death callers per root: the
+actor step and the world pass, no E9 or stored dword to death in these scans.
+This is a byte-scan result, Medium completeness until pointer and jump routes
+are traced. It does not exclude a destructor or detach route without the death
+routine. Existing complete EXP-2104 `out/listings/ru-detach.txt` reads
+RU L2.07189 and L2.01841: remove from Group and owner list, conditionally remove
+the Group, then call virtual slot +4 with 1; list and virtual effects retain
+their cited Medium grade. Its new reference scan is a candidate list, not a
+classification of every caller or object.
+
+**Confidence.** Medium for this composed census in both roots; individual
+inherited direct stores keep their original grades. Unknown for completeness,
+timers, caster-dependent effects, save/load outcome and visible removal.
+No original program or owner save was read. No Q5 native window was used;
+the last native pass is reserved for reproduction of the committed measurements.
+
+**Unknown.** On map 10, cast once and wait while recording time and Session
++4; then cast twice and record each key, count, list position, death entry
+and visible frame. Repeat with the caster killed, with the caster leaving,
+with victory and defeat separately, and with SAVE/LOAD before waiting.
+These runs distinguish timer, count, dependent cleanup and serialization effects
+for the tested states. Further static caller/field classification is needed for
+a complete path census; a bounded run cannot prove global absence.
+
+**Amends.** R2-ENGINE-455's departure Unknown and R2-ENGINE-776's bounded
+absence/census clause, narrowed only. R2-SESSION-326's post-LOAD Unknown stands.
+
+**Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 5.

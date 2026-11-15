@@ -375,3 +375,22 @@ book (the loops stop at 28); that no other routine chooses a book spell is
 Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick is Unknown.
+
+## Guard and summoned-unit boundaries
+
+Guard setup reads installed Scanning/MinimalGuardRange=8, with getter fallback
+10; the full source-loader and writer census remain Medium (R2-ENGINE-1252).
+For r=0, Guard A uses max(b,8); Guard B keeps b>=8 or writes 20. Baselines 8
+and 20 give next-leash 11..13 and 23..25 under the Medium draw interpretation.
+Nonzero arguments, LOAD and byte narrowing keep a universal minimum Unknown
+(R2-ENGINE-1253).
+
+The leash uses the current member mean. Losing target assignment can prepare
+return to the post, or Guard B's earlier special goals, but does not establish
+a fixed journey from home or an immediate visible turn (R2-ENGINE-1254,
+Medium composition). The count pass calls death for the first matching
+linked-list unit after its draw<n test, at most one per caster key per pass;
+its map helpers and visible effects keep the composition Medium
+(R2-ENGINE-1255). This does not close caster loss, an independent timer,
+mission failure or LOAD-dependent removal (R2-ENGINE-1256, Medium bounded
+census, completeness Unknown).
