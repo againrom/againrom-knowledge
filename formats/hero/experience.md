@@ -58,9 +58,9 @@ at creation  xp[i] = S(skill[i])                          R0899, both build path
 
 ```
 gate    typeID (+0x0e) in [0x21, 0x3f]             player-character mode, not every Human
-        source, if given and not already dead (health >= 0):
+        source, if given and its signed health >= 0 (HERO-XPKILL-203):
           same owner (+0x14)                        -> nothing
-          diploMatrix[srcPlayer][myPlayer] & 2       -> nothing
+          diploMatrix[srcPlayer][myPlayer] & 2       -> nothing   (HERO-XPCELL-202)
 amount  ftol( amount * (mind/30 + 0.25) )           signed; zero is not an early refusal
 slot    +0x4c & 4 ? the caller's slot, which must be > 0
                   : the caller's slot must be 0, and the slot used is +0xb6 (active), > 0

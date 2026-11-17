@@ -1589,3 +1589,140 @@ EXP-0234's Complication histogram. The arithmetic over the committed tables is e
 **Unknown.** The approach and turn before the first wind-up are not included. Settle with an
 original run: order an Orc_Sword at an adjacent enemy, SAVE each tick and count the ticks
 between two consecutive health drops of the target.
+
+## The relation an experience award reads
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-XPCELL-202 | Experience is refused on bit 1 of `matrix[source player][payer player]`: the struck or killed side's row, not the payer's. | High | ● active (branch candidate) | [EXP-0647](../experiments/EXP-0647-rom1-xp-relation/) |
+| HERO-XPKILL-203 | Both refusals need source health >= 0: a kill award that is paid, and a strike leaving -9..-1, skip them (other blow producers not followed). | High / Medium | ● active (branch candidate) | [EXP-0647](../experiments/EXP-0647-rom1-xp-relation/) |
+| HERO-XPMAP-204 | Loader-written bit 1 is one-sided in 9 ordered player pairs over 4 of 38 EN maps and in 6 over 3 of 34 RU maps (33 of which yield a type-5 record under this parser; `Horror.alm` yields none). | High | ● active (branch candidate) | [EXP-0647](../experiments/EXP-0647-rom1-xp-relation/) |
+
+### HERO-XPCELL-202
+
+- The sink `R0810` is `vt+0x5c` of both human vtables `L00002` and `L00003`
+  (dwords read in both roots). It takes `(amount, source, slot)` and `RET 0xc`; `this`, saved at
+  `L17653`, is the paying actor.
+- After the type gate and the Mind scaling, with `source != 0` and `R1561(source)` false
+  (`L17654`..`L17655`; `HERO-XPKILL-203`): `L17656`/`L04118` compare the two Player
+  pointers at `+0x14`; equal jumps to the epilogue `L17657` and nothing is paid.
+- A zero session pointer `[L00004]` skips the relation test (`L17658`/`L17659`).
+- Row: `(i16)[source+0x14]+0x04` (`L17660`, `L17661`) times 50 (`IMUL …,0x32`, `L17662`),
+  added to `[L00004] + 0xa9c4` (`L17663`). Column: `(i16)[this+0x14]+0x04` (`L17664`,
+  `L17665`). The byte is read signed (`L04119`) and masked with 2 (`L17666`). Set: `JMP
+  L17657` (`L17667`), no award and no later test. Clear: `L17668`, the award path.
+- The cell is therefore `matrix[sourcePlayer][payerPlayer]`. The `.alm` loader writes row `idx`
+  from player `idx`'s own scenario record (`AI-DIPLO-005`), so the refusal follows the struck or
+  killed side's authored relation toward the payer. Bit 1 held only in the payer's row does not
+  refuse; bit 1 held only in the source's row does.
+- The award routines pass the struck or killed actor as `source`: the blow award `R0870`
+  (`vt+0x64`) pushes its target (`L17669`/`L17670`), the kill award `R1054`
+  (`vt+0x60`) its victim (`L17671`/`L17672`). The cast award `R1053` (`vt+0x68`)
+  leaves `EDX`, `0` and the amount as the sink's three arguments, on the reading that `L16239`
+  (unread) takes the two pushes `(EAX, 1)` as at its two other call sites; the sink's `RET 0xc`
+  fixes the count. Medium for the helper's argument count; the sink's own refusal, which tests
+  `source != 0` at `L17654`, is High.
+  These are the three callers read; direct callers of `vt+0x5c` other than the three award
+  routines were not enumerated.
+- In the sink's 339 listed instructions the only `[L00004]` loads are `L17658` and
+  `L17673`; the later `+0x14` reads (`L17674`, `L17675`, `L17676`, `L17677`) follow
+  the award store `L08072`/`L03945`
+  (`experiments/EXP-0342-effect-source-consequence/evidence/instructions.tsv` lines 1581-1919,
+  339 rows).
+- EN and RU `rom.exe` are one image (equal SHA-256); the windows holding these bodies hash equal
+  in both roots.
+
+**Confidence.** High. The refusal window is read in two decoders (a Ghidra listing and an
+independent Capstone audit, every instruction PASS), and the jumps, the stride, the base and the
+mask are byte-verified against the image by an earlier code-identity check. The reverse
+orientation is excluded instruction by instruction: the row is computed from the stack argument
+`[EBP+0xc]`, the source, and the column from `[EBP-0x24]`, `this`.
+
+**Amends.** `AI-DIPLO-005` and `HERO-AGGRO-028`'s amendment say the engine indexes `[me][him]`.
+That is the acquisition filter's orientation. The experience refusal indexes the other way from
+the payer's view: row = the struck or killed actor's player. `HERO-KILL-027` names this bit-1
+refusal without its cell.
+
+### HERO-XPKILL-203
+
+- `R1561` returns `(i16)actor+0x94 < 0` (`L17678`..`L17679`). The sink tests it on the
+  source at `L17680` and, when true, jumps past both refusals to `L17668`. A source at
+  exactly 0 keeps both refusals.
+- Blow: the strike `R0246` records `preHealth <= 0` (`L04106`..`L04396`), subtracts the
+  damage from `target+0x94` (`L04164`), may run a weapon-borne spell `R0002`
+  (`L03045`), and calls `vt+0x64` only when damage > 0, the target was alive before the blow
+  and `target+0x94 > -10` now (`L04107`..`L04400`). Through the strike `R0246`, a blow
+  leaving -9..-1 pays and skips both refusals, 0 or more keeps them and -10 or below pays no blow
+  award. Other producers of `vt+0x64` (effect-side damage, Drain Life, Slow, Stone Curse, Curse,
+  Poison Cloud) were not followed; their source health at the call is unread.
+- Kill: the death arm of the actor tick sets `actor+0x54 = 0x10` and tears the actor down only
+  when `actor+0x94 <= -10` (`L04387`..`L01924`; non-ground movers are first set to -1000 at
+  `L04398`). The delayed death processor `R0427` acts on `+0x54 == 0x10`
+  (`L17681`..`L17682`). The kill award is paid only for a credited actor at `victim+0x40`
+  whose Player is non-null (else the credit is cleared, `L17683`..`L17684`), with type
+  `0x21..0x3f` (else skipped) and non-negative health (else the credit is cleared, `L17685`);
+  the kill award itself needs the victim's Player non-null (`L17686`) and refuses on `+0x5c`
+  with multiplayer (`L17687`..`L17688`). Then the processor calls the killer's
+  `vt+0x48(victim)` (`L08088`, no field store in its 27 instructions; its callee `R0449` was
+  not read) and `vt+0x60(victim, (i8)victim+0x48)` (`L17689`). A kill award that is paid
+  reaches the sink with the victim's signed health below zero and so passes neither refusal (High
+  for the predicate and the death-arm test; Medium that no other writer of `+0x54 = 0x10` and no
+  unread helper changes this). The award itself has further gates.
+  The teardown's one `+0x94` store writes -50 (`L16827`).
+- A ground actor felled to -9..0 is not torn down by this arm while its health stays above -10,
+  so, through this arm, the kill award waits for that (Medium: writers of `+0x54 = 0x10` other
+  than `L01710` and the teardown were not censused); the blow award of the felling blow is paid
+  at once.
+- Other reads on the path, none a relation cell: the blow award needs the victim's Player
+  non-null with `+0x28 != 0` (`L16266`..`L16267`); the blow and kill awards refuse when that
+  Player's `+0x5c` and `[L00285]+0x0c` are both nonzero (`L12729`..`L17690`,
+  `L17686`..`L17688`); the cap `R2313` divides by 5 on `[L00285]+0x0c`. The damage
+  routine `R0265` (`vt+0x4c` of all three vtables) references neither `L00004` nor
+  `0xa9c4` in its 424 listed instructions except the tail call `R0226` (`L00875`), the
+  flip `HERO-AGGRO-028` describes: it sets bit 0 only where bits 0 and 1 are clear, so it cannot
+  create the bit-1 refusal.
+- All named bodies hash equal in the EN and RU images.
+
+**Confidence.** High for the predicate, the two thresholds and the instructions of both routes /
+Medium that no other relation read changes the payment: the helpers of `R0265`
+(`R0254`, `R1050`, `R0861`, `R0416`, `R0442`, `R0473`, `R1347`), the
+weapon-spell call `R0002`, the notification `R0561`, the callee `R0449` of
+`L08088` and the death processor's calls before `L17689` were not read; and that the kill award always sees a source below zero:
+writers of `actor+0x54 = 0x10` other than `L01710` and the teardown it calls were not censused.
+
+**Amends.** `HERO-SKILLGATE-074`'s "an already-dead source bypasses both" is exactly a signed
+health below zero; a source felled to exactly 0, dead by the death arm's `<= 0`, keeps both
+refusals. `HERO-KILL-027`'s two refusals never apply to the kill award.
+
+**Unknown.** Whether the original pays a blow that leaves an allied victim at -9..-1 is not
+observed. Settle with an original run: on a map whose two players carry bit 1 toward each other,
+let a fighter hero strike an allied soldier to between -9 and -1 health, SAVE before and after,
+and compare the hero's `actor+0x130`.
+
+### HERO-XPMAP-204
+
+- Input: every `*.alm` in each root's directory and every `M7R` entry of its `scenario.res`; EN 38
+  maps, 191 player records; RU 34 maps, 166 records. Each map's SHA-256 is in
+  `evidence/probe/maps.tsv`.
+- Method: replay of the loader store `AI-DIPLO-005` names (`matrix[idx][k+1]` = low byte of the
+  record's word `k`, then `matrix[idx][idx] = 2`), then a count of ordered pairs `(p, q)`,
+  `p != q`, with bit 1 set at `[p][q]` and clear at `[q][p]`.
+- EN: 866 ordered pairs, 37 with bit 1, 9 one-sided, on `Cross.ALM` (3), `scenario.res:90.alm`
+  (4), `scenario.res:60.alm` (1) and `scenario.res:131.alm` (1). RU: 744 ordered pairs, 30 with
+  bit 1, 6 one-sided, on `SCENARIO.RES:90.alm` (4), `:60.alm` (1) and `:131.alm` (1). The EN
+  totals 866, 37 and 102 bit-0 disagreements equal `AI-DIPLO-005`'s.
+- Example pairs `[row][column]`: `Cross.ALM` player 2 to 3 is 2 and 3 to 2 is 0;
+  `scenario.res:131.alm` 7 to 3 is 2 and 3 to 7 is 1. On the second, by `HERO-XPCELL-202`, a
+  player-3 actor striking a player-7 actor is refused and a player-7 actor striking a player-3
+  actor is paid.
+- Roots: 30 maps hash equal; `scenario.res:100.alm`, `:140.alm` and `LuMoir.alm` differ with
+  equal counts; `Cross.ALM`, `Tomb.ALM`, `Beast.ALM` and `Kids2.ALM` are EN only; RU
+  `Horror.alm` (262 876 bytes, other bytes than EN) yields no type-5 record under the record walk,
+  so it contributes no pair.
+
+**Confidence.** High for the counts over the loader-written matrix: the store is replayed as read
+and the EN totals reproduce an independent earlier count.
+
+**Unknown.** A mission join rewrites cells between human participants and a reference player
+(`AI-DIPLO-005`), and script action 10 can change a cell; the counts are the loader's, not those
+of a running mission. Whether RU `Horror.alm` loads players by another route is not read.

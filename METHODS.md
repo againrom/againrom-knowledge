@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5042. Observation: 143. Static analysis: 4211. Mixed: 688.
+Claims labelled: 5045. Observation: 143. Static analysis: 4213. Mixed: 689.
 
 ## Ledger ai
 
@@ -1132,6 +1132,9 @@ Claims labelled: 5042. Observation: 143. Static analysis: 4211. Mixed: 688.
 | HERO-197 | static analysis | ● active (branch candidate) |
 | HERO-198 | static analysis | ● active (branch candidate) |
 | HERO-199 | mixed | ● active (branch candidate) |
+| HERO-XPCELL-202 | static analysis | ● active (branch candidate) |
+| HERO-XPKILL-203 | static analysis | ● active (branch candidate) |
+| HERO-XPMAP-204 | mixed | ● active (branch candidate) |
 
 ## Ledger inv
 

@@ -240,7 +240,10 @@ death, from the killing blow to the freed id  (HERO-DEATH-026 amended, SESS-TICK
 experience, per LANDED blow and only to a human class (the monster slot is a stub)
   xp = ftol( target.XPvalue * 0.5 * dmg / target.healthMax + 1 )
   then the [experience](experience.md) Mind scaling; refused when the two share a player, or when the
-  diplomacy byte has bit 1 -- and, past that, capped and credited to ONE slot by
+  victim's row toward the payer, diplomacy[victimPlayer][payerPlayer], has bit 1 (HERO-XPCELL-202);
+  neither refusal applies once the victim's health is below 0, so a strike leaving -9..-1 is paid
+  across both, and a kill award, when the death processor pays it, passes neither refusal
+  (HERO-XPKILL-203, Medium for the writer census) -- and, past that, capped and credited to ONE slot by
   the [experience rules](experience.md), which is where it becomes a skill level
 ```
 

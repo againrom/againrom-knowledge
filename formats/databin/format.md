@@ -102,6 +102,8 @@ Medium. — DAT-CSVCELL-028
   masks). The **treasure and spell slots (38–54) are not streamed**: the spell pairs
   are read by `R0184` into the spellbook and the order block
   (`UNIT-SPELL-007`) and the treasure columns by the kill payout (`HERO-KILL-027`).
+  The experience that payout pays from `XPvalue` is refused on the victim's relation row
+  (`HERO-XPCELL-202`) only while the victim's health is not below zero (`HERO-XPKILL-203`).
   Complete slot → actor-field map with widths and instruction addresses:
   [`formats/unit`](../unit/format.md), `UNIT-STREAM-001`.
 

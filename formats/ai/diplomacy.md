@@ -81,6 +81,16 @@ The relation is directional: `matrix[A][B]` and `matrix[B][A]` can
 differ, including hostility bit 0. Store ordered pairs independently.
 — AI-DIPLO-005
 
+Bit 1 is one-sided as the loader writes it in 9 ordered player pairs over 4 of the 38 EN maps and in
+6 over 3 of the 34 RU maps, 33 of which yield a type-5 record under this parser (`Horror.alm`
+yields none). — HERO-XPMAP-204
+
+The experience sink reads bit 1 the other way from acquisition: `matrix[victim][payer]`, the
+struck or killed side's row. With bit 1 at `[P][Q]` only, as the loader writes it, a blow by one
+of Q's human-class actors on one of P's actors that leaves P's actor at 0 or more health is
+refused, and the mirror blow is not; a blow leaving -9..-1 or a kill passes (HERO-XPCELL-202 High,
+HERO-XPKILL-203 High / Medium; not observed in the original). — HERO-XPCELL-202
+
 `World\Data\ai.reg` contributes one value on this path: `[Scanning] MinimalGuardRange`, the floor
 of the argument-0 callers on a group's notice radius. The code default is 10; **the shipped file sets 8**. The file has four
 records in total and its other scalar, `[Tasker] IntelligentCons` = 15, has no literal anywhere in
