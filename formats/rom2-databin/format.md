@@ -171,6 +171,11 @@ Authored key constraints, collisions after truncation/transformation and
 original-compatible arbitrary-value binding remain Unknown.
 — R2-ENGINE-072
 
+Units census (EN and RU equal counts): 180 of 241 rows carry typeID, face and serverID; 13
+typeID/face pairs are shared by 64 rows, each row with its own serverID; no raw serverID
+repeats, none is 0 and 23 lie outside 1..0x9ff. Low WORDs were not computed.
+— R2-ENGINE-1273
+
 ## Selected construction input records
 
 Measured character input stems Start_MF, Start_FF, Start_MM and Start_FM each

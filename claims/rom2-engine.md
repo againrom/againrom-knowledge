@@ -5624,7 +5624,7 @@ attribute choice and items.
 | R2-ENGINE-297 | In ROM2 campaign mode a locked Player's chat line whose first 7 bytes are ##Cowar sets its flag byte +0xa78 to 0xff and broadcasts reply 5; other lines are dropped and the unlock line runs no command. | High | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
 | R2-ENGINE-298 | ROM2 command replies are message 0x92 to every client with code 5, 6 or 7 and a Player ID; the client shows that Player's name with main.txt lines 221-222, 223-224 or 225-226 for 5 seconds. | High | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
 | R2-ENGINE-299 | ROM2 #create [N] Gold adds N to Player +0x3c; #create [N] name puts the named item with quantity N in the hero's inventory; both refuse with reply 6 when hero kind byte +0x13c is nonzero. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
-| R2-ENGINE-300 | ROM2 #modify self or army +god sets six words +0x102.. and six bytes +0x10e.. to 100 and re-derives; +spell N and +spells fill the hero's book; +knowledge only sends the Player its 2,560-byte block. | High / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
+| R2-ENGINE-300 | ROM2 #modify self or army +god sets six words +0x102.. and six bytes +0x10e.. to 100 and re-derives; +spell N and +spells fill the hero's book; +knowledge only sends the Player its 2,560-byte block. | High / Unknown | ● active (amended, branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
 | R2-ENGINE-301 | ROM2 #summon [N] [hero] name builds N creatures or humans by name near the hero in a new group owned by the hero's owner; #pickup all gives every world sack's money and items to the hero. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
 | R2-ENGINE-302 | ROM2 #killall and #kill all set word +0x94 to -50 on every unit of each Player whose diplomacy byte toward the sender has bit 0; #kill cheaters also clears their flags; #kill name hits one Player. | High / Medium | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
 | R2-ENGINE-303 | ROM2 #show map and #hide map send message 0xaa to the Player, setting client global L2.00989 and on show marking its grid; #victory posts the normal completion message 0x430; #event N sends 0xb6. | High / Unknown | ● active (branch candidate) | [EXP-2036](../experiments/EXP-2036-rom2-cheats/) |
@@ -5765,6 +5765,9 @@ there. `+spells` does the same for 1..29. `+knowledge` calls
 the six bytes reach.
 
 **Unknown.** `L2.01058`; reading it would settle the bytes' effect.
+
+**Amended.** R2-ENGINE-1270: `+knowledge` calls the builder L2.01061 with index 0, its 0xba arm;
+the same builder sends one byte as 0xb3 after a kill. [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md).
 
 ### R2-ENGINE-301
 
@@ -14120,7 +14123,7 @@ committed output.
 
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-577 | The ROM2 EN inn's left card is the shared sheet L2.01119 drawn for the selected actor: BODY, AGILITY, MIND, SPIRIT are bytes +0x144/+0x147/+0x145/+0x146, HEALTH +0x104/+0x108, MANA +0x148/+0x14a, gated by a grade 0..7. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
+| R2-ENGINE-577 | The ROM2 EN inn's left card is the shared sheet L2.01119 drawn for the selected actor: BODY, AGILITY, MIND, SPIRIT are bytes +0x144/+0x147/+0x145/+0x146, HEALTH +0x104/+0x108, MANA +0x148/+0x14a, gated by a grade 0..7. | High / Medium | ● active (amended, branch candidate) | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-578 | The first town-1 inn patrons' NPC words 207, 2108 and 517 each equal the serverID of one installed Humans row, NPC07_2, 2U_PeasantMale and M141_MageTooth (EN = RU); the absence of other rows for them is Medium. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-579 | R2-ENGINE-290's maxima on those rows, with the five school skills' T(s) as experience, give HEALTH 156, 55, 158 and MANA 0, 0, 604: every inn card value at the first visit, with current equal to maximum. | Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
 | R2-ENGINE-580 | The ROM2 sheet draws main.txt 190 (spellcaster) when actor flags +0x1b8 bit 1 is clear, dword +0x1c is nonzero and the grade is 7; at the first inn visit only the mage's card meets it. | High / Medium | ● active | [EXP-2073](../experiments/EXP-2073-rom2-town-persons/) |
@@ -14171,6 +14174,11 @@ the unread `L2.02956`.
 
 **Unknown.** The callee `L2.01492` that places the rectangle, the body of
 `L2.02956` and the grade byte table's writer.
+
+**Amended.** R2-ENGINE-1268 to R2-ENGINE-1272: the RU sheet L2.02952 is masked-equal to L2.01119
+(High). The found writers of the grade byte table at world (+0xe8) +0x3f70 are the 0xb3 and 0xba
+receive arms, which copy Player +0x44 (High for the arms; Medium that their object is the sheet's,
+and for "kill" as the meaning of the counts). [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md).
 
 **Evidence.** [EXP-2073](../experiments/EXP-2073-rom2-town-persons/)
 
@@ -16732,7 +16740,7 @@ repeat the first-frame/watch runs with matching RU mission state.
 |---|---|---|---|---|
 | R2-ENGINE-673 | ROM2 terrain +0x2c/+0x30 hold footprint occupants kept by L2.03569, cell events at +0x34 act in placement L2.03570 and arrival L2.03571, and refresh L2.03572 reads the +0x3a key. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 | R2-ENGINE-674 | ROM2 Pointer +0x6c is 24 in five EN saves, and the read EN bodies hold no reader of Building base byte +0x0d and no constructor store to word +0x0c. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
-| R2-ENGINE-675 | In EN ROM2 the one found reader of Player +0x44 is a 0xba message builder at L2.03573, and a census of loaded +0x1c0 pointers in the terrain routines hits 27 offsets read (heuristic; the base is not shown to be a Unit). | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
+| R2-ENGINE-675 | In EN ROM2 the one found reader of Player +0x44 is a 0xba message builder at L2.03573, and a census of loaded +0x1c0 pointers in the terrain routines hits 27 offsets read (heuristic; the base is not shown to be a Unit). | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 | R2-ENGINE-676 | ROM2 LOAD keeps a terrain or movement key that misses the saved-object lookup and passes session registers, terrain plane and event bytes, Player raw blocks and Building +0x0c without a value test. | High / Medium | ✔ promoted (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 | R2-ENGINE-677 | 31 ROM2 EN/RU save-payload routine and listing pairs are equal after masking operands >=0x400000. | High | ● active (branch candidate) | [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/) |
 
@@ -16859,6 +16867,9 @@ only the terrain listings and does not identify the base as a Unit.
 the first reads after LOAD. Load game0006 and record the first reads of
 Player 0 +0x10..+0x17, +0x44..+0xa43 and the hero's +0x1c0 block for one
 minute without input.
+
+**Amended.** R2-ENGINE-1270: the builder also reads one byte of Player +0x44 at L2.07219 (its
+0xb3 arm), so L2.03573 is not the one reader. [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md).
 
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 4.
 
@@ -30022,3 +30033,197 @@ then with a staff, then Invisibility from the book, and count actor steps from t
 cast order to the next order; the counts should fall in the bounds above.
 
 **Evidence.** [EXP-2169](../experiments/EXP-2169-rom2-cast-recovery/RESULTS.md), question 4.ROM2 allods2.exe stores +0x134/+0x135 in defaults 8/4, weapon equip (12/13), unequip 8/4, a copy, a 1/1 builder and three bodies that pass the two addresses to a callee (two to the byte reader L2.01279, one to the unread L2.07192); direct operands only.
+## Creature card knowledge grade
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1268 | The ROM2 sheet RU L2.02952 equals EN L2.01119 under the address mask over all 1,250 instructions; its grade gates are 1 health/mana, 2 sight/speed, 3 damage, 4 absorption/defence, 5 attributes, 6 resistances, 7 the rest. | High | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1269 | For a ROM2 creature with serverID s in 1..0x9ff and no override, the card grade is half the viewer's byte s; counted kills raise it by 1 per 2 kills to 7 at 14 kills (composed). | Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1270 | EN ROM2 L2.01061(i, P) sends 0xb3 with word i and byte P+0x44+i for i nonzero, else 0xba with all 2,560 bytes run-coded; four direct calls: join handler, an arm at L2.07220 and `+knowledge` (i = 0), kill (i = victim +0x14c). | High / Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1271 | ROM2 client copy at +0x3f70: 0xba decodes and copies the run-coded block, 0xb3 stores one byte, both unbounded; 7 displacement or immediate 0x3f70 sites per root, all classified. | High / Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1272 | ROM2 Player +0x44 is 2,560 bytes indexed by unit word +0x14c; kills write 1..14 at 1..0x9ff; byte 0 is never counted and index 0 selects the full send; found writers and readers listed. | High / Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1273 | ROM2 Units (EN = RU counts): 180 of 241 rows carry typeID, face and serverID; 13 typeID/face pairs cover 64 rows, each row with its own serverID; no raw serverID repeats; 23 raw values lie outside 1..0x9ff. | High | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1274 | ROM2 records a kill and reads the card grade under the creature's serverID, not its type or face: rows sharing typeID and face keep separate bytes unless their low WORDs match (not counted). | Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+
+### R2-ENGINE-1268
+
+The RU sheet body L2.02952..L2.07221 (`ret 4`, five windows `ru-painter-*`) and the EN body
+L2.01119..L2.07222 (the EXP-2073 listing `en-sheet-paint.txt`) give 1,250 instructions each, equal
+after replacing every operand at or above 0x400000 (`evidence/derived/maskcmp.tsv`). R2-ENGINE-577's
+grade, fields and keys therefore hold in RU.
+
+The grade G (local `[ebp-0x78]`) is computed before any field is drawn. The heading lines
+(R2-ENGINE-581) are drawn at every grade. The later groups test G in this order, each skipping only
+its own group (`jl` to the next test):
+
+| Test | Group (main.txt label keys pushed) |
+|---|---|
+| G >= 5 | Body, Agility, Mind, Spirit (15..18) |
+| G >= 1 | Health, Mana (19, 20) |
+| G >= 3 | flags +0x1b8 bit 0x2 with a +0x188 object: line 118 from that object; else Damage (23) and Attack (25) |
+| G >= 4 | Absorption (24), Defence (26) |
+| G >= 2 | Sight (21), Speed (22) |
+| G >= 7 | heading 27 (flags & 0x11) or 28, then five skill rows: 36..40 when +0x24 is 0x17 or 0x18 or flags have bits 0x1 and 0x2, else 30..34 |
+| G >= 6 | heading 28 at the right column and resistances 41..45 |
+| G = 7 | flags bit 0x1: Weight (35), Experience (46); flags bit 0x1 clear and +0x1c nonzero: 190; flags & 0x11 clear and byte +0x156 nonzero: 191 |
+
+**Confidence.** High for the equality and the tests: complete bodies in both roots and the branch
+targets of each compare.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 1.
+
+### R2-ENGINE-1269
+
+The grade input, read in both roots (R2-ENGINE-1268): for the unit's word +0x1dc in 1..0x9ff, G is
+the byte at the client object (unit +0xe8) +0x3f70 + word, halved with `sar`; for other words 0.
+G is replaced by 7 when the DWORD at owner (+0x14) +4 is 0, when the local relation word
+for that key has value 0x8 set (`L2.02954` returns `& 8`, R2-ENGINE-826), or when the reveal global `L2.00989` is set
+(#show map). One client update copies the server word +0x14c into +0x1dc (R2-ENGINE-069).
+R2-ENGINE-069 names four other writers of +0x1dc and does not list all writers.
+
+Composed with R2-ENGINE-772 (a counted kill adds 1 to the killer's owner's byte +0x44 + victim
++0x14c while it is below 14, for +0x14c in 1..0x9ff) and R2-ENGINE-1270 and R2-ENGINE-1271 (each
+even result is sent as 0xb3 to that Player and stored in its client copy): from a zero byte, k
+counted kills of serverID s give G = floor(k/2) up to 7 at k = 14. With R2-ENGINE-1268's gates the
+card adds Health and Mana at 2 kills, Sight and Speed at 4, the damage group at 6, Absorption and
+Defence at 8, the four attributes at 10, resistances at 12 and the rest at 14.
+
+**Confidence.** Medium: a composition. High links: the sheet bodies, the kill arm, the 0xb3 builder
+and receive arms (EN). Medium links: R2-ENGINE-772's writer census; that the client object of the
+sheet (unit +0xe8) and of the receive arm (pump local) are one object, which rests on the shared
+displacement 0x3f70; that +0x1dc holds the server +0x14c for the hovered creature (R2-ENGINE-069);
+that `L2.00871` delivers 0xb3 to the killer's owner's client (body unread); the builder is read in
+EN only; that the client copy starts equal to the server block (a 0xba send is read in
+the join handler, not its order against the first card).
+
+**Unknown.** The owner key of placed wild creatures: if it is 0 their card is always complete. A
+run of the original that hovers one wild creature of a kind never fought, kills two of that kind
+and hovers a third, recording the card each time, would settle the key and the grade steps.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 1.
+
+### R2-ENGINE-1270
+
+EN builder L2.01061 (`en-builder-505582`): when the low word of argument 1 is nonzero it fills the
+buffer at L2.07223 with type 0xb3 (+9), the Player's signed word +4 (+7), the index word (+0xa)
+and the byte at Player +0x44 + index (+0xc), and sends it through L2.00871. When the index is 0 it
+fills L2.07224 with type 0xba, encodes the Player's 2,560 bytes at +0x44 with L2.03621 (the run
+codec of R2-SESSION-022, encode side; length at +0xa), copies the output to +0xe, frees it and
+sends.
+
+A raw scan for `E8`/`E9` rel32 to L2.01061 in EN executable sections finds four calls: L2.07225 in
+the join handler L2.02723 (index 0, after the 0xb9 and other sends; committed EXP-2067 listing),
+L2.07226 (#modify +knowledge, index 0, R2-ENGINE-300), L2.07220, in code whose function start the
+scan did not find (window `en-send-L2.07227`, decode synchronised at L2.07228; it first calls
+L2.07019 with DWORD +0x14 of the object at `[ebp-0x9c8]`, then the builder with index 0), and
+L2.07229 in the kill arm (victim +0x14c).
+
+**Confidence.** High for the two arms and the four direct calls. Medium for completeness: stored
+addresses, jump tables and calls through registers are not scanned. EN only; the RU builder is
+not read.
+
+**Unknown.** The function and message that reach L2.07220.
+
+**Amends.** R2-ENGINE-675: L2.03573 is not the only reader of Player +0x44; the same builder reads
+one byte at L2.07219. R2-ENGINE-300: `+knowledge` is the index-0 arm of a routine that also sends
+single bytes.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 2.
+
+### R2-ENGINE-1271
+
+The EN client pump L2.00466 maps type t through byte table L2.00467 (t - 3) and jump table L2.00468
+(R2-ENGINE-826); the tables (`nav/nav3/scans`) give 0xb3 index 0x28, target L2.07230, and 0xba
+index 0x2f, target L2.07231. The 0xba arm decodes message +0xe (length +0xa) with L2.07232 and
+copies the decoded length into the client object +0x3f70 with no bound, then frees the buffer. The
+0xb3 arm stores byte +0xc at +0x3f70 + word +0xa, unbounded. Each arm then calls L2.07233 on
+application +0x450 unless application +0x5d8 is 2. RU bodies L2.07234 and L2.07235 have the same
+operations with other registers and frame offsets (decoder R2.0187, application +0x63c, +0x468);
+each is the target of one dword (L2.07236, L2.07237); the RU type tables are not read.
+
+Raw scans of `70 3f 00 00` in the executable sections find 7 hits per root, each one instruction:
+
+| EN | RU | Operation |
+|---|---|---|
+| L2.07238 | L2.07239 | 0xba copy destination |
+| L2.07240 | L2.07241 | 0xb3 byte store |
+| L2.07242 | L2.07243 | sheet grade read (R2-ENGINE-1269) |
+| L2.07244 | L2.07245 | routine `L2.07246` (RU `L2.07247`) computes the same grade |
+| L2.07248 | L2.07249 | character creation L2.07250 clears 0xa00 bytes |
+| L2.07251 | L2.07252 | full `.a2c` write passes the address (R2-SESSION-416) |
+| L2.07253 | L2.07254 | section-B `.a2c` write passes the address |
+
+**Confidence.** High for the arms, the EN table entries, the 7 hits per root and their EN
+classification, and the RU hits inside read RU bodies (`L2.07239`, `L2.07241`, `L2.07243`). Medium
+for the RU classification of `L2.07245`, `L2.07252` and `L2.07254` (bodies not read) and of
+`L2.07249` (R2-SESSION-022's creation routine). Medium for
+completeness: a pointer formed once and passed on, or a copy of the whole client object,
+escapes the scan; the RU type mapping rests on the parallel bodies.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 2.
+
+### R2-ENGINE-1272
+
+Element size 1 byte: every read and write found is a byte load or store at base + index + 0x44
+(server) or + 0x3f70 (client). Count 2,560 (0xa00 in the constructor clear, serializer and
+builder). Index: the victim's word +0x14c (R2-ENGINE-772), the builder's word argument, the
+sheet's word +0x1dc. The kill arm writes indices 1..0x9ff only and values up to 14; index 0 is
+the builder's full-send selector, so byte 0 is sent only inside a 0xba block.
+
+Found server writers: constructor clear L2.03619, kill L2.04434, character-file load copy
+L2.03620 (R2-ENGINE-772), SAV LOAD L2.03618 (R2-ENGINE-675). Found server readers: the builder
+(L2.07219 one byte, L2.03573 all), the kill test, SAVE L2.03617. A raw scan of the immediate
+`00 0a 00 00` in EN executable sections (17 hits) adds no other use of the block: beside these
+and the client clear L2.03623, the sheet bounds L2.07255 and L2.07256, the kill bound L2.07257
+and the `.a2c` writer's local L2.03622, the hits are instruction interiors (L2.07258, L2.07259,
+L2.07260), a frame size (L2.07261) and library code (L2.07262, L2.07263, L2.07264).
+
+No script or mission-start writer was found: the immediate scan sees only sites that state 0xa00,
+and indexed byte writes at 0x44 are R2-ENGINE-772's census.
+
+EN addresses. The kill arm is EN = RU (R2-ENGINE-772). The builder, the serializer sites and the
+`0xa00` scan are EN only. The RU builder is not read, so "index 0 selects the full send" holds for
+EN.
+
+**Confidence.** High for element size, count and the listed sites. Medium that no other writer
+exists (R2-ENGINE-772's census grade; stores through computed pointers). Medium for "kill" as the
+meaning of the counting routine (R2-ENGINE-772).
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 2.
+
+### R2-ENGINE-1273
+
+`world.res` `data/data.bin` group E through the EXP-2091 grammar (`evidence/derived/units`), EN
+and RU equal in every count: 241 rows; 61 rows end before the typeID column; of the other 180,
+129 distinct (typeID, face) pairs, 13 of them shared by 64 rows: four pairs of 2 rows, one of 3,
+two of 4, two of 5, one of 6, two of 8 and one of 13. In each shared pair every row has its own
+serverID; across the 180 rows no raw serverID value repeats and none is 0; 23 raw values lie
+outside 1..0x9ff. The census prints counts only: the low WORD that R2-ENGINE-072 transfers
+to +0x14c was not computed, so collisions and range after truncation are not tested.
+
+**Confidence.** High: the whole file parses in both roots; counts only.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 4.
+
+### R2-ENGINE-1274
+
+The kill arm indexes the killer's owner's block with the victim's word +0x14c (R2-ENGINE-772); the
+sheet indexes the viewer's copy with the client word +0x1dc, which the client update copies from
+the server word +0x14c (R2-ENGINE-069). For a unit placed from a Units row, +0x14c is that row's
+serverID (R2-ENGINE-072's parameter 55, R2-ENGINE-038's placement scan). With R2-ENGINE-1273, the
+64 rows of the 13 shared (typeID, face) pairs have distinct raw serverIDs, so unless their low
+WORDs collide a kill of one row does not raise the grade of another row of the same type and
+face. A row whose low WORD lies outside 1..0x9ff is never counted and shows grade 0 unless an
+override of R2-ENGINE-1269 applies; which of the 23 raw values outside 1..0x9ff do so is not
+computed. Neither the kill arm nor the grade reads
+the unit's kind +0x24; the sheet reads +0x24 only for the name line and the skill labels.
+
+**Confidence.** Medium: the ordinary Units placement arm is read in RU only (R2-ENGINE-038), the
+parameter-55 parser's call from that arm is not read, and creatures created by scripts or spells
+may set +0x14c otherwise.
+
+**Unknown.** The low WORDs of the 180 serverIDs. A run that kills two creatures of rows sharing
+a typeID and face but differing in
+serverID, then hovers a third of each row, would settle whether the grades differ.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 4.

@@ -153,9 +153,9 @@ The shared ALM record-header primitive is a three-way byte-identical match acros
 | R2-SESSION-017 | A ROM2 single-player `game*.sav` uses the ROM1 envelope with magic `Bsg&` (0x26677342): same 16-byte header, version 0x0BAD0002, word-codec blob and 256-byte label at the blob end. | High | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-018 | The ROM2 document serializer reproduces the ROM1 head, Player-list position, world-present byte, world-half order and 400-byte trailer; ROM2 adds one object list after the last world list. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-019 | ROM2 session raw data is 10,374 bytes against ROM1's 4,374, and ROM2 terrain is a sparse key list over cell indices 0x807 up to 0xedee (exclusive) plus a sub-object, not the ROM1 cell table. | High / Medium | ✔ promoted (amended) | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
-| R2-SESSION-020 | The ROM2 Player body keeps ROM1's 51-byte scalar prefix widths and adds a 2,560-byte raw block, a 36-byte raw suffix and no Diary; Player grows 112 to 2,688 runtime bytes. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
+| R2-SESSION-020 | The ROM2 Player body keeps ROM1's 51-byte scalar prefix widths and adds a 2,560-byte raw block, a 36-byte raw suffix and no Diary; Player grows 112 to 2,688 runtime bytes. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 | R2-SESSION-021 | After the label ROM2 keeps the ROM1 `&YA1` store and its key names, then writes a count-prefixed pair list, the `scenario.dll` `ScenarioSave` record and nine length-prefixed blocks in place of ROM1's campaign record. | High / Unknown | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
-| R2-SESSION-022 | A ROM2 `.a2c` character file is a `0x04507989` magic plus six 16-byte-headed sections, scrambled with a per-section 15-bit key and a doubling checksum; both lawful files decode to end of file. | High / Medium | ✔ promoted | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
+| R2-SESSION-022 | A ROM2 `.a2c` character file is a `0x04507989` magic plus six 16-byte-headed sections, scrambled with a per-section 15-bit key and a doubling checksum; both lawful files decode to end of file. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2005](../experiments/EXP-2005-rom2-save-format/) |
 
 ### R2-SESSION-017
 
@@ -199,6 +199,9 @@ The Player body is the virtual slot `+8` of vtable `L2.00376` (`R2.0085`). It wr
 
 **Unknown.** The meaning of the 2,560-byte block (its size equals a `.a2c` section B decoded size, `R2-SESSION-022`; the identity is inference), the 36-byte suffix, and the 51-byte prefix field meanings beyond ROM1's, which ROM2 does not establish.
 
+**Amended.** R2-SESSION-416: the block's size match with section B is read as a copy: section B
+holds the client copy of Player +0x44 (Medium for the object identity). [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md).
+
 ### R2-SESSION-021
 
 `R2.0166` (the single-player save driver) writes, after the label: the `&YA1` store from `R2.0176` (magic 0x31415926, header of six `u32`, 32-byte records, a pool length `u32` and the pool, `R2.0177`), filled by `R2.0178`, `R2.0179`, `R2.0180` and `R2.0181` from key names that include `Character`, `GameOptions` (`Wimpy`, `ShowHP`, `FlyingHP`, `Formation`, `Speed`, `ShowTimeFlow`), `SpellBook` (`IsOpen`, `Pressed`, `Shortcuts`), `Objects` (`Selection`, `Group0`..`Group9`), `Inventory/IsOpen`, `Projectiles` (`FreeIndex`, `Prj<id>`) and `Fog` (`FirstState`, `Data`). Those are the ROM1 roots of `formats/sav/application.md`. The store is followed by `R2.0182`: a `u32` count and that many pairs of two `u32` (`R2.0183`), then two `u32`; then the `scenario.dll` export `ScenarioSave` through the pointer at `L2.00377`, which `allods2.exe` fills with `GetProcAddress(module, 12)` at `L2.00378` after loading `scenario.dll` by name; then nine blocks from `R2.0184`, each `u16`, `u16`, `u32` length and that many raw bytes.
@@ -218,6 +221,9 @@ The file name is `<decimal id0><decimal id1>.a2c` (`%u%u.a2c`); the character-cr
 **Confidence.** High for the container, scramble, checksum, run codec, section order and the id-pair file name (decompiled writer and reader, replayed on two files). The checksum keeps only the last 32 plain bytes, so a verifying checksum excludes error only there, and C's checksum is 0 over zero tail bytes and does not discriminate; the scramble of A, B and D rests on structure (B decodes to exactly 2,560 bytes, the A id pair equals the file name, D framing consumes its stated length) plus the tail checksum, and C's scramble on its small decoded values; Medium for the item-record framing (three non-empty records replayed) and for the id pair being a performance-counter value (read from one routine); Unknown for every field meaning in A..F, for section B's 2,560 bytes beyond size, and for the `BlCh` variant.
 
 **Unknown.** Section C; section E field meanings; item record kinds; the A bytes at offsets 0x2c and 0x2f (observed 0x00/0x40 and 4 in two files); server-side validation was located but not read: `Cheating detected! Player: %s file: %u%u.a2c` is referenced at `L2.00379` inside `R2.0119`, and `Character is too strong for this map.` at `L2.00380` and `L2.00381` in a different routine.
+
+**Amended.** R2-SESSION-416: section B's 2,560 bytes are the client copy of the kill-grade
+block (client +0x3f70), rewritten alone after each 0xb3 or 0xba receipt unless application +0x5d8 is 2 (EN read; RU write sites Medium). [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md).
 
 
 ## Initial campaign bank and first continuation
@@ -5969,3 +5975,53 @@ No save was newly opened. R2-SESSION-306's already-published rom2-gog-original-2
 **Amends.** R2-SESSION-158's cold-LOAD Unknown remains; the distinction between a requested bank transfer, saved-value evaluation and delivered first frame is explicit.
 
 **Evidence.** EXP-2137 RESULTS.md question 8; out-fourth/*-scenario-save-load.txt; existing R2-SESSION-306 evidence at its own grade.
+## Creature kill-grade block in files
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-416 | ROM2 `.a2c` section B is the client copy of the 2,560-byte kill-grade block at client +0x3f70: EN L2.07233 rewrites only B after each 0xb3 or 0xba receipt unless app +0x5d8 is 2; character creation zeroes it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-SESSION-417 | Across ROM2 SAVE and LOAD the kill grades travel only as the SAV Player body's raw 2,560 bytes of +0x44, restored raw; no found SAV transfer touches the client copy +0x3f70 that the card reads. | Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+
+### R2-SESSION-416
+
+EN L2.07233 (`en-a2c-L2.07233`), called by both receive arms of R2-ENGINE-1271, tests application
++0x5d8 and, unless it is 2, calls the `.a2c` writer L2.07265 with the file name, two zero
+arguments, the client object (application +0xd0) +0x3f70 as the section-B pointer (argument 4) and
+zeros for the other four; the writer keeps the sections it is not given (R2-SESSION-022), encodes B
+with the run codec L2.03621 and writes tag 0x55555555. The full write L2.07266 passes the same
+address in the same position. EN character creation L2.07250 (RU R2.0188, R2-SESSION-022) clears
+0xa00 bytes at application (+0xd0) +0x3f70 before the first write. In RU the same three uses are
+the 0x3f70 sites L2.07254, L2.07252 and L2.07249 (R2-ENGINE-1271).
+
+**Confidence.** High for the EN calls and argument positions and the EN and RU creation clear.
+Medium for the RU write sites: found by the displacement scan, bodies not read. Medium that the
+object at application +0xd0 is the receive arms' pump object and the sheet's unit +0xe8 object (the
+shared displacement 0x3f70, R2-ENGINE-1269), and that `L2.05132` returns the application.
+
+**Unknown.** Mode 2 of application +0x5d8; whether the client reads section B back into +0x3f70
+when a character is loaded (the `.a2c` reader's B destination is not read).
+
+**Amends.** R2-SESSION-022: section B's 2,560 bytes are the client copy of the kill-grade block.
+R2-SESSION-020: the block's size match with section B is read as a copy: section B holds the client
+copy of Player +0x44 (Medium for the object identity).
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 3.
+
+### R2-SESSION-417
+
+The SAV Player body (R2-SESSION-020) writes the raw 2,560 bytes at Player +0x44; the EN serializer
+transfers them without a test in both directions (L2.03617 SAVE, L2.03618 LOAD, R2-ENGINE-675), so
+LOAD writes the saved kill bytes back into the server block. The client copy at +0x3f70 has 7
+sites per root (R2-ENGINE-1271): the two receive arms, the two sheet reads, the creation clear and
+two `.a2c` writes; none is in a SAV serializer. After LOAD the card shows the saved grades only if
+the server sends 0xba (or 0xb3) to the viewer: the found 0xba sends are the join handler, the arm
+at L2.07220 and `#modify +knowledge` (R2-ENGINE-1270), and none is shown to run after LOAD.
+
+**Confidence.** Medium: the SAV and client-site facts are High; the absence of a SAV copy of
++0x3f70 is bounded by the displacement scan, and the post-LOAD send order is not read.
+
+**Unknown.** Whether LOAD is followed by a 0xba send. A run of the original that kills two
+creatures of one kind, saves, loads and hovers a third of that kind would settle it: Health and
+Mana visible after LOAD means the grade survives.
+
+**Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 3.

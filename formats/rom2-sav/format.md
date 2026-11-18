@@ -269,8 +269,9 @@ fields. After it, ROM2 writes 2,560 raw bytes, then the group list, then 36 raw
 bytes. ROM1 has the group list, 32 raw bytes and a Diary; ROM2 has no Diary.
 — R2-SESSION-020
 
-The 2,560 raw bytes are Player +0x44; the only reader found among the seven
-EN `push 0xa00` sites passes them to a 0xba message builder. They are zero
+The 2,560 raw bytes are Player +0x44; among the seven EN `push 0xa00` sites the
+readers are SAVE `L2.03617` and the 0xba arm of the builder `L2.01061`
+(R2-ENGINE-675, amended by R2-ENGINE-1270). They are zero
 in the five EN mission-10 saves except one byte of Player 0 in game0006. A
 census of loaded +0x1c0 pointers in the terrain routines hits 27 offsets
 read (heuristic; the base is not shown to be a Unit); LOAD remaps the
@@ -284,6 +285,23 @@ is below 14, after it adds 1 to +0xa4c (victim class 0x21..0x3f) or +0xa48
 reads the 2,560 bytes from the save, and the constructor clears them. That the
 routine counts kills is Medium: the meaning is taken from its conditions (a
 unit in state 0x10 with a live killer), not from a run. — R2-ENGINE-772
+
+The 2,560 bytes are one byte per unit identity word +0x14c (1..0x9ff); byte 0 is never counted.
+The found server writers are the constructor clear, the kill count, the character-file copy and
+LOAD; the found readers are the kill test, SAVE and one message builder whose two arms send one
+byte (0xb3, after a kill) or the run-coded block (0xba).
+— R2-ENGINE-1272
+
+EN builder `L2.01061` sends 0xb3 for a nonzero index and 0xba for index 0; its four direct calls
+are the join handler, one arm at `L2.07220` and `#modify +knowledge` (index 0), and the kill count.
+— R2-ENGINE-1270
+
+Across SAVE and LOAD the kill grades travel only in this raw block (Medium), and LOAD writes it
+back raw. The client copy that the unit card reads is in no SAV transfer that the `0x3f70`
+displacement scan finds (Medium). It shows the loaded grades only after a 0xba send. The found
+0xba sends are the join handler, an arm at `L2.07220` and `#modify +knowledge`, and none is shown
+to follow LOAD (Unknown).
+— R2-SESSION-417
 
 Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
 byte +0x0d and no constructor store to its word +0x0c was found in the read

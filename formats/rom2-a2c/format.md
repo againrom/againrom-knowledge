@@ -5,7 +5,8 @@
 A ROM2 character is a standalone file named `<decimal id0><decimal id1>.a2c`.
 It is a magic dword and six sections, each with a 16-byte header, a per-section
 scramble and a doubling checksum. Section meanings are Unknown except the
-identity pair and the name string. — R2-SESSION-022
+identity pair, the name string and section B, the client's copy of the Player
+kill-grade block (R2-SESSION-416). — R2-SESSION-022, R2-SESSION-416
 
 ## File
 
@@ -68,4 +69,9 @@ offset 0x4c drive a cleanup scan; its writer was not found. — R2-SESSION-022
 ## Relation to the save
 
 The save's Player body carries a 2,560-byte raw block of the same size as
-section B. The identity is inference. — R2-SESSION-020
+section B. The identity is inference (Medium for the object identity). — R2-SESSION-020
+
+Section B is the client's copy of that block (client +0x3f70). Both receive arms that
+update the copy (0xba: the whole run-coded block; 0xb3: one byte) rewrite section B alone
+unless application +0x5d8 is 2, and character creation clears the copy. Whether loading
+a character reads B back into the copy is Unknown. — R2-SESSION-416, R2-ENGINE-1271
