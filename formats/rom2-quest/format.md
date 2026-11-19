@@ -60,3 +60,5 @@ The Opens and Completes cells give the first test of the trigger only, other tes
 stronger than the lowest clause it names. The frame and banner clauses of
 R2-ENGINE-046 are partially retracted; R2-ENGINE-889 and R2-ENGINE-891 replace
 them.
+
+Script operation reads add these bounds. The zero-check-ID rule covers the first left ID of a trigger as well: a zero first left ID excludes the whole trigger from compilation (High as code; R2-ENGINE-1316). No installed campaign trigger has one, and one campaign trigger (map 42, index 16, both roots) names left check ID 0xFFFFFFFF, which is no check ID of its map (R2-ASSET-248). Action 36's body calls GetVar/SetVar on 752+p0 with the arms of R2-ENGINE-046 (partially retracted, amended grade; High for the instructions, Medium for delegated effects; R2-ENGINE-1313). The read action wrappers expose operand widths and delegated calls only; they add no objective-state claim (R2-ENGINE-1314). Checks 23 and 24 read scenario GetVar(p0) or GetVar(752+p0) with Medium helper results (R2-ENGINE-1315). The map-slot actions and check 19 have no local index guard, which proves no safe slot range (Medium; R2-ENGINE-1319).

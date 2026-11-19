@@ -30748,3 +30748,336 @@ listening for the music during the movie.
 **Amends.** R2-ENGINE-075's Unknown on full playback and audio behavior, and its note that the player may return zero: the inputs that end the batch and the sound path are read here.
 
 **Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 4.
+
+## ROM2 installed script dispatch and record consumers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1312 | Both ROM2 dispatch tables map every occurring ordinary action/check ID; listings reach RET for 27 action and 19 check handlers per root. | High | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1313 | ROM2 actions 3/8 write map result slots; 4/5 write Session DWORDs +0xbe0c/+0xbe14 (role Unknown); 10 writes one relation cell; 35/36 call the scenario bank; 39 clears a group override. | High / Medium | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1314 | Read ROM2 action wrappers expose operand widths, stores and delegated calls; complete effects of unread helpers and actions 33/34 remain open. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1315 | All 19 occurring ordinary ROM2 check bodies are read in EN/RU; exact field predicates and helper calls differ by operation, and check 18 writes no result. | High / Medium | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1316 | Both ROM2 loaders copy 184-byte triggers; the compiler reads three check-ID pairs, four action IDs, three comparisons and the latch skip flag DWORD. | High / Medium | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1317 | ROM2 action word 65538 still has no established downstream collection consumer after the bounded compiler and postcompile reads. | Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1318 | Both ROM2 action compilers mark reference operands 8000..9999 for deferred resolution; the read executor uses a Session pointer array, whose producers are unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1319 | The read ROM2 map-slot actions/checks use DWORD indices without local range tests; complete slot capacity, safe limits and invalid-index behavior remain unproved. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+
+### R2-ENGINE-1312
+
+EN check entry L2.03274 / RU L2.03275 subtracts one from IR DWORD+4,
+compares the unsigned result with 26 and dispatches through 27 DWORD cells
+at EN L2.03276 / RU L2.03277. Its out-of-range branch returns without
+calling an operation body. EN action entry L2.07383 / RU L2.02490 does
+reference preparation, subtracts one from the copied IR operation and
+compares the unsigned result with 38 before its 39-cell table at
+EN L2.00509 / RU L2.00508. Default action handling is separate from a check.
+
+`evidence/derived/dispatch-coverage.tsv` maps all 29 ordinary action IDs
+and all 19 ordinary check IDs of R2-ASSET-247 to their exact case and
+direct handler addresses, independently for EN and RU. `tables/` contains
+every cell, not a byte-scan estimate. The two dispatch bodies and all
+selected case wrappers are committed in `listings/*-dispatch-*.txt`.
+`handler-mask.tsv` has 46 equal complete pairs: 27 actions and 19 checks.
+Action 33 has only EN three / RU six listed prefix instructions; action
+34's target is known but its body is unread. A RET receipt means contiguous
+listing coverage to RET; it is not an indirect-route completeness proof.
+
+**Amends.** R2-ENGINE-041: supplies the case-to-handler mapping for the whole
+occurring ordinary population, not only the added arms.
+
+**Confidence.** High for this positive table mapping, the unsigned switch
+bounds and listed body coverage: section-aware Capstone 5.0.7 reads on
+the two image hashes in `inputs.tsv`. Every case entry is read as a DWORD
+and every wrapper's direct call is listed. This is not a global call-site
+census. The mask hides absolute targets and does not prove helper equality;
+their two addresses remain in the underlying listings.
+
+**Unknown.** Complete effects of unread callees, bodies 33/34 and other
+callers or entry routes. Full word 65538 is a compiler case, not table ID 2.
+
+### R2-ENGINE-1313
+
+IR scalar pN is DWORD at +8+4*N; R[s] is Session DWORD at +0xc784+4*s.
+The following direct body effects are read independently in EN and RU,
+with addresses in R2-ENGINE-1312's coverage table:
+
+| Action | Reads | Local effect |
+|---:|---|---|
+| 3 | p0, p1 | R[p0] = p1 |
+| 4 | no operand | Session+0xbe0c increments by one (role Unknown) |
+| 5 | p0 | Session+0xbe14 = p0 (role Unknown) |
+| 8 | p0 | R[p0] increments by one, DWORD arithmetic |
+| 10 | p0, p1, low8(p2) | Byte at Session+0xa8c4+70*p0+p1 becomes (old AND 0xfc)+low8(p2), modulo 256; then, for each entry of the Session+0xc77c iteration whose word +4 equals p0 or p1, calls EN L2.01852 (R2-ENGINE-980 at its grade) |
+| 35 | p0, p1 | Calls imported SetVar(p0,p1) |
+| 36 | p0, p1 | Calls GetVar/SetVar on 752+p0, with p1's 1/2/4/default arms as R2-ENGINE-046, at its amended grade |
+| 39 | group IR+0x60 | Stores zero at [group+0x3c]+0x48 |
+
+Listings are `*-actions-a.txt`, `*-actions-b.txt` and `*-actions-c.txt`.
+The local DWORD and byte stores, increments and addresses are High.
+SetVar/GetVar identity is inherited from R2-ENGINE-045 (High), whose binding
+and DLL bodies were not reread here. Relation meaning and notification
+coverage inherit R2-ENGINE-979/980 at their grades. Group-activity meaning
+inherits R2-ENGINE-057 at its stated boundaries; the clear alone is not a
+guarantee that the group becomes inactive. Those dependencies are not new reads.
+
+**Amends.** R2-ENGINE-044: gives exact compiled operand accesses for the
+read actions; it does not change the literal compiler's packing rule.
+
+**Confidence.** High for direct body stores and calls in both roots.
+Medium for complete delegated effects, valid indices, packet delivery and
+later outcomes. No local store proves a safe variable index domain.
+
+**Unknown.** Result-slot capacity, all writers, overflow consequences at
+the game level and malformed operand behavior.
+
+### R2-ENGINE-1314
+
+Operand notation is R2-ENGINE-1313. U=IR+0x5c, G=+0x60, P=+0x64,
+V=+0x68, I=u16+0x6c. The table records the read wrappers' local work.
+Helper addresses below are EN; RU calls and all handler entries are in the
+paired listings and `dispatch-coverage.tsv`. Naming an unread helper here
+does not identify its final game effect.
+
+| Action | Reads and local work | Unread boundary |
+|---:|---|---|
+| 2 | p0 passed with two zeros to L2.00458 | Event interface inherits R2-ENGINE-047 (High); delivery not reread |
+| 6 | p0-1 selects an 18-cell nested switch; arms pass G, U and low8(p1/p2) to eleven methods | Nested table and method bodies unread here; arm-to-method correspondence Medium |
+| 12 | I to L2.05906; nonzero return to L2.01055 on U+0x7c; then notification L2.00497 | Creation, collection mutation and delivery |
+| 13 | I to L2.00495 on U+0x7c; nonzero return gets virtual slot+4(1); then L2.00497 | Extraction quantity, virtual destruction, delivery |
+| 16 | U to method L2.04906 | Final effect |
+| 17 | U to method L2.01848 | Final effect |
+| 18 | U to L2.04906, then U location getters and constant 3 to L2.07384 on V | Getters and final effect |
+| 19 | U,P to L2.07385 on global Session+0x7c | Ownership mutation and delivery |
+| 20 | U+0x7c to L2.01810 with zeros; allocates 0x24, calls L2.01737, stores return at U+0x7c | Collection identity and constructor effects |
+| 21 | low8(p0..p3), p4 and (p5 if nonzero, else 99) to L2.03575 | Creation and parameter meanings |
+| 22 | Iterates G; each returned pointer and P go to L2.07385 | Iterator membership and final effect |
+| 23 | p0 and zero to L2.01052 on P | Parameter meaning and final effect |
+| 24 | low8(p0/p1), U, p2/p3 to L2.03574 | Final effect |
+| 25 | Makes a byte descriptor from p0..p7; p4=0 repeats low8(p2/p3), else uses low8(p4..p7); packed low8(p2/p3) and descriptor to L2.03589 | Descriptor constructor and terrain effect |
+| 28 | U+0x7c passed to L2.01786 on V+0x7c; allocates 0x24, calls L2.01737, stores return at U+0x7c; notifies U and V | Transfer semantics and constructor effects |
+| 29 | p0+256*p1 to L2.00475; over six returned pointers, u16+0x0c==p2 selects stores u16+0x50=low16(p3) | Helper contents and complete producer domain |
+| 30 | Iterates U+0x20; u16+0x0c==p0 selects store u16+0x42=low16(p1) | Collection identity and iterator membership |
+| 32 | Iterates G, calling L2.04906 on each returned pointer | Iterator membership and final effect |
+| 33 | Only prologue prefix read | Operands and effect Unknown |
+| 34 | Direct dispatch target only | Operands and effect Unknown |
+| 38 | Iterates terrain+0xa456c; I to L2.00495 on each unit+0x7c; nonzero return gets virtual slot+4(1), then notification | R2-ENGINE-056 supplies extraction meaning at its grade; list/callback boundaries remain |
+
+**Amends.** R2-ENGINE-044 and R2-ENGINE-1123: extends the wrapper read
+population; does not promote the unread nested switch table or Group methods.
+
+**Confidence.** High for operand widths, explicit calls, predicates and
+stores of the 19 complete wrappers in this table. Medium for delegated
+effects and complete iteration; Unknown for actions 33/34. Paired full
+handler listings match after address masking, but addresses and indirect
+targets hidden by the mask are not evidence of callee equality.
+
+**Unknown.** Helper semantics not stated above, malformed/null inputs,
+complete Group selector mapping, actions 33/34 and runtime execution counts.
+
+### R2-ENGINE-1315
+
+R[s], pN, U, G, P, V and I are as in R2-ENGINE-1313/1314.
+Every ordinary check below writes R[IR.DWORD+0] unless stated otherwise.
+Addresses and exact per-root calls are in `dispatch-coverage.tsv` and the
+six `listings/*-checks-{a,b,c}.txt` files. Helper addresses below are EN.
+
+| Check | Reads and local result | Unread boundary |
+|---:|---|---|
+| 1 | L2.02798(G) result | Group count meaning and membership |
+| 4 | If p0==6, sign-extends U.i16+0x94 into R; otherwise returns with no R store | Other field interpretations |
+| 5 | U.DWORD+0x54!=16, as 0/1 | State meaning beyond R2-ENGINE-627 |
+| 6 | If U or V state+0x54==16, 255; otherwise low8 of L2.03287 on both locations | Location getters and distance metric |
+| 7 | low8 of L2.03287(U location,low8(p0),low8(p1)) | Metric |
+| 8 | Counts returns over nested P+0x28 and inner collections | Iterator population |
+| 9 | If [U+0x1c4].BYTE+8==5, reads DWORD at [[U+0x1c4]+0xc]+8; else 0 | Record kind and meaning |
+| 10 | Relation byte for signed owner words P+4,V+4, masked with 3 | Complete relation meaning |
+| 14 | Boolean of L2.07386(low8(p0),low8(p1)) on terrain | Lookup meaning |
+| 15 | Minimum low8 L2.03287 result over P's nested collection; default 255 | Membership, metric and location getters |
+| 16 | If L2.07387(I) on U+0x7c is nonzero, low8 metric to low8(p0/p1); else 255 | Item/helper and metric semantics |
+| 17 | Boolean of L2.07387(I) on U+0x7c | Item lookup semantics |
+| 18 | If U state+0x54==16, increments Session+0xbe14 (role Unknown); no R store | Role of +0xbe14 Unknown |
+| 19 | R[p0] | Valid source slot domain |
+| 21 | Sign-extends i16+0x42 of pointer at IR+0x70 | Building meaning and validity |
+| 23 | GetVar(p0) | Binding identity inherits R2-ENGINE-045 (High) |
+| 24 | GetVar(752+p0) | Same inherited binding |
+| 25 | Boolean of returned layer-pointer array[p2] after L2.00475(low16(p0+256*p1)) | R2-ENGINE-053 at its grade |
+| 26 | Boolean of U.DWORD+0x144 AND (1<<(p0 AND 31)) | Effect identity inherits R2-ENGINE-054 at its grade |
+
+**Amends.** R2-ENGINE-044: adds the complete occurring ordinary check
+wrapper population, preserving the distinction between source parameters,
+compiled scalar positions and separately resolved pointers. Check 27 is
+outside this occurring population, although its prefix appears in a window.
+
+**Confidence.** High for the 19 local body predicates, accesses and calls
+in both roots; all 19 complete pairs match under the address mask. Medium
+for names or total effects depending on unread helpers/iterators. No field
+name alone establishes a health, distance, ownership or item contract.
+
+**Unknown.** Complete helper behavior, accepted malformed references,
+safe source/result indices and the domain behind IR+0x70.
+
+### R2-ENGINE-1316
+
+Both type-7 load cases (EN L2.07388 / RU L2.07389) read action/check
+nodes field by field, moving file+0x48 to object+0x318 and file parameter
+base+0x4c to object+0x48. They read each trigger with one 0xb8-byte call
+through archive slot+0x3c into the element of map+0x78. Thus file and
+compiler offsets for triggers agree, unlike the node permutation.
+
+| Trigger offset | Width | Read contract |
+|---|---|---|
+| 0x00..0x7f | 128 bytes | Copied by loader; exact values measured; label interpretation Medium, no separate prefix reader established |
+| 0x80,0x88,0x90 | 3 DWORDs | Left check IDs, paired with following DWORD |
+| 0x84,0x8c,0x94 | 3 DWORDs | Right check IDs, not immediate comparison values |
+| 0x98,0x9c,0xa0,0xa4 | 4 DWORDs | Action IDs, visited in this order; zero skipped |
+| 0xa8,0xac,0xb0 | 3 DWORDs | Comparison code for corresponding pair |
+| 0xb4 | DWORD | Latch skip flag: copied into compiled flag; nonzero makes runner skip a set latch |
+
+Compiler trigger body EN L2.07390..L2.07391 / RU L2.07392..L2.07393
+skips a whole trigger when its first left check ID at+0x80 is zero. In
+three rows it skips a pair when either check ID is zero. Each nonzero ID
+goes through EN L2.04242 / RU L2.07394; that helper body is unread here,
+so mapping failure/default behavior is Medium. The compiler copies+0xb4
+and the row's comparison for included pairs; the zero-pair case therefore
+does not establish unconditional copying of the stored flag. Four nonzero
+action IDs are mapped and appended; IDs above 5000 trigger a diagnostic
+before continuing the mapping, not a proved rejection. The list helpers
+and compiled-record constructors remain unread.
+
+Runners EN L2.00517 / RU L2.00516 compare map-result DWORDs using
+codes 0..5 for ==, !=, >, <, >=, <= with signed ordered comparisons.
+They clear an eligible trigger's byte latch, short-circuit failed conjunctions,
+set it on a pass and execute stored action order. The flag controls the next
+scan's skip. R2-ENGINE-059 supplies the prior contract at High; these runner
+bodies are reread, but the six-cell comparison target table is not newly
+enumerated here. Values and byte frequencies are R2-ASSET-248.
+
+**Amends.** R2-ENGINE-041/059: supplies the complete stored trigger field
+map and both node-loader permutations. It extends, rather than changes,
+the prior signed-comparison/latch contract. R2-ENGINE-893: its "a trigger
+without a compiled condition passes" holds only when the first left check ID
+is nonzero; a trigger whose first left ID is zero is not compiled.
+R2-ENGINE-042: the EN node-loader permutation Unknown is read here
+(`en-type7-load.txt`, L2.07395..L2.07396).
+
+**Confidence.** High for loader widths, compiler offset accesses, zero-ID
+tests, action iteration and local runner instructions in both roots. Medium
+for full mapping and list contracts that depend on the named unread helpers,
+for label meaning and for malformed records. No complete caller census was
+performed. The semantic ID-to-result mapping also inherits R2-ENGINE-059.
+
+**Unknown.** Prefix consumers, invalid/missing ID behavior, a stored flag
+with no admitted condition, arbitrary comparison codes and scheduler timing.
+
+### R2-ENGINE-1317
+
+The full-word 65538 producer's byte packing and append to compiler-this+0x28
+remain R2-ENGINE-042 (High). New paired compiler-head/action windows show the
+same branch and append, including EN call L2.07397. The body of that append
+helper is unread. An E8/E9 raw byte scan finds two compiler call sites per
+root, committed under `scans/*-compiler-callers.txt`; it does not census
+indirect routes. One postcompile caller excerpt is read, EN L2.07398 /
+RU L2.07399. After compilation it calls the type-9 stage and conditionally
+EN L2.07400 / RU L2.07401, whose read body iterates owners/groups and
+calls EN L2.02494 / RU L2.02493. Neither excerpt establishes a consumer
+of compiler-this+0x28. This is a bounded unsuccessful trace, not proof
+that the collection is unused or that these are every compiler caller.
+
+The RU packed-append scan (target L2.07402, `scans/ru-packed-add-callers.txt`)
+is not the RU append helper (L2.07403, from `ru-compiler-action.txt`) and
+carries no result; the RU append callers were not scanned. The EN scan finds
+18 callers of the general append helper L2.07397, so a caller of it is no
+evidence of the compiler's collection.
+
+**Amends.** R2-ENGINE-042: its downstream-consumer Unknown remains after
+these additional bounded reads. No camera, spawn or trigger-action meaning
+is assigned to the packed word.
+
+**Confidence.** Unknown for the downstream consumer and its return meaning.
+The producer is reused at High; compiler caller enumeration is Medium
+because the instrument scans raw E8/E9 forms only. The second caller,
+collection aliasing and computed/indirect paths were not expanded.
+
+**Unknown.** Which program consumes the collection after compile and what
+it reads. A settling run starts `allods2.exe` on a copy of mission 10,
+changes only the full-word action's first parameter, watches the append
+destination and its first subsequent read, and compares the resulting
+consumer arguments with an unmodified map.
+
+### R2-ENGINE-1318
+
+Both action compilers, EN L2.07404..L2.07405 / RU L2.07406..L2.07407,
+test signed parameter value >=8000 and <10000, then require type 2, 3 or 4.
+They retain the original value at IR+8+4*sourceSlot, set a per-slot mode
+byte at+0x3a+slot to 1 below 9000 or 2 otherwise, subtract 8000 or 9000
+from the source value, and store quotient/remainder on division by 100
+at IR+0x44+slot / +0x4e+slot. They increment IR byte+0x58. This is not
+the literal scalar dense-packing branch.
+
+In the action executor prefix, when copied IR byte+0x58 is nonzero,
+slots with a nonzero+0x3a mode and type 2/3/4 use the unsigned byte
+at+0x4e+slot to load a pointer from Session+0xd724+4*index. The first
+pointer of each reference type goes to its own field; another goes to
+the shared second-reference field+0x68. This read prefix tests the mode
+as nonzero; it does not itself select by mode 1 versus 2 or read the
+quotient byte. Those facts do not identify the array's producer or domain.
+
+The bounded raw displacement-byte scan for 0xd724 finds seven hits per
+client: six indexed loads in this executor and one other address-arithmetic
+hit (EN L2.07408). It excludes other encodings, embedded bases and bulk
+copies; it is not a complete writer census. That other body was not read.
+There is no occurring stored dynamic ID to resolve in the 142-map population
+(R2-ASSET-249, High).
+
+**Amends.** R2-ENGINE-044: reads a positive action-side dynamic compiler
+and executor path; the complete dynamic/error contract remains open.
+
+**Confidence.** High for the exact positive action compiler/prefix accesses
+in both roots. Medium for the broader path and displacement census;
+Unknown for pointer-array producers and specific dynamic return values.
+The check-side dynamic compilation and its complete execution route were
+not read by this experiment and retain R2-ENGINE-044's Medium boundary.
+
+**Unknown.** Meaning of mode/quotient, pointer-array initialization and
+failure behavior. A settling run uses a copied mission-10 map with one
+type-4 action reference changed from its literal value to 8000 and then
+9000; break at EN L2.07409 (or RU corresponding listing), compare the
+array element, resolved pointer and operation effect to the literal map.
+
+### R2-ENGINE-1319
+
+Read action 3 stores R[p0]=p1; action 8 increments R[p0]; check 19 reads
+R[p0] and stores to R[IR+0]. Their complete bodies contain no explicit
+local signed/unsigned range comparison for p0, result slot or value.
+This absence is scoped to these six bodies (three per root), not to
+their callers, compiler, allocation, other writers or DLL bank. The
+action compiler's ten-parameter loop bounds the number of node operands,
+not the variable index domain. Trigger action-ID diagnostic threshold
+5000 is also not a result-slot bound.
+
+R2-ENGINE-043 (High) establishes special-check initialization into the
+same map result namespace; its allocation and full compiler count limits
+were not newly read. R2-ENGINE-045 (High, reused without DLL reread)
+separately establishes scenario.dll DWORD GetVar/SetVar bodies with no
+explicit index guard and a NewGame initial clear of 1024 DWORDs. Actions
+35/36 and checks 23/24 call that bank, not a map-result-count API. This
+does not establish a safe domain 0..1023 for every external access, nor
+unbounded safe indices. `variables.tsv` measures installed operand values
+and is not an admission-limit proof.
+
+**Amends.** R2-ENGINE-043/045: distinguishes the newly read local map-slot
+accesses from the already established DLL bank. Existing capacity and safe
+domain Unknowns are retained, not converted to constants by adjacent offsets.
+
+**Confidence.** Medium for the bounded absence of local range tests and
+its relation to the complete variable contract; Unknown for safe count,
+index/value limits and rejection/failure behavior. The direct DWORD
+accesses are recorded separately at High in R2-ENGINE-1313/1315.
+
+**Unknown.** General count/index/value limits and failure reactions. A
+settling run of `allods2.exe` loads copied mission 10 with one write/read
+pair using indices 999, 1000 and -1 in turn, and a separate scenario-bank
+pair at 1023, 1024 and -1. Watch the accessed address and compare accepted
+load, result value, diagnostics and process behavior with the literal map;
+these are probes, not asserted boundaries. Test DWORD edge values
+0x7fffffff, 0x80000000 and 0xffffffff separately for value behavior.

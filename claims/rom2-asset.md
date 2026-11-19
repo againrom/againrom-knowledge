@@ -3696,3 +3696,119 @@ draw positions of R2-ENGINE-1302 agree with the sizes.
 
 **Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 1;
 the frame measurement is [EXP-2037](../experiments/EXP-2037-rom2-tips/)'s art table.
+
+## Installed script operation and trigger census
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-247 | Each ROM2 scenario corpus uses 29 ordinary action IDs, 19 ordinary check IDs and full word 65538 in both lists; node counts agree between roots. | High | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ASSET-248 | The 142 installed ROM2 maps parse exactly; trigger byte-value sets are measured at all 184 offsets, with 715 EN and 714 RU campaign triggers. | High | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ASSET-249 | None of the 47,410 stored parameter DWORDs in the 142 censused ROM2 maps is in 8000..9999; the runtime dynamic-reference domain remains separate. | High | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+
+### R2-ASSET-247
+
+Population: 46 `.alm` members of each root's `scenario.res`. `evidence/census.py`
+parses both clients' maps independently with exact record-chain and type-7 EOF.
+Each root has 1334 actions and 986 checks, including 46 action and 164 check
+nodes whose full operation word is 65538. Ordinary counts per root:
+
+| Action ID | Nodes | Check ID | Nodes |
+|---:|---:|---:|---:|
+| 2 | 448 | 1 | 58 |
+| 3 | 48 | 4 | 8 |
+| 4 | 46 | 5 | 62 |
+| 5 | 81 | 6 | 205 |
+| 6 | 102 | 7 | 62 |
+| 8 | 197 | 8 | 14 |
+| 10 | 60 | 9 | 5 |
+| 12 | 8 | 10 | 50 |
+| 13 | 21 | 14 | 1 |
+| 16 | 20 | 15 | 46 |
+| 17 | 2 | 16 | 5 |
+| 18 | 2 | 17 | 37 |
+| 19 | 10 | 18 | 1 |
+| 20 | 7 | 19 | 209 |
+| 21 | 5 | 21 | 24 |
+| 22 | 4 | 23 | 5 |
+| 23 | 10 | 24 | 3 |
+| 24 | 3 | 25 | 24 |
+| 25 | 9 | 26 | 3 |
+| 28 | 18 | — | — |
+| 29 | 4 | — | — |
+| 30 | 3 | — | — |
+| 32 | 13 | — | — |
+| 33 | 9 | — | — |
+| 34 | 1 | — | — |
+| 35 | 4 | — | — |
+| 36 | 140 | — | — |
+| 38 | 7 | — | — |
+| 39 | 6 | — | — |
+
+Loose maps are a separate population: EN 13 maps, 21 actions, no checks;
+RU 37 maps, 72 actions, eight checks. Their full-word operation counts are
+in `evidence/derived/census/operations.tsv`; no loose-map operation adds an
+ordinary ID to the campaign set. `arguments.tsv` preserves per-operation,
+slot and type value sets; `inputs.tsv` names every map and archive by full SHA256.
+
+**Amends.** R2-ENGINE-041: extends the selected-arm census to every full
+operation word and separates the two roots' loose maps. The prior campaign
+action/check totals and separate namespaces stand.
+
+**Confidence.** High for the complete stated population, independently of
+function recovery or a byte scan. This is a stored-node census, not a count
+of executions or reachable nodes. Generator outputs reproduced byte-equal.
+
+**Unknown.** Other archives, subdirectories, saves, user maps and arbitrary
+operation words are outside this population.
+
+### R2-ASSET-248
+
+The same scanner reads 142 maps: EN 13 loose plus 46 scenario, RU 37 plus
+46. Campaign triggers number EN 715 / RU 714; loose-map triggers number
+EN four / RU fourteen. `trigger-bytes.tsv` gives every byte's exact decimal
+value set and frequencies separately for root and population, at all offsets
+0x00..0xb7. `trigger-words.tsv` gives DWORD sets for 0x80..0xb4;
+`triggers.tsv` preserves numeric fields per map and trigger index, never labels.
+The two corpora therefore do not have equal trigger counts even though their
+action/check counts agree.
+
+Campaign comparison fields 0xa8, 0xac and 0xb0 each contain only 0..5.
+Flag 0xb4 contains 0 or 1. One installed campaign trigger (map 42, index 16,
+both roots) names left check ID 0xFFFFFFFF, which is no check ID of its map
+(`triggers.tsv` column `missing_check_ids`); every other nonzero left or
+right ID is the ID of a node of the same map. No campaign trigger has a zero
+first left ID; EN four and RU eleven loose-map triggers do. A byte's value set alone supplies no semantic
+name. The prefix 0x00..0x7f is measured, but its label interpretation and
+complete read coverage are separate from the numeric census.
+
+**Amends.** R2-ENGINE-041 and R2-ENGINE-059: extends exact parsing and the
+selected mission's trigger measurement to every trigger of both populations.
+The former runner semantics are not changed.
+
+**Confidence.** High for this exhaustive stored-byte measurement and the
+record extents: every counted payload and map reaches exact EOF. The full
+64-character map and archive SHA256s identify the population. No runtime
+meaning follows solely from a value set.
+
+**Unknown.** Malformed records, unused padding interpretation, editor-created
+defaults and every reader of the 128-byte prefix remain outside the census.
+
+### R2-ASSET-249
+
+`dynamic.tsv` is header-only because no stored parameter DWORD lies in the
+inclusive range 8000..9999. The instrument tests all ten slots of every
+action and check, including inactive type-0 slots and full-word special nodes.
+The population is 23,410 parameter DWORDs in EN and 24,000 in RU, including
+23,200 campaign DWORDs per root. This covers 142 maps named in `inputs.tsv`.
+The check is numeric, not a search for a text representation or instruction.
+
+**Amends.** R2-ENGINE-044: bounds the dynamic-reference question for the
+installed root/scenario population. The compiler's positive 8000..9999
+branch remains; the census supplies no example that takes it.
+
+**Confidence.** High for absence among these stored parameter values. This
+does not exclude runtime synthesis, encoded values outside these fields or
+other maps. Dynamic-reference execution is R2-ENGINE-1318, at its grade.
+
+**Unknown.** Values returned by dynamic references in authored maps; no
+occurring ID in this numeric range was available to resolve in the census.

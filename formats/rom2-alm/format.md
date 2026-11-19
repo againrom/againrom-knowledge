@@ -53,6 +53,34 @@ The campaign type7 grammar is exactly consumed for all 46 maps per preserved
 root. Full-word operation values, compilation and the supported added arms are
 specified in [Campaign scripts](script.md). — R2-ENGINE-041
 
+The installed script census covers 142 maps: EN 13 loose and 46 campaign,
+RU 37 loose and 46 campaign. Campaign actions/checks agree at 1334/986 per
+root; triggers differ, EN 715 / RU 714. Both campaigns use 29 ordinary action
+IDs and 19 ordinary check IDs, plus full word 65538 in both lists.
+— R2-ASSET-247, R2-ASSET-248
+
+The script companion specifies all 184 trigger offsets: a 128-byte prefix
+(label interpretation Medium), three check-ID pairs, four action IDs,
+three comparison codes and the flag DWORD at+0xb4. Both loaders bulk-copy
+the trigger; unlike nodes, it has no field permutation. ID-map failures,
+prefix consumers and the flag of a zero-condition trigger remain open.
+— R2-ENGINE-1316
+
+Every occurring ordinary ID is mapped through both dispatch tables.
+Twenty-seven action and nineteen check bodies per root are read to RET;
+action 33 is a prefix and action 34 unread. Local map-slot/Session-DWORD/relation
+stores, delegated action calls and check operands are specified at their
+individual confidence boundaries. Unread helpers do not establish complete
+player effects. — R2-ENGINE-1312, R2-ENGINE-1313, R2-ENGINE-1314,
+R2-ENGINE-1315
+
+The packed full-word action's downstream consumer remains Unknown.
+No stored parameter among all 142 maps is 8000..9999, although the action
+compiler and executor have a positive deferred-reference path. Its pointer
+array producer and return meanings are unproved. Map-result safe limits
+remain Unknown and differ from the separate scenario bank's initialized
+span. — R2-ENGINE-1317, R2-ASSET-249, R2-ENGINE-1318, R2-ENGINE-1319
+
 <a id="byte-planes-and-the-client-fog"></a>
 
 ## Byte planes and the client fog

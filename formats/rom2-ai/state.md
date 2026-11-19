@@ -397,3 +397,5 @@ key (R2-ENGINE-1255, High local helpers, Medium composition). Serializer omissio
 of the key does not establish its value or counting after LOAD. Caster loss,
 timers and complete departure coverage remain Unknown (R2-ENGINE-1256,
 Medium bounded census).
+
+The ordinary script action and check wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and actions 33 and 34 Unknown. The 19 ordinary check bodies are read the same way, with Medium helper results (R2-ENGINE-1315), and the map-slot actions and check 19 have no local index guard, which proves no safe slot range (Medium; R2-ENGINE-1319). They change no rule above (R2-ENGINE-1313, R2-ENGINE-1314).

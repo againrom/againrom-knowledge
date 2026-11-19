@@ -367,3 +367,5 @@ world list; the step at which the effect lands is Unknown. R2-ENGINE-1260 (High
 stores, Medium completeness), R2-ENGINE-1261 (High expression, Medium names),
 R2-ENGINE-1262 (High step table, effect step Unknown), R2-ENGINE-1263 (High
 terms, Medium column bindings).
+
+The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and actions 33 and 34 Unknown. They change no rule above (R2-ENGINE-1314).

@@ -394,3 +394,5 @@ its map helpers and visible effects keep the composition Medium
 (R2-ENGINE-1255). This does not close caster loss, an independent timer,
 mission failure or LOAD-dependent removal (R2-ENGINE-1256, Medium bounded
 census, completeness Unknown).
+
+The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and actions 33 and 34 Unknown. They change no rule above (R2-ENGINE-1314).

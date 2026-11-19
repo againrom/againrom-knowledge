@@ -16,6 +16,11 @@ parameter 0 and creates no executable check. Mission10's action pair is 11/41;
 its special checks initialize 0/4/1/2/3/1229. These full words must not be
 reduced to ordinary opcode 2. — R2-ENGINE-042, R2-ENGINE-043
 
+The bounded postcompile trace still leaves the packed collection's consumer
+Unknown. The read caller invokes the type-9 stage and a conditional
+owner/group pass; neither read establishes what consumes that collection.
+This does not establish that it is unused. — R2-ENGINE-1317
+
 Ordinary check IR has result slot+0, operation+4 and scalar 0 at+8. Literal
 nonreference values pack densely, including trailing scalar zeros. Literal
 references resolve separately: first unit pointer+0x5c, group+0x60,
@@ -399,3 +404,173 @@ These hire identities1..20 differ from the 21+k compared by literal
 10001+k. The body has no additional numeric cap on its supplied list,
 but complete mission admission and placement remain Unknown.
 — R2-ENGINE-381
+
+## Installed operation population and dispatch
+
+Each scenario corpus has 29 ordinary action IDs and 19 ordinary check IDs,
+plus the full word 65538 in both lists. Counts below are per root and agree
+between EN and RU. They count stored nodes, including unreferenced nodes,
+rather than executions. — R2-ASSET-247
+
+| Action ID | Nodes | Check ID | Nodes |
+|---:|---:|---:|---:|
+| 2 | 448 | 1 | 58 |
+| 3 | 48 | 4 | 8 |
+| 4 | 46 | 5 | 62 |
+| 5 | 81 | 6 | 205 |
+| 6 | 102 | 7 | 62 |
+| 8 | 197 | 8 | 14 |
+| 10 | 60 | 9 | 5 |
+| 12 | 8 | 10 | 50 |
+| 13 | 21 | 14 | 1 |
+| 16 | 20 | 15 | 46 |
+| 17 | 2 | 16 | 5 |
+| 18 | 2 | 17 | 37 |
+| 19 | 10 | 18 | 1 |
+| 20 | 7 | 19 | 209 |
+| 21 | 5 | 21 | 24 |
+| 22 | 4 | 23 | 5 |
+| 23 | 10 | 24 | 3 |
+| 24 | 3 | 25 | 24 |
+| 25 | 9 | 26 | 3 |
+| 28 | 18 | 65538 | 164 |
+| 29 | 4 | — | — |
+| 30 | 3 | — | — |
+| 32 | 13 | — | — |
+| 33 | 9 | — | — |
+| 34 | 1 | — | — |
+| 35 | 4 | — | — |
+| 36 | 140 | — | — |
+| 38 | 7 | — | — |
+| 39 | 6 | — | — |
+| 65538 | 46 | — | — |
+
+The check switch subtracts one from IR operation+4, admits unsigned 0..26
+and dispatches through EN L2.03276 / RU L2.03277. The action switch similarly
+admits 0..38 through EN L2.00509 / RU L2.00508 after reference preparation.
+Every occurring ordinary ID has a read table cell and direct handler call.
+Twenty-seven action and all nineteen check bodies are read through RET in
+each root. Action 33 is only a prefix; action 34's body is unread. Neither
+is assigned an operand/effect contract here. — R2-ENGINE-1312
+
+R[s] below is Session DWORD+0xc784+4*s. pN is compiled DWORD+8+4*N;
+U/G/P/V are resolved pointers at IR+0x5c/+0x60/+0x64/+0x68, and I is
+u16+0x6c. These are compiled positions, not source parameter slots.
+Read stores and call arguments are High; complete effects of unread helpers
+and collection membership are Medium or Unknown. — R2-ENGINE-1313,
+R2-ENGINE-1314, R2-ENGINE-1315
+
+Actions 3 and 8 respectively store R[p0]=p1 and increment R[p0]. The other
+read local effects, each High for the instructions and Medium for delegated
+effects:
+- 4: Session+0xbe0c += 1; the role of the field is Unknown.
+- 5: Session+0xbe14 = p0; the role of the field is Unknown.
+- 10: byte at Session+0xa8c4+70*p0+p1 = (old AND 0xfc)+low8(p2), then, for
+  each entry of the Session+0xc77c iteration whose word +4 equals p0 or p1,
+  a call to EN L2.01852 (R2-ENGINE-980 at its grade).
+- 35: SetVar(p0,p1).
+- 36: GetVar/SetVar on 752+p0 with the arms of R2-ENGINE-046 (partially retracted; amended
+  grade).
+- 39: zero stored at [group+0x3c]+0x48.
+
+No accepted-index domain follows from these DWORD accesses.
+— R2-ENGINE-1313
+
+| Action | Additional read operand/call contract | Boundary |
+|---:|---|---|
+| 2 | p0 and zeros to event producer | Event interface above; delivery separate |
+| 6 | p0 selects nested 18-cell switch; arms pass G, U, low8(p1/p2) | Nested table and method effects not fully read |
+| 12 | I lookup; nonzero return to U+0x7c collection helper; notify U | Creation/mutation helpers unread |
+| 13 | I extraction helper on U+0x7c; nonzero return gets virtual slot+4(1); notify U | Extraction quantity and callback unread |
+| 16, 17 | U to EN L2.04906 or L2.01848 respectively | Final effects unread |
+| 18 | U to L2.04906, then its location and constant 3 to L2.07384 on V | Callees unread |
+| 19, 22 | U,P or each iterated G member,P to EN L2.07385 | Ownership effect and membership unproved |
+| 20 | Calls U helper; allocates/constructs 0x24-byte object and replaces U+0x7c | Constructor and old collection effects unread |
+| 21 | low8(p0..p3), p4, p5 (or 99 when p5=0) to EN L2.03575 | Creation and parameter meanings unread |
+| 23 | p0,0 to EN L2.01052 on P | Final effect unread |
+| 24 | low8(p0/p1), U, p2/p3 to EN L2.03574 | Final effect unread |
+| 25 | Byte descriptor from p0..p7, with p4=0 repetition branch; packed low8(p2/p3) to terrain helper | Terrain meaning unread |
+| 28 | Calls helper with U/V collections, replaces U+0x7c, notifies both | Complete transfer semantics unread |
+| 29 | p0+256*p1 lookup; six returned pointers; matching u16+0x0c==p2 gets u16+0x50=low16(p3) | Returned pointer kinds unproved here |
+| 30 | Iterates U+0x20; matching u16+0x0c==p0 gets u16+0x42=low16(p1) | Collection identity/membership unread |
+| 32 | Iterates G and calls EN L2.04906 | Final effect unread |
+| 33, 34 | Dispatch targets EN L2.07410/L2.07411, RU L2.07412/L2.07413 | Operands/effects Unknown |
+| 38 | I extraction per iterated terrain unit, optional virtual slot+4(1), refresh call | Existing extraction boundary above |
+
+The delegated action table is a wrapper contract in both roots, with EN
+callee addresses for reference. It does not assign callee semantics from
+editor names. — R2-ENGINE-1314
+
+| Check | Read result contract | Boundary |
+|---:|---|---|
+| 1 | Helper result on G | Group population/count meaning Medium |
+| 4 | p0=6 writes signed U.i16+0x94; other p0 writes no result | Other selectors unproved |
+| 5 | U.DWORD+0x54!=16 as 0/1 | Meaning of other states unproved |
+| 6 | Either unit state 16 gives 255; else low8 helper on U/V locations | Metric/getters unread |
+| 7 | low8 helper on U location and low8(p0/p1) | Metric/getters unread |
+| 8 | Count nested returns from P+0x28 | Membership unread |
+| 9 | If [U+0x1c4].BYTE+8=5, DWORD at [[U+0x1c4]+0xc]+8; else 0 | Record-kind meaning unread |
+| 10 | P/V owner-word-indexed relation byte AND 3 | Complete relation contract separate |
+| 14 | Boolean terrain lookup of low8(p0/p1) | Lookup meaning unread |
+| 15 | Minimum low8 location helper over P's nested collection, default 255 | Membership and metric unread |
+| 16 | I lookup nonzero gives low8 location helper to low8(p0/p1); else 255 | Lookup and metric unread |
+| 17 | Boolean I lookup on U+0x7c | Lookup semantics unread |
+| 18 | State 16 increments Session+0xbe14 (role Unknown); no result store | Role of +0xbe14 Unknown |
+| 19 | R[p0] | Source-slot limits unproved |
+| 21 | Signed i16+0x42 through IR pointer+0x70 | Complete pointer/field meaning separate |
+| 23, 24 | Scenario GetVar(p0) or GetVar(752+p0) | DLL contract above |
+| 25, 26 | Layer pointer / active effect bit | Added-arm contracts above |
+
+All nineteen local bodies are read independently in EN and RU. Helper
+results, iterations and field meanings retain the boundaries in the table.
+— R2-ENGINE-1315
+
+## Complete stored trigger extent
+
+Type 7 bulk-loads each trigger as 184 bytes into the compiler's record,
+with no node-style field permutation. Per-byte value sets are measured
+over every trigger in 142 maps: EN 715 campaign plus four loose; RU 714
+campaign plus fourteen loose. Values alone do not name a field.
+— R2-ASSET-248, R2-ENGINE-1316
+
+| Offset | Stored extent | Game read |
+|---|---|---|
+| 0x00..0x7f | 128 bytes | Prefix copied by loader; label interpretation Medium; its separate consumers Unknown |
+| 0x80/0x84, 0x88/0x8c, 0x90/0x94 | Three DWORD pairs | Left/right check IDs, not immediate right operands |
+| 0x98,0x9c,0xa0,0xa4 | Four DWORDs | Action IDs in execution order; zero skipped |
+| 0xa8,0xac,0xb0 | Three DWORDs | Corresponding signed-comparison code, installed values 0..5 |
+| 0xb4 | DWORD | Latch skip flag (nonzero: skip a set latch); installed values 0 or 1 |
+
+A zero first left check ID excludes the trigger from compilation (High as
+code). No installed campaign trigger has one; EN 4 and RU 11 loose-map
+triggers do (`triggers.tsv`). One installed campaign trigger (map 42, index
+16, both roots) names left check ID 0xFFFFFFFF, which is no check ID of its
+map; every other nonzero ID is the ID of a node of the same map.
+The compiler skips a condition pair when either ID is zero. ID mapping and list-helper
+failure/default behavior remain Medium. The stored flag is copied within
+an admitted condition path; the zero-condition case's final flag is Unknown.
+An action ID above 5000 causes a diagnostic and continues to mapping; this
+is not a proved rejection bound. — R2-ENGINE-1316, R2-ASSET-248
+
+## Dynamic references and variable limits
+
+None of the 47,410 stored parameter DWORDs of these 142 maps lies in
+8000..9999. This includes all ten slots and both lists, including special
+nodes. No ID from that range occurs in this population, so there is no
+installed-map-specific return value to enumerate. Other archives, saves,
+user maps and runtime synthesis are outside the census. — R2-ASSET-249
+
+The read action compiler nevertheless recognizes 8000<=value<10000 with
+type 2/3/4. It retains the original value, records mode 1 below 9000 or
+mode 2 otherwise, subtracts the corresponding base, and stores division-by-100
+quotient/remainder bytes. The action prefix uses the remainder byte to load
+Session+0xd724+4*index into the appropriate resolved pointer field. That
+array's producers, mode/quotient meaning, check-side complete route and
+failure behavior remain Medium or Unknown. — R2-ENGINE-1318
+
+The read map-slot action 3/8 and check 19 bodies have no explicit local
+index/value guard; this is a bounded observation about those bodies, not
+a complete compiler/caller census. Safe map-slot capacity and index/value
+limits remain Unknown. The scenario DLL's initial 1024-DWORD clear is a
+different namespace and does not prove an external safe range or unbounded
+admission. — R2-ENGINE-1319
