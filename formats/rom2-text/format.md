@@ -247,6 +247,15 @@ differ; a named encoding or rendered correspondence is not established.
 The CRLF loader calls CharToOemA. Live table mutation, the full startup
 schedule and complete generic input bindings remain Unknown. — R2-ENGINE-093
 
+Both outcome reports draw every word in font1. The victory words are
+anchored at the centre of their rectangle's top edge (the anchor is High;
+the centring by the font method is Medium); the failure title,
+general-table slot 0x8d (main row 141, Medium), is left-aligned above the
+wrapped cached failure text. The failure buttons use dialogs indices 0x2c
+and 0x23 (row 35 is the load caption); the caption of row 44 is not read
+here. A RU row reaches the glyphs through the font1 byte mapper.
+— R2-ENGINE-1303
+
 ## Inn card and unit-type rows
 
 The inn statistics card uses zero-based `main.res:text/main.txt` rows 15..20

@@ -1944,7 +1944,7 @@ or complete constructor census was performed.
 |---|---|---|---|---|
 | R2-ENGINE-073 | The selected EN/RU fresh campaign starts with DLL type 2/ID 1; packed inn TALK unlocks type 1/ID 10, whose record ID supplies the first mission path. | Medium | ● active (partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/), [EXP-2054](../experiments/EXP-2054-rom2-global-map/) |
 | R2-ENGINE-074 | In selected EN/RU campaign result paths, victory acknowledgement calls DLL LeaveLocation; the first failure report instead offers menu or save-slot selection. | Medium | ● active (amended, partially retracted) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
-| R2-ENGINE-075 | The enabled EN/RU movie dispatcher indexes cutpaths by DLL output; output 1 selects teleport files 01..99, skips missing files and stops on player return zero. | High | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
+| R2-ENGINE-075 | The enabled EN/RU movie dispatcher indexes cutpaths by DLL output; output 1 selects teleport files 01..99, skips missing files and stops on player return zero. | High | ● active (amended) | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-076 | Selected EN/RU additional-unit entry filters two bank ranges and uses stage-sensitive native templates; those paths do not establish the complete entering party. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 | R2-ENGINE-077 | The selected EN/RU movie-open path reads Common, Fading and Panaraming keys from a same-stem inline REG before opening the SMK through its native import. | Medium | ● active | [EXP-2011](../experiments/EXP-2011-rom2-campaign/) |
 
@@ -1988,6 +1988,8 @@ The selected first teleport SMK node exists in both video archives and differs i
 **Confidence.** High for this conditional dispatcher/index/resource contract. Complete selected dispatcher spans, native CRLF/index helpers, startup bindings, PE mappings and archive-node measurements establish table-selected stems and numeric segment iteration, excluding a hard-coded teleport stem within this dispatcher. Capstone 5.0.7 and pefile 2024.8.26 decode/map the selected ranges; no global consumer or absence enumeration is claimed.
 
 **Unknown.** Movie-enable setting provenance, decoded media, full playback/audio behavior, other output values and later campaign movie ordering.
+
+**Amended.** R2-ENGINE-1308 narrows the Unknown on playback and audio behavior and the note that the player may return zero: a key, a left or right press, close or quit end the batch, and the sound path is read in EN.
 
 ### R2-ENGINE-076
 
@@ -2111,7 +2113,7 @@ explicit order's producer nor successful execution after all later checks.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-093 | Selected EN/RU victory reports use general UI text and dialogs labels; the startup source join identifies main row 140 and dialogs rows 43/154, rather than mission text. | Medium | ● active | [EXP-2013](../experiments/EXP-2013-rom2-completion/) |
+| R2-ENGINE-093 | Selected EN/RU victory reports use general UI text and dialogs labels; the startup source join identifies main row 140 and dialogs rows 43/154, rather than mission text. | Medium | ● active (amended) | [EXP-2013](../experiments/EXP-2013-rom2-completion/) |
 | R2-ENGINE-094 | The selected EN/RU outer movie player returns zero for six input/message IDs, but returns one for open failure or a terminating tick; both paths clean up the player. | High | ● active | [EXP-2013](../experiments/EXP-2013-rom2-completion/) |
 | R2-ENGINE-095 | Selected EN/RU movie ticks terminate on a library-descriptor comparison or presentation failure; that client boundary does not establish physical EOF or successful decoding. | Medium | ● active | [EXP-2013](../experiments/EXP-2013-rom2-completion/) |
 | R2-ENGINE-096 | Selected EN/RU movie opens seek a RES member and pass its backing handle to SmackOpen; the member reader's clamp does not prove a codec EOF bound. | Medium | ● active | [EXP-2013](../experiments/EXP-2013-rom2-completion/) |
@@ -2126,6 +2128,8 @@ The selected startup excerpts load main\\text\\main.txt as the first shared stri
 **Confidence.** Medium for the composed startup/resource source join. Both image call operands, constructors, report vtable targets, complete initialization/index helpers and selected source measurements agree. A zero-filled PE global was not treated as a live bank value. The entire startup and input schedule was not executed, so this is a conditional selected route.
 
 **Unknown.** Earlier or later live table mutation, report fonts/background resources, generic input bindings, RU displayed glyphs and other report producers.
+
+**Amended.** R2-ENGINE-1300, R2-ENGINE-1303, R2-ENGINE-1304 and R2-ENGINE-1305 narrow the Unknown on the report font, frame and input bindings: they are read in EN there (R2-ENGINE-1302 for the frame). The Medium of the row join stands.
 
 ### R2-ENGINE-094
 
@@ -14725,7 +14729,7 @@ once every number at or above 0x400000 is masked.
 | R2-ENGINE-605 | ROM2 hover takes the last accepted registered rectangle meeting (x-1,y-1,x+1,y+1); CStructure kind+0x8c adds 0x800, while +0x8c zero and +0x64 set skip it. | High / Medium / Unknown | ✔ promoted (amended, partially retracted, branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md); [EXP-2119](../experiments/EXP-2119-hover/) |
 | R2-ENGINE-606 | A ROM2 map click whose box is at most screen width x 10/640 and whose cursor is [L2.02987] sends message type 0x24 with the hovered ID and the IDs of objects that L2.02988 accepts; EN picks that cursor only on hover flag 0x800. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-607 | ROM2 message 0x24 finds the structure by ID and sets order 0xf: target its position word, range 1 for building byte +0x60 of 1 or 2, 2 (cell +0x101) for 3 or 4, else 3 (+0x202); prepared 0xf reaches the state-15 handler. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
-| R2-ENGINE-608 | The ROM2 event box starts as a 580x240 rect at (30,120); placement rounds it to 8+96k by 104+64k and centres it on the screen (488x232 at 268,268 at 1024x768); Enter and Esc post 0x470 as Ok does. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
+| R2-ENGINE-608 | The ROM2 event box starts as a 580x240 rect at (30,120); placement rounds it to 8+96k by 104+64k and centres it on the screen (488x232 at 268,268 at 1024x768); Enter and Esc post 0x470 as Ok does. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-609 | A ROM2 modal box sets UI bit 8 (EN +0x404, RU +0x41c); in EN it stops the edge routine and panel redraws and defers events; the mode 2 dispatcher skips local ticks on +0x404 & 0x4008 (R2-ENGINE-671); loaded-mission simulation stop Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 
 ### R2-ENGINE-605
@@ -14934,6 +14938,8 @@ box in play.
 **Unknown.** The box frame and its drawn size: a run opening the signpost
 box at 1024x768 and measuring its rectangle, with the hero at two screen
 places to test R2-SESSION-230's "to his right".
+
+**Amended.** R2-ENGINE-1302 and R2-ASSET-244 narrow the Unknown on the box frame for the same popup class (frame `L2.07324`, pieces 0..8). R2-ENGINE-1300 and R2-ENGINE-1301 reuse the snap and inherit its Medium on the numbers on screen.
 
 ### R2-ENGINE-609
 
@@ -15353,7 +15359,7 @@ or more digits is masked.
 | R2-ENGINE-626 | Raw push 0xb4 (68 b4 00 00 00) has 13 EN and 15 RU sites; the packet sender follows only the three result-tick sites and the death routine's site; the rest call other routines. | High / Medium | ● active (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
 | R2-ENGINE-627 | ROM2 check 18 adds 1 to Session +0xbe14 on each pass while its unit's +0x54 is 0x10 and writes no result; both 46-map corpora hold one check 18: map 10 ID 1 on unit 32, named by no trigger. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
 | R2-ENGINE-628 | EN ROM2 L2.03210, which adds 1 to Session +0xbe14 when no unit of an owner with +0x2c zero remains and +0xbe10 is set, has no call, branch or raw DWORD reference in the EN image. | High / Medium | ● active (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
-| R2-ENGINE-629 | ROM2 UI 0x431 takes failure cache entry reason - 2 through an accessor with no bound; entries run 2..1+E with slots 0x118+n for empty 2..4; what a reason outside them shows is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
+| R2-ENGINE-629 | ROM2 UI 0x431 takes failure cache entry reason - 2 through an accessor with no bound; entries run 2..1+E with slots 0x118+n for empty 2..4; what a reason outside them shows is Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
 | R2-ENGINE-630 | In both ROM2 46-map corpora the 81 instant-5 nodes store 0 or 5..9; only map 96's triggered 5 and map 40's untriggered 7 lie outside their mission's failure cache; mission 10 stores 0 and 5. | High / Medium | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
 | R2-ENGINE-631 | In ROM2 play a mission fails when the hero is absent or flagged (2), a class 0x21..0x3f actor dies (identity - 19), instant 5 stores a reason or check 18 sees state 0x10; the screen takes cache entry reason - 2, Unknown outside it. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2079](../experiments/EXP-2079-rom2-loss-reasons/) |
 
@@ -15558,6 +15564,8 @@ established.
 
 **Unknown.** In the original, mission 96 with the trigger that runs its
 instant 5 (reason 5, three cache entries), recording the failure screen.
+
+**Amended.** R2-ENGINE-1301 narrows the Medium that the report displays the entry with slot 0x8d as its title: EN `L2.02030` and `L2.07325` are read there; the title row stays Unknown.
 
 ### R2-ENGINE-630
 
@@ -30394,3 +30402,349 @@ fills and which catalog index becomes a type-4 kind or a type-6 definition id ar
 editor's player +0x0c is file +8, the field R2-ASSET-238 finds as 5000, is not read.
 
 **Unknown.** What the editor writes into each field of a new type-4, type-6 or type-9 placement.
+
+## Mission outcome pages and teleport movie presentation
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1300 | ROM2 EN victory report: popup built as (128,200,512,380), snapped to 296x168, placed at ((W-296)>>1, (H-168)>>1) (Medium as drawn); page-relative text (40,32,232,80) and buttons (40,84,248,108), (40,108,248,132). | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1301 | ROM2 EN first-failure report: popup built as (32,100,608,380), 488 wide; text area (40,56,w-40,h-88) before call L2.01495 (unread; body top and title row Unknown); buttons 24 high at x 61..427, rows H-96, H-72. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1302 | ROM2 EN outcome pages remap the screen once through row 3 of table L2.07326 (Medium that this darkens it), then paint the lm.256 frame 0..8 on the page less 8 pixels right and bottom; children after (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1303 | ROM2 EN outcome words use font1 and colour table L2.05264: victory main row 140 anchored at the centre of its top edge; failure title slot 0x8d left-aligned, body cache text wrapped; buttons dialogs rows (rows carry R2-ENGINE-093's Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1304 | ROM2 EN outcome buttons fire on release inside and in their own Enter and ~ letter arms; a key reaching the focused button is Medium. Victory 0x41d, 0x446 via 0x47b; failure 0x445 main menu, 0x446 load page. | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1305 | ROM2 EN outcome page keys: Esc closes with 0x446 (failure: load page), Tab and arrows move focus, victory Up/Down step it; victory focus starts on the first child (a button: Medium), failure on id 4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1306 | ROM2 EN outcome reports play sound entry 0xe (victory) or 0x10 (failure), read as sfx.reg Sfx14 and Sfx16, right after showing the page; the read button bodies call no sound. | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1307 | ROM2 EN movie player skips its doubling branch for a 640x360 SMK (High); destination (origin x, origin y + 60), (0,60) at 640x480 (High); drawn 1:1 and black fill around it are Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ENGINE-1308 | ROM2 EN/RU movie sound goes through Smacker with DirectSound use 0 and sound on; a key, mouse button, close or quit stops the whole teleport batch; a fill with colour 0 follows (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+
+### R2-ENGINE-1300
+
+The UI 0x430 arm EN `L2.01072` (RU `L2.07327`, R2-ENGINE-093) shows no page
+when stage word 768 is 120 or more; otherwise it constructs EN `R2.0099`
+with (1, 128, 200, 512, 380, text slot 0x8c, rectangle (48,60,336,84)), the
+last being (w/8, h-0x78, 7w/8, h-0x60) of the 384x180 build size. EN
+`R2.0099` passes (id, 128, 200, 512, 380, 0, 0, rectangle) to EN
+`L2.07328`, sets vtable `L2.07329` and stores the text at +0x7c. EN
+`L2.07328` passes (id, 128, 200, 512, 380, 0) to the popup constructor EN
+`L2.01470`, which passes all six to the panel constructor EN `L2.00634`
+(sixth stored at +0x64), sets vtable `L2.03069` and calls the placement EN
+`L2.03070` of R2-ENGINE-608. The placement turns 384x180 into 296x168:
+(376/96)x96+8 = 296 and (76/64)x64+104 = 168. EN `L2.07328` then copies the
+rectangle to +0x6c..+0x78, sets +0x6c = 40 and +0x74 = width - 48 = 248.
+
+The init slot +0x78, EN `R2.0101`, adds text child 1 (EN `L2.07330`) at
+(40,32,232,80) and buttons 2 and 3 (EN `L2.07331`). Each button goes
+through EN `L2.07332` with height 24, which places it at (+0x6c, +0x78,
++0x74, +0x78 + 24) and advances +0x78 by 24: (40,84,248,108) and
+(40,108,248,132). Child rectangles are page-relative (R2-ENGINE-274).
+The page is placed by the snap at x = (screen width - 296) >> 1, y = (screen
+height - 168) >> 1 (arithmetic High; that this is the drawn rectangle is
+Medium, the rectangle setter EN `L2.00637` being unread): (172,156) at
+640x480 (Medium), (252,216) at 800x600, (364,300) at 1024x768 (Medium).
+
+**Confidence.** High for the constructor arguments, the size arithmetic and
+the child rectangles in EN. Medium for the screen numbers: they rest on the
+rectangle setter EN `L2.00637` (unread) storing left, top, right, bottom and
+on [`L2.00628`] and [`L2.00629`] holding the screen size (R2-ENGINE-608).
+Medium in RU: the arm and the report class are RU rows of R2-ENGINE-093;
+`L2.07328`, `L2.01470` and `L2.07332` were read in EN only.
+
+**Unknown.** The drawn rectangle: a run winning a mission at 640x480 and
+measuring the page edges would settle it.
+
+**Amends.** R2-ENGINE-093's Unknown on the report font, frame and input bindings: read in EN here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 1.
+
+### R2-ENGINE-1301
+
+The UI 0x431 arm EN `L2.03289` constructs EN `R2.0033` with (1, 32, 100,
+608, 380, cache text of R2-ENGINE-629). That calls EN `L2.02030` with title
+slot 0x8d and button mask 0xffff, which calls EN `L2.07325`: the popup
+constructor EN `L2.01470` with sixth value 0, vtable `L2.07333`, text at
++0x68, title at +0x70, mask at +0x74 and zero at +0x6c. The placement makes
+576x280 into 488x232. The failure vtable is `L2.07334`.
+
+The init slot +0x78, EN `L2.07335`, first runs the base init EN `L2.05254`.
+With +0x6c zero, the text area before the call EN `L2.01495` (0, 12) is
+(40, 56, w - 40, h - 88), (40,56,448,144) at 488x232. With a non-empty
+title (the failure page has one) that call runs on the area (unread) and
+the title child, id -1, is built from the area at (area left, area top - 20,
+area right, area top - 4) after the call; so the final body top and the
+title row are Unknown until EN `L2.01495` is read or the page is measured. Slot +0x88, EN `L2.07336`, adds the body as a
+0x98-byte text child (EN `L2.07337`, id 2) in the area. The page bottom
+becomes top + the body's bottom (EN `L2.07338`, unread) + 0x90 and the
+placement runs again: width stays 488 and the height snaps to 104 + 64k.
+At EN `L2.07339` the mask 0xffff exceeds the switch bound 5, so the base
+adds no message-box buttons. EN `L2.07335` then adds 0x40 to the bottom
+without a new placement, so the page extends 64 pixels below its centred
+height, and adds button 4 at (w/8, h - 96, 7w/8, h - 72) and button 5 at
+(w/8, h - 72, 7w/8, h - 48): x 61..427 for w = 488. The snap places x at
+(screen width - 488) >> 1: 76, 156 and 268 in the three screen sizes
+(arithmetic High; that this is the drawn rectangle is Medium, EN `L2.00637`
+being unread).
+
+**Confidence.** High for the constructor chain, the area and button
+formulas before `L2.01495` and the skipped switch in EN. Medium for the
+height and the screen numbers: EN `L2.07338`, `L2.07337` and `L2.00637` are
+unread. Unknown for the final body top and the title row: they depend on
+what EN `L2.01495` does to the area rectangle. Medium in RU (EN bodies
+only).
+
+**Unknown.** The page height for a given failure text, the body top and the
+title row: reading EN `L2.01495`, or a run failing mission 10 at 640x480 and
+measuring the page, would settle them.
+
+**Amends.** R2-ENGINE-629's Medium that the report displays the entry with slot 0x8d as its title: EN `L2.02030` and `L2.07325` are read here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), questions 1 and 2.
+
+### R2-ENGINE-1302
+
+The show routine EN `L2.03080` adds the page to the window stack app+0xcc,
+calls the init slot +0x78 and slot +0x80 (EN `L2.00783`: shown flag +0x5c,
+focus on the first child), then between lock and unlock calls EN
+`L2.03082` (0, 0, [`L2.00628`], [`L2.00629`], 3). That body maps every
+screen pixel through row 3 of table `L2.07326` (row stride [`L2.07340`];
+the pixel is shifted right 3 first while [`L2.00648`] is set). The present
+call EN `L2.03085` follows. The remapping runs once per show; it remaps the
+whole screen once through row 3 of table `L2.07326` (Medium that this
+darkens it: the table's writer is unread; the amount is Unknown).
+
+Victory and failure vtables share paint slot +0x2c, EN `L2.00578`, and
+frame slot +0x30, EN `L2.07324`. EN `L2.00578` takes the page's screen
+rectangle (EN `L2.00905`), calls slot +0x30, then EN `L2.00579` (unread;
+R2-ENGINE-274 names the children's paint route). EN `L2.07324` clips its
+rectangle to [`L2.07341`], [`L2.07342`], [`L2.00628`], [`L2.00629`]. With
++0x64 = 0 it draws `lm.256` pieces (R2-ASSET-244) from [`L2.07343`] with
+L, T, R' = R - 8, B' = B - 8 and n = (R' - L - 96) / 96, m = (B' - T - 96) / 64:
+
+| Pass | Pieces and positions |
+|---|---|
+| shadow, slot +0x1c level 6 | 3 (R'-40,T+8), 6 (L+8,B'-40), 8 (R'-40,B'-40), 7 at (L+56+96i,B'-40), 5 at (R'-40,T+56+64j) |
+| corners, slot +0x18 | 1 (L,T), 3 (R'-48,T), 6 (L,B'-48), 8 (R'-48,B'-48) |
+| edges | 2 top and 7 bottom at x = L+48+96i, i < n; 4 left and 5 right at y = T+48+64j, j < m |
+| fill | 0 at (L+48+96i, T+48+64j) |
+
+The placement sizes give exact tilings: 296x168 is 288x160 of frame
+(n = 2, m = 1). A text child's paint, EN `L2.07344`, first calls its
+parent's slot +0x30 with the text's screen rectangle, so the frame is
+redrawn under the text before the words.
+
+**Confidence.** High for the call order and the piece positions in EN, and
+for the text child's repaint of the frame under it. Medium that the
+children are painted after the frame (the child-paint route `L2.00579` is
+unread), and that row 3 darkens the screen (the table's writer is unread).
+Medium in RU.
+
+**Unknown.** The colour of a remapped pixel: a run comparing one screen
+pixel before and after the report.
+
+**Amends.** R2-ENGINE-608's Unknown on the popup frame: the frame `L2.07324`, pieces 0..8 of `lm.256`, is read here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 1.
+
+### R2-ENGINE-1303
+
+The victory text child (EN `L2.07330`) gets the slot 0x8c text (main row
+140, R2-ENGINE-093), font [`L2.07345`], colour [`L2.07346`] and alignment 2.
+The only store to [`L2.07345`] among its 199 absolute references in the EN
+image is in EN `R2.0064`, which creates font1 (R2-ENGINE-052). [`L2.07346`]
+holds `L2.05264` as an image value (no scan for other writers was run); EN `L2.07347` swaps it for [`L2.07348`] = `L2.01250`, the gold
+table of R2-ENGINE-313, when its argument is non-zero. Text paint EN
+`L2.07344` anchors x at the right edge for bit 1, at left + width / 2 for
+bit 2, else at the left edge; y at the bottom for bit 4, at top + height / 2
+for bit 8, else at the top. It calls the font method EN `L2.00720` with (x,
+y, text, flags, colour, 1). Alignment 2 anchors the victory words at (136,
+32) of the page. The failure title (slot 0x8d) uses alignment 0, so it
+starts at its rectangle's top left; the body is the cache text of
+R2-ENGINE-629 in the multi-line class EN `L2.07337`, font1 and the same
+colour. Button captions are dialogs.txt rows: victory 43 and 154
+(R2-ENGINE-093), failure indices 0x2c and 0x23 (row 35 is the load caption
+of R2-ENGINE-441), all in font1. A RU row reaches the glyphs through the
+font1 mapper of R2-ENGINE-052 (selector 1).
+
+**Confidence.** High for the slots, the font global (population: the 199
+absolute references to `L2.07345` in the EN image; one is a store), the
+colour pointers' image values and the anchor rule in EN. The rows main 140
+and dialogs 43 and 154 carry the grade of R2-ENGINE-093 (Medium). Medium that `L2.00720` centres the string on the
+anchor (it receives the flags; unread), that slot 0x8d is main row 141, and
+for the RU glyph route (R2-ENGINE-052 is Medium). The writer of table
+`L2.05264` is unread.
+
+**Unknown.** The colour values of `L2.05264` and the dialogs row 44 caption:
+a run showing a failure report, or a read of the RU and EN dialogs rows.
+
+**Amends.** R2-ENGINE-093's Unknown on the report font, frame and input bindings: the font and colour pointers are read in EN here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 2.
+
+### R2-ENGINE-1304
+
+The button constructor EN `L2.07349` stores the caption at +0x5c, font at
++0x60, command at +0x70 and key at +0x74; when the caption holds one `~`
+followed by a letter (not `~~`) the key becomes EN `L2.07350` of that
+letter. Base button vtable `L2.07351` paints with EN `L2.01254`
+(R2-ENGINE-313). A release over the rectangle after a press (EN `L2.00909`),
+key 0xd (EN `L2.07352`) or a character whose EN `L2.07353` value equals the
+key (EN `L2.00910`) posts the command through EN `L2.00470`. The victory
+subclass EN `L2.07331`, vtable `L2.07354`, paints with the same body and
+posts 0x47b with the command instead (EN `L2.07355`, `L2.07356`; Enter or
+the key after EN `L2.07350`). The victory handler EN `L2.07357` closes the
+page with 0x445 and posts the command for a non-zero command; zero closes
+with 0x446. Victory commands are 0x41d (row 43, key V; R2-ENGINE-074
+LeaveLocation route) and 0x446 (row 154, key C).
+
+Failure buttons are base buttons: id 4 (index 0x2c) posts 0x445, id 5
+(index 0x23) 0x446. EN `L2.07358` closes the page for 0x445..0x44b and
+stores the message as the result. The close branch EN `L2.00526` posts
+0x41e (cleanup, then the main menu 0x421) for 0x445 and 0x418 (the load page
+of R2-ENGINE-438) otherwise. When EN `L2.02009` finds no save file, button
+5 receives slot +0x1c (1, 0).
+
+**Confidence.** High for the commands, the release inside, the Enter and
+key arms (they fire the button in the button's own key arm) and the close
+branch in EN; the victory key handler is equal in RU (60 of 60 masked
+instructions). Medium that a key reaches the focused button, and the key
+value of the letter (the meaning of EN `L2.07353` and of EN `L2.07350` in
+EN; its RU arm is read), that slot +0x1c disables button 5, and the app's
+handling of 0x446 from the victory page.
+
+**Unknown.** What 0x446 from the victory page does: a run pressing
+Continue after a win.
+
+**Amends.** R2-ENGINE-093's Unknown on the report font, frame and input bindings: the button and key arms are read in EN here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 3.
+
+### R2-ENGINE-1305
+
+Both pages use popup key slot +0x6c: victory EN `L2.07359` sends Up (0x26)
+and Down (0x28) to the focus step EN `L2.03078` (0,1) and (1,1); every other
+key, and every key on the failure page, goes to EN `L2.07360`. That body
+turns Esc (0x1b) into slot +0x48 with 0x446 and sends the rest to EN
+`L2.03076`: Tab steps focus forward, or back while [`L2.01653`] is set, and
+Left, Up, Right, Down follow the focused child's links +0x50, +0x48, +0x54,
++0x4c. On the victory page 0x446 reaches EN `L2.00782`, which hides the
+page, stores 0x446 and posts 0x44c with the page; on the failure page it
+closes with 0x446, the load page of R2-ENGINE-1304. The pointer slot +0x54
+EN `L2.07361` hit-tests a child (EN `L2.00716`) and calls the child's slot
++0x54. EN `L2.00783` focuses the first child (EN `L2.03078` (1,0)); the
+failure init then focuses id 4 (EN `L2.03680`).
+
+**Confidence.** High for the key values and targets in EN, and for the
+failure first focus (id 4). The victory first focus is the first child by
+EN `L2.03078` (1,0); that it is a button is Medium (the text child is child
+1; the step body is read for 80 instructions). Medium for the route that
+brings Enter to the focused button, and for the application's 0x44c branch
+for the victory page (EN `L2.00787`, unread). Medium in RU, except the
+equal victory handler.
+
+**Unknown.** What Esc on the victory page leads to: a run pressing Esc on
+the report.
+
+**Amends.** R2-ENGINE-093's Unknown on the report font, frame and input bindings: the focus and key routes are read in EN here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 3.
+
+### R2-ENGINE-1306
+
+Right after the show call, the UI 0x430 arm (EN `L2.07362`) takes entry
+0xe of the sound table `L2.02160` (EN `L2.02161`) and, when EN `L2.00976`
+on it returns zero, calls EN `L2.02166` ([`L2.02251`], 0, 0, 0xdc, 0). The
+UI 0x431 arm (EN `L2.07363`) does the same with entry 0x10. In the measured
+`sfx.reg` (R2-ASSET-102) keys Sfx14 and Sfx16 name `mcomplet` and
+`mfailed`. The button bodies EN `L2.07364` to
+`L2.07365` and EN `L2.07366` to `L2.07367` contain no call to EN
+`L2.02166`.
+
+**Confidence.** High for the calls and entry numbers in EN. Medium that
+entry n is key Sfx<n>, that a zero from EN `L2.00976` means idle and that
+0xdc is a volume. The negative covers only the named button bodies.
+
+**Unknown.** A click sound from a shared input path: a run clicking a
+report button with sounds on.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 3;
+the key names are rows of [EXP-2056](../experiments/EXP-2056-rom2-spell-presentation/)'s measured registry table.
+
+### R2-ENGINE-1307
+
+The player EN `R2.0103` sets the destination to ([`L2.00707`],
+[`L2.07368`] + 0x3c) through EN `L2.07369` (+0x358, +0x35c) and opens the
+file with target 640x360 (EN `L2.00528`, +0x350, +0x354). The lower open
+(EN `L2.07370`) calls SmackBlitOpen with flag 2, halves the stored source,
+target and destination values (+0x348..+0x35c) and sets +0x368 = 1 when
+twice the SMK width fits the target width or twice its height fits the
+target height; otherwise it uses flag 1.
+After open, an SMK 480 high is moved to ([`L2.00707`], [`L2.07368`]) at its
+own size (EN `L2.07371`). The source rectangle starts at the companion's
+startx, starty (EN `L2.07372`, R2-ENGINE-097). The surface format read by
+EN `L2.07373` adds flag 0xc0000000 for 565, 0x80000000 for 555 and 0 for 8
+bits. The tick blits between the surface receiver slots +0x64 and +0x80
+(R2-ENGINE-095) at the destination.
+
+`teleport/01.smk` is 640x360 (R2-ASSET-243). The test is
+`2 x width <= target width` or `2 x height <= target height` (`+0x368` is
+written only in the constructor, the open and the close); 2 x 640 > 640 and
+2 x 360 > 360, so the branch with flag 2 and halved geometry is not taken
+and SmackBlitOpen gets flag 1. The player does not take its doubling branch
+for a 640x360 SMK (High, EN). That the blit then draws 1:1 is Medium (the
+meaning of SmackBlitOpen flags 1 and 2 is unread; the tick and blit bodies
+read do not test `+0x368`). The destination is (0,60) at 640x480 (High),
+(80,120) at 800x600 and (192,204) at 1024x768, with [`L2.00707`] and
+[`L2.07368`] the centring offsets of R2-ENGINE-238 (the stores at EN
+`L2.07374` and `L2.07375`: (width - 640) / 2, (height - 480) / 2); in
+larger modes it is centred on the 640x360 target. The evidence for the
+target 640x360 is the one call in the player EN `R2.0103` reached through
+the dispatcher. Before the first file the dispatcher EN `L2.00875` calls
+the fill with colour 0 over `L2.07341..L2.00629` through EN `L2.04985` and
+presents; it does so again after the batch (Medium that it covers the
+screen and runs: the early-return flag and the rectangle values are
+unread).
+
+EN and RU equal: EN `L2.07376` / RU `L2.07377` (150 of 150 masked
+instructions), EN `L2.07373` / RU `L2.07378` (150 of 150), EN `L2.07369` /
+RU `L2.07379` (40 of 40).
+
+**Confidence.** High for the destination (as destinations), the doubling
+test and its result for 640x360 (the branch is not taken), in EN. Medium
+that the blit then draws 1:1, that the fill is black over the whole screen
+(EN `L2.04985` returns early while [`L2.00624`] is set; [`L2.07341`],
+[`L2.07342`] were not read as values), that slots +0x64 and +0x80 are
+surface Lock and Unlock and that flag 1 and 2 are the library's normal and
+doubling modes. "Centred on black in larger modes" carries the fill's
+Medium. The doubling test and the destination statements are read in EN
+only; EN = RU holds for the three bodies listed, and RU is Medium outside
+them.
+
+**Unknown.** A frame of the teleport movie at 1024x768: a capture
+measuring the picture's rectangle.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 4.
+
+### R2-ENGINE-1308
+
+The player constructor EN `L2.07380` calls SmackUseMMX (1) and
+SmackSoundUseDirectSound (0); the lower open calls SmackSoundOnOff (1) on
+the opened file. `teleport/01.smk` has one 22050 Hz 16-bit stereo track
+(R2-ASSET-243). Before the first file the dispatcher calls EN `L2.00714`
+and `L2.07381` on the sound object at `L2.02992`, and EN `L2.07382` after
+any file played. Messages 0x12, 0x10, 0x201, 0x204, 0x100 and 0x104 end the
+player with zero (R2-ENGINE-094), and zero ends the batch (R2-ENGINE-075):
+a key, a left or right press, close or quit skips every remaining teleport
+file. After the batch the dispatcher clears bit 0x2000 of app+0x404, calls the
+fill with colour 0 over `L2.07341..L2.00629` and presents (Medium that the
+fill covers the screen and runs, R2-ENGINE-1307); the victory route continues as in R2-ENGINE-422.
+
+**Confidence.** High for the imports, the order of the calls and the skip
+messages. Medium that `L2.00714`, `L2.07381` and `L2.07382` pause and
+resume the game music (unread), that the fill after the batch covers the
+screen and runs (R2-ENGINE-1307), and for the audio heard (no run).
+
+**Unknown.** Whether the music pauses: a run of mission 10's Leave
+listening for the music during the movie.
+
+**Amends.** R2-ENGINE-075's Unknown on full playback and audio behavior, and its note that the player may return zero: the inputs that end the batch and the sound path are read here.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 4.

@@ -3657,3 +3657,42 @@ Population limit: the `.alm` files of the root folder and the `.alm` members of 
 
 **Confidence.** High for the counts. The mask-4 totals (EN 99, RU 322) equal R2-ASSET-230. Type-9 owner check:
 Unknown.
+
+## Outcome page frame pieces and teleport movie header
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-243 | ROM2 video.res teleport/01.smk (EN and RU): SMK2, 640x360, 167 frames at 15 per second, header flags 0, one 22050 Hz 16-bit stereo compressed audio track; the member hashes differ. | High | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md) |
+| R2-ASSET-244 | ROM2 graphics.res interface/lm.256 frames 0..8 (EN = RU): fill 0 96x64, corners 1, 3, 6, 8 48x48, edges 2 and 7 96x48, edges 4 and 5 48x64. | High | ✔ promoted (branch candidate) | [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+
+### R2-ASSET-243
+
+The header of `teleport/01.smk`, read through the RES walker from each
+root's `video.res`, gives tag SMK2, width 640, height 360, 167 frames and
+frame-rate word -6666 (66.66 ms a frame, 15 frames a second). Flags are 0,
+so the header asks for no interlacing or line doubling. Audio track 0 has
+rate word 0xf0005622: present, compressed, 16-bit, stereo, 22050 Hz; tracks
+1..6 are empty. Both members are 6753596 bytes; their SHA-256 values differ
+(EN `e2a9ceb0…`, RU `aeaf3860…`, full values in the evidence).
+
+**Confidence.** High: header fields read from both installed members.
+The SMK field layout is the published container layout; no frame was
+decoded.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 4.
+
+### R2-ASSET-244
+
+`interface/lm.256` holds 18 frames (R2-ASSET-081). Frames 0..8, measured
+with their opaque-pixel counts and SHA-256 values in EN and RU, are: 0
+96x64, 1 48x48, 2 96x48, 3 48x48, 4 48x64, 5 48x64, 6 48x48, 7 96x48 and 8
+48x48. The outcome-page frame (R2-ENGINE-1302) uses 0 as fill, 1, 3, 6 and
+8 as corners, 2 and 7 as top and bottom edges and 4 and 5 as left and right
+edges; with these sizes every placement size tiles exactly. Every value is
+equal in EN and RU.
+
+**Confidence.** High: one measurement of both roots' frame headers and the
+draw positions of R2-ENGINE-1302 agree with the sizes.
+
+**Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 1;
+the frame measurement is [EXP-2037](../experiments/EXP-2037-rom2-tips/)'s art table.
