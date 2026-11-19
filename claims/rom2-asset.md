@@ -25,7 +25,7 @@ Unknown field meanings, consumers and codepage assignments remain Unknown.
 | ID | Claim | Confidence | Status | Evidence |
 |----|-------|-----------|--------|----------|
 | R2-ASSET-001 | ROM2's `.res` container is byte-identical to ROM1's `&YA1` container (`RES-MAGIC-001`, `RES-HDR-002`, `RES-ACCEPT-031`, cross-reference only). | High | ✔ promoted | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
-| R2-ASSET-002 | ROM2's `.alm` file header uses ROM1's exact field layout (`ALM-FRAME-031`, `ALM-HDR-001`, cross-reference only), not byte-identical VALUES. | High | ✔ promoted | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
+| R2-ASSET-002 | ROM2's `.alm` file header uses ROM1's exact field layout (`ALM-FRAME-031`, `ALM-HDR-001`, cross-reference only), not byte-identical VALUES. | High | ✔ promoted (amended) | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
 | R2-ASSET-003 | Past record 0, ROM2's `.alm` record chain uses ROM1's exact ALM-FRAME-031 record framing (the 20-byte `[tag][hdrLen][payloadSize][typeId][f32]` header, `payloadSize` used unmodified to advance to the next record) — **all 83… | High | ✔ promoted | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
 | R2-ASSET-004 | `world.res:data/data.bin` and `world_srv.res:data/data.bin` (149 971 and 152 527 bytes) both parse under DAT-GRAM-003's wire grammar (cross-reference only) identically to ROM1 EN through group A's title array: the leading… | High | ✔ promoted | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
 | R2-ASSET-005 | The ROM2 root's `templates.bin` (61 802 bytes) is a distinct file from `world.res`'s own `data/data.bin` — different size, different content (`R2-ASSET-004`) — but whether it shares DAT-GRAM-003's own wire grammar at all is… | High / Unknown | ✔ promoted | [EXP-2000](../experiments/EXP-2000-asset-identity/) |
@@ -64,6 +64,9 @@ ROM2's `.res` container is byte-identical to ROM1's `&YA1` container (`RES-MAGIC
 ROM2's `.alm` file header uses ROM1's exact field layout (`ALM-FRAME-031`, `ALM-HDR-001`, cross-reference only), not byte-identical VALUES. Over the full population — 37 root `.alm` files + 46 `M7R\0`-magic payloads nested in `scenario.res` (named `<n>.alm`) = 83 maps, not the ~30 this experiment's own brief assumed — every one carries magic `4D 37 52 00` ("M7R\0") and header field `hdrLen=20` (83/83, both fields uniform with 0 exceptions), and every one's first record reads as type 0 with a payload `>= 0x28` bytes, from which `W`/`H` are read at `+0x00`/`+0x04` per ALM-HDR-001. Replaying ALM-HDR-001's own corpus arithmetic identity `dataSize = 4*W*H + 72` (an independent cross-check spanning 3 separately-read fields, unaffected by the correction below since `W`/`H` are read before it applies) holds on **83/83**, 0 exceptions. Record 0's own declared `payloadSize` is a corpus-wide constant **644** (ROM1's own constant: **632**, `ALM-SEC-004`) — a genuine 12-byte content difference — and separately, record 0's TRUE span (its header's end to record 1's header's start) is **660** bytes, 16 more than even the declared 644: a `type0PayloadOverhang` this survey had to add to its own cursor arithmetic to reach record 1 correctly. Replaying that same +16 correction against ROM1's own two preserved roots, as a falsification check, does NOT also produce a clean walk (`alm-control.txt`: ROM1 EN 0/38 clean, ROM1 RU 0/34 clean, both with `firstDivergent` at record 1 uniformly) — ruling out "this is a universal reader forgiveness that would clean up any file, ROM1 included." Before this correction, this survey's own tool carried the uncorrected 644-byte advance forward into every later record read, desyncing the cursor; the far-out `typeId` values that produced (e.g. `343807103`, `4292870144`) were an artifact of that desync, not a ROM2 grammar fact (`R2-ASSET-003`, Attempts to falsify)
 
 **Confidence.** High (three independently-positioned fields — `dataSize` from the file header, `W` and `H` from record 0's payload — satisfying one fixed arithmetic identity on 100% of an 83-file corpus is not plausible if any of the three were being read from the wrong offset; this rules out "the offsets merely look right but are shifted". The 644-vs-632 and +16-overhang facts are direct, uniform, corpus-wide reads with 0 variance; the overhang specifically is confirmed by a targeted falsification control that rules out "any additive fudge factor would work here," not merely asserted by trial against ROM2 alone)
+
+**Amended.** The constant 644 is no longer without a source: the editor's full-map writer declares it as an immediate
+and writes 660 bytes (R2-ASSET-231). The writer of the constant is read; its reason is not.
 
 ### R2-ASSET-003
 
@@ -175,7 +178,7 @@ ROM2 extended the dispatcher's existing generic per-element read/allocate mechan
 
 **Confidence.** High for every threshold value, its direction, and the corpus-uniform branch each one takes (all read directly from decompiled control flow, cross-checked against the corpus's own two `formatVersion` values by direct arithmetic). High for the case-0 and case-6 field-by-field reconciliation: both sums are read from the same raw disassembly already cited for the threshold facts, not fitted to the target numbers, and each is validated per file against the full declared-`payloadSize` population at 155/155 and 154/154 with 0 exceptions — a wrong field list could not reproduce both games' own constants simultaneously by chance. Unknown, unchanged, for whether case 6's `0x3db` and `ALM-META-024`'s `0x3da` are the same field, and for which specific bytes of case 0's 28-byte growth the writer's own declared `payloadSize` counts versus which land in the 16-byte undeclared overhang
 
-**Amended.** The case 6 thresholds `0x47e`/1150, `0x3db`/987 and `0x456`/1110 are tested as `cmp`, `jb`: the two reads are present at the value and above, and the four-byte form is taken at `0x456` and above, not only above it (`ru-dispatcher.txt` `L2.02479`, `L2.02480`, `L2.02481`, read by R2-ASSET-119). The text "if `formatVersion>t`" for these three values is read as "at or above t". The case 0 values are not re-read here. No installed map (1300, 1600) is affected.
+**Amended.** The case 6 thresholds `0x47e`/1150, `0x3db`/987 and `0x456`/1110 are tested as `cmp`, `jb`: the two reads are present at the value and above, and the four-byte form is taken at `0x456` and above, not only above it (`ru-dispatcher.txt` `L2.02479`, `L2.02480`, `L2.02481`, read by R2-ASSET-119). The text "if `formatVersion>t`" for these three values is read as "at or above t". The case 0 values are not re-read here. No installed map (1300, 1600) is affected. The open question on the declared 644 is narrowed: the editor's full writer declares 644 as an immediate and writes 660 (the 16 bytes are the four type-0 dwords `+0x34..+0x40`); the reason remains Unknown (R2-ASSET-231).
 
 
 ### R2-ASSET-025
@@ -3350,6 +3353,10 @@ original (the draw's own resolution untrapped, Medium); R2-ENGINE-977 is the fra
 | R2-ASSET-228 | ROM2 spell.txt line 17 is EN Stone Curse, RU Каменное проклятие; main.txt 92 is EN casts, RU с заклинанием, 93 is empty, and 123 and 124 are EN Range and Duration, RU Дистанция and Длительность. | High | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ASSET-229 | ROM2 Units rows: 241 per root, 61 have zero columns for Withdraw and Wimpy; Withdraw is above 0 on 20 rows and Wimpy on 46; EN and RU equal in all 482 row-title pairs; -1 is stored on 4 rows. | High | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 | R2-ASSET-230 | ROM2 type-9 map records with mode mask 4: 99 of 219 EN and 322 of 635 RU over 142 maps; maps 72 and 81 hold 27 and 3 in both roots; 9 mode-5 records lie at cell 0,0; element grammar read in RU, EN Medium. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ASSET-231 | ROM2 editor map writer: 13 or 11 records, header fields, type-0 sources; 644 is a constant | High / Medium | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
+| R2-ASSET-232 | ROM2 editor terrain writer: records 0-3, 644-byte type 0, chosen by a global | High / Medium | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
+| R2-ASSET-233 | ROM2 editor save: version 0x640, scalar unset, one tag, tile transforms | High / Medium | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
+| R2-ASSET-234 | ROM2 map re-heading: 56 of 142 give the same file, 86 differ only in version 1300 | High | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
 
 ### R2-ASSET-228
 
@@ -3425,3 +3432,126 @@ record.
 **Unknown.** How many elements a type-8 record binds to a sack (+4 nonzero).
 
 **Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
+
+### R2-ASSET-231
+
+`ROM2 Map Editor.exe` writes a full map in routine EN `L2.07267` (RU `L2.07268`, masked-equal over the 2,048-instruction
+window that holds the 1,976 instructions of the routine, to its `ret 4` at EN `L2.07269`). It calls `L2.07270` (open),
+`L2.07271` (write) and `L2.07272` (close), identified by argument shape, one field per write call. File
+header: `M7R\0` (copied from the string at `L2.07273`), 0x14, `4*W*H+0x48` (W = map+0, H = map+4), record count
+0xd when map+0x39c is nonzero and 0xb when it is zero, version 0x640. Records follow in the order
+0,1,2,3,5,11,4,9,8,6,7,10,12; when map+0x39c is zero the type-4 section (`je` at `L2.07274`) and the type-6 section
+(`je` at `L2.07275`) are skipped, which leaves 11 records. map+0x39c is also the loop bound over the placed-item
+container at map+0x390 (container identity from loop shape, Medium).
+
+Each record header is one 20-byte stack block. Its `+0` is map+8, stored once at `L2.07276`; `+4` is 0x14; `+0xc`
+is the type, stored before each header `fwrite`; `+8` is the declared size: type 0 the immediate 0x284; type 1
+`2*W*H`; types 2 and 3 `W*H`; type 5 `76*n`; type 6 `48*n`; type 10 `16*n`; type 11 `12*a+84*b+12*c`; type 12
+`28*(n+1)`; type 4 the sum of 0x1c or 0x14 per element; type 9 4 plus `6*k+0x1a` per element; type 8 `20+10*k` per
+element; type 7 `12+796*m+184*map[+0x80]`. Each `n`, `a`, `b`, `c` is the same stack value the type-0 record writes
+below. The block's `+0x10` is not stored in the routine (R2-ASSET-233).
+
+The type-0 payload is 660 bytes in 23 `fwrite` calls: `+0x00` W, `+0x04` H, `+0x08..+0x14` map+0x18, +0x1c, +0x20,
++0x24; `+0x18` map+0x94 after the tile pass of R2-ASSET-233; `+0x1c` map+0x30 (the type-5 `n`); `+0x20` a count
+incremented once per placed item that passes the class test at `L2.07277` (the type-4 loop bound); `+0x24` a second
+count kept in the routine (the type-6 `n`); `+0x28` map+0x4c + map+0x80 + map+0x68; `+0x2c` map+0x2f0 (the type-8 loop count); `+0x30`
+the type-10 `n`; `+0x34`, `+0x38`, `+0x3c` the type-11 `a`, `b`, `c`; `+0x40` the type-12 `n`; `+0x44` 64 bytes at
+map+0x98; `+0x84..+0x90` map+0xd8, +0xdc, +0xe0, +0xe4; `+0x94` 512 bytes at map+0xe8. map+0xdc is set to 1 at
+`L2.07278` and rewritten in the placed-item loop at `L2.07279`.
+
+Before the type-0 record, the routine removes list entries in place (`L2.07280..L2.07281`, `L2.07282..L2.07283`):
+from the list at map+0x314 those whose first dword is not in a table held on the stack, from the lists at map+0x33c
+and map+0x328 those for which `L2.07284` returns 0, each time decrementing the list's count. Type-0 `+0x30`, `+0x34`
+and `+0x38` are the counts after the removal (the three tests' tables and the bodies of `L2.07284` and `L2.07285` are
+not read: Medium).
+
+The declared 0x284 (644) is an immediate; the routine writes 660 bytes. Both installed maps at version 1600 and at
+version 1300 declare 644; that these editor builds wrote the installed maps is not shown (the 86 version-1300 maps
+carry a version neither writer stores). Why the constant is 644 and not 660 remains Unknown.
+
+**Amends.** The ALM page's Unknown "the writer's reason for declaring 644 bytes while the metadata programme
+transfers 660" (cited to R2-ASSET-023, R2-ASSET-024): the editor's full-map writer declares 644 as a constant.
+R2-ASSET-024: the open question is narrowed: the editor's full writer declares 644 as an immediate and writes 660
+(the 16 bytes are the four type-0 dwords `+0x34..+0x40`); the reason remains Unknown. R2-ASSET-002: the writer of
+the constant is read; its reason is not.
+
+**Confidence.** High for the order, the header values, the type-0 field order and the size formulas: read from the
+EN listings; RU is masked-equal. The mask hides call targets and string addresses; RU equality is of structure,
+immediates under 0x400000 and offsets. The header-block offsets come from a stack-depth table (`espframe.py`) whose
+callee pop counts are read from the argument pushes; all 13 header pointers resolve to the same block. Medium for
+what the computed counts count (the type-10, 11 and 12 values and the two placed-item counters come from helpers
+`L2.07285`, `L2.07286`, `L2.07284`, `L2.07287`, `L2.07288`, `L2.07289`, bodies not read), for map+0x390 being a
+container (from its loop shape), and for the type-7 `m` term: `m` is map+0x4c + map+0x68 at `L2.07290..L2.07291`;
+what those two fields mean is Unknown.
+
+**Evidence.** [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md)
+
+### R2-ASSET-232
+
+A second routine, EN `L2.07292` (RU `L2.07293`, masked-equal), writes records 0, 1, 2 and 3 only. File header:
+`M7R\0`, 0x14, `4*W*H+0x48`, record count 4, version 0x640. Its type-0 payload is 644 bytes: W, H, map+0x18,
++0x1c, +0x20, +0x24, map+0x94, six zero dwords, 64 bytes at map+0x98, map+0xd8..+0xe4, 512 bytes at map+0xe8. It
+declares 0x284, equal to what it writes. The full writer's type 0 carries four more dwords, `+0x34` to `+0x40`, than
+this routine's (computed from the two field lists). Types 1, 2 and 3 are the planes at map+0xc, +0x14 and +0x10, as in
+R2-ASSET-231. The EN save routine `L2.07294` (`this` = document, argument = file name) calls the full-map writer
+on map = document+0x50 when the dword at `L2.07295` is zero and this routine otherwise, then calls the document's
+virtual slot `+0x5c` with 0 and returns 1.
+
+Inference: at version 0x640 the game loader consumes 660 bytes of type 0 (R2-ASSET-002, R2-ASSET-024), 16 more
+than this routine writes, so the next record header is read 16 bytes late.
+
+**Confidence.** High for the routine's output (EN read; RU masked-equal in structure, immediates under 0x400000 and
+offsets; the mask hides call targets and string addresses). High for the EN save routine; in RU only
+its two call sites (`L2.07296`, `L2.07297`) were found by scan, the body was not read. Medium for the load
+consequence, a composition with R2-ASSET-024 that was not run. What sets the dword at `L2.07295` is Unknown.
+
+**Evidence.** [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md)
+
+### R2-ASSET-233
+
+Both editor writers (R2-ASSET-231, R2-ASSET-232) store the version as the immediate 0x640 and the header length as
+0x14; neither body holds another version store. Neither stores the record header's `+0x10` scalar: in the full-map
+writer no instruction addresses that stack slot (stack-depth table over the whole routine, checked at all 13 header
+writes). The tag `+0` is one value, map+8, for every record.
+Before writing, both routines set the first `8*W` tile cells to the last cell's value, call `L2.07298(0)`, whose
+argument-0 path clears bit 0x4000 of every cell and returns (`L2.07298..L2.07299`, `L2.07300..L2.07301`), and
+mask every cell with 0x23ff. Both writers then OR `1<<((cell>>6)&15)` of every masked cell into the loaded value at
+map+0x94 (EN `L2.07302..L2.07303` and `L2.07304..L2.07305`), OR in 0xf00 when the value exceeds 0xff, and above
+0x1fff report the cap with a message and store 0x1fff. The routines do not clear map+0x94 first; whether the loader
+or `L2.07298` leaves it clear is not read. The full-map writer's type-0 `+0x18` and the terrain writer's carry that
+value.
+
+**Confidence.** High for the immediates and the tile transforms (EN read; RU masked-equal in structure, immediates
+under 0x400000 and offsets, including `L2.07298`; the mask hides call targets and string addresses). Medium that the
+editor can write no other version: the population is these two writers and the EN save routine that selects between
+them; other write paths were not searched. The EN immediate scans find the version 0x640 at the loader compare and
+the two stores only; a version built from a table or a register is outside that scan. The scalar absence is High
+within the two writers: in the full-map writer from the stack-depth table, and the terrain writer's four header
+stores were read and none addresses the slot. Every installed map carries one scalar value on all 13 records, which
+fits an unwritten stack slot; that it is leftover stack is an inference.
+
+**Evidence.** [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md)
+
+### R2-ASSET-234
+
+The population is 142 maps (EN 59: 13 loose and 46 in `scenario.res`; RU 83: 37 and 46), each named by SHA256 in
+`roundtrip.tsv`; every `scenario.res` member has a registry node holding its offset and length. The 142 rows are 87
+distinct contents, 55 of them shared by both roots. The census sees the loose `.alm` files of the two root folders
+and the 46 `M7R\0` members of each `scenario.res`; maps in sub-folders, other archives and saved games were not
+searched. Each map was parsed (type 0 660 bytes, other records their declared size) and re-headed with the writer's
+header values of R2-ASSET-231: `M7R\0`, 0x14, `4*W*H+0x48`, 13 records, 0x640, the writer's order, record 0's tag on
+every record, header length 0x14, 0x284 for type 0 and the payload length for the others, and the installed scalar;
+payloads, tag and scalar are kept. 56 maps give the same file (EN 18, RU 38; all version 1600). The census tests the
+file header, the record order and the header lengths, not any payload. The other 86 (EN 41, RU 45; all version 1300) differ at one field
+only, file header `+0x10`: 1300 installed, 1600 rebuilt. Every map holds one tag (5 or 7) and one scalar value
+across its 13 records (EN 11 distinct scalar values, RU 22; the value 0 is one of them in both roots). On 142 of 142
+maps the first `8*W` cells equal the last cell, every cell is within 0x23ff, type-0 `+0x18` holds every
+`1<<((cell>>6)&15)` bit (a superset test, not equality), and the type-0
+counts match the sizes: `+0x1c*76` type 5, `+0x20` the type-4 element count, `+0x24*48` type 6, `+0x30*16` type
+10, `12*[+0x34]+84*[+0x38]+12*[+0x3c]` type 11, `28+28*[+0x40]` type 12.
+
+**Confidence.** High: direct byte comparison and counts over the whole installed population (`almrt.py`). That
+every installed map, including the version-1300 maps, passed through a save with these transforms is an
+inference from the fingerprints.
+
+**Evidence.** [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md)

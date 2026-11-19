@@ -369,6 +369,55 @@ The ROM1 version ceiling of 1001 rejects the preserved ROM2 versions. Shared
 field shapes do not imply ROM1 load acceptance. — R2-ASSET-002,
 R2-ASSET-003, R2-ASSET-024
 
+<a id="editor-write-sequence"></a>
+
+## Editor write sequence
+
+`ROM2 Map Editor.exe` saves a full map with one routine (EN and RU bodies
+masked-equal). It writes the file header `M7R\0`, 20, `4*W*H+72`, record count
+and version 0x640, then the records in the order `0,1,2,3,5,11,4,9,8,6,7,10,12`.
+The count is 13 when the map's placed-item container is non-empty (container
+identity from loop shape, Medium). When it is empty the writer leaves out
+types 4 and 6 and writes 11.
+
+| Record header field | Value written |
+|---|---|
+| `+0x00` tag | One map field, the same on every record |
+| `+0x04` header length | 20 |
+| `+0x08` payloadSize | Type 0: the constant 644. Other types: the payload length: from W and H (1, 2, 3), from the type-0 counts (5, 6, 10, 11, 12), summed over the elements (4, 9, 8) or from map fields (7), per R2-ASSET-231 |
+| `+0x0c` typeId | The type |
+| `+0x10` scalar | Not stored by either writer (read); every installed map carries one value on all 13 of its records, which fits an unwritten stack slot (inference) |
+
+The type-0 record is 660 bytes, in the loader's field order. `+0x18` is the
+loaded value with `1<<((cell>>6)&15)` of every masked cell ORed in, then
+`0xf00` ORed in when the value exceeds 0xff, then capped at 0x1fff. Both
+writers do this. The routine does not clear it first; whether the loader or
+`L2.07298` leaves it clear is not read. `+0x1c`, `+0x20`, `+0x24` and
+`+0x30..+0x40` are the counts that size types 5, 4, 6, 10, 11 and 12. What the
+type-10, 11 and 12 counts and the two placed-item counts count was not read in
+the helpers that compute them (Medium). The editor removes entries from three
+lists before it writes them (R2-ASSET-231). Before writing, the editor sets the
+first `8*W` tile cells to the last cell's value and masks every cell with
+0x23ff.
+
+A second routine writes terrain only: records 0–3 with record count 4. Its
+type-0 record is 644 bytes and declares 644; the full writer's type 0 carries
+four more dwords, `+0x34` to `+0x40`. At version 0x640 the loader consumes 660,
+so the next header is read 16 bytes late (Medium, not run). A global flag in
+the save routine selects between the two routines (EN read; in RU only the two
+call sites, `L2.07296` and `L2.07297`, are found).
+
+Re-heading an installed map with these header values (payloads, tag and scalar
+kept) gives the same file for 56 of the 142 installed maps (both roots; 87
+distinct contents). The other 86 are the version-1300 maps; each differs only
+in the version field. The census tests the file header, the record order and
+the header lengths, not any payload, and sees only the loose `.alm` files of
+the two root folders and the `scenario.res` members. Every installed map
+carries one scalar and one tag on all its records, and the tile and count
+fingerprints of the save. What a newly created map holds before any placement
+remains Unknown.
+— R2-ASSET-231, R2-ASSET-232, R2-ASSET-233, R2-ASSET-234
+
 ## Type-9 records with mode mask 4
 
 An element is, in file order: u32 `+0x00` (only at version 0x3de and above), u32 `+8`, u32 `+0xc`, u16 mode at
@@ -416,10 +465,10 @@ is retracted). What an Inn offer is and which event builds the offer list also
 remain Unknown (R2-ENGINE-536). So does the reader of unit-record
 0x0a and 0x20 outside the two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0
-there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The writer's reason
-for declaring 644 bytes while the metadata programme transfers 660 is also
-Unknown; no complete original-compatible ROM2 ALM writer follows from this
-loader grammar. — R2-ASSET-023, R2-ASSET-024
+there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The editor's
+full-map writer declares type 0's 644 bytes as a constant while it writes 660
+(R2-ASSET-231). Why the constant is 644 remains Unknown. See [Editor write sequence](#editor-write-sequence).
+— R2-ASSET-023, R2-ASSET-024, R2-ASSET-231
 
 Installed W/H maxima are 256, object-count maximum 324 and unit-count maximum
 785; these are not format limits. The player record has sixteen diplomacy
