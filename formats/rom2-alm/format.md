@@ -296,9 +296,10 @@ The 46 campaign maps per root hold 13 Pointers and no Shop or Inn. The 35
 gate-1 11c entries name 12 Pointers; for each, the action node at index
 position exists and has operation 2. That the Pointer selects that node at
 run time is Medium; the thirteenth Pointer has only a gate-0 entry. The
-root `.alm` maps were not censused. Type-4 kinds 0x46..0x4b occur in these
+root `.alm` maps are censused: they hold 8 Pointers, 50 Shops and 50 Inns
+(EN) and 8, 151, 132 (RU). Type-4 kinds 0x46..0x4b occur in the campaign
 maps, so the two-value kind vocabulary of R2-ASSET-019 holds only for the
-files it described. — R2-ASSET-123, R2-ENGINE-520, R2-ASSET-019
+files it described. — R2-ASSET-123, R2-ENGINE-520, R2-ASSET-019, R2-ASSET-237
 
 The Shop and Inn slot-5 bodies read in RU do not read the 11b or 11a
 fields; no caller of slot 5 was read, so when they run is Unknown.
@@ -422,8 +423,8 @@ remains Unknown.
 
 An element is, in file order: u32 `+0x00` (only at version 0x3de and above), u32 `+8`, u32 `+0xc`, u16 mode at
 `+0x10`, u32 key at `+0x12`, u32 at `+0x16` (bytes `+0x16` and `+0x18` used), u32 count, count × (u32, u16) entries.
-Read from RU `L2.05946`; EN grammar is Medium. Mode values in the census are 0, 1, 2, 4 and 5. "Mode mask 4" is
-mode & 4. — R2-ASSET-230
+Read from RU `L2.05946` and EN `L2.07314`, equal under the address mask. Mode values in the census are 0, 1, 2, 4 and
+5. "Mode mask 4" is mode & 4. — R2-ASSET-230, R2-ENGINE-1292
 
 The population of 142 maps (EN 59, RU 83) has 99 EN and 322 RU mask-4 records, on 9 EN and 29 RU map files. Maps 72
 and 81 of `scenario.res` hold 27 and 3 in both roots. The 9 mode-5 records are at cell 0,0 and have a key above 32767,
@@ -450,6 +451,52 @@ removal routes were not searched. — R2-ENGINE-1010
 
 The objects are in the document's caster list and are saved and loaded with it; LOAD calls the list reader, whose bodies are unread (Medium that it rebuilds the list from the file).
 — R2-ENGINE-1011
+
+## Placement fields and catalog keys
+
+What each placement names, per record type, in EN and RU unless stated.
+
+**Type 4.** Element: x (+0x00) and y (+0x04), of which the loader keeps `x >> 8` and `y >> 8` (tile, Medium); kind
+dword (+0x08); word +0x0c; owner word (+0x0e, low word of a dword); id (+0x12, i16). A kind of 0x21 or with bit
+24 is stored as 0x21 and reads two more dwords; when the sum of their low bytes is above 0 they replace row
+parameters 0 and 1 (the size, Medium; all 41 EN and 170 RU 28-byte elements of the census do, so the census
+cannot show the other case). Shop, Inn and Pointer kinds select those classes; every other kind is a Building.
+An unknown owner keeps the building and logs a warning. — R2-ENGINE-1288, R2-ENGINE-1289, R2-ASSET-237
+
+The kind byte indexes by position the collection the building initialiser reads (the row is at the array
+pointer held at collection +4, plus 0x1c × kind, with no bound test): kind 0, or a kind above the collection's
+count minus one, gives a Building with no row and no registration. Row parameters 0..5 fill the size, a byte, two words and two
+dwords of the Building; word +0x0c equal to 0 clears one of those words. That the collection is data.bin
+Buildings and which title each parameter is are Medium. — R2-ENGINE-1289
+
+In the installed maps (EN 59, RU 83: the `.alm` files of the root folder and the `.alm` members of `scenario.res`;
+other archives including `world.res`, saves and user maps are not in the population) every kind lies in 1..179;
+data.bin Buildings stores 180 rows, and that this is the collection the loader indexes is Medium. Every owner
+word lies in 1..player count of its map, and no id repeats within a map. Word +0x0c is 100 in 8,800 of the
+9,351 elements and 0 in 515. — R2-ASSET-237, R2-ENGINE-1289
+
+**Type 5.** File +0x00 plus one becomes Player byte +0xa44, the colour (R2-ENGINE-963); +0x04 AND 0x2 (value 3) sets Player +0xa60 to 1; +0x08 is
+not read by the Player builder; the name is 32 bytes; the low byte of each of the 16 diplomacy words fills the
+session matrix, whose diagonal is forced to 0x12. No comparison of the player count with a constant was found in
+the type-5 case, the Player builder or the diplomacy routine as read (the type-0 count reader was not read).
+— R2-ENGINE-1291
+
+File +0x08 is 5000 or 0 in every installed record; the editor gives a new player 5000 in a field whose file
+offset was not read. — R2-ASSET-238, R2-ENGINE-1293
+
+**Type 6.** A record without flag 0x10 names a Units row by `serverID`, scanned from the last row down to
+row 1; a miss builds the unit from row 0 (Medium). Installed definition ids are 600..999 without flag 0x10
+and 1..10230 with it. — R2-ENGINE-1290, R2-ASSET-239
+
+**Type 9.** Mode below 4 with a nonzero cell, mode & 8 (a unit's spellbook, keyed by unit) and mode & 4 take
+separate arms. The grammar and the first two arm tests are read in the committed stage windows; the mode & 4
+arm lies past their end and rests on R2-ENGINE-1006 at its grade. Installed maps have no mode 8; every mode-4 key equals a type-4 id of the same map.
+— R2-ENGINE-1292, R2-ASSET-240
+
+**Editor catalogs.** The EN map editor reads `objects.reg`, `units.reg` and `structures.reg` under
+`graphics\` and `templates.bin`. That it opens `world.res` was observed in an uncommitted scan and is Medium,
+not reproduced. Which catalog index becomes a kind or a definition id,
+and what a new placement holds, are Unknown. — R2-ENGINE-1293
 
 <a id="not-yet-surveyed"></a>
 

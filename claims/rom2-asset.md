@@ -146,7 +146,7 @@ The condition that selects ROM2's 28-byte extended type-4 (placed object) record
 
 **Confidence.** High for the condition itself — read directly from the decompiled dispatcher body (cross-checked against the function's own raw, byte-free disassembly, not the decompiled C alone), and its own replay reaches 0 residue on the full 83-map/all-type-4-records population, which a materially wrong condition could not achieve by chance. Explicitly not claiming more: this experiment's own corpus cannot separate this exact condition from a simpler low-byte mask, since no observed record carries a kind that would make the two disagree (one sharing the `0x21` low byte with bit 24 clear, or vice versa) — the code read, not a corpus discrimination, is this row's basis
 
-**Amended.** The sentence "This corpus's own type-4 `kind` vocabulary is exactly two values, `0x21` and `0x1000021`" holds for the files that census described and no wider. R2-ASSET-123 reads the same field (low word of dword 0x08) in the 46 campaign maps per root and finds kinds 0x46..0x4b on 13 records per root, in maps 10, 20, 21, 30, 40, 50 and 76. Both walks end at their payload end under the 20/28-byte rule, which is not in question. Whether those maps are in the 83-file population of this claim is not established here; the low-byte-mask remark stands for that population only. See retracted.md.
+**Amended.** The sentence "This corpus's own type-4 `kind` vocabulary is exactly two values, `0x21` and `0x1000021`" holds for the files that census described and no wider. R2-ASSET-123 reads the same field (low word of dword 0x08) in the 46 campaign maps per root and finds kinds 0x46..0x4b on 13 records per root, in maps 10, 20, 21, 30, 40, 50 and 76. Both walks end at their payload end under the 20/28-byte rule, which is not in question. Whether those maps are in the 83-file population of this claim is not established here; the low-byte-mask remark stands for that population only. See retracted.md. R2-ASSET-237 censuses the root maps: they hold 8 Pointers, 50 Shops and 50 Inns (EN) and 8, 151, 132 (RU).
 
 ### R2-ASSET-020
 
@@ -1663,6 +1663,8 @@ the 1334 action nodes per root: one table from the committed generator
 would settle the signed comparison. The root `.alm` maps (R2-ASSET-084) are
 not censused; the same generator over them would settle which structure
 kinds and 11c entries they hold.
+
+**Amended.** R2-ASSET-237 censuses the root `.alm` maps: they hold 8 Pointers, 50 Shops and 50 Inns (EN) and 8, 151, 132 (RU).
 
 **Amended.** R2-ASSET-130: the root `.alm` maps hold Shop and Inn kinds (every 11a entry names an Inn, every 11b entry but five per root a Shop), and all their 11c entries have gate 0.
 
@@ -3555,3 +3557,103 @@ every installed map, including the version-1300 maps, passed through a save with
 inference from the fingerprints.
 
 **Evidence.** [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md)
+
+## Map placement census (types 4, 5, 6 and 9)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-237 | ROM2 type-4 census, EN 59 / RU 83 maps: 3,270 / 6,081 elements, kind 1..179 after the loader, owner within the player count, no repeated id. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ASSET-238 | ROM2 type-5 census, EN 360 / RU 548 records: file +8 is 5000 or 0; diplomacy words 0, 1, 2, 16, 18 with high byte 0. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ASSET-239 | ROM2 type-6 census, EN 7,461 / RU 15,482 records: definition ids 600..999 without flag 0x10, 1..10230 with it; no id 0. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ASSET-240 | ROM2 type-9 census, EN 219 / RU 635: no mode 8; every mode-4 key is a type-4 id of its map; mode-0 keys are 0. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+
+### R2-ASSET-237
+
+Population: the loose `.alm` files of each root and the `.alm` members of its `scenario.res`, EN 13 + 46 =
+59 maps, RU 37 + 46 = 83, each named by SHA-256 in `evidence/derived/census/inputs.tsv`. The census program
+`evidence/census.py` walks every record chain to its exact end with the R2-ENGINE-1288 grammar; tables are
+`evidence/derived/census/{en,ru}-{all,root,scenario}.tsv`, reproduced byte-equal.
+
+| Measure | EN | RU |
+|---|---:|---:|
+| Elements | 3,270 | 6,081 |
+| 28-byte elements (kind 0x21 / 0x1000021) | 41 (10 / 31) | 170 (21 / 149) |
+| Kind bits other than bit 24 above 0xff | 0 | 0 |
+| Kind after the loader outside 1..179 | 0 | 0 |
+| Class by kind: Building / Shop / Inn / Pointer | 3,149 / 50 / 50 / 21 | 5,777 / 151 / 132 / 21 |
+| File word +0x0c = 100 / = 0 / other | 3,056 / 203 / 11 | 5,744 / 312 / 25 |
+| Owner word outside 1..player count; high word nonzero | 0; 0 | 0; 0 |
+| x or y low byte nonzero | 3,270 | 6,081 |
+| Tile outside the map | 0 | 0 |
+| Id range; repeats within a map | 1..1146; 0 | 1..1146; 0 |
+| 28-byte elements with extension byte sum above 0 | 41 | 170 |
+
+The `scenario.res` members hold 1,708 Building and 13 Pointer elements in each root and no Shop or Inn
+(R2-ASSET-123). Data.bin Buildings stores 180 entries (R2-ASSET-124), so every kind is at most count − 1
+and passes the R2-ENGINE-1289 row test if the collection's count is the data.bin count (Medium).
+
+The population is the `.alm` files of the root folder and the `.alm` members of `scenario.res`; other archives
+(including `world.res`), saves and user maps are not in it.
+
+**Amends.** R2-ASSET-123 and R2-ASSET-019: the root maps are censused; they hold 8 Pointers, 50 Shops and 50
+Inns (EN) and 8, 151, 132 (RU).
+
+**Confidence.** High for the counts: the walk consumes every payload exactly in all 142 maps. That each kind
+names a Buildings row inherits R2-ENGINE-1289 (Medium).
+
+### R2-ASSET-238
+
+Same population and tables as R2-ASSET-237. Player records: EN 360, RU 548; players per map 2..15.
+
+- File +0 (Player +0xa44 − 1, R2-ENGINE-1291): 0..15.
+- File +4: values 0, 1 and 3; mask 0x2 set (value 3) in EN 13 and RU 42 records, all in root maps.
+- File +8: 5000 in EN 301 and RU 465 records, 0 in the rest.
+- Names: none empty, all terminated within 32 bytes.
+- Diplomacy words: values 0, 1, 2, 16 and 18; no high byte set. Diagonal: 18 in EN 355 and RU 543
+  records; 0, 2 and 16 in the other five. Entries beyond the player count are nonzero in 41 records
+  per root.
+
+Population limit: the `.alm` files of the root folder and the `.alm` members of `scenario.res`; other archives
+(including `world.res`), saves and user maps are not in the population.
+
+**Confidence.** High for the counts.
+
+**Unknown.** What file +8 means: the game's Player builder does not read it (R2-ENGINE-1291).
+
+### R2-ASSET-239
+
+Same population and tables as R2-ASSET-237. Unit records: EN 7,461, RU 15,482.
+
+- Flags +0x0c: 0, 4, 16 and 20; flag 0x10 set in EN 1,066 and RU 1,847 records.
+- Definition id +0x14 with flag 0x10: 1..10230, 91 EN and 95 RU distinct values. Without it:
+  600..999, 150 EN and 155 RU distinct values. Full value sets in the tables. No id is 0.
+- Owner +0x18: within 1..player count in every record; high word 0.
+- Tile: inside the map in every record.
+
+Population limit: the `.alm` files of the root folder and the `.alm` members of `scenario.res`; other archives
+(including `world.res`), saves and user maps are not in the population.
+
+**Confidence.** High for the counts.
+
+**Unknown.** Whether every flag-0 definition id equals a Units `serverID`: `world.res` was outside this
+population. R2-SESSION-297 joins the flag-0x10 records of the 46 campaign maps to Humans.
+
+### R2-ASSET-240
+
+Same population and tables as R2-ASSET-237. Elements: EN 219, RU 635.
+
+| Mode | EN | RU | Cell (+8, +0xc) zero | Key |
+|---:|---:|---:|---|---|
+| 0 | 117 | 309 | EN 80, RU 184 | 0 in all |
+| 1 | 3 | 3 | all | nonzero |
+| 2 | 0 | 1 | all | nonzero |
+| 4 | 98 | 314 | none | a type-4 file +0x12 id of the same map in all |
+| 5 | 1 | 8 | all | nonzero |
+
+No element has mode 8 or a mode above 5. Counted 6-byte entries occur in modes 0, 1, 2 and 5 only.
+
+Population limit: the `.alm` files of the root folder and the `.alm` members of `scenario.res`; other archives
+(including `world.res`), saves and user maps are not in the population.
+
+**Confidence.** High for the counts. The mask-4 totals (EN 99, RU 322) equal R2-ASSET-230. Type-9 owner check:
+Unknown.

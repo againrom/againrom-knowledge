@@ -1415,7 +1415,10 @@ R2-SESSION-297 narrows the Unknown on missing `serverID`s: all 605 flag-0x10
 records of the 46 maps of each root resolve to a Humans row; flag-0 records
 were not joined. R2-ENGINE-741 narrows the collection identity: the database
 serializer loads +0xa0 in the walker-group order, and its `this` link is
-still numeric (Medium).
+still numeric (Medium). R2-ENGINE-1289 replaces the sentence on the building
+loader `L2.00131`: the kind byte is a position, kind 0 is skipped and the
+largest accepted kind is the collection's count minus 1. R2-ENGINE-1290 reads
+the ordinary Units arm in EN.
 
 ### R2-ENGINE-039
 
@@ -30227,3 +30230,167 @@ a typeID and face but differing in
 serverID, then hovers a third of each row, would settle whether the grades differ.
 
 **Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 4.
+
+## Map placement fields and catalog keys
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1288 | ROM2 type-4 load: x and y kept as value >> 8, kind, word +0x0c, owner word +0x0e, id +0x12; kind 0x21 or bit 24 reads 8 more bytes. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1289 | A ROM2 Building takes the row its kind byte indexes by position; kind 0 or above count − 1 gets no row; extension bytes replace the size. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1290 | ROM2 EN and RU resolve a flag-0 unit's definition id to a Units row by `serverID`; a miss returns 0 and builds the unit from row 0. | Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1291 | ROM2 type-5: file +0 + 1 is Player +0xa44, file +4 AND 0x2 sets +0xa60, file +8 is unread; diplomacy low bytes fill the matrix, diagonal 0x12. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1292 | The ROM2 type-9 grammar holds in EN and RU; mode < 4 with a cell, mode & 8 (a unit's spellbook) and mode & 4 take separate arms. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1293 | EN ROM2 Map Editor reads objects.reg, units.reg, structures.reg and templates.bin as catalogs; the new-player routine stores 5000 at +0xc of the object it builds. | Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+
+### R2-ENGINE-1288
+
+The type-4 case of the dispatcher (EN `L2.05108`, RU `L2.07306`, listings `*-disp-t4t5.txt`) reads per
+element, in file order:
+
+| File offset | Width | Element (0x14 bytes, constructor EN `L2.02500`) | Reading |
+|---:|---|---|---|
+| 0x00 | u32 | +0 word: x `sar` 8 | the low byte is dropped; the byte passed on is the x tile (Medium) |
+| 0x04 | u32 | +2 word: y `sar` 8 | likewise for y |
+| 0x08 | u32 | +4 word: kind | see below |
+| 0x0c | u16 | +6 word | zero clears Building +0x42 (R2-ENGINE-1289) |
+| 0x0e | u32 | +8 word: low word | owner; the high word is dropped |
+| 0x12 | i16 | +0x10 dword, sign-extended | id; Building +8 receives it |
+| 0x14, 0x18 | u32, u32 | +0xa, +0xc words (zero otherwise) | only when the kind dword is 0x21 or has bit 24 |
+
+When the kind dword equals 0x21 or has bit 24 set the loader stores 0x21 as the kind before the 8-byte
+read, so a 28-byte element always carries kind 0x21. Each element is appended to map+0x390. The type-4 tail
+(EN `L2.07307`) passes the x and y bytes, the kind byte and the extension bytes to the Building
+constructor EN `L2.02575`, resolves the owner word through EN `L2.00308` into Building +0x14 and, when it
+fails, logs a warning that a building without an owner was loaded and keeps the building. Kinds
+0x22/0x23/0x5d..0x5f/0x69..0x6b build a Shop, 0x43..0x45/0x63..0x65/0x6f..0x71 an Inn, 0x46..0x4b a
+Pointer (R2-ENGINE-512, R2-ENGINE-517). The runtime key id + 0x6000 is R2-ENGINE-857.
+
+**Confidence.** High: the EN and RU bodies are equal in position under the address mask (dispatcher 230,
+element constructors 80, tail 200 and owner resolve 40 instructions; `evidence/nav/nav1/maskcmp.tsv`),
+re-read in `evidence/derived/listings/`. R2-ASSET-237 parses all 142 installed maps with this grammar.
+Medium that x >> 8 and y >> 8 are tile coordinates: the location routine EN `L2.07308` is unread; every
+installed value lies inside the map (R2-ASSET-237).
+
+### R2-ENGINE-1289
+
+The Building initialiser (EN `L2.03611`, RU `L2.00131`, listings `*-bld-init.txt`, constructors
+`*-bld-ctor.txt`) reads the kind byte at Building +0x40. When it is 0 or above the count getter's value
+(EN `L2.06904`: collection +8 minus 1) it skips the row, every row field and the registration call EN
+`L2.06901`. Otherwise it stores the kind byte at +0x0e and, at +0x3c, the row from getter EN `L2.03201`,
+which calls EN `L2.07309`: the row is at the array pointer held at collection +4, plus 0x1c × kind, with no
+bound test; the count is the dword at collection +8 (`en-array-get.txt`, `en-count-getter.txt`). Row parameters fill the Building:
+
+| Parameter | Building field |
+|---:|---|
+| 0, 1 | +0x60, +0x61 bytes |
+| 2 | +0x48 byte |
+| 3 | +0x44 and +0x42 words |
+| 4, 5 | +0x64, +0x68 dwords |
+
+When the two extension bytes sum above 0 they replace parameters 0 and 1, and +0x64 becomes 0 and +0x68
+becomes −1. The type-4 tail then sets +0x42 to 0 when the element's word +6 (file +0x0c) is 0.
+
+The collection object is EN `L2.03202`. At the two direct callers of the database loader per root
+(`evidence/derived/scans/*-call-db-load.txt`, `*-dword-db.txt`, listing `*-db-caller.txt`) it reads as the
+Buildings collection of data.bin (Medium: no committed window ties `L2.03202` to the loader's Buildings
+group; R2-ASSET-124 titles: Building, sizeX, sizeY, scanRange, healthMax, Passability, BuildingPresent,
+Start ID, Tiles).
+
+**Amends.** R2-ENGINE-038: its sentence that the building loader `L2.00131` treats the kind byte `+0x40` as a
+1-based index bounded by the collection count is replaced: the kind byte is a position, kind 0 is skipped and
+the largest accepted kind is the collection's count minus 1 (`cmp esi,eax; jle` against the getter's +8 minus 1).
+
+**Confidence.** High for the read bodies in EN and RU (bld-init 127 and bld-ctor 39 instructions equal
+under the mask). Medium that the collection is the data.bin Buildings collection: the committed evidence is a
+20-instruction window of the loader's start, 60 dword hits of `L2.00811` and 2 call hits; indirect calls of the
+loader were not censused, and the getters `L2.06904`, `L2.03201`, `L2.07309` were read in EN only. Medium
+for the parameter-to-title map: the parameter getter EN `L2.02667` is unread.
+
+**Unknown.** What a kind byte above the collection range leaves on the map, and what file word +0x0c
+means beyond the zero test. R2-ASSET-237 finds no such kind in the installed maps.
+
+### R2-ENGINE-1290
+
+The ordinary unit arm (EN `L2.07310`, RU `L2.07311`, listings `*-units-arm.txt`; the test of flag 0x10 that
+selects this arm is not in the committed window, which starts inside the arm; it rests on R2-ENGINE-038 (RU)
+and R2-ENGINE-742 (EN person arm)) calls the lookup EN
+`L2.02665` / RU `L2.02666` (`*-units-lookup.txt`) with the row's definition id. The lookup scans index
+i from count − 1 down to 1; it skips a row whose +8 fails EN `L2.02664` and returns i when parameter 0x37
+of row +8 equals the id; otherwise it returns 0. The arm passes the result, with no zero test, to the
+row getter EN `L2.04941` → `L2.05811` (the array pointer held at collection +4, plus 0x30 × i, no bound test;
+`en-units-get.txt`, `en-units-row-get.txt`) and builds the 0x208-byte unit from row +4. A definition id that matches no row
+therefore builds a unit from row 0.
+
+**Amends.** R2-ENGINE-038: its ordinary Units arm, there RU only, holds in EN (arm 30 and lookup 64
+instructions equal under the mask).
+
+**Confidence.** Medium: the count helper EN `L2.07312`, the row test `L2.02664` and the parameter getter
+`L2.02667` are unread; `L2.04941` and `L2.05811` were read in EN only. The collection identity with
+data.bin Units stays as in R2-ENGINE-038 and R2-ENGINE-741.
+
+### R2-ENGINE-1291
+
+The type-5 case (`*-disp-t4t5.txt`) builds a 0x4c-byte record per player and appends it to map+0x28:
+
+| File offset | Width | Record | Reading |
+|---:|---|---|---|
+| 0x00 | u32 | +0x0c | the Player builder stores +0x0c + 1 at Player byte +0xa44 |
+| 0x04 | u32 | +0x34 | file +4 AND 0x2 (value 3) sets Player +0xa60 to 1 (`mov ecx,[eax+0x34]; and ecx, 2`) |
+| 0x08 | u32 | +0x10 | not read by the builder |
+| 0x0c | 32 bytes | +0x14 | name |
+| 0x2c | 16 × u16 | +0x38 | diplomacy |
+
+Record +4 is the 1-based ordinal; the count is the type-0 player count. No comparison of the count with a
+constant was found in the type-5 case, the Player builder or the diplomacy routine as read (the type-0 count
+reader was not read). The
+diplomacy routine (`*-diplomacy.txt`) copies the low byte of each word into the session matrix row of the
+player and forces the diagonal to 0x12. Owner checks: a building with an unknown owner is kept with a
+warning (R2-ENGINE-1288); a unit with an unknown owner is skipped (R2-ENGINE-742).
+
+**Confidence.** High for the read bodies in EN and RU (dispatcher 230, builder 115 and diplomacy 70
+instructions equal under the mask). Medium for when entry 1 reuses the first Player: helpers EN
+`L2.00223` and `L2.07313` are unread (R2-ENGINE-071).
+
+### R2-ENGINE-1292
+
+The type-9 arm (EN `L2.07314`, RU `L2.05946`, `*-t9-arm.txt`) reads the R2-ASSET-230 grammar into a
+0x2e-byte element: file +0 (version 0x3de and above) to +0, then +8, +0x0c, six bytes to +0x10 (mode
+word, key dword at +0x12), +0x16, a count and count × 6-byte entries to the list at +0x1a; the element
+goes to map+0x2fc. The stage (EN `L2.02687`, RU `L2.00117`, `*-t9-stage.txt`) has three arms:
+
+- mode below 4 with a nonzero cell: entries go to EN `L2.03589`, unread;
+- mode & 8: the key is resolved to a placed unit, else a diagnostic that the unit of the spellbook cannot be
+  resolved is logged; the unit's +0x140 receives an object;
+- mode & 4: R2-ENGINE-1006.
+
+**Amends.** R2-ASSET-230: its EN grammar, there Medium, is read in EN (110 instructions equal to RU under
+the mask).
+
+**Confidence.** High for the grammar and for the mode < 4 and mode & 8 arm tests in EN and RU (t9-stage 256
+instructions equal; `cmp edx,4` at EN `L2.07315`, `and ecx,8` at `L2.07316`). The mode & 4 arm lies past the end
+of the committed stage windows (EN `L2.07317`, RU `L2.05960`) and rests on R2-ENGINE-1006 at its grade.
+Medium for what the mode < 4 entries hold and for the mode-8 object: `L2.03589` and the element
+constructor `L2.07318` are unread. R2-ASSET-240 finds no mode-8 element.
+
+### R2-ENGINE-1293
+
+EN `ROM2 Map Editor.exe` listings `evidence/derived/listings/en-ed-*.txt`:
+
+| Loader | File | Keys read |
+|---|---|---|
+| `L2.07319` | `graphics\objects\objects.reg` | Global FileCount, ObjectCount; FileN; ObjectN Parent, File, Index, Phases |
+| `L2.07320` | `graphics\units\units.reg` | Global FileCount, UnitCount; FileN; UnitN Parent, File, Index |
+| `L2.07321` | `graphics\structures\structures.reg` | Global Count; StructureN File, TileWidth, TileHeight, FullHeight, Phases, SelectionX1..Y2, ShadowY |
+| `L2.07322` | `templates.bin` | a count, then 0x74-byte templates |
+
+The new-player routine (`L2.07323`) stores 0x1388 at `[edi+0xc]` of the object built there; that this object
+is the player record is Medium.
+
+Observed in uncommitted scans, not reproducible from the tree: a reference to `world.res` with a terminate
+message when it is missing; no ASCII string matching `data[.]` in the editor; the RU editor compared by strings.
+
+**Confidence.** Medium, EN only; the statements of the preceding paragraph are not reproduced. Which map record each catalog
+fills and which catalog index becomes a type-4 kind or a type-6 definition id are Unknown. That the
+editor's player +0x0c is file +8, the field R2-ASSET-238 finds as 5000, is not read.
+
+**Unknown.** What the editor writes into each field of a new type-4, type-6 or type-9 placement.
