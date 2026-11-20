@@ -151,7 +151,7 @@ range test, the edge gap and the bearing read is `P + (n-1) * 128` per axis, 16 
 step bytes whatever `n` is. A resting mover has both sub-cell bytes `0x80`, so its centre is the geometric
 centre of its block. The range test returns 1 when the centre distance minus `((n1+n2) << 7) - 0x100` is at
 most `0x180`, else `(v + 0x40) >> 8`; the edge gap subtracts `(n1+n2) << 7`, clamps at 0 and returns
-`(v >> 8) + 1`. Which actors have `n` above 1 is not measured.
+`(v >> 8) + 1`. The Units rows read with `n` above 1 are Catapult, Ballista, Ogre, Troll and Daemon (2) and Dragon (3); 62 Units rows have no value and are read as 1 (`MAGIC-451`, Medium). A spell cast at a target with `n` of 2 or more is placed at `P + (n-1) * 128 - 1` per axis (`MAGIC-449`).
 
 ### What the cell-boundary calls do (`TERR-CELLREC-146`, `TERR-FOOTPRINT-147` (amended, partially retracted))
 

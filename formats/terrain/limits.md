@@ -7,7 +7,7 @@
 The six area-effect layer pointers and their cost/block consumers are specified
 by `TERR-CELLREC-146`. Bit 4's damaging-effect producer and preservation are
 `TERR-PASS-148`; the old complete writer lists in `TERR-PASS-073` remain
-retracted. `TERR-MOVE-057` supplies spawned footprint/domain values from Data.bin,
+retracted. `TERR-MOVE-057` supplies spawned footprint/domain values from Data.bin (the rows above size 1: `MAGIC-451`),
 so the old universal 1×1/0x41 consequence is withdrawn. These facts do not remove the other limits below.
 
 Reveal-permission writers include opcodes 33 and 45 (`TERR-FOG-089`). Calling bit 3

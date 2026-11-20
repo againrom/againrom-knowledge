@@ -1917,7 +1917,7 @@ The stores of the literal 1 at displacement `0x60` over the whole image (`eviden
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-245 | Fire_Ball's transport target point is the footprint centre minus one sub-unit per axis for a target of size above 1 (`L06144`), and the cell centre of the cast's x and y bytes for a null target (`R0289`). | High / Medium | ● active | [EXP-0453](../experiments/EXP-0453-shot-burst/) |
+| MAGIC-245 | Fire_Ball's transport target point is the footprint centre minus one sub-unit per axis for a target of size above 1 (`L06144`), and the cell centre of the cast's x and y bytes for a null target (`R0289`). | High / Medium | ● active (amended) | [EXP-0453](../experiments/EXP-0453-shot-burst/) |
 | MAGIC-246 | The area effect's size byte `+0x49` is spell parameter 9 (1 for Fire_Ball), so the blast arm `R0630` applies the blast to cells -size to +size on both axes: a 3 x 3 area for Fire_Ball. | High / Medium | ● active | [EXP-0453](../experiments/EXP-0453-shot-burst/) |
 | MAGIC-247 | The Ballista's weapon spell in the EN data is Fire_Ball with value 40 (Catapult: 70), taking the weapon-spell path and not a cast divert. | High / Medium | ● active | [EXP-0453](../experiments/EXP-0453-shot-burst/) |
 
@@ -1929,6 +1929,8 @@ The stores of the literal 1 at displacement `0x60` over the whole image (`eviden
 **Confidence.** High for the arithmetic of both branches (instructions); Medium that a shot reaches the null branch only through a point cast: callers of `R0003` were read in `EXP-0441` and here only for the point cast.
 
 **Unknown.** A saved Fire_Ball with a multi-cell or null target; none was read.
+
+**Amended.** `MAGIC-449` narrows the footprint-centre wording to a unit at rest (fine 128): the word is P + (n-1)*128 - 1 with the unit's own fine, it wraps mod 65536 per axis, and a size of 0 is not adjusted. The point is handed to the AreaEffect of an area spell (`MAGIC-450`), not to a transport as a destination (`MAGIC-293`).
 
 ### MAGIC-246
 
@@ -4937,21 +4939,23 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs) and o
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-428 | Each repeat of a retained kind-8 cast calls the range gate at progress 0 and releases at the target's position then, except id 14 (aim Unknown); no HP or sight test gates the arm, install or release call (card). | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
+| MAGIC-428 | A kind-8 repeat calls the range gate at progress 0 and releases at the target's position as `MAGIC-449` adjusts it, except id 14, applied per list entry from the admission (`MAGIC-450`; its point Unknown); no HP or sight test gates. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
 | MAGIC-429 | A retained cast does not cut a step except at command state 0x17 with `mover+0x98` set (`MAGIC-341`); a repeat is installed and cast from the cell the step reached. | Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
 | MAGIC-430 | A computer-owned Dragon or Daemon has empty class slots, so each engage draw reaches `R0393`: Mind 75..99 gives about 30-in-100 kind 5 (CRT `rand()` / `0x8000`), else an equal-weight kind-8 pick of an affordable book spell. | High / Medium | ✔ promoted (branch candidate) | [EXP-0636](../experiments/EXP-0636-dragon-casts/) |
 
 ### MAGIC-428
 
 - Kind-8 arm `L00108`: a self target bypasses the gate; otherwise `R0041(actor, ord+0x28, ord+0x14)` is called with the target pointer. It compares the facing byte of `R0051` with the direction byte and then the distance from `R0036` with reach (`L14169..L00578`); both callees are unread here, the reading of the target's position inside `R0036` is inherited from `AI-522`, and a failure may be a facing failure. On failure the arm approaches through `R0042`. On success the install copies `ord+0x28` to `actor+0x5c` and `ord+0x30` to `actor+0x64`, stores `ord+0x5c` := 1 and tests `ord+0x60`.
-- Release `R0002` calls `R0003(caster, target, 0, 0)` except for spell id 14 (Prismatic Spray, `L06167..L17368`), which bypasses it; the aim of id 14 is Unknown. Prismatic Spray is in the books of Dragon.3, Dragon.4 and the Daemon (`UNIT-167`). The application reads `target+0x10` at release (`L16485..L06146`, with the multi-cell adjustment through `vt+0x1c`, `R0863`, `R0862`); a null target uses the cell arguments.
-- So a retained Fire Ball, Wall of Fire or Poison Cloud (ids other than 14) ordered at an actor lands at that actor's position at each release, after its wind-up, and follows it between repeats.
+- Release `R0002` calls `R0003(caster, target, 0, 0)` except for spell id 14 (Prismatic Spray, `L06167..L17368`), which bypasses it; id 14 is applied per list entry from the admission (`MAGIC-450`) and where its point effect lands is Unknown. Prismatic Spray is in the books of Dragon.3, Dragon.4 and the Daemon (`UNIT-167`). The application reads `target+0x10` at release (`L16485..L06146`, with the multi-cell adjustment through `vt+0x1c`, `R0863`, `R0862`); a null target uses the cell arguments.
+- So a retained Fire Ball, Wall of Fire or Poison Cloud (ids other than 14) ordered at an actor lands at that actor's position, moved by `MAGIC-449` for a size of 2 or more, at each release, after its wind-up, and follows it between repeats.
 - Kind 9 (`L05042`) gates with `R0086` and the cell `ord+0x3c` stored at the draw (`MAGIC-237`) and installs through `R0013`.
 - Dead target: no HP test gates the range call, the install or the release call. The application listing tests the target's health in two arms: `L17369` (health above −10, in the arm at `L03244..L17370`) and `L17371..L03258` (the arm at `L03256..L16490` clamps the amount to health + 10 and applies nothing when the clamp is not positive). Which spell ids reach those arms is not shown; Drain Life (id 11) is in four dragon books. The strike path refuses only a null victim, a zero owner or reach (`AI-640`), and a body below 1 stays a target until the dying arm tears it down at health ≤ −10 (`AI-719`); no sweep clears other actors' order targets (`AI-470`). Out of sight: no sight-map routine is reached at direct-call depth 3 or less with a target set (`AI-718`). Out of range: the arm approaches.
 
-**Confidence.** High for the call of the gate, the install copies and the release read of `target+0x10` (ids other than 14). Medium for the dead-target and sight clauses, which compose `AI-640`, `AI-718`, `AI-719` and `AI-470` at their grades, with the Drain Life exception above. Unknown: the release aim of id 14, the effect of a dead target on the application's health arms, what the gate's two callees test, and what a repeat does with a target pointer after teardown.
+**Confidence.** High for the call of the gate, the install copies and the release read of `target+0x10` (ids other than 14). Medium for the dead-target and sight clauses, which compose `AI-640`, `AI-718`, `AI-719` and `AI-470` at their grades, with the Drain Life exception above. Unknown: where the point effect of id 14 lands (`MAGIC-450`), the effect of a dead target on the application's health arms, what the gate's two callees test, and what a repeat does with a target pointer after teardown.
 
 **Unknown.** Settle with the original: a computer-owned Dragon face 1 against a moving unit; record each Fire Ball release position against the target's `+0x10`, then kill the target and record `ord+0x28`, `ord+0x08` and the next release until the target is torn down.
+
+**Amended.** `MAGIC-450` reads the aim of id 14: its application runs from the admission `R0268` through `R0269`, which calls `R0003` once per list entry, and for id 14 (Distribution 1) the adjusted point is not read (static reading of the listings, Medium: `R0619`'s callees are unread and `MAGIC-241` grades the admission path Medium). `MAGIC-449` states what the adjustment computes and for which sizes. The other clauses stand.
 
 ### MAGIC-429
 
@@ -5050,6 +5054,84 @@ Jump table L03242 selects R0003 branches that write 2*spell_id+8 for rows 5, 10,
 Separately, fresh attachment in R0612 calls Effect copy R1001 at L16460, then Token copy R1134, which reads/writes +0x0e at L17480/L03176; insertion follows at L05845. The attachment search compares +0x0c. The retained noncontinuous arm calls unapply at L05205, replaces magnitude +0x40 at L16467 and counter +0x42 at L16468, then calls apply at L05206. Those explicit stores write neither retained +0x0e, +0x3c nor +0x0c. The continuous arm refreshes only the counter. Callback mutations and other cast routes are not excluded.
 
 **Confidence.** Medium for complete local EN/RU attachment/copy listings (one image), not a global store census or complete cast-to-attachment path. SAV-1397 supplies the mixed-lineage snapshot/timer fit: ten pairs with parent timers above the 628 delta depart from simple decay and retain type0, while two parent Bless timers below 628 fit expiry/fresh creation. It is one file pair, not an observed cast sequence. Actual refresh, creation and LOAD-to-draw behaviour remain Unknown without an original-runtime witness.
+
+## Release point of a kind-8 cast at a target wider than one cell
+
+Evidence is a static read of committed listings of `rom.exe` (one image on both lawful installs, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on EN and RU), two caller instruments, and the Spells and Units collections of `data/data.bin` in both `world.res` files; no process was run. `EXP-0648` was allocated `MAGIC-449`..`MAGIC-452` and used the first three. A fine unit is 1/256 of a cell.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-449 | At a cast with a target, `R0003` keeps the record that the pointer at `target+0x10` designates as is when body size n (`vt+0x1c` low byte) is 0 or 1; for n of 2 to 255 each axis word becomes cell*256+fine+(n-1)*128-1, mod 65536. | High / Medium | ✔ promoted (branch candidate) | [EXP-0648](../experiments/EXP-0648-rom1-body-aim/) |
+| MAGIC-450 | `R0003` has three callers and each target-bearing one passes the MAGIC-449 prelude, Prismatic Spray's list entries included; only the ten area ids, Control Spirit and Teleport read the adjusted point. | High / Medium | ✔ promoted (branch candidate) | [EXP-0648](../experiments/EXP-0648-rom1-body-aim/) |
+| MAGIC-451 | Only the 15 shipped Units rows with tokenSize 2 (11) or 3 (4), EN and RU equal, give MAGIC-449 a size above 1; Humans, heroes and structures give 1, and a loaded actor takes its saved byte (62 rows without a value read as 1, Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0648](../experiments/EXP-0648-rom1-body-aim/) |
+
+### MAGIC-449
+
+For a non-null target `R0003` builds a 12-byte Position record at `ebp-0x20` in `L17691..L17692`. Sources are the listing of `L13150..L17693` (EXP-0441 `evidence/disasm-rider-position-L13150.txt`, the same bytes in EXP-0595 `run1/release-application.txt`), `R0862` and `R0863` whole (EXP-0595 `run2/position-centres.txt`), `L06144` (EXP-0441 `evidence/disasm-position-centre-L06144.txt`; EXP-0509 `evidence/q4-listings.txt` adds its `RET 8` at `L17694`), and `R1010`, `L05872`, `R0165`, `R0166` (EXP-0441 `evidence/disasm-position-copy-R1010.txt`).
+
+- Copy. `R0287` builds the record. `R1010` copies the Position record that the pointer at `target+0x10` designates (`L17695` loads it with `mov ecx, [eax+0x10]`) into a temporary and `L05872` copies the temporary into the record. Both copy bytes `+0`, `+1`, `+4`, `+5`, the word `+2` and the dword `+8`; bytes `+6` and `+7` are not written (`MAGIC-289` states the same).
+- Size n. `L06145` calls `[vt+0x1c]` on the target, `L17696` masks the result with `0xff`, and `L17697..L09266` compare it with 1 and jump over the adjustment when it is at most 1. The masked value is never negative, so n of 0 or 1 leaves the record equal to the copy of the record that the pointer at `target+0x10` designates, and n of 2 to 255 runs the adjustment.
+- Word. P is cell*256 + fine per axis: `R0165` for x from bytes `+0` and `+4`, `R0166` for y from `+1` and `+5`. `R0862` (x) and `R0863` (y) return (P + ((n-1) << 7)) mod 65536, re-reading n through `vt+0x1c` (`AI-444`, `MOVE-087`). The caller masks each result with `0xffff` and subtracts 1 (`L09267..L17698`; y first, then x).
+- Store. `L06144(record, x word, y word)` writes cell x = high byte of the x word at `+0`, cell y at `+1`, fine x = low byte at `+4`, fine y at `+5`, and the word `+2` = cell y*256 + cell x. The dword `+8` keeps the copy's value. A centre of 0 gives the word `0xffff`; a cell sum past 255 wraps per axis (`evidence/generated/points.tsv`).
+- At rest. A unit at rest has fine 128 on both axes (`MOVE-087`). The table gives the result per axis for that fine and agrees with `MAGIC-289`'s sizes 1 to 4:
+
+| n | cell offset from the anchor cell | fine |
+|---|---|---|
+| 0, 1 | 0 | 128 |
+| 2 | 0 | 255 |
+| 3 | +1 | 127 |
+| 4 | +1 | 255 |
+| 5 | +2 | 127 |
+| 6 | +2 | 255 |
+| 255 | +127 | 127 |
+
+For a general fine f the word is P + (n-1)*128 - 1 with the unit's own fine. The point is the centre of the n by n block minus one fine unit only for a unit at rest.
+
+**Confidence.** High for the copy, the compare, the arithmetic and the stores: named instructions in committed listings of one image, and the sum is the one `AI-444` and `MOVE-087` read at High. Medium that the receiver of `vt+0x1c` is one of the 20 vtables `AI-557` read, whose grade is High / Medium with 220 anchor positions unread. Medium that every writer of a resting position stores fine 128 (`MOVE-087`: 13 writer bodies unread). No original run observed the point.
+
+**Unknown.** The point the original passes for a size-2 or size-3 target in play, and a release position against `target+0x10`. Settle with the original as in `MAGIC-428`: a computer-owned Dragon against an Ogre at rest and against a moving one; record `target+0x10` and each Fire Ball release position.
+
+**Amends.** `MAGIC-245`: its footprint-centre wording holds for a unit at rest only; a unit with another fine value gets P + (n-1)*128 - 1 with its own fine; the word wraps mod 65536 per axis; a size of 0 is not adjusted. The point goes to the application, which hands it to the AreaEffect of an area spell (`MAGIC-450`); it is not a transport destination (`MAGIC-293`).
+
+### MAGIC-450
+
+Callers, read as three instruments over `rom.exe`: the byte scan of EXP-0648 pass 1 (`E8` and `E9` rel32 in `.text`, aligned dwords of every section; `evidence/pass1/callers-en.tsv`), the unaligned `imm32` scan of `.text` for seven entry addresses (pass 4, no hit; `evidence/pass4`), and the Ghidra reference enumeration of EXP-0243 (`evidence/refs.txt`, `callto`). The three agree:
+
+- `R0002` is called by `L00007` (actor tick, action `0xd`, target `actor+0x5c`; `MAGIC-403`) and `L03045` (the rider of `R0246`, which passes its own target argument; EXP-0441 `disasm-rider-R0246.txt`).
+- `R0003` is called by `L03044` (inside `R0002`, skipped for id 14 at `L06167..L17699`), `L00008` (action `0xe`, null target and cell bytes `actor+0x60`, `actor+0x61`: no adjustment) and `L03043`.
+- `L03043` is the loop of `R0269`, read whole in EXP-0559 `run1/listings/w-R0269-R0002.txt`. It calls `R0003(spell, caster, entry, 0, 0)` for each entry of the list that `R0109` fills (primary first, then the ranked secondaries; `MAGIC-SPRAY-134`). Between them `L03026` calls `R0619`, which reads the list (the word at `+4` of each entry) and the caster and stores nothing into the list (EXP-0243 `listings.txt`, 84 instructions; its callees `R1369`, `L08089`, `R0069`, `R0646` are unread). `R0269` has one caller, `L03027` in `R0268` (the id-14 arm, `MAGIC-241`), which the actor tick calls at `L01994` and `L01995`.
+- So every Prismatic Spray list entry passes the `MAGIC-449` prelude with its own size, and the application of id 14 is reached from the admission, not from the release.
+
+Consumers of the adjusted record, from the listing of `R0003` (EXP-0595 `run1/release-application.txt`, jump tables in `run2/application-tables.tsv`; `evidence/generated/arm-map.tsv` lists every operand). Over `R0003..L16488` the record `ebp-0x20` appears in 9 operands: 4 build it, and 5 read it:
+
+- `L05853`, `L17700`: the Teleport arm (id 26) takes cell x (`R0299`) and cell y (`R0300`) from it for `R1055`, called with the caster.
+- `L17701`: the Control Spirit arm (id 25) compares it with an object's `+0x10` (`R1146`).
+- `L06148`: the AreaEffect constructor `R0652` receives it, in the branch of Distribution other than 1 (`L05102..L17702` test `getParam(row, 8)`).
+- `L17703`: the packed cell word (`R0019`) goes to `R0089` with the caster and sets AreaEffect byte `+0x4a`, in the same branch.
+
+The target pointer `[ebp+0xc]` appears in 24 operands of the same range: 7 in the prelude (among them `L17704`, the argument of a caster `vt+0x68` call), 15 in arms, and 2 in the suffix. The arms are the Heal arm (id 6, `L17705..`), the Drain Life arm (id 11, `L03256..`), the arms of ids 24 and 28 (`L17706..`), id 20 (`L17707..`) and ids 23 and 27 (`L17708..`). The suffix `L14298` reads it at `L05217` and `L17709`, where Distribution 1 with a non-null target passes it to the PointEffect constructor `R1046`; with a null target `L05217` jumps to `L05218`, which calls `R0473` and `R1347` (not read here). A control-flow walk over the listing (the two indirect jumps are the tables at `L05081` and `L03242`, both read) finds that the arms of ids 0, 6, 11, 25 and 26 do not reach `L14298` and every other arm and the damage half do.
+
+Distribution (Spells parameter 8, EN and RU equal; `evidence/generated/databin-spells-en.tsv`) is 1 on ids 1, 5, 6, 10, 11, 13, 14, 15, 16, 18, 20, 22, 23, 24, 25, 26, 27, 28, 3 on ids 2, 7, 8, 12, 17, 4 on ids 3 and 19, and 5 on ids 4, 9, 21. Hence the adjusted point reaches an AreaEffect for ids 2, 3, 4, 7, 8, 9, 12, 17, 19 and 21 (Fire Ball, Wall of Fire, Fire Sacrifice, Freezing Cloud, Poison Cloud, Acid Stream, Light, Darkness, Wall of Earth, Meteor Storm), and Teleport and Control Spirit read it in their arms. For the other 16 ids (1, 5, 6, 10, 11, 13, 14, 15, 16, 18, 20, 22, 23, 24, 27, 28; among them Fire Arrow, Lightning and Prismatic Spray) the record is built and not read; they act through the target pointer.
+
+**Confidence.** High for the instructions, tables and the Distribution column, each read in a committed listing or table. The split of ids between the damage half and the arms is `MAGIC-ARM-014`'s (High); every route of every id ends the same way here, in an arm that reads the point or the target, or in the suffix, whose branch is `MAGIC-SHAPE-008`'s column 8 read in this card. Medium for completeness of the caller census: three instruments agree, and a call through an address computed at run time is outside all three. Medium for the control-flow walk, which follows jumps inside the listed range and treats calls as returning. Medium for `R0619`'s callees and for whether the primary and the secondaries of `R0109` can be anything but actors.
+
+**Unknown.** What the PointEffect (`R1046`, `R0266`) does with the target position for Distribution 1 ids, so where Fire Arrow, Lightning and each Prismatic Spray entry land; the body of the AreaEffect and SpellTransport beyond `MAGIC-289`'s constructor read. A saved Teleport or Control Spirit cast with a multi-cell unit target (`MAGIC-245`).
+
+**Amends.** `MAGIC-428`: the aim of id 14 is the per-entry application above, reached from the admission; the adjusted point is not read for id 14 (Distribution 1). Static reading of the listings, Medium: `R0619`'s callees are unread and `MAGIC-241` grades the admission path Medium.
+
+### MAGIC-451
+
+Tables come from the Units and Humans collections of `data/data.bin` in `world.res` of both roots (`evidence/generated/databin-token-en.tsv`, `-ru.tsv`; the two tables equal apart from their hash header lines). The columns are named by the file's own titles: Units parameter 31 `tokenSize`, Humans parameter 21 `TokenSize`. `AI-699` and `AI-722` state the same census and the loaded, summoned and hero sides at High / Medium; this card ties the table to `MAGIC-449`. The committed tables list by row the 15 rows above size 1 and give the histogram of the others; the 41 rows of size 1, the 62 rows with no value and the 5 Humans rows with no value are counted, not listed.
+
+- Units, 118 rows (collection count 119, entry 0 skipped): tokenSize 1 on 41 rows, 2 on 11 rows, 3 on 4 rows, and no value in the row on 62 rows. Rows with 2: Catapult (row 26), Ballista (27), Ogre and Ogre.2 to .4 (80 to 83), Troll and Troll.2 to .4 (84 to 87), Daemon (116). Rows with 3: Dragon and Dragon.2 to .4 (112 to 115). The suffixed rows are the difficulty variants of `TERR-MOVE-057`.
+- Humans, 215 rows: -1 on 190, 1 on 20, no value on 5; none above 1. The streamer skips the store for -1 and the constructor's 1 stays (`TERR-MOVE-057`, `AI-699`).
+- `vt+0x1c` returns `[this+0x49]` for the three actor vtables `L00001`, `L00002`, `L00003` and 1 for 17 other vtables, among them the slots `L16486` of Building and `L16487` of Shop (`AI-557`; EXP-0648 pass 1, `evidence/pass1/vtable-slot1c-en.tsv`). A building or shop target takes the size-1 branch of `MAGIC-449`: its point is the anchor cell's centre (`MOVE-184`).
+- A summoned creature takes its Units row's value and a hero 1; a loaded actor takes the saved byte, which holds the class value in the install saves (2 on the 5 Ogre records, 1 elsewhere; `AI-722`).
+- So the adjusted branch of `MAGIC-449` is reached by targets built from the 15 Units rows above. Every other Units row, a Human, a hero, a building and a shop keep the position as is.
+
+**Confidence.** High for the 15 rows and the histograms (the file's own bytes, equal on both roots, the walk consuming the whole payload); the rows outside the 15 are not listed in the evidence, and their grade is Medium. Medium for the 62 Units rows with no value: the walk shows a shorter parameter list, and the streamer's treatment of a missing slot is not read, so their size is taken as the constructor's default. Medium for "only these": other writers of `+0x49` and the 220 vtables of `AI-557` are not enumerated, and a loaded actor's byte is read only in the install saves. Medium for the structure clause (`MOVE-184`).
+
+**Unknown.** Whether a spell can target a structure, and the byte of a loaded actor outside the install saves. A decode of `+0x49` in a save holding such a unit and a read of the streamer for a short parameter list settle them.
 
 ## Light and Darkness sight
 

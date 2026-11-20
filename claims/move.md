@@ -972,10 +972,12 @@ writer list and the reader lists: the instrument is a linear sweep with a 24-ins
 calls only, and it misses stores split over longer windows, changed base registers, `REP MOVS` copies of the
 record, computed indices and indirect callers.
 
-**Unknown.** Which shipped or authored actors have n above 1; no census was run. Observed positions of a size
+**Unknown.** Which authored actors have n above 1; no census of authored actors was run. Observed positions of a size
 above 1 in play. The full bodies of the 13 writers other than `R0047`, which were located and only their quoted stores asserted.
 
 **Amended.** MAGIC-TELEPORT-356 reads R1055 whole and distinguishes its mask veto, old-cell release, centred Position stores and nontransactional entry failure. The other located writer bodies remain outside that new reading.
+
+**Amended.** `MAGIC-451` lists the shipped Units rows with n above 1 (Medium for the rows with no value).
 
 ### MOVE-088
 

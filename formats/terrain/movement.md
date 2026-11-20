@@ -94,7 +94,7 @@ simulation actor instance the predicate is called on (base vtable `L00001`, deri
 The constructor's1 values are defaults. Data.bin Units/Humans streamers
 overwrite tokenSize/movementType when the parameter is not−1. Installed
 Ghost/Bee use domain 2 (mask0x44), Bat_Sonic/Dragon use 3 (mask0x82), and
-footprints include sizes 2 and 3. The universal 1×1/0x41 consequence is
+footprints include sizes 2 and 3 (rows listed in `MAGIC-451`). The universal 1×1/0x41 consequence is
 retracted by `TERR-MOVE-057`. The units.reg drawable class array is not a
 simulation input: TileSize belongs to drawable CUnit, while Z selects the
 drawable class. The simulation-domain clause of `REG-UNITS-061` is retained

@@ -392,7 +392,7 @@ Frequencies over time depend on mana, which the static read does not give. A Dra
 Each repeat of a retained kind-8 cast calls the range gate with the target at that pass (the
 facing byte must match and the distance be within reach) and releases at the target's position
 at release, so the cast follows a moving target; spell id 14 (Prismatic Spray) bypasses that
-release call and its aim is Unknown, and a kind-9 repeat keeps the cell stored at the draw. No
+release call and is applied once per list entry from the admission (`MAGIC-450`; static reading of the listings, Medium: `R0619`'s callees are unread and `MAGIC-241` grades the admission path Medium), and a kind-9 repeat keeps the cell stored at the draw. No
 HP or sight test gates the arm, the install or the release call, so a repeat keeps a dying
 target until its teardown; the application's effect arms test the target's health in places and
 which spells reach them is unread (High / Medium, `MAGIC-428`). A repeat that needs an approach
@@ -504,6 +504,24 @@ class/ownership. The three ordinary actor classes return 1 from virtual
 +0x2c without reading HP. Null target with unit distribution reports and
 exits. Removed-target lifetime and callbacks remain Unknown. Literal
 predicates are High; composed target-loss outcomes are Medium. — MAGIC-404
+
+The application's Position for a target is a copy of the Position record that the pointer at `target+0x10` designates. When the target's body size n
+(the low byte of `vt+0x1c`) is 2 or more, each axis word becomes cell*256 + fine + (n-1)*128 - 1 modulo
+65536 and is split back into cell and fine; sizes 0 and 1 are not adjusted. A unit at rest has fine 128 (`MOVE-087`, Medium: 13 writer bodies unread),
+so a size-2 target gives its anchor cell at fine 255 and a size-3 target the next cell at fine 127 for such a unit.
+The release point of a spell at a unit wider than one cell was not observed in the original. — MAGIC-449
+
+The application has three callers: the actor tick's cast release, the weapon rider, and the loop that
+applies each Prismatic Spray list entry. Each target passes the same adjustment. Only the area spells
+(ids 2, 3, 4, 7, 8, 9, 12, 17, 19 and 21), Teleport and Control Spirit read the adjusted point; the
+other spells act through the target pointer (High for the instructions and table rows; Medium for completeness: three
+instruments agree and a call through a computed address is not covered, 62 Units rows carry no value and are read as
+size 1, and the receivers of `vt+0x1c` are the 20 vtables of `AI-557` only). — MAGIC-450
+
+Of the shipped Units rows, 11 have size 2 and 4 have size 3; Humans, heroes and structures have size 1,
+and a loaded actor takes its saved byte (High for the 15 listed rows and the histograms; Medium for the 62 Units rows
+with no value, which are read as size 1, and for "only these rows": other writers of `+0x49` and 220 vtables are not
+enumerated). — MAGIC-451
 
 Admission has charged the eligible book caster before wind-up; local release
 has no second payment. Helper R0014 preserves a loaded cast. Cut routine

@@ -118,7 +118,7 @@ footprint, so it reaches R cells past the footprint's left and top edges and Râˆ
 right and bottom edges (`AI-696`). The footprint side n is the `Data.bin` `tokenSize`: 2 for
 Catapult, Ballista, Ogre, Troll and Daemon, 3 for Dragon, 1 for every other Units entry and every
 Humans actor created from `Data.bin`; a summoned creature takes its Units `tokenSize`, a hero 1, and
-a loaded actor the saved byte, which in the install saves is the class value (`AI-699`, `AI-722`). The collector reads only the ground occupant slot of each cell record: a
+a loaded actor the saved byte, which in the install saves is the class value (`AI-699`, `AI-722`). A spell cast at an actor with that side above 1 is placed by `MAGIC-449`; `MAGIC-451` lists the rows and `MAGIC-450` the spells that read the placed point. The collector reads only the ground occupant slot of each cell record: a
 domain-1 or 2 hostile is listed once per footprint cell inside the square, and a domain-3 hostile
 is not entered at the slot the collector reads: for a Dragon or Bat_Sonic created from `Data.bin`
 (`movementType` 3, `TERR-MOVE-055`, and `TERR-MOVE-057`, whose domain gloss was superseded and whose streamed cells stand) it is not listed (`AI-697`, Medium: stores to

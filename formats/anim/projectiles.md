@@ -168,7 +168,8 @@ without the fine byte. For a size-2 target at fine 128 that is the anchor
 cell, while a homing record aims at the footprint centre. No stage stores the
 target's size: the Position has no size byte, AreaEffect `+0x49` holds the
 Radius, and the record has no size field. MAGIC-289's transport-flight/default-entry clauses are partially retracted;
-the stationary wrapper and fixed child destination are specified by MAGIC-293.
+the stationary wrapper and fixed child destination are specified by MAGIC-293. The point the AreaEffect
+retains is the application's adjusted Position (MAGIC-449, MAGIC-450).
 
 SAVE writes the 16 leaves of every record. LOAD reads them, rebinds the view,
 the ID and the map node, and loses the word list `+0xa8` (a loaded picture

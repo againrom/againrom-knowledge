@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5170. Observation: 143. Static analysis: 4315. Mixed: 712.
+Claims labelled: 5173. Observation: 143. Static analysis: 4318. Mixed: 712.
 
 ## Ledger ai
 
@@ -1431,7 +1431,7 @@ Claims labelled: 5170. Observation: 143. Static analysis: 4315. Mixed: 712.
 | MAGIC-238 | static analysis | ✔ promoted |
 | MAGIC-239 | static analysis | ✔ promoted (amended) |
 | MAGIC-240 | static analysis | ✔ promoted (amended) |
-| MAGIC-245 | static analysis | ● active |
+| MAGIC-245 | static analysis | ● active (amended) |
 | MAGIC-246 | static analysis | ● active |
 | MAGIC-247 | mixed | ● active |
 | MAGIC-241 | static analysis | ● active |
@@ -1533,7 +1533,7 @@ Claims labelled: 5170. Observation: 143. Static analysis: 4315. Mixed: 712.
 | MAGIC-422 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-424 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-426 | static analysis | ✔ promoted (branch candidate) |
-| MAGIC-428 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-428 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-429 | mixed | ✔ promoted (branch candidate) |
 | MAGIC-430 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-433 | static analysis | ✔ promoted (branch candidate) |
@@ -1541,6 +1541,9 @@ Claims labelled: 5170. Observation: 143. Static analysis: 4315. Mixed: 712.
 | MAGIC-435 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-437 | mixed | ✔ promoted (branch candidate) |
 | MAGIC-438 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-449 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-450 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-451 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-441 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-442 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-443 | static analysis | ✔ promoted (branch candidate) |

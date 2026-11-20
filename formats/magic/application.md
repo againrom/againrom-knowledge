@@ -459,6 +459,14 @@ cast by that caster. The first unguarded read is the owner read inside the helpe
 before the group read and the empty-list test; no try block is in the frames read (`MAGIC-241`). Whether a later tick
 assigns an owner is Unknown.
 
+The loop of `R0269` applies each list entry, primary first, through the same application entry as every
+other cast, so each entry's Position receives the size adjustment of `MAGIC-449`. Prismatic Spray's
+Distribution column is 1, so the application binds the entry's pointer and does not read the adjusted point
+(`MAGIC-450`; static reading of the listings, Medium: `R0619`'s callees are unread and `MAGIC-241` grades the
+admission path Medium). High for the instructions and table rows; Medium for completeness: three instruments agree
+and a call through a computed address is not covered, 62 Units rows carry no value and are read as size 1, and the
+receivers of `vt+0x1c` are the 20 vtables of `AI-557` only.
+
 ## Effect duration
 
 `effect+0x3d` carries the game's own five words, parsed by `R0857`:

@@ -68,6 +68,9 @@ transport counter with 10 after construction. Positive damage enters the shared 
 suffix at L14298; MAGIC-289's default-entry and transport-flight clauses
 are partially retracted. — MAGIC-293
 
+An area spell's AreaEffect receives the application's Position record, which for a target of size 2 or
+more is the position moved by (size-1)*128 - 1 fine units per axis. — MAGIC-449, MAGIC-450
+
 DirectDamage's base/spread/school are fixed before the transport wait. The
 child application calls the victim resolver with those fields, consumes RNG
 and current resistance, then subtracts HP. The physical dead-shooter/range
