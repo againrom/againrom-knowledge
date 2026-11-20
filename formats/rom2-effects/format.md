@@ -129,3 +129,7 @@ Identified field writers include construction, copy, parser, speed-arm fill,
 same-ID renewal and duration tick. The dword copies overlap both words.
 Dispel, save/load, server-message and all other writers were not censused.
 Completeness remains Unknown. R2-ENGINE-1171.
+
+## Effect words in computer-unit scoring
+
+Bit 0x40000 of the unit effect word +0x144 is effect id 18, and a candidate with it set gets +0x7f in the first ROM2 scorer. The bit 0x40000 of the field mask +0x150 is a separate flag that the slot routine sets when a Light or Darkness field changes (R2-ENGINE-1496).

@@ -339,6 +339,12 @@ Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick outside the Group pass is Unknown.
 
+No body read chooses a point for an area spell. The offensive choice casts at the
+victim unit; the special cast uses the victim's cell (for Acid Stream, a cell
+beside the caster toward the victim). No body read tests the own or allied
+units in the area. The centre a target-mode area spell takes is Unknown
+(R2-ENGINE-1490, Medium for the composition).
+
 In a Group pass (once per 16 counter values, RU; EN Medium) programmes 1 and 2
 (a member at its post, with L2.00490 nonzero) and 18 (the same, with two
 further gates), 3 and 5 reach the heal routine for a member without a target,
@@ -451,3 +457,7 @@ The ordinary script action and check wrappers are read independently of this pag
 The bodies of the numbers no installed map uses are read in R2-ENGINE-1450, except action 37, whose cell is a message-formatting arm (Unknown); checks 1, 5, 8 and 20 test no per-entry state beyond +0x42 of check 20 (R2-ENGINE-1452). The script tick runs before the loop over the group list and empties the Session+0xbbec list (R2-ENGINE-1451).
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472); the full tables are on the route page.
+
+## Computer-unit gaps
+
+A struck ROM2 unit rewrites six command fields and posts a 0x54-byte record to the session list. The look-around is the one reader of command +0x54 found in the census (Medium), and no reader of a record was found in the chain that destroys the list (Medium) (R2-ENGINE-1491, R2-ENGINE-1492, R2-ENGINE-1262, R2-ENGINE-1451). Guard B reads the hit stamps in session ticks and in blocks of 16 ticks, and Guard A reads none of the hit fields (R2-ENGINE-1493, R2-ENGINE-1494). No body read chooses a point for an area spell: the aim is the victim unit or the victim's cell (R2-ENGINE-1490). Two scorers rank candidates, and of the effect words they read only bit 0x40000 of +0x144; an effect that changes the Mind word, the range or the virtual kind is not excluded (Medium) (R2-ENGINE-1495, R2-ENGINE-1496). The group assignment targets every member of the group with no idle test (R2-ENGINE-1497). A flee without Teleport walks, and an empty route ends in a stop and order 0xc at the unit's cell (R2-ENGINE-1498). A withdraw message sets v = 0, 10 or 30 for the owner object that message word +5 resolves to (that the word names a sender is Medium), and the outer message type, the sender and the control are Unknown (R2-ENGINE-1499, R2-ENGINE-1421). The numbers are in the area hit numbers table of the behavior page.

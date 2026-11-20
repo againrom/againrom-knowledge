@@ -339,6 +339,12 @@ Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick outside the Group pass is Unknown.
 
+No body read chooses a point for an area spell. The offensive choice casts at the
+victim unit; the special cast uses the victim's cell (for Acid Stream, a cell
+beside the caster toward the victim). No body read tests the own or allied
+units in the area. The centre a target-mode area spell takes is Unknown
+(R2-ENGINE-1490, Medium for the composition).
+
 In a Group pass (once per 16 counter values, RU; EN Medium) programmes 1 and 2
 (a member at its post, with L2.00490 nonzero) and 18 (the same, with two
 further gates), 3 and 5 reach the heal routine for a member without a target,
@@ -452,3 +458,7 @@ Questions answered at the grade of earlier claims: which cell a step occupies an
 when a route is rebuilt (R2-ENGINE-872, R2-ENGINE-871, R2-ENGINE-874, R2-ENGINE-1108). Unknown: the passability
 test that refuses entry into the source cell during a step, and the tie rule between equal routes, whose bodies
 (the path helpers at RU `L2.05231..L2.05230`) are unread.
+
+## Computer-unit gaps
+
+A struck ROM2 unit rewrites six command fields and posts a 0x54-byte record to the session list. The look-around is the one reader of command +0x54 found in the census (Medium), and no reader of a record was found in the chain that destroys the list (Medium) (R2-ENGINE-1491, R2-ENGINE-1492, R2-ENGINE-1262, R2-ENGINE-1451). Guard B reads the hit stamps in session ticks and in blocks of 16 ticks, and Guard A reads none of the hit fields (R2-ENGINE-1493, R2-ENGINE-1494). No body read chooses a point for an area spell: the aim is the victim unit or the victim's cell (R2-ENGINE-1490). Two scorers rank candidates, and of the effect words they read only bit 0x40000 of +0x144; an effect that changes the Mind word, the range or the virtual kind is not excluded (Medium) (R2-ENGINE-1495, R2-ENGINE-1496). The group assignment targets every member of the group with no idle test (R2-ENGINE-1497). A flee without Teleport walks, and an empty route ends in a stop and order 0xc at the unit's cell (R2-ENGINE-1498). A withdraw message sets v = 0, 10 or 30 for the owner object that message word +5 resolves to (that the word names a sender is Medium), and the outer message type, the sender and the control are Unknown (R2-ENGINE-1499, R2-ENGINE-1421). The numbers are in the area hit numbers table of the behavior page.

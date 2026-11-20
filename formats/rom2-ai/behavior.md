@@ -163,6 +163,43 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 | Look-around flag | +0x54 requests a new heading and is cleared by look-around. The hit hook does not directly order every Group to attack the attacker. | R2-ENGINE-504 High RU look-around, Medium EN/helper meaning; R2-ENGINE-845 High no direct target write, Medium broader inference | Event consumers and untraced target writers |
 | Stored attacker pointer | +0x94 has no reader in the census with traced command bases; +0x58 has builder/group-sight readers, +0x98/+0x9c have Guard B readers. | R2-ENGINE-875 Medium census; High for the Guard B readers of +0x98/+0x9c; Medium for the builder and group-sight readers of +0x58 | 268 RU +0x94 sites with untraced bases; aliases and bulk copies |
 
+## Area hit numbers
+
+Every row is one number of the struck unit's reaction. A hit rewrites the six command fields and posts a record; the
+fields' readers and the repeat behaviour are the rows below.
+
+| Number | Value | Claim and grade |
+|---|---|---|
+| Command +0x54 after a hit | 1; the one reader found in the census is the look-around, which clears it | R2-ENGINE-1491 High, readers Medium |
+| Command +0x58 after a hit | the attacker's cell; five sight copies read it | R2-ENGINE-1491 High, readers Medium |
+| Command +0x5a after a hit | 0, so each hit restarts the sight count | R2-ENGINE-1491 High |
+| Command +0x94 after a hit | the attacker; no reader in the census | R2-ENGINE-1491 High, absence Medium |
+| Command +0x98 after a hit | the session tick count; one reader found in the census, Guard B case 4 | R2-ENGINE-1491 High, reader Medium |
+| Command +0x9c after a hit | a cell up to 10 cells from the victim, away from the attacker | R2-ENGINE-1491 High, sign Medium, truncation of L2.01309 Medium |
+| Away vector scale | 10.0 divided by the larger absolute axis difference | R2-ENGINE-1491 High |
+| Sight passes that mark the cell | 21 after the last hit (the mark clears when signed +0x5a exceeds 0x14) | R2-ENGINE-1492 High RU, EN Medium |
+| Look-around new heading | heading byte + 0x21 + draw below 0xbe; taken when the flag is set or a 0..0x7fff draw is below 0xcd | R2-ENGINE-1491 High |
+| Posted record per hit | 0x54 bytes (21 dwords), appended; the script tick destroys the list | R2-ENGINE-1492 High chain, no reader Medium |
+| Hit counter | none: +0x5a counts sight passes and is reset by a hit | R2-ENGINE-1492 High |
+| Session dword +4 | counts calls of the session tick; the tick returns at once when its object's +0x94 is 0 (R2-ENGINE-1016) | R2-ENGINE-1493 Medium: the tick object is not shown to be `[L2.01317]` |
+| Session word +0 | counts blocks of 16 calls of the session tick | R2-ENGINE-1493 Medium: the tick object is not shown to be `[L2.01317]` |
+| Group pass spacing | 16 session ticks; the turn routine runs when the tick count's low nibble is 6 | R2-ENGINE-1493 Medium: the tick object is not shown to be `[L2.01317]`; one direct caller (R2-ENGINE-1016, R2-ENGINE-778) |
+| Guard B case 4 window | tick difference below 10 with health below maximum | R2-ENGINE-1493 High RU, EN Medium |
+| Guard B cases 1 and 2 window | stamp difference below 30 blocks with health below maximum; below 10 blocks without the health test | R2-ENGINE-1493 High RU, EN Medium |
+| Step-away passes per hit | case 4: at most 1 (for 10 of the 16 phases of the hit tick the next pass is within 9 ticks); cases 1 and 2: every pass walks to +0x9c while the stamp is under 30 or 10 blocks old, whatever the hit | R2-ENGINE-1493 Medium |
+| Guard A with no target | walks to its post or idles; reads none of +0x16, +0x94, +0x98, +0x9c | R2-ENGINE-1494 High, absence Medium |
+| Seconds per session tick | Unknown; 16.13 and 32.08 counter values per second were measured in two EN launches under a debugger and the difference is open | R2-ENGINE-1493 Unknown, R2-ENGINE-1073 |
+| Area spell point | no body read chooses a point: the offensive choice casts at the victim unit and the special cast at the victim's cell; the centre of the target-mode apply L2.00034 is Unknown; no unit test of the area | R2-ENGINE-1490 High for the bodies, Medium for the composition |
+| Candidate score, scorer L2.00057 | preference 1: s + s/2; preference 4: s - s/4, only when the actor's vtable +0x1c result is below 2 and its word +0x88 is at least 15; effect bit 0x40000 of +0x144: +0x7f, floor 1 | R2-ENGINE-1495 High both roots (bodies); callers RU |
+| Candidate score, scorer L2.05238 | adjusted distance above 1: 0xffffff; preference 1 doubles, preference 4 halves, no conditions, no effect test | R2-ENGINE-1495 High both roots (bodies); callers RU |
+| Effect bit 0x40000 | bit of +0x144 is effect id 18; the +0x150 bit 0x40000 is the separate field-changed flag; the two scorers read no other effect word, and an effect that changes the Mind word, the range or the virtual kind is not excluded | R2-ENGINE-1496 High for the bodies, Medium for the rest |
+| Group assignment target | every member of the group argument gets the lowest-scoring enemy of the list +0xa68, or 0; no idle test | R2-ENGINE-1497 High, completeness Medium |
+| Writers of command +0x20 | 7 command-block stores in the assignment routines; two unclassified dword stores near the group code and four unclassified non-dword stores outside the group code range | R2-ENGINE-1497 High, Medium |
+| Flee without Teleport, empty route | stop, then order 0xc at the own cell; the next Group pass decides again | R2-ENGINE-1498 High bodies, Medium composed; Medium that a flee walk reaches the order-1 branch (movement +0x98 nonzero and +0x50 = 1, R2-ENGINE-1020) |
+| Withdraw v | message dword +0xe = 0, 1, 2 gives 0, 10, 30 (other 0); the owner is the object L2.01565 returns for message word +5 | R2-ENGINE-1499 High RU and EN; that +5 names a sender is Medium (R2-ENGINE-1179) |
+| Withdraw thresholds | command +0x40 = HPmax x {0, 2v, 3v} / 100; command +0x44 = word +0x96 x v / 100 | R2-ENGINE-1499 High, R2-ENGINE-1421 |
+| Withdraw outer message type, sender and control | Unknown; the outer message type that selects the arm is not recorded in the committed evidence | R2-ENGINE-1499 Unknown |
+
 ## Health and hostile post-step
 
 | Input/state | Rule | Claims and clause grades | Unknowns |
@@ -475,6 +512,12 @@ Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick outside the Group pass is Unknown.
 
+No body read chooses a point for an area spell. The offensive choice casts at the
+victim unit; the special cast uses the victim's cell (for Acid Stream, a cell
+beside the caster toward the victim). No body read tests the own or allied
+units in the area. The centre a target-mode area spell takes is Unknown
+(R2-ENGINE-1490, Medium for the composition).
+
 In a Group pass (once per 16 counter values, RU; EN Medium) programmes 1 and 2
 (a member at its post, with L2.00490 nonzero) and 18 (the same, with two
 further gates), 3 and 5 reach the heal routine for a member without a target,
@@ -581,3 +624,7 @@ The ordinary script action and check wrappers are read independently of this pag
 The bodies of the numbers no installed map uses are read in R2-ENGINE-1450, except action 37, whose cell is a message-formatting arm (Unknown); checks 1, 5, 8 and 20 test no per-entry state beyond +0x42 of check 20 (R2-ENGINE-1452).
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472); the full tables are on the route page.
+
+## Computer-unit gaps
+
+A struck ROM2 unit rewrites six command fields and posts a 0x54-byte record to the session list. The look-around is the one reader of command +0x54 found in the census (Medium), and no reader of a record was found in the chain that destroys the list (Medium) (R2-ENGINE-1491, R2-ENGINE-1492, R2-ENGINE-1262, R2-ENGINE-1451). Guard B reads the hit stamps in session ticks and in blocks of 16 ticks, and Guard A reads none of the hit fields (R2-ENGINE-1493, R2-ENGINE-1494). No body read chooses a point for an area spell: the aim is the victim unit or the victim's cell (R2-ENGINE-1490). Two scorers rank candidates, and of the effect words they read only bit 0x40000 of +0x144; an effect that changes the Mind word, the range or the virtual kind is not excluded (Medium) (R2-ENGINE-1495, R2-ENGINE-1496). The group assignment targets every member of the group with no idle test (R2-ENGINE-1497). A flee without Teleport walks, and an empty route ends in a stop and order 0xc at the unit's cell (R2-ENGINE-1498). A withdraw message sets v = 0, 10 or 30 for the owner object that message word +5 resolves to (that the word names a sender is Medium), and the outer message type, the sender and the control are Unknown (R2-ENGINE-1499, R2-ENGINE-1421). The numbers are in the area hit numbers table of the behavior page.
