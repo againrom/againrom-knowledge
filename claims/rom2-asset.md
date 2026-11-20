@@ -3697,6 +3697,137 @@ draw positions of R2-ENGINE-1302 agree with the sizes.
 **Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 1;
 the frame measurement is [EXP-2037](../experiments/EXP-2037-rom2-tips/)'s art table.
 
+## ROM2 Kaarg taverner table, shop cells, gate sounds and inn pictures
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-269 | The ROM2 Kaarg taverner state 5 shows a5 elements 0..28 by a 95-entry index table, equal in EN and RU and ending in -1; a repeated index holds its picture one more step per repeat; the table is published as text. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ASSET-270 | ROM2 shop loader EN L2.00771 reads myitem.256, shopitem.256, costs, costm, backinvg, backinvb and backinvs; hero, shelf and table cells share painter L2.00845, which draws backinvg or backinvs. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ASSET-271 | ROM2 Kaarg gates request SFX\Town_kaarg\Kdoor1.wav when the sampled selector is 8 and the latch is 0, and Kdoor2.wav when it is not 8 and the latch is set; EN and RU read equal. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ASSET-272 | The ROM2 generic inn candle container holds 10 pictures and the cauldron 21, as many as their names lists; the advance helper cycles over count-1 entries, so the last picture is not selected by it. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ASSET-273 | ROM2 druid shop keeper shows movies\shop_druid a2 after a Buy or Sell, a1 for flag 0x10, and nothing after a refused Buy or a category press; EN and RU read equal. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+
+### R2-ASSET-269
+
+The Kaarg inn taverner state 5 (R2-ENGINE-277) draws the a5 series element
+given by the index table at EN `L2.00943` (RU `L2.07474`): 96 DWORDs, 95
+element indexes and the terminator -1. The values are equal in EN and RU
+(SHA-256 of the 96 values as decimal text, one per line with LF, `8b7691d7144f6063ba9c33fd3d3d3f84957517bec6ccbcf8b283f18d52a22e9c` in both). Each table entry is one step,
+numbered from 0:
+
+| Steps | Element |
+|---|---|
+| 0, 1, 2, 3 | 0, 1, 2, 3 |
+| 4 to 12 | 4 (9 steps) |
+| 13, 14, 15 | 5, 6, 7 |
+| 16 to 27 | 8 (12 steps) |
+| 28 to 35 | 5, 6, 7, 8, 9, 10, 11, 12 |
+| 36 to 46 | 13 (11 steps) |
+| 47 to 52 | 14, 15, 16, 17, 18, 19 |
+| 53 to 63 | 20 (11 steps) |
+| 64, 65, 66 | 21, 22, 23 |
+| 67 to 76 | 24 (10 steps) |
+| 77, 78, 79 | 5, 6, 7 |
+| 80 to 90 | 24 (11 steps) |
+| 91 to 94 | 25, 26, 27, 28 |
+| 95 | -1, end of the episode |
+
+The 29 elements are the files 0000..0028 of the a5 series. A step ends at the
+first paint more than 100 ms after the previous advance (R2-ENGINE-277), so
+a run of k equal entries keeps its picture for more than k times 100 ms,
+and for at most that plus k paint intervals; the paint interval was not
+measured. The shared time static is not reset at series start, so the first
+interval of an episode can be shorter than 100 ms (Medium).
+
+Input and program: EN and RU `allods2.exe` (sha256
+`0eaa9673d74d26dcf245d7233da5757a88769ecfe3cc1a706f34fb4e93c1b0c7` and
+`0bda594428a021a8def38c2a1844184d28071d0f5f6402946bd5f43242e9f109`), read
+with `read_town.py` operation `dat` (generation run, reproduced byte for
+byte in a second run).
+
+**Amends.** R2-ENGINE-277: its table of 95 entries is now published as text
+with the run lengths. R2-ENGINE-689: its statement that the 96 cells of
+`L2.00943` are equal is extended with the published values, the run lengths and
+the step rule.
+
+**Confidence.** High for the 96 values in both roots. Medium for the length
+of the first interval; Unknown for the milliseconds of each hold.
+
+**Unknown.** The paint interval and so the hold in milliseconds. An original
+run of EN `allods2.exe` in the Kaarg inn: wait for state 5 and record the
+time of each picture change over one episode; compare the run lengths with
+the table.
+
+### R2-ASSET-270
+
+Shop loader EN L2.00771 reads `graphics\interface\myitem.256`, `shopitem.256`,
+`costs%d.bmp`, `costm%d.bmp`, `backinvg.bmp`, `backinvb.bmp` and
+`backinvs.bmp` (R2-ENGINE-1356 gives the page fields and the callers;
+R2-ENGINE-249 names these files; this card adds the stores, the release
+routine and the painter's choice). The
+three backs are 80x80 (R2-ASSET-182). The hero inventory, the shelf header
+and the deal table paint their cells through the same routine L2.00845, which
+draws backinvg or backinvs as the back and, in one arm, the picture at global
+L2.03933. It does not read backinvb. R2-ENGINE-714 describes the cell layers
+over that back.
+
+**Confidence.** High for the names and the painter's picture choice in EN;
+Medium for RU (field loads at EN+0x8160 only).
+
+**Unknown.** Which cell state takes which back and where backinvb and
+L2.03933 are used. An original run in
+the Kaarg shop comparing equal items in a hero cell, a shelf cell and a
+table cell against the three back bitmaps settles it.
+
+### R2-ASSET-271
+
+Gate advance EN L2.00600 (RU L2.00601) requests `SFX\Town_kaarg\Kdoor1.wav`
+when the sampled selector is 8 and latch +0x1a4 is 0, and
+`SFX\Town_kaarg\Kdoor2.wav` when the selector is not 8 and the latch is
+nonzero. Each key string has one reference in each root, in this routine
+(R2-ENGINE-1357).
+
+**Amends.** R2-ENGINE-236: it left the key of each direction open.
+
+**Confidence.** High for the request in both roots. Medium that selector 8 is
+the pointer inside the gate (opening). Playback and file content are Unknown.
+
+**Unknown.** Whether the wave files play. An original run in the Kaarg town,
+moving the pointer onto and off a gate, settles it.
+
+### R2-ASSET-272
+
+Generic inn builder L2.00761 sizes the candle container to the names-list
+count, 10 pictures (`t0000..t0009`), and the cauldron container to 21
+(`t0000..t0020`; R2-ENGINE-248, R2-ENGINE-1358). The wrap helper L2.00685
+cycles over count-1 entries, so its cursor reaches `t0008` and `t0019` and
+the last picture is not selected by it.
+
+**Amends.** R2-ENGINE-685: the container's +8 equals the count passed in.
+
+**Confidence.** High that the container holds the count passed from its names
+list. Medium that the list count equals the appended names and for the wrap
+reading.
+
+**Unknown.** Whether `t0009` or `t0020` is ever drawn. An original run of a
+generic inn over several candle cycles settles it.
+
+### R2-ASSET-273
+
+Druid shop keeper updater EN L2.00695 (RU L2.07475) selects the picture series
+`movies\shop_druid\a1%04d.bmp` for flag 0x10, `a2%04d.bmp` for flag 0x20 and
+`a10001.bmp` otherwise; the painter draws it only while flags & 0x30
+(R2-ENGINE-1362). A Buy or Sell sets 0x20, a refused Buy 0x40, a category
+press nothing. So a druid Buy or Sell shows the a2 series; a refused Buy and
+a category press show none.
+
+**Confidence.** High for the selection in both roots; Medium for the shared
+button responses in the druid shop. The file counts of a1 and a2 and the
+setter of 0x10 are not claimed here.
+
+**Unknown.** The owner's sound. An original run in the druid shop (Buy,
+Sell, refused Buy, category press) settles the pictures and the sound.
+
 ## Installed script operation and trigger census
 
 | ID | Claim | Confidence | Status | Evidence |

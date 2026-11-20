@@ -172,9 +172,11 @@ These are bounded request clocks; playback was not observed (`R2-ENGINE-235`,
 amended). The square sound table below names their keys.
 
 Each admitted advance samples the pointer for gates. Selector 8 increments
-the cursor toward 10; other selectors decrement it toward 0. Direction
-changes request `SFX\Town_kaarg\Kdoor1.wav` or `Kdoor2.wav` in the selected
-arms. Endpoint clamps operate independently of the gate flag. Highlighting
+the cursor toward 10; other selectors decrement it toward 0. Selector 8 with
+the gate latch clear requests `SFX\Town_kaarg\Kdoor1.wav` and sets the latch;
+another selector with the latch set requests `Kdoor2.wav` and clears it, in
+both roots (`R2-ENGINE-1357`, `R2-ASSET-271`, High; Medium that these are the
+pointer entering and leaving the gate; playback Unknown). Endpoint clamps operate independently of the gate flag. Highlighting
 uses these frames rather than a separate bitmap (`R2-ENGINE-236`, High).
 
 ## Room art and shared bodies
@@ -273,6 +275,18 @@ previous terminal image. Entry rebinds the vectors but keeps the state
 | 3 | a3 0001..0003 | (112,112) | 3 | 4682 | none |
 | 4 | a4 0000..0006 | (200,136) | 7 | 23405 | none |
 | 5 | a5 0000..0028 by a 95-step index table | (88,84) | 95 | 1560 | none |
+
+State 5 shows the a5 element given by a 96-entry index table, equal in EN
+and RU: steps 0 to 3 show elements 0 to 3; steps 4 to 12 element 4; 13 to
+15 elements 5 to 7; 16 to 27 element 8; 28 to 35 elements 5 to 12; 36 to
+46 element 13; 47 to 52 elements 14 to 19; 53 to 63 element 20; 64 to 66
+elements 21 to 23; 67 to 76 element 24; 77 to 79 elements 5 to 7; 80 to 90
+element 24; 91 to 94 elements 25 to 28; step 95 holds -1 and ends the
+episode. A step ends at the first paint more than 100 ms after the previous
+advance, so a run of k equal entries keeps its picture for more than k times
+100 ms; the paint interval, and so the length in milliseconds, is Unknown, and
+the first interval of an episode can be shorter (`R2-ASSET-269`, High; Medium
+for the first interval).
 
 Unlike the druid taverner (`R2-ENGINE-258`), Kaarg has no idle wait and
 no static pose. The same painter requests `Kvox6..8` with R(3) and
@@ -529,7 +543,7 @@ The grade is half the byte at the viewer's client copy +0x3f70 indexed by the un
 
 A dialogue page with a portrait calls face builder `L2.02950` once, at `L2.02964`, with a number from the unread part parser `R2.0048`. The builder resolves the actor through `R2.0071`, building a fallback actor (flags 0x56, +0x28 = number-0x50) when no unit matches; flags 0x11 select the paperdoll slot +0x88 under `graphics\equipment\<mfighter|mmage|ffighter|fmage>\`, other actors `graphics\infowindow\<name><+0x28>.bmp`. The drawn frame and crop remain Unknown (`R2-ENGINE-582`, High / Medium / Unknown). The gate refusal `plagatguard` (npc=97) has no installed row; if no live unit carries 97, its face is the fallback's `equipment\fmage\17.256` (`R2-ENGINE-583`, Medium).
 
-The generic inn loads 10 candle pictures, 21 cauldron pictures, 24 breath pictures and 40 drink pictures at (160,48), (420,160), (240,152) and (240,152). Candle/cauldron advance once after elapsed time exceeds 100 ms; active tender motion advances once after 83 ms. Its odd/even retained delay selects drink/breath; reset delay is 3000..5047 ms from the bounded 15-bit source, without a probability claim. Drink runs forward then reverse; breath returns to idle after forward completion. Only the selected seated actor advances after 125 ms. The wrap helper uses native field+0x8-1, whose relation to loaded-list counts is Unknown; complete visible cadence and audible playback are unobserved (`R2-ENGINE-248`, High / Medium / Unknown).
+The generic inn loads 10 candle pictures, 21 cauldron pictures, 24 breath pictures and 40 drink pictures at (160,48), (420,160), (240,152) and (240,152). Candle/cauldron advance once after elapsed time exceeds 100 ms; active tender motion advances once after 83 ms. Its odd/even retained delay selects drink/breath; reset delay is 3000..5047 ms from the bounded 15-bit source, without a probability claim. Drink runs forward then reverse; breath returns to idle after forward completion. Only the selected seated actor advances after 125 ms. Each container holds as many pictures as its names list (10 and 21) and the wrap helper cycles over that count minus one, so the last candle and cauldron picture is not selected by it (`R2-ENGINE-1358`, `R2-ASSET-272`; Medium for the names-list count and the wrap). The EN painter draws candle, then cauldron, advances both, then draws drink and breath. Complete visible cadence and audible playback are unobserved (`R2-ENGINE-248`, High / Medium / Unknown).
 
 Inn animation archive keys use `interface/inn/candle/t0000.bmp`..`t0009.bmp`, `cauldron/t0000.bmp`..`t0020.bmp`, `tender/breath/br0001.bmp`..`br0024.bmp` and `tender/drink/dr0001.bmp`..`dr0040.bmp`. Actor art selects `interface/inn/Unit%d/sprites.16a` or HeroMage/HeroFighter. The missing-controlled-actor fallback selects Unit1; its use by every fresh actor remains Unknown (`R2-ENGINE-248`, `R2-ENGINE-247`).
 
@@ -765,6 +779,8 @@ duration for a target that takes the draw, before Earth resistance, in units
 of 16 timer counts, and the RU timer decrements once per actor step
 (`R2-ENGINE-1000`, Medium); seconds per step are Unknown.
 
+The shop loader stores `myitem.256`, `shopitem.256`, the cost sheets, `backinvg.bmp`, `backinvb.bmp` and `backinvs.bmp` in the page. The hero, shelf and table cells share one painter, which uses `backinvg` or `backinvs` as the back (for an item of page 5..8 under a flag test, `backinvs`), a picture at a global in one more arm, and never reads `backinvb` (`R2-ENGINE-1356`, `R2-ASSET-270`; High in EN, Medium in RU; which cell state takes which back is Unknown, so the observed colours of `R2-ENGINE-576` are not explained by this choice alone).
+
 A cell draws, in order, an opaque 80x80 back, the `.16a` item picture with
 its skipped pixels transparent, an overlay for item flag 0x20, the
 quantity, the price plate keyed on 16-bit pixel 0, and the price
@@ -991,7 +1007,8 @@ presentation, edges and children follow. The lower-right edge chooses
 one of two global bitmaps. The page+0x6c child's DWORD +0x70 selects
 EN `L2.00747` / RU `L2.01612` when nonzero and EN `L2.00748` / RU
 `L2.01613` when zero. Both draw source (0,0), extent 16x242, at P+(464,238).
-The field's gameplay meaning and live visibility remain Unknown
+The field is set to 1 by the panel constructor, by a second class routine and by the panel painter (when the space below the panel exceeds its height and the application flag word is 1), and toggled by message 0x412; the panel painter draws EN global `L2.07477` when it is nonzero and `L2.07478` otherwise (`R2-ENGINE-1359`, `R2-ENGINE-1360`, High; EN and RU equal).
+The field's gameplay meaning, the sender of 0x412 and live visibility remain Unknown
 (`R2-ENGINE-258`, amended, `R2-ENGINE-368`, High for bounded draw rules;
 `R2-ASSET-089` for the literal resource evidence).
 The first chain pushes `graphics\interface\HumanBackL.bmp`; the second
@@ -1047,6 +1064,8 @@ passes file 30 and returns to default file 1. Kaarg instead uses modulus
 20/default a10000 and additional fire transitions. Shared shell/button
 art, audible timing and live pixels remain Unknown (`R2-ENGINE-259`, amended).
 
+The druid shop's buttons come from the class constructor shared by all three shop builders, so a Buy (affordable: flag 0x20; refused: 0x40) and a Sell (credited: 0x20) use the shared responses and a Buy or Sell shows the a2 series; a refused Buy shows no keeper picture, and a category press sets no keeper flag, in EN and RU (`R2-ENGINE-1362`, `R2-ASSET-273`, High; Medium for the shared responses in this shop). A category press in the Kaarg and druid shops stores the category in page +0x132, rebinds the shelf list through `L2.00965` and repaints the header (`R2-ENGINE-1361`, High). Dropping an item of page 5..8 on the deal table may play speech (`R2-ENGINE-803`; the draw below 30, campaign mode, the page values and the shop pick are Medium); the druid owner's sound on Buy, Sell and category press is Unknown.
+
 The selected campaign entry stores EnterShop's return at page+0x160.
 Installed EN/RU EnterShop returns zero, so the named ordinary entry does
 not initiate pending dialogue. The client's nonzero branch formats
@@ -1068,10 +1087,12 @@ ROM2 ships twelve tips as sections `#tips1`..`#tips12` of `main.res` `text/town.
 | `#tips11` | druid square | enter, TipsMode set | (328,0)-(640,200) |
 | `#tips2` | each inn | enter, TipsMode set and mode 2 | (160,0)-(472,200) |
 | `#tips3` | each shop | enter, TipsMode set and mode 2 | (164,162)-(476,298) |
-| `#tips4` | the open shop tip | idle message 0x402 with a nonempty shop-inventory list, once per shop entry | replaces the `#tips3` text |
+| `#tips4` | the open shop tip | idle message 0x402 with flag +0x404 bit 8 clear and a nonempty deal-table list, once per shop entry | replaces the `#tips3` text |
 | `#tips<N>` | mission view | message 0x45b from a dialogue `tips=N`; no shipped text has one | (10,20)-(370,188) |
 
-Sources: `R2-ENGINE-308` (High; Medium that `#tips4` follows opening a shelf), `R2-ENGINE-309` (High), `R2-ENGINE-312` (High for the rectangles; Medium for page positions). The gate shows no tip.
+Sources: `R2-ENGINE-308` (High; Medium that 0x402 reaches the shop as a room-stack child), `R2-ENGINE-309` (High), `R2-ENGINE-312` (High for the rectangles; Medium for page positions). The gate shows no tip.
+
+The list `#tips4` counts is the deal table's own list (no read code rebinds it; the callers of slot 0x90 were not censused; Medium), empty at each entry and filled by dropping an item on the table; opening a shelf rebinds the shelf header's list in the bodies read. While application flag +0x404 bit 8 is set the shop runs neither the tip nor its child callbacks. The tip body and the latch writers read the same in EN and RU (`R2-ENGINE-1352`, High; Medium for the delivery chain). The table gains items through its drop slot (`R2-ENGINE-1353`, High; the effect of take, buy and sell on the list is Unknown). The census finds four setters and four whole-word zero stores (`R2-ENGINE-1354`; completeness Medium; meaning Unknown). In the bodies read (`L2.00965`, `L2.07476` itself, `L2.01897`, slot a4 and the shelf-header slot a4 rows read), open shelf, put on table and leave do not store the latch or the bit; the callees listed in the card were not read (`R2-ENGINE-1355`, Medium).
 
 ### Tip latches and persistence
 

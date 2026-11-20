@@ -3581,7 +3581,7 @@ an authorized original visit and click would settle that composed route.
 | R2-ENGINE-233 | The selected town sampler maps nine mask bytes to selectors; eight occur in the Kaarg mask, and hit testing uses the view-relative pixel rather than figure bounds. | High | ● active (branch candidate, partially retracted) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-234 | Kaarg mask clicks open shop, inn, mission navigation or the in-game menu popup (0x41f); its four person regions request stage-keyed dialogue, with no school click arm. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-235 | Kaarg person animation starts use separate elapsed-time intervals; frame advancement admits one step only after more than 100 ms, while scheduling runs on every active paint. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
-| R2-ENGINE-236 | Kaarg gates advance toward frame 10 while the pointer samples selector 8 and toward frame 0 otherwise; they use their frame series rather than a separate highlight bitmap. | High | ● active (branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
+| R2-ENGINE-236 | Kaarg gates advance toward frame 10 while the pointer samples selector 8 and toward frame 0 otherwise; they use their frame series rather than a separate highlight bitmap. | High | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 | R2-ENGINE-237 | Campaign town ID 2 selects Kaarg inn and shop pages with shared native bases; the inn mixes generic overlays with Kaarg art, while the shop selects Kaarg frame, fire and keeper art. | High / Medium | ● active (amended, branch candidate) | [EXP-2029](../experiments/EXP-2029-rom2-town-screens/) |
 
 ### R2-ENGINE-231
@@ -3825,6 +3825,10 @@ independent of whether the +0x208 gate flag is currently set.
 
 **Unknown.** Physical hover delivery, audible sound and the complete
 mission-start receiver. The click's posted messages are R2-ENGINE-234.
+
+**Amended.** R2-ENGINE-1357 assigns Kdoor1.wav to selector 8 with latch 0 and
+Kdoor2.wav to the other selectors with the latch set; the wording "direction
+changes request Kdoor1 or Kdoor2" is narrowed to those two conditions.
 
 ### R2-ENGINE-237
 
@@ -4221,6 +4225,9 @@ Selected evidence: [filename loops](../experiments/EXP-2030-rom2-first-town/evid
 vector through `L2.03658` and constructs one element for each index below
 +0x8, so +0x8 - 1 is the last filled element and the one-shot skips none.
 That +0x8 equals the list count rests on `L2.03658` and `L2.03659`, not read.
+R2-ENGINE-1358 reads both: the container size is the names-list count, and
+the wrap helper `L2.00685` cycles over count - 1 entries, so the final candle
+and cauldron picture is not selected by it (Medium).
 
 ### R2-ENGINE-249
 
@@ -4257,7 +4264,7 @@ Selected evidence: [builder](../experiments/EXP-2030-rom2-first-town/evidence/me
 
 **Unknown.** The selected constructors, panels and traversal do not close the town-1 stock source or every item-panel virtual edge. Follow them on a known readonly initial campaign state, or obtain original observation. Complete item sprite/name/price drawing requires those receivers; no catalog-wide absence or stock identity is claimed.
 
-**Amended.** R2-ENGINE-263 through R2-ENGINE-267 answer the town-1 stock, price and item-text Unknowns; R2-ENGINE-268 and R2-ENGINE-269 answer the keeper episode state; R2-ENGINE-270 decodes the ShopFrame pixels.
+**Amended.** R2-ENGINE-263 through R2-ENGINE-267 answer the town-1 stock, price and item-text Unknowns; R2-ENGINE-268 and R2-ENGINE-269 answer the keeper episode state; R2-ENGINE-270 decodes the ShopFrame pixels. R2-ENGINE-1353 names the "shop inventory" child (ID 0x3eb, constructor `L2.00763`) as the deal table whose list an item drop fills; the name above did not say that it holds the dropped items and not the stock.
 
 ### R2-ENGINE-250
 
@@ -5107,7 +5114,7 @@ square consumes 0x45a.
 |---|---|---|---|---|
 | R2-ENGINE-277 | The ROM2 Kaarg inn taverner picks a1..a5 by ((rand*21)>>15)+1 with no idle wait, runs each series once in >100 ms steps at fixed center positions and keeps its state in a process static. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 | R2-ENGINE-278 | The ROM2 Kaarg shop fire steps once per 100 ms tick through 18 frames: idle loops lite or cicle, choosing weapons runs it up through burn to cicle, another category runs it back to lite. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
-| R2-ENGINE-279 | The ROM2 Kaarg shop keeper plays a1 or a2 files 2..20 under one modulus-20 counter; an idle start picks either, buy and sale start a2, and refusals and category clicks start nothing. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
+| R2-ENGINE-279 | The ROM2 Kaarg shop keeper plays a1 or a2 files 2..20 under one modulus-20 counter; an idle start picks either, buy and sale start a2, and refusals and category clicks start nothing. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 | R2-ENGINE-280 | ROM2 Kaarg square slots +0x20c..+0x24c hold 17 town_kaarg keys: three voice and four bird clocks, Kman1 after 45 s, two hover keys, the Kvox1 entry loop and six guard steps at nine guard cursors. | High / Unknown | ● active (branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 | R2-ENGINE-281 | Kaarg's omitted pre-load release leaves no different sound state: each slot load releases its slot first and leave releases the same 17 slots; only clock baselines and waits carry across visits. | High / Unknown | ● active (amended, branch candidate) | [EXP-2034](../experiments/EXP-2034-kaarg-room-schedules/) |
 
@@ -5279,6 +5286,9 @@ writers was made. Unknown for live timing and appearance.
 
 **Unknown.** Writers of the flag word or counter outside the selected
 bodies; a census of center-field writers would settle them.
+
+**Amended.** R2-ENGINE-1361 reads the category-click callees L2.00965 and
+slot +0x34 (L2.02272) and Kaarg slot a4; none sets an episode bit.
 
 ### R2-ENGINE-280
 
@@ -5893,7 +5903,7 @@ creation calls with their modes would settle the modes; reading the
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-307 | ROM2 has 17 tip formatter calls per locale: 16 push a constant tip number 1..12 and one passes the 0x45b wParam; 12 direct panel-constructor calls create tip popups and 4 sites retext them. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
-| R2-ENGINE-308 | ROM2 room tips open at every room entry while TipsMode is set: squares #tips1, #tips12 (Kaarg), #tips11 (druid); inns #tips2 and shops #tips3 also need mode 2; #tips4 then replaces #tips3 once per shop entry. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
+| R2-ENGINE-308 | ROM2 room tips open at every room entry while TipsMode is set: squares #tips1, #tips12 (Kaarg), #tips11 (druid); inns #tips2 and shops #tips3 also need mode 2; #tips4 then replaces #tips3 once per shop entry. | High / Medium | ● active (amended, branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-309 | ROM2 message 0x45b shows #tips<wParam> of the current text pool in mission-view child 0x10 (RU 0x11) at (10,20,370,188); the only constant 0x45b in either client is a dialogue's post of its nonzero tips= value, which no shipped text has. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-310 | ROM2 tip popups have no show-once latch: Close (0x45a) and the room leave delete the panel, and an entry that does not build one deletes a leftover; the shop and generator latches reset at each entry. | High | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
 | R2-ENGINE-311 | ROM2 TipsMode is loaded from HKLM once at startup and stored at exit and after a cutscene through a key opened with KEY_READ; clearing it closes no open tip, stops later builds and the pre-create cycle, not the detail cycle. | High / Medium | ● active (branch candidate) | [EXP-2037](../experiments/EXP-2037-rom2-tips/) |
@@ -5976,6 +5986,13 @@ callers of slot +0x90 were not read.
 **Unknown.** Which shop actions fill the shop-inventory list and what
 application +0x404 bit 8 means. Reading the callers of slot +0x90 and the
 writers of that bit would settle them.
+
+**Amended.** R2-ENGINE-1352 to R2-ENGINE-1355 read the list and the bit: the
+list at +0x70 is the deal table's own list, emptied at each entry and filled by
+a drop; no read code binds the shelf list to it, so the Medium clause on
+opening a shelf is narrowed to the unread callers of slot 0x90; the bit has
+four setters found by a census of `or` after a load (completeness Medium) and
+its tip effect is read.
 
 ### R2-ENGINE-309
 
@@ -7617,7 +7634,7 @@ remaining EN routes and observe the same controlled action in both originals.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-367 | Selected EN/RU Scenario paths set bank 770 to 1 on Leave70 and 2 on druid inn TalkTo; NewGame clears it and ScenarioLoad restores raw bank bytes, while indexed writers remain open. | High / Medium | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
-| R2-ENGINE-368 | Selected druid inn painters choose lower-right shared globals by zero/nonzero child+0x70 and draw a 16x242 crop at page+(464,238); the field meaning remains Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
+| R2-ENGINE-368 | Selected druid inn painters choose lower-right shared globals by zero/nonzero child+0x70 and draw a 16x242 crop at page+(464,238); the field meaning remains Unknown. | High / Unknown | ● active (amended, branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
 | R2-ENGINE-369 | Installed EN/RU ScenarioEnterShop returns 0; the selected druid pending branch formats shop\npc31m%d and acknowledges the same handle immediately, with no progression counter in that branch. | High / Medium | ● active (branch candidate) | [EXP-2045](../experiments/EXP-2045-rom2-druid-town-remainder/) |
 
 ### R2-ENGINE-367
@@ -7678,6 +7695,10 @@ requests do not establish live pixels or a successful bitmap allocation.
 global replacement and delivered visibility. Trace that field's bounded
 writer/caller graph, or have the owner enter the druid inn and toggle the
 corresponding panel state while observing the lower-right crop.
+
+**Amended.** R2-ENGINE-1359 reads the writers of the child +0x70 and
+R2-ENGINE-1360 its tests; the value is a two-valued field (zero or nonzero)
+whose reads pick one of two painter globals; its meaning is Unknown.
 
 ### R2-ENGINE-369
 
@@ -16937,7 +16958,7 @@ constants and does not compare callees.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-685 | ROM2 Kaarg inn leave frees the five taverner frame vectors, seat sprites, art and 17 sound slots and entry rebuilds them, so each visit restarts frames at element 0; the taverner state and clocks are kept. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
+| R2-ENGINE-685 | ROM2 Kaarg inn leave frees the five taverner frame vectors, seat sprites, art and 17 sound slots and entry rebuilds them, so each visit restarts frames at element 0; the taverner state and clocks are kept. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
 | R2-ENGINE-686 | In ROM2 Kaarg inn campaign paint the seat sprites step only for the selected seat, (cursor+1) mod frame count after >125 ms on static L2.03662; entry selects seat 0 when any seat exists and restarts every seat cursor at 0. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
 | R2-ENGINE-687 | The ROM2 Kaarg inn page requests Kin1 once and loops Kvox5 at entry, Kman3 or Kman2 at an a1 or a2 start, and Kvox6..8 and Kdish1..4 on 2000+R(2000) ms clocks; leave stops all 17 slots. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
 | R2-ENGINE-688 | ROM2 EN constructs the Kaarg inn page at one E8 call in start-up chain L2.01428, L2.00558 and RU at one call; the inn selector calls entry on that one object (on every visit: Medium). | High / Medium | ● active (branch candidate) | [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/) |
@@ -16989,6 +17010,11 @@ shows on such a re-entry.
 leaves the inn mid-a2 and enters again would settle it. The meaning of the
 `scenario.dll` ordinal-10 cell called at leave; a read of the DLL's export 10
 would settle it.
+
+**Amended.** R2-ENGINE-1358 reads `L2.03658` and `L2.03659` (EN, with the RU
+resize body equal under the mask): the vector size equals the count passed in,
+so the unread clause above is closed for the container; the names-list count
+itself stays Medium.
 
 **Evidence.** [EXP-2087](../experiments/EXP-2087-rom2-kaarg-inn/RESULTS.md), questions 2 and 5.
 
@@ -21445,7 +21471,7 @@ hits (EN 33, the three in `L2.04839` read) call this slot.
 
 **Evidence.** [EXP-2110](../experiments/EXP-2110-rom2-speech/RESULTS.md), question 1.
 
-**Amended.** R2-ENGINE-861 resolves the known speech receiver to the middle page-4 release call. R2-ENGINE-862 reads numeric helpers and draw arithmetic. R2-ASSET-212 is only a 491-record projection, not stock admission or universal key coverage. Other receiver classes/indirect paths remain open.
+**Amended.** R2-ENGINE-861 resolves the known speech receiver to the middle page-4 release call. R2-ENGINE-862 reads numeric helpers and draw arithmetic. R2-ASSET-212 is only a 491-record projection, not stock admission or universal key coverage. Other receiver classes/indirect paths remain open. R2-ENGINE-1353 and R2-ENGINE-1362 read that the routine does not end at its tests: every path plays the page sound at +0x20b4 and calls L2.01897, which calls slot 78 of the table.
 
 ### R2-ENGINE-804
 
@@ -30963,6 +30989,415 @@ were not censused. All 142 installed maps are square, W = H in 80, 144, 208 or 2
 **Unknown.** What a shorter buffer, a larger map or an out-of-range value does in play. Runs: a copy of an installed
 map with the type-2 record shorter than W*H and its size field matching, loaded and played at the map edge; a map
 of 257 columns.
+
+## ROM2 shop tip, flag, cells, gates, inn container and hero panel
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1352 | ROM2 shop tip #tips4 shows once per entry: the first message 0x402 that finds flag +0x404 bit 8 clear, popup +0x88 set, deal-table list nonempty and latch +0x8c zero shows it; EN and RU bodies are equal under the mask. | High / Medium | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1353 | The ROM2 deal-table list gains items through table slot 78, reached from the drop slot a4 (EN L2.04832) by L2.01897, and through slot 7c, whose caller is unidentified; the take, buy and sell effects on it are Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1354 | ROM2 app flag +0x404 (RU +0x41c) bit 8 is set at four EN sites found by a census of `or` after a load (completeness Medium); while set, the shop skips the tip; its meaning is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1355 | In the bodies read (L2.00965, L2.07476, L2.01897, slot a4), open shelf, put on table and leave do not store latch +0x8c or flag bit 8; the callees were not read (Medium); take, buy and sell on the list are Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1356 | ROM2 shop page loader EN L2.00771 stores myitem.256, shopitem.256, backinvg, backinvb and backinvs; cell painter L2.00845 draws backinvg or backinvs, a global L2.03933 picture in one arm, and never reads backinvb. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1357 | ROM2 gate advance EN L2.00600 (RU L2.00601) requests Kdoor1.wav when the sampled selector is 8 and latch +0x1a4 is 0, and Kdoor2.wav when it is not 8 and the latch is set; each key has one reference per root. | High / Medium | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1358 | ROM2 inn builder L2.00761 sizes each picture container to its names-list count and the wrap helper L2.00685 cycles over count-1 entries; EN generic-inn painter L2.00746 draws candle, cauldron, then advances, drink, breath. | High / Medium | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1359 | ROM2 hero panel field +0x70 is set to 1 by the constructor, a second class routine and the painter, and toggled by message 0x412; no other store of 0 is in the class code; EN and RU read equal. | High / Medium | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1360 | ROM2 panel +0x70 is read by nine tests in the class code: the painter draws global L2.07477 when it is nonzero and L2.07478 otherwise; its gameplay meaning and the sender of message 0x412 are Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1361 | A ROM2 Kaarg or druid shop category press (slot 54: L2.00964, L2.07479) calls its center slot a4, then L2.00965 and header slot +0x34; the generic click L2.04811 also calls L2.00965 (EN census, Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+| R2-ENGINE-1362 | ROM2 druid shop owner: buy and sell set keeper flags through the shared L2.00776 and L2.00777, a category press sets none, and a drop on the deal table of a 5..8 item may play speech; the druid answer sound is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2177](../experiments/EXP-2177-rom2-town-shop-inn/) |
+
+### R2-ENGINE-1352
+
+Shop message slot EN L2.01218 (RU L2.01219) takes message 0x402 at EN
+L2.01220 (RU L2.07480) and tests application +0x404 (RU +0x41c) bit 8. With
+the bit clear it calls the tip body EN L2.01204 (RU L2.01205) and then slot
++0x34 of its child windows. With the bit set it calls neither. The tip body
+(whole body, 44 decoded rows per root, equal under the address mask) does
+nothing unless popup +0x88 is nonzero, the count routine L2.01221 returns
+nonzero for list +0x84 of the child at +0x70 (the deal table, R2-ENGINE-1353)
+and latch +0x8c is zero. It then stores 1 in the latch, builds text 4 with
+L2.00896 (the #tips4 text of R2-ENGINE-308) and passes it to the popup
+through L2.01194.
+
+Latch writers in the three shop enter routines and the tip body, from the
+field-write list of the selected shop roles: each enter (EN L2.00767, L2.01200,
+L2.00954; RU L2.01201, L2.01202, L2.01203) stores 0, the tip body stores 1.
+The tip therefore shows at most once per entry, at the first delivery of
+0x402 after the table list is nonempty.
+
+Delivery. Idle body EN L2.01222 (RU L2.01223; 145 rows each, equal under the
+mask apart from application displacements) sends 0x402 through slot +0x48 of
+[application +0xcc] when [application +0xbc] is nonzero. The send at L2.07481
+lies behind the branch taken when +0x404 bit 0 is clear (L2.07482 to L2.03566);
+the bit-set path jumps to L2.07483, past the send. It sends once per call of
+the body.
+
+**Amends.** R2-ENGINE-308: the list the tip counts is list +0x84 of the child
+at +0x70, which is the deal table (R2-ENGINE-1353). The constructor binds the
+embedded list and no read caller rebinds it; the callers of slot 0x90 and the
+other writers of +0x84 were not censused. The Medium clause on opening a shelf
+is narrowed to this. Its Unknown on which shop actions fill the list is
+narrowed to take, buy and sell.
+
+**Confidence.** High for the tests, the latch stores and the delivery
+condition in the bodies read, in both roots; the latch stores are those of the
+field-write list of the selected shop roles. Medium that the list the tip
+counts is never rebound to another list (the callers of slot 0x90 were not
+read). Medium that [application +0xcc]
+is the shop page while the shop is open (R2-ENGINE-275), that the idle body
+runs every frame, and that popup +0x88 exists whenever the tip mode of
+R2-ENGINE-308 allows it.
+
+**Unknown.** The callers of slot 0x90 (EN L2.01224, which stores its argument
+in +0x84), so whether anything binds another list to the deal table. Whether
+bit 8 is set during an ordinary shop session
+(R2-ENGINE-1354) and the time between the list turning nonempty and the tip.
+An original run of EN `allods2.exe` in the Kaarg shop with tips on settles
+it: put one item on the deal table and record the delay until the tip;
+take it off, put it on again and compare the tip count (expected one); then
+open the amount dialog and repeat.
+
+### R2-ENGINE-1353
+
+The table class (name shop-player-inventory-shared, page +0x70, constructor
+L2.00763, vtable L2.04837) overrides slots 5c L2.07484, 78 L2.07485, 7c
+L2.07486, a0 L2.01654, a4 L2.04832 and b4 L2.07487 (RU L2.07488, L2.07489,
+L2.07490, L2.07491, L2.04836, L2.07492). The constructor stores the list
+embedded at table+0x20f4 in +0x84 (L2.07493, L2.07494). Method L2.07495 (42
+rows, EN) deletes every element of that list and empties it; the three enter
+routines call it (EN L2.07496, L2.07497, L2.07498), so the table starts each
+entry empty.
+
+Drop. Slot a4 (207 rows per root, equal under the mask) joins every path at
+L2.07499: it plays the page sound at +0x20b4 (L2.07500, L2.00941) and calls
+L2.01897 (RU: the call at L2.07501 to L2.01899; 64 rows, equal under the
+mask). That
+routine returns -1 when the dragged item [application +0x3f4] is 0, takes
+the index item+0x20 when [application +0x3fc] is 5..8 and [application +0x3f8]
+otherwise, calls slot 78 of the table with the item and the caller's argument,
+then slots 0x90 (list +0x84) and 0xa8.
+
+Slot 78 calls the base insert L2.07502, which merges (L2.07503, L2.07504),
+inserts at an index (L2.07505) or appends (L2.07506). Slot 7c L2.07486
+merges by +4 and +0x18, else appends while the count is below columns times
+rows. The append routine has eight direct callers in EN `.text`: L2.07507,
+L2.07508, L2.07509, L2.07510, L2.07511 (in L2.07502), L2.07512 (in L2.07513),
+L2.07514 (in L2.07515, the hero class) and L2.07516 (in L2.07486). Of the 20
+call-through-slot-7c sites in EN `.text`, the shop sites call the hero panel
+(L2.07517, L2.07518, L2.07519), the center (L2.07520) and the center's own
+slot (L2.07521, L2.07522, L2.07523); none was traced to the table.
+
+Pickup. Base slot a0 L2.01655 (EN) is reached through the table's a0 override
+L2.01654, which plays the sound at +0x20b8 and calls it. Read whole, it
+returns when the list is empty, reads the item by L2.07524 and slot +0x84,
+stores [application +0x3f4], +0x3f8 and +0x3fc (kind from slot 0xa8), calls
+slots +0x94 and +0x90 and sends message 0x46e through slot +0x48. It makes no
+direct list-removal call.
+
+**Confidence.** High for the drop chain and the bodies named, EN and RU equal
+under the mask. Medium for the append census, which is EN-only, and for the
+reading of L2.01897's later calls, whose callees were not read.
+
+**Amends.** R2-ENGINE-249 and R2-ENGINE-308: the "shop inventory" child (ID
+0x3eb, constructor L2.00763) is the deal table whose list an item drop fills;
+its name in those cards did not say that it holds the dropped items and not
+the stock.
+
+**Unknown.** The callers of slot 0x90 (EN L2.01224, which stores its argument
+in +0x84) and the other writers of +0x84, so whether anything binds another
+list to the deal table; the caller of slot 7c; whether slots +0x84 and +0x90 remove the
+picked item from the list (and so empty the table on pickup); how Buy and
+Sell change the list (R2-ENGINE-1355). An original run in the Kaarg shop with
+an item on the table settles the last: pick the item up and drop it on a
+shelf, then buy one, and watch whether the tip text changes.
+
+### R2-ENGINE-1354
+
+Bit 8 of the application flag word +0x404 (RU +0x41c) is a mask bit, though
+other tests compare the whole word with 1, 3 and 5. A census of `.text`
+(N1: pattern for loads of the displacement, classified by the next
+instruction) gives, in EN, 19 loads followed by `or`, of which four carry the
+immediate 8: L2.07525 (function L2.03080), L2.07526 (L2.01100), L2.07527
+(L2.07528) and L2.07529 (no prologue found); RU has the same four at L2.07530,
+L2.07531, L2.07532 and L2.07533. The masked listings of the three named
+functions are equal in EN and RU apart from field displacements. Fourteen
+loads followed by `and` with 0xf7 lie in L2.00787 (RU L2.05477), and four
+whole-word zero stores lie at L2.07534, L2.07535, L2.07536 (in L2.00787) and
+L2.07537 (RU L2.07538, L2.07539, L2.07540, L2.07541).
+
+In L2.07528 (an inventory-base method) the bit is set when the cell item
+passes L2.03921 and a value read from [[application +0xd0]+0x9cc]+0x10 is
+above 0; it then pushes children +0x120 and +0xcc and calls L2.07542. This
+looks like an amount dialog (Medium). While the bit is set, shop message 0x402
+runs neither the tip nor the child callbacks (R2-ENGINE-1352).
+
+**Confidence.** High for the sites and bodies listed. Medium for the
+completeness of the setters: the census covers the `or` immediately after a
+plain load, not other instruction forms or whole-word stores of non-zero
+values. The meaning of the bit is Unknown beyond the shop tip.
+
+**Unknown.** Which setter runs while the shop is open and what the bit means.
+An original run of EN `allods2.exe` that opens the amount dialog in a shop,
+then moves an item onto the table, shows whether the tip is held back.
+
+### R2-ENGINE-1355
+
+Per shop action, the effect on the tip's three inputs (popup +0x88, table
+list count, latch +0x8c) and bit 8, from bodies read in EN, with RU partners
+equal under the mask where named.
+
+- Open shelf. Category press calls L2.00965(category) on the shelf header
+  (15 rows, EN equals RU L2.07543): it stores header+0x2100+category*0x14 in
+  header +0x84 and calls L2.07476. It does not touch the table, the latch or
+  the bit.
+- Put on table. Table slot a4 then L2.01897 add the item to the table list
+  (R2-ENGINE-1353); the tip's count test can become true here.
+- Put back on the shelf. The shelf header classes override slot a4 with
+  L2.01893 (RU L2.01895; the first 80 rows, equal under the mask, were
+  read): it reads the dragged item, calls its own slot 78 to insert it into
+  the shelf list and refreshes through slot 0x90. These rows do not touch
+  the table or the latch.
+- Leave. L2.00966 zeroes +0x7c, +0x80 and +0x88, calls slot 0xb8 on +0x70 and
+  +0x68 and slot 0x7c on the center; the bodies of slot 0xb8 were not read.
+- Latch. Only the three enters (0) and the tip body (1) write it in the
+  field-write list of the selected shop roles.
+- Take, buy, sell. R2-ENGINE-1353 gives the pickup. The responses L2.00776
+  (Buy) and L2.00777 (Sell) set center keeper flags (R2-ENGINE-1362); their
+  further calls were not read.
+
+**Confidence.** High for the named bodies and the latch writers within the
+listed roles. In the bodies read (L2.00965, L2.07476 itself, L2.01897, slot a4
+and the shelf-header slot a4 rows read), open shelf, put on table and leave do
+not store +0x8c or flag bit 8; the callees L2.04813, L2.03752, L2.03937, slot
+0xb8, the callees of L2.01897 (slots 0x90, 0xa8 and the L2.07502 chain) and
+slot +0x34 beyond the guarded repaint were not read, so the statement is
+Medium. Medium that no other shop code writes +0x8c, since the field-write
+list covers selected roles, not every function. Unknown for take, buy, sell and
+slot 0xb8.
+
+**Unknown.** The list effect of take, buy and sell. Original run in the Kaarg
+shop: put an item on the table, buy it, and see whether a second tip appears
+when another item is put on the table in the same visit (expected none).
+
+### R2-ENGINE-1356
+
+Shop loader EN L2.00771 first calls the release routine L2.07544, then
+stores: +0xd4 from `graphics\interface\myitem.256`, +0xd8 from `shopitem.256`,
+the price-plate sheets `costs%d.bmp` and `costm%d.bmp`, +0xc8 from
+`backinvg.bmp`, +0xcc from `backinvb.bmp` and +0xd0 from `backinvs.bmp`.
+L2.07544 (45 rows, EN equals RU L2.07545) deletes each of the five through
+slot +4 and zeroes the fields. The loader has three EN callers, in the generic
+(L2.07546), druid (L2.07547) and Kaarg (L2.07548) enter routines. RU
+partners of the field loads exist at EN+0x8160 (L2.07549, L2.07550); RU
+loader strings and callers were not read.
+
+Cell painter L2.00845 is called by the hero (L2.07551), table (L2.07552) and
+shelf (L2.07553) painters. It draws, in order of test: when L2.03922(item)
+is nonzero, page +0xc8 (backinvg); else, with a flag from L2.03935 applied to
+an entry of the page's list at +0x108 chosen by the category word +0x130,
+for an item +0x18 of 5..8 page +0xd0 (backinvs) when page+0x150 is not below
+the result of L2.00846 and the flag is set, else +0xc8; for another item
++0x18 the picture at global L2.03933 when the flag is set, else +0xc8. A
+census of the `mov reg,[reg+0xc8|0xcc|0xd0|0xd4|0xd8]` form finds 33 EN
+hits in L2.07554..L2.07555. Besides the loader and L2.07544, hits in the
+painter (+0xc8, +0xd0) and in L2.01893 and L2.01897 (where the base is the
+application object from L2.05132, so they are application fields), the other
+hits are in L2.07556, L2.01887, L2.07557, L2.07558, L2.00966 and L2.00767;
+their bases were not traced. No load of +0xcc, +0xd4 or +0xd8 was found in
+a cell painter.
+
+**Confidence.** High for the loader names and stores, the release routine and
+the painter's branch structure in EN. Medium for RU (census and partner
+displacements), for the meaning of the flag and of L2.03933, and for the
+absence of a +0xcc reader: the census covers the `8B reg disp32` form in the
+shop range only.
+
+R2-ENGINE-249 names the loader L2.00771 and its seven file families at High;
+this card adds the stores, the release routine and the painter's choice.
+
+**Unknown.** Which cell state (hero, shelf, table, empty) takes each branch,
+and what L2.03933 holds. An original run in the Kaarg shop comparing a hero
+cell, a shelf cell and a table cell with equal items against the three back
+sheets settles it.
+
+### R2-ENGINE-1357
+
+Gate advance EN L2.00600 (RU L2.00601; 94 rows per root, equal under the
+mask) takes the selector from slot +0x94 (R2-ENGINE-236). With selector 8
+and latch +0x1a4 zero it pushes `SFX\Town_kaarg\Kdoor1.wav` (EN L2.07559, RU
+L2.07560) through L2.00980 into the sound object at this+0x78 and calls the
+play-once routine L2.00941. It then sets the latch to 1, adds 1 to +0x1a0
+(limit 10; at 10 it clears bit 8 of +0x208). With any other selector and the
+latch nonzero it plays `Kdoor2.wav` (EN L2.07561, RU L2.07562), sets the
+latch to 0, subtracts 1 from +0x1a0 (floor 0; at 0 it clears bit 8 of
++0x208). A raw dword census finds one reference to each key string per root
+(EN L2.07563 and L2.07564; RU L2.07565 and L2.07566).
+
+So Kdoor1 is requested when the pointer enters the gate region (opening)
+and Kdoor2 when it leaves (closing); a repeated selector 8 does not repeat
+the sound while the latch is 1.
+
+**Amends.** R2-ENGINE-236: names the sound key of each direction.
+
+**Confidence.** High for the body and the key mapping in both roots. Medium
+for "opening" and "closing" as the player-visible meaning of the two
+selectors and for whether one body serves every Kaarg gate. Playback is
+Unknown: only the request is read.
+
+**Unknown.** Whether the files play and are audible. An original run in the
+Kaarg town: move the pointer onto a gate, then off, and note the sound at each
+step.
+
+### R2-ENGINE-1358
+
+Inn builder L2.00761 (EN equals RU in the committed frame binding) calls
+L2.03659 for the names list's count (+8), then resize L2.03658 with that
+count and the grow flag -1. Every path of the resize body with n above 0 ends
+with [this+8] = n; the RU body L2.07567 is equal to EN under the mask (180
+rows each). It then loops while the index is below the container's +8
+(getter L2.07568, RU L2.07569) constructing bitmaps. So the candle container
+holds as many pictures as its names list (10 for `t0000..t0009`) and the
+cauldron container as many as its list (21 for `t0000..t0020`; R2-ENGINE-248).
+The wrap helper L2.00685 advances the cursor modulo count-1 through getter
+L2.00758 (+8 minus 1), so the last picture is not selected by the advance.
+
+EN generic-inn center painter L2.00746 draws the candle (+0x280, call
+L2.00942 at L2.07570), then the cauldron (+0x2b0, at L2.07571), then advances
+candle (L2.00685) and cauldron, then draws drink (+0x310) and breath (+0x2e0).
+
+**Amends.** R2-ENGINE-248 and R2-ENGINE-685: the container-count reading
+(the container holds the names-list count; R2-ENGINE-685 had left the +8
+equality unread). It agrees with R2-ENGINE-258 (druid inn: ten names, cursors
+0..8).
+
+**Confidence.** High for the container size equal to the count passed from
+the names list. Medium that the names-list count equals the number of names
+appended, since the append helper was not read, and for the wrap reading
+(helper L2.00685's body was read in the committed listing only for its
+arithmetic). Draw order is EN-only.
+
+**Unknown.** Whether the last candle or cauldron picture ever appears. An
+original run in a generic inn, capturing a long sequence of frames and
+checking whether t0009 or t0020 shows, settles it.
+
+### R2-ENGINE-1359
+
+Class "campaign-character-panel" (vtable L2.00699, constructor L2.00696) holds
+field +0x70 (getter EN L2.01621, RU L2.01622). The stores in the class code:
+the constructor stores 1 at L2.07572 (RU L2.07573); a second class routine
+L2.07574 stores 1 at L2.07575 (RU L2.07576); message slot L2.03550 (RU
+L2.07577; 150 rows each, equal under the mask apart from displacements) sets
++0x70 to (+0x70 == 0) at L2.07578 (RU L2.07579) for message 0x412, after
+the click sound and with the local debounce value zero, and sets dirty +0x60;
+painter L2.03701 (RU L2.05088; 70 rows, equal under the mask) sets it to 1
+at L2.07580 (RU L2.07581) when [L2.00629] minus the rect bottom exceeds the
+rect height and application +0x404 equals 1. The message byte table at EN
+L2.07582 (RU L2.07583) maps message index (message minus 0x402) 0 to case 0,
+1 to case 1, 6 to case 2, 12 to case 3, 13 to case 4, 14 to case 5 and the
+other indexes below 16 to the default case 7; index 16 (message 0x412) maps to
+case 6, the toggle, in both roots (data read, EN equals RU).
+
+**Confidence.** High for the sites in both roots. Medium for completeness:
+the census covers the class code range, not stores through the getter or
+a pointer from other code, and the identity of L2.07574 as a slot is not
+established.
+
+**Unknown.** What sends 0x412 and when the painter's condition holds. An
+original run in the druid inn: click the panel control, then resize the
+window if possible, and see whether the lower-right edge changes.
+
+### R2-ENGINE-1360
+
+The class code has nine tests of +0x70 against 0 (EN L2.07584, L2.07585,
+L2.07586, L2.07587, L2.07588, L2.07589, L2.07590, L2.07591, L2.03684; RU
+L2.07592, L2.07593, L2.07594, L2.07595, L2.07596, L2.07597, L2.07598,
+L2.07599, L2.03723), matching in order, plus the getter. The painter draws
+global [L2.07477] at the panel rectangle when +0x70 is nonzero and
+[L2.07478] otherwise. The druid inn lower-right edge picks EN L2.00747
+(nonzero) or L2.00748 (zero), RU L2.01612 or L2.01613, 16x242 at
+page+(464,238) (R2-ENGINE-368). Every writer is in R2-ENGINE-1359.
+
+**Amends.** R2-ENGINE-368: gives the writers of the child +0x70 and what the
+panel does with it.
+
+**Confidence.** High for the tests and the draw choice. The gameplay meaning
+is Unknown: the value is a two-valued field (zero or nonzero) whose reads
+pick one of two painter globals, initially 1.
+
+**Unknown.** The caller set of the getter beyond the inn painters, the sender
+of 0x412 and the meaning. An original run in the druid inn that toggles the
+panel control and compares the lower-right edge settles the visible effect.
+
+### R2-ENGINE-1361
+
+Kaarg center slot 54 (EN L2.00964, RU L2.07600; 74 rows each, equal under the
+mask) tests the category rectangles, calls center slot a4 (EN L2.00955, RU
+L2.07601), calls L2.00965(page+0x68, category) (RU L2.07543) and then slot
++0x34 of the header, which resolves to L2.02272 (guarded repaint through
+slots 0x2c and 0x38, body read). Druid slot 54 (EN L2.07479, RU L2.07602; 80
+rows, equal) has the same shape; category 3 first requires predicate
+L2.00693. The generic click L2.04811 calls L2.00965 as well (EN callers:
+L2.07603, L2.07604, L2.07605, L2.07606, L2.07607, L2.07608). L2.00965 stores
+header+0x2100+category*0x14 in header +0x84, then calls L2.07476.
+
+Kaarg slot a4 (87 rows per root, equal under the mask) returns 0 when the
+page's +0x132 equals the category; otherwise it plays the page sound object
+at page +0xa0, sets the button state words at +0x244+index*4, stores the
+category in +0x132, zeroes the value that header +0x90 points to and, for
+category 3 with +0x2fc below 12, stores 1 in +0x300, or -1 for another
+category when +0x2fc is above 0 (the meaning of +0x2fc and +0x300 is
+Unknown). Druid slot a4 (EN L2.07609; 53 rows per root, equal under the
+mask): page sound, zero [this+index*4+0x244], +0x132 = index, zero the value
+header +0x90 points to; it sets no keeper flag.
+
+**Amends.** R2-ENGINE-279: its card said the callees L2.00965 and page+0x68
+slot +0x34 of the Kaarg category click were not read; both are read, and
+neither sets a keeper flag. It agrees with R2-ENGINE-798 on the tab click and
+L2.00965.
+
+**Confidence.** High for the call chain and the stores in both roots for
+Kaarg slots 54 and a4 and for druid slots 54 and a4 (EN equals RU under the
+mask in each). The generic click L2.04811 calls L2.00965 (EN census), not a
+center slot a4 that was read. Medium for the generic click L2.04811 and the other callers of
+L2.00965, which are EN-only censuses.
+
+**Unknown.** Meaning of Kaarg +0x2fc and +0x300. An original run in the
+Kaarg shop pressing category 3 and another, watching the center art.
+
+### R2-ENGINE-1362
+
+The generic, Kaarg and druid builders construct their buttons with the same
+class constructor L2.00766 (EN), so the shared responses apply to the druid
+shop. Buy L2.00776 sets center flag 0x20 for an affordable buy and 0x40 for a
+refusal; Sell L2.00777 sets 0x20 for a credited sale. Druid updater EN L2.00695
+(RU L2.07475; 92 rows, equal under the mask) counts modulo 30; at counter 0
+it keeps flags & 0xf and selects `movies\shop_druid\a1%04d.bmp` for flag
+0x10, `a2%04d.bmp` for 0x20 and `a10001` otherwise. The painter draws the
+keeper only when flags & 0x30; an idle start is allowed unless 0x10 or 0x20 is
+set. So a druid Buy or Sell shows the a2 series, a refused Buy (0x40) shows
+none, and a category press sets no keeper flag (R2-ENGINE-1361). The
+deal-table drop slot a4 may play speech (R2-ENGINE-803): below the draw
+threshold 30, in campaign mode and for a 5..8 item page it formats a
+`speech\<shop>\...` file, and in EN picks `shop_druid` when [application
++0xfc] equals the page pointer +0x20ac.
+
+**Amends.** R2-ENGINE-803: slot a4 does not end at its tests; every path
+plays the page sound and calls L2.01897 (R2-ENGINE-1353).
+
+**Confidence.** High for the flag writes and the updater in both roots,
+reading bodies of the named routines. Medium for the setter of 0x10 (not
+identified) and for the shared responses' reach in the druid shop (the
+buttons are shared by all three builders). Medium for the speech conditions
+(the draw L2.00728(100) below 0x1e as a 30 percent chance, campaign mode, the
+page values 5..8 and the shop pick); R2-ENGINE-803 holds the same bound. The
+Buy and Sell bodies in both roots rest on the earlier listings
+(en-buy-response-L2.00776, ru-buy-response-L2.07610, EXP-2032, EXP-2034), not
+on the comparison of this experiment's normdiff files. The druid owner's sound
+is Unknown.
+
+**Unknown.** The owner's audio on Buy and Sell, which `speech` files exist
+and the 0x10 setter. An original run in the druid shop (Buy, Sell, refused
+Buy, category press, item drop) with the sound heard at each step settles it.
 
 ## ROM2 installed script dispatch and record consumers
 
