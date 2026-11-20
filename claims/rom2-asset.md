@@ -3812,3 +3812,160 @@ other maps. Dynamic-reference execution is R2-ENGINE-1318, at its grade.
 
 **Unknown.** Values returned by dynamic references in authored maps; no
 occurring ID in this numeric range was available to resolve in the census.
+
+## ROM2 placement records: file census and editor writes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-253 | ROM2 installed maps, EN 59 / RU 83: type-6 +0x28 high word equals the x low word, the low word is never 0, ids of types 4 and 6 share no value and ascend; 90 EN / 343 RU units name a sack. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-254 | ROM2 type-8 census: owner +0x04 is a unit id or 0 (25 ground sacks per root, x low byte 128); item ids high word 0, item word 0, binding 0 or a type-9 position whose cell is 0. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-255 | ROM2 type-0 +0x20, +0x24, +0x2c equal the type-4, 6, 8 record counts and +0x28 the type-7 sum in all 142 maps; the editor counts CStructure, CUnit and sack-list objects; +0x88 is map +0xdc (EN). | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-256 | ROM2 editor: structures, units and ground sacks share one id map; a new element takes the lowest free id from 1, map +0x8c becomes id + 1, positions are cell x 256 + 0x80. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-257 | ROM2 editor new unit, structure and ground sack: stores read for each; dialog fields, default type-11 contents and the object tool unread; EN bodies; RU masked-equal for the document creators L2.07414, L2.07415, L2.07416 only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-258 | ROM2 editor delete removes the element's sacks, bound type-9 elements and type-11 entries with renumbering; other ids, map +0x8c stay; no type-7 or type-10 store in the read bodies; move changes x and y only. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-259 | ROM2 editor map reader refuses a structure with x or y at most 7 or within 8 cells of the far edge and replaces the object of a repeated id; EN bodies. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+
+### R2-ASSET-253
+
+Population: EN 59 and RU 83 maps (root `.alm` files and `scenario.res` members), named by SHA-256 in
+`evidence/derived/census/inputs.tsv`; table `evidence/derived/census/{en,ru}-all.tsv`, program
+`evidence/census.py`, reproduced byte-equal.
+
+- Type 6, 0x28: in all 7,461 EN and 15,482 RU records the high word equals the low word of x (+0x00), and the
+  low word is never 0.
+- Type 6, 0x1c: 90 EN and 343 RU records name a sack. Each named sack has +0x04 equal to that unit's id and
+  +0x08, +0x0c equal to the unit's x, y. No sack is named twice.
+- Type 6, 0x20: EN {0:87, 2:6, 4:19, 6:6, 8:12, 10:7321, 12:8, 14:2}; RU 0..14 (4,902 zeros, 10,324 tens).
+  Type 6, 0x2c: 3 EN and 22 RU records hold 0.
+- Ids of types 4 and 6 never share a value and never repeat within a map. Both arrays are in strictly
+  ascending id order in every map. The largest id is 1,148 in both roots.
+
+The editor writer stores the 0x28 high word from object +4 and +6 (R2-ASSET-231, at its grade). The game reads
+the low word only and stores it as unit +8 (R2-ENGINE-1326).
+
+**Amends.** R2-ASSET-239: adds the 0x28, 0x1c, 0x20 and id measurements. The definition-id census is unchanged.
+
+**Confidence.** High for the counts: the census walks every record to exact end. The reader of 0x20 is not
+found in the bodies read (format page, R2-ENGINE-513); the value set alone gives no meaning.
+
+### R2-ASSET-254
+
+Same population and tables as R2-ASSET-253.
+
+- Owner +0x04: a unit id (EN 90, RU 343) or 0 (25 per root). Ground sacks (+0x04 = 0): x low byte 128 in all 25
+  per root; no tile outside the map.
+- +0x10: EN {0:106, 100:4, 5000:1, 10000:3, 250000:1}, RU {0:359, same nonzero values}. Meaning Unknown for
+  unit-owned sacks. For ground sacks the game passes it on (R2-ENGINE-1328).
+- Item: u32 id, u16 word, u32 binding. The id lies in 258..64,635 EN and 258..64,667 RU with high word 0 in
+  every item. The word is 0 in all 139 EN and 327 RU items; no reader of it is identified.
+- Binding: 0 (EN 93, RU 230) or a 1-based type-9 position (EN 46, RU 97). Every bound type-9 element has
+  cell (+8, +0xc) zero and +0x00 equal to the item's 0-based position in its sack. Modes: EN {0:45, 1:1},
+  RU {0:91, 1:1, 5:5}. No element is bound twice.
+
+**Confidence.** High for the measured values. Unknown for the meaning of +0x10 on unit sacks and of the item
+word. Run that settles the item word and +0x10: copy a map, set the word to 1 and a ground sack's +0x10 to 500,
+load it in `allods2.exe` and inspect the bag and its items.
+
+### R2-ASSET-255
+
+Census, 142 maps, both roots: +0x20 equals the type-4 element count, +0x24 the type-6 record count, +0x2c the
+type-8 sack count, +0x28 the sum of the three type-7 array counts. High. `+0x2c` equals the type-8 sack count
+including the ground sacks (`t0.+0x2c_equals_t8_sacks` 59 of 59 EN and 83 of 83 RU maps; `t8.f04_class` zero 25
+per root).
+
+Editor (writer `en-ed-b1`, `en-ed-b2` listings of R2-ASSET-231, read as text; RU by that claim's masked
+equality): +0x20 counts container objects that pass IsKindOf CStructure, +0x24 those that pass CUnit, +0x28
+is the sum of the three type-7 array counts, +0x2c is the sack-list count. Ground-sack objects (CBackPack)
+are counted by neither `+0x20` nor `+0x24`; the type-8 record of a ground sack is counted by `+0x2c` (25 of 115
+EN, 25 of 368 RU records).
+
+Dword 0x88 is map +0xdc (EN). The EN map-properties routine `L2.07417` sets it to 1, raises it to the largest
+level of the units whose owner's word at [+0x38] is 1, subtracts 1 when the result is above 1, and opens a
+dialog (`en-ed-ui-L2.07417.txt`). Person-unit level is the largest of four stats of the matching table row
+divided by 20; other units use the first digit '1'..'5' of the matching catalog string, else 1. Installed
+0x88: EN {1:48, 2:4, 3:4, 4:3}, RU {1:55, 2:8, 3:8, 4:12}. The save routine also sets map+0xdc to 1 and
+rewrites it in its placed-item loop (R2-ASSET-231); whether that loop gives the `L2.07417` value is not read.
+
+**Amends.** R2-ASSET-231: the type-0 counts that size types 4, 6 and 8 now have their counted objects read.
+The format page's earlier sentence on the two placed-item counts is narrowed. R2-ASSET-122: dword 0x88 has a
+computing routine.
+
+**Confidence.** High for the census and the EN computation. Medium for when `L2.07417` runs and for RU
+(not compared). The dialog's write-back, the value the save loop (EN L2.07278, L2.07279) writes to map+0xdc and
+the game meaning of 0x88 are Unknown. Run: open the
+map-properties dialog of map 10 in the editor, change the value, save, compare type-0 +0x88.
+
+### R2-ASSET-256
+
+One id map (CMapWordToOb at map +0x390, keyed by the id word) holds structures, units and ground-sack objects
+(`en-ed-doc-L2.07418.txt`, `en-ed-doc-L2.07419.txt`, `en-ed-doc-L2.07420.txt`, `en-ed-doc-L2.07421.txt`). Each
+creator takes the lowest id of 1 or more that no object holds; map +0x8c is raised to id + 1. Positions are
+cell x 256 + 0x80. The structure creator treats id 0xffff as "assign a new id". In the census no type-4 or
+type-6 id repeats and none is shared (R2-ASSET-253).
+
+**Confidence.** High for the read stores (EN; RU `L2.07414`, `L2.07415`, `L2.07416` masked-equal to EN,
+150/150, 256/256, 120/120). That the game needs the ids distinct is Unknown; the load of a shared id is not
+read. Run: copy map 10, set a unit's 0x28 low word to a structure id, load it and click the structure.
+
+### R2-ASSET-257
+
+- Unit (`en-ed-ui-L2.07422.txt`, `en-ed-ui-L2.07423.txt`, `en-ed-doc-L2.07419.txt`): the template unit (a CUnit built
+  by `L2.07424`) gets x, y, owner = the current player (players[map +0x3b4 - 1]) and an id; map +0x90 is raised to
+  the template's group. A template sack is copied with +0x3c = the id, its bound type-9 elements are copied and
+  appended, and the unit's sack index is set to the new sack's position. `L2.07419` copies the template,
+  clears +0x0e, +0x72, +0x76 and +0x8a, sets +0x2a and +0x2e to x and y.
+- Structure (`en-ed-ui-L2.07425.txt` L2.07426..L2.07427, `en-ed-doc-L2.07420.txt`): placed only after the footprint
+  test; x, y, id 0xffff, word +0x102 (file +0x0c) from a view field, owner = the current player when the template
+  has none. `L2.07420` calls the object initialiser (`en-ed-obj-init-L2.07428.txt`) and, for the classes that hold
+  type-11 entries, creates a default 11a (12 bytes), 11b (84 bytes) or 11c (12 bytes) entry from a global default
+  record, replacing an entry with the same id.
+- Ground sack (`en-ed-ui-L2.07422.txt` L2.07429..L2.07430, `en-ed-doc-L2.05153.txt`, `en-ed-doc-L2.07431.txt`):
+  created only when the sack dialog returns OK and the sack holds an item. A kind-3 object (`L2.07432`) with
+  id, x, y and owner = the map's default player object; sack +0x3c = id, +0x40/+0x44 = x/y. The writer then
+  writes +0x04 = 0 for a CBackPack owner.
+- Bridge (`en-ed-doc-L2.07421.txt`): lowest free id and kind 0x25 for one orientation; the rest is not interpreted.
+
+RU scope: `compare/editor.tsv` pairs only the document creators `L2.07414` (150/150), `L2.07415` (256/256) and
+`L2.07416` (120/120). The UI bodies `L2.07422`, `L2.07423` and `L2.07425` (owner = current player, template sack
+copy, footprint test, dialog OK condition) have no RU listing and are claimed for EN only.
+
+**Confidence.** High for the stores read. Medium for the class-to-list link (by list identity). Unknown: the
+fields the unit dialog sets (type, face, flags, definition id, group, words 0x24 and 0x26), the structure kind
+from the catalog selection, the default record contents, +0x10 of a new sack (constructor `L2.07433`
+unread), and which tool writes decorative objects (no separate object record or tool body found; in this
+experiment an object is a type-4 element). Runs: save a map after placing each kind in the original editor
+and compare the new record with the template.
+
+### R2-ASSET-258
+
+Delete (EN bodies; RU as stated):
+
+- Unit (`en-ed-doc-L2.07434.txt`): every sack whose +0x3c is the unit's id is emptied and removed; each bound
+  type-9 element is removed with later bindings renumbered; later sacks' owners get their new sack positions;
+  type-9 elements with +4 = 0, mode word 8 and key = the id are removed; the object and its id leave the map.
+  RU `L2.07435` removes only the sack at the unit's sack index, when its +0x3c is the id.
+- Structure (`en-ed-doc-L2.07436.txt`, RU `L2.07437` equal 200/200): type-9 elements with +4 = 0, mode word 4 and
+  key = the id are removed with renumbering; 11a, 11b and 11c entries with the id are removed when the class
+  predicates `L2.07284`, `L2.07286`, `L2.07287` hold; the object is deleted.
+- Ground sack (`en-ed-doc-L2.07438.txt`, EN only): its sack, bound type-9 elements and object are removed.
+- No other object's id changes, map +0x8c is not lowered, and these bodies store to no type-7 or type-10
+  record: script references to a removed id are left in place.
+- Move (`en-ed-ui-L2.07439.txt`, EN): a dragged structure or unit gets x, y = cell x 256 + 0x80 and +0x2a, +0x2e
+  copies; occupancy bits are recomputed; nothing else changes. At save the unit's 0x28 high word and the
+  x, y of its sack follow the new x, y.
+
+Root scope: EN bodies read; RU removes only the sack at the unit's sack index (`compare/editor.tsv` `unit-delete`
+equal 22 of 256); ground-sack delete and move are read in EN only.
+
+**Confidence.** High for the stores in the read bodies. Medium for the class predicates and for "script
+references stay": that is the boundary of the bodies read, not a read of the whole save. Unknown: RU
+deletion of a second sack of the same owner; script node behaviour after a delete. Runs: in the RU editor
+delete such a unit, save, reload; in the EN editor delete a unit named by a type-7 node, save, load in the game.
+
+### R2-ASSET-259
+
+The editor reader's structure add (`en-ed-doc-L2.07440.txt`, `en-ed-doc-L2.07441.txt`) refuses a structure with
+x at most 7, y at most 7, x + width at least W - 8, or y + height at least H - 8, and replaces the object of an
+id already in the map (read in EN only).
+
+**Confidence.** High for the EN bodies. RU is not claimed.

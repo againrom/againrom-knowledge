@@ -30749,6 +30749,84 @@ listening for the music during the movie.
 
 **Evidence.** [EXP-2173](../experiments/EXP-2173-rom2-outcome-report/RESULTS.md), question 4.
 
+## ROM2 placement load: counts, unit checks and sack binding
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1324 | ROM2 map load bounds the type-4, 6 and 8 loops and the unit 0x1c test by type-0 +0x20, +0x24, +0x2c; the +0x28 dword is overwritten by the type-7 case; no count-to-payload comparison found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ENGINE-1325 | ROM2 unit load skips, with a log line, a unit with an unresolved owner, whose built actor's word +0x0e is 0 or that cannot be placed at (x>>8, y>>8); the map is not rejected. EN and RU masked-equal. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ENGINE-1326 | ROM2 sack stage finds a sack's owner through the unit table keyed by unit +8 (the 0x28 low word, sign-extended), not by record position; EN population read, RU lookup only; a missed key inserts a node through unread NewAssoc L2.07442. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ENGINE-1327 | ROM2 sack items: the id low word is decoded to A, B, C, D and a null build skips the item; a binding keeps it only for a type-9 element with +8 = 0, +0xc = 0 and +4 nonzero. Builder arms other than A = 1, 2 unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ENGINE-1328 | ROM2 ground sack (+0x04 = 0) is placed at x>>8, y>>8 with +0x10; a unit-owned sack uses none of the three; EN runs the sack stage only when Session +0x74 is 0, RU has no such test. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+
+### R2-ENGINE-1324
+
+Dispatcher cases 0, 4, 6, 7 and 8 (EXP-2068 `en|ru-dispatcher.txt`, masked-equal 183/183, 329/329, 220/220,
+140/140; read by R2-ASSET-129 for types 10 to 12): +0x20 and +0x24 bound the type-4 and type-6 loops; +0x2c
+bounds the type-8 loop and the unit 0x1c test; case 7 overwrites the local loaded from +0x28 with the counts
+it reads, so the file's +0x28 is not used. No comparison of +0x20, +0x24 or +0x2c with the record payload
+size was found in the cases read.
+
+**Confidence.** High for the bodies read. Medium for the absence of a payload-size comparison (bounded to
+these cases; a count that disagrees with the size is not run). The file side is R2-ASSET-255.
+
+### R2-ENGINE-1325
+
+Actor builder, EN `L2.00192`, RU `L2.00115` (EXP-2064 `en|ru-actor-builder.txt`, masked-equal 459/459):
+
+- An unresolved owner logs "Can't resolve player %d for unit %d." and skips the unit.
+- Session +0x174 with owner +0x2c nonzero skips the unit without a log line.
+- The built actor's word +0x0e is 0 (set by the object build; not a record field): logs "Invalid unit %d during
+  loading.", deletes and skips (`mov dx, [ecx+0xe]`, ecx = the built actor `[ebp-0x18]`, EN L2.07443..L2.07444).
+- A failed placement at (x>>8, y>>8) logs "Can't place unit %d during loading on the tile(%d, %d).", deletes
+  and skips.
+- The map is not rejected in any of these cases. The 0x28 low word is stored as unit +8.
+
+A type-4 element with an unknown owner stays and logs a warning (R2-ENGINE-1288, R2-ENGINE-1289).
+
+R2-ENGINE-742 (unknown owner skips the unit) is unchanged; this claim adds the actor-word and placement skip reasons.
+
+**Confidence.** High for the bodies read. Whether the +0x0e test and the placement test fire for an editor
+placed unit (that is, whether an editor-placed unit reaches an actor word +0x0e of 0) is not run; Unknown.
+
+### R2-ENGINE-1326
+
+EXP-2144 stage B (EN `L2.07445..L2.07446`, `en-stage-b.txt`) and `evidence/derived/listings/{en,ru}-unitmap-index.txt`:
+the stage looks the owner id up with operator[] of the unit table, whose key is unit +8. The unit's 0x1c names
+the sack (format page). On a miss operator[] inserts a node through `L2.07442` (NewAssoc, unread) and the
+stage uses the node's value as the owner; a fault is inference.
+
+Key link: the table is populated with key = object +8 in the function of EXP-2066
+`evidence/navigation/nav3/listings/en-map-L2.02687.txt` at EN `L2.07447` (map `[ebp-0x40]`, list `[L2.00325]+4`).
+The actor builder stores the low word with `movsx` (EXP-2064 `en-actor-builder.txt` L2.07448), so the low word is
+sign-extended into unit +8; ids of 0x8000 and above differ between the file word and unit +8 (installed ids stop
+at 1,148). EN population read; RU lookup body read, RU population not read (Medium).
+
+**Confidence.** High for the keyed lookup in EN and the RU index body, and for the EN population of the key.
+Medium for the RU population of the key (not read). Medium for the insert on a miss
+(NewAssoc unread). Unknown: the outcome when +0x04 names no unit. Run: load a copy of map 10 whose type-8 +0x04
+names an absent id and observe crash or load. Likewise Unknown: a unit id equal to a structure id (see
+R2-ASSET-256).
+
+### R2-ENGINE-1327
+
+`evidence/derived/listings/{en,ru}-item-from-id.txt`: the low word of the item id splits as A = bits 8-11,
+B = bits 12-15, C = bits 5-7, D = bits 0-4; A = 0xe passes (A, 0, 0, low byte). A null result skips the item
+(EXP-2144 `en-stage-b.txt`). Binding (stage B `L2.07449..L2.07450`): a nonzero binding keeps the item only when
+the type-9 element at that 1-based position has +8 = 0, +0xc = 0 and +4 nonzero; otherwise the item is skipped.
+
+**Confidence.** High for the decode and the binding test. Medium for the rest of the builder: only the A = 1 and
+A = 2 arms are read. The item word (file) has no reader identified.
+
+### R2-ENGINE-1328
+
+`evidence/derived/listings/{en,ru}-sack-stage-c.txt` (masked-equal 217/217): for a sack whose owner id is 0 the
+game builds a bag and places it with x>>8, y>>8 and +0x10. For a unit-owned sack it uses none of x, y and +0x10.
+EN runs the sack stage only when Session +0x74 is 0; the RU stage has no such test (EXP-2144 stage B, 160 of
+163 equal under the register mask).
+
+**Confidence.** High for the bodies read. What a Session +0x74 value of 0 means for a played map is not read.
+
 ## ROM2 installed script dispatch and record consumers
 
 | ID | Claim | Confidence | Status | Evidence |

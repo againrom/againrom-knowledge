@@ -163,6 +163,23 @@ record), 0x2c 0..38. In the root `.alm` maps: 0x0a 0..7, 0x0c {0, 4, 16,
 word 0, 0x1c 0..58, 0x20 0..14, 0x2c 0..555.
 — R2-ASSET-119, R2-ASSET-122, R2-ASSET-132, R2-ENGINE-038, R2-ENGINE-513
 
+In every installed map (EN 59, RU 83) the 0x28 high word equals the low word of x and the low word is never 0;
+the game reads the low word only and keys its unit table by it. The id never repeats within a map and never
+equals a type-4 id; types 4 and 6 are in ascending id order. 90 EN and 343 RU units name a sack through 0x1c,
+and each named sack holds the unit's id at +0x04 and its x and y. A unit is skipped with a log line, and the map
+is not rejected, when its owner is not found, when the built actor's word +0x0e is 0 (set by the object build; not a record field) or when it cannot be placed on its tile.
+— R2-ASSET-253, R2-ENGINE-1325, R2-ENGINE-1326
+
+**Type 8 (sack).** Head: item count (+0x00), owner id (+0x04), x (+0x08), y (+0x0c), +0x10; then per item a u32
+id, a u16 word and a u32 binding. +0x04 is a unit id, which the game resolves through the unit table, or 0 for
+a ground sack (25 per root, x low byte 128), which the game places at x>>8, y>>8 with +0x10. A unit-owned sack
+uses none of x, y and +0x10 in the game. The item id's high word is 0; its low word splits into A (bits
+8-11), B (12-15), C (5-7) and D (0-4), and an id the builder cannot build is skipped. The item word is 0 in
+every installed item and has no reader found. The binding is 0 or a 1-based type-9 position; that element
+has cell (+8, +0xc) zero, +0x00 equal to the item's 0-based position and +4 nonzero, or the item is skipped.
+A sack owner naming no unit is not tested before use; the result is Unknown.
+— R2-ASSET-254, R2-ENGINE-1326, R2-ENGINE-1327, R2-ENGINE-1328
+
 Actor +0x1a0 also receives 1 from two unique-spell arms and, when
 Session+0x74 is set, from the map build for the units of owners whose
 diplomacy toward the owner named "Self" has bits 0..2 clear. An actor with
@@ -234,8 +251,11 @@ in file order. The 46 `scenario.res` campaign maps per root have dword
 dword 0x84 of 4..16, above 1, and type-10 entries; the gate opens for them
 if they are built by this routine (Medium: the loader of a root map is
 unread). Type-0 payload dword 0x88 is
-stored in the map and the session; its meaning is Unknown.
-— R2-ASSET-120, R2-ASSET-122, R2-ASSET-130, R2-ENGINE-509, R2-ENGINE-510,
+stored in the map and the session; the editor's map-properties routine computes it from the
+largest unit level (the EN body read; Medium for when it runs; the save routine also sets map `+0xdc` to 1 and
+rewrites it in its placed-item loop, and whether that loop gives the same value is not read), and its meaning in the
+game is Unknown.
+— R2-ASSET-120, R2-ASSET-122, R2-ASSET-130, R2-ASSET-255, R2-ENGINE-509, R2-ENGINE-510,
 R2-ENGINE-538
 
 Flag 4 and flag 8 also put the group in Inn offer blocks 3 and 5 through
@@ -423,8 +443,13 @@ loaded value with `1<<((cell>>6)&15)` of every masked cell ORed in, then
 writers do this. The routine does not clear it first; whether the loader or
 `L2.07298` leaves it clear is not read. `+0x1c`, `+0x20`, `+0x24` and
 `+0x30..+0x40` are the counts that size types 5, 4, 6, 10, 11 and 12. What the
-type-10, 11 and 12 counts and the two placed-item counts count was not read in
-the helpers that compute them (Medium). The editor removes entries from three
+type-10, 11 and 12 counts count was not read in the helpers that compute them
+(Medium). `+0x20` counts the editor's CStructure objects, `+0x24` its CUnit objects
+and `+0x2c` its sack list; in every installed map they equal the type-4, type-6 and
+type-8 record counts, and `+0x28` equals the sum of the three type-7 counts
+(R2-ASSET-255). The game bounds its type-4, type-6 and type-8 loops by them and
+overwrites its copy of `+0x28`; it compares none with a payload size (Medium,
+R2-ENGINE-1324). The editor removes entries from three
 lists before it writes them (R2-ASSET-231). Before writing, the editor sets the
 first `8*W` tile cells to the last cell's value and masks every cell with
 0x23ff.
@@ -446,6 +471,21 @@ carries one scalar and one tag on all its records, and the tile and count
 fingerprints of the save. What a newly created map holds before any placement
 remains Unknown.
 — R2-ASSET-231, R2-ASSET-232, R2-ASSET-233, R2-ASSET-234
+
+**Placed elements.** The editor keeps structures, units and ground sacks in one id map. A new element takes the
+lowest free id from 1, map `+0x8c` becomes id + 1 and the position is cell × 256 + 0x80
+(R2-ASSET-256). These are EN reads; RU is read for the document creators only. A new unit copies the template unit with the current player as owner and, when the template
+holds a sack, a copy of that sack with `+0x04` = the unit id and its bound type-9 elements. A new structure takes
+the template's kind, x, y and word `+0x0c`, the current player when the template has none, and, for the Shop, Inn
+and Pointer classes, a default type-11 entry with the structure's id (Medium: class-to-list link by list identity). A ground sack is created only with at
+least one item; its `+0x04` is written as 0. Dialog fields, default record contents and the object tool are
+unread (R2-ASSET-257). Deleting a unit (EN bodies read; RU removes only the sack at the unit's sack index; ground-sack delete and move are
+read in EN only) removes its sacks and bound type-9 elements and renumbers the later
+bindings and sack indices; deleting a structure removes its mode-4 type-9 elements and its type-11 entries.
+No other id changes, map `+0x8c` is not lowered and type-7 and type-10 records are not touched, so a script
+reference to a removed id stays (Medium: the bodies read). Moving changes x and y only; the unit's 0x28 high word
+and its sack's coordinates follow at save (R2-ASSET-258). The editor's own reader refuses a structure within 8
+cells of the map edge (R2-ASSET-259).
 
 ## Type-9 records with mode mask 4
 
@@ -524,7 +564,8 @@ arm lies past their end and rests on R2-ENGINE-1006 at its grade. Installed maps
 **Editor catalogs.** The EN map editor reads `objects.reg`, `units.reg` and `structures.reg` under
 `graphics\` and `templates.bin`. That it opens `world.res` was observed in an uncommitted scan and is Medium,
 not reproduced. Which catalog index becomes a kind or a definition id,
-and what a new placement holds, are Unknown. — R2-ENGINE-1293
+and the dialog-set fields of a new placement, are Unknown; what the editor stores for a new element is in
+[Editor write sequence](#editor-write-sequence). — R2-ENGINE-1293, R2-ASSET-257
 
 <a id="not-yet-surveyed"></a>
 
