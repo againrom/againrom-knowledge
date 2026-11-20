@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5126. Observation: 143. Static analysis: 4274. Mixed: 709.
+Claims labelled: 5128. Observation: 143. Static analysis: 4276. Mixed: 709.
 
 ## Ledger ai
 
@@ -2228,7 +2228,7 @@ Claims labelled: 5126. Observation: 143. Static analysis: 4274. Mixed: 709.
 |---|---|---|
 | R2-ENGINE-997 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-998 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-999 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-999 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1000 | mixed | ✔ promoted (branch candidate) |
 | R2-ENGINE-1001 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-1002 | static analysis | ● active (branch candidate) |
@@ -3078,7 +3078,7 @@ Claims labelled: 5126. Observation: 143. Static analysis: 4274. Mixed: 709.
 | R2-ENGINE-1138 | static analysis | ● active (amended) |
 | R2-ENGINE-1139 | static analysis | ● active |
 | R2-ENGINE-1140 | static analysis | ● active |
-| R2-ENGINE-1141 | static analysis | ● active |
+| R2-ENGINE-1141 | static analysis | ● active (amended) |
 | R2-ENGINE-1142 | static analysis | ● active |
 | R2-ENGINE-1143 | static analysis | ● active |
 | R2-ENGINE-1144 | static analysis | ● active |
@@ -3208,6 +3208,8 @@ Claims labelled: 5126. Observation: 143. Static analysis: 4274. Mixed: 709.
 | R2-ENGINE-1360 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1361 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1362 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1366 | static analysis | ● active |
+| R2-ENGINE-1367 | static analysis | ● active |
 | R2-ENGINE-1312 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1313 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1314 | static analysis | ✔ promoted (branch candidate) |

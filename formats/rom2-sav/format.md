@@ -1908,6 +1908,14 @@ Complete child traversal, the parameter binding and all-event coverage are
 Medium; map construction and initial modifier values are Unknown.
 — R2-ENGINE-947
 
+The EN weapon fill (L2.05911) and its RU twin (L2.02311) are read whole and
+equal after masking apart from seven displacements, RU +4. They store base
+and spread (+0x64, +0x65), to-hit (+0x56), defence (+0x6e), weight (+0x4a),
+range (+0x54) and word +0x48 from one Weapons row and two factor rows; the
+routine at L2.00844 / L2.07612 sets dword +0x1c from a factor product and
+the entries of the list at +0x20. The roles of word +0x48 and dword +0x1c
+are Unknown. High for the listed stores. — R2-ENGINE-1366
+
 In both read Effect apply bodies, tag 49 shares the arm of tags 13 and 43
 and adds the scaled operand to modifier base modulo 256. That arm writes
 neither modifier to-hit nor spread. Flags 1/2/4 select signed16 +0x40, otherwise dword +0x40;

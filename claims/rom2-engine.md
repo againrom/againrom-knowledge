@@ -28,7 +28,7 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 |---|---|---|---|---|
 | R2-ENGINE-997 | The ROM2 item card is built by description EN L2.00841 (RU L2.03947); raw scans find five direct calls per root, among them the shop hover and the hero inventory strip hover, and no jump or stored address. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ENGINE-998 | A ROM2 tag-50 pair adds Damage, Range, Duration and a stat line of the last tag-41 spell. Spell 18 is the only spell the description routine's own code compares (word halved, 0.0 - x); six getters choose the stat line. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
-| R2-ENGINE-999 | A ROM2 weapon card with spell 18 at L adds casts Stone Curse, Range: column 11 (or 1), Duration: 0.0 -%5.1f of floor(2.4L)/16, no tag-50 Damage or stat line; EN equals RU under the address mask, apart from the RU item fields 4 bytes higher. | High / Medium | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
+| R2-ENGINE-999 | A ROM2 weapon card with spell 18 at L adds casts Stone Curse, Range: column 11 (or 1), Duration: 0.0 -%5.1f of floor(2.4L)/16, no tag-50 Damage or stat line; EN equals RU under the address mask, apart from the RU item fields 4 bytes higher. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ENGINE-1000 | If L is the item cast's power, the ROM2 card's Stone Curse maximum floor(2.4L)/16 is the server's item-cast duration before Earth resistance, in units of 16 timer counts; the server's pair writer is unread. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ENGINE-1001 | ROM2 creature command +0x40/+0x44 come from the stat reader's Units Withdraw/Wimpy and the map arm L2.05178 (+0x44 >>= 1); a census finds 19 stores traced to +0x1c4, the others unclassified. | High / Medium | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 | R2-ENGINE-1002 | RU ROM2 map arm L2.00115, non-Human records: [L2.01317]+0xd8 = 1 halves HPmax, HP and cmd +0x44; 2 or +0x74 set: none; other values +50 toHit and defence, HPmax x1.5. Three other routines read +0xd8 too. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
@@ -160,6 +160,8 @@ roots. Medium for:
 
 **Unknown.** A shop or backpack hover over a staff with Stone Curse in the original, recorded with
 the staff's level, would settle the order, the spacing and r.
+
+**Amended.** R2-ENGINE-1366 reads the EN fill L2.05911 whole: it is the routine whose Range store is cited here.
 
 ### R2-ENGINE-1000
 
@@ -11075,6 +11077,9 @@ weapon fill, equip and fold, which were not located.
 equip, remove and fold bodies, narrowing those local-body Unknowns.
 R2-ENGINE-946 establishes the tag-49 addition to the modifier base;
 the formulas above omit child-effect and other pre-existing modifier terms.
+R2-ENGINE-1366 reads the EN fill L2.05911 whole and finds it equal to the RU fill L2.02311
+after masking (RU object offsets +4 from +0x54); the weapon fill terms listed above are
+confirmed for EN, and the EN Unknown of the weapon fill is closed.
 The power helper, table-record values and whole-event coverage remain open.
 
 **Unknown.** The body of `L2.02322`; the fold tail of `L2.02321`; the
@@ -26892,7 +26897,7 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1138 | ROM2 cast routine, apply call and target sender compare no distance in the bodies read; a staff-armed mage pays no mana; apply tail and four helpers unread. | High / Medium | ● active (amended) | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1139 | ROM2 approach routes to the target's anchor cell; by the code read, admission needs a unit facing the target with edge distance to the nearest body cell within range; no run was made. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1140 | ROM2 size slot +0x1c returns byte +0x49; Units tokenSize is 2 for typeIDs 66 and 68 and 3 for 71 in EN and RU. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
-| R2-ENGINE-1141 | EN ROM2 item factory takes kind (ID>>8)&0xf; only kind 1 builds a weapon, so a Weapons-row staff is kind 1. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
+| R2-ENGINE-1141 | EN ROM2 item factory takes kind (ID>>8)&0xf; only kind 1 builds a weapon, so a Weapons-row staff is kind 1. | High / Medium | ● active (amended) | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1142 | Read ROM2 attack and cast order bodies write no command byte +0x78; the range producer and selected-spell policy read it; its writer and any value met by an attack order are Unknown. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1143 | ROM2 order 0xd at a unit admits by edge distance against spell +9, except a self target; the eight scan hits of packed-cell metric L2.01520 lie in L2.06342..L2.06343, RU only. | High / Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
 | R2-ENGINE-1144 | By the code read, a ROM2 staff mage with no affordable selected spell and no winning special-spell draw enters the staff's spell cast once its cell is within +0x12c of the target's nearest cell; no run was made. | Medium | ● active | [EXP-2154](../experiments/EXP-2154-rom2-staff-sight/) |
@@ -27467,6 +27472,8 @@ EN L2.05906 (51, whole) splits an item ID into kind (ID >> 8) & 0xf, (ID >> 5) &
 **Unknown.** The RU twin and the writer of a staff's ID. Read them.
 
 **Amends.** R2-ENGINE-999's weapon branch: kind 1 is the only arm that builds a weapon.
+
+**Amended.** R2-ENGINE-1367 adds the callers of L2.05910 (the loader L2.07611 and four other routines) and the second caller of L2.03904, L2.05390.
 
 **Evidence.** EXP-2154 generated/win/en-item-factory.lst, en-item-kind-dispatch.lst, en-item-lookup.lst.
 
@@ -31398,6 +31405,93 @@ is Unknown.
 **Unknown.** The owner's audio on Buy and Sell, which `speech` files exist
 and the 0x10 setter. An original run in the druid shop (Buy, Sell, refused
 Buy, category press, item drop) with the sound heard at each step settles it.
+
+## ROM2 item construction: derived values and constructor callers
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1366 | EN L2.05911 / RU L2.02311 compute six stored weapon values from one row and two factor rows; L2.00844 / L2.07612 set dword +0x1c from a factor product and the list at +0x20, clamped to 0x1312cff. | High / Unknown | ● active | [EXP-2178](../experiments/EXP-2178-rom2-sav-load/RESULTS.md) |
+| R2-ENGINE-1367 | In EN, L2.05911 has one direct caller, L2.03904, called by constructor L2.05910 and L2.05390; the loader L2.07611 and four routines call L2.05910, so a loaded weapon uses the constructor a new one uses. L2.05390 unread. | Medium / Unknown | ● active | [EXP-2178](../experiments/EXP-2178-rom2-sav-load/RESULTS.md) |
+
+### R2-ENGINE-1366
+
+Listings: `experiments/EXP-2178-rom2-sav-load/evidence/out-nav5/listings/en-weapon-init-L2.05911.txt`,
+`out-nav7/listings/ru-weapon-derive-L2.02311.txt`, `en-weapon-derive-tail-L2.00844.txt`,
+`ru-weapon-derive-tail-L2.07612.txt`. Both roots hold the two routines whole (EN L2.05911 to
+L2.07613 and L2.00844 to L2.07614; RU L2.02311 to L2.07615 and L2.07612 to L2.07616). Their
+instructions are equal after masking addresses of 0x400000 and above (`evidence/maskcmp.py`)
+apart from seven displacements, RU +4 for the fields +0x54, +0x56, +0x64, +0x65 and +0x6e;
+fields below +0x50 are equal in both roots.
+
+The routine takes the item row object (argument at +8, read with accessor L2.02667) and the object
+itself. It looks up one factor row by byte +0x45 in the table at L2.07617 and one by byte +0x46 in
+the table at L2.00811 (EN addresses; RU table addresses were not read). It stores, in EN offsets:
+
+| Stored | Row field index | Factor offset in both factor rows |
+|---|---|---|
+| byte +0x64 | 6 | 0x40 |
+| byte +0x65 | 7, minus byte +0x64 | 0x40 |
+| word +0x56 | 8 | 0x48 |
+| word +0x6e | 9 | 0x50 |
+| word +0x48 | none (product of the two factors alone) | 0x60 |
+| word +0x4a | 3 | 0x38 |
+| byte +0x54 | 0xb, or 1 when the field is -1 | none |
+
+Each product except word +0x48 adds the constant at L2.01125 before the helper L2.02708; word
++0x48 is the helper applied to the product of the two +0x60 doubles alone. The helper and the
+constant were not read. Byte +0x54 is not a product.
+
+The routine at EN L2.00844 (RU L2.07612) takes row field 2 from the row at [this+0x3c] (not the
+argument row), then walks the list at +0x20. An entry of kind byte 1 overwrites +0x1c with its
+dword +0x40; an entry of kind 0x29 adds the result of its virtual slot +0x4c; every other entry
+adds the result of L2.07618 to a local sum. The sum is passed to L2.07619 and added, and the
+result is clamped to 0x1312cff, a literal equal in both listings. The helpers L2.05662, L2.05663,
+L2.05664, L2.07618 and L2.07619 were not read.
+
+**Names.** Byte +0x64 and +0x65 are base and spread, word +0x56 to-hit, +0x6e defence, +0x4a
+weight, byte +0x54 range (R2-ENGINE-479, R2-ENGINE-999).
+
+**Confidence.** High for the field indices, factor offsets, destinations and the byte +0x54:
+read in full, in both roots, in raw disassembly. High for the listed stores and the clamp of
+L2.00844 / L2.07612. Unknown for the factor-row contents.
+
+**Unknown.** What word +0x48 (the product of the two factors at +0x60 alone) and dword +0x1c
+hold; the kinds 1 and 0x29 of the list entries at +0x20, the helpers named above and which
+entries exist; the table contents and the helper L2.02708. A run of the original that settles
+the names: load a mission file with a carried bow, open the item card and compare the shown
+values with the stored values above after a resave.
+
+**Amends.** R2-ENGINE-479: the EN fill L2.05911 is read whole and equals the RU fill L2.02311
+after masking (RU object offsets +4 from +0x54); the weapon fill terms listed there are
+confirmed for EN, and the EN Unknown of the weapon fill is closed. R2-ENGINE-999: the EN fill is
+the routine whose Range store is cited there.
+
+### R2-ENGINE-1367
+
+Listings: `out-nav6/scans/en-calls-weapon-ctors.txt` and `en-dwords-weapon-ctors.txt` (raw E8/E9
+census of the executable sections and dword census of every section, EN only).
+
+- L2.05911 has one direct call site, at L2.07620 inside L2.03904. L2.03904 is called from constructor
+  L2.05910 (L2.07621) and from L2.05390 (L2.07622), which was not read.
+- Constructors L2.05910, L2.01754 and L2.06362 are called at L2.07623, L2.07624 and L2.07625 in
+  loader L2.07611, which reads records keyed by the string at L2.07626 and counts them to 0x32.
+  L2.07611 is called four times from L2.07627. They are also called from L2.07628, L2.01053,
+  L2.06361 and L2.00812, whose roles were not read.
+- The dword census finds no table or data reference to L2.05910, L2.05911, L2.01754, L2.06362 or
+  L2.07611.
+
+**Confidence.** Medium for the headline: the census is direct `E8`/`E9` calls plus a dword scan
+and is exact only for those; indirect calls were not censused. L2.05390 was not read and its
+callers were not censused. The roles of L2.07611 as the SAV loader and of the other four callers
+as creation paths rest on call structure and the key string, not on a read of their bodies. The
+siblings' own derive routines (L2.01351, L2.03903) were not read. RU was not censused.
+
+**Unknown.** Whether the equip routines EN L2.05653 / RU L2.01314 (R2-ENGINE-947) are reached
+for a weapon built by the loader L2.07611; the equip bodies themselves are read. A run of the
+original: load a mission file, equip each weapon kind, resave, and compare the stored values
+above with a file saved before equipping.
+
+**Amends.** R2-ENGINE-1141: adds the callers of L2.05910 and the loader L2.07611.
 
 ## ROM2 installed script dispatch and record consumers
 

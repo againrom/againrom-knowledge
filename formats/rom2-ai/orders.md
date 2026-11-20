@@ -125,7 +125,9 @@ counted (R2-ENGINE-1137, R2-ENGINE-1136). Command +0x78 is read and not
 written in the bodies read; who writes it is Unknown (R2-ENGINE-1142). A book
 cast at a unit compares the same distance with spell +9, except for a self
 target; the packed-cell metric's scan hits lie after the support entry
-(R2-ENGINE-1143, Medium). A staff's item kind is 1 in EN (R2-ENGINE-1141).
+(R2-ENGINE-1143, Medium). A staff's item kind is 1 in EN (R2-ENGINE-1141). The weapon constructor
+L2.05910 is called by the record loader L2.07611 and four other routines
+(R2-ENGINE-1367, Medium).
 
 ## Keyboard orders and the defend order
 

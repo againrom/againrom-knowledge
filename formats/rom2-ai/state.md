@@ -165,7 +165,9 @@ marked-cell path of the sight lists, whose callers were not counted
 (R2-ENGINE-1137), no distance re-test after admission in the bodies read
 (R2-ENGINE-1138), command +0x78 read with its writer Unknown
 (R2-ENGINE-1142), the book cast's spell +9 admission (R2-ENGINE-1143) and the
-EN item kind of a staff (R2-ENGINE-1141).
+EN item kind of a staff (R2-ENGINE-1141). The weapon constructor L2.05910 is
+called by the record loader L2.07611 and four other routines (R2-ENGINE-1367,
+Medium).
 
 ## Keyboard orders and the defend order
 
