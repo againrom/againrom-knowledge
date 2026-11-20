@@ -78,6 +78,16 @@ The additional titles include serverID, knownSpells and the five school skills.
 Other title arrays retain their ROM1 forms; the Spells radius title differs
 only by literal quote characters. — R2-ASSET-031
 
+Item rows hold the value 12 only as the Slot of four Armors rows (27 to 30,
+the boots) and the Price of one Shields row, in no Weapons field and no
+MagicItems byte; the two staves are Slot 1, attackType 3, physical 0 to 0, range
+6 and 5, identical in EN and RU (R2-ASSET-297). The kind nibble of an item-name
+record ID equals the Slot of its data.bin row for all 395 equipment records
+(R2-ASSET-298, Medium: one generation run). Slot is Medium as the engine's
+item type; the object +0x44 type of a built item is not read here. The
+itemname.pkt kind 14 join to MagicItems rows uses the low byte of the ID, and
+the committed kind-14 row counts of the generated table do not state it.
+
 ## Units treasure parameters
 
 Units parameters 38..44 are titled treasure.1 Gold, treasureMin.1,

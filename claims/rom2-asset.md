@@ -4188,6 +4188,78 @@ id already in the map (read in EN only).
 
 **Confidence.** High for the EN bodies. RU is not claimed.
 
+## ROM2 item rows: the value 12 and the Slot of weapons
+
+Terms: row = one entry of an Armors, Shields, Weapons or MagicItems collection of `data/data.bin` inside
+`world.res`; parameter i carries title i + 1 (R2-ASSET-107); Slot = the title of parameter 4 in Armors,
+Shields and Weapons (R2-ASSET-111).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-297 | ROM2 data.bin item rows hold 12 only as Slot of Armors 27 to 30 (boots) and Price of Shields 1; no Weapons or MagicItems field is 12; Staff and Shaman Staff are Slot 1, attackType 3, range 6 and 5. | High / Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+| R2-ASSET-298 | ROM2 itemname.pkt kind (ID >> 8) & 0xf equals the data.bin Slot of the row for all 395 equipment records; kind 12 is 23 records of Armors rows 27 to 30; no record of kind 12 is a weapon. | Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+
+### R2-ASSET-297
+
+Table `generated/derived/find12.tsv` and `summary.tsv` (program `evidence/itemcensus.py`, parser `dump.py` over
+the grammar of `data.py` of EXP-2060; the `world.res` of the EN and RU roots hash to
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`; reproduced byte-equal, run 1 against
+`evidence/reproduction.tsv`). Population: every row of the four collections, every parameter, every u16 of the
+14-byte raw block of an Armors, Shields or Weapons row, every element of its second dword array and the raw
+byte of a MagicItems row. Fields examined per root (parameters, raw u16, second dwords, raw bytes): Armors 30
+rows 510, 210, 0, 0; Shields 9 rows 153, 63, 0, 0; Weapons 27 rows 459, 189, 0, 0; MagicItems 96 rows 192, 0,
+0, 96. Every collection is equal in EN and RU (names, parameters, raw values, strings).
+
+- Value 12 occurs five times per root: Armors 27 Shoes, 28 Soft Boots, 29 Chain Boots and 30 Plate Boots in
+  parameter 4 (title Slot), and Shields 1 Buckler in parameter 2 (title Price). It occurs in no Weapons field,
+  no raw u16, no second dword and no MagicItems byte.
+- Weapons Slot is 1 in 26 rows and -1 in row 23 (`rem`, -1 in every field, R2-ASSET-111). The armour Slot
+  values are 4 (1 row), 5 (1), 6 (8), 7 (5), 8 (4), 9 (3), 10 (4) and 12 (4); all 9 Shields rows hold Slot 2.
+- Staff (row 13) and Shaman Staff (row 14): Slot 1, attackType 3, physicalMin and physicalMax 0, range 6 and 5,
+  2 handed 2, sutableFor 2. These are the R2-ASSET-111 values, re-read.
+
+**Confidence.** High for the values, in both roots: the parser ends at the payload end and the two reads agree.
+Medium that Slot is what the engine calls an item's type: the title name alone does not show it. R2-ASSET-298
+joins Slot to the kind nibble of the item ID, and R2-ENGINE-1441 reads the engine side. The object `+0x44` type of
+a built item is not read here (R2-ENGINE-711, R2-ENGINE-265).
+
+**Unknown.** Which Armors or Shields column the shop or equip code reads as "class"; the rows give only the
+titles.
+
+**Evidence.** EXP-2182 `generated/derived/find12.tsv`, `slot-census.tsv`, `summary.tsv`; `evidence/dump.py`.
+
+### R2-ASSET-298
+
+Table `generated-itemname/{en,ru}-kind-slot.tsv`, `-summary.tsv`, `-find.tsv` and `-records.tsv` (program
+`evidence/itempkt.py`, walking `data/itemname.pkt` with the record layout of R2-ASSET-207: a 9-byte header,
+then per record u16 ID, flag, byte 5, length L and L attribute bytes; the walk ends at the payload end and no
+record has a misaligned attribute list). 491 records in each root; the two roots' outputs are byte-equal. Kind
+= (ID >> 8) & 0xf, the item factory's kind (R2-ENGINE-1141). Kind census: 1:154, 2:37, 4:11, 5:14, 6:56, 7:28,
+8:30, 9:20, 10:22, 12:23, 14:96.
+
+Join of an equipment record to its data.bin row (kind 1 Weapons, kind 2 Shields, any other kind except 14
+Armors, row = ID & 0x1f): all 395 equipment records have Slot equal to kind and none differs. Kind 12 holds
+23 records: rows 27 (5 records), 28 (6), 29 (3) and 30 (9), the four boots rows of R2-ASSET-297. No record of
+kind 12 reaches a Weapons row; no record has 12 as flag or byte 5; 107 weapon records carry tag id 12 and 24
+records carry the value 12 under another tag (tag ids and values are R2-ASSET-207 attribute data; their meaning
+is not read here), listed in `*-find.tsv`.
+
+The kind 14 (MagicItems) join in `evidence/itempkt.py` masks the ID with 0x1f, which is not the row the item
+factory uses for kind 14: the factory passes the low byte, row = ID & 0xff (R2-ENGINE-1141, R2-ASSET-207). The
+committed `*-kind-slot.tsv` rows `14 magic row 93` and `14 row absent 3` come from that mask; the 3 "absent"
+rows are IDs 0x0e20, 0x0e40 and 0x0e60 (low byte 32, 64, 96). The 96 kind 14 IDs have low bytes 1 to 96, so with
+the low byte all 96 records meet the 96 MagicItems rows; the counts 93 and 3 carry no meaning. The join result
+for kinds 1, 2 and 4 to 12 stands.
+
+**Confidence.** Medium. The itemname.pkt walk was generated once (the generation run of this experiment that
+carries the item records), not reproduced, and R2-ASSET-207's layout is reused. The kind-Slot agreement is a
+property of the rows read, not a rule the engine states; R2-ENGINE-1141 gives the kind split in the EN factory.
+
+**Unknown.** A second run of `evidence/itempkt.py` into a scratch directory would reproduce or refute the byte
+equality.
+
+**Evidence.** EXP-2182 `generated-itemname/`; `evidence/itempkt.py`.
+
 ## ROM2 Units healers and break-off thresholds
 
 | ID | Claim | Confidence | Status | Evidence |

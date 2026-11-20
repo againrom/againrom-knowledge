@@ -12047,7 +12047,7 @@ sites (`ru-cmd-fields-2.tsv`) were not read. The body of `L2.01518`
 (spell admission in flee) was not read.
 
 **Amended.** R2-ENGINE-884 narrows the clause on creature-table units: their +0x40 and +0x44 may come from the Units Withdraw and Wimpy parameters through the stat reader (R2-ENGINE-777, Medium; a stored -1 keeps the constructor default; creature rows unread), not from the constructor alone. The other clauses and grades stand.
-R2-ENGINE-1418 reads the flee spell routine, the back-off helper `L2.02451`, its spell routine and the admission `L2.01518`: the spell is Teleport at a cell scanRange + 1 (back-off: scanRange − 1) from the hostiles' mean point when Teleport is in the book and mana covers its cost; otherwise the unit walks 3 cells away (the Invisibility and walk-to-cell arms are unreachable while the admission is pure, Medium). R2-ENGINE-1421 gives the arguments of `L2.02445` (0, 2v, 3v). The other clauses and grades stand.
+R2-ENGINE-1418 reads the flee spell routine, the back-off helper `L2.02451`, its spell routine and the admission `L2.01518`: the spell is Teleport at a cell scanRange + 1 (back-off: scanRange − 1) from the hostiles' mean point when Teleport is in the book and mana covers its cost; otherwise the unit walks 3 cells away (the Invisibility and walk-to-cell arms are unreachable while the admission is pure, Medium). R2-ENGINE-1421 gives the arguments of `L2.02445` (0, 2v, 3v). R2-ENGINE-1440 reads the block byte +8: it is the constructor constant 5 (R2-ENGINE-1438), so the flee radius is 10 cells for the test and the walk arm (the Teleport arm lists 5 cells) and the back-off radius the constant 2 (High for the bodies, Medium for the value in a running unit, R2-ENGINE-1439). The other clauses and grades stand.
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
 
@@ -31781,6 +31781,208 @@ both roots. Medium for the request meaning of `L2.00941`, `L2.07500` and
 **Amends.** R2-ENGINE-256: it names 21 keys without values; this card gives
 the key of each slot and arm.
 
+## ROM2 flee radius byte, staff items and heal against withdraw
+
+Terms: block = the 0xb4-byte movement block at unit `+0x1c0` (R2-SESSION-362); command = the object at unit
+`+0x1c4`; flee test RU `L2.02448` / EN `L2.07746`, back-off test RU `L2.02450` / EN `L2.07747`, flee RU
+`L2.02449` / EN `L2.07155` (R2-ENGINE-506, R2-ENGINE-1418). EN addresses are RU − 0x9ff0 below `L2.02449` and
+RU − 0xa039 from it; each pair read is masked-equal (`generated/derived/compare.tsv`, 0 differing positions).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1438 | ROM2 block constructor RU L2.01783 / EN L2.05745 zeroes 0xb4 bytes and stores +5 = 0x41, +0xa = 0x10, +9 = 0xff and the constant +8 = 5; it takes only the block and has 5 direct callers per root. | High / Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+| R2-ENGINE-1439 | In ROM2 337 RU and 336 EN traced loads of [unit+0x1c0] write block byte +8 nowhere; 11 sites per root read it; all 356 saved Unit and Human records hold 5, so every unit seen holds 5 (Medium; callees and copies unread). | Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+| R2-ENGINE-1440 | ROM2 flee tests a hostile within block +8 + 5 = 10 cells and walks from a 10-cell list; the Teleport arm lists 5 cells and calls the idle planner when none lives; back-off uses 2; no write to block +8 seen (Medium). | High / Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+| R2-ENGINE-1441 | ROM2 data.bin item rows and itemname.pkt records hold 12 as kind and Slot only for boots; a Staff is kind 1, attackType 3, physical 0 to 0; by the code read a mage's staff cast pays no mana and re-tests no distance in the bodies read. | Medium / Unknown | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+| R2-ENGINE-1442 | By the code read a ROM2 computer mage meeting heal and withdraw on one Group pass walks: the post-step overwrites the heal with the walk (+8 = 1); with no living hostile listed the idle planner may heal; the Teleport store is unread. | Medium / Unknown | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+
+### R2-ENGINE-1438
+
+Body RU `L2.01783` (22 instructions, whole; `generated/listings/ru-blockctor-L2.01783.txt`; EN `L2.05745`
+masked-equal): it calls `L2.00342` with the block pointer, 0 and `0xb4`, then stores byte `+5` = `0x41`, `+0xa` =
+`0x10`, `+9` = `0xff` and `+8` = 5, and returns the block. No other input is read: the body has no stack
+argument and no table access. The scan `ru-refs-block.txt` (E8/E9 and conditional rel32, short jumps and
+absolute DWORDs at every byte of the executable sections; `prev=` fields empty) finds 5 direct calls per root:
+RU `L2.07748`, `L2.07749`, `L2.07750`, `L2.07751`, `L2.07752`; EN `L2.07753`, `L2.07754`, `L2.07755`,
+`L2.07756`, `L2.07757`; no absolute reference and no jump. A second target of the same scan, `L2.04908` (EN
+`L2.04909`), has 3 (EN 2) callers and is not read here.
+
+**Confidence.** High for the body and the call-site census in both roots. Medium that the object it fills is the
+unit's `+0x1c0` block: R2-ENGINE-789 and R2-ENGINE-654 name `L2.01783` as the block constructor (its
+`+5` = 0x41 read there), the size 0xb4 equals the 180 raw bytes R2-SESSION-362 serializes, and the allocation
+and store at a call site (the unit constructor near `L2.07750`) was only viewed in navigation, not committed.
+`L2.00342` is not read; "zeroes" rests on its arguments (pointer, 0, 0xb4).
+
+**Unknown.** The other four callers' roles (which unit kinds they build). A run of the original that creates one
+unit of each kind and reads block byte `+8` after creation settles whether any constructor path other than this
+one leaves another value.
+
+**Evidence.** EXP-2182 `generated/listings/{ru,en}-blockctor-*.txt`, `{ru,en}-refs-block.txt`,
+`generated/derived/compare.tsv`.
+
+### R2-ENGINE-1439
+
+Instrument `evidence/blockchain.py` (Python/pefile/Capstone; no code run). Population: every byte offset of
+every executable section where the DWORD `0x1c0` occurs as the displacement of one decoded memory operand; only
+`mov reg, [m + 0x1c0]` loads are followed (RU 337, EN 336; non-load forms 31 and 30, ambiguous decodes 0),
+straight-line for at most 40 instructions, keeping the register, its register copies and `[ebp − k]` slots as
+aliases and dropping eax, ecx and edx at a call. Output `generated/derived/{ru,en}-blockchain.tsv`: 295 memory
+events per root, of which 112 are writes. Displacement 8: 11 reads and 0 writes per root (RU `L2.07758`,
+`L2.07759`, `L2.07760`, `L2.07761`, `L2.07762`, `L2.07763`, `L2.07764`, `L2.07765`, `L2.07766`, `L2.07767`,
+`L2.07768`; EN the same routines, listed in `en-blockchain.tsv`). For comparison, displacements 9 and 10 have 5
+reads and 7 writes, and 7 reads and 4 writes. R2-SESSION-362 (committed census of five original saves): all 356
+Unit and Human records hold block byte +8 = 5, the constructor's value, while byte +5 takes 0x41, 0x44 and 0x82:
+the block is written after construction at other offsets and byte +8 stays 5.
+
+**Confidence.** Medium. The census shows no write at displacement 8 inside the traced window; it does not exclude
+a writer reached through a pointer kept in a field or a global, a trace longer than 40 instructions, an alias
+reached only by a branch target, SIB addressing, a bulk copy or a callee. 36 RU and 35 EN calls receive an alias
+in ecx or after a push (14 direct targets and 7 indirect call forms per root, 10 sites in RU, listed as `call`
+rows); those bodies are unread and the indirect forms have no target to read. The
+save loader moves the whole block from the file (R2-SESSION-362), so a loaded unit holds the saved byte; every
+saved byte read was 5, which is evidence for the population of five saves and not for later versions.
+
+**Unknown.** The callees of the 14 direct call targets and the targets of the 7 indirect call forms; a block copy between units. A search of every store of byte 8 of
+the block through a field-held pointer (a scan with the block's offset 8 and its owner types) would settle the
+writer census.
+
+**Evidence.** EXP-2182 `generated/derived/{ru,en}-blockchain.tsv`, `evidence/blockchain.py`.
+
+### R2-ENGINE-1440
+
+Bodies read whole in both roots, masked-equal (`generated/listings/{ru,en}-*.txt`):
+
+- Flee test RU `L2.02448` (42 instructions): when signed health `+0x94` is at most command `+0x44` it loads the
+  block, reads byte `+8`, adds 5 and passes the sum as the radius to `L2.05939(cell, radius)` on the unit's cell
+  (`L2.01521` on object `+0x10`), then `L2.02119(unit, list, 0)` and `L2.02502`; a nonempty result returns 1.
+  The flee body `L2.02449` reads the same byte at `L2.07767` and adds 5 again (R2-ENGINE-1418). With the byte at
+  its constructor value 5 (R2-ENGINE-1438) both radii are 10.
+- Back-off test RU `L2.02450` (37 instructions): radius is the pushed constant 2 (`L2.07769`), the same list
+  calls; no read of the block.
+- List builders RU `L2.06585`, `L2.02117` and `L2.02118`: radius = byte `+8` (5), passed to `L2.05939` on the
+  unit's cell. `L2.06585` has one call (`L2.07770`), `L2.02118` one (`L2.07771`, in the spell routine `L2.01524`
+  of R2-ENGINE-1143). No listing of `L2.02117` is committed (`compare.tsv` has 7 pairs; the committed windows are
+  `L2.06585` and `L2.02118`): its body rests on R2-ENGINE-1418 plus the one load at `L2.07765` in
+  `ru-blockchain.tsv`. By R2-ENGINE-1418 a flee with a book and Teleport admitted enters the flee spell routine,
+  whose hostile list is `L2.02117` (area radius byte `+8` = 5) and which calls `L2.01733(unit, 0)` when that list
+  holds no living member. A hostile 6 to 10 cells away passes the 10-cell test, so a Teleport-booked unit takes
+  the idle route, not the flee.
+- Six area routines `L2.07772`, `L2.07773`, `L2.07774`, `L2.07775`, `L2.07776`, `L2.07777` (EN `L2.07778`,
+  `L2.07779`, `L2.07780`, `L2.07781`, `L2.07782`, `L2.07783`) read the byte at their start. `L2.07772` (98
+  instructions) and `L2.07773` (112) are read whole: a radius below 8 goes to `L2.07773`, which for
+  each offset pair up to the radius tests a table word of the receiving object against (radius + 1)² and ORs the word at
+  `[owner object +0x14] + 0x30` into 4 mirrored map words around the unit's cell; `L2.07772` is called once
+  (`L2.07784`) and clamps its box at 0x100. The other four bodies were read as entry blocks only.
+
+By the data: the byte is a constant of the constructor; no write to it was seen, so no Units or Humans column
+feeds it in the loads traced (Medium, the population and blind spots of R2-ENGINE-1439; the row readers store the
+neighbouring byte `+0xa` as rotationSpeed, R2-ENGINE-777). So the flee test and the no-Teleport walk (`L2.02449`,
+`L2.07767`) use 10 cells and the back-off radius is 2 for every unit, in the code read; the Teleport arm lists 5
+cells.
+
+**Confidence.** High for the bodies, the constants and the radius arithmetic in both roots. Medium for the
+radius meaning: `L2.05939` and `L2.02119` are read only through their arguments (R2-ENGINE-1418), so "cells" and
+"a hostile in range" rest on that, and the unit of the radius in `L2.07773` is not named. Medium that the value
+is 5 in a running unit (R2-ENGINE-1439). The purpose of the area routines (what the owner word marks) is Unknown.
+
+**Unknown.** What the area routines mark. The area search takes the centre cell then square rings (R2-ENGINE-1188,
+Medium for EN); `L2.05939` itself is not read here. A run of the original with a computer
+mage below its Wimpy threshold and hostiles placed 9, 10 and 11 cells away settles the flee radius by whether it
+walks.
+
+**Amends.** R2-ENGINE-506 and R2-ENGINE-1418: the byte `[+0x1c0]+8` of the flee test is the constructor constant
+5, so the flee test and the walk arm use 10 cells, the Teleport arm lists 5 cells and the back-off radius is 2; R2-ENGINE-1418 listed the meaning of the byte as
+unread.
+
+**Evidence.** EXP-2182 `generated/listings/{ru,en}-fleetest-*.txt`, `-backofftest-*.txt`, `-areascan-*.txt`,
+`-list-*.txt`, `{ru,en}-refs-areascan.txt`, `generated/derived/compare.tsv`.
+
+### R2-ENGINE-1441
+
+Population: the Armors, Shields, Weapons and MagicItems rows of `data.bin` and the 491 records of
+`itemname.pkt` in `world.res` (R2-ASSET-297, R2-ASSET-298), and the claims read for the engine side.
+
+- Type field. The item ID's kind (ID >> 8) & 0xf equals the data.bin Slot for all 395 equipment records
+  (R2-ASSET-298); the EN item factory builds a weapon only for kind 1 and the other kinds through other
+  constructors (R2-ENGINE-1141). The object's own type `+0x44` is read as 2 for a weapon by the shop enchant
+  and 3 or 4 for stackable items (R2-ENGINE-711, R2-ENGINE-265).
+- Type 12. Value 12 is the Slot and kind of Shoes, Soft Boots, Chain Boots and Plate Boots (23 itemname
+  records), and Price of Buckler; no Weapons field and no MagicItems byte is 12 (R2-ASSET-297). No Weapons row or
+  itemname.pkt weapon record holds 12 in Slot, kind or any parameter; the object `+0x44` type of a built Staff is
+  not read, and no constructor listing (`L2.05910`, `L2.01754`) and no scan for compares against 12 is committed.
+- Staff. Staff and Shaman Staff are Weapons rows 13 and 14: Slot 1, attackType 3, physical 0 to 0, range 6
+  and 5, 2 handed 2 (R2-ASSET-297, R2-ASSET-111).
+- Strike delivery. In actor state 3 a unit with the mage bit and a weapon Spell enters state 0xd (R2-ENGINE-901,
+  which records the stores and leaves the state 0xd handler Unknown) and the cast call of the same step is
+  R2-ENGINE-1144 (RU actor arm `L2.02871`); any other unit with a weapon Spell casts it in the strike only after
+  a blow with damage above 0 to a living target, or for Spell id 2 (R2-ENGINE-901). The staff cast pays no mana
+  and re-tests no distance in the bodies read (R2-ENGINE-1138, High for the bodies, Medium for no re-test at
+  release). The cast distance is within `+0x12c` of the target's nearest cell, the RU equip body adding range − 1
+  (EN unread); that is 6 cells for a Staff and 5 for a Shaman Staff if the base is 1 (the base is assumed, not
+  read, and R2-ENGINE-1144 states the distance for the equip body and the computer planner only). The Staff row's
+  physical damage is 0 to 0, so a non-mage's staff delivers its Spell only when the damage formula (not read
+  here) gives above 0 or the Spell has id 2.
+- Holders. R2-ENGINE-901's tests read the mage bit `+0x4c` and the weapon, not the owner (the predicates
+  `L2.00044` and `L2.02338` read the mage bit and the weapon), so a computer and a player holder enter the same
+  state-3 arm (Medium); the order that leads to state 3 is not shared evidence, and they differ in how an attack
+  order is chosen (the computer planner of R2-ENGINE-1144).
+
+**Confidence.** Medium: a composition of the claims named, each read in the roots those claims state; the
+weakest link is Medium (R2-ENGINE-1144's composition, whose own grade is Medium). High for the row values.
+Unknown: which Spell a placed Staff carries (the Weapons rows hold no Spell column; a weapon Spell is an
+effect, R2-ENGINE-711), what the strike costs a non-mage beyond the weapon charge and relax columns (not read
+here), and the player's order route.
+
+**Unknown.** The Spell of a staff and the cost of a non-mage's blow. A run of the original with one player mage
+and one computer mage, each holding a Staff, attacking a unit from 7 cells, reads the cast and the mana.
+
+**Evidence.** EXP-2182 `generated/derived/find12.tsv`, `slot-census.tsv`, `generated-itemname/`; claims as
+named.
+
+### R2-ENGINE-1442
+
+Composition by the code read, for a computer unit (owner `+0x2c` nonzero, R2-ENGINE-362 at its grade) with Heal
+(spell 24) in its book:
+
+1. The Group programme arm may reach the heal routine `L2.01513` (R2-ENGINE-1420): it needs mana above 10, the
+   book and spell 0x18, then casts on the unit or the ally with the lowest health quotient, storing command
+   `+0x60` = 1 and, through `L2.01524`, prepared `+8` = 8 (R2-ENGINE-1200, R2-ENGINE-1143).
+2. In the same Group pass the post-step `L2.02446` follows the arm (its one caller is the group tick,
+   R2-ENGINE-1003) and runs `L2.02447` per member: flee test (health at most `+0x44` and a living hostile within
+   10 cells, R2-ENGINE-1440), else back-off test (health at most `+0x40`, hostile within 2). The flee body stores
+   prepared `+8` = 1 with the target cell through `L2.02401` (R2-ENGINE-1418), or casts Teleport (the cell cast
+   `L2.01732` is unread, so the Teleport arm's store is Unknown); with a hostile list that holds no living unit
+   it calls `L2.01733(unit, 0)`. The flee test counts any filtered unit and does not test health above 0, while
+   the flee body counts only health above 0, and the Teleport arm's list is 5 cells (R2-ENGINE-1440).
+3. The heal is prepared, not cast, on the pass: the executor takes prepared `+8` on a unit tick (R2-ENGINE-1200).
+   On the walk arm the post-step's store replaces `+8` = 8 with `+8` = 1 before any tick, so the walk is what
+   runs.
+
+So on the walk arm the walk replaces the prepared heal on the pass when a withdrawal test holds. When the flee
+finds no living hostile in its list, `L2.01733(unit, 0)` is the idle planner, whose no-candidate arm calls the
+idle wrapper and so the heal routine (R2-ENGINE-1420, row 0xff), and a heal may be prepared. When neither test
+holds, the heal stays prepared. Among the 40 Heal-booked Units rows only Succubus has a nonzero threshold (Wimpy;
+flee test), and none has Withdraw; the 20 Withdraw rows book no Heal (R2-ASSET-293). A stored 0 satisfies a test
+only at health 0 or below (R2-ENGINE-1003). A Human-table mage flees at a quarter of its health (R2-ENGINE-506).
+
+Later passes. A pass whose tests both fail and whose programme arm reaches the heal routine stores prepared `+8`
+= 8 over the walk's `+8` = 1. The flee test keeps passing while the unit is within 10 cells of a living hostile,
+and the walk moves it 3 cells, so on a usual pass the flee repeats and no heal is cast. After the unit's
+withdraw ends (hostiles dead or beyond 10 cells, health healed above the thresholds) the heal can run. Whether a
+walk or teleport in progress stops when `+8` becomes 8 is not read: the executor handlers of prepared 1 and 8 and
+the cell cast `L2.01732` are unread here.
+
+**Confidence.** Medium for the composition: the weakest link is the executor, which this experiment did not
+read, and the post-step order relative to the arm in the group tick (R2-ENGINE-1003, High for the call, Medium
+for indirect routes). Unknown for the later-pass cast while a walk or teleport is under way.
+
+**Unknown.** The executor handlers for prepared 1 and 8 and `L2.01732`. A run of the original with a computer
+Succubus (Wimpy and Heal) beside one hostile, health below its flee threshold, with a damaged ally in range,
+settles the order on one pass by its first order: a heal on the ally against a walk away. Watching the second
+pass while the walk is under way settles the later-pass cast.
+
+**Evidence.** EXP-2182 `generated/listings/{ru,en}-fleetest-*.txt`, `-backofftest-*.txt`; claims as named.
+
 ## ROM2 computer heal cadence and break-off
 
 Terms: command = the block at unit `+0x1c4`; Group pass = `L2.00502`, called when session counter `+4`
@@ -31791,7 +31993,7 @@ for `L2.02117`; each pair is masked-equal (`generated/derived/compare.tsv`).
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1418 | ROM2 flee and back-off cast Teleport at scanRange +1 (back-off: -1) from the hostiles' mean point when it is booked and paid; otherwise the unit walks 3 cells. The spell routines' Invisibility and walk-to-cell arms are unreachable (Medium). | High / Medium | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+| R2-ENGINE-1418 | ROM2 flee and back-off cast Teleport at scanRange +1 (back-off: -1) from the hostiles' mean point when it is booked and paid; otherwise the unit walks 3 cells. The spell routines' Invisibility and walk-to-cell arms are unreachable (Medium). | High / Medium | ● active (amended) | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
 | R2-ENGINE-1419 | ROM2 break-off runs once per Group pass per member from the post-step; flee also runs from selector cell 0x16 (cadence Unknown); no flight state is kept in the bodies read; each decision is re-made. | High / Medium / Unknown | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
 | R2-ENGINE-1420 | ROM2 Group programmes 1, 2, 3, 5, 18 and 0xff reach a computer mage's heal routine when it lacks a target (programmes 1 and 2 at their post with `L2.00490` nonzero; programme 18 the same with two further gates); programme 19 always. | High / Medium / Unknown | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
 | R2-ENGINE-1421 | ROM2 L2.02445 sets +0x40 = HPmax x {0, 2v, 3v}[class] / 100 (v 0, 10 or 30) for owner +0x2c zero units or a passed owner. | High / Medium / Unknown | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
@@ -31851,6 +32053,8 @@ when Teleport is in the book and mana covers its cost; otherwise the unit walks 
 Invisibility and walk-to-cell arms of the spell routine are unreachable while the admission is pure,
 Medium); the back-off helper `L2.02451` walks 3 cells or calls its own spell routine
 (r = scanRange − 1); the admission body `L2.01518` is read.
+
+**Amended.** R2-ENGINE-1440 reads the byte `[+0x1c0]+8` that this card lists as unread: it is the block constructor's constant 5 (R2-ENGINE-1438), so the flee area radius is 5 + 5 = 10 cells for the test and the walk arm (the Teleport arm lists 5 cells) and the back-off area radius the constant 2 (High for the bodies, Medium for the value in a running unit, R2-ENGINE-1439). The other clauses and grades stand.
 
 **Evidence.** EXP-2181 `RESULTS.md` question 5.
 

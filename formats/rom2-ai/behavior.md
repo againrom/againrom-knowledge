@@ -167,7 +167,7 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 
 | Input/state | Rule | Claims and clause grades | Unknowns |
 |---|---|---|---|
-| Each member after programme route | Health <= command +0x44 and hostile within movement byte +8 + 5: flee. Otherwise health <= +0x40 and hostile within 2: back-off helper L2.02451. | R2-ENGINE-506 High predicates, Medium helper destination; R2-ENGINE-877 Medium bounded route independence | All threshold writers; units outside this Group post-step |
+| Each member after programme route | Health <= command +0x44 and hostile within movement byte +8 + 5 (10 cells; the Teleport arm lists 5 cells): flee. Otherwise health <= +0x40 and hostile within 2: back-off helper L2.02451. | R2-ENGINE-506 High predicates, Medium helper destination; R2-ENGINE-877 Medium bounded route independence; R2-ENGINE-1440 radius | All threshold writers; units outside this Group post-step |
 | Human-table threshold setup | Spellbook: class 2, +0x40=HPmax, +0x44=HPmax/4. Else range>1 and kind!=3: class 1, HPmax/2 and 0. Else class 0, both zero. | R2-ENGINE-506 High local stores | Further writer effects |
 | Creature thresholds | Stat reader can supply Withdraw/Wimpy to command +0x40/+0x44, keeping defaults for -1. Human-only setup does not imply creature thresholds stay constructor values. | R2-ENGINE-777 High reader, Medium delivered row; R2-ENGINE-884 Medium creature composition | Creature row values and complete writer population |
 | Flee chosen | Teleport (23) admitted by L2.01518 (in the book, mana at least its cost): cast at a cell scanRange + 1 from the hostiles' mean point; otherwise walk 3 cells away from that point. Each spell routine also holds an Invisibility (12) arm and a walk-to-cell arm behind a repeated Teleport admission; the callers' entry test makes them unreachable while the admission is pure (Medium). No living hostile: idle planner. Back-off is the same with radius 2 and scanRange - 1 (R2-ENGINE-1418). | R2-ENGINE-506 High flee body, Medium centre/away interpretation | Spell admission and concrete destination |
@@ -247,7 +247,11 @@ marked-cell path of the sight lists, whose callers were not counted
 (R2-ENGINE-1142), the book cast's spell +9 admission (R2-ENGINE-1143) and the
 EN item kind of a staff (R2-ENGINE-1141). The weapon constructor L2.05910 is
 called by the record loader L2.07611 and four other routines (R2-ENGINE-1367,
-Medium).
+Medium). No installed data.bin item row and no itemname.pkt record has 12 as Slot or
+kind except the boots (Medium that either is the engine's item type; the object
++0x44 type of a built item is read only through R2-ENGINE-711 and
+R2-ENGINE-265); a Staff is kind 1, attackType 3, physical 0 to 0 (R2-ASSET-297, R2-ASSET-298),
+and its cast pays no mana (R2-ENGINE-1441, Medium).
 
 ## Keyboard orders and the defend order
 
@@ -282,7 +286,7 @@ entries of the RU install text have an arm in the read routines
 This path reads no list stored for the defended unit; it reads the map's
 shared scratch list, rewritten by each call. Each call rebuilds it from the
 units on the cells within r of the defended unit's cell, where r is byte +8 of the object
-at defended +0x1c0. The search takes the centre cell first, then square
+at defended +0x1c0 (5 for every unit read, R2-ENGINE-1440). The search takes the centre cell first, then square
 rings. The list is then filtered with the defended unit as the reference
 (R2-ENGINE-1188; the EN search body and the filter meanings are Medium).
 With the list empty, order 8 reads as calling the idle planner for the
@@ -492,6 +496,19 @@ units are not read). The player threshold rewrite
 L2.02445 sets +0x40 to HPmax x {0, 2v, 3v}[class] / 100 (R2-ENGINE-1421). No
 heal, break-off or Group arm body read reads the difficulty word
 (R2-ENGINE-1422, Medium).
+
+The flee test and the flee body use the radius of the movement block's byte +8
+plus 5. The byte is the block constructor's constant 5 (R2-ENGINE-1438); the
+traced loads read it at 11 sites and write it nowhere, and all 356 saved Unit
+and Human records hold 5 (R2-ENGINE-1439, Medium). So the flee radius of R2-ENGINE-506 and
+R2-ENGINE-1418 is 10 cells for the test and the walk arm; the Teleport arm lists 5 cells, the
+back-off radius is the constant 2, and the guard list radius is 5
+(R2-ENGINE-1440). A computer healer that meets both the break-off test and the
+heal on one Group pass walks: the post-step's store replaces the prepared heal
+with the walk (R2-ENGINE-1442, Medium). When the flee finds no living hostile
+in its list it runs the idle planner instead, which may prepare a heal; the
+Teleport arm's store is unread (Medium / Unknown). A heal cast during a walk
+that is under way is Unknown (R2-ENGINE-1442).
 
 ## Guard radius source
 
