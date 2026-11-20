@@ -4377,6 +4377,9 @@ body settles it, and no map of the 46-map corpora needs it. E9, indirect and dat
 `L2.03284`: an E9, indirect-call and dword-data scan settles it. A computed-index write to 100..999. Load game0012 (mission 30) with a write watch on
 session +0xc914..+0xd723 until mission end, then save and compare the registers.
 
+**Amended.** R2-ENGINE-1453 reads the body of `L2.04242`: it is find-or-insert, so a missing check id inserts a node; the
+value stored for it stays Unknown. R2-ENGINE-893 already stated find-or-insert from this card; R2-ENGINE-1453 reads the body.
+
 **Format surface.** `formats/rom2-sav/format.md`, Terrain and session.
 
 **Evidence.** [EXP-2099](../experiments/EXP-2099-rom2-mission-terrain-session/RESULTS.md), question 3.

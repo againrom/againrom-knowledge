@@ -438,4 +438,4 @@ its map helpers and visible effects keep the composition Medium
 mission failure or LOAD-dependent removal (R2-ENGINE-1256, Medium bounded
 census, completeness Unknown).
 
-The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and actions 33 and 34 Unknown. They change no rule above (R2-ENGINE-1314).
+The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and the bodies of actions 33 and 34 are read (R2-ENGINE-1450), their delegated effects Medium. The script tick runs before the loop over the group list and empties the Session+0xbbec list (R2-ENGINE-1451); checks 1, 5 and 8 test no per-entry state (R2-ENGINE-1452). They change no rule above (R2-ENGINE-1314).

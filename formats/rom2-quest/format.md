@@ -47,7 +47,8 @@ Both maps write objectives 1 and 2 with instant 36 modes 1 and 2 only (no mode
 4, so no state 5) and have no check 24 or check 23, so no condition in these two
 maps reads an objective slot (R2-ENGINE-894, R2-ENGINE-895: High wiring; the
 condition and end labels Medium). A condition row with a zero check ID is not compiled (R2-ENGINE-893);
-the others compare result registers as R2-ENGINE-059 states.
+the others compare result registers as R2-ENGINE-059 states. A nonzero check ID absent from
+the map inserts a new map node when compiled; the slot it then names is Unknown (R2-ENGINE-1453).
 
 | Map | Objective | Opens | Completes | Claims and clause grades | Unknowns |
 |---|---|---|---|---|---|
@@ -62,3 +63,5 @@ R2-ENGINE-046 are partially retracted; R2-ENGINE-889 and R2-ENGINE-891 replace
 them.
 
 Script operation reads add these bounds. The zero-check-ID rule covers the first left ID of a trigger as well: a zero first left ID excludes the whole trigger from compilation (High as code; R2-ENGINE-1316). No installed campaign trigger has one, and one campaign trigger (map 42, index 16, both roots) names left check ID 0xFFFFFFFF, which is no check ID of its map (R2-ASSET-248). Action 36's body calls GetVar/SetVar on 752+p0 with the arms of R2-ENGINE-046 (partially retracted, amended grade; High for the instructions, Medium for delegated effects; R2-ENGINE-1313). The read action wrappers expose operand widths and delegated calls only; they add no objective-state claim (R2-ENGINE-1314). Checks 23 and 24 read scenario GetVar(p0) or GetVar(752+p0) with Medium helper results (R2-ENGINE-1315). The map-slot actions and check 19 have no local index guard, which proves no safe slot range (Medium; R2-ENGINE-1319).
+
+Bodies of the numbers no installed map uses (except action 37, Unknown), the order of one script tick and the bodies of checks 1, 5, 8 and 20 are in R2-ENGINE-1450, R2-ENGINE-1451 and R2-ENGINE-1452.

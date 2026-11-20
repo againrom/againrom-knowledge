@@ -2,12 +2,12 @@
 
 ## Snapshot
 
-Snapshot k487, exported from the private research repository at commit
-`e93d202ac58d8e850c77138ab5ebc945be4d187d`.
+Snapshot k488, exported from the private research repository at commit
+`fc4f252ed115fdd93d5565dd0bc1b1e769789be9`.
 
 | Field | Count |
 |---|---:|
-| Claim ids | 5153 |
+| Claim ids | 5157 |
 | Retracted ids | 600 |
 | Format pages | 138 |
 

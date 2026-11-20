@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5153. Observation: 143. Static analysis: 4298. Mixed: 712.
+Claims labelled: 5157. Observation: 143. Static analysis: 4302. Mixed: 712.
 
 ## Ledger ai
 
@@ -2249,7 +2249,7 @@ Claims labelled: 5153. Observation: 143. Static analysis: 4298. Mixed: 712.
 | R2-ENGINE-1018 | static analysis | ● active |
 | R2-ENGINE-1019 | static analysis | ● active |
 | R2-ENGINE-1020 | static analysis | ● active |
-| R2-ENGINE-1021 | static analysis | ● active |
+| R2-ENGINE-1021 | static analysis | ● active (amended) |
 | R2-ENGINE-1022 | static analysis | ● active |
 | R2-ENGINE-1040 | static analysis | ● active |
 | R2-ENGINE-1041 | static analysis | ● active |
@@ -2949,7 +2949,7 @@ Claims labelled: 5153. Observation: 143. Static analysis: 4298. Mixed: 712.
 | R2-ENGINE-890 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-891 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-892 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-893 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-893 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-894 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-895 | mixed | ✔ promoted (branch candidate) |
 | R2-ENGINE-896 | static analysis | ✔ promoted (branch candidate) |
@@ -3235,14 +3235,18 @@ Claims labelled: 5153. Observation: 143. Static analysis: 4298. Mixed: 712.
 | R2-ENGINE-1401 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-1402 | static analysis | ● active (branch candidate) |
 | R2-ENGINE-1403 | static analysis | ● active (branch candidate) |
-| R2-ENGINE-1312 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1312 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1313 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1314 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1314 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1315 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1316 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1316 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1317 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1318 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1319 | mixed | ✔ promoted (branch candidate) |
+| R2-ENGINE-1450 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-1451 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-1452 | static analysis | ● active (branch candidate) |
+| R2-ENGINE-1453 | static analysis | ● active (branch candidate) |
 
 ## Ledger rom2-session
 

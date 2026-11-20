@@ -494,7 +494,8 @@ No accepted-index domain follows from these DWORD accesses.
 | 29 | p0+256*p1 lookup; six returned pointers; matching u16+0x0c==p2 gets u16+0x50=low16(p3) | Returned pointer kinds unproved here |
 | 30 | Iterates U+0x20; matching u16+0x0c==p0 gets u16+0x42=low16(p1) | Collection identity/membership unread |
 | 32 | Iterates G and calls EN L2.04906 | Final effect unread |
-| 33, 34 | Dispatch targets EN L2.07410/L2.07411, RU L2.07412/L2.07413 | Operands/effects Unknown |
+| 33 | L2.01848 on each member of G | Final effect unread (R2-ENGINE-1450) |
+| 34 | p0 6, 15, 16 store low16 p1 at U+0x94, +0xbe, +0xc0; other p0 store nothing; notify L2.07789 | Final effect unread (R2-ENGINE-1450) |
 | 38 | I extraction per iterated terrain unit, optional virtual slot+4(1), refresh call | Existing extraction boundary above |
 
 The delegated action table is a wrapper contract in both roots, with EN
@@ -574,3 +575,45 @@ a complete compiler/caller census. Safe map-slot capacity and index/value
 limits remain Unknown. The scenario DLL's initial 1024-DWORD clear is a
 different namespace and does not prove an external safe range or unbounded
 admission. — R2-ENGINE-1319
+
+## Remaining action and check bodies, tick order and unit counts
+
+The executable parses action numbers 1..39 and check numbers 1..27. Every check cell and 38
+action cells reach a wrapper call (R2-ENGINE-1312). The cell of action 37 (EN L2.00511,
+RU L2.00510) leads to a message-formatting arm that calls L2.04048 (EN) and posts through
+L2.00513 when the diagnostic object is set; its meaning and whether the out-of-range default
+is the same arm are Unknown. Bodies of the numbers that occur in no installed map are read in
+both roots except action 37, equal after masking; delegated helper effects stay Medium, and
+the x/y reads of checks 2, 3, 22 and 27 are Medium.
+Pointer names U/V/P/G are as in R2-ENGINE-1313. — R2-ENGINE-1450
+
+| Action | Body | Check | Body |
+|---:|---|---:|---|
+| 1 | Session+0xc710 and register 902 each add 1 | 2 | R=1 when U's low8 x is in p0..p2 and y in p1..p3 |
+| 7 | helper L2.07788 on P with low8 p0 | 3 | R=1 when terrain metric (U, p0, p1) is at most p2 |
+| 9 | returns at once | 11, 13 | return at once, no result |
+| 11 | item found in U's collection, U notified; if found, added to V's collection, V notified; whether U loses it is Unknown | 12 | R=1 when the item is in U's collection |
+| 14, 15 | same call: global L2.00994 with U and 0xffb | 20 | count of P's objects with i16+0x42 above 0 |
+| 26 | word +0x42 of the IR+0x70 object = low16 p0 | 22 | R=1 when terrain cell (p0, p1) exists; helper called on it |
+| 27 | terrain call on U, then L2.00441 | 27 | R=1 when low8 x = p1, y = p2 and helper true |
+| 31 | objects with DWORD+0xac = p0 get +0xb4 = p1 | | |
+| 33 | action 17's helper on each member of G | | |
+| 34 | p0 6, 15, 16 stores p1 at U+0x94, +0xbe, +0xc0 | | |
+
+Rows for the other numbers are in the tables above. — R2-ENGINE-1450
+
+One script tick adds 1 to register 999, runs the check loop, runs the trigger runner and
+empties the Session+0xbbec list, and the turn routine runs the tick before the loop over the
+group list (R2-ENGINE-936), also while Session+0xbbe8 is nonzero (the field's meaning is not
+read). Which condition makes the check loop skip a node and which posted records the drain
+consumes are Unknown. — R2-ENGINE-1451
+
+Check 1 returns DWORD+0xc of G (read as the group's member count: Medium). Check 8 adds one
+per entry of every group list of P+0x28 with no test on the entry. Check 20 counts objects
+whose owner equals P and whose signed word +0x42 is above 0 (Medium: +0x42 is health). Which
+of unconscious, dead with body and remains has +0x42 at or below 0, and whether a dead unit
+or remains entry stays in a group's collection, are Unknown. Check 5 returns 0 only for state
+16 (R2-ENGINE-1315). No body of checks 1, 5 and 8 reads a per-entry field. — R2-ENGINE-1452
+
+The check-ID map is hash find-or-insert: a check ID absent from the map inserts a node, and
+the value later used as its register slot is Unknown. — R2-ENGINE-1453

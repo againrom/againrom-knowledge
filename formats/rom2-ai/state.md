@@ -441,4 +441,6 @@ of the key does not establish its value or counting after LOAD. Caster loss,
 timers and complete departure coverage remain Unknown (R2-ENGINE-1256,
 Medium bounded census).
 
-The ordinary script action and check wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and actions 33 and 34 Unknown. The 19 ordinary check bodies are read the same way, with Medium helper results (R2-ENGINE-1315), and the map-slot actions and check 19 have no local index guard, which proves no safe slot range (Medium; R2-ENGINE-1319). They change no rule above (R2-ENGINE-1313, R2-ENGINE-1314).
+The ordinary script action and check wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and the bodies of actions 33 and 34 are read (R2-ENGINE-1450), their delegated effects Medium. The 19 ordinary check bodies are read the same way, with Medium helper results (R2-ENGINE-1315), and the map-slot actions and check 19 have no local index guard, which proves no safe slot range (Medium; R2-ENGINE-1319). They change no rule above (R2-ENGINE-1313, R2-ENGINE-1314).
+
+The bodies of the numbers no installed map uses are read in R2-ENGINE-1450, except action 37, whose cell is a message-formatting arm (Unknown); checks 1, 5, 8 and 20 test no per-entry state beyond +0x42 of check 20 (R2-ENGINE-1452). The script tick runs before the loop over the group list and empties the Session+0xbbec list (R2-ENGINE-1451).

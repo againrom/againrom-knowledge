@@ -62,13 +62,13 @@ IDs and 19 ordinary check IDs, plus full word 65538 in both lists.
 The script companion specifies all 184 trigger offsets: a 128-byte prefix
 (label interpretation Medium), three check-ID pairs, four action IDs,
 three comparison codes and the flag DWORD at+0xb4. Both loaders bulk-copy
-the trigger; unlike nodes, it has no field permutation. ID-map failures,
-prefix consumers and the flag of a zero-condition trigger remain open.
-— R2-ENGINE-1316
+the trigger; unlike nodes, it has no field permutation. Compiler use of the ID-map node,
+prefix consumers and the flag of a zero-condition trigger remain open; the miss path
+of the ID map is read (find or insert, node value Unknown). — R2-ENGINE-1316, R2-ENGINE-1453
 
 Every occurring ordinary ID is mapped through both dispatch tables.
 Twenty-seven action and nineteen check bodies per root are read to RET;
-action 33 is a prefix and action 34 unread. Local map-slot/Session-DWORD/relation
+the bodies of actions 33 and 34 are read (R2-ENGINE-1450); their delegated effects are Medium. Local map-slot/Session-DWORD/relation
 stores, delegated action calls and check operands are specified at their
 individual confidence boundaries. Unread helpers do not establish complete
 player effects. — R2-ENGINE-1312, R2-ENGINE-1313, R2-ENGINE-1314,
