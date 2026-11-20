@@ -14673,6 +14673,8 @@ entry reaches `L2.02974` when `L2.01829` is nonzero and the unread getter
 `R2.0113` returns the stored value (Medium); `L2.01829` is Unknown.
 R2-ENGINE-723 lists the REG keys that branch requests.
 
+**Amended.** R2-ENGINE-1402 reads the getter `R2.0113`: a miss returns the default, a hit returns the stored value.
+
 ### R2-ENGINE-602
 
 Selected class descriptor/factory/constructor/vtable chains bind Spell to
@@ -16456,6 +16458,8 @@ postload effect members and the first ticks as RESULTS question 1 specifies.
 
 **Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
 
+**Amended.** R2-ENGINE-1398 adds the base fields +4, +8, +0xc, +0xe, +0x18 (zeroed on load) and +0x1c and finds no read of DirectDamage +0x44; R2-ENGINE-1399 narrows the caster-delivery Unknown: a loaded point or area effect reaches its target's apply path with no stored caster link (Medium; the HP amount without a caster is Unknown).
+
 ### R2-ENGINE-660
 
 World phase L2.03435 calls effect-list tick L2.03436. It invokes
@@ -16483,6 +16487,8 @@ This narrows R2-SESSION-235's static continuation Unknown; it does not
 replace R2-SESSION-161's ordinary AreaEffect Unknown.
 
 **Evidence.** [EXP-2083](../experiments/EXP-2083-rom2-flight-restore/RESULTS.md), questions 1 through 6 and their named committed listings.
+
+**Amended.** R2-ENGINE-1399 reads the caster arms around DirectDamage and area application; the damage amount stays Unknown. R2-ENGINE-1400 reads the AreaEffect tick's pulse, start and end arms.
 
 ### R2-ENGINE-661
 
@@ -18724,6 +18730,8 @@ with the screen recorded, would settle it; the same loads with a trace of the
 `L2.01829` and `R2.0113` results would settle the gate and the getter.
 
 **Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 5.
+
+**Amended.** R2-ENGINE-1402 reads the getter `R2.0113` (a miss returns the default) and finds that InBattle and SpellBook/IsOpen go to locals the town branch does not read again.
 
 ### R2-ENGINE-724
 
@@ -31959,6 +31967,210 @@ excluded.
 **Unknown.** Which difficulty label each value names (index + 1 at Accept, R2-ENGINE-283).
 
 **Evidence.** EXP-2181 `RESULTS.md` question 6.
+
+## ROM2 effects in flight and town REG after LOAD
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1398 | ROM2 effect base LOAD reads +4, +8, +0xc, +0xe, +0x18 (then zeroed), +0x1c and two keys; EN DirectDamage adds the Effect fields and 0x18 raw bytes at +0x48; no read stores +0x3c or +0x44; what the effect +0x14 key names is Unknown. | High / Medium | ● active (branch candidate) | [EXP-2180](../experiments/EXP-2180-rom2-sav-load-runtime/EXP-2180.md) |
+| R2-ENGINE-1399 | A loaded ROM2 point or area effect reaches its target's apply path with no stored caster link: LOAD stores neither +0x3c nor +0x44 (Medium; constructors unread); the HP amount without a caster is Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2180](../experiments/EXP-2180-rom2-sav-load-runtime/EXP-2180.md) |
+| R2-ENGINE-1400 | A loaded ROM2 timed AreaEffect resumes from its stored +0x50: it pulses when +0x50 mod 16 is 0, over radius +0x4d, and ends at +0x50 <= 0; +0x4c 0 takes the start arm first. | High / Medium | ● active (branch candidate) | [EXP-2180](../experiments/EXP-2180-rom2-sav-load-runtime/EXP-2180.md) |
+| R2-ENGINE-1401 | ROM2 Unit LOAD reads the caster's substate +0x58, count byte +0x6c and bytes +0x134..+0x136, so a caster saved in wind-up or recovery resumes its own count (that the count runs to its end is Medium); no effect object holds it. | High / Medium | ● active (branch candidate) | [EXP-2180](../experiments/EXP-2180-rom2-sav-load-runtime/EXP-2180.md) |
+| R2-ENGINE-1402 | ROM2 town LOAD stores 10 of 12 REG values (Character/Name through an unread reader, Medium); InBattle and SpellBook/IsOpen go to locals not read again; nine getters default to the current value, so a missing key leaves it unchanged. | High / Medium | ● active (branch candidate) | [EXP-2180](../experiments/EXP-2180-rom2-sav-load-runtime/EXP-2180.md) |
+| R2-ENGINE-1403 | ROM2 town LOAD reads pairs into app +0x598, the Scenario record through a function pointer set at run time, and nine cells into app +0x4dc, each freed and refilled. | High / Medium | ● active (branch candidate) | [EXP-2180](../experiments/EXP-2180-rom2-sav-load-runtime/EXP-2180.md) |
+
+### R2-ENGINE-1398
+
+The shared base serializer EN L2.03196 / RU L2.01164 (123 rows each, 0
+differing rows after masking operands of five or more hex digits,
+`evidence/normdiff/base-serialize.txt`) first calls L2.02232 and the +0x10
+sub-object serializer L2.03197. Its load arm reads DWORD +4, word +0xc, word
++0xe, DWORD +8, word +0x18, which it then sets to 0, DWORD +0x1c, the saved self
+address (registered in session +0xdc through L2.03198) and the saved +0x14
+owner address (fixed by L2.03199). It addresses no offset above +0x1c.
+
+The EN DirectDamage vtable L2.07729 has slot 2 L2.07730: it calls L2.07731 and
+then L2.07732 on +0x48. L2.07731 calls the base and transfers byte +0x3c, byte
++0x3d, DWORD +0x40 and word +0xc, the unit Effect fields of R2-SESSION-328.
+L2.07732 transfers 0x18 raw bytes at +0x48 through L2.01538 (store) and
+L2.01539 (load). DirectDamage +0x44, the caster the apply suffix stores
+(R2-ENGINE-1262, payload L +0x44), is not addressed by these three bodies.
+Listings: `evidence/nav/n1/en-base-serialize-L2.03196.txt`,
+`ru-base-serialize-L2.01164.txt`, `en-dd-serialize-L2.07730.txt`,
+`evidence/nav/n2/en-dd-parent-serialize-L2.07731.txt`,
+`en-dd-desc-serialize-L2.07732.txt`.
+
+The RU vtable at L2.07733 has the same shape (slot 2 L2.07734, slot 9 the base
+postload L2.03190, slot 15 L2.01702; `ru-data-vt-after-area-L2.07735.tsv`);
+its serializer bodies were not read.
+
+**Confidence.** High for the read EN bodies and the RU base body. Medium for
+DirectDamage in RU (bodies unread) and for the object state after LOAD: the
+archive factory's constructor, which sets the fields no read stores, is unread.
+
+**Unknown.** The constructor values of DirectDamage +0x44 and SpellEffect
++0x3c after the factory builds a loaded record. Read the factory's
+DirectDamage and PointEffect constructors. What the effect +0x14 owner key
+names (it is restored by lookup, and no apply body read reads it) and what
+L2.00336 does with a nonzero +4 (the base load arm passes the stored +4 to it
+at L2.07736). Read both.
+
+**Amends.** R2-ENGINE-659's base field list: the base also transfers +4, +8,
++0xc, +0xe, +0x18 (zeroed on load) and +0x1c.
+
+### R2-ENGINE-1399
+
+Point application EN L2.03442 (EXP-2083 `en-point-apply-L2.03442.txt`) first
+clears payload +0x44 when the payload's caster has +0x14 zero, then calls the
+payload's slot +0x3c on a live target. When the point's +0x3c and byte +0x41
+are nonzero it sets the target's +0x40 to the caster and +0x48 to payload byte
++0xc (or +0x40 to 0 when L2.03453 of the caster is true) and, when caster and
+target both have +0x14, calls L2.04120 (caster, target, 0) on [L2.01066]. Area
+application EN L2.05842 shows `push 1` and the two +0x14 tests before a call
+that lies beyond the 128-instruction window (the call target is inferred from
+the point application, Medium), and skips spell 17 and the target arm for
+spell 15. RU L2.01708 equals it for rows 0..122 under the mask, then tests
+[L2.01317]+0x74 (`evidence/normdiff/area-unit-apply.txt`); its branch target
+is unread. For spell 2 the area apply builds a local object with L2.07737 and
+applies L2.03443 to it; that constructor is unread.
+
+DirectDamage application L2.03443 subtracts the target's slot +0x54
+(descriptor +0x48, caster +0x44) from Unit word +0x94, or L2.07738 of the same
+arguments from structure word +0x42 clamped at 0, and only when +0x44 and +0xc
+are nonzero and damage is positive calls the caster's slot +0x6c (target,
+damage, spell id).
+
+With +0x3c not transferred (R2-ENGINE-659) and +0x44 not transferred
+(R2-ENGINE-1398), a loaded payload still reaches the target's apply path; the
+attacker memory, the L2.04120 call and the caster's slot +0x6c are skipped
+when the constructor leaves both fields 0. Whether the target loses the same
+HP without a caster is Unknown: slot +0x54 receives +0x44 and +0x48 and its
+return is subtracted from Unit word +0x94.
+
+**Confidence.** High for the point application, EN. Medium for the area
+hostility call (the window ends before it) and for the skipped calls after
+LOAD (constructors unread, and no claim shows DirectDamage +0x44 starts at 0;
+R2-ENGINE-659's zero start is SpellEffect +0x3c). Unknown whether the damage
+amount depends on the caster argument: target slot +0x54 and L2.07738 are
+unread, and a null argument may give any amount, including 0 or a fault.
+
+**Unknown.** The HP change of a loaded point effect against a live one.
+Cold-load game0006 (one transport with nested DirectDamage, R2-SESSION-260)
+in the original EN, record the target's HP and +0x40 at the landing tick and
+compare with the same cast landing without a LOAD.
+
+**Amends.** R2-ENGINE-659's Unknown "actual caster/target delivery" and
+R2-ENGINE-660's "exact damage calculation": the caster link of a loaded point
+or area effect is absent from the stored fields; the amount stays Unknown.
+
+### R2-ENGINE-1400
+
+AreaEffect tick EN L2.03444 (EXP-2083 `en-area-slot6-L2.03444.txt`): base +8
+bit 2 (L2.07739, `en-area-test-L2.07739.txt`) calls L2.01696; else bit 1
+(L2.07740) with byte +0x4c 0 calls the start arm L2.04739; with +0x4c nonzero
+and word +0x50 above 0 it decrements +0x50 and, when the new value mod 16 is 0,
+walks the square from -(+0x4d) to +(+0x4d) around the +0x10 position and
+applies L2.05842 to each unit found; with +0x50 at or below 0 it calls
+L2.04741, which clears the cells, notifies through L2.04772 and sets +0x4c to
+0, and then sets completion +0x40. Without either bit it calls L2.04764.
+The apply suffix sets +8 = 1 and +0x50 = element 11 * 16 for a timed area and
++8 = 2 for Distribution 5 (R2-ENGINE-1262). +8 (R2-ENGINE-1398), +0x4c..+0x4f
+and +0x50 (R2-ENGINE-659) are stored. A loaded area with +0x4c nonzero continues from the stored +0x50;
+with +0x4c 0 the start arm runs first, and whether it rewrites +0x50 is
+Unknown.
+
+**Confidence.** High for the EN tick read with +0x4c nonzero; the RU tick pair
+is equal under R2-ENGINE-665's mask. Medium for the start arm (L2.04743,
+L2.04750 unread) and for L2.01696 and L2.04764, read in navigation only.
+Unknown for the pulse phase with +0x4c 0.
+
+**Unknown.** The first pulse tick after LOAD in the original. Save during a
+timed area effect between pulses, cold-load and count ticks to the next HP
+change.
+
+**Amends.** R2-ENGINE-660's "application/expiry helpers remain open": the
+pulse, per-unit application and end arms are read; the start arm is not.
+
+### R2-ENGINE-1401
+
+The RU Unit serializer (EXP-2083 `ru-unit-serialize-L2.01161.txt`) load arm
+reads DWORD +0x58 through L2.00548 (4 bytes), byte +0x6c through L2.07741,
+which calls the one-byte reader L2.07192, and bytes +0x134, +0x135 and +0x136
+through L2.07192 (`evidence/nav/n1/ru-byte-read-L2.07192.txt`,
+`ru-byte-read-b-L2.07741.txt`); the store arm writes the same fields. These are
+the actor-step fields of R2-ENGINE-1262: substate +0x58 (5 wind-up, 7
+recovery), count +0x6c and the done byte +0x136. A caster saved in substate 5
+or 7 therefore resumes its count after LOAD and sets +0x136 at the count's end;
+the read effect serializers (R2-ENGINE-1398, R2-ENGINE-659) store no caster
+state.
+
+**Confidence.** Unit LOAD stores and reads back +0x58, +0x6c and
++0x134..+0x136: High for the RU body, Medium for EN (R2-ENGINE-665's masked
+pair equality). That the count then runs to its end is Medium: the Unit
+postload callees L2.03191, L2.03192, L2.03193, L2.03194 and L2.03195 and the
+RU base postload L2.03190 are unread (EN L2.03185 calls L2.03186 only).
+
+**Unknown.** The next order starts no earlier than step s + c + r of
+R2-ENGINE-1262; the tick is Unknown. The tick at which a loaded caster takes its next order. Save
+during a book cast's recovery, cold-load, and count actor steps to the next
+order against R2-ENGINE-1262's s + c + r.
+
+### R2-ENGINE-1402
+
+The EN town branch L2.02974 (EXP-2093 `en-townprep-L2.02974.txt`) reads eleven of
+the twelve values through the getter R2.0113 (RU R2.0114, 43 rows each, 0
+differing rows, `evidence/normdiff/reg-getint.txt`); Character/Name goes
+through L2.03130, unread, with destination app +0x460, 32 bytes and default
+"No name" (Medium). The getter looks up section and
+key through L2.03131; on a miss it returns its third argument; on a hit whose
+type bits (+0xc & 0xe) >> 1 are not 1 it throws with "not an int associated
+with specified key"; otherwise it returns record +4.
+
+| Key | Destination | Default on a miss |
+|---|---|---|
+| CurrentState/InBattle | local, not read again in the body | 1 |
+| Character/Name | argument of the unread call L2.03130: app +0x460, 32 bytes; +0x47f set to 0 after it | "No name" (literal argument) |
+| GameOptions Wimpy, ShowHP, FlyingHP, Formation | client +0xab4, +0xab8, +0xabc, +0xab0 | the current value |
+| GameOptions Speed | app +0x41c, then L2.03127 | the current value |
+| GameOptions ShowTimeFlow | global L2.03133 | the current value |
+| View X, Y | client +0x5c, +0x60 | the current value |
+| SpellBook IsOpen | local, not read again in the body | 0 |
+| SpellBook Pressed | [app +0xec] +0x60 | the current value |
+| Objects Selection, Group%d | by object ID through L2.03129 and L2.03137 | none |
+
+After the keys it calls L2.03144 on the client, sets app +0x43c to -1 and
++0x3e4 and +0x3e8 to 0, and calls L2.03127 with +0x41c, which clamps it to
+0..8, sets +0x418 to 1000 divided by 8..32 and resets +0x40c, +0x428 and
++0x42c (`evidence/nav/n1/en-speed-apply-L2.03127.txt`).
+
+**Confidence.** High for the EN branch and the getter in both roots. Medium
+for the Character/Name destination (unread reader) and for RU destinations (R2-ENGINE-724's masked equality) and for later readers of
+the locals: the body ends without reading them, callees were not searched.
+
+**Unknown.** What L2.03144 rebuilds; read it.
+
+**Amends.** R2-ENGINE-723's key list: InBattle and IsOpen are requested and
+then not used by this body.
+
+### R2-ENGINE-1403
+
+Before the keys the EN town branch seeks past the label, reads the REG store
+into a local (L2.06955), the pairs into app +0x598 (L2.00383), the Scenario
+record through `call [L2.00393]` and nine cells into app +0x4dc + 12i
+(L2.00388). L2.00393 lies past the raw data of `.data`, so it has no file
+value (the reader's error that stopped pass N1, `evidence/README.md`); a
+census of instruction text finds one store, EN L2.07742 in the function at
+L2.01428, and two calls, L2.07743 (town branch) and L2.00397; RU L2.00394 has
+the store L2.07744 and calls L2.07745 and L2.00398
+(`evidence/nav/n2/en-ins-scen-ptr.tsv`, `ru-ins-scen-ptr.tsv`). The cell
+reader frees a nonzero buffer (+8) and clears +4 and +8, then reads word +0,
+word +2 and DWORD +4 through the archive's slot +0x3c, then the data.
+
+**Confidence.** High for the EN reads and the census rows. Medium for the
+Scenario reader's identity: the stored value at L2.07742 was not read.
+
+**Unknown.** The function stored at L2.07742 and what the cells change. Read
+the store's source and the readers of app +0x4dc.
 
 ## ROM2 installed script dispatch and record consumers
 

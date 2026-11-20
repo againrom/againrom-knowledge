@@ -860,6 +860,20 @@ does not request `SpellBook/Shortcuts`, `Inventory/IsOpen`, `Projectiles` or
 `Fog`; that holds for the body read, not for the image. What the player sees
 after a refused file is Medium to Unknown. — R2-ENGINE-723
 
+The REG getter returns the stored integer, throws on a non-integer record and
+returns its default on a missing key. The town branch stores Character/Name
+in app +0x460 through an unread string reader (Medium; default `No name`), the four GameOptions flags in client
++0xab0..+0xabc, Speed in app +0x41c, ShowTimeFlow in a global, View X/Y in
+client +0x5c/+0x60 and SpellBook/Pressed in [app +0xec] +0x60; nine of these
+getters default to the current value, so a missing key leaves the value
+unchanged. InBattle and SpellBook/IsOpen are read into locals the branch does
+not read again. Then app +0x43c = -1, +0x3e4 = +0x3e8 = 0, and Speed is
+clamped to 0..8 and sets the tick length. — R2-ENGINE-1402
+
+The pairs go to app +0x598, the Scenario record is read through a function
+pointer stored at run time (its target is Medium), and the nine 12-byte cells
+go to app +0x4dc, each old buffer freed first. — R2-ENGINE-1403
+
 Nine EN and RU writer and town-LOAD bodies are equal in instruction sequence
 after masking every operand of 0x1000 and above, apart from application field
 offsets; callees are not compared. — R2-ENGINE-724
@@ -1509,6 +1523,36 @@ The separate REG projectile has its own continuation contract: a stored
 object with zero segments requests removal on its first read update path,
 conditional on unchanged entry state. Actual first-frame behavior remains
 Unknown. — R2-ENGINE-661
+
+The shared base LOAD reads +4, +8, +0xc, +0xe, +0x18 (then set to 0), +0x1c,
+the self key and the +0x14 owner key, in both roots. DirectDamage (EN) adds
+the unit Effect fields +0x3c, +0x3d, +0x40, +0xc and 0x18 raw bytes at +0x48.
+No read serializer stores the SpellEffect caster +0x3c or the DirectDamage
+caster +0x44; their values after the factory's constructor are Medium. The
++0x14 owner key is restored by lookup; what it names is Unknown.
+— R2-ENGINE-1398
+
+A loaded point or area effect reaches its target with no stored caster link
+(Medium); the HP amount without a caster is Unknown. The
+attacker memory (target +0x40, +0x48), the L2.04120 hostility call and the
+caster's credit slot need the caster fields and are skipped when they are 0
+(Medium). The damage amount comes from target slot +0x54 of the stored
+descriptor and the caster; whether a zero caster changes it is Unknown.
+— R2-ENGINE-1399
+
+A timed AreaEffect (+8 bit 1) decrements +0x50 each tick, pulses when +0x50
+mod 16 is 0 over the square of radius +0x4d, and at +0x50 <= 0 clears its cells,
+resets +0x4c and completes; +0x4c 0 takes the start arm. A loaded area with
++0x4c nonzero continues from the stored +0x50 (High, EN tick read). With +0x4c
+0 the start arm runs first; whether it rewrites +0x50 is Unknown (Medium for
+the arm, helpers unread). — R2-ENGINE-1400
+
+The caster is not tied to the effect: Unit LOAD restores its substate +0x58,
+count byte +0x6c and +0x134..+0x136, so a caster saved in wind-up or recovery
+resumes its own count and begins its next order no earlier than
+R2-ENGINE-1262's s + c + r (Medium; RU body read, EN by masked equality,
+Medium; that the count runs to its end is Medium, postload callees unread).
+— R2-ENGINE-1401
 
 ### Unit Effect marks
 

@@ -3876,6 +3876,8 @@ settle it.
 
 **Evidence.** [EXP-2093](../experiments/EXP-2093-rom2-town-save-writer/RESULTS.md), question 3.
 
+**Amended.** R2-ENGINE-1402 reads the getter `R2.0113`: a miss returns the default, a hit returns the stored value.
+
 ### R2-SESSION-287
 
 game0003 and game9998 decode to documents equal in every field at every

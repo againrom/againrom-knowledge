@@ -71,6 +71,8 @@ R2-ENGINE-541, R2-ENGINE-554, R2-ENGINE-823.
 | command word +0xb0 | Cell-record destination (x low byte, y high); same SAV word, not an order. | R2-ENGINE-557 High writer/consumer, Medium completeness; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | Cell-record kind 0x17 |
 | command list +0xb4 | Point word list +0xb4 as read by the order-0xa tail follows command raw transfer; it is not a stable serialized pointer. | R2-ENGINE-872 High tail accesses; R2-ENGINE-823 Medium EN transfer/list replacement; RU coordinates by equal layout | Complete list restoration; order name not established |
 
+Across a mission LOAD the actor-step fields +0x58, +0x6c and +0x134..+0x136 are read back into place, so a caster saved in wind-up or recovery resumes its own count (R2-ENGINE-1401: High for the RU body, Medium for EN; that the count runs to its end is Medium, postload callees unread) and begins its next order no earlier than R2-ENGINE-1262's s + c + r (Medium). A loaded timed area effect with a nonzero stored +0x4c continues from the stored +0x50 (R2-ENGINE-1400: High for a stored +0x4c nonzero, Unknown for +0x4c 0), and the read effect serializers store no caster field (R2-ENGINE-1398, Medium for the values after construction; what the effect +0x14 owner key names is Unknown), so a loaded effect reaches its target with no stored caster link (R2-ENGINE-1399, Medium); the HP amount without a caster is Unknown.
+
 ## Movement and clock fields
 
 | Input/state field | Rule and stored boundary | Claims and clause grades | Unknowns |

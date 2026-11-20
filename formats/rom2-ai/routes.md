@@ -392,4 +392,6 @@ stores, Medium completeness), R2-ENGINE-1261 (High expression, Medium names),
 R2-ENGINE-1262 (High step table, effect step Unknown), R2-ENGINE-1263 (High
 terms, Medium column bindings).
 
+Across a mission LOAD the actor-step fields +0x58, +0x6c and +0x134..+0x136 are read back into place, so a caster saved in wind-up or recovery resumes its own count (R2-ENGINE-1401: High for the RU body, Medium for EN; that the count runs to its end is Medium, postload callees unread) and begins its next order no earlier than R2-ENGINE-1262's s + c + r (Medium). A loaded timed area effect with a nonzero stored +0x4c continues from the stored +0x50 (R2-ENGINE-1400: High for a stored +0x4c nonzero, Unknown for +0x4c 0), and the read effect serializers store no caster field (R2-ENGINE-1398, Medium for the values after construction; what the effect +0x14 owner key names is Unknown), so a loaded effect reaches its target with no stored caster link (R2-ENGINE-1399, Medium); the HP amount without a caster is Unknown.
+
 The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and actions 33 and 34 Unknown. They change no rule above (R2-ENGINE-1314).
