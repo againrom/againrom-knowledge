@@ -130,6 +130,57 @@ uncovers 155 cells over x 7..18 and y 35..48; sight 1617 gives 154
 frame holds is Unknown. — R2-ENGINE-647,
 R2-ASSET-162
 
+<a id="cell-planes-bridges-and-plane-load"></a>
+
+## Cell planes, bridges and the plane load
+
+Types 1, 2 and 3 are 2×W×H, W×H and W×H bytes in all 59 EN and 83 RU installed
+maps. Above the 10-bit tile index a type 1 word holds only bit 0x2000; type 2
+holds 0..127 (no negative value); type 3 holds 0 or one of 191 values from 1 to
+209. — R2-ASSET-261
+
+The loader allocates and reads type 1 as W×H×2 bytes whatever its record
+says. It reads type 2 by its own size field and type 3 by the size field of
+the last type 2 record, so a writer gives type 3 the byte count of the type 2
+record and places it after it; the type 3 size field is not read. The results
+of the stream reads are not tested. EN and RU bodies are masked-equal
+(R2-ASSET-129). — R2-ENGINE-1338
+
+The loader stores codes at map +0x8c: 1 before the stream opens (the final value 1
+does not tell a failed open from a load that ran), then bad magic 2, fewer than three
+records 3, version above 0x640 4; after the record loop a missing type 1 gives
+5 and a missing type 2 gives 6, and a missing type 3 becomes a zero buffer of
+the type 2 size. No value of a plane is checked in the bodies read (Medium).
+What the caller does with a nonzero status is Unknown. — R2-ENGINE-1339,
+R2-ASSET-020
+
+The terrain build then reads each cell at y×W+x and writes the plane at
++0x10000 with stride 256: 1 for type 1 bit 0x2000, for tile class 8 and for
+`(tile & 0x300) == 0x200`; 5 for a nonzero type 3 byte, stored last; the type 2
+byte goes to +0x944f4. Only bytes are set, never cleared. The border routine
+then writes 0x1f over the 8-cell ring of the plane, so a 5 stored there from
+type 3 is overwritten; the type 3 buffer itself is unchanged. The readers of
+these planes in play are unread, so what 1, 5 and 0x1f mean to a unit is
+Unknown. That +0x944f4 is a height plane is Medium (it holds the type 2 byte,
+which the client copy of R2-ENGINE-645 uses as height); that +0x10000 blocks
+movement is Unknown. — R2-ENGINE-1340, R2-ENGINE-1341
+
+The loader and the build compare no plane size with W×H and no value with a
+range (Medium). All 142 installed maps are square and none is wider than
+256. What a short plane or a map wider than 256 columns does in play is
+Unknown. — R2-ENGINE-1342
+
+A type 4 element of kind 0x21 or 0x1000021 carries two extra dwords, an extent
+rectangle (EN 41, RU 170; kind 0x25 never occurs). That such an element is a
+bridge is the working label of this experiment (Medium; no string or caller was
+read). Under the assumed footprint of the extra dwords no type 1 bit marks its
+cells, and the game's reader of the element is unread (Medium). The editor's
+creator (EN, 256 instructions read) leaves through a jump outside the part read
+for an x or y below 8 or an extent reaching W−8 or H−8, builds the object, and
+writes no cell plane in the part read; whether the id it searches is the new
+object's id is not read, and what the rest of the editor writes is Unknown.
+— R2-ASSET-262, R2-ASSET-263
+
 <a id="unit-record-type-6"></a>
 
 ## Unit record (type 6)

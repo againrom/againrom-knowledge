@@ -3813,6 +3813,93 @@ other maps. Dynamic-reference execution is R2-ENGINE-1318, at its grade.
 **Unknown.** Values returned by dynamic references in authored maps; no
 occurring ID in this numeric range was available to resolve in the census.
 
+## ROM2 cell planes and bridge elements: file census and editor bridge creator
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-261 | ROM2 installed maps, EN 59 / RU 83: types 1, 2, 3 hold 2WH, WH, WH bytes; type-1 words carry only bit 0x2000 above the tile index; type 2 spans 0..127; type 3 is nonzero in 108,099 EN / 173,349 RU cells, values 1..209. | High | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ASSET-262 | ROM2 installed type-4 elements of kind 0x21 (EN 10, RU 21) or 0x1000021 (EN 31, RU 149) carry two extra dwords (working label bridge); kind 0x25 is absent, and no type-1 bit marks their assumed footprint cells. | High / Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ASSET-263 | ROM2 editor EN L2.07421 (256 instructions): x or y at most 7, or an extent reaching W - 8, H - 8, jumps outside the window; else builds a 0x11f-byte object, kind 0x21 or 0x25, at (cell<<8)+0x80; no cell-plane store seen, tail unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+
+### R2-ASSET-261
+
+Population: EN 59 and RU 83 maps (root `.alm` files and `scenario.res` members, the R2-ASSET-237 population),
+named by full SHA-256 in `evidence/census/inputs.tsv`. Tables `evidence/census/planes-en.txt` and
+`planes-ru.txt`, program `evidence/census.py`, reproduced byte-equal into a scratch directory.
+
+- Types 1, 2 and 3 occur once in all 142 maps. Sizes: type 1 is 2 x W x H, type 2 and type 3 are W x H bytes
+  in every map (EN 1,158,912 and RU 2,012,416 cells in total).
+- Type 1 (u16 words): above the low 10 bits only bit 0x2000 occurs, in EN 1,927 and RU 2,155 cells; 40 of them
+  in each root lie in the 8-cell border ring. The largest value of word & 0x3ff is 821 in both roots.
+- Type 2: 128 distinct values, 0 to 127, in both roots (EN 13,101 and RU 98,240 zeros); all 128 also occur in
+  the border ring. The format page names the plane signed; no value is negative, so the sign is not exercised.
+- Type 3: nonzero in 108,099 EN cells (per map 281 to 7,360) and 173,349 RU cells (126 to 8,687); 191 distinct
+  nonzero values from 1 to 209 in both roots; 3,451 EN and 4,535 RU nonzero cells lie in the border ring.
+
+What the values mean to the game is stated by R2-ENGINE-1340, R2-ENGINE-1341 and R2-ENGINE-1338.
+
+**Confidence.** High for the counts: the census walks every record of every map in the population. The census
+gives value sets, not meanings.
+
+### R2-ASSET-262
+
+Population as R2-ASSET-261. A type-4 element has the 28-byte form when `kind == 0x21` or bit 24 is set
+(R2-ASSET-019); the two extra dwords are called e0 and e1 here.
+
+- Elements with the 28-byte form: EN 41 (kind 0x21: 10, kind 0x1000021: 31), RU 170 (21 and 149). No element
+  of kind 0x25 exists in any of the 142 maps (the kind the editor creator can also produce, R2-ASSET-263).
+- Footprint test (assumption): e0 columns by e1 rows from the anchor cell (x >> 8, y >> 8), 690 EN and 3,457 RU
+  cells. In none of them does a type-1 word have a bit above the tile index; the type-3 byte is nonzero in
+  19 EN and 92 RU of them and the type-2 byte in 543 and 2,338.
+- `evidence/census/planes-en.txt` and `planes-ru.txt` list each element with its map, W, H, x, y, kind, e0, e1 and
+  the type 1, 2, 3 values at the anchor cell.
+
+Kind 0x21 and 0x1000021 elements carry an extent rectangle (the editor creator takes two extents and checks them
+against W - 8 and H - 8, R2-ASSET-263); under the assumed footprint no type-1 bit marks its cells.
+
+**Confidence.** High for the counts and for the 0x2000 absence under the stated footprint. Medium for the
+footprint extent: that e0 is the extent along x and e1 the extent along y rests on the editor creator's bounds
+test (x + e0 and y + e1, R2-ASSET-263), not on a game reader. That such an element is a bridge is the working label
+of this experiment; no string or caller was read (Medium).
+
+**Amends.** R2-ASSET-019: adds the installed counts of the 28-byte form.
+
+**Unknown.** Whether the game reads e0, e1 or the kind when it makes a cell walkable: no game reader of the
+element was read in this experiment. Run: a copy of an installed map with one bridge element moved over cells
+the type-3 plane marks (19 EN / 92 RU installed footprint cells carry a nonzero byte), then lead a unit across
+and compare with the original map.
+
+### R2-ASSET-263
+
+`ROM2 Map Editor.exe` (EN), `L2.07421`, one window of 256 instructions ending at `L2.07451` inside the function
+(`evidence/nav1-out/listings/en-ed-bridge-create-L2.07421.txt`, SHA-256 of the image in
+`evidence/nav1-out/inputs.tsv`).
+
+- Arguments x, y, extents e0 and e1 and a kind. When x or y is at most 7, or x + e0 or y + e1 is not below W - 8 or
+  H - 8, the function jumps to `L2.07452`, which is outside the window; what it does there was not read.
+- It allocates 0x11f bytes. When e1 > e0 or the argument kind is 0x21 the vtable is `L2.07453` and the kind
+  pushed to the object initialiser `L2.07428` is 0x21; otherwise the vtable is `L2.07454` and the kind is 0x25.
+  Position x and y are (cell << 8) + 0x80 (R2-ASSET-256 states the same for units and structures).
+- The argument of `L2.07428` is the lowest value from 1 not found in the document id list at +0x390/+0x39c
+  (`L2.07455` to `L2.07456`; the id map is shared with units, structures and ground sacks, R2-ASSET-256). A second
+  search from 1 over the hash at +0x394 (`L2.07457`) sets document +0x8c to its result + 1 when that reaches +0x8c;
+  that its result is the new object's id is not read (`L2.07428` unread). A kind row is linked from the list at
+  document +0x2c or created at +0x3c.
+- No store into a cell plane occurs in the 256 instructions read. The function continues past `L2.07451`.
+
+**Confidence.** High for the 256 instructions as read (EN only; RU not read). Medium for calling the function the
+bridge creator: "bridge" is the working label of this experiment; R2-ASSET-257 holds only the listing name and
+"kind 0x25 for one orientation", and no string, caller or menu entry linking kind 0x21 to a bridge was read.
+Unknown for the whole editor path: the tail of the function, the bridge delete, and whether
+the editor writes type 1, 2 or 3 or a type-0 count when a bridge is placed.
+
+**Unknown.** The editor's bridge write to the cell planes and to the type-0 counts. Run: in the original editor
+place one bridge on a copy of an installed map, save, and compare type 0, 1, 2, 3 and 4 byte by byte with the
+unedited map; repeat after deleting it.
+
+**Amends.** R2-ASSET-257: its line "kind 0x25 for one orientation" becomes: kind 0x21 when e1 > e0 or the argument kind
+is 0x21, else 0x25.
+
 ## ROM2 placement records: file census and editor writes
 
 | ID | Claim | Confidence | Status | Evidence |

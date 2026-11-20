@@ -30827,6 +30827,143 @@ EN runs the sack stage only when Session +0x74 is 0; the RU stage has no such te
 
 **Confidence.** High for the bodies read. What a Session +0x74 value of 0 means for a played map is not read.
 
+## ROM2 map load of the cell planes and the terrain build
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1338 | ROM2 loader (EN L2.02484, RU R2.0002, masked-equal): type 1 reads W*H*2 bytes whatever its record says, type 2 reads its own size field, type 3 reads the size left by the last type-2 record; read results are not tested. | High / Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ENGINE-1339 | ROM2 loader codes at map +0x8c (1 is stored before the open): bad magic 2, under 3 records 3, version above 0x640 4, no type 1 gives 5, no type 2 gives 6; a missing type 3 becomes zeros; the caller's reaction to a status is unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ENGINE-1340 | ROM2 terrain build (EN L2.03175, RU L2.07458, masked-equal): per cell type-1 bit 0x2000, tile class 8, tile bits 0x200 and a nonzero type-3 byte set plane +0x10000 to 1 or 5; the type-2 byte is stored at +0x944f4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ENGINE-1341 | ROM2 border ring (EN L2.06926, RU L2.07459, masked-equal): after the cell loop the 8-cell ring gets 0x1f in plane +0x10000 (W = H: four sides of W x W; else a 256 x 256 frame plus the real right and bottom edges). | High | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ENGINE-1342 | ROM2 map load indexes the type-2 and type-3 buffers at y*W+x for every cell with no test against their allocated size; no W, H, tile-index, height or type-3 range test was found in the bodies read. | Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+
+### R2-ENGINE-1338
+
+Listings: EXP-2068 `out/listings/en-dispatcher.txt` (EN `L2.02484`, 0x17c4 bytes) and `en-dispatcher-tail.txt`
+to the `ret` at `L2.07460`; the RU pair `ru-dispatcher*.txt` (`R2.0002`). `evidence/maskcmp.py` (address operands
+of six or more hex digits masked) gives 1,623 of 1,623 equal instructions for the body and 117 of 117 through the
+`ret` for the tail (`evidence/compare/cmp-dispatcher.txt`, `cmp-dispatcher-tail.txt`); the rest of each tail
+listing is the jump table decoded as code. The loader reads the record header (five dwords at `[ebp-0x40]`,
+type at `[ebp-0x34]`) and indexes a 13-entry jump table by type (EN `L2.02737`, RU `L2.02736`; both read,
+`evidence/nav1-out/tables/`). A type above 12 jumps to `L2.07461`, which seeks by the header dword at `[ebp-0x38]`.
+
+- Type 1 (EN `L2.07462`, RU `L2.00006`): stores header dword +0 at asset +8; allocates W*H*2 bytes (`L2.03261`,
+  W at asset +0, H at +4), stores the pointer at +0xc and reads that many bytes through the stream's vtable +0x3c.
+  The record's own size is not used.
+- Type 2 (EN `L2.07463`, RU `L2.07464`): copies `[ebp-0x38]` to `[ebp-0x58]`, allocates that many bytes, stores
+  the pointer at +0x14, reads that many bytes.
+- Type 3 (EN `L2.07465`, RU `L2.07466`): allocates `[ebp-0x58]` bytes, stores the pointer at +0x10, reads that many.
+  `[ebp-0x58]` is written only by the type-2 arm: of its seven references in the body and tail, one is that write
+  and six are reads (two in the type-2 arm, two in the type-3 arm, two in the tail). The type-3 record's own size
+  field is not read.
+- Each arm returns to the loop head at `L2.07467`; the result of the stream read is not compared. A type 1, 2 or 3
+  arm never seeks to the record end.
+
+For the installed maps the arms agree: type 2 and type 3 sizes both equal W*H (R2-ASSET-261). A writer must give
+type 3 the byte count of the preceding type-2 record, and place it after type 2, whatever size field it writes.
+
+**Confidence.** High for the arm bodies in EN and, by the masked equality, in RU. Medium for the allocation: the
+allocator `L2.03261` was not read. Header dword +8 is the size the unknown-type arm seeks by and the
+variable the type 2 arm copies (R2-ASSET-129 read the header reader in both roots). Unknown: a type 3 before a
+type 2 reads an uninitialised local; the effect of a short stream read. Run: a copy of an installed map with the type
+2 record 4 bytes longer than W*H and the type-3 size field unchanged; load it in the original and compare the
+map's later records.
+
+The loader side of the type 2 arm of the client height plane is read here: the arm that fills asset +0x14 is type 2
+in both roots. The client's own copy of the plane is unchanged.
+
+**Amends.** R2-ASSET-129: names the type 1, 2 and 3 arms it did not state. R2-ENGINE-645: the loader side of the
+type 2 arm is read; the header reader is read by R2-ASSET-129.
+
+### R2-ENGINE-1339
+
+Same listings as R2-ENGINE-1338. The header checks are those of R2-ASSET-020; the status is stored at the map
+object's +0x8c and every failing path jumps to the epilogue `L2.07468`.
+
+- R2-ASSET-129 states codes 1 to 6; this card adds the zero fill of a missing type 3. The function stores 1 at
+  `L2.07469` before the open (with W = H = 0x10 stored just before) and stores 0 nowhere in the body or tail read,
+  so a final value of 1 does not tell a failed open from a load that ran; the editor reads the same offset as the
+  next id (R2-ASSET-256).
+- Stream open failure: +0x8c = 1 (`L2.07470`). Bad magic: 2. Record count below 3: 3. Version above 0x640: 4.
+- After the record loop (EN tail `L2.07471`): type-1 pointer (+0xc) null: 5; type-2 pointer (+0x14) null: 6;
+  type-3 pointer (+0x10) null: a buffer of `[ebp-0x58]` bytes (the type-2 size, defined because type 2 is present
+  by then) is filled with zeros and loading goes on.
+- A type above 12 is skipped by its size field. No arm 1, 2 or 3 checks a value of the bytes it reads.
+
+**Confidence.** High for the status values and the zero fill (EN bodies, RU masked-equal). Medium for the absence
+of other checks: the population is the dispatcher body, its tail and the terrain build of R2-ENGINE-1340; the
+callers of the loader and the later users of the three buffers were not read.
+
+**Unknown.** What the caller does with a nonzero +0x8c (reject, retry or continue), and whether the buffers allocated
+before the failure are released. Run: copies of an installed map without the type-2 record and without the type-3
+record; start each in the original and record the outcome.
+
+**Amends.** R2-ASSET-129: adds the zero fill and the initial store.
+
+### R2-ENGINE-1340
+
+Sources: RU window `evidence/nav1-out/listings/ru-terrain-from-map-L2.07458.txt` (214 instructions); EN listing
+EXP-2078 `evidence/derived/code/en-terrain-from-map-L2.03175.txt`; masked comparison 214 of 214
+(`evidence/compare/cmp-en-terrain-m.txt`, `cmp-ru-terrain-m.txt`). The routine takes the map object `[ebp+8]`
+(type 1 words through the getter `L2.07472`, type 3 pointer at +0x10, type 2 pointer at +0x14) and the plane owner
+`this`.
+
+- It stores W and H at `this+0x50000` and `+0x50004` and the bounds 8, 8, W - 9, H - 9 as bytes at `+0x58eb8..bb`
+  (and as words `(y<<8)+x` at `+0x58ebc` and `+0x58ebe`).
+- For every y < H, x < W, with i = y*W+x (16-bit) and key = (y<<8)+x, in this order:
+  type-1 word bit 0x2000 sets `+0x10000+key` to 1; `L2.06958(word & 0x3ff)` returns a class and a terrain byte;
+  class 8 sets +0x10000+key to 1; a class below 13 stores its terrain byte at `+key`, else the byte at `+0x54146`;
+  `(word & 0x300) == 0x200` sets +0x10000+key to 1; a nonzero type-3 byte at i sets +0x10000+key to 5 (the last
+  store); the type-2 byte at i is stored at `+0x944f4+key`.
+- After the loop it calls the ring routine (R2-ENGINE-1341) and copies 0x10000 bytes from `+0x10000` to `+0x20000`
+  (`L2.04512`, argument order read; the callee not read).
+- The routine only sets bytes in +0x10000; no store clears one.
+
+The tile-class routine `L2.06958` (EN lines 9263 to 9435 of EXP-2085 `en-terrain-lin-L2.03582.txt`; RU `L2.07473`) is
+equal in both roots (173 of 173 after masking) and was not interpreted.
+
+**Confidence.** High for the stores and their order (EN listing, RU masked-equal). Medium that +0x944f4 is a height
+plane: it holds the type 2 byte, which the client copy read by R2-ENGINE-645 uses as height. Unknown that +0x10000
+blocks movement: no reader was read. Alternatives left open: the tile word could also reach the height through
+`L2.06958` or a later writer of +0x944f4.
+
+**Unknown.** The readers of +0x10000, +0x20000 and +0x944f4 in play, what the values 1 and 5 mean to them, and
+whether the client reads type 3. Runs: a map with one cell set to type 3 = 0, 1, 50 and 200 in turn, and a unit
+sent across it; a map with the type-2 byte of one cell changed, compared by the fog of a unit beside it.
+
+### R2-ENGINE-1341
+
+Sources: RU window `evidence/nav1-out/listings/ru-border-ring-L2.07459.txt`; EN listing EXP-2085
+`en-terrain-lin-L2.03582.txt` from line 8393 (`L2.06926`); masked comparison 147 of 147 (`evidence/compare/cmp-en-ring.txt`,
+`cmp-ru-ring.txt`). Both write the byte 0x1f into `+0x10000`, key (y<<8)+x:
+
+- W = H: for i < W and j < 8: cells (j, i), (W - 1 - j, i), (i, j), (i, W - 1 - j) in (x, y) order.
+- Otherwise: the 256 x 256 frame (j < 8 on all four sides of the 256 stride), then x from W - 8 to W - 1 for every
+  y < H, then y from H - 8 to H - 1 for every x < W.
+
+It runs after the cell loop of R2-ENGINE-1340, so it overrides a 1 or a 5 stored in the ring. The census
+(R2-ASSET-261) holds 3,451 EN and 4,535 RU nonzero type-3 cells in the ring.
+
+**Confidence.** High for the stores. The meaning of 0x1f is not read: the readers of the plane are unread
+(R2-ENGINE-1340). No installed map has W different from H, so the second shape is read, not exercised by an
+installed file.
+
+### R2-ENGINE-1342
+
+Bodies read: the dispatcher of R2-ENGINE-1338, the terrain build and the ring routine, EN and RU (masked-equal).
+The build reads `type-1 getter[i]`, `+0x14[i]` and `+0x10[i]` for i = y*W+x up to W*H, with the buffers sized by
+R2-ENGINE-1338: type 1 by W*H*2, type 2 by its own field, type 3 by the type-2 field. No comparison of the size
+fields with W*H, no test of W or H against 256 (the stride of the planes written at +0x10000) and no test of a
+type-1 tile index, a type-2 height or a type-3 value was found in these bodies.
+
+**Confidence.** Medium: the claim is a negative over the bodies named; the callers of the loader and of the build
+were not censused. All 142 installed maps are square, W = H in 80, 144, 208 or 256 (`evidence/census/inputs.tsv`); none is wider than
+256. They always hold the full plane sizes (R2-ASSET-261).
+
+**Unknown.** What a shorter buffer, a larger map or an out-of-range value does in play. Runs: a copy of an installed
+map with the type-2 record shorter than W*H and its size field matching, loaded and played at the map edge; a map
+of 257 columns.
+
 ## ROM2 installed script dispatch and record consumers
 
 | ID | Claim | Confidence | Status | Evidence |
