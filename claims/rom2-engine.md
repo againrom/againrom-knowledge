@@ -4119,7 +4119,7 @@ Frame counts are from the complete selected [art frame envelopes](../experiments
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-245 | Campaign town ID 1 selects the generic inn and shop in preserved ROM2 EN/RU; selected EN generic and Kaarg constructors share native page or child bases. | High | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
-| R2-ENGINE-246 | The selected ROM2 EN generic inn fixes three panel rectangles, primary art layers and three button targets; complete portrait/stat drawing and the lower-right resource binding remain Unknown. | High / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
+| R2-ENGINE-246 | The selected ROM2 EN generic inn fixes three panel rectangles, primary art layers and three button targets; complete portrait/stat drawing and the lower-right resource binding remain Unknown. | High / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-247 | The selected ROM2 EN inn consumes packed DLL options, seats actors and dispatches talk by NPC/topic; the stage-10 roster is conditional, and its complete live actor-art join is Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-248 | Selected ROM2 EN inn branches load candle, cauldron, breath and drink lists and advance them on native clocks; container-count interpretation and the complete visible schedule remain bounded. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
 | R2-ENGINE-249 | The selected ROM2 EN generic shop fixes five child rectangles, primary art and Undo/Buy/Sell/Exit targets; complete stock, item-price text and episode state remain Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2030](../experiments/EXP-2030-rom2-first-town/) |
@@ -4175,6 +4175,8 @@ Selected evidence: [builder](../experiments/EXP-2030-rom2-first-town/evidence/me
 **Confidence.** High for the selected EN corner operands, primary keys, painter order, caption keys and local button targets. Unknown for complete portrait/stat drawing and lower-right resource identity; no complete visible-room equality is asserted.
 
 **Unknown.** The selected left painter does not close the fresh actor portrait/stat state; the center painter exposes conditional globals without a closed resource initializer. Follow the corresponding actor state and global initialization, or obtain original observation. No complete RU geometry claim follows from shared art payloads.
+
+**Amended.** R2-ENGINE-1385 compares the RU inn builders, side and center constructors and the right and center painters with EN: equal after masking hexadecimal numbers of five or more digits, so these rectangles hold in RU.
 
 ### R2-ENGINE-247
 
@@ -4266,7 +4268,7 @@ Selected evidence: [builder](../experiments/EXP-2030-rom2-first-town/evidence/me
 
 **Unknown.** The selected constructors, panels and traversal do not close the town-1 stock source or every item-panel virtual edge. Follow them on a known readonly initial campaign state, or obtain original observation. Complete item sprite/name/price drawing requires those receivers; no catalog-wide absence or stock identity is claimed.
 
-**Amended.** R2-ENGINE-263 through R2-ENGINE-267 answer the town-1 stock, price and item-text Unknowns; R2-ENGINE-268 and R2-ENGINE-269 answer the keeper episode state; R2-ENGINE-270 decodes the ShopFrame pixels. R2-ENGINE-1353 names the "shop inventory" child (ID 0x3eb, constructor `L2.00763`) as the deal table whose list an item drop fills; the name above did not say that it holds the dropped items and not the stock.
+**Amended.** R2-ENGINE-263 through R2-ENGINE-267 answer the town-1 stock, price and item-text Unknowns; R2-ENGINE-268 and R2-ENGINE-269 answer the keeper episode state; R2-ENGINE-270 decodes the ShopFrame pixels. R2-ENGINE-1353 names the "shop inventory" child (ID 0x3eb, constructor `L2.00763`) as the deal table whose list an item drop fills; the name above did not say that it holds the dropped items and not the stock. R2-ENGINE-1385 compares the RU generic shop builder `L2.07629` with `L2.00762`: equal after masking hexadecimal numbers of five or more digits, so the five child rectangles hold in RU.
 
 ### R2-ENGINE-250
 
@@ -4295,7 +4297,7 @@ Selected evidence: [square leave request](../experiments/EXP-2030-rom2-first-tow
 | R2-ENGINE-253 | The active druid square draws background, shop highlight, woman, inn highlight, man, lizard and bug before inherited overlay and child dispatch; person subset changes also change destinations. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 | R2-ENGINE-254 | The druid view inherits the shared ROM2 mask sampler; changed shop/inn hover can immediately start person subset 2, while its two dialogue selectors do not start an episode. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 | R2-ENGINE-255 | Selected druid click arms post shop, inn, navigation and menu messages or stage-keyed keeper dialogue; its complete selected loader, painter and advance contain no gate frame operation. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
-| R2-ENGINE-256 | The druid square advances once after more than 100 ms and schedules each paint; people require idle state, bug uses three 61-frame routes, and lizard uses four sentinel-terminated selector vectors. | High | ● active (branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
+| R2-ENGINE-256 | The druid square advances once after more than 100 ms and schedules each paint; people require idle state, bug uses three 61-frame routes, and lizard uses four sentinel-terminated selector vectors. | High | ● active (amended, branch candidate) | [EXP-2031](../experiments/EXP-2031-rom2-town-views/) |
 
 ### R2-ENGINE-251
 
@@ -4473,6 +4475,8 @@ completely and branch/table targets are retained. EN/RU is one code dependency.
 **Unknown.** Delivered cadence, PRNG sequence, process baseline before re-entry,
 sound delivery and live episode appearance. Authorized observation would settle
 the delivered timing; no game execution occurred in this experiment.
+
+**Amended.** R2-ENGINE-1387 gives the slot of each of the 21 keys and the key each scheduler arm requests, in EN and RU.
 
 ## ROM2 room classes and druid behavior
 
@@ -10749,10 +10753,10 @@ offset 0x30 would settle it. The EN bodies: reading the EN routines around the
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-470 | ROM2 shop refill 0x3f has one client builder per root, called only by the 0x468 arm on a non-mission arrival and by the load entry in a town; New Game sends none; the server refills the static shop owner only when +0x74 is zero. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
-| R2-ENGINE-471 | Every ROM2 shop fill empties and redraws all four categories from the current location's record, on refill 0x3f, on an entry with category 0 empty and on a tick-raised pending refill; EN bodies, other shop+8 writers unread. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-471 | Every ROM2 shop fill empties and redraws all four categories from the current location's record, on refill 0x3f, on an entry with category 0 empty and on a tick-raised pending refill; EN bodies, other shop+8 writers unread. | High / Medium | ● active (amended) | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
 | R2-ENGINE-472 | In a ROM2 campaign every town's shop entry and refill reach one static shop owner; each arrival in a town draws its stock again from that town's record, and an earlier visit's stock does not come back. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
 | R2-ENGINE-473 | ROM2 departure and stage writes to a shop record reach the shelves at the next town arrival's draw; the druid inn TalkTo write reaches them only at the next fill while town 3 is current. | Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
-| R2-ENGINE-474 | An item sold to the ROM2 shop stays through shop entries and leaves until the next fill, which empties all four lists; buying out category 0 makes the next entry draw the whole stock again. EN bodies; RU bodies unread. | High / Medium | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
+| R2-ENGINE-474 | An item sold to the ROM2 shop stays through shop entries and leaves until the next fill, which empties all four lists; buying out category 0 makes the next entry draw the whole stock again. EN bodies; RU bodies unread. | High / Medium | ● active (amended) | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
 | R2-ENGINE-475 | ROM2 EN and RU refill builder, its two callers, server cases 0x32 and 0x3f, owner lookup and static owner wrappers agree after masking addresses and frame or field offsets; RU +0x1a4 writers and RU New Game start are unread. | High / Unknown | ● active | [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/) |
 
 ### R2-ENGINE-470
@@ -10833,6 +10837,8 @@ displacement `+8` on the shop object would settle it; none was run.
 
 **Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
 
+**Amended.** R2-ENGINE-1383 reads the RU entry, leave, tick and pending-refill bodies: equal to EN after masking hexadecimal numbers of five or more digits.
+
 ### R2-ENGINE-472
 
 Owner lookup EN `L2.01846` / RU `L2.02211`, which server case 0x32 uses to
@@ -10908,6 +10914,8 @@ bodies were not read: Unknown. Medium for the event set, which is
 R2-ENGINE-471's.
 
 **Evidence.** [EXP-2059](../experiments/EXP-2059-rom2-shop-stock/)
+
+**Amended.** R2-ENGINE-1383 reads the RU entry and leave bodies: equal to EN after masking hexadecimal numbers of five or more digits; the RU sell insert stays unread.
 
 ### R2-ENGINE-475
 
@@ -18195,6 +18203,11 @@ order shows only among items equal under them. The equal-key order, Medium
 above, is High (R2-ENGINE-799); the client Unknown is closed for EN; the
 grades of the other clauses stay.
 
+**Amended.** R2-ENGINE-1382 reads the RU qsort, short sort, swap and the RU
+client re-sort bodies: equal to EN after masking hexadecimal numbers of five
+or more digits; the client Unknown is closed for RU too (Medium for the RU
+transfer before the install).
+
 **Evidence.** [EXP-2091](../experiments/EXP-2091-rom2-shop/RESULTS.md), question 3.
 
 ### R2-ENGINE-711
@@ -21180,8 +21193,8 @@ occupant condition changes: `L2.02074` was not read.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-798 | The ROM2 EN client re-sorts each shop list it receives: itemname.pkt flag 0x2 set first, then item kind, weapon row group, shown price ascending; tab k shows list k, cell i entry i plus the scroll. | High / Medium | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
-| R2-ENGINE-799 | EN: ROM2 qsort `L2.03908` short-sorts by selecting the maximum; items equal under the client shop keys get a permutation of the server order, which for a MagicItems list rests on two stale stack slots. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+| R2-ENGINE-798 | The ROM2 EN client re-sorts each shop list it receives: itemname.pkt flag 0x2 set first, then item kind, weapon row group, shown price ascending; tab k shows list k, cell i entry i plus the scroll. | High / Medium | ● active (amended, branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
+| R2-ENGINE-799 | EN: ROM2 qsort `L2.03908` short-sorts by selecting the maximum; items equal under the client shop keys get a permutation of the server order, which for a MagicItems list rests on two stale stack slots. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
 | R2-ENGINE-800 | EN: no pick of fill `L2.00813` and no untagged sale puts an item without effects on a magic-items tab; `L2.04790` could (no direct caller, Medium); potions are 50 plus a draw by `L2.04697(50)` each. | High / Medium | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
 | R2-ENGINE-801 | Kaarg's NewGame shop record admits, in both data files: Armors 47 armour and 9 shield keys; Magic items 41 armour, 7 shield, 27 weapon keys admitted to enchanting (survivors Unknown); Scrolls 7 books, 32 MagicItems rows; Weapons 33. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/) |
 
@@ -21254,6 +21267,12 @@ show rows of two.
 
 **Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), questions 3 and 4.
 
+**Amended.** R2-ENGINE-1382 reads the RU client bodies of the install, comparator, sort, price, kind and group: equal to EN after masking hexadecimal numbers of five or more digits.
+
+**Amended.** R2-ENGINE-1384: only the lists of wparams 5 to 8 pass through the
+client re-sort; list 2 (hero grid) and list 4 (deal table) are installed
+unsorted.
+
 ### R2-ENGINE-799
 
 Short sort `L2.03910` (cutoff 8, R2-ENGINE-710) runs, while hi > lo: take
@@ -21299,6 +21318,8 @@ replay of the server and client sorts. Unknown for the stale slot values.
 Q-0x40 at the first comparator call of a MagicItems sort would settle it.
 
 **Evidence.** [EXP-2109](../experiments/EXP-2109-rom2-shop-shelves/), questions 1 and 2.
+
+**Amended.** R2-ENGINE-1382 reads the RU qsort, short sort and swap: equal to EN after masking hexadecimal numbers of five or more digits.
 
 ### R2-ENGINE-800
 
@@ -31492,6 +31513,260 @@ original: load a mission file, equip each weapon kind, resave, and compare the s
 above with a file saved before equipping.
 
 **Amends.** R2-ENGINE-1141: adds the callers of L2.05910 and the loader L2.07611.
+
+## ROM2 RU shop bodies, hero pack strip, RU rooms and druid square sounds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1382 | The ROM2 RU client shop re-sort is the EN one: list install, comparator, sort, price, kind, group, qsort, short sort and swap equal EN after masking hexadecimal numbers of five or more digits; R2-ENGINE-798 and 799 hold in RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2179](../experiments/EXP-2179-rom2-town-loot/) |
+| R2-ENGINE-1383 | ROM2 RU shop entry, leave, tick and pending refill equal EN after masking hexadecimal numbers of five or more digits and the RU fill has the same three callers, so the fill events of R2-ENGINE-471 and 474 hold in RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2179](../experiments/EXP-2179-rom2-town-loot/) |
+| R2-ENGINE-1384 | The ROM2 shop hero strip receives its list unsorted: in the shop page handler, message 0x413 wparam 2 copies the list into hero grid page+0x6c in list order via slot 0xb0, no sort is called; the sender is Unknown (High in EN, Medium in RU). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2179](../experiments/EXP-2179-rom2-town-loot/) |
+| R2-ENGINE-1385 | ROM2 RU inn pages 1 to 3 with their side and center children, the generic shop page and the druid square painter, hover, enter and click equal EN after masking hexadecimal numbers of five or more digits, so RU builds the EN rectangles. | High / Medium | ✔ promoted (branch candidate) | [EXP-2179](../experiments/EXP-2179-rom2-town-loot/) |
+| R2-ENGINE-1386 | The ROM2 RU inn Talk release skips the hire-entry path when the selection index +0xb8 is negative; EN L2.00743 has no such test and passes the index to the hire-list lookup. | High / Medium | ✔ promoted (branch candidate) | [EXP-2179](../experiments/EXP-2179-rom2-town-loot/) |
+| R2-ENGINE-1387 | The ROM2 druid square keeps its 21 sounds at +0x20c+4i in loader order; its scheduler requests Dbird, Dtree, Dwolf1, Dbug, Dlizard and Ddruid keys by fixed draws and clocks, in EN and RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2179](../experiments/EXP-2179-rom2-town-loot/) |
+
+### R2-ENGINE-1382
+
+RU addresses, EN in parentheses: list install `L2.07630` (`L2.04801`),
+comparator `L2.07631` (`L2.04803`), sort `L2.07632` (`L2.04802`), price
+`L2.07633` (`L2.00846`), kind `L2.07634` (`L2.03925`), weapon group
+`L2.07635` (`L2.03699`), qsort `L2.03940` (`L2.03908`), short sort `L2.07636`
+(`L2.03910`), swap `L2.07637` (`L2.03911`). Each RU body has the EN row count
+(126, 201, 14, 10, 13, 12, 75, 40, 23) and 0 differing rows after masking
+hexadecimal numbers of five or more digits, and 0 after masking every number.
+Fifty pairs of ROM2 shop, inn and druid-square client bodies (plus three pairs
+of sack and list-builder bodies) in this experiment compare equal between EN
+and RU after that mask, except: field displacements +0x404 to +0x41c and
++0x5d8 to +0x63c, one wparam constant (7 in EN, 8 in RU) in the shop page
+handler, frame-local displacements in one packet routine (`L2.07638` /
+`L2.07639`), and the RU Talk release (one added negative-index test plus
+register renaming in the tail).
+The RU comparator calls the RU kind, group and price above; the RU sort calls
+the RU qsort. The E8/E9 census of the RU `.text` finds one caller of
+`L2.07630`: `L2.07640` in page handler `L2.01219` (EN `L2.07641` in
+`L2.01218`).
+
+Compared from EXP-2031's EN and RU listings: page handler `L2.01219` (266
+rows), grid painter slot 2c `L2.03948` (EN `L2.00845`, 644 rows), category
+click `L2.07642` (EN `L2.04811`, 190 rows) and tab select `L2.07643` (EN
+`L2.04812`, 86 rows) have 0 differing rows after masking every number. Under
+the 5-digit mask the handler differs in two rows: the application flag field
++0x404 is +0x41c in RU, and the arm at EN `L2.07644` tests wparam 7 where RU
+`L2.07645` tests 8 (R2-ENGINE-1384).
+
+So the RU client stamps each received shop list, sorts it by record bit 0x2,
+kind, weapon group and shown price, and shows tab k as list k with cell i
+holding entry i plus the scroll, as R2-ENGINE-798 states for EN; items equal
+under these keys are permuted as R2-ENGINE-799 states.
+
+**Confidence.** High for the listed RU bodies: linear windows ending at the
+next prologue or int3 padding, equal to EN under both masks. Medium for the RU
+transfer before the install: the RU decoder window and item reader (EN
+`L2.04798`..`L2.04799`, `L2.03700`) were not read; the RU post of message
+0x413 at `L2.07646` reads packet byte +0xc & 0x7f as EN does
+(R2-ENGINE-1384).
+
+**Amends.** R2-ENGINE-798 (its RU client bodies) and R2-ENGINE-799 (its RU
+short sort and swap): the RU bodies are read here and equal EN.
+
+### R2-ENGINE-1383
+
+RU entry `L2.01639`, leave `L2.07647`, tick `L2.02651` and pending refill
+`L2.07648` (39, 100, 55 and 20 rows) compared with EXP-2032's EN listings of
+`L2.00823`, `L2.00830`, `L2.00828` and `L2.00829` have 0 differing rows
+after masking hexadecimal numbers of five or more digits and 0 after masking
+every number. The E8/E9 census of RU fill `L2.01640` finds three callers: `L2.02208` in the entry, `L2.02210` in
+the pending refill and `L2.07649` in `L2.02204`. EN has the same three
+(R2-ENGINE-471); the third is by position the owner refill caller of
+R2-ENGINE-470, whose RU body was not read.
+
+So in RU the entry draws all four categories when category 0 is empty, the
+tick raises shop+8 every 180 ticks while server +0x74 is nonzero, the pending
+refill draws when shop+8 is above 0, and leave removes only quantity-0
+entries with no deal reference and calls the pending refill.
+
+**Confidence.** High for the four RU bodies and the three RU fill callers.
+Medium for the RU event list: it composes R2-ENGINE-470's sender set, whose RU
+body was not read here, and the shop+8 writers that R2-ENGINE-471 leaves
+unenumerated. Medium for R2-ENGINE-474's sold-item clause in RU: the RU sell
+insert (EN `L2.00804`) was not read.
+
+**Amends.** R2-ENGINE-471 and R2-ENGINE-474: their RU entry, leave, tick and
+pending-refill bodies are read here and equal EN.
+
+### R2-ENGINE-1384
+
+Addresses are EN; RU in parentheses where read.
+
+- Page handler `L2.01218` (`L2.01219`) takes message 0x413 with wparam 1..8
+  through table `L2.07650`. Wparam 2 calls slot 0xb0 of page+0x6c with the
+  lparam list, then refresh `L2.07476` of that grid. Wparam 4 calls the same
+  slot on the deal table (page+0x70, grid kind 4, so no kind stamp) and then
+  `L2.00847`. Wparams 5..8 go to `L2.04801`
+  (R2-ENGINE-798). Builder `L2.00762` stores the hero inventory (constructor
+  `L2.00764`, ID 0x3e9) at page+0x6c and the deal table (`L2.00763`, ID
+  0x3eb) at page+0x70.
+- Hero grid vtable `L2.05139` slot 0xb0 is `L2.07651` (`L2.07652`). It asks
+  slot 0xa8 for the grid kind (the hero grid's `L2.07653` returns 2) and,
+  unless the kind is 4, stores it in item +0x18 of every received entry. It
+  destroys the entries of grid list +0x84 from index 0, then `L2.07654`
+  (`L2.07655`) copies the received list: `L2.07505` (`L2.07656`) opens n
+  slots at index 0 and `L2.07657` (`L2.07658`) stores entry i in slot i for i
+  from 0 up. No sort routine is called on this path.
+- Hero painter slot 2c `L2.07551` (`L2.07659`) calls base painter `L2.00845`,
+  which fills cell i with entry i plus [grid+0x90] (R2-ENGINE-798).
+- A raw census of push 0x413 over the EN `.text` finds five hits:
+  `L2.07660`, `L2.07661`, `L2.07662`, `L2.07663`, `L2.07664`. Read:
+  `L2.07661` and `L2.07662` post to window 0x3e8 with wparam = packet byte
+  +0xc & 0x7f behind application +0x404 bit 2 (lparam 0 at `L2.07661`, the
+  decoded list at `L2.07662`). Not read: `L2.07660`, and the two wrappers
+  (`L2.07663`, `L2.07664`). RU has five hits at the corresponding places
+  (`L2.07665`, `L2.07646`, `L2.07666`, `L2.07667`, `L2.07668`); only
+  `L2.07646` was read, with the EN shape.
+- Message 0x76 builder `L2.07669` (`L2.02767`) writes byte +0xc from its third
+  argument and serializes the items through iterator `L2.07670` and
+  `L2.07671` (unread). Its E8/E9 callers are `L2.07672`
+  (id 4) and `L2.07673` (id 9); RU `L2.07674` and `L2.07675`. The other
+  builder `L2.04796` is called only from `L2.04795`, which sends ids 5..8.
+- The arm at `L2.07644` refreshes grids +0x6c and +0x70 when wparam is 7; RU
+  `L2.07645` tests 8. The message of that arm was not identified.
+
+The strip therefore shows a received list 2 in its order. If the server sends
+the hero bag Unit +0x7c in list order, the strip follows R2-ENGINE-402:
+append at the tail, an equal stackable ID merged into the earlier entry.
+
+**Confidence.** High for the client path in EN (dispatch tables read) and for
+the RU slot 0xb0 chain, list copy and painter, equal under the full mask
+except the field and wparam rows named in R2-ENGINE-1382. Medium that RU
+wparam 2 reaches the RU slot 0xb0 call on page+0x6c: the RU message byte table
+and the RU jump tables `L2.07676`, `L2.07677`, `L2.07678` were not read, and RU
+tests wparam 8 where EN tests 7 in this handler. The population searched for
+"no sort" is the page-1 handler arms for wparams 2 and 4, slot 0xb0 body
+`L2.07651` (RU `L2.07652`), the copy `L2.07654`, helpers `L2.07505` and
+`L2.07657`, refresh `L2.07476` and the hero painter; not searched: any other
+writer of the hero grid list (+0x84), the Kaarg and druid shop pages' own
+handlers (builders `L2.01247`, `L2.01248` not compared) and indirect calls of
+slot 0xb0. Medium that only message 0x413 fills the strip: in the read
+listings of EXP-2031 and EXP-2109 no other code calls slot 0xb0; no census of
+indirect calls was run. Unknown for the sender of list id 2 and its order:
+the census covers direct calls of the two known builders, not inline
+builders, other message types or calls through pointers.
+
+**Amends.** R2-ENGINE-798: only the lists of wparams 5 to 8 pass through the
+client re-sort; list 2 (hero grid) and list 4 (deal table) are installed
+unsorted.
+
+**Unknown.** Who sends list 2. An original run settles the order: in the EN
+town-1 shop, take three different items in the order X, Y, Z plus two equal
+potions, open the shop and compare the strip cells with the taking order;
+repeat after a LOAD and in RU.
+
+### R2-ENGINE-1385
+
+Compared with this experiment's normalizer (EN listing against RU listing by
+row, hexadecimal numbers of five or more digits masked; a second count masks
+every number):
+
+| Body | EN | RU | Rows | Differing rows |
+|---|---|---|---|---|
+| inn page 1 builder | `L2.00744` | `L2.07679` | 153 | 0 |
+| inn page 3 builder | `L2.01245` | `L2.07680` | 153 | 0 |
+| inn page 2 builder | `L2.01246` | `L2.07681` | 153 | 0 |
+| inn left, right constructors | `L2.00736`, `L2.00737` | `L2.07682`, `L2.07683` | 43, 48 | 0 |
+| inn centers 1, 2, 3 constructors | `L2.00610`, `L2.00609`, `L2.00681` | `L2.07684`, `L2.01484`, `L2.07685` | 87, 71, 56 | 0 |
+| inn left and right painters | `L2.07686`, `L2.00749` | `L2.07687`, `L2.07688` | 55, 344 | 0 |
+| inn center painters 1, 2, 3 | `L2.00746`, `L2.00935`, `L2.00682` | `L2.02395`, `L2.00936`, `L2.01620` | 745, 869, 838 | 1, 3, 2 field rows |
+| window constructor | `L2.00635` | `L2.07689` | 74 | 0 |
+| shop page 1 builder | `L2.00762` | `L2.07629` | 205 | 0 |
+| druid square painter, hover, enter, click | `L2.00658`.. | `L2.00659`.. | 384, 204, 174, 110 | 0 |
+
+The field rows test application +0x5d8 in EN and +0x63c in RU; under the
+full mask all rows are equal. A raw census of push 0x44d finds the three inn
+builders in each root, and of push 0x3e9 the three shop builders (RU
+`L2.07629`, `L2.07690`, `L2.07691`; EN `L2.00762`, `L2.01247`, `L2.01248`).
+
+The corner operands are immediates in these bodies, so RU builds inn page 1's
+children at (0,0,160,480), (480,0,640,238) and (160,0,480,480) and the right
+and center painters' art origins of R2-ENGINE-246, the five shop children of
+R2-ENGINE-249, and the druid square highlight, person, bug and lizard
+operands.
+
+**Confidence.** High for the compared bodies in both roots. Medium for the
+inn left painter `L2.00745` that R2-ENGINE-246 cites (not compared), the
+Kaarg and druid shop builders (`L2.01248`, `L2.01247`; RU found by census, not
+compared) and for squares other than the druid square, whose bodies were not
+compared here.
+
+**Amends.** R2-ENGINE-246 and R2-ENGINE-249: their EN rectangles hold in RU
+for the compared builders.
+
+### R2-ENGINE-1386
+
+Release slot 58 of the inn right panel (EN `L2.00743`, RU `L2.07692`; 368
+and 372 rows) is equal under the full mask up to row 108. For Talk, both
+compare the selection index +0xb8 of panel +0x5c with the value `L2.07693`
+returns for list +0xc0 (EN; read as its count): an index at or above the count takes the talk entry path
+(`L2.00554`). Below the count, EN `L2.07694` passes the index to the hire-list
+lookup `L2.03994` and formats `npc%dabout` from the entry's word +0x1dc. RU
+`L2.07695` first tests the index against 0 and jumps past the hire-list lookup
+when it is negative; the added test and the loading of the index into a second
+register make the RU body 4 rows longer, and the next 32 rows (EN
+`L2.07696..L2.07697`) use other registers for the same operations; from EN
+`L2.07698` the bodies match at a shift of 4 rows. The shifted comparison (EN
+row i against RU row i+4 from row 110) was recomputed by the review from the
+committed `inn-right-release.txt`; the committed comparison alone shows 248
+differing rows.
+
+**Confidence.** High for the instruction difference. Medium for its effect:
+the bodies `L2.07693` and `L2.03994` and whether Talk can be pressed with a
+negative index were not read.
+
+**Amends.** R2-ENGINE-246: the RU Talk release differs from the EN one that
+246 cites (button press and release); the EN release is unchanged.
+
+**Unknown.** An original run settles it: in the EN and RU first-town inn,
+with no hire or talk entry selected, press Talk and compare.
+
+### R2-ENGINE-1387
+
+The sound loader (slot 0x88; EN `L2.00979`, RU `L2.07699`) stores the 21
+`sfx\town_druid\` keys at square +0x20c + 4i in this order: Dlizard1 to
+Dlizard4 (+0x20c..+0x218), Dbug1 to Dbug3 (+0x21c..+0x224), Dbird1 to Dbird3
+(+0x228..+0x230), Dtree1 to Dtree4 (+0x234..+0x240), Dforest1 (+0x244),
+Ddruid1 (+0x248), Ddruid2 (+0x24c), Denter2 (+0x250), Denter1 (+0x254),
+Dout (+0x258), Dwolf1 (+0x25c).
+
+Scheduler `L2.00670` (R2-ENGINE-256; draws R(n) through `L2.00728`) requests
+sounds through `L2.00941`, the person arms after `L2.07500` on the same slot:
+
+| Arm | Condition | Key |
+|---|---|---|
+| woman start | now − +0x2f0 over +0x2f4, subset +0x2ec = −1 | Ddruid1 |
+| man start | elapsed over +0x2ac, subset +0x2a4 = −1 | Ddruid2 |
+| bird | now − +0xb8 over global `L2.07700` | Dbird r, r = R(3)+1 |
+| tree | now − +0x2f8 over global `L2.07701` | Dtree t+1, t = R(4) through table `L2.07702` |
+| wolf | now − +0x2fc over 60000 ms | Dwolf1 |
+| bug start | now − +0x304 over +0x308 | Dbug r, r = R(3)+1 |
+| lizard start | route +0x318 = −1 | Dlizard r+1 for route r |
+
+The bird and tree waits are process globals: set once to 2000+R(2000) under
+flag bits 1 and 2 of byte `L2.07703`, and set to 2000+R(2000) again after
+each request, with the baseline set to the current time. The bug arm stores
+route r−1 at +0x30c, sets flag 0x80 and the next wait 10000+R(10000). The
+lizard arm draws R(15)+1: 1, 2 and 3 give routes 1 to 3 and Dlizard2 to
+Dlizard4; other values give route 0 and Dlizard1; it sets flag 0x100. Slot
+0x90 (`L2.07704`) requests Dforest1 through `L2.00974`. Hover requests pairs
+on +0x248 to +0x258; which hover region requests which key was not read.
+
+The EN and RU scheduler, loader, slot 0x90 and hover listings of EXP-2031
+compare with 0 differing rows under both masks.
+
+**Confidence.** High for the slot order, the arms, their keys and clocks in
+both roots. Medium for the request meaning of `L2.00941`, `L2.07500` and
+`L2.00974`, whose bodies were not read, and for the hover key mapping.
+
+**Amends.** R2-ENGINE-256: it names 21 keys without values; this card gives
+the key of each slot and arm.
 
 ## ROM2 installed script dispatch and record consumers
 

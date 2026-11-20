@@ -501,7 +501,7 @@ HORSE requests Horse2 at A1 frame 14 and A2 frames 8/14, Horse1 at A3 frame 1 an
 
 Campaign town ID 1 selects the generic inn and shop in both preserved clients. Their selected EN constructors share page or child bases with Kaarg. Shared inn receivers supply buttons, talk and exit. Generic table `L2.00739` uses enter +0x80 `L2.00552`; Kaarg table `L2.00741` replaces it with `L2.00613`. Roster handling belongs to each page's enter body. Per-town center/art methods supply backgrounds, overlays and animation episodes. Detailed geometry below is EN-only. Complete layout equality and differences limited to art remain unproven (`R2-ENGINE-245`, High).
 
-The inn page builds left (0,0,160,480), right-button (480,0,640,238) and center (160,0,480,480) panels. It also attaches the campaign hero panel at (640-panelWidth,0). Its primary graphics are `interface/inn/{LeftStats,LeftPicture,ButtonsArea,CenterArea,manback,ManBackTalk,LUOver,LDOver,RUOver}.bmp` and on/off art for three buttons. The center painter draws background, candle, cauldron, conditional tender, seated actors, edge overlays, a conditional lower-right image and shared children, in that order. The lower-right key remains Unknown (`R2-ENGINE-246`, High / Unknown); the left stat drawing is the shared sheet below (`R2-ENGINE-577`).
+The inn page builds left (0,0,160,480), right-button (480,0,640,238) and center (160,0,480,480) panels. It also attaches the campaign hero panel at (640-panelWidth,0). Its primary graphics are `interface/inn/{LeftStats,LeftPicture,ButtonsArea,CenterArea,manback,ManBackTalk,LUOver,LDOver,RUOver}.bmp` and on/off art for three buttons. The center painter draws background, candle, cauldron, conditional tender, seated actors, edge overlays, a conditional lower-right image and shared children, in that order. The lower-right key remains Unknown (`R2-ENGINE-246`, High / Unknown); the left stat drawing is the shared sheet below (`R2-ENGINE-577`). The RU inn builders, panel constructors and painters equal EN after masking hexadecimal numbers of five or more digits and one field displacement, so these rectangles hold in RU (`R2-ENGINE-1385`, High).
 
 The primary inn destinations add to the page origin (`R2-ENGINE-246`, High for selected EN operands):
 
@@ -517,7 +517,7 @@ The primary inn destinations add to the page origin (`R2-ENGINE-246`, High for s
 | lower-right shared art | (464,238), crop 16x242 | hero-panel state; key Unknown |
 | shared children | delegated | after center layers |
 
-Inn button rectangles are (484,44,624,90), (484,91,624,137) and (484,138,624,184). A selected talk actor gives a blank first caption, Talk and Exit. A selected hire entry gives Hire or Fire according to option bit 31. Matching press/release selects the local action; Talk formats actor/topic text, and Exit starts room removal (`R2-ENGINE-246`, High).
+Inn button rectangles are (484,44,624,90), (484,91,624,137) and (484,138,624,184). A selected talk actor gives a blank first caption, Talk and Exit. A selected hire entry gives Hire or Fire according to option bit 31. Matching press/release selects the local action; Talk formats actor/topic text, and Exit starts room removal (`R2-ENGINE-246`, High). The RU Talk release adds one test that EN lacks: a negative selection index skips the hire-list lookup; EN passes the index to it. After the test, 32 rows of the RU tail use other registers for the same operations. Whether Talk can be pressed with a negative index is Unknown (`R2-ENGINE-1386`, High / Medium).
 
 The generic inn enter `L2.00552` consumes DLL options in order, with kinds 1/2 assigned to hire entries and other kinds to talk entries. The conditional stage-10 speakers are NPC 207/topic 9, NPC 2108/topic 8 and NPC 517/topic 10. Three rows of six 48x64 seats use corners `(176+48*c,480-64*(r+1),224+48*c,480-64*r)`. Only populated seats participate in the hit receiver. Selection updates the actor index and buttons; talk formats `npc%dtalk%d` from the first matching copied option and calls DLL TalkTo. Complete fresh actor artwork and state-gated roster continuation remain Unknown (`R2-ENGINE-247`, High / Medium / Unknown).
 
@@ -547,7 +547,7 @@ The generic inn loads 10 candle pictures, 21 cauldron pictures, 24 breath pictur
 
 Inn animation archive keys use `interface/inn/candle/t0000.bmp`..`t0009.bmp`, `cauldron/t0000.bmp`..`t0020.bmp`, `tender/breath/br0001.bmp`..`br0024.bmp` and `tender/drink/dr0001.bmp`..`dr0040.bmp`. Actor art selects `interface/inn/Unit%d/sprites.16a` or HeroMage/HeroFighter. The missing-controlled-actor fallback selects Unit1; its use by every fresh actor remains Unknown (`R2-ENGINE-248`, `R2-ENGINE-247`).
 
-The shop builds inventory (0,303,480,390), hero inventory (0,390,480,480), item information (0,0,164,303), main art (164,0,480,303) and buttons (464,0,640,238). Its selected painter draws ShopFrame at (164,0), ShopMain at (169,8), enabled category layers 0..3 at (353,108), (197,108), (313,20), (201,20) and the keeper at (277,112), then shared children. Support art includes myitem/shopitem, cost and inventory-background families. State-supplied items populate the panels (`R2-ENGINE-249`, amended, High / Medium); the stock, price text and keeper episodes follow below.
+The shop builds inventory (0,303,480,390), hero inventory (0,390,480,480), item information (0,0,164,303), main art (164,0,480,303) and buttons (464,0,640,238). Its selected painter draws ShopFrame at (164,0), ShopMain at (169,8), enabled category layers 0..3 at (353,108), (197,108), (313,20), (201,20) and the keeper at (277,112), then shared children. Support art includes myitem/shopitem, cost and inventory-background families. State-supplied items populate the panels (`R2-ENGINE-249`, amended, High / Medium); the stock, price text and keeper episodes follow below. The RU shop builder equals EN after masking hexadecimal numbers of five or more digits, so these rectangles hold in RU (`R2-ENGINE-1385`, High).
 
 Selected shop archive keys are `graphics.res:interface/ShopFrame.256`, `interface/shopanim/ShopMain.bmp` and `interface/shopanim/01..04/1..11.bmp`; keeper pictures use `movies.res:shopanim/{Pose2-3,Yes,No}/`. Support keys are `interface/{myitem,shopitem}.256`, `costs1..7.bmp`, `costm1..7.bmp` and `backinv{g,b,s}.bmp`. Buttons append the per-town prefix and ShopButton1..4.bmp under interface/. The generic empty prefix remains a Medium inference; Kaarg supplies its own prefix (`R2-ENGINE-249`).
 
@@ -716,7 +716,7 @@ Undo merges into an equal entry or appends at the tail, and nothing
 re-sorts until the next fill (`R2-ENGINE-710`, High / Medium / Unknown;
 `R2-ENGINE-799`, High / Medium / Unknown).
 
-The EN client re-sorts each list it receives (RU Unknown), and the shelf shows that order:
+The client re-sorts each shop list it receives for tabs 0..3 (wparams 5 to 8), in EN and in RU (the RU install, comparator, sort, price, kind, group, quicksort, short sort, swap, painter and tab bodies equal EN after masking hexadecimal numbers of five or more digits; the RU decoder before the install is Medium: `R2-ENGINE-1382`, High / Medium), and the shelf shows that order:
 items whose itemname.pkt flag has bit 0x2 set first, then the item kind
 (weapon, shield, ring, amulet, head, body, bracers, gloves, boots,
 MagicItems), then for weapons the row group (swords and daggers, axes,
@@ -730,6 +730,20 @@ Medium). Among items equal under these keys the final order is a fixed
 function of the server order and the list size, because the client sort
 permutes equal items again (`R2-ENGINE-799`). itemname.pkt holds 491 records; flag bit 0x2 is clear on cloth
 armour, staffs, books and quest items (`R2-ASSET-207`, High / Medium).
+
+The hero strip below the shelves receives its list unsorted in the generic
+shop page handler. Message 0x413 with
+wparam 2 installs the received list 2 into the hero grid (page +0x6c, ID
+0x3e9): the client stamps each item with grid kind 2, destroys the old
+entries and copies the new ones in list order, and cell i shows entry i plus
+the scroll (`R2-ENGINE-1384`, High in EN, Medium in RU). Wparam 4 calls the
+same slot on the deal table (page +0x70, grid kind 4, so no kind stamp) and
+then `L2.00847`. The wparam is the packet's
+list byte; no direct call of the two known list senders sends list 2, so the
+sender and its order are Unknown. If the server sends the hero bag in its
+list order, the strip shows items in the order taken, with an equal
+stackable item merged into the earlier cell (`R2-ENGINE-1384`, Medium /
+Unknown; `R2-ENGINE-402`).
 
 An enchanted category gives each pick one to three effects drawn by the
 data.bin group B weights of its part and column-15 bit. A second pick is
@@ -934,6 +948,27 @@ Lizard vectors have 8/11/25/47 values before -1, with repeated holds and
 one-based sprite ordinals. The scheduler also requests bird/tree sounds
 after separate 2000+R(2000) waits and wolf after more than 60000 ms.
 Delivered timing and audible output remain Unknown (`R2-ENGINE-256`).
+
+The druid square keeps its 21 sound keys in slots +0x20c+4i in this
+order: Dlizard1-4, Dbug1-3, Dbird1-3, Dtree1-4, Dforest1, Ddruid1, Ddruid2,
+Denter2, Denter1, Dout, Dwolf1. The scheduler arms request these keys, in
+EN and RU (`R2-ENGINE-1387`, High):
+
+| Arm | Requested key |
+|---|---|
+| woman start | Ddruid1 |
+| man start | Ddruid2 |
+| bird | Dbird R(3)+1 |
+| tree | Dtree t+1, t = R(4) through a slot table |
+| wolf | Dwolf1 |
+| bug start | Dbug R(3)+1 |
+| lizard start | Dlizard2/3/4 for routes 1/2/3, otherwise Dlizard1 |
+| page slot 0x90 | Dforest1 |
+
+The bird and tree waits are two process globals, set once under a
+first-use flag and again after each request; no per-visit reset was read
+(`R2-ENGINE-1387`, High / Medium). Whether each request plays, and which
+hover region requests which person key, remain Unknown.
 
 ### Druid campaign availability
 
@@ -1146,7 +1181,9 @@ town draws its stock again; an earlier visit's stock does not come back
 shelves at the next town arrival; the druid inn TalkTo write reaches them
 only at the next fill while town 3 is current (`R2-ENGINE-473`, Medium).
 A sold item stays through entries and leaves until the next fill
-(`R2-ENGINE-474`, High / Medium for EN bodies; RU bodies unread). A SAVE and
+(`R2-ENGINE-474`, High / Medium for EN bodies; the RU entry, leave, tick
+and pending-refill bodies equal EN after masking hexadecimal numbers of five or more digits, and the RU fill
+has the same three callers: `R2-ENGINE-1383`, High / Medium). A SAVE and
 a load through the load entry do not keep the stock; the `.text` references
 to the static shop owner are four per root and the alternate owner
 serializer `L2.01660` is unclosed (`R2-SESSION-187`, High / Medium). Whether a New Game after an earlier game in the same process
