@@ -146,7 +146,9 @@ on the cell named by the unit's position bytes (Medium as an invariant) and
 moves to the next cell when the fine coordinate crosses into it; +0x2c (kind
 3: +0x30) is on both cells of a step from its start until the unit reaches
 the centre of the target cell, and on the one cell of a standing unit (the
-stage table is Medium). — R2-ENGINE-1213
+stage table is Medium; the direction of the step vector written by `L2.06918`
+is read in R2-ENGINE-1470, the stage table's Medium for the occupancy premise
+stands). — R2-ENGINE-1213
 
 Plane two is rebuilt from the entry at each refresh: 0x20 for an entry, 0x40
 for +0x2c, 0x80 for +0x30, 5 for a blocking building cell or a nonzero +0x20;

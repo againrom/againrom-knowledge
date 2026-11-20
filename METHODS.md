@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5157. Observation: 143. Static analysis: 4302. Mixed: 712.
+Claims labelled: 5160. Observation: 143. Static analysis: 4305. Mixed: 712.
 
 ## Ledger ai
 
@@ -2229,6 +2229,9 @@ Claims labelled: 5157. Observation: 143. Static analysis: 4302. Mixed: 712.
 
 | ID | Method | Status |
 |---|---|---|
+| R2-ENGINE-1470 | static analysis | ● active |
+| R2-ENGINE-1471 | static analysis | ● active |
+| R2-ENGINE-1472 | static analysis | ● active |
 | R2-ENGINE-997 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-998 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-999 | static analysis | ✔ promoted (amended, branch candidate) |
@@ -2888,7 +2891,7 @@ Claims labelled: 5157. Observation: 143. Static analysis: 4302. Mixed: 712.
 | R2-ENGINE-807 | static analysis | ● active (branch candidate, amended) |
 | R2-ENGINE-808 | static analysis | ● active |
 | R2-ENGINE-809 | static analysis | ● active |
-| R2-ENGINE-810 | static analysis | ● active |
+| R2-ENGINE-810 | static analysis | ● active (amended) |
 | R2-ENGINE-811 | static analysis | ● active |
 | R2-ENGINE-812 | static analysis | ● active |
 | R2-ENGINE-813 | static analysis | ● active |
@@ -3125,7 +3128,7 @@ Claims labelled: 5157. Observation: 143. Static analysis: 4302. Mixed: 712.
 | R2-ENGINE-1208 | static analysis | ● active |
 | R2-ENGINE-1209 | mixed | ● active |
 | R2-ENGINE-1212 | static analysis | ● active (amended) |
-| R2-ENGINE-1213 | static analysis | ● active |
+| R2-ENGINE-1213 | static analysis | ● active (amended) |
 | R2-ENGINE-1214 | static analysis | ● active |
 | R2-ENGINE-1215 | static analysis | ● active (amended) |
 | R2-ENGINE-1216 | static analysis | ● active (amended) |

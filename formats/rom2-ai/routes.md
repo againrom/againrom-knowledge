@@ -412,3 +412,43 @@ terms, Medium column bindings).
 Across a mission LOAD the actor-step fields +0x58, +0x6c and +0x134..+0x136 are read back into place, so a caster saved in wind-up or recovery resumes its own count (R2-ENGINE-1401: High for the RU body, Medium for EN; that the count runs to its end is Medium, postload callees unread) and begins its next order no earlier than R2-ENGINE-1262's s + c + r (Medium). A loaded timed area effect with a nonzero stored +0x4c continues from the stored +0x50 (R2-ENGINE-1400: High for a stored +0x4c nonzero, Unknown for +0x4c 0), and the read effect serializers store no caster field (R2-ENGINE-1398, Medium for the values after construction; what the effect +0x14 owner key names is Unknown), so a loaded effect reaches its target with no stored caster link (R2-ENGINE-1399, Medium); the HP amount without a caster is Unknown.
 
 The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and the bodies of actions 33 and 34 are read (R2-ENGINE-1450), their delegated effects Medium. Checks 1, 5 and 8 test no per-entry state (R2-ENGINE-1452). They change no rule above (R2-ENGINE-1314).
+
+## Step vector, step time and parameters from map.reg
+
+The step vector is the block at unit `+0x1c0`. EN `L2.06918` / RU `L2.07803` stores into it (R2-ENGINE-1470): speed
+word `+0xa8`, heading word `+0xae` (dir 0 is dy = -1, dir 2 is dx = +1, 0 to 7; "north, clockwise" names this order),
+signed x and y bytes per advance `+0xb0` and `+0xb1`, advance count word `+0xaa`. In EN `L2.03582..L2.06966` it has one
+call, the step start of R2-ENGINE-1213; a census outside that range and of the other stores into the block is not made
+(the arrival zeroes `+0xa8` and `+0xaa`), so that it is the only writer of the step values is Medium. Straight step:
+the vector is speed * (dx, dy). Diagonal step: each axis is the speed * 0.707 truncated toward zero (speed 1 gives
+(0, 0), speed 2 gives (1, 1), speed 63 gives (44, 44)); how a step with a zero vector ends is Unknown. The count is 256
+divided by the larger axis byte, rounded up; the absolute-value helper `L2.04968` is unread and taken as an absolute
+value, so the count is Medium (R2-ENGINE-1470).
+
+Speed for a unit whose kind (`L2.03577`) is 1 (R2-ENGINE-1471): base * M, then the slope term, then divided by the mean
+of the two cell terms, ((t(cell) + t(next)) and 0xff) >> 1, the sum kept in a byte (a mean of 0 counts as 8); M is
+`SpeedMultiplier`, default 8. The term `L2.03599` has three return paths and one stores the cell byte shifted right by 2
+back into the terrain byte array; which cells take it is Unknown. The slope term uses the byte at `this+0x944f4` that
+R2-ENGINE-1340 reads as a height (Medium): dh < 0 (called climbing, the next cell higher) subtracts speed * |dh| / 64,
+dh >= 0 adds speed * dh / 64, dh clamped to 32. Any other kind uses the base speed unchanged. The speed is clamped to
+1..63, so a straight step takes from 5 to 256 advances (counted in advances, not game ticks; Medium for the helper).
+No group term was found in the bodies read; the object that holds the base speed byte is not identified
+(R2-ENGINE-1471).
+
+| Section | Key | Default | Destination |
+|---|---|---|---|
+| Scanning | ScanShift | 7 | dword `+0x2a004` |
+| Terrain | CostLand, CostGrass, CostFlowers, CostSand, CostCracked, CostStones, CostSavanna, CostMountain, CostWater, CostRoad | 8, 8, 9, 14, 6, 12, 11, 16, 8, 6 | bytes `+0x54147..+0x54150` |
+| Path Finding | SpeedMultiplier | 8 | dword `+0x58d84` |
+| Path Finding | StaticScanAhead, DynamicScanAhead, StaticRefreshRate, DynamicRefreshRate, DynamicByStaticLookup, StaticIsntNeeded | 5, 3, 16, 32, 3, 5 | dwords `+0x58584..+0x58598` |
+
+All 18 keys are read by EN `R2.0113` through the config object named `World\Data\map.reg` (R2-ENGINE-1472: High for
+the name string and the 18 calls, Medium that the object is built from the file). R2-ASSET-012 lists an entry `map.reg`
+of 1020 bytes in `world.res` and `world_srv.res`; that the name reaches that entry is Medium. The values in it and the
+readers of the cost bytes are Unknown. The search bounds are code constants: 8, 8, width - 9, height - 9.
+
+Questions answered at the grade of earlier claims: which cell a step occupies and when it changes
+(R2-ENGINE-1213, R2-ENGINE-673); the refused placement and the removal that does not compare (R2-ENGINE-1215);
+when a route is rebuilt (R2-ENGINE-872, R2-ENGINE-871, R2-ENGINE-874, R2-ENGINE-1108). Unknown: the passability
+test that refuses entry into the source cell during a step, and the tie rule between equal routes, whose bodies
+(the path helpers at RU `L2.05231..L2.05230`) are unread.

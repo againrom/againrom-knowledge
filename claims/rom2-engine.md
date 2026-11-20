@@ -22,6 +22,54 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## ROM2 unit step vector, step time and map.reg parameters
+
+Terms shared by these cards: the step vector is the block at unit `+0x1c0` (the block R2-ENGINE-1213 advances); the EN and RU bodies named below were compared line by line after masking addresses in 0x400000..0x8fffff, over the committed linear listings (EN `L2.03582..L2.06966`, RU at EN + 0x9ff0).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1470 | ROM2 EN L2.06918 / RU L2.07803 (masked-equal) stores speed +0xa8, heading +0xae, axis bytes +0xb0/+0xb1 (diagonal: 0.707 truncated) and advance count +0xaa into the unit +0x1c0 block; one call found, in R2-ENGINE-1213's step start. | High / Medium | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
+| R2-ENGINE-1471 | ROM2 step time in advances: ceil(256 / larger axis byte); speed 1..63 from base speed and, for kind 1 only, a height-difference term and a byte-wrapped mean of two cell terms; no group term in the bodies read. | High / Medium / Unknown | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
+| R2-ENGINE-1472 | ROM2 terrain constructor reads 18 parameters through a config object named World\Data\map.reg (sections Scanning, Terrain, Path Finding) through EN R2.0113; defaults and destinations are in code; the values in the file are unread. | High / Medium / Unknown | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
+
+### R2-ENGINE-1470
+
+`L2.06918`(this = terrain, unit, cell word, heading byte; `ret 0xc`, returns the speed) EN and RU masked-equal, 249 of 249 lines. Directions: dir = ((heading + 0x10) and 0xff) >> 5, 0 to 7. The next cell word is the cell word plus the dword `this+0x58e98[dir]`. The three tables are written by the terrain constructor (EN `L2.07804..`): dx 0, 1, 1, 1, 0, -1, -1, -1; dy -1, -1, 0, 1, 1, 1, 0, -1 (dir 0 is dy = -1, dir 2 is dx = +1; "north, clockwise" is a name for this order); the cell delta is dy * 256 + dx.
+
+EN `L2.06918` stores into the block at unit `+0x1c0`: word `+0xa8` = speed, word `+0xae` = dir, byte `+0xb0` = x per advance, byte `+0xb1` = y per advance, word `+0xaa` = advance count. Straight: `+0xb0` = speed * dx, `+0xb1` = speed * dy. Diagonal (dx * dy nonzero): each is the integer from `L2.02708`(speed * d * K), K the double at EN `L2.07805` / RU `L2.07806`, both the bit pattern of 0.707 (`tables/*-diagonal-double.tsv`). `L2.02708` (EN, RU `L2.01309`, masked-equal, 16 instructions) is a store-control-word, set rounding to chop (or ah, 0xc), fistp, restore: truncation toward zero. The byte stored is the low byte. Speed 1 gives the diagonal vector (0, 0); speed 2 gives (1, 1); speed 63 gives (44, 44) (arithmetic on the bodies).
+
+The advance count: n = the absolute value (by the helper `L2.04968`, RU `L2.01523`, unread and taken as an absolute value) of `+0xb0`, or of `+0xb1` when `+0xb0` is 0; n = 1 when 0; count = 256 / n, plus 1 when 256 mod n is nonzero. With R2-ENGINE-1213 (offset bytes advanced by `+0xb0`, `+0xb1` once per advance) a step is that many advances.
+
+**Confidence.** High for the stores and formulas other than the advance count, in both roots (the body read whole in EN, equal in RU). The helper `L2.04968` (RU `L2.01523`) is unread and is taken as an absolute value (R2-ENGINE-828, R2-ENGINE-654); the terms that use it (the advance count here; the climbing term and the clamp test in R2-ENGINE-1471) are Medium for that reason, the other terms High. High for the initial values of the direction tables (byte stores at EN `L2.07807..L2.07808`, inside the compared constructor range, and the dword table built from them in a loop at `L2.07809`); Medium that they stay unchanged (R2-ENGINE-810). In EN `L2.03582..L2.06966` `L2.06918` has one call (`L2.07810`, the step start of R2-ENGINE-1213); a census outside that range and of the other stores into the block is not made (the arrival `L2.03571` zeroes `+0xa8` and `+0xaa`). That `L2.06918` is the only writer of the step values is Medium.
+
+**Unknown.** Who reads the block bytes outside the advance of R2-ENGINE-1213: a reference scan of the block displacements `+0xa8` to `+0xb1` at `unit+0x1c0`. The body of `L2.04968`. How a step with a zero vector (speed 1 on a diagonal, count 256) ends: whether the arrival test ends it is not shown.
+
+**Amends.** R2-ENGINE-1213's Unknown "the step vector written by `L2.06918`": read; its Medium for the stage table stands for the occupancy premise, the direction of the vector is read. R2-ENGINE-810: the table values are read again in the constructor at EN `L2.07807..L2.07808`; the Medium for later writers stands. R2-ENGINE-456 and R2-ENGINE-654: the offset tables are read.
+
+### R2-ENGINE-1471
+
+Speed s comes from `L2.07811`(unit) (EN, RU `L2.07812`, masked-equal, 23 instructions): p = dword [[unit+0x70]+0x3c]; the result is byte [p+0x44] when nonzero, else the signed word [unit+0x8c]. The object at `[unit+0x70]` and the byte `+0x44` are not identified. `L2.06918` asks the unit kind from `L2.03577` (body unread). Kind 1 (`L2.03577` returns 1): dh = byte(cell) - byte(next) from the signed bytes at `this+0x944f4+cell` (the byte R2-ENGINE-1340 reads as a height, Medium; the difference is stored in a byte before the clamp, so a difference outside -128..127 wraps), clamped to -32..+32; s = base * dword `this+0x58d84`; dh < 0: s = s - (s * |dh| >> 6); dh >= 0: s = s + (s * dh >> 6); the term is called slope and dh < 0 climbing on the Medium of R2-ENGINE-1340; |dh| uses the unread helper `L2.04968`, taken as an absolute value; a = ((t(cell) + t(next)) and 0xff) >> 1, the sum kept in a byte, with t = `L2.03599` (EN, RU `L2.07813`, masked-equal, 107 instructions); a = 0 becomes 8; s = s / a (signed division). `L2.03599` has three return paths (a byte through `L2.07814`, a byte from `L2.03578`-tested records, a loop over six values through `L2.04169`) and one of them stores the cell byte shifted right by 2 back into the terrain byte array before returning it; which cells take that path is unread. Any other kind: s = base, no slope, no cell term, no multiplier. s is then clamped to 1..63.
+
+Time, counted in advances (advances per game tick are outside this card): advances = ceil(256 / s) for a straight step; at most 256 (speed 1), at least 5 (speed 63). A diagonal step uses the truncated vector byte as n, so it takes as many advances as a straight step at speed floor(0.707 * s) (6 for s = 63), and 256 for s = 1. Multiplier `+0x58d84` defaults to 8 (R2-ENGINE-1472); with a = 8 the multiplier cancels (a flat cell with t = 8 gives s = base).
+
+**Confidence.** High for the arithmetic of the stores and formulas in both roots, except the terms below. The helper `L2.04968` (RU `L2.01523`) is unread and is taken as an absolute value (R2-ENGINE-828, R2-ENGINE-654); the terms that use it (the climbing term, the clamp test `|dh| > 0x20`, the advance count) are Medium for that reason, the other terms High. The cell term is High as arithmetic over the return value of `L2.03599` (with the byte wrap above) and Medium as "the cell cost". That the byte at `this+0x944f4` is a height, and that a negative difference is a climb, is Medium (R2-ENGINE-1340). Medium for the reading that +0xaa is consumed as the number of advances (R2-ENGINE-1213 states one advance per call). Unknown: the group (no group record is read in these bodies, so no group dependence is shown; the identity of `[unit+0x70]` is unread), what `L2.03577` kind 1 means, and how the ten cost parameters of R2-ENGINE-1472 reach t.
+
+**Unknown.** The byte wrap of the cell-term sum and the cells for which `L2.03599` stores `byte >> 2` back into the terrain byte array; the body of `L2.04968`. Settled by reading `L2.03577`, `L2.07814`, `L2.04968` and the unit class tables, and a run of the original that loads one mission, orders a unit across a flat cell and across a slope, and counts advances per step.
+
+**Amends.** none; consistent with R2-ENGINE-1470 and cites R2-ENGINE-1340 (height byte, Medium), R2-ENGINE-828 and R2-ENGINE-654 (the unread helper).
+
+### R2-ENGINE-1472
+
+The terrain constructor (EN `L2.07804..L2.07815`, RU `L2.07816..`, masked-equal, 1024 of 1024 lines) opens a file whose name string is `World\Data\map.reg` (two reads of the same name, one before the first parameter, one before the other seventeen), loads a config object from it and reads each parameter through `R2.0113`(section, key, default) (EN, RU `R2.0114`, masked-equal, 43 instructions): a lookup of section then key; a found integer record returns its value; no record returns the default; a record of another type calls `L2.05734` (unread; R2-ENGINE-614: it throws) and then returns record `+4`. The file opener `L2.03656` (RU `L2.04010`, masked-equal, 114 instructions) was read only as a window, not interpreted.
+
+Section, key, default, destination: Scanning, ScanShift, 7, dword +0x2a004; Terrain, CostLand 8, CostGrass 8, CostFlowers 9, CostSand 14, CostCracked 6, CostStones 12, CostSavanna 11, CostMountain 16, CostWater 8, CostRoad 6, bytes +0x54147..+0x54150 in that order; Path Finding, SpeedMultiplier 8, dword +0x58d84; StaticScanAhead 5, DynamicScanAhead 3, StaticRefreshRate 16, DynamicRefreshRate 32, DynamicByStaticLookup 3, StaticIsntNeeded 5, dwords +0x58584, +0x58588, +0x5858c, +0x58590, +0x58594, +0x58598. EN and RU strings are equal text. Code constants: search bounds +0x58eb8..+0x58ebb = 8, 8, width - 9, height - 9; the direction tables of R2-ENGINE-1470.
+
+**Confidence.** High for the name string, the 18 getter calls, and the keys, defaults and destinations (both roots); Medium that the config object is built from the file (the opener `L2.03656` and loader `L2.06955` are not interpreted). R2-ASSET-012 lists an entry `map.reg` of 1020 bytes in `world.res` and `world_srv.res`; that the name `World\Data\map.reg` reaches that entry is Medium (the opener `L2.03656` is read as a window only). The values in it are Unknown, and so is whether the shipped file overrides a default. Medium for the roles of the Path Finding keys: their names and the destinations are read; which consumer uses which is read only for `+0x58d84` (R2-ENGINE-1471).
+
+**Unknown.** Whether the path reaches the archive entry of R2-ASSET-012 and the values in that entry: a static read of the opener and of the entry, then the cost bytes' consumers by a displacement census of `+0x54147..+0x54150` and `+0x58584..+0x58598`.
+
+**Amends.** none; consistent with R2-ENGINE-614 and R2-ENGINE-956, which read the same body of `R2.0113`.
+
 ## Item card for a spell-carrying item
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -10678,6 +10726,8 @@ R2-ENGINE-654 narrows the Unknown on ids 9 and 23 by reading `L2.02113`,
 `L2.02114` and `L2.01522`: the "free cell" is a cell where the caster's
 footprint passes a byte-mask test; which cells result stays Medium.
 
+**Amended.** R2-ENGINE-1470 reads the offset tables `+0x58e88/+0x58e90` (and the dword table `+0x58e98`) that this card lists as unread.
+
 ### R2-ENGINE-457
 
 With nonzero Player kind (+0x2c), the RU offensive choice `L2.00056`
@@ -16388,6 +16438,8 @@ blocked neighbours, recording the cast cell, would settle both.
 **Amended.** R2-ENGINE-809, R2-ENGINE-810 narrow the offset/getter and cell-byte/mask Unknowns with initialization, centre getters, P2 pointer/writers and the kind-dependent block writer; persistence, full terrain producers and the absolute-value helper remain open. R2-ENGINE-789 narrows the byte test: the caster byte `[+0x1c0]+5` is 0x41 from the
 block constructor `L2.01783` (Medium for later writers). The cell byte of `L2.03519` stays unread.
 
+**Amended.** R2-ENGINE-1470 reads the offset tables `+0x58e88/+0x58e90` that this card lists as unread; the absolute-value helper (RU `L2.01523`, EN `L2.04968`) stays unread.
+
 **Evidence.** [EXP-2082](../experiments/EXP-2082-rom2-creature-aim/RESULTS.md)
 
 ### R2-ENGINE-655
@@ -21660,7 +21712,7 @@ window of the state 1 hard voice and is shown by the listing tails
 |---|---|---|---|---|
 | R2-ENGINE-808 | ROM2 bit-8 branch enters a retarget/default path (RU body read). | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-809 | ROM2 Teleport reads P2 and a kind-initialized block mask. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
-| R2-ENGINE-810 | ROM2 Acid Stream uses eight offsets and centre getters. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-810 | ROM2 Acid Stream uses eight offsets and centre getters. | High / Medium | ● active (amended) | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-811 | ROM2 Stone Curse has class duration tests and tag-0 start/end. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-812 | ROM2 Blizzard's one-cell pulse and schedule are inherited Medium. | High / Medium / Unknown | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-813 | ROM2 spell-test comparison has four bounded text differences. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
@@ -21759,6 +21811,8 @@ bulk-copy writers. This is initialization evidence, not immutability proof.
 **Unknown.** Close later writers or observe a bounded original case with
 Turtle.4 attacking on all eight headings, varied sizes and subcell positions,
 recording centres, index and prepared cell. No runtime was observed.
+
+**Amended.** R2-ENGINE-1470 reads the table values again in the constructor at EN `L2.07807..L2.07808`; the Medium for later writers stands.
 
 **Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 3.
 
@@ -28514,7 +28568,7 @@ Terms shared by these cards: the entry is the 60-byte per-cell record of R2-SESS
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1212 | ROM2 building setter EN L2.06901 / RU L2.06902 stores the building in entry +0x0c of each width x height cell whose bit is set in +0x68; refresh blocks the cells whose bit is set in +0x64; the clearer zeroes +0x0c without comparing. | High / Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
-| R2-ENGINE-1213 | A walking one-cell ROM2 unit: entry +4 (kind 3: +8) is on its position cell and moves when the fine coordinate crosses into the next cell; +0x2c (+0x30) is on both cells of a step from its start until the centre of the target cell. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
+| R2-ENGINE-1213 | A walking one-cell ROM2 unit: entry +4 (kind 3: +8) is on its position cell and moves when the fine coordinate crosses into the next cell; +0x2c (+0x30) is on both cells of a step from its start until the centre of the target cell. | High / Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
 | R2-ENGINE-1214 | ROM2 plane bytes: refresh rebuilds plane two from the entry (0x20 always, 0x40 for +0x2c, 0x80 for +0x30, 5 for a blocking building cell or +0x20) and keeps 0x10; 34 direct stores in 9 terrain routines per root; 4 routines unread. | High / Medium / Unknown | ● active | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
 | R2-ENGINE-1215 | ROM2 removal zeroes entry +4 or +8 without comparing; the footprint clear compares; death (EN L2.01806) clears the position square and the ring around it; a refused placement leaves a unit with no +4 entry on its position cell. | High / Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
 | R2-ENGINE-1216 | In ROM2 the terrain serializer and the post-load pass call no entry writer (R2-ENGINE-759); the writers' direct callers by a reference scan of allods2.exe; whether LOAD reaches one of them: Unknown. | Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
@@ -28581,6 +28635,8 @@ In the bodies read, the cell holding `+4` is the cell of the position object's b
 **Amends.** R2-ENGINE-673's "the footprint pass keeps +0x2c and +0x30": the pass clears the unit from the ring around its position and sets the position square and, in mode 0, the target square; its jump table `L2.06923` holds four targets (no action, clear, set, set). R2-ENGINE-501's "sends the unit back to that cell through `L2.02410`": the pass moves no unit; it rewrites the footprint references and block `+0x80`. R2-ENGINE-1199's Medium for `L2.02410(unit, 0, 1)`: it clears the ring, sets the position square and stores `+0x80` = the position cell. The Unknowns of R2-ENGINE-546, R2-ENGINE-549 (item 4), R2-ENGINE-555, R2-ENGINE-560, R2-ENGINE-561 and R2-ENGINE-1043 that list RU `L2.02410` or the advance RU `L2.02876` (EN `L2.06919`) as unread are narrowed, not contradicted.
 
 **Evidence.** EXP-2163 `evidence/derived/listing-compare.tsv` (rows `fn-L2.03570`, `fn-L2.04158`, `fn-550697`, `fn-L2.00314`, `pass-L2.03569-code`, `clear-L2.03586`, `fn-L2.03584`, `fn-L2.06917`, `fn-L2.06919`, `fn-L2.03571`, `fn-555411`, `fn-L2.05532`, `fn-551383`), `evidence/derived/en-writer-callsites.tsv`; EXP-2085 `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.06912.txt`, `ru-terrain-lin-L2.05179.txt`.
+
+**Amended.** R2-ENGINE-1470 reads the step vector written by `L2.06918` (the Unknown above): the direction of the vector is read; the Medium for the stage table stands for the occupancy premise.
 
 ### R2-ENGINE-1214
 
