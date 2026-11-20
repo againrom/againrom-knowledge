@@ -230,6 +230,10 @@ that no other routine chooses a book spell is Medium (R2-ENGINE-1244).
 The per-spell census of the 29 spells is R2-ENGINE-1248; the EN bodies equal
 RU after masking (R2-ENGINE-1249).
 
+In a Group pass (counter test read in RU; EN Medium) the heal routine runs for a computer mage member without a
+target, or for every member under programme 19; runs outside the Group pass
+are Unknown (R2-ENGINE-1420; R2-ENGINE-1244 for the routines).
+
 EN/RU acquired third maps, cycles, receiving byte widths, options masks and
 36-byte preference widths agree. Their key-mode field offsets differ:
 EN+0x404 and RU+0x41c; both test literal 1. Both aligned setup excerpts resend

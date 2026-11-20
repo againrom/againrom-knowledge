@@ -170,7 +170,7 @@ Medium. The word and dword clocks are distinct. R2-ENGINE-828, R2-ENGINE-844.
 | Each member after programme route | Health <= command +0x44 and hostile within movement byte +8 + 5: flee. Otherwise health <= +0x40 and hostile within 2: back-off helper L2.02451. | R2-ENGINE-506 High predicates, Medium helper destination; R2-ENGINE-877 Medium bounded route independence | All threshold writers; units outside this Group post-step |
 | Human-table threshold setup | Spellbook: class 2, +0x40=HPmax, +0x44=HPmax/4. Else range>1 and kind!=3: class 1, HPmax/2 and 0. Else class 0, both zero. | R2-ENGINE-506 High local stores | Further writer effects |
 | Creature thresholds | Stat reader can supply Withdraw/Wimpy to command +0x40/+0x44, keeping defaults for -1. Human-only setup does not imply creature thresholds stay constructor values. | R2-ENGINE-777 High reader, Medium delivered row; R2-ENGINE-884 Medium creature composition | Creature row values and complete writer population |
-| Flee chosen | Try spell 23 through admission L2.01518; otherwise move 3 cells away from living hostiles' centre. No living hostile: default route. | R2-ENGINE-506 High flee body, Medium centre/away interpretation | Spell admission and concrete destination |
+| Flee chosen | Teleport (23) admitted by L2.01518 (in the book, mana at least its cost): cast at a cell scanRange + 1 from the hostiles' mean point; otherwise walk 3 cells away from that point. Each spell routine also holds an Invisibility (12) arm and a walk-to-cell arm behind a repeated Teleport admission; the callers' entry test makes them unreachable while the admission is pure (Medium). No living hostile: idle planner. Back-off is the same with radius 2 and scanRange - 1 (R2-ENGINE-1418). | R2-ENGINE-506 High flee body, Medium centre/away interpretation | Spell admission and concrete destination |
 | RU creation arm with session word +0xd8=1 | Halve command +0x44. | R2-ENGINE-884 High stores, Medium selection meaning | Meaning of +0xd8 and complete EN counterpart |
 
 ## Health thresholds, difficulty and attack order
@@ -469,7 +469,29 @@ it back to the planner; the three routines never choose Slow (29) from the
 book (the loops stop at 28); that no other routine chooses a book spell is
 Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
 after masking (R2-ENGINE-1249). How often these routines run per simulation
-tick is Unknown.
+tick outside the Group pass is Unknown.
+
+In a Group pass (once per 16 counter values, RU; EN Medium) programmes 1 and 2
+(a member at its post, with L2.00490 nonzero) and 18 (the same, with two
+further gates), 3 and 5 reach the heal routine for a member without a target,
+programme 0xff when the idle planner finds no candidate, and programme 19 for
+every member; runs outside the Group pass are Unknown (R2-ENGINE-1420). The
+post-step then decides break-off for the same member: when Teleport is in the
+book and mana covers its cost it casts Teleport at a cell scanRange + 1
+(back-off: scanRange - 1) from the hostiles' mean point; otherwise it walks 3
+cells away from that point. Each spell routine also holds an Invisibility arm
+and a walk-to-cell arm behind a repeated Teleport admission; the callers' entry
+test makes them unreachable while the admission is pure (Medium). With no
+hostile it takes the idle planner (R2-ENGINE-1418). Break-off runs once per
+Group pass per member from the post-step; flee also runs from selector cell
+0x16 (cadence Unknown). The bodies read keep no flight state; each decision is
+re-made (R2-ENGINE-1419). Withdraw and Wimpy are hit points; of 180 populated
+Units template rows, 40 book Heal, all by knownSpells, and of them only
+Succubus has a Wimpy (R2-ASSET-293; Medium: books of heroes, summons and loaded
+units are not read). The player threshold rewrite
+L2.02445 sets +0x40 to HPmax x {0, 2v, 3v}[class] / 100 (R2-ENGINE-1421). No
+heal, break-off or Group arm body read reads the difficulty word
+(R2-ENGINE-1422, Medium).
 
 ## Guard radius source
 

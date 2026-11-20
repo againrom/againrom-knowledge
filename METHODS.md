@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5134. Observation: 143. Static analysis: 4282. Mixed: 709.
+Claims labelled: 5140. Observation: 143. Static analysis: 4287. Mixed: 710.
 
 ## Ledger ai
 
@@ -2221,6 +2221,7 @@ Claims labelled: 5134. Observation: 143. Static analysis: 4282. Mixed: 709.
 | R2-ASSET-257 | static analysis | ✔ promoted (branch candidate) |
 | R2-ASSET-258 | static analysis | ✔ promoted (branch candidate) |
 | R2-ASSET-259 | static analysis | ✔ promoted (branch candidate) |
+| R2-ASSET-293 | mixed | ● active |
 
 ## Ledger rom2-engine
 
@@ -3149,7 +3150,7 @@ Claims labelled: 5134. Observation: 143. Static analysis: 4282. Mixed: 709.
 | R2-ENGINE-1240 | static analysis | ● active |
 | R2-ENGINE-1241 | static analysis | ● active |
 | R2-ENGINE-1242 | mixed | ● active |
-| R2-ENGINE-1244 | static analysis | ● active |
+| R2-ENGINE-1244 | static analysis | ● active (amended) |
 | R2-ENGINE-1245 | static analysis | ● active |
 | R2-ENGINE-1246 | static analysis | ● active |
 | R2-ENGINE-1247 | static analysis | ● active |
@@ -3216,6 +3217,11 @@ Claims labelled: 5134. Observation: 143. Static analysis: 4282. Mixed: 709.
 | R2-ENGINE-1385 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1386 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1387 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1418 | static analysis | ● active |
+| R2-ENGINE-1419 | static analysis | ● active |
+| R2-ENGINE-1420 | static analysis | ● active |
+| R2-ENGINE-1421 | static analysis | ● active |
+| R2-ENGINE-1422 | static analysis | ● active |
 | R2-ENGINE-1312 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1313 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1314 | static analysis | ✔ promoted (branch candidate) |

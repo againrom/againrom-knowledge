@@ -4187,3 +4187,44 @@ x at most 7, y at most 7, x + width at least W - 8, or y + height at least H - 8
 id already in the map (read in EN only).
 
 **Confidence.** High for the EN bodies. RU is not claimed.
+
+## ROM2 Units healers and break-off thresholds
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-293 | ROM2 Units: of 180 populated template rows (241 ordinals, 61 empty), 40 book Heal, all by a knownSpells mask and none by a Spell slot; of those only Succubus has Wimpy (33..137); Withdraw 100/90/60/15 on 20 rows. | High / Medium | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+
+### R2-ASSET-293
+
+Table `generated/derived/census.tsv` (program `evidence/census.py` over EXP-2143 `units.tsv` and EXP-2082
+`known-spell-books.tsv` and `unit-slots.tsv`; both roots' `world.res` hash to
+`863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`; reproduced byte-equal). One row per
+Units ordinal 1..241 with Withdraw, Wimpy, the knownSpells mask and whether Heal (24), Teleport (23) and
+Invisibility (12) are booked. A knownSpells mask books its spells in a new book and sets the mage bit;
+without one the Spell 1..3 slots are booked (R2-ENGINE-652).
+
+- Heal booked (40 rows, all with knownSpells, none through a slot): Dragon 1..5, Orc_Shaman 1..5,
+  M_Skeleton 3..5, Druid, Druid_Mercenary, Druid_Preacher, Druid_Male/Female/Leader 2..5, Succubus 1..5,
+  MercenaryDruidBase and MercenaryDruid60..110. Withdraw and Wimpy are 0 on all of them except Succubus,
+  Wimpy 33, 53, 85, 137, 137.
+- Withdraw above 0 (20 rows): Goblin_Sling 1..4 60, Orc_Bow 1..4 90, Bat_Sonic 1..4 15, MercenaryOrc and
+  MercenaryOrcBase, MercenaryOrc60..110 100.
+- Wimpy above 0 (46 rows): Goblin_Pike 1..5 10, Goblin_Sling 1..5 8, Bat_Sonic 1..5 4, Bee 1..5 3,
+  Squirrel 1..5 5, Wolf 20, 32, 51, 82, 82, Spider 5, 8, 13, 20, 20, Succubus as above, Dino 10, 16, 26, 41,
+  41, Sheep 1.
+- -1 in both (constructor default kept, R2-ENGINE-777): Catapult, CatapultBase, MercenaryCatapult, Human.
+- Teleport booked: Orc_Sword 4 and 5 (slot 1). Invisibility booked: 23 rows.
+
+The predicates compare health `+0x94` with these values as signed integers (R2-ENGINE-1003), so they are
+hit points, not fractions of HPmax.
+
+**Confidence.** High for the values and the booking rule over these tables. The census covers Units
+template rows in RU (`known-spell-books.tsv` and `unit-slots.tsv` are RU). 61 of the 241 ordinals are empty
+rows (blank name, no Withdraw or Wimpy value; `census.tsv` ordinals 1 to 25, 29 to 63, 130), so 180 rows
+carry data. Medium: books of heroes, summons and loaded units are not read; the EN knownSpells loop is not
+compared (R2-ENGINE-1247); Human-table books are outside the census. Medium that a row's values
+reach a placed unit (the loader condition of R2-ENGINE-777 and R2-ENGINE-1001) and that a knownSpells row is
+exactly a row of `known-spell-books.tsv` (EXP-2082 derived it; its rule is not re-read here). Whether
+Orc_Sword 4 and 5 can pay Teleport's cost of 60 depends on their manaMax, not read here.
+
+**Evidence.** EXP-2181 `RESULTS.md` questions 3 and 4.

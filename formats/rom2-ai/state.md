@@ -366,6 +366,28 @@ from the book; that no other routine chooses a book spell is Medium
 (R2-ENGINE-1249); the priority routine has no direct reference
 (R2-ENGINE-1250).
 
+In a Group pass (once per 16 counter values, RU; EN Medium) programmes 1 and 2
+(a member at its post, with L2.00490 nonzero) and 18 (the same, with two
+further gates), 3 and 5 reach the heal routine for a member without a target,
+programme 0xff when the idle planner finds no candidate, and programme 19 for
+every member; runs outside the Group pass are Unknown (R2-ENGINE-1420). The
+post-step then decides break-off for the same member: when Teleport is in the
+book and mana covers its cost it casts Teleport at a cell scanRange + 1
+(back-off: scanRange - 1) from the hostiles' mean point; otherwise it walks 3
+cells away from that point. Each spell routine also holds an Invisibility arm
+and a walk-to-cell arm behind a repeated Teleport admission; the callers' entry
+test makes them unreachable while the admission is pure (Medium). With no
+hostile it takes the idle planner (R2-ENGINE-1418). Break-off runs once per
+Group pass per member from the post-step; flee also runs from selector cell
+0x16 (cadence Unknown). The bodies read keep no flight state; each decision is
+re-made (R2-ENGINE-1419). Withdraw and Wimpy are hit points; of 180 populated
+Units template rows, 40 book Heal, all by knownSpells, and of them only
+Succubus has a Wimpy (R2-ASSET-293; Medium: books of heroes, summons and loaded
+units are not read). The player threshold rewrite
+L2.02445 sets +0x40 to HPmax x {0, 2v, 3v}[class] / 100 (R2-ENGINE-1421). No
+heal, break-off or Group arm body read reads the difficulty word
+(R2-ENGINE-1422, Medium).
+
 ## Guard radius source
 
 The installed Scanning/MinimalGuardRange value is 8 in both roots; the getter

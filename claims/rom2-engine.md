@@ -12047,6 +12047,7 @@ sites (`ru-cmd-fields-2.tsv`) were not read. The body of `L2.01518`
 (spell admission in flee) was not read.
 
 **Amended.** R2-ENGINE-884 narrows the clause on creature-table units: their +0x40 and +0x44 may come from the Units Withdraw and Wimpy parameters through the stat reader (R2-ENGINE-777, Medium; a stored -1 keeps the constructor default; creature rows unread), not from the constructor alone. The other clauses and grades stand.
+R2-ENGINE-1418 reads the flee spell routine, the back-off helper `L2.02451`, its spell routine and the admission `L2.01518`: the spell is Teleport at a cell scanRange + 1 (back-off: scanRange − 1) from the hostiles' mean point when Teleport is in the book and mana covers its cost; otherwise the unit walks 3 cells away (the Invisibility and walk-to-cell arms are unreachable while the admission is pure, Medium). R2-ENGINE-1421 gives the arguments of `L2.02445` (0, 2v, 3v). The other clauses and grades stand.
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
 
@@ -29282,7 +29283,7 @@ defensive byte.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1244 | A ROM2 computer mage chooses book spells in offensive choice L2.00056 (attack planner) and heal routine L2.01513 with support choice L2.01533 (idle wrapper); each has one direct caller per root; cadence is Unknown. | High / Medium / Unknown | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
+| R2-ENGINE-1244 | A ROM2 computer mage chooses book spells in offensive choice L2.00056 (attack planner) and heal routine L2.01513 with support choice L2.01533 (idle wrapper); each has one direct caller per root; cadence is Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
 | R2-ENGINE-1245 | ROM2 computer support candidates are the units of the Heal-radius area list around the caster, kept on relation bit 2, caster first (Medium); other support goes to one drawn same-owner unit. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
 | R2-ENGINE-1246 | ROM2 computer casters pick spells and support targets by draws uniform if the divisor stays at the constructor's 0x8000 (Medium); Heal needs mana above 10, other support full mana; offense yields at Mind above 59 in 30 of 100. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
 | R2-ENGINE-1247 | ROM2 computer book choices read ids 1..28 of book +0x140: offense takes spells whose Defensive value is not 1, support Heal, Shield and the other Defensive spells; the three never choose Slow (29); no other chooser is Medium. | High / Medium | ● active | [EXP-2167](../experiments/EXP-2167-rom2-mage-support/) |
@@ -29345,6 +29346,10 @@ or a run of the original counting entries of the heal routine per tick, would se
 
 **Amends.** R2-ENGINE-351's and R2-ENGINE-457's Unknown on the callers of the computer routines: one
 direct caller each in both roots.
+
+**Amended.** R2-ENGINE-1420 narrows the cadence Unknown: in a Group pass the idle wrapper reaches the heal
+routine for a member with no target in programmes 1 and 2 (a member at its post, with `L2.00490` nonzero),
+18 (the same, with two further gates), 3, 5 and 0xff, and for every member in programme 19. Runs outside the Group pass stay Unknown. The other clauses and grades stand.
 
 **Evidence.** EXP-2167 `RESULTS.md` question 1; `navigation/listings/ru-refs-decision.txt`,
 `en-refs-decision.txt`, `ru-idlearm-L2.07122.txt`, `en-idlearm-L2.07123.txt`.
@@ -31767,6 +31772,193 @@ both roots. Medium for the request meaning of `L2.00941`, `L2.07500` and
 
 **Amends.** R2-ENGINE-256: it names 21 keys without values; this card gives
 the key of each slot and arm.
+
+## ROM2 computer heal cadence and break-off
+
+Terms: command = the block at unit `+0x1c4`; Group pass = `L2.00502`, called when session counter `+4`
+mod 16 is 6 (R2-ENGINE-1016); idle wrapper RU `L2.01531` / EN `L2.04984` and heal routine RU `L2.01513` /
+EN `L2.05314` (R2-ENGINE-1200); member routine `L2.02447` with the flee test `L2.02448` and the back-off
+test `L2.02450` (R2-ENGINE-1003). EN addresses are RU − 0xa039 in `L2.02449..L2.02445` and RU − 0x9ff0
+for `L2.02117`; each pair is masked-equal (`generated/derived/compare.tsv`).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1418 | ROM2 flee and back-off cast Teleport at scanRange +1 (back-off: -1) from the hostiles' mean point when it is booked and paid; otherwise the unit walks 3 cells. The spell routines' Invisibility and walk-to-cell arms are unreachable (Medium). | High / Medium | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+| R2-ENGINE-1419 | ROM2 break-off runs once per Group pass per member from the post-step; flee also runs from selector cell 0x16 (cadence Unknown); no flight state is kept in the bodies read; each decision is re-made. | High / Medium / Unknown | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+| R2-ENGINE-1420 | ROM2 Group programmes 1, 2, 3, 5, 18 and 0xff reach a computer mage's heal routine when it lacks a target (programmes 1 and 2 at their post with `L2.00490` nonzero; programme 18 the same with two further gates); programme 19 always. | High / Medium / Unknown | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+| R2-ENGINE-1421 | ROM2 L2.02445 sets +0x40 = HPmax x {0, 2v, 3v}[class] / 100 (v 0, 10 or 30) for owner +0x2c zero units or a passed owner. | High / Medium / Unknown | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+| R2-ENGINE-1422 | No ROM2 heal, support, flee, back-off, post-step or Group arm body read here reads the difficulty word [session]+0xd8; the population is bounded below. | Medium | ● active | [EXP-2181](../experiments/EXP-2181-rom2-heal-withdraw/) |
+
+### R2-ENGINE-1418
+
+Bodies read whole in both roots (`generated/listings/{ru,en}-*.txt`, masked-equal: flee 112, flee spell 127,
+back-off 79, back-off spell 106, mean point 72, hostile list 25 instructions):
+
+- Flee RU `L2.02449` / EN `L2.07155`: with a book (`+0x140` nonzero) and admission `L2.01518(unit, 23)`
+  nonzero it calls the flee spell routine. Otherwise it takes the area list of radius `[+0x1c0]+8` + 5 around
+  the unit's cell (`L2.05939`), keeps the units the filter `L2.02119(unit, list, 0)` keeps, and counts those
+  with health `+0x94` above 0. With one or more it walks (`L2.02401`) to `L2.02454(map, unit, P, 3)`, P being
+  the mean point `L2.02453(list)`; with none it calls `L2.01733(unit, 0)`.
+- Flee spell RU `L2.02452` / EN `L2.07705`: r = scanRange `+0xa5` + 1; list `L2.02117(unit, cell)` (area
+  radius `[+0x1c0]+8`, same filter); no living member: `L2.01733(unit, 0)`. Else cell C =
+  `L2.02454(map, unit, P, r)`; Teleport (23) admitted: command `+0x60` = 1 and the cell cast `L2.01732(unit, C,
+  spell)`; else Invisibility (12) admitted and effect mask `+0x144` & 0xc zero: `+0x60` = 1 and
+  `L2.01524(unit, unit, spell)`; else a walk to C.
+- Reachability: the flee spell routine has one call, at `L2.07706`, made only after `L2.01518(unit, 23)`
+  returned nonzero (tested at `L2.07707`, repeated at `L2.07708`; otherwise the walk). The back-off spell
+  routine has one call, at `L2.07709`, after the same test (`L2.07710`, `L2.07711`). The spell routine tests
+  `L2.01518(unit, 23)` again with the same arguments before its Invisibility arm. The admission returns the
+  spell object when mana is at least the cost and reads no other state, so the third test repeats the first
+  two unless a callee between them changes mana (`L2.02117`, `L2.02453`, `L2.02454`, read as list or
+  arithmetic helpers, none stores mana in the listing). The Invisibility arm and the walk to C are then not
+  entered; a unit that books Invisibility but not Teleport (R2-ASSET-293 census: 23 rows book Invisibility, 2
+  Teleport) walks 3 cells from the mean point. EN is masked-equal.
+- Back-off RU `L2.02451` / EN `L2.07712`: book and Teleport admitted: the back-off spell routine. Else area
+  radius 2, same filter; a nonempty list (no health test): walk to `L2.02454(map, unit, P, 3)`; empty: idle
+  planner `L2.01731`.
+- Back-off spell RU `L2.07713` / EN `L2.07714`: as the flee spell routine with r = scanRange − 1, area radius
+  2, a nonempty list without a health test, and the idle planner `L2.01731` for an empty list.
+- Mean point `L2.02453`: sums the fine x (`L2.02411`) and y (`L2.02412`) of every list member, divides each
+  by the list count taken as a byte, returns y << 16 + x; an empty list returns 0.
+- Admission `L2.01518(unit, id, x)` (EXP-2042 `ru-admission-affinity-range.txt`): returns the book's spell
+  object from `L2.00040(id)` when mana `+0x9a` is at least its cost `+0xc`, else 0; x is not read.
+- Walk setter `L2.02401(unit, cell)` (EXP-2063 `ru-move-flee.txt`, whole): command `+8` = 1, command word
+  `+0xa` = cell.
+- Spell rows (EXP-2082 `out/data/ru-spell-rows.tsv`): 23 Teleport, cost 60; 12 Invisibility, cost 100.
+
+**Confidence.** High for the bodies, their order and constants in RU and EN. Medium for what the helpers
+make of them: the filter keeps units whose relation bit 1 to the caster is set (R2-ENGINE-1112, whose hostility reading it
+inherits at its grade); `L2.02454` steps r cells from P along the line through
+the unit with the clamps of R2-ENGINE-1184, which reads it with a cell argument where this route passes a
+packed mean point; the cell cast `L2.01732`, the meaning of the `+0x144` mask 0xc and of byte `[+0x1c0]+8`
+are not read here. Medium for the unreachability of the Invisibility and walk-to-cell arms: it rests on
+the repeated admission being pure and on the helpers between the tests not storing mana.
+
+**Unknown.** Whether a Teleport cast lands at C (the cell cast body); a run of the original with a computer
+mage holding Teleport and 60 mana, brought below its Wimpy threshold beside a hostile, settles it by its
+landing cell.
+
+**Amends.** R2-ENGINE-506: the flee spell is Teleport at a cell scanRange + 1 from the hostiles' mean point
+when Teleport is in the book and mana covers its cost; otherwise the unit walks 3 cells away (the
+Invisibility and walk-to-cell arms of the spell routine are unreachable while the admission is pure,
+Medium); the back-off helper `L2.02451` walks 3 cells or calls its own spell routine
+(r = scanRange − 1); the admission body `L2.01518` is read.
+
+**Evidence.** EXP-2181 `RESULTS.md` question 5.
+
+### R2-ENGINE-1419
+
+Direct references (`generated/listings/{ru,en}-refs-breakoff.txt`: rel32 calls and jumps, rel32 and rel8
+branches, absolute dwords in every section): flee 2 (RU `L2.07715` in the member routine, `L2.07716` in the
+selector; EN `L2.07717`, `L2.07718`); flee spell 1 (`L2.07706` in flee); back-off 1 (`L2.07719`); back-off
+spell 1 (`L2.07709` in back-off); flee test 1 (`L2.07720`); back-off test 1 (`L2.07721`); EN the same
+counts at RU − 0xa039.
+
+The group tick runs the programme route and then the post-step (R2-ENGINE-507, R2-ENGINE-1003), so a
+member's break-off is decided once per Group pass, after its programme arm; flee is also called from the
+per-actor selector (cell 0x16, R2-ENGINE-558), whose cadence is Unknown. The bodies of
+R2-ENGINE-1418 store command `+8`, `+0xa` and `+0x60` and nothing that marks a flight. At the next pass a
+member whose health is above both thresholds, or with no hostile in the test radius, gets no break-off
+order and its programme arm decides: the attack planner for a member with target `+0x20`, the walk to the
+post, or the idle routes of R2-ENGINE-1420. Flee also runs from selector cell 0x16 (`L2.07716`).
+
+**Confidence.** High for the reference census of the direct forms named and for the order in the group
+tick (RU; EN post-step masked-equal, R2-ENGINE-1005). Medium that no flight state exists: the executor's walk
+handler and the cell cast were not read. Unknown how far the walk gets before the next pass.
+
+**Unknown.** Distance covered per Group pass; a run of the original logging a fleeing unit's cell at each
+Group pass (counter `+4` mod 16 = 6) settles it.
+
+**Evidence.** EXP-2181 `RESULTS.md` question 5.
+
+### R2-ENGINE-1420
+
+Calls of the idle wrapper and of `L2.01733(unit, 1)`, which calls it (R2-ENGINE-1244), by Group programme
+(R2-ENGINE-507 numbering):
+
+| Programme | Arm that reaches the heal routine | Listing |
+|---|---|---|
+| 1 guard A `L2.02464` | target `+0x20` zero, cell equals command word `+0` and `L2.00490` nonzero: `L2.01733(m, 1)` at `L2.07112` | `generated/listings/*-guarda-*.txt` |
+| 18 guard B `L2.07722..L2.07723` | target `+0x20` zero; not (health `+0x94` differs from `+0x96` and clock gap `L2.01523(+0x98 - [session]+4)` below 10); byte `+0x9e` zero; cell equals command word `+0`; `L2.00490` nonzero: `L2.01733(m, 1)` at `L2.07113` (the gates are in EXP-2122 `ru-guard-b.txt`; the EXP-2181 tail listing starts mid-instruction and shows the last test) | EXP-2122 `ru-guard-b.txt`, `*-guardb-tail-*.txt` |
+| 2 `L2.02465` | target zero, cell equals the point argument, `L2.00490` nonzero: `L2.07114` | EXP-2123 `ru-fn-L2.02465.txt` |
+| 5 `L2.02468` | Group list `+0xa68` nonempty and target zero: `L2.07115` | EXP-2123 `ru-fn-L2.02468.txt` |
+| 3 `L2.02466` | target zero: idle wrapper at `L2.07110` | EXP-2123 `ru-fn-L2.02466.txt` |
+| 19 `L2.02471` | every member: idle wrapper at `L2.07111` | EXP-2123 `ru-fn-L2.02471.txt` |
+| 0xff `L2.02472` | `L2.01733(m, 0)`: idle planner; its arm `L2.07108` calls the idle wrapper when it finds no candidate | EXP-2123 `ru-fn-L2.02472.txt`, EXP-2167 `ru-idlearm-L2.07122.txt` |
+
+A member with a target runs the attack planner, whose book choice is the offensive one (R2-ENGINE-1244); a
+guard or point member off its post walks back. The idle wrapper calls the heal routine only for owner
+`+0x2c` nonzero with the mage bit (R2-ENGINE-1200). The post-step then runs on the same member
+(R2-ENGINE-1419) and may store a walk over the prepared cast. A Group pass comes once per 16 counter values
+(RU, R2-ENGINE-1016); the EN runs of R2-ENGINE-1073 counted 16.1 and 32.1 values per second, about one and
+two passes per second.
+
+**Confidence.** High for the RU arms and for EN guard A and the guard B tail (masked-equal 130 and 78);
+for programme 18 High for the listed gates in RU, Medium for EN (not compared here). The Group pass
+counter test (`+4` mod 16 = 6) is read in RU (R2-ENGINE-1016; EN unread there): RU; EN Medium.
+Medium for EN programmes 2, 3, 5, 19 and 0xff (R2-ENGINE-882 and the flag census of R2-ENGINE-1244), for
+`L2.00490` (unread; it gates the guard arms), for "computer" (R2-ENGINE-362) and for the seconds. Medium
+for the composed clause that the post-step replaces a prepared cast: it stores a walk or a cast only below
+a threshold beside a hostile, and the executor that consumes command `+8` was not read.
+
+**Unknown.** Whether the per-unit selector reaches the idle planner outside the Group pass (caller of
+`L2.01724`, R2-ENGINE-558), which adds runs per actor step; and how many programme-0 members reach it
+through `L2.01726`. A run of the original counting heal routine entries per counter value for one
+computer mage settles both.
+
+**Amends.** R2-ENGINE-1244's Unknown on cadence: the heal routine runs from Group programme arms at most
+once per Group pass per member, for a member with no target, or for any member under programme 19.
+
+**Evidence.** EXP-2181 `RESULTS.md` question 2; EXP-2122 `ru-guard-b.txt` (programme 18 gates).
+
+### R2-ENGINE-1421
+
+Census (`*-refs-breakoff.txt`): `L2.02445` has one direct reference per root, RU `L2.05917` / EN
+`L2.07724`; `L2.02444` one, RU `L2.02455` / EN `L2.07725`, the template loader's last call after the stat
+reader (EXP-2082 `ru-template-loader.txt`).
+
+Caller window (`*-caller-*.txt`, 25 instructions, equal but for the frame offset of the tested local): the
+local v is 30 when another local equals 2 and 0 on the fall-through; two arms storing 0 and 10 are entered
+from code before the window. The call passes (0, 2v, 3v, owner local). Body (`*-player-thresholds-*.txt`, 142, masked-equal): with owner argument 0, for each unit of
+session list `[+0xa50]+0xa456c` with owner `+0x2c` zero, by command class `+0x4c`: class 0, command `+0x40` =
+HPmax x 0 / 100; class 1, HPmax x 2v / 100; class 2, HPmax x 3v / 100; any other class, class byte = 0. With a
+nonzero owner argument the same formula runs for units whose owner `+0x14` equals it. Command `+0x44` is
+not written.
+
+**Confidence.** High for the census, the window and the body in both roots. Medium for the classes, which
+are the values `L2.02444` stores (R2-ENGINE-506). Unknown what selects v and which owner the caller passes.
+
+**Unknown.** The routine around the call (its entry and the source of the two locals); reading it settles
+whether a computer owner is ever passed.
+
+**Amends.** R2-ENGINE-506: `L2.02445` is called with a = 0, b = 2v, c = 3v.
+
+**Evidence.** EXP-2181 `RESULTS.md` question 4.
+
+### R2-ENGINE-1422
+
+Population: the generated listings of this experiment (flee, flee spell, back-off, back-off spell, mean
+point, hostile list, guard A, guard B tail, `L2.02445`, its caller; both roots), EXP-2122 `ru-guard-b.txt`
+(RU only), and the committed listings of the heal routine (EXP-2161 `ru-computer-mage.lst`, EN
+`en-computer-mage.lst`), the support choice (EXP-2042 `ru-computer-support.txt`), the admission
+(`ru-admission-affinity-range.txt`), the member routine (EXP-2143 `ru-post-L2.02447.txt`), programmes 2, 3,
+5, 19 and 0xff (EXP-2123) and the idle planner arm (EXP-2167). Every listing is RU except the heal routine,
+which is read in both roots; the support choice, the admission, the member routine, programmes 2, 3, 5,
+19, 0xff and the idle arm are RU only. Form searched: an operand `0xd8]`, `L2.01317` or `L2.00805`. The
+only hits are three loads of `[L2.01317]` in EXP-2122 `ru-guard-b.txt` (`L2.07726`, `L2.07727`,
+`L2.07728`) that read session `+0` and `+4`; the EXP-2181 listings hold none.
+
+Difficulty (R2-ENGINE-1002, whose census names four readers and whose arm writes nothing when Session
+`+0x74` is set): at creation of non-Human map records value 1 halves HPmax, HP and Wimpy `+0x44`; any value
+but 1 and 2 adds 50 to toHit and defence and multiplies HPmax by 1.5; the other readers are not read here.
+
+**Confidence.** Medium: the search is a text form over the bodies named; a read through another register
+copy of the session pointer or in an unread callee (`L2.00490`, `L2.01732`, `L2.02454`, the executor) is not
+excluded.
+
+**Unknown.** Which difficulty label each value names (index + 1 at Accept, R2-ENGINE-283).
+
+**Evidence.** EXP-2181 `RESULTS.md` question 6.
 
 ## ROM2 installed script dispatch and record consumers
 
