@@ -140,6 +140,15 @@ units with word +0xe in 0x21..0x3f another player may receive it, Unknown) (R2-E
 adds the shift back (R2-ENGINE-1241), and the per-class result is Medium (R2-ENGINE-1242)
 (High for the arms, Medium for the reach, the delivery and the fog link).
 
+Area reach of these Effects (Medium throughout): Light and Darkness pulse onto cell entry +4 only, so kind 1 or 2 units
+(Units rows with movementType 1 or 2, which include Ghost and Bee; R2-ASSET-327, R2-ASSET-328, R2-ENGINE-1530) are
+reached and kind 3 units (Bat_Sonic, Dragon, Succubus; a flier by name only) and buildings are not
+(R2-ENGINE-1535); in EN sight is base once per 16 updates between the end of one pulse's Effect
+and the next pulse (R2-ENGINE-1534). Blizzard passes the kind 1 or 2, kind 3 and building occupants of
+its one sampled cell per pulse to a damage object that admits all three (R2-ENGINE-1533; resolver rejection by
+target flag +0x4c bit 8 is unread in EN); the cells and pulses of the other area spells
+are in R2-ENGINE-1536; Fire Ball hits a multi-cell unit once per covered cell (R2-ENGINE-1537, Medium).
+
 The orders page's static continuation adds bounded clauses. The selector calls
 the stop chain for order 3 when the target's +0x54 is 0x10 (R2-ENGINE-1121; the
 order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium)

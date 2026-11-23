@@ -133,3 +133,33 @@ Completeness remains Unknown. R2-ENGINE-1171.
 ## Effect words in computer-unit scoring
 
 Bit 0x40000 of the unit effect word +0x144 is effect id 18, and a candidate with it set gets +0x7f in the first ROM2 scorer. The bit 0x40000 of the field mask +0x150 is a separate flag that the slot routine sets when a Light or Darkness field changes (R2-ENGINE-1496).
+
+## Area and cloud spells: cells, pulses, sight timeline
+
+Rows of the Spells table with Distribution above 1 are 2, 3, 6, 7, 9, 14, 15 and 17 and no others; the cells,
+pulses and occupant entry per pulse are (R2-ENGINE-1536, High for the census and the cell counts, Medium for the pulse counts, the multiplicity and the classes):
+
+| Row | Spell | Cells per pulse | Pulses | Entry applied | Claim |
+|---|---|---|---|---|---|
+| 2 | Fire Ball | 3 by 3 = 9 | 1 | +4, +8, +0xc | R2-ENGINE-1536, R2-ENGINE-1537 |
+| 3 | Wall of Fire | 10 or 9 by facing | 10 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
+| 6 | Poison Cloud | diamond, 21 | 10 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
+| 7 | Blizzard | 1 of 36 | 32, 3 updates apart | +4, +8, +0xc | R2-ENGINE-1533 |
+| 9 | Acid Stream | cone, 25 or 21 in total | 6, at updates 1, 4, 7, 10, 13, 16 | +4, +8, +0xc | R2-ENGINE-1536 |
+| 14 | Darkness | diamond, 57 | 15 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
+| 15 | Light | diamond, 57 | 15 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
+| 17 | Wall of Earth | 10 or 9 by facing | 10 + ceil(floor(16P/10)/16), 16 updates apart | applies nothing | R2-ENGINE-1536 |
+
+P is the book power 0 to 255, so the pulse count runs from the first number to that number plus 26. A unit
+of s by s cells stands at entry +4 of each covered cell: a wall or Poison Cloud applies once per covered shape
+cell per pulse, Fire Ball once per covered cell of its square at damage divided by the square of the unit's size byte (equal to s if that byte equals s; its source is not read)
+(R2-ENGINE-1536, R2-ENGINE-1537, Medium).
+
+Light and Darkness reach only entry +4: kind 1 or 2 units (Units rows with movementType 1 or 2, which include Ghost and Bee; R2-ASSET-327, R2-ASSET-328) are reached; a kind 3 unit (Bat_Sonic, Dragon, Succubus; a flier by name only) at entry +8 and
+a building at entry +0xc are not (R2-ENGINE-1535, R2-ENGINE-1530, Medium). On a reached unit, in EN a pulse
+attaches an Effect of duration 16, the actor step decrements it once per update and runs the end at the 16th
+step of the pulse, which adds the sight shift back and unlinks the Effect; the next pulse, 16 updates after
+the first, attaches again (a unit on several cells of one pulse renews one Effect, R2-ENGINE-1236). Sight is base between the end and that pulse once per 16 updates, and 15 updates
+after the last pulse it returns for good (R2-ENGINE-1534, R2-ENGINE-1165, Medium; the RU twins are unread; no
+census of other callers of the timer slot).
+The per-class amount stays as in R2-ENGINE-1242.

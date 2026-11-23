@@ -232,3 +232,44 @@ Zero exact Blizzard-name matches in the 241 Units templates and nine Weapons
 numeric-7 candidates per root do not bind creature or weapon spells. The
 placement/template/item joins needed to count Blizzard casters remain Unknown
 (R2-SESSION-162).
+
+## Units movementType and the occupant kind
+
+The Units table of `data.bin` in `world.res` (the same file in EN and RU) has 241 entries, 61 empty and
+180 rows of 62 values. Value index 32 (movementType) and index 31 (tokenSize) give these counts, equal in
+both locales (R2-ASSET-327):
+
+| movementType | Rows | Names, five rows each | tokenSize | Claim |
+|---|---|---|---|---|
+| 1 | 155 | every other row | 1 in 135 rows, 2 in 20 rows | R2-ASSET-327 |
+| 2 | 10 | Ghost, Bee | 1 | R2-ASSET-327 |
+| 3 | 15 | Bat_Sonic, Dragon, Succubus | 1, 3 (Dragon), 1 | R2-ASSET-327 |
+
+The Humans table has MovementType -1 in all 284 populated rows (R2-ASSET-328). The engine's occupant kind
+is byte +0x4a, read through virtual slot +0x20 of Unit, Human and Humanoid and 0 for the other classes;
+the kinds 1 and 2 are written at cell entry +4, kind 3 at +8 and a building at +0xc (R2-ENGINE-1530,
+R2-ENGINE-1532). Medium for the link from the column to the byte and for kind 3 meaning flight.
+
+## Blizzard reach and rate
+
+Per target cell inside the 6 by 6 window of one pulse, at the two update rates read under a debugger in one
+launch each in EN (16.1 and 32.1 per second, R2-ENGINE-1073; the rate outside a debugger and the Speed setting
+behind it are Unknown), Medium (R2-ENGINE-1533):
+
+| Quantity | 16.1 updates/s | 32.1 updates/s | Claim |
+|---|---|---|---|
+| Pulses per second (one per 3 updates) | 5.4 | 10.7 | R2-ENGINE-1533 |
+| Hits per second per target cell | 0.149 | 0.297 | R2-ENGINE-1533 |
+| Cast of 32 pulses | 5.8 s | 2.9 s | R2-ENGINE-1533 |
+| Hits per target cell per cast | 0.889 | 0.889 | R2-ENGINE-1533 |
+
+| Target | Entry queried | Hit | Arm | Claim |
+|---|---|---|---|---|
+| Kind 1 or 2 unit (movementType 1 or 2, which include Ghost and Bee) | +4 | yes (damage object admits; resolver rejection by +0x4c bit 8 unread in EN) | actor, water resistance | R2-ENGINE-393, R2-ENGINE-1531 |
+| Kind 3 unit (Bat_Sonic, Dragon, Succubus; a flier by name only) | +8 | yes (same) | actor | R2-ENGINE-1530, R2-ENGINE-1531 |
+| Building | +0xc | yes (same) | structure, B+U[0,S]-5 on word +0x42 | R2-ENGINE-1532, R2-ENGINE-1531 |
+| Token, Effect | none | no | none | R2-ENGINE-1531 |
+
+A target covering a cells inside the window is hit with probability a/36 per pulse; the map-band rule is read in
+RU only (R2-ENGINE-391), so a/36 holds for a target wholly inside the band in EN at Medium. The damage object has
+no filter by caster, ally or class beyond the two slots. The rate is not measured in RU; RU is not claimed.

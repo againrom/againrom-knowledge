@@ -22,6 +22,154 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## ROM2 map unit-list rows, health words, definition lookup and sack item builder
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1510 | ROM2 EN and RU: in the census of 21 references to map +0x3a4 per root, the actor builder and the mission-load loop read the row slots, neither row +0x0c nor +0x1c; other routes are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ENGINE-1511 | ROM2 actor builder stores row words +0x20, +0x22 into actor words +0x94, +0x96 in both arms after the Units arm's scaling by object +0xd8 (difficulty, Medium); only the Humans arm resets an equal pair to -1. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ENGINE-1512 | ROM2 definition-id lookups compare the full dword id with Units parameter 0x37 or Humans 0x18, from count - 1 to 1, skipping a row whose row-test result is zero (read as no parameter array, Medium); helpers read in EN and RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ENGINE-1513 | ROM2 sack item builder: A = 1 builds a weapon (0x88 bytes), A = 2 a shield, A = 3..13 an armour, A = 0xe a magic item by the low id byte (table names by use, Medium); A = 0 and 0xf build nothing; EN read, RU by shape. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ENGINE-1514 | ROM2 collection getters: count is collection +8; row = [this+4] plus 0x30 x index (Units, Humans), 0x40 x index (item tables) or 0x44 x index (magic items), with no bound test; EN read, RU by shape. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+
+### R2-ENGINE-1510
+
+Population: the unit rows in the list at map +0x3a4 (0x54 bytes each, R2-ASSET-253 for the file side). Evidence:
+`evidence/derived/rowfields.tsv`, a text census of the EXP-2064 committed listings `{en,ru}-actor-builder.txt`
+(EN builder L2.00192, RU L2.00115) and `{en,ru}-mission-load-rows.txt` (EN loop L2.02555, RU L2.02554). Every load
+of the row-pointer stack slot (29 in the builder, 23 in the loop) is followed by a dereference; none is passed on.
+
+| Row slot | File field | Builder reads | Loop reads |
+|---:|---|---:|---:|
+| +0x00, +0x04 | x, y | 2, 2 | 1, 1 |
+| +0x08 | 0x08 | 0 | 1 |
+| +0x10 | 0x14 (definition id) | 2 | 2 |
+| +0x14 | 0x18 (owner) | 2 | 1 |
+| +0x20, +0x22 | 0x24, 0x26 | 4, 5 | 6, 7 |
+| +0x3c | 0x28 | 4 | 1 |
+| +0x40 | 0x2c (group) | 2 | 1 |
+| +0x48 | 0x0c (flags) | 2 | 2 |
+| +0x50 | 0x10 | 4 | 0 |
+
+EN and RU give the same table. Neither body reads row +0x0c (file 0x0a) or +0x1c (file 0x20). The census of the
+displacement 0x3a4 (`evidence/derived/scans/{en,ru}-disp-unitrows.txt`, 21 hits per root) classifies them: 2 not the
+list (a frame size and a compare with a global; EN L2.07887, L2.07888), 5 in the two bodies above, 2 in the
+dispatcher (EN L2.07889 the list constructor call L2.07890, L2.07891 an append call L2.07892; RU L2.07893, L2.07894; committed windows of the earlier map experiments), 3 in the map
+constructors, each calling the list constructor L2.07890 on map +0x3a4 (EN L2.07895, L2.07896, L2.07897; RU L2.07898,
+L2.07899, L2.07900), 4 in the map teardown (EN L2.07901: one loop of three references, count L2.00302, element test through L2.07902 and free through L2.07040, and the list destructor L2.07903
+at L2.07904; RU L2.07905 and L2.07906) and 5 unwinding funclets (EN L2.07907, L2.07908, L2.07909, L2.07910,
+L2.07911; RU L2.07912, L2.07913, L2.07914, L2.07915, L2.07916), each only calling the destructor. The 5 in the two
+bodies are 3 in the builder and 2 in the loop: 2 + 5 + 2 + 3 + 4 + 5 = 21.
+
+**Confidence.** High for the slot table and for the classification of the 21 direct references. Medium that no
+other reader of row +0x0c or +0x1c exists: a pointer to the list or to a row handed to a callee, a different member
+offset and the callers of the row getters other than the teardown (R2-ENGINE-513) were not
+re-censused. High for the 19 sites read here; the two dispatcher sites rest on the committed dispatcher listings of EXP-2064 and EXP-2068 at the grade of R2-ENGINE-513 (Medium for other routes). The EN row getter is L2.07902; L2.02552 and L2.02553 are the RU addresses.
+
+**Unknown.** What file fields 0x0a and 0x20 do: R2-ASSET-313 gives their values. Run: copy an installed map, set
+0x20 of one unit from 10 to 3 and, in a second copy, 0x0a of one unit by 1, load each in `allods2.exe`, and compare
+the unit's colour, palette, size or level with the unedited copy.
+
+**Amends.** R2-ENGINE-513: its Medium for the absence of +0x0c and +0x1c readers stays Medium; the direct
+displacement route is now a census of 21 references per root.
+
+### R2-ENGINE-1511
+
+Listings: EXP-2064 `{en,ru}-actor-builder.txt` (EN L2.07917..L2.07918; RU the same instructions at L2.07919..L2.06877, line
+for line). The builder reaches the Units arm (EN L2.07310) or the Humans arm (flag 0x10 of row +0x48) and both join
+at EN L2.07920.
+
+1. Units arm only, before the join: when the object at global L2.00805 (RU L2.01317) has +0xd8 not 2 and +0x74 equal to 0: with
+   +0xd8 = 1 it multiplies actor word +0x96 by a constant at L2.07921, copies it to +0x94 and halves dword +0x44 of
+   the object at actor +0x1c4; otherwise it adds 0x32 to actor words +0xa6 and +0xbe and multiplies +0x96 by a
+   constant at L2.07922, copying it to +0x94. The constants are unread data; which +0xd8 is which difficulty is not
+   read. The Humans arm jumps over this block (EN L2.07923).
+2. Both arms, when the built actor's word +0xe is nonzero (EN L2.07924..L2.07444; zero takes the skip of
+   R2-ENGINE-1325): if flag 0x10 is set and row word +0x22 is not -1 and equals +0x20, both become -1 (EN
+   L2.07925..L2.07926; Humans arm only). Then +0x22 not -1 stores it to actor word +0x96; +0x20 not -1 stores it to
+   +0x94, else +0x94 takes the value of +0x96 (EN L2.07927..L2.07918).
+
+So a file pair other than -1 replaces the scaled values of actor words +0x94 and +0x96 in both arms (the scaling's other effects stay); a pair of both -1 keeps the scaled value for
+the Units arm. Census, `evidence/derived/census/{en,ru}-all.tsv`, `{en,ru}-units-health-join.tsv` (EN 59 / RU 83
+maps): EN 7,461 records: both -1 6,301 (Units arm 5,458, Humans 843), equal and not -1 1,155 (935, 220), 0x24 only
+5 (2, 3), 0x26 set with 0x24 -1 none. RU 15,482: 12,965 (11,465, 1,500), 2,512 (2,168, 344), 5 (2, 3). Non-negative
+0x24 0..12000 (RU up to 18432), 0x26 5..12000 (RU up to 18432). For resolved rows, the equal value equals the row's
+Units or Humans healthMax (slot 4) in EN 917 of 935 Units and 194 of 220 Humans pairs, RU 1,934 of 2,168 and 278 of
+344. In the Humans arm an equal pair is reset to -1 and so has no effect: 220 EN and 344 RU records.
+
+**Confidence.** High for the code in both roots (the RU listing is the same instruction sequence) and the census.
+Medium for the names "current and maximum health": by R2-ENGINE-086 and the Hero table, not a run. Medium for
+the identity of the global L2.00805 object with the Session of other claims (not re-read), and so for reading object +0xd8 as the difficulty (other writers of +0xd8 were not censused).
+
+**Unknown.** The health the original shows. Run: in `allods2.exe` load a copy of a map with one Units-arm record's
+0x24 = 100 and 0x26 = 500 (row healthMax different) and compare the health bar with the unedited map; repeat with
+0x24 = -1, 0x26 = 500.
+
+**Amends.** R2-ENGINE-513: its +0x20, +0x22 cell lists the stores beside the person arm; both arms store, and only
+the person arm resets.
+
+### R2-ENGINE-1512
+
+Units lookup EN L2.02665, RU L2.02666; Humans lookup EN L2.02663, RU L2.02560 (listings
+`evidence/derived/listings/{en,ru}-humans-lookup-*.txt`, `{en,ru}-row-test-*.txt`, `{en,ru}-param-get-*.txt`,
+`{en,ru}-param-array-get-*.txt`, `{en,ru}-coll-count-*.txt`, `{en,ru}-humans-count-*.txt`). The count getter (EN
+L2.07312, Humans L2.04076) returns collection +8. The row test EN L2.02664 returns dword +8 of the row member that
+the lookup tests. The parameter getter L2.02667 -> L2.04051 returns [this+4] + 4 x i. The lookup runs i from count -
+1 down to 1, skips a row for which the test returns zero (read as a row without a parameter array, Medium), and compares the full dword id of the record with
+parameter 0x37 (Units) or 0x18 (Humans) of the row; a hit returns i. The row getters are in R2-ENGINE-1514.
+Over the installed maps (R2-ASSET-316) every record resolves, no id matches two rows, 61 Units rows and 5 Humans rows
+give a zero row-test result (read as no parameter array, Medium) and so are skipped.
+
+**Confidence.** High for the EN bodies as read. Medium for RU: the same helpers were read at their RU addresses
+(RU L2.07928, L2.07929, L2.02312, L2.01170, L2.07930, L2.01160) and have the EN shape; masked equality was not
+computed. Medium for the identity of collections [this+0x8c] and [this+0xa0] with the Data.bin Units and Humans
+rows (R2-ENGINE-038, R2-ENGINE-741). Medium for the reading that a zero test result means a missing parameter array. The Humans lookup and its helpers are equal in RU under the mask at High in R2-ENGINE-742; the Units lookup and the row getters are read by shape in RU (Medium).
+
+**Amends.** R2-ENGINE-1290: its helpers L2.07312, L2.02664 and L2.02667 are now read, so its Medium for the lookup
+rule rises to High in EN; the collection identity stays Medium, RU stays Medium.
+
+### R2-ENGINE-1513
+
+Listings `evidence/derived/listings/{en,ru}-item-rest.txt` (EN L2.07931..), `{en,ru}-item-ctor-a1.txt`,
+`-a2.txt`, `-armour-ctor.txt`, `-magic-ctor.txt` plus the EXP-2175 builder listing (R2-ENGINE-1327). The builder EN
+L2.06361 takes A (id bits 8-11) and the three further values C, B, D (R2-ENGINE-1327) and branches:
+
+| A | Object built | Constructor (EN, RU) | Table |
+|---|---|---|---|
+| 1 | 0x88 bytes | L2.05910, L2.07932 | L2.00807 |
+| 2 | 0x6c bytes | L2.06362, L2.07933 | L2.00809 |
+| 3..13 | 0x6c bytes | L2.01754, L2.07934 | L2.00808 |
+| 0xe | 0x54 bytes, row = low id byte | L2.05638, L2.05637 | L2.01753 |
+| 0, 0xf | none: the item is skipped | | |
+
+A = 1 checks B <= 15 and D below the row count; A = 3..13 does not pass A itself; A = 0xe has a bound check
+`row < count` at EN L2.03905 and sets +0x44 to 3, 4 or 5 by the result of a call to L2.00997 on the row's member +4 (a find, body unread, R2-ENGINE-742). The
+constructors store B and C and read the two factor tables L2.07617 (by C) and L2.00811 (by B) for derived stats.
+Table names by use: the weapon, shield and armour tables by their admission use (R2-ENGINE-264, High); the magic-item table L2.01753 by use only (R2-ENGINE-999, Medium).
+Over the installed maps (R2-ASSET-319) every item resolves in range, no A of 3, 11, 13, 0 or 15 occurs, and for every
+weapon, shield and armour row the Slot parameter equals A.
+
+**Confidence.** High for the EN branch table and constructor identities as read. Medium for the derived-stat
+details (constructor bodies read for their calls and stores, not every callee) and for the table names. Medium for
+RU: constructor addresses read with the EN shape, masked equality not computed.
+
+**Unknown.** The in-game item an id yields and the effect of the item's word. Run: load a copy of a map holding one
+sack with one item id per table in `allods2.exe` and compare the item panel with the Data.bin row.
+
+**Amends.** R2-ENGINE-1327: its clause "builder arms other than A = 1, 2 unread" is replaced by this table.
+
+### R2-ENGINE-1514
+
+Listings `evidence/derived/listings/{en,ru}-*row-get*`, `*-count-*`, `*-row-impl-*`. The count getters (EN L2.07935
+items, L2.07936 magic items, L2.07312 Units, L2.04076 Humans) return collection +8. Row getters: Units L2.04941 ->
+L2.05811 and Humans L2.03310 -> L2.04052 return [this+4] + 0x30 x i; item tables L2.07937 -> L2.07938 return [this+4]
++ (i << 6); magic items L2.07939 -> L2.07940 return [this+4] + 0x44 x i. No getter tests i against the count; the
+caller does (the lookup, R2-ENGINE-1512; the magic constructor at EN L2.03905). The Buildings stride 0x1c is in
+R2-ENGINE-1289.
+
+**Confidence.** High for the EN bodies. Medium for RU: the RU getters (L2.01186, L2.01185, L2.04050, L2.03504,
+L2.01183) were read for shape only. The collection identity with Data.bin tables stays Medium (R2-ENGINE-038).
+
 ## ROM2 unit step vector, step time and map.reg parameters
 
 Terms shared by these cards: the step vector is the block at unit `+0x1c0` (the block R2-ENGINE-1213 advances); the EN and RU bodies named below were compared line by line after masking addresses in 0x400000..0x8fffff, over the committed linear listings (EN `L2.03582..L2.06966`, RU at EN + 0x9ff0).
@@ -1482,7 +1630,7 @@ serializer loads +0xa0 in the walker-group order, and its `this` link is
 still numeric (Medium). R2-ENGINE-1289 replaces the sentence on the building
 loader `L2.00131`: the kind byte is a position, kind 0 is skipped and the
 largest accepted kind is the collection's count minus 1. R2-ENGINE-1290 reads
-the ordinary Units arm in EN.
+the ordinary Units arm in EN. R2-ASSET-316 and R2-ENGINE-1512 narrow the Unknown on missing `serverID`s: every installed flag-0 and flag-0x10 id joins to a Data.bin row (EN 241, RU 250 distinct pairs); Medium that `world.res` is the Data.bin the game loads.
 
 ### R2-ENGINE-039
 
@@ -8105,6 +8253,8 @@ returns (body unread; the core addresses it alike, Medium), and the
 map-load method calls it before the map build (R2-SESSION-329). Other srand callers were not
 scanned, so a later reseed stays open (Medium).
 
+**Amended.** R2-ENGINE-1533 uses the RU band rule of this card for EN at Medium; the Unknown on EN map-edge acceptance is not narrowed.
+
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
 ### R2-ENGINE-392
@@ -8131,6 +8281,8 @@ update, collection removal delay and presentation lifetime after completion.
 An original time-stamped cast would settle these. No runtime was observed.
 
 **Amended.** R2-ENGINE-812 narrows first-update timing to the read active session chain and an ordinary actor successful late-pass insertion; unconditional request delay and first accepted hit remain Unknown.
+
+**Amended.** R2-ENGINE-1533 narrows the Unknown on the wall-clock update rate to two debugger-attached EN rates (R2-ENGINE-1073), not to a rate outside a debugger.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -8182,7 +8334,7 @@ classes of the three query results, maximum hits for multi-cell occupants,
 EN structure/resistance parity and player-visible health deltas. An original
 cast covering caster, ally, enemy and structure would settle these.
 
-**Amended.** R2-ENGINE-812, R2-ENGINE-813 narrow query admission and row-7 multiplicity to the read slots, placement writers and one-cell pulse; EN query/occupant bodies are read, while complete class reachability and damage-resolver parity remain Unknown.
+**Amended.** R2-ENGINE-812, R2-ENGINE-813 narrow query admission and row-7 multiplicity to the read slots, placement writers and one-cell pulse; EN query/occupant bodies are read, while complete class reachability and damage-resolver parity remain Unknown. R2-ENGINE-1531 reads the EN damage object and structure resolver (RU shape, EN parity at Medium) and binds the structure arm to the Building and Pointer classes by slot +0x34.
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -11017,7 +11169,7 @@ only; reading them in RU would settle it.
 | R2-ENGINE-479 | In RU, a ROM2 human's attack value is trunc((1.1^Body + 1.1^Reaction)/5) + 3 skill[t] + weapon toHit; damage base trunc(1.1^Body/20) + skill[t]/5 + weapon base; spread trunc(1.1^Body/20) + weapon spread. (Medium.) | Medium / Unknown | ● active (amended) | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-480 | A ROM2 weapon hit pays a fighter trunc(V x 0.5 x D / HPmax + 1), V victim value +0x1c, scaled by Mind/30 + 0.25, cut for repeated victim kinds (Medium) and off-main skills, into the weapon's skill; a mage's weapon hit pays none (Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-481 | The ROM2 strike body `L2.02313` resolves a melee or ranged weapon blow within range byte +0x12c, calls no object constructor and subtracts the damage in the same call (no projectile object and a cast object on a surviving target: Medium). | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
-| R2-ENGINE-482 | ROM2 EN and RU strike, resolver, structure resolver, damage object, experience and recompute attack bodies agree after address masking, except an RU-only refusal against a target whose byte +0x4a is 3 and an RU-only bookkeeping gate. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
+| R2-ENGINE-482 | ROM2 EN and RU strike, resolver, structure resolver, damage object, experience and recompute attack bodies agree after address masking, except an RU-only refusal against a target whose byte +0x4a is 3 and an RU-only bookkeeping gate. | High / Medium / Unknown | ● active (amended) | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 | R2-ENGINE-483 | In RU, a ROM2 creature's attack block is read from its Units row: toHit, physicalMin and max - min (scaled by 15 above byte range); attackKind 3 sets unit flag 0x10 and kinds 1 and 2 fill the other damage parts. | High / Medium / Unknown | ● active | [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/) |
 
 ### R2-ENGINE-477
@@ -11309,6 +11461,8 @@ compare the values behind masked constant addresses.
 **Unknown.** The value table of MovementType and the writers of +0x4a; EN constants, the EN generator, weapon fill, equip, fold,
 creature row reader, actor update and distance. Reading them in EN would
 settle EN parity.
+
+**Amended.** R2-ASSET-327 reads the value table of MovementType (values 1, 2, 3 in 155, 10 and 15 Units rows); the writers of byte +0x4a remain unread.
 
 **Evidence.** [EXP-2060](../experiments/EXP-2060-rom2-physical-combat/)
 
@@ -12395,6 +12549,8 @@ a helper, or a copy of the row, would escape it.
 an EN call-target scan of the getters would bound the EN readers.
 
 **Amended.** R2-ENGINE-535 states the effect of +0x1a0 (bit 8) and R2-ENGINE-537 the Inn offer reads of +0x194, +0x19c and +0x198 (bits 1, 2 and 4). The bound on row +0x0c and +0x1c readers is unchanged (the two bodies of this card; EXP-2068 ran no displacement scan for those row offsets, and one over `.text` classified against the row consumers settles it): a displacement scan for +0x3a4 finds 21 sites per root, and only the dispatcher and teardown sites lie in windows read for it.
+
+**Amended.** R2-ENGINE-1510 reads and classifies the 21 sites (builder 3, loop 2, dispatcher 2, constructors 3, teardown 4, funclets 5, non-list 2); no site reads row +0x0c or +0x1c, and the grade stays Medium for other routes. R2-ENGINE-1511 narrows the +0x20, +0x22 row of the table: both arms store the words, only the person arm resets an equal pair.
 
 ## Map structure objects: Pointer, Shop and Inn
 
@@ -20998,7 +21154,7 @@ actor-step call and the death loop (RU and EN). Medium:
 | R2-ENGINE-792 | ROM2 builds an AreaEffect at one direct call in the apply tail, for the 8 rows with Distribution not 1: mode 2 for rows 7 and 9 (Distribution 5), mode 1 for rows 3, 6, 14, 15, 17 (AreaDuration > 0), mode 0 for row 2. | High / Medium | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-793 | A ROM2 mode-1 area registers a wall (rows 3, 17) or a diamond (rows 6, 14, 15) in per-cell kind slots and, for 16*AreaDuration+16P/10 updates, applies its effect every 16 updates to the first occupant of each cell. | High / Medium | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-794 | On a shared cell ROM2 Fire Ball and Wall of Fire unregister Poison Cloud, Poison Cloud leaves a Wall of Fire cell, Light and Darkness unregister each other; Wall of Earth skips cells whose record entry +4 is set and applies nothing. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
-| R2-ENGINE-795 | ROM2 Fire Ball's area applies each of the 3 occupant entries of each 3 by 3 cell once, damage divided by size squared; Acid Stream's hits a stored cone in 6 pulses 3 updates apart (25 straight or 21 diagonal cells), no draw for cells. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-795 | ROM2 Fire Ball's area applies each of the 3 occupant entries of each 3 by 3 cell once, damage divided by size squared; Acid Stream's hits a stored cone in 6 pulses 3 updates apart (25 straight or 21 diagonal cells), no draw for cells. | High / Medium / Unknown | ● active (branch candidate, amended) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-796 | ROM2 area bodies read send 0x87 cell bitmaps at start and end for rows 3, 6, 14, 15, 17, gated by area word +0x42, setting bit row in client map +0xa08; Fire Ball sends 0x86 ID 13 (22) once, Acid Stream ID 27 (18) per cell. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-797 | Compared ROM2 EN/RU area bodies (card list) match after masking except: EN's straight Acid Stream cone repeats (-1,2) and omits (-2,2) at pulse 2; RU guards the 0x87 client arm and post-hit occupant step; client counter +0x49b8/+0x4a38. | High / Medium | ● active (branch candidate) | [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md) |
 
@@ -21176,6 +21332,8 @@ to interior addresses of these `.data` tables were not searched.
 **Confidence.** High for the bodies and the table contents as stored. Medium that the cone tables
 do not change at run time, and for the occupant classes (R2-ENGINE-393). Unknown whether Fire Ball
 hits a multi-cell target once or once per covered cell.
+
+**Amended.** R2-ENGINE-1537 narrows that Unknown at Medium: a unit of s by s cells is listed at entry +4 of every cell it covers, so it is applied once per covered cell of the square, each at damage divided by s squared.
 
 **Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 2.
 
@@ -21732,7 +21890,7 @@ window of the state 1 hard voice and is shown by the listing tails
 | R2-ENGINE-809 | ROM2 Teleport reads P2 and a kind-initialized block mask. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-810 | ROM2 Acid Stream uses eight offsets and centre getters. | High / Medium | ● active (amended) | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-811 | ROM2 Stone Curse has class duration tests and tag-0 start/end. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
-| R2-ENGINE-812 | ROM2 Blizzard's one-cell pulse and schedule are inherited Medium. | High / Medium / Unknown | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
+| R2-ENGINE-812 | ROM2 Blizzard's one-cell pulse and schedule are inherited Medium. | High / Medium / Unknown | ● active (amended) | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 | R2-ENGINE-813 | ROM2 spell-test comparison has four bounded text differences. | High / Medium | ● active | [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/) |
 
 ### R2-ENGINE-808
@@ -21915,6 +22073,8 @@ No wall-clock rate or complete EN damage-resolver parity is claimed.
 SAV with an ordinary caster inside/outside range and a large occupant.
 Record session ticks at request receipt, acceptance, insertion, first update
 and first accepted hit, distinguishing one pulse from following pulses.
+
+**Amended.** R2-ENGINE-1533 settles the class reachability this card leaves open at Medium: the three entries hold ground units (+4), kind 3 units (+8) and buildings (+0xc), and the damage object hits all three by class (R2-ENGINE-1531); the one-application-per-pulse conclusion stands.
 
 **Evidence.** [EXP-2111](../experiments/EXP-2111-rom2-spell-tests/RESULTS.md), ordered question 5.
 
@@ -28739,7 +28899,7 @@ So a per-cell field is rebuilt at LOAD only if LOAD reaches the positioning rout
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1164 | ROM2 same-ID renewal keeps the old Effect and independently maximizes signed magnitude and u16 duration. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
-| R2-ENGINE-1165 | ROM2 Effect entry tests flags&3; timer duration0 wraps to 65535; continuous expiry omits end. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
+| R2-ENGINE-1165 | ROM2 Effect entry tests flags&3; timer duration0 wraps to 65535; continuous expiry omits end. | High / Medium | ✔ promoted (amended) | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1166 | ROM2 Effect slots use ID specials or 50 tag arms; clamps and packed overwrites limit reversibility. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1167 | ROM2 renewal keeps the less negative magnitude; speed-arm examples are conditional on recomputation. | High / Medium | ✔ promoted | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
 | R2-ENGINE-1168 | ROM2 different Effect IDs can coexist; IDs20/28 cancel, while the read ID14/15 slots use opposite predicates. | High / Medium | ✔ promoted (amended) | [EXP-2157](../experiments/EXP-2157-rom2-effect-meet/) |
@@ -28846,6 +29006,8 @@ Timer RU L2.00482..L2.00480 / EN L2.00483..L2.00481 first requires entry. With f
 **Unknown.** Timer scheduling, seconds, ended-record cleanup and all external duration writers. Read callers and list cleanup; measure only in a separately authorized run.
 
 **Amends.** R2-ENGINE-695's expiry boundary is narrowed: an initial zero wraps rather than expiring on its first decrement; the continuous start precedes the >9600 check. Existing notification and delivery grades stand. R2-ENGINE-454: 'larger magnitude' is the signed maximum; 'removes the effect' at timer zero is not shown by the timer body (unlink unread); an initial duration 0 wraps to 65535. R2-ENGINE-697's Medium for the blank Effect narrows to: the blank constructor read stores flags 0, which fails the entry test; that the default arm uses this constructor remains from R2-ENGINE-697.
+
+**Amended.** R2-ENGINE-1534 narrows the Unknown on timer scheduling and unlink for the EN Light and Darkness Effects: the actor step EN L2.00263 calls the timer once per step per Effect and unlinks the Effect in the same step when the end flag is set (Medium; RU twins unread; no census of other callers of slot +0x38).
 
 **Evidence.** EXP-2157 RESULTS section4; generated *-entry, *-timer, flags in tables.tsv and equality.tsv.
 
@@ -29167,13 +29329,13 @@ spell row 15 and Effect ID15, Darkness row 14 and Effect ID14. EN addresses firs
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1236 | ROM2 Light and Darkness build Effects ID15 and ID14 with m = P/30+1 and m = -1-P/30, duration 16 and mark 2*row+8; R2-ENGINE-793's diamond pulses them onto cell occupants. | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1236 | ROM2 Light and Darkness build Effects ID15 and ID14 with m = P/30+1 and m = -1-P/30, duration 16 and mark 2*row+8; R2-ENGINE-793's diamond pulses them onto cell occupants. | High / Medium | ● active (amended) | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
 | R2-ENGINE-1237 | ROM2 virtual +0x30 returns 1 in the Human and Humanoid vtables and 0 in the Unit, Token, Building and Pointer vtables (RU also Shop and Inn); the 1-returning body at that address stands only in those two slots (dword scan). | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
 | R2-ENGINE-1238 | A ROM2 Darkness cell lowers a Human or Humanoid occupant's sight byte +0xa5 and word +0xe4 by 1+P/30; a Light cell lowers a Unit occupant's +0xa5 by P/30+1 while the byte is not below that (it wraps mod 256); no owner test. | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
 | R2-ENGINE-1239 | ROM2 byte +0xa5 has 17 read sites per root (two ray scans, a ring walk, a planner test, three movement reads, ten group maxima); five routines overwrite it; +0xe4 has no unit reader outside Effects (direct-displacement census). | High / Medium / Unknown | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
 | R2-ENGINE-1240 | ROM2 Light and Darkness set unit +0x150 bit 0x40000; the sender clears it for other recipients when virtual +0x30 is 0, and for word +0xe outside 0x21..0x3f when it is nonzero; the 0x21..0x3f path is Unknown. | High / Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
 | R2-ENGINE-1241 | ROM2 Light and Darkness timer expiry runs the end slot, which adds the shift back, then sends the unit with its +0x150 bits; the Unit serializer saves the changed word +0xa4. | High / Medium / Unknown | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
-| R2-ENGINE-1242 | ROM2 sight by class: Darkness lowers Human and Humanoid sight by 1+P/30 cells, Light lowers Unit sight by P/30+1 while the byte is not below that (it wraps); Light on a Human and Darkness on a Unit change no sight; other classes Unknown. | Medium | ● active | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
+| R2-ENGINE-1242 | ROM2 sight by class: Darkness lowers Human and Humanoid sight by 1+P/30 cells, Light lowers Unit sight by P/30+1 while the byte is not below that (it wraps); Light on a Human and Darkness on a Unit change no sight; other classes Unknown. | Medium | ● active (amended) | [EXP-2166](../experiments/EXP-2166-rom2-light-sight/) |
 
 ### R2-ENGINE-1236
 
@@ -29191,6 +29353,8 @@ power is inherited, the constructor `L2.07048` [`L2.00086`] is read only for the
 the area clauses keep the grades of R2-ENGINE-793 and R2-ENGINE-024.
 
 **Unknown.** The readers of mark 36 and 38 at Effect +0xe. How often the timer runs against the 16-update pulse period (R2-ENGINE-1165).
+
+**Amended.** R2-ENGINE-1534 narrows the Unknown on expiry between pulses for EN at Medium: the Effect ends in the actor step of the 16th update and is unlinked before the next pulse (RU twins unread); the sentence that each pulse renews the Effect holds only for several cells of one unit within one pulse.
 
 **Evidence.** EXP-2166 `RESULTS.md` question 1; R2-ASSET-178; EXP-2057 `out/listings/ru-unique-arms.txt` and
 `en-unique-arms.txt`.
@@ -29363,6 +29527,8 @@ unread callers of the overwriting routines and the unattributed dword operands.
 
 **Unknown.** Whether a non-unit class is ever a cell occupant; a run of the original that compares
 the ScanRange byte of a Human and a creature inside both areas settles the composition.
+
+**Amended.** R2-ENGINE-1535 narrows the Unknown on whether a non-unit class is ever a cell occupant at Medium: a building stands at entry +0xc and is not handed to the Light and Darkness pulse.
 
 **Evidence.** EXP-2166 `RESULTS.md` question 5.
 
@@ -30404,7 +30570,7 @@ serverID, then hovers a third of each row, would settle whether the grades diffe
 |---|---|---|---|---|
 | R2-ENGINE-1288 | ROM2 type-4 load: x and y kept as value >> 8, kind, word +0x0c, owner word +0x0e, id +0x12; kind 0x21 or bit 24 reads 8 more bytes. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1289 | A ROM2 Building takes the row its kind byte indexes by position; kind 0 or above count − 1 gets no row; extension bytes replace the size. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
-| R2-ENGINE-1290 | ROM2 EN and RU resolve a flag-0 unit's definition id to a Units row by `serverID`; a miss returns 0 and builds the unit from row 0. | Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1290 | ROM2 EN and RU resolve a flag-0 unit's definition id to a Units row by `serverID`; a miss returns 0 and builds the unit from row 0. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1291 | ROM2 type-5: file +0 + 1 is Player +0xa44, file +4 AND 0x2 sets +0xa60, file +8 is unread; diplomacy low bytes fill the matrix, diagonal 0x12. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1292 | The ROM2 type-9 grammar holds in EN and RU; mode < 4 with a cell, mode & 8 (a unit's spellbook) and mode & 4 take separate arms. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1293 | EN ROM2 Map Editor reads objects.reg, units.reg, structures.reg and templates.bin as catalogs; the new-player routine stores 5000 at +0xc of the object it builds. | Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
@@ -30476,6 +30642,8 @@ for the parameter-to-title map: the parameter getter EN `L2.02667` is unread.
 **Unknown.** What a kind byte above the collection range leaves on the map, and what file word +0x0c
 means beyond the zero test. R2-ASSET-237 finds no such kind in the installed maps.
 
+**Amended.** R2-ENGINE-1512 reads the parameter getter `L2.02667` (EN, `[this+4] + 4 x i`); the Medium for the parameter-to-title map stays for the collection identity.
+
 ### R2-ENGINE-1290
 
 The ordinary unit arm (EN `L2.07310`, RU `L2.07311`, listings `*-units-arm.txt`; the test of flag 0x10 that
@@ -30494,6 +30662,8 @@ instructions equal under the mask).
 **Confidence.** Medium: the count helper EN `L2.07312`, the row test `L2.02664` and the parameter getter
 `L2.02667` are unread; `L2.04941` and `L2.05811` were read in EN only. The collection identity with
 data.bin Units stays as in R2-ENGINE-038 and R2-ENGINE-741.
+
+**Amended.** R2-ENGINE-1512 reads the count helper, the row test and the parameter getter named here as unread, and R2-ENGINE-1514 the row getter; the lookup rule is read at High in EN by R2-ENGINE-1512; this card's grade is unchanged. RU stays Medium and the collection identity stays Medium.
 
 ### R2-ENGINE-1291
 
@@ -30915,7 +31085,7 @@ listening for the music during the movie.
 | R2-ENGINE-1324 | ROM2 map load bounds the type-4, 6 and 8 loops and the unit 0x1c test by type-0 +0x20, +0x24, +0x2c; the +0x28 dword is overwritten by the type-7 case; no count-to-payload comparison found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 | R2-ENGINE-1325 | ROM2 unit load skips, with a log line, a unit with an unresolved owner, whose built actor's word +0x0e is 0 or that cannot be placed at (x>>8, y>>8); the map is not rejected. EN and RU masked-equal. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 | R2-ENGINE-1326 | ROM2 sack stage finds a sack's owner through the unit table keyed by unit +8 (the 0x28 low word, sign-extended), not by record position; EN population read, RU lookup only; a missed key inserts a node through unread NewAssoc L2.07442. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
-| R2-ENGINE-1327 | ROM2 sack items: the id low word is decoded to A, B, C, D and a null build skips the item; a binding keeps it only for a type-9 element with +8 = 0, +0xc = 0 and +4 nonzero. Builder arms other than A = 1, 2 unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ENGINE-1327 | ROM2 sack items: the id low word is decoded to A, B, C, D and a null build skips the item; a binding keeps it only for a type-9 element with +8 = 0, +0xc = 0 and +4 nonzero. Builder arms other than A = 1, 2 unread. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 | R2-ENGINE-1328 | ROM2 ground sack (+0x04 = 0) is placed at x>>8, y>>8 with +0x10; a unit-owned sack uses none of the three; EN runs the sack stage only when Session +0x74 is 0, RU has no such test. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 
 ### R2-ENGINE-1324
@@ -30976,6 +31146,8 @@ the type-9 element at that 1-based position has +8 = 0, +0xc = 0 and +4 nonzero;
 
 **Confidence.** High for the decode and the binding test. Medium for the rest of the builder: only the A = 1 and
 A = 2 arms are read. The item word (file) has no reader identified.
+
+**Amended.** R2-ENGINE-1513 reads every builder arm (A = 1, 2, 3..13, 0xe, 0 and 0xf); the clause that arms other than A = 1 and 2 are unread no longer holds. The item word still has no reader.
 
 ### R2-ENGINE-1328
 
@@ -33423,3 +33595,281 @@ How long 65535 unit updates are in seconds depends on the unit update period, wh
 **Confidence.** High for the arithmetic of the cited stores and decrement. Medium for the count in unit updates (the `+0x184` gate, R2-ENGINE-692) and for the mark-60 start (R2-ENGINE-700, no 0x88 expected: Medium). Unknown for the seconds.
 
 **Unknown.** The Effect timer cadence on the server. A run of the original timing a held Curse would give the period.
+## ROM2 area and cloud spells: reach by class, Blizzard rate and Light and Darkness sight
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1530 | ROM2 occupant kind is byte +0x4a for Unit, Human and Humanoid (EN L2.07941, RU L2.04693) and 0 for Token, Building, Pointer and Effect; placement writes kinds 1 and 2 at cell entry +4, kind 3 at +8, others nowhere (EN body). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1531 | ROM2 Blizzard's damage object (EN L2.03443, RU L2.01702) takes the actor arm when target slot +0x2c is 1 (Unit, Human, Humanoid), else the structure arm when slot +0x34 is 1 (Building, Pointer), else nothing (Token, Effect). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1532 | ROM2 Building cell registration EN L2.04916 / RU L2.04915 writes cell entry +0xc when empty; its one direct caller registers each footprint cell whose bit in dword +0x68 is set, rows +0x61 by columns +0x60 (EN equals RU). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1533 | ROM2 Blizzard: 1 of 36 cells per pulse, 32 pulses; the damage object admits all three entries; a cell in the window takes 0.149 or 0.297 hits/s if updates run 16.1 or 32.1/s (two debugger rates, R2-ENGINE-1073; else Unknown). | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1534 | ROM2 Light and Darkness (EN): the 16-update pulse attaches an Effect of duration 16 that the actor step ends at its 16th step, so sight is base once per 16 updates before the next pulse; it returns 15 updates after the last pulse. | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1535 | ROM2 Light and Darkness pulse onto entry +4 of each cell only: kind 1 or 2 units are reached, a kind 3 unit (entry +8; a flier by name only) and a building (entry +0xc) are not, so neither changes sight under either cloud. | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1536 | ROM2 area spells besides Blizzard: walls 10 or 9 cells, Poison Cloud 21, Light and Darkness 57, pulsing every 16 updates AreaDuration + ceil(floor(16P/10)/16) times; Fire Ball 9 cells once; Acid Stream 6 pulses; census of 8 rows. | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1537 | ROM2 Fire Ball applies once per covered cell of its 3 by 3 square to a unit of s by s covered cells, each at damage divided by its size byte squared; if that byte equals s, about the undivided damage once (source unread). | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+
+### R2-ENGINE-1530
+
+Kind getter. The virtual slot +0x20, which the map lookup `L2.03577` calls, is EN `L2.07941` / RU
+`L2.04693` in the Unit, Human and Humanoid vtables: 9 instructions that return byte +0x4a of the object. In
+the Token, Building, Pointer and Effect vtables (RU also Shop and Inn) the slot is EN `L2.07942` / RU
+`L2.07943`, which returns 0. Both roots read; the vtable addresses come from the EXP-2111 slot tables.
+
+Placement EN `L2.03570` (R2-ENGINE-812; the one direct caller is EN `L2.07944`) takes that kind: 0 returns,
+1 and 2 write the cell record entry +4, 3 writes entry +8, any other kind returns without a write. The RU
+twin `L2.02922` is located by its one direct caller `L2.02925` (a rel32 scan) and its body was not read.
+
+Byte +0x4a is the Units column movementType (R2-ENGINE-1213, R2-ENGINE-482; the title list of the table).
+The Units rows hold 1 in 155 rows, 2 in 10 (Ghost, Bee) and 3 in 15 (Bat_Sonic, Dragon, Succubus)
+(R2-ASSET-327); a Human or Humanoid keeps the default 1 (R2-ASSET-328). So Unit-class occupants stand at
+entry +4 of every cell they cover, except the 15 kind-3 rows, which stand at entry +8.
+
+**Confidence.** High for the getter bodies and constants in both roots and for the EN placement branch.
+Medium that the Units column reaches byte +0x4a (the Units reader's store was not read here), that
+placement has no other writer and that the RU twin matches, and that kind 3 means a flier: the rows
+Bat_Sonic, Dragon and Succubus are fliers by name only.
+
+**Unknown.** The RU placement body; a census of every writer of byte +0x4a.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1; listings under
+`evidence/navigation` (`*-kind-unit-*`, `*-kind-other-*`, `*-scan-place-*`).
+
+### R2-ENGINE-1531
+
+Damage object EN `L2.03443` (104 instructions) and RU `L2.01702` have one shape. They call the target's
+virtual slot +0x2c. A nonzero result takes the actor arm: the slot +0x54 result is subtracted from health word
++0x94 and the caster's slot +0x6c is called when a caster and a positive amount exist. A zero result calls slot
++0x34; a nonzero result takes the structure arm, EN `L2.07738` / RU `L2.01703`, which subtracts from word +0x42
+and clamps at 0 (EN clamp read; RU as in R2-ENGINE-393). Both zero: nothing happens.
+
+| Class | slot +0x2c | slot +0x34 | Arm |
+|---|---|---|---|
+| Unit, Human, Humanoid | 1 | 0 | actor |
+| Building, Pointer | 0 | 1 | structure |
+| Token, Effect | 0 | 0 | none |
+
+Addresses: slot +0x2c is EN `L2.04129` and `L2.04649` (Unit, Human and Humanoid), RU `L2.04128` and
+`L2.04648`, and EN `L2.07945` / RU `L2.07946` for the others; slot +0x34 is EN `L2.07947` / RU `L2.07948`
+returning 0 and EN `L2.07949` / RU `L2.07950` returning 1.
+
+EN structure resolver `L2.07738` (81 instructions): returns 0 for a null payload or a target whose word +0x44
+is 0; otherwise, when byte +0x14 is positive, the sum of payload byte +0x13 and the result of helper `L2.00939`
+for byte +0x14, otherwise 0; minus 5; returns 0 when the result is not positive; when the result is at
+least the target's word +0x42 it walks a list and calls `L2.04534` and `L2.07951` before returning it.
+This is the shape R2-ENGINE-393 reads in RU. The damage object has no filter by caster, ally or class beyond
+the two slots; whether the actor resolver rejects the application for target flag +0x4c bit 8
+(R2-ENGINE-393, RU) is not read in EN.
+
+**Confidence.** High for the shapes, slot values and the EN resolver's direct arithmetic in both roots as
+read. Medium for helper `L2.00939` being the 0..S draw of R2-ENGINE-393 (not read) and for the RU
+resolver's equality (R2-ENGINE-393 reads it; not compared again).
+
+**Unknown.** Bodies of `L2.00939`, `L2.04534`, `L2.07951`; the classes outside the eight vtables read.
+
+**Amends.** R2-ENGINE-393: the class identity of its structure arm (the alternate target admitted by slot
++0x34 is Building and Pointer) and its EN parity (the EN object and resolver are read and have the RU shape).
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1; listings
+`en-damage-apply-L2.03443.txt`, `en-structure-hit-L2.07738.txt` and the `*-slot2c-*`, `*-slot34-*` windows.
+
+### R2-ENGINE-1532
+
+`L2.04916(building, cell)` (EN; RU `L2.04915`) stores the building in cell record entry +0xc when that entry is
+empty and returns 0 when it holds something. A direct rel32 scan finds one caller per root: EN `L2.07952`,
+RU `L2.07953`. That caller's body (entry EN `L2.06901`, RU `L2.06902`, 66 instructions to the return; the
+81-instruction windows are equal after the address mask, the last 15 belong to the next function `L2.06903`,
+which is not read) loops rows 0 up to byte +0x61 and columns 0 up to byte +0x60 of
+the building, adds the building's position (helpers `L2.00488` and `L2.00489`), and registers cell (x + column,
+y + row) when bit k of dword +0x68 is set, k counting every cell of the rectangle; a refused registration
+makes it return 0. So a building stands at entry +0xc of the footprint cells its mask selects, and
+at no other entry.
+
+**Confidence.** High for the body in both roots. Medium that the routine registers the Building class (the
+callers of `L2.06901` were not read; the binding is inherited from R2-ENGINE-758 and R2-ENGINE-812), that bit
+k is a footprint bit (the field's meaning is taken from the loop only), and for the position helpers (not read).
+The scan covers direct E8 and E9 forms only.
+
+**Unknown.** Callers of `L2.06901`; indirect references to `L2.04916`.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1; listings
+`en-bldreg-caller-L2.07952.txt`, `ru-bldreg-caller-L2.07953.txt` and the two `*-scan-bldreg-*` scans.
+
+### R2-ENGINE-1533
+
+Composed from R2-ENGINE-391, R2-ENGINE-392, R2-ENGINE-393, R2-ENGINE-812, R2-ENGINE-1073, R2-ENGINE-1213 and
+R2-ENGINE-1530 to R2-ENGINE-1532. A pulse draws x and y each from the area position -2 to +3, a window of 36
+cells (the band rule, cells outside the map band 8..dimension-9 rejected with the attempt consumed, is read in
+RU, R2-ENGINE-391; the EN validity routine is not read here). The three entries +4, +8
+and +0xc of the sampled cell are queried together and each non-null occupant is passed to the damage object,
+which has no filter by caster, ally or class beyond the two slots; whether the actor resolver rejects the
+application for target flag +0x4c bit 8 (R2-ENGINE-393, RU) is not read in EN. 32 pulses, one per 3 area
+updates, at updates 1, 4, ..., 94. The update counter ran 16.1 per second in one EN launch and 32.1 in
+another, both under a debugger (R2-ENGINE-1073); the rate outside a debugger is Unknown, so every per-second
+figure below holds only at those two rates.
+
+| Quantity | 16.1 updates/s | 32.1 updates/s |
+|---|---|---|
+| Pulses per second | 5.4 | 10.7 |
+| Hits per second on a target cell in the window | 0.149 | 0.297 |
+| Cast length (94 updates) | 5.8 s | 2.9 s |
+| Hits per target cell per cast (32/36) | 0.889 | 0.889 |
+
+| Target | Entry queried | Hit |
+|---|---|---|
+| Kind 1 or 2 unit (Units rows with movementType 1 or 2, which include Ghost and Bee) | +4 of each cell it covers | yes (damage object admits; resolver rejection by +0x4c bit 8 unread in EN), actor arm |
+| Kind 3 unit (Bat_Sonic, Dragon, Succubus; a flier by name only, R2-ENGINE-1530) | +8 of each cell it covers | yes (same), actor arm |
+| Building | +0xc of each registered cell | yes (same), structure arm, B+U[0,S]-5 |
+| Token, Effect | none by kind | no |
+
+A target covering a cells that lie inside the window and, in RU, the map band is hit with probability a/36 per
+pulse, at most once per entry per pulse (a Dragon of 3 by 3 cells fully inside: 9/36). The factor a/36 holds
+for a target wholly inside the band in EN at Medium. One pulse can reach a kind 1 or 2 unit, a kind 3 unit and
+a building standing on the same cell. The damage object does not filter a caster or ally inside the window.
+
+**Confidence.** Medium: the one-cell draw and the schedule are Medium in R2-ENGINE-391 and R2-ENGINE-392; the
+rate is two EN counter readings under a debugger, not tied to a Speed setting here; the kind of a flier is
+by row name. EN and RU bodies are read for the damage object and the kind getters; the update rate was
+measured in EN only and is not claimed for RU.
+
+**Unknown.** The rate under each Speed setting and in RU; the hit time and first update (R2-ENGINE-812). An
+original run settles it: cast Blizzard at a ground unit, a flier and a building inside the window and count
+hits per second over one cast at two Speed settings (`allods2.exe`, a new save).
+
+**Amends.** R2-ENGINE-812: the class reachability its Unknown leaves open (the three entries hold kind 1 or 2
+units, kind 3 units and buildings, all admitted by the damage object); its one-application-per-pulse
+conclusion stands.
+
+**Amends.** R2-ENGINE-392: its Unknown on the wall-clock update rate is narrowed to two debugger-attached EN
+rates (R2-ENGINE-1073), not to a rate outside a debugger.
+
+**Amends.** R2-ENGINE-391: its Unknown on EN map-edge acceptance is not narrowed here; the band rule is
+read in RU only and the EN factor a/36 rests on it at Medium.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1.
+
+### R2-ENGINE-1534
+
+Composed from R2-ENGINE-695, R2-ENGINE-793, R2-ENGINE-1073, R2-ENGINE-1164, R2-ENGINE-1165, R2-ENGINE-1236 and R2-ENGINE-1241 and EN
+listings. The session step EN `L2.04407` raises the counter, runs the world phase `L2.03435`, then the area list
+`L2.03436` (each member's slot +0x18 once), then the units step `L2.04418`, which calls each unit's actor step
+EN `L2.00263` for every unit whose state +0x54 is not 0x10. The actor step walks the unit's effect list and
+calls each Effect's timer slot +0x38 (`L2.00483`); for a nonzero result of `L2.07954` (the end flag, byte
++0x3d AND byte `L2.07955`) it unlinks the Effect in the same step.
+
+Timeline for a unit on a cloud cell, tick t being the area phase that pulses (every 16 updates,
+R2-ENGINE-793): the pulse attaches an Effect of duration 16 (R2-ENGINE-1236); the actor steps of ticks t to
+t+15 decrement it 16 times, so the duration is 0 in the actor step of tick t+15; that step runs the end,
+which adds the sight shift back (R2-ENGINE-1241), and unlinks the Effect; the area phase of tick t+16 pulses
+again and attaches a new Effect. Sight is the base value from the actor step of tick t+15 to the area phase
+of tick t+16, once in 16 updates, and lowered otherwise (15 updates in 16). After the last pulse the
+shift returns in the actor step 15 updates later: 0.9 s at 16.1 updates per second, 0.5 s at 32.1, the two
+rates read under a debugger in EN (R2-ENGINE-1073); the rate outside a debugger is Unknown. The expiry store
+`+0x3d |= 0x80` is R2-ENGINE-695. Per-class amount: R2-ENGINE-1242.
+
+**Confidence.** Medium: the order of phases and the single call per step are read in EN only; the RU twins of
+the actor step, the area list and `L2.07954` were not read; what reads the sight byte at the base-value
+moment (a scan inside the same actor step, a client copy) is not read; whether the end resend reaches the
+client before the next pulse is not read.
+
+**Unknown.** Whether any reader sees the base value, and the RU order. Other callers of Effect slot +0x38
+were not searched (planned, not run), so the actor step is the only caller read. An original run settles it:
+place a Human in a Darkness cloud and read its ScanRange byte (+0xa5) at every update across two pulses and for
+16 updates after the last (`allods2.exe`, a new save).
+
+**Amends.** R2-ENGINE-1165: its Unknown on timer scheduling and unlink for these Effects in EN (the timer is
+called once per actor step and the end flag unlinks in that step; no census of other callers of slot +0x38).
+
+**Amends.** R2-ENGINE-1236: its Unknown on expiry between pulses is narrowed for EN at Medium: the Effect ends
+in the actor step of the 16th update and is unlinked before the next pulse (RU twins unread); its sentence that
+each pulse renews the Effect holds only for several cells of one unit within one pulse.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 2; listings
+`en-effect-end-L2.07954.txt`, `ru-effect-end-L2.04650.txt` and the EXP-2111 actor-step and session-step listings.
+
+### R2-ENGINE-1535
+
+R2-ENGINE-793 hands the first occupant of each cloud cell, cell record entry +4, to the area object. By
+R2-ENGINE-1530 kind 1 or 2 units (Units rows with movementType 1 or 2, which include Ghost and Bee) stand at
+entry +4 of each covered cell; kind 3 units (Bat_Sonic, Dragon, Succubus; a flier by name only,
+R2-ENGINE-1530) stand at entry +8 and buildings at entry +0xc (R2-ENGINE-1532). Mark-cell skips a cell whose
+third occupant is nonzero when its map byte has mask 0x04 (R2-ENGINE-793; whether a building's cells carry
+that mask is not read); whether or not the cell is registered, the pulse hands entry +4, so a building at
++0xc is not handed to the area object. So Light and Darkness reach kind 1 or 2 units only; over a kind 3 unit
+alone or a building the effect is not applied and its sight is unchanged. Over a kind 1 or 2 unit the
+per-class change is R2-ENGINE-1242.
+
+| Occupant | Entry | Reached by Light and Darkness |
+|---|---|---|
+| Kind 1 or 2 unit | +4 | yes, sight as R2-ENGINE-1242 |
+| Kind 3 unit (flier by name only) | +8 | no |
+| Building | +0xc | no (entry +0xc is not handed) |
+
+**Confidence.** Medium: the first-occupant entry and mask rule are R2-ENGINE-793 (High for the body, Medium for
+the classes); kind placement is R2-ENGINE-1530 with the RU placement body unread; the Building binding is
+Medium (R2-ENGINE-1532).
+
+**Unknown.** A kind 3 unit or a building inside a cloud is not observed; a run settles it: cast Darkness over a
+Dragon alone and over a Human beside it and compare ScanRange.
+
+**Amends.** R2-ENGINE-1242: its Unknown on whether a non-unit class is ever a cell occupant is narrowed at
+Medium: a building stands at entry +0xc and is not handed to the Light and Darkness pulse.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 2.
+
+### R2-ENGINE-1536
+
+Census: the Spells rows with Distribution above 1 are rows 2, 3, 6, 7, 9, 14, 15 and 17 and no others (equal
+in EN and RU on the 23 compared columns). Cells and pulses, all from R2-ENGINE-793, R2-ENGINE-794,
+R2-ENGINE-795 and R2-ENGINE-391/392:
+
+| Row | Spell | Cells per pulse | Pulses and spacing | Entry applied |
+|---|---|---|---|---|
+| 2 | Fire Ball | 3 by 3 = 9 | 1, at the first update | +4, +8 and +0xc |
+| 3 | Wall of Fire | 10 (A) or 9 (B) by facing | AreaDuration 10 + ceil(floor(16P/10)/16), 16 updates apart | +4 |
+| 6 | Poison Cloud | diamond R+1 of R 2, 21 | the same, AreaDuration 10 | +4 |
+| 7 | Blizzard | 1 of 36 | 32, 3 updates apart (R2-ENGINE-1533) | +4, +8, +0xc |
+| 9 | Acid Stream | cone of 25 (straight) or 21 (diagonal) in total | 6, at updates 1, 4, 7, 10, 13, 16 | +4, +8 and +0xc |
+| 14 | Darkness | diamond R+1 of R 4, 57 | AreaDuration 15 + ceil(floor(16P/10)/16), 16 updates apart | +4 |
+| 15 | Light | the same 57 | the same | +4 |
+| 17 | Wall of Earth | 10 or 9 | AreaDuration 10 + ..., 16 updates apart | applies nothing |
+
+P is the book power 0 to 255, so the pulse count runs from AreaDuration at P 0 to AreaDuration + 26 at P 255:
+10 to 36 for rows 3, 6 and 17, 15 to 41 for rows 14 and 15 (item casts: P is unclamped, R2-ENGINE-793).
+A unit of s by s cells stands at entry +4 of each cell it covers (R2-ENGINE-1530, R2-ENGINE-1213), so under a
+wall, Poison Cloud or Wall of Fire each covered shape cell hands it to the occupant routine: c covered cells
+give c applications per pulse. For Light and Darkness a unit on several cells of one pulse renews one Effect
+(R2-ENGINE-1164); between pulses the Effect has ended (R2-ENGINE-1534), so there is no stacking.
+
+**Confidence.** High for the census and the cell counts of the shape tables; Medium for the pulse counts (P and
+AreaDuration are Medium in R2-ENGINE-793 and R2-ENGINE-1236) and for the Acid Stream cone as stored
+(R2-ENGINE-795, R2-ENGINE-797); Medium for the multiplicity (composed from the placement loop, whose RU body
+is unread) and for the classes (R2-ENGINE-1530).
+Acid Stream's cone differs between roots at pulse 2 (R2-ENGINE-797). The frequency column of the Spells
+rows is not read as a mechanism.
+
+**Unknown.** The update rate for RU; the effect of the frequency column; the Poison Cloud's repeated `health`
+Effect on a unit under several cells. An original run settles it: stand a 2 by 2 unit in a Wall of Fire and
+count the hits per pulse.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 3.
+
+### R2-ENGINE-1537
+
+Fire Ball (R2-ENGINE-795) visits the 9 cells of its 3 by 3 square once and passes all three occupant
+entries of each to the occupant routine, which divides base and spread by the square of the target's size byte
+(vtable +0x1c). A unit of s by s covered cells stands at entry +4 of every cell it covers (R2-ENGINE-1530), and a kind 3
+unit at +8, so it is applied once per covered cell inside the square, each at 1/(size byte)^2 of the damage. If the size
+byte equals s (its source is not read), a unit that fills s by s cells of the square takes s^2 applications of
+1/s^2: about the undivided damage once; a unit with c covered cells inside takes c/s^2 of it. The
+per-application integer division is not modelled.
+
+**Confidence.** Medium: composed from R2-ENGINE-795 (High for its body) and the multi-cell registration of
+R2-ENGINE-1530 (the RU body unread). The size byte is not tied to the Units tokenSize column here.
+
+**Unknown.** The size byte's source; the integer truncation of base and spread per application. An original
+run settles it: cast Fire Ball over a Dragon and a single-cell unit with the same health and compare the loss.
+
+**Amends.** R2-ENGINE-795: its Unknown on whether a target larger than one cell is hit once or once per
+covered cell (once per covered cell, each at 1/s^2).
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 3.

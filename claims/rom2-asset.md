@@ -231,6 +231,140 @@ Classifying `allods2.exe`'s Data.bin-reading population against `a2server.exe`'s
 
 **Confidence.** High for the dispatcher and the 7 substantive group-level Serialize call sites (all but the 11-instruction wrapper): two independent methods sharing no code — a function census keyed on mnemonic-sequence hash, instruction count plus byte length, and a raw relocation-tolerant byte search of the target's whole file image — both return 0 matches in `a2server.exe`, while the self-collision census shows every one of these addresses is unique even inside `allods2.exe`'s own function population. The byte-level method rules out the alternative the strict tier alone could not exclude: that a genuinely shared, byte-identical function is merely relocated differently between the two binaries and so hashes differently — a relocation-tolerant search would find that function anyway, and does not. Medium remains for the classification's treatment of the wrapper and the SetSize shapes specifically: both are now measured, not merely argued, as generic/multiply-instantiated within `allods2.exe` itself (self-collision 102, 11, 5; the byte method further resolves the two mnemHash buckets into 2 true byte-identical pairs (B~G, E~F) plus 4 byte-unique singles (A, C, D, H), all eight individually 0 in `a2server.exe`), so they are excluded from the positive count for a demonstrated reason rather than a structural assumption alone — but no non-Data.bin negative-control population was run, and the SetSize byte-pairing is not traced past this experiment's own 18 named addresses, so this pass does not independently establish which other MFC template instantiations, if any, they collide with beyond what is named here
 
+## ROM2 map records: unit, structure and sack field values and definition tables
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-313 | ROM2 type-6 0x0a is 0..7, 0x20 is 0..14, no reader found (Medium); EN 0x20 is even, 10 in 6,255 of 6,395 Units and all 1,066 Humans; no field is read as a level or experience in the two bodies read; level source Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-314 | ROM2 installed maps: type-6 owner is 1..15 with high word 0 and never above the map's player count; flags 0x0c are 0, 4, 16 or 20 and bit 0x10 selects the Humans arm (EN 1,066, RU 1,847). | High | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-315 | ROM2 type-6 health words: EN 1,155 of 7,461 and RU 2,512 of 15,482 hold an equal pair; in 917 of 935 EN Units pairs the value is the row's healthMax; 5 records per root hold 0x24 only. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-316 | ROM2 installed maps: every type-6 definition id resolves to a Data.bin Units row (flag 0x10 clear) or Humans row (set) by serverID; EN 241 and RU 250 distinct (arm, id) pairs, none matching two rows. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-317 | ROM2 installed maps: type-4 kinds name Buildings rows 1..179 by position, EN 176 distinct kinds in 3,270 elements, RU 178 in 6,081; every kind has a row; the 28-byte elements are all kind 0x21. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-318 | ROM2 type-4 extension dwords are 2..11 in EN (41 elements) and 2..17 in RU (170); word 0x0c is 100 in 3,056 of 3,270 EN and 5,744 of 6,081 RU elements, 0 in 203 EN and 312 RU; no consumer of the footprint or of Building +0x42 is read. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-319 | ROM2 installed sack items (EN 139, RU 327) decode to weapon, shield, armour and magic-item rows in range (table names by use, Medium); for every weapon, shield and armour the row's Slot equals A; none has A of 0, 3, 11, 13 or 15. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ASSET-320 | ROM2 Data.bin collections the map joins use: Units 241 entries (180 with 62 parameters, 61 empty), Humans 289 (284 with 26, 5 empty), Buildings 179, Weapons 27, Armors 30, Shields 9, MagicItems 96; EN, RU equal in counts and widths. | High | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+
+### R2-ASSET-313
+
+Population: the 59 EN and 83 RU maps of R2-ASSET-253 (root `.alm` files and `scenario.res` members), EN 7,461 and RU
+15,482 type-6 records; tables `evidence/derived/census/{en,ru}-all.tsv`, instrument `evidence/census.py`, reproduced
+byte-equal. Arm: flag 0x10 clear is the Units arm, set the Humans arm (R2-ASSET-314).
+
+| Field | EN Units arm (6,395) | EN Humans arm (1,066) | RU Units arm (13,635) | RU Humans arm (1,847) |
+|---|---|---|---|---|
+| 0x0a | 1..6 | 0..7 (0: 133) | 1..7 | 0..7 (0: 133) |
+| 0x20 | 0, 2, 4, 6, 8, 10, 12, 14 | 10 | 0..10, 12, 13, 14 | 0 (532), 10 (1,315) |
+
+0x0a counts, EN: 1: 2,407, 2: 1,226, 3: 1,803, 4: 1,789, 5: 82, 6: 19, 7: 2; RU: 1: 4,259, 2: 2,498, 3: 3,691, 4:
+4,000, 5: 770, 6: 126, 7: 5. 0x20 counts, EN Units arm: 0: 87, 2: 6, 4: 19, 6: 6, 8: 12, 10: 6,255, 12: 8, 14: 2; RU
+Units arm: 0: 4,370, 1: 1, 2: 28, 3: 3, 4: 31, 5: 12, 6: 31, 7: 3, 8: 39, 9: 4, 10: 9,009, 12: 35, 13: 3, 14: 66.
+EN has 28 distinct (0x0a, 0x20) pairs. 0x08 is 1..107 with 53 distinct values in both roots.
+
+The two bodies read use neither 0x0a nor 0x20; a reader elsewhere is unread (R2-ENGINE-1510, Medium). No field of the 48-byte record is read as a level or an experience
+value in the two bodies read; the Data.bin Units row holds healthMax (slot 4), XPvalue (slot 37) and serverID (slot 55)
+(R2-ASSET-320). Where the game takes a placed unit's level from was not read.
+
+**Confidence.** High for the counts: the census walks every record to its exact end. Unknown for the meaning of
+0x0a and 0x20 and for the source of a unit's level; the value sets alone give no meaning.
+
+**Unknown.** Meaning of 0x0a, 0x20 and the level source. Run: on copies of an installed map, set 0x20 of one Units
+record from 10 to 3, and in another copy 0x0a by 1; load each in `allods2.exe` and compare the unit's colour,
+palette, size and level with the unedited copy.
+
+### R2-ASSET-314
+
+Same population as R2-ASSET-313. Owner (0x18), low word, EN: 1: 5, 2: 2,998, 3: 1,359, 4: 778, 5: 810, 6: 455, 7:
+757, 8: 127, 9: 92, 10: 12, 11: 27, 12: 12, 13: 17, 14: 4, 15: 8; RU 1..15 with 2: 5,841 the largest. The high word
+is 0 in all records. No owner is 0 or above the map's type-0 +0x1c player count (0 records, both roots). The game
+skips a unit whose owner it does not find (R2-ENGINE-1325). Flags 0x0c: EN 0: 6,393, 4: 2, 16: 1,053, 20: 13; RU 0:
+13,633, 4: 2, 16: 1,834, 20: 13. Bit 0x10 is set in EN 1,066 and RU 1,847 records and selects the Humans arm
+(R2-ENGINE-513). Field 0x10: EN {0: 6,905, 1: 289, 2: 13, 3: 16, 4: 9, 5: 3, 8: 203, 9: 7, 11: 1, 12: 15}; RU {0:
+14,045, 1: 708, 2: 62, 3: 67, 4: 22, 5: 3, 8: 534, 9: 7, 10: 1, 11: 1, 12: 32}. Group 0x2c is 0 in 3 EN and 22 RU
+records (R2-ASSET-253).
+
+**Confidence.** High for the counts. The meaning of the flag bits 4 and 0x10 beyond the arm test is not read here.
+
+### R2-ASSET-315
+
+Same population. The words 0x24 and 0x26 (R2-ENGINE-1511 for what the builder does with them).
+
+| Class | EN all | EN Units | EN Humans | RU all | RU Units | RU Humans |
+|---|---:|---:|---:|---:|---:|---:|
+| both -1 | 6,301 | 5,458 | 843 | 12,965 | 11,465 | 1,500 |
+| equal, not -1 | 1,155 | 935 | 220 | 2,512 | 2,168 | 344 |
+| 0x24 only | 5 | 2 | 3 | 5 | 2 | 3 |
+| 0x26 only | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Non-negative 0x24: 0..12,000 (RU maximum 18,432); non-negative 0x26: 5..12,000 (RU 18,432). The join with the
+resolved row (`{en,ru}-units-health-join.tsv`, R2-ASSET-316): the equal value equals the row's healthMax in EN 917 of
+935 Units and 194 of 220 Humans pairs, in RU 1,934 of 2,168 and 278 of 344. Equal pairs that differ from
+healthMax: EN 18 Units, 26 Humans; RU 234 and 66.
+
+**Confidence.** High for the counts. Medium for reading the pair as health: the join with healthMax supports it and
+the builder stores it to the actor words R2-ENGINE-086 reads as health; no run was made.
+
+### R2-ASSET-316
+
+Same population; table `evidence/derived/census/{en,ru}-units-defs.tsv` (arm, id, row, name, record counts, maps),
+published as a table in the ROM2 map definition tables page. The rule R2-ENGINE-1512: a Units row matches when its
+serverID (slot 55) equals the id, a Humans row when its serverID (slot 24) does. EN 241 distinct pairs (Units arm 150
+ids in 6,395 records, Humans arm 91 in 1,066), RU 250 (155 in 13,635, 95 in 1,847). Every record resolves; none falls
+to row 0; no id matches two rows. Units has 180 rows with parameters and 180 distinct serverID values; Humans 284 rows
+and 284 values. Units ids are 600..999 (R2-ASSET-239).
+
+**Confidence.** High for the join as computed over the Data.bin of each root's `world.res`. Medium that the
+collections the game scans are these tables (R2-ENGINE-038, R2-ENGINE-741), and that `world.res` is the Data.bin the
+game loads for a map.
+
+### R2-ASSET-317
+
+Same population; table `{en,ru}-structure-kinds.tsv` (kind, row name, parameters, element counts per source), in the
+definition tables page. The loader keeps a kind of 0x21 or with bit 24 as 0x21 (R2-ENGINE-1288); the effective kinds
+are 1..179 in both roots, EN 176 distinct in 3,270 elements, RU 178 in 6,081, and the row at that position exists for
+every kind (Buildings stores 179 serialized rows, R2-ASSET-320). The 28-byte elements are all kind 0x21 (row 33,
+parameters 1;1;0;0;1;1): EN 41 (raw kind 0x21: 10, 0x1000021: 31), RU 170 (21 and 149).
+
+**Confidence.** High for the join as computed. Medium that the position index is the one the building initialiser
+uses and that the collection is Data.bin Buildings (R2-ENGINE-1289).
+
+### R2-ASSET-318
+
+Same population. The two extension dwords of the 28-byte elements (R2-ASSET-317): pairs (first, second), EN: (2,2)
+3, (2,3) 2, (3,4) 4, (3,5) 1, (3,6) 1, (4,2) 1, (4,4) 1, (4,5) 2, (4,9) 1, (5,2) 4, (5,4) 2, (5,5) 1, (6,4) 2, (7,2)
+4, (7,3) 2, (8,2) 4, (8,4) 1, (9,2) 1, (9,3) 1, (10,3) 2, (11,3) 1; RU 44 pairs with both values 2..17 in
+`structure-extensions.tsv`. The loader replaces row parameters 0 and 1 with them when their low bytes sum above 0
+(R2-ENGINE-1289). Word 0x0c: EN 0: 203, 10: 1, 20: 2, 50: 1, 90: 1, 100: 3,056, 200: 1, 300: 1, 500: 1, 1000: 2,
+9999: 1; RU 0: 312, 1: 2, 100: 5,744, 300: 13 and the same other values. Zero clears Building +0x42 (R2-ENGINE-1289).
+Owner: low word 1..15, high word 0, never above the player count.
+
+**Confidence.** High for the counts. Unknown for what reads Building +0x42, +0x60, +0x61, +0x64 and +0x68, and so
+for the footprint and any health the extension and word 0x0c set; not read. Run: load a copy of a map in
+`allods2.exe` with one 0x21 element's extension changed from (2,3) to (5,5) and compare the footprint and what stops
+a unit crossing; with word 0x0c set to 50 compare the structure's health bar.
+
+### R2-ASSET-319
+
+Same population; tables `{en,ru}-items-decode.tsv` (A, table, D or low byte, row in range, name, count, B and C
+values) and `-items-summary.tsv`, in the definition tables page. Items by A (R2-ENGINE-1513), EN: 1 weapons 5, 2
+shields 4, 4..12 armours 41 (A 4: 4, 5: 4, 6: 10, 7: 5, 8: 7, 9: 3, 10: 4, 12: 4), 14 magic items 89; RU: 22, 6, 71 (7,
+7, 15, 11, 12, 4, 6, 9), 228. Every item row index is below the table's count, and for every weapon, shield and armour
+the row's Slot parameter equals A. The sack head, owners and binding values are in R2-ASSET-254.
+
+**Confidence.** High for the decode and the join as computed. Medium for the names of the tables, which are by use (R2-ENGINE-1513; the weapon, shield and armour tables are named by admission use at High in R2-ENGINE-264, the magic-item table by use only).
+The meaning of B and C values is shown only as counts in the table; their effect is read in the constructors by their
+calls (R2-ENGINE-1513, Medium).
+
+### R2-ASSET-320
+
+Data.bin of each root's `world.res`, walked by `evidence/census.py` (`{en,ru}-databin-shape.tsv`): collection,
+group, stored count, serialized entries, parameter widths. Armors C 31 / 30 (17 parameters), Shields C 10 / 9 (17),
+Weapons C 28 / 27 (17), MagicItems D 97 / 96 (2), Units E 242 / 241 (61 with 0, 180 with 62), Humans F 290 / 289 (5
+with 0, 284 with 26), Buildings G 180 / 179 (6). EN and RU are equal in the counts and parameter widths. Title slots used by the joins:
+Units slot 4 healthMax, 37 XPvalue, 55 serverID; Humans slot 4 HealthMax, 24 serverID (EN and RU titles equal).
+
+**Confidence.** High for the counts, parameter widths and titles as read from the files. Medium that the `world.res` Data.bin is the table the game loads. The identity of these collections with those the
+program indexes is Medium (R2-ENGINE-038).
+
 ## Town and room art populations
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -3638,6 +3772,8 @@ Population limit: the `.alm` files of the root folder and the `.alm` members of 
 **Unknown.** Whether every flag-0 definition id equals a Units `serverID`: `world.res` was outside this
 population. R2-SESSION-297 joins the flag-0x10 records of the 46 campaign maps to Humans.
 
+**Amended.** R2-ASSET-316 joins every installed flag-0 and flag-0x10 id to a Data.bin row (EN 241, RU 250 distinct pairs); the Unknown on flag-0 ids is answered for the installed maps, Medium that `world.res` is the Data.bin the game loads.
+
 ### R2-ASSET-240
 
 Same population and tables as R2-ASSET-237. Elements: EN 219, RU 635.
@@ -4300,3 +4436,51 @@ exactly a row of `known-spell-books.tsv` (EXP-2082 derived it; its rule is not r
 Orc_Sword 4 and 5 can pay Teleport's cost of 60 depends on their manaMax, not read here.
 
 **Evidence.** EXP-2181 `RESULTS.md` questions 3 and 4.
+## ROM2 Units and Humans movementType
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-327 | ROM2 Units table (EN equals RU): movementType is 1 in 155 of 180 populated rows, 2 in 10 (Ghost, Bee) and 3 in 15 (Bat_Sonic, Dragon, Succubus); tokenSize is 1 in 155 rows, 2 in 20, 3 in the 5 Dragon rows. | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ASSET-328 | ROM2 Humans table (EN equals RU): MovementType is -1 in all 284 populated rows (5 of 289 empty), so a Human keeps the Unit constructor's default kind 1. | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+
+### R2-ASSET-327
+
+Both roots' `world.res` hash to `863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9`; the
+table `data/data.bin` inside hashes to `aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`.
+The Units table has 241 entries, 61 with no values and 180 rows of 62 values. The columns are, by value index,
+typeID 29, tokenSize 31 and movementType 32 (title 33), named by the table's title list. The
+derived tables `generated/derived/{en,ru}-units-movement.tsv` list every row; the two locales are equal on
+ordinal, typeID, tokenSize and movementType.
+
+| movementType | Rows | Names (five rows each) | typeID | tokenSize |
+|---|---|---|---|---|
+| 1 | 155 | every other row | many | 1 (135 rows), 2 (20 rows) |
+| 2 | 10 | Ghost, Bee | 69, 73 | 1 |
+| 3 | 15 | Bat_Sonic, Dragon, Succubus | 70, 71, 105 | 1, 3 (Dragon), 1 |
+
+tokenSize is 1 in 155 rows, 2 in 20 rows (all movementType 1) and 3 in the 5 Dragon rows.
+
+**Confidence.** High for the values and counts as stored in the table; both locales read. Medium that
+column index 32 is the value the engine stores in byte +0x4a (R2-ENGINE-1213 and R2-ENGINE-482 state it; the
+Units reader's store was not read here) and for what the values mean beyond the column's title
+(R2-ENGINE-1530). The title strings name the columns; a name alone is not a fact about their effect.
+
+**Amends.** R2-ENGINE-482: its Unknown on the value table of MovementType is read here (values 1, 2, 3 in 155,
+10 and 15 Units rows); the writers of byte +0x4a remain unread.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1; program
+`evidence/units_movement.py` over the grammar of `evidence/data.py`.
+
+### R2-ASSET-328
+
+The Humans table has 289 entries, 5 empty and 284 with 26 values. Column 22 (title MovementType) is -1 in all
+284 (`generated/derived/{en,ru}-human-movement.tsv`; EN equals RU). The Humans reader stores a column value
+only when it is not -1 (R2-ENGINE-319), and the Humanoid constructor runs the Unit constructor, whose
+initializer stores byte +0x49 = 1 and byte +0x4a = 1 (EN `L2.01793`, RU `L2.01794`, EXP-2111 `en-q1-unit-init`
+listings), before the template load. So a Human and a Humanoid have kind 1 unless another writer changes byte
++0x4a (R2-ENGINE-1530).
+
+**Confidence.** High for the table counts in both locales. Medium for the default kind: the reader's skip rule
+is taken from R2-ENGINE-319, and no census of every writer of byte +0x4a was made.
+
+**Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1.

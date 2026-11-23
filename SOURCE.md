@@ -2,14 +2,14 @@
 
 ## Snapshot
 
-Snapshot k493, exported from the private research repository at commit
-`f4dfc15cdd1527f80f4c9d006ae98872729792f7`.
+Snapshot k494, exported from the private research repository at commit
+`b7c0db3e45f03feeec97bc3df1bffbd5823f649c`.
 
 | Field | Count |
 |---|---:|
-| Claim ids | 5191 |
+| Claim ids | 5214 |
 | Retracted ids | 601 |
-| Format pages | 138 |
+| Format pages | 139 |
 
 Each count is recomputed from this snapshot's own exported ledgers, not carried
 forward from an earlier snapshot. A commit identity is not a licence, a proof of

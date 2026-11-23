@@ -195,14 +195,14 @@ uses other fields.
 |---:|---|---:|---|
 | 0x00, 0x04 | i32 | +0x00, +0x04 | x, y; shifted right by 8 into the placement call (the 1/256 tile unit is Medium) |
 | 0x08 | i16 | +0x08 | read by the mission-load row loop, as a lookup index into a collection whose record chooses the object build; no actor-builder read (Medium) |
-| 0x0a | u16 | +0x0c | no reader found |
+| 0x0a | u16 | +0x0c | no reader found in the census of 21 references (Medium); 0..7, 0 only in the person arm (R2-ASSET-313, R2-ENGINE-1510) |
 | 0x0c | u32 | +0x48 | flags; bit 0x10 selects the person arm |
 | 0x10 | u32 | +0x50 | bits 1, 2, 4, 8 set actor +0x194, +0x19c, +0x198, +0x1a0; read at version 0x47e and above. Bits 1, 2 and 4 put the unit in Inn offer populations; bit 8 removes its death drop and the experience a human attacker is paid for it (Medium) |
-| 0x14 | u32 | +0x10 | definition id; read at version 0x3db and above |
+| 0x14 | u32 | +0x10 | definition id; read at version 0x3db and above; names the Units row (flag 0x10 clear) or Humans row by serverID, see [the definition tables](map-definitions.md#type-6-definition-id-to-databin-row) (R2-ENGINE-1512, R2-ASSET-316) |
 | 0x18 | u32 | +0x14 | owner, low word only |
 | 0x1c | u32 | +0x44 | 1-based type-8 index; that type-8 element takes the record's 0x28 low word |
-| 0x20 | u32 | +0x1c | no reader found |
-| 0x24, 0x26 | i16 | +0x20, +0x22 | actor words +0x94 and +0x96; -1 keeps the default |
+| 0x20 | u32 | +0x1c | no reader found in the census of 21 references (Medium); 0..14, 10 in 6,255 of 6,395 EN Units-arm records (R2-ASSET-313, R2-ENGINE-1510) |
+| 0x24, 0x26 | i16 | +0x20, +0x22 | actor words +0x94 and +0x96 in both arms, after the Units arm's scaling by object +0xd8 (difficulty, Medium, R2-ENGINE-1002); -1 keeps the default; an equal pair other than -1 is reset to -1 in the person arm only (R2-ENGINE-1511) |
 | 0x28 | u32 | +0x3c | low word read; two bytes below version 0x456, four from 0x456 |
 | 0x2c | u32 | +0x40 | group number; the map keeps the maximum |
 
@@ -213,6 +213,23 @@ record), 0x2c 0..38. In the root `.alm` maps: 0x0a 0..7, 0x0c {0, 4, 16,
 20}, 0x10 {0, 1, 2, 3, 4, 5, 8, 9, 11, 12} in EN and also 10 in RU (the builder tests each bit separately; R2-ENGINE-513), 0x18 2..15 with high
 word 0, 0x1c 0..58, 0x20 0..14, 0x2c 0..555.
 — R2-ASSET-119, R2-ASSET-122, R2-ASSET-132, R2-ENGINE-038, R2-ENGINE-513
+
+The actor builder and the mission-load loop are the only bodies read that take fields from the row (the builder: x,
+y, 0x14, 0x18, 0x24, 0x26, 0x28, 0x2c, 0x0c, 0x10; the loop: the same without 0x10, with 0x08); none of 21 direct
+references to the list per root reads the slot of 0x0a or 0x20; a route that hands the list or a row to another body
+is unread (Medium). — R2-ENGINE-1510
+
+Value sets in the installed maps (EN 59 maps, 7,461 records; RU 83, 15,482), flag 0x10 clear is the Units arm, set the
+person (Humans) arm. 0x0a: EN Units arm 1..6, person arm 0..7; RU 1..7 and 0..7. 0x20: EN Units arm 0, 2, 4, 6, 8, 10,
+12, 14 and the person arm only 10; RU has odd values and 532 person-arm zeros. 0x18 owner: 1..15, high word 0, never
+above the map's player count. 0x0c is 0, 4, 16 or 20, with bit 0x10 set in EN 1,066 and RU 1,847 records. No field of
+the record is read as a level or an experience value in the two bodies read (the actor builder and the mission-load loop); where the game takes a placed unit's level
+is Unknown. — R2-ASSET-313, R2-ASSET-314
+
+0x24 and 0x26: EN 6,301 records hold -1 in both, 1,155 an equal pair, 5 only 0x24; RU 12,965, 2,512 and 5. The equal
+value is the row's healthMax in 917 of 935 EN Units-arm pairs (RU 1,934 of 2,168). In the person arm an equal pair is
+reset to -1 by the builder and so has no effect (EN 220, RU 344 records). That the actor words are current and
+maximum health is Medium. — R2-ASSET-315, R2-ENGINE-1511
 
 In every installed map (EN 59, RU 83) the 0x28 high word equals the low word of x and the low word is never 0;
 the game reads the low word only and keys its unit table by it. The id never repeats within a map and never
@@ -225,7 +242,11 @@ is not rejected, when its owner is not found, when the built actor's word +0x0e 
 id, a u16 word and a u32 binding. +0x04 is a unit id, which the game resolves through the unit table, or 0 for
 a ground sack (25 per root, x low byte 128), which the game places at x>>8, y>>8 with +0x10. A unit-owned sack
 uses none of x, y and +0x10 in the game. The item id's high word is 0; its low word splits into A (bits
-8-11), B (12-15), C (5-7) and D (0-4), and an id the builder cannot build is skipped. The item word is 0 in
+8-11), B (12-15), C (5-7) and D (0-4), and an id the builder cannot build is skipped. A = 1 builds a weapon, A = 2 a
+shield, A = 3..13 an armour, A = 0xe a magic item whose row is the low id byte (table names by use, Medium); A = 0 and A = 0xf build nothing. The
+installed maps hold EN 139 and RU 327 items, all with a row in range, and for every weapon, shield and armour the
+row's Slot parameter equals A; none has A of 0, 3, 11, 13 or 15 (rows in [the definition
+tables](map-definitions.md#sack-item-to-databin-row)). — R2-ENGINE-1513, R2-ENGINE-1514, R2-ASSET-319. The item word is 0 in
 every installed item and has no reader found. The binding is 0 or a 1-based type-9 position; that element
 has cell (+8, +0xc) zero, +0x00 equal to the item's 0-based position and +4 nonzero, or the item is skipped.
 A sack owner naming no unit is not tested before use; the result is Unknown.
@@ -591,8 +612,13 @@ Buildings and which title each parameter is are Medium. — R2-ENGINE-1289
 In the installed maps (EN 59, RU 83: the `.alm` files of the root folder and the `.alm` members of `scenario.res`;
 other archives including `world.res`, saves and user maps are not in the population) every kind lies in 1..179;
 data.bin Buildings stores 180 rows, and that this is the collection the loader indexes is Medium. Every owner
-word lies in 1..player count of its map, and no id repeats within a map. Word +0x0c is 100 in 8,800 of the
-9,351 elements and 0 in 515. — R2-ASSET-237, R2-ENGINE-1289
+word lies in 1..player count of its map, and no id repeats within a map. Word +0x0c is 100 in 3,056 of 3,270 EN
+elements and in 5,744 of 6,081 RU elements, and 0 in 203 EN and 312 RU. — R2-ASSET-237, R2-ENGINE-1289
+
+The kind's row is listed per kind in [the definition tables](map-definitions.md#type-4-kind-to-databin-buildings-row):
+EN 176 distinct kinds in 3,270 elements, RU 178 in 6,081, every kind with a row. The 28-byte elements are all kind
+0x21 (EN 41, RU 170); their two extension dwords are 2..11 in EN and 2..17 in RU, in the pairs the page lists, and what reads the footprint
+they replace, or Building +0x42 which a zero word +0x0c clears, is Unknown. — R2-ASSET-317, R2-ASSET-318
 
 **Type 5.** File +0x00 plus one becomes Player byte +0xa44, the colour (R2-ENGINE-963); +0x04 AND 0x2 (value 3) sets Player +0xa60 to 1; +0x08 is
 not read by the Player builder; the name is 32 bytes; the low byte of each of the 16 diplomacy words fills the
@@ -606,6 +632,12 @@ offset was not read. — R2-ASSET-238, R2-ENGINE-1293
 **Type 6.** A record without flag 0x10 names a Units row by `serverID`, scanned from the last row down to
 row 1; a miss builds the unit from row 0 (Medium). Installed definition ids are 600..999 without flag 0x10
 and 1..10230 with it. — R2-ENGINE-1290, R2-ASSET-239
+
+The lookup compares the full dword id with Units parameter 0x37 or, with flag 0x10, Humans parameter 0x18, from
+count - 1 down to 1, and skips a row whose row-test result is zero (read as a row without a parameter array, Medium); its helpers are read in EN (High) and by shape in RU (Medium; the Humans lookup helpers are equal in RU under the mask, R2-ENGINE-742).
+Every installed record resolves in the `world.res` Data.bin (Medium that this is the table the game loads; EN 241 and RU 250 distinct pairs, none matching two rows; table in [the definition
+tables](map-definitions.md#type-6-definition-id-to-databin-row)). The Data.bin collections have the shapes in
+R2-ASSET-320. — R2-ENGINE-1512, R2-ENGINE-1514, R2-ASSET-316, R2-ASSET-320
 
 **Type 9.** Mode below 4 with a nonzero cell, mode & 8 (a unit's spellbook, keyed by unit) and mode & 4 take
 separate arms. The grammar and the first two arm tests are read in the committed stage windows; the mode & 4

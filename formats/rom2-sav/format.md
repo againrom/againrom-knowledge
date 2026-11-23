@@ -1568,7 +1568,7 @@ The server expiry decrements +0x42 unless it is above 9600 and sends
 0x89 at 0; for a continuous Effect it also calls slot +0x40 at every eighth
 step. Which duration an attached Poison Cloud Effect
 holds, and whether the single-target delivery object attaches its Effect,
-are Unknown. A Light or Darkness Effect holds duration 16 at cast (R2-ENGINE-1236; Unknown after renewal). In the
+are Unknown. A Light or Darkness Effect holds duration 16 at cast (R2-ENGINE-1236; in EN the Effect ends before the next pulse, R2-ENGINE-1534, Medium; renewal holds only for several cells of one unit within one pulse). In the
 EN saves game0004..0006 the hero holds Shield (+0xc 27, +0xe 62, durations
 563, 302 and 50) and, in game0005, Haste (21, 50, duration 196); a player-7
 unit holds Shield. Its u16 +0x40 is 5 for the hero's Shield, 14 for player 7's
