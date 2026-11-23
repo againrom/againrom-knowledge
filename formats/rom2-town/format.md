@@ -539,6 +539,23 @@ The writer of +0x1c remains Unknown (`R2-ENGINE-580`). The heading test `L2.0294
 
 The sheet is the same in RU (`L2.02952`, masked-equal over all 1,250 instructions). Its grade gates the field groups: the headings at every grade; Health and Mana at 1; Sight and Speed at 2; Damage and Attack (or line 118 for a +0x188 object) at 3; Absorption and Defence at 4; Body, Agility, Mind and Spirit at 5; heading 28 and resistances 41..45 at 6; the skill heading and five skill rows at 7; at exactly 7 Weight and Experience, 190 or 191 by the flags above (`R2-ENGINE-1268`, High).
 
+The damage group at grade 3 draws Attack as the signed word +0x152 of the displayed object and Damage as the bytes +0x154 and +0x155 as (a', a' + b'): when bit 0x80 of a is set and flags +0x1b8 & 0x11 is zero, a' is 15 times the low seven bits of a and b' is 15 times b, else a' = a and b' = b; with flags & 2 set the numbers come from the +0x188 object and line 118 instead (`R2-ENGINE-1607`, High for the sheet's reads and arithmetic; Medium for the tie of the client bytes to the server bytes +0xb4/+0xb5 and for the flags object being the displayed object with +0x1b8 & 0x11 clear). For the ROM2 Units rows, with attackKind -1 on 165 rows and 3 on 15, the decode gives, at Medium, the row's min and max on 167 rows; these 12 rows would show other digits and F_Skeleton.5, whose max is below its min, has no model (`R2-ASSET-343`, High for the stored table, Medium for the sheet column):
+
+| Row | attackKind | Row min..max | Sheet min..max |
+|---|---:|---|---|
+| Goblin_Pike.5 | -1 | 131..262 | 120..240 |
+| Orc_Sword.5 | -1 | 262..517 | 255..510 |
+| Orc_Bow.5 | -1 | 197..393 | 195..390 |
+| Ogre.5 | -1 | 655..910 | 645..900 |
+| Troll.5 | -1 | 492..747 | 480..735 |
+| Dragon.5 | -1 | 328..492 | 315..465 |
+| Orc_Shaman.5 | -1 | 131..262 | 120..240 |
+| F_Zombie.5 | -1 | 197..393 | 195..390 |
+| A_Skeleton.5 | -1 | 197..393 | 195..390 |
+| Wolf.5 | -1 | 131..262 | 120..240 |
+| Spider.5 | 3 | 131..262 | 45..2010 |
+| Dino.5 | -1 | 262..517 | 255..510 |
+
 The grade is half the byte at the viewer's client copy +0x3f70 indexed by the unit's word +0x1dc (copied from the server word +0x14c by one client update) for words 1..0x9ff, else 0; it is 7 when the owner key is 0, when the relation word for the owner has value 0x8 set, or under #show map. A counted kill adds 1 to the killer's Player byte for the victim's word up to 14, and every even value is sent to the client copy, so a never-fought creature without an override shows the headings only and each two kills open the next group, all groups at 14 kills (`R2-ENGINE-1269`, Medium: a composition). The key is the serverID, not the type or face: Units rows sharing a typeID and face have distinct raw serverIDs and keep separate grades unless their low WORDs match; the low WORDs, including those of the 23 raw serverIDs outside 1..0x9ff, were not computed (`R2-ENGINE-1274`, Medium). Unknown: the owner key of placed wild creatures; a key of 0 would make their card always complete.
 
 A dialogue page with a portrait calls face builder `L2.02950` once, at `L2.02964`, with a number from the unread part parser `R2.0048`. The builder resolves the actor through `R2.0071`, building a fallback actor (flags 0x56, +0x28 = number-0x50) when no unit matches; flags 0x11 select the paperdoll slot +0x88 under `graphics\equipment\<mfighter|mmage|ffighter|fmage>\`, other actors `graphics\infowindow\<name><+0x28>.bmp`. The drawn frame and crop remain Unknown (`R2-ENGINE-582`, High / Medium / Unknown). The gate refusal `plagatguard` (npc=97) has no installed row; if no live unit carries 97, its face is the fallback's `equipment\fmage\17.256` (`R2-ENGINE-583`, Medium).

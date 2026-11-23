@@ -226,6 +226,49 @@ hit, in two runs (High); a single restart near the entry's computed end is
 derived (Medium). The absence of a select hit is not evidence for or against a
 track end. — R2-ENGINE-1099
 
+## Track at each screen change
+
+Every row is a call the bodies make, in order; each lists the player methods
+only. The screen bodies (R2-ENGINE-335) and the mission-end stop test the
+music-available word; the cutscene stop does not. Each row was read in EN. RU
+was read for the cutscene body, the 0x42d and 0x41d arms, mission end, fail
+cleanup, the fade callback and method, the LOAD entry and the first 40
+instructions of mission entry; the RU helpers, the 0x430 arm and mission entry
+after its mode test were not read. Audible output was not observed in any
+row.
+
+| Case | Step | Player call | Track after the step |
+|---|---|---|---|
+| Leave a town by the gate | gate click, message 0x42d | none; the DLL's type-2 leave output stays -1, so no movie (R2-ENGINE-1640) | the square track, unchanged |
+| | map body | set list stops the player, selects entry 0, start | `map.wav` from its first byte, repeating (R2-ENGINE-1641, R2-ENGINE-335) |
+| | travel end, message 0x468 | mission entry: stop, set list B00..B16; or the town body | a mission list, or the town key restarted from byte 0 (R2-ENGINE-1641) |
+| Movie | cutscene body entry | stop (a call), before the movie-enable test | none; the movie's own sound; the buffer is paused only while the hold flag is clear (Medium) (R2-ENGINE-1636, R2-ENGINE-1637) |
+| | after the batch | no start call found in the bodies read | none until the next screen's request (R2-ENGINE-1637) |
+| Victory | mission end (needs the music-available word and bit 0 of application +0x404, RU +0x41c) | stop | none |
+| | transition, LeaveLocation | none | none |
+| | movie | stop again | none |
+| | next screen | credits, mission entry, town body or map body | `credit.wav`, a mission list, a town key or `map.wav` (R2-ENGINE-1642, R2-ENGINE-422) |
+| Loss | fail cleanup, mission end (needs the music-available word and bit 0 of application +0x404, RU +0x41c) | stop | none |
+| | post 0x421 | menu body: set list, start | `menu.wav` from its first byte (R2-ENGINE-1643) |
+| Fade | the screen changes read | no fade call (direct-call scan, Medium); stop, then set list and start in one handler | the next track at once (R2-ENGINE-1639, R2-ENGINE-1638) |
+| Load, mission save | mission entry(1) | stop, set list B00..B16, area select, start | a theme of the area at the restored position (observed on one EN save; the same-key branch is read, not observed) (R2-ENGINE-1645, R2-ENGINE-1096) |
+| Load, town save | town body | key of the town ID; set list and start unless the key is at element 0 | `b14`, `b16` or `b15` (observed on one EN save; the same-key branch is read, not observed) (R2-ENGINE-1645, R2-ENGINE-1097) |
+| Load, failed | post 0x421 | menu body | `menu.wav` (R2-ENGINE-1644) |
+
+The movie Fading ramp scales a 0x300-byte table frame by frame and calls no
+player method. — R2-ENGINE-1638
+
+Other ways a town is left (the senders of 0x42f, 0x457 and 0x468, message
+0x436) were not read; the music and movie at those exits are Unknown. Closing
+the inn called start only in one EN run; a shop close and other rooms are not
+read. — R2-ENGINE-1641, R2-ENGINE-1098
+
+In the bodies read in both clients, EN and RU differ in application-field
+displacements, the address of the music-available word and, outside the
+campaign mode, in a RU branch of the 0x41d arm; no difference in player calls,
+keys or order was found there. The first teleport member of `video.res` differs by hash between the
+locales; `music.res` is equal. — R2-ENGINE-1645, R2-ENGINE-1644
+
 ## Settings
 
 | Registry value | Meaning | Default |
@@ -383,7 +426,9 @@ plays sound itself is Medium.
 | 0x436 | cutscene |
 | 0x45c, 0x45d | mission end |
 
-The table is the dispatcher's own calls; other callers exist. RU makes the
+The table is the dispatcher's own calls; other callers exist. The 0x42d arm
+contains the cutscene call, but its condition is never met for a type-2
+record, so the call does not run in the arm (R2-ENGINE-1640). RU makes the
 same calls for the targets scanned (cutscene and logos were not scanned in
 RU) and also calls mission end for 0x48e. Arm boundaries and the meaning of location kind 1 are Medium.
 — R2-ENGINE-918
@@ -410,7 +455,8 @@ R2-ENGINE-834
 Audible output, the complete 0x451 sender events, complete indirect
 screen inventory, panel layout and RU tune-name build remain Unknown. So do
 the fault result for an unknown town ID, which archive wins a shared name,
-the RU readiness helper and the order of mission-end music and a movie.
+the RU readiness helper, what sets bit 0 of application +0x404 (which gates
+the mission-end stop) and whether a screen change fades the display.
 Both client byte scans find six/eight/ten rel32 set-list/start/stop
 candidates. This is a byte census with Medium completeness; computed
 pointers and other jump routes were not closed.

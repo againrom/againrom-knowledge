@@ -163,3 +163,51 @@ the first, attaches again (a unit on several cells of one pulse renews one Effec
 after the last pulse it returns for good (R2-ENGINE-1534, R2-ENGINE-1165, Medium; the RU twins are unread; no
 census of other callers of the timer slot).
 The per-class amount stays as in R2-ENGINE-1242.
+
+## Acid Stream by heading and at the map edge
+
+The RU heading d is bits 5..7 of the byte `L2.02635` returns: an octant from the offset between caster and
+target by slope thresholds 1/2 and 2, equal sides and a zero offset going to a diagonal (a zero offset to heading 7)
+(R2-ENGINE-1545, High for the RU instructions read except the one at `L2.08087`, whose continuation to the tail for
+sectors 4 to 7 is Medium; Medium for the position getters and the EN twin). Cells of pulse p around
+the origin (x, y), p = 0..4 for the straight headings (pulse 5 is empty) and p = 0..5 for the diagonal ones:
+
+| d | Cells of pulse p | Claim |
+|---|---|---|
+| 0 | (x+i, y-p), i = -p..p | R2-ENGINE-1546 |
+| 1 | (x+(p-i), y-i), i = 0..p | R2-ENGINE-1546 |
+| 2 | (x+p, y+i), i = -p..p | R2-ENGINE-1546 |
+| 3 | (x+(p-i), y+i), i = 0..p | R2-ENGINE-1546 |
+| 4 | (x+i, y+p), i = -p..p | R2-ENGINE-1546 |
+| 5 | (x-(p-i), y+i), i = 0..p | R2-ENGINE-1546 |
+| 6 | (x-p, y+i), i = -p..p | R2-ENGINE-1546 |
+| 7 | (x-(p-i), y-i), i = 0..p | R2-ENGINE-1546 |
+
+A cell whose byte x or y is below 8 or above the map's size field minus 9 is skipped whole: no packet, no occupant
+call, no damage; the other cells are unchanged, and no cell is clamped or shifted (R2-ENGINE-1546, High for the RU
+body, Medium that the two fields are width and height and for EN, whose cone also differs at pulse 2, R2-ENGINE-797).
+The origin (x, y) is the stage's origin byte pair; whether it is the target cell or the caster's cell plus an offset of
+R2-ENGINE-810 is not read here (Unknown), so the table does not give which map cells are hit.
+
+## Stone Curse reach by object class
+
+The point apply attaches the Effect to a target whose class slot `+0x2c` is true (Unit, Humanoid, Human) and also to
+one whose slot `+0x34` is true: Building and Pointer reach the attach, Token is refused. The slot `+0x2c` bodies of the Unit and Human vtables are `mov eax, 1; ret` (R2-ENGINE-1565, High for the
+slot bodies). A ROM2 mage restores max*(M+100)*K/D hundredths of mana per 16-tick pass, M the `+0xe2` value and D the
+Units MP regeneration (R2-ENGINE-1566, High for the formula, Medium for the source of M and the Human D join, Unknown for D 0).
+A Building's actor slots do
+not walk its Effects, so no timer end is read for it; Token slot `+0x34` returns 0 here and slot `+0x2c` by R2-ENGINE-811,
+and the class sizes are those of R2-ENGINE-517 (R2-ENGINE-1550, High for the slots, Medium for the composition
+and for whether a cast request can select such a target). The hold is the actor mask of R2-ENGINE-454 and R2-ENGINE-786.
+State 16, which makes the actor step skip its Effect walk (R2-ENGINE-786), is stored by two immediate `mov` stores per
+root with displacement 0x54, both on the death path; a unit removed from play is not given it among those stores (RU
+linear decode of `.text`; EN immediate-0x10 form only). Register stores (29 in RU, 27 unread), other store forms and the
+EN register stores are not read (R2-ENGINE-1547, High for the sites, Medium that no other writer exists).
+
+## Strike refusal
+
+The RU unit strike refuses a blow from a non-mage Human-kind attacker of attack type other than 5 against a movementType 3 target, and from any attacker for a missing party or owner, health at or below 0 or a range below the distance (R2-ENGINE-1605, Medium that a Human's attack type byte is the weapon's attackType; the EN strike body has no such test, EN behaviour Medium).
+
+## Idle-mage casting
+
+A player mage on order 0x17 casts support spells in the part of the RU body read (R2-ENGINE-1627); the per-cell application of an area effect is R2-ENGINE-1537.

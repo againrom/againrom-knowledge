@@ -4396,6 +4396,45 @@ equality.
 
 **Evidence.** EXP-2182 `generated-itemname/`; `evidence/itempkt.py`.
 
+## ROM2 Spells delivery and speed, Units MP regeneration, and the building casters of maps 72 and 81
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-333 | EN world.res Spells: Delivery 2 on rows 1, 2, 5, 10, 11, 16, Effect Speed 200, 384, 200, 60, 60, 200; Max Range 0..10; Units MP regeneration 0 on 114 of 180 rows, 50..150 on 66 (one run, tables not reproduced). | High / Medium | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
+| R2-ASSET-334 | The 27 building-caster records of map 72.alm (equal in EN and RU) have radius +0x00 of 5 (10), 6 (15), 7 and 8, spells 10 (7), 2 (6), 16 (5), 6 (5), 5 (2), 18 (2) and power 255, 30 or 50; map 81.alm holds 3 (radius 8, 6, 6). | High | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
+
+### R2-ASSET-333
+
+Input: EN `world.res` `data/data.bin` (full SHA256 `aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`), grammar
+of the EXP-2144 probe, group H (Spells, 29 rows; `world.res` is the same file in both roots by R2-ASSET-178). Column c of a row carries
+title c + 1. Columns used (row, name, Complication, Mana Cost, Delivery, Max Range, Effect Speed): 1 Fire Arrow 3, 3, 2, 7, 200;
+2 Fire Ball 10, 30, 2, 10, 384; 5 Ice Missile 3, 3, 2, 7, 200; 10 Lightning 10, 10, 2, 7, 60; 11 Prismatic Spray 20, 80, 2, 7, 60;
+16 Diamond Dust 3, 3, 2, 7, 200. The other 23 rows have Delivery System 1 and Effect Speed 0, except rows 20, 21, 28 and 29
+(Bless, Haste, Curse, Slow) with -1. Max Range over the 29 rows: 7 10 6 5 7 6 10 5 3 7 7 5 5 6 6 7 6 5 5 5 5 5 1 6 0 7 0 5 5
+in row order (0 on Summon and Shield, 1 on Teleport). The titles name Delivery System, Max Range and Spell Effect Speed
+(by title; the meaning of a column is by its title and by the cast routine's reads, R2-ENGINE-1567).
+
+Units group E, the column titled "MP regeneraton" (column 7): 180 rows, 0 on 114, 50 (1 row), 73 (16), 80 (5), 81 (11), 90 (7), 100 (16), 109 (4), 122 (2), 135 (2),
+150 (2). The "HP regeneraton" column (column 5) holds 0 to 200. The Humans group F has no column whose title holds "regen" (0 columns).
+The Units rows' value is the divisor `+0x9e` through the stat reader of R2-ENGINE-777.
+
+**Confidence.** High for the values from one generation run; the table reads were not reproduced (a whole-file parse with no residue; EN only; RU world.res is equal by R2-ASSET-178). Medium for the
+column-to-engine-field binding of Effect Speed and MP regeneration (by title and by the reads of R2-ENGINE-1567 and R2-ENGINE-777).
+
+**Evidence.** [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) question 3.
+
+### R2-ASSET-334
+
+Derived from the committed type-9 table of R2-ASSET-230 (`type9-bit2.tsv`, columns `+0x00`, x, y, mode, key, spell byte `+0x16`, power byte `+0x18`), no new
+read of the maps. Map `72.alm` of `scenario.res`: 27 mode-4 records in both roots (the rows are equal in EN and RU). Radius `+0x00`: 5 on 10 records, 6 on 15, 7 on 1, 8 on 1.
+Spell rows (R2-ENGINE-1009): 10 Lightning on 7 (radius 6 on 5, 5 on 2), 2 Fire Ball on 6 (5 on 4, 6 on 2), 16 Diamond Dust on 5 (6 on 4, 5 on 1), 6 Poison Cloud on 5 (6 on 3,
+5 on 2), 5 Ice Missile on 2 (radius 8 and 7), 18 Stone Curse on 2 (radius 6 with power 50, radius 5 with power 30). Power 255 on the other 25. Map `81.alm`: 3 records, radius 8
+with spell 8 (power 99), radius 6 with spell 14 (99), radius 6 with spell 2 (99).
+
+**Confidence.** High for the counts (a derived tally of a committed table, EN equals RU on the sorted rows for map 72).
+
+**Evidence.** [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) question 1.
+
 ## ROM2 Units healers and break-off thresholds
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -4484,3 +4523,49 @@ listings), before the template load. So a Human and a Humanoid have kind 1 unles
 is taken from R2-ENGINE-319, and no census of every writer of byte +0x4a was made.
 
 **Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1.
+## ROM2 Units rows: damage digits the sheet derives
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-343 | Of 180 ROM2 Units rows (EN equals RU) 165 carry attackKind -1 and 15 kind 3; the R2-ENGINE-1607 decode, at Medium, gives the row's min and max for 167 rows, other digits for 12 (Spider.5 45..2010 if flag clear), none for F_Skeleton.5. | High / Medium | ● active | [EXP-2193](../experiments/EXP-2193-rom2-combat-stats/RESULTS.md) |
+
+### R2-ASSET-343
+
+Both roots' `world.res` hash to `863b15ce6a304263d9ed97ca14426db42e07825b91165b39d5adf4054d9dd8a9` and the table
+`data/data.bin` inside to `aa9952354f1cbc4329528dff49ed4a6d9c875877b3ce22fe2a1c48b12d3b84d6`. The Units table
+has 241 entries, 61 without values and 180 rows. By column title, attackKind is -1 on 165 rows and 3 on 15 rows
+(Bat_Sonic, Bee and Spider, five levels each); no row carries 1 or 2. The RU count of R2-ENGINE-483 is extended to EN: both locales equal. The derived tables
+`evidence/generated/data/{en,ru}-units-card.tsv` (selected columns per row) and `{en,ru}-card-damage.tsv` are equal
+between the roots apart from the locale column.
+
+Stored bytes follow R2-ENGINE-483 (kind -1: raw min and spread when min < 128 and spread <= min + 255, else
+min(min/15, 127) | 0x80 and min(spread/15, 255); kind 3: raw) and the sheet decodes them as R2-ENGINE-1607
+(truncating division). Result: 153 of 165 kind -1 rows and 14 of 15 kind 3 rows read as the row's min..max; F_Skeleton.5
+(min 262, max 197, spread -65) has no model here; these 12 rows would differ (Medium):
+
+| Row | attackKind | Row min..max | Sheet min..max |
+|---|---:|---|---|
+| Goblin_Pike.5 | -1 | 131..262 | 120..240 |
+| Orc_Sword.5 | -1 | 262..517 | 255..510 |
+| Orc_Bow.5 | -1 | 197..393 | 195..390 |
+| Ogre.5 | -1 | 655..910 | 645..900 |
+| Troll.5 | -1 | 492..747 | 480..735 |
+| Dragon.5 | -1 | 328..492 | 315..465 |
+| Orc_Shaman.5 | -1 | 131..262 | 120..240 |
+| F_Zombie.5 | -1 | 197..393 | 195..390 |
+| A_Skeleton.5 | -1 | 197..393 | 195..390 |
+| Wolf.5 | -1 | 131..262 | 120..240 |
+| Spider.5 | 3 | 131..262 | 45..2010 |
+| Dino.5 | -1 | 262..517 | 255..510 |
+
+**Confidence.** High for the row values and counts as stored in the table, both locales read. Medium for the sheet
+column: it assumes the client bytes +0x154/+0x155 equal the server bytes +0xb4/+0xb5 and that the sheet's flags
+object is the displayed object and its +0x1b8 & 0x11 is zero for a Units-row creature (R2-ENGINE-1607: the
+committed typeID column avoids the types R2-ENGINE-805 reads, about 30 other stores of +0x1b8 are unread, and kind 3
+sets server unit flag 0x10, R2-ENGINE-483, whose client counterpart is unread; for the 15 kind-3 rows the sheet
+would show the raw bytes if it is, and Spider.5 would not show 45..2010), and it rests on R2-ENGINE-483 (RU
+reader; EN not read).
+F_Skeleton.5 stores a max below its min in the table; the reader's byte store of a negative spread is not modelled.
+
+**Evidence.** [EXP-2193](../experiments/EXP-2193-rom2-combat-stats/RESULTS.md) question 1; programs
+`evidence/units_columns.py` over the grammar of `evidence/data.py` and `evidence/card_damage.py`.

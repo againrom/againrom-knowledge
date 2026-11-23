@@ -202,6 +202,8 @@ fields' readers and the repeat behaviour are the rows below.
 
 ## Health and hostile post-step
 
+The unit strike returns without a blow when a party or owner is missing, the attacker's health is not above 0, or its range byte +0x12c is below the distance; in RU it also returns when a non-mage Human-kind attacker whose attack type byte is not 5 meets a target of movementType 3 (Bat_Sonic, Dragon, Succubus rows); the EN strike body has no such test (the EN distance and callers are unread, so EN behaviour is Medium). The strike has no refusing test on the target's maximum-health word or health; it reads the target's health word to subtract the damage and to gate the notification (R2-ENGINE-1605, High for the body; the damage body is unread, Medium; Medium that a Human's byte +0xb6 is the weapon's attackType). In RU the Human threshold setter has one direct call site, in the template loader tail; a Unit takes nothing from it (R2-ENGINE-1606, Medium that a Human reaches that loader; other writers of the command fields stay Unknown, R2-ENGINE-1001).
+
 | Input/state | Rule | Claims and clause grades | Unknowns |
 |---|---|---|---|
 | Each member after programme route | Health <= command +0x44 and hostile within movement byte +8 + 5 (10 cells; the Teleport arm lists 5 cells): flee. Otherwise health <= +0x40 and hostile within 2: back-off helper L2.02451. | R2-ENGINE-506 High predicates, Medium helper destination; R2-ENGINE-877 Medium bounded route independence; R2-ENGINE-1440 radius | All threshold writers; units outside this Group post-step |
@@ -266,7 +268,7 @@ are in R2-ENGINE-1536; Fire Ball hits a multi-cell unit once per covered cell (R
 
 The orders page's static continuation adds bounded clauses. The selector calls
 the stop chain for order 3 when the target's +0x54 is 0x10 (R2-ENGINE-1121; the
-order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium)
+order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium; orders 8 and 0x11 are tested alike and the cast orders 0xd and 0xe are not, R2-ENGINE-1548; the immediate stores of 0x10, mov with displacement 0x54, are two per root and on the death path, register and other store forms unread, R2-ENGINE-1547, amending R2-ENGINE-1121)
 and stops order 1 on the +0x90 arrival flag at the destination
 (R2-ENGINE-1121). The attack planner stores no order; with target +0x4c bit 8
 set it runs the idle planner, and with a null or self target it first takes the
@@ -483,9 +485,11 @@ at its maximum after the remainder is stored. With the defaults 100 and 50
 and modifiers 0 each restoration adds 2 % of the maximum. K is 3 when
 Session +4 minus the unit's stamp +0x138 exceeds 80, else 1; the move step,
 the strike senders and three further senders, called from the address range
-of the cast routine, set the stamp. Effect tag 8 adds to +0xde without a
-clamp; tag 11 adds to +0xe2 under an unread test (Medium) (R2-ENGINE-1206;
+of the cast routine, set the stamp; a cast through the unit sender stamps it, so K is 1 for 5 passes after a cast (Medium: 5 or 6 by tick order) and the restoration does not pause; a move or strike also stores a stamp, so K stays 1 while a unit keeps moving or striking (R2-ENGINE-1565). Effect tag 8 adds to +0xde without a
+clamp; tag 11 adds to +0xe2 only for a unit with mask 4 of +0x4c (named the mage bit, Medium) (R2-ENGINE-1564, R2-ENGINE-1206;
 formulas High, sender meanings and writer completeness Medium).
+
+An item's tag 11 value M adds M percent to the mana rate of a mage: each pass restores max * (M + 100) * K / D hundredths, D being the Units row's MP regeneration when the reader stores it (114 of 180 EN rows hold 0 and the effect of a 0 on D is Unknown), so an item of M 50 turns 2 % of the maximum per pass (D 50, K 1) into 3 %; the interval is the world pass of 16 session ticks (R2-ENGINE-1566).
 
 A unit with +0x54 = 0x10 or with health 0 or below restores nothing; below 0
 the refill takes 1 health on one pass in four, and corpse ageing lowers
@@ -621,7 +625,7 @@ Complication byte on a book cast and 0 on an item or staff cast. In the arms and
 weapon equip write the table values (its handling of -1 is unread), unequip restores 8 and 4, and one unit builder
 writes 1 and 1; the writer census covers direct operands only. The apply's
 common suffix builds the effect object and adds it, or its projectile, to a
-world list; the step at which the effect lands is Unknown. R2-ENGINE-1260 (High
+world list; a Delivery 2 spell's effect object enters the effect list max(1, floor(distance / Effect Speed)) steps after the apply (Medium cadence; the effect object's own step is Unknown), a Delivery 1 spell's at the apply, and the walk to range is Unknown (R2-ENGINE-1567, R2-ENGINE-1568, R2-ENGINE-1569). R2-ENGINE-1260 (High
 stores, Medium completeness), R2-ENGINE-1261 (High expression, Medium names),
 R2-ENGINE-1262 (High step table, effect step Unknown), R2-ENGINE-1263 (High
 terms, Medium column bindings).
@@ -634,6 +638,12 @@ The bodies of the numbers no installed map uses are read in R2-ENGINE-1450, exce
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472); the full tables are on the route page.
 
+A map building caster lists the units within its record radius of its cell, Chebyshev (Medium), 1 to 9 cells, with no range compare against the spell (R2-ENGINE-1560). It starts a cast once per 16 session ticks (whether the built unit repeats its cast is Unknown) through a built Unit that casts from state 13 with wind-up 1 and recovery 1 (R2-ENGINE-1561, R2-ENGINE-1562). It stops when the resolver is called with a blow or Blizzard value not below the building's health; no other route is shown to stop it (R2-ENGINE-1563). The Delivery 2 spell rows and Effect Speeds are in R2-ASSET-333.
+
 ## Computer-unit gaps
 
 A struck ROM2 unit rewrites six command fields and posts a 0x54-byte record to the session list. The look-around is the one reader of command +0x54 found in the census (Medium), and no reader of a record was found in the chain that destroys the list (Medium) (R2-ENGINE-1491, R2-ENGINE-1492, R2-ENGINE-1262, R2-ENGINE-1451). Guard B reads the hit stamps in session ticks and in blocks of 16 ticks, and Guard A reads none of the hit fields (R2-ENGINE-1493, R2-ENGINE-1494). No body read chooses a point for an area spell: the aim is the victim unit or the victim's cell (R2-ENGINE-1490). Two scorers rank candidates, and of the effect words they read only bit 0x40000 of +0x144; an effect that changes the Mind word, the range or the virtual kind is not excluded (Medium) (R2-ENGINE-1495, R2-ENGINE-1496). The group assignment targets every member of the group with no idle test (R2-ENGINE-1497). A flee without Teleport walks, and an empty route ends in a stop and order 0xc at the unit's cell (R2-ENGINE-1498). A withdraw message sets v = 0, 10 or 30 for the owner object that message word +5 resolves to (that the word names a sender is Medium), and the outer message type, the sender and the control are Unknown (R2-ENGINE-1499, R2-ENGINE-1421). The numbers are in the area hit numbers table of the behavior page.
+
+## Player orders in play
+
+In the RU body, at Medium for play, a player's guard sets the group radius of R2-ENGINE-1621 on one path; whether that path or the unit-level order 0xb governs in play is Unknown (R2-ENGINE-1620, R2-ENGINE-1622). A pick-up order walks to a ring-searched cell; what takes the item is Unknown (R2-ENGINE-1183, R2-ENGINE-1625, R2-ENGINE-1626). Orders 0xc and 0x17 stand until another write in the bodies read (R2-ENGINE-1627). An idle mage casts by the arm table (R2-ENGINE-1628, R2-ENGINE-1629) and the look-around draws a heading (R2-ENGINE-1630). A patrol unit stays and retries at an unreachable point (Medium composition; R2-ENGINE-1624). A Fire Ball is applied once per covered cell of its square (Medium; R2-ENGINE-1537).

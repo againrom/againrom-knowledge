@@ -109,6 +109,7 @@ idle wrapper. The order-2 branch prepares movement while destination differs
 and an arrival order when equal. It does not directly call human support.
 Named hold and retreat input bindings and other support events while visibly
 walking remain Unknown. — R2-ENGINE-398
+Among the RU input cells read no order is a hold (Medium; EN not read). — R2-ENGINE-1627
 
 Actor state 16 exits the acquired actor step. Its living branch requires
 positive health; actor+0x3c = 0 makes the acquired command-skip predicate true.
@@ -295,10 +296,19 @@ mask bit 0x40000 is absent. A cast passes init, routine try, wind-up and
 recovery; mana subtraction is once per call that reaches delivery, with
 zero-return reachability still open. Wind-up lasts byte +0x134 actor steps
 with the apply in its last step, and recovery the count of R2-ENGINE-1261;
-the step at which the effect lands is Unknown (R2-ENGINE-1262). Movement local flow in L2.02848 and
+a Delivery 2 spell's effect object enters the effect list max(1, floor(distance / Effect Speed)) steps after the apply (steps counted until the effect object enters the effect list, Medium, one step per session tick assumed; the effect object's own step is Unknown) and a Delivery 1 spell's at the apply
+(R2-ENGINE-1262, R2-ENGINE-1567, R2-ENGINE-1568, R2-ENGINE-1569). Movement local flow in L2.02848 and
 L2.01578 is acquired; unread callees still prevent guaranteed movement.
 — R2-ENGINE-543, R2-ENGINE-544, R2-ENGINE-545, R2-ENGINE-546,
 R2-ENGINE-556, R2-ENGINE-1261, R2-ENGINE-1262
+
+Delivery 2 flight steps, floor(distance / Effect Speed) with a minimum of 1, at 256 position units per cell, counted until the effect object enters the effect list (Medium). The rows 10 and 11 are Medium: the delay word 5 sent for these rows has unread receivers, and the figure holds if the word does not act:
+
+| Spell row | Effect Speed | Adjacent (256) | Adjacent diagonal (362) | 7 cells (1792) | Claims |
+|---|---|---|---|---|---|
+| 1 Fire Arrow, 5 Ice Missile, 16 Diamond Dust | 200 | 1 | 1 | 8 | R2-ENGINE-1568, R2-ASSET-333 |
+| 2 Fire Ball | 384 | 1 | 1 | 4 | R2-ENGINE-1568, R2-ASSET-333 |
+| 10 Lightning, 11 Prismatic Spray (Medium) | 60 | 4 | 6 | 29 | R2-ENGINE-1568, R2-ASSET-333 |
 
 A zero +9 alone does not guarantee new-order dispatch. The executor entry
 must admit the unit, the effect-mask test must not reinstall hold, and +8

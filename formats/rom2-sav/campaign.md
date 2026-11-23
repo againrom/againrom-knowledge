@@ -852,6 +852,14 @@ The lookup is a substring search that takes the first occurrence, so
 which draws no text. A key found nowhere leaves the name empty and the
 text block undrawn. — R2-ENGINE-462
 
+Each line is drawn with the centre flag (EN; Medium for the name's font4 body
+and for RU), so the offset 230 from the paint origin is the line centre; the
+wrap rectangle (70,48)-(390,200) has the same centre (Medium: the wrap body is
+unread). The name and the description lines take their ink from the fifth draw
+argument (Medium): palette 0 of the table object for the name and a global
+palette object for the description lines; the colours are unread (Unknown).
+— R2-ENGINE-1653, R2-ENGINE-1654
+
 EN and RU run the same bodies with the same resource names; the text
 files differ in bytes and share their keys. — R2-ENGINE-435
 
@@ -892,3 +900,34 @@ R2-SESSION-367, High transfer request / Medium persistence). Raw bank restoratio
 examples establish no first-frame town roster or party. The prior delivery/LOAD Unknowns
 remain (R2-SESSION-158, R2-SESSION-195, amended; R2-SESSION-366, R2-SESSION-367,
 R2-SESSION-368).
+
+## Campaign flow summary
+
+The Grade column is the weakest cited input. A row marked "when the bank gate is set" adds
+its record only when that bank slot is nonzero; the movie is played only when the movie
+global is nonzero (R2-ENGINE-423).
+
+| After completed mission | Availability and party change | Departure movie | Grade | Claims |
+|---|---|---|---|---|
+| 10 | record 20 offered | teleport | High | R2-ENGINE-146, R2-ENGINE-423 |
+| 20 | town 2 offered; record 21 offered when the bank gate (slot 772) is set; hire 1 with town 2 | none | Medium | R2-ENGINE-146, R2-ENGINE-380, R2-ENGINE-1592 |
+| 30 | none by the departure | stars | High | R2-ENGINE-146, R2-ENGINE-423 |
+| 40 | records 50 and 60 offered; identity 23 requested | none | Medium | R2-ENGINE-146, R2-ENGINE-379, R2-ENGINE-1592 |
+| 50 | town 3 offered; record D2.00015 offered when the bank gate (slot 780) is set; hire 3 with town 3 | none | Medium | R2-ENGINE-146, R2-ENGINE-380, R2-ENGINE-1592 |
+| 60 | record 80 offered; hire 6 with town 2 | none | Medium | R2-ENGINE-146, R2-ENGINE-380, R2-ENGINE-1592 |
+| 70 | hire 4 with town 3 | crown after the second of 70 and 80, when the bank gate is set | Medium | R2-ENGINE-380, R2-ENGINE-423, R2-ENGINE-1592 |
+| 100 | hire 7 with town 2 | none | Medium | R2-ENGINE-380, R2-ENGINE-1592 |
+| 110 | Hall row added at stage768 120 or more, else the next record or the map | output 4 (knights) or 5 (druids), then credits, Hall and menu | Medium | R2-ENGINE-422, R2-ENGINE-1593 |
+
+At stage 30, before mission 30 is completed, the inn offers NPC 22 (TALK topic 30), requests
+identity 22 and enables hire 2 with town 2 (R2-ENGINE-380, R2-ENGINE-637, R2-ENGINE-1592,
+Medium; R2-ENGINE-380 states this is not a rule that mission 30 occurred). No cited claim
+states which mission sets stage 40 or stage 120.
+
+Leaving a town through a gate adds no record (R2-ENGINE-1592, R2-ENGINE-144). A death selects
+failure cache entry 2 for the hero and identity 21, 3 for identity 22, 4 for identity 23;
+hires send nothing (Medium, R2-ENGINE-525); missions 10, 20, 30, 32 and 40 take general rows
+for entries 3 or 4 (R2-ENGINE-1591). Four of ten callees of the victory transition's first
+loop are lookups, one (L2.00830) is a probable bag item remover that was not followed and is a
+candidate bag writer; the bag and worn items across victory stay Medium (R2-ENGINE-1590).
+Saves possible after the ending are Unknown (R2-ENGINE-1593).

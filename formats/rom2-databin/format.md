@@ -248,7 +248,7 @@ both locales (R2-ASSET-327):
 The Humans table has MovementType -1 in all 284 populated rows (R2-ASSET-328). The engine's occupant kind
 is byte +0x4a, read through virtual slot +0x20 of Unit, Human and Humanoid and 0 for the other classes;
 the kinds 1 and 2 are written at cell entry +4, kind 3 at +8 and a building at +0xc (R2-ENGINE-1530,
-R2-ENGINE-1532). Medium for the link from the column to the byte and for kind 3 meaning flight.
+R2-ENGINE-1532). Medium for the link from the column to the byte and for kind 3 meaning flight. The movementType 3 rows are the targets of the RU strike refusal (R2-ENGINE-1605, Medium for the column-to-byte tie); attackKind is -1 on 165 rows and 3 on 15, equal in EN and RU (R2-ASSET-343).
 
 ## Blizzard reach and rate
 

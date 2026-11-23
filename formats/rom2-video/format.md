@@ -16,6 +16,13 @@ contracts. R2-ENGINE-073 is partially retracted only for its world-map
 record-choice clause; the clauses here stand. — R2-ENGINE-073, R2-ENGINE-074,
 R2-ENGINE-075
 
+Startup plays `video\logos\publisher.smk` and then `video\logos\nival.smk`
+(EN and RU), then the intro cutscene. A key press, a click or a close in
+either logo ends the logos and skips the intro (Medium: no original ran; the
+movie opener is unread); a failed open counts as finished. The tail runs logos and intro only when the init flag is set and the
+application string holds none of `-startserver`, `-cfg` and `.asl` (Medium).
+— R2-ENGINE-1650, R2-ENGINE-1651
+
 The success report uses general flat text slot 0x8c. The selected startup
 join identifies main.res:text/main.txt row 140 and dialogs.txt rows 43/154.
 Report initialization stores the supplied text pointer and constructs labels
@@ -158,8 +165,15 @@ the destinations are read in EN only; RU is Medium outside the three equal
 player bodies. — R2-ENGINE-1307
 
 Sound plays through the movie library with its own DirectSound choice
-(argument 0) and sound switched on; the game's sound object gets one call
-pair before the batch and one call after it (Medium: pause and resume). A
+(argument 0) and sound switched on. The object at `L2.02992` gets two calls
+before the batch and one after it; they step a counter and update an input
+position, and call no music-player method (R2-ENGINE-1635). The cutscene body
+stops the music player before it tests the movie-enable word, so a disabled
+movie still stops the music, and no start call occurs in the body
+(R2-ENGINE-1636, R2-ENGINE-1637; the unread tails, the movie library and
+indirect calls are not excluded). The town gate exit (message 0x42d)
+plays no movie (R2-ENGINE-1640). The movie's Fading segments ramp a 0x300-byte table frame
+by frame and touch no audio (R2-ENGINE-1638). A
 key press, a left or right mouse press, close or quit ends the player with
 zero, which ends the whole teleport batch. The victory route then
 continues as in the campaign flow, after the same fill (Medium). — R2-ENGINE-1308

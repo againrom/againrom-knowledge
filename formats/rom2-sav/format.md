@@ -261,7 +261,8 @@ is the "extra" list of the paragraphs above; its observed counts in five saves a
 The layout row "ROM2-only object list" and the Unknown "Nonempty Sack/extra restoration" name the same list. — R2-ENGINE-1011
 
 Bytes 0 to 3 of the block are the spell, power and cell bytes of the map record; bytes 4 and 5 are not written by the
-arm. At run time the caster's target is chosen and the cast entry `L2.05951` called on the chosen unit. — R2-ENGINE-1008
+arm. At run time the caster's target is chosen among the units within the record's radius and the cast entry `L2.05951` called
+on the chosen unit, which builds a transient Unit for the cast. — R2-ENGINE-1008, R2-ENGINE-1560, R2-ENGINE-1561
 
 ## Player body
 
@@ -805,6 +806,12 @@ travels in a type-7 record and no label is appended. The save page runs in
 any mode. Delete asks for confirmation and removes the file. The main menu
 disables Load Game when no `game*.sav` exists in that directory.
 — R2-SESSION-179, R2-ENGINE-440, R2-ENGINE-437
+
+Over the immediate stores of the displacement in the EN and RU `.text` (22
+forms), the mode word is stored 2 at two sites only (the new campaign and a
+load path); the other immediate stores are 0, 1 and 3. That the label is
+appended only for a save after those two paths is Medium (R2-ENGINE-440 rests
+on R2-ENGINE-271 at Medium; the driver was not read). — R2-ENGINE-1652
 
 ## Town SAVE writer
 

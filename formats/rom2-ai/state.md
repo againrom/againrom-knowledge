@@ -151,7 +151,7 @@ are in R2-ENGINE-1536; Fire Ball hits a multi-cell unit once per covered cell (R
 
 The orders page's static continuation adds bounded clauses. The selector calls
 the stop chain for order 3 when the target's +0x54 is 0x10 (R2-ENGINE-1121; the
-order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium)
+order-0xc ending of the chain is R2-ENGINE-1020; the meaning of 0x10 is Medium; orders 8 and 0x11 are tested alike and the cast orders 0xd and 0xe are not, R2-ENGINE-1548; the immediate stores of 0x10, mov with displacement 0x54, are two per root and on the death path, register and other store forms unread, R2-ENGINE-1547, amending R2-ENGINE-1121)
 and stops order 1 on the +0x90 arrival flag at the destination
 (R2-ENGINE-1121). The attack planner stores no order; with target +0x4c bit 8
 set it runs the idle planner, and with a null or self target it first takes the
@@ -351,9 +351,9 @@ it, and whether a loaded unit resumes the route is Unknown (R2-ENGINE-1203).
 | Unit +0x94, +0x96 | s16 | Health and its cap | R2-ENGINE-1205, R2-ENGINE-1206 |
 | Unit +0x9a, +0x9c | s16 | Mana and its cap | R2-ENGINE-1205, R2-ENGINE-1206 |
 | Unit +0x98, +0x9e | s16 | Divisors, defaults 100 and 50; +0x98 = 0 stops health | R2-ENGINE-1206, R2-ENGINE-1207 |
-| Unit +0xde, +0xe2 | s16 | Modifiers added to 100; Effect tag 8 adds to +0xde; tag 11 adds to +0xe2 under an unread test (Medium) | R2-ENGINE-1206 |
+| Unit +0xde, +0xe2 | s16 | Modifiers added to 100; Effect tag 8 adds to +0xde; tag 11 adds to +0xe2 only for a unit with mask 4 of +0x4c (named the mage bit, Medium); an item's M adds M percent to the rate | R2-ENGINE-1206, R2-ENGINE-1564, R2-ENGINE-1566 |
 | Unit +0xa2, +0xa3 | u8 | Remainders in hundredths | R2-ENGINE-1206 |
-| Unit +0x138 | u32 | Stamp; K = 3 when Session +4 minus it exceeds 80 | R2-ENGINE-1206 |
+| Unit +0x138 | u32 | Stamp; K = 3 when Session +4 minus it exceeds 80; a cast through the unit sender sets it to Session +4 | R2-ENGINE-1206, R2-ENGINE-1565 |
 
 These are readings of both executables; no run of the original measured a
 restoration. The refill runs once per world pass, every 16 session ticks;
@@ -456,6 +456,16 @@ The bodies of the numbers no installed map uses are read in R2-ENGINE-1450, exce
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472); the full tables are on the route page.
 
+A map building caster lists the units within its record radius of its cell, Chebyshev (Medium), 1 to 9 cells, with no range compare against the spell (R2-ENGINE-1560). It starts a cast once per 16 session ticks (whether the built unit repeats its cast is Unknown) through a built Unit that casts from state 13 with wind-up 1 and recovery 1 (R2-ENGINE-1561, R2-ENGINE-1562). It stops when the resolver is called with a blow or Blizzard value not below the building's health; no other route is shown to stop it (R2-ENGINE-1563). A Delivery 2 cast adds max(1, floor(distance / Effect Speed)) flight steps to the wind-up before the effect object enters the effect list (Medium; the effect object's own step is Unknown) (R2-ENGINE-1567, R2-ENGINE-1568, R2-ENGINE-1569); the spell rows and speeds are in R2-ASSET-333.
+
 ## Computer-unit gaps
 
 A struck ROM2 unit rewrites six command fields and posts a 0x54-byte record to the session list. The look-around is the one reader of command +0x54 found in the census (Medium), and no reader of a record was found in the chain that destroys the list (Medium) (R2-ENGINE-1491, R2-ENGINE-1492, R2-ENGINE-1262, R2-ENGINE-1451). Guard B reads the hit stamps in session ticks and in blocks of 16 ticks, and Guard A reads none of the hit fields (R2-ENGINE-1493, R2-ENGINE-1494). No body read chooses a point for an area spell: the aim is the victim unit or the victim's cell (R2-ENGINE-1490). Two scorers rank candidates, and of the effect words they read only bit 0x40000 of +0x144; an effect that changes the Mind word, the range or the virtual kind is not excluded (Medium) (R2-ENGINE-1495, R2-ENGINE-1496). The group assignment targets every member of the group with no idle test (R2-ENGINE-1497). A flee without Teleport walks, and an empty route ends in a stop and order 0xc at the unit's cell (R2-ENGINE-1498). A withdraw message sets v = 0, 10 or 30 for the owner object that message word +5 resolves to (that the word names a sender is Medium), and the outer message type, the sender and the control are Unknown (R2-ENGINE-1499, R2-ENGINE-1421). The numbers are in the area hit numbers table of the behavior page.
+
+## Strike refusal and threshold setup
+
+The RU unit strike refuses a blow from a non-mage Human-kind attacker of attack type other than 5 against a movementType 3 target, and from any attacker for a missing party or owner, health at or below 0 or a range below the distance (R2-ENGINE-1605, Medium that a Human's attack type byte is the weapon's attackType; the EN strike body has no such test, EN behaviour Medium). In RU the Human threshold setter has one direct call site, in the template loader tail; a Unit takes nothing from it (R2-ENGINE-1606, Medium that a Human reaches that loader; other writers of the command fields stay Unknown, R2-ENGINE-1001).
+
+## State of player orders
+
+In the RU body, at Medium for play, state kept by the guard group, patrol list, pick-up cell and standing orders is in R2-ENGINE-872, R2-ENGINE-1183, R2-ENGINE-1620, R2-ENGINE-1621, R2-ENGINE-1622, R2-ENGINE-1623, R2-ENGINE-1624, R2-ENGINE-1625, R2-ENGINE-1626, R2-ENGINE-1627, R2-ENGINE-1628 and R2-ENGINE-1629; per-cell effect state is in R2-ENGINE-1537.

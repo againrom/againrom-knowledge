@@ -577,17 +577,29 @@ bytes. `+4` is set by the type-8 arm. — R2-ENGINE-1006
 
 The turn routine, once per 16 session ticks (Medium), runs a consumer that walks the objects in the session list. For
 each object the spell table at Session `+0xf8` gives T; a unit chosen by the relation bit against T `+0xa` is passed to
-the call of `L2.05951`. The candidate fill and the cast body are unread, so whether a cast takes effect is Unknown.
-Read in RU; the EN call site of the consumer and the EN type-9 arm are Medium. — R2-ENGINE-1007, R2-ENGINE-1008
+the call of `L2.05951`. The turn routine runs when Session `+4` mod 16 is 6, so a caster with a candidate casts once per 16
+session ticks, with no mana, timer or cooldown test in the consumer, pick, fill and cast entry (whether the built unit's own cast pays or fails on mana is Medium; whether it repeats its cast is Unknown). Read in RU; the EN call site of the consumer and the
+EN type-9 arm are Medium. — R2-ENGINE-1007, R2-ENGINE-1008, R2-ENGINE-1562
+
+The candidates are the units of the map list whose cell is within `+0x00` cells (Chebyshev (Medium) distance, a square; the absolute value, the position-word encoding and the list builder are unread) of the record's
+cell, then the relation filter; no Spell Max Range is compared in the bodies read. Map 72 holds radii 5 to 8 and spells
+10, 2, 16, 6, 5 and 18, power 255 except two Stone Curse records. — R2-ENGINE-1560, R2-ASSET-334
+
+The cast body builds a new Unit object in state 13 with the record's spell, the power byte as its skill in the spell's
+sphere, wind-up 1 and recovery 1, aimed at the chosen unit, and the cast routine then applies as for any unit; what removes that
+unit afterwards is Unknown. — R2-ENGINE-1561
 
 Field ranges: spell 1..29; power 2..255; `+0x00` 1..9 on mode 4 and 0 or 2 on mode 5; cell low bytes up to 243 and
-242. The consumer tests no range of the spell or power. What a value does beyond the cast entry is Unknown.
-— R2-ENGINE-1009
+242. The consumer tests no range of the spell or power. `+0x00` is the radius in cells of the candidate fill; the power byte
+is the skill of the built unit in the spell's sphere, and whether it equals the spell power is Unknown. — R2-ENGINE-1009,
+R2-ENGINE-1560, R2-ENGINE-1561
 
 Type-4 `+0x0e` is resolved at load into the building's `+0x14`. The built object copies that pointer, and the consumer
 uses its word `+4` as the row of the relation matrix. A call of `L2.01703` whose computed value is not below its target's word `+0x42` removes the objects whose
-location word `+2` equals the target's (the cell word only). That the target is the building class is Medium. Other
-removal routes were not searched. — R2-ENGINE-1010
+location word `+2` equals the target's (the cell word only). That the target is the building class is Medium. In the RU
+image the resolver has two direct callers: the blow HP application and Blizzard's damage object, so a building struck by a
+blow or by Blizzard's object with a value not below its `+0x42` stops its casters; a script kill and the other spells'
+hits are not shown to remove them (other paths not shown). — R2-ENGINE-1010, R2-ENGINE-1563
 
 The objects are in the document's caster list and are saved and loaded with it; LOAD calls the list reader, whose bodies are unread (Medium that it rebuilds the list from the file).
 — R2-ENGINE-1011
