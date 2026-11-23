@@ -525,6 +525,14 @@ Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick outside the Group pass is Unknown.
 
+From the Shield arm of the support choice to the end of the recovery draw, a Shield cast at the caster draws once on the
+read path in RU, the recovery draw of the step that calls the apply; the bodies of the cast, the Shield arm and the
+Effect constructor hold no draw call, and the single-target object skips the hit hook for a Defensive spell
+(R2-ENGINE-1577, R2-ENGINE-1578, Medium; callers, list helpers, callees and virtual calls unread; the EN twins of
+`L2.00031`, `L2.02072`, `L2.08110` and `L2.02074` are unread). A Poison Cloud Effect applied again to a unit that
+carries it ends with remaining duration 128, the maximum of the standing value and 128, never a sum (R2-ENGINE-1575,
+R2-ENGINE-1576, Medium; RU).
+
 No body read chooses a point for an area spell. The offensive choice casts at the
 victim unit; the special cast uses the victim's cell (for Acid Stream, a cell
 beside the caster toward the victim). No body read tests the own or allied

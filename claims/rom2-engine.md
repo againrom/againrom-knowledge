@@ -1414,7 +1414,7 @@ ROM1 states the same one-term use of the skill (`MAGIC-POWER-004`), with its cei
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active (partially retracted) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active (partially retracted, amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-025 | Stone Curse draws a random duration up to `4.8*P` units for a spell cast (`2.4*P` for an item cast), cut by Earth resistance; its Effects string begins with a quote that probably stops the kind parsing. | Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active (partially retracted, amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-027 | Prismatic Spray hits min(P/20 + 2, 7) victims, where P for a book cast comes from the power byte and for an item cast from the castSpell effect. | High | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
@@ -1444,6 +1444,8 @@ ROM1 has the same arm-per-rule structure, 28 spells in 17 rules (`MAGIC-ARM-014`
 
 
 **Amended.** R2-ENGINE-390 partially retracts the blank/default route for positive filled Blizzard damage. The row-7 damage arm jumps around L2.00085 to common shaping L2.01690. Other rows, effect arms and the original confidence levels stand. See the EXP-2049 overturn entry in retracted.md.
+
+**Amended.** R2-ENGINE-1575 narrows the Poison Cloud duration cell of the table: the Poison Cloud arm stores no duration and the Effect's remaining duration is 128 (Medium; RU) from its Effects string, not Duration value 5 of the 1.025 law; the area clause and the magnitude stand.
 
 ### R2-ENGINE-025
 
@@ -1524,7 +1526,7 @@ For Spirit up to 52 the effective ceiling is 96.
 |---|---|---|---|---|
 | R2-ENGINE-030 | Mana regenerates while below maximum, once per world pass (R2-ENGINE-1204): `max*(modifier+100)*K/50` hundredths, K 3 when more than 80 counter advances have passed since actor+0x138 and 1 otherwise; the block has no cast condition. | High / Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-031 | Maximum mana is `2*Spirit` plus an experience term, then scaled by `pow(1.1, Spirit)/100 + 1`; health regenerates every fourth world pass per actor phase (R2-ENGINE-1205). | Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-032 | Duration words are 16 bits and the arithmetic wraps from P 228 (Protection), 216 (Shield) and 244 (Bless, Curse, Haste, Slow); Poison Cloud never does, and no damage byte wraps. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-032 | Duration words are 16 bits and the arithmetic wraps from P 228 (Protection), 216 (Shield) and 244 (Bless, Curse, Haste, Slow); Poison Cloud never does, and no damage byte wraps. | High / Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-030
 
@@ -1559,6 +1561,9 @@ ROM1 caps P at 100 with the same base 1.025 (`MAGIC-POWER-004`, `MAGIC-CEIL-013`
 **Confidence.** High for the 16-bit arithmetic on the P range `R2-ENGINE-020` admits. Medium that the word is stored without a later saturating clamp: the stores read are word writes, and the effect timer consumer was not read.
 
 **Unknown.** The effect timer's own handling of a wrapped word.
+
+**Amended.** R2-ENGINE-1575 narrows the Poison Cloud clause: the RU arm stores no word +0x42 and the Effects string gives
+128 (Medium), so the value 43418 at P 255 describes a 1.025-law duration that the arm does not store.
 
 ## Single-mission load
 
@@ -17864,7 +17869,7 @@ constants of 0x400000 and above and callees were compared only where listed.
 | R2-ENGINE-697 | ROM2 apply arms store Effect +0xe = 2*row+8 with a timed flag for rows 4, 6, 8, 12..15, 18..21 and 27..29; an Effect that reaches attach sends that mark by 0x88; Heal, Drain Life, Teleport, Summon, Animate Dead, Wall of Earth store none. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
 | R2-ENGINE-698 | ROM2 mark 20 draws one poison_d sprite 32s up and mark 64 a 20-spark Curse ring like Bless; marks 56 and 60 add 3 to 5 random sparks per update on a 16s by 8s ellipse while c >= 8, each shown 8 updates, rising or sinking. | High / Medium | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
 | R2-ENGINE-699 | The ROM2 consumer switch over mark - 16 builds a figure only for marks 16, 20, 24, 34, 46, 48, 56, 60, 62 and 64; every other mark, including 32, 36, 38, 44, 50 and 66, builds none and is only counted down. | High | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
-| R2-ENGINE-700 | ROM2 Heal and Drain Life apply arms build no Effect; the cast object's one update sets marks 56 and 60 to (ID<<16) OR 0x20 and no 0x88 is expected (Medium); a continuous Effect calls slot +0x40 every eighth step and skips end slot +0x44. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
+| R2-ENGINE-700 | ROM2 Heal and Drain Life apply arms build no Effect; the cast object's one update sets marks 56 and 60 to (ID<<16) OR 0x20 and no 0x88 is expected (Medium); a continuous Effect calls slot +0x40 every eighth step and skips end slot +0x44. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
 | R2-ENGINE-701 | Of 34 classified of 38 EN `add e?x, 0x130` sites, only the 0x88 arm and update arms L2.03772 and L2.03740 add or overwrite ROM2 unit marks; opcode 0x6c calls L2.03773 on the list; the rest build, free, look up or read it. | High / Medium | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
 | R2-ENGINE-702 | 16 ROM2 EN/RU listing pairs are equal after masking; of 16 apply slices (head and 15 arms) 14 are equal, and the Animate Dead and Summon arms are 6 instructions longer in RU; 8 tables and 2 scans agree. | High | ● active (branch candidate) | [EXP-2089](../experiments/EXP-2089-rom2-other-marks/) |
 
@@ -17990,6 +17995,9 @@ Effects hold: the tail callees `L2.03781`, `L2.01694` and `L2.03788`, which
 could rewrite +0x42, and the expiry rate were not read. An original run that casts Poison Cloud over a
 unit in any mission at Speed 4 and times the poison_d sprite from its first
 frame to its disappearance would settle the Poison Cloud case.
+
+**Amended.** R2-ENGINE-1575 narrows the Unknown on the duration of the attached Poison Cloud Effect at Medium to 128 for
+the RU arm; the callees `L2.01694` and `L2.03788` stay unread.
 
 **Evidence.** [EXP-2089](../experiments/EXP-2089-rom2-other-marks/RESULTS.md), question 4.
 
@@ -34360,6 +34368,10 @@ folder would settle it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
+| R2-ENGINE-1575 | ROM2 Poison Cloud's RU apply arm stores no word +0x42 in the 256 instructions read; the Effects string gives 128 through the constructor (Medium); the callees `L2.01694`, `L2.03788` that R2-ENGINE-700 names are unread. | High / Medium | ● active (branch candidate) | [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) |
+| R2-ENGINE-1576 | ROM2 Poison Cloud (RU) applied again to a unit that carries it ends with remaining duration 128, the maximum of the standing value and 128, never a sum; the less negative magnitude stays; renewal does not start. | Medium | ● active (branch candidate) | [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) |
+| R2-ENGINE-1577 | ROM2 computer mage Shield on itself: from the support choice's Shield arm to the end of the recovery draw the read path draws once, `R2.0021(3)` of the step that calls the apply; callers, list helpers and callees unread. | Medium | ● active (branch candidate) | [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) |
+| R2-ENGINE-1578 | ROM2 the single-target spell object calls the hit hook `L2.02074` only when its byte +0x41 is set, which the apply stores as Defensive equal to 0; Shield through it skips it; the hook has no direct draw call (callees unread). | High / Medium | ● active (branch candidate) | [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) |
 | R2-ENGINE-1530 | ROM2 occupant kind is byte +0x4a for Unit, Human and Humanoid (EN L2.07941, RU L2.04693) and 0 for Token, Building, Pointer and Effect; placement writes kinds 1 and 2 at cell entry +4, kind 3 at +8, others nowhere (EN body). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1531 | ROM2 Blizzard's damage object (EN L2.03443, RU L2.01702) takes the actor arm when target slot +0x2c is 1 (Unit, Human, Humanoid), else the structure arm when slot +0x34 is 1 (Building, Pointer), else nothing (Token, Effect). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1532 | ROM2 Building cell registration EN L2.04916 / RU L2.04915 writes cell entry +0xc when empty; its one direct caller registers each footprint cell whose bit in dword +0x68 is set, rows +0x61 by columns +0x60 (EN equals RU). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
@@ -34373,6 +34385,152 @@ folder would settle it.
 | R2-ENGINE-1652 | ROM2 application mode word (EN +0x5d8, RU +0x63c) has 8 EN and 9 RU immediate stores, values 0 to 3; value 2 only at EN L2.04902 and L2.04903; no register mov store, inc, dec or lea form among the 22 searched disp32 forms. | High / Medium | ● active (branch candidate) | [EXP-2196](../experiments/EXP-2196-rom2-map-menu/RESULTS.md) |
 | R2-ENGINE-1653 | ROM2 font draw slot +0x14 (font2 EN R2.0062, font4 EN L2.08019) takes x, y, string, flags, palette pointer; the map select lines pass flag 2, so the x offset 230 from the paint origin is the line centre, not a left edge (Medium on screen). | High / Medium | ● active (branch candidate) | [EXP-2196](../experiments/EXP-2196-rom2-map-menu/RESULTS.md) |
 | R2-ENGINE-1654 | ROM2 map select text ink is the fifth draw argument: name uses palette 0 of the table object at global L2.08020 (base+512n), description lines use global L2.08021; the colours are unread and no font field holds ink. | Medium | ● active (branch candidate) | [EXP-2196](../experiments/EXP-2196-rom2-map-menu/RESULTS.md) |
+
+### R2-ENGINE-1575
+
+The RU Poison Cloud arm `L2.00070` (spell byte +8 = 6; read in a 256-instruction window that runs from its entry
+into the shared suffix `L2.01690`) allocates 0x48 bytes, builds the Effect with the constructor
+`L2.00086` from the row's Effects string (spell row +0x1c), stores word +0x40 = ftol(MOVSX(word +0x40) * s), word
++0xc = spell byte +8 and word +0xe = 2 * byte + 8, and jumps to `L2.01690`. The suffix `L2.01690..L2.07191` is read to
+its return in R2-ENGINE-1262. The double s is the dispatcher local
+`[ebp-0x2c]`, set at `L2.08145..L2.08146` as P over the double at `L2.08147` plus the double at `L2.00067`
+(R2-ENGINE-024 gives P/45.0 + 1.0). The arm calls no `pow`, no draw routine, and stores nothing at +0x42. Its Shield
+neighbour `L2.00084` is the arm that calls `pow` with the constant 1.025 (R2-ENGINE-024's duration law).
+
+The constructor RU `L2.00086` (71 instructions, whole; EN `L2.07048` equal after masking over 71) copies byte +0x3c,
+byte +0x3d, the dword at +0x40 (so both words +0x40 and +0x42) and word +0xc from the Effects-string parser result
+`L2.00087`. By R2-ENGINE-697 the parser stores +0x42 = N << 4 when the keyword value AND 7 is nonzero, and row 6's
+string is `health=-2:continuous 8` (R2-ASSET-178; `continuous` is 2). So the Effect's +0x42 is 8 << 4 = 128 for every
+power P (Medium; RU), and the Effect carries timed flag 2 (R2-ENGINE-1165).
+
+**Confidence.** High for the RU arm's stores and calls, the absence of a +0x42 store in the 256 decoded instructions
+read (the suffix stores none, R2-ENGINE-1262), and the constructor's copy in both roots. Medium for the value 128: it composes the parser store of
+R2-ENGINE-697 and the string of R2-ASSET-178; the parser body `L2.00087` was not re-read here (256-instruction
+window with open edges). Medium for EN as a whole: the EN twin of `L2.00070` was not read (an EN window at the
+address RU minus 0x9cec decoded other code).
+
+**Unknown.** The EN Poison Cloud arm; the tail callees `L2.01694` and `L2.03788`, which R2-ENGINE-700 names as able to
+rewrite +0x42 and which were not read here (the EN twin of `L2.03781`, 34 instructions, and the RU occupant `L2.01708`
+were read); how many updates one unit of +0x42 lasts (R2-ENGINE-1165; R2-ENGINE-1534 states the EN reading for Light). An original run settles the value: cast Poison Cloud, read the Effect's +0x42 on an
+enemy at the first pulse for P = 0 and P = 200.
+
+**Amends.** R2-ENGINE-024's Poison Cloud row: its duration cell ("Duration value 5 in the 1.025 law") does not
+describe the Effect; the duration is 128 (Medium; RU) and does not depend on P. The area clause and the magnitude stand.
+R2-ENGINE-700: its Unknown on the duration of the attached Poison Cloud Effect is narrowed at Medium to 128 for the RU
+arm (callees `L2.01694`, `L2.03788` unread). R2-ENGINE-032: its Poison Cloud clause (duration 43418 at P 255, no wrap)
+describes a 1.025-law value that the arm does not store.
+
+**Evidence.** [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) question 3.
+
+### R2-ENGINE-1576
+
+An Effect with ID 6 (Poison Cloud) attached to a unit that already carries one is a renewal: the old record stays,
+its word +0x40 becomes the signed maximum of old and new, its u16 +0x42 the maximum of old and new, and start (slot
++0x40) is not called for ID 6 (R2-ENGINE-1164). A fresh record has +0x42 = 128 (R2-ENGINE-1575) and a standing one
+holds at most 128, so after every application the remaining duration is 128: the remaining duration is
+the maximum of the standing value and 128, which replaces a standing value below 128 and keeps 128 at 128, and is
+never a sum (RU). The magnitude is negative (template -2 times
+P/45.0 + 1.0), so the signed maximum is the smaller magnitude: a later cast by a stronger caster leaves the standing
+magnitude, and a later cast by a weaker caster lowers it.
+
+The timer (R2-ENGINE-1165) decrements +0x42 once per call and, with flag 2, calls start and notify when the value
+before the decrement is divisible by 8. Composed: 128 is divisible by 8, so a record that has just been renewed to
+128 runs start and notify at its next timer call, and then every 8 calls; a renewal therefore re-aligns the start
+and notify phase to the renewal (Medium; what start does to the health is not read here). For EN, R2-ENGINE-1534 reads the actor step as calling the timer once per update
+(Medium, Light); on that reading the remaining duration is 128 right after a cast, 112 sixteen updates later, and is
+set back to 128 by the next pulse of a standing cloud, so an Effect outlasts the 16-update pulse period.
+
+Scope: the Effect on one unit only. Whether a second cloud cast on the same cells replaces or coexists with the first
+(R2-ENGINE-794) and the several-cell multiplicity of one pulse (R2-ENGINE-1536) are not examined here.
+
+**Confidence.** Medium: composed from R2-ENGINE-1164 (High / Medium, renewal body in both roots), R2-ENGINE-1165, the
+value 128 (R2-ENGINE-1575, Medium) and, for the update count, R2-ENGINE-1534 (EN only, Medium). The RU timer rate is
+unread.
+
+**Unknown.** The timer rate in RU; expiry between pulses for Poison Cloud; the cloud-object interaction. An original
+run settles them: cast Poison Cloud twice on one standing enemy and read the Effect's +0x42 and +0x40 after each
+pulse.
+
+**Evidence.** [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) question 3.
+
+### R2-ENGINE-1577
+
+On the read path of a computer mage's Shield cast at itself, from the Shield arm of the support choice to the end of the
+recovery draw, one draw occurs: the recovery draw `R2.0021(3)` of the actor-step arm that calls the apply
+(R2-ENGINE-1261). The choosing routines and the Shield arm of the support choice draw nothing (R2-ENGINE-1244,
+R2-ENGINE-1248; High in RU); the callers and the unread list helpers `L2.04531`, `L2.01588`, `L2.00550`, `L2.02476`
+(R2-ENGINE-1245) are outside the count. No read body between the cast call and the Effect link contains a call to a draw
+routine: the cast routine RU `L2.00027` (206 instructions, whole; EN `L2.03854` equal after masking over 206), the
+apply preamble `L2.00034..L2.08148`, the Shield arm `L2.00084` (EN `L2.08149`, equal over 256), the constructor
+`L2.00086` (EN equal over 71), the delay helper `L2.00031`, the object constructor `L2.02072` with its base
+`L2.08150` and `L2.01295`, the object step `L2.08151` and `L2.08110`, the list add `L2.04731`, `L2.08152`, and the leaf
+`L2.01570`. No read body on the path calls the draw sites of RU `L2.00101` (six, `L2.06382..L2.06388`; it calls the hook at
+`L2.05048`; no rel32 call or jump site reaches it; absolute-address references were not scanned). The routine that
+resolves a hit was not identified; the hook `L2.02074` is bookkeeping (R2-ENGINE-1578) and is not claimed to be it.
+
+Census, a scan of E8/E9 rel32 sites over the executable sections of each `allods2.exe`: the range routine RU
+`R2.0021` has 95 call sites and EN `L2.00939` 93. The generator core RU `L2.01699` has 39 call sites and EN `L2.00729`
+39; three of the RU sites lie in the engine range (`L2.08153` and `L2.08154` in the range routine, `L2.08155`), the
+other 36 lie below `L2.08156` in code that no body read here calls and was not classified; EN has 36 below `L2.08157`
+and 3 in the range routine and `L2.08158`. In the RU actor step `L2.00028..L2.02590` (EXP-2069 listing) the only site
+is `L2.04707`; between the apply entry `L2.00034` and its return `L2.07191` the only site is `L2.08159`, the duration
+draw in the Stone Curse arm (id 18, R2-ENGINE-025), which Shield does not take. The EN sites sit at the RU addresses
+minus 0x9c03 (`L2.04708`) and 0x9cec (`L2.08160`). The 95 RU range-routine sites were not assigned to enclosing
+functions; a draw inside an unread callee is not excluded by the census.
+
+So, from the Shield arm of the support choice (R2-ENGINE-1244; draws made by the callers and the unread list helpers
+before that arm are not counted) to the end of the recovery draw, the read path draws once (d in 0..3, uniform over the
+32768 core values as 8192 each), in order: the cast and apply with no read draw, then the recovery draw in the
+substate 5 arm.
+
+**Confidence.** Medium. High for the read bodies, the census as a scan, and the EN equalities named. Medium for the
+whole path because these are unread, and the 95 RU range-routine sites were not assigned to enclosing functions (a draw
+inside an unread callee is not excluded by the census): the callees of the parser `L2.00087`, of `L2.08161`, of the Effect attach
+`L2.00480` (`L2.05847`, `L2.05648`, `L2.00060`, `L2.04914`, `L2.05641`; the attach body is R2-ENGINE-1164) and of
+`L2.02419` (`L2.05827`); the virtual calls (the caster's slot +0x70 at `L2.06431`, whose creature-class body
+`L2.08162` is `ret 8` and whose Human-class body was not read; the target's slot +0x2c; the Effect's slots +0x40 and
++0x44); the row's Distribution value for Shield (element 8, R2-ENGINE-1262), which selects the single-target object
+read here or an area object `L2.01691` not read; the row's Delivery value (R2-ENGINE-1262: Delivery 2 goes through the
+projectile `L2.02075`, unread); the list walker of `[[L2.01317]+0x7c]+4`+4 and the object steps it calls (the effect
+step is Unknown in R2-ENGINE-1262); the hook `L2.02074` callees `L2.01521`, `L2.02411`, `L2.02412`, `L2.00487`,
+`L2.00486`, `L2.01523` besides the two named; the constructor's `[edx+4]` call at `L2.08163`; the object step
+`L2.08110` call `[eax+0x3c]` at `L2.08164` and its branch at `L2.08165` (the other arm when slot +0x2c is false),
+outside the 96-instruction window; a second generator copy or draw route is not censused; the EN twins of `L2.00031`,
+`L2.02072`, `L2.08110` and `L2.02074` were not read (the findings above are RU).
+
+**Unknown.** The draws of the unread callees and virtual calls. An original run settles it: load a map with a
+computer mage that has Shield, read the generator state before the cast and at the next substate 5 step; one core
+step of s = 214013 s + 2531011 (R2-ENGINE-391) means one draw.
+
+**Evidence.** [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) question 2.
+
+### R2-ENGINE-1578
+
+The single-target spell object (vtable RU `L2.02073`; constructor `L2.02072`) has the step slot +0x18 = `L2.08151`,
+which calls `L2.08110`. That body calls the hit hook `L2.02074` (call site `L2.05049`) only when the object's byte
++0x41 is nonzero and the object's +0x3c (caster) and both units' +0x14 are nonzero. The apply suffix stores
++0x41 = (spell byte +0xa == 0) (R2-ENGINE-1262, `L2.08166..L2.08167`), and byte +0xa is the Defensive flag, 1 for ids
+4, 8, 12, 13, 15, 19, 20, 21, 23, 24 and 27 (R2-ENGINE-1247). So a Shield cast through the single-target object (spell
+27, Defensive 1) stores +0x41 = 0 and skips the hook. The hook is bookkeeping; it is not shown to be the hit
+calculation.
+
+The hook RU `L2.02074` (148 instructions, whole) sets the victim's +0x1c4 state fields (+0x54 = 1, +0x58, +0x5a, +0x94,
++0x98), calls `L2.02419` (which calls `L2.05827`) with the hook's arguments on script +0xa8bc, stores a 21-dword
+record on script +0xbd98 and appends it through `L2.01727` (R2-ENGINE-1262). The body holds no call to a draw routine.
+Its callers in RU are `L2.05048` (inside `L2.00101`), `L2.05049` (inside `L2.08110`), `L2.05050` (inside `L2.01708`),
+`L2.05051` (inside the apply routine) and `L2.05052`.
+
+**Confidence.** High for the `L2.08110` condition, the +0x41 store and the hook body's calls in RU. Medium for EN
+(the EN twins of `L2.08110` and `L2.02074` were not read), for the hook's lack of a draw (it calls `L2.01521`,
+`L2.02411`, `L2.02412`, `L2.00487`, `L2.00486` and `L2.01523` besides the two named callees, all unread; the object
+step `L2.08110` calls `[eax+0x3c]` at `L2.08164` and its branch at `L2.08165` lies outside the 96-instruction window
+read, the window ending at the hook call, not the whole body) and for the route: the Distribution value of the Shield row
+that selects this object (R2-ENGINE-1262) is not read. `L2.05827` is unread.
+
+**Unknown.** Whether the hook runs for a Shield cast at a target that is not the caster's own; the row's
+Distribution value.
+
+**Evidence.** [EXP-2191](../experiments/EXP-2191-rom2-rules-shown/RESULTS.md) question 2.
 
 ### R2-ENGINE-1530
 

@@ -164,6 +164,14 @@ after the last pulse it returns for good (R2-ENGINE-1534, R2-ENGINE-1165, Medium
 census of other callers of the timer slot).
 The per-class amount stays as in R2-ENGINE-1242.
 
+The Poison Cloud Effect (ID 6): the RU arm stores no +0x42 in the 256 instructions read, and the suffix stores none
+(R2-ENGINE-1262); the value 128 from the Effects string through the constructor is Medium (R2-ENGINE-1575; EN arm
+unread). A cast onto a unit that carries the Effect keeps the record, leaves +0x42 at the maximum of the old value and
+128, never adds, keeps the less negative magnitude and does not call start (R2-ENGINE-1576, Medium; RU). From the Shield
+arm of the support choice to the end of the recovery draw, a Shield cast at the caster draws once on the read path in
+RU, and a cast through the single-target object skips the hit hook when that object carries the cast
+(R2-ENGINE-1577, R2-ENGINE-1578, Medium; the EN twins of `L2.00031`, `L2.02072`, `L2.08110` and `L2.02074` are unread).
+
 ## Acid Stream by heading and at the map edge
 
 The RU heading d is bits 5..7 of the byte `L2.02635` returns: an octant from the offset between caster and
