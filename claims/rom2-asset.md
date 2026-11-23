@@ -4569,3 +4569,43 @@ F_Skeleton.5 stores a max below its min in the table; the reader's byte store of
 
 **Evidence.** [EXP-2193](../experiments/EXP-2193-rom2-combat-stats/RESULTS.md) question 1; programs
 `evidence/units_columns.py` over the grammar of `evidence/data.py` and `evidence/card_damage.py`.
+
+## ROM2 script nodes: type vectors of the installed maps
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-363 | In the 46 campaign maps of both ROM2 roots each ordinary action and check ID has one ten-code type vector in every node, except action 6 (six vectors) and check 65538 (two); EN and RU agree. | High | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ASSET-364 | In the 46 campaign maps of both ROM2 roots every script node has a nonempty name and nonempty text in all ten 64-byte fields (at most 45 and 23 bytes), and every trigger has a nonempty prefix (at most 56 bytes). | High | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+
+### R2-ASSET-363
+
+Population: the 46 `scenario.res` ALM maps of `rom2-en` and `rom2-ru` (1334 action and 986 check nodes per root) and the
+loose ALM files (EN 3 action vectors; RU 7 action and 5 check vectors, not tabulated on the format page). Per node the
+ten type codes at +0x74 are read. Scenario result: 35 action vectors and 21 check vectors per root, equal between roots.
+Action 6 has the six vectors that `formats/rom2-alm/script.md` lists, told apart in the 46 maps by the value of slot 0
+(3; 1; 15; 10; 11; 4, 5 or 14), and the compiler reads type codes only (R2-ENGINE-1680); check 65538 has two. No node has a value in
+8000..9999 under type 2, 3 or 4. The compiled layout of each vector follows R2-ENGINE-1680 (checks: R2-ENGINE-044);
+`evidence/derived/census/vectors.tsv` lists every vector with its layout and node count.
+
+**Confidence.** High for the vectors and counts (full census of the population named; no other install archive).
+The layout column depends on R2-ENGINE-1680 and R2-ENGINE-044.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/census_q1.py`,
+`evidence/derived/census/vectors.tsv`.
+
+### R2-ASSET-364
+
+Population: the 46 `scenario.res` ALM maps of `rom2-en` and `rom2-ru`: 1334 action nodes, 986 check nodes and 715 (EN) or
+714 (RU) triggers per root. Per node the name field (+0x00..+0x3f) and the ten 64-byte text fields (+0x9c..+0x31b), per
+trigger the prefix (+0x00..+0x7f), are tested for a nonzero first byte. Result: every one of the 1334 and 986 nodes has a
+nonempty name, and all 13340 action and 9860 check text fields are nonempty; every trigger prefix is nonempty. The longest
+terminated lengths are 45 (action name), 34 (check name), 23 and 22 (action and check text field) and 56 (trigger prefix).
+Bytes follow the first terminator in 1145 (EN) and 1143 (RU) action names, 893 and 891 check names, all trigger prefixes,
+and in 11207 and 11171 action and 8573 and 8547 check text fields. The loose `.alm` files of the roots are separate rows of
+`evidence/derived/census/text-fields.tsv` (per kind and operation ID). The census records lengths and counts only; it does
+not say what the fields mean, and the program's use of them is R2-ENGINE-1681.
+
+**Confidence.** High for the counts (full census of the population named; no other install archive).
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/census_q4.py`,
+`evidence/derived/census/text-fields.tsv`.

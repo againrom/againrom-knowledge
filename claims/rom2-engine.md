@@ -1671,7 +1671,7 @@ Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evid
 | R2-ENGINE-041 | Both preserved ROM2 campaign corpora have 46 exactly parsed type 7 payloads; new instants/checks retain separate full-word operation and ID namespaces. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-042 | In the verified RU/EN compilers, action word 65538 appends a packed low-byte parameter pair to a compiler collection instead of creating an executable action. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-043 | In the verified RU/EN compilers, check word 65538 initializes its map result-register slot from parameter 0 instead of creating an executable check. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-044 | ROM2 literal checks pack ordinary scalar operands densely and resolve unit/group/player references separately; unresolved literal references can omit the compiled node. | High / Medium | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-044 | ROM2 literal checks pack ordinary scalar operands densely and resolve unit/group/player references separately; unresolved literal references can omit the compiled node. | High / Medium | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-045 | Instants 35 and checks 23/24 access the scenario.dll DWORD bank; its exports have no explicit index guard, and NewGame initially clears a1024-DWORD span. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-046 | In both clients, instant 36 mutates752+n with exact mode-dependent stores and 253/254 notifications; objective rows read the resulting bits. | High | ✔ promoted (amended, partially retracted) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-047 | ROM2 instant 2 emits packet 0xb6; actual RU/EN receiver tables forward its event ID to UI 433, which separates ordinary events from 250/253/254/255. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
@@ -1726,6 +1726,8 @@ References in 8000..9999 take a different path: original parameter-slot position
 **Confidence.** High for literal scalar/reference packing and the positive omission branch, independently read in both compilers. Medium for the complete dynamic-reference/error contract because some indirect lookup and dynamic execution edges remain frontier.
 
 **Unknown.** Arbitrary invalid references, callbacks, dynamic source domains and malformed scalar admission remain unverified. Check 27's consequence of dense packing is stated separately in 055.
+
+**Amended.** R2-ENGINE-1684 reads the check compiler's dynamic arm (marking and copy into the check IR, High); the check-side resolution stays Medium.
 
 ### R2-ENGINE-045
 
@@ -6850,7 +6852,7 @@ in a committed listing.
 | R2-ENGINE-340 | The ROM2 sound panel turns music on (resume or restart the chosen melody) and off (stop or fade), stores the chosen melody, the random flag and three volumes, and names melodies from main.res text/tunes.txt. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-341 | A ROM2 dialogue tag tune=N cross-fades music to list index N, which repeats only while no area pick exists; no data file or archive entry in either root contains tune=, so shipped dialogue never changes music. | High | ✔ promoted (branch candidate) | [EXP-2040](../experiments/EXP-2040-rom2-music/) |
 | R2-ENGINE-343 | On a -1 find the ROM2 dialogue loader leaves a one-byte empty body, a clear flag and no error (EN High, RU Medium); that absent means -1, and the TALK body ignoring the result (TalkTo), are Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
-| R2-ENGINE-344 | The `#<key>` lookup is reached via the dialogue builder (21 direct call sites, 10 functions per image; register calls unseen); only TALK formats `npc%dtalk%d`; no save-load read found. | Medium | ● active (branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
+| R2-ENGINE-344 | The `#<key>` lookup is reached via the dialogue builder (21 direct call sites, 10 functions per image; register calls unseen); only TALK formats `npc%dtalk%d`; no save-load read found. | Medium | ● active (amended, branch candidate) | [EXP-2041](../experiments/EXP-2041-rom2-inn-talk-missing/) |
 
 ### R2-ENGINE-335
 
@@ -7257,6 +7259,8 @@ destination (decode that RU site); the 14 dword references to the EN
 buffer between `L2.01478` and `L2.01479` and the two in the text loader
 (`L2.01480`, `L2.01481`), which are not classified; the `Docs\%d.txt`
 destination; which file the buffer holds when TALK runs.
+
+**Amended.** R2-ENGINE-1682 reads the RU `mission%d.txt` destination (RU L2.01456); the 14 + 2 unclassified references to the EN buffer and which file the buffer holds when TALK runs stay Unknown.
 
 ## Kaarg selected room construction
 
@@ -33083,8 +33087,8 @@ the store's source and the readers of app +0x4dc.
 | R2-ENGINE-1314 | Read ROM2 action wrappers expose operand widths, stores and delegated calls; complete effects of unread helpers remain open; the bodies of actions 33 and 34 are read in R2-ENGINE-1450. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 | R2-ENGINE-1315 | All 19 occurring ordinary ROM2 check bodies are read in EN/RU; exact field predicates and helper calls differ by operation, and check 18 writes no result. | High / Medium | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 | R2-ENGINE-1316 | Both ROM2 loaders copy 184-byte triggers; the compiler reads three check-ID pairs, four action IDs, three comparisons and the latch skip flag DWORD. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
-| R2-ENGINE-1317 | ROM2 action word 65538 still has no established downstream collection consumer after the bounded compiler and postcompile reads. | Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
-| R2-ENGINE-1318 | Both ROM2 action compilers mark reference operands 8000..9999 for deferred resolution; the read executor uses a Session pointer array, whose producers are unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1317 | ROM2 action word 65538 still has no established downstream collection consumer after the bounded compiler and postcompile reads. | Unknown | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1318 | Both ROM2 action compilers mark reference operands 8000..9999 for deferred resolution; the read executor uses a Session pointer array, whose producers are unread. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 | R2-ENGINE-1319 | The read ROM2 map-slot actions/checks use DWORD indices without local range tests; complete slot capacity, safe limits and invalid-index behavior remain unproved. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 
 ### R2-ENGINE-1312
@@ -33298,7 +33302,7 @@ performed. The semantic ID-to-result mapping also inherits R2-ENGINE-059.
 **Unknown.** Prefix consumers, invalid/missing ID behavior, a stored flag
 with no admitted condition, arbitrary comparison codes and scheduler timing.
 
-**Amended.** R2-ENGINE-1453 reads the miss path of the id map `L2.04242` (find or insert; the node value stays Unknown); the mapping-failure statement narrows to the compiler's later use of the returned node.
+**Amended.** R2-ENGINE-1453 reads the miss path of the id map `L2.04242` (find or insert; the node value stays Unknown); the mapping-failure statement narrows to the compiler's later use of the returned node. R2-ENGINE-1681 reads the trigger prefix: a census of direct accessor calls finds no reader (Medium); the node name has the readers named there.
 
 ### R2-ENGINE-1317
 
@@ -33334,6 +33338,8 @@ it reads. A settling run starts `allods2.exe` on a copy of mission 10,
 changes only the full-word action's first parameter, watches the append
 destination and its first subsequent read, and compares the resulting
 consumer arguments with an unmodified map.
+
+**Amended.** R2-ENGINE-1683: the collection is a member of the compiler object; no vector-method consumer in the named population (Medium).
 
 ### R2-ENGINE-1318
 
@@ -33374,6 +33380,8 @@ failure behavior. A settling run uses a copied mission-10 map with one
 type-4 action reference changed from its literal value to 8000 and then
 9000; break at EN L2.07409 (or RU corresponding listing), compare the
 array element, resolved pointer and operation effect to the literal map.
+
+**Amended.** R2-ENGINE-1684 reads the check-side arm: same marking, no check handler read addresses it.
 
 ### R2-ENGINE-1319
 
@@ -35293,6 +35301,217 @@ SPELLCASTER caption for creature kinds that cast is not settled here. A run sett
 creature (row 209) and a Troll.5 creature (row 93) with both groups open and compare the digits with the table.
 
 **Evidence.** [EXP-2193](../experiments/EXP-2193-rom2-combat-stats/RESULTS.md) question 1.
+## ROM2 script compiler: source slots to compiled operand positions
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1680 | ROM2 action compiler (EN L2.08168..L2.08169, RU L2.02647) packs the ten source slots like the check compiler: types 2/3/4 go to G/P/U (second of a type to V), 8 to I, 9 to +0x70, all others dense to pN. | High / Medium | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1681 | ROM2 loaders put the 64-byte node name at object+0 and ten 64-byte text fields at +0x98; readers found: two compile-failure messages (check, action) that receive the node pointer; no reader of the text fields or trigger prefix. | High / Medium | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1682 | ROM2 mission entry loads mission<N>.txt into the one global string that TALK's dialogue lookup also searches (EN L2.01191, RU L2.01456); which file that string holds at TALK is not settled by the bodies read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1683 | ROM2 word-65538 action collection (compiler member +0x28): no consumer found in the compile function (EN L2.00201..L2.08170), the caller or the type-9 stage to EN L2.08171; of 87 vector-call sites per root 6 are named, 5 classified. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1684 | ROM2 check compiler marks 8000..9999 under types 2/3/4 like the action compiler and copies the metadata into the check IR; no check handler or dispatcher body read addresses it; the Session+0xd724 loads found are in the action executor. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1685 | In the 46 campaign maps no ROM2 script operand is a zone record by the bodies read: kinds are group, unit, player, item and one type-9 object (record unread, lookup EN L2.08172); trigger-list accessor calls: loader and compiler only. | Medium | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+
+### R2-ENGINE-1680
+
+The per-node action compile loop (EN L2.08168, loop head L2.08173, exit L2.08169; RU is the same body 0x9ffc higher) walks
+slots 0 to 9. For each slot it reads the value at record +0x48+4*slot and the type code at +0x70+4*slot of the in-memory node
+(file offsets +0x4c and +0x74, four bytes later) and copies the type to the byte IR+0x30+slot.
+Values 8000..9999 under type 2, 3 or 4 take the dynamic path of R2-ENGINE-1318 and skip the arms. Every other slot
+jumps through the 8-cell table (EN L2.08174, RU L2.08175) indexed by type minus 2:
+
+- type 2: first stores at IR+0x60 (G), a second type-2 slot at +0x68 (V);
+- type 3: first at +0x64 (P), a second at +0x68;
+- type 4: first at +0x5c (U), a second at +0x68;
+- type 8: u16 at +0x6c = low16(value + 0xe18);
+- type 9: pointer at +0x70 from a lookup of the value; a zero result clears the compile-success flag and reports the node;
+- types 5, 6, 7 and any type below 2 or above 9: the value is appended to IR+8+4*N, N counting only these slots (EN
+  L2.08176, RU L2.02648).
+
+A zero result from the type 2, 3, 4 lookups also clears the compile-success flag; a successful group or unit sets
+[ref+0x3c]+0x48 = 1. At the loop exit a successful node is appended to the compiled collection and the ID map; a failed
+one is reported. The rule is the one R2-ENGINE-044 gives for checks.
+
+**Confidence.** High for the packing rule and the arm table in both roots: the 256-instruction windows EN L2.08177 and
+L2.08178 and the scalar arm EN L2.08176 equal the RU windows after masking addresses. Medium for what the lookups
+(EN L2.00183, R2.0090, L2.00178, L2.08172) return, and for the type 9 meaning: their bodies are unread. Checks use the
+same rule from R2-ENGINE-044. The check arm of type 9 (EN L2.08179..L2.08180, RU equal after masking) looks up the value
+through EN L2.08172, stores the pointer in the frame cell that is IR+0x70 and reports a failure message (Medium; the format
+string was read in an uncommitted pass).
+
+**Unknown.** The lookup helper bodies, among them EN L2.08172 (the lookup is unread; the check arm of type 9 is read in
+`evidence/derived/p3b/listings/*-q3-check-loop.txt`, see R2-ENGINE-1684).
+
+The compiled positions pN of the read action wrappers are the dense counters of this rule.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/p1/*-q1-action-cont.txt`,
+`*-q1-scalar-arm.txt`, `tables.tsv`, `evidence/derived/p3b/listings/*-q3-check-loop.txt`; EXP-2174
+`listings/*-compiler-action.txt`.
+
+### R2-ENGINE-1681
+
+The type-7 load cases (EN L2.07388, RU L2.07389) allocate a 0x31c-byte node object per file node and read it in seven
+calls: 0x40 bytes to object+0, then DWORDs to +0x40, +0x44 and +0x318, 0x28 bytes to +0x48 (ten values), 0x28 bytes to
++0x70 (ten type codes) and 0x280 bytes to +0x98. The 0x280 bytes are ten 64-byte fields, file +0x9c..+0x31b. The node
+constructor (EN L2.08181, RU L2.08182; 32 of 32 lines equal after masking) clears byte 0 of the name, the first byte of each
+64-byte field, +0x40, the twenty value and type DWORDs and +0x318. A trigger is read whole (0xb8 bytes, R2-ENGINE-1316).
+
+Readers. The check compile loop (EN L2.08183..L2.07390, RU 0x9ffc higher, read in two windows) reads node +0x40, +0x44,
++0x48+4*slot, +0x70+4*slot and +0x318. At its failure arm (EN L2.08184..L2.08185, RU equal after masking) it clears the
+ID-map slot of node+0x44 and calls the formatting call EN L2.05909 with the node ID (node+0x44) and the node object
+pointer as the two variadic arguments, the format string L2.08186 and a local buffer, then calls L2.06997 (the sink, unread).
+The object pointer is the address of the name field. The format string (one decimal, one string conversion) was read in an
+uncommitted pass; no committed table holds it. The action compile loop reads +0x40, +0x44, the values and the types; its
+failure report (EN L2.08187..L2.08188, RU equal after masking) passes the node pointer and node+0x44 to the same call with the
+format string L2.08189. The readers found are two failure messages of the script compiler, a check (EN L2.08184..L2.08185)
+and an action (EN L2.08187..L2.08188), each passing the node ID and the node pointer to the formatting call L2.05909.
+The type-9 stage head reads no name and no text field; its message (string L2.08190, read in an uncommitted pass) takes
+one decimal.
+A byte census of direct `call rel32` sites in `.text` finds the trigger-list accessors (element EN L2.08191, RU L2.08192;
+count EN L2.08193, RU L2.08194) at the loader and the compiler only (EN L2.08195, L2.08196, L2.08197; RU L2.08198, L2.08199,
+L2.08200), and 10 node-list begin/next sites per root (EN L2.06998/L2.08201). A displacement scan for +0x98 over
+`.text` lists 202 (EN) and 203 (RU) sites; the 24 (EN) and 25 (RU) in L2.08202..L2.04218 (overlapping matches merged) are
+the loader region, the 174 others (EN and RU) were not classified. In the loader region only the constructor (EN L2.08203) and
+the four trigger-compiler pairs (EN L2.08204, L2.08205, L2.08206, L2.08207; trigger +0x98 action-ID reads) are classified.
+No read of the ten text fields and no read of the trigger prefix (+0x00..+0x7f) was found.
+
+**Confidence.** High that the loader places the name at object+0 and the text fields at +0x98 (equal after masking).
+Medium that the failure message formats the node pointer as the name: the call pushes the pointer as the second variadic
+argument; the format string L2.08186 was read in passes whose output is not committed, and the sink L2.06997 is unread.
+Medium that nothing else reads the name, the text fields or the trigger prefix: the census covers direct call sites and the
++0x98 displacement only.
+
+**Unknown.** The node-list sites EN L2.08208/L2.08209, 19 (EN) and 20 (RU) unclassified +0x98 sites in L2.08202..L2.04218,
+among them EN L2.08210, L2.08211, L2.08212, and the 174 outside it; no search for bulk copies of 0x31c bytes;
+register-indirect calls; the message sink L2.06997; what the ten text fields mean. A read of the name needs no
+displacement, so the accessor census (13 sites per root) is its only bound. A run that settles it: load one installed map with the name and text bytes of
+one node changed to another same-length value, watch reads of object+0 and object+0x98..0x317 from the load to the first
+script tick, and compare the message of a deliberately failing check.
+
+**Amends.** R2-ENGINE-1316: its "no separate prefix reader established" holds for the trigger prefix; the node name has the
+readers above.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/p3a/listings/*-q4-node-ctor.txt`,
+`evidence/derived/p3a/sites.tsv`, `evidence/derived/p3b/sites.tsv`, `evidence/derived/p3c/listings/*-q3-check-tail.txt`;
+EXP-2174 `listings/*-type7-load.txt`.
+
+### R2-ENGINE-1682
+
+The text loader (EN R2.0056, RU R2.0055; equal after masking) takes a path string and a destination string, reads the file,
+converts it through the imported conversion call (R2-ENGINE-052) and assigns the result to the destination string. Each call
+replaces the destination text. Mission entry (EN R2.0026 body; the sequence at L2.08213, RU L2.08214) formats
+`main\text\mission%d.txt`, loads it into the global string EN L2.01191 / RU L2.01456, then calls the section parser with the
+cache object (EN R2.0027 on L2.08215; RU R2.0025 on L2.05290). The same destination receives `globalmap.txt`, `town.txt`
+(three sites) and `quest.txt` (R2-ENGINE-344).
+
+The TALK action (EN L2.00554, RU L2.00555; 82 of 82 lines equal after masking) formats `npc%dtalk%d` from the low 16 bits and
+bits 16..27 of the chosen packed word, calls the dialogue builder (EN R2.0038) with the key and the object at this+0x68,
+then calls TalkTo. It makes no call to the text loader. The builder's lookup searches the global string (R2-ENGINE-343,
+R2-ENGINE-344). Hence the mission file is in that string from mission entry until the next load replaces it (the 14 and 2
+unclassified references to the EN buffer, R2-ENGINE-344, are unread), and at TALK the string holds the last loaded file. The 46
+inn keys are in `town.txt` (R2-ASSET-115); the mission files carry the section tags of R2-ENGINE-037; the key of a TALK from
+any other source is not enumerated.
+
+**Confidence.** High for the loader, the destination and the TALK body in both roots. Medium for the builder's use of the
+global string (R2-ENGINE-344, EN). Unknown which file the string holds at a given TALK: the order of the three `town.txt`
+loads against the inn entry was not read.
+
+**Unknown.** The 14 and 2 unclassified references to the EN buffer (R2-ENGINE-344). The run that settles it: in a campaign
+game stop at the loader (EN R2.0056) on the way to the inn, record the path of the last call before TALK and compare the
+global string with that file.
+
+**Amends.** R2-ENGINE-344: its Unknown on the RU `mission%d.txt` destination is read here (RU L2.01456); the 14 + 2
+unclassified references to the EN buffer and which file the string holds at a TALK stay Unknown.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/p3a/listings/*-q4-text-loader.txt`,
+`*-q4-talk-action.txt`, `evidence/derived/p3b/listings/*-q4-mission-load.txt`.
+
+### R2-ENGINE-1683
+
+Action word 65538 appends low8(p0) | low8(p1)<<8 through EN L2.07397 / RU L2.07403 on `this+0x28`, where `this` is the
+object that the caller (EN body L2.00186) holds at [ebp-0x90]; the map object pushed to the compile call is a different
+object ([ebp-0x10]). The 87 direct vector-call sites per root that call a vector method on a `+0x28` member
+(86 `add ecx,0x28` sites and 1 `lea` site, spread over `.text`, EN L2.08216..L2.08217) were searched by byte census. Six of
+them are named and five classified: the map object's own +0x28 vector is a pointer vector that the loader fills; the caller
+reads it at EN L2.08218 and L2.08219 and the function that starts at EN R2.0081 at EN L2.08220 and L2.08221; the only site
+on the compiler's `this` is the append (EN L2.08222); EN L2.08223 (call L2.02956) is unread. The site EN L2.08224 (call
+L2.08225) is unclassified, and 80 further sites are unclassified; the sites outside EN L2.04217..L2.04448 are taken to
+belong to other classes by address only (not read). The compile function (EN L2.00201..L2.08170), the caller body
+L2.08226..L2.02213, the type-9 stage (EN L2.02687..L2.08171; RU equal after masking in the head) and the conditional pass
+(EN L2.07400..L2.08227) read no `this+0x28`; the stage reads `this+0x24`.
+
+**Confidence.** Medium that no vector-method consumer of the compiler's `+0x28` exists in the population named. Unknown for
+the stage after EN L2.08171, the body of EN L2.02494 after L2.08228 (the conditional pass calls it with the compiler as
+`this`), the function at EN R2.0081, the compiler methods EN L2.00189 and L2.00192, the site EN L2.08223 (call L2.02956
+on a `+0x28` member, context unread), the site EN L2.08224, the 80 unclassified sites, and direct field reads at +0x2c and
++0x30.
+
+**Unknown.** A run that settles it: load mission 10 (it has the 11/41 pair of R2-ENGINE-042), set a write watchpoint on the
+compiler's +0x28 vector and a read watchpoint on its data pointer, and list the readers.
+
+**Amends.** R2-ENGINE-1317: narrows the unread population and names the object whose member is meant.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/p3a/sites.tsv`,
+`evidence/derived/p3a/listings/*-q2-type9-stage.txt`, `evidence/derived/p3b/listings/*-q2-consumer-*.txt`,
+`*-q2-vec-*.txt`, `evidence/derived/p3c/listings/*-q2-stage-rest.txt`.
+
+### R2-ENGINE-1684
+
+The check compile loop (EN L2.08183..L2.07390, RU +0x9ffc; 256 of 256 and 114 of 114 lines equal after masking) walks the
+check list and, for an ordinary check, for each slot copies the type code to the byte IR+0x30+slot. A slot of type 2, 3 or 4
+with a value from 8000 below 10000 (constants 0x1f40 and 0x2710) stores the value, sets a mode byte (2 from 9000, value
+minus 9000; else 1, value minus 8000), stores quotient and remainder by 100 as bytes at IR+0x44+slot and IR+0x4e+slot and
+counts the slot at IR+0x58. This is the action compiler's path of R2-ENGINE-1318. The reference pointers are not set for
+such a slot, and a successful node is appended whole. Check word 65538 stores parameter 0 at Session+0xc784+4*n and counts n.
+In the 19 EN check handler listings of R2-ENGINE-1312 (RU in part) and the check dispatcher (EN L2.03274) the only memory
+operands with displacement 0x3a or 0x44..0x58 are three compares at +0x54 on a unit object in checks-a and one in checks-c
+(RU: same counts); none addresses IR+0x44, +0x4e or +0x58. The 8 further check handlers (checks 11, 12, 13, 2, 20, 22, 27
+and 3, listed in EXP-2183) were not read for these operands by this experiment. The scan for the displacement 0xd724 is that of
+R2-ENGINE-1318, not rerun here: seven hits per root, six indexed loads in the action executor and one unclassified hit
+(EN L2.07408); it is no census of other encodings, embedded bases or bulk copies. The immediates 0x1f40 appear at EN L2.08229, L2.08230 (action compile), L2.08231, L2.08232 (check compile) and
+at L2.08233, L2.08234 (unclassified); RU has the matching sites and two more (L2.08235, L2.08236, unclassified).
+The dword 0xc784 occurs at 61 EN and 62 RU sites; none was classified as a writer of register index 1000 or above.
+
+**Confidence.** High for the check compile arm and its equality with the action arm in both roots. Medium that no check-side
+resolution exists and that the Session+0xd724 loads found are all in the action executor: the handler bodies of RU were
+compared in part only, the 8 further check handlers were not read, the 0xd724 scan is that of R2-ENGINE-1318 (one hit
+unclassified), the 61 and 62 sites were not classified, and the reference-pointer consumers of a check with unset pointers
+were not read. Unknown which code, if any, writes Session+0xd724.
+No installed map has a value in 8000..9999 under these types (R2-ASSET-249), so the installed campaign never takes the path.
+
+**Unknown.** The 8 check handlers not read; the 0xd724 hit EN L2.07408. A run that settles it: load one installed map with
+one check slot of type 4 set to 8001, run the first tick and compare the check result and the log with an unchanged map.
+
+**Amends.** R2-ENGINE-1318: supplies the check side that it left unread. R2-ENGINE-044: the dynamic path of checks.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/p3b/listings/*-q3-check-loop.txt`,
+`evidence/derived/p3c/listings/*-q3-check-tail.txt`, `evidence/derived/p3a/sites.tsv`; EXP-2174 `listings/*-check-dispatch.txt`,
+`*-checks-*.txt`, `*-action-dispatch-a.txt`.
+
+### R2-ENGINE-1685
+
+Population: the ten type codes of every installed check and action node (R2-ASSET-363), the check and action handler
+listings of EXP-2174 and EXP-2183, the type-9 stage head and the ledger and format pages of ROM2. Operand kinds in the
+46 campaign maps are group, unit, player, second reference, item (type 8), type 9 (check 21 only, 24 nodes per root) and
+scalars of type codes 0, 1, 5, 6 and 7. Checks 2, 3, 22 and 27 take literal coordinates in their scalars (Medium:
+the x/y reading of these four rests on the unread helpers EN L2.00488, L2.00489 and L2.07790) and no campaign map uses them (R2-ASSET-247, the 46 campaign
+`.alm` members). The type-9 stage walks a map list at map+0x2fc (EN L2.02687) and reads its elements at +0x04,
++0x08, +0x0c, +0x10, +0x12, +0x16, +0x18 and +0x1a; the compile lookup of a type-9 value (EN L2.08172) is unread, so the
+record that check 21's one type-9 operand selects is unread and a zone record is not excluded for that operand. No other script
+check or action body read takes a zone, area or region record. The ALM format page lists music areas (type 12), which the
+bodies read here do not name. Direct accessor calls of the trigger list are in the loader and the compiler only (the census
+of R2-ENGINE-1681). The fields that decide when a trigger fires are the compiler reads of three check-ID pairs, four action
+IDs, three comparison codes and the latch flag; this reading adds none.
+
+**Confidence.** Medium: the negative covers the bodies and pages named; the lookup helper bodies and the type-9 operand's
+target record are unread.
+
+**Unknown.** The record that a type-9 value selects (EN L2.08172); a run that settles it: break there on the first check 21 of
+a campaign map and compare the result with the map's type-9 and structure records.
+
+**Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/census/vectors.tsv`,
+`evidence/derived/p3a/listings/*-q2-type9-stage.txt`, `evidence/derived/p3a/sites.tsv`.
+
 ## ROM2 guard, patrol, pick-up and idle orders
 
 | ID | Claim | Confidence | Status | Evidence |

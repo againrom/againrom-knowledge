@@ -63,8 +63,9 @@ The script companion specifies all 184 trigger offsets: a 128-byte prefix
 (label interpretation Medium), three check-ID pairs, four action IDs,
 three comparison codes and the flag DWORD at+0xb4. Both loaders bulk-copy
 the trigger; unlike nodes, it has no field permutation. Compiler use of the ID-map node,
-prefix consumers and the flag of a zero-condition trigger remain open; the miss path
-of the ID map is read (find or insert, node value Unknown). — R2-ENGINE-1316, R2-ENGINE-1453
+prefix consumers and the flag of a zero-condition trigger remain open (no reader of the
+prefix was found by a census of direct accessor calls, Medium); the miss path
+of the ID map is read (find or insert, node value Unknown). — R2-ENGINE-1316, R2-ENGINE-1453, R2-ENGINE-1681
 
 Every occurring ordinary ID is mapped through both dispatch tables.
 Twenty-seven action and nineteen check bodies per root are read to RET;
@@ -79,7 +80,9 @@ No stored parameter among all 142 maps is 8000..9999, although the action
 compiler and executor have a positive deferred-reference path. Its pointer
 array producer and return meanings are unproved. Map-result safe limits
 remain Unknown and differ from the separate scenario bank's initialized
-span. — R2-ENGINE-1317, R2-ASSET-249, R2-ENGINE-1318, R2-ENGINE-1319
+span. The check compiler marks the same path and no check handler read addresses it
+(Medium; R2-ENGINE-1684), and no vector-method consumer of the word-65538 collection was
+found in the population named (Medium; R2-ENGINE-1683). — R2-ENGINE-1317, R2-ASSET-249, R2-ENGINE-1318, R2-ENGINE-1319
 
 <a id="byte-planes-and-the-client-fog"></a>
 

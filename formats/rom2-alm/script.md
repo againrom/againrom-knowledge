@@ -21,6 +21,14 @@ Unknown. The read caller invokes the type-9 stage and a conditional
 owner/group pass; neither read establishes what consumes that collection.
 This does not establish that it is unused. — R2-ENGINE-1317
 
+The collection is a member of the compiler object, not of the map object whose own +0x28
+vector the loader fills. No vector-method consumer of the compiler's member was found in
+the compile function (EN L2.00201..L2.08170), the caller or the type-9 stage to EN L2.08171
+(Medium). Of the 87 direct vector-call sites per root, 6 are named and 5 classified; the other
+sites are unclassified, and those outside EN L2.04217..L2.04448 are taken to belong to other
+classes by address only. The stage after EN L2.08171, the body of EN L2.02494 after L2.08228,
+the function at EN R2.0081 and direct field reads are unread. — R2-ENGINE-1683
+
 Ordinary check IR has result slot+0, operation+4 and scalar 0 at+8. Literal
 nonreference values pack densely, including trailing scalar zeros. Literal
 references resolve separately: first unit pointer+0x5c, group+0x60,
@@ -29,6 +37,19 @@ low16(value+3608) at+0x6c. Failed literal reference resolution can clear the
 ID mapping and omit executable IR. Dynamic references in 8000..9999 use a
 different metadata path; its complete resolution/error contract is Unknown.
 — R2-ENGINE-044
+
+The check compiler marks a slot of type 2, 3 or 4 whose value lies in 8000..9999 exactly as
+the action compiler does: mode 1 below 9000 and mode 2 from 9000, value minus the base,
+quotient and remainder by 100 as bytes, and a slot count. It leaves the reference pointer
+unset and copies the metadata into the check IR (High). In the 19 check handler listings of
+R2-ENGINE-1312 (EN; RU in part) and the check dispatcher no body read addresses that
+metadata (Medium); the 8 further check handlers were not read for it. The scan for the
+displacement 0xd724 is that of R2-ENGINE-1318, not rerun: seven hits per root, six indexed
+loads in the action executor and one unclassified hit (EN L2.07408); it is no census of
+other encodings, embedded bases or bulk copies (Medium). — R2-ENGINE-1684, R2-ENGINE-1318
+
+No value in 8000..9999 under type 2, 3 or 4 is stored in the 142 installed maps, so the
+installed campaign does not take the path. — R2-ASSET-249
 
 Literal Unit references 10001..11000 take a separate EN/RU native path with
 offset reference-10001. It requires Session +0x74==0 and nonnull selected
@@ -617,3 +638,100 @@ or remains entry stays in a group's collection, are Unknown. Check 5 returns 0 o
 
 The check-ID map is hash find-or-insert: a check ID absent from the map inserts a node, and
 the value later used as its register slot is Unknown. — R2-ENGINE-1453
+
+## Names, text fields and the shared text buffer
+
+Every action and check node carries a 64-byte name at file +0x00 and ten 64-byte text fields at
++0x9c..+0x31b; every trigger carries a 128-byte prefix. In the 46 campaign maps of both roots all
+names, all text fields and all prefixes are nonempty (longest 45, 23 and 56 bytes). — R2-ASSET-364
+
+The loader puts the name at object+0 and the text fields at object+0x98 (High). The readers
+found are two compile-failure messages of the script compiler, a check and an action, each
+passing the node ID and the node pointer to the formatting call; the format string was read in
+an uncommitted pass and the message sink is unread (Medium). No reader of the ten text fields
+or of the trigger prefix was found; this is a census of direct accessor calls (13 sites per
+root) and a displacement scan for +0x98 over `.text` whose 174 sites outside the loader region
+were not classified, so it is Medium. — R2-ENGINE-1681
+
+Mission entry loads `mission<N>.txt` into the one global string that the dialogue lookup of the
+TALK action also searches (High for the loader and the TALK body; Medium for the lookup's use of
+that string), and each text load replaces that string. Which file the string holds at a given
+TALK is not settled (Unknown). The 46 inn keys are in `town.txt`; the mission files carry the
+section tags of R2-ENGINE-037; the key of a TALK from any other source is not enumerated.
+— R2-ENGINE-1682, R2-ASSET-115
+
+In the 46 campaign maps no script operand is a zone record by the bodies read (Medium). The
+operand kinds are group, unit, player, item and one type-9 object whose record (the lookup
+EN L2.08172) is unread; trigger-list accessor calls are in the loader and the compiler only.
+— R2-ENGINE-1685
+
+## Source slots and compiled positions
+
+The action compiler loops the ten source slots in order and sends each by its type code (node +0x74+4*slot).
+Types 2, 3 and 4 store a resolved group at IR+0x60, player at +0x64 and unit at +0x5c; a second reference of the same
+type goes to +0x68. Type 8 stores u16 +0x6c = low16(value + 3608) and type 9 a pointer at +0x70. Every other type code
+(0, 1, 5, 6, 7) appends the value to the next scalar position pN at IR+8+4*N, N counting only those slots. Values
+8000..9999 under types 2, 3 and 4 skip the arms (R2-ENGINE-1318). This is the rule R2-ENGINE-044 states for checks.
+The 46 campaign maps give each ordinary ID the same type vector in every node, except action 6 (six vectors, told apart
+in the installed maps by the value of slot 0: 3; 1; 15; 10; 11; 4, 5 or 14; the compiler reads type codes only) and check
+word 65538 (two). English and Russian campaign maps agree. In a check, type 9 (check 21, s0=T) takes the lookup EN L2.08172
+and stores the pointer at IR+0x70; the lookup is unread (Medium). — R2-ENGINE-1680, R2-ASSET-363
+
+| Kind | ID | Type codes (s0..s9) | Reference slots | Scalar slots (p0, p1, ... in slot order) | Nodes, EN campaign | Claim |
+|---|---:|---|---|---|---:|---|
+| action | 2 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 448 | R2-ASSET-363 |
+| action | 3 | 1,1,0,0,0,0,0,0,0,0 | none | s0-9 | 48 | R2-ASSET-363 |
+| action | 4 | 0,0,0,0,0,0,0,0,0,0 | none | s0-9 | 46 | R2-ASSET-363 |
+| action | 5 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 81 | R2-ASSET-363 |
+| action | 6 | 7,0,0,0,0,0,0,0,0,2 | s9=G | s0-8 | 8 | R2-ASSET-363 |
+| action | 6 | 7,1,0,0,0,0,0,0,0,2 | s9=G | s0-8 | 1 | R2-ASSET-363 |
+| action | 6 | 7,2,4,1,0,0,0,0,0,0 | s1=G s2=U | s0,3-9 | 14 | R2-ASSET-363 |
+| action | 6 | 7,4,0,0,0,0,0,0,0,2 | s1=U s9=G | s0,2-8 | 1 | R2-ASSET-363 |
+| action | 6 | 7,4,1,0,0,0,0,0,0,2 | s1=U s9=G | s0,2-8 | 7 | R2-ASSET-363 |
+| action | 6 | 7,5,6,0,0,0,0,0,0,2 | s9=G | s0-8 | 71 | R2-ASSET-363 |
+| action | 8 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 197 | R2-ASSET-363 |
+| action | 10 | 1,1,1,0,0,0,0,0,0,0 | none | s0-9 | 60 | R2-ASSET-363 |
+| action | 12 | 4,8,0,0,0,0,0,0,0,0 | s0=U s1=I | s2-9 | 8 | R2-ASSET-363 |
+| action | 13 | 4,8,0,0,0,0,0,0,0,0 | s0=U s1=I | s2-9 | 21 | R2-ASSET-363 |
+| action | 16 | 4,0,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 20 | R2-ASSET-363 |
+| action | 17 | 4,0,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 2 | R2-ASSET-363 |
+| action | 18 | 4,4,0,0,0,0,0,0,0,0 | s0=U s1=V | s2-9 | 2 | R2-ASSET-363 |
+| action | 19 | 4,3,0,0,0,0,0,0,0,0 | s0=U s1=P | s2-9 | 10 | R2-ASSET-363 |
+| action | 20 | 4,0,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 7 | R2-ASSET-363 |
+| action | 21 | 5,6,5,6,1,1,0,0,0,0 | none | s0-9 | 5 | R2-ASSET-363 |
+| action | 22 | 2,3,0,0,0,0,0,0,0,0 | s0=G s1=P | s2-9 | 4 | R2-ASSET-363 |
+| action | 23 | 3,1,0,0,0,0,0,0,0,0 | s0=P | s1-9 | 10 | R2-ASSET-363 |
+| action | 24 | 5,6,4,1,1,0,0,0,0,0 | s2=U | s0-1,3-9 | 3 | R2-ASSET-363 |
+| action | 25 | 1,1,5,6,5,6,5,6,0,0 | none | s0-9 | 9 | R2-ASSET-363 |
+| action | 28 | 4,4,0,0,0,0,0,0,0,0 | s0=U s1=V | s2-9 | 18 | R2-ASSET-363 |
+| action | 29 | 5,6,1,1,0,0,0,0,0,0 | none | s0-9 | 4 | R2-ASSET-363 |
+| action | 30 | 4,1,1,0,0,0,0,0,0,0 | s0=U | s1-9 | 3 | R2-ASSET-363 |
+| action | 32 | 2,0,0,0,0,0,0,0,0,0 | s0=G | s1-9 | 13 | R2-ASSET-363 |
+| action | 33 | 2,0,0,0,0,0,0,0,0,0 | s0=G | s1-9 | 9 | R2-ASSET-363 |
+| action | 34 | 4,1,1,0,0,0,0,0,0,0 | s0=U | s1-9 | 1 | R2-ASSET-363 |
+| action | 35 | 1,1,0,0,0,0,0,0,0,0 | none | s0-9 | 4 | R2-ASSET-363 |
+| action | 36 | 1,1,0,0,0,0,0,0,0,0 | none | s0-9 | 140 | R2-ASSET-363 |
+| action | 38 | 8,0,0,0,0,0,0,0,0,0 | s0=I | s1-9 | 7 | R2-ASSET-363 |
+| action | 39 | 2,0,0,0,0,0,0,0,0,0 | s0=G | s1-9 | 6 | R2-ASSET-363 |
+| action | 65538 | 5,6,0,0,0,0,0,0,0,0 | none | s0-9 | 46 | R2-ASSET-363 |
+| check | 1 | 2,0,0,0,0,0,0,0,0,0 | s0=G | s1-9 | 58 | R2-ASSET-363 |
+| check | 4 | 4,1,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 8 | R2-ASSET-363 |
+| check | 5 | 4,0,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 62 | R2-ASSET-363 |
+| check | 6 | 4,4,0,0,0,0,0,0,0,0 | s0=U s1=V | s2-9 | 205 | R2-ASSET-363 |
+| check | 7 | 4,5,6,0,0,0,0,0,0,0 | s0=U | s1-9 | 62 | R2-ASSET-363 |
+| check | 8 | 3,0,0,0,0,0,0,0,0,0 | s0=P | s1-9 | 14 | R2-ASSET-363 |
+| check | 9 | 4,0,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 5 | R2-ASSET-363 |
+| check | 10 | 3,3,0,0,0,0,0,0,0,0 | s0=P s1=V | s2-9 | 50 | R2-ASSET-363 |
+| check | 14 | 5,6,0,0,0,0,0,0,0,0 | none | s0-9 | 1 | R2-ASSET-363 |
+| check | 15 | 3,5,6,0,0,0,0,0,0,0 | s0=P | s1-9 | 46 | R2-ASSET-363 |
+| check | 16 | 4,8,5,6,0,0,0,0,0,0 | s0=U s1=I | s2-9 | 5 | R2-ASSET-363 |
+| check | 17 | 4,8,0,0,0,0,0,0,0,0 | s0=U s1=I | s2-9 | 37 | R2-ASSET-363 |
+| check | 18 | 4,0,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 1 | R2-ASSET-363 |
+| check | 19 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 209 | R2-ASSET-363 |
+| check | 21 | 9,0,0,0,0,0,0,0,0,0 | s0=T | s1-9 | 24 | R2-ASSET-363 |
+| check | 23 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 5 | R2-ASSET-363 |
+| check | 24 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 3 | R2-ASSET-363 |
+| check | 25 | 5,6,1,0,0,0,0,0,0,0 | none | s0-9 | 24 | R2-ASSET-363 |
+| check | 26 | 4,1,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 3 | R2-ASSET-363 |
+| check | 65538 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 160 | R2-ASSET-363 |
+| check | 65538 | 7,0,0,0,0,0,0,0,0,0 | none | s0-9 | 4 | R2-ASSET-363 |

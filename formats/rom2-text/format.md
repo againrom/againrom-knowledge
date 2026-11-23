@@ -95,13 +95,15 @@ the `npc` control test uses a temporary lowercase copy. — R2-ENGINE-050
 
 The search runs on one shared text buffer that holds `town.txt`,
 `globalmap.txt`, `quest.txt` or a mission file, whichever loader ran last;
-which file it holds when TALK runs is Unknown. When the find returns -1 the
+which file it holds when TALK runs is Unknown. The RU destination of the mission
+text is the same global string (RU L2.01456; R2-ENGINE-1682); the 14 and 2
+unclassified references to the EN buffer stay Unknown. When the find returns -1 the
 loader leaves a one-byte empty body and a clear control flag (EN High; RU
 Medium, the RU find was not read). That the find returns -1 for an absent
 section rests on an unread callee (Medium). The first-town TALK body
 appears to ignore the builder's result and still call TalkTo (Medium).
 Whether the page then draws an empty box or closes is Unknown.
-— R2-ENGINE-343, R2-ENGINE-344
+— R2-ENGINE-343, R2-ENGINE-344, R2-ENGINE-1682
 
 The part counter starts at zero and advances before reading. `<...>` headers
 are scanned in source order; temporary lowercase headers match the substring

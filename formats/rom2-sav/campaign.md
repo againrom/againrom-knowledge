@@ -318,7 +318,8 @@ Medium: within one visit of the page, a repeated TALK with the same hero
 selects the same alternatives, because each builds a new dialogue from part
 1. No inn section header carries `npcalive=`, `npcdead=` or `tips=`; other
 header tokens were not enumerated. The file the buffer holds when TALK runs
-is Unknown (R2-ENGINE-344). — R2-ENGINE-499
+is Unknown, as are 14 and 2 unclassified references to the EN buffer; the RU mission
+destination is read (R2-ENGINE-344, R2-ENGINE-1682). — R2-ENGINE-499
 
 In `text/town.txt` each of the 46 talk keys first hits its own line-leading
 tag in EN; in RU 45 do, and `#npc2006talk110` is not at a line start. It holds `about` for hires 1..7
