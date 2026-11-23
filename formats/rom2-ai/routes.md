@@ -87,7 +87,7 @@ Area reach of these Effects (Medium throughout): Light and Darkness pulse onto c
 reached and kind 3 units (Bat_Sonic, Dragon, Succubus; a flier by name only) and buildings are not
 (R2-ENGINE-1535); in EN sight is base once per 16 updates between the end of one pulse's Effect
 and the next pulse (R2-ENGINE-1534). Blizzard passes the kind 1 or 2, kind 3 and building occupants of
-its one sampled cell per pulse to a damage object that admits all three (R2-ENGINE-1533; resolver rejection by
+its one sampled cell per pulse to a damage object that admits all three (R2-ENGINE-1533; cell validity band `8..W - 9`, `8..H - 9` confirmed High in both roots, R2-ENGINE-1668; resolver rejection by
 target flag +0x4c bit 8 is unread in EN); the cells and pulses of the other area spells
 are in R2-ENGINE-1536; Fire Ball hits a multi-cell unit once per covered cell (R2-ENGINE-1537, Medium).
 
@@ -446,7 +446,7 @@ Speed for a unit whose kind (`L2.03577`) is 1 (R2-ENGINE-1471): base * M, then t
 of the two cell terms, ((t(cell) + t(next)) and 0xff) >> 1, the sum kept in a byte (a mean of 0 counts as 8); M is
 `SpeedMultiplier`, default 8. The term `L2.03599` has three return paths and one stores the cell byte shifted right by 2
 back into the terrain byte array; which cells take it is Unknown. The slope term uses the byte at `this+0x944f4` that
-R2-ENGINE-1340 reads as a height (Medium): dh < 0 (called climbing, the next cell higher) subtracts speed * |dh| / 64,
+R2-ENGINE-1340 reads as a height (Medium; tile classifier `L2.06958`/`L2.07473` indexes `+0x54146..+0x54150` and writes no height, R2-ENGINE-1665; client/server type-3 readers in R2-ENGINE-1667): dh < 0 (called climbing, the next cell higher) subtracts speed * |dh| / 64,
 dh >= 0 adds speed * dh / 64, dh clamped to 32. Any other kind uses the base speed unchanged. The speed is clamped to
 1..63, so a straight step takes from 5 to 256 advances (counted in advances, not game ticks; Medium for the helper).
 No group term was found in the bodies read; the object that holds the base speed byte is not identified

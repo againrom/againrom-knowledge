@@ -105,6 +105,35 @@ The type-12 record shape and the shipped areas are in
 [ALM type 12](../rom2-alm/format.md#music-areas-type-12).
 — R2-ASSET-084
 
+Every type-12 theme index `t` in `0..16` directly selects entry `t` of the
+17-entry list pushed in ascending order by EN `L2.01375` / RU `L2.01376`,
+copied by `SetList` (`L2.01377`/`L2.01403`), picked by area select
+(`L2.01380`/`L2.01381`) into `L2.01378`/`L2.01379`, and opened by
+`SelectEntry` (`L2.01404`/`L2.01405`) -> `OpenTrack` (`L2.06189`/`L2.08298`)
+(all five routines masked-equal across EN and RU; High for the program's index
+from theme to list entry; what plays is Medium: archive opener unread, no original
+run). — R2-ENGINE-1672
+
+| Theme `t` | Mission list literal | `music.res` key | Bytes | Seconds | EN head / area | RU head / area | Claim |
+|---:|---|---|---:|---:|---|---|---|
+| 0 | `music\B00.wav` | `b00.wav` | 7688332 | 87.169 | 18 / 85 | 18 / 85 | R2-ENGINE-1672 |
+| 1 | `music\B01.wav` | `b01.wav` | 6920696 | 78.465 | 23 / 133 | 23 / 134 | R2-ENGINE-1672 |
+| 2 | `music\B02.wav` | `b02.wav` | 8564176 | 97.099 | 4 / 29 | 4 / 31 | R2-ENGINE-1672 |
+| 3 | `music\B03.wav` | `b03.wav` | 6669132 | 75.613 | 4 / 136 | 4 / 137 | R2-ENGINE-1672 |
+| 4 | `music\B04.wav` | `b04.wav` | 8899164 | 100.897 | 6 / 26 | 6 / 32 | R2-ENGINE-1672 |
+| 5 | `music\B05.wav` | `b05.wav` | 6655172 | 75.455 | 16 / 118 | 16 / 120 | R2-ENGINE-1672 |
+| 6 | `music\B06.wav` | `b06.wav` | 8874020 | 100.612 | 1 / 17 | 1 / 22 | R2-ENGINE-1672 |
+| 7 | `music\B07.wav` | `b07.wav` | 7371544 | 83.577 | 18 / 168 | 18 / 169 | R2-ENGINE-1672 |
+| 8 | `music\B08.wav` | `b08.wav` | 5924884 | 67.175 | 32 / 91 | 32 / 93 | R2-ENGINE-1672 |
+| 9 | `music\B09.wav` | `b09.wav` | 4810760 | 54.543 | 15 / 77 | 15 / 82 | R2-ENGINE-1672 |
+| 10 | `music\B10.wav` | `b10.wav` | 4348964 | 49.307 | 5 / 41 | 5 / 43 | R2-ENGINE-1672 |
+| 11 | `music\B11.wav` | `b11.wav` | 4619292 | 52.372 | 1 / 112 | 1 / 115 | R2-ENGINE-1672 |
+| 12 | `music\B12.wav` | `b12.wav` | 9261044 | 105.000 | 1 / 63 | 1 / 67 | R2-ENGINE-1672 |
+| 13 | `music\B13.wav` | `b13.wav` | 12170708 | 137.989 | 0 / 9 | 0 / 13 | R2-ENGINE-1672 |
+| 14 | `music\B14.wav` | `b14.wav` | 4467500 | 50.651 | 0 / 3 | 0 / 8 | R2-ENGINE-1672 |
+| 15 | `music\B15.wav` | `b15.wav` | 7404536 | 83.951 | 0 / 2 | 0 / 4 | R2-ENGINE-1672 |
+| 16 | `music\B16.wav` | `b16.wav` | 6050536 | 68.600 | 0 / 1 | 0 / 6 | R2-ENGINE-1672 |
+
 ## Player
 
 The player streams the open entry into a looping DirectSound buffer. At

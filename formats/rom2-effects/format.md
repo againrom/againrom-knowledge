@@ -144,7 +144,7 @@ pulses and occupant entry per pulse are (R2-ENGINE-1536, High for the census and
 | 2 | Fire Ball | 3 by 3 = 9 | 1 | +4, +8, +0xc | R2-ENGINE-1536, R2-ENGINE-1537 |
 | 3 | Wall of Fire | 10 or 9 by facing | 10 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
 | 6 | Poison Cloud | diamond, 21 | 10 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
-| 7 | Blizzard | 1 of 36 | 32, 3 updates apart | +4, +8, +0xc | R2-ENGINE-1533 |
+| 7 | Blizzard | 1 of 36 | 32, 3 updates apart | +4, +8, +0xc | R2-ENGINE-1533, R2-ENGINE-1668 |
 | 9 | Acid Stream | cone, 25 or 21 in total | 6, at updates 1, 4, 7, 10, 13, 16 | +4, +8, +0xc | R2-ENGINE-1536 |
 | 14 | Darkness | diamond, 57 | 15 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
 | 15 | Light | diamond, 57 | 15 + ceil(floor(16P/10)/16), 16 updates apart | +4 | R2-ENGINE-1536 |
@@ -153,7 +153,9 @@ pulses and occupant entry per pulse are (R2-ENGINE-1536, High for the census and
 P is the book power 0 to 255, so the pulse count runs from the first number to that number plus 26. A unit
 of s by s cells stands at entry +4 of each covered cell: a wall or Poison Cloud applies once per covered shape
 cell per pulse, Fire Ball once per covered cell of its square at damage divided by the square of the unit's size byte (equal to s if that byte equals s; its source is not read)
-(R2-ENGINE-1536, R2-ENGINE-1537, Medium).
+(R2-ENGINE-1536, R2-ENGINE-1537, Medium). Blizzard cell validity EN `L2.02717` / RU `L2.01700` (61 of 61 masked-equal)
+admits a candidate `(x, y)` iff `8 <= x <= W - 9` and `8 <= y <= H - 9`, reading only ALM type-0 `W` and `H`
+(`+0x50000`, `+0x50004`) and clamping out-of-band coordinates (High in both roots, R2-ENGINE-1668, amending R2-ENGINE-1533).
 
 Light and Darkness reach only entry +4: kind 1 or 2 units (Units rows with movementType 1 or 2, which include Ghost and Bee; R2-ASSET-327, R2-ASSET-328) are reached; a kind 3 unit (Bat_Sonic, Dragon, Succubus; a flier by name only) at entry +8 and
 a building at entry +0xc are not (R2-ENGINE-1535, R2-ENGINE-1530, Medium). On a reached unit, in EN a pulse

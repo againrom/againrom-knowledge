@@ -1638,7 +1638,7 @@ R2-ENGINE-510 grades Medium. The node-iterating helpers `L2.02497` and
 
 **Unknown.** The EN image was not scanned for other readers of map+0x310.
 
-**Amended.** R2-ENGINE-537: group +0x48 and +0x4c, set by e2 bits 4 and 8, select the groups of Inn offer blocks 3 and 5. R2-ENGINE-538 reads `L2.02502`. R2-ASSET-132 gives the root-map values.
+**Amended.** R2-ENGINE-537: group +0x48 and +0x4c, set by e2 bits 4 and 8, select the groups of Inn offer blocks 3 and 5. R2-ENGINE-538 reads `L2.02502`. R2-ASSET-132 gives the root-map values. R2-ASSET-360 publishes the complete flag-mask, per-bit and position distributions across all 142 maps, and R2-ENGINE-1670 verifies EN/RU respawn parity (`L2.08237`/`L2.08238`) and reports 37 direct `.text` `0x310` hits per root (Medium for reader completeness).
 
 ### R2-ASSET-121
 
@@ -3488,7 +3488,7 @@ original (the draw's own resolution untrapped, Medium); R2-ENGINE-977 is the fra
 |---|---|---|---|---|
 | R2-ASSET-228 | ROM2 spell.txt line 17 is EN Stone Curse, RU Каменное проклятие; main.txt 92 is EN casts, RU с заклинанием, 93 is empty, and 123 and 124 are EN Range and Duration, RU Дистанция and Длительность. | High | ✔ promoted (branch candidate) | [EXP-2142](../experiments/EXP-2142-rom2-curse-card/RESULTS.md) |
 | R2-ASSET-229 | ROM2 Units rows: 241 per root, 61 have zero columns for Withdraw and Wimpy; Withdraw is above 0 on 20 rows and Wimpy on 46; EN and RU equal in all 482 row-title pairs; -1 is stored on 4 rows. | High | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
-| R2-ASSET-230 | ROM2 type-9 map records with mode mask 4: 99 of 219 EN and 322 of 635 RU over 142 maps; maps 72 and 81 hold 27 and 3 in both roots; 9 mode-5 records lie at cell 0,0; element grammar read in RU, EN Medium. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ASSET-230 | ROM2 type-9 map records with mode mask 4: 99 of 219 EN and 322 of 635 RU over 142 maps; maps 72 and 81 hold 27 and 3 in both roots; 9 mode-5 records lie at cell 0,0; element grammar read in RU, EN Medium. | High / Medium | ● active (amended, branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 | R2-ASSET-231 | ROM2 editor map writer: 13 or 11 records, header fields, type-0 sources; 644 is a constant | High / Medium | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
 | R2-ASSET-232 | ROM2 editor terrain writer: records 0-3, 644-byte type 0, chosen by a global | High / Medium | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
 | R2-ASSET-233 | ROM2 editor save: version 0x640, scalar unset, one tag, tile transforms | High / Medium | ● active (branch candidate) | [EXP-2171](../experiments/EXP-2171-rom2-map-writer/RESULTS.md) |
@@ -3566,6 +3566,8 @@ interpretation of the question's "bit 4": mode 4 is tested by `and edx, 4` at `L
 record.
 
 **Unknown.** How many elements a type-8 record binds to a sack (+4 nonzero).
+
+**Amended.** R2-ENGINE-1669 tabulates the trailing count at `+0x1a` across all 421 mask-4 elements (all 412 mode-4 elements have count 0; 7 of the 8 RU mode-5 elements have count 1..3; the 1 EN mode-5 element has count 0) and shows that the mode-4 stage arm and caster constructor never read `+0x1a` in EN or RU.
 
 **Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
 
@@ -4569,6 +4571,105 @@ F_Skeleton.5 stores a max below its min in the table; the reader's byte store of
 
 **Evidence.** [EXP-2193](../experiments/EXP-2193-rom2-combat-stats/RESULTS.md) question 1; programs
 `evidence/units_columns.py` over the grammar of `evidence/data.py` and `evidence/card_damage.py`.
+
+## ROM2 map loot, group and shop records
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-359 | ROM2 ALM type-8 loot parser EN L2.08239 / RU L2.08240 (113/113 masked-equal) uses one version-gated grammar (>= 0x3dd) consuming all 142 installed maps (59 EN, 83 RU) with 0 bytes left over. | High | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ASSET-360 | ROM2 ALM type-10 census over 142 maps (674 EN, 1696 RU root entries; 0 campaign): flags take bits 1/2/4/8 only (masks 0..14), position takes -1..9; 1 EN and 2 RU have pos>=0 with bit 1 clear. | High | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ASSET-361 | ROM2 ALM type-11a census over 142 maps (376 EN, 477 RU root entries; 0 campaign): 23 EN and 30 RU distinct flag masks; bit 1 occurs in 143 EN / 158 RU; bit 0x08 and bits >=0x80 never occur. | High | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+
+### R2-ASSET-359
+
+The ALM type-8 dispatcher arm in EN (`L2.08239..L2.08241`) and RU (`L2.08240..L2.08242`) matches 113 of 113
+instructions after address masking (`evidence/derived/q4-type8-loot.tsv`). It loops `type0[+0x2c]` times (R2-ASSET-255);
+each sack reads `u32 itemCount`, `u32 ownerId`, `u32 x`, `u32 y`, then when `formatVersion >= 0x3dd` (`989`; EN arm
+`L2.08243`: `cmp dword ptr [ebp - 0x44], 0x3dd` then `jb` over the read) reads `u32 +0x10`, then loops `itemCount` times reading `(u32 itemId, u16 word, u32 binding)` (10 bytes per item).
+
+Across all 142 installed maps (59 EN: 46 `scenario.res` + 13 root, 27 with sacks, 115 sacks, 139 items; 83 RU: 46
+`scenario.res` + 37 root, 36 with sacks, 368 sacks, 327 items; all versions 1300 (EN 41, RU 45 maps) or 1600 (EN 18,
+RU 38), both above `0x3dd`), the
+strict parser of R2-ASSET-254 (`c.at != end` aborts) consumes every map's type-8 payload with **0 bytes left over**
+per map. Independent cross-check: R2-ASSET-018's `structure-walk.tsv` reports `residue = 0` on all 83 of 83 RU maps
+for `typeId = 8`. (The strict parser's `version >= 0x3dd` check agrees with the code exactly; no installed map has
+version `0x3dd`.) The EXP-2197 install census
+(`evidence/census/type8-loot-per-map.tsv`, read-only, reproduced byte-equal) parses each of the 142 maps' type-8
+payload with this grammar: consumed bytes equal the declared payload size on every map, leftover 0 on every map, 115
+sacks and 139 items in 27 of 59 EN maps, 368 sacks and 327 items in 36 of 83 RU maps.
+
+**Confidence.** High for the EN/RU dispatcher grammar parity and for 0 leftover bytes on all 142 installed maps.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q4-type8-loot.tsv`
+(derived from committed EXP-2068 dispatcher listings, EXP-2175 census tables and EXP-2003 `structure-walk.tsv`).
+
+### R2-ASSET-360
+
+Over all 142 installed maps, the 46 campaign maps per root carry 0 type-10 entries (R2-ASSET-122), and the root `.alm`
+maps carry 674 EN (13 maps) and 1,696 RU (37 maps) entries (R2-ASSET-132; recomputed from `t10-entries.tsv` into
+`evidence/derived/q6-type10-groups.tsv`).
+
+Flag dword (`+0x08`) values (no bit above 8 ever occurs):
+
+| Mask | Bits set | EN count | RU count |
+|---:|---|---:|---:|
+| 0 | none | 6 | 26 |
+| 2 | 2 | 268 | 649 |
+| 3 | 1, 2 | 7 | 22 |
+| 4 | 4 | 0 | 5 |
+| 6 | 2, 4 | 326 | 881 |
+| 7 | 1, 2, 4 | 0 | 4 |
+| 10 | 2, 8 | 35 | 62 |
+| 14 | 2, 4, 8 | 32 | 47 |
+
+Per-bit totals: bit 1 in 7 EN / 26 RU; bit 2 in 668 EN / 1,665 RU; bit 4 in 358 EN / 937 RU; bit 8 in 67 EN / 109 RU.
+
+Position dword (`+0x0c`) values: `-1` (666 EN / 1,668 RU), `0` (1 / 1), `1` (3 / 7), `2` (3 / 7), `3` (1 / 5), `4` (0 / 2),
+`5` (0 / 2), `6` (0 / 1), `7` (0 / 1), `8` (0 / 1), `9` (0 / 1). Every entry with bit 1 set has `pos >= 0` (7/7 EN,
+26/26 RU; 0 with `pos < 0`). Three entries carry `pos >= 0` with bit 1 clear: EN `CROSS2.ALM` index 1 (`flags=10, pos=0`)
+and RU `CROSS2.ALM` index 1 (`flags=10, pos=0`) and `wsenigma.alm` index 5 (`flags=2, pos=2`); the type-10 pass sets
+object `+0xb8 = -1` for those entries (R2-ASSET-120).
+
+**Confidence.** High for all counts over the 142 installed maps.
+
+**Amends.** none; extends R2-ASSET-132 (same totals, adds the per-mask and per-position tables).
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q6-type10-groups.tsv`.
+
+### R2-ASSET-361
+
+Over all 142 installed maps, the 46 campaign maps per root carry 0 type-11a entries (R2-ASSET-122), and the root `.alm`
+maps carry 376 EN (in 12 of 13 maps) and 477 RU (in 29 of 37 maps) entries (R2-ASSET-132; recomputed from
+`t11a-entries.tsv` into `evidence/derived/q7-type11a-shops.tsv`).
+
+Flag dword (`+0x04`) distinct masks (23 in EN, 30 in RU):
+
+| Mask | Bits set | EN | RU | Mask | Bits set | EN | RU |
+|---:|---|---:|---:|---:|---|---:|---:|
+| `0x00` | none | 0 | 2 | `0x36` | 0x02,0x04,0x10,0x20 | 10 | 10 |
+| `0x02` | 0x02 | 0 | 1 | `0x37` | 0x01,0x02,0x04,0x10,0x20 | 18 | 18 |
+| `0x14` | 0x04,0x10 | 26 | 26 | `0x41` | 0x01,0x40 | 8 | 8 |
+| `0x20` | 0x20 | 21 | 28 | `0x43` | 0x01,0x02,0x40 | 7 | 7 |
+| `0x21` | 0x01,0x20 | 2 | 2 | `0x60` | 0x20,0x40 | 31 | 49 |
+| `0x22` | 0x02,0x20 | 51 | 62 | `0x61` | 0x01,0x20,0x40 | 16 | 22 |
+| `0x23` | 0x01,0x02,0x20 | 26 | 26 | `0x62` | 0x02,0x20,0x40 | 15 | 17 |
+| `0x24` | 0x04,0x20 | 2 | 4 | `0x63` | 0x01,0x02,0x20,0x40 | 11 | 11 |
+| `0x25` | 0x01,0x04,0x20 | 4 | 4 | `0x64` | 0x04,0x20,0x40 | 0 | 1 |
+| `0x30` | 0x10,0x20 | 11 | 15 | `0x70` | 0x10,0x20,0x40 | 11 | 36 |
+| `0x31` | 0x01,0x10,0x20 | 7 | 7 | `0x71` | 0x01,0x10,0x20,0x40 | 8 | 12 |
+| `0x32` | 0x02,0x10,0x20 | 0 | 2 | `0x72` | 0x02,0x10,0x20,0x40 | 55 | 60 |
+| `0x33` | 0x01,0x02,0x10,0x20 | 17 | 21 | `0x73` | 0x01,0x02,0x10,0x20,0x40 | 13 | 14 |
+| `0x34` | 0x04,0x10,0x20 | 0 | 2 | `0x74` | 0x04,0x10,0x20,0x40 | 0 | 3 |
+| `0x35` | 0x01,0x04,0x10,0x20 | 6 | 6 | `0x76` | 0x02,0x04,0x10,0x20,0x40 | 0 | 1 |
+
+Per-bit totals: `0x01` in 143 EN / 158 RU; `0x02` in 223 / 250; `0x04` in 66 / 75; `0x08` in 0 / 0; `0x10` in 182 / 233;
+`0x20` in 335 / 433; `0x40` in 175 / 241; bits `>= 0x80` in 0 / 0.
+
+**Confidence.** High for all counts over the 142 installed maps.
+
+**Amends.** none; extends R2-ASSET-132 (same totals, adds the per-mask and per-position tables).
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q7-type11a-shops.tsv`.
 
 ## ROM2 script nodes: type vectors of the installed maps
 

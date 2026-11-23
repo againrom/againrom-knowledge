@@ -270,6 +270,8 @@ behind it are Unknown), Medium (R2-ENGINE-1533):
 | Building | +0xc | yes (same) | structure, B+U[0,S]-5 on word +0x42 | R2-ENGINE-1532, R2-ENGINE-1531 |
 | Token, Effect | none | no | none | R2-ENGINE-1531 |
 
-A target covering a cells inside the window is hit with probability a/36 per pulse; the map-band rule is read in
-RU only (R2-ENGINE-391), so a/36 holds for a target wholly inside the band in EN at Medium. The damage object has
+A target covering a cells inside the window and the map band `8..W-9`, `8..H-9` is hit with probability a/36 per
+pulse; cell validity EN `L2.02717` equals RU `L2.01700` (61 of 61 masked-equal) and reads only ALM type-0 `W` and `H`
+(the cell rule is High in both roots, R2-ENGINE-1668, amending R2-ENGINE-391 and R2-ENGINE-1533; the probability a/36
+is Medium, R2-ENGINE-1533). The damage object has
 no filter by caster, ally or class beyond the two slots. The rate is not measured in RU; RU is not claimed.

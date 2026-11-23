@@ -178,7 +178,7 @@ Terms shared by these cards: the step vector is the block at unit `+0x1c0` (the 
 |---|---|---|---|---|
 | R2-ENGINE-1470 | ROM2 EN L2.06918 / RU L2.07803 (masked-equal) stores speed +0xa8, heading +0xae, axis bytes +0xb0/+0xb1 (diagonal: 0.707 truncated) and advance count +0xaa into the unit +0x1c0 block; one call found, in R2-ENGINE-1213's step start. | High / Medium | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
 | R2-ENGINE-1471 | ROM2 step time in advances: ceil(256 / larger axis byte); speed 1..63 from base speed and, for kind 1 only, a height-difference term and a byte-wrapped mean of two cell terms; no group term in the bodies read. | High / Medium / Unknown | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
-| R2-ENGINE-1472 | ROM2 terrain constructor reads 18 parameters through a config object named World\Data\map.reg (sections Scanning, Terrain, Path Finding) through EN R2.0113; defaults and destinations are in code; the values in the file are unread. | High / Medium / Unknown | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
+| R2-ENGINE-1472 | ROM2 terrain constructor reads 18 parameters through a config object named World\Data\map.reg (sections Scanning, Terrain, Path Finding) through EN R2.0113; defaults and destinations are in code; the values in the file are unread. | High / Medium / Unknown | ● active (amended) | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
 
 ### R2-ENGINE-1470
 
@@ -218,6 +218,8 @@ Section, key, default, destination: Scanning, ScanShift, 7, dword +0x2a004; Terr
 
 **Amends.** none; consistent with R2-ENGINE-614 and R2-ENGINE-956, which read the same body of `R2.0113`.
 
+**Amended.** R2-ENGINE-1665 reads the tile classifier EN `L2.06958` / RU `L2.07473`, which indexes `this+0x54146 + class` (using `T[0] = 0xff` and `T[1..10]` at `+0x54147..+0x54150`) to blend cell terrain bytes. The shipped `map.reg` values and any other `+0x54147..+0x54150` readers remain Unknown.
+
 ## Item card for a spell-carrying item
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -231,7 +233,7 @@ Section, key, default, destination: Scanning, ScanShift, 7, dword +0x2a004; Terr
 | R2-ENGINE-1003 | ROM2 post-step L2.02446 has one direct caller, the group tick at L2.05914, reached by every programme including 0 once the tick runs; member routine L2.02447 has one, in it; no slot +0x30 test; ungrouped units Medium. | High / Medium | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 | R2-ENGINE-1004 | ROM2 order-3 arm passes command +0xc with no test; the planner head reads target +0x4c first in both roots (masked equal), so a zero target faults; dead or removed targets are not tested in the head read. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
 | R2-ENGINE-1005 | No census store of command +0x40/+0x44 traced to +0x1c4 lies in a LOAD body read; seven ROM2 bodies (creation, post-step, member routine, predicates, order-3 arm, planner head) are equal under the mask. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2143](../experiments/EXP-2143-rom2-creature-thresholds/RESULTS.md) |
-| R2-ENGINE-1006 | ROM2 stage RU L2.00117/EN L2.02687 builds a 0x44 caster for a type-9 element with mask 4, a nonzero cell and no sack whose key names a building, calling unread L2.05948 with its location and copying its owner; a missing key builds none. | High / Medium | ● active (branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
+| R2-ENGINE-1006 | ROM2 stage RU L2.00117/EN L2.02687 builds a 0x44 caster for a type-9 element with mask 4, a nonzero cell and no sack whose key names a building, calling unread L2.05948 with its location and copying its owner; a missing key builds none. | High / Medium | ● active (amended, branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 | R2-ENGINE-1007 | ROM2 turn routine RU L2.00502 calls consumer L2.05949 after the group-tick loop; it walks the caster list once per turn, so by R2-ENGINE-778 once per 16 session ticks (Medium); no caller census of L2.05949. | High / Medium | ● active (amended, branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 | R2-ENGINE-1008 | A ROM2 caster picks a unit through L2.05950 by relation bit 0 against spell byte +0xa and unit +0x144 bit 0x1000, draws one survivor and calls L2.05951 on it; fill L2.05952 and L2.05953 are unread, so a cast taking effect is Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
 | R2-ENGINE-1009 | ROM2 caster fields: type-9 +0x16 is the spell index (EN 1..27, RU 1..29), +0x18 the power (EN 5..255, RU 2..255), +8/+0xc low bytes the cell, +0x00 a fill byte (1..9); power goes unchanged to the call of L2.05951. | High / Medium | ● active (amended, branch candidate) | [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md) |
@@ -566,6 +568,8 @@ only by the type-8 arm and no census of those links was made, so the count of th
 reach the arm is Unknown. Medium for the error path, whose body `L2.05959` was not read.
 
 **Unknown.** Whether the error sink stops the load.
+
+**Amended.** R2-ENGINE-1669 confirms that neither the mode-4 stage arm (EN `L2.07317..L2.08244`, RU `L2.05960..L2.05961`) nor caster constructor `L2.05956`/`L2.05954` reads the trailing count or `(u32, u16)` entries at element `+0x1a`; other readers remain unsearched (Medium).
 
 **Evidence.** [EXP-2144](../experiments/EXP-2144-rom2-structure-casters/RESULTS.md)
 
@@ -8270,7 +8274,7 @@ returns (body unread; the core addresses it alike, Medium), and the
 map-load method calls it before the map build (R2-SESSION-329). Other srand callers were not
 scanned, so a later reseed stays open (Medium).
 
-**Amended.** R2-ENGINE-1533 uses the RU band rule of this card for EN at Medium; the Unknown on EN map-edge acceptance is not narrowed.
+**Amended.** R2-ENGINE-1533 uses the RU band rule of this card for EN at Medium; the Unknown on EN map-edge acceptance is not narrowed. R2-ENGINE-1668 closes the EN map-edge Unknown: EN `L2.02717` equals RU `L2.01700` (61 of 61 masked-equal) and reads only `W` and `H` from type 0 (`+0x50000`, `+0x50004`).
 
 **Evidence.** [EXP-2049](../experiments/EXP-2049-rom2-blizzard/RESULTS.md); committed derived listings and tables named in that result.
 
@@ -12478,6 +12482,8 @@ which skip re-creation; the caller and call rate of slot 5; the units of
 default; the key string at `L2.02529`. Reading `L2.02502` and the slot-5
 caller would settle the first two; the EN store would settle the last.
 
+**Amended.** R2-ENGINE-1670 verifies EN/RU masked parity on the first 17 of 152 instructions of slot 5 (`L2.08245`/`L2.02521`; 152 of 152 here) and on the respawn method (`L2.08237`/`L2.08238`, 156 instructions, equal), confirming both roots read `+0xbc` (flag 2), `+0xc4`/`+0xc8` (flags 4/8) and `+0xb8` (flag 1 + position -> script action executor `L2.07383`/`L2.02490`); caller completeness remains Medium.
+
 **Amended.** R2-ENGINE-538 reads `L2.02502`: it returns dword +0xc of its receiver (High); that the value is a member count is Medium. The third argument of `L2.00313` is the positioning radius of R2-ENGINE-531.
 
 ### R2-ENGINE-511
@@ -16158,7 +16164,7 @@ five or more digits is masked.
 |---|---|---|---|---|
 | R2-ENGINE-643 | EN ROM2 fog stamp L2.03326 is slot +0x48 of statics and, via wrapper L2.03327, units; refresh L2.01068 (tick L2.01389, every 32nd tick, while [L2.00989] is 0) calls it; slot +0x44 L2.03328 is a second route (Medium). | High / Medium | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
 | R2-ENGINE-644 | EN ROM2 fog walk L2.03329 seeds its centre with (word +0x10a >> 1) + 64 (s 7, K 128); a copied unit's +0x10a is argument word +0xa4, so the hero's seed is 888 for sight 1648 and 872 for sight 1617. | High / Medium | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
-| R2-ENGINE-645 | EN ROM2 fog walk: rings 1..19 around cell (+0x38, +0x3c); a cell keeps its predecessor's budget minus trunc(128·sqrt(i²+j²)/max(i,j)) and its type-2 height rise over the centre; cells outside 7..W-8 are skipped; an empty ring ends it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
+| R2-ENGINE-645 | EN ROM2 fog walk: rings 1..19 around cell (+0x38, +0x3c); a cell keeps its predecessor's budget minus trunc(128·sqrt(i²+j²)/max(i,j)) and its type-2 height rise over the centre; cells outside 7..W-8 are skipped; an empty ring ends it. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
 | R2-ENGINE-646 | EN ROM2 fog stamp ORs 0xc000 into fog cells X..X+1, Y..Y+1 for each positive budget cell, X = +0x38 + trunc(size/2) - 20 + i; a one-cell body stamps on the walk centre, sizes 2 and 3 one cell to +x and +y. | High / Medium | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
 | R2-ENGINE-647 | Derived, EN ROM2 first mission, hero 11/41: a stamp uncovers 155 cells for sight 1648 (unmodified Start_MF), 154, the saved count, for 1617; the refresh stamps no earlier than the 32nd tick, L2.03328 earlier is Unknown. | Medium | ● active (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
 | R2-ENGINE-648 | EN ROM2 stamp gate: an object stamps only when word [[Player+0x3c] + 2·owner key] has bit 0x8 and, for units, byte +0x184 is below 3; no 10.alm type 5 entry has bit 0x8, so the writer of that bit is Unknown. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2081](../experiments/EXP-2081-rom2-fog-stamp/) |
@@ -16314,6 +16320,8 @@ the header reader `L2.02735` is unread; the 20-byte header copy at
 type 2 heights, not type 3 (R2-ENGINE-647). Medium for truncation in
 `L2.02708` (unread); rounding gives the same figure at 11/41 for seeds
 888 and 872.
+
+**Amended.** R2-ENGINE-1666 reads the header reader EN `L2.02735` / RU `R2.0003` (25/25 masked-equal), except its `0x3e8` skip case, and confirms switch arm 2 (`L2.07463`/`L2.07464`) fills `asset+0x14` with ALM type 2, copied to `client+0x10` in both roots (High). Truncation in `L2.02708` remains Medium.
 
 ### R2-ENGINE-646
 
@@ -31598,7 +31606,7 @@ EN runs the sack stage only when Session +0x74 is 0; the RU stage has no such te
 |---|---|---|---|---|
 | R2-ENGINE-1338 | ROM2 loader (EN L2.02484, RU R2.0002, masked-equal): type 1 reads W*H*2 bytes whatever its record says, type 2 reads its own size field, type 3 reads the size left by the last type-2 record; read results are not tested. | High / Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 | R2-ENGINE-1339 | ROM2 loader codes at map +0x8c (1 is stored before the open): bad magic 2, under 3 records 3, version above 0x640 4, no type 1 gives 5, no type 2 gives 6; a missing type 3 becomes zeros; the caller's reaction to a status is unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
-| R2-ENGINE-1340 | ROM2 terrain build (EN L2.03175, RU L2.07458, masked-equal): per cell type-1 bit 0x2000, tile class 8, tile bits 0x200 and a nonzero type-3 byte set plane +0x10000 to 1 or 5; the type-2 byte is stored at +0x944f4. | High / Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ENGINE-1340 | ROM2 terrain build (EN L2.03175, RU L2.07458, masked-equal): per cell type-1 bit 0x2000, tile class 8, tile bits 0x200 and a nonzero type-3 byte set plane +0x10000 to 1 or 5; the type-2 byte is stored at +0x944f4. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 | R2-ENGINE-1341 | ROM2 border ring (EN L2.06926, RU L2.07459, masked-equal): after the cell loop the 8-cell ring gets 0x1f in plane +0x10000 (W = H: four sides of W x W; else a 256 x 256 frame plus the real right and bottom edges). | High | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 | R2-ENGINE-1342 | ROM2 map load indexes the type-2 and type-3 buffers at y*W+x for every cell with no test against their allocated size; no W, H, tile-index, height or type-3 range test was found in the bodies read. | Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 
@@ -31695,6 +31703,8 @@ blocks movement: no reader was read. Alternatives left open: the tile word could
 **Unknown.** The readers of +0x10000, +0x20000 and +0x944f4 in play, what the values 1 and 5 mean to them, and
 whether the client reads type 3. Runs: a map with one cell set to type 3 = 0, 1, 50 and 200 in turn, and a unit
 sent across it; a map with the type-2 byte of one cell changed, compared by the fog of a unit beside it.
+
+**Amended.** R2-ENGINE-1665 interprets tile-class routine EN `L2.06958` / RU `L2.07473` and its three tables (`+0x540a6`, `+0x54126`, `+0x54146..+0x54150`), showing it writes no height plane. R2-ENGINE-1667 documents the client type-3 copy (`L2.01385`/`L2.01386` interior `x=8..W - 9`, `y=8..H - 5` into zeroed `client+0x14`, High) and links server value `5` on `+0x10000`/`+0x20000` to footprint masks `0x41`/`0x44`/`0x82` (Medium). Downstream client readers of `client+0x14` remain Unknown.
 
 ### R2-ENGINE-1341
 
@@ -34383,7 +34393,7 @@ folder would settle it.
 | R2-ENGINE-1530 | ROM2 occupant kind is byte +0x4a for Unit, Human and Humanoid (EN L2.07941, RU L2.04693) and 0 for Token, Building, Pointer and Effect; placement writes kinds 1 and 2 at cell entry +4, kind 3 at +8, others nowhere (EN body). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1531 | ROM2 Blizzard's damage object (EN L2.03443, RU L2.01702) takes the actor arm when target slot +0x2c is 1 (Unit, Human, Humanoid), else the structure arm when slot +0x34 is 1 (Building, Pointer), else nothing (Token, Effect). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1532 | ROM2 Building cell registration EN L2.04916 / RU L2.04915 writes cell entry +0xc when empty; its one direct caller registers each footprint cell whose bit in dword +0x68 is set, rows +0x61 by columns +0x60 (EN equals RU). | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
-| R2-ENGINE-1533 | ROM2 Blizzard: 1 of 36 cells per pulse, 32 pulses; the damage object admits all three entries; a cell in the window takes 0.149 or 0.297 hits/s if updates run 16.1 or 32.1/s (two debugger rates, R2-ENGINE-1073; else Unknown). | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
+| R2-ENGINE-1533 | ROM2 Blizzard: 1 of 36 cells per pulse, 32 pulses; the damage object admits all three entries; a cell in the window takes 0.149 or 0.297 hits/s if updates run 16.1 or 32.1/s (two debugger rates, R2-ENGINE-1073; else Unknown). | Medium | ● active (amended, branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1534 | ROM2 Light and Darkness (EN): the 16-update pulse attaches an Effect of duration 16 that the actor step ends at its 16th step, so sight is base once per 16 updates before the next pulse; it returns 15 updates after the last pulse. | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1535 | ROM2 Light and Darkness pulse onto entry +4 of each cell only: kind 1 or 2 units are reached, a kind 3 unit (entry +8; a flier by name only) and a building (entry +0xc) are not, so neither changes sight under either cloud. | Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
 | R2-ENGINE-1536 | ROM2 area spells besides Blizzard: walls 10 or 9 cells, Poison Cloud 21, Light and Darkness 57, pulsing every 16 updates AreaDuration + ceil(floor(16P/10)/16) times; Fire Ball 9 cells once; Acid Stream 6 pulses; census of 8 rows. | High / Medium | ● active (branch candidate) | [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) |
@@ -34631,7 +34641,7 @@ The scan covers direct E8 and E9 forms only.
 Composed from R2-ENGINE-391, R2-ENGINE-392, R2-ENGINE-393, R2-ENGINE-812, R2-ENGINE-1073, R2-ENGINE-1213 and
 R2-ENGINE-1530 to R2-ENGINE-1532. A pulse draws x and y each from the area position -2 to +3, a window of 36
 cells (the band rule, cells outside the map band 8..dimension-9 rejected with the attempt consumed, is read in
-RU, R2-ENGINE-391; the EN validity routine is not read here). The three entries +4, +8
+RU, R2-ENGINE-391, and in EN, R2-ENGINE-1668). The three entries +4, +8
 and +0xc of the sampled cell are queried together and each non-null occupant is passed to the damage object,
 which has no filter by caster, ally or class beyond the two slots; whether the actor resolver rejects the
 application for target flag +0x4c bit 8 (R2-ENGINE-393, RU) is not read in EN. 32 pulses, one per 3 area
@@ -34674,8 +34684,9 @@ conclusion stands.
 **Amends.** R2-ENGINE-392: its Unknown on the wall-clock update rate is narrowed to two debugger-attached EN
 rates (R2-ENGINE-1073), not to a rate outside a debugger.
 
-**Amends.** R2-ENGINE-391: its Unknown on EN map-edge acceptance is not narrowed here; the band rule is
-read in RU only and the EN factor a/36 rests on it at Medium.
+**Amended.** R2-ENGINE-1668 confirms EN cell validity `L2.02717` equals RU `L2.01700` (61 of 61 masked-equal), establishing the map-band rule (`8 <= x <= W - 9`, `8 <= y <= H - 9`, reading only type-0 `W`/`H`) at High in both roots; the composed hit rates and wall-clock rate remain Medium/Unknown.
+
+**Amends.** R2-ENGINE-391: the EN map-edge Unknown is closed by R2-ENGINE-1668; the EN factor a/36 stays Medium.
 
 **Evidence.** [EXP-2188](../experiments/EXP-2188-rom2-area-spells/RESULTS.md) question 1.
 
@@ -35511,6 +35522,296 @@ a campaign map and compare the result with the map's type-9 and structure record
 
 **Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/census/vectors.tsv`,
 `evidence/derived/p3a/listings/*-q2-type9-stage.txt`, `evidence/derived/p3a/sites.tsv`.
+
+## ROM2 map planes, placement, casters, groups, shops and music
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1665 | ROM2 tile classifier EN L2.06958 / RU L2.07473 indexes 4x14 weights (+0x540a6), 9 class pairs (+0x54126) and 11 terrain costs (+0x54146..+0x54150); EN equals RU; per-map u16 sets censused (530 EN, 589 RU values). | High / Unknown | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1666 | ROM2 ALM header reader EN L2.02735 / RU R2.0003 puts typeId at [ebp-0x34] unless the 0x3e8 skip case (unread, Medium); arm 2 fills asset+0x14 (type-2 height), copied to client+0x10 by L2.01385/L2.01386 (High, both roots). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1667 | ROM2 type-3 plane (asset+0x10): client L2.01385/L2.01386 copies interior x=8..W - 9, y=8..H - 5 into zeroed client+0x14 (downstream readers Unknown); server writes 5 to P1/P2 (Medium block). | High / Medium / Unknown | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1668 | ROM2 Blizzard validity EN L2.02717 / RU L2.01700 (61 of 61 masked-equal) admits a cell iff 8<=x<=W - 9 and 8<=y<=H - 9, reading only type-0 W and H (+0x50000, +0x50004), clamping out-of-band; other callers unread (Summon calls it). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1669 | ROM2 type-9 mode-4 stage arm (EN L2.07317/RU L2.05960, 93/93) and caster ctor (28/28) never read element +0x1a; all 412 installed mode-4 records have count 0 (7 of 8 RU mode-5 carry 1..3). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1670 | ROM2 type-10 readers: 0xcc slot-5 (first 17 of 152 compared) and respawn EN L2.08237 / RU L2.08238 (156, equal) read +0xbc (flag 2), +0xc4/+0xc8 (flags 4/8) and +0xb8 (flag 1+pos -> action exec); 37 direct 0x310 sites per root (17 unread). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1671 | ROM2 type-11a flag-1 search: EN and RU allods2.exe .text direct 0x338 scans each find the same 17 sites (ctors, loader, case 11a, teardown, SEH, type-4 pass storing no bit 1); no reader found. | Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1672 | ROM2 type-12 theme index t in 0..16 names mission list entry t (music\B00.wav..music\B16.wav, music.res b00.wav..b16.wav), read by area-select -> SelectEntry -> OpenTrack (both roots). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+
+### R2-ENGINE-1665
+
+Server tile-class routine EN `L2.06958` / RU `L2.07473` (EN `L2.06958` equals RU `L2.07473` in all 173 instructions,
+R2-ENGINE-1340; the compared range of `evidence/derived/q1-terrain-tables.tsv`, 149 instructions, stops inside the
+`w=4` arm) takes `tile = word & 0x3ff` from ALM type-1 u16 cells (R2-ENGINE-1340) and
+writes no height plane. It splits `tile` into two branches:
+
+1. `(tile & 0x300) == 0x200`: `sub = (tile & 0x30) >> 4`, `low = tile & 0xf`. If `low < 8`: returns class `1` when
+   `low == 4 && sub == 1`, else `9`; `*out_terrain` stays `8`. If `low >= 8`: returns `0xff` (`-1`).
+2. Otherwise: `grp = (tile & 0x3c0) >> 6`, `mid = (tile & 0x30) >> 4`, `low = tile & 0xf`. If `low >= 14`: returns
+   `0xff` (`*out_terrain = 8`). Otherwise it indexes three tables on `this` initialized identically in EN
+   (`L2.08246..L2.08247`) and RU (`L2.08248..L2.08249`):
+   - **4 x 14 weight table** `this + 0x540a6 + mid*16 + low` -> `w` in `1..5`:
+     `mid=0: [2,3,2,4,3,4,2,2,2,2,4,4,4,4]`; `mid=1: [3,5,3,3,1,3,2,4,2,2,4,2,4,4]`;
+     `mid=2: [2,3,2,4,3,4,2,4,2,2,4,2,4,4]`; `mid=3: [5,5,5,5,5,5,2,2,2,2,4,4,4,4]`.
+   - **Class-pair table** `this + 0x54126 + grp*2` -> `(c0, c1)` for 9 initialized groups:
+     `0:(2,1)`, `1:(5,1)`, `2:(4,1)`, `3:(7,1)`, `4:(6,1)`, `5:(5,6)`, `6:(3,7)`, `7:(8,6)`, `12:(10,1)`
+     (groups `8..11` take the `0x200` branch; `13..15` receive no literal store).
+   - **Terrain cost table** `T = this + 0x54146`: `T[0] = 255` (`0xff`), and `T[1..10]` (`+0x54147..+0x54150`) are the
+     destinations of the 10 `[Terrain]` reads of R2-ENGINE-1472 (`CostLand..CostRoad`, loaded via `R2.0113`/`R2.0114`
+     with code defaults `[8, 8, 9, 14, 6, 12, 11, 16, 8, 6]`); their values come from `map.reg` only if the config
+     object is built from the file (Medium there).
+   It returns `c0` if `w > 2` else `c1`, and computes `*out_terrain` via a 5-arm jump table on `w`:
+   `w=1: T[c1]`; `w=2: (T[c0]+3*T[c1])>>2`; `w=3: (T[c0]+T[c1])>>1`; `w=4: (3*T[c0]+T[c1])>>2`; `w=5: T[c0]`.
+
+Aggregate installed type-1 census across all 142 maps (R2-ASSET-261): `word >> 10` is only `0` (1,156,985 EN / 2,010,261
+RU) or `8` (bit `0x2000`, 1,927 EN / 2,155 RU; 40 in the 8-cell ring in both roots), and `max(word & 0x3ff) == 821`
+(`0x335`, inside group 12).
+
+**Confidence.** High for the classifier body, its three tables and defaults in both roots, and for the aggregate
+type-1 bit bounds across 142 maps.
+
+Install census (EXP-2197 `evidence/census.py` over the 142 installed maps, read-only, reproduced byte-equal into
+scratch): every map's distinct `u16` set is listed as hex runs in `evidence/census/type1-values-per-map.tsv`, and each
+value with its map and cell counts in `evidence/census/type1-values.tsv`. EN maps hold 530 distinct `u16` values
+(373 distinct `word & 0x3ff`), RU maps 589 (421); groups `0..12` occur in both roots and groups `13..15` in no cell.
+Cells the classifier returns `0xff` for: `low = 15` outside the `0x200` branch in 2 EN and 2 RU cells, `low >= 8`
+inside it in 3 EN and 3 RU cells; `low = 14` occurs nowhere (`type1-summary.tsv`). High for these counts over the
+142 installed maps. The per-group cell totals of `type1-summary.tsv` are not on the format page. The jump-table dwords
+are not committed as a table; the five arm addresses are read from the RU listing.
+
+**Unknown.** Shipped `World\Data\map.reg` values (R2-ENGINE-1472); client consumer of `client_map+0xc`
+copied in `L2.01385`/`L2.01386`. Run that settles client rendering of a type-1 cell: edit one cell in a copy of
+`10.alm` across `grp 0..12`, open in `allods2.exe` and compare the rendered tile.
+
+**Amends.** R2-ENGINE-1340: interprets tile-class routine `L2.06958`/`L2.07473` and rules out height-plane writes by it.
+R2-ENGINE-1472: identifies `L2.06958`/`L2.07473` as a reader of `T[1..10]` (`+0x54147..+0x54150`).
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q1-terrain-tables.tsv`.
+
+### R2-ENGINE-1666
+
+The ALM record-header reader EN `L2.02735` / RU `R2.0003` (the compared range `L2.02735..L2.08250`, 25/25
+instructions masked-equal, `evidence/derived/q2-plane-chain.tsv`, also holds the first header reader `L2.08251`)
+copies 20 bytes via archive vtable `+0x3c` into the caller's `[ebp-0x40]` block, putting `payloadSize` at `[ebp-0x38]`
+and `typeId` at `[ebp-0x34]`, unless its by-value header argument carries `0x3e8` at its fifth dword
+(`cmp dword ptr [ebp + 0x1c], 0x3e8; jne ...; jmp` over the read). What the dispatcher does with `[ebp-0x34]` in the
+skipped case is not read (Medium). Dispatcher EN `L2.02484` / RU `R2.0002` switches
+on `[ebp-0x34]` through the 13-entry jump table EN `L2.02737` / RU `L2.02736`:
+
+- **Switch arm 2** (EN `L2.07463`, RU `L2.07464`, 18/18 masked-equal): allocates and reads `[ebp-0x38]` bytes into
+  `asset+0x14` (ALM type-2 height plane) and saves `[ebp-0x38]` into `[ebp-0x58]` (R2-ENGINE-1338).
+- **Switch arm 3** (EN `L2.07465`, RU `L2.07466`): allocates and reads `[ebp-0x58]` bytes into `asset+0x10` (ALM type-3
+  plane).
+
+In both roots, client map builder EN `L2.01385` / RU `L2.01386` copies `W*H` bytes from `asset+0x14` to
+`client_map+0x10`, the signed height plane read by the client fog walk (R2-ENGINE-645).
+
+**Confidence.** The reader copies 20 bytes into the caller's block unless its by-value header argument carries `0x3e8`
+at its fifth dword; the skipped case is not read (Medium). Arm 2 and the copy stand at High: jump table, dispatcher
+arm 2 and the client `asset+0x14 -> client+0x10` copy in both EN and RU.
+
+**Amends.** R2-ENGINE-645: the header reader is read, except its `0x3e8` skip case, and the
+`asset+0x14 -> client+0x10` copy confirmation extends to RU (`L2.01386`).
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q2-plane-chain.tsv`.
+
+### R2-ENGINE-1667
+
+Two consumers read the ALM type-3 byte plane (`asset+0x10`, filled by switch arm 3 of R2-ENGINE-1666):
+
+1. **Client map builder** EN `L2.01385` (`L2.08252..L2.08253`) / RU `L2.01386` (`L2.08254..L2.08255`; 54 of 54 instructions masked-equal
+   between EN `L2.08252..L2.08253` and RU `L2.08254..L2.08255`; the four unequal pairs of the first run of `derive.py`
+   came from its listing parser, which reads the mnemonic `add` of the tab-separated RU listing as bytes): allocates `W*H` bytes at `client_map+0x14`, zero-fills the
+   whole buffer, and copies only the interior rows `y = 8..H - 5` and columns `x = 8..W - 9` (row width `W - 16`) from
+   `asset+0x10` into `client_map+0x14`. Across installed maps, 1,294 EN and 1,363 RU nonzero type-3 cells lie outside
+   the copied rectangle (EXP-2176 census, not R2-ASSET-261); the client copy does not carry them into
+   `client_map+0x14`. Other readers of `asset+0x10` are not excluded (R2-ENGINE-1342 reads none; nobody scanned).
+2. **Server terrain build** EN `L2.03175` / RU `L2.07458` (R2-ENGINE-1340): writes byte `5` (`0x01 | 0x04`) into P1
+   (`terrain+0x10000+key`) wherever `asset+0x10[y*W+x]` is nonzero (regardless of the specific value `1..209`),
+   overwritten by `0x1f` on the 8-cell border ring (R2-ENGINE-1341), and copies P1 to P2 (`terrain+0x20000`). Footprint
+   testers EN `L2.02720`/`L2.03523` / RU `L2.03520`/`L2.02114` (R2-ENGINE-789, R2-ENGINE-809) test P1/P2 against the
+   unit mask at `[unit+0x1c0]+5` (`0x41` kind 1, `0x44` kind 2, `0x82` kind 3), so byte `5` blocks kinds 1 and 2
+   (`5 & 0x41 != 0`, `5 & 0x44 != 0`) and admits kind 3 (`5 & 0x82 == 0`).
+
+**Confidence.** High for the client copy into `client_map+0x14` in both roots and for the server `asset+0x10 -> 5` store.
+Medium for the composed server movement-blocking rule (inherits R2-ENGINE-789/809 caller completeness and does not exclude
+other readers of `asset+0x10`).
+
+**Unknown.** Downstream client readers of `client_map+0x14` and whether any code reads the specific byte value `1..209`
+rather than `!= 0`. Run that settles both: edit one interior cell of a copy of `10.alm` to type-3 values `0`, `1`, `50`
+and `200`, load in `allods2.exe`, inspect rendered object/terrain at that cell and send a kind-1 and kind-3 unit across it.
+
+**Amends.** R2-ENGINE-1340: answers its Unknown on whether the client reads type 3 (`client_map+0x14` interior copy) and
+links server byte `5` on `+0x10000`/`+0x20000` to the footprint mask testers of R2-ENGINE-789 and R2-ENGINE-809.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q2-plane-chain.tsv`.
+
+### R2-ENGINE-1668
+
+The Blizzard mode-2 stage EN `L2.01696` (`L2.08256`) / RU `L2.01695` (`L2.08096`, 128/128 instructions masked-equal)
+decides whether a sampled candidate cell `(uint8 x, uint8 y)` is admitted by calling cell-validity method EN `L2.02717` /
+RU `L2.01700` (61 of 61 instructions to `ret 8`, `L2.02717..L2.08257`, masked-equal; the derived table
+`evidence/derived/q3-blizzard-valid.tsv` lists 53) on `[damageObj+0x10]`.
+
+`L2.02717`/`L2.01700` reads only two map fields through `[pos+8]`:
+- `GetW()` EN `L2.08258` / RU `L2.02777` (9/9 masked-equal) -> `[terrain+0x50000]` (ALM type-0 `W`, R2-ENGINE-1340).
+- `GetH()` EN `L2.08259` / RU `L2.06570` (9/9 masked-equal) -> `[terrain+0x50004]` (ALM type-0 `H`, R2-ENGINE-1340).
+
+Rule: it returns `1` (admitted) if and only if `8 <= uint8(x) <= W - 9` and `8 <= uint8(y) <= H - 9`. Otherwise it clamps
+`x` into `[8, W - 9]` and `y` into `[8, H - 9]` and returns `0`, causing the stage to skip packet `0x86` and all three
+occupant queries (`+4, +8, +0xc`). In both cases it calls `SetCell` EN `L2.03602` / RU `L2.02927` (37/37 masked-equal)
+to store `(x, y, (y << 8) + x, 0x80, 0x80)`. It reads no type-1 tile, type-2 height, type-3 byte, P0/P1/P2 plane or
+occupant field.
+
+**Confidence.** High in both EN and RU for the cell rule of `L2.02717`/`L2.01700` and every map field read by it.
+Medium that no other check gates Blizzard placement: the callers of `L2.02717`/`L2.01700` were not enumerated; the
+Summon positioning of R2-ENGINE-789 calls the RU routine (so the rule is the shared map-band clamp, not a Blizzard-only
+placement rule); the other callers are unread. The 72-line scans of the `W`/`H` displacements (`evidence/nav1-out/scans/{en,ru}-disp-map-dims.txt`)
+were not read site by site.
+
+**Amends.** R2-ENGINE-391 and R2-ENGINE-1533: closes the EN map-edge acceptance Unknown by establishing full EN/RU masked
+equality of `L2.02717`/`L2.01700` and its three callees.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q3-blizzard-valid.tsv`.
+
+### R2-ENGINE-1669
+
+In the mission-load type-9 stage (EN `L2.07317..L2.08244`, RU `L2.05960..L2.05961`, 93/93 instructions masked-equal,
+`evidence/derived/q5-type9-casters.tsv`), after resolving the building `P` and building the `0x44` caster object `Q` via
+EN `L2.05956` / RU `L2.05954` (28/28 masked-equal, allocating a 6-byte block at `Q+0x40` and zeroing `Q+0x3c`), the
+mode-4 arm copies `P`'s location, `E+0x00`, `E+0x16`, `E+0x18`, `E+8` low byte, `E+0xc` low byte and `P+0x14`, appends
+`Q` to `[stage+0x24]+0x10`, and jumps directly to the loop increment (`L2.08260`/`L2.08261`). Neither the mode-4 arm nor
+`Q`'s constructor references element `+0x1a` (0 references in both roots): the trailing `u32 count` and `count x (u32, u16)`
+entries are ignored by the stage arm and the caster constructor.
+
+Across all 142 installed maps (recomputed from `type9-bit2.tsv`, R2-ASSET-230):
+- All **98 of 98 EN** and **314 of 314 RU** mode-4 elements (412/412) have `count == 0` and 0 trailing entries.
+- Of the 9 mode-5 records (all at cell `0,0`), the 1 EN record has `count == 0`; 7 of the 8 RU records carry `count`
+  1..3 (`1` x5, `2` x1, `3` x1; 1 RU record has `count == 0`). The sack binding of 5 RU mode-5 elements is
+  R2-ASSET-254 (the other 3 RU records and the EN record are not bound by a sack).
+
+**Confidence.** High for the mode-4 arm, caster constructor and the 142-map count distribution in both roots. Medium
+that no other routine reads `E+0x1a` for mode-4 elements: the EXP-2197 raw displacement scan of `allods2.exe`
+(`evidence/nav1-out/scans/{en,ru}-disp-map-lists.txt`, Capstone over every executable section) finds 42 direct
+`0x2fc` sites per root and 15 rel32 calls per root to the three type-9 getters (`{en,ru}-call-t9-getters.txt`); those
+sites were not read, and an `E+0x1a` displacement census (a common displacement) was not run. The installed
+census (`evidence/census/type9-mode4-entries.tsv`) reproduces 98 EN and 314 RU mode-4 elements, all with count 0.
+
+**Unknown.** Whether any other routine outside `L2.02687`/`L2.00117` reads `map+0x2fc` or `E+0x1a` for mode-4 elements.
+Run that settles it in play: copy map `72.alm`, add one `(u32, u16)` entry (`count = 1`) to a mode-4 building caster and
+compare load and cast behaviour in `allods2.exe` against the unmodified map.
+
+**Amends.** R2-ENGINE-1006 and R2-ASSET-230: specifies that the mode-4 stage arm and constructor ignore `E+0x1a` and
+publishes the installed count distribution across mode 4 vs mode 5.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q5-type9-casters.tsv`.
+
+### R2-ENGINE-1670
+
+In both EN and RU, every type-10 flag (bits 1, 2, 4, 8) and the position field (`+0x0c`) are read across three stages
+(`evidence/derived/q6-type10-groups.tsv`):
+
+1. **Type-10 group pass** EN `L2.02494` / RU `L2.02493` (R2-ASSET-120, R2-ENGINE-510, R2-ENGINE-511): tests bit 1 -> sets
+   `0xcc` object `+0xb8` to the count of leading type-7 first-array nodes (`0..pos-1`) with dword `+0x40 < 0x10002` (else
+   `-1`), and runs script action executor EN `L2.07383` / RU `L2.02490` when `+0xb8 >= 0`; tests bit 2 -> clears `+0xbc`
+   when bit 2 is clear (when set, RU keeps group spread at `+0xbc`, EN keeps 0, R2-ENGINE-511); tests bit 4 -> sets `+0xc4`
+   and `group+0x48` to 1 else 0; tests bit 8 -> sets `+0xc8` and `group+0x4c` to 1 else 0.
+2. **`0xcc` slot 5 and respawn method** EN `L2.08245` / RU `L2.02521` (first 17 of 152 instructions compared here,
+   masked-equal; 152 of 152 in R2-ENGINE-510) calling the respawn method EN `L2.08237` / RU `L2.08238` (156
+   instructions to `ret 4` at `L2.08262`, equal; the compared range of 234 instructions, `L2.08238..L2.08263`, includes
+   later routines): when countdown `+0xb4 <= 0` and `L2.02502(group) <= 0` (R2-ENGINE-538), recreates
+   members with `+0xbc` (flag 2) as the third argument to `L2.00312`/`L2.00313`, copies `+0xc4`/`+0xc8` (flags 4/8) to the
+   recreated `group+0x48`/`+0x4c`, and calls `L2.07383`/`L2.02490` with `+0xb8` (flag 1 + position) when `>= 0`.
+3. **Inn offer generator** EN `L2.02769` / RU `L2.02768` (R2-ENGINE-537): reads `group+0x48` (flag 4 -> offer block 3; RU
+   skips Inn owner's groups, EN does not) and `group+0x4c` (flag 8 -> offer block 5).
+
+Direct `.text` operand scans for `0x310` (map type-10 array offset, EXP-2068) find 37 direct sites per root: 20 in map
+constructors, loader, teardown, the type-10 pass and unwind thunks, 17 on other bases (`L2.08264..L2.08265`, EN) that
+were not read.
+
+**Confidence.** High for the read pass, slot-5, respawn and Inn offer bodies in EN and RU. Medium for reader completeness
+(direct `.text` `0x310` scan covers neither indirect/pointer-mediated routes nor other binaries; `L2.00312`/`L2.00313`
+and `L2.02497`/`L2.02498` remain unread).
+
+**Unknown.** Whether any indirect caller reads `map+0x310` outside the pass, and the exact placement radius semantics of
+unread `L2.00312`/`L2.00313`. Run that settles flag 2 in EN vs RU: copy `CROSS2.ALM`, toggle flag 2 on one respawning
+group, defeat it in `allods2.exe` and compare respawn positions.
+
+**Amends.** R2-ENGINE-510 and R2-ASSET-120: verifies EN/RU masked parity of slot 5 (`L2.08245`/`L2.02521`) and respawn
+(`L2.08237`/`L2.08238`) and adds the EN `0x310` hit count beside RU.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q6-type10-groups.tsv`.
+
+### R2-ENGINE-1671
+
+In the committed EXP-2068 `.text` direct-operand scans for `0x338` (map type-11a array offset) across EN and RU
+`allods2.exe` (`evidence/derived/q7-type11a-shops.tsv`), both roots yield the exact same 17 `add ecx, 0x338` sites:
+- 3 map constructors (EN `L2.08266, L2.08267, L2.08268`; RU `L2.08269, L2.08270, L2.08271`),
+- 1 site in the loader before the type loop (EN `L2.08272`; RU `L2.08273`),
+- 1 ALM dispatcher case 11a (EN `L2.08274`; RU `L2.08275`),
+- 4 map teardown sites (EN `L2.08276, L2.08277, L2.08278, L2.08279`; RU `L2.08280, L2.08281, L2.08282, L2.08283`),
+- 3 type-4 object pass sites (EN `L2.08284, L2.08285, L2.08286`; RU `L2.08287, L2.08288, L2.08289`),
+- 5 SEH unwind thunks (EN `L2.08290..L2.08291`; RU `L2.08292..L2.08293`).
+
+In the type-4 pass (R2-ENGINE-512), only bits `0x02`, `0x04`, `0x10`, `0x20` and `0x40` of 11a `+0x04` are tested and
+transferred to the Inn object; bit `0x01` is neither tested nor stored, even though it occurs in 143 EN and 158 RU
+installed entries (R2-ASSET-361). No reader of 11a flag `0x01` was found in this population.
+
+**Confidence.** Medium: covers direct `0x338` immediate/displacement operands in EN and RU `allods2.exe` `.text` only;
+pointer-mediated access, computed offsets and other binaries (`Scenario.dll`, `engine32.dll`) are outside this scan.
+
+**Unknown.** Whether indirect access or another binary reads 11a flag `0x01`, or whether it is editor-only metadata. Run
+that settles it in play: copy `CROSS2.ALM`, toggle flag `0x01` on one Inn's 11a entry, load in `allods2.exe` and compare
+Inn offers and shop state against the unmodified map.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q7-type11a-shops.tsv`.
+
+### R2-ENGINE-1672
+
+Every ALM type-12 theme index `t` in `0..16` (R2-ASSET-084) directly indexes entry `t` of the 17-entry mission music
+list pushed in strict ascending order `0..16` by mission music body EN `L2.01375` / RU `L2.01376` (128/128 instructions
+masked-equal, `evidence/derived/q8-music-themes.tsv`). Five EN/RU routines form the complete read chain, all 100%
+masked-equal:
+- Mission music body EN `L2.01375` / RU `L2.01376` (128/128): pushes `music\B00.wav`..`music\B16.wav` in order `0..16`
+  (EN string VAs `L2.08294..L2.08295`, RU `L2.08296..L2.08297`, stride `0x10`) and calls `SetList`.
+- `SetList` EN `L2.01377` / RU `L2.01403` (34/34): copies the list verbatim into `player+0x40`, picks `rand() mod 17` and
+  clears the area-pick global (EN `L2.01378` / RU `L2.01379`) to `-1`.
+- Area select EN `L2.01380` / RU `L2.01381` (145/145): selects the nearest active type-12 area from global `L2.01387` /
+  `L2.01388` (loaded from map `+0x374`/`+0x360` by `L2.01385`/`L2.01386`), draws `r = rand(3)` (`0..3`) until
+  `record[+0x0c + 4*r] != -1`, and stores that index `t` into `L2.01378` / `L2.01379` (R2-ENGINE-336).
+- `SelectEntry` EN `L2.01404` / RU `L2.01405` (89/89) and streaming refill (R2-ENGINE-337): store `t` at `player+0x58`
+  and pass `t` to `OpenTrack` EN `L2.06189` / RU `L2.08298` (compared window 210/210), which indexes `player+0x40[t]` (`L2.03290`/`L2.08299`)
+  and passes the string to the archive file opener (`L2.06177`/`L2.08300`).
+
+| Index `t` | Code literal | `music.res` key | Bytes | Seconds | EN head / area | RU head / area |
+|---:|---|---|---:|---:|---|---|
+| 0 | `music\B00.wav` | `b00.wav` | 7688332 | 87.169 | 18 / 85 | 18 / 85 |
+| 1 | `music\B01.wav` | `b01.wav` | 6920696 | 78.465 | 23 / 133 | 23 / 134 |
+| 2 | `music\B02.wav` | `b02.wav` | 8564176 | 97.099 | 4 / 29 | 4 / 31 |
+| 3 | `music\B03.wav` | `b03.wav` | 6669132 | 75.613 | 4 / 136 | 4 / 137 |
+| 4 | `music\B04.wav` | `b04.wav` | 8899164 | 100.897 | 6 / 26 | 6 / 32 |
+| 5 | `music\B05.wav` | `b05.wav` | 6655172 | 75.455 | 16 / 118 | 16 / 120 |
+| 6 | `music\B06.wav` | `b06.wav` | 8874020 | 100.612 | 1 / 17 | 1 / 22 |
+| 7 | `music\B07.wav` | `b07.wav` | 7371544 | 83.577 | 18 / 168 | 18 / 169 |
+| 8 | `music\B08.wav` | `b08.wav` | 5924884 | 67.175 | 32 / 91 | 32 / 93 |
+| 9 | `music\B09.wav` | `b09.wav` | 4810760 | 54.543 | 15 / 77 | 15 / 82 |
+| 10 | `music\B10.wav` | `b10.wav` | 4348964 | 49.307 | 5 / 41 | 5 / 43 |
+| 11 | `music\B11.wav` | `b11.wav` | 4619292 | 52.372 | 1 / 112 | 1 / 115 |
+| 12 | `music\B12.wav` | `b12.wav` | 9261044 | 105.000 | 1 / 63 | 1 / 67 |
+| 13 | `music\B13.wav` | `b13.wav` | 12170708 | 137.989 | 0 / 9 | 0 / 13 |
+| 14 | `music\B14.wav` | `b14.wav` | 4467500 | 50.651 | 0 / 3 | 0 / 8 |
+| 15 | `music\B15.wav` | `b15.wav` | 7404536 | 83.951 | 0 / 2 | 0 / 4 |
+| 16 | `music\B16.wav` | `b16.wav` | 6050536 | 68.600 | 0 / 1 | 0 / 6 |
+
+Slot value `-1` (none) occurs 92 EN / 188 RU in head records and 833 EN / 951 RU in area records (R2-ASSET-084).
+
+**Confidence.** High for the five routines (the 210 instructions of `OpenTrack` are the compared window; the routine is
+89 instructions to its `ret`), the strict `0..16 -> music\B<t:02d>.wav` order and the installed counts in both roots. The
+index map is a statement about program code, High for the program's index from theme to list entry; what plays is
+Medium (archive opener unread, no original run). Medium for case-insensitive resolution of `music\B<t:02d>.wav` to `music.res` `b<t:02d>.wav` (archive opener
+`L2.06177`/`L2.08300` body unread; R2-ASSET-083).
+
+**Amends.** none; extends R2-ASSET-084 (its theme index into the mission list) with the program chain.
+
+**Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q8-music-themes.tsv`.
 
 ## ROM2 guard, patrol, pick-up and idle orders
 

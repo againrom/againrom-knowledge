@@ -90,8 +90,11 @@ found in the population named (Medium; R2-ENGINE-1683). — R2-ENGINE-1317, R2-A
 
 The client copies the type 2 plane, W×H signed bytes, as its height plane:
 one byte per tile cell, index `y*W+x`, the same index as the u16 fog words.
-That the switch arm which fills it is type 2 rests on an unread header reader
-(Medium). — R2-ENGINE-645
+The header reader (EN `L2.02735`, RU `R2.0003`) copies 20 bytes and puts `typeId`
+at `[ebp-0x34]` unless its by-value header argument carries `0x3e8` at its fifth
+dword; the skipped case is not read (Medium). Switch arm 2 (EN `L2.07463`, RU
+`L2.07464`) fills `asset+0x14`, and client map builder EN `L2.01385` / RU
+`L2.01386` copies `asset+0x14` to `client+0x10` (High in both roots). — R2-ENGINE-645, R2-ENGINE-1666
 
 Every 32nd client tick, when `[L2.00989]` is zero, the client clears fog
 bit 0x4000 in all W×H words and calls each client object's stamp slot (EN
@@ -162,11 +165,45 @@ The terrain build then reads each cell at y×W+x and writes the plane at
 `(tile & 0x300) == 0x200`; 5 for a nonzero type 3 byte, stored last; the type 2
 byte goes to +0x944f4. Only bytes are set, never cleared. The border routine
 then writes 0x1f over the 8-cell ring of the plane, so a 5 stored there from
-type 3 is overwritten; the type 3 buffer itself is unchanged. The readers of
-these planes in play are unread, so what 1, 5 and 0x1f mean to a unit is
-Unknown. That +0x944f4 is a height plane is Medium (it holds the type 2 byte,
-which the client copy of R2-ENGINE-645 uses as height); that +0x10000 blocks
-movement is Unknown. — R2-ENGINE-1340, R2-ENGINE-1341
+type 3 is overwritten; the type 3 buffer itself is unchanged. Server tile
+classifier EN `L2.06958` / RU `L2.07473` (High in both roots; writes no height
+plane) decodes `tile = word & 0x3ff`: for `(tile & 0x300) == 0x200` it returns
+class `1` if `(tile & 0xf) == 4` and `((tile & 0x30) >> 4) == 1`, else `9` for
+`low < 8` (terrain byte `8`) and `0xff` for `low >= 8`; otherwise for `low < 14`
+it reads weight `w` (`1..5`) from `this+0x540a6 + mid*16 + low`, class pair
+`(c0, c1)` from `this+0x54126 + grp*2`, and blends `T[c0]`/`T[c1]` from
+`this+0x54146` (`T[0] = 255`; `T[1..10]` are the destinations of the 10 `[Terrain]`
+reads of R2-ENGINE-1472, code defaults `8, 8, 9, 14, 6, 12, 11, 16, 8, 6`; their
+values come from `map.reg` only if the config object is built from the file, Medium
+there) by `w` (`w=1: T[c1]`;
+`w=2: (T[c0]+3*T[c1])>>2`; `w=3: (T[c0]+T[c1])>>1`; `w=4: (3*T[c0]+T[c1])>>2`;
+`w=5: T[c0]`), returning `c0` if `w > 2` else `c1` (per-map distinct `u16` sets:
+530 EN and 589 RU values in groups `0..12`; EN equals RU in all 173 instructions of
+the routine). — R2-ENGINE-1340, R2-ENGINE-1341, R2-ENGINE-1472, R2-ENGINE-1665
+
+| `mid` | Offset | Weights `low = 0..13` | Claim |
+|---:|---|---|---|
+| 0 | `+0x540a6` | 2, 3, 2, 4, 3, 4, 2, 2, 2, 2, 4, 4, 4, 4 | R2-ENGINE-1665 |
+| 1 | `+0x540b6` | 3, 5, 3, 3, 1, 3, 2, 4, 2, 2, 4, 2, 4, 4 | R2-ENGINE-1665 |
+| 2 | `+0x540c6` | 2, 3, 2, 4, 3, 4, 2, 4, 2, 2, 4, 2, 4, 4 | R2-ENGINE-1665 |
+| 3 | `+0x540d6` | 5, 5, 5, 5, 5, 5, 2, 2, 2, 2, 4, 4, 4, 4 | R2-ENGINE-1665 |
+
+| `grp` | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 12 | Claim |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| `(c0, c1)` at `+0x54126 + grp*2` | (2,1) | (5,1) | (4,1) | (7,1) | (6,1) | (5,6) | (3,7) | (8,6) | (10,1) | R2-ENGINE-1665 |
+
+Type-3 plane readers: client map builder EN `L2.01385` / RU `L2.01386` zero-fills
+`client+0x14` (`W×H` bytes) and copies only the interior rows `y = 8..H-5`,
+columns `x = 8..W-9` from `asset+0x10` (High; downstream client readers of
+`client+0x14` remain Unknown). On the server, byte `5` (`0x01 | 0x04`) in
+`+0x10000`/`+0x20000` blocks footprint masks `0x41` (kind 1) and `0x44` (kind 2)
+and admits `0x82` (kind 3) at `L2.02720`/`L2.03523` (Medium composition).
+Blizzard cell validity EN `L2.02717` / RU `L2.01700` admits `(x, y)` iff
+`8 <= x <= W-9` and `8 <= y <= H-9`, reading only type-0 `W` and `H`
+(`+0x50000`, `+0x50004`) and clamping out-of-band coordinates (High in both
+roots); that no other check gates Blizzard placement is Medium, because the routine
+is shared with Summon positioning (R2-ENGINE-789) and its other callers are unread.
+Other readers of the type-3 plane are not excluded. — R2-ENGINE-1667, R2-ENGINE-1668
 
 The loader and the build compare no plane size with W×H and no value with a
 range (Medium). All 142 installed maps are square and none is wider than
@@ -253,7 +290,11 @@ tables](map-definitions.md#sack-item-to-databin-row)). — R2-ENGINE-1513, R2-EN
 every installed item and has no reader found. The binding is 0 or a 1-based type-9 position; that element
 has cell (+8, +0xc) zero, +0x00 equal to the item's 0-based position and +4 nonzero, or the item is skipped.
 A sack owner naming no unit is not tested before use; the result is Unknown.
-— R2-ASSET-254, R2-ENGINE-1326, R2-ENGINE-1327, R2-ENGINE-1328
+EN `L2.08239` and RU `L2.08240` (113/113 masked-equal) share one version-gated
+grammar (`>= 0x3dd`: the arm reads the `+0x10` dword when the version is not below
+`0x3dd`; no installed map has version `0x3dd`), consuming every installed map's
+type-8 payload with 0 bytes left over across all 59 EN and 83 RU maps.
+— R2-ASSET-254, R2-ASSET-359, R2-ENGINE-1326, R2-ENGINE-1327, R2-ENGINE-1328
 
 Actor +0x1a0 also receives 1 from two unique-spell arms and, when
 Session+0x74 is set, from the map build for the units of owners whose
@@ -335,10 +376,35 @@ R2-ENGINE-538
 
 Flag 4 and flag 8 also put the group in Inn offer blocks 3 and 5 through
 group +0x48 and +0x4c. In block 3 RU skips groups of the Inn's own owner
-and EN does not. The object re-creates members only when the group's
-dword +0xc is 0 or below (Medium, R2-ENGINE-510: no slot-5 body was read
-for this page); RU places them over the member spread, EN at
-radius 0 (Medium). — R2-ENGINE-537, R2-ENGINE-538
+and EN does not. `0xcc` slot 5 (EN `L2.08245`, RU `L2.02521`; first 17 of 152 instructions compared
+here, masked-equal) and respawn method EN `L2.08237` / RU `L2.08238` (156
+instructions, equal; the compared range of 234 includes later routines) re-create
+members only when `L2.02502(group) <= 0`, pass `+0xbc` (flag 2; RU stores spread,
+EN keeps 0) to `L2.00312`/`L2.00313`, copy `+0xc4`/`+0xc8` (flags 4 and 8) to
+the recreated `group+0x48`/`+0x4c`, and call script action executor
+`L2.07383`/`L2.02490` with `+0xb8` (flag 1 + position) when `>= 0` (High for the
+read bodies; Medium for caller/reader completeness across 37 direct `.text`
+`0x310` sites per root: 20 in map constructors, loader, teardown, the type-10 pass
+and unwind thunks, 17 on other bases that were not read). — R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1670
+
+Over all 142 installed maps (0 campaign entries; 674 EN and 1,696 RU root
+entries), type-10 flags use only bits 1, 2, 4 and 8 (bit 1: 7 EN / 26 RU;
+bit 2: 668 / 1,665; bit 4: 358 / 937; bit 8: 67 / 109) and position (`+0x0c`)
+takes `-1` (666 EN / 1,668 RU) or `0..9` (`0`: 1/1, `1`: 3/7, `2`: 3/7,
+`3`: 1/5, `4`: 0/2, `5`: 0/2, `6..9`: 0/1 each); every bit-1 entry has
+`pos >= 0`, while 1 EN and 2 RU entries have `pos >= 0` with bit 1 clear.
+— R2-ASSET-360
+
+| Type-10 flag mask | Bits | EN | RU | Claim |
+|---:|---|---:|---:|---|
+| 0 | none | 6 | 26 | R2-ASSET-360 |
+| 2 | 2 | 268 | 649 | R2-ASSET-360 |
+| 3 | 1, 2 | 7 | 22 | R2-ASSET-360 |
+| 4 | 4 | 0 | 5 | R2-ASSET-360 |
+| 6 | 2, 4 | 326 | 881 | R2-ASSET-360 |
+| 7 | 1, 2, 4 | 0 | 4 | R2-ASSET-360 |
+| 10 | 2, 8 | 35 | 62 | R2-ASSET-360 |
+| 14 | 2, 4, 8 | 32 | 47 | R2-ASSET-360 |
 
 Type 11 entries key on a type-4 object id, the sign-extended type-4 file
 word 0x12:
@@ -354,9 +420,27 @@ entries in 10 maps. The root `.alm` maps carry 376 EN and 477 RU 11a
 entries, all on Inn kinds, and 452 EN and 555 RU 11b entries, all on Shop
 kinds except five per root (entries 1, 4, 11, 16 and 19, all with id 265)
 that name no type-4 record; their 11c entries
-all have gate 0. 11a flag 1 occurs there and no field receives it; under
-flag 2 the word is 3661..3680. — R2-ASSET-121, R2-ASSET-122,
-R2-ASSET-130, R2-ASSET-132, R2-ENGINE-512
+all have gate 0. 11a flag 1 occurs in 143 EN and 158 RU root entries (23 EN and 30 RU distinct
+flag masks; bits `0x08` and `>= 0x80` never occur); in direct `.text` `0x338`
+scans of EN and RU `allods2.exe`, all 17 hits per root lie in map ctors,
+dispatcher case 11a, teardown, SEH unwinds and the type-4 pass (which stores
+nothing from bit 1), so no reader of flag 1 was found in that population
+(Medium; indirect and other-binary routes unread); under flag 2 the word is
+3661..3680. — R2-ASSET-121, R2-ASSET-122, R2-ASSET-130, R2-ASSET-132,
+R2-ASSET-361, R2-ENGINE-512, R2-ENGINE-1671
+
+| 11a mask | EN | RU | 11a mask | EN | RU | 11a mask | EN | RU | Claim |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| `0x00` | 0 | 2 | `0x31` | 7 | 7 | `0x61` | 16 | 22 | R2-ASSET-361 |
+| `0x02` | 0 | 1 | `0x32` | 0 | 2 | `0x62` | 15 | 17 | R2-ASSET-361 |
+| `0x14` | 26 | 26 | `0x33` | 17 | 21 | `0x63` | 11 | 11 | R2-ASSET-361 |
+| `0x20` | 21 | 28 | `0x34` | 0 | 2 | `0x64` | 0 | 1 | R2-ASSET-361 |
+| `0x21` | 2 | 2 | `0x35` | 6 | 6 | `0x70` | 11 | 36 | R2-ASSET-361 |
+| `0x22` | 51 | 62 | `0x36` | 10 | 10 | `0x71` | 8 | 12 | R2-ASSET-361 |
+| `0x23` | 26 | 26 | `0x37` | 18 | 18 | `0x72` | 55 | 60 | R2-ASSET-361 |
+| `0x24` | 2 | 4 | `0x41` | 8 | 8 | `0x73` | 13 | 14 | R2-ASSET-361 |
+| `0x25` | 4 | 4 | `0x43` | 7 | 7 | `0x74` | 0 | 3 | R2-ASSET-361 |
+| `0x30` | 11 | 15 | `0x60` | 31 | 49 | `0x76` | 0 | 1 | R2-ASSET-361 |
 
 An Inn uses its 11a fields to build a player's offer list: flags 0x20,
 0x40 and 0x10 admit unit class ranges, flag 4 enables one block and the
@@ -451,7 +535,9 @@ record with all four themes -1 is ignored. Area selection and the theme draw are
 All 46 campaign maps per root have a (0,0,0) head with 1..4 themes and
 2..33 areas (470 per root, equal in EN and RU). Two EN and six RU root
 maps have areas and a head with themes -1; the other root maps have
-neither. Theme values are -1..16. — R2-ASSET-084
+neither. Theme values are -1..16, where `t` in `0..16` directly indexes entry `t`
+(`music\B00.wav`..`music\B16.wav`, archive keys `b00.wav`..`b16.wav`) of the
+mission music list in both roots (full table on the music page). — R2-ASSET-084, R2-ENGINE-1672
 
 ## Version conditions
 
@@ -576,7 +662,11 @@ and the 412 mode-4 records have a nonzero cell. — R2-ASSET-230, R2-ENGINE-1009
 The mission-load stage builds one object for an element with mode & 4, a nonzero cell and `+4` zero, when the key
 names a building by its `+8`; otherwise an error is reported and nothing is built. The object copies the building's
 location and owner pointer, the element's `+0x00`, the spell byte `+0x16`, the power byte `+0x18` and the cell low
-bytes. `+4` is set by the type-8 arm. — R2-ENGINE-1006
+bytes. `+4` is set by the type-8 arm. Neither the mode-4 stage arm (EN `L2.07317..L2.08244`, RU `L2.05960..L2.05961`)
+nor the caster constructor (`L2.05956`/`L2.05954`) reads the trailing count or `(u32, u16)` entries at `+0x1a`
+(High for the read bodies, Medium that no other routine reads `+0x1a`); all 412 installed mode-4 elements (98 EN,
+314 RU) have count 0; of the 9 mode-5 records the 1 EN record has count 0 and 7 of
+the 8 RU records carry count 1..3 (the sack binding of 5 RU mode-5 elements is R2-ASSET-254). — R2-ENGINE-1006, R2-ENGINE-1669, R2-ASSET-230
 
 The turn routine, once per 16 session ticks (Medium), runs a consumer that walks the objects in the session list. For
 each object the spell table at Session `+0xf8` gives T; a unit chosen by the relation bit against T `+0xa` is passed to
