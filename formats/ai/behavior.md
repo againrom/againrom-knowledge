@@ -37,7 +37,7 @@ health that the diplomacy filter keeps (`AI-785`; which Players it keeps is Medi
 kept unit and, only for a unit of its own Player at full caster mana, casts a drawn affordable
 Defensive spell other than Heal whose effect the unit lacks (`AI-786`). A human participant's unit
 runs the heal AI, which casts only Heal (`AI-789`). The cast install searches for its own target only
-when passed none (`AI-787`); the routes per spell row are `AI-788`.
+when passed none (`AI-787`); the routes per spell row are `AI-788`. An area spell goes to the cell its arm fixes, and no count of units on the spell's cells enters the choice (`AI-796`, Medium); the session-list cast routine that picks a unit on a cell is `AI-797` (the list entries are not decoded; that it is not a computer unit's cast is Medium).
 
 Roam's local result is the Group-AI cell/counter program and the Swarm2 call,
 not a proved copy into member destinations. Swarm2 forwards the cell only on

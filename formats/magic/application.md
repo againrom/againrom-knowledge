@@ -520,12 +520,24 @@ from B+R(S), clamps damage at zero, then word-subtracts HP+42 and clamps
 its signed stored result at zero. These are local receiver contracts;
 the full dynamic receiver join is Medium. — MAGIC-301
 
+The unit resolver enters the elemental component only when toHit plus the 200-wide draw minus 100
+exceeds the target's defence word, or when the physical pair is zero; the auto-hit bit and a draw
+of 90 or more admit the physical component only. The jump table `L04134` leads kind 1..5 through
+the arms `L17776`, `L17777`, `L17778`, `L17779`, `L17780` to the words +c4, +c6, +c8,
++ca, +cc (Fire, Water, Air, Earth, Astral; names Medium, MAGIC-453). — MAGIC-453, MAGIC-455
+
 Fire Sacrifice 4 derives its pair from current signed caster HP and mana,
 resets those fields to 1 and 0, then uses fire DirectDamage. Poison 8 scales
 its signed template health magnitude and applies water resistance with
 a0.5 bias on periodic HP subtraction; its decoded branch has no random
 draw. Heal 6 requests B+1..B+S for positive S, then caps against missing
 HP. None of these is the generic harmful row-pair path. — MAGIC-302
+
+A timed Effect keeps its owner as a raw pointer at `+0x44`, found by no id and no registry in the bodies read (other readers and writers of `+0x44` are Medium / Unknown, `MAGIC-454`). Poison 8
+tests it with the owner's signed health word: below zero it clears the pointer, makes no credit call and
+still subtracts the damage. A direct-damage Effect passes the pointer as the attacker of the target's
+resolver, and a null pointer takes the null-attacker route; what happens when the owner's memory is
+freed while the Effect lives is Unknown. — MAGIC-454, HERO-205
 
 ## Applied lifetime operands
 

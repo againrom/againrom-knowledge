@@ -353,6 +353,10 @@ Spray, Stone Curse, or Drain Life for a mage. With spell scalar `S`, it requires
 `min(100,trunc(30*(1.2^r-1)))`. Fighter cast uses `currentPrice*10` as `B`. All ten mage-only
 weapon triples take the forced-cast arm with
 `B=min(2*ceiling-currentPrice,currentPrice*100)` (`SHOP-EFFCAST-065`).
+A weighted draw that lands on `castSpell` for a mage item (class flag 0) replaces the offered budget by
+`currentPrice*100` before the payload routine, and for a fighter item by `currentPrice*10` (`SHOP-156`).
+Only a mage item whose byte `+0x44` is 2 goes to the forced loop; every other mage item takes up to three
+weighted draws, the second behind a 50 gate and the third behind a 25 gate (`SHOP-157`).
 
 For summed non-cast points `N`, the price addition is
 `trunc((1.5^(N/70)+1)*N*50)`. Each retained cast adds

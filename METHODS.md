@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
+Claims labelled: 5191. Observation: 143. Static analysis: 4335. Mixed: 713.
 
 ## Ledger ai
 
@@ -505,6 +505,8 @@ Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
 | AI-787 | static analysis | ● active (branch candidate) |
 | AI-788 | static analysis | ● active (branch candidate) |
 | AI-789 | static analysis | ● active (branch candidate) |
+| AI-796 | static analysis | ✔ promoted (branch candidate) |
+| AI-797 | static analysis | ✔ promoted (branch candidate) |
 | AI-792 | static analysis | ● active (branch candidate) |
 | AI-793 | static analysis | ● active (branch candidate) |
 | AI-794 | mixed | ● active (branch candidate) |
@@ -1031,7 +1033,7 @@ Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
 | HERO-DEATH-026 | static analysis | ● active (amended, superseded) |
 | HERO-KILL-027 | static analysis | ● active (amended) |
 | HERO-AGGRO-028 | static analysis | ● active (amended) |
-| HERO-DMG2-029 | static analysis | ● active |
+| HERO-DMG2-029 | static analysis | ● active (partially retracted) |
 | HERO-CLAMP-030 | static analysis | ● active |
 | HERO-AUTOHIT-031 | static analysis | ● active |
 | HERO-HEALTH-032 | static analysis | ● active (amended) |
@@ -1132,6 +1134,8 @@ Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
 | HERO-197 | static analysis | ● active (branch candidate) |
 | HERO-198 | static analysis | ● active (branch candidate) |
 | HERO-199 | mixed | ● active (branch candidate) |
+| HERO-205 | static analysis | ✔ promoted (branch candidate) |
+| HERO-206 | static analysis | ✔ promoted (branch candidate) |
 | HERO-XPCELL-202 | static analysis | ● active (branch candidate) |
 | HERO-XPKILL-203 | static analysis | ● active (branch candidate) |
 | HERO-XPMAP-204 | mixed | ● active (branch candidate) |
@@ -1284,6 +1288,9 @@ Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
 | ITEM-225 | static analysis | ✔ promoted |
 | ITEM-231 | static analysis | ✔ promoted |
 | ITEM-232 | static analysis | ✔ promoted |
+| ITEM-253 | static analysis | ✔ promoted (branch candidate) |
+| ITEM-254 | static analysis | ✔ promoted (branch candidate) |
+| ITEM-255 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-246 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-247 | static analysis | ● active (branch candidate) |
 | ITEM-248 | static analysis | ✔ promoted (branch candidate) |
@@ -1544,6 +1551,9 @@ Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
 | MAGIC-449 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-450 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-451 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-453 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-454 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-455 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-441 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-442 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-443 | static analysis | ✔ promoted (branch candidate) |
@@ -4267,6 +4277,8 @@ Claims labelled: 5179. Observation: 143. Static analysis: 4323. Mixed: 713.
 | SHOP-ROUTE-150 | observation | ● active |
 | SHOP-ROUTE-151 | observation | ● active |
 | SHOP-ROUTE-152 | observation | ● active |
+| SHOP-156 | static analysis | ✔ promoted (branch candidate) |
+| SHOP-157 | static analysis | ✔ promoted (branch candidate) |
 | SHOP-154 | static analysis | ● active (branch candidate) |
 | SHOP-155 | static analysis | ● active (branch candidate) |
 

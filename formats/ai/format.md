@@ -22,6 +22,8 @@ field-specific restoration with a single generic Group reset.
 | Actor order at actor+0x158 | Holds the member action and its subject/target |
 | Caster with no group-assigned target | Heal itself or the first kept damaged unit, else may buff one unit of its own Player — AI-784, AI-785, AI-786, AI-787, AI-788, AI-789 |
 
+A computer caster's cast takes the target its spell arm fixes; no count of units on the spell's cells is read (`AI-796`, Medium), and the session-list cast routine that selects a unit on a cell is a separate routine (the list entries are not decoded; that it is not a computer unit's cast is Medium, `AI-797`).
+
 The full-tick group pass dispatches its current order, then applies withdrawal
 tests. Player commands can allocate a new order 0 group; map scripts can
 replace the load-time guard/aggressive order. Movement executes the selected

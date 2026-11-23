@@ -192,7 +192,7 @@ Heal and its target the caster or the first listed damaged unit (`AI-789`). A co
 member with no group-assigned target stores `0xb` and runs the support arm, which stores `8` when it
 heals itself or the first kept damaged unit or buffs a unit of its own Player (`AI-784`, `AI-785`,
 `AI-786`). Of the 13 rel32 sites, only the state-0xd re-issue can hand the cast install a null target with a Defensive spell (`AI-787`, Medium); the
-routes per spell row are `AI-788`. A step under
+routes per spell row are `AI-788`. No body of the cast chain counts units on a spell's cells (`AI-796`, Medium); `R0293` lists the units at a cell and draws one, called from the session-list cast routine `R1139` (the list entries are not decoded; that it is not a computer unit's cast is Medium, `AI-797`). A step under
 way ends at the next cell centre (`AI-352`). Its unconditional strike consequence is
 partially retracted: a counted strike or cast finishes its progress first only when
 the common tail and other writers retain its active fields (`AI-354`).
@@ -628,7 +628,7 @@ cell and the diplomacy flip and stores no pending kind or target (`AI-523`,
 `AI-546`). The hook's three direct callers pass the striker or the effect's source or caster, and no `.rdata` or `.data`
 dword equals its address (Medium for the whole image: `.text` tables and `push` or `mov` immediates are not scanned); in
 the bodies read a poison tick and Drain Life lower health without it (Medium: their callees are unread and other
-damage-over-time routes are not enumerated) (`AI-650`). The turn flag forces one random idle turn; no reader of the attacker
+damage-over-time routes are not enumerated) (`AI-650`). With a null attacker the hit routine stores no attacker pointer and calls no hook (`HERO-205`). A timed effect's owner is a raw pointer, and the poison tick clears it, without credit, when the owner's health word is below zero (`MAGIC-454`). The turn flag forces one random idle turn; no reader of the attacker
 pointer found starts or changes an order, a strike, a cast or a withdrawal (`AI-547`,
 Medium). The withdrawal tests run for every member of every group order byte
 (`AI-548`); their thresholds start from the authored `Withdraw` and `Wimpy` values (`AI-WITHDRAW-027`) and the Wimpy

@@ -83,6 +83,15 @@ modifier on the Human families and the live field on the Unit family.
 | 44..48 damageFire..damageAstral | assign modifier `+0xf9`, `+0xfa` from the operand bytes and `+0xfb` = 1..5 |
 | 0, 38..41; 42 | no state change; teachSpell adds a missing Spell |
 
+The five damage keys and the weapon element share one pair and one kind in the modifier block: each
+arm assigns all three bytes without reading the old ones, so a later item of any of the five overwrites
+an earlier one's pair and kind (`ITEM-253`). `Weapon::Equip` assigns the same three bytes for weapon
+classes below 10 (zeros included), adds into the pair and sets kind 1 or 2 for classes 11 and 12, and
+leaves them alone for class 10 and above 12 (`ITEM-254`). Human mission-entry and tavern-hire construction for a matched `Humans` row equips the weapon, then
+the shield, then armor cells 2..9, so the last writer is an armor when one carries a damage key; a
+recompute zeroes the live elemental bytes and refolds the modifier block without re-walking the worn
+items, and a load restores the saved block (`ITEM-255`).
+
 No instruction in an arm body stores into or points at the modifier damage-kind bytes
 `+0x10e..+0x113`; each arm tail calls `vt+0x50`, which recomputes the live bytes `+0xce..+0xd3`
 from the modifier. That no effect apply or remove changes the modifier bytes, callees included,

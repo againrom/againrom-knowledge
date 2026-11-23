@@ -81,6 +81,8 @@ The relation is directional: `matrix[A][B]` and `matrix[B][A]` can
 differ, including hostility bit 0. Store ordered pairs independently.
 — AI-DIPLO-005
 
+The routine `R0293` (called from the session-list cast routine) that lists the units at a cell reads bit 0 of this byte for each unit and drops the units whose bit equals its parameter (`AI-797`).
+
 Bit 1 is one-sided as the loader writes it in 9 ordered player pairs over 4 of the 38 EN maps and in
 6 over 3 of the 34 RU maps, 33 of which yield a type-5 record under this parser (`Horror.alm`
 yields none). — HERO-XPMAP-204

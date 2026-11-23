@@ -43,7 +43,7 @@ equipment, script, save and external-effect changes are outside this statement.
    participant's unit (`AI-715`). The mage's cast arm targets itself when damaged, else the first
    kept unit below maximum health within Heal's range, else one drawn unit of its own Player for a
    buff (`AI-785`, `AI-786`); the heal arm targets the first listed damaged unit (`AI-789`). Callers,
-   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`.
+   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`. No count of units on a spell's cells enters the choice (`AI-796`, Medium); the session-list cast routine that picks a unit on a cell is `AI-797` (the list entries are not decoded; that it is not a computer unit's cast is Medium).
 
 **Sight decides the population and reach decides the pick.** An engine that acquires on sight
 alone starts fights the game does not; one that scans only within reach acquires through walls,

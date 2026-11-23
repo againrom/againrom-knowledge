@@ -1892,6 +1892,44 @@ processes and within one; the digits are High as read from those 3x crops.
 **Unknown.** The source of the variation (a draw at load or a state carried from earlier
 loads). Other shelves were compared in one load only.
 
+## The budget of a weighted cast on a mage item
+
+Evidence is a static read of committed listings of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, identical on the EN and RU installs) under `experiments/EXP-0649-rom1-magic-five/evidence/nav/p5/`; no process was run. Names follow `SHOP-EFFCAST-065`: orchestrator `R1031`, weighted selector `R1035`, forced selector `R1627`, payload routine `R2185` and the effect-cost sum `L16770`. In the orchestrator `[ebp+8]` is the item and `[ebp-8]` the class flag C (fighter 1, mage 0); the item's `+0x1c` is its current price and `[ebp-0x34]+0x38` the shop's price ceiling.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-156 | A weighted castSpell draw on a mage item (C = 0) replaces the offered budget by `item+0x1c` times 100 (`L17824..L17825`), not `2*ceiling - currentPrice`; a fighter item gets times 10 (`L17826`). | High | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| SHOP-157 | The orchestrator sends only a mage item with byte `+0x44` = 2 to the forced loop; every other mage item takes up to three weighted draws, the second behind a 50 gate and the third behind a 25 gate, budget `2*ceiling - price`. | High | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+
+### SHOP-156
+
+`R1035` takes seven arguments (`evidence/nav/p5/shop2.txt`, `R1035`): the flag C at `[ebp+8]`, the offered budget at `[ebp+0x18]`, the item's current price at `[ebp+0x1c]` and the gate 100 at `[ebp+0x20]`. After it has drawn an effect kind, at `L17827..L17828` it compares the kind byte `+0x3c` with 0x29 (41, castSpell). For that kind only:
+
+- C nonzero (fighter): `[ebp+0x18] = [ebp+0x1c] * 10` (`L17826..L17829`);
+- C zero (mage): `[ebp+0x18] = [ebp+0x1c] * 0x64` (`L17824..L17825`).
+
+It then calls the payload routine `R2185` with that budget (`L17830..L17831`). The orchestrator passes the item's `+0x1c` as the sixth argument at every call (`L17832`, `L17833..L17834`, `L17835..L17836`), and passes `2*ceiling - price` as the offered budget (`L08696..L17837`, `L17838..L17839`). For a castSpell draw on a mage item the payload routine therefore receives `price*100`, whatever the offered value was; for the other kinds the offered budget is unchanged.
+
+**Confidence.** High: the compare, both multiplies and the argument slots are decoded in the window. `SHOP-EFFCAST-065` names the fighter value; this claim names the mage value for the weighted draw.
+
+**Amends.** None. `SHOP-EFFCAST-065` stands: its forced-loop budget `min(2*ceiling - currentPrice, currentPrice*100)` is the other path (`SHOP-157`).
+
+### SHOP-157
+
+`R1031` (`evidence/nav/p5/shop1.txt`):
+
+- It sets `[ebp-0x10] = 2*ceiling - item+0x1c` (`L08696..L17837`).
+- Forced path (`L17840..L17841`): taken when C is zero (`L17840`) and the item byte `+0x44` equals 2 (`L17842..L17843`); the budget is the smaller of `2*ceiling - price` and `price*100` (`L17844..L17845`), the second argument is the word `item+0x48` (`L17846`), and the forced selector `R1627` is called with gate 100 (`L17847..L17848`). C nonzero, or `+0x44` not 2, jumps to `L17849`.
+- Weighted path (`L17849..L17850`): the first draw is unconditional (`L17851`) with budget `2*ceiling - price` (`L17852..L17853`); a null result returns 0 (`L17854`). When the drawn kind is 0x29 the routine returns 1 (`L17855..L17856`). Otherwise the budget is recomputed (`L17838..L17839`), the word `+0x48` is lowered by the effect-cost sum `L16770` (`L17857..L17858`), and `rand(100) < 0x32` (`L17859..L17860`) gates a second draw `L17861`. The third draw sits behind `rand(100) < 0x19` (`L17862..L17863`) and the call `L17864`.
+
+Every draw is the same selector `R1035`, so a mage item outside the forced path gets, whenever it draws castSpell, the budget of `SHOP-156`.
+
+**Confidence.** High for the branch structure and constants as read in the windows (`shop1` ends at `L17865` and `shop2` starts at `L17865`, so the ordering is read whole). The population of mage items with `+0x44` other than 2 in a real shop is not counted.
+
+**Unknown.** The share of generated mage items whose first or later draw is castSpell and so uses the times-100 budget. Settle with the original: generate shop stock many times at a fixed ceiling with a mage-class item that is not a weapon of `+0x44 = 2` and record how often a castSpell effect appears and its power; compare with the formula of `SHOP-EFFCAST-065` at `B = currentPrice*100`.
+
+**Amends.** None.
+
 ## Shelf sort order
 
 | ID | Claim | Confidence | Status | Evidence |

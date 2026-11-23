@@ -4598,6 +4598,59 @@ Materials table of parameters 0..3 against the material doubles at
 counts are each one decoded fact; even a call through `R1470` reaches
 only the jump to the epilogue.
 
+## One elemental pair on the actor: who writes it last, and what rebuilds it
+
+Evidence is a static read of committed listings of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, identical on the EN and RU installs) under `experiments/EXP-0649-rom1-magic-five/evidence/nav/`; no process was run. The actor's modifier block is the block `HERO-MOD-016` names: live word `+0xa6`, modifier `+0xe6`, base `+0x114`. The elemental base, spread and kind sit live at `+0xb9`, `+0xba`, `+0xbb` and as modifier at `+0xf9`, `+0xfa`, `+0xfb`. `ITEM-EFFSYM-148` already lists keys 44..48 as assignments and `ITEM-161` lists the removal clear; this section adds what follows from them when two writers meet.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-253 | Keys 44..48 and the weapon element share one pair and one kind: each arm assigns kind 1..5 to `actor+0xfb`, effect `+0x40` to `+0xf9` and `+0x41` to `+0xfa`, reading no old byte, so a later item overwrites all three. | High | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| ITEM-254 | `Weapon::Equip` `R0850` assigns `+0xf9..+0xfb` from the weapon's `+0x65..+0x67` for classes below 10, zeroing an earlier item's element; classes 11 and 12 add and set kind 1 or 2; class 10 and above 12 store nothing. | High | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| ITEM-255 | Human mission-entry and tavern-hire construction for a matched `Humans` row (`ITEM-203`) equips weapon, shield, armor 2..9, so armor keys 44..48 override the weapon's element; recompute does not re-walk items; load restores the block. | High / Medium | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+
+### ITEM-253
+
+The table at `L04018` is indexed by the effect's kind byte `+0x3c` (`evidence/nav/p1/efftab.txt`); its slots for keys 44..48 are `L17748`, `L17749`, `L17750`, `L17751`, `L17752`. Each arm (`evidence/nav/p2/arms44_48.txt`) does the same four steps with its own kind number:
+
+- `mov byte [actor+0xfb], k` with k = 1, 2, 3, 4, 5 (`L17753` for key 44);
+- `mov [actor+0xf9]` from the effect byte `+0x40` (`L17754..L17755`);
+- `mov [actor+0xfa]` from the effect byte `+0x41` (`L17756..L17757`);
+- `or ch, 2` on the dword `+0x150`, which sets bit 9 (`L17758..L17759`), then a jump to the shared tail `L04870`, which calls `vt+0x50` (`L06977`), the recompute `R0280`.
+
+No arm reads the old bytes or tests the old kind. A second item of any of keys 44..48 therefore replaces the first item's pair and kind whole, also when the two keys differ: the kind of the second wins even if its base is zero. The default arm prints an error string (`L17760`, `L17761`). Removal (`ITEM-EFFSYM-148`, `ITEM-161`) is not read again.
+
+**Confidence.** High: the five arms, their stores and the tail are decoded whole.
+
+**Amends.** None. `ITEM-EFFSYM-148` states the assignment; this claim adds the overwrite across items and the bit and the tail.
+
+### ITEM-254
+
+`Weapon::Equip` (`evidence/nav/p4/weaponequip.txt`, `R0850`) compares the weapon's class dword with 10 at `L17762`.
+
+- Class 11 (`L17763`): `+0xf9 += weapon+0x60` and `+0xfa += weapon+0x61` (`L17764..L17765`), then `+0xfb = 1` (`L17766`).
+- Class 12 (`L17767`): the same two adds, then `+0xfb = 2` (`L17768`).
+- Class 10 and classes above 12 reach `L17769` with no store to the three bytes; `L17769` then copies the word `+0xa8` into `+0xe6` and clears `+0xb6`.
+- Classes below 10 (`L17770`): `+0xf4 += weapon+0x60`, `+0xf5 += weapon+0x61`, `+0xfe += word weapon+0x6a`, then three plain stores: `+0xf9 = weapon+0x65` (`L13278..L17771`), `+0xfa = weapon+0x66`, `+0xfb = weapon+0x67` (`L13280..L17772`).
+- The call of the walker `R0855` is the last call of the body (`L17773`), after these stores.
+
+So the class-11 and class-12 arms add to a pair another item may have set, and the below-10 arm replaces it, also with zeros. The writes agree with `ITEM-WEAPCOL-021` and the `Weapon::Equip` arms of the weapon-row claims; the weapon is the only equip method read here.
+
+**Confidence.** High: the paths are read whole. The walker is read only as a call target in this window.
+
+**Amends.** None.
+
+### ITEM-255
+
+- Order. `ITEM-HUMEQ-030` and `ITEM-203` give the order of Human mission-entry and tavern-hire construction for a matched `Humans` row: weapon in cell 0, shield in cell 1, armor in cells 2..9, each through the equip method of its class. The six equip and remove methods are the only rel32 callers of the walkers `R0855` and `R0854`, and no loop over the worn slots calls a walker (`evidence/nav/p1/cwalk.txt`). With `ITEM-253` and `ITEM-254`, the last equip call that writes the pair decides it: an armor of keys 44..48 equipped after the weapon replaces the weapon's own element, and a weapon of class below 10 equipped later in play replaces an armor's.
+- Load. A saved hero restores its modifier block from the file and is not re-equipped (`ITEM-204`), so the loaded pair and kind are the saved bytes.
+- Recompute. `R0280` (`vt+0x50`) builds the live defence block from the stats and stores zero to live `+0xb8`, `+0xb9`, `+0xba` (`evidence/nav/p5/derive0.txt`, `L17774..L17775`), then folds the modifier block at `L03969` (`evidence/nav/p1/fold.txt`, `R0846`): live `+0xb9` and `+0xba` receive the modifier bytes added and live `+0xbb` is assigned the modifier kind. The Human derive window (`evidence/nav/p4/derivehuman.txt`) contains no call of an equip method or a walker.
+
+**Confidence.** High for the arms, the zeroing and the fold. The construction order is the grade of `ITEM-HUMEQ-030` (High / Medium); the writes are High. Medium for the absence of any other re-walk: the caller census is a rel32 and aligned-dword scan, so a call through a register is outside it, and the recompute body was read in windows.
+
+**Unknown.** This read does not count how many shipped heroes or Humans-row units wear two items that both write the pair, so how often the order matters in play is open. Settle with the original: put one hero in a mission `Humans` row with a weapon of one element and an armor with a key from 44..48 of another kind, and compare the elemental kind and damage of its blow after construction and after taking the armor off.
+
+**Amends.** None.
+
 ## Sack pickup destination and refusal
 
 | ID | Claim | Confidence | Status | Evidence |

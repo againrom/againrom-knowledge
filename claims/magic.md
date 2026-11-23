@@ -245,7 +245,7 @@ current account.
 
 ### MAGIC-RESIST-006
 
-**A resistance is a straight percentage, it applies only to the elemental component, and a spell never rolls to hit.** In `R0265` (`HERO-DAMAGE-022`) the elemental component is `v = block+0x13 + U[0, block+0x14]`, admitted iff the physical swing landed **or the attacker has no physical damage at all** (`L05085`…`L05086`), then reduced by the protection word of its own kind — `A+0x15 − 1` bounded `0..4` through the jump table at `L04134`, kind 1→`target+0xc4` Fire, 2→`+0xc6` Water, 3→`+0xc8` Air, 4→`+0xca` Earth, 5→`+0xcc` Astral, default printing `"Unknown magic damage type"`. Each arm is the same seven-instruction FPU block: `ftol(v × (100 − p)/100 + 0.75)` — `[L02972] = 100`, `[L05087] = 0.75` — then `max(v, 0)`. **Absorption (`target+0xc0`) is subtracted from the physical component only** (`L04133`), so nothing flat reduces a spell; and because an `Effect_DirectDamage`'s block carries no physical pair, a spell's elemental damage always applies. `HERO-RESIST-012` clamps the protection to `[0,100]`, so **100 is immunity and no value can invert the sign** (`evidence/resistance.txt` re-executes the curve over `[1,1000] × [0,100]`). Consequence in a player's terms, on the sheet `EXP-0063/evidence/owner-testimony.txt` T5 records: Spirit 42 → protection 21 → a 100-point fireball lands for **79**. A second component sits between the two — `block+0x11 + U[0, block+0x12]`, run whenever that pair is nonzero and reduced by `target+0xc6` (protection index 2, `protectionWater`) — and it is **not gated on the hit**: `L05088`, a jump on less-or-equal to `L05089`, jumps a missed swing straight into it. Its filler was not located
+**A resistance is a straight percentage, it applies only to the elemental component, and a spell never rolls to hit.** In `R0265` (`HERO-DAMAGE-022`) the elemental component is `v = block+0x13 + U[0, block+0x14]`, admitted iff the hit compare passes **or the attacker has no physical damage at all** (`L05085`…`L05086`), then reduced by the protection word of its own kind — `A+0x15 − 1` bounded `0..4` through the jump table at `L04134`, kind 1→`target+0xc4` Fire, 2→`+0xc6` Water, 3→`+0xc8` Air, 4→`+0xca` Earth, 5→`+0xcc` Astral, default printing `"Unknown magic damage type"`. Each arm is the same seven-instruction FPU block: `ftol(v × (100 − p)/100 + 0.75)` — `[L02972] = 100`, `[L05087] = 0.75` — then `max(v, 0)`. **Absorption (`target+0xc0`) is subtracted from the physical component only** (`L04133`), so nothing flat reduces a spell; and because an `Effect_DirectDamage`'s block carries no physical pair, a spell's elemental damage always applies. `HERO-RESIST-012` clamps the protection to `[0,100]`, so **100 is immunity and no value can invert the sign** (`evidence/resistance.txt` re-executes the curve over `[1,1000] × [0,100]`). Consequence in a player's terms, on the sheet `EXP-0063/evidence/owner-testimony.txt` T5 records: Spirit 42 → protection 21 → a 100-point fireball lands for **79**. A second component sits between the two — `block+0x11 + U[0, block+0x12]`, run whenever that pair is nonzero and reduced by `target+0xc6` (protection index 2, `protectionWater`) — and it is **not gated on the hit**: `L05088`, a jump on less-or-equal to `L05089`, jumps a missed swing straight into it. Its filler was not located
 
 **Confidence.** High (seven identical FPU blocks read at instruction level, the jump table resolved, and the flat rival excluded by the presence of the `FDIV`) / **Unknown** (what writes the `block+0x11`/`+0x12` pair)
 
@@ -253,7 +253,7 @@ current account.
 
 **Evidence.** [EXP-0065](../experiments/EXP-0065-magic/)
 
-**Amended.** The table ledger carried the status "● active (amended)". `retracted.md` records a correction against this claim.
+**Amended.** The table ledger carried the status "● active (amended)". `retracted.md` records a correction against this claim. The admission clause is corrected there (`MAGIC-455`): the auto-hit bit and a roll of 90 or more land the physical swing but do not admit the elemental component.
 
 ### MAGIC-ITEM-007
 
@@ -5132,6 +5132,58 @@ Tables come from the Units and Humans collections of `data/data.bin` in `world.r
 **Confidence.** High for the 15 rows and the histograms (the file's own bytes, equal on both roots, the walk consuming the whole payload); the rows outside the 15 are not listed in the evidence, and their grade is Medium. Medium for the 62 Units rows with no value: the walk shows a shorter parameter list, and the streamer's treatment of a missing slot is not read, so their size is taken as the constructor's default. Medium for "only these": other writers of `+0x49` and the 220 vtables of `AI-557` are not enumerated, and a loaded actor's byte is read only in the install saves. Medium for the structure clause (`MOVE-184`).
 
 **Unknown.** Whether a spell can target a structure, and the byte of a loaded actor outside the install saves. A decode of `+0x49` in a save holding such a unit and a read of the streamer for a short parameter list settle them.
+
+## Element resistance arms, effect owner and elemental admission
+
+Evidence is a static read of committed listings of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, identical on the EN and RU installs) and the Units titles of `data/data.bin` in both `world.res` files; no process was run. Listings are under `experiments/EXP-0649-rom1-magic-five/evidence/nav/`. In `R0265` `this` is the target, `[ebp+8]` the attack record A and `[ebp+0xc]` the attacker.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-453 | Jump table `L04134` of `R0265` leads attack kind 1..5 to arms `L17776`, `L17777`, `L17778`, `L17779`, `L17780`, reading target words `+0xc4`, `+0xc6`, `+0xc8`, `+0xca`, `+0xcc` (Fire, Water, Air, Earth, Astral). | High / Medium | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| MAGIC-454 | A timed effect's owner is the raw pointer at `effect+0x44`; `R1050` finds an effect by `+0x0c` alone, and effect 8 clears an owner whose health word is below zero (`R1561`) and still damages, without credit. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| MAGIC-455 | In `R0265` the elemental component runs only when toHit + roll(200) - 100 exceeds target `+0xbe` or the physical pair is zero; the auto-hit bit and a roll of 90 or more do not admit it. | High | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+
+### MAGIC-453
+
+`R0265` builds the elemental value from A+0x13 and A+0x14 (`L17781..L17782`) and dispatches on the kind byte A+0x15 at `L17783..L17784`: the index is A+0x15 - 1, an unsigned compare with 4 sends larger values to `L04135` (`L17785`, `L17786`), and `jmp [index*4 + L04134]` (`L17784`). The five table dwords are `L17776`, `L17777`, `L17778`, `L17779`, `L17780` (`evidence/nav/p1/r0265tab.txt`). Each arm loads one signed word of the target, skips on zero, otherwise computes `ftol(v*(100-p)/100 + 0.75)` through `R0279` (constants at `L02972` and `L05087`), replaces a negative result by 0 and jumps to `L04151`, where a positive result joins the sum (`evidence/nav/p1/r0265a.txt`, `r0265b.txt`).
+
+| kind A+0x15 | table dword | arm | word read |
+|---|---|---|---|
+| 1 | `L04134` | `L17776` | target `+0xc4` (`L04149`) |
+| 2 | `L17787` | `L17777` | target `+0xc6` (`L17788`) |
+| 3 | `L17789` | `L17778` | target `+0xc8` (`L17790`) |
+| 4 | `L17791` | `L17779` | target `+0xca` (`L17792`) |
+| 5 | `L17793` | `L17780` | target `+0xcc` (`L17794`) |
+
+- The arms lie in memory in the order kind 1, 4, 3, 2, 5 (`L17776`, `L17779`, `L17778`, `L17777`, `L17780`). `HERO-DMG2-029` and `UNIT-COMBAT-006` read them by address and so gave kind 2 the word `+0xca` and kind 4 the word `+0xc6`. The table index decides, and `MAGIC-RESIST-006` and `MAGIC-301` have the right words.
+- Kind 0 and kinds above 5 take `L04135`, which prints the error string at `L17795` through `R0473` and `R1347` and applies no reduction; the unreduced elemental value (A+0x13 plus the draw) still joins the sum at `L04151` when positive.
+- The second damage component, A+0x11 and A+0x12, reads `+0xc6` at `L04148` and `L17796`, whatever the attack kind (as `HERO-DMG2-029` says).
+- Names. `R0180` stores five u16 reads into actor `+0xc2 + 2i`, i = 1..5 (`L17797..L17798`, `evidence/nav/p2/unitload.txt`), after 19 earlier reads (slots 0..18: nine u16, two u8, three u32, three u16 and two u8 helper calls, counted from the listing). Slot s is Units title s+1 (`UNIT-STREAM-001`), so `+0xc4`, `+0xc6`, `+0xc8`, `+0xca`, `+0xcc` hold titles 20..24: `prot Fire`, `prot Water`, `prot Air`, `prot Earth`, `prot Astral` (`evidence/nav/g1/titles-en.tsv` and `titles-ru.tsv`, 57 Units titles in each root, titles equal).
+- The Human derive stores Spirit divided by two into all five words (`L03963..L17799`, `evidence/nav/p4/derivehuman.txt`; `HERO-RESIST-012`).
+- Kind written by a spell: school i becomes kind i (`MAGIC-DMG-005`); kind written by an item effect: keys 44..48 write 1..5 (`ITEM-253`).
+
+**Confidence.** High for the table dwords, the five arms, the word each reads and the arithmetic: the listings decode them whole and the comparison with the table index is by address. Medium for the element names: the read count and the title offset rest on `UNIT-STREAM-001` (High / Medium, contested) and on counting helper calls in the listing, not on a decoded row of a unit.
+
+**Amends.** `HERO-DMG2-029` and `UNIT-COMBAT-006`: kind 2 reads `+0xc6` and kind 4 reads `+0xca`, not the reverse. `MAGIC-RESIST-006` and `MAGIC-301` stand.
+
+### MAGIC-454
+
+- Lookup. `R1050` (`evidence/nav/p2/lk R1050.txt`) walks the list at actor `+0x20` and returns the first effect whose byte `+0x0c` equals the argument (`L17800..L17801`); it reads no other field. Its callers are the two sites in `R0265`, `L17802` (id 0x17) and `L17803` (id 0x1b) (`evidence/nav/p2/c4f4c47.txt`, rel32 and dword scan, no dword reference). After a hit `R0265` reads only the signed word `+0x40` (`L17804`, `L17805`). `R0265` reads only the signed word `+0x40` of the effect it finds.
+- Owner field. `Effect_DirectDamage` `R0564` passes `effect+0x44` as the attacker argument of the target's `vt+0x4c` (`L17806..L05510`; `vt+0x4c` is `R0265`, `AI-546`), subtracts the result from target `+0x94`, and when the result is positive and both `effect+0x44` and the byte `effect+0x0c` are nonzero calls the owner's `vt+0x64` with target, damage and the byte (`L17807..L17808`). A zero `+0x44` skips the call and the damage still lands. The body tests no owner health.
+- Effect with `+0x0c` equal to 8 (`R0565`, `L17809..L17810`). Damage is the negated signed word `+0x40`, scaled by target `+0xc6` when that word is nonzero (`L17811..L17812`), subtracted from target `+0x94` (`L17813..L16826`). If `effect+0x44` is nonzero, `R1561` (`evidence/nav/p2/own R1561.txt`) returns 1 when the signed word `owner+0x94` is below zero: then `effect+0x44` is set to 0 and no credit call is made (`L16323..L17814`); otherwise the owner's `vt+0x64` is called with target, damage and 8 (`L17815..L05847`). The notify call `R0561` follows in both (`L02978..L02979`).
+- The pointer is raw: no id, no registry lookup and no reference count appear in these bodies. `R0003` stores the caster there (`MAGIC-DMG-005`).
+
+**Confidence.** High for the three bodies read whole. Medium for the census of `R1050`: two rel32 sites and no dword reference; a call through a register or a computed target is outside the scans. Medium that the effect 8 body and `R0564` are the only readers of `+0x44` that act on the owner (other effect ids were not read for this field). Unknown for the writers of `+0x44` on ids other than the one `MAGIC-DMG-005` names, and for what happens when the owner object is freed or its memory reused while the effect lives: no read here tests object lifetime, and the health test reads the word at `owner+0x94` of whatever the pointer holds.
+
+**Unknown.** Run of the original, no edit: poison a unit with Poison Cloud (effect 8) and kill the caster with other means; keep the poisoned unit alive for ten ticks and record whether the poisoned unit keeps losing health, whether the caster's experience changes, and whether the game stays up after the caster's body is removed. Compare with a run where the caster stays alive.
+
+### MAGIC-455
+
+`R0265` rolls the hit once: toHit is the signed word A+0 plus `rand(0xc8) - 0x64` (`L17816..L17817`) and the target defence is the signed word `+0xbe` (`L17818`). The physical component takes damage when toHit + roll exceeds the defence (`L04064`, `L17819`), or when the attacker's `+0x4c & 0x10` bit is set (`L04159..L04160`, a nonnull attacker), or when the roll is 90 or more (`L04066`). The elemental component (A+0x13, A+0x14; `L17820..L17821`) is skipped when `A+0x13 + A+0x14` is not above zero; otherwise it is entered only through `L17822..L17781`: toHit + roll above the defence (`jg L17781`), or the flag at `[ebp-0xc]`, which `L05085..L17823` set to 1 when `A+0xe + A+0xf` is zero. The auto-hit bit and the roll of 90 are checked only on the physical side and do not reach this test. With a null attacker the auto-hit test is absent as well (`L17736`).
+
+**Confidence.** High: the compare, the flag and both exits are named instructions in `evidence/nav/p1/r0265a.txt`.
+
+**Amends.** `MAGIC-RESIST-006` says the elemental component is admitted when "the physical swing landed". A swing that lands through the auto-hit bit or a roll of 90 or more does not admit it unless the compare above also passes or the physical pair is zero. `MAGIC-301` words the same gate as "the hit succeeds or the physical pair is zero"; read as the compare alone it agrees with this claim, and `MAGIC-301` stands.
 
 ## Light and Darkness sight
 

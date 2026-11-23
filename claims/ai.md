@@ -9651,6 +9651,48 @@ word `+0x98` nonzero, and spell id 6 is Heal. `AI-FOLLOWHEAL-118`: its spell id 
 
 **Unknown.** In the original, a participant's mage holding Heal beside two damaged units of its
 Player at different health: record which one `ord+0x28` names.
+## What the computer's cast chain counts on the cells of an area spell
+
+Evidence is a static read of committed listings of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, identical on the EN and RU installs) under `experiments/EXP-0649-rom1-magic-five/evidence/nav/`; no process was run. The chain is the one `MAGIC-237`, `AI-785`, `AI-786` and `AI-788` describe: slot draw `R0009`, arm table `R0209`, order writer `R0018`, heal `R0113`, `R0015`, defensive tail `R0394`, `R0305` and the Mind-gated draw `R0393`.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-796 | No body of the computer's cast chain counts units on the cells a spell would hit: the arms aim at the victim, the caster, the victim's cell or the cell next to the caster, and the order writer takes that target as given. | Medium | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| AI-797 | `R0293`, whose one rel32 caller is `R1139` (itself with one rel32 caller, the AI driver `R0076`), lists the units at a cell, drops those with the diplomacy bit equal to a parameter or effect bit 15, and draws one at random. | High / Medium | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+
+### AI-796
+
+The chain was read in eight windows (`evidence/nav/p6/`: `cb940`, `cb6d0`, `cbeea0`, `cbd30`, `cbb60`, `cb840`, `cbd600`, `cb600`) and its callers by rel32 census (`evidence/nav/p6/ccast.txt`: 47 rel32 call sites of the eight entry points, owners `R0008`, `R0441`, `R0138`, `R0022`, `R0137`, `R0306`, `R0009`, `R0015`, `R0113`, `R0023` and orphan pieces).
+
+- The slot draw `R0009` picks a spell and calls the arm table `R0209`, a jump table at `L05156` indexed by a spell id (`L05151..L05157`); each arm ends in a call of the order writer `R0018` (`L06077`, `L06080`, and the calls from the heal and buff routines at `L17511`, `L17517`).
+- The target values of the arms are the ones `MAGIC-237` lists: the engage victim, the caster, the victim's cell, the cell next to the caster, or none. An area spell takes the victim's cell, not a best cell chosen from a count.
+- The windows contain no call of `L17710`, the routine `R0293` uses to collect the units on a cell (`evidence/nav/p5/a1b0.txt`, `L17711`), and no loop that reads a unit's position and compares it with the spell's cells. The calls the windows do make besides the order writer (`R0017`, `R0019`, `R0020`, `R2214`, `R0021`, `R0179`) are not read here.
+- The heal and buff tails choose among units by their own conditions (`AI-785`, `AI-786`): damage, health, the diplomacy filter and effect bit tests, with a random draw among the kept units; neither counts units on spell cells.
+
+So the answer to the question as asked is the third alternative of the preregistration: there is no count in the bodies read, and the cast follows the arm's target.
+
+**Confidence.** Medium: the negative rests on eight read windows and on callee bodies that were not read, so a count inside an unread callee called from an arm cannot be excluded. The positive parts (the arm targets, the order writer calls) are `MAGIC-237` at its own grade.
+
+**Unknown.** Whether an unread callee counts units. Settle with the original: a computer mage with Fire Ball in its book against one lone enemy and then against a group of enemies, with an own unit next to the victim; record the cast target cell for each, and whether the mage casts at the lone enemy and at the group alike.
+
+**Amends.** None. `MAGIC-237` stands.
+
+### AI-797
+
+`R1139` (`evidence/nav/p5/a400.txt`, `R1139..R1048`) has one rel32 caller, `R0076` at `L06062` (`evidence/nav/p5/ca53.txt`; rel32 census of `L17712`, `R0293`, `R1139`, `R1048`). It walks a list reached from the session object `[L00285]` (`+0x14`, list at `+0x10`; `L00398..L17713`), reads for each entry a record at `entry+0x40` whose bytes `+0`, `+2` and `+3` give a player index and a cell (`L17714..L17715`), and calls `R0293` with that cell, the entry's byte `+0x3c` and its field `+0x14` (`L17502`). When it returns a unit, a test `R2078` on the player object and that unit (`L17716`) chooses between the two wrappers `R1137` (`L06047`) and `R1138` (`L06048`) that `AI-618` names, which store the cast action word 0xd (target actor) or 0xe (target cell) in a newly built actor. What the entries are is not decoded here.
+
+`R0293` (`R0293..L17717`):
+
+- It calls `L17710` with the cell and a radius to fill the list at `this+0xba4` (`L17711`).
+- For each unit it reads a byte of the diplomacy table at `this+0xa9c4`, indexed by the unit's player word and the player word of the first parameter (`L17718..L17719`; the matrix is the one `AI-DIPLO-005` names), masks bit 0 (`L17720`) and compares it with another parameter (`L17721`). A unit is dropped from the list (`L17722`, `R0413`) when the bit equals the parameter, or when bit 15 of its effect mask `+0x144` is set (`L05777..L17723`).
+- It then draws `rand * count / [this] + 1` (`L17724..L17725`) and picks that unit of the rest.
+
+So this routine counts and filters the units on a cell and selects one at random. Its one rel32 caller walks a session list and builds the action in a new actor through the `AI-618` wrappers; it never reads a computer unit's spell book or the chain of `AI-796`. So it is not the computer unit's automatic cast of an area spell.
+
+**Confidence.** High for the body. Medium for the caller census: rel32 sites only, no dword scan recorded, a call through a register is outside it. Medium for the reading that this is not a computer unit's choice (the list's entries were not decoded) and for the meaning of the two parameters compared with the diplomacy bit.
+
+**Amends.** None.
+
 ## Guard radius sources and the turn back to the post
 
 | ID | Claim | Confidence | Status | Evidence |

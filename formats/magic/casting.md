@@ -362,6 +362,13 @@ from the caster toward the victim; Teleport's search for a free cell around the 
 its result is overwritten (`MAGIC-238`). Fire Sacrifice and Control Spirit write no order. No
 slot-drawn spell is aimed at an ally; none of the 28 arms is.
 
+No body of the computer's cast chain counts units on the cells a spell would hit: an area spell goes to
+the victim's cell as the arm fixes it (`AI-796`, Medium: callee bodies of the arms were not read).
+`R0293` lists the units at a cell with `L17710` and draws one (`AI-797`); callers of `L17710` and
+other selectors of this kind were not searched. It is reached from the session-list cast routine
+`R1139` (the list entries are not decoded), and that it is not a computer unit's cast from its
+spell book is Medium (`AI-797`).
+
 A failed kind-8/9 reach or facing test selects approach rather than immediate
 release. Approach whose route search leaves a non-empty path re-evaluates the
 cast. The former unconditional pending-order-retention wording is narrowed by

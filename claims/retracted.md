@@ -1,5 +1,13 @@
 # Overturn history
 
+## EXP-0649: element resistance table arms and the elemental admission
+
+| Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |
+|---|---|---|---|---|---|
+| `HERO-DMG2-029` (the kind-to-word mapping for attack kinds 2 and 4 only; the table, the arms, the writer and the other clauses stand) | Verbatim: "(1→`+0xc4`, 2→`+0xca`, 3→`+0xc8`, 4→`+0xc6`, 5→`+0xcc`; anything else takes the error string at `L04135`)" | High | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/), MAGIC-453 | The jump table at `L04134` holds `L17776`, `L17777`, `L17778`, `L17779`, `L17780`, so kind 2 reads `+0xc6` and kind 4 reads `+0xca`; the arms lie in memory in the order kind 1, 4, 3, 2, 5 and the clause listed them by address. | **REFUTED** |
+| `UNIT-COMBAT-006` (the kind-to-word mapping for attack kinds 2 and 4 only; every other clause and grade stands) | Verbatim: "in the jump-table order `HERO-DMG2-029` names (1→`+0xc4`, 2→`+0xca`, 3→`+0xc8`, 4→`+0xc6`, 5→`+0xcc`)" | High | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/), MAGIC-453 | The clause repeated the address order of `HERO-DMG2-029`; the table index gives kind 2 `+0xc6` and kind 4 `+0xca`. | **REFUTED** |
+| `MAGIC-RESIST-006` (the admission clause only; the resistance arithmetic, the kind-to-word list and the other clauses stand) | Verbatim: "admitted iff the physical swing landed **or the attacker has no physical damage at all**" | High | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/), MAGIC-455 | The elemental component is entered when toHit plus the roll of 200 minus 100 exceeds the target's `+0xbe`, or when the physical pair is zero (`L17822..L17781`). The auto-hit bit and a roll of 90 or more land the physical swing and do not admit it. | **NARROWED** |
+
 ## EXP-2138: mission 42 mage palette selection
 
 | Claim | Former wording | Confidence when believed | Evidence | Correction | Kind |

@@ -31,14 +31,22 @@ and no absorption is subtracted from it:
         A[+0x11]/A[+0x12] = actor+0xb7/+0xb8, written only by the units streamer's
         attackKind == 1 arm -- which NO shipped class takes, so this pair is 0 in play
 
-elemental component, applied iff the swing landed OR A has no physical damage at all:
+elemental component, applied iff toHit + roll > target.defence (that compare alone; the
+auto-hit bit and the roll >= 90 admit the physical component only) OR A has no physical damage
+at all (`MAGIC-455`):
         v = A.elemBase + rand(A.elemSpread)
-        p = target.protection[A.elemKind]   kind 1..5 = Fire/Water/Air/Earth/Astral
+        p = target.protection[A.elemKind]   kind 1..5 = Fire/Water/Air/Earth/Astral = words
+            +0xc4/+0xc6/+0xc8/+0xca/+0xcc through the jump table (`MAGIC-453`)
         v = ftol( v * (100 - p) / 100 + 0.75 ) ; max(v, 0)
 
 result = max(sum, 0) ; the melee strike subtracts it from target+0x94
 side effect: target+0x40 = the attacker, target+0x48 = A.elemKind when the attacker is a mage
 ```
+
+With a null attacker the resolver skips Bless and Curse, the auto-hit bit, the flat absorption
+and the attribution tail (no store to `target+0x40` or `+0x48`), and still rolls and returns the
+damage; a null attack record returns 0 (`HERO-205`). The effect-bit test `(1 << n) & actor+0x144`
+has no null test of its own; its four rel32 callers test the receiver (three) or read it through `R0442` first (`HERO-206`, Medium for the census and for `R0442`).
 
 The six bytes at `+0xce … +0xd3` are therefore **resistance by weapon class**, read from the
 target and indexed by the attacker's own active byte (`attacker+0xb6` for a melee strike; 0 =

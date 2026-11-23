@@ -52,7 +52,7 @@ area is `R0824`'s `+0.5` before its truncate.
 | HERO-DEATH-026 | Death is a three-stage arm of the actor's own tick; the corpse keeps its cells until the dying countdown expires *and* its health is at or below −10, and `MOVE-ID-016`'s id release is confirmed from the death path's own instructions. | High | ● active (amended, superseded) | [EXP-0069](../experiments/EXP-0069-combat-loop/), **[EXP-0076](../experiments/EXP-0076-session-lifecycle/)**, **[EXP-0121](../experiments/EXP-0121-death-row/)** |
 | HERO-KILL-027 | Experience is paid per landed blow in proportion to the health removed, only to a human class, and a kill also pays gold from three template columns. | High / Unknown | ● active (amended) | **[EXP-0069](../experiments/EXP-0069-combat-loop/)**, **[EXP-0135](../experiments/EXP-0135-skill-raise/)** |
 | HERO-AGGRO-028 | Being struck does not give the victim a target — it makes the two *players* mutually hostile, and acquisition does the rest. | High / Medium | ● active (amended) | [EXP-0069](../experiments/EXP-0069-combat-loop/), [EXP-0074](../experiments/EXP-0074-target-acquisition/) |
-| HERO-DMG2-029 | The `+0xb7`/`+0xb8` pair is a class's `physicalMin`/spread routed by the `attackKind` column; it is reduced by `target+0xc6` and never by absorption — and no shipped class takes that arm. | High / Medium | ● active | [EXP-0069](../experiments/EXP-0069-combat-loop/) |
+| HERO-DMG2-029 | The `+0xb7`/`+0xb8` pair is a class's `physicalMin`/spread routed by the `attackKind` column; it is reduced by `target+0xc6` and never by absorption — and no shipped class takes that arm. | High / Medium | ● active (partially retracted) | [EXP-0069](../experiments/EXP-0069-combat-loop/) |
 | HERO-CLAMP-030 | The blow's three components carry three different clamps, and only the physical one can leave its block negative. | High / Medium | ● active | [EXP-0104](../experiments/EXP-0104-combat-columns/) |
 | HERO-AUTOHIT-031 | The auto-hit bit does two things, and the second one is published nowhere: it skips absorption. | High / Medium | ● active | [EXP-0104](../experiments/EXP-0104-combat-columns/) |
 | HERO-HEALTH-032 | What reaches the health field, read at the write: `max(total, 0)`, subtracted 16-bit, with no guard on either side. | High | ● active (amended) | [EXP-0104](../experiments/EXP-0104-combat-columns/), **[EXP-0122](../experiments/EXP-0122-corpse-clock/)** |
@@ -340,9 +340,11 @@ area is `R0824`'s `+0.5` before its truncate.
 
 ### HERO-DMG2-029
 
-*(re-tested by EXP-0072 with the Units schema decoded, and it holds — on **two** shipped roots, EN and RU, whose `Data.bin` files differ: `attackKind` is `−1` on 48 classes and `3` on eight, never 1 or 2, and the Units collection is byte-for-byte identical between the roots. One mechanism the row asserted implicitly is now an instruction: `−1` does **not** reach arm 0 by being `≤ 0`, because the helper `R0872` skips the store entirely on `−1` — it reaches arm 0 because the local is **pre-set to 0** at `L04076`, before the read. A consumer that treats an absent `attackKind` as anything but 0 diverges.)* **The `+0xb7`/`+0xb8` pair is a class's `physicalMin`/spread routed by the `attackKind` column; it is reduced by `target+0xc6` and never by absorption — and no shipped class takes that arm.** In `R0265` the second component is gated only on `A+0x11 + A+0x12 > 0` (`L04129`), rolled `A+0x11 + U[0, A+0x12]` (`L04130`), reduced by `ftol(v × (100 − target+0xc6)/100 + 0.75)` clamped at 0 (`L04131`…`L04132`) and added to the total; the absorption subtraction of `target+0xc0` at `L04133` is inside the physical block only, and no hit-roll gate stands on this path. A third component follows — `A+0x13`/`A+0x14`, with `A+0x15` selecting a protection through a five-way jump table at `L04134` (1→`+0xc4`, 2→`+0xca`, 3→`+0xc8`, 4→`+0xc6`, 5→`+0xcc`; anything else takes the error string at `L04135`). The **writer** is `R0180`'s `attackKind` switch: `<= 0` → `+0xb4`/`+0xb5`; `== 1` → `+0xb7`/`+0xb8` (`L04136`/`L04137`); `== 2` → `+0xb9`/`+0xba` **negated**; `== 3` → `+0xb4`/`+0xb5` **and `actor+0x4c |= 0x10`** (the OR with 0x10 at `L04138`) — which identifies `HERO-DAMAGE-022`'s auto-hit override as that arm. The shipped population of the column is exactly `−1` on 48 unit classes and `3` on eight (Bat_Sonic ×4, Bee ×4, which therefore **never miss**), and **1 and 2 on none**, so on a shipped map the second component is zero and its own gate skips it. Instrument: `EnumRefs disp:b7`, whole image on a repaired table — **3 hits, 0 orphan**; the field is a byte, so every byte-wide hit is a candidate and the whole population is listed (a read in `R0059`, the writer above, and `R0280`'s zeroing store at `L04139`). `disp:b8` adds only those same two stores inside the actor module; `disp:bb` (`A+0x15`) returns **0 hits anywhere in the image**. **Blind spot, stated:** `+0xb7` is offset 0x11 inside the 0x40-byte live block at `actor+0xa6` that `HERO-MOD-016` shows being folded wholesale from a modifier copy, and a store through that base carries no displacement — so "one writer" is a claim about displacement-addressed writers only
+*(re-tested by EXP-0072 with the Units schema decoded, and it holds — on **two** shipped roots, EN and RU, whose `Data.bin` files differ: `attackKind` is `−1` on 48 classes and `3` on eight, never 1 or 2, and the Units collection is byte-for-byte identical between the roots. One mechanism the row asserted implicitly is now an instruction: `−1` does **not** reach arm 0 by being `≤ 0`, because the helper `R0872` skips the store entirely on `−1` — it reaches arm 0 because the local is **pre-set to 0** at `L04076`, before the read. A consumer that treats an absent `attackKind` as anything but 0 diverges.)* **The `+0xb7`/`+0xb8` pair is a class's `physicalMin`/spread routed by the `attackKind` column; it is reduced by `target+0xc6` and never by absorption — and no shipped class takes that arm.** In `R0265` the second component is gated only on `A+0x11 + A+0x12 > 0` (`L04129`), rolled `A+0x11 + U[0, A+0x12]` (`L04130`), reduced by `ftol(v × (100 − target+0xc6)/100 + 0.75)` clamped at 0 (`L04131`…`L04132`) and added to the total; the absorption subtraction of `target+0xc0` at `L04133` is inside the physical block only, and no hit-roll gate stands on this path. A third component follows — `A+0x13`/`A+0x14`, with `A+0x15` selecting a protection through a five-way jump table at `L04134` (1→`+0xc4`, 2→`+0xc6`, 3→`+0xc8`, 4→`+0xca`, 5→`+0xcc`; anything else takes the error string at `L04135`). The **writer** is `R0180`'s `attackKind` switch: `<= 0` → `+0xb4`/`+0xb5`; `== 1` → `+0xb7`/`+0xb8` (`L04136`/`L04137`); `== 2` → `+0xb9`/`+0xba` **negated**; `== 3` → `+0xb4`/`+0xb5` **and `actor+0x4c |= 0x10`** (the OR with 0x10 at `L04138`) — which identifies `HERO-DAMAGE-022`'s auto-hit override as that arm. The shipped population of the column is exactly `−1` on 48 unit classes and `3` on eight (Bat_Sonic ×4, Bee ×4, which therefore **never miss**), and **1 and 2 on none**, so on a shipped map the second component is zero and its own gate skips it. Instrument: `EnumRefs disp:b7`, whole image on a repaired table — **3 hits, 0 orphan**; the field is a byte, so every byte-wide hit is a candidate and the whole population is listed (a read in `R0059`, the writer above, and `R0280`'s zeroing store at `L04139`). `disp:b8` adds only those same two stores inside the actor module; `disp:bb` (`A+0x15`) returns **0 hits anywhere in the image**. **Blind spot, stated:** `+0xb7` is offset 0x11 inside the 0x40-byte live block at `actor+0xa6` that `HERO-MOD-016` shows being folded wholesale from a modifier copy, and a store through that base carries no displacement — so "one writer" is a claim about displacement-addressed writers only
 
 **Confidence.** High (the resolver's three components are read whole, the switch is read whole, and the population is a corpus census of the column) / **Medium** on "never non-zero in play", which the modifier-fold blind spot bounds
+
+**Amended.** The jump-table mapping for attack kinds 2 and 4 is corrected in [`retracted.md`](retracted.md): the table `L04134` leads kind 2 to `+0xc6` and kind 4 to `+0xca` (`MAGIC-453`); the clause above listed the arms by address. The table, its five arms, the writer and the other clauses stand.
 
 ### HERO-CLAMP-030
 
@@ -1589,6 +1591,44 @@ EXP-0234's Complication histogram. The arithmetic over the committed tables is e
 **Unknown.** The approach and turn before the first wind-up are not included. Settle with an
 original run: order an Orc_Sword at an adjacent enemy, SAVE each tick and count the ticks
 between two consecutive health drops of the target.
+
+## The damage resolver with no attacker and the effect-bit test
+
+Evidence is a static read of committed listings of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`, identical on the EN and RU installs) under `experiments/EXP-0649-rom1-magic-five/evidence/nav/`; no process was run. In `R0265` `this` is the target, `[ebp+8]` the attack record A and `[ebp+0xc]` the attacker.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-205 | `R0265` with a null attacker skips Bless, Curse, the auto-hit bit, the flat absorption and the attribution tail but still rolls and returns damage; a null attack record returns 0. | High | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+| HERO-206 | `R0254` has no null test, it computes `(1 << n) & this+0x144`; of its four direct callers three test the receiver first and the fourth reads it through `R0442` first; register calls are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-0649](../experiments/EXP-0649-rom1-magic-five/) |
+
+### HERO-205
+
+`evidence/nav/p1/r0265a.txt`, `r0265b.txt`. A null attack record returns 0 at `L17726..L17727`. A null attacker is tested at four places and takes the skip arm at each:
+
+- `L17728` (`cmp [ebp+0xc], 0`, `je L17729`) jumps over the Bless (id 0x17) and Curse (id 0x1b) tests (`L17730..L17731`). A nonnull attacker whose `+0x14` is zero jumps there too (`L17732`). The spread draw `rand(A+0xf)` still runs, because the local at `[ebp-4]` starts at 1 (`L17733`, `L17734..L17735`).
+- `L17736` (`cmp [ebp+0xc], 0`, `je L04066`) skips the auto-hit test of `attacker+0x4c & 0x10`, so only the compare and the roll of 90 or more can give the physical hit.
+- `L04156` (`je L04055`) skips the flat absorption subtraction of target `+0xc0` (`L17737..L17738`), the exit `HERO-AUTOHIT-031` names for an auto-hit attacker.
+- `L16253` (`cmp [ebp+0xc], 0`, `je L04058`) skips the attribution tail: no call of `R0416`, no store to target `+0x40` or `+0x48`, and no call of `R0226` with target and attacker.
+
+The class reduction by `target+0xce + A+0x10` (`L04140..L17739`), the second component (`L05089..L17740`) and the elemental component run as for any attacker. The return value is the sum when positive, else 0 (`L04058..L17741`).
+
+**Confidence.** High: every skip is a compare of the attacker argument with zero in the listing, and the arms are read whole. The callee `R0416` is unread; the claim names only that the tail is jumped over before it.
+
+**Amends.** None. `HERO-AUTOHIT-031` states the absorption clause for a null attacker (High / Medium) and this read confirms it.
+
+### HERO-206
+
+`R0254` (`evidence/nav/p1/r0254.txt`, 13 instructions `R0254..L17742`) loads `1`, shifts it left by the argument, and ands it with the dword at `this+0x144` taken from the saved `ecx`; it reads no other field and tests nothing. `HERO-DAMAGE-022` names the bit test. Direct callers by a rel32 scan of `.text` and an aligned dword scan of every section (`evidence/nav/p1/c4f4c25.txt`): four sites, no dword reference.
+
+- `L17743` in `R0245`: argument 0xf (`L14863`), receiver `[ebp+8]`, tested at `L16242..L17744`.
+- `L17745` and `L17746` in `R0265`: arguments 0x17 and 0x1b, receiver the attacker, tested at `L17728` and `L17732`.
+- `L15399` in `R0268`: argument 0xf (`L05058`), receiver `[ebp+8]`, passed first to `R0442` at `L17747..L01998`, which reads `actor+0x4c & 4` (`MAGIC-AUTOCAST-020`) without a test in the listing (`evidence/nav/p4/fe6d3.txt`).
+
+So no read site of the four reaches `R0254` with a null receiver unless `R0442` already faulted; the body of `R0442` is not in the listings of this experiment.
+
+**Confidence.** High for the body and for the four rel32 sites. Medium for the fourth site: the body of `R0442` is not in the listings of this experiment and its lack of a null test rests on `MAGIC-AUTOCAST-020`. Medium for the census: a call through a register or a computed target and an unaligned immediate are outside the scans.
+
+**Amends.** None.
 
 ## The relation an experience award reads
 
