@@ -221,7 +221,8 @@ caster's one-update object, found as a client unit, shows frame 1
 Effect pictures drawn through the common draw head are centred on the
 object's point, raised by its height and by a bilinear sample of a
 signed-byte grid of the client at that point, which is the ground height
-(Medium); the Blizzard object (23) adds its fall lift. The Blizzard cell
+(Medium; the formula is read in EN in the next paragraph but one,
+R2-ENGINE-1518, and its unit stays Medium); the Blizzard object (23) adds its fall lift. The Blizzard cell
 object (23) and the teleport object (54) never move in the update arms
 read; the other area cell identifiers (13, 21, 27, 43) were not traced for
 movement. — R2-ENGINE-993
@@ -263,3 +264,28 @@ and the tile is shaded bilinearly between its corners. A lower value selects
 a brighter shade row: row 0 triples each channel, row 64 keeps the colour and
 row 95 is the darkest (Medium). Effect light values 0..46 therefore brighten
 the ground (Medium). — R2-ENGINE-996
+
+## Effect paths, cell light flags, ground height and held-mark lifetimes
+
+Lightning (28) and Prismatic Spray chains (30) rebuild their drawn path at every update. The builder cuts a bolt into 2 to 5
+random kinks (a walk of steps 0.16 to 0.49 of the length until 0.7 is passed, offsets within ±3 times 0.03 of the length), fits
+a quadratic through each triple of points, samples it every 6.0 units along the axis, rotates the samples onto the line from
+the effect to the target and rejects a bolt that strays more than 0.15 of the length. The sample count therefore follows the
+distance and random draws, from the length over 6 up to that plus the kink count. Each point holds X, Y and a type byte: 28
+for Lightning, the target index mod 7 for a chain. A chain clears its list and builds one path per target. No saved key of
+the projectile record lists the path (Medium: the save writer was not searched); a loaded effect builds a new path at its
+first update. — R2-ENGINE-1515, R2-ENGINE-1516
+
+The client cell set written by the 0x87 packet is read in two places found: a light writer (bit 15 writes light 0, bit 14 writes
+0xc, bit 3 flickers between 0xc and 0) and a redraw rectangle queue. Neither draws a picture, so Wall of Fire, Poison Cloud and
+Wall of Earth show no picture from that set (Medium; no image-wide census). — R2-ENGINE-1517
+
+An effect point inside a cell stands at the bilinear blend of the four corner bytes of the ground plane (32 steps per cell, EN
+read), and is drawn at its y minus that sample minus its raise. — R2-ENGINE-1518
+
+In the EN base constructor a new effect object starts with raise, frame, counter and lifetime 0 (EN only; the RU twin is not
+read). — R2-ENGINE-1519
+
+A held Poison Cloud (20) or Curse (64) mark starts at 65535 and falls by one per call of the unit consumer (a unit update with
+byte +0x184 below 5), so it lives 65535 such calls unless a 0x89 removes it; a held Drain (60) mark starts at 32 (Medium: no 0x88
+is expected for it). The update period is Unknown. — R2-ENGINE-1520

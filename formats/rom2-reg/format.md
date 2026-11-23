@@ -155,10 +155,12 @@ meaning of the caster's +0x5c/+0x60 is Medium and the screen direction of
 the draw direction is Unknown. A type
 without ShootOffset uses the Center/Selection anchor of Teleport. The
 release sets no height; the draw lifts by +0x6c and +0x10, whose values are
-Unknown. — R2-ENGINE-930, R2-ENGINE-703
+Unknown; the formula of +0x6c is read in EN and the unit of its byte stays
+Medium. — R2-ENGINE-930, R2-ENGINE-703, R2-ENGINE-1518
 
 The lift +0x6c is the bilinear sample, at the object's point, of a signed-byte
-grid that the client's dword +0x80 supplies, the ground height (Medium); its
+grid that the client's dword +0x80 supplies, the ground height (Medium); the
+formula is read in EN (R2-ENGINE-1518) and its unit stays Medium; its
 bytes at a given cell are Unknown. The teleport objects' slot +0x40 is the
 effect light method, whose default arm stores no light for them; other
 light writers are not excluded (Medium). —

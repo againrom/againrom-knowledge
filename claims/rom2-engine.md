@@ -824,6 +824,8 @@ ID 23 starts at the cell centre with +0x10 = 0 and a zero step, so it never move
 
 **Unknown.** The helper `L2.03398`; the release's store to +0x10 of effect 1.
 
+**Amended.** R2-ENGINE-1518 reads the formula of `+0x6c` in EN (High); the unit of the byte stays Medium.
+
 **Evidence.** [Answer 3](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#3-identifiers-23-and-54-position): projection, vtable slot, update and draw listings.
 
 ### R2-ENGINE-994
@@ -835,6 +837,8 @@ A unit's release object has lifetime 13 (R2-ENGINE-691) and counter 0 from the r
 **Confidence.** High for the arm and both roots' tables, read from the committed table words of `nav9-tables.tsv`. Medium for the release object's counter start (as in R2-ENGINE-992) and for the path builder's result. Unknown for the non-unit chain arm and the 0x8b arm.
 
 **Unknown.** The counter start and lifetime of the non-unit chain arm and the 0x8b arm, which decide whether their first update shows 4 and whether updates past 13 occur.
+
+**Amended.** R2-ENGINE-1516 reads the path builder `L2.05869` (R2-ENGINE-1515); the type byte passed for effect 28 is 0x1c, not 0x12, and for effect 30 it is the entry index mod 7.
 
 **Evidence.** [Answer 4](../experiments/EXP-2141-rom2-effect-draw/RESULTS.md#4-identifiers-28-and-30): update, slot +0x50 and draw listings; navigation table.
 
@@ -17552,6 +17556,8 @@ by use. Medium for the hero's s, which was not read.
 reads their four generators and gives their entries. R2-ENGINE-699 narrows
 the switch: no mark outside the ten builds a figure.
 
+**Amended.** R2-ENGINE-1520 bounds a held mark's life in consumer calls (65535 for marks 20 and 64, 32 for 60); the decrement of the low word and the grades stand.
+
 **Evidence.** [EXP-2088](../experiments/EXP-2088-rom2-held-marks/RESULTS.md), question 3.
 
 ### R2-ENGINE-693
@@ -17953,6 +17959,8 @@ the depth against the caster depends only on which grid holds it (for the
 +0x28 draws read; a +0x2c sweep of grid +0x90 before the effect pass is
 unread). R2-ENGINE-930
 reads the ShootOffset branch that ID 0x36 skips.
+
+**Amended.** R2-ENGINE-1518 reads the formula of `+0x6c` in EN (High); the unit of the byte stays Medium.
 
 **Amended.** The slot +0x40 `L2.03841` is the effect light method (R2-ENGINE-995); ID 54 reaches its default arm, which only marks the dirty rectangle. R2-ENGINE-993 reads +0x6c: the bilinear sample of the signed-byte grid of client +0x80 at the effect's point; its values stay Unknown.
 
@@ -21227,6 +21235,8 @@ Unknown which client routine draws the firewall, poison and wall pictures from `
 Poison Cloud and Wall of Earth and records the pictures and their duration, would settle it.
 Whether a receiver deferred in `+0x46` gets the start later is open; reading the other `+0x46`
 readers would settle it.
+
+**Amended.** R2-ENGINE-1517: of the readers of `+0xa08`, two are read there and neither draws a picture (Medium); which routine draws the pictures stays Unknown.
 
 **Evidence.** [EXP-2108](../experiments/EXP-2108-rom2-area-spells/RESULTS.md), question 3.
 
@@ -33268,3 +33278,148 @@ routine sends sub-id 1 and from which control. A run of the original with a play
 withdraw control set to each of its three positions, with the message sender logged at the caller window, would show
 the `+0xe` values and the owner; a computer-only game shows whether the arm is ever reached for a computer owner.
 
+## ROM2 spell effects: Lightning paths, cell light flags, ground sample, constructor, held-mark lifetimes
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1515 | ROM2 path builder L2.05869 turns a bolt into 2 to 5 random kinks and samples a fitted curve every 6.0 units along the axis, so the point count follows distance and random draws (not a fixed count), and no point repeats the target. | High / Medium | ● active (branch candidate) | [EXP-2187](../experiments/EXP-2187-rom2-effects-drawn/) |
+| R2-ENGINE-1516 | ROM2 effect 28 rebuilds one Lightning path at every update (point type byte 28); effect 30 rebuilds one path per target with type byte index mod 7; the path is held in +0x11c and no saved key lists it (Medium: save writer not searched). | High / Medium / Unknown | ● active (branch candidate) | [EXP-2187](../experiments/EXP-2187-rom2-effects-drawn/) |
+| R2-ENGINE-1517 | In ROM2 the two readers found of the client cell set +0xa08 write light bytes (flag bits 15, 14, 3: 0, 0xc, flicker) and queue redraw rectangles and draw no picture; no third reader was searched for (Medium). | High / Medium | ● active (branch candidate) | [EXP-2187](../experiments/EXP-2187-rom2-effects-drawn/) |
+| R2-ENGINE-1518 | An effect point inside a ROM2 cell is raised by a bilinear blend of the four corner signed bytes of the ground plane, weights in 32nds of the cell (EN read); the effect draws at +0x58 minus that ground sample minus its raise +0x10. | High / Medium | ● active (branch candidate) | [EXP-2187](../experiments/EXP-2187-rom2-effects-drawn/) |
+| R2-ENGINE-1519 | The ROM2 effect constructor L2.03141 stores no field itself and its base constructor L2.03363 zeroes raise +0x10, frame +0x74, counter +0x9c and lifetime +0xa8, so a Teleport effect starts at raise 0 and frame 0 until its creator writes. | High / Medium | ● active (branch candidate) | [EXP-2187](../experiments/EXP-2187-rom2-effects-drawn/) |
+| R2-ENGINE-1520 | A held ROM2 mark 20 (Poison Cloud) or 64 (Curse) starts at 0xffff and falls by one per unit-consumer call (gate +0x184 below 5), so it lives 65535 calls unless 0x89 removes it; mark 60 starts at 32 (Medium); the period is Unknown. | Medium / Unknown | ● active (branch candidate) | [EXP-2187](../experiments/EXP-2187-rom2-effects-drawn/) |
+
+### R2-ENGINE-1515
+
+The builder `L2.05869` (EN, RU `L2.07863`, 256 instructions each, masked text equal) takes four doubles `x0, y0, x1, y1`
+and a type byte. It stores `L = L2.07864(x1-x0, y1-y0)` at object `+0x60`, calls the generator `L2.07865` (RU `L2.07866`) with
+`(x0, y0, x0+L, y0)`, divides `dx` and `dy` by `L` and rotates every sample `(xs, ys)` of the arrays `+0x90` and `+0xa4`
+about `(x0, y0)`: `X = x0 + (xs-x0)*dx/L - (ys-y0)*dy/L`, `Y = y0 + (xs-x0)*dy/L + (ys-y0)*dx/L`, each converted by `L2.02708` to a
+16-bit word. Each point is built by `L2.03750` (word X, word Y, word 0, byte type at `+6`, byte 0 at `+7`) and appended to
+the list at `+0x7c`.
+
+The generator draws a random walk in a frame where the axis runs along x. Constants (table `L2.07867..L2.07868`, values
+derived by `derive_doubles.py`): 0.15, 0.03, 0.01, 2.0, 3.0, -3.0, -1.0, 0.7, 1.0, 7.0 and the sample step 6.0.
+
+- Amplitude `+0x58 = 0.03 * L`. Sign `s` is +1 or -1 by the parity of one `L2.00729` draw.
+- Start entry (t 0, offset 0). Repeat: `a = (draw mod 7) * s`, `b = (draw mod 50) * 0.01`; when `|a| > 2.0` and `b > 0.15`
+  (`L2.03755` taken as the magnitude, Medium) add `a` to a running offset clamped to [-3, 3] and `b` to `t`, append both,
+  flip `s`; until `t >= 0.7`. A rejected trial appends nothing. If the last `t >= 1.0` it is removed. Then (1.0, 0) is appended.
+  Each accepted step adds 0.16 to 0.49 to `t`, so 2 to 5 kinks `P1..Pk` remain (k = 2..5).
+- Absolute list: start, P1, then for each further kink the midpoint to it and the kink, then the end point. Offsets scale by
+  `+0x58`. For each triple `(i-2, i-1, i)`, `i = 2, 4, ...`, the step `L2.07869` (RU `L2.07870`) fits a quadratic through the
+  three points and appends `(x, y)` for `x = x1, x1+6.0, ...` while `x < x3`. Each of the k pieces restarts at its own `x1`.
+- When any sample has `|y - y0| > 0.15 * L` the whole generation restarts (recursive call with the same arguments).
+
+So the sample count is the sum over k pieces of `ceil((x3-x1)/6.0)`, at least `ceil(L/6)` and below `L/6 + k`. The end point
+`x1` is not a sample, and the path length per sample is at least 6.0 units. The distance unit is the caller's
+(R2-ENGINE-1516). No fixed count exists, and a path differs at every build because every value comes from `L2.00729`.
+
+**Confidence.** High for the arithmetic of the three bodies in EN with RU masked text equal (`equality.tsv` of the three
+windows). Medium that `L2.00729` is the C runtime random draw and `L2.03755` a magnitude: their bodies are read only in
+part (`L2.03755` is a wrapper of the C runtime math code) and a result that depends on them is Medium. The count bounds follow
+from the constants and are a derivation, not a run.
+
+**Unknown.** Whether the second routine `L2.03747` in the same window (side branches of points with type byte 0x38) is called for
+Lightning; its caller is not in the L2.05869 call sites found (R2-ENGINE-1516). A run of the original that cast Lightning at a
+distant target and logged the point list length each update would show the count and spacing.
+
+### R2-ENGINE-1516
+
+The slot `+0x50` routine EN `L2.05868` (RU `L2.07871`) reads effect id `+0x24`. For 28 (`0x1c`) it builds a start `(+0x54, +0x58 - +0x6c - +0x10)` of the effect, looks up the
+target object by word `+0x8e` in the table at world `+0x9d0` (`L2.02998`), and builds the end
+`(+0x64, +0x68 - +0x6c - +0x10)` of that target; it calls `L2.05869` with type byte `0x1c`, then assigns the builder's list `+0x7c`
+(`L2.07872`) to the effect's list `+0x11c` by `L2.03745`. A missing target leaves the list unchanged. For 30 (`0x1e`, EN window from
+`L2.07873`, RU `L2.07874`, masked text equal to the function return): `L2.03820` clears `+0x11c`, then for each entry of the target list `+0xb0` the same start and
+end are built, the builder is called with type byte `index mod 7`, and the result is appended to `+0x11c` by `L2.07875`.
+R2-ENGINE-994 reads that every update tail calls this slot, so the path is rebuilt at every update and differs between updates
+(R2-ENGINE-1515). R2-ENGINE-447 reads the draw: a point of a chain adds 5 times its type byte to the frame, which gives seven
+frame groups for 30; the draw of 28 uses the frame table of R2-ENGINE-994.
+
+Hero and script. The slot has no caster test. A unit caster's object has lifetime 13 (R2-ENGINE-691, R2-ENGINE-994); the non-unit
+arm creates effect 30 with lifetime 13 and the 0x8b arm takes lifetime from packet word `+0xf` (R2-ENGINE-445, R2-ENGINE-691). Which
+senders a script cast reaches is not read: a script's spell cast is taken to be the non-unit sender only by name (Medium).
+
+Save and load. The saved projectile record keys (R2-ENGINE-614, R2-SESSION-244) list position, picture, direction, phases, action
+fields and `actionsegments +0xa8` (the lifetime) and no point list; the list `+0x11c` is not among them (Medium: no write of the
+point list to a save was searched in the save writer). A loaded effect with remaining lifetime rebuilds a path at its first update.
+
+**Amends.** R2-ENGINE-994: the path builder `L2.05869` is read here (R2-ENGINE-1515); the type byte passed for effect 28 is 0x1c, not 0x12, and for effect 30 it is the entry index mod 7.
+
+**Confidence.** High for the two branches of the slot in EN. RU masked text is equal for the effect-30 branch to the function return (first 100 of 128 instructions); the RU effect-28 branch is not read (Medium). The effect-28 branch of the EN slot is read in the committed listing `en-cfg-L2.05868.txt` of the window `L2.05868..L2.07873`, which this experiment does not commit. Medium for `L2.03745` as an
+assignment and `L2.07875` as an append (their callee bodies `L2.07876`, `L2.07877`, `L2.07875`, `L2.03820` were not read), for
+script routing and for the save claim. Unknown for the chain and 0x8b arms' counter start (R2-ENGINE-994).
+
+**Unknown.** The caster-independent claim covers the slot only; which program path a script cast takes to the client is open. A run
+of the original with a trigger that casts Lightning, then a save during the bolt and a load, compared with a hero cast, would settle
+script routing and the save.
+
+**Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md): listing `en-cfg-L2.05868.txt` (EN slot window `L2.05868..L2.07873`, effect 28 branch, `push 0x1c` at `L2.07878` before the call at `L2.07879`).
+
+### R2-ENGINE-1517
+
+The cell-set reader EN `L2.05879` (RU `L2.07880` in the listing of the published window) walks the set at client `+0xa08`
+(`L2.07881` has-next, `L2.07882` next, bodies `nav7` windows) and, for each cell inside the view rectangle
+(`+0x5c-3 .. +0x5c+0x64+3`, `+0x60-3 .. +0x60+0x68+7`), reads a flag word. Flag `0x8000` writes light byte 0 and `0x4000` writes 0xc
+into the light map `+0xb0`; flag `0x8` writes 0xc or 0 by the parity of `(((+0xa88 - sign) >> 1) + x*y)` through `L2.04968`, mod 5.
+A second reader, the render pass `L2.07883` at `L2.07884`, walks the same set and for each non-zero flag word queues a redraw
+rectangle of 32-pixel cells from `(x-3, y-3)` to `(x+4, y+4)` (or `(x+2, y+2)` when flag `L2.02187` is 0) into the list `+0xf4`.
+R2-ENGINE-796 reads that bit `row` of the cell word is set by the 0x87 packet. So bit 15 (row 15), bit 14 (row 14) and bit 3 (row 3,
+Wall of Fire) change light; rows 6 (Poison Cloud) and 17 (Wall of Earth) set bits that these two readers do not test beyond the redraw
+rectangle. Neither reader draws a picture, and R2-ENGINE-445's rows 3, 6, 17 have no typed effect from the bodies read, so the
+pictures `firewall`, `poison` and `wall` of R2-ASSET-101 are not drawn by these two readers.
+
+**Amends.** R2-ENGINE-796: of the readers of `+0xa08`, two are read here and neither draws a picture (Medium); which routine draws the pictures stays Unknown.
+
+**Confidence.** High for the two bodies in EN (RU masked text equal for the two listings, `equality.tsv` of the published window).
+Medium that there is no third reader or picture path: the census is two windows of one pass, and the planned image-wide scan for the
+displacement and the add form was not run for lack of a native pass. `L2.07881`, `L2.07882` and `L2.04968` were read as calls.
+
+**Unknown.** Whether another routine draws type 15, 21 or 43 pictures at those cells, the rows 14 and 15 spells, and the unit that writes
+`+0xa88`. A run of the original casting each area spell and capturing the screen with the light overlay off would show the pictures.
+
+### R2-ENGINE-1518
+
+Method EN `L2.07885` (window `projection-2`, 144 instructions) reads effect `+0x5c` and `+0x60` (256 units per cell): cell
+`(x>>8, y>>8)`, index `(x>>8) + (y>>8) * client+0x84`, weights `fx = (x>>3) & 0x1f`, `fy = (y>>3) & 0x1f`. It reads four signed
+bytes of the plane returned by `L2.03398` for client `+0x80`: `A` at the index, `B` at +1, `D` at +1+width, `C` at +width. Then
+`p = A + ((B-A)*fx)/32`, `q = C + ((D-C)*fx)/32`, `h = p + ((q-p)*fy)/32` (each division is a signed shift with a bias of 31 for negative
+products) and `h` is stored at `+0x6c`. R2-ENGINE-993 reads that the draw is raised by `+0x6c` and `+0x10`; the slot of
+R2-ENGINE-1516 uses y = `+0x58 - +0x6c - +0x10`. The plane is the ALM asset's type-2 plane copy (R2-ENGINE-645,
+R2-ASSET-261). So a point inside a cell on rising ground stands at the blended height, not at a corner byte, and a point at a cell
+corner (fx = fy = 0) stands at the byte A.
+
+**Amends.** R2-ENGINE-993 and R2-ENGINE-703: the formula of `+0x6c` is read in EN (High); the unit of the byte stays Medium.
+
+**Confidence.** High for the arithmetic in EN. Medium for RU: the RU twin window started at a different boundary (masked text not
+equal in the published comparison) and is not claimed. Medium that the plane's unit is one screen row (the byte is subtracted without
+a scale) and that the bytes are the ALM plane (R2-ENGINE-645).
+
+**Unknown.** The RU body. A run of the original with an effect on a slope would show the pixel offset.
+
+### R2-ENGINE-1519
+
+The constructor `L2.03141` (EN) calls the base constructor `L2.03363`, sets vtable `L2.03350` and initialises list `+0x144`; the copy
+constructor `L2.03836` calls `L2.03382`. The base constructor (window of 120 instructions ending at its `ret L2.07886`) stores 0 to
+`+0x10`, `+0x70`, `+0x74`, `+0x8c`, `+0x8d`, `+0x90..+0x98`, `+0x9c` and `+0xa8`. The release of R2-ENGINE-703 writes the lifetime 21,
+the type 54 and the frames; this claim shows that the fields it does not write start at 0, so a Teleport effect's raise is 0 and its first frame
+is 0 where no store of the creator or the update arm overrides them (R2-ENGINE-703 reads frames 0 to 20 over 21 updates). The hero and the creature share that arm (R2-ENGINE-704).
+
+**Confidence.** High for the stores in EN. Medium that the release does not write `+0x10` for effect 1 or 2: R2-ENGINE-993 left +0x10 of effect 1 unread and
+this claim does not read the release's stores again. RU: the constructor window's masked text is not equal in this run's comparison and is not claimed.
+
+**Unknown.** The depth of effects against the person grid (R2-ENGINE-933: effects draw after grid `+0x8c`, before grid `+0x90`; the person grid is unread).
+
+### R2-ENGINE-1520
+
+R2-ENGINE-695 reads that 0x88 writes mark `(ID<<16) | 0xffff`; R2-ENGINE-692 and R2-ENGINE-698 read that the consumer decrements the low
+word per call and removes the mark at 0, the consumer running only while unit byte `+0x184` is below 5 (R2-ENGINE-692), and R2-ENGINE-447 that IDs 56 and 60 add `(ID<<16) | 0x20` (R2-ENGINE-700, which expects no 0x88 for marks 56 and 60: Medium). So mark 20
+and mark 64 live 65535 calls of the unit consumer (a unit update with byte `+0x184` below 5) unless a 0x89 removes them, and mark 60 lives 32 such calls. R2-ENGINE-691: a unit caster's release of IDs 20 and 64
+has lifetime 0 (the first update ends it), so a hero's cast of Poison Cloud or Curse leaves only the held mark; 60 releases with lifetime 1.
+How long 65535 unit updates are in seconds depends on the unit update period, which is Unknown (R2-ENGINE-669 is Medium).
+
+**Amends.** R2-ENGINE-692 and R2-ENGINE-695: bound of a held mark's life in consumer calls (65535 for 20 and 64, 32 for 60); the grades of both stand. R2-SESSION-273 and R2-SESSION-274 are not changed.
+
+**Confidence.** High for the arithmetic of the cited stores and decrement. Medium for the count in unit updates (the `+0x184` gate, R2-ENGINE-692) and for the mark-60 start (R2-ENGINE-700, no 0x88 expected: Medium). Unknown for the seconds.
+
+**Unknown.** The Effect timer cadence on the server. A run of the original timing a held Curse would give the period.
