@@ -40,13 +40,20 @@ different metadata path; its complete resolution/error contract is Unknown.
 
 The check compiler marks a slot of type 2, 3 or 4 whose value lies in 8000..9999 exactly as
 the action compiler does: mode 1 below 9000 and mode 2 from 9000, value minus the base,
-quotient and remainder by 100 as bytes, and a slot count. It leaves the reference pointer
-unset and copies the metadata into the check IR (High). In the 19 check handler listings of
-R2-ENGINE-1312 (EN; RU in part) and the check dispatcher no body read addresses that
-metadata (Medium); the 8 further check handlers were not read for it. The scan for the
-displacement 0xd724 is that of R2-ENGINE-1318, not rerun: seven hits per root, six indexed
-loads in the action executor and one unclassified hit (EN L2.07408); it is no census of
-other encodings, embedded bases or bulk copies (Medium). — R2-ENGINE-1684, R2-ENGINE-1318
+quotient and remainder by 100 as bytes, and a slot count at IR+0x58. It leaves the reference pointer
+unset and copies the metadata into the check IR (High). In the check loop (EN L2.03283, RU L2.05851),
+every check copy with nonzero byte IR+0x58 is skipped before the check dispatcher runs (High); that the copy
+routine (EN L2.08305, RU L2.08306) carries the compiler's count into that byte is not read (Medium), so that
+every check carrying an 8000..9999 parameter is skipped is Medium. In checks 2, 3, 11, 12, 13, 20, 22 and 27
+(EN and RU) no operand with displacement 0x3a or 0x44..0x58 has the IR as base and none addresses Session+0xd724
+(High; the one operand in 0x3a..0x58 is [obj+0x42] on the Buildings object of check 20, EN L2.08341, RU L2.08342);
+for the 19 EN handlers of R2-ENGINE-1312 and the check dispatcher the grade stays Medium (R2-ENGINE-1684), and the
+19 RU handlers were read in part.
+In the raw-DWORD 0xd724 scan of both roots (seven hits per root), the six indexed loads are in the
+action executor and the one remaining hit (EN L2.07408, RU L2.08307) is the argument of a Session init fill routine called with
+0 and 0xfa0 (Session+0xd724..0xe6c3, 0xfa0 bytes; EN L2.00341 is the memset of R2-ENGINE-996, High for EN; RU L2.00342 body unread, Medium); the EN session serializer skips +0xd724 (High; Medium
+that no indirect pointer or out-of-range +0xc784 index >= 1000 writes nonzero values). —
+R2-ENGINE-1684 (amended), R2-ENGINE-1318, R2-ENGINE-1451 (amended), R2-ENGINE-1697
 
 No value in 8000..9999 under type 2, 3 or 4 is stored in the 142 installed maps, so the
 installed campaign does not take the path. — R2-ASSET-249
@@ -510,7 +517,7 @@ No accepted-index domain follows from these DWORD accesses.
 | 21 | low8(p0..p3), p4, p5 (or 99 when p5=0) to EN L2.03575 | Creation and parameter meanings unread |
 | 23 | p0,0 to EN L2.01052 on P | Final effect unread |
 | 24 | low8(p0/p1), U, p2/p3 to EN L2.03574 | Final effect unread |
-| 25 | Byte descriptor from p0..p7, with p4=0 repetition branch; packed low8(p2/p3) to terrain helper | Terrain meaning unread |
+| 25 | Byte descriptor from p0..p7, with p4=0 copying cell (p2, p3) into both source (+0x36,+0x37) and target (+0x38,+0x39) and passing the packed key to a call on [Session+0xa50] (callee outside the committed window; EN only read) | Consumer uses (+0x36,+0x37) literally without zero-substitution (R2-ENGINE-1698) |
 | 28 | Calls helper with U/V collections, replaces U+0x7c, notifies both | Complete transfer semantics unread |
 | 29 | p0+256*p1 lookup; six returned pointers; matching u16+0x0c==p2 gets u16+0x50=low16(p3) | Returned pointer kinds unproved here |
 | 30 | Iterates U+0x20; matching u16+0x0c==p0 gets u16+0x42=low16(p1) | Collection identity/membership unread |
@@ -613,28 +620,37 @@ Pointer names U/V/P/G are as in R2-ENGINE-1313. — R2-ENGINE-1450
 | 1 | Session+0xc710 and register 902 each add 1 | 2 | R=1 when U's low8 x is in p0..p2 and y in p1..p3 |
 | 7 | helper L2.07788 on P with low8 p0 | 3 | R=1 when terrain metric (U, p0, p1) is at most p2 |
 | 9 | returns at once | 11, 13 | return at once, no result |
-| 11 | item found in U's collection, U notified; if found, added to V's collection, V notified; whether U loses it is Unknown | 12 | R=1 when the item is in U's collection |
-| 14, 15 | same call: global L2.00994 with U and 0xffb | 20 | count of P's objects with i16+0x42 above 0 |
+| 11 | removes item from U+0x7c (unlinks qty <= 1; splits qty > 1 through slot +0x40, read for Weapon, other item classes Medium), subtracts weight, notifies U, inserts/merges into V+0x7c, notifies V (R2-ENGINE-1699) | 12 | R=1 when the item is in U's collection |
+| 14, 15 | same call: global L2.00994 with U and 0xffb | 20 | count of P's Buildings in [[[L2.00805]+0x7c]] with i16+0x42 above 0; does not count units (R2-ENGINE-1696) |
 | 26 | word +0x42 of the IR+0x70 object = low16 p0 | 22 | R=1 when terrain cell (p0, p1) exists; helper called on it |
-| 27 | terrain call on U, then L2.00441 | 27 | R=1 when low8 x = p1, y = p2 and helper true |
-| 31 | objects with DWORD+0xac = p0 get +0xb4 = p1 | | |
+| 27 | cell move EN L2.03593 / RU L2.00093 on U to (p0, p1) (cell test L2.03600, then detach, position store, placement, command reset and broadcast calls; helper bodies unread), then Guard setter EN L2.00441 / RU L2.02815 when owner+0x2c != 0, whether or not the move was accepted (R2-ENGINE-1700) | 27 | R=1 when low8 x = p1, y = p2 and helper true |
+| 31 | filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn and, by R2-ENGINE-517, Building, 1 for Outpost; EN: 0 for Building and Pointer, EN Outpost slot unread), matches group number +0xac = p0, writes remaining respawn countdown +0xb4 = p1 read by Outpost::slot5 (R2-ENGINE-1701) | | |
 | 33 | action 17's helper on each member of G | | |
 | 34 | p0 6, 15, 16 stores p1 at U+0x94, +0xbe, +0xc0 | | |
 
-Rows for the other numbers are in the tables above. — R2-ENGINE-1450
+Rows for the other numbers are in the tables above. — R2-ENGINE-1450 (amended), R2-ENGINE-1696, R2-ENGINE-1699, R2-ENGINE-1700, R2-ENGINE-1701
 
 One script tick adds 1 to register 999, runs the check loop, runs the trigger runner and
 empties the Session+0xbbec list, and the turn routine runs the tick before the loop over the
 group list (R2-ENGINE-936), also while Session+0xbbe8 is nonzero (the field's meaning is not
-read). Which condition makes the check loop skip a node and which posted records the drain
-consumes are Unknown. — R2-ENGINE-1451
+read). The check loop skips any check whose copied IR+0x58 byte is nonzero (High); the check compiler
+counts 8000..9999 parameters under types 2, 3 and 4 into that byte, and that the check copy keeps the count is Medium (R2-ENGINE-1697). — R2-ENGINE-1451 (amended)
 
-Check 1 returns DWORD+0xc of G (read as the group's member count: Medium). Check 8 adds one
-per entry of every group list of P+0x28 with no test on the entry. Check 20 counts objects
-whose owner equals P and whose signed word +0x42 is above 0 (Medium: +0x42 is health). Which
-of unconscious, dead with body and remains has +0x42 at or below 0, and whether a dead unit
-or remains entry stays in a group's collection, are Unknown. Check 5 returns 0 only for state
-16 (R2-ENGINE-1315). No body of checks 1, 5 and 8 reads a per-entry field. — R2-ENGINE-1452
+Group list membership by unit state and script checks 1, 5, 8 and 20 (R2-ENGINE-1452 amended,
+R2-ENGINE-1696): an unconscious unit (`+0x54 = 0` after the actor step: health above -10, or health -10 or below while the `+0x6c` countdown has not run out; `+0x13c = 1`) stays in its
+group list, while any dead unit (`+0x54 = 0x10`, whether leaving a body `+0x13c` in `2..4` or no
+body `+0x13c = 5`, `+0x94 = -10001`) is detached from its group list by the kill walker
+(EN `L2.04418`, RU `L2.04426`) via `owner->L2.01670` -> `group->L2.04986`, only when `[unit+0x14] != 0` (units with a zero owner pointer are not read). Living and unconscious units are counted by checks 1, 5 and 8; dead units are not. Check 20 walks the
+Buildings collection `[[[L2.00805]+0x7c]]` and tests Building word `+0x42 > 0`; it does not count
+units in any state.
+
+| Unit state | Stays in group list | Check 1 (`G+0xc`) | Check 5 (`+0x54 != 0x10`) | Check 8 (one per member node of the groups of `P`) | Check 20 (Buildings) | Claim |
+|---|---|---|---|---|---|---|
+| Unconscious (`+0x54 = 0` after the actor step) | Yes (High) | Counts (Medium) | Counts / 1 (High) | Counts (Medium) | No (High) | R2-ENGINE-1696 |
+| Dead leaving body (`+0x54 = 0x10`, `+0x13c` in `2..4`) | No (High) | No (Medium) | No / 0 (High) | No (Medium) | No (High) | R2-ENGINE-1696 |
+| Dead leaving no body (`+0x54 = 0x10`, `+0x13c = 5`) | No (High) | No (Medium) | No / 0 (High) | No (Medium) | No (High) | R2-ENGINE-1696 |
+
+The Medium cells for checks 1 and 8 name the RU group-count removal helpers (the unlink twins of `L2.04533` and `L2.08333`), which were not read; in EN the chain from the detach to the unlink of the member node and the decrement of `G+0xc` was read. Check 8 counts member nodes and does not read `G+0xc`.
 
 The check-ID map is hash find-or-insert: a check ID absent from the map inserts a node, and
 the value later used as its register slot is Unknown. — R2-ENGINE-1453

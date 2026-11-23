@@ -385,7 +385,13 @@ the recreated `group+0x48`/`+0x4c`, and call script action executor
 `L2.07383`/`L2.02490` with `+0xb8` (flag 1 + position) when `>= 0` (High for the
 read bodies; Medium for caller/reader completeness across 37 direct `.text`
 `0x310` sites per root: 20 in map constructors, loader, teardown, the type-10 pass
-and unwind thunks, 17 on other bases that were not read). — R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1670
+and unwind thunks, 17 on other bases that were not read). — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1670
+
+Script action 31 filters the Buildings collection by vtable slot +0x38 (RU: returns 0 for Pointer, Shop, Inn and, by
+R2-ENGINE-517, Building, and 1 for Outpost; EN: returns 0 for Building and Pointer, the EN Outpost slot is unread;
+Medium that only Outpost returns nonzero), matches Outpost group number dword +0xac against p0, and writes remaining
+respawn countdown dword +0xb4 = p1, which Outpost::slot5 decrements once +0xc0 is 1 and uses to trigger respawn when it
+reaches 0 or below. — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1450 (amended), R2-ENGINE-1701
 
 Over all 142 installed maps (0 campaign entries; 674 EN and 1,696 RU root
 entries), type-10 flags use only bits 1, 2, 4 and 8 (bit 1: 7 EN / 26 RU;
@@ -472,8 +478,17 @@ One order handler sets state 15 when `L2.02567` returns nonzero (arrival in
 range is Medium) and calls `L2.01576`, which sets [r+0x50] to 1, on its next
 call in state 15. Compiled slots follow node order; that a slot advances
 only on a successful compile is Medium, so +0x6c names the 11c node only if
-no earlier node below 0x10002 failed. — R2-ENGINE-517, R2-ENGINE-518,
-R2-ENGINE-519, R2-ENGINE-520
+no earlier node below 0x10002 failed. In the same state-15 arm, kinds 76
+and 77 (0x4c, 0x4d, with kinds 28 and 29; first lookup) toggle signed building word +0x42 between
+0 and 1 and call notify (unread, Medium) with no unit or inventory write;
+kinds 15 and 16 (0x0f, 0x10; second lookup directly at unit +0x10) require
+signed word +0x42 above 0, decrement it by 1, call notify, construct a named
+Item from literal strings EN `L2.08314` / `L2.08316` (RU `L2.08315` /
+`L2.08317`; the texts are "Potion Big Healing" and "Potion Big Mana"; the Data.bin MagicItems effects they name are Unknown)
+and pass it to unit vtable +0x44 (EN read; RU twin unread, Medium), where Item vtable +0x38 attaches child
+effects, recomputes, destroys the Item and returns 0 so it does not enter
+unit +0x7c. — R2-ENGINE-517, R2-ENGINE-518 (amended), R2-ENGINE-519,
+R2-ENGINE-520, R2-ENGINE-1695
 
 A map click on cursor `L2.02987`, which EN chooses only on hover flag 0x800
 (a structure whose record has +0x8c set), is an order, not a walk. The
@@ -747,7 +762,8 @@ R2-ASSET-320. — R2-ENGINE-1512, R2-ENGINE-1514, R2-ASSET-316, R2-ASSET-320
 **Type 9.** Mode below 4 with a nonzero cell, mode & 8 (a unit's spellbook, keyed by unit) and mode & 4 take
 separate arms. The grammar and the first two arm tests are read in the committed stage windows; the mode & 4
 arm lies past their end and rests on R2-ENGINE-1006 at its grade. Installed maps have no mode 8; every mode-4 key equals a type-4 id of the same map.
-— R2-ENGINE-1292, R2-ASSET-240
+In mode below 4, the stage indexes point-list entries 0 (source +0x36/+0x37) and 1 (target +0x38/+0x39) through EN `L2.08347` with no bounds check and no trigger-cell substitution. At cell entry, the consumer passes record source bytes (+0x36, +0x37) unchanged through the cast wrappers and position setter without testing for zero, so zero source bytes place the temporary actor at cell (0, 0) with sub-cell (0x80, 0x80). The following application targets the entering unit on the unit-targeted path (state 0xd) or record target bytes (+0x38, +0x39) on the point-targeted path (state 0xe); projectile spells (`param5 == 2`, other than 0xa and 0xb) compute flight delay from the distance between actor position (0, 0) and the target position in EN `L2.03854` (RU parity of `L2.05953`/`L2.02599`/`L2.08352`/`L2.08354` and per-spell reads inside `L2.01692` Medium).
+— R2-ENGINE-1292, R2-ASSET-240, R2-ENGINE-1698
 
 **Editor catalogs.** The EN map editor reads `objects.reg`, `units.reg` and `structures.reg` under
 `graphics\` and `templates.bin`. That it opens `world.res` was observed in an uncommitted scan and is Medium,

@@ -12463,6 +12463,10 @@ absolute store found by the writer scan is at `L2.02528`, by a key/value
 parser (key string `L2.02529`, unread) that clamps the value to 20..500;
 the ctor RU `L2.02530` writes 100 to this+0.
 
+**Amended.** R2-ENGINE-1701 narrows two statements: the group function stores +0xb4 = 120 * S / 100 at build (the
+constructor's +0xb0 = 0x78 is overwritten), and slot 5 decrements +0xb4 only after +0xc0 is 1 (RU L2.08301..L2.08302;
+EN equal after masking), not once per call.
+
 **Confidence.** High for the build: the group function, ctor, init and
 template copy were read in both roots (the group function differs only as
 R2-ENGINE-511 states), and the owner and `L2.02502` guards are read in RU
@@ -12589,7 +12593,7 @@ an EN call-target scan of the getters would bound the EN readers.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-517 | The ROM2 0x70 structure class is Pointer, a Building subclass built for type-4 kinds 0x46..0x4b; it overrides only vtable slots 0 (runtime class), 1 and 2 (Serialize), and Serialize transfers dword +0x6c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
-| R2-ENGINE-518 | At health above 0, a ROM2 actor step in state 15 looks up a building within distance 2 of (x-1, y-1) (Medium); a Pointer with +0x6c above 0 calls the executor with +0x6c each step; Shop and Inn call L2.02566 with 0x83, 0x84. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
+| R2-ENGINE-518 | At health above 0, a ROM2 actor step in state 15 looks up a building within distance 2 of (x-1, y-1) (Medium); a Pointer with +0x6c above 0 calls the executor with +0x6c each step; Shop and Inn call L2.02566 with 0x83, 0x84. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-519 | ROM2 unit state 15 is set by one order handler when `L2.02567` returns nonzero (Medium: arrival in range); its next call in state 15 calls `L2.01576`, which sets [r+0x50] to 1. One state-15 store per root found. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/), [EXP-2077](../experiments/EXP-2077-rom2-signpost/EXP-2077.md) |
 | R2-ENGINE-520 | ROM2 compiled action slots follow node order over nodes below 0x10002; Pointer +0x6c counts the same nodes. That a slot advances only on a successful compile is Medium; +0x6c names node e2 only if no earlier node failed. | High / Medium | ✔ promoted (branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
 | R2-ENGINE-521 | In the RU bodies read, Shop slot 5 calls a method of its 0x98 helper and Inn slot 5 walks a member list and a call counter; neither body reads the 11b or 11a fields; no campaign map has a Shop or Inn. No slot-5 caller was read. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2065](../experiments/EXP-2065-rom2-structure-actions/) |
@@ -12700,6 +12704,13 @@ through a pointer.
 and EN `.rdata` and `.data` for `L2.00028` and for the vtable that holds it,
 then the caller of that slot, would settle it. What `L2.02566` does with 0x83
 and 0x84 and what their receivers open: a read of `L2.02566` in both roots.
+
+**Amended.** R2-ENGINE-1695 reads the remaining state-15 branches in both roots:
+kinds 76 and 77 (0x4c, 0x4d) toggle building word +0x42 (0 <-> 1) and call
+notify (EN L2.07789, RU L2.02657); kinds 15 and 16 (0x0f, 0x10) require signed
+word +0x42 > 0, decrement it, call notify, build a named Item and pass it to
+unit vtable +0x44 (consumed by Item vtable +0x38, returning 0 so it does not
+enter unit +0x7c). The two literal item names remain Unknown.
 
 ### R2-ENGINE-519
 
@@ -30763,6 +30774,10 @@ goes to map+0x2fc. The stage (EN `L2.02687`, RU `L2.00117`, `*-t9-stage.txt`) ha
 **Amends.** R2-ASSET-230: its EN grammar, there Medium, is read in EN (110 instructions equal to RU under
 the mask).
 
+**Amended.** R2-ENGINE-1698 narrows the Medium on what the mode < 4 entries hold, for EN at High and RU at Medium: the
+stage copies entry 0 into source bytes and entry 1 into target bytes of the six-byte descriptor passed to L2.03589; the
+callee body stays unread.
+
 **Confidence.** High for the grammar and for the mode < 4 and mode & 8 arm tests in EN and RU (t9-stage 256
 instructions equal; `cmp edx,4` at EN `L2.07315`, `and ecx,8` at `L2.07316`). The mode & 4 arm lies past the end
 of the committed stage windows (EN `L2.07317`, RU `L2.05960`) and rests on R2-ENGINE-1006 at its grade.
@@ -33438,9 +33453,9 @@ index guard for a map slot, so this card's grade is unchanged.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1450 | ROM2 actions 1,7,9,11,14,15,26,27,31,33,34 and checks 2,3,11,12,13,20,22,27 have bodies read in EN and RU, masked-equal in 19 pairs; action 9 and checks 11 and 13 return at once. | High / Medium | ● active (branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md) |
-| R2-ENGINE-1451 | Each ROM2 script tick adds 1 to register 999, runs the check loop, then the trigger runner, then empties the Session+0xbbec list; the turn routine runs it before the loop over the group list (L2.00505, R2-ENGINE-936). | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md) |
-| R2-ENGINE-1452 | None of ROM2 checks 1, 5, 8 tests the state of an entry: check 1 returns DWORD+0xc of G, check 8 adds one per entry of every group list of P+0x28, check 20 counts a player's objects with signed word +0x42 above 0. | High / Medium | ● active (branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md) |
+| R2-ENGINE-1450 | ROM2 actions 1,7,9,11,14,15,26,27,31,33,34 and checks 2,3,11,12,13,20,22,27 have bodies read in EN and RU, masked-equal in 19 pairs; action 9 and checks 11 and 13 return at once. | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1451 | Each ROM2 script tick adds 1 to register 999, runs the check loop, then the trigger runner, then empties the Session+0xbbec list; the turn routine runs it before the loop over the group list (L2.00505, R2-ENGINE-936). | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1452 | None of ROM2 checks 1, 5, 8 tests the state of an entry: check 1 returns DWORD+0xc of G, check 8 adds one per entry of every group list of P+0x28, check 20 counts a player's objects with signed word +0x42 above 0. | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1453 | The ROM2 check-ID map (EN L2.04242, RU L2.07787) is hash find-or-insert: an ID absent from the map gets a new node whose initial value is unread; the compiler is not read to say what it then stores. | High / Unknown | ● active (branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md) |
 
 ### R2-ENGINE-1450
@@ -33487,6 +33502,10 @@ not prove equal callees. Action 37 is not read: its table cell leads to a messag
 the original with copied mission 10 and one authored check 20 counting a player with one unit at full health, one at
 zero health and one dead with a body would settle the count and compare the register in a save.
 
+**Amended.** R2-ENGINE-1699 settles action 11's transfer (the item leaves U+0x7c and enters V+0x7c); R2-ENGINE-1700
+reads action 27's terrain move and Guard setter; R2-ENGINE-1701 identifies action 31's +0xac and +0xb4 fields on Outpost
+and their reader Outpost::slot5; R2-ENGINE-1696 identifies check 20's list as Buildings rather than units.
+
 ### R2-ENGINE-1451
 
 Script tick EN L2.03284 (RU L2.03648, EN = RU masked equal in R2-ENGINE-761): add 1 to DWORD+0xd720 (register 999); call
@@ -33506,7 +33525,10 @@ hit hook of R2-ENGINE-987 and the appends of R2-ENGINE-1021 fill. Unknown: what 
 
 **Amended.** R2-ENGINE-1492 reads EN L2.07785 (18 instructions, equal to RU L2.06061 after masking): per element it
 calls the EN counterpart of the element destroyer and reads no field of the record. The Unknown on which record L2.07785
-consumes narrows to none in that body; the callee EN L2.07818 was not read.
+consumes narrows to none in that body; the callee EN L2.07818 was not read. R2-ENGINE-1697 reads the check-loop +0x58
+skip (EN L2.08303, RU L2.08304: a check whose copied byte IR+0x58 is nonzero is skipped, High); that the check copy
+routine (EN L2.08305, RU L2.08306) carries the compiler's count of 8000..9999 parameters (R2-ENGINE-1684) into that byte
+is not read, so the Unknown on what sets the check copy's byte +0x58 stays open at Medium.
 
 **Confidence.** High for the order within the three listings read. Medium for the RU turn routine (equal in 132 of 133
 lines, R2-ENGINE-761) and that L2.03285 is the only caller (R2-SESSION-313). Unknown: what sets the check copy's byte
@@ -33533,6 +33555,12 @@ not committed here); the population searched is those four bodies, not the 27 ch
 
 **Unknown.** A run of the original with a copied map holding a group of three units, one killed with a body left, and
 check 1 saved to a register, then a second run with the body removed, would settle the count against each state.
+
+**Amended.** R2-ENGINE-1696 resolves group list membership by unit state and check 20's target collection: unconscious
+units stay in their group list while dead units (+0x54 = 0x10, body or no body) are detached by the kill walker; checks
+1, 5 and 8 count living and unconscious units and exclude dead units (check 8 counts member nodes of the groups of P,
+not G+0xc; EN High, RU Medium for checks 1 and 8); check 20 iterates the Buildings list ([[[L2.00805]+0x7c]])
+and checks Building word +0x42 > 0, so it does not count units in any state.
 
 ### R2-ENGINE-1453
 
@@ -35320,7 +35348,7 @@ creature (row 209) and a Troll.5 creature (row 93) with both groups open and com
 | R2-ENGINE-1681 | ROM2 loaders put the 64-byte node name at object+0 and ten 64-byte text fields at +0x98; readers found: two compile-failure messages (check, action) that receive the node pointer; no reader of the text fields or trigger prefix. | High / Medium | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
 | R2-ENGINE-1682 | ROM2 mission entry loads mission<N>.txt into the one global string that TALK's dialogue lookup also searches (EN L2.01191, RU L2.01456); which file that string holds at TALK is not settled by the bodies read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
 | R2-ENGINE-1683 | ROM2 word-65538 action collection (compiler member +0x28): no consumer found in the compile function (EN L2.00201..L2.08170), the caller or the type-9 stage to EN L2.08171; of 87 vector-call sites per root 6 are named, 5 classified. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
-| R2-ENGINE-1684 | ROM2 check compiler marks 8000..9999 under types 2/3/4 like the action compiler and copies the metadata into the check IR; no check handler or dispatcher body read addresses it; the Session+0xd724 loads found are in the action executor. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1684 | ROM2 check compiler marks 8000..9999 under types 2/3/4 like the action compiler and copies the metadata into the check IR; no check handler or dispatcher body read addresses it; the Session+0xd724 loads found are in the action executor. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1685 | In the 46 campaign maps no ROM2 script operand is a zone record by the bodies read: kinds are group, unit, player, item and one type-9 object (record unread, lookup EN L2.08172); trigger-list accessor calls: loader and compiler only. | Medium | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
 
 ### R2-ENGINE-1680
@@ -35492,6 +35520,11 @@ No installed map has a value in 8000..9999 under these types (R2-ASSET-249), so 
 
 **Unknown.** The 8 check handlers not read; the 0xd724 hit EN L2.07408. A run that settles it: load one installed map with
 one check slot of type 4 set to 8001, run the first tick and compare the check result and the log with an unchanged map.
+
+**Amended.** R2-ENGINE-1697 narrows both items: the 8 handlers contain no operand in the scanned range (R2-ENGINE-1697
+states the range); the 0xd724 hit EN L2.07408 / RU L2.08307 is the argument of a fill routine called with 0 and 0xfa0 at
+Session init (EN High, RU Medium). Which code, if any, writes a nonzero value into Session+0xd724 stays Medium-bounded by
+the literal-displacement scan.
 
 **Amends.** R2-ENGINE-1318: supplies the check side that it left unread. R2-ENGINE-044: the dynamic path of checks.
 
@@ -36070,3 +36103,140 @@ Unknown.
 **Evidence.** [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) `evidence/generated/win/ru-rand-L2.02431.txt`,
 `ru-rand-L2.01532.txt`, `ru-rand-L2.02421.txt`, `ru-rand-L2.01699.txt`; the committed look-around listing of
 R2-ENGINE-504.
+## Structure use, group membership, late references, cell-entry actor and actions 11, 27, 31 (EXP-2199)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1695 | ROM2 state 15: kinds 76, 77 toggle building word +0x42; kinds 15, 16 need +0x42 > 0, decrement it, build a "Potion Big Healing" or "Potion Big Mana" Item and pass it to unit slot +0x44 (EN read; RU Medium); Effects Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1696 | A dead ROM2 unit (+0x54 = 0x10) leaves its group list; checks 1, 5, 8 count living and unconscious units, not dead ones (EN High, RU Medium for 1 and 8); check 20 counts Buildings with +0x42 > 0, not units. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1697 | ROM2 Session init passes Session+0xd724 to a fill routine with 0 and 0xfa0 (EN L2.00341 memset, RU L2.00342 unread); the check loop skips a check with nonzero copied IR+0x58 (copy unread, Medium); 8 handlers have no IR operand 0x3a..0x58. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1698 | ROM2 cell-entry consumer passes source bytes (+0x36, +0x37) unchanged to the cast actor, which takes cell (0, 0) when zero; application targets the entering unit or (+0x38, +0x39), and Action 25 (EN) with p4 = 0 writes (p2, p3). | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1699 | ROM2 script action 11 removes the item from U+0x7c via bag extract (unlinks quantity <= 1; splits quantity > 1 via slot +0x40, Weapon read), subtracts weight, notifies U, inserts or merges it into V+0x7c, and notifies V. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1700 | ROM2 script action 27 calls the cell move (EN L2.03593, RU L2.00093; helper bodies unread), then, when owner+0x2c is nonzero, the Guard setter (order 0xb), whether or not the move was accepted. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1701 | ROM2 script action 31 filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn, Building, 1 for Outpost; EN Outpost slot unread), matches Outpost group +0xac == p0, writes respawn countdown +0xb4 = p1, read in Outpost::slot5. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+
+### R2-ENGINE-1695
+
+In ROM2 actor step state 15 (EN `L2.02595`, RU `L2.02594`; committed `EXP-2065` listings `en-unit-step.txt`, `ru-unit-step.txt`):
+
+1. **Kinds 76 (0x4c) and 77 (0x4d)** (`EN L2.08308..L2.08309`, `RU L2.08310..L2.08311`): on the first building lookup (EN `L2.02597`, RU `L2.02596`, within Chebyshev distance 2 of `(x-1, y-1)`), after the Shop, Inn, Pointer and kind-0x42 checks, the arm tests `word [b+0x0e]` (copied from `byte [b+0x40]` by Building init EN `L2.03611`) against `0x1c`, `0x1d`, `0x4c` and `0x4d`. When matched, it reads signed `word [b+0x42]` (Building init EN `L2.03611` copies the Buildings row parameter at zero-based index 3 through +0x44 into +0x42; the EN row table gives 1 for kinds 76 and 77, R2-ASSET-317, Medium that the row position is the one the init reads). The same arm also matches kinds 28 and 29 (rows named Switch, Switch 2). If nonzero it writes 0, else it writes 1. It then calls notify (EN `L2.07789`, RU `L2.02657`) with `(b, 0, 0)` on `L2.00994` / `L2.02608` and falls through to the second building lookup. It writes no unit or inventory field directly.
+2. **Kinds 15 (0x0f) and 16 (0x10)** (`EN L2.08309..L2.08312`, `RU L2.08311..L2.05539`): the arm re-looks up a building at `unit+0x10` directly via EN `L2.08313` / RU `L2.02600` on `[[[L2.00805]+0x7c]]`. If `byte [b+0x40]` is `0x0f` (kind 15) or `0x10` (kind 16), it tests signed `word [b+0x42] > 0` (same init path; the EN row table gives 3 for kinds 15 and 16, which bounds the uses at three if nothing else writes +0x42, not searched); if `<= 0` it exits. Otherwise it decrements `word [b+0x42]` by 1, calls notify `(b, 0, 0)`, allocates a new `Item` (`0x54` bytes EN, `0x58` bytes RU), constructs it via the magic-item-by-name constructor (EN `L2.05636`, RU `L2.05635`) from the literal C-string at EN `L2.08314` / RU `L2.08315` (kind 15) or EN `L2.08316` / RU `L2.08317` (kind 16), and calls `unit->vtable[+0x44](item)`.
+3. **Item consumption**: `Unit` vtable slot +0x44 (EN `L2.08318` -> `L2.01777`, `EXP-2051` `en-equip-displaced-to-bag-recompute.txt`) calls `item->vtable[+0x38](unit)`, inserts any nonzero returned item into `unit+0x7c`, and calls `unit->vtable[+0x5c]()`. `Item::vtable[+0x38]` (EN `L2.06444` `EXP-2157` `en-item-use.txt`, RU `L2.01763` `EXP-2051` `ru-item-use.txt`) tests `i16(unit+0x94) > 0`, attaches every child Effect in `item+0x20` (setting `+0x3d |= 8` when `+0x3d == 0`, calling `Effect->vtable[+0x3c](unit)`), calls `unit->vtable[+0x5c]()`, runs four substring checks on the item name, destroys `item` (`vtable[+4](1)`), and returns 0 — so the item is consumed and does not enter `unit+0x7c`. When `i16(unit+0x94) <= 0` the same slot returns the item itself without applying effects or destroying it; the state-15 arm is reached only with health above 0 (R2-ENGINE-518), so that return is not on the well path. The name tests it runs are against the substrings "ody", "ind", "eaction" and "pirit" (EN `L2.08319`, `L2.08320`, `L2.08321`, `L2.08322`); when one matches it may call EN `L2.08323` after a time-difference test (unread).
+
+**Amends.** R2-ENGINE-518: adds the state-15 arms for kinds 15, 16, 76 and 77.
+
+**Confidence.** Consumption of the built Item by the unit slot `+0x44` is High in EN and Medium in RU (the RU unit slot twin is unread). High for the state-15 branches in both EN and RU, for EN `Unit::vtable[+0x44]` (`L2.01777`) and for `Item::vtable[+0x38]` in both EN and RU, for the item names (native read of the four literals in EN and RU, both "Potion Big Healing" at kind 15 and "Potion Big Mana" at kind 16) and for the arm structure. Medium for the notify body (EN `L2.07789`, RU `L2.02657`: 99 instructions read, no ret reached, not interpreted), for Humanoid/Human `+0x44` dispatch parity across all subclasses (EN `L2.01777` RU twin unread, though `ru-add-item.txt` `L2.01310` also dispatches through `item->vtable[+0x38]` and inserts only when nonzero), for the uses limit (other writers of building `+0x42` not searched) and that no other code path handles using kinds 15, 16, 76 or 77 outside state 15. Unknown for the Data.bin MagicItems rows named by the two strings and so the stat values the effects write.
+
+**Unknown.** The MagicItems rows "Potion Big Healing" and "Potion Big Mana" and the effects they hold (not read). In the original program, load a map containing kind 15 and kind 16 wells in `allods2.exe`, have a wounded hero with reduced mana use each well once, and compare unit HP, mana, active effects and inventory before and after each use.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`, `evidence/native/pass1/strings.tsv` (the four item-name literals), `evidence/native/pass2/strings.tsv`; committed listings `en-unit-step.txt`, `ru-unit-step.txt`, `en-building-lookups.txt`, `en-building-init-L2.03611.txt`, `en-equip-displaced-to-bag-recompute.txt`, `en-item-use.txt` (EXP-2157), `ru-item-use.txt`, `EXP-2186` `en-structure-kinds.tsv`, `EXP-2154` `en-vt-unit.tsv`.
+
+### R2-ENGINE-1696
+
+Group list membership and script check counts across the three unit states:
+
+1. **Unconscious (`+0x54 = 0` after the actor step: health above -10, or health -10 or below while the `+0x6c` countdown, EN `L2.08324..L2.08325`, has not run out)**: actor step (EN `L2.08326..L2.08327`, `en-unit-step.txt`) writes `unit+0x50 = 0`, `unit+0x54 = 0`, `byte [unit+0x13c] = 1` (on first entry) and does not call death (`L2.01806`). The kill walker (EN `L2.04418`, RU `L2.04426`, `EXP-2103` `en-kill.txt`, `ru-kill.txt`; called every session tick by EN `L2.04407`, `en-tick-loop.txt`) detaches a unit only when `DWORD [unit+0x54] == 0x10`. Therefore an unconscious unit stays in its group list (`unit+0x70`), in `owner+0x24`, and in `[L2.00325]+4`. (Multi-tile or `byte [+0x4a] > 1` units set `+0x94 = -1000` once `+0x6c <= 0`, immediately entering death.)
+2. **Dead leaving a body (`+0x54 == 0x10`, `+0x13c` in `2..4`) and dead leaving no body (`+0x54 == 0x10`, `+0x13c == 5`, `+0x94 == -10001`)**: death (EN `L2.01806`, `EXP-2131` `p1-en-death-L2.01806.txt`) sets `+0x54 = 0x10` and `+0x50 = 0x10` and ages `+0x13c` via `L2.08328` (leaving `+0x13c` in `2..4` for a body or `5` with `-10001` for no body, including summons with `+0x148 != 0`). Immediately after `vtable[+0x18]` in the same loop iteration, the kill walker tests only `DWORD [unit+0x54] == 0x10` (with no test on `+0x13c`), calls `owner->L2.01670(unit)` (EN `L2.08329` reaches it only when `DWORD [unit+0x14] != 0`; units with a zero owner pointer are not read; RU `L2.07189`, `EXP-2116` `en-owner-detach-L2.01670.txt`, R2-ENGINE-831) -> `group->L2.04986(unit)` (`EXP-2105` `en-group-add.txt`, unlinks via `L2.04533` and clears `unit+0x70 = 0`; removes an empty group from `owner+0x28` when `owner+0x2c == 0`), unlinks `unit` from `owner+0x24` and `[L2.00325]+4`, and appends `unit` to the corpse list `[[L2.00805]+0x7c]+0xc` (R2-ENGINE-830). Thus both dead-with-body and dead-no-body leave their group list.
+3. **Script checks 1, 5, 8 and 20**:
+   - **Check 1** (EN `L2.07795`, RU `L2.06081`, returns `DWORD [G+0xc]` via `L2.02798` -> `L2.02800`): counts every unit still in G, living and unconscious; excludes dead-with-body and dead-no-body (detached from G).
+   - **Check 5** (EN `L2.08330`, RU `L2.06278`, returns 1 iff `DWORD [unit+0x54] != 0x10`): counts every unit with `+0x54 != 0x10`, living and unconscious (returns 1); excludes dead-with-body and dead-no-body (returns 0, since `+0x54 == 0x10`).
+   - **Check 8** (EN `L2.07796`, RU `L2.06277`): walks every group list of `P+0x28` and adds one per member node (EN `L2.08331`/`L2.08332`, `L2.04088`/`L2.04089`; it calls neither `L2.02798` nor reads `G+0xc`); counts living and unconscious units; a dead unit is absent because the unlink `L2.04533` -> `L2.08333` removed its node (EN High; the RU unlink twins are unread, Medium).
+   - **Check 20** (EN `L2.08334`, RU `L2.08335`, `EXP-2183` `en-check-20.txt`, `ru-check-20.txt`): iterates `[[[L2.00805]+0x7c]]` (RU `[[[L2.01317]+0x7c]]`) using the Buildings list iterators (EN `L2.07791`/`L2.07792`/`L2.07793`, RU `L2.02601`/`L2.02602`/`L2.02603`, identical to building lookup EN `L2.08313` and Action 31) and counts entries with `DWORD [obj+0x14] == P` and signed `word [obj+0x42] > 0` (Building health/counter). Check 20 counts Buildings, not units in any state (alive, unconscious, dead with body, or dead with no body).
+
+**Amends.** R2-ENGINE-1452: resolves group membership by unit state (living and unconscious units are counted by checks 1, 5 and 8, dead units are not) and corrects Check 20's collection to Buildings rather than units.
+
+**Confidence.** High for EN: the kill-walker `+0x54 == 0x10` detach condition, the unconscious write in the actor step, the aging body `L2.08328` (EN window read natively: `+0x13c` becomes 2, 3, 4 below health -10, -20, -40 and 5 with `+0x94 = -10001` below -600), check 5 and check 20 iterating the Buildings list, and the detach chain `L2.01670` -> `L2.04986` -> `L2.04533` -> remove `L2.08333` -> free-node `L2.08336`, which subtracts 1 from `DWORD [G+0xc]` (EN windows read natively), with `L2.02798` -> `L2.02800` returning `[G+0xc]`; check 8 counts member nodes, not `G+0xc`. High for the kill-walker condition and check 20 in RU as well. Medium for RU checks 1 and 8 on dead units: the RU twins of `L2.04533`, `L2.08333`, `L2.08336` and `L2.02800` were not read. The unlink through `owner->L2.01670` runs only when `[unit+0x14] != 0`; units with a zero owner pointer are not read. The population is the one actor-step body per root read, the kill walker, and the four check bodies; no census of other writers of `+0x54` or of other removal paths from a group list.
+
+**Unknown.** RU twins of the list-remove helpers (above). Settled in the original `allods2.exe` by loading a map copy with a group of three units (one alive, one reduced to HP between 0 and -9, one killed leaving a body, one summon killed leaving no body) and reading saved script registers written by checks 1, 5, 8 and 20.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`, `evidence/native/pass2/listings/en-list-remove-L2.08333.txt`, `en-count-L2.02798.txt`, `en-count-L2.02800.txt`, `en-list-find-L2.00321.txt`, `evidence/native/pass3/listings/en-list-free-node-L2.08336.txt`, `evidence/native/pass4/listings/en-death-age-L2.08328.txt`; committed listings `en-unit-step.txt`, `en-tick-loop.txt`, `en-kill.txt`, `ru-kill.txt`, `en-owner-detach-L2.01670.txt`, `en-group-add.txt`, `p1-en-death-L2.01806.txt`, `en-checks-a.txt`, `en-check-20.txt`, `ru-check-20.txt`, `en-building-lookups.txt`.
+
+### R2-ENGINE-1697
+
+Late-bound script parameters in `8000..9999` under types 2, 3 and 4:
+
+1. **Action resolution source, timing and value**: When an action executes (EN `L2.08337..L2.05821`, RU `L2.08338..L2.05820`; R2-ENGINE-1318), if `u8 [IR+0x58] != 0`, before dispatching the action handler, the executor prefix loops slots `0..9`; for each slot with `u8 [IR+0x3a+slot] != 0` and type 2, 3 or 4, it loads `DWORD [Session + 0xd724 + 4 * u8(IR + 0x4e + slot)]` into the resolved pointer field (`G +0x60`, `P +0x64`, `U +0x5c`, or second reference `+0x68`). It ignores the mode byte `1` vs `2` (`IR+0x3a+slot`) and the quotient byte (`IR+0x44+slot`).
+2. **Classification of `Session+0xd724` writers**: In the raw-DWORD `0xd724` scans over `.text` of EN and RU `allods2.exe` (`EXP-2174` `en-d724-users.txt`, `ru-d724-users.txt`), the single hit outside the action executor (EN `L2.07408`, RU `L2.08307`) lies inside Session init (EN `L2.03643`, RU `L2.03644`; `EXP-2085` `en-init-L2.03643.txt`, `ru-init-L2.03644.txt`), which calls a fill routine (EN `L2.00341`, the memset of R2-ENGINE-996, body read there; RU `L2.00342`, named memset in R2-ENGINE-909, body unread) with arguments pointer `Session + 0xd724`, 0 and `0xfa0` (so zeroing 1,000 DWORDs: High for EN, Medium for RU). Session serializer (EN `L2.01736`, `EXP-2099` `en-session-ser.txt`) transfers `+0xc784` (`0xfa0` bytes) and `+0xe6c4` (`0x3e8` bytes) and skips `+0xd724`. No direct `+0xd724` displacement in `.text` of EN or RU writes a nonzero value.
+3. **Check-side runtime behavior**: The check compiler marks `8000..9999` parameters under types 2, 3 and 4 by incrementing `IR+0x58` and leaving the compiled reference pointer unset (R2-ENGINE-1684). During each script tick, the check loop (EN `L2.03283`, RU `L2.05851`; `EXP-2099` `en-script-tick.txt`, `ru-script-tick.txt`) copies each check IR onto the stack at `[ebp-0x88]` and tests `u8 [ebp-0x30]` (`IR+0x58`, EN `L2.08303..L2.08339`, RU `L2.08304..L2.08340`): when nonzero, it skips the check without calling the check dispatcher (EN `L2.03274`, RU `L2.03275`). Furthermore, all 8 remaining check handlers omitted from R2-ENGINE-1684 (checks 2, 3, 11, 12, 13, 20, 22 and 27 in `EXP-2183`, both EN and RU; `evidence/derived/checks-8-late-ref.tsv`) contain no operand with displacement `0x3a`, `0x44..0x58` (the displacements the committed table `checks-8-late-ref.tsv` scans) whose base is the IR, and none addressing `Session+0xd724`. The one operand the review found in `0x3a..0x58` outside the scanned displacements is `[obj+0x42]` (`movsx ecx, word ptr [eax + 0x42]`) in check 20 (EN `L2.08341`, RU `L2.08342`), on the Buildings object, not on the IR; displacements `0x3b..0x43` are not in the committed table. Joined with the 19 EN check handlers (RU in part) and the dispatcher of R2-ENGINE-1684, graded there at Medium, no handler read in EN addresses these fields (27 handler bodies in EN: 19 plus these 8) and none of the 8 read here does in RU; the 19 RU handlers were read in part only. The check loop skips a check whose copied byte `IR+0x58` is nonzero (High); that the copy routine (EN `L2.08305`, RU `L2.08306`) carries the compiler's count into that byte is not read (Medium), so that every check carrying an `8000..9999` parameter is skipped is Medium.
+
+**Amends.** R2-ENGINE-1684, R2-ENGINE-1451: closes the 8 unread check handlers in both roots, classifies `EN L2.07408` / `RU L2.08307` as the argument of a Session-init fill routine called with 0 and `0xfa0` (EN High, RU Medium), and relates the check-loop `IR+0x58` skip to the check compiler's `8000..9999` mark (Medium: the check copy routine is unread).
+
+**Confidence.** High for the EN zero fill of `Session+0xd724` (body of `L2.00341` read in R2-ENGINE-996), Medium for RU (`L2.00342` body unread, named memset in R2-ENGINE-909). High for EN serializer omission of `+0xd724`, for the check-loop `IR+0x58` skip in EN and RU, and for no IR-based operand with displacement `0x3a` or `0x44..0x58` and no `0xd724` reference in the 8 handlers read here (checks 2, 3, 11, 12, 13, 20, 22, 27, committed EXP-2183 listings, EN and RU; instruction counts in `evidence/derived/checks-8-late-ref.tsv`). Medium that the check copy (EN `L2.08305`, RU `L2.08306`) carries the compiler's `IR+0x58` count, so Medium that every check carrying an `8000..9999` parameter is skipped. The 19 handlers of R2-ENGINE-1684 stay as graded there (Medium, EN full, RU in part). Medium that no indirect pointer or out-of-range write through `Session+0xc784` with index `>= 1000` writes a nonzero pointer into `Session+0xd724..0xe6c3` (the `.text` scan matches literal `0xd724` displacements only).
+
+**Unknown.** Whether any code writes `Session+0xd724..0xe6c3` through an indirect pointer or an index `>= 1000` on `Session+0xc784`. Settled by running `allods2.exe` on a copied campaign map with an action using parameter 8001 under type 4 (and a check using 8001 under type 4), placing a write watch on `Session+0xd724..0xe6c3`, and comparing the executed action target and check register against an unchanged map.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/checks-8-late-ref.tsv`, `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-dispatch-a.txt`, `en-d724-users.txt`, `ru-d724-users.txt`, `en-init-L2.03643.txt`, `ru-init-L2.03644.txt`, `en-session-ser.txt`, `en-script-tick.txt`, `ru-script-tick.txt`, and `EXP-2183` `{en,ru}-check-{2,3,11,12,13,20,22,27}.txt`.
+
+### R2-ENGINE-1698
+
+Temporary actor cell position and following application for a cell-entry record (terrain cell record `+0x34..+0x39`: `+0x34` spell ID, `+0x35` power, `+0x36/+0x37` source `(x, y)`, `+0x38/+0x39` target `(x, y)`):
+
+1. **Zero or absent source bytes at write time**:
+   - **Type-9 mode `< 4` loader** (EN `L2.08343..L2.08344` `EXP-2172` `en-t9-stage.txt`, RU `L2.08345..L2.08346` `EXP-2144` `ru-stage-a.txt`, R2-ENGINE-1292): copies point-list entry 0 bytes `(+0, +2)` into `(+0x36, +0x37)` and entry 1 bytes `(+0, +2)` into `(+0x38, +0x39)` via EN `L2.08347` -> `L2.08348` (`en-terrain-lin-L2.03582.txt` lines 30..59: returns `[this+4] + 6 * index` with no bounds check). It never substitutes the trigger cell when entry 0 is `(0, 0)` or absent (an absent entry reads unguarded `[this+4]`).
+   - **Action 25** (EN `L2.08349..L2.06981`, `EXP-2174` `en-actions-d.txt`; only EN read): tests `p4 == 0`; when `p4 == 0`, it writes the script cell `(low8 p2, low8 p3)`, which is the key of the record, into both `(+0x36, +0x37)` and `(+0x38, +0x39)` into a six-byte descriptor on the stack, which it passes with the packed key `(low8 p3 << 8) + low8 p2` to a call on `[Session+0xa50]`; the committed window ends at `L2.06981` before that call, so the callee is not in this listing (the callee is outside the committed window and not read here; EN `L2.03589`, RU `L2.08350` are named the cell-entry writer by R2-ENGINE-1292, a different statement). When `p4 != 0`, it writes `(p4, p5)` into `(+0x36, +0x37)` and `(p6, p7)` into `(+0x38, +0x39)`.
+2. **Actor position at cell entry**: Cell-entry consumer (EN `L2.03570` `en-terrain-lin-L2.03582.txt`, RU `L2.02922` `EXP-2070` `ru-writer-L2.02922.txt`) runs for occupant kinds 1 and 2 when `byte [+0x34]` is nonzero and `!= 0x17`. It tests `spell->L2.03576(unit)` (RU `L2.05970`) and passes `byte [+0x36], byte [+0x37]` unchanged to EN `L2.03574` / RU `L2.05951` (unit-targeted) or EN `L2.03575` / RU `L2.05971` (point-targeted; `EXP-2144` `{en,ru}-cast-{a,b}.txt`). Both call EN `L2.07199` (`EXP-2190` `en-cast-L2.07199.lst`), which calls EN `L2.02713(srcX, srcY, [L2.01839])` (`en-terrain-lin-L2.03582.txt` lines 3261..3294). `L2.02713` unconditionally stores `x = srcX`, `y = srcY`, cell key `(srcY << 8) + srcX` and sub-cell `(0x80, 0x80)`. None of these bodies tests `(srcX, srcY)` for zero or substitutes the entered cell. Therefore, whenever the stored record's source bytes `(+0x36, +0x37)` are `(0, 0)`, the temporary actor takes **cell `(0, 0)`** (sub-cell centre `(0x80, 0x80)`) as its position `actor+0x10`.
+3. **Cell used by the following application**:
+   - **Unit-targeted (`L2.03574`, state `0xd`)**: sets `actor+0x5c = unit` (the entering unit). Actor step calls `spell->L2.03854(actor, unit, 0, 0)` (`EXP-2049` `en-cast.txt`: copies `unit+0x10`, the entering unit's cell, as target position) and then `L2.05342(actor, unit)` -> `L2.01692(actor, unit, 0, 0)` targeting the **entering unit**.
+   - **Point-targeted (`L2.03575`, state `0xe`)**: sets `actor+0x60 = byte [+0x38]` and `actor+0x61 = byte [+0x39]`. Actor step calls `spell->L2.03854(actor, 0, +0x38, +0x39)` (builds target position via `L2.02713(+0x38, +0x39, [L2.01839])`) and `L2.01692(actor, 0, +0x38, +0x39)` targeting **cell `(byte [+0x38], byte [+0x39])`** (not the entered cell unless `+0x38, +0x39` equals it).
+   - **Caster origin use during try**: In `EN L2.03854` (`en-cast.txt` lines 118..154), for projectile spells (`param5 == 2`, other than spell IDs `0xa` and `0xb` which force delay 5), travel delay is `distance(actor+0x10, targetPos) / param7` via `L2.08351`, so caster position `(0, 0)` enters the flight-time calculation and cast broadcast (`L2.02153` / `L2.02154`).
+
+**Amends.** R2-ENGINE-1292: its Medium on what the mode < 4 entries hold is narrowed for EN at High and RU at Medium: the stage copies entry 0 into source bytes and entry 1 into target bytes of the six-byte descriptor passed to L2.03589; the callee body stays unread.
+
+**Confidence.** High for the cell-entry consumer and cast wrappers in both EN and RU, for type-9 stage A and the cell-entry writer in both EN and RU, and for EN `L2.07199`, `L2.02713`, `L2.08347`, `L2.03854` and Action 25. High for the RU twins `L2.05953` (cast actor constructor called by the RU wrappers `L2.05951`/`L2.05971`) and `L2.02599` (position setter), read natively: the setter stores its two byte arguments as the cell, the cell key and sub-cell `(0x80, 0x80)` with no zero test. Medium for the RU type-9 element accessor `L2.08352` (it calls `L2.08353`, unread, so no bounds-check statement is made for RU), for `L2.08354`, and for per-spell origin reads inside `L2.01692` (not enumerated per spell here).
+
+**Unknown.** The RU body of `L2.08353` and per-spell `actor+0x10` origin reads inside `L2.01692`. Settled in `allods2.exe` by loading a map copy with a type-9 mode `< 4` cell-entry record whose entry 0 is `(0, 0)` and entry 1 is `(tx, ty)`, walking a unit onto the trigger cell, and observing projectile origin, flight delay and impact cell.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; `evidence/native/pass1/listings/ru-cast-L2.05953.txt`, `ru-pos-L2.02599.txt`, `ru-t9-get-L2.08352.txt`; committed listings `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.05179.txt`, `ru-writer-L2.02922.txt`, `en-cast-a.txt`, `en-cast-b.txt`, `ru-cast-a.txt`, `ru-cast-b.txt`, `en-t9-stage.txt`, `ru-stage-a.txt`, `en-actions-d.txt`, `en-cast-L2.07199.lst`, `en-cast.txt`.
+
+### R2-ENGINE-1699
+
+Script action 11 (EN `L2.08355`, RU `L2.08356`; `EXP-2183` `{en,ru}-action-11.txt`) transfers one item from unit `U`'s bag (`U+0x7c`) to unit `V`'s bag (`V+0x7c`):
+
+1. **Extraction from `U+0x7c`**: calls EN `L2.00495(I)` / RU `L2.00494(I)` on `U+0x7c` (`EXP-2051` `{en,ru}-bag-extract.txt`). That routine looks up item ID `I` (`u16 [IR+0x6c]`) via `L2.07387` / `L2.01742`. If found:
+   - when `u16 [item+0x42] > 1`, it calls `item->vtable[+0x40]()` (verified on Weapon in RU `L2.01789`, `EXP-2051` `ru-weapon-clone.txt`: decrements the original stack's `word [+0x42]` by 1 and returns a newly allocated copy with `word [+0x42] = 1`);
+   - when `u16 [item+0x42] <= 1`, it unlinks `item` from `U+0x7c` via EN `L2.01765` / RU `L2.08357`.
+   It then subtracts `i16 [returned+0x4a] * u16 [returned+0x42]` from `DWORD [U+0x7c + 0x20]` (bag weight) and returns the extracted item pointer. Action 11 next notifies `U` via EN `L2.00497(U, U+0x14, 0, 0)` / RU `L2.00496`.
+2. **Insertion into `V+0x7c`**: if the extracted item pointer is nonzero, Action 11 calls EN `L2.01055(item)` / RU `L2.01313(item)` on `V+0x7c` (`EXP-2051` `en-bag-insert.txt`), which calls EN `L2.08358(bag+0x1c, item)` / RU `L2.01741` (`EXP-2051` `ru-list-insert-at.txt`): clears `byte [item+0x4d] = 0`, merges into an existing stackable item with the same key (adding `word [+0x42]`, ORing `+8`, adding weight to `V+0x7c+0x20`, and deleting the incoming item) or inserts at `bag+0x1c` (appending at tail when `0x7fff`) and adds weight to `V+0x7c+0x20`. Action 11 then notifies `V` via EN `L2.00497(V, V+0x14, 0, 0)` / RU `L2.00496`.
+
+Thus the item leaves `U`'s bag (unlinked if quantity `<= 1`, or decremented by 1 and split if `> 1`, read for Weapon; other item classes Medium) and enters `V`'s bag.
+
+**Amends.** R2-ENGINE-1450: settles the Unknown on whether the item leaves `U`'s collection and where it goes.
+
+**Confidence.** High for Action 11, bag extraction (`L2.00495` / `L2.00494`) and bag insert entry (`L2.01055`) in EN and RU, and for RU `L2.01741` and Weapon clone `L2.01789`. Medium for non-Weapon item subclasses' `vtable[+0x40]` clone implementations (unread), for EN `L2.08358` body parity, and for unread notify helper `L2.00497` / `L2.00496`.
+
+**Unknown.** Non-Weapon `vtable[+0x40]` clone bodies and notify helper `L2.00497` / `L2.00496`. Settled in `allods2.exe` by running a map copy with Action 11 transferring a stack of 2 potions and a single unique item from unit U to unit V and comparing both units' bags in saves before and after.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-11.txt`, `ru-action-11.txt`, `en-bag-extract.txt`, `ru-bag-extract.txt`, `en-bag-insert.txt`, `ru-list-insert-at.txt`, `ru-weapon-clone.txt`.
+
+### R2-ENGINE-1700
+
+Script action 27 (EN `L2.08359`, RU `L2.08360`; `EXP-2183` `{en,ru}-action-27.txt`) relocates unit `U` to `(low8 p0, low8 p1)` and, for computer-owned units, sets the Guard order:
+
+1. **Terrain call (`EN L2.03593`, `RU L2.00093`)**: 59 instructions, 0 EN-RU differences (`en-terrain-lin-L2.03582.txt` lines 16579..16637; `EXP-2070` `ru-consumer-L2.00093.txt`, R2-ENGINE-705). It packs `(low8 p1 << 8) + low8 p0` and calls EN `L2.03600(U, key)` / RU `L2.02921` (two `L2.03831` cell tests with arguments 0 and 1): if that returns 0, it returns 1 immediately with no state change. Otherwise it detaches `U` from terrain (EN `L2.03601`, RU `L2.02926`), updates `U+0x10` to cell `(low8 p0, low8 p1)` (EN `L2.03602`, RU `L2.02927`), re-places `U` on terrain (EN `L2.00314`, RU `L2.00315`), resets `U`'s command on `[terrain+0x58d80]` (EN `L2.03312`, RU `L2.02636`), and broadcasts EN `L2.01056(U, 0, -1, 0xffb, 0, 0)` / RU `L2.00060`.
+2. **Follow-up call (`EN L2.00441`, `RU L2.02815`)**: runs whether or not the move was accepted (when `L2.03600` returns 0 the terrain call returns 1 with no change, and the setter still runs); called only when `DWORD [[U+0x14] + 0x2c] != 0` (`EXP-2152` `{en,ru}-setters-next.lst`, R2-ENGINE-1620). It calls command reset (EN `L2.03061`, RU `L2.01584`), sets `DWORD [U+0x50] = 0xb` (Guard order), writes `command word +0` (guard post cell) to `word [[U+0x1c0]+6]` when `L2.00491(U+0x10) == 0` else `L2.03062(U+0x10)` (unit's current cell — the destination `(p0, p1)` if the move succeeded), and clears `byte [command+8] = 0`.
+
+**Amends.** R2-ENGINE-1450: resolves the terrain call and follow-up call of Action 27.
+
+**Confidence.** High for Action 27, the terrain move (`EN L2.03593`, `RU L2.00093`), and the Guard setter (`EN L2.00441`, `RU L2.02815`) in both EN and RU. Medium for the inner terrain helpers (`L2.03600`, `L2.03601`, `L2.03602`, `L2.00314`, `L2.03312`, `L2.01056` / RU twins) whose bodies were not re-read in full here; their roles (detach, position store, placement, command reset, broadcast) come from the call order in the 59-instruction body.
+
+**Unknown.** Exact rejection predicates inside `L2.03831` for impassable or occupied cells. Settled in `allods2.exe` by running a map copy with Action 27 targeting an empty cell and an occupied/blocked cell for both a player unit (`owner+0x2c == 0`) and a computer unit (`owner+0x2c != 0`), then comparing position and order `+0x50` in saves.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-27.txt`, `ru-action-27.txt`, `en-terrain-lin-L2.03582.txt`, `ru-consumer-L2.00093.txt`, `en-setters-next.lst`, `ru-setters-next.lst`.
+
+### R2-ENGINE-1701
+
+Script action 31 (EN `L2.08361`, RU `L2.08362`; `EXP-2183` `{en,ru}-action-31.txt`) walks the Buildings collection `[[[L2.00805]+0x7c]]` (RU `[[[L2.01317]+0x7c]]`), tests `obj->vtable[+0x38]() != 0`, matches `DWORD [obj+0xac] == p0`, and writes `DWORD [obj+0xb4] = p1`:
+
+1. **Matching class and vtable slot +0x38**: RU: slot `+0x38` returns 0 (`L2.08363`) for `Pointer` (`L2.02549`), `Shop` (`L2.02546`), `Inn` (`L2.02544`) and, by R2-ENGINE-517 (Pointer overrides slots 0..2 only; RU `Building` `L2.02576` slot 14 is in no table), `Building`, and 1 for `Outpost` (`L2.02515`, `0xcc` bytes; `EXP-2064` `out/tables.tsv`, R2-ENGINE-510) through `L2.08364`. EN: `L2.08365` returns 0 for `Building` (`L2.02577`) and `Pointer` (`L2.02578`); the EN `Outpost` (`L2.05003`) slot is unread.
+2. **Fields `+0xac` and `+0xb4` on `Outpost`** (`EXP-2064` `en-area-object-ctor.txt`, `{en,ru}-area-class-methods.txt`):
+   - `DWORD [+0xac]` is the Outpost's **group number**, matched against `DWORD [Group+0x1c]` in `Outpost::slot5` when locating or recreating its group.
+   - `DWORD [+0xb4]` is the Outpost's **remaining respawn countdown** (reloaded from `DWORD [+0xb0]` when the group respawns, RU `L2.08366..L2.08367`, EN `L2.08368`; the constructor sets `+0xb0 = 0x78` and `+0xac = 0`, EN `L2.08369`, `L2.08370`; R2-ENGINE-510: the group function stores `+0xb4 = 120 * S / 100` at build, so the constructor's `+0xb0 = 0x78` is overwritten).
+3. **Reader of `+0xb4` afterwards**: `Outpost::slot5` (EN `L2.08245`, RU `L2.02521`) checks `DWORD [+0xc0]`: when 0, it walks the member list `+0x6c` and sets `+0xc0 = 1` once every member has `byte [+0x13c] >= 3`. Once `+0xc0 != 0`, it reads `DWORD [+0xb4]`, decrements `+0xb4` by 1, and returns early when the pre-decrement value was `> 0`. When `<= 0`, it ages remaining `< 5` corpses in `+0x6c`, checks that the owner's group with `Group+0x1c == +0xac` has `<= 0` members (creating the group with `+0x1c = +0xac` if absent), respawns saved template copies from `+0x8c` into `+0x6c`, resets `+0xc0 = 0`, reloads `+0xb4 = +0xb0`, runs Guard B, and invokes action `+0xb8` if `>= 0`.
+
+**Amends.** R2-ENGINE-1450: identifies the listed objects (`Outpost`), offsets `+0xac` and `+0xb4`, and the downstream reader `Outpost::slot5`. R2-ENGINE-510: slot 5 decrements `+0xb4` only after `+0xc0` is 1 (RU `L2.08301..L2.08302`; EN equal after masking by R2-ENGINE-510).
+
+**Confidence.** High for Action 31 and for `Outpost` constructor and `Outpost::slot5` in both EN and RU. for the slot bodies read natively in RU and EN: `L2.08365` (EN) and `L2.08363` (RU) return 0, `L2.08364` (RU Outpost) returns 1, so among the classes Building, Pointer, Shop, Inn and Outpost only Outpost passes the filter in RU. Medium for EN Outpost (its slot-14 value is not tabulated and its body unread), for other Building subclasses (no census of all vtables), and that no other routine reads `+0xb4` (no global `+0xb4` displacement census ran).
+
+**Unknown.** The EN Outpost slot-14 body, and whether any other routine reads `Outpost+0xb4`. Settled in `allods2.exe` by loading a map copy with a type-10 Outpost group `g`, wiping the group, firing Action 31 with `(g, 1)` vs `(g, 500)`, and comparing the tick at which the group respawns.
+
+**Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-31.txt`, `ru-action-31.txt`, `en-area-object-ctor.txt`, `en-area-class-methods.txt`, `ru-area-class-methods.txt`, `EXP-2064/out/tables.tsv`, `EXP-2065/out/tables.tsv`, `en-building-vtable.txt`; `evidence/native/pass1/listings/en-building-slot38-L2.08365.txt`, `ru-building-slot38-L2.08363.txt`, `ru-outpost-slot38-L2.08364.txt`.
