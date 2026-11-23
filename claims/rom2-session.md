@@ -5985,7 +5985,8 @@ No save was newly opened. R2-SESSION-306's already-published rom2-gog-original-2
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-SESSION-416 | ROM2 `.a2c` section B is the client copy of the 2,560-byte kill-grade block at client +0x3f70: EN L2.07233 rewrites only B after each 0xb3 or 0xba receipt unless app +0x5d8 is 2; character creation zeroes it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
-| R2-SESSION-417 | Across ROM2 SAVE and LOAD the kill grades travel only as the SAV Player body's raw 2,560 bytes of +0x44, restored raw; no found SAV transfer touches the client copy +0x3f70 that the card reads. | Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-SESSION-417 | Across ROM2 SAVE and LOAD the kill grades travel only as the SAV Player body's raw 2,560 bytes of +0x44, restored raw; no found SAV transfer touches the client copy +0x3f70 that the card reads. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-SESSION-486 | EN ROM2 mission start R2.0026 with application mode not 3 sends client message 0x04 (sender L2.03115); its server arm calls join L2.02723, which sends the Player's 0xba when it has a hero; whether SAV LOAD runs R2.0026 is not read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
 
 ### R2-SESSION-416
 
@@ -6029,4 +6030,55 @@ at L2.07220 and `#modify +knowledge` (R2-ENGINE-1270), and none is shown to run 
 creatures of one kind, saves, loads and hovers a third of that kind would settle it: Health and
 Mana visible after LOAD means the grade survives.
 
+**Amended.** R2-SESSION-486 narrows the Unknown: every EN mission start `R2.0026` (app +0x5d8
+not 3) sends message 0x04, and the join it reaches sends 0xba to a Player with a hero; only
+whether SAV LOAD runs that mission start remains unread.
+
 **Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 3.
+
+### R2-SESSION-486
+
+- EN client `L2.03115`(a) fills buffer `L2.08388` with type 0x04, word +5 from (app +0x9cc) +4,
+  word +7 = 0 and DWORD +0xa = a, and sends it through `L2.00871`. Its one call site is
+  `L2.08389` in `R2.0026`.
+- `R2.0026`(a): when app +0x5d8 is 2 and a is 0 it formats `"%d.alm"` with the number from
+  `L2.08390`; otherwise it takes the name at app +0x5d0. When a is 0 and app +0x5d4 is nonzero it
+  calls the server load `L2.00222` with that name. Unless app +0x5d8 is 3 it stores a at app
+  +0x3f0 and calls `L2.03115`(a).
+- The four call sites of `R2.0026` (E8 and stored-dword scans only) pass a = 0 (`L2.08391`, `L2.08392`, `L2.08393`) and a = 1
+  (`L2.05478`, taken when `L2.01830`, which reads the value "InBattle" of "CurrentState",
+  returns nonzero).
+- EN server: type 0x04 selects arm `L2.05684` (R2-ENGINE-1711's switch). The arm looks the
+  Player up by word +5 (`L2.08394` on `[L2.00292]`) and calls join `L2.02723`(Player, +0xa == 0).
+  The join returns early for a Player without a hero (R2-ENGINE-532) and otherwise sends 0xba
+  (`L2.07225`, R2-ENGINE-1270).
+- Sender population: byte stores of 0x04 or 0xbe at displacement 9 from a 32-bit register, or of
+  0x04 or 0xbe at an absolute address in L2.08395..L2.03731, and stores of 0xbe at an
+  `ebp`-relative address, in the EN code sections (`evidence/derived/probe/scans/en-type-04-be.txt`):
+  3 hits, this sender, the 0xbe sender of R2-ENGINE-1711 and `L2.02899`, which stores 4 at
+  unit +0x1c4 +9, not into a message.
+
+Composed with R2-SESSION-020, R2-ENGINE-323, R2-ENGINE-675 and R2-ENGINE-772: the kill-derived
+state that a mission or town file keeps is the Player body record, its raw 2,560 bytes of +0x44
+and the counters +0xa48 (u32, XORed) and +0xa4c (u16), written and read back without a test.
+The client copy +0x3f70 that the card reads is in no SAV transfer (R2-SESSION-417); its file copy
+is `.a2c` section B (R2-SESSION-416). Each mission start with application mode not 3 sends 0x04,
+and the server answers a Player with a hero with 0xba of its +0x44.
+
+**Confidence.** High for the sender, the mission start body and the join arm (EN bodies read);
+the join's 0xba send (`L2.07225`) is read in EXP-2067's listing (R2-ENGINE-532, R2-ENGINE-1270),
+not in a listing of this experiment. Medium for the completeness of the four call sites of
+`R2.0026` (the scans `en-call-R2.0026` and `en-dword-R2.0026` cover E8 calls and stored dwords;
+jumps and register calls are not scanned). Medium for the sender population: 16- or 32-bit
+stores, stores through a register with a 32-bit displacement and computed pointers are not
+searched. Medium for town files: R2-SESSION-322 reads the Player body there. EN only. Unknown
+whether SAV LOAD reaches `R2.0026`.
+
+**Unknown.** Whether loading a SAV file runs `R2.0026`: neither the name at app +0x5d0 nor the
+server load `L2.00222` is tied to SAV LOAD here. A run of the original settles it: kill two
+creatures of one kind, SAVE, quit the program, start it again, LOAD that save and hover a third
+creature of that kind; Health and Mana on the card mean a 0xba followed LOAD.
+
+**Amends.** R2-SESSION-417: its Unknown is narrowed to the LOAD path's tie to the mission start.
+
+**Evidence.** [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md), question 3.

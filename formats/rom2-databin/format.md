@@ -183,8 +183,35 @@ original-compatible arbitrary-value binding remain Unknown.
 
 Units census (EN and RU equal counts): 180 of 241 rows carry typeID, face and serverID; 13
 typeID/face pairs are shared by 64 rows, each row with its own serverID; no raw serverID
-repeats, none is 0 and 23 lie outside 1..0x9ff. Low WORDs were not computed.
+repeats, none is 0 and 23 lie outside 1..0x9ff.
 — R2-ENGINE-1273
+
+The 180 rows have distinct names; the 61 rows without parameters share the empty name. Each
+serverID is its own low WORD except Human's (-1, low WORD 0xffff), and no low WORD repeats: 157
+lie in 600..999, 22 in 10030..10079 (CatapultBase, MercenaryCatapult and the MercenaryDruid,
+MercenaryTroll and MercenaryOrc rows), and Human's is -1. — R2-ASSET-371
+
+| typeID | face | Rows | Rows outside 1..0x9ff | Claim |
+|---:|---:|---:|---:|---|
+| 26 | 1 | 3 | 2 | R2-ASSET-371 |
+| 81 | 3 | 2 | 0 | R2-ASSET-371 |
+| 99 | 1 | 13 | 0 | R2-ASSET-371 |
+| 99 | 2 | 5 | 0 | R2-ASSET-371 |
+| 99 | 3 | 5 | 0 | R2-ASSET-371 |
+| 100 | 2 | 2 | 0 | R2-ASSET-371 |
+| 100 | 3 | 4 | 0 | R2-ASSET-371 |
+| 100 | 4 | 8 | 7 | R2-ASSET-371 |
+| 100 | 5 | 2 | 0 | R2-ASSET-371 |
+| 100 | 6 | 4 | 0 | R2-ASSET-371 |
+| 100 | 7 | 2 | 0 | R2-ASSET-371 |
+| 101 | 1 | 8 | 7 | R2-ASSET-371 |
+| 102 | 3 | 6 | 6 | R2-ASSET-371 |
+
+A unit placed from a Units row counts kills and reads its card grade under its own row's
+serverID low WORD, because the unit loader's name walk finds every named row first at itself,
+given the table's index alignment; the 22 shared-pair rows outside 1..0x9ff are never counted
+(High for the walk in EN, Medium for the placement chain to the loader and for RU).
+— R2-ENGINE-1712
 
 ## Selected construction input records
 

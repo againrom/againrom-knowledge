@@ -75,3 +75,8 @@ Section B is the client's copy of that block (client +0x3f70). Both receive arms
 update the copy (0xba: the whole run-coded block; 0xb3: one byte) rewrite section B alone
 unless application +0x5d8 is 2, and character creation clears the copy. Whether loading
 a character reads B back into the copy is Unknown. — R2-SESSION-416, R2-ENGINE-1271
+
+When a client uploads a character file (message 0xbe) for a Player without a hero, the EN server
+copies the buffer the reader returns in its fifth out-parameter, taken to be section B, into
+Player +0x44 and sends 0xba, which rewrites the client copy (Medium that the copied buffer is
+section B). — R2-ENGINE-1711

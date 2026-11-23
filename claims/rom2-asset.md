@@ -4671,6 +4671,37 @@ Per-bit totals: `0x01` in 143 EN / 158 RU; `0x02` in 223 / 250; `0x04` in 66 / 7
 
 **Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q7-type11a-shops.tsv`.
 
+## ROM2 Units rows: names and serverID low WORDs
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-371 | ROM2 Units (EN = RU): the 180 rows with typeID, face and serverID have 180 distinct names (the 61 others share the empty name); 157 serverIDs lie in 600..999, 22 in 10030..10079, and Human's is -1. | High | ✔ promoted (branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
+
+### R2-ASSET-371
+
+`world.res` `data/data.bin` Units rows through the probe's units reader
+(`evidence/derived/probe/units/en-rows.tsv`, `ru-rows.tsv`; the two tables are equal from the
+header on): 241 rows. The 61 rows without parameters have the empty name; the 180 rows with
+typeID, face and serverID have 180 distinct names. Their serverIDs are their own low WORDs except
+Human's (-1, low WORD 0xffff), and no low WORD repeats.
+
+- 157 serverIDs lie in 600..999.
+- 22 lie in 10030..10079: CatapultBase 10070, MercenaryCatapult 10079, MercenaryDruidBase 10030
+  and MercenaryDruid60..110 10034..10039, MercenaryTrollBase 10040 and MercenaryTroll70..110
+  10045..10049, MercenaryOrcBase 10050 and MercenaryOrc60..110 10054..10059.
+- Human (typeID -1) has serverID -1.
+
+In the 13 typeID/face pairs that 64 rows share (R2-ENGINE-1273), 22 of the 23 values outside
+1..0x9ff fall in four pairs and the other nine pairs have none: pair (26, 1) 2 of 3 rows,
+(100, 4) 7 of 8, (101, 1) 7 of 8, (102, 3) 6 of 6. Human's pair is not shared. The per-pair table
+is on the data.bin format page.
+
+**Confidence.** High: the whole file parses in both roots.
+
+**Amends.** R2-ENGINE-1273: the low WORDs and their ranges are computed.
+
+**Evidence.** [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md), question 4.
+
 ## ROM2 script nodes: type vectors of the installed maps
 
 | ID | Claim | Confidence | Status | Evidence |

@@ -299,12 +299,26 @@ EN builder `L2.01061` sends 0xb3 for a nonzero index and 0xba for index 0; its f
 are the join handler, one arm at `L2.07220` and `#modify +knowledge` (index 0), and the kill count.
 — R2-ENGINE-1270
 
+The RU builder `L2.08373` is the same body under the address mask. The arm at `L2.07220` serves
+client message 0xbe, which the EN client always sends and to which it attaches the named file only
+when it opens and is shorter than 0x8000 bytes: for a Player without a hero the server loads the
+file, copies the buffer the reader returns in its fifth out-parameter, taken to be section B
+(Medium), into +0x44 and sends 0xba. What the arm does with an empty message is Unknown. So the
+values written into +0x44 during play are 0 at construction, one more per counted kill up to 14,
+the uploaded file's buffer taken to be section B (Medium), and the saved bytes at LOAD (Medium for the completeness of
+that list). — R2-ENGINE-1711
+
 Across SAVE and LOAD the kill grades travel only in this raw block (Medium), and LOAD writes it
 back raw. The client copy that the unit card reads is in no SAV transfer that the `0x3f70`
 displacement scan finds (Medium). It shows the loaded grades only after a 0xba send. The found
-0xba sends are the join handler, an arm at `L2.07220` and `#modify +knowledge`, and none is shown
-to follow LOAD (Unknown).
+0xba sends are the join handler, an arm at `L2.07220` and `#modify +knowledge`.
 — R2-SESSION-417
+
+The kill-derived state of a mission or town file is this Player body record: the 2,560 bytes and
+the counters +0xa48 and +0xa4c. In EN every mission start (application mode not 3) sends client
+message 0x04 (Medium for the completeness of the four call sites); its server arm runs the join
+handler, which sends 0xba to a Player with a hero. Whether loading a save runs that mission start is not read (Unknown).
+— R2-SESSION-486
 
 Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
 byte +0x0d and no constructor store to its word +0x0c was found in the read
