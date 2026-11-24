@@ -14,7 +14,10 @@ u16 collection and creates no executable action. Its downstream consumer is
 Unknown. Check word 65538 initializes a local check-result register with
 parameter 0 and creates no executable check. Mission10's action pair is 11/41;
 its special checks initialize 0/4/1/2/3/1229. These full words must not be
-reduced to ordinary opcode 2. — R2-ENGINE-042, R2-ENGINE-043
+reduced to ordinary opcode 2. — R2-ENGINE-042 (amended), R2-ENGINE-043 (amended)
+
+The register is the running check index, the value is slot 0 whatever its type code, and the packed action bytes are
+slots 0 and 1 whatever their type codes; see Constants and registers. — R2-ENGINE-1727
 
 The bounded postcompile trace still leaves the packed collection's consumer
 Unknown. The read caller invokes the type-9 stage and a conditional
@@ -223,6 +226,9 @@ RU result tick prioritizes a positive failure reason and emits 0xb4, otherwise
 a nonzero win counter emits 0xb5. The receiver forwards these to UI 433 selector255
 and UI 430 respectively. Full acknowledgement scheduling is Unknown. Its former
 mission-10 reason 19 is retracted: mission 10 stores 0 and 5. — R2-ENGINE-060
+
+The roles of +0xbe0c and +0xbe14, Unknown in R2-ENGINE-1313 (amended), are the win counter and the failure reason;
+see Victory and defeat. — R2-ENGINE-1729
 
 DLL EnterLocation stores the location-record pointer and clears slots 752..767.
 GetCurrentLocation returns a pointer; the client wrapper reads its numeric ID.
@@ -491,8 +497,8 @@ R2-ENGINE-1314, R2-ENGINE-1315
 Actions 3 and 8 respectively store R[p0]=p1 and increment R[p0]. The other
 read local effects, each High for the instructions and Medium for delegated
 effects:
-- 4: Session+0xbe0c += 1; the role of the field is Unknown.
-- 5: Session+0xbe14 = p0; the role of the field is Unknown.
+- 4: Session+0xbe0c += 1; the win counter (R2-ENGINE-1729).
+- 5: Session+0xbe14 = p0; the failure reason (R2-ENGINE-1729).
 - 10: byte at Session+0xa8c4+70*p0+p1 = (old AND 0xfc)+low8(p2), then, for
   each entry of the Session+0xc77c iteration whose word +4 equals p0 or p1,
   a call to EN L2.01852 (R2-ENGINE-980 at its grade).
@@ -507,7 +513,7 @@ No accepted-index domain follows from these DWORD accesses.
 | Action | Additional read operand/call contract | Boundary |
 |---:|---|---|
 | 2 | p0 and zeros to event producer | Event interface above; delivery separate |
-| 6 | p0 selects nested 18-cell switch; arms pass G, U, low8(p1/p2) | Nested table and method effects not fully read |
+| 6 | p0 selects nested 18-cell switch; arms pass G, U, low8(p1/p2) | Arms read: see Action 6 selectors (R2-ENGINE-1726); play meaning of the orders Medium |
 | 12 | I lookup; nonzero return to U+0x7c collection helper; notify U | Creation/mutation helpers unread |
 | 13 | I extraction helper on U+0x7c; nonzero return gets virtual slot+4(1); notify U | Extraction quantity and callback unread |
 | 16, 17 | U to EN L2.04906 or L2.01848 respectively | Final effects unread |
@@ -652,8 +658,10 @@ units in any state.
 
 The Medium cells for checks 1 and 8 name the RU group-count removal helpers (the unlink twins of `L2.04533` and `L2.08333`), which were not read; in EN the chain from the detach to the unlink of the member node and the decrement of `G+0xc` was read. Check 8 counts member nodes and does not read `G+0xc`.
 
-The check-ID map is hash find-or-insert: a check ID absent from the map inserts a node, and
-the value later used as its register slot is Unknown. — R2-ENGINE-1453
+The check-ID map is hash find-or-insert: a check ID absent from the map inserts a node.
+— R2-ENGINE-1453 (amended)
+
+The new node's value is zeroed, so that ID names register 0, the first check's register (Medium). — R2-ENGINE-1728
 
 ## Names, text fields and the shared text buffer
 
@@ -677,9 +685,12 @@ section tags of R2-ENGINE-037; the key of a TALK from any other source is not en
 — R2-ENGINE-1682, R2-ASSET-115
 
 In the 46 campaign maps no script operand is a zone record by the bodies read (Medium). The
-operand kinds are group, unit, player, item and one type-9 object whose record (the lookup
-EN L2.08172) is unread; trigger-list accessor calls are in the loader and the compiler only.
-— R2-ENGINE-1685
+operand kinds are group, unit, player, item and one type-9 object; trigger-list accessor calls
+are in the loader and the compiler only. — R2-ENGINE-1685 (amended)
+
+The type-9 object is the structure whose type-4 id equals the value: the compiler keys each
+object of its +0x24 list by DWORD+8, the type-4 id (Medium that the list is the Session
+Buildings list). — R2-ENGINE-1725
 
 ## Source slots and compiled positions
 
@@ -691,7 +702,7 @@ type goes to +0x68. Type 8 stores u16 +0x6c = low16(value + 3608) and type 9 a p
 The 46 campaign maps give each ordinary ID the same type vector in every node, except action 6 (six vectors, told apart
 in the installed maps by the value of slot 0: 3; 1; 15; 10; 11; 4, 5 or 14; the compiler reads type codes only) and check
 word 65538 (two). English and Russian campaign maps agree. In a check, type 9 (check 21, s0=T) takes the lookup EN L2.08172
-and stores the pointer at IR+0x70; the lookup is unread (Medium). — R2-ENGINE-1680, R2-ASSET-363
+and stores the pointer at IR+0x70; the lookup is read in R2-ENGINE-1725. — R2-ENGINE-1680, R2-ASSET-363
 
 | Kind | ID | Type codes (s0..s9) | Reference slots | Scalar slots (p0, p1, ... in slot order) | Nodes, EN campaign | Claim |
 |---|---:|---|---|---|---:|---|
@@ -751,3 +762,114 @@ and stores the pointer at IR+0x70; the lookup is unread (Medium). — R2-ENGINE-
 | check | 26 | 4,1,0,0,0,0,0,0,0,0 | s0=U | s1-9 | 3 | R2-ASSET-363 |
 | check | 65538 | 1,0,0,0,0,0,0,0,0,0 | none | s0-9 | 160 | R2-ASSET-363 |
 | check | 65538 | 7,0,0,0,0,0,0,0,0,0 | none | s0-9 | 4 | R2-ASSET-363 |
+
+## Authoring a map script
+
+The rules below are what a map editor needs to write nodes and triggers that compile as the installed maps do. Counts
+are per root over the 46 campaign maps unless a loose-map count is given. — R2-ASSET-375
+
+### Type-9 operands
+
+Check 21 is the one installed user of type 9. Its slot value names a structure by its type-4 id (file +0x12). The
+compiler keys every object of its +0x24 list by DWORD+8, which is that id, looks the value up and stores the object
+at IR+0x70; check 21 then sets its register to the object's sign-extended word +0x42 (High for the bodies; Medium that
+the list is the Session Buildings list). A value that names no structure of the map fails the node's compile (Medium:
+one constructor after the zero fill is unread). A zero type-4 file word +0x0c clears Building +0x42 (R2-ENGINE-1288);
+what +0x42 holds is Unknown. — R2-ENGINE-1725
+
+| Measure | Count | Claim |
+|---|---|---|
+| Check 21 values that are type-4 ids of the same map (kinds 0x1c / 0x1d) | 24 (12 / 12); RU loose 1 (0x1d) | R2-ASSET-375 |
+| Action nodes with a type-9 slot | 0 | R2-ASSET-375 |
+
+### Action 6 selectors
+
+Action 6 takes the selector in p0 and the group G; U, p1 and p2 follow in slot order. Selectors 6..9, 12, 13 and 16,
+0 and values above 18 do nothing. Order codes are those of the player-order setters; what each order and group
+programme value does in play is Medium. — R2-ENGINE-1726
+
+| p0 | Operands | Effect | Campaign nodes | Claim |
+|---:|---|---|---:|---|
+| 1 | G, p1 | each member guards (order 0xb); programme 1; record +0x2d and +0x38 raised to p1, or to Session byte +0xa8b8 when p1 is 0 | 1 | R2-ENGINE-1726, R2-ASSET-375 |
+| 2 | G, p1, p2 | members reset; programme 2; record cell = (p1, p2) | 0 (loose EN 2, RU 3) | R2-ENGINE-1726, R2-ASSET-375 |
+| 3 | G | each member gets order 0xc; programme 3 | 8 | R2-ENGINE-1726, R2-ASSET-375 |
+| 4 | G, p1, p2 | each member moves (order 1) to (p1, p2), keeping its offset from the group centre when [[G+0x44]+0x34]+0x1f is 2; programme 4; record cell = (p1, p2) | 20 | R2-ENGINE-1726, R2-ASSET-375 |
+| 5 | G, p1, p2 | as 4, programme 5 | 32 | R2-ENGINE-1726, R2-ASSET-375 |
+| 10 | G, U | each member attacks U (order 3) when its score for U is valid, else stops | 1 | R2-ENGINE-1726, R2-ASSET-375 |
+| 11 | G, U, p1 | each member gets order 8 on U with byte p1 (3 when 0); a member equal to U stops | 7 | R2-ENGINE-1726, R2-ASSET-375 |
+| 14 | G, p1, p2 | each member gets order 0xa with a path to (p1, p2) | 19 | R2-ENGINE-1726, R2-ASSET-375 |
+| 15 | G, U, p1 | each member gets order 0x11 on U with byte p1 (3 when 0); a member equal to U stops | 14 | R2-ENGINE-1726, R2-ASSET-375 |
+| 17 | G | programme 0x11; record cell = the first member's cell | 0 (RU loose 1) | R2-ENGINE-1726, R2-ASSET-375 |
+| 18 | G, p1 | as 1, programme 0x12, default range 20 | 0 | R2-ENGINE-1726, R2-ASSET-375 |
+
+A move target is clamped to four bytes of the map object, read as its movable bounds (Medium). — R2-ENGINE-1726
+
+### Constants and registers
+
+The compiler gives check IDs registers by a running index k over the check list in file order: a check of word 65538
+and a check that compiles take register k and advance it; a check of a word above 65538 compiles nothing, advances
+nothing and so shares the next check's register. Word 65538 stores its slot-0 value in its register at compile time
+and reads no type code. An action of word 65538 adds value slots 0 and 1, as bytes, to a compiler collection whose
+consumer is Unknown (R2-ENGINE-1683). — R2-ENGINE-1727
+
+The installed maps use word-65538 checks as the constants of comparisons; the registers named by actions 3, 8 and check 19 lie above
+every check register (their role is not read). — R2-ASSET-375
+
+| Measure | Count | Claim |
+|---|---|---|
+| Word-65538 checks; slot 0 of type 1 / type 7 | 164; 160 / 4 | R2-ASSET-375 |
+| Word-65538 checks named by a trigger; values | 153; 0..1229 | R2-ASSET-375 |
+| Trigger rows whose right side is a word-65538 check | EN 1341, RU 1337 (every row) | R2-ASSET-375 |
+| Register operand p0 of actions 3, 8 and check 19 above the map's check registers | 48, 197, 208 (registers 70..83) | R2-ASSET-375 |
+| Check 19 whose p0 is an ordinary check register | 1 | R2-ASSET-375 |
+| Largest number of check registers in a map | 54 | R2-ASSET-375 |
+| Action nodes of word 65538 (slot types 5 and 6) | 46 | R2-ASSET-375 |
+
+### Node and trigger fields the game reads
+
+The type-7 loader reads the counts, each node's seven fields and each 184-byte trigger, and tests no value but the
+allocation result. The compiler reads of a node are the operation word, the ID, the ten type codes and values, the
+node pointer for its failure message, and for a check the word at file +0x48, which it copies to IR+0x74; no reader of
+IR+0x74 is found in the listings searched (Medium). Name and text fields reach only the failure messages
+(R2-ENGINE-1681); the type-0 +0x28 count is overwritten (R2-ENGINE-1324); the trigger fields are R2-ENGINE-1316. A check
+that fails to compile, such as a type-9 value naming no structure, gets the failure message and register 0 and takes
+no index; a trigger naming such a check reads register 0. — R2-ENGINE-1728
+
+| Measure | Count | Claim |
+|---|---|---|
+| Word +0x48: action nodes 0 / check nodes 0 / check nodes 1 | 1334 / 824 / 162 | R2-ASSET-375 |
+| Check / action nodes; duplicate, zero or above-5000 IDs | 986 / 1334; 0 | R2-ASSET-375 |
+| Triggers; flag 0 / 1 | EN 715, RU 714; EN 130 / 585, RU 129 / 585 | R2-ASSET-375 |
+| Rows by comparison code 0..5 | EN 661, 159, 96, 24, 12, 389; RU 660, 158, 95, 24, 12, 388 | R2-ASSET-375 |
+| Rows naming a check ID no node has | 1 | R2-ASSET-375 |
+| Triggers whose first left check ID is 0 | campaign 0; EN loose 4, RU loose 11 | R2-ASSET-375 |
+
+### Victory and defeat
+
+A map states its outcome with two actions. Action 4 adds one to the win counter; the result tick then sends victory
+when no failure is pending (Medium as the player sees it, R2-ENGINE-624). Action 5 stores p0 as the failure reason; a
+reason above 0 is sent as defeat and selects the mission's failure text (Medium, R2-ENGINE-629), and p0 = 0 stores no
+defeat. Check 18 also adds one to the failure reason. An actor byte +0x13c state sends reason 2 without a script node
+(Medium; its meaning is Unknown, R2-ENGINE-624), and a companion's death sends its own reason (R2-ENGINE-625).
+— R2-ENGINE-1729
+
+| Measure | Count | Claim |
+|---|---|---|
+| Action 4 nodes; named by a trigger | 46; 46 | R2-ASSET-375 |
+| Action 5 nodes; named by a trigger | 81; 75 | R2-ASSET-375 |
+| Check 18 nodes; named by a trigger | 1; 0 | R2-ASSET-375 |
+
+### Rectangular areas
+
+Among the check bodies read (Medium), the script has one rectangle test: check 2 with unit U in its type-4 slot and the scalars left, top, right, bottom in
+p0..p3 sets its register to 1 when U's x lies in p0..p2 and its y in p1..p3, bounds included, compared signed. x and y
+are bytes +0 and +1 of U's position object (Medium that they are tile coordinates). No other read check takes four
+corner scalars; action 25 passes three point pairs to an unread terrain helper, so whether it shapes a rectangle is
+Unknown. No script operand kind of the 46 campaign maps is a rectangle record (R2-ENGINE-1685), and the type-12 music
+areas are a centre and a radius read by music (R2-ASSET-084); other map record kinds were not read for rectangles
+(Medium). — R2-ENGINE-1730
+
+| Measure | Count | Claim |
+|---|---|---|
+| Nodes of checks 2, 3, 22 or 27 in the 46 campaign maps of either root and the loose `.alm` files (EN 13, RU 37); no other install archive counted | 0 | R2-ASSET-375 |
+| Operations with point operands (types 5 and 6) | checks 7, 14, 15, 16, 25; actions 21, 24, 25, 29 | R2-ASSET-375 |

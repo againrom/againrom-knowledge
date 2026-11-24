@@ -1673,8 +1673,8 @@ Input: the 46 `scenario.res` maps of each root (`evidence/map-census.tsv`, `evid
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-041 | Both preserved ROM2 campaign corpora have 46 exactly parsed type 7 payloads; new instants/checks retain separate full-word operation and ID namespaces. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-042 | In the verified RU/EN compilers, action word 65538 appends a packed low-byte parameter pair to a compiler collection instead of creating an executable action. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
-| R2-ENGINE-043 | In the verified RU/EN compilers, check word 65538 initializes its map result-register slot from parameter 0 instead of creating an executable check. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-042 | In the verified RU/EN compilers, action word 65538 appends a packed low-byte parameter pair to a compiler collection instead of creating an executable action. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
+| R2-ENGINE-043 | In the verified RU/EN compilers, check word 65538 initializes its map result-register slot from parameter 0 instead of creating an executable check. | High | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-044 | ROM2 literal checks pack ordinary scalar operands densely and resolve unit/group/player references separately; unresolved literal references can omit the compiled node. | High / Medium | ● active (amended) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-045 | Instants 35 and checks 23/24 access the scenario.dll DWORD bank; its exports have no explicit index guard, and NewGame initially clears a1024-DWORD span. | High | ● active | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
 | R2-ENGINE-046 | In both clients, instant 36 mutates752+n with exact mode-dependent stores and 253/254 notifications; objective rows read the resulting bits. | High | ✔ promoted (amended, partially retracted) | [EXP-2008](../experiments/EXP-2008-rom2-script/) |
@@ -1709,6 +1709,8 @@ The mission10 action ID 1 has parameter 11/type 5 and 41/type 6, yielding 0x290b
 
 **Unknown.** The downstream consumer and semantic role of the collection, and EN's node-loader permutation, remain unverified. A packed coordinate-looking pair does not identify a spawn or camera effect.
 
+**Amended.** R2-ENGINE-1727: the packed bytes are value slots 0 and 1 whatever their type codes.
+
 ### R2-ENGINE-043
 
 RU compiler L2.00116 and EN L2.00201 assign original check IDs to compiled result slots. The check 65538 branch copies runtime parameter 0 into Session+0xc784+4*slot, advances the slot, and creates no ordinary executable check. Selected sites RU L2.00441 and EN L2.00442 retain the full-word comparison and store. Ordinary compiled check IR has result slot at+0, operation at+4 and dense scalar base+8. Runtime+0x318 retains the stored node word 0x48 in compiled metadata; its full meaning is not supplied by that copy.
@@ -1718,6 +1720,8 @@ Mission10's special check IDs 2/4/6/7/8 initialize0/4/1/2/3; ID 21 initializes12
 **Confidence.** High for both actual compiler branches and the exactly parsed mission10 values. Raw stores distinguish constants from executing ordinary check 2 and from calling DLL GetVar/SetVar.
 
 **Unknown.** General result-register allocation bounds, the stored metadata word's full role and malformed/high operation words beyond the observed equality remain unverified.
+
+**Amended.** R2-ENGINE-1727: the slot is the running index shared with compiled checks, the value is slot 0 whatever its type code, and an operation word above 65538 compiles nothing and shares the next check's register; the high-word Unknown narrows to that rule.
 
 ### R2-ENGINE-044
 
@@ -33272,7 +33276,7 @@ the store's source and the readers of app +0x4dc.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1312 | Both ROM2 dispatch tables map every occurring ordinary action/check ID; listings reach RET for 27 action and 19 check handlers per root. | High | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
-| R2-ENGINE-1313 | ROM2 actions 3/8 write map result slots; 4/5 write Session DWORDs +0xbe0c/+0xbe14 (role Unknown); 10 writes one relation cell; 35/36 call the scenario bank; 39 clears a group override. | High / Medium | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
+| R2-ENGINE-1313 | ROM2 actions 3/8 write map result slots; 4/5 write Session DWORDs +0xbe0c/+0xbe14 (role Unknown); 10 writes one relation cell; 35/36 call the scenario bank; 39 clears a group override. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 | R2-ENGINE-1314 | Read ROM2 action wrappers expose operand widths, stores and delegated calls; complete effects of unread helpers remain open; the bodies of actions 33 and 34 are read in R2-ENGINE-1450. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 | R2-ENGINE-1315 | All 19 occurring ordinary ROM2 check bodies are read in EN/RU; exact field predicates and helper calls differ by operation, and check 18 writes no result. | High / Medium | ✔ promoted (branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
 | R2-ENGINE-1316 | Both ROM2 loaders copy 184-byte triggers; the compiler reads three check-ID pairs, four action IDs, three comparisons and the latch skip flag DWORD. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2174](../experiments/EXP-2174-rom2-script-arms/RESULTS.md) |
@@ -33350,6 +33354,9 @@ later outcomes. No local store proves a safe variable index domain.
 **Unknown.** Result-slot capacity, all writers, overflow consequences at
 the game level and malformed operand behavior.
 
+**Amended.** R2-ENGINE-1729: the roles of +0xbe0c and +0xbe14, Unknown in the actions 4 and 5 rows, are the win
+counter and the failure reason that the result tick reads.
+
 ### R2-ENGINE-1314
 
 Operand notation is R2-ENGINE-1313. U=IR+0x5c, G=+0x60, P=+0x64,
@@ -33395,6 +33402,8 @@ targets hidden by the mask are not evidence of callee equality.
 complete Group selector mapping, actions 33/34 and runtime execution counts.
 
 **Amended.** R2-ENGINE-1450 reads the bodies of actions 33 and 34; the rows for 33 and 34 and the Unknown for actions 33/34 narrow to their delegated final effects (Medium).
+R2-ENGINE-1726 reads action 6's nested table and its eleven group methods; the action 6 row's unread boundary and the
+Unknown "complete Group selector mapping" narrow to what the orders and group programme values do in play (Medium).
 
 ### R2-ENGINE-1315
 
@@ -33620,7 +33629,7 @@ index guard for a map slot, so this card's grade is unchanged.
 | R2-ENGINE-1450 | ROM2 actions 1,7,9,11,14,15,26,27,31,33,34 and checks 2,3,11,12,13,20,22,27 have bodies read in EN and RU, masked-equal in 19 pairs; action 9 and checks 11 and 13 return at once. | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1451 | Each ROM2 script tick adds 1 to register 999, runs the check loop, then the trigger runner, then empties the Session+0xbbec list; the turn routine runs it before the loop over the group list (L2.00505, R2-ENGINE-936). | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1452 | None of ROM2 checks 1, 5, 8 tests the state of an entry: check 1 returns DWORD+0xc of G, check 8 adds one per entry of every group list of P+0x28, check 20 counts a player's objects with signed word +0x42 above 0. | High / Medium | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
-| R2-ENGINE-1453 | The ROM2 check-ID map (EN L2.04242, RU L2.07787) is hash find-or-insert: an ID absent from the map gets a new node whose initial value is unread; the compiler is not read to say what it then stores. | High / Unknown | ● active (branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md) |
+| R2-ENGINE-1453 | The ROM2 check-ID map (EN L2.04242, RU L2.07787) is hash find-or-insert: an ID absent from the map gets a new node whose initial value is unread; the compiler is not read to say what it then stores. | High / Unknown | ● active (amended, branch candidate) | [EXP-2183](../experiments/EXP-2183-rom2-script-vocab/RESULTS.md) |
 
 ### R2-ENGINE-1450
 
@@ -33669,6 +33678,8 @@ zero health and one dead with a body would settle the count and compare the regi
 **Amended.** R2-ENGINE-1699 settles action 11's transfer (the item leaves U+0x7c and enters V+0x7c); R2-ENGINE-1700
 reads action 27's terrain move and Guard setter; R2-ENGINE-1701 identifies action 31's +0xac and +0xb4 fields on Outpost
 and their reader Outpost::slot5; R2-ENGINE-1696 identifies check 20's list as Buildings rather than units.
+R2-ENGINE-1730 reads L2.00488 and L2.00489 (bytes +0 and +1 of the object at U+0x10): x and y in row 2
+are High, in rows 3 and 27 Medium; row 22's cell lookup L2.07790 stays Medium.
 
 ### R2-ENGINE-1451
 
@@ -33745,6 +33756,9 @@ allocator's visible part does not store it, and the compiler's later use is not 
 
 **Unknown.** A run of the original loading a map copy whose trigger names a missing check ID, with a watch on register
 slot use, would settle the stored slot.
+
+**Amended.** R2-ENGINE-1728 reads the pool allocator L2.07801 and its fill: key and value of the new node are zeroed,
+so the missing ID names register 0 (Medium: the constructor L2.06010 that runs after the fill is unread).
 
 ## ROM2 computer units: area aim, hit orders, guard clocks, scores, group targets, flight and withdraw
 
@@ -34167,6 +34181,9 @@ script routing and for the save claim. Unknown for the chain and 0x8b arms' coun
 **Unknown.** The caster-independent claim covers the slot only; which program path a script cast takes to the client is open. A run
 of the original with a trigger that casts Lightning, then a save during the bolt and a load, compared with a hero cast, would settle
 script routing and the save.
+
+**Amended.** R2-ENGINE-1729 names +0xbe14 the failure reason that check 18 raises (Medium for the player effect);
+R2-ENGINE-1725 reads the lookup behind check 21's IR+0x70 (the +0x42 meaning stays Unknown).
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md): listing `en-cfg-L2.05868.txt` (EN slot window `L2.05868..L2.07873`, effect 28 branch, `push 0x1c` at `L2.07878` before the call at `L2.07879`).
 
@@ -35513,7 +35530,7 @@ creature (row 209) and a Troll.5 creature (row 93) with both groups open and com
 | R2-ENGINE-1682 | ROM2 mission entry loads mission<N>.txt into the one global string that TALK's dialogue lookup also searches (EN L2.01191, RU L2.01456); which file that string holds at TALK is not settled by the bodies read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
 | R2-ENGINE-1683 | ROM2 word-65538 action collection (compiler member +0x28): no consumer found in the compile function (EN L2.00201..L2.08170), the caller or the type-9 stage to EN L2.08171; of 87 vector-call sites per root 6 are named, 5 classified. | Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
 | R2-ENGINE-1684 | ROM2 check compiler marks 8000..9999 under types 2/3/4 like the action compiler and copies the metadata into the check IR; no check handler or dispatcher body read addresses it; the Session+0xd724 loads found are in the action executor. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/), [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
-| R2-ENGINE-1685 | In the 46 campaign maps no ROM2 script operand is a zone record by the bodies read: kinds are group, unit, player, item and one type-9 object (record unread, lookup EN L2.08172); trigger-list accessor calls: loader and compiler only. | Medium | ✔ promoted (branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
+| R2-ENGINE-1685 | In the 46 campaign maps no ROM2 script operand is a zone record by the bodies read: kinds are group, unit, player, item and one type-9 object (record unread, lookup EN L2.08172); trigger-list accessor calls: loader and compiler only. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) |
 
 ### R2-ENGINE-1680
 
@@ -35546,6 +35563,9 @@ string was read in an uncommitted pass).
 `evidence/derived/p3b/listings/*-q3-check-loop.txt`, see R2-ENGINE-1684).
 
 The compiled positions pN of the read action wrappers are the dense counters of this rule.
+
+**Amended.** R2-ENGINE-1725 reads the lookup EN L2.08172: find-or-insert keyed by DWORD +8 of the +0x24 list; a zero
+result is the failure arm.
 
 **Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/p1/*-q1-action-cont.txt`,
 `*-q1-scalar-arm.txt`, `tables.tsv`, `evidence/derived/p3b/listings/*-q3-check-loop.txt`; EXP-2174
@@ -35716,6 +35736,11 @@ target record are unread.
 
 **Unknown.** The record that a type-9 value selects (EN L2.08172); a run that settles it: break there on the first check 21 of
 a campaign map and compare the result with the map's type-9 and structure records.
+
+**Amended.** R2-ENGINE-1725 reads the lookup EN L2.08172: check 21's type-9 operand selects an object of the
+compiler's +0x24 list by type-4 id, so it is not a zone record; the record-unread clause and its Unknown narrow to
+the meaning of that object's +0x42. R2-ENGINE-1730 reads the x/y helpers EN L2.00488 and L2.00489: the x/y reading
+of check 2 is High, of checks 3 and 27 Medium; check 22's L2.07790 stays Medium.
 
 **Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/derived/census/vectors.tsv`,
 `evidence/derived/p3a/listings/*-q2-type9-stage.txt`, `evidence/derived/p3a/sites.tsv`.
@@ -36404,3 +36429,214 @@ Script action 31 (EN `L2.08361`, RU `L2.08362`; `EXP-2183` `{en,ru}-action-31.tx
 **Unknown.** The EN Outpost slot-14 body, and whether any other routine reads `Outpost+0xb4`. Settled in `allods2.exe` by loading a map copy with a type-10 Outpost group `g`, wiping the group, firing Action 31 with `(g, 1)` vs `(g, 500)`, and comparing the tick at which the group respawns.
 
 **Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-31.txt`, `ru-action-31.txt`, `en-area-object-ctor.txt`, `en-area-class-methods.txt`, `ru-area-class-methods.txt`, `EXP-2064/out/tables.tsv`, `EXP-2065/out/tables.tsv`, `en-building-vtable.txt`; `evidence/native/pass1/listings/en-building-slot38-L2.08365.txt`, `ru-building-slot38-L2.08363.txt`, `ru-outpost-slot38-L2.08364.txt`.
+## ROM2 script authoring: type-9 operand, action 6 arms, word 65538, node fields, outcome and areas (EXP-2201)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1725 | ROM2 script type-9 operand: the compiler keys each object of [[compiler+0x24]] by DWORD+8; check 21 sets R[slot] to that object's i16+0x42; a value absent from the map is read as 0 and fails the compile (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1726 | ROM2 script action 6: p0 selects one of eleven group methods (1, 2, 3, 4, 5, 10, 11, 14, 15, 17, 18); other p0 does nothing; each method body is read in EN and RU (orders 8, 0xa, 0x11 and programme values Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1727 | ROM2 EN check compile (RU Medium): each check ID maps to register k, a running index over compiled and word-65538 checks; word 65538 stores slot 0 in R[k] without reading a type; a word above 65538 takes no index. | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1728 | ROM2 EN type-7 loader tests no node or trigger value; the EN compiler copies node word +0x48 only to IR+0x74 (no reader in 45 EN listings; Medium); a failed check or a trigger's absent check ID reads register 0 (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1729 | ROM2 script outcome: action 4 adds one to the win counter Session+0xbe0c; action 5 stores p0 as the failure reason Session+0xbe14, sent as defeat when above 0 (Medium); check 18 also adds one to it. | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1730 | ROM2 check 2 tests a rectangle: R=1 when unit U's x lies in p0..p2 and y in p1..p3, inclusive and signed, x and y being bytes +0 and +1 of the object at U+0x10; among the check bodies read no other check takes four corner scalars (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+
+### R2-ENGINE-1725
+
+Compiler EN L2.00201 (RU L2.00116). EN addresses below; RU bodies are paired in the listings named.
+
+- Head EN L2.08396..L2.08397: a map M at a local is built by L2.08398(10) (body unread); the iterators EN L2.07791,
+  L2.07792 and L2.07793 walk [[compiler+0x24]] and each returned object b is stored as M[DWORD b+8] = b.
+  Structure +8 is the type-4 record id (file +0x12; R2-ENGINE-1288, R2-ENGINE-857), so M is keyed by the map's type-4 ids.
+- Type-9 arms: check arm EN L2.08179..L2.08180 and action arm at EN L2.08399 pass the address of value slot i to
+  L2.08172 on M and take the DWORD it returns. A zero result takes the node's failure arm (R2-ENGINE-1728); a nonzero
+  one is stored at IR+0x70 (R2-ENGINE-1680).
+- L2.08172 (RU L2.08400) is find-or-insert: find L2.08401 (RU L2.08402) hashes the key with L2.07797, takes the
+  remainder by DWORD+8 and walks the chain with the compare L2.07798; on a miss it allocates the bucket table with
+  L2.08403 when null, takes a node from L2.08404 (RU L2.08405), stores bucket and key, links the node and returns node+0xc.
+- L2.08404 calls L2.08406(node+8, 1) and L2.08407(node+0xc, 1); L2.08407 (RU L2.08408) fills 4·n bytes with 0 through
+  L2.00341 (RU L2.00342, a byte-fill loop) and then calls L2.06010(4, pointer) (unread).
+- Check 21 (EN L2.08409, RU L2.08410): R[IR+0] = sign-extended word at [IR+0x70]+0x42. A zero file word +0x0c of the
+  type-4 record clears Building +0x42 (R2-ENGINE-1288).
+
+**Amends.** R2-ENGINE-1685: reads the lookup EN L2.08172 that card left unread; check 21's type-9 operand selects an
+object of the compiler's +0x24 list by type-4 id, not a zone record.
+
+**Confidence.** High for the head, the lookup, find, node allocation and fill bodies in EN and RU (masked-equal pairs)
+and for check 21's body. Medium that [[compiler+0x24]] is the Session Buildings list: R2-ENGINE-857 names the list a
+structure list, and no body read here ties the compiler member to the Session. Medium that an absent value reads as 0:
+the zero fill is read, but the unread L2.06010 runs after it. Medium for what Building +0x42 means.
+
+**Unknown.** The meaning of Building +0x42, the body L2.06010 and the identity of compiler+0x24. A run of the original
+on a copy of a campaign map with a check 21 would settle them: break at EN L2.08409, compare R[slot] with +0x42 of the
+building whose type-4 id is the value, then change the value to an id the map lacks and watch the compile-failure message.
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md)
+`evidence/native/pass1/listings/*-q1-type9-lookup.txt`, `evidence/native/pass2/listings/*-q1-*.txt`,
+`evidence/native/pass3/listings/*-q1-ctor-L2.08407.txt`, `evidence/native/pass4/listings/*-q4-fill-L2.00341.txt`,
+`evidence/native/pass*/pairs.tsv`; compiler and check-21 listings of EXP-2174, EXP-2183 and EXP-2198.
+
+### R2-ENGINE-1726
+
+Action 6 (EN wrapper L2.08411, RU L2.06286) indexes an 18-cell table with p0-1 (EN L2.08412, RU L2.06288;
+`evidence/native/pass1/tables/*-q2-action6-switch.tsv`, consistent at the RU offset +0xa039). G is IR+0x60, U IR+0x5c,
+p1 and p2 the next dense scalars. Each arm calls one group method; the group record is [G+0x3c]. Order codes are those of
+the setters (R2-ENGINE-541, R2-ENGINE-1107).
+
+| p0 | Method (EN) | Effect read |
+|---:|---|---|
+| 1 | L2.04664(G, low8 p1) | each member gets the Guard setter L2.00441 (order 0xb); record +0x20 = 1; centre L2.08413 (R2-ENGINE-788); record +0x2d and +0x38 raised to p1 when p1 is nonzero, else to Session byte +0xa8b8; record +0x39 = 0 |
+| 2 | L2.08414(G, p1, p2) | member reset L2.04086; record +0x20 = 2; record word +0xa = low8 p1 + 256·low8 p2 |
+| 3 | L2.04087(G) | each member gets L2.02686 (order 0xc); record +0x20 = 3 |
+| 4 | L2.06320(G, p1, p2) | each member moves (setter L2.08415, order 1): when [[G+0x44]+0x34]+0x1f is 2, to (p1, p2) plus its offset from the group centre L2.08416, the offset kept at its command +0x24 and +0x26, gated by a distance test through [Session+0xa50] L2.03524 against Session byte +0xa724; else to (p1, p2); record +0x44 = the least member word +0x8c, starting at 250; record +0x20 = 4; record word +0xa = p1 + 256·p2 |
+| 5 | L2.08417(G, p1, p2) | as 4, with record +0x20 = 5 |
+| 10 | L2.05607(G, U) | per member: score L2.04954(member, U) other than 0xffffff gives L2.05582(member, U) (order 3), else stop L2.03312 |
+| 11 | L2.08418(G, U, p1) | each member gets L2.08419(member, U, p1) (order 8) |
+| 14 | L2.06322(G, p1, p2) | each member gets L2.08420(member, p1, p2) (order 0xa) |
+| 15 | L2.08421(G, U, p1) | each member gets L2.08422(member, U, p1) (order 0x11) |
+| 17 | L2.08423(G) | record +0x20 = 0x11; record word +0xa = word +2 of the first member's object +0x10 (L2.03062); record +0x15 = 0 |
+| 18 | L2.05047(G, p1) | as 1, with record +0x20 = 0x12 and default 20 |
+| 6..9, 12, 13, 16, 0, above 18 | none | no call |
+
+Setter bodies read in EN (`evidence/native/pass2/listings/en-q2-set*.txt`); [Session+0xa50] is L:
+
+- L2.08415 (order 1): x is clamped to L bytes +0x58eb8..+0x58eba and y to +0x58eb9..+0x58ebb; order +0x50 = 1, command
+  word +0xa = x + 256·y, [member+0x1c0]+0x90 = 0, command byte +8 = 1.
+- L2.08419 (order 8) and L2.08422 (order 0x11): a member equal to U is stopped (L2.03312); else order +0x50 = 8 or
+  0x11, command +0x10 = U, command byte +8 = 0, command byte +0x70 = low8 p1, or 3 when it is 0.
+- L2.08420 (order 0xa): order +0x50 = 0xa; command word +0 = the member's cell (L2.03062); the path object at command
+  +0xb4 receives L2.06464, L2.06549(cell) and L2.08424(low8 p1 + 256·low8 p2); command word +2 from L2.08425; command +4
+  and byte +8 = 0; then L2.08426 on L+0x58ec0 with the member and its cell.
+
+**Amends.** R2-ENGINE-1314: the action 6 row's nested table and eleven method bodies are read; the arm-to-method
+correspondence is High.
+
+**Confidence.** High for the table and the eleven method bodies in EN and RU (masked-equal pairs) and for the four
+EN setter bodies; the RU setters rest on R2-ENGINE-1107's pairing. Medium for what each order and group programme
+value (record +0x20) does in play: the programme handlers are read in R2-ENGINE-882 at its grades, the helpers L2.08416,
+L2.03524, L2.04954, L2.08426, L2.06464, L2.08424, L2.06549 and L2.08425 are unread. Medium that L bytes +0x58eb8..+0x58ebb
+are the map's movable bounds.
+
+**Unknown.** What orders 8, 0xa and 0x11 do in play and what the clamp bytes hold. A run of the original on a copy
+of a campaign map with one action 6 per selector 11, 14 and 15 on a known group, saving after a few ticks, would settle
+the order codes and command fields from the save.
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md)
+`evidence/native/pass1/listings/*-q2-m-*.txt`, `evidence/native/pass1/tables/*-q2-action6-switch.tsv`,
+`evidence/native/pass1/pairs.tsv`, `evidence/native/pass2/listings/en-q2-set*.txt`; wrapper listing `en-actions-b.txt` of EXP-2174.
+
+### R2-ENGINE-1727
+
+Check loop of the compiler (EN L2.02935..L2.08427; listings of EXP-2198): a counter k starts at 0. For each check node
+in list order the check-ID map entry of node ID (node +0x44) is set to k, and IR+0 = k, IR+4 = operation word,
+IR+0x74 = node +0x318 (file word +0x48), IR+0x78 = 0.
+
+- Operation word 0x10002 (65538): R[k] = node value slot 0 (Session+0xc784+4k through [L2.01066]); k advances. No
+  type code of the node is read.
+- Operation word above 0x10002: nothing compiles and k does not advance, so the ID's map entry equals the next
+  check's register.
+- Other operations: the check compiles and is appended through L2.08428 to [Session+0xeaac]; k advances. A check that
+  fails to compile takes no index and its ID's map entry becomes 0.
+
+Action side (EN L2.08429..L2.08177): the compiler counts action nodes with operation word below 0x10002 and passes the
+count and -1 to L2.08430 on [Session+0xeab0]. An action of word 65538 appends low8 slot 0 + 256·low8 slot 1 to compiler
++0x28 (R2-ENGINE-042); no type code is read. The trigger compiler resolves check IDs through the check-ID map and
+action IDs through a second map.
+
+**Amends.** R2-ENGINE-043: the slot is the running index k shared with compiled checks, the value is slot 0 whatever its
+type code, and an operation word above 65538 shares the next check's register.
+
+**Amends.** R2-ENGINE-042: the packed bytes are value slots 0 and 1 whatever their type codes.
+
+**Confidence.** High for the loop, the 65538 store and the action count and packing in the committed EN compiler
+listings. The RU compiler is not cited here: Medium for RU. A failed check taking no index is read at the EN check tail only.
+The consumer of the action collection stays as R2-ENGINE-1683. The seeds are re-stored when LOAD compiles again
+(R2-ENGINE-760).
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) compiler listings
+`en-q3-check-loop.txt` and `en-q1-action-cont.txt` of EXP-2198 and `en-compiler-head.txt` of EXP-2174.
+
+### R2-ENGINE-1728
+
+- The type-7 loader (EN L2.07388..L2.08431) reads each count, per node seven reads (0x40, DWORDs, 0x28, 0x28, 0x280)
+  and per trigger one 0xb8-byte read; it tests nothing but the allocation result. Name and ten text fields are
+  R2-ENGINE-1681; the type-0 +0x28 count is overwritten by the type-7 case (R2-ENGINE-1324).
+- The compiler reads of a node: operation word, ID (+0x44), ten type codes, ten values, the node pointer for the failure
+  messages and, for checks only, node
+  +0x318 (file word +0x48), copied to IR+0x74. No read of +0x74 on an IR is found in the 20 EN listings of EXP-2174
+  and the 25 EN listings of EXP-2183 (dispatchers, handlers and compiler parts); the five +0x74 reads there are of
+  the global [L2.00805]. The action compiler does not read node +0x318.
+- Trigger reads are R2-ENGINE-1316.
+- A check whose compile fails (for instance a type-9 value absent from the map, Medium, R2-ENGINE-1725) gets message L2.08186
+  through L2.05909 with the node pointer, sink L2.06997, check-ID map entry 0 and no index (EN check tail from L2.08432).
+- A trigger check ID absent from the check-ID map gets a new map node (R2-ENGINE-1453); its pool allocator L2.07801
+  (RU L2.07802) zeroes key and value through L2.08406 (RU L2.08433), which fills through L2.00341 (RU L2.00342), then
+  calls the unread L2.06010. The value 0 names register 0.
+
+**Amends.** R2-ENGINE-1453: the value stored after a miss is read as 0 (register 0), Medium on the unread L2.06010.
+
+**Confidence.** High for the EN loader (EN L2.07388..L2.08431), the EN compiler reads and the failure arm in the
+committed listings, and for the allocator and fill bodies in EN and RU (masked-equal pairs). The RU loader is not cited
+here: Medium for RU. Medium for the absent reader of IR+0x74 and for the statement that the text fields reach only failure
+messages: the search covers the 45 EN listings named, not every function, and R2-ENGINE-1681 holds unclassified +0x98
+sites at Medium. Medium that the absent ID reads register 0: L2.06010 is unread.
+
+**Unknown.** The role of word +0x48. A run of the original on a copy of a campaign map in which one check with word
++0x48 = 1 is set to 0, comparing trigger firing and registers in a save, would settle it.
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md)
+`evidence/native/pass2/listings/*-q4-pool-L2.07801.txt`, `evidence/native/pass3/listings/*-q4-ctor-L2.08406.txt`,
+`evidence/native/pass4/listings/*-q4-fill-L2.00341.txt`; type-7 loader `en-type7-load.txt` of EXP-2174.
+
+### R2-ENGINE-1729
+
+Composition of read stores and the result tick:
+
+- Action 4 increments Session+0xbe0c; action 5 stores p0 at Session+0xbe14 (R2-ENGINE-1313). Check 18 adds 1 to
+  +0xbe14 (R2-ENGINE-623).
+- The result tick (R2-ENGINE-624): owner +0x38 null or its actor's byte +0x13c set sends reason 2; else +0xbe14 above
+  0 is sent as the failure reason while owner +0x40 is below 2; else a nonzero +0xbe0c sends 0xb5, which posts victory 0x430 (R2-ENGINE-060, R2-ENGINE-303), and
+  victory runs the mission end (R2-ENGINE-1642). A death of a class 0x21..0x3f companion sends its own reason
+  (R2-ENGINE-625).
+- The failure screen shows the mission text for the reason (R2-ENGINE-629); installed action 5 values are R2-ENGINE-630.
+- So an author states victory with an action 4 and defeat with an action 5 whose p0 is above 0; p0 = 0 stores no defeat.
+
+**Amends.** R2-ENGINE-1313: the roles of +0xbe0c and +0xbe14, left Unknown there, are the win counter and the failure
+reason.
+
+**Confidence.** High for the stores in actions 4 and 5 and check 18 (index grade High / Medium). Medium for victory and defeat as the player sees
+them and for the tick's order relative to other end paths (R2-ENGINE-624, R2-ENGINE-060: the EN result tick is not
+independently followed); no original ran. Unknown for actor byte +0x13c, owner +0x42 and the tick object's +0x74
+(R2-ENGINE-624). The hero route to reason 2 is Medium; a companion's death sends its own reason (R2-ENGINE-625).
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) `evidence/derived/census/q5-outcome-nodes.tsv`.
+
+### R2-ENGINE-1730
+
+Check 2 (EN L2.08434, RU L2.08435; listings of EXP-2183) reads x through L2.00488 and y through L2.00489 on the
+object at U+0x10. L2.00488 (RU L2.00486) returns byte +0 and L2.00489 (RU L2.00487) byte +1 of that object; L2.03062
+(RU L2.01521) returns word +2 of the same object. R = 1 when p0 ≤ x ≤ p2 and p1 ≤ y ≤ p3, compared signed, else 0. The
+operand layout is p0 = left, p1 = top, p2 = right, p3 = bottom and one type-4 unit slot.
+
+Among the other read operations: check 3 compares a terrain call on U's x, y and (p0, p1) with p2; check 27 tests
+U's cell against (p1, p2); check 22 takes cell p0 + 256·p1 (R2-ENGINE-1450). No other read check takes four corner
+scalars. Action 25 passes three point pairs to the unread terrain helper L2.03589 (R2-ENGINE-1314); whether that
+descriptor is a rectangle is Unknown. Type-12 music areas are a centre and a radius, read by music (R2-ASSET-084,
+R2-ENGINE-336).
+
+**Amends.** R2-ENGINE-1450 and R2-ENGINE-1685: the x/y getters are read; x and y in check 2 are High; in checks 3 and
+27 Medium. Check 22's cell lookup L2.07790 stays Medium.
+
+No script operand kind of the 46 campaign maps is a rectangle record (R2-ENGINE-1685), and the type-12 music areas are a
+centre and a radius (R2-ASSET-084); other map record kinds were not read for rectangles (Medium).
+
+**Confidence.** High for check 2's comparisons and for the getters in EN and RU (masked-equal pairs). Medium that the
+bytes are the cell in tiles: the position object's writer is not read here. Medium for checks 3 and 22, whose terrain
+helpers are unread. Medium for the negative: it covers the check bodies read in R2-ENGINE-1450 and EXP-2174's check
+listings and the coordinate operations of the installed maps, not a census of every check number's body.
+
+**Unknown.** Whether action 25 shapes a rectangle of terrain. A run of the original on a copy of a campaign map with
+one action 25 of distinct corners, saving before and after, would settle the changed cells.
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md)
+`evidence/native/pass1/listings/*-q6-*.txt`, `evidence/native/pass2/listings/*-q6-loc-L2.03062.txt`,
+`evidence/derived/census/q6-coordinate-ops.tsv`; check listings of EXP-2183.

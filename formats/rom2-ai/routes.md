@@ -430,6 +430,10 @@ Across a mission LOAD the actor-step fields +0x58, +0x6c and +0x134..+0x136 are 
 
 The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and the bodies of actions 33 and 34 are read (R2-ENGINE-1450 amended), with action 11 moving items from U+0x7c to V+0x7c (R2-ENGINE-1699), action 27 running cell move and Guard setter (R2-ENGINE-1700), and action 31 setting Outpost respawn countdown +0xb4 (R2-ENGINE-1701). Unconscious units stay in their group list while dead units (+0x54 = 0x10, body or no body) are detached by the kill walker; checks 1, 5 and 8 count every unit still in its group list (living and unconscious units, not dead units; EN High, RU Medium for checks 1 and 8), check 20 counts Buildings rather than units (R2-ENGINE-1452 amended, R2-ENGINE-1696), and the check loop skips a check whose copied IR+0x58 byte is nonzero (High; that the 8000..9999 mark reaches that byte is Medium; R2-ENGINE-1451 amended, R2-ENGINE-1697). They change no rule above (R2-ENGINE-1314).
 
+Script action 6 gives a group one of eleven method calls by its selector p0 (1, 2, 3, 4, 5, 10, 11, 14, 15, 17, 18); the method bodies are read in EN and RU, the other selectors do nothing, and the arms set member orders 0xb, 0xc, 1, 3, 8, 0xa and 0x11 and the group programme value; what these orders and programme values do in play is Medium (R2-ENGINE-1726, amending R2-ENGINE-1314).
+
+Script check 2 reads x and y as bytes +0 and +1 of the object at unit +0x10 and is an inclusive rectangle test on them (High); checks 3 and 27 read the same getters (Medium) (R2-ENGINE-1730, amending R2-ENGINE-1450).
+
 ## Step vector, step time and parameters from map.reg
 
 The step vector is the block at unit `+0x1c0`. EN `L2.06918` / RU `L2.07803` stores into it (R2-ENGINE-1470): speed

@@ -4741,3 +4741,47 @@ not say what the fields mean, and the program's use of them is R2-ENGINE-1681.
 
 **Evidence.** [EXP-2198](../experiments/EXP-2198-rom2-script-operands-texts/) `evidence/census_q4.py`,
 `evidence/derived/census/text-fields.tsv`.
+## ROM2 script authoring census: type-9 values, action 6 selectors, word 65538, registers, node words and triggers (EXP-2201)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-375 | In the 46 ROM2 campaign maps per root every trigger row with both sides set has a word-65538 check on its right (EN 1341, RU 1337); registers named by actions 3, 8 and check 19 are 70..83, above every check slot, in all but one node. | High | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+
+### R2-ASSET-375
+
+Population: the 46 campaign maps of each root's `scenario.res` and the loose `.alm` files (EN 13, RU 37), with
+hashes in `inputs.tsv`. Counts are per root for the campaign maps; EN and RU campaign counts are equal unless both are
+given. Each row cites its table under `evidence/derived/census/`.
+
+| Measure | Count | Table |
+|---|---|---|
+| Check 21 type-9 values; all are type-4 ids of the same map, kinds 0x1c and 0x1d | 24 (12 + 12); RU loose 1 (0x1d) | `q1-type9-slots.tsv` |
+| Action nodes with a type-9 slot | 0 | `q1-type9-slots.tsv` |
+| Action 6 nodes by selector p0: 1, 3, 4, 5, 10, 11, 14, 15 | 1, 8, 20, 32, 1, 7, 19, 14 | `q2-action6.tsv` |
+| Check nodes of word 65538; slot 0 of type 1 / type 7 | 164; 160 / 4 (value 0) | `q3-check65538.tsv` |
+| Word-65538 checks named by a trigger; values | 153; 0..1229 | `q3-check65538.tsv` |
+| Trigger rows with both sides set and a word-65538 right side: left other / left 65538 | EN 1278 / 63, RU 1275 / 62; RU loose 6 / 0 | `q3-trigger-sides.tsv` |
+| Registers named by actions 3, 8 and check 19, p0 above the map's check slots: action 3, action 8, check 19 | 48, 197, 208 | `q3-register-operands.tsv` |
+| Check 19 whose p0 is an ordinary check slot | 1 | `q3-register-operands.tsv` |
+| Largest check-slot count of a map; register p0 range | 54; 0..83 | `q3-register-indices.tsv` |
+| Action nodes of word 65538, slot types 5 and 6 | 46; EN loose 14, RU loose 40 | `q3-register-operands.tsv` |
+| Node word +0x48: actions 0; checks 0 / 1 | 1334; 824 / 162 | `q4-word48.tsv`, `q4-word48-by-operation.tsv` |
+| Check / action nodes; duplicate, zero or above-5000 IDs | 986 / 1334; 0 | `q4-nodes.tsv` |
+| Triggers; flag 0 / 1 | EN 715, RU 714; EN 130 / 585, RU 129 / 585 | `q4-triggers.tsv` |
+| Rows by comparison code 0..5 | EN 661, 159, 96, 24, 12, 389; RU 660, 158, 95, 24, 12, 388 | `q4-triggers.tsv` |
+| Rows naming a check ID no node has | 1 | `q4-triggers.tsv` |
+| Triggers whose first left check ID is 0 | campaign 0; EN loose 4, RU loose 11 | `q4-triggers.tsv` |
+| Action 4 nodes, named by a trigger | 46, 46 | `q5-outcome-nodes.tsv` |
+| Action 5 nodes, named by a trigger | 81, 75 | `q5-outcome-nodes.tsv` |
+| Check 18 nodes, named by a trigger | 1, 0 | `q5-outcome-nodes.tsv` |
+| Nodes of checks 2, 3, 22 or 27 in the 46 campaign maps of either root and the loose `.alm` files (EN 13, RU 37); no other install archive counted | 0 | `q6-coordinate-ops.tsv` |
+
+Loose maps also use action 6 selectors 2, 3, 5, 14 and 17. Coordinate operands in the installed maps are type 5 and
+type 6 pairs: checks 7, 14, 15, 16, 25 and actions 21, 24, 25, 29 (`q6-coordinate-ops.tsv`).
+
+**Confidence.** High for the counts: a full parse of the population named; no other install archive is counted.
+The check-register numbers of a map follow the compile rule of R2-ENGINE-1727 on the assumption that every ordinary
+check compiles; reference resolution is not modelled.
+
+**Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) `evidence/census.py`,
+`evidence/derived/census/*.tsv`.
