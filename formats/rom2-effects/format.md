@@ -105,6 +105,8 @@ Darkness on a Unit change no sight. Neither arm tests the owner (R2-ENGINE-1238)
 The 17 read sites of +0xa5 are the ray scans (one with no found caller; whether it runs is
 Unknown) and the planner, movement and group radii; five routines overwrite the word, and +0xe4
 has no unit reader outside the Effect arms in the direct-displacement census (R2-ENGINE-1239).
+The same sight decides Prismatic Spray's extra victims. They are hostiles (bodies only when no living hostile is in sight) that the caster's `+0x70` members see, ranked by edge distance from the caster and then by turn, and admitted up to the
+range byte (R2-ENGINE-1766, High / Medium).
 Bit 0x40000 sends the word to the unit's own player; for Human and Humanoid units with word +0xe in
 0x21..0x3f another player may receive it (Unknown), with a further cut for Units below key 0x6000
 (R2-ENGINE-1240). Expiry runs the end slot and resends; a
@@ -167,7 +169,7 @@ census of other callers of the timer slot).
 The per-class amount stays as in R2-ENGINE-1242.
 
 The Poison Cloud Effect (ID 6): the RU arm stores no +0x42 in the 256 instructions read, and the suffix stores none
-(R2-ENGINE-1262); the value 128 from the Effects string through the constructor is Medium (R2-ENGINE-1575; EN arm
+(R2-ENGINE-1262; within one step the executor runs before that arm, R2-ENGINE-1763); the value 128 from the Effects string through the constructor is Medium (R2-ENGINE-1575; EN arm
 unread). A cast onto a unit that carries the Effect keeps the record, leaves +0x42 at the maximum of the old value and
 128, never adds, keeps the less negative magnitude and does not call start (R2-ENGINE-1576, Medium; RU). From the Shield
 arm of the support choice to the end of the recovery draw, a Shield cast at the caster draws once on the read path in
@@ -205,7 +207,8 @@ A cell whose byte x or y is below 8 or above the map's size field minus 9 is ski
 call, no damage; the other cells are unchanged, and no cell is clamped or shifted (R2-ENGINE-1546, High for the RU
 body, Medium that the two fields are width and height and for EN, whose cone also differs at pulse 2, R2-ENGINE-797).
 The origin (x, y) is the stage's origin byte pair; whether it is the target cell or the caster's cell plus an offset of
-R2-ENGINE-810 is not read here (Unknown), so the table does not give which map cells are hit.
+R2-ENGINE-810 is not read here (Unknown), so the table does not give which map cells are hit. The direction tables of
+R2-ENGINE-810 are read again in the terrain constructor, where the unit step vector uses them (R2-ENGINE-1470); a unit step changes its cell on advance ceil(128/v) or floor(128/-v)+1 of the step, by its y vector component (x when it has none) (R2-ENGINE-1760).
 
 ## Stone Curse reach by object class
 

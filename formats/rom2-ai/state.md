@@ -53,7 +53,7 @@ R2-ENGINE-541, R2-ENGINE-554, R2-ENGINE-823.
 
 | Input/state field | Read/write and SAV coordinate | Claims and clause grades | Unknowns |
 |---|---|---|---|
-| unit bytes +0x134/+0x135, +0x6c, +0x136 | Wind-up and recovery bases, the substate count, completion; defaults 8/4, table, weapon equip, unequip 8/4. | R2-ENGINE-1260 High stores, Medium completeness; R2-ENGINE-1261 High count; R2-ENGINE-1262 High step table; R2-ENGINE-1263 Medium column bindings | Pointer and bulk writers; the effect step |
+| unit bytes +0x134/+0x135, +0x6c, +0x136 | Wind-up and recovery bases, the substate count, completion; defaults 8/4, table, weapon equip, unequip 8/4. A strike's count is byte +0x134 plus a distance term; a held attack in range hits every c+r+2 steps (Medium; no state-13 conversion). | R2-ENGINE-1260 High stores, Medium completeness; R2-ENGINE-1261 High count; R2-ENGINE-1262 High step table; R2-ENGINE-1263 Medium column bindings; R2-ENGINE-1763 High bodies, Medium time | Pointer and bulk writers; the effect step |
 | unit dwords +0x50/+0x54/+0x58 | Order, actor state, action substate; separately transferred scalars. | R2-ENGINE-541 High order; R2-ENGINE-543 High substate flow; R2-ENGINE-823 Medium EN LOAD; RU coordinates by equal layout | Later overwrites and complete restoration |
 | unit words +0x94/+0x96 | Health/max; read by Guard B and post-step. This page establishes no physical SAV offset for them. | R2-ENGINE-844 High comparisons; R2-ENGINE-506 High predicates | Complete save coordinate here |
 | command word +0; word +2; +4 | Post; point word +2 and flag +4 as read by the order-0xa tail (order name not established). Same positions within raw SAV command block. | R2-ENGINE-844 High post; R2-ENGINE-872 High order-0xa tail; R2-ENGINE-823 Medium EN transfer; RU coordinates by equal layout | All post/point/flag producers |
@@ -355,11 +355,23 @@ it, and whether a loaded unit resumes the route is Unknown (R2-ENGINE-1203).
 | Unit +0xa2, +0xa3 | u8 | Remainders in hundredths | R2-ENGINE-1206 |
 | Unit +0x138 | u32 | Stamp; K = 3 when Session +4 minus it exceeds 80; a cast through the unit sender sets it to Session +4 | R2-ENGINE-1206, R2-ENGINE-1565 |
 
+Prismatic Spray takes its extra victims from Group sight of the caster's
+`+0x70` members. The candidates are hostiles (bodies only when no living hostile is in sight; Medium), ranked by
+edge distance from the caster, then by the turn from the caster's facing, and
+admitted up to the spell's range byte. The target comes first and the list is
+cut to the cap (R2-ENGINE-1766, High / Medium). Drain Life stores the caster
+as the victim's killer and stores its spell id. A unit at health 0 or below
+falls and dies at -10 or below, and the kill route may credit the stored killer
+(R2-ENGINE-1767, High / Medium; the credit is Medium).
+
 These are readings of both executables; no run of the original measured a
 restoration. The refill runs once per world pass, every 16 session ticks;
 mana is restored on every pass and health on one pass in four
 (R2-ENGINE-1204, R2-ENGINE-1205). Health 0 or below restores nothing
-(R2-ENGINE-1207). A census of word stores to health and mana finds no other
+(R2-ENGINE-1207). Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass);
+a corpse of class 0x21..0x24 stops at -61 with kind 4 and stays, and any
+other corpse reaches kind 5 below -600 and is released (R2-ENGINE-1765,
+High / Medium). A census of word stores to health and mana finds no other
 restorer of a living unit over time among the stores it classified; nine RU
 word stores are unclassified and are not excluded. A per-player pass
 revives a hero at health -40 or below to full health and mana
@@ -463,6 +475,8 @@ The roles of the Session DWORDs that script actions 4 and 5 write are the win co
 Script check 2 reads x and y as bytes +0 and +1 of the object at unit +0x10 and is an inclusive rectangle test on them (High); checks 3 and 27 read the same getters (Medium) (R2-ENGINE-1730, amending R2-ENGINE-1450).
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472; tile classifier `L2.06958`/`L2.07473` indexes `+0x54146..+0x54150` and writes no height, R2-ENGINE-1665; client/server type-3 readers in R2-ENGINE-1667); the full tables are on the route page.
+
+A step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive and floor(128/-v)+1 when negative, from fine bytes 0x80 and a heading that already matches, advance 1 being the step start tick in that case (R2-ENGINE-1760, Medium for the premises). The static route is rebuilt on a new goal or after 17 repaths, the local path when empty or after 33 walk calls, unless the wait decision of R2-ENGINE-1762 returns 1 or 2, and after a re-plan (R2-ENGINE-1761), with the shipped `map.reg` values of R2-ASSET-383. At a held next cell a one-cell unit turns and waits for a walking occupant or a standing one about to leave, else it re-plans (R2-ENGINE-1762).
 
 A map building caster lists the units within its record radius of its cell, Chebyshev (Medium), 1 to 9 cells, with no range compare against the spell (R2-ENGINE-1560). It starts a cast once per 16 session ticks through a built Unit that casts from state 13 with wind-up 1 and recovery 1 (R2-ENGINE-1561 amended, R2-ENGINE-1562); the built Unit casts once and is deleted when its recovery ends (Medium; R2-ENGINE-1740). It stops when the resolver is called with a blow or Blizzard value not below the building's health; no other route is shown to stop it (R2-ENGINE-1563). A Delivery 2 cast adds max(1, floor(distance / Effect Speed)) flight steps to the wind-up before the effect object enters the effect list (Medium; the effect object's own step is Unknown) (R2-ENGINE-1567, R2-ENGINE-1568, R2-ENGINE-1569); the spell rows and speeds are in R2-ASSET-333.
 

@@ -316,9 +316,21 @@ formulas High, sender meanings and writer completeness Medium).
 
 An item's tag 11 value M adds M percent to the mana rate of a mage: each pass restores max * (M + 100) * K / D hundredths, D being the Units row's MP regeneration when the reader stores it (114 of 180 EN rows hold 0 and the effect of a 0 on D is Unknown), so an item of M 50 turns 2 % of the maximum per pass (D 50, K 1) into 3 %; the interval is the world pass of 16 session ticks (R2-ENGINE-1566).
 
+Prismatic Spray takes its extra victims from Group sight of the caster's
+`+0x70` members. The candidates are hostiles (bodies only when no living hostile is in sight; Medium), ranked by
+edge distance from the caster, then by the turn from the caster's facing, and
+admitted up to the spell's range byte. The target comes first and the list is
+cut to the cap (R2-ENGINE-1766, High / Medium). Drain Life stores the caster
+as the victim's killer and stores its spell id. A unit at health 0 or below
+falls and dies at -10 or below, and the kill route may credit the stored killer
+(R2-ENGINE-1767, High / Medium; the credit is Medium).
+
 A unit with +0x54 = 0x10 or with health 0 or below restores nothing; below 0
 the refill takes 1 health on one pass in four, and corpse ageing lowers
-health separately, so the total loss per pass is not this figure alone. The
+health separately, so the total loss per pass is not this figure alone.
+Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass); a corpse of class
+0x21..0x24 stops at -61 with kind 4 and stays, and any other corpse reaches
+kind 5 below -600 and is released (R2-ENGINE-1765, High / Medium). The
 body tests no owner, side, player, order, combat or cast. Which classes the
 list holds is Medium (R2-ENGINE-1207). A census of word stores to health and
 mana finds no other restorer of a living unit over time among the stores it
@@ -426,6 +438,10 @@ stores, Medium completeness), R2-ENGINE-1261 (High expression, Medium names),
 R2-ENGINE-1262 (High step table, effect step Unknown), R2-ENGINE-1263 (High
 terms, Medium column bindings).
 
+The executor runs before the actor substate arm in each step. A strike started at step s counts down from s + 1 and
+hits at s + c when it does not convert to state 13 (Medium), c being byte +0x134 plus a distance term; a held attack in range hits every c + r + 2 steps (Medium)
+(R2-ENGINE-1763: High bodies, Medium time and period).
+
 Across a mission LOAD the actor-step fields +0x58, +0x6c and +0x134..+0x136 are read back into place, so a caster saved in wind-up or recovery resumes its own count (R2-ENGINE-1401: High for the RU body, Medium for EN; that the count runs to its end is Medium, postload callees unread) and begins its next order no earlier than R2-ENGINE-1262's s + c + r (Medium). A loaded timed area effect with a nonzero stored +0x4c continues from the stored +0x50 (R2-ENGINE-1400: High for a stored +0x4c nonzero, Unknown for +0x4c 0), and the read effect serializers store no caster field (R2-ENGINE-1398, Medium for the values after construction; what the effect +0x14 owner key names is Unknown), so a loaded effect reaches its target with no stored caster link (R2-ENGINE-1399, Medium); the HP amount without a caster is Unknown.
 
 The ordinary script action wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and the bodies of actions 33 and 34 are read (R2-ENGINE-1450 amended), with action 11 moving items from U+0x7c to V+0x7c (R2-ENGINE-1699), action 27 running cell move and Guard setter (R2-ENGINE-1700), and action 31 setting Outpost respawn countdown +0xb4 (R2-ENGINE-1701). Unconscious units stay in their group list while dead units (+0x54 = 0x10, body or no body) are detached by the kill walker; checks 1, 5 and 8 count every unit still in its group list (living and unconscious units, not dead units; EN High, RU Medium for checks 1 and 8), check 20 counts Buildings rather than units (R2-ENGINE-1452 amended, R2-ENGINE-1696), and the check loop skips a check whose copied IR+0x58 byte is nonzero (High; that the 8000..9999 mark reaches that byte is Medium; R2-ENGINE-1451 amended, R2-ENGINE-1697). They change no rule above (R2-ENGINE-1314).
@@ -444,7 +460,8 @@ signed x and y bytes per advance `+0xb0` and `+0xb1`, advance count word `+0xaa`
 call, the step start of R2-ENGINE-1213; a census outside that range and of the other stores into the block is not made
 (the arrival zeroes `+0xa8` and `+0xaa`), so that it is the only writer of the step values is Medium. Straight step:
 the vector is speed * (dx, dy). Diagonal step: each axis is the speed * 0.707 truncated toward zero (speed 1 gives
-(0, 0), speed 2 gives (1, 1), speed 63 gives (44, 44)); how a step with a zero vector ends is Unknown. The count is 256
+(0, 0), speed 2 gives (1, 1), speed 63 gives (44, 44)); a step with a zero vector makes 256 advances and changes no
+cell, and what follows its last advance is Unknown (R2-ENGINE-1760). The count is 256
 divided by the larger axis byte, rounded up; the absolute-value helper `L2.04968` is unread and taken as an absolute
 value, so the count is Medium (R2-ENGINE-1470).
 
@@ -467,14 +484,31 @@ No group term was found in the bodies read; the object that holds the base speed
 
 All 18 keys are read by EN `R2.0113` through the config object named `World\Data\map.reg` (R2-ENGINE-1472: High for
 the name string and the 18 calls, Medium that the object is built from the file). R2-ASSET-012 lists an entry `map.reg`
-of 1020 bytes in `world.res` and `world_srv.res`; that the name reaches that entry is Medium. The values in it and the
-readers of the cost bytes are Unknown. The search bounds are code constants: 8, 8, width - 9, height - 9.
+of 1020 bytes in `world.res` and `world_srv.res`; that the name reaches that entry is Medium. The search bounds are
+code constants: 8, 8, width - 9, height - 9. The entry in `world.res` holds, in both roots, the six Path Finding
+values and ScanShift equal to the defaults above, SpeedMultiplier 8, the costs above except Flowers 8 and Savanna 8,
+and ten Pass keys the constructor does not ask (R2-ASSET-383: High for the file, Medium for the value the engine
+uses). The readers of the cost bytes are Unknown.
 
-Questions answered at the grade of earlier claims: which cell a step occupies and when it changes
-(R2-ENGINE-1213, R2-ENGINE-673); the refused placement and the removal that does not compare (R2-ENGINE-1215);
-when a route is rebuilt (R2-ENGINE-872, R2-ENGINE-871, R2-ENGINE-874, R2-ENGINE-1108). Unknown: the passability
-test that refuses entry into the source cell during a step, and the tie rule between equal routes, whose bodies
-(the path helpers at RU `L2.05231..L2.05230`) are unread.
+## Cell change, route rebuild and a held next cell
+
+- **Cell change.** Each advance adds the vector bytes to the fine x and y words; the unit moves to the next cell on
+  the advance whose high byte changes: ceil(128/v) when the y vector component (x when it has none) is positive, floor(128/-v)+1 when negative, from fine bytes 0x80 and a heading that already matches (R2-ENGINE-1760, Medium for those premises). Advance 1 runs on the step start tick in that case. At speed 4 a straight step is 64 advances and
+  the cell changes at advance 32 east or south, 33 west or north; a diagonal step is 128 advances with the change at
+  64 or 65. The last advance stores the fine bytes 0x80. Entry `+4` moves at that advance; `+0x2c` holds both cells
+  from the step start until the centre of the next cell (R2-ENGINE-1213).
+- **Route rebuild.** The walk driver adds 1 to block `+0x78` on each call outside a step and the repath adds 1 to
+  block byte `+9`. The static route is rebuilt on a new goal or when `+9` is above StaticRefreshRate (16): after 17
+  repaths. The local path is rebuilt when it is empty, when `+0x78` is above DynamicRefreshRate (32), unless the wait decision returns 1 or 2 (no repath then), or after a re-plan at a held cell; the repath aims at the goal when the static route has at most 5 cells, at its newest cell
+  when that is more than 3 cells away, else at the fourth cell from the top (R2-ENGINE-1761).
+- **Held next cell.** When the local path is empty or stale and the newest static cell one step away fails the cell test (plane two AND block `+5` over the size square), a one-cell unit waits for a walking occupant, for a standing occupant with prepared order 1 or 4 unless the waiting unit's own target is that cell, and for an empty cell that a neighbour is
+  leaving; it re-plans for a dead occupant, a standing occupant that stays, and in every other case. A waiting unit
+  turns toward the cell and starts no step; how long it waits is Unknown (R2-ENGINE-1762, R2-ENGINE-549).
+
+Questions answered at the grade of earlier claims: the refused placement and the removal that does not compare
+(R2-ENGINE-1215); the empty-route results (R2-ENGINE-872, R2-ENGINE-871, R2-ENGINE-874, R2-ENGINE-1108). Unknown:
+the passability test that refuses entry into the source cell during a step, and the tie rule between equal routes,
+whose bodies (the path helpers at RU `L2.05231..L2.05230`) are unread.
 
 A map building caster lists the units within its record radius of its cell, Chebyshev (Medium), 1 to 9 cells, with no range compare against the spell (R2-ENGINE-1560), and the pick of R2-ENGINE-1008 draws one of them. It starts a cast once per 16 session ticks through a built Unit that casts from state 13 with wind-up 1 and recovery 1 (R2-ENGINE-1561 amended, R2-ENGINE-1562); the built Unit casts once and is deleted when its recovery ends (Medium; R2-ENGINE-1740). It stops when the resolver is called with a blow or Blizzard value not below the building's health; no other route is shown to stop it (R2-ENGINE-1563). The Delivery 2 spell rows and Effect Speeds are in R2-ASSET-333.
 

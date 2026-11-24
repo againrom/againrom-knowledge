@@ -176,7 +176,7 @@ Terms shared by these cards: the step vector is the block at unit `+0x1c0` (the 
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1470 | ROM2 EN L2.06918 / RU L2.07803 (masked-equal) stores speed +0xa8, heading +0xae, axis bytes +0xb0/+0xb1 (diagonal: 0.707 truncated) and advance count +0xaa into the unit +0x1c0 block; one call found, in R2-ENGINE-1213's step start. | High / Medium | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
+| R2-ENGINE-1470 | ROM2 EN L2.06918 / RU L2.07803 (masked-equal) stores speed +0xa8, heading +0xae, axis bytes +0xb0/+0xb1 (diagonal: 0.707 truncated) and advance count +0xaa into the unit +0x1c0 block; one call found, in R2-ENGINE-1213's step start. | High / Medium | ● active (amended) | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
 | R2-ENGINE-1471 | ROM2 step time in advances: ceil(256 / larger axis byte); speed 1..63 from base speed and, for kind 1 only, a height-difference term and a byte-wrapped mean of two cell terms; no group term in the bodies read. | High / Medium / Unknown | ● active | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
 | R2-ENGINE-1472 | ROM2 terrain constructor reads 18 parameters through a config object named World\Data\map.reg (sections Scanning, Terrain, Path Finding) through EN R2.0113; defaults and destinations are in code; the values in the file are unread. | High / Medium / Unknown | ● active (amended) | [EXP-2184](../experiments/EXP-2184-rom2-unit-step/) |
 
@@ -193,6 +193,8 @@ The advance count: n = the absolute value (by the helper `L2.04968`, RU `L2.0152
 **Unknown.** Who reads the block bytes outside the advance of R2-ENGINE-1213: a reference scan of the block displacements `+0xa8` to `+0xb1` at `unit+0x1c0`. The body of `L2.04968`. How a step with a zero vector (speed 1 on a diagonal, count 256) ends: whether the arrival test ends it is not shown.
 
 **Amends.** R2-ENGINE-1213's Unknown "the step vector written by `L2.06918`": read; its Medium for the stage table stands for the occupancy premise, the direction of the vector is read. R2-ENGINE-810: the table values are read again in the constructor at EN `L2.07807..L2.07808`; the Medium for later writers stands. R2-ENGINE-456 and R2-ENGINE-654: the offset tables are read.
+
+**Amended.** R2-ENGINE-1760 reads the advance that consumes the vector: a zero-vector step (speed 1, diagonal) makes its 256 advances without a cell change; the arrival test stays Unknown.
 
 ### R2-ENGINE-1471
 
@@ -218,7 +220,182 @@ Section, key, default, destination: Scanning, ScanShift, 7, dword +0x2a004; Terr
 
 **Amends.** none; consistent with R2-ENGINE-614 and R2-ENGINE-956, which read the same body of `R2.0113`.
 
-**Amended.** R2-ENGINE-1665 reads the tile classifier EN `L2.06958` / RU `L2.07473`, which indexes `this+0x54146 + class` (using `T[0] = 0xff` and `T[1..10]` at `+0x54147..+0x54150`) to blend cell terrain bytes. The shipped `map.reg` values and any other `+0x54147..+0x54150` readers remain Unknown.
+**Amended.** R2-ENGINE-1665 reads the tile classifier EN `L2.06958` / RU `L2.07473`, which indexes `this+0x54146 + class` (using `T[0] = 0xff` and `T[1..10]` at `+0x54147..+0x54150`) to blend cell terrain bytes. The shipped `map.reg` values and any other `+0x54147..+0x54150` readers remain Unknown. R2-ASSET-383 reads the values in the `world.res` entry `data/map.reg` of both roots; which value the engine uses stays Medium.
+
+## ROM2 step cell change, route rebuild and a held next cell
+
+Terms shared by these cards: the walk driver is RU `L2.02867` / EN `L2.05544`, the repath RU `L2.05184` / EN `L2.06220`, the step start RU `L2.06347` / EN `L2.06917`, the wait decision RU `L2.08467` / EN `L2.08468`; each pair is equal line by line after masking every literal of 0x10000 or more other than 0x10000, 0x20000 and 0x30000 (236, 126, 97 and 256 lines). The movement block is unit `+0x1c0`; the static route list is unit `+0x1c8`, the local path list unit `+0x1e4`. A walk call is a call of the walk driver that does not find the unit in the middle of a step. A unit is walking when RU `L2.00490` returns 0, the test the walk driver makes before it advances a step (the body is not read; the name follows that use); standing otherwise.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1760 | A ROM2 step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive, floor(128/-v)+1 when negative, from fine bytes 0x80 and a matching heading. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1761 | ROM2 walk: static route rebuilt on a new goal or after 17 local repaths; local path when empty or after 33 walk calls, unless the wait decision returns 1 or 2. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1762 | At a held next ROM2 cell (cell test returns 0) a one-cell unit waits for a walking occupant or a standing one about to leave, else re-plans. | High / Medium / Unknown | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+
+### R2-ENGINE-1760
+
+The advance EN `L2.06919` (RU `L2.02876`, masked-equal per R2-ENGINE-1213), read whole in the committed EN terrain listing: it adds 1 to block `+0xac`; the x and y words of the position object (cell in the high byte, fine part in the low byte) add the signed vector bytes `+0xb0` and `+0xb1`; in directions 1 and 5, when both low bytes are 0 after the add, x is decreased by 1. When a high byte differs from the cell at the start of the call, the advance calls the footprint pass `L2.03569`(unit, 0, 2), `L2.06913`(unit), the position setter `L2.06920`(x, y), `L2.00314`(unit) and `L2.03569`(unit, old cell, 0); otherwise it calls only `L2.06920`(x, y). When `+0xac` reaches `+0xaa`, `L2.06936` stores 0x80 in position bytes `+4` and `+5`. The step start sets `+0xac` = 0 and calls the advance once when the heading already matches (R2-ENGINE-1213), so advance 1 runs on the step start tick.
+
+Derived table (`derive_step.py`, speeds 1..63, directions 0..7, vectors of R2-ENGINE-1470, fine bytes 0x80 at the step start and a heading that already matches): 500 of 504 steps change the cell once and end on the direction's neighbour; the 4 diagonal steps at speed 1 (vector 0, 0) make 256 advances and never change the cell. Examples, advances and cell-change advance: speed 4 straight 64 and 32 (directions 2, 4) or 33 (directions 0, 6), diagonal (vector 2) 128 and 64 (directions 3, 5) or 65 (directions 1, 7); speed 8 straight 32 and 16 or 17, diagonal 52 and 26; speed 63 straight 5 and 3, diagonal 6 and 3. The two straight values differ only when v divides 128. In directions 1 and 5 the deciding component is y, because x is decreased by 1 when both fine bytes are 0 and that moves the x crossing; the x formula alone is wrong for speeds 2, 3, 4, 6, 7, 12, 23, 24, 46 there (18 of 504 rows). The formula holds from fine bytes 0x80 and a heading that already matches; advance 1 is on the step start tick only then.
+
+Occupancy during the step, with the stage table of R2-ENGINE-1213: entry `+4` stays on the origin cell A through advance k - 1 and is on the next cell B from advance k, k the cell-change advance; `+0x2c` holds A and B from the step start (also while the unit first turns) until the centre of B, then B only; block `+0x80` is B from the step start, A after advance k, B at the centre.
+
+**Confidence.** High for the advance arithmetic and its calls (EN body read whole; RU masked-equal per R2-ENGINE-1213) and for the single advance in the step start (both roots, masked-equal). Medium: that the fine bytes are 0x80 when a step starts (stored by the previous step's last advance; the fine bytes after a ground place or a LOAD are not read); that each later actor step makes one advance (R2-ENGINE-1213; the mid-step call RU `L2.02848` is not read here); the occupancy rows, a composition at the grade of R2-ENGINE-1213. Ticks: one actor step per session tick is a measurement under a debugger (R2-ENGINE-1073).
+
+**Unknown.** What follows the 256th advance of a speed-1 diagonal step (the arrival test is not read). A run of the original that orders a unit of known speed one cell east and one cell west and samples the position bytes each tick settles the cell-change advance and its asymmetry.
+
+**Amends.** R2-ENGINE-1213's stage "after the fine coordinate enters B's cell": it is advance ceil(128/v) or floor(128/-v)+1 of the step, by the y vector component (x when it has none). R2-ENGINE-1470's Unknown "how a step with a zero vector ends": its 256 advances change no cell; the arrival test stays Unknown.
+
+### R2-ENGINE-1761
+
+The walk driver (unit, goal, range): d = `L2.01522`(own cell, goal). A unit in the middle of a step gets `L2.02848` and the call returns. When d <= range the unit stops (a nonzero range also turns it, `L2.05545`). Otherwise block `+0x78` += 1. When block `+0x74` differs from the goal or block byte `+9` is above dword terrain `+0x5858c` (StaticRefreshRate), a full search `L2.05182`(..., 1, 0) rebuilds the static route `+0x1c8`, then `+0x90` = 0, `+0x74` = goal, `+9` = 0, the local path `+0x1e4` is cleared, and `+0x76` = the destination element of the route (own cell and `+0x98` = 1 when the route is empty). Own cell equal to `+0x76` sets `+0x90` = 1 and returns. When the local path is not empty and `+0x78` <= dword terrain `+0x58590` (DynamicRefreshRate) the step start runs. Otherwise the next cell is tested (R2-ENGINE-1762); a re-plan calls the repath (unit, 0), adds 1 to `+9`, sets `+0x78` = 0 and runs the step start.
+
+The repath: n = count of `+0x1c8`, top = its newest element, dist = distance(own cell, top). The local goal is `+0x76` when n <= dword `+0x58598` (StaticIsntNeeded), top when dist > dword `+0x58594` (DynamicByStaticLookup), else the fourth element from the top. The local search `L2.05182`(..., 0, flag) fills `+0x1e4`; an empty result with the first goal sets `+0x98` = 1; when n is nonzero and dist <= 3 the top element is removed (`L2.05231`). The static search reads plane one with scan dword `+0x58584`; the local search clears the unit's own footprint, reads plane two (occupancy bits) with scan dword `+0x58588` and restores the footprint.
+
+With the shipped values (R2-ASSET-383: StaticRefreshRate 16, DynamicRefreshRate 32, DynamicByStaticLookup 3, StaticIsntNeeded 5, equal to the code defaults of R2-ENGINE-1472): the static route is rebuilt on a new goal and on the first walk call after the 17th repath since the last rebuild; the local path is rebuilt when it is empty or when 33 walk calls pass since the last repath, unless the wait decision of R2-ENGINE-1762 returns 1 or 2 (no repath then), and after a re-plan at a held cell. No body read here rebuilds a route on a timer of session ticks (a negative over the bodies read here).
+
+**Confidence.** High for the walk driver and repath bodies in both roots (masked-equal) and for the counters and comparisons. Medium for the effective values (R2-ASSET-383) and for when the local path empties (the element is consumed outside the bodies read; `L2.02848` is not read). The names of the terrain dwords are the key names of R2-ENGINE-1472.
+
+**Unknown.** The removal of local path elements during a step. A run of the original that walks a unit along a long route while a second unit crosses it, with the route lists sampled each walk call, settles the rebuild points.
+
+**Amends.** R2-ENGINE-1108's Unknowns: the counters that decide when its route branches rebuild a route are read; the search `L2.05182` stays read in part.
+
+### R2-ENGINE-1762
+
+When the local path is empty or older than the refresh count, the walk driver takes next = `L2.08469`(unit), the newest static route cell when it is one cell away, else 0. A next cell is held when `L2.03831`(unit, next, 0) returns 0 (some cell of the unit's size square has plane two byte (`+0x20000`) AND block byte `+5` nonzero) and the wait decision is then called; a nonzero return re-plans with no wait decision (EN `L2.02719` reads plane two through `L2.02722` for flag 0 and plane one through `L2.02721` otherwise, the AND in `L2.02720`; RU `L2.03871`, `L2.03872`, `L2.03520`; masked-equal getters). For a held cell the wait decision (unit, next) returns 0 (re-plan), 1 or 2 (wait):
+
+1. 0 when the unit's virtual `+0x1c` value (the square side of the cell test) is not 1, when dword `+0x2c` of `[unit+0x14]` is nonzero, or when block `+0x80` equals the cell.
+2. No unit in entry `+4` of the cell: 2 when a unit of the 3 x 3 square (`L2.05939`) is in the middle of a step from that cell (its block `+0x70` equals the cell), else 0.
+3. An occupant with health below 1: 0.
+4. A standing occupant: with prepared order 1 or 4, 0 when the waiting unit's own command word `+0xa` equals the cell, else 2; any other prepared order 0. The names of orders 1 and 4 are not read in the evidence cited.
+5. A walking occupant: 0 when the unit's block `+6` equals the cell, else 1.
+
+A nonzero result starts no step: the unit turns toward the cell (prepared order 0xa) or, already facing it, gets prepared order 0. A zero result re-plans (R2-ENGINE-1761): the local search reads plane two, whose occupancy bits mark the cells held at that moment (R2-ENGINE-1214). In the executor table RU `L2.01571` (15 slots) slot 1 is the walk handler and slot 10 the turn handler; prepared order 0 has no handler, so the unit stays until the planner sets an order again (R2-ENGINE-549). While the local path is fresh, the step start runs with no cell test.
+
+**Confidence.** High for the EN cell test `L2.02719` and the RU wait decision (256 of 256 lines equal in both roots), the getters and the RU executor table scan; the RU body of `L2.03831` is not read (Medium; twin by prologue and position). Medium for block `+5` = 0x41 (R2-ENGINE-531, R2-ENGINE-789) and the meaning of the plane bits (R2-ENGINE-1214), and for "walking" as the mid-step test. Unknown: how many ticks a waiting unit waits before its order is set again.
+
+**Unknown.** The planner cadence that ends a wait (R2-ENGINE-549). A run of the original with one unit standing in a corridor and a second ordered through it, counting ticks until the second steps or turns away, settles it.
+
+**Amends.** R2-ENGINE-1108's Medium for the passability helper `L2.03831` and its Unknown "elapsed waiting": the EN passability helper `L2.02719` and the wait decision are read (the RU `L2.03831` is not read); the waiting time stays Unknown.
+
+## ROM2 strike schedule of a held attack
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1763 | In range, with no state-13 conversion (Medium), a ROM2 strike started at step s hits at s+c; a held attack hits every c+r+2 steps (Medium). | High / Medium / Unknown | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+
+### R2-ENGINE-1763
+
+Bodies read in both roots and compared after masking every literal of 0x10000 or more: the actor step RU `L2.00028` / EN `L2.00263` (814 of 818 aligned lines equal; the four replacements are the weapon record word at two sites, `+0x88` RU and `+0x84` EN, and the allocation size at two, 0x58 RU and 0x54 EN; RU has three further lines after its last `ret`), the executor RU `L2.00506` / EN `L2.00507` (467 of 467), the prepared handlers RU `L2.02634..` / EN `L2.05543..` (861 of 861) and the strike check RU `L2.06348` / EN `L2.08470` (77 of 77).
+
+Order within one actor step: the actor step calls the executor (RU `L2.01569`, when `L2.01570` returns 0) before it dispatches on state `+0x54` and substate `+0x58`. The executor first sets state 0 unless it is 2 or 15, then runs either the primary arm (command byte `+9` nonzero) or the prepared handler (`+9` = 0), not both.
+
+| Step | Executor | Actor substate arm |
+|---|---|---|
+| s | prepared 5: range test `L2.01574`(unit, command `+0xc`, `L2.01728`(unit)); in range the strike init `L2.02407` sets `+9` = 1, phase `+0x15` = 0, state 3, target `+0x5c` = command `+0xc`; out of range the approach `L2.01577`, state 1 | substate 0: `+0x6c` = c, `+0x136` = 0, substate 5 |
+| s + 1 .. s + c | primary 1 (R2-ENGINE-553): state 3, phase + 1 | substate 5: `+0x6c` - 1; at 0, in step s + c, the strike `L2.02315`(unit, `+0x5c`), substate 7, `+0x6c` = r |
+| s + c + 1 .. s + c + r | the same | substate 7: `+0x6c` - 1; at 0, in step s + c + r, substate 0 and `+0x136` = 1 |
+| s + c + r + 1 | primary 1: phase above 2 and `+0x136` set: `+9` = 0, state 0 | no state arm runs |
+| s + c + r + 2 | prepared 5 again (the arm does not clear `+8`) | substate 0 of the next strike |
+
+At substate 5 count 0 the strike runs only when `[unit+0x74]` is unset or `L2.02338` or `L2.00044` fails (RU `L2.08471..L2.07212`); otherwise the unit takes the weapon record word, sets state 13 and casts. Both helpers are unread. The range test `L2.01574` is unread too. c = (byte `+0x134` + term) as a byte. The strike check (unit, target, &term) sets term = 0 and, for d = `L2.02339`(unit, target) above 1, term = (d * 256 + 128) / 200 in signed integer division: 3 for d = 2, 4 for 3, 7 for 5, 13 for 10; the arm does not use its return value. r = byte `+0x135` + the weapon and Reaction term + `R2.0021`(3) (R2-ENGINE-1261); the Complication term is added only in states 13 and 14. A count of 0 lasts 256 steps. Prepared 2 calls the strike init with no range test. With the target in range and no state-13 conversion the period of a held attack is c + r + 2 actor steps (phase is c + r + 1 at step s + c + r + 1, above 2 when c + r is at least 2).
+
+**Confidence.** High for the bodies, the order within a step and the arm by arm counts (`+0x6c` set to c, the decrements to the strike, r, the phase test, the `+9` clear) in both roots. Medium for the strike at s + c and for the period c + r + 2: the period is composed from the executor arm, the substate arm and the phase test, with the premises "in range", "prepared order 5 not cleared", "no other writer" and no state-13 conversion. Medium for the time: one actor step per session tick is a measurement under a debugger (R2-ENGINE-1073); for the unit of d (`L2.02339` is not read here). Unknown: on which step an attack order sets prepared 5 relative to the executor call, so the delay from the order to step s.
+
+**Unknown.** The delay from the order to step s and the distance unit of the term. A run of the original that orders one unit of known `+0x134` and `+0x135` to attack an adjacent standing target and logs the tick of each hit settles the period.
+
+**Amends.** R2-ENGINE-1262's "the order of the executor and the actor step within one tick is not read here": read for the strike.
+
+## ROM2 enchantment surcharge and corpse ageing by class
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1764 | ROM2 armour, shield and weapon prices add one surcharge on the summed effect size S: 7000 for S = 70, 26798 for two of 70 (S as the item text size is Medium). | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1765 | The world pass ages ROM2 corpses by 1 health per two world passes (Medium for the Session counter identity); classes 0x21..0x24 stop at -61 (kind 4, kept), others reach kind 5 below -600. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+
+### R2-ENGINE-1764
+
+The three item price slots EN `L2.00842` (armour), `L2.00843` (shield), `L2.00844` (weapon), read in the committed EN listings, walk the item's effect list once. An effect with tag `+0x3c` = 1 replaces the price with its `+0x40` and returns at once. The weapon slot adds a tag-41 effect's own price through its virtual `+0x4c` straight to the price; armour and shield have no such branch. Every other effect adds `L2.07618`(effect) to one running size S: 0 for tag 0; word `+0x42` times the tag weight for tag 41 (armour and shield); (byte `+0x40` + byte `+0x41`) times the weight for tags 44..48; dword `+0x40` times the weight otherwise, the weight being element 0 of the tag's row in table `L2.03915`. After the walk the slot adds `L2.07619`(S) once: trunc((pow(S / 70, 1.5) + 1) * S * 50) (the doubles 70, 1, 50 at EN `L2.08472`, `L2.08473`, `L2.08474`; truncation `L2.02708`); the total is capped at 19999999.
+
+Direct calls (raw E8/E9 scan of the executable sections, both roots): the surcharge has three callers in each root, the three slots (RU `L2.08475`, `L2.08476`, `L2.07612`, surcharge RU `L2.08477`); the size routine (RU `L2.08478`) has four, the three slots and one routine at EN `L2.03900` / RU `L2.05643` that calls no surcharge (not read).
+
+Arithmetic on the bodies (`derive_price.py`): one effect of size 70 adds 7000; two of size 70 add 26798, not 14000; two of 35 add 7000, not 4736; three of 70 add 65059. The surcharge grows faster than the size, so a split of one size over several effects does not lower it.
+
+**Confidence.** High for the bodies and the call census in both roots. The RU slots, size routine and surcharge are equal to their EN twins after masking, compared whole (`generated/twin-price.tsv`, 394 of 394 instructions); that generation was reproduced byte for byte. Medium that S is the "size" a player reads in the item text: the tag weights times the effect values are read, their display is not.
+
+**Unknown.** The routine at EN `L2.03900` that sums sizes without a surcharge. A run of the original that shows the shop price of one item with two equal effects and of the same item with one settles the displayed result.
+
+**Amends.** R2-ENGINE-267's "other effects add trunc(50*S*(1+(S/70)^1.5))": S is the sum over the item's effects, and the surcharge is added once.
+
+### R2-ENGINE-1765
+
+Corpse ageing EN `L2.08328` and RU `L2.02525`, read whole in the committed listings, called at the death call and on each world pass (R2-ENGINE-776). The raw call scan (nav8, both roots) finds a third direct caller, EN `L2.08245` (call at `L2.08479`) and RU `L2.02521`, which calls the ageing routine outside the world pass; the schedule derived here is not theirs:
+
+1. Health word `+0x94` below -10000: return.
+2. RU only: for class word `+0xe` in 0x21..0x24 and health below -61, health = -61. EN has no such store.
+3. When the Session counter `+0` (EN `[L2.00805]`, RU `[L2.01317]`) is even, health - 1; for class 0x21..0x24 only while health is -60 or above (both roots).
+4. Kind byte `+0x13c` = 2, 3, 4 below -10, -20, -40; below -600 kind 5 and health -10001, then the unit's `+4` is released (EN `L2.03314`, RU `L2.04385`) and cleared when it is nonzero and byte `+0x4a` is at most 1.
+5. One message through the state sender when the kind differs from the kind at entry.
+
+The counter advances by 1 between two world passes (R2-ENGINE-1204) and a world pass is 16 session ticks (R2-ENGINE-778), so the rate is 1 health per 2 world passes, 32 session ticks, the same in every stage; the refill takes nothing from a unit with `+0x54` = 0x10 (R2-ENGINE-1207). Derived schedule (`derive_decay.py`, calls counted from the death call): a unit that dies at -10 is kind 2 at call 0 or 1, kind 3 at 20 or 21, kind 4 at 60 or 61 and kind 5 at 1180 or 1181, by the counter's parity. Classes 0x21..0x24 stop at -61 and stay kind 4: they are never released. At Speed 4 (62 ms per session tick, R2-ENGINE-620, R2-ENGINE-1204) kind 5 comes about 18880 session ticks, 19.5 minutes, after the death.
+
+Control Spirit (spell row 22) takes a corpse of kind 2 first, then 3, then 4 (R2-ENGINE-780): from the first call below -10 until kind 5; a class 0x21..0x24 corpse stays takeable. This is a composition on R2-ENGINE-780 (High / Medium; it needs word `+0xe` outside 0x52..0x62 and the target cell): Medium.
+
+**Confidence.** High for the bodies in both roots and the arithmetic. Medium for the rate per world pass (the counter step per world pass is R2-ENGINE-1204's and the world pass is R2-ENGINE-778's, whose Session object is read at one RU call site of four and by operand position in EN), for the 19.5 minutes (62 ms per tick is a lookup, R2-ENGINE-620, scheduler unread) and for the Control Spirit sentence. What classes 0x21..0x24 are and what `+4` holds are not read.
+
+**Unknown.** The class names of 0x21..0x24 and whether the released `+4` is the map entry. A run of the original that kills a unit at a known Speed and samples its health and kind each world pass until it disappears settles the schedule.
+
+**Amends.** R2-ENGINE-776's "lowers health by 1 when Session `+0` is even": not for class 0x21..0x24 below -60, and RU clamps those classes at -61.
+
+## ROM2 Prismatic Spray secondary victims and Drain Life kill credit
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1766 | ROM2 Prismatic Spray adds seen hostiles nearest the caster, key 256 x distance + turn up to 256 x range; target first, cut to cap; bodies only when no living hostile is in sight (candidate population Medium). | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1767 | ROM2 Drain Life sets killer +0x40 = caster, +0x48 = its spell; a victim at -10 or below dies and the kill route may credit +0x40 (Medium). | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+
+### R2-ENGINE-1766
+
+The list builder RU `L2.00094` / EN `L2.08480` is read whole and is equal after masking in both roots, as are the edge-distance key RU `L2.08481` / EN `L2.08482` and the spray routine RU `L2.00033` / EN `L2.08483`. A raw E8/E9 scan finds one direct caller of the builder in each root, the spray routine. The routine passes the caster, the target, an output list, the cap n = min(P/20 + 2, 7) (R2-ENGINE-027) and the spell's range byte `+9`, r. Then:
+
+1. The hit hook `L2.02074`(caster, target) runs (R2-ENGINE-1109), then Group sight `L2.02473` on caster `+0x70` (R2-ENGINE-1112). Group sight lists units whose anchor cell is marked by the ScanRange sight of the members of caster `+0x70` and that are hostile by relation bit 1 to the first member (R2-ENGINE-502, R2-ENGINE-1137). Health 1 or above goes to the live list `+0xa64`; health below 1 goes to `+0xa84`. When the live list is empty and `+0xa84` is not, Group sight (`L2.08484..L2.08485`) clears the live list and moves every `+0xa84` unit into it, so a spray with only bodies in sight takes them as victims, ranked like live units. Only when a living candidate is in sight is a body dropped. The candidate set is Group sight's (R2-ENGINE-1112, Medium; it also holds the remembered-attacker cell for a unit with an owner and admits effect-0x1000 candidates only within the member's `+0x71`).
+2. When no unit is in sight after that step, the output list gets the target alone.
+3. The key is k = 256 x `L2.01588`(caster, unit) + `L2.02405`(caster facing, direction to the unit). These are the edge distance in cells from the caster, at least 1, and the turn from the caster's facing (R2-ENGINE-501). A live unit with k up to 256 x r is kept with key k. A `+0xa84` unit with k up to 256 x r is kept with key 256 x k, which is at least 65536.
+4. Over n rounds, each round takes the smallest key below 65530, the earlier list entry on a tie, and sets that key to 65500. A taken unit is added when its key was below 65000 and it is not the target.
+5. The target is added before the taken units. While the list holds more than n entries, `L2.08486` removes the tail node.
+
+So a spray hits the target plus at most n - 1 other units. Those units are the hostiles nearest the caster, not the target, that the caster's `+0x70` members see. Between equal distances it prefers the smaller turn from the caster's facing. A unit at distance r enters only at turn 0. A unit with health below 1 is taken only when no living candidate is in sight (Group sight then moves it into the live list); while a living candidate exists its key exceeds every bound and it is dropped. The list then goes out as message 0x8a or 0x8c through `L2.02157`, and `L2.00034` runs for each entry, target first.
+
+The builder stores each admitted unit in a frame table of 100 entries with no bound check. The 102nd admitted unit would overwrite the bound 256 x r at `ebp-4`; the capacity of the key table `this+0xc74` is unread.
+
+**Confidence.** High for the builder, key and routine bodies in both roots and for the single caller; the helpers `L2.01588`, `L2.02405`, `L2.02113`, `L2.00207`, `L2.08486` are read in RU (R2-ENGINE-501 and the list trim listing) and unread in EN (Medium). Medium for the candidate population, bodies included: it is Group sight's, at R2-ENGINE-1112 and R2-ENGINE-502 grades. Medium for what caster `+0x70` holds for a caster without a Group.
+
+**Unknown.** The unit of the turn byte is unread; a turn never outweighs a distance step (the key keeps one byte of each), so it only matters on a tie. Also unread is the population when caster `+0x70` has no member. A run of the original settles both: cast Prismatic Spray at power 100 with hostiles placed at known distances and bearings from the caster, and log which units take a ray.
+
+**Amends.** R2-ENGINE-027's "The victim ranking inside `L2.00094` is not read here": read.
+
+### R2-ENGINE-1767
+
+The Drain Life arm RU `L2.00083` / EN `L2.08487` (EXP-2061 listings, equal after masking per R2-ENGINE-488) computes v as R2-ENGINE-026 does, capped at the victim's health + 10. When v > 0, it does the following in order:
+
+1. caster slot `+0x6c` (R2-ENGINE-488);
+2. the hit hook `L2.02074` when both units have an owner `+0x14`;
+3. victim health `+0x94` minus v, then a message;
+4. victim `+0x40` = the caster (RU `L2.08488`, EN `L2.08489`);
+5. victim byte `+0x48` = spell row byte `+8`, the spell id (RU `L2.08490`, EN `L2.08491`);
+6. caster `L2.02360`(v), then a message.
+
+The arm's own instructions call no death routine. The cap leaves the victim at -10 or above.
+
+The actor step RU `L2.00028` / EN `L2.00263` handles a unit not in state 0x10 with health 0 or below. It sets order `+0x50` and state `+0x54` to 0. At kind `+0x13c` 0, it sets kind 1, calls the fall `L2.01843` and sets counter `+0x6c` to virtual `+0x74` minus 1. Later steps count `+0x6c` down. At 0, byte `+0x4a` above 1 sets health to -1000. Then health -10 or below sets state 0x10 and calls the death routine RU `L2.01807` / EN `L2.01806`. That routine stores state and order 0x10, and health -10000 for a unit with `+0x148`. A unit at -9..0 stays down at kind 1 and does not die in this arm. The refill takes 1 health on one pass in four below 0 (R2-ENGINE-1207). These two listings are in EXP-2152 (masked equal through the death arm).
+
+The kill route takes the killer from victim `+0x40` for a unit in state 0x10 (R2-ENGINE-772, R2-ENGINE-1158). For a killer of class 0x21..0x3f with health 0 or above and an owner, it runs slot `+0x50` and slot `+0x68` with the victim and `+0x48` as the spell, and adds the owner's kill count. A Drain Life hit that takes all remaining health therefore leaves the victim at -10. The victim dies after its fall, and the kill route may credit the caster with Drain Life's spell id when the killer is still of class 0x21..0x3f with health 0 or above and an owner and no other writer has replaced `+0x40` (Medium). The award is R2-ENGINE-1158's: for a mage, trunc(V x 0.5) into the spell's Sphere.
+
+**Confidence.** High for the arm's stores, the actor-step arms and the death-routine call in both roots (RU read, EN equal after masking). Medium for the credit. Writers of `+0x40` other than this arm are not censused, so a later hit by another unit between the Drain Life hit and the death may replace the killer. The kill route is R2-ENGINE-772's, read in EN, with RU equal after masking.
+
+**Unknown.** The other writers of `+0x40` and the meaning of byte `+0x4a`. A run of the original settles the credit: kill a unit with Drain Life cast by a mage, and read the mage's Sphere skill and the owner's kill count before and after.
+
+**Amends.** R2-ENGINE-1158's "The writers of victim +0x40 and +0x48": the Drain Life arm is one. R2-ENGINE-488's "whether a spell kill pays its trunc(V x 0.5) is not established": a Drain Life kill reaches the kill route with the caster as killer and Drain Life's spell id.
 
 ## Item card for a spell-carrying item
 
@@ -1421,7 +1598,7 @@ ROM1 states the same one-term use of the skill (`MAGIC-POWER-004`), with its cei
 | R2-ENGINE-024 | Fifteen apply arms give the effect magnitudes: protections P/2, Shield P/10+3, Haste P/15+1, Bless and Curse 4P/5+20, Light and Darkness P/30+1, Poison Cloud a health change of -2*(P/45.0+1). | High / Medium | ● active (partially retracted, amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-025 | Stone Curse draws a random duration up to `4.8*P` units for a spell cast (`2.4*P` for an item cast), cut by Earth resistance; its Effects string begins with a quote that probably stops the kind parsing. | Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 | R2-ENGINE-026 | Heal, Drain Life, Summon, Control Spirit and Teleport each have a unique arm; Summon and Teleport depend on P, Control Spirit does not read it. | High / Medium | ● active (partially retracted, amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-027 | Prismatic Spray hits min(P/20 + 2, 7) victims, where P for a book cast comes from the power byte and for an item cast from the castSpell effect. | High | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-027 | Prismatic Spray hits min(P/20 + 2, 7) victims, where P for a book cast comes from the power byte and for an item cast from the castSpell effect. | High | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-024
 
@@ -1490,6 +1667,8 @@ Prismatic Spray (id 11) bypasses the normal arm: refill `L2.00032`, then `L2.000
 ROM1: the capped argument and ranked victim selector are in `MAGIC-SPRAY-134`; the ROM2 selector and its ranking were not read.
 
 **Confidence.** High for the cap formula and the call structure. The victim ranking inside `L2.00094` is not read here.
+
+**Amended.** R2-ENGINE-1766 reads the ranking inside `L2.00094`: hostiles that the caster's `+0x70` members see, ordered by edge distance from the caster and then by turn, admitted up to the range byte, with the target first and the list cut to the cap.
 
 ## Resolution of a magic hit
 
@@ -4886,7 +5065,7 @@ observe an authorized original session. The panel probe is EN only.
 | R2-ENGINE-264 | Town-1 category masks admit 70 armor/shield rows, 44 weapon rows, 4 enchantable weapon rows and 5 books plus scroll rows per fill from data.bin tables, by price, class and material. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-265 | A town-1 shop fill draws random admitted candidates with stackable quantities, preloads six potions and the books, and enchants category 2 into 160 possible spell-level variants. | High | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-266 | ROM2 shop buy moves affordable pending items to the hero, sale and undo return items into categories, and refills replace all lists only while no deal is open; finite stock is implied. | High / Medium / Unknown | ● active (amended, branch candidate, partially retracted) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
-| R2-ENGINE-267 | ROM2 shop text and prices come from text tables, item attributes and data.bin factors; cells show unit P or (P+1)/2, pending totals P*q and ceil(P/2)*q, sale credit floor(P*q/2+0.5). | High / Medium | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
+| R2-ENGINE-267 | ROM2 shop text and prices come from text tables, item attributes and data.bin factors; cells show unit P or (P+1)/2, pending totals P*q and ceil(P/2)*q, sale credit floor(P*q/2+0.5). | High / Medium | ● active (amended, branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-268 | The ROM2 generic shop keeper updates after 100 ms, resamples a 5000+1000*(rand()%5) ms idle threshold, plays Pose2-3 through counter 28 and responses through counter 12. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-269 | Generic shop responses start the keeper's Yes on category change, affordable buy or credited sale and No on an unaffordable buy; first category choice and exit clear all episode bits, not the counter. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
 | R2-ENGINE-270 | ROM2 EN draws the town-1 ShopFrame with byte reader L2.00798 and palette mode 1: low six bits count, top bits select palette literals, row skip or pixel skip. | High / Unknown | ● active (branch candidate) | [EXP-2032](../experiments/EXP-2032-rom2-first-town-shop/) |
@@ -5076,6 +5255,8 @@ measured consumers. Medium for the whole rendered description, whose
 helper-derived spell clauses were not executed.
 
 **Unknown.** A price factor outside the measured consumers; a census of the callers of the price slots and the price wrapper would settle it.
+
+**Amended.** R2-ENGINE-1764 reads the effect walk of the three price slots: S is the sum of the effect sizes and the surcharge is added once on it; the weapon's tag-41 effect adds its own price outside S.
 
 ### R2-ENGINE-268
 
@@ -11745,7 +11926,7 @@ its end.
 | R2-ENGINE-485 | The ROM2 skill threshold table `L2.02330` holds T(L) = trunc((1.1^L - 1) x 1000) for L 0..149, filled by `L2.02342`; a skill's level from experience E is the largest L with T(L) <= E for E below the dword at `L2.02343`, which was not read. | High / Medium | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-486 | A ROM2 award raises a school skill by one when its experience reaches T(L+1), L the base level; each award is capped at T(L+1) - T(L), none is paid at base 100 or above, and a raise runs recompute. | High / Medium | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-487 | A ROM2 caster with `+0x4c` bits 2 and 4 who casts without an item offers trunc(row parameter 1 x 0.5 + 0.5) to the award, which scales it by Mind, cuts it off the main skill and caps it. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
-| R2-ENGINE-488 | ROM2 spell damage pays a mage trunc(V x 0.5 x D / HPmax + 1) into the spell's Sphere skill through slot +0x6c, called by the damage object, the Drain Life arm and the health effect tick (as spell 6); no call census (Medium). | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-488 | ROM2 spell damage pays a mage trunc(V x 0.5 x D / HPmax + 1) into the spell's Sphere skill through slot +0x6c, called by the damage object, the Drain Life arm and the health effect tick (as spell 6); no call census (Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-489 | Outside the award, ROM2 sets skill experience on the hero reuse path (x 9/10), in the character-file loaders, in an experience-from-skill producer, and for item class 0xfffe, which spreads 250 x its word +0x42. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-490 | ROM2 recompute reads the experience sum +0x130 in the HP and mana term log1.1(sum/5000 + 1); two routines read it through Player +0x38; +0x1c feeds the award routes and slot +0x50. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-491 | ROM2 EN and RU table writer, threshold, skill-from-experience, award, cap, slots +0x68, +0x6c, +0x70 and +0x50, reuse, raise, apply head and Heal/Drain arms agree after address masking; the item cases agree with frame offsets masked. | High / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
@@ -11925,6 +12106,8 @@ whether a spell kill pays its trunc(V x 0.5) is not established; the
 meaning of `L2.02362`; the callers of slots +0x6c and +0x70 beyond the
 three above (the census and its byte patterns are in R2-ENGINE-487); the
 damage object's route for an item cast.
+
+**Amended.** R2-ENGINE-1767 narrows the Unknown on spell kills for Drain Life: the arm stores the caster in victim `+0x40` and the spell id in `+0x48`, and the kill route offers the award to that unit with that spell.
 
 **Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
 
@@ -20580,7 +20763,7 @@ call settles both; classifying the 65 unclassified sites and reading the callers
 detach through virtual and stored addresses settles the removal routes, as does a run that casts
 Summon and waits.
 
-**Amended.** R2-ENGINE-780 to R2-ENGINE-783 narrow the Animate Dead clause: the arm from `L2.00079` is spell row 22's, whose data.bin record is named Control Spirit and whose EN `spell.txt` row is Animate Dead (R2-ASSET-179); its end is read, it raises a corpse of kind 2..4, and the unit it builds has `+0x148` = 0. R2-ENGINE-1549 bounds the 65 unclassified sites of the census to the region `L2.07956..L2.07957`, with four sampled and none showing the key shape.
+**Amended.** R2-ENGINE-780 to R2-ENGINE-783 narrow the Animate Dead clause: the arm from `L2.00079` is spell row 22's, whose data.bin record is named Control Spirit and whose EN `spell.txt` row is Animate Dead (R2-ASSET-179); its end is read, it raises a corpse of kind 2..4, and the unit it builds has `+0x148` = 0. R2-ENGINE-1549 bounds the 65 unclassified sites of the census to the region `L2.07956..L2.07957`, with four sampled and none showing the key shape. R2-ENGINE-1765 narrows the corpse-ageing clause: class words 0x21..0x24 lose no health below -60, and RU sets them to -61 when below; such a corpse stays kind 4.
 
 ### R2-ENGINE-777
 
@@ -27205,13 +27388,13 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 |---|---|---|---|---|
 | R2-ENGINE-1156 | The ROM2 award (RU L2.00055) stores skill XP after a class gate, +0x1a0, Mind scaling, the kind cut, owner gates, ceil(X/8) unless the skill is main or 5, and the cap; field writers Medium; main skill unchanged: Medium. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
 | R2-ENGINE-1157 | The ROM2 award's +0x1a8 list: kind + 0x10000 x count dwords, five entries; slot +0x68 updates it after the award call, paid or not; by the code read, for an empty start, the cut 10/(n+10) starts at the third call for a kind. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
-| R2-ENGINE-1158 | One ROM2 kill route (one of 4+ slot +0x68 sites in the unit range): killer class 0x21..0x3f, health not below 0, offers trunc(V x 0.5) via slot +0x68; owner gates skipped if victim health below 0 (unread); 9 of 109 slot calls classified. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
+| R2-ENGINE-1158 | One ROM2 kill route (one of 4+ slot +0x68 sites in the unit range): killer class 0x21..0x3f, health not below 0, offers trunc(V x 0.5) via slot +0x68; owner gates skipped if victim health below 0 (unread); 9 of 109 slot calls classified. | High / Medium | ● active (amended) | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
 | R2-ENGINE-1159 | ROM2 dword L2.02343 past the threshold table is the first of an object built by L2.06401 (Medium: constructor, other readers unread); the loop reads it only for E at or above T(149); two Heal windows hold no slot call, call unread callees. | High / Medium | ● active | [EXP-2156](../experiments/EXP-2156-rom2-skill-award/) |
 | R2-ENGINE-1104 | ROM2 EXE sweeps find one direct immediate order-0xc store per root; unit-writer closure is open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1105 | Read ROM2 bodies set unit +0x5c for strikes/casts and clear it during construction/copy. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1106 | ROM2 strike admission and HP application use different distance calculations and thresholds. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1107 | Twenty ROM2 setters match across roots; RU input types 0x1e/0x25 reach order 0xd. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
-| R2-ENGINE-1108 | Read ROM2 route branches distinguish an empty-route flag from own-cell arrival. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1108 | Read ROM2 route branches distinguish an empty-route flag from own-cell arrival. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1109 | ROM2 hit-hook bodies write hit memory and an event; later order effects remain open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1110 | EN Effect 14 slots +0x40/+0x44 and their masked-equal RU bodies adjust unit words +0xa4 and +0xe4. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1111 | Scorer L2.05238 rejects adjusted distance above 1 and ranks by turn and preference. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
@@ -27370,6 +27553,8 @@ were not read).
 
 **Amends.** R2-ENGINE-480's Unknown on the callers of +0x68: the kill route is one, read.
 
+**Amended.** R2-ENGINE-1767 reads one writer of victim +0x40 and +0x48: the Drain Life arm stores the caster and the spell id. Other writers stay Unknown.
+
 **Evidence.** EXP-2156 `evidence/generated/scan/ru-slotcalls-award-slots.tsv`, `en-slotcalls-award-slots.tsv`,
 `win/ru-pred-L2.02362.lst`; EXP-2103 `out/code/listings/ru-kill.txt`; EXP-2060 `out/listings/ru-creature-award.txt`.
 
@@ -27491,6 +27676,8 @@ The executor tail RU L2.02883..L2.06221 and its EN prefix are equal through the 
 **Amends.** R2-ENGINE-1042's unread movement-flag set sites are narrowed by their local bodies. R2-ENGINE-872's empty-route result stands; the new +0x90 arrival store does not equate arrival with +0x98 or close its runtime frequency.
 
 **Evidence.** EXP-2152 generated/win/*walk-route.lst, *approach-route.lst, *repath-route.lst, *empty-route-tail.lst, *wait-blocked.lst, *reset-state.lst, *stop-chain.lst, *setters-next-next-next.lst and mask receipts.
+
+**Amended.** R2-ENGINE-1761 reads the two counters that decide when the walk branches rebuild a route, and R2-ENGINE-1762 the EN passability helper `L2.02719` (RU `L2.03831` unread) and the wait decision at a held next cell; the waiting time stays Unknown.
 
 ### R2-ENGINE-1109
 
@@ -28895,7 +29082,7 @@ In the bodies read, the cell holding `+4` is the cell of the position object's b
 
 **Evidence.** EXP-2163 `evidence/derived/listing-compare.tsv` (rows `fn-L2.03570`, `fn-L2.04158`, `fn-550697`, `fn-L2.00314`, `pass-L2.03569-code`, `clear-L2.03586`, `fn-L2.03584`, `fn-L2.06917`, `fn-L2.06919`, `fn-L2.03571`, `fn-555411`, `fn-L2.05532`, `fn-551383`), `evidence/derived/en-writer-callsites.tsv`; EXP-2085 `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.06912.txt`, `ru-terrain-lin-L2.05179.txt`.
 
-**Amended.** R2-ENGINE-1470 reads the step vector written by `L2.06918` (the Unknown above): the direction of the vector is read; the Medium for the stage table stands for the occupancy premise.
+**Amended.** R2-ENGINE-1470 reads the step vector written by `L2.06918` (the Unknown above): the direction of the vector is read; the Medium for the stage table stands for the occupancy premise. R2-ENGINE-1760 names the advance of the stage "after the fine coordinate enters B's cell": ceil(128/v) or floor(128/-v)+1, by the y vector component (x when it has none).
 
 ### R2-ENGINE-1214
 
@@ -30359,6 +30546,8 @@ per 0x54-byte element, and that routine calls the empty L2.07817. The Medium for
 L2.07190 and on vtable or pointer routes, not on L2.06061.
 
 **Amended.** R2-ENGINE-1568 reads the Delivery 2 projectile constructor and step: the effect object enters the effect list max(1, floor(distance / Effect Speed)) steps after the apply (Medium cadence); the effect object's own step stays Unknown.
+
+**Amended.** R2-ENGINE-1763 reads the order within one tick: the actor step calls the executor before its substate arm, so the executor ends the order no earlier than step s + c + r + 1, after the substate arm of step s + c + r has set +0x136; for a held attack the next substate 0 runs at step s + c + r + 2. For a cast the re-issue is not read.
 
 **Confidence.** High for the step table, the suffix arms and the 0xbbec census
 rows in RU, and for the suffix in EN over the instructions compared. Medium for
@@ -32335,7 +32524,7 @@ Buy, category press, item drop) with the sound heard at each step settles it.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1366 | EN L2.05911 / RU L2.02311 compute six stored weapon values from one row and two factor rows; L2.00844 / L2.07612 set dword +0x1c from a factor product and the list at +0x20, clamped to 0x1312cff. | High / Unknown | ● active | [EXP-2178](../experiments/EXP-2178-rom2-sav-load/RESULTS.md) |
+| R2-ENGINE-1366 | EN L2.05911 / RU L2.02311 compute six stored weapon values from one row and two factor rows; L2.00844 / L2.07612 set dword +0x1c from a factor product and the list at +0x20, clamped to 0x1312cff. | High / Unknown | ● active (amended) | [EXP-2178](../experiments/EXP-2178-rom2-sav-load/RESULTS.md) |
 | R2-ENGINE-1367 | In EN, L2.05911 has one direct caller, L2.03904, called by constructor L2.05910 and L2.05390; the loader L2.07611 and four routines call L2.05910, so a loaded weapon uses the constructor a new one uses. L2.05390 unread. | Medium / Unknown | ● active | [EXP-2178](../experiments/EXP-2178-rom2-sav-load/RESULTS.md) |
 
 ### R2-ENGINE-1366
@@ -32390,6 +32579,8 @@ values with the stored values above after a resave.
 after masking (RU object offsets +4 from +0x54); the weapon fill terms listed there are
 confirmed for EN, and the EN Unknown of the weapon fill is closed. R2-ENGINE-999: the EN fill is
 the routine whose Range store is cited there.
+
+**Amended.** R2-ENGINE-1764 reads `L2.07618` and `L2.07619`: S is the sum of the effect sizes and the surcharge is added once; the other helpers of 1366 stay unread.
 
 ### R2-ENGINE-1367
 

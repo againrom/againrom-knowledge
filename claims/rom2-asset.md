@@ -4786,6 +4786,27 @@ check compiles; reference resolution is not modelled.
 **Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) `evidence/census.py`,
 `evidence/derived/census/*.tsv`.
 
+## ROM2 shipped map.reg values
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-383 | ROM2 world.res map.reg (EN = RU): Path Finding values and ScanShift equal the code defaults; costs Flowers 8 and Savanna 8 differ. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+
+### R2-ASSET-383
+
+The `world.res` entry `data/map.reg` of each root, read through the `&YA1` grammar (magic 0x31415926, 32-byte records), holds 28 integer keys under three sections; the two decoded tables are equal. Key names are stored at most 15 characters long (`StaticScanAhead`, `DynamicScanAhea`, `StaticRefreshRa`, `DynamicRefreshR`, `DynamicByStatic`, `StaticIsntNeede`).
+
+- Path Finding: SpeedMultiplier 8, StaticScanAhead 5, DynamicScanAhead 3, StaticRefreshRate 16, DynamicRefreshRate 32, DynamicByStaticLookup 3, StaticIsntNeeded 5 (full names as the constructor of R2-ENGINE-1472 asks them).
+- Scanning: ScanShift 7.
+- Terrain, cost: Land 8, Grass 8, Flowers 8, Sand 14, Cracked 6, Stones 12, Savanna 8, Mountain 16, Water 8, Road 6. Flowers (code default 9) and Savanna (default 11) differ from R2-ENGINE-1472; the other eight equal it.
+- Terrain, pass: Mountain, Water and Road 1; the other seven 0. The constructor of R2-ENGINE-1472 asks no Pass key.
+
+**Confidence.** High for the keys and values of the entry in both roots. Medium for the value the engine uses: the opener and loader of R2-ENGINE-1472 are not interpreted, and whether the getter matches a 16-character key name against its 15-character stored form is not read. For Path Finding and ScanShift the effective value is the same either way; for Flowers and Savanna it is 8 when the file is applied, the code default otherwise.
+
+**Unknown.** `world_srv.res` was not read. A run of the original that times a unit across a Savanna cell settles which Savanna cost applies.
+
+**Amends.** R2-ENGINE-1472's "the values in the file are unread": read.
+
 ## ROM2 script nodes: shipped caster actions 21 and 24 (EXP-2202)
 
 | ID | Claim | Confidence | Status | Evidence |

@@ -316,9 +316,21 @@ formulas High, sender meanings and writer completeness Medium).
 
 An item's tag 11 value M adds M percent to the mana rate of a mage: each pass restores max * (M + 100) * K / D hundredths, D being the Units row's MP regeneration when the reader stores it (114 of 180 EN rows hold 0 and the effect of a 0 on D is Unknown), so an item of M 50 turns 2 % of the maximum per pass (D 50, K 1) into 3 %; the interval is the world pass of 16 session ticks (R2-ENGINE-1566).
 
+Prismatic Spray takes its extra victims from Group sight of the caster's
+`+0x70` members. The candidates are hostiles (bodies only when no living hostile is in sight; Medium), ranked by
+edge distance from the caster, then by the turn from the caster's facing, and
+admitted up to the spell's range byte. The target comes first and the list is
+cut to the cap (R2-ENGINE-1766, High / Medium). Drain Life stores the caster
+as the victim's killer and stores its spell id. A unit at health 0 or below
+falls and dies at -10 or below, and the kill route may credit the stored killer
+(R2-ENGINE-1767, High / Medium; the credit is Medium).
+
 A unit with +0x54 = 0x10 or with health 0 or below restores nothing; below 0
 the refill takes 1 health on one pass in four, and corpse ageing lowers
-health separately, so the total loss per pass is not this figure alone. The
+health separately, so the total loss per pass is not this figure alone.
+Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass); a corpse of class
+0x21..0x24 stops at -61 with kind 4 and stays, and any other corpse reaches
+kind 5 below -600 and is released (R2-ENGINE-1765, High / Medium). The
 body tests no owner, side, player, order, combat or cast. Which classes the
 list holds is Medium (R2-ENGINE-1207). A census of word stores to health and
 mana finds no other restorer of a living unit over time among the stores it
@@ -461,6 +473,10 @@ stores, Medium completeness), R2-ENGINE-1261 (High expression, Medium names),
 R2-ENGINE-1262 (High step table, effect step Unknown), R2-ENGINE-1263 (High
 terms, Medium column bindings).
 
+The executor runs before the actor substate arm in each step. A strike started at step s counts down from s + 1 and
+hits at s + c when it does not convert to state 13 (Medium), c being byte +0x134 plus a distance term; a held attack in range hits every c + r + 2 steps (Medium)
+(R2-ENGINE-1763: High bodies, Medium time and period).
+
 Across a mission LOAD the actor-step fields +0x58, +0x6c and +0x134..+0x136 are read back into place, so a caster saved in wind-up or recovery resumes its own count (R2-ENGINE-1401: High for the RU body, Medium for EN; that the count runs to its end is Medium, postload callees unread) and begins its next order no earlier than R2-ENGINE-1262's s + c + r (Medium). A loaded timed area effect with a nonzero stored +0x4c continues from the stored +0x50 (R2-ENGINE-1400: High for a stored +0x4c nonzero, Unknown for +0x4c 0), and the read effect serializers store no caster field (R2-ENGINE-1398, Medium for the values after construction; what the effect +0x14 owner key names is Unknown), so a loaded effect reaches its target with no stored caster link (R2-ENGINE-1399, Medium); the HP amount without a caster is Unknown.
 
 The ordinary script action and check wrappers are read independently of this page: local stores and calls are High, delegated effects Medium, and the bodies of actions 33 and 34 are read (R2-ENGINE-1450), their delegated effects Medium. The 19 ordinary check bodies are read the same way, with Medium helper results (R2-ENGINE-1315), and the map-slot actions and check 19 have no local index guard, which proves no safe slot range (Medium; R2-ENGINE-1319). They change no rule above (R2-ENGINE-1313, R2-ENGINE-1314).
@@ -476,6 +492,8 @@ The roles of the Session DWORDs that script actions 4 and 5 write are the win co
 Script check 2 reads x and y as bytes +0 and +1 of the object at unit +0x10 and is an inclusive rectangle test on them (High); checks 3 and 27 read the same getters (Medium) (R2-ENGINE-1730, amending R2-ENGINE-1450).
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472; tile classifier `L2.06958`/`L2.07473` indexes `+0x54146..+0x54150` and writes no height, R2-ENGINE-1665; client/server type-3 readers in R2-ENGINE-1667); the full tables are on the route page.
+
+A step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive and floor(128/-v)+1 when negative, from fine bytes 0x80 and a heading that already matches, advance 1 being the step start tick in that case (R2-ENGINE-1760, Medium for the premises). The static route is rebuilt on a new goal or after 17 repaths, the local path when empty or after 33 walk calls, unless the wait decision of R2-ENGINE-1762 returns 1 or 2, and after a re-plan (R2-ENGINE-1761), with the shipped `map.reg` values of R2-ASSET-383. At a held next cell a one-cell unit turns and waits for a walking occupant or a standing one about to leave, else it re-plans (R2-ENGINE-1762).
 
 A map building caster lists the units within its record radius of its cell, Chebyshev (Medium), 1 to 9 cells, with no range compare against the spell (R2-ENGINE-1560). It starts a cast once per 16 session ticks through a built Unit that casts from state 13 with wind-up 1 and recovery 1 (R2-ENGINE-1561 amended, R2-ENGINE-1562); the built Unit casts once and is deleted when its recovery ends (Medium; R2-ENGINE-1740). It stops when the resolver is called with a blow or Blizzard value not below the building's health; no other route is shown to stop it (R2-ENGINE-1563). The Delivery 2 spell rows and Effect Speeds are in R2-ASSET-333.
 
