@@ -174,6 +174,14 @@ arm of the support choice to the end of the recovery draw, a Shield cast at the 
 RU, and a cast through the single-target object skips the hit hook when that object carries the cast
 (R2-ENGINE-1577, R2-ENGINE-1578, Medium; the EN twins of `L2.00031`, `L2.02072`, `L2.08110` and `L2.02074` are unread).
 
+## Script-set effect times and script casts
+
+Script action 29 sets the remaining time +0x50 of the area effects of spell p2 at cell (p0, p1) to p3, and action 30
+sets the duration +0x42 of unit U's effects of spell p0 to p1 (Medium; R2-ENGINE-1749). Actions 21 and 24 cast one
+spell through a caster Unit with Mind 30 whose sphere skill holds the node's power word, so the spell power is the word
+up to 255 (Medium); the caster casts once and is deleted (Medium; R2-ENGINE-1740, R2-ENGINE-1741, R2-ENGINE-1742). The shipped
+nodes cast Poison Cloud, Blizzard, Wall of Earth and Stone Curse (R2-ASSET-379).
+
 ## Acid Stream by heading and at the map edge
 
 The RU heading d is bits 5..7 of the byte `L2.02635` returns: an octant from the offset between caster and

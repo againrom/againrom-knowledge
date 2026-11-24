@@ -33405,6 +33405,8 @@ complete Group selector mapping, actions 33/34 and runtime execution counts.
 R2-ENGINE-1726 reads action 6's nested table and its eleven group methods; the action 6 row's unread boundary and the
 Unknown "complete Group selector mapping" narrow to what the orders and group programme values do in play (Medium).
 
+**Amended.** R2-ENGINE-1740 to R2-ENGINE-1749 read the final effects of actions 12, 13, 16 to 24, 28 to 30, 32 to 34 and 38 at their own grades; the boundaries of those rows narrow to the helpers those claims name as unread.
+
 ### R2-ENGINE-1315
 
 R[s], pN, U, G, P, V and I are as in R2-ENGINE-1313/1314.
@@ -33680,6 +33682,8 @@ reads action 27's terrain move and Guard setter; R2-ENGINE-1701 identifies actio
 and their reader Outpost::slot5; R2-ENGINE-1696 identifies check 20's list as Buildings rather than units.
 R2-ENGINE-1730 reads L2.00488 and L2.00489 (bytes +0 and +1 of the object at U+0x10): x and y in row 2
 are High, in rows 3 and 27 Medium; row 22's cell lookup L2.07790 stays Medium.
+
+**Amended.** R2-ENGINE-1744 reads `L2.01848`, `L2.07384` and `L2.00312`, and R2-ENGINE-1747 reads `L2.00497`; those two helpers leave its list of unread helpers.
 
 ### R2-ENGINE-1451
 
@@ -34260,8 +34264,8 @@ How long 65535 unit updates are in seconds depends on the unit update period, wh
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1560 | ROM2 building-caster fill RU L2.05952 compares the larger per-axis difference of two cell words with record byte +0x00 (High in RU); a cell Chebyshev distance over every unit is Medium; no Spell Max Range compare in the bodies read. | High / Medium | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
-| R2-ENGINE-1561 | ROM2 caster cast body RU L2.05953 (EN L2.07199) builds a 0x208-byte Unit with the record's spell, power as its sphere skill, wind-up byte 1 and recovery byte 1, in state 13 on the chosen unit; the unit's later fate is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
-| R2-ENGINE-1562 | ROM2 session tick calls the caster consumer when Session +4 mod 16 is 6; consumer, pick, fill and cast entry test no mana, timer or cooldown, so a cast starts per 16 ticks (RU); the built unit's mana is Medium, its repeat cast Unknown. | High / Medium | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
+| R2-ENGINE-1561 | ROM2 caster cast body RU L2.05953 (EN L2.07199) builds a 0x208-byte Unit with the record's spell, power as its sphere skill, wind-up 1 and recovery 1, in state 13 on the chosen unit; the unit's later fate is R2-ENGINE-1740 (Medium). | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
+| R2-ENGINE-1562 | ROM2 session tick calls the caster consumer when Session +4 mod 16 is 6; consumer, pick, fill and cast entry test no mana, timer or cooldown, so a cast starts per 16 ticks (RU); the built unit's mana is Medium, its repeat cast Unknown. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
 | R2-ENGINE-1563 | RU resolver L2.01703 has two E8 callers, the blow HP application and the Blizzard damage object; damage not below the building's +0x42 removes its casters; a script kill and other damage routes are not shown to (not read). | High / Medium | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
 | R2-ENGINE-1564 | ROM2 effect tag 11 (manaregeneration) adds to +0xe2 only for a unit with mask 0x04 of byte +0x4c, named the mage bit (Medium); High for the arm in both roots and the predicate L2.00044 in RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
 | R2-ENGINE-1565 | A ROM2 cast through the unit sender RU L2.02155 stores Session +4 in +0x138: K 1 for 5 or 6 passes, then 3 (Medium schedule, tick order unread); a move or strike also stamps (R2-ENGINE-1206), so K stays 1 while it continues. | High / Medium | ✔ promoted (branch candidate) | [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) |
@@ -34329,6 +34333,8 @@ side hit per 16-tick turn and compare with the number of casters.
 
 **Evidence.** [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) question 1.
 
+**Amended.** R2-ENGINE-1740 reads the defaults `L2.01794` and the world phase: the built unit has no mage bit, so its cast pays no mana; the world phase deletes it once `+0x136` is set, so it casts at most once (Medium). The Unknown on removal and repeat and the Medium for the mage bit are settled at the grades of R2-ENGINE-1740.
+
 ### R2-ENGINE-1562
 
 The session tick RU `L2.04380` (EN `L2.03120`, R2-ENGINE-778) tests `(Session +4) & 15` with a sign-safe absolute
@@ -34348,6 +34354,8 @@ read in the tick window).
 call is not excluded; EN not scanned), and for the clock conversion.
 
 **Evidence.** [EXP-2190](../experiments/EXP-2190-rom2-building-casters/RESULTS.md) question 1.
+
+**Amended.** R2-ENGINE-1740 settles that the built unit has no mage bit and casts at most once (Medium); the Unknown on its repeat cast narrows to the readers of the list container+0x2c.
 
 ### R2-ENGINE-1563
 
@@ -36429,6 +36437,172 @@ Script action 31 (EN `L2.08361`, RU `L2.08362`; `EXP-2183` `{en,ru}-action-31.tx
 **Unknown.** The EN Outpost slot-14 body, and whether any other routine reads `Outpost+0xb4`. Settled in `allods2.exe` by loading a map copy with a type-10 Outpost group `g`, wiping the group, firing Action 31 with `(g, 1)` vs `(g, 500)`, and comparing the tick at which the group respawns.
 
 **Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-31.txt`, `ru-action-31.txt`, `en-area-object-ctor.txt`, `en-area-class-methods.txt`, `ru-area-class-methods.txt`, `EXP-2064/out/tables.tsv`, `EXP-2065/out/tables.tsv`, `en-building-vtable.txt`; `evidence/native/pass1/listings/en-building-slot38-L2.08365.txt`, `ru-building-slot38-L2.08363.txt`, `ru-outpost-slot38-L2.08364.txt`.
+## Script action effects: caster actions 21 and 24, placement, ownership, gold and bags (EXP-2202)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1740 | ROM2 cast body EN L2.07199 (RU L2.05953) puts its Unit (health 30, no mage bit, +0x136 = 1) on container+0x2c; the world phase deletes it once +0x136 is nonzero; it casts at most once (Medium: EN actor step differs from RU). | High / Medium / Unknown | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1741 | ROM2 action 21 casts spell low8(p4) from cell (p0, p1) at cell (p2, p3) in state 14 with power word p5, or 99 when p5 = 0; with Mind 30 the spell power is p5 for p5 up to 255 (Medium). | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1742 | ROM2 action 24 builds the same caster at cell (p0, p1) in state 13 aimed at unit U, with spell low8(p2) and power word p3 and no default; a power word of 32768 or more reads as a negative skill, power 0 (Medium). | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1743 | ROM2 actions 16 and 32 run EN L2.04906 on U or each G member: unless +0x4c bit 0x08 is set, a map call, set the bit, unlink from the unit registry, two messages; the unit is off the map (Medium). | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1744 | ROM2 actions 17 and 33 put U back at the cell [U+0x10] gives via getters L2.00488, L2.00489 (unread, Medium) or within 3 (L2.01848); action 18 puts V within 3 of U's cell (L2.07384); success re-adds the registry entry. | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1745 | ROM2 actions 19 and 22 (EN L2.07385) give U to player P: leave old group and owner list, +0x14 = P, join P+0x24 and a new group in P+0x28, clear the +0x30 bits of both players in +0x18, message, +0x204 = 1. | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1746 | ROM2 action 23 adds p0 to player P's +0x3c (named gold, R2-ENGINE-299 Medium; EN L2.01052, RU L2.02367) and sends message 0x67 with the new total; it has no lower bound and no other store. | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1747 | ROM2 action 12 builds item I into U's bag; 13 takes I out of U's bag and destroys it (take quantity Medium); 38 does that for every unit of one Session list; each sends bag message 0x76, which stores no unit or bag field in its own body. | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1748 | ROM2 action 20 drops U's bag as a sack at U's cell (Medium) and gives U an empty bag; action 28 moves U's bag into V's; when V's count is 1024 or more (Medium, unread helper) U's items stay in its unowned old bag. | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+| R2-ENGINE-1749 | ROM2 action 29 sets remaining time +0x50 = p3 on the area effects of spell p2 at cell (p0, p1); action 30 sets duration +0x42 = p1 on U's effects of spell p0; action 34 stores U health, defence or absorption. | Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+
+### R2-ENGINE-1740
+
+The cast body EN `L2.07199` (RU `L2.05953`) builds the caster Unit of actions 21 and 24 (R2-ENGINE-1741, R2-ENGINE-1742) and of the map building casters (R2-ENGINE-1561). The committed EN listings show it called through `L2.03574` (target unit) and `L2.03575` (target cell) from the action wrappers (`L2.08436`, `L2.08437`, `L2.08438`), from `L2.08439` and `L2.08440`, and from `L2.08441` and `L2.08442`; the callers other than the wrappers are not identified here.
+
+1. **Construction** (EN and RU read, equal under the mask): 0x208 bytes, constructor EN `L2.03160` (RU `L2.01273`). Its base EN `L2.05786` (RU `L2.01295`) stores owner `+0x14 = 0`, a position object at `+0x10`, and through EN `L2.03610` (RU `L2.08443`) `+0x18 = 0`, `+0x1c = 0`, `+4 = 0`. The constructor sets vtable EN `L2.04102` and calls the defaults EN `L2.01793` (RU `L2.01794`) with an empty name.
+2. **Defaults**: byte `+0x4c = 0`, `+0x54 = 0`, `+0x58 = 0`, byte `+0x136 = 1`, a new empty bag; then the stat reset EN `L2.04401` (RU `L2.00105`): health `+0x94 = 30`, `+0x96 = 30`, mana `+0x9a = 0`, `+0x88 = 20`, `+0x134 = 8`, `+0x135 = 4`. The template call EN `R2.0086` runs only for a nonempty name; the name length EN `L2.05360` (RU `L2.03298`) is `[string+4]`, and the name literal at EN `L2.08444` (RU `L2.08445`) is empty in both images. The mage test EN `L2.01136` (RU `L2.00044`) is `+0x4c & 4`, so the caster is no mage.
+3. **Cast body**: the unit joins the list at container `+0x2c` (container = `[Session+0x7c]`), its position is set to `(p0, p1)`, the spell built from the spell byte is stored at `+0x64`, Mind `+0x88 = 30`, the power word goes to `+0xa8 + 2 * sphere` with the sphere from EN `L2.08446` (RU `L2.08004`: element 2 of the spell row, read in both images), and `+0x134 = 1`, `+0x135 = 1`. No owner, group or registry entry is set.
+4. **Lifetime**: the world phase EN `L2.03435` (RU `L2.08447`) walks container `+0x2c`, calls vtable slot `+0x18` of each unit (EN `L2.08448` holds `L2.00263`, RU `L2.02945` holds `L2.00028`, the actor step), and then, when byte `+0x136` is nonzero, calls EN `L2.07014` (RU `L2.08449`), which unlinks the node and calls virtual slot `+4` with 1, deleting the unit. In the cast machine of R2-ENGINE-543 and R2-ENGINE-1262, substate 0 calls the cast routine; a nonzero return sets `+0x136 = 0`, and the end of recovery sets it to 1. Health 30 passes the actor step's health test (EN `L2.08450`). The caster therefore casts once and is deleted in the step its recovery ends (1 + 1 + r steps, r of R2-ENGINE-1262); this lifetime is Medium: the EN actor step differs from the RU step that R2-ENGINE-543 reads, and no read shows the state 13 and 14 arms running the substate machine for a unit that no initializer (`L2.01575`, `L2.02860`) prepared. When the cast routine returns 0 in the first step, `+0x136` is still 1 from the defaults and the caster is deleted after that step without a cast. The cast routine charges mana only to a mage (R2-ENGINE-544), so this caster pays none.
+5. **Readers of the list**: the search population is the 9776 committed `.txt` and `.lst` files under `experiments/EXP-2*-rom2-*/`. The pattern `add e?x, 0x2c` at the end of a line matches in 47 of them (list with counts: `evidence/derived/container2c-search.tsv`). The sites that follow a container load are the world phase (two sites; EN, RU, and the EXP-2111 world-phase listings) and the world clear EN `L2.01837`, which empties the list through `L2.01866`; the cast bodies add to the list. The other matching files are routines for other objects (status text, player serializers and loaders, dispatchers, sheet and creature-card painters, sound init, the ALM loader, player transfer) and are not classified further. No other reader of the list was found in that population (Medium); the image's other code and any displacement not written as `add e?x, 0x2c` are outside it.
+
+**Amends.** R2-ENGINE-1561: its Unknown on what removes the built unit and whether it repeats its cast, and its Medium for the mage bit and mana charge: the defaults leave the mage bit clear, the world phase deletes the unit when `+0x136` is set, and the unit makes at most one cast.
+
+**Confidence.** High for the constructor, defaults, reset, mage test, name length, sphere call, world phase and node removal in both images (all read; masked bodies equal, `evidence/derived/parity.tsv`), and for the vtable slot values. High for the world phase and node removal in both images. Medium for one cast per caster, composed with R2-ENGINE-543 and R2-ENGINE-1262 (the EN actor step differs from the RU step that R2-ENGINE-543 reads; the EN health test `L2.08450` is the only actor-step instruction read here; no read shows the state 13 and 14 arms for a unit no initializer prepared). Medium that no other routine reads or extends the list (the 47 files of item 5 within 9776 committed ROM2 listing files, not the whole image), and that a save written during the cast's few steps does not store the caster (no save writer was read).
+
+**Unknown.** Whether the caster is drawn or stands on a map cell, so that an area spell aimed at its own cell can hit it (maps 60 and 95 aim at the source cell). The run that settles it: in the original, play map 60 until trigger 3 fires, watch cell (23, 66) for a figure, and count the Poison Cloud objects and the units hit; then save one step after the trigger fires, load the save and see whether a second cast follows.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1` to `pass4` listings (unit constructor, base, defaults, reset, mage test, name length, spell sphere, RU world phase, RU node removal), `pass2/strings.tsv`, `pass3/dwords.tsv`, `evidence/derived/parity.tsv`; committed listings `en-cast-L2.07199.lst` (EXP-2190), `en-world-tick2-L2.03435.txt` (EXP-2083), `en-noderemove-L2.07014.txt` (EXP-2165), `en-world-clear.txt` (EXP-2052), `en-actor-step.txt` (EXP-2069).
+
+### R2-ENGINE-1741
+
+Action 21 (handler EN `L2.08451`, RU `L2.08452`; committed listings `en-actions-d.txt`, `ru-actions-d.txt`) has the type vector 5, 6, 5, 6, 1, 1. It calls EN `L2.03575` (RU `L2.05971`) on `[Session]+0x7c` with `low8(p0)`, `low8(p1)`, `low8(p2)`, `low8(p3)`, `p4` and `p5`, or 99 (`push 0x63`) in place of `p5` when `p5` is 0. `L2.03575` calls the cast body with `(p0, p1, p4, p5)`, then stores state `+0x54 = 0xe`, `+0x60 = p2` and `+0x61 = p3` (committed `en-cast-b.txt`, `ru-cast-b.txt`).
+
+| Operand | Meaning |
+|---|---|
+| p0, p1 | cell of the caster, the cast's source (low byte each) |
+| p2, p3 | target cell of the state 14 point cast (low byte each) |
+| p4 | spell index (low byte; the spell is built from it) |
+| p5 | power word written to the sphere skill; 0 means 99 |
+
+The caster's Mind is 30 (R2-ENGINE-1740), so the power `max(skill + Mind - 30, 0)` of R2-ENGINE-020 equals the signed power word: `p5` for 1..255, 99 for 0, clamped to 255 by the apply (EN `L2.08453`, RU `L2.00049`, read), and 0 for a word of 32768 or more (Medium: the power byte EN `L2.08454`, RU `L2.00046`, reads the skill with `movsx`; the apply reads its power from a local whose source is not in the window, and R2-ENGINE-020 gives `L2.00046` one other reader). The caster casts once and is deleted (Medium, R2-ENGINE-1740).
+
+**Amends.** R2-ENGINE-1314: the action 21 row's boundary "creation and parameter meanings".
+
+**Confidence.** High for the wrapper, the 99 default, the stores of `L2.03575` and the operand routing in both images. Medium for the power: that the cast reads its power from the skill slot the body wrote is composed from R2-ENGINE-020, and the source of the apply's power value is unread. Medium for the source cell as the cast origin (the state 14 cast of R2-ENGINE-1261 at its grade).
+
+**Unknown.** The power the spell applies with. The run that settles it: in the original, copy map 71, set node 5's power to 30 and to 200 in two copies, fire trigger 28 in each, and compare the Wall of Earth's lifetime with the original's power 99.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass4` listings (power byte, apply clamp), `evidence/derived/parity.tsv`; committed `en-actions-d.txt`, `ru-actions-d.txt` (EXP-2174), `en-cast-b.txt`, `ru-cast-b.txt` (EXP-2144).
+
+### R2-ENGINE-1742
+
+Action 24 (handler EN `L2.08455`, RU `L2.08456`) has the type vector 5, 6, 4, 1, 1, so `p0 = s0`, `p1 = s1`, `U = s2`, `p2 = s3`, `p3 = s4`. It calls EN `L2.03574` (RU `L2.05951`) with `low8(p0)`, `low8(p1)`, `U`, `p2` and `p3`; `L2.03574` calls the cast body with `(p0, p1, p2, p3)` and stores state `+0x54 = 0xd` and `+0x5c = U` (committed `en-cast-a.txt`, `ru-cast-a.txt`). So the caster stands at cell `(p0, p1)` and casts spell `low8(p2)` at unit U with power word `p3`; there is no default, so `p3 = 0` gives power 0 (Medium). The lifetime is that of R2-ENGINE-1740 (Medium). A power word of 32768 or more is a negative signed skill and gives power 0 by R2-ENGINE-020 (Medium).
+
+**Amends.** R2-ENGINE-1314: the action 24 row's boundary "final effect".
+
+**Confidence.** High for the wrapper and stores in both images. Medium for the power value, as in R2-ENGINE-1741, and for the case of a U that is dead, off the map or null (not read).
+
+**Unknown.** Whether power 32768 gives power 0. The run that settles it: in the original, play map 96 from its start (trigger 0 fires at once) and compare the Stone Curse on unit 20 (power 100) with units 21 and 22 (power 32768).
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/census/target-nodes.tsv`; committed `en-actions-d.txt`, `ru-actions-d.txt` (EXP-2174), `en-cast-a.txt`, `ru-cast-a.txt` (EXP-2144).
+
+### R2-ENGINE-1743
+
+`L2.04906` (EN; RU `L2.04905`, equal under the mask) on unit U: when `+0x4c & 8` is set it returns. Otherwise it calls EN `L2.03601(U)` on `[L2.01839]` (body unread), sets `+0x4c |= 8`, unlinks U from the unit registry `[L2.00325]+4` (`L2.04533`), and sends two messages through EN `L2.05694` on `L2.00994`: `(U, 1, 0)` and `(U, 0, [U+0x14])`. Action 16 calls it on U; action 32 calls it on each member of G (R2-ENGINE-1314). The unit is taken off the map and out of the registry; that `L2.03601` clears its cells is Medium (body unread). A second call on the same unit does nothing.
+
+**Amends.** R2-ENGINE-1314: the boundaries of actions 16 and 32.
+
+**Confidence.** High for the body in both images. Medium for the map effect of `L2.03601` and for the content of the two messages.
+
+**Unknown.** What a player sees. The run that settles it: in the original, play map 10 until the trigger holding node 14 (action 16 on unit 36) fires, and check whether unit 36 disappears, stops acting and still counts for check 1.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1/listings/en-bit8-L2.04906.txt`, `ru-bit8-L2.04905.txt`.
+
+### R2-ENGINE-1744
+
+1. **`L2.01848`** (EN; in the same RU window): calls the placement `L2.00312(x, y, 0)` with the cell the getters `L2.00488` and `L2.00489` (unread, Medium) give on `[U+0x10]`, and on failure again with radius 3. On success it adds U to the registry `[L2.00325]` (`L2.00202`), clears `+0x4c` bit 0x08, calls EN `L2.08457(U)` and sends `L2.01056(U, 0, 0x10, 0xffb, 0, 0)` and `L2.05694(U, 0, 0)` on `L2.00994`, and returns 1. On failure it builds the diagnostic at EN `L2.08458` and returns 0. Action 17 calls it on U; action 33 on each member of G (R2-ENGINE-1450).
+2. **Action 18**: `L2.04906` on U (R2-ENGINE-1743), then `L2.07384(x, y, 3)` on V with U's cell: placement with radius 3, the same registry add, bit clear and `L2.01056` message; on failure the diagnostic at EN `L2.08459` and 0. V takes U's place.
+3. **Placement `L2.00312(x, y, r)`** (EN; RU `L2.00313`): `(r * r) / 2 + 1` random tries at `x - r/2 + rand(r)` and `y - r/2 + rand(r)`, each tested by EN `L2.02718`; when all fail and `r > 0`, a square scan. When `Session+0x74` is nonzero it skips rows `y < 12`. Success places through EN `L2.00314`.
+
+**Amends.** R2-ENGINE-1314: the boundaries of actions 17, 18 and 33.
+
+**Confidence.** High for the three bodies in both images and for the masked RU equality of `L2.04906..` and `L2.00312`. Medium for the cell the placement starts from (unread getters `L2.00488` and `L2.00489`, R2-ENGINE-1450), for the cell test `L2.02718` and the place call `L2.00314` (bodies unread), and so for which cells count as free.
+
+**Unknown.** Which cells the placement accepts. The run that settles it: in the original, play map 31 until the trigger holding node 36 (action 18, units 101 and 165) fires, with units standing around unit 101, and record the cell where unit 165 appears.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1/listings/en-bit8-L2.04906.txt`, `ru-bit8-L2.04905.txt`, `evidence/native/pass2/listings/en-place-L2.00312.txt`, `ru-place-L2.00313.txt`.
+
+### R2-ENGINE-1745
+
+`L2.07385(U, P)` (EN, on container `[Session+0x7c]`; RU in the window `L2.06029..L2.05953`, equal under the mask) with old owner O = `[U+0x14]`:
+
+1. when `U+0x70` (group) is nonzero, the group's remove `L2.04986(U)`; U is unlinked from `O+0x24` (`L2.04533`);
+2. `U+0x14 = P`; U joins `P+0x24` (`L2.00202`);
+3. a new 0x50-byte group (`L2.04046`) is added to `P+0x28` (`L2.04047`), U joins it (`L2.04535`), and the group is passed to `L2.02714` on `[L2.01066]`;
+4. the word `U+0x18` loses the bits of `O+0x30` and of `P+0x30`;
+5. message `L2.01056(U, 0, -1, 0xffb, 0, 0)` on `L2.00994`; `U+0x204 = 1`.
+
+Action 19 calls it with U and P; action 22 with each member of G and P (R2-ENGINE-1314). Each unit given to P is in its own new group.
+
+**Amends.** R2-ENGINE-1314: the boundaries of actions 19 and 22.
+
+**Confidence.** High for the body in both images. Medium for the meaning of `U+0x18`, `P+0x30`, `U+0x204` and the call `L2.02714`, and for the group helpers' list effects at the grade of the group claims they come from.
+
+**Unknown.** What the `+0x18` mask and `+0x204` do. The run that settles it: in the original, play map 102 until the trigger holding node 25 (action 19, unit 217 to player 1) fires and see whether the unit becomes controllable and changes colour.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1/listings/en-container-L2.08460.txt`, `ru-container-L2.06029.txt`.
+
+### R2-ENGINE-1746
+
+`L2.01052(N, x)` (EN; RU `L2.02367`, equal under the mask) on player P: `P+0x3c += N`, then message `0x67` with the new total, `x` and P through EN `L2.01047`. Action 23 passes `(p0, 0)`. `+0x3c` is the field named gold, which the `#create Gold` command adds to (R2-ENGINE-299, Medium). The body has no bound test, so a negative p0 lowers gold below 0.
+
+**Amends.** R2-ENGINE-1314: the boundary of action 23.
+
+**Confidence.** High for the body in both images. Medium for the message's use.
+
+**Unknown.** Whether the gold counter on screen follows message 0x67. The run that settles it: in the original, play map 10 until the trigger holding node 18 (action 23, player 1, 700) fires and read the gold counter before and after.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1/listings/en-gold-L2.01052.txt`, `ru-gold-L2.02367.txt`.
+
+### R2-ENGINE-1747
+
+1. **Action 12**: the item factory EN `L2.05906` (RU `L2.08461`, same shape: kind `(I >> 8) & 0xf`, R2-ENGINE-1141) builds item I; a nonzero item goes into U's bag `U+0x7c` (`L2.01055`), then the bag message.
+2. **Action 13**: `L2.00495(I)` takes item I out of U's bag; a nonzero item is destroyed through virtual slot `+4` with 1; then the bag message.
+3. **Action 38**: for each unit of the list `[[Session+0xa50]+0xa456c]+4`, the same take and destroy, then the bag message.
+4. **Bag message** EN `L2.00497` (RU `L2.00496`): for a unit whose class (`L2.05803`) is 0x21..0x3f it builds message 0x76 in `L2.08462` listing the bag's items (`L2.04797`) and sends it (`L2.00871`). It stores no unit or bag field in its own body (105 instructions read; its callees `L2.04797` and `L2.00871` are unread).
+
+**Amends.** R2-ENGINE-1314: the boundaries of actions 12, 13 and 38.
+
+**Confidence.** High for the bag message in both images and for the item factory shape in RU. Medium that the action 38 list holds every unit on the map (its producer is unread) and for the take quantity of `L2.00495` (R2-ENGINE-1699 at its grade).
+
+**Unknown.** Which units the action 38 list holds. The run that settles it: in the original, play map 102 until the trigger holding node 24 (action 38, item 60) fires while units of two players and a sack hold item 60, then check every inventory.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1/listings/en-notify-L2.00497.txt`, `ru-notify-L2.00496.txt`, `evidence/native/pass2/listings/ru-item-factory-L2.08461.txt`; committed `en-actions-c.txt` (EXP-2174).
+
+### R2-ENGINE-1748
+
+1. **Action 20**: `L2.01810(bag, 0, 0)` (EN, read) calls `L2.08463(U+0x10, bag, 0, 0)` on the sack list `[container+8]`, the sack drop of R2-ENGINE-940: the bag lies as a sack at U's cell with gold 0. The wrapper then gives U a new empty bag: EN `L2.01737` (RU `L2.01738`) runs the base `L2.08464` and stores `+0x1c = 0x7fff`, `+0x20 = 0`.
+2. **Action 28**: `L2.01786` (EN; RU `L2.01743`) on V's bag with U's bag: when U's bag is null or V's count (`L2.08465`) is 1024 or more it returns at once. Otherwise it takes the first entry with `L2.01646(0, 1)` (EN; RU `L2.01651`) and inserts it into V's bag (`L2.01055`) until the take returns 0, then clears (`L2.08466`) and destroys (`L2.07042(1)`; callees unread) U's bag. The wrapper then stores a new empty bag at `U+0x7c` in both cases, so on the early return U's old bag stays allocated with no owner (inference from the EN wrapper read in EXP-2174, Medium); the 1024 threshold is Medium, because the compare (`cmp eax, 0x400; jl`, signed) is read but the compared value comes from the unread `L2.08465`. The count is tested once, before the loop.
+
+**Amends.** R2-ENGINE-1314: the boundaries of actions 20 and 28.
+
+**Confidence.** High for the bodies of the merge, the take and the bag constructor in both images and for `L2.01810` in EN. Medium for the sack drop in EN (R2-ENGINE-940 reads RU) and for the count helper `L2.08465` (unread).
+
+**Unknown.** The EN sack drop body and the count helper. The run that settles the visible part: in the original, play map 103 until the trigger holding node 33 (action 20, unit 131) fires and check for a sack holding the unit's items at its cell.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/native/pass1/listings/en-bag-merge-L2.01786.txt`, `ru-bag-merge-L2.01743.txt`, `en-bag-ctor-L2.01737.txt`, `ru-bag-ctor-L2.01738.txt`, `evidence/native/pass2/listings/en-sack-drop-L2.01810.txt`, `en-bag-take-L2.01646.txt`, `ru-bag-take-L2.01651.txt`.
+
+### R2-ENGINE-1749
+
+No new body is read for these actions; the statement composes the wrapper reads of R2-ENGINE-1314 and R2-ENGINE-1450 with the field claims named.
+
+1. **Action 29**: the cell lookup of `p0 + 256 * p1` returns the six effect-layer pointers of the cell (R2-ENGINE-053); objects with word `+0xc == p2` get `+0x50 = low16(p3)`. `+0x0c` is the spell index and `+0x50` the remaining time of an area effect (R2-ENGINE-1400). The shipped node in map 71 sets the Wall of Earth at (66, 50) to 1, which follows action 21 node 5 casting Wall of Earth at that cell.
+2. **Action 30**: effects in `U+0x20` with word `+0xc == p0` get duration `+0x42 = low16(p1)` (R2-ENGINE-1236, R2-ENGINE-1534).
+3. **Action 34**: `p0` 6, 15 or 16 stores `low16(p1)` at `U+0x94` (health), `+0xbe` (defence) or `+0xc0` (absorption) (R2-ENGINE-1450, R2-ENGINE-777); the notify `L2.07789` is not interpreted (R2-ENGINE-1695).
+
+**Confidence.** Medium: each field meaning is taken at the grade of its source claim, and the step that ends an effect at the new time is not read here (R2-ENGINE-1568).
+
+**Unknown.** Whether a remaining time of 1 ends the wall at the next effect step. The run that settles it: in the original, play map 71 until triggers holding nodes 5 and 6 fire and record the step at which the Wall of Earth at (66, 50) disappears.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/census/target-nodes.tsv`, `evidence/derived/census-counts.tsv`.
+
 ## ROM2 script authoring: type-9 operand, action 6 arms, word 65538, node fields, outcome and areas (EXP-2201)
 
 | ID | Claim | Confidence | Status | Evidence |

@@ -514,27 +514,83 @@ No accepted-index domain follows from these DWORD accesses.
 |---:|---|---|
 | 2 | p0 and zeros to event producer | Event interface above; delivery separate |
 | 6 | p0 selects nested 18-cell switch; arms pass G, U, low8(p1/p2) | Arms read: see Action 6 selectors (R2-ENGINE-1726); play meaning of the orders Medium |
-| 12 | I lookup; nonzero return to U+0x7c collection helper; notify U | Creation/mutation helpers unread |
-| 13 | I extraction helper on U+0x7c; nonzero return gets virtual slot+4(1); notify U | Extraction quantity and callback unread |
-| 16, 17 | U to EN L2.04906 or L2.01848 respectively | Final effects unread |
-| 18 | U to L2.04906, then its location and constant 3 to L2.07384 on V | Callees unread |
-| 19, 22 | U,P or each iterated G member,P to EN L2.07385 | Ownership effect and membership unproved |
-| 20 | Calls U helper; allocates/constructs 0x24-byte object and replaces U+0x7c | Constructor and old collection effects unread |
-| 21 | low8(p0..p3), p4, p5 (or 99 when p5=0) to EN L2.03575 | Creation and parameter meanings unread |
-| 23 | p0,0 to EN L2.01052 on P | Final effect unread |
-| 24 | low8(p0/p1), U, p2/p3 to EN L2.03574 | Final effect unread |
+| 12 | I lookup; nonzero return to U+0x7c collection helper; notify U | Final effect below (R2-ENGINE-1747) |
+| 13 | I extraction helper on U+0x7c; nonzero return gets virtual slot+4(1); notify U | Final effect below (R2-ENGINE-1747) |
+| 16, 17 | U to EN L2.04906 or L2.01848 respectively | Final effects below (R2-ENGINE-1743, R2-ENGINE-1744) |
+| 18 | U to L2.04906, then its location and constant 3 to L2.07384 on V | Final effect below (R2-ENGINE-1744) |
+| 19, 22 | U,P or each iterated G member,P to EN L2.07385 | Final effect below (R2-ENGINE-1745) |
+| 20 | Calls U helper; allocates/constructs 0x24-byte object and replaces U+0x7c | Final effect below (R2-ENGINE-1748) |
+| 21 | low8(p0..p3), p4, p5 (or 99 when p5=0) to EN L2.03575 | Final effect below (R2-ENGINE-1740, R2-ENGINE-1741) |
+| 23 | p0,0 to EN L2.01052 on P | Final effect below (R2-ENGINE-1746) |
+| 24 | low8(p0/p1), U, p2/p3 to EN L2.03574 | Final effect below (R2-ENGINE-1742) |
 | 25 | Byte descriptor from p0..p7, with p4=0 copying cell (p2, p3) into both source (+0x36,+0x37) and target (+0x38,+0x39) and passing the packed key to a call on [Session+0xa50] (callee outside the committed window; EN only read) | Consumer uses (+0x36,+0x37) literally without zero-substitution (R2-ENGINE-1698) |
-| 28 | Calls helper with U/V collections, replaces U+0x7c, notifies both | Complete transfer semantics unread |
-| 29 | p0+256*p1 lookup; six returned pointers; matching u16+0x0c==p2 gets u16+0x50=low16(p3) | Returned pointer kinds unproved here |
-| 30 | Iterates U+0x20; matching u16+0x0c==p0 gets u16+0x42=low16(p1) | Collection identity/membership unread |
-| 32 | Iterates G and calls EN L2.04906 | Final effect unread |
-| 33 | L2.01848 on each member of G | Final effect unread (R2-ENGINE-1450) |
-| 34 | p0 6, 15, 16 store low16 p1 at U+0x94, +0xbe, +0xc0; other p0 store nothing; notify L2.07789 | Final effect unread (R2-ENGINE-1450) |
-| 38 | I extraction per iterated terrain unit, optional virtual slot+4(1), refresh call | Existing extraction boundary above |
+| 28 | Calls helper with U/V collections, replaces U+0x7c, notifies both | Final effect below (R2-ENGINE-1748) |
+| 29 | p0+256*p1 lookup; six returned pointers; matching u16+0x0c==p2 gets u16+0x50=low16(p3) | Final effect below (Medium; R2-ENGINE-1749) |
+| 30 | Iterates U+0x20; matching u16+0x0c==p0 gets u16+0x42=low16(p1) | Final effect below (Medium; R2-ENGINE-1749) |
+| 32 | Iterates G and calls EN L2.04906 | Final effect below (R2-ENGINE-1743) |
+| 33 | L2.01848 on each member of G | Final effect below (R2-ENGINE-1450, R2-ENGINE-1744) |
+| 34 | p0 6, 15, 16 store low16 p1 at U+0x94, +0xbe, +0xc0; other p0 store nothing; notify L2.07789 | Final effect below (Medium; R2-ENGINE-1450, R2-ENGINE-1749) |
+| 38 | I extraction per iterated terrain unit, optional virtual slot+4(1), refresh call | Final effect below (R2-ENGINE-1747) |
 
 The delegated action table is a wrapper contract in both roots, with EN
 callee addresses for reference. It does not assign callee semantics from
-editor names. — R2-ENGINE-1314
+editor names. — R2-ENGINE-1314 (amended)
+
+### Final action effects
+
+Ordered by scenario nodes per root (equal in EN and RU; R2-ASSET-247). Each row
+states what the action does in the game; a row that rests on an unread helper carries
+(Medium), and so does every row that depends on the caster lifetime or an unread getter.
+
+| Action | Nodes | Effect | Claim |
+|---:|---:|---|---|
+| 13 | 21 | Takes item I out of U's bag and destroys it (take quantity Medium); sends the bag message 0x76, which stores nothing in its own body | R2-ENGINE-1747 |
+| 16 | 20 | Takes U off the map (Medium, unread `L2.03601`) and out of the unit registry and sets +0x4c bit 0x08; does nothing when the bit is set | R2-ENGINE-1743 |
+| 28 | 18 | Moves every item of U's bag into V's bag and gives U an empty bag; when V's count is 1024 or more (Medium, unread count helper), U's items stay in its old bag, which nothing owns (Medium) | R2-ENGINE-1748 |
+| 32 | 13 | Action 16 on each member of G (Medium as action 16) | R2-ENGINE-1743 |
+| 19 | 10 | Gives U to player P: new owner, owner list, a new group of its own, cleared +0x18 bits, +0x204 = 1 | R2-ENGINE-1745 |
+| 23 | 10 | Adds p0 to player P's +0x3c (named gold, Medium), without a bound, and sends message 0x67 | R2-ENGINE-1746 |
+| 33 | 9 | Action 17 on each member of G (Medium as action 17) | R2-ENGINE-1744 |
+| 12 | 8 | Builds item I and puts it into U's bag; sends the bag message | R2-ENGINE-1747 |
+| 20 | 7 | Drops U's bag as a sack at U's cell with gold 0 (Medium, EN sack drop unread) and gives U an empty bag | R2-ENGINE-1748 |
+| 38 | 7 | Action 13 for every unit of one Session list (that it is every unit is Medium) | R2-ENGINE-1747 |
+| 21 | 5 | Casts spell low8(p4) once from cell (p0, p1) at cell (p2, p3) with power word p5, 99 when p5 = 0; the caster is then deleted (Medium) | R2-ENGINE-1740, R2-ENGINE-1741 |
+| 22 | 4 | Action 19 on each member of G | R2-ENGINE-1745 |
+| 29 | 4 | Sets remaining time p3 on the area effects of spell p2 at cell (p0, p1) (Medium) | R2-ENGINE-1749 |
+| 24 | 3 | Casts spell low8(p2) once from cell (p0, p1) at unit U with power word p3, no default; the caster is then deleted (Medium) | R2-ENGINE-1740, R2-ENGINE-1742 |
+| 30 | 3 | Sets duration p1 on U's effects of spell p0 (Medium) | R2-ENGINE-1749 |
+| 17 | 2 | Puts U back on the map at the cell its stored position gives (Medium, unread getters), else within 3 cells (Medium, unread free-cell test); re-adds it to the registry and clears bit 0x08 | R2-ENGINE-1744 |
+| 18 | 2 | Takes U off the map (Medium) and puts V within 3 cells of U's cell (Medium, unread free-cell test) | R2-ENGINE-1744 |
+| 34 | 1 | Stores p1 as U's health, defence or absorption for p0 6, 15 or 16 (Medium) | R2-ENGINE-1749 |
+
+With Mind 30 the spell power of actions 21 and 24 equals the power word for 1
+to 255, is clamped to 255 above, and is 0 for a word of 32768 or more (Medium).
+— R2-ENGINE-1741, R2-ENGINE-1742
+
+### Shipped caster actions 21 and 24
+
+Both roots hold the same scenario nodes; RU also holds one loose map node. Spell
+names follow R2-ENGINE-1536 and R2-ENGINE-025 (Medium; that p4 is a Spells row number is not read).
+
+| Map | Node | Action | Source | Target | Spell | Power | Trigger |
+|---|---:|---:|---|---|---|---:|---|
+| 53 | 14 | 21 | (15, 121) | cell (13, 22) | Blizzard | 100 | none |
+| 60 | 6 | 21 | (23, 66) | cell (23, 66) | Poison Cloud | 100 | 3, four times |
+| 71 | 5 | 21 | (66, 47) | cell (66, 50) | Wall of Earth | 99 | 28 |
+| 95 | 26 | 21 | (66, 25) | cell (66, 25) | Poison Cloud | 100 | 0 |
+| 95 | 27 | 21 | (69, 27) | cell (69, 27) | Poison Cloud | 100 | 0 |
+| 96 | 15 | 24 | (26, 69) | unit 20 | Stone Curse | 100 | 0 |
+| 96 | 16 | 24 | (26, 69) | unit 21 | Stone Curse | 32768 | 0 |
+| 96 | 17 | 24 | (26, 69) | unit 22 | Stone Curse | 32768 | 0 |
+| Valley2 (RU loose) | 2 | 24 | (105, 27) | unit 556 | Stone Curse | 255 | 0 |
+
+Map 60 trigger 3 fires when check 15 for player 1 and cell (23, 66) gives at
+most 2; triggers 71/28, 95/0 and 96/0 compare constant 0 with constant 0. These
+four have latch flag 1 and fire once. RU Valley2 trigger 0 needs check 21 on
+object 551 and R[74] both 0 and has latch flag 0. No shipped action 21 node has
+p5 = 0. — R2-ASSET-379
+
+### Check result contracts
 
 | Check | Read result contract | Boundary |
 |---:|---|---|

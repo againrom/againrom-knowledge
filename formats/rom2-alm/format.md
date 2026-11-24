@@ -75,6 +75,13 @@ individual confidence boundaries. Unread helpers do not establish complete
 player effects. — R2-ENGINE-1312, R2-ENGINE-1313, R2-ENGINE-1314,
 R2-ENGINE-1315
 
+The final effects of actions 12, 13, 16 to 24, 28 to 30, 32 to 34 and 38 are read
+at their own grades and listed in the action table of [script.md](script.md);
+the shipped action 21 and 24 nodes and their triggers are tabulated there too.
+— R2-ENGINE-1740, R2-ENGINE-1741, R2-ENGINE-1742, R2-ENGINE-1743,
+R2-ENGINE-1744, R2-ENGINE-1745, R2-ENGINE-1746, R2-ENGINE-1747,
+R2-ENGINE-1748, R2-ENGINE-1749, R2-ASSET-379
+
 The packed full-word action's downstream consumer remains Unknown.
 No stored parameter among all 142 maps is 8000..9999, although the action
 compiler and executor have a positive deferred-reference path. Its pointer
@@ -686,21 +693,21 @@ the 8 RU records carry count 1..3 (the sack binding of 5 RU mode-5 elements is R
 The turn routine, once per 16 session ticks (Medium), runs a consumer that walks the objects in the session list. For
 each object the spell table at Session `+0xf8` gives T; a unit chosen by the relation bit against T `+0xa` is passed to
 the call of `L2.05951`. The turn routine runs when Session `+4` mod 16 is 6, so a caster with a candidate casts once per 16
-session ticks, with no mana, timer or cooldown test in the consumer, pick, fill and cast entry (whether the built unit's own cast pays or fails on mana is Medium; whether it repeats its cast is Unknown). Read in RU; the EN call site of the consumer and the
-EN type-9 arm are Medium. — R2-ENGINE-1007, R2-ENGINE-1008, R2-ENGINE-1562
+session ticks, with no mana, timer or cooldown test in the consumer, pick, fill and cast entry (the built unit has no mage bit, so its own cast pays no mana, and it casts once, Medium). Read in RU; the EN call site of the consumer and the
+EN type-9 arm are Medium. — R2-ENGINE-1007, R2-ENGINE-1008, R2-ENGINE-1562, R2-ENGINE-1740
 
 The candidates are the units of the map list whose cell is within `+0x00` cells (Chebyshev (Medium) distance, a square; the absolute value, the position-word encoding and the list builder are unread) of the record's
 cell, then the relation filter; no Spell Max Range is compared in the bodies read. Map 72 holds radii 5 to 8 and spells
 10, 2, 16, 6, 5 and 18, power 255 except two Stone Curse records. — R2-ENGINE-1560, R2-ASSET-334
 
 The cast body builds a new Unit object in state 13 with the record's spell, the power byte as its skill in the spell's
-sphere, wind-up 1 and recovery 1, aimed at the chosen unit, and the cast routine then applies as for any unit; what removes that
-unit afterwards is Unknown. — R2-ENGINE-1561
+sphere, wind-up 1 and recovery 1, aimed at the chosen unit, and the cast routine then applies as for any unit. The world phase deletes
+that unit when its recovery ends, so it casts once (Medium). — R2-ENGINE-1561 (amended), R2-ENGINE-1740
 
 Field ranges: spell 1..29; power 2..255; `+0x00` 1..9 on mode 4 and 0 or 2 on mode 5; cell low bytes up to 243 and
 242. The consumer tests no range of the spell or power. `+0x00` is the radius in cells of the candidate fill; the power byte
-is the skill of the built unit in the spell's sphere, and whether it equals the spell power is Unknown. — R2-ENGINE-1009,
-R2-ENGINE-1560, R2-ENGINE-1561
+is the skill of the built unit in the spell's sphere; with the unit's Mind of 30 it equals the spell power (Medium). — R2-ENGINE-1009,
+R2-ENGINE-1560, R2-ENGINE-1561, R2-ENGINE-1740, R2-ENGINE-1741
 
 Type-4 `+0x0e` is resolved at load into the building's `+0x14`. The built object copies that pointer, and the consumer
 uses its word `+4` as the row of the relation matrix. A call of `L2.01703` whose computed value is not below its target's word `+0x42` removes the objects whose

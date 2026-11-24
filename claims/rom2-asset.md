@@ -4785,3 +4785,41 @@ check compiles; reference resolution is not modelled.
 
 **Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) `evidence/census.py`,
 `evidence/derived/census/*.tsv`.
+
+## ROM2 script nodes: shipped caster actions 21 and 24 (EXP-2202)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-379 | Both ROM2 roots ship 5 action 21 nodes (4 in triggers of maps 60, 71, 95) and 3 action 24 nodes (map 96) in the scenario maps, RU also loose Valley2.alm node 2; 4 of their 5 triggers fire once, 3 on a constant check. | High / Medium | ● active (branch candidate) | [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) |
+
+### R2-ASSET-379
+
+Census of the 46 scenario maps of each root and the loose maps in each root directory (`evidence/census/inputs.tsv` names every map by SHA256). EN and RU scenario rows are equal. Slot values are listed in operand order (R2-ENGINE-1741, R2-ENGINE-1742); spell names follow R2-ENGINE-1536 (Poison Cloud 6, Blizzard 7, Wall of Earth 17) and R2-ENGINE-025 (Stone Curse 18).
+
+| Map | Node | Action | Operands | Trigger |
+|---|---:|---:|---|---|
+| 53 | 14 | 21 | from (15, 121) at (13, 22), Blizzard, power 100 | none |
+| 60 | 6 | 21 | from (23, 66) at (23, 66), Poison Cloud, power 100 | 3, four times |
+| 71 | 5 | 21 | from (66, 47) at (66, 50), Wall of Earth, power 99 | 28 |
+| 95 | 26 | 21 | from (66, 25) at (66, 25), Poison Cloud, power 100 | 0 |
+| 95 | 27 | 21 | from (69, 27) at (69, 27), Poison Cloud, power 100 | 0 |
+| 96 | 15 | 24 | from (26, 69) at unit 20, Stone Curse, power 100 | 0 |
+| 96 | 16 | 24 | from (26, 69) at unit 21, Stone Curse, power 32768 | 0 |
+| 96 | 17 | 24 | from (26, 69) at unit 22, Stone Curse, power 32768 | 0 |
+| Valley2 (RU loose) | 2 | 24 | from (105, 27) at unit 556, Stone Curse, power 255 | 0 |
+
+Triggers (comparison codes and check results per R2-ENGINE-059 and R2-ENGINE-043; check bodies per R2-ENGINE-1315):
+
+- Map 60 trigger 3 runs node 6 in all four action slots when check 5 (check 15: player 1, cell (23, 66)) is at most check 12 (constant 2); latch flag 1.
+- Map 71 trigger 28 runs node 5 alone; constant 0 == constant 0; latch flag 1.
+- Map 95 trigger 0 runs action 2, nodes 26 and 27, and an action 28 node; constant 0 == constant 0; latch flag 1.
+- Map 96 trigger 0 runs action 2 and nodes 15, 16, 17; constant 0 == constant 0; latch flag 1.
+- RU Valley2 trigger 0 runs node 2 and an action 8 node when check 1 (check 21 on the type 9 operand 551) == 0 and check 3 (R[74]) == 0; latch flag 0.
+
+No EN loose map holds action 21 or 24. Action 21 has no node with p5 = 0 in either root, so the 99 default is never used by a shipped map.
+
+**Confidence.** High for the census (generated, then reproduced byte for byte). Medium for the spell names (R2-ENGINE-025, R2-ENGINE-1536; that p4 is a Spells row number is not read). Medium for the plain meanings of checks 15 and 21 (R2-ENGINE-1315 helper results) and for when the latch flag 0 trigger repeats: it depends on whether the action 8 node changes R[74], which the census does not read.
+
+**Unknown.** How often Valley2 trigger 0 fires. The run that settles it: in the original RU program, load the loose Valley2 map, destroy object 551 and count the Stone Curse casts at unit 556.
+
+**Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/census.py`, `evidence/census/target-nodes.tsv`, `action21-24-triggers.tsv`, `action21-24-checks.tsv`, `inputs.tsv`, `evidence/README.md` (reproduction receipt).

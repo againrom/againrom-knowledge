@@ -262,7 +262,9 @@ The layout row "ROM2-only object list" and the Unknown "Nonempty Sack/extra rest
 
 Bytes 0 to 3 of the block are the spell, power and cell bytes of the map record; bytes 4 and 5 are not written by the
 arm. At run time the caster's target is chosen among the units within the record's radius and the cast entry `L2.05951` called
-on the chosen unit, which builds a transient Unit for the cast. — R2-ENGINE-1008, R2-ENGINE-1560, R2-ENGINE-1561
+on the chosen unit, which builds a transient Unit for the cast. The world phase deletes that Unit when its recovery
+ends (Medium); whether a save written during those few steps stores it is not read. — R2-ENGINE-1008, R2-ENGINE-1560,
+R2-ENGINE-1561, R2-ENGINE-1740
 
 ## Player body
 
