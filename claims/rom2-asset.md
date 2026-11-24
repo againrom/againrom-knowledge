@@ -4807,6 +4807,81 @@ The `world.res` entry `data/map.reg` of each root, read through the `&YA1` gramm
 
 **Amends.** R2-ENGINE-1472's "the values in the file are unread": read.
 
+## ROM2 cell event 23 in shipped maps: mission 53 and the census (EXP-2204)
+
+Population: every `.alm` member of every top-level `.res` archive of the EN and RU roots (only `scenario.res` holds
+maps; every archive's envelope parses), 59 EN and 83 RU maps. Arrays are read in file order: type-7 actions, checks,
+triggers. A pad is a type-4 element of kind 48, the Data.bin Buildings row Teleport Pad (R2-ASSET-317).
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-386 | ROM2 53.alm (EN = RU) holds action node 37 (op 25: 23, 255, 15, 121, 15, 121, 13, 22) as the one action of trigger 25, whose one condition row compares check 38 (op 7: 89, 15, 121) with check 6 (op 65538: 4) under comparison code 5. | High | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+| R2-ASSET-387 | ROM2 maps (59 EN, 83 RU) hold 9 action 25 nodes per root, all with p0 = 23, and 16 EN / 18 RU type-9 records (mode below 4, cell nonzero) with event byte 23 handed to the writer; 18 event-23 cells per root lie at a pad's base + (1, 1). | High | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+
+### R2-ASSET-386
+
+`53.alm` has the same SHA256 in both roots,
+`06ff7fd431b96ace1376f4491eea5d61d5230a7dc252dbd0a4c12b3656dc2c33`. It holds 87 type-4 elements, no type-9 element,
+54 actions, 41 checks and 27 triggers.
+
+- Trigger index 25 (latch flag 1) has one condition row: left check ID 38 (index 35, op 7, values 89, 15, 121)
+  against right check ID 6 (index 5, op 65538, value 4) under comparison code 5 (the signed comparison codes are
+  R2-ENGINE-059).
+- Its one action is ID 44, action index 37, op 25, values 23, 255, 15, 121, 15, 121, 13, 22, 0, 0.
+- Action 25 then writes event 23, power 255, source (15, 121), target (13, 22) on cell (15, 121) (R2-ENGINE-1775,
+  R2-ENGINE-1776), and a unit that reaches the centre of (15, 121) is passed to the cell move with target (13, 22)
+  (R2-ENGINE-1778; Medium, see below).
+- The map has no pad, so the entry cell shows no Teleport Pad structure. Action index 9 (ID 14, op 21, values 15,
+  121, 13, 22, 7, 100) is in no trigger.
+
+Among the type-9 elements (none), the 27 triggers and the direct callers of `L2.03589` (R2-ENGINE-1776), the event on
+cell (15, 121) is written only by trigger 25's action; before it fires that cell holds no event. Medium: the scan of
+the callers is limited to E8/E9 and 4-byte values, a map state entered by load rather than from the start is not read,
+and the cell-move callers in the script handler range are unread.
+
+**Confidence.** High for the fields (census of the map; arrays in file order). Medium that a unit is moved
+(R2-ENGINE-1778: High / Medium, refusal Medium). Medium for "unit 89 within 4 of the cell" and for "the register of
+check 6 keeps 4": check op 7's helper `L2.03287` was not read (R2-ENGINE-1315), and the right operand is a map result
+register initialised from parameter 0 (R2-ENGINE-043), not a constant; no committed table searches the actions of map 53
+for a writer of register 6.
+
+**Unknown.** When check 38 is true. A run of the original settles it: load a copy of mission 53 and record check 38's
+result while unit 89 approaches cell (15, 121).
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) `evidence/census.py`, `evidence/derived/census/a25-nodes.tsv`, `a25-trigger-checks.tsv`, `maps.tsv`, `inputs.tsv`.
+
+### R2-ASSET-387
+
+Action 25 nodes, both roots alike: 53 has one (index 37), and 93, 94, 95, 96 have two each (index 0 with cell
+(102, 34) and target (74, 72); index 7 with its own cell). Every node has p0 = 23, p4 nonzero and (p4, p5) = (p2, p3),
+and every node is the action of one trigger. No action 25 cell is also a type-9 event cell of its map. Eight per root
+have a pad whose base cell is the event cell − (1, 1); the 53 node has none.
+
+Type-9 records (R2-ASSET-230): the stage writes an event only for mode below 4 and a nonzero cell (R2-ENGINE-1776).
+
+| Root | Mode < 4, cell, event 23 | Of them, target = own cell | Event 23 at cell (0, 0) | Mode 4, byte 23 |
+|---|---|---|---|---|
+| EN | 16 (93: 7, 94: 2, 95: 5, 96: 2) | 5 | 1 | Inout, sholotl |
+| RU | 18 (the same and wsordeal: 2) | 6 | 3 | Inout, sholotl |
+
+Records at cell (0, 0) are not written by the stage; mode-4 records are structure casters (R2-ENGINE-1006), not cell
+events. Event-23 cells, type-9 and action 25 together: 25 EN, 27 RU; 18 per root lie at a pad's base + (1, 1).
+Pads: 45 EN (27 with no event at base + (1, 1)), 56 RU (38).
+
+So the moves a map can make are, at Medium: 11 EN / 12 RU type-9 records with a target other than their own cell,
+handed to the event writer at load, and the 9 action 25 nodes per root, handed to it when their trigger fires; a move
+needs the unrefused write, the unrefused cell move and a unit that reaches the step. A record whose target is its own
+cell passes the unit's own cell to the cell move.
+
+**Confidence.** High for the counts (generated, then reproduced byte for byte into scratch). Medium that a written
+record moves a unit: it rests on R2-ENGINE-1778, and a write refused by bit 0 of the `+0x20000` byte map
+(R2-ENGINE-1776) is not modelled. Medium that the pad offset is the pad's centre: the pad's size is not read here.
+
+**Unknown.** Whether a pad without an event moves a unit. A run of the original settles it: in a copy of a map with
+such a pad, walk a unit onto the cell at its base + (1, 1).
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) `evidence/census.py`, `evidence/derive.py`, `evidence/derived/census/{summary,a25-nodes,t9-cell-events,t4-kind48}.tsv`, `evidence/derived/join/{event23-cells,kind48-events}.tsv`.
+
 ## ROM2 script nodes: shipped caster actions 21 and 24 (EXP-2202)
 
 | ID | Claim | Confidence | Status | Evidence |

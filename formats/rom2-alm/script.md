@@ -523,7 +523,7 @@ No accepted-index domain follows from these DWORD accesses.
 | 21 | low8(p0..p3), p4, p5 (or 99 when p5=0) to EN L2.03575 | Final effect below (R2-ENGINE-1740, R2-ENGINE-1741) |
 | 23 | p0,0 to EN L2.01052 on P | Final effect below (R2-ENGINE-1746) |
 | 24 | low8(p0/p1), U, p2/p3 to EN L2.03574 | Final effect below (R2-ENGINE-1742) |
-| 25 | Byte descriptor from p0..p7, with p4=0 copying cell (p2, p3) into both source (+0x36,+0x37) and target (+0x38,+0x39) and passing the packed key to a call on [Session+0xa50] (callee outside the committed window; EN only read) | Consumer uses (+0x36,+0x37) literally without zero-substitution (R2-ENGINE-1698) |
+| 25 | Six-byte cell event (low8 p0, low8 p1, source, target) for cell (low8 p2, low8 p3), source and target (p2, p3) twice when p4=0, else (p4, p5) and (p6, p7); p8, p9 unread; written by L2.03589 on [Session+0xa50] (EN and RU read) | The writer replaces the cell's event (R2-ENGINE-1775, R2-ENGINE-1776); event 23 passes a unit at the cell centre to the cell move toward the target (R2-ENGINE-1778; Medium for units outside the three step callers; nothing observed in the original); the cast consumer uses (+0x36,+0x37) literally (R2-ENGINE-1698) |
 | 28 | Calls helper with U/V collections, replaces U+0x7c, notifies both | Final effect below (R2-ENGINE-1748) |
 | 29 | p0+256*p1 lookup; six returned pointers; matching u16+0x0c==p2 gets u16+0x50=low16(p3) | Final effect below (Medium; R2-ENGINE-1749) |
 | 30 | Iterates U+0x20; matching u16+0x0c==p0 gets u16+0x42=low16(p1) | Final effect below (Medium; R2-ENGINE-1749) |
@@ -920,8 +920,8 @@ defeat. Check 18 also adds one to the failure reason. An actor byte +0x13c state
 Among the check bodies read (Medium), the script has one rectangle test: check 2 with unit U in its type-4 slot and the scalars left, top, right, bottom in
 p0..p3 sets its register to 1 when U's x lies in p0..p2 and its y in p1..p3, bounds included, compared signed. x and y
 are bytes +0 and +1 of U's position object (Medium that they are tile coordinates). No other read check takes four
-corner scalars; action 25 passes three point pairs to an unread terrain helper, so whether it shapes a rectangle is
-Unknown. No script operand kind of the 46 campaign maps is a rectangle record (R2-ENGINE-1685), and the type-12 music
+corner scalars; action 25 writes one cell event for the single cell (p2, p3) and shapes no rectangle
+(R2-ENGINE-1775). No script operand kind of the 46 campaign maps is a rectangle record (R2-ENGINE-1685), and the type-12 music
 areas are a centre and a radius read by music (R2-ASSET-084); other map record kinds were not read for rectangles
 (Medium). — R2-ENGINE-1730
 

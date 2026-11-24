@@ -325,6 +325,9 @@ order. With +9 zero and the position test admitting, the executor calls
 L2.00093 with its two bytes and then clears the word. Guaranteed relocation
 and writer completeness remain Medium. — R2-ENGINE-557
 
+Record kind 0x17 is the cell move event: placement of an occupant of kind 1 or
+2 stores the record's target pair in +0xb0. — R2-ENGINE-1778
+
 Acquired scheduler wrappers and E8 hit counts do not establish planner
 cadence. The actor-step executor call is conditional in standing evidence;
 the other site's containing loop, L2.02880, is inherited. Raw pointer

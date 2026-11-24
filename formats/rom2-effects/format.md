@@ -184,6 +184,13 @@ spell through a caster Unit with Mind 30 whose sphere skill holds the node's pow
 up to 255 (Medium); the caster casts once and is deleted (Medium; R2-ENGINE-1740, R2-ENGINE-1741, R2-ENGINE-1742). The shipped
 nodes cast Poison Cloud, Blizzard, Wall of Earth and Stone Curse (R2-ASSET-379).
 
+A cell event of kind 23, written by a type-9 record or script action 25 (R2-ENGINE-1775), casts no spell: placement
+skips its cast branch for that kind, and a unit whose step ends at the cell centre is passed to the cell move toward the target cell with no
+effect created in the bodies read (Medium for the absence of an effect and for units outside the three step callers;
+R2-ENGINE-1778). No store to the event was found in the EN range of R2-ENGINE-1777 (Medium; whole-entry stores and RU
+bodies other than the empty test not searched). Mission 53 writes one from a trigger, and both roots ship nine action 25 nodes with kind 23
+(R2-ASSET-386, R2-ASSET-387).
+
 ## Acid Stream by heading and at the map edge
 
 The RU heading d is bits 5..7 of the byte `L2.02635` returns: an octant from the offset between caster and

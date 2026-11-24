@@ -772,6 +772,15 @@ arm lies past their end and rests on R2-ENGINE-1006 at its grade. Installed maps
 In mode below 4, the stage indexes point-list entries 0 (source +0x36/+0x37) and 1 (target +0x38/+0x39) through EN `L2.08347` with no bounds check and no trigger-cell substitution. At cell entry, the consumer passes record source bytes (+0x36, +0x37) unchanged through the cast wrappers and position setter without testing for zero, so zero source bytes place the temporary actor at cell (0, 0) with sub-cell (0x80, 0x80). The following application targets the entering unit on the unit-targeted path (state 0xd) or record target bytes (+0x38, +0x39) on the point-targeted path (state 0xe); projectile spells (`param5 == 2`, other than 0xa and 0xb) compute flight delay from the distance between actor position (0, 0) and the target position in EN `L2.03854` (RU parity of `L2.05953`/`L2.02599`/`L2.08352`/`L2.08354` and per-spell reads inside `L2.01692` Medium).
 — R2-ENGINE-1292, R2-ASSET-240, R2-ENGINE-1698
 
+**Cell events.** The stage hands bytes `+0x16`, `+0x18` and the low bytes of entries 0 and 1 as a six-byte event to
+the writer `L2.03589`, which stores it at `+0x34..+0x39` of the cell's terrain record, creating the record when absent
+and replacing an earlier event; script action 25 is the writer's only other direct caller. Event 23 (`0x17`) passes a unit
+whose step ends at the cell centre to the cell move toward the target cell `(+0x38, +0x39)`, which refuses it when the
+move test fails (Medium for units outside the three step callers; nothing observed in the original);
+its power and source bytes are unread (Medium). Both roots ship 16 EN and 18 RU type-9 records (mode below 4, cell
+nonzero) whose event byte is 23 and that the stage hands to the writer (Medium that a move follows), 5 EN and 6 RU of them with the target equal to their own cell; 18 event-23 cells per root lie one cell right and
+down of a Teleport Pad's base cell. — R2-ENGINE-1776, R2-ENGINE-1778, R2-ENGINE-1779, R2-ASSET-387
+
 **Editor catalogs.** The EN map editor reads `objects.reg`, `units.reg` and `structures.reg` under
 `graphics\` and `templates.bin`. That it opens `world.res` was observed in an uncommitted scan and is Medium,
 not reproduced. Which catalog index becomes a kind or a definition id,

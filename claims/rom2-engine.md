@@ -14006,6 +14006,10 @@ L2.00080, which passes x and y of the apply's position object
 [ebp-0x20], not the +0xb0 word (R2-ENGINE-705). The meaning of record kind 0x17 and the callers L2.02931
 and L2.02932 stay Unknown.
 
+**Amended.** R2-ENGINE-1778 reads record kind 0x17: it is the cell move event; placement stores its target pair in
++0xb0 for occupant kinds 1 and 2, and the step moves a unit at the cell centre itself. The callers L2.02931 and L2.02932
+lie in the script handler range and stay unread.
+
 **Format surface.** Command object word +0xb0; `formats/rom2-autocast/format.md`.
 
 **Evidence.** [EXP-2070](../experiments/EXP-2070-rom2-order-cells/RESULTS.md)
@@ -17298,6 +17302,9 @@ writer and the six bytes until mission end.
 
 **Amended.** R2-ENGINE-1213 narrows "the footprint pass keeps +0x2c and +0x30": the pass clears the unit from the ring around its position and sets the position square and, in mode 0, the target square.
 
+**Amended.** R2-ENGINE-1776 narrows the Unknown on the callers of L2.03589 to two direct call sites per root (the
+type-9 stage and action 25); R2-ENGINE-1778 reads the move to (+0x38, +0x39) for event 0x17 in the step and placement.
+
 **Evidence.** [EXP-2085](../experiments/EXP-2085-rom2-save-payloads/RESULTS.md), question 2.
 
 ### R2-ENGINE-674
@@ -18471,6 +18478,10 @@ values of the three gates for a hero's cast, and the client arm for 0x8b.
 `L2.00314`, `L2.03569`, `L2.03312`, `L2.01056`). The two byte maps are planes P2 (`L2.03871`) and
 P1 (`L2.03872`) tested against mask 0x41, and `L2.00315` returns 0 when a footprint cell's record
 already holds a unit (layer kinds 1 to 3; kind 0 unread).
+
+**Amended.** R2-ENGINE-1778 reads the callers of the cell move in both roots: five direct call sites per root, two of
+them in the script handler range after prologues whose bodies are unread; the step (`L2.08492`) and the executor
+(`L2.06976`) pass it the target cell of an event-23 record.
 
 **Evidence.** [EXP-2090](../experiments/EXP-2090-rom2-teleport/RESULTS.md), questions 2 and 4.
 
@@ -29020,7 +29031,7 @@ Terms shared by these cards: the entry is the 60-byte per-cell record of R2-SESS
 | R2-ENGINE-1216 | In ROM2 the terrain serializer and the post-load pass call no entry writer (R2-ENGINE-759); the writers' direct callers by a reference scan of allods2.exe; whether LOAD reaches one of them: Unknown. | Medium / Unknown | ● active (amended) | [EXP-2163](../experiments/EXP-2163-rom2-cell-records/) |
 | R2-ENGINE-1220 | EN ROM2 LOAD calls the Players reader, then the Buildings reader, then reads the cell records into a new terrain object; its constructor's two passes make no direct call to a scanned entry writer (Medium: callees unread). | High / Medium / Unknown | ● active | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
 | R2-ENGINE-1221 | EN ROM2 Building Serialize calls neither the init nor the setter; maker L2.05099 is unread; in the bodies read, entry +0x0c after LOAD is the file's, replaced by the object on a key hit (Medium). | High / Medium / Unknown | ● active | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
-| R2-ENGINE-1222 | By two EN scans no call site of a cell writer or of positioning lies in the read ROM2 LOAD bodies; entry +4, +8, +0x0c, +0x2c, +0x30 after LOAD are the file's, remapped, with no compare against the objects in the read bodies. | Medium / Unknown | ● active | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
+| R2-ENGINE-1222 | By two EN scans no call site of a cell writer or of positioning lies in the read ROM2 LOAD bodies; entry +4, +8, +0x0c, +0x2c, +0x30 after LOAD are the file's, remapped, with no compare against the objects in the read bodies. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2164](../experiments/EXP-2164-rom2-load-cells/) |
 
 ### R2-ENGINE-1212
 
@@ -29236,6 +29247,8 @@ No body read writes an entry field a second time from a loaded unit or building,
 **Unknown.** Whether a constructor run for a loaded Unit calls a cell writer through a virtual call: reading the object maker behind `L2.04956` (`L2.03455`) and the Unit and Human constructors it runs settles it. The count of entries in the native mission saves that differ from the building and unit records of the same file: a committed reader over the nine files of R2-SESSION-310 settles it; no save was read in this experiment. What the original does on its first tick with an entry that names a unit positioned elsewhere: a load of a save edited that way, observed in the original.
 
 **Amends.** R2-ENGINE-1216's "whether LOAD reaches one of them: Unknown": narrowed for EN to the unread object makers, constructors and virtual calls; no call site of a writer or of positioning lies in the listed load bodies. R2-ENGINE-1215's Unknown "What a load does with an entry whose `+4` names a unit whose position bytes name another cell": narrowed: kept as read in the bodies read; the original's behaviour after the load stays Unknown.
+
+**Amended.** R2-ENGINE-1776 reads two of its 23 outside sites (`L2.06973`, `L2.06981`) as the callers of the event writer.
 
 **Evidence.** EXP-2163 `evidence/generated/scan/en-refs-cell-writers.tsv`; EXP-2067 `evidence/navigation/nav1/scans/en-callto-positioning.tsv`, `ru-callto-positioning.tsv`; EXP-2085 `evidence/derived/code/en-compiler-L2.00201.txt`; EXP-2078 `evidence/derived/code/en-document.txt`.
 
@@ -31000,7 +31013,7 @@ placement arm is composed in EN.
 | R2-ENGINE-1289 | A ROM2 Building takes the row its kind byte indexes by position; kind 0 or above count − 1 gets no row; extension bytes replace the size. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1290 | ROM2 EN and RU resolve a flag-0 unit's definition id to a Units row by `serverID`; a miss returns 0 and builds the unit from row 0. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1291 | ROM2 type-5: file +0 + 1 is Player +0xa44, file +4 AND 0x2 sets +0xa60, file +8 is unread; diplomacy low bytes fill the matrix, diagonal 0x12. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
-| R2-ENGINE-1292 | The ROM2 type-9 grammar holds in EN and RU; mode < 4 with a cell, mode & 8 (a unit's spellbook) and mode & 4 take separate arms. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1292 | The ROM2 type-9 grammar holds in EN and RU; mode < 4 with a cell, mode & 8 (a unit's spellbook) and mode & 4 take separate arms. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1293 | EN ROM2 Map Editor reads objects.reg, units.reg, structures.reg and templates.bin as catalogs; the new-player routine stores 5000 at +0xc of the object it builds. | Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 
 ### R2-ENGINE-1288
@@ -31133,7 +31146,8 @@ the mask).
 
 **Amended.** R2-ENGINE-1698 narrows the Medium on what the mode < 4 entries hold, for EN at High and RU at Medium: the
 stage copies entry 0 into source bytes and entry 1 into target bytes of the six-byte descriptor passed to L2.03589; the
-callee body stays unread.
+callee body stays unread. R2-ENGINE-1776 reads that callee in EN and RU: it writes the six bytes at +0x34..+0x39 of
+the cell's record, creating the record when absent.
 
 **Confidence.** High for the grammar and for the mode < 4 and mode & 8 arm tests in EN and RU (t9-stage 256
 instructions equal; `cmp edx,4` at EN `L2.07315`, `and ecx,8` at `L2.07316`). The mode & 4 arm lies past the end
@@ -33597,6 +33611,9 @@ R2-ENGINE-1726 reads action 6's nested table and its eleven group methods; the a
 Unknown "complete Group selector mapping" narrow to what the orders and group programme values do in play (Medium).
 
 **Amended.** R2-ENGINE-1740 to R2-ENGINE-1749 read the final effects of actions 12, 13, 16 to 24, 28 to 30, 32 to 34 and 38 at their own grades; the boundaries of those rows narrow to the helpers those claims name as unread.
+
+**Amended.** R2-ENGINE-1775 reads action 25 in EN and RU: the descriptor constructor only returns its object, and the
+terrain effect is the event write of R2-ENGINE-1776 with the move of R2-ENGINE-1778.
 
 ### R2-ENGINE-1315
 
@@ -36498,7 +36515,7 @@ R2-ENGINE-504.
 | R2-ENGINE-1695 | ROM2 state 15: kinds 76, 77 toggle building word +0x42; kinds 15, 16 need +0x42 > 0, decrement it, build a "Potion Big Healing" or "Potion Big Mana" Item and pass it to unit slot +0x44 (EN read; RU Medium); Effects Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1696 | A dead ROM2 unit (+0x54 = 0x10) leaves its group list; checks 1, 5, 8 count living and unconscious units, not dead ones (EN High, RU Medium for 1 and 8); check 20 counts Buildings with +0x42 > 0, not units. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1697 | ROM2 Session init passes Session+0xd724 to a fill routine with 0 and 0xfa0 (EN L2.00341 memset, RU L2.00342 unread); the check loop skips a check with nonzero copied IR+0x58 (copy unread, Medium); 8 handlers have no IR operand 0x3a..0x58. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
-| R2-ENGINE-1698 | ROM2 cell-entry consumer passes source bytes (+0x36, +0x37) unchanged to the cast actor, which takes cell (0, 0) when zero; application targets the entering unit or (+0x38, +0x39), and Action 25 (EN) with p4 = 0 writes (p2, p3). | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1698 | ROM2 cell-entry consumer passes source bytes (+0x36, +0x37) unchanged to the cast actor, which takes cell (0, 0) when zero; application targets the entering unit or (+0x38, +0x39), and Action 25 (EN) with p4 = 0 writes (p2, p3). | High / Medium | ● active (amended, branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1699 | ROM2 script action 11 removes the item from U+0x7c via bag extract (unlinks quantity <= 1; splits quantity > 1 via slot +0x40, Weapon read), subtracts weight, notifies U, inserts or merges it into V+0x7c, and notifies V. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1700 | ROM2 script action 27 calls the cell move (EN L2.03593, RU L2.00093; helper bodies unread), then, when owner+0x2c is nonzero, the Guard setter (order 0xb), whether or not the move was accepted. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1701 | ROM2 script action 31 filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn, Building, 1 for Outpost; EN Outpost slot unread), matches Outpost group +0xac == p0, writes respawn countdown +0xb4 = p1, read in Outpost::slot5. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
@@ -36573,6 +36590,9 @@ Temporary actor cell position and following application for a cell-entry record 
 **Confidence.** High for the cell-entry consumer and cast wrappers in both EN and RU, for type-9 stage A and the cell-entry writer in both EN and RU, and for EN `L2.07199`, `L2.02713`, `L2.08347`, `L2.03854` and Action 25. High for the RU twins `L2.05953` (cast actor constructor called by the RU wrappers `L2.05951`/`L2.05971`) and `L2.02599` (position setter), read natively: the setter stores its two byte arguments as the cell, the cell key and sub-cell `(0x80, 0x80)` with no zero test. Medium for the RU type-9 element accessor `L2.08352` (it calls `L2.08353`, unread, so no bounds-check statement is made for RU), for `L2.08354`, and for per-spell origin reads inside `L2.01692` (not enumerated per spell here).
 
 **Unknown.** The RU body of `L2.08353` and per-spell `actor+0x10` origin reads inside `L2.01692`. Settled in `allods2.exe` by loading a map copy with a type-9 mode `< 4` cell-entry record whose entry 0 is `(0, 0)` and entry 1 is `(tx, ty)`, walking a unit onto the trigger cell, and observing projectile origin, flight delay and impact cell.
+
+**Amended.** R2-ENGINE-1775 reads action 25 in RU as well and names the call left out: EN `L2.06981` to `L2.03589`;
+with p4 nonzero the source and target pairs are (p4, p5) and (p6, p7).
 
 **Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; `evidence/native/pass1/listings/ru-cast-L2.05953.txt`, `ru-pos-L2.02599.txt`, `ru-t9-get-L2.08352.txt`; committed listings `en-terrain-lin-L2.03582.txt`, `ru-terrain-lin-L2.05179.txt`, `ru-writer-L2.02922.txt`, `en-cast-a.txt`, `en-cast-b.txt`, `ru-cast-a.txt`, `ru-cast-b.txt`, `en-t9-stage.txt`, `ru-stage-a.txt`, `en-actions-d.txt`, `en-cast-L2.07199.lst`, `en-cast.txt`.
 
@@ -36803,7 +36823,7 @@ No new body is read for these actions; the statement composes the wrapper reads 
 | R2-ENGINE-1727 | ROM2 EN check compile (RU Medium): each check ID maps to register k, a running index over compiled and word-65538 checks; word 65538 stores slot 0 in R[k] without reading a type; a word above 65538 takes no index. | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
 | R2-ENGINE-1728 | ROM2 EN type-7 loader tests no node or trigger value; the EN compiler copies node word +0x48 only to IR+0x74 (no reader in 45 EN listings; Medium); a failed check or a trigger's absent check ID reads register 0 (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
 | R2-ENGINE-1729 | ROM2 script outcome: action 4 adds one to the win counter Session+0xbe0c; action 5 stores p0 as the failure reason Session+0xbe14, sent as defeat when above 0 (Medium); check 18 also adds one to it. | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
-| R2-ENGINE-1730 | ROM2 check 2 tests a rectangle: R=1 when unit U's x lies in p0..p2 and y in p1..p3, inclusive and signed, x and y being bytes +0 and +1 of the object at U+0x10; among the check bodies read no other check takes four corner scalars (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1730 | ROM2 check 2 tests a rectangle: R=1 when unit U's x lies in p0..p2 and y in p1..p3, inclusive and signed, x and y being bytes +0 and +1 of the object at U+0x10; among the check bodies read no other check takes four corner scalars (Medium). | High / Medium | ● active (amended, branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
 
 ### R2-ENGINE-1725
 
@@ -37005,3 +37025,184 @@ one action 25 of distinct corners, saving before and after, would settle the cha
 **Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md)
 `evidence/native/pass1/listings/*-q6-*.txt`, `evidence/native/pass2/listings/*-q6-loc-L2.03062.txt`,
 `evidence/derived/census/q6-coordinate-ops.tsv`; check listings of EXP-2183.
+
+**Amended.** R2-ENGINE-1775 narrows the Unknown: action 25 hands one six-byte cell event for the single cell
+(low8 p2, low8 p3) to the event writer; it shapes no rectangle of terrain.
+
+## ROM2 cell event 23: action 25, the event writer and the move at the cell centre (EXP-2204)
+
+Terms shared by these cards: the cell record is the 60-byte terrain entry of R2-SESSION-266, keyed by `(y << 8) + x`;
+its event is bytes `+0x34..+0x39`. EN addresses; the RU twin of a terrain routine is EN + 0x9ff0 (R2-ENGINE-677), of a
+script or executor routine EN + 0xa039. "Masked-equal" means equal line by line after every number in
+0x400000..L2.03731 is masked.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1775 | ROM2 action 25 (EN, RU) passes the event (low8 p0, low8 p1, source, target) for cell (low8 p2, low8 p3) to writer L2.03589; source and target are (p2, p3) twice when p4 = 0, else (p4, p5) and (p6, p7). | High | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+| R2-ENGINE-1776 | ROM2 event writer L2.03589 (EN, RU) puts six bytes at +0x34..+0x39 of the cell's record, creating it when absent and overwriting an earlier event; it refuses when map byte +0x20000+key has bit 0. | High / Medium | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+| R2-ENGINE-1777 | A ROM2 cell record whose event byte +0x34 is nonzero passes none of the six delete sites read and the EN range L2.03582..L2.08493 has no store to +0x34..+0x39 through a base register, so a written event stays for the map's run (Medium). | High / Medium | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+| R2-ENGINE-1778 | ROM2 cell event 23 (EN, RU): a unit whose step ends at the centre of the cell is passed to the cell move L2.03593 with cell (+0x38, +0x39); entering the cell, kinds 1 and 2 also store that cell in command word +0xb0. | High / Medium | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+| R2-ENGINE-1779 | For ROM2 cell event 23 the power byte +0x35 and source bytes +0x36, +0x37 are stored but read by none of the bodies that act on the event; only +0x34, +0x38 and +0x39 decide the move (Medium). | Medium | ● active (branch candidate) | [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) |
+
+### R2-ENGINE-1775
+
+Action 25 (EN `L2.08349`, RU `L2.08494`; 68 instructions each, masked-equal) fills a six-byte descriptor on its stack
+from byte loads of its operands:
+
+- byte 0 = low8 p0, byte 1 = low8 p1;
+- when the dword p4 is 0: bytes 2, 3 and bytes 4, 5 are both (low8 p2, low8 p3);
+- otherwise: bytes 2..5 are low8 p4, p5, p6, p7.
+
+It pushes the descriptor and the key `(low8 p3 << 8) + low8 p2` and calls `L2.03589` (RU `L2.08350`) at EN `L2.06981`
+(RU `L2.08495`) on the object at `[this+0xa50]`, ignores the result, runs the descriptor's empty destructor
+`L2.08496` and returns. p8 and p9 are not read. The writer places bytes 0..5 at `+0x34..+0x39` (R2-ENGINE-1776), so
+byte 0 is the event byte, byte 1 the power byte, bytes 2, 3 the source pair and bytes 4, 5 the target pair that event
+23 uses as its destination (R2-ENGINE-1778).
+
+**Amends.** R2-ENGINE-1698: the call its window left out is at EN `L2.06981` to `L2.03589`, and the action 25 body is
+read in RU as well. R2-ENGINE-1314: the action 25 row's unread boundary (descriptor constructor and terrain effect)
+narrows to R2-ENGINE-1776 and R2-ENGINE-1778; the constructor `L2.08497` only returns its object. R2-ENGINE-1730:
+action 25 writes one cell event for the single cell (p2, p3); it shapes no rectangle.
+
+**Confidence.** High for the loads, the p4 test, the key, the call and the unread p8, p9 (EN and RU listings, 68 of
+68 lines equal under the mask). The byte meanings rest on R2-ENGINE-1776 and R2-ENGINE-1778 at their grades.
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) `evidence/native/pass1/listings/{en,ru}-q2-action25.txt`, `evidence/native/pass1/pairs.tsv`.
+
+### R2-ENGINE-1776
+
+The writer `L2.03589(key, event)` (EN; RU `L2.08350`, masked-equal, 94 instructions) on the map object:
+
+1. When byte `[map + 0x20000 + key]` has bit 0 set it returns 0 and writes nothing.
+2. It looks the record up through `L2.03578(key, scratch)` with the scratch record at `map+0x5402c`; the lookup finds
+   the node through `L2.08498`, copies node `+0xc` into the scratch through `L2.04180` and returns 1, or returns 0.
+3. Found: it copies the six event bytes to scratch `+0x34` through `L2.03590` (a 6-byte copy) and stores the scratch
+   back through `L2.03579(key, scratch)` (find-or-insert `L2.04227`, then `L2.04180`). It returns 0 when the earlier
+   `+0x34` was nonzero and 1 when it was zero.
+4. Absent: it creates the record (`L2.03594`, R2-ENGINE-673), looks it up again, copies and stores as in 3, refreshes
+   the cell (`L2.04166`) and returns 1; a failed second lookup returns 0.
+
+A cell holds one event: a later write overwrites all six bytes, nothing is appended. Callers, by E8/E9 rel32 and
+4-byte value scans of every section of both images: two direct calls per root, the type-9 stage (EN `L2.06973`, RU
+`L2.08499`) and action 25 (EN `L2.06981`, RU `L2.08495`); no E9 and no data reference. The 6-byte copy `L2.03590`
+(RU `L2.08500`) has only the writer's three call sites.
+
+**Amends.** R2-ENGINE-1292: the writer named there as unread is read. R2-ENGINE-673: its Unknown on the callers of
+`L2.03589` narrows to the two call sites per root.
+
+**Confidence.** High for the body (EN listing of EXP-2085, RU pair equal in its `en-ru.tsv`; lookup and store read in
+both roots, masked-equal) and for the direct and data reference census; a target computed in a register and a conditional jump (Jcc) are outside
+the scan. Medium for what `L2.04180` copies (unread; taken as the 60-byte entry from its use) and for the meaning of
+bit 0 of the `+0x20000` byte map.
+
+**Unknown.** What sets bit 0 of the `+0x20000` byte map. A run of the original that loads a copy of mission 53 with a
+write watch on the record of cell (15, 121) settles whether action 25's write is refused there.
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) `evidence/native/pass1/scans/{en,ru}-refs.tsv`, `evidence/native/pass1/listings/{en,ru}-q2-{lookup,store}.txt`; EXP-2085 `en-terrain-lin-L2.03582.txt` (`L2.03590`, `L2.03589`) and `en-ru.tsv`.
+
+### R2-ENGINE-1777
+
+The record-empty test `L2.04154` (EN; RU `L2.08501`, 38 instructions, masked-equal) returns 1 only when dwords `+4`,
+`+8`, `+0xc`, `+0x10`, byte `+2`, byte `+0x34` and dwords `+0x2c`, `+0x30` are all zero. The delete routine `L2.04155`
+(looks the record up, copies its plane bytes back, removes the entry through `L2.04156`) has six call sites in the EN
+terrain range `L2.03582..L2.08493`: `L2.04157`, `L2.04159`, `L2.04161`, `L2.04163`, `L2.04164`, `L2.04165`; each follows
+a call of `L2.04154` whose zero result jumps past it. R2-ENGINE-1222 finds no call site of the delete outside that
+range.
+
+Bodies that read the event: placement `L2.03570` (R2-ENGINE-1778), the step `L2.03571`, the writer and the empty
+test; none writes `+0x34..+0x39`. A displacement search of the committed EN listing `en-terrain-lin-L2.03582.txt` (EN
+range `L2.03582..L2.08493`) finds no store to `+0x34..+0x39` through a base register (22 mentions of those
+displacements, all loads or the one `cmp`). Not searched: whole-entry stores (the lookup scratch written back by
+`L2.03579`; the entry copy `L2.04180`, unread) from the 26 set call sites of R2-ENGINE-673, the executor `L2.00507` and
+the cell move, which are not among the bodies named, and every RU body other than the empty test. A save carries the whole 60-byte entry and a load restores it (R2-SESSION-266,
+R2-ENGINE-604, R2-ENGINE-1222); the post-load fix-up `L2.03627..L2.08502` (EN) has no access at displacements
+`+0x34..+0x39`.
+
+**Confidence.** High for the empty test and the six guarded delete sites (EN listing, RU test equal). Medium that the
+event lasts the map's run and survives a save: the delete census outside the range rests on R2-ENGINE-1222, which is EN-only, Medium / Unknown, with computed and
+virtual calls outside it;
+other writers of `+0x34` rest on R2-ENGINE-673's scans (Medium); the load path is read in RU (R2-ENGINE-604) and no
+installed save holds an event (R2-SESSION-266).
+
+**Unknown.** Whether a save made after the event is written restores it. A run of the original settles it: in a copy
+of mission 53, bring unit 89 within 4 of cell (15, 121), save, load, walk a unit to (15, 121) and see whether it
+arrives at (13, 22).
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) `evidence/native/pass4/listings/{en,ru}-q2-record-empty.txt`, `evidence/native/pass4/pairs.tsv`; EXP-2085 `en-terrain-lin-L2.03582.txt` (`L2.04154`, `L2.04155` and its six sites, `L2.03627`).
+
+### R2-ENGINE-1778
+
+1. **Entry.** When the advance `L2.06919` moves the fine position into another cell, it clears the footprint, calls
+   the removal `L2.06913`, stores the position (`L2.06920`) and calls `L2.00314`, whose call at `L2.07944` is the one
+   direct call of placement `L2.03570` (scan, both roots). For occupant kinds 1 and 2 (the kind getter `L2.03577`, RU
+   `L2.02402`, calls vtable slot `+0x20`; the Unit and Human vtables EN `L2.04102`, `L2.00217` and RU `L2.02314`, `L2.00218` hold EN `L2.07941` / RU
+   `L2.04693`, which returns byte `+0x4a`; R2-ENGINE-1530), a record whose `+0x34` is `0x17` makes placement store
+   word `[unit+0x1c4]+0xb0` = `(+0x39 << 8) + +0x38` and skip the cast branch (`L2.08503..L2.08504`). Kinds 0 and 3
+   store nothing.
+2. **Centre.** The step `L2.03571` (RU `L2.02848`; direct call sites EN `L2.03591` in the walk driver, `L2.03592` in
+   the approach, `L2.06975` in the executor `L2.00507`; RU `L2.08505`, `L2.08506`, `L2.08507`) runs the advance. When the position is then centred
+   (`L2.00491`: bytes `+4` and `+5` of the position object both `0x80`), it zeroes words `+0xa8`, `+0xaa`, `+0xac` of
+   `[unit+0x1c0]`, runs the footprint pass in modes 2 and 1 and `L2.06464` on `unit+0x1e4`, looks up the record of the
+   unit's cell and, when its `+0x34` is `0x17`, calls the cell move `L2.03593(unit, +0x38, +0x39)`. The step body
+   (`L2.03571`) tests no occupant kind, owner, size or flight (its branch at `L2.08508..L2.08492` reads `+0x34`,
+   `+0x38`, `+0x39` only); the cell move it calls tests the unit's footprint against the unit's byte `[+0x1c0]+5`
+   (R2-ENGINE-705, R2-ENGINE-788, R2-ENGINE-789), so size and owner can decide whether the move happens.
+3. **Executor.** On its branch at EN `L2.08509` (RU listing masked-equal, EXP-2070; reached when byte `+9` is 0,
+   R2-ENGINE-557), a nonzero word `+0xb0` and a centred position call `L2.03593(unit, low byte, high byte)` on
+   `[session+0xa50]`, then store 0 to the word whether or not the unit moved.
+4. **Move.** The cell move (R2-ENGINE-705): a destination that fails its cell test over the unit's footprint
+   (R2-ENGINE-788, R2-ENGINE-789) gives a return of 1 and no move; otherwise the unit is detached, put at the centre of
+   the destination cell, entered there through `L2.00314`, its command reset and its state broadcast with mask -1. Its
+   five direct call sites per root are EN `L2.06970` (the Teleport spell arm), `L2.08492` (the step), `L2.06976` (the
+   executor), `L2.06980` and `L2.06982` (RU `L2.02928`, `L2.02929`, `L2.02930`, `L2.02931`, `L2.02932`); the last two
+   lie in the script handler range after the nearest prologues EN `L2.08510`, `L2.08359` (RU `L2.08511`, `L2.08360`),
+   whose bodies were not read.
+5. **The record stays (Medium).** None of these bodies writes `+0x34..+0x39` (R2-ENGINE-1777, Medium); the next unit
+   to reach the centre is passed to the cell move as well.
+6. **What the player gets.** The step's event branch, placement's `0x17` branch and the executor branch create no
+   effect and call no sound or message routine; the move's callees are those R2-ENGINE-705 names. What the client
+   draws on the state record is Unknown (R2-ENGINE-705).
+
+So a unit that walks to the centre of an event-23 cell is passed to the cell move; the move puts it at the centre of
+the target cell when the unit's footprint passes the cell test of R2-ENGINE-705 (the test reads the unit's size and
+owner byte); refused, it stays, and a unit of kind 1 or 2 is tried once more by the executor when idle, after
+which the word is 0. The destination is the target pair `(+0x38, +0x39)`, never the source pair.
+
+**Amends.** R2-ENGINE-673: its Medium that `L2.03593` moves the unit to `(+0x38, +0x39)` rests on the cell move read
+in R2-ENGINE-705, and kind `0x17` is a move to that cell. R2-ENGINE-557: record kind `0x17` is the cell move event of
+this card; its callers `L2.02931` and `L2.02932` are call sites in the script handler range, still unread.
+
+**Confidence.** High for the bodies (EN listings of EXP-2085 and EXP-2070; RU pairs masked-equal: placement, step and
+cell move in EXP-2085 `en-ru.tsv`, executor in EXP-2070, the kind slot and centred test here) and for the direct call
+census of placement, step and cell move. Medium for the units that reach the step: fliers (kind 3, named so by
+R2-ENGINE-1530 at Medium) and order paths other than the three callers were not followed. Medium for the refusal,
+which rests on R2-ENGINE-705, R2-ENGINE-788 and R2-ENGINE-789. Medium for "no sound": a negative over the bodies read. Medium that the record is not spent (R2-ENGINE-1777). Nothing
+was observed in the original.
+
+**Unknown.** What the player sees and hears when a unit moves. A run of the original settles it: load a copy of
+mission 53, let unit 89 come within 4 of cell (15, 121), walk a player unit onto (15, 121) and record the screen and
+sound, and whether the unit appears at (13, 22); a second run with (13, 22) occupied shows the refusal.
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md) `evidence/native/pass1/scans/{en,ru}-refs.tsv`, `evidence/native/pass1/listings/{en,ru}-q3-{kind,centred}.txt`, `evidence/native/pass2/tables/*-vtable.tsv`, `evidence/native/pass3/listings/{en,ru}-q3-slot8.txt`; EXP-2085 `en-terrain-lin-L2.03582.txt` (`L2.03570`, `L2.06919`, `L2.00314`, `L2.03571`) and `en-ru.tsv`; EXP-2070 `evidence/measured/listings/{en,ru}-executor.txt`.
+
+### R2-ENGINE-1779
+
+The writer copies all six bytes (R2-ENGINE-1776). For event `0x17`:
+
+- placement reads `+0x34`, `+0x38`, `+0x39` and jumps past the cast branch, the only reader of `+0x35`, `+0x36` and
+  `+0x37` in its body;
+- the step reads `+0x34`, `+0x38`, `+0x39`;
+- the executor reads only command word `+0xb0`;
+- the empty test reads `+0x34` only.
+
+So the power byte (255 in mission 53) and the source pair change nothing these bodies do for event 23; the event byte
+selects the move and the target pair is the destination.
+
+**Confidence.** Medium. The negative covers the bodies named and the event users R2-ENGINE-673 found by its scans of
+the map displacements; a reader of the record through another base was not searched.
+
+**Unknown.** Whether any other routine reads `+0x35..+0x37` of an event-23 record. A run of the original settles it:
+two copies of mission 53 with action 25's p1 = 255 and p1 = 0, and with p4, p5 = (15, 121) and (1, 1), compared for
+destination and timing.
+
+**Evidence.** [EXP-2204](../experiments/EXP-2204-rom2-cell-portal/RESULTS.md); EXP-2085 `en-terrain-lin-L2.03582.txt` (`L2.03570`, `L2.03571`); EXP-2070 `evidence/measured/listings/en-executor.txt`.

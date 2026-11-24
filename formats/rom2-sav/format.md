@@ -134,6 +134,13 @@ A nonzero event kind acts when an occupant is placed on the cell (kind 0x17
 stores the target pair into the unit's command word) or arrives there;
 refresh reads +0x3a as the cell to write back. — R2-ENGINE-673
 
+The event bytes +0x34..+0x39 are written by L2.03589, whose direct callers
+are the type-9 stage and script action 25; it replaces them. No delete site
+read passes a record with a nonzero +0x34, so a written event stays in the
+saved entry (Medium; other writers Medium). Kind
+0x17 passes a unit at the cell centre to the cell move toward the cell (+0x38, +0x39) (Medium for units outside the three step callers).
+— R2-ENGINE-1776, R2-ENGINE-1777, R2-ENGINE-1778
+
 A building is stored in +0x0c of each cell of its width (+0x60) by height
 (+0x61) rectangle whose bit, row x width + column, is set in the building's
 +0x68 mask; the cells whose bit is set in the +0x64 mask get mask 5 in both
