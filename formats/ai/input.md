@@ -286,3 +286,7 @@ first kind 29h effect's byte+40. It skips the book ordinal translation and
 the producer's learned-spell bit filter. Its target predicate uses L00201.
 Item snapshot synchronization and the complete use/refund lifecycle are
 separate boundaries. — AI-SPELLITEM-290
+
+## Retreat with a refused flee route
+
+An explicit Retreat order whose flee walk is refused is followed by a strike on a hostile at reach when the in-position gate passes, not by flight (Medium: composed from listings; the gate is unread). — AI-798

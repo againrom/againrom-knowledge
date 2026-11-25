@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5336. Observation: 143. Static analysis: 4450. Mixed: 743.
+Claims labelled: 5343. Observation: 143. Static analysis: 4457. Mixed: 743.
 
 ## Ledger ai
 
@@ -403,7 +403,7 @@ Claims labelled: 5336. Observation: 143. Static analysis: 4450. Mixed: 743.
 | AI-638 | static analysis | ● active |
 | AI-639 | static analysis | ● active |
 | AI-640 | static analysis | ● active |
-| AI-641 | static analysis | ● active |
+| AI-641 | static analysis | ● active (amended) |
 | AI-642 | static analysis | ● active |
 | AI-643 | static analysis | ● active |
 | AI-644 | static analysis | ● active |
@@ -500,16 +500,20 @@ Claims labelled: 5336. Observation: 143. Static analysis: 4450. Mixed: 743.
 | AI-781 | static analysis | ● active (branch candidate) |
 | AI-782 | mixed | ● active (branch candidate) |
 | AI-784 | static analysis | ● active (branch candidate) |
-| AI-785 | static analysis | ● active (branch candidate) |
-| AI-786 | static analysis | ● active (branch candidate) |
+| AI-785 | static analysis | ● active (branch candidate, amended) |
+| AI-786 | static analysis | ● active (branch candidate, amended) |
 | AI-787 | static analysis | ● active (branch candidate) |
-| AI-788 | static analysis | ● active (branch candidate) |
+| AI-788 | static analysis | ● active (branch candidate, amended) |
 | AI-789 | static analysis | ● active (branch candidate) |
 | AI-796 | static analysis | ✔ promoted (branch candidate) |
 | AI-797 | static analysis | ✔ promoted (branch candidate) |
 | AI-792 | static analysis | ● active (branch candidate) |
 | AI-793 | static analysis | ● active (branch candidate) |
 | AI-794 | mixed | ● active (branch candidate) |
+| AI-798 | static analysis | ● active |
+| AI-799 | static analysis | ● active |
+| AI-800 | static analysis | ● active |
+| AI-801 | static analysis | ● active |
 
 ## Ledger alm
 
@@ -1360,7 +1364,7 @@ Claims labelled: 5336. Observation: 143. Static analysis: 4450. Mixed: 743.
 | MAGIC-WALLBLOCK-045 | static analysis | ● active |
 | MAGIC-AREACOST-046 | static analysis | ● active |
 | MAGIC-FIREDIV-047 | static analysis | ● active (amended, partially retracted) |
-| MAGIC-RING-048 | static analysis | ✔ promoted |
+| MAGIC-RING-048 | static analysis | ✔ promoted (amended) |
 | MAGIC-BOLTGATE-069 | static analysis | ✔ promoted |
 | MAGIC-BOLTSHAPE-070 | mixed | ✔ promoted (partially retracted, superseded) |
 | MAGIC-BOLTLIST-071 | static analysis | ✔ promoted (superseded) |
@@ -1484,7 +1488,7 @@ Claims labelled: 5336. Observation: 143. Static analysis: 4450. Mixed: 743.
 | MAGIC-298 | static analysis | ● active (branch candidate) |
 | MAGIC-300 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-301 | static analysis | ✔ promoted (branch candidate) |
-| MAGIC-302 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-302 | static analysis | ✔ promoted (branch candidate, amended) |
 | MAGIC-303 | mixed | ✔ promoted (branch candidate) |
 | MAGIC-304 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-305 | mixed | ✔ promoted (branch candidate) |
@@ -1560,6 +1564,9 @@ Claims labelled: 5336. Observation: 143. Static analysis: 4450. Mixed: 743.
 | MAGIC-444 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-445 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-446 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-463 | static analysis | ● active |
+| MAGIC-464 | static analysis | ● active |
+| MAGIC-465 | static analysis | ● active |
 
 ## Ledger menu
 

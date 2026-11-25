@@ -449,3 +449,9 @@ uniform on `0…n−1`. The idle-turn arm is the same idiom at `n = 190`.
 
 The radius clips the group's **candidate list** around the centroid under group order 1. It is
 never authored, and it never decides whether a blow lands.
+
+## Refused flight and the heal list (first game)
+
+A unit under explicit Retreat whose flee walk is refused strikes a hostile at reach when the in-position gate passes, instead of fleeing (Medium: composed from listings; the gate is unread). — AI-798
+
+The computer mage's Heal candidate list is built with no identity test, so it can hold the caster (Medium); at full health the caster is never the pick. — AI-800

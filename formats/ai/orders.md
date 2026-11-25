@@ -664,3 +664,13 @@ Local branches are High; composed continuation is Medium. — AI-666
 Player and creature kind-8/9 casts use the same progress-2 phase body and
 release calls. Retention selects parent-command reset; selectors can aim
 at victim, self or cell. Other special starts remain Unknown. — AI-667
+
+## Refused flight and a scroll cast in melee
+
+Under explicit Retreat a refused flee walk reaches the tail's reacquisition, which installs a strike on a hostile at reach when the in-position gate passes and otherwise turns toward it; the next pending move waits while progress is 1 (Medium: composed from listings; the in-position gate is unread). A unit under its Wimpy bound holding command state 1 is stood down instead (Medium). — AI-798
+
+A Teleport scroll used in melee installs only after the strike leaves progress 1. The relocation stands the unit down and keeps its target pointer (Medium); values per sub-tick are Unknown. — AI-799
+
+The computer mage's Heal list is built centre cell first with no identity test (High); whether it holds the caster is Medium. — AI-800
+
+A staged area spell cast by an order lands its first stage one world step after the applying step (Medium: the registration caller is unread). — MAGIC-463

@@ -233,3 +233,13 @@ for `AI-329`. On the evidence available, the group layer's periodic re-evaluatio
 to see whether a route to its chosen candidate exists or whether that candidate's cell is claimed
 by another mover; that information exists in the per-actor layer's `mover+0x98` flag above, which
 the group arms never consult.
+
+## Heal-list membership and a missed blow
+
+The block builder the computer's Heal routine uses appends occupants centre cell first with no identity test (High), so its candidate list can hold the caster (Medium); at full health the caster is never the pick. — AI-800
+
+A blow whose roll fails still records the attacker in the victim's `+0x40` when the attacker is set (High for the resolver body, Medium that nothing else writes it). — AI-801
+
+A staged area spell's first stage runs one world step after the applying step, then every 3 steps (Medium). — MAGIC-463
+
+A refused flee walk under explicit Retreat hands the unit to the reacquisition above, which strikes a hostile at reach when the in-position gate passes (Medium: composed from listings; the gate is unread). — AI-798

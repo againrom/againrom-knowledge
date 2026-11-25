@@ -566,7 +566,7 @@ current account.
 | MAGIC-WALLBLOCK-045 | (rom.exe) `wall_of_earth` blocks movement through the ordinary terrain-block bits, and a routine outside the area module derives them from the cell record. | High | ● active | [EXP-0174](../experiments/EXP-0174-area-movement/) |
 | MAGIC-AREACOST-046 | (rom.exe) Every occupied area layer multiplies its cell's movement cost byte by four, and the step-duration path divides it back by four once and stores the result. | High / Unknown | ● active | [EXP-0174](../experiments/EXP-0174-area-movement/) |
 | MAGIC-FIREDIV-047 | (rom.exe) `fire_ball`'s footprint-squared divide is a per-cell normalisation, not a size penalty — because a unit is stored in every cell record it covers. | High | ● active (amended, partially retracted) | [EXP-0174](../experiments/EXP-0174-area-movement/), [EXP-0271](../experiments/EXP-0271-multicell-area/) |
-| MAGIC-RING-048 | (rom.exe) The three staged AreaEffect spells use three distinct cell generators. | High / Medium | ✔ promoted | [EXP-0175](../experiments/EXP-0175-ring-geometry/) |
+| MAGIC-RING-048 | (rom.exe) The three staged AreaEffect spells use three distinct cell generators. | High / Medium | ✔ promoted (amended) | [EXP-0175](../experiments/EXP-0175-ring-geometry/) |
 | MAGIC-BOLTGATE-069 | (rom.exe) Exactly two picture ids produce a drawn path, and the routine that produces it is one virtual slot whose whole body sits behind a two-comparison gate. | High | ✔ promoted | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
 | MAGIC-BOLTSHAPE-070 | The bolt figure starts with a bounded random walk, inserts midpoint knots, samples quadratic triples and rotates the resulting points onto the projectile-to-target segment. | High | ✔ promoted (partially retracted, superseded) | [EXP-0178](../experiments/EXP-0178-bolt-path/); [EXP-0504](../experiments/EXP-0504-bolt-figure/) |
 | MAGIC-BOLTLIST-071 | (rom.exe) The point list is rebuilt on every driver tick and it does not accumulate: picture 34 replaces it, picture 36 clears it and concatenates one generated set per victim id. | High | ✔ promoted (superseded) | [EXP-0178](../experiments/EXP-0178-bolt-path/) |
@@ -727,6 +727,8 @@ draw remains Unknown. Construction, timing and lifetime clauses stand.
 
 **Amended.** The table ledger carried the status "● active (staged cadence and cloud endpoint amended)". `retracted.md` records a correction against this claim. The qualifier follows that record.
 
+**Amended.** `MAGIC-463`: counted in world steps, stage 0 runs on the step after the step whose actor pass applies the cast, not on it (Medium: the caller of the list append is not read); the driver-call cadence stands.
+
 ### MAGIC-AREAAPPLY-038
 
 **(rom.exe) An area effect invokes its inner effect's per-target virtual entry; the dynamic class determines direct damage versus ordinary attachment.** `R0267(unit)` is the single per-unit apply of all three modes: `EnumRefs callto:R0267` returns **7 hits / 3 owners / 0 orphan** — `R0629` at `L05403` (cloud pulse), `R0639` at `L05404`, `L05405` and `L05406` (ring), `R0630` at `L05407`, `L05408` and `L05409` (blast). Its body returns on a null unit (`L05410`), returns for spell id `0x13` (`L05411`, a compare with 0x13), and otherwise pushes the unit and calls `[areaEffect+0x44]->vtable[+0x3c]` at `L05412`…`L05413`. `areaEffect+0x44` is the inner `Effect` the spell's own apply arm built and passed to the AreaEffect constructor (`L05414` pushes it, `L03047` calls `R0652`); the builder then writes `innerEffect+0x44 = caster` at `L05415`. The two **base Effect** constructors install vtable **`L02981`** — `L05416` in the plain `R1049` and `L05417` in the template `R1047`, both storing the vtable L02981 into the first field — and slot `+0x3c` of that vtable is **`R0612`**, the attach routine `MAGIC-ATTACH-016` decodes. `EnumRefs callto:R0612` returns **1 hit / 0 owners / 0 orphan**, the `.rdata` dword at `L05418 = L02981 + 0x3c`, This identifies the base-Effect attach slot, not every inner effect's virtual target. For the base-Effect route, the applied magnitude is the inner `Effect`'s `+0x40`, written by the spell's own apply arm (`MAGIC-CEIL-013`), and no per-tick magnitude exists anywhere in the area module; whether an application damages once or is stored and re-run is the inner effect's mode byte `+0x3d` (`MAGIC-EFFMODE-009` — an untimed effect is applied and never stored, a `continuous` one is stored and re-runs `vt+0x40` every 8th tick from `R0673`); and `MAGIC-ATTACH-016` governs timed base-Effect re-application, not every area damage object. **The broader virtual-target and universal non-stacking clauses are REFUTED by `UNIT-AREADIRECT-072`: `Effect_DirectDamage` overwrites its vtable with `L02980`, whose `+0x3c` points directly to `R0564`; the read damage-ring producers carry that object in area `+0x44`. Untimed base effects are also applied without being stored.** Two per-spell exceptions in the same routine: for spell id **2** (`fire_ball`), `L05419`…`L05420` copy-construct the inner effect (`R1068`), call `unit->vtable[+0x1c]` twice, multiply the two results, divide the copy's byte fields at `+0x5b` and `+0x5c` by that square, apply the copy through `R0564` and destroy it at `R1069`; for spell id **0xc** (`light`), `L05421`, a compare with 0xc, jumps to the epilogue before the kill-credit block
@@ -852,6 +854,8 @@ on this code read is not independent corroboration.
 **Original status.** ✔ promoted
 
 **Evidence.** [EXP-0175](../experiments/EXP-0175-ring-geometry/)
+
+**Amended.** `MAGIC-463`: counted in world steps, stage 0 runs on the step after the step whose actor pass applies the cast, not on it (Medium: the caller of the list append is not read); the stage ticks 0, 3, 6 count driver calls.
 
 ### MAGIC-BOLTGATE-069
 
@@ -3174,7 +3178,7 @@ The provisional `w64-queued-cast` label is an attack setter, not cast evidence.
 |---|---|---|---|---|
 | MAGIC-300 | The seven row-driven harmful ROM1 book ids copy freshly scaled Spell bytes into DirectDamage before delivery; target application reads that payload, not the popup aggregate. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
 | MAGIC-301 | The decoded ROM1 DirectDamage unit path narrows scaled damage to bytes, draws inclusive CRT spread, then applies signed resistance with a 0.75 bias; buildings use a separate minus-five rule. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
-| MAGIC-302 | ROM1 Fire Sacrifice, Poison Cloud and Heal bypass the ordinary row-driven harmful damage rule; their decoded arms use caster HP/mana, periodic magnitude, or a shifted healing interval. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
+| MAGIC-302 | ROM1 Fire Sacrifice, Poison Cloud and Heal bypass the ordinary row-driven harmful damage rule; their decoded arms use caster HP/mana, periodic magnitude, or a shifted healing interval. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
 | MAGIC-303 | ROM1 popup duration is Spell+10; status arms recompute Effect+42, while template counters and AreaEffect+4c give separate lifetimes for several offered ids. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
 | MAGIC-304 | The decoded ROM1 ordinary timer decrements counters only at 9600 or below; active ordinary areas decrement by one before pulsing, so a stored duration word alone does not prove elapsed lifetime. | High / Medium | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
 | MAGIC-305 | The two installed ROM1 EN/RU executables and all 28 parsed Spells rows match, including Effects strings; their whole Data.bin payload hashes differ. | High | ✔ promoted (branch candidate) | [EXP-0535](../experiments/EXP-0535-cast-damage-source/) |
@@ -3343,6 +3347,8 @@ the unread healing helper, reusing MAGIC-EFFECT-015 and MAGIC-SING-019.
 **Unknown.** Full native healing-helper behavior and parser helper edge
 inputs outside the retained shipped strings. Their complete local decodes
 would settle those joins. Runtime target eligibility was not observed.
+
+**Amended.** `MAGIC-465` reads the Heal arm's diplomacy branch: it exits to the epilogue when the low bit of the caster-to-target byte is 1 (Medium: polarity from `AI-FILTER-001`).
 
 ### MAGIC-303
 
@@ -5281,3 +5287,55 @@ Evidence is a static read of committed listings of `rom.exe` (one image on both 
 **Confidence.** High for the sight-word writes, the kill-credit stores and the hook call in the plain-Unit and Humanoid/Human rows (`MAGIC-443`, `MAGIC-445`). The owner-fog and AI-stamp entries carry `TERR-FOG-275`'s High / Medium / Unknown and `AI-SIGHT-094`'s High / Medium. The air-actor and structure row carries `MAGIC-442`'s Medium. Medium for the actor column: that every Units-table actor carries the plain Unit table and every Humans-table actor a Humanoid or Human table is taken from the creation sequence and was not re-read; and Medium for the shipped minimum and the acquisition consequence, at their sources' grades. Unknown off the clamped power path or when other reductions are in force, where `m` can exceed the unit's sight and the word wraps.
 
 **Unknown.** Settle with the original: in a mission, an own Units-table creature and an own hero stand in one Light cast at power 90 or more; per tick for 40 ticks record each one's revealed radius. Prediction from this claim, not a finding: the creature's radius falls by 4 cells and the hero's does not change.
+## Staged stage timing, poison on a body and Heal at a hostile unit
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0650-rom1-fidelity-unknowns/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-463 | A staged AreaEffect built in a world step's actor pass is first driven in a later step's area pass: stage k on relative step 1 + 3k (Medium); a DirectDamage occupant loses health in the stage call (Medium). | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+| MAGIC-464 | A body's attachments tick before the health branch, so poison keeps lowering a fallen unit's health; health at or below -10 sets action 0x10 only after the death countdown ends. | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+| MAGIC-465 | A hero mage's book Heal at a hostile Player's unit has paid mana at admission and, when `ebp-0x10` is 0, trains the school before the per-id dispatch; the Heal arm's diplomacy test then skips the heal (Medium). | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+
+### MAGIC-463
+
+Listings `evidence/nav/p1/q2-world-step-R0193.txt`, `evidence/nav/p1/q2-area-ctor-R0652.txt`, `evidence/nav/p3/q2-area-register-L06148.txt`, `evidence/nav/p4/q2-area-register-L17873.txt`; the area pass, list and occupant apply rows are EXP-0332 `evidence/world-entities.txt`, `evidence/area-list-tick.txt`, `evidence/area-list-append.txt` and `evidence/area-apply.txt`.
+
+- World step `R0193` increments its counter `+4`, calls `R0191`, the area pass `R0426` (`L01866`), the actor pass `R0427` (`L01867`) and `R0611` with the counter. `R0426` walks the entity list and then calls `R0641` (`L03066`), which calls each area entry's `vt+0x18` (`L03082`); EXP-0332 `area-list-tick.txt`, `area-list-append.txt`.
+- The cast applies inside the actor pass: the actor tick calls `R0003` (`MAGIC-TELEPORT-370`, `MAGIC-450`). Its AreaEffect constructor `R0652` (called at `L03047`) calls `L05979`, stores `+0x44`, `+0x48` = 0, `+0x49`, `+0x4b` = 0 and `+0x4c` = 0, and returns (`L17874`) without a driver call. The rows `L03047..L17875` hold no `vt+0x18` call. The list append is `R0647` (EXP-0332); its caller for this spell is not read.
+- The driver at `R0629` calls `R0639` when `R0631` is nonzero (`L17876..L05351`). Stages run on driver calls 0, 3, 6, ... (`MAGIC-AREAPULSE-037`). Counting the applying step as 0, stage k runs on step 1 + 3k (Medium).
+- Each accepted cell's occupant goes to `R0267`. For effect byte `+0xc` = 2 it calls `R0564` at `L16318` on a scaled copy; for other ids, Fire Sacrifice (4) among them, it calls the effect object's `vt+0x3c` at `L05413` (EXP-0332 `area-apply.txt`, `L17877..L05419`). Fire Sacrifice builds a DirectDamage (`MAGIC-302`); that its `vt+0x3c` writes health in the stage call is not read. Acid Stream's stage 0 is the target cell (`MAGIC-RING-048`). Meteor Storm's first accepted stage is the first whose cell passes the interior gate (`MAGIC-093`). Consecutive stages, accepted or not, run 3 steps apart; accepted stages need not be consecutive.
+
+**Confidence.** High for the step order, the constructor and the driver branch read whole. Medium for step 1: the caller of the list append `R0647` for this spell is not read, so a registration that drives the entry at once is not excluded. Medium that a Fire Sacrifice occupant loses health in the stage call: the `vt+0x3c` body of the DirectDamage object is not read. Medium for Meteor Storm and Acid Stream health writes: their inner Effect classes are not read.
+
+**Amends.** `MAGIC-AREAPULSE-037`, `MAGIC-RING-048`: stage 0 runs on the step after the applying step, not on it (Medium).
+
+**Unknown.** Settle with the original: cast Fire Sacrifice beside a unit and record the world counter (`+4` of the step object) on the step whose actor pass applies the cast and on each step the unit's health word changes; repeat with Acid Stream and Meteor Storm.
+
+### MAGIC-464
+
+Actor tick rows of EXP-0163 `evidence/listing-actor-tick.txt` (`L17878..L04388`).
+
+- Action 0x10 skips the whole tick (`L05756..L09290`). Otherwise the attachment loop calls each attachment's `vt+0x38` (`L16462`) before the health load at `L04397`.
+- Health at or below 0 (`L04385`): `actor+0x50` = 0 and `actor+0x54` = 0. On the first such tick (corpse byte `+0x13c` zero) it sets `+0x13c` = 1, calls `R0014`, halves `+0xbe`, stores `+0x6c` = `vt+0x6c()` - 1 and notifies with 0x409, then leaves (`L17879..L04560`). On later ticks it decrements a positive `+0x6c` and leaves (`L16842..L04561`).
+- With `+0x6c` at or below 0: byte `+0x4a` above 1 stores health -1000 (`L04398`); then health at or below -10 stores `actor+0x54` = 0x10 and calls `R0208` (`L04387..L01924`). Above -10 nothing is stored.
+- Composed with Poison Cloud: id 8 subtracts its scaled magnitude with no health floor on admitted timer calls, admitted by the old counter modulo 8 (`MAGIC-302`, `MAGIC-304`). For an attachment whose counter is at least 30 at the first call and that no cloud pulse refreshes, 3 or 4 of 30 calls lower health (phase of the counter), by the same amount each, and the count stays 1; a smaller counter or a refresh changes both (Medium). At the call where health first reaches -10 or below, under the same conditions, the attachment count is still 1. Action 0x10 follows on the first tick after the countdown ends with health at or below -10; the terminal loop then stores 1 into each attachment's counter and calls its timer (`MAGIC-399`), which marks it for retirement; its removal after action 0x10 is unread.
+
+**Confidence.** High for the listed branches (one committed body read in this range, one image). Medium for the per-call values: the counter phase and remaining count, cloud refreshes, the magnitude after power and resistance, the countdown from `vt+0x6c`, the byte `+0x4a` and the body of `R0208` are not read here.
+
+**Unknown.** Settle with the original: poison a unit with Poison Cloud, bring it to -3 health with a blow outside the cloud, and record its health word, the attachment count and `+0x6c` after each of the next 30 timer calls and on the tick its action becomes 0x10.
+
+### MAGIC-465
+
+Listings `evidence/nav/p1/q4-apply-prelude-R0003.txt` and `evidence/nav/p1/q4-heal-arm-L17705.txt`.
+
+- Prelude. `R0003..L02776` has no branch to the epilogue. With `ebp-0x10` zero and caster `+0x68` zero (`L05223..L17880`) it calls the caster's `vt+0x68` at `L02776`, the book-cast training call (`MAGIC-TRAIN-018`; it trains only a hero), before the per-id dispatch. The value of `ebp-0x10` is not read.
+- Heal arm `L17705`. With target `+0x14` set it reads the diplomacy byte at `session+0xa9c4` + 0x32 × the caster's Player word + the target's Player word (`L17881..L17882`). Low bit 1 stores `ebp-0x48` = 0, and `L17883` then jumps to the epilogue `L05879`. Target health at or below -10, or word `+0x98` zero, also leaves (`L17369..L17884`).
+- Otherwise the amount is byte `+0xe` plus `R1715(byte +0xf)`, capped at maximum minus current health (`L17885..L17886`). It stores target `+0x150` = 0, calls `R0671(amount)` (`L03248`) and `R0059(target, 0, +0x150)` (`L03249`). An amount of 0 runs the same two calls.
+- Composed with `MAGIC-406` (mana paid at `L05055` on admission; no refund branch read, High / Medium there): a hero mage's book Heal applied at a hostile unit leaves mana lowered by the cost and, when `ebp-0x10` is 0, the school raised by the training award; the target is unchanged (Medium).
+
+**Confidence.** High for the prelude and arm branches read whole. Medium that the hostile case reaches the apply: the order interface and the admission's target tests are not read here, and that a hostile Player's byte has low bit 1 rests on `AI-FILTER-001`'s polarity. The initial value of `ebp-0x48` and the value of `ebp-0x10` are not read.
+
+**Amends.** `MAGIC-302`: the Heal arm's diplomacy test exits on low bit 1 (Medium).
+
+**Unknown.** Settle with the original: a hero mage orders Heal at a living unit of a hostile Player; record the mana word `+0x9a` and the Heal school's experience before the order and after recovery, and the target's health.

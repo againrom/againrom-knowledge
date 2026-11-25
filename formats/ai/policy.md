@@ -175,3 +175,9 @@ health / to-hit / defence adjustment ([UNIT](../unit/format.md)).
 The candidate sweep is **linear in the number of on-map actors**, twice: once to stamp
 visibility, once to test each actor's cell. There is no spatial index anywhere on the path, and
 the visibility map is cleared and rebuilt per decision.
+
+## Refused flight and staged spell timing
+
+Under explicit Retreat a refused flee walk installs a strike on a hostile at reach when the in-position gate passes, and the unit does not flee while that holds (Medium: composed from listings; the gate is unread). — AI-798
+
+A staged area spell's first stage runs one world step after the step that applies the cast, and later stages every 3 steps (Medium: the registration caller is unread). — MAGIC-463

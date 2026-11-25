@@ -6882,7 +6882,7 @@ client) each window mode is. A read of the writers of window `+0x6bc`,
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-640 | The strike path refuses a victim only for a null pointer, a zero owner `+0x14` or reach; the read teardown, reap and detach keep a dead victim's owner, so a corpse passes every refusal test. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
-| AI-641 | A strike on a victim at or below 0 health still runs its damage resolver, which records the attacker in the victim's `+0x40` and, when both owners are set, marks the victim's order record through `R0226`. | High / Medium / Unknown | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
+| AI-641 | A strike on a victim at or below 0 health still runs its damage resolver, which records the attacker in the victim's `+0x40` and, when both owners are set, marks the victim's order record through `R0226`. | High / Medium / Unknown | ● active (amended) | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
 | AI-642 | In the AI call that stands state 3 down for a victim at action 0x10, `ord+0x0c` changes only when `R0022` finds a candidate; that call runs the acquisition, and a dying victim is re-engaged. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
 | AI-643 | The join `R0064` detaches the actor, sets its owner to the new Player, puts it alone in a new Group, applies Stand Ground and clears two bits of `actor+0x18`; it stores no progress, phase or victim. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
 | AI-644 | The script action `R0262` is the only caller of the join that `EnumRefs callto:` finds (direct calls, `.rdata` pointers), for one actor or a list; 14 other member-insert sites in 10 routines call the member insert without it. | High / Medium | ● active | [EXP-0588](../experiments/EXP-0588-d2-remainders/) |
@@ -6981,6 +6981,8 @@ at action 0x10.
 
 **Unknown.** The callees `R0254`, `R1050`, `R0861`,
 `R0279` and `R0126`.
+
+**Amended.** `AI-801` extends the store to a blow whose roll fails: no branch of `R0265` after its entry test bypasses `L16253`.
 
 ### AI-642
 
@@ -9457,10 +9459,10 @@ pass.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | AI-784 | Caster cast decisions, rel32 and dword census of 14 entries in the EN image (RU same SHA256): `R0113` and `R0015` have 8 sites each, `R0394` one; `R2211`, `R2212`, `R1048`, `L14879` and `L14880` none. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
-| AI-785 | `R0113` (computer mage, Heal in book, mana above 10) heals itself when damaged, else the first kept unit below maximum health within Heal's 6 cells, else calls the buff tail `R0394`. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
-| AI-786 | `R0394` draws one kept unit; a unit of the caster's own Player, caster mana full, gets an affordable non-Heal Defensive spell drawn with equal weight up to the modulus, if its Effects bit is clear; an empty draw can cast Slow. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-785 | `R0113` (computer mage, Heal in book, mana above 10) heals itself when damaged, else the first kept unit below maximum health within Heal's 6 cells, else calls the buff tail `R0394`. | High / Medium | ● active (branch candidate, amended) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-786 | `R0394` draws one kept unit; a unit of the caster's own Player, caster mana full, gets an affordable non-Heal Defensive spell drawn with equal weight up to the modulus, if its Effects bit is clear; an empty draw can cast Slow. | High / Medium | ● active (branch candidate, amended) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
 | AI-787 | `R0018` searches for a target only when passed none; of its 13 sites only the state-0xd re-issue `L14884` can pass a null target with a Defensive spell, so its ally search is not shown reachable. | Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
-| AI-788 | Of 28 spell rows the 17 non-Defensive go at enemies (Slow also at an own unit); Heal at the caster and units the diplomacy filter keeps (which Players: Medium); the other 10 Defensive rows at own-Player units, 4 also at the caster by slot. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
+| AI-788 | Of 28 spell rows the 17 non-Defensive go at enemies (Slow also at an own unit); Heal at the caster and units the diplomacy filter keeps (which Players: Medium); the other 10 Defensive rows at own-Player units, 4 also at the caster by slot. | High / Medium | ● active (branch candidate, amended) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
 | AI-789 | `R0015` and `R0305` cast only spell id 6, Heal: `R0015` at itself or the first listed unit below maximum health with word `+0x98` nonzero, not the most damaged; `R0305` at the protected unit. | High / Medium | ● active (branch candidate) | [EXP-0643](../experiments/EXP-0643-rom1-mage-support/EXP-0643.md) |
 
 ### AI-784
@@ -9540,6 +9542,8 @@ are not read here.
 its own Player, one of an allied computer Player and one neutral within 6 cells: record
 `ord+0x28` after each pass.
 
+**Amended.** `AI-800` reads the block builder `R0020`: it has no identity test and the caster's cell is the block's centre cell, so the caster can be in the list this routine walks and hands to `R0394`; whether `R0034` and `R0035` pass the caster's cell is Medium.
+
 ### AI-786
 
 `R0394(actor, list)` (listing
@@ -9576,6 +9580,8 @@ for whether the caster itself can be the drawn unit.
 **Unknown.** In the original, a computer mage holding Heal and Bless at full mana, no damaged unit
 near it, beside two units of its own Player: record which unit and spell `ord+0x28` and `ord+0x30`
 name over 20 passes.
+
+**Amended.** `AI-800`: the list this routine draws from is built by `R0020` with no identity test from a block centred on the caster's cell, so the caster can be among the units drawn (Medium: `R0034` and `R0035` are not read).
 
 ### AI-787
 
@@ -9631,6 +9637,8 @@ from the EN rows of `data-en.tsv`; the RU rows were compared only for the Defens
 
 **Unknown.** In the original, a Bee and an Ogre in combat: record whether either starts its slot
 cast.
+
+**Amended.** `AI-800`: the Heal and buff list of `R0113`, built by `R0020` with no identity test, can hold the caster (Medium that the caster's cell passes `R0034` and `R0035`).
 
 ### AI-789
 
@@ -9774,3 +9782,69 @@ in `AI-792`.
 **Unknown.** The distance a guard member chases in play. Settle with an original run: place
 an enemy just inside a guard group's radius, let it flee in a straight line, SAVE every
 16 ticks and record the member's distance from its post when its order turns to kind 1.
+## Refused flight, a teleport scroll in melee, the heal list and a missed blow
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0650-rom1-fidelity-unknowns/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-798 | Under Retreat a refused flee walk reaches `R0004`, which installs a strike (`R0005`) on a hostile at reach when the gate `R0041` passes, else turns through `R0250`; later pending moves wait behind progress 1. | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+| AI-799 | A Teleport scroll used in melee installs only after the running strike leaves progress 1; the relocation stands the unit down through `R0044` and keeps `actor+0x5c`; per-sub-tick values are Unknown. | Medium / Unknown | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+| AI-800 | `R0020` has no identity test: it appends the occupant `R0035` returns for each cell that passes `R0034`, centre cell first; whether the caster's cell passes and returns the caster is Medium. | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+| AI-801 | On a failed roll `R0265` still stores the attacker in victim `+0x40` (`L04123`) when the attacker is set, `R0416` returns 0 and attacker `+0x14` is nonzero; no branch after its entry test bypasses `L16253`. | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+
+### AI-798
+
+Listings `evidence/nav/p1/q1-strike-install-R0005.txt` and `evidence/nav/p1/q1-executor-head-L17866.txt`; the actor tick rows are EXP-0163 `evidence/listing-actor-tick.txt`.
+
+- Refused pass. The Retreat arm (state 0x16) writes pending kind 1 through `R0100` (`AI-RETREAT-273`). The executor's row 1 walk with an empty static list sets `mover+0x98` (`AI-658`). The tail reads `actor+0x50`; 0x16 is not 1, 0xa or 0x17, so it stores `ord+8` = 0 and calls `R0004` (`AI-649`). With the hostile inside `actor+0x12c` that routine stores `ord+0xc` and `ord+8` = 6 and, when the in-position gate `R0041` passes, calls `R0005`; otherwise it turns toward the hostile through `R0250` (`AI-649`, `AI-327`). The gate's body is not read here.
+- `R0005` (whole, 10 instructions) stores progress `ord+9` = 1 (`L00747`), `ord+0x15` = 0 (`L16193`), `actor+0x54` = 3 (`L00739`) and `actor+0x5c` = `ord+0xc` (`L04074`); `ord` is `actor+0x158`.
+- Later passes. The executor selects a progress arm while `ord+9` is nonzero (`L00547`, `MAGIC-341`). Progress 1 stores `actor+0x54` = 3 (`L00092`), increments `ord+0x15` (`L16197`) and stores progress 0 and `actor+0x54` = 0 only when `ord+0x15` exceeds 2 and `actor+0x136` is nonzero (`L00094..L02015`). A pending move the Retreat arm writes meanwhile (`ord+8` = 1) is not consumed while progress is 1.
+- Sub-phase. The actor tick runs the executor first and then dispatches `actor+0x54` (`MAGIC-TELEPORT-370`). In sub-phase 5 it counts `actor+0x6c` down; at 0 with state 3 it calls `R0001(actor, actor+0x5c)` at `L00006` (`L13484..L00006`).
+- Three ticks, composed (Medium), for the case where the gate passes. Tick 1: `ord+8` = 6, `actor+0x54` = 3, progress 1, and the same tick's sub-phase machine starts the swing. Ticks 2 and 3: `actor+0x54` = 3; `ord+8` = 1 if a Retreat group pass ran in between, else 6; sub-phase 5 counting down, or 7 after the release. When the strike ends, the next progress 0 pass runs the pending move; if it is refused again the sequence repeats. If the gate fails, the unit turns through `R0250` and does not strike on that pass.
+- Wimpy. The group-tail helpers call `R0100`/`R0107` without installing 0x16 (`AI-RETREAT-274`). The tail then branches on the state the unit holds: 1 stands it down to 0xc with `ord+8` = 0 and no strike on that pass (`AI-649`); any value other than 1, 0xa and 0x17 gives the Retreat sequence above.
+
+**Confidence.** High for the stores of `R0005`, the executor head and the progress 1 arm (one image; EN and RU share one SHA256). Medium for the sequence across passes and every per-tick value: the group pass cadence against the actor tick (`AI-660`, Medium), the gate `R0041`, the sub-phase 0 arm for state 3 and the countdown lengths are not read here. Medium for Wimpy: which command state a fighting unit holds is not read.
+
+**Unknown.** Settle with the original: one melee unit with one hostile at weapon reach and every flee cell blocked; give Retreat and record `ord+8`, `ord+9`, `actor+0x54` and `actor+0x58` after each of three actor ticks. Repeat with the unit's health below its Wimpy bound `ord+0x44` and no Retreat order.
+
+### AI-799
+
+Composed from published bodies; listing `evidence/nav/p1/q1-executor-head-L17866.txt` for the progress arms.
+
+- Use. Command 0x26 stores `actor+0x68` and `actor+0x44` and calls the setter `R0012` (`AI-617`), which parks the cast for pending kind 9 (`MAGIC-340`). While the strike holds progress 1 the executor takes the progress arm (`L00547`) and kind 9 does not install (`MAGIC-341`). When progress 1 ends (`L00095` progress 0, `L02015` `actor+0x54` = 0), a later pass installs kind 9: progress 2, action 0xe, the cell and the Spell (`AI-667`).
+- Relocation. It runs on the actor tick `+0x134` ticks after admission (`MAGIC-TELEPORT-370`). `R1055` calls `R0044`, which stores `ord+0x14`, `ord+0x60` = 0, `mover+0x7c` = 0, `actor+0x54` = 0, `ord+0x50` = 0, `actor+0x50` = 0xc, `ord[0]` and `ord+8` = 0 and no target pointer or route node (`AI-535`, `MAGIC-TELEPORT-357`, whose negative is Medium).
+- After recovery. Progress 2 stores progress 0 and `actor+0x54` = 0 when `ord+0x15` exceeds 2 and `actor+0x136` is nonzero (`L00093..L02015`). With `ord+8` = 0 the unit strikes again only after an acquisition writes `ord+8` = 6 and the gate passes (`AI-658`); a hostile 3 cells away needs a turn or walk through `R0250`.
+
+**Confidence.** Medium: every step is a published body or a listed store, but the order of group and executor passes, the path-list head and `mover+0x7c` writers after recovery, and the setter's parked fields are not read here.
+
+**Unknown.** The values at use, at relocation and every 8 sub-ticks for 80 sub-ticks after recovery, and whether the cell or the hostile's health changes in that window. Settle with the original: a mage in melee with one hostile uses a Teleport scroll at a cell 3 away; record `actor+0x50`, `actor+0x54`, `actor+0x5c`, `ord+8`, `ord+9`, the group order byte, `mover+0x7c` and the path-list head at those sub-ticks.
+
+### AI-800
+
+Listing EXP-0386 `evidence/occ-block-R0020-body.txt` (191 lines, read for every call, compare and branch).
+
+- `R0020` clears the list (`L17867`), takes the centre cell first (`L17868..L16730`) and then loops over the block (`L01724..L01733`). For each cell it calls `R0034`, then `R0035`, and appends a nonzero result through `R0032`. Its compares are the cell test, the occupant null test, the loop bounds and the ring-corner compare (`L01730`); none compares an occupant with an actor.
+- `R0113` passes the caster's own cell (`R0019`) and radius `Heal+9` (`AI-785`), so the caster's cell is the centre cell. The caster is the first entry only if that cell passes `R0034` and `R0035` returns the caster for it (Medium; neither body is read). The filter `R0021(actor, list, 1)` then keeps it when its own diplomacy byte has low bit 0 and the invisibility test passes (`AI-FILTER-001`).
+- The walk runs only when the caster's health equals its maximum (`AI-785`, step 2), so its quotient is 1. It can replace the 2.0 seed as the running best, but the pick needs a best below 1.0. A caster in the list therefore never changes the pick. It does reach the list handed to the buff tail `R0394` (`AI-786`, not read here).
+- Order. Centre cell, then rings by Chebyshev radius (`AI-336`); the walk starts at the list head (`AI-785`); which end `R0032` appends to is not read.
+
+**Confidence.** High for the absence of an identity test in the body read whole. Medium for the caster's presence: `R0035`, `R0034` and `R0032` are not read, and the self diplomacy byte value is not read.
+
+**Amends.** `AI-785`, `AI-786`, `AI-788`: the caster's cell is the centre cell of the block and no identity test excludes it; whether `R0034` and `R0035` pass it stays Medium.
+
+**Unknown.** Settle with the original: a computer mage holding Heal at full health and full mana, alone, then with one damaged ally within 6 cells; record `ord+0x28` after each pass and which unit the buff tail aims at.
+
+### AI-801
+
+Listings `evidence/nav/p1/q7-blow-R0246.txt`, `evidence/nav/p3/q7-blow-caller-R0001.txt`, the table `evidence/nav/p2/q7-jumptable-L04134.txt` and the censuses `evidence/nav/p2/q7-callers-R0246.txt` and `evidence/nav/p4/q7-callers-R0001.txt`; the resolver body is EXP-0588 `evidence/listings/q1virt.txt`.
+
+- Path. The actor tick's state 3 release calls `R0001` at `L00006` with no roll between the countdown test and the call. `R0001` calls `R0246` when the target's `vt+0x2c` is nonzero (`L02046`). `R0246` tests a non-null victim and attacker with nonzero `+0x14`, attacker health above 0 and reach (`L16249..L17869`), then calls the victim's `vt+0x4c` at `L02047`. Roll: none on `L00006` -> `R0001` -> `R0246` -> `vt+0x4c` as read; the reach call `R0247` (`L02044`) is not read. The victim's `vt+0x4c` is `R0265` in the three vtables of EXP-0588 `tables.txt`, `tables2.txt`; other classes are not read (Medium).
+- Resolver. In `R0265` the only exit before `L16253` is the null block test at `L17726..L17727`. Every forward branch from `L17870` targets an address inside `L17870..L16253` (40 jumps and the five-entry table `L04134`, whose targets run from `L17776` to `L17780`); the body holds no `ret` before `L17871`; the default arm's call `R1347` (`L17872`) is not read. The roll compare at `L04064` (`ebp-0x18` against `ebp-0x10`) therefore changes only the damage terms. From `L16253` the store of the attacker into victim `+0x40` (`L04123`) runs when the attacker is set, `R0416` returns 0 and attacker `+0x14` is nonzero; with `+0x14` zero, `L15021` stores 0 (`AI-641`).
+- Censuses. `R0246` has one rel32 caller, `L02046`; `R0001` has one, `L00006`; neither has a dword reference.
+
+**Confidence.** High for the listed branches of the resolver body. Medium for the path: `R0247`, `R1347` and the `vt+0x4c` slot of other classes are not read. Medium that no other code writes `+0x40` on a miss: no `disp:0x40` census of the image was run, and a call through a computed pointer is outside the rel32 and dword censuses.
+
+**Amends.** `AI-641`: the store also runs on a failed roll.
+
+**Unknown.** Settle with the original: a melee unit against a high-defence victim; on a blow that leaves the victim's health unchanged, record victim `+0x40` before and after.

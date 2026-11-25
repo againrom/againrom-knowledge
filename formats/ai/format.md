@@ -45,3 +45,9 @@ for each gate and for field-specific save restoration.
 
 Runtime member offsets identify original in-memory fields. Wire offsets and
 byte order are stated separately in the relevant layouts.
+
+## Heal list membership and Heal at a hostile unit
+
+The Heal candidate list can hold the caster (Medium), which is never the pick at full health. — AI-800
+
+A hero mage's book Heal at a hostile unit has paid mana and, under the prelude's gate, trains the school; the Heal arm then skips the heal (Medium: diplomacy polarity and admission target tests unread). — MAGIC-465

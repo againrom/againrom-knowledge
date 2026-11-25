@@ -728,3 +728,9 @@ and the base of HERO-SIGHT-007, amended and superseded); whether other writers b
 Unknown. At 0 its body stamps no fog. A unit whose lowered
 sight is below its reach acquires only inside that sight. Above the clamped
 power range the word can wrap; that case is Unknown. — MAGIC-446, TERR-FOG-081, HERO-SIGHT-007
+
+## Poison on a body and Heal at a hostile unit
+
+A body's attachments tick before the health branch, so poison keeps lowering a fallen unit's health; health at or below -10 sets the terminal action only once the death countdown has ended (High for the branches; per-call counts Medium). — MAGIC-464
+
+A hero mage's book Heal at a hostile unit has paid its mana at admission and, under the prelude's gate, trains the school before the per-id dispatch; the Heal arm's diplomacy test then skips the heal (Medium: polarity from the diplomacy filter, admission target tests unread). A zero amount still calls the healing helper. — MAGIC-465

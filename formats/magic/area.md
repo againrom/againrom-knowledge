@@ -134,3 +134,7 @@ the immediate 32 and overwrites one count-1 record. The 20-cell capacity, stage 
 engine limits. Changing the shipped fixed geometry changes `ROM.EXE`, not `Data.bin`. An engine may
 externalize replacement tables without changing any shipped file bytes. More than 20 cells, 255
 stages, 8 directions or single-byte coordinates requires a wider engine representation.
+
+## When the first stage lands
+
+A staged effect built during a step's actor pass is first driven in a later step's area pass; counting the applying step as 0, stage k runs on step 1 + 3k (Medium: the registration caller is unread). Consecutive stages run 3 steps apart; accepted stages need not be consecutive. A DirectDamage occupant loses health in the stage call (Medium: the effect object's `vt+0x3c` is unread for Fire Sacrifice, and the inner effects of Meteor Storm and Acid Stream are unread). — MAGIC-463
