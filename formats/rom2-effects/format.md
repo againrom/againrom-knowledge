@@ -132,6 +132,14 @@ same-ID renewal and duration tick. The dword copies overlap both words.
 Dispel, save/load, server-message and all other writers were not censused.
 Completeness remains Unknown. R2-ENGINE-1171.
 
+## Speed and resistance after the fold
+
+In RU the fold `L2.00102` adds an effect modifier to the Human speed word +0x8c; a sum below 0 zeroes the
+modifier and keeps the negative word. In the bodies read the speed word has a floor of 6 only when load reaches
+capacity and no upper bound; when the step takes that word it clamps it to 1..63 (Medium). The recompute clamps
+each resistance word after the fold to 0..min(Spirit/2 + 70, 100); the fold's effect on the resistance words is
+Unknown, and the damage resolver bounds no resistance word but raises its result to 0 (R2-ENGINE-1830).
+
 ## Effect words in computer-unit scoring
 
 Bit 0x40000 of the unit effect word +0x144 is effect id 18, and a candidate with it set gets +0x7f in the first ROM2 scorer. The bit 0x40000 of the field mask +0x150 is a separate flag that the slot routine sets when a Light or Darkness field changes (R2-ENGINE-1496).

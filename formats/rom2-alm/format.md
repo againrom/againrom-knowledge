@@ -363,7 +363,9 @@ attacker (R2-ENGINE-480; Medium here; a creature attacker's award was not
 read for the flag). By the code read, the flag is the second refusal of the
 Human award, after the attacker class test (R2-ENGINE-1156); by the code read,
 for a Human killer, a kill pays through the killer's repeated-victim list
-(R2-ENGINE-1157, R2-ENGINE-1158). The unit copy omits the flag (Medium; the complete
+(R2-ENGINE-1157, R2-ENGINE-1158). In RU a mage's spell hit stores its Sphere value in victim +0x48 and the kill
+reads it as a spell id; an RU spell kill offers its experience to award index 1 for Spheres 1 to 4 and index 2 for
+Sphere 5 (R2-ENGINE-1826, Medium for the credit in play; the damage payment of R2-ENGINE-488 is a separate call). The unit copy omits the flag (Medium; the complete
 selected bodies are now read, but callee effects remain unclosed, R2-ENGINE-1174);
 the save keeps it (Medium). Actor +0x194, +0x19c and +0x198 select
 Inn offer blocks 2, 4 and 6 (Medium: the receiver of the offer generator is
@@ -573,10 +575,15 @@ kinds 15 and 16 (0x0f, 0x10; second lookup directly at unit +0x10) require
 signed word +0x42 above 0, decrement it by 1, call notify, construct a named
 Item from literal strings EN `L2.08314` / `L2.08316` (RU `L2.08315` /
 `L2.08317`; the texts are "Potion Big Healing" and "Potion Big Mana"; the Data.bin MagicItems effects they name are Unknown)
-and pass it to unit vtable +0x44 (EN read; RU twin unread, Medium), where Item vtable +0x38 attaches child
+and pass it to unit vtable +0x44 (EN and RU read), where Item vtable +0x38 attaches child
 effects, recomputes, destroys the Item and returns 0 so it does not enter
-unit +0x7c. — R2-ENGINE-517, R2-ENGINE-518 (amended), R2-ENGINE-519,
-R2-ENGINE-520, R2-ENGINE-1695
+unit +0x7c. In the RU arm read the use is spent before any benefit test (the
+orders that send a unit to a well are unread); Unit +0x44
+`L2.08556` has the EN order, and Human +0x44 `L2.01310` reaches item +0x38
+through its own slot +0x40 `L2.01311`, which first returns an Armor, Shield or
+Weapon item unused under the item's class bits (that the potion is none of
+those classes is Medium). — R2-ENGINE-517, R2-ENGINE-518 (amended), R2-ENGINE-519,
+R2-ENGINE-520, R2-ENGINE-1695 (amended), R2-ENGINE-1831
 
 A map click on cursor `L2.02987`, which EN chooses only on hover flag 0x800
 (a structure whose record has +0x8c set), is an order, not a walk. The

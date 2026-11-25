@@ -106,6 +106,10 @@ rand(100) lies below parameter 41, one entry of the shop category draw for
 44}, when that draw returns any; it drops with the gold in the sack of the
 unit's cell. — R2-ENGINE-940, R2-ENGINE-941
 
+In RU the rolled item enters the bag after the unit's +0x78, +0x74 and slot items, and in the death body read the gold passed to
+the sack is the rolled gold; a sack already on the cell whose bag reports 1024 or more (count routine taken as the item count,
+Medium) takes nothing. — R2-ENGINE-1828
+
 Of the 180 Units rows with values, 66 reach the roll (Medium: the same
 template binding): orcs, undead and necromancers at chance 30, ogres at
 40, dragons and Urd at 100. A magic

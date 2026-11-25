@@ -299,7 +299,9 @@ Medium). No installed data.bin item row and no itemname.pkt record has 12 as Slo
 kind except the boots (Medium that either is the engine's item type; the object
 +0x44 type of a built item is read only through R2-ENGINE-711 and
 R2-ENGINE-265); a Staff is kind 1, attackType 3, physical 0 to 0 (R2-ASSET-297, R2-ASSET-298),
-and its cast pays no mana (R2-ENGINE-1441, Medium).
+and its cast pays no mana (R2-ENGINE-1441, Medium). A weapon's shop price adds its cast spell apart; an
+armour's or shield's spell enters the effect size S of the surcharge trunc((1.5^(S/70) + 1) x S x 50)
+(R2-ENGINE-1824, High for the order; Medium for the price).
 
 ## Keyboard orders and the defend order
 
@@ -498,14 +500,20 @@ admitted up to the spell's range byte. The target comes first and the list is
 cut to the cap (R2-ENGINE-1766, High / Medium). Drain Life stores the caster
 as the victim's killer and stores its spell id. A unit at health 0 or below
 falls and dies at -10 or below, and the kill route may credit the stored killer
-(R2-ENGINE-1767, High / Medium; the credit is Medium).
+(R2-ENGINE-1767, High / Medium; the credit is Medium). In RU a mage's spell hit stores its Sphere in victim
+byte +0x48, which the kill reads as a spell id; an RU spell kill offers its experience to award index 1 for
+Spheres 1 to 4 and index 2 for Sphere 5 (R2-ENGINE-1826, Medium for the credit in play). A non-mage's weapon
+Spell fires only when the blow's damage and the target's health after it are above 0, except Spell id 2, which
+fires on every strike that reaches the cast test (R2-ENGINE-1829, High / Medium).
 
 A unit with +0x54 = 0x10 or with health 0 or below restores nothing; below 0
 the refill takes 1 health on one pass in four, and corpse ageing lowers
 health separately, so the total loss per pass is not this figure alone.
-Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass); a corpse of class
-0x21..0x24 stops at -61 with kind 4 and stays, and any other corpse reaches
-kind 5 below -600 and is released (R2-ENGINE-1765, High / Medium). The
+Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass); a corpse of a class other than 0x21..0x24 reaches
+kind 5 below -600 and is released (R2-ENGINE-1765, High / Medium). The stage tests are strict: kind 2, 3, 4 and
+5 below -10, -20, -40 and -600. In RU a corpse of class 0x21..0x24 is held at -61 with kind 4 and never gets kind 5
+by ageing; in EN it stops losing health below -60 but gets kind 5 when its health is below -600 at an ageing call
+(R2-ENGINE-1825, High / Medium). The
 body tests no owner, side, player, order, combat or cast. Which classes the
 list holds is Medium (R2-ENGINE-1207). A census of word stores to health and
 mana finds no other restorer of a living unit over time among the stores it
@@ -672,7 +680,7 @@ Script action 25 writes one cell event on the single cell (low8 p2, low8 p3), no
 
 EN `L2.06918` stores the speed, heading, the per-advance x and y bytes and the advance count into the block at unit `+0x1c0` (R2-ENGINE-1470). In EN `L2.03582..L2.06966` it has one call (the step start of R2-ENGINE-1213); that it is the only writer of the step values is Medium. The count is 256 divided by the larger axis byte rounded up (Medium: the absolute-value helper `L2.04968` is unread). For a unit whose kind (`L2.03577`) is 1 the speed comes from the base speed, the multiplier, the slope between the two cells (Medium: the byte read as a height, R2-ENGINE-1340) and the mean of two cell bytes (the sum kept in a byte); for any other kind it is the base speed. The result is clamped to 1..63 (R2-ENGINE-1471); no group term was read. The 18 path and terrain parameters are read from `World\Data\map.reg` with code defaults (R2-ENGINE-1472; tile classifier `L2.06958`/`L2.07473` indexes `+0x54146..+0x54150` and writes no height, R2-ENGINE-1665; client/server type-3 readers in R2-ENGINE-1667); the full tables are on the route page.
 
-A step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive and floor(128/-v)+1 when negative, from fine bytes 0x80 and a heading that already matches, advance 1 being the step start tick in that case (R2-ENGINE-1760, Medium for the premises). The static route is rebuilt on a new goal or after 17 repaths, the local path when empty or after 33 walk calls, unless the wait decision of R2-ENGINE-1762 returns 1 or 2, and after a re-plan (R2-ENGINE-1761), with the shipped `map.reg` values of R2-ASSET-383. At a held next cell a one-cell unit turns and waits for a walking occupant or a standing one about to leave, else it re-plans (R2-ENGINE-1762).
+A step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive and floor(128/-v)+1 when negative, from fine bytes 0x80 and a heading that already matches, advance 1 being the step start tick in that case (R2-ENGINE-1760, Medium for the premises). The static route is rebuilt on a new goal or after 17 repaths, the local path when empty or after 33 walk calls, unless the wait decision of R2-ENGINE-1762 returns 1 or 2, and after a re-plan (R2-ENGINE-1761), with the shipped `map.reg` values of R2-ASSET-383. In RU the local search stores every cell from the unit's next cell to the local goal, none when its trace passes 1000 steps; a step takes the first cell, and the list is cleared at each cell centre; the search then runs again at the next walk call unless the wait decision holds the unit (R2-ENGINE-1827, Medium). At a held next cell a one-cell unit turns and waits for a walking occupant or a standing one about to leave, else it re-plans (R2-ENGINE-1762). In RU, in the bodies read, the Human speed word `+0x8c` that the step speed falls back on has a floor of 6 only when load reaches capacity and no upper bound, and an effect modifier may leave it at 0 or below; when the step takes that word it clamps it to 1..63 (R2-ENGINE-1830, Medium for the step).
 
 A map building caster lists the units within its record radius of its cell, Chebyshev (Medium), 1 to 9 cells, with no range compare against the spell (R2-ENGINE-1560). It starts a cast once per 16 session ticks through a built Unit that casts from state 13 with wind-up 1 and recovery 1 (R2-ENGINE-1561 amended, R2-ENGINE-1562); the built Unit casts once and is deleted when its recovery ends (Medium; R2-ENGINE-1740). It stops when the resolver is called with a blow or Blizzard value not below the building's health; no other route is shown to stop it (R2-ENGINE-1563). The Delivery 2 spell rows and Effect Speeds are in R2-ASSET-333.
 

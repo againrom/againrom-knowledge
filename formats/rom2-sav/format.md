@@ -626,8 +626,15 @@ is not 0, and the slots; a template name holding "NPC" (Medium) or +0x1a0
 empties it. The item roll then adds at most one generated item with
 quantity 1, and a nonempty bag or nonzero gold drops in the sack of the
 unit's cell. Whether the death's walk of unit list +0x20 and its virtual
-calls +0x38, +0x48 and +0x4c drop anything else, and how a sack already on
-the cell bounds the merged bag, are Unknown. — R2-ENGINE-943, R2-ENGINE-940
+call +0x38 drop anything else is Unknown. — R2-ENGINE-943, R2-ENGINE-940
+
+In RU the bag keeps its carried items and then takes, in order, unit +0x78, +0x74 (row parameter 15 set), the Human
+slots 1..12 (virtual +0x4c; the Unit body adds nothing) and the rolled item. A stackable item joins an equal stack
+already in the bag; another item goes to bag position +0x1c when that is below the count, else to the end (Medium).
+In the RU death body the gold passed to the sack is the rolled gold; no read of a unit gold field was found in that body
+(callees and other writers of the sack gold word not searched). A sack already on the cell takes the bag's items one
+unit at a time, unless its bag reports 1024 or more (count routine taken as the item count, Medium), when it takes
+none. — R2-ENGINE-1828
 
 EN and RU write the same bytes at Medium: the EN serializer bodies were
 read, their list and reference callees were not. RU items carry one more runtime dword
@@ -1920,6 +1927,10 @@ casts the weapon Spell only from the strike, after a blow with damage above 0
 to a living target (or the Spell id is 2). The tests are High in both clients;
 what state 0xd does is Unknown (the handler was not read). — R2-ENGINE-900,
 R2-ENGINE-901
+
+In RU a non-mage's weapon Spell fires only when the blow's damage and the target's health after it are above 0
+(living means the signed health word after the blow is above 0), except Spell id 2, which fires on every strike that
+reaches the cast test (High / Medium; Medium that id 2 is Fire Ball). — R2-ENGINE-1829
 
 In EN only, the attack-order routine and idle support call the book choices and
 support only for a mage (High for the gates; Medium for what the choices do,

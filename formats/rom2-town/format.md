@@ -629,10 +629,11 @@ factor. The whole rendered description is Medium (`R2-ENGINE-267`,
 High / Medium).
 
 The effect prices of armour, shields and weapons are one surcharge on the summed effect size S, the sum of each
-effect's value times its tag weight: trunc(50 * S * (1 + (S/70)^1.5)), added once, so one effect of size 70 adds 7000
-and two of size 70 add 26798. A tag-1 effect replaces the price; a weapon's castSpell effect adds its own price outside
-S; the total is capped at 19999999 (`R2-ENGINE-1764`, High in both clients; Medium that S is the size the item text
-shows).
+effect's value times its tag weight, added once (`R2-ENGINE-1764`, High in both clients; Medium that S is the size
+the item text shows). The power routine returns first^second, so the surcharge is trunc((1.5^(S/70) + 1) * S * 50):
+one effect of size 70 adds 8750 and two of size 70 add 22750 (`R2-ENGINE-1824`, High for the argument order; Medium
+for every price, and for the exact value when the product is an integer). A tag-1 effect replaces the price; a weapon's castSpell effect adds its own price outside
+S, while an armour's or shield's castSpell effect enters S; the total is capped at 19999999.
 
 ### Town 1 shop keeper
 

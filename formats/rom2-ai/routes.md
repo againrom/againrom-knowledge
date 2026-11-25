@@ -124,7 +124,9 @@ Medium). No installed data.bin item row and no itemname.pkt record has 12 as Slo
 kind except the boots (Medium that either is the engine's item type; the object
 +0x44 type of a built item is read only through R2-ENGINE-711 and
 R2-ENGINE-265); a Staff is kind 1, attackType 3, physical 0 to 0 (R2-ASSET-297, R2-ASSET-298),
-and its cast pays no mana (R2-ENGINE-1441, Medium).
+and its cast pays no mana (R2-ENGINE-1441, Medium). A weapon's shop price adds its cast spell apart; an
+armour's or shield's spell enters the effect size S of the surcharge trunc((1.5^(S/70) + 1) x S x 50)
+(R2-ENGINE-1824, High for the order; Medium for the price).
 
 ## Keyboard orders and the defend order
 
@@ -323,14 +325,20 @@ admitted up to the spell's range byte. The target comes first and the list is
 cut to the cap (R2-ENGINE-1766, High / Medium). Drain Life stores the caster
 as the victim's killer and stores its spell id. A unit at health 0 or below
 falls and dies at -10 or below, and the kill route may credit the stored killer
-(R2-ENGINE-1767, High / Medium; the credit is Medium).
+(R2-ENGINE-1767, High / Medium; the credit is Medium). In RU a mage's spell hit stores its Sphere in victim
+byte +0x48, which the kill reads as a spell id; an RU spell kill offers its experience to award index 1 for
+Spheres 1 to 4 and index 2 for Sphere 5 (R2-ENGINE-1826, Medium for the credit in play). A non-mage's weapon
+Spell fires only when the blow's damage and the target's health after it are above 0, except Spell id 2, which
+fires on every strike that reaches the cast test (R2-ENGINE-1829, High / Medium).
 
 A unit with +0x54 = 0x10 or with health 0 or below restores nothing; below 0
 the refill takes 1 health on one pass in four, and corpse ageing lowers
 health separately, so the total loss per pass is not this figure alone.
-Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass); a corpse of class
-0x21..0x24 stops at -61 with kind 4 and stays, and any other corpse reaches
-kind 5 below -600 and is released (R2-ENGINE-1765, High / Medium). The
+Corpse ageing takes 1 health on every second world pass (Medium for the Session counter identity; a third caller ages units outside the world pass); a corpse of a class other than 0x21..0x24 reaches
+kind 5 below -600 and is released (R2-ENGINE-1765, High / Medium). The stage tests are strict: kind 2, 3, 4 and
+5 below -10, -20, -40 and -600. In RU a corpse of class 0x21..0x24 is held at -61 with kind 4 and never gets kind 5
+by ageing; in EN it stops losing health below -60 but gets kind 5 when its health is below -600 at an ageing call
+(R2-ENGINE-1825, High / Medium). The
 body tests no owner, side, player, order, combat or cast. Which classes the
 list holds is Medium (R2-ENGINE-1207). A census of word stores to health and
 mana finds no other restorer of a living unit over time among the stores it
@@ -475,7 +483,9 @@ R2-ENGINE-1340 reads as a height (Medium; tile classifier `L2.06958`/`L2.07473` 
 dh >= 0 adds speed * dh / 64, dh clamped to 32. Any other kind uses the base speed unchanged. The speed is clamped to
 1..63, so a straight step takes from 5 to 256 advances (counted in advances, not game ticks; Medium for the helper).
 No group term was found in the bodies read; the object that holds the base speed byte is not identified
-(R2-ENGINE-1471).
+(R2-ENGINE-1471). In RU, in the bodies read, the Human speed word `+0x8c` that the step speed falls back on has a
+floor of 6 only when load reaches capacity and no upper bound, and an effect modifier may leave it at 0 or below; when
+the step takes that word it clamps it to 1..63 (R2-ENGINE-1830, Medium for the step).
 
 | Section | Key | Default | Destination |
 |---|---|---|---|
@@ -502,7 +512,10 @@ uses). The readers of the cost bytes are Unknown.
 - **Route rebuild.** The walk driver adds 1 to block `+0x78` on each call outside a step and the repath adds 1 to
   block byte `+9`. The static route is rebuilt on a new goal or when `+9` is above StaticRefreshRate (16): after 17
   repaths. The local path is rebuilt when it is empty, when `+0x78` is above DynamicRefreshRate (32), unless the wait decision returns 1 or 2 (no repath then), or after a re-plan at a held cell; the repath aims at the goal when the static route has at most 5 cells, at its newest cell
-  when that is more than 3 cells away, else at the fourth cell from the top (R2-ENGINE-1761).
+  when that is more than 3 cells away, else at the fourth cell from the top (R2-ENGINE-1761). In RU the local search
+  stores every cell from the unit's next cell to the local goal, none when its trace passes 1000 steps; a step takes
+  the first cell, and the list is cleared at each cell centre; the search then runs again at the next walk call
+  unless the wait decision holds the unit (R2-ENGINE-1827, Medium).
 - **Held next cell.** When the local path is empty or stale and the newest static cell one step away fails the cell test (plane two AND block `+5` over the size square), a one-cell unit waits for a walking occupant, for a standing occupant with prepared order 1 or 4 unless the waiting unit's own target is that cell, and for an empty cell that a neighbour is
   leaving; it re-plans for a dead occupant, a standing occupant that stays, and in every other case. A waiting unit
   turns toward the cell and starts no step; how long it waits is Unknown (R2-ENGINE-1762, R2-ENGINE-549).

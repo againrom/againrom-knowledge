@@ -22,6 +22,185 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## ROM2 surcharge power, spell kill credit, local path, death sack and well item
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1824 | ROM2 pow (RU `L2.02322`, EN `L2.02353`) returns first^second, so the surcharge expression is trunc((1.5^(S/70) + 1) x S x 50), High; every price (8750 at S = 70) is Medium; a weapon prices its cast spell apart. | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1825 | ROM2 corpse stage tests are strict (kind 2, 3, 4, 5 below -10, -20, -40, -600); RU holds a class 0x21..0x24 body at -61 so ageing never gives it kind 5, while EN gives kind 5 to one below -600. | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1826 | ROM2 RU: a mage's spell hit stores its Sphere (1..5) in victim byte +0x48 and the kill reads it as a spell id, offering the experience to award index 1 for Spheres 1 to 4 and 2 for Sphere 5 (skill names Unknown; credit in play Medium). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1827 | ROM2 RU local route: the trace stores cells to the local goal (none past 1000 steps), a step takes the first, and the list is cleared at each cell centre; unless the wait decision holds the unit, the next walk call searches again (Medium). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1828 | ROM2 RU death bag: +0x78, +0x74 (parameter 15 set), Human slots 1..12, then the rolled item; in the death body `L2.01807` the only gold passed to the sack is the rolled gold; a bag reporting 1024 or more merges nothing (Medium). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1829 | ROM2 RU strike: a non-mage's weapon Spell fires only when the blow's damage and the target's health after it are above 0, or when its id byte is 2, which fires on every strike reaching the cast test (Medium that id 2 is Fire Ball). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1830 | ROM2 RU Human speed +0x8c: floor 6 only at overload, no upper bound in the bodies read, may go negative; the 1..63 step clamp applies when type byte +0x44 is 0 (Medium). The resolver bounds no resistance word; it floors the result at 0. | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1831 | ROM2 RU wells 15 and 16: the state 15 arm spends a use before any benefit test; Unit +0x44 and Human +0x44 via +0x40 pass the potion to item +0x38, which applies and destroys it, so nothing enters the bag (Medium: potion class). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+
+### R2-ENGINE-1824
+
+The surcharge body (RU `L2.08477`, EN `L2.07619`, read whole in the committed listings of R2-ENGINE-1764) loads S, divides it by 70.0, stores the quotient as the higher-addressed double argument, pushes the double 1.5 (high dword `0x3ff80000`, low 0) as the lower-addressed one, and calls the power routine. It then adds 1.0, multiplies by S and by 50.0 and truncates through `L2.01309` (R2-ENGINE-478).
+
+The power routine, read in both roots (RU `L2.02322`, EN `L2.02353`, equal in structure):
+
+1. It loads the higher-addressed argument (`[esp+0xc]` at entry) through the loader RU `L2.08624` / EN `L2.08625`, which runs `fld qword [edx]` for a finite value.
+2. It loads the lower-addressed argument (`[esp+8]` after one push), so that argument is on top of the x87 stack.
+3. It sends a negative lower-addressed argument to a separate branch (sign bit of its high byte).
+4. It runs `fyl2x`, which gives higher x log2(lower), then the exponent helper RU `L2.08626` / EN `L2.08627`. Its error path names the string "pow".
+
+The routine returns lower^higher, the C library pow(x, y) with x the first argument. The surcharge is therefore trunc((1.5^(S/70) + 1) x S x 50). The same order gives R2-ENGINE-485's 1.1^L through the RU helper `L2.00109`; those thresholds equal the saved hero's experience (R2-SESSION-144), and L^1.1 would not.
+
+Values in host doubles (`derived/surcharge.tsv`, `derive_price.py`):
+
+| S | Surcharge | Earlier reading (S/70)^1.5 |
+|---|---|---|
+| 10 | 1029 | 526 |
+| 35 | 3893 | 2368 |
+| 70 | 8750 | 7000 |
+| 105 | 14894 | 14894 |
+| 140 | 22750 | 26798 |
+| 210 | 45937 | 65059 |
+| 280 | 84875 | 126000 |
+
+The two readings agree only at S = 105, where S/70 = 1.5. The surcharge is applied once on the summed size, so two effects of size 70 cost the same as one of size 140 (R2-ENGINE-1764).
+
+Cast spell (tag 41, R2-ENGINE-414): the weapon slot adds the effect's own price through effect slot `+0x4c`, trunc(10 x c20 x 2^(ln(1 + L/30)/ln 1.2)) (R2-ENGINE-265), and that effect stays out of S. The armour and shield slots have no such branch, so their tag-41 effect enters S like any other effect (R2-ENGINE-1764). Shop armour and shields carry no cast spell (R2-ENGINE-711).
+
+**Confidence.** High for the argument order and the surcharge expression in the bodies read, in both roots. Medium for every price: S as the item text size (R2-ENGINE-1764), the cap, any shop factor unread, and the helper's rounding at integral exponents. That last link touches the exact values where the product is an integer (S a multiple of 70: 8750, 22750, 84875). There the unread exponent helper may return one unit in the last place below 1.5^k, and truncation would then give one less. The cast-spell clauses compose R2-ENGINE-265, R2-ENGINE-711 and R2-ENGINE-1764 and keep their grades.
+
+**Unknown.** The rounding of the exponent helper at an integral exponent. A run of the original that shows the shop price of an armour with one effect of size 70 next to its plain price settles 8750 against 8749.
+
+**Amends.** R2-ENGINE-1764's "7000 for S = 70, 26798 for two of 70" and its arithmetic paragraph: the power is 1.5^(S/70), giving 8750 and 22750. R2-ENGINE-267's "other effects add trunc(50*S*(1+(S/70)^1.5))": the surcharge is trunc((1.5^(S/70) + 1) x S x 50).
+
+### R2-ENGINE-1825
+
+The corpse ageing body (RU `L2.02525`, committed listing `ru-corpse.txt` of EXP-2104; EN `L2.08328`, committed listing `en-death-age-L2.08328.txt` of EXP-2199) tests health word `+0x94` in this order:
+
+1. Below -10000 (`cmp` with -10000, `jge` past the return): return. Health -10000 itself goes on.
+2. RU only: class word `+0xe` in 0x21..0x24 and health below -61 (`cmp` with -61, `jge` past the store): health = -61. EN has no such store.
+3. When the Session counter is even: health - 1; for class 0x21..0x24 only while health is -60 or above (`cmp` with -60, `jl` past the decrement), both roots.
+4. Three independent tests, each `cmp` then `jge` past its store: below -10 kind byte `+0x13c` = 2, below -20 kind 3, below -40 kind 4. The last true test sets the kind.
+5. Below -600: kind 5, health -10001, and the release of R2-ENGINE-1765.
+
+A class 0x21..0x24 body in RU reaches at most -61 after step 2 or 3, so step 5 never runs for it: it keeps kind 4 and is never released by ageing. RU raises such a body from any health in -10000..-62 to -61, including the -10000 the death routine stores for a `+0x148` unit (R2-ENGINE-1767). In EN the same body stops losing health below -60. When its health is already below -600 at an ageing call (an overkill blow, or the -1000 of the actor step for byte `+0x4a` above 1, R2-ENGINE-1767), it gets kind 5 and health -10001. Its `+4` is then released when it is nonzero and byte `+0x4a` is at most 1. Classes 0x21 + gender and 0x23 + gender are the fighter and mage hero bodies by R2-ENGINE-739.
+
+**Confidence.** High for the order, the comparisons and their strictness in both roots. Medium that 0x21..0x24 are the hero classes (R2-ENGINE-739 is Medium). Other routes that remove a body (map unload, a spell, a script) were not searched; the statement is limited to the ageing body.
+
+**Unknown.** Whether the released `+4` is the map entry, so whether kind 5 removes the body from view. A run of the EN original that kills a hero with one blow of more than 600 damage beyond its health and watches the body over 2 world passes settles it.
+
+**Amends.** R2-ENGINE-1765's "classes 0x21..0x24 stop at -61 (kind 4, kept)": in RU always by ageing; in EN only while the body's health is -600 or above at an ageing call.
+
+### R2-ENGINE-1826
+
+All bodies are RU.
+
+1. **Damage kind.** The spell apply head `L2.00034` (committed listing `ru-apply-head.txt` of EXP-2098) stores the spell id at damage object word `+0xc` and its caster at `+0x44`. It switches on spell parameter 2 minus 1 through table `L2.00100`; the table scan gives slots 0 to 4 = `L2.08628`, `L2.08629`, `L2.08630`, `L2.08631`, `L2.08632`. Those arms call the setters `L2.00095`, `L2.00096`, `L2.00097`, `L2.00098`, `L2.00099`. Each setter stores its two byte arguments at `+0x5b` and `+0x5c` and the constant 1, 2, 3, 4 or 5 at `+0x5d`, which is byte `+0x15` of the damage block at object `+0x48`. Parameter value s therefore gives kind s, as R2-ENGINE-028 states.
+2. **Attacker record.** The resolver `L2.00101` (committed listing `ru-resolver.txt` of EXP-2060) runs for every hit with an attacker. When `L2.01570`(attacker) is false (that routine returns attacker `+0x3c` == 0) and the attacker has an owner `+0x14`, it sets victim `+0x40` = attacker. It also sets victim byte `+0x48` = block byte `+0x15` when the mage test `L2.00044`(attacker) holds, else 0. Without an owner it sets `+0x40` = 0 and leaves `+0x48`. A mage's spell hit thus leaves the Sphere value in `+0x48`; the next recorded hit overwrites it.
+3. **Kill credit.** Human slot `+0x68` `L2.02328` (committed listing `ru-xp-scale-and-vt26-28.txt` of EXP-2060) receives `+0x48` as the spell (R2-ENGINE-1158). For a mage and a nonzero value v, it calls `L2.02358`(v) on table `L2.08633`. That routine returns `[table+4]` + 32 x v through `L2.08634`, row v with no lookup. It then calls `L2.02312`(row + 8, 2), parameter 2 of row v, and offers trunc(V x 0.5) with that value as the skill through slot `+0x64`.
+4. **Data.** In the client Spells table parameter 2 is Sphere (R2-ASSET-107; EXP-2057 `ru-spell-rows.tsv`). Rows 1 to 5 hold Fire Arrow 1, Fire Ball 1, Wall of Fire 1, Protection from Fire 1 and Ice Missile 2.
+
+A mage's kill whose last recorded hit was a spell of Sphere 1, 2, 3 or 4 therefore offers its experience to award index 1, and one of Sphere 5 to award index 2; the names of those skills are Unknown, and that the offer trains that skill in play is Medium. This is the kill call only: the damage payment of R2-ENGINE-488 into the spell's Sphere skill through slot `+0x6c` is a separate call and is not read here. Only a Sphere-1 kill reaches the skill of the spell's own Sphere. Drain Life writes its spell id to `+0x48` instead (R2-ENGINE-1767), so a Drain Life kill credits Drain Life's own Sphere. A hit by an owned non-mage writes 0 (R2-ENGINE-1158 gives the award for 0).
+
+**Confidence.** High for the RU bodies, the table scan and the row arithmetic. Medium for three links. Table `L2.08633` is taken to be the client Spells table indexed by spell id because the apply head reads parameter 2 of the spell being cast and switches over 1..5 on it. Writers of `+0x48` other than the resolver and Drain Life between the hit and the kill are not censused (R2-ENGINE-1158). The EN bodies are unread.
+
+**Unknown.** The skill names of award indices 1 and 2. R2-ENGINE-488's damage payment through slot `+0x6c` is a separate call and is not read here. A run of the original settles the credit: a mage kills a unit with Ice Missile (Sphere 2), and the experience of every skill is read before and after; this claim predicts the gain in skill 1.
+
+**Amends.** R2-ENGINE-1158's "takes the spell's Sphere for a mage" and "Medium that +0x48 holds the killing spell": the resolver writes the damage kind (the Sphere value), so for a non-Drain-Life spell the Sphere used is that of spell row number = Sphere value.
+
+### R2-ENGINE-1827
+
+All bodies are RU. The local path is the list at unit `+0x1e4`, a doubly linked list with head `+4`, tail `+8` and count `+0xc`. Its routines (`generated/gen1/listings/ru-path-*.txt`): `L2.06350` returns the count, `L2.06219` tests count 0, `L2.06547` returns the head cell (head node `+8`), `L2.05231` removes the head node, `L2.05229` inserts a cell before the head, and `L2.05193` frees every node and zeroes head, tail and count.
+
+1. **Fill.** The local trace `L2.05190` (committed linear listing `ru-terrain-lin-L2.06912.txt` of EXP-2085, lines 1950..2172) inserts its start cell before the head, then walks one neighbour per step and inserts each cell before the head. It stops on reaching its end cell or when its step counter passes 1000 (`cmp` 1000, `jle` to continue). Past 1000 it empties the list (`L2.05193`); otherwise it removes the head (`L2.05231`). The route search calls it with the local goal as start and the unit's cell as end (R2-ENGINE-1761 names the search; the argument roles follow from the head removal, which drops the unit's own cell). The list then holds every traced cell from the cell next to the unit (head) to the local goal (tail).
+2. **Use.** The step start `L2.06347` takes the head cell through `L2.06547` into block `+6` and removes nothing (committed listing `ru-cell-step.txt` of EXP-2135). On an empty list it calls `L2.05527` (`L2.06347..L2.08635`), which is unread.
+3. **Drop.** The mid-step routine `L2.02848` (same listing) advances the unit, then tests the position with `L2.00490`, which returns 1 when fine bytes `+4` and `+5` are both 0x80, the centre of a cell. On 1 it zeroes block words `+0xaa`, `+0xac` and `+0xa8`, runs the footprint updates `L2.02410` and empties `+0x1e4` (`L2.05193` at `L2.08636`).
+
+So the trace stores the whole detour, the unit walks only its first cell, and the list is empty again at the centre of that cell. Unless the wait decision holds the unit (R2-ENGINE-1761, results 1 and 2), the next walk call builds a new local path at each cell (Medium for the roles of the trace arguments and for that rebuild; the tick cost Unknown).
+
+**Confidence.** High for the RU list routines, the trace, the step start and the mid-step drop. Medium for the start and end roles of the trace's arguments, inferred from the head removal and not from the caller's argument stores. Medium that the next walk call rebuilds at once, which rests on R2-ENGINE-1761 and its wait-decision exceptions. The EN bodies are unread.
+
+**Unknown.** The cost of the per-cell search in ticks. A run of the original that walks a unit around a wall, with `+0x1e4` sampled each tick, shows the list emptying at each cell centre.
+
+**Amends.** R2-ENGINE-1761's Medium "when the local path empties (the element is consumed outside the bodies read; `L2.02848` is not read)" and its Unknown "the removal of local path elements during a step": no element is consumed one by one; the whole list is emptied when the unit reaches the centre of the next cell.
+
+### R2-ENGINE-1828
+
+All bodies are RU. The death routine `L2.01807` (committed listing `p1-ru-death-L2.01807.txt` of EXP-2131) fills the unit's bag `+0x7c`, which already holds the carried items, in this order:
+
+1. Item `+0x78` when nonzero: bag add of virtual `+0x48`(item).
+2. Item `+0x74` when nonzero and parameter 15 of its row (`L2.02312`(row + 8, 15), row at item `+0x3c`) is nonzero: bag add of virtual `+0x48`(item).
+3. Virtual `+0x4c`. The Unit body `L2.08637` returns at once. The Human body `L2.01773` runs i = 1..12 and adds virtual `+0x48`(slot dword `+0x208` + 4i) to the bag.
+4. When the string at `[+0x3c]+4` contains "NPC" (`L2.01289` returns the position from `L2.02244`, else -1; tested `!= -1`) or `+0x1a0` is set, the bag is destroyed and replaced by an empty one (R2-ENGINE-535, R2-ENGINE-943).
+5. Class `+0xe` of 64 or more with `+0x1a0` clear: the rolled gold and at most one rolled item (R2-ENGINE-940).
+6. A nonempty bag or nonzero gold goes to the sack placement with the rolled gold (R2-ENGINE-940).
+
+Virtual `+0x48` takes an item off: the Unit body `L2.08638` calls item virtual `+0x3c`(unit) and unit virtual `+0x5c`, the Human body `L2.01771` only item `+0x3c`(unit). Both return the item, or 0 for 0.
+
+Bag add `L2.01313`(item) calls `L2.01741`(bag `+0x1c`, item) and ignores 0. A stackable item (item virtual `+0x50` nonzero) whose id (`L2.08639`) equals that of a stackable item already in the bag joins it. Its count word `+0x42` is added to that stack, its word `+0x4a` x count to bag dword `+0x20`, and it is destroyed. Any other item is inserted at position bag `+0x1c` when that is below the count, else appended (`L2.01748`).
+
+In the death body `L2.01807` the gold passed to the sack placement is the local roll; no read of a unit gold field was found in that body. Its callees `L2.01738` and `L2.03271`, the placement bodies (read by EXP-2131, not here) and other writers of the sack gold word `+0x3c` were not searched. The sack placement builds a new sack from the bag itself (`L2.05626`: sack `+0x40` = bag, gold `+0x3c` = 0, then the placement adds the gold) or merges into a sack already on the cell through `L2.01743`(sack bag, bag). The merge returns at once when the sack bag's count (`L2.01746`) is 1024 or more. Otherwise it takes one unit at a time from position 0 (`L2.01651`(0, 1)), adds it with the bag add above, and destroys the emptied bag. Because the unit then receives a new empty bag (R2-ENGINE-940), the items of a bag refused at 1024 are referenced nowhere in the bodies read.
+
+**Confidence.** High for the order, the bag add, the sack constructor and the merge in RU. Medium for these links. The meaning of item row parameter 15 is unread. `L2.01746` calls `L2.01747` (unread), taken as the item count because the bag routines compare positions with it. Bag `+0x1c` has no writer read, so whether a non-stacking item lands at the end is Medium. The split of a stack in `L2.01651` uses item virtual `+0x40` (unread). That the refused bag is lost assumes no other holder of its pointer. Whether `+0x74` or `+0x78` can also sit in a Human slot, and so be added twice, is not read. The EN bodies are unread.
+
+**Unknown.** Bag `+0x1c`. A run of the original that kills a hero carrying two items and wearing a weapon and an armour shows the sack's order; a run that drops a 1025th item on one cell shows the refusal.
+
+**Amends.** R2-ENGINE-940's Unknown on `L2.01743` and `L2.05626` and "whether a sack merge bounds the bag": read; a sack bag of 1024 or more items takes nothing.
+
+### R2-ENGINE-1829
+
+The RU strike (committed listing `ru-strike.txt` of EXP-2060, `L2.08640..L2.05341`) runs in this order:
+
+1. d = target virtual `+0x54`(block, attacker), the resolver.
+2. Target health word `+0x94` = health - d (16-bit store).
+3. When the attacker holds a weapon `+0x74`, the weapon has a Spell (`L2.02338`: weapon `+0x88` nonzero) and `L2.01517`(attacker) holds (mage bit clear, R2-ENGINE-901): if d > 0 (`jle` past) and the new signed health is above 0 (`test`, `jg` to the cast), or else the Spell's id byte `+8` is 2, the attacker gets `+0x64` = Spell and `+0x68` = weapon, the cast `L2.00035`(attacker, target) runs, and both fields are cleared.
+
+Health 0 is not above 0. A blow that kills, or one that leaves the target at 0..-9 (down but not dead, R2-ENGINE-1767), therefore casts no weapon Spell except id 2. Id 2 is Fire Ball (client Spells row 2, R2-ASSET-107 and EXP-2057 `ru-spell-rows.tsv`); it is cast after every strike that reaches step 3, with any damage, 0 included.
+
+**Confidence.** High for the RU order and comparisons. R2-ENGINE-901 gives the same tests in EN. Medium that the Spell's byte `+8` numbers the client Spells rows (R2-ENGINE-1767 calls it the spell id). Whether a strike that misses reaches step 3 depends on the resolver's return for a miss and is not separated here.
+
+**Unknown.** A run of the original that gives a fighter a Fire Arrow weapon and kills a weak unit with one blow, then hits a strong unit, shows a cast only on the second.
+
+**Amends.** R2-ENGINE-901's "after a blow with damage above 0 to a living target": the target's signed health word after the blow is above 0; 0 counts as not living.
+
+### R2-ENGINE-1830
+
+The RU Human recompute (committed listing `ru-human-recompute.txt` of EXP-2132, `L2.00052`) sets speed and load in this order:
+
+1. Speed word `+0x8c` = Agility `+0x86` when Agility is below 12, else Agility/5 + 12; 10 more when class `+0xe` is 0x13 or 0x15.
+2. Load `+0x90` = `+0x8e` plus bag `+0x20`/2, or plus 0x7d00 when the bag value is 0xfa00 or more. Capacity `+0x92` = Strength `+0x84` * 10 + 1.
+3. When load is at least capacity, speed -= load/capacity, then speed is raised to 6 when below 6 (`L2.08641`). This floor sits on the overload branch only.
+4. The fold `L2.00102` (call at `L2.08642`; committed listing `ru-modifier-fold.txt` of EXP-2060) adds the effect modifier to `+0x8c`. A sum below 0 zeroes the modifier and keeps the negative word.
+5. The low byte of `+0x8c` is copied to the step block, `[+0x1c0]+0xa` (`L2.01329`).
+
+The bodies read are the recompute `L2.00052`, the fold `L2.00102` and the Creature slot `L2.04100`. No instruction in them bounds the speed word from above, and only step 3 bounds it from below. Other writers of `+0x8c`, the RU step routine and the readers of the step block byte were not searched. The step speed of R2-ENGINE-1471 (EN `L2.07811`) takes the byte `[[unit+0x70]+0x3c]+0x44` when nonzero, an object that claim leaves unidentified, else the signed word `+0x8c`, and clamps it to 1..63. Only on that path does a speed word of 0 or less step at 1 and one above 63 at 63 (Medium). If the step reads the copied low byte instead, a negative word steps at its low byte and a word over 255 wraps.
+
+Resistances: the recompute clamps each word after the fold to 0..min(Spirit/2 + 70, 100) (R2-ENGINE-029). The committed fold listing adds the modifier to `+0x8c`, `+0x92`, `+0x96`, `+0x9c` and `+0xa4` and calls `L2.08643` (at `+0xbe`) and `L2.02321` (at `+0xa6`), both unread; no instruction in it touches the five resistance words, so the fold's effect on them is still Unknown. The Creature slot `+0x58` (`L2.04100`, generated listing `ru-creature-slot58-L2.04100.txt`) sets `+0xa0` = `+0x9c` * owner `+0xa5c` / 100 and nothing else; it bounds neither speed nor resistance.
+
+The damage resolver `L2.00101` (committed listing `ru-resolver.txt` of EXP-2060) bounds no resistance word. Its Fire arm (`L2.08644..L2.08645`) reads the signed word `+0xc4`, skips at 0, otherwise computes ftol(v * (100 - p) / 100 + 0.75) (R2-ENGINE-028) and raises a negative result to 0; a word above 100 therefore gives 0 and a negative word raises the damage. The other four arms read `+0xc6`, `+0xc8`, `+0xca` and `+0xcc` in the same pattern; they were not each read through. The `0x5a` and `-0x5a` compares (`L2.06373`, `L2.06376`) test the physical roll `R2.0021`(200) - 100, not a protection value: at 90 or more the swing takes its damage whatever the defence `+0xbe`, below -90 its damage is 0; absorption `+0xc0` is then subtracted and the result raised to 0.
+
+**Confidence.** High for the RU Human order, the overload floor of 6, the fold's keeping of a negative speed word, the absence of an upper bound in the bodies read and the resolver's Fire arm. Medium for the step clamp in RU: R2-ENGINE-1471 reads EN, it applies only when byte `+0x44` is 0, the RU step routine is not read here, and the consumer of the copied low byte is unread. Medium for the four other resistance arms and for the random helper `R2.0021` (unread). Medium that a Creature has no other speed or resistance writer: only slot `+0x58` was read.
+
+**Unknown.** The consumer of step block byte `+0xa`. The fold's effect on the resistance words. A run of the original that gives a hero Agility 60 with Haste and loads a weak hero past capacity under Slow would show whether the step stops at 63 and at 1.
+
+**Amends.** R2-ENGINE-029's Unknown fold: the fold body adds the modifier to `+0x8c` and other words and calls two unread routines; its effect on the resistance words is still Unknown.
+
+### R2-ENGINE-1831
+
+The well arm of state 15 for kinds 15 and 16 (R2-ENGINE-1695, RU `L2.08311..L2.05539`) tests building `+0x42` above 0, decrements it and only then builds the Item. No test of the unit's health against its maximum, of its mana or of its class precedes the decrement in that arm. A use is therefore spent whenever the arm runs with `+0x42` above 0.
+
+The built Item goes to the unit's slot `+0x44`:
+
+1. Unit `+0x44` (`L2.08556`, generated listing `ru-unit-slots-L2.08556.txt`) calls item `+0x38`(unit), adds a nonzero result to the bag `+0x7c` and calls unit `+0x5c`. This is the EN order of R2-ENGINE-1695.
+2. Human `+0x44` (`L2.01310`, committed listing `ru-add-item.txt` of EXP-2051) calls the unit's own slot `+0x40` and adds a nonzero result to the bag. The Human vtable `L2.00218` holds `L2.01311` at `+0x40` (navigation scan `ru-vt-human-40-L2.08646.txt`).
+3. Human `+0x40` (`L2.01311`, navigation listings `ru-human-slot40-L2.01311.txt` and `ru-human-slot40-tail-L2.08647.txt`) tests whether the item is of the runtime class at `L2.01176`, `L2.01312` or `L2.01175`, named "Armor", "Shield" and "Weapon" (kind test `L2.02629`, listing `ru-kind-test-L2.02629.txt`; scans `ru-rtc-name-*.txt` and `ru-cstr-L2.08648.txt`, `ru-cstr-L2.08649.txt`, `ru-cstr-L2.08650.txt`). Such an item is returned unused when item parameter 15 bit 0 is clear and the unit is not a mage, or bit 1 is clear and the unit is a mage. In every other case the slot calls item `+0x38`(unit) and returns its result.
+4. Item `+0x38` (RU `L2.01763`, R2-ENGINE-1695) with health above 0 attaches the child Effects, recomputes, destroys the item and returns 0.
+
+Through either slot the potion is applied and destroyed and nothing enters the bag, unless the built Item is of one of the three gated classes. The magic-item constructor `L2.05635` (listing `ru-magic-item-ctor-L2.05635.txt`) calls base constructor `L2.01295`, sets vtable `L2.01751` and item count `+0x42` = 1; the runtime class of vtable `L2.01751` was not read.
+
+**Confidence.** High for the RU order of Unit `+0x44`, the Human `+0x44` call of slot `+0x40`, the class gate as read and the decrement before any benefit test. The decrement-before-test holds for the state 15 arm only; the orders that send a unit to a well (a player order, the AI order choice) are unread, so a use may be gated upstream. Medium that the well Item passes the Human gate, since the runtime class of vtable `L2.01751` is unread. Medium for unit classes other than Unit and Human, whose vtables were not read. Whether a unit at full health or mana gains anything, and whether health stops at its maximum, depends on Effect slot `+0x3c`, unread.
+
+**Unknown.** A run of the original in which a hero at full health uses a kind 15 well, and a hero 10 health below maximum uses it again, shows whether the use count still drops and whether health passes the maximum.
+
+**Amends.** R2-ENGINE-1695: Unit `+0x44` is read in RU and has the EN order, which lifts its RU Medium; Human `L2.01310` reaches item `+0x38` through its own slot `+0x40` and its class gate, not by a direct call.
+
 ## ROM2 map unit-list rows, health words, definition lookup and sack item builder
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -234,7 +413,7 @@ Terms shared by these cards: the walk driver is RU `L2.02867` / EN `L2.05544`, t
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1760 | A ROM2 step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive, floor(128/-v)+1 when negative, from fine bytes 0x80 and a matching heading. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
-| R2-ENGINE-1761 | ROM2 walk: static route rebuilt on a new goal or after 17 local repaths; local path when empty or after 33 walk calls, unless the wait decision returns 1 or 2. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1761 | ROM2 walk: static route rebuilt on a new goal or after 17 local repaths; local path when empty or after 33 walk calls, unless the wait decision returns 1 or 2. | High / Medium | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
 | R2-ENGINE-1762 | At a held next ROM2 cell (cell test returns 0) a one-cell unit waits for a walking occupant or a standing one about to leave, else re-plans. | High / Medium / Unknown | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
 
 ### R2-ENGINE-1760
@@ -264,6 +443,8 @@ With the shipped values (R2-ASSET-383: StaticRefreshRate 16, DynamicRefreshRate 
 **Unknown.** The removal of local path elements during a step. A run of the original that walks a unit along a long route while a second unit crosses it, with the route lists sampled each walk call, settles the rebuild points.
 
 **Amends.** R2-ENGINE-1108's Unknowns: the counters that decide when its route branches rebuild a route are read; the search `L2.05182` stays read in part.
+
+**Amended.** R2-ENGINE-1827 reads `L2.02848` and the list routines in RU: the local path is emptied when the unit reaches the centre of its next cell, so it is rebuilt for every cell walked; elements are not consumed one by one.
 
 ### R2-ENGINE-1762
 
@@ -315,12 +496,12 @@ At substate 5 count 0 the strike runs only when `[unit+0x74]` is unset or `L2.02
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1764 | ROM2 armour, shield and weapon prices add one surcharge on the summed effect size S: 7000 for S = 70, 26798 for two of 70 (S as the item text size is Medium). | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
-| R2-ENGINE-1765 | The world pass ages ROM2 corpses by 1 health per two world passes (Medium for the Session counter identity); classes 0x21..0x24 stop at -61 (kind 4, kept), others reach kind 5 below -600. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1764 | ROM2 armour, shield and weapon prices add one surcharge on the summed effect size S (values superseded: R2-ENGINE-1824 gives 8750 for S = 70 and 22750 for two of 70; S as the item text size is Medium). | High / Medium | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1765 | The world pass ages ROM2 corpses by 1 health per two world passes (Medium for the Session counter identity); classes 0x21..0x24 stop at -61 (kind 4, kept) in RU only (R2-ENGINE-1825), others reach kind 5 below -600. | High / Medium | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
 
 ### R2-ENGINE-1764
 
-The three item price slots EN `L2.00842` (armour), `L2.00843` (shield), `L2.00844` (weapon), read in the committed EN listings, walk the item's effect list once. An effect with tag `+0x3c` = 1 replaces the price with its `+0x40` and returns at once. The weapon slot adds a tag-41 effect's own price through its virtual `+0x4c` straight to the price; armour and shield have no such branch. Every other effect adds `L2.07618`(effect) to one running size S: 0 for tag 0; word `+0x42` times the tag weight for tag 41 (armour and shield); (byte `+0x40` + byte `+0x41`) times the weight for tags 44..48; dword `+0x40` times the weight otherwise, the weight being element 0 of the tag's row in table `L2.03915`. After the walk the slot adds `L2.07619`(S) once: trunc((pow(S / 70, 1.5) + 1) * S * 50) (the doubles 70, 1, 50 at EN `L2.08472`, `L2.08473`, `L2.08474`; truncation `L2.02708`); the total is capped at 19999999.
+The three item price slots EN `L2.00842` (armour), `L2.00843` (shield), `L2.00844` (weapon), read in the committed EN listings, walk the item's effect list once. An effect with tag `+0x3c` = 1 replaces the price with its `+0x40` and returns at once. The weapon slot adds a tag-41 effect's own price through its virtual `+0x4c` straight to the price; armour and shield have no such branch. Every other effect adds `L2.07618`(effect) to one running size S: 0 for tag 0; word `+0x42` times the tag weight for tag 41 (armour and shield); (byte `+0x40` + byte `+0x41`) times the weight for tags 44..48; dword `+0x40` times the weight otherwise, the weight being element 0 of the tag's row in table `L2.03915`. After the walk the slot adds `L2.07619`(S) once: trunc((pow(S / 70, 1.5) + 1) * S * 50) (argument order superseded by R2-ENGINE-1824) (the doubles 70, 1, 50 at EN `L2.08472`, `L2.08473`, `L2.08474`; truncation `L2.02708`); the total is capped at 19999999.
 
 Direct calls (raw E8/E9 scan of the executable sections, both roots): the surcharge has three callers in each root, the three slots (RU `L2.08475`, `L2.08476`, `L2.07612`, surcharge RU `L2.08477`); the size routine (RU `L2.08478`) has four, the three slots and one routine at EN `L2.03900` / RU `L2.05643` that calls no surcharge (not read).
 
@@ -331,6 +512,8 @@ Arithmetic on the bodies (`derive_price.py`): one effect of size 70 adds 7000; t
 **Unknown.** The routine at EN `L2.03900` that sums sizes without a surcharge. A run of the original that shows the shop price of one item with two equal effects and of the same item with one settles the displayed result.
 
 **Amends.** R2-ENGINE-267's "other effects add trunc(50*S*(1+(S/70)^1.5))": S is the sum over the item's effects, and the surcharge is added once.
+
+**Amended.** R2-ENGINE-1824 reads the power routine: it returns first^second, so the surcharge is trunc((1.5^(S/70) + 1) x S x 50); one effect of size 70 adds 8750, two add 22750, two of 35 add 8750 and three of 70 add 45937.
 
 ### R2-ENGINE-1765
 
@@ -351,6 +534,8 @@ Control Spirit (spell row 22) takes a corpse of kind 2 first, then 3, then 4 (R2
 **Unknown.** The class names of 0x21..0x24 and whether the released `+4` is the map entry. A run of the original that kills a unit at a known Speed and samples its health and kind each world pass until it disappears settles the schedule.
 
 **Amends.** R2-ENGINE-776's "lowers health by 1 when Session `+0` is even": not for class 0x21..0x24 below -60, and RU clamps those classes at -61.
+
+**Amended.** R2-ENGINE-1825 narrows "classes 0x21..0x24 stop at -61 (kind 4, kept)" to RU; in EN such a body whose health is below -600 at an ageing call gets kind 5. The stage tests are strict.
 
 ## ROM2 Prismatic Spray secondary victims and Drain Life kill credit
 
@@ -1689,7 +1874,7 @@ ROM1: the capped argument and ranked victim selector are in `MAGIC-SPRAY-134`; t
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-028 | A magic hit resolves as `base + U[0, spread]`, cut by the matching elemental resistance as `ftol(v*(100-p)/100 + 0.75)`; spells never roll to hit and absorption does not touch the magic part. | High / Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
-| R2-ENGINE-029 | Each elemental resistance word is Spirit/2 plus effect modifiers, clamped to 0..min(Spirit/2 + 70, 100), in the same derive order as ROM1. | High / Medium | ● active | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
+| R2-ENGINE-029 | Each elemental resistance word is Spirit/2 plus effect modifiers, clamped to 0..min(Spirit/2 + 70, 100), in the same derive order as ROM1. | High / Medium | ● active (amended) | [EXP-2006](../experiments/EXP-2006-rom2-magic/) |
 
 ### R2-ENGINE-028
 
@@ -1716,6 +1901,8 @@ For Spirit up to 52 the effective ceiling is 96.
 **Confidence.** High for the order, the Spirit/2 base and the clamp instructions (read after the fold call). The effect of the fold on the value is Unknown.
 
 **Unknown.** The fold `L2.00102`.
+
+**Amended.** R2-ENGINE-1830 reads the fold body in RU: it adds the effect modifier to `+0x8c` and other words and calls two unread routines; its effect on the resistance words is still Unknown.
 
 ## Mana regeneration
 
@@ -5271,6 +5458,8 @@ helper-derived spell clauses were not executed.
 **Unknown.** A price factor outside the measured consumers; a census of the callers of the price slots and the price wrapper would settle it.
 
 **Amended.** R2-ENGINE-1764 reads the effect walk of the three price slots: S is the sum of the effect sizes and the surcharge is added once on it; the weapon's tag-41 effect adds its own price outside S.
+
+**Amended.** R2-ENGINE-1824 reads the power routine: the other effects add trunc((1.5^(S/70) + 1) x S x 50), not trunc(50*S*(1+(S/70)^1.5)).
 
 ### R2-ENGINE-268
 
@@ -24474,7 +24663,7 @@ direct references of `scenario.dll`.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-900 | ROM2 unit predicates: EN L2.01136 / RU L2.00044 return byte +0x4c & 4 (the mage bit), EN L2.05310 / RU L2.01517 return 1 when it is clear, EN L2.05311 / RU L2.02338 return weapon Spell (EN +0x84, RU +0x88) nonzero. | High | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
-| R2-ENGINE-901 | In ROM2 EN and RU actor state 3 a unit with bit 4 and a weapon Spell sets +0x64, +0x68 and state 0xd; without bit 4 only the strike casts the weapon Spell, after a blow with damage above 0 to a living target or for Spell id 2. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
+| R2-ENGINE-901 | In ROM2 EN and RU actor state 3 a unit with bit 4 and a weapon Spell sets +0x64, +0x68 and state 0xd; without bit 4 only the strike casts it, after a blow with damage above 0 leaving health above 0 (RU, R2-ENGINE-1829) or for Spell id 2. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
 | R2-ENGINE-902 | ROM2 EN attack-order routine L2.05312..L2.05313 calls book choice L2.04141 (computer owner) or L2.04143 (player) only for a mage, else sets cmd +8 = 5; idle support L2.04984 calls L2.05314 or L2.05315 only for a mage. | High / Medium | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
 | R2-ENGINE-903 | ROM2 EN cast L2.03854 charges mana only to a mage with +0x68 = 0, returns 1 for a non-mage whose weapon is +0x68 before its Spell +4 test, else 0 if +4 = 0; book order L2.04338 and mask update L2.04298: no bit 4 test (L2.03061 unread). | High / Unknown | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
 | R2-ENGINE-904 | ROM2 class record EN L2.05316 / RU L2.01180, which the Weapon Spell reference loads (EN L2.05317), is Spell: size 0x14, schema 1, factory EN L2.05318 / RU L2.05307, base EN L2.05319 / RU L2.05320. | High | ✔ promoted (branch candidate) | [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md) |
@@ -24527,6 +24716,8 @@ So a weapon Spell reaches a mage only through state 0xd and a non-mage only thro
 its handler was not read, so that a mage casts the weapon Spell at range is not shown.
 
 **Unknown.** The state-0xd handler; the body of the cast EN `L2.05342`.
+
+**Amended.** R2-ENGINE-1829 narrows "to a living target" in RU: the target's signed health after the blow must be above 0, so a killing blow, or one leaving 0 or less, casts only Spell id 2.
 
 **Evidence.** [EXP-2126](../experiments/EXP-2126-rom2-necro-load/RESULTS.md)
 
@@ -25517,7 +25708,7 @@ question 3; listings `en-order3-setter-L2.05582`, `en-group-attack-570946`,
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-940 | A ROM2 unit death with typeID +0xe of 64 or more and +0x1a0 = 0 draws rand(100) for gold, then for an item; below Units parameter 41, entry rand(n − 1) of the generated list, when the list is not empty, goes to the bag and the ground sack. | High / Medium | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
+| R2-ENGINE-940 | A ROM2 unit death with typeID +0xe of 64 or more and +0x1a0 = 0 draws rand(100) for gold, then for an item; below Units parameter 41, entry rand(n − 1) of the generated list, when the list is not empty, goes to the bag and the ground sack. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
 | R2-ENGINE-941 | The ROM2 death item comes from the shop draw for {parameters 42, 43, 100 draws, bound 1, mask 44}: magic adds every admitted book and six potions; bit 29 enchants each draw (with bit 28, only when rand(100) > 50) and keeps it in [min, max]. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
 | R2-ENGINE-942 | In the EN and RU data.bin, 66 of 180 Units rows reach the ROM2 death item roll: orcs, undead and necromancers at chance 30, ogres at 40, dragons and Urd at 100; Urd and Orc_ShamanLeader admit no item. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
 | R2-ENGINE-943 | A ROM2 unit death first bags items +0x78, +0x74 (what +0x48 returns: Medium, R2-ENGINE-410) and the slots; a template name holding NPC or +0x1a0 discards them, and with +0x1a0 = 0 the roll still runs and its item and gold still drop. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md) |
@@ -25571,6 +25762,8 @@ template whose name matches while skipping indexes 0..25 and 30..62
 `L2.05627`, `L2.05628`, `L2.05629`, `L2.05630` and `L2.02657`, so whether a
 sack merge bounds the bag, and whether a new sack is always registered
 (`L2.05627` failure returns 0).
+
+**Amended.** R2-ENGINE-1828 reads `L2.01743` and `L2.05626` in RU: a new sack takes the bag itself, and a merge moves the bag's items one unit at a time unless the sack bag already holds 1024 or more, when it merges nothing. It also gives the bag order before the roll.
 
 **Evidence.** [EXP-2131](../experiments/EXP-2131-rom2-death-items/RESULTS.md), question 1; listings `p1-*-death-*`, `p1-*-param-*`, `p1-*-sack-*`, `p2-*-sackadd-*`, `p3-*-sackplace-*`, `p3-*-loader-*`, `p6-*-deathcaller-*`, `s1-*`.
 
@@ -27626,6 +27819,8 @@ were not read).
 **Amends.** R2-ENGINE-480's Unknown on the callers of +0x68: the kill route is one, read.
 
 **Amended.** R2-ENGINE-1767 reads one writer of victim +0x40 and +0x48: the Drain Life arm stores the caster and the spell id. Other writers stay Unknown.
+
+**Amended.** R2-ENGINE-1826 reads the resolver as a writer of +0x48 (RU): a mage's hit stores the damage kind, the Sphere value 1..5, which slot +0x68 then reads as a spell id; a spell kill credits skill 1 for Spheres 1 to 4 and skill 2 for Sphere 5.
 
 **Evidence.** EXP-2156 `evidence/generated/scan/ru-slotcalls-award-slots.tsv`, `en-slotcalls-award-slots.tsv`,
 `win/ru-pred-L2.02362.lst`; EXP-2103 `out/code/listings/ru-kill.txt`; EXP-2060 `out/listings/ru-creature-award.txt`.
@@ -36619,7 +36814,7 @@ R2-ENGINE-504.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1695 | ROM2 state 15: kinds 76, 77 toggle building word +0x42; kinds 15, 16 need +0x42 > 0, decrement it, build a "Potion Big Healing" or "Potion Big Mana" Item and pass it to unit slot +0x44 (EN read; RU Medium); Effects Unknown. | High / Medium / Unknown | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1695 | ROM2 state 15: kinds 76, 77 toggle building word +0x42; kinds 15, 16 need +0x42 > 0, decrement it, build a "Potion Big Healing" or "Potion Big Mana" Item and pass it to unit slot +0x44 (EN, RU Unit read; RU Human Medium); Effects Unknown. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1696 | A dead ROM2 unit (+0x54 = 0x10) leaves its group list; checks 1, 5, 8 count living and unconscious units, not dead ones (EN High, RU Medium for 1 and 8); check 20 counts Buildings with +0x42 > 0, not units. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1697 | ROM2 Session init passes Session+0xd724 to a fill routine with 0 and 0xfa0 (EN L2.00341 memset, RU L2.00342 unread); the check loop skips a check with nonzero copied IR+0x58 (copy unread, Medium); 8 handlers have no IR operand 0x3a..0x58. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1698 | ROM2 cell-entry consumer passes source bytes (+0x36, +0x37) unchanged to the cast actor, which takes cell (0, 0) when zero; application targets the entering unit or (+0x38, +0x39), and Action 25 (EN) with p4 = 0 writes (p2, p3). | High / Medium | ● active (amended, branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
@@ -36642,6 +36837,8 @@ In ROM2 actor step state 15 (EN `L2.02595`, RU `L2.02594`; committed `EXP-2065` 
 **Unknown.** The MagicItems rows "Potion Big Healing" and "Potion Big Mana" and the effects they hold (not read). In the original program, load a map containing kind 15 and kind 16 wells in `allods2.exe`, have a wounded hero with reduced mana use each well once, and compare unit HP, mana, active effects and inventory before and after each use.
 
 **Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`, `evidence/native/pass1/strings.tsv` (the four item-name literals), `evidence/native/pass2/strings.tsv`; committed listings `en-unit-step.txt`, `ru-unit-step.txt`, `en-building-lookups.txt`, `en-building-init-L2.03611.txt`, `en-equip-displaced-to-bag-recompute.txt`, `en-item-use.txt` (EXP-2157), `ru-item-use.txt`, `EXP-2186` `en-structure-kinds.tsv`, `EXP-2154` `en-vt-unit.tsv`.
+
+**Amended.** R2-ENGINE-1831 reads RU Unit `+0x44` (`L2.08556`), which has the EN order, and shows that Human `L2.01310` calls its own slot `+0x40` (`L2.01311`), which calls item `+0x38` after an Armor, Shield and Weapon class gate.
 
 ### R2-ENGINE-1696
 
