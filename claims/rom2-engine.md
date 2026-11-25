@@ -12133,7 +12133,7 @@ its end.
 | R2-ENGINE-486 | A ROM2 award raises a school skill by one when its experience reaches T(L+1), L the base level; each award is capped at T(L+1) - T(L), none is paid at base 100 or above, and a raise runs recompute. | High / Medium | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-487 | A ROM2 caster with `+0x4c` bits 2 and 4 who casts without an item offers trunc(row parameter 1 x 0.5 + 0.5) to the award, which scales it by Mind, cuts it off the main skill and caps it. | High / Medium / Unknown | ● active (amended) | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-488 | ROM2 spell damage pays a mage trunc(V x 0.5 x D / HPmax + 1) into the spell's Sphere skill through slot +0x6c, called by the damage object, the Drain Life arm and the health effect tick (as spell 6); no call census (Medium). | High / Medium / Unknown | ● active (amended) | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
-| R2-ENGINE-489 | Outside the award, ROM2 sets skill experience on the hero reuse path (x 9/10), in the character-file loaders, in an experience-from-skill producer, and for item class 0xfffe, which spreads 250 x its word +0x42. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
+| R2-ENGINE-489 | Outside the award, ROM2 sets skill experience on the hero reuse path (x 9/10), in the character-file loaders, in an experience-from-skill producer, and for item class 0xfffe, which spreads 250 x its word +0x42. | High / Medium / Unknown | ● active (amended) | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-490 | ROM2 recompute reads the experience sum +0x130 in the HP and mana term log1.1(sum/5000 + 1); two routines read it through Player +0x38; +0x1c feeds the award routes and slot +0x50. | High / Medium / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 | R2-ENGINE-491 | ROM2 EN and RU table writer, threshold, skill-from-experience, award, cap, slots +0x68, +0x6c, +0x70 and +0x50, reuse, raise, apply head and Heal/Drain arms agree after address masking; the item cases agree with frame offsets masked. | High / Unknown | ● active | [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/) |
 
@@ -12373,6 +12373,8 @@ were not classified.
 Script and `scenario.dll` sources: neither was searched.
 Mission-end awards: no census of award-slot callers was run. The caller of
 `L2.02368`.
+
+**Amended.** R2-SESSION-517: the records' dwords +0x20..+0x30 are section E +0x20..+0x30 (High in EN).
 
 **Evidence.** [EXP-2061](../experiments/EXP-2061-rom2-hero-growth/)
 
@@ -20538,6 +20540,9 @@ R2-ENGINE-773 reads
 `L2.04255..L2.04256` (the join's number search) and the builder store `L2.04421`. The callers
 of `L2.04419` and the counts behind the stored values stay open.
 
+**Amended.** R2-SESSION-517: the file dwords stored at `L2.04249..L2.04250` are E +0, +0xc, +4, +8 (High for the
+stores, Unknown for what they hold).
+
 ### R2-ENGINE-763
 
 EN against RU `allods2.exe` (`out/code/bodycmp.tsv`): each window's body up to its first `ret`
@@ -20737,7 +20742,7 @@ and compare `SpellBook/Pressed`.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-772 | ROM2 EN tick L2.04407 → unit list L2.04418: a unit in state 0x10 with a live killer of class 0x21..0x3f adds 1 to the killer's owner +0xa4c (victim class 0x21..0x3f) or +0xa48; after either, +0x44[victim +0x14c] + 1 below 14. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
+| R2-ENGINE-772 | ROM2 EN tick L2.04407 → unit list L2.04418: a unit in state 0x10 with a live killer of class 0x21..0x3f adds 1 to the killer's owner +0xa4c (victim class 0x21..0x3f) or +0xa48; after either, +0x44[victim +0x14c] + 1 below 14. | High / Medium | ● active (amended, branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
 | R2-ENGINE-773 | ROM2 EN Player +0xa44: join L2.00197 stores the requested number or, for a new Player, the smallest of 1..15 free among Players with +0x2c 0 (16 when none is); map builder R2.0081 stores entry +0xc + 1 per map player entry. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
 | R2-ENGINE-774 | ROM2 EN Player +0x40: of 24 byte stores at displacement 0x40, the Player ones are constructor 0, result tick 0/2/+0xbe14/1, death id−19, handler L2.02723 0 (hero present), transition loop 0 (Session +0x74 set). | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
 | R2-ENGINE-775 | ROM2 EN pair object (application +0x598): +4 += Session +4 / 16 at L2.04422, the one add-0x598 site found that calls L2.04423 (Medium); +8 += 1 through L2.04424, its one direct call L2.04425; L2.01855 reads both. | High / Medium | ● active (branch candidate) | [EXP-2103](../experiments/EXP-2103-rom2-town-field-writers/RESULTS.md) |
@@ -20801,6 +20806,9 @@ read). The callers of `L2.04407`: a call scan and the dispatch of its callers. H
 between two town files: a run of the original that kills a counted number of enemies of one
 identity between two town SAVEs, compared on `+0xa48` and the byte at `+0x44 + identity`, would
 settle it.
+
+**Amended.** R2-SESSION-517: the file dwords stored at `L2.04249..L2.04250` are E +0, +0xc, +4, +8 (High for the
+stores, Unknown for what they hold).
 
 **Format surface.** `formats/rom2-sav/format.md`, Player body and Town SAVE writer.
 
@@ -30924,7 +30932,7 @@ cast order to the next order; the counts should fall in the bounds above.
 | R2-ENGINE-1273 | ROM2 Units (EN = RU counts): 180 of 241 rows carry typeID, face and serverID; 13 typeID/face pairs cover 64 rows, each row with its own serverID; no raw serverID repeats; 23 raw values lie outside 1..0x9ff. | High | ✔ promoted (amended, branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
 | R2-ENGINE-1274 | ROM2 records a kill and reads the card grade under the creature's serverID, not its type or face: rows sharing typeID and face keep separate bytes unless their low WORDs match (not counted). | Medium | ✔ promoted (amended, branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
 | R2-ENGINE-1710 | The ROM2 sheet (EN L2.01119 = RU L2.02952) body has no `cmp` or `test` of a per-kind level: grade compares 1..7 open its groups, kind +0x24 meets only 0x40, 0x17 and 0x18 (Medium for the whole sheet). | High / Medium | ✔ promoted (branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
-| R2-ENGINE-1711 | ROM2 message 0xbe (EN client L2.08371 always sends it, file only under 0x8000 bytes) selects arm L2.08372: a Player without hero gets +0x44 from the reader's 5th out-parameter, taken as section B (Medium), then 0xba; RU builder = EN masked. | High / Medium | ✔ promoted (branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
+| R2-ENGINE-1711 | ROM2 message 0xbe (EN client L2.08371 always sends it, file only under 0x8000 bytes) selects arm L2.08372: a Player without hero gets +0x44 from the reader's 5th out-parameter, taken as section B (Medium), then 0xba; RU builder = EN masked. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
 | R2-ENGINE-1712 | A ROM2 unit placed from a Units row counts kills and reads its grade under that row's own serverID low WORD: all 180 named rows are their own first name match (EN read; RU tables equal); 22 of 64 shared-pair rows are never counted. | High / Medium | ✔ promoted (branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
 
 ### R2-ENGINE-1268
@@ -31232,6 +31240,11 @@ path through `L2.05371` writes Player +0x44.
 **Amends.** R2-ENGINE-1270: the arm at `L2.07220` is the 0xbe upload arm, and the builder is read
 in RU. R2-ENGINE-1272: the RU builder is read; the source of the character-file copy is taken to
 be section B of the uploaded file (Medium).
+
+**Amended.** R2-SESSION-512: the reader stores the section B buffer in the out-parameter the server
+loader passes as `[ebp-0x60]`, so the copied buffer is section B (High in EN; the RU server loader is not read,
+Medium). `L2.08378` pushes B fifth; it is the fourth argument and the third out-parameter, so "5th out-parameter"
+above counts pushes.
 
 **Evidence.** [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md), question 2.
 
@@ -38057,8 +38070,8 @@ the route search (it closes every kind).
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1840 | ROM2 EN list L2.08651 keeps current-directory `*.a2c` whose A+8, after replacing 0x529c0291 and 0xbaadf00d by app +0x3d8, equals app +0x3d8, plus one text entry; OK on that entry runs creation L2.07250, also New Game's. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
-| R2-ENGINE-1841 | ROM2 EN server character writer L2.08323 runs only when Session +0x74 is nonzero and +0x1a8 is 0; it writes the hero to `%schr\%s\%u%u.a2c` or `%u%u.a2c` through L2.07265; 9 call sites. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1840 | ROM2 EN list L2.08651 keeps current-directory `*.a2c` whose A+8, after replacing 0x529c0291 and 0xbaadf00d by app +0x3d8, equals app +0x3d8, plus one text entry; OK on that entry runs creation L2.07250, also New Game's. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1841 | ROM2 EN server character writer L2.08323 runs only when Session +0x74 is nonzero and +0x1a8 is 0; it writes the hero to `%schr\%s\%u%u.a2c` or `%u%u.a2c` through L2.07265; 9 call sites. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1842 | ROM2 EN join L2.00197 rejects a character when [ebp-0x10c]+0x1cc (Medium: R2-ENGINE-509's Session, map dword 0x88) is not -1 and lies below byte 2 ("too strong") or above byte 3 ("too weak") of its packed argument. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1843 | ROM2 EN owner word +0xa6c: 4 word-mov stores found by byte pattern; two server arms store the unit's cell (x low, y high) before passing the unit on; join and constructor store 0; respawn placement starts there (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1844 | ROM2 EN view app +0x370 (ctor L2.08652, vtable L2.08653) holds three panels, ids 0x462, 0x461, 0x463; its close L2.08654 runs creation on OK when the selection is the last entry. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
@@ -38105,6 +38118,10 @@ this route was read. EN only.
 **Unknown.** The value of app +0x3d8 and its source. The text of entry 0x78. A run settles both:
 from main-menu button 1 (0x426), open the character list with one `.a2c` of this install
 and one copied from another install, and note which names are listed and the last entry's text.
+
+**Amended.** R2-ENGINE-1853: neither the creation body nor the template `L2.04094` contains a call of the writer
+(callees of both unread, Medium that creation writes no file); that a new character's first file comes from the full
+write `L2.07266` is Medium.
 
 **Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 1:
 `evidence/generated/listings/en-a2c-list-L2.08651.txt`, `en-create-L2.07250.txt`,
@@ -38153,6 +38170,10 @@ die once, leave, and list the files written under `ChrBase` with their times aft
 
 **Amends.** R2-ENGINE-509: its Unknown on what Session +0x74 means beyond its two read uses gains
 a third, this writer's guard.
+
+**Amended.** R2-SESSION-514: the A offsets of the flag byte (+0x2c), unit byte +0x4b (+0x2d), unit
+byte +0x23c (+0x2e), the constant 4 (+0x2f) and owner byte +0xa44 (+0x30). R2-SESSION-516: the
+first buffer is section D and the second section F.
 
 **Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) questions 1 and 6:
 `evidence/generated/listings/en-chr-writer-L2.08323.txt`, `en-chr-writer-tail-L2.08682.txt`,
@@ -38550,3 +38571,125 @@ of the script tick and the container pass within one session tick is not read, w
 31 with (g, 0) and with (g, 10), and count container passes to each re-formation.
 
 **Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 3.
+## ROM2 `.a2c` loaders, creation and client writes (EXP-2210)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1852 | ROM2 EN client loader L2.01814 needs A and E, uses D and C, never reads B, F or C's length in its body; server loader L2.01818 needs A, E, D, uses B, F, never reads C; another path filling client +0x3f70 is Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-ENGINE-1853 | ROM2 EN creation L2.07250 and template L2.04094 call no writer (callees unread: no file written is Medium); full write L2.07266 on app +0x36c close, not 0x446, mode not 2: A, B, C, D, E (E+0x10 = 1000), no F; first file Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-ENGINE-1854 | ROM2 EN client `.a2c` writes, 7 of the writer's 8 E8 sites: all but F, A, A and E, C, B, D alone, F alone; sections High, the events reaching each (Accept, rename, key 0x1b when app +0x404 is 1, hotkey, 0xb3/0xba, pump arms) Medium. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+
+### R2-ENGINE-1852
+
+Client loader `L2.01814`(index), whole body read (committed listing, 2,782 bytes to `ret 4` at `L2.08740`). It calls
+the reader with file, A `[ebp-0x1c]`, E `[ebp-0x24]`, B `[ebp-0x4c]`, D `[ebp-0x28]`, F `[ebp-0x44]`, C `[ebp-0x50]`
+and C length `[ebp-0x40]`. A failed read, a null A or a null E ends the load. The B, F and C-length locals occur
+once each, as the pushed address; D is loaded at `L2.08741` and C at `L2.08742`. Order: A fields, E fields and the
+skills derived from them, then D (R2-SESSION-516), then C (R2-SESSION-515).
+
+Server loader `L2.01818`(message, Player) calls the reader with A `[ebp-0x14]`, E `[ebp-0x20]`, B `[ebp-0x60]`, D
+`[ebp-0x50]`, F `[ebp-0x54]`, C `[ebp-0x64]` and C length `[ebp-0x58]`; a failed read or a null A, E or D returns 0
+(`L2.08743`..`L2.08744`). B, when nonnull, is copied into Player +0x44 (0xa00 bytes, `L2.03620`); F, when nonnull,
+goes into the bag; C and C length occur only as pushed addresses.
+
+Client loader callers (E8 scan): `L2.08745` in `L2.08746`(index), which loads the list entry of that index unless it
+is the last entry; `L2.08747` in `L2.08748`, which passes the selected entry's name to the import at `L2.08749`
+(unresolved), removes the entry from the lists +0x11c and +0xf8 and loads the entry before it; `L2.08750` in
+`L2.08751`, which runs `L2.08748` when a dialog returns 0x447; `L2.08752` in the list routine `L2.08651`
+(R2-ENGINE-1840); `L2.08753` in `L2.08754`, which outside mode 2 scans `*.a2c` for `BlCh` files as R2-SESSION-022
+describes, sets the selection to 0 and loads it.
+
+Client +0x3f70 on load: none of the seven +0x3f70 sites of R2-ENGINE-1271 is in a loader. In the EN client loader
+body the local for B is only passed to the reader. A read of the static buffer `L2.08755` by other code was not
+searched; that no other path fills client +0x3f70 from a file is Medium (R2-ENGINE-1271 census: displacement and
+immediate forms). The 0xba and 0xb3 receipts change the copy (R2-ENGINE-1271), including the 0xba the server sends
+after it loads an uploaded file (R2-ENGINE-1711).
+
+**Confidence.** High for both loaders' section use (EN bodies read). Medium that no other path fills +0x3f70 from a
+file: R2-ENGINE-1271's census is High for displacement and immediate forms only. Medium for the caller events: the
+dialog at `L2.08751` and the import at `L2.08749` are not identified.
+
+**Amends.** R2-SESSION-416: whether a load reads B back is answered for the EN client loader body (the local is only
+passed to the reader); other readers of the static buffer are not searched (Medium).
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) questions 1 and 6;
+`evidence/nav/nav1/scans/en-calls-L2.01814.txt`; `evidence/nav/nav2/listings/en-loadcall-L2.08751.txt`,
+`en-loadcall-L2.08746.txt`, `en-loadcall-L2.08748.txt`, `en-loadcall-L2.08754.txt`; committed
+`out/code/listings/en-charfile-client.txt`, `en-charfile-server.txt` (EXP-2052).
+
+### R2-ENGINE-1853
+
+Creation `L2.07250` (committed listing to `ret 0xc` at `L2.08756`) calls neither the writer `L2.07265` nor any of the
+client writers of R2-ENGINE-1854; it ends with the template `L2.04094`. The template builds a preview unit from the
+row `this+0x34` selects, copies `this+0x4c..+0x58` to unit words +0x84..+0x8a and `this+0x60` to unit +0x4b, takes
+`this+0x5c` from unit +0x23c when it is 0, copies the unit into the client object (`R2.0075`), refreshes client
+object +0x180..+0x183 and `this+0x4c..+0x58`, sets `this+0x60` from client object +0x28 and deletes the unit.
+Neither body contains a call of the writer `L2.07265` or of any routine that calls it (E8 scan of the writer's 8
+sites); the callees of both bodies were not followed, so that creation writes no file is Medium.
+
+The full write `L2.07266` has one E8 caller, `L2.08757` in the application command routine `L2.00787`. That arm runs
+when the Detail screen (app +0x36c) closes with a result other than 0x446 (Back, R2-ENGINE-283) and app +0x5d8 is not
+2; in mode 2 the same close runs the commit `L2.00168` instead. The full write passes A, E, B (client +0x3f70, cleared
+at creation, R2-SESSION-416), D (the static buffer `L2.08462`), C and its length, and no F. It first sets
+`this+0x38` = 1000 and `this+0x3c..+0x48` = 0; E gets +0..+0xc = 0 and +0x10 = 1000 (R2-SESSION-517). For a file
+that does not exist the writer reads nothing, so the file holds A, B, C, D and E.
+
+**Confidence.** High for the bodies read and the section set of the full write. Medium that creation writes no file
+(callees unread), that the close result is Accept on the multiplayer route (R2-ENGINE-1840: no mode test of this
+route was read), and that the full write is a new character's first file: other writers could run first on events not read, and what the static buffer `L2.08462`
+holds at that moment is not established; the full write does not fill it.
+
+**Unknown.** The D bytes of a new character's first file. Run: in the original, create a multiplayer character, leave
+the Detail screen with Accept, and decode the new `.a2c` before any other action.
+
+**Amends.** R2-ENGINE-1840: neither the creation body nor the template contains a call of the writer; callees of both
+are unread (Medium that creation writes no file).
+R2-SESSION-022: which sections a new character's file carries.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 7;
+`evidence/nav/nav1/listings/en-template-L2.04094.txt`; `evidence/nav/nav2/listings/en-template-b-L2.08758.txt`;
+`evidence/generated/listings/en-full-write-L2.07266.txt`; `evidence/nav/nav1/scans/en-calls-L2.07266.txt`; committed
+`evidence/generated/listings/en-create-L2.07250.txt` (EXP-2209), `evidence/measured/en-app-command-L2.00787.txt`
+(EXP-2035).
+
+### R2-ENGINE-1854
+
+The E8 scan of EN `allods2.exe` finds 8 calls of the writer `L2.07265`; 7 are client writes, the eighth is the server
+writer `L2.08323` (R2-ENGINE-1841). Each client write names the current character's file by the file-name builder `L2.08759`, which is unread; the pump
+arms have no found prologue, so "client" for them is inference (Medium).
+
+| Site | Routine | Sections passed | When |
+|---|---|---|---|
+| `L2.08760` | full write `L2.07266` | A, E, B, D, C | app +0x36c result other than 0x446, mode not 2 (R2-ENGINE-1853; Accept 0x445 by R2-ENGINE-283 on the New Game route, multiplayer route Medium, R2-ENGINE-1840) |
+| `L2.08761` | `L2.08762`(name) | A | caller `L2.08763` in key routine `L2.08764`: key 0xd when +0xd8 is nonzero, name from an edit field; a `:N` suffix stores N (1..16, else 0) in A+0x30 |
+| `L2.08765` | `L2.06536` | A, E | skipped in mode 2; clears bit 0 of A+0x2f first and sets `this+0x110` = timeGetTime after; E+0x10 from (client +0x9cc) +0x10 |
+| `L2.08766` | `L2.04366` | C | callers `L2.08767` in panel routine `L2.04364` (hotkey assignment, R2-ENGINE-768) and `L2.08768` in `L2.08769` |
+| `L2.08770` | `L2.07233` | B | after 0xb3 or 0xba, mode not 2 (R2-SESSION-416) |
+| `L2.08771` | client pump | D | 12 slots at +0x4988 of the pump's object `[ebp-0xc34]` |
+| `L2.08772` | client pump | F | every item of the list at +0x4974 of the same object |
+
+`L2.06536` has four E8 callers: `L2.08773` in the application key routine `L2.06472`, and `L2.08774`, `L2.08775` and
+`L2.08776`, unread. In `L2.06472` the argument minus 8 selects an arm through `L2.06533` and `L2.06532`; case 0x1b
+(the Esc key code) reaches `L2.08777`, which, when app +0x404 is 1, posts 0x416 and, when the mode is not 2, calls
+`L2.06536(app+0x450)`; the arm writes only when both conditions hold (app +0x404 equal to 1 and the mode not 2).
+The key routine `L2.08764` has no
+E8 caller; its switch on the key minus 0xd sends 0xd to the rename arm, 0x1b to `L2.08778`, 0x26 to `L2.08779`, 0x28
+to `L2.08780` and every other key 0xe..0x27 to the default.
+
+**Confidence.** High for the sites, the sections each passes and the conditions inside each routine. Medium for the
+events (which player step reaches each body: "Accept", "Esc", "rename", "hotkey change", "after 0xb3/0xba" and "client
+pump arm" are inference): the message types of the two pump arms, the callers `L2.08774`, `L2.08775` and `L2.08776`, and the reading of
+the `L2.08764` and `L2.06472` arguments as key codes are not established.
+
+**Unknown.** Which messages reach the two pump arms. Run: in the original, join a server, buy one item and equip
+another, and watch which `.a2c` sections change after each step.
+
+**Amends.** R2-SESSION-416: the full write is one of seven client writes, each with its section set.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 8;
+`evidence/nav/nav1/scans/en-calls-L2.07265.txt`; `evidence/nav/nav2/scans/en-calls-L2.08762.txt`, `en-calls-L2.06536.txt`,
+`en-calls-L2.04366.txt`; `evidence/generated/listings/en-full-write-L2.07266.txt`, `en-site-L2.08762.txt`,
+`en-site-L2.06536.txt`, `en-site-L2.04366.txt`, `en-pump-arm-L2.08781.txt`; `evidence/generated/scans/en-switch-keys-L2.08782.txt`;
+`evidence/nav/nav3/listings/en-rename-caller-L2.08764.txt`; `evidence/nav/nav3/scans/en-calls-L2.08764.txt`;
+`evidence/nav/nav5/listings/en-keyroutine-L2.06472.txt`; `evidence/nav/nav6/scans/en-switch-appkeys-L2.06533.txt`; committed
+`evidence/listings/en-sync-L2.08783.txt` (EXP-2109).

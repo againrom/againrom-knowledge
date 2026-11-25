@@ -321,11 +321,10 @@ are the join handler, one arm at `L2.07220` and `#modify +knowledge` (index 0), 
 The RU builder `L2.08373` is the same body under the address mask. The arm at `L2.07220` serves
 client message 0xbe, which the EN client always sends and to which it attaches the named file only
 when it opens and is shorter than 0x8000 bytes: for a Player without a hero the server loads the
-file, copies the buffer the reader returns in its fifth out-parameter, taken to be section B
-(Medium), into +0x44 and sends 0xba. What the arm does with an empty message is Unknown. So the
-values written into +0x44 during play are 0 at construction, one more per counted kill up to 14,
-the uploaded file's buffer taken to be section B (Medium), and the saved bytes at LOAD (Medium for the completeness of
-that list). — R2-ENGINE-1711
+file, copies the file's section B (High in EN; the RU server loader is not read, Medium) into +0x44 and sends 0xba. What the arm does with an empty
+message is Unknown. So the values written into +0x44 during play are 0 at construction, one more
+per counted kill up to 14, the uploaded file's section B, and the saved bytes at LOAD (Medium for
+the completeness of that list). — R2-ENGINE-1711, R2-SESSION-512
 
 Across SAVE and LOAD the kill grades travel only in this raw block (Medium), and LOAD writes it
 back raw. The client copy that the unit card reads is in no SAV transfer that the `0x3f70`

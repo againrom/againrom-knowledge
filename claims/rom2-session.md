@@ -225,6 +225,11 @@ The file name is `<decimal id0><decimal id1>.a2c` (`%u%u.a2c`); the character-cr
 **Amended.** R2-SESSION-416: section B's 2,560 bytes are the client copy of the kill-grade
 block (client +0x3f70), rewritten alone after each 0xb3 or 0xba receipt unless application +0x5d8 is 2 (EN read; RU write sites Medium). [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md).
 
+**Amended.** EN reader and writer addresses, failure paths and the E header-length rule: R2-SESSION-512 and
+R2-SESSION-513. Section A bytes 0x2c..0x30 and +8: R2-SESSION-514. Section C: R2-SESSION-515. Sections D and F and the
+record framing: R2-SESSION-516. Section E field meanings: R2-SESSION-517. The sections of a new character's first
+file: R2-ENGINE-1853. [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md).
+
 
 ## Initial campaign bank and first continuation
 
@@ -5984,7 +5989,7 @@ No save was newly opened. R2-SESSION-306's already-published rom2-gog-original-2
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-SESSION-416 | ROM2 `.a2c` section B is the client copy of the 2,560-byte kill-grade block at client +0x3f70: EN L2.07233 rewrites only B after each 0xb3 or 0xba receipt unless app +0x5d8 is 2; character creation zeroes it. | High / Medium | ✔ promoted (branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
+| R2-SESSION-416 | ROM2 `.a2c` section B is the client copy of the 2,560-byte kill-grade block at client +0x3f70: EN L2.07233 rewrites only B after each 0xb3 or 0xba receipt unless app +0x5d8 is 2; character creation zeroes it. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
 | R2-SESSION-417 | Across ROM2 SAVE and LOAD the kill grades travel only as the SAV Player body's raw 2,560 bytes of +0x44, restored raw; no found SAV transfer touches the client copy +0x3f70 that the card reads. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md) |
 | R2-SESSION-486 | EN ROM2 mission start R2.0026 with application mode not 3 sends client message 0x04 (sender L2.03115); its server arm calls join L2.02723, which sends the Player's 0xba when it has a hero; whether SAV LOAD runs R2.0026 is not read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md) |
 
@@ -6010,6 +6015,10 @@ when a character is loaded (the `.a2c` reader's B destination is not read).
 **Amends.** R2-SESSION-022: section B's 2,560 bytes are the client copy of the kill-grade block.
 R2-SESSION-020: the block's size match with section B is read as a copy: section B holds the client
 copy of Player +0x44 (Medium for the object identity).
+
+**Amended.** R2-ENGINE-1852: the EN client loader never reads B, so a load does not fill the copy
+from the file. R2-ENGINE-1854: the full write is one of seven EN client writes, each with its own
+section set.
 
 **Evidence.** [EXP-2170](../experiments/EXP-2170-rom2-creature-card/RESULTS.md), question 3.
 
@@ -6214,3 +6223,220 @@ wait more than e1 + 1 container passes, and compare with the same run without th
 `evidence/generated/gen1/listings/ru-outpost-class-L2.08611.txt`, `en-outpost-class-L2.08612.txt`;
 `evidence/generated/gen1/scans/ru-classrec-L2.08609.txt`, `en-classrec-L2.08603.txt`, `ru-dword-L2.08609.txt`,
 `en-dword-L2.08603.txt`.
+## ROM2 `.a2c` sections: reader, writer and the meaning of A, C, D, E and F (EXP-2210)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-512 | ROM2 EN `.a2c` reader L2.08376 fills seven out-parameters (A, E, B, D, F, C, C length) with static section buffers in any tag order; bad magic, tag or checksum returns 0; a missing section stays null; no read result or length is checked. | High | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-SESSION-513 | ROM2 EN `.a2c` writer L2.07265 pre-reads an existing file, replaces each section its caller passes, needs an A, writes A, B, C, D, E, F skipping null ones, with random 15-bit keys and E pad bytes. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-SESSION-514 | ROM2 EN `.a2c` A after the name: +0x2c bits 6-7 pick the Start unit row (client, template; server Medium), +0x2d unit byte +0x4b, +0x2e +0x23c; +0x2f, +0x30 client fields only; +0x31..+0x33 Unknown; +8 list key. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-SESSION-515 | ROM2 EN `.a2c` C is nine entries (u16 kind, u16 value, u32 n, n bytes) written from and read into list object +0x8c, R2-ENGINE-768's hotkey entries (Medium); the server ignores C; both files hold 9 entries with n 0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-SESSION-516 | ROM2 EN `.a2c` D is 12 worn-item records (unit +0x74, +0x78, slots 3..12) that both loaders pass to unit slot +0x44; F is the bag list +0x7c, loaded by the server only; a record is u16 item word, u8 flags, count or effects. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+| R2-SESSION-517 | ROM2 EN `.a2c` E: +0..+0xc Player +0xa48, +0xa4c, +0xa58, +0xa54; +0x10 Player +0x3c; +0x14..+0x17 unit words +0x84..+0x8a (writer less bonus bytes); +0x18 spell mask; +0x1c unit +0x1c4 byte; +0x20..+0x30 skill experience; writer = inverse. | High / Medium | ✔ promoted (branch candidate) | [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) |
+
+### R2-SESSION-512
+
+EN `allods2.exe`, reader `L2.08376`(file, A, E, B, D, F, C, C length), three windows read to its return.
+
+1. It stores 0 in all seven out-parameters, reads the magic and returns 0 when it is not `0x04507989`.
+2. While the file position is below the file length it reads a 16-byte header and dispatches on the tag. An unknown
+   tag returns 0. Any tag order is accepted. The reader tests no stream read result (`call [edx+0x3c]` at `L2.08784`,
+   `L2.08785`, `L2.08786`) and compares no section length with its static buffer (A, C and B's decoded length are all
+   unbounded).
+3. Each section goes into one static buffer, and the out-parameter receives its address: A `L2.08787` (`L2.08788`),
+   E `L2.08789` (`L2.08790`), B `L2.08755` (`L2.08791`), D the stream object `L2.08792` (`L2.08793`), F the stream
+   object `L2.08794` (`L2.08795`), C `L2.08796` (`L2.08797`) with its length stored at `L2.08798`. D and F bodies
+   start at stream +0xa.
+4. A, B, C, D and F are descrambled (`L2.08658`) and their checksum (`L2.08659`) is compared with the header; a
+   mismatch returns 0. B is then run-decoded (`L2.07232`) and copied to `L2.08755` with no bound on the decoded
+   length.
+5. E is read field by field: a pad byte is skipped when the field's key bit is set, the header length is not used,
+   the field chain of R2-SESSION-517 is applied and the checksum is taken over the decoded 0x34 bytes.
+6. At the end of the file it returns 1. A section the file lacks leaves its out-parameter null; a repeated tag
+   overwrites the earlier buffer.
+
+Callers (E8 scan of the executable sections): the client loader `L2.08386`, the server loader `L2.08377`, the writer
+`L2.08387`. The server loader passes its local `[ebp-0x60]` as the fourth argument (`L2.08378`), the B buffer.
+
+Both installed files (EN and RU roots hold the same two files, equal SHA256) carry the sections in the order A, B, C,
+D, E, F, end at the file end, and verify every checksum under the read descramble and E chain.
+
+**Confidence.** High: the whole EN reader body is read and the out-parameter stores are named by address. The data
+read confirms the algorithms on two files only.
+
+**Amends.** R2-SESSION-022: EN reader address, out-parameter order and failure paths. R2-ENGINE-1711: the buffer the
+server copies into Player +0x44 is section B (High in EN; it was Medium).
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 1;
+`evidence/generated/listings/en-reader-L2.08376.txt`, `en-reader-b.txt`, `en-reader-c.txt`;
+`evidence/nav/nav1/scans/en-calls-L2.08376.txt`; `evidence/generated/data/en-a2c.tsv`, `ru-a2c.tsv`; committed
+`out/code/listings/en-charfile-server.txt` (EXP-2052).
+
+### R2-SESSION-513
+
+EN `allods2.exe`, writer `L2.07265`(file, A, E, B, D, F, C, C length), four windows read to its return.
+
+1. It opens the file for reading; when it opens and is not empty, it reads it with the reader `L2.08376`. A failed
+   read returns 0 and writes nothing.
+2. It reopens the file with mode 0x1001 and then replaces each kept section with the caller's argument when that
+   argument is nonnull (C with its length). When no A remains it returns 0 after that reopen.
+3. It writes the magic, then A (0x34 bytes), B, C (the given length), D, E and F, each only when its buffer is
+   nonnull. B is run-encoded (`L2.03621`), and its checksum covers the encoded bytes. D and F have length
+   `u16 [stream+0x11] + 9`, body from stream +0xa.
+4. Every key is `L2.00939(0x7fff)`. E's header length is `0x34 +` the key's bit count; a pad byte from
+   `L2.00939(0xff)` precedes each field whose key bit is set, in the reader's bit order, so key bit 13 pads two
+   fields and the header length is then one less than the bytes written. E's forward chain uses the plain earlier
+   fields and is the exact inverse of the reader's chain.
+5. It restores the caller's buffers and returns 1.
+
+Both installed files: E header length equals `0x34 +` the key's bit count; in one file the reader consumes 60 bytes
+against a header length of 59. The writer's chain applied to the decoded fields restores the stored fields in both.
+
+**Confidence.** High for the body. Medium for the effect of mode 0x1001 (create and write) and for the file left by a
+call with no A: the open helper `L2.03883` is unread.
+
+**Amends.** R2-SESSION-022: EN writer address, the failure paths, the E header-length rule and the forward chain.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 5;
+`evidence/generated/listings/en-writer-L2.07265.txt`, `en-writer-b.txt`, `en-writer-c.txt`, `en-writer-d-L2.08799.txt`;
+`evidence/generated/data/en-a2c.tsv`, `ru-a2c.tsv`.
+
+### R2-SESSION-514
+
+Section A bytes after the name, as the EN bodies read use them. "Client" is the client loader `L2.01814` (`this` is
+the list object); "server" is the server loader `L2.01818`; "server writer" is `L2.08323`.
+
+| A offset | Client loader | Server loader | Server writer | Client writers |
+|---|---|---|---|---|
+| +0 (8 bytes) | `this+8` | not used | owner +0x10 (R2-ENGINE-1841) | `this+8` |
+| +8 (u32) | `this+0x64` | not used | 0 | `this+0x64`; creation stores app +0x3d8 there and the list compares it (R2-ENGINE-1840) |
+| +0xc (32 bytes) | `this+0x10`; split at the bar character into client object +0xec and +0xf8 | not used | the name | `this+0x10`; `L2.08762` replaces it |
+| +0x2c | `this+0x34`; `& 0xc0` selects the unit row | `& 0xc0` selects the unit row | 0x80 when unit word +0xe is 0x22 or 0x24 (`L2.01137`), 0x40 when unit +0x4c has bit 2 (`L2.01136`) | `this+0x34` |
+| +0x2d | `this+0x60` and unit byte +0x4b | unit byte +0x4b | unit byte +0x4b | full write: client object +0x28 |
+| +0x2e | `this+0x5c` | unit byte +0x23c | unit byte +0x23c | `this+0x5c` |
+| +0x2f | `this+0x30` | not used | 4 | `this+0x30`; `L2.06536` clears bit 0 before its write |
+| +0x30 | `this+0x88` | not used | owner byte +0xa44 | `this+0x88`; `L2.08762` stores N of a `:N` name suffix (1..16, else 0) |
+
+The client switch on `A+0x2c & 0xc0` reaches the arm that pushes the unit name `Start_MF` for 0, `Start_MM` for 0x40,
+`Start_FF` for 0x80 and `Start_FM` for 0xc0 (byte table `L2.08800`, jump table `L2.08801`). The creation template
+`L2.04094` selects by `this+0x34` through `L2.08802` and `L2.08803` the same way. The server loader pushes the same
+four strings; its switch mapping was not read. The server loader body loads the A pointer four times: the null test,
++0x2c, +0x2d and +0x2e.
+
+**Confidence.** High for every store in the table (EN bodies read). Medium for the server loader's row mapping and for
+"not used" in the server column (direct loads of the A local only). Unknown: what the client fields `this+0x30`,
+`this+0x64` and `this+0x88` do beyond the list key; the unit names are install strings, not behaviour facts.
+
+**Unknown.** The use of A+0x2f and A+0x30 after a client load. Static run: E8 and displacement census of list object
++0x30 and +0x88 readers in EN `allods2.exe`.
+
+**Amends.** R2-SESSION-022: the A bytes at 0x2c and 0x2f are no longer Unknown as stores. R2-ENGINE-1841: the A
+offsets of the server writer's fields.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 2;
+`evidence/generated/scans/en-switch-loader-L2.08800.txt`, `en-switch-template-L2.08802.txt`;
+`evidence/nav/nav1/scans/en-cstr-L2.08804.txt`, `en-cstr-L2.08805.txt`, `en-cstr-L2.08806.txt`, `en-cstr-L2.08807.txt`;
+`evidence/nav/nav1/listings/en-template-L2.04094.txt`, `en-flag80-L2.01137.txt`, `en-flag40-L2.01136.txt`;
+`evidence/nav/nav2/listings/en-template-b-L2.08758.txt`; `evidence/generated/listings/en-full-write-L2.07266.txt`,
+`en-site-L2.08762.txt`, `en-site-L2.06536.txt`; committed `out/code/listings/en-charfile-client.txt`,
+`en-charfile-server.txt` (EXP-2052) and `evidence/generated/listings/en-chr-writer-L2.08323.txt` (EXP-2209).
+
+### R2-SESSION-515
+
+Entry writer `L2.08808` writes u16 kind, u16 value, u32 n and n bytes; entry reader `L2.08809` reads the same. The
+client full write `L2.07266` and the C-only write `L2.04366` write nine entries from `this+0x8c+0xc*i`, i = 0..8; the
+client loader `L2.01814` reads nine entries back into the same places when C is present. Nine entries with n = 0 make
+72 bytes. The server loader never loads its C or C-length local. With `this` = app +0x450 (the full write's caller
+`L2.08810` adds 0x450), `this+0x8c` is app +0x4dc, the nine 12-byte entries of R2-ENGINE-768.
+
+Both installed files: C is 72 bytes and parses as nine entries that fill the section exactly.
+
+**Confidence.** High for the framing, the nine entries and the server's neglect of C. Medium that the list object is
+app +0x450 at every client loader call.
+
+**Amends.** R2-SESSION-022: section C is no longer Unknown.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 3;
+`evidence/nav/nav1/listings/en-cslot-read-L2.08809.txt`; `evidence/nav/nav2/listings/en-cslot-write-L2.08808.txt`;
+`evidence/generated/listings/en-full-write-L2.07266.txt`, `en-site-L2.04366.txt`; `evidence/generated/data/en-a2c.tsv`;
+committed `out/code/listings/en-charfile-client.txt`, `en-charfile-server.txt` (EXP-2052).
+
+### R2-SESSION-516
+
+Record framing, item record reader `L2.07628` and serializer `L2.04797`:
+
+1. u16 item word (item +0x40). Zero is an empty item (`L2.01752`).
+2. u8 flags. With bit 0x80 the low six bits are the count. Otherwise with bit 0x20 the count is 1 and the low four
+   bits are n: a u32 the reader skips (the serializer writes item +0x1c), then n effect units, each a type byte (+0x3c) and a value byte (+0x40); type 0x29 is followed
+   by a marker byte and a byte into +0x42, types 0x2c..0x30 by a byte the reader skips and a byte into +0x41, each
+   such effect using two units. Otherwise a u16 count follows.
+3. The class `(word >> 8) & 0xf` picks the constructor: 1 `L2.05910`, 2 `L2.06362`, 0xe `L2.05636` through table
+   `L2.01753[word & 0xff]`, others `L2.01754`; the constructors take `(word >> 5) & 7`, `word >> 12` and
+   `word & 0x1f`.
+
+Collections:
+
+- Server writer `L2.08323`: D from unit +0x74, +0x78 and slots +0x208+4i for i = 3..12 (an empty record for each
+  null), 12 records; F from the bag list +0x7c.
+- Server loader: 12 D records each go to unit virtual slot +0x44; an item whose +0x50 is set makes unit +0x1bc = 1.
+  F, when present, goes into the bag through `L2.01055`, bounded by its u16 length.
+- Client loader: worn items move to the bag, the bag is deleted and replaced by a new empty bag, and 12 D records
+  (cursor at D body +9) each with a nonzero item word go to unit virtual slot +0x44. It never loads its F local.
+- Client writes: `L2.08771` writes D alone from 12 slots at +0x4988+4i of the client pump's object `[ebp-0xc34]`
+  (empty records for null); `L2.08772` writes F alone from every item of the list at +0x4974 of the same object.
+
+Both installed files: D holds 12 records (9 and 12 empty) and F holds none (9 bytes each).
+
+**Confidence.** High for the framing, the counts and the stores. Medium for the names worn and bag: slot +0x44's body
+and `L2.01055` are unread, and the bag name of list +0x7c is R2-ENGINE-1841's.
+
+**Amends.** R2-SESSION-022: D and F are identified and the record framing is read. R2-ENGINE-1841: the first buffer is
+D and the second F.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 4;
+`evidence/nav/nav1/listings/en-item-read-L2.07628.txt`, `en-item-write-L2.04797.txt`;
+`evidence/nav/nav2/listings/en-item-read-b-L2.08811.txt`, `en-item-code-L2.08812.txt`;
+`evidence/generated/listings/en-writer-d-L2.08799.txt`, `en-pump-arm-L2.08781.txt`; `evidence/generated/data/en-a2c.tsv`;
+committed `out/code/listings/en-charfile-client.txt`, `en-charfile-server.txt` (EXP-2052),
+`evidence/generated/listings/en-chr-writer-L2.08323.txt` (EXP-2209), `evidence/listings/en-sync-L2.08783.txt` (EXP-2109).
+
+### R2-SESSION-517
+
+Section E fields after the reader's chain (EN reader `L2.08376`), with each EN body's source or destination:
+
+| E offset | Reader chain | Client loader | Server loader | Server writer | Client full write |
+|---|---|---|---|---|---|
+| +0 | `^= 0x1529251` | `this+0x3c` | Player +0xa48 | +0xa48 | 0 |
+| +4 | `+= f0*5 + 0x13141516` | `this+0x40` | Player +0xa4c | +0xa4c | 0 |
+| +8 | `+= f1*7 + 0xabcdef` | `this+0x44` | Player +0xa58 | +0xa58 | 0 |
+| +0xc | `^= 0x17ff12aa` | `this+0x48` | Player +0xa54 | +0xa54 | 0 |
+| +0x10 | `+= f0*3 - 0x21524542` | `this+0x38` | Player +0x3c | owner +0x3c | 1000 |
+| +0x14..+0x17 (u8) | b5 `+= low byte of (f4*0x11 + f0*0x13)`; b6 `+= b5*3`; b7 `+= b5 + b6*5`; b8 `+= b5*7 + b7*9` | `this+0x4c..+0x58`, unit words +0x84..+0x8a, client object +0x180..+0x183 | unit words +0x84..+0x8a | unit word less its bonus byte (+0xd4..+0xd7) | client object +0x180..+0x183 |
+| +0x18 | `-= 0x10121974` | not used | bits 1..29 create spells when unit word +0x9c > 0 | `L2.04288`: bit s set for each nonnull book slot s >= 1 | client object +0x1c |
+| +0x1c | none | not used | byte +0x78 of unit +0x1c4 | byte +0x78 of unit +0x1c4 | client object byte +0x118 |
+| +0x20..+0x30 | g0 `^= 0xdadedade`; g(i) `-= g(i-1)*0x771` with the decoded g(i-1) | unit +0x240..+0x250 | unit +0x240..+0x250 | unit +0x240..+0x250 | client object +0x16c..+0x17c |
+
+Pad bits: 0..8 for the first nine fields, 14 for +0x18, 13 for +0x1c, 9..13 for +0x20..+0x30. The client loader
+computes the skill levels, unit +0x116, the sum +0x130 and the tiers `this+0x114` and `this+0x118` from +0x240..+0x250,
+then calls unit virtual slot +0x58. The server loader, when unit word +0x9c is positive, sets unit +0x4c |= 6 and
+replaces the book at +0x140 before creating spells through `L2.01059` and `L2.01060`. Both installed files decode
+with a verifying checksum.
+
+**Confidence.** High for the chain, the stores and the forward chain (R2-SESSION-513). Medium for the names: Player
++0x3c is money by R2-ENGINE-299; +0x84..+0x8a are Body, Reaction, Mind and Spirit by R2-ENGINE-483, read in RU;
++0x240..+0x250 is skill experience by R2-ENGINE-489.
+
+**Unknown.** What Player +0xa48, +0xa4c, +0xa54 and +0xa58 and unit +0x1c4 byte +0x78 hold. Static run: read their
+readers in EN `allods2.exe` (R2-ENGINE-762 lists the +0xa44..+0xa5f operands).
+
+The record whose dwords +0x20..+0x30 the loaders read (R2-ENGINE-489) is section E, and the load sources of Player
++0xa48, +0xa4c, +0xa54 and +0xa58 (R2-ENGINE-762) are E +0, +4, +0xc and +8.
+
+**Amends.** R2-SESSION-022: E field meanings. R2-ENGINE-489: the records' dwords +0x20..+0x30 are section E. R2-ENGINE-762
+and R2-ENGINE-772: the file dwords stored at `L2.04249..L2.04250` are E +0, +0xc, +4, +8.
+
+**Evidence.** [EXP-2210](../experiments/EXP-2210-rom2-a2c-sections/RESULTS.md) question 5;
+`evidence/generated/listings/en-reader-b.txt`, `en-reader-c.txt`, `en-writer-b.txt`, `en-writer-c.txt`,
+`en-full-write-L2.07266.txt`; `evidence/nav/nav2/listings/en-spellmask-L2.04288.txt`; `evidence/generated/data/en-a2c.tsv`;
+committed `out/code/listings/en-charfile-client.txt`, `en-charfile-server.txt` (EXP-2052),
+`evidence/generated/listings/en-chr-writer-L2.08323.txt` (EXP-2209).
