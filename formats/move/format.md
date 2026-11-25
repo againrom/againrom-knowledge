@@ -34,6 +34,13 @@ helpers. Diagonal and straight costs, stopping conditions and failure paths
 are explicit in the linked procedures. — MOVE-SEARCH-001, MOVE-REFRESH-012,
 MOVE-TICK-013, MOVE-RATE-029
 
+The near (dynamic) route stores every cell from the step after the start to its goal, but the
+landing on the first cell frees the whole list, so one search drives one step (read as
+instructions; not observed). — MOVE-205
+
+Effects bound speed only through the modifier reset above 24 and the humanoid derive; the step
+rate clamp is the movement bound (readers not censused). — MAGIC-476
+
 A diagonal step lasts `ceil(256 / trunc(0.707 v))` calls and a straight one
 `ceil(256 / v)`: at v = 16, 24 against 16. — MOVE-200
 

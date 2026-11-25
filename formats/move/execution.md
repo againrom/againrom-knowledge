@@ -145,6 +145,9 @@ direction 5 the positive-axis call; the zero-fraction correction aligns the
 two axes when `s` divides 128. Translation rate is frozen at the start of the
 transit. — MOVE-126, MOVE-RATE-029, MOVE-DIR-034
 
+The speed under that clamp has no lower bound of its own: a Unit's speed effect adds to `+0x8c`
+with no floor, and a humanoid's negative derived speed only zeroes the modifier. — MAGIC-476
+
 **Footprint position** (`MOVE-087`). The stored cell is the top-left cell of the `n x n` footprint, with
 `n` = actor byte `+0x49`. The fine value `P = (cell << 8) + sub-cell` is that corner. The centre that the
 range test, the edge gap and the bearing read is `P + (n-1) * 128` per axis, 16 bits. A step moves `P` by the

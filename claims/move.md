@@ -2296,6 +2296,29 @@ Evidence is a static read of `rom.exe` (one image on both lawful installs; EN an
 
 **Unknown.** An original run that teleports a unit onto a trap cell and one that loads a map with a unit record on a trap cell would show whether these entries fire and what the client draws then.
 
+## Cells the near route stores
+
+Evidence is the committed listing of an earlier experiment of `rom.exe` (EN and RU one image) and the claims it supports. No native window was run for this claim and no original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-205 | The near-route extractor stores every cell from the step after the start to the near goal (walk-back capped at 1000 steps), and landing on the first cell frees the whole list, so each near search drives one step. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### MOVE-205
+
+Listing EXP-0591 `evidence/generated/run2/dynamic-extractor.txt` (`R0438..L17904`).
+
+- Extraction. The extractor allocates the goal node and adds it at the head of the list (`L17905..L17906`: new node becomes `+4` head; the old head becomes its next). The loop `L16411..L17907` walks back to the neighbour with the lower label and adds each cell at the head (`L17908..L17909`), until the cell equals the start (`L17910..L16412`). The step counter is tested against 1000 (`L06783`, `L14987`); above it the loop leaves to `L17911`.
+- At the start the extractor removes the head node, which is the start cell (`L17912..L16413`). The stored list therefore runs in walking order from the first step to the near goal.
+- Refresh. Landing centred on a cell frees the whole near list (`R0039`), and the walk also re-searches when `mover+0x78` exceeds DynamicRefreshRate 32. The static route is searched again on a new target cell or when `mover+0x09` exceeds StaticRefreshRate 16. The near goal is the static waypoint at most DynamicByStaticLookup 3 cells ahead, or one further, or the final goal when the static route holds 5 nodes or fewer (`MOVE-REFRESH-012`).
+- So the extractor may store several cells, and a unit walks only the first before the next near search.
+
+**Confidence.** High for the extractor and the refresh rules, read as instructions in the cited listings. Medium for the per-step behaviour in play (no original run) and for a walk-back over 1000 steps: the exit path past `L17913` is not decoded.
+
+**Amends.** None.
+
+**Unknown.** Settle with the original: order a unit around a moving obstacle and record its cell each tick; each step should follow a fresh near search.
+
 ## Step count, diagonal stride and the flee read after LOAD
 
 Evidence is a static read of `rom.exe` (one image on both lawful installs; EN and RU byte-equal, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`) and listings committed by earlier experiments; no process was run and no save was read. `EXP-0646` was allocated `MOVE-199`..`MOVE-204` and `SAV-1406`..`SAV-1408` and spent `MOVE-199`..`MOVE-201` and `SAV-1406`; `MOVE-202`..`MOVE-204`, `SAV-1407` and `SAV-1408` are unused. Mover offsets are relative to the mover at actor `+0x154`; Position is the 12-byte record at actor `+0x10`, sub bytes `+4`/`+5`, 0x80 the cell centre.

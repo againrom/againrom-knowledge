@@ -56,7 +56,8 @@ tail and then list B head to tail; it does not run a radius search. The ordinary
 therefore the builder's group-wide visibility, first-member diplomacy and See-invisible rule, then
 its living/corpse split. The primary spell target is separate: the selector alarms it and performs
 the hostility flip before the builder call, appends it first, and skips an equal secondary later.
-It can therefore survive conditions that would remove it as a secondary.
+It can therefore survive conditions that would remove it as a secondary. The selector has one rel32
+caller, Prismatic Spray's `R0269` (census of rel32 transfers in `.text` and aligned dwords; immediates and computed calls not searched; `MAGIC-474`).
 
 Prismatic rank differs from ordinary acquisition. List A uses
 `((edgeDistance<<8)+turnCost)&0xffff`; list B uses

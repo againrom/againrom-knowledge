@@ -12,6 +12,7 @@ latency, interruption and first dispatch after LOAD remain Unknown.
 UNIT-STRUCTUSE-090 and UNIT-STRUCTUSE-091 describe the reached switch and
 fountain effects. They resolve nearby objects again; retained order identity
 alone does not establish which object receives the effect in ambiguous layouts.
+A fountain's charge is spent before any test of the receiver (ITEM-257).
 
 ## Player input contract (`AI-INPUT-121`, `AI-SELECT-122`, `AI-PANEL-123`, `AI-MINIMAP-124`, `AI-KEY-125`, `AI-CURSOR-126`, `AI-INPUT-127`)
 

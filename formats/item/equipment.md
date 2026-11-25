@@ -130,6 +130,11 @@ posts a physical ranged attack, and the unit shot would take the class Projectil
 Human Mage row (Medium; Ferion's class is not read from the save).
 — ITEM-187, MAGIC-379
 
+On a fighter's melee blow, when the strike's gates pass (`R0247` unread), the weapon's Spell is
+applied after the health subtraction when the
+damage is positive and the victim stays above 0 health, or always when the Spell is Fire Ball
+(id 2); Prismatic Spray (id 14) is never applied there. — MAGIC-475
+
 Over the 7646 registry bodies of the image, the stores to a Weapon's `+0x80` are the nine in
 Weapon routines (two constructors, the fill, the destructor, two in the copy, removal, the Spell
 builder under equip, and a by-name builder with no caller) and the archive read of Weapon

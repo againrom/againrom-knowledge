@@ -144,6 +144,14 @@ container-identity sentence is retracted), `ITEM-GROUNDMOVE-130` and
 leaves nothing at all. Because the strip precedes the
 emptiness test, a body that wore anything leaves a sack even if it carried nothing.
 
+When the container survives the suppression of `ITEM-DEATH-012` (partially retracted; its
+suppression inputs stand), each unequipped item joins the
+carried items through the container's add: it merges into the first
+held stack of the same code, or else is inserted at the container's index `+0x1c` (10 000 from the
+constructor, so after the last item). A drain into an existing Sack moves the dead unit's items head
+first, each through the same add, and the Sack's gold grows by the routine's gold; nothing else
+reaches it (`ITEM-256`).
+
 The gold of steps 7 and 8 is the routine's own local: it is written only as 0 and as the template
 draw, and the suppression of step 6 replaces only the container, so a suppressed unit still
 reaches the draw (`ALM-OWNGOLD-341`). A unit that a map's type-8 loot record names as its owner

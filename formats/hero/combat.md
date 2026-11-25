@@ -208,7 +208,7 @@ death, from the killing blow to the freed id  (HERO-DEATH-026 amended, SESS-TICK
                                                SESS-TICK-006, HERO-DWELL-065 amended,
                                                HERO-FINISH-066, HERO-DYETICK-067,
                                                HERO-REVIVE-068, HERO-DECAY-069,
-                                               HERO-ZERO-070)
+                                               HERO-ZERO-070, HERO-207)
   TWO clocks act on a dying body when stepping is admitted. Campaign outcome panels
   pause frontend stepping before teardown (SESS-DEFEAT-065); primary-fall reporting
   can also replace owned actors' HP with -50 (MISSION-DEFEAT-045).
@@ -235,8 +235,12 @@ death, from the killing blow to the freed id  (HERO-DEATH-026 amended, SESS-TICK
   health == 0   entered (JLE) and left untouched (JGE)    <-- NOTHING HAPPENS, EVER
 
   C. after the teardown, R0867 over the DEAD list, once per FULL tick
-  then          one health point per two FULL ticks; stages at -10, -20, -40
-  at -600       the runtime id's bitmap bit is freed and actor+0x4 = 0
+  then          one health point per two FULL ticks (cadence Medium, not run); stage
+                2, 3, 4 when health is below -10, -20, -40 (strict), for every
+                actor of the dead-list loop and of the teardown call
+  below -600    stage 5: the runtime id's bitmap bit is freed, actor+0x4 = 0,
+                health = -10001; below -10000 the routine returns at once
+  a Player's primary hero is set to -50 by its teardown and enters at stage 4
 
   so a ground unit felled to -h, 1 <= h <= 9, and left alone:
     >= dyingTime-1 sub-ticks   ~437 ms   the countdown, then it pins
@@ -252,7 +256,8 @@ experience, per LANDED blow and only to a human class (the monster slot is a stu
   neither refusal applies once the victim's health is below 0, so a strike leaving -9..-1 is paid
   across both, and a kill award, when the death processor pays it, passes neither refusal
   (HERO-XPKILL-203, Medium for the writer census) -- and, past that, capped and credited to ONE slot by
-  the [experience rules](experience.md), which is where it becomes a skill level
+  the [experience rules](experience.md), which is where it becomes a skill level; a mage's spell
+  kill pays the Fire slot for damage kinds 1..5 (MAGIC-473; High as code; Medium for the school paid in play)
 ```
 
 **`dyingTime` is a floor on the dwell, not the whole of it, and a corpse is not out of reach.**

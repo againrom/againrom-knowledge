@@ -52,7 +52,7 @@ site-count clause of SHOP-ROUND-017 is retracted (`SHOP-102`,
 
 - Armor (`R0960`), Shield (`R0961`) and Weapon (`R0962`) all set `item+0x1c = ftol(base * material.+0x30 * tier.+0x30 + 0.5)`, which rounds half up. `base` is parameter slot 2 of the item's own `Data.bin` entry; `material` is `Materials[item+0x46]` (table `L02110`) and `tier` is the entry `[item+0x45]` (table `L04635`).
 - Enchantment addend: `R1720(n) = ftol((1.5^(n/70.0) + 1.0) * n * 50.0)`, which truncates. `item+0x1c` grows by that amount and is then clamped to 9 999 999.
-- Cast addend: `R1780 = ftol(10*S*2^log_1.2(1+power/30))`, which truncates.
+- Cast addend: `R1780 = ftol(10*S*2^log_1.2(1+power/30))`, which truncates. Only the Weapon prices a castSpell Effect this way; Armor and Shield put its power into `n` (`SHOP-158`).
 - Sell payout: `R1572 = ftol(0.5 * (qty * price) + 0.5)`, which rounds half up.
 - Buy: `R1628` uses integer multiplication only, no floating point at all.
 

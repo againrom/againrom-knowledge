@@ -93,6 +93,9 @@ of Q's human-class actors on one of P's actors that leaves P's actor at 0 or mor
 refused, and the mirror blow is not; a blow leaving -9..-1 or a kill passes (HERO-XPCELL-202 High,
 HERO-XPKILL-203 High / Medium; not observed in the original). — HERO-XPCELL-202
 
+A spell kill is credited to the caster recorded at victim `+0x40`; a mage's kill pays the Fire
+slot for damage kinds 1..5 (High as code; Medium for the school paid in play). — MAGIC-473
+
 `World\Data\ai.reg` contributes one value on this path: `[Scanning] MinimalGuardRange`, the floor
 of the argument-0 callers on a group's notice radius. The code default is 10; **the shipped file sets 8**. The file has four
 records in total and its other scalar, `[Tasker] IntelligentCons` = 15, has no literal anywhere in

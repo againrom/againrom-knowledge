@@ -39,7 +39,8 @@ instant 28   move the whole container from the first Target_Unit to the second,
 The container is `actor+0x7c` (`ITEM-CONT-004`) and the routine that moves it **deletes**
 it, which is why both instants must re-seat the giver. A consumer maintaining a cell→sack
 index for pick-ups already has everything check 14 needs; one that does not will implement
-the check against the wrong structure.
+the check against the wrong structure. A death drain into an existing sack moves the items head
+first and adds each at the receiving container's index `+0x1c` or onto an equal stack (`ITEM-256`).
 
 Three more (`TRIG-ADDITEM-027` (amended)…`TRIG-NEAREST-029`):
 

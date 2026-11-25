@@ -365,7 +365,8 @@ constant base first and the computed exponent second. After every append the sto
 9,999,999, and the next call recalculates `2*ceiling-currentStoredPrice`. The final ordinary path
 debits MagCap by `N` (`SHOP-102`, `SHOP-EFFPRICE-066`, `SHOP-EFFCAP-069`). The former nonlinear
 formulas in `SHOP-EFFPRICE-066` are partially retracted; aggregation, retained-cast additivity,
-upper clamp and subsequent budget reads stand.
+upper clamp and subsequent budget reads stand. The separate cast addition is the Weapon's; Armor and
+Shield test no kind and add a castSpell Effect's power to `N` (`SHOP-158`).
 
 For a text-authored cast, the suffix's leading plus/digit run supplies a
 decimal i32 that narrows to the power word, then pricing sign-extends it.

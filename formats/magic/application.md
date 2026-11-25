@@ -392,7 +392,8 @@ See [overlap rules](overlap.md) for Fire Wall/Poison Cloud and
 
 `MAGIC-CONSUME-142`, `MAGIC-CONSUME-143` and `MAGIC-CONSUME-144` qualify this attachment mechanism. Only mode bits 1
 and 2 are timed; charges bit 4 alone is not. Item use turns mode 0 into singleuse 8.
-Current-health/mana potions add 30 or 100, capped at maxima. The four +1 attribute
+Current-health/mana potions add 30 or 100, capped at maxima; a well's potion is applied and
+destroyed even when the cap leaves no gain (`ITEM-257`). The four +1 attribute
 potions change the live attribute without changing its modifier byte and leave no
 timer. The common effect-dispatch tail immediately invokes Human derive, which caps it at 50 plus signed modifier.
 
@@ -415,7 +416,9 @@ These readers do not replay a fresh Potion or reset its timer. Native drink-save
 `R0269` constructs a local output list and calls
 `R0109(session,caster,primary,out,cap)`. The cap is
 `(u8)min(power/20+2,7)`: book power comes from Sphere 2, while an item/staff uses the signed
-kind-`0x29` effect's `+0x42`. It is a final victim count, not a distance.
+kind-`0x29` effect's `+0x42`. It is a final victim count, not a distance. This call is the
+selector's one rel32 caller (census of rel32 transfers in `.text` and aligned dwords; immediates and computed calls not searched;
+`MAGIC-474`).
 
 The selector first alarms the primary and applies the directional hostility flip. It asks
 `R0110` for the caster group's shared candidate lists: sight is cleared once and stamped by
@@ -506,6 +509,13 @@ for positive p16, then S=low 8(T(p17*f-B)) for positive p17; otherwise
 the respective byte is zero. B is narrowed before the subtraction.
 The x87 entry precision and rounding state remain Unknown.
 — MAGIC-300, MAGIC-301
+
+The landed damage stores its caster at victim `+0x40` and, for a mage caster, the damage kind
+at `+0x48`; the kill award reads that kind as a Spells id, so a mage's spell kill pays the Fire
+slot for kinds 1..5 (High as code; Medium for the school paid in play). — MAGIC-473
+
+A Human's protection reaches this expression clamped to 0..100 by its derive; protection effects
+floor their modifier word at 0; no arm caps it; readers not censused. — MAGIC-476
 
 Fire Ball 2 area application first divides a copied B/S by the product
 of two target virtual+1c byte results, then applies that copy. The

@@ -10,6 +10,9 @@ r to `floor(r*(n+1)/32768)` on `[0,n]` inclusive. Bound zero returns zero
 without a draw. Exactly equal buckets require n+1 to divide 32768; a shared
 CRT stream can have preceding consumers. — MAGIC-284, MAGIC-301
 
+The effect dispatcher zeroes a speed modifier above 24 before each arm, and protection arms
+floor their modifier word at 0; no arm caps it; readers not censused. — MAGIC-476
+
 Runtime `Data.bin` column *i* is title *i+1* throughout.
 
 ## Spell definitions
@@ -458,6 +461,10 @@ payload+5b/+5c with elemental kind at+5d. The target consumer reads that
 payload, not the popup aggregate. Fire Sacrifice 4, Poison 8 and Heal 6 have
 separate HP arms. The whole release-to-target timing join is Medium.
 — MAGIC-300, MAGIC-302
+
+The kind at+5d also reaches the victim's attacker record `+0x48` when the caster is a mage, and
+the kill award looks it up as a Spells id (High as code; Medium for the school paid in play).
+— MAGIC-473
 
 For ordinary actor input, power is signed skill[Sphere]+Mind-30 clamped
 to 0..100. Popup preparation instead keeps byte addition before its clamp:

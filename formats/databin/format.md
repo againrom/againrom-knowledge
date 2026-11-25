@@ -104,6 +104,10 @@ Medium. — DAT-CSVCELL-028
   (`UNIT-SPELL-007`) and the treasure columns by the kill payout (`HERO-KILL-027`).
   The experience that payout pays from `XPvalue` is refused on the victim's relation row
   (`HERO-XPCELL-202`) only while the victim's health is not below zero (`HERO-XPKILL-203`).
+  A mage's spell kill reads the `Spells` row whose id is the damage kind for its slot
+  (`MAGIC-473`, amending `HERO-KILL-027`; High as code; Medium for the school paid in play). The kill pays `ftol(XPvalue × 0.5)` before the
+  Mind scaling; the amount before the cap is the same for the first and the hundredth kill, and
+  the cap reads the current level (`HERO-209`).
   Complete slot → actor-field map with widths and instruction addresses:
   [`formats/unit`](../unit/format.md), `UNIT-STREAM-001`.
 

@@ -26,7 +26,9 @@ else:                                                    drop at the actor's own
 Never refused — out of range it lands underfoot. Money is opcode `0x23` and uses the same
 window; it refuses an amount `<= 0` or one exceeding `Player+0x38`, debits `Player+0x38`, and
 adds the amount to the sack's `+0x3c`. CastSpell item use is orders `0x25`/`0x26`;
-ordinary Potion use is session `0x22` destination 1 (`ITEM-USE-113`).
+ordinary Potion use is session `0x22` destination 1 (`ITEM-USE-113`). A well's potion takes the
+same item use on a Human or a Unit receiver and returns to its container only at health <= 0
+(`ITEM-257`).
 
 ### Carried Potion and Scroll activation
 

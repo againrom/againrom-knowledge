@@ -79,7 +79,13 @@ Three feeds, all `vt` slots of the same two vtables and all **stubs** on the non
 `vt+0x60` a kill, `ftol(victim+0x1c * 0.5)`; `vt+0x64` a landed hit,
 `ftol(victim+0x1c * 0.5 * dealt / victim.healthMax + 1)`; `vt+0x68` a cast,
 `round(manaCost/2)`. `victim+0x1c` is the `Units` `XPvalue` column. Each resolves the slot as
-*"the spell's `Sphere` if a spell id was supplied and `+0x4c & 4` is set, otherwise 0"*. The
+*"the spell's `Sphere` if a spell id was supplied and `+0x4c & 4` is set, otherwise 0"*. On the
+kill feed the supplied value is the victim's `+0x48`, the damage kind 1..5, looked up as a spell
+id; ids 1..5 are Fire spells, so a mage's spell kill pays the Fire slot
+(`MAGIC-473`; High as code; Medium for the school paid in play). Mind is
+the signed word `+0x88`, 30.0 and 0.25 are binary64 constants, the product truncates toward zero,
+and the amount before the cap is the same for the first and the hundredth kill; the cap reads
+the current level (`HERO-209`). The
 clear-bit arm accepts that zero and substitutes the current weapon skill at `+0xb6`; a fighter's
 weapon-borne spell damage therefore trains its weapon, not a school, only after the typeID gate
 above. A low-type map Human receives no item hit, damage or kill award. Item context suppresses the

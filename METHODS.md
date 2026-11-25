@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
+Claims labelled: 5367. Observation: 143. Static analysis: 4482. Mixed: 742.
 
 ## Ledger ai
 
@@ -1140,6 +1140,8 @@ Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
 | HERO-199 | mixed | ● active (branch candidate) |
 | HERO-205 | static analysis | ✔ promoted (branch candidate) |
 | HERO-206 | static analysis | ✔ promoted (branch candidate) |
+| HERO-207 | static analysis | ● active |
+| HERO-209 | static analysis | ● active |
 | HERO-XPCELL-202 | static analysis | ● active (branch candidate) |
 | HERO-XPKILL-203 | static analysis | ● active (branch candidate) |
 | HERO-XPMAP-204 | mixed | ● active (branch candidate) |
@@ -1228,7 +1230,7 @@ Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
 | ITEM-CASTLINK-076 | static analysis | ● active (amended) |
 | ITEM-EFFSAVE-077 | static analysis | ● active |
 | ITEM-EFFARM-146 | static analysis | ● active |
-| ITEM-EFFKEY-147 | static analysis | ● active |
+| ITEM-EFFKEY-147 | static analysis | ● active (amended) |
 | ITEM-EFFSYM-148 | static analysis | ● active |
 | ITEM-EFFSHIP-149 | mixed | ● active |
 | ITEM-AUTHCAST-086 | mixed | ● active |
@@ -1295,6 +1297,8 @@ Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
 | ITEM-253 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-254 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-255 | static analysis | ✔ promoted (branch candidate) |
+| ITEM-256 | static analysis | ● active |
+| ITEM-257 | static analysis | ● active |
 | ITEM-246 | static analysis | ✔ promoted (branch candidate) |
 | ITEM-247 | static analysis | ● active (branch candidate) |
 | ITEM-248 | static analysis | ✔ promoted (branch candidate) |
@@ -1564,6 +1568,10 @@ Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
 | MAGIC-444 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-445 | static analysis | ✔ promoted (branch candidate) |
 | MAGIC-446 | static analysis | ✔ promoted (branch candidate) |
+| MAGIC-473 | static analysis | ● active |
+| MAGIC-474 | static analysis | ● active |
+| MAGIC-475 | static analysis | ● active |
+| MAGIC-476 | static analysis | ● active |
 | MAGIC-463 | static analysis | ● active |
 | MAGIC-464 | static analysis | ● active |
 | MAGIC-465 | static analysis | ● active |
@@ -1885,6 +1893,7 @@ Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
 | MOVE-195 | static analysis | ✔ promoted (branch candidate) |
 | MOVE-196 | static analysis | ✔ promoted (branch candidate) |
 | MOVE-197 | static analysis | ✔ promoted (branch candidate) |
+| MOVE-205 | static analysis | ● active |
 | MOVE-199 | static analysis | ✔ promoted (branch candidate) |
 | MOVE-200 | static analysis | ✔ promoted (branch candidate) |
 | MOVE-201 | static analysis | ✔ promoted (branch candidate) |
@@ -4445,6 +4454,7 @@ Claims labelled: 5357. Observation: 143. Static analysis: 4472. Mixed: 742.
 | SHOP-ROUTE-152 | observation | ● active |
 | SHOP-156 | static analysis | ✔ promoted (branch candidate) |
 | SHOP-157 | static analysis | ✔ promoted (branch candidate) |
+| SHOP-158 | static analysis | ● active |
 | SHOP-154 | static analysis | ● active (branch candidate) |
 | SHOP-155 | static analysis | ● active (branch candidate) |
 

@@ -51,6 +51,9 @@ traced LOAD bodies do not recompute it, and SAVE writes both live values.
 Whether the original re-derives speed after LOAD is Unknown; on one mission-140
 pair the derive formula reproduces the saved values. — SAV-1116
 
+On a humanoid the speed effect writes the modifier `+0xd8`, which every effect dispatch zeroes
+when it is above 24; on a Unit it writes `+8c` directly, with no bound. — MAGIC-476
+
 The six raw block writes in rows 5..10 total 462 bytes. SAVE first copies
 `u8 +14c` into `u32 +148`; this is a local SAVE mutation. Presence producers
 emit 0/1 while the load arms accept every nonzero byte. The inventory presence
@@ -475,6 +478,9 @@ container identity. — SAV-DEADLOAD-127, SAV-DEADLOAD-129, SAV-DEADLOAD-130,
 ITEM-DEATH-012 (its unconditional container-identity sentence is retracted;
 ITEM-GROUNDMOVE-130 holds both Sack branches)
 
+The worn items follow the carried ones in the Sack, or merge into an equal stack, and an
+existing Sack's gold grows by the death gold. — ITEM-256
+
 Unit `+40` is a raw old actor-address key; `+64` is temporary attribution;
 `+68` is initially an archive object reference; signed `+48` is an attribution
 byte. World lifecycle separately map-repairs `+40/+64/+68`, nulling misses;
@@ -597,6 +603,9 @@ runtime ID 0 (Medium for this conditional composition). Retention through
 notification and until SAVE is Unknown; other stage-5 health residues remain
 possible. The exclusive direct-write and cursor/no-unlink clauses are
 partially retracted. — SAV-1238
+
+The ladder's tests are strict (stage 2, 3, 4 and 5 below -10, -20, -40 and -600), a body
+below -10000 is left unchanged, and no class or hero is exempt. — HERO-207
 
 If the actor remains archived with state 5/-10001/0 and intervening archive
 operations preserve it, the standing current-field list/scalar STORE contracts

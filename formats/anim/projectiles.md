@@ -548,6 +548,9 @@ stages 2..4 use a shared arm. The selected creation/update path
 writes its supplied drawable on key hit as well as miss. Upstream allocation,
 the complete sender/decoder link and native timing remain Unknown. — ANIM-163
 
+The server stage 5 begins when a body's health falls below -600, with no class or hero
+exception. — HERO-207
+
 ## Teleport cached origin and phase
 
 Picture 60 increments actionphase, then assigns phase = actionphase - 1.

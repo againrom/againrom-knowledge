@@ -99,8 +99,10 @@ is Medium (`HERO-MODDK-161`). Remove is the exact inverse of apply except at the
 2..5 with mode bit 8, for kinds 44..48 (the multiplier is ignored, so remove restores nothing) and
 for kind 42 (remove passes the negated id). A signed modifier speed above `0x18` is zeroed before
 every dispatch. The shipped equipment cells carry 266 accepted effects per root over 16 keys, equal
-in EN and RU, none of them belonging to an arm body that stores into the damage-kind block. Whether a
-non-humanoid actor folds the modifier protections into its live block is Unknown.
+in EN and RU, none of them belonging to an arm body that stores into the damage-kind block. The Unit
+family's recompute `R0836` writes only `+0xa0` and does not fold the modifier protections into a
+non-humanoid actor's live block; no other reader was searched (`MAGIC-476`, amending
+`ITEM-EFFKEY-147`). Only the Human derive bounds protection, to 0..100.
 
 
 ### A weapon's numbers — `R0856`
@@ -321,7 +323,8 @@ Effect pair carries its kind as its tag, so a Defence or absorbtion Effect repea
 searched), only the Magic Items shop generator merges an equal kind (`SHOP-146`): it overwrites
 the operand dword of the existing node and discards the new Effect, after first discarding a
 drawn kind whose UsableBy shares no bit with a held entry's, and it starts no redraw
-(`SHOP-144`). The reprice and the MagCap debit count the later payload once (`SHOP-145`). The map
+(`SHOP-144`). The reprice and the MagCap debit count the later payload once (`SHOP-145`); an Armor
+or Shield reprice counts a castSpell Effect's power in the summed points (`SHOP-158`). The map
 loader, the cell parser, the item copy and the book makers append with no kind test
 (`ITEM-155`, `SHOP-146`).
 

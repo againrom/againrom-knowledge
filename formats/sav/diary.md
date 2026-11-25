@@ -39,6 +39,10 @@ The array accessors perform pointer arithmetic without a length check. No
 safe malformed count/index relationship follows from the field widths.
 — SAV-842
 
+The kill tally is written after the experience award, and no award body reads it: the
+amount before the cap is the same for the first and the hundredth kill; the cap reads the current
+level. — HERO-209
+
 ## Mutation and notification
 
 The located mutation first decrements a nonzero word, then increments the

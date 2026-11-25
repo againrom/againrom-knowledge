@@ -43,7 +43,9 @@ Potion Big Healing or Potion Big Mana. For Human receivers the item goes
 through the ordinary potion-use virtual before any unconsumed item is returned
 to the container (UNIT-STRUCTUSE-091). ITEM-USE-113 and MAGIC-CONSUME-142 give
 the existing application and clamped +100 effects. A full stat does not prevent
-charge consumption. UNIT-STRUCTZERO-080 describes the separate local recharge
+charge consumption. A Unit receiver takes the same item use and returns an unconsumed item to
+its container too; the potion stays in an inventory only when the receiver's health is at or
+below 0 (ITEM-257). UNIT-STRUCTZERO-080 describes the separate local recharge
 callback; its scheduler period in elapsed play time remains Unknown.
 
 The action performs nearby-object lookups rather than using the retained order

@@ -5287,6 +5287,97 @@ Evidence is a static read of committed listings of `rom.exe` (one image on both 
 **Confidence.** High for the sight-word writes, the kill-credit stores and the hook call in the plain-Unit and Humanoid/Human rows (`MAGIC-443`, `MAGIC-445`). The owner-fog and AI-stamp entries carry `TERR-FOG-275`'s High / Medium / Unknown and `AI-SIGHT-094`'s High / Medium. The air-actor and structure row carries `MAGIC-442`'s Medium. Medium for the actor column: that every Units-table actor carries the plain Unit table and every Humans-table actor a Humanoid or Human table is taken from the creation sequence and was not re-read; and Medium for the shipped minimum and the acquisition consequence, at their sources' grades. Unknown off the clamped power path or when other reductions are in force, where `m` can exceed the unit's sight and the word wraps.
 
 **Unknown.** Settle with the original: in a mission, an own Units-table creature and an own hero stand in one Light cast at power 90 or more; per tick for 40 ticks record each one's revealed radius. Prediction from this claim, not a finding: the creature's radius falls by 4 cells and the hero's does not change.
+## The attacker record a spell writes and the kill slot it selects
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-473 | Spell damage stores its caster at victim `+0x40` and, for a mage caster, the damage kind (Sphere 1..5) at `+0x48`, via a slot the melee blow also calls; the kill award reads that byte as a Spells id, so kinds 1..5 pay the Fire slot. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### MAGIC-473
+
+Listings `evidence/nav/p1/q3-resolver-stores-L16253.txt`, `q3-owner-test-R0416.txt`, `q3-mage-test-R0442.txt`, `q3-kill-award-R1054.txt`, `q3-spell-row-L16239.txt` and `evidence/nav/p2/q3-spell-lookup-L16441.txt`; EXP-0332 `evidence/direct-hp.txt`; EXP-0385 `evidence/reap-sweep-R0427-body.txt`; EXP-0535 `evidence/en-spells.tsv` and `evidence/ru-spells.tsv`.
+
+- Delivery. DirectDamage `R0564` tests the target's `vt+0x2c` and calls its `vt+0x4c` with the combat block at payload `+0x48` and the source at payload `+0x44`. Block `+0x15` is payload `+0x5d`, the damage kind 1..5 that Sphere 1..5 selects; the source is conditional (`MAGIC-300`). The melee strike `R0246` calls the same victim slot `vt+0x4c` with the attacker as source and the attacker's block `+0xa6` (`L17892..L02047`).
+- Stores. In the resolver tail `L16253..L00875`, when the source is non-null and its `+0x3c` is non-zero (`R0416` returns 0): with source `+0x14` (Player) set, victim `+0x40` = source, and victim `+0x48` = block `+0x15` when the source has `+0x4c` bit 4 (`R0442`), else 0; with source `+0x14` zero, victim `+0x40` = 0 and `+0x48` is not written. When both Players are set, `R0226(source, victim)` runs (`AI-641`). A null source, or a source with `+0x3c` zero, stores nothing, and the earlier attacker keeps the credit. Which body `vt+0x4c` reaches for each victim class was not read; the tail above is the one read.
+- Kill. For a credited killer, the death processor `R0427` calls killer `vt+0x60(victim, (i8)victim+0x48)` (`HERO-XPKILL-203`). The human kill award `R1054` sets slot 0; when the byte is non-zero and the killer has `+0x4c` bit 4, the slot is parameter 2 (Sphere) of the Spells collection `L05046` at index byte: `L16239` calls `L16441`, which returns collection `+4` + 32 × byte. It pays `ftol(victim+0x1c × 0.5)` through `vt+0x5c(amount, victim, slot)`.
+- Rows. Spells ids 1..5 are Fire Arrow, Fire Ball, Wall of Fire, Fire Sacrifice and Protection from Fire, each Sphere 1 in EN and in RU. A mage's spell kill with damage kind k therefore pays Sphere 1 (Fire) for every k in 1..5.
+- A killer without bit 4 gets 0 in `+0x48` and slot 0; the sink then uses the active weapon skill (`HERO-SKILLGATE-074`).
+
+**Confidence.** High for the stores, the index lookup and the row values. Medium for the paid school in play: the sink's slot handling is `HERO-SKILLGATE-074`'s read, and the caster written into payload `+0x44` per spell is `MAGIC-300`'s conditional source, not re-read here. Medium that the stores belong to spell damage alone: the melee strike `R0246` calls the same victim slot `vt+0x4c` with the attacker as source (`L17893..L02047`); the byte a mage's blow stores from its own block `+0x15` was not read, and neither was whether the slot is one body for every victim class.
+
+**Amends.** `HERO-KILL-027`, `HERO-SKILLGATE-074`: on the kill feed the slot is the Sphere of the Spells row whose id equals the damage kind, not the killing spell's own Sphere.
+
+**Unknown.** Settle with the original: a hero mage with known Fire and Air experience kills a unit with an Air damage spell; record both schools' experience before the cast and after the kill. For the melee case, the same mage kills a unit with a weapon blow; record the same two schools before and after.
+
+## Callers of the ranked secondary-target selector
+
+Evidence is a caller census of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/p2/q4-callers-R0109.txt`. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-474 | The ranked selector `R0109` has one rel32 caller, `L06149` in Prismatic Spray's `R0269`, and no aligned-dword reference in the sections searched; its candidate, score and order rules are read from that one caller. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### MAGIC-474
+
+Census `evidence/nav/p2/q4-callers-R0109.txt`: E8, E9 and 0F 8x rel32 sites in `.text` and aligned dwords of every section equal to `R0109`.
+
+- One site: `call` at `L06149`, owner `R0269` in the function index. No jump and no aligned dword equals the address. Immediate operands in code (`push`, `mov reg, imm32`) and computed calls were not searched.
+- Rules of that one consumer, unchanged: candidates are the actors of the global list that pass the caster group's sight and first-member gates; living ones (health >= 1) go to list A with score `((edge<<8)+turn)&0xffff`, fallen ones (health < 1) to list B with that score shifted left by 8; when A is empty, B moves into A and takes the A score; selection is the strict minimum, so equal scores keep list order; the primary is appended first and the cap is `min(power/20+2, 7)` (`AI-SPRAY-266`, `AI-SPRAY-267`, `MAGIC-SPRAY-134`).
+- Inference from those formulas: beside a non-empty list A a fallen unit is appended only when its B score is below 65000, that is when the masked A-form score is at most 253.
+
+**Confidence.** High for the census over its population. Medium that no other spell ranks secondaries this way: a call through a computed pointer is outside the census, and other multi-target spells may collect targets by other routines, which were not read.
+
+**Unknown.** Settle with the original: cast Prismatic Spray at power 100 into a group of five living units with two bodies beside them, and record which units the rays strike, in order.
+
+## A weapon's spell on a melee blow
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/`. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-475 | When the strike's gates pass (`R0247` unread), after a fighter's blow subtracts health its weapon's spell fires if damage > 0 and the target stays > 0, or if it is Fire Ball (id 2); a kill fires Fire Ball only, Prismatic Spray never. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### MAGIC-475
+
+Listings `evidence/nav/p1/q8-strike-R0246.txt`, `q8-weapon-spell-R0002.txt`, `evidence/nav/p2/q8-weapon-test-R0408.txt` and `q8-fighter-test-R0859.txt`.
+
+- Gates of the strike `R0246`: victim and attacker non-null with a Player each, attacker health above 0, and attacker byte `+0x12c` at least the signed result of `R0247(attacker, victim)` (`L16249..L17869`). It notes whether the victim's health was already at or below 0 (`L04106..L04396`), calls the victim's `vt+0x4c` with the attacker's block `+0xa6` and subtracts the result from victim health (`L02047..L04164`).
+- Weapon spell (`L17894..L00050`), all required: weapon `+0x74` non-null; `R0408` true (weapon `+0x80`, its Spell, non-null); `R0859` true (attacker `+0x4c` bit 4 clear, a fighter); and either damage > 0 with victim health > 0 after the subtraction, or the Spell's id byte `+8` equal to 2. It stores the Spell in attacker `+0x64` and the weapon in `+0x68`, calls `R0002(attacker, victim)` and clears both fields.
+- `R0002` returns without a cast for id 14 (Prismatic Spray); otherwise it calls Spell::Apply `R0003(attacker, victim, 0, 0)`.
+- Cases, when the gates pass. A blow that kills, or leaves the victim at or below 0, fires only Fire Ball. A blow of 0 damage fires only Fire Ball. A blow on a body already at or below 0 fires only Fire Ball. A mage's weapon spell never fires here (`MAGIC-379`).
+- After the spell the strike shows the damage numeral (`R0561`) unless the victim was already down and is now at or below -10, and pays the blow award when damage > 0, the victim was alive before and its health is above -10.
+
+**Confidence.** High for the branch conditions and their order, read as instructions. Medium for the reach gate: `R0247` is not read.
+
+**Unknown.** Settle with the original: a fighter with a Fire Arrow weapon and one with a Fire Ball weapon each strike a unit with a killing blow; record whether a projectile appears.
+
+## Bounds on effect protection and speed
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MAGIC-476 | The protection arms floor their modifier word at 0 and store no cap; only the Human derive was found to clamp protection to 0..100 (no census of readers of `+0x102..+0x10c`); a speed modifier above 24 is zeroed at every effect dispatch. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### MAGIC-476
+
+Listings `evidence/nav/p2/q9-dispatch-head-R0843.txt`, `evidence/nav/p3/q9-dispatch-table-L04018.txt`, `q9-dispatch-arms-a.txt`, `q9-dispatch-arms-b.txt` and `evidence/nav/p1/q9-unit-derive-R0836.txt`; EXP-0549 `evidence/listings/m52-fn-R0280.txt`.
+
+- Prelude. The effect dispatcher `R0843` sets actor `+0xd8` (the speed modifier word) to 0 when its signed value is above 24 (`L17895..L17896`), before any kind's arm. It forms `S` from the sign argument and the Effect operand and switches on kind byte `+0x3c` through the table `L04018`.
+- Speed, kind 17 (`L17897`). When the actor's `vt+0x30` is true (humanoid) it adds `S` to modifier `+0xd8`, else to the live speed `+0x8c`; it sets flag 0x200000 in `+0x150`. The arm has no floor and no cap.
+- Protection, kinds 20..25 (`L17898`, `L17899`, `L17900`, `L17901`, `L17902`, `L17903`). Each adds `S` to modifier word `+0x102`, `+0x104`, `+0x106`, `+0x108`, `+0x10a` or `+0x10c` and stores 0 when the signed result is negative; no arm has an upper bound or a class test (`ITEM-EFFARM-146`).
+- Human derive. Protections are `spirit/2`, then after the equipment fold `clamp(min(spirit/2 + 70, prot), 0, 100)` (`HERO-RESIST-012`). Speed adds modifier `+0xd8`; when the sum is negative the derive zeroes `+0xd8`, not the speed, and copies the speed's low byte to the mover (`SAV-1116`).
+- Unit derive. `R0836`, the Unit family's `vt+0x50`, writes only `+0xa0` (`+0x9c` times `Player+0x58` / 100, or `+0x9c` without a Player) and returns at `L12584`; it reads no modifier protection word and no speed field.
+- Use. The damage expression takes a signed protection `r`: `v × (100 - r) / 100 + 0.75`, then 0 at least; `r` above 100 gives 0 and `r` below 0 adds damage (`MAGIC-301`). The step rate is clamped to 1..63 for each transit (`MOVE-RATE-029`).
+
+**Confidence.** High for the prelude, the arms, the table targets and the Unit derive, read as instructions. Medium that no other routine folds the modifier protections into a Unit's live protections: no census of reads of `+0x102..+0x10c` was run. Medium for the absence of another clamp and for every in-play speed value.
+
+**Amends.** `ITEM-EFFKEY-147`: the Unit family's `vt+0x50` (`R0836`) does not fold modifier protections into the live block.
+
+**Unknown.** Settle with the original: cast Protection from Fire on a monster and on a hero, then strike each with Fire Arrow and compare damage; give a hero stacked Slow effects and record speed and the mover byte.
+
 ## Staged stage timing, poison on a body and Heal at a hostile unit
 
 Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0650-rom1-fidelity-unknowns/evidence/nav/` and in committed listings of earlier experiments. No original run was made.

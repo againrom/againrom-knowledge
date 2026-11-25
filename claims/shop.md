@@ -1930,6 +1930,30 @@ Every draw is the same selector `R1035`, so a mage item outside the forced path 
 
 **Amends.** None.
 
+## Enchanted item price by class
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in committed listings of earlier experiments, cited by path in the card. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SHOP-158 | Non-cast surcharge base is 1.5 and exponent N/70; Weapon prices each castSpell Effect apart from N, while Armor and Shield add its power to N (Magic row 41 costMP 1) with no kind test. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### SHOP-158
+
+Listings EXP-0610 `evidence/probe-en/listings/armor-price.txt`, `shield-price.txt` and `effect-points.txt`; the Magic table EXP-0226 `evidence/magic-table.tsv`.
+
+- Expression. `R1720` computes `trunc((1.5^(N/70) + 1) × N × 50)`: the base is 1.5 and the exponent is N/70 (`SHOP-102`).
+- Weapon. `R0962` prices each kind-41 Effect through Effect `vt+0x4c`, the cast addition `trunc(10 × S × 2^(log(1+p/30)/log 1.2))`, and keeps that Effect out of N (`SHOP-103`).
+- Armor and Shield. `R0960` and `R0961` test no Effect kind. Each sums `L09850` over every Effect of the list, passes the sum to `R1720`, adds the result to the rounded base and clamps at 9 999 999 (`SHOP-145`). Neither calls Effect `vt+0x4c`.
+- Points. `L09850` returns 0 for kind 0. For kind 0x29 it returns the signed word Effect `+0x42` (the cast power) times parameter 0 of Magic row 41; for kinds 0x2c..0x30, byte `+0x40` plus byte `+0x41` times parameter 0 of the kind's row; for every other kind, dword `+0x40` times parameter 0.
+- Row 41. `L09850` reads the Magic collection `L05012` at row 41 and the first parameter (costMP in the table's column order; `UsableBy` is parameter 3), 1 in EN and RU, so on an Armor or a Shield a castSpell Effect adds its power to N.
+
+**Confidence.** High for the three bodies and the row value: the three price bodies and the points routine are read whole, and the row value is equal in both languages. Medium for the price a shop shows (no original run, no shown price compared).
+
+**Amends.** None.
+
+**Unknown.** Settle with the original: a shop that offers an Armor and a Weapon with castSpell Effects of equal power; compare the two prices with the expressions above.
+
 ## Shelf sort order
 
 | ID | Claim | Confidence | Status | Evidence |

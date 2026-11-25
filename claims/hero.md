@@ -320,7 +320,7 @@ area is `R0824`'s `+0.5` before its truncate.
 
 **Confidence.** High (every hop is a listed instruction, `R0208` has a single caller, and the id release is re-derived here rather than cited) / High for the cadence ([EXP-0076], three routines read whole) / High for the corrected dwell ([EXP-0121](../experiments/EXP-0121-death-row/), the countdown's complete writer set plus the branch's own `rel8`)
 
-**Amended.** Corrections to this claim are recorded in [`retracted.md`](retracted.md).
+**Amended.** Corrections to this claim are recorded in [`retracted.md`](retracted.md). `HERO-207`: the stage tests are strict (< -10, < -20, < -40, < -600), the machine returns at once below -10000, and a Player's primary hero enters the ladder at -50.
 
 ### HERO-KILL-027
 
@@ -328,7 +328,7 @@ area is `R0824`'s `+0.5` before its truncate.
 
 **Confidence.** High (both vtable slots are dumped and read, the guard is the strike's own compares, and the two field identifications ride `HERO-CADENCE-023`'s offset law) / ~~**Unknown** which skill absorbs the gain~~ — **closed by [EXP-0135]** (`HERO-SKILLGATE-074`): with the bit **set** the slot is the spell's `Sphere` and a blow, which carries spell id 0, is dropped outright; with it **clear** the slot is `actor+0xb6`, the weapon's own attack type. So this row's per-blow experience reaches a **weapon** skill for a fighter and reaches **nothing at all** for a spellbook carrier
 
-**Amended.** Corrections to this claim are recorded in [`retracted.md`](retracted.md).
+**Amended.** Corrections to this claim are recorded in [`retracted.md`](retracted.md). `MAGIC-473`: on the kill feed the slot is the Sphere of the Spells row whose id equals the victim's damage-kind byte `+0x48`, which is Fire for kinds 1..5.
 
 ### HERO-AGGRO-028
 
@@ -634,7 +634,7 @@ area is `R0824`'s `+0.5` before its truncate.
 
 **Confidence.** High for the gate order, slot selection and feeds; the narrowed population is directly witnessed by mission-20 save typeWords
 
-**Amended.** Corrected.
+**Amended.** Corrected. `MAGIC-473`: on the kill feed the slot is the Sphere of the Spells row whose id equals the victim's damage-kind byte `+0x48`, which is Fire for kinds 1..5. `HERO-209`: Mind is the signed word `+0x88`, 30.0 and 0.25 are binary64 constants, the scaled amount truncates toward zero, and no award body reads an earlier kill before the cap; the cap reads the current level.
 
 ### HERO-SKILLLOSS-075
 
@@ -1629,6 +1629,55 @@ So no read site of the four reaches `R0254` with a null receiver unless `R0442` 
 **Confidence.** High for the body and for the four rel32 sites. Medium for the fourth site: the body of `R0442` is not in the listings of this experiment and its lack of a null test rests on `MAGIC-AUTOCAST-020`. Medium for the census: a call through a register or a computed target and an unaligned immediate are outside the scans.
 
 **Amends.** None.
+
+## Decay ladder of a dead actor
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-207 | Decay stages 2, 3, 4 and 5 begin at health < -10, < -20, < -40 and < -600, all strict, for every actor of the dead-list loop and the teardown call; no hero floor exists, and a Player's primary hero is set to -50 at teardown. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### HERO-207
+
+Listings EXP-0490 `evidence/bodies/decay-machine-R0867.txt`, EXP-0385 `evidence/teardown-R0208-body.txt` and `evidence/reap-sweep-R0427-body.txt`, and `evidence/nav/p1/q2-reap-loops-R0860.txt`.
+
+- Machine. `R0867` returns at once when health is below -10000. Otherwise it subtracts 1 when the counter `[L00285]` is even (the full-tick counter in `HERO-DECAY-069`'s read), then sets stage 2 when health < -10, stage 3 when < -20 and stage 4 when < -40, each test strict and applied in that order. Below -600 it sets stage 5, writes health -10001, releases the runtime id through `R0868` and stores `+0x4` = 0. A stage change sends message 9.
+- Callers. The dead-list loop `R0860` calls the machine for every entry with no class or Player filter; the teardown `R0208` calls it once at `L04404`.
+- Primary hero. When `Player+0x34` (the Player's primary hero) is the actor, the teardown adds 1 to `Player+0x54`, sends message 0x80, calls `L12802` only when the multiplayer flag is set, and then always stores health -50 (`L16827`) before the machine call at `L04404`, so the body enters stage 4 on its teardown. Without multiplayer, with `Player+0x28` zero and type 0x21..0x3f, it stores `Player+0x3c` = 2 and sends message 0xb4.
+- Before the teardown, health exactly 0 is a fixed point (`HERO-ZERO-070`). No branch of the machine or the teardown tests a class to stop the decay.
+- Removal. The client deletes the actor's drawable at stage 5 (`ANIM-163`). The server actor stays on the dead list at health -10001; its retention until SAVE is `SAV-1238` (Medium / Unknown).
+
+**Confidence.** High for the machine, the two callers and the teardown branch, read as instructions. Medium for the body's disappearance from the screen, which rests on the client stage-5 arm of `ANIM-163`. Medium for the cadence of one point per two full ticks (the counter's identity is `HERO-DECAY-069`'s, nothing was run).
+
+**Amends.** `HERO-DEATH-026`: the stage tests are strict, the machine returns at once below -10000, and a Player's primary hero enters the ladder at -50.
+
+**Unknown.** Settle with the original: let a Player's primary hero and an ordinary unit die on one map at the default speed, save before and after about 20 minutes of game time, and compare each body's health, stage and presence on screen.
+
+## Kill experience and earlier kills
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-209 | Before the cap, kill experience keeps no history: `ftol(XPvalue × 0.5)` scaled by `ftol(a × (Mind/30.0 + 0.25))`; the cap `R2313` then bounds it by the killer's current level span, which earlier kills raised. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### HERO-209
+
+Listings `evidence/nav/p1/q3-kill-award-R1054.txt`, `q6-sink-a-R0810.txt`, `q6-sink-b.txt`, `q6-cap-R2313.txt`; decoded constants `evidence/nav/p2/q6-constants-L02973.txt`; EXP-0647 `evidence/listings.txt`; EXP-0385 `evidence/reap-sweep-R0427-body.txt`.
+
+- Kill award `R1054`. With a victim Player (`victim+0x14`), and unless the victim Player's `+0x5c` and the global `[L00285]+0xc` are both set, it pays `ftol((double)victim+0x1c × 0.5)` (`L02973` = 0.5) to `vt+0x5c(amount, victim, slot)`. `victim+0x1c` is the `XPvalue` the actor carries.
+- Sink `R0810`. It converts the signed word Mind `+0x88` to double, divides by 30.0 (`L05069`), adds 0.25 (`L17887`), multiplies by the amount and truncates through `R0279` (toward zero). The scaling comes before the refusals and before the cap.
+- Cap `R2313`. The amount becomes `min(amount, S(L+1) - S(L))`, with `L` its second parameter, the killer's current level (`S` is `R0900`), divided by 5 (`idiv`) when `[L00285]+0xc` is non-zero (`HERO-SKILLGATE-074`).
+- Blow award `R0870`: `ftol(XPvalue × 0.5 × dmg / healthMax + 1)` (`HERO-KILL-027`).
+- No history before the cap. None of the four bodies reads the Player kill counters `+0x48`/`+0x4c` or the Player Diary. The death processor `R0427` updates those after the award: it adds 1 to killer Player `+0x4c` (victim type 0x21..0x3f) or `+0x48` (other types), then calls `R1484`, the per-type Diary tally (`SAV-842`, `SAV-845`).
+- Example: XPvalue 100 and Mind 30 give 50, then `ftol(50 × 1.25)` = 62 before the cap, the same for the first and the hundredth kill of that type; the cap reads the current level.
+
+**Confidence.** High for the four bodies and the constants. Medium that `XPvalue` stays constant across kills: no census of writes to `+0x1c` was run. Medium that the Mind word stays constant: whether earlier gains change it was not read. The paid amount depends on earlier kills through the level the cap reads.
+
+**Amends.** `HERO-SKILLGATE-074`: the Mind word is signed 16-bit, the divisor 30.0 and the addend 0.25 are binary64 constants, and the scaled amount is truncated toward zero.
+
+**Unknown.** Settle with the original: a hero with known Mind kills ten units of one type in a row; record the skill experience after each kill.
 
 ## The relation an experience award reads
 

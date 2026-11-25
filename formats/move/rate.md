@@ -5,7 +5,8 @@
 ## Movement rate and clock (`MOVE-RATE-029`…`034`)
 
 The rate is computed **once per cell transit**, by `R1088`, from the actor's current facing
-and cell, and is then frozen until the next cell.
+and cell, and is then frozen until the next cell. The speed effect itself has no floor on a Unit
+and zeroes only the modifier on a humanoid whose derived speed is negative (`MAGIC-476`).
 
 ```
 dir  = ((facing + 0x10) >> 5) & 7          facing is a byte, 8 directions x 32 units

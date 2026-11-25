@@ -82,6 +82,10 @@ actor callbacks and aliases remain outside the local no-write result.
 — ITEM-WHOLE-128, ITEM-MERGE-129, ITEM-GROUNDMOVE-130, ITEM-DEATH-012 (its
 unconditional container-identity sentence is retracted)
 
+At death, when the container survives the suppression of `ITEM-DEATH-012` (partially
+retracted; its suppression inputs stand), each worn item is added after the carried items at the container's index `+0x1c`, or
+merged into the first equal stack. — ITEM-256
+
 Armor/Shield/Weapon equip bodies write actor slots/stats. Base Item equip can
 consume/delete the Item and change an Effect mode. Transitive callback writes
 to the full Token head remain Unknown. — ITEM-EQUIPMOVE-131

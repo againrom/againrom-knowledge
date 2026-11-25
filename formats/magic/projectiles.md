@@ -157,7 +157,8 @@ and cache-refresh order remain Unknown; MAGIC-281 is partially retracted
 for its direct-route spell set only. — MAGIC-277, MAGIC-281 The `+0xac` array is copied word by word
 onto the projectile by the cast spawner from the caster's own array of the same offsets.
 
-`MAGIC-SPRAY-134`…`MAGIC-SPRAY-137` close that array's producer. After applying the selected list, simulation opcode `0x8a`
+`MAGIC-SPRAY-134`…`MAGIC-SPRAY-137` close that array's producer; its ranked selector has one rel32
+caller, Prismatic Spray (census of rel32 transfers in `.text` and aligned dwords; immediates and computed calls not searched; `MAGIC-474`). After applying the selected list, simulation opcode `0x8a`
 or `0x8c` sends `count+1` words: caster identity or packed source cell first, then every selected
 victim id in list order. The matching client arm clears the source's embedded word array, appends
 those ids, writes its count and primary, and only then reaches the spawner copy above. The previously
@@ -474,6 +475,9 @@ The selected client stage 5 branch unlinks and deletes its actor drawable;
 stages 2..4 use a shared arm. The selected creation/update path
 writes its supplied drawable on key hit as well as miss. Upstream allocation,
 the complete sender/decoder link and native timing remain Unknown. — ANIM-163
+
+The server stage 5 begins when a body's health falls below -600, with no class or hero
+exception. — HERO-207
 
 The selected actor-cast policy uses a nonnull target directly and queues it
 in Orders `+28`, without local HP, terminal-action or off-map rejection.

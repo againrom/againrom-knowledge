@@ -2126,7 +2126,7 @@ writer was located.
 | ITEM-CASTLINK-076 | `castSpell` is both an ordered general-list Effect and the source of a separate Weapon-owned Spell. | High / Medium | ● active (amended) | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
 | ITEM-EFFSAVE-077 | Effect persistence preserves ordered values but omits transient `+0x44`. | High / Medium | ● active | [EXP-0225](../experiments/EXP-0225-item-effect-grammar/) |
 | ITEM-EFFARM-146 | No instruction in the 46 arm bodies of `R0843` stores into or points at actor `+0x10e..+0x113`; each arm tail then recomputes live `+0xce..+0xd3` through `vt+0x50`. | High / Medium | ● active | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
-| ITEM-EFFKEY-147 | Each of the 49 accepted effect keys adds to one named live or modifier field; the complete key-to-field-and-offset table is published, including the word that kinds 16, 19 and 21..24 add to. | High | ● active | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
+| ITEM-EFFKEY-147 | Each of the 49 accepted effect keys adds to one named live or modifier field; the complete key-to-field-and-offset table is published, including the word that kinds 16, 19 and 21..24 add to. | High | ● active (amended) | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
 | ITEM-EFFSYM-148 | Apply and remove are one add of the signed operand times +1 or -1; the exceptions are caps, floors, the singleuse skip, elemental assignment and `teachSpell`, listed per key. | High | ● active | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
 | ITEM-EFFSHIP-149 | The shipped equipment cells carry 266 accepted effects over 16 keys per root, identical in EN and RU; none belongs to an arm body that stores into the damage-kind block. | Medium | ● active | [EXP-0433](../experiments/EXP-0433-effect-arms/) |
 
@@ -2433,6 +2433,8 @@ extraction in `armtable.py`; each field offset is an instruction operand.
 **Unknown.** What `vt+0x50` does for the `L00001` Unit family: kinds 20..25
 write only the modifier on every class, and whether a non-humanoid actor
 folds it into the live protections was not read.
+
+**Amended.** `MAGIC-476`: the Unit family's `vt+0x50` is `R0836`, which writes only `+0xa0` and reads no modifier protection word; whether another routine folds those words for a non-humanoid actor is Medium.
 
 ### ITEM-EFFSYM-148
 
@@ -4650,6 +4652,53 @@ So the class-11 and class-12 arms add to a pair another item may have set, and t
 **Unknown.** This read does not count how many shipped heroes or Humans-row units wear two items that both write the pair, so how often the order matters in play is open. Settle with the original: put one hero in a mission `Humans` row with a weapon of one element and an armor with a key from 44..48 of another kind, and compare the elemental kind and damage of its blow after construction and after taking the armor off.
 
 **Amends.** None.
+
+## Order and gold of a dead unit's sack
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-256 | When the container survives the suppression of `ITEM-DEATH-012`, death appends shield, weapon and worn cells 1..12 after the carried items or merges each into the first equal stack; an existing sack gains only these and the rolled gold. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### ITEM-256
+
+Listings `evidence/nav/p1/q7-container-add-R0929.txt`, `q7-armour-drop-R0981.txt`, `q7-sack-make-R0871.txt`, `q7-sack-place-R0944.txt`, `evidence/nav/p2/q7-container-add-b-L17888.txt`, `q7-sack-ctor-R1008.txt`, `q7-sack-merge-R0472.txt`, `q7-sack-drain-R0450.txt`; EXP-0385 `evidence/teardown-R0208-body.txt`.
+
+- Order. The teardown `R0208` adds to the actor's container `+0x7c`, which already holds the carried items: the shield `+0x78`, the weapon `+0x74` when its parameter 15 is non-zero, then `vt+0x44` (`R0981` on the humanoid classes) for worn cells i = 1..12 at `+0x198+4i` (`ITEM-DEATH-012`). Each item goes through `vt+0x40` and then `R0929`.
+- Insertion. `R0929` calls `R0930(container+0x1c, item)`. A stackable item (`vt+0x50`) merges into the first held stackable item with the same code (`R0885`): count `+0x42` adds, flags `+8` OR, load `+0x20` grows by weight times count, and the incoming item is deleted. Otherwise the item is inserted at index `+0x1c`: appended (`L16157`) when the index is at least the count, else placed before that position (`L16565`). The constructor sets `+0x1c` to 10000 (`ITEM-CONT-004`).
+- Sack. After the suppression of `ITEM-DEATH-012`, and only when the container is non-empty or gold is non-zero, `R0871` calls `R0944(cell, container, gold)`, which calls `R0472`. With no sack on the cell, a new 0x44-byte sack adopts the container itself (`R1008` stores it at `+0x40`), so the order above is the sack's order. With a sack on the cell, `R0450` removes the head item of the dead unit's container (`R0095(0,1)`) and adds it to the sack's container through `R0929` until none is left, then deletes the empty container. In both branches the sack's gold `+0x3c` grows by `gold`.
+- Gold. `gold` is the teardown's local: 0, or the template draw for type above 0x40 (`ALM-OWNGOLD-341`). The teardown passes no other gold, and it creates no rolled item.
+
+**Confidence.** High for the order, the merge, the two sack branches and the gold addition, read as instructions. Medium for tail insertion in play: a pick-up or equip arm rewrites `+0x1c` before its own add (`ITEM-CONT-004`), and whether a lower value can remain at death was not traced.
+
+**Amends.** None. Scope: `ITEM-DEATH-012` (the suppression and the build condition apply first).
+
+**Unknown.** Settle with the original: a hero carrying a stack of potions and an unstacked ring, wearing a shield, weapon and armour, dies on a cell that already holds a sack with gold; open the sack and record the item order and the gold.
+
+## A well's potion on the Human and Unit receivers
+
+Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03` on both roots) in the windows of `experiments/EXP-0651-rom1-fidelity-batch4/evidence/nav/` and in committed listings of earlier experiments. No original run was made.
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| ITEM-257 | A well spends its charge before any test of the drinker; Human and Unit receivers apply and destroy the potion when their health is above 0, even with nothing to gain, and keep it in the inventory only at health <= 0. | High / Medium | ● active | [EXP-0651](../experiments/EXP-0651-rom1-fidelity-batch4/) |
+
+### ITEM-257
+
+Listings `evidence/nav/p2/q10-base-use-R0931.txt`, `q10-unit-give-R0976.txt`, `q10-human-use-R0933.txt`, `q10-human-give-R0975.txt`, `q10-item-use-R0935.txt`; vtable slots `evidence/nav/p1/q10-unit-vt-38-L17889.txt`, `q10-human-vt-38-L17890.txt`, `q10-vt448-38-L17891.txt`; EXP-0325 `evidence/actor15-slice.txt`.
+
+- Well. The action-15 arm finds the structure at the actor's Position; with selector `+0x40` 15 (Potion Big Healing) or 16 (Potion Big Mana) and a positive charge word `+0x42`, it decrements the charge, notifies, builds the potion (`R2076`) and calls the actor's `vt+0x3c(item)`. It tests no stat, class or need before the decrement (`UNIT-STRUCTUSE-091`).
+- Human receiver. The vtables `L00003` and `L00002` hold `R0933` at `+0x38` and `R0975` at `+0x3c`. `R0975` calls `vt+0x38`, which calls the item's `vt+0x38(actor)` on both arms of a class test (`R0214` against `L04584`); a non-null result is added to container `+0x7c` (`R0929`).
+- Unit receiver. The vtable `L00001` holds `R0931` at `+0x38` and `R0976` at `+0x3c`. `R0976` calls the item's `vt+0x38(actor)`, adds a non-null result to `+0x7c`, then calls the actor's `vt+0x54`.
+- Item use `R0935`. With actor health at or below 0 it returns the item itself, which the receiver adds to its inventory. Otherwise it sets mode bit 8 on each Effect whose mode byte is 0, applies each Effect through its `vt+0x3c(actor)`, calls the actor's `vt+0x54`, deletes the item and returns 0 (`ITEM-USE-113`).
+- Cannot benefit. The charge is spent and the potion destroyed for a receiver at full health or mana or without mana; the applied Effect is capped at the maximum and leaves no gain (`MAGIC-CONSUME-142`).
+
+**Confidence.** High for the arm order, both receiver classes and the item use, read as instructions; that the built potion's `vt+0x38` is `R0935` is `ITEM-USE-113`'s read. Medium for the effect of Potion Big Mana on a receiver without mana: the cap value of such a receiver was not read.
+
+**Amends.** None.
+
+**Unknown.** Settle with the original: send a hero at full health to a healing well and a fighter to a mana well; record the well's charge, the receiver's health and mana and its inventory before and after.
 
 ## Sack pickup destination and refusal
 
