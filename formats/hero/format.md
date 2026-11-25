@@ -43,3 +43,36 @@ fields from definitions. — HERO-STAT-001, HERO-EQUIP-017 (amended), HERO-MOD-0
 
 Runtime member offsets identify original in-memory fields. Wire offsets and
 byte order are stated separately in the relevant layouts.
+
+## Network character file
+
+A network character lives in the network character file in the current directory. Its name is
+built from the format string at `L17914`: a fixed prefix, the slot index as four zero-padded
+decimal digits, and the character-file extension. The text was read outside the committed
+evidence (Medium). — HERO-213
+
+| order | source | bytes | note |
+|---|---|---|---|
+| 1 | tag `AlCh` (`0x68436c41`) | 4 | the list accepts only this tag |
+| 2 | store `+0x08` | 8 | |
+| 3 | store `+0x10` | 32 | name, read by the list at file `+0x0c` |
+| 4 | store `+0x30` | 32 | |
+| 5 | flags `+0x70` | 4 | file `+0x4c`; bit 0 set ends the file here after row 8 |
+| 6 | store `+0x74` | 4 | |
+| 7 | store `+0x90` | 28 | starts with the four creation stats (Medium) |
+| 8 | store `+0xac` | 28 | |
+| 9 | store `+0x78` | 56 | starts with 16 Player-scalar bytes (Medium). The null-argument write stores 100, 0, 0, 0 in the object; whether those bytes reach the file depends on flag bit 0, whose setter was not read (Unknown) |
+| 10 | six blocks of a second object | 16, 32, 16, 16, 4, 4 | meanings unread |
+| 11 | store `+0xac` | 32 | |
+| 12 | store `+0x8c` | 4 | four bytes packed from the frame |
+| 13 | twelve slot dwords, each nonzero one followed by its record | 48 + records | |
+| 14 | archive count, then the archive | 4 + 2 × count | the hero graph |
+
+The creation pages are shared with the campaign; outside the campaign phase Play writes this
+file. In the campaign phase the writer `R2314` returns at once; other writers of the file
+were not searched (Medium). The client rewrites the file when it is connected and `L17915`
+accepts a character packet; the match of the server's packet to that handler is Medium. The
+server exports from six direct call sites: join, reporter (network mode), the primary's
+teardown (network mode, after adding 1 to `player+0x54`), the actor tick, disconnect (when
+`server+0x150 == 0` in network mode) and `R2129`, a function that sets four stats to 10,
+10, 10, 1 (its role is unread). Register-indirect calls were not searched. — HERO-214, HERO-215

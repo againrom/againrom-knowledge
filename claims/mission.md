@@ -2016,3 +2016,48 @@ network map that builds an Outpost on a Player's object, recording the index `R2
 returns and the instant `R0262` runs, settles it. Whether any shipped map's instant names a
 Player's object there is settled by a census of the shipped maps' instant records, a static
 read of the maps.
+
+## Network-mode reporter export
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MISSION-100 | Below latch 2 the reporter exports the character when network mode, a primary with stage 0 and `R0547() >> 4 == 0x14` hold, before its loss and win arms; those arms test counters whose writers were not searched. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+
+### MISSION-100
+
+- Reporter `R0132` (`listings/ranges.txt`, `L17979..L17980`): a null primary or a
+  nonzero stage byte `+0x13c` takes the latch-2 arm (`MISSION-DEFEAT-045`). Otherwise, when
+  `[server]+0x0c != 0`, the primary is non-null and `R0547(primary) >> 4 == 0x14`, it calls
+  `L12802(player)` at `L17928` (`HERO-214`).
+- Then loss counter `+0xb3b4 == 1` logs the message at `L08291` (`L17981`; a
+  mission-failed message), sends `0xb4` and stores latch 2 unless the latch is already 2;
+  success counter `+0xb3ac == 1` logs the message at `L08288` (`L17982`; a
+  mission-complete message), sends `0xb5` and stores latch 1 unless it is already 1. The
+  latch-2 arm stores latch 2 (`L08290`) and, when the player's `+0x3e` is 0, calls
+  `L06591` (`L17983`); whether the map then ends was not read.
+- On the 10 EN loose maps no instant-4 node exists (`MISSION-WIN-003`). The writers of the
+  counters `+0xb3b4` and `+0xb3ac` were not searched in this experiment.
+- `R1290` (`L17984..L17985`) decrements `[L08257]`; at 0 it stores 2 and calls the
+  placement `R0065`, otherwise it logs the message at `L17986` (`L17987`; a wait for
+  new heroes).
+- `R2318` (`R2318..L17988`) returns unless `[server] >= 0x708`, then calls a function
+  with argument `0x3001` (unread; taken as a file open, Medium) and formats a message
+  (`L17989`, pushed at `L17990`; a session-statistic title) with `[server]`. No direct
+  caller was found (`listings/refs.txt`, `callto:R2318`, 0 hits), so whether it runs is
+  Unknown.
+- The texts at these addresses were read from the string table in an uncommitted pass; the
+  committed listings hold the addresses and the pushes.
+
+**Confidence.** High for the gates and the order. Medium for the meaning of `0x14`: `R0547`
+was not read. Medium that only scripted code writes the counters `+0xb3b4` and `+0xb3ac`:
+their writers were not searched. Medium that the loose maps of `MISSION-WIN-003` are the maps
+the dialog offers: the dialog's directory is unread (`SESS-100`). Medium that `[server]`
+counts seconds: the unit rests on the hour, minute and second formatting of `R2318`.
+Medium for the texts named by address.
+
+**Unknown.** Whether a network map ever ends for a lone player. A run of the EN original that
+hosts one loose map alone for 40 minutes, with a capture each 10 minutes and the root listed at
+the end, settles it.
+
+**Amends.** `MISSION-DEFEAT-045` reads the reporter's gates; this card adds the export call
+between the latch-2 arm and the counter arms.

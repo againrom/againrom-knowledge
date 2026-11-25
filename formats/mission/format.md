@@ -99,6 +99,15 @@ check   18 ->  lose    when its unit is dead; writes no slot, so the trigger tha
 A win node may be referenced by more than one trigger — four on `81.alm`, two on `130.alm` — so
 resolve `THEN` slots by node **id**, never by position.
 
+In network mode the reporter exports the primary's character before its loss and win arms
+when the primary has stage 0 and `R0547() >> 4 == 0x14` (MISSION-100). On the 10 EN loose
+maps no instant-4 node exists (MISSION-WIN-003; its win-action census stands, its lose-arm map
+counts are superseded). The reporter's loss and win arms test the
+counters `+0xb3b4` and `+0xb3ac`; their writers were not searched (Medium that only scripted
+code writes them). Whether a lone player's network map ends is Unknown. A session-statistic
+routine runs only when `[server] >= 0x708`, but no direct caller of it was found, so whether
+it runs is Unknown (MISSION-100).
+
 **The two lose arms are armed differently, and a consumer that treats them alike will get one
 of them wrong.** In mode zero an instant-5 node fires when a trigger's action list reaches it,
 or when an Outpost whose saved `+0x8c` holds its index builds actors; `R0431`, the only

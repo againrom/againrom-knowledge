@@ -83,8 +83,38 @@ Layout: two columns of 4 (buttons 1–4 left, 5–8 right), each column top→bo
   button is composited over the base at its normal rect; on mouse-down over the latched
   button, its **pressed** overlay is composited at the pressed rect. A set bit in the
   `+0xe4` disable field suppresses the overlay for that button (MENU-STATE-007).
-- Click (`R0820`): posts a per-button command message; button 8 → WM_CLOSE (quit).
-  The other message ids are not decoded (Medium).
+- Click (`R0820`): posts a per-button command message (MENU-168): buttons 1..8 post
+  `0x425`, `0x426` (Multiplayer), `0x43b`, `0x428`, `0x418`, `0x422` (Server), `0x429` and
+  `0x10` (WM_CLOSE, quit), each only when its bit in `+0xe4` is clear.
+
+## Multiplayer route (MENU-168…MENU-172)
+
+The frame handler `R0701` dispatches these messages. Phase is `frame+0x6bc`. Rows 1–2
+are MENU-168 and MENU-169, rows 3–5 MENU-169, rows 6–8 MENU-170, row 9 MENU-172. Each row is
+High for the dispatcher arm read. The chain from Select Connection through `0x45c` to the
+start page is Medium: what posts `0x45c` after Select Connection's Ok was not read
+(MENU-169), and the link from the start dialog `L17936` to the button builder `L06382`
+was not read (MENU-170). Switch and file names are given by their string addresses; their
+texts are Medium (MENU-169, MENU-170, MENU-172).
+
+| step | message or result | effect |
+|---|---|---|
+| Multiplayer | `0x426` | phase 0; show the character page (network character files, wildcard `L17919`, of the current directory) |
+| Play on the detailed creation page, phase not 2 | dialog close | write the network character file, post `0x451` |
+| an existing character on the character page | dialog close | with `frame+0x490` bit 2 set, post `0x451` with no write; with it clear, call `R0909` (unread) |
+| Select Connection | `0x451` | dialog `L17947`; five protocol switches (`L17948`..`L17949`) preset the provider |
+| connection kind | `0x45c` | kind 0 → `0x454` (serial port and baud page), 1 → `0x455`, other → `0x452` |
+| start page | `0x452` | dialog `L17936`; its rows accept `0x44d`, `0x44e` (phase 1 start `R1667`) and `0x44f` (phase 0 start `R1323`); `L06382` creates buttons `0x44f` and `0x44e` (link Medium) |
+| map choice | `0x459` | map dialog (SESS-100), skipped by the map switch (`L17968`) |
+| map entry | `0x457` | send the stored character (not in phase 3), then `R0099`; failure → `0x45c` |
+| Server | `0x422` | phase 3, then `0x451`; in phase 3 `0x452` starts `R1666` directly |
+
+Back and Cancel (MENU-171): the character page's Cancel posts `0x421`, or `WM_CLOSE` when
+`frame+0x3b4` holds a string; Select Connection's Cancel returns to the character page, or to
+the main menu (`0x421`) in phase 3; the map dialog's Cancel posts `0x45c`; any other close of
+the start page posts `0x421`. Esc on these screens is Unknown. The captions of `0x44e` and
+`0x44f` are Unknown (MENU-170). The character send compares an elapsed value with 15000; the
+unit is Medium (MENU-170).
 
 ## The in-mission command panel (`MENU-COMBAT-018`, `MENU-COMBAT-019`)
 

@@ -2438,3 +2438,170 @@ by the tool's quit command, not by Quit, and add nothing. Medium for the exit fa
 debugger may change the exit path.
 
 **Unknown.** The exit code without a debugger; whether a confirmation was drawn before the fault.
+
+## Multiplayer route
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MENU-168 | Main-menu buttons 1..8 post `0x425`, `0x426`, `0x43b`, `0x428`, `0x418`, `0x422`, `0x429`, `0x10`, each only when its `+0xe4` bit is clear; `0x426` sets phase 0 and shows page `+0x35c` (Medium: the character page). | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| MENU-169 | Outside phase 2, Play on the detailed creation page calls the character-file writer `R2314` and posts `0x451`; `0x45c` routes by kind to `0x454`, `0x455` or `0x452`; what posts `0x45c` after Ok is Medium. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| MENU-170 | Rows for `frame+0x338` accept results `0x44d`, `0x44e`, `0x44f`; `L06382` creates buttons `0x44f` and `0x44e` (link from dialog `L17936` to `L06382` unread, Medium; `L17937` also pushes `0x44f`). | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| MENU-171 | Cancel in Select Connection returns to the character page outside phase 3 and to the main menu in phase 3; Cancel in the map dialog posts `0x45c`; the character page's Cancel posts `0x421` or closes. | High / Medium / Unknown | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| MENU-172 | Server (`0x422`) sets phase 3 and posts `0x451`; in phase 3 `0x452` calls `R1666` without page `0x452`, and `0x457` skips the character send `R0821`. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+
+### MENU-168
+
+- The click `R0820` switches on the button index through the table at `L14391`
+  (`listings/jt.tsv`, rows `button`); arms 1..8 load the message ids above
+  (`listings/functions.txt`, `R0820`). Arm n loads its id only when bit `1 << (n-1)`
+  of `+0xe4` is clear (`L17938`..`L17939`). Button 2 is Multiplayer and button 6 is Server
+  by `MENU-ROUTE-163`'s run.
+- The frame handler `R0701` dispatches `message - 0x416` through the byte table `L12997`
+  and the target table `L12998` (`listings/jt.tsv`, rows `message`). `0x426` reaches
+  `L17940`.
+- Arm `0x426` (`listings/ranges.txt`, range `L17940..L17941`) stores 0 into
+  `frame+0x3e0` and into phase `frame+0x6bc`, then calls `R1316`. `R1316` sets
+  `[frame+0xe0]+0x70 = 1`, shows `frame+0x35c` through `R0385` and its `vt+0x80`, and sets
+  bit `0x400` of `frame+0x3dc` (`listings/functions.txt`).
+- The character-list page init `L14910` stores `frame+0x420` at `this+0x68` and calls
+  `L16632` on it. Outside phase 2, `L16632` enumerates the network character files (the
+  wildcard at `L17919`, pushed at `L17942`), accepts a file
+  whose first dword is `0x68436c41` (`AlCh`), takes the 32-byte name at file `+0xc`, and
+  sorts files whose dword at `+0x6c` equals `frame+0x3b8` by `CompareFileTime` into the lists
+  `+0xe4`/`+0xcc`, others into `+0xf8`. `L14910` also calls `R2317`, the owner of the
+  Delete and Rename sound names.
+
+**Confidence.** High for the ids, the dispatch and the arm. Medium that `frame+0x35c` is the
+`L14910` page: the store of `+0x35c` and the page's vtable were not read; the link rests on
+`MENU-ROUTE-163`'s capture (a list with Delete and Rename) and on `R1316` being the return
+target of every Back named in `MENU-171`. The pattern has no directory, so the list reads the
+process's current directory (Medium: the launcher's working directory was not read). The text
+at `L17919` was read from the string table in an uncommitted pass; the committed listings
+hold its address and the site that pushes it (Medium for the text).
+
+**Unknown.** What the list shows per row beyond the name. A run of the EN original that
+creates one character and opens Multiplayer again, with a listing of the root before and
+after, settles it.
+
+**Amends.** `MENU-ROUTE-163`'s Unknown ("Ok in the Server and Multiplayer screens was not
+pressed") is narrowed by a static read: `MENU-169`..`MENU-172` give the messages that follow.
+The menu page's "other message ids are not decoded" is replaced by the ids above.
+
+### MENU-169
+
+- The dialog-closed dispatcher `R0709` (`listings/functions.txt`): for the detailed
+  creation page `frame+0x358`, Play in phase 2 calls `R0821` and posts `0x42f`; in any
+  other phase it calls `R2314(0)` on `frame+0x420` and posts `0x451`. `R2314` writes
+  the network character file unless its registry check fails (`HERO-213`).
+- The character page's own non-Cancel close (`L17943`..`L17944`) posts `0x451` directly
+  when `frame+0x490` bit 2 is set, with no `R2314` call; with the bit clear it calls
+  `R0909` (unread).
+- The pre-create page `frame+0x360`: Back posts `0x421` in phase 2 and calls `R1316`
+  otherwise; Forward copies name, difficulty and class and calls `R0591` and `R1321`.
+  `R1321` shows `frame+0x358`. Both phases use the same two pages.
+- Arm `0x451` (`L17941..L17945`): a non-empty `frame+0x3b4` calls `L17946`; otherwise
+  it builds `L17947` (Select Connection, `MENU-ROUTE-163`) into `frame+0x33c`. Five
+  numbered protocol switches (`L17948`..`L17949`, pushed at `L17950`..`L17951`) on
+  the command line preset `frame+0x88` to 0..4, and the bare protocol switch posts `0x445` to
+  the new dialog.
+- Arm `0x45c` (`L17952..L13683`): a non-empty `frame+0x3b4` posts `WM_CLOSE`. In phase
+  0 or 1 it calls `R1301(1)` and `R1303`, then switches on `[L06743]`: 0 posts
+  `0x454` (dialog `L17953`, whose page `L06385` owns the serial-port and baud strings),
+  1 posts `0x455` (dialog `L17954`), any other value posts `0x452`. In phase 3 it posts
+  `0x453` when `[L06743] == 3`, else `0x451`.
+
+**Confidence.** High for the arms and the dispatcher rows read. Medium for the path from
+Select Connection's Ok to `0x45c`: the `frame+0x33c` Ok row only frees the dialog, and the
+producer of `0x45c` on that path (the dialog's own code, or the network object) was not read.
+Medium that `[L06743]` is the chosen provider's kind: its writer was not read. Medium that
+each switch address holds the switch named: the texts were read from the string table in an
+uncommitted pass, and the committed listings hold only the addresses and the pushes.
+
+**Unknown.** Which provider gives which kind. A run of the EN original that picks the
+TCP/IP row in Select Connection and captures the next screen settles it. The path of an
+existing character: the character page posts `0x451` at `L17955` when `frame+0x490` bit 2
+is set, and no write on that path was read. A run of the EN original that picks an existing
+character, presses Play, and lists the file's write time before and after settles it.
+
+**Amends.** None.
+
+### MENU-170
+
+- Arm `0x452` builds dialog `L17936` into `frame+0x338` (`listings/ranges.txt`,
+  `L17956`); `L17936` is in no listing.
+- Page builder `L06382` (`L17957..L17958`) creates two buttons: `0x44f` with text
+  index `0x57` and `0x44e` with text index `0x56` of the string table at `L06197`. Its only
+  caller is `L17959@L17960` (`listings/refs.txt`, `callto:L06382`); nothing committed
+  links `L17936` to `L17959` or `L06382`. `L17937` also pushes `0x44f` twice
+  (`L17961`, `L17962`; `imm:44f`), unread.
+- Dispatcher rows for `frame+0x338`: `0x44e` calls `R1667` (phase 1, the world allocator's
+  argument is the phase; posts `0x459` or `0x45c`); `0x44f` calls `R1323` with
+  `frame+0x6b8 = 0`; `0x44d` calls `R1666` (phase 3, posts `0x459`). The only other
+  producer of `0x44d` and `0x44e` is `R1939`, a different class.
+- `R1323` (`listings/functions.txt`) stores phase 0, the wait switch (`L17963`, pushed
+  at `L17964`) stores -1 into `[L17965]`, a failed `R0912` posts `0x41d`, a message
+  box can post `0x41d`, and the end posts `0x457` when `frame+0x418` is nonzero and `0x459`
+  otherwise.
+- Arm `0x459` (`L17966..L17967`): the map switch (`L17968`, pushed at `L17969`) on
+  the command line copies the map name into `frame+0x6b4` and posts `0x457`. Otherwise it
+  builds `L15881` (the map dialog, `SESS-100`) with `&frame+0x6b4` into `frame+0x364`. The
+  dispatcher's `frame+0x364` row posts `0x457` for any result but `0x446`.
+- Arm `0x457` (`L17966..L17970`): outside phase 3 it calls `R0821` on `frame+0x420`;
+  `R0821` sends the stored character through `R1377` when the file's flag bit 0 is
+  clear (else `R0822`), and compares an elapsed value with 15000 (`0x3a98` at `L17971`,
+  after a call through `EDI`); on failure it stores `0x1008` in `[L06740]`. A failure shows
+  a message box and posts `0x45c`. Then `R0099(0)`; zero shows a box and posts `0x45c`.
+
+**Confidence.** High for the arms, the message rows and the two button ids of `L06382`.
+Medium that `L06382` builds the page `0x452` shows: the link from `L17936` is unread.
+Medium for which button the player sees as "create" and "join": the text table's source was
+not read. Medium that the 15000 is milliseconds: the clock `EDI` holds was not read. Medium
+that each switch address holds the switch named (texts read in an uncommitted pass).
+
+**Unknown.** The captions of `0x44e` and `0x44f`. A run of the EN original that reaches page
+`0x452` and captures it settles them.
+
+**Amends.** `SESS-PHASE-002` names the phase-1 and phase-3 starts; this card adds the controls
+that reach them and the phase-0 start `R1323`.
+
+### MENU-171
+
+- Dispatcher rows (`listings/functions.txt`, `R0709`): `frame+0x33c` result `0x446`
+  posts `0x421` in phase 3 and calls `R1316` otherwise; `frame+0x364` result `0x446` sends
+  `0x446` to `frame+0xcc` and posts `0x45c`; `frame+0x338` results other than `0x44d`,
+  `0x44e` and `0x44f` post `0x421`; `frame+0x39c` result `0x445` posts `0x421`; `frame+0x360`
+  Back calls `R1316` outside phase 2.
+- The `frame+0x35c` row (the character page, Medium by `MENU-168`), result `0x446`
+  (`L17972`, `L17973`): when the string at `frame+0x3b4` is empty it posts `0x421`,
+  otherwise it posts `WM_CLOSE` (`0x10`).
+- Arm `0x421` (`L17966..L17967`) calls `R0816` when `frame+0x3dc == 0`.
+
+**Confidence.** High for the rows. High that `0x421` reaches the main menu in phase 3:
+`MENU-ROUTE-163` saw Server's Select Connection Cancel return to the main menu. Medium that
+`0x446` is the Cancel result of each dialog: the dialogs' own key and button code was not read.
+
+**Unknown.** What Esc does on each screen. A run of the EN original that presses Esc once on
+the character page, the creation pages, Select Connection, page `0x452` and the map dialog,
+with a capture after each, settles it.
+
+**Amends.** None.
+
+### MENU-172
+
+- Arm `0x422` (`listings/ranges.txt`, `L17974..L14387`): with `frame+0x3dc == 0` and no
+  server running it takes the session name from the session switch (`L17975`, pushed at
+  `L17976`) or a 0x20-byte default into
+  `frame+0x430`, stores phase 3 and posts `0x451`. With `frame+0x3dc == 1` it builds dialog
+  `R1229` instead.
+- Arm `0x452` calls `R1666` in phase 3; otherwise it builds `L17936` into `frame+0x338`.
+- Arm `0x457` tests phase 3 before `R0821` and jumps past it.
+- Arm `0x440` calls `R1665`: phase 3, protocol 4, the address from the address switch
+  (`L17977`, pushed at `L17978`).
+
+**Confidence.** High for the arms. Medium that phase 3 runs no local character: the world and
+join paths of phase 3 were not read past the start. Medium that each switch address holds the
+switch named (texts read in an uncommitted pass).
+
+**Unknown.** None beyond `MENU-171`'s Esc.
+
+**Amends.** None.

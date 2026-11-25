@@ -248,6 +248,35 @@ SESS-075
 
 <a id="the-map-load-in-order"></a>
 
+## Network map list and join files (SESS-100…SESS-102)
+
+Switch, file and message names below are given by their string addresses; their texts were
+read outside the committed evidence and are Medium (SESS-100, SESS-101, SESS-102).
+
+- Map list (SESS-100): the map dialog scans the map-file wildcard (`L15880`) in one
+  directory (helper unread), skips subdirectories and hides a map whose type-0 `+0x70 < 2`;
+  the accept test also needs the magic, `recordCount >= 2` and a type-0 record. A row has five
+  `#`-separated fields (format `L15886`): name, width − 16, height − 16 and two unread
+  fields. The 10 EN root maps have `+0x70 >= 4`. Of the 6 RU root maps, four are hash-equal to
+  EN maps, RU `Horror.alm` has 1 and is hidden, and RU `LUMOIR.ALM`'s value is inferred
+  (Medium). So 10 EN and 5 RU maps are offered only if the root is the scanned directory
+  (Medium).
+- Host switches (SESS-101): the map switch (`L17968`), five protocol switches
+  (`L17948`..`L17949`), the session switch (`L17975`), the address switch
+  (`L17977`) and the wait switch (`L17963`); the server-save switch (`L17992`) or the
+  internet-server switch (`L17993`) stores 0 into `server+0x150`.
+- Join file (SESS-102): a per-name server character file (`L17994`) guarded by a lock file
+  in the same directory (`L17995`), or a bare two-number file (`L17996`). With
+  `server+0x150 == 0` in network mode a failed import refuses the character; otherwise the
+  join logs an invalid character and calls the accepter with four values 25. A later
+  `R1132` passes the lock-file path to an unread call taken as its delete; its caller was
+  not searched, so when the lock file goes is Unknown.
+- Client file (HERO-213, HERO-214): the network character file (name format `L17914`) in the
+  current directory, written at creation. The client rewrites it when it is connected and
+  `L17915` accepts a character packet; the match of the server's packet to that handler is
+  Medium. The server exports from six direct call sites; register-indirect calls were not
+  searched.
+
 ## Random stream
 
 The CRT seed is per thread. Six secondary thread entries have creator code:

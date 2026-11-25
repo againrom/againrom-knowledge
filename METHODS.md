@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5394. Observation: 143. Static analysis: 4507. Mixed: 744.
+Claims labelled: 5406. Observation: 143. Static analysis: 4519. Mixed: 744.
 
 ## Ledger ai
 
@@ -1125,6 +1125,9 @@ Claims labelled: 5394. Observation: 143. Static analysis: 4507. Mixed: 744.
 | HERO-170 | static analysis | ● active (branch candidate) |
 | HERO-171 | static analysis | ● active (branch candidate) |
 | HERO-172 | static analysis | ✔ promoted (branch candidate) |
+| HERO-213 | static analysis | ● active (branch candidate) |
+| HERO-214 | static analysis | ● active (branch candidate) |
+| HERO-215 | static analysis | ● active (branch candidate) |
 | HERO-ROUTE-181 | observation | ● active |
 | HERO-ROUTE-182 | observation | ● active |
 | HERO-187 | static analysis | ✔ promoted (branch candidate) |
@@ -1699,6 +1702,11 @@ Claims labelled: 5394. Observation: 143. Static analysis: 4507. Mixed: 744.
 | MENU-ROUTE-164 | observation | ● active |
 | MENU-ROUTE-165 | observation | ● active |
 | MENU-ROUTE-166 | observation | ● active |
+| MENU-168 | static analysis | ● active (branch candidate) |
+| MENU-169 | static analysis | ● active (branch candidate) |
+| MENU-170 | static analysis | ● active (branch candidate) |
+| MENU-171 | static analysis | ● active (branch candidate) |
+| MENU-172 | static analysis | ● active (branch candidate) |
 
 ## Ledger mission
 
@@ -1771,6 +1779,7 @@ Claims labelled: 5394. Observation: 143. Static analysis: 4507. Mixed: 744.
 | MISSION-ROUTE-094 | observation | ● active |
 | MISSION-098 | static analysis | ● active |
 | MISSION-099 | static analysis | ● active |
+| MISSION-100 | static analysis | ● active (branch candidate) |
 
 ## Ledger move
 
@@ -4357,6 +4366,9 @@ Claims labelled: 5394. Observation: 143. Static analysis: 4507. Mixed: 744.
 | SESS-088 | static analysis | ✔ promoted |
 | SESS-090 | static analysis | ✔ promoted |
 | SESS-091 | static analysis | ✔ promoted |
+| SESS-100 | static analysis | ● active (branch candidate) |
+| SESS-101 | static analysis | ● active (branch candidate) |
+| SESS-102 | static analysis | ● active (branch candidate) |
 
 ## Ledger shop
 

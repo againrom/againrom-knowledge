@@ -1125,6 +1125,122 @@ allocation section in `claims/registry.md` is authoritative.
 
 `HERO-165`..`HERO-166` were allocated to EXP-0519 and are returned unused.
 
+## Network character file
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| HERO-213 | Outside phase 2, `R2314` writes the network character file (name format `L17914`): tag `AlCh`, name, flags, the four creation stats; with flag bit 0 clear also 16 Player-scalar bytes, slots and the archive. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| HERO-214 | Connected, with `L17915` accepting, the client rewrites its file from a character packet (match Medium); `L12802` exports from six direct sites: join, reporter, teardown, actor tick, disconnect, `R2129`. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| HERO-215 | When a Player's primary hero is torn down, `R0208` adds 1 to `player+0x54`, calls `R0059` (unread), in network mode exports the character, and then sets health -50. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+
+### HERO-213
+
+- Caller: the dispatcher row for the detailed creation page calls `R2314(0)` outside phase
+  2 (`MENU-169`); the client packet handler calls it with a packet archive (`HERO-214`).
+  `obj` is `frame+0x420`.
+- `R2314` (`listings/functions.txt`) returns at once in phase 2. When `[L03937]` is
+  nonzero it re-reads a registry value; a failed read stores 0 there, shows a message box,
+  posts `0x41e` and writes nothing.
+- It packs the low bytes of `[frame+0xec]+0x64..+0x70` into `obj+0x8c`. With a null argument (or an
+  argument whose `+8` is 0) it stores `obj+0x78 = 100` and `+0x7c = +0x80 = +0x84 = 0`;
+  otherwise it copies the archive into `obj+0x110`, clears flag bit 0 of `obj+0x70`, and copies
+  four dwords from the argument into `obj+0x78..+0x84`.
+- The file name is built by `R2315` from the format at `L17914` (pushed at `L17916`:
+  a fixed prefix, the selected index as four zero-padded decimal digits, the character-file
+  extension). Write order and sizes:
+  tag `0x68436c41` (4); `obj+0x8` (8); `obj+0x10` (32, the name `L16632` reads at file
+  `+0xc`); `obj+0x30` (32); flags `obj+0x70` (4, file `+0x4c`); `obj+0x74` (4); `obj+0x90` (28;
+  its first four dwords are the creation stats `R0832` stores, `HERO-BUY-003`); `obj+0xac`
+  (28). With flag bit 0 set the file ends here.
+- With bit 0 clear it continues: `obj+0x78` (56, beginning with the four dwords above); six
+  blocks of the second object (`+0xfc` 16, `+0x138` 32, `+0xe4` 16, `+0xf0` 16, `+0x20` 4,
+  `+0x24` 4); `obj+0xac` (32); `obj+0x8c` (4); twelve dwords from `+0x15c`, each nonzero one
+  followed by `L17917`'s record; the count `obj+0x118` (4) and `2 * count` bytes from
+  `obj+0x114`.
+- `L17918` deletes network character files (wildcard `L17919`, pushed at `L17920`)
+  whose flag has bit 0 set and bit 2 clear; no direct caller was found.
+- Campaign comparison: the creation pages are the same frame pages in both phases
+  (`MENU-169`); in phase 2 `R2314` returns at once, and its two call sites
+  (`listings/refs.txt`, `callto:R2314`) are the creation row and the client handler. Other
+  users of the name builder `R2315` were not searched (no `callto:R2315` section).
+- The texts at `L17914` and `L17919` were read from the string table in an uncommitted
+  pass; the committed listings hold the addresses and the pushes.
+
+**Confidence.** High for the order, the sizes, the branches and the tag. The file calls
+`R1453` (mode `0x1001`) and `R2316` were not read; they are taken as create and write from
+their arguments (Medium). Medium for every field meaning beyond the name and the stats: the 16
+copied bytes match `PARTY-CARRY-005`'s Player-scalar count but their source in the packet was
+not read; `obj+0x78 = 100` matches the 100-gold participant value of `PARTY-MONEY-018`. Medium
+for who sets flag bit 0: the creation code that does was not read. Medium for the file name's
+text (uncommitted string read). Medium that the campaign writes no such file: only the
+`R2314` path was read.
+
+**Unknown.** The stored skill and weapon of a new network hero (`HERO-START-039` gives the
+phase-2 condition only). Whether a new file holds the 100, 0, 0, 0 that the null-argument
+write stores in the object (`obj+0x78..+0x84`): the file holds them only when flag bit 0 is
+clear (`TEST byte [EDI],1` at `L17921` jumps to `L17922`), the null-argument arm does not
+clear the bit (only the packet arm does, `L17923`..`L17924`), and the bit's setter was
+not read. A run of the EN original that creates one network character, with a copy of the new
+file (index 0) kept outside the repository and a field read of it, settles both.
+
+**Amends.** `PARTY-CARRY-005` calls the carried form the character file. That holds for the
+server's per-profile two-number file; the client's network character file is a second form
+with its own header and blocks around the archive.
+
+### HERO-214
+
+- Client: in `R0509` (`L17925..L02957`) the character packet (`+0xa` count, data at
+  `+0xe`) becomes a memory archive. Outside phase 2, when connected and `L17915` on
+  `+0x9b8` returns nonzero, it calls `R2314` on `frame+0x420` with it (`L17926`).
+- Server: `L12802` (`listings/functions.txt`) returns when `player+0x28 != 0` or
+  `player+0x34 == 0`. Otherwise it stores `[L00285]` into `player+0x1c`, calls the exporter
+  `R1375(player+0x34)` (`PARTY-CARRY-005`), stores the Player's id into packet `L07299`,
+  and sends it through `R0217` when `player+0x3e != 0`.
+- Callers of `L12802` (`listings/refs.txt`, `callto:L12802`, six sites):
+  - join `R0061@L17927`;
+  - reporter `R0132@L17928`, in network mode with a primary whose `R0547() >> 4 ==
+    0x14`;
+  - teardown `R0208@L17929`, in network mode (`HERO-215`);
+  - actor tick `R0037@L17930`, on a message with word `+0xe == 0x42` when
+    `R2288` on `L12800` is not 4 (when it is 4 the tick stores `[server]` into
+    `player+0x50` instead);
+  - disconnect `L09306@L17931`, when `server+0x150 == 0` and network mode;
+  - `R2129@L17932`, a function that sets the hero's four stats to 10, 10, 10, 1 and
+    clears `+0x130` before the call; its role is unread (no caller section for `R2129`).
+- The six are the direct calls `EnumRefs callto:L12802` found, none in orphan code; calls
+  through a register are outside that search. `R1375` has one direct caller,
+  `L12802@L17933`.
+
+**Confidence.** High for the six direct call sites and their gates. Medium for the meanings of
+`R0547`'s value `0x14`, of message `0x42` and of `L17915`: none was read. Medium that a
+send reaches the client handler above: the packet's id was not matched across the two, so
+"the client rewrites its file from each packet the server sends" is Medium.
+
+**Unknown.** How often a running network map writes the file. A run of the EN original that
+hosts one map, plays one hero to one level-up, one death and a disconnect, with the file's
+write time and size listed after each, settles it.
+
+**Amends.** `PARTY-CARRY-005` names the exporter `R1375` and leaves its timing; this card
+gives its six direct call sites.
+
+### HERO-215
+
+- Teardown `R0208` (`listings/ranges.txt`, `L17934..L17935`), reached from the actor
+  tick `R0037@L01924`: when `player+0x34` is the torn-down actor, it adds 1 to
+  `player+0x54`, calls `R0059(actor, player, 0x80)`, calls `L12802(player)` when
+  `[L00285]+0x0c != 0`, and stores -50 into `actor+0x94`.
+- `player+0x54` is one of `PARTY-CARRY-005`'s four carried scalars, so the next export carries
+  the new count.
+
+**Confidence.** High for the order and the gate. Medium that `player+0x54` counts deaths: only
+this increment was read. Medium for what `R0059` does: it was not read. The stored -50 is
+above `MISSION-DEFEAT-045`'s -53 gate, so this store alone does not reach that accepter; what
+the teardown leads to was not read.
+
+**Unknown.** None beyond `HERO-214`'s run.
+
+**Amends.** None.
+
 ## Route observation: hero creation
 
 | ID | Claim | Confidence | Status | Evidence |

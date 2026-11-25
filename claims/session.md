@@ -904,3 +904,121 @@ windows).
 **Confidence.** High for the stepper's slots, the sub-tick's calls, the opcode and order tables and the arms read (`b1`..`b3`), and for the walk's sites (`w10`). Medium that the walk is the only drawing work, and Medium for "the three `0x46` commands draw nothing" (the Unit slot `R0836` was not a closure root either): the three `0x46` commands' delivery and the queue's first-in first-out order were not read; the subtype arms' callees `R0186`, `R0187`, `R0080` and `R0440` were not rooted (any draw they reach is among the sub-tick closure's 15 sites: walk, constructors, placement, item generation); `R0426`'s 4 computed calls and the effects' `vt+0x38` were not followed; `rand` site `L13438` has no inventory owner and `closure.py` counts no direct call dropped outside its inventory; the census sees actor state only after the tick. Unknown for an actor with health ≤ 0: the death arm's draws were not enumerated.
 
 **Unknown.** The attempt count and start-list size of a given map (a read of the map's start list and a native breakpoint on `rand` settle them). The draws of an actor that starts dead or with an order (a closure scan rooted at the death arm settles it). The two instrument gaps of `SESS-090`.
+
+## Network map list, host switches and the join file
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| SESS-100 | The map dialog lists map files of one directory (unread `L17991`), skips subdirectories and hides type-0 `+0x70 < 2`; 10 EN and 5 of 6 RU root maps pass if the root is the directory (Medium). | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| SESS-101 | Switch strings at `L17968`, `L17948`..`L17949`, `L17975`, `L17977`, `L17963` preset the start; those at `L17992` or `L17993` store 0 into `server+0x150` (Medium: texts uncommitted). | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+| SESS-102 | The join builds a per-name server character file and lock file (`L17994`, `L17995`) or a bare file (`L17996`); a lock file that opens skips the read; a read file is imported, then the lock file is created. | High / Medium | ● active (branch candidate) | [EXP-0652](../experiments/EXP-0652-rom1-mp-solo/) |
+
+### SESS-100
+
+- The map dialog constructor `L15881` (`listings/ranges.txt`, `L15881..L17997`) stores
+  vtable `L06390`, keeps the result pointer (`frame+0x6b4`, `MENU-170`) at `this+0x68` and
+  registers `L13591` through `L15883`. `L13591` calls `R0511` (`listings/refs.txt`:
+  `refto:L13591` has one site, in `L15881`).
+- `R0511` (`R0511..L17998`) fills a 0x103-byte buffer through `L17991`, appends
+  the map-file wildcard (`L15880`, pushed at `L17999`), calls `FindFirstFile` and skips
+  entries with attribute bit `0x10`. Its accept test `R0479` hides a map whose type-0
+  `+0x70 < 2`; by `ALM-META-058` the test also needs the magic, `recordCount >= 2` and a
+  type-0 record.
+- The row builder `R2271` formats five `#`-separated fields with the format at `L15886`
+  (pushed at `L11168`) from entry `+0x4` (name), `+0x14 - 16`, `+0x18 - 16`, `+0xc` and
+  `+0x10`; the drawer `L15894` splits the row at `#`.
+- Roots (`listings/maps.tsv`, map files at depth 1): EN 10 files, RU 6 files. The 10 EN
+  files have `+0x70 >= 4` (the EXP-0018 table). Of the 6 RU files, FORESTER, ISLANDS, KIDS and
+  WATERS are hash-equal to EN files with `+0x70` 16, 16, 4, 8; `Horror.alm` has 1
+  (`ALM-CORP-060`); `LUMOIR.ALM` differs from EN `LuMoir.alm` by hash and its `+0x70` is in no
+  committed table.
+
+**Confidence.** High for the scan, the skip, the row's field order and the file counts.
+Medium for "10 EN and 5 RU": the directory is the unread `L17991`'s, so the counts hold for
+the root only if the root is scanned; the accept test was read in `ALM-META-058`, not here;
+RU `LUMOIR.ALM`'s `+0x70 >= 2` is inferred from its shared 144x144 class with EN
+`LuMoir.alm` (EXP-0056), not read. Medium for the size reading of `+0x14`/`+0x18`: only the
+format and the subtraction were read. Medium for the texts at `L15880` and `L15886`: they
+were read from the string table in an uncommitted pass; the committed listings hold the
+addresses and the pushes.
+
+**Unknown.** The meaning of entry `+0xc` and `+0x10`. A run of the EN original that opens the
+map dialog and captures its rows settles them and the count.
+
+**Amends.** `ALM-META-058` names the browser's screen and caller as unread: the screen is the
+`0x459` map dialog and the caller is `L15881`'s registration; the directory stays unread.
+
+### SESS-101
+
+- The map switch `L17968` (`MENU-170`). Five numbered protocol switches
+  `L17948`..`L17949`, the bare protocol switch and the session switch `L17975`
+  (`MENU-169`, `MENU-172`). The address switch `L17977` (`R1665`, `MENU-172`). The wait
+  switch `L17963` (`R1323`, `MENU-170`); `R1664` also pushes `L17963`
+  (`L18000`, `listings/refs.txt`, `refto:L17963`), unread.
+- Page `L18001` (`listings/functions.txt`; reached only as vtable slot `L18002`) builds an
+  Ok button (`0x445`, text `0xe` of `L06197`), a Cancel button (`0x446`, text `0x2a`), a
+  check box (text `0x38` of `L06351`) and one more control. The box starts at 1. When the
+  command line holds the server-save switch (`L17992`, pushed at `L18003`) or the
+  internet-server switch (`L17993`, pushed at `L18004`) it stores 0 into
+  `[L00285]+0x150`; when `+0x150` is nonzero the box starts at 0.
+- The switch texts were read from the string table in an uncommitted pass. The committed
+  listings hold the string addresses and the sites that push them (`listings/refs.txt`
+  sections `refto:L17968`, `refto:L17992`, `refto:L17993`, `refto:L17963`;
+  `listings/ranges.txt` for the protocol, session and address switches) and no compare call.
+- `server+0x150 == 0` with network mode makes a disconnect export the character
+  (`L09306`, `HERO-214`) and makes a failed join import refuse the character (`SESS-102`).
+
+**Confidence.** High that the arms read push the addresses named and make the stores named.
+Medium that each address is the switch named: the texts are uncommitted. Medium for the
+box's caption and for what owns page `L18001`: neither was read. Medium that `server+0x150` defaults to
+nonzero: its constructor store was not read.
+
+**Unknown.** The box's caption and when the page appears; what `R1664` does with the wait
+switch. A run of the EN original that opens each page of the host route and captures it
+settles the first two; a static read of `R1664` settles the third.
+
+**Amends.** None.
+
+### SESS-102
+
+- The join `R0061` (`listings/ranges.txt`, `L18005..L18006`): when `L14096` on
+  `player+0x64` returns 0 it formats the server character file (`L17994`, pushed at
+  `L18007`: a directory under `chr` named by the character, a file named by two unsigned
+  numbers) and the lock file in the same directory (`L17995`, `L18008`) from the name and
+  two dwords; otherwise the bare two-number name (`L17996`, `L18009`). It opens the lock
+  file first; an open lock file skips the read. An opened character file is read into the
+  join packet (`+0xa` = length / 2, data at `+0xe`) and passed to the importer `R1378`;
+  then the lock file is created (`CFile` mode `0x1001`).
+- A zero import result with `server+0x150 == 0` and network mode logs the message at
+  `L18010` (`L18011`; a refusal of characters made outside this server) and calls
+  `R0623` (codes `0xb`, `0xb`), `R1675`, `R1385` and `L09058`; their effect was not
+  read. Otherwise it logs the message at `L18012` (`L18013`; an invalid character joined)
+  and calls the accepter `R0823` with four values 25.
+- `R1132` (`listings/functions.txt`): for a player with `+0x50 > 0`, `+0x3d != 0` and
+  `+0x50 < [server]`, it passes each own actor to `R0865` and `R1133`, clears its
+  `+0x14`, sets its health to -50, and passes the lock-file path (`L18014`, `L18015`) to
+  `L18016` (unread; taken from its argument as the file delete, Medium).
+  `player+0x50` is set by the disconnect `L09306` and by the actor tick's `0x42` arm when
+  `R2288` is 4 (`listings/ranges.txt`, `L18017`). The caller of `R1132` was not
+  searched (`listings/refs.txt` has no `callto:R1132` section).
+- `R0910` (`L18018..L18019`) logs the message at `L18020` (`L18021`; one
+  character allowed) when `R0750` on `player+0x64` succeeds.
+- The texts at these addresses were read from the string table in an uncommitted pass; the
+  committed listings hold the addresses and the pushes (`listings/refs.txt` sections
+  `refto:L17994`, `refto:L17995`, `refto:L17996`, `refto:L18010`, `refto:L18012`,
+  `refto:L18020`, `refto:L18014`).
+
+**Confidence.** High for the paths and the order. Medium for the texts named by address and
+for the path readings above. Unknown when `R1132` runs: its caller was not searched. The
+file calls `L18022`, `L18023`, `R0534` and `L18024` were not read; they are taken as
+open, length, read and close from their arguments and the mode values 0 and `0x1001`. Medium
+for the import result when the lock file exists or the character file is missing: the
+result's earlier store was not read.
+Medium for the second import site `L07308`: the branch that reaches it was not read.
+
+**Unknown.** Which joins take the server file, and when the lock file is removed. A run of the
+EN original that hosts with the server-save switch, joins, leaves and joins again, with a
+listing of the `chr` directory after each step, settles both.
+
+**Amends.** `PARTY-CARRY-005` names the per-profile two-number server file as the exporter's
+file; this card adds the join's read of the same name and the lock file.
