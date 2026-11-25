@@ -254,6 +254,13 @@ positive +0xbe14 is sent and its low byte stored at +0x40; else a nonzero
 win counter sends 0xb5 and stores 1. Byte +0x13c and +0x42 are Unknown in
 meaning. — R2-ENGINE-624
 
+By the bodies read (Medium for what a player sees; no run): when the tick object's +0x74 is
+nonzero, the respawn block of a hero at word +0x94 <= -40 calls the producer and then party
+placement, which starts at owner word +0xa6c when it is nonzero; two EN server arms write the
+unit's cell there. What the producer restores beyond the owner +0x38 reuse, the template, skill
+setup, HP and mana is Unknown.
+— R2-ENGINE-1843
+
 Outside the script, the death of a class 0x21..0x3f actor, with
 `[L2.00805]` +0x74 zero and owner +0x2c zero, stores owner +0x40 = identity
 +0x14c − 19 and sends it: identity 21 gives reason 2, identities 22..30

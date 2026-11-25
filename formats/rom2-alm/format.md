@@ -432,9 +432,23 @@ of the pass are unread). Type-0 payload dword 0x88 is
 stored in the map and the session; the editor's map-properties routine computes it from the
 largest unit level (the EN body read; Medium for when it runs; the save routine also sets map `+0xdc` to 1 and
 rewrites it in its placed-item loop, and whether that loop gives the same value is not read), and its meaning in the
-game is Unknown.
+game beyond the join's level gate below is Unknown.
 — R2-ASSET-120, R2-ASSET-122, R2-ASSET-130, R2-ASSET-255, R2-ENGINE-509, R2-ENGINE-510,
 R2-ENGINE-538, R2-ENGINE-1816, R2-ENGINE-1819
+
+The EN join compares its receiver's +0x1cc with two bounds sent for the joining character: below
+the lower bound it refuses the character as too strong for the map, above the upper bound as too
+weak, and -1 skips the test (High for the comparison). That the receiver is the Session whose
++0x1cc holds dword 0x88 is Medium; that 0x88 is a map level is Medium; how the client computes
+the bounds is Unknown. The loose root maps hold 0x88 = 1, 2, 3, 4 in EN 6, 3, 2, 2 and RU 10, 8,
+7, 12 maps, and dword 0x84 = 4, 6, 8 or 16. The EN server character writer runs only when
+Session +0x74 is nonzero; the map build stores `0x84 > 1` there, the server init stores
+`mode < 2`, other writers are unclassified, and whether a loose root map reaches the map build is
+Unknown (Medium). The shipped `srv.cfg` sets RepopDelay 100. An EN config parser window (its
+entry and its file name unread) clamps a key `repopdelay` to 20..500 and stores it at
+`L2.02527`, the value the group re-creation countdown reads; that the file is `srv.cfg` is
+Medium. — R2-ASSET-403, R2-ENGINE-1842, R2-ENGINE-1841, R2-SESSION-506, R2-SESSION-507,
+R2-ENGINE-509, R2-ENGINE-510, R2-ASSET-255
 
 Flag 4 and flag 8 also put the group in Inn offer blocks 3 and 5 through
 group +0x48 and +0x4c. In block 3 RU skips groups of the Inn's own owner

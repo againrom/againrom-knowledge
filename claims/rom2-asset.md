@@ -4258,6 +4258,10 @@ computing routine.
 the game meaning of 0x88 are Unknown. Run: open the
 map-properties dialog of map 10 in the editor, change the value, save, compare type-0 +0x88.
 
+**Amended.** R2-ENGINE-1842 reads one probable game use of 0x88: the EN join compares its receiver's +0x1cc with two
+bounds of the joining character and refuses it as too strong or too weak; that the receiver is the Session whose +0x1cc
+holds 0x88 is Medium, and the client's bounds are Unknown.
+
 ### R2-ASSET-256
 
 One id map (CMapWordToOb at map +0x390, keyed by the id word) holds structures, units and ground-sack objects
@@ -4926,6 +4930,38 @@ No EN loose map holds action 21 or 24. Action 21 has no node with p5 = 0 in eith
 **Unknown.** How often Valley2 trigger 0 fires. The run that settles it: in the original RU program, load the loose Valley2 map, destroy object 551 and count the Stone Curse casts at unit 556.
 
 **Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/census.py`, `evidence/census/target-nodes.tsv`, `action21-24-triggers.tsv`, `action21-24-checks.tsv`, `inputs.tsv`, `evidence/README.md` (reproduction receipt).
+## ROM2 loose root maps: census of type-0 dwords 0x84 and 0x88 (EXP-2209)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-403 | ROM2 loose root maps (EN 13, RU 37, version 1600, 13 records each) hold type-0 dword 0x88 of 1..4 and dword 0x84 above 1; the shipped `[Maps]` entry `monsters.alm` is among the loose root `.alm` files in RU and not in EN. | High / Medium | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+
+### R2-ASSET-403
+
+The probe's map table reads every loose `.alm` file in the root directory of each install (EN 13,
+RU 37). All have version 1600 and 13 records. Type-0 payload dwords at 0x84 and 0x88 (file
+offset 40 + the payload offset):
+
+| Root | Maps | 0x84 = 4 | 6 | 8 | 16 | 0x88 = 1 | 2 | 3 | 4 |
+|---|---|---|---|---|---|---|---|---|---|
+| EN | 13 | 7 | 0 | 3 | 3 | 6 | 3 | 2 | 2 |
+| RU | 37 | 15 | 1 | 9 | 12 | 10 | 8 | 7 | 12 |
+
+Every loose map has dword 0x84 above 1, the value the map build stores in Session +0x74 when that
+routine builds the map (R2-ENGINE-509, R2-ASSET-130; the loader of a root map is Unknown). The map
+build stores dword 0x88 in Session +0x1cc (R2-ENGINE-509); the join compares its receiver's
++0x1cc with the character's two bounds (R2-ENGINE-1842; Medium that the receiver is that
+Session). R2-ASSET-255 counts dword 0x88 over all maps of each root; this table is the loose
+root subset. The shipped `srv.cfg` names one map, `monsters.alm` (R2-SESSION-506); it is among
+the loose root `.alm` files in RU and not in EN.
+
+**Confidence.** High for the census of the loose root maps of both roots. Medium that dword 0x88
+is a map level: the meaning rests on the join's comparison, whose receiver identity and client
+bounds are unread. Maps in archives and in other directories are not in this population.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 2:
+`evidence/generated/data/en-loose-maps.tsv`, `ru-loose-maps.tsv`.
+
 ## ROM2 type-10 entries per root map and their percent values (EXP-2207)
 
 | ID | Claim | Confidence | Status | Evidence |

@@ -12822,6 +12822,11 @@ other `[reg+0x74]` stores would settle the gate.
 
 **Amended.** R2-ENGINE-1816: the map build has one direct call site per root, RU `L2.04714` and EN `L2.04715`, in the map caller of R2-ENGINE-152, the only direct caller of the map build in each root; that a root map is built through it is Medium (the load routines and the callers of the pass are unread).
 
+**Amended.** R2-ENGINE-1842 reads one probable use of Session +0x1cc: the EN join refuses a character when its
+receiver's +0x1cc is not -1 and lies outside two bounds of the join request ("too strong" below, "too weak" above);
+that the receiver is this Session is Medium. R2-ENGINE-1841 reads one more use of Session +0x74: the EN server
+character writer runs only when it is nonzero.
+
 ### R2-ENGINE-510
 
 For every owner (global RU `L2.00293`) whose +0x2c is not 0 (`L2.02508`..
@@ -12897,6 +12902,8 @@ caller would settle the first two; the EN store would settle the last.
 **Amended.** R2-ENGINE-538 reads `L2.02502`: it returns dword +0xc of its receiver (High); that the value is a member count is Medium. The third argument of `L2.00313` is the positioning radius of R2-ENGINE-531.
 
 **Amended.** R2-ENGINE-1816 reads the EN owner and group guards. R2-ENGINE-1817 reads the caller of slot 5: once per container pass, which runs once per 16 session ticks in RU (Medium; EN tick unread). R2-ENGINE-1818 narrows the placement: around object+0x10 with radius +0xbc only when +0xbc is nonzero, else the positioning routine gets the member's own position and radius 0 (where the member then stands is Unknown); +0xb4 and +0xc0 are reset per member on a successful placement. R2-ENGINE-1819 reads the EN writer of `L2.02527` (constructor 100, parser clamp 20..500) and finds RU `L2.02529` to be "settings".
+
+**Amended.** R2-SESSION-507 reads the EN writer of `L2.02527`: the `repopdelay` arm of an in-process config parser clamps it to 20..500; its default and the file it parses are Unknown.
 
 ### R2-ENGINE-511
 
@@ -38046,6 +38053,279 @@ the route search (this table); the readers of +0x944f4 stay Unknown. R2-ENGINE-1
 the route search (it closes every kind).
 
 **Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 5.
+## ROM2 multiplayer client: character list and creation, screens to the map, join level gate, respawn cell, server character writer (EXP-2209)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1840 | ROM2 EN list L2.08651 keeps current-directory `*.a2c` whose A+8, after replacing 0x529c0291 and 0xbaadf00d by app +0x3d8, equals app +0x3d8, plus one text entry; OK on that entry runs creation L2.07250, also New Game's. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1841 | ROM2 EN server character writer L2.08323 runs only when Session +0x74 is nonzero and +0x1a8 is 0; it writes the hero to `%schr\%s\%u%u.a2c` or `%u%u.a2c` through L2.07265; 9 call sites. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1842 | ROM2 EN join L2.00197 rejects a character when [ebp-0x10c]+0x1cc (Medium: R2-ENGINE-509's Session, map dword 0x88) is not -1 and lies below byte 2 ("too strong") or above byte 3 ("too weak") of its packed argument. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1843 | ROM2 EN owner word +0xa6c: 4 word-mov stores found by byte pattern; two server arms store the unit's cell (x low, y high) before passing the unit on; join and constructor store 0; respawn placement starts there (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1844 | ROM2 EN view app +0x370 (ctor L2.08652, vtable L2.08653) holds three panels, ids 0x462, 0x461, 0x463; its close L2.08654 runs creation on OK when the selection is the last entry. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1845 | ROM2 EN protocol view app +0x350 (ctor L2.08655): OK posts 0x454, 0x455, 0x452 or 0x453 for entry type 0..3, Cancel posts 0x421; arm 0x452 opens popup app +0x34c (join, host, local). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1846 | ROM2 EN arm 0x459 sets the map name app +0x5d0 from `-map"`, else from server map list L2.08656, else opens map view app +0x378 (ctor L2.08657); the first two post 0x457. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+
+### R2-ENGINE-1840
+
+The EN character list `L2.08651` (application method; it returns at once when app +0x5d8 is 2):
+
+- clears the file-name list +0x11c and the name list +0xf8, then enumerates `*.a2c` in the current
+  directory;
+- for each file tests the container magic 0x04507989, reads section header A and its body,
+  descrambles (`L2.08658`) and checks the checksum (`L2.08659`), takes the name from A +0xc;
+- takes A +8; when it is 0x529c0291 or 0xbaadf00d it is replaced by app +0x3d8; the entry is kept
+  only when the result equals app +0x3d8;
+- inserts each kept entry in an order set by `CompareFileTime` on the file times;
+- sets the selection +0x130 to 0, calls `L2.01814` (unread) and appends text 0x78 of table
+  `L2.02397` to the name list as its last entry.
+
+The close routine of view app +0x370 (R2-ENGINE-1844) calls creation `L2.07250`(0, 0, 0) when the
+result is OK (0x445) and the centre panel's selection +0xd0 equals the count from `L2.08660`
+minus 1, the last entry. The E8 call scan finds two call sites of `L2.07250`: `L2.08661` in that
+close routine and `L2.08662` in the New Game arm. Creation (R2-SESSION-022) fills the id pair
+from the performance counter, names the file `%u%u.a2c`, stores app +0x3d8 at +0x64, zeroes the
+client copy +0x3f70 (R2-SESSION-416), builds the client unit and calls the template `L2.04094`;
+the two bodies read write no file, and their callees are unread (Medium that no file is written).
+The result handler of view app +0x370 then runs the pre-create screen
+`L2.01100` when app +0x480 bit 4 is clear (R2-ENGINE-283's route), else posts 0x489 when app
++0x3dc is nonzero, else 0x451.
+
+A byte-pattern pass (mov from a register or immediate, 32-bit displacement 0x3d8 in a ModRM
+without SIB, EN code sections) finds three stores of that pattern: `L2.08663` (register; its
+nearest preceding prologue found by the scan is `L2.00466`, Medium, and its object is not shown to
+be the application), `L2.08664` and `L2.08665` (both 0). SIB forms and computed pointers are not
+searched.
+
+**Confidence.** High for the list and close bodies and the two call sites (E8 scan). Medium that
+the last entry is the new-character entry: text 0x78's content and `L2.08660`'s count are
+unread. Medium that the multiplayer creation offers the campaign's choices: the shared
+pre-create and detail bodies are R2-ENGINE-283's, read for the campaign route; no mode test of
+this route was read. EN only.
+
+**Unknown.** The value of app +0x3d8 and its source. The text of entry 0x78. A run settles both:
+from main-menu button 1 (0x426), open the character list with one `.a2c` of this install
+and one copied from another install, and note which names are listed and the last entry's text.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 1:
+`evidence/generated/listings/en-a2c-list-L2.08651.txt`, `en-create-L2.07250.txt`,
+`en-loader-fn-L2.08654.txt`, `evidence/generated/scans/en-calls-L2.07250.txt`,
+`evidence/nav/nav3/scans/en-app3d8-stores.txt`; result handler: EXP-2035
+`evidence/measured/en-app-command-L2.00787.txt`.
+
+### R2-ENGINE-1841
+
+The EN routine `L2.08323`(unit) returns at once unless Session (`[L2.00805]`) +0x1a8 is 0 and
+Session +0x74 is nonzero. The map build stores `0x84 > 1` in +0x74 (R2-ENGINE-509), the server
+init stores `mode < 2` (R2-ENGINE-334), other writers are unclassified, and whether a loose root
+map reaches the map build is Unknown (R2-ENGINE-509, Medium). Otherwise, with owner = unit
++0x14:
+
+- owner +0xa74 = `timeGetTime` (import `[L2.08666]`);
+- section A fields: a flag byte (0x80 when `L2.01137`(unit) is nonzero, 0x40 when `L2.01136`(unit)
+  is nonzero), unit byte +0x23c, the constant 4, unit byte +0x4b, owner byte +0xa44, the 8 bytes
+  at owner +0x10, the name string at owner +0x18, owner +0x3c, +0xa48, +0xa4c, +0xa54, +0xa58, the
+  four bytes word +0x84..+0x8a minus byte +0xd4..+0xd7, a value from `L2.04288`(unit +0x140),
+  byte +0x78 of unit +0x1c4, and the five dwords +0x240..+0x250;
+- a first buffer from unit +0x74, unit +0x78 and slots +0x208 + 4i for i = 3..12 (an empty
+  object is serialized for each null), a second buffer from the list at unit +0x7c with a
+  count word;
+- the path: when the string at owner +0xa70 is non-empty (`L2.01986` false), `%schr\%s\%u%u.a2c`
+  from the string at `L2.08667`, owner +0xa70 and the id pair; when that file cannot be opened
+  (`L2.08668`) it calls import `[L2.08669]` on `<L2.08667>chr\<owner +0xa70>`; otherwise
+  `%u%u.a2c`;
+- it calls the client file writer `L2.07265` (R2-SESSION-416) with the path, the id pair, the
+  section A fields, owner +0x44 and the two buffers.
+
+The E8 call scan finds 9 call sites. Their containers are the nearest preceding prologue found
+by the scan (Medium): `L2.00171` (the server dispatch) for `L2.08670`, `L2.08671`, `L2.08672`,
+`L2.08673` and `L2.08674`; `L2.01806` (unit death) for `L2.08675`; `L2.08676` for `L2.08677`;
+`L2.06937` for `L2.08678`; `L2.06444` for `L2.08679`.
+
+**Confidence.** High for the guard, the field sources, the two path forms and the writer call
+(body read). Medium that `L2.08667` holds ChrBase and that `[L2.08669]` creates the directory:
+neither the store to `L2.08667` nor the import name was read. Medium for the call-site census
+(E8 only). EN only; RU `a2server.exe` holds the same path string at `L2.08680` in `L2.08681`,
+unread.
+
+**Unknown.** Which event each of the 9 call sites serves, besides unit death. The string at owner
++0xa70. A run settles both: run a server with `Save=server`, join one character, kill a monster,
+die once, leave, and list the files written under `ChrBase` with their times after each event.
+
+**Amends.** R2-ENGINE-509: its Unknown on what Session +0x74 means beyond its two read uses gains
+a third, this writer's guard.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) questions 1 and 6:
+`evidence/generated/listings/en-chr-writer-L2.08323.txt`, `en-chr-writer-tail-L2.08682.txt`,
+`evidence/generated/scans/en-calls-L2.08323.txt`.
+
+### R2-ENGINE-1842
+
+The EN join `L2.00197` (receiver at `[ebp-0x10c]`) splits its packed dword argument (`[ebp+0x18]`):
+byte 1 to a local, byte 2 to L (`[ebp-0x20]`), byte 3 to U (`[ebp-0x34]`), byte 0 kept. A byte 0
+that is nonzero and differs from the dword at `L2.08018` rejects with `Demo & Release are
+incompatible` (code 8). After the Player loop, when the loop left `[ebp-0x14]` at 0 (what the loop
+matches is not read) and receiver +0x1cc is not -1:
+
+- +0x1cc < L sends code 0xe with `Character is too strong for this map.` and logs
+  `Player <name> rejected (too strong for this map)`;
+- +0x1cc > U sends code 0xf with `Character is too weak for this map.` and logs
+  `Player <name> rejected (too weak for this map)`.
+
+R2-ENGINE-509 reads that the map build stores the map's type-0 payload dword 0x88 (map +0xdc) in
+Session +0x1cc. The root maps hold 1..4 there (R2-ASSET-403).
+
+**Confidence.** High for the split and the two comparisons (body read). Medium that the receiver
+is the Session of R2-ENGINE-509 (its identity is not read here), so Medium that the compared value
+is map dword 0x88. Medium that dword 0x88 is a map level: the reject texts name strength, and no
+other read use was found. EN only.
+
+**Unknown.** How the client computes bytes 2 and 3 from the character. A read of the client's
+join request builder settles it; a run settles the boundary: join one map of each level 1..4
+with one new character and note which are refused.
+
+**Amends.** R2-ENGINE-509 and R2-ASSET-255: their Unknown on the game meaning of dword 0x88 is
+narrowed to one read use, the join's strength gate (Medium that the join's receiver +0x1cc is
+the Session field holding it).
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 3:
+`evidence/generated/listings/en-join-mid-L2.08683.txt`, `en-join-strength-L2.08684.txt`.
+
+### R2-ENGINE-1843
+
+A word-store pattern pass (`66` prefix, mov from a register or immediate, displacement 0xa6c,
+EN code sections) finds 4 stores to owner word +0xa6c:
+
+- `L2.08685` and `L2.08686`, two arms of the server dispatch `L2.00171` (container: the nearest
+  preceding prologue found by the scan, Medium): each looks a unit up from packet words +5 and
+  +0xa (`L2.01661`), looks an object up from unit +0x10 (`L2.01846`, `L2.01849`), calls
+  `L2.01842`(unit), stores x | y << 8 from `L2.00488` and `L2.00489` of unit +0x10 in owner
+  +0xa6c, and passes the unit to the object (`L2.01637`, `L2.02764`);
+- `L2.08687` in the join `L2.02723` and `L2.08688` in the owner constructor store 0 (containers
+  by the same scan, Medium).
+
+Party placement (R2-ENGINE-529) starts at owner +0xa6c when Session +0x74 and that word are
+nonzero, else at a random drop-list word of the map or a random cell. Session +0x74 is nonzero
+when the map build stored `0x84 > 1` there (R2-ENGINE-509) or the server init stored `mode < 2`
+(R2-ENGINE-334); other writers are unclassified. The join clears the word first (R2-ENGINE-532),
+so a join places at the map's drop list. The result tick's respawn block (R2-ENGINE-624, Session
++0x74 nonzero, hero word +0x94 <= -40) calls the producer `L2.00160` and then party placement
+(EXP-2052 listing), so a hero that died after one of the two arms ran is placed at the recorded
+cell. The producer reuses owner +0x38 and builds `Start_*` (R2-ENGINE-105), and builds from the
+template, sets up skills and sets HP and mana to their maxima (R2-ENGINE-290).
+
+**Confidence.** High for the 4 stores and the two arm bodies (read). Medium for the population:
+32-bit stores and stores through computed pointers are not searched. Medium that the two objects
+are buildings (Inn, Shop): `L2.01846`, `L2.01849`, `L2.01637` and `L2.02764` are unread. Medium
+for the player-visible respawn: by the bodies read, no run. EN only.
+
+**Unknown.** What the two objects are, and what the producer restores beyond R2-ENGINE-105 (owner
++0x38 reuse) and R2-ENGINE-290 (template, skill setup, HP and mana) when called from the respawn
+block. A run settles both: on a server, enter an Inn, leave, die, and note where the hero
+reappears and its Health and items.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 4:
+`evidence/generated/scans/en-a6c-word-stores.txt`, `evidence/generated/listings/en-dispatch-save-L2.08671.txt`;
+respawn block: EXP-2052 `out/code/listings/en-result-tick.txt`.
+
+### R2-ENGINE-1844
+
+App init stores the view built by `L2.08652` at app +0x370 (`L2.08689`, `L2.08690`); main-menu
+button 1 (0x426) shows it (R2-ENGINE-437); that button 1 is the menu's Multiplayer button is
+inferred (Medium). The constructor sets vtable `L2.08653` and calls
+`L2.08691`, which clears +0x6c, +0x70 and +0x88..+0x94 and builds three child panels:
+
+| Field | Bytes | Constructor | Id | Pushed rectangle values |
+|---|---|---|---|---|
+| +0x74 | 0xd0 | `L2.08692` | 0x462 | 0, 0, 0xa0, 0x1e0 |
+| +0x78 | 0xe0 | `L2.08693` | 0x461 | 0x1e0, 0, 0x280, 0xee |
+| +0x7c | 0xdc | `L2.08694` | 0x463 | 0xa0, 0, 0x1e0, 0x1e0 |
+
+The close routine `L2.08654`(result) runs creation (R2-ENGINE-1840) for OK on the last entry of
+the +0x7c panel, then releases +0x6c, clears +0x70 and +0x84, calls the three panels' routines
+`L2.08695`, `L2.08696`, `L2.08697` and passes the result to `L2.00785`. The application's result
+handler `L2.00787` maps it: Cancel posts 0x421 or `WM_CLOSE` by `L2.01986`(app +0x3d4); OK runs
+the pre-create screen or posts 0x489 or 0x451 (R2-ENGINE-1840).
+
+**Confidence.** High for the constructor, the panel table and the close body. Medium that the
+pushed values are left, top, right and bottom in a 640 x 480 screen. Unknown what each panel
+shows: the three panel bodies are unread.
+
+**Unknown.** The panels' controls and texts, and the name of main-menu button 1. A run settles
+them: press button 1 (0x426) in the main menu and record the screen.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 7:
+`evidence/generated/listings/en-app-init-370.txt`, `en-loader-ctor-L2.08652.txt`,
+`en-loader-fn-L2.08654.txt`; result handler: EXP-2035 `evidence/measured/en-app-command-L2.00787.txt`.
+
+### R2-ENGINE-1845
+
+- Arm 0x451 (`L2.01426`): when `L2.01986`(app +0x3d4) is 0 it calls `L2.08698`. Otherwise, when app
+  +0x404 is 0, it initialises the protocol list app +0x368 (`L2.01408`, `L2.08699`); on failure it
+  shows text 0x98 and posts 0x421; else it builds the 0x80-byte view `L2.08655`(app +0x368) at app
+  +0x350, shows it (`L2.03080`) and applies `-protocol0` options.
+- View `L2.08655` (vtable `L2.08700`, title texts 0x50 and 0x92 of table `L2.04002`) closes in
+  `L2.08701`: OK (0x445) stores the selected index, takes the type dword +0x100 of that 0x104-byte
+  entry and selects it on the client `L2.08702` (`L2.08703`). Failure shows text 0x98 and posts
+  0x421. Success posts 0x454 for type 0, 0x455 for 1, 0x452 for 2, 0x453 for 3. Cancel (0x446)
+  posts 0x421.
+- Arms 0x454 (`L2.08704`) and 0x455 (`L2.08705`) build and show views `L2.08706`(app +0x39c) and
+  `L2.08707`(app +0x380). Arm 0x453 (`L2.08708`) shows view `L2.08709`(app +0x3b0) and posts OK
+  (0x445) at once when `-protocol` is on the command line or the cfg protocol `[L2.08710]` is not
+  negative.
+- Arm 0x452 (`L2.08711`) connects the client: kind 2 with the string at `L2.08712`, kind 3 with app
+  +0x3e0 (`L2.08713`). With app +0x5d8 = 3 it calls join `L2.08714`; else it builds the 0x94-byte
+  popup `L2.08715`(app +0x354) at app +0x34c and shows it. Its results (`L2.00787`): 0x44d calls
+  `L2.08714` (mode 3, join), 0x44e calls `L2.08716` (mode 1, host: creates the server), 0x44f
+  sets app +0x5d4 = 0 and calls `L2.08717` (mode 0, local server); other results post 0x421.
+- Arm 0x489 (`L2.08718`) builds the 0x68-byte view `L2.08719` at app +0x37c and posts 0x48a.
+
+A byte-pattern pass (mov from a register or immediate, 32-bit displacement 0x34c in a ModRM
+without SIB, EN code sections) finds seven stores of that pattern: `L2.08720` (this popup),
+`L2.08721` and `L2.08722` (0), and four in `R2.0108`..`L2.07372` on objects not shown to be the
+application (containers: the nearest preceding prologue found by the scan, Medium). SIB forms and
+computed pointers are not searched.
+
+**Confidence.** High for the arm, view and popup-result bodies (read). Medium for the names join,
+host and local: they are inferred from the modes and calls of `L2.08714`, `L2.08716` and
+`L2.08717`. Unknown which protocol each type 0..3 is and what views `L2.08706`, `L2.08707`,
+`L2.08709`, `L2.08719` and `L2.08715` show: their bodies are unread. EN only.
+
+**Unknown.** The protocol names and the screens of each arm. A run settles them: with each
+protocol of the list, press OK and record the next screen and its Esc result.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 7:
+`evidence/generated/listings/en-arm-451.txt`, `en-view-ctor-L2.08655.txt`, `en-arm-452.txt`,
+`en-arm-453.txt`, `en-arm-454.txt`, `en-arm-455.txt`, `en-arm-489.txt`,
+`evidence/generated/scans/en-app34c-stores.txt`; popup results: EXP-2035
+`evidence/measured/en-app-command-L2.00787.txt`.
+
+### R2-ENGINE-1846
+
+Arm 0x459 (`L2.08723`) chooses the map:
+
+1. `-map"` on the command line: the text after it, cut at the next `"`, goes to app +0x5d0; post
+   0x457.
+2. Else, when the list `L2.08656` is not empty: its entry at index `[L2.08724]` goes to app
+   +0x5d0; post 0x457.
+3. Else it builds the 0xfc-byte view `L2.08657`(1, 0, -0x40, 0x280, 0x1e0, app +0x5d0) at app
+   +0x378 and shows it; its non-Cancel result posts 0x457 (`L2.00787`).
+
+Posts of 0x459 come from `L2.08717` (local, when app +0x440 is 0), `L2.08716` (host, when the
+server starts), and the two join bodies `L2.08725` and `L2.08714` (R2-ENGINE-1845). Arm 0x457
+(`L2.05487`) branches to `L2.08726` when app +0x5d8 is 3, and the call site `L2.08392` of the
+mission start `R2.0026` follows; that routine takes the map name at app +0x5d0 and sends the
+join message 0x04 (R2-SESSION-486).
+
+**Confidence.** High for the arm body. Medium that `L2.08656` is the server's `[Maps]` list: its
+writer is not read. Unknown what view `L2.08657` lists. EN only.
+
+**Unknown.** What the map view lists and whether a joining client sees it. A run settles it:
+host with an empty `[Maps]` section and record the screen after the popup.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 7:
+`evidence/generated/listings/en-arm-459.txt`, `en-choice-44f-L2.08717.txt`, `en-host-L2.08716.txt`;
+join bodies: EXP-2117 `evidence/measured/listings/en-mode3-writer-a.tsv`, `en-mode3-writer-b.tsv`.
+
 ## ROM2 Outpost: map build caller, slot-5 rate, respawn placement, respawn scale, action 31 (EXP-2207)
 
 | ID | Claim | Confidence | Status | Evidence |

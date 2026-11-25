@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5384. Observation: 143. Static analysis: 4499. Mixed: 742.
+Claims labelled: 5394. Observation: 143. Static analysis: 4507. Mixed: 744.
 
 ## Ledger ai
 
@@ -2277,6 +2277,7 @@ Claims labelled: 5384. Observation: 143. Static analysis: 4499. Mixed: 742.
 | R2-ASSET-386 | static analysis | ● active (branch candidate) |
 | R2-ASSET-387 | mixed | ● active (branch candidate) |
 | R2-ASSET-379 | mixed | ● active (branch candidate) |
+| R2-ASSET-403 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-397 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-engine
@@ -3462,6 +3463,13 @@ Claims labelled: 5384. Observation: 143. Static analysis: 4499. Mixed: 742.
 | R2-ENGINE-1803 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1804 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1805 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1840 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1841 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1842 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1843 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1844 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1845 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1846 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1816 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1817 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1818 | static analysis | ✔ promoted (branch candidate) |
@@ -3667,6 +3675,8 @@ Claims labelled: 5384. Observation: 143. Static analysis: 4499. Mixed: 742.
 | R2-SESSION-416 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-417 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-SESSION-486 | static analysis | ✔ promoted (branch candidate) |
+| R2-SESSION-506 | mixed | ✔ promoted (branch candidate) |
+| R2-SESSION-507 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-502 | static analysis | ✔ promoted (branch candidate) |
 | R2-SESSION-503 | static analysis | ✔ promoted (branch candidate) |
 

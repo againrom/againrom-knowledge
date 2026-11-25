@@ -22,6 +22,18 @@ application command with the Accept arm, the detail show, the commit and
 the cursor loader. The RU SetVar 776/781 pair sits at `L2.01108` and
 `L2.01109`, EN at `L2.01106` and `L2.01107`. — R2-ENGINE-283
 
+## Multiplayer route
+
+By the bodies read (Medium for the order a player sees; no run): main-menu button 1 (0x426),
+whose name Multiplayer is inferred (Medium), shows the EN character list view (three panels, ids
+0x462, 0x461 and 0x463; what each shows is Unknown). The list holds the matching `.a2c` files of the current
+directory and one last text entry. OK on that entry runs the same creation routine as New Game.
+After any OK the application shows pre-create when its flag +0x480 bit 4 is clear, else a
+further view (message 0x489) or the protocol list (0x451); which entry sets the bit is not read.
+Cancel posts 0x421 or closes the program, by whether an application string is empty. Medium that
+this route offers the campaign's choices: no mode test on it was read. — R2-ENGINE-1840,
+R2-ENGINE-1844
+
 ## Pre-create screen
 
 | Control | Rectangle | Mask | Art |

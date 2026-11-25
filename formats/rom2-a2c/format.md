@@ -66,6 +66,27 @@ framing) plus that tail checksum. — R2-SESSION-022
 A `BlCh` (`0x68436c42`) first dword marks a different variant whose flags at
 offset 0x4c drive a cleanup scan; its writer was not found. — R2-SESSION-022
 
+## Multiplayer list and server copy
+
+The EN multiplayer character list reads every `*.a2c` of the current directory, checks the magic
+and the checksum, takes the name from section A +0xc and keeps the file only when A +8 equals an
+application value (+0x3d8, source Unknown; an A +8 of 0x529c0291 or 0xbaadf00d is first replaced
+by +0x3d8). It orders the kept files by file time and appends one text entry; OK on that entry
+runs the creation routine, which creates a new character in memory; the two bodies read write no
+file (callees unread, Medium). Medium that the entry means "new character". — R2-ENGINE-1840
+
+The EN in-process server character writer runs only when Session +0x74 is nonzero; the map build
+stores `0x84 > 1` there, the server init stores `mode < 2`, other writers are unclassified, and
+whether a loose root map reaches the map build is Unknown (Medium). It writes to
+`<base>chr\<owner +0xa70>\<id0><id1>.a2c` when the owner's +0xa70 string is non-empty, else to
+`<id0><id1>.a2c`, through the same file writer. Section A takes a flag byte, unit byte +0x23c,
+the constant 4, unit byte +0x4b, owner byte +0xa44, the 8 bytes at owner +0x10, the name, the
+owner's +0x3c, +0xa48, +0xa4c, +0xa54 and +0xa58, the unit's words +0x84..+0x8a less bytes
++0xd4..+0xd7, a value computed from unit +0x140, byte +0x78 of unit +0x1c4, and the unit dwords
++0x240..+0x250; one buffer holds unit +0x74, +0x78 and slots 3..12, another the bag list. Medium
+that `<base>` is ChrBase. Which events call the writer, besides unit death, is Unknown.
+— R2-ENGINE-1841
+
 ## Relation to the save
 
 The save's Player body carries a 2,560-byte raw block of the same size as

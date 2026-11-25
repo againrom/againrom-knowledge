@@ -6082,6 +6082,78 @@ creature of that kind; Health and Mana on the card mean a 0xba followed LOAD.
 **Amends.** R2-SESSION-417: its Unknown is narrowed to the LOAD path's tie to the mission start.
 
 **Evidence.** [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md), question 3.
+## ROM2 server configuration: shipped `srv.cfg`, `[Maps]` times, GameSpeed, RepopDelay (EXP-2209)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-506 | ROM2 EN and RU ship one `srv.cfg` (626 bytes, same SHA256): RepopDelay 100, GameSpeed 4, MaxPlayers 16, GameType COOPERATIVE, Save server, and `[Maps]` with one entry `monsters.alm=10`. | High | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-SESSION-507 | ROM2 RU a2server stores a `[Maps]` entry's value times 60.0 (0x7fffffff without `=`) and keeps GameSpeed 0..8, else 4; an EN config parser clamps a `repopdelay` key to 20..500 (Medium that the file is `srv.cfg`). | High / Medium | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+
+### R2-SESSION-506
+
+The EN and RU roots hold the same `srv.cfg`: 626 bytes, SHA256
+2206cf3bd2065d0d8740793e332e98518e1862667673591e47b8ef51c72f8e10. Its key=value facts, in file
+order:
+
+| Section | Key | Value |
+|---|---|---|
+| Settings | RepopDelay | 100 |
+| Settings | Protocol | WSOCK_TCPIP |
+| Settings | GameSpeed | 4 |
+| Settings | LogFile | srv.log |
+| Settings | ChrBase | `chr1\` |
+| Settings | IPAddress | 127.0.0.1:8001 |
+| Settings | IPAddress2 | 127.0.0.1:8002 |
+| Settings | HatAddress | 127.0.0.1 |
+| Settings | ServerID | 1 |
+| Settings | SayRange | 256 |
+| Settings | ShoutDelay | 20 |
+| Settings | MaxPlayers | 16 |
+| Settings | Save | server |
+| Settings | GameType | COOPERATIVE |
+| Settings | Description | free text, not recorded |
+| Maps | monsters.alm | 10 |
+
+R2-SESSION-008 reads the network values of the RU file; this claim adds the EN root and the other
+keys.
+
+**Confidence.** High: both files read whole by the probe's cfg table, which prints section, key
+and value and drops comment text.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 2:
+`evidence/generated/data/en-srvcfg.tsv`, `ru-srvcfg.tsv`, `evidence/generated/inputs.tsv`.
+
+### R2-SESSION-507
+
+RU `a2server.exe` cfg parser `R2.0157`:
+
+- `[Maps]` (`L2.08727`): a line without `=` appends its name to list `L2.08728` and 0x7fffffff to
+  list `L2.08729`; a line with `=` appends the name and the value converted by `L2.08730`, times
+  the double 60.0 at `L2.08731`, converted to an integer (`L2.08732`). The three other code sites
+  holding `L2.08729` lie in `L2.08733`, unread.
+- `gamespeed` (`L2.08734`): a value below 0 or above 8 becomes 4; the result goes to `L2.08735`.
+
+An EN `allods2.exe` config parser window (starting at `L2.08736`, possibly inside an instruction;
+its entry and its file name unread) clamps a key `repopdelay` to 20..500 (below 20 becomes 20,
+above 500 becomes 500) and stores it at `L2.02527`, the value R2-ENGINE-510 reads as S in the
+group re-creation countdown 120 x S / 100. The same window stores 0 for `dplay_ipx` and 1 for
+`dplay_tcpip` of a key `protocol` at `L2.08710` (a `wsock_tcpip` arm lies past the window).
+
+**Confidence.** High for the parser bodies read. Medium that the EN file is `srv.cfg`: the key
+names match it, but the parser's entry and its file name are unread. Medium that the `[Maps]`
+value is a time and the product a unit conversion: `L2.08730` (assumed `atof`), `L2.08732` and
+the consumer `L2.08733` are unread. Medium that the EN clamp holds for RU: the RU `repopdelay`
+arm (`L2.08737`) is unread. Unknown what the server does when a map's time ends.
+
+**Unknown.** The map-time consumer. A run settles it: set `monsters.alm=0.05` in a copy of
+`srv.cfg`, start the server and note what happens after three minutes.
+
+**Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 2:
+`evidence/generated/listings/ru-srv-cfg-maps-L2.08738.txt`, `ru-srv-cfg-gamespeed-L2.08739.txt`,
+`en-cfg-repop-L2.08736.txt`, `evidence/generated/scans/ru-srv-f64-L2.08731.txt`,
+`ru-srv-maptimes-L2.08729.txt`; key sites: `evidence/nav/nav1/scans/ru-srv-strref-cfgkeys.txt`
+(navigation scan).
+
 ## ROM2 Outpost in a save: what is written and what a load rebuilds (EXP-2207)
 
 | ID | Claim | Confidence | Status | Evidence |

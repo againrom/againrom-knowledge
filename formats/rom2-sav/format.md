@@ -339,6 +339,14 @@ message 0x04 (Medium for the completeness of the four call sites); its server ar
 handler, which sends 0xba to a Player with a hero. Whether loading a save runs that mission start is not read (Unknown).
 — R2-SESSION-486
 
+By the bodies read (Medium for the order a player sees; no run): main-menu button 1 (0x426),
+whose name Multiplayer is inferred (Medium), shows a character list view; its OK leads through a
+protocol list and a join, host or local popup to a map choice, which sets the map name that the
+mission start takes. The respawn block calls the producer and party placement, so a hero that
+died after one of two EN server arms ran is placed at the cell owner word +0xa6c recorded, else at the
+map's drop list; what the producer restores is Unknown (Medium).
+— R2-ENGINE-1844, R2-ENGINE-1846, R2-ENGINE-1843
+
 Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
 byte +0x0d and no constructor store to its word +0x0c was found in the read
 EN bodies (terrain module listing, serializers and constructor chain);

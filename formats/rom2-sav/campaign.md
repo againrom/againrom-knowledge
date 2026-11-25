@@ -606,6 +606,15 @@ sender, its dword +0xa and its order against the creator are unread, and
 two EN callers of positioning are unclassified. The source of the drop list
 is Unknown. — R2-ENGINE-529, R2-ENGINE-530, R2-ENGINE-531, R2-ENGINE-532
 
+Owner word +0xa6c, the start cell placement prefers when Session +0x74 is nonzero, has four EN
+word stores found by a word-store byte pattern: two server arms record the unit's cell before
+passing the unit to an object (Medium that the objects are buildings), and the join and the owner
+constructor store 0. The respawn block calls the producer and party placement, so a hero that
+died after one of the two arms ran is placed at the recorded cell, else at the drop list; what
+the producer restores beyond the owner +0x38 reuse, the template, skill setup, HP and mana is
+Unknown (Medium; no run).
+— R2-ENGINE-1843
+
 Scenario.dll stores availability and town literals only for hires 1..7.
 After NewGame hires 8..20 stay unavailable (Medium), so every hire that
 enters has template rows. — R2-SESSION-199, R2-ENGINE-524
