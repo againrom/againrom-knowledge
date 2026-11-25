@@ -686,11 +686,11 @@ Pointer names U/V/P/G are as in R2-ENGINE-1313. — R2-ENGINE-1450
 | 14, 15 | same call: global L2.00994 with U and 0xffb | 20 | count of P's Buildings in [[[L2.00805]+0x7c]] with i16+0x42 above 0; does not count units (R2-ENGINE-1696) |
 | 26 | word +0x42 of the IR+0x70 object = low16 p0 | 22 | R=1 when terrain cell (p0, p1) exists; helper called on it |
 | 27 | cell move EN L2.03593 / RU L2.00093 on U to (p0, p1) (cell test L2.03600, then detach, position store, placement, command reset and broadcast calls; helper bodies unread), then Guard setter EN L2.00441 / RU L2.02815 when owner+0x2c != 0, whether or not the move was accepted (R2-ENGINE-1700) | 27 | R=1 when low8 x = p1, y = p2 and helper true |
-| 31 | filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn and, by R2-ENGINE-517, Building, 1 for Outpost; EN: 0 for Building and Pointer, EN Outpost slot unread), matches group number +0xac = p0, writes remaining respawn countdown +0xb4 = p1 read by Outpost::slot5 (R2-ENGINE-1701) | | |
+| 31 | filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn and, by R2-ENGINE-517, Building, 1 for Outpost; EN: 0 for Building and Pointer, 1 for Outpost, R2-ENGINE-1820), writes p1 into +0xb4, the remaining respawn countdown read by Outpost::slot5, of every Outpost whose group number equals p0, for every owner and with no loop exit (the filter passes only the Outpost in the classes with a record; EN Shop and Inn slot 14 unread, Medium; R2-ENGINE-1701); p1 counts container passes without S and the check fires on the (p1 + 1)-th pass (Medium, R2-ENGINE-1821) | | |
 | 33 | action 17's helper on each member of G | | |
 | 34 | p0 6, 15, 16 stores p1 at U+0x94, +0xbe, +0xc0 | | |
 
-Rows for the other numbers are in the tables above. — R2-ENGINE-1450 (amended), R2-ENGINE-1696, R2-ENGINE-1699, R2-ENGINE-1700, R2-ENGINE-1701
+Rows for the other numbers are in the tables above. — R2-ENGINE-1450 (amended), R2-ENGINE-1696, R2-ENGINE-1699, R2-ENGINE-1700, R2-ENGINE-1701 (amended), R2-ENGINE-1820, R2-ENGINE-1821
 
 One script tick adds 1 to register 999, runs the check loop, runs the trigger runner and
 empties the Session+0xbbec list, and the turn routine runs the tick before the loop over the

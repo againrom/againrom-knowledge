@@ -6082,3 +6082,63 @@ creature of that kind; Health and Mana on the card mean a 0xba followed LOAD.
 **Amends.** R2-SESSION-417: its Unknown is narrowed to the LOAD path's tie to the mission start.
 
 **Evidence.** [EXP-2200](../experiments/EXP-2200-rom2-creature-card/RESULTS.md), question 3.
+## ROM2 Outpost in a save: what is written and what a load rebuilds (EXP-2207)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-SESSION-502 | A ROM2 save writes an Outpost through Building Serialize: Outpost Serialize (RU L2.08608, EN L2.08605) calls Building Serialize and nothing else; whether Building Serialize or Outpost slot 1 writes any Outpost field is unread (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-SESSION-503 | A ROM2 load builds an Outpost through its class record (new 0xcc, default constructor, init): empty lists, group number 0, reload 120, no +0xb4 store (Medium); it re-creates no member; regrouping after a load is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+
+### R2-SESSION-502
+
+Outpost Serialize, vtable slot 2 (RU `L2.08608`, committed `EXP-2086` `out/listings/ru-serializers.txt`; EN
+`L2.08605`, 11 instructions read here), calls Building Serialize (RU `L2.02582`, EN `L2.01659`) and nothing else. The
+EN list writer `L2.05113` (committed `EXP-2120` `out/listings/en-list-serialize.txt`) writes the Buildings list as a
+count and one archive object per entry through `L2.04999` (unread). The EN Outpost vtable differs from the EN Building
+vtable only at slots 0, 1, 2, 5 and 14, so Building Serialize reaches Outpost code only through slot 0 (the class
+record), slot 1 (EN `L2.08604`, RU `L2.08607`, unread), slot 5 or slot 14.
+
+So the Outpost's own fields, the member list +0x6c, the template list +0x8c, the group number +0xac, the reload +0xb0
+and the countdown +0xb4, are written only if Building Serialize writes these offsets itself or through slot 1.
+
+**Confidence.** High for the two Serialize bodies. Medium for the fields not written: Building Serialize and slot 1
+are not read here, and `L2.04999` is unread.
+
+**Unknown.** Whether a ROM2 save file carries any Outpost field. Static run: read Building Serialize (RU `L2.02582`)
+for stores at +0x6c..+0xc8 and the Outpost slot 1 body.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 4;
+`evidence/generated/gen1/listings/en-outpost-slot2-L2.08605.txt`, `evidence/generated/gen1/scans/en-vtable-L2.05003.txt`.
+
+### R2-SESSION-503
+
+The Outpost class record (RU `L2.08609`, EN `L2.08603`; six-dword scans) holds the name "Outpost", size 0xcc, schema
+1, the creator (RU `L2.08611`, EN `L2.08612`) and the base Building record. The creator calls operator new with 0xcc
+(RU `L2.03294`, EN `L2.04063`) and the default constructor (RU `L2.08613`, EN `L2.05002`). That constructor calls the
+Building default constructor (RU `L2.08614`, EN `L2.08615`), constructs the lists +0x6c and +0x8c (RU `L2.08616`, EN
+`L2.03181`), sets the Outpost vtable and calls init (RU `L2.02516`, EN `L2.02535`), which sets +0xac = 0, +0xb8 = -1,
++0x68 = 0, +0xbc = 0, +0xb0 = 0x78 and +0xc0 = +0xc4 = +0xc8 = 0 and does not store +0xb4. The class-init code (RU
+`L2.08617`, EN `L2.08618`) passes the record to RU `L2.04517` / EN `L2.08619`; the archive reader (RU `L2.08620`, EN
+`L2.08621`) passes it to RU `L2.01148` / EN `L2.03455`. The EN list reader `L2.05113` clears the list (`L2.08622`,
+unread), reads a count and calls `L2.05099` per object, which reads one archive object against the Building class
+record through `L2.03455` (unread; committed `EXP-2178` `evidence/out-nav4/listings/en-unitfn-L2.08623.txt`).
+
+If the archive reader builds a saved Outpost through its class record and Building Serialize reads no Outpost field
+(R2-SESSION-502), a loaded Outpost has empty member and template lists, group number 0 and +0xb0 = 120 without S. The
+map caller takes the load route instead of the map build (R2-ENGINE-1816); that the load route runs no type-10 pass is
+Medium there. With slot 5 (R2-ENGINE-1817, R2-ENGINE-1818) the empty member list sets +0xc0 = 1. In the bodies read,
+such an Outpost has no member to re-create; whether it also appends an empty group 0 to its owner (Medium) and what
++0xb4 holds is not established.
+
+**Confidence.** High for the class record, the creator, the default constructor and the init stores, read in both
+roots. Medium for the loaded state: the archive reader `L2.03455`, the list clear `L2.08622`, Building Serialize and
+the Outpost's owner (+0x14) after a load are not read here, and the load routines are unread.
+
+**Unknown.** The value of +0xb4 after a load, and whether a loaded game re-forms Outpost groups at all. Run: on a root
+map in a mode that allows saving (whether one does is Unknown), wipe a type-10 group, save during the countdown, load,
+wait more than e1 + 1 container passes, and compare with the same run without the save and load.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 4;
+`evidence/generated/gen1/listings/ru-outpost-class-L2.08611.txt`, `en-outpost-class-L2.08612.txt`;
+`evidence/generated/gen1/scans/ru-classrec-L2.08609.txt`, `en-classrec-L2.08603.txt`, `ru-dword-L2.08609.txt`,
+`en-dword-L2.08603.txt`.

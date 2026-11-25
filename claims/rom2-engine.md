@@ -12631,6 +12631,8 @@ other `[reg+0x74]` stores would settle the gate.
 
 **Amended.** R2-ASSET-130 reads the root `.alm` maps: type-0 dword 0x84 is 4..16, above 1, in all 13 EN and 37 RU of them; the gate opens if the root maps are built by this routine, which was not read (Medium). The loader of a root map is Unknown; reading the callers of the build RU `L2.00113` settles it. Dword 0x88 is 1..4 there.
 
+**Amended.** R2-ENGINE-1816: the map build has one direct call site per root, RU `L2.04714` and EN `L2.04715`, in the map caller of R2-ENGINE-152, the only direct caller of the map build in each root; that a root map is built through it is Medium (the load routines and the callers of the pass are unread).
+
 ### R2-ENGINE-510
 
 For every owner (global RU `L2.00293`) whose +0x2c is not 0 (`L2.02508`..
@@ -12704,6 +12706,8 @@ caller would settle the first two; the EN store would settle the last.
 **Amended.** R2-ENGINE-1670 verifies EN/RU masked parity on the first 17 of 152 instructions of slot 5 (`L2.08245`/`L2.02521`; 152 of 152 here) and on the respawn method (`L2.08237`/`L2.08238`, 156 instructions, equal), confirming both roots read `+0xbc` (flag 2), `+0xc4`/`+0xc8` (flags 4/8) and `+0xb8` (flag 1 + position -> script action executor `L2.07383`/`L2.02490`); caller completeness remains Medium.
 
 **Amended.** R2-ENGINE-538 reads `L2.02502`: it returns dword +0xc of its receiver (High); that the value is a member count is Medium. The third argument of `L2.00313` is the positioning radius of R2-ENGINE-531.
+
+**Amended.** R2-ENGINE-1816 reads the EN owner and group guards. R2-ENGINE-1817 reads the caller of slot 5: once per container pass, which runs once per 16 session ticks in RU (Medium; EN tick unread). R2-ENGINE-1818 narrows the placement: around object+0x10 with radius +0xbc only when +0xbc is nonzero, else the positioning routine gets the member's own position and radius 0 (where the member then stands is Unknown); +0xb4 and +0xc0 are reset per member on a successful placement. R2-ENGINE-1819 reads the EN writer of `L2.02527` (constructor 100, parser clamp 20..500) and finds RU `L2.02529` to be "settings".
 
 ### R2-ENGINE-511
 
@@ -13062,6 +13066,8 @@ multiplayer shops and inns would be placed, are not censused; the census
 generator of R2-ASSET-123 over them would settle which kinds they build.
 
 **Amended.** R2-ENGINE-536 reads a reader of Inn +0xc4..+0xd4 (the offer generator, called from one Inn method whose receiver is inferred from addresses, Medium) and R2-ENGINE-539 a reader of Shop +0x70..+0xbf (the fill, through helper +0x94). Other readers are Unknown (R2-ENGINE-512). The root `.alm` maps hold Shops and Inns (R2-ASSET-130). The slot-5 caller stays unread.
+
+**Amended.** R2-ENGINE-1817 reads the caller of slot 5: the Buildings method calls it on every listed object once per container pass (RU; EN Medium); the container pass runs once per 16 session ticks in RU (Medium).
 
 ## Hire entry, mission and mission end
 
@@ -13539,7 +13545,7 @@ it settles its class.
 | R2-ENGINE-535 | A ROM2 actor with +0x1a0 set drops no bag or gold at death and pays no human attacker experience (Medium); type-6 0x10 bit 8, two spell arms and the map build (diplomacy byte toward "Self" bits 0..2 clear) set it. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ENGINE-536 | A ROM2 Inn builds a player's offer list from ten blocks gated by its 11a fields +0xc4, +0xc8, +0xcc, +0xd0 and word +0xd4 (receiver Medium), each candidate within a level window of the hero's top skill; an offer stays Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ENGINE-537 | ROM2 Inn offer blocks draw from flagged actors and groups: +0x194, +0x19c and +0x198 (type-6 0x10 bits 1, 2, 4) and group +0x48, +0x4c (type-10 e2 bits 4, 8); RU block 3 skips the Inn owner's groups, EN does not. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
-| R2-ENGINE-538 | ROM2 L2.02502 returns its receiver's dword +0xc: a group with 0 there gets no type-10 object, and slot 5 (Medium, R2-ENGINE-510) re-creates only at 0 or below; RU re-creates over the member spread, EN at radius 0 (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ENGINE-538 | ROM2 L2.02502 returns its receiver's dword +0xc: a group with 0 there gets no type-10 object, and slot 5 (Medium, R2-ENGINE-510) re-creates only at 0 or below; RU re-creates over the member spread, EN at radius 0 (Medium). | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ENGINE-539 | When Session+0x74 is not 0, a ROM2 Shop fill reads its stock record from the Shop's own 11b fields (+0x70) through helper +0x94, which the Shop constructor sets to the Shop; otherwise from Scenario.dll ordinal 15. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 
 ### R2-ENGINE-535
@@ -13775,6 +13781,8 @@ hits no window read classifies; reading the callers of the slot-5 entry in
 the type-10 object, Shop and Inn vtables settles it.
 
 **Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+**Amended.** R2-ENGINE-1817 reads the caller of slot 5 (once per container pass; once per 16 session ticks in RU, Medium). R2-ENGINE-1818 narrows the placement: the Outpost position and radius +0xbc are used only when +0xbc is nonzero; with 0, every EN member and RU members with a zero spread, the positioning routine gets the member's own position (where the member then stands is Unknown).
 
 ### R2-ENGINE-539
 
@@ -36617,7 +36625,7 @@ R2-ENGINE-504.
 | R2-ENGINE-1698 | ROM2 cell-entry consumer passes source bytes (+0x36, +0x37) unchanged to the cast actor, which takes cell (0, 0) when zero; application targets the entering unit or (+0x38, +0x39), and Action 25 (EN) with p4 = 0 writes (p2, p3). | High / Medium | ● active (amended, branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1699 | ROM2 script action 11 removes the item from U+0x7c via bag extract (unlinks quantity <= 1; splits quantity > 1 via slot +0x40, Weapon read), subtracts weight, notifies U, inserts or merges it into V+0x7c, and notifies V. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 | R2-ENGINE-1700 | ROM2 script action 27 calls the cell move (EN L2.03593, RU L2.00093; helper bodies unread), then, when owner+0x2c is nonzero, the Guard setter (order 0xb), whether or not the move was accepted. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
-| R2-ENGINE-1701 | ROM2 script action 31 filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn, Building, 1 for Outpost; EN Outpost slot unread), matches Outpost group +0xac == p0, writes respawn countdown +0xb4 = p1, read in Outpost::slot5. | High / Medium | ● active (branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
+| R2-ENGINE-1701 | ROM2 script action 31 filters Buildings by vtable +0x38 (RU: 0 for Pointer, Shop, Inn, Building, 1 for Outpost; EN 1: R2-ENGINE-1820), matches Outpost group +0xac == p0, writes respawn countdown +0xb4 = p1, read in Outpost::slot5. | High / Medium | ● active (amended, branch candidate) | [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) |
 
 ### R2-ENGINE-1695
 
@@ -36742,11 +36750,13 @@ Script action 31 (EN `L2.08361`, RU `L2.08362`; `EXP-2183` `{en,ru}-action-31.tx
 
 **Amends.** R2-ENGINE-1450: identifies the listed objects (`Outpost`), offsets `+0xac` and `+0xb4`, and the downstream reader `Outpost::slot5`. R2-ENGINE-510: slot 5 decrements `+0xb4` only after `+0xc0` is 1 (RU `L2.08301..L2.08302`; EN equal after masking by R2-ENGINE-510).
 
-**Confidence.** High for Action 31 and for `Outpost` constructor and `Outpost::slot5` in both EN and RU. for the slot bodies read natively in RU and EN: `L2.08365` (EN) and `L2.08363` (RU) return 0, `L2.08364` (RU Outpost) returns 1, so among the classes Building, Pointer, Shop, Inn and Outpost only Outpost passes the filter in RU. Medium for EN Outpost (its slot-14 value is not tabulated and its body unread), for other Building subclasses (no census of all vtables), and that no other routine reads `+0xb4` (no global `+0xb4` displacement census ran).
+**Confidence.** Superseded for the EN slot-14 body by R2-ENGINE-1820. High for Action 31 and for `Outpost` constructor and `Outpost::slot5` in both EN and RU. for the slot bodies read natively in RU and EN: `L2.08365` (EN) and `L2.08363` (RU) return 0, `L2.08364` (RU Outpost) returns 1, so among the classes Building, Pointer, Shop, Inn and Outpost only Outpost passes the filter in RU. Medium for EN Outpost (its slot-14 value is not tabulated and its body unread), for other Building subclasses (no census of all vtables), and that no other routine reads `+0xb4` (no global `+0xb4` displacement census ran).
 
 **Unknown.** The EN Outpost slot-14 body, and whether any other routine reads `Outpost+0xb4`. Settled in `allods2.exe` by loading a map copy with a type-10 Outpost group `g`, wiping the group, firing Action 31 with `(g, 1)` vs `(g, 500)`, and comparing the tick at which the group respawns.
 
 **Evidence.** [EXP-2199](../experiments/EXP-2199-rom2-remarks-open/RESULTS.md) `evidence/derived/summary.tsv`, `evidence/derived/inputs.tsv`; committed listings `en-action-31.txt`, `ru-action-31.txt`, `en-area-object-ctor.txt`, `en-area-class-methods.txt`, `ru-area-class-methods.txt`, `EXP-2064/out/tables.tsv`, `EXP-2065/out/tables.tsv`, `en-building-vtable.txt`; `evidence/native/pass1/listings/en-building-slot38-L2.08365.txt`, `ru-building-slot38-L2.08363.txt`, `ru-outpost-slot38-L2.08364.txt`.
+
+**Amended.** R2-ENGINE-1820 reads the EN Outpost slot 14 (`L2.08568`, returns 1), finds Building to be the base of four class records per root (Pointer, Outpost, Shop, Inn) and Outpost of none, and finds no owner test and no loop exit in action 31. R2-ENGINE-1821 gives the effect of p1 on a running countdown (pass numbers Medium).
 ## Script action effects: caster actions 21 and 24, placement, ownership, gold and bags (EXP-2202)
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -37839,3 +37849,227 @@ the route search (this table); the readers of +0x944f4 stay Unknown. R2-ENGINE-1
 the route search (it closes every kind).
 
 **Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 5.
+## ROM2 Outpost: map build caller, slot-5 rate, respawn placement, respawn scale, action 31 (EXP-2207)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1816 | ROM2 map build (RU L2.00113, EN L2.00186) has one direct call site per root, in the map caller of R2-ENGINE-152; the EN type-10 pass skips owners with +0x2c = 0 and groups whose L2.02798 value is 0, as RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-ENGINE-1817 | ROM2 Outpost slot 5 runs once per container pass: the Buildings method (RU L2.08569, EN L2.08570) calls virtual +0x14 on each listed object; its one direct caller runs in the RU session tick's mod-16 branch (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-ENGINE-1818 | ROM2 Outpost respawn (EN L2.08237, RU L2.08238) calls, per member, a template restore and the positioning routine: radius +0xbc around the Outpost if nonzero, else the member's own position, radius 0; no cycle counter read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-ENGINE-1819 | ROM2 EN respawn scale S (L2.02527): a static constructor writes 100; a parser stores the value it tests against "repopdelay" and "settings" (roles Medium), clamped to 20..500. RU L2.02529 is "settings". | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-ENGINE-1820 | ROM2 EN Outpost slot 14 (L2.08568) returns 1, as RU; Building is the base of four class records per root (Pointer, Outpost, Shop, Inn), Outpost of none; action 31 has no owner test and no loop exit. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-ENGINE-1821 | ROM2 action 31 on an Outpost countdown: p1 replaces +0xb4 unscaled by S; while counting the check fires on the (p1+1)-th container pass (Medium); before +0xc0 is set p1 waits; a re-formation reloads +0xb0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+
+### R2-ENGINE-1816
+
+Population: every E8 (`call`) or E9 (`jmp`) rel32 at any byte offset of the executable sections of each root's
+`allods2.exe` (inputs and full hashes in `evidence/generated/gen1/inputs.tsv`); calls through a register or a table
+are not covered. The RU dword scan covers every byte offset of the image.
+
+The call-target scans find one call of the map build per root: RU `L2.00113` at `L2.04714` in the map caller
+`L2.00112`, EN `L2.00186` at `L2.04715` in `L2.00222`. The RU dword scan finds no stored copy of `L2.00113`; no EN
+dword scan ran. R2-ENGINE-152 reads the map caller only to its split: the map build when Session+0x1ac is 0, the load
+(RU `R2.0121`, EN `L2.00289`) otherwise. Whether a root map reaches the type-10 pass through this site, and whether
+the load route runs no type-10 pass, is Medium: the load routines are unread, and the pass, the group function and
+the object constructors have no caller scan.
+
+The EN pass and group function in the committed listing `EXP-2064` `out/listings/en-world-build.txt` carry the RU
+guards of R2-ENGINE-510: the pass `L2.07400` walks the owners from `[L2.00292]`, skips an owner whose +0x2c is 0
+(`L2.08571`) and calls the group function `L2.02494` for each group of owner+0x28 (`L2.08572`); the group function
+calls `L2.02798(group)` at `L2.08573` and returns when the result is 0. The group function stores +0xb0 = 120 × S / 100
+and +0xb4 = +0xb0; a matching type-10 entry then sets +0xb0 = e1 × S / 100 (signed division) and +0xb4 = +0xb0
+(`L2.08574`..`L2.08575`). The pass appends the object through `L2.05098` (`L2.05130`), the routine the type-4
+Building arm calls at `L2.05103`.
+
+**Confidence.** High for the direct call scan and the EN guards. Medium that no other path runs the pass: callers of
+the pass (EN `L2.07400`), the group function (EN `L2.02494`) and the object constructors (RU `L2.02513`, EN
+`L2.02514`) were not scanned; the load routines `R2.0121` and `L2.00289` were not read; which route a root map takes
+is Unknown (R2-ENGINE-152); no EN dword scan of `L2.00186`. The EN caller `L2.00222` is not read past the call.
+
+**Unknown.** Which route a root map takes and whether a load runs the pass. Static run: call-target scans of EN
+`L2.07400`, `L2.02494` and `L2.02514` (RU `L2.02513`), an EN dword scan of `L2.00186`, and the bodies of `R2.0121`
+and `L2.00289`.
+
+**Amends.** R2-ENGINE-509: the loader its amendment left Unknown: the map caller of R2-ENGINE-152 is the only direct
+caller of the map build in each root; that a root map is built through it is Medium. R2-ASSET-130: the callers of the
+map build are read; which route a root map takes is Medium. R2-ENGINE-510: the EN owner and group guards are read
+(they were compared in RU only).
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 1;
+`evidence/generated/gen1/scans/ru-calls-L2.00113.txt`, `ru-dword-L2.00113.txt`, `en-calls-L2.00186.txt`.
+
+### R2-ENGINE-1817
+
+Population: every E8 (`call`) or E9 (`jmp`) rel32 at any byte offset of the executable sections of each root's
+`allods2.exe`; calls through a register or a table are not covered.
+
+The Buildings method RU `L2.08569` / EN `L2.08570` (36 instructions read in each root) walks its list with the
+iterator helpers RU `L2.02601`, `L2.02602`, `L2.02603` (EN `L2.07791`, `L2.07792`, `L2.07793`; unread, the helpers
+action 31 calls) and calls virtual +0x14, slot 5, on each object. The call-target scans find one direct caller per
+root: RU `L2.08576` in the container pass `L2.06029`, which passes `[this]`, and EN `L2.08577` in `L2.08460`
+(committed listings `EXP-2202` `evidence/native/pass1/listings/ru-container-L2.06029.txt`, `en-container-L2.08460.txt`).
+The RU session tick `L2.04380` (committed `EXP-2190` `evidence/generated/win/ru-sessiontick-L2.04380.lst`) calls the
+container pass on `[Session+0x7c]` at `L2.08578`, inside the branch taken when Session+4 modulo 16 is 12 (`and eax,
+0xf` at `L2.08579`, `cmp eax, 0xc` at `L2.08580`, `jne L2.06033`), the branch that also calls the world pass
+`L2.04378`. So in RU the Outpost slot 5 runs once per container pass, and this branch runs once per 16 session ticks
+(Medium: the tick object is read at one RU call site of four and the scheduler is unread; the step of
+Session+4 is in `L2.04406`, outside the window). +0xb0 and +0xb4 count container passes.
+
+Slot 5 (EN `L2.08245` in the committed listing `EXP-2064` `out/listings/en-area-class-methods.txt`; RU equal under the
+mask by R2-ENGINE-1670) first calls `L2.08581` (`L2.08582`, unread), then sets +0xc0 to 1 on the first pass at which
+no member in +0x6c has byte +0x13c below 3, an empty list included, and decrements +0xb4 in that same call. The check
+runs when the value before the decrement is 0 or below, so a countdown V fires on the (V+1)-th pass counted from the
+pass that set +0xc0. While the group still has members the call returns and +0xb4 goes on falling, so the check
+repeats on every pass until the group is empty. With S = 100 and e1 = 120, the default as well, V is 120: a countdown
+of 120 fires on the 121st pass, about 1,936 session ticks after the pass that set +0xc0 (Medium).
+
+**Confidence.** High for the bodies and the call chain read: the Buildings method in both roots, the container pass in
+both, the session tick in RU. Medium for the rate, the pass counts and the tick counts: the tick object read at one RU call
+site of four, the unread scheduler, the unread step of Session+4 and the unread EN tick; slot 5 as sole reader and
+writer of +0xb4 and +0xc0 is Medium (no displacement census ran); `L2.08581` and the meaning of byte +0x13c are unread; S is
+Medium (R2-ENGINE-1819). Medium that the method reaches every object: its iterator helpers are unread, and no dword
+scan of the method address ran, so an indirect call is not excluded.
+
+**Unknown.** Seconds per container pass at each game speed. Run: on a copy of a root map with a type-10 group, wipe
+the group at two speeds and time the re-formation; the counts above give the passes.
+
+**Amends.** R2-ENGINE-510, R2-ENGINE-538: their Unknown on the caller and call rate of slot 5 is answered for RU
+(Medium; EN tick unread). R2-ENGINE-521: the caller of the Shop and Inn slot 5 is the same Buildings method.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 2;
+`evidence/generated/gen1/listings/ru-buildings-method-L2.08569.txt`, `en-buildings-method-L2.08570.txt`;
+`evidence/generated/gen1/scans/ru-calls-L2.08569.txt`, `en-calls-L2.08570.txt`.
+
+### R2-ENGINE-1818
+
+The respawn method (EN `L2.08237` in the committed listing `EXP-2064` `out/listings/en-area-class-methods.txt`; RU
+`L2.08238`, equal under the mask by R2-ENGINE-1670) walks the member list +0x6c and the template list +0x8c in step.
+For each member it:
+
+1. calls `L2.04533(member)` on the list `[[Session+0x7c]+0xc]+4` (`L2.08583`);
+2. restores the member from its template, through `L2.08584(member, template)` (`L2.08585`) when template virtual +0x30
+   returns nonzero, else through member virtual +0x3c(template), and clears member word +0x18;
+3. places it with the positioning routine `L2.00312` (RU `L2.00313`, R2-ENGINE-531): when Outpost +0xbc is nonzero
+   (`L2.08586`) with the x and y of the Outpost's `[+0x10]` and radius byte +0xbc (call `L2.06990`), else with the x
+   and y of the member's own `[+0x10]` and radius 0 (call `L2.06991`);
+4. on success sets +0xc0 = 0 (`L2.08587`) and +0xb4 = +0xb0 (`L2.08005`), calls `L2.00319` on `[L2.00325]`,
+   `L2.04535(group, member)` and `L2.00202` on owner+0x24, and posts `L2.01056` on `L2.00994` with (member, 0,
+   0x800000fb, 0xffb, 0, 0) (`L2.08588`).
+
+After the loop it sets group +0x48 = +0xc4 and +0x4c = +0xc8, calls `L2.05047([L2.01066], group, 0)` (`L2.07156`)
+and runs the +0xb8 action when +0xb8 is 0 or above. RU takes the same placement branch (`L2.08589`..`R2.0154`,
+coordinate helpers `L2.00486`, `L2.00487`). Where the member then stands, and what the restore copies, rest on the
+unread callees below.
+
+Before the call slot 5 (`L2.08245`) stores 0xfda7 in Outpost word +0x42 and calls `L2.08328` (RU `L2.02525`) on each
+member whose byte +0x13c is below 5, then looks up the owner group (`[+0x14]+0x28`) whose +0x1c equals +0xac. It
+returns when `L2.02798(group)` is above 0; when no group matches it allocates a 0x50 group (constructor `L2.04046`),
+sets its +0x1c to +0xac and adds it through `L2.04047`. The bodies read hold no field that counts or bounds the
+cycles; the unread callees below may change a member's `[+0x10]`, bound the repeats or mark the group.
+
+EN keeps +0xbc at 0 (R2-ENGINE-511), so for every EN member the positioning routine gets the member's own `[+0x10]`
+and radius 0. In RU, +0xbc keeps the group spread when type-10 flag 2 is set, which 1,665 of the 1,696 RU entries
+have (R2-ASSET-360); these are entries, not groups, and a one-cell group's spread of 0 also gives radius 0.
+
+**Confidence.** High for the branch structure and the stores read. Medium for the effect in play: `L2.04533`,
+`L2.08584`, template virtual +0x30, member virtual +0x3c, `L2.00319`, `L2.04535`, `L2.00202`, `L2.01056`, `L2.05047`,
+`L2.08328` and the coordinate helpers are unread, so what the restore copies, whether it resets the member's
+`[+0x10]` to the template's position, and what the message does are not established. What byte +0x13c holds is not
+read (Medium).
+
+**Unknown.** The cell a re-created member takes when +0xbc is 0 (every EN member; RU entries with flag 2 clear). Run:
+on a copy of CROSS2.ALM in EN, draw a type-10 group away from its start cells, kill it there, wait for the
+re-formation, and compare each member's cell with its start cell and its death cell.
+
+**Amends.** R2-ENGINE-538: re-created members are placed around the Outpost position only when +0xbc is nonzero;
+with +0xbc = 0 the positioning routine gets the member's own position (where it then stands is Unknown). R2-ENGINE-510: "places it at object+0x10" holds only for a
+nonzero +0xbc, and +0xb4 and +0xc0 are reset per member on a successful placement.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 2.
+
+### R2-ENGINE-1819
+
+The EN static initialiser `L2.08590` loads ecx = `L2.02527` and calls the constructor `L2.08591`, which stores 100 at
+this+0 (`L2.08592`); the initialiser registers the destructor `L2.08593` through `L2.08594`. The parser that holds
+`L2.08595` converts a value string through `L2.08596`. When `L2.00997` compares the string at [ebp-0x2c] with
+"repopdelay" (EN `L2.08597`) and returns 0, and `L2.08598` given the string at [ebp-0x28] and "settings" (EN
+`L2.08599`) returns a nonzero low byte, the parser clamps the value to 20..500 and stores it at `[L2.02527]`
+(`L2.08600`). A dword scan of the EN file (navigation receipt) finds five references to `L2.02527`: two in the
+initialiser code, this store and two reads in the group function, which are R2-ENGINE-510's S. The RU string at
+`L2.02529`, which R2-ENGINE-510 names as the RU key, reads "settings" (8 characters).
+
+**Confidence.** High for the constructor store, the clamp and the store. Medium for the roles of the two strings:
+`L2.00997`, `L2.08598` and `L2.08596` are unread. Medium that S stays 100 when the parser does not store: the
+parser's caller and the file it reads are unread. Medium for the census of five, a navigation scan.
+
+**Unknown.** Which file feeds the parser and whether a shipped file sets the value; the RU counterpart of
+"repopdelay". Static run: read the callers of the parser `L2.08601` and the file name they open, and the RU parser
+around `L2.02528`.
+
+**Amends.** R2-ENGINE-510: the EN writer and default of `L2.02527` are read (100; clamp 20..500); RU `L2.02529` is
+"settings", the second string the EN parser tests, not the "repopdelay" string.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 2;
+`evidence/generated/gen1/listings/en-s-init-L2.08590.txt`, `en-s-ctor-L2.08591.txt`, `en-s-parser-tail-L2.08595.txt`,
+`evidence/generated/gen1/scans/ru-cstr-L2.02529.txt`; `evidence/nav/nav1/scans/en-dword-L2.02527.txt` for the dword census.
+
+### R2-ENGINE-1820
+
+The 16-entry scan of the EN Outpost vtable `L2.05003` gives slot 0 `L2.08602` (returns the class record `L2.08603`),
+slot 1 `L2.08604`, slot 2 `L2.08605`, slot 5 `L2.08245`, slot 14 `L2.08568` and slot 15 = 0. These are the only slots
+that differ from the EN Building vtable `L2.02577` (committed `EXP-2078`
+`evidence/derived/code/en-building-vtable.txt`, 15 slots). The RU Outpost vtable `L2.02515` (`EXP-2064` `out/tables.tsv`) holds `L2.08606`, `L2.08607`,
+`L2.08608`, `L2.02521` and `L2.08364` at slots 0, 1, 2, 5 and 14; the RU Building vtable is not tabulated, so the RU
+comparison is not made. EN slot 14 `L2.08568` loads
+1 and returns (8 instructions read), as RU `L2.08364` does (R2-ENGINE-1701).
+
+Class census over every aligned dword of each file: the Building class record (RU `L2.02572`, EN `L2.02573`) is the
+base field (+0x10) of exactly four class records per root, Pointer, Outpost (RU `L2.08609`, EN `L2.08603`), Shop and
+Inn, and its other three references are code. The Outpost record has three references per root, all code (slot 0,
+class init, archive reader), so no class record names it as base. The RU slot-14 body `L2.08364` occurs once as data,
+at `L2.08610`, slot 14 of the Outpost vtable.
+
+Action 31 (EN `L2.08361`, committed `EXP-2183` `generated/listings/en-action-31.txt`, RU `ru-action-31.txt`) walks
+`[[L2.00805]+0x7c]` with no owner test and no exit inside the loop: every listed object whose slot 14 returns nonzero
+and whose +0xac equals p0 (IR+8) gets +0xb4 = p1 (IR+0xc). So it writes p1 into +0xb4 of every Outpost whose group
+number equals p0, for every owner and with no loop exit (the filter passes only the Outpost in the classes with a
+record; EN Shop and Inn slot 14 unread, Medium).
+
+**Confidence.** High for EN slot 14, the EN vtable differences and the census of class records. Medium that no other
+object on the Buildings list passes slot 14: a class without a class record and the EN Shop and Inn slot 14 (unread in
+EN) are not excluded. The census covers class records whose base field names Building; a subclass of Shop, Inn or
+Pointer, or a Building object without a record, is not excluded.
+
+**Unknown.** The EN Shop and Inn slot-14 bodies. Static run: a jump-table scan of their EN vtables and an 8-instruction
+window on each slot-14 target.
+
+**Amends.** R2-ENGINE-1701: the EN Outpost slot 14 is read (returns 1); the subclass census its Medium named is done
+over class records; action 31 has no owner test and no loop exit.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 3;
+`evidence/generated/gen1/scans/en-vtable-L2.05003.txt`, `ru-dword-L2.02572.txt`, `en-dword-L2.02573.txt`,
+`ru-dword-L2.08609.txt`, `en-dword-L2.08603.txt`, `ru-dword-L2.08364.txt`; `evidence/generated/gen1/listings/en-outpost-slot14-L2.08568.txt`.
+
+### R2-ENGINE-1821
+
+Action 31 writes p1 into +0xb4 and leaves +0xb0 and +0xc0 as they are (R2-ENGINE-1701, R2-ENGINE-1820). Slot 5 and
+the respawn method (R2-ENGINE-1817, R2-ENGINE-1818) then give:
+
+- while +0xc0 is 0, a member having byte +0x13c below 3, slot 5 does not read +0xb4, and the countdown starts from p1
+  on the pass that sets +0xc0;
+- while +0xc0 is 1, the next passes read p1, p1 - 1, ..., and the check fires on the (p1 + 1)-th container pass
+  after the write; a p1 of 0 or below fires on the next pass;
+- p1 is a count of container passes: no S applies to it, unlike e1;
+- a successful placement reloads +0xb4 from +0xb0, so p1 lasts one cycle and the next cycle uses +0xb0.
+
+The check still needs the group empty: with members left it repeats on every pass.
+
+**Confidence.** High for the arithmetic over the read bodies (action 31 in both roots; slot 5 read in EN and equal
+under the mask in RU). Medium for the pass numbers: slot 5 as sole reader of +0xb4 and +0xc0 is Medium (R2-ENGINE-1701);
+`L2.08581` and byte +0x13c are unread. Medium for time in play: the pass rate is Medium (R2-ENGINE-1817) and the order
+of the script tick and the container pass within one session tick is not read, which can move the count by one pass.
+
+**Unknown.** The pass on which a write lands relative to slot 5. Run: wipe a type-10 group on a map copy, fire action
+31 with (g, 0) and with (g, 10), and count container passes to each re-formation.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 3.

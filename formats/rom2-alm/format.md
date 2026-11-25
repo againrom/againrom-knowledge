@@ -412,7 +412,7 @@ Type 10 entries are four i32, keyed on a unit group number:
 | Offset | Field |
 |---:|---|
 | 0x00 | group number (unit record 0x2c) |
-| 0x04 | percent, scaled by a global setting; the product is the reload value of the group object's countdown (Medium) |
+| 0x04 | percent e1: the group object's countdown reload is e1 × S / 100 container passes; S is 100 unless a settings parser stores 20..500 (EN read; Medium) |
 | 0x08 | flags 1, 2, 4, 8 |
 | 0x0c | position in the type-7 first array; the count of nodes before it with dword +0x40 below 0x10002 is passed to the routine `L2.02490` (Medium) |
 
@@ -423,15 +423,16 @@ each unit group of an owner with a nonzero +0x2c whose dword +0xc is not 0
 object, with defaults when no entry matches; every matching entry applies
 in file order. The 46 `scenario.res` campaign maps per root have dword
 0x84 = 1 and no type-10 entry. The 13 EN and 37 RU root `.alm` maps have
-dword 0x84 of 4..16, above 1, and type-10 entries; the gate opens for them
-if they are built by this routine (Medium: the loader of a root map is
-unread). Type-0 payload dword 0x88 is
+dword 0x84 of 4..16, above 1, and type-10 entries. The map build has one
+direct call site per root, in the map caller; that a root map reaches the pass
+through it, and that a load does not, is Medium (the load routines and the callers
+of the pass are unread). Type-0 payload dword 0x88 is
 stored in the map and the session; the editor's map-properties routine computes it from the
 largest unit level (the EN body read; Medium for when it runs; the save routine also sets map `+0xdc` to 1 and
 rewrites it in its placed-item loop, and whether that loop gives the same value is not read), and its meaning in the
 game is Unknown.
 — R2-ASSET-120, R2-ASSET-122, R2-ASSET-130, R2-ASSET-255, R2-ENGINE-509, R2-ENGINE-510,
-R2-ENGINE-538
+R2-ENGINE-538, R2-ENGINE-1816, R2-ENGINE-1819
 
 Flag 4 and flag 8 also put the group in Inn offer blocks 3 and 5 through
 group +0x48 and +0x4c. In block 3 RU skips groups of the Inn's own owner
@@ -444,13 +445,22 @@ the recreated `group+0x48`/`+0x4c`, and call script action executor
 `L2.07383`/`L2.02490` with `+0xb8` (flag 1 + position) when `>= 0` (High for the
 read bodies; Medium for caller/reader completeness across 37 direct `.text`
 `0x310` sites per root: 20 in map constructors, loader, teardown, the type-10 pass
-and unwind thunks, 17 on other bases that were not read). — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1670
+and unwind thunks, 17 on other bases that were not read). Slot 5 runs once per container pass, which runs once per 16
+session ticks in RU (Medium; EN tick unread), so the countdown counts container passes, and the check repeats on every
+pass until the group is empty. Per member the respawn calls a template restore and the positioning routine, with the
+object's position and radius `+0xbc` when `+0xbc` is nonzero, else with the member's own position and radius 0, which
+is every EN member (where the member then stands is Unknown); a successful placement reloads `+0xb4` from `+0xb0`, and
+no field read here bounds the cycles. — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1670, R2-ENGINE-1817,
+R2-ENGINE-1818
 
 Script action 31 filters the Buildings collection by vtable slot +0x38 (RU: returns 0 for Pointer, Shop, Inn and, by
-R2-ENGINE-517, Building, and 1 for Outpost; EN: returns 0 for Building and Pointer, the EN Outpost slot is unread;
-Medium that only Outpost returns nonzero), matches Outpost group number dword +0xac against p0, and writes remaining
-respawn countdown dword +0xb4 = p1, which Outpost::slot5 decrements once +0xc0 is 1 and uses to trigger respawn when it
-reaches 0 or below. — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1450 (amended), R2-ENGINE-1701
+R2-ENGINE-517, Building, and 1 for Outpost; EN: returns 0 for Building and Pointer and 1 for Outpost; Building is the
+base of four class records per root and Outpost of none). It writes p1 into +0xb4 of every Outpost whose group number
+(+0xac) equals p0, for every owner and with no loop exit (the filter passes only the Outpost in the classes with a
+record; EN Shop and Inn slot 14 unread, Medium). Outpost::slot5 decrements +0xb4 once +0xc0 is 1 and triggers respawn
+when it reaches 0 or below. p1 counts container passes without S; while the countdown runs, the check fires on the
+(p1 + 1)-th pass (Medium), and a re-formation reloads +0xb0. — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538,
+R2-ENGINE-1450 (amended), R2-ENGINE-1701 (amended), R2-ENGINE-1820, R2-ENGINE-1821
 
 Over all 142 installed maps (0 campaign entries; 674 EN and 1,696 RU root
 entries), type-10 flags use only bits 1, 2, 4 and 8 (bit 1: 7 EN / 26 RU;
@@ -470,6 +480,25 @@ takes `-1` (666 EN / 1,668 RU) or `0..9` (`0`: 1/1, `1`: 3/7, `2`: 3/7,
 | 7 | 1, 2, 4 | 0 | 4 | R2-ASSET-360 |
 | 10 | 2, 8 | 35 | 62 | R2-ASSET-360 |
 | 14 | 2, 4, 8 | 32 | 47 | R2-ASSET-360 |
+
+Percent e1 over the same entries: 120 in 494 EN and 1,009 RU entries, above 120 in 166 and 662, below 120 in 14 and
+25; 22 EN and 72 RU distinct values, 5..7500 EN and 5..30000 RU. CROSS2.ALM holds 238 entries per root and
+SHALLOW.ALM 108, the most. An entry that matches a group object sets its reload to e1 × S / 100; the counts are entries,
+not group objects built. With S = 100 an e1 of 120 fires on the 121st container pass (Medium).
+— R2-ASSET-397
+
+| Group object field | Use in the read bodies | Claim |
+|---:|---|---|
+| +0x14 | owner, from group +0x44 | R2-ENGINE-510 |
+| +0x6c | member list; the respawn walks it | R2-ENGINE-1818 |
+| +0x8c | template list, one copy per member, walked in step with +0x6c | R2-ENGINE-1818 |
+| +0xac | group number; slot 5 looks the group up by it, action 31 matches it against p0 | R2-ENGINE-1820 |
+| +0xb0 | countdown reload: 120 × S / 100, or e1 × S / 100 from a matching entry | R2-ENGINE-1816 |
+| +0xb4 | countdown in container passes; action 31 writes p1 into it | R2-ENGINE-1817, R2-ENGINE-1821 |
+| +0xb8 | argument of `L2.02490` at build and after a re-formation when 0 or above (set under flag 1), else -1 | R2-ENGINE-510 |
+| +0xbc | placement radius around the object; 0 places a member at its own position | R2-ENGINE-1818 |
+| +0xc0 | 1 once no member has byte +0x13c below 3; the countdown runs only then | R2-ENGINE-1817 |
+| +0xc4, +0xc8 | copied to group +0x48 and +0x4c after a re-formation | R2-ENGINE-1818 |
 
 Type 11 entries key on a type-4 object id, the sign-extended type-4 file
 word 0x12:
@@ -583,8 +612,9 @@ maps, so the two-value kind vocabulary of R2-ASSET-019 holds only for the
 files it described. — R2-ASSET-123, R2-ENGINE-520, R2-ASSET-019, R2-ASSET-237
 
 The Shop and Inn slot-5 bodies read in RU do not read the 11b or 11a
-fields; no caller of slot 5 was read, so when they run is Unknown.
-— R2-ENGINE-521
+fields; slot 5 runs once per container pass (R2-ENGINE-1817), so the bodies run
+once per 16 session ticks (Medium).
+— R2-ENGINE-521, R2-ENGINE-1817
 
 <a id="music-areas-type-12"></a>
 
@@ -871,7 +901,8 @@ is retracted). What an Inn offer is and which event builds the offer list also
 remain Unknown (R2-ENGINE-536). So does the reader of unit-record
 0x0a and 0x20 outside the two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0
-there (R2-ENGINE-511). Type 12 is decoded above (R2-ASSET-084). The editor's
+there (R2-ENGINE-511). With 0 the positioning routine gets the member's own position; which cell the member takes
+after the template restore is Unknown (R2-ENGINE-1818). Seconds per container pass are Unknown (R2-ENGINE-1817). Type 12 is decoded above (R2-ASSET-084). The editor's
 full-map writer declares type 0's 644 bytes as a constant while it writes 660
 (R2-ASSET-231). Why the constant is 644 remains Unknown. See [Editor write sequence](#editor-write-sequence).
 — R2-ASSET-023, R2-ASSET-024, R2-ASSET-231

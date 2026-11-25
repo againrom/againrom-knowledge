@@ -225,7 +225,7 @@ slot bodies). A ROM2 mage restores max*(M+100)*K/D hundredths of mana per 16-tic
 Units MP regeneration (R2-ENGINE-1566, High for the formula, Medium for the source of M and the Human D join, Unknown for D 0).
 A Building's actor slots do
 not walk its Effects, so no timer end is read for it; Token slot `+0x34` returns 0 here and slot `+0x2c` by R2-ENGINE-811,
-and the class sizes are those of R2-ENGINE-517 (slot `+0x38` of these classes is read in RU only, the EN Outpost slot is unread: R2-ENGINE-1701; R2-ENGINE-1550, High for the slots, Medium for the composition
+and the class sizes are those of R2-ENGINE-517 (slot `+0x38` of these classes is read in RU, and in EN for Building, Pointer and Outpost, which returns 1 as in RU: R2-ENGINE-1701 (amended), R2-ENGINE-1820; action 31 writes p1 into +0xb4 of every Outpost whose group number equals p0, for every owner and with no loop exit (the filter passes only the Outpost in the classes with a record; EN Shop and Inn slot 14 unread, Medium), counted in container passes: R2-ENGINE-1820, R2-ENGINE-1821; R2-ENGINE-1550, High for the slots, Medium for the composition
 and for whether a cast request can select such a target). The hold is the actor mask of R2-ENGINE-454 and R2-ENGINE-786.
 State 16, which makes the actor step skip its Effect walk (R2-ENGINE-786), is stored by two immediate `mov` stores per
 root with displacement 0x54, both on the death path; a unit removed from play is not given it among those stores (RU

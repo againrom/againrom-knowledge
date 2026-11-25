@@ -190,6 +190,16 @@ makes each Building object from the file is unread. In the bodies read
 (Medium), an entry's +0x0c after a load is the file's number, replaced by the
 object on a key hit. — R2-ENGINE-1221
 
+An Outpost, the type-10 group object, is a Building in the Buildings list. Its Serialize calls Building Serialize and
+nothing else in both roots; whether Building Serialize or Outpost slot 1 writes any Outpost field (member list,
+template list, group number, reload, countdown) is unread (Medium). — R2-SESSION-502
+
+A load builds an Outpost through its class record ("Outpost", size 0xcc, schema 1, base Building): the default
+constructor and init leave empty member and template lists, group number 0, reload 120 without S, and no countdown
+store (Medium: the archive reader and Building Serialize are unread here). In the bodies read such an Outpost has no
+member to re-create; whether it appends an empty group 0 to its owner is Medium, and whether a loaded game re-forms
+Outpost groups, and the countdown after a load, are Unknown. — R2-SESSION-503
+
 By two reference scans of the EN executable (Medium), no call site of a cell
 writer or of the positioning routine lies in the read load bodies. In the
 bodies read (Medium), entry +0x04, +0x08, +0x0c, +0x2c and +0x30 after a load

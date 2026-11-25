@@ -1880,7 +1880,7 @@ naming of each parameter follows R2-ENGINE-319.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ASSET-129 | The ROM2 ALM loader reads types 10, 11 and 12 by their type-0 counts in signed loops and never by payload size: a count of 0 or below reads nothing; a count that disagrees with the size misframes later records (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
-| R2-ASSET-130 | The 13 EN and 37 RU ROM2 root .alm maps are version 1600 with every counted payload exact; all hold type-10 and 11b entries, type-0 dword 0x84 is 4..16, and each EN file equals its RU namesake byte for byte. | High / Medium | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
+| R2-ASSET-130 | The 13 EN and 37 RU ROM2 root .alm maps are version 1600 with every counted payload exact; all hold type-10 and 11b entries, type-0 dword 0x84 is 4..16, and each EN file equals its RU namesake byte for byte. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ASSET-131 | A ROM2 ALM 11b entry is a shop stock record: for category i (0..3) mask 0x04+4i, minimum price 0x14+4i, maximum price 0x24+4i, draws 0x34+4i, quantity bound 0x44+4i; the Shop holds it in the Scenario.dll record layout. | High | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 | R2-ASSET-132 | In the ROM2 root .alm maps type-6 0x10 uses bits 1, 2, 4 and 8 and 0x0a takes 0..7; 11a flag 1 occurs although the type-4 pass stores nothing from it; the 11a word is 3661..3680 whenever flag 2 is set. | High | ✔ promoted (branch candidate) | [EXP-2068](../experiments/EXP-2068-rom2-map-records/) |
 
@@ -1983,6 +1983,8 @@ which routine builds it; reading the callers of the build RU `L2.00113`
 settles it.
 
 **Evidence.** [EXP-2068](../experiments/EXP-2068-rom2-map-records/)
+
+**Amended.** R2-ENGINE-1816 reads the callers of the map build: one direct call site per root, in the map caller of R2-ENGINE-152; which route a root map takes is Medium.
 
 ### R2-ASSET-131
 
@@ -4924,3 +4926,37 @@ No EN loose map holds action 21 or 24. Action 21 has no node with p5 = 0 in eith
 **Unknown.** How often Valley2 trigger 0 fires. The run that settles it: in the original RU program, load the loose Valley2 map, destroy object 551 and count the Stone Curse casts at unit 556.
 
 **Evidence.** [EXP-2202](../experiments/EXP-2202-rom2-script-actions/RESULTS.md) `evidence/census.py`, `evidence/census/target-nodes.tsv`, `action21-24-triggers.tsv`, `action21-24-checks.tsv`, `inputs.tsv`, `evidence/README.md` (reproduction receipt).
+## ROM2 type-10 entries per root map and their percent values (EXP-2207)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-397 | ROM2 type-10 entries per root map: CROSS2 holds 238 per root, SHALLOW 108; percent e1 is 120 in 494 of 674 EN and 1,009 of 1,696 RU entries, above 120 in 166 and 662, and spans 5..7500 EN, 5..30000 RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+
+### R2-ASSET-397
+
+Population: the committed table `EXP-2068` `out/maps/t10-entries.tsv`, one row per type-10 entry of the 13 EN and 37
+RU root `.alm` maps (R2-ASSET-360's population; the campaign maps have none). `evidence/derive.sh` counts it into
+`evidence/derived/q1-maps.tsv` (entries per map and root), `q1-percent.tsv` (entries per e1 value) and `q1-flags.tsv`
+(entries per e2 value); a second run into scratch was byte-equal.
+
+| Root | Maps | Entries | e1 = 120 | e1 above 120 | e1 below 120 | Distinct e1 | e1 range |
+|---|---:|---:|---:|---:|---:|---:|---|
+| EN | 13 | 674 | 494 | 166 | 14 | 22 | 5..7500 |
+| RU | 37 | 1,696 | 1,009 | 662 | 25 | 72 | 5..30000 |
+
+CROSS2.ALM has 238 entries in each root and SHALLOW.ALM 108, the two largest. The e2 counts equal R2-ASSET-360's
+flag table.
+
+By R2-ASSET-120 and R2-ENGINE-1816 an entry that matches a group object sets its reload to e1 × S / 100; the tables
+count entries, not group objects built (not counted). An entry changes a group object only when the owner's +0x2c is
+nonzero, the group's `L2.02798` value is nonzero and the entry matches the group. By R2-ENGINE-1817 the countdown
+counts container passes: with S = 100 a countdown of 120 fires on the 121st pass (about 1,936 session ticks, Medium),
+and the largest values, 7500 EN and 30000 RU, give reloads of 7,500 and 30,000 container passes (Medium).
+
+**Confidence.** High for the counts of entries: they are computed from the committed table and reproduced. Medium for
+the pass and tick values: matching, S = 100 (R2-ENGINE-1819) and the rate (R2-ENGINE-1817) are Medium.
+
+**Unknown.** None beyond those of R2-ENGINE-1817 and R2-ENGINE-1819.
+
+**Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 1;
+`evidence/derive.sh`, `evidence/derived/q1-maps.tsv`, `q1-percent.tsv`, `q1-flags.tsv`.
