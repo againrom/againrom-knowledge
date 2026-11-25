@@ -4174,7 +4174,7 @@ is 0x21, else 0x25.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ASSET-253 | ROM2 installed maps, EN 59 / RU 83: type-6 +0x28 high word equals the x low word, the low word is never 0, ids of types 4 and 6 share no value and ascend; 90 EN / 343 RU units name a sack. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
-| R2-ASSET-254 | ROM2 type-8 census: owner +0x04 is a unit id or 0 (25 ground sacks per root, x low byte 128); item ids high word 0, item word 0, binding 0 or a type-9 position whose cell is 0. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
+| R2-ASSET-254 | ROM2 type-8 census: owner +0x04 is a unit id or 0 (25 ground sacks per root, x low byte 128); item ids high word 0, item word 0, binding 0 or a type-9 position whose cell is 0. | High / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 | R2-ASSET-255 | ROM2 type-0 +0x20, +0x24, +0x2c equal the type-4, 6, 8 record counts and +0x28 the type-7 sum in all 142 maps; the editor counts CStructure, CUnit and sack-list objects; +0x88 is map +0xdc (EN). | High / Medium | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 | R2-ASSET-256 | ROM2 editor: structures, units and ground sacks share one id map; a new element takes the lowest free id from 1, map +0x8c becomes id + 1, positions are cell x 256 + 0x80. | High | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
 | R2-ASSET-257 | ROM2 editor new unit, structure and ground sack: stores read for each; dialog fields, default type-11 contents and the object tool unread; EN bodies; RU masked-equal for the document creators L2.07414, L2.07415, L2.07416 only. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2175](../experiments/EXP-2175-rom2-placement-write/RESULTS.md) |
@@ -4221,6 +4221,11 @@ Same population and tables as R2-ASSET-253.
 **Confidence.** High for the measured values. Unknown for the meaning of +0x10 on unit sacks and of the item
 word. Run that settles the item word and +0x10: copy a map, set the word to 1 and a ground sack's +0x10 to 500,
 load it in `allods2.exe` and inspect the bag and its items.
+
+**Amended.** R2-ENGINE-1803 finds the reader of the item word: stage C (EN only when Session +0x74 is 0, RU always;
+R2-ENGINE-1328) gives an item of a unit-owned sack whose word
+is nonzero to the owner's slot +0x44 (equip, Medium) and otherwise to the owner's bag. The clause that no reader is
+identified no longer holds; the effect in play stays Unknown.
 
 ### R2-ASSET-255
 

@@ -26,7 +26,7 @@ what the load reads and which ROM1 grammars still parse, not a new stored byte l
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1510 | ROM2 EN and RU: in the census of 21 references to map +0x3a4 per root, the actor builder and the mission-load loop read the row slots, neither row +0x0c nor +0x1c; other routes are unread. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
+| R2-ENGINE-1510 | ROM2 EN and RU: in the census of 21 references to map +0x3a4 per root, the actor builder and the mission-load loop read the row slots, neither row +0x0c nor +0x1c; other routes are unread. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
 | R2-ENGINE-1511 | ROM2 actor builder stores row words +0x20, +0x22 into actor words +0x94, +0x96 in both arms after the Units arm's scaling by object +0xd8 (difficulty, Medium); only the Humans arm resets an equal pair to -1. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
 | R2-ENGINE-1512 | ROM2 definition-id lookups compare the full dword id with Units parameter 0x37 or Humans 0x18, from count - 1 to 1, skipping a row whose row-test result is zero (read as no parameter array, Medium); helpers read in EN and RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
 | R2-ENGINE-1513 | ROM2 sack item builder: A = 1 builds a weapon (0x88 bytes), A = 2 a shield, A = 3..13 an armour, A = 0xe a magic item by the low id byte (table names by use, Medium); A = 0 and 0xf build nothing; EN read, RU by shape. | High / Medium | ✔ promoted (branch candidate) | [EXP-2186](../experiments/EXP-2186-rom2-map-records/RESULTS.md) |
@@ -72,6 +72,11 @@ the unit's colour, palette, size or level with the unedited copy.
 
 **Amends.** R2-ENGINE-513: its Medium for the absence of +0x0c and +0x1c readers stays Medium; the direct
 displacement route is now a census of 21 references per root.
+
+**Amended.** R2-ENGINE-1801 censuses the direct calls and stored dwords of the two list routines (EN `L2.08531`,
+`L2.07902`; RU `L2.02552`, `L2.02553`): 7 sites per root, all in the row loop, the teardown and the actor builder.
+The Medium on the getter callers other than the teardown is closed for direct calls; computed calls and copies stay
+Medium.
 
 ### R2-ENGINE-1511
 
@@ -25918,7 +25923,7 @@ the differing pushes and the RU-inserted tests mean is unread.
 | R2-ENGINE-875 | In the ROM2 census the hit fields are read by look-around (+0x54), the candidate builder and group sight (+0x58) and guard B (+0x98, +0x9c); +0x94 has no traced reader among traced bases; none of the read readers tests a route or reach. | High / Medium | ● active (branch candidate) | [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md) |
 | R2-ENGINE-876 | ROM2 cmd +0x9e/+0xa0 are accessed, among census-traced sites, only in guard B case 5 (untraced sites unclassified); its start follows xor eax,eax; je, so no read body starts it; five saves store 0. | High / Medium | ● active (branch candidate) | [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md) |
 | R2-ENGINE-877 | ROM2 thresholds +0x40/+0x44: census writers in L2.05176..L2.05177 plus an unread +0x44 write at L2.05178; the two traced readers are the R2-ENGINE-506 predicates, which test health and hostiles, not a route. | Medium / Unknown | ● active (amended, branch candidate) | [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md) |
-| R2-ENGINE-878 | ROM2 stand-in L2.05179 returns the cell of least `L2.05180` word on the first square ring 1..r-1 around the goal that holds a word below 0xffff, else 0; L2.05036 is a per-axis distance with a size argument. | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
+| R2-ENGINE-878 | ROM2 stand-in L2.05179 returns the cell of least `L2.05180` word on the first square ring 1..r-1 around the goal that holds a word below 0xffff, else 0; L2.05036 is a per-axis distance with a size argument. | High / Medium | ● active (amended, branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 | R2-ENGINE-879 | ROM2 L2.05181 traces list +0x1c8 from the end cell to the unit's cell by least neighbour word plus step cost, clearing it past 1000 steps; a nonzero stand-in so yields a route unless the helpers (unread) empty it. | High / Medium | ● active (amended, branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 | R2-ENGINE-880 | On an empty route the ROM2 executor tail's order-1 arm L2.02858 stops the unit (L2.01585) and gives it order 0xc, cmd word +0 = its cell and cmd +8 = 0 (L2.02636, L2.02637). | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 | R2-ENGINE-881 | The 7 census-traced ROM2 writes of target cmd +0x20 per root lie in group assignment L2.05172, L2.02424 and L2.05173: 0 with no member or enemy, the least-score enemy, or 0 when all are excluded. | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
@@ -25956,6 +25961,9 @@ list; the effect of the notice `L2.02354`.
 **Amended.** R2-ENGINE-1787 composes the stand-in for a pocket closed by terrain: a stand-in other than the unit's own
 cell keeps the route; whether a stand-in equal to the own cell empties the list is narrowed to the unread helpers
 `L2.05231` and `L2.05229`, not closed (Medium).
+
+**Amended.** R2-ENGINE-1804 reads `L2.05185`: it returns this + 0x30000 + 2 x ((y << 8) + x), the address of the
+search grid word, and reads the workers that fill the grid for each flag.
 
 ### R2-ENGINE-872
 
@@ -26154,6 +26162,10 @@ on the substitute; R2-ENGINE-873's Medium on `L2.05036` past its x axis.
 
 **Evidence.** [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md)
 
+**Amended.** R2-ENGINE-1804 reads `L2.05180`(key): it returns this + 0x30000 + 2 x key, the word `L2.05185` addresses
+for the same cell and the same `this`. The `this` at the stand-in's call sites is not read, so the Medium narrows to
+that `this`.
+
 ### R2-ENGINE-879
 
 `L2.05181`(unit, x0, y0, x, y) (EN `L2.05225`, masked-equal; raw E8
@@ -26187,6 +26199,10 @@ equal to the unit's cell stays open).
 **Amended.** R2-ENGINE-1787 composes the stand-in for a pocket closed by terrain: a stand-in other than the unit's own
 cell keeps the route; whether a stand-in equal to the own cell empties the list is narrowed to the unread helpers
 `L2.05231` and `L2.05229`, not closed (Medium).
+
+**Amended.** R2-ENGINE-1804 reads `L2.05185` (grid word address), `L2.05230` (terrain byte address, this + key) and
+`L2.02402` (returns unit virtual +0x20); the Medium on these three is closed. `L2.05231`, `L2.05229`, `L2.05228` and
+`L2.02566` stay unread.
 
 ### R2-ENGINE-880
 
@@ -31049,8 +31065,8 @@ placement arm is composed in EN.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1288 | ROM2 type-4 load: x and y kept as value >> 8, kind, word +0x0c, owner word +0x0e, id +0x12; kind 0x21 or bit 24 reads 8 more bytes. | High | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
-| R2-ENGINE-1289 | A ROM2 Building takes the row its kind byte indexes by position; kind 0 or above count − 1 gets no row; extension bytes replace the size. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1288 | ROM2 type-4 load: x and y kept as value >> 8, kind, word +0x0c, owner word +0x0e, id +0x12; kind 0x21 or bit 24 reads 8 more bytes. | High | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
+| R2-ENGINE-1289 | A ROM2 Building takes the row its kind byte indexes by position; kind 0 or above count − 1 gets no row; extension bytes replace the size. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1290 | ROM2 EN and RU resolve a flag-0 unit's definition id to a Units row by `serverID`; a miss returns 0 and builds the unit from row 0. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1291 | ROM2 type-5: file +0 + 1 is Player +0xa44, file +4 AND 0x2 sets +0xa60, file +8 is unread; diplomacy low bytes fill the matrix, diagonal 0x12. | High / Medium | ✔ promoted (branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
 | R2-ENGINE-1292 | The ROM2 type-9 grammar holds in EN and RU; mode < 4 with a cell, mode & 8 (a unit's spellbook) and mode & 4 take separate arms. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2172](../experiments/EXP-2172-rom2-map-placements/RESULTS.md) |
@@ -31084,6 +31100,11 @@ element constructors 80, tail 200 and owner resolve 40 instructions; `evidence/n
 re-read in `evidence/derived/listings/`. R2-ASSET-237 parses all 142 installed maps with this grammar.
 Medium that x >> 8 and y >> 8 are tile coordinates: the location routine EN `L2.07308` is unread; every
 installed value lies inside the map (R2-ASSET-237).
+
+**Amended.** R2-ENGINE-1802 reads the arms of the type-4 pass: in that pass word +6 is read only on the Building arm (a
+zero test; the zero is copied to Building +0x42); the Shop, Inn and Pointer arms do not read it (other readers of map
+list +0x390 are not censused). It reads the location routine EN `L2.07308` (word +2 = (y << 8) + x), so x >> 8 and
+y >> 8 are cell coordinates (EN body read; Medium that they index the planes).
 
 ### R2-ENGINE-1289
 
@@ -31124,6 +31145,10 @@ for the parameter-to-title map: the parameter getter EN `L2.02667` is unread.
 means beyond the zero test. R2-ASSET-237 finds no such kind in the installed maps.
 
 **Amended.** R2-ENGINE-1512 reads the parameter getter `L2.02667` (EN, `[this+4] + 4 x i`); the Medium for the parameter-to-title map stays for the collection identity.
+
+**Amended.** R2-ENGINE-1802: the zero test of word +6 and the store to +0x42 run on the Building arm only in the type-4
+pass; the Shop, Inn and Pointer arms skip them there (other readers of map list +0x390 are not censused). No body read
+takes a nonzero value of the word; what it means stays Unknown.
 
 ### R2-ENGINE-1290
 
@@ -32017,6 +32042,10 @@ A = 2 arms are read. The item word (file) has no reader identified.
 
 **Amended.** R2-ENGINE-1513 reads every builder arm (A = 1, 2, 3..13, 0xe, 0 and 0xf); the clause that arms other than A = 1 and 2 are unread no longer holds. The item word still has no reader.
 
+**Amended.** R2-ENGINE-1803 finds the reader of the item word in stage C (EN only when Session +0x74 is 0, RU always;
+R2-ENGINE-1328): an item of a unit-owned sack with a nonzero word goes to the owner's slot +0x44, otherwise to the owner's bag. The clauses that the item word has no reader no
+longer hold.
+
 ### R2-ENGINE-1328
 
 `evidence/derived/listings/{en,ru}-sack-stage-c.txt` (masked-equal 217/217): for a sack whose owner id is 0 the
@@ -32033,7 +32062,7 @@ EN runs the sack stage only when Session +0x74 is 0; the RU stage has no such te
 | R2-ENGINE-1338 | ROM2 loader (EN L2.02484, RU R2.0002, masked-equal): type 1 reads W*H*2 bytes whatever its record says, type 2 reads its own size field, type 3 reads the size left by the last type-2 record; read results are not tested. | High / Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 | R2-ENGINE-1339 | ROM2 loader codes at map +0x8c (1 is stored before the open): bad magic 2, under 3 records 3, version above 0x640 4, no type 1 gives 5, no type 2 gives 6; a missing type 3 becomes zeros; the caller's reaction to a status is unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 | R2-ENGINE-1340 | ROM2 terrain build (EN L2.03175, RU L2.07458, masked-equal): per cell type-1 bit 0x2000, tile class 8, tile bits 0x200 and a nonzero type-3 byte set plane +0x10000 to 1 or 5; the type-2 byte is stored at +0x944f4. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
-| R2-ENGINE-1341 | ROM2 border ring (EN L2.06926, RU L2.07459, masked-equal): after the cell loop the 8-cell ring gets 0x1f in plane +0x10000 (W = H: four sides of W x W; else a 256 x 256 frame plus the real right and bottom edges). | High | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
+| R2-ENGINE-1341 | ROM2 border ring (EN L2.06926, RU L2.07459, masked-equal): after the cell loop the 8-cell ring gets 0x1f in plane +0x10000 (W = H: four sides of W x W; else a 256 x 256 frame plus the real right and bottom edges). | High | ✔ promoted (amended, branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 | R2-ENGINE-1342 | ROM2 map load indexes the type-2 and type-3 buffers at y*W+x for every cell with no test against their allocated size; no W, H, tile-index, height or type-3 range test was found in the bodies read. | Medium | ✔ promoted (branch candidate) | [EXP-2176](../experiments/EXP-2176-rom2-objects-planes-write/RESULTS.md) |
 
 ### R2-ENGINE-1338
@@ -32132,6 +32161,10 @@ sent across it; a map with the type-2 byte of one cell changed, compared by the 
 
 **Amended.** R2-ENGINE-1665 interprets tile-class routine EN `L2.06958` / RU `L2.07473` and its three tables (`+0x540a6`, `+0x54126`, `+0x54146..+0x54150`), showing it writes no height plane. R2-ENGINE-1667 documents the client type-3 copy (`L2.01385`/`L2.01386` interior `x=8..W - 9`, `y=8..H - 5` into zeroed `client+0x14`, High) and links server value `5` on `+0x10000`/`+0x20000` to footprint masks `0x41`/`0x44`/`0x82` (Medium). Downstream client readers of `client+0x14` remain Unknown.
 
+**Amended.** R2-ENGINE-1804 reads the route-search readers of +0x10000 and +0x20000, and R2-ENGINE-1805 composes
+which unit kinds the values 1, 5 and 0x1f close (Medium); the Unknown that +0x10000 blocks movement is answered for
+the route search. No route-search worker or helper read takes +0x944f4 (the unread ones are named in R2-ENGINE-1804); its readers stay Unknown.
+
 ### R2-ENGINE-1341
 
 Sources: RU window `evidence/nav1-out/listings/ru-border-ring-L2.07459.txt`; EN listing EXP-2085
@@ -32148,6 +32181,9 @@ It runs after the cell loop of R2-ENGINE-1340, so it overrides a 1 or a 5 stored
 **Confidence.** High for the stores. The meaning of 0x1f is not read: the readers of the plane are unread
 (R2-ENGINE-1340). No installed map has W different from H, so the second shape is read, not exercised by an
 installed file.
+
+**Amended.** R2-ENGINE-1805: in the route search 0x1f closes a cell for the mask bytes of all three unit kinds
+(Medium composition), so the meaning of 0x1f is read for that reader.
 
 ### R2-ENGINE-1342
 
@@ -36028,7 +36064,7 @@ of check 2 is High, of checks 3 and 27 Medium; check 22's L2.07790 stays Medium.
 |---|---|---|---|---|
 | R2-ENGINE-1665 | ROM2 tile classifier EN L2.06958 / RU L2.07473 indexes 4x14 weights (+0x540a6), 9 class pairs (+0x54126) and 11 terrain costs (+0x54146..+0x54150); EN equals RU; per-map u16 sets censused (530 EN, 589 RU values). | High / Unknown | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
 | R2-ENGINE-1666 | ROM2 ALM header reader EN L2.02735 / RU R2.0003 puts typeId at [ebp-0x34] unless the 0x3e8 skip case (unread, Medium); arm 2 fills asset+0x14 (type-2 height), copied to client+0x10 by L2.01385/L2.01386 (High, both roots). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
-| R2-ENGINE-1667 | ROM2 type-3 plane (asset+0x10): client L2.01385/L2.01386 copies interior x=8..W - 9, y=8..H - 5 into zeroed client+0x14 (downstream readers Unknown); server writes 5 to P1/P2 (Medium block). | High / Medium / Unknown | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
+| R2-ENGINE-1667 | ROM2 type-3 plane (asset+0x10): client L2.01385/L2.01386 copies interior x=8..W - 9, y=8..H - 5 into zeroed client+0x14 (downstream readers Unknown); server writes 5 to P1/P2 (Medium block). | High / Medium / Unknown | ● active (amended) | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
 | R2-ENGINE-1668 | ROM2 Blizzard validity EN L2.02717 / RU L2.01700 (61 of 61 masked-equal) admits a cell iff 8<=x<=W - 9 and 8<=y<=H - 9, reading only type-0 W and H (+0x50000, +0x50004), clamping out-of-band; other callers unread (Summon calls it). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
 | R2-ENGINE-1669 | ROM2 type-9 mode-4 stage arm (EN L2.07317/RU L2.05960, 93/93) and caster ctor (28/28) never read element +0x1a; all 412 installed mode-4 records have count 0 (7 of 8 RU mode-5 carry 1..3). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
 | R2-ENGINE-1670 | ROM2 type-10 readers: 0xcc slot-5 (first 17 of 152 compared) and respawn EN L2.08237 / RU L2.08238 (156, equal) read +0xbc (flag 2), +0xc4/+0xc8 (flags 4/8) and +0xb8 (flag 1+pos -> action exec); 37 direct 0x310 sites per root (17 unread). | High / Medium | ● active | [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) |
@@ -36142,6 +36178,8 @@ and `200`, load in `allods2.exe`, inspect rendered object/terrain at that cell a
 links server byte `5` on `+0x10000`/`+0x20000` to the footprint mask testers of R2-ENGINE-789 and R2-ENGINE-809.
 
 **Evidence.** [EXP-2197](../experiments/EXP-2197-rom2-map-planes-records/RESULTS.md) `evidence/derived/q2-plane-chain.tsv`.
+
+**Amended.** R2-ENGINE-1804: RU L2.03520 (EN L2.02720) is the AND of two bytes; the P1 footprint loop is RU L2.08532 (EN L2.08533), which calls it (R2-ENGINE-1667's footprint tester naming narrowed).
 
 ### R2-ENGINE-1668
 
@@ -37581,3 +37619,223 @@ of `L2.00342`. R2-ENGINE-506: its Human thresholds do not reach a Human built by
 `L2.03298` (returns the string length) are read here.
 
 **Evidence.** [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) question 7.
+## ROM2 map fields the game reads: unit-row routes, type-4 word +0x0c, sack item word, route-search planes (EXP-2206)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1801 | ROM2 EN and RU unit list: the two routines the row loop calls on map +0x3a4 have 7 direct call sites per root, all in the row loop, the teardown and the actor builder, and no stored dword; no such route reads row +0x0c or +0x1c. | High / Medium | ✔ promoted (branch candidate) | [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) |
+| R2-ENGINE-1802 | ROM2 type-4 pass (EN L2.00189, RU masked-equal): every arm reads x, y, kind, owner and id; in this pass the Shop, Inn and Pointer arms do not read word +6 (file 0x0c); the Building arm only tests it for zero and copies the zero to +0x42. | High / Medium | ✔ promoted (branch candidate) | [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) |
+| R2-ENGINE-1803 | ROM2 sack word: type-8 arm appends it to list +0x28; stage C (EN only if Session +0x74 is 0, RU always; R2-ENGINE-1328) gives a unit-owned sack's item to owner virtual +0x44 when the word is nonzero, else to the owner's bag. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) |
+| R2-ENGINE-1804 | ROM2 route search (RU L2.05174, EN masked-equal): flag 1 floods over plane +0x10000, flag 0 over +0x20000; a neighbour whose plane byte AND the unit mask is nonzero is skipped; kind 1 adds the terrain byte to the step cost. | High / Medium | ✔ promoted (branch candidate) | [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) |
+| R2-ENGINE-1805 | ROM2 passability, size-1 flag-1 route test: plane +0x10000 value 1 closes kind 1, 5 kinds 1 and 2, the ring's 0x1f all three; terrain byte 255 only raises kind 1's cost in the workers read; no worker or helper read takes the type-2 byte. | Medium | ✔ promoted (branch candidate) | [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) |
+
+### R2-ENGINE-1801
+
+Population: every direct `call` or `jmp` (E8/E9 rel32) in the executable sections, and every stored dword in any
+section, of each root's `allods2.exe` that names one of the two list routines the mission-load row loop calls on map
++0x3a4: EN `L2.08531`, `L2.07902`; RU `L2.02552`, `L2.02553` (`evidence/derived/scans/{en,ru}-q1-rowget-calls.txt`,
+`{en,ru}-q1-rowget-dwords.txt`). Each root has 7 call sites and 0 stored dwords:
+
+| Body (EN / RU) | EN sites | RU sites | Committed listing |
+|---|---|---|---|
+| mission-load row loop, inside `L2.01385` / `L2.01386` | `L2.08534`, `L2.08535` | `L2.08536`, `L2.08537` | EXP-2064 `{en,ru}-mission-load-rows.txt` |
+| map teardown `L2.07901` / `L2.07905` | `L2.08538`, `L2.08539` | `L2.02563`, `L2.02564` | EXP-2186 row-teardown listings |
+| actor builder `L2.00192` / `L2.00115` | `L2.08540`, `L2.08541`, `L2.08542` | `L2.08543`, `L2.08544`, `L2.08545` | EXP-2064 `{en,ru}-actor-builder.txt` |
+
+The three bodies are those R2-ENGINE-1510 reads: the builder and the loop read the row slots of its table and
+neither +0x0c (file 0x0a) nor +0x1c (file 0x20); the teardown tests and frees each element. So no body reaches a row
+through a direct call of these routines and reads +0x0c or +0x1c.
+
+**Confidence.** High for the census: both roots give 7 sites in the same three bodies and no stored dword. Medium
+that file 0x0a and 0x20 have no reader: a computed call of the two routines, a copy of a row or of the list, and a row
+pointer handed on from the three bodies are outside this scan; the bodies of the two routines are not re-read here.
+
+**Unknown.** What file fields 0x0a and 0x20 do in play. Run: copy an installed map, set 0x20 of one unit from 10 to 3
+and, in a second copy, 0x0a of one unit by 1, load each in `allods2.exe` and compare the unit with the unedited copy.
+
+**Amends.** R2-ENGINE-1510: its Medium on the callers of the row getters other than the teardown is closed for direct
+calls and stored dwords (7 sites per root, all in bodies read); the Medium for computed calls and copies stays.
+
+**Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 1.
+
+### R2-ENGINE-1802
+
+The type-4 pass EN `L2.00189..L2.08546` (EXP-2120 `en-type4-pass.txt` to `L2.07307`, then EXP-2172
+`en-t4-tail.txt`) and RU `L2.00114` (`evidence/derived/listings/ru-q2-type4-pass-{a,b}.txt`; EN and RU equal in
+position under the address mask over the 360 instructions of the EN pass listing, `evidence/derived/census/maskcmp.tsv`;
+the tail 200 of 200 by R2-ENGINE-1288) holds the element (R2-ENGINE-1288) in stack slot `[ebp-0x18]`. Every load of
+that slot, 42 in the EN pass and tail listings and 42 in the RU listings, is followed by a dereference; none is passed on
+(`evidence/derived/census/slots.tsv`). The class tests read the kind word +4. Per arm:
+
+| Arm | Kinds | Element fields read | Word +6 (file 0x0c) |
+|---|---|---|---|
+| Shop, constructor EN `L2.01634` | 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b | x byte +0 and y byte +2 for the location, kind byte +4, id +0x10 in a list compare | not read in this pass; jumps to `L2.08547` |
+| Inn, constructor EN `L2.08548` | 0x43..0x45, 0x63..0x65, 0x6f..0x71 | the same | not read in this pass; jumps to `L2.08547` |
+| Pointer, call EN `L2.02574` (not read) | 0x46..0x4b | the same and the extension bytes +0xa, +0xc; the id compared with +0x10 over map list +0x34c | not read in this pass; jumps to `L2.08547` |
+| Building, constructor EN `L2.02575`(kind, location, +0xa, +0xc) | every other kind | x, y, kind, +0xa, +0xc | `movsx` and zero test at EN `L2.08549`; a zero is copied to Building +0x42; a nonzero value is not read |
+
+From `L2.08547` every arm reads the owner word +8 into EN `L2.00308` (result at +0x14) and the id +0x10 into +8.
+
+The location routine EN `L2.07308`(x, y, `L2.01839`) (`evidence/derived/listings/en-q2-location-L2.07308.txt`, `ret
+0xc`, body from `L2.02713`) stores x at +0, y at +1, the word (y << 8) + x at +2, 0x80 at +4 and +5 and its third
+argument at +8. The word at +2 has the form of the cell key of the terrain planes (R2-ENGINE-1340); no read of a plane through a
+location word is shown. So the element's x >> 8 and y >> 8 are cell coordinates (EN body read; Medium that they index
+the planes).
+
+The pass takes each element from map list +0x390 through the list getter EN `L2.08550` (`en-type4-pass.txt`,
+`L2.08551..L2.08552`). Other readers of that list are not censused here: the client map builder EN `L2.01385` walks it
+(R2-ENGINE-615) and creates objects from entry words +0, +2, +4 and +0x10 with builders EN `L2.03155`, `L2.03156` and
+`L2.03157` that no committed window reads.
+
+**Confidence.** High for the arm table in EN and RU and for the EN location body; Medium that its word is the
+terrain-plane key (the form matches R2-ENGINE-1340; no plane read through it is shown); the RU location body is unread
+(RU calls its own copy at the masked address). Medium that the slot census covers every route to the element: a copy
+of the element pointer held outside `[ebp-0x18]` is not followed. The population is the type-4 pass over the elements
+of map list +0x390. Other readers of that list are not censused: the client map builder EN `L2.01385` walks it
+(R2-ENGINE-615) and its object builders EN `L2.03155`, `L2.03156` and `L2.03157` are unread; no count of references to
++0x390 or of calls of EN `L2.08550` was made. Outside the pass the absence of a read of word +6 is Medium.
+
+**Unknown.** What Building +0x42 does when a zero word clears it. Run: in a copy of an installed map set file word
+0x0c of one Building-kind element from 100 to 0, load both copies in `allods2.exe` and compare that building in play.
+
+**Amends.** R2-ENGINE-1288: its row "+6 word: zero clears Building +0x42" holds for Building-arm kinds only; in the type-4 pass the
+Shop, Inn and Pointer kinds do not read the word. Its Medium that x >> 8 and y >> 8 are tile coordinates is narrowed:
+cell coordinates (EN location body read; Medium that they index the planes). R2-ENGINE-1289: the sentence that the tail sets +0x42 to 0 when word +6 is 0 is bounded to
+Building-arm kinds.
+
+**Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 2.
+
+### R2-ENGINE-1803
+
+The type-8 arm of the dispatcher (EN `L2.08239`, RU `L2.08240`; EXP-2068 `{en,ru}-dispatcher.txt`) takes the head
+count as its loop bound and stores head +0x04 at sack +0x3c, +0x08 at +0x40, +0x0c at +0x44 and, from version 0x3dd,
++0x10 at +0x48 (0 below it). It reads per item a
+u32 id, appended to the sack through `L2.08553`; a u16 word, appended to the sack's list +0x28 (EN `L2.07397`, RU
+`L2.07403`); and a u32 binding, appended to list +0x14. Stage B (EN `L2.07445`, EXP-2144 `en-stage-b.txt`) looks the
+owner up in the unit table when sack +0x3c is nonzero and builds a bag `L2.01737` when it is 0. Stage C (EN
+`L2.08554..L2.08555`, EXP-2175 `en-sack-stage-c.txt`; RU masked-equal, R2-ENGINE-1328) places each built item i. EN
+runs the sack stage only when Session +0x74 is 0; the RU stage has no such test (R2-ENGINE-1328: EXP-2144 stage B, 160
+of 163 equal under the register mask); the stage-C body itself is masked-equal (217 of 217). What Session +0x74 = 0
+means in play is unread. The three cases:
+
+1. Ground sack: into the new bag through `L2.01055`.
+2. Unit-owned sack, word +0x28[i] nonzero: owner virtual +0x44(item).
+3. Unit-owned sack, word 0: `L2.01055`(item) on the owner's bag `[owner+0x7c]`.
+
+Slot +0x44 (`evidence/derived/scans/{en,ru}-q3-slots.txt`; bodies in `evidence/derived/listings/*-q3-*-slot44-*.txt`,
+EN and RU equal under the mask over 60 of 60 instructions each):
+
+| Vtable (EN / RU) | Slot +0x44 (EN / RU) | Body |
+|---|---|---|
+| `L2.04102` / `L2.02314` | `L2.01777` / `L2.08556` | calls item virtual +0x38(unit); a nonzero result goes into the bag `[unit+0x7c]` through EN `L2.01055` / RU `L2.01313`; then calls unit virtual +0x5c |
+| `L2.00217` / `L2.00218` | `L2.08557` / `L2.01310` | calls this virtual +0x40(item) (EN `L2.08558`, RU `L2.01311`); a nonzero result goes into the bag |
+
+Slot +0x40 of the first vtable is EN `L2.01776`, RU `L2.08559`. EN `L2.01055` calls `L2.08358`(bag + 0x1c, item),
+not read (`evidence/derived/listings/en-q3-bag-add-L2.01055.txt`). R2-ENGINE-405 reads these slot bodies as equip
+(+0x40, RU `L2.01311` the equip test) and equip with the displaced item to the bag (+0x44), with `L2.00218` the RU
+Human vtable. So a nonzero item word makes the owner equip the item, a displaced or refused item going to its bag;
+a zero word puts the item into the bag. The item word is 0 in the 139 EN and 327 RU items of the 59 EN and 83 RU
+`.alm` maps of the root folder and the `scenario.res` members (R2-ASSET-254); `world.res`, saves and user maps are
+outside that census.
+
+**Confidence.** High for the store of the word, the stage-C branch (EN read, RU masked-equal; EN under the Session
++0x74 gate), the slot values and the slot bodies in both roots. Medium for "equip" and "bag": item virtual +0x38, the +0x40 bodies and `L2.08358` are not
+read here and carry R2-ENGINE-405's grade, and which vtable a given owner has is not read per unit. Unknown in play.
+
+**Unknown.** The effect of a nonzero item word in play. Run: in a copy of an installed map set the item word to 1 on
+one item of a unit-owned sack, load it in `allods2.exe` and compare the unit's equipment and bag with the unedited copy.
+
+**Amends.** R2-ENGINE-1327: its sentence that the item word has no reader identified is replaced; stage C reads it.
+R2-ASSET-254: its clause that no reader of the item word is identified is replaced, and its Unknown on the meaning
+of the word is narrowed to the effect in play.
+
+**Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 3.
+
+### R2-ENGINE-1804
+
+The route search RU `L2.05174` / EN `L2.05175` (EXP-2122 `{ru,en}-route-search.txt`; masked-equal, R2-ENGINE-871)
+branches on its flag `[ebp+0x1c]`: nonzero to the workers that read plane +0x10000, zero (from `L2.08560`) to those
+that read +0x20000. The unit's size byte (virtual +0x1c, +0x49) chooses the size-1 or the larger workers. RU windows
+in `evidence/derived/listings/`; per-listing plane displacements in `evidence/derived/census/planes.tsv`:
+
+| Workers (RU) | Plane | Size | Neighbours tested |
+|---|---|---|---|
+| `L2.08518`, `L2.08519` | +0x10000, read directly | 1 | 8 |
+| `L2.08561`, `L2.08562` | +0x20000, read directly | 1 | 8 |
+| `L2.08563`, `L2.08564` | +0x10000 through `L2.08532` (cell `L2.08565`, AND `L2.03520`) | larger | 3 x 3, own cell included |
+| `L2.08566`, `L2.08567` | +0x20000 through `L2.02114` | larger | 3 x 3, own cell included |
+
+The two workers of a pair differ only in the displacements of their frontier lists (244 of 256 and 168 of 174
+instructions equal). The size-1 P1 and P2 workers differ only in their six plane reads (390 of 396). A size-1 worker
+takes the neighbours at key offsets -0x101, -0xff, +0xff, +0x101, -0x100, -1, +1 and +0x100 and skips a neighbour
+whose plane byte AND the unit's mask byte is nonzero. The step cost for kind 1 (unit virtual +0x20 = 1, through
+`L2.02402`) is the grid word plus the terrain byte at +key straight, and word + byte + byte >> 1 diagonal; for other
+kinds 2 straight and 3 diagonal. A neighbour's word is replaced when the new cost is below it.
+
+Helpers, read whole in RU: `L2.05185`(x, y) returns this + 0x30000 + 2 x ((y & 0xff) << 8 + (x & 0xff)); `L2.05180`(key)
+returns this + 0x30000 + 2 x key; `L2.05230`(x, y) returns this + ((y & 0xff) << 8) + (x & 0xff); `L2.02402` returns
+this virtual +0x20. EN and RU equal under the mask: footprint test `L2.08532` / `L2.08533` 80 of 80; size-1 P1 worker 256
+of 256, continuation 140 of 140 and tail 120 of 120; larger P1 worker 256 of 256; size-1 P2 worker 256 of 256. In
+the workers and helpers read (RU eight workers, the footprint test `L2.08532` with `L2.03520`, the helpers `L2.02402`,
+`L2.05185`, `L2.05180`, `L2.05230`, `L2.08565`; EN three workers and the footprint test `L2.08533`) a terrain byte
+enters only kind 1's step sum and no test closes a cell on it, and none takes the type-2 byte (+0x944f4); `L2.03871`,
+`L2.05228`, `L2.05231`, `L2.05229`, `L2.02566`, the stand-in and the callers of the search are unread (Medium).
+
+**Confidence.** High for the RU bodies and the EN equality of the windows compared. Medium for the flag mapping
+(walk and approach 1, repath 0) at R2-ENGINE-871's grade, for the mask byte per kind at R2-ENGINE-809's, for the
+footprint loop `L2.08532` and its AND `L2.03520` at R2-ENGINE-1667's, and for the RU-only pairs (second list workers, larger P2 workers),
+which have no EN window here. That `L2.05180` and `L2.05185` read the same grid needs the same `this` at the
+stand-in's call sites, which is not read.
+
+**Unknown.** Which pass runs the second worker of each pair. Run: break on RU `L2.08518` and `L2.08519` in one walk
+order on an open map and record which runs first.
+
+**Amends.** R2-ENGINE-879: `L2.05185`, `L2.05230` and `L2.02402` are read (grid word address, terrain byte address,
+unit virtual +0x20); `L2.05231`, `L2.05229`, `L2.05228` and `L2.02566` stay unread. R2-ENGINE-878: `L2.05180`
+addresses the same word as `L2.05185` for one `this` (Medium for the `this`). R2-ENGINE-871: `L2.05185` is read. R2-ENGINE-1667: RU L2.03520 (EN L2.02720) is the AND of two bytes; the P1 footprint
+loop is RU L2.08532 (EN L2.08533), which calls it (R2-ENGINE-1667's footprint tester naming narrowed).
+
+**Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 5.
+
+### R2-ENGINE-1805
+
+Composed from R2-ENGINE-1340, R2-ENGINE-1341 and R2-ENGINE-1665 (the values of plane +0x10000), R2-ENGINE-809 and
+R2-ENGINE-1667 (mask byte 0x41, 0x44, 0x82 for unit kinds 1, 2, 3) and R2-ENGINE-1804 (the route test). What each
+value of plane +0x10000 as the terrain build stores it closes, for flag 1 (Medium composition; the flag-0 plane is not
+derived here):
+
+| Cell content | +0x10000 | Kind 1 (0x41) | Kind 2 (0x44) | Kind 3 (0x82) |
+|---|---:|---|---|---|
+| type-1 bit 0x2000; tile class 8; `(tile & 0x300) == 0x200` | 1 | closed | open | open |
+| nonzero type-3 byte (stored after the class tests) | 5 | closed | closed | open |
+| 8-cell border ring (stored after the cell loop) | 0x1f | closed | closed | closed |
+| a cell none of the three stores touches | 0 (initial value and other writers of +0x10000 not read here) | open | open | open |
+
+Tile class 8 is group 7 (`(tile & 0x3c0) >> 6 = 7`) with weight above 2, that is `low = tile & 0xf` in {1, 3, 4, 5,
+10, 11, 12, 13} for mid 0, {0, 1, 2, 3, 5, 7, 10, 12, 13} for mid 1, {1, 3, 4, 5, 7, 10, 12, 13} for mid 2 and {0..5,
+10..13} for mid 3 (R2-ENGINE-1665). The table is the test of one cell. A unit of size 1 applies it to each of 8 neighbours; a larger unit applies it to
+every cell of its size x size footprint from the neighbour's key (RU `L2.08532`), so a neighbour is closed when any
+footprint cell is closed. A unit whose virtual +0x20 is not 1, 2 or 3 keeps mask 0x41 (R2-ENGINE-809) and takes the
+step cost of the other kinds.
+
+In the route-search workers and helpers read (RU eight workers and the footprint test, EN three workers) a terrain
+byte (255 for a class of 13 and above) enters only kind 1's step sum and no test closes a cell on it; `L2.03871`,
+`L2.05228`, `L2.05231`, `L2.05229` and the stand-in are unread (Medium). With flag 0 (repath) the route test reads plane
++0x20000, which the terrain build fills through a copy call whose body is unread (R2-ENGINE-1340) and which
+R2-ENGINE-809 rebuilds with occupancy bits and structure masks. No worker or helper read takes the type-2 byte
+(+0x944f4).
+
+**Confidence.** Medium: the composition rests on the mask byte per kind (R2-ENGINE-809, Medium for the live mask) and
+the flag mapping (R2-ENGINE-871, Medium). High for the three stores of the terrain build and the size-1 route test;
+Medium for the mask per kind (R2-ENGINE-809), the flag roles (R2-ENGINE-871) and for the absence of other writers of
++0x10000.
+
+**Unknown.** Passability in play. Run: in a copy of `10.alm` set one row of cells across a corridor to type-1 bit
+0x2000 and a second row to a nonzero type-3 byte, load it in `allods2.exe`, order a unit of each kind across both rows
+and record which rows each crosses.
+
+**Amends.** R2-ENGINE-1340: its Unknown on what the values 1 and 5 of +0x10000 mean to their readers is answered for
+the route search (this table); the readers of +0x944f4 stay Unknown. R2-ENGINE-1341: the meaning of 0x1f is read in
+the route search (it closes every kind).
+
+**Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 5.

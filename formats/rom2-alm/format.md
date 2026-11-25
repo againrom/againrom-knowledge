@@ -212,6 +212,39 @@ roots); that no other check gates Blizzard placement is Medium, because the rout
 is shared with Summon positioning (R2-ENGINE-789) and its other callers are unread.
 Other readers of the type-3 plane are not excluded. — R2-ENGINE-1667, R2-ENGINE-1668
 
+The route search (RU `L2.05174`, EN `L2.05175`) floods a word grid at +0x30000 + 2 × key from the unit's cell. With
+its flag 1 (walk and approach, Medium) it tests plane +0x10000. With flag 0 (repath) it tests plane +0x20000, which
+the terrain build fills through a copy call whose body is unread (R2-ENGINE-1340) and which R2-ENGINE-809 rebuilds
+with occupancy bits and structure masks. A neighbour is skipped when its plane byte AND the unit's mask byte (0x41, 0x44
+or 0x82 for unit kinds 1, 2 and 3; Medium for the live mask) is nonzero. A unit of size 1 tests the 8 neighbours; a
+larger unit tests a 3 × 3 neighbourhood through the footprint test. A step costs, for kind 1, the terrain byte
+at +key straight and one and a half times it diagonal (rounded down), and for other kinds 2 straight and 3
+diagonal; a neighbour's word is replaced when the new cost is below it. No worker or helper read takes the type-2
+byte (+0x944f4); `L2.03871`, `L2.05228`, `L2.05231`, `L2.05229`, `L2.02566`, the stand-in and the callers of the
+search are unread (Medium). — R2-ENGINE-1804, R2-ENGINE-871, R2-ENGINE-809
+
+What each value of plane +0x10000 as the terrain build stores it closes, for flag 1 (Medium composition; the flag-0
+plane is not derived here):
+
+| Cell content | +0x10000 | Kind 1 (0x41) | Kind 2 (0x44) | Kind 3 (0x82) | Claim |
+|---|---:|---|---|---|---|
+| type-1 bit 0x2000; tile class 8; `(tile & 0x300) == 0x200` | 1 | closed | open | open | R2-ENGINE-1805 |
+| nonzero type-3 byte | 5 | closed | closed | open | R2-ENGINE-1805 |
+| 8-cell border ring | 0x1f | closed | closed | closed | R2-ENGINE-1805 |
+| a cell none of the three stores touches | 0 (initial value and other writers of +0x10000 not read here) | open | open | open | R2-ENGINE-1805 |
+
+The table is the test of one cell. A unit of size 1 applies it to each of 8 neighbours; a larger unit applies it to
+every cell of its size × size footprint from the neighbour's key (RU `L2.08532`), so a neighbour is closed when any
+footprint cell is closed. A unit whose virtual +0x20 is not 1, 2 or 3 keeps mask 0x41 (R2-ENGINE-809) and takes the
+step cost of the other kinds. — R2-ENGINE-1805, R2-ENGINE-1804
+
+Tile class 8 is group 7 (`(tile & 0x3c0) >> 6 = 7`) with weight above 2: `low` in {1, 3, 4, 5, 10, 11, 12, 13} for
+`mid` 0, {0, 1, 2, 3, 5, 7, 10, 12, 13} for `mid` 1, {1, 3, 4, 5, 7, 10, 12, 13} for `mid` 2 and {0..5, 10..13} for
+`mid` 3. In the route-search workers and helpers read (RU eight workers and the footprint test, EN three workers) a terrain
+byte of 255 (class 13 and above) enters only kind 1's step sum and no test closes a cell on it; `L2.03871`,
+`L2.05228`, `L2.05231`, `L2.05229` and the stand-in are unread (Medium). What a unit of
+each kind does on these cells in play is Unknown. — R2-ENGINE-1805, R2-ENGINE-1665
+
 The loader and the build compare no plane size with W×H and no value with a
 range (Medium). All 142 installed maps are square and none is wider than
 256. What a short plane or a map wider than 256 columns does in play is
@@ -242,19 +275,19 @@ uses other fields.
 |---:|---|---:|---|
 | 0x00, 0x04 | i32 | +0x00, +0x04 | x, y; shifted right by 8 into the placement call (the 1/256 tile unit is Medium) |
 | 0x08 | i16 | +0x08 | read by the mission-load row loop, as a lookup index into a collection whose record chooses the object build; no actor-builder read (Medium) |
-| 0x0a | u16 | +0x0c | no reader found in the census of 21 references (Medium); 0..7, 0 only in the person arm (R2-ASSET-313, R2-ENGINE-1510) |
+| 0x0a | u16 | +0x0c | no reader found in the census of 21 references and of the 7 direct calls of the row routines per root (Medium); 0..7, 0 only in the person arm (R2-ASSET-313, R2-ENGINE-1510, R2-ENGINE-1801) |
 | 0x0c | u32 | +0x48 | flags; bit 0x10 selects the person arm |
 | 0x10 | u32 | +0x50 | bits 1, 2, 4, 8 set actor +0x194, +0x19c, +0x198, +0x1a0; read at version 0x47e and above. Bits 1, 2 and 4 put the unit in Inn offer populations; bit 8 removes its death drop and the experience a human attacker is paid for it (Medium) |
 | 0x14 | u32 | +0x10 | definition id; read at version 0x3db and above; names the Units row (flag 0x10 clear) or Humans row by serverID, see [the definition tables](map-definitions.md#type-6-definition-id-to-databin-row) (R2-ENGINE-1512, R2-ASSET-316) |
 | 0x18 | u32 | +0x14 | owner, low word only |
 | 0x1c | u32 | +0x44 | 1-based type-8 index; that type-8 element takes the record's 0x28 low word |
-| 0x20 | u32 | +0x1c | no reader found in the census of 21 references (Medium); 0..14, 10 in 6,255 of 6,395 EN Units-arm records (R2-ASSET-313, R2-ENGINE-1510) |
+| 0x20 | u32 | +0x1c | no reader found in the census of 21 references and of the 7 direct calls of the row routines per root (Medium); 0..14, 10 in 6,255 of 6,395 EN Units-arm records (R2-ASSET-313, R2-ENGINE-1510, R2-ENGINE-1801) |
 | 0x24, 0x26 | i16 | +0x20, +0x22 | actor words +0x94 and +0x96 in both arms, after the Units arm's scaling by object +0xd8 (difficulty, Medium, R2-ENGINE-1002); -1 keeps the default; an equal pair other than -1 is reset to -1 in the person arm only (R2-ENGINE-1511) |
 | 0x28 | u32 | +0x3c | low word read; two bytes below version 0x456, four from 0x456 |
 | 0x2c | u32 | +0x40 | group number; the map keeps the maximum |
 
-"No reader found" is bounded to the actor builder and the mission-load
-row loop. Installed values in the campaign maps: 0x08 1..107, 0x0a 1..6,
+"No reader found" is bounded to the actor builder, the mission-load
+row loop and the direct calls of the row routines (R2-ENGINE-1801). Installed values in the campaign maps: 0x08 1..107, 0x0a 1..6,
 0x0c {0, 16}, 0x10 {0, 8}, 0x1c 0..4, 0x20 0..14 (10 in nearly every
 record), 0x2c 0..38. In the root `.alm` maps: 0x0a 0..7, 0x0c {0, 4, 16,
 20}, 0x10 {0, 1, 2, 3, 4, 5, 8, 9, 11, 12} in EN and also 10 in RU (the builder tests each bit separately; R2-ENGINE-513), 0x18 2..15 with high
@@ -265,6 +298,11 @@ The actor builder and the mission-load loop are the only bodies read that take f
 y, 0x14, 0x18, 0x24, 0x26, 0x28, 0x2c, 0x0c, 0x10; the loop: the same without 0x10, with 0x08); none of 21 direct
 references to the list per root reads the slot of 0x0a or 0x20; a route that hands the list or a row to another body
 is unread (Medium). — R2-ENGINE-1510
+
+The two list routines the row loop calls on the list (EN `L2.08531`, `L2.07902`; RU `L2.02552`, `L2.02553`) have 7
+direct call sites per root and no stored dword, all in the row loop, the map teardown and the actor builder. So no
+body reaches a row through a direct call of them and reads the slot of 0x0a or 0x20; a computed call or a copy of a
+row is outside that census (Medium). — R2-ENGINE-1801
 
 Value sets in the installed maps (EN 59 maps, 7,461 records; RU 83, 15,482), flag 0x10 clear is the Units arm, set the
 person (Humans) arm. 0x0a: EN Units arm 1..6, person arm 0..7; RU 1..7 and 0..7. 0x20: EN Units arm 0, 2, 4, 6, 8, 10,
@@ -294,7 +332,11 @@ shield, A = 3..13 an armour, A = 0xe a magic item whose row is the low id byte (
 installed maps hold EN 139 and RU 327 items, all with a row in range, and for every weapon, shield and armour the
 row's Slot parameter equals A; none has A of 0, 3, 11, 13 or 15 (rows in [the definition
 tables](map-definitions.md#sack-item-to-databin-row)). — R2-ENGINE-1513, R2-ENGINE-1514, R2-ASSET-319. The item word is 0 in
-every installed item and has no reader found. The binding is 0 or a 1-based type-9 position; that element
+the 139 EN and 327 RU items of the 59 EN and 83 RU `.alm` maps of the root folder and the `scenario.res` members
+(`world.res`, saves and user maps are outside that census). The loader appends it to the sack's list +0x28; stage C
+(EN only when Session +0x74 is 0, RU always; R2-ENGINE-1328) gives, for a unit-owned sack, an item whose word is
+nonzero to the owner's slot +0x44 (equip, a displaced or refused item going to the bag; Medium), and an item
+whose word is 0 to the owner's bag (Medium); the effect in play is Unknown (R2-ENGINE-1803). The binding is 0 or a 1-based type-9 position; that element
 has cell (+8, +0xc) zero, +0x00 equal to the item's 0-based position and +4 nonzero, or the item is skipped.
 A sack owner naming no unit is not tested before use; the result is Unknown.
 EN `L2.08239` and RU `L2.08240` (113/113 masked-equal) share one version-gated
@@ -302,6 +344,16 @@ grammar (`>= 0x3dd`: the arm reads the `+0x10` dword when the version is not bel
 `0x3dd`; no installed map has version `0x3dd`), consuming every installed map's
 type-8 payload with 0 bytes left over across all 59 EN and 83 RU maps.
 — R2-ASSET-254, R2-ASSET-359, R2-ENGINE-1326, R2-ENGINE-1327, R2-ENGINE-1328
+
+| Field | Width | Where the loader keeps it | Game use | Claim |
+|---|---|---|---|---|
+| head +0x00, item count | u32 | loop bound | one item read per count | R2-ENGINE-1803 |
+| head +0x04, owner id | u32 | sack +0x3c | nonzero: the owner from the unit table; 0: a ground sack in a new bag | R2-ENGINE-1803 |
+| head +0x08, +0x0c, x and y | u32 | sack +0x40, +0x44 | ground sack only: placed at x >> 8, y >> 8 | R2-ENGINE-1803, R2-ENGINE-1328 |
+| head +0x10 | u32 | sack +0x48 from version 0x3dd, else 0 | ground sack only: passed on | R2-ENGINE-1803, R2-ENGINE-1328 |
+| item id | u32 | appended to the sack | low word decoded to A, B, C, D; a null build skips the item | R2-ENGINE-1327, R2-ENGINE-1513 |
+| item word | u16 | sack list +0x28 | unit-owned sack, stage C (EN only when Session +0x74 is 0, RU always): nonzero to slot +0x44 (equip, Medium), 0 to the bag (Medium) | R2-ENGINE-1803 |
+| item binding | u32 | sack list +0x14 | type-9 test; a failed test skips the item | R2-ENGINE-1327, R2-ENGINE-1803 |
 
 Actor +0x1a0 also receives 1 from two unique-spell arms and, when
 Session+0x74 is set, from the map build for the units of owners whose
@@ -723,18 +775,36 @@ The objects are in the document's caster list and are saved and loaded with it; 
 
 What each placement names, per record type, in EN and RU unless stated.
 
-**Type 4.** Element: x (+0x00) and y (+0x04), of which the loader keeps `x >> 8` and `y >> 8` (tile, Medium); kind
+**Type 4.** Element: x (+0x00) and y (+0x04), of which the loader keeps `x >> 8` and `y >> 8` (cell coordinates; the
+EN location routine `L2.07308` keeps `(y << 8) + x`, which has the form of the plane key; EN body read, Medium that the
+coordinates index the planes, R2-ENGINE-1802); kind
 dword (+0x08); word +0x0c; owner word (+0x0e, low word of a dword); id (+0x12, i16). A kind of 0x21 or with bit
 24 is stored as 0x21 and reads two more dwords; when the sum of their low bytes is above 0 they replace row
 parameters 0 and 1 (the size, Medium; all 41 EN and 170 RU 28-byte elements of the census do, so the census
 cannot show the other case). Shop, Inn and Pointer kinds select those classes; every other kind is a Building.
 An unknown owner keeps the building and logs a warning. — R2-ENGINE-1288, R2-ENGINE-1289, R2-ASSET-237
 
+Readers of each element field in the type-4 pass, per arm (EN and RU masked-equal; every load of the element in the
+pass is followed by a dereference, and an element copy held elsewhere is not followed, Medium; other readers of map
+list +0x390 are not censused, Medium):
+
+| File offset | Field | Shop | Inn | Pointer | Building | Claim |
+|---:|---|---|---|---|---|---|
+| 0x00, 0x04 | x, y | location | location | location | location | R2-ENGINE-1802 |
+| 0x08 | kind | class tests, kind byte | class tests, kind byte | class tests, kind byte | class tests, constructor argument | R2-ENGINE-1802 |
+| 0x0c | word | not read in this pass | not read in this pass | not read in this pass | zero test; a zero is copied to Building +0x42, a nonzero value is not read | R2-ENGINE-1802 |
+| 0x0e | owner word | owner resolve | owner resolve | owner resolve | owner resolve | R2-ENGINE-1802 |
+| 0x12 | id | list compare, object +8 | list compare, object +8 | compare over map list +0x34c, object +8 | object +8 | R2-ENGINE-1802 |
+| 0x14, 0x18 | extension (kind 0x21) | not read in this pass | not read in this pass | passed on | constructor arguments | R2-ENGINE-1802 |
+
+Shop kinds are 0x22, 0x23, 0x5d..0x5f and 0x69..0x6b; Inn kinds 0x43..0x45, 0x63..0x65 and 0x6f..0x71; Pointer kinds
+0x46..0x4b; every other kind takes the Building arm. — R2-ENGINE-1802
+
 The kind byte indexes by position the collection the building initialiser reads (the row is at the array
 pointer held at collection +4, plus 0x1c × kind, with no bound test): kind 0, or a kind above the collection's
 count minus one, gives a Building with no row and no registration. Row parameters 0..5 fill the size, a byte, two words and two
-dwords of the Building; word +0x0c equal to 0 clears one of those words. That the collection is data.bin
-Buildings and which title each parameter is are Medium. — R2-ENGINE-1289
+dwords of the Building; for a Building-arm kind, word +0x0c equal to 0 clears one of those words (+0x42). That the
+collection is data.bin Buildings and which title each parameter is are Medium. — R2-ENGINE-1289, R2-ENGINE-1802
 
 In the installed maps (EN 59, RU 83: the `.alm` files of the root folder and the `.alm` members of `scenario.res`;
 other archives including `world.res`, saves and user maps are not in the population) every kind lies in 1..179;
