@@ -483,7 +483,7 @@ From the Shield arm of the support choice to the end of the recovery draw, a Shi
 
 ## Strike refusal and threshold setup
 
-The RU unit strike refuses a blow from a non-mage Human-kind attacker of attack type other than 5 against a movementType 3 target, and from any attacker for a missing party or owner, health at or below 0 or a range below the distance (R2-ENGINE-1605, Medium that a Human's attack type byte is the weapon's attackType; the EN strike body has no such test, EN behaviour Medium). In RU the Human threshold setter has one direct call site, in the template loader tail; a Unit takes nothing from it (R2-ENGINE-1606, Medium that a Human reaches that loader; other writers of the command fields stay Unknown, R2-ENGINE-1001).
+The RU unit strike refuses a blow from a non-mage Human-kind attacker of attack type other than 5 against a movementType 3 target, and from any attacker for a missing party or owner, health at or below 0 or a range below the distance (R2-ENGINE-1605, Medium that a Human's attack type byte is the weapon's attackType; the EN strike body has no such test, EN behaviour Medium). In RU the Human threshold setter has one direct call site, in the template loader tail; a Unit takes nothing from it (R2-ENGINE-1606, amended by R2-ENGINE-1795: a Human built by `L2.00130` does not reach that loader and starts at 0, Medium; other writers of the command fields stay Unknown, R2-ENGINE-1001).
 
 ## Player guard, patrol, pick-up, standing orders and idle casting
 
@@ -500,3 +500,33 @@ order 0xb are two paths whose precedence in play is Unknown (R2-ENGINE-1620).
 | Standing orders (0xc, 0x17) | They end when another write replaces the order in the bodies read; a hit stores hit fields only. Order 0x17: a player mage may cast the support spells of a 256-instruction window (five edges unfollowed) and no attack call is in it; other player units make no attack call. Among the RU input cells read no order is a hold; EN not read. | R2-ENGINE-1627 Medium composition; R2-ENGINE-1200, R2-ENGINE-1201 | Hit, save and load; open edges of the window |
 | Idle mage, target found | Selected spell cast when the book holds it and mana covers the cost; else strike or turn at weapon range. Single-target ids cast at the target; Heal and the effect-mask ids use their own arms; twelve ids and id 29 cast nothing. | R2-ENGINE-1628 High bodies, Medium field meaning; R2-ENGINE-1629 High entry and three arms, Medium id-to-arm map (byte tables not preserved) | Seven unread arms |
 | Look-around | Turn to the heading when facing differs; else 205 of 32768 per call picks facing + 33 + rand(190), otherwise stand. | R2-ENGINE-1630 High bodies, divisor and call rate Unknown | Divisor; call rate |
+
+## Pocket flight, Teleport flight, staged areas, fallen units, hostile Heal, support relations, hired thresholds
+
+In RU a refused flight in a pocket closed by terrain walks toward a cell at most 3 cells away for a unit inside the 8 .. size - 9 band; the route is not emptied when the route search's stand-in is another pocket cell, and then the order-1 branch is not entered and each Group pass stores the walk order again (R2-ENGINE-1787, amending R2-ENGINE-1498, R2-ENGINE-879 and R2-ENGINE-871; Medium); the own-cell stand-in case is open, and the outcome in play is Unknown. A computer mage that can pay Teleport casts it at a cell scanRange + 1 cells from its own cell, away from the hostiles' mean point along the major axis, clamped to the map band; the move happens when the landing test accepts the cell (Medium for the arguments; High for the arithmetic of `L2.02454`); with the hostile outside the flee list the idle planner gives prepared 6 on a hostile in range, else 0xb and, for a damaged mage with Heal, a self-Heal, and no walk (R2-ENGINE-1788, amending R2-ENGINE-1418 and R2-ENGINE-506; the caster's cell 40 ticks after the cast is Unknown).
+
+Acid Stream and Blizzard accepted at one wind-up both attempt on area update 1; a first cell outside the band or rejected moves the first paint to update 4 or later (R2-ENGINE-1789, amending R2-ENGINE-812; Medium).
+
+A fallen unit keeps running its Effect timers in each actor step before the health test; the fall sets the counter +0x6c to virtual +0x74 - 1 (the row value at index 33; for a Human the value at index 23 or the constant 8; counted in actor steps), and the death loop ends Poison with no further start (R2-ENGINE-1790, Medium; amending R2-ENGINE-1576 and R2-ENGINE-1534). From -3, a Poison Cloud of power P takes m = 2 + floor(2P/45) on each eighth timer call, and the unit dies on the first step after the counter at which health is -10 or below; the refill's loss below 0 comes on top (R2-ENGINE-1791, Medium):
+
+| m (power P) | Start that first brings health from -3 to -10 or below, for word `+0xc6` = 0, ignoring the refill's loss (Medium) | Claim |
+|---|---|---|
+| 2 (P 0..22) | 4th | R2-ENGINE-1791 |
+| 3 (P 23..44) | 3rd | R2-ENGINE-1791 |
+| 4..6 (P 45..112) | 2nd | R2-ENGINE-1791 |
+| 7 and above (P 113 and above) | 1st | R2-ENGINE-1791 |
+
+The RU Heal arm refuses a target whose Player the caster's Player row marks hostile (bit 0), before its health tests; a refused Heal runs none of the arm's callees, while the apply head's cast award has run under its gates (bit 2, no item, mage, row parameter 2 nonzero) and the mana was paid at the cast (R2-ENGINE-1792, Medium for the argument roles; it amends R2-ENGINE-487 and the partially retracted R2-ENGINE-026).
+
+The player support sweep heals only members of the builder's list +0xaa8 (the caster's bit 0 toward them clear) that pass the affinity; with Neutral alone the diagonal 0x12 refuses own units other than the caster, and a Player at relation 3 is not in the list the Heal walk reads (builder `L2.01515`) (R2-ENGINE-1793, amending R2-ENGINE-360 and R2-ENGINE-1200; Medium in play: the diagonal can be rewritten by script action 10, and `L2.01514` and `L2.01520` are unread). The relation matrix holds one byte per ordered pair of Player numbers at Session + 0xa8c4 + 70a + b; bit n is value 2^n:
+
+| Bit or value | Use | Claim |
+|---|---|---|
+| bit 0 | the row's Player holds the column's hostile: hostility predicate, support builder, Heal arm | R2-ENGINE-1794 |
+| bit 1 | ally: support filter, affinity Allies test | R2-ENGINE-1794 |
+| low two bits 0 | affinity Neutral test | R2-ENGINE-1794 |
+| bit 4 (0x10) | copied in reverse into the client word by the EN server routine `L2.01852` (EN read, RU not read) | R2-ENGINE-1794, R2-ENGINE-826 |
+| 0x12 on the diagonal | map build and the original's saves | R2-ENGINE-1794 |
+| (old & 0xfc) + low8(p2) | script action 10, which can store 3 | R2-ENGINE-1794 |
+
+For a Human built by `L2.00130`, a hire or a map Human, no direct call reaches the loader or the threshold setter: the Unit constructor's default name has length 0 and the setter would read the Unit slot +0x30; command +0x40, +0x44 and +0x4c are 0 after creation, with a book or a bow (R2-ENGINE-1795, amending R2-ENGINE-1606, R2-ENGINE-506, R2-ENGINE-1001, R2-ENGINE-1002 and R2-ENGINE-777; Medium).
