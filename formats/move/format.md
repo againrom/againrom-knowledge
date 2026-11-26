@@ -38,6 +38,11 @@ The near (dynamic) route stores every cell from the step after the start to its 
 landing on the first cell frees the whole list, so one search drives one step (read as
 instructions; not observed). — MOVE-205
 
+The near search is aimed at the final destination when the static route holds shipped 5 nodes or fewer
+(`StaticIsntNeeded`), at the head node when it is over shipped 3 cells away (`DynamicByStaticLookup`),
+and otherwise at the node of index `DynamicByStaticLookup` (shipped 3) counted from the head; the head is dropped once it is
+within that distance (High for the branches; Medium that the head is the nearest node). — MOVE-208
+
 Effects bound speed only through the modifier reset above 24 and the humanoid derive; the step
 rate clamp is the movement bound (readers not censused). — MAGIC-476
 

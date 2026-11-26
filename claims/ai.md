@@ -30,6 +30,125 @@ now direct: the complete caller is the id-14 Prismatic Spray selector, which fli
 building secondaries. Its secondaries pass the builder's directional first-member diplomacy test;
 the primary does not.
 
+## Scan radii, defender ranking, group ties, retreat detection and Teleport (EXP-0653)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-810 | A guard post scans a block of radius `mover+8` about its post and engages the list head; a defender's cover scans `mover+8` of the protected unit about that unit; no read branch substitutes a default. | High / Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+| AI-811 | In a linear sweep of `.text` the only store that targets a mover's `+8` scan byte by identity is the constructor's store of 5; 171 other byte stores keep an unresolved base. | Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+| AI-812 | Defender cover drops fliers when the protected unit's reach is below 2, then engages the nearest flier if any remain, else the nearest unit; none of the four bodies read tests health or state (the occupant source and `R0009` are unread). | High / Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+| AI-813 | `R0036` returns, per axis, the sub-cell centre gap minus both half footprints floored at 0, takes the larger axis, shifts right 8 and adds 1; wide or mid-step units are measured edge to edge. | High / Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+| AI-814 | Group target ties: each scorer compares signed costs with strict less-than over members, then candidates head to tail; the first of equal costs is kept, and both scorers share that code. | High / Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+| AI-815 | The retreat check hands the wounded unit to `R0021`; an invisible enemy stays a candidate when any groupmate's See-invisible byte is at least the `R0036` distance to it. | High / Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+| AI-816 | No withdrawal-specific Teleport branch was found in the decoded retreat tail and caster routines; the tail writes move kind 1 to a flee cell or reacquires, and the immediate spell ids loaded are 6 and 1. | Medium / Unknown | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+
+### AI-810
+
+Listings `evidence/code-en/listings/guard-post.txt` (`R0137`), `defend-arm.txt` (`R0138`), `cover.txt` (`R0306`), `tail-hp.txt`, `tail-radius2.txt`, `block-builder.txt` (`R0020`).
+
+- Guard post. The radius is the byte at `mover+8`, the mover being `actor+0x154` (`L18025..L00584`); the centre is the post cell word `ord+0x00` (`L00585`). `R0020(centre, radius)` is followed by `R0021(actor, list, 0)` (`L00332..L17459`). A nonempty list engages the first node's element through `R0009` (`L14872..L00586`); no ranking is applied. The leash compare of the post distance against `actor+0xa5` (`L00267`) is `AI-BREAK-041`'s.
+- Defender. `R0138` compares Chebyshev distance (`R0162`) to the protected unit with the byte `ord+0x70` (`L01053`, `L01054..L01057`); beyond it the arm writes kind 4 toward the protected unit with stop distance `ord+0x70`, or `actor+0xa5` when that is 0 (`L01058..L00269`). Within it calls `R0305` when `actor+0x140` is nonzero, else cover `R0306(self, protected)` (`L01056..L01062`).
+- Cover's radius is the byte at `[protected+0x154]+8` and its centre the protected unit's cell (`L01063..L01064`).
+- Retreat checks. `R0105` takes the radius from the wounded actor's own `mover+8` about its own cell (`L16710..L18026`); `R0106` pushes the literal 2 (`L00485`). Both call `R0020` then `R0021(actor, list, 0)` and return 1 when the list is nonempty.
+- Block shape: `R0020` loops radius 1 to the argument inclusive after the centre cell (`AI-336`).
+- No instruction in these bodies tests the byte for zero or replaces it by a constant: the byte is passed as read. A value other than 5 therefore changes the radius in each case directly; a value of 0 would scan the centre cell only.
+
+**Confidence.** High for every cited instruction and for the absence of a default branch in the bodies read. Medium for the identity of `actor+0x154` as the mover (`TERR-MOVE-054`, not re-derived) and for the writers of the byte (`AI-811`).
+
+**Amends.** None. `AI-BREAK-041`, `AI-778` and `AI-DEFEND-111` state the same radii; this claim adds the retreat checks and the absence of a default substitution.
+
+**Unknown.** Settle with the original: `rom.exe` EN, a mission map with a computer guard creature whose post is known; place the hero at Chebyshev distance 5 and then 6 from the post and record whether it engages.
+
+### AI-811
+
+Tables `evidence/code-en/census-b8.tsv` and `census-disp8.tsv`, `census.json` (EXP-0653): a linear Capstone sweep of `.text` (`L08454..L18027`, 554,722 instructions, no repaired Ghidra project).
+
+- The census lists every instruction writing memory whose displacement range covers `+8`: 2,530 rows (byte 172, word at `+7` or `+8` 168, dword 2,190 at `+5` to `+8`) and every `lea` with displacement 8. A row is flagged when its base register still holds a value loaded from `[x+0x154]` (the mover pointer, `L18025` shape) within 0x100 bytes without redefinition, with a call clearing `eax`, `ecx`, `edx`. Flagged rows: 0 stores and 0 `lea`.
+- The constructor `R0206` stores 5 at `L00587` (`mov byte ptr [edx+8], 5`) through `this`, so the flag cannot see it. Other byte stores into `mover+8` by identity: none found; the byte stores at `L13340` and `L13496` write `ord+8` (`MOVE-181`).
+- Base identity of the other 171 byte rows is unresolved (the rows follow loads of `+0x158`, stack slots and other objects); the sweep does not search for block copies, helper stores or stream loads; they are unseen. The flag was never seen to fire on any row of this sweep (no positive control). The mover is saved whole (`MOVE-DOM-025`), so a restored save carries the byte's saved value.
+
+**Confidence.** Medium: the instrument is a linear decode with a register-tracking heuristic that ignores branch joins, and it resolves no base identity beyond that.
+
+**Amends.** None. `AI-BREAK-041` states the constructor is the only mover-based writer from another instrument (118 hits, 69 owners); this sweep (172 byte stores, 171 with unresolved base) does not confirm or refute it.
+
+**Unknown.** A pointer-taking stream load of the mover, and any writer reached by a block copy. Settle with a repaired project: `disp:`, `imm:` and stream-load census of the mover class, and the bytes of an owner save of a mission with a guard creature against the byte `5`.
+
+### AI-812
+
+Listings `cover.txt` (`R0306`, 153 instructions), `filter2.txt` (`R0460`, 99), `filter.txt` (`R0021`), `distance.txt`, `defend-alt.txt` (`R0305`).
+
+- Cover builds the block (`AI-810`), filters it with `R0021(protected, list, 0)` (`L01065`), then calls `R0460(protected, list)` (`L02062`). Empty list: reacquisition `R0022(self)` (`L18028..L01068`).
+- `R0460` reads the byte `protected+0x12c` (reach); when it is below 2 it unlinks every candidate whose `vt+0x20` returns 3 (`L02056..L18029`). Domain 3 is the flier domain of `MOVE-DOM-024`.
+- First loop (`L02070..L18030`): among candidates whose `vt+0x20` returns 3, keep the one with the smallest `R0036(self, cand)`; a later candidate replaces the kept one only when its distance is strictly smaller (`cmp al, bl` with `jae` at `L18031`). A kept candidate is engaged through `R0009(self, cand)` (`L02072`).
+- Second loop, only when no flier was kept (`L18032..L18033`): the same rule over every remaining candidate, seeded 0xff, engaged at `L02073`.
+- The four bodies `R0306`, `R0460`, `R0021`, `R0036` contain no load of `+0x94`, `+0x96`, `+0x54` or `+0x50`; the only flag read is `+0x144` bit `0x8000` in `R0021` (`AI-815`). A health, death or consciousness state therefore does not enter the ranking read here. Ties go to the first node in list order.
+- A defender with a spell book (`actor+0x140` nonzero) goes to `R0305` first (`defend-arm.txt` `L01056..L01062`, `defend-alt.txt`): under the health tests at `L01136..L01135` it may choose spell 6 on the protected unit and call `R0018` (`L18034..L01144`); cover runs only when `ebx` is still 0 (`L18035..L01145`). Read as listed, not graded further.
+- So fliers rank ahead of non-fliers whatever the distance when the protected unit has reach 2 or more, and are absent when reach is 0 or 1; inside each class the nearest by `AI-813` wins.
+
+**Confidence.** High for the loops, compares and filter. Medium for the negative: the block builder's occupant source (`R0035`, `R0034`), the engage routine `R0009` and the meaning of the `+0x144` bit were not read here, so a dead or downed unit's presence in the list is not excluded. The name "unconscious" is not a state any read routine tests.
+
+**Amends.** None. `AI-DEFEND-111` states the preference for `vt+0x20` = 3 and the nearest-by-`R0036` pick; this claim adds the `R0460` filter, the strict tie rule and the non-reads. `vt+0x20` = 3 as flier is `MOVE-DOM-024` (e)'s reading.
+
+**Unknown.** Settle with the original: `rom.exe` EN, a mission map with a computer defender (state 8) beside a protected unit; put a flier and a ground enemy at unequal distances, record the engaged target; repeat with a protected unit of reach 1.
+
+### AI-813
+
+Listing `evidence/code-en/listings/distance.txt` (`R0036`, 82 instructions, read whole).
+
+- Each side's footprint size is `vt+0x1c` (`L14946`, `L14947`). The position object at `actor+0x10` gives, per axis, a cell byte and a sub-cell byte: bytes `+1` and `+5` for one axis, `+0` and `+4` for the other (`L18036..L18037`). Per axis the centre is `((2*cell + size + 0x1ff) << 7) + sub`, masked to 16 bits (`L07091`, `L18038`, `L18039`).
+- Per axis the gap is `abs(centreA - centreB) - ((sizeA + sizeB) << 7)`, set to 0 when negative (`L18040..L18041`). The larger gap is shifted right by 8 and increased by 1 (`L18042..L02065`); the result is a byte (`AI-ACQUIRE-002` reads `al`).
+- Two adjacent size-1 units at centre sub-position give 1; overlap or contact gives 1; every further whole cell of clear gap adds 1.
+- Consumers read here: cover (`AI-812`), `R0021` (`AI-815`). `AI-ACQUIRE-002` cites it at `L00224`.
+
+**Confidence.** High for the arithmetic. Medium for the field names: which bytes are cell and which sub-cell rests on the shift pattern and on `MOVE-174`'s cell-times-256-plus-sub position record. Wrap of the 16-bit mask for cells above 254 was not analysed.
+
+**Unknown.** Group scoring uses another measure: `R0167` (`AI-COST-071`), whose body was not read here.
+
+### AI-814
+
+Listings `group-scorer.txt` (`R0177`), `group-scorer2.txt` (`R0153`), `cost-scorer.txt` (`R0225`).
+
+- The scorer opens with a zero test of the low byte of the group member count and of `AImgr+0xbb4` (`L18043..L01049`). Per member (list at group `+4`) it seeds the best cost 0xffffff (`L00771`) and walks the candidate list at `AImgr+0xba8` from its head (`L01016..L18044`), costing each with `R0225(member, cand)` (`L00766`).
+- `L00770 cmp eax, ebp` with `jge` at `L01744` skips a candidate whose cost is not below the best, so equal costs keep the first scanned. The pick is stored per member; a pick still at 0xffffff means no target (`AI-SCORE-069`, tail not re-read).
+- The cost is `(d << 8) + turn` where `d` comes from `R0167` (a cell distance, with the ranged adjustment of `AI-COST-071`), then the preference-matrix modifiers; preference 0 returns 0xffffff, a veto (`L18045..L02051`, `L00781`).
+- With the address operands removed, the listings of `R0177` and `R0153` are identical, so the second scorer differs only in the cost function it calls.
+- The candidate list order is the world actor list head to tail with dead units moved aside and back (`AI-GROUPSEE-068`), not read here.
+
+**Confidence.** High for the compare, scan loops and seed in `R0177`; Medium for the second scorer's cost function `R0252`, not read, and for the list order, which rests on `AI-GROUPSEE-068`.
+
+**Amends.** None. `AI-SCORE-069` and `AI-340` state the same tie rule.
+
+**Unknown.** `AI-340`: whether list order tracks creation order.
+
+### AI-815
+
+Listings `filter.txt` (`R0021`), `tail-hp.txt`, `tail-radius2.txt`, `dispatcher-tail.txt` (`L18046..L08178`).
+
+- The group tail calls `R0105` (`L18047`); a nonzero result calls `R0100`, else `R0106` and, when nonzero, `R0107` (`L00486..L18048`). Each predicate calls `R0021(actor, list, 0)` with the wounded actor as decider (`L18049..L18050`).
+- Per candidate `R0021` looks up the diplomacy byte at `AImgr+0xa9c4` by the two owners (`L00249..L00215`). A candidate whose relation bit equals the argument 0 is removed. Otherwise a candidate whose `+0x144` has bit `0x8000` set (`L00219..L18051`) is tested against the decider's list at `decider+0x70` (`L18052`): for each node it computes `R0036(cand, member)` and compares it with the byte `[member+0x158]+0x71` (`L18053..L18054`); a distance not above that byte clears the removal. Any one member within its byte keeps the candidate; an empty list removes it.
+- The `+0x71` byte is the Units column "See invisible" (`AI-WITHDRAW-027`). The distance is `AI-813`'s, so a wide enemy or one between tiles is measured edge to edge in sub-cell steps, rounded down, plus 1.
+- Whether the decider is in its own `+0x70` list is not read.
+
+**Confidence.** High for the loop and compares. Medium for the names: that `+0x144` bit `0x8000` is invisibility and that `decider+0x70` is the group member list rest on `AI-694`, `AI-718` and `AI-GROUPSEE-068`.
+
+**Amends.** None. It reads instruction by instruction what `AI-718` states at Medium for `R0021`.
+
+**Unknown.** Settle with the original: `rom.exe` EN, a computer unit of a ranged class below its Withdraw threshold with an invisible hero at 3 cells (Invisibility cast) and a groupmate with a See-invisible byte of at least 3 standing 2 cells from the hero; record whether the unit withdraws.
+
+### AI-816
+
+Listings in `evidence/code-en/listings/`: `dispatcher-tail.txt`, `tail-hp.txt`, `tail-radius2.txt`, `flee.txt`, `flee2.txt`, `flee-point.txt`, `acquire.txt`, `caster-ai.txt`, `heal-arm.txt`, `caster-pick.txt`, `setter-to-flee-multi.txt`; tables `calls.tsv`, `census-disp.tsv`, `census-imm26.tsv`.
+
+- Population decoded: the retreat tail (`L00311..L08178`; the listing `dispatcher-tail.txt` begins with a misaligned decode at `L18046` and the instruction boundary before `L00311` is unread) and its direct callees `R0105`, `R0106`, `R0100`, `R0107`, `R0104`; reacquisition `R0022` and its caster callees `R0113` and `R0015` (`heal-arm.txt` decodes `R0015..L18055` to its `ret`); `R0394`; `R0018` (`setter-to-flee-multi.txt` decodes `R0018..R0100`). Their direct calls are in `calls.tsv`; `R0104` calls only the CRT `R0279`. The tail's writes are kind 1 with a cell word at `ord+0x0a` (`L13765..L13766`, `L13767..L13768`) or a call to `R0022`.
+- Immediate spell ids loaded by these routines are 6 (`L17508`, `L18056`, `L18057`, `L18058`) and 1 (`L18059`); `R0305` selects 6 as well (`L01135`).
+- Census of immediates equal to 26 in the band `L00339..L13260` (`regen.sh`): 16 sites. Read and classified: command-state stores of `0x1a` to `actor+0x54` and `+0x50` (`L01986`, `L00089`, `L02932`, `L00544`, `L18060`), a state compare (`L00319`) and the coordinate pair pushed at `L18061`. Nine sites were not read (`L18062`, `L18063`, `L07118`, `L00160`, `L18064`, `L18065`, `L18066`, `L18067`, `L18068`).
+- Readers of the sight byte `actor+0xa5` in the band (`census-disp.tsv`): follow stop distance, post leash, default stop distance, group maximum, sight stamp, ring search; none compares it with a constant or reaches a spell. Three (`L04077`, `L04078`, `L18069`) are classified from `AI-SIGHT-006` and `AI-RADIUS-014`, not read here.
+- No instruction in the read bodies selects Teleport, tests a smallest sight range or tests adjacency for a spell. The cast table of `R0209` has a Teleport arm for id 26 (`MAGIC-238`), reached from `R0009` by the ordinary slot draw or Mind walk; the pick reads a slot of the Spell book, not only immediates. A caster whose book holds Teleport can cast it by that ordinary pick, and this claim says nothing about that path: it is a negative about a withdrawal-specific branch. Teleport id 26 is `MAGIC-TELEPORT-364`'s.
+
+**Confidence.** Medium. Decoded: the tail `L00311..L08178`, `R0105`, `R0106`, `R0100`, `R0107`, `R0104`, `R0022`, `R0113`, `R0015`, `R0394`, `R0018` (window to `R0100`). Direct callees not decoded: `R1334`, `R0165`, `R0166`, `R0114`, `R0040`, `R0046`, `R2214`, `R2213`, `R0179`, `R0027`, `R0028`, `R0029`, `R0009`, `R0071`, `R0070`, plus nine immediate-26 sites. The cast table of `R0209` has a Teleport arm for id 26 (`MAGIC-238`); a caster whose book holds Teleport can cast it by the ordinary pick, and this claim says nothing about that path. Teleport id 26 is `MAGIC-TELEPORT-364`'s. Readers of `+0xa5` are counted in `L00339..L13260` only. The population is not the direct-call closure to depth 2 of the tail (preregistration deviation). The `callto:` listing is blind to computed calls. Unknown for a branch outside this population.
+
+**Unknown.** Settle with the original: `rom.exe` EN, a mission map with a computer unit whose Spell book holds Teleport (find it from the Units and Spell rows of the install's Data.bin first); drop its health to its Wimpy threshold with an enemy within its scan radius; record cell, `actor+0x54` and mana after each pass; compare a three-cell walk with a cast.
+
 ## Commands during an action cycle
 
 | ID | Claim | Confidence | Status | Evidence |

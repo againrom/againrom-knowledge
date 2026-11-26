@@ -455,3 +455,17 @@ never authored, and it never decides whether a blow lands.
 A unit under explicit Retreat whose flee walk is refused strikes a hostile at reach when the in-position gate passes, instead of fleeing (Medium: composed from listings; the gate is unread). — AI-798
 
 The computer mage's Heal candidate list is built with no identity test, so it can hold the caster (Medium); at full health the caster is never the pick. — AI-800
+
+## Scan radii, defender ranking, group ties, retreat detection (first game)
+
+A guard post scans the block of radius `mover+8` about its post cell and engages the first listed hostile; a defender's cover scans `mover+8` of the protected unit about that unit. The byte is passed as read, with no default branch; the constructor's 5 is the only store of it found by identity, and the sweep that found it leaves other writers open (Medium). — AI-810, AI-811
+
+Defender cover removes fliers when the protected unit's reach is below 2, then engages the nearest flier if one remains, else the nearest unit. Health and state are not read in that ranking; the occupant source and the engage routine are unread (Medium). — AI-812
+
+The defender and the invisibility test measure distance edge to edge in sub-cell steps, rounded down, plus 1. — AI-813
+
+Group target ties keep the first scanned candidate of equal cost, scanning members then candidates head to tail (High; the list order and the second scorer's cost function are Medium). — AI-814
+
+The retreat check passes the wounded unit as decider; an invisible enemy stays a candidate when any groupmate's See-invisible byte is at least that distance. — AI-815
+
+No withdrawal-specific automatic Teleport branch was found in the decoded retreat tail and caster routines (Medium; undecoded callees and nine immediate sites are named in the claim). The cast table has a Teleport arm for id 26 (MAGIC-238) reached by the ordinary pick, and this negative says nothing about that path. — AI-816

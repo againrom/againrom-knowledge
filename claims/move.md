@@ -36,7 +36,7 @@ plane that carries occupancy. Each produces its own route list on the actor.
 | MOVE-TICK-009 | The per-tick update imposes no priority, so insertion order decides which actor gets a contested cell. | High | ● active (partially retracted) | [EXP-0054](../experiments/EXP-0054-unit-movement/), [EXP-0055](../experiments/EXP-0055-tick-order/), [EXP-0192](../experiments/EXP-0192-mission20-party-boundary/) |
 | MOVE-STEP-010 | Movement is sub-cell, 1/256 of a cell per axis, and the position is a byte pair per axis. | High | ● active (amended, partially retracted) | [EXP-0054](../experiments/EXP-0054-unit-movement/) |
 | MOVE-SPEED-011 | Speed does not feed the search. | High | ● active | [EXP-0054](../experiments/EXP-0054-unit-movement/) |
-| MOVE-REFRESH-012 | When a route is recomputed — per cell for the dynamic one, per target change for the static one, and nothing is staggered. | High / Medium | ● active | [EXP-0054](../experiments/EXP-0054-unit-movement/) |
+| MOVE-REFRESH-012 | When a route is recomputed — per cell for the dynamic one, per target change for the static one, and nothing is staggered. | High / Medium | ● active (amended) | [EXP-0054](../experiments/EXP-0054-unit-movement/) |
 | MOVE-TICK-013 | The tick loop's container is a pooled doubly-linked list embedded in a 0x20-byte manager at `[L00240]`, its walk is head→tail, and its order is pure insertion history — the only insert operation that exists for it is AddTail. | High | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
 | MOVE-TICK-014 | What fixes the order at map load: the creators' call sequence — campaign party first, then the map's type-6 records in ascending record order — and the list is per-*ticking-thing*, not total. | High / Medium | ● active (contested, partially retracted) | [EXP-0055](../experiments/EXP-0055-tick-order/) |
 | MOVE-TICK-015 | How the order changes during play — and death leaves no hole. | High | ● active | [EXP-0055](../experiments/EXP-0055-tick-order/) |
@@ -194,6 +194,8 @@ plane that carries occupancy. Each produces its own route list on the actor.
 **Original status.** ● active
 
 **Evidence.** [EXP-0054](../experiments/EXP-0054-unit-movement/)
+
+**Amended.** Clause (d) names the static list's "tail waypoint". `MOVE-208` reads `R0055` again: the far branch takes the node at the list pointer `+0x160` (the head), and the near branch takes the node at index `DynamicByStaticLookup` counted from that head (head identity Medium, `MOVE-208`). The other clauses stand.
 
 ### MOVE-TICK-013
 
@@ -525,6 +527,29 @@ an order arm" is Medium until those callers are found.
 
 **Evidence.** [EXP-0386](../experiments/EXP-0386-engagement-under-occupancy/EXP-0386.md)
 
+
+## Near-search sub-goal on a static route
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| MOVE-208 | `R0055` aims the local search at the final goal when the static route has at most `StaticIsntNeeded` (shipped 5) nodes; else at the head if over `DynamicByStaticLookup` (shipped 3) cells away; else at index `DynamicByStaticLookup`. | High / Medium | ● active | [EXP-0653](../experiments/EXP-0653-rom1-ai-seven/) |
+
+### MOVE-208
+
+Listing `evidence/code-en/listings/near-search.txt` (EXP-0653, `R0055..L18070`, 131 instructions, read whole). The static route is the actor's list at `actor+0x160` (head), `+0x164`, with its count at `+0x168`; a node's cell word sits at node `+8` and its next pointer at node `+0`.
+
+- Count N is `actor+0x168` (`L18071`). When N is nonzero, `edi` becomes the larger of the two absolute axis differences between the actor's cell word and the head node's cell word, a Chebyshev cell distance (`L18072..L18073`).
+- N at most `world+0x585c8` (`L16396..L18074`): the goal is `mover+0x76`, the final destination, kind 1 (`L16407..L16397`).
+- Otherwise, when the head distance exceeds `world+0x585c4` (`L18075..L15403`): the goal is the head node's cell, kind 2 (`L18076..L18077`).
+- Otherwise the code walks `world+0x585c4 + 1` nodes from the head pointer with the next pointer, taking the cell of the last node reached (`L18078..L18079`): the node of index `world+0x585c4` when the head is index 0. This is kind 3. A non-positive walk count takes the head.
+- `R0053` then runs with flag 0 from the actor's own cell to that goal (`L01908`). When the dynamic list at `actor+0x184` is empty and the kind is 1, `mover+0x98` becomes 1 (`L01909..L00162`). When N was nonzero and the head distance is at most `world+0x585c4`, the head node is unlinked and freed (`L18080..L01911`).
+- The two thresholds are `StaticIsntNeeded` 5 and `DynamicByStaticLookup` 3 in both roots (`MOVE-PARAM-006`). With those values: N of 5 or fewer goes to the final cell; N of 6 or more goes to the head when it is 4 or more cells away, else to the fourth node, which exists because N is at least 6.
+
+**Confidence.** High for the branches, comparisons and walk, read in one routine. Medium that the head pointer `+0x160` is the node nearest the actor: the static extractor was not read in this experiment, and `MOVE-205` reads the dynamic one.
+
+**Amends.** `MOVE-REFRESH-012` clause (d): it names the static list's tail waypoint; the far branch reads the head pointer. Thresholds and the 5-node rule stand.
+
+**Unknown.** Settle with the original: `rom.exe` EN, a mission map from the install, a ground unit ordered over 20 cells round an obstacle; record the unit's cell each tick and compare the turning cells with the static route's fourth node.
 
 ## Centered turn continuation
 

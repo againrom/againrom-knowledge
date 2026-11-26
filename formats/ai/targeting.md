@@ -244,3 +244,7 @@ A blow whose roll fails still records the attacker in the victim's `+0x40` when 
 A staged area spell's first stage runs one world step after the applying step, then every 3 steps (Medium). — MAGIC-463
 
 A refused flee walk under explicit Retreat hands the unit to the reacquisition above, which strikes a hostile at reach when the in-position gate passes (Medium: composed from listings; the gate is unread). — AI-798
+
+## Defender ranking, distance, group ties and retreat detection (first game)
+
+Cover engages the nearest flier when one remains, else the nearest unit, and removes fliers when the protected unit's reach is below 2 (AI-812). Distance there and in the invisibility test is edge to edge in sub-cell steps (AI-813). A group scorer keeps the first of equal costs (AI-814). An invisible enemy stays a candidate of the retreat check when any groupmate's See-invisible byte reaches that distance (AI-815).

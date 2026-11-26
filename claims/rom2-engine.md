@@ -12453,7 +12453,7 @@ state executable behaviour and no stored-file layout.
 | ID | Public functional claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-501 | A ROM2 idle unit attacks the nearest hostile it marks within attack range, least turn on a tie, turning to it without stepping. | High / Medium | ● active (amended) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
-| R2-ENGINE-502 | ROM2 idle candidates: hostile units on cells a ScanRange ray scan marks (creature ScanRange Medium), plus a computer unit's last attacker cell for 21 builder runs. | High / Medium | ● active | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
+| R2-ENGINE-502 | ROM2 idle candidates: hostile units on cells a ScanRange ray scan marks (creature ScanRange Medium), plus a computer unit's last attacker cell for 21 builder runs. | High / Medium | ● active (amended) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-503 | ROM2 group members take the enemy with the least score (cells x 256 + turn), scaled by a 16-byte kind table whose 0 excludes. | High / Medium | ● active (amended) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-504 | A ROM2 unit holds a target for one activity, then re-picks, from units each nearer than those kept before, the hostile of least turn, or stands or looks around. | High / Medium / Unknown | ● active (amended) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
 | R2-ENGINE-505 | A ROM2 attack order's activity-5 body has no distance bound (Medium); a guard's walk-back gives way to an attack on a hostile within the picker radius of its post. | High / Medium / Unknown | ● active (amended, branch candidate) | [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/) |
@@ -12553,6 +12553,8 @@ only.
 title ScanRange of its Units row.
 
 **Evidence.** [EXP-2063](../experiments/EXP-2063-rom2-enemy-targets/)
+
+**Amended.** R2-ENGINE-1879 reads the filter L2.02119 again in a committed RU window: it removes a candidate whose relation result equals the third argument, and removes an effect-0x1000 candidate unless a unit of the list at ref +0x70 is within its byte +0x71 (Medium for the meanings).
 
 ### R2-ENGINE-503
 
@@ -26181,6 +26183,8 @@ cell keeps the route; whether a stand-in equal to the own cell empties the list 
 **Amended.** R2-ENGINE-1804 reads `L2.05185`: it returns this + 0x30000 + 2 x ((y << 8) + x), the address of the
 search grid word, and reads the workers that fill the grid for each flag.
 
+**Amended.** R2-ENGINE-1876 reads the size-1 arm of the RU search: a goal left without a cost has three causes there, an empty frontier, the layer limit, or no cost reaching the goal cell.
+
 ### R2-ENGINE-872
 
 Walk `L2.02867` and approach `L2.01578` store dword +0x98 = 1 on the block
@@ -27678,7 +27682,7 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1109 | ROM2 hit-hook bodies write hit memory and an event; later order effects remain open. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1110 | EN Effect 14 slots +0x40/+0x44 and their masked-equal RU bodies adjust unit words +0xa4 and +0xe4. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1111 | Scorer L2.05238 rejects adjusted distance above 1 and ranks by turn and preference. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
-| R2-ENGINE-1112 | Read ROM2 Group sight gathers marked-cell units, filters them and supplies assignment. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
+| R2-ENGINE-1112 | Read ROM2 Group sight gathers marked-cell units, filters them and supplies assignment. | High / Medium | ● active (amended) | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1113 | Read ROM2 Group setters write programme constants; programme and member order stay distinct. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1114 | EN ROM2 speed setup writes a selectable period; read RU schedulers use different app offsets. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1115 | ROM2 body comparisons close the 20 setter twins, while mismatches and ambiguous twins remain. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
@@ -28011,6 +28015,8 @@ Assignment L2.05173/L2.06128 (97 instructions, whole and equal) calls this score
 
 **Evidence.** EXP-2152 generated/win/*scorer.lst, *assignment3.lst, *cell-distance.lst, *turn-distance.lst, *unit-kind.lst, *heading-resolved.lst, *range-source.lst and mask receipts.
 
+**Amended.** R2-ENGINE-1877 names the list +0xa68 that the assignment loop walks and its build order by group sight L2.02473, and repeats the strict comparison from the same bodies.
+
 ### R2-ENGINE-1112
 
 RU Group sight L2.02473..L2.06225 and its EN body at L2.04963 are contained in paired equal listing spans. With a first member, the body clears the sight grid through L2.02413 and calls L2.01586 per member. For a member with owner +0x2c nonzero and command cell +0x58 nonzero it marks that cell, increments signed byte +0x5a and clears the cell when the new count exceeds 20. It walks the world list at [session+0xa50]+0xa456c, adds units whose cell is marked, then filters using the first member as querying unit and argument 0, followed by the health filter. If no live list remains and fallback +0xa88 is nonempty it moves that fallback population back to candidates. The shape is read; grid/list helpers remain explicit boundaries.
@@ -28026,6 +28032,8 @@ Leash L2.02474 reads each candidate's packed cell and removes it when cell dista
 **Amends.** R2-ENGINE-1076's open filter/append bodies are narrowed. R2-ENGINE-1018/1019's helper boundaries are not turned into complete target-population closure.
 
 **Evidence.** EXP-2152 generated/win/*group-sight*.lst, *hostility-resolved.lst, *health-filter.lst, *sight-population.lst, *leash.lst and corresponding mask receipts.
+
+**Amended.** R2-ENGINE-1879 gives the removal direction of the filter L2.02119 from a committed RU window; the clause that the filter removes stands.
 
 ### R2-ENGINE-1113
 
@@ -28510,7 +28518,7 @@ R2-ENGINE-526 supplies, at High for the selected owner loop / Medium for party r
 | R2-ENGINE-1182 | ROM2 Num+ and Num- step speed index app +0x41c (RU +0x434) by 1 within 0..8; EN jump table L2.03207 leads to nine arms that store 8, 10, 12, 14, 16, 20, 24, 28, 32 for 0..8, and app +0x418 = 1000 / that value. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1183 | ROM2 order 0x1a planner RU L2.02865 / EN L2.06476 searches square rings around the unit out to its byte +0xa5 for a cell L2.06477 accepts; a hit sets cell +0xa and prepared +8 = 0xc, none calls the order-0xc setter. | High / Medium | ● active (amended) | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1184 | ROM2 order 8 planner RU L2.02907 / EN L2.06478 approaches beyond range r = command byte +0x70, else runs two helpers; at distance < 2 with prepared +8 7 or outside 5..9 it steps r cells away; no read body reads a facing field. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
-| R2-ENGINE-1185 | Within r, ROM2 order 8 plans spell 0x18 on the defended unit when +0x94 is below +0x96 (or half) and the cost fits +0x9a; else it attacks the nearest member of list L2.03475, kind 3 first; with an empty list it calls L2.01733(defender, 0). | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1185 | Within r, ROM2 order 8 plans spell 0x18 on the defended unit when +0x94 is below +0x96 (or half) and the cost fits +0x9a; else it attacks the nearest member of list L2.03475, kind 3 first; with an empty list it calls L2.01733(defender, 0). | High / Medium / Unknown | ● active (amended) | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1186 | RU readme.txt lists 46 key entries; 39 have an arm in the read ROM2 key routines with the stated key and condition; Tab, Ctrl+A, Shift+1..9, Alt+F4 and the held Alt, Ctrl and Shift have none there. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 
 ### R2-ENGINE-1178
@@ -28656,6 +28664,8 @@ Helper B RU `L2.03474` / EN `L2.06580` (143, masked-equal): list = `L2.03475(def
 
 **Evidence.** EXP-2159 `evidence/generated-2/win/*-defend-helper-{a,b}.lst`, `generated-2/mask/defend-helper-{a,b}.tsv`, `navigation/nav4/win/ru-defend-*.lst`, `navigation/nav4/win/ru-idle-planner.lst`.
 
+**Amended.** R2-ENGINE-1878 reads L2.06586 whole: it removes kind-3 members when L2.01728(defended) is below 2, so helper B's kind-3 branch fires only for a defended unit with L2.01728 of 2 or more.
+
 ### R2-ENGINE-1186
 
 The RU install's `readme.txt` (code page 1251) has a key section of 46 entries, lines 31..76. Each entry was matched to the read arms of R2-ENGINE-1178 through R2-ENGINE-1181 by key code, modifier and stated condition. 39 entries have an arm in the read routines; for the entry `` ` `` the arm is in the view routine (T3 cell 0xc0) and the application routine's cell for 0xc0 was not read (R2-ENGINE-1181), and the same holds for every entry whose route passes the application default cell. The arm's conditions agree where the text names one: W, Ctrl+K and F3's second action are limited to non-mode-2 sessions, F2 and F3's load to mode 2, P to members with +0x1b8 & 1 (the text restricts it to hero members), C to `L2.03135()` returning 0.
@@ -28672,7 +28682,7 @@ The text's actions (M move, A attack, G guard, D defend, S move in combat readin
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1188 | ROM2 Defend list L2.03475 is rebuilt on every call from units within r of the defended unit's cell (r = byte +8 of its +0x1c0 object), then filtered; this path reads the map's shared scratch list, not a list stored for the unit. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1188 | ROM2 Defend list L2.03475 is rebuilt on every call from units within r of the defended unit's cell (r = byte +8 of its +0x1c0 object), then filtered; this path reads the map's shared scratch list, not a list stored for the unit. | High / Medium | ● active (amended) | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1189 | With an empty Defend list ROM2 order 8 reads as calling L2.01733(defender, 0), whose idle planner stores no order itself; selected branch prepares 6, default 0xb, 0 or a mage helper (Medium); RU L2.02907 has one direct caller, L2.06587. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1190 | ROM2 view mode +0x9b4 sets the cursor (1 cc4, 2 cbc, 4 cc8, 5 cd4, 6 cc0, 8 cd0; 3 and 7 none); a click sends by cursor, and a nonzero mode then stores 0 (0x40b post Medium); no setter path holds mode 8 (cd0 source Unknown). | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1191 | ROM2 EN order panel (app +0xdc) has 8 buttons (hit-test geometry); a press (0x201, read as left) on button i sends 0x40c(i), the view calls L2.04359(i+1), which stores the mode under its mask; k = 3, 7 and 8 reach a sender, then mode 0. | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
@@ -28701,6 +28711,8 @@ The list is the map's shared scratch list: this path reads no list stored for th
 **Amends.** R2-ENGINE-1185: the list `L2.03475` returns, which it left Unknown, is the per-call area list described here.
 
 **Evidence.** EXP-2160 `evidence/generated/win/*-defend-source.lst`, `generated/mask/defend-source.tsv`, `navigation/nav1/win/ru-area-query.lst`; EXP-2063 `out/listings/ru-pickers-filter.txt`.
+
+**Amended.** R2-ENGINE-1878 reads L2.06586 whole in a committed RU window, and R2-ENGINE-1879 reads L2.02119 whole there; their Medium clauses on those two bodies are now High for the body, Medium for the meanings.
 
 ### R2-ENGINE-1189
 
@@ -33187,7 +33199,7 @@ RU − 0xa039 from it; each pair read is masked-equal (`generated/derived/compar
 |---|---|---|---|---|
 | R2-ENGINE-1438 | ROM2 block constructor RU L2.01783 / EN L2.05745 zeroes 0xb4 bytes and stores +5 = 0x41, +0xa = 0x10, +9 = 0xff and the constant +8 = 5; it takes only the block and has 5 direct callers per root. | High / Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
 | R2-ENGINE-1439 | In ROM2 337 RU and 336 EN traced loads of [unit+0x1c0] write block byte +8 nowhere; 11 sites per root read it; all 356 saved Unit and Human records hold 5, so every unit seen holds 5 (Medium; callees and copies unread). | Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
-| R2-ENGINE-1440 | ROM2 flee tests a hostile within block +8 + 5 = 10 cells and walks from a 10-cell list; the Teleport arm lists 5 cells and calls the idle planner when none lives; back-off uses 2; no write to block +8 seen (Medium). | High / Medium | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
+| R2-ENGINE-1440 | ROM2 flee tests a hostile within block +8 + 5 = 10 cells and walks from a 10-cell list; the Teleport arm lists 5 cells and calls the idle planner when none lives; back-off uses 2; no write to block +8 seen (Medium). | High / Medium | ● active (amended) | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
 | R2-ENGINE-1441 | ROM2 data.bin item rows and itemname.pkt records hold 12 as kind and Slot only for boots; a Staff is kind 1, attackType 3, physical 0 to 0; by the code read a mage's staff cast pays no mana and re-tests no distance in the bodies read. | Medium / Unknown | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
 | R2-ENGINE-1442 | By the code read a ROM2 computer mage meeting heal and withdraw on one Group pass walks: the post-step overwrites the heal with the walk (+8 = 1); with no living hostile listed the idle planner may heal; the Teleport store is unread. | Medium / Unknown | ● active | [EXP-2182](../experiments/EXP-2182-rom2-staff-flee/) |
 
@@ -33291,6 +33303,8 @@ unread.
 
 **Evidence.** EXP-2182 `generated/listings/{ru,en}-fleetest-*.txt`, `-backofftest-*.txt`, `-areascan-*.txt`,
 `-list-*.txt`, `{ru,en}-refs-areascan.txt`, `generated/derived/compare.tsv`.
+
+**Amended.** R2-ENGINE-1880 reads the admission body L2.01518 in a committed RU window: book lookup, then word +0x9a not below the record's word +0xc.
 
 ### R2-ENGINE-1441
 
@@ -33455,6 +33469,8 @@ Medium); the back-off helper `L2.02451` walks 3 cells or calls its own spell rou
 away from the mean point, on the major axis.
 
 **Evidence.** EXP-2181 `RESULTS.md` question 5.
+
+**Amended.** R2-ENGINE-1880 narrows the Unknown on callers of the admission L2.01518: of its 20 direct call sites in 6 owners, L2.01527 and L2.01512 stay unread besides virtual calls.
 
 ### R2-ENGINE-1419
 
@@ -38024,6 +38040,8 @@ loop is RU L2.08532 (EN L2.08533), which calls it (R2-ENGINE-1667's footprint te
 
 **Evidence.** [EXP-2206](../experiments/EXP-2206-rom2-editor-fields/RESULTS.md) question 5.
 
+**Amended.** R2-ENGINE-1876 states the same cost rule for the size-1 arm and answers the pair order: list A half-pass then list B half-pass in one iteration, goal tested once per pair.
+
 ### R2-ENGINE-1805
 
 Composed from R2-ENGINE-1340, R2-ENGINE-1341 and R2-ENGINE-1665 (the values of plane +0x10000), R2-ENGINE-809 and
@@ -38711,6 +38729,11 @@ another, and watch which `.a2c` sections change after each step.
 | R2-ENGINE-1866 | EN reuse of a fallen hero scales five XP values by 9/10, then refills HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
 | R2-ENGINE-1867 | One EN Outpost restore copies template position and current and maximum HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
 | R2-ENGINE-1868 | EN in-process and RU dedicated death pass the owner's hero to the writer before HP is set to -50. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1876 | RU size-1 route search relaxes cost per neighbour (orthogonal +t or 2, diagonal +t+t/2 or 3) and tests the goal once per A-and-B half-pass pair; other arms unread. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
+| R2-ENGINE-1877 | RU group acquisition scans the enemy list in list order and keeps a candidate only on a strictly lower score; the first of equal scores stays. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
+| R2-ENGINE-1878 | RU defender helper ranks kind 3 first, then least edge distance (L2.01588), only when the defended unit's L2.01728 is 2 or more (L2.06586 removes kind 3 otherwise). | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
+| R2-ENGINE-1879 | RU hostile filter L2.02119 removes an invisible candidate unless a unit of the reference list is within that unit's byte +0x71 by L2.01588 distance. | Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
+| R2-ENGINE-1880 | RU flee Teleport admission tests book and mana only; no sight-range or adjacency test in the bodies read; callers L2.01527 and L2.01512 and virtual calls unread. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
 
 ### R2-ENGINE-1864
 
@@ -38781,3 +38804,63 @@ RU a2server.exe separately compares the owner hero with the dying unit, incremen
 **Amends.** R2-ENGINE-1841. The EN death call is restricted to the owner's hero and precedes the -50 HP store. The RU dedicated death callee is L2.08813.
 
 **Evidence.** [RU dedicated writer](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q5-dedicated-writer.txt), q5-dedicated-writer-tail and q5-file-open, with q1-death-finish and q1-dedicated-death for the callers. The EN writer body and section mapping are in R2-ENGINE-1841, R2-SESSION-516 and R2-SESSION-517.
+
+### R2-ENGINE-1876
+
+RU search L2.05174 (EN entry L2.05175 is unread), in its arm for a nonzero search flag and a unit of size byte 1 (L2.08835..L2.08836), fills a word grid at world +0x30000 with 0xffff and expands from the start cell in two alternating half-passes, L2.08518 reading frontier list A (count +0x54008, cells +0x54584) and L2.08519 reading list B (count +0x5400a, cells +0x56584). For a neighbour whose blocking byte (+0x10000, ANDed with the unit's mask) is zero, the new cost is, with the cost flag set (the unit's virtual +0x20 result equals 1): orthogonal cost[cur] + t, diagonal cost[cur] + t + (t >> 1), where t is the byte at world +0 for the neighbour cell. With the flag clear: orthogonal cost[cur] + 2, diagonal cost[cur] + 3. A neighbour is written only when the new cost is strictly below its stored word, and it joins the next frontier list. The goal test, the frontier test and the limit test sit at the loop top L2.08837 and run once per iteration, which is one A half-pass followed by one B half-pass; the layer counter is incremented after each half-pass (L2.08838, L2.08839). So expansion ends at the end of the iteration (the B half-pass) in which the goal cell first holds a cost, and the B half-pass may still lower it. The limit test compares the counter, which counts half-passes, with d + max(d >> 2, word +0x58584), where d is the byte L2.02442 returns. A special arm (unit object +0x14 field +0x2c zero and L2.08532 nonzero) sets the limit 1000, refills the whole word grid with 0xffff and sets the start cell's word to 0.
+
+**Amends.** R2-ENGINE-1804 (same cost rule for the size-1 workers; its Unknown on the pair order is answered: A then B in one iteration) and R2-ENGINE-871 (a failed search has three causes in the size-1 arm: empty frontier, layer limit, and no cost for the goal; the pocket cause of the flee card is one of them).
+
+**Confidence.** High for the RU bodies of the size-1 arm of L2.05174 (L2.05174..L2.08836, from the committed windows), the diagonal and orthogonal neighbour blocks of L2.08518 up to the last neighbour, and the diagonal blocks of L2.08519; the last neighbour's compare and store and the return of L2.08518 lie outside the windows. Medium for the L2.08519 orthogonal half and the list swap (read only as the same diagonal arithmetic and the loop's call). Medium that expansion by layer returns the cheapest route: layers count steps, so a goal cost found early need not be the minimum over all paths (inference). Unknown: the flag-zero arm (L2.08560), the size-not-1 arm (L2.08517) and the code from L2.08840 (R2-ENGINE-1804 names their workers); the contents of the byte table at world +0, the producers of word +0x58584, EN equivalents.
+
+**Unknown.** Run RU in an original session: order a unit across two terrains whose table bytes differ and compare the route against the sum of bytes; settles the byte table and the layer limit.
+
+**Evidence.** [RU search and helpers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w01-search-cost-helpers.txt), [diagonal half](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w02-cost-diag-score-assign-sight.txt), [orthogonal half](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w03-cost-orth-defend-filter-flee.txt). Instrument: Ghidra 12.1.2 import of rom2-ru allods2.exe, DisasmRangesNoBytes; callers of L2.05174 by EnumRefs callto: one (L2.05182).
+
+### R2-ENGINE-1877
+
+RU group assignment L2.05173 (one caller, L2.02466) walks the member list given as argument. For each member it starts the best score at 0xffffff and walks the enemy list at session +0xa68 from its head through the list's next-element helper, scoring each with L2.05238(member, enemy) and replacing the kept enemy only when the score is strictly below the best (signed compare, equal scores keep the earlier one). The target word at command +0x20 receives the kept enemy, or 0 when the best is still 0xffffff. With an empty enemy list or an empty argument it writes 0 to every member. The score is ((first term) << 8) + a byte from L2.02405, a first term above 1 gives 0xffffff, and a relation byte from the member table multiplies by 2 (value 1), halves (value 4), gives 0xffffff (value 0) or leaves it. The list's own order is the order of appends by group sight L2.02473: cells marked by the members' sight, world list order (L2.00205 at L2.08841), then the removals of L2.02119 and L2.02416, then, when the list is empty, the fallback list +0xa88 in its order (L2.08842).
+
+**Amends.** R2-ENGINE-1111 (the same assignment loop; adds the named list +0xa68 and its build order). See also R2-ENGINE-1112 and R2-ENGINE-842.
+
+**Confidence.** High for the loop, the strict comparison and the write of +0x20 in RU. Medium for the scan order being the build order of list +0xa68 (the append helper bodies are unread) and for the meaning of the first term (L2.01522, L2.01728, L2.02405 unread). EN unread.
+
+**Unknown.** The order of list +0xa68 for equal scores in a real session: place two enemies at equal distance, attack with a group and compare the chosen target with their creation order.
+
+**Evidence.** [RU scorer and assignment](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w02-cost-diag-score-assign-sight.txt), [callers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w05-callto.txt).
+
+### R2-ENGINE-1878
+
+RU defender helper B L2.03474 takes the list L2.03475 and picks the entry with virtual +0x20 result 3 and least L2.01588 distance, replacing the best only on a strictly lower distance; with none of kind 3 it picks the nearest entry under 0xff, then calls the attack planner L2.01530. The list is first filtered by L2.06586, which removes every member whose virtual +0x20 result is 3 when L2.01728(defended) is below 2 (R2-ENGINE-1188), so the kind-3 branch of helper B can fire only for a defended unit with L2.01728 of 2 or more. No health, life or consciousness test appears in helper B, in L2.01588, in L2.02119 or in L2.06586 (L2.03475 also calls L2.06585 and its area builder L2.05939; L2.02476, which returns the unit of a cell, is unread). L2.01588(a, b) takes each unit's footprint size s from virtual +0x1c and the two positions of L2.02411 and L2.02412, shifts each by (s - 1) << 7, takes per axis |difference| - ((sa + sb) << 7) clamped at 0, the larger axis m, and returns ((m + (sign mask & 0xff)) >> 8) + 1 as a byte.
+
+**Amends.** R2-ENGINE-1185 (helper B's Unknown on the list and kind 3) and R2-ENGINE-1188 (its Medium for L2.06586, now read whole in RU).
+
+**Confidence.** High for the L2.01588 body except the per-axis absolute value, and for the helper B comparisons in RU. Medium that L2.01523 is the absolute value (unread). L2.06586 is read whole; L2.01728 is unread. Medium that the positions are in 1/256 cell units (L2.02411/6c and L2.01521 unread); Unknown whether virtual +0x20 value 3 encodes living or unconscious (L2.02402 is a plain virtual call). Wide units use the size term; movement of an enemy is not part of the body (positions as stored at the call).
+
+**Unknown.** A run with a defender, a living and a fallen enemy at equal distance, noting the target chosen.
+
+**Evidence.** [RU helper B and distance](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w03-cost-orth-defend-filter-flee.txt), [distance tail](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w04-distance-tail.txt).
+
+### R2-ENGINE-1879
+
+RU L2.02119(ref, list, wanted) walks list+4 and removes (L2.04531, R2-ENGINE-1008) every candidate whose relation result L2.01589 equals the third argument. It removes any other candidate whose word +0x144 has bit 0x1000 unless some unit of the list at ref +0x70 has L2.01588(candidate, unit) not above byte +0x71 of that unit's command block. The flee test L2.02448 builds the area list of radius [+0x1c0]+8 + 5 around the unit's cell (L2.05939), filters it with L2.02119(unit, list, 0) and flees when the result is nonempty. L2.02119 has 13 direct callers, among them group sight L2.02473.
+
+**Amends.** R2-ENGINE-502, R2-ENGINE-1112 and R2-ENGINE-1188 (the filter body read again; the removal direction and the not-above test are now in a committed RU window).
+
+**Confidence.** High for the body; Medium for the rest. The comparison direction is read in the body, but the meaning of bit 0x1000 as the Invisibility effect, of byte +0x71 as a detection range and of the list at ref +0x70 as the group's members is a name-free reading from the body alone; L2.01589's values and the callers' wanted argument besides 0 were not read.
+
+**Unknown.** A run with a wounded unit near an invisible enemy and a groupmate at known distances, flee toggling.
+
+**Evidence.** [RU filters and flee test](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w03-cost-orth-defend-filter-flee.txt), [callers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w05-callto.txt).
+
+### R2-ENGINE-1880
+
+RU admission L2.01518(unit, id, 0) looks up spell id in the book at +0x140 (L2.00040) and returns the record when the unit's word +0x9a is at least the record's word +0xc, else 0. The flee spell routine L2.02452 calls it for id 0x17 and casts through L2.01732 at the computed cell; it tests a hostile count and a list, no sight-range byte and no adjacency. L2.01518 has 20 call sites in 6 owners (L2.01527, L2.01512, L2.02449, L2.02452, L2.02451, L2.07713); L2.01732 has 6 sites in 4 owners.
+
+**Amends.** R2-ENGINE-1418 (its Unknown on callers beyond the two spell routines narrows to two owners) and R2-ENGINE-1440.
+
+**Confidence.** High for the bodies of L2.01518, L2.02452 and L2.02448 and for the census of direct callers in RU. The callers L2.02449, L2.02452, L2.02451 and L2.07713 are read in R2-ENGINE-1418 (flee and back-off both cast Teleport). Unread: L2.01527, L2.01512 (11 sites) and virtual calls. Medium that no other Teleport branch exists. The sight-range eligibility and adjacency test the question names are not found in the read bodies.
+
+**Unknown.** A run with a caster of the smallest sight range next to an enemy and Teleport in the book; compare the action with the flee branch.
+
+**Evidence.** [RU admission and flee spell](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w03-cost-orth-defend-filter-flee.txt), [callers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w05-callto.txt).

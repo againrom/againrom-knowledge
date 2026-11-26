@@ -181,3 +181,7 @@ the visibility map is cleared and rebuilt per decision.
 Under explicit Retreat a refused flee walk installs a strike on a hostile at reach when the in-position gate passes, and the unit does not flee while that holds (Medium: composed from listings; the gate is unread). — AI-798
 
 A staged area spell's first stage runs one world step after the step that applies the cast, and later stages every 3 steps (Medium: the registration caller is unread). — MAGIC-463
+
+## Scan radii, ranking and detection (first game)
+
+Guard post, defender cover and the Wimpy retreat check use the byte `mover+8` as block radius; the Withdraw retreat check uses the literal 2 (AI-810). Defender cover prefers fliers and reads no health or state (AI-812), by the edge-to-edge sub-cell distance (AI-813); group ties keep the first scanned candidate (AI-814); the retreat check shares invisibility detection across the group (AI-815).

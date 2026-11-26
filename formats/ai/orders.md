@@ -674,3 +674,13 @@ A Teleport scroll used in melee installs only after the strike leaves progress 1
 The computer mage's Heal list is built centre cell first with no identity test (High); whether it holds the caster is Medium. — AI-800
 
 A staged area spell cast by an order lands its first stage one world step after the applying step (Medium: the registration caller is unread). — MAGIC-463
+
+## Scan radii of guard, defender and retreat (first game)
+
+The guard post and the defender's cover scan the block of radius `mover+8` about the post and about the protected unit; the two retreat predicates use the wounded unit's own `mover+8`, or the literal 2 for the Withdraw threshold, and no read branch substitutes a default for the byte. — AI-810
+
+The retreat predicates keep an invisible enemy when any groupmate's See-invisible byte reaches its distance. — AI-815
+
+The defender arm hands the protected unit to cover when `actor+0x140` is zero; with a spell book it first tries the `R0305` spell branch, and cover runs when no spell is chosen. Cover engages the nearest flier if one remains, else the nearest unit. — AI-812
+
+Cover and the invisibility test measure distance edge to edge in sub-cell steps. — AI-813

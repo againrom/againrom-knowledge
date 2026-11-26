@@ -200,9 +200,10 @@ in 2 owners, `R0209` and `R0142`.
 | ordered target != `mover+0x74` | static re-search; the dynamic route is freed |
 | `mover+0x09` (dynamic searches since the last static one) > `StaticRefreshRate` | static re-search |
 
-The dynamic search does not aim at the final goal: it takes the static route's tail waypoint when it
-is more than `DynamicByStaticLookup` cells away, else the node `DynamicByStaticLookup + 1` further
-along, and the final goal only when the static route holds `StaticIsntNeeded` nodes or fewer. A
+The dynamic search does not aim at the final goal: it takes the head node of the static list when it is
+over `DynamicByStaticLookup` cells away, else the node of index `DynamicByStaticLookup` counted from the
+head, and the final goal only when the static list holds `StaticIsntNeeded` nodes or fewer (MOVE-208;
+Medium that the head is the node nearest the unit). A
 waypoint is popped once the unit is within `DynamicByStaticLookup` of it. Every counter is per-unit
 and reset on use — **nothing is staggered**, and neither terrain change nor target movement
 invalidates a stored route by itself.
