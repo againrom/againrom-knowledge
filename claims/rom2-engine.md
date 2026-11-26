@@ -22,6 +22,102 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## ROM2 order machine: Drain Life without health and the area-defence setters (EXP-2213)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1892 | EN Drain Life arm: a computed v of 0 or below leaves through the arm exit with no hit hook, no relation call, no killer store and no health change; v above 0 runs the hook with F = 0. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1893 | EN action 6 selectors 1 and 18: members get order 0xb at their own cell; the group record takes centre = group cell and a radius raised to p1 when p1 is nonzero (else +0xa8b8, selector 18: 0x14); no member flag in the bodies read. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1894 | EN and RU allods2.exe: 17 byte-width stores to a +0x20 operand with a non-esp base, the same sites in both; immediate values 0..5, 0x11..0x13, 0xff and one register store; none from 6 to 16. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1895 | No body with the shape of a Druid patrol stage found among the group programme byte stores, the programme dispatch (no route for 6 to 16) and six order handlers read. Bounded negative. | Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1896 | EN L2.08843 (order 0x18) and L2.08844 (order 0x19) are the only coordinate walkers the order dispatcher reaches; EN L2.08845, which tests x against 0x48, 0x55, 0x62 and sets a destination, has no reference in either image. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1897 | Census of the unit position getters L2.00488 and L2.00489: 246 direct call sites in EN and 246 in RU, no absolute reference; 44 per image have a compare with an immediate within 10 instructions; stored results are not followed. | Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1898 | Darkness pulse, EN: the occupant routine has no caster-equals-target test, so the caster can be a hook target when it is the occupant picked; the hook then writes its +0x54, +0x58, +0x94, +0x98, +0x9c. | Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+
+### R2-ENGINE-1892
+
+The EN Drain Life arm L2.08487 (the committed EXP-2061 listing en-heal-drain) first calls the target's virtual slot +0x2c and leaves for the arm exit L2.08846 when it returns 0. It then forms v = (spell byte +0xe + helper L2.04697 of byte +0xf) x (100 - target word +0xcc) / 100, caps it at the target's health word +0x94 plus 10 and leaves for L2.08846, which jumps to the common exit L2.08847, when v is 0 or below (jle at L2.08848). Past that test, in order: caster slot +0x6c with (target, v, spell id); the hit hook L2.04120 with (caster, target, 0) when both units have a nonzero owner +0x14; the target's health word minus v with a message; the target's +0x40 = caster and byte +0x48 = spell id; caster L2.06847(v) with a message. So a Drain Life whose v is 0 or below runs none of these: the hook's stores (R2-ENGINE-1109), the relation helper call (R2-ENGINE-981) and the attacker store are all skipped, and the victim records no attacker cell +0x58.
+
+**Confidence.** High for the EN arm path (whole listing read, 668 bytes). Medium for the RU arm, read in R2-ENGINE-1767 and equal after masking per R2-ENGINE-488, not re-read here. Medium that no other route calls the hook for a Drain Life cast: the hook's direct callers (R2-ENGINE-845) are a direct E8 census in RU only, and the apply head before the arm was not re-read for a hook call. That v is 0 or below only for a target word +0xcc of 100 or more (and a target whose health is at or below -10) is read from the arithmetic, not observed.
+
+**Unknown.** What the relation helper does for F = 0 beyond R2-ENGINE-981. A run of the original settles the whole question: load a map with a mage and a hostile whose word +0xcc is 100 (or a fully Drain-resistant unit), cast Drain Life, and compare the victim's command block (+0x54, +0x58) and the owners' relation cell before and after.
+
+**Amends.** R2-ENGINE-1767 gains the v 0 or below branch it left open; its steps 1 to 6 stand.
+
+**Evidence.** `experiments/EXP-2061-rom2-hero-growth/out/listings/en-heal-drain.txt` lines 86 to 192.
+
+### R2-ENGINE-1893
+
+Action 6 selector 1 (EN L2.04664, RU L2.04403) and selector 18 (EN L2.05047, RU L2.02519) were read in EN (`evidence/native/pass1/listings/en-*.txt` of EXP-2213; the RU windows have the same instruction counts and were not compared line by line). Selector 1: reset L2.04086, for each member the Guard setter L2.00441, record programme +0x20 = 1, then centre L2.08413, then the radius step. The Guard setter calls L2.03061 (unread), stores order +0x50 = 0xb, command word +0 = the member's cell (L2.03062 of its position object, or word +6 of block +0x1c0 when L2.00491 is nonzero) and command byte +8 = 0, and stores nothing else. Centre L2.08413 calls L2.08416 (unread), copies the group cell word +0x28 to record word +0, and sets +0x2d and +0x38 to +0x2c. The radius step: p1 (low byte) nonzero raises +0x2d and +0x38 to p1 when +0x2d is below it; p1 zero raises both to session byte +0xa8b8 when +0x2d is below it; then +0x39 = 0. Selector 18 has the same length (70 instructions) but is not the same body: it sets programme 0x12 (R2-ENGINE-843) and, for p1 = 0, stores the constant 0x14 to +0x2d and +0x38 when +0x2d is below session byte +0xa8b8 (`en-sel18-L2.05047.txt`, L2.08849 to L2.08850); selector 1 for p1 = 0 raises both to session byte +0xa8b8 (`en-sel1-L2.04664.txt`, L2.08402 to L2.08851). The defended area is therefore a Chebyshev circle: centre the group cell word, radius at least +0x2c (largest member distance plus largest sight byte, R2-ENGINE-1621), raised to p1 when p1 is nonzero, else per the two rules above. No bit or byte of member behaviour besides order 0xb and prepared byte 0 is stored by the bodies read.
+
+**Confidence.** High for the EN bodies. Medium for RU (same lengths, not compared) and for the circle being the area every reader tests: the leash readers are R2-ENGINE-1622's. The helpers L2.03061, L2.04086, L2.08416 and L2.00491 are unread; a flag set inside one of them is not excluded (Medium).
+
+**Unknown.** Whether the original keeps a group dwelling in place beyond these stores. A run of the original settles it: fire action 6 selector 1 with p1 = 12 on a placed group in a copy of a campaign map, save after a few ticks, and read the group record bytes +0x20, +0x2d, +0x38 and each member's order and command.
+
+**Amends.** R2-ENGINE-1726's selector 1 and 18 rows gain the Guard setter body, the centre helper body and the p1 = 0 radius rules, which differ between the two selectors.
+
+**Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/native/pass1/listings/en-guard-setter-L2.00441.txt`, `en-sel1-L2.04664.txt`, `en-sel18-L2.05047.txt`, `en-centre-L2.08413.txt`.
+
+### R2-ENGINE-1894
+
+A whole-.text census of EN allods2.exe and RU allods2.exe (Capstone linear decode, `evidence/census45.py`) lists every instruction with a memory operand whose displacement range covers +0x20 and that writes it, every LEA of such an operand and every `add reg, 0x20`: EN 539 rows, RU 555. Byte-width writes with a non-esp base number 17 in each root, at the same set of sites. Their values are 0, 1, 2, 3, 4, 5, 0x11, 0x12, 0x13 and 0xff as immediates, and one register store. No immediate from 6 to 16 is stored. Fourteen of the 17 write the group record at `[group+0x3c]`: the 8 setters for programmes 1, 2, 3, 4, 5, 0x11, 0x12 and 0x13, 5 resets to 0 and the empty-group store of 0xff; the stores of programme 3 (EN L2.08852) and of the empty-group 0xff (EN L2.08853) are paired by displacement and their EN bodies were not read. Two write constructors of other records (EN L2.08854, L2.08855). One, EN L2.08856 (RU L2.06073), stores message byte +0xe into a record found by id through L2.01568 at base +0x34, inside the network message handler L2.00171. Within EN L2.08857 to L2.04218 there are 16 byte writes, 8 dword writes (7 of them the command block +0x20 at EN L2.08858 to L2.08859), 1 add and 0 lea. A second run of the census reproduced all five output files byte for byte.
+
+**Confidence.** High for the census as a measurement of the two images (reproduced). Medium that it covers every store: the remaining 247 (EN) and 254 (RU) `add reg, 0x20` rows and the 68 (EN) and 77 (RU) LEA rows are not read except 3 sites, and 180 dword writes and 2 word writes outside the group-code region are not read. A value from 6 to 16 could also reach the byte by a copy of a whole group record, a stream load of a group record from a map or a save, or a block move; the census does not see those forms (the record constructor EN L2.08854 is in the census, its loaders are not). Whether the object behind the +0x34 store is a group record is Unknown.
+
+**Unknown.** The population behind EN L2.08856. A run of the original settles it: receive a programme message in a network game, save, and compare the object's +0x20 byte with the message byte.
+
+**Amends.** None.
+
+**Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/census/prog-sites.tsv`, `evidence/derived/prog-store-classes.tsv`, `evidence/refs/`.
+
+### R2-ENGINE-1895
+
+No routine with the shape of a Druid patrol stage was found: no enemy scan tied to a patrol phase, no phase shared by the group, no regroup of members that lack waypoints. The values the census of R2-ENGINE-1894 stores are 0..5, 0x11, 0x12, 0x13 and 0xff; the script selectors of action 6 that act (R2-ENGINE-1726) are 1 to 5, 10, 11, 14, 15, 17 and 18, and the programme dispatch has routes 0..5, 17, 18, 19 and 0xff only (R2-ENGINE-882). Every stored programme value is reached by a script selector or by an internal setter or reset read in this experiment, except programme 3 and the empty-group 0xff, which are paired by displacement only; selectors 10, 11, 14 and 15 are not programme values in the census. Programme 1 is the Guard programme of R2-ENGINE-1893, programmes 2, 4 and 5 are the sight, walk and planner routes, programme 17 is the distance test. Of the handlers the unit order selector EN L2.02477 calls beyond orders 0x18 and 0x19, six bodies were read (EN L2.06478, L2.08860, L2.08861, L2.06476, L2.08862, L2.03067) and show no patrol phase; eight were not read in a committed listing of this experiment (EN L2.08863, L2.06363, L2.07820, L2.08864, L2.05941, L2.07155, L2.04965, L2.03461). Coordinate walkers are in R2-ENGINE-1896. Population searched: the group programme byte stores of both images (immediate, register and byte width), the programme dispatch, six order handler bodies and the unit position getter callers. Forms not covered: the unread add and LEA rows and wide stores named in R2-ENGINE-1894; a copy of a whole group record, a stream load of a group record from a map or a save and a block move, by which a value from 6 to 16 could reach the byte; the eight unread handlers; and any patrol held as a sequence of existing script actions or as data.
+
+**Confidence.** Medium: a negative bounded by the population above.
+
+**Unknown.** Whether a Druid patrol exists as a script sequence of existing actions. A run of the original settles it: play the Druid mission with a watch on the group record byte +0x20 and member orders +0x50 over several ticks.
+
+**Amends.** None.
+
+**Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/derived/prog-store-classes.tsv`, `evidence/native/pass5/listings/`.
+
+### R2-ENGINE-1896
+
+EN L2.08843 (the planner the unit order selector L2.02477 reaches for order 0x18, RU L2.02864, 184 instructions read whole) and EN L2.08844 (order 0x19, RU L2.02872, 26 instructions) are the only coordinate walkers the order dispatcher reaches. Order 0x18 planner: a unit whose word +0xe is 0x18 (its meaning as a class is not shown) is stored in session +0xbe00 with +0xa5 and +0x12c set to 5; if the command block byte +8 is 6, session +0xbdfc is incremented, and on the same call it is incremented a second time when it is then nonzero (L2.08865 to L2.08866), after which the routine returns without a walk. Otherwise, when session byte +0xbdfc is nonzero (alert), a random destination x in 0x4d to 0x57 and y in 0x2d to 0x37 is chosen when L2.08867 is nonzero, then L2.08868 runs. Otherwise, when session byte +0xbded (stage) is nonzero, the waypoint is x = session[0xbdec + 2 x stage], y = session[0xbded + 2 x stage]; when the Chebyshev distance L2.03287 from the unit is below 5 the walk destination is set to the waypoint through L2.04961, else L2.08868 runs. Order 0x19 planner: it always sets the walk destination to x 0x5b, y 0x4f; if the unit's x exceeds 0x58 it also calls L2.08869, giving order 4 with destination x 0x52, y 0x2f. The RU planners equal EN after address masking (210 of 210 lines, both planners). For the stage writer L2.03210 only a prefix was compared (130 lines of the EN window against a 256-line RU window; the RU function end is not shown equal). EN L2.08845 (RU L2.08870) was not compared with RU. Setters EN L2.08871 and L2.08872 store orders 0x18 and 0x19. The stage writer EN L2.03210 (stage = random 1 to 3) and EN L2.08845 (unit x against 0x48, 0x55 and 0x62, a destination x 0x64 or 0x46 with y 0x3c to 0x46 by a random draw, set through L2.04961) have no E8, E9 or dword reference in EN or RU (R2-ENGINE-628 and a reference scan). The second has the shape of thresholds on position with a destination per threshold; the absence of a reference bounds its reachability, not its shape.
+
+**Confidence.** High for the EN bodies and the RU equality (EN and RU are builds of one program, so this is not a second witness for meaning). Medium that these are the evacuation walkers: the waypoint table values and writers are unread, no script action 6 arm sets orders 0x18 or 0x19, and the callers of the two setters were not censused. Reachability is Unknown.
+
+**Unknown.** Who calls EN L2.08871 and L2.08872 and what fills session +0xbdee to +0xbdf3. A run of the original settles it: run a mission with an evacuation scene, watch unit +0x50 for 0x18 and 0x19 and the session bytes +0xbded to +0xbdf3 and +0xbdfc.
+
+**Amends.** None. Cites R2-ENGINE-628 and R2-ENGINE-1107; the stage writer and L2.08845 are unreferenced.
+
+**Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/native/pass2/listings/en-cmpx-L2.08873.txt`, `en-cmpx-L2.08874.txt`, `en-cmpx-L2.08875.txt`, `evidence/native/pass3/listings/ru-fn-L2.02864.txt`, `ru-fn-L2.02872.txt`, `evidence/derived/parity.tsv`, `evidence/refs/`.
+
+### R2-ENGINE-1897
+
+The census of the unit position getters EN L2.00488 (x byte) and L2.00489 (y byte), RU L2.00486 and L2.00487 (R2-ENGINE-1730), finds 246 direct E8 call sites in EN and 246 in RU and no absolute-dword reference in either. The mechanical rule "a `cmp` with an immediate within the next 10 instructions" over `census/getter-callers.tsv` selects 44 call sites in each image (recomputed in the review of this experiment; the rule is not a committed script). A hand selection of 20 of them in EN, committed as `derived/getter-compare-callers-en.tsv`, is: L2.08876, L2.08877, L2.08878, L2.08879, L2.08880, L2.08881, L2.08882, L2.08883, L2.08884, L2.08885, L2.08886, L2.08887, L2.08888, L2.08889, L2.08890, L2.08891, L2.08875, L2.08873, L2.08892, L2.08874; the RU list of 20 is not committed. Of these, L2.08873, L2.08892 and L2.08874 are in the planners of R2-ENGINE-1896, L2.08890 and L2.08891 are in the unreferenced routine EN L2.08845, and L2.08875 is in the unreferenced stage writer L2.03210; the others read as Chebyshev tests of at most 1 or 2, map-bound checks (coordinate plus a word above 0x100) or terrain calls. The unit executor L2.00507 is not a mission class. Among the direct call sites with a compare against a constant within 10 instructions, no routine other than those named compares a unit position with a coordinate table; a later compare of a stored result is not covered (28 call sites per image store the result to a local in the first three instructions).
+
+**Confidence.** Medium: only direct calls and absolute references to the getters are covered; an inlined read of the position object or a call through a pointer is not.
+
+**Unknown.** Whether position is read inline anywhere. A decode of every load of the position object offset is the next static pass; a run of the original does not settle it.
+
+**Amends.** None.
+
+**Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/census/getter-callers.tsv`, `getter-refs.tsv`, `evidence/derived/getter-compare-callers-en.tsv`.
+
+### R2-ENGINE-1898
+
+The Darkness area (row 14, kind 5) pulses every 16 updates onto the first occupant of each cell through the EN occupant routine L2.05842 (R2-ENGINE-985, R2-ENGINE-1109, the committed EXP-2140 listings). The routine has no test that the target equals the caster; this is the new fact, read in EN against the whole 137-instruction listing. Its steps 4 to 8 are R2-ENGINE-985's: it returns for a null target or row 17, for row 15 (Light), for a target virtual +0x20 low byte of zero or a caster of zero; a nonzero predicate L2.03453 on the caster stores target +0x40 = 0 and continues (L2.08893 to L2.08894; Darkness stores neither +0x40 nor +0x48, R2-ENGINE-1238), so for T = C the routine also writes C+0x40 = 0; with both owners (+0x14) nonzero it calls the hit hook L2.04120 (C, T, 1) at L2.05845. The card reads EN only. When the caster is the occupant picked, the hook writes the caster's command block: +0x54 = 1, +0x58 = the caster's cell word, +0x5a = 0, +0x94 = the caster, +0x98 = the session word at [[L2.00805]+4], +0x9c = the away cell. For dx = dy = 0 the scale is 10.0 divided by a zero magnitude (the double at EN L2.07821 is 10.0); under masked FPU exceptions the conversion through EN L2.02708 returns 0, so +0x9c = 0 (cell 0, 0). The hook also calls the relation helper L2.04202 with F = 1, which ORs 1 into the owner's own relation cell when its low two bits are zero (R2-ENGINE-988), and appends a 0x54-byte event record. It stores no order and no target.
+
+**Confidence.** Medium. The hook writes and the missing test are read from listings; the away cell 0 rests on masked FPU exceptions (control word not read) and L2.04968 is unread.
+
+**Unknown.** Whether the caster is the first occupant of its own cell, the meaning of virtual +0x20, and whether the area's +0x3c holds the caster at apply time. A run of the original settles it: cast Darkness with the caster inside the area, save, and read the caster's +0x54, +0x58, +0x94 and +0x9c.
+
+**Amends.** R2-ENGINE-985 gains the T = C case of its steps 4 to 8 (no caster-equals-target test; C+0x40 = 0 when the predicate is nonzero). R2-ENGINE-1491's Unknown on the dx = dy = 0 away cell is read here at Medium.
+
+**Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/native/pass6/listings/`, `evidence/native/pass6/dwords.tsv`, `experiments/EXP-2140-rom2-area-blow/evidence/generated/listings/en-area-occupant.txt`.
+
 ## ROM2 surcharge power, spell kill credit, local path, death sack and well item
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -542,7 +638,7 @@ Control Spirit (spell row 22) takes a corpse of kind 2 first, then 3, then 4 (R2
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1766 | ROM2 Prismatic Spray adds seen hostiles nearest the caster, key 256 x distance + turn up to 256 x range; target first, cut to cap; bodies only when no living hostile is in sight (candidate population Medium). | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
-| R2-ENGINE-1767 | ROM2 Drain Life sets killer +0x40 = caster, +0x48 = its spell; a victim at -10 or below dies and the kill route may credit +0x40 (Medium). | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1767 | ROM2 Drain Life sets killer +0x40 = caster, +0x48 = its spell; a victim at -10 or below dies and the kill route may credit +0x40 (Medium). | High / Medium | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
 
 ### R2-ENGINE-1766
 
@@ -586,6 +682,8 @@ The kill route takes the killer from victim `+0x40` for a unit in state 0x10 (R2
 **Unknown.** The other writers of `+0x40` and the meaning of byte `+0x4a`. A run of the original settles the credit: kill a unit with Drain Life cast by a mage, and read the mage's Sphere skill and the owner's kill count before and after.
 
 **Amends.** R2-ENGINE-1158's "The writers of victim +0x40 and +0x48": the Drain Life arm is one. R2-ENGINE-488's "whether a spell kill pays its trunc(V x 0.5) is not established": a Drain Life kill reaches the kill route with the caster as killer and Drain Life's spell id.
+
+**Amended.** R2-ENGINE-1892 reads the branch this card leaves open: a computed v of 0 or below leaves the arm before the hit hook, the relation call and the killer store; steps 1 to 6 stand for v above 0.
 
 ## Item card for a spell-carrying item
 
@@ -1412,7 +1510,7 @@ A second routine `L2.05879` writes per-cell bytes at client +0xb0 from the corne
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-985 | ROM2 area occupant applies the area object, then calls the hit hook (caster, occupant, 1) with no owner or relation test. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
+| R2-ENGINE-985 | ROM2 area occupant applies the area object, then calls the hit hook (caster, occupant, 1) with no owner or relation test. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-986 | The ROM2 Effect attach renews, cancels or adds an Effect on its unit without reading an owner or a relation. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-987 | The ROM2 hit hook writes victim hit memory and posts an event record; its body writes no command +0x20, +8 or +0x0c. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
 | R2-ENGINE-988 | A same-owner ROM2 hook call changes no relation cell when the diagonal's low bits are set; group sight marks the caster cell for a member whose owner +0x2c is nonzero. | High / Medium | ✔ promoted (branch candidate) | [EXP-2140](../experiments/EXP-2140-rom2-area-blow/) |
@@ -1439,6 +1537,8 @@ The body reads no owner index +4, no relation cell and no relation predicate. St
 **Confidence.** High for the complete occupant, predicate and apply-tail windows in both roots. Medium that [area+0x48] for row 14 is the arm-14 Effect and its vtable+0x3c the attach (R2-ENGINE-697, R2-ENGINE-793), and that a creature's +0x3c, nonzero when the executor prepared its cast (R2-ENGINE-399, R2-ENGINE-542), is still nonzero at the apply. Medium for what T vtable+0x20 tests (not read).
 
 **Unknown.** The meaning of [L2.01317]+0x74 and owner +0x2c in step 7; which of a cell's occupant entries a pulse passes is R2-ENGINE-793's.
+
+**Amended.** R2-ENGINE-1898 reads the EN occupant routine for a caster that is its own target: it has no caster-equals-target test, and a nonzero predicate L2.03453 stores target +0x40 = 0 and continues to the owner tests and the hook; steps 4 to 8 stand.
 
 **Evidence.** [Answer 1](../experiments/EXP-2140-rom2-area-blow/RESULTS.md#1-reach): apply-tail-store, caster-predicate and area-occupant listings; occupant-compare.tsv.
 
@@ -34295,7 +34395,7 @@ so the missing ID names register 0 (Medium: the constructor L2.06010 that runs a
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1490 | No body read chooses a point for a ROM2 mage's area spell: the offensive choice casts at the victim unit, the special cast at the victim's cell; the centre L2.00034 takes is Unknown; no body read tests own units in the area. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
-| R2-ENGINE-1491 | A ROM2 area hit stores six fields in the struck unit's command (+0x54, +0x58, +0x5a, +0x94, +0x98, +0x9c) and no order; their readers found in the displacement census are the look-around, five sight copies and Guard B. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
+| R2-ENGINE-1491 | A ROM2 area hit stores six fields in the struck unit's command (+0x54, +0x58, +0x5a, +0x94, +0x98, +0x9c) and no order; their readers found in the displacement census are the look-around, five sight copies and Guard B. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1492 | A repeated ROM2 area hit overwrites the same six fields and restarts a 21-pass sight count; each hit posts a record that the script tick destroys, and no reader of its content was found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1493 | ROM2 Guard B counts the hurt step-away in ticks (+0x98, below 10) and the stamp window in 16-tick blocks (+0x16); case 4 gives one step-away pass per hit at most (Medium); cases 1 and 2 walk to +0x9c every pass while the stamp is young. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1494 | A ROM2 Guard A member with no target walks to its post or idles there; the body reads none of command +0x16, +0x94, +0x98 and +0x9c, so by the bodies read a struck member there gets no step away. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
@@ -34392,6 +34492,8 @@ dx and dy, which is read from the arithmetic and not from the position helpers' 
 
 **Unknown.** The result for dx = dy = 0. A run of the original with a victim on the attacker's cell, and a read of
 the saved away cell afterwards, would settle it.
+
+**Amended.** R2-ENGINE-1898 reads the dx = dy = 0 away cell from the EN listing at Medium: a divide of 10.0 by a zero magnitude converted through L2.02708 gives 0 (cell 0, 0) under masked FPU exceptions; the control word at run time and L2.04968 are unread, and the run named above still settles it.
 
 ### R2-ENGINE-1492
 
@@ -37161,7 +37263,7 @@ No new body is read for these actions; the statement composes the wrapper reads 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1725 | ROM2 script type-9 operand: the compiler keys each object of [[compiler+0x24]] by DWORD+8; check 21 sets R[slot] to that object's i16+0x42; a value absent from the map is read as 0 and fails the compile (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
-| R2-ENGINE-1726 | ROM2 script action 6: p0 selects one of eleven group methods (1, 2, 3, 4, 5, 10, 11, 14, 15, 17, 18); other p0 does nothing; each method body is read in EN and RU (orders 8, 0xa, 0x11 and programme values Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
+| R2-ENGINE-1726 | ROM2 script action 6: p0 selects one of eleven group methods (1, 2, 3, 4, 5, 10, 11, 14, 15, 17, 18); other p0 does nothing; each method body is read in EN and RU (orders 8, 0xa, 0x11 and programme values Medium). | High / Medium | ● active (amended, branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
 | R2-ENGINE-1727 | ROM2 EN check compile (RU Medium): each check ID maps to register k, a running index over compiled and word-65538 checks; word 65538 stores slot 0 in R[k] without reading a type; a word above 65538 takes no index. | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
 | R2-ENGINE-1728 | ROM2 EN type-7 loader tests no node or trigger value; the EN compiler copies node word +0x48 only to IR+0x74 (no reader in 45 EN listings; Medium); a failed check or a trigger's absent check ID reads register 0 (Medium). | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
 | R2-ENGINE-1729 | ROM2 script outcome: action 4 adds one to the win counter Session+0xbe0c; action 5 stores p0 as the failure reason Session+0xbe14, sent as defeat when above 0 (Medium); check 18 also adds one to it. | High / Medium | ● active (branch candidate) | [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md) |
@@ -37246,6 +37348,8 @@ are the map's movable bounds.
 **Unknown.** What orders 8, 0xa and 0x11 do in play and what the clamp bytes hold. A run of the original on a copy
 of a campaign map with one action 6 per selector 11, 14 and 15 on a known group, saving after a few ticks, would settle
 the order codes and command fields from the save.
+
+**Amended.** R2-ENGINE-1893 reads the selector 1 and selector 18 bodies in EN: the Guard setter, the centre helper and the radius step, and shows that selector 18 differs from selector 1 for p1 = 0 (constant 0x14 when +0x2d is below session byte +0xa8b8, against that byte itself for selector 1).
 
 **Evidence.** [EXP-2201](../experiments/EXP-2201-rom2-script-authoring/RESULTS.md)
 `evidence/native/pass1/listings/*-q2-m-*.txt`, `evidence/native/pass1/tables/*-q2-action6-switch.tsv`,
