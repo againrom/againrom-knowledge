@@ -134,7 +134,7 @@ partially retracted, the four Light and Darkness apply and remove stores (`MAGIC
 `L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`. A
 `disp:a5` sweep sees two of the six; the seven `+0xa5` byte reads it lists include the stamp
 seed (`MAGIC-444`). A Humanoid derive keeps Darkness's reduction through `+0xe4`
-(`MAGIC-445`).
+(`MAGIC-445`). The Darkness tail that stores the caster has no comparison of caster and unit (`AI-829`; Medium that the area loops pass the caster).
 
 **Light and Darkness shrink the stamp.** Light lowers a reached plain Unit's sight, and Darkness a
 reached Humanoid's or Human's, by p/30 + 1 whole cells, so the stamp's seed and the candidate set

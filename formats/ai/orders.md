@@ -385,7 +385,7 @@ every other order that has a "walk there, then do a thing" shape.
   completed pickup leaves 1, which sends that arm to the state 0xc acquire routine instead of a walk
   (`AI-372`).
 - Acquisition, engage, reacquisition, strike install and the struck hook store no `ord+0x0a`; the 39 stores
-  found lie in setters, group arms, state arms and withdrawal (`AI-651`). the 14 immediate stores of 1 to
+  found lie in setters, group arms, state arms and withdrawal (`AI-651`); no evacuation walk was found among the classes read (`AI-834`, Medium / Unknown). the 14 immediate stores of 1 to
   `ord+0x50` are at arrival, stand-downs, pickup end and cast end (the 112 register-valued stores are Medium),
   `grpAI+0x44` has three direct stores, and SAVE and LOAD copy the order
   block, the group record and the mover raw (`AI-652`, Medium for completeness).
@@ -628,7 +628,12 @@ cell and the diplomacy flip and stores no pending kind or target (`AI-523`,
 `AI-546`). The hook's three direct callers pass the striker or the effect's source or caster, and no `.rdata` or `.data`
 dword equals its address (Medium for the whole image: `.text` tables and `push` or `mov` immediates are not scanned); in
 the bodies read a poison tick and Drain Life lower health without it (Medium: their callees are unread and other
-damage-over-time routes are not enumerated) (`AI-650`). With a null attacker the hit routine stores no attacker pointer and calls no hook (`HERO-205`). A timed effect's owner is a raw pointer, and the poison tick clears it, without credit, when the owner's health word is below zero (`MAGIC-454`). The turn flag forces one random idle turn; no reader of the attacker
+damage-over-time routes are not enumerated) (`AI-650`). The Drain Life arm's own instructions have no
+health store, hook or flip on the paths that leave when the target's slot `+0x2c` returns zero or
+its rolled amount is 0 or less; the callees of that slot and of the amount are unread, and slot `+0x64` of the
+three classes holding the hit routine is a stub in one and a routine with unread helpers in two
+(Medium for anything below them; the caster's and the attacker's classes are not matched to them)
+(`AI-826`, `AI-827`). With a null attacker the hit routine stores no attacker pointer and calls no hook (`HERO-205`). A timed effect's owner is a raw pointer, and the poison tick clears it, without credit, when the owner's health word is below zero (`MAGIC-454`). The turn flag forces one random idle turn; no reader of the attacker
 pointer found starts or changes an order, a strike, a cast or a withdrawal (`AI-547`,
 Medium). The withdrawal tests run for every member of every group order byte
 (`AI-548`); their thresholds start from the authored `Withdraw` and `Wimpy` values (`AI-WITHDRAW-027`) and the Wimpy

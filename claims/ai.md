@@ -30,6 +30,159 @@ now direct: the complete caller is the id-14 Prismatic Spray selector, which fli
 building secondaries. Its secondaries pass the builder's directional first-member diplomacy test;
 the primary does not.
 
+## Drain Life hit, remembered attacker cell, Dwell, patrol and evacuation (EXP-0654)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-826 | The Drain Life arm `L03256` has no health store, hook call, flip or `victim+0x40` store on the paths leaving at `L18081` or `L03258`; target slot `+0x2c` and other callees are unread (Medium beyond the arm). | High / Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-827 | Slot `+0x64` of the three vtables holding the hit routine is `R0869` (no store, no call) in one and `R0870` in two; `R0870` calls four helpers and slot `+0x5c`, all unread (Medium). | High / Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-828 | The stamp adds 1 to the count of cell `ord+0x58` in a sight map for an AI owner, cleared after 21 stamps; its occupant passes the hostility filter and cap `actor+0x12c`; `R0145`, `R0135`, `R0028` unread. | High / Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-829 | The Darkness tail compares no caster with unit and the hook and flip write the stores listed (High); that the loops pass the caster, `R0416` for it and the locked diagonal are Medium. | Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-830 | Par0 18 (Dwell) takes the out-of-table exit `L00407`, which stores and calls nothing; no opcode-6 node of the 38 EN and 33 parsable RU maps carries it; a separate consumer is not excluded (Medium). | High / Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-831 | `Guard range` labels Guard (Par0 1) and Dwell (18) only; Guard's setter `R0125` keeps a larger nonzero byte, raises a zero byte to `+0xa9b8` when lower, and sets state 0xb at own cell; the notice circle is Medium. | High / Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-832 | A patrol member advances its waypoint after guard scan `R0137` (unread) leaves `ord+8` at 0 or 0xb and its cell equals the waypoint (High); no group patrol phase or regroup cell is Medium. | High / Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-833 | No file of the population spells Druid in ASCII, UTF-16LE or code pages 1251 and 866; one `evacu` ASCII hit per root in `main` is unclassified; byte search of uncompressed members only. | Medium | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+| AI-834 | No catalogue action, group arm or string names an evacuation walk, apart from one unclassified `evacu` hit per root; the `ord+0x0a` stores read compare no coordinate list; code census partial. | Medium / Unknown | ● active | [EXP-0654](../experiments/EXP-0654-rom1-machine-five/) |
+
+### AI-826
+
+Listing `evidence/code-en/listings/drainlife.txt` (the arm is its first 72 instructions, `L03256..L16490`); `evidence/scan-en.txt` (cast table, caller censuses).
+
+- Entry. Cast table `L03242` has 27 entries; entry 11 is `L03256`. The arm lies inside the cast function entered at `R0003` (rel32 callers `L00008`, `L03043`, `L03044`) that returns through `L05879` (`ret 0x10`, `evidence/code-en/listings/cast-tail.txt`).
+- Gate. The arm calls the target's slot `+0x2c` before the gate on both paths (its meaning and body are unread) and jumps to `L16490` (a jump to `L05879`) on a zero result (`L18082..L18081`).
+- Amount. The word is the spell record's byte `+0xe` plus the result of `R1715` called with byte `+0xf` (`L18083..L18084`, the callee unread), capped at the target's health word `+0x94` plus 10 (`L17371..L18085`). A word of 0 or less jumps to `L16490` (`L03258`).
+- Positive path. The caster's slot `+0x64` (`L16327`), `target+0x94` minus the amount (`L16319`), the message call `R0059` for the target, the caster's heal `R0671` and a second message call. The heal body (`heal.txt`, read to its return) stores `+0x150` and `+0x94` of the caster.
+- The arm has no call of `R0226` or `R0126` and no operand at displacement `0x40` or `0x48`. Rel32 callers of the hook: `L00875`, `L00876`, `L00877`, none inside `R0003..L16488`. Rel32 callers of the flip `R0126`: `L15388` (inside the hook) and `L00878`.
+
+A roll that removes health always takes the positive path; the skip path is the case "removes no health". The arm itself writes neither a hostility byte nor an attacker field on either path.
+
+**Confidence.** High for the arm's instructions and the two jumps. Medium for "no hostility change" outside the arm: the target's slot `+0x2c` bodies, the callees `R1715` and `R0059` and the three callers of the cast function were not read, and indirect calls are not followed. The census is a linear rel32 pass (`scan.py`); it does not see a `push` or `mov` immediate of the hook address.
+
+**Amends.** `AI-650`'s Drain Life row: the arm's own body is read whole and the skip path is stated (the callee of slot `+0x64` is `AI-827`).
+
+**Unknown.** Settle with the original: `rom.exe` EN, a mission where the player's mage holds Drain Life and a unit of a neutral owner (diplomacy byte of that owner toward the player with bit 0 clear) stands within range; cast once, save, and compare the victim's order block bytes `+0x54`, `+0x58`, `+0x5a`, the actor's `+0x40`, and the diplomacy cell, before and after, against the same cast of Fire Ball on a second identical unit. The skip case itself needs a target whose health word is below -9.
+
+### AI-827
+
+Listings `evidence/code-en/listings/slot64-R0869.txt`, `slot64-R0870.txt`; `nav/scan-hit-routine.txt` (three vtables, 33 slots each, and the dword references to `R0265`).
+
+- The hit routine `R0265` is referenced by exactly three dwords in the image, `L04059`, `L04060`, `L04061`, all in `.rdata`; they are slot `+0x4c` of the vtables at `L00001`, `L00002`, `L00003`.
+- Slot `+0x64` is `R0869` for the first and `R0870` for the other two.
+- `R0869` saves `this` and returns, `ret 0xc`; it has no store or call.
+- `R0870` takes the target, a value and a byte. It reads the target's `+0x14`, that owner's `+0x28` and `+0x5c`, a global `L00285` word `+0xc`, the target's `+0x1c` and `+0x96`, scales the value with two float constants and calls its own slot `+0x5c` with the target, the scaled value and a table lookup result. In its own instructions it writes only locals, has no call of `R0226` and no store to the target; its four direct helpers `R0279`, `L16239`, `R0476`, `R0442` and slot `+0x5c` are unread, so a hook or attacker store below it is not excluded.
+- The Drain Life arm calls this slot before it lowers the target's health (`L16327` against `L16319`; `AI-826`).
+
+**Confidence.** High for the two bodies and the three references. Medium that a caster's class is one of the three: other actor classes (flying, structures) have vtables whose slot `+0x64` was not read, and the vtable run census (`scan-en.txt`, 79 runs of 30 or more text-pointing dwords) was not matched to classes. The slot `+0x5c` callee of `R0870` and the callees `R0279`, `L16239`, `R0476` and `R0442` are unread.
+
+**Amends.** `AI-650`: the Drain Life row's unread caster slot `+0x64` is read for the classes that hold the hit routine; the caster's and the attacker's classes are not matched to them. `AI-546`: its Unknown "the callee of slot `+0x64` of the attacker" is read for the same classes, with the same bound.
+
+**Unknown.** The slot `+0x5c` callee of `R0870`; the slot `+0x64` of any other actor class.
+
+### AI-828
+
+Listings `evidence/code-en/listings/standing-acq.txt` (`R0022`), `sight-stamp.txt` (`R0114`), `filter-R0021.txt`.
+
+- Entry. The standing acquisition `R0022` calls the sight stamp `R0114` first (`L01742`); that call is the stamp's only rel32 caller.
+- Stamp. It calls `R0145` (clear) and `R0135` (own-sight stamp), both unread; the listing shows a count on one cell of a sight map at `[manager+0xa50]+0x58ee8`, and not that the map is per owner. Only when the owner's Player `+0x28` is nonzero and `ord+0x58` is nonzero it adds 1 to the map byte at that cell (`L18086..L18087`), adds 1 to `ord+0x5a` and clears `ord+0x58` when `ord+0x5a` exceeds 0x14 (`L18088..L14710`).
+- List. It clears list A at manager `+0xba4` and appends every actor of the world list whose own cell holds a nonzero map byte (`L18089..L18090`). The stamped cells are the actor's own sight and the remembered cell; if that cell lies in the own sight, only a count rises and no cell is added. The restriction to a unit alone in its group comes from the list builder `R0028`, unread. Entries with a health word below 1 move to list B at `+0xbc4` (`L18091..L18092`).
+- Filter. `R0021` is then called with mode 0 (`L18093..L14820`): it drops a candidate when the relation byte of (actor's owner, candidate's owner) has bit 0 equal to the mode, and drops a hostile candidate that is invisible unless a groupmate's detection reaches it. Candidates at the remembered cell are not exempt.
+- Pick. `R0022` scores each list A entry with `R0036` (plus 1 for a candidate of movement domain 3 against an actor that is not), keeps the lowest score, and uses it only if the score does not exceed the actor's byte `+0x12c` (`L14824..L00231`); list B is scanned the same way only when list A gave none. A pick writes `ord+8` = 6, `ord+0xc` = the target, `ord+0x14` = `actor+0x12c` (`L18094..L14776`); no pick writes `ord+8` = 0xb for an AI owner.
+
+So the remembered cell widens the candidate population by one cell at most; it does not widen the reach cap, and an attacker that stands there but is farther than `+0x12c` is not picked by this routine.
+
+**Confidence.** High for the bodies read. Medium for the name "reach" for byte `+0x12c` (`AI-ACQUIRE-002` uses it); Medium that `R0036` is the edge distance measured elsewhere; the stamp callees `R0145` and `R0135`, the list builder `R0028` and the list helpers `R0032`, `R1334` and `R1133` are unread. The effect on an isolated unit is derived from the bodies, not observed.
+
+**Extends.** `AI-703`: its 21 stamps are over two consumers, the builder `R0110` and `R0114`; this card counts the stamps of the standing acquisition only.
+
+**Unknown.** Settle with the original: `rom.exe` EN, one AI unit standing alone with a hostile that struck it from outside its sight; at every pass for 21 passes record `ord+0x58`, `ord+0x5a` and `ord+8` and the distance to the attacker, once with the attacker beyond `+0x12c` and once within it.
+
+### AI-829
+
+Listings `evidence/code-en/listings/darkness-tail.txt` (`R0267`), `hook.txt`, `flip.txt`, `helper-23360.txt`, `area-loop-a.txt`, `area-loop-b.txt`, `area-loop-c.txt`.
+
+- Tail. For a unit with movement domain above 0, an area id other than `0xc` and `0x13`, and a nonzero caster `area+0x3c`: if `R0416(caster)` is nonzero (`caster+0x3c` is zero) it clears `unit+0x40`; else with `caster+0x14` nonzero it stores `unit+0x40` = caster and `unit+0x48` = the inner effect's byte `+0xc` (`L05460..L06006`). When both owners are nonzero it calls the hook with the caster and the unit (`L18095..L00877`). It has no comparison of the two actors.
+- Callers. `R0267` has seven rel32 call sites, in the three area loops (`L05403`, `L05404`, `L05405`, `L05406`, `L05407`, `L05408`, `L05409`); each passes the result of a cell lookup (`R0035`, `R1071`, `R1072`, `R1073`), and the windows read show no test against the caster.
+- Hook. With caster and unit the same actor it stores `ord+0x54` = 1, `ord+0x58` = that actor's own cell word (`R0019`) and `ord+0x5a` = 0 in its order block, then calls the flip with both arguments (`R0226`).
+- Flip. `R0126` indexes the matrix at manager `+0xa9c4` by the two owners' `Player+4` bytes and sets bit 0 of a cell only when `cell & 3` is 0 (`L18096..L18097`, `L18098..L18099`). For one owner both cells are the diagonal, which has bit 1 set (forced at map load and join), so nothing is written and no message is sent.
+- Next stamp. For an AI-owned caster the sight stamp then marks its own cell (`AI-828`); the actor is its own list A entry and is dropped by the filter, whose relation byte for a player against itself has bit 0 clear.
+
+**Amends.** `AI-707` (turn flag, remembered cell, diplomacy flip) and `MAGIC-445` (hook with caster and unit) for the self-hook case, if the caster is passed.
+
+**Confidence.** The card is Medium. High only for the tail having no actor comparison and for the stores the hook and flip bodies write. Medium that the caster is ever passed: the area loops were read only in the windows around their calls (the loop prologues and the cell lookups are unread), and `R0416`'s result for a real caster is not measured. Medium for the diagonal byte (no listing of this experiment shows it) and for the filter step, which rests on it.
+
+**Unknown.** Settle with the original: `rom.exe` EN, an AI-owned caster of Darkness (Dragon face or Daemon) at the centre of its own cloud; save at the cast and one pass later and compare the caster's order block bytes `+0x54`, `+0x58`, `+0x5a`, its `+0x40` and `+0x48`, and the diplomacy cell of the caster's owner against itself.
+
+### AI-830
+
+Listings `evidence/code-en/listings/cmd-disp-multi.txt`, `cmd-disp-tail-multi.txt`; `evidence/scan-en.txt` (table `L00408`, callers); `evidence/catalogue-en.tsv`. The shipped-node histogram is `EXP-0612`'s `evidence/aipatrol-en/group-commands.txt` and its RU twin, read for this claim.
+
+- Dispatch. `R0156` computes Par0 minus 1 and branches to `L00407` when the result is above 0x10 (`L00405..L00406`); the jump table `L00408` has 17 entries, Par0 1 to 17. Par0 18 gives 17 and takes the branch.
+- Exit. `L00407` is `pop edi`, `pop esi`, `pop ebp`, `pop ebx`, `add esp, 8`, `ret 4`; it stores nothing and calls nothing. Par0 6 to 9, 12, 13 and 16 are table entries that point at the same exit.
+- Callers. `R0156` has one rel32 caller, `L01860`, and no dword reference in the image.
+- Catalogue. The row `Group Command : Dwell` has `ID` 6, Par0 constant 18 and the Par1 label `Guard range`.
+- Shipped content. The 38 EN maps and the 33 RU maps with a parsable script record hold nodes with Par0 1, 2, 3, 4, 5, 10, 11, 14 and 15 only (`AI-GROUPCMD-020`'s census, repeated by `EXP-0612`); none with 18.
+- Strings. `rom.exe` holds no string `dwell`; the word occurs in the catalogue, in `Templates.ini` and `world.res` as part of a monster name, and in dialogue (`evidence/strcensus.tsv`, EN and RU).
+
+The "no case" fact repeats `AI-GROUPCMD-020`; the exit address, the bounds test, the table and the catalogue label are new here. Par0 18 therefore installs no defended area and sets no member flag in the exit body read (an inference from that body, Medium for other consumers). The census covers type-7 opcode 6 and no other node form. The members of a group sent that command keep the state and group order they had.
+
+**Confidence.** High for the bounds test, the exit body and the table. Medium that nothing else reads Par0 18: the one caller `L01860` and the opcode-6 handler's other paths were not read, so a separate consumer of the same node field is not excluded; the map census covers the shipped maps, not authored ones.
+
+**Unknown.** Settle with the original: `rom.exe` EN from an install copy whose script catalogue and one test map carry a `Group Command : Dwell` node with Guard range 10 aimed at a group of three; after the node fires, save and compare each member's state byte `+0x50`, order block `+0x00`, `+0x08` and the group order byte with a save taken before. The map-editing step is outside this experiment's population.
+
+### AI-831
+
+Listings `evidence/code-en/listings/guard-issue.txt` (`R0125`); `evidence/catalogue-en.tsv`; `evidence/scan-en.txt` (callers).
+
+- Catalogue. Of the 44 instant entries, the Par1 label `Guard range` appears on exactly two group commands, Guard (Par0 1) and Dwell (Par0 18); the other commands' Par1 labels are X, Victim, Unit to defend and Group, and Stand Ground and Roam have none.
+- Arm. The Guard arm of `R0156` (`L17624`) calls `R0125(group, byte)` with the node's byte at `+0xc` (`L17624..L00596`); the setter has six rel32 callers (`L00378`, `L00949`, `L00384`, `L00388`, `L00950`, `L00596`).
+- Members. Per member: the stop reset `R0007`, `ord+0x50` = 0, `ord+0x38` = 0; group order byte (`grp+0x3c`, `+0x20`) = 0; then `ord+0x14` = `actor+0x12c`, `ord+0x60` = 0, `mover+0x7c` = 0, `actor+0x54` = 0, `actor+0x50` = 0xb, `ord+0x00` = the member's cell word (`mover+6` when the cell test `R0040` is zero), `ord+8` = 0.
+- Group. The group order byte is then set to 1 and `R0140` runs. The group record stores `+0x2d` = `+0x38` = the computed radius `+0x2c`; a nonzero byte above `+0x2d` replaces both, a zero byte raises them to the manager's `+0xa9b8` when they are lower; `+0x39` = 0 (`L18100..L18101`).
+- So the radius is a floor on the group's notice circle about the centroid, not a fixed defended area; the circle clips the candidate list.
+
+**Confidence.** High for the arm and setter bodies. Medium for the phrase "notice circle": the use of `+0x2d` in the group scan is read elsewhere and the geometry routine `R0140` is unread. The six setter callers other than Guard were not read for their byte argument.
+
+### AI-832
+
+Listings `evidence/code-en/listings/patrol-walk.txt` (`R0159`), `patrol-setter.txt` (`R0171`), `patrol-state-set.txt` (`R0172`), `cmd-disp-tail-multi.txt` (Patrol arm `L00409`).
+
+- Per-member walk. `R0159(actor)`: `ord+8` = 0; when the latch `ord+4` is set the post `ord[0]` becomes the actor's cell and the latch clears (`L14783..L00425`); the guard scan `R0137` runs; if `ord+8` is then 0 or 0xb the latch is set, and when the actor's cell equals the waypoint `ord+2` the waypoint moves to the node after the matching node of the ring `ord+0x90`, or to the head; `ord+8` = 1 and `ord+0xa` = the waypoint (`L00594..L14785`).
+- So the advance condition is: no engagement written by the guard scan, and the cell is the waypoint. The walk body has no sight, attack or detection test of its own; the guard scan `R0137`, which decides "no engagement", is unread in this experiment.
+- Setters. `R0171` (group) stops each member and stores the group order byte 0 once (`L00412`); `R0172` (member, callers `L14694` and `L00411`) sets state 0xa, the post to the cell and rebuilds the ring list `ord+0x90` from empty (`L18102..`).
+- No group field. In the bytes read, neither setter writes a group-record field other than the order byte, and `R0159` writes only order-block fields of the member; the ring-building tail of `R0172` after `L18103` and the other state-0xa writers are unread, so "no group phase" is Medium.
+- At the waypoint, a ring that does not hold the waypoint (`L01778`) or is empty (`L00347`) dereferences a null pointer; the patrol setters build the ring first, so a member without waypoints is not expected (an inference: an empty ring would crash, which does not show that none exists), and no regroup cell was found.
+
+**Confidence.** High for the three bodies. Medium that no other patrol advance exists: the state-0xa writer census (`AI-PATROL-019`: four writers, two dead) is a store-form sweep, and the ring-building tail of `R0172` after `L18103` was not read for this claim. EN image only.
+
+**Unknown.** The behaviour of a group of several members observed in the original; the shipped Patrol nodes number 14 over 8 maps (`EXP-0612`'s `patrol-nodes.csv`), one to six members each.
+
+### AI-833
+
+Table `evidence/strcensus.tsv`, file list `evidence/strcensus-files.tsv` (full SHA256 of each file); instrument `strcensus.py`.
+
+- Population. Every file under the EN install root (109 files) and the RU root (34 files) except the map editor, the saves and the media of extensions `bmp`, `wav`, `mp3`, `smk`, `bik`, `ico`, `lnk`: `rom.exe`, the libraries, the `.res` archives (read as bytes, members not extracted), `.alm`, `.lm`, `.ini` and Help files.
+- Forms. Case-insensitive: the needles `druid`, `evacu`, `dwell`, `patrol`, `regroup`, `rally`, `muster` in ASCII and UTF-16LE; the Cyrillic stems of druid, evacu- and patrol- in code pages 1251 and 866 and UTF-16LE.
+- Druid: no hit in any form in any file.
+- Evacu: one hit per root, in `main.res` (EN offset `11b7b1`) and `MAIN.RES` (RU `2cf432`), inside a run of about 75 printable bytes; the read that judged it a chance match is not kept in the generated evidence, so both hits are unclassified. No Cyrillic evacu- hit.
+- Dwell: the catalogue row (`Description Instants.ini`), the monster name `M61_VolcanoDweller` in `Templates.ini` and `world.res`, and dialogue in `main.res`.
+- Patrol: the catalogue row, `rom.exe` (six hits: cursor art names), 32 hits in `scenario.res` and the RU twin (in the four contexts read, editor labels of Patrol script nodes such as `Patrol1`, and node names beginning `Group Command : Patrol`) and dialogue.
+
+**Confidence.** Medium. A byte search sees no name stored compressed, split across a field boundary or drawn from a code page not tried; the `.res` members were not extracted, so a compressed member would hide a name. The Druid absence is bounded to byte search of uncompressed members.
+
+### AI-834
+
+Listings `evidence/code-en/listings/cmd-disp-multi.txt`; `evidence/catalogue-en.tsv` (44 instants); `evidence/strcensus.tsv`. Existing claims read: `AI-PATROL-019`, `AI-651`, `AI-833`.
+
+- Catalogue. None of the 44 script instants of `Description Instants.ini` names evacuation, retreat or a coordinate list; the group commands are Guard, Swarm, Stand Ground, Move, Swarm 2, Attack, Defend, Patrol, Follow, Roam and Dwell. The 22 condition names of `Description Checks.ini` were read once and name none either; that read is not in the generated evidence and is not committed.
+- Arms. Ten of the 17 table entries have an arm; the other seven and Par0 18 end at `L00407`.
+- Strings. No evacuation name in the string population of `AI-833`, apart from one unclassified `evacu` hit per root.
+- Walk destinations. The 39 stores to `ord+0x0a` fall in setters, group arms, state arms, withdrawal and the 0x17/0x18 cluster (`AI-651`); the walker with a waypoint list found is the patrol ring. The writers read in this experiment are those of the listings named above; which of the 39 writers were read is not itemised, so only the ones read are stated to compare no coordinate list.
+
+Apart from the unclassified hits, no walker was found that compares its position with coordinate thresholds or a waypoint list other than the patrol ring.
+
+**Confidence.** Medium for the negative over the catalogue, the command table, the strings and the classified `ord+0x0a` stores. Unknown for code outside them: no census of compares against coordinate constants was run, a store of a walk destination through another field or a bulk copy is not seen (the bound of the store census), and the state value set is Medium.
+
+**Unknown.** Settle with a further static pass: a census over `.text` of compares of a position field against immediates followed within a routine by a store of a walk destination, every hit classified, with the call cone of the state arms `0x17` and `0x18`. A run of the original that would show a hard-coded walk is not identified, because the construct has no known trigger.
+
 ## Scan radii, defender ranking, group ties, retreat detection and Teleport (EXP-0653)
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -6242,7 +6395,7 @@ and `R2212` beyond their stores and calls. No player command stores group order 
 | AI-543 | Mover `+0x98` is raised at three sites (`L01720`, `L00161`, `L00162`; no fourth site is Medium); the readers of `actor+0x168` and `+0x184` in the route region test the count and either replan through `R2223` or turn in place. | High / Medium | ● active | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
 | AI-544 | The path search `R0053` leaves its static list empty on start equal to goal, picker answer 0 or the start cell, the extractor's 1000-step cap or a one-node path; the dynamic form has the cap and an unreached goal with answer 0. | High / Medium | ● active | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
 | AI-545 | None of the 83 `m98` census rows outside `L08481..L14887` stores into a mover: 19 stack locals, 18 stat-record words, 1 indexed byte, 45 dword fields of other objects; the base identity is inferred from neighbour fields. | Medium | ● active | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
-| AI-546 | The hit routine `R0265` is a damage computation called through vtable slot `+0x4c` by the strike executor `R0246` and the effect applier `R0564`; it stores no order field and calls the hook only for two owners. | High / Medium | ● active | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
+| AI-546 | The hit routine `R0265` is a damage computation called through vtable slot `+0x4c` by the strike executor `R0246` and the effect applier `R0564`; it stores no order field and calls the hook only for two owners. | High / Medium | ● active (amended) | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
 | AI-547 | In nine actor-bearing segments with a dword read of `+0x40` (eight code, one data decode) none reads the attacker pointer; `ord+0x54` is read by the idle-turn arm `R0205` (the one reader is inherited from `AI-523`). | Medium | ● active | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
 | AI-548 | The withdrawal tests `R0105` and `R0106` run for every member of every group order byte; the Wimpy command overwrites both thresholds over the authored values (`AI-CLASS-030`); other writers are Unknown (Medium). | High / Medium | ● active (amended) | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
 | AI-549 | The unplaced sites of `AI-517` are placed: `L14813` and `L14814` in the withdrawal actions, `L14815` and `L14816` in two bodies without a caller; the wrappers `L14669`, `L14670` and `L14671` have no caller (Medium). | High / Medium | ● active | [EXP-0549](../experiments/EXP-0549-route-refusal-and-hit/) |
@@ -6394,6 +6547,8 @@ other classes: the receiver type is not read, only the argument shape and the wi
 **Unknown.** The callee of slot `+0x64` of the attacker.
 
 **Effect on earlier claims.** `AI-523`: the body of `R0265` and the two other hook callers are read.
+
+**Amended.** `AI-827` reads slot `+0x64` for the three vtables that hold the hit routine: a stub in one and `R0870` in two (whose helpers and slot `+0x5c` are unread). The caster's and the attacker's classes are not matched to the three. The Unknown above stands for any other actor class.
 
 ### AI-547
 
@@ -7308,7 +7463,7 @@ the callees of `R0265` and of `R0870`, and for the Human and
 |---|---|---|---|---|
 | AI-648 | Move and Swarm members walk at command state 1; Guard walks at 0xb (group order 1), Defend escorts at 8 and script Follow at 0x11 (group order 0); no guard or escort setter or arm read stores 1 or 0xa. | High | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-649 | On a refused route the executor tail stands state 1 down to 0xc and sends every other walking state to `R0004`; neither reads the group; the next group pass re-issues the walk whatever `grpAI+0x44` holds. | High / Medium | ● active (superseded) | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
-| AI-650 | The struck hook has three direct callers and no `.rdata` or `.data` pointer; strikes pass the striker, spell payloads the caster or source; poison and Drain Life lower health without it in the bodies read (Medium). | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
+| AI-650 | The struck hook has three direct callers and no `.rdata` or `.data` pointer; strikes pass the striker, spell payloads the caster or source; poison and Drain Life lower health without it in the bodies read (Medium). | High / Medium | ● active (amended) | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-651 | Of the 39 order-block stores to `ord+0x0a`, none is in acquisition, engage, reacquisition, strike install or the struck hook; setters, group arms, state arms and withdrawal write the walk destination. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-652 | The 14 immediate stores of 1 to `ord+0x50` are at arrival, stand-downs, pickup end and cast end; 112 register stores are Medium; `grpAI+0x44` has three stores; SAVE and LOAD copy order, group and mover raw. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-653 | The activity rebuild walks the global on-map list `[L00240]`; the LOAD arm builds the world on that list and adds every restored actor whose `+0x4c` bit 8 is clear. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
@@ -7441,6 +7596,8 @@ poison body and the Drain Life arm are read, tokens 0xc and 0x11 change
 other effect class's tick is read. Health writers in the 160-row `+0x94`
 write census that lie outside the simulation range or whose bodies were not
 read are also unread.
+
+**Amended.** `AI-826` reads the Drain Life arm whole and states its skip path; `AI-827` reads slot `+0x64` for the three classes that hold the hit routine; the caster's class is not matched to them. The Drain Life row's "none in the body read" now holds for the arm and that slot (High for the instructions, Medium for the callees `R1715`, `R0059` and the slot `+0x5c` callee of `R0870`). The poison row is unchanged.
 
 ### AI-651
 
@@ -8620,6 +8777,8 @@ and call `R0009`, which writes kind 5, `ord+0x0c` = the scored victim and `ord+0
 `L00877` (`MAGIC-LIGHTDARK-044`): turn flag, remembered cell, diplomacy flip, and `victim+0x40`;
 no store of kind or target. A pursuit of the caster follows only from a later group pass in which
 the caster is a candidate inside the circle.
+
+**Amended.** `AI-829`: for a caster standing in its own Darkness the hook receives the same actor twice if the caster is passed (Medium), and the diplomacy flip then finds the diagonal and writes nothing.
 
 **Confidence.** High for the engage writer `R0009` and the stores the hook makes (`+0x54`,
 `+0x58`, `+0x5a`, the flip). Medium for "a Darkness hit writes no pursuit" and "only from a later

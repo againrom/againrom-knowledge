@@ -353,14 +353,35 @@ not read for a nested hook call). The spell routes do so only conditionally: spe
 the point route needs the effect's `+0x41` non-zero. The attacker record is read for kill credit;
 no AI reader was found. — AI-706
 
+The Drain Life arm itself has no health store, hook call, diplomacy flip or attacker store on the
+paths that leave when the target's slot `+0x2c` returns zero or the rolled amount is 0 or less
+(High for the arm's instructions). The meaning of that slot, its body, the amount callees and the
+cast function's callers are unread (Medium for any change outside the arm). Slot `+0x64` of the
+three classes holding the hit routine is a stub in one; in two it is a routine whose four helpers
+and slot `+0x5c` are unread, so a hook or attacker store below it is not excluded (Medium).
+The caster's and the attacker's classes are not matched to the three. — AI-826, AI-827
+
 **Joining and provocation.** A group joining a fight writes the ordinary engage (kind 5 toward the
 scored target, stop distance = reach). A Darkness hit writes no pursuit; a pursuit of the caster
 follows only when a later group pass finds it inside the circle. Both negatives rest on the pursuit
 writer census above and are Medium. — AI-707
 
+**Remembered cell in a standing scan.** For an AI-owned unit, the sight stamp adds a count to
+the remembered cell in a sight map beside the unit's own sight (the clear and own-sight callees
+and the list builder are unread); the stamped cells' occupants form candidate list A, the
+hostility filter drops friendly and undetected invisible ones, and the nearest is picked only when
+its score does not exceed `actor+0x12c`. The cell adds at most one cell to the population and does
+not widen the cap; the standing acquisition's stamps clear the mark after the 21st. — AI-828, AI-703
+
 **Light and Darkness.** Darkness credits its caster and calls the struck hook on a reached ground actor of any class,
 under `MAGIC-445`'s caster and `+0x14` conditions, and lowers sight only on Humanoids and Humans; Light does neither of the first
 two and lowers sight only on plain Units. — MAGIC-445, MAGIC-446
+
+The tail has no test between the caster and the unit (High). If the area loops pass the caster,
+a caster standing in its own Darkness credits itself, and the hook sets its turn flag, its own cell
+as the remembered cell and the stamp count 0; the diplomacy flip then finds the locked diagonal and
+writes nothing. That the loops pass the caster, the result of `R0416` for it and the diagonal
+byte are Medium. — AI-829
 
 **Alert between groups.** Nothing reached from the hook, the builder or the arms writes another
 group's order, cell or members. An alert crosses groups only through the player-level diplomacy
@@ -423,6 +444,19 @@ preserved root — so no shipped patrol comes from *there*.
 
 A consumer implementing the ring should note that the engine's own search dereferences null when the
 current waypoint is not a member of the list. No live setter can produce that state.
+
+**Patrol advances per member.** A member's patrol pass runs the guard scan first. When the scan
+leaves no engagement and the member stands on its waypoint, the waypoint moves to the next ring
+node (High for the walk body; the guard scan that decides "no engagement" is unread). In the
+bytes read the setters write no group-level patrol field and no regroup cell was found, because
+every member is given its own ring; the ring-building tail and two other state-0xa writers are
+unread, so no group patrol phase is Medium. — AI-832
+
+**No Druid patrol or evacuation walk found.** No file of the EN or RU install spells Druid by
+byte search, and the catalogue holds no action for either Druid or evacuation; one `evacu` hit per
+root is unclassified. Among the group commands, Dwell (Par0 18) leaves through the shared exit
+(Medium for other consumers). A hard-coded coordinate walk outside the patrol ring was not
+found; the code census is partial (Medium / Unknown). — AI-833, AI-834, AI-830
 
 ## Engagement radius
 

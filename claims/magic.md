@@ -5265,6 +5265,8 @@ Evidence is a static read of committed listings of `rom.exe` (one image on both 
 - Derive: the plain Unit derive (`vt+0x50` = `R0836`, EXP-0347 `evidence/game-instructions.tsv`) writes `+0xa0` and not `+0xa4`, so nothing in it undoes Light's change. `R0280` rewrites `+0xa4` from Mind and Reaction (`HERO-SIGHT-007`, `L00919`, High) and then adds `+0xe4` into it through `R0840` (`HERO-MOD-016`, `L17538`, High), so Darkness's share in `+0xe4` keeps the reduction across a derive.
 - The remove writes neither `unit+0x40` nor `unit+0x48`; the kill-credit pair outlives the Effect.
 
+**Amended.** `AI-829`: the tail has no comparison of caster and unit; whether the loops pass the caster into its own cloud is Medium, and then the hook receives the same actor twice.
+
 **Confidence.** High for the stores in the attach, the `R0267` tail and the remove, each read whole in a committed listing. Medium for the per-pulse schedule (`MAGIC-400`'s Medium model), for the hook's effects (`AI-707`'s grade) and for the routes through the unread helpers `R0416` and `R0627`.
 
 **Unknown.** Whether the bit `0x2000` the remove sets at expiry is sent before the next pulse lands, so whether the owner's fog widens for the tick between two pulses.

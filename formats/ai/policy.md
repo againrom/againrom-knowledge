@@ -66,6 +66,14 @@ Subcommand 11 is the defend form already specified by `AI-DEFEND-111` and
 defends it at the authored range. Subcommand 15 is the related follow form, which keeps the range but omits defending on the
 subject's behalf.
 
+Dwell (Par0 18) carries the catalogue label `Guard range` but leaves the dispatcher through the
+exit shared with the unused values 6 to 9, 12, 13 and 16: no store and no call in that exit body,
+so it is read as installing no defended area and setting no member flag (Medium: other consumers of
+the node field are unread); no opcode-6 node of the shipped maps uses it. — AI-830. The only other
+command with that label is Guard: its setter keeps a larger nonzero byte over the computed radius,
+raises a zero byte to the manager's minimum when lower, sets each member to state `0xb` at its own cell and the
+group order to 1; that the radius is a "notice circle" is Medium. — AI-831
+
 A group's order is therefore **not** its load-time 1 or 3 for the whole mission: it is whatever the
 last command left. The four commands that leave 0 are the ones that hand the group back to its
 members' own states.
