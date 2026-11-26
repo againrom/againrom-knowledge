@@ -254,12 +254,8 @@ positive +0xbe14 is sent and its low byte stored at +0x40; else a nonzero
 win counter sends 0xb5 and stores 1. Byte +0x13c and +0x42 are Unknown in
 meaning. — R2-ENGINE-624
 
-By the bodies read (Medium for what a player sees; no run): when the tick object's +0x74 is
-nonzero, the respawn block of a hero at word +0x94 <= -40 calls the producer and then party
-placement, which starts at owner word +0xa6c when it is nonzero; two EN server arms write the
-unit's cell there. What the producer restores beyond the owner +0x38 reuse, the template, skill
-setup, HP and mana is Unknown.
-— R2-ENGINE-1843
+EN request 0x4b sets owner +0xa64 for a present hero with HP <= -40. With +0x41 and +0x43 set, +0x2c zero, +0x40 at least 2 and Session +0x74 nonzero, the result tick consumes the flag at that HP threshold and calls the producer and party placement. The normal cell-recording lookups test Shop and Inn. The recorded cell is the search origin.
+— R2-ENGINE-1843, R2-ENGINE-1865
 
 Outside the script, the death of a class 0x21..0x3f actor, with
 `[L2.00805]` +0x74 zero and owner +0x2c zero, stores owner +0x40 = identity
@@ -936,3 +932,5 @@ areas are a centre and a radius read by music (R2-ASSET-084); other map record k
 |---|---|---|
 | Nodes of checks 2, 3, 22 or 27 in the 46 campaign maps of either root and the loose `.alm` files (EN 13, RU 37); no other install archive counted | 0 | R2-ASSET-375 |
 | Operations with point operands (types 5 and 6) | checks 7, 14, 15, 16, 25; actions 21, 24, 25, 29 | R2-ASSET-375 |
+
+For a retained hero with a positive corpse-stage byte, the EN producer scales five skill XP values separately by 9/10 and refills HP and mana. — R2-ENGINE-1866

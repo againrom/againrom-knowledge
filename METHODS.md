@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5415. Observation: 143. Static analysis: 4528. Mixed: 744.
+Claims labelled: 5420. Observation: 143. Static analysis: 4533. Mixed: 744.
 
 ## Ledger ai
 
@@ -3475,19 +3475,24 @@ Claims labelled: 5415. Observation: 143. Static analysis: 4528. Mixed: 744.
 | R2-ENGINE-1840 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1841 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1842 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1843 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1843 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1844 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1845 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1846 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1816 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1817 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1818 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1818 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1819 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1820 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1821 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1852 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1853 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1854 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1864 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1865 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1866 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1867 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1868 | static analysis | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-session
 

@@ -341,10 +341,8 @@ handler, which sends 0xba to a Player with a hero. Whether loading a save runs t
 By the bodies read (Medium for the order a player sees; no run): main-menu button 1 (0x426),
 whose name Multiplayer is inferred (Medium), shows a character list view; its OK leads through a
 protocol list and a join, host or local popup to a map choice, which sets the map name that the
-mission start takes. The respawn block calls the producer and party placement, so a hero that
-died after one of two EN server arms ran is placed at the cell owner word +0xa6c recorded, else at the
-map's drop list; what the producer restores is Unknown (Medium).
-— R2-ENGINE-1844, R2-ENGINE-1846, R2-ENGINE-1843
+mission start takes. On an eligible EN result tick, a return request is consumed before party placement starts at the recorded cell, a map drop, or the coordinate fallback. The actual cell is Unknown.
+— R2-ENGINE-1844, R2-ENGINE-1846, R2-ENGINE-1843, R2-ENGINE-1865
 
 Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
 byte +0x0d and no constructor store to its word +0x0c was found in the read
@@ -2109,3 +2107,5 @@ cleanup and general defeat fate remain Unknown. The Unit serializer omits
 after LOAD. Field candidates, indirect routes and saved-unit selection remain
 unclosed. R2-ENGINE-1256 (Medium bounded composition, completeness and runtime
 outcome Unknown).
+
+The EN retained-hero return scales the five skill XP values separately and fills HP and mana when the corpse-stage byte is positive. — R2-ENGINE-1866

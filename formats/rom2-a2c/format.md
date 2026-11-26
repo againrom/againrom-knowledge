@@ -189,13 +189,14 @@ by +0x3d8). It orders the kept files by file time and appends one text entry; OK
 runs the creation routine, which creates a new character in memory and writes no file (callees unread, Medium).
 Medium that the entry means "new character". — R2-ENGINE-1840, R2-ENGINE-1853
 
-The EN in-process server character writer runs only when Session +0x74 is nonzero; the map build
+The EN in-process server character writer requires Session +0x1a8 zero and +0x74 nonzero; the map build
 stores `0x84 > 1` there, the server init stores `mode < 2`, other writers are unclassified, and
 whether a loose root map reaches the map build is Unknown (Medium). It writes to
 `<base>chr\<owner +0xa70>\<id0><id1>.a2c` when the owner's +0xa70 string is non-empty, else to
 `<id0><id1>.a2c`, through the same file writer. It passes sections A, B (owner +0x44), D, E and
 F and no C, so an existing file keeps its C; the A and E fields are in the tables above. Medium that `<base>` is ChrBase. Which
-events call the writer, besides unit death, is Unknown. — R2-ENGINE-1841, R2-SESSION-514,
+other events call the writer is unresolved. At EN death, the checked unit must equal its owner's hero. Its post-bag state and the incremented owner counter reach the writer before HP is set to -50. On the EN return path the XP penalty runs later (Medium for the order in play).
+The RU dedicated death block increments owner +0xa54 and passes the victim to L2.08813 before setting HP to -50. That routine reads owner +0x3c and +0xa54, unit +0x240..+0x250, equipment slots and the bag. Field meanings and the RU write interpretation are Medium. The committed RU death excerpts omit L2.08820..L2.08821. RU return-penalty parity is Unknown. Successful writes and the next write after return are Unknown. — R2-ENGINE-1868, R2-ENGINE-1841, R2-SESSION-514,
 R2-SESSION-516, R2-SESSION-517
 
 ## Relation to the save

@@ -607,13 +607,8 @@ two EN callers of positioning are unclassified. The source of the drop list
 is Unknown. — R2-ENGINE-529, R2-ENGINE-530, R2-ENGINE-531, R2-ENGINE-532
 
 Owner word +0xa6c, the start cell placement prefers when Session +0x74 is nonzero, has four EN
-word stores found by a word-store byte pattern: two server arms record the unit's cell before
-passing the unit to an object (Medium that the objects are buildings), and the join and the owner
-constructor store 0. The respawn block calls the producer and party placement, so a hero that
-died after one of the two arms ran is placed at the recorded cell, else at the drop list; what
-the producer restores beyond the owner +0x38 reuse, the template, skill setup, HP and mana is
-Unknown (Medium; no run).
-— R2-ENGINE-1843
+word stores found by a word-store pattern. Two server arms record the unit's cell and the join and owner constructor store 0. The normal lookup paths test Shop and Inn. When receiver +0x1a4 is nonzero, the Shop lookup returns the fixed address L2.00822. Its target is unidentified. EN request 0x4b sets owner +0xa64 when the hero has HP <= -40. An eligible result tick consumes the flag, calls the producer and starts placement at the recorded cell, else at a map drop or random fallback. The final cell and client action are Unknown.
+— R2-ENGINE-1843, R2-ENGINE-1865
 
 Scenario.dll stores availability and town literals only for hires 1..7.
 After NewGame hires 8..20 stay unavailable (Medium), so every hire that
@@ -941,3 +936,8 @@ for entries 3 or 4 (R2-ENGINE-1591). Four of ten callees of the victory transiti
 loop are lookups, one (L2.00830) is a probable bag item remover that was not followed and is a
 candidate bag writer; the bag and worn items across victory stay Medium (R2-ENGINE-1590).
 Saves possible after the ending are Unknown (R2-ENGINE-1593).
+
+On EN hero death, ground-bag handling and effect processing precede the owner check. For the owner's hero, the server increments +0xa54, calls the update helper, calls the character writer and sets HP to -50. Corpse ageing follows the optional campaign failure-reason block on the common death path.
+The RU dedicated owner-hero block increments +0xa54, calls the update helper and character routine, then sets HP to -50. RU effect processing remains open. For hero classes, only mode 0 enters the block selected at L2.08815. Equipment removal by its callees and the mode name cooperative are Medium. The alternative at L2.08818 lies outside the cited excerpts. The purse balance and multiplayer death display are Unknown. — R2-ENGINE-1864
+
+The EN return producer reuses the owner's existing hero. For a positive corpse-stage byte it reduces each of the five skill XP values to nine tenths (integer division per school), rebuilds their total and skills, then fills current HP and mana from the maxima. When the byte is zero, the producer returns owner +0x38 directly. It skips the XP helper, both refills, the owner-list append and group creation. Item repair and the final purse are Unknown. — R2-ENGINE-1866

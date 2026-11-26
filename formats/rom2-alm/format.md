@@ -441,8 +441,8 @@ the lower bound it refuses the character as too strong for the map, above the up
 weak, and -1 skips the test (High for the comparison). That the receiver is the Session whose
 +0x1cc holds dword 0x88 is Medium; that 0x88 is a map level is Medium; how the client computes
 the bounds is Unknown. The loose root maps hold 0x88 = 1, 2, 3, 4 in EN 6, 3, 2, 2 and RU 10, 8,
-7, 12 maps, and dword 0x84 = 4, 6, 8 or 16. The EN server character writer runs only when
-Session +0x74 is nonzero; the map build stores `0x84 > 1` there, the server init stores
+7, 12 maps, and dword 0x84 = 4, 6, 8 or 16. At the EN owner-hero death call, the server character writer requires Session +0x1a8 zero and
++0x74 nonzero (R2-ENGINE-1868); the map build stores `0x84 > 1` there, the server init stores
 `mode < 2`, other writers are unclassified, and whether a loose root map reaches the map build is
 Unknown (Medium). The shipped `srv.cfg` sets RepopDelay 100. An EN config parser window (its
 entry and its file name unread) clamps a key `repopdelay` to 20..500 and stores it at
@@ -468,6 +468,8 @@ object's position and radius `+0xbc` when `+0xbc` is nonzero, else with the memb
 is every EN member (where the member then stands is Unknown); a successful placement reloads `+0xb4` from `+0xb0`, and
 no field read here bounds the cycles. — R2-ENGINE-510, R2-ENGINE-537, R2-ENGINE-538, R2-ENGINE-1670, R2-ENGINE-1817,
 R2-ENGINE-1818
+
+On the EN direct Outpost restore path, L2.08831..L2.08832 copies template current and maximum HP and mana. Retention of template current HP after the rest of the base assignment and subsequent Outpost calls is Medium. For each slot 0..12 the direct restore clears any occupied destination slot. It constructs an item from a non-null template slot if allocation succeeds, and stores null for a null template slot. Item durability is Unknown. It also copies six dwords at +0x23c..+0x250. This path requires a nonzero template virtual +0x30 result. The other branch calls the member's virtual +0x3c. Which branch runs for each monster remains Unknown. — R2-ENGINE-1867
 
 Script action 31 filters the Buildings collection by vtable slot +0x38 (RU: returns 0 for Pointer, Shop, Inn and, by
 R2-ENGINE-517, Building, and 1 for Outpost; EN: returns 0 for Building and Pointer and 1 for Outpost; Building is the
@@ -923,7 +925,7 @@ remain Unknown (R2-ENGINE-536). So does the reader of unit-record
 0x0a and 0x20 outside the two bodies read. EN and RU differ in one type-10 store: the
 RU group object stores the group's spread at +0xbc, the EN object keeps 0
 there (R2-ENGINE-511). With 0 the positioning routine gets the member's own position; which cell the member takes
-after the template restore is Unknown (R2-ENGINE-1818). Seconds per container pass are Unknown (R2-ENGINE-1817). Type 12 is decoded above (R2-ASSET-084). The editor's
+after placement is Unknown. On the EN direct restore path, the position copy takes x and y from the template before positioning (Medium for the search origin). The virtual restore path for a given monster is unresolved (R2-ENGINE-1818, R2-ENGINE-1867). Seconds per container pass are Unknown (R2-ENGINE-1817). Type 12 is decoded above (R2-ASSET-084). The editor's
 full-map writer declares type 0's 644 bytes as a constant while it writes 660
 (R2-ASSET-231). Why the constant is 644 remains Unknown. See [Editor write sequence](#editor-write-sequence).
 — R2-ASSET-023, R2-ASSET-024, R2-ASSET-231

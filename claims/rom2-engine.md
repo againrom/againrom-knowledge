@@ -38073,7 +38073,7 @@ the route search (it closes every kind).
 | R2-ENGINE-1840 | ROM2 EN list L2.08651 keeps current-directory `*.a2c` whose A+8, after replacing 0x529c0291 and 0xbaadf00d by app +0x3d8, equals app +0x3d8, plus one text entry; OK on that entry runs creation L2.07250, also New Game's. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1841 | ROM2 EN server character writer L2.08323 runs only when Session +0x74 is nonzero and +0x1a8 is 0; it writes the hero to `%schr\%s\%u%u.a2c` or `%u%u.a2c` through L2.07265; 9 call sites. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1842 | ROM2 EN join L2.00197 rejects a character when [ebp-0x10c]+0x1cc (Medium: R2-ENGINE-509's Session, map dword 0x88) is not -1 and lies below byte 2 ("too strong") or above byte 3 ("too weak") of its packed argument. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
-| R2-ENGINE-1843 | ROM2 EN owner word +0xa6c: 4 word-mov stores found by byte pattern; two server arms store the unit's cell (x low, y high) before passing the unit on; join and constructor store 0; respawn placement starts there (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
+| R2-ENGINE-1843 | ROM2 EN owner word +0xa6c: 4 word-mov stores found by byte pattern; two server arms store the unit's cell (x low, y high) before passing the unit on; join and constructor store 0; respawn placement starts there (Medium). | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1844 | ROM2 EN view app +0x370 (ctor L2.08652, vtable L2.08653) holds three panels, ids 0x462, 0x461, 0x463; its close L2.08654 runs creation on OK when the selection is the last entry. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1845 | ROM2 EN protocol view app +0x350 (ctor L2.08655): OK posts 0x454, 0x455, 0x452 or 0x453 for entry type 0..3, Cancel posts 0x421; arm 0x452 opens popup app +0x34c (join, host, local). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
 | R2-ENGINE-1846 | ROM2 EN arm 0x459 sets the map name app +0x5d0 from `-map"`, else from server map list L2.08656, else opens map view app +0x378 (ctor L2.08657); the first two post 0x457. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) |
@@ -38179,6 +38179,8 @@ first buffer is section D and the second section F.
 `evidence/generated/listings/en-chr-writer-L2.08323.txt`, `en-chr-writer-tail-L2.08682.txt`,
 `evidence/generated/scans/en-calls-L2.08323.txt`.
 
+**Amended.** R2-ENGINE-1868 narrows the EN death call to the owner's own hero after bag handling and the +0xa54 increment. In RU dedicated the corresponding call reaches L2.08813.
+
 ### R2-ENGINE-1842
 
 The EN join `L2.00197` (receiver at `[ebp-0x10c]`) splits its packed dword argument (`[ebp+0x18]`):
@@ -38247,6 +38249,10 @@ reappears and its Health and items.
 **Evidence.** [EXP-2209](../experiments/EXP-2209-rom2-mp-solo/RESULTS.md) question 4:
 `evidence/generated/scans/en-a6c-word-stores.txt`, `evidence/generated/listings/en-dispatch-save-L2.08671.txt`;
 respawn block: EXP-2052 `out/code/listings/en-result-tick.txt`.
+
+**Amended.** R2-ENGINE-1865 identifies the normal EN class tests as Shop and Inn. One Shop path bypasses the test. The recorded cell is the placement search origin.
+
+**Amended.** R2-ENGINE-1866 separates the live owner pointer's reuse arm from new-character construction. On a positive actor +0x13c, the EN reuse arm scales five XP values and fills HP and mana.
 
 ### R2-ENGINE-1844
 
@@ -38353,7 +38359,7 @@ join bodies: EXP-2117 `evidence/measured/listings/en-mode3-writer-a.tsv`, `en-mo
 |---|---|---|---|---|
 | R2-ENGINE-1816 | ROM2 map build (RU L2.00113, EN L2.00186) has one direct call site per root, in the map caller of R2-ENGINE-152; the EN type-10 pass skips owners with +0x2c = 0 and groups whose L2.02798 value is 0, as RU. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
 | R2-ENGINE-1817 | ROM2 Outpost slot 5 runs once per container pass: the Buildings method (RU L2.08569, EN L2.08570) calls virtual +0x14 on each listed object; its one direct caller runs in the RU session tick's mod-16 branch (Medium). | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
-| R2-ENGINE-1818 | ROM2 Outpost respawn (EN L2.08237, RU L2.08238) calls, per member, a template restore and the positioning routine: radius +0xbc around the Outpost if nonzero, else the member's own position, radius 0; no cycle counter read. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
+| R2-ENGINE-1818 | ROM2 Outpost respawn (EN L2.08237, RU L2.08238) calls, per member, a template restore and the positioning routine: radius +0xbc around the Outpost if nonzero, else the member's own position, radius 0; no cycle counter read. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
 | R2-ENGINE-1819 | ROM2 EN respawn scale S (L2.02527): a static constructor writes 100; a parser stores the value it tests against "repopdelay" and "settings" (roles Medium), clamped to 20..500. RU L2.02529 is "settings". | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
 | R2-ENGINE-1820 | ROM2 EN Outpost slot 14 (L2.08568) returns 1, as RU; Building is the base of four class records per root (Pointer, Outpost, Shop, Inn), Outpost of none; action 31 has no owner test and no loop exit. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
 | R2-ENGINE-1821 | ROM2 action 31 on an Outpost countdown: p1 replaces +0xb4 unscaled by S; while counting the check fires on the (p1+1)-th container pass (Medium); before +0xc0 is set p1 waits; a re-formation reloads +0xb0. | High / Medium | ✔ promoted (branch candidate) | [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) |
@@ -38484,6 +38490,8 @@ with +0xbc = 0 the positioning routine gets the member's own position (where it 
 nonzero +0xbc, and +0xb4 and +0xc0 are reset per member on a successful placement.
 
 **Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 2.
+
+**Amended.** R2-ENGINE-1867 reads the EN direct restore and its base assignment. Its excerpts show the position copy and HP/mana stores on that branch. Retained current HP is Medium. The other virtual restore and the final cell in play remain open.
 
 ### R2-ENGINE-1819
 
@@ -38693,3 +38701,83 @@ another, and watch which `.a2c` sections change after each step.
 `evidence/nav/nav3/listings/en-rename-caller-L2.08764.txt`; `evidence/nav/nav3/scans/en-calls-L2.08764.txt`;
 `evidence/nav/nav5/listings/en-keyroutine-L2.06472.txt`; `evidence/nav/nav6/scans/en-switch-appkeys-L2.06533.txt`; committed
 `evidence/listings/en-sync-L2.08783.txt` (EXP-2109).
+
+## Multiplayer death and return
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1864 | EN hero death counts the death and calls the character writer before setting HP to -50. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1865 | EN request 0x4b arms return at HP <= -40. The tick consumes it before placement. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1866 | EN reuse of a fallen hero scales five XP values by 9/10, then refills HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1867 | One EN Outpost restore copies template position and current and maximum HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1868 | EN in-process and RU dedicated death pass the owner's hero to the writer before HP is set to -50. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+
+### R2-ENGINE-1864
+
+EN allods2.exe death first processes equipment, then checks bag count and rolled gold. A nonempty bag or nonzero roll reaches the ground placement call with the bag, rolled gold and a flag identifying the owner's hero. The actor receives a replacement bag on this path. The effect loop follows. If unit +0x14 points to an owner and owner +0x38 points back to the victim, the routine increments owner +0xa54, calls the update helper (L2.01056), calls the character writer with the victim and stores signed -50 in HP. Both paths then test the campaign failure-reason conditions at L2.03253. Whether that block sends a reason or skips it, the common tail at L2.03257 calls corpse ageing (L2.08328). A class below 64 bypasses the treasure roll. This supplies no purse balance as the placement argument.
+
+RU a2server.exe also compares the victim with owner +0x38 before incrementing +0xa54, calling L2.08814 and L2.08813, and storing -50. The branch at L2.08815 selects L2.08816 for mode dword 0 or for mode 3 and class at least 64. The config parser tests cooperative, deathmatch, teamplay and arena and stores 0, 1, 2 and 3 respectively on a zero comparison. For classes 0x21..0x24, only mode 0 enters the block with virtual calls +0x48 and +0x4c and calls to L2.08817. The committed excerpts omit the alternative at L2.08818..L2.08819 and the interval L2.08820..L2.08821 before the owner-hero check. A separate block at L2.08822 tests the bag and conditionally passes it to L2.08823.
+
+**Confidence.** High for the observed EN order, RU comparisons and stores. Medium for the interpretation that virtual +0x48, +0x4c and L2.08817 remove or bag equipment in RU dedicated. Their bodies were not established here. The mode names (comparison helper L2.08824) and visible sack and body are also Medium. The read EN client report arm requires application mode 2 and +0x3e8 zero. The reason-2 route alone cannot identify a multiplayer screen.
+
+**Unknown.** The victim's final purse, what the multiplayer client displays, and which item remains in play after each server mode. On CROSS2, compare the first death frame, corpse, marked equipment, bag and balances on EN in-process and RU dedicated cooperative hosts.
+
+**Evidence.** [Death listings](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/), q1-death-items, q1-death-finish, q1-dedicated-loot, q1-dedicated-mode, [q1-dedicated-bag](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q1-dedicated-bag.txt), q1-dedicated-death and q1-report-gate.
+
+### R2-ENGINE-1865
+
+EN allods2.exe. In the small-message dispatch (byte +4 below 1), byte +9 selects the arm. Among opcodes 2..193 the two indexed tables map 0x4b to L2.08825. The arm looks up the owner using word +5. With an owner, a hero at +0x38 and signed HP <= -40, it stores 1 at owner +0xa64.
+
+The result tick requires owner +0x41 nonzero, +0x2c zero, +0x40 at least 2, session +0x74 nonzero, owner byte +0x43 nonzero (L2.03236), hero HP <= -40 and +0xa64 nonzero. It consumes +0xa64, constructs a bag only for a null +0x7c, passes the actor to the corpse-list helper and clears its word +0x18. It calls the producer, then party placement and clears +0x40. The owner-hero death store of -50 already satisfies the HP comparison.
+
+The two cell-recording arms in R2-ENGINE-1843 take the unit's cell. The normal first lookup tests the object's class chain against the Shop record. The second tests against Inn. The first lookup instead returns a fixed address if the receiver's +0x1a4 is nonzero. For both checks the identity comes from the object method, the class-chain walk and the two class records' name pointers. Placement prefers a nonzero recorded word, else draws from the drop list, with a random coordinate fallback if x*y is zero. This is a search origin.
+
+**Confidence.** High for the EN request, tick guards, call order and normal runtime class tests. Medium for the cell in play (placement can fail or move off the origin) and for identifying L2.01568's result as the owner. Its body and the virtual class getter were not traced here.
+
+**Unknown.** Which client action sends the request, other possible setters of +0xa64, elapsed time and final cell. On EN CROSS2 use one character for three deaths after join, after a Shop and after an Inn. Compare the first return cell and screen while waiting without input, then after the offered action.
+
+**Amends.** R2-ENGINE-1843. The normal lookups test Shop and Inn, and the stored cell is the starting point for placement.
+
+**Evidence.** [EN result tick](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q2-result-tick.txt), adjacent q2 request, dispatch, owner-byte, class lookup and table excerpts. The two cell stores are in the dispatch listing linked by R2-ENGINE-1843.
+
+### R2-ENGINE-1866
+
+EN allods2.exe. The return tick reads the non-null owner +0x38 actor before calling L2.00160. With that pointer still present, the producer bypasses new-character construction. A positive unsigned actor byte +0x13c selects L2.08826. For each i = 1..5 it multiplies the dword x at +0x23c + 4i by 9 and divides the signed low 32 bits by 10 towards zero, storing the result in the same dword. For 0 <= x <= 238609294 this yields floor(9 * x / 10). It sums the five results at +0x130, derives each skill through L2.08827 and copies the five resulting words into the base skills. The skill lookup walks its threshold table. Table contents were not read.
+
+After replacing subobjects +0x1c0 and +0x1c4, the helper calls L2.08828, which clears +0x13c and calls virtual +0x58. On return the producer writes current HP from +0x96 and current mana from +0x9c, adds the actor to the owner list and creates a group if +0x70 is null. With byte +0x13c zero, L2.08829 jumps directly to the return of owner +0x38 at L2.08830. This skips the XP helper, both refills, the owner-list append and group creation. The template and starter equipment are on the separate null-pointer branch.
+
+**Confidence.** High for the EN conditional branches, XP arithmetic and refill sources. Medium for the in-game XP and HP/mana outcome across the helper calls. The two constructors, virtual +0x58 and placement can change other fields. The tick's bag constructor is guarded by a null pointer. These reads establish neither equipment repair nor a final purse change.
+
+**Unknown.** Durability, the final bag and purse and the corresponding RU dedicated return arithmetic. On CROSS2, die with a damaged marked item, known cash and XP in two skills. Compare the corpse sack, surviving gear, five XP totals and HP/mana immediately after return, before pickup.
+
+**Amends.** R2-ENGINE-1843. The EN owner-hero reuse branch scales the five skill XP values and fills HP and mana when actor byte +0x13c is positive. With byte zero it returns directly. Both paths skip template construction.
+
+**Evidence.** [Producer](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q3-reuse.txt), q3-experience, q3-skill-lookup and q3-reset. The caller is q2-result-tick.
+
+### R2-ENGINE-1867
+
+EN allods2.exe Outpost L2.08237. With a nonzero result from template virtual +0x30, the restore at L2.08584 calls the base assignment L2.05385 with the template. If template +0x10 exists, base assignment allocates a position object, calls L2.03614 with the template position and stores the result in member +0x10. The copy transfers byte 0 and byte 1, which the two getters read as x and y. At L2.08831..L2.08832, base assignment copies template current and maximum HP (+0x94 and +0x96) and mana (+0x9a and +0x9c) into the corresponding member fields.
+
+The direct restore loops over slot indices 0..12, clears occupied destination slots, constructs from each non-null template slot through L2.08833 and stores its result. It also copies six dwords from +0x23c..+0x250. The Outpost calls positioning with the member's coordinates at radius zero or Outpost coordinates at nonzero radius. When template virtual +0x30 returns zero it instead calls member virtual +0x3c. The dynamic target was not established for the killed group.
+
+**Confidence.** High for the copy instructions, source coordinates and branch structure in EN. Medium for the member retaining template current HP after the restore. The middle and tail of L2.05385 and subsequent Outpost calls are outside the committed excerpts. The template cell as the zero-radius search origin is also Medium, given successful allocation and intervening calls. Construction from a template slot does not by itself establish equal item durability (L2.08833 unread).
+
+**Unknown.** Which restore runs for each monster class, final cell, template health at runtime, clock time and behaviour after a failed placement. On CROSS2 lure a group off its start cells, leave one member alive, then kill the last. Record initial, death and return cells, HP and elapsed time at two RepopDelay settings. Repeat on RU with a group using nonzero placement radius.
+
+**Amends.** R2-ENGINE-1818. On the EN direct path the excerpts show the position copy and the assignments of template current and maximum HP and mana. Retention of template current HP after the restore is Medium.
+
+**Evidence.** [EN restore](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q4-restore.txt), q4-outpost, q4-position, q4-cell, q4-get-xy and q4-template-stats.
+
+### R2-ENGINE-1868
+
+EN in-process death tests that unit +0x14 exists and owner +0x38 is this unit. After bag handling and the owner +0xa54 increment, L2.08675 passes the victim to L2.08323. HP is set to -50 after the call. On the R2-ENGINE-1841 writer's open branch (session +0x74 nonzero and +0x1a8 zero), it takes equipment slots and bag from the actor at this point, money from owner +0x3c (field interpretation Medium), and five XP dwords from actor +0x240..+0x250. These are death-time values before the return helper scales XP. Sections D and F describe equipment and bag, E carries the five XP values. The EN section C is preserved when present in the existing file.
+
+RU a2server.exe separately compares the owner hero with the dying unit, increments owner +0xa54, then calls L2.08813 before storing -50. The routine immediately takes the owner from the unit. Its inputs include owner +0x3c and +0xa54, the five unit dwords, equipment and bag. It constructs a string from the global base and owner +0xa78 with %s%s and passes it, the sections and buffers to L2.08834. That helper attempts a file open, can reject an existing file, and tests a second open with mode 0x1001. This evidence does not identify the caller's filename suffix. The path-building routine L2.08681 named in the prior card is a different function.
+
+**Confidence.** High for the owner identity check, ordering and field sources in the named images. Medium for the EN event order in play and death-time file contents. The RU field meanings and write interpretation are Medium. The RU return penalty is Unknown. No successful filesystem operation was observed. The other eight EN relative calls in the previous scan, virtual calls, asynchronous and later periodic writes are outside this event proof.
+
+**Unknown.** Whether return or a monster death/return independently causes a file update and when reduced XP reaches disk. On an original dedicated server with Save=server and a disposable character on CROSS2, compare file hashes, timestamps and decoded money, equipment, bag and skill XP before death, while dead, immediately after return, after a monster group returns, while idle and after disconnect.
+
+**Amends.** R2-ENGINE-1841. The EN death call is restricted to the owner's hero and precedes the -50 HP store. The RU dedicated death callee is L2.08813.
+
+**Evidence.** [RU dedicated writer](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q5-dedicated-writer.txt), q5-dedicated-writer-tail and q5-file-open, with q1-death-finish and q1-dedicated-death for the callers. The EN writer body and section mapping are in R2-ENGINE-1841, R2-SESSION-516 and R2-SESSION-517.
