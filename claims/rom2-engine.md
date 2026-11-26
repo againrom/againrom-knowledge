@@ -22,6 +22,111 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## ROM2 multiplayer return request, return penalty and building visits (EXP-2214)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1908 | EN allods2.exe: builder L2.06508 is the one found sender of request 0x4b; its one direct caller is the Space arm (+0x404 = 1, +0xc0 = 0, view word +0x104 at most -40); Medium that these hold in multiplayer; no timer on that branch. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+| R2-ENGINE-1909 | RU a2server.exe hero reuse: XP helper L2.08895 by mode dword L2.01089: 3 keeps XP; 1, 2 store skill 70; 0 and others scale XP 9/10. Mode names and the return caller are Medium; runs only for actor byte +0x13c above 0. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+| R2-ENGINE-1910 | EN client: server messages 0x83 and 0x84 become application messages 0x42a and 0x42b, whose arms call selectors L2.00602 and L2.00425, each one found direct call site. Which page a multiplayer game opens is Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+| R2-ENGINE-1911 | EN server: the Shop buy (0x33) and sell (0x34) arms call the character writer L2.08323 after the deal only when timeGetTime minus owner +0xa74, the writer's last-write time, is above 15000 ms. | High / Medium | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+| R2-ENGINE-1912 | EN Inn and Shop: with Session +0x74 nonzero (Medium: multiplayer), entry calls L2.04906 (off the map, Medium); request 0x3a gives dword +0xe to L2.01850: 0xaaaaaaaa leaves, below 0x100 indexes a list; 0x100 up unread. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+| R2-ENGINE-1913 | EN actor step state 15, building kind 0x42 (Multiplayer Church, a table name): when getter L2.08896 on L2.08702 returns 4, it calls L2.08897 with the owner id, then L2.08898 and L2.08899, and stores Session dword +0 in owner +0xa50. | High / Unknown | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+
+### R2-ENGINE-1908
+
+EN allods2.exe. Builder L2.06508 (receiver: the view) writes 0x4b into byte +9 of the static message L2.08900, copies word +4 of [view +0x9cc] into word +5, stores 0 in word +7 and passes the message to L2.00871 on L2.00872. The server dispatch maps byte +9 = 0x4b to the return-request arm, which looks up the owner by word +5 (R2-ENGINE-1865).
+
+An E8/E9 call scan of the executable sections finds one caller, L2.08901, inside the view key routine L2.04345. It is the call of the Space arm L2.06507 (R2-ENGINE-1180): with application +0x404 = 1 and +0xc0 = 0, and view +0x3f6c nonzero with signed word +0x104 at most -40, Space calls L2.06508. The readme names the Space key as opening the inventory or spell book through R2-ENGINE-1180; the posts 0x40e and 0x40f were not read. A scan for byte stores of the immediate 0x4b (`mov byte` with mod 01, with and without SIB, and mod 10 without SIB) finds three sites: L2.08902 (+9 of the message), L2.08903 ([ebp - 4]) and L2.08904 (+0xbdee). Only the first site is read here; the other two have no committed listing.
+
+The server stores HP -50 at the owner-hero death (R2-ENGINE-1864) and its arm requires HP at most -40 (R2-ENGINE-1865). The client branch has no timer: each Space press while its condition holds sends one request. The server tick that consumes the request has its own guards (+0x40 at least 2, byte +0x43, R2-ENGINE-1865) and R2-ENGINE-1865 leaves the elapsed time Unknown, so the delay between death, the first Space and the return is Unknown.
+
+**Confidence.** High for the builder body, the single E8/E9 caller and the three byte-store sites in EN. EN allods2.exe: the one found sender, reached by the Space arm when application +0x404 = 1, +0xc0 = 0 and view +0x3f6c word +0x104 is at most -40. Medium that these hold in a multiplayer game: the values of +0x404 and +0xc0 were not traced there (+0x404 is a flag field). Medium that view +0x3f6c is the player's hero and word +0x104 its HP: the -40 constant matches the server arm, but the field was not traced. Medium that no other sender exists: stores of other forms (mod 00, SIB with disp32, word and dword stores), a 0x4b held in a register, indirect calls and the RU client were not searched, and the two other 0x4b byte stores, L2.08903 and L2.08904, were not read. The client branch has no timer; the delay between death, the request and the return is Unknown.
+
+**Unknown.** What the client shows while the hero is dead: no display code was read. A text search of both resource roots found a help-text line for the Space key that mentions returning to the game after death in multiplayer (a lead, not a fact; `evidence/nav/restext-summary.md`). On EN allods2.exe host CROSS2 alone, let the hero die, record the screen for 60 s without input, then press Space. Compare the screen before and after the press and the hero's cell after return.
+
+**Amends.** R2-ENGINE-1865: the client action that sends the request is the Space key arm through L2.06508.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) question 1: `evidence/generated/listings/en-q1-builder-4b-L2.06508.txt`, `evidence/generated/scans/en-q1-calls-L2.06508.txt`, `evidence/generated/scans/en-q1-store-4b.txt`.
+
+### R2-ENGINE-1909
+
+RU a2server.exe. The producer L2.08905 reads actor A = [argument +0x38]; a null A jumps to L2.08906 (not read). With A non-null and unsigned byte A +0x13c above 0 it calls L2.08895(A), then stores HP +0x94 = +0x96 and mana +0x9a = +0x9c, passes A to L2.08907 on [argument +0x24], and allocates a 0x50-byte group (L2.08908) when A +0x70 is null. A zero byte +0x13c jumps to L2.08909 (not read).
+
+L2.08895 clears +0x130, then for i = 1..5 tests the mode dword L2.01089:
+
+| Mode | Skill word +0xa8 + 2i | XP dword +0x23c + 4i |
+|---|---|---|
+| 1 or 2 | 70 | L2.08910(70) |
+| 3 | L2.08911(XP) | unchanged |
+| any other, 0 included | L2.08911(XP) after the store | (9 x XP) / 10, signed division towards zero |
+
+Each arm adds the XP dword to +0x130. After the loop the helper copies the five skill words to +0x116 + 2i, replaces the subobjects +0x1c0 (a new 0xb4 object, L2.08912) and +0x1c4 (a new 0xb8 object, L2.08913) and calls L2.08914. The config parser stores 0, 1, 2 and 3 for cooperative, deathmatch, teamplay and arena (R2-ENGINE-1864, names Medium: comparison helper L2.08824). The shipped srv.cfg sets GameType COOPERATIVE (R2-SESSION-506), so with it, if the mode names hold and the producer caller is the return tick (both Medium), the RU XP arithmetic is that of R2-ENGINE-1866: floor(9x/10) for 0 <= x <= 238609294. In modes 1 and 2 the helper stores skill 70 (read), then the XP from L2.08910(70) (not read); the final skill after L2.08914 is Unknown. The whole arm runs only when actor byte +0x13c is above 0 (R2-ENGINE-1866).
+
+An E8/E9 call scan finds one caller of L2.08895, L2.08915 in the producer. It finds three of L2.08905: L2.08916 (in L2.08917), L2.08918 (in L2.08919) and L2.08920 (in L2.08921).
+
+**Confidence.** High for the RU helper's mode tests, arithmetic, stores and calls, and for the producer head to the group allocation. Medium for the skill values: L2.08911 and L2.08910 were not read. Medium for the mode names (R2-ENGINE-1864). Medium for which producer caller is the return tick: the three callers' bodies were not read. The arm runs only when actor byte +0x13c is above 0.
+
+**Unknown.** The skill values after a return in modes 1, 2 and 3, and the effect of L2.08914 (the helper stores 70; the final skill is not shown). On RU a2server.exe with Save=server, die once with a disposable character under GameType COOPERATIVE and once under DEATHMATCH. Compare the five skill XP values in the character file before death and after return.
+
+**Amends.** R2-ENGINE-1866: the RU dedicated return arithmetic is mode-dependent and equals the EN 9/10 scaling in cooperative mode. R2-ENGINE-1868: the RU return penalty is read.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) question 3: `evidence/generated/listings/ru-srv-q3-xp-helper-L2.08895.txt`, `ru-srv-q3-producer-L2.08905.txt`, `evidence/generated/scans/ru-srv-q3-calls-L2.08895.txt`, `ru-srv-q3-calls-L2.08905.txt`.
+
+### R2-ENGINE-1910
+
+EN allods2.exe. The client receive routine L2.00466 takes a message from L2.03122 on L2.00872 and switches on byte +9 minus 3 (range 3..0xc1) through byte table L2.00467 and arm table L2.00468. The table read maps 0x83 to L2.08922 and 0x84 to L2.08923. Arm L2.08922 calls L2.00470(0x42a, dword +0xa, 0) on the application, and arm L2.08923 calls L2.00470(0x42b, dword +0xa, dword +0xe).
+
+In L2.00262 a switch takes the message number minus 0x416 (0..0x73) through byte table L2.00794 and arm table L2.00795. The table read maps 0x42a to L2.08924 and 0x42b to L2.08925. Both arms run when application +0x404 is 0, or when it is 1 and +0x5d8 is at most 1. L2.08924 calls L2.00602 with the first parameter; L2.08925 calls L2.00425 with the first and second. An E8/E9 scan finds no other call of either selector (a direct-call census). L2.00602 sends 0x32 and L2.00425 is the inn selector by R2-ENGINE-373 (Medium, composition of selected calls) and R2-ENGINE-633 (campaign EnterInn selector, segment gated on +0x5d8 = 2; the arms of L2.00262 run for +0x5d8 at most 1). The server's state-15 arm builds 0x83 from building byte +0x40 and 0x84 from byte +0x40 and building dword +4 (R2-ENGINE-518).
+
+**Confidence.** High for the two switch tables, the receive arms and the application arms in EN. Medium that L2.00602 sends 0x32 and that L2.00425 is the inn selector (R2-ENGINE-373, 633). Which page opens in a multiplayer game is Unknown. Medium that L2.00470 delivers its message to the switch in L2.00262: L2.00470 was not read. Medium that dword +0xa carries the building byte +0x40 and +0xe the building dword +4: the server packet builder was not read (L2.02566 is its RU address, R2-ENGINE-518; in the EN listing of EXP-2065 the call is L2.01047).
+
+**Unknown.** The RU client path and the pages shown in multiplayer. On EN allods2.exe host CROSS2 alone, walk the hero into one Shop and one Inn. Record each page opened and the kind of the building entered.
+
+**Amends.** R2-ENGINE-518: its Unknown on what the receivers of 0x83 and 0x84 open; in the EN client they reach the shop and inn selectors.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) question 4: `evidence/generated-2/listings/en-q4-net-handler-L2.00466.txt`, `en-q4-net-cases-L2.08922.txt`, `evidence/generated-2/data/en-q4-net-optable-L2.03247.tsv`, `evidence/generated/data/en-q4-client-optable-L2.08926.tsv`, `evidence/generated/listings/en-q4-client-cases-L2.08924.txt`, `evidence/generated/scans/en-q4-calls-L2.00602.txt`, `en-q4-calls-L2.00425.txt`, `evidence/nav/listings/en-client-switch2-L2.08927.txt`.
+
+### R2-ENGINE-1911
+
+EN allods2.exe, server small-message dispatch L2.00171. The buy arm L2.08928 (opcode 0x33) finds the unit (L2.01661 with word +5 and dword +0xa) and the Shop (L2.01846), calls buy L2.00834 (R2-ENGINE-266), then calls import [L2.08666] (timeGetTime, R2-ENGINE-1841). It subtracts [unit +0x14] +0xa74 and skips the call of L2.08323(unit) at L2.08672 when the difference is at most 0x3a98 (unsigned). The sell arm L2.08929 (0x34) has the same order with sell L2.00835. Its compare at L2.08930 branches to L2.08931, the instruction after writer call site L2.08673. The writer stores timeGetTime in owner +0xa74 on its open branch (R2-ENGINE-1841).
+
+The undo (0x35), leave (0x36) and refill (0x3f) arms call L2.00836, L2.00836 then L2.08932, and L2.00825 with no writer call. Of the nine E8 writer call sites (R2-ENGINE-1841), none lies in the read Shop methods L2.01637..L2.08933, the Inn methods L2.02764..L2.08934 or the arms L2.08935..L2.08936.
+
+The writer itself returns unless Session +0x74 is nonzero and +0x1a8 is zero, and R2-ENGINE-1868 observed no successful write: the arms call the writer, which is not a save. Other call sites exist (R2-ENGINE-1841; the item-move, L2.08937 and L2.00172 arms, death L2.08675, L2.08677, L2.08678 and item routine L2.08679).
+
+**Confidence.** High for the buy gate and call in EN. Medium for the sell call: the window ends at L2.08938, and the call site at L2.08673 comes from the R2-ENGINE-1841 scan. The negative for the Shop methods and Inn arms is a direct-call census (E8 only): indirect calls, the unread Inn reward arms and the arm for values of 0x100 and above are outside it. Medium that the deal precedes the write in play: L2.00834 and L2.00835 may fail without a test here.
+
+**Amends.** R2-ENGINE-1841: its Unknown on which event each call site serves; L2.08672 serves Shop buy and L2.08673 Shop sell, at most one write per 15 s per owner from these arms.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) question 5: `evidence/generated/listings/en-q4-arm-33-34-L2.08928.txt`, `en-q4-arms-35-3f-L2.08939.txt`, `en-q4-arm-3a-L2.08935.txt`, `en-q4-shop-method-L2.01637.txt`, `en-q4-inn-methods-L2.02764.txt`, `evidence/generated/data/en-q4-server-optable-L2.00171.tsv`.
+
+### R2-ENGINE-1912
+
+EN allods2.exe. After the part read in R2-ENGINE-536, the Inn entry method L2.02764 adds unit U to the visitor list Inn +0xa4 (L2.00202). With Session +0x74 nonzero it then calls L2.04906(U). The Shop entry L2.01637 also calls L2.04906 under the same test after L2.00823. The Shop leave method L2.08932 calls L2.00830, then L2.01848 under the same test, then notify L2.07789.
+
+L2.04906 returns when U byte +0x4c has bit 8. Otherwise it calls L2.03601(U) on [L2.01839], sets bit 8, removes U from the list at [L2.00325] +4 (L2.04533) and posts L2.05694 on L2.00994 twice. L2.01848 calls L2.00312 with U's own x and y at radius 0 and, when that returns 0, at radius 3.
+
+The request 0x3a arm L2.08935 finds U by word +5 and dword +0xa (L2.01661) and the Inn by U +0x10 (L2.01849). It calls Inn L2.01850(U, dword +0xe). L2.01850 returns unless U is in the visitor list (L2.08940 on Inn +0xa4). It then removes U (L2.04533 on Inn +0xa8) and, with Session +0x74 nonzero, calls L2.01848(U). An argument of 0xaaaaaaaa calls L2.08941 on L2.08942 with (0x11, player id, Inn +4), then with (2, that result, 0), and returns. An argument below 0x100 looks up the player in Inn +0x88 (L2.08943), takes element `argument` through L2.01646(argument, 0xffff), and dispatches on its class word +0x40: 0xfffd, 0xfffe, 0xffff or other. The EN dispatch at L2.08944..L2.08945 jumps to L2.08946, L2.08947, L2.08948 and L2.08949; the listing ends at L2.08934, so the EN arms are not read. R2-ENGINE-489 reads the RU item routine L2.02366 (a different function), whose 0xfffe and 0xffff cases give XP and gold: the effect is by the RU item routine, Medium for the EN arms. An argument of 0x100 or more jumps to L2.08950 (not read).
+
+**Confidence.** High for the call order, tests and branches in EN. The tests are Session +0x74 nonzero. R2-ENGINE-509 and R2-ENGINE-1841 give that field two writers read (the map build for dword 0x84 above 1, the server init for mode below 2), 119 and 121 unclassified stores, and "whether a loose root map reaches the map build is Unknown": "multiplayer" is Medium. "Takes the hero off the map" and "places it" rest on L2.03601 and L2.00312, whose bodies were not read: Medium. Medium that bit 8 of +0x4c marks a building visit.
+
+**Unknown.** Which request value takes an offer (the offer kind stays Unknown, R2-ENGINE-536), the 0xfffd and other EN arms, the jump targets L2.08951 and L2.08952 (no list entry, no element), and the call after `push 3` in L2.01848 (the window ends at L2.08953). On EN allods2.exe host CROSS2 alone, enter an Inn, take one offer and leave once without one. Record the request bytes the client sends and the hero's cell after each exit.
+
+**Amends.** R2-ENGINE-1843: its Unknown on what the two lookup targets are (L2.01637 and L2.02764, "unread"); R2-ENGINE-1912 reads their entry order, and names them in the cell-recording arms.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) questions 4 and 5: `evidence/generated/listings/en-q4-inn-methods-L2.02764.txt`, `en-q4-arm-3a-L2.08935.txt`, `en-q4-shop-method-L2.01637.txt`, `en-q4-unit-shop-L2.04906.txt`.
+
+### R2-ENGINE-1913
+
+EN allods2.exe, actor step state-15 arm (committed EXP-2065 listing `en-unit-step.txt`, L2.08954..L2.08955). After the Pointer test, the arm reads word +0x0e of the building found. This is the field the kind tests of R2-ENGINE-1695 read. When it is 0x42 it calls L2.08896 on L2.08702, which returns dword +0x4e0 of its receiver. When the result is 4 it calls L2.08897(word +4 of the unit's owner) on L2.00994. A nonzero result goes to L2.08898 on L2.00994, and L2.08899 is called on L2.00994 either way. The arm then stores the dword at [L2.00805] +0 in owner +0xa50. Without kind 0x42 or with another result it continues to the kind tests of R2-ENGINE-1695.
+
+**Confidence.** High for the tests, the call order and the store in EN. "Multiplayer Church" is a name in the Buildings table, not a read function. Unknown for what value 4 of L2.08702 +0x4e0 means, what the three calls do and what owner +0xa50 holds.
+
+**Unknown.** On EN allods2.exe host CROSS2 alone, walk a wounded hero into a Multiplayer Church once alive. Then die nearby and return. Compare HP, mana, the hero's cell after return and any message shown.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) question 4: EXP-2065 `out/listings/en-unit-step.txt`; `evidence/nav/listings/en-church-test-L2.08896.txt`.
+
 ## ROM2 order machine: Drain Life without health and the area-defence setters (EXP-2213)
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -13230,6 +13335,8 @@ notify (EN L2.07789, RU L2.02657); kinds 15 and 16 (0x0f, 0x10) require signed
 word +0x42 > 0, decrement it, call notify, build a named Item and pass it to
 unit vtable +0x44 (consumed by Item vtable +0x38, returning 0 so it does not
 enter unit +0x7c). The two literal item names remain Unknown.
+
+**Amended.** R2-ENGINE-1910: in the EN client, 0x83 and 0x84 reach the shop selector L2.00602 and the inn selector L2.00425 through application messages 0x42a and 0x42b. R2-ENGINE-1913 reads the kind-0x42 branch.
 
 ### R2-ENGINE-519
 
@@ -38303,6 +38410,8 @@ first buffer is section D and the second section F.
 
 **Amended.** R2-ENGINE-1868 narrows the EN death call to the owner's own hero after bag handling and the +0xa54 increment. In RU dedicated the corresponding call reaches L2.08813.
 
+**Amended.** R2-ENGINE-1911: call sites L2.08672 and L2.08673 serve Shop buy (0x33) and sell (0x34) and run only when more than 15000 ms have passed since owner +0xa74.
+
 ### R2-ENGINE-1842
 
 The EN join `L2.00197` (receiver at `[ebp-0x10c]`) splits its packed dword argument (`[ebp+0x18]`):
@@ -38375,6 +38484,8 @@ respawn block: EXP-2052 `out/code/listings/en-result-tick.txt`.
 **Amended.** R2-ENGINE-1865 identifies the normal EN class tests as Shop and Inn. One Shop path bypasses the test. The recorded cell is the placement search origin.
 
 **Amended.** R2-ENGINE-1866 separates the live owner pointer's reuse arm from new-character construction. On a positive actor +0x13c, the EN reuse arm scales five XP values and fills HP and mana.
+
+**Amended.** R2-ENGINE-1912 reads the entry order of the two lookup targets L2.01637 and L2.02764, which the Unknown above leaves unread, and names them in the cell-recording arms.
 
 ### R2-ENGINE-1844
 
@@ -38829,10 +38940,10 @@ another, and watch which `.a2c` sections change after each step.
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
 | R2-ENGINE-1864 | EN hero death counts the death and calls the character writer before setting HP to -50. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
-| R2-ENGINE-1865 | EN request 0x4b arms return at HP <= -40. The tick consumes it before placement. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
-| R2-ENGINE-1866 | EN reuse of a fallen hero scales five XP values by 9/10, then refills HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1865 | EN request 0x4b arms return at HP <= -40. The tick consumes it before placement. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1866 | EN reuse of a fallen hero scales five XP values by 9/10, then refills HP and mana. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
 | R2-ENGINE-1867 | One EN Outpost restore copies template position and current and maximum HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
-| R2-ENGINE-1868 | EN in-process and RU dedicated death pass the owner's hero to the writer before HP is set to -50. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
+| R2-ENGINE-1868 | EN in-process and RU dedicated death pass the owner's hero to the writer before HP is set to -50. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
 | R2-ENGINE-1876 | RU size-1 route search relaxes cost per neighbour (orthogonal +t or 2, diagonal +t+t/2 or 3) and tests the goal once per A-and-B half-pass pair; other arms unread. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
 | R2-ENGINE-1877 | RU group acquisition scans the enemy list in list order and keeps a candidate only on a strictly lower score; the first of equal scores stays. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
 | R2-ENGINE-1878 | RU defender helper ranks kind 3 first, then least edge distance (L2.01588), only when the defended unit's L2.01728 is 2 or more (L2.06586 removes kind 3 otherwise). | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
@@ -38867,6 +38978,8 @@ The two cell-recording arms in R2-ENGINE-1843 take the unit's cell. The normal f
 
 **Evidence.** [EN result tick](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q2-result-tick.txt), adjacent q2 request, dispatch, owner-byte, class lookup and table excerpts. The two cell stores are in the dispatch listing linked by R2-ENGINE-1843.
 
+**Amended.** R2-ENGINE-1908 names the sender: the EN client Space arm calls builder L2.06508, which writes request 0x4b.
+
 ### R2-ENGINE-1866
 
 EN allods2.exe. The return tick reads the non-null owner +0x38 actor before calling L2.00160. With that pointer still present, the producer bypasses new-character construction. A positive unsigned actor byte +0x13c selects L2.08826. For each i = 1..5 it multiplies the dword x at +0x23c + 4i by 9 and divides the signed low 32 bits by 10 towards zero, storing the result in the same dword. For 0 <= x <= 238609294 this yields floor(9 * x / 10). It sums the five results at +0x130, derives each skill through L2.08827 and copies the five resulting words into the base skills. The skill lookup walks its threshold table. Table contents were not read.
@@ -38880,6 +38993,8 @@ After replacing subobjects +0x1c0 and +0x1c4, the helper calls L2.08828, which c
 **Amends.** R2-ENGINE-1843. The EN owner-hero reuse branch scales the five skill XP values and fills HP and mana when actor byte +0x13c is positive. With byte zero it returns directly. Both paths skip template construction.
 
 **Evidence.** [Producer](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q3-reuse.txt), q3-experience, q3-skill-lookup and q3-reset. The caller is q2-result-tick.
+
+**Amended.** R2-ENGINE-1909 reads the RU dedicated arithmetic: RU L2.08895 scales by 9/10 in cooperative mode 0, keeps XP in arena mode 3 and sets the five skills to 70 in modes 1 and 2.
 
 ### R2-ENGINE-1867
 
@@ -38908,6 +39023,8 @@ RU a2server.exe separately compares the owner hero with the dying unit, incremen
 **Amends.** R2-ENGINE-1841. The EN death call is restricted to the owner's hero and precedes the -50 HP store. The RU dedicated death callee is L2.08813.
 
 **Evidence.** [RU dedicated writer](../experiments/EXP-2211-rom2-mp-death-respawn/evidence/generated/q5-dedicated-writer.txt), q5-dedicated-writer-tail and q5-file-open, with q1-death-finish and q1-dedicated-death for the callers. The EN writer body and section mapping are in R2-ENGINE-1841, R2-SESSION-516 and R2-SESSION-517.
+
+**Amended.** R2-ENGINE-1909 reads the RU return penalty, which depends on the server mode.
 
 ### R2-ENGINE-1876
 

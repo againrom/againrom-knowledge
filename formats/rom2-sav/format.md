@@ -341,8 +341,8 @@ handler, which sends 0xba to a Player with a hero. Whether loading a save runs t
 By the bodies read (Medium for the order a player sees; no run): main-menu button 1 (0x426),
 whose name Multiplayer is inferred (Medium), shows a character list view; its OK leads through a
 protocol list and a join, host or local popup to a map choice, which sets the map name that the
-mission start takes. On an eligible EN result tick, a return request is consumed before party placement starts at the recorded cell, a map drop, or the coordinate fallback. The actual cell is Unknown.
-— R2-ENGINE-1844, R2-ENGINE-1846, R2-ENGINE-1843, R2-ENGINE-1865
+mission start takes. On an eligible EN result tick, a return request is consumed before party placement starts at the recorded cell, a map drop, or the coordinate fallback. The actual cell is Unknown. The EN client sends the return request from the Space key arm when its branch conditions hold (Medium in multiplayer; the one found sender; the delay before the return is Unknown).
+— R2-ENGINE-1844, R2-ENGINE-1846, R2-ENGINE-1843, R2-ENGINE-1865, R2-ENGINE-1908
 
 Pointer +0x6c is 24 in the five EN saves. No reader of a Building's base
 byte +0x0d and no constructor store to its word +0x0c was found in the read
@@ -2109,3 +2109,5 @@ unclosed. R2-ENGINE-1256 (Medium bounded composition, completeness and runtime
 outcome Unknown).
 
 The EN retained-hero return scales the five skill XP values separately and fills HP and mana when the corpse-stage byte is positive. — R2-ENGINE-1866
+
+The RU dedicated return applies the same scaling in mode 0 and any unlisted mode value, keeps XP in mode 3 and, in modes 1 and 2, the helper stores skill 70 with the final skill Unknown (the mode names and the return caller are Medium; only when actor byte +0x13c is above 0). — R2-ENGINE-1909

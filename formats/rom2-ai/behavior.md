@@ -329,7 +329,12 @@ setter that R2-ENGINE-620 describes (R2-ENGINE-1182). The view key
 routine and its three key tables are read in R2-ENGINE-1178 and
 R2-ENGINE-1180 (the third table's arms); 39 of the 46 key
 entries of the RU install text have an arm in the read routines
-(R2-ENGINE-1186).
+(R2-ENGINE-1186). In EN allods2.exe the Space arm calls builder L2.06508, the
+one found sender of the multiplayer return request 0x4b, when application +0x404 = 1,
++0xc0 = 0 and view +0x3f6c word +0x104 is at most -40 (Medium that these hold in a
+multiplayer game and that the word is the hero's HP; Medium that no other sender
+exists). The client branch has no timer; the delay before the return is Unknown
+(R2-ENGINE-1908).
 
 ## Cursor modes, the order panel and the Defend list
 

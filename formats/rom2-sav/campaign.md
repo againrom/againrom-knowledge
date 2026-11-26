@@ -607,8 +607,8 @@ two EN callers of positioning are unclassified. The source of the drop list
 is Unknown. — R2-ENGINE-529, R2-ENGINE-530, R2-ENGINE-531, R2-ENGINE-532
 
 Owner word +0xa6c, the start cell placement prefers when Session +0x74 is nonzero, has four EN
-word stores found by a word-store pattern. Two server arms record the unit's cell and the join and owner constructor store 0. The normal lookup paths test Shop and Inn. When receiver +0x1a4 is nonzero, the Shop lookup returns the fixed address L2.00822. Its target is unidentified. EN request 0x4b sets owner +0xa64 when the hero has HP <= -40. An eligible result tick consumes the flag, calls the producer and starts placement at the recorded cell, else at a map drop or random fallback. The final cell and client action are Unknown.
-— R2-ENGINE-1843, R2-ENGINE-1865
+word stores found by a word-store pattern. Two server arms record the unit's cell and the join and owner constructor store 0. The normal lookup paths test Shop and Inn. When receiver +0x1a4 is nonzero, the Shop lookup returns the fixed address L2.00822. Its target is unidentified. EN request 0x4b sets owner +0xa64 when the hero has HP <= -40. An eligible result tick consumes the flag, calls the producer and starts placement at the recorded cell, else at a map drop or random fallback. The final cell is Unknown. The EN client sends the request from the Space key arm when its branch conditions hold (Medium in multiplayer; Medium that the tested word is the hero's HP; the one found sender, no timer on that branch, the delay before the return Unknown).
+— R2-ENGINE-1843, R2-ENGINE-1865, R2-ENGINE-1908
 
 Scenario.dll stores availability and town literals only for hires 1..7.
 After NewGame hires 8..20 stay unavailable (Medium), so every hire that
@@ -941,3 +941,5 @@ On EN hero death, ground-bag handling and effect processing precede the owner ch
 The RU dedicated owner-hero block increments +0xa54, calls the update helper and character routine, then sets HP to -50. RU effect processing remains open. For hero classes, only mode 0 enters the block selected at L2.08815. Equipment removal by its callees and the mode name cooperative are Medium. The alternative at L2.08818 lies outside the cited excerpts. The purse balance and multiplayer death display are Unknown. — R2-ENGINE-1864
 
 The EN return producer reuses the owner's existing hero. For a positive corpse-stage byte it reduces each of the five skill XP values to nine tenths (integer division per school), rebuilds their total and skills, then fills current HP and mana from the maxima. When the byte is zero, the producer returns owner +0x38 directly. It skips the XP helper, both refills, the owner-list append and group creation. Item repair and the final purse are Unknown. — R2-ENGINE-1866
+
+RU a2server.exe applies the 9/10 scaling in mode 0 and in any unlisted mode value (Medium that mode 0 is cooperative, the shipped srv.cfg value, and that the producer caller read is the return tick; only when actor byte +0x13c is above 0). It keeps XP in mode 3 and, in modes 1 and 2, the helper stores skill 70 (the final skill is Unknown). — R2-ENGINE-1909

@@ -564,6 +564,17 @@ entries from the Shop's 11b fields, in the order of the Scenario.dll
 ordinal-15 record; otherwise from that record. — R2-ENGINE-536,
 R2-ASSET-131, R2-ENGINE-539
 
+With Session+0x74 nonzero (Medium that this is multiplayer), the EN Inn and Shop entries call L2.04906
+(takes the hero off the map, Medium: the bodies of L2.03601 and L2.00312 were not read); the Shop leave
+method and the Inn method L2.01850 call L2.01848, which tries the hero's own cell at radius 0 and then 3.
+Request 0x3a carries the Inn choice in dword +0xe: 0xaaaaaaaa leaves, and a value below 0x100 indexes the
+player's list in Inn +0x88 (the XP and gold effect is by the RU item routine, Medium for the EN arms, which are
+not read); which value takes an offer and the kind of offer are Unknown. The Shop buy and sell arms call the
+character writer when more than 15000 ms have passed since its last write; the writer returns unless Session
++0x74 is nonzero and +0x1a8 is zero, and other call sites exist (R2-ENGINE-1841). By a direct-call census the
+Shop and Inn entries and the Inn choice arm call no writer; indirect calls, the unread Inn reward arms and the
+arm for values of 0x100 and above are outside it (Medium). — R2-ENGINE-1912, R2-ENGINE-1911, R2-ENGINE-1841
+
 The kinds that receive type-11 fields build structure classes: 0x46..0x4b
 Pointer (0x70 bytes), 0x22, 0x23, 0x5d..0x5f, 0x69..0x6b Shop (0xc4) and
 0x43..0x45, 0x63..0x65, 0x6f..0x71 Inn (0xec), each a subclass of the 0x6c
@@ -600,6 +611,17 @@ through its own slot +0x40 `L2.01311`, which first returns an Armor, Shield or
 Weapon item unused under the item's class bits (that the potion is none of
 those classes is Medium). — R2-ENGINE-517, R2-ENGINE-518 (amended), R2-ENGINE-519,
 R2-ENGINE-520, R2-ENGINE-1695 (amended), R2-ENGINE-1831
+
+Kind 0x42 (Multiplayer Church, a name in the Buildings table) has its own branch after the Pointer test: when getter L2.08896 on
+L2.08702 returns 4, it calls L2.08897 with the owner id, then L2.08898 and L2.08899, and stores Session
+dword +0 in owner +0xa50; what these calls do is Unknown. In the EN client the Shop and Inn messages 0x83
+and 0x84 reach selectors L2.00602 and L2.00425 through application messages 0x42a and 0x42b (High for
+the tables and arms; the shop and inn identity of the selectors is Medium and the page a multiplayer game
+shows is Unknown). The loose root maps place 172 building kinds: 29 have an EN state-15 arm and 143 have
+none (RU columns classify RU elements by the EN arm; the RU client is unread; nine kinds have no EN
+element), among them Church (11), Inn 1 and 2, Teleport Pad, Training School 1..3, the Kaarg Shops and
+the Kaarg and Druid Inns (Medium that no other path gives them an entry action). — R2-ENGINE-1913,
+R2-ENGINE-1910, R2-ASSET-415
 
 A map click on cursor `L2.02987`, which EN chooses only on hover flag 0x800
 (a structure whose record has +0x8c set), is an order, not a walk. The

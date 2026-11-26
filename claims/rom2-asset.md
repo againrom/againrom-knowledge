@@ -4996,3 +4996,29 @@ the pass and tick values: matching, S = 100 (R2-ENGINE-1819) and the rate (R2-EN
 
 **Evidence.** [EXP-2207](../experiments/EXP-2207-rom2-outpost/RESULTS.md) question 1;
 `evidence/derive.sh`, `evidence/derived/q1-maps.tsv`, `q1-percent.tsv`, `q1-flags.tsv`.
+
+## ROM2 loose root maps: building kinds by state-15 arm (EXP-2214)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ASSET-415 | ROM2 loose root maps (EN 13, RU 37) place 172 building kinds; 29 have an EN state-15 arm (8 Shop, 9 Inn, 5 Pointer, Multiplayer Church, 4 toggles, 2 wells); 143 have none (Medium: EN code alone, RU client unread). | High / Medium | ✔ promoted (branch candidate) | [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/) |
+
+### R2-ASSET-415
+
+Population: the `elements_root` column of the committed EXP-2186 tables `{en,ru}-structure-kinds.tsv` (type-4 kinds of the loose root maps, R2-ASSET-237). `evidence/census.py` keeps every kind with a root element in either root: 172 kinds, EN 1,549 and RU 4,360 elements. It assigns each kind its type-4 object by the R2-ENGINE-512 split and its state-15 arm by R2-ENGINE-518, R2-ENGINE-1695 and R2-ENGINE-1913:
+
+| Arm | Kinds | EN | RU |
+|---|---|---:|---:|
+| Shop, post 0x83: 34, 35, 93..95, 105..107 | 8 | 50 | 151 |
+| Inn, post 0x84: 67..69, 99..101, 111..113 | 9 | 50 | 132 |
+| Pointer, executor while +0x6c > 0: 70, 71, 72, 74, 75 | 5 | 8 | 8 |
+| Multiplayer Church, kind 66 (0x42) | 1 | 28 | 109 |
+| toggle word +0x42: Switch 28, 29, Altar 76, 77 | 4 | 18 | 35 |
+| Magic Well 2 (15), Big Healing potion; Magic Well 3 (16), Big Mana potion | 2 | 26 | 85 |
+| none | 143 | 1,369 | 3,840 |
+
+The kinds with no arm include Church (11), Inn 1 (43), Inn 2 (44), Teleport Pad (48), Training School 1..3 (49..51), Kaarg Shop 1 and 2 (90, 91), Kaarg Inn 1..3 (96..98), Druid Inn 1..3 (108..110) and BlackSmith 1 and 2 (145, 146). Names are the Buildings row names of the census table; "Multiplayer Church" and "Church" are table names, not read functions. Nine of the 172 kinds have no EN element (44, 49, 50, 54, 62, 128, 129, 155, 179); for them the "none" rests on the EN code alone.
+
+**Confidence.** RU columns count elements in the RU maps and class them by the EN arm: the RU client `allods2.exe` was not read, and the RU state-15 arm was read only for Shop, Inn, Pointer and kinds 15, 16, 76, 77 (R2-ENGINE-518, 1695), not kind 66. High for the counts, which `evidence/census.py` reproduces from the committed tables, and for the kind lists of the split. Medium that the 0xc4, 0xec and 0x70 objects carry the Shop, Inn and Pointer class records that the state-15 arm tests: R2-ENGINE-512 reads the constructors, not the class records. Medium that a kind with no state-15 arm has no entry action: other paths, such as a cell trigger for the Teleport Pad, were not searched.
+
+**Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) question 4: `evidence/census.py`, `evidence/derived/root-building-census.tsv`, `evidence/derived/root-building-summary.tsv`.

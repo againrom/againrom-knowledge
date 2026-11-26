@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5449. Observation: 143. Static analysis: 4561. Mixed: 745.
+Claims labelled: 5456. Observation: 143. Static analysis: 4567. Mixed: 746.
 
 ## Ledger ai
 
@@ -2305,11 +2305,18 @@ Claims labelled: 5449. Observation: 143. Static analysis: 4561. Mixed: 745.
 | R2-ASSET-379 | mixed | ● active (branch candidate) |
 | R2-ASSET-403 | mixed | ✔ promoted (branch candidate) |
 | R2-ASSET-397 | static analysis | ✔ promoted (branch candidate) |
+| R2-ASSET-415 | mixed | ✔ promoted (branch candidate) |
 
 ## Ledger rom2-engine
 
 | ID | Method | Status |
 |---|---|---|
+| R2-ENGINE-1908 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1909 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1910 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1911 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1912 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1913 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1892 | static analysis | ● active |
 | R2-ENGINE-1893 | static analysis | ● active |
 | R2-ENGINE-1894 | static analysis | ● active |
@@ -3513,10 +3520,10 @@ Claims labelled: 5449. Observation: 143. Static analysis: 4561. Mixed: 745.
 | R2-ENGINE-1853 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1854 | static analysis | ✔ promoted (branch candidate) |
 | R2-ENGINE-1864 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1865 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1866 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1865 | static analysis | ✔ promoted (amended, branch candidate) |
+| R2-ENGINE-1866 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1867 | static analysis | ✔ promoted (branch candidate) |
-| R2-ENGINE-1868 | static analysis | ✔ promoted (branch candidate) |
+| R2-ENGINE-1868 | static analysis | ✔ promoted (amended, branch candidate) |
 | R2-ENGINE-1876 | static analysis | ● active |
 | R2-ENGINE-1877 | static analysis | ● active |
 | R2-ENGINE-1878 | static analysis | ● active |
