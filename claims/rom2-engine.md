@@ -222,8 +222,8 @@ RU. Walk start L2.02867(unit, cell word, k) (200 instructions read, L2.02867 to 
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1960 | Route list object: +4 head, +8 tail, +0xc count; L2.05229 pushes a word at the head, L2.00549 appends at the tail, L2.05231 pops the head and frees it, L2.06351 gives the tail word, a pop to count 0 clears the list. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
-| R2-ENGINE-1961 | Route builders L2.05181 (list +0x1c8) and L2.05190 (list +0x1e4) push end to own cell, then pop the own cell; a stand-in equal to the own cell leaves an empty list (Medium; the push's count increment is unread); ties and costs as stated. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1960 | Route list object: +4 head, +8 tail, +0xc count; L2.05229 pushes a word at the head, L2.00549 appends at the tail, L2.05231 pops the head and frees it, L2.06351 gives the tail word, a pop to count 0 clears the list. | High / Medium | ● active (amended) | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1961 | Route builders L2.05181 (list +0x1c8) and L2.05190 (list +0x1e4) push end to own cell, then pop the own cell; a stand-in equal to the own cell leaves an empty list (Medium; the push's count increment is unread); ties and costs as stated. | High / Medium | ● active (amended) | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
 | R2-ENGINE-1962 | RU walk L2.02867 after a search: empty list stores +0x76 = own cell and +0x98 = 1, then +0x90 = 1; approach L2.01578 stores +0x98 = 1 on an empty list; L2.05782 is an empty routine. | High / Medium | ● active (amended) | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
 | R2-ENGINE-1963 | RU stand-in search L2.05179: rings 1 to limit-1 around the goal cell, four probes per j, strictly lower grid word wins, stops after the first ring with a word below 0xffff; returns 0 or the cell index. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
 | R2-ENGINE-1964 | RU target stand-in L2.05189: eight rectangle rings, strictly lower grid word wins; returns 256*y+x or 0; the side walk's four jump tables are unread (Medium). | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
@@ -252,6 +252,8 @@ RU. Walk start L2.02867(unit, cell word, k) (200 instructions read, L2.02867 to 
 
 ### R2-ENGINE-1960
 
+**Amended.** R2-ENGINE-2024 reads the tail of `L2.06588` from `L2.09054`: a push adds 1 to the count `+0xc`.
+
 RU list object (this = list): word +4 is the head node, +8 the tail node, +0xc the node count, +0x10 a free-node chain. A node holds a next link at +0, a previous link at +4 and a cell word at +8. `L2.06350` returns the count, `L2.06219` returns 1 when the count is 0, and `L2.06351` returns the address of the tail node's word. `L2.05229(word)` takes a node from `L2.06588`, stores the word, links it before the old head and makes it the head. `L2.00549(word)` takes a node the same way, stores the word and links it after the old tail. `L2.05231()` reads the head node's word, makes the next node the head (clearing that node's previous link, or the tail when none remains), hands the old head to `L2.09049`, and returns the word. `L2.09049(node)` calls `L2.09050(node + 8, 1)`, chains the node on +0x10, lowers the count by 1 and calls the clear routine `L2.05193` when the count reaches 0. `L2.05193` calls `L2.09050` on each node's word area, zeroes count, free chain, tail and head and calls `L2.06062` on +0x14. `L2.05231` has no empty-list test: on a list with no head it reads through a zero pointer.
 
 The search object grids: `L2.05185(x, y)` returns this + 0x30000 + 2 * (256 * (y and 0xff) + (x and 0xff)); `L2.05180(i)` returns this + 0x30000 + 2 * (i and 0xffff); `L2.05228(x, y)` returns 256 * (y and 0xff) + (x and 0xff); `L2.05230(x, y)` returns this + (x and 0xff) + 256 * (y and 0xff). The word grid is 65,536 words from +0x30000 and the cost-byte grid starts at +0.
@@ -265,6 +267,8 @@ The search object grids: `L2.05185(x, y)` returns this + 0x30000 + 2 * (256 * (y
 **Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass1/listings/ru-fin-L2.05231.txt` (holds `L2.05231`, `L2.05229`, `L2.09055`), `ru-h-L2.05185.txt`, `ru-h-L2.05180.txt`, `ru-h-L2.05228.txt`; `pass3/listings/ru-list-L2.06350.txt`, `ru-list-L2.06219.txt`, `ru-list-L2.06351.txt`, `ru-clear-L2.05193.txt`, `ru-alloc-L2.06588.txt`, `ru-free-L2.09049.txt`, `ru-append-L2.00549.txt`, `ru-cellbyte-L2.05230.txt`; `pass2/listings/en-pop-L2.09051.txt`, `en-word-L2.09052.txt`, `en-index-L2.09053.txt`; `derived/q3-ru-en-helper-cmp.txt`.
 
 ### R2-ENGINE-1961
+
+**Amended.** R2-ENGINE-2024 reads the count increment of the push; the empty list rests on it and stays Medium.
 
 RU `L2.05181(unit, x0, y0, x, y)` and `L2.05190` have the same instruction sequence in the 223 instructions of the first function (`L2.05181` to `ret 0x14` at `L2.09056`); they differ only in the list base the unit reaches (+0x1c8 for `L2.05181`, +0x1e4 for `L2.05190`, four references each). Order of work: the end cell (x, y) is pushed at the head of the list; the loop compares the current cell with (x0, y0) and leaves when equal; it adds 1 to a word counter and leaves when the counter exceeds 1000 (compare with 0x3e8, jump to the exit when not below or equal); it scans neighbours with the x offset in the outer loop and the y offset in the inner loop, each from -1 to 1, including (0, 0); a neighbour is skipped when x is below 8, above the dword at +0x50000 plus 8, y is below 8, or above the dword at +0x50004 plus 8, or when its grid word is 0xffff. A neighbour with a zero x or zero y offset (the cell itself included) costs word + 2, or for a unit whose virtual +0x20 result is 1 (`L2.02402`) word + the cost byte `L2.05230` of the current cell; it replaces the best when not greater (a tie takes the later probe). A diagonal neighbour costs word + 3, or for kind 1 word + byte + byte / 2 (shift right), and replaces the best only when strictly lower. After the scan the current cell moves by the best offsets and is pushed at the head. When no neighbour qualifies the offsets are not stored in that pass: they keep the values of the earlier pass and are never initialised on the first. At exit with the counter above 1000 the list is cleared by `L2.05193`; otherwise `L2.05231` pops the head, which is the unit's own cell. A stand-in equal to the unit's cell therefore pushes one node and pops it: the list is empty (count 0, cleared by `L2.09049`; Medium, because the push's count increment is unread, R2-ENGINE-1960); a route to a cell next to the unit leaves the end cell alone. The own cell is a straight candidate, so a pass finds no candidate only when the current cell fails the bounds test or holds the word 0xffff.
 
@@ -595,6 +599,16 @@ RU `L2.03520(a, b)` returns the AND of the low bytes of its two arguments (`ret 
 | R2-ENGINE-2009 | RU the dword store at L2.09178 is the +0x78+0x14i field of the type-4 pass slot copy at L2.00114 into a Shop object (R2-ENGINE-512, 539, 033), not a write of the command byte +0x78. Window read to L2.09179. | Medium | ● active | [EXP-2219](../experiments/EXP-2219-rom2-spells/RESULTS.md) |
 | R2-ENGINE-2010 | RU area object of the apply tail: constructor L2.01691; step: mode 0 visits a square once, mode 1 every 16th countdown value, passing the occupant only for cells where L2.04755 is nonzero (R2-ENGINE-793, 795, 985). | High / Medium | ● active | [EXP-2219](../experiments/EXP-2219-rom2-spells/RESULTS.md) |
 | R2-ENGINE-2011 | RU effect list add L2.04731 appends the object to a linked list; L2.04675 sets word +0x42 of the area object from map sector words (R2-ENGINE-796); row accessor L2.02312 and other objects cited from older claims. | High / Medium | ● active | [EXP-2219](../experiments/EXP-2219-rom2-spells/RESULTS.md) |
+| R2-ENGINE-2020 | Sender of the withdraw message: EN L2.03116 and RU L2.09265 post type 0x46 with word +5 from the view's player word, dword +0xa = 1 and dword +0xe = the argument; 3 direct callers in each image. | High / Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2021 | EN callers of the sender: key cycler L2.06512 (client +0xab4 + 1 mod 3), Game Options handler L2.09266 (control 9 value mod 3), mission-load tail (stored +0xab4). RU sites L2.09267, L2.09268, L2.09269. | Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2022 | EN Game Options handler L2.09266, command 0x445, reads controls 7 and 9 into [L2.09270], [L2.09271] and sends them mod 3 as sub-ids 2 and 1; control 9 as the Retreat Mode radio is inferred, not tied to a caption. | Medium | ● active (amended) | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2023 | The withdraw arm is entered at RU L2.09272 and EN L2.09273 through the second jump table of the message handler (RU L2.01871 index 20, EN L2.01870 index 21); the type to index byte table is unread. | Medium | ● active (amended) | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2024 | RU node allocator L2.06588 tail: a push stores two words in the node, raises the list count +0xc by 1 and returns the node; push then pop of the own cell leaves count 0 (empty route list) in the bodies read. | Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2025 | RU owners of the spell admission: router L2.01527 admits the prepared id (command +0x78) and refuses before any arm; planner L2.01512 admits ids 0x18, 0x1b, 0x18, 0x14 in 256 instructions, none 0x17 (Teleport). | Medium | ● active (amended) | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2026 | Both roots: message type 0x46 (byte +9 minus 2 = index 0x44, bound 0xbf, byte +4 below 1) maps to cell 20 (RU) and 21 (EN) of the second dispatcher table, the cell of arm RU L2.09272 and EN L2.09273; no other index in one run. | High / Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2027 | RU Game Options handler L2.09274: on 0x445 control 7 feeds sender L2.09275 (sub-id 2) and control 9 feeds L2.09265 (sub-id 1), each value mod 3, and [L2.01504] feeds L2.01562 (sub-id 3). Captions unread. | High / Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2028 | RU router L2.01527: spell id 0x17 (Teleport) maps by byte cell 15 to L2.08144, which returns 0; no cast, no store. 12 of 28 ids reach it; the map agrees with R2-ENGINE-1629. | High / Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
+| R2-ENGINE-2029 | RU planner L2.01512 read whole (ret 4 at L2.06769): 11 admission calls, ids 0x18 x2, 0x1b, 0x14, 0x15, 0xd, 0x13, 4, 8, 0xc x2, none 0x17; 11 casts; no store to unit +0x50 or +0x54. | High / Medium | ● active | [EXP-2220](../experiments/EXP-2220-rom2-retreat/EXP-2220.md) |
 
 ### R2-ENGINE-1940
 
@@ -845,6 +859,166 @@ Cited, not decoded again. The single-target object `L2.02072` (vtable `L2.02073`
 **Unknown.** What the table words at `this + 0x400` hold (R2-ENGINE-796 reads them as sector words) and the readers of word `+0x42` other than the send `L2.04774`. Static: read the other readers of `+0x42` of the area class.
 
 **Evidence.** `experiments/EXP-2219-rom2-spells/evidence/native/pass8/listings/ru-list-add-L2.04731.txt`, `ru-list-add-L2.08152.txt`, `ru-area-register-L2.04675.txt`, `native/pass8/windows.tsv`.
+
+## ROM2 withdrawal and retreat (EXP-2220)
+
+### R2-ENGINE-2020
+
+EN and RU. The sender of the withdraw message.
+
+EN `L2.03116` (listing `en-sender-L2.03116`, `ret 4` at `L2.09276`) writes the static message object `L2.08388`: byte `+9` = 0x46, word `+5` = word `+4` of the object at `[this + 0x9cc]`, word `+7` = 0, dword `+0xa` = 1 and dword `+0xe` = its stack argument. It pushes the object and calls `L2.00871` on `L2.00872`. The two neighbours in the same listing have the same shape with dword `+0xa` = 2 (`L2.03118`) and 3 (`L2.03117`, whose `+0xe` is the global `[L2.01503]`; `L2.01501` computes that global and calls it). RU `L2.09265` (30 instructions, `ret 4` at `L2.09277`) stores the same fields with object `L2.09278`, `+0xa` = 1, `+0xe` = its argument and calls `L2.00459` on `L2.03039`.
+
+Census of references (linear decode of the executable sections for direct call, jump and conditional-jump targets, and every 4-byte occurrence in all sections, `native/pass1/refs.tsv`, `native/pass4/refs.tsv`): EN `L2.03116` has 3 direct calls (`L2.09279`, `L2.09280`, `L2.09281`) and no absolute occurrence; RU `L2.09265` has 3 direct calls (`L2.09267`, `L2.09268`, `L2.09269`) and no absolute occurrence. Calls through a register or a virtual table are outside the census.
+
+**Amends.** R2-ENGINE-613 (it cites the sender for the mission-load call and leaves the body unread; the body is read here).
+
+**Confidence.** High for the two bodies. Medium for the caller census (linear decode; indirect calls not covered).
+
+**Unknown.** The EN window ends inside `L2.03118` (at `L2.09282`); the RU twins of `L2.03118` and `L2.03117` are not read.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass1/listings/en-sender-L2.03116.txt`, `native/pass3/listings/ru-sender-twin-L2.09265.txt`, `native/pass1/refs.tsv`, `native/pass4/refs.tsv`.
+
+### R2-ENGINE-2021
+
+EN, RU sites by census. The callers of the sender and the value each passes.
+
+EN cycler `L2.06512` (`ret` at `L2.09283`): client `+0xab4` = (`+0xab4` + 1) mod 3 by `idiv` with 3, then it pushes the stored value and calls `L2.03116`. Its one direct caller is `L2.09284`, inside the key handler that starts at `L2.04345`; the case at `L2.06511` tests the global `[L2.01559]`, calls the cycler when it is nonzero, then pushes 0x7d0 and builds a text from `L2.06513` (which reads client `+0xab4`, `L2.09285`) plus 0x5e (callees unread). The Game Options handler `L2.09266` passes `[L2.09271]` read as a dword pointer, mod 3 (R2-ENGINE-2022). The tail at `L2.09286` to `L2.09281` pushes client `+0xab4` read through the object at `[view + 0xd0]` and calls the sender after `L2.03115`; the same field is written at `L2.09287` (0), `L2.09288` and `L2.09289` (stores from a result; those routines unread) and read at `L2.09290`, `L2.09291` and `L2.09292` before a push of a constant address (unread). RU: the cycler `L2.09293` has the same load, add, `idiv`, store sequence (`native/pass5/listings/ru-cycler-L2.09293.txt`, calling `L2.09265` at `L2.09267`) and one caller `L2.09294`; the sites `L2.09268` (R2-ENGINE-2027) and `L2.09269` are read as calls. Census of every decoded instruction with displacement `0xab4` (`native/pass3/census.tsv`): 13 rows in EN and 13 in RU, in matching routines.
+
+**Amends.** R2-ENGINE-1180 (its callee `L2.06512` of the W arm has one caller, `L2.09284`; it sends the value of client `+0xab4` through `L2.03116`).
+
+**Confidence.** Medium: the EN cycler and the EN handler site are read bodies. The key is Ctrl with W, arm EN `L2.06511` (R2-ENGINE-1180; the EN key tables `L2.04353`, `L2.04892`, `L2.06485` are T1, T2 and T3 of R2-ENGINE-1178). The RU sites `L2.09268` (R2-ENGINE-2027) and `L2.09269` are read as calls.
+
+**Unknown.** The routines at `L2.09290` to `L2.09289` (settings load and save); whether the stored `+0xab4` and the handler's `[L2.09271]` are both loaded from the same saved setting.
+
+**Evidence.** `native/pass2/listings/en-caller-L2.09279.txt`, `en-caller-L2.09281.txt`, `native/pass6/listings/en-keycase-L2.09295.txt`, `native/pass5/listings/en-handler-L2.04345-c.txt`, `native/pass3/census.tsv`, `native/pass5/refs.tsv`, all under `experiments/EXP-2220-rom2-retreat/evidence/`.
+
+### R2-ENGINE-2022
+
+**Amended.** R2-ENGINE-2027 reads the RU handler `L2.09274` (globals `L2.09296`, `L2.09297`) and the RU sender twins.
+
+EN. The Game Options handler and its two three-way settings.
+
+`L2.09266` (frame `0x60`) compares its argument with 0x445 and branches to `L2.09298` otherwise (`L2.09299`, `L2.09300`). On 0x445 it reads controls by id through `L2.03680(id)` and the virtual method `+0x3c`. Control 7 is read into the dword that `[L2.09270]` points to, control 9 into the dword that `[L2.09271]` points to (`L2.09301` to `L2.09302`). Controls `0x8d`, `0x83`, `0x84` and `0x85` drive bits of the global `[L2.01503]` (set to 8, then `|= 0x18` for the value 1 and `|= 0x38` for 2 of control `0x8d`, `|= 1` for a nonzero `0x83`, `|= 4` for a nonzero `0x85`; the effect of `0x84` is not read; the same global is the `+0xe` of the sub-id 3 sender, R2-ENGINE-2020). Then `L2.09303` calls the sub-id 2 sender with `[L2.09270]` mod 3 and `L2.09280` calls the sub-id 1 sender with `[L2.09271]` mod 3 (window `en-caller-443193` plus its continuation, 200 and 60 instructions). The value is passed unchanged, so the receiver of R2-ENGINE-1499 sees 0, 1, 2 for a radio index 0, 1, 2, with v = 0, 10, 30.
+
+The Game Options box has three three-way radios: Formation Mode, Retreat Mode and AutoCast mode (R2-ASSET m1.15 row); the box has no other three-way radio in that row. That control 9 is the Retreat Mode radio and control 7 the Formation Mode radio is inferred from the sender sub-ids and the receiver values (percent of hit points, R2-ENGINE-1499); the dialog resource that names the controls is not read.
+
+**Confidence.** High for the reads and stores; Medium that control 9 is the Retreat Mode radio. EN only; the RU handler is not read.
+
+**Unknown.** The dialog resource ids against captions (static read of the resource archive, or a run that sets Retreat Mode to Low Health and records the message at RU `L2.09272`); the RU handler.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass2/listings/en-caller-L2.09280.txt`, `native/pass3/listings/en-caller-L2.09280-c.txt`, `native/pass4/census.tsv`.
+
+### R2-ENGINE-2023
+
+**Amended.** R2-ENGINE-2026 reads the byte table: type 0x46 is index 0x44, cell 20 (RU) and 21 (EN), the cells of these entries.
+
+RU and EN. The entry of the withdraw arm.
+
+RU `L2.07853` and EN `L2.07854` are not arm entries: no direct call, jump, conditional jump or 4-byte absolute occurrence refers to either (`native/pass1/refs.tsv` has no row for them). `L2.07853` lies in the preceding arm, which stores the message pointer, calls `L2.02204` on `L2.02205` and jumps to the common end `L2.06754`. The arm entry is RU `L2.09272` (`cmp [L2.02609], 0` then `je L2.07855`, the first step of R2-ENGINE-1499) and EN `L2.09273`. Each has exactly one reference, an absolute dword in a jump table: RU `L2.09304`, EN `L2.09305` (`native/pass3/refs.tsv`). Those lie in the second table of the message handler: RU `jmp [edx*4 + L2.01871]` at `L2.09306` after a byte lookup at `L2.01869`, EN `jmp [edx*4 + L2.01870]` at `L2.09307` (`native/pass5/jtabs.tsv`, the census of every `jmp [reg*4 + disp]`). The entry is index 20 of the RU table and index 21 of the EN table by address arithmetic (the first table `L2.02841` has 21 entries, R2-ENGINE-1107). That the byte `+9` = 0x46 selects that index is not read: the byte table and the subtraction before it are unread. The field layout supports it: the sender writes `+9`, word `+5`, dword `+0xa` and `+0xe` (R2-ENGINE-2020) and the arm reads word `+5`, dword `+0xa` and `+0xe`.
+
+**Amends.** R2-ENGINE-1499 (its "caller window RU `L2.07853`" and EN `L2.07854` are window starts inside the arm's predecessor and the arm; the entries are `L2.09272` and `L2.09273`; the outer type 0x46 is Medium here).
+
+**Confidence.** High for the references and the table entry address; Medium for the outer type 0x46 and for the EN index.
+
+**Unknown.** The byte table at RU `L2.01869` and the dispatcher stretch before `L2.09308`; a run that sends the Retreat Mode value and breaks at `L2.09272`.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass2/listings/ru-pre-L2.07853.txt`, `en-pre-L2.07854.txt`, `native/pass6/listings/ru-switch2-L2.09309.txt`, `native/pass3/refs.tsv`, `native/pass5/jtabs.tsv`.
+
+### R2-ENGINE-2024
+
+RU. The tail of the route list node allocator.
+
+`L2.06588(prev, next)` (listing `ru-alloc-L2.06588`, `ret 8` at `L2.09310`): when the free chain `[this + 0x10]` is empty it refills it by `L2.09311` and `L2.09312` and links the new nodes; then it takes the head of the chain, stores arg 1 at node `+4` and arg 2 at node `+0` (`L2.09313` to `L2.09314`), adds 1 to the count `+0xc` (`L2.09315` to `L2.09316`, no branch between the take and the add), calls `L2.09317(node + 8, 1)` and returns the node. So a push raises the count by 1 on every call. With the pop of R2-ENGINE-1960 (`L2.09049` lowers the count by 1 and clears the list at 0), a route builder that pushes the end cell and pops it, when the end cell is the unit's own cell and the list held no other node, leaves count 0, that is an empty list.
+
+**Amends.** R2-ENGINE-1960, R2-ENGINE-1961 and R2-ENGINE-1787 (their Unknown on the count increment of the push). R2-ENGINE-1192 (its condition "if `L2.06588` counts nodes in `+0xc`": it does). R2-ENGINE-871 and R2-ENGINE-879 (their helper clause for an own-cell stand-in, at Medium).
+
+**Confidence.** Medium: the allocator tail is read to its return (High, RU); the empty list rests on R2-ENGINE-1960 for the pop and the builders, on the list holding no other node, and `L2.09317`, `L2.09311` and `L2.09312` are unread. RU only.
+
+**Unknown.** A run of the original with a walk to the own cell and the list state after the pop.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass1/listings/ru-alloc-L2.06588.txt`.
+
+### R2-ENGINE-2025
+
+**Amended.** R2-ENGINE-2028 reads the arm of id 0x17 in the router (it returns 0, no cast); R2-ENGINE-2029 reads the whole planner `L2.01512` (no admission of id 0x17).
+
+RU. The admission owners `L2.01527` and `L2.01512`, read to 256 instructions each here; R2-ENGINE-1127 and R2-ENGINE-1944 read 512.
+
+Router `L2.01527` (window of 256 instructions to `L2.09318`, before the routine returns): it returns 0 when command byte `+0x78` is zero, calls `L2.01518(unit, id, 0)` with that byte as the id and returns 0 when the admission is 0 (`L2.09319` to `L2.09320`). Otherwise it subtracts 1, leaves for ids above 0x1c, and jumps through the byte table `L2.01529` and the jump table `L2.01528` (both unread). The arms in the window call `L2.01524`, `L2.01514`, `L2.01515`, `L2.00209`, `L2.01519` and `L2.00213`. For the router, between the entry and the jump through `L2.01528` the tests are the zero byte, the admission result and the range test of id minus 1 against 0x1b. Planner `L2.01512` (256 instructions to `L2.08130`): it leaves with command `+8` = 0 when word `+0x9a` is below 5 or when bit 8 of the byte at `[[unit + 0x14] + 0x34] + 0x20` is clear; it admits id 0x18 when word `+0x94` differs from word `+0x96`, id 0x1b when dword `+0x144` has bit 0x8000000 clear, id 0x18 again and id 0x14 at `L2.09321`; an admitted record of the first two sets command `+0x60` = 1 and goes to `L2.01524`. Those are 5 of the 12 sites of the two owners (1 in the router, 11 in the planner, R2-ENGINE-2029); none passes id 0x17 (Teleport, R2-ENGINE-1418).
+
+**Amends.** R2-ENGINE-1880 (its "callers `L2.01527` and `L2.01512` unread": both entries are read to 256 instructions). R2-ENGINE-1944 (its Unknown on whether the sites of these owners pass id 0x17: none does in RU, R2-ENGINE-2028, 2029).
+
+**Confidence.** Medium: bodies of the entry stretch read in RU; the arm that the id 0x17 reaches in the router, both byte and jump tables and the tails after `L2.09318` and `L2.08130` are unread, so a sight or adjacency test inside the Teleport arm is not excluded.
+
+**Unknown.** The jump table `L2.01528` as table cells and the tails of the router after `L2.09318` (the arm of id 0x17 is read in R2-ENGINE-2028 and the rest of `L2.01512` in R2-ENGINE-2029).
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass6/listings/ru-owner-L2.01527.txt`, `ru-owner-L2.01512.txt`.
+
+### R2-ENGINE-2026
+
+RU and EN. The route of the type 0x46 message to the withdraw arm.
+
+RU dispatcher `R2.0119` (listing `ru-disp-head-R2.0119`): it loads byte `[message + 4]` into `ecx`, compares it with 1 and jumps to `L2.06751` when it is below (`cmp ecx, 1` at `L2.06752`, `jl L2.06751` at `L2.06753`). `L2.06751` (listing `ru-disp-index-L2.06751`) loads byte `[message + 9]`, subtracts 2 (`L2.09322`), compares the result with 0xbf and leaves to the common end `L2.06754` when it is above (`cmp` at `L2.09323`, `ja` at `L2.09324`), loads `dl` from the byte table `L2.01869` (`L2.09308`) and jumps through the dword table `L2.01871` (`jmp [edx*4 + L2.01871]` at `L2.09306`). EN: `cmp ecx, 1` at `L2.09325`, `jl L2.09326` at `L2.09327` (listing `en-disp-head-L2.00171`); `L2.09326` (listing `en-disp-index-en`) subtracts 2, compares with 0xbf (`ja L2.09328` at `L2.09329`), reads the byte table `L2.01868` and jumps through `L2.01870` at `L2.09307`.
+
+The composed lookup (`lookups.tsv` of pass 7 and pass 9, a derived table written by `win.py`, never the table cells) gives for type 0x46, index 0x44, the cell 20 in RU and 21 in EN, and the jump-table targets RU `L2.09272` and EN `L2.09273`. Over the indexes 0 to 0xbf (pass 9) the lookup run lists no other index reaching either target (`pass9/lookups.tsv` lists only the indexes whose target is the arm). So a type 0x46 message with byte +4 below 1 enters the withdraw arm of R2-ENGINE-1499 in both roots; if byte +4 is 1 or more at receipt the message does not reach the arm. R2-ENGINE-413 reads the other branch (byte +4 at least 1) as bounded at 0x14 after subtracting 0x12; 0x46 - 0x12 = 0x34 exceeds that bound. R2-ENGINE-413 and R2-ENGINE-1711 read types 0x22 and 0xbe through the same byte table in the branch of byte +4 below 1, for messages sent by the same transport `L2.00871`.
+
+**Amends.** R2-ENGINE-2023 (its outer type 0x46 was Medium; the byte table is read here). R2-ENGINE-1198 (its Unknown on the `L2.06751` path: read here; that the L message (type 0x12) takes this path is not excluded by this card, since byte `+4` of an L message is not written by its sender either, and R2-ENGINE-1198 needs byte `+4` of 1 or more for its Group build).
+
+**Confidence.** High / Medium. High for the dispatcher stretch, the bound and the two lookups in both roots. The statement that no other index of 0 to 0xbf reaches either arm rests on one run of the lookup tool over those indexes; the byte table cells are not committed and the run is not reproduced. Medium that a type 0x46 message arrives with byte +4 below 1: the writer of byte +4 sits in the transport routines `L2.00871` (EN) and `L2.00459` (RU), which were not read, and the bound of the other branch is taken from R2-ENGINE-413.
+
+**Unknown.** The value of byte +4 of a message sent by the sender of R2-ENGINE-2020. Reading `L2.00459` settles it; so does a run of the original that sets Retreat Mode and records byte +4 at RU `L2.09330`.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass7/listings/ru-disp-head-R2.0119.txt`, `en-disp-head-L2.00171.txt`, `pass7/lookups.tsv`, `pass8/listings/ru-disp-index-L2.06751.txt`, `pass9/listings/en-disp-index-en.txt`, `pass9/lookups.tsv`.
+
+### R2-ENGINE-2027
+
+RU. The Game Options handler and the twins of the option senders.
+
+RU handler `L2.09274` (entry found by the site `L2.09268`; listings `ru-gameopt-L2.09268.txt` and `-c`; 256 instructions each; `ret 0xc` at `L2.09331`) loads `[L2.06698]`, compares its first argument with 0x445 and jumps to `L2.09332` otherwise (`cmp` at `L2.09333`, `jne` at `L2.09334`). On 0x445 it reads control 7 into the dword that `[L2.09296]` points to and control 9 into the dword that `[L2.09297]` points to (calls of `L2.09335(id, pointer)` at `L2.09336` and `L2.09337`, each followed by the virtual method `+0x3c`). At `L2.09338` it takes the view `[app + 0xd0]` and calls `L2.09275([[L2.09296]] mod 3)` (`idiv` by 3 at `L2.09339`), `L2.09265([[L2.09297]] mod 3)` (`L2.09268`) and `L2.01562([L2.01504])` (`L2.09340`). The RU senders have the shape of R2-ENGINE-2020: `L2.09275` stores byte +9 = 0x46, dword `+0xa` = 2 (`L2.09341`) and dword `+0xe` = its argument (`L2.09342`); `L2.01562` stores `+0xa` = 3 (`L2.09343`); `L2.09265` stores `+0xa` = 1. All three send through `L2.00459` on `L2.03039`. EN `L2.03118` (listing `en-sender-L2.03118`) has the same shape with `+0xa` = 2 (`L2.09344`), object `L2.08388` and `L2.00871`. A fourth neighbour in each root stores `+0xa` = 0x80 (EN `L2.09345`, RU `L2.09346`); its meaning is not read.
+
+Derived fact on the controls, not a caption: control 7 feeds the sub-id 2 sender and control 9 feeds the sub-id 1 sender. The sub-id 1 receiver turns the value 0, 1, 2 into 0, 10, 30 (R2-ENGINE-1499), so control 9 is the three-way setting behind the withdraw threshold; the resource that names the controls was not read.
+
+**Amends.** R2-ENGINE-2022 (its RU handler Unknown is read; the global names are RU `L2.09296`, `L2.09297` against EN `L2.09270`, `L2.09271`). R2-ENGINE-613 (the body of `L2.03118` and the RU twins of `L2.03117` and `L2.03118` are read).
+
+**Confidence.** High for the RU reads and the sender shapes. Medium that control 9 is the Retreat Mode radio and control 7 the second three-way radio: derived from the senders and the receiver, no caption read. The RU `[L2.01504]` and EN `[L2.01503]` feed the sub-id 3 sender in the same way (`L2.09347` and `L2.09348`).
+
+**Unknown.** The captions of controls 7 and 9: a static read of the dialog resource of the Game Options box, or a run of the original that sets the radio and records the message sub-id.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass7/listings/ru-gameopt-L2.09268.txt`, `ru-gameopt-L2.09268-c.txt`, `ru-sender-twins-L2.09265.txt`, `en-sender-L2.03118.txt`.
+
+### R2-ENGINE-2028
+
+RU. The arm of spell id 0x17 in the router L2.01527.
+
+After the admission the router subtracts 1 from the id (`L2.09349`), compares with 0x1b and jumps to `L2.08144` when above (`cmp` at `L2.09350`, `ja` at `L2.09351`), loads `dl` from the byte table `L2.01529` (`L2.09352`) and jumps through `L2.01528` (`jmp` at `L2.09353`). The composed map is `lookups.tsv` of pass 7 (label `router-id-to-arm`, 28 rows, a derived table, not the table cells). Index 0x16 (id 0x17) has cell 15 and target `L2.08144`, whose body is `xor eax, eax`, `mov esp, ebp`, `pop ebp`, `ret 8` (listing `ru-router-end-L2.08144`): the router returns 0 with no cast call and no store. 12 of the 28 indexes reach `L2.08144`: ids 4, 8, 9, 12, 13, 14, 15, 17, 19, 20, 21 and 23; ids above 28 leave through the same address by the `ja`. Id 24 reaches `L2.08134` and ids 18 and 28 reach `L2.08135`, as R2-ENGINE-1629 reads them; every id R2-ENGINE-1629 lists agrees with the table.
+
+Id 22 reaches `L2.08140`, an arm that returns 0 (`xor eax, eax`, `jmp L2.09354`); R2-ENGINE-458 lists 22 among the ids that cast nothing.
+
+The id 0x17 is the Teleport id of R2-ENGINE-2025. The idle-mage router does not cast Teleport; the Teleport casts of R2-ENGINE-1418 and R2-ENGINE-1880 stay with the flee, back-off and flee-spell routines.
+
+**Amends.** R2-ENGINE-2025 (the arm of id 0x17 is read). R2-ENGINE-1629 (its id-to-arm map, which it called not preserved, is committed as a derived table).
+
+**Confidence.** High for the body and the map in RU. Medium that id 0x17 is Teleport (the name comes from R2-ASSET through R2-ENGINE-2025). EN `L2.04143` is not read for this arm.
+
+**Unknown.** The EN router arm for id 0x17: R2-ENGINE-1944 shows the EN router differs from the RU one in 368 of 512 instructions (an extra block of about 100 instructions), so the EN arm of id 0x17 cannot be inferred from the RU one.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass7/lookups.tsv`, `pass8/listings/ru-router-end-L2.08144.txt`, `pass6/listings/ru-owner-L2.01527.txt`.
+
+### R2-ENGINE-2029
+
+RU. The whole body of the support planner L2.01512.
+
+Three linear windows of 256 instructions (pass 6 from `L2.01512`, pass 7 from `L2.08130`, pass 8 from `L2.09355`; `windows.tsv` of each pass) cover the planner to its `ret 4` at `L2.06769`; the next routine starts at `L2.01513`. The derived table `evidence/derived/owner-admissions.tsv` (generator in `regen.sh`) lists 11 direct calls of the admission `L2.01518` and 11 direct calls of the cast preparer `L2.01524` up to `L2.06769`. The immediate pushed as the second argument of the admission is 0x18 (twice), 0x1b, 0x14, 0x15, 0xd, 0x13, 4, 8 and 0xc (twice). No site pushes 0x17. The derived table `evidence/derived/owner-displacements.tsv` counts 11 instructions with `+ 0x60], 1` (one before each cast call) and none with `+ 0x50]` or `+ 0x54]` up to `L2.06769`. The failure path stores command `+8` = 0 at `L2.09356` and leaves at `L2.09357`; every cast call is followed by `jmp L2.09357`.
+
+So the planner names nine distinct ids in its admission calls and none is Teleport (0x17, R2-ENGINE-2025): the planner casts no Teleport. The listing has no register call and no register jump, and every jump target lies inside `L2.01512` to `L2.06769`; no operand `0x17` occurs in it.
+
+**Amends.** R2-ENGINE-1944 (its Unknown on the sites of `L2.01512`: 11 sites, none id 0x17). R2-ENGINE-2025 (its "tail after L2.08130 unread" is read). R2-ENGINE-1627 (its five open edges `L2.08128`, `L2.08129`, `L2.08130`, `L2.08131` and `L2.08132` lie inside the read span). R2-ENGINE-1127 (its "L2.01512 beyond L2.06315" is read).
+
+**Confidence.** High for the listed calls and ids. Medium that the admission result passed to `L2.01524` is the cast spell (the body of `L2.01524` was not read here), and Medium that no Teleport cast exists in the planner (RU only). EN `L2.05315` was compared with RU over 512 instructions only (R2-ENGINE-1944, Medium); its tail is unread.
+
+**Unknown.** The EN planner beyond 512 instructions. The body of `L2.01524` and what it does with the admission result.
+
+**Evidence.** `experiments/EXP-2220-rom2-retreat/evidence/native/pass6/listings/ru-owner-L2.01512.txt`, `pass7/listings/ru-owner-tail-L2.08130.txt`, `pass8/listings/ru-owner-tail-L2.09355.txt`, `evidence/derived/owner-admissions.tsv`.
 
 ## ROM2 multiplayer return request, return penalty and building visits (EXP-2214)
 
@@ -16800,6 +16974,10 @@ is the receiver of the mission entry.
 
 ### R2-ENGINE-613
 
+**Amended.** R2-ENGINE-2020 reads the body of EN `L2.03116` and its RU twin `L2.09265` and lists the three direct callers of each.
+
+**Amended.** R2-ENGINE-2027 reads EN `L2.03118` and the RU twins `L2.01562` (of `L2.03117`) and `L2.09275` (of `L2.03118`).
+
 With argument 1 (the LOAD tail of R2-ENGINE-601) the entry runs, in order:
 
 1. client +0x80 = 0; `L2.01133` on cursor `[L2.03110]`; music stop
@@ -29263,6 +29441,8 @@ Constructor RU L2.06231/EN L2.06300 (150, whole, masked-equal) builds the object
 
 ### R2-ENGINE-1127
 
+**Amended.** R2-ENGINE-2029 reads `L2.01512` beyond `L2.06315`; R2-ENGINE-2028 reads the router arm table `L2.01528` (RU).
+
 Masked-equal whole pairs: L2.02430/L2.06310 (72), L2.02408/L2.05536 (28), L2.02404/L2.06311 (151). L2.02430 turns toward movement byte +1 through L2.02409 and stores unit +0x54=1 when +0 differs; otherwise, when command +0x54 is nonzero or L2.02431 is below 0xcd, it stores a new heading (+0)+0x21+L2.01532(0xbe) in +1, clears command +0x54, turns and stores +0x54=1; else +0x54=0. L2.02408 calls L2.02409 with its heading argument and stores +0x54=1 when the facing changed. L2.02404 clears the sight grid, calls L2.01586, marks command cells for owner +0x2c nonzero, gathers world units on marked cells through L2.00205, filters with L2.02119 and L2.02416 and uses the fallback list. None stores unit order, prepared +8, +0xc or +0x20.
 
 L2.01527/L2.04143 first 256 instructions are equal; continuation RU L2.06312 and EN L2.06313 (256 each) first differ at index 13. In the 512 RU instructions read, a 28-cell switch (table L2.01528 unread) stores command +0x60=1 before each L2.01524 call or prepared +8=0; no order store. The body continues past L2.06314.
@@ -35406,7 +35586,7 @@ so the missing ID names register 0 (Medium: the constructor L2.06010 that runs a
 | R2-ENGINE-1496 | Of the effect words, the two ROM2 scorers read only the candidate's +0x144 bit 0x40000 (id 18, +0x7f in L2.00057); other effects on Mind, range or kind are not excluded (Medium); +0x150 bit 0x40000 is a separate flag no scorer reads. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1497 | A ROM2 assignment writes command +0x20 of every member of the Group list with the least-score enemy or 0, idle or not; the census finds 7 command-block writers and two unclassified stores near the group code. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1498 | A ROM2 flee with no Teleport walks; an empty walk route stops the unit and gives it order 0xc at its cell; the cell cast tests no landing cell; no flight state is kept. A closed path is Medium. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
-| R2-ENGINE-1499 | In ROM2 a message with sub-id 1 sets withdraw v = 0, 10 or 30 from dword +0xe = 0, 1, 2 for the owner resolved from word +5, via L2.02445 and L2.07819; sender and control Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
+| R2-ENGINE-1499 | In ROM2 a message with sub-id 1 sets withdraw v = 0, 10 or 30 from dword +0xe = 0, 1, 2 for the owner resolved from word +5, via L2.02445 and L2.07819; sender and control Unknown. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 
 ### R2-ENGINE-1490
 
@@ -35721,6 +35901,8 @@ unit's own cell, the route is not emptied and the order-1 branch is not reached 
 own cell it rests on the unread helpers `L2.05231` and `L2.05229` (R2-ENGINE-879).
 
 ### R2-ENGINE-1499
+
+**Amended.** R2-ENGINE-2023 and R2-ENGINE-2020: the window starts RU `L2.07853` and EN `L2.07854` lie inside the arm and its predecessor; the arm entries are RU `L2.09272` and EN `L2.09273`; the sender of sub-id 1 is read (Medium for the outer type 0x46).
 
 The ROM2 withdraw setting reaches the thresholds from a message. Caller window RU `L2.07853` (92 instructions; EN
 `L2.07854`; 14 differing positions, all frame offsets of locals):
@@ -37715,9 +37897,9 @@ Medium (archive opener unread, no original run). Medium for case-insensitive res
 | R2-ENGINE-1624 | RU bodies read, no original run: ROM2 patrol moves on at exact arrival or on an empty route within Chebyshev 3; farther away the unit stays, resets its post and retries the same point (Medium composition). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1625 | RU bodies, no run: ROM2 pick-up: a ring cell needs a record with nonzero +0x10 and a footprint passing `L2.02114`, the centre cell the record test alone (R2-ENGINE-1192); no route test in bodies read, `L2.03520`, `L2.03519` unread (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1626 | RU ROM2 input 0x13 (key P) sets order 0x1a, input 0x21 sets order 2; with no accepted cell 0x1a stands (order 0xc); an arrived order 2 takes state 2 for one call, then the stop chain; no read body takes an item. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
-| R2-ENGINE-1627 | RU ROM2 orders 0xc and 0x17 end only when another write replaces order +0x50 in the bodies read; a player mage on 0x17 may cast support spells in a 256-instruction window (five edges open); no RU input cell is a hold, EN unread. | Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
+| R2-ENGINE-1627 | RU ROM2 orders 0xc and 0x17 end only when another write replaces order +0x50 in the bodies read; a player mage on 0x17 may cast support spells in a 256-instruction window (five edges open); no RU input cell is a hold, EN unread. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1628 | RU bodies read, no original run: ROM2 player mage with a found target casts its selected spell (command +0x78) only when the book holds it and mana >= cost; otherwise it strikes or turns at weapon range +0x12c (Medium in play). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
-| R2-ENGINE-1629 | RU ROM2 idle-mage switch L2.01527: ids 1, 5, 10, 11, 16, 26 cast at the target, 24 Heal and 18/28 use own arms, ids 4, 8, 9, 12..15, 17, 19..21, 23, 29 cast nothing; the id-to-arm map comes from byte tables not preserved. | Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
+| R2-ENGINE-1629 | RU ROM2 idle-mage switch L2.01527: ids 1, 5, 10, 11, 16, 26 cast at the target, 24 Heal and 18/28 use own arms, ids 4, 8, 9, 12..15, 17, 19..21, 23, 29 cast nothing; the id-to-arm map comes from byte tables not preserved. | Medium | ✔ promoted (amended, branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1630 | RU bodies read, no original run: ROM2 look-around: facing differs from heading, turn; else with the hit flag clear a draw below 205 of 0..32767 picks heading facing + 33 + 0..189 or 0..190 and turns; divisor and call rate Unknown. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 
 ### R2-ENGINE-1620
@@ -37885,6 +38067,8 @@ sack and record when the items move and the state sequence.
 
 ### R2-ENGINE-1627
 
+**Amended.** R2-ENGINE-2029 reads the five open edges of `L2.01512` (the whole body to its `ret 4` at `L2.06769`): no store to unit `+0x50`, 11 casts through `L2.01524`.
+
 Standing orders: type 0x18 sets order 0xc, type 0x12 (key L) sets order 0x17 with programme 0x13 (R2-ENGINE-1107,
 R2-ENGINE-1198, R2-ENGINE-1199). Under 0x17 each member calls `L2.01531`: owner kind +0x2c nonzero stores prepared
 0xb (a mage tries `L2.01513`); owner kind 0 calls `L2.02911`, which calls `L2.01512` for a mage and stores prepared 0
@@ -37924,6 +38108,8 @@ R2-ENGINE-483, not from a field name); EN not read.
 `ru-mage-admit-L2.01518.txt`, `ru-range-L2.01728.txt`.
 
 ### R2-ENGINE-1629
+
+**Amended.** R2-ENGINE-2028 commits the id-to-arm map as a derived table (28 rows); every id this claim lists agrees with it.
 
 `L2.01527` reduces the spell id to id - 1, returns 0 above 27, and jumps through a byte index table and a 16-cell
 table; the derived map is in `evidence/derived/spell-arms.tsv`. Arm `L2.08133` sets command +0x60 = 1 and calls
@@ -38675,7 +38861,7 @@ destination and timing.
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1787 | ROM2 RU refused flight in a terrain-closed pocket: walk goal within 3 cells (before the 8 .. size - 9 clamp); a stand-in other than the own cell keeps the route; an own-cell stand-in rests on unread helpers (R2-ENGINE-879). | High / Medium | ✔ promoted (branch candidate) | [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) |
+| R2-ENGINE-1787 | ROM2 RU refused flight in a terrain-closed pocket: walk goal within 3 cells (before the 8 .. size - 9 clamp); a stand-in other than the own cell keeps the route; an own-cell stand-in rests on unread helpers (R2-ENGINE-879). | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) |
 | R2-ENGINE-1788 | ROM2 RU computer mage fleeing with Teleport: the cast cell lies scanRange + 1 cells from its own cell, away from the hostiles' mean point on the major axis, clamped; a hostile outside the flee list gets idle-planner orders. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) |
 | R2-ENGINE-1789 | ROM2 RU Acid Stream and Blizzard accepted at one wind-up both make their first attempt on area update 1; a first cell outside the band or rejected moves the first paint to update 4 or later. | Medium | ✔ promoted (branch candidate) | [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) |
 | R2-ENGINE-1790 | ROM2 RU fallen unit: the actor step runs each Effect timer before the health test; the fall sets +0x6c = virtual +0x74 - 1 (row value at index 33; Humans index 23 or the constant 8; actor steps); the death loop ends Poison. | High / Medium | ✔ promoted (branch candidate) | [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) |
@@ -38686,6 +38872,8 @@ destination and timing.
 | R2-ENGINE-1795 | ROM2 RU Human built by L2.00130 (hire, map Human): no direct call reaches L2.02444 (empty default name, Unit vtable at the call), so command +0x40, +0x44 and +0x4c are 0 after creation, book or bow alike. | High / Medium | ✔ promoted (branch candidate) | [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) |
 
 ### R2-ENGINE-1787
+
+**Amended.** R2-ENGINE-2024 reads the count increment of the push (the own-cell stand-in's empty list stays Medium).
 
 All bodies RU, read in committed listings (EXP-2205 `evidence/README.md` names each):
 
@@ -39991,6 +40179,8 @@ RU L2.02119(ref, list, wanted) walks list+4 and removes (L2.04531, R2-ENGINE-100
 **Evidence.** [RU filters and flee test](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w03-cost-orth-defend-filter-flee.txt), [callers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w05-callto.txt).
 
 ### R2-ENGINE-1880
+
+**Amended.** R2-ENGINE-2025 reads the entry stretches of the owners `L2.01527` and `L2.01512` (256 instructions each); the Teleport arm of the router stays unread.
 
 RU admission L2.01518(unit, id, 0) looks up spell id in the book at +0x140 (L2.00040) and returns the record when the unit's word +0x9a is at least the record's word +0xc, else 0. The flee spell routine L2.02452 calls it for id 0x17 and casts through L2.01732 at the computed cell; it tests a hostile count and a list, no sight-range byte and no adjacency. L2.01518 has 20 call sites in 6 owners (L2.01527, L2.01512, L2.02449, L2.02452, L2.02451, L2.07713); L2.01732 has 6 sites in 4 owners.
 

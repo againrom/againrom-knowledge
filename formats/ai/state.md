@@ -196,3 +196,5 @@ AI-449's map-admission clause is superseded; its constructor facts stand.
 — AI-449, AI-479, AI-628, AI-629
 
 Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.
+
+Withdrawal and retreat reads: the cell record's write-back callee and recompute (AI-942, AI-943, AI-944); within the routines read (AI-947, AI-950, Medium) the occupy sets and the release `R0057` clears the occupant slots (AI-947, AI-949, AI-950); the retreat tail's callees load no spell id in their own bodies (AI-948, Medium); the closure below the callees and the ordinary cast pick stay as AI-816 states, and the direct callee `R0009` calls the cast table; the corpse and count bounds of the flee helper (AI-945, AI-946; whether a corpse alone occurs in play is Unknown).

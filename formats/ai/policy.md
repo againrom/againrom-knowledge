@@ -135,13 +135,13 @@ filter's verdict; the averaging helper weighs a multi-cell hostile once per list
 each entry's anchor point (`AI-698`). Strike reach 1 holds for resting actors exactly when the two
 footprints touch, edge or corner (`AI-700`). Every such striking position of a ground attacker has
 a cell inside the radius-5 square; at radius 2 a side-3 target leaves the cells along its +x and +y
-edges outside (`AI-701`).
+edges outside (`AI-701`). The callee `R1362`, which follows the slot store in each occupy arm (body unread), has four direct call sites, all in the occupy `R0458` (`AI-942`, Medium; a computed call is not excluded). Of the routines that load the scratch record, 38 were decoded and none stores slot `+4` or `+8` through the scratch base (`AI-947`); their two capped tails store nothing (`AI-949`). The release `R0057` clears slot `+4` (domains 1, 2) or `+8` (domain 3) after a nonzero test, with no identity compare, and is the second writer next to the occupy (`AI-950`, `MOVE-156`); the occupant slots are written by those two within what was read (Medium). The direct callees of the retreat tail load no spell id in their own bodies (`AI-948`, Medium); the closure below the callees and the ordinary cast pick stay as `AI-816` states, and the direct callee `R0009` calls the cast table.
 
 The first reaction helper counts entries with `health > 0` in a byte. A zero count calls
 ordinary acquisition. Its averaging loop then sums fine coordinates over the **whole filtered
 list**, not a living-only subset, and divides by the low byte of the list count. The second
 helper has a nonempty-list gate without a positive-HP scan. Their actual mixed/all-dead
-runtime populations and dense-count wrap remain Unknown (`AI-RETREAT-274`).
+runtime populations and dense-count wrap remain Unknown (`AI-RETREAT-274`). A corpse that is not torn down stays in its cell record, so a square holding only corpses gives a nonempty list with a zero positive-HP count and the first helper calls ordinary acquisition (`AI-945`, Medium). The list count byte cannot wrap while the radius byte is at most 7, because the square holds at most 225 cells (`AI-946`, Medium).
 
 Both call the same distance-3 away picker and install pending move 1. The picker clamps to
 `[8, dimension-9]`; a zero coordinate difference becomes 1. It has no passability test.
@@ -202,3 +202,5 @@ The group arms assign each member the lowest-scoring candidate by the loop `R017
 The area-object registration only appends a node and the area pass drives each listed entry in a later world step, so no stage runs at registration if the registration list is the walked list (AI-922; Medium for that identity).
 
 Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.
+
+Plane bit 5 of a cell is set by the cell-record recompute, which the occupy calls after each slot write-back (AI-943, AI-944).

@@ -144,7 +144,7 @@ helper below. Its radius is mover field `+8`, not a player-supplied destination.
 positive-HP count falls back to ordinary acquisition, which can choose a pursuit, idle or
 autoheal order. The local state arm and helper have no timer, arrival termination or state
 `0x16` reset; route failure also uses ordinary acquisition. Sustained whole-session
-persistence and visible completion timing remain Medium/Unknown (`AI-RETREAT-273`).
+persistence and visible completion timing remain Medium/Unknown (`AI-RETREAT-273`). A square holding only corpses gives a zero positive-HP count while a corpse that is not torn down stays in its cell record, and then the helper calls ordinary acquisition; whether this occurs in play is Unknown (`AI-945`, Medium); the list count byte does not wrap for a radius byte of 7 or less (`AI-946`, Medium).
 
 Later admitted Move installs group order 4. Target attack replaces actor state with 3 or
 fallback `0xc`; the two cast commands replace it with `0xd`/`0xe` or fallback `0xc`.

@@ -1792,9 +1792,9 @@ callees through route headers and frees, plus all destruction callers, to settle
 | MOVE-144 | The census of byte stores to the position bytes `+4` and `+5` finds the stepper, the arrival block, a routine before the stepper and two other routines in the movement module; two are read, the others are receipts (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-0546](../experiments/EXP-0546-order-machine-step/) |
 | MOVE-148 | The step bodies `R0039` and `R0047` read mover `+0x70`, `+0x80`, `+0xa6`, `+0xaa`, `+0xac`, `+0xae`, `+0xb0`, `+0xb1` and write `+0x72`, `+0x76`, `+0x80`, `+0xa6`, `+0xa8`, `+0xaa`, `+0xac`; no order-record operand (High). | High | ✔ promoted (branch candidate, amended) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
 | MOVE-149 | The step's arrival block calls the relocation routine `R0044` at `L00117` when the cell record copied from the hash table at manager `+0x540b8` has type 0x1a and two `R0048` checks pass (High for the site). | High / Medium | ✔ promoted (branch candidate) | [EXP-0548](../experiments/EXP-0548-order-machine-branches/) |
-| MOVE-156 | `R0058`, `R1332`, `R0057`, `R0049`, `R0048`, `R1544` read whole store mover `+0xa6`, `+0x86`..`+0x89`, `+1`, `actor+0x17c`, `+0x180`, claim bits and cell-record slots; `R0048` none. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
+| MOVE-156 | `R0058`, `R1332`, `R0057`, `R0049`, `R0048`, `R1544` read whole store mover `+0xa6`, `+0x86`..`+0x89`, `+1`, `actor+0x17c`, `+0x180`, claim bits and cell-record slots; `R0048` none. | High / Medium | ● active (amended) | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | MOVE-157 | `R0392` and `R0435`, read whole in `MOVE-ALT-019` and `MOVE-ALT-020`, store nothing outside their stack frames; both read the label word array at manager `+0x30000` and return the cell of the least word or 0. | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
-| MOVE-158 | The cell-record hash at manager `+0x540b4` has the helpers `L14473` (find or create, 13 zeroed dwords), `R2259` (remove) and `L14472` (set buckets); `L07102` builds a position record (bytes `+0`..`+5`, `+8`). | High / Medium | ● active | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
+| MOVE-158 | The cell-record hash at manager `+0x540b4` has the helpers `L14473` (find or create, 13 zeroed dwords), `R2259` (remove) and `L14472` (set buckets); `L07102` builds a position record (bytes `+0`..`+5`, `+8`). | High / Medium | ● active (amended) | [EXP-0551](../experiments/EXP-0551-order-machine-dark-functions/) |
 | MOVE-171 | `mover+0x98` := 1 is stored in the step starts `R0178`, `R0043`, `R0055`; the executor tail clears it; 68 other exact stores unread (Medium). | High / Medium | ● active (amended) | EXP-0559 |
 
 ### MOVE-144
@@ -1891,6 +1891,7 @@ Bodies read whole (EN, windows `q-<entry>`; the RU image is the same file). `mov
 
 **Unknown.** The bodies named; the gap-range sites of `R0058`, `R0057`, `R0050` are read by `MOVE-093` only as a step body.
 
+**Amended.** By `AI-943`: `R0453`, unread here, is read whole; it sets plane bit 5 of a cell whose record is found (confirmed; `TERR-PASS-073` and `TERR-STRUCT-071` read the same routine).
 ### MOVE-157
 
 `R0392` and `R0435` are read whole in `MOVE-ALT-019` (High: rings, strict minimum, the `0xffff` sentinel, return 0) and `MOVE-ALT-020` (High / Medium, narrowed by `MOVE-098`: box, 8 rings, two walkers, the 12-entry byte table at `world+0x54186`, the four jump tables read out of the image); `MOVE-097` reads `R0436` (High) and `MOVE-098` the entry arithmetic with `R0279` as truncation. This card re-reads both bodies for stores and adds one fact: neither stores outside its stack frame.
@@ -1910,6 +1911,8 @@ Bodies read whole (EN, windows `q-<entry>`; the RU image is the same file). `mov
 **Confidence.** High for the bodies. Medium for `R0540`, `R1355`, `R0747`, `R0525` (`AI-573`) The roles of record dwords `+4` (ground occupant) and `+8` (air occupant) are those of `TERR-CELLREC-146`; the bodies here show only the stores.
 
 **Unknown.** The callers of `L14472` and `R2250`; the body of `R1537`.
+
+**Amended.** By `AI-942`: the rel32 callers of `L14473` (seven sites) and `R2259` (one site, `L18439`) are enumerated; the callers of `L14472` are counted (14 sites), their bodies unread.
 
 ### MOVE-171
 
