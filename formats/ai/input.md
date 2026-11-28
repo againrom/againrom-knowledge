@@ -221,6 +221,11 @@ Message `0x411` and controller right-down/up clear current spell only;
 selection-summary recomputation has no direct binding write. Book open/close
 attaches/detaches the same controller. Selection carry beyond these bodies is
 Medium; no-load mission entry and new-campaign reset remain Unknown.
+The builder has one call site, in the campaign screen builder, which has one
+call site in a routine whose entry is not located; over rel32 call and jump
+sites in `.text` and exact dword references no other caller exists. Whether the
+controller is rebuilt at a mission entry or a new campaign is Unknown (Medium,
+`AI-847`).
 — AI-QUICKOWNER-280
 
 F5–F8 send `0x417`, slot 0–3 and the Ctrl latch to that controller. Ctrl copies

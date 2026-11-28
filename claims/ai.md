@@ -2567,7 +2567,7 @@ This narrows `AI-THREAT-044`'s open item 17 ("what fills the threat cache") to a
 
 **Confidence.** High for the whole-body loop, independent per-slot draw (S2), spell-id use by R0209, and computed-offset blind spot. High for the census counts. The original disambiguation grade is narrowed: the two R0169 field identities are Unknown. Other classifications retain their prior grade and method: four of the 28 mover-family functions were read whole; the rest matched the two-instruction idiom. Medium for no writer beyond spawn setup and Order::Serialize LOAD, bounded to the literal/narrow-displacement sweep and its base-register classification; the two now-untyped accesses cannot support that negative.
 
-**Amended.** The R0169 pre-create-control and actor-Mind classifications are partially retracted. TRIG-ACTIONWRITE-135's whole-body read shows a dword store at L01769, payload +0x88, gated by virtual +0x38 and dword +0x80. The payload class and both field identities remain Unknown. The other sites and spellbook reader retain their prior evidence; these two accesses no longer support the typed no-writer inference.
+**Amended.** `AI-844`: `R0184`, named here as the writer of the class spellbook slots, also stores `actor+0x3c` from a type-table lookup (Medium). The R0169 pre-create-control and actor-Mind classifications are partially retracted. TRIG-ACTIONWRITE-135's whole-body read shows a dword store at L01769, payload +0x88, gated by virtual +0x38 and dword +0x80. The payload class and both field identities remain Unknown. The other sites and spellbook reader retain their prior evidence; these two accesses no longer support the typed no-writer inference.
 
 
 ## Open, written out
@@ -3194,7 +3194,7 @@ sha256 `942e9b72610eeba2f3d74930ee47cbc4476b85a942c14348f874ec7b7d367d03`). No p
 | AI-370 | Script group sub-command 3 (Stand Ground) is the arm at `L01853` in `R0156`; it calls neither `R0060` nor `R0063`, stands each member through `R0088` and stores group order 3 itself at `L00315`. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-371 | In one tick the AI slot and queue drain precede every member's executor pass; a spell application in the actor body can run a setter after it. `R0062`, `R0065`, `R0066`, `R0067` are unplaced. | High / Medium / Unknown | ● active | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-372 | In the `+0x158` census the only reads of the order word `ord+0x50` are two compares in `R0154`, the group order 4 arm; if reached, a completed pickup leaves 1 there, which sends that arm to `R0022`, not to a walk. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
-| AI-373 | In `R0043` and `R0055` the near search raises `mover+0x98` only when aimed at the final destination; an empty waypoint search retries next pass. Occupied ring cells unlabelled: Unknown. | High / Medium / Unknown | ● active | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
+| AI-373 | In `R0043` and `R0055` the near search raises `mover+0x98` only when aimed at the final destination; an empty waypoint search retries next pass. Occupied ring cells unlabelled: Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-374 | In state 3 `R0008` tests only the victim's action word; 0x10, set at health -10 or less, stands the member down to state 0xc before dispatch, so arm 3 is not entered; the prologue reads no list. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-375 | Move stores `actor+0x50` = 1 and pickup 2; the executor tail reads that value when it consumes `mover+0x98`. A pending walk installed when recovery reaches zero at T0 first calls `R0178` at T0+2; whether it writes a step is Unknown. | High / Medium | ● active (amended) | [EXP-0440](../experiments/EXP-0440-order-pursuit/) |
 | AI-394 | In `R0053`'s own body the static list is empty on return only through three exits: start equals goal, picker A answers 0, or it answers the start cell; the extractor's 1000-step cap is a fourth, unexcluded exit. | High / Medium | ● active (amended) | [EXP-0489](../experiments/EXP-0489-troll-hints/) |
@@ -3336,6 +3336,8 @@ Unknown for whether a cell holding another unit carries label 0xffff.
 `mover+0x05` at `L01920` and similar sites; no unit-occupancy write was traced), what `R0054` does
 with an empty dynamic list, what `R0436` computes, and the values of `ctx+0x585c0`, `ctx+0x585c4`
 and `ctx+0x585c8`.
+
+**Amended.** `AI-848` reads the labelling of the dynamic search: a cell under another unit's occupancy bit of the mover's mask is not labelled and keeps 0xffff, so picker B skips it (High for the relaxer instructions and the mask test, Medium for the composition; the routines `R1329` and `R1330`, called before the relaxer loop, hold 16 label-plane stores and are unread). The Unknown on a cell holding another unit stands only for the static form and for the restoration of the searcher's own bits.
 
 ### AI-374
 
@@ -4535,6 +4537,8 @@ leave the composed route open. A bounded callee/table/lifecycle study or
 native actor-identity/list trace would test those alternatives. No new native
 read or runtime observation supports this correction.
 
+**Amended.** `AI-842`, `AI-843`, `AI-844`, `AI-845` and `AI-846` read the unread builder helpers and the same-actor calls named above, decode the parameter table `L12450`, and read the kind-3 case that reaches the resolver. The Medium grades stand for the helpers' own callees and for the resolver identity. The other Unknowns stand.
+
 ### AI-478
 
 Subtick `R0193` calls `R0426` before ordinary actor pass `R0427`.
@@ -4585,6 +4589,181 @@ list lifecycle beyond the named builder, trigger execution, persistence and
 original runtime behavior. The unread same-actor/helper calls and action
 tables require a bounded callee/table/lifecycle study or native identity/list
 trace. No null-pointer fault was observed at runtime.
+
+**Amended.** `AI-842`, `AI-843`, `AI-844` and `AI-845` read the builder helpers `R0289`, `R0462`, `R0463`, `R0915` and `R0464`, the same-actor calls `R1624` and `R0184` (tail unread), and decode the action tables `L01775`/`L01776`. The Medium grades stand for the helpers' own callees. The other Unknowns stand.
+
+## Temporary-caster builder callees, dispatch tables and the quick-slot builder (EXP-0655)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-842 | Six helpers the script-cast builder reaches store no `+0x14`, `+0x3c`, `+0x50` or `+0x70` word of the object each receives. Only `R1624` receives the actor; the other five receive other objects. Callees are unread. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-843 | The builder body `R0914` stores into the new actor only `+4`, `+0x64`, `+0x88`, `+0xa8+2*k`, `+0x134`, `+0x135`, `+0x140`; the constructor `R0901` and the append `R0292` run outside that list. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-844 | `R0184` stores `actor+0x3c`; its one call site (`R0185`) is reached by four named constructors, and the zero constructor alone skips it. One exact dword reference to `L06853` found; base-register stores unscanned. | Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-845 | Binder table `L12450` has eight entries for kinds 2 to 9 (5 to 7 default); the actor-tick tables `L01775`/`L01776` send actions 3, 13 and 14 to one case and 4 to 12 to the default. Dispatch sequences are Medium. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-846 | Table kind 3 reaches the case at `L00176` (Medium: dispatch read from an earlier listing); it calls `L00177` and stores the result at `+0x3c` or `+0x38` of a record. That `L00177` is the Player resolver is Medium. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-847 | `R0083` has one call site (`L06303`) in `R0315`, which has one (`L13470`) in a routine with no located entry; no other caller among rel32 call/jmp sites and exact dwords. Rebuild at mission entry or new campaign: Unknown. | Medium / Unknown | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-848 | Relaxers `R1327` and `R1328` store no label for a cell whose footprint holds a plane `+0x20000` bit of the mover's mask. `R1329` and `R1330`, called before the relaxer loop, hold 16 label-plane stores and are unread. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-849 | `R0115`, `R0051`, `R0019` and `R0162` have no store in their own bodies (`R0051` calls `R0862`, `R0863`). `R0021` stores list-node words through its list argument and calls `R0036`, `R1355`. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-850 | A `.text` census (554,587 instructions; no indirect call or pushed address) and a dword scan find 5, 4 and 2 sites for the `+0x98` setters `R0178`, `R0043`, `R0055`, all in the executor chain or unreached state functions. | Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-851 | Of the 112 register-valued stores to `ord+0x50`, 102 store 0 (9 read in listings, 93 from a register-definition table assuming callees keep `ebx`, `edi`, `ebp`), 1 stores 1 (`L16352`) and 9 are unresolved. | High / Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+| AI-852 | Of the 240 anchor positions of `AI-557`, 72 have slot pairs read; 30 rows hold a value outside the image, 5 more a slot-7 pointer into the data sections; the rest of the 138 are unread. | Medium | ● active | [EXP-0655](../experiments/EXP-0655-rom1-orders/) |
+
+### AI-842
+
+Listings `evidence/code-en/listings/h-R1624.txt`, `h-R0289.txt`, `h-R0462.txt`, `h-R0463.txt`, `h-R0915.txt`, `h-R0464.txt`; call sites `evidence/code-en/callers.tsv`. Instrument: Capstone raw decode of the EN image, no repaired Ghidra project.
+
+- `R1624` (3 call sites: `L18104`, `L18105`, `L18106`) stores a word at `+0x18`, a dword at `+0x1c` and a dword at `+4`, all zero, on its receiver. It makes no call. The base constructor `R0923` stores `+0x14 = 0` itself before it.
+- `R0289` (8 sites) writes the record it receives: byte `+0`, byte `+1`, word `+2` (second argument shifted left 8, plus first), bytes `+4` and `+5` set to `0x80`, dword `+8`. It makes no call. The builder passes the object that the dword at `actor+0x10` points to (the base constructor stores that pointer at `L18107`); the word stores at `+4` and `+5` of that object are not at `actor+0x14` and `actor+0x15`.
+- `R0462` (8 sites) is an exception-framed constructor that calls `L08171` and `L18108` (on `this+4`) and sets the vtable word `L08319`. `R0463` (40 sites) calls `L08171` and `R0624` and stores vtable `L05044`, `+4 = 0`, `+8` from its argument, `+9 = 1`, `+0xa = 0`. In the builder both receive a freshly allocated object.
+- `R0915` (1 site) reads one byte through `R0476` and stores nothing. `R0464` (33 sites) sets slot `k` of the list at `this+4`: it grows the list through `R1588` when the count is not above `k`, calls virtual slot `+4` with argument 1 on a nonnull old element, and stores its second argument in the slot. In the builder its receiver is the list object at `actor+0x140`.
+
+None of these bodies stores at displacement `+0x14`, `+0x3c`, `+0x50` or `+0x70` of its receiver. Only `R1624` receives the actor; the other five receive other objects (the object at `[actor+0x10]`, two freshly allocated objects, a byte reader, the list at `[actor+0x140]`). For the actor itself the evidence is `R1624`, the builder body (`AI-843`) and `R0184` (`AI-844`, which stores `+0x3c`).
+
+**Confidence.** High for the stores in the six bodies read whole. Medium for the effect through their callees: `L08171`, `L18108`, `R0624`, `R0476`, `R0030`, `R1588`, `R0031` and the virtual slot `+4` are unread, as are the other 40 and 33 call sites' receivers.
+
+**Amends.** `AI-477` and `AI-478`: the helpers they name as unread are read, and the ones named store no ownership or order word of the actor.
+
+**Unknown.** The unread leaf helpers. A native trace of the actor's `+0x14`, `+0x3c`, `+0x50` and `+0x70` words across one script cast would settle both the helpers and the composed route.
+
+### AI-843
+
+Listing `evidence/code-en/listings/tempcaster-builder.txt` (`R0914`..`R1137`, 104 instructions, ends at `ret 0x10`).
+
+The builder allocates `0x198` bytes and calls the zero constructor `R0901` (`L06031`). With the actor `A` it stores `A+4 = 0` (`L18109`), appends `A` to the list at `this+0x2c` through `R0292`, and calls `R0289` on the object that the dword at `A+0x10` points to (`mov ecx, [ecx+0x10]` at `L18110`) with its first two arguments and the global at `L04624`. It stores a new list object at `A+0x140`, a new `0x14`-byte object `B` built by `R0463` from its third argument, the word `0x1e` at `A+0x88`, its fifth argument at `A+0xa8+2*k` where `k` is the byte `R0915` reads from `B`, `B` into slot `arg3` of the `A+0x140` list through `R0464`, `B` at `A+0x64`, and bytes `1` at `A+0x134` and `A+0x135`. It returns `A`.
+
+The builder's own body stores no `A+0x14`, `A+0x3c`, `A+0x50` or `A+0x70`. The constructor `R0901` stores more words of `A` than this list, and the append `R0292` is unread; neither is covered by the list above. The earlier stores to those words are in the constructors (`AI-477`, `AI-842`).
+
+**Confidence.** High for the stores and calls listed. Medium for the effect of `R0292` (the append) and for the zero constructor's callees beyond those read.
+
+**Amends.** `AI-477`: the unread builder helpers are now read (`AI-842`); the Medium reading of ownerless creation stands for the remaining unread callees.
+
+**Unknown.** `R0292`'s body, and whether another routine assigns a Player or Group to `A` after the builder returns; the wrappers and callers are covered by `AI-477`.
+
+### AI-844
+
+Listings `evidence/code-en/listings/h-R0184.txt` (read to `L18111`; the window ended at the range bound before the routine's last return, so the tail is unread), `strctor-R0473.txt`, `strlen-L04697.txt`, `strdata-R2245.txt`, `strnil-L18112.txt`; tables `callers.tsv`, `dwordrefs.tsv`, `sections.tsv`, `nilstr.tsv`.
+
+- Body read. With `this` = the actor and a string argument, `R0184` stores `+0xe = 0`, scans the type table at `L02114` from index `0x1a` (index `0x1c` jumps to `0x3f`) comparing each record's name with the argument through `R0750`, and on a match stores the index byte at `+0xc` and the record pointer at `+0x3c`, then builds `0x68`- or `0x84`-byte components and passes them to virtual slot `+0x3c`. So for a matched name `actor+0x3c` becomes nonzero.
+- Reach. The sweep over `.text` (554,587 decoded instructions) finds one call, at `L00493` inside `R0185`, taken when `L04697` of the string argument is above zero. `L04697` returns the dword at offset 4 of the header 12 bytes before the string's characters. `R0185` has 5 call sites; four are the named constructors and one is the zero constructor at `L00495`.
+- The zero constructor pushes a string built by `R0473` from the pointer `L06853`. That address is beyond the raw size of `.data` (virtual end `L18113`, raw end `L18114`), so the file holds no bytes there; the image holds one dword reference to it, the push at `L18115`. `R0473` measures a nonnull pointer through an import call, and with length zero it keeps the shared nil string, whose header length word is 0 (`nilstr.tsv`). The branch therefore skips `R0184`.
+
+- Older cards that name `R0184`: `AI-722` (summon: create-by-name `R0501` runs the Units constructor `R0184`) and `AI-341` (writer of the class spellbook slots). The four named constructors reach it, so for them `actor+0x3c` is written; the zero constructor alone skips it.
+
+**Confidence.** Medium. Population searched: one exact dword reference to `L06853` (`L18115`); stores through a base register are not scanned. The length of the string depends on the cell staying zero at run time, so a write through a base register is not excluded. The import called by `R0473` (`[L16001]`) was not identified here. The tail of `R0184` is unread, so its stores after `L18111` are open.
+
+**Amends.** `AI-478`: the same-actor call `R0184` is read, and on the zero-constructor route it is not reached (Medium); where it is reached it stores `+0x3c`. `AI-722` and `AI-341`: the routine they name as the Units constructor and the spellbook writer also stores `actor+0x3c`.
+
+**Unknown.** Settle with a native trace of `actor+0x3c` for a script-cast actor after construction, or by reading the tail of `R0184` and the string cell's writers.
+
+### AI-845
+
+Tables `evidence/code-en/tables.tsv` (binder), `switches.tsv` (action dispatch). The action switch is published as the composed map from action to case target; no byte column is committed.
+
+- Binder. In `R0067`, `JMP [eax*4+L12450]` follows `sub edx,2` and a bound check `ja L12451` above 7. The eight entries: kind 2 `L01824`, kind 3 `L00176`, kind 4 `R2070`, kinds 5, 6 and 7 `L12451`, kind 8 `L15957`, kind 9 `L14627`.
+- Actor tick. `L00538` loads action `actor+0x54`, subtracts 1, and ends at `L02936` when the result is above `0xe`. Otherwise a byte table at `L01775` selects one of six dwords at `L01776`. Action 1 reaches `L01777`, action 2 `L00009`, actions 3, 13 and 14 `L00005`, action 15 `L00196`, and actions 4 to 12 `L02936`.
+
+**Confidence.** High for the decoded entries (`tables.tsv`, `switches.tsv`). The two dispatch sequences and their bound checks are taken from the committed `EXP-0529` listings `w10-trigger-binder.txt` and `w06-actor-tick.txt`, not decoded again here: Medium for them. The statement "kinds 2 to 9" names the table, not the dispatch. Medium for the meaning of the action numbers, which this claim takes from `AI-477` and `AI-478`.
+
+**Amends.** `AI-477` and `AI-478`: the parameter table `L12450` and the action tables `L01775`/`L01776` are decoded.
+
+**Unknown.** The bodies of cases `L00009` and `L00196`, and the other binder cases, are not read in this experiment.
+
+### AI-846
+
+Evidence read: the committed listing `experiments/EXP-0529-ownerless-units/evidence/native/w10-trigger-binder.txt` (lines for `L15957`..`L18116`) with the case target from `AI-845`.
+
+The case at `L00176` loads the parameter dword at `[node+4*i+0x48]`. A flag at `[ebp-0x20]` selects between two arms. Each calls `L00177` with the parameter and a frame object, looks up a record through `L00004+0xc2b0` and `R2190` with an index, and stores the result at record `+0x3c` (flag set) or `+0x38` (flag clear). A zero result clears the build flag `[ebp-0x11c]`. Kind 8 (`L15957`) instead stores a word at record `+0x40` from the parameter plus `0xe18`.
+
+**Confidence.** High that the table entry for kind 3 is `L00176` and that the case calls `L00177`. Medium that table kind 3 selects this case (the dispatch sequence `sub edx,2`, bound 7, `jmp [eax*4+L12450]` is read from the earlier listing, `AI-845`). Medium that `L00177` is the Player resolver: its body is taken from `AI-477`, not read here, and the record is not identified as the actor.
+
+**Amends.** `AI-477`: the kind-3 association is read from the table.
+
+**Unknown.** Whether the record is the actor or a node, and the cases of kinds 2, 4 and 9.
+
+### AI-847
+
+Listings `evidence/code-en/listings/builder-R0083.txt`, `campaign-ctor-multi.txt`, `screen-site-multi.txt`, `screen-fn-head-multi.txt`; tables `callers.tsv`, `dwordrefs.tsv`, `rets.tsv`.
+
+- `R0083` stores the vtable `L16050`, `+0x5c = 0`, and `-1` at `+0x60`, `+0x64`, `+0x68`, `+0x6c`, `+0x70` and `+0x74`. Its only call site in the `.text` sweep is `L06303`; the result is stored at `[esi+0xec]` at `L18117`.
+- That site lies in `R0315` (children at `+0xd0..+0xec`). `R0315` has one call site, `L13470`, and no dword reference. `L13470` follows stores of the globals `L10964` and `L18118`. The routine holding it begins after returns at `L18119`, `L18120` and `L18121`; its entry was not located. The startup routine `R0326` has no call site and one dword reference, in `.rdata` at `L01309`.
+- The routine around `L13470` sets `[esi+0x41c] = 1` and calls `R1659`, `R1985` and `R0499` on the same object, which is the setup of a screen object. How often it runs, and whether it runs at a mission entry or a new campaign, is not read.
+- The older statement that `campaign+0xec` is built once by `R0083` is `MENU-064`; this card does not establish a count of runs.
+
+**Confidence.** Medium. Population searched: rel32 `call` and `jmp` sites in `.text` and exact dword references; no other builder or caller of `R0083`, `R0315` or the startup routine exists in it. Indirect calls and computed pointers are outside it. Which routine contains `L13470` and how often it runs is not established. Unknown for mission entry, new-campaign reset and any other writer of the four slots: no store census of `+0x64..+0x70` was committed.
+
+**Unknown.** Run the original: in a mission, assign F5 to F8 slots, then load another mission and start a new campaign, and compare the slot popup labels and the cast keys' behaviour after each step.
+
+### AI-848
+
+Listings `evidence/code-en/listings/s-R0053-multi.txt`, `s-L02030-multi.txt`, `r-R1327.txt`, `r-R1328.txt`, `r-R1332.txt`, `pb-R0435-multi.txt`; table `dispstores.tsv`.
+
+- `R0053` branches to `L18122` at `L18123` when its static-flag argument is zero (`MOVE-PLANE-005`: the dynamic search). There `L06784` calls `R1332(actor, word [position+2])`. That routine loops over an n by n footprint (n from `[vt+0x1c]`) and applies `and 0x7f` to the plane byte `+0x20000` for domain 3 or `and 0xbf` for domains 1 and 2 (`L13327`, `L13328`). It clears the searching unit's own occupancy bit over its own cell.
+- The dynamic loop alternates the relaxers `R1327` (`L18124`) and `R1328` (`L18125`). Each tests, for every cell of the candidate's n by n footprint, `byte [plane+0x20000]` against the byte `[actor+0x154]+5` (`L13329`, `L13330`); a set bit jumps past the label store (`L18126` to `L18127`; `L18128`). The label store is `L18129` and `L18130`. The loop ends when the goal label stops being 0xffff (`L18131`) or the list empties or the cap holds.
+- The sweep of stores with displacement `+0x30000` finds 32 sites in `L07036..L00612` (16 in the static body `L18132..L18133`, 16 in `L18134..L18135`) and none elsewhere in `.text`; `dispstores.tsv` has a header and 33 rows, and one row is not accounted for by the 16 and 16; the relaxers store through a computed register and are not in that count.
+- The dynamic path calls `R1329` (`L18136`) and `R1330` (`L18137`) before the relaxer loop. Neither body is read; the 16 label-plane stores at `L18134..L18135` (first `L18134`, last `L18135`) are placed in no function here.
+- A cell under another unit's occupancy bit (`MOVE-PLANE-005`: bit 6 ground, bit 7 air, ORed over the occupant's footprint) is therefore not labelled by the relaxers for a mover whose mask byte holds that bit; it keeps 0xffff unless `R1329` or `R1330` labels it (Medium). The goal cell of a pursuit is the victim's own cell; picker B (`AI-373`) scans the ring around the victim and keeps only labels below 0xffff, so it never answers such a cell. An occupant of the other class (air against a ground mask) does not block.
+
+**Amends.** `AI-373`: the Unknown "whether a cell holding another unit carries label 0xffff" is answered for the dynamic search with the mask conditions above.
+
+**Confidence.** High for the relaxer instructions and the mask test (one image, one witness). Medium for the composition: another unit's cell staying 0xffff depends on `R1329` and `R1330`, which are unread; the plane content is `MOVE-PLANE-005`'s; the occupancy writer `R0257` and the restoration of the searching unit's own bits after `R1332` were not read; `R0053`'s window pass over `L18138..L18122` is the static form and is not claimed here; stores through a register to the label plane are outside the displacement sweep.
+
+**Unknown.** The bodies of `R1329` and `R1330` and the 16 label-plane stores they hold. Whether the searching unit's own bits return before another unit's search reads the plane, and the footprint a size-2 victim leaves for picker B, need the original: a Move toward a monster standing among three units of the same class; compare the destination cell chosen with and without the neighbours.
+
+### AI-849
+
+Listings `evidence/code-en/listings/h-R0115.txt`, `h-R0051.txt`, `h-R0021.txt`, `h-R0019.txt`, `h-R0162.txt`.
+
+- `R0115(x, y)` (12 instructions) returns the folded absolute difference of the two low bytes (`L18139..L18140`: values above 0x80 are negated). `R0019` returns the word at `[ecx+2]` (2 instructions). `R0162(x1, y1, x2, y2)` (21 instructions) returns the larger of the two folded byte differences, a Chebyshev distance. None stores to memory.
+- `R0051` (106 instructions) makes four calls (`R0862`, `R0863`) and has no store to memory through a pointer in its own instructions.
+- `R0021` (142 instructions) calls `R0036` (`L18141`) and `R1355` (`L18142`); its stores through registers are at `L00084`, `L18143`, `L18144`, `L18145`, `L18146`, `L18147`, `L18148..L00085` and `L14933` (`+8`, `+0xc`, `+0x10`, `+0x14`, `+0x18` and the pointers at offset 0 and 4 of two nodes) and go through the list header argument at `[esp+0x24]` and nodes at `[edx+8..0x18]`; reading them as candidate-list links (unlinking a rejected candidate, the count store 0) is Medium, because the list owner is not identified. The listing has no store at `+0x50` or `+0x60` and no store through a base loaded from `actor+0x158`.
+
+**Amends.** `AI-553`, `AI-555`, `AI-556` and `AI-815`, which had read the same bodies: the five bodies are read whole here, with no store in their own instructions at an order, mover or group word of the kind searched. The rows of `orders.md` that name `R0115`, `R0051`, `R0021`, `R0019` and `R0162` as unread are corrected. `AI-527` through `AI-535` keep their grades.
+
+**Confidence.** High for the five bodies' own instructions (one image, one witness). Medium for the callees `R1355`, `R0862`, `R0863` and `R0036` (read by earlier claims at their grade; not re-read) and for the node-link reading of the register stores.
+
+**Unknown.** The callees of `R1355` beyond the node free.
+
+### AI-850
+
+Tables `evidence/code-en/callers.tsv` (11 rows for the three targets; header line `# decoded_instructions 554587`) and `dwordrefs.tsv` (no row for the three targets).
+
+- The sweep decodes `.text` linearly (554,587 instructions) and lists every direct `call`, `jmp`, conditional jump and `loop` with an immediate target equal to `R0178` (5 sites: `L01932`, `L06117`, `L14756`, `L14757`, `L14758`), `R0043` (4: `L06939`, `L06113`, `L14182`, `L14183`) and `R0055` (2: `L01717`, `L01901`). The dword scan over all sections finds none of the three values.
+- The sites agree with the list of `AI-510`. The executor chain holds `L01932`, `L06939`, `L06117` (in `R0087`, called at `L06112`) and `L06113` (in `R0042`, called at `L06107` and `L00106`); `L01717` and `L01901` lie in `R0043`. The other five lie in the state functions of `AI-516`, which no site, dword or short jump reaches (`AI-533`, `AI-562`).
+- The setters of opcodes 0x14, 0x18, 0x19, 0x1e and 0x1f are read (`AI-527`, `AI-528`); none stores at `+0x98` (`AI-527`), so a stored order during a hold does not change the entry value of the flag.
+
+**Amends.** `AI-510`: the callers of the three setters are counted over direct calls, jumps of every form and dwords, not rel32 calls alone; the entry value is zero unless one of the five sites in the unreached state functions or a computed call runs. `AI-509` and `AI-513`: the clause that the setters of 0x14, 0x18, 0x19, 0x1e and 0x1f are unread no longer stands (`AI-527`).
+
+**Confidence.** Medium. The linear sweep can desynchronise on data in `.text`, sees no register-indirect call and no pushed address, and the executor chain's own rows are `AI-510`'s reading, not re-read.
+
+**Unknown.** Whether a computed call reaches the state functions; the counts of `AI-510` stand at Medium for the run that traces `mover+0x98` at the entry of every pass.
+
+### AI-851
+
+Table `evidence/code-en/regdefs.tsv` (writes of the register since the nearest call target at or below the site, the first write's branch count, the join count after the last write), `evidence/regtiers.tsv` (rule in `tiers.awk`) and `ord50-sites.tsv` (the 112 sites of `AI-652`); listing `f-L18149-multi.txt`.
+
+- Tier 1, 7 sites: the last write of the register is `xor r, r` with no branch target after it (the executor sites `L18150`, `L18151`, `L18152`, `L14842` among them). Tier 2, 52 sites: every write is `xor r, r` and no branch precedes the first one. Tier 3, 41 sites: every write is `xor r, r` but a branch precedes the first. The stored value is 0 under the assumption that callees keep `ebx`, `edi` and `ebp`, for every tier including tier 1.
+- Limits of the table. `func_start` is the nearest rel32 call target, which is wrong for `L14677`; the four tier-3 sites `L18153`, `L18154`, `L18155`, `L18156` lie in the state functions `L14681` and `L14742` (`AI-533`), their recorded start `R0042` is another function and their branch count 17 belongs to it. No per-site check of function start is committed for the 100 sites of tiers 1 to 3. `tiers.awk` reads `last_writes`, which `probe.py` truncates to the last six writes; eight sites have seven or more (`L18157` 13 writes, tier 2; `L18158` 7, `L18159` 9, `L18160` 11, `L18161` 7, `L18162` 8, `L18163` 8, `L18164` 10, tier 3), so "every write is `xor`" is checked on six of up to 13.
+- Tier 4, 12 sites. `L18165` and `L18166` lie in `L14677`, which starts at `L14677` (the nearest call target, `L18149`, belongs to the function before it); its only write of `ebx` is `xor ebx, ebx` at `L18167`, so both store 0. `L16352` stores `edi`, which is 1 on every path to it: `mov edi, 1` at `L18168` precedes the store, the only jumps past it (`L18169`, `L15397`, `L18170`) land at `L18171`, and no jump lands between. So `ord+0x50` := 1 at `L16352`, after `actor+0x54` := 0xd (`L15263`) and `actor+0x50` := 0xc (`L18172`); `AI-652`'s list of stores of 1 lacks it. The window `f-L18149-multi` holds no jump into `L18173..L18174` from outside that span. `L14677` has no rel32 site (`AI-556`, `AI-570`).
+- Nine sites stay unresolved: `L16353` (`edi`), `L18175`, `L18176`, `L18177`, `L18178`, `L18179`, `L18180`, `L18181`, `L18182`. Each has a non-`xor` write earlier in its function and a join after the last `xor`.
+
+**Amends.** `AI-652`: the 112 register-valued stores are split by value; one stores 1, and the count of immediate stores of 1 (14) is unchanged.
+
+**Confidence.** High for the two zero stores and the one store of 1 read in `f-L18149-multi`, and for the 7 tier-1 zeros under the stated callee assumption: 9 zeros and 1 one. Medium for the other 93 zeros (the 52 tier-2 and the 41 tier-3 sites; no flow analysis, and the limits of the table above); unresolved for 9. Medium for completeness under `AI-651`'s blind spots.
+
+**Unknown.** The nine sites need a flow trace; the run: stand a unit down by each state arm and compare `ord+0x50` after the pass.
+
+### AI-852
+
+Table `evidence/code-en/vtscan.tsv` (240 rows; the generator prints a slot value outside `00400000..L18183`, the whole image, as `data`, so a pointer into `.rdata` or `.data` prints as a hex address; the file is the output of one run of the committed generator and was not compared with a second run); listings `v-L18184` and the seven other `v-*.txt` leaves (`v-L18185`, `v-L18186`, `v-L18187`, `v-L18188`, `v-L18189`, `v-L18190`, `v-L08322`) in `evidence/code-en/listings/`.
+
+- The scan finds 240 aligned positions in `.rdata` and `.data` where slots 3 and 4 equal `R0531` and `L04402`. Slot pairs `+0x1c`, `+0x20`: `(L18184, L18185)` 32 positions (return 1 and 0), `(R1827, R1828)` 17 and `(R0256, R1344)` 3 (`AI-557`), `(null, L18190)` 7 and `(null, L08322)` 4 (slot 8 returns a constant address; slot 7 is null), `(L18188, L18189)` 4 (`and [this+8], 0` and `and [this+4], 0`), `(L18186, L18187)` 5 (longer bodies; the first 19 and 14 instructions read, their callees unread).
+- 30 rows hold a value outside the image in slot 5, 7 or 8; 5 more rows hold a slot-7 pointer into the data sections (`L18191`, `L18192`, `L18193`, `L18194`, `L18195`), counted among the unread pairs. 30 rows have slot 8 equal to `R0530` with 30 distinct slot-7 targets (bodies unread, `R0530` included); 108 further positions carry other pairs, unread.
+
+**Amends.** `AI-557`: the 220 other anchor positions are classified; 43 read pairs store nothing, 4 store zero to the receiver.
+
+**Confidence.** Medium: no census of which vtable each passed object has; the four storing positions would matter only if a scorer or group routine passed such an object.
+
+**Unknown.** Bodies `R0530` and the 108 other pairs; the classes constructed at the call sites of `R0036` and `R0046`.
 
 ## Empty Group prefix at mission join
 
@@ -5133,6 +5312,8 @@ fields the step reads.
 
 **Amended.** `AI-527` reads the setters of 0x14, 0x18, 0x19, 0x1e and 0x1f and the member reset; `AI-528` and `MOVE-148` give the intersection of their stores with the step's mover words: only mover `+0x80`, `+0xa6`, `+0x76` through the claim release (Medium). The clause that the setters are unread no longer stands. `AI-535` reads `R0044` whole: the stores listed there are High, and the absence of a progress or position store in the body High; through its calls (`R0045`, `R0046` and its two virtuals) the absence is Medium. The clauses above are otherwise unchanged.
 
+**Amended.** `AI-850` counts the callers of the three flag setters over direct calls, jumps of every form and dwords; the setters of 0x14, 0x18, 0x19, 0x1e and 0x1f are read (`AI-527`) and none stores `+0x98`, so the clause on the unread setters of this card no longer stands.
+
 ### AI-510
 
 In a pass entered at progress 3, 4 or 0xff the executor tail's `mover+0x98` branch is not
@@ -5184,6 +5365,8 @@ hold `L00010`.
 `L14682`; the 86 `m98` census rows not classified here (which record each store targets).
 
 **Amended.** `AI-532` reads the three stores of mover `+0x98` after a path call with an empty route list, and `AI-533` re-runs the call scan with `0F 8x` jumps and unaligned dwords for the state functions: no site for their five entries. The entry value of the flag stays Medium. The Unknown above stands: `AI-532` classifies only the census rows in `L08481..L14887`, not the 86 rows.
+
+**Amended.** `AI-850` repeats the caller census with jumps of every form and dwords: 5, 4 and 2 sites for the three setters, none outside the executor chain and the unreached state functions. The entry value of the flag stays Medium.
 
 ### AI-511
 
@@ -5297,6 +5480,8 @@ whole-hold composition as in `AI-510`.
 **Unknown.** The initial countdown of the hold effect (`AI-512`).
 
 **Amended.** The initial countdown of the hold effect is given by `MAGIC-303` and `MAGIC-ACTKEY-080`, at the grade stated in the Amended paragraph of `AI-512`; `MAGIC-323` adds the store order of the arm.
+
+**Amended.** `AI-850`: the setters of 0x14, 0x18, 0x19, 0x1e and 0x1f store no `+0x98` word and the callers of the three flag setters are counted over every direct form, so the hold composition of this card keeps Medium only through the entry value of the flag.
 
 ### AI-514
 
@@ -5696,6 +5881,8 @@ The table read `t10` (`L13147..L14948`, both roots equal) and the vtable scan (`
 **Confidence.** High for the four bodies. Medium that every object the callers pass belongs to one of these 20 vtables: 220 anchor positions carry other slot 7 and 8 pairs and a class whose vtable lacks the anchor is not excluded.
 
 **Unknown.** The classes of the other 220 anchor positions.
+
+**Amended.** `AI-852` classifies the 240 anchor positions by slot pair: 43 positions beyond the 20 return a value or are null, 4 clear `this+4` and `this+8`, 5 have longer bodies, 30 rows hold a value outside the image and the rest of the 138 pairs are unread (Medium).
 
 ### AI-558
 
@@ -7465,7 +7652,7 @@ the callees of `R0265` and of `R0870`, and for the Human and
 | AI-649 | On a refused route the executor tail stands state 1 down to 0xc and sends every other walking state to `R0004`; neither reads the group; the next group pass re-issues the walk whatever `grpAI+0x44` holds. | High / Medium | ● active (superseded) | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-650 | The struck hook has three direct callers and no `.rdata` or `.data` pointer; strikes pass the striker, spell payloads the caster or source; poison and Drain Life lower health without it in the bodies read (Medium). | High / Medium | ● active (amended) | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-651 | Of the 39 order-block stores to `ord+0x0a`, none is in acquisition, engage, reacquisition, strike install or the struck hook; setters, group arms, state arms and withdrawal write the walk destination. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
-| AI-652 | The 14 immediate stores of 1 to `ord+0x50` are at arrival, stand-downs, pickup end and cast end; 112 register stores are Medium; `grpAI+0x44` has three stores; SAVE and LOAD copy order, group and mover raw. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
+| AI-652 | The 14 immediate stores of 1 to `ord+0x50` are at arrival, stand-downs, pickup end and cast end; 112 register stores are Medium; `grpAI+0x44` has three stores; SAVE and LOAD copy order, group and mover raw. | High / Medium | ● active (amended) | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-653 | The activity rebuild walks the global on-map list `[L00240]`; the LOAD arm builds the world on that list and adds every restored actor whose `+0x4c` bit 8 is clear. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 | AI-654 | Before its group gate the AI slot runs the activity rebuild when `+0xb388` is 0, then the trigger passes; the session Serialize does not carry `+0xb388`, and the constructor leaves it 0. | High / Medium | ● active | [EXP-0590](../experiments/EXP-0590-pursuit-remainders/) |
 
@@ -7658,6 +7845,8 @@ register's value for the `edi` rows and most `ebx` rows.
 serializers. Medium for the value stored by the 112 register stores: a
 register-valued 1 is not excluded. Medium for completeness under the census
 blind spots of `AI-651`.
+
+**Amended.** `AI-851` resolves the values of the 112 register stores: 59 store 0 on a dominating or adjacent `xor`, 41 behind an earlier branch, 2 more in `L14677`, one stores 1 (`L16352`) and 9 are unresolved.
 
 ### AI-653
 
@@ -9048,6 +9237,8 @@ Mover byte `+0x08` is 5 on all 1 134 (`AI-692`); its writers are `AI-691` and `A
 "no change in play".
 
 **Unknown.** The side of a summoned creature in a save; no install save holds one.
+
+**Amended.** `AI-844`: the Units constructor `R0184` also stores `actor+0x3c` from a type-table lookup; the zero constructor alone skips its call (Medium).
 
 
 ## Group give-up and a stale pursuit route

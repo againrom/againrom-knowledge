@@ -8,7 +8,7 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5456. Observation: 143. Static analysis: 4567. Mixed: 746.
+Claims labelled: 5467. Observation: 143. Static analysis: 4578. Mixed: 746.
 
 ## Ledger ai
 
@@ -258,7 +258,7 @@ Claims labelled: 5456. Observation: 143. Static analysis: 4567. Mixed: 746.
 | AI-370 | static analysis | ● active (amended) |
 | AI-371 | static analysis | ● active |
 | AI-372 | static analysis | ● active (amended) |
-| AI-373 | static analysis | ● active |
+| AI-373 | static analysis | ● active (amended) |
 | AI-374 | static analysis | ● active (amended) |
 | AI-375 | static analysis | ● active (amended) |
 | AI-394 | static analysis | ● active (amended) |
@@ -323,6 +323,17 @@ Claims labelled: 5456. Observation: 143. Static analysis: 4567. Mixed: 746.
 | AI-476 | static analysis | ✔ promoted (branch candidate) |
 | AI-477 | static analysis | ✔ promoted (branch candidate) |
 | AI-478 | static analysis | ✔ promoted (branch candidate) |
+| AI-842 | static analysis | ● active |
+| AI-843 | static analysis | ● active |
+| AI-844 | static analysis | ● active |
+| AI-845 | static analysis | ● active |
+| AI-846 | static analysis | ● active |
+| AI-847 | static analysis | ● active |
+| AI-848 | static analysis | ● active |
+| AI-849 | static analysis | ● active |
+| AI-850 | static analysis | ● active |
+| AI-851 | static analysis | ● active |
+| AI-852 | static analysis | ● active |
 | AI-479 | static analysis | ● active (amended) |
 | AI-487 | static analysis | ✔ promoted (branch candidate, amended) |
 | AI-488 | static analysis | ✔ promoted (branch candidate) |
@@ -429,7 +440,7 @@ Claims labelled: 5456. Observation: 143. Static analysis: 4567. Mixed: 746.
 | AI-649 | static analysis | ● active (superseded) |
 | AI-650 | static analysis | ● active (amended) |
 | AI-651 | static analysis | ● active |
-| AI-652 | static analysis | ● active |
+| AI-652 | static analysis | ● active (amended) |
 | AI-653 | static analysis | ● active |
 | AI-654 | static analysis | ● active |
 | AI-658 | static analysis | ● active |

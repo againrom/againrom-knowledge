@@ -344,7 +344,7 @@ every other order that has a "walk there, then do a thing" shape.
   of order, actor and mover words and the group byte `+0x20`; none stores the position bytes, mover
   `+0x98`, progress `ord+0x09` or `actor+0x144` (`AI-527`, High for the bodies read; the callees of the five
   setter windows are now read, `AI-559`, `AI-560`, `AI-555`, `AI-557`; Medium for the class population of the
-  virtual calls). They touch the mover words the step reads or writes only at `+0x80`,
+  virtual calls: 72 of the 240 anchor vtable positions have slot pairs read; 30 rows hold a value outside the image, 5 more a slot-7 pointer into the data sections, and the rest of the 138 are unread, `AI-852`). They touch the mover words the step reads or writes only at `+0x80`,
   `+0xa6`, `+0x76`, through the claim release, which runs for a unit at a cell centre (`AI-528`, Medium).
 - Command state 8 leaves pending 4 or 1 itself and 8, 5, 6, 0xb, 0, 9 or 1 through its helpers
   (`AI-529`); states 0xa and 0xc leave 1, 5, 6, 0xb, 0 or 8 (`AI-530`). The six callees `R0021`,
@@ -386,12 +386,15 @@ every other order that has a "walk there, then do a thing" shape.
   (`AI-372`).
 - Acquisition, engage, reacquisition, strike install and the struck hook store no `ord+0x0a`; the 39 stores
   found lie in setters, group arms, state arms and withdrawal (`AI-651`); no evacuation walk was found among the classes read (`AI-834`, Medium / Unknown). the 14 immediate stores of 1 to
-  `ord+0x50` are at arrival, stand-downs, pickup end and cast end (the 112 register-valued stores are Medium),
+  `ord+0x50` are at arrival, stand-downs, pickup end and cast end (of the 112 register-valued stores 102 store 0 (9 read in listings; 93 from a register-definition table that assumes callees keep `ebx`, `edi` and `ebp`, takes the function start from the nearest call target and reads at most six writes per site, Medium), one stores 1 at `L16352`, and 9 are unresolved; `AI-851`),
   `grpAI+0x44` has three direct stores, and SAVE and LOAD copy the order
   block, the group record and the mover raw (`AI-652`, Medium for completeness).
 - In `R0043` and `R0055` the route refusal flag is raised only by a full search that leaves
-  the path list empty or by a near search aimed at the final destination; `R0178` also stores it. An empty waypoint search retries on the next pass. Whether
-  another unit's cell blocks the contact ring is Unknown (`AI-373`).
+  the path list empty or by a near search aimed at the final destination; `R0178` also stores it. An empty waypoint search retries on the next pass. In the
+  dynamic search the relaxers store no label for a cell under another unit's occupancy bit of the mover's mask, so picker B
+  skips it unless `R1329` or `R1330` (called before the relaxer loop, 16 label-plane stores, unread) labels it
+  (`AI-848`, High for the relaxers, Medium for the composition); whether the searcher's own bits are restored before another search reads the plane is
+  Unknown (`AI-373`).
 - The full search's own body leaves the static list empty in three cases: start equals goal, picker A
   answers 0, or picker A answers the start cell. The extractor's 1000-step cap and its one-node path (`L14986`) are two
   further static exits, and the dynamic form has its own cap and an unreached-goal exit (`AI-544`, amending `AI-394`). Picker A scans rings up to Chebyshev radius `(D>>2)+3` around
@@ -471,12 +474,23 @@ indirect assignment or registration remains open. Local ordinary activity
 dereferences the Player, and the executor with override zero dereferences
 the Group before its progress gate; these instructions remain High (`AI-478`).
 
-Conversion binding is Medium because parameter table `L12450` is
-undecoded; resolver miss, publication predicate and transfer/removal
-instructions remain High. Builder helpers `R0289`, `R0462`,
-`R0463`, `R0915` and `R0464` remain unread. Full scheduling,
-indirect registration, null-owner spell outcomes and persistence remain
-Unknown (`AI-477`, `AI-478`).
+Conversion binding stays Medium: parameter table `L12450` is now decoded
+(eight entries for kinds 2 to 9) and kind 3 reaches the case that calls the
+resolver `L00177`, but the record that case writes is not identified as
+the actor (`AI-845`, `AI-846`; the dispatch sequences and that `L00177` is the resolver are Medium). Resolver miss, publication predicate and
+transfer/removal instructions remain High. Builder helpers `R0289`,
+`R0462`, `R0463`, `R0915` and `R0464` are read: with
+`R1624` they store no Player, admission, order or Group word of the object
+each receives; only `R1624` receives the actor. For the actor the evidence
+is `R1624`, the builder's own body and `R0184` (`AI-842`, `AI-843`); the
+constructor `R0901` and the append `R0292` are outside it, and the
+helpers' callees are unread (Medium). The same-actor call `R0184`
+stores `actor+0x3c` from a type-table lookup, and the zero constructor
+reaches it only if a string cell that is zero in the file is nonempty at run
+time (`AI-844`, Medium; the routine's tail is unread). Action dispatch sends
+actions 3, 13 and 14 to one case and actions 4 to 12 to the default
+(`AI-845`). Full scheduling, indirect registration, null-owner spell
+outcomes and persistence remain Unknown (`AI-477`, `AI-478`).
 
 ## A new order during a cast
 
@@ -506,7 +520,8 @@ nonzero `mover+0x98` can store progress 0xff (command state 0x17) or call
 `R0004`, whose callee stores progress 1 (`AI-511`). The arms of progress 3, 4
 and 0xff call no routine read that sets the flag, and every pass clears it, so the
 tail's branch is not taken in such a pass through any path read; the callees
-not read rest on the census and `MAGIC-ACTGATE-079` at their grade, and the entry
+not read rest on the census and `MAGIC-ACTGATE-079` at their grade (the census of the three setters' callers covers
+direct calls and jumps of every form and dwords, with no register-indirect call and no pushed address, `AI-850`), and the entry
 value of the flag is Medium (`AI-510`, `AI-516`). The step bodies read hold no
 order-record operand (High); that a move, attack, cast or stop stored during a
 step leaves it running to the cell centre, to be read at the first pass entered
@@ -605,11 +620,11 @@ something and the order 4 arm when it found nothing (`AI-520`, `AI-519`). Order 
 maps the command states to engage, acquire, re-issue and cast arms, and a
 victim at action 0x10 stands a state 3 member down to state 0xc and acquisition
 in the same call (`AI-521`). The executor tail body `R0016` names no group order operand (High for that body; its
-callees `R0019` and `R0162` are unread, Medium); when the mover raises its refusal word it stands state 1 down to
+callees `R0019` and `R0162` have no store in their own bodies, `AI-849`, High); when the mover raises its refusal word it stands state 1 down to
 0xc through three member resets (desired facing := current facing, `actor+0x54`, `ord+0x60` and mover `+0x7c` := 0, a
 possible claim release; no direct store to `actor+0x54`), advances the patrol for 0xa, stores progress 0xff for 0x17 and
 reacquires for every other state (`AI-541`, `AI-527`). The reacquisition picks the candidate with the least `R0115`
-value (turn cost, Medium: `R0115`, `R0051` and `R0021` are unread), installs the strike (progress 1, action 3)
+value (turn cost; `R0115`, `R0051` and `R0021` are read whole and add no order store in their own instructions; `R0021` stores list-node words through its list argument and calls `R0036` and `R1355`, `AI-849`), installs the strike (progress 1, action 3)
 when facing and reach hold and turns in place otherwise; a mage-mask actor with reach below 2 and `Player+0x28` zero
 stores pending 0 and neither strikes nor turns. The six bodies read (`R0016`, `R0004`, `R0005`, `R0250`,
 `R0205`, `R0041`) call no walk routine and name no group order operand (High for those bodies, Medium for their

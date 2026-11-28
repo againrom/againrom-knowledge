@@ -167,13 +167,21 @@ Local calls, explicit separate-list append and Unit vtable slot `+0x18`
 binding to actor tick remain High. On the positive-HP actor path, the
 executor bypass is High conditional on `actor+0x3c` still zero at its getter.
 The constructor's earlier zero does not establish this later field value.
-Unread same-actor calls `R1624`/`R0184` and builder helpers `R0289`,
-`R0462`, `R0463`, `R0915` and `R0464` can change fields or
-registration. Actor tables `L01775`/`L01776` are not
-decoded as semantic values. Conversion binding is separately Medium because
-parameter table `L12450` is undecoded. Full scheduling, indirect
-registration, null-owner spell outcomes and persistence remain Unknown
-(`AI-477`, `AI-478`).
+The builder helpers `R0289`, `R0462`, `R0463`, `R0915` and
+`R0464` and the same-actor call `R1624` are read: they store no
+Player, admission, order or Group word of the object each receives; only
+`R1624` receives the actor. For the actor the evidence is `R1624`, the
+builder's own body and `R0184` (`AI-842`, `AI-843`); the constructor
+`R0901` and the append `R0292` are outside it, and the helpers' callees
+are unread (Medium).
+The same-actor call `R0184` stores `actor+0x3c` from a type-table lookup;
+the zero constructor reaches it only if a string cell that is zero in the
+file is nonempty at run time (`AI-844`, Medium; its tail is unread). Actor
+tables `L01775`/`L01776` and the binder table `L12450` are decoded
+(`AI-845`; the table entries are High, the dispatch sequences Medium);
+conversion binding stays Medium because the record the kind-3 case writes is
+not identified and `L00177` as the Player resolver is Medium (`AI-846`). Full scheduling, indirect registration,
+null-owner spell outcomes and persistence remain Unknown (`AI-477`, `AI-478`).
 
 ## Empty Group prefix at join
 

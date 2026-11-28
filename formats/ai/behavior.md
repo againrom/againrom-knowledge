@@ -305,7 +305,7 @@ placed later in the interleave — three named exceptions (a low-reach human-own
 class-spellbook slot draw, an AI-owned mage's own cast check) leave that default path (`AI-337`;
 the slot draw is a creature's own `Spell 1..3`/`Probability 1..3` columns, not a target cache,
 `AI-341`). AI-341's two script-payload classifications are partially retracted;
-the class-spellbook identity retains its prior evidence.
+the class-spellbook identity retains its prior evidence. The routine that writes the class spellbook slots, `R0184`, also stores `actor+0x3c`, and the zero constructor skips its call (`AI-844`, Medium). The builder helpers of a script cast store no Player, admission, order or Group word of the object each receives, and the builder body stores only the listed actor words (`AI-842`, `AI-843`).
 
 **This is what ends a pursuit.** Nothing inside a pursuit order measures elapsed time, health, or
 the distance the pursuer has covered; the decision is re-taken from scratch every group tick, and
@@ -500,6 +500,6 @@ The defender and the invisibility test measure distance edge to edge in sub-cell
 
 Group target ties keep the first scanned candidate of equal cost, scanning members then candidates head to tail (High; the list order and the second scorer's cost function are Medium). — AI-814
 
-The retreat check passes the wounded unit as decider; an invisible enemy stays a candidate when any groupmate's See-invisible byte is at least that distance. — AI-815
+The retreat check passes the wounded unit as decider; an invisible enemy stays a candidate when any groupmate's See-invisible byte is at least that distance. — AI-815. The filter `R0021` stores list-node words through its list argument (read as candidate links, Medium), has no order-word store in its own instructions, and calls `R0036` and `R1355`. — AI-849
 
 No withdrawal-specific automatic Teleport branch was found in the decoded retreat tail and caster routines (Medium; undecoded callees and nine immediate sites are named in the claim). The cast table has a Teleport arm for id 26 (MAGIC-238) reached by the ordinary pick, and this negative says nothing about that path. — AI-816

@@ -126,7 +126,7 @@ footprint, so it reaches R cells past the footprint's left and top edges and Râˆ
 right and bottom edges (`AI-696`). The footprint side n is the `Data.bin` `tokenSize`: 2 for
 Catapult, Ballista, Ogre, Troll and Daemon, 3 for Dragon, 1 for every other Units entry and every
 Humans actor created from `Data.bin`; a summoned creature takes its Units `tokenSize`, a hero 1, and
-a loaded actor the saved byte, which in the install saves is the class value (`AI-699`, `AI-722`). A spell cast at an actor with that side above 1 is placed by `MAGIC-449`; `MAGIC-451` lists the rows and `MAGIC-450` the spells that read the placed point. The collector reads only the ground occupant slot of each cell record: a
+a loaded actor the saved byte, which in the install saves is the class value (`AI-699`, `AI-722`). The summon's Units constructor `R0184` also stores `actor+0x3c`, and the zero constructor skips its call (`AI-844`, Medium); the builder helpers of a script cast store no Player, admission, order or Group word of the object each receives, and the builder body stores only the listed actor words (`AI-842`, `AI-843`). A spell cast at an actor with that side above 1 is placed by `MAGIC-449`; `MAGIC-451` lists the rows and `MAGIC-450` the spells that read the placed point. The collector reads only the ground occupant slot of each cell record: a
 domain-1 or 2 hostile is listed once per footprint cell inside the square, and a domain-3 hostile
 is not entered at the slot the collector reads: for a Dragon or Bat_Sonic created from `Data.bin`
 (`movementType` 3, `TERR-MOVE-055`, and `TERR-MOVE-057`, whose domain gloss was superseded and whose streamed cells stand) it is not listed (`AI-697`, Medium: stores to
@@ -192,4 +192,4 @@ A staged area spell's first stage runs one world step after the step that applie
 
 ## Scan radii, ranking and detection (first game)
 
-Guard post, defender cover and the Wimpy retreat check use the byte `mover+8` as block radius; the Withdraw retreat check uses the literal 2 (AI-810). Defender cover prefers fliers and reads no health or state (AI-812), by the edge-to-edge sub-cell distance (AI-813); group ties keep the first scanned candidate (AI-814); the retreat check shares invisibility detection across the group (AI-815).
+Guard post, defender cover and the Wimpy retreat check use the byte `mover+8` as block radius; the Withdraw retreat check uses the literal 2 (AI-810). Defender cover prefers fliers and reads no health or state (AI-812), by the edge-to-edge sub-cell distance (AI-813); group ties keep the first scanned candidate (AI-814); the retreat check shares invisibility detection across the group (AI-815); the filter `R0021` stores list-node words through its list argument (read as candidate links, Medium), has no order-word store in its own instructions, and calls `R0036` and `R1355` (AI-849).
