@@ -233,6 +233,22 @@ RU. Walk start L2.02867(unit, cell word, k) (200 instructions read, L2.02867 to 
 | R2-ENGINE-1968 | RU cell test L2.03831 read whole: the square of the unit's size byte from the cell, plane +0x10000 (flag nonzero) or +0x20000 (flag 0), each byte ANDed with block byte +5; any nonzero returns 0. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
 | R2-ENGINE-1969 | RU next cell L2.08469 returns the head word of list +0x1c8 only when it is at Chebyshev distance 1 from the unit, else 0; distance helpers L2.02442 and L2.01522 take the larger absolute axis difference. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
 | R2-ENGINE-1970 | Occupied goal cell: the static size-1 arm reads plane one, a cell with a nonzero byte under the unit's mask gets no cost; the local search reads plane two (R2-ENGINE-1761), flag-0 worker unread; empty local result, mode 1: +0x98 = 1. | Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1980 | RU group pass L2.00502 walks the list at global L2.00293 from its head by link order, and each entry's +0x28 group list the same way, running L2.00504 per entry; an earlier list entry ticks first. Insertion order unread. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1981 | RU L2.04380 gates the group pass L2.00502 (low four bits of session field +4 equal 6) and five other calls (12, among them slot +0x14 of each actor) on the one field; the group pass keeps its own count at +0xa4c. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1982 | RU actor state routine L2.00028 is slot +0x18 of at least two class tables (a third dword at L2.02947 is not attributed); the world phase L2.08447 calls it after the group pass in one L2.04380 call (R2-ENGINE-1740, 778). | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1983 | RU Guard A body L2.02464, read to its ret: group preparation, radius step, then per member: target +0x20 to planner L2.01530; else post reached and centred to L2.01733(m,1); else walk to post. No hit field read. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1984 | RU member walk of Guard A, Guard B, programmes 2 and 4: first member L2.04689, next L2.04690(group, prev); head node of the list at group +4 first, then node links. Each member takes all its cases before the next. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1985 | RU programme 2 body L2.02465 read to ret: sight, assignment, then per member planner on target +0x20, else L2.01733(m,1) when on the argument cell and centred, else walk to the argument cell. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1986 | RU programme 4 body L2.02467 read to ret: per member a release by L2.01576 that falls through to the +0x50 test: L2.01733(m,0) when +0x50 is set, else walk, footprint test L2.02114 and a distance-gated L2.01731. Branch conditions listed. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1987 | RU L2.02114(member, cell) returns 1 when L2.03520 is 0 for every footprint cell at the cell, else 0; L2.01576 sets command +0x50 = 1 after L2.01585 and L2.02636; L2.01731 is R2-ENGINE-1018's idle planner. | High / Medium | ● active (amended) | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1988 | RU L2.01724 runs L2.01726 on every unit of the list at machine +0xa50 object field +0xa456c, +4, then adds 2 to +0xa4c; no call, jump or absolute reference to it in the RU image. Four group bodies have 1, 1, 1, 2 direct call sites. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1989 | RU draw L2.02421(lo,hi) = lo + L2.02431() * (hi-lo+1) / [this] with signed division; L2.02431 forwards L2.01699 (read in R2-ENGINE-1630). Radius steps L2.05033 and L2.05034 call it with (-1,1). The divisor value is unread. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1990 | RU append L2.01727 copies a 0x54-byte record by value into a list node and links it; element destructors L2.06061 and L2.06283 read no record field in their windows; the L2.02419 tail compares +0x94 with half of +0x96. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1991 | RU programme 3 L2.02466: sight, assignment L2.05173, then per member L2.01530(member, target) when target +0x20 is nonzero, else L2.01531(member). It does not call the selector L2.01726. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1992 | RU assignment L2.02424: when L2.02502 is zero for the group or list +0xa68 (read as emptiness) it clears member targets +0x20; else it posts a kind 4 record and stores the strictly least L2.00057 score (R2-ENGINE-503). | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1993 | RU scorers L2.00057 and L2.05238 combine L2.01522 (larger of two values through unread L2.01523), L2.01728, table bytes at +0xa54, L2.02113 and L2.02405; the arithmetic is R2-ENGINE-503's, past these windows. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1994 | RU Guard setters L2.04403 and L2.02519 store the radius only when the argument is nonzero and above byte +0x2d; of the seven RU call sites in R2-ENGINE-1252, L2.07168, L2.07169, L2.07155 push 0 and L2.07170 is unread. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
+| R2-ENGINE-1995 | RU L2.03520(a, b) returns the AND of two low bytes; L2.01576 calls L2.01585 and L2.02636 then stores +0x50 = 1 on the member command. L2.01585 copies command byte 0 to byte 1 and stores +0x14 and +0x60 = 0. | High / Medium | ● active | [EXP-2218](../experiments/EXP-2218-rom2-groups/RESULTS.md) |
 
 ### R2-ENGINE-1960
 
@@ -369,6 +385,194 @@ Occupied goal cell. The static route builds (flag 1) read plane +0x10000 and the
 **Unknown.** The flag-0 size-1 workers and the larger-size arm. A run of the original: order a unit to walk to a cell held by a standing unit, one cell and then five cells away; sample block +0x90 and +0x98, the unit's cell and the route lists each walk call.
 
 **Evidence.** Composition of `pass2/listings/ru-repath-L2.05184.txt`, `pass8/listings/ru-plane-two-L2.03871.txt`, `ru-plane-one-L2.03872.txt` (under `experiments/EXP-2217-rom2-routes/evidence/native/`) and the cited claims.
+
+### R2-ENGINE-1980
+
+RU group pass `L2.00502` (this = the object at global `L2.02609`, the group machine of R2-ENGINE-1983: `pass3/refs.tsv` shows `mov ecx, dword ptr [L2.02609]` before the call at `L2.05966`, as R2-ENGINE-778 and R2-ENGINE-1940 read; the identity of that object with the session `[L2.01317]` is not established, R2-ENGINE-1252; its argument is the global at `L2.00293`, pushed with `push ecx` at `L2.09099` after `mov ecx, [L2.00293]`) takes its first entry with `L2.05824`, calls the entry pass `L2.00504` on it, and takes the next entry with `L2.04686(previous)`, until the call returns 0 (`jmp L2.09100` loop, committed earlier listing). The first-entry helper `L2.05824` calls `L2.00311`, which returns 0 when `L2.09101` (read in `pass3`, `ru-tmpl-empty-545890`: it returns 1 when list field +0xc is 0, the emptiness test) returns nonzero and otherwise the payload at node +8 of the head node, the word at list +4 (`L2.09102`). The next-entry helper `L2.04686` searches from the head for the node whose payload dword equals the previous entry (`L2.09103`: start at list +4, follow the dword at node +0, compare through `L2.09104`, which sets al when two dwords are equal), then moves to the node's successor (`L2.09105` stores the dword at node +0 and returns node +8). The entry pass `L2.00504` takes each entry's group list at entry +0x28 with `L2.09106` and `L2.09107`; these have the same instruction sequence as `L2.05824` and the next-entry helper's first window (`L2.09108` equals `L2.00311` over 30 instructions, `L2.09109` equals `L2.09105` over 30, and `L2.04791` equals `L2.09103` to its `ret 8`, the first difference being at instruction 43 of 60; `derived/q1-helper-cmp.txt`). So an entry earlier in link order from list +4 has its groups run before a later entry, and groups of one entry run in link order. The list object keeps head at +4, tail at +8 and count at +0xc in the unlink bodies read (`L2.09110`, `L2.09111`, `L2.04540`).
+
+**Confidence.** High for the call order and the head-to-successor traversal in RU. Medium that the global at `L2.00293` holds the players of the session on this card's own reads: the by-id lookup `L2.07856` compares a word at entry +4 with an id, and the global is stored once outside a zeroing (`L2.09112`, in a constructor path read as a window only). R2-ENGINE-154 (High / Medium) reads the global owner collection stored at RU `L2.00293`, R2-ENGINE-510 reads it as the owner list of the type-10 pass and R2-ENGINE-788 reads the sender walking the players `[L2.00293]`; those claims name the global as the owner collection at their grade, and this card adds no read against them. The EN twin was not read.
+
+**Unknown.** Which end a new entry is added at, hence which player ticks first; the add methods of this list class were not found in `L2.09113` to `L2.09114` or `L2.09115` to `L2.09116`. A run of the original with two players placed on one map in the map file's order, logging which player's group runs first, settles it.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass1/listings/ru-list-first-L2.05824.txt`, `ru-list-next-L2.04686.txt`, `ru-sub-first-L2.09106.txt`, `ru-sub-next-L2.09107.txt`; `pass2/listings/ru-tmpl-first-L2.00311.txt`, `ru-tmpl-first2-L2.09108.txt`, `ru-tmpl-find-L2.09103.txt`, `ru-tmpl-adv-L2.09105.txt`, `ru-tmpl-find2-L2.04791.txt`, `ru-tmpl-adv2-L2.09109.txt`, `ru-players-by-id-L2.07856.txt`, `ru-players-create-L2.09112.txt`; `pass3/listings/ru-tmpl-empty-L2.09101.txt`, `ru-tmpl-head-L2.09102.txt`, `ru-tmpl-eq-L2.09104.txt`, `ru-tmpl-adv3-L2.09117.txt`; `pass4/listings/ru-tmpl-methods-L2.09115.txt`, `pass5/listings/ru-tmpl-methods-L2.09113.txt`; earlier listing `experiments/EXP-2146-rom2-order-machine/evidence/generated/win/ru-groupsched-before-L2.06034.lst`; `derived/q1-helper-cmp.txt`.
+
+### R2-ENGINE-1981
+
+RU `L2.04380` (this = the session object, called at `L2.04409`, `L2.09023`, `L2.09024` and `L2.06230`, each after `mov ecx, [L2.01317]`; `pass3/refs.tsv`) returns at once when its field +0x94 is 0, then reads the same field +4 twice. After the group pass (`cmp eax, 6`, `jne` at `L2.09118`) it tests the signed low four bits of field +4 against 12 (`cmp eax, 0xc`, `jne L2.06033` at `L2.09119`); at 12 it calls `L2.04378` (this = the global at `L2.00326`), `L2.06029` (this = field +0x7c), `L2.06030` (this = the global at `L2.00293`), `L2.06031` and `L2.06032`. So the group pass has no separate gating counter: it and the 12 branch read the one field. The increment is `L2.04406` (adds 1 to field +4, then calls `L2.00236`, `L2.08447`, `L2.04426` with this = `L2.00326`, and `L2.09120`); R2-ENGINE-778 reads that `L2.04380` calls it after the 6 and 12 branches on every call. Two bodies advance a field +0xa4c: `L2.00502` adds 1 to the +0xa4c of its object at global `L2.02609` (`L2.09121`) once per group pass, and `L2.01724` adds 2 to the +0xa4c of its machine (R2-ENGINE-1988); that both are the one object is not established here. `L2.00502` divides by its +0xa4c only in a block that runs when the dword the global at `L2.01317` points to through +0x170 is nonzero (`L2.09122`), which formats a text through `L2.09123`; the block was read only to its first calls. `L2.04378` walks the list at argument +4 with an iterator (`L2.06151`, `L2.00209`, `L2.00213`) and calls the virtual at +0x14 of each element (`call dword ptr [eax + 0x14]` at `L2.09124`), then walks a second list at the session's field +0x7c's +0xc and calls `L2.02525`. The slot +0x14 (slot 5) holds `R2.0022` at three dword sites per R2-ENGINE-1204 (committed there; the dword run of this experiment's pass 2 is not committed), two of them in the class tables whose base a constructor stores (`L2.02314`, `L2.06391`; R2-ENGINE-1982). `R2.0022` is a unit routine that tests unit fields +0x54, +0x94, +0x96 and +0x98 and compares the session word at +0 with unit +4 both reduced to two bits, so it is not the actor state routine `L2.00028`.
+
+**Amends.** R2-ENGINE-1016: the Unknown on which counter the group pass and the actor step use is narrowed: the group pass and the 12 branch share session field +4; the order of `L2.00028` against the group pass is read in R2-ENGINE-1982. R2-ENGINE-778, R2-ENGINE-776, R2-ENGINE-1204: the same field +4 branches, the `L2.04406` increment and the slot +0x14 walk of `L2.04378` are read there; this card adds the four call sites of `L2.04380` and the shared-field statement. R2-ENGINE-778's single read caller site of the increment stays as read there.
+
+**Confidence.** High for the RU branches and calls (R2-ENGINE-778, R2-ENGINE-776 and R2-ENGINE-1204 read them at High). Medium for the meaning of `R2.0022`, which was read to instruction 80 only (R2-ENGINE-1204 reads its sites at High and the refill meaning at Medium), and for the diagnostics role of the `+0x170` block. Medium that every element of the list walked by `L2.04378` is of one of the classes whose slot 5 holds `R2.0022` (R2-ENGINE-1204 infers three bases; this card found constructor stores for two). EN unread.
+
+**Unknown.** How many server steps one count of field +4 is (R2-ENGINE-778 and R2-ENGINE-1204 give seconds at Medium): a run of the original that logs the count of field +4 against `L2.00502` entries per second settles it.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass1/listings/ru-step12-L2.04378.txt`, `ru-step12-L2.06030.txt`, `ru-step12-L2.06029.txt`, `ru-step12-L2.06031.txt`, `ru-step12-L2.06032.txt`, `ru-counter-L2.04406.txt`; `pass3/listings/ru-vt14-R2.0022.txt`, `pass3/refs.tsv`; earlier listings `experiments/EXP-2146-rom2-order-machine/evidence/generated/win/ru-sched-parent-L2.05966.lst`, `ru-groupsched-2-L2.06035.lst`.
+
+### R2-ENGINE-1982
+
+RU `L2.00028` (a routine beginning with a switch whose arms jump to `L2.05539`) appears as a dword at three sites, `L2.02945`, `L2.02946` and `L2.02947` and nowhere else as a call target or immediate in the scan of the RU image (`pass1/refs.tsv`: three `abs-dword` rows). Constructor immediates store the bases `L2.02314` (six sites, `L2.09125` to `L2.09126`) and `L2.06391` (three sites, `L2.09127` to `L2.09128`; `pass3/refs.tsv`), so `L2.00028` is at +0x18 of those two. Two constructor stores of bases `L2.02314` and `L2.06391` were found. The third dword `L2.02947` implies a base `L2.00218`; no search for that immediate was run. Its call to `L2.00506` (the unit tick) is at `L2.01569` with this = the global at `L2.02609` (`pass1/refs.tsv`); the only other call site of `L2.00506` is a recursive call at `L2.02879` inside it. The caller of slot +0x18 is the world phase: R2-ENGINE-1740 reads RU `L2.08447` walking container +0x2c and calling vtable slot +0x18 of each unit (`L2.02945` holds `L2.00028`); R2-ENGINE-1981 reads `L2.08447` as called by `L2.04406`, and R2-ENGINE-778 reads `L2.04406` after the group pass inside one call of `L2.04380`. So within one call of `L2.04380` the group pass runs first when the count is 6, then the increment and the world phase with the slot +0x18 walk. R2-ENGINE-1073 (EN, High) counts the actor step once per counter value.
+
+**Amends.** R2-ENGINE-1740: the world phase `L2.08447` calls slot +0x18; `L2.00028` is that slot in the table at `L2.02314`. R2-ENGINE-778: the order inside one call of `L2.04380` is stated from its bodies.
+
+**Confidence.** High for the dword, immediate and call sites in RU and for the bases of the two tables. Medium for the slot number of the third dword (no search for its base). Medium for the order against the group pass: the bodies are read at High in R2-ENGINE-778 and R2-ENGINE-1740, and this card composes them; that every actor sits in container +0x2c is not read here.
+
+**Unknown.** The base of the third dword (a search for the immediate `L2.00218`) and the actors outside container +0x2c, if any; a run of the original that logs `L2.00028` and `L2.00502` entries in order for one session settles the order directly.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass1/refs.tsv`, `pass3/refs.tsv`, `pass1/listings/ru-actor-L2.00028.txt`, `pass2/listings/ru-actor-unit-tick-L2.01569.txt`.
+
+### R2-ENGINE-1983
+
+RU Guard A `L2.02464` (this = the group machine, argument at `[ebp+8]` = the group, `ret 4` at `L2.09129`; window `pass6/windows.tsv`) runs in this order: `L2.02475(group)` with the result stored in a local that nothing in the body reads, sight `L2.02473`, leash `L2.02474` with the word at programme +0x28 and the byte at programme +0x2d, assignment `L2.02424`, then the first member `L2.04689(group)`. The radius step follows the first-member test (`cmp [ebp-8], 0; je L2.09130`): with a member and programme +0x30 zero (`cmp [ecx+0x30], 0; jne L2.09131`) it calls `L2.05033` and writes +0x34 = 0, else it adds 1 to +0x34; it then writes +0x30 = 1. With no member and +0x30 nonzero (`je L2.09132`) it calls `L2.05034` and writes +0x34 = 0, else adds 1 to +0x34; it then writes +0x30 = 0. The member loop (`L2.09133`): command = `[member+0x1c4]`; command +0x20 nonzero (`cmp [ecx+0x20], 0; je L2.09134`) calls the planner `L2.01530(member, target)`; otherwise, when `L2.01521(member+0x10)` equals the word at command +0 (`cmp eax, ecx; jne L2.09135`) and `L2.00490(member+0x10)` is nonzero (`test eax, eax; jne L2.09136`) it calls `L2.01733(member, 1)`; in every other case it calls `L2.02401(member, word at command +0)`. The next member is `L2.04690(group, member)` and the loop ends on 0 (`je L2.09137`). The body reads no command +0x94..+0xa0 field and no command +0x30 or later field; of the command block it reads +0, +0x20 only.
+
+**Amends.** R2-ENGINE-844: its one sentence that Guard A has only cases 3 and 6, read for Guard B, and the page's "RU Guard A body not read" are replaced by this body; the case order, the walk and `L2.01733` stay as R2-ENGINE-844 reads them. R2-ENGINE-824's EN mode-1 arm is not reread. R2-ENGINE-1076: adds the operands, offsets and branch labels; the branch order stands as read there (R2-ENGINE-1076 reads Guard A whole at High; R2-ENGINE-1622 reads `L2.05033` and the Guard A member loop at High).
+
+**Confidence.** High for the RU body, order, operands and branches. Medium for what `L2.05033`, `L2.05034`, `L2.01530`, `L2.02475`, `L2.02473`, `L2.02474` and `L2.02424` store beyond what R2-ENGINE-843, R2-ENGINE-841 and R2-ENGINE-505 read; the radius stores are those of R2-ENGINE-843. EN unread in this experiment.
+
+**Unknown.** A zero word at command +0 (no post): the walk goes to cell 0; the run that settles it is a map with a Guard A group whose post word is 0, logging the cell the member walks to.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass6/listings/ru-guardA-L2.02464.txt` (lines to `L2.09129`), `pass7/listings/ru-radstep-L2.05033.txt`, `ru-radstep-L2.05034.txt`, `pass10/listings/ru-radstep-full-L2.05033.txt`, `pass7/listings/ru-cell-L2.01521.txt`, `ru-flag-L2.00490.txt`, `ru-walk-L2.02401.txt`, `ru-stand-L2.01733.txt`.
+
+### R2-ENGINE-1984
+
+RU `L2.04689(group)` forwards to `L2.05041`: when `L2.05043` returns 1 (list field +0xc compared with 0, `sete`) it returns 0, otherwise the payload at node +8 of the node at list field +4 (`L2.05044`). `L2.04690(group, previous)` calls `L2.00322(previous, 0)`, which starts at list field +4 and follows each node's first dword until the compare helper `L2.00324` accepts the payload at node +8, and returns 0 when none matches; then `L2.09138` replaces the node with its first-dword successor, the result is 0 when that successor is 0, else the payload at successor +8 (`L2.09139`). So a member loop built from the pair visits members from the head node along the node links, and a member that appears twice resumes from its first occurrence. The loops that use the pair are Guard A (`L2.09133`), Guard B (`L2.09140`, back-jump `L2.09141`), programme 2 (`L2.09142`, back-jump after `L2.04690`) and programme 4 (`L2.09143`, back-jump `L2.09144`). In each, all the cases of the member run before the next member is taken; Guard B's case list (R2-ENGINE-844) is therefore evaluated per member in the list order, not case by case across the members. Insertion order of that list class is Unknown (R2-ENGINE-1980).
+
+**Confidence.** High for the RU bodies of the five helpers and the four loops. Medium that the payload equality helper `L2.00324` is an equality on the member pointer (not read). The EN twins were not read.
+
+**Unknown.** Which group member the list holds first for a group the map file defines: a run of the original with a three-member Guard B group logging the order of the walk calls on one group tick settles it.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass7/listings/ru-memberfirst-L2.04689.txt`, `ru-membernext-L2.04690.txt`; `pass8/listings/ru-list-L2.05041.txt`, `ru-list-L2.00322.txt`, `ru-list-L2.09139.txt`, `ru-list-L2.09138.txt`; `pass9/listings/ru-list-head-L2.05044.txt`, `ru-list-empty-L2.05043.txt`; `pass6/listings/ru-guardA-L2.02464.txt`, `ru-guardB-L2.02470.txt`, `ru-prog4-L2.02467.txt`; `pass7/listings/ru-guardB-tail-L2.09145.txt`, `ru-prog4-tail-L2.09146.txt`.
+
+### R2-ENGINE-1985
+
+RU programme 2 `L2.02465` (arguments: the group at `[ebp+8]`, a cell word at `[ebp+0xc]`; `ret 8` after the loop) calls sight `L2.02473(group)`, assignment `L2.02424(group)` and takes the first member. Per member: command +0x20 nonzero (`je L2.09147`) calls `L2.01530(member, target)`; otherwise, when `L2.01521(member+0x10)` equals the argument word (`cmp eax, ecx; jne L2.09148`) and `L2.00490(member+0x10)` is nonzero (`jne L2.09149`) it calls `L2.01733(member, 1)`; otherwise `L2.02401(member, argument word)`. Then `L2.04690(group, member)` and the back-jump to `L2.09142`. The window to the `ret 8` is `pass7/listings/ru-guardB-tail-L2.09145.txt` and `pass8/listings/ru-prog2-tail-L2.09150.txt`. The caller `L2.03491` is the only direct call site (R2-ENGINE-1988); the source of the argument word is not read here.
+
+**Confidence.** High for the RU body. Medium for the argument word being the group point at +0xa that R2-ENGINE-882 names (the pushes at `L2.09151` were not read). Medium for the callees' effects beyond R2-ENGINE-844.
+
+**Unknown.** The argument word's source; the run that settles it is a programme 2 group with a known point logging the `L2.02465` argument.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass7/listings/ru-guardB-tail-L2.09145.txt` (the `L2.02465` body begins in it), `pass8/listings/ru-prog2-tail-L2.09150.txt`, `pass9/refs.tsv`.
+
+### R2-ENGINE-1986
+
+RU programme 4 `L2.02467` (this = the group machine, arguments: the group at `[ebp+8]` and a word at `[ebp+0xc]`; `ret 8` at `L2.09152`) calls `L2.04666(group)`, stores that result and the two bytes of the word into three locals that the body does not read, then takes the first member. Per member, with command = `[member+0x1c4]` and unit block = `[member+0x1c0]`: (1) when `L2.01521(member+0x10)` equals command word +0xa (`jne L2.09153`), `L2.00490` is nonzero (`je L2.09153`) and command +0x50 is 0 (`jne L2.09153`), it calls `L2.01576(member)` and writes unit block +0x90 = 0, then falls through to test (3) at `L2.09154`; (2) otherwise, when unit block +0x90 is nonzero (`je L2.09154`) and the word at unit block +0x76 equals the member's cell (`cmp esi, eax; jne L2.09154`), it calls `L2.01576(member)` and writes +0x90 = 0 and falls through to (3); (3) command +0x50 nonzero (`je L2.09155`) calls `L2.01733(member, 0)` and goes to the next member, so after a release (command +0x50 = 1, R2-ENGINE-1995) the member takes `L2.01733(member, 0)` in the same pass; (4) otherwise: when the byte at programme +0x44 of the group is nonzero it writes command +0x6c = 1; then it calls `L2.02401(member, command word +0xa)` and `L2.02114(machine +0xa50 object; member, argument word)` (`L2.09155` to `L2.09156`, for every member that reaches (4)); a nonzero result goes to the next member; (5) at result 0, when command word +0xa equals the argument word (`jne L2.09157`) and `L2.01522(machine +0xa50 object, member cell, argument word)` masked to a byte is below 2 (`cmp eax, 2; jge L2.09157`), it calls `L2.01731(member)`. The next member is `L2.04690(group, member)` with the back-jump `L2.09144`; the loop ends on 0 (`je L2.09158`). The body reads no command +0x20 field. Programme 4 is called at `L2.06149` and `L2.06152` (R2-ENGINE-1988).
+
+**Amends.** R2-ENGINE-1076: adds the operands, offsets and branch labels; the branch order stands as read there.
+
+**Confidence.** High for the RU body, operands and branch order. Medium for the meaning of the argument word (not read at the callers) and for the callees' effects (R2-ENGINE-1987, R2-ENGINE-1995). `L2.01522` is read whole (R2-ENGINE-1993); the callee `L2.01523`, called twice in it, is unread in this experiment and in R2-ENGINE-844, so the absolute-value reading is by inference; R2-ENGINE-503 states a Chebyshev distance at High.
+
+**Unknown.** The run of the original that settles the branch composition: a programme 4 group with a blocked and a free cell, logging command +8, +0xa and +0x50 for each member over three group ticks.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass6/listings/ru-prog4-L2.02467.txt`, `pass7/listings/ru-prog4-tail-L2.09146.txt` (to `L2.09152`), `pass8/listings/ru-sess-L2.01522.txt`, `ru-sess-L2.02114.txt`, `pass9/refs.tsv`.
+
+### R2-ENGINE-1987
+
+RU `L2.02114(member, cell)` (this = machine +0xa50 object) takes the footprint size from the member's virtual slot +0x1c (low byte), loops both axes over 0 to size - 1, and for each cell (the argument cell plus x plus y shifted left 8, with the plane byte at unit block +5) calls `L2.03519` and `L2.03520` on the byte read; the first nonzero `L2.03520` result returns 0, and when all are zero it returns 1. `L2.01576(member)` calls `L2.01585(member)` and `L2.02636(member)`, then writes command +0x50 = 1; the siblings at `L2.01584`, `L2.02858` and `L2.02880` are separate bodies (one writes +0x50 = 0). `L2.01731(member)` is the idle planner that R2-ENGINE-1018 reads to its return; this experiment's window (`pass8/listings/ru-stand0-L2.01731.txt`) reproduces its opening (`L2.01728`, `L2.06151`, `L2.02404`, the list at machine +0xa64, scorer `L2.00057(member, candidate)` with the score 0xffffff as a skip) and adds nothing to that card. `L2.01733(member, 0)` calls it, and `L2.01733(member, 1)` calls `L2.01531` (R2-ENGINE-844).
+
+**Confidence.** High for the local bodies of `L2.02114` (R2-ENGINE-1625 reads it at High) and `L2.01576`. `L2.03520` is read in R2-ENGINE-789 and R2-ENGINE-1968 (the plane byte ANDed with the pushed block byte; a nonzero result fails the cell), and `L2.01585`, `L2.01584`, `L2.02636` and `L2.02637` in R2-ENGINE-880, R2-ENGINE-1020 and R2-ENGINE-1199 (the release ends with order 0xc, R2-ENGINE-541); R2-ENGINE-1925 reads the hook calling `L2.01585` then `L2.02636` and storing `+0x50 = 1`; those grades hold. `L2.01731` is graded as in R2-ENGINE-1018.
+
+**Unknown.** `L2.03519` and the meaning of +0x50 beyond the release stores of R2-ENGINE-1925.
+
+**Amends.** R2-ENGINE-1625: `L2.02114` is read there at High; this card repeats the body and adds the offsets. R2-ENGINE-789, R2-ENGINE-1968: `L2.03520` is read there. R2-ENGINE-880, R2-ENGINE-1020, R2-ENGINE-1199, R2-ENGINE-1925: the release bodies are read there; none narrowed.
+
+**Amended.** R2-ENGINE-1995 states the same reads of `L2.03520`, `L2.01585` and `L2.02636`.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass8/listings/ru-sess-L2.02114.txt`, `ru-stand0-L2.01731.txt`, `pass7/listings/ru-clear-L2.01576.txt`.
+
+### R2-ENGINE-1988
+
+RU `L2.01724` (this = the machine) calls `L2.06036` on this +8, then takes the first element of the list at `[[this+0xa50]+0xa456c]+4` with `L2.04689`, calls `L2.01726(element)` on it and takes the next with `L2.04690` until 0, adds 1 to field +0xa4c, calls `L2.06037` on this +8, copies +0x30 and +0x34 to locals, writes +0x8b0 = 0, +0x8b4 = 0, byte +0xa48 = 0 and adds 1 to +0xa4c again (`ret` at `L2.09159`). This +0xa4c is that of this card's machine; the group pass `L2.00502` adds 1 to the +0xa4c of the object at global `L2.02609` (R2-ENGINE-1981), so two bodies advance a +0xa4c, by 1 per group pass and by 2 per loop run, and that the two objects are one is not established. The reference scan of the RU image for `L2.01724` (direct near call, jump and conditional jump targets by a linear sweep of the code sections, and a four-byte occurrence of the address in any section, any alignment) found none (`pass9/refs.tsv` has no row for it). The same scan found these direct call sites: `L2.03490` for `L2.02464`, `L2.03494` for `L2.02470`, `L2.03491` for `L2.02465`, `L2.06149` and `L2.06152` for `L2.02467`, and no absolute occurrence of any of the four.
+
+The scan agrees with R2-ENGINE-1017's (E8/E9 and dword scans over the RU image); this experiment's scan is a second run of the same forms and changes no grade of that claim.
+
+**Confidence.** High for the body and the scan result in RU. Medium that the loop is not reached through a register call or a table built at run time (the grade of R2-ENGINE-1017 stays). EN unread.
+
+**Unknown.** The caller of `L2.01724`: a run that logs entries of `L2.01724` against the session counter settles it.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass9/listings/ru-unitloop-L2.01724.txt`, `pass9/refs.tsv`.
+
+### R2-ENGINE-1989
+
+RU `L2.02421(lo, hi)` (this = an object whose first dword is the divisor) calls `L2.02431`, computes (hi - lo + 1) times its result, divides with `idiv [this]` (signed) and adds lo. `L2.02431` calls `L2.01699` and returns. Both radius steps `L2.05033` and `L2.05034` call it on the group machine with (-1, 1) and store the byte at programme +0x2d as +0x38 plus the draw (`L2.05033` also adds 4), and the listing's `idiv dword ptr [ecx]` takes `ecx` = the radius step's `this`, so the divisor is the first dword of the group machine that both radius steps pass. `L2.01699` is read in R2-ENGINE-1630 (range 0 to 0x7fff); the divisor `[this]` is unread, and R2-ENGINE-1622 states that no read body initialises it.
+
+**Amends.** R2-ENGINE-1630, R2-ENGINE-1622: same bodies; this card adds that both radius steps pass the group machine as `this`. R2-ENGINE-843's `lea eax, [esi + eax + 4]` at `L2.05046` is read there.
+
+**Confidence.** High for the arithmetic and the call arguments in RU. Medium for the range of the draw: it depends on the divisor, which is unread (R2-ENGINE-1622 reads -1..1 for a divisor 0x8000 and -1..2 for 0x7fff); R2-ENGINE-843's {-1,0,1} reading stays Medium.
+
+**Unknown.** The divisor `[machine]`: a run logging it and the draw results of `L2.02421` settles it.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass8/listings/ru-draw-L2.02421.txt`, `pass10/listings/ru-rand-L2.02431.txt`, `ru-radstep-full-L2.05033.txt`, `pass7/listings/ru-radstep-L2.05034.txt`.
+
+### R2-ENGINE-1990
+
+RU `L2.01727` (this = a list object; the record is the 21 dwords on the stack) calls `L2.05849(this, [this+8], 0)` for a node, copies 0x15 dwords (`rep movsd`) from the stack argument to node +8, links the node (previous tail `[this+8]` gets the node as its first dword, or `[this+4]` when the list is empty) and stores the node in `[this+8]` (window of 40 instructions, ends at `L2.09160`). `L2.06061(first, count)` calls `L2.06283(0)` on each element at a stride of 0x54 and `L2.06283` calls `L2.07817` and frees when its flag bit 0 is set; none of the three reads a record field in its window. R2-ENGINE-1942 reads the RU record destructor `L2.07817` and finds it empty; this card's windows of `L2.01727`, `L2.06061` and `L2.06283` agree with it. `L2.02419` beyond its window is unread. The hit hook's helper `L2.02419` (this = a table whose bytes at `this + 8 + 0x46*a + b` are indexed by the two units' player bytes at `[[unit+0x14]+4]`) tests a cell with `and 3` against zero (`jne L2.09161`), ors 1 into the cell, may call `L2.05827` on the two units' `+0x14` objects, and its read tail (the pass 12 window, `L2.09162` to `L2.09163`, ends at `L2.09163`) tests `[ebp+0x10]` and command `+0xac <= 0xa`, then compares word `+0x94` with half of word `+0x96` of the second unit (`cdq; sub; sar 1`); the rest is unread.
+
+**Confidence.** High for the three bodies as windowed. Medium for completeness of `L2.02419`.
+
+**Unknown.** The tail of `L2.02419` and any reader of a record before the clear: a run logging reads of `+0xbbec` nodes settles it.
+
+**Amends.** R2-ENGINE-1021's reader Unknown narrowed only: the append and destructor bodies read no field. R2-ENGINE-1942: none narrowed; same reads repeated.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass11/listings/ru-post-L2.01727.txt`, `ru-free-L2.06061.txt`, `ru-hitcallee-L2.02419.txt`, `pass12/listings/ru-hittail-L2.09164.txt`, `pass13/listings/ru-elem-L2.06283.txt`.
+
+### R2-ENGINE-1991
+
+RU programme 3 `L2.02466` (this = the machine, group at `[ebp+8]`, `ret 4` at `L2.09165`) calls sight `L2.02473(group)`, assignment `L2.05173(group)`, takes the first member with `L2.04689`; per member, when `[[member+0x1c4]+0x20]` is nonzero (`je L2.09166`) it calls `L2.01530(member, target)`, else `L2.01531(member)`; next member with `L2.04690`. The body contains no call of `L2.01726` or `L2.01724`. In the same window programme 19 `L2.02471` calls `L2.01531(member)` and programme 0xff `L2.02472` calls `L2.01733(member, 0)` per member.
+
+**Confidence.** High for the three bodies in RU. Medium for what `L2.01530` and `L2.01531` do and for whether a callee reaches the selector (R2-ENGINE-1017's census stays). EN unread.
+
+**Unknown.** The callees' reach of `L2.01726`.
+
+**Amends.** R2-ENGINE-882's table row for programme 3: the target branch is `L2.01530(member, target)`, which the row named only as the planner.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass11/listings/ru-prog3-L2.02466.txt`.
+
+### R2-ENGINE-1992
+
+RU assignment `L2.02424` (this = the machine, group at `[ebp+8]`, `ret 4` at `L2.09167`) calls `L2.02502` on the group and on `this+0xa68` and keeps the bytes. When `L2.02502` returns zero for the group or for the list at `+0xa68` (`je L2.09168`, `jne L2.09169`; read as the emptiness test from the branch shape, as in R2-ENGINE-1076 and R2-ENGINE-503), it clears `[[member+0x1c4]+0x20]` for every member and returns. Otherwise it stores `this+0xbd98 = 4` and `this+0xbdc4 = group`, copies the 0x54-byte block at `this+0xbd98` by value and calls `L2.01727` on `this+0xbbec` (R2-ENGINE-1990); then per member scores each element of the list at `this+0xa68` with `L2.00057(member, element)`, keeps the first element with a strictly smaller score than the best so far (start 0xffffff, `jge L2.09170` skips), and stores it at `[[member+0x1c4]+0x20]`, or 0 when no element scores below 0xffffff. It rejects no score by a distance bound; `L2.05173` (R2-ENGINE-1111) is the other assignment. Window of 120 instructions, whole body. R2-ENGINE-503 (High) reads the same selection, "strictly least score (first on a tie), or 0, and posts event 4 when enemies exist"; R2-ENGINE-881 and R2-ENGINE-1495 list the callers of `L2.02424`: Guard A `L2.05038`, Guard B `L2.05040`, programme 2 `L2.05233` and programme 5 `L2.05234`.
+
+**Amends.** R2-ENGINE-503, R2-ENGINE-881, R2-ENGINE-1495: same assignment body read in RU; this card adds the operands, the post of the 0x54-byte kind 4 block and the empty-list branch labels; none narrowed.
+
+**Confidence.** High for the body in RU. Medium for the sense of `L2.02502` (branch shape only). The score value is read in R2-ENGINE-503 at High and in R2-ENGINE-1993's helper windows.
+
+**Unknown.** Which of the two assignments serves each programme beyond the bodies read (programme 3 uses `L2.05173`; Guard A, Guard B, programme 2 and programme 5 call `L2.02424`, R2-ENGINE-881).
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass11/listings/ru-assign-L2.02424.txt`.
+
+### R2-ENGINE-1993
+
+RU scorers `L2.00057(a, b)` and `L2.05238(a, b)` (this = the machine) read `L2.01522(L2.01521(b+0x10), L2.01521(a+0x10))` on the object at `this+0xa50`, which is the larger of two values, each passed through `L2.01523` (unread; the absolute value is by inference, and R2-ENGINE-503 states a Chebyshev cell distance at High). They read the kind byte `L2.01728(unit)` (command `+0x78` index, a table row from `[unit+0x140]` via `L2.00040`, byte +9 when word `+0x9a` is not below row word +0xc), the virtual `+0x20` byte `L2.02402`, table bytes at `this+0xa54` indexed by those kinds and the object `L2.02113(a, b)` (differences of two word getters, sign and magnitude tests) and `L2.02405(x, y)` (byte difference folded at 0x80). The arithmetic is read in R2-ENGINE-503 (score = d x 256 plus the turn, preference table T at session `+0xa54`, p = 0 gives 0xffffff, p = 1 adds half and p = 4 subtracts a quarter under the size and Mind tests) and R2-ENGINE-1495 separates the two bodies; this card's windows (80 and 100 instructions) end before the final arithmetic of `L2.00057` and `L2.05238`, after `L2.09171` and `L2.09172`.
+
+**Amends.** R2-ENGINE-503, R2-ENGINE-881, R2-ENGINE-1495: the same bodies are read there whole in RU and EN at High; this card repeats the helper operands and changes no grade of them.
+
+**Confidence.** High for each read helper body and the operands. Medium for what the kind and table bytes mean (as in R2-ENGINE-503) and for `L2.01523` as an absolute value.
+
+**Unknown.** `L2.01523` and `L2.02113`'s contribution beyond the windows of this card; the final arithmetic is R2-ENGINE-503's.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass12/listings/ru-score-L2.00057.txt`, `ru-score-L2.05238.txt`, `ru-fn-L2.01522.txt`, `pass13/listings/ru-kind-L2.01728.txt`, `ru-pref-L2.02113.txt`, `ru-pref-L2.02405.txt`, `ru-byte-L2.02402.txt`.
+
+### R2-ENGINE-1994
+
+RU Guard A setter `L2.04403(group, r)` calls `L2.02842(group)`, `L2.02815(member)` for every member, stores byte `[[group+0x3c]+0x20] = 1`, calls `L2.04665(group)` and, when the low byte of `r` is nonzero and byte `[+0x2d]` is below it, stores `r` at `+0x2d` and `+0x38`. The Guard B setter `L2.02519` is the same with the programme byte 0x12. Of the seven RU call sites in R2-ENGINE-1252 (three Guard A, four Guard B), this card reads `L2.07168` (`push 0` as `r`), `L2.07169` (`push 0`) and the Guard B caller `L2.07155` (`push 0`, group from a list walk) as `push 0`, so the setter leaves the radius to the setup call `L2.04665` (unread here; R2-ENGINE-1252). `L2.07170` is unread and `L2.07166` passes record byte `+0xc` (R2-ENGINE-1252); R2-ENGINE-1252 also reads `L2.07163` (passes 0) and `L2.07164` (locally 0, Medium). `L2.02842`, `L2.04665` and `L2.02815` are unread.
+
+**Confidence.** High for the two setter bodies (the setter window of 50 ends at `L2.09173`) and for the three read arguments; Medium that `L2.07168` and `L2.07169` argument order is as stdcall pushes suggest. `L2.07170` is unread.
+
+**Unknown.** The radius delivered by `L2.04665` and the argument of `L2.07170`: the read of those and a run logging `r` settle it.
+
+**Amends.** R2-ENGINE-1252's Unknown on the arguments of the three Guard A setter callers: `L2.07168` and `L2.07169` read, `L2.07170` unread; and its unclassified Guard B caller `L2.07155`, read here as `push 0`.
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass12/listings/ru-setter-L2.04403.txt`, `ru-guardBcall-L2.07155.txt`, `pass13/listings/ru-setterB-L2.02519.txt`, `pass11/listings/ru-setcall-L2.07168.txt`, `ru-setcall-L2.07169.txt`.
+
+### R2-ENGINE-1995
+
+RU `L2.03520(a, b)` returns the AND of the low bytes of its two arguments (`ret 8`). `L2.01576(member)` calls `L2.01585(member)`, `L2.02636(member)` and stores `[[member+0x1c4]+0x50] = 1`. `L2.02636(member)` calls `L2.01584(member)` then `L2.02637(member)`. `L2.01585` copies command byte 0 to byte 1 when they differ, calls `L2.02822` when command word `+0x80` is nonzero, `L2.00490` is nonzero and the word differs from `L2.01521(+0x10)`, then stores `[[member+0x1c4]+0x14] = L2.01728(member)` and `[+0x60] = 0` (window of 60 instructions, does not reach its return). R2-ENGINE-880, R2-ENGINE-1020 and R2-ENGINE-1199 read `L2.01585`, `L2.01584` (14 instructions: calls `L2.01585`, stores `+0x50 = 0`), `L2.02636` and `L2.02637` (the order 0xc setter, R2-ENGINE-541); the release `L2.01576` therefore ends with order 0xc and `+0x50 = 1` (R2-ENGINE-1925 reads the hook storing `+0x50 = 1`). R2-ENGINE-789 and R2-ENGINE-1968 read `L2.03520` as the plane byte ANDed with the pushed block byte, a nonzero result failing the cell.
+
+**Amends.** R2-ENGINE-789, R2-ENGINE-1968: `L2.03520` is read there. R2-ENGINE-880, R2-ENGINE-1020, R2-ENGINE-1199: `L2.01585`, `L2.01584`, `L2.02636` and `L2.02637` are read there. R2-ENGINE-1925: the hook calling `L2.01585`, `L2.02636` and storing `+0x50 = 1` is read there. R2-ENGINE-1987's statement of `L2.03520`: the same byte AND (R2-ENGINE-789). No older grade is narrowed.
+
+**Confidence.** High for the windowed bodies, at the grades of the older claims for the repeated reads. Medium for the stores after this card's window of `L2.01585` that only the older claims read.
+
+**Unknown.** The body of `L2.02822`, called by `L2.01585` (named as a call in R2-ENGINE-880).
+
+**Evidence.** `experiments/EXP-2218-rom2-groups/evidence/native/pass12/listings/ru-fn-L2.03520.txt`, `ru-fn-L2.01585.txt`, `ru-fn-L2.02636.txt`.
 
 ## ROM2 targeting and the blow (EXP-2216)
 
@@ -1266,7 +1470,7 @@ The kill route takes the killer from victim `+0x40` for a unit in state 0x10 (R2
 | R2-ENGINE-1073 | EN actor step L2.00263 ran once per scheduler counter value for each of 30 units, from one return address; the counter advanced 16.1 per second in launch 1 and 32.1 in launch 2; server tick unmeasured. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 | R2-ENGINE-1074 | In one EN launch each player ground click moved the hero into a new Group object and wrote order 1; the left Group record read programme 0xff; order read 0xc afterwards. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 | R2-ENGINE-1075 | EN L2.04984's return L2.06121 lies in idle planner L2.05941's no-candidate arm, L2.06122 in programme-3 route L2.04959; six E8 callers; which reached it for the hero in launch 1 is Unknown (launch 2: R2-ENGINE-1078). | High / Medium / Unknown | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
-| R2-ENGINE-1076 | RU programme 4 L2.02467 and Guard A L2.02464 read whole: programme 4: route end, walk or idle planner; Guard A: attack planner, L2.02401 or L2.01733(member, 1); empty-Group 0xff store at L2.05243; scorer L2.05238 Unknown. | High / Medium / Unknown | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
+| R2-ENGINE-1076 | RU programme 4 L2.02467 and Guard A L2.02464 read whole: programme 4: route end, walk or idle planner; Guard A: attack planner, L2.02401 or L2.01733(member, 1); empty-Group 0xff store at L2.05243; scorer L2.05238 Unknown. | High / Medium / Unknown | ● active (amended) | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 | R2-ENGINE-1077 | Masked RU-to-EN comparison of the table's bodies: 16 pairs equal through 256 instructions, 7 differ at a later index; EN twins of L2.02466 and L2.02473 are fixed; L2.05852 stays ambiguous. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 | R2-ENGINE-1078 | Second EN launch, save game0006: with no attack order the hero read order 0xc, state 3 and another owner's unit at +0x5c; loop L2.04213 stayed at 0; idle planner entries came from L2.06123 (479) and L2.06124 (2). | High / Medium / Unknown | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 
@@ -1725,6 +1929,8 @@ RU `L2.04380` (`win/ru-sched-parent-L2.05966.lst`, 196 instructions) returns at 
 
 **Unknown.** Seconds per tick; the RU scheduler above `L2.04380` past R2-ENGINE-778's one read caller site `L2.04409`; where the actor step `L2.00028` (three raw `.rdata` dwords `L2.02945`, `L2.02946`, `L2.02947`, which do not identify vtables or a dispatch, R2-ENGINE-558; dispatch site unread) is scheduled relative to the Group pass. Finding what calls `L2.00028` settles it.
 
+**Amended.** R2-ENGINE-1981 reads the same field +4 in the 12 branch and R2-ENGINE-1980 the argument list walk; the Unknown on the actor step's schedule is narrowed in R2-ENGINE-1981 and R2-ENGINE-1982 (the order inside one call of the session tick is stated there at Medium from R2-ENGINE-778 and R2-ENGINE-1740), not settled.
+
 **Amended.** R2-ENGINE-1493 reads the EN tick body (equal after masking) and the early return as the unit of the
 Guard B window; the Unknown on seconds stands.
 
@@ -1789,6 +1995,8 @@ A linear sweep of RU `.text` for any operand with displacement or immediate 0xbb
 **Amended.** R2-ENGINE-1451 reads the EN drain `L2.03651` that empties the same list; no reader before the clear is read, so this card stays Medium.
 
 **Amended.** R2-ENGINE-1942 repeats the census in both roots with the memory-operand and immediate forms separate (nine immediate sites per root, no memory operand), reads the constructor, append, clear and destructor bodies, and finds the RU record destructor empty; the unread callers of the two helpers stay open there.
+
+**Amended.** R2-ENGINE-1990 reads the RU append `L2.01727` and the element destructors `L2.06061` and `L2.06283`: none reads a record field in its window.
 
 **Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 4.
 
@@ -1933,6 +2141,8 @@ E8/E9 callers, RU (`scan/ru-callers-item7.tsv`): `L2.02464` only at `L2.03490`; 
 **Unknown.** The decision of scorer `L2.05238` per value, which units the assignment and group sight admit (body of `L2.02119`, `L2.02416`, `L2.00205`), and what ends a pursuit (the attack planner's endings, R2-ENGINE-1044, stay open). Reading those bodies against their callers settles it.
 
 **Amends.** R2-ENGINE-1040's unread writer at `L2.05243` and R2-ENGINE-882's unread programme 1 (Guard A).
+
+**Amended.** R2-ENGINE-1983 and R2-ENGINE-1986 add the operands, offsets and branch labels of Guard A and programme 4; the branch order stands as read here.
 
 **Evidence.** [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md).
 
@@ -24372,6 +24582,8 @@ starts order 11 (R2-ENGINE-505), and what `L2.00044`, `L2.01513` and
 
 **Amended.** R2-ENGINE-876 narrows the case-5 Medium: the block that starts case 5 (+0x9e from 0, +0xa0 = post plus a random offset) follows xor eax, eax; je in RU as in EN, so no read body starts it on the listed path, and the census-traced sites of +0x9e and +0xa0 lie only in this case (untraced sites are unclassified). R2-ENGINE-873 places the +0x16 writer read by cases 1 and 2 in the route search. The other clauses and grades stand.
 
+**Amended.** R2-ENGINE-1983 reads the RU Guard A body `L2.02464` itself: the Guard A member loop takes the planner on a target, else `L2.01733(member, 1)` on the centred post, else the walk, which is the sentence above for Guard A with the RU operands read.
+
 **Evidence.** [EXP-2118](../experiments/EXP-2118-rom2-aggro/RESULTS.md)
 
 ### R2-ENGINE-845
@@ -27164,6 +27376,8 @@ nonzero skips it).
 
 **Amends.** R2-ENGINE-507's Medium on the EN value mapping (EN tables read);
 R2-ENGINE-874's "programmes 2, 3, 4, 5, 17, 19 and 0xff are not read here".
+
+**Amended.** R2-ENGINE-1991 reads the RU programme 3 body: the target branch is `L2.01530(member, target)`.
 
 **Evidence.** [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md)
 
@@ -31097,6 +31311,8 @@ zero-instruction decodes and is exhausted.
 
 **Amends.** R2-ENGINE-843's Unknown on the setter's callers and compared value,
 and R2-ENGINE-788's Unknown on configuration source/value, narrowed only.
+
+**Amended.** R2-ENGINE-1994 reads three of the seven RU setter call sites listed here (RU L2.07168, L2.07169 and L2.07155 push radius 0); L2.07170 stays Unknown.
 
 **Evidence.** [EXP-2168](../experiments/EXP-2168-rom2-guard-summon/RESULTS.md), question 1.
 

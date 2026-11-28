@@ -96,8 +96,9 @@ and `ord+0x08` 0. — AI-450, AI-451
 
 The script Guard command calls the same setter with the low byte of its node's Par1. A
 nonzero argument replaces MinimalGuardRange as the floor, so that radius is
-max(`+0x2c`, Par1) with no minimum of 8; the other five direct callers pass 0.
-— AI-792, AI-793
+max(`+0x2c`, Par1) with no minimum of 8; the other five direct callers pass 0. The one
+shipped Guard node has Par1 13 in both installs (`AI-902`).
+— AI-792, AI-793, AI-902
 
 The trigger binder writes AI `+0x48` = 1 for a Group it resolves directly or
 through a unit; it writes no other AI field and no order field. — AI-452

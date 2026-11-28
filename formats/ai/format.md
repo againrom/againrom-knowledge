@@ -55,3 +55,7 @@ The Heal candidate list can hold the caster (Medium), which is never the pick at
 A hero mage's book Heal at a hostile unit has paid mana and, under the prelude's gate, trains the school; the Heal arm then skips the heal (Medium: diplomacy polarity and admission target tests unread). — MAGIC-465
 
 Each of the five `R0020` calls in the six cast-chain windows centres on the actor's own cell (AI-862; AI-796, Medium); the Heal list's cell lookup returns slot `+4`, the actor of movement domain 1 or 2 (AI-866; AI-800, Medium); that list is built by bodies that load none of the six health and state offsets searched (AI-872, Medium).
+
+## Group order arms
+
+The dispatcher maps each group order to one arm routine (AI-908). The Guard arm builds the candidate list, clips it, assigns a target to every member and then walks the members, in a fixed order (AI-905, AI-913, AI-909); arms 2, 4, 5 and 0x11 are read (AI-910). The engagement setter stores state 5 on its engagement path and has 14 direct call sites (AI-907). The follow, acquisition and heal helpers store the pending kinds 4, 6, 0xb, 0 and 8 (AI-911). The AI driver has two direct call sites, and the Guard counter counts Guard-arm passes since the last latch flip, not session ticks (AI-904, AI-TICK-008). The sight radius byte has a second direct store (AI-903) and the Guard arm reads it per member through the geometry routine (AI-906). The one immediate store of 0x17 to an actor state word in the AI module's range is in a routine with no direct caller (AI-912).

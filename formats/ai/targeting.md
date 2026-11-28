@@ -128,7 +128,8 @@ seed for whole-cell sight. The shared algorithm has two parameters:
   here against 32-bit ones there (`TERR-FOG-118`).
 
 A guard group's base radius is the largest member distance to the centroid plus that
-member's `actor+0xa5`, then the guard setter's floor or script argument (`AI-793`).
+member's `actor+0xa5`, then the guard setter's floor or script argument (`AI-793`); the one
+shipped Guard node passes 13 (`AI-902`).
 
 `actor+0xa4` has at least twelve writers: the six `AI-SIGHT-092` names, whose count of six is
 partially retracted, the four Light and Darkness apply and remove stores (`MAGIC-443`),
@@ -253,3 +254,7 @@ The block builder's cell lookup returns slot `+4` of the cell record, which name
 ## Defender ranking, distance, group ties and retreat detection (first game)
 
 Cover engages the nearest flier when one remains, else the nearest unit, and removes fliers when the protected unit's reach is below 2 (AI-812). The block builder and the engage routine load none of the six health and state offsets searched, so a unit that is still in a cell record is a candidate whatever its health (AI-872; Medium: the other engage callees and the cell record of a dying unit are unread). The block builder lists slot `+4` only, so the flier branch is reached only by a slot `+4` unit whose `vt+0x20` is 3, which is unread (AI-866). Distance there and in the invisibility test is edge to edge in sub-cell steps (AI-813). A group scorer keeps the first of equal costs (AI-814). An invisible enemy stays a candidate of the retreat check when any groupmate's See-invisible byte reaches that distance (AI-815). The filter `R0021` stores list-node words through its list argument (read as candidate links, Medium), has no order-word store in its own instructions, and calls `R0036` and `R1355` (AI-849).
+
+The group candidate list that the assignment loop scores is built by `R0110` from the shared sight map; entries with word `+0x94` below 1 come back only when the list would be empty (AI-913).
+
+The group arms assign each member the lowest-scoring candidate of that list by the loop `R0177` with scorer `R0225`, or `R0252` under order 3 (AI-909); the Guard arm runs it after the clip loop (AI-905). The dispatcher maps each group order to its arm routine (AI-908); the Guard arm reads `actor+0xa5` of every member in its geometry routine (AI-906) and the other store of that field is at `L00261` (AI-903). The arms 2, 4, 5 and 0x11 are read (AI-910); the follow, target-pick and heal helpers store `ord+0x08` = 4, 6, 0xb, 0 or, on the heal path, 8 (AI-911, AI-349); the one immediate store of 0x17 to a displacement-0x50 operand in `L06931..L07036` is in `L18326`, which has no direct caller (AI-912). The engagement setter `R0009` has 14 direct call sites (AI-907). The AI driver has two direct call sites, and the Guard counter `grpAI+0x34` counts Guard-arm passes since the last latch flip, not session ticks (AI-904).

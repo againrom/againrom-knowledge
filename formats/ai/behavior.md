@@ -11,6 +11,10 @@ index that is one AI pass per about 992 ms. A second, ungated call of the pass s
 server loop whose launcher has no reference in the image; were it run, it would also decide once
 per 16 ticks, at another phase. Whether a computed address reaches it is Unknown. — AI-702
 
+The AI driver has two direct call sites in the image, the counter route and that loop; no rel32 site
+targets the launcher, and the loop's thread procedure is six instructions. The guard arm's group counter
+`grpAI+0x34` is zeroed at each roll and incremented on the other passes of a Guard group (order 1), so it counts Guard-arm passes since the last latch flip, not session ticks (High / Medium). No rel32 site targets the launcher (`AI-702`). — AI-904
+
 ## Group and actor behavior
 
 The group order at grpAI+0x20 is evaluated first. Eight values have live
@@ -94,6 +98,8 @@ The arms a consumer needs:
 | 0x16 | **explicit Retreat** — installed by the player command through a register-form store; repeatedly calls the first automatic-withdrawal helper, without that tail's HP-threshold admission (`AI-RETREAT-271`, `AI-RETREAT-274`) |
 | anything else | clear the sub-tick gate and acquire |
 
+The group arms are separate routines: order 0 runs `R0008` per member, order 1 is `R0024`, order 2 `R0025`, order 3 an inline block with `R0153`, order 4 `R0154`, order 5 `R0026`, order 0x11 `R0155` (which ends in the order 5 routine) and order 0xff runs the standing acquisition `R0022` per member. Orders 2 and 5 send a member that holds an assigned target to the engagement setter and give the others the walk or the cast split; order 4 never reads the assigned target. The routine that holds the call site `L01991` has the call shape of order 3 and is undecoded. — AI-908, AI-910, AI-907
+
 ## Group engagement
 
 Everything here is what a group order arm runs before it touches a member; a consumer that gets the
@@ -168,6 +174,8 @@ tick, which runs far more often. Nothing in the group arms is sticky because not
 on every guard tick, but the only reader of the derived radius is the routine that *issues* a guard
 order. The circle follows the group; its size is whatever it was when guard was last issued.
 
+**The candidate list and the assigned target.** The list builder stamps the sight map, appends every session actor standing on a stamped cell, moves each entry with word `+0x94` below 1 to a second list and refills the candidate list from it only when no other candidate remains. The assignment loop then gives each member the candidate with the lowest score (the first of equal scores) in `ord+0x20`, or 0 when there is none or the list is empty. Orders 1, 2 and 5 score with `R0225`, order 3 with `R0252`, which returns the worst value when the distance, after a shrink by a `+0x12c` byte, still exceeds 1. `R0167` is the edge distance (the larger of the two absolute coordinate differences). The class-0 arm of `R0225` and the relation table are unread (Medium). — AI-913, AI-909
+
 ## Guard
 
 ### Group give-up and reacquisition
@@ -199,6 +207,8 @@ memory can still stamp its old cell until consumed; the actor must stand on that
 cell and pass the remaining gates. No prior-target cooldown is found in the bodies read (not checked in their callees; Medium).
 — AI-741, AI-742
 
+In their own instructions the assignment loop of a pass and its two scorers load neither the member's previous `ord+0x20` nor `ord+0x0c` nor `ord+0x18`, and the loop stores 0 or a fresh candidate into `ord+0x20` for every member, so a Guard pass has no memory of the last assigned target in the loop itself; the callees of the scorers are not read for it (Medium); a downed candidate (word `+0x94` below 1) is kept out unless nothing else is a candidate. The scorer's relation table is unread, so no give-up condition inside the scorer is excluded (Medium). — AI-909, AI-913
+
 ### The guard machine per pass
 
 Each Guard pass gives each member one of three outcomes: engage its scored candidate; at its post
@@ -217,9 +227,10 @@ the low byte of its node's Par1. With 0 the stored radius is the group geometry 
 MinimalGuardRange (8 shipped), so at least 8 cells stored; the radius rolled on a populated
 latch-zero pass is at least 11, and the empty-members edge can store 7 (High / Medium, `AI-741`,
 `AI-JITTER-103`). A script argument whose low byte is nonzero replaces that floor and has none;
-a low byte of 0 takes the floor. No pursue-distance test is in the Guard bodies read (`AI-777`,
+a low byte of 0 takes the floor. The one shipped Guard node (`scn:80.alm` node 9, no trigger record carries it) has Par1 13 in both installs, so no shipped Guard node passes a value below 8 (`AI-902`, High / Medium; whether it fires is Unknown). No pursue-distance test is in the Guard bodies read (`AI-777`,
 Medium); whether the default state's 5-cell post test (`AI-BREAK-041`) also applies to a guard
-member is not read (its bound `actor+0xa5` is stored 5 in the constructor, `AI-891`, which counts one further direct store with that displacement and did not record its address). A member chases while its clipped population yields a winner; the pass runs
+member is not read in the arm's member walk (its bound `actor+0xa5` is stored 5 in the constructor, `AI-891`; the one further direct store is `L00261`, which also stores 5, `AI-903`, reached from slot 0x17 of the per-actor machine; the arm reads every member's `actor+0xa5` in the group geometry routine, `AI-906`).
+Within one pass the arm runs the geometry routine, the list build, the clip loop, the scorer, the latch block and the member walk, and the dispatcher's member tail follows; both member loops go head to tail through the group list (`AI-905`, High / Medium). On its engagement path the engagement setter stores `ord+0x08` = 5, the target and `actor+0x12c`; its other paths store through `R0209` and `R0393` (`AI-907`, `AI-886`). A member chases while its clipped population yields a winner; the pass runs
 once per 16 ticks (`AI-385`, High / Medium / Unknown), and the member walks back to its post at
 the first pass without a winner (Medium).
 — AI-792, AI-793, AI-794
@@ -259,6 +270,8 @@ not a function of the offset alone. — AI-753
 
 A relocation from out of sight into sight was followed by engagement at the first
 group pass, 6 sub-ticks later (one observation). — AI-754
+
+The follow helpers `R0138` and `R0139` read the target's cell through `R0300` and `R0299` on every call and store the target in `ord+0x18` only while it is beyond the stop byte `ord+0x70`; the pursuit state 5 that `R0009` stores is run by `R0008`, whose arm is not read here, so what that state does when the target's cell changes is Unknown. The setter `R0009` runs again for every member that holds an assigned target in each pass of orders 2, 3 and 5. — AI-911, AI-910
 
 ### Member guard under group order 0
 
@@ -411,6 +424,8 @@ because the map's script can put a group on patrol (below).
 Two fields of the group AI record belong to this arm and to nothing else: `grpAI+0x30` is a
 **has-members latch** and `grpAI+0x34` a **tick counter with no reader**. The latch is what gates
 the radius roll below.
+
+The order-0 member walk runs `R0008` per member. The one immediate store of 0x17 to a displacement-0x50 operand in `L06931..L07036` is in `L18326` (a reset that also stores 0 into `ord+0x08` and `ord+0x50`), and no direct call, jump or absolute dword in the image reaches it: no direct path sets slot 0x17, a computed address is not excluded (Medium). — AI-912, AI-908
 
 ## Patrol
 

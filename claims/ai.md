@@ -43,7 +43,7 @@ the primary does not.
 | AI-888 | The claim routine `R0257` ORs 0x40 (class 1 or 2) or 0x80 (class 3) over the footprint at the next cell; `R0046` clears it except inside the unit's current footprint; its seven call sites are read. | High / Medium | ● active | [EXP-0657](../experiments/EXP-0657-rom1-routes/) |
 | AI-889 | Of 33 direct call sites of six setter-class routines and four callers of setters, 25 are reached from the command-queue drain (5 also from the AI pass), 2 from the AI pass only, 3 from the actor slot only and 3 from no root. | Medium / Unknown | ● active | [EXP-0657](../experiments/EXP-0657-rom1-routes/) |
 | AI-890 | In phases 5 and 7 the arm at `L00005` counts `actor+0x6c` down and returns to phase 0 only at phase 7's zero (two cancels also store 0, `AI-632`); a stop writes neither and freezes both until the action word is 3, 0xd or 0xe again. | Medium | ● active | [EXP-0657](../experiments/EXP-0657-rom1-routes/) |
-| AI-891 | `actor+0xa5` is stored once with an immediate, 5, in the constructor at `L00260`; the census counted one further direct store with displacement 0xa5 outside the constructor zone and did not record its address. | High / Medium | ● active | [EXP-0657](../experiments/EXP-0657-rom1-routes/) |
+| AI-891 | `actor+0xa5` is stored once with an immediate, 5, in the constructor at `L00260`; the census counted one further direct store with displacement 0xa5 outside the constructor zone and did not record its address. | High / Medium | ● active (amended) | [EXP-0657](../experiments/EXP-0657-rom1-routes/) |
 
 ### AI-882
 
@@ -213,6 +213,209 @@ Listing `evidence/code-en/dispstores.tsv`, from the probe's store sweep with dis
 **Confidence.** High for the constructor store; Medium for the field's value in play: the one other store is unread, and only direct stores with displacement exactly 0xa5 are counted (26 mnemonics, memory first operand); wider stores at `+0xa2..0xa4`, block copies, a save restore and stores through an index with another displacement are not searched.
 
 **Unknown.** The other store and its value; whether the guard group's members read the field (`AI-794`'s Unknown).
+
+**Amended.** By `AI-903`: the other direct store is `L00261` and stores 5 (also `AI-SIGHT-006`); the readers are `AI-906`'s.
+
+## First-game group behaviour: guard script argument and the second `actor+0xa5` store (EXP-0658)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| AI-902 | The only Group Command Guard node (opcode 6, Par0 = 1) in the 38 EN maps is `scn:80.alm` node 9, Par1 = 13, group 4 (15 members), no trigger record; same in the 33 parsed of 34 RU maps, the unparsed RU map is Unknown. | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-903 | The second direct store of `actor+0xa5` is `L00261` in `R0146`: it stores 5 when the actor word `+0xe` is 0x18, with `+0x12c`, then calls `R0022`; direct form only, not the writer set (`AI-SIGHT-092`). | High / Medium | ● active (amended) | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-904 | The AI driver `R0076` has two direct call sites, the thread procedure is 6 instructions and no rel32 site targets `R0456` (`AI-702`); `grpAI+0x34` is zeroed at each roll, incremented on other Guard passes: not session ticks. | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-905 | One Guard pass runs per group in this order: geometry `R0141`, `R0110`, clip loop over `+0xba8`, scorer `R0177`, latch block, member walk, then the member tail `R0105`; both member loops go head to tail. | High / Medium | ● active (amended) | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-906 | A displacement sweep of `0xa5` finds 8 operand sites in `L06931`..`L07036`, 5 outside (unclassified); the Guard arm reads `actor+0xa5` of every member in `R0141`; `R0146` has one direct call site, in slot 0x17 of `R0008`. | High / Medium | ● active (amended) | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-907 | On its engagement path `R0009` stores `ord+0x08` = 5, `ord+0x0c` = the target, `ord+0x14` = `actor+0x12c`; other paths store through `R0209` and `R0393` (`AI-886`); 14 direct call sites, one the Guard member walk. | High / Medium | ● active (amended) | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-908 | The dispatcher `R0023` maps `grpAI+0x20` to arms: 0 `R0008` per member, 1 `R0024`, 2 `R0025`, 3 inline with `R0153`, 4 `R0154`, 5 `R0026`, 0x11 `R0155`, 0xff `R0022` per member. | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-909 | `R0177` and `R0153` store into each member's `ord+0x20` the lowest-score candidate of the `+0xba8` list, else 0; in their own instructions they and the two scorers load no `ord+0x20`, `ord+0x0c` or `ord+0x18` (callees unread, Medium). | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-910 | Arms 2 and 5 send a member with an `ord+0x20` target to `R0009` (sites `L01990`, `L01708`); arm 4 `R0154` never loads `ord+0x20`; arm 0x11 re-rolls its cell and calls arm 5. `L01991` is unread. | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-911 | `R0138` and `R0139` store `ord+0x08` = 4 and the target in `ord+0x18` when the target is beyond `ord+0x70`; `R0022` stores `ord+0x08` = 6 and the target in `ord+0x0c`; `R0015` and `R0113` heal or idle. | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-912 | `L18326` holds the one immediate store of 0x17 to a displacement-0x50 operand in `L06931`..`L07036` (`L18327`), a value `AI-STATE-043` lists as unwritten; no direct call, jump or absolute dword reaches it (Medium: computed targets). | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+| AI-913 | `R0110` stamps every member's sight, appends session actors on stamped cells to the candidate list, moves those with word `+0x94` below 1 to a second list and refills the first from it only when it is empty. | High / Medium | ● active | [EXP-0658](../experiments/EXP-0658-rom1-groups/) |
+
+### AI-902
+
+Table `evidence/guardpar-en.tsv` and `evidence/guardpar-ru.tsv`, written by `tools/aiguardpar` (one row per Guard node: node id, Par0, Par1, Par1 low byte, Par9 group, group type, member count, carrying triggers). Input: every root map and every map of `scenario.res` of each install; the node layout is the one `tools/aipatrol` reads (Par values at node `+0x4c`, ten dwords).
+
+- EN: 38 maps, 38 type-7 records parsed, 135 opcode-6 nodes, one with Par0 = 1: `scn:80.alm` node 9, Par1 = 13 (low byte 13), Par9 = group 4 (type 2), 15 units carry group 4 in the map's unit record, trigger column empty.
+- RU: 34 maps, 33 type-7 records parsed, 135 opcode-6 nodes in the 33 parsed maps, the same single Guard node with the same values. The Par0 histogram of the opcode-6 nodes equals EN's in both files (committed tables). The statement for RU covers the 33 parsed maps only; the one unparsed RU map is not named by the tool and is Unknown. EN has 4 maps more than RU and the same 135 nodes, so equal node counts do not show that the unparsed RU map has no Guard node.
+- The Guard arm passes the low byte of Par1 to the guard setter (`AI-792`), so the shipped Guard node passes `n` = 13. By the setter paths of `AI-793`, `n` nonzero stores `max(+0x2c, 13)` into `+0x2d` and `+0x38`, which is above 8: no shipped Guard node reaches the no-floor case with `n` below 8.
+
+**Confidence.** High for the node's Par1 and group in both installs: read from the parsed record. Medium for completeness: in RU one of 34 maps did not parse and is not named by the tool, and a Guard command can also reach the arm through a mission description or a player command (those five callers pass 0, `AI-792`). That the node never fires is not shown: an empty trigger column means no trigger record in the map names the node id; other routes that run a node are not read.
+
+**Amends.** `AI-792`, `AI-793`: their Unknown on Par1 and on `n` below 8 is answered for the shipped population (EN: 38 maps; RU: the 33 parsed maps).
+
+**Unknown.** Whether node 9 fires in play: an original run of mission 80 that SAVEs after the Guard node would show group 4's `+0x2d` and `+0x38` (13 or the geometry value if above). Whether the unparsed RU map holds a Guard node: the tool names no map that fails to parse; a per-map listing of the parse result would settle it.
+
+### AI-903
+
+Listing `evidence/code-en/listings/g-L18328-multi.txt` (window `L18328..L18329`, 86 listing lines, a -multi window that ends at its range end; the first part of the window belongs to the routine before) and `evidence/code-en/dispstores.tsv`.
+
+- The store sweep with displacement `0xa5` over `.text` `00400000..00700000` finds two direct stores, none outside that zone: `L00260` (constructor, `AI-891`) and `L00261`.
+- Routine `R0146` (one stack argument, the actor; `ecx` is an object whose `+0xb38d`, `+0xb39c` and `+0xb3a0` it reads or stores). At `L00920` it compares word `[edi+0xe]` with 0x18 (`cmp word ptr`), jumps away with `jne L18330` when unequal. Otherwise `mov al, 5` (`L18331`), `mov [ebx+0xb3a0], edi`, then `mov [edi+0xa5], al` (`L00261`) and `mov [edi+0x12c], al`, then `call R0022` (the routine `AI-BREAK-041` calls when the creature is home) with the actor pushed.
+- `al` is not written between `L18331` and `L00261`, so the stored value is 5.
+
+**Confidence.** High for the store, its address and value (listing). Medium that no other write exists: the sweep counts direct stores with displacement exactly `0xa5` by 26 mnemonics (`AI-891`), not wider stores, block copies or a save restore. The two direct stores are not the writer set of the field: `AI-SIGHT-092` states more writers (a 16-bit store at `L00919`, address-formation sites `L00921` and `L00923`) that this displacement sweep cannot see. The callers of `R0146` are `AI-906`'s, the readers of `+0xa5` under group order 1 are `AI-SIGHT-006`'s, `AI-RADFREEZE-075`'s and `AI-906`'s, and the meaning of the word `+0xe` value 0x18 stays as `AI-GATE-079` states it.
+
+**Amends.** `AI-891`: the other store is located and stores 5. `AI-SIGHT-006`, `AI-GUARD-007`, `AI-SIGHT-092`: the store at `L00261` and its gate on the word `+0xe` are stated there (`AI-GUARD-007` also states the `+0x12c` store); the count of writers of the byte and word is `AI-SIGHT-092`'s.
+
+**Unknown.** `AI-794`'s run (SAVE every 16 ticks of a Guard pursuit that ends) would settle the pursuit distance.
+
+**Amended.** By `AI-906`: the Guard arm reads `actor+0xa5` of every member in `R0141`; the member walk reads none; `R0146` is reached from slot 0x17 of `R0008`.
+
+### AI-904
+
+Windows `l-R0261`, `c-R0147`, `d-R0076` and `g-R0024` (`evidence/s2/p3/listings/`, EN image) and `evidence/s2/p3/callers.tsv`, `evidence/s2/p3/dispany.tsv`. The pass decoded 554587 instructions linearly over `.text` and listed every `call` or `jmp` or `jcc` with a rel32 target in the set below.
+
+- Call sites of the AI driver `R0076`: two, `L00163` (inside the thread loop `R0075`) and `L00279` (inside the counter route `R0147`, after `and eax, 0xf` / `cmp eax, 6` / `jne L18332` at `L00847`..`L00281`). The counter route loads `ecx` from `[L00004]` and pushes `[L00380]` before the call.
+- Rel32 sites targeting `R0456` and `R0261`: none. The thread procedure `R0261` is the window of 6 instructions `push ebp`, `mov ebp, esp`, `mov ecx, [ebp+8]`, `call R0075`, `pop ebp`, `ret`; it holds no other call. `R0456` follows it.
+- The driver `R0076` runs the world refresh `L00164` only when `session+0xb388` is zero (`L18333`, `jne L18334`), increments `session+0xbea8` at `L08515` on both paths, then walks the player list and, per group, calls `R0023` when `session+0xb388` is nonzero or the byte `grpAI+0x45` (`[[edi+0x3c]+0x45]`) is nonzero (`L00658`..`L00282`). Window `d-R0076` ends at 256 instructions (`L18335`) before the routine returns.
+- `grpAI+0x34`: the sweep of operands with displacement `0x34` and a base register in `L18336`..`L18337` lists five sites outside stack slots, `L00439`, `L00365`, `L00441`, `L18338`, `L18339`, all in the guard arm `R0024`: two stores of a register that is zero, a load and store pair that is the increment, and `inc dword ptr [eax+0x34]`. `L00439` and `L18338` store a zero register into `+0x34` (the latch flip and the empty-members edge of `AI-GUARD-021`); `L00365`..`L00441` and `L18339` increment it. The arm runs only for a group under order 1 (`AI-908`). The counter is therefore the number of Guard-arm passes of the group since the last latch flip or radius roll, not a count of all passes of the group and not session ticks. On the counter route a pass is one per 16 ticks (`AI-385`); the thread-loop route has no modulo (`AI-TICK-008`, `AI-385`). No operand with that displacement in that zone reads the counter for another purpose. 1390 operands with displacement `0x34` lie outside the zone and were not classified.
+
+**Confidence.** High for the two driver call sites, the 6-instruction thread procedure and the five counter sites (listings and sweep tables). Medium for "no reader": the zone covers one part of the image and the field is a plain displacement of a record reached through `grp+0x3c`, so a reader elsewhere is excluded only by the unclassified 1390 outside operands. Reaching `R0456` by a computed address is not excluded and stays as `AI-702` states.
+
+**Amends.** `AI-385`, `AI-702`: not narrowed. The in-image census of rel32 sites gives the same zero for the launcher as their raw scans; `AI-702` searched rel32, dword and immediate references, this card's census is the rel32 form only. `AI-TICK-008`, `AI-ARBITER-057`: the two direct call sites of `R0076` (`callto:R0076`, 2 hits) and the per-group gate on `session+0xb388` or `grpAI+0x45` are stated there; this card confirms them from the committed table. `AI-GUARD-021`: its "tick counter with no reader" gains the zone bound and the two reset sites stated here.
+
+**Unknown.** Whether any mission mode reaches `R0456` by a computed address: a breakpoint on `R0456` during a mission of the original (any mode, one full scenario load) would show a hit or none.
+
+### AI-905
+
+Windows `d-R0023`, `g-R0024` (`evidence/s2/p3/listings/`), `m-537038`, `n-R0071`, `b-R0141`, `f-R0105`, `f-R0106` (`evidence/s2/p4/listings/`) and `evidence/s2/p4/callers.tsv`.
+
+- Dispatcher `R0023` (argument: the group): a group with an empty member list (`[grp+0xc]` zero, `L18340`..`L18341`) gets `grpAI+0x20` = 0xff (`L00300`). It then jumps on the byte `grpAI+0x20`: 0x11 to `L00310`, above 0x11 to `L18342`, above 5 to `L00483`, otherwise through the table at `L00303`. The call `L16849` is the call of the Guard arm `R0024`. The tail at `L00483` walks the members and, per member, calls `R0105`; nonzero runs `R0100`; zero runs `R0106` and, if that returns nonzero, `R0107` (`L00312`..`L18343`).
+- Guard arm `R0024` order (listing lines `L18344`..`L16851`): `R0141(group)` (members' centroid and extents, below), `R0110(group)`, a loop over the list at `session+0xba8` that, per node, calls `R0167` with the group centre and the node's cell and passes the node to `R1133` when the returned byte is above the radius byte `grpAI+0x2d` (`cmp al, bl` / `jbe`), `R0177(grpAI)`, the member-count and latch block of `AI-GUARD-021`, then the member walk `L00825`..`L00826` of `AI-776`.
+- Both member loops (the arm's and the tail's) take the first member from the list at `[grp+4]` (`[[grp+4]+8]`) and the next from `R0071(grp, member)`, which scans the list for the member and returns the data word of the following node. The traversal is list order, head to tail, in both loops; the tail runs after the arm returns.
+- `R0141` has one direct call site (`L00822`). It sums the members' cell coordinates and divides by the count, stores `grpAI+0x24` and `grpAI+0x28`, then for each member calls `R0167` and reads `actor+0xa5`, keeping running bytes that it stores at `grpAI+0x2a`, `+0x2b`, `+0x2c` (`L18345`..`L00835`). The window `b-R0141` ends at `L18346` and the continuation `g2-L18347-multi` (`evidence/s2/p6/listings/`) begins one byte off the instruction boundary, so its first three lines are not instructions. The three bytes are stated by `AI-RADFREEZE-075`: `grpAI+0x2a` is the largest Chebyshev spread, `+0x2b` the largest member sight and `+0x2c` the sum of the two.
+
+**Confidence.** High for the order of the calls and the loop shape (listings). The roles are read elsewhere: `R0110` by `AI-GROUPSEE-068` (High / Medium) and `AI-913`, `R0177` by `AI-SCORE-069` (High) and `AI-909`, `R0141` by `AI-RADFREEZE-075` (High / Medium); `R0167` (edge distance) and `R1133` (remove a node) are stated at the grade of `AI-913` and `AI-GRPGUARD-074`. Medium that list order is insertion order: the list builder of the member list at `[grp+4]` is unread here.
+
+**Amends.** `AI-776`: adds the call order before the member walk; the walk itself is unchanged. `AI-GRPGUARD-074`: same order, confirmed (`R0141`, `R0110`, clip, `R0177`, latch, member tail). `AI-RADFREEZE-075`: the three bytes `+0x2a..+0x2c` are stated there (spread, sight, sum).
+
+**Unknown.** The per-pass order in the original for groups with mixed members, and the member order of a loaded save: a native run that SAVEs after one Guard pass of a group of at least three members and records which member's `ord+0x08` changed first.
+
+**Amended.** By `AI-908`, `AI-909` and `AI-913`: the dispatcher's other arms are mapped; `R0177` is the assignment loop (scorer `R0225`), and the bodies of `R0110`, `R0167` and `R1133` are read.
+
+### AI-906
+
+Sweep `evidence/s2/p5/dispany.tsv` (loads and stores with a base register and displacement `0xa5` over `.text`, zone `L06931`..`L07036` printed, other hits counted), table `evidence/s2/p5/tables.tsv` (27 entries at `L00322`), windows `x-L18348-multi` (`p5`), `o-R0008`, `c-R0146`, `h-L13240-multi`, `i-533290-multi`, `j-L18349-multi` (`p4`, `p6`).
+
+- Operand sites in the zone: `L00268`, `L00270`, `L00267` (`cmp al, [esi+0xa5]`, the default state of `AI-BREAK-041`), `L18350`, `L00261` (the store of `AI-903`), `L04077`, `L04078`, `L18351`; five further operand sites lie outside the zone and were not classified. `AI-SIGHT-006` counts ten hits over ten owners for `disp:a5` in a different instrument (an enumeration over a repaired function table), two writes, one address computation in the presentation module and seven reads; this card's 8 zone sites (one store, `L00261`) and 5 outside sites are not reconciled with that count, and the difference stays Unknown.
+- `R0146` has one direct call site, `L14684`, which is the slot 0x17 arm of the per-actor machine (`R0008`, jump table at `L00322`, 27 entries, the arm at `L14683`). `R0008` has five direct call sites: `L14643`, `L14644`, `L14645`, `L14646`, `L00284` (the last is the dispatcher's order-0 case, `R0008` per member).
+- The Guard arm reads `actor+0xa5` of every member: `L04078` is in `R0141` (single caller `L00822`, `AI-905`). The Guard member walk `L00825`..`L00826` reads none. `L04077` is the same loop in a sibling routine that ends where `R0141` begins; its caller is unread.
+- `L18350` is in the routine `L18352` (setter: `ord+0x08` = 4, `ord+0x18` = argument, and `ord+0x14` = the third argument when nonzero, else `actor+0xa5`, `L18353`..`L18354`). `L18351` loads the byte in a loop over the group list and keeps its maximum in `ebx`.
+- The states 8 and 0x11 arms call `R0138` and `R0139`; `L00268` and `L00270` lie inside those address ranges. `AI-SIGHT-006` and `AI-911` read those two routines: the byte is the stop distance of the follow order they emit, used only when `ord+0x70` is 0.
+
+**Confidence.** High for the site list and the call-site facts (tables). The roles of the sites in `R0138` and `R0139` are `AI-SIGHT-006`'s and `AI-911`'s; `L04077` is the group-maximum loop of `R0140` (`AI-SIGHT-006`, High). Medium for the owner routine of `L18351` (not decoded).
+
+**Amends.** `AI-903`: its Unknown on readers under order 1 is answered (the arm reads the field through `R0141`, as `AI-SIGHT-006` and `AI-RADFREEZE-075` also state; a per-member 5-cell test in the arm's walk is absent). `AI-891`: the field has 8 operand sites in the zone, listed here. `AI-SIGHT-006`: the readers `L00268`, `L00270`, `L00267` and the group maximum are the same as stated there; the site counts are not reconciled (above).
+
+**Unknown.** Whether `R0146` is reached in play for a member of a Guard group (the immediate writer of slot 0x17 is `L18326`, `AI-912`, and whether it runs is Unknown), and the meaning of word `+0xe` = 0x18 (`AI-GATE-079`): a native SAVE of a Guard member after the writer fires, or a breakpoint on `L18326`.
+
+**Amended.** By `AI-912`: the one immediate writer of slot 0x17 is `L18326` and no direct call, jump or absolute dword reaches it.
+
+### AI-907
+
+Window `e-R0009` (`evidence/s2/p4/listings/`, 122 instructions, ends at the last `ret 8`, lines 31 to 83 of the listing not interpreted) and `evidence/s2/p4/callers.tsv`.
+
+- On its engagement path the setter `R0009` stores `ord+0x08` = 5, `ord+0x0c` = the target and `ord+0x14` = `actor+0x12c`; its other paths store through `R0209` (`ord+0x08` = 9 and further stores) and `R0393` (`AI-886`). The window here covers 122 instructions and ends before the end of the routine; `AI-886` reads `R0009..R0015` (209 instructions), including the `R0209` path and the `ord+0x78..0x80` scan, which this card does not state.
+- `R0009(actor, target)` with `ecx` the AI manager: when `actor+0x4c` has bit 4, `actor+0x12c` is below 2 and the byte `[[actor+0x14]+0x28]` is zero it calls `R0022(actor)` and returns (`L01996`..`L01997`). The engagement path stores `ord+0x08` = 5 (`L00018`), `ord+0x0c` = the target (`L00019`) and `ord+0x14` = the byte `actor+0x12c` (`L18355`..`L00159`). The cast helper `R0393` is called before the stores when bit 4 is set and `[[actor+0x14]+0x28]` is nonzero, and a nonzero return skips them (`L05133`..`L01741`). An empty target (no result of the middle block) calls `R0022`.
+- Direct call sites: 14 rows for target `R0009` in the table `evidence/s2/p4/callers.tsv` (`L01988`, `L01989`, `L06090`, `L06089`, `L00333`, `L00586`, `L02072`, `L02073`, `L00842`, `L00336`, `L01990`, `L01708`, `L01991`, `L01992`; the same count as `AI-886` and `AI-517`), among them `L00842` (dispatcher), `L00336` (Guard member walk, argument `ord+0x20`), `L01990`, `L01708`, `L01991` (further group arms in `00537xxx`) and `L01992`. The stop distance of a Guard pursuit is `actor+0x12c`, which `R0146` also sets to 5 (`AI-903`).
+
+**Confidence.** High for the stores and call sites listed. Medium for the middle block of this window (target resolution, path call `R0021`) as read here; `AI-886` states it (a block built around the actor's cell with radius `mover+8`, filtered by `R0021`).
+
+**Amends.** `AI-886`: same stores and call count 14; the window here ends before the routine's end. `AI-GUARD-007`: states the same three stores for `R0009` with 13 call sites over 9 owners; the count here and in `AI-886` and `AI-517` is 14 rel32 sites, and the difference with 13 is not reconciled. `AI-383`: the setter body its Unknown names is the one read here and in `AI-886`.
+
+**Unknown.** Group engagement, give-up and the pursuit after a teleport (rows of `behavior.md`): the callers `L01990`, `L01708`, `L01991` were not decoded; a native run of a group of three that attacks a unit which then teleports, SAVEing every 16 ticks, would show `ord+0x08`, `+0x0c` and `+0x14`.
+
+**Amended.** By `AI-910`: `L01990` and `L01708` are the member loops of the group arms 2 and 5; `L01991` is still undecoded.
+
+### AI-908
+
+Window `d-R0023` (`evidence/s2/p3/listings/`), `evidence/s3/p9/tables.tsv` (the dword table at `L00303`, six entries) and `evidence/s3/p9/callers.tsv`.
+
+- The byte `grpAI+0x20` is compared with 0x11 (`L00301`, `jg L18342`, `je L00310`) and with 5 (`L18356`, `ja L00483`); below that the table sends 0 to `L00304`, 1 to `L00305`, 2 to `L00306`, 3 to `L00307`, 4 to `L00308` and 5 to `L00309`.
+- Case 0 (`L00304`..`L18357`): per member `R0008(member)` (`L00284`), the next member by an inline walk of the list (`L18358`..`L18359`). Case 1 calls `R0024(group)` (`L16849`). Case 2 pushes the word `[grpAI+0x0a]` and calls `R0025(group, word)` (`L18360`). Case 4 calls `R0154(group, word)` (`L01877`) and case 5 `R0026(group, word)` (`L01709`). Value 0x11 calls `R0155(group)` (`L18361`). Value 0xff, and only that value, calls `R0070(group)` and then per member `R0022(member)` (`L18362`).
+- Case 3 (`L00307`..`L02017`) calls `R0110(group)` and `R0153(group)`, then per member: `ord+0x20` nonzero calls `R0009(member, ord+0x20)` (`L00842`); else, when `[[actor+0x14]+0x28]` is nonzero it stores `ord+0x08` = 0xb and, when `actor+0x4c` has bit 4, calls `R0113`; when it is zero it calls `R0015` (`L00051`). The next member comes from `R0071`.
+- Values 6..0x10 and 0x12..0xfe reach no arm and fall to the tail (`ja L00483`, `jne L00483` after `cmp ecx, 0xff`).
+
+**Confidence.** High for the map and the call arguments (listing and table). Medium for what the arm routines do beyond the stores named here, except as `AI-909` to `AI-911` read them.
+
+**Amends.** `AI-905`: adds the other arms of the dispatcher; the Guard order is unchanged. `AI-517`: same map; adds `R0070` for the `0xff` arm and the inline walk of case 0. `AI-ORDER-010`: same table `L00303` and the same arm targets, confirmed.
+
+**Unknown.** Which order value a loaded group holds in play (writers of `grpAI+0x20` are not censused here).
+
+### AI-909
+
+Windows `u-R0177` (`evidence/s3/p7/listings/`), `g-R0153`, `a-R0225`, `k-L01766`, `l-R0252` (`evidence/s3/p8..p10/listings/`), `evidence/s3/p9/callers.tsv`, `evidence/s3/p8/callers.tsv`.
+
+- `R0177(group)` (`ecx` the AI manager) reads the member count (`[grp+0xc]`) and the candidate count `AI-manager+0xbb4`. When either is zero it walks the members and stores 0 in `[actor+0x158]+0x20` (`L01050`..`L18363`). Otherwise for each member it walks the list at `+0xba8` calling `R0225(member, candidate)` and keeps the candidate with the strictly lowest result (`cmp eax, ebp` / `jge`, start value 0xffffff), so the first of equal scores wins; it stores that candidate in `[actor+0x158]+0x20`, or 0 when no result is below 0xffffff (`L18364`..`L00772`).
+- `R0153` is the same routine with the call replaced by `R0252` (`L00767` against `L00766`); both are called once from the dispatcher or the arms (`AI-908`, `AI-910`; `R0177` from `L00824`, `L18365`, `L18366`; `R0153` from `L00795` and `L18367`).
+- `R0225` computes the edge distance of the two cells with `R0167` (the larger of two absolute byte differences), shrinks it by the member's `+0x12c` byte when that byte exceeds 1, forms `(distance << 8) + R0115(...)`, then adjusts it by a relation byte read from `AI-manager+0xb94` (the member's `+0x88` word of at least 0xf and the candidate's `+0x144` flag, bit 0x100000, change it further; `L01766`..`L05779`). `R0252` returns 0xffffff when its distance, after a `+0x12c` shrink, exceeds 1, and otherwise doubles, halves or voids the result by a relation byte (`L00793`..`L18368`).
+- In their own instructions neither assignment routine nor the two scorers loads `ord+0x20`, `ord+0x0c` or `ord+0x18` of any member; the callees `R0167`, `R0051`, `R0115`, `R0019` and the scorers' virtual calls are not read for it (Medium). `AI-SCORE-069`'s module-scoped census of every dword access at displacement 0x20 in `L00339..L00340` lists four readers (`L00774`, `L00444`, `L00775`, `L00776`), none in these four bodies; callees outside that zone are not covered by it.
+
+**Confidence.** High for the loop and the stores; `AI-560` reads `R0225` and `R0252` whole (116 and 104 instructions), so the class-0 arm at `L00781` is read there. Medium for the scores: the helpers `R0019`, `R0051`, `R0115` and the scorers' virtual targets are read only as `AI-560` and `AI-557` state them, and what the relation table holds is unread.
+
+**Amends.** `AI-905`: `R0177` is the assignment loop of the Guard arm, not a scorer; its scorer is `R0225`. `AI-SCORE-069`, `AI-814`: same loop and tie rule (strict less-than, seed 0xffffff, first of equal scores wins); `AI-814` calls the loop "the scorer", which is a name, not a different fact. `AI-560`: the scorer bodies are read whole there.
+
+**Unknown.** Which member's pursuit a tie between two candidates changes in play: the candidate list order is the world actor list head to tail with downed entries moved aside and back (`AI-GROUPSEE-068`, `AI-814`, `AI-913`); whether that tracks creation order is `AI-340`'s.
+
+### AI-910
+
+Windows `y-L18369` (`evidence/s3/p7/listings/`), `z-L18370`, `i-537510`, `h-R0155` (`evidence/s3/p8`, `p9`), `evidence/s3/p8/callers.tsv`, `evidence/s3/p9/callers.tsv`.
+
+- `R0025(group, word)` (arm 2; window `y-L18369`): `R0110`, then `R0177`, then per member: `ord+0x20` nonzero calls `R0009(member, ord+0x20)` (`L01990`). With none, a member whose cell word (`R0019`) equals the argument word and for which `R0040(cell)` is nonzero gets `ord+0x08` = 0xb and `R0113` when `[[actor+0x14]+0x28]` is nonzero and `actor+0x4c` has bit 4, else nothing, or `R0015` when it is zero; any other member gets `ord+0x08` = 1 and `ord+0x0a` = the argument word (`L14847`..`L00448`).
+- `R0026(group, word)` (arm 5; window `z-L18370`): `R0110`; when the candidate count `+0xbb4` is zero it calls `R0154(group, word)` (`L00463`) and returns; otherwise `R0177`, then per member `R0009` (`L01708`) when `ord+0x20` is nonzero, else `ord+0x08` = 0xb with `R0113` or `R0015` as in arm 2 (no walk).
+- `R0154(group, word)` (arm 4): `R0140(group)`, then per member: when the cell word equals the member's own `ord+0x0a`, `R0040(cell)` is nonzero and `ord+0x50` is zero, it calls `R0007` and `R0088` (which stores `actor+0x50` = 0xc) and leaves `ord+0x50` = 1 (`L18371`..`L16345`); otherwise, when `[actor+0x154]+0x90` is nonzero and `[actor+0x154]+0x76` equals the cell word, it calls `R0007` three times, stores `actor+0x50` = 0xc and `ord+0x50` = 1 (`L06958`..`L01879`); the same path stores `ord+0x00` = the current cell word (`L18372`..`L18373`) and `ord+0x08` = 0 (`L18374`). `AI-MOVE-023` lists the last two stores on this path and not `ord+0x50`; the committed listing `i-537510` line `L01879` is `mov dword ptr [eax + 0x50], 1` with `eax` loaded from `[esi + 0x158]` at `L18375`, and `AI-372` names the same store, so the listing settles that `AI-MOVE-023` omits it. Then `ord+0x50` nonzero calls `R0022(member)`; zero stores `ord+0x08` = 1 and rewrites `ord+0x0a` with its own value (`L01716`..`L14832`). It loads no `ord+0x20` and never reads the word argument.
+- `R0155(group)` (arm 0x11): the largest edge distance (`R0167`) of any member from the word `[grpAI+0x0a]`; below 10, or at least 10 with the byte `grpAI+0x15` above 0x32 (`L00467`..`L18376`), it rolls a new word by one of eight offsets from the tables at `context+0x58eb0` and `+0x58eb8` scaled by 20 (`lea ... *5` twice then `*4`), repeating while the result leaves the bounds bytes `context+0x58ee0`..`0x58ee3`, stores it and zeroes `grpAI+0x15`; then it calls `R0026(group, word)` (`L00481`) and increments `grpAI+0x15` (`L00482`).
+- The routine that holds `L01991` and its calls to `R0110` (`L16823`), `R0153` (`L18367`), `R0113` and `R0015` is by call-site address the shape of arm 3 but its body is not decoded.
+
+**Confidence.** High for the calls, compares and stores listed. Medium for the names of the words (the cell word and `R0040` are unread; `R0140` is read by `AI-RADFREEZE-075` and `AI-739`; the `0x58eb0` and `0x58eb8` tables are read by `AI-ROAM-025`: `dx = {0,1,1,1,0,-1,-1,-1}`, `dy = {-1,-1,0,1,1,1,0,-1}`, filled in code at `L00472`..`L00473`).
+
+**Amends.** `AI-907`: places `L01990` and `L01708` in arms 2 and 5 (an Amended line there). `AI-SWARM-022`, `AI-SWARM2-024`, `AI-MOVE-023`, `AI-ROAM-025`: confirmed; the `0x58eb0` tables and the rectangle `world+0x58ee0..3`, the 10 and 0x32 thresholds are read there. `AI-MOVE-023`: its second-path stores (`ord+0x00`, `ord+0x08` = 0) are confirmed and the `ord+0x50` = 1 store at `L01879` is added (an Amended line there); `AI-372` states that store. `AI-383`: arms 3 and 5 branch as stated there.
+
+**Unknown.** The routine holding `L01991` and its callers; the values of the bounds bytes `world+0x58ee1..3` (`AI-ROAM-025` states the byte store of 8 into `world+0x58ee0` at `L00478` only).
+
+### AI-911
+
+Windows `w-R0138`, `w-R0139` (`evidence/s3/p7/listings/`), `d-R0022`, `j-L18377` (`evidence/s3/p8`, `p10`), `e-R0015`, `f-R0113` (`evidence/s3/p8`), `evidence/s3/p8/tables.tsv`.
+
+- `R0138(actor, target)` and `R0139` read the byte `[actor+0x158]+0x70`, take the edge distance of the two cells with `R0162` and, when it exceeds that byte (`cmp al, cl` / `jbe`), store `ord+0x08` = 4, `ord+0x18` = target and `ord+0x14` = the byte, or `actor+0xa5` when the byte is zero. Within reach: `R0138` calls `R0305` (actor `+0x140` nonzero) or `R0306`, then jumps on `ord+0x08` - 5 through a five-entry table (states 5, 6, 8, 9 return, 7 continues); a distance below 2 calls `R0104` and stores `ord+0x08` = 1 with `ord+0x0a` = the result; `R0139` instead calls `R0022` at distance 2 or more.
+- `R0022(actor)` scans the lists at `+0xba4` and `+0xbc4` with `R0036` and `R0115` and, with a winner, stores `ord+0x08` = 6, `ord+0x0c` = the winner and `ord+0x14` = `actor+0x12c` (`L18094`..`L14776`); with none it takes the 0xb, `R0113`, `R0015` split of arm 3. The first line of window `j-L18377` is not an instruction (the window started on a misaligned byte); the rest is aligned to the branch targets.
+- `R0015(actor)` and `R0113(actor)` require `actor+0x140` nonzero and the word `+0x9a` above the word `+0xa0` (`R0015`) or above 10 (`R0113`), read entry 6 of `+0x140` (`R0017`), compare the word pair `+0x94`/`+0x96` and, when they differ, store `ord+0x60` = 1 and call `R0018(actor, actor, entry)`; at equality they scan the list from `R0020` for the lowest integer quotient of the pair and call `R0018` for it when it is below the constant at `L00059`. Otherwise `R0015` stores `ord+0x08` = 0 on its non-heal paths (`AI-349`: 0 at `L00053`, 8 through `R0018` on the heal path) and `R0113` calls `R0394`.
+
+**Confidence.** High for the stores and calls. Medium for the meaning of word `+0x94`/`+0x96`, of `ord+0x70` and of the item entry 6 (not read as data; entry 6 is Heal, `AI-789`).
+
+**Amends.** `AI-529`, `AI-518`, `AI-349`, `AI-789`, `AI-886`: confirmed; `R0015` stores 0 on the non-heal paths and 8 on the heal path (`AI-349`), `R0022` stores 6 or 0xb (`AI-518`, `AI-715`), `R0138` and `R0139` store 4 beyond `ord+0x70` (`AI-529`, `AI-DEFEND-111`), `R0113` stores `ord+0x60` only (`AI-886`).
+
+**Unknown.** The arms of the ord+0x08 = 5 and 6 states in `R0008` (bodies in `R0008`, read only in part by `AI-906`).
+
+### AI-912
+
+Windows `m-L18378` (`evidence/s3/p10/listings/`), `s-L18326` (`evidence/s3/p12/listings/`), `evidence/s3/p8/dispstores.tsv`, `evidence/s3/p11/callers.tsv`, `evidence/s3/p12/dwordrefs.tsv`.
+
+- `L18326(actor)` stores `ord+0x50` = 0, `ord+0x08` = 0 and, at `L18327`, `actor+0x50` = 0x17 (immediate), after the same reset as `R0007` and `R0088` (`ord+0x14` = `actor+0x12c`, `ord+0x60` = 0, `+0x154` word `+0x7c` = 0, `actor+0x54` = 0, and `R0045` when a pending word at `+0x154`+0x80 differs from the cell). `R0088` is the same with slot 0xc and `ord` word = the cell; `R0007` has no slot store. The base register at `L18327` is `esi`, loaded from the stack argument at `L18379` (`mov esi, [esp+0xc]`); the same `esi` is dereferenced at `+0x154` and `+0x158` (`L18380`, `L18381`) and the order block loaded from `[esi+0x158]` takes the `+0x50` store of `L18382`, so `esi` is the actor and not the order block (listing `s-L18326`).
+- The sweep for stores with displacement 0x50 in `L06931`..`L07036` lists 192 sites of any base register (stack slots included: `L18383` is `[esp+0x50]`); one stores the immediate 0x17 (`L18327`). 134 further sites with displacement 0x50 lie outside the zone and are not classified. Stores of a register value (`L18384`, `L18385` and others) are not classified.
+- The `.text` sweep (554587 decoded instructions, `call`, `jmp` and `jcc` rel32) lists no site that targets `L18326`; a search of the whole image for the absolute dword `L18326` finds none (the dword search covered six values, `L18326`, `R0088`, `R0025`, `R0026`, `R0154` and `R0155`, and found none).
+
+**Confidence.** High for the store and the two negative censuses over the stated populations. Medium that no path sets slot 0x17: a register-valued store, a computed address or a relative far jump through a register is outside the forms covered.
+
+**Amends.** `AI-906`: the slot 0x17 writer is located and has no direct caller; whether `R0146` is reached in play stays Medium. `AI-STATE-043`: its value set of `actor+0x50` lacks 0x17; `L18327` stores it. `AI-GATE-079`: the producer of 0x17 is located and has no direct caller; whether it runs stays Unknown. The older sweep (81 immediate hits over 55 owners, a register-store sweep) did not find this store; which instrument gap hid it (the sweep zone, the operand form or the base-register rule) is Unknown, and the statement here is bounded to the zone `L06931..L07036`.
+
+**Unknown.** Whether any path reaches `L18326`: a breakpoint at `L18326` over a full mission would settle it. Which gap of the `AI-STATE-043` sweep missed `L18327`.
+
+### AI-913
+
+Window `s-R0110` (`evidence/s2/p4/listings/`, ends at its range end) and `k-L18386` (`evidence/s3/p7/listings/`, the end of the routine at `L18387`).
+
+- `R0110(group)` clears the list at `+0xba8` (`R0251`), then per member: stamps the sight map (`R0145` once, `R0135(member, cell)` per member) and, when `[[actor+0x14]+0x28]` is nonzero and the word `[actor+0x158]+0x58` is nonzero, increments the byte `map+0x2a008[word]` and the byte `+0x5a` of the same record, clearing the word `+0x58` when the byte passes 0x14 (`L18388`..`L00758`).
+- It then walks the session actor list (`session+0xa4554`) and appends (`R0032` on `+0xba4`) every actor whose cell word indexes a nonzero byte of that map (`L18389`..`L18390`), calls the filter `R0021(first member, list, 0)` (body not read in this experiment; `AI-GROUPSEE-068`), and walks the list: an entry whose word `+0x94` is below 1 is removed (`R1133`) and appended to the list at `+0xbc4` (`L18391`..`L18392`).
+- When the candidate count `+0xbb4` is zero and the count `+0xbd4` is nonzero, it appends each entry of the second list back to the first and frees the second (`L00763`..`L18393`). A downed entry is therefore a candidate only when no other candidate remains.
+
+**Confidence.** High for the loop shapes and stores; Medium for the helper `R0040` (unread) and for the reading of word `+0x94` below 1 as a downed unit (the name is from `AI-870`'s stage subtraction). The filter `R0021` is the diplomacy predicate with the first member as decider (`AI-GROUPSEE-068`, `AI-FILTER-001`).
+
+**Amends.** `AI-905`: the body of `R0110` is read; the roles of `R0177`, `R0167` (edge distance, the larger of two byte differences) and `R1133` (remove a node) are read as well. `AI-GROUPSEE-068`: confirmed (list A cleared, one sight clear and a stamp per member, the world list walked head to tail, filter `R0021`, downed entries moved to the list at `+0xbc4` and back when the first list is empty); the `+0x2a008` byte increments and the `ord+0x5a` count are also in `AI-703`.
+
+**Unknown.** The `+0x2a008` map semantics beyond the stamp count (`AI-703`).
 
 ## First-game targeting: cast-chain gathers, Spray score, refused reacquisition, in-position gate (EXP-0656)
 
@@ -1172,6 +1375,8 @@ Nothing in it iterates actors. The per-actor state machine `R0008` has **2 calle
 
 **Amended.** The raw rel32 scan of `.text` for `R0008` lists five call sites (`L14643`, `L14644`, `L14645`, `L14646`, `L00284`) against the two callers recorded above. Two sites fall in `R0148` and `R0023`; the other three are not classified, so the caller set is Medium. The grades stand.
 
+**Amended.** By `AI-904`: the committed rel32 table `evidence/s2/p3/callers.tsv` lists two direct call sites of `R0076` (`L00163`, `L00279`), the same two as the `callto:R0076` census here; the cadence readings are unchanged.
+
 ### AI-GROUP-009
 
 Constructor `R0149`: `grp+0x40 = 0`, `grp+0x44 = 0`, then `new(0x50)` then `R0150` then `grp+0x3c` (`L00288`…`L00289`). That record's constructor zeroes `0x14` dwords, sets `grpAI+0x20 = 0` (the order) and **`grpAI+0x45 = 1`** (AI enabled), and allocates a `0x1c`-byte `CList` with growBy 10 at `grpAI+0x4c` — the patrol path (`L00290`…`L00291`). Membership: the type-6 spawner `R0151` adds each actor to the world list, sets `actor+0x14 = Player`, then scans `player+0x24` for a group whose **`grp+0x1c` equals the loader struct's `+0x40`** (`L00292`/`L00293`); on a miss it allocates `0x48` (`L00294`), appends to `player+0x24` (`L00295`) and stores that value (`L00296`).
@@ -1303,6 +1508,8 @@ In `R0024`: `L00438` loads the group's member count, the latch at `+0x30` is rea
 
 **Amended.** The `+r` term is exact rather than assumed: the divisor is `AImgr+0x00` = `0x8000` (`AI-RANGE-102`), so `3 × rand() / 0x8000 − 1` is `{−1, 0, +1}` in thirds, and the empty-members edge is the same sequence without the `+4` (`AI-JITTER-103`). The row also corrects `AI-RADIUS-014`'s "every run" to the tick the latch flips.
 
+**Amended.** By `AI-904`: "a tick counter with no reader" is bounded to a sweep of displacement `0x34` operands in `L18336`..`L18337` (five sites, 1390 outside operands unclassified); the counter is zeroed at `L00439` and `L18338` and incremented at `L00365`..`L00441` and `L18339`, so it counts Guard-arm passes since the last latch flip or radius roll, not ticks.
+
 ## Group orders 2, 4, 5 and 0x11, withdrawal and the order writers
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -1333,6 +1540,8 @@ In `R0024`: `L00438` loads the group's member count, the latch at `+0x30` is rea
 **Confidence.** High — one routine read end to end; the unread second argument is a bounded statement about *this* routine, not about the order
 
 **Amended.** Gloss superseded. The `mover+0x90` gloss, at both sites in its own prose: the first arrived branch's "route list `pth+0x90` cleared," and the `else if` branch's "the route list is non-empty and `pth+0x76` equals the current cell": `mover+0x90` is a plain boolean, not a list or a count, set to 1 only by `R0178` (`L00457`), and cleared to 0 at three sites this row's own routine and this round's own evidence together identify: `L00458`, inside the first arrived branch this row's own prose cites as "route list `pth+0x90` cleared"… (superseded, EXP-0386). `retracted.md` holds the full entries.
+
+**Amended.** By `AI-910`: on the second arrived path the listing `i-537510` also stores `ord+0x50` = 1 (`L01879`, after `ord+0x00` = the current cell at `L18372` and `ord+0x08` = 0 at `L18374`); this card lists the first two stores and not the third, and `AI-372` names it.
 
 **Amended.** `AI-649` reads the branch after `L00455`: with `ord+0x50` zero, `grpAI+0x44` gates only `ord+0x6c` = 1 (`L06882`..`L14831`), and the move is re-issued (`ord+8` = 1, same `ord+0xa`) without a test of it (`L16315`..`L14832`). The clause "`grpAI+0x44 != 0` → `ord+0x6c = 1` and the move is re-issued" holds for the first store only.
 
@@ -1542,6 +1751,8 @@ Against `AI-STATE-011`'s 27-arm table: `5,6,7,9,0x12..0x15` are unwritten *and* 
 **Confidence.** **Medium**, and the instrument's blind spot is the reason: a store-form sweep cannot see a state restored by `CArchive` from a save, written through a scaled-index displacement, produced by arithmetic in place, or — per the `0x10` correction — missed by the sweep's own pattern for an unidentified reason. The *positive* half — that the listed values are written at the listed addresses — is High
 
 **Amended.** Value-set clause only: `0x10` is written: teardown `R0208` stores it at `L00607`, on the function's own unmodified `this`, confirmed by a fresh whole-body read and matching `TRIG-REAP-017`'s own prior citation of the same instruction (amended, EXP-0385). `retracted.md` holds the full entries.
+
+**Amended.** By `AI-912`: the value set lacks 0x17; `L18327` in `L18326` stores the immediate 0x17 to `actor+0x50` (zone `L06931`..`L07036`, base `esi` the actor argument). The clause "0x17 has a live arm and no writer" becomes "0x17 has a located writer with no direct caller"; which gap of the sweep missed the store is Unknown.
 
 ### AI-THREAT-044
 
@@ -1945,6 +2156,8 @@ An `EnumRefs` pattern sweep for byte stores into `+0x2d` returns **7 hits / 4 ow
 **Confidence.** High for the class bit and 57-row census; Medium for the `0x17` arm's unreachability, unchanged from `AI-STATE-043`
 
 **Amended.** Corrected. The second reason for the `typeID==0x18` arm's unreachability and the class-bit provenance only — the 57-row census and missing state writer stand: The class bit is derived from positive mana (`HERO-HP-071`), and zero-mode map Humans can retain table `typeID=0x18` (refuted, EXP-0192). `retracted.md` holds the full entries.
+
+**Amended.** By `AI-912`: the producer of `actor+0x50` = 0x17 is located (`L18326`, `L18327`) and has no direct caller, jump or absolute dword reference; whether it runs stays Unknown, so the unreachability of the `typeID` 0x18 test stays Medium.
 
 ### AI-CLOCK-080
 
@@ -3949,6 +4162,8 @@ allocated ids `381`..`386` of `claims/ai.md` and spent `AI-381`..`AI-385`.
 **Confidence.** High for the period on each route, read from the listing. Medium for the two callers sharing the `obj+0x2c` gate; whether both routes run in one session is Unknown.
 
 **Unknown.** Whether the launcher `R0456` is reachable: it has no direct call, no reference and no raw dword hit in the PE (`rom-enum-cadence.txt`, `rom-tables.txt`; the one hit for `R0261` is the launcher's own push at `L02032`); whether both routes run in one session; and which route a given session mode uses.
+
+**Amended.** By `AI-904`: the thread procedure `R0261` is the 6-instruction window `push ebp`, `mov ebp, esp`, `mov ecx, [ebp+8]`, `call R0075`, `pop ebp`, `ret`; the census of rel32 sites over the decoded `.text` lists no site targeting `R0456` or `R0261`; a computed address stays Unknown.
 
 **Amended.** `AI-639` names the counter route as the only in-play caller of the AI pass found, through `R0560`'s callers and `R0099`, and leaves the launcher `R0456` and the session modes open (Medium / Unknown).
 
@@ -6680,6 +6895,8 @@ EN and RU `rom.exe` are one image (one SHA-256): one image, one witness.
 **Unknown.** The tail routines `R0105`, `R0100`, `R0106`, `R0107`; the arm `R0155`;
 the value of `grpAI+0x45` for a group a player order builds; the seven unplaced call sites above.
 
+**Amended.** By `AI-908`: the `0xff` arm also calls `R0070(group)` before the per-member `R0022`, and case 0 walks the member list inline (`L18358`..`L18359`); the map and the table are unchanged.
+
 **Amended.** `AI-549` places the seven sites: `L14813` and `L14814` in the withdrawal actions, `L14815` and `L14816` in bodies with no caller, the wrappers without a caller.
 
 ### AI-518
@@ -9230,7 +9447,7 @@ actors, and whether a ground melee attacker strikes a Dragon depends on target s
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-702 | The unconditional AI-pass call `L00163` lies in thread loop `R0075`, whose only launcher `R0456` has no rel32, dword or immediate reference in the image; were it run, it would also decide once per 16 ticks. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
+| AI-702 | The unconditional AI-pass call `L00163` lies in thread loop `R0075`, whose only launcher `R0456` has no rel32, dword or immediate reference in the image; were it run, it would also decide once per 16 ticks. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
 | AI-703 | The remembered attacker cell `ord+0x58` is forgotten by a count of stamps, not of ticks: the candidate builder `R0110` and the sight stamp `R0114` each add 1 to `ord+0x5a` and clear the cell when it exceeds 20, AI owners only. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
 | AI-704 | Of 212 order-record stores to the pursuit fields, 74 sit in routines with no reference; referenced writers end a pursuit only by group re-scoring, the stand, a refused route, the withdrawal tail, a teardown, or a command or script setter. | High / Medium | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
 | AI-705 | Under Guard, a member struck by an attacker farther than the working radius from the centroid is not given that attacker: the clip drops it, the member keeps or resumes its walk home, and its turn waits until it next runs order kind 0xb. | High / Unknown | ✔ promoted (branch candidate) | [EXP-0612](../experiments/EXP-0612-pursuit-end-alert/) |
@@ -9257,6 +9474,8 @@ the loop never runs in play: an address computed at run time is not excluded.
 
 **Unknown.** Whether any session mode reaches `R0456` by a computed address: a breakpoint on
 `R0456` during a mission of the original would settle it.
+
+**Amended.** By `AI-904`: the committed rel32 census (`evidence/s2/p3/callers.tsv`, 554587 decoded instructions) lists no site targeting `R0456` or `R0261`, the same zero as the raw scan here for the rel32 form; the thread procedure is the 6-instruction window stated there.
 
 ### AI-703
 
@@ -10189,7 +10408,7 @@ In the complete listed R0218 body the object rectangle walk and paired hit store
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-776 | Guard's member tail has three outcomes per pass (engage, kind 0xb or heal at the post, else kind 1 to the post); row 1 calls no acquisition, so kind 1 stays at the post unless the route is refused (`mover+0x98`: `R0004`). | High | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
+| AI-776 | Guard's member tail has three outcomes per pass (engage, kind 0xb or heal at the post, else kind 1 to the post); row 1 calls no acquisition, so kind 1 stays at the post unless the route is refused (`mover+0x98`: `R0004`). | High | ● active (branch candidate, amended) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
 | AI-777 | Under Guard a pursuit ends at the first pass that gives the member no winner from the clipped shared population; no pursuer-to-post, pursuit-time or pursued-distance test is in the bodies read. | Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
 | AI-778 | Order-0 state 0xb tests the 5-cell block about the post through `R0020` and `R0021` and reads no sight stamp, so a remembered attacker cell reaches it only after arrival, through `R0022`. | High | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
 | AI-779 | A Guard member struck on the walk home keeps walking until a later pass admits the attacker for the whole group; the turn flag waits for the idle turn and turns to a random facing, not to the attacker. | High / Medium | ● active (branch candidate) | [EXP-0638](../experiments/EXP-0638-rom1-guard/EXP-0638.md) |
@@ -10219,6 +10438,8 @@ reacquisition `R0004` (`AI-ROUTE-045`, `AI-375`). Kind 0xb's row
 `942e9b72…`, one witness), every store a cited instruction and every branch target local. Callees
 `R0009`, `R0113`, `R0015`, `R0178` and the list primitives `R1334`, `R0029`,
 `R1133` are not re-read here.
+
+**Amended.** By `AI-905`: the walk is preceded in the arm by `R0141`, `R0110`, the clip loop over `+0xba8`, `R0177` and the latch block, in that order; the walk itself is unchanged.
 
 ### AI-777
 
@@ -10564,8 +10785,8 @@ So this routine counts and filters the units on a cell and selects one at random
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| AI-792 | Of the six direct callers of the guard setter `R0125(grp, n)`, five push `n` = 0 (`L00384`, `L00378`, `L00949`, `L00950`, `L00388`); the script Guard arm `L00596` passes the low byte of the node's Par1. | High / Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
-| AI-793 | A guard radius is geometry `+0x2c` raised to `MinimalGuardRange` (8) when `n` = 0, or to a nonzero script `n`: at least 8 stored, 11 rolled on a populated pass, 7 on the empty edge (`AI-JITTER-103`); a nonzero `n` has no floor, 0 takes it. | High / Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| AI-792 | Of the six direct callers of the guard setter `R0125(grp, n)`, five push `n` = 0 (`L00384`, `L00378`, `L00949`, `L00950`, `L00388`); the script Guard arm `L00596` passes the low byte of the node's Par1. | High / Medium | ● active (branch candidate, amended) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
+| AI-793 | A guard radius is geometry `+0x2c` raised to `MinimalGuardRange` (8) when `n` = 0, or to a nonzero script `n`: at least 8 stored, 11 rolled on a populated pass, 7 on the empty edge (`AI-JITTER-103`); a nonzero `n` has no floor, 0 takes it. | High / Medium | ● active (branch candidate, amended) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
 | AI-794 | No pursue-distance test is in the Guard bodies read (`AI-777`, Medium); the 5-cell post test (`AI-BREAK-041`) is not read for a guard member. Passes run every 16 ticks (`AI-385`, High / Medium / Unknown); no winner turns it back. | Medium | ● active (branch candidate) | [EXP-0645](../experiments/EXP-0645-rom1-phases-guard/EXP-0645.md) |
 
 ### AI-792
@@ -10594,6 +10815,8 @@ it. Medium that the six are all callers: the set is `AI-POST-097`'s direct-call 
 a data read of node 9's Par1 in both roots' `scn:80.alm`, and with an original run of mission
 80 that SAVEs after the node's trigger and records group 4's `+0x2d` and `+0x38`.
 
+**Amended.** By `AI-902`: the node's Par1 is 13 in both installs and no trigger record carries the node; whether it fires stays Unknown.
+
 ### AI-793
 
 - Setter `R0125(grp, n)` (`AI-450`, High): `+0x2d` = `+0x38` = geometry `+0x2c`
@@ -10620,6 +10843,8 @@ smallest values, the weakest links being `AI-741` and `AI-JITTER-103`.
 
 **Unknown.** Whether any shipped script passes an `n` below 8: settled by the data read named
 in `AI-792`.
+
+**Amended.** By `AI-902`: the one shipped Guard node passes `n` = 13, so no shipped Guard node passes an `n` below 8 (Medium for completeness, see the card).
 
 ### AI-794
 

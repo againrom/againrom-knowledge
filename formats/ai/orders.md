@@ -431,13 +431,16 @@ every other order that has a "walk there, then do a thing" shape.
 - In the walk, stepper, near-search and search routines no counter gives up: `mover+9` and `mover+0x78` only
   select a re-search against the `[Path Finding]` values, and the flag `mover+0x98` is set at three empty-list
   sites (`AI-384`).
-- The AI pass that contains the group tail runs once per 16 ticks on both of its callers (`AI-385`).
+- The AI pass that contains the group tail runs once per 16 ticks on both of its callers (`AI-385`). The driver has two direct call sites and no rel32 site targets the launcher (`AI-904`, `AI-702`).
+- On its engagement path the setter `R0009` stores `ord+0x08` = 5, the target in `ord+0x0c` and `actor+0x12c` in `ord+0x14`; its other paths store through `R0209` and `R0393`; it has 14 direct call sites (`AI-907`, `AI-886`).
+- The dispatcher `R0023` maps the group order to its arm routine (`AI-908`); the Guard arm runs the geometry, list, clip and assignment calls in a fixed order (`AI-905`). The group arms store the assigned target in `ord+0x20` through `R0177` and `R0153` (`AI-909`), and the setter call sites of arms 2 and 5 are `L01990` and `L01708` (`AI-910`). The follow helpers store `ord+0x08` = 4 with the target in `ord+0x18`, and `R0022` stores `ord+0x08` = 6 with the target in `ord+0x0c`; `R0015` stores 0 on its non-heal paths and 8 on the heal path (`AI-911`, `AI-349`). The one immediate store of 0x17 to a displacement-0x50 operand in `L06931..L07036` is in `L18326`, which has no direct caller (`AI-912`; it amends `AI-STATE-043`). The candidate list that feeds the assignment is built by `R0110` (`AI-913`).
+- `actor+0xa5` has 8 operand sites in the AI module's address range and 5 outside it, unclassified; the store at `L00261` sits behind slot 0x17 of the per-actor machine, whose one direct call site is `L14684` (`AI-906`).
 - The pursuit's near search is counted per centred call: `mover+0x78` (a byte) rises on every centred call past the stop test, an
   endpoint-match return included; the one clear in the windows read is the near search (stores to `+0x78` elsewhere are not censused). The near search runs when the dynamic list is empty or
   the counter exceeds `ctx+0x585c0` (shipped 32), and `mover+0` equals `mover+1`. On calls with unchanged target identity and no endpoint match it runs on the 33rd centred call after the last one and the stepper alone runs in between; a call after an endpoint match takes the new-target path (`AI-743`). High for the branches, Medium for the cadence (`AI-885`).
 - A guard member's chase is judged on that pass: it ends at the first pass without a winner,
   and the member walks back to its post (`AI-794`, Medium). The break distance field `actor+0xa5` is stored 5 once, in the
-  constructor; the census counted one other direct store with that displacement and did not record its address (`AI-891`; wider stores and block copies are not searched). A guard pursuit threshold in cells stays Unknown.
+  constructor; the one other direct store is `L00261`, which also stores 5 (`AI-891`, `AI-903`; wider stores and block copies are not searched). A guard pursuit threshold in cells stays Unknown.
 
 ### Transit into a held cell
 
