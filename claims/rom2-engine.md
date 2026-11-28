@@ -218,6 +218,84 @@ RU. Walk start L2.02867(unit, cell word, k) (200 instructions read, L2.02867 to 
 
 **Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass20/listings/ru-w L2.02867.txt`, `ru-w L2.01587.txt`.
 
+## ROM2 targeting and the blow (EXP-2216)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1940 | The session tick has four direct call sites per root, each loading its this from the tick global; no absolute reference to the tick, computed-address calls not excluded. High RU for the sites, Medium for no other caller and for EN. | High / Medium | ● active | [EXP-2216](../experiments/EXP-2216-rom2-targeting/) |
+| R2-ENGINE-1941 | RU point apply L2.00034 (1,280 instructions read): for a target whose virtual +0x1c result 1 or less the cell object copies the target's position, for a larger result it is rebuilt (targets unread); three read tests compare cell words. | Medium | ● active | [EXP-2216](../experiments/EXP-2216-rom2-targeting/) |
+| R2-ENGINE-1942 | Session list +0xbbec is touched at 9 sites per root (constructor, 4 appends, clear, 3 destructor); the record destructor is empty in RU; no site reads a record field. No reader found; Medium. | Medium | ● active | [EXP-2216](../experiments/EXP-2216-rom2-targeting/) |
+| R2-ENGINE-1943 | Unit state +0x54 = 0x10: the only immediate stores in the decoded code are two per root, in the per-tick step and in death finish (two callers). 29 RU register stores and the copy method L2.00106 are unread; entry to 0x10 is Medium. | High / Medium | ● active | [EXP-2216](../experiments/EXP-2216-rom2-targeting/) |
+| R2-ENGINE-1944 | Nine of ten RU/EN function pairs: the first 60-512 instructions are equal after normalisation; no window reaches a function end, callees and tables are normalised away; the cast router L2.01527 differs in EN. Admission: 20 sites per root. | High / Medium | ● active | [EXP-2216](../experiments/EXP-2216-rom2-targeting/) |
+
+### R2-ENGINE-1940
+
+RU. The session tick `L2.04380` has four direct call sites (`L2.04409`, `L2.09023`, `L2.09024`, `L2.06230`), found by a linear rel32 sweep of the code sections; an absolute-dword scan of every section for the routine's address finds none. At each site the instruction before the call is `mov ecx, [L2.01317]`. The tick stores its argument ecx as its object, returns when the object's `+0x94` is 0, and reads and increments the object's `+4`. Its call to the turn routine `L2.00502` takes ecx from the other global `[L2.02609]` (a different object). The stores to `[L2.01317]` are three (R2-ENGINE-1493's census): the store of the constructor body at `L2.00332` writes the constructor's `this`, `L2.07831` writes the pointer returned by an allocation and constructor call, `L2.07832` writes 0. EN. The tick `L2.03120` has four direct callers (`L2.09025`, `L2.05595`, `L2.09026`, `L2.05999`), each preceded by `mov ecx, [L2.00805]`; no absolute-dword reference to the routine. The one EN store read is `L2.00331` in the constructor body, which stores `this`.
+
+So at each of the four direct calls the object whose `+4` the tick counts is the global. Guard B's reads of `[L2.01317]` (R2-ENGINE-1493) read that object while the global is not rewritten between the tick call and the read.
+
+**Amends.** R2-ENGINE-1493 (its Medium on the tick object).
+
+**Confidence.** High in RU for the four direct call sites and the identity of the global at each call. Medium for the absence of other callers: the population is a rel32 sweep of the code sections and an absolute-dword scan of every section (`native/pass2/refs.tsv`: four call rows, no absolute row); a call through a register loaded by arithmetic, or through a vtable slot built at run time, is not excluded. Medium in EN (the EN global has 260 absolute-dword references in `.text`, of which one store was read): the EN stores to the global other than the constructor's were not read, and the EN census of reads and writes was not rerun. Medium for both roots that the constructor at `R2.0010` (EN `L2.00221` body) builds the class of the tick: the tick's own `+0x94` early return was read, the constructor's class was not shown to be the tick's. A caller that passes another object through a register copy is excluded for the eight sites read; virtual calls through a table were not found by the absolute-dword scan.
+
+**Unknown.** Seconds per tick (R2-ENGINE-1073): a run of the original at each speed setting with a stopwatch against a walk of a known distance.
+
+**Evidence.** `experiments/EXP-2216-rom2-targeting/evidence/native/pass1/listings/ru-tick-caller-L2.04409.txt`, `ru-tick-caller-L2.09023.txt`, `ru-tick-caller-L2.09024.txt`, `ru-tick-caller-L2.06230.txt`, `ru-global-store-L2.00332.txt`, `ru-global-store-L2.07831.txt`, `ru-tick-head-L2.04380.txt`, `native/pass1/refs.tsv` (EN callers), `native/pass2/refs.tsv` (RU references), `native/pass3/listings/en-en-global-store-L2.00331.txt`.
+
+### R2-ENGINE-1941
+
+RU. The point apply `L2.00034(this, actor, target, x, y)` builds a cell object at `[ebp-0x20]` before any occupant is touched. With target 0 the object is made by `L2.02599` from the bytes x and y (byte `+0` = x, `+1` = y, word `+2` = y*256 + x, bytes `+4` and `+5` = 0x80). With a target the object is a copy (`L2.09027`, `L2.05948`) of the target's position object `[target+0x10]`, so the trailing arguments x and y are not read on that path; when the target's virtual `+0x1c` result is above 1 the object is rebuilt by `L2.02120` from two 16-bit values (`L2.03516` and `L2.03515` results, each minus 1; both unread). The routine returns early when the target's virtual `+0x2c` is nonzero and its byte `+0x4c` has bit 8 set. Three later tests, `L2.09028`, `L2.09029` and `L2.09030`, ask `L2.04529(cell, [candidate+0x10])`, whose body returns 1 exactly when the word `+2` of the two position objects is equal, so those candidates are matched by same cell, not by distance. Another site (`L2.00080`) passes the object's x (`L2.00486`) and y (`L2.00487`) with the actor to `L2.00093` on `[L2.02538]`.
+
+So for a target whose virtual `+0x1c` result is 1 or less the cell object is a copy of the target's position; for a larger result it is rebuilt from two 16-bit values and the cell word that `L2.04529` compares is not the copy. Which targets give a result above 1 is unread, so whether the offensive cast of R2-ENGINE-1490 (a victim unit, trailing arguments 0) uses the copy or the rebuilt object is not settled.
+
+**Amends.** R2-ENGINE-1490 (its Unknown on the centre, for the unit-target path).
+
+**Confidence.** Medium. The bodies named are read; 1,280 instructions (L2.00034 to L2.06349 and L2.09031 to L2.09032, five windows of 256) were read and the routine continues past `L2.04530` (its length is not counted), so other arms may use other points; "matched by cell-word equality" holds for the three read tests, whose owners (which spell rows reach them) were not identified. That the cell object is the area's application centre is an inference from the routine's name in R2-ENGINE-1490 and is not read in the 1,280 instructions. The cell-cast route of `L2.01732` (R2-ENGINE-1490) enters through its own prepared state and was not followed. The values of `L2.03516` and `L2.03515` and the cell/pixel meaning of the rebuilt object are unread.
+
+**Unknown.** Which targets give a virtual `+0x1c` result above 1 (read that method for the unit classes). A run of the original with a computer mage, a victim and an own unit one cell from the victim drawing Fire Ball: compare the cell of the first damage with the victim's cell and the own unit's health before and after.
+
+**Evidence.** `experiments/EXP-2216-rom2-targeting/evidence/native/pass2/listings/ru-target-apply-L2.00034.txt`, `native/pass3/listings/ru-target-apply-cont-L2.09031*.txt`, `native/pass4/listings/ru-cell-*.txt`.
+
+### R2-ENGINE-1942
+
+Both roots. A census of every decoded instruction of the code sections with a memory operand of displacement `0xbbec`, and of every instruction with an immediate operand `0xbbec`, finds no memory operand and nine instructions per root, all `add ecx, 0xbbec` followed by one call. RU: `L2.06045` calls the constructor `L2.06024` (which stores the vtable `L2.09033`, zeroes `+4`, `+8`, `+0xc`, `+0x10`, `+0x14` and stores its argument at `+0x18`); `L2.06050`, `L2.06051`, `L2.06049` and `L2.06053` call the append `L2.01727`; `L2.06048` calls the clear `L2.05852`; `L2.06046`, `L2.06055` and `L2.06056` call the destructor `L2.06025`. EN: the same order of sites (`L2.09034` constructor `L2.09035`; `L2.09036`, `L2.09037`, `L2.09038`, `L2.09039` append `L2.05848`; `L2.09040` clear `L2.03651`; `L2.09041`, `L2.09042`, `L2.09043` destructor `L2.09044`). The append allocates a node, copies 0x15 dwords (a 0x54-byte record) to node `+8`, links it at the tail through `+4` and `+8` of the list object, and calls the record destructor on its by-value argument. The clear walks the chain from `[this+4]`, calls `L2.06061(node+8, 1)` per node (RU; EN `L2.07785`), which steps by 0x54 and calls `L2.06283` (EN `L2.07818`) on each; that routine calls `L2.07817` (EN `L2.07827` by the append's call) and frees the block when its argument has bit 0 set. RU `L2.07817` is a function that stores its `this` in a local and returns. So no read of a record field is reached from a constructor, append, clear or destructor in RU; an iteration over the list from another site would need the list pointer by another computation than the nine sites.
+
+So in a decode of both code sections the area blow's posted records (R2-ENGINE-987) are formed at nine sites per root and only constructed, appended to, cleared and destroyed; the RU record destructor is empty; the EN record destructor chain (`L2.07827`) is unread; the bodies read contain no consumer (Medium).
+
+**Amends.** R2-ENGINE-1021 (the sweep for a read operand is now a census of all four operand forms with the method bodies read in RU; the aliased-reader Unknown narrows to a pointer formed by other arithmetic). R2-ENGINE-1045 (its unread helper `L2.06061` and `L2.06283` are read; `L2.06062` stays a read as a free, Medium). R2-ENGINE-1123 (its unread `L2.06283` is read here). R2-ENGINE-1451 and R2-ENGINE-1492 (their open EN callee `L2.07818` is read in `native/pass9/listings/en-elem-dtor-L2.07818.txt`).
+
+**Confidence.** Medium. The census is a linear decode of the code sections (decode desynchronisation after data is possible); the EN method bodies were compared for shape (calls, the 0x15-dword copy, the vtable store) and not read whole; EN `L2.07827` is unread; a reader that forms the list pointer from `session` plus a different constant, or from a stored pointer, is not excluded; the destructor of the RU record is read, the EN one is not.
+
+**Unknown.** Whether another consumer exists: a run of the original with a watch on the list head after a strike would show a read; static settle by reading the 20 case routines and `L2.02490`, `L2.06283` callers of R2-ENGINE-1123 for a stored list pointer.
+
+**Evidence.** `experiments/EXP-2216-rom2-targeting/evidence/native/pass6/census.tsv` (rows `anyimm-bbec`), `native/pass5/census.tsv` (no memory operand), `native/pass7/listings/*list-*`, `native/pass8/listings/*dtor*`, `native/pass9/listings/ru-record-dtor-L2.07817.txt`, `en-elem-dtor-L2.07818.txt`.
+
+### R2-ENGINE-1943
+
+Both roots. Immediate stores of `0x10` to a dword at displacement `0x54` (census of every decoded instruction, `native/pass5/census.tsv`): RU `L2.07958` and `L2.07959`, EN `L2.07960` and `L2.03248`; the other 13 (RU) and 13 (EN) rows with that immediate are compares. The census of all `mov` stores to displacement `0x54` finds 104 (RU) and 114 (EN) instructions (`native/pass6/census.tsv`), among them register stores and stores of other immediates. RU `L2.07958` is in the per-tick step `L2.00028` (EN `L2.00263`, mirror read), which returns at once when the state is 0x10. The step runs the unit's effect list (virtual `+0x38` per element at `+0x20`), then for health word `+0x94` at most 0 sets state `+0x54` and order `+0x50` to 0, and on the first pass (byte `+0x13c` zero) sets that byte, halves word `+0xbe` and loads byte `+0x6c` from virtual `+0x74` minus 1; on later passes it decrements `+0x6c` to 0, then for byte `+0x4a` above 1 stores health -1000, and when the signed health is -10 or less stores state 0x10 and calls death finish `L2.01807` (EN `L2.01806`). Death finish (`L2.01807`) has two direct callers, `L2.05623` (the step) and `L2.04382` (EN `L2.05624` and `L2.04383`); it stores health -10000 when word `+0x148` is nonzero (and clears it), then state `+0x54` = 0x10 and `+0x50` = 0x10, and calls `L2.02926` on the global `[L2.02538]`. `L2.04382` belongs to a pass over the units of `[L2.01317]+0x7c`: counts units by their word `+0x148` in a map, rolls `L2.00092(100)` against each count, marks some entries -1, then kills each unit with `+0x148` whose entry is -1. The step is stored in three vtables per root (RU `L2.02945`, `L2.02946`, `L2.02947`); the copy method `L2.00106` (callers `L2.06465` and vtables `L2.09045`, `L2.09046`, `L2.09047`) copies `+0x54` from another unit.
+
+So the only immediate stores of 0x10 to dword `+0x54` in the decoded code are two per root (the per-tick step and death finish). A unit can also reach state 0x10 by a register store (29 RU stores, 36 EN, unread) or by the copy method `L2.00106`; whatever sets health or `+0x148` upstream is not claimed.
+
+**Amends.** R2-ENGINE-1452 (dead units, state 0x10): two writers of state 0x10 are named; register stores and the copy method stay unread.
+
+**Confidence.** High in RU for the two bodies and for the census rows of immediate stores of 0x10 (15 rows per root: 2 stores, 13 compares). Medium for how a unit enters state 0x10, because the census of all `+0x54` stores finds in RU 29 register stores and 75 immediate stores of other values (EN 36 and 78), unread; Medium that the EN step mirrors the RU one (store and compares read, the rest by shape); Medium for completeness: stores through a register, string moves and the copy method at `L2.00106` can carry 0x10 and are unread, and the census is a linear decode. The meaning of `+0x148`, `+0x13c` and `+0x6c` is taken from the stores alone. The threshold writers of command `+0x40` and `+0x44` are not settled: the census finds 156 and 119 stores per root across all classes (`native/pass8/census.tsv`), not reduced to the command class.
+
+**Unknown.** Command `+0x40`/`+0x44` writers: read the classes of the stores in `native/pass8/census.tsv` whose base is the command block; a run with a unit pinned at the threshold would show the flee.
+
+**Evidence.** `experiments/EXP-2216-rom2-targeting/evidence/native/pass5/census.tsv`, `native/pass6/census.tsv`, `native/pass7/listings/*state10-*`, `native/pass8/refs.tsv`, `native/pass9/listings/ru-death-caller-L2.04382.txt`, `en-death-caller-L2.04383.txt`.
+
+### R2-ENGINE-1944
+
+Both roots. For each RU routine of R2-ENGINE-1877 to 1880 the EN entry was found by the page's offset (RU minus 0x9ff0 for L2.01588, L2.03475 and the planner L2.01530; RU minus 0xa039 for L2.01518 and after), checked by call pairing or by the prologue frame size, then both bodies decoded and compared with addresses, call and jump targets and absolute numbers normalised. Equal after normalisation over the window of the stated size, with no window reaching a function end (the first N instructions only): scorer RU `L2.05238` / EN `L2.06224` (160 instructions), group assignment `L2.05173` / `L2.06128` (512), defender helper B `L2.03474` / `L2.06580` (256), hostile filter `L2.02119` / `L2.05839` (200), kind-3 filter `L2.06586` / `L2.06597` (120), distance `L2.01588` / `L2.06209` (140), admission `L2.01518` / `L2.09048` (60), flee cast `L2.02452` / `L2.07705` (256), caller `L2.01512` / `L2.05315` (512). The cast router RU `L2.01527` / EN `L2.04143` matches 368 of 512 instructions; EN has an extra block of about 100 instructions in the second window and different frame offsets in the locals. Admission `L2.01518` has 20 call sites in RU and 20 in EN (`native/pass13/refs.tsv`); `L2.01527` has 3 direct callers per root and `L2.01512` 2. The RU router `L2.01527` reads the prepared spell id from command `+0x78`, admits it through `L2.01518(unit, id, 0)`, returns 0 when it is refused, and dispatches by a byte table and a jump table on 28 values of the id (`id - 1` tested against 0x1b; tables `L2.01529` and `L2.01528` unread). So nine of ten pairs begin as the RU bodies R2-ENGINE-1877 to 1880 read; the difference that is shown is in the router.
+
+**Amends.** R2-ENGINE-1877, R2-ENGINE-1880 (their EN-unread clauses are answered at Medium for the windows named).
+
+**Confidence.** High for the table's arithmetic: nine of ten pairs with 0 differing hunks after normalisation (every address, call target and absolute number of six hex digits or more mapped to one symbol), the router 9 hunks. Medium for the functions: no window reaches a function end (the last listed instruction of each RU window is inside the body), the `ret` instructions in the windows are inner returns, and a different callee, table, constant or global is not seen after normalisation; equal behaviour of the whole bodies is not shown. Medium for the router: the extra EN block is not read. Unknown whether the 20 call sites of the admission pass Teleport (id 0x17) in the routines other than `L2.02452`.
+
+**Unknown.** The EN router's extra block and the callers `L2.01512` / `L2.05315` arms: read the two chained windows listed in `evidence/derived/q6-ru-en-compare.tsv`.
+
+**Evidence.** `experiments/EXP-2216-rom2-targeting/evidence/derived/q6-ru-en-compare.tsv`, `native/pass10/listings/*`, `native/pass12/listings/*`, `native/pass11/entries.tsv`, `native/pass13/refs.tsv`.
+
 ## ROM2 multiplayer return request, return penalty and building visits (EXP-2214)
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -1021,7 +1099,7 @@ The kill route takes the killer from victim `+0x40` for a unit in state 0x10 (R2
 | R2-ENGINE-1042 | RU walk prepare L2.02401 stores +8=1 and +0xa, no candidate read; RU L2.02637 stores order 0xc and +8=0; movement +0x98 has three sets and one clear in the census, arrival unread. | High / Medium / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
 | R2-ENGINE-1043 | RU L2.01525 (whole body): a unit with owner +0x2c zero passing L2.00044 tries L2.01527; otherwise +8=6, +0xc=target and +0x14 from L2.01728; bodies EN masked equal. | High / Medium | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
 | R2-ENGINE-1044 | RU attack planner L2.01530 (188 decoded instructions) holds no +0x94 or +0x96 operand; no test in it is identified as a death, sight or hostility test; endings Unknown. | High / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
-| R2-ENGINE-1045 | RU L2.03275 has 27 arms, one call each (jump table L2.03277 unread); RU L2.05852 walks a chain from [this+4] calling L2.06061 per node and clears +4, +8, +0xc, +0x10 and, after L2.06062, +0x14; helpers unread. | High / Medium / Unknown | ● active | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
+| R2-ENGINE-1045 | RU L2.03275 has 27 arms, one call each (jump table L2.03277 unread); RU L2.05852 walks a chain from [this+4] calling L2.06061 per node and clears +4, +8, +0xc, +0x10 and, after L2.06062, +0x14; helpers unread. | High / Medium / Unknown | ● active (amended) | [EXP-2147](../experiments/EXP-2147-rom2-order-machine-2/RESULTS.md) |
 | R2-ENGINE-1072 | EN loop L2.04213 and wrapper L2.02403 (20-instruction twins of RU L2.01724, L2.01726) had 0 hits in one counted mission-10 launch while the hero stood, read order 1 and stood again. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 | R2-ENGINE-1073 | EN actor step L2.00263 ran once per scheduler counter value for each of 30 units, from one return address; the counter advanced 16.1 per second in launch 1 and 32.1 in launch 2; server tick unmeasured. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
 | R2-ENGINE-1074 | In one EN launch each player ground click moved the hero into a new Group object and wrote order 1; the left Group record read programme 0xff; order read 0xc afterwards. | High / Medium | ● active | [EXP-2149](../experiments/EXP-2149-rom2-order-machine-3/RESULTS.md) |
@@ -1548,6 +1626,8 @@ A linear sweep of RU `.text` for any operand with displacement or immediate 0xbb
 
 **Amended.** R2-ENGINE-1451 reads the EN drain `L2.03651` that empties the same list; no reader before the clear is read, so this card stays Medium.
 
+**Amended.** R2-ENGINE-1942 repeats the census in both roots with the memory-operand and immediate forms separate (nine immediate sites per root, no memory operand), reads the constructor, append, clear and destructor bodies, and finds the RU record destructor empty; the unread callers of the two helpers stay open there.
+
 **Evidence.** [EXP-2146](../experiments/EXP-2146-rom2-order-machine/RESULTS.md) question 4.
 
 ### R2-ENGINE-1022
@@ -1615,6 +1695,8 @@ RU `L2.03275` (151 decoded instructions, `hit-L2.03275.lst`) is a switch on fiel
 **Confidence.** High for the arms and the body read. Medium for "frees" (`L2.06061`, `L2.06062` unread). Unknown whether any arm reads a record of list `+0xbbec`.
 
 **Amends.** R2-ENGINE-1021's Unknown on whether `L2.05852` reads the records (narrowed: it passes `node+8` to `L2.06061`, unread).
+
+**Amended.** R2-ENGINE-1942 reads `L2.06061` and `L2.06283` (the per-node routines): they step by 0x54, call `L2.06283` per element and then the record destructor, which is empty in RU; `L2.06062` stays unread.
 
 **Evidence.** EXP-2147 RESULTS.md question 9; `evidence/generated/win/ru-hit-L2.03275.lst`, `ru-list-L2.05852.lst`.
 
@@ -28551,6 +28633,8 @@ L2.06061 (18, whole) calls L2.06283(0) on each of count consecutive 0x54-byte el
 
 **Amended.** R2-ENGINE-1927 reads the 18 cells of table L2.06288 and the call of L2.08360 from the head of L2.02490, which this claim lists as unread; the runner's switch and the other cases stay unread.
 
+**Amended.** R2-ENGINE-1942 reads `L2.06283` (RU): it calls the record destructor `L2.07817`, which is empty, and frees the block when its argument has bit 0 set; the 20 case routines and `L2.02490` stay unread.
+
 **Evidence.** EXP-2153 generated/tables/ru-script-switch.tsv, win/ru-script-cases-a.lst, ru-record-release.lst, ru-list-free.lst, ru-script-list-b.lst, ru-caller-L2.06070.lst, scan/ru-refs-pass3.tsv; EXP-2146 ru-reader-L2.03275.lst (arm calls of L2.03275).
 
 ### R2-ENGINE-1124
@@ -34654,6 +34738,8 @@ skip (EN L2.08303, RU L2.08304: a check whose copied byte IR+0x58 is nonzero is 
 routine (EN L2.08305, RU L2.08306) carries the compiler's count of 8000..9999 parameters (R2-ENGINE-1684) into that byte
 is not read, so the Unknown on what sets the check copy's byte +0x58 stays open at Medium.
 
+**Amended.** R2-ENGINE-1942 reads the EN callee `L2.07818` (`native/pass9/listings/en-elem-dtor-L2.07818.txt` in EXP-2216); the EN record destructor `L2.07827` stays unread (Medium).
+
 **Confidence.** High for the order within the three listings read. Medium for the RU turn routine (equal in 132 of 133
 lines, R2-ENGINE-761) and that L2.03285 is the only caller (R2-SESSION-313). Unknown: what sets the check copy's byte
 +0x58 (a check whose byte is nonzero is skipped; R2-ENGINE-1318 reads the action-side compiler that increments the same IR
@@ -34686,6 +34772,8 @@ units stay in their group list while dead units (+0x54 = 0x10, body or no body) 
 not G+0xc; EN High, RU Medium for checks 1 and 8); check 20 iterates the Buildings list ([[[L2.00805]+0x7c]])
 and checks Building word +0x42 > 0, so it does not count units in any state.
 
+**Amended.** R2-ENGINE-1943 lists the immediate stores of 0x10 to dword +0x54: two per root, in the per-tick unit step and in death finish (two direct callers per root); register stores (29 RU, 36 EN) and the copy method `L2.00106` are unread, so these are two writers of state 16 and not all of them (High RU for the two bodies, Medium for the rest).
+
 ### R2-ENGINE-1453
 
 The map EN L2.04242 (RU L2.07787, masked equal) hashes the ID with L2.07797, takes the remainder by DWORD+8, and walks the
@@ -34715,7 +34803,7 @@ so the missing ID names register 0 (Medium: the constructor L2.06010 that runs a
 |---|---|---|---|---|
 | R2-ENGINE-1490 | No body read chooses a point for a ROM2 mage's area spell: the offensive choice casts at the victim unit, the special cast at the victim's cell; the centre L2.00034 takes is Unknown; no body read tests own units in the area. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1491 | A ROM2 area hit stores six fields in the struck unit's command (+0x54, +0x58, +0x5a, +0x94, +0x98, +0x9c) and no order; their readers found in the displacement census are the look-around, five sight copies and Guard B. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
-| R2-ENGINE-1492 | A repeated ROM2 area hit overwrites the same six fields and restarts a 21-pass sight count; each hit posts a record that the script tick destroys, and no reader of its content was found. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
+| R2-ENGINE-1492 | A repeated ROM2 area hit overwrites the same six fields and restarts a 21-pass sight count; each hit posts a record that the script tick destroys, and no reader of its content was found. | High / Medium | ✔ promoted (amended, branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1493 | ROM2 Guard B counts the hurt step-away in ticks (+0x98, below 10) and the stamp window in 16-tick blocks (+0x16); case 4 gives one step-away pass per hit at most (Medium); cases 1 and 2 walk to +0x9c every pass while the stamp is young. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1494 | A ROM2 Guard A member with no target walks to its post or idles there; the body reads none of command +0x16, +0x94, +0x98 and +0x9c, so by the bodies read a struck member there gets no step away. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
 | R2-ENGINE-1495 | ROM2 has two score bodies: L2.00057 adds half for preference 1 under a size and Mind test, L2.05238 doubles it unconditionally; the two published wordings describe different bodies. | High / Medium | ✔ promoted (branch candidate) | [EXP-2185](../experiments/EXP-2185-rom2-ai-gaps/RESULTS.md) |
@@ -34759,6 +34847,8 @@ absence of a unit test covers the bodies named, not every cast route.
 A run of the original, on a map with a computer mage, a victim and an own unit one cell from the victim, would
 settle it: let the mage draw Fire Ball (row 2) and compare the cell of the first damage with the victim's cell and
 the health of the own unit before and after.
+
+**Amended.** R2-ENGINE-1941 reads 1,280 instructions of `L2.00034`: with a unit target whose virtual `+0x1c` result is 1 or less the cell object is a copy of the target's position object and the trailing bytes are not read on that path; for a larger result it is rebuilt from two 16-bit values (which targets, unread) (Medium; the routine continues past `L2.04530`, unread).
 
 ### R2-ENGINE-1491
 
@@ -34839,6 +34929,8 @@ record. The census of RU `0xbbec` references (R2-ENGINE-1262) finds 9 sites, all
 census covers RU only, and the unread L2.07190 (vtable `L2.07216`), the EN counterpart `L2.07818` and pointer or
 vtable routes are not excluded. Medium for the 21 passes in EN, from R2-ENGINE-988.
 
+**Amended.** R2-ENGINE-1942 reads the EN callee `L2.07818` (`native/pass9/listings/en-elem-dtor-L2.07818.txt` in EXP-2216); the EN record destructor `L2.07827` stays unread, and the census of both roots (nine immediate sites per root, no memory operand) replaces the RU-only census named here.
+
 **Unknown.** Whether any code reads a posted record before the script tick drains it. A run of the original under a
 read watch on the nodes of the list at session `+0xbbec`, after an area blow on a unit, would show a reader or none.
 
@@ -34882,6 +34974,8 @@ the tick (four rel32 sites in RU, `nav1/n1-callers-sesstick.txt`) and the game-s
 **Unknown.** Seconds per tick; R2-ENGINE-1073 measured 16.13 and 32.08 counter values per second in two EN launches
 under a debugger and left the difference open. A run of the original at each speed setting, with a stopwatch against a
 unit's walk of a known distance, would give the seconds per tick.
+
+**Amended.** R2-ENGINE-1940 reads all four direct callers of the tick in RU and EN and the constructor store: the tick's `this` is the global at every call, High in RU and Medium in EN (the EN stores other than the constructor's are unread). The Medium on the tick object above is lifted for RU only, and names the unread EN stores.
 
 ### R2-ENGINE-1494
 
@@ -39163,10 +39257,10 @@ another, and watch which `.a2c` sections change after each step.
 | R2-ENGINE-1867 | One EN Outpost restore copies template position and current and maximum HP and mana. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
 | R2-ENGINE-1868 | EN in-process and RU dedicated death pass the owner's hero to the writer before HP is set to -50. | High / Medium / Unknown | ✔ promoted (amended, branch candidate) | [EXP-2211](../experiments/EXP-2211-rom2-mp-death-respawn/) |
 | R2-ENGINE-1876 | RU size-1 route search relaxes cost per neighbour (orthogonal +t or 2, diagonal +t+t/2 or 3) and tests the goal once per A-and-B half-pass pair; other arms unread. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
-| R2-ENGINE-1877 | RU group acquisition scans the enemy list in list order and keeps a candidate only on a strictly lower score; the first of equal scores stays. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
+| R2-ENGINE-1877 | RU group acquisition scans the enemy list in list order and keeps a candidate only on a strictly lower score; the first of equal scores stays. | High / Medium / Unknown | ● active (amended) | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
 | R2-ENGINE-1878 | RU defender helper ranks kind 3 first, then least edge distance (L2.01588), only when the defended unit's L2.01728 is 2 or more (L2.06586 removes kind 3 otherwise). | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
 | R2-ENGINE-1879 | RU hostile filter L2.02119 removes an invisible candidate unless a unit of the reference list is within that unit's byte +0x71 by L2.01588 distance. | Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
-| R2-ENGINE-1880 | RU flee Teleport admission tests book and mana only; no sight-range or adjacency test in the bodies read; callers L2.01527 and L2.01512 and virtual calls unread. | High / Medium / Unknown | ● active | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
+| R2-ENGINE-1880 | RU flee Teleport admission tests book and mana only; no sight-range or adjacency test in the bodies read; callers L2.01527 and L2.01512 and virtual calls unread. | High / Medium / Unknown | ● active (amended) | [EXP-2212](../experiments/EXP-2212-rom2-ai-seven/) |
 
 ### R2-ENGINE-1864
 
@@ -39266,6 +39360,8 @@ RU group assignment L2.05173 (one caller, L2.02466) walks the member list given 
 
 **Unknown.** The order of list +0xa68 for equal scores in a real session: place two enemies at equal distance, attack with a group and compare the chosen target with their creation order.
 
+**Amended.** R2-ENGINE-1944 answers the "EN unread" clause at Medium: the first 160 (scorer) and 512 (assignment) instructions of the EN bodies equal the RU windows after normalisation; the windows do not reach the function ends and callees, tables and globals are normalised away, so equal EN behaviour of the whole bodies is not shown.
+
 **Evidence.** [RU scorer and assignment](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w02-cost-diag-score-assign-sight.txt), [callers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w05-callto.txt).
 
 ### R2-ENGINE-1878
@@ -39301,5 +39397,7 @@ RU admission L2.01518(unit, id, 0) looks up spell id in the book at +0x140 (L2.0
 **Confidence.** High for the bodies of L2.01518, L2.02452 and L2.02448 and for the census of direct callers in RU. The callers L2.02449, L2.02452, L2.02451 and L2.07713 are read in R2-ENGINE-1418 (flee and back-off both cast Teleport). Unread: L2.01527, L2.01512 (11 sites) and virtual calls. Medium that no other Teleport branch exists. The sight-range eligibility and adjacency test the question names are not found in the read bodies.
 
 **Unknown.** A run with a caster of the smallest sight range next to an enemy and Teleport in the book; compare the action with the flee branch.
+
+**Amended.** R2-ENGINE-1944 reads the callers `L2.01527` and `L2.01512` in RU and EN as listings: the RU router reads the prepared id from command `+0x78`, admits it through `L2.01518(unit, id, 0)`, returns 0 when refused and dispatches through a byte table and a jump table (tables unread); admission has 20 call sites in each root (`native/pass13/refs.tsv`). The first 60 instructions of the EN admission and 256 of the EN flee cast equal the RU windows after normalisation (Medium); the EN router differs (368 of 512 instructions equal).
 
 **Evidence.** [RU admission and flee spell](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w03-cost-orth-defend-filter-flee.txt), [callers](../experiments/EXP-2212-rom2-ai-seven/evidence/ru-w05-callto.txt).

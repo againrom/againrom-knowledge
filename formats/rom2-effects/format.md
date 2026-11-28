@@ -299,3 +299,5 @@ Order machine reading citing claims of this page: R2-ENGINE-1929 gives the RU De
 Order machine reading citing claims of this page: R2-ENGINE-1931 gives the RU walk start L2.02867 called by the prepared 1 handler.
 
 Order machine readings that amend or reproduce claims of this page: R2-ENGINE-1896. They read the setter callers, the script table cells, the walk start and the L key order, and narrow the amended claims at the grades their Amended lines name.
+
+Also read in this machine: the session list +0xbbec that a blow's posted records fill is touched at nine sites per root, the RU record destructor is empty and no reader was found (Medium; R2-ENGINE-1942, which reads the EN callee that R2-ENGINE-1492 left open); in nine of ten RU/EN function pairs of the target ranking, hostile filter and Teleport admission the first 60 to 512 instructions are equal after normalisation, no window reaches a function end, and equal behaviour of the whole bodies is not shown (Medium; R2-ENGINE-1944).

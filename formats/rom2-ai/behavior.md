@@ -80,7 +80,7 @@ member with a target stays in Guard B's target case; a member without one
 and below max health walks to command +0x9c while the hit clock is fresh.
 This path is Medium, not observed; the Darkness Effect changes sight only for objects whose virtual +0x30 returns
 nonzero (R2-ENGINE-1237, R2-ENGINE-1238), whether the lowered sight drops the old
-target is Unknown, and so are the +0xbbec readers.
+target is Unknown, and so are the +0xbbec readers. In both roots the list is touched at nine sites (constructor, four appends, clear, three destructor calls), the record destructor is empty in RU, and no read of a record field is reached from them (Medium, R2-ENGINE-1942).
 Mission 10's Troll.4 and the four
 Bat_Sonic.4 share owner word 5, whose Player row stores diagonal 0x12 (High
 fields, Medium names). — R2-ENGINE-989, R2-ENGINE-990
@@ -181,15 +181,15 @@ fields' readers and the repeat behaviour are the rows below.
 | Look-around new heading | heading byte + 0x21 + draw below 0xbe; taken when the flag is set or a 0..0x7fff draw is below 0xcd | R2-ENGINE-1491 High |
 | Posted record per hit | 0x54 bytes (21 dwords), appended; the script tick destroys the list | R2-ENGINE-1492 High chain, no reader Medium |
 | Hit counter | none: +0x5a counts sight passes and is reset by a hit | R2-ENGINE-1492 High |
-| Session dword +4 | counts calls of the session tick; the tick returns at once when its object's +0x94 is 0 (R2-ENGINE-1016) | R2-ENGINE-1493 Medium: the tick object is not shown to be `[L2.01317]` |
-| Session word +0 | counts blocks of 16 calls of the session tick | R2-ENGINE-1493 Medium: the tick object is not shown to be `[L2.01317]` |
-| Group pass spacing | 16 session ticks; the turn routine runs when the tick count's low nibble is 6 | R2-ENGINE-1493 Medium: the tick object is not shown to be `[L2.01317]`; one direct caller (R2-ENGINE-1016, R2-ENGINE-778) |
+| Session dword +4 | counts calls of the session tick; the tick returns at once when its object's +0x94 is 0 (R2-ENGINE-1016) | R2-ENGINE-1493 Medium; the tick's this is the global `[L2.01317]` at each of its four direct calls, R2-ENGINE-1940 High RU, Medium EN |
+| Session word +0 | counts blocks of 16 calls of the session tick | R2-ENGINE-1493 Medium; tick object as above, R2-ENGINE-1940 |
+| Group pass spacing | 16 session ticks; the turn routine runs when the tick count's low nibble is 6 | R2-ENGINE-1493 Medium; tick object as above, R2-ENGINE-1940; one direct caller (R2-ENGINE-1016, R2-ENGINE-778) |
 | Guard B case 4 window | tick difference below 10 with health below maximum | R2-ENGINE-1493 High RU, EN Medium |
 | Guard B cases 1 and 2 window | stamp difference below 30 blocks with health below maximum; below 10 blocks without the health test | R2-ENGINE-1493 High RU, EN Medium |
 | Step-away passes per hit | case 4: at most 1 (for 10 of the 16 phases of the hit tick the next pass is within 9 ticks); cases 1 and 2: every pass walks to +0x9c while the stamp is under 30 or 10 blocks old, whatever the hit | R2-ENGINE-1493 Medium |
 | Guard A with no target | walks to its post or idles; reads none of +0x16, +0x94, +0x98, +0x9c | R2-ENGINE-1494 High, absence Medium |
 | Seconds per session tick | Unknown; 16.13 and 32.08 counter values per second were measured in two EN launches under a debugger and the difference is open | R2-ENGINE-1493 Unknown, R2-ENGINE-1073 |
-| Area spell point | no body read chooses a point: the offensive choice casts at the victim unit and the special cast at the victim's cell; the centre of the target-mode apply L2.00034 is Unknown; no unit test of the area | R2-ENGINE-1490 High for the bodies, Medium for the composition |
+| Area spell point | no body read chooses a point: the offensive choice casts at the victim unit and the special cast at the victim's cell; in the target-mode apply L2.00034 for a target whose virtual +0x1c result is 1 or less the cell object is a copy of the target's position, and for a larger result it is rebuilt from two 16-bit values (which targets: not read) and three read tests compare cell words for equality, their owners unread (RU, 1,280 instructions read; the routine continues past L2.04530, unread) | R2-ENGINE-1490 High for the bodies, Medium for the composition; R2-ENGINE-1941 Medium |
 | Candidate score, scorer L2.00057 | preference 1: s + s/2; preference 4: s - s/4, only when the actor's vtable +0x1c result is below 2 and its word +0x88 is at least 15; effect bit 0x40000 of +0x144: +0x7f, floor 1 | R2-ENGINE-1495 High both roots (bodies); callers RU |
 | Candidate score, scorer L2.05238 | adjusted distance above 1: 0xffffff; preference 1 doubles, preference 4 halves, no conditions, no effect test | R2-ENGINE-1495 High both roots (bodies); callers RU |
 | Effect bit 0x40000 | bit of +0x144 is effect id 18; the +0x150 bit 0x40000 is the separate field-changed flag; the two scorers read no other effect word, and an effect that changes the Mind word, the range or the virtual kind is not excluded | R2-ENGINE-1496 High for the bodies, Medium for the rest |
@@ -202,7 +202,7 @@ fields' readers and the repeat behaviour are the rows below.
 
 ## Health and hostile post-step
 
-The unit strike returns without a blow when a party or owner is missing, the attacker's health is not above 0, or its range byte +0x12c is below the distance; in RU it also returns when a non-mage Human-kind attacker whose attack type byte is not 5 meets a target of movementType 3 (Bat_Sonic, Dragon, Succubus rows); the EN strike body has no such test (the EN distance and callers are unread, so EN behaviour is Medium). The strike has no refusing test on the target's maximum-health word or health; it reads the target's health word to subtract the damage and to gate the notification (R2-ENGINE-1605, High for the body; the damage body is unread, Medium; Medium that a Human's byte +0xb6 is the weapon's attackType). In RU the Human threshold setter has one direct call site, in the template loader tail; a Unit takes nothing from it (R2-ENGINE-1606, amended by R2-ENGINE-1795: a Human built by `L2.00130` does not reach that loader and starts at 0, Medium; other writers of the command fields stay Unknown, R2-ENGINE-1001).
+The unit strike returns without a blow when a party or owner is missing, the attacker's health is not above 0, or its range byte +0x12c is below the distance; in RU it also returns when a non-mage Human-kind attacker whose attack type byte is not 5 meets a target of movementType 3 (Bat_Sonic, Dragon, Succubus rows); the EN strike body has no such test (the EN distance and callers are unread, so EN behaviour is Medium). The strike has no refusing test on the target's maximum-health word or health; it reads the target's health word to subtract the damage and to gate the notification (R2-ENGINE-1605, High for the body; the damage body is unread, Medium; Medium that a Human's byte +0xb6 is the weapon's attackType). In RU the Human threshold setter has one direct call site, in the template loader tail; a Unit takes nothing from it (R2-ENGINE-1606, amended by R2-ENGINE-1795: a Human built by `L2.00130` does not reach that loader and starts at 0, Medium; other writers of the command fields stay Unknown, R2-ENGINE-1001). The only immediate stores of 0x10 to dword +0x54 in the decoded code are two per root: the per-tick step, when health is -10 or less after the corpse timer, and death finish, which has two callers (High in RU for the two bodies, Medium in EN; 29 RU register stores and the copy method L2.00106 are unread, so how a unit enters state 0x10 is Medium; R2-ENGINE-1943).
 
 | Input/state | Rule | Claims and clause grades | Unknowns |
 |---|---|---|---|
@@ -630,6 +630,8 @@ conditional arithmetic; Medium delivered bounds; global minimum Unknown).
 | Defender ranking | Kind 3 first, then least footprint-aware edge distance, first listed on a tie, when the defended unit's L2.01728 is 2 or more; kind 3 is removed from the list otherwise. No life or consciousness test in the bodies read. | R2-ENGINE-1878 High bodies, Medium units | Whether kind 3 encodes living; L2.01728 |
 | Invisible candidate in the hostile filter | Removed unless a listed unit is within its byte +0x71 by the same edge distance. | R2-ENGINE-1879 High body, Medium meanings | Meaning of bit 0x1000, byte +0x71 and list +0x70 |
 | Teleport withdrawal | Flee and back-off cast it; admission is book and mana only; no sight-range or adjacency test in the bodies read. | R2-ENGINE-1880 High bodies, Medium absence | Callers L2.01527, L2.01512 unread |
+
+In nine of ten RU/EN function pairs of the four rows (scorer, assignment, helper B, both filters, distance, admission, flee cast, caller L2.01512) the first 60 to 512 instructions are equal after normalisation; no window reaches a function end, callees, tables and globals are normalised away, and equal behaviour of the whole bodies is not shown (Medium). The cast router L2.01527 differs in EN by an extra block (R2-ENGINE-1944).
 
 ## Pursuit reference and return
 
