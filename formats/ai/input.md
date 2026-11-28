@@ -297,4 +297,4 @@ separate boundaries. — AI-SPELLITEM-290
 
 An explicit Retreat order whose flee walk is refused is followed by a strike on a hostile at reach when the in-position gate passes, not by flight (Medium: composed from listings; the gate tests facing and reach, AI-865). — AI-798
 
-A refused reacquisition of an AI-owned unit leaves the target pointer and runs an idle turn (AI-864).
+A refused reacquisition of an AI-owned unit leaves the target pointer and runs an idle turn (AI-864) whose turn routine stores no order, route or position field in the window read (AI-884; Medium for the call as a whole, AI-395).

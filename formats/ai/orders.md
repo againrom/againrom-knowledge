@@ -19,6 +19,7 @@ or t+2 when that early return occurs at t+1. A moved target need not satisfy the
 cache match. Turning, a stale resolved endpoint, search failure or a replacement
 order changes the delay. Crossing initiation and the first cell-byte change are
 different events. No fixed runtime delay or next cell has been measured.
+The counter `mover+0x78` also rises on the endpoint-match return and is not cleared there (`AI-885`).
 — AI-743
 
 ## Player orders
@@ -379,8 +380,10 @@ every other order that has a "walk there, then do a thing" shape.
   stores group order 3 itself, calling neither `R0060` nor `R0063` (`AI-370`).
 - Within one tick the AI slot and the command-queue drain run before every member's executor pass; a
   spell application inside the actor body can run a setter after it. A setter between a pickup's two passes
-  writes action 0 and pending 0, so the completion pass finds no row. Callers `R0062`, `R0065`,
-  `R0066` and `R0067` are not placed in the tick (`AI-371`).
+  writes action 0 and pending 0, so the completion pass finds no row. By direct calls the command drain reaches
+  `R0062`, `R0066`, `R0067` and `R0065` (through `R0131`; its callers `R0132` and `R1290` are not reached); of 33 direct call sites of six
+  setter-class routines and four callers of setters 25 are reached from the drain, 2 from the AI pass only, 3 from the actor slot only and 3 from
+  no root, the last two relative to the one actor-slot entry `R0037` (`AI-371`, `AI-889`, Medium).
 - The order word `ord+0x50` is read only by the group order 4 arm in the `+0x158` census. If reached, a
   completed pickup leaves 1, which sends that arm to the state 0xc acquire routine instead of a walk
   (`AI-372`).
@@ -392,9 +395,11 @@ every other order that has a "walk there, then do a thing" shape.
 - In `R0043` and `R0055` the route refusal flag is raised only by a full search that leaves
   the path list empty or by a near search aimed at the final destination; `R0178` also stores it. An empty waypoint search retries on the next pass. In the
   dynamic search the relaxers store no label for a cell under another unit's occupancy bit of the mover's mask, so picker B
-  skips it unless `R1329` or `R1330` (called before the relaxer loop, 16 label-plane stores, unread) labels it
-  (`AI-848`, High for the relaxers, Medium for the composition); whether the searcher's own bits are restored before another search reads the plane is
-  Unknown (`AI-373`).
+  skips it (`AI-848`, High for the relaxers, Medium for the composition). The other two relaxers `R1329` and `R1330`
+  (`AI-848`'s earlier reading; read in `AI-882`) apply the same
+  skip to each of eight neighbours (`AI-882`), so none of the four dynamic-search relaxers labels a held cell of the mover's class. The search clears the
+  searcher's own class bit over its current footprint at `L06784` and sets it again at `L01945` with no exit between, so the bits are back before the picker tail
+  if they were set before the clear; its claim bit at the next cell stays (`AI-883`, Medium across the program; `AI-373`).
 - The full search's own body leaves the static list empty in three cases: start equals goal, picker A
   answers 0, or picker A answers the start cell. The extractor's 1000-step cap and its one-node path (`L14986`) are two
   further static exits, and the dynamic form has its own cap and an unreached-goal exit (`AI-544`, amending `AI-394`). Picker A scans rings up to Chebyshev radius `(D>>2)+3` around
@@ -403,34 +408,50 @@ every other order that has a "walk there, then do a thing" shape.
   `min(D-1, (D>>2)+3)` of it is labelled; near the border probes alias (`AI-394`).
 - The idle-turn arm that a refused AI-owned pursuit can fall into, and the turn routines it calls, store neither
   `ord+0x08` nor `ord+0x0c` and call neither reacquisition nor route search; the arm ends order 0xb by no write
-  of its own (`AI-395`).
+  of its own (`AI-395`). The turn routine `R0056` and its callee store facing, a turn counter, a turning flag and `+0x9d` (meaning unread)
+  (`AI-864`, `AI-884`; `AI-395` records two stores past the 70-instruction window `AI-884` reads, so the absence of an order, route or position field is High for the window and Medium for the call).
 - In state 3 a victim whose action word is 0x10 stands the member down to state 0xc before dispatch; the
-  state-3 prologue reads no list. Arm 3 was not read for list tests, and other callers of the state machine
-  were not enumerated (`AI-374`).
+  state-3 prologue reads no list. Arm 3, `R0009`, in its own instructions tests no victim list or liveness word; it stores
+  `ord+0x08` = 5, `ord+0x0c` and `ord+0x14`, or calls the cast routine `R0209` or the acquire routine `R0022` (the refusal for `Player+0x28` = 0 is a tail call of it, `AI-GUARD-007` amended by `AI-886`), and in its own instructions stores no route
+  field (`AI-374`, `AI-886`, Medium for the composition). Other callers of the state machine were not enumerated.
 - Move stores `actor+0x50` = 1 and pickup 2; the executor tail reads that value when it consumes the
   refusal flag. A pending walk installed when recovery reaches zero at T0 first calls the walk routine at T0+2; that call writes a step only when the facing already equals the direction to the first node, otherwise it turns and the step follows at the next call (`AI-375`, `MOVE-090`).
 
 ### Stop, pickup, group evaluation, pursuit thresholds and cadence
 
 - The stop routines clear the action word and neither the strike phase nor the progress byte; the strike
-  continues unless progress is cleared elsewhere (Medium; `AI-381`).
+  continues unless progress is cleared elsewhere (Medium; `AI-381`). Strike phases 5 and 7 count `actor+0x6c` down in the arm
+  that runs for action words 3, 0xd and 0xe, and a stop leaves phase and counter in place (Medium; `AI-890`).
 - The first pickup pass stores action 2 and the same slot call runs the sack transfer; the second pass
   carries only the completion stores (`AI-382`).
 - Group orders 3 and 5 branch per member on `ord+0x20` and `Player+0x28` without testing the pending order or
   destination: both zero reaches the evaluation (pending order 0, or 8 on the heal path, `AI-349`), and
-  `Player+0x28` nonzero stores pending order 0xb (`AI-383`). Two routines on those branches are unread.
+  `Player+0x28` nonzero stores pending order 0xb (`AI-383`). The two routines on those branches store `ord+0x08` = 5 with the
+  victim (`R0009`) and `ord+0x60` = 1 (`R0113`), and in their own instructions no route field; their callees `R0018`, `R0393` and `R0394` are unread (`AI-886`, Medium for the composition).
 - In the walk, stepper, near-search and search routines no counter gives up: `mover+9` and `mover+0x78` only
   select a re-search against the `[Path Finding]` values, and the flag `mover+0x98` is set at three empty-list
   sites (`AI-384`).
 - The AI pass that contains the group tail runs once per 16 ticks on both of its callers (`AI-385`).
+- The pursuit's near search is counted per centred call: `mover+0x78` (a byte) rises on every centred call past the stop test, an
+  endpoint-match return included; the one clear in the windows read is the near search (stores to `+0x78` elsewhere are not censused). The near search runs when the dynamic list is empty or
+  the counter exceeds `ctx+0x585c0` (shipped 32), and `mover+0` equals `mover+1`. On calls with unchanged target identity and no endpoint match it runs on the 33rd centred call after the last one and the stepper alone runs in between; a call after an endpoint match takes the new-target path (`AI-743`). High for the branches, Medium for the cadence (`AI-885`).
 - A guard member's chase is judged on that pass: it ends at the first pass without a winner,
-  and the member walks back to its post (`AI-794`, Medium).
+  and the member walks back to its post (`AI-794`, Medium). The break distance field `actor+0xa5` is stored 5 once, in the
+  constructor; the census counted one other direct store with that displacement and did not record its address (`AI-891`; wider stores and block copies are not searched). A guard pursuit threshold in cells stays Unknown.
 
 ### Transit into a held cell
 
 A mid-transit walk call reaches the step with no destination check. A crossing into a cell a live unit holds releases
 blind at the old footprint, rewrites the position into the held cell and has the occupy refused with no slot store;
 the step does not test the refusal or roll back (`AI-387`).
+
+A goal cell held by a live unit of the mover's class stays unlabelled in the dynamic search, because none of the four
+relaxers stores a label for it (`AI-882`, `AI-848`). The mover's footprint at a candidate cell is tested over every
+cell of its square by `R1055` (dynamic plane), by `R0048` (static plane with flag 1, dynamic plane
+with flag 0; called from the stepper `R0039` and `R1055`) and by the occupy `R0050`, which stops at the first refused cell without an undo; no such test was found in the dynamic search window `L18122..L18297` or the four relaxers, and the static search head `R0053..L18122` is unread (`AI-887`, High / Medium).
+The claim routine ORs 0x40 (class 1 or 2) or 0x80 (class 3) over the footprint at the next route cell and `R0046` clears it
+at seven read call sites (`AI-888`). Whether a size-2 unit refused by the occupy next to a held cell was admitted by the
+search stays Unknown.
 
 ## Retained targets at death and departure
 

@@ -221,7 +221,7 @@ larger unit tests a 3 × 3 neighbourhood through the footprint test. A step cost
 at +key straight and one and a half times it diagonal (rounded down), and for other kinds 2 straight and 3
 diagonal; a neighbour's word is replaced when the new cost is below it. No worker or helper read takes the type-2
 byte (+0x944f4); `L2.03871`, `L2.05228`, `L2.05231`, `L2.05229`, `L2.02566`, the stand-in and the callers of the
-search are unread (Medium). — R2-ENGINE-1804, R2-ENGINE-871, R2-ENGINE-809
+search are unread (Medium; as of the cited claims, the RU bodies of `L2.05231`, `L2.05229` and `L2.05228` were read later). — R2-ENGINE-1804, R2-ENGINE-871, R2-ENGINE-809
 
 What each value of plane +0x10000 as the terrain build stores it closes, for flag 1 (Medium composition; the flag-0
 plane is not derived here):
@@ -242,7 +242,7 @@ Tile class 8 is group 7 (`(tile & 0x3c0) >> 6 = 7`) with weight above 2: `low` i
 `mid` 0, {0, 1, 2, 3, 5, 7, 10, 12, 13} for `mid` 1, {1, 3, 4, 5, 7, 10, 12, 13} for `mid` 2 and {0..5, 10..13} for
 `mid` 3. In the route-search workers and helpers read (RU eight workers and the footprint test, EN three workers) a terrain
 byte of 255 (class 13 and above) enters only kind 1's step sum and no test closes a cell on it; `L2.03871`,
-`L2.05228`, `L2.05231`, `L2.05229` and the stand-in are unread (Medium). What a unit of
+`L2.05228`, `L2.05231`, `L2.05229` and the stand-in are unread (Medium; as of the cited claims, the RU bodies of `L2.05231`, `L2.05229` and `L2.05228` were read later). What a unit of
 each kind does on these cells in play is Unknown. — R2-ENGINE-1805, R2-ENGINE-1665
 
 The loader and the build compare no plane size with W×H and no value with a

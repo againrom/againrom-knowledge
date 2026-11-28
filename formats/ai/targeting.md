@@ -43,7 +43,7 @@ equipment, script, save and external-effect changes are outside this statement.
    participant's unit (`AI-715`). The mage's cast arm targets itself when damaged, else the first
    kept unit below maximum health within Heal's range, else one drawn unit of its own Player for a
    buff (`AI-785`, `AI-786`); the heal arm targets the first listed damaged unit (`AI-789`). Callers,
-   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`. No count of units on a spell's cells enters the choice (`AI-796`, Medium; each of the five `R0020` calls in the six chain windows centres on the actor's own cell, `AI-862`); the session-list cast routine that picks a unit on a cell is `AI-797` (the list entries are not decoded; that it is not a computer unit's cast is Medium).
+   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`. No count of units on a spell's cells enters the choice (`AI-796`, Medium; each of the five `R0020` calls in the six chain windows centres on the actor's own cell, `AI-862`; the engage routine `R0009` and the heal routine `R0113` that use those gathers store `ord+8` = 5 with the victim and `ord+0x60` = 1 and, in their own instructions, no route field; Medium for the composition, `AI-886`); the session-list cast routine that picks a unit on a cell is `AI-797` (the list entries are not decoded; that it is not a computer unit's cast is Medium).
 
 **Sight decides the population and reach decides the pick.** An engine that acquires on sight
 alone starts fights the game does not; one that scans only within reach acquires through walls,
@@ -217,9 +217,9 @@ On total refusal — no candidate within reach survives the filters — the orde
 `order+0xc` is left exactly as it was: the scan's only write to that field sits inside the
 candidate-found branch, and the no-candidate exit never touches it (`AI-328`). The same happens on
 the found path when the engagement-suppression clause above fires: the target is written, then the
-order kind is put back to `0` (`AI-GUARD-007`). Inside the scan itself, the order kind and the flag
+order kind is put back to `0` (`AI-GUARD-007`). The engage routine's refusal for that clause is a tail call of the acquire routine `R0022`, which acquires; it is not a no-op (`AI-GUARD-007`, `AI-886`). Inside the scan itself, the order kind and the flag
 that triggered the re-scan are the only fields reset; the AI-owner exit then calls `R0205`, an idle turn that stores `actor+0x54`, `ord+0x54` and
-the second facing byte and calls the turn routine `R0056` (`AI-864`; `R0056` is unread, Medium).
+the second facing byte and calls the turn routine `R0056` (`AI-864`). `R0056` and its one callee store the wanted facing, a turn counter, a turning flag, the current facing and `+0x9d` (meaning unread), and in the window `R0056..L18254` no order, route or position field (`AI-884`, High for the window, Medium for the call; `AI-395` records two stores past it); the divisor `[this]` of the idle turn's random step stays Medium.
 
 ## What the group-level scorers call
 

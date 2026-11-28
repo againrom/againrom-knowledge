@@ -218,6 +218,158 @@ RU. Walk start L2.02867(unit, cell word, k) (200 instructions read, L2.02867 to 
 
 **Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass20/listings/ru-w L2.02867.txt`, `ru-w L2.01587.txt`.
 
+## ROM2 route list, route builders and the walk's empty-route stores (EXP-2217)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1960 | Route list object: +4 head, +8 tail, +0xc count; L2.05229 pushes a word at the head, L2.00549 appends at the tail, L2.05231 pops the head and frees it, L2.06351 gives the tail word, a pop to count 0 clears the list. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1961 | Route builders L2.05181 (list +0x1c8) and L2.05190 (list +0x1e4) push end to own cell, then pop the own cell; a stand-in equal to the own cell leaves an empty list (Medium; the push's count increment is unread); ties and costs as stated. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1962 | RU walk L2.02867 after a search: empty list stores +0x76 = own cell and +0x98 = 1, then +0x90 = 1; approach L2.01578 stores +0x98 = 1 on an empty list; L2.05782 is an empty routine. | High / Medium | ● active (amended) | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1963 | RU stand-in search L2.05179: rings 1 to limit-1 around the goal cell, four probes per j, strictly lower grid word wins, stops after the first ring with a word below 0xffff; returns 0 or the cell index. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1964 | RU target stand-in L2.05189: eight rectangle rings, strictly lower grid word wins; returns 256*y+x or 0; the side walk's four jump tables are unread (Medium). | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1965 | RU repath L2.05184: a local byte 0 to 3 records the goal; only 1 with an empty local list stores +0x98 = 1; goal 3 is the (dword +0x58594 + 1)th list word, the fourth at the shipped value 3 (Medium). | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1966 | RU step start L2.06347 and mid-step L2.02848: store order read whole; the test of both position bytes +4, +5 equal 0x80 is High, that it ends every step Medium (advance tail unread); then counters, footprints and local list are cleared. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1967 | RU L2.00490 returns 1 only when position bytes +4 and +5 both equal 0x80; a zero-vector step leaves them at 0x80, so the walk driver sees it as standing after advance 1 (Medium; the RU advance tail is unread). | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1968 | RU cell test L2.03831 read whole: the square of the unit's size byte from the cell, plane +0x10000 (flag nonzero) or +0x20000 (flag 0), each byte ANDed with block byte +5; any nonzero returns 0. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1969 | RU next cell L2.08469 returns the head word of list +0x1c8 only when it is at Chebyshev distance 1 from the unit, else 0; distance helpers L2.02442 and L2.01522 take the larger absolute axis difference. | High / Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+| R2-ENGINE-1970 | Occupied goal cell: the static size-1 arm reads plane one, a cell with a nonzero byte under the unit's mask gets no cost; the local search reads plane two (R2-ENGINE-1761), flag-0 worker unread; empty local result, mode 1: +0x98 = 1. | Medium | ● active | [EXP-2217](../experiments/EXP-2217-rom2-routes/RESULTS.md) |
+
+### R2-ENGINE-1960
+
+RU list object (this = list): word +4 is the head node, +8 the tail node, +0xc the node count, +0x10 a free-node chain. A node holds a next link at +0, a previous link at +4 and a cell word at +8. `L2.06350` returns the count, `L2.06219` returns 1 when the count is 0, and `L2.06351` returns the address of the tail node's word. `L2.05229(word)` takes a node from `L2.06588`, stores the word, links it before the old head and makes it the head. `L2.00549(word)` takes a node the same way, stores the word and links it after the old tail. `L2.05231()` reads the head node's word, makes the next node the head (clearing that node's previous link, or the tail when none remains), hands the old head to `L2.09049`, and returns the word. `L2.09049(node)` calls `L2.09050(node + 8, 1)`, chains the node on +0x10, lowers the count by 1 and calls the clear routine `L2.05193` when the count reaches 0. `L2.05193` calls `L2.09050` on each node's word area, zeroes count, free chain, tail and head and calls `L2.06062` on +0x14. `L2.05231` has no empty-list test: on a list with no head it reads through a zero pointer.
+
+The search object grids: `L2.05185(x, y)` returns this + 0x30000 + 2 * (256 * (y and 0xff) + (x and 0xff)); `L2.05180(i)` returns this + 0x30000 + 2 * (i and 0xffff); `L2.05228(x, y)` returns 256 * (y and 0xff) + (x and 0xff); `L2.05230(x, y)` returns this + (x and 0xff) + 256 * (y and 0xff). The word grid is 65,536 words from +0x30000 and the cost-byte grid starts at +0.
+
+**Amends.** R2-ENGINE-878 and R2-ENGINE-879 name `L2.05180`, `L2.05231`, `L2.05229`, `L2.05228` and `L2.05185` as unread; their bodies are read here (the `L2.05180` word is the grid word of a cell index).
+
+**Confidence.** High for the RU bodies. The EN twins of `L2.05231`, `L2.05229`, `L2.05185` and `L2.05228` (EN `L2.09051`, `L2.06549`, `L2.09052`, `L2.09053`) are equal after address normalisation over the instructions read (100, 100, 40 and 20; `L2.05228` only its 20 instructions) - Medium for EN as a root read. `L2.06588` is read to `L2.09054` (60 instructions); its tail, where the node's next link and the list count `+0xc` are stored, is unread; that a push raises the count is therefore not shown. Not read: `L2.09050`, `L2.06062`; `L2.05193`, `L2.00549`, `L2.09049`, `L2.06219`, `L2.06351`, `L2.06350` are RU only. The EN equalities cover the instruction sequence only (callee, table and global identities are normalised away).
+
+**Unknown.** The tail of the node allocator `L2.06588` from `L2.09054` (the next link and the count increment of a push); the EN twins of the 0x54c and L2.09049 routines. A run of the original with a walk to its own cell settles the first by the list state after the pop.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass1/listings/ru-fin-L2.05231.txt` (holds `L2.05231`, `L2.05229`, `L2.09055`), `ru-h-L2.05185.txt`, `ru-h-L2.05180.txt`, `ru-h-L2.05228.txt`; `pass3/listings/ru-list-L2.06350.txt`, `ru-list-L2.06219.txt`, `ru-list-L2.06351.txt`, `ru-clear-L2.05193.txt`, `ru-alloc-L2.06588.txt`, `ru-free-L2.09049.txt`, `ru-append-L2.00549.txt`, `ru-cellbyte-L2.05230.txt`; `pass2/listings/en-pop-L2.09051.txt`, `en-word-L2.09052.txt`, `en-index-L2.09053.txt`; `derived/q3-ru-en-helper-cmp.txt`.
+
+### R2-ENGINE-1961
+
+RU `L2.05181(unit, x0, y0, x, y)` and `L2.05190` have the same instruction sequence in the 223 instructions of the first function (`L2.05181` to `ret 0x14` at `L2.09056`); they differ only in the list base the unit reaches (+0x1c8 for `L2.05181`, +0x1e4 for `L2.05190`, four references each). Order of work: the end cell (x, y) is pushed at the head of the list; the loop compares the current cell with (x0, y0) and leaves when equal; it adds 1 to a word counter and leaves when the counter exceeds 1000 (compare with 0x3e8, jump to the exit when not below or equal); it scans neighbours with the x offset in the outer loop and the y offset in the inner loop, each from -1 to 1, including (0, 0); a neighbour is skipped when x is below 8, above the dword at +0x50000 plus 8, y is below 8, or above the dword at +0x50004 plus 8, or when its grid word is 0xffff. A neighbour with a zero x or zero y offset (the cell itself included) costs word + 2, or for a unit whose virtual +0x20 result is 1 (`L2.02402`) word + the cost byte `L2.05230` of the current cell; it replaces the best when not greater (a tie takes the later probe). A diagonal neighbour costs word + 3, or for kind 1 word + byte + byte / 2 (shift right), and replaces the best only when strictly lower. After the scan the current cell moves by the best offsets and is pushed at the head. When no neighbour qualifies the offsets are not stored in that pass: they keep the values of the earlier pass and are never initialised on the first. At exit with the counter above 1000 the list is cleared by `L2.05193`; otherwise `L2.05231` pops the head, which is the unit's own cell. A stand-in equal to the unit's cell therefore pushes one node and pops it: the list is empty (count 0, cleared by `L2.09049`; Medium, because the push's count increment is unread, R2-ENGINE-1960); a route to a cell next to the unit leaves the end cell alone. The own cell is a straight candidate, so a pass finds no candidate only when the current cell fails the bounds test or holds the word 0xffff.
+
+**Amends.** R2-ENGINE-879 (the Unknown "whether a stand-in equal to the unit's cell stays open" and "whether finalization empties a one-cell route": it does empty it; the descriptions of the tie rule and the cost byte are made exact) and R2-ENGINE-1787 (a stand-in equal to the own cell yields an empty list, Medium; the push's count increment is unread).
+
+**Confidence.** High for both RU bodies. High for the equal instruction sequence of the whole EN function (EN `L2.05225`, `L2.09057`; 256 of 256 instructions equal after address normalisation; callee, table and global identities are normalised away; `derived/q3-ru-en-builder-cmp.txt` for `L2.05181` against `L2.05225`, `derived/q3-ru-en-helper-cmp.txt` for `L2.05190` against `L2.09057`; each table was produced once and not reproduced); Medium for equal EN behaviour. Medium for the empty list: it rests on the unread count increment of the push (R2-ENGINE-1960) and on the EN list routines. The grid word values at run time (that the predecessor word equals the current word minus the cost) are not read.
+
+**Unknown.** Whether a run ever reaches the no-candidate pass: a run of the original with a goal behind a wall and the stand-in cell next to the unit; compare the first step with the route list.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass1/listings/ru-build-L2.05181.txt`, `ru-builder-L2.05190.txt`; `pass2/listings/en-build-L2.05225.txt`, `en-builder-L2.09057.txt`; `derived/q3-ru-builder-pair-cmp.txt`, `derived/q3-ru-en-builder-cmp.txt`.
+
+### R2-ENGINE-1962
+
+RU search tail (window from `L2.09058`, the function entry is not in the window): when the goal's word is not 0xffff, flag 1 builds to the goal with `L2.05181` and flag 0 with `L2.05190`; at 0xffff with flag 1 the stand-in comes from `L2.05179` and the notice, the stamp test and, for a zero stand-in, the clearing of list +0x1c8 follow as in the earlier read of this tail; a nonzero stand-in builds with `L2.05181`. With flag 0 the stand-in comes from `L2.05189(unit, target)` when a target is given, else from `L2.05179(unit, 0, goal, 8)`; a nonzero value builds with `L2.05190`, a zero value stores nothing in this tail and does not clear list +0x1e4.
+
+RU walk `L2.02867`, after its call to `L2.05182` at `L2.09059`: store +0x90 = 0 and +0x74 = the goal word on the movement object; if list +0x1c8 is empty (`L2.06219`), store +0x76 = the word at +2 of the unit's position object (its own cell), call `L2.05782` twice and store +0x98 = 1; otherwise store +0x76 = the tail word. Then store byte +9 = 0, clear list +0x1e4, and when the own cell equals +0x76 store +0x90 = 1 and leave. An empty list therefore stores +0x98 = 1 and +0x90 = 1 in one call. RU approach `L2.01578` after its search call at `L2.09060` stores +0x8a = the list count and +0x74 = the goal word, then on an empty list +0x76 = own cell, +0x8c = the goal word, two calls to `L2.05782` and +0x98 = 1; otherwise +0x76 = the tail word and +0x8c = the goal word; it then stores the target dword at +0x7c and byte +9 = 0 and clears list +0x1e4 when +0x8a exceeds the dword at +0x58598. RU repath `L2.05184` after its call at `L2.09061` stores +0x98 = 1 when list +0x1e4's count is 0 and a local byte equals 1 (the byte's source is unread). `L2.05782` is a routine with an empty body (it only returns, pops one argument).
+
+**Amends.** None. The +0x98 stores read here are the walk, approach and repath writers of R2-ENGINE-872's local-writers census; this claim adds the order of the stores in the same call and the +0x90 store that follows.
+
+**Confidence.** High for the RU bodies of the tail, the walk and the approach windows. The Medium of the repath clause (the local byte unread) is closed for RU by R2-ENGINE-1965 (High body). EN twins of the tail, walk, approach and repath unread: RU only. Not claimed: that `L2.05189` returns a cell or 0 (its first 200 instructions contain no return; it was not read to its end).
+
+**Unknown.** The EN bodies; the repath byte; the effect of `L2.05782` in EN. A run of the original: order a walk to an unreachable cell whose nearest reachable cell is the unit's own cell, and compare movement +0x90, +0x98 and the order at the next tick.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass2/listings/ru-search-tail-L2.09062.txt`, `ru-walk-L2.02867.txt`, `ru-approach-L2.01578.txt`, `ru-repath-L2.05184.txt`; `pass3/listings/ru-post-L2.05782.txt`.
+
+**Amended.** R2-ENGINE-1964 reads `L2.05189` to its return and R2-ENGINE-1963 reads `L2.05179`; the clause "not claimed that `L2.05189` returns a cell or 0" is closed for RU. R2-ENGINE-1965 reads the repath local byte: its Medium for the repath clause and its Unknown "the repath byte" are closed for RU (High body).
+
+### R2-ENGINE-1963
+
+RU stand-in search `L2.05179` (this = the search object; arguments: the unit at +8, an unused dword at +0xc, the goal word at +0x10, the limit at +0x14; all 281 instructions of the function, `L2.05179` to `ret 0x10` at `L2.09063`, read across two windows). It reads the unit's virtual +0x1c result (low byte) and stores the goal word as the centre, the best word 0xffff and no best cell. Ring r runs from 1 while r is below the limit word. On ring r it takes j from -r to r inclusive and probes four cells: centre + 256r + j, centre - 256r + j, centre + 256j + r and centre + 256j - r, each as a cell index through `L2.05180`. A probe replaces the best word and best cell only when its grid word is strictly below the best word, so a word of 0xffff is never taken and the first lowest word in probe order wins. After a ring ends the search stops when the best word is below 0xffff. The return is 0 when the best word is still 0xffff, else the best cell index. The centre itself is never probed, and the unit is used only for the virtual +0x1c result. When that low byte is 2 the search runs a second copy of the loops (entry `L2.09064`); the compare-and-store sequence of the four probes in the copy is identical to the first copy after addresses are removed, and what makes the copy a separate arm is not read. EN `L2.05221` equals RU over the first 200 instructions after address normalisation (`derived/q3-ru-en-subst-cmp.txt`: A 200, B 256, matching 200; produced once, not reproduced); the EN tail is read only to 256.
+
+**Amends.** R2-ENGINE-871 names `L2.05179` as a substitute chooser without its body; the body is read here. R2-ENGINE-1962 reads its callers' use of the return.
+
+**Confidence.** High for the RU body. High for the equal instruction sequence of the EN first 200 instructions (callee, table and global identities are normalised away); Medium for equal EN behaviour and for the EN tail. Medium for what the grid word measures (R2-ENGINE-1961 reads the builders that consume the same grid; the words' run-time values are not read), and Medium that no other caller passes other arguments (callers other than the search tail of R2-ENGINE-871 not counted).
+
+**Unknown.** The low byte 2 meaning (a unit kind or a size class). A run of the original: order a walk to a cell the search cannot reach, with a unit whose virtual +0x1c byte is 2 and one whose byte is not, and compare the cell each unit ends on.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass1/listings/ru-subst-L2.05179.txt`, `pass4/listings/ru-subst-tail-L2.09065.txt`, `pass6/listings/en-subst-L2.05221.txt`; `derived/q3-ru-en-subst-cmp.txt`.
+
+### R2-ENGINE-1964
+
+RU target stand-in `L2.05189` (this = the search object; arguments: the unit at +8, the target at +0xc; read from entry to its `ret 8` at `L2.09066`). It reads the target's position object (+0x10) through `L2.00486` and `L2.00487` and the unit's virtual +0x1c result (low byte), and forms a rectangle whose lower bounds are the target's position minus that byte and whose upper bounds are the target's position plus the target's own virtual +0x1c byte. It sets the best word to 0xffff and the ring counter to 0. Each ring walks the four sides of the rectangle with two cursors that start at opposite corners, direction steps taken from the byte pairs at object +0x54156 indexed by the side. Each step probes two cells through `L2.05185(x, y)` and takes a cell only when its grid word is strictly below the best word; the best word and the cell x and y are then stored. After a ring, the lower bounds go down by 1 and the upper bounds up by 1. The loop stops after a ring in which the best word is below 0xffff or after 8 rings. The return is 0 when the best word is still 0xffff, else 256 times the best y plus the best x. A 100-step guard bounds the side walk. The side walk dispatches through four jump tables (`L2.09067`, `L2.09068`, `L2.09069`, `L2.09070`, used at `L2.07918`, `L2.09071`, `L2.09072`, `L2.09073`); their entries are the data after `ret 8` at `L2.09066` and are unread (Medium).
+
+**Amends.** R2-ENGINE-1962 left unclaimed that `L2.05189` returns a cell or 0 and listed it unread; both are read here for RU. R2-ENGINE-871 names it a flag-zero substitute with Medium meaning; its body is read here.
+
+**Confidence.** High for the return rule, the strict-below store, the stop and the eight-ring limit. Medium for the rectangle bounds and the side-walk order (the first 40 instructions and the side tables were read, the direction table values were not; the four jump tables of the side walk have unread entries). RU only; the EN first 200 instructions equal RU over the compare range of `cmp.py` (`derived/q3-ru-en-pick-cmp.txt`: A 200, B 256, matching 200; produced once, not reproduced; High for the equal instruction sequence, callee, table and global identities normalised away; Medium for equal EN behaviour), the EN tail is read only to 256.
+
+**Unknown.** The direction table values at +0x54156; which side the first cursor walks. A run of the original: order an attack walk on a target with its adjacent cells blocked, and compare the cell the unit goes to with each side.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass1/listings/ru-pick-L2.05189.txt`, `pass4/listings/ru-pick-tail-L2.09074.txt`, `pass5/listings/ru-pick-end-L2.09075.txt` (three lines after `ret 8`, in table data, differ from the generator output; no claim rests on them), `pass6/listings/en-pick-L2.09076.txt`; `derived/q3-ru-en-pick-cmp.txt`.
+
+### R2-ENGINE-1965
+
+RU repath `L2.05184(unit, flag)` (this = terrain; read whole from entry to its `ret 8`, L2.05184 to L2.09077 in the committed window). Order of work: a local byte is set to 0; the own cell is the word at +2 of the unit's position object (`L2.01521` on unit +0x10); the count of the static list +0x1c8 (`L2.06350`) is kept as a word; when it is nonzero the head word of that list (`L2.06547` returns the address of the head node's word) is read and the distance `L2.02442`(own x, own y, head x, head y) is kept as a word, else the distance word stays 0. Then: count not above dword `+0x58598` (compare and `jg`) - goal word = block `+0x76`, byte 1. Else distance above dword `+0x58594` (compare and `jle` falls through) - goal word = the head word, byte 2. Else the iterator `L2.09055` is taken and `L2.08126` is called while a counter is below dword `+0x58594` plus 1; each call returns the word under the iterator and advances it, so the goal word is the (dword `+0x58594` + 1)th word from the list head - byte 3; it is the fourth word at the shipped value 3 of that dword (R2-ENGINE-1761, R2-ASSET-383; Medium, the map.reg values are Unknown per R2-ENGINE-1472). Goal 1 is block `+0x76`, the destination word of the static route (the own cell when the route is empty, R2-ENGINE-1761), not the walk's goal word `+0x74`; goal 2 is the head word of `+0x1c8`, the next cell of the static route. The local search `L2.05182`(unit, goal x, goal y, 0, flag) follows. When the local list +0x1e4 is then empty (`L2.06350` returns 0) and the byte equals 1, block `+0x98` is stored as the dword 1. When the static count was nonzero and the distance is not above dword `+0x58594`, `L2.05231` removes the head word of +0x1c8. The byte source named in R2-ENGINE-1962 is therefore this local byte, set at `L2.09078`, `L2.09079`, `L2.09080` and `L2.09081`. The routine has two direct call sites in RU, `L2.09082` (inside the walk body) and `L2.09083` (inside the approach body), by the reference scan of pass 7.
+
+**Amends.** R2-ENGINE-1962 listed the byte source of the repath store at `L2.09084` as unread; it is the local mode byte above.
+
+**Confidence.** High for the RU body and the two call sites (direct rel32 forms only; Medium for an indirect call). Medium that the dword names are the map.reg keys (R2-ENGINE-1472). The EN twin is equal to RU after masking per R2-ENGINE-1761 (Medium as a root read here). The fourth-word position is Medium (the dword value). The helpers `L2.02442`, `L2.06547`, `L2.08126`, `L2.01521` are read in pass 7 and 8; `L2.05182` is read in part.
+
+**Unknown.** None for the branch rule; the third goal's position (the fourth word) depends on the dword `+0x58594` being 3 (Medium). Whether a run reaches mode 3 with fewer than four list words is not shown; with count above 5 it cannot.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass2/listings/ru-repath-L2.05184.txt`, `pass7/listings/ru-list-top-L2.06547.txt`, `ru-list-iter-L2.08126.txt`, `ru-cell-L2.01521.txt`, `ru-dist-L2.02442.txt`, `pass7/refs.tsv`.
+
+### R2-ENGINE-1966
+
+RU mid-step `L2.02848(unit)` (this = terrain; to its `ret 4` at `L2.02884`) stores in this order: the own cell is read; the advance `L2.02876`(unit) runs; when the own cell word differs, block `+0x72` is stored with the word `L2.04692`(this, unit, y, x) returns; then `L2.00490` on the position object decides. Result 0 ends the call. Result 1 stores 0 in block words `+0xaa`, `+0xac`, `+0xa8` (in that order), calls the footprint routine `L2.02410`(unit, 0, 2) and `L2.02410`(unit, 0, 1), clears the local list `+0x1e4` (`L2.05193`), then looks the own cell up with `L2.01707` in the table at this `+0x54084` over the record at this `+0x5402c`; when it is found and record byte `+0x34` equals 0x17, `L2.00093`(unit, record `+0x38`, record `+0x39`) runs. The record and `L2.00093` are not read.
+
+RU step start `L2.06347(unit)` (to its `ret 4` at `L2.09085`): when the local list is empty (`L2.06219`), `L2.05527`(unit) runs and the call ends. Otherwise block `+6` = the head word of `+0x1e4`; block `+0x70` = the own cell; block byte `+0x9c` = 0; `L2.02410`(unit, 0, 2); `L2.02410`(unit, block `+6`, 0); block byte `+1` = `L2.09086`(unit, block `+6`). When block byte `+0` equals byte `+1`: `L2.07803`(unit, own cell, byte `+0`) stores the step vector (R2-ENGINE-1470), block `+0xac` = 0, and the advance `L2.02876` runs once. Otherwise `L2.02409`(unit, byte `+1`) runs: it stores byte `+1`, takes the absolute difference of bytes `+0` and `+1` (`L2.01523`), clears byte `+0x9d` when dword `+0xa0` is 0, and, with `+0xa0` equal to 0 and the difference below 0x21 either way round, copies byte `+1` into byte `+0` and stores byte `+0xa4` = 1; the rest of that routine is not read. `L2.05527` is read to its 70th instruction: it takes the same difference folded to at most 0x80 and, below byte `+0xa`, copies byte `+1` into `+0`; the rest is not read. The walk driver `L2.02867` has two direct callers (`L2.06981`, `L2.09087`), mid-step three (`L2.08505`, `L2.08506`, `L2.08507`) and step start two (`L2.09088`, `L2.09089`), by the reference scan.
+
+**Confidence.** High for both RU bodies to their returns and for the store order. The EN twins of the step start and the mid-step routine are unread by this experiment. Medium for `L2.02410` meaning (R2-ENGINE-1213 names the stages; the body is unread), `L2.04692`, `L2.01707`, `L2.00093`, `L2.09086`. The step-start local-list head is the next cell the heading points at: Medium. The reference scan covers direct call and jump forms.
+
+**Unknown.** What `L2.04692` stores into `+0x72` and what the 0x17 record does. A run of the original that walks a unit across a cell and samples block `+0x72`, `+0x70` and `+6` each tick settles them.
+
+**Amends.** R2-ENGINE-1827's unread `L2.05527` (read to 70 instructions) and R2-ENGINE-1761's `L2.02848`/`L2.06347` body detail; the order of clears already stated in R2-ENGINE-1827 is confirmed. R2-ENGINE-1760's Unknown arrival test is read in R2-ENGINE-1967.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass7/listings/ru-stepmid-L2.02848.txt`, `ru-stepstart-L2.06347.txt`, `pass8/listings/ru-turn-L2.02409.txt`, `ru-finish-L2.05527.txt`, `pass7/refs.tsv`.
+
+### R2-ENGINE-1967
+
+RU `L2.00490` (this = the unit's position object; `ret` with no argument, L2.00490 to L2.09090): returns 1 when the byte at `+4` equals 0x80 and the byte at `+5` equals 0x80, else 0. It is the test the walk driver makes before a step (R2-ENGINE-1761, "walking" when 0) and the arrival test of `L2.02848` (R2-ENGINE-1966). With R2-ENGINE-1760 (the last advance of a step stores 0x80 in `+4` and `+5`), arrival is detected when both fine bytes are 0x80, whatever the advance count. Inference, Medium: a step whose vector is (0, 0) (speed 1 on a diagonal, R2-ENGINE-1470) leaves both bytes at 0x80 after its first advance, so the walk driver reads the unit as standing and does not send it to the mid-step routine `L2.02848`; the local list is not cleared by that path, so the step start runs again on the same list. The premise is R2-ENGINE-1760 (EN, earlier: the last advance of a step stores 0x80 in `+4` and `+5`, fine bytes 0x80 at the step start); the RU advance `L2.02876` window (130 instructions, to `L2.09091`) shows the vector bytes `+0xb0`, `+0xb1` added to the two position words and a diagonal correction that needs both low bytes 0, and does not show the tail that stores 0x80, so that tail is unread in RU. The same-list rerun is an inference from R2-ENGINE-1761 (not re-read here). Callers of `L2.02876` and of `L2.02848` other than the three listed (`L2.08507` is unread) are not censused, and no run of the original was made.
+
+**Amends.** R2-ENGINE-1470 and R2-ENGINE-1760 state that a zero-vector step makes 256 advances; the walk driver's test shows it is read as standing after advance 1 (Medium).
+
+**Confidence.** High for the body of `L2.00490` and for its use before `L2.02848` in the walk (`L2.09092` to `L2.08505`) and the approach (`L2.09093`, `L2.08506`), RU. Medium for the consequence for a zero-vector step: each link (the RU advance leaves the bytes at 0x80, no other caller runs the 256 advances, the walk driver re-enters the step start on the same list) is an inference from R2-ENGINE-1760 and R2-ENGINE-1761, not re-read here.
+
+**Unknown.** The run of the original: a Ghost or other unit that reaches speed 1 on a diagonal (speed word forced to 1) ordered one cell diagonally; sample position bytes `+4`, `+5` and the cell each tick.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass7/listings/ru-walking-L2.00490.txt`; `pass8/listings/ru-advance-L2.02876.txt` (the RU advance to `L2.09091`: vector bytes added to the position words, diagonal correction; the 0x80 store tail is not in the window).
+
+### R2-ENGINE-1968
+
+RU cell test `L2.03831(unit, cell, flag)` (this = terrain; read whole, L2.03831 to `ret 0xc` at `L2.09094`): s = the byte `[unit vtable + 0x1c]` returns; x = the low byte of the cell word, y = its high byte. Two nested loops, i over 0..s-1 for x and j over 0..s-1 for y, test each cell (x + i, y + j). With flag nonzero the byte is read through `L2.03872` (address this + 0x10000 + 256 * (y and 0xff) + (x and 0xff)); with flag 0 through `L2.03871` (this + 0x20000 + the same index). Each call receives block byte `+5` as an extra pushed argument that the callee's `ret 8` leaves on the stack; `L2.03520` then returns the byte AND that value. A nonzero result returns 0 at once; a complete square returns 1. Byte x and y are masked to 8 bits after the add, so the test wraps at 256 and has no map-bound check.
+
+**Amends.** R2-ENGINE-1762 said the RU body of `L2.03831` was not read (Medium by twin); it is read here and agrees with the stated EN rule.
+
+**Confidence.** High for the RU body, both arms. Medium that block `+5` is the unit's mask byte (R2-ENGINE-531, R2-ENGINE-789) and for the meaning of the plane bits (R2-ENGINE-1214).
+
+**Unknown.** The meaning of each plane bit for each cell state; the EN twin `L2.02719` equal over its read range only (R2-ENGINE-1762).
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass7/listings/ru-pass-L2.03831.txt`, `pass8/listings/ru-pass-flag0-L2.09095.txt`, `ru-plane-and-L2.03520.txt`, `ru-plane-two-L2.03871.txt`, `ru-plane-one-L2.03872.txt`.
+
+### R2-ENGINE-1969
+
+RU `L2.08469(unit)` (to `ret 4` at `L2.09096`): returns 0 when the static list +0x1c8 is empty (`L2.06219`); else reads the head word (`L2.06547`) and returns it only when `L2.02442`(own x, own y, head x, head y) and 0xff equals 1, else 0. `L2.02442` (to `ret 0x10` at `L2.09097`) and `L2.01522` (cell word a, cell word b; to `ret 8` at `L2.09098`) return the larger of the absolute differences of the x bytes and of the y bytes (Chebyshev), with the absolute value taken by `L2.01523` (unread; taken as an absolute value as in R2-ENGINE-1470).
+
+**Confidence.** High for the shape of the bodies; Medium for the absolute value helper. RU only.
+
+**Unknown.** None for these bodies.
+
+**Evidence.** `experiments/EXP-2217-rom2-routes/evidence/native/pass7/listings/ru-nextcell-L2.08469.txt`, `ru-dist-L2.01522.txt`, `ru-dist-L2.02442.txt`.
+
+### R2-ENGINE-1970
+
+Occupied goal cell. The static route builds (flag 1) read plane +0x10000 and the local repath (flag 0) reads plane +0x20000 (R2-ENGINE-1804; the plane getters are read in R2-ENGINE-1968). In the size-1 arm for flag 1 a neighbour is written only when its blocking byte ANDed with the unit's mask is zero (R2-ENGINE-1876), so a goal cell with a nonzero byte in the plane read never receives a cost, and the search ends with no cost for the goal (R2-ENGINE-871, amended there). The static route therefore does not see units' cells if plane one holds none (R2-ENGINE-1340 names the terrain build, plane two the occupancy bits per R2-ENGINE-1214: Medium). An empty local list after the repath with mode 1 (goal aimed at the static route's destination word, block `+0x76`) stores block +0x98 = 1 (R2-ENGINE-1965); modes 2 and 3 store nothing, and the next walk call searches again (R2-ENGINE-1827). Whether the flag-0 workers (RU `L2.08560`) and the larger-size arm test the goal the same way is unread, so the answer for an occupied goal cell of a unit of any size is Medium.
+
+**Confidence.** Medium: a composition of High bodies (size-1 arm, repath, cell test) with an unread flag-0 arm and Medium plane meaning. The cited plane listings are the getters of the cell test `L2.03831`, not of the search workers; the search's plane choice rests on R2-ENGINE-1761 and R2-ENGINE-1804. Weakest links: the unread flag-0 worker; what plane one and plane two hold for a unit's cell (R2-ENGINE-1214, Medium); what the consumer of `+0x98 = 1` does (R2-ENGINE-1498, R2-ENGINE-1020); the larger-size arm.
+
+**Unknown.** The flag-0 size-1 workers and the larger-size arm. A run of the original: order a unit to walk to a cell held by a standing unit, one cell and then five cells away; sample block +0x90 and +0x98, the unit's cell and the route lists each walk call.
+
+**Evidence.** Composition of `pass2/listings/ru-repath-L2.05184.txt`, `pass8/listings/ru-plane-two-L2.03871.txt`, `ru-plane-one-L2.03872.txt` (under `experiments/EXP-2217-rom2-routes/evidence/native/`) and the cited claims.
+
 ## ROM2 targeting and the blow (EXP-2216)
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -508,7 +660,7 @@ The Darkness area (row 14, kind 5) pulses every 16 updates onto the first occupa
 | R2-ENGINE-1824 | ROM2 pow (RU `L2.02322`, EN `L2.02353`) returns first^second, so the surcharge expression is trunc((1.5^(S/70) + 1) x S x 50), High; every price (8750 at S = 70) is Medium; a weapon prices its cast spell apart. | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
 | R2-ENGINE-1825 | ROM2 corpse stage tests are strict (kind 2, 3, 4, 5 below -10, -20, -40, -600); RU holds a class 0x21..0x24 body at -61 so ageing never gives it kind 5, while EN gives kind 5 to one below -600. | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
 | R2-ENGINE-1826 | ROM2 RU: a mage's spell hit stores its Sphere (1..5) in victim byte +0x48 and the kill reads it as a spell id, offering the experience to award index 1 for Spheres 1 to 4 and 2 for Sphere 5 (skill names Unknown; credit in play Medium). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
-| R2-ENGINE-1827 | ROM2 RU local route: the trace stores cells to the local goal (none past 1000 steps), a step takes the first, and the list is cleared at each cell centre; unless the wait decision holds the unit, the next walk call searches again (Medium). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
+| R2-ENGINE-1827 | ROM2 RU local route: the trace stores cells to the local goal (none past 1000 steps), a step takes the first, and the list is cleared at each cell centre; unless the wait decision holds the unit, the next walk call searches again (Medium). | High / Medium | ● active (amended) | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
 | R2-ENGINE-1828 | ROM2 RU death bag: +0x78, +0x74 (parameter 15 set), Human slots 1..12, then the rolled item; in the death body `L2.01807` the only gold passed to the sack is the rolled gold; a bag reporting 1024 or more merges nothing (Medium). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
 | R2-ENGINE-1829 | ROM2 RU strike: a non-mage's weapon Spell fires only when the blow's damage and the target's health after it are above 0, or when its id byte is 2, which fires on every strike reaching the cast test (Medium that id 2 is Fire Ball). | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
 | R2-ENGINE-1830 | ROM2 RU Human speed +0x8c: floor 6 only at overload, no upper bound in the bodies read, may go negative; the 1..63 step clamp applies when type byte +0x44 is 0 (Medium). The resolver bounds no resistance word; it floors the result at 0. | High / Medium | ● active | [EXP-2208](../experiments/EXP-2208-rom2-fidelity-batch4/) |
@@ -599,6 +751,8 @@ So the trace stores the whole detour, the unit walks only its first cell, and th
 **Unknown.** The cost of the per-cell search in ticks. A run of the original that walks a unit around a wall, with `+0x1e4` sampled each tick, shows the list emptying at each cell centre.
 
 **Amends.** R2-ENGINE-1761's Medium "when the local path empties (the element is consumed outside the bodies read; `L2.02848` is not read)" and its Unknown "the removal of local path elements during a step": no element is consumed one by one; the whole list is emptied when the unit reaches the centre of the next cell.
+
+**Amended.** R2-ENGINE-1966 reads `L2.05527` to its 70th instruction in RU (listed unread here) and confirms the order of the clears stated in item 3.
 
 ### R2-ENGINE-1828
 
@@ -859,6 +1013,8 @@ The advance count: n = the absolute value (by the helper `L2.04968`, RU `L2.0152
 
 **Amended.** R2-ENGINE-1760 reads the advance that consumes the vector: a zero-vector step (speed 1, diagonal) makes its 256 advances without a cell change; the arrival test stays Unknown.
 
+**Amended.** R2-ENGINE-1967 reads the RU test `L2.00490` (both fine bytes 0x80): a zero-vector step is read by the walk driver as standing after its first advance, so the "256 advances" count is not run through the mid-step routine (Medium; the RU advance tail is unread).
+
 ### R2-ENGINE-1471
 
 Speed s comes from `L2.07811`(unit) (EN, RU `L2.07812`, masked-equal, 23 instructions): p = dword [[unit+0x70]+0x3c]; the result is byte [p+0x44] when nonzero, else the signed word [unit+0x8c]. The object at `[unit+0x70]` and the byte `+0x44` are not identified. `L2.06918` asks the unit kind from `L2.03577` (body unread). Kind 1 (`L2.03577` returns 1): dh = byte(cell) - byte(next) from the signed bytes at `this+0x944f4+cell` (the byte R2-ENGINE-1340 reads as a height, Medium; the difference is stored in a byte before the clamp, so a difference outside -128..127 wraps), clamped to -32..+32; s = base * dword `this+0x58d84`; dh < 0: s = s - (s * |dh| >> 6); dh >= 0: s = s + (s * dh >> 6); the term is called slope and dh < 0 climbing on the Medium of R2-ENGINE-1340; |dh| uses the unread helper `L2.04968`, taken as an absolute value; a = ((t(cell) + t(next)) and 0xff) >> 1, the sum kept in a byte, with t = `L2.03599` (EN, RU `L2.07813`, masked-equal, 107 instructions); a = 0 becomes 8; s = s / a (signed division). `L2.03599` has three return paths (a byte through `L2.07814`, a byte from `L2.03578`-tested records, a loop over six values through `L2.04169`) and one of them stores the cell byte shifted right by 2 back into the terrain byte array before returning it; which cells take that path is unread. Any other kind: s = base, no slope, no cell term, no multiplier. s is then clamped to 1..63.
@@ -891,9 +1047,9 @@ Terms shared by these cards: the walk driver is RU `L2.02867` / EN `L2.05544`, t
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| R2-ENGINE-1760 | A ROM2 step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive, floor(128/-v)+1 when negative, from fine bytes 0x80 and a matching heading. | High / Medium | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1760 | A ROM2 step changes the cell on advance ceil(128/v) when its y vector component (x when it has none) is positive, floor(128/-v)+1 when negative, from fine bytes 0x80 and a matching heading. | High / Medium | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
 | R2-ENGINE-1761 | ROM2 walk: static route rebuilt on a new goal or after 17 local repaths; local path when empty or after 33 walk calls, unless the wait decision returns 1 or 2. | High / Medium | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
-| R2-ENGINE-1762 | At a held next ROM2 cell (cell test returns 0) a one-cell unit waits for a walking occupant or a standing one about to leave, else re-plans. | High / Medium / Unknown | ● active | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
+| R2-ENGINE-1762 | At a held next ROM2 cell (cell test returns 0) a one-cell unit waits for a walking occupant or a standing one about to leave, else re-plans. | High / Medium / Unknown | ● active (amended) | [EXP-2203](../experiments/EXP-2203-rom2-fidelity-checks/) |
 
 ### R2-ENGINE-1760
 
@@ -908,6 +1064,8 @@ Occupancy during the step, with the stage table of R2-ENGINE-1213: entry `+4` st
 **Unknown.** What follows the 256th advance of a speed-1 diagonal step (the arrival test is not read). A run of the original that orders a unit of known speed one cell east and one cell west and samples the position bytes each tick settles the cell-change advance and its asymmetry.
 
 **Amends.** R2-ENGINE-1213's stage "after the fine coordinate enters B's cell": it is advance ceil(128/v) or floor(128/-v)+1 of the step, by the y vector component (x when it has none). R2-ENGINE-1470's Unknown "how a step with a zero vector ends": its 256 advances change no cell; the arrival test stays Unknown.
+
+**Amended.** R2-ENGINE-1967 reads the RU test `L2.00490` (both fine bytes 0x80): a zero-vector step is seen as standing after advance 1 (Medium). The 256 advances of such a step are not run by the mid-step routine. Callers of the advance other than `L2.02848` and the step start are unread.
 
 ### R2-ENGINE-1761
 
@@ -924,6 +1082,8 @@ With the shipped values (R2-ASSET-383: StaticRefreshRate 16, DynamicRefreshRate 
 **Amends.** R2-ENGINE-1108's Unknowns: the counters that decide when its route branches rebuild a route are read; the search `L2.05182` stays read in part.
 
 **Amended.** R2-ENGINE-1827 reads `L2.02848` and the list routines in RU: the local path is emptied when the unit reaches the centre of its next cell, so it is rebuilt for every cell walked; elements are not consumed one by one.
+
+**Amended.** R2-ENGINE-1965 makes the repath's goal choice exact: goal 1 is block `+0x76`, goal 2 the head word of `+0x1c8`, goal 3 the (dword `+0x58594` + 1)th word from the list head (the fourth at the shipped value 3, Medium). R2-ENGINE-1966 reads the `L2.02848` and `L2.06347` bodies in RU.
 
 ### R2-ENGINE-1762
 
@@ -942,6 +1102,8 @@ A nonzero result starts no step: the unit turns toward the cell (prepared order 
 **Unknown.** The planner cadence that ends a wait (R2-ENGINE-549). A run of the original with one unit standing in a corridor and a second ordered through it, counting ticks until the second steps or turns away, settles it.
 
 **Amends.** R2-ENGINE-1108's Medium for the passability helper `L2.03831` and its Unknown "elapsed waiting": the EN passability helper `L2.02719` and the wait decision are read (the RU `L2.03831` is not read); the waiting time stays Unknown.
+
+**Amended.** R2-ENGINE-1968 reads the RU `L2.03831` whole (both plane arms); its Medium by twin is High for RU. Callers of the held-cell path other than the walk driver stay unread.
 
 ## ROM2 strike schedule of a held attack
 
@@ -26667,9 +26829,13 @@ list; the effect of the notice `L2.02354`.
 
 **Evidence.** [EXP-2122](../experiments/EXP-2122-rom2-no-route/RESULTS.md)
 
+**Amended.** R2-ENGINE-1963 reads the substitute chooser `L2.05179` and R2-ENGINE-1964 reads the target stand-in `L2.05189`, both in RU to their returns.
+
 **Amended.** R2-ENGINE-1787 composes the stand-in for a pocket closed by terrain: a stand-in other than the unit's own
 cell keeps the route; whether a stand-in equal to the own cell empties the list is narrowed to the unread helpers
 `L2.05231` and `L2.05229`, not closed (Medium).
+
+**Amended.** R2-ENGINE-1960 and R2-ENGINE-1961 read the helpers `L2.05231`, `L2.05229`, `L2.05228` and `L2.05185` in RU: a stand-in equal to the unit's own cell leaves an empty list (High for the RU builder bodies and the equal EN instruction sequence; Medium for the empty list: the push's count increment, the tail of `L2.06588` from `L2.09054`, is unread). The tie rule is exact: a straight candidate (the unit's cell included) wins on a tie, a diagonal needs a strictly lower cost, and the cost byte is that of the current cell.
 
 **Amended.** R2-ENGINE-1804 reads `L2.05185`: it returns this + 0x30000 + 2 x ((y << 8) + x), the address of the
 search grid word, and reads the workers that fill the grid for each flag.
@@ -26877,6 +27043,8 @@ on the substitute; R2-ENGINE-873's Medium on `L2.05036` past its x axis.
 for the same cell and the same `this`. The `this` at the stand-in's call sites is not read, so the Medium narrows to
 that `this`.
 
+**Amended.** R2-ENGINE-1960 reads `L2.05180`, `L2.05231`, `L2.05229`, `L2.05228` and `L2.05185` in RU; the unread bodies this card names are read there (High for the RU bodies; the node allocator's tail from `L2.09054` stays unread).
+
 ### R2-ENGINE-879
 
 `L2.05181`(unit, x0, y0, x, y) (EN `L2.05225`, masked-equal; raw E8
@@ -26910,6 +27078,8 @@ equal to the unit's cell stays open).
 **Amended.** R2-ENGINE-1787 composes the stand-in for a pocket closed by terrain: a stand-in other than the unit's own
 cell keeps the route; whether a stand-in equal to the own cell empties the list is narrowed to the unread helpers
 `L2.05231` and `L2.05229`, not closed (Medium).
+
+**Amended.** R2-ENGINE-1960 and R2-ENGINE-1961 read the helpers `L2.05231`, `L2.05229`, `L2.05228` and `L2.05185` in RU: a stand-in equal to the unit's own cell leaves an empty list (High for the RU builder bodies and the equal EN instruction sequence; Medium for the empty list: the push's count increment, the tail of `L2.06588` from `L2.09054`, is unread). The tie rule is exact: a straight candidate (the unit's cell included) wins on a tie, a diagonal needs a strictly lower cost, and the cost byte is that of the current cell.
 
 **Amended.** R2-ENGINE-1804 reads `L2.05185` (grid word address), `L2.05230` (terrain byte address, this + key) and
 `L2.02402` (returns unit virtual +0x20); the Medium on these three is closed. `L2.05231`, `L2.05229`, `L2.05228` and
@@ -38132,6 +38302,8 @@ Unknown on a stand-in equal to the unit's own cell is narrowed to the unread hel
 closed.
 
 **Evidence.** [EXP-2205](../experiments/EXP-2205-rom2-fidelity-unknowns/RESULTS.md) question 1.
+
+**Amended.** R2-ENGINE-1960 and R2-ENGINE-1961 read `L2.05231` and `L2.05229` in RU: when the stand-in is the unit's own cell the route list is empty after the pop (Medium; the push's count increment, the tail of `L2.06588` from `L2.09054`, is unread), so the order-1 branch text of item 4 is narrowed to that Medium.
 
 ### R2-ENGINE-1788
 

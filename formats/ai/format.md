@@ -28,8 +28,10 @@ The full-tick group pass dispatches its current order, then applies withdrawal
 tests. Player commands can allocate a new order 0 group; map scripts can
 replace the load-time guard/aggressive order. Movement executes the selected
 route and reservations through its own clock. See the linked state tables
-for each gate and for field-specific save restoration.
-— AI-TICK-008, AI-GUARD-007, AI-ORDER-031
+for each gate and for field-specific save restoration. The engage routine's
+refusal for a short-reach spellcaster of a human participant is a tail call of the
+acquire routine, not a no-op.
+— AI-TICK-008, AI-GUARD-007, AI-ORDER-031, AI-886
 
 ## Reference map
 

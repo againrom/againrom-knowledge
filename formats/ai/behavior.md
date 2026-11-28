@@ -219,7 +219,7 @@ latch-zero pass is at least 11, and the empty-members edge can store 7 (High / M
 `AI-JITTER-103`). A script argument whose low byte is nonzero replaces that floor and has none;
 a low byte of 0 takes the floor. No pursue-distance test is in the Guard bodies read (`AI-777`,
 Medium); whether the default state's 5-cell post test (`AI-BREAK-041`) also applies to a guard
-member is not read. A member chases while its clipped population yields a winner; the pass runs
+member is not read (its bound `actor+0xa5` is stored 5 in the constructor, `AI-891`, which counts one further direct store with that displacement and did not record its address). A member chases while its clipped population yields a winner; the pass runs
 once per 16 ticks (`AI-385`, High / Medium / Unknown), and the member walks back to its post at
 the first pass without a winner (Medium).
 — AI-792, AI-793, AI-794
@@ -506,3 +506,4 @@ The retreat check passes the wounded unit as decider; an invisible enemy stays a
 No withdrawal-specific automatic Teleport branch was found in the decoded retreat tail and caster routines (Medium; undecoded callees and nine immediate sites are named in the claim). The cast table has a Teleport arm for id 26 (MAGIC-238) reached by the ordinary pick, and this negative says nothing about that path. — AI-816
 
 Each of the five `R0020` calls in the six chain windows centres on the actor's own cell (AI-862; the chain's count negative is AI-796, Medium). The block's cell lookup returns slot `+4`, the ground-actor slot of the cell record, so a domain-3 actor is not in the Heal list (AI-866; whether domain 3 is the flier class is Medium, MOVE-DOM-024; the caster is listed when registered, Medium, AI-800). The in-position gate passes when the actor faces the target's direction and the edge distance is within reach (AI-865; AI-798). A refused reacquisition of an AI-owned unit sets `ord+8` to 0xb and runs an idle turn, leaving the target pointer (AI-864). The executor body holds two timer-import calls and two table jumps, and the admission body and three direct callees of the admission hold one size-getter call; the executor's direct callees are not read for indirect calls (AI-868, Medium; AI-718). A Prismatic Spray list-B entry is not selected while list A is non-empty (AI-863, Medium: the footprint getter is unread). The Spray scratch lives in an object of 0xc320 bytes, so its capacity is at most 11627 dwords (AI-871, capacity Unknown; AI-SPRAY-266).
+A refused reacquisition of an AI-owned unit runs an idle turn whose turn routine stores facing, a turn counter, a turning flag and +0x9d (meaning unread), and in the window read no order, route or position field (AI-864, AI-884; Medium for the call as a whole, AI-395).

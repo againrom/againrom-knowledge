@@ -8,15 +8,25 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
+Claims labelled: 5516. Observation: 143. Static analysis: 4627. Mixed: 746.
 
 ## Ledger ai
 
 | ID | Method | Status |
 |---|---|---|
+| AI-882 | static analysis | ● active (amended) |
+| AI-883 | static analysis | ● active (amended) |
+| AI-884 | static analysis | ● active |
+| AI-885 | static analysis | ● active |
+| AI-886 | static analysis | ● active |
+| AI-887 | static analysis | ● active |
+| AI-888 | static analysis | ● active |
+| AI-889 | static analysis | ● active |
+| AI-890 | static analysis | ● active |
+| AI-891 | static analysis | ● active |
 | AI-862 | static analysis | ● active |
 | AI-863 | static analysis | ● active (amended) |
-| AI-864 | static analysis | ● active |
+| AI-864 | static analysis | ● active (amended) |
 | AI-865 | static analysis | ● active |
 | AI-866 | static analysis | ● active |
 | AI-867 | static analysis | ● active |
@@ -86,7 +96,7 @@ Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 | AI-DIPLO-004 | static analysis | ● active (amended, superseded) |
 | AI-DIPLO-005 | static analysis | ● active |
 | AI-SIGHT-006 | static analysis | ● active (amended, partially retracted, superseded, contested) |
-| AI-GUARD-007 | static analysis | ● active |
+| AI-GUARD-007 | static analysis | ● active (amended) |
 | AI-TICK-008 | static analysis | ● active (contested, amended) |
 | AI-GROUP-009 | static analysis | ● active (superseded) |
 | AI-ORDER-010 | static analysis | ● active |
@@ -267,7 +277,7 @@ Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 | AI-366 | static analysis | ● active (amended) |
 | AI-367 | static analysis | ● active |
 | AI-370 | static analysis | ● active (amended) |
-| AI-371 | static analysis | ● active |
+| AI-371 | static analysis | ● active (amended) |
 | AI-372 | static analysis | ● active (amended) |
 | AI-373 | static analysis | ● active (amended) |
 | AI-374 | static analysis | ● active (amended) |
@@ -340,7 +350,7 @@ Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 | AI-845 | static analysis | ● active |
 | AI-846 | static analysis | ● active |
 | AI-847 | static analysis | ● active |
-| AI-848 | static analysis | ● active |
+| AI-848 | static analysis | ● active (amended) |
 | AI-849 | static analysis | ● active |
 | AI-850 | static analysis | ● active |
 | AI-851 | static analysis | ● active |
@@ -2345,6 +2355,17 @@ Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 | R2-ENGINE-1929 | static analysis | ● active |
 | R2-ENGINE-1930 | static analysis | ● active |
 | R2-ENGINE-1931 | static analysis | ● active |
+| R2-ENGINE-1960 | static analysis | ● active |
+| R2-ENGINE-1961 | static analysis | ● active |
+| R2-ENGINE-1962 | static analysis | ● active (amended) |
+| R2-ENGINE-1963 | static analysis | ● active |
+| R2-ENGINE-1964 | static analysis | ● active |
+| R2-ENGINE-1965 | static analysis | ● active |
+| R2-ENGINE-1966 | static analysis | ● active |
+| R2-ENGINE-1967 | static analysis | ● active |
+| R2-ENGINE-1968 | static analysis | ● active |
+| R2-ENGINE-1969 | static analysis | ● active |
+| R2-ENGINE-1970 | static analysis | ● active |
 | R2-ENGINE-1940 | static analysis | ● active |
 | R2-ENGINE-1941 | static analysis | ● active |
 | R2-ENGINE-1942 | static analysis | ● active |
@@ -2366,7 +2387,7 @@ Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 | R2-ENGINE-1824 | static analysis | ● active |
 | R2-ENGINE-1825 | static analysis | ● active |
 | R2-ENGINE-1826 | static analysis | ● active |
-| R2-ENGINE-1827 | static analysis | ● active |
+| R2-ENGINE-1827 | static analysis | ● active (amended) |
 | R2-ENGINE-1828 | static analysis | ● active |
 | R2-ENGINE-1829 | static analysis | ● active |
 | R2-ENGINE-1830 | static analysis | ● active |
@@ -2379,9 +2400,9 @@ Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 | R2-ENGINE-1470 | static analysis | ● active (amended) |
 | R2-ENGINE-1471 | static analysis | ● active |
 | R2-ENGINE-1472 | static analysis | ● active (amended) |
-| R2-ENGINE-1760 | static analysis | ● active |
+| R2-ENGINE-1760 | static analysis | ● active (amended) |
 | R2-ENGINE-1761 | static analysis | ● active (amended) |
-| R2-ENGINE-1762 | static analysis | ● active |
+| R2-ENGINE-1762 | static analysis | ● active (amended) |
 | R2-ENGINE-1763 | static analysis | ● active |
 | R2-ENGINE-1764 | static analysis | ● active (amended) |
 | R2-ENGINE-1765 | static analysis | ● active (amended) |
