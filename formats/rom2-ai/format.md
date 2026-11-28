@@ -323,7 +323,7 @@ of the cast routine, set the stamp; a cast through the unit sender stamps it, so
 clamp; tag 11 adds to +0xe2 only for a unit with mask 4 of +0x4c (named the mage bit, Medium) (R2-ENGINE-1564, R2-ENGINE-1206;
 formulas High, sender meanings and writer completeness Medium).
 
-An item's tag 11 value M adds M percent to the mana rate of a mage: each pass restores max * (M + 100) * K / D hundredths, D being the Units row's MP regeneration when the reader stores it (114 of 180 EN rows hold 0 and the effect of a 0 on D is Unknown), so an item of M 50 turns 2 % of the maximum per pass (D 50, K 1) into 3 %; the interval is the world pass of 16 session ticks (R2-ENGINE-1566).
+An item's tag 11 value M adds M percent to the mana rate of a mage: each pass restores max * (M + 100) * K / D hundredths, D being the Units row's MP regeneration when the reader stores it (114 of 180 rows hold 0, EN equal to RU, and all 114 have manaMax 0, so no division by 0 is reached for a Units-row unit; a hero's D is unread, R2-ENGINE-2006), so an item of M 50 turns 2 % of the maximum per pass (D 50, K 1) into 3 %; the interval is the world pass of 16 session ticks (R2-ENGINE-1566).
 
 Prismatic Spray takes its extra victims from Group sight of the caster's
 `+0x70` members. The candidates are hostiles (bodies only when no living hostile is in sight; Medium), ranked by
@@ -376,6 +376,10 @@ book (the loops stop at 28); that no other routine chooses a book spell is
 Medium (R2-ENGINE-1244, R2-ENGINE-1247; per-spell census R2-ENGINE-1248). The EN bodies equal RU
 after masking (R2-ENGINE-1249). How often these routines run per simulation
 tick outside the Group pass is Unknown.
+
+The book getter returns 0 for an id at or beyond the stored count or for an empty slot (R2-ENGINE-2000, High RU, EN unread). In the target apply a unit of the three unit classes whose size byte is above 1 (Units tokenSize 2 or 3, 25 of 180 rows) takes the rebuilt cell object, any other unit of those classes a copy of its position (R2-ENGINE-2002, Medium for the set of targets). The support choice's helpers are read in RU: L2.02476 gates on cell flag 0x20, L2.01588 returns the Chebyshev distance to the nearest body cell (R2-ENGINE-1139) and L2.04531 finds then removes a list element (R2-ENGINE-2003, Medium; its callees L2.00322 and L2.04540 are unread).
+
+The point apply routes each spell row by its damage columns and id (RU). Ids 1, 2, 3, 5, 7, 9, 10, 11 and 16 build a damage block and go to the common tail. Ids 4, 6, 8, 12 to 15, 17 to 21 and 27 to 29 take an effect arm and then the tail; the delete branches of ids 12 and 18 return without it. Ids 22 to 26 (Control Spirit, Teleport, Heal, Summon, Drain Life) act directly and return without the tail (R2-ENGINE-2004, R2-ENGINE-2005). The tail aims shape 1 (21 rows) at the target unit and shapes 3, 4 and 5 (ids 2, 3, 6, 7, 9, 14, 15, 17) at the cell object with the row's radius; Delivery 2 (ids 1, 2, 5, 10, 11, 16) adds a projectile object. The branches are High in RU; the join of table columns to the code is Medium; the effect-list add, the area constructor and the area step's cell loops are read (R2-ENGINE-2010, R2-ENGINE-2011, with the cast timing in R2-ENGINE-1262; the area step's cell loops are read (R2-ENGINE-2010); which cells an area hits is R2-ENGINE-793 and R2-ENGINE-795, and the occupant routine tests no owner or relation (R2-ENGINE-985)); the other callees of the arms are unread. The RU stores of the range byte +0x12c in the unit classes are the default 1, a copy, equip, unequip and one type-specific 5 (R2-ENGINE-2007, Medium). A census of RU `mov` stores with displacement 0x78 finds two byte stores through the command pointer at `L2.09176` and `L2.09177`; their routine is unread and the writer of the command byte is Unknown (R2-ENGINE-2008, R2-ENGINE-1142, Medium). The indexed dword store at `L2.09178` is the +0x78+0x14i slot copy of the type-4 pass into a Shop object, made at map load (R2-ENGINE-2009, R2-ENGINE-512, R2-ENGINE-033, Medium). The staff composition is R2-ENGINE-1144.
 
 No body read chooses a point for an area spell. The offensive choice casts at the
 victim unit; the special cast uses the victim's cell (for Acid Stream, a cell
@@ -479,7 +483,7 @@ and returns to substate 0, with completion byte +0x136 = 1, in step s + c + r; a
 count of 0 lasts 256 steps. c is caster byte +0x134. r = low byte(+0x135 + t + d
 + k): t = 0 unless a Human caster holds a weapon, else clamp((weapon word +0x4a +
 (30 - Reaction) * 5) / 12, 0, 12); d is a 0..3 draw; k is the spell's
-Complication byte on a book cast and 0 on an item or staff cast. In the arms and suffix read, neither count reads the target; the per-spell arms are unread. The defaults are 8 and 4; the Units and Humans readers and
+Complication byte on a book cast and 0 on an item or staff cast. In the arms and suffix read, neither count reads the target; the per-spell arms of the apply hold no direct operand of the count or completion bytes and their callees are unread (R2-ENGINE-2001, Medium). The defaults are 8 and 4; the Units and Humans readers and
 weapon equip write the table values (its handling of -1 is unread), unequip restores 8 and 4, and one unit builder
 writes 1 and 1; the writer census covers direct operands only. The apply's
 common suffix builds the effect object and adds it, or its projectile, to a

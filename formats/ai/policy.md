@@ -186,7 +186,7 @@ the visibility map is cleared and rebuilt per decision.
 
 ## Refused flight and staged spell timing
 
-Under explicit Retreat a refused flee walk installs a strike on a hostile at reach when the in-position gate passes, and the unit does not flee while that holds (Medium: composed from listings; the gate is unread). — AI-798
+Under explicit Retreat a refused flee walk installs a strike on a hostile at reach when the in-position gate passes, and the unit does not flee while that holds (Medium: composed from listings; the gate is a facing and reach test, AI-865; the held command state decides the Wimpy case, AI-929). — AI-798
 
 A staged area spell's first stage runs one world step after the step that applies the cast, and later stages every 3 steps (Medium: the registration is a list append with no drive call, AI-870; the area pass list rests on MAGIC-463). — MAGIC-463
 
@@ -198,3 +198,7 @@ A refused reacquisition of an AI-owned unit runs an idle turn whose turn routine
 The group candidate list that every group arm scores is built by `R0110`: it appends session actors on cells stamped by any member and holds back entries with word `+0x94` below 1 unless no other candidate remains (AI-913).
 
 The group arms assign each member the lowest-scoring candidate by the loop `R0177` and its scorer (AI-909); the Guard arm runs that loop after the list build and clip loop (AI-905). The dispatcher maps each group order to its arm routine (AI-908); the Guard arm reads `actor+0xa5` of every member in its geometry routine (AI-906) and the other store of that field is at `L00261` (AI-903). The arms 2, 4, 5 and 0x11 are read (AI-910); the follow, target-pick and heal helpers store `ord+0x08` = 4, 6, 0xb, 0 or, on the heal path, 8 (AI-911, AI-349); the one immediate store of 0x17 to a displacement-0x50 operand in `L06931..L07036` is in `L18326`, which has no direct caller (AI-912). The engagement setter `R0009` has 14 direct call sites (AI-907). The AI driver has two direct call sites, and the Guard counter `grpAI+0x34` counts Guard-arm passes since the last latch flip, not session ticks (AI-904).
+
+The area-object registration only appends a node and the area pass drives each listed entry in a later world step, so no stage runs at registration if the registration list is the walked list (AI-922; Medium for that identity).
+
+Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.

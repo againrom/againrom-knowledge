@@ -705,13 +705,15 @@ Caster HP at most zero bypasses release and replaces the countdown for dying.
 The mover-failure tail and external callbacks remain open interruption routes.
 Local branches are High; composed continuation is Medium. — AI-666
 
+The progress 2 executor arm holds no call and ends in the tail, so the tail's `mover+0x98` branch can run during a cast only when the flag was set outside an executor pass (Medium for the entry value; High for the arm). — AI-928
+
 Player and creature kind-8/9 casts use the same progress-2 phase body and
 release calls. Retention selects parent-command reset; selectors can aim
 at victim, self or cell. Other special starts remain Unknown. — AI-667
 
 ## Refused flight and a scroll cast in melee
 
-Under explicit Retreat a refused flee walk reaches the tail's reacquisition, which installs a strike on a hostile at reach when the in-position gate passes and otherwise turns toward it; the next pending move waits while progress is 1 (Medium: composed from listings; the in-position gate is unread). A unit under its Wimpy bound holding command state 1 is stood down instead (Medium). — AI-798
+Under explicit Retreat a refused flee walk reaches the tail's reacquisition, which installs a strike on a hostile at reach when the in-position gate passes and otherwise turns toward it; the next pending move waits while progress is 1 (Medium: composed from listings; the in-position gate is a facing and reach test, AI-865). A unit under its Wimpy bound holding command state 1 is stood down instead (Medium); a unit holding an attack (3) or stand (0xc) command takes the strike path (Medium, AI-929). — AI-798
 
 A Teleport scroll used in melee installs only after the strike leaves progress 1. The relocation stands the unit down and keeps its target pointer (Medium); values per sub-tick are Unknown. — AI-799
 
@@ -730,3 +732,9 @@ The defender arm hands the protected unit to cover when `actor+0x140` is zero; w
 Cover and the invisibility test measure distance edge to edge in sub-cell steps. — AI-813
 
 Each of the five `R0020` calls in the six cast-chain windows gathers occupants around the actor's own cell (AI-862; AI-796, Medium). A Heal list holds a slot `+4` caster (movement domain 1 or 2) only when registered in its cell record (AI-866; AI-800, Medium). The reacquisition's in-position gate tests facing against direction and distance against reach (AI-865; AI-798), and its AI-owned no-winner exit stores `ord+8` = 0xb and runs the idle turn `R0205` (AI-864). The executor body holds two timer-import calls and two table jumps, and the admission body one size-getter call; the executor's direct callees are unread (AI-868, Medium). The Darkness area loops pass the area object that carries the caster, for the first stage and for later stages while the caster's `+0x14` is nonzero (AI-867, Medium for later stages). The candidate list of cover and engage is built by bodies that load none of the six health and state offsets searched (AI-872; AI-812, Medium).
+
+In `R0184` the only store with displacement `0x3c` from its entry to `L18401` is the matched-name type-record store (AI-924, Medium).
+
+Spell-choice reads: the area-object registration only appends a node, so no stage runs at registration if the registration list is the list the area pass walks (AI-922, Medium for that identity); a placed ground caster sits in slot `+4` of its base cell and is in the Heal list when the plane byte of its cell has bit 5 set (the bit's meaning is unread) and the occupy did not stop at a taken cell (AI-923, AI-866, AI-697); `R0184` holds one `0x3c` store (AI-924); each is Medium for completeness.
+
+Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.

@@ -245,7 +245,7 @@ A blow whose roll fails still records the attacker in the victim's `+0x40` when 
 
 A staged area spell's first stage runs one world step after the applying step, then every 3 steps (Medium). The cast arm registers the area object through a list append with no drive call, and the DirectDamage `vt+0x3c` body subtracts health in the stage call (AI-870). — MAGIC-463
 
-A refused flee walk under explicit Retreat hands the unit to the reacquisition above, which strikes a hostile at reach when the in-position gate passes (Medium: composed from listings). — AI-798
+A refused flee walk under explicit Retreat hands the unit to the reacquisition above, which strikes a hostile at reach when the in-position gate passes (Medium: composed from listings; the gate tests facing and reach, AI-865; the stand-down of Move state 1 belongs to the Wimpy case, AI-929). — AI-798
 
 The in-position gate passes when the direction helper's result equals the actor's facing byte and the edge distance is at most the reach byte. — AI-865
 
@@ -258,3 +258,5 @@ Cover engages the nearest flier when one remains, else the nearest unit, and rem
 The group candidate list that the assignment loop scores is built by `R0110` from the shared sight map; entries with word `+0x94` below 1 come back only when the list would be empty (AI-913).
 
 The group arms assign each member the lowest-scoring candidate of that list by the loop `R0177` with scorer `R0225`, or `R0252` under order 3 (AI-909); the Guard arm runs it after the clip loop (AI-905). The dispatcher maps each group order to its arm routine (AI-908); the Guard arm reads `actor+0xa5` of every member in its geometry routine (AI-906) and the other store of that field is at `L00261` (AI-903). The arms 2, 4, 5 and 0x11 are read (AI-910); the follow, target-pick and heal helpers store `ord+0x08` = 4, 6, 0xb, 0 or, on the heal path, 8 (AI-911, AI-349); the one immediate store of 0x17 to a displacement-0x50 operand in `L06931..L07036` is in `L18326`, which has no direct caller (AI-912). The engagement setter `R0009` has 14 direct call sites (AI-907). The AI driver has two direct call sites, and the Guard counter `grpAI+0x34` counts Guard-arm passes since the last latch flip, not session ticks (AI-904).
+
+Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.

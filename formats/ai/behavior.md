@@ -502,7 +502,7 @@ never authored, and it never decides whether a blow lands.
 
 ## Refused flight and the heal list (first game)
 
-A unit under explicit Retreat whose flee walk is refused strikes a hostile at reach when the in-position gate passes, instead of fleeing (Medium: composed from listings; the gate is unread). — AI-798
+A unit under explicit Retreat whose flee walk is refused strikes a hostile at reach when the in-position gate passes, instead of fleeing (Medium: composed from listings; the gate tests facing and reach, AI-865; the stand-down of Move state 1 belongs to the Wimpy case, AI-929). — AI-798
 
 The computer mage's Heal candidate list is built with no identity test, so it can hold the caster (Medium); at full health the caster is never the pick. — AI-800
 
@@ -522,3 +522,5 @@ No withdrawal-specific automatic Teleport branch was found in the decoded retrea
 
 Each of the five `R0020` calls in the six chain windows centres on the actor's own cell (AI-862; the chain's count negative is AI-796, Medium). The block's cell lookup returns slot `+4`, the ground-actor slot of the cell record, so a domain-3 actor is not in the Heal list (AI-866; whether domain 3 is the flier class is Medium, MOVE-DOM-024; the caster is listed when registered, Medium, AI-800). The in-position gate passes when the actor faces the target's direction and the edge distance is within reach (AI-865; AI-798). A refused reacquisition of an AI-owned unit sets `ord+8` to 0xb and runs an idle turn, leaving the target pointer (AI-864). The executor body holds two timer-import calls and two table jumps, and the admission body and three direct callees of the admission hold one size-getter call; the executor's direct callees are not read for indirect calls (AI-868, Medium; AI-718). A Prismatic Spray list-B entry is not selected while list A is non-empty (AI-863, Medium: the footprint getter is unread). The Spray scratch lives in an object of 0xc320 bytes, so its capacity is at most 11627 dwords (AI-871, capacity Unknown; AI-SPRAY-266).
 A refused reacquisition of an AI-owned unit runs an idle turn whose turn routine stores facing, a turn counter, a turning flag and +0x9d (meaning unread), and in the window read no order, route or position field (AI-864, AI-884; Medium for the call as a whole, AI-395).
+
+Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.

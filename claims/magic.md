@@ -554,7 +554,7 @@ current account.
 | MAGIC-CASTSPAWN-033 | The caster builds the cast map object; seven picture IDs get a nonzero countdown. | High / Medium | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/) |
 | MAGIC-BURSTLIFE-034 | (rom.exe) A burst is stationary, and its sender chooses its lifetime. | High | ● active (amended, partially retracted) | [EXP-0167](../experiments/EXP-0167-spell-art/), [EXP-0175](../experiments/EXP-0175-ring-geometry/) |
 | MAGIC-DELIVER-035 | (rom.exe) The simulation and the client each compute a cast projectile's flight length, by different rules, and on the normal path the client's wins. | High / Medium | ● active | [EXP-0167](../experiments/EXP-0167-spell-art/) |
-| MAGIC-AREATICK-036 | (rom.exe) The `AreaEffect` per-tick entry is vtable slot `+0x18`, and `effect+0x08` selects one of three exclusive per-tick modes. | High / Medium | ● active | [EXP-0172](../experiments/EXP-0172-area-tick/) |
+| MAGIC-AREATICK-036 | (rom.exe) The `AreaEffect` per-tick entry is vtable slot `+0x18`, and `effect+0x08` selects one of three exclusive per-tick modes. | High / Medium | ● active (amended) | [EXP-0172](../experiments/EXP-0172-area-tick/) |
 | MAGIC-AREAPULSE-037 | (rom.exe) A cloud pulses once every 16 ticks, a staged effect runs its first stage immediately and later stages every 3 ticks, and a blast runs once. `effect+0x4c` is a counter with mode-specific meaning. | High | ● active (amended, partially retracted) | [EXP-0172](../experiments/EXP-0172-area-tick/), [EXP-0175](../experiments/EXP-0175-ring-geometry/) · [EXP-0332](../experiments/EXP-0332-area-damage-overlap/) |
 | MAGIC-AREAAPPLY-038 | (rom.exe) An area effect invokes its inner effect's per-target virtual entry; the dynamic class determines direct damage versus ordinary attachment. | High / Medium | ● active (amended, partially retracted) | [EXP-0172](../experiments/EXP-0172-area-tick/), [EXP-0174](../experiments/EXP-0174-area-movement/), [EXP-0271](../experiments/EXP-0271-multicell-area/) |
 | MAGIC-AREACELL-039 | (rom.exe) Three different cell sets, and the simulated set is not the mask sent on the wire. | High / Medium | ● active (amended, partially retracted) | [EXP-0172](../experiments/EXP-0172-area-tick/), [EXP-0174](../experiments/EXP-0174-area-movement/) |
@@ -714,6 +714,8 @@ draw remains Unknown. Construction, timing and lifetime clauses stand.
 **Original status.** ● active
 
 **Evidence.** [EXP-0172](../experiments/EXP-0172-area-tick/)
+
+**Amended.** By `AI-922`: same walk; registration list identity Medium.
 
 ### MAGIC-AREAPULSE-037
 
@@ -1474,7 +1476,7 @@ on this code read is not independent corroboration.
 | MAGIC-TARGETID-182 | PointEffect::Tick's attribution tail (`R0266`) reads its own `+44` (target) six times across its branches; two of those reads feed an unconditional dereference with no null check anywhere between function entry and the dereferencing ... | High | ● active | [EXP-0371](../experiments/EXP-0371-saved-effect-identity/) |
 | MAGIC-TICKGATE-183 | Within the graph this experiment traced, cast-time construction is the only target-specific gate on the population PointEffect::Tick reaches; a separate, target-blind exclusion also exists, and one caller of the registrar ... | High | ● active (partially retracted) | [EXP-0371](../experiments/EXP-0371-saved-effect-identity/); [EXP-0388](../experiments/EXP-0388-effect-construction/EXP-0388.md) |
 | MAGIC-SIBLINGREF-184 | AreaEffect's own `+44` and SpellTransport's own `+44`/`+48` are read by different functions than PointEffect's raw target dword, through the standard typed-reference mechanism rather than a raw identity dword — but the guard contrast ... | High / Medium | ● active | [EXP-0371](../experiments/EXP-0371-saved-effect-identity/) |
-| MAGIC-187 | `R0641` walks a container whose `+0x4`/`+0x8` hold head/tail node pointers and whose nodes hold next/payload at `+0x0`/`+0x8`, through the standard GetHeadPosition/GetNext idiom that advances the walk's position before it reads ... | High / Medium / Unknown | ● active | [EXP-0374](../experiments/EXP-0374-ticked-effect-population/) |
+| MAGIC-187 | `R0641` walks a container whose `+0x4`/`+0x8` hold head/tail node pointers and whose nodes hold next/payload at `+0x0`/`+0x8`, through the standard GetHeadPosition/GetNext idiom that advances the walk's position before it reads ... | High / Medium / Unknown | ● active (amended) | [EXP-0374](../experiments/EXP-0374-ticked-effect-population/) |
 | MAGIC-188 | `R0641` reads exactly two fields on a member before dispatching Tick — `member+0x3c` and the member's own vtable pointer at `member+0x00`, which the dispatch itself loads — plus, conditionally, `(*(member+0x3c))+0x14`, a field ... | High | ● active | [EXP-0374](../experiments/EXP-0374-ticked-effect-population/) |
 | MAGIC-189 | `R0641`'s own body writes exactly one field on any member object — `member+0x3c = 0`, conditionally — and no other instruction in its complete 50-instruction body (`R0641`-`L05858`, 148 contiguous bytes) touches member ... | High | ● active | [EXP-0374](../experiments/EXP-0374-ticked-effect-population/) |
 | MAGIC-190 | `R0641`'s own body never reads or writes a member's `+0x44` anywhere, and gates nothing on it; a member whose `+0x44` is null — including one left null by `SAV-1010`'s load-time identity-map miss — is not filtered, skipped, or ... | High | ● active | [EXP-0374](../experiments/EXP-0374-ticked-effect-population/) |
@@ -1526,6 +1528,8 @@ on this code read is not independent corroboration.
 **Confidence.** High for the container/node layout (four independent writers/readers agree: insert, allocator, begin, GetNext), the advance-before-return idiom, the removal call chain's instructions through `R1118` and `R1119`, and the PointEffect-specific `+0x04` dispatch, each read as complete bodies, the last cross-corroborated by `TRIG-TAKEITEM-038`'s identical-pattern finding for four unrelated item vtables. That the two unread primitives `R1119` calls unlink the node is inference from the call shape, marked as inference in the row and on the canonical page, not part of this High. Medium for treating the registration and the walk as the same list at runtime: the two chains compute an identical offset formula, but this experiment read no caller of `R0193` and ran no `callto:` census on it, so it did not re-derive that function's `this`. Searching the pinned pre-publication ledgers for `R0193`, `R0426` and `L00285` returns four active rows that do bear on the identity: `UNIT-GATE-012` names `[L00285]` the server singleton; `SESS-TICK-004` places the `server+0x04` sub-tick increment at the head of `R0193`; `SESS-TICK-006` names `R0426(server+0x14)` — the exact hop traced here — as that function's per-sub-tick work; and `SAV-657` publishes `[L00285]+0x14` as the constructor-written literal `L05906` (`L05907`), which would make both formulas resolve through one fixed static object. Those four leave little room for the alternative that `R0193`'s `this` and `*(L00285)` are two distinct, same-shaped objects, but they are other experiments' evidence cited here, not this experiment's discrimination — hence Medium. Unknown: the internal unlink mechanics inside `R1111`/`R1112` (unread bodies); whether `R0634` (named by `MAGIC-SIBLINGREF-184`/`MAGIC-DELIVERY-170` as SpellTransport's Tick, feeding the same-named registrar) computes the identical offset formula this experiment found for `R0003`, which was not re-derived here.
 
 **Evidence.** [EXP-0374](../experiments/EXP-0374-ticked-effect-population/)
+
+**Amended.** By `AI-922`.
 
 ### MAGIC-188
 
@@ -5406,6 +5410,8 @@ Listings `evidence/nav/p1/q2-world-step-R0193.txt`, `evidence/nav/p1/q2-area-cto
 **Amended.** By `AI-870`: the caller of the list append `R0647` for this arm is `R1113` at `L05395`, a list append with no drive call in the instructions read (the callees `L18244`, `R0540`, `R2248` and the arm at `L03053` are unread); the DirectDamage `vt+0x3c` body `R0564` is read and subtracts health in the stage call, with the slot identity taken from `UNIT-AREADIRECT-072`.
 
 **Unknown.** Settle with the original: cast Fire Sacrifice beside a unit and record the world counter (`+4` of the step object) on the step whose actor pass applies the cast and on each step the unit's health word changes; repeat with Acid Stream and Meteor Storm.
+
+**Amended.** By `AI-922`: the registration at `L05395` only appends a node (callees of `R0651` read); the drive by `vt+0x18` is the area pass `R0426` in the next world step. That the registration list is the walked list is Medium.
 
 ### MAGIC-464
 

@@ -1371,7 +1371,7 @@ So a turn before an act or a step aims at one of three heading routines (`AI-444
 |---|---|---|---|---|
 | MOVE-119 | The actor base constructor sets Mover facing `+0x00` and wanted facing `+0x01` to 0x40 plus one rand() draw over 0..0x80; of the image's four Mover constructor calls only this one stores a facing. | High | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 | MOVE-120 | The type-6 spawner has no Mover access of its own; it runs the class derive at `L04446`, so a placed Human holds its derived rate, then places the actor through `R1145` at radius 0, which draws no random value. | High / Medium | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/); [EXP-0568](../experiments/EXP-0568-map-load-bounds/) |
-| MOVE-121 | The occupy `R0050` writes Mover `+0x72` (a step-cost word), `+0x82`/`+0x83` (cell) and `+0x84`/`+0x85` (sub-cell) before it enters the footprint's cell-record slots; its own body writes no other Mover byte. | High / Medium | ✔ promoted | [EXP-0523](../experiments/EXP-0523-start-motion/) |
+| MOVE-121 | The occupy `R0050` writes Mover `+0x72` (a step-cost word), `+0x82`/`+0x83` (cell) and `+0x84`/`+0x85` (sub-cell) before it enters the footprint's cell-record slots; its own body writes no other Mover byte. | High / Medium | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 | MOVE-122 | The join walk places each carried member, then deletes its Mover and order block and installs constructor-state ones (facing 0, mask 0x41, rate 0x10); all 22 saved carried members hold the derived rate instead, its writer Unknown. | High / Medium / Unknown | ✔ promoted (amended) | [EXP-0523](../experiments/EXP-0523-start-motion/) |
 
 ### MOVE-119
@@ -1415,6 +1415,8 @@ See [EXP-0568](../experiments/EXP-0568-map-load-bounds/).
 - A placement through `R1145` therefore leaves the Mover with these five fields set from the placement cell, the speed word and the cost byte, and the cell-record slots of its footprint holding the actor.
 
 **Confidence.** High for the stores and their sources, read whole. Medium that the occupy writes no other Mover byte: its callees `R0453`, `R1342`, `R1362`, `R1351` and the trigger builders `R1137`/`R1138` were not read here. The census in `SAV-1213` finds no other nonzero Mover byte in 421 placed records.
+
+**Amended.** By `AI-923`: the occupy `R0050` calls `R0458` for each footprint cell, the base cell included; a placed ground caster is stored at slot `+4` of its base cell.
 
 ### MOVE-122
 

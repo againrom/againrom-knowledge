@@ -194,3 +194,5 @@ nonempty head or one Group remains. Remaining-list progression after cleanup
 callbacks stays Medium; full carry/start and exceptional effects stay Unknown.
 AI-449's map-admission clause is superseded; its constructor facts stand.
 — AI-449, AI-479, AI-628, AI-629
+
+Spell-choice and cast-entry reads: AI-922, AI-923, AI-924, AI-925, AI-926, AI-927.
